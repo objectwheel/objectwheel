@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/fonts/raleway-extraLight.ttf</file>
+        <file>resources/fonts/raleway-light.ttf</file>
+        <file>resources/qmls/design-area.qml</file>
+        <file>resources/tools/tools.json</file>
+        <file>resources/tools/Dial.zip</file>
+        <file>resources/tools/Button.zip</file>
+        <file>resources/tools/CheckBox.zip</file>
+        <file>resources/tools/ColumnLayout.zip</file>
+        <file>resources/tools/GridLayout.zip</file>
+        <file>resources/tools/RowLayout.zip</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,31 @@
+{
+    "Dial" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Dial.zip"
+    },
+
+    "Button" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Button.zip"
+    },
+
+    "CheckBox" :
+    {
+        "toolUrl" : "qrc:/resources/tools/CheckBox.zip"
+    },
+
+    "GridLayout" :
+    {
+        "toolUrl" : "qrc:/resources/tools/GridLayout.zip"
+    },
+
+    "RowLayout" :
+    {
+        "toolUrl" : "qrc:/resources/tools/RowLayout.zip"
+    },
+
+    "ColumnLayout" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ColumnLayout.zip"
+    }
+}

@@ -1,0 +1,3 @@
+[submodule "libs/fit"]
+	path = libs/fit
+	url = https://github.com/MrKozmon/fit

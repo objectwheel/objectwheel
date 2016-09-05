@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>619</width>
-    <height>398</height>
+    <width>620</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,16 +19,16 @@
 }</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <layout class="QVBoxLayout" name="mainLayout">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="upsideLayout">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="toolboxsLayout">
         <property name="spacing">
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="toolboxTitle">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -60,7 +60,7 @@ color:black;</string>
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="listWidget">
+         <widget class="ListWidget" name="toolboxWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -78,6 +78,9 @@ color:black;</string>
             <width>170</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
           </property>
           <property name="styleSheet">
            <string notr="true">QListView {
@@ -119,17 +122,29 @@ QListView::item:selected:!active {
     border: 0px solid #bfcde4;
 }</string>
           </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragOnly</enum>
+          </property>
          </widget>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="designsLayout">
         <property name="spacing">
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="designTitle">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -161,7 +176,7 @@ color:black;</string>
          </widget>
         </item>
         <item>
-         <widget class="QQuickWidget" name="quickWidget">
+         <widget class="QQuickWidget" name="designWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -169,13 +184,15 @@ color:black;</string>
            </sizepolicy>
           </property>
           <property name="styleSheet">
-           <string notr="true">
-border:1px solid white;
-background:#61bd6d;
-</string>
+           <string notr="true">border:1px solid white;</string>
           </property>
           <property name="resizeMode">
            <enum>QQuickWidget::SizeRootObjectToView</enum>
+          </property>
+          <property name="source">
+           <url>
+            <string>qrc:/resources/qmls/design-area.qml</string>
+           </url>
           </property>
          </widget>
         </item>
@@ -184,9 +201,9 @@ background:#61bd6d;
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="downsideLayout">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="editButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -206,13 +223,13 @@ background:#61bd6d;
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">QPushButton::checked
+         <string notr="true">QPushButton::!checked
 {
 	border:1px solid #31984f;
 	background:#41a85f;
 	color:white;
 }
-QPushButton::!checked
+QPushButton::checked
 {
 	border:1px solid #1959a0;
 	background:#2969b0;
@@ -226,12 +243,12 @@ QPushButton::!checked
          <bool>true</bool>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="clearButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -263,6 +280,13 @@ QPushButton::pressed
 	border:1px solid #a8211f;
 	background:#b8312f;
 	color:white;
+}
+
+QPushButton::disabled
+{
+	border:1px solid #555555;
+	background:#888888;
+	color:#cccccc;
 }</string>
         </property>
         <property name="text">
@@ -294,6 +318,11 @@ QPushButton::pressed
    <class>QQuickWidget</class>
    <extends>QWidget</extends>
    <header>QtQuickWidgets/QQuickWidget</header>
+  </customwidget>
+  <customwidget>
+   <class>ListWidget</class>
+   <extends>QListWidget</extends>
+   <header>listwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
