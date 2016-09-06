@@ -84,11 +84,15 @@ void MainWindow::SetupGui()
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
+	/* Handle events which are happening on design area */
 	if (object == ui->designWidget)
 	{
+		/* Design area's events' shared variables */
+		static QPoint dragStartPoint;
+
 		switch (event->type())
 		{
-			case QEvent::DragEnter: /* Drag & Drop things */
+			case QEvent::DragEnter:
 			{
 				event->accept();
 				return true;
@@ -103,28 +107,56 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				event->accept();
 				return true;
 			}
+
 			case QEvent::Drop:
 			{
 				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
-				if (dropEvent->mimeData()->hasUrls())
+
+				/* Edit mode things */
+				if (!ui->editButton->isChecked())
 				{
-					QQmlComponent component(ui->designWidget->engine());
-					component.loadUrl(dropEvent->mimeData()->urls().at(0));
-					QQuickItem *qml = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
-					qml->setParentItem(ui->designWidget->rootObject());
-					qml->setPosition(qml->mapFromGlobal(QCursor::pos()));
-					ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
-					Fitter::AddItem(qml, Fit::WidthHeight);
+					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(dragStartPoint.x(), dragStartPoint.y());
+
+					if (nullptr != trackedItem)
+					{
+						/* Handled drops coming from design area itself */
+						if (true == dropEvent->mimeData()->hasFormat("designarea/x-qquickitem"))
+						{
+							trackedItem->setPosition(dropEvent->pos() - dragStartPoint + trackedItem->position().toPoint());
+							ShowSelectionTools(trackedItem);
+						}
+					}
 				}
-				return true;
+
+				/* Non-edit mode things */
+				else
+				{
+					/* Handled drops coming from toolbox */
+					if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
+					{
+						QQmlComponent component(ui->designWidget->engine());
+						component.loadUrl(dropEvent->mimeData()->urls().at(0));
+						QQuickItem *qml = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
+						qml->setParentItem(ui->designWidget->rootObject());
+						qml->setPosition(qml->mapFromGlobal(QCursor::pos()));
+						ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
+						Fitter::AddItem(qml, Fit::WidthHeight);
+					}
+				}
+
+				return false;
 			}
 
-			case QMouseEvent::MouseButtonPress: /* Show selection tools */
+			case QMouseEvent::MouseButtonPress:
 			{
 				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+
+				/* Edit mode things */
 				if (!ui->editButton->isChecked())
 				{
 					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(mouseEvent->x(), mouseEvent->y());
+
+					/* Show selection tools */
 					if (nullptr != trackedItem)
 					{
 						QQuickItem* source = qvariant_cast<QQuickItem*>(QQmlProperty::read(m_SelectionEffect, "source"));
@@ -137,7 +169,53 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					}
 					else
 						HideSelectionTools();
+
+					/* Capture drag start point for drags made within design area */
+					dragStartPoint = mouseEvent->pos();
+
 				}
+
+				return false;
+			}
+
+			case QMouseEvent::MouseMove:
+			{
+				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+
+				/* Edit mode things */
+				if (!ui->editButton->isChecked())
+				{
+					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(dragStartPoint.x(), dragStartPoint.y());
+
+					/* Made Drags from design area */
+					if (nullptr != trackedItem)
+					{
+						if (!(mouseEvent->buttons() & Qt::LeftButton))
+							return false;
+						if ((mouseEvent->pos() - dragStartPoint).manhattanLength()
+							< QApplication::startDragDistance())
+							return false;
+
+						QVariant variant;
+						variant.setValue<QQuickItem*>(trackedItem);
+
+						QString mimeType = "designarea/x-qquickitem";
+						QMimeData *mimeData = new QMimeData;
+						mimeData->setData(mimeType, variant.toByteArray());
+
+						QDrag *drag = new QDrag(this);
+						drag->setMimeData(mimeData);
+						drag->setHotSpot(dragStartPoint - trackedItem->position().toPoint());
+
+						QSharedPointer<QQuickItemGrabResult> result = trackedItem->grabToImage();
+						connect(result.data(),&QQuickItemGrabResult::ready,this,[drag, result]
+						{
+							drag->setPixmap(QPixmap::fromImage(result.data()->image()));
+							drag->exec();
+						});
+					}
+				}
+
 				return false;
 			}
 
@@ -339,3 +417,5 @@ MainWindow::~MainWindow()
 
 // TODO: Code a version numberer for tools' objectNames
 // TODO: Make layouts works
+// FIXME: Make CheckTools works
+// FIXME: Make CheckBox tool's internal "rectangle" visible
