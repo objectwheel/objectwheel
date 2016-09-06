@@ -25,11 +25,6 @@ MainWindow::MainWindow(QWidget *parent)
 	DownloadTools(QUrl::fromUserInput("qrc:/resources/tools/tools.json"));
 }
 
-MainWindow::~MainWindow()
-{
-	delete ui;
-}
-
 void MainWindow::SetupGui()
 {
 	/* Scaling things */
@@ -44,6 +39,13 @@ void MainWindow::SetupGui()
 	ui->downsideLayout->setSpacing(fit(6));
 	ui->mainLayout->setSpacing(fit(6));
 	ui->mainLayout->setContentsMargins(fit(9),fit(9),fit(9),fit(9));
+
+	/* Load items' selection effect */
+	QQmlComponent component(ui->designWidget->engine());
+	component.loadUrl(QUrl("qrc:/resources/qmls/selection-effect.qml"));
+	m_SelectionEffect = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
+	m_SelectionEffect->setParentItem(ui->designWidget->rootObject());
+	ui->designWidget->rootContext()->setContextProperty(m_SelectionEffect->objectName(), m_SelectionEffect);
 
 	/* Toolbox touch-shift things */
 	QScroller::grabGesture(ui->toolboxWidget, QScroller::LeftMouseButtonGesture);
@@ -67,6 +69,84 @@ void MainWindow::SetupGui()
 	/* Enable/Disable other controls when editButton clicked */
 	connect(ui->editButton, &QPushButton::toggled, ui->toolboxWidget, &ListWidget::setEnabled);
 	connect(ui->editButton, &QPushButton::toggled, ui->clearButton, &QPushButton::setEnabled);
+
+	/* Set ticks' Parents and hide ticks */
+	m_ResizerTick->setParent(ui->designWidget);
+	m_RemoverTick->setParent(ui->designWidget);
+	m_ResizerTick->hide();
+	m_RemoverTick->hide();
+
+	/* Clear selection effect when it's necessary */
+	connect(m_RemoverTick, &RemoverTick::ItemRemoved, this, &MainWindow::ClearSelectionEffect);
+	connect(ui->editButton, &QPushButton::clicked, this, &MainWindow::ClearSelectionEffect);
+}
+
+
+bool MainWindow::eventFilter(QObject* object, QEvent* event)
+{
+	if (object == ui->designWidget)
+	{
+		switch (event->type())
+		{
+			case QEvent::DragEnter: /* Drag & Drop things */
+			{
+				event->accept();
+				return true;
+			}
+			case QEvent::DragLeave:
+			{
+				event->accept();
+				return true;
+			}
+			case QEvent::DragMove:
+			{
+				event->accept();
+				return true;
+			}
+			case QEvent::Drop:
+			{
+				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
+				if (dropEvent->mimeData()->hasUrls())
+				{
+					QQmlComponent component(ui->designWidget->engine());
+					component.loadUrl(dropEvent->mimeData()->urls().at(0));
+					QQuickItem *qml = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
+					qml->setParentItem(ui->designWidget->rootObject());
+					qml->setPosition(qml->mapFromGlobal(QCursor::pos()));
+					ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
+					Fitter::AddItem(qml, Fit::WidthHeight);
+				}
+				return true;
+			}
+
+			case QMouseEvent::MouseButtonPress: /* Show selection tools */
+			{
+				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+				if (!ui->editButton->isChecked())
+				{
+					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(mouseEvent->x(), mouseEvent->y());
+					if (nullptr != trackedItem)
+					{
+						QQuickItem* source = qvariant_cast<QQuickItem*>(QQmlProperty::read(m_SelectionEffect, "source"));
+						if (source != trackedItem)
+							ShowSelectionTools(trackedItem);
+						else if (m_ResizerTick->isHidden())
+							ShowSelectionTools(trackedItem);
+						else
+							HideSelectionTools();
+					}
+					else
+						HideSelectionTools();
+				}
+				return false;
+			}
+
+			default:
+				return false;
+		}
+	}
+	else
+		return QMainWindow::eventFilter(object,event);
 }
 
 void MainWindow::DownloadTools(const QUrl& url)
@@ -205,11 +285,34 @@ void MainWindow::ExtractZip(const QByteArray& zipData, const QString& path) cons
 	mz_zip_reader_end(&zip);
 }
 
+void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
+{
+	QVariant variant;
+	variant.setValue(selectedItem);
+	QQmlProperty::write(m_SelectionEffect, "source", variant);
+	QQmlProperty::write(m_SelectionEffect, "anchors.fill", variant);
+	QQmlProperty::write(m_SelectionEffect, "visible", true);
+
+	m_ResizerTick->SetTrackedItem(selectedItem);
+	m_ResizerTick->show();
+
+	m_RemoverTick->SetTrackedItem(selectedItem);
+	m_RemoverTick->show();
+}
+
+void MainWindow::HideSelectionTools()
+{
+	ClearSelectionEffect();
+	m_ResizerTick->hide();
+	m_RemoverTick->hide();
+}
+
 void MainWindow::on_clearButton_clicked()
 {
 	/* Delete design items */
 	foreach(QQuickItem* item, ui->designWidget->rootObject()->childItems())
-		item->deleteLater();
+		if (m_SelectionEffect != item)
+			item->deleteLater();
 }
 
 void MainWindow::on_editButton_clicked()
@@ -219,66 +322,20 @@ void MainWindow::on_editButton_clicked()
 		item->setEnabled(ui->editButton->isChecked());
 }
 
-bool MainWindow::eventFilter(QObject* object, QEvent* event)
+void MainWindow::ClearSelectionEffect()
 {
-	if (object == ui->designWidget)
-	{
-		switch (event->type())
-		{
-			case QEvent::DragEnter: /* Drag & Drop things */
-			{
-				event->accept();
-				return true;
-			}
-			case QEvent::DragLeave:
-			{
-				event->accept();
-				return true;
-			}
-			case QEvent::DragMove:
-			{
-				event->accept();
-				return true;
-			}
-			case QEvent::Drop:
-			{
-				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
-				if (dropEvent->mimeData()->hasUrls())
-				{
-					QQmlComponent component(ui->designWidget->engine());
-					component.loadUrl(dropEvent->mimeData()->urls().at(0));
-					QQuickItem *qml = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
-					qml->setParentItem(ui->designWidget->rootObject());
-					qml->setPosition(qml->mapFromGlobal(QCursor::pos()));
-					ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
-					Fitter::AddItem(qml, Fit::WidthHeight);
-				}
-				return true;
-			}
-
-			case QMouseEvent::MouseButtonRelease: /* Move ticks to clicked item */
-			{
-				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-				if (!ui->editButton->isChecked())
-				{
-					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(mouseEvent->x(),mouseEvent->y());
-					if (nullptr != trackedItem)
-					{
-						m_ResizerTick->setParent(ui->designWidget);
-						m_ResizerTick->SetTrackedItem(trackedItem);
-						m_ResizerTick->show();
-
-						m_RemoverTick->setParent(ui->designWidget);
-						m_RemoverTick->SetTrackedItem(trackedItem);
-						m_RemoverTick->show();
-					}
-				}
-			}
-
-			default:
-				return false;
-		}
-	}
-	else
-		return QMainWindow::eventFilter(object,event);
+	/* Clear selection effect */
+	QVariant variant;
+	variant.setValue(ui->designWidget->rootObject());
+	QQmlProperty::write(m_SelectionEffect, "source", variant);
+	QQmlProperty::write(m_SelectionEffect, "anchors.fill", variant);
+	QQmlProperty::write(m_SelectionEffect, "visible", false);
 }
+
+MainWindow::~MainWindow()
+{
+	delete ui;
+}
+
+// TODO: Code a version numberer for tools' objectNames
+// TODO: Make layouts works

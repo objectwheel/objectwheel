@@ -5,6 +5,6 @@ Rectangle {
     y: 0
     width: 100
     height: 100
-    color: "lightGray"
+    color: "#61bd6d"
     objectName: "designArea"
 }

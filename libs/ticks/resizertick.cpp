@@ -49,8 +49,8 @@ void ResizerTick::paintEvent(QPaintEvent* const)
 void ResizerTick::mouseMoveEvent(QMouseEvent* const event)
 {
 	move(pos() + event->pos() - m_HotspotDifference);
-	m_TrackedItem->setProperty("width",pos().x()-TrackedItem()->x());
-	m_TrackedItem->setProperty("height",pos().y()-TrackedItem()->y());
+	m_TrackedItem->setProperty("width", pos().x() - TrackedItem()->x());
+	m_TrackedItem->setProperty("height", pos().y() - TrackedItem()->y());
 	emit ItemResized(m_TrackedItem);
 }
 
