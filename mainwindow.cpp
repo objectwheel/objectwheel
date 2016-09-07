@@ -208,7 +208,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						drag->setHotSpot(dragStartPoint - trackedItem->position().toPoint());
 
 						QSharedPointer<QQuickItemGrabResult> result = trackedItem->grabToImage();
-						connect(result.data(),&QQuickItemGrabResult::ready,this,[drag, result]
+						connect(result.data(), &QQuickItemGrabResult::ready, this, [drag, result]
 						{
 							drag->setPixmap(QPixmap::fromImage(result.data()->image()));
 							drag->exec();
@@ -418,4 +418,6 @@ MainWindow::~MainWindow()
 // TODO: Code a version numberer for tools' objectNames
 // TODO: Make layouts works
 // FIXME: Make CheckTools works
+// FIXME: changed qml file doesn't make changes on designer due to source url is same
 // FIXME: Make CheckBox tool's internal "rectangle" visible
+// TODO: Review selection effect
