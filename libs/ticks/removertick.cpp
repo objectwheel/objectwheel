@@ -7,9 +7,9 @@
 #include <QQuickItem>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#  define REMOVERTICK_SIZE 10
+#    define REMOVERTICK_SIZE 10
 #else
-#  define REMOVERTICK_SIZE 20
+#    define REMOVERTICK_SIZE 20
 #endif
 
 RemoverTick::RemoverTick(QWidget* const parent)

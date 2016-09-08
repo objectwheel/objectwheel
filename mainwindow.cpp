@@ -388,7 +388,7 @@ void MainWindow::HideSelectionTools()
 void MainWindow::on_clearButton_clicked()
 {
 	/* Delete design items */
-	foreach(QQuickItem* item, ui->designWidget->rootObject()->childItems())
+	for (auto item : ui->designWidget->rootObject()->childItems())
 		if (m_SelectionEffect != item)
 			item->deleteLater();
 }
@@ -396,7 +396,7 @@ void MainWindow::on_clearButton_clicked()
 void MainWindow::on_editButton_clicked()
 {
 	/* Enable/Disable design items */
-	foreach(QQuickItem* item, ui->designWidget->rootObject()->childItems())
+	for (auto item : ui->designWidget->rootObject()->childItems())
 		item->setEnabled(ui->editButton->isChecked());
 }
 

@@ -8,6 +8,7 @@
 #define REF_HEIGHT 400
 #define REF_DPI 102
 
+// FIXME: Android fit library ratio changes when rotations changed
 int main(int argc, char *argv[])
 {
 	// Initialize application base with style
@@ -23,13 +24,17 @@ int main(int argc, char *argv[])
 	QFont font("Raleway Light");
 	font.setPixelSize(PIXEL_SIZE);
 	QApplication::setFont(font);
-	Fitter::AddAppWideFonts();
+	Fitter::AddAppWideWidgetFonts();
 
 	// Start MainWidget
 	MainWindow w;
+# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 	w.resize({REF_WIDTH, REF_HEIGHT});
 	Fitter::AddWidget(&w, Fit::WidthHeight);
 	w.show();
+# else
+	w.showFullScreen();
+# endif
 
 	// Start main event loop
 	return a.exec();

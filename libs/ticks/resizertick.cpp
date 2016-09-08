@@ -7,9 +7,9 @@
 #include <QQuickItem>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#  define RESIZERTICK_SIZE 10
+#    define RESIZERTICK_SIZE 10
 #else
-#  define RESIZERTICK_SIZE 20
+#    define RESIZERTICK_SIZE 20
 #endif
 
 ResizerTick::ResizerTick(QWidget* const parent)
