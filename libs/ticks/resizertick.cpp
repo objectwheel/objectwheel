@@ -1,10 +1,11 @@
+#include <fitter.h>
 #include <resizertick.h>
-#include <fit.h>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QColor>
 #include <QQuickItem>
+#include <QQuickWidget>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 #    define RESIZERTICK_SIZE 10
@@ -17,7 +18,8 @@ ResizerTick::ResizerTick(QWidget* const parent)
 	, m_TrackedItem(nullptr)
 {
 	setCursor(QCursor(Qt::SizeFDiagCursor));
-	resize(fit({RESIZERTICK_SIZE, RESIZERTICK_SIZE}));
+	resize(RESIZERTICK_SIZE, RESIZERTICK_SIZE);
+	Fitter::AddWidget(this);
 }
 
 QQuickItem* ResizerTick::TrackedItem() const
@@ -33,8 +35,11 @@ void ResizerTick::SetTrackedItem(QQuickItem* const trackedItem)
 
 void ResizerTick::FixCoord()
 {
-	move({static_cast<int>(m_TrackedItem->x() + m_TrackedItem->width()),
-		  static_cast<int>(m_TrackedItem->y() + m_TrackedItem->height())});
+	QQuickWidget* parent = qobject_cast<QQuickWidget*>(this->parent());
+	QQuickItem* rootObject = parent->rootObject();
+	QPointF point = rootObject->mapFromItem(m_TrackedItem->parentItem(), m_TrackedItem->position());
+	move({static_cast<int>(point.x() + m_TrackedItem->width()),
+		  static_cast<int>(point.y() + m_TrackedItem->height())});
 }
 
 void ResizerTick::paintEvent(QPaintEvent* const)

@@ -10,6 +10,5 @@
         <file>resources/tools/ColumnLayout.zip</file>
         <file>resources/tools/GridLayout.zip</file>
         <file>resources/tools/RowLayout.zip</file>
-        <file>resources/qmls/selection-effect.qml</file>
     </qresource>
 </RCC>

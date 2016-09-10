@@ -3,30 +3,32 @@
 
 #include <QPushButton>
 
+class QQuickItem;
+
 class EditorTick : public QPushButton
 {
 		Q_OBJECT
 
 	private:
-		QWidget* m_TrackedWidget = nullptr;
+		QQuickItem* m_TrackedItem;
 
 	public:
-		explicit EditorTick(QWidget *parent = 0);
-		QWidget* TrackedWidget() const;
-		void setTrackedWidget(QWidget* const);
-
-	public slots:
-		void fixCoord();
-
-	private slots:
-		void openEditor();
+		explicit EditorTick(QWidget* const parent = 0);
+		QQuickItem* TrackedItem() const;
+		void SetTrackedItem(QQuickItem* const trackedItem);
 
 	protected:
-		void paintEvent(QPaintEvent*);
-		bool eventFilter(QObject* o, QEvent* e);
+		void paintEvent(QPaintEvent* const event);
+		bool eventFilter(QObject* object, QEvent* event);
 
 	signals:
-		void editorOpened(QWidget* const);
+		void EditorOpened(QQuickItem* const item) const;
+
+	public slots:
+		void FixCoord();
+
+	private slots:
+		void OpenEditor();
 
 };
 

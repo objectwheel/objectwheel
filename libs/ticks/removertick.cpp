@@ -1,10 +1,11 @@
+#include <fitter.h>
 #include <removertick.h>
-#include <fit.h>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QColor>
 #include <QQuickItem>
+#include <QQuickWidget>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 #    define REMOVERTICK_SIZE 10
@@ -18,7 +19,8 @@ RemoverTick::RemoverTick(QWidget* const parent)
 {
 	connect(this, SIGNAL(clicked(bool)), this, SLOT(RemoveItem()));
 	setCursor(QCursor(Qt::PointingHandCursor));
-	resize(fit({REMOVERTICK_SIZE, REMOVERTICK_SIZE}));
+	resize(REMOVERTICK_SIZE, REMOVERTICK_SIZE);
+	Fitter::AddWidget(this);
 }
 
 QQuickItem* RemoverTick::TrackedItem() const
@@ -34,8 +36,11 @@ void RemoverTick::SetTrackedItem(QQuickItem* const trackedItem)
 
 void RemoverTick::FixCoord()
 {
-	move({static_cast<int>(m_TrackedItem->x() + m_TrackedItem->width()),
-		  static_cast<int>(m_TrackedItem->y())});
+	QQuickWidget* parent = qobject_cast<QQuickWidget*>(this->parent());
+	QQuickItem* rootObject = parent->rootObject();
+	QPointF point = rootObject->mapFromItem(m_TrackedItem->parentItem(), m_TrackedItem->position());
+	move({static_cast<int>(point.x() + m_TrackedItem->width()),
+		  static_cast<int>(point.y())});
 }
 
 void RemoverTick::RemoveItem()

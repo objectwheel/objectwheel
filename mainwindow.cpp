@@ -40,13 +40,6 @@ void MainWindow::SetupGui()
 	ui->mainLayout->setSpacing(fit(6));
 	ui->mainLayout->setContentsMargins(fit(9),fit(9),fit(9),fit(9));
 
-	/* Load items' selection effect */
-	QQmlComponent component(ui->designWidget->engine());
-	component.loadUrl(QUrl("qrc:/resources/qmls/selection-effect.qml"));
-	m_SelectionEffect = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
-	m_SelectionEffect->setParentItem(ui->designWidget->rootObject());
-	ui->designWidget->rootContext()->setContextProperty(m_SelectionEffect->objectName(), m_SelectionEffect);
-
 	/* Toolbox touch-shift things */
 	QScroller::grabGesture(ui->toolboxWidget, QScroller::LeftMouseButtonGesture);
 
@@ -75,10 +68,6 @@ void MainWindow::SetupGui()
 	m_RemoverTick->setParent(ui->designWidget);
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
-
-	/* Clear selection effect when it's necessary */
-	connect(m_RemoverTick, &RemoverTick::ItemRemoved, this, &MainWindow::ClearSelectionEffect);
-	connect(ui->editButton, &QPushButton::clicked, this, &MainWindow::ClearSelectionEffect);
 }
 
 
@@ -159,8 +148,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					/* Show selection tools */
 					if (nullptr != trackedItem)
 					{
-						QQuickItem* source = qvariant_cast<QQuickItem*>(QQmlProperty::read(m_SelectionEffect, "source"));
-						if (source != trackedItem)
+						if (m_ResizerTick->TrackedItem() != trackedItem)
 							ShowSelectionTools(trackedItem);
 						else if (m_ResizerTick->isHidden())
 							ShowSelectionTools(trackedItem);
@@ -365,12 +353,6 @@ void MainWindow::ExtractZip(const QByteArray& zipData, const QString& path) cons
 
 void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 {
-	QVariant variant;
-	variant.setValue(selectedItem);
-	QQmlProperty::write(m_SelectionEffect, "source", variant);
-	QQmlProperty::write(m_SelectionEffect, "anchors.fill", variant);
-	QQmlProperty::write(m_SelectionEffect, "visible", true);
-
 	m_ResizerTick->SetTrackedItem(selectedItem);
 	m_ResizerTick->show();
 
@@ -380,7 +362,6 @@ void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 
 void MainWindow::HideSelectionTools()
 {
-	ClearSelectionEffect();
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
 }
@@ -389,7 +370,6 @@ void MainWindow::on_clearButton_clicked()
 {
 	/* Delete design items */
 	for (auto item : ui->designWidget->rootObject()->childItems())
-		if (m_SelectionEffect != item)
 			item->deleteLater();
 }
 
@@ -398,16 +378,6 @@ void MainWindow::on_editButton_clicked()
 	/* Enable/Disable design items */
 	for (auto item : ui->designWidget->rootObject()->childItems())
 		item->setEnabled(ui->editButton->isChecked());
-}
-
-void MainWindow::ClearSelectionEffect()
-{
-	/* Clear selection effect */
-	QVariant variant;
-	variant.setValue(ui->designWidget->rootObject());
-	QQmlProperty::write(m_SelectionEffect, "source", variant);
-	QQmlProperty::write(m_SelectionEffect, "anchors.fill", variant);
-	QQmlProperty::write(m_SelectionEffect, "visible", false);
 }
 
 MainWindow::~MainWindow()
