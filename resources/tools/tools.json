@@ -27,5 +27,45 @@
     "ColumnLayout" :
     {
         "toolUrl" : "qrc:/resources/tools/ColumnLayout.zip"
+    },
+
+    "Rectangle" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Rectangle.zip"
+    },
+
+    "BusyIndicator" :
+    {
+        "toolUrl" : "qrc:/resources/tools/BusyIndicator.zip"
+    },
+
+    "Text" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Text.zip"
+    },
+
+    "Switch" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Switch.zip"
+    },
+
+    "Slider" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Slider.zip"
+    },
+
+    "TextField" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TextField.zip"
+    },
+
+    "ProgressBar" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ProgressBar.zip"
+    },
+
+    "RadioButton" :
+    {
+        "toolUrl" : "qrc:/resources/tools/RadioButton.zip"
     }
 }

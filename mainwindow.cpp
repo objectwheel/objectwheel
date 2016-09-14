@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_ToolsDir("tools")
 	, m_ResizerTick(new ResizerTick)
 	, m_RemoverTick(new RemoverTick)
+	, m_RootItem(nullptr)
 {
 	ui->setupUi(this);
 	SetupGui();
@@ -33,6 +34,9 @@ void MainWindow::SetupGui()
 	Fitter::AddWidget(ui->toolboxWidget, Fit::WidthScaling | Fit::LaidOut);
 	Fitter::AddWidget(ui->toolboxTitle, Fit::WidthHeight | Fit::LaidOut);
 	Fitter::AddWidget(ui->designTitle, Fit::HeightScaling | Fit::LaidOut);
+
+	/* Assign design area's root object */
+	m_RootItem = ui->designWidget->rootObject();
 
 	/* Layout spacing things */
 	ui->upsideLayout->setSpacing(fit(6));
@@ -51,6 +55,9 @@ void MainWindow::SetupGui()
 
 	/* Hide ticks when tracked item removed */
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
+
+	/* Remove deleted items from internal item list */
+	connect(m_RemoverTick, &RemoverTick::ItemRemoved, this, &MainWindow::RemoveItem);
 
 	/* Re-move ticks when tracked item resized */
 	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RemoverTick, &RemoverTick::FixCoord);
@@ -78,6 +85,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 	{
 		/* Design area's events' shared variables */
 		static QPoint dragStartPoint;
+		static QQuickItem* pressedItem;
 
 		switch (event->type())
 		{
@@ -104,15 +112,39 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				/* Edit mode things */
 				if (!ui->editButton->isChecked())
 				{
-					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(dragStartPoint.x(), dragStartPoint.y());
 
-					if (nullptr != trackedItem)
+					if (nullptr != pressedItem)
 					{
 						/* Handled drops coming from design area itself */
 						if (true == dropEvent->mimeData()->hasFormat("designarea/x-qquickitem"))
 						{
-							trackedItem->setPosition(dropEvent->pos() - dragStartPoint + trackedItem->position().toPoint());
-							ShowSelectionTools(trackedItem);
+							/* Get deepest item under the dropped point */
+							QQuickItem* itemAtDroppedPoint = GetDeepestDesignItemOnPoint(dropEvent->pos());
+
+							/* Get all children */
+							QQuickItemList childItems = GetAllChildren(pressedItem);
+
+							/* Get fixed dropped point as in desing area coord system */
+							QPointF droppedPoint = dropEvent->pos() - dragStartPoint +
+												   m_RootItem->mapFromItem(pressedItem->parentItem(), pressedItem->position());
+
+							/* Move related item to its new position */
+							if (nullptr == itemAtDroppedPoint)
+							{
+								pressedItem->setParentItem(m_RootItem);
+								pressedItem->setPosition(droppedPoint);
+							}
+							else if (true == childItems.contains(itemAtDroppedPoint))
+							{
+								pressedItem->setPosition(pressedItem->parentItem()->mapFromItem(m_RootItem, droppedPoint));
+							}
+							else if (pressedItem != itemAtDroppedPoint)
+							{
+								QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_RootItem, droppedPoint);
+								pressedItem->setParentItem(itemAtDroppedPoint->childItems()[0]);
+								pressedItem->setPosition(mappedPoint);
+							}
+							QTimer::singleShot(100, [=]{ ShowSelectionTools(pressedItem); });
 						}
 					}
 				}
@@ -126,10 +158,40 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						QQmlComponent component(ui->designWidget->engine());
 						component.loadUrl(dropEvent->mimeData()->urls().at(0));
 						QQuickItem *qml = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
-						qml->setParentItem(ui->designWidget->rootObject());
-						qml->setPosition(qml->mapFromGlobal(QCursor::pos()));
 						ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
-						Fitter::AddItem(qml, Fit::WidthHeight);
+
+						QQmlComponent designComponent(ui->designWidget->engine());
+						designComponent.loadUrl(QUrl("qrc:/resources/qmls/design-item.qml"));
+						QQuickItem *qmlDesing = qobject_cast<QQuickItem*>(designComponent.create(ui->designWidget->rootContext()));
+						qmlDesing->setParentItem(m_RootItem);
+						qmlDesing->setPosition(qmlDesing->mapFromItem(m_RootItem, dropEvent->pos()));
+						qmlDesing->setWidth(qml->width());
+						qmlDesing->setHeight(qml->height());
+						Fitter::AddItem(qmlDesing, Fit::WidthHeight);
+						qml->setParentItem(qmlDesing);
+						m_Items << qmlDesing;
+
+						QVariant variant;
+						variant.setValue(qmlDesing);
+						QQmlProperty::write(qml, "anchors.margins", 1);
+						QQmlProperty::write(qml, "anchors.fill", variant);
+
+						QQmlProperty::write(qmlDesing, "Layout.fillHeight",
+											QQmlProperty::read(qml, "Layout.fillHeight", qmlContext(qml)), qmlContext(qmlDesing));
+						QQmlProperty::write(qmlDesing, "Layout.fillWidth",
+											QQmlProperty::read(qml, "Layout.fillWidth", qmlContext(qml)), qmlContext(qmlDesing));
+						QQmlProperty::write(qmlDesing, "Layout.alignment",
+											QQmlProperty::read(qml, "Layout.alignment", qmlContext(qml)), qmlContext(qmlDesing));
+						QQmlProperty::write(qmlDesing, "Layout.margins",
+											QQmlProperty::read(qml, "Layout.margins", qmlContext(qml)), qmlContext(qmlDesing));
+						QQmlProperty::write(qmlDesing, "Layout.maximumHeight",
+											QQmlProperty::read(qml, "Layout.maximumHeight", qmlContext(qml)), qmlContext(qmlDesing));
+						QQmlProperty::write(qmlDesing, "Layout.maximumWidth",
+											QQmlProperty::read(qml, "Layout.maximumWidth", qmlContext(qml)), qmlContext(qmlDesing));
+						QQmlProperty::write(qmlDesing, "Layout.minimumHeight",
+											QQmlProperty::read(qml, "Layout.minimumHeight", qmlContext(qml)), qmlContext(qmlDesing));
+						QQmlProperty::write(qmlDesing, "Layout.minimumWidth",
+											QQmlProperty::read(qml, "Layout.minimumWidth", qmlContext(qml)), qmlContext(qmlDesing));
 					}
 				}
 
@@ -143,15 +205,16 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				/* Edit mode things */
 				if (!ui->editButton->isChecked())
 				{
-					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(mouseEvent->x(), mouseEvent->y());
+					/* Get deepest item under the pressed point */
+					pressedItem = GetDeepestDesignItemOnPoint(mouseEvent->pos());
 
 					/* Show selection tools */
-					if (nullptr != trackedItem)
+					if (nullptr != pressedItem)
 					{
-						if (m_ResizerTick->TrackedItem() != trackedItem)
-							ShowSelectionTools(trackedItem);
+						if (m_ResizerTick->TrackedItem() != pressedItem)
+							ShowSelectionTools(pressedItem);
 						else if (m_ResizerTick->isHidden())
-							ShowSelectionTools(trackedItem);
+							ShowSelectionTools(pressedItem);
 						else
 							HideSelectionTools();
 					}
@@ -160,7 +223,6 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 					/* Capture drag start point for drags made within design area */
 					dragStartPoint = mouseEvent->pos();
-
 				}
 
 				return false;
@@ -173,10 +235,8 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				/* Edit mode things */
 				if (!ui->editButton->isChecked())
 				{
-					QQuickItem* trackedItem = ui->designWidget->rootObject()->childAt(dragStartPoint.x(), dragStartPoint.y());
-
 					/* Made Drags from design area */
-					if (nullptr != trackedItem)
+					if (nullptr != pressedItem)
 					{
 						if (!(mouseEvent->buttons() & Qt::LeftButton))
 							return false;
@@ -185,7 +245,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 							return false;
 
 						QVariant variant;
-						variant.setValue<QQuickItem*>(trackedItem);
+						variant.setValue<QQuickItem*>(pressedItem);
 
 						QString mimeType = "designarea/x-qquickitem";
 						QMimeData *mimeData = new QMimeData;
@@ -193,9 +253,10 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 						QDrag *drag = new QDrag(this);
 						drag->setMimeData(mimeData);
-						drag->setHotSpot(dragStartPoint - trackedItem->position().toPoint());
+						QPointF diffPoint = dragStartPoint - m_RootItem->mapFromItem(pressedItem->parentItem(), pressedItem->position());
+						drag->setHotSpot(diffPoint.toPoint());
 
-						QSharedPointer<QQuickItemGrabResult> result = trackedItem->grabToImage();
+						QSharedPointer<QQuickItemGrabResult> result = pressedItem->grabToImage();
 						connect(result.data(), &QQuickItemGrabResult::ready, this, [drag, result]
 						{
 							drag->setPixmap(QPixmap::fromImage(result.data()->image()));
@@ -351,33 +412,83 @@ void MainWindow::ExtractZip(const QByteArray& zipData, const QString& path) cons
 	mz_zip_reader_end(&zip);
 }
 
+QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
+{
+	QQuickItem* item = m_RootItem->childAt(point.x(), point.y());
+
+	if (nullptr != item)
+	{
+		QQuickItem* designItem = nullptr;
+		if (0 == QString::compare(item->objectName(), "design-item"))
+			designItem = item;
+
+		QPointF newPos = item->mapFromItem(m_RootItem, {point});
+		while (nullptr != item->childAt(newPos.x(), newPos.y()))
+		{
+			item = item->childAt(newPos.x(), newPos.y());
+			newPos = item->mapFromItem(item->parentItem(), newPos);
+
+			if (0 == QString::compare(item->objectName(), "design-item"))
+				designItem = item;
+		}
+		return designItem;
+	}
+
+	return nullptr;
+}
+
+const MainWindow::QQuickItemList MainWindow::GetAllChildren(QQuickItem* const item) const
+{
+	QQuickItemList childList;
+	for (auto child : item->childItems())
+		childList << GetAllChildren(child);
+	childList << item;
+	return childList;
+}
+
 void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 {
+	HideSelectionTools();
+
 	m_ResizerTick->SetTrackedItem(selectedItem);
 	m_ResizerTick->show();
 
 	m_RemoverTick->SetTrackedItem(selectedItem);
 	m_RemoverTick->show();
+
+	QQmlProperty::write(selectedItem, "border.color", "blue");
 }
 
 void MainWindow::HideSelectionTools()
 {
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
+
+	for (auto item : m_Items)
+		QQmlProperty::write(item, "border.color", "gray");
 }
 
 void MainWindow::on_clearButton_clicked()
 {
 	/* Delete design items */
-	for (auto item : ui->designWidget->rootObject()->childItems())
-			item->deleteLater();
+	for (auto item : m_Items)
+		item->deleteLater();
+
+	/* Clear list */
+	m_Items.clear();
 }
 
 void MainWindow::on_editButton_clicked()
 {
 	/* Enable/Disable design items */
-	for (auto item : ui->designWidget->rootObject()->childItems())
+	for (auto item : m_Items)
+	{
 		item->setEnabled(ui->editButton->isChecked());
+		if (ui->editButton->isChecked())
+			QQmlProperty::write(item, "border.color", "transparent");
+		else
+			QQmlProperty::write(item, "border.color", "gray");
+	}
 }
 
 MainWindow::~MainWindow()
@@ -385,9 +496,14 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
+void MainWindow::RemoveItem(QQuickItem* const item)
+{
+	for (auto child : GetAllChildren(item))
+		if (m_Items.contains(child))
+			m_Items.removeAll(child);
+}
+
 // TODO: Code a version numberer for tools' objectNames
-// TODO: Make layouts works
-// FIXME: Make CheckTools works
+// FIXME: Make CheckTools function works
 // FIXME: changed qml file doesn't make changes on designer due to source url is same
-// FIXME: Make CheckBox tool's internal "rectangle" visible
-// TODO: Review selection effect
+// TODO: Make parent controls covers their childs

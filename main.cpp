@@ -8,7 +8,6 @@
 #define REF_HEIGHT 400
 #define REF_DPI 102
 
-// FIXME: Android fit library ratio changes when rotations changed
 int main(int argc, char *argv[])
 {
 	// Initialize application base with style

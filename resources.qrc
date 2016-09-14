@@ -10,5 +10,14 @@
         <file>resources/tools/ColumnLayout.zip</file>
         <file>resources/tools/GridLayout.zip</file>
         <file>resources/tools/RowLayout.zip</file>
+        <file>resources/qmls/design-item.qml</file>
+        <file>resources/tools/Rectangle.zip</file>
+        <file>resources/tools/BusyIndicator.zip</file>
+        <file>resources/tools/Text.zip</file>
+        <file>resources/tools/Switch.zip</file>
+        <file>resources/tools/Slider.zip</file>
+        <file>resources/tools/TextField.zip</file>
+        <file>resources/tools/ProgressBar.zip</file>
+        <file>resources/tools/RadioButton.zip</file>
     </qresource>
 </RCC>
