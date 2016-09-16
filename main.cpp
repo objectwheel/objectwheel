@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	Fitter::AddWidget(&w, Fit::WidthHeight);
 	w.show();
 # else
-	w.showFullScreen();
+	w.show();
 # endif
 
 	// Start main event loop

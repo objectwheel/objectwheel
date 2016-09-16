@@ -528,6 +528,5 @@ void MainWindow::RemoveItem(QQuickItem* const item)
 // TODO: Make it possible to resize(zoom) and rotate operations with fingers
 // TODO: Make main design area layoutable
 // TODO: Code a version numberer for tools' objectNames
-// FIXME: Fix android design area geometry corruption
 // FIXME: Make CheckTools function works
 // FIXME: changed qml file doesn't make changes on designer due to source url is same
