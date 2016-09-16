@@ -4,6 +4,7 @@
 #include <listwidget.h>
 #include <mainwindow.h>
 #include <resizertick.h>
+#include <rotatortick.h>
 #include <removertick.h>
 #include <ui_mainwindow.h>
 
@@ -18,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, ui(new Ui::MainWindow)
 	, m_ToolsDir("tools")
 	, m_ResizerTick(new ResizerTick)
+	, m_RotatorTick(new RotatorTick)
 	, m_RemoverTick(new RemoverTick)
 	, m_RootItem(nullptr)
 {
@@ -35,17 +37,22 @@ void MainWindow::SetupGui()
 	Fitter::AddWidget(ui->toolboxTitle, Fit::WidthHeight | Fit::LaidOut);
 	Fitter::AddWidget(ui->designTitle, Fit::HeightScaling | Fit::LaidOut);
 
+	/* Set ticks' icons */
+	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
+	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
+	m_RotatorTick->setIcon(QIcon(":/resources/images/rotate-icon.png"));
+
 	/* Assign design area's root object */
 	m_RootItem = ui->designWidget->rootObject();
 
 	/* Layout spacing things */
-	ui->upsideLayout->setSpacing(fit(6));
+	ui->leftLayout->setSpacing(fit(6));
 	ui->downsideLayout->setSpacing(fit(6));
 	ui->mainLayout->setSpacing(fit(6));
 	ui->mainLayout->setContentsMargins(fit(9),fit(9),fit(9),fit(9));
 
 	/* Toolbox touch-shift things */
-	QScroller::grabGesture(ui->toolboxWidget, QScroller::LeftMouseButtonGesture);
+	QScroller::grabGesture(ui->toolboxWidget, QScroller::TouchGesture);
 
 	/* Toolbox stylizing */
 	ui->toolboxWidget->setIconSize(fit({30, 30}));
@@ -55,16 +62,23 @@ void MainWindow::SetupGui()
 
 	/* Hide ticks when tracked item removed */
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
+	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
 
 	/* Remove deleted items from internal item list */
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, this, &MainWindow::RemoveItem);
 
 	/* Re-move ticks when tracked item resized */
 	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RemoverTick, &RemoverTick::FixCoord);
+	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RotatorTick, &RotatorTick::FixCoord);
+
+	/* Re-move ticks when tracked item rotated */
+	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_RemoverTick, &RemoverTick::FixCoord);
+	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_ResizerTick, &ResizerTick::FixCoord);
 
 	/* Hide ticks when editButton clicked */
 	connect(ui->editButton, &QPushButton::clicked, m_ResizerTick, &ResizerTick::hide);
 	connect(ui->editButton, &QPushButton::clicked, m_RemoverTick, &RemoverTick::hide);
+	connect(ui->editButton, &QPushButton::clicked, m_RotatorTick, &RotatorTick::hide);
 
 	/* Enable/Disable other controls when editButton clicked */
 	connect(ui->editButton, &QPushButton::toggled, ui->toolboxWidget, &ListWidget::setEnabled);
@@ -73,8 +87,10 @@ void MainWindow::SetupGui()
 	/* Set ticks' Parents and hide ticks */
 	m_ResizerTick->setParent(ui->designWidget);
 	m_RemoverTick->setParent(ui->designWidget);
+	m_RotatorTick->setParent(ui->designWidget);
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
+	m_RotatorTick->hide();
 }
 
 
@@ -453,6 +469,9 @@ void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 	m_ResizerTick->SetTrackedItem(selectedItem);
 	m_ResizerTick->show();
 
+	m_RotatorTick->SetTrackedItem(selectedItem);
+	m_RotatorTick->show();
+
 	m_RemoverTick->SetTrackedItem(selectedItem);
 	m_RemoverTick->show();
 
@@ -463,6 +482,7 @@ void MainWindow::HideSelectionTools()
 {
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
+	m_RotatorTick->hide();
 
 	for (auto item : m_Items)
 		QQmlProperty::write(item, "border.color", "gray");
@@ -503,7 +523,11 @@ void MainWindow::RemoveItem(QQuickItem* const item)
 			m_Items.removeAll(child);
 }
 
+// TODO: Make a object copy tick
+// TODO: Make ticks ordered nicely
+// TODO: Make it possible to resize(zoom) and rotate operations with fingers
+// TODO: Make main design area layoutable
 // TODO: Code a version numberer for tools' objectNames
+// FIXME: Fix android design area geometry corruption
 // FIXME: Make CheckTools function works
 // FIXME: changed qml file doesn't make changes on designer due to source url is same
-// TODO: Make parent controls covers their childs

@@ -5,6 +5,7 @@ Rectangle {
     color: "transparent"
     border.color: "transparent"
     objectName: "design-item"
+    clip: true
 
     Layout.alignment : Qt.AlignCenter
     Layout.fillHeight : true

@@ -8,9 +8,9 @@
 #include <QQuickWidget>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#    define REMOVERTICK_SIZE 10
+#    define REMOVERTICK_SIZE 15
 #else
-#    define REMOVERTICK_SIZE 20
+#    define REMOVERTICK_SIZE 25
 #endif
 
 RemoverTick::RemoverTick(QWidget* const parent)
@@ -39,8 +39,8 @@ void RemoverTick::FixCoord()
 	QQuickWidget* parent = qobject_cast<QQuickWidget*>(this->parent());
 	QQuickItem* rootObject = parent->rootObject();
 	QPointF point = rootObject->mapFromItem(m_TrackedItem->parentItem(), m_TrackedItem->position());
-	move({static_cast<int>(point.x() + m_TrackedItem->width()),
-		  static_cast<int>(point.y())});
+	move({static_cast<int>(point.x() - width()),
+		  static_cast<int>(point.y() + m_TrackedItem->height())});
 }
 
 void RemoverTick::RemoveItem()
@@ -65,9 +65,10 @@ void RemoverTick::paintEvent(QPaintEvent* const)
 	}
 	else
 	{
-		QBrush b(QColor("#d14938"));
+		QBrush b(QColor("#f15958"));
 		p.setPen(QColor("#c13928"));
 		p.setBrush(b);
 		p.drawEllipse(rect().adjusted(1, 1, -1, -1));
 	}
+	p.drawPixmap(rect().adjusted(2, 2, -2, -2), icon().pixmap(size() - QSize(4, 4)));
 }

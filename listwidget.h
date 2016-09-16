@@ -10,6 +10,8 @@ class ListWidget : public QListWidget
 
 	private:
 		QMap<QListWidgetItem*, QList<QUrl>> m_Urls;
+		QPoint m_PreviousPoint;
+		QList<qreal> m_AngleList;
 
 	public:
 		explicit ListWidget(QWidget *parent = 0);
@@ -19,6 +21,8 @@ class ListWidget : public QListWidget
 
 	protected:
 		QMimeData* mimeData(const QList<QListWidgetItem *> items) const;
+		void mousePressEvent(QMouseEvent* const event);
+		void mouseMoveEvent(QMouseEvent* const event);
 };
 
 #endif // TREEWIDGET_H

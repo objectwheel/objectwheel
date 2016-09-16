@@ -7,9 +7,9 @@
 #include <QtQuickWidgets>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#    define EDITORTICK_SIZE 10
+#    define EDITORTICK_SIZE 15
 #else
-#    define EDITORTICK_SIZE 20
+#    define EDITORTICK_SIZE 25
 #endif
 
 EditorTick::EditorTick(QWidget* const parent)
@@ -60,6 +60,7 @@ void EditorTick::paintEvent(QPaintEvent*)
 		p.setBrush(b);
 		p.drawEllipse(rect().adjusted(1, 1, -1, -1));
 	}
+	p.drawPixmap(rect().adjusted(2, 2, -2, -2), icon().pixmap(size() - QSize(4, 4)));
 }
 
 QPlainTextEdit* textEdit = nullptr;

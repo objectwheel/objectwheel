@@ -19,11 +19,11 @@
 }</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="mainLayout">
+   <layout class="QHBoxLayout" name="mainLayout">
     <item>
-     <layout class="QHBoxLayout" name="upsideLayout">
+     <layout class="QVBoxLayout" name="leftLayout">
       <item>
-       <layout class="QVBoxLayout" name="toolboxsLayout">
+       <layout class="QVBoxLayout" name="upsideLayout">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -84,7 +84,6 @@ color:black;</string>
           </property>
           <property name="styleSheet">
            <string notr="true">QListView {
-    show-decoration-selected: 1;
 	border:1px solid white;
 	background:#2969b0;
 	padding:6px;
@@ -97,30 +96,7 @@ QListView::item {
     border-bottom-color: transparent;
 	padding:2px;
 }
-
-QListView::item:hover {
-    background: white;
-	color:black;
-    border: 0px solid #bfcde4;
-}
-
-QListView::item:selected {
-     background: white;
-	color:black;
-    border: 0px solid #bfcde4;
-}
-
-QListView::item:selected:active{
-    background: white;
-	color:black;
-    border: 0px solid #bfcde4;
-}
-
-QListView::item:selected:!active {
-    background: white;
-	color:black;
-    border: 0px solid #bfcde4;
-}</string>
+</string>
           </property>
           <property name="verticalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -134,103 +110,47 @@ QListView::item:selected:!active {
           <property name="dragDropMode">
            <enum>QAbstractItemView::DragOnly</enum>
           </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="verticalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
          </widget>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="designsLayout">
-        <property name="spacing">
-         <number>0</number>
-        </property>
+       <layout class="QHBoxLayout" name="downsideLayout">
         <item>
-         <widget class="QLabel" name="designTitle">
+         <widget class="QPushButton" name="editButton">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>25</height>
+            <width>82</width>
+            <height>35</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>16777215</width>
-            <height>25</height>
+            <width>82</width>
+            <height>35</height>
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">background:white;
-color:black;</string>
-          </property>
-          <property name="text">
-           <string>Design Area</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QQuickWidget" name="designWidget">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="mouseTracking">
-           <bool>false</bool>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">border:1px solid white;</string>
-          </property>
-          <property name="resizeMode">
-           <enum>QQuickWidget::SizeRootObjectToView</enum>
-          </property>
-          <property name="source">
-           <url>
-            <string>qrc:/resources/qmls/design-area.qml</string>
-           </url>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="downsideLayout">
-      <item>
-       <widget class="QPushButton" name="editButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>82</width>
-          <height>35</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>82</width>
-          <height>35</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton::!checked
+           <string notr="true">QPushButton::!checked
 {
-	border:1px solid #31984f;
-	background:#41a85f;
-	color:white;
+	border:1px solid #e1e2e4;
+	background:#f1f2f4;
+	color:black;
 }
 QPushButton::checked
 {
@@ -238,40 +158,44 @@ QPushButton::checked
 	background:#2969b0;
 	color:white;
 }</string>
-        </property>
-        <property name="text">
-         <string>Edit ✎</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="clearButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>82</width>
-          <height>35</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>82</width>
-          <height>35</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton::!pressed
+          </property>
+          <property name="text">
+           <string>Edit</string>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/resources/images/edit-icon.png</normaloff>:/resources/images/edit-icon.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clearButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>82</width>
+            <height>35</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>82</width>
+            <height>35</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton::!pressed
 {
 	border:1px solid #c13928;
 	background:#d14938;
@@ -291,24 +215,80 @@ QPushButton::disabled
 	background:#888888;
 	color:#cccccc;
 }</string>
+          </property>
+          <property name="text">
+           <string>Clear</string>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/resources/images/trash-icon.png</normaloff>:/resources/images/trash-icon.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="designsLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="designTitle">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background:white;
+color:black;</string>
         </property>
         <property name="text">
-         <string>Clear all ✗</string>
+         <string>Design Area</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QQuickWidget" name="designWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="mouseTracking">
+         <bool>false</bool>
         </property>
-       </spacer>
+        <property name="styleSheet">
+         <string notr="true">border:1px solid white;</string>
+        </property>
+        <property name="resizeMode">
+         <enum>QQuickWidget::SizeRootObjectToView</enum>
+        </property>
+        <property name="source">
+         <url>
+          <string>qrc:/resources/qmls/design-area.qml</string>
+         </url>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -328,6 +308,8 @@ QPushButton::disabled
    <header>listwidget.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

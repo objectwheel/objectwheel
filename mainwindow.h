@@ -9,6 +9,7 @@ namespace Ui {
 
 class QQuickItem;
 class ResizerTick;
+class RotatorTick;
 class RemoverTick;
 
 class MainWindow : public QMainWindow
@@ -32,6 +33,7 @@ class MainWindow : public QMainWindow
 		Ui::MainWindow *ui;
 		QString m_ToolsDir;
 		ResizerTick* m_ResizerTick;
+		RotatorTick* m_RotatorTick;
 		RemoverTick* m_RemoverTick;
 		QQuickItem* m_RootItem;
 		QQuickItemList m_Items;

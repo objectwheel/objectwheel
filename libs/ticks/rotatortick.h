@@ -1,33 +1,32 @@
-#ifndef RESIZERTICK_H
-#define RESIZERTICK_H
+#ifndef ROTATORTICK_H
+#define ROTATORTICK_H
 
 #include <QPushButton>
+#include <QQuickItem>
 
-class QQuickItem;
-
-class ResizerTick : public QPushButton
+class RotatorTick : public QPushButton
 {
 		Q_OBJECT
 
 	private:
 		QQuickItem* m_TrackedItem;
-		QPoint m_HotspotDifference;
+		QPointF m_EndPoint;
 
 	public:
-		explicit ResizerTick(QWidget* const parent = 0);
+		explicit RotatorTick(QWidget* const parent = 0);
 		QQuickItem* TrackedItem() const;
 		void SetTrackedItem(QQuickItem* const trackedItem);
 
 	protected:
 		void paintEvent(QPaintEvent* const event);
 		void mouseMoveEvent(QMouseEvent* const event);
-		void mousePressEvent(QMouseEvent* const event);
 
 	public slots:
 		void FixCoord();
+		inline void ResetRotation() { m_TrackedItem->setRotation(0); }
 
 	signals:
-		void ItemResized(QQuickItem* const item) const;
+		void ItemRotated(QQuickItem* const item) const;
 };
 
-#endif // RESIZERTICK_H
+#endif // ROTATORTICK_H

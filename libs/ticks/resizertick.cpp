@@ -6,15 +6,16 @@
 #include <QColor>
 #include <QQuickItem>
 #include <QQuickWidget>
+#include <QApplication>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#    define RESIZERTICK_SIZE 10
+#    define RESIZERTICK_SIZE 15
 #else
-#    define RESIZERTICK_SIZE 20
+#    define RESIZERTICK_SIZE 25
 #endif
 
 ResizerTick::ResizerTick(QWidget* const parent)
-	: QWidget(parent)
+	: QPushButton(parent)
 	, m_TrackedItem(nullptr)
 {
 	setCursor(QCursor(Qt::SizeFDiagCursor));
@@ -47,18 +48,25 @@ void ResizerTick::paintEvent(QPaintEvent* const)
 	QPainter p(this);
 	p.setRenderHint(QPainter::Antialiasing);
 	p.setPen(QColor("#1959a0"));
-	p.setBrush(QColor("#2969b0"));
+	p.setBrush(QColor("#4989d0"));
 	p.drawEllipse(rect().adjusted(1, 1, -1, -1));
+	p.drawPixmap(rect().adjusted(2, 2, -2, -2), icon().pixmap(size() - QSize(4, 4)));
 }
 
 void ResizerTick::mouseMoveEvent(QMouseEvent* const event)
 {
+	if (!(event->buttons() & Qt::LeftButton))
+		return;
+	if ((event->pos() - pos()).manhattanLength()
+		< QApplication::startDragDistance())
+		return;
+
 	QQuickWidget* parent = qobject_cast<QQuickWidget*>(this->parent());
 	QQuickItem* rootObject = parent->rootObject();
 	QPointF point = rootObject->mapFromItem(m_TrackedItem->parentItem(), m_TrackedItem->position());
 	move(pos() + event->pos() - m_HotspotDifference);
-	m_TrackedItem->setProperty("width", pos().x() - point.x());
-	m_TrackedItem->setProperty("height", pos().y() - point.y());
+	m_TrackedItem->setWidth(pos().x() - point.x());
+	m_TrackedItem->setHeight(pos().y() - point.y());
 	emit ItemResized(m_TrackedItem);
 }
 
