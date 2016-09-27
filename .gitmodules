@@ -1,3 +1,6 @@
 [submodule "libs/fit"]
 	path = libs/fit
 	url = https://github.com/MrKozmon/fit
+[submodule "libs/couchbase"]
+	path = libs/couchbase
+	url = http://github.com/MrKozmon/couchbase
