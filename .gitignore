@@ -2,4 +2,9 @@ build
 Makefile
 *.user
 *.rej
+*.o
+*.obj
+*.lib
+*.a
+*.dll
 *.stash

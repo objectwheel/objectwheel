@@ -1,0 +1,9 @@
+[submodule "contrib/couchbase"]
+	path = contrib/couchbase
+	url = http://github.com/MrKozmon/couchbase
+[submodule "contrib/fit"]
+	path = contrib/fit
+	url = http://github.com/MrKozmon/fit
+[submodule "contrib/miniz"]
+	path = contrib/miniz
+	url = http://github.com/MrKozmon/miniz
