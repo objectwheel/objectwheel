@@ -2,3 +2,4 @@ build
 Makefile
 *.user
 *.rej
+*.stash
