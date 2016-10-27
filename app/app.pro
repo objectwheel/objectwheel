@@ -3,7 +3,7 @@ include($$PWD/app.pri)
 VERSION         = 1.0
 QT             += core gui widgets qml quick quickwidgets network
 TEMPLATE        = app
-CONFIG         += c++11 static
+CONFIG         += c++11
 
 debug {
     DESTDIR     = $$PWD/../build/debug
