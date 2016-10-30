@@ -24,5 +24,8 @@
         <file>resources/images/resize-icon.png</file>
         <file>resources/images/delete-icon.png</file>
         <file>resources/images/rotate-icon.png</file>
+        <file>resources/tools/CircularGauge.zip</file>
+        <file>resources/tools/PredixTemp.zip</file>
+        <file>resources/qmls/module-resolver.qml</file>
     </qresource>
 </RCC>

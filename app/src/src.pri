@@ -11,10 +11,9 @@ FORMS                     += $$PWD/mainwindow.ui
 
 RESOURCES                 += $$PWD/resources.qrc
 
-DISTFILES                 += $$PWD/android/AndroidManifest.xml \
-                             $$PWD/android/res/values/libs.xml \
-                             $$PWD/android/build.gradle \
-                             $$PWD/images/resize-icon.png
+DISTFILES                 += android/AndroidManifest.xml \
+							 android/res/values/libs.xml \
+							 android/build.gradle
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 

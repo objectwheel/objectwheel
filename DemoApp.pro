@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
-CONFIG   = ordered
+CONFIG  += ordered
 SUBDIRS += contrib \
-           app
+		   app

@@ -173,6 +173,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					{
 						QQmlComponent component(ui->designWidget->engine());
 						component.loadUrl(dropEvent->mimeData()->urls().at(0));
+						qWarning() << "@@@@@@@@@@@@:" << component.errors();
 						QQuickItem *qml = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
 						ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
 

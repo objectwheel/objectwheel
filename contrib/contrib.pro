@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-CONFIG   = ordered
+CONFIG  += ordered
 SUBDIRS += fit \
            miniz \
            couchbase

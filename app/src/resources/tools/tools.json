@@ -67,5 +67,15 @@
     "RadioButton" :
     {
         "toolUrl" : "qrc:/resources/tools/RadioButton.zip"
+    },
+
+	"CircularGauge" :
+    {
+        "toolUrl" : "qrc:/resources/tools/CircularGauge.zip"
+    },
+
+	"PredixTemp" :
+    {
+        "toolUrl" : "qrc:/resources/tools/PredixTemp.zip"
     }
 }

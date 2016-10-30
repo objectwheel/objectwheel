@@ -1,17 +1,17 @@
-INCLUDEPATH = $$PWD/../contrib/fit/include \
-              $$PWD/../contrib/miniz/include \
-              $$PWD/../contrib/couchbase/include
+INCLUDEPATH += $$PWD/../contrib/fit/include \
+			   $$PWD/../contrib/miniz/include \
+			   $$PWD/../contrib/couchbase/include
 
-debug {
-    LIBS    = -L$$PWD/../contrib/fit/build/debug \
-              -L$$PWD/../contrib/miniz/build/debug \
-              -L$$PWD/../contrib/couchbase/build/debug
-} release {
-	LIBS    = -L$$PWD/../contrib/fit/build/release \
-              -L$$PWD/../contrib/miniz/build/release \
-              -L$$PWD/../contrib/couchbase/build/release
+CONFIG(debug, debug|release) {
+	BUILD_DIR = build/$$first(QMAKE_PLATFORM)-$$QT_ARCH-debug
+} else {
+	BUILD_DIR = build/$$first(QMAKE_PLATFORM)-$$QT_ARCH-release
 }
 
-LIBS       += -lfit \
-              -lminiz \
-              -lcouchbase
+LIBS        += -L$$PWD/../contrib/fit/$$BUILD_DIR \
+			   -L$$PWD/../contrib/miniz/$$BUILD_DIR \
+			   -L$$PWD/../contrib/couchbase/$$BUILD_DIR
+
+LIBS        += -lfit \
+			   -lminiz \
+			   -lcouchbase
