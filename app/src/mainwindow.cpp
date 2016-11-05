@@ -1,6 +1,8 @@
 #include <miniz.h>
 #include <fitter.h>
 #include <string.h>
+#include <titlebar.h>
+#include <covermenu.h>
 #include <listwidget.h>
 #include <mainwindow.h>
 #include <resizertick.h>
@@ -22,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_RotatorTick(new RotatorTick)
 	, m_RemoverTick(new RemoverTick)
 	, m_RootItem(nullptr)
+	, m_ToolMenu(new CoverMenu)
+	, m_PropertiesMenu(new CoverMenu)
 {
 	ui->setupUi(this);
 	SetupGui();
@@ -33,9 +37,7 @@ void MainWindow::SetupGui()
 	/* Scaling things */
 	Fitter::AddWidget(ui->editButton, Fit::WidthHeight | Fit::LaidOut);
 	Fitter::AddWidget(ui->clearButton, Fit::WidthHeight | Fit::LaidOut);
-	Fitter::AddWidget(ui->toolboxWidget, Fit::WidthScaling | Fit::LaidOut);
-	Fitter::AddWidget(ui->toolboxTitle, Fit::WidthHeight | Fit::LaidOut);
-	Fitter::AddWidget(ui->designTitle, Fit::HeightScaling | Fit::LaidOut);
+	Fitter::AddWidget(ui->toolboxTitle, Fit::HeightScaling | Fit::LaidOut);
 
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
@@ -48,8 +50,6 @@ void MainWindow::SetupGui()
 	/* Layout spacing things */
 	ui->leftLayout->setSpacing(fit(6));
 	ui->downsideLayout->setSpacing(fit(6));
-	ui->mainLayout->setSpacing(fit(6));
-	ui->mainLayout->setContentsMargins(fit(9),fit(9),fit(9),fit(9));
 
 	/* Toolbox touch-shift things */
 	QScroller::grabGesture(ui->toolboxWidget, QScroller::TouchGesture);
@@ -91,6 +91,49 @@ void MainWindow::SetupGui()
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
 	m_RotatorTick->hide();
+
+	/* Add Tool Menu */
+	m_ToolMenu->setCoverWidget(centralWidget());
+	centralWidget()->layout()->removeItem(ui->upsideLayout);
+	m_ToolMenu->setContainer(ui->upsideLayout);
+	m_ToolMenu->setCoverSide(CoverMenu::FromLeft);
+	connect(this,SIGNAL(resized()),m_ToolMenu,SLOT(hide()));
+	connect(this,&MainWindow::resized, [this] { ui->titleBar->setMenuChecked(false); });
+
+	/* Add Properties Menu */
+	m_PropertiesMenu->setCoverWidget(centralWidget());
+	centralWidget()->layout()->removeItem(ui->middleLayout);
+	m_PropertiesMenu->setContainer(ui->middleLayout);
+	m_PropertiesMenu->setCoverSide(CoverMenu::FromRight);
+	connect(this,SIGNAL(resized()),m_PropertiesMenu,SLOT(hide()));
+	connect(this,&MainWindow::resized, [this] { ui->titleBar->setSettingsChecked(false); });
+
+	/* Add Title Bar */
+	Fitter::AddWidget(ui->titleBar, Fit::HeightScaling | Fit::LaidOut);
+	ui->titleBar->setText("Studio");
+	ui->titleBar->setColor("#2196f3");
+	ui->titleBar->setShadowColor("#e0e4e7");
+	connect(ui->titleBar, SIGNAL(MenuToggled(bool)), m_ToolMenu, SLOT(setCovered(bool)));
+	connect(ui->titleBar, SIGNAL(SettingsToggled(bool)), m_PropertiesMenu, SLOT(setCovered(bool)));
+	connect(m_ToolMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setMenuChecked(bool)));
+	connect(m_PropertiesMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setSettingsChecked(bool)));
+
+	/* Edit Toolbox Title*/
+	ui->toolboxTitle->setText("Toolbox");
+	ui->toolboxTitle->hideButtons();
+	ui->toolboxTitle->setShadowColor("#566573");
+	ui->toolboxTitle->setColor("#98d367");
+
+	/* Edit Properties Title*/
+	ui->propertiesTitle->setText("Properties");
+	ui->propertiesTitle->hideButtons();
+	ui->propertiesTitle->setShadowColor("#566573");
+	ui->propertiesTitle->setColor("#fab153");
+
+	ui->editButton->setColor(QColor("#2196f3"));
+	ui->editButton->setTextColor(Qt::white);
+	ui->clearButton->setColor(QColor("#d95459"));
+	ui->clearButton->setTextColor(Qt::white);
 }
 
 
@@ -290,6 +333,12 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 	}
 	else
 		return QMainWindow::eventFilter(object,event);
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+	emit resized();
+	QMainWindow::resizeEvent(event);
 }
 
 void MainWindow::DownloadTools(const QUrl& url)

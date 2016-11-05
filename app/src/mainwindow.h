@@ -11,6 +11,8 @@ class QQuickItem;
 class ResizerTick;
 class RotatorTick;
 class RemoverTick;
+class CoverMenu;
+class TitleBar;
 
 class MainWindow : public QMainWindow
 {
@@ -37,6 +39,8 @@ class MainWindow : public QMainWindow
 		RemoverTick* m_RemoverTick;
 		QQuickItem* m_RootItem;
 		QQuickItemList m_Items;
+		CoverMenu* m_ToolMenu;
+		CoverMenu* m_PropertiesMenu;
 
 		void SetupGui();
 		bool CheckTools(const QJsonObject& toolsObject) const;
@@ -48,6 +52,10 @@ class MainWindow : public QMainWindow
 		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void HideSelectionTools();
 		bool eventFilter(QObject* object, QEvent* event);
+		void resizeEvent(QResizeEvent *event);
+
+	signals:
+		void resized();
 };
 
 #endif // MAINWINDOW_H

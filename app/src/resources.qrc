@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/fonts/raleway-extraLight.ttf</file>
-        <file>resources/fonts/raleway-light.ttf</file>
         <file>resources/qmls/design-area.qml</file>
         <file>resources/tools/tools.json</file>
         <file>resources/tools/Dial.zip</file>
@@ -27,5 +25,13 @@
         <file>resources/tools/CircularGauge.zip</file>
         <file>resources/tools/PredixTemp.zip</file>
         <file>resources/qmls/module-resolver.qml</file>
+        <file>resources/tools/DelayButton.zip</file>
+        <file>resources/tools/Gauge.zip</file>
+        <file>resources/tools/StatusIndicator.zip</file>
+        <file>resources/tools/ToggleButton.zip</file>
+        <file>resources/tools/Tumbler.zip</file>
+        <file>resources/fonts/TitilliumWeb-Bold.ttf</file>
+        <file>resources/fonts/TitilliumWeb-Light.ttf</file>
+        <file>resources/fonts/TitilliumWeb-Regular.ttf</file>
     </qresource>
 </RCC>

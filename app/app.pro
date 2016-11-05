@@ -1,5 +1,5 @@
 VERSION          = 1.0
-QT              += core gui widgets network qml quick quickwidgets
+QT              += core gui widgets network qml quick quickwidgets webview
 TEMPLATE         = app
 CONFIG          += c++11
 TARGET           = DemoApp

@@ -77,5 +77,30 @@
 	"PredixTemp" :
     {
         "toolUrl" : "qrc:/resources/tools/PredixTemp.zip"
+    },
+
+    "ToggleButton" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ToggleButton.zip"
+    },
+
+    "Tumbler" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Tumbler.zip"
+    },
+
+    "DelayButton" :
+    {
+        "toolUrl" : "qrc:/resources/tools/DelayButton.zip"
+    },
+
+	"Gauge" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Gauge.zip"
+    },
+
+	"StatusIndicator" :
+    {
+        "toolUrl" : "qrc:/resources/tools/StatusIndicator.zip"
     }
 }

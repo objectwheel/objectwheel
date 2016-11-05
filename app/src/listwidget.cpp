@@ -51,7 +51,7 @@ void ListWidget::mouseMoveEvent(QMouseEvent* const event)
 			dangle += a;
 		dangle /= m_AngleList.size();
 
-		if (15 < dangle)
+		if (25 < dangle)
 			return;
 	}
 #endif // QT_NO_DRAGANDDROP

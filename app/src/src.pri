@@ -1,11 +1,17 @@
 INCLUDEPATH               += $$PWD
 
 HEADERS                   += $$PWD/mainwindow.h \
-                             $$PWD/listwidget.h
+                             $$PWD/listwidget.h \
+							 $$PWD/covermenu.h \
+							 $$PWD/titlebar.h \
+							 $$PWD/flatbutton.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
-                             $$PWD/listwidget.cpp
+                             $$PWD/listwidget.cpp \
+							 $$PWD/covermenu.cpp \
+							 $$PWD/titlebar.cpp \
+							 $$PWD/flatbutton.cpp
 
 FORMS                     += $$PWD/mainwindow.ui
 

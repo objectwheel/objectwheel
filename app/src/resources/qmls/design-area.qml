@@ -6,7 +6,6 @@ Rectangle {
     y: 0
     width: 100
     height: 100
-    color: "#61bd6d"
-    border.color: "white"
+    color: "#e0e4e7"
     objectName: "designArea"
 }
