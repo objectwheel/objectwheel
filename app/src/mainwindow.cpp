@@ -38,6 +38,13 @@ void MainWindow::SetupGui()
 	Fitter::AddWidget(ui->editButton, Fit::WidthHeight | Fit::LaidOut);
 	Fitter::AddWidget(ui->clearButton, Fit::WidthHeight | Fit::LaidOut);
 	Fitter::AddWidget(ui->toolboxTitle, Fit::HeightScaling | Fit::LaidOut);
+	Fitter::AddWidget(ui->propertiesTitle, Fit::HeightScaling | Fit::LaidOut);
+
+	/* */
+	ui->buttonsLayout->setSpacing(fit(6));
+	ui->buttonsLayout->setContentsMargins(0, 0, fit(9), 0);
+	ui->containerLayout->setSpacing(fit(6));
+	ui->containerLayout->setContentsMargins(0, fit(10), 0, fit(9));
 
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
@@ -46,10 +53,6 @@ void MainWindow::SetupGui()
 
 	/* Assign design area's root object */
 	m_RootItem = ui->designWidget->rootObject();
-
-	/* Layout spacing things */
-	ui->leftLayout->setSpacing(fit(6));
-	ui->downsideLayout->setSpacing(fit(6));
 
 	/* Toolbox touch-shift things */
 	QScroller::grabGesture(ui->toolboxWidget, QScroller::TouchGesture);
@@ -81,8 +84,8 @@ void MainWindow::SetupGui()
 	connect(ui->editButton, &QPushButton::clicked, m_RotatorTick, &RotatorTick::hide);
 
 	/* Enable/Disable other controls when editButton clicked */
-	connect(ui->editButton, &QPushButton::toggled, ui->toolboxWidget, &ListWidget::setEnabled);
-	connect(ui->editButton, &QPushButton::toggled, ui->clearButton, &QPushButton::setEnabled);
+	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->toolboxWidget->setEnabled(!checked);});
+	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->clearButton->setEnabled(!checked);});
 
 	/* Set ticks' Parents and hide ticks */
 	m_ResizerTick->setParent(ui->designWidget);
@@ -94,16 +97,16 @@ void MainWindow::SetupGui()
 
 	/* Add Tool Menu */
 	m_ToolMenu->setCoverWidget(centralWidget());
-	centralWidget()->layout()->removeItem(ui->upsideLayout);
-	m_ToolMenu->setContainer(ui->upsideLayout);
+	centralWidget()->layout()->removeItem(ui->toolboxLayout);
+	m_ToolMenu->setContainer(ui->toolboxLayout);
 	m_ToolMenu->setCoverSide(CoverMenu::FromLeft);
 	connect(this,SIGNAL(resized()),m_ToolMenu,SLOT(hide()));
 	connect(this,&MainWindow::resized, [this] { ui->titleBar->setMenuChecked(false); });
 
 	/* Add Properties Menu */
 	m_PropertiesMenu->setCoverWidget(centralWidget());
-	centralWidget()->layout()->removeItem(ui->middleLayout);
-	m_PropertiesMenu->setContainer(ui->middleLayout);
+	centralWidget()->layout()->removeItem(ui->propertiesLayout);
+	m_PropertiesMenu->setContainer(ui->propertiesLayout);
 	m_PropertiesMenu->setCoverSide(CoverMenu::FromRight);
 	connect(this,SIGNAL(resized()),m_PropertiesMenu,SLOT(hide()));
 	connect(this,&MainWindow::resized, [this] { ui->titleBar->setSettingsChecked(false); });
@@ -130,6 +133,7 @@ void MainWindow::SetupGui()
 	ui->propertiesTitle->setShadowColor("#566573");
 	ui->propertiesTitle->setColor("#fab153");
 
+	/* Set flat buttons' colors*/
 	ui->editButton->setColor(QColor("#2196f3"));
 	ui->editButton->setTextColor(Qt::white);
 	ui->clearButton->setColor(QColor("#d95459"));
@@ -169,7 +173,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
 
 				/* Edit mode things */
-				if (!ui->editButton->isChecked())
+				if (ui->editButton->isChecked())
 				{
 
 					if (nullptr != pressedItem)
@@ -262,7 +266,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 
 				/* Edit mode things */
-				if (!ui->editButton->isChecked())
+				if (ui->editButton->isChecked())
 				{
 					/* Get deepest item under the pressed point */
 					pressedItem = GetDeepestDesignItemOnPoint(mouseEvent->pos());
@@ -292,7 +296,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 
 				/* Edit mode things */
-				if (!ui->editButton->isChecked())
+				if (ui->editButton->isChecked())
 				{
 					/* Made Drags from design area */
 					if (nullptr != pressedItem)
@@ -552,8 +556,8 @@ void MainWindow::on_editButton_clicked()
 	/* Enable/Disable design items */
 	for (auto item : m_Items)
 	{
-		item->setEnabled(ui->editButton->isChecked());
-		if (ui->editButton->isChecked())
+		item->setEnabled(!ui->editButton->isChecked());
+		if (!ui->editButton->isChecked())
 			QQmlProperty::write(item, "border.color", "transparent");
 		else
 			QQmlProperty::write(item, "border.color", "gray");

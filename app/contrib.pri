@@ -14,4 +14,4 @@ ios {
 
 LIBS            += -lfit \
                    -lminiz \
-                   -lcouchbase
+				   #-lcouchbase

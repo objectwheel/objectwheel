@@ -19,7 +19,10 @@ RESOURCES                 += $$PWD/resources.qrc
 
 DISTFILES                 += android/AndroidManifest.xml \
                              android/res/values/libs.xml \
-                             android/build.gradle
+                             android/build.gradle \
+                             android/res/drawable-mdpi/icon.png \
+                             android/res/drawable-ldpi/icon.png \
+                             android/res/drawable-hdpi/icon.png
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 

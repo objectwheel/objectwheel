@@ -58,7 +58,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="leftLayout">
+     <layout class="QVBoxLayout" name="containerLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -96,7 +96,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="downsideLayout">
+       <layout class="QHBoxLayout" name="buttonsLayout">
         <property name="rightMargin">
          <number>9</number>
         </property>
@@ -144,7 +144,7 @@
            <bool>true</bool>
           </property>
           <property name="checked">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -182,7 +182,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="upsideLayout">
+     <layout class="QVBoxLayout" name="toolboxLayout">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -269,7 +269,7 @@ QListWidget::item:selected:!active {
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="middleLayout">
+     <layout class="QVBoxLayout" name="propertiesLayout">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -299,7 +299,7 @@ QListWidget::item:selected:!active {
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="listWidget">
+       <widget class="QListWidget" name="propertiesWidget">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
