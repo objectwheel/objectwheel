@@ -19,7 +19,6 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-	, m_ToolsDir("tools")
 	, m_ResizerTick(new ResizerTick)
 	, m_RotatorTick(new RotatorTick)
 	, m_RemoverTick(new RemoverTick)
@@ -28,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_PropertiesMenu(new CoverMenu)
 {
 	ui->setupUi(this);
+	SetToolsDir();
 	SetupGui();
 	DownloadTools(QUrl::fromUserInput("qrc:/resources/tools/tools.json"));
 }
@@ -347,7 +347,6 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::DownloadTools(const QUrl& url)
 {
-	QString m_ToolsDir = "tools";
 	QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 	QNetworkRequest request;
 	request.setUrl(url);
@@ -562,6 +561,15 @@ void MainWindow::on_editButton_clicked()
 		else
 			QQmlProperty::write(item, "border.color", "gray");
 	}
+}
+
+void MainWindow::SetToolsDir()
+{
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+	m_ToolsDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0) + "/tools";
+#else
+	m_ToolsDir = "./tools";
+#endif
 }
 
 MainWindow::~MainWindow()

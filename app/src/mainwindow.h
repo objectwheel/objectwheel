@@ -42,6 +42,7 @@ class MainWindow : public QMainWindow
 		CoverMenu* m_ToolMenu;
 		CoverMenu* m_PropertiesMenu;
 
+		void SetToolsDir();
 		void SetupGui();
 		bool CheckTools(const QJsonObject& toolsObject) const;
 		void DownloadTools(const QUrl& url);
