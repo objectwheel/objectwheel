@@ -235,12 +235,6 @@ QListView::item {
     border-top-color: transparent;
     border-bottom-color: transparent;
 	padding:2px;
-}
-
-QListWidget::item:selected:!active {
-  border-top:0px solid #0077cc;
-  background-color:white;
-  color:#263543;	
 }</string>
         </property>
         <property name="verticalScrollBarPolicy">
@@ -319,12 +313,6 @@ QListView::item {
     border-top-color: transparent;
     border-bottom-color: transparent;
 	padding:2px;
-}
-
-QListWidget::item:selected:!active {
-  border-top:0px solid #0077cc;
-  background-color:white;
-  color:#263543;	
 }</string>
         </property>
        </widget>
