@@ -231,14 +231,9 @@
 
 QListView::item {
 	color:white;
-    border: 0px solid #d9d9d9;
-    border-top-color: transparent;
-    border-bottom-color: transparent;
+    border: 0px solid transparent;
 	padding:2px;
 }</string>
-        </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
         <property name="horizontalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -290,10 +285,13 @@ QListView::item {
           <height>48</height>
          </size>
         </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="propertiesWidget">
+       <widget class="PropertiesWidget" name="propertiesWidget" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -301,19 +299,7 @@ QListView::item {
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">QListView {
-	border:0px solid white;
-	background:#566573;
-	padding:6px;
-}
-
-QListView::item {
-	color:white;
-    border: 0px solid #d9d9d9;
-    border-top-color: transparent;
-    border-bottom-color: transparent;
-	padding:2px;
-}</string>
+         <string notr="true"/>
         </property>
        </widget>
       </item>
@@ -344,6 +330,12 @@ QListView::item {
    <class>FlatButton</class>
    <extends>QPushButton</extends>
    <header>flatbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PropertiesWidget</class>
+   <extends>QWidget</extends>
+   <header>propertieswidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

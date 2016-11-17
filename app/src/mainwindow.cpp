@@ -54,9 +54,6 @@ void MainWindow::SetupGui()
 	/* Assign design area's root object */
 	m_RootItem = ui->designWidget->rootObject();
 
-	/* Toolbox touch-shift things */
-	QScroller::grabGesture(ui->toolboxWidget, QScroller::TouchGesture);
-
 	/* Toolbox stylizing */
 	ui->toolboxWidget->setIconSize(fit({30, 30}));
 
@@ -85,6 +82,7 @@ void MainWindow::SetupGui()
 
 	/* Enable/Disable other controls when editButton clicked */
 	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->toolboxWidget->setEnabled(!checked);});
+	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->propertiesWidget->setEnabled(checked);});
 	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->clearButton->setEnabled(!checked);});
 
 	/* Set ticks' Parents and hide ticks */
@@ -132,6 +130,14 @@ void MainWindow::SetupGui()
 	ui->propertiesTitle->hideButtons();
 	ui->propertiesTitle->setShadowColor("#566573");
 	ui->propertiesTitle->setColor("#fab153");
+
+	/* Prepare Properties Widget */
+	connect(this, SIGNAL(selectionShowed(QObject*const)), ui->propertiesWidget, SLOT(updateProperties(QObject*const)));
+	connect(this, &MainWindow::selectionHided, [this] { ui->propertiesWidget->setDisabled(true); });
+
+	/* Pop-up toolbox widget's scrollbar */
+	connect(m_ToolMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->toolboxWidget->showBar(); });
+	connect(m_PropertiesMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->propertiesWidget->showBar(); });
 
 	/* Set flat buttons' colors*/
 	ui->editButton->setColor(QColor("#2196f3"));
@@ -527,7 +533,9 @@ void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 	m_RemoverTick->SetTrackedItem(selectedItem);
 	m_RemoverTick->show();
 
-	QQmlProperty::write(selectedItem, "border.color", "blue");
+	QQmlProperty::write(selectedItem, "border.color", "#7cc053");
+
+	emit selectionShowed(selectedItem->childItems().at(0));
 }
 
 void MainWindow::HideSelectionTools()
@@ -538,6 +546,8 @@ void MainWindow::HideSelectionTools()
 
 	for (auto item : m_Items)
 		QQmlProperty::write(item, "border.color", "gray");
+
+	emit selectionHided();
 }
 
 void MainWindow::on_clearButton_clicked()

@@ -1,3 +1,4 @@
+#include <css.h>
 #include <fitter.h>
 #include <mainwindow.h>
 #include <QApplication>
@@ -18,6 +19,9 @@ int main(int argc, char *argv[])
 
 	// Initialize Scaling Fundamentals
 	Fit::Setup({REF_WIDTH, REF_HEIGHT}, REF_DPI);
+
+	// Init CSS
+	CSS::initCSS();
 
 	// Initialize Web View
 	QtWebView::initialize();

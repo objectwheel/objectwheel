@@ -33,5 +33,7 @@
         <file>resources/fonts/TitilliumWeb-Bold.ttf</file>
         <file>resources/fonts/TitilliumWeb-Light.ttf</file>
         <file>resources/fonts/TitilliumWeb-Regular.ttf</file>
+        <file>resources/images/plus.png</file>
+        <file>resources/images/minus.png</file>
     </qresource>
 </RCC>

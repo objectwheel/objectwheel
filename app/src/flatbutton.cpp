@@ -40,9 +40,9 @@ void FlatButton::setTextColor(const QColor& TextColor)
 
 void FlatButton::applyTheme()
 {
-	QColor mix(	m_Color.red() * 0.85 + QColor(Qt::black).red() * 0.15,
-				m_Color.green() * 0.85 + QColor(Qt::black).green() * 0.15,
-				m_Color.blue() * 0.85 + QColor(Qt::black).blue() * 0.15, 255);
+	QColor mix(	m_Color.red() * 0.75 + QColor(Qt::black).red() * 0.25,
+				m_Color.green() * 0.75 + QColor(Qt::black).green() * 0.25,
+				m_Color.blue() * 0.75 + QColor(Qt::black).blue() * 0.25, 255);
 
 	setStyleSheet(QString("QPushButton {border:0px; border-radius: %4px;"
 						  "color:rgb(%5,%6,%7); background:rgb(%1,%2,%3);}"

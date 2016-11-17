@@ -206,8 +206,8 @@ TitleBar::TitleBar(QWidget *parent)
 	, m_Menu(new QPushButton)
 	, m_Settings(new QPushButton)
 	, m_Color(QColor("#47a3da"))
-	, m_ShadowBackground(new QWidget(this))
-	, m_Shadow(new QWidget(m_ShadowBackground))
+	, m_ShadowWidgetBackground(new QWidget(this))
+	, m_ShadowWidget(new QWidget(m_ShadowWidgetBackground))
 {
 	connect(m_Menu, SIGNAL(toggled(bool)), this, SIGNAL(MenuToggled(bool)));
 	connect(m_Settings, SIGNAL(toggled(bool)), this, SIGNAL(SettingsToggled(bool)));
@@ -248,25 +248,25 @@ TitleBar::TitleBar(QWidget *parent)
 	m_UpperLayout->addWidget(m_Title);
 	m_UpperLayout->addWidget(m_Settings);
 
-	QVBoxLayout* layout = new QVBoxLayout(m_ShadowBackground);
+	QVBoxLayout* layout = new QVBoxLayout(m_ShadowWidgetBackground);
 	layout->setSpacing(0);
 	layout->setContentsMargins(0, 0, 0, 0);
-	layout->addWidget(m_Shadow);
+	layout->addWidget(m_ShadowWidget);
 
-	QPalette p2(m_ShadowBackground->palette());
+	QPalette p2(m_ShadowWidgetBackground->palette());
 	p2.setColor(QPalette::Window, Qt::white);
-	m_ShadowBackground->setAutoFillBackground(true);
-	m_ShadowBackground->setPalette(p2);
-	m_ShadowBackground->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	m_ShadowBackground->setMinimumHeight(fit(5));
-	m_ShadowBackground->setMaximumHeight(fit(5));
-	m_Shadow->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,stop:0 "
+	m_ShadowWidgetBackground->setAutoFillBackground(true);
+	m_ShadowWidgetBackground->setPalette(p2);
+	m_ShadowWidgetBackground->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	m_ShadowWidgetBackground->setMinimumHeight(fit(5));
+	m_ShadowWidgetBackground->setMaximumHeight(fit(5));
+	m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,stop:0 "
 							"rgba(0, 0, 0, 100), stop:0.6 rgba(0, 0, 0, 20), stop:1 rgba(0, 0, 0, 0));");
 
 	m_Layout->setSpacing(0);
 	m_Layout->setContentsMargins(0, 0, 0, 0);
 	m_Layout->addLayout(m_UpperLayout);
-	m_Layout->addWidget(m_ShadowBackground);
+	m_Layout->addWidget(m_ShadowWidgetBackground);
 }
 
 const QColor& TitleBar::Color() const
@@ -317,13 +317,13 @@ void TitleBar::setSettingsChecked(bool checked)
 
 const QColor& TitleBar::ShadowColor() const
 {
-	return m_ShadowColor;
+	return m_ShadowWidgetColor;
 }
 
 void TitleBar::setShadowColor(const QColor& ShadowColor)
 {
-	m_ShadowColor = ShadowColor;
-	QPalette p(m_ShadowBackground->palette());
-	p.setColor(QPalette::Window, m_ShadowColor);
-	m_ShadowBackground->setPalette(p);
+	m_ShadowWidgetColor = ShadowColor;
+	QPalette p(m_ShadowWidgetBackground->palette());
+	p.setColor(QPalette::Window, m_ShadowWidgetColor);
+	m_ShadowWidgetBackground->setPalette(p);
 }

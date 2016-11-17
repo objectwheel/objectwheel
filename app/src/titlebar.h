@@ -22,9 +22,9 @@ class TitleBar : public QWidget
 		QPushButton* m_Settings;
 		QColor m_Color;
 		QString m_Text;
-		QWidget* m_ShadowBackground;
-		QWidget* m_Shadow;
-		QColor m_ShadowColor;
+		QWidget* m_ShadowWidgetBackground;
+		QWidget* m_ShadowWidget;
+		QColor m_ShadowWidgetColor;
 
 	public:
 		explicit TitleBar(QWidget *parent = 0);

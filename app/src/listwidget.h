@@ -23,6 +23,13 @@ class ListWidget : public QListWidget
 		QMimeData* mimeData(const QList<QListWidgetItem *> items) const;
 		void mousePressEvent(QMouseEvent* const event);
 		void mouseMoveEvent(QMouseEvent* const event);
+		void wheelEvent(QWheelEvent *e);
+		void setBarOpacity(const int opacity);
+		int getBarOpacity() const;
+
+	public slots:
+		void showBar();
+		void hideBar();
 };
 
 #endif // TREEWIDGET_H

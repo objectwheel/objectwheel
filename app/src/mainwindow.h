@@ -57,6 +57,9 @@ class MainWindow : public QMainWindow
 
 	signals:
 		void resized();
+		void selectionHided();
+		void selectionShowed(QObject* const selectedItem);
+
 };
 
 #endif // MAINWINDOW_H
