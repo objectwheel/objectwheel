@@ -8,8 +8,7 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/propertieswidget.h \
 							 $$PWD/propertyitem.h \
 							 $$PWD/css.h \
-							 $$PWD/selectionmanager.h \
-							 $$PWD/quickitem.h
+							 $$PWD/switch.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -20,8 +19,7 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/propertieswidget.cpp \
 							 $$PWD/propertyitem.cpp \
 							 $$PWD/css.cpp \
-							 $$PWD/selectionmanager.cpp \
-							 $$PWD/quickitem.cpp
+							 $$PWD/switch.cpp
 
 FORMS                     += $$PWD/mainwindow.ui
 

@@ -14,27 +14,50 @@
 #define ALPHA 70
 #define STYLE_SHEET "\
 QScrollBar:vertical { \
-background: transparent; \
-width: %2px; \
+	background: transparent; \
+	width: %2px; \
 } QScrollBar::handle:vertical { \
-background: rgba(0,0,0,%4); \
-min-height: %1px; \
-border-radius: %3px; \
+	background: rgba(0,0,0,%4); \
+	min-height: %1px; \
+	border-radius: %3px; \
 } QScrollBar::add-line:vertical { \
-background: none; \
+	background: none; \
 } QScrollBar::sub-line:vertical { \
-background: none; \
+	background: none; \
 } QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical { \
-background: none; \
+	background: none; \
 } QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { \
-background: none; \
+	background: none; \
 }"
 
 ListWidget::ListWidget(QWidget *parent)
 	: QListWidget(parent)
+	, m_HiderTimer(new QTimer)
+	, m_DelayTimer(new QTimer)
+	, m_Running(false)
 {
 	setBarOpacity(ALPHA);
 	QScroller::grabGesture(this, QScroller::TouchGesture);
+
+	connect(m_DelayTimer, &QTimer::timeout, [&]{
+		m_DelayTimer->stop();
+		hideBar();
+	});
+
+	connect(m_HiderTimer, &QTimer::timeout, [&] {
+		if (getBarOpacity() > m_Alpha + 2) {
+			m_HiderTimer->stop();
+			m_Running = false;
+		}
+
+		setBarOpacity(m_Alpha);
+		m_Alpha-=2;
+
+		if (m_Alpha < 2) { // this "2" is constant
+			m_HiderTimer->stop();
+			m_Running = false;
+		}
+	});
 }
 
 QMimeData* ListWidget::mimeData(const QList<QListWidgetItem*> items) const
@@ -55,7 +78,7 @@ void ListWidget::mouseMoveEvent(QMouseEvent* const event)
 {
 	showBar();
 
-#ifndef QT_NO_DRAGANDDROP
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WINPHONE)
 	/* Make dragging if direction is right out of the list widget */
 	if (state() == DraggingState)
 	{
@@ -84,7 +107,7 @@ void ListWidget::mouseMoveEvent(QMouseEvent* const event)
 		if (25 < dangle)
 			return;
 	}
-#endif // QT_NO_DRAGANDDROP
+#endif
 
 	QListWidget::mouseMoveEvent(event);
 }
@@ -119,48 +142,16 @@ int ListWidget::getBarOpacity() const
 void ListWidget::showBar()
 {
 	setBarOpacity(ALPHA);
-
-	static bool firstTime = true;
-	static QTimer* timer = new QTimer;
-	timer->stop();
-	if (firstTime) {
-		firstTime = false;
-		connect(timer, &QTimer::timeout, [&]{
-			timer->stop();
-			hideBar();
-		});
-	}
-	timer->start(400);
+	m_DelayTimer->stop();
+	m_DelayTimer->start(400);
 }
 
 void ListWidget::hideBar()
 {
-	static int alpha;
-	static bool running = false;
-	static QTimer* timer;
-
-	if (true == running)
+	if (true == m_Running)
 		return;
 
-	alpha = ALPHA;
-	running = true;
-
-	timer = new QTimer;
-	connect(timer, &QTimer::timeout, [&] {
-		if (getBarOpacity() > alpha + 2) {
-			timer->stop();
-			timer->deleteLater();
-			running = false;
-		}
-
-		setBarOpacity(alpha);
-		alpha-=2;
-
-		if (alpha < 2) { // this "2" is constant
-			timer->stop();
-			timer->deleteLater();
-			running = false;
-		}
-	});
-	timer->start(10);
+	m_Alpha = ALPHA;
+	m_Running = true;
+	m_HiderTimer->start(10);
 }

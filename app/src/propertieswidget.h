@@ -15,7 +15,8 @@ class PropertiesWidget : public QWidget
 		Q_OBJECT
 
 	public:
-		typedef QList<QPair<QMetaProperty, QObject*>> Properties;
+		typedef QPair<QMetaProperty, QObject*> Property;
+		typedef QList<Property> Properties;
 
 	private:
 		Properties m_Properties;
@@ -31,14 +32,17 @@ class PropertiesWidget : public QWidget
 		void setColor(const QColor& color);
 
 	protected:
-		void updateListWidget();
+		void refreshListWidget();
 
 	signals:
-		void propertiesUpdated();
+		void listRefreshed();
+		void propertyChanged(const Property& property);
 
 	public slots:
 		inline void showBar() { m_ListWidget->showBar(); }
-		void updateProperties(QObject* const selectedItem);
+		void refreshList(QObject* const selectedItem);
+		void clearList();
+		void updateLayout();
 };
 
 #endif // PROPERTIESWIDGET_H

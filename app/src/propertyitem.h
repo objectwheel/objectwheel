@@ -12,22 +12,21 @@ class PropertyItem : public QWidget
 
 	private:
 		QPair<QMetaProperty, QObject*> m_Property;
+		bool m_Valid;
 
 	protected:
 		void fillCup();
 		void applyValue(const QVariant& value);
+		bool eventFilter(QObject* o, QEvent* e);
+		void paintEvent(QPaintEvent *e);
 
 	public:
-		explicit PropertyItem(QWidget *parent = 0);
-		PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidget *parent = 0);
-
+		explicit PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidget *parent = 0);
 		const QPair<QMetaProperty, QObject*>& property() const;
-		void setProperty(const QPair<QMetaProperty, QObject*>& property);
+		inline bool isValid() const { return m_Valid; }
 
 	signals:
-
-	public slots:
-
+		void valueApplied();
 };
 
 #endif // PROPERTYITEM_H

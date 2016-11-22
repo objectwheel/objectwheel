@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QQuickItem>
 #include <QVBoxLayout>
+#include <QLabel>
 
 PropertiesWidget::PropertiesWidget(QWidget *parent)
 	: QWidget(parent)
@@ -52,37 +53,62 @@ void PropertiesWidget::setColor(const QColor& color)
 	setPalette(p);
 }
 
-void PropertiesWidget::updateProperties(QObject* const selectedItem)
+void PropertiesWidget::refreshList(QObject* const selectedItem)
 {
+	clearList();
+
 	/* Get selected item's properties */
-	m_Properties.clear();
 	auto meta = selectedItem->metaObject();
 	int count = meta->propertyCount();
 	for (int i = 0; i < count; i++) {
 		auto property = meta->property(i);
-		if (property.isDesignable()) {
-			m_Properties << QPair<QMetaProperty, QObject*>(property, selectedItem);
+		if (!QString(property.name()).startsWith("__")) {
+			m_Properties << Property(property, selectedItem);
 		}
 	}
 
 	/* Update list widget */
-	updateListWidget();
+	refreshListWidget();
 
 	setEnabled(true);
 
 	m_ListWidget->showBar();
 
-	emit propertiesUpdated();
+	emit listRefreshed();
 }
 
-void PropertiesWidget::updateListWidget()
+void PropertiesWidget::clearList()
 {
 	m_ListWidget->clear();
+	m_Properties.clear();
+}
 
+void PropertiesWidget::updateLayout()
+{
+	for (int i=0; i<m_ListWidget->count(); i++) {
+		QWidget* propertyItem = m_ListWidget->itemWidget(m_ListWidget->item(i));
+		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
+		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
+		m_ListWidget->item(i)->setSizeHint(QSize(m_ListWidget->width() - fit(4), propertyItem->sizeHint().height()));
+	}
+}
+
+void PropertiesWidget::refreshListWidget()
+{
 	for (auto property : m_Properties) {
 		QListWidgetItem* item = new QListWidgetItem;
 		PropertyItem* propertyItem = new PropertyItem(property);
-		item->setSizeHint(propertyItem->sizeHint());
+		if (!propertyItem->isValid()) {
+			delete item;
+			propertyItem->deleteLater();
+			continue;
+		}
+		connect(propertyItem, &PropertyItem::valueApplied, [&] {
+			emit propertyChanged(property);
+		});
+		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
+		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
+		item->setSizeHint(QSize(m_ListWidget->width() - fit(4), propertyItem->sizeHint().height()));
 		m_ListWidget->addItem(item);
 		m_ListWidget->setItemWidget(item, propertyItem);
 	}

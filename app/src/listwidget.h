@@ -12,6 +12,10 @@ class ListWidget : public QListWidget
 		QMap<QListWidgetItem*, QList<QUrl>> m_Urls;
 		QPoint m_PreviousPoint;
 		QList<qreal> m_AngleList;
+		QTimer* m_HiderTimer;
+		QTimer* m_DelayTimer;
+		int m_Alpha;
+		bool m_Running;
 
 	public:
 		explicit ListWidget(QWidget *parent = 0);

@@ -21,7 +21,7 @@ class CoverMenu : public QWidget
 		int m_MenuWidth;
 		int m_Duration;
 		QAbstractAnimation::State m_AnimationState;
-		QWidget* m_Shadow;
+		QWidget* m_ShadowWidget;
 
 	public:
 		explicit CoverMenu(QWidget *parent = 0);

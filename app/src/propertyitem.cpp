@@ -1,17 +1,17 @@
 #include <propertyitem.h>
 #include <css.h>
 #include <fitter.h>
+#include <switch.h>
+
 #include <QHBoxLayout>
 #include <QtWidgets>
-
-PropertyItem::PropertyItem(QWidget *parent)
-	: PropertyItem(QPair<QMetaProperty, QObject*>(), parent)
-{}
 
 PropertyItem::PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidget* parent)
 	: QWidget(parent)
 	, m_Property(property)
 {
+	setObjectName("propertyItem");
+	setStyleSheet(CSS::PropertyItem);
 	fillCup();
 }
 
@@ -20,15 +20,10 @@ const QPair<QMetaProperty, QObject*>& PropertyItem::property() const
 	return m_Property;
 }
 
-void PropertyItem::setProperty(const QPair<QMetaProperty, QObject*>& property)
-{
-	m_Property = property;
-	fillCup();
-}
-
 void PropertyItem::applyValue(const QVariant& value)
 {
 	m_Property.second->setProperty(m_Property.first.name(), value);
+	emit valueApplied();
 }
 
 void PropertyItem::fillCup()
@@ -39,79 +34,107 @@ void PropertyItem::fillCup()
 	QFont font;
 	font.setPixelSize(fit(13));
 
-	QLabel* label = new QLabel;
-	label->setText(name + ":");
-	label->setFont(font);
-	label->setStyleSheet("color:white;");
-
-	QWidget* valueWidget;
-
+	QWidget* valueWidget = nullptr;
 	switch (int(m_Property.first.type())) {
 		case QVariant::Bool: {
-			QCheckBox* widget = new QCheckBox;
-			widget->setChecked(m_Property.first.read(m_Property.second).toBool());
+			Switch* widget = new Switch;
 			widget->setFont(font);
+			widget->setFixedSize(fit(widget->sizeHint()));
+			widget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+			widget->setChecked(m_Property.first.read(m_Property.second).toBool());
 			valueWidget = widget;
-			connect(widget,static_cast<void(QCheckBox::*)(bool)>(&QCheckBox::toggled),[&](bool b){applyValue(b);});
+			connect(widget,static_cast<void(Switch::*)(bool)>(&Switch::toggled),[&](bool b){applyValue(b);});
 			break;
 
 		} case QVariant::String: {
 			QLineEdit* widget = new QLineEdit;
-			widget->setText(m_Property.first.read(m_Property.second).toString());
 			widget->setFont(font);
+			widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			widget->setStyleSheet(CSS::LineEdit);
+			widget->setFixedHeight(fit(30));
+			widget->setText(m_Property.first.read(m_Property.second).toString());
 			valueWidget = widget;
 			connect(widget,static_cast<void(QLineEdit::*)(const QString&)>(&QLineEdit::textChanged),[&](const QString& b){applyValue(b);});
 			break;
 
 		} case QVariant::Int: {
 			QSpinBox* widget = new QSpinBox;
-			widget->setValue(m_Property.first.read(m_Property.second).toInt());
 			widget->setFont(font);
-			widget->findChild<QLineEdit*>()->setReadOnly(true);
+			widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			// widget->findChild<QLineEdit*>()->setReadOnly(true);
 			widget->setStyleSheet(CSS::SpinBox);
 			widget->setAlignment(Qt::AlignCenter);
-			widget->setFixedSize(fit(120), fit(30));
-			widget->setRange(-1000,1000);
+			widget->setFixedHeight(fit(30));
+			widget->setRange(-9999,9999);
+			widget->setAccelerated(true);
+			widget->installEventFilter(this);
+			widget->setValue(m_Property.first.read(m_Property.second).toInt());
 			valueWidget = widget;
 			connect(widget,static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),[&](int b){applyValue(b);});
 			break;
 
 		} case QVariant::Double: {
 			QDoubleSpinBox* widget = new QDoubleSpinBox;
-			widget->setValue(m_Property.first.read(m_Property.second).toDouble());
 			widget->setFont(font);
-			widget->findChild<QLineEdit*>()->setReadOnly(true);
+			widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			// widget->findChild<QLineEdit*>()->setReadOnly(true);
 			widget->setStyleSheet(CSS::SpinBox);
 			widget->setAlignment(Qt::AlignCenter);
-			widget->setFixedSize(fit(120), fit(30));
+			widget->setFixedHeight(fit(30));
 			widget->setSingleStep(0.1);
-			widget->setRange(-1000,1000);
+			widget->setRange(-9999,9999);
+			widget->setAccelerated(true);
+			widget->installEventFilter(this);
+			widget->setValue(m_Property.first.read(m_Property.second).toDouble());
 			valueWidget = widget;
 			connect(widget,static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),[&](double b){applyValue(b);});
 			break;
 
 		} case QVariant::Font: {
 			QFontComboBox* widget = new QFontComboBox;
-			widget->setCurrentText(m_Property.first.read(m_Property.second).toString());
+			widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 			widget->setFont(font);
+			widget->setCurrentText(m_Property.first.read(m_Property.second).toString());
 			valueWidget = widget;
 			break;
 
 		} default: {
-//			QLineEdit* widget = new QLineEdit;
-//			widget->setText(m_Property.first.read(m_Property.second).toString());
-//			widget->setFont(font);
-//			valueWidget = widget;
-			 valueWidget = new QWidget;
 			break;
 		}
 	}
 
-	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->setSizeConstraint(QLayout::SetFixedSize);
-	layout->setSpacing(0);
-	layout->setContentsMargins(0, 0, 0, fit(15));
+	if (nullptr == valueWidget) {
+		return;
+	}
 
+	QLabel* label = new QLabel;
+	label->setText(name + ":");
+	label->setFont(font);
+	label->setStyleSheet("color:white;");
+	label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setSpacing(0);
+	layout->setContentsMargins(fit(5), fit(5), fit(7), fit(10));
 	layout->addWidget(label);
 	layout->addWidget(valueWidget);
+	m_Valid = true;
+}
+
+bool PropertyItem::eventFilter( QObject * o, QEvent * e )
+{
+	if ( e->type() == QEvent::Wheel && qobject_cast<QAbstractSpinBox*>(o)) {
+		e->ignore();
+		return true;
+	}
+	return QWidget::eventFilter(o, e);
+}
+
+void PropertyItem::paintEvent(QPaintEvent* e)
+{
+	QStyleOption opt;
+	opt.init(this);
+	QPainter p(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+	QWidget::paintEvent(e);
 }

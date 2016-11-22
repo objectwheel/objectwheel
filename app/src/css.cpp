@@ -3,8 +3,8 @@
 
 #define CSS_SPINBOX "\
 QAbstractSpinBox { \
-	selection-background-color: transparent; \
-	selection-color: black; \
+	selection-background-color: #555555; \
+	selection-color: white; \
 	background:white; \
 	border: %1 solid #bdbebf; \
 	border-radius:%2; \
@@ -14,7 +14,7 @@ QAbstractSpinBox { \
 	position: absolute; \
 	top: 0px; right: 0px; bottom: 0px; \
 	width: %3; \
-	background:#7cc053; \
+	background:#98d367; \
 	border-top-right-radius:%4; \
 	border-bottom-right-radius:%4; \
 } QAbstractSpinBox::up-button:pressed { \
@@ -31,7 +31,7 @@ QAbstractSpinBox { \
 	position: absolute; \
 	top: 0px; left: 0px; bottom: 0px; \
 	width: %3; \
-	background:#7cc053; \
+	background:#ed5f55; \
 	border-top-left-radius:%4;	 \
 	border-bottom-left-radius:%4; \
 } QAbstractSpinBox::down-button:pressed { \
@@ -44,11 +44,38 @@ QAbstractSpinBox { \
 	height: %5; \
 }"
 
+#define CSS_LINEEDIT "\
+QLineEdit {\
+	selection-background-color: #555555; \
+	selection-color: white; \
+	background:white; \
+	border: %1 solid #bdbebf; \
+	border-radius:%2;\
+	padding:%2;\
+}"
+
+#define CSS_PROPERTY_ITEM "\
+#propertyItem {\
+	background-color: rgba(0, 0, 0, 60);\
+	border: 0px;\
+	border-radius: %1px;\
+	margin-right: %2px;\
+	margin-bottom: %3px;\
+}"
+
 QString CSS::SpinBox;
+QString CSS::LineEdit;
+QString CSS::PropertyItem;
 
 void CSS::initCSS()
 {
 	/* SpinBox */
 	SpinBox = QString(CSS_SPINBOX).arg(fit(1)).arg(fit(5))
 				  .arg(fit(30)).arg(fit(4)).arg(fit(15));
+
+	/* LineEdit */
+	LineEdit = QString(CSS_LINEEDIT).arg(fit(1)).arg(fit(5));
+
+	/* PropertyItem */
+	PropertyItem = QString(CSS_PROPERTY_ITEM).arg(fit(4)).arg(fit(2)).arg(fit(5));
 }

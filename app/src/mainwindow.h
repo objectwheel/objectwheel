@@ -19,19 +19,9 @@ class MainWindow : public QMainWindow
 		Q_OBJECT
 
 	public:
-		explicit MainWindow(QWidget *parent = 0);
-		~MainWindow();
-
-	public slots:
-		void RemoveItem(QQuickItem* const item);
-
-	private slots:
-		void on_clearButton_clicked();
-		void on_editButton_clicked();
-
-	private:
 		typedef QList<QQuickItem*> QQuickItemList;
 
+	private:
 		Ui::MainWindow *ui;
 		QString m_ToolsDir;
 		ResizerTick* m_ResizerTick;
@@ -42,6 +32,9 @@ class MainWindow : public QMainWindow
 		CoverMenu* m_ToolMenu;
 		CoverMenu* m_PropertiesMenu;
 
+	public:
+		explicit MainWindow(QWidget *parent = 0);
+		~MainWindow();
 		void SetToolsDir();
 		void SetupGui();
 		bool CheckTools(const QJsonObject& toolsObject) const;
@@ -59,6 +52,10 @@ class MainWindow : public QMainWindow
 		void resized();
 		void selectionHided();
 		void selectionShowed(QObject* const selectedItem);
+
+	private slots:
+		void on_clearButton_clicked();
+		void on_editButton_clicked();
 
 };
 

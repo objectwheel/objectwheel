@@ -11,7 +11,11 @@ class FlatButton : public QPushButton
 
 	private:
 		QColor m_Color;
+		QColor m_DisabledColor;
+		QColor m_CheckedColor;
 		QColor m_TextColor;
+		QColor m_DisabledTextColor;
+		QColor m_CheckedTextColor;
 		QGraphicsDropShadowEffect* m_Shadow;
 
 	public:
@@ -19,9 +23,17 @@ class FlatButton : public QPushButton
 
 		const QColor& Color() const;
 		void setColor(const QColor& Color);
+		const QColor& DisabledColor() const;
+		void setDisabledColor(const QColor& Color);
+		const QColor& CheckedColor() const;
+		void setCheckedColor(const QColor& Color);
 
 		const QColor& TextColor() const;
 		void setTextColor(const QColor& TextColor);
+		const QColor& DisabledTextColor() const;
+		void setDisabledTextColor(const QColor& TextColor);
+		const QColor& CheckedTextColor() const;
+		void setCheckedTextColor(const QColor& TextColor);
 
 	protected:
 		void applyTheme();

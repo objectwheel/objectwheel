@@ -14,7 +14,7 @@ CoverMenu::CoverMenu(QWidget *parent)
 	, m_MenuWidth(fit(170))
 	, m_Duration(500)
 	, m_AnimationState(QParallelAnimationGroup::Stopped)
-	, m_Shadow(new QWidget(this))
+	, m_ShadowWidget(new QWidget(this))
 {
 	m_Layout->setSpacing(0);
 	m_Layout->setContentsMargins(0, 0, 0, 0);
@@ -98,39 +98,39 @@ void CoverMenu::fixShadow()
 	switch (m_CoverSide)
 	{
 		case FromLeft:
-			m_Shadow->setStyleSheet("background:qlineargradient(spread:pad, x1:1, y1:0.5, x2:0, y2:0.5,stop:0 "
+			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:1, y1:0.5, x2:0, y2:0.5,stop:0 "
 									"rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
-			m_Shadow->move(width() - fit(8), 0);
-			m_Shadow->resize(fit(8), height());
+			m_ShadowWidget->move(width() - (int)fit(8), 0);
+			m_ShadowWidget->resize(fit(8), height());
 			break;
 
 		case FromRight:
-			m_Shadow->setStyleSheet("background:qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5,stop:0 "
+			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5,stop:0 "
 									"rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
-			m_Shadow->move(0, 0);
-			m_Shadow->resize(fit(8), height());
+			m_ShadowWidget->move(0, 0);
+			m_ShadowWidget->resize(fit(8), height());
 			break;
 
 		case FromTop:
-			m_Shadow->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0,stop:0 "
+			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0,stop:0 "
 									"rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
-			m_Shadow->move(0, height() - fit(8));
-			m_Shadow->resize(width(), fit(8));
+			m_ShadowWidget->move(0, height() - (int)fit(8));
+			m_ShadowWidget->resize(width(), fit(8));
 			break;
 
 		case FromBottom:
-			m_Shadow->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,stop:0 "
+			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,stop:0 "
 									"rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
-			m_Shadow->move(0, 0);
-			m_Shadow->resize(width(), fit(8));
+			m_ShadowWidget->move(0, 0);
+			m_ShadowWidget->resize(width(), fit(8));
 			break;
 
 		default:
 			qWarning("CoverMenu::cover() Wrong cover side.");
 			break;
 	}
-	m_Shadow->show();
-	m_Shadow->raise();
+	m_ShadowWidget->show();
+	m_ShadowWidget->raise();
 }
 
 void CoverMenu::setAnimationState(const QAbstractAnimation::State animationState, const QAbstractAnimation::State)
