@@ -220,13 +220,13 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 							{
 								pressedItem->setPosition(pressedItem->parentItem()->mapFromItem(m_RootItem, droppedPoint));
 							}
-							else if (pressedItem != itemAtDroppedPoint) // WARNING: else?
+							else if (pressedItem != itemAtDroppedPoint) // else handled in previous else if
 							{
 								QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_RootItem, droppedPoint);
 								pressedItem->setParentItem(itemAtDroppedPoint);
 								pressedItem->setPosition(mappedPoint);
 							}
-							QTimer::singleShot(100, [=]{ ShowSelectionTools(pressedItem); }); // FIXME: QTimer?
+							ShowSelectionTools(pressedItem);
 						}
 					}
 				}
@@ -239,7 +239,14 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					{
 						QQmlComponent component(ui->designWidget->engine()); //TODO: Drop into another item?
 						component.loadUrl(dropEvent->mimeData()->urls().at(0));
-						QQuickItem *qml = qobject_cast<QQuickItem*>(component.create(ui->designWidget->rootContext()));
+
+						QQmlIncubator incubator;
+						component.create(incubator, ui->designWidget->rootContext());
+						while (!incubator.isReady()) {
+							QApplication::processEvents();
+						}
+						QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
+
 						if (component.isError()) qWarning() << component.errors();
 						ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
 						qml->setParentItem(m_RootItem);
@@ -490,6 +497,7 @@ QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
 
 const MainWindow::QQuickItemList MainWindow::GetAllChildren(QQuickItem* const item) const
 {
+	/* Return all child items of item including item itself */
 	QQuickItemList childList;
 	for (auto child : item->childItems())
 		childList << GetAllChildren(child);
@@ -545,10 +553,10 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-// TODO: Make a object copy tick
-// TODO: Make ticks ordered nicely
+// TODO: Pop-up loading screen
+// TODO: Make a object clone tick
 // TODO: Make it possible to resize(zoom) and rotate operations with fingers
-// TODO: Make main design area layoutable
+// TODO: Layouts?
 // TODO: Code a version numberer for tools' objectNames
 // FIXME: Make CheckTools function works
 // FIXME: changed qml file doesn't make changes on designer due to source url is same
