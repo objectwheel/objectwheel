@@ -19,6 +19,11 @@
         "toolUrl" : "qrc:/resources/tools/Rectangle.zip"
     },
 
+    "AppAi" :
+    {
+        "toolUrl" : "qrc:/resources/tools/AppAi.zip"
+    },
+
     "BusyIndicator" :
     {
         "toolUrl" : "qrc:/resources/tools/BusyIndicator.zip"

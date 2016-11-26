@@ -35,3 +35,4 @@ DISTFILES                 += android/AndroidManifest.xml \
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 include($$PWD/ticks/ticks.pri)
+include($$PWD/components/components.pri)

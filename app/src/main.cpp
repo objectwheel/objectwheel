@@ -1,5 +1,6 @@
 #include <css.h>
 #include <fitter.h>
+#include <components.h>
 #include <mainwindow.h>
 #include <QApplication>
 #include <QFontDatabase>
@@ -22,6 +23,9 @@ int main(int argc, char *argv[])
 
 	// Init CSS
 	CSS::initCSS();
+
+	// Init Components
+	Components::init();
 
 	// Initialize Web View
 	QtWebView::initialize();

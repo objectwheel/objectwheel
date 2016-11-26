@@ -1,5 +1,5 @@
 VERSION          = 1.0
-QT              += core gui widgets network qml quick quickwidgets webview
+QT              += core gui widgets network qml quick quickwidgets webview websockets multimedia
 TEMPLATE         = app
 CONFIG          += c++11
 CONFIG          -= debug_and_release debug_and_release_target
