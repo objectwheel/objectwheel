@@ -1,45 +1,11 @@
 #include <audiorecorder.h>
-#include <QUrl>
-#include <QDir>
-#include <QFile>
-#include <QDataStream>
-#include <QAudioDecoder>
-#include <QAudioRecorder>
-#include <QStandardPaths>
-#include <QCoreApplication>
-
-#ifdef QT_QML_LIB
-#include <QQmlEngine>
-#endif
-
-#define COMPONENT_URI "com.objectwheel.components"
-#define COMPONENT_NAME "AudioRecorder"
-#define COMPONENT_DIR "/components/audio-recorder"
-#define COMPONENT_VERSION_MAJOR 1
-#define COMPONENT_VERSION_MINOR 0
-
-#define AUDIO_WAV_FILE "/audio.wav"
+#include <QIODevice>
 
 AudioRecorder::AudioRecorder(QObject* parent)
 	: QObject(parent)
-	, m_audioRecorder(new QAudioRecorder(this))
-	, m_audioDecoder(new QAudioDecoder(this))
-	, m_recording(false)
-	, m_error(NoError)
+	, m_audioInput(nullptr)
+	, m_audioDevice(nullptr)
 {
-	initPath();
-
-	QAudioEncoderSettings audioSettings;
-	audioSettings.setCodec("audio/PCM");
-	audioSettings.setQuality(QMultimedia::HighQuality);
-	audioSettings.setSampleRate(16000);
-	audioSettings.setChannelCount(1);
-
-	m_audioRecorder->setEncodingSettings(audioSettings);
-	m_audioRecorder->setContainerFormat("wav");
-	m_audioRecorder->setOutputLocation(QUrl::fromLocalFile(m_componentPath + AUDIO_WAV_FILE));
-	connect(m_audioRecorder, SIGNAL(error(QMediaRecorder::Error)), this, SLOT(handleError()));
-
 	QAudioFormat format;
 	format.setSampleRate(16000);
 	format.setChannelCount(1);
@@ -48,102 +14,73 @@ AudioRecorder::AudioRecorder(QObject* parent)
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::SignedInt);
 
-	m_audioDecoder->setAudioFormat(format);
-	m_audioDecoder->setSourceFilename(m_componentPath + AUDIO_WAV_FILE);
-	connect(m_audioDecoder, SIGNAL(bufferReady()), this, SLOT(handleDecodingBuffer()));
-	connect(m_audioDecoder, SIGNAL(finished()), this, SLOT(handleDecodingFinish()));
-	connect(m_audioDecoder, SIGNAL(error(QAudioDecoder::Error)), this, SLOT(handleDecodingError()));
+	Q_ASSERT(QAudioDeviceInfo::defaultInputDevice().isFormatSupported(format));
+
+	m_audioInput = new QAudioInput(format, this);
+	m_audioInput->setBufferSize(4096);
+	connect(m_audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanges(QAudio::State)));
 }
 
-AudioRecorder::Error AudioRecorder::hasError() const
+bool AudioRecorder::recording() const
 {
-	return m_error;
+	if (m_audioInput->state() == QAudio::StoppedState) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
-bool AudioRecorder::isRecording() const
+bool AudioRecorder::error() const
 {
-	return m_recording;
-}
-
-const QByteArray& AudioRecorder::data() const
-{
-	return m_data;
+	if (m_audioInput->error() == QAudio::NoError) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 void AudioRecorder::record()
 {
-	if (!m_recording) {
-		m_audioRecorder->record();
-		m_error = NoError;
-		m_recording = true;
-		emit recordingChanged();
-	}
+	m_audioDevice = m_audioInput->start();
+	connect(m_audioDevice, SIGNAL(readyRead()), this, SLOT(handleBuffer()));
+	emit recordingChanged();
 }
 
 void AudioRecorder::stop()
 {
-	if (m_recording && m_audioDecoder->state() == QAudioDecoder::StoppedState) {
-		m_audioRecorder->stop();
-		m_audioDecoder->stop();
-		startDecoding();
+	m_audioDevice = nullptr;
+	m_audioInput->stop();
+	emit recordingChanged();
+}
+
+void AudioRecorder::setBufferSize(const int bufferSize)
+{
+	m_audioInput->setBufferSize(bufferSize);
+}
+
+void AudioRecorder::handleStateChanges(const QAudio::State state)
+{
+	if (m_audioInput->error() != QAudio::NoError && state == QAudio::StoppedState) {
+		m_audioDevice = nullptr;
+		emit recordingChanged();
 	}
 }
 
-void AudioRecorder::handleError()
+void AudioRecorder::handleBuffer() const
 {
-	m_error = static_cast<Error>(m_audioDecoder->error());
-	m_recording = false;
-	emit recordingChanged();
-}
-
-void AudioRecorder::startDecoding()
-{
-	if (hasError() == NoError) {
-		m_data.clear();
-		m_audioDecoder->start();
+	if (m_audioDevice) {
+		emit readyBuffer(m_audioDevice->readAll());
 	}
 }
 
-void AudioRecorder::handleDecodingBuffer()
-{
-	auto buffer = m_audioDecoder->read();
-	auto data = buffer.constData<char>();
-	auto length = buffer.byteCount();
-	QDataStream out(&m_data, QIODevice::Append);
-	out.writeRawData(data, length);
-}
-
-void AudioRecorder::handleDecodingFinish()
-{
-	m_recording = false;
-	emit recordingChanged();
-}
-
-void AudioRecorder::handleDecodingError()
-{
-	m_data.clear();
-	m_error = DecodeError;
-	m_recording = false;
-	emit recordingChanged();
-}
-
-void AudioRecorder::initPath()
-{
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-	m_componentPath = QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0);
-#else
-	m_componentPath = QCoreApplication::applicationDirPath();
-#endif
-	m_componentPath += COMPONENT_DIR;
-	Q_ASSERT(QDir(m_componentPath).removeRecursively());
-	Q_ASSERT(QDir().mkpath(m_componentPath));
-}
-
+#ifdef QT_QML_LIB
+#include <QQmlEngine>
+#define COMPONENT_URI "com.objectwheel.components"
+#define COMPONENT_NAME "AudioRecorder"
+#define COMPONENT_VERSION_MAJOR 1
+#define COMPONENT_VERSION_MINOR 0
 void AudioRecorder::registerQmlType()
 {
-#ifdef QT_QML_LIB
 	qmlRegisterType<AudioRecorder>(COMPONENT_URI, COMPONENT_VERSION_MAJOR, COMPONENT_VERSION_MINOR, COMPONENT_NAME);
-#else
-	qWarning("WARNING! AudioRecorder::registerQmlType() : QtQml module not included.");
-#endif
 }
+#endif

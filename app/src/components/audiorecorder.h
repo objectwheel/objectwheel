@@ -1,60 +1,43 @@
 #ifndef AUDIORECORDER_H
 #define AUDIORECORDER_H
 
-#include <QAudioRecorder>
+#include <QAudioInput>
 
-class QAudioDecoder;
+class QIODevice;
 
 class AudioRecorder : public QObject
 {
-	public:
-		enum Error {
-			NoError,
-			ResourceError,
-			FormatError,
-			OutOfSpaceError,
-			DecodeError
-		};
-		Q_ENUMS(Error)
-
-	private:
 		Q_OBJECT
-		Q_PROPERTY(bool recording READ isRecording NOTIFY recordingChanged)
-		Q_PROPERTY(Error error READ hasError)
-		Q_PROPERTY(QByteArray data READ data)
+		Q_PROPERTY(bool error READ error)
+		Q_PROPERTY(bool recording READ recording NOTIFY recordingChanged)
+		Q_PROPERTY(int bufferSize WRITE setBufferSize)
 
 	private:
-		QString m_componentPath;
-		QAudioRecorder* m_audioRecorder;
-		QAudioDecoder* m_audioDecoder;
-		bool m_recording;
-		QByteArray m_data;
-		Error m_error;
+		QAudioInput* m_audioInput;
+		QIODevice* m_audioDevice;
 
 	public:
 		explicit AudioRecorder(QObject* parent = 0);
-		bool isRecording() const;
-		Error hasError() const;
-		const QByteArray& data() const;
-		static void registerQmlType();
-
-	private:
-		void initPath();
+		bool recording() const;
+		bool error() const;
+		void setBufferSize(const int bufferSize);
 
 	public slots:
 		void record();
 		void stop();
 
-	private slots:
-		void handleError();
-		void startDecoding();
-		void handleDecodingBuffer();
-		void handleDecodingFinish();
-		void handleDecodingError();
-
 	signals:
-		void recordingChanged();
+		void recordingChanged() const;
+		void readyBuffer(const QByteArray& data) const;
 
+	private slots:
+		void handleStateChanges(const QAudio::State state);
+		void handleBuffer() const;
+
+	public:
+		#ifdef QT_QML_LIB
+		static void registerQmlType();
+		#endif
 };
 
 #endif // AUDIORECORDER_H

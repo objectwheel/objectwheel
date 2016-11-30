@@ -34,6 +34,6 @@
         <file>resources/fonts/TitilliumWeb-Regular.ttf</file>
         <file>resources/images/plus.png</file>
         <file>resources/images/minus.png</file>
-        <file>resources/tools/AppAi.zip</file>
+        <file>resources/tools/WikipediaSurfer.zip</file>
     </qresource>
 </RCC>

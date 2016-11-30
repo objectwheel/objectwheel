@@ -2,48 +2,53 @@
 #define APIAI_H
 
 #include <QObject>
+#include <QWebSocket>
 
-class QWebSocket;
-class QByteArray;
+class ApiAiPrivate;
 
 class ApiAi : public QObject
 {
 		Q_OBJECT
-		Q_PROPERTY(QString response READ response NOTIFY responseReady)
 		Q_PROPERTY(QString token READ token WRITE setToken)
 		Q_PROPERTY(QString language READ language WRITE setLanguage)
+		Q_PROPERTY(bool state READ state NOTIFY stateChanged)
+		Q_PROPERTY(bool error READ error)
 
 	private:
+		ApiAiPrivate* m_d;
 		QWebSocket* m_webSocket;
 		QString m_token;
-		QString m_id;
 		QString m_language;
-		QByteArray m_voiceData;
-		QString m_response;
+		bool m_error;
 
 	public:
 		explicit ApiAi(QObject *parent = 0);
 		const QString& token() const;
 		void setToken(const QString& token);
-		static void registerQmlType();
 		const QString& language() const;
 		void setLanguage(const QString& language);
-		const QString& response() const;
-
-	private:
-		void commitVoice();
-		void openWebSocket();
-		QString generateRandomId() const;
-
-	signals:
-		void responseReady();
-
-	private slots:
-		void handleConnection();
-		void handleResponse(const QString& response);
+		bool state() const;
+		bool error() const;
 
 	public slots:
-		void sendVoiceData(const QByteArray& data);
+		void open();
+		void send(const QByteArray& data);
+		void flush();
+		void close();
+
+	signals:
+		bool stateChanged() const;
+		void readyResponse(const QString& response) const;
+
+	private slots:
+		void handleError(QAbstractSocket::SocketError error);
+		void handleStateChanges(QAbstractSocket::SocketState state);
+
+	public:
+		static QString generateRandomId();
+		#ifdef QT_QML_LIB
+		static void registerQmlType();
+		#endif
 };
 
 #endif // APIAI_H

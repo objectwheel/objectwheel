@@ -19,9 +19,9 @@
         "toolUrl" : "qrc:/resources/tools/Rectangle.zip"
     },
 
-    "AppAi" :
+    "WikipediaSurfer" :
     {
-        "toolUrl" : "qrc:/resources/tools/AppAi.zip"
+        "toolUrl" : "qrc:/resources/tools/WikipediaSurfer.zip"
     },
 
     "BusyIndicator" :
