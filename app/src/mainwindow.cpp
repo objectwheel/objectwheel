@@ -226,6 +226,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 								pressedItem->setParentItem(itemAtDroppedPoint);
 								pressedItem->setPosition(mappedPoint);
 							}
+							fixPosition(pressedItem);
 							ShowSelectionTools(pressedItem);
 						}
 					}
@@ -342,6 +343,14 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	QMainWindow::resizeEvent(event);
 	emit resized();
+}
+
+void MainWindow::fixPosition(QQuickItem* const item)
+{
+	item->setWidth(item->width() + 1);
+	QTimer::singleShot(0, [=]{
+		item->setWidth(item->width() - 1);
+	});
 }
 
 void MainWindow::DownloadTools(const QUrl& url)

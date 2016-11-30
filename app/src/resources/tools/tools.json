@@ -64,9 +64,9 @@
         "toolUrl" : "qrc:/resources/tools/CircularGauge.zip"
     },
 
-	"PredixTemp" :
+	"Thermometer" :
     {
-        "toolUrl" : "qrc:/resources/tools/PredixTemp.zip"
+        "toolUrl" : "qrc:/resources/tools/Thermometer.zip"
     },
 
     "ToggleButton" :

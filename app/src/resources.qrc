@@ -22,7 +22,6 @@
         <file>resources/images/delete-icon.png</file>
         <file>resources/images/rotate-icon.png</file>
         <file>resources/tools/CircularGauge.zip</file>
-        <file>resources/tools/PredixTemp.zip</file>
         <file>resources/qmls/module-resolver.qml</file>
         <file>resources/tools/DelayButton.zip</file>
         <file>resources/tools/Gauge.zip</file>
@@ -35,5 +34,6 @@
         <file>resources/images/plus.png</file>
         <file>resources/images/minus.png</file>
         <file>resources/tools/WikipediaSurfer.zip</file>
+        <file>resources/tools/Thermometer.zip</file>
     </qresource>
 </RCC>

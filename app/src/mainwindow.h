@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow
 		void HideSelectionTools();
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
+		void fixPosition(QQuickItem* const item);
 
 	signals:
 		void resized();
