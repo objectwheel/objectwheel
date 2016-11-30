@@ -358,7 +358,7 @@ void MainWindow::DownloadTools(const QUrl& url)
 	QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 	QNetworkRequest request;
 	request.setUrl(url);
-	request.setRawHeader("User-Agent", "DemoApp 1.0");
+	request.setRawHeader("User-Agent", "objectwheel 1.0");
 
 	QNetworkReply *reply = manager->get(request);
 	connect(reply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
@@ -393,7 +393,7 @@ void MainWindow::DownloadTools(const QUrl& url)
 
 			QNetworkRequest request;
 			request.setUrl(toolUrl);
-			request.setRawHeader("User-Agent", "DemoApp 1.0");
+			request.setRawHeader("User-Agent", "objectwheel 1.0");
 
 			QNetworkReply *toolReply = manager->get(request);
 			connect(toolReply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>

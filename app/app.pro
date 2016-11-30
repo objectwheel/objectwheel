@@ -3,7 +3,7 @@ QT              += core gui widgets network qml quick quickwidgets webview webso
 TEMPLATE         = app
 CONFIG          += c++11
 CONFIG          -= debug_and_release debug_and_release_target
-TARGET           = DemoApp
+TARGET           = objectwheel
 PROJECT_ROOT     = $$clean_path($$PWD/..)
 
 include($$PWD/detect_build.pri) # BUILD_POSTFIX
