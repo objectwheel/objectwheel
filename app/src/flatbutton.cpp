@@ -18,6 +18,8 @@ QPushButton {\
 	color:rgb(%20,%21,%22);\
 }"
 
+using namespace Fit;
+
 FlatButton::FlatButton(QWidget *parent)
 	: QPushButton(parent)
 	, m_Color("#f0f0f0")

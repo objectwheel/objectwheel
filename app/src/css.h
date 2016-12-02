@@ -9,7 +9,7 @@ class CSS
 		CSS() { }
 
 	public:
-		static void initCSS();
+		static void init();
 
 		static QString SpinBox;
 		static QString LineEdit;

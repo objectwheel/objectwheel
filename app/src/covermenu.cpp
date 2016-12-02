@@ -5,6 +5,8 @@
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 
+using namespace Fit;
+
 CoverMenu::CoverMenu(QWidget *parent)
 	: QWidget(parent)
 	, m_CoverSide(CoverSide::FromLeft)

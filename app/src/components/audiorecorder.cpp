@@ -58,6 +58,11 @@ void AudioRecorder::setBufferSize(const int bufferSize)
 	m_audioInput->setBufferSize(bufferSize);
 }
 
+int AudioRecorder::bufferSize() const
+{
+	return m_audioInput->bufferSize();
+}
+
 void AudioRecorder::handleStateChanges(const QAudio::State state)
 {
 	if (m_audioInput->error() != QAudio::NoError && state == QAudio::StoppedState) {

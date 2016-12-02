@@ -1,4 +1,4 @@
-#include <fitter.h>
+#include <fit.h>
 #include <rotatortick.h>
 #include <QPainter>
 #include <QMouseEvent>
@@ -15,6 +15,8 @@
 #    define ROTATORTICK_SIZE 25
 #endif
 
+using namespace Fit;
+
 RotatorTick::RotatorTick(QWidget* const parent)
 	: QPushButton(parent)
 	, m_TrackedItem(nullptr)
@@ -22,7 +24,7 @@ RotatorTick::RotatorTick(QWidget* const parent)
 	connect(this, &RotatorTick::clicked, this, &RotatorTick::ResetRotation);
 	setCursor(QCursor(Qt::CrossCursor));
 	resize(ROTATORTICK_SIZE, ROTATORTICK_SIZE);
-	Fitter::AddWidget(this);
+	fit(this);
 }
 
 QQuickItem* RotatorTick::TrackedItem() const

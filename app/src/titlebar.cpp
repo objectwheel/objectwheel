@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QGraphicsDropShadowEffect>
 
+using namespace Fit;
+
 const uchar TitleBar::m_SettingsIconData[] = {"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A\x00\x00\x00\x0D"
 											  "\x49\x48\x44\x52\x00\x00\x00\x40\x00\x00\x00\x40"
 											  "\x08\x04\x00\x00\x00\x00\x60\xB9\x55\x00\x00\x00"
@@ -227,8 +229,8 @@ TitleBar::TitleBar(QWidget *parent)
 	settings.loadFromData(m_SettingsIconData, sizeof(m_SettingsIconData));
 	m_Settings->setIcon(QIcon(settings));
 	m_Settings->setIconSize(fit({24, 24}));
-	m_Settings->setMinimumSize(fit ({32, 32}));
-	m_Settings->setMaximumSize(fit ({32, 32}));
+	m_Settings->setMinimumSize(fit({32, 32}));
+	m_Settings->setMaximumSize(fit({32, 32}));
 	m_Settings->setStyleSheet(QString("QPushButton {border:0px; border-radius: %1px;} QPushButton::checked {background:rgba(0,0,0,40);} QPushButton::pressed {background:rgba(0,0,0,40);}").arg(fit(15)));
 	m_Settings->setCheckable(true);
 
@@ -236,8 +238,8 @@ TitleBar::TitleBar(QWidget *parent)
 	menu.loadFromData(m_MenuIconData, sizeof(m_MenuIconData));
 	m_Menu->setIcon(QIcon(menu));
 	m_Menu->setIconSize(fit({24, 24}));
-	m_Menu->setMinimumSize(fit ({32, 32}));
-	m_Menu->setMaximumSize(fit ({32, 32}));
+	m_Menu->setMinimumSize(fit({32, 32}));
+	m_Menu->setMaximumSize(fit({32, 32}));
 	m_Menu->setStyleSheet(QString("QPushButton {border:0px; border-radius: %1px;} QPushButton::checked {background:rgba(0,0,0,40);} QPushButton::pressed {background:rgba(0,0,0,40);}").arg(fit(15)));
 	m_Menu->setCheckable(true);
 

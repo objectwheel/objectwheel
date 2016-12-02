@@ -1,4 +1,4 @@
-#include <fitter.h>
+#include <fit.h>
 #include <removertick.h>
 #include <QPainter>
 #include <QMouseEvent>
@@ -13,6 +13,8 @@
 #    define REMOVERTICK_SIZE 25
 #endif
 
+using namespace Fit;
+
 RemoverTick::RemoverTick(QWidget* const parent)
 	: QPushButton(parent)
 	, m_TrackedItem(nullptr)
@@ -20,7 +22,7 @@ RemoverTick::RemoverTick(QWidget* const parent)
 	connect(this, SIGNAL(clicked(bool)), this, SLOT(RemoveItem()));
 	setCursor(QCursor(Qt::PointingHandCursor));
 	resize(REMOVERTICK_SIZE, REMOVERTICK_SIZE);
-	Fitter::AddWidget(this);
+	fit(this);
 }
 
 QQuickItem* RemoverTick::TrackedItem() const

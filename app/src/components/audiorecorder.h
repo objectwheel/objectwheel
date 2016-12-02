@@ -10,7 +10,7 @@ class AudioRecorder : public QObject
 		Q_OBJECT
 		Q_PROPERTY(bool error READ error)
 		Q_PROPERTY(bool recording READ recording NOTIFY recordingChanged)
-		Q_PROPERTY(int bufferSize WRITE setBufferSize)
+		Q_PROPERTY(int bufferSize READ bufferSize WRITE setBufferSize)
 
 	private:
 		QAudioInput* m_audioInput;
@@ -21,6 +21,7 @@ class AudioRecorder : public QObject
 		bool recording() const;
 		bool error() const;
 		void setBufferSize(const int bufferSize);
+		int bufferSize() const;
 
 	public slots:
 		void record();

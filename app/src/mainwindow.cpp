@@ -1,5 +1,5 @@
+#include <fit.h>
 #include <miniz.h>
-#include <fitter.h>
 #include <string.h>
 #include <titlebar.h>
 #include <covermenu.h>
@@ -15,6 +15,8 @@
 #include <QtQuick>
 #include <QtWidgets>
 #include <QtNetwork>
+
+using namespace Fit;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -35,10 +37,10 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::SetupGui()
 {
 	/* Scaling things */
-	Fitter::AddWidget(ui->editButton, Fit::WidthHeight | Fit::LaidOut);
-	Fitter::AddWidget(ui->clearButton, Fit::WidthHeight | Fit::LaidOut);
-	Fitter::AddWidget(ui->toolboxTitle, Fit::HeightScaling | Fit::LaidOut);
-	Fitter::AddWidget(ui->propertiesTitle, Fit::HeightScaling | Fit::LaidOut);
+	fit(ui->editButton, Fit::WidthHeight, true);
+	fit(ui->clearButton, Fit::WidthHeight, true);
+	fit(ui->toolboxTitle, Fit::Height, true);
+	fit(ui->propertiesTitle, Fit::Height, true);
 
 	/* Set layout things */
 	ui->buttonsLayout->setSpacing(fit(6));
@@ -115,7 +117,7 @@ void MainWindow::SetupGui()
 	connect(this,&MainWindow::resized, [this] { ui->titleBar->setSettingsChecked(false); });
 
 	/* Add Title Bar */
-	Fitter::AddWidget(ui->titleBar, Fit::HeightScaling | Fit::LaidOut);
+	fit(ui->titleBar, Fit::Height, true);
 	ui->titleBar->setText("Studio");
 	ui->titleBar->setColor("#2196f3");
 	ui->titleBar->setShadowColor("#e0e4e7");
@@ -253,7 +255,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						qml->setParentItem(m_RootItem);
 						qml->setPosition(qml->mapFromItem(m_RootItem, dropEvent->pos()));
 						qml->setClip(true); // Even if it's not true
-						Fitter::AddItem(qml, Fit::WidthHeight);
+						fit(qml, Fit::WidthHeight);
 						m_Items << qml;
 					}
 				}

@@ -63,11 +63,13 @@ QLineEdit {\
 	margin-bottom: %3px;\
 }"
 
+using namespace Fit;
+
 QString CSS::SpinBox;
 QString CSS::LineEdit;
 QString CSS::PropertyItem;
 
-void CSS::initCSS()
+void CSS::init()
 {
 	/* SpinBox */
 	SpinBox = QString(CSS_SPINBOX).arg(fit(1)).arg(fit(5))

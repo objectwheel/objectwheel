@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
+using namespace Fit;
+
 PropertiesWidget::PropertiesWidget(QWidget *parent)
 	: QWidget(parent)
 	, m_ListWidget(new ListWidget)

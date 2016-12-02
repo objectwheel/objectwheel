@@ -1,4 +1,4 @@
-#include <fitter.h>
+#include <fit.h>
 #include <editortick.h>
 #include <QtGui>
 #include <QtCore>
@@ -12,6 +12,8 @@
 #    define EDITORTICK_SIZE 25
 #endif
 
+using namespace Fit;
+
 EditorTick::EditorTick(QWidget* const parent)
 	: QPushButton(parent)
 	, m_TrackedItem(nullptr)
@@ -19,7 +21,7 @@ EditorTick::EditorTick(QWidget* const parent)
 	connect(this, SIGNAL(clicked(bool)), this, SLOT(OpenEditor()));
 	setCursor(QCursor(Qt::PointingHandCursor));
 	resize(EDITORTICK_SIZE, EDITORTICK_SIZE);
-	Fitter::AddWidget(this);
+	fit(this);
 }
 
 QQuickItem* EditorTick::TrackedItem() const

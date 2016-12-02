@@ -30,6 +30,8 @@ QScrollBar:vertical { \
 	background: none; \
 }"
 
+using namespace Fit;
+
 ListWidget::ListWidget(QWidget *parent)
 	: QListWidget(parent)
 	, m_HiderTimer(new QTimer)

@@ -1,6 +1,6 @@
 [submodule "contrib/fit"]
 	path = contrib/fit
-	url = http://github.com/MrKozmon/fit
+	url = http://github.com/omergoktas/fit
 [submodule "contrib/miniz"]
 	path = contrib/miniz
-	url = http://github.com/MrKozmon/miniz
+	url = http://github.com/omergoktas/miniz

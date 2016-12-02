@@ -1,4 +1,4 @@
-#include <fitter.h>
+#include <fit.h>
 #include <resizertick.h>
 #include <QPainter>
 #include <QMouseEvent>
@@ -14,13 +14,15 @@
 #    define RESIZERTICK_SIZE 25
 #endif
 
+using namespace Fit;
+
 ResizerTick::ResizerTick(QWidget* const parent)
 	: QPushButton(parent)
 	, m_TrackedItem(nullptr)
 {
 	setCursor(QCursor(Qt::SizeFDiagCursor));
 	resize(RESIZERTICK_SIZE, RESIZERTICK_SIZE);
-	Fitter::AddWidget(this);
+	fit(this);
 }
 
 QQuickItem* ResizerTick::TrackedItem() const

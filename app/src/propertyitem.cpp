@@ -1,10 +1,12 @@
-#include <propertyitem.h>
 #include <css.h>
-#include <fitter.h>
+#include <fit.h>
+#include <propertyitem.h>
 #include <switch.h>
 
 #include <QHBoxLayout>
 #include <QtWidgets>
+
+using namespace Fit;
 
 PropertyItem::PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidget* parent)
 	: QWidget(parent)

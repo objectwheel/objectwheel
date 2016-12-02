@@ -5,6 +5,8 @@
 
 #define DIFF (1.5)
 
+using namespace Fit;
+
 Switch::Switch(QWidget *parent)
 	: QAbstractButton(parent)
 	, m_x(fit(DIFF))

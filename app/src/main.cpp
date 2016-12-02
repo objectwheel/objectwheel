@@ -1,5 +1,5 @@
 #include <css.h>
-#include <fitter.h>
+#include <fit.h>
 #include <components.h>
 #include <mainwindow.h>
 #include <QApplication>
@@ -18,11 +18,11 @@ int main(int argc, char *argv[])
 	QApplication::setStyle("fusion");
 	qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
 
-	// Initialize Scaling Fundamentals
-	Fit::Setup({REF_WIDTH, REF_HEIGHT}, REF_DPI);
+	// Init Fit
+	Fit::init(REF_WIDTH, REF_HEIGHT, REF_DPI);
 
 	// Init CSS
-	CSS::initCSS();
+	CSS::init();
 
 	// Init Components
 	Components::init();
@@ -33,15 +33,14 @@ int main(int argc, char *argv[])
 	// Add system wide fonts and set default font
 	QFontDatabase::addApplicationFont(":/resources/fonts/TitilliumWeb-Regular.ttf");
 	QFont font("TitilliumWeb");
-	font.setPixelSize(PIXEL_SIZE);
+	font.setPixelSize(Fit::fit(PIXEL_SIZE));
 	QApplication::setFont(font);
-	Fitter::AddAppWideWidgetFonts();
 
 	// Start MainWidget
 	MainWindow w;
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 	w.resize({REF_WIDTH, REF_HEIGHT});
-	Fitter::AddWidget(&w, Fit::WidthHeight);
+	fit(&w, Fit::WidthHeight);
 	w.show();
 # else
 	w.show();
