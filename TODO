@@ -1,2 +1,33 @@
-Add readme
-Add license
+* Add readme
+* Add license
+* Fix properties list scrolling on mobile devices
+* Fix toolbox list scrolling on mobile devices
+* Adapt font property comboboxes on mobile devices
+* Restylize font property comboboxes
+* Split up the api.ai Console And Weview into (2) controls [Webview/Console]
+* The console should show only last query's resutls
+* Fix tumbler control's geometry
+* Test compass control on IOS
+* Research for other QtSensor based new controls
+* Add text-to-speech support for WikipediaSurfer control
+* While reading (text to speech) -- Create buttons for Faster, Slower, Pause, Resume -- Buttons only -- some sort of button control panel. 
+* Research for a flexible way to control api.ai based controls easily [Pattern based surfing]
+* Research for more voice drived record button for WikipediaSurfer
+* Don't forget about producing somethings related with Particle Photon
+* Accordion like properties window [ordering Alphabetically, Genetic etc.]
+* Accordion like toolbox window [ordering Alphabetically, Genetic etc.]
+* Make a IOS like Toolbar for inside of containers of covered menus
+* Fix issues about attached properties on properties window
+* Change scrollbar color in right of the properties window (grey or something lighter)
+* Make a new multilined text area control
+* Make an "are you sure" window right before you clear all controls on design area
+* Make layouts works again with a well thought-out usage system
+* Search bar for toolbox window
+* Research on how controls talk to each other
+* Fix "record button stopped working" bugs on android
+* A new control for Google analystics
+* Break out the Intent and Action -- These two things matter a lot -- they should be easily found in a separate place. 
+* Create a chat window (new control), chatting with who?
+* Make the record Button a control. Allow me to move it around and make it bigger. When the System is listening -- change words somewhere to Listening and count down 10, 9, 8, 7, etc. 
+* Add Chatbot Control to simply have a conversation with api.ai
+* Work with Keen.io to send What was said -- and by Who -- to the cloud. Be thinking about Logging in (Via Facebook or ?) 
