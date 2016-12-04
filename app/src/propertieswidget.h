@@ -9,6 +9,7 @@
 
 class QQuickItem;
 class QVBoxLayout;
+class QLineEdit;
 
 class PropertiesWidget : public QWidget
 {
@@ -23,6 +24,8 @@ class PropertiesWidget : public QWidget
 		ListWidget* m_ListWidget;
 		QVBoxLayout* m_Layout;
 		QColor m_Color;
+		QObject* m_LastObject;
+		QLineEdit* m_SearchEdit;
 
 	public:
 		explicit PropertiesWidget(QWidget *parent = 0);
@@ -40,7 +43,7 @@ class PropertiesWidget : public QWidget
 
 	public slots:
 		inline void showBar() { m_ListWidget->showBar(); }
-		void refreshList(QObject* const selectedItem);
+		void refreshList(QObject* const selectedItem, const QString& filter = QString());
 		void clearList();
 		void updateLayout();
 };

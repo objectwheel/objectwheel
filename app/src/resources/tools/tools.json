@@ -92,5 +92,10 @@
 	"StatusIndicator" :
     {
         "toolUrl" : "qrc:/resources/tools/StatusIndicator.zip"
+    },
+
+	"Compass" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Compass.zip"
     }
 }

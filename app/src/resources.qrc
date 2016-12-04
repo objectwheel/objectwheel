@@ -35,5 +35,6 @@
         <file>resources/images/minus.png</file>
         <file>resources/tools/WikipediaSurfer.zip</file>
         <file>resources/tools/Thermometer.zip</file>
+        <file>resources/tools/Compass.zip</file>
     </qresource>
 </RCC>

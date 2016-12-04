@@ -6,7 +6,7 @@
 #include <QFontDatabase>
 #include <QtWebView>
 
-#define PIXEL_SIZE 16
+#define PIXEL_SIZE 15
 #define REF_WIDTH 660
 #define REF_HEIGHT 400
 #define REF_DPI 102
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	fit(&w, Fit::WidthHeight);
 	w.show();
 # else
-	w.show();
+	w.showFullScreen();
 # endif
 
 	// Start main event loop
