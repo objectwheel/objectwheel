@@ -159,6 +159,11 @@ void MainWindow::SetupGui()
 	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_RotatorTick, &RotatorTick::FixCoord);
 	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_ResizerTick, &ResizerTick::FixCoord);
+
+	QTimer::singleShot(0, [=] {
+		ui->designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
+		ui->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+	});
 }
 
 

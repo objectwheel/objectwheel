@@ -27,7 +27,7 @@ class ListWidget : public QListWidget
 		QMimeData* mimeData(const QList<QListWidgetItem *> items) const;
 		void mousePressEvent(QMouseEvent* const event);
 		void mouseMoveEvent(QMouseEvent* const event);
-		void wheelEvent(QWheelEvent *e);
+		void wheelEvent(QWheelEvent* const event);
 		void setBarOpacity(const int opacity);
 		int getBarOpacity() const;
 

@@ -11,13 +11,13 @@
 #include <QScroller>
 #include <QWheelEvent>
 
-#define ALPHA 70
+#define ALPHA 150
 #define STYLE_SHEET "\
 QScrollBar:vertical { \
 	background: transparent; \
 	width: %2px; \
 } QScrollBar::handle:vertical { \
-	background: rgba(0,0,0,%4); \
+	background: rgba(255,255,255,%4); \
 	min-height: %1px; \
 	border-radius: %3px; \
 } QScrollBar::add-line:vertical { \
@@ -39,7 +39,13 @@ ListWidget::ListWidget(QWidget *parent)
 	, m_Running(false)
 {
 	setBarOpacity(ALPHA);
-	QScroller::grabGesture(this, QScroller::TouchGesture);
+
+	QScroller::grabGesture(viewport(), QScroller::TouchGesture);
+	QScrollerProperties prop = QScroller::scroller(viewport())->scrollerProperties();
+	prop.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
+	prop.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
+	prop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.009);
+	QScroller::scroller(viewport())->setScrollerProperties(prop);
 
 	connect(m_DelayTimer, &QTimer::timeout, [&]{
 		m_DelayTimer->stop();
@@ -106,7 +112,7 @@ void ListWidget::mouseMoveEvent(QMouseEvent* const event)
 			dangle += a;
 		dangle /= m_AngleList.size();
 
-		if (25 < dangle)
+		if (35 < dangle)
 			return;
 	}
 #endif
@@ -114,10 +120,10 @@ void ListWidget::mouseMoveEvent(QMouseEvent* const event)
 	QListWidget::mouseMoveEvent(event);
 }
 
-void ListWidget::wheelEvent(QWheelEvent* e)
+void ListWidget::wheelEvent(QWheelEvent* const event)
 {
 	showBar();
-	QListWidget::wheelEvent(e);
+	QListWidget::wheelEvent(event);
 }
 
 void ListWidget::setBarOpacity(const int opacity)
@@ -130,7 +136,7 @@ void ListWidget::setBarOpacity(const int opacity)
 int ListWidget::getBarOpacity() const
 {
 	QString styleSheet = verticalScrollBar()->styleSheet();
-	styleSheet = styleSheet.split("rgba(0,0,0,").at(1);
+	styleSheet = styleSheet.split("rgba(255,255,255,").at(1);
 	QString value;
 	if (styleSheet[0].isNumber())
 		value.append(styleSheet.at(0));
@@ -145,7 +151,7 @@ void ListWidget::showBar()
 {
 	setBarOpacity(ALPHA);
 	m_DelayTimer->stop();
-	m_DelayTimer->start(400);
+	m_DelayTimer->start(1000);
 }
 
 void ListWidget::hideBar()
