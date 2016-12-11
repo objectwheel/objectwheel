@@ -36,5 +36,6 @@
         <file>resources/tools/WikipediaSurfer.zip</file>
         <file>resources/tools/Thermometer.zip</file>
         <file>resources/tools/Compass.zip</file>
+        <file>resources/tools/TextReader.zip</file>
     </qresource>
 </RCC>

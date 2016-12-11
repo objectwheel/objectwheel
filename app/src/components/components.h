@@ -3,6 +3,7 @@
 
 #include <apiai.h>
 #include <audiorecorder.h>
+#include <audioplayer.h>
 
 class Components
 {

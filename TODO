@@ -50,3 +50,11 @@
 * Password protected acccordion like toolbox titles, and tools(controls)
 * Background of design-area(dashboard) need properties those showed on properties window
 * Disable edit mode when click toolbox menu
+* Fix ugly image scaling on IOS
+* Fix control's black dragging icon issue on IOS
+* Fix spinbox keyboard pop-up on IOS
+* Fix design-area stretching problem on initialization of IOS app
+* Fix crazy compass on IOS
+* Add an about window with build numbers
+* Json communication between controls
+* Control movement history in json

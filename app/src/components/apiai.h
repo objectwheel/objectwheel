@@ -33,12 +33,14 @@ class ApiAi : public QObject
 	public slots:
 		void open();
 		void send(const QByteArray& data);
+		void speak(const QString& text);
 		void flush();
 		void close();
 
 	signals:
-		bool stateChanged() const;
+		void stateChanged() const;
 		void readyResponse(const QString& response) const;
+		void readySpeak(const QByteArray& data) const;
 
 	private slots:
 		void handleError(QAbstractSocket::SocketError error);

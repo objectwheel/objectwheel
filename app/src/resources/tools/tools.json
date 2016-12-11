@@ -97,5 +97,10 @@
 	"Compass" :
     {
         "toolUrl" : "qrc:/resources/tools/Compass.zip"
+    },
+
+    "TextReader" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TextReader.zip"
     }
 }

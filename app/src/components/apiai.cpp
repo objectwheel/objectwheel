@@ -1,6 +1,9 @@
 #include <apiai.h>
 #include <QWebSocket>
 #include <QByteArray>
+#include <QDataStream>
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
 
 #define URL "wss://api-ws.api.ai:4435/api/ws/query?v=20150910&" \
 	"content-type=audio/x-raw,+layout=(string)interleaved,+rate=(int)" \
@@ -89,6 +92,26 @@ void ApiAi::send(const QByteArray& data)
 	} else {
 		qWarning() << "ApiAi::send() : Send failed, socket is closed.";
 	}
+}
+
+void ApiAi::speak(const QString& text)
+{
+	auto url(QUrl("https://api.api.ai/v1/tts?v=20150910&text=" + text));
+	QNetworkRequest http(url);
+	http.setRawHeader("Authorization", QString("Bearer " + m_token).toStdString().c_str());
+	http.setRawHeader("Accept-Language", m_language.toStdString().c_str());
+	auto manager = new QNetworkAccessManager;
+	auto reply = manager->get(http);
+
+	connect(reply, static_cast<void(QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+			[](QNetworkReply::NetworkError code) {
+		qWarning() << "ApiAi::speak() :" << code;
+	});
+
+	connect(reply, &QNetworkReply::finished, [=] {
+		emit readySpeak(reply->readAll());
+		manager->deleteLater();
+	});
 }
 
 void ApiAi::flush()

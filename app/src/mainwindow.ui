@@ -79,75 +79,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="palette">
-         <palette>
-          <active>
-           <colorrole role="Base">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>224</red>
-              <green>228</green>
-              <blue>231</blue>
-             </color>
-            </brush>
-           </colorrole>
-           <colorrole role="Window">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>224</red>
-              <green>228</green>
-              <blue>231</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </active>
-          <inactive>
-           <colorrole role="Base">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>224</red>
-              <green>228</green>
-              <blue>231</blue>
-             </color>
-            </brush>
-           </colorrole>
-           <colorrole role="Window">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>224</red>
-              <green>228</green>
-              <blue>231</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </inactive>
-          <disabled>
-           <colorrole role="Base">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>224</red>
-              <green>228</green>
-              <blue>231</blue>
-             </color>
-            </brush>
-           </colorrole>
-           <colorrole role="Window">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>224</red>
-              <green>228</green>
-              <blue>231</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </disabled>
-         </palette>
-        </property>
         <property name="mouseTracking">
          <bool>false</bool>
         </property>
-        <property name="styleSheet">
-         <string notr="true"/>
+        <property name="resizeMode">
+         <enum>QQuickWidget::SizeRootObjectToView</enum>
         </property>
         <property name="source">
          <url>
