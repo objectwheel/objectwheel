@@ -149,24 +149,21 @@ void MainWindow::SetupGui()
 	toolboxVariant.setValue<QWidget*>(ui->toolboxWidget);
 	QVariant propertiesVariant;
 	propertiesVariant.setValue<QWidget*>(ui->propertiesWidget);
-
 	Container* leftContainer = new Container;
 	leftContainer->addWidget(ui->toolboxWidget);
 	leftContainer->addWidget(ui->propertiesWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	/////////
 	QToolBar* leftToolbar = new QToolBar;
 	leftToolbar->setStyleSheet(CSS::Toolbar);
 	leftToolbar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	leftToolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	leftToolbar->resize(leftToolbar->width(), fit(43));
+	leftToolbar->resize(leftToolbar->width(), 43);
 	fit(leftToolbar, Fit::Height, true);
 	QGraphicsDropShadowEffect* toolbarShadowEffect = new QGraphicsDropShadowEffect;
 	toolbarShadowEffect->setBlurRadius(fit(7));
 	toolbarShadowEffect->setOffset(0, fit(4));
 	toolbarShadowEffect->setColor(QColor(0, 0, 0, 50));
 	leftToolbar->setGraphicsEffect(toolbarShadowEffect);
-
 	QRadioButton* toolboxButton = new QRadioButton;
 	toolboxButton->setStyleSheet(CSS::ToolboxButton);
 	toolboxButton->setCheckable(true);
@@ -177,7 +174,6 @@ void MainWindow::SetupGui()
 	toolboxButtonAction->setCheckable(true);
 	leftToolbar->addAction(toolboxButtonAction);
 	connect(toolboxButton, SIGNAL(clicked(bool)), toolboxButtonAction, SLOT(trigger()));
-
 	QRadioButton* propertiesButton = new QRadioButton;
 	propertiesButton->setStyleSheet(CSS::PropertiesButton);
 	propertiesButton->setCheckable(true);
@@ -187,12 +183,8 @@ void MainWindow::SetupGui()
 	propertiesButtonAction->setCheckable(true);
 	leftToolbar->addAction(propertiesButtonAction);
 	connect(propertiesButton, SIGNAL(clicked(bool)), propertiesButtonAction, SLOT(trigger()));
-
 	connect(toolboxButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 	connect(propertiesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
-
-	/////////
-
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
 	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
@@ -201,7 +193,6 @@ void MainWindow::SetupGui()
 	leftMenuLayout->setSpacing(fit(8));
 	leftMenuLayout->addWidget(leftToolbar);
 	leftMenuLayout->addWidget(leftContainer);
-
 	m_LeftMenu->attachWidget(leftMenuWidget);
 }
 
