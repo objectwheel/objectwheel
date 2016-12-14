@@ -36,6 +36,8 @@ class PropertiesWidget : public QWidget
 
 	protected:
 		void refreshListWidget();
+		void showEvent(QShowEvent *event);
+		void fixItemsGeometry();
 
 	signals:
 		void listRefreshed();
@@ -45,7 +47,6 @@ class PropertiesWidget : public QWidget
 		inline void showBar() { m_ListWidget->showBar(); }
 		void refreshList(QObject* const selectedItem, const QString& filter = QString());
 		void clearList();
-		void updateLayout();
 };
 
 #endif // PROPERTIESWIDGET_H

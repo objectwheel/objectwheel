@@ -319,7 +319,6 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 
 	m_Layout->addLayout(layout);
 	m_Layout->addWidget(m_ListWidget);
-
 }
 
 const PropertiesWidget::Properties& PropertiesWidget::properties() const
@@ -377,16 +376,6 @@ void PropertiesWidget::clearList()
 	m_LastObject = nullptr;
 }
 
-void PropertiesWidget::updateLayout()
-{
-	for (int i=0; i<m_ListWidget->count(); i++) {
-		QWidget* propertyItem = m_ListWidget->itemWidget(m_ListWidget->item(i));
-		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
-		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
-		m_ListWidget->item(i)->setSizeHint(QSize(m_ListWidget->width() - fit(4), propertyItem->sizeHint().height()));
-	}
-}
-
 void PropertiesWidget::refreshListWidget()
 {
 	for (auto property : m_Properties) {
@@ -402,8 +391,24 @@ void PropertiesWidget::refreshListWidget()
 		});
 		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
 		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
-		item->setSizeHint(QSize(m_ListWidget->width() - fit(4), propertyItem->sizeHint().height()));
+		item->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
 		m_ListWidget->addItem(item);
 		m_ListWidget->setItemWidget(item, propertyItem);
+	}
+}
+
+void PropertiesWidget::showEvent(QShowEvent* event)
+{
+	fixItemsGeometry();
+	QWidget::showEvent(event);
+}
+
+void PropertiesWidget::fixItemsGeometry()
+{
+	for (int i=0; i<m_ListWidget->count(); i++) {
+		QWidget* propertyItem = m_ListWidget->itemWidget(m_ListWidget->item(i));
+		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
+		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
+		m_ListWidget->item(i)->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
 	}
 }

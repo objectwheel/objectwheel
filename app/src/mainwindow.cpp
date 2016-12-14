@@ -42,11 +42,8 @@ void MainWindow::SetupGui()
 	fit(ui->editButton, Fit::WidthHeight, true);
 	fit(ui->clearButton, Fit::WidthHeight, true);
 
-	/* Set layout things */
-	ui->buttonsLayout->setSpacing(fit(6));
-	ui->buttonsLayout->setContentsMargins(0, 0, fit(9), 0);
-	ui->containerLayout->setSpacing(fit(6));
-	ui->containerLayout->setContentsMargins(0, 0, 0, fit(9));
+	ui->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
+	ui->buttonsLayout->setSpacing(fit(5));
 
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
@@ -80,7 +77,7 @@ void MainWindow::SetupGui()
 	/* Re-move ticks when tracked item rotated */
 	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_ResizerTick, &ResizerTick::FixCoord);
-	//	connect(m_RotatorTick, &RotatorTick::ItemRotated, [&] {ui->propertiesWidget->refreshList(m_RotatorTick->TrackedItem());});
+//	connect(m_RotatorTick, &RotatorTick::ItemRotated, [&] {ui->propertiesWidget->refreshList(m_RotatorTick->TrackedItem());});
 
 	/* Hide ticks when editButton clicked */
 	connect(ui->editButton, &QPushButton::clicked, m_ResizerTick, &ResizerTick::hide);
@@ -121,7 +118,6 @@ void MainWindow::SetupGui()
 	connect(ui->titleBar, SIGNAL(SettingsToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
 	connect(m_LeftMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setMenuChecked(bool)));
 	connect(m_RightMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setSettingsChecked(bool)));
-	connect(m_RightMenu, SIGNAL(toggled(bool)), ui->propertiesWidget, SLOT(updateLayout()));
 
 	/* Prepare Properties Widget */
 	connect(this, SIGNAL(selectionShowed(QObject*const)), ui->propertiesWidget, SLOT(refreshList(QObject*const)));
