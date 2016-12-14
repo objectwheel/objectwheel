@@ -9,6 +9,8 @@
 #include <rotatortick.h>
 #include <removertick.h>
 #include <ui_mainwindow.h>
+#include <container.h>
+#include <css.h>
 
 #include <QtQml>
 #include <QtCore>
@@ -19,14 +21,14 @@
 using namespace Fit;
 
 MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent)
+	: QWidget(parent)
 	, ui(new Ui::MainWindow)
 	, m_ResizerTick(new ResizerTick)
 	, m_RotatorTick(new RotatorTick)
 	, m_RemoverTick(new RemoverTick)
 	, m_RootItem(nullptr)
-	, m_ToolMenu(new CoverMenu)
-	, m_PropertiesMenu(new CoverMenu)
+	, m_LeftMenu(new CoverMenu)
+	, m_RightMenu(new CoverMenu)
 {
 	ui->setupUi(this);
 	SetToolsDir();
@@ -39,8 +41,6 @@ void MainWindow::SetupGui()
 	/* Scaling things */
 	fit(ui->editButton, Fit::WidthHeight, true);
 	fit(ui->clearButton, Fit::WidthHeight, true);
-	fit(ui->toolboxTitle, Fit::Height, true);
-	fit(ui->propertiesTitle, Fit::Height, true);
 
 	/* Set layout things */
 	ui->buttonsLayout->setSpacing(fit(6));
@@ -101,19 +101,15 @@ void MainWindow::SetupGui()
 	m_RotatorTick->hide();
 
 	/* Add Tool Menu */
-	m_ToolMenu->setCoverWidget(centralWidget());
-	centralWidget()->layout()->removeItem(ui->toolboxLayout);
-	m_ToolMenu->setContainer(ui->toolboxLayout);
-	m_ToolMenu->setCoverSide(CoverMenu::FromLeft);
-	connect(this,SIGNAL(resized()),m_ToolMenu,SLOT(hide()));
+	m_LeftMenu->setCoverWidget(ui->centralWidget);
+	m_LeftMenu->setCoverSide(CoverMenu::FromLeft);
+	connect(this,SIGNAL(resized()),m_LeftMenu,SLOT(hide()));
 	connect(this,&MainWindow::resized, [this] { ui->titleBar->setMenuChecked(false); });
 
 	/* Add Properties Menu */
-	m_PropertiesMenu->setCoverWidget(centralWidget());
-	centralWidget()->layout()->removeItem(ui->propertiesLayout);
-	m_PropertiesMenu->setContainer(ui->propertiesLayout);
-	m_PropertiesMenu->setCoverSide(CoverMenu::FromRight);
-	connect(this,SIGNAL(resized()),m_PropertiesMenu,SLOT(hide()));
+	m_RightMenu->setCoverWidget(ui->centralWidget);
+	m_RightMenu->setCoverSide(CoverMenu::FromRight);
+	connect(this,SIGNAL(resized()),m_RightMenu,SLOT(hide()));
 	connect(this,&MainWindow::resized, [this] { ui->titleBar->setSettingsChecked(false); });
 
 	/* Add Title Bar */
@@ -121,38 +117,28 @@ void MainWindow::SetupGui()
 	ui->titleBar->setText("Studio");
 	ui->titleBar->setColor("#2196f3");
 	ui->titleBar->setShadowColor("#e0e4e7");
-	connect(ui->titleBar, SIGNAL(MenuToggled(bool)), m_ToolMenu, SLOT(setCovered(bool)));
-	connect(ui->titleBar, SIGNAL(SettingsToggled(bool)), m_PropertiesMenu, SLOT(setCovered(bool)));
-	connect(m_ToolMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setMenuChecked(bool)));
-	connect(m_PropertiesMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setSettingsChecked(bool)));
-	connect(m_PropertiesMenu, SIGNAL(toggled(bool)), ui->propertiesWidget, SLOT(updateLayout()));
-
-	/* Edit Toolbox Title*/
-	ui->toolboxTitle->setText("Toolbox");
-	ui->toolboxTitle->hideButtons();
-	ui->toolboxTitle->setShadowColor("#566573");
-	ui->toolboxTitle->setColor("#98d367");
-
-	/* Edit Properties Title*/
-	ui->propertiesTitle->setText("Properties");
-	ui->propertiesTitle->hideButtons();
-	ui->propertiesTitle->setShadowColor("#566573");
-	ui->propertiesTitle->setColor("#fab153");
+	connect(ui->titleBar, SIGNAL(MenuToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
+	connect(ui->titleBar, SIGNAL(SettingsToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
+	connect(m_LeftMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setMenuChecked(bool)));
+	connect(m_RightMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setSettingsChecked(bool)));
+	connect(m_RightMenu, SIGNAL(toggled(bool)), ui->propertiesWidget, SLOT(updateLayout()));
 
 	/* Prepare Properties Widget */
 	connect(this, SIGNAL(selectionShowed(QObject*const)), ui->propertiesWidget, SLOT(refreshList(QObject*const)));
 	connect(this, &MainWindow::selectionHided, [this] { ui->propertiesWidget->setDisabled(true); });
 
 	/* Pop-up toolbox widget's scrollbar */
-	connect(m_ToolMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->toolboxWidget->showBar(); });
-	connect(m_PropertiesMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->propertiesWidget->showBar(); });
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->toolboxWidget->showBar(); });
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->propertiesWidget->showBar(); });
 
 	/* Set flat buttons' colors*/
 	ui->editButton->setColor(QColor("#2196f3"));
-	ui->editButton->setCheckedColor(QColor("#82c250"));
+	ui->editButton->setCheckedColor(QColor("#72b240"));
 	ui->editButton->setTextColor(Qt::white);
-	ui->editButton->setCheckedTextColor("#333333");
+	ui->editButton->setCheckedTextColor(QColor("#444444"));
 	ui->clearButton->setColor(QColor("#d95459"));
+	ui->clearButton->setDisabledColor(Qt::darkGray);
+	ui->clearButton->setDisabledTextColor(QColor("#444444"));
 	ui->clearButton->setTextColor(Qt::white);
 
 	/* Fix Coords of ticks when property changed */
@@ -161,6 +147,66 @@ void MainWindow::SetupGui()
 	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_ResizerTick, &ResizerTick::FixCoord);
 
     ui->designWidget->rootContext()->setContextProperty("dpi", Fit::ratio());
+
+	/* Init Left Container */
+	QVariant toolboxVariant;
+	toolboxVariant.setValue<QWidget*>(ui->toolboxWidget);
+	QVariant propertiesVariant;
+	propertiesVariant.setValue<QWidget*>(ui->propertiesWidget);
+
+	Container* leftContainer = new Container;
+	leftContainer->addWidget(ui->toolboxWidget);
+	leftContainer->addWidget(ui->propertiesWidget);
+	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	/////////
+	QToolBar* leftToolbar = new QToolBar;
+	leftToolbar->setStyleSheet(CSS::Toolbar);
+	leftToolbar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	leftToolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	leftToolbar->resize(leftToolbar->width(), fit(43));
+	fit(leftToolbar, Fit::Height, true);
+	QGraphicsDropShadowEffect* toolbarShadowEffect = new QGraphicsDropShadowEffect;
+	toolbarShadowEffect->setBlurRadius(fit(7));
+	toolbarShadowEffect->setOffset(0, fit(4));
+	toolbarShadowEffect->setColor(QColor(0, 0, 0, 50));
+	leftToolbar->setGraphicsEffect(toolbarShadowEffect);
+
+	QRadioButton* toolboxButton = new QRadioButton;
+	toolboxButton->setStyleSheet(CSS::ToolboxButton);
+	toolboxButton->setCheckable(true);
+	toolboxButton->setChecked(true);
+	QWidgetAction* toolboxButtonAction = new QWidgetAction(this);
+	toolboxButtonAction->setDefaultWidget(toolboxButton);
+	toolboxButtonAction->setData(toolboxVariant);
+	toolboxButtonAction->setCheckable(true);
+	leftToolbar->addAction(toolboxButtonAction);
+	connect(toolboxButton, SIGNAL(clicked(bool)), toolboxButtonAction, SLOT(trigger()));
+
+	QRadioButton* propertiesButton = new QRadioButton;
+	propertiesButton->setStyleSheet(CSS::PropertiesButton);
+	propertiesButton->setCheckable(true);
+	QWidgetAction* propertiesButtonAction = new QWidgetAction(this);
+	propertiesButtonAction->setDefaultWidget(propertiesButton);
+	propertiesButtonAction->setData(propertiesVariant);
+	propertiesButtonAction->setCheckable(true);
+	leftToolbar->addAction(propertiesButtonAction);
+	connect(propertiesButton, SIGNAL(clicked(bool)), propertiesButtonAction, SLOT(trigger()));
+
+	connect(toolboxButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+	connect(propertiesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+
+	/////////
+
+	QWidget* leftMenuWidget = new QWidget;
+	leftMenuWidget->setObjectName("leftMenuWidget");
+	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+	QVBoxLayout* leftMenuLayout = new QVBoxLayout(leftMenuWidget);
+	leftMenuLayout->setContentsMargins(0, 0, 0, 0);
+	leftMenuLayout->setSpacing(fit(8));
+	leftMenuLayout->addWidget(leftToolbar);
+	leftMenuLayout->addWidget(leftContainer);
+
+	m_LeftMenu->attachWidget(leftMenuWidget);
 }
 
 
@@ -340,12 +386,13 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 		}
 	}
 	else
-		return QMainWindow::eventFilter(object,event);
+		return QWidget::eventFilter(object,event);
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-	QMainWindow::resizeEvent(event);
+	ui->centralWidget->setGeometry(0, 0, width(), height());
+	QWidget::resizeEvent(event);
 	emit resized();
 }
 

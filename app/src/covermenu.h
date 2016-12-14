@@ -5,6 +5,7 @@
 #include <QParallelAnimationGroup>
 
 class QVBoxLayout;
+class QWidget;
 
 class CoverMenu : public QWidget
 {
@@ -16,7 +17,7 @@ class CoverMenu : public QWidget
 	private:
 		CoverSide m_CoverSide;
 		QWidget* m_CoverWidget;
-		QObject* m_Container;
+		QWidget* m_AttachedWidget;
 		QVBoxLayout* m_Layout;
 		int m_MenuWidth;
 		int m_Duration;
@@ -32,10 +33,9 @@ class CoverMenu : public QWidget
 		QWidget* coverWidget() const;
 		void setCoverWidget(QWidget* const coverWidget);
 
-		QObject* container() const;
-		void setContainer(QWidget* const container);
-		void setContainer(QLayout* const container);
-		void removeContainer();
+		QWidget* attachedWidget() const;
+		void attachWidget(QWidget* const widget);
+		void detachWidget();
 
 		int menuWidth() const;
 		void setMenuWidth(const int menuWidth);

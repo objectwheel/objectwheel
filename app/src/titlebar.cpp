@@ -5,7 +5,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <QGraphicsDropShadowEffect>
 
 using namespace Fit;
 

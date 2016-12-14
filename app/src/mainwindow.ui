@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <widget class="QWidget" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>660</width>
-    <height>400</height>
+    <width>680</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#centralWidget{
-	background:#e0e4e7;
+   <string notr="true">#centralWidget, #MainWindow{
+background:&quot;#e0e4e7&quot;;
 }</string>
   </property>
-  <widget class="QWidget" name="centralWidget">
+  <widget class="QWidget" name="centralWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>667</width>
+     <height>415</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>0</number>
@@ -174,56 +185,39 @@
           </property>
          </widget>
         </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="toolboxLayout">
-      <property name="spacing">
-       <number>0</number>
+     <widget class="ListWidget" name="toolboxWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="topMargin">
-       <number>0</number>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
       </property>
-      <item>
-       <widget class="TitleBar" name="toolboxTitle" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>48</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ListWidget" name="toolboxWidget">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QListView {
+      <property name="styleSheet">
+       <string notr="true">QListView {
 	border:0px solid white;
 	background:#566573;
-	padding:6px;
+	padding-right:5px;
 }
 
 QListView::item {
@@ -231,76 +225,39 @@ QListView::item {
     border: 0px solid transparent;
 	padding:2px;
 }</string>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="dragEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="dragDropMode">
-         <enum>QAbstractItemView::DragOnly</enum>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <property name="verticalScrollMode">
-         <enum>QAbstractItemView::ScrollPerPixel</enum>
-        </property>
-        <property name="horizontalScrollMode">
-         <enum>QAbstractItemView::ScrollPerPixel</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="dragEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::DragOnly</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="verticalScrollMode">
+       <enum>QAbstractItemView::ScrollPerPixel</enum>
+      </property>
+      <property name="horizontalScrollMode">
+       <enum>QAbstractItemView::ScrollPerPixel</enum>
+      </property>
+     </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="propertiesLayout">
-      <property name="spacing">
-       <number>0</number>
+     <widget class="PropertiesWidget" name="propertiesWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="bottomMargin">
-       <number>0</number>
+      <property name="styleSheet">
+       <string notr="true"/>
       </property>
-      <item>
-       <widget class="TitleBar" name="propertiesTitle" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="PropertiesWidget" name="propertiesWidget" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     </widget>
     </item>
    </layout>
   </widget>

@@ -63,11 +63,42 @@ QLineEdit {\
 	margin-bottom: %3px;\
 }"
 
+#define CSS_TOOLBAR "\
+QToolBar { \
+	padding-left: %1px; \
+	spacing: %1px; \
+	background: #82c250; \
+	border-top: %2px solid #555555; \
+}"
+
+#define CSS_TOOLBOX_BUTTON "\
+QRadioButton::indicator { \
+	width: %1px; \
+	height: %1px; \
+} QRadioButton::indicator::checked { \
+	border-image: url(:/resources/images/toolboxbuttonfilled.png); \
+} QRadioButton::indicator::unchecked { \
+	border-image: url(:/resources/images/toolboxbutton.png); \
+}"
+
+#define CSS_PROPERTIES_BUTTON "\
+QRadioButton::indicator { \
+	width: %1px; \
+	height: %1px; \
+} QRadioButton::indicator::checked { \
+	border-image: url(:/resources/images/propertiesbuttonfilled.png); \
+} QRadioButton::indicator::unchecked { \
+	border-image: url(:/resources/images/propertiesbutton.png); \
+}"
+
 using namespace Fit;
 
 QString CSS::SpinBox;
 QString CSS::LineEdit;
 QString CSS::PropertyItem;
+QString CSS::Toolbar;
+QString CSS::ToolboxButton;
+QString CSS::PropertiesButton;
 
 void CSS::init()
 {
@@ -80,4 +111,13 @@ void CSS::init()
 
 	/* PropertyItem */
 	PropertyItem = QString(CSS_PROPERTY_ITEM).arg(fit(4)).arg(fit(2)).arg(fit(5));
+
+	/* Toolbar */
+	Toolbar = QString(CSS_TOOLBAR).arg(fit(5)).arg(fit(1));
+
+	/* ToolboxButton */
+	ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(32));
+
+	/* PropertiesButton */
+	PropertiesButton = QString(CSS_PROPERTIES_BUTTON).arg(fit(32));
 }

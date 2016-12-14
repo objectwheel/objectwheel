@@ -7,7 +7,6 @@ class QLabel;
 class QHBoxLayout;
 class QVBoxLayout;
 class QPushButton;
-class QGraphicsDropShadowEffect;
 
 class TitleBar : public QWidget
 {

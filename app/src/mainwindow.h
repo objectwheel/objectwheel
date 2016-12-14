@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include <QWidget>
 
 namespace Ui {
 	class MainWindow;
@@ -14,7 +14,7 @@ class RemoverTick;
 class CoverMenu;
 class TitleBar;
 
-class MainWindow : public QMainWindow
+class MainWindow : public QWidget
 {
 		Q_OBJECT
 
@@ -29,8 +29,8 @@ class MainWindow : public QMainWindow
 		RemoverTick* m_RemoverTick;
 		QQuickItem* m_RootItem;
 		QQuickItemList m_Items;
-		CoverMenu* m_ToolMenu;
-		CoverMenu* m_PropertiesMenu;
+		CoverMenu* m_LeftMenu;
+		CoverMenu* m_RightMenu;
 
 	public:
 		explicit MainWindow(QWidget *parent = 0);

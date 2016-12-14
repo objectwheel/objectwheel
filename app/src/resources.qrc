@@ -37,5 +37,9 @@
         <file>resources/tools/Thermometer.zip</file>
         <file>resources/tools/Compass.zip</file>
         <file>resources/tools/TextReader.zip</file>
+        <file>resources/images/toolboxbuttonfilled.png</file>
+        <file>resources/images/toolboxbutton.png</file>
+        <file>resources/images/propertiesbutton.png</file>
+        <file>resources/images/propertiesbuttonfilled.png</file>
     </qresource>
 </RCC>
