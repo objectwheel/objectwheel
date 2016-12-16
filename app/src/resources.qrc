@@ -41,5 +41,6 @@
         <file>resources/images/toolboxbutton.png</file>
         <file>resources/images/propertiesbutton.png</file>
         <file>resources/images/propertiesbuttonfilled.png</file>
+        <file>resources/tools/WebSurfer.zip</file>
     </qresource>
 </RCC>

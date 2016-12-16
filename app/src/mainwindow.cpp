@@ -276,6 +276,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
 					{
 						auto url = dropEvent->mimeData()->urls().at(0);
+						ui->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
 						QQmlComponent component(ui->designWidget->engine()); //TODO: Drop into another item?
 						component.loadUrl(url);
 
@@ -286,7 +287,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						}
 						QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
-						if (component.isError() || !qml) qWarning() << component.errors() << incubator.errors();
+						if (component.isError() || !qml) {qWarning() << component.errors() << incubator.errors(); qApp->quit();}
 						ui->designWidget->rootContext()->setContextProperty(qmlContext(qml)->nameForObject(qml), qml);
 						qml->setParentItem(m_RootItem);
 						qml->setPosition(qml->mapFromItem(m_RootItem, dropEvent->pos()));

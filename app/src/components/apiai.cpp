@@ -103,6 +103,7 @@ void ApiAi::speak(const QString& text)
 	auto manager = new QNetworkAccessManager;
 	auto reply = manager->get(http);
 
+	connect(reply, SIGNAL(sslErrors(QList<QSslError>)), reply, SLOT(ignoreSslErrors()));
 	connect(reply, static_cast<void(QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
 			[](QNetworkReply::NetworkError code) {
 		qWarning() << "ApiAi::speak() :" << code;

@@ -102,5 +102,10 @@
     "TextReader" :
     {
         "toolUrl" : "qrc:/resources/tools/TextReader.zip"
+    },
+
+    "WebSurfer" :
+    {
+        "toolUrl" : "qrc:/resources/tools/WebSurfer.zip"
     }
 }
