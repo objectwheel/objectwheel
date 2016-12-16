@@ -58,3 +58,4 @@
 * Add an about window with build numbers
 * Json communication between controls
 * Control movement history in json
+* Why Switch control crash if its id "switch"

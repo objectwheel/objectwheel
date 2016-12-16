@@ -7,7 +7,7 @@
 #include <QPair>
 #include <QMetaProperty>
 
-class QQuickItem;
+class QQmlContext;
 class QVBoxLayout;
 class QLineEdit;
 
@@ -26,6 +26,7 @@ class PropertiesWidget : public QWidget
 		QColor m_Color;
 		QObject* m_LastObject;
 		QLineEdit* m_SearchEdit;
+		QQmlContext* m_rootContext;
 
 	public:
 		explicit PropertiesWidget(QWidget *parent = 0);
@@ -33,15 +34,17 @@ class PropertiesWidget : public QWidget
 
 		const QColor& color() const;
 		void setColor(const QColor& color);
+		void setRootContext(QQmlContext* const context);
 
 	protected:
-		void refreshListWidget();
+		void refreshListWidget(QObject* const selectedItem);
 		void showEvent(QShowEvent *event);
 		void fixItemsGeometry();
 
 	signals:
 		void listRefreshed();
 		void propertyChanged(const Property& property);
+		void idChanged(const QString& newId);
 
 	public slots:
 		inline void showBar() { m_ListWidget->showBar(); }

@@ -2,7 +2,8 @@
 #include <fit.h>
 #include <propertyitem.h>
 #include <switch.h>
-
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QHBoxLayout>
 #include <QtWidgets>
 
@@ -13,9 +14,18 @@ PropertyItem::PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidg
 	, m_Property(property)
 	, m_Valid(true)
 {
-	setObjectName("propertyItem");
+	setObjectName("propertyItem"); //for css
 	setStyleSheet(CSS::PropertyItem);
 	fillCup();
+}
+
+PropertyItem::PropertyItem(QObject* const selectedItem, QQmlContext* const context, QWidget *parent)
+	: QWidget(parent)
+	, m_Valid(true)
+{
+	setObjectName("propertyItem"); //for css
+	setStyleSheet(CSS::PropertyItem);
+	fillId(selectedItem, context);
 }
 
 const QPair<QMetaProperty, QObject*>& PropertyItem::property() const
@@ -27,6 +37,11 @@ void PropertyItem::applyValue(const QVariant& value)
 {
 	m_Property.second->setProperty(m_Property.first.name(), value);
 	emit valueApplied();
+}
+
+void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlContext* const context)
+{
+	context->setContextProperty(id, selectedItem);
 }
 
 void PropertyItem::fillCup()
@@ -225,6 +240,48 @@ void PropertyItem::fillCup()
 			break;
 		}
 	}
+}
+
+void PropertyItem::fillId(QObject* const selectedItem, QQmlContext* const context)
+{
+	QFont font;
+	font.setPixelSize(fit(13));
+
+	QLabel* label = new QLabel;
+	label->setText("Id:");
+	label->setFont(font);
+	label->setStyleSheet("color:white;");
+	label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setSpacing(0);
+	layout->setContentsMargins(fit(5), fit(5), fit(7), fit(10));
+	layout->addWidget(label);
+
+	QLineEdit* widget = new QLineEdit;
+	widget->setFont(font);
+	widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	widget->setStyleSheet(CSS::LineEdit);
+	widget->setFixedHeight(fit(30));
+	widget->setText(qmlContext(selectedItem)->nameForObject(selectedItem));
+	layout->addWidget(widget);
+	connect(widget,static_cast<void(QLineEdit::*)(const QString&)>(&QLineEdit::textChanged),[=](const QString& b){applyId(b,selectedItem,context);});
+
+	widget->setReadOnly(true);
+	QCheckBox* enabler = new QCheckBox;
+	connect(enabler, static_cast<void(QCheckBox::*)(int)>(&QCheckBox::stateChanged),[=](int checked){
+		if (checked == Qt::Unchecked) {
+			widget->setReadOnly(true);
+		} else if (checked == Qt::Checked) {
+			widget->setReadOnly(false);
+		}
+	});
+	QHBoxLayout* lay = new QHBoxLayout;
+	lay->setSpacing(fit(5));
+	lay->setContentsMargins(0, 0, 0, 0);
+	lay->addWidget(widget);
+	lay->addWidget(enabler);
+	layout->addLayout(lay);
 }
 
 bool PropertyItem::eventFilter( QObject * o, QEvent * e )

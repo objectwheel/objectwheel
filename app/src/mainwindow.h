@@ -49,15 +49,14 @@ class MainWindow : public QWidget
 		void resizeEvent(QResizeEvent *event);
 		void fixPosition(QQuickItem* const item);
 
-	signals:
-		void resized();
-		void selectionHided();
-		void selectionShowed(QObject* const selectedItem);
-
 	private slots:
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
 
+	signals:
+		void resized();
+		void selectionHided();
+		void selectionShowed(QObject* const selectedItem);
 };
 
 #endif // MAINWINDOW_H

@@ -72,12 +72,10 @@ void MainWindow::SetupGui()
 	/* Re-move ticks when tracked item resized */
 	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RotatorTick, &RotatorTick::FixCoord);
-	//	connect(m_ResizerTick, &ResizerTick::ItemResized, [&] {ui->propertiesWidget->refreshList(m_ResizerTick->TrackedItem());});
 
 	/* Re-move ticks when tracked item rotated */
 	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_ResizerTick, &ResizerTick::FixCoord);
-//	connect(m_RotatorTick, &RotatorTick::ItemRotated, [&] {ui->propertiesWidget->refreshList(m_RotatorTick->TrackedItem());});
 
 	/* Hide ticks when editButton clicked */
 	connect(ui->editButton, &QPushButton::clicked, m_ResizerTick, &ResizerTick::hide);
@@ -194,6 +192,8 @@ void MainWindow::SetupGui()
 	leftMenuLayout->addWidget(leftToolbar);
 	leftMenuLayout->addWidget(leftContainer);
 	m_LeftMenu->attachWidget(leftMenuWidget);
+
+	ui->propertiesWidget->setRootContext(ui->designWidget->rootContext());
 }
 
 
@@ -275,18 +275,19 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					/* Handled drops coming from toolbox */
 					if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
 					{
+						auto url = dropEvent->mimeData()->urls().at(0);
 						QQmlComponent component(ui->designWidget->engine()); //TODO: Drop into another item?
-						component.loadUrl(dropEvent->mimeData()->urls().at(0));
+						component.loadUrl(url);
 
 						QQmlIncubator incubator;
 						component.create(incubator, ui->designWidget->rootContext());
 						while (!incubator.isReady()) {
-							QApplication::processEvents();
+							QApplication::processEvents(QEventLoop::AllEvents, 50);
 						}
 						QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
-						if (component.isError()) qWarning() << component.errors();
-						ui->designWidget->rootContext()->setContextProperty(qml->objectName(), qml);
+						if (component.isError() || !qml) qWarning() << component.errors() << incubator.errors();
+						ui->designWidget->rootContext()->setContextProperty(qmlContext(qml)->nameForObject(qml), qml);
 						qml->setParentItem(m_RootItem);
 						qml->setPosition(qml->mapFromItem(m_RootItem, dropEvent->pos()));
 						qml->setClip(true); // Even if it's not true

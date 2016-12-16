@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QGraphicsDropShadowEffect>
+#include <QQmlContext>
 
 using namespace Fit;
 
@@ -256,6 +257,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 	, m_Color(QColor("#566573"))
 	, m_LastObject(nullptr)
 	, m_SearchEdit(nullptr)
+	, m_rootContext(nullptr)
 {
 	setAutoFillBackground(true);
 	QPalette p(palette());
@@ -339,6 +341,11 @@ void PropertiesWidget::setColor(const QColor& color)
 	setPalette(p);
 }
 
+void PropertiesWidget::setRootContext(QQmlContext* const context)
+{
+	m_rootContext = context;
+}
+
 void PropertiesWidget::refreshList(QObject* const selectedItem, const QString& filter)
 {
 	clearList();
@@ -358,7 +365,7 @@ void PropertiesWidget::refreshList(QObject* const selectedItem, const QString& f
 	}
 
 	/* Update list widget */
-	refreshListWidget();
+	refreshListWidget(selectedItem);
 
 	setEnabled(true);
 
@@ -376,8 +383,26 @@ void PropertiesWidget::clearList()
 	m_LastObject = nullptr;
 }
 
-void PropertiesWidget::refreshListWidget()
+void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
 {
+	QListWidgetItem* item = new QListWidgetItem;
+	PropertyItem* propertyItem = new PropertyItem(selectedItem, m_rootContext);
+	if (!propertyItem->isValid()) {
+		delete item;
+		propertyItem->deleteLater();
+		return;
+	}
+	connect(propertyItem, &PropertyItem::valueApplied, [&] {
+		emit idChanged(qmlContext(selectedItem)->nameForObject(selectedItem));
+	});
+	propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
+	propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
+	item->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
+	m_ListWidget->addItem(item);
+	m_ListWidget->setItemWidget(item, propertyItem);
+
+	// ***
+
 	for (auto property : m_Properties) {
 		QListWidgetItem* item = new QListWidgetItem;
 		PropertyItem* propertyItem = new PropertyItem(property);
