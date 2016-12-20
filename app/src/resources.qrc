@@ -33,7 +33,6 @@
         <file>resources/fonts/TitilliumWeb-Regular.ttf</file>
         <file>resources/images/plus.png</file>
         <file>resources/images/minus.png</file>
-        <file>resources/tools/WikipediaSurfer.zip</file>
         <file>resources/tools/Thermometer.zip</file>
         <file>resources/tools/Compass.zip</file>
         <file>resources/tools/TextReader.zip</file>
@@ -42,5 +41,6 @@
         <file>resources/images/propertiesbutton.png</file>
         <file>resources/images/propertiesbuttonfilled.png</file>
         <file>resources/tools/WebSurfer.zip</file>
+        <file>resources/tools/SpeakSurf.zip</file>
     </qresource>
 </RCC>

@@ -282,12 +282,12 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 						QQmlIncubator incubator;
 						component.create(incubator, ui->designWidget->rootContext());
-						while (!incubator.isReady()) {
+						while (incubator.isLoading()) {
 							QApplication::processEvents(QEventLoop::AllEvents, 50);
 						}
 						QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
-						if (component.isError() || !qml) {qWarning() << component.errors() << incubator.errors(); qApp->quit();}
+						if (component.isError() || !qml) {qWarning() << component.errors(); qApp->quit();}
 						ui->designWidget->rootContext()->setContextProperty(qmlContext(qml)->nameForObject(qml), qml);
 						qml->setParentItem(m_RootItem);
 						qml->setPosition(qml->mapFromItem(m_RootItem, dropEvent->pos()));

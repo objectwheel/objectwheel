@@ -1,10 +1,13 @@
 #include <audiorecorder.h>
 #include <QIODevice>
+#include <QDataStream>
+#include <QtEndian>
 
 AudioRecorder::AudioRecorder(QObject* parent)
 	: QObject(parent)
 	, m_audioInput(nullptr)
 	, m_audioDevice(nullptr)
+	, m_level(0)
 {
 	QAudioFormat format;
 	format.setSampleRate(16000);
@@ -39,6 +42,11 @@ bool AudioRecorder::error() const
 	}
 }
 
+qreal AudioRecorder::level() const
+{
+	return m_level;
+}
+
 void AudioRecorder::record()
 {
 	m_audioDevice = m_audioInput->start();
@@ -71,10 +79,22 @@ void AudioRecorder::handleStateChanges(const QAudio::State state)
 	}
 }
 
-void AudioRecorder::handleBuffer() const
+void AudioRecorder::handleBuffer()
 {
 	if (m_audioDevice) {
-		emit readyBuffer(m_audioDevice->readAll());
+		auto data = m_audioDevice->readAll();
+		QDataStream stream(data);
+		qint16 value = 0;
+		qint16 max_value = 0;
+		while(!stream.atEnd()) {
+			stream.readRawData((char*)&value, sizeof(qint16));
+			value = qFromLittleEndian<qint16>(value);
+			max_value = qMax(value, max_value);
+		}
+		max_value = qMin(max_value, qint16(32767));
+		m_level = qreal(max_value) / 32768;
+		emit levelChanged();
+		emit readyBuffer(data);
 	}
 }
 

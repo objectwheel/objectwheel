@@ -19,9 +19,9 @@
         "toolUrl" : "qrc:/resources/tools/Rectangle.zip"
     },
 
-    "WikipediaSurfer" :
+    "SpeakSurf" :
     {
-        "toolUrl" : "qrc:/resources/tools/WikipediaSurfer.zip"
+        "toolUrl" : "qrc:/resources/tools/SpeakSurf.zip"
     },
 
     "BusyIndicator" :

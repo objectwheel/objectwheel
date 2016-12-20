@@ -53,7 +53,7 @@ void ApiAi::setLanguage(const QString& language)
 
 bool ApiAi::state() const
 {
-	if (m_webSocket->state() == QAbstractSocket::UnconnectedState || m_error) {
+	if (m_webSocket->state() != QAbstractSocket::ConnectedState || m_error) {
 		return false;
 	} else {
 		return true;
