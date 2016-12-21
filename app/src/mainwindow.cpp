@@ -140,7 +140,7 @@ void MainWindow::SetupGui()
 	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_RotatorTick, &RotatorTick::FixCoord);
 	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_ResizerTick, &ResizerTick::FixCoord);
 
-    ui->designWidget->rootContext()->setContextProperty("dpi", Fit::ratio());
+	ui->designWidget->rootContext()->setContextProperty("dpi", Fit::ratio());
 
 	/* Init Left Container */
 	QVariant toolboxVariant;
@@ -194,6 +194,9 @@ void MainWindow::SetupGui()
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
 	ui->propertiesWidget->setRootContext(ui->designWidget->rootContext());
+
+	ui->centralWidget->installEventFilter(this);
+	connect(this, SIGNAL(centralWidgetMoved()), this, SLOT(fixWebViewPositions()));
 }
 
 
@@ -263,7 +266,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 								pressedItem->setParentItem(itemAtDroppedPoint);
 								pressedItem->setPosition(mappedPoint);
 							}
-							fixPosition(pressedItem);
+							fixWebViewPosition(pressedItem);
 							ShowSelectionTools(pressedItem);
 						}
 					}
@@ -294,6 +297,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						qml->setClip(true); // Even if it's not true
 						fit(qml, Fit::WidthHeight);
 						m_Items << qml;
+						QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
 					}
 				}
 
@@ -373,9 +377,12 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 			default:
 				return false;
 		}
-	}
-	else
+	} else if (object == ui->centralWidget && event->type() == QEvent::Move) {
+		emit centralWidgetMoved();
+		return false;
+	} else {
 		return QWidget::eventFilter(object,event);
+	}
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)
@@ -385,12 +392,54 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 	emit resized();
 }
 
-void MainWindow::fixPosition(QQuickItem* const item)
+void MainWindow::fixWebViewPosition(QQuickItem* const item)
 {
-	item->setWidth(item->width() + 1);
-	QTimer::singleShot(0, [=]{
-		item->setWidth(item->width() - 1);
-	});
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WINPHONE)
+	// WARNING: All controls could only have one single webview
+	QQuickItem* view = nullptr;
+	for (auto ccitem : item->findChildren<QObject*>()) {
+		if (QString(ccitem->metaObject()->className()) == "QQuickWebView")
+			view = qobject_cast<QQuickItem*>(ccitem);
+	}
+	if (!view) return;
+
+	QWindow* main_window = nullptr;
+	for (auto window : QApplication::allWindows()) {
+		if (QString(window->metaObject()->className()) == "QWidgetWindow" &&
+			window->objectName() == "MainWindowWindow") {
+			main_window = window;
+		}
+	}
+	if (!main_window) return;
+
+	int count = 0;
+	for (auto citem : m_Items) {
+		if (citem == item) break;
+		for (auto ccitem : citem->findChildren<QObject*>()) {
+			if (QString(ccitem->metaObject()->className()) == "QQuickWebView")
+				count++;
+		}
+	}
+
+	int count_2 = 0;
+	for (auto child : main_window->children()) { //WARNING: We assume all child windows of QWidgetWindow are WebViews
+		auto window = qobject_cast<QWindow*>(child);
+		if (!window) continue;
+		if (count_2 == count) {
+			window->setPosition(view->parentItem()->mapToGlobal(view->position()).toPoint());
+			break;
+		}
+		count_2++;
+	}
+#else
+	Q_UNUSED(item)
+#endif
+}
+
+void MainWindow::fixWebViewPositions()
+{
+	for (auto item : m_Items)
+		fixWebViewPosition(item);
 }
 
 void MainWindow::DownloadTools(const QUrl& url)

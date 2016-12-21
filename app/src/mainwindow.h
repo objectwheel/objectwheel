@@ -47,14 +47,16 @@ class MainWindow : public QWidget
 		void HideSelectionTools();
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
-		void fixPosition(QQuickItem* const item);
+		void fixWebViewPosition(QQuickItem* const item);
 
 	private slots:
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
+		void fixWebViewPositions();
 
 	signals:
 		void resized();
+		void centralWidgetMoved();
 		void selectionHided();
 		void selectionShowed(QObject* const selectedItem);
 };
