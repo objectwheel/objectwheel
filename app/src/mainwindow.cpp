@@ -18,6 +18,10 @@
 #include <QtWidgets>
 #include <QtNetwork>
 
+#if defined(Q_OS_IOS)
+#include <ios.h>
+#endif
+
 using namespace Fit;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -377,9 +381,11 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 			default:
 				return false;
 		}
-	} else if (object == ui->centralWidget && event->type() == QEvent::Move) {
-		emit centralWidgetMoved();
-		return false;
+	} else if (object == ui->centralWidget) {
+		if (event->type() == QEvent::Move) {
+			emit centralWidgetMoved();
+			return false;
+		}
 	} else {
 		return QWidget::eventFilter(object,event);
 	}
@@ -395,6 +401,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 void MainWindow::fixWebViewPosition(QQuickItem* const item)
 {
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WINPHONE)
+	// FIXME: If object resized or rotated
 	// WARNING: All controls could only have one single webview
 	QQuickItem* view = nullptr;
 	for (auto ccitem : item->findChildren<QObject*>()) {
@@ -421,6 +428,9 @@ void MainWindow::fixWebViewPosition(QQuickItem* const item)
 		}
 	}
 
+#if defined(Q_OS_IOS)
+	IOS::fixCoordOfWebView(main_window, view, count);
+#else
 	int count_2 = 0;
 	for (auto child : main_window->children()) { //WARNING: We assume all child windows of QWidgetWindow are WebViews
 		auto window = qobject_cast<QWindow*>(child);
@@ -431,6 +441,8 @@ void MainWindow::fixWebViewPosition(QQuickItem* const item)
 		}
 		count_2++;
 	}
+#endif
+
 #else
 	Q_UNUSED(item)
 #endif

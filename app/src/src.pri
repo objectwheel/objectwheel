@@ -9,7 +9,7 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/propertyitem.h \
 							 $$PWD/css.h \
 							 $$PWD/switch.h \
-    $$PWD/container.h
+							 $$PWD/container.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -21,10 +21,9 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/propertyitem.cpp \
 							 $$PWD/css.cpp \
 							 $$PWD/switch.cpp \
-    $$PWD/container.cpp
+							 $$PWD/container.cpp
 
-FORMS                     += \
-    $$PWD/mainwindow.ui
+FORMS                     += $$PWD/mainwindow.ui
 
 RESOURCES                 += $$PWD/resources.qrc
 
@@ -39,3 +38,4 @@ ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 include($$PWD/ticks/ticks.pri)
 include($$PWD/components/components.pri)
+include($$PWD/platform_spesific/ios/ios.pri)
