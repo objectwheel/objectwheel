@@ -202,7 +202,9 @@ void MainWindow::SetupGui()
 	m_d->centralWidget->installEventFilter(this);
 
 	QTimer::singleShot(0, [=] {
+	#if !defined(Q_OS_IOS)
 		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
+	#endif
 		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 	});
 }
