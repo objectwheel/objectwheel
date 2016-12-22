@@ -1,6 +1,7 @@
 INCLUDEPATH               += $$PWD
 
 HEADERS                   += $$PWD/mainwindow.h \
+							 $$PWD/mainwindow_p.h \
                              $$PWD/listwidget.h \
                              $$PWD/covermenu.h \
                              $$PWD/titlebar.h \
@@ -23,7 +24,7 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/switch.cpp \
 							 $$PWD/container.cpp
 
-FORMS                     += $$PWD/mainwindow.ui
+FORMS                     +=
 
 RESOURCES                 += $$PWD/resources.qrc
 

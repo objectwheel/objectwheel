@@ -46,9 +46,10 @@ class AudioPlayer : public QObject
 		const QByteArray& data() const;
 
 	public slots:
-		void play();
-		void pause();
-		void stop();
+		void play(); // play from beginning
+		void pause(); // pause
+		void resume(); // resume
+		void stop(); // stop
 
 	signals:
 		void stateChanged() const;

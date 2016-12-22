@@ -3,10 +3,7 @@
 
 #include <QWidget>
 
-namespace Ui {
-	class MainWindow;
-}
-
+class MainWindowPrivate;
 class QQuickItem;
 class ResizerTick;
 class RotatorTick;
@@ -22,7 +19,7 @@ class MainWindow : public QWidget
 		typedef QList<QQuickItem*> QQuickItemList;
 
 	private:
-		Ui::MainWindow *ui;
+		MainWindowPrivate* m_d;
 		QString m_ToolsDir;
 		ResizerTick* m_ResizerTick;
 		RotatorTick* m_RotatorTick;

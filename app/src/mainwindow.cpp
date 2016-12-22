@@ -8,7 +8,7 @@
 #include <resizertick.h>
 #include <rotatortick.h>
 #include <removertick.h>
-#include <ui_mainwindow.h>
+#include <mainwindow_p.h>
 #include <container.h>
 #include <css.h>
 
@@ -26,7 +26,7 @@ using namespace Fit;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QWidget(parent)
-	, ui(new Ui::MainWindow)
+	, m_d(new MainWindowPrivate)
 	, m_ResizerTick(new ResizerTick)
 	, m_RotatorTick(new RotatorTick)
 	, m_RemoverTick(new RemoverTick)
@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_LeftMenu(new CoverMenu)
 	, m_RightMenu(new CoverMenu)
 {
-	ui->setupUi(this);
+	m_d->setupUi(this);
 	SetToolsDir();
 	SetupGui();
 	DownloadTools(QUrl::fromUserInput("qrc:/resources/tools/tools.json"));
@@ -43,11 +43,11 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::SetupGui()
 {
 	/* Scaling things */
-	fit(ui->editButton, Fit::WidthHeight, true);
-	fit(ui->clearButton, Fit::WidthHeight, true);
+	fit(m_d->editButton, Fit::WidthHeight, true);
+	fit(m_d->clearButton, Fit::WidthHeight, true);
 
-	ui->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
-	ui->buttonsLayout->setSpacing(fit(5));
+	m_d->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
+	m_d->buttonsLayout->setSpacing(fit(5));
 
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
@@ -55,18 +55,18 @@ void MainWindow::SetupGui()
 	m_RotatorTick->setIcon(QIcon(":/resources/images/rotate-icon.png"));
 
 	/* Assign design area's root object */
-	m_RootItem = ui->designWidget->rootObject();
+	m_RootItem = m_d->designWidget->rootObject();
 
 	/* Toolbox stylizing */
-	ui->toolboxWidget->setIconSize(fit({30, 30}));
+	m_d->toolboxWidget->setIconSize(fit({30, 30}));
 
 	/* Start filtering design area */
-	ui->designWidget->installEventFilter(this);
+	m_d->designWidget->installEventFilter(this);
 
 	/* Hide ticks when tracked item removed */
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
-	connect(m_RemoverTick, &RemoverTick::ItemRemoved, ui->propertiesWidget, &PropertiesWidget::clearList);
+	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
 
 	/* Remove deleted items from internal item list */
 	connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=] (QQuickItem* item) {
@@ -82,78 +82,78 @@ void MainWindow::SetupGui()
 	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_ResizerTick, &ResizerTick::FixCoord);
 
 	/* Hide ticks when editButton clicked */
-	connect(ui->editButton, &QPushButton::clicked, m_ResizerTick, &ResizerTick::hide);
-	connect(ui->editButton, &QPushButton::clicked, m_RemoverTick, &RemoverTick::hide);
-	connect(ui->editButton, &QPushButton::clicked, m_RotatorTick, &RotatorTick::hide);
+	connect(m_d->editButton, &QPushButton::clicked, m_ResizerTick, &ResizerTick::hide);
+	connect(m_d->editButton, &QPushButton::clicked, m_RemoverTick, &RemoverTick::hide);
+	connect(m_d->editButton, &QPushButton::clicked, m_RotatorTick, &RotatorTick::hide);
 
 	/* Enable/Disable other controls when editButton clicked */
-	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->toolboxWidget->setEnabled(!checked);});
-	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->propertiesWidget->setEnabled(checked);});
-	connect(ui->editButton, &QPushButton::toggled, [this](bool checked) {ui->clearButton->setEnabled(!checked);});
+	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->toolboxWidget->setEnabled(!checked);});
+	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->propertiesWidget->setEnabled(checked);});
+	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->clearButton->setEnabled(!checked);});
 
 	/* Set ticks' Parents and hide ticks */
-	m_ResizerTick->setParent(ui->designWidget);
-	m_RemoverTick->setParent(ui->designWidget);
-	m_RotatorTick->setParent(ui->designWidget);
+	m_ResizerTick->setParent(m_d->designWidget);
+	m_RemoverTick->setParent(m_d->designWidget);
+	m_RotatorTick->setParent(m_d->designWidget);
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
 	m_RotatorTick->hide();
 
 	/* Add Tool Menu */
-	m_LeftMenu->setCoverWidget(ui->centralWidget);
+	m_LeftMenu->setCoverWidget(m_d->centralWidget);
 	m_LeftMenu->setCoverSide(CoverMenu::FromLeft);
 	connect(this,SIGNAL(resized()),m_LeftMenu,SLOT(hide()));
-	connect(this,&MainWindow::resized, [this] { ui->titleBar->setMenuChecked(false); });
+	connect(this,&MainWindow::resized, [this] { m_d->titleBar->setMenuChecked(false); });
 
 	/* Add Properties Menu */
-	m_RightMenu->setCoverWidget(ui->centralWidget);
+	m_RightMenu->setCoverWidget(m_d->centralWidget);
 	m_RightMenu->setCoverSide(CoverMenu::FromRight);
 	connect(this,SIGNAL(resized()),m_RightMenu,SLOT(hide()));
-	connect(this,&MainWindow::resized, [this] { ui->titleBar->setSettingsChecked(false); });
+	connect(this,&MainWindow::resized, [this] { m_d->titleBar->setSettingsChecked(false); });
 
 	/* Add Title Bar */
-	fit(ui->titleBar, Fit::Height, true);
-	ui->titleBar->setText("Studio");
-	ui->titleBar->setColor("#2196f3");
-	ui->titleBar->setShadowColor("#e0e4e7");
-	connect(ui->titleBar, SIGNAL(MenuToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
-	connect(ui->titleBar, SIGNAL(SettingsToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
-	connect(m_LeftMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setMenuChecked(bool)));
-	connect(m_RightMenu, SIGNAL(toggled(bool)), ui->titleBar, SLOT(setSettingsChecked(bool)));
+	fit(m_d->titleBar, Fit::Height, true);
+	m_d->titleBar->setText("Studio");
+	m_d->titleBar->setColor("#2196f3");
+	m_d->titleBar->setShadowColor("#e0e4e7");
+	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
+	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
+	connect(m_LeftMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setMenuChecked(bool)));
+	connect(m_RightMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setSettingsChecked(bool)));
 
 	/* Prepare Properties Widget */
-	connect(this, SIGNAL(selectionShowed(QObject*const)), ui->propertiesWidget, SLOT(refreshList(QObject*const)));
-	connect(this, &MainWindow::selectionHided, [this] { ui->propertiesWidget->setDisabled(true); });
+	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
+	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
 
 	/* Pop-up toolbox widget's scrollbar */
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->toolboxWidget->showBar(); });
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) ui->propertiesWidget->showBar(); });
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxWidget->showBar(); });
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar(); });
 
 	/* Set flat buttons' colors*/
-	ui->editButton->setColor(QColor("#2196f3"));
-	ui->editButton->setCheckedColor(QColor("#72b240"));
-	ui->editButton->setTextColor(Qt::white);
-	ui->editButton->setCheckedTextColor(QColor("#444444"));
-	ui->clearButton->setColor(QColor("#d95459"));
-	ui->clearButton->setDisabledColor(Qt::darkGray);
-	ui->clearButton->setDisabledTextColor(QColor("#444444"));
-	ui->clearButton->setTextColor(Qt::white);
+	m_d->editButton->setColor(QColor("#2196f3"));
+	m_d->editButton->setCheckedColor(QColor("#72b240"));
+	m_d->editButton->setTextColor(Qt::white);
+	m_d->editButton->setCheckedTextColor(QColor("#444444"));
+	m_d->clearButton->setColor(QColor("#d95459"));
+	m_d->clearButton->setDisabledColor(Qt::darkGray);
+	m_d->clearButton->setDisabledTextColor(QColor("#444444"));
+	m_d->clearButton->setTextColor(Qt::white);
 
 	/* Fix Coords of ticks when property changed */
-	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
-	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_RotatorTick, &RotatorTick::FixCoord);
-	connect(ui->propertiesWidget, &PropertiesWidget::propertyChanged, m_ResizerTick, &ResizerTick::FixCoord);
+	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
+	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RotatorTick, &RotatorTick::FixCoord);
+	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_ResizerTick, &ResizerTick::FixCoord);
 
-	ui->designWidget->rootContext()->setContextProperty("dpi", Fit::ratio());
+	m_d->designWidget->rootContext()->setContextProperty("dpi", Fit::ratio());
 
 	/* Init Left Container */
 	QVariant toolboxVariant;
-	toolboxVariant.setValue<QWidget*>(ui->toolboxWidget);
+	toolboxVariant.setValue<QWidget*>(m_d->toolboxWidget);
 	QVariant propertiesVariant;
-	propertiesVariant.setValue<QWidget*>(ui->propertiesWidget);
+	propertiesVariant.setValue<QWidget*>(m_d->propertiesWidget);
 	Container* leftContainer = new Container;
-	leftContainer->addWidget(ui->toolboxWidget);
-	leftContainer->addWidget(ui->propertiesWidget);
+	leftContainer->addWidget(m_d->toolboxWidget);
+	leftContainer->addWidget(m_d->propertiesWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	QToolBar* leftToolbar = new QToolBar;
 	leftToolbar->setStyleSheet(CSS::Toolbar);
@@ -197,17 +197,21 @@ void MainWindow::SetupGui()
 	leftMenuLayout->addWidget(leftContainer);
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
-	ui->propertiesWidget->setRootContext(ui->designWidget->rootContext());
+	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
 
-	ui->centralWidget->installEventFilter(this);
-	connect(this, SIGNAL(centralWidgetMoved()), this, SLOT(fixWebViewPositions()));
+	m_d->centralWidget->installEventFilter(this);
+
+	QTimer::singleShot(0, [=] {
+		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
+		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+	});
 }
 
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
 	/* Handle events which are happening on design area */
-	if (object == ui->designWidget)
+	if (object == m_d->designWidget)
 	{
 		/* Design area's events' shared variables */
 		static QPoint dragStartPoint;
@@ -236,7 +240,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
 
 				/* Edit mode things */
-				if (ui->editButton->isChecked())
+				if (m_d->editButton->isChecked())
 				{
 
 					if (nullptr != pressedItem)
@@ -283,19 +287,19 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
 					{
 						auto url = dropEvent->mimeData()->urls().at(0);
-						ui->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
-						QQmlComponent component(ui->designWidget->engine()); //TODO: Drop into another item?
+//						 m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+						QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
 						component.loadUrl(url);
 
 						QQmlIncubator incubator;
-						component.create(incubator, ui->designWidget->rootContext());
+						component.create(incubator, m_d->designWidget->rootContext());
 						while (incubator.isLoading()) {
 							QApplication::processEvents(QEventLoop::AllEvents, 50);
 						}
 						QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
 						if (component.isError() || !qml) {qWarning() << component.errors(); qApp->quit();}
-						ui->designWidget->rootContext()->setContextProperty(qmlContext(qml)->nameForObject(qml), qml);
+						m_d->designWidget->rootContext()->setContextProperty(qmlContext(qml)->nameForObject(qml), qml);
 						qml->setParentItem(m_RootItem);
 						qml->setPosition(qml->mapFromItem(m_RootItem, dropEvent->pos()));
 						qml->setClip(true); // Even if it's not true
@@ -313,7 +317,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 
 				/* Edit mode things */
-				if (ui->editButton->isChecked())
+				if (m_d->editButton->isChecked())
 				{
 					/* Get deepest item under the pressed point */
 					pressedItem = GetDeepestDesignItemOnPoint(mouseEvent->pos());
@@ -343,7 +347,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 
 				/* Edit mode things */
-				if (ui->editButton->isChecked())
+				if (m_d->editButton->isChecked())
 				{
 					/* Made Drags from design area */
 					if (nullptr != pressedItem)
@@ -381,19 +385,20 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 			default:
 				return false;
 		}
-	} else if (object == ui->centralWidget) {
+	} else if (object == m_d->centralWidget) {
 		if (event->type() == QEvent::Move) {
-			emit centralWidgetMoved();
+			fixWebViewPositions();
 			return false;
 		}
 	} else {
 		return QWidget::eventFilter(object,event);
 	}
+	return false;
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-	ui->centralWidget->setGeometry(0, 0, width(), height());
+	m_d->centralWidget->setGeometry(0, 0, width(), height());
 	QWidget::resizeEvent(event);
 	emit resized();
 }
@@ -437,6 +442,7 @@ void MainWindow::fixWebViewPosition(QQuickItem* const item)
 		if (!window) continue;
 		if (count_2 == count) {
 			window->setPosition(view->parentItem()->mapToGlobal(view->position()).toPoint());
+			QApplication::processEvents(QEventLoop::AllEvents);
 			break;
 		}
 		count_2++;
@@ -518,8 +524,8 @@ void MainWindow::AddTool(const QString& name)
 	QList<QUrl> urls;
 	QListWidgetItem* item = new QListWidgetItem(QIcon(m_ToolsDir + "/" + name + "/icon.png"), name);
 	urls << QUrl::fromLocalFile(m_ToolsDir + "/" + name + "/main.qml");
-	ui->toolboxWidget->addItem(item);
-	ui->toolboxWidget->AddUrls(item,urls);
+	m_d->toolboxWidget->addItem(item);
+	m_d->toolboxWidget->AddUrls(item,urls);
 }
 
 bool MainWindow::CheckTools(const QJsonObject& toolsObject) const
@@ -644,9 +650,9 @@ void MainWindow::on_clearButton_clicked()
 void MainWindow::on_editButton_clicked()
 {
 	for (auto item : m_Items) {
-		item->setEnabled(!ui->editButton->isChecked());
+		item->setEnabled(!m_d->editButton->isChecked());
 	}
-	ui->propertiesWidget->clearList();
+	m_d->propertiesWidget->clearList();
 }
 
 void MainWindow::SetToolsDir()
@@ -660,7 +666,7 @@ void MainWindow::SetToolsDir()
 
 MainWindow::~MainWindow()
 {
-	delete ui;
+	delete m_d;
 }
 
 // TODO: Pop-up loading screen

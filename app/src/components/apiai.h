@@ -23,6 +23,7 @@ class ApiAi : public QObject
 
 	public:
 		explicit ApiAi(QObject *parent = 0);
+		~ApiAi();
 		const QString& token() const;
 		void setToken(const QString& token);
 		const QString& language() const;
@@ -33,14 +34,12 @@ class ApiAi : public QObject
 	public slots:
 		void open();
 		void send(const QByteArray& data);
-		void speak(const QString& text);
 		void flush();
 		void close();
 
 	signals:
 		void stateChanged() const;
 		void readyResponse(const QString& response) const;
-		void readySpeak(const QByteArray& data) const;
 
 	private slots:
 		void handleError(QAbstractSocket::SocketError error);

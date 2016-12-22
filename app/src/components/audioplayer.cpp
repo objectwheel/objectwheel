@@ -151,6 +151,13 @@ void AudioPlayer::pause()
 	}
 }
 
+void AudioPlayer::resume()
+{
+	if (m_audioOutput) {
+		m_audioOutput->resume();
+	}
+}
+
 void AudioPlayer::stop()
 {
 	if (m_audioOutput) {

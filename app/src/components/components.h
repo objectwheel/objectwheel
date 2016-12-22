@@ -4,6 +4,7 @@
 #include <apiai.h>
 #include <audiorecorder.h>
 #include <audioplayer.h>
+#include <aispeak.h>
 
 class Components
 {
