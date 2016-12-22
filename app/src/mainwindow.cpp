@@ -54,9 +54,6 @@ void MainWindow::SetupGui()
 	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
 	m_RotatorTick->setIcon(QIcon(":/resources/images/rotate-icon.png"));
 
-	/* Assign design area's root object */
-	m_RootItem = m_d->designWidget->rootObject();
-
 	/* Toolbox stylizing */
 	m_d->toolboxWidget->setIconSize(fit({30, 30}));
 
@@ -202,10 +199,12 @@ void MainWindow::SetupGui()
 	m_d->centralWidget->installEventFilter(this);
 
 	QTimer::singleShot(0, [=] {
-	#if !defined(Q_OS_IOS)
+	#if !defined(Q_OS_DARWIN)
 		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
 	#endif
 		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+		/* Assign design area's root object */
+		m_RootItem = m_d->designWidget->rootObject();
 	});
 }
 
@@ -278,6 +277,8 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 							}
 							fixWebViewPosition(pressedItem);
 							ShowSelectionTools(pressedItem);
+							event->accept();
+							return true;
 						}
 					}
 				}
@@ -308,6 +309,8 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						fit(qml, Fit::WidthHeight);
 						m_Items << qml;
 						QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
+						event->accept();
+						return true;
 					}
 				}
 
@@ -373,9 +376,9 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						drag->setHotSpot(diffPoint.toPoint());
 
 						QSharedPointer<QQuickItemGrabResult> result = pressedItem->grabToImage(); // FIXME: On IOS
-						connect(result.data(), &QQuickItemGrabResult::ready, this, [drag, result]
+						connect(result.data(), &QQuickItemGrabResult::ready, this, [=]
 						{
-							drag->setPixmap(QPixmap::fromImage(result.data()->image()));
+							drag->setPixmap(QPixmap::fromImage(result->image()));
 							drag->exec();
 						});
 					}
