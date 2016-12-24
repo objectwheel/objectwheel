@@ -10,7 +10,9 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/propertyitem.h \
 							 $$PWD/css.h \
 							 $$PWD/switch.h \
-							 $$PWD/container.h
+							 $$PWD/container.h \
+							 $$PWD/bindingwidget.h \
+    $$PWD/lineedit.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -22,9 +24,9 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/propertyitem.cpp \
 							 $$PWD/css.cpp \
 							 $$PWD/switch.cpp \
-							 $$PWD/container.cpp
-
-FORMS                     +=
+							 $$PWD/container.cpp \
+							 $$PWD/bindingwidget.cpp \
+    $$PWD/lineedit.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

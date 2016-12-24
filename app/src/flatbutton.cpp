@@ -29,12 +29,24 @@ FlatButton::FlatButton(QWidget *parent)
 	, m_DisabledTextColor("#444444")
 	, m_CheckedTextColor(Qt::white)
 	, m_Shadow(new QGraphicsDropShadowEffect)
+	, m_Radius(fit(4))
 {
-	m_Shadow->setBlurRadius(fit(5));
+	m_Shadow->setBlurRadius(fit(3));
 	m_Shadow->setOffset(0,fit(2));
-	m_Shadow->setColor(QColor(0, 0, 0, 100));
+	m_Shadow->setColor(QColor(0, 0, 0, 70));
 	setGraphicsEffect(m_Shadow);
 
+	applyTheme();
+}
+
+int FlatButton::radius() const
+{
+	return m_Radius;
+}
+
+void FlatButton::setRadius(int value)
+{
+	m_Radius = value;
 	applyTheme();
 }
 
@@ -110,7 +122,7 @@ void FlatButton::applyTheme()
 				m_Color.green() * 0.75 + QColor(Qt::black).green() * 0.25,
 				m_Color.blue() * 0.75 + QColor(Qt::black).blue() * 0.25, 255);
 
-	setStyleSheet(QString(STYLE_SHEET).arg(fit(4))
+	setStyleSheet(QString(STYLE_SHEET).arg(m_Radius)
 				  .arg(m_TextColor.red()).arg(m_TextColor.green()).arg(m_TextColor.blue())
 				  .arg(m_Color.red()).arg(m_Color.green()).arg(m_Color.blue())
 				  .arg(mix.red()).arg(mix.green()).arg(mix.blue())

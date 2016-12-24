@@ -17,6 +17,8 @@ class CSS
 		static QString Toolbar;
 		static QString ToolboxButton;
 		static QString PropertiesButton;
+		static QString BindingButton;
+		static QString BindingListWidget;
 };
 
 #endif // CSS_H

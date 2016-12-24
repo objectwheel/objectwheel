@@ -13,8 +13,8 @@ Switch::Switch(QWidget *parent)
 	, m_indicatorWidth(height() - 2.0 * fit(DIFF))
 	, m_shifterTimer(new QTimer(this))
 	, m_indicatorColor(Qt::white)
-	, m_activeColor("#98d367")
-	, m_passiveColor("#ed5f55")
+	, m_activeColor("#1e8145")
+	, m_passiveColor("#c03638")
 {
 	setCheckable(true);
 	m_shifterTimer->setInterval(10);

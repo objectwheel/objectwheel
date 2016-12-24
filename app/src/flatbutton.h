@@ -17,6 +17,7 @@ class FlatButton : public QPushButton
 		QColor m_DisabledTextColor;
 		QColor m_CheckedTextColor;
 		QGraphicsDropShadowEffect* m_Shadow;
+		int m_Radius;
 
 	public:
 		explicit FlatButton(QWidget *parent = 0);
@@ -34,6 +35,9 @@ class FlatButton : public QPushButton
 		void setDisabledTextColor(const QColor& TextColor);
 		const QColor& CheckedTextColor() const;
 		void setCheckedTextColor(const QColor& TextColor);
+
+		int radius() const;
+		void setRadius(int value);
 
 	protected:
 		void applyTheme();

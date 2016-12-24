@@ -64,6 +64,7 @@ void MainWindow::SetupGui()
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
+	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
 
 	/* Remove deleted items from internal item list */
 	connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=] (QQuickItem* item) {
@@ -86,6 +87,7 @@ void MainWindow::SetupGui()
 	/* Enable/Disable other controls when editButton clicked */
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->toolboxWidget->setEnabled(!checked);});
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->propertiesWidget->setEnabled(checked);});
+	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->bindingWidget->setEnabled(checked);});
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->clearButton->setEnabled(!checked);});
 
 	/* Set ticks' Parents and hide ticks */
@@ -111,7 +113,7 @@ void MainWindow::SetupGui()
 	/* Add Title Bar */
 	fit(m_d->titleBar, Fit::Height, true);
 	m_d->titleBar->setText("Studio");
-	m_d->titleBar->setColor("#2196f3");
+	m_d->titleBar->setColor("#2b5796");
 	m_d->titleBar->setShadowColor("#e0e4e7");
 	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
 	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
@@ -121,17 +123,19 @@ void MainWindow::SetupGui()
 	/* Prepare Properties Widget */
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
 	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
+	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(refreshList(QObject*const)));
+	connect(this, &MainWindow::selectionHided, [this] { m_d->bindingWidget->setDisabled(true); });
 
 	/* Pop-up toolbox widget's scrollbar */
 	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxWidget->showBar(); });
 	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar(); });
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
 
 	/* Set flat buttons' colors*/
-	m_d->editButton->setColor(QColor("#2196f3"));
-	m_d->editButton->setCheckedColor(QColor("#72b240"));
+	m_d->editButton->setColor(QColor("#2b5796"));
+	m_d->editButton->setCheckedColor(QColor("#1e8145"));
 	m_d->editButton->setTextColor(Qt::white);
-	m_d->editButton->setCheckedTextColor(QColor("#444444"));
-	m_d->clearButton->setColor(QColor("#d95459"));
+	m_d->clearButton->setColor(QColor("#c03638"));
 	m_d->clearButton->setDisabledColor(Qt::darkGray);
 	m_d->clearButton->setDisabledTextColor(QColor("#444444"));
 	m_d->clearButton->setTextColor(Qt::white);
@@ -148,10 +152,14 @@ void MainWindow::SetupGui()
 	toolboxVariant.setValue<QWidget*>(m_d->toolboxWidget);
 	QVariant propertiesVariant;
 	propertiesVariant.setValue<QWidget*>(m_d->propertiesWidget);
+	QVariant bindingVariant;
+	bindingVariant.setValue<QWidget*>(m_d->bindingWidget);
 	Container* leftContainer = new Container;
 	leftContainer->addWidget(m_d->toolboxWidget);
 	leftContainer->addWidget(m_d->propertiesWidget);
+	leftContainer->addWidget(m_d->bindingWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 	QToolBar* leftToolbar = new QToolBar;
 	leftToolbar->setStyleSheet(CSS::Toolbar);
 	leftToolbar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
@@ -163,6 +171,7 @@ void MainWindow::SetupGui()
 	toolbarShadowEffect->setOffset(0, fit(4));
 	toolbarShadowEffect->setColor(QColor(0, 0, 0, 50));
 	leftToolbar->setGraphicsEffect(toolbarShadowEffect);
+
 	QRadioButton* toolboxButton = new QRadioButton;
 	toolboxButton->setStyleSheet(CSS::ToolboxButton);
 	toolboxButton->setCheckable(true);
@@ -173,6 +182,8 @@ void MainWindow::SetupGui()
 	toolboxButtonAction->setCheckable(true);
 	leftToolbar->addAction(toolboxButtonAction);
 	connect(toolboxButton, SIGNAL(clicked(bool)), toolboxButtonAction, SLOT(trigger()));
+	connect(toolboxButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+
 	QRadioButton* propertiesButton = new QRadioButton;
 	propertiesButton->setStyleSheet(CSS::PropertiesButton);
 	propertiesButton->setCheckable(true);
@@ -182,11 +193,24 @@ void MainWindow::SetupGui()
 	propertiesButtonAction->setCheckable(true);
 	leftToolbar->addAction(propertiesButtonAction);
 	connect(propertiesButton, SIGNAL(clicked(bool)), propertiesButtonAction, SLOT(trigger()));
-	connect(toolboxButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 	connect(propertiesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+
+
+	QRadioButton* bindingButton = new QRadioButton;
+	bindingButton->setStyleSheet(CSS::BindingButton);
+	bindingButton->setCheckable(true);
+	QWidgetAction* bindingButtonAction = new QWidgetAction(this);
+	bindingButtonAction->setDefaultWidget(bindingButton);
+	bindingButtonAction->setData(bindingVariant);
+	bindingButtonAction->setCheckable(true);
+	leftToolbar->addAction(bindingButtonAction);
+	connect(bindingButton, SIGNAL(clicked(bool)), bindingButtonAction, SLOT(trigger()));
+	connect(bindingButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
 	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+
 	QVBoxLayout* leftMenuLayout = new QVBoxLayout(leftMenuWidget);
 	leftMenuLayout->setContentsMargins(0, 0, 0, 0);
 	leftMenuLayout->setSpacing(fit(8));
@@ -658,6 +682,7 @@ void MainWindow::on_editButton_clicked()
 		item->setEnabled(!m_d->editButton->isChecked());
 	}
 	m_d->propertiesWidget->clearList();
+	m_d->bindingWidget->clearList();
 }
 
 void MainWindow::SetToolsDir()

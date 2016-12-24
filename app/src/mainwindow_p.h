@@ -22,6 +22,7 @@
 #include <flatbutton.h>
 #include <listwidget.h>
 #include <propertieswidget.h>
+#include <bindingwidget.h>
 #include <titlebar.h>
 #include <QTimer>
 
@@ -30,17 +31,18 @@ QT_BEGIN_NAMESPACE
 class MainWindowPrivate
 {
 	public:
-		QWidget *centralWidget;
-		QVBoxLayout *verticalLayout;
-		TitleBar *titleBar;
-		QQuickWidget *designWidget;
-		QHBoxLayout *buttonsLayout;
-		QSpacerItem *horizontalSpacer;
-		FlatButton *editButton;
-		FlatButton *clearButton;
-		QSpacerItem *horizontalSpacer_2;
-		ListWidget *toolboxWidget;
-		PropertiesWidget *propertiesWidget;
+		QWidget* centralWidget;
+		QVBoxLayout* verticalLayout;
+		TitleBar* titleBar;
+		QQuickWidget* designWidget;
+		QHBoxLayout* buttonsLayout;
+		QSpacerItem* horizontalSpacer;
+		FlatButton* editButton;
+		FlatButton* clearButton;
+		QSpacerItem* horizontalSpacer_2;
+		ListWidget* toolboxWidget;
+		PropertiesWidget* propertiesWidget;
+		BindingWidget* bindingWidget;
 
 		void setupUi(QWidget *MainWindow)
 		{
@@ -94,6 +96,7 @@ class MainWindowPrivate
 			QIcon icon1;
 			icon1.addFile(QStringLiteral(":/resources/images/trash-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
 			clearButton->setIcon(icon1);
+
 			buttonsLayout->addWidget(clearButton);
 			horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 			buttonsLayout->addItem(horizontalSpacer_2);
@@ -120,12 +123,14 @@ class MainWindowPrivate
 			toolboxWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 			toolboxWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 			toolboxWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-			verticalLayout->addWidget(toolboxWidget);
 
 			propertiesWidget = new PropertiesWidget(centralWidget);
 			propertiesWidget->setObjectName(QStringLiteral("propertiesWidget"));
 			propertiesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-			verticalLayout->addWidget(propertiesWidget);
+
+			bindingWidget = new BindingWidget(centralWidget);
+			bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
+			bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
 			retranslateUi(MainWindow);
 

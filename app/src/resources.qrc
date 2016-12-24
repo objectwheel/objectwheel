@@ -28,9 +28,6 @@
         <file>resources/tools/StatusIndicator.zip</file>
         <file>resources/tools/ToggleButton.zip</file>
         <file>resources/tools/Tumbler.zip</file>
-        <file>resources/fonts/TitilliumWeb-Bold.ttf</file>
-        <file>resources/fonts/TitilliumWeb-Light.ttf</file>
-        <file>resources/fonts/TitilliumWeb-Regular.ttf</file>
         <file>resources/images/plus.png</file>
         <file>resources/images/minus.png</file>
         <file>resources/tools/Thermometer.zip</file>
@@ -42,5 +39,10 @@
         <file>resources/images/propertiesbuttonfilled.png</file>
         <file>resources/tools/WebSurfer.zip</file>
         <file>resources/tools/SpeakSurf.zip</file>
+        <file>resources/images/bindingbuttonfilled.png</file>
+        <file>resources/images/bindingbutton.png</file>
+        <file>resources/fonts/OpenSans-Regular.ttf</file>
+        <file>resources/fonts/OpenSans-Light.ttf</file>
+        <file>resources/fonts/OpenSans-Bold.ttf</file>
     </qresource>
 </RCC>
