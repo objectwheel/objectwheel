@@ -9,7 +9,7 @@
 
 class QQmlContext;
 class QVBoxLayout;
-class QLineEdit;
+class LineEdit;
 
 class PropertiesWidget : public QWidget
 {
@@ -25,7 +25,7 @@ class PropertiesWidget : public QWidget
 		QVBoxLayout* m_Layout;
 		QColor m_Color;
 		QObject* m_LastObject;
-		QLineEdit* m_SearchEdit;
+		LineEdit* m_SearchEdit;
 		QQmlContext* m_rootContext;
 
 	public:

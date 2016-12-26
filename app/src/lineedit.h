@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class LineEditPrivate;
+class QLineEdit;
 
 class LineEdit : public QWidget
 {
@@ -12,6 +13,11 @@ class LineEdit : public QWidget
 	public:
 		explicit LineEdit(QWidget* parent = 0);
 		void setIcon(const QIcon& icon);
+		void setPlaceholderText(const QString& text);
+		void setColor(const QColor& color);
+		void setText(const QString& text);
+		const QString text() const;
+		QLineEdit* lineEdit();
 		~LineEdit();
 
 	private:

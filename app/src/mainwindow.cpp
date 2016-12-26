@@ -48,7 +48,7 @@ void MainWindow::SetupGui()
 
 	m_d->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
 	m_d->buttonsLayout->setSpacing(fit(5));
-
+	m_d->bindingWidget->setItems(&m_Items);
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
 	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));

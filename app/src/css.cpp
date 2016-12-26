@@ -112,8 +112,18 @@ QRadioButton::indicator { \
 	border: none;\
 	border-radius: %2px;\
 } QListView::item:selected {\
-	background: #e0e4e7;\
+	background: white;\
 	color: black\
+}"
+
+#define CSS_COMBOBOX "\
+QComboBox {\
+	border: none;\
+	border-top-left-radius: %1px;\
+	border-bottom-left-radius: %1px\
+} QComboBox::drop-down {\
+	width:0px;\
+	height: 0px;\
 }"
 
 using namespace Fit;
@@ -126,6 +136,7 @@ QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
 QString CSS::BindingButton;
 QString CSS::BindingListWidget;
+QString CSS::ComboBox;
 
 void CSS::init()
 {
@@ -154,4 +165,6 @@ void CSS::init()
 	/* BindingListWidget */
 	BindingListWidget = QString(CSS_BINDING_LISTWIDGET).arg(fit(5)).arg(fit(2));
 
+	/* ComboBox */
+	ComboBox = QString(CSS_COMBOBOX).arg(fit(2));
 }

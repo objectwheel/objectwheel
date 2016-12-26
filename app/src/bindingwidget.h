@@ -13,17 +13,19 @@ class BindingWidget : public QWidget
 		friend class BindingWidgetPrivate;
 
 	public:
-		typedef QList<QQuickItem*> QQuickItemList;
 		explicit BindingWidget(QWidget *parent = 0);
 		~BindingWidget();
 
-		const QQuickItemList* items() const;
-		void setItems(const QQuickItemList* const items);
+		const QList<QQuickItem*>* items() const;
+		void setItems(const QList<QQuickItem*>* const items);
 
 	public slots:
 		void clearList();
-		void refreshList(QObject*const);
+		void refreshList(QObject* const);
 		void showBar();
+
+	protected slots:
+		void processBindings();
 
 	private:
 		BindingWidgetPrivate* m_d;

@@ -2,6 +2,7 @@
 #include <propertyitem.h>
 #include <fit.h>
 #include <listwidget.h>
+#include <lineedit.h>
 
 #include <QStyleOption>
 #include <QPainter>
@@ -11,6 +12,7 @@
 #include <QLineEdit>
 #include <QGraphicsDropShadowEffect>
 #include <QQmlContext>
+#include <QIcon>
 
 using namespace Fit;
 
@@ -277,49 +279,23 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 	m_Layout->setSpacing(fit(10));
 	m_Layout->setContentsMargins(fit(10), fit(5), fit(5), fit(10));
 
-	m_SearchEdit = new QLineEdit;
-	m_SearchEdit->setStyleSheet(QString("background:white;border:none; border-top-right-radius:%1px;"
-										"border-bottom-right-radius:%1px;padding-left:%1;").arg(fit(2)));
+
+	QPixmap pm;
+	pm.loadFromData(rawData, sizeof(rawData));
+	pm = pm.scaled(fit(30), fit(30), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	m_SearchEdit = new LineEdit;
 	m_SearchEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	m_SearchEdit->setPlaceholderText("Search");
 	m_SearchEdit->setFixedHeight(fit(30));
-	m_SearchEdit->setAlignment(Qt::AlignLeft);
-	connect(m_SearchEdit, static_cast<void(QLineEdit::*)(const QString &)>(&QLineEdit::textEdited), [=] (const QString& str){
+	m_SearchEdit->setIcon(QIcon(pm));
+	m_SearchEdit->setPlaceholderText("Search");
+	m_SearchEdit->show();
+	connect(m_SearchEdit->lineEdit(), (void(QLineEdit::*)(const QString&))(&QLineEdit::textEdited), [=] (const QString& str){
 		if (m_LastObject) {
 			refreshList(m_LastObject, str);
 		}
 	});
 
-	QGraphicsDropShadowEffect* shadowEffect = new QGraphicsDropShadowEffect;
-	shadowEffect->setBlurRadius(fit(7));
-	shadowEffect->setOffset(0, fit(4));
-	shadowEffect->setColor(QColor(0, 0, 0, 50));
-	m_SearchEdit->setGraphicsEffect(shadowEffect);
-
-	QPixmap pm;
-	pm.loadFromData(rawData, sizeof(rawData));
-	pm = pm.scaled(fit(30), fit(30), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-	QLabel* label = new QLabel;
-	label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	label->setFixedSize(fit(30), fit(30));
-	label->setStyleSheet(QString("background:#cccccc; border-top-left-radius:%1px;"
-								 "border-bottom-left-radius:%1px;").arg(fit(2)));
-	label->setPixmap(pm);
-
-	QGraphicsDropShadowEffect* shadowEffect2 = new QGraphicsDropShadowEffect;
-	shadowEffect2->setBlurRadius(fit(7));
-	shadowEffect2->setOffset(0, fit(4));
-	shadowEffect2->setColor(QColor(0, 0, 0, 50));
-	label->setGraphicsEffect(shadowEffect2);
-
-	QHBoxLayout* layout = new QHBoxLayout;
-	layout->setSpacing(0);
-	layout->addWidget(label);
-	layout->addWidget(m_SearchEdit);
-	layout->setContentsMargins(0, 0, fit(7), 0);
-
-	m_Layout->addLayout(layout);
+	m_Layout->addWidget(m_SearchEdit);
 	m_Layout->addWidget(m_ListWidget);
 }
 
@@ -351,7 +327,7 @@ void PropertiesWidget::refreshList(QObject* const selectedItem, const QString& f
 	clearList();
 
 	if (filter.isEmpty() && m_LastObject != selectedItem) {
-		m_SearchEdit->clear();
+		m_SearchEdit->lineEdit()->clear();
 	}
 
 	/* Get selected item's properties */

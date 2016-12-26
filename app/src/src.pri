@@ -12,7 +12,8 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/switch.h \
 							 $$PWD/container.h \
 							 $$PWD/bindingwidget.h \
-    $$PWD/lineedit.h
+    $$PWD/lineedit.h \
+    $$PWD/combobox.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -26,7 +27,8 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/switch.cpp \
 							 $$PWD/container.cpp \
 							 $$PWD/bindingwidget.cpp \
-    $$PWD/lineedit.cpp
+    $$PWD/lineedit.cpp \
+    $$PWD/combobox.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

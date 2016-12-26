@@ -44,5 +44,9 @@
         <file>resources/fonts/OpenSans-Regular.ttf</file>
         <file>resources/fonts/OpenSans-Light.ttf</file>
         <file>resources/fonts/OpenSans-Bold.ttf</file>
+        <file>resources/images/down-arrow.png</file>
+        <file>resources/images/plug-up.png</file>
+        <file>resources/images/plug-down.png</file>
+        <file>resources/images/item.png</file>
     </qresource>
 </RCC>
