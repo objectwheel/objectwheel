@@ -317,6 +317,16 @@ void PropertiesWidget::setColor(const QColor& color)
 	setPalette(p);
 }
 
+QList<QQuickItem*>* PropertiesWidget::itemSource() const
+{
+	return m_Items;
+}
+
+void PropertiesWidget::setItemSource(QList<QQuickItem*>* items)
+{
+	m_Items = items;
+}
+
 void PropertiesWidget::setRootContext(QQmlContext* const context)
 {
 	m_rootContext = context;
@@ -363,13 +373,14 @@ void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
 {
 	QListWidgetItem* item = new QListWidgetItem;
 	PropertyItem* propertyItem = new PropertyItem(selectedItem, m_rootContext);
+	propertyItem->setItemSource(m_Items);
 	if (!propertyItem->isValid()) {
 		delete item;
 		propertyItem->deleteLater();
 		return;
 	}
 	connect(propertyItem, &PropertyItem::valueApplied, [&] {
-		emit idChanged(qmlContext(selectedItem)->nameForObject(selectedItem));
+		emit idChanged(m_rootContext->nameForObject(selectedItem));
 	});
 	propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
 	propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
@@ -382,6 +393,7 @@ void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
 	for (auto property : m_Properties) {
 		QListWidgetItem* item = new QListWidgetItem;
 		PropertyItem* propertyItem = new PropertyItem(property);
+		propertyItem->setItemSource(m_Items);
 		if (!propertyItem->isValid()) {
 			delete item;
 			propertyItem->deleteLater();

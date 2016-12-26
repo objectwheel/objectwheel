@@ -48,7 +48,8 @@ void MainWindow::SetupGui()
 
 	m_d->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
 	m_d->buttonsLayout->setSpacing(fit(5));
-	m_d->bindingWidget->setItems(&m_Items);
+	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
+	m_d->bindingWidget->setItemSource(&m_Items);
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
 	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
@@ -65,6 +66,7 @@ void MainWindow::SetupGui()
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
+	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
 
 	/* Remove deleted items from internal item list */
 	connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=] (QQuickItem* item) {
@@ -87,7 +89,6 @@ void MainWindow::SetupGui()
 	/* Enable/Disable other controls when editButton clicked */
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->toolboxWidget->setEnabled(!checked);});
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->propertiesWidget->setEnabled(checked);});
-	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->bindingWidget->setEnabled(checked);});
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->clearButton->setEnabled(!checked);});
 
 	/* Set ticks' Parents and hide ticks */
@@ -123,8 +124,8 @@ void MainWindow::SetupGui()
 	/* Prepare Properties Widget */
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
 	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
-	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(refreshList(QObject*const)));
-	connect(this, &MainWindow::selectionHided, [this] { m_d->bindingWidget->setDisabled(true); });
+	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
+	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
 
 	/* Pop-up toolbox widget's scrollbar */
 	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxWidget->showBar(); });
@@ -219,6 +220,8 @@ void MainWindow::SetupGui()
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
 	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
+	m_d->propertiesWidget->setItemSource(&m_Items);
+	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
 
 	m_d->centralWidget->installEventFilter(this);
 
@@ -326,12 +329,24 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
 						if (component.isError() || !qml) {qWarning() << component.errors(); qApp->quit();}
-						m_d->designWidget->rootContext()->setContextProperty(qmlContext(qml)->nameForObject(qml), qml);
+
+						int count = 1;
+						QString componentName = qmlContext(qml)->nameForObject(qml);
+						for (int i=0; i<m_Items.size();i++) {
+							if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_Items[i])) ||
+								componentName == QString("dpi")) {
+								componentName += QString::number(count);
+								count++;
+								i = 0;
+							}
+						}
+						m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
 						qml->setParentItem(m_RootItem);
 						qml->setPosition(qml->mapFromItem(m_RootItem, dropEvent->pos()));
 						qml->setClip(true); // Even if it's not true
 						fit(qml, Fit::WidthHeight);
 						m_Items << qml;
+
 						QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
 						event->accept();
 						return true;
@@ -671,6 +686,7 @@ void MainWindow::HideSelectionTools()
 
 void MainWindow::on_clearButton_clicked()
 {
+	m_d->bindingWidget->clearAllBindings();
 	for (auto item : m_Items)
 		item->deleteLater();
 	m_Items.clear();

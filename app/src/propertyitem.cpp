@@ -28,6 +28,16 @@ PropertyItem::PropertyItem(QObject* const selectedItem, QQmlContext* const conte
 	fillId(selectedItem, context);
 }
 
+QList<QQuickItem*>* PropertyItem::itemSource() const
+{
+	return m_Items;
+}
+
+void PropertyItem::setItemSource(QList<QQuickItem*>* items)
+{
+	m_Items = items;
+}
+
 const QPair<QMetaProperty, QObject*>& PropertyItem::property() const
 {
 	return m_Property;
@@ -41,7 +51,18 @@ void PropertyItem::applyValue(const QVariant& value)
 
 void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlContext* const context)
 {
-	context->setContextProperty(id, selectedItem);
+	int count = 1;
+	QString componentName = id;
+	for (int i=0; i<m_Items->size();i++) {
+		if (componentName == QString(context->nameForObject((QObject*)(m_Items->at(i)))) ||
+			componentName == QString("dpi")) {
+			componentName += QString::number(count);
+			count++;
+			i = 0;
+		}
+	}
+	context->setContextProperty(context->nameForObject(selectedItem), 0);
+	context->setContextProperty(componentName, selectedItem);
 }
 
 void PropertyItem::fillCup()
@@ -263,7 +284,7 @@ void PropertyItem::fillId(QObject* const selectedItem, QQmlContext* const contex
 	widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	widget->setStyleSheet(CSS::LineEdit);
 	widget->setFixedHeight(fit(30));
-	widget->setText(qmlContext(selectedItem)->nameForObject(selectedItem));
+	widget->setText(context->nameForObject(selectedItem));
 	layout->addWidget(widget);
 	connect(widget,static_cast<void(QLineEdit::*)(const QString&)>(&QLineEdit::textChanged),[=](const QString& b){applyId(b,selectedItem,context);});
 

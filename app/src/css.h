@@ -19,7 +19,6 @@ class CSS
 		static QString PropertiesButton;
 		static QString BindingButton;
 		static QString BindingListWidget;
-		static QString ComboBox;
 };
 
 #endif // CSS_H

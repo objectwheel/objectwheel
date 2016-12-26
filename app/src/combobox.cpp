@@ -17,19 +17,19 @@
 #include <QString>
 
 #define CSS_COMBOBOX_LISTWIDGET \
-	"QListView {\
-background:#566573;border:none;\
-border-bottom-left-radius:%1px;\
-border-bottom-right-radius:%1px\
-	} QListView::item {\
-		  color:white;\
-border: none;\
-border-radius: %1px;\
-padding: %2px;\
-margin: %2px;\
+"QListView {\
+	background:#566573;border:none;\
+	border-bottom-left-radius:%1px;\
+	border-bottom-right-radius:%1px\
+} QListView::item {\
+	color:white;\
+	border: none;\
+	border-radius: %1px;\
+	padding: %2px;\
+	margin: %2px;\
 } QListView::item:selected {\
-					  background: white;\
-color: black\
+	background: white;\
+	color: black\
 }"
 
 using namespace Fit;
@@ -297,7 +297,7 @@ ComboBoxPrivate::ComboBoxPrivate(ComboBox* p)
 
 	itemListWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	itemListWidget.setFocusPolicy(Qt::NoFocus);
-	itemListWidget.setStyleSheet(QString(CSS_COMBOBOX_LISTWIDGET).arg(fit(2)).arg(2));
+	itemListWidget.setStyleSheet(QString(CSS_COMBOBOX_LISTWIDGET).arg(fit(4)).arg(2));
 	itemListWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	itemListWidget.setDragDropMode(QAbstractItemView::NoDragDrop);
 	itemListWidget.setSelectionBehavior(QAbstractItemView::SelectRows);

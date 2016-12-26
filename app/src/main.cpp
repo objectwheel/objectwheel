@@ -6,7 +6,7 @@
 #include <QFontDatabase>
 #include <QtWebView>
 
-#define PIXEL_SIZE 14
+#define PIXEL_SIZE 12
 #define REF_WIDTH 660
 #define REF_HEIGHT 400
 #define REF_DPI 102

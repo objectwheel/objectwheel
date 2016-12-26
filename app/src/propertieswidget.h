@@ -10,6 +10,7 @@
 class QQmlContext;
 class QVBoxLayout;
 class LineEdit;
+class QQuickItem;
 
 class PropertiesWidget : public QWidget
 {
@@ -27,6 +28,7 @@ class PropertiesWidget : public QWidget
 		QObject* m_LastObject;
 		LineEdit* m_SearchEdit;
 		QQmlContext* m_rootContext;
+		QList<QQuickItem*>* m_Items;
 
 	public:
 		explicit PropertiesWidget(QWidget *parent = 0);
@@ -35,6 +37,9 @@ class PropertiesWidget : public QWidget
 		const QColor& color() const;
 		void setColor(const QColor& color);
 		void setRootContext(QQmlContext* const context);
+
+		QList<QQuickItem*>* itemSource() const;
+		void setItemSource(QList<QQuickItem*>* ItemSource);
 
 	protected:
 		void refreshListWidget(QObject* const selectedItem);

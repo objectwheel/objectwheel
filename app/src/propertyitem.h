@@ -14,12 +14,14 @@ class PropertyItem : public QWidget
 	private:
 		QPair<QMetaProperty, QObject*> m_Property;
 		bool m_Valid;
-
+		QList<QQuickItem*>* m_Items;
 
 	public:
 		explicit PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidget *parent = 0);
 		explicit PropertyItem(QObject* const selectedItem, QQmlContext* const context, QWidget *parent = 0);
 		const QPair<QMetaProperty, QObject*>& property() const;
+		QList<QQuickItem*>* itemSource() const;
+		void setItemSource(QList<QQuickItem*>* ItemSource);
 		inline bool isValid() const { return m_Valid; }
 
 	protected:
