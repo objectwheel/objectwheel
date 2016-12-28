@@ -172,8 +172,8 @@ void ComboBox::paintEvent(QPaintEvent* event)
 
 	/**/
 	if (!m_d->icon.isNull()) {
-		painter.drawPixmap(m_d->indicatorRect, m_d->icon.pixmap(m_d->indicatorRect.size().toSize()),
-						   QRectF(0, 0, m_d->indicatorRect.width(), m_d->indicatorRect.height()));
+		QPixmap p(m_d->icon.pixmap(m_d->indicatorRect.size().toSize()));
+		painter.drawPixmap(m_d->indicatorRect.toRect(), p);
 	}
 
 	painter.restore();
