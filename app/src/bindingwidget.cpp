@@ -454,7 +454,6 @@ void BindingWidget::clearList()
 	m_d->targetPropertyCombobox.clear();
 	m_d->sourceItemCombobox.clear();
 	m_d->sourcePropertyCombobox.clear();
-	m_d->popupItemNameTextBox.setText("");
 	m_d->nameEdit.setText("");
 }
 
