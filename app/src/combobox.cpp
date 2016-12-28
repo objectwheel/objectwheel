@@ -16,7 +16,7 @@
 #include <listwidget.h>
 #include <QString>
 
-#define LIST_LEGHT 195
+#define LIST_LEGHT 90 //195
 
 #define CSS_COMBOBOX_LISTWIDGET \
 "QListView {\
