@@ -49,5 +49,6 @@
         <file>resources/images/plug-down.png</file>
         <file>resources/images/item.png</file>
         <file>resources/images/advanced.png</file>
+        <file>resources/images/edit.png</file>
     </qresource>
 </RCC>

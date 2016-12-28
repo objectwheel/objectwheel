@@ -16,6 +16,8 @@
 #include <listwidget.h>
 #include <QString>
 
+#define LIST_LEGHT 195
+
 #define CSS_COMBOBOX_LISTWIDGET \
 "QListView {\
 	background:#566573;border:none;\
@@ -99,6 +101,18 @@ const QString ComboBox::currentItem() const
 	auto currentItem =  m_d->itemListWidget.currentItem();
 	if (!currentItem) return QString();
 	return currentItem->text();
+}
+
+void ComboBox::setCurrentItem(const QString& text)
+{
+	int row = -1;
+	for (int i = 0; i < m_d->itemListWidget.count(); i++)
+		if (m_d->itemListWidget.item(i)->text() == text)
+			row = i;
+	if (row >= 0) {
+		m_d->itemListWidget.setCurrentRow(row);
+		m_d->searchEdit.setText(text);
+	}
 }
 
 const QStringList ComboBox::items() const
@@ -229,21 +243,21 @@ void ComboBoxPrivate::indicatorClickHandler(bool checked)
 		auto animation = new QPropertyAnimation(parent, "minimumHeight");
 		animation->setDuration(500);
 		animation->setStartValue(previousMinHeight);
-		animation->setEndValue(fit(90));
+		animation->setEndValue(fit(LIST_LEGHT));
 		animation->setEasingCurve(QEasingCurve::OutExpo);
 		QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 
 		auto animation2 = new QPropertyAnimation(parent, "maximumHeight");
 		animation2->setDuration(500);
 		animation2->setStartValue(previousMinHeight);
-		animation2->setEndValue(fit(90));
+		animation2->setEndValue(fit(LIST_LEGHT));
 		animation2->setEasingCurve(QEasingCurve::OutExpo);
 		QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
 		auto animation3 = new QPropertyAnimation(&itemListWidget, "geometry");
 		animation3->setDuration(500);
-		animation3->setStartValue(QRect( itemListWidget.x(), itemListWidget.y(),  itemListWidget.width(), 0));
-		animation3->setEndValue(QRect( itemListWidget.x(),  itemListWidget.y(),  itemListWidget.width(), fit(49)));
+		animation3->setStartValue(QRect(itemListWidget.x(), itemListWidget.y(),  itemListWidget.width(), 0));
+		animation3->setEndValue(QRect(itemListWidget.x(),  itemListWidget.y(),  itemListWidget.width(), fit(LIST_LEGHT-41)));
 		animation3->setEasingCurve(QEasingCurve::OutExpo);
 		QObject::connect(animation3, SIGNAL(finished()), animation3, SLOT(deleteLater()));
 
@@ -259,20 +273,20 @@ void ComboBoxPrivate::indicatorClickHandler(bool checked)
 		searchEdit.setText(parent->currentItem());
 		auto animation = new QPropertyAnimation(parent, "minimumHeight");
 		animation->setDuration(100);
-		animation->setStartValue(fit(90));
+		animation->setStartValue(fit(LIST_LEGHT));
 		animation->setEndValue(previousMinHeight);
 		QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 		animation->start();
 
 		auto animation2 = new QPropertyAnimation(parent, "maximumHeight");
 		animation2->setDuration(100);
-		animation2->setStartValue(fit(90));
+		animation2->setStartValue(fit(LIST_LEGHT));
 		animation2->setEndValue(previousMinHeight);
 		QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
 		auto animation3 = new QPropertyAnimation(&itemListWidget, "geometry");
 		animation3->setDuration(100);
-		animation3->setStartValue(QRect( itemListWidget.x(),  itemListWidget.y(),  itemListWidget.width(), fit(49)));
+		animation3->setStartValue(QRect( itemListWidget.x(),  itemListWidget.y(),  itemListWidget.width(), fit(LIST_LEGHT-41)));
 		animation3->setEndValue(QRect( itemListWidget.x(),  itemListWidget.y(),  itemListWidget.width(), 0));
 		QObject::connect(animation3, SIGNAL(finished()), animation3, SLOT(deleteLater()));
 
@@ -297,7 +311,7 @@ ComboBoxPrivate::ComboBoxPrivate(ComboBox* p)
 
 	itemListWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	itemListWidget.setFocusPolicy(Qt::NoFocus);
-	itemListWidget.setStyleSheet(QString(CSS_COMBOBOX_LISTWIDGET).arg(fit(4)).arg(2));
+	itemListWidget.setStyleSheet(QString(CSS_COMBOBOX_LISTWIDGET).arg(fit(2)).arg(1));
 	itemListWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	itemListWidget.setDragDropMode(QAbstractItemView::NoDragDrop);
 	itemListWidget.setSelectionBehavior(QAbstractItemView::SelectRows);

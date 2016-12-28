@@ -18,6 +18,7 @@ class ComboBox : public QWidget
 		void addItem(const QString& item);
 		const QString item(const int index) const;
 		const QString currentItem() const;
+		void setCurrentItem(const QString& text);
 		const QStringList items() const;
 		~ComboBox();
 

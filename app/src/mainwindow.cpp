@@ -211,6 +211,12 @@ void MainWindow::SetupGui()
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
 	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+	connect(m_d->bindingWidget, &BindingWidget::popupShowed, [=] {
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#2b5796;}");
+	});
+	connect(m_d->bindingWidget, &BindingWidget::popupHid, [=] {
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+	});
 
 	QVBoxLayout* leftMenuLayout = new QVBoxLayout(leftMenuWidget);
 	leftMenuLayout->setContentsMargins(0, 0, 0, 0);

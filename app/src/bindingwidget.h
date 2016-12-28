@@ -33,6 +33,10 @@ class BindingWidget : public QWidget
 	protected slots:
 		void processBindings();
 
+	signals:
+		void popupShowed();
+		void popupHid();
+
 	private:
 		BindingWidgetPrivate* m_d;
 };
