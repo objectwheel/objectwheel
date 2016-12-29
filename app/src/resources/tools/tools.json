@@ -107,5 +107,15 @@
     "WebSurfer" :
     {
         "toolUrl" : "qrc:/resources/tools/WebSurfer.zip"
+    },
+
+    "ComboBox" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/ComboBox.zip"
+    },
+
+    "TextArea" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/TextArea.zip"
     }
 }

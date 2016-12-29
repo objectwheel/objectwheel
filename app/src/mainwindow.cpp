@@ -338,6 +338,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 						int count = 1;
 						QString componentName = qmlContext(qml)->nameForObject(qml);
+						if (componentName.isEmpty()) componentName = "anonymous";
 						for (int i=0; i<m_Items.size();i++) {
 							if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_Items[i])) ||
 								componentName == QString("dpi")) {

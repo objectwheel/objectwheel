@@ -50,5 +50,7 @@
         <file>resources/images/item.png</file>
         <file>resources/images/advanced.png</file>
         <file>resources/images/edit.png</file>
+        <file>resources/tools/ComboBox.zip</file>
+        <file>resources/tools/TextArea.zip</file>
     </qresource>
 </RCC>
