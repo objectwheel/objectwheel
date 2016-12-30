@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class AboutPrivate;
+struct AboutPrivate;
 
 class About : public QWidget
 {

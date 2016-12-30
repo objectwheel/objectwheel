@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <fit.h>
+#include <QApplication>
 
 #define TITLE_TEXT "<p><b>version</b> 1.53 <b>pbuild</b> dddd759<br>Fri Dec 30 05:00:20 2016 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015-2016 Objectwheel, Inc. All Rights Reserved.</b></p>"
@@ -47,8 +48,10 @@ AboutPrivate::AboutPrivate(QWidget* p, QWidget* cW)
 
 	iconLabel.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	iconLabel.setFixedSize(fit(150), fit(74.5));
-	iconLabel.setPixmap(QPixmap(":/resources/images/logo.png").
-						scaled(fit(150), fit(74.5),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    QPixmap pixmap(":/resources/images/logo.png");
+    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
+	iconLabel.setPixmap(pixmap.scaled(fit(150)*qApp->devicePixelRatio(), fit(74.5)*qApp->devicePixelRatio(),
+									  Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 
 	iconLayout.addStretch();
 	iconLayout.addWidget(&iconLabel);

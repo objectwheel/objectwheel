@@ -34,6 +34,7 @@ class BindingWidgetPrivate
 		FlatButton editButton;
 		FlatButton removeButton;
 		ListWidget bindingListWidget;
+		bool hasPopupOpen = false;
 
 		QWidget popupWidget;
 		QVBoxLayout popupVLayout;
@@ -286,6 +287,7 @@ void BindingWidgetPrivate::addButtonClicked()
 	popupHideButton.raise();
 	popupHideButton.move(popupWidget.width()-fit(24), 0);
 	parent->clearList();
+	hasPopupOpen = true;
 	emit parent->popupShowed();
 }
 
@@ -314,6 +316,7 @@ void BindingWidgetPrivate::editButtonClicked()
 	sourceItemCombobox.setCurrentItem(rootContext->nameForObject(b.sourceItem));
 	sourcePropertyCombobox.setCurrentItem(b.sourceProperty);
 	nameEdit.setText(bindingListWidget.currentItem()->text());
+	hasPopupOpen = true;
 	emit parent->popupShowed();
 }
 
@@ -328,6 +331,7 @@ void BindingWidgetPrivate::popupHideButtonClicked()
 	QObject::connect(animation, SIGNAL(finished()), &popupWidget, SLOT(hide()));
 	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 	animation->start();
+	hasPopupOpen = false;
 	emit parent->popupHid();
 }
 
@@ -523,6 +527,11 @@ void BindingWidget::setRootContext(QQmlContext* const rootContext)
 void BindingWidget::showBar()
 {
 	m_d->bindingListWidget.showBar();
+}
+
+bool BindingWidget::hasPopupOpen()
+{
+	return m_d->hasPopupOpen;
 }
 
 void BindingWidget::processBindings()
