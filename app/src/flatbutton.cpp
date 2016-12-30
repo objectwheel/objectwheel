@@ -1,21 +1,22 @@
 #include <fit.h>
 #include <flatbutton.h>
 #include <QGraphicsDropShadowEffect>
+#include <QPainter>
 
 #define STYLE_SHEET "\
 QPushButton {\
-	border:0px;\
+border:0px;\
 	border-radius: %1px;\
-	color:rgb(%2,%3,%4);\
-	background:rgb(%5,%6,%7);\
+color:rgb(%2,%3,%4);\
+background:rgb(%5,%6,%7);\
 } QPushButton::pressed {\
-	background:rgb(%8,%9,%10);\
+background:rgb(%8,%9,%10);\
 } QPushButton::checked {\
-	background:rgb(%11,%12,%13);\
-	color:rgb(%14,%15,%16);\
+background:rgb(%11,%12,%13);\
+color:rgb(%14,%15,%16);\
 } QPushButton::disabled {\
-	background:rgb(%17,%18,%19);\
-	color:rgb(%20,%21,%22);\
+background:rgb(%17,%18,%19);\
+color:rgb(%20,%21,%22);\
 }"
 
 using namespace Fit;
@@ -30,13 +31,24 @@ FlatButton::FlatButton(QWidget *parent)
 	, m_CheckedTextColor(Qt::white)
 	, m_Shadow(new QGraphicsDropShadowEffect)
 	, m_Radius(fit(4))
+	, m_IconButton(false)
+	, m_Down(false)
 {
 	m_Shadow->setBlurRadius(fit(3));
 	m_Shadow->setOffset(0,fit(2));
 	m_Shadow->setColor(QColor(0, 0, 0, 70));
 	setGraphicsEffect(m_Shadow);
-
 	applyTheme();
+}
+
+bool FlatButton::IconButton() const
+{
+	return m_IconButton;
+}
+
+void FlatButton::setIconButton(bool IconButton)
+{
+	m_IconButton = IconButton;
 }
 
 int FlatButton::radius() const
@@ -130,4 +142,25 @@ void FlatButton::applyTheme()
 				  .arg(m_CheckedTextColor.red()).arg(m_CheckedTextColor.green()).arg(m_CheckedTextColor.blue())
 				  .arg(m_DisabledColor.red()).arg(m_DisabledColor.green()).arg(m_DisabledColor.blue())
 				  .arg(m_DisabledTextColor.red()).arg(m_DisabledTextColor.green()).arg(m_DisabledTextColor.blue()));
+}
+
+void FlatButton::paintEvent(QPaintEvent* e)
+{
+	if (m_IconButton) {
+		QPainter painter(this);
+		painter.setRenderHint(QPainter::Antialiasing);
+		QImage image = icon().pixmap(width(),height()).toImage();
+		for (int i = 0; i < image.width(); i++) {
+			for (int j = 0; j < image.height(); j++) {
+				if (isDown() || isChecked()) {
+					image.setPixelColor(i, j, image.pixelColor(i, j).darker(150));
+				} else {
+					image.setPixel(i, j, image.pixel(i, j));
+				}
+			}
+		}
+		painter.drawImage(rect(), image);
+	} else {
+		QPushButton::paintEvent(e);
+	}
 }

@@ -18,6 +18,8 @@ class FlatButton : public QPushButton
 		QColor m_CheckedTextColor;
 		QGraphicsDropShadowEffect* m_Shadow;
 		int m_Radius;
+		bool m_IconButton;
+		bool m_Down;
 
 	public:
 		explicit FlatButton(QWidget *parent = 0);
@@ -39,10 +41,12 @@ class FlatButton : public QPushButton
 		int radius() const;
 		void setRadius(int value);
 
-	protected:
-		void applyTheme();
+		bool IconButton() const;
+		void setIconButton(bool IconButton);
 
-	public slots:
+	protected:
+		virtual void applyTheme();
+		virtual void paintEvent(QPaintEvent *);
 };
 
 #endif // FLATBUTTON_H

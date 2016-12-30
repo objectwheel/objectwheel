@@ -24,7 +24,7 @@
 #include <propertieswidget.h>
 #include <bindingwidget.h>
 #include <titlebar.h>
-#include <QTimer>
+#include <about.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -43,6 +43,8 @@ class MainWindowPrivate
 		ListWidget* toolboxWidget;
 		PropertiesWidget* propertiesWidget;
 		BindingWidget* bindingWidget;
+		About* aboutWidget;
+		FlatButton* aboutButton;
 
 		void setupUi(QWidget *MainWindow)
 		{
@@ -131,6 +133,9 @@ class MainWindowPrivate
 			bindingWidget = new BindingWidget(centralWidget);
 			bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
 			bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+			aboutWidget = new About(centralWidget, MainWindow);
+			aboutButton = new FlatButton(MainWindow);
 
 			retranslateUi(MainWindow);
 

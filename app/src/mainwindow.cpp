@@ -239,6 +239,22 @@ void MainWindow::SetupGui()
 		/* Assign design area's root object */
 		m_RootItem = m_d->designWidget->rootObject();
 	});
+
+	m_d->aboutButton->setIcon(QIcon(":/resources/images/info.png"));
+	m_d->aboutButton->setIconButton(true);
+	m_d->aboutButton->setCheckable(true);
+	connect(m_d->aboutButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=]{
+		m_LeftMenu->hide();
+		m_d->titleBar->setMenuChecked(false);
+		m_RightMenu->hide();
+		m_d->titleBar->setSettingsChecked(false);
+	});
+	connect(this,&MainWindow::resized, [=]{
+		m_d->aboutWidget->hide();
+		m_d->aboutButton->setChecked(false);
+	});
+	connect(m_d->aboutButton, SIGNAL(clicked(bool)), m_d->aboutWidget, SLOT(show(bool)));
+
 }
 
 
@@ -450,6 +466,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	m_d->centralWidget->setGeometry(0, 0, width(), height());
+	m_d->aboutButton->setGeometry(width()-fit(40), height()-fit(40), fit(30),fit(30));
 	QWidget::resizeEvent(event);
 	emit resized();
 }

@@ -52,5 +52,7 @@
         <file>resources/images/edit.png</file>
         <file>resources/tools/ComboBox.zip</file>
         <file>resources/tools/TextArea.zip</file>
+        <file>resources/images/info.png</file>
+        <file>resources/images/logo.png</file>
     </qresource>
 </RCC>
