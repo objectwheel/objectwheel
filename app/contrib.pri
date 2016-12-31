@@ -1,7 +1,7 @@
 INCLUDEPATH     += $$PROJECT_ROOT/contrib/fit/include \
                    $$PROJECT_ROOT/contrib/miniz/include
 
-ios {
+ios | windows {
     LIBS        += -L$$PROJECT_ROOT/contrib/fit \
                    -L$$PROJECT_ROOT/contrib/miniz
 } else {
