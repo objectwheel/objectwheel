@@ -249,6 +249,13 @@ void MainWindow::SetupGui()
 		m_RootItem = m_d->designWidget->rootObject();
 	});
 
+	m_d->bubbleHead = new BubbleHead(this);
+	m_d->bubbleHead->setIcon(QIcon(":/resources/images/editor.png"));
+	m_d->bubbleHead->setNotificationCount(2);
+	m_d->bubbleHead->setNotificationCount(2);
+
+	m_d->aboutWidget = new About(m_d->centralWidget, this);
+	m_d->aboutButton = new FlatButton(this);
 	m_d->aboutButton->setIcon(QIcon(":/resources/images/info.png"));
 	m_d->aboutButton->setIconButton(true);
 	m_d->aboutButton->setCheckable(true);
@@ -263,7 +270,6 @@ void MainWindow::SetupGui()
 		m_d->aboutButton->setChecked(false);
 	});
 	connect(m_d->aboutButton, SIGNAL(clicked(bool)), m_d->aboutWidget, SLOT(show(bool)));
-
 }
 
 

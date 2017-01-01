@@ -25,6 +25,7 @@
 #include <bindingwidget.h>
 #include <titlebar.h>
 #include <about.h>
+#include <bubblehead.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -45,6 +46,7 @@ class MainWindowPrivate
 		BindingWidget* bindingWidget;
 		About* aboutWidget;
 		FlatButton* aboutButton;
+		BubbleHead* bubbleHead;
 
 		void setupUi(QWidget *MainWindow)
 		{
@@ -133,9 +135,6 @@ class MainWindowPrivate
 			bindingWidget = new BindingWidget(centralWidget);
 			bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
 			bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-			aboutWidget = new About(centralWidget, MainWindow);
-			aboutButton = new FlatButton(MainWindow);
 
 			retranslateUi(MainWindow);
 

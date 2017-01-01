@@ -54,5 +54,6 @@
         <file>resources/tools/TextArea.zip</file>
         <file>resources/images/info.png</file>
         <file>resources/images/logo.png</file>
+        <file>resources/images/editor.png</file>
     </qresource>
 </RCC>
