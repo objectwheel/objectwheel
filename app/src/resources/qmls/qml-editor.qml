@@ -37,7 +37,7 @@ Item {
                 sourceSize.width: width * 2.0
                 sourceSize.height: height
                 Layout.fillHeight: true
-                source: "file:///home/kozmon/Masaüstü/left-arrow.png"
+                source: "qrc:///resources/images/left-arrow.png"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: editor.undo()
@@ -53,7 +53,7 @@ Item {
                 sourceSize.width: width
                 sourceSize.height: height
                 Layout.fillHeight: true
-                source: "file:///home/kozmon/Masaüstü/save-icon.png"
+                source: "qrc:///resources/images/save-icon.png"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: root.saved(editor.text)
@@ -69,7 +69,7 @@ Item {
                 sourceSize.width: width * 2.0
                 sourceSize.height: height
                 Layout.fillHeight: true
-                source: "file:///home/kozmon/Masaüstü/right-arrow.png"
+                source: "qrc:///resources/images/right-arrow.png"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: editor.redo()
@@ -79,7 +79,7 @@ Item {
 
         Image {
             fillMode: Image.TileHorizontally
-            source: "file:///home/kozmon/Masaüstü/shadow.png"
+            source: "qrc:///resources/images/shadow.png"
             width: toolBar.width
             anchors.top: toolBar.bottom
             height: 4 * scaleRatio

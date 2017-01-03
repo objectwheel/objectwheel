@@ -53,7 +53,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	font.setFamily("Liberation Mono");
 	font.setStyleHint(QFont::Monospace);
 	font.setFixedPitch(true);
-	font.setPointSize(9);
+	font.setPixelSize(fit(12));
 	textEdit->setProperty("font", font);
 
 	const int tabStop = 4;  // 4 characters
@@ -71,7 +71,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 
 void QmlEditorPrivate::resize()
 {
-	minimizeButton.move(fit(10), fit(parent->height() - minimizeButton.height() - fit(10)));
+	minimizeButton.move(fit(10), parent->height() - minimizeButton.height() - fit(2));
 }
 
 QmlEditor::QmlEditor(QWidget *parent)

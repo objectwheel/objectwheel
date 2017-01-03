@@ -58,5 +58,14 @@
         <file>resources/qmls/NaviBar.qml</file>
         <file>resources/qmls/qml-editor.qml</file>
         <file>resources/images/mask.png</file>
+        <file>resources/images/shadow@2x.png</file>
+        <file>resources/images/shadow.png</file>
+        <file>resources/images/right-arrow@2x.png</file>
+        <file>resources/images/right-arrow.png</file>
+        <file>resources/images/left-arrow@2x.png</file>
+        <file>resources/images/left-arrow.png</file>
+        <file>resources/images/save-icon@2x.png</file>
+        <file>resources/images/save-icon.png</file>
+        <file>resources/fonts/LiberationMono-Regular.ttf</file>
     </qresource>
 </RCC>

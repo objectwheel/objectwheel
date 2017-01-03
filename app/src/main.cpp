@@ -33,7 +33,10 @@ int main(int argc, char *argv[])
 	QtWebView::initialize();
 
 	// Add system wide fonts and set default font
+	QFontDatabase::addApplicationFont(":/resources/fonts/OpenSans-Bold.ttf");
 	QFontDatabase::addApplicationFont(":/resources/fonts/OpenSans-Regular.ttf");
+	QFontDatabase::addApplicationFont(":/resources/fonts/OpenSans-Light.ttf");
+	QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
 	QFont font("OpenSans");
 	font.setPixelSize(Fit::fit(PIXEL_SIZE));
 	QApplication::setFont(font);
