@@ -252,7 +252,8 @@ void MainWindow::SetupGui()
 	m_d->bubbleHead = new BubbleHead(this);
 	m_d->bubbleHead->setIcon(QIcon(":/resources/images/editor.png"));
 	m_d->bubbleHead->setNotificationCount(2);
-	m_d->bubbleHead->setNotificationCount(2);
+	m_d->bubbleHead->move(qrand() % width() - m_d->bubbleHead->width(),
+						  qrand() % height() - m_d->bubbleHead->height());
 
 	m_d->aboutWidget = new About(m_d->centralWidget, this);
 	m_d->aboutButton = new FlatButton(this);

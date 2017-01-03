@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 	QApplication::setStyle("fusion");
 	qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
 	qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
+	qsrand(QDateTime::currentMSecsSinceEpoch());
 
 	// Init Fit
 	Fit::init(REF_WIDTH, REF_HEIGHT, REF_DPI);

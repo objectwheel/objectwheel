@@ -5,6 +5,7 @@
 #include <audiorecorder.h>
 #include <audioplayer.h>
 #include <aispeak.h>
+#include <documenthandler.h>
 
 class Components
 {

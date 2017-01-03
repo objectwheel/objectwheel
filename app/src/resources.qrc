@@ -55,5 +55,7 @@
         <file>resources/images/info.png</file>
         <file>resources/images/logo.png</file>
         <file>resources/images/editor.png</file>
+        <file>resources/qmls/NaviBar.qml</file>
+        <file>resources/qmls/qml-editor.qml</file>
     </qresource>
 </RCC>

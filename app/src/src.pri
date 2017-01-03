@@ -16,7 +16,8 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/combobox.h \
 							 $$PWD/scrollarea.h \
 							 $$PWD/about.h \
-							 $$PWD/bubblehead.h
+							 $$PWD/bubblehead.h \
+							 $$PWD/qmleditor.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -34,7 +35,8 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/combobox.cpp \
 							 $$PWD/scrollarea.cpp \
 							 $$PWD/about.cpp \
-							 $$PWD/bubblehead.cpp
+							 $$PWD/bubblehead.cpp \
+							 $$PWD/qmleditor.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
