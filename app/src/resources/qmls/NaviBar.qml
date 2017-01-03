@@ -89,7 +89,7 @@ Rectangle {
     Text {
         visible: (parent.state == 'selection')
         anchors {
-            left: parent.left
+            right: parent.right
             verticalCenter: parent.verticalCenter
             margins: 10 * scaleRatio
         }

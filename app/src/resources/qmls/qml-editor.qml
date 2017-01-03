@@ -9,7 +9,7 @@ Item {
     id: root
     signal saved(string code)
 
-    property real scaleRatio: 1
+    property real scaleRatio: Math.floor(dpi)
     property string splitState: 'splitted'
     property int lineNumberPadding: 20 * scaleRatio
     property int lineNumberSpacing: 0
@@ -22,8 +22,8 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 32 * scaleRatio
-        color: "#666666"
+        height: 38 * scaleRatio
+        color: "#555555"
 
         RowLayout {
             anchors.margins: 6 * scaleRatio

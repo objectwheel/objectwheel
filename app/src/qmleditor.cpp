@@ -36,6 +36,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 #else
 	quickWidget.rootContext()->setContextProperty("isDesktop", false);
 #endif
+	quickWidget.rootContext()->setContextProperty("dpi", Fit::ratio());
 
 	quickWidget.setSource(QUrl("qrc:/resources/qmls/qml-editor.qml"));
 	quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
