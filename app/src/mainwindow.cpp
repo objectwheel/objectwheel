@@ -251,9 +251,8 @@ void MainWindow::SetupGui()
 
 	m_d->bubbleHead = new BubbleHead(this);
 	m_d->bubbleHead->setIcon(QIcon(":/resources/images/editor.png"));
-	m_d->bubbleHead->setNotificationCount(2);
-	m_d->bubbleHead->move(qrand() % width() - m_d->bubbleHead->width(),
-						  qrand() % height() - m_d->bubbleHead->height());
+	m_d->bubbleHead->setNotificationText("E");
+	m_d->bubbleHead->move(fit(20), height()-fit(150));
 
 	m_d->aboutWidget = new About(m_d->centralWidget, this);
 	m_d->aboutButton = new FlatButton(this);
@@ -271,6 +270,11 @@ void MainWindow::SetupGui()
 		m_d->aboutButton->setChecked(false);
 	});
 	connect(m_d->aboutButton, SIGNAL(clicked(bool)), m_d->aboutWidget, SLOT(show(bool)));
+
+
+	m_d->qmlEditor = new QmlEditor(this);
+	m_d->qmlEditor->setHidden(true);
+	connect(m_d->bubbleHead, SIGNAL(clicked(bool)), m_d->qmlEditor, SLOT(show()));
 }
 
 
@@ -482,6 +486,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	m_d->centralWidget->setGeometry(0, 0, width(), height());
+	m_d->qmlEditor->setGeometry(0, 0, width(), height());
 	m_d->aboutButton->setGeometry(width()-fit(40), height()-fit(40), fit(30),fit(30));
 	QWidget::resizeEvent(event);
 	emit resized();

@@ -57,5 +57,6 @@
         <file>resources/images/editor.png</file>
         <file>resources/qmls/NaviBar.qml</file>
         <file>resources/qmls/qml-editor.qml</file>
+        <file>resources/images/mask.png</file>
     </qresource>
 </RCC>

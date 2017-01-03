@@ -5,6 +5,7 @@
 #include <QIcon>
 #include <QGraphicsDropShadowEffect>
 #include <mainwindow.h>
+#include <QApplication>
 
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
 #define MOBILE_FACTOR 1.3
@@ -25,7 +26,7 @@ class BubbleHeadPrivate
 		QIcon icon;
 		QColor borderColor;
 		QGraphicsDropShadowEffect shadowEffect;
-		int notificationCount;
+		QString notificationText;
 		bool moved;
 		void fixCoord();
 };
@@ -36,7 +37,6 @@ BubbleHeadPrivate::BubbleHeadPrivate(BubbleHead* p)
 {
 	moved = false;
 	borderColor = "#666666";
-	notificationCount = 0;
 	shadowEffect.setBlurRadius(fit(13));
 	shadowEffect.setOffset(0,fit(3));
 	shadowEffect.setColor("#99000000");
@@ -87,14 +87,14 @@ const QColor&BubbleHead::borderColor() const
 	return m_d->borderColor;
 }
 
-void BubbleHead::setNotificationCount(const uint count)
+void BubbleHead::setNotificationText(const QString& text)
 {
-	m_d->notificationCount = count;
+	m_d->notificationText = text;
 }
 
-int BubbleHead::notificationCount() const
+const QString& BubbleHead::notificationText() const
 {
-	return m_d->notificationCount;
+	return m_d->notificationText;
 }
 
 void BubbleHead::mousePressEvent(QMouseEvent* event)
@@ -106,6 +106,8 @@ void BubbleHead::mousePressEvent(QMouseEvent* event)
 
 void BubbleHead::mouseMoveEvent(QMouseEvent* event)
 {
+	if ((m_d->hotPoint - event->pos()).manhattanLength() <
+		QApplication::startDragDistance()) return;
 	event->accept();
 	m_d->moved = true;
 	QWidget* parent = (QWidget*)(BubbleHead::parent());
@@ -157,32 +159,26 @@ void BubbleHead::paintEvent(QPaintEvent*)
 		painter.drawEllipse(bgRect);
 	}
 
-	if (m_d->notificationCount > 0) {
-		QRect notfRect = QRect(fit(1),fit(3),fit(13.85*MOBILE_FACTOR),fit(16.15*MOBILE_FACTOR));
+	QRect notfRect = QRect(fit(1),fit(3),fit(13.85*MOBILE_FACTOR),fit(16.15*MOBILE_FACTOR));
 
-		QPen p;
-		p.setWidthF(fit(1));
-		p.setColor("#30000000");
+	QPen p2;
+	p2.setWidthF(fit(1));
+	p2.setColor("#30000000");
 
-		QLinearGradient g;
-		g.setStart(fit(9), 0);
-		g.setFinalStop(fit(9), fit(21));
-		g.setColorAt(0, "#ed323f");
-		g.setColorAt(1, "#da0220");
+	QLinearGradient g;
+	g.setStart(fit(9), 0);
+	g.setFinalStop(fit(9), fit(21));
+	g.setColorAt(0, "#ed323f");
+	g.setColorAt(1, "#da0220");
 
-		painter.setPen(p);
-		painter.setBrush(g);
-		painter.drawRoundedRect(notfRect, fit(3), fit(3));
+	painter.setPen(p2);
+	painter.setBrush(g);
+	painter.drawRoundedRect(notfRect, fit(3), fit(3));
 
-		QFont f("OpenSans Bold");
-		f.setWeight(QFont::Black);
+	QFont f("OpenSans Bold");
+	f.setWeight(QFont::Black);
 
-		painter.setFont(f);
-		painter.setPen(Qt::white);
-		if (m_d->notificationCount > 9) {
-			painter.drawText(notfRect, "...", QTextOption(Qt::AlignCenter));
-		} else {
-			painter.drawText(notfRect, QString::number(m_d->notificationCount), QTextOption(Qt::AlignCenter));
-		}
-	}
+	painter.setFont(f);
+	painter.setPen(Qt::white);
+	painter.drawText(notfRect, m_d->notificationText, QTextOption(Qt::AlignCenter));
 }

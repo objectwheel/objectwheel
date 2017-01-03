@@ -13,6 +13,9 @@ class QmlEditor : public QWidget
 		explicit QmlEditor(QWidget *parent = 0);
 		~QmlEditor();
 
+	protected:
+		void resizeEvent(QResizeEvent *event);
+
 	private:
 		QmlEditorPrivate* m_d;
 };

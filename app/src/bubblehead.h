@@ -19,8 +19,8 @@ class BubbleHead : public QPushButton
 		void setBorderColor(const QColor& color);
 		const QColor& borderColor() const;
 
-		void setNotificationCount(const uint count);
-		int notificationCount() const;
+		void setNotificationText(const QString& text);
+		const QString& notificationText() const;
 
 	protected:
 		void mousePressEvent(QMouseEvent *event) override;

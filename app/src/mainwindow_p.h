@@ -26,6 +26,7 @@
 #include <titlebar.h>
 #include <about.h>
 #include <bubblehead.h>
+#include <qmleditor.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -47,6 +48,7 @@ class MainWindowPrivate
 		About* aboutWidget;
 		FlatButton* aboutButton;
 		BubbleHead* bubbleHead;
+		QmlEditor* qmlEditor;
 
 		void setupUi(QWidget *MainWindow)
 		{
