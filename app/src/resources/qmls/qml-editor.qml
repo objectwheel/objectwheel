@@ -9,7 +9,7 @@ Item {
     id: root
     signal saved(string code)
 
-    property real scaleRatio: Math.floor(dpi)
+    property real scaleRatio: dpi
     property string splitState: 'splitted'
     property int lineNumberPadding: 20 * scaleRatio
     property int lineNumberSpacing: 0
@@ -34,7 +34,7 @@ Item {
                 id: undo
                 height: 10
                 width: height
-                sourceSize.width: width * 2.0
+                sourceSize.width: width
                 sourceSize.height: height
                 Layout.fillHeight: true
                 source: "qrc:///resources/images/left-arrow.png"
@@ -50,6 +50,7 @@ Item {
                 id: save
                 height: 10
                 width: height
+                enabled: ((errorMessage.text=="") && (editor.text!=""))
                 sourceSize.width: width
                 sourceSize.height: height
                 Layout.fillHeight: true
@@ -66,7 +67,7 @@ Item {
                 id: redo
                 height: 10
                 width: height
-                sourceSize.width: width * 2.0
+                sourceSize.width: width
                 sourceSize.height: height
                 Layout.fillHeight: true
                 source: "qrc:///resources/images/right-arrow.png"
@@ -305,11 +306,6 @@ Item {
                     DocumentHandler {
                         id: documentHandler
                         target: editor
-                        Component.onCompleted: {
-                            documentHandler.text = "import QtQuick 2.0\n\nRectangle { \n    color: '#FEEB75'" +
-                                    "\n    Text { \n        anchors.centerIn: parent" +
-                                    "\n        text: 'Hello, World!' \n\t\tcolor: \"white\"; \n    } \n}"
-                        }
                     }
 
                     // FIXME: add selection / copy / paste popup
@@ -353,12 +349,19 @@ Item {
                     error.columnNumber + " : " + error.message;
             return;
         }
+        if (newItem === null) {
+            previousItem = null;
+            return;
+        }
+
         if (errorLineNumber > 0) {
             lineNumberRepeater.itemAt(errorLineNumber - 1).bgcolor = 'transparent'
             errorLineNumber = 0;
             errorMessage.text = ""
         }
         newItem.anchors.centerIn = viewContent
+        newItem.width = newItem.width * scaleRatio
+        newItem.height = newItem.height * scaleRatio
         previousItem = newItem;
     }
 }

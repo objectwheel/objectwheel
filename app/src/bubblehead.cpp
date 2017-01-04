@@ -54,6 +54,7 @@ void BubbleHeadPrivate::fixCoord()
 	if (newPos.x() > grandParentRect.width()) newPos.setX(grandParentRect.width());
 	if (newPos.y() > grandParentRect.height()) newPos.setY(grandParentRect.height());
 	parent->move(newPos);
+	emit parent->moved(newPos+QPoint(parent->width()/2.0, parent->height()/2.0));
 }
 
 BubbleHead::BubbleHead(QWidget *parent)
@@ -118,6 +119,7 @@ void BubbleHead::mouseMoveEvent(QMouseEvent* event)
 	if (newPos.x() > parentRect.width()) newPos.setX(parentRect.width());
 	if (newPos.y() > parentRect.height()) newPos.setY(parentRect.height());
 	move(newPos);
+	emit moved(newPos+QPoint(width()/2.0, height()/2.0));
 }
 
 void BubbleHead::mouseReleaseEvent(QMouseEvent* event)
@@ -181,4 +183,10 @@ void BubbleHead::paintEvent(QPaintEvent*)
 	painter.setFont(f);
 	painter.setPen(Qt::white);
 	painter.drawText(notfRect, m_d->notificationText, QTextOption(Qt::AlignCenter));
+}
+
+void BubbleHead::moveEvent(QMoveEvent* event)
+{
+	QWidget::moveEvent(event);
+	emit moved(event->pos()+QPoint(width()/2.0, height()/2.0));
 }

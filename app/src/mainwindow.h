@@ -17,6 +17,7 @@ class MainWindow : public QWidget
 
 	public:
 		typedef QList<QQuickItem*> QQuickItemList;
+		typedef QList<QUrl> QQuickUrlList;
 
 	private:
 		MainWindowPrivate* m_d;
@@ -26,6 +27,7 @@ class MainWindow : public QWidget
 		RemoverTick* m_RemoverTick;
 		QQuickItem* m_RootItem;
 		QQuickItemList m_Items;
+		QQuickUrlList m_ItemUrls;
 		CoverMenu* m_LeftMenu;
 		CoverMenu* m_RightMenu;
 
@@ -40,7 +42,6 @@ class MainWindow : public QWidget
 		void ExtractZip(const QByteArray& zipData, const QString& path) const;
 		QQuickItem* GetDeepestDesignItemOnPoint(const QPoint& point) const;
 		const QQuickItemList GetAllChildren(QQuickItem* const item) const;
-		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void HideSelectionTools();
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
@@ -50,6 +51,7 @@ class MainWindow : public QWidget
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
 		void fixWebViewPositions();
+		void ShowSelectionTools(QQuickItem* const selectedItem);
 
 	signals:
 		void resized();

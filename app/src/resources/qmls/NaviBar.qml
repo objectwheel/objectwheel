@@ -14,8 +14,8 @@ Rectangle {
     Rectangle {
         id: repeater
         border.color: "#007edf"
-        width: 240 * scaleRatio
-        height: 29 * scaleRatio
+        width: Math.floor(240 * scaleRatio)
+        height: Math.floor(29 * scaleRatio)
         anchors.centerIn: parent
         radius: 5 * scaleRatio
         visible: false

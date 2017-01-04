@@ -70,7 +70,11 @@ void MainWindow::SetupGui()
 
 	/* Remove deleted items from internal item list */
 	connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=] (QQuickItem* item) {
-		m_Items.removeAll(item);
+		int i = m_Items.indexOf(item);
+		if (i >= 0) {
+			m_Items.removeAt(i);
+			m_ItemUrls.removeAt(i);
+		}
 	});
 
 	/* Re-move ticks when tracked item resized */
@@ -241,9 +245,9 @@ void MainWindow::SetupGui()
 	m_d->centralWidget->installEventFilter(this);
 
 	QTimer::singleShot(0, [=] {
-	#if !defined(Q_OS_DARWIN)
+#if !defined(Q_OS_DARWIN)
 		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
-	#endif
+#endif
 		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 		/* Assign design area's root object */
 		m_RootItem = m_d->designWidget->rootObject();
@@ -252,7 +256,9 @@ void MainWindow::SetupGui()
 	m_d->bubbleHead = new BubbleHead(this);
 	m_d->bubbleHead->setIcon(QIcon(":/resources/images/editor.png"));
 	m_d->bubbleHead->setNotificationText("E");
-	m_d->bubbleHead->move(fit(20), height()-fit(150));
+	QTimer::singleShot(200,[this] {
+		m_d->bubbleHead->move(fit(20), height()-fit(75));
+	});
 
 	m_d->aboutWidget = new About(m_d->centralWidget, this);
 	m_d->aboutButton = new FlatButton(this);
@@ -274,7 +280,11 @@ void MainWindow::SetupGui()
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
+	m_d->qmlEditor->setItems(&m_Items, &m_ItemUrls);
+	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
+	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
 	connect(m_d->bubbleHead, SIGNAL(clicked(bool)), m_d->qmlEditor, SLOT(show()));
+	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 }
 
 
@@ -359,7 +369,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
 					{
 						auto url = dropEvent->mimeData()->urls().at(0);
-//						 m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+						//						 m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
 						QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
 						component.loadUrl(url);
 
@@ -389,6 +399,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						qml->setClip(true); // Even if it's not true
 						fit(qml, Fit::WidthHeight);
 						m_Items << qml;
+						m_ItemUrls << url;
 
 						QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
 						event->accept();
@@ -735,6 +746,7 @@ void MainWindow::on_clearButton_clicked()
 	for (auto item : m_Items)
 		item->deleteLater();
 	m_Items.clear();
+	m_ItemUrls.clear();
 }
 
 void MainWindow::on_editButton_clicked()

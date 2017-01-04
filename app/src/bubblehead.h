@@ -22,12 +22,17 @@ class BubbleHead : public QPushButton
 		void setNotificationText(const QString& text);
 		const QString& notificationText() const;
 
+
 	protected:
 		void mousePressEvent(QMouseEvent *event) override;
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void mouseReleaseEvent(QMouseEvent *event) override;
 		void resizeEvent(QResizeEvent *event) override;
 		void paintEvent(QPaintEvent *event) override;
+		void moveEvent(QMoveEvent *event) override;
+
+	signals:
+		void moved(const QPoint&) const;
 
 	private:
 		BubbleHeadPrivate* m_d;
