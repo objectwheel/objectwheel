@@ -52,7 +52,6 @@
         <file>resources/images/edit.png</file>
         <file>resources/tools/ComboBox.zip</file>
         <file>resources/tools/TextArea.zip</file>
-        <file>resources/images/info.png</file>
         <file>resources/images/logo.png</file>
         <file>resources/images/editor.png</file>
         <file>resources/qmls/NaviBar.qml</file>
@@ -67,5 +66,9 @@
         <file>resources/images/save-icon@2x.png</file>
         <file>resources/images/save-icon.png</file>
         <file>resources/fonts/LiberationMono-Regular.ttf</file>
+        <file>resources/images/pagesbuttonfilled.png</file>
+        <file>resources/images/pagesbutton.png</file>
+        <file>resources/images/aboutus.png</file>
+        <file>resources/images/loading.gif</file>
     </qresource>
 </RCC>

@@ -27,6 +27,7 @@
 #include <about.h>
 #include <bubblehead.h>
 #include <qmleditor.h>
+#include <pageswidget.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -45,6 +46,7 @@ class MainWindowPrivate
 		ListWidget* toolboxWidget;
 		PropertiesWidget* propertiesWidget;
 		BindingWidget* bindingWidget;
+		PagesWidget* pagesWidget;
 		About* aboutWidget;
 		FlatButton* aboutButton;
 		BubbleHead* bubbleHead;
@@ -137,6 +139,10 @@ class MainWindowPrivate
 			bindingWidget = new BindingWidget(centralWidget);
 			bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
 			bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+			pagesWidget = new PagesWidget(centralWidget);
+			pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
+			pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
 			retranslateUi(MainWindow);
 

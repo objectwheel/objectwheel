@@ -5,6 +5,9 @@
 #include <QApplication>
 #include <QFontDatabase>
 #include <QtWebView>
+#include <splashscreen.h>
+#include <QIcon>
+#include <QBuffer>
 
 #define PIXEL_SIZE 12
 #define REF_WIDTH 660
@@ -43,9 +46,26 @@ int main(int argc, char *argv[])
 
 	// Start MainWidget
 	MainWindow w;
+	QFile loading(":/resources/images/loading.gif");
+	Q_ASSERT(loading.open(QIODevice::ReadOnly));
+	auto data = loading.readAll();
+	QBuffer buff(&data);
+	buff.open(QBuffer::ReadOnly);
+
+	// Init Splash Screen
+	SplashScreen::init(&w);
+	SplashScreen::setTextColor(Qt::white);
+	SplashScreen::setBackgroundBrush(QColor("#2c9ecc"));
+	SplashScreen::setText("Launching...");
+//	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
+//	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
+	SplashScreen::setLoadingSize(Fit::fit(160), Fit::fit(120));
+	SplashScreen::setLoadingDevice(&buff);
+	SplashScreen::show();
+
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 	w.resize({REF_WIDTH, REF_HEIGHT});
-	fit(&w, Fit::WidthHeight);
+	Fit::fit(&w, Fit::WidthHeight);
 	w.show();
 # else
 	w.showFullScreen();

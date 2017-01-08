@@ -11,7 +11,7 @@
 #include <mainwindow_p.h>
 #include <container.h>
 #include <css.h>
-
+#include <splashscreen.h>
 #include <QtQml>
 #include <QtCore>
 #include <QtQuick>
@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_RotatorTick(new RotatorTick)
 	, m_RemoverTick(new RemoverTick)
 	, m_RootItem(nullptr)
+	, m_CurrentPage(nullptr)
 	, m_LeftMenu(new CoverMenu)
 	, m_RightMenu(new CoverMenu)
 {
@@ -72,6 +73,7 @@ void MainWindow::SetupGui()
 	connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=] (QQuickItem* item) {
 		int i = m_Items.indexOf(item);
 		if (i >= 0) {
+			m_d->designWidget->rootContext()->setContextProperty(m_d->designWidget->rootContext()->nameForObject(item), 0);
 			m_Items.removeAt(i);
 			m_ItemUrls.removeAt(i);
 		}
@@ -159,10 +161,13 @@ void MainWindow::SetupGui()
 	propertiesVariant.setValue<QWidget*>(m_d->propertiesWidget);
 	QVariant bindingVariant;
 	bindingVariant.setValue<QWidget*>(m_d->bindingWidget);
+	QVariant pagesVariant;
+	pagesVariant.setValue<QWidget*>(m_d->pagesWidget);
 	Container* leftContainer = new Container;
 	leftContainer->addWidget(m_d->toolboxWidget);
 	leftContainer->addWidget(m_d->propertiesWidget);
 	leftContainer->addWidget(m_d->bindingWidget);
+	leftContainer->addWidget(m_d->pagesWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QToolBar* leftToolbar = new QToolBar;
@@ -200,7 +205,6 @@ void MainWindow::SetupGui()
 	connect(propertiesButton, SIGNAL(clicked(bool)), propertiesButtonAction, SLOT(trigger()));
 	connect(propertiesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
-
 	QRadioButton* bindingButton = new QRadioButton;
 	bindingButton->setStyleSheet(CSS::BindingButton);
 	bindingButton->setCheckable(true);
@@ -211,6 +215,17 @@ void MainWindow::SetupGui()
 	leftToolbar->addAction(bindingButtonAction);
 	connect(bindingButton, SIGNAL(clicked(bool)), bindingButtonAction, SLOT(trigger()));
 	connect(bindingButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+
+	QRadioButton* pagesButton = new QRadioButton;
+	pagesButton->setStyleSheet(CSS::PagesButton);
+	pagesButton->setCheckable(true);
+	QWidgetAction* pagesButtonAction = new QWidgetAction(this);
+	pagesButtonAction->setDefaultWidget(pagesButton);
+	pagesButtonAction->setData(pagesVariant);
+	pagesButtonAction->setCheckable(true);
+	leftToolbar->addAction(pagesButtonAction);
+	connect(pagesButton, SIGNAL(clicked(bool)), pagesButtonAction, SLOT(trigger()));
+	connect(pagesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
@@ -225,6 +240,9 @@ void MainWindow::SetupGui()
 		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
 	});
 	connect(propertiesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+	});
+	connect(pagesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
 		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
 	});
 	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
@@ -251,6 +269,22 @@ void MainWindow::SetupGui()
 		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 		/* Assign design area's root object */
 		m_RootItem = m_d->designWidget->rootObject();
+		connect(m_RootItem, SIGNAL(currentPageChanged(QVariant, QVariant)),
+				this, SLOT(handleCurrentPageChanges(QVariant, QVariant)));
+		auto v = QQmlProperty::read(m_RootItem, "current_page", m_d->designWidget->rootContext());
+		m_CurrentPage = qobject_cast<QQuickItem*>(v.value<QObject*>());
+		Q_ASSERT(m_CurrentPage);
+		auto v2 = QQmlProperty::read(m_RootItem, "swipeView", m_d->designWidget->rootContext());
+		auto view = qobject_cast<QQuickItem*>(v2.value<QObject*>());
+		Q_ASSERT(view);
+		auto v3 = qmlContext(view)->contextProperty("page");
+		auto item = qobject_cast<QQuickItem*>(v3.value<QObject*>());
+		Q_ASSERT(item);
+		m_d->designWidget->rootContext()->setContextProperty("page", item);
+		m_d->pagesWidget->setSwipeItem(view);
+		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
+		m_d->pagesWidget->setItemList(&m_Items);
+		m_d->pagesWidget->setUrlList(&m_ItemUrls);
 	});
 
 	m_d->bubbleHead = new BubbleHead(this);
@@ -262,7 +296,7 @@ void MainWindow::SetupGui()
 
 	m_d->aboutWidget = new About(m_d->centralWidget, this);
 	m_d->aboutButton = new FlatButton(this);
-	m_d->aboutButton->setIcon(QIcon(":/resources/images/info.png"));
+	m_d->aboutButton->setIcon(QIcon(":/resources/images/aboutus.png"));
 	m_d->aboutButton->setIconButton(true);
 	m_d->aboutButton->setCheckable(true);
 	connect(m_d->aboutButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=]{
@@ -277,7 +311,6 @@ void MainWindow::SetupGui()
 	});
 	connect(m_d->aboutButton, SIGNAL(clicked(bool)), m_d->aboutWidget, SLOT(show(bool)));
 
-
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
 	m_d->qmlEditor->setItems(&m_Items, &m_ItemUrls);
@@ -285,6 +318,14 @@ void MainWindow::SetupGui()
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
 	connect(m_d->bubbleHead, SIGNAL(clicked(bool)), m_d->qmlEditor, SLOT(show()));
 	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
+
+# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
+	QTimer::singleShot(2000,[this] {
+#else
+	QTimer::singleShot(5000,[this] {
+#endif
+		SplashScreen::hide();
+	});
 }
 
 
@@ -336,21 +377,21 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 							/* Get fixed dropped point as in desing area coord system */
 							QPointF droppedPoint = dropEvent->pos() - dragStartPoint +
-												   m_RootItem->mapFromItem(pressedItem->parentItem(), pressedItem->position());
+												   m_CurrentPage->mapFromItem(pressedItem->parentItem(), pressedItem->position());
 
 							/* Move related item to its new position */
 							if (nullptr == itemAtDroppedPoint)
 							{
-								pressedItem->setParentItem(m_RootItem);
+								pressedItem->setParentItem(m_CurrentPage);
 								pressedItem->setPosition(droppedPoint);
 							}
 							else if (true == childItems.contains(itemAtDroppedPoint))
 							{
-								pressedItem->setPosition(pressedItem->parentItem()->mapFromItem(m_RootItem, droppedPoint));
+								pressedItem->setPosition(pressedItem->parentItem()->mapFromItem(m_CurrentPage, droppedPoint));
 							}
 							else if (pressedItem != itemAtDroppedPoint) // else handled in previous else if
 							{
-								QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_RootItem, droppedPoint);
+								QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_CurrentPage, droppedPoint);
 								pressedItem->setParentItem(itemAtDroppedPoint);
 								pressedItem->setPosition(mappedPoint);
 							}
@@ -394,8 +435,8 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 							}
 						}
 						m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
-						qml->setParentItem(m_RootItem);
-						qml->setPosition(qml->mapFromItem(m_RootItem, dropEvent->pos()));
+						qml->setParentItem(m_CurrentPage);
+						qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
 						qml->setClip(true); // Even if it's not true
 						fit(qml, Fit::WidthHeight);
 						m_Items << qml;
@@ -465,7 +506,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 						QDrag *drag = new QDrag(this);
 						drag->setMimeData(mimeData);
-						QPointF diffPoint = dragStartPoint - m_RootItem->mapFromItem(pressedItem->parentItem(), pressedItem->position());
+						QPointF diffPoint = dragStartPoint - m_CurrentPage->mapFromItem(pressedItem->parentItem(), pressedItem->position());
 						drag->setHotSpot(diffPoint.toPoint());
 
 						QSharedPointer<QQuickItemGrabResult> result = pressedItem->grabToImage(); // FIXME: On IOS
@@ -698,7 +739,7 @@ void MainWindow::ExtractZip(const QByteArray& zipData, const QString& path) cons
 QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
 {
 	QPointF pt = point;
-	QQuickItem* parent = m_RootItem;
+	QQuickItem* parent = m_CurrentPage;
 	QQuickItem* item = parent->childAt(pt.x(), pt.y());
 
 	while (item && m_Items.contains(item)) {
@@ -707,7 +748,7 @@ QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
 		item = parent->childAt(pt.x(), pt.y());
 	}
 
-	if (parent == m_RootItem) return nullptr;
+	if (parent == m_CurrentPage) return nullptr;
 	return parent;
 }
 
@@ -732,6 +773,13 @@ void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 	emit selectionShowed(selectedItem);
 }
 
+void MainWindow::handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index)
+{
+	m_CurrentPage = qobject_cast<QQuickItem*>(CurrentPage.value<QObject*>());
+	Q_ASSERT(m_CurrentPage);
+	m_d->pagesWidget->setCurrentPage(index.toInt());
+}
+
 void MainWindow::HideSelectionTools()
 {
 	m_ResizerTick->hide();
@@ -742,11 +790,18 @@ void MainWindow::HideSelectionTools()
 
 void MainWindow::on_clearButton_clicked()
 {
-	m_d->bindingWidget->clearAllBindings();
-	for (auto item : m_Items)
-		item->deleteLater();
-	m_Items.clear();
-	m_ItemUrls.clear();
+	auto items = GetAllChildren(m_CurrentPage);
+	for (auto item : items) {
+		if (m_Items.contains(item)) {
+			m_d->designWidget->rootContext()->setContextProperty(
+						m_d->designWidget->rootContext()->nameForObject(item), 0);
+			int i = m_Items.indexOf(item);
+			m_Items.removeOne(item);
+			m_ItemUrls.removeAt(i);
+			m_d->bindingWidget->detachBindingsFor(item);
+			item->deleteLater();
+		}
+	}
 }
 
 void MainWindow::on_editButton_clicked()

@@ -26,6 +26,7 @@ class MainWindow : public QWidget
 		RotatorTick* m_RotatorTick;
 		RemoverTick* m_RemoverTick;
 		QQuickItem* m_RootItem;
+		QQuickItem* m_CurrentPage;
 		QQuickItemList m_Items;
 		QQuickUrlList m_ItemUrls;
 		CoverMenu* m_LeftMenu;
@@ -52,6 +53,7 @@ class MainWindow : public QWidget
 		void on_editButton_clicked();
 		void fixWebViewPositions();
 		void ShowSelectionTools(QQuickItem* const selectedItem);
+		void handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index);
 
 	signals:
 		void resized();

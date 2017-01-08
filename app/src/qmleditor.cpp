@@ -16,6 +16,12 @@
 #include <QPropertyAnimation>
 #include <QTimer>
 
+#if defined(Q_OS_IOS)
+#define DURATION 1
+#else
+#define DURATION 400
+#endif
+
 using namespace Fit;
 
 class QmlEditorPrivate
@@ -187,7 +193,7 @@ void QmlEditorPrivate::show()
 	minimizeButton.hide();
 
 	QPropertyAnimation *animation = new QPropertyAnimation(parent, "showRatio");
-	animation->setDuration(400);
+	animation->setDuration(DURATION);
 	animation->setStartValue(0.0);
 	animation->setEndValue(1.0);
 	animation->setEasingCurve(QEasingCurve::InExpo);
@@ -210,7 +216,7 @@ void QmlEditorPrivate::hide()
 	minimizeButton.hide();
 
 	QPropertyAnimation *animation = new QPropertyAnimation(parent, "showRatio");
-	animation->setDuration(400);
+	animation->setDuration(DURATION);
 	animation->setStartValue(1.0);
 	animation->setEndValue(0.0);
 	animation->setEasingCurve(QEasingCurve::OutExpo);

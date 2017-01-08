@@ -68,7 +68,7 @@ QToolBar { \
 	padding-left: %1px; \
 	spacing: %1px; \
 	background: #1e8145; \
-	border-top: %2px solid #555555; \
+	border: none;\
 }"
 
 #define CSS_TOOLBOX_BUTTON "\
@@ -101,6 +101,16 @@ QRadioButton::indicator { \
 	border-image: url(:/resources/images/bindingbutton.png); \
 }"
 
+#define CSS_PAGES_BUTTON "\
+QRadioButton::indicator { \
+	width: %1px; \
+	height: %1px; \
+} QRadioButton::indicator::checked { \
+	border-image: url(:/resources/images/pagesbuttonfilled.png); \
+} QRadioButton::indicator::unchecked { \
+	border-image: url(:/resources/images/pagesbutton.png); \
+}"
+
 #define CSS_BINDING_LISTWIDGET \
 "QListView {\
 	background:#566573;\
@@ -127,6 +137,7 @@ QString CSS::Toolbar;
 QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
 QString CSS::BindingButton;
+QString CSS::PagesButton;
 QString CSS::BindingListWidget;
 
 void CSS::init()
@@ -142,7 +153,7 @@ void CSS::init()
 	PropertyItem = QString(CSS_PROPERTY_ITEM).arg(fit(4)).arg(fit(2)).arg(fit(5));
 
 	/* Toolbar */
-	Toolbar = QString(CSS_TOOLBAR).arg(fit(5)).arg(fit(1));
+	Toolbar = QString(CSS_TOOLBAR).arg(fit(3));
 
 	/* ToolboxButton */
 	ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(32));
@@ -152,6 +163,9 @@ void CSS::init()
 
 	/* BindingButton */
 	BindingButton = QString(CSS_BINDING_BUTTON).arg(fit(32));
+
+	/* PagesButton */
+	PagesButton = QString(CSS_PAGES_BUTTON).arg(fit(32));
 
 	/* BindingListWidget */
 	BindingListWidget = QString(CSS_BINDING_LISTWIDGET).arg(fit(5)).arg(fit(2));

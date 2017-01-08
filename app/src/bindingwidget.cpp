@@ -79,8 +79,6 @@ class BindingWidgetPrivate
 				}
 		};
 		QList<Binding> bindings;
-
-	public:
 		BindingWidgetPrivate(BindingWidget* parent);
 
 	private slots:
@@ -135,13 +133,16 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
 	QObject::connect(&editButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {editButtonClicked();});
 
 	horizontalLayout.addWidget(&addButton);
-	horizontalLayout.addWidget(&removeButton);
-	horizontalLayout.addWidget(&editButton);
 	horizontalLayout.addStretch();
+	horizontalLayout.addWidget(&removeButton);
+	horizontalLayout.addStretch();
+	horizontalLayout.addWidget(&editButton);
 
 	verticalLayout.addWidget(&bindingListWidget);
 	verticalLayout.addLayout(&horizontalLayout);
 	verticalLayout.setContentsMargins(fit(6), 0, fit(8), fit(8));
+	parent->setLayout(&verticalLayout);
+
 	/* ----------------------------- */
 	popupWidget.setParent(parent);
 	popupWidget.setObjectName("popupWindow");
@@ -270,7 +271,7 @@ void BindingWidgetPrivate::removeButtonClicked()
 
 	bindings.removeOne(binding);
 	QObject::disconnect(binding.connection);
-	bindingListWidget.takeItem(bindingListWidget.currentRow());
+	delete bindingListWidget.takeItem(bindingListWidget.currentRow());
 }
 
 void BindingWidgetPrivate::addButtonClicked()
@@ -445,7 +446,6 @@ BindingWidget::BindingWidget(QWidget *parent)
 	: QWidget(parent)
 	, m_d(new BindingWidgetPrivate(this))
 {
-	setLayout(&m_d->verticalLayout);
 }
 
 BindingWidget::~BindingWidget()

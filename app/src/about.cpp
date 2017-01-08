@@ -7,8 +7,8 @@
 #include <fit.h>
 #include <QApplication>
 
-#define TITLE_TEXT "<p><b>version</b> 1.55 <b>pbuild</b> aff736b<br>Wed Jan 4 06:36:10 2017 +0300<br></p>"
-#define LEGAL_TEXT "<p><b>© 2015-2016 Objectwheel, Inc. All Rights Reserved.</b></p>"
+#define TITLE_TEXT "<p><b>version</b> 1.56 <b>pbuild</b> 907d9e0<br>Sun Jan 9 01:49:12 2017 +0300<br></p>"
+#define LEGAL_TEXT "<p><b>© 2015-2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
 using namespace Fit;
 
@@ -39,7 +39,7 @@ AboutPrivate::AboutPrivate(QWidget* p, QWidget* cW)
 	parallelAnimationGroup.addAnimation(&aboutShifterAmination);
 
 	QPalette palette(parent->palette());
-	palette.setColor(QPalette::Window,"#444444");
+	palette.setColor(QPalette::Window,"#333739");
 	parent->setPalette(palette);
 
 	parent->setAutoFillBackground(true);

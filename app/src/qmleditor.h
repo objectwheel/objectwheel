@@ -14,9 +14,9 @@ class QmlEditor : public QWidget
 
 	public:
 		explicit QmlEditor(QWidget *parent = 0);
-		~QmlEditor();
 		void setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const urlList);
 		void setRootContext(QQmlContext* const context);
+		~QmlEditor();
 
 		float getShowRatio() const;
 		void setShowRatio(float value);

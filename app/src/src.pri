@@ -17,7 +17,10 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/scrollarea.h \
 							 $$PWD/about.h \
 							 $$PWD/bubblehead.h \
-							 $$PWD/qmleditor.h
+							 $$PWD/qmleditor.h \
+							 $$PWD/pageswidget.h \
+							 $$PWD/splashscreen.h \
+							 $$PWD/splashscreen_p.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -36,7 +39,10 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/scrollarea.cpp \
 							 $$PWD/about.cpp \
 							 $$PWD/bubblehead.cpp \
-							 $$PWD/qmleditor.cpp
+							 $$PWD/qmleditor.cpp \
+							 $$PWD/pageswidget.cpp \
+							 $$PWD/splashscreen.cpp \
+							 $$PWD/splashscreen_p.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
