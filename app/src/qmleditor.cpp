@@ -143,7 +143,7 @@ void QmlEditorPrivate::saved(const QString& text)
 	if (componentName.isEmpty()) componentName = "anonymous";
 	for (int i=0; i<itemList->size();i++) {
 		if (componentName == QString(rootContext->nameForObject((*itemList)[i])) ||
-			componentName == QString("dpi")) {
+			componentName == QString("dpi") || componentName == QString("swipeView")) {
 			componentName += QString::number(count);
 			count++;
 			i = 0;

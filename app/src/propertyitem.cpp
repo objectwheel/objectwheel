@@ -55,7 +55,7 @@ void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlC
 	QString componentName = id;
 	for (int i=0; i<m_Items->size();i++) {
 		if (componentName == QString(context->nameForObject((QObject*)(m_Items->at(i)))) ||
-			componentName == QString("dpi")) {
+			componentName == QString("dpi") || componentName == QString("swipeView")) {
 			componentName += QString::number(count);
 			count++;
 			i = 0;

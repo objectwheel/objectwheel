@@ -277,6 +277,7 @@ void MainWindow::SetupGui()
 		auto v2 = QQmlProperty::read(m_RootItem, "swipeView", m_d->designWidget->rootContext());
 		auto view = qobject_cast<QQuickItem*>(v2.value<QObject*>());
 		Q_ASSERT(view);
+		m_d->designWidget->rootContext()->setContextProperty("swipeView", view);
 		auto v3 = qmlContext(view)->contextProperty("page");
 		auto item = qobject_cast<QQuickItem*>(v3.value<QObject*>());
 		Q_ASSERT(item);
@@ -428,7 +429,8 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						if (componentName.isEmpty()) componentName = "anonymous";
 						for (int i=0; i<m_Items.size();i++) {
 							if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_Items[i])) ||
-								componentName == QString("dpi")) {
+								componentName == QString("dpi") || componentName == QString("swipeView")) {
+								// FIXME: If it's conflict with page names?
 								componentName += QString::number(count);
 								count++;
 								i = 0;

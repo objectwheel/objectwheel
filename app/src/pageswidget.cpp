@@ -16,6 +16,22 @@
 
 using namespace Fit;
 
+#define PAGE_CODE "\
+import QtQuick 2.0 \n\
+Item { \n\
+id:%1 \n\
+\n\
+function show() { \n\
+	for (var i = 0; i < swipeView.count; i++) { \n\
+		if (swipeView.itemAt(i) === %1) { \n\
+			swipeView.currentIndex = i \n\
+		} \n\
+	} \n\
+} \n\
+\n\
+}"
+
+
 class PagesWidgetPrivate
 {
 	public:
@@ -174,7 +190,7 @@ void PagesWidgetPrivate::addButtonClicked()
 	pagesListWidget.addItem(name);
 
 	QQmlComponent c(qmlEngine((QObject*)swipeItem));
-	c.setData(QByteArray().insert(0,QString("import QtQuick 2.0\nItem{\nid:%1\n}").arg(name)), QUrl());
+	c.setData(QByteArray().insert(0,QString(PAGE_CODE).arg(name)), QUrl());
 	auto item = qobject_cast<QQuickItem*>(c.create(qmlContext((QObject*)swipeItem)));
 	Q_ASSERT(item);
 	item->setParentItem(swipeItem);

@@ -20,6 +20,13 @@ Rectangle {
         }
         Item {
             id: page
+            function show() {
+                for (var i = 0; i < swipeView.count; i++) {
+                    if (swipeView.itemAt(i) === page) {
+                        swipeView.currentIndex = i
+                    }
+                }
+            }
         }
     }
 
