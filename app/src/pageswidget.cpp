@@ -140,7 +140,7 @@ PagesWidgetPrivate::PagesWidgetPrivate(PagesWidget* p)
 	verticalLayout.setContentsMargins(fit(6), 0, fit(8), fit(8));
 	parent->setLayout(&verticalLayout);
 
-	pagesListWidget.addItem("page");
+	pagesListWidget.addItem("page1");
 }
 
 const QList<QQuickItem*> PagesWidgetPrivate::GetAllChildren(QQuickItem* const item) const

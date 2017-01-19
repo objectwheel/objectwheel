@@ -286,10 +286,10 @@ void MainWindow::SetupGui()
 		connect(view, SIGNAL(currentIndexChanged()), this, SLOT(HideSelectionTools()));
 		Q_ASSERT(view);
 		m_d->designWidget->rootContext()->setContextProperty("swipeView", view);
-		auto v3 = qmlContext(view)->contextProperty("page");
+		auto v3 = qmlContext(view)->contextProperty("page1");
 		auto item = qobject_cast<QQuickItem*>(v3.value<QObject*>());
 		Q_ASSERT(item);
-		m_d->designWidget->rootContext()->setContextProperty("page", item);
+		m_d->designWidget->rootContext()->setContextProperty("page1", item);
 		m_d->pagesWidget->setSwipeItem(view);
 		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
 		m_d->pagesWidget->setItemList(&m_Items);

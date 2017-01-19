@@ -19,10 +19,10 @@ Rectangle {
             designArea.currentPageChanged(swipeView.currentItem, swipeView.currentIndex)
         }
         Item {
-            id: page
+            id: page1
             function show() {
                 for (var i = 0; i < swipeView.count; i++) {
-                    if (swipeView.itemAt(i) === page) {
+                    if (swipeView.itemAt(i) === page1) {
                         swipeView.currentIndex = i
                     }
                 }
