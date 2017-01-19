@@ -74,6 +74,26 @@ function suffix(name) {
     return fileManager.suffix(name)
 }
 
+function separator() {
+    init()
+    return fileManager.separator()
+}
+
+function ls(dir) {
+    init()
+    return fileManager.ls(dir)
+}
+
+function lsdir(dir) {
+    init()
+    return fileManager.lsdir(dir)
+}
+
+function lsfile(dir) {
+    init()
+    return fileManager.lsfile(dir)
+}
+
 function ftype(file) {
     return stype(suffix(file))
 }

@@ -30,6 +30,7 @@ import "delaycaller.js" as DelayCaller
 //TODO: Keşe alınan dosya silinirse ?
 //TODO: Keşe alınan dosyanın adı değişirse ?
 //FIX: indexOf(toolDir) bunları fixle
+//FIX: Seperator restores its size if I resize window
 
 Item {
     id: root
@@ -46,7 +47,22 @@ Item {
             from = from.toString().replace("file://", "")
             to = to.toString().replace("file://", "")
             if (isdir) {
-                console.log(from + "," + to)
+                var updateSubCaches = function(dirold, dirnew) {
+                    var fileList = FileManager.lsfile(dirnew)
+                    for (var i = 0; i < fileList.length; i++) {
+                        for (var ii = 0; ii < urlCache.length; ii++) {
+                            if (urlCache[ii] === (dirold + "/" + fileList[i])) {
+                                urlCache[ii] = (dirnew + "/" + fileList[i])
+                            }
+                        }
+                    }
+
+                    var dirList = FileManager.lsdir(dirnew)
+                    for (var j = 0; j < dirList.length; j++) {
+                        updateSubCaches(dirold + "/" + dirList[j], dirnew + "/" + dirList[j])
+                    }
+                }
+                updateSubCaches(from, to)
             } else if (isTextFile(from) && isTextFile(to)) {
                 for (var i = 0; i < urlCache.length; i++) {
                     if (urlCache[i] === from) {
@@ -75,8 +91,32 @@ Item {
         }
         onEntryRemoved: {
             urlval = urlval.toString().replace("file://", "")
-            if (!isdir && isTextFile(urlval)) {
-                root.url = urlval
+            if (isdir) {
+                for (var i = 0; i < urlCache.length; i++) {
+                    if (urlCache[i].indexOf(urlval + "/") >= 0) {
+                        urlCache.splice(i, 1)
+                        saveCache.splice(i, 1)
+                    }
+                }
+
+                for (var j=0; j<folderBrowser.count;j++) {
+                    if (folderBrowser.itemAt(j) === "main.qml") {
+                        folderBrowser.currentIndex = j
+                    }
+                }
+            } else if (isTextFile(urlval)) {
+                for (var ii = 0; ii < urlCache.length; ii++) {
+                    if (urlCache[ii] === urlval) {
+                        urlCache.splice(ii, 1)
+                        saveCache.splice(ii, 1)
+                    }
+                }
+
+                for (var jj=0; jj<folderBrowser.count;jj++) {
+                    if (folderBrowser.itemAt(jj) === "main.qml") {
+                        folderBrowser.currentIndex = jj
+                    }
+                }
             }
         }
 
@@ -232,6 +272,7 @@ Item {
                         Repeater {
                             id: lineNumberRepeater
                             model: editor.lineCount
+                            clip: true
                             Text {
                                 property alias bgcolor: rect.color
                                 width: Fit.fit(20)
@@ -239,12 +280,13 @@ Item {
                                 height: editor.cursorRectangle.height
                                 color: "#e0e0e0"
                                 horizontalAlignment: TextEdit.AlignHCenter
+                                font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false
                                 Rectangle {
                                     id: rect
                                     color: 'transparent'
                                     anchors.fill: parent
-                                    opacity: 0.5
                                     z:-1
+                                    radius: Fit.fit(1)
                                 }
                             }
                         }
@@ -548,7 +590,7 @@ Item {
             } catch (e) {
                 var error = e.qmlErrors[0];
                 errorMessage.text = "Error, line "+error.lineNumber+":"+error.columnNumber+" : "+error.message;
-                lineNumberRepeater.itemAt(error.lineNumber - 1).bgcolor = 'red'
+                lineNumberRepeater.itemAt(error.lineNumber - 1).bgcolor = "#c74c3c"
                 return;
             }
         } else {
@@ -566,7 +608,7 @@ Item {
                     errorMessage.text = "Error code 0x54."
                 }
             } else {
-                var regex = /file:\/\/.*(:)/g
+                var regex = /file:\/\/.*?:/g
                 var festring = component.errorString().split("\n")
                 var estring = festring[festring.length - 2]
                 var fpath = estring.match(regex)[0].replace("file://","").slice(0, -1)
@@ -577,7 +619,7 @@ Item {
                 var ferror = "Error, line " + line + " in " + fname + ":" + message
                 errorMessage.text = ferror
                 if (FileManager.fname(root.url) === fname) {
-                    lineNumberRepeater.itemAt(line - 1).bgcolor = 'red'
+                    lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
                 }
             }
 
