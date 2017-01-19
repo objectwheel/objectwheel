@@ -3,11 +3,15 @@
 #include <QLinearGradient>
 #include <QPainter>
 #include <fit.h>
+#include <QPropertyAnimation>
+
+#define DURATION 450
 
 using namespace Fit;
 
 SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
 	: QWidget(parent)
+	, showRatio(1.0)
 {
 	move(0,0);
 	resize(parent->size());
@@ -30,37 +34,56 @@ void SplashScreenPrivate::setLoadingDevice(QIODevice* device)
 	movie.start();
 }
 
+float SplashScreenPrivate::getShowRatio() const
+{
+	return showRatio;
+}
+
+void SplashScreenPrivate::setShowRatio(float value)
+{
+	showRatio = value;
+}
+
+void SplashScreenPrivate::hide()
+{
+	QPropertyAnimation *animation = new QPropertyAnimation(this, "showRatio");
+	animation->setDuration(DURATION);
+	animation->setStartValue(1.0);
+	animation->setEndValue(0.001);
+	animation->setEasingCurve(QEasingCurve::OutExpo);
+	animation->start();
+	QObject::connect(animation, SIGNAL(valueChanged(QVariant)), this, SLOT(update()));
+	QObject::connect(animation, &QPropertyAnimation::finished, [this]{setHidden(true);showRatio=1;});
+	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+}
+
 void SplashScreenPrivate::paintEvent(QPaintEvent* event)
 {
 	QWidget::paintEvent(event);
 
 	QPainter painter(this);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::TextAntialiasing);
+	if (showRatio > 0.0 && showRatio < 1.0) {
+		int caliber = qMax(width(), height()) / 2.0;
+		QPainterPath path;
+		path.addEllipse(rect().center(), caliber * showRatio, caliber * showRatio);
+		painter.setClipPath(path);
+	}
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(backgroundBrush);
 	painter.drawRect(rect());
 
-//	float h = height() - iconSize.height();
-//	painter.drawPixmap(rect().adjusted(width()/2.0 - iconSize.width()/2.0,
-//									   h - h/1.618,
-//									   -(width()/2.0 - iconSize.width()/2.0),
-//									   -(h/1.618)), icon.pixmap(iconSize));
+	int spacing = fit(40);
+	int x = width() / 2.0;
+	int y = height() - height()/1.618;
+	painter.drawPixmap(x - iconSize.width()/2.0, y - iconSize.height()/2.0,
+					   iconSize.width(), iconSize.height(), icon.pixmap(iconSize));
 
-	float h2 = height() - loadingSize.height();
-	painter.drawPixmap(rect().adjusted(width()/2.0 - loadingSize.width()/2.0,
-									  h2/1.618 ,
-									   -(width()/2.0 - loadingSize.width()/2.0),
-									   -(h2 - h2/1.618)), movie.currentPixmap());
+	y += (spacing + iconSize.height());
+	painter.drawPixmap(x - loadingSize.width()/2.0, y - loadingSize.height()/2.0,
+					   loadingSize.width(), loadingSize.height(), movie.currentPixmap());
 
-	QFont f;
-	f.setPixelSize(fit(40));
-	painter.setFont(f);
-	float h = height() - fit(50);
-	painter.setPen(Qt::white);
-	painter.drawText(0, h - h/1.618, width(), fit(50), Qt::AlignCenter, "Objectwheel");
-
-
-	QFont f2;
-	f2.setPixelSize(fit(14));
-	painter.setFont(f2);
-	painter.drawText(0, h/1.618 + loadingSize.height(), width(), fit(20), Qt::AlignCenter, "Launching...");
+	y += (loadingSize.height());
+	painter.setPen(textColor);
+	painter.drawText(0, y - fit(10), width(), fit(20), Qt::AlignCenter, text);
 }

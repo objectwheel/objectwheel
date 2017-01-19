@@ -17,6 +17,10 @@
 #include <QtQuick>
 #include <QtWidgets>
 #include <QtNetwork>
+#include <filemanager.h>
+#include <QFileInfo>
+
+#define TOOLS_URL (QUrl::fromUserInput("qrc:/resources/tools/tools.json"))
 
 #if defined(Q_OS_IOS)
 #include <ios.h>
@@ -38,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_d->setupUi(this);
 	SetToolsDir();
 	SetupGui();
-	DownloadTools(QUrl::fromUserInput("qrc:/resources/tools/tools.json"));
+	DownloadTools(TOOLS_URL);
 }
 
 void MainWindow::SetupGui()
@@ -57,7 +61,7 @@ void MainWindow::SetupGui()
 	m_RotatorTick->setIcon(QIcon(":/resources/images/rotate-icon.png"));
 
 	/* Toolbox stylizing */
-	m_d->toolboxWidget->setIconSize(fit({30, 30}));
+	m_d->toolboxList->setIconSize(fit({30, 30}));
 
 	/* Start filtering design area */
 	m_d->designWidget->installEventFilter(this);
@@ -93,7 +97,6 @@ void MainWindow::SetupGui()
 	connect(m_d->editButton, &QPushButton::clicked, m_RotatorTick, &RotatorTick::hide);
 
 	/* Enable/Disable other controls when editButton clicked */
-	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->toolboxWidget->setEnabled(!checked);});
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->propertiesWidget->setEnabled(checked);});
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->clearButton->setEnabled(!checked);});
 
@@ -119,7 +122,7 @@ void MainWindow::SetupGui()
 
 	/* Add Title Bar */
 	fit(m_d->titleBar, Fit::Height, true);
-	m_d->titleBar->setText("Studio");
+	m_d->titleBar->setText("Objectwheel Studio");
 	m_d->titleBar->setColor("#2b5796");
 	m_d->titleBar->setShadowColor("#e0e4e7");
 	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
@@ -134,7 +137,7 @@ void MainWindow::SetupGui()
 	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
 
 	/* Pop-up toolbox widget's scrollbar */
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxWidget->showBar(); });
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxList->showBar(); });
 	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar(); });
 	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
 
@@ -186,6 +189,7 @@ void MainWindow::SetupGui()
 	toolboxButton->setStyleSheet(CSS::ToolboxButton);
 	toolboxButton->setCheckable(true);
 	toolboxButton->setChecked(true);
+	toolboxButton->setCursor(Qt::PointingHandCursor);
 	QWidgetAction* toolboxButtonAction = new QWidgetAction(this);
 	toolboxButtonAction->setDefaultWidget(toolboxButton);
 	toolboxButtonAction->setData(toolboxVariant);
@@ -195,6 +199,7 @@ void MainWindow::SetupGui()
 	connect(toolboxButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
 	QRadioButton* propertiesButton = new QRadioButton;
+	propertiesButton->setCursor(Qt::PointingHandCursor);
 	propertiesButton->setStyleSheet(CSS::PropertiesButton);
 	propertiesButton->setCheckable(true);
 	QWidgetAction* propertiesButtonAction = new QWidgetAction(this);
@@ -206,6 +211,7 @@ void MainWindow::SetupGui()
 	connect(propertiesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
 	QRadioButton* bindingButton = new QRadioButton;
+	bindingButton->setCursor(Qt::PointingHandCursor);
 	bindingButton->setStyleSheet(CSS::BindingButton);
 	bindingButton->setCheckable(true);
 	QWidgetAction* bindingButtonAction = new QWidgetAction(this);
@@ -217,6 +223,7 @@ void MainWindow::SetupGui()
 	connect(bindingButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
 	QRadioButton* pagesButton = new QRadioButton;
+	pagesButton->setCursor(Qt::PointingHandCursor);
 	pagesButton->setStyleSheet(CSS::PagesButton);
 	pagesButton->setCheckable(true);
 	QWidgetAction* pagesButtonAction = new QWidgetAction(this);
@@ -229,21 +236,21 @@ void MainWindow::SetupGui()
 
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
-	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
 	connect(m_d->bindingWidget, &BindingWidget::popupShowed, [=] {
 		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#2b5796;}");
 	});
 	connect(m_d->bindingWidget, &BindingWidget::popupHid, [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
 	});
 	connect(toolboxButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
 	});
 	connect(propertiesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
 	});
 	connect(pagesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
 	});
 	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
 		if (m_d->bindingWidget->hasPopupOpen())
@@ -276,6 +283,7 @@ void MainWindow::SetupGui()
 		Q_ASSERT(m_CurrentPage);
 		auto v2 = QQmlProperty::read(m_RootItem, "swipeView", m_d->designWidget->rootContext());
 		auto view = qobject_cast<QQuickItem*>(v2.value<QObject*>());
+		connect(view, SIGNAL(currentIndexChanged()), this, SLOT(HideSelectionTools()));
 		Q_ASSERT(view);
 		m_d->designWidget->rootContext()->setContextProperty("swipeView", view);
 		auto v3 = qmlContext(view)->contextProperty("page");
@@ -321,7 +329,7 @@ void MainWindow::SetupGui()
 	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-	QTimer::singleShot(2000,[this] {
+	QTimer::singleShot(3000,[this] {
 #else
 	QTimer::singleShot(5000,[this] {
 #endif
@@ -361,95 +369,86 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 			{
 				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
 
-				/* Edit mode things */
-				if (m_d->editButton->isChecked())
+				if (nullptr != pressedItem)
 				{
-
-					if (nullptr != pressedItem)
+					/* Handled drops coming from design area itself */
+					if (true == dropEvent->mimeData()->hasFormat("designarea/x-qquickitem"))
 					{
-						/* Handled drops coming from design area itself */
-						if (true == dropEvent->mimeData()->hasFormat("designarea/x-qquickitem"))
+						/* Get deepest item under the dropped point */
+						QQuickItem* itemAtDroppedPoint = GetDeepestDesignItemOnPoint(dropEvent->pos());
+
+						/* Get all children */
+						QQuickItemList childItems = GetAllChildren(pressedItem);
+
+						/* Get fixed dropped point as in desing area coord system */
+						QPointF droppedPoint = dropEvent->pos() - dragStartPoint +
+											   m_CurrentPage->mapFromItem(pressedItem->parentItem(), pressedItem->position());
+
+						/* Move related item to its new position */
+						if (nullptr == itemAtDroppedPoint)
 						{
-							/* Get deepest item under the dropped point */
-							QQuickItem* itemAtDroppedPoint = GetDeepestDesignItemOnPoint(dropEvent->pos());
-
-							/* Get all children */
-							QQuickItemList childItems = GetAllChildren(pressedItem);
-
-							/* Get fixed dropped point as in desing area coord system */
-							QPointF droppedPoint = dropEvent->pos() - dragStartPoint +
-												   m_CurrentPage->mapFromItem(pressedItem->parentItem(), pressedItem->position());
-
-							/* Move related item to its new position */
-							if (nullptr == itemAtDroppedPoint)
-							{
-								pressedItem->setParentItem(m_CurrentPage);
-								pressedItem->setPosition(droppedPoint);
-							}
-							else if (true == childItems.contains(itemAtDroppedPoint))
-							{
-								pressedItem->setPosition(pressedItem->parentItem()->mapFromItem(m_CurrentPage, droppedPoint));
-							}
-							else if (pressedItem != itemAtDroppedPoint) // else handled in previous else if
-							{
-								QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_CurrentPage, droppedPoint);
-								pressedItem->setParentItem(itemAtDroppedPoint);
-								pressedItem->setPosition(mappedPoint);
-							}
-							fixWebViewPosition(pressedItem);
-							ShowSelectionTools(pressedItem);
-							event->accept();
-							return true;
+							pressedItem->setParentItem(m_CurrentPage);
+							pressedItem->setPosition(droppedPoint);
 						}
-					}
-				}
-
-				/* Non-edit mode things */
-				else
-				{
-					/* Handled drops coming from toolbox */
-					if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
-					{
-						auto url = dropEvent->mimeData()->urls().at(0);
-						//						 m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
-						QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
-						component.loadUrl(url);
-
-						QQmlIncubator incubator;
-						component.create(incubator, m_d->designWidget->rootContext());
-						while (incubator.isLoading()) {
-							QApplication::processEvents(QEventLoop::AllEvents, 50);
+						else if (true == childItems.contains(itemAtDroppedPoint))
+						{
+							pressedItem->setPosition(pressedItem->parentItem()->mapFromItem(m_CurrentPage, droppedPoint));
 						}
-						QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
-
-						if (component.isError() || !qml) {qWarning() << component.errors(); qApp->quit();}
-
-						int count = 1;
-						QString componentName = qmlContext(qml)->nameForObject(qml);
-						if (componentName.isEmpty()) componentName = "anonymous";
-						for (int i=0; i<m_Items.size();i++) {
-							if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_Items[i])) ||
-								componentName == QString("dpi") || componentName == QString("swipeView")) {
-								// FIXME: If it's conflict with page names?
-								componentName += QString::number(count);
-								count++;
-								i = 0;
-							}
+						else if (pressedItem != itemAtDroppedPoint) // else handled in previous else if
+						{
+							QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_CurrentPage, droppedPoint);
+							pressedItem->setParentItem(itemAtDroppedPoint);
+							pressedItem->setPosition(mappedPoint);
 						}
-						m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
-						qml->setParentItem(m_CurrentPage);
-						qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
-						qml->setClip(true); // Even if it's not true
-						fit(qml, Fit::WidthHeight);
-						m_Items << qml;
-						m_ItemUrls << url;
-
-						QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
+						fixWebViewPosition(pressedItem);
+						ShowSelectionTools(pressedItem);
 						event->accept();
 						return true;
 					}
 				}
 
+				/* Handled drops coming from toolbox */
+				if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
+				{
+					auto url = dropEvent->mimeData()->urls().at(0);
+					//						 m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+					QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
+					component.loadUrl(url);
+
+					QQmlIncubator incubator;
+					component.create(incubator, m_d->designWidget->rootContext());
+					while (incubator.isLoading()) {
+						QApplication::processEvents(QEventLoop::AllEvents, 50);
+					}
+					QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
+
+					if (component.isError() || !qml) {qWarning() << component.errors(); qApp->quit();}
+
+					int count = 1;
+					QString componentName = qmlContext(qml)->nameForObject(qml);
+					if (componentName.isEmpty()) componentName = "anonymous";
+					for (int i=0; i<m_Items.size();i++) {
+						if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_Items[i])) ||
+							componentName == QString("dpi") || componentName == QString("swipeView")) {
+							// FIXME: If it's conflict with page names?
+							componentName += QString::number(count);
+							count++;
+							i = 0;
+						}
+					}
+					m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
+					qml->setParentItem(m_CurrentPage);
+					qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
+					qml->setClip(true); // Even if it's not true
+					fit(qml, Fit::WidthHeight);
+					m_Items << qml;
+					m_ItemUrls << url;
+
+					QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
+					if (m_d->editButton->isChecked()) ShowSelectionTools(qml);
+					event->accept();
+					return true;
+				}
 				return false;
 			}
 
@@ -620,19 +619,16 @@ void MainWindow::DownloadTools(const QUrl& url)
 		QJsonDocument toolsDoc = QJsonDocument::fromJson(reply->readAll());
 		QJsonObject toolsObject = toolsDoc.object();
 
-		if (true == CheckTools(toolsObject))
-		{
-			for (int i = 0; i < toolsObject.size(); i++)
-			{
-				QString toolName = toolsObject.keys().at(i);
+		if (toolsExists(toolsObject)) {
+			for (auto toolName : lsdir(m_ToolsDir)) {
 				AddTool(toolName);
 			}
 			reply->deleteLater();
 			return;
 		}
 
-		if (!QDir(m_ToolsDir).removeRecursively())
-			Q_ASSERT_X(0, "GetTools()", "Can not remove tools dir");
+//		if (!QDir(m_ToolsDir).removeRecursively())
+//			Q_ASSERT_X(0, "GetTools()", "Can not remove tools dir");
 
 		for (int i = 0; i < toolsObject.size(); i++)
 		{
@@ -667,14 +663,15 @@ void MainWindow::AddTool(const QString& name)
 	QList<QUrl> urls;
 	QListWidgetItem* item = new QListWidgetItem(QIcon(m_ToolsDir + "/" + name + "/icon.png"), name);
 	urls << QUrl::fromLocalFile(m_ToolsDir + "/" + name + "/main.qml");
-	m_d->toolboxWidget->addItem(item);
-	m_d->toolboxWidget->AddUrls(item,urls);
+	m_d->toolboxList->addItem(item);
+	m_d->toolboxList->AddUrls(item,urls);
 }
 
-bool MainWindow::CheckTools(const QJsonObject& toolsObject) const
-{
-	//	if (!QDir().exists(m_ToolsDir))
-	//		return false;
+bool MainWindow::toolsExists(const QJsonObject& toolsObject) const
+{ // Return true if tools exist
+	Q_UNUSED(toolsObject);
+	if (!QDir().exists(m_ToolsDir)) return false;
+	else return true;
 
 	//	for (int i = 0; i < toolsObject.size(); i++)
 	//	{
@@ -682,10 +679,7 @@ bool MainWindow::CheckTools(const QJsonObject& toolsObject) const
 	//		if (!QDir(m_ToolsDir).exists(toolName))
 	//			return false;
 	//	}
-
 	//	return true;
-	Q_UNUSED(toolsObject);
-	return false;
 }
 
 void MainWindow::ExtractZip(const QByteArray& zipData, const QString& path) const
@@ -792,16 +786,31 @@ void MainWindow::HideSelectionTools()
 
 void MainWindow::on_clearButton_clicked()
 {
-	auto items = GetAllChildren(m_CurrentPage);
-	for (auto item : items) {
-		if (m_Items.contains(item)) {
-			m_d->designWidget->rootContext()->setContextProperty(
-						m_d->designWidget->rootContext()->nameForObject(item), 0);
-			int i = m_Items.indexOf(item);
-			m_Items.removeOne(item);
-			m_ItemUrls.removeAt(i);
-			m_d->bindingWidget->detachBindingsFor(item);
-			item->deleteLater();
+	QMessageBox msgBox;
+	msgBox.setText("<b>This will clear the current page's content.</b>");
+	msgBox.setInformativeText("Do you want to continue?");
+	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+	msgBox.setDefaultButton(QMessageBox::No);
+	msgBox.setIcon(QMessageBox::Warning);
+	const int ret = msgBox.exec();
+	switch (ret) {
+		case QMessageBox::Yes: {
+			auto items = GetAllChildren(m_CurrentPage);
+			for (auto item : items) {
+				if (m_Items.contains(item)) {
+					m_d->designWidget->rootContext()->setContextProperty(
+								m_d->designWidget->rootContext()->nameForObject(item), 0);
+					int i = m_Items.indexOf(item);
+					m_Items.removeOne(item);
+					m_ItemUrls.removeAt(i);
+					m_d->bindingWidget->detachBindingsFor(item);
+					item->deleteLater();
+				}
+			}
+			break;
+		} default: {
+			// Do nothing
+			break;
 		}
 	}
 }
@@ -815,12 +824,72 @@ void MainWindow::on_editButton_clicked()
 	m_d->bindingWidget->clearList();
 }
 
+void MainWindow::toolboxAddButtonClicked()
+{
+	qWarning("aaaaaaaaaaaaaaaa");
+}
+
+void MainWindow::toolboxRemoveButtonClicked()
+{
+	if (m_d->toolboxList->currentRow() < 0) return;
+	auto name = m_d->toolboxList->currentItem()->text();
+	QMessageBox msgBox;
+	msgBox.setText(QString("<b>This will remove %1 named tool from Tool Library.</b>").arg(name));
+	msgBox.setInformativeText("Do you want to continue?");
+	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+	msgBox.setDefaultButton(QMessageBox::No);
+	msgBox.setIcon(QMessageBox::Warning);
+	const int ret = msgBox.exec();
+	switch (ret) {
+		case QMessageBox::Yes: {
+			rm(m_ToolsDir + separator() + name);
+			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
+			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
+			break;
+		} default: {
+			// Do nothing
+			break;
+		}
+	}
+}
+
+void MainWindow::toolboxEditButtonClicked()
+{
+	if (m_d->toolboxList->currentRow() < 0) return;
+	auto cItem = m_d->toolboxList->currentItem();
+	m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
+	m_d->qmlEditor->setRootFolder(m_ToolsDir + separator() + m_d->toolboxList->currentItem()->text());
+}
+
+void MainWindow::toolboxResetButtonClicked()
+{
+	QMessageBox msgBox;
+	msgBox.setText("<b>This will reset Tool Library.</b>");
+	msgBox.setInformativeText("Do you want to continue?");
+	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+	msgBox.setDefaultButton(QMessageBox::No);
+	msgBox.setIcon(QMessageBox::Warning);
+	const int ret = msgBox.exec();
+	switch (ret) {
+		case QMessageBox::Yes: {
+			m_d->toolboxList->ClearUrls();
+			m_d->toolboxList->clear();
+			rm(m_ToolsDir);
+			DownloadTools(TOOLS_URL);
+			break;
+		} default: {
+			// Do nothing
+			break;
+		}
+	}
+}
+
 void MainWindow::SetToolsDir()
 {
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
 	m_ToolsDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0) + "/tools";
 #else
-	m_ToolsDir = "./tools";
+	m_ToolsDir = QCoreApplication::applicationDirPath() + separator() + "tools";
 #endif
 }
 
@@ -834,5 +903,5 @@ MainWindow::~MainWindow()
 // TODO: Make it possible to resize(zoom) and rotate operations with fingers
 // TODO: Layouts?
 // TODO: Code a version numberer for tools' objectNames
-// FIXME: Make CheckTools function works
+// FIXME: Make toolsExists function works
 // FIXME: changed qml file doesn't make changes on designer due to source url is same

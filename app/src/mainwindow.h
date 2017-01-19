@@ -37,13 +37,12 @@ class MainWindow : public QWidget
 		~MainWindow();
 		void SetToolsDir();
 		void SetupGui();
-		bool CheckTools(const QJsonObject& toolsObject) const;
+		bool toolsExists(const QJsonObject& toolsObject) const;
 		void DownloadTools(const QUrl& url);
 		void AddTool(const QString& name);
 		void ExtractZip(const QByteArray& zipData, const QString& path) const;
 		QQuickItem* GetDeepestDesignItemOnPoint(const QPoint& point) const;
 		const QQuickItemList GetAllChildren(QQuickItem* const item) const;
-		void HideSelectionTools();
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
 		void fixWebViewPosition(QQuickItem* const item);
@@ -51,7 +50,12 @@ class MainWindow : public QWidget
 	private slots:
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
+		void toolboxAddButtonClicked();
+		void toolboxRemoveButtonClicked();
+		void toolboxEditButtonClicked();
+		void toolboxResetButtonClicked();
 		void fixWebViewPositions();
+		void HideSelectionTools();
 		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index);
 

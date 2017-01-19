@@ -2,6 +2,7 @@
 #define QMLEDITOR_H
 
 #include <QWidget>
+#include <QQmlEngine>
 
 class QmlEditorPrivate;
 class QQuickItem;
@@ -24,6 +25,8 @@ class QmlEditor : public QWidget
 	public slots:
 		void selectItem(QObject* const item);
 		void setShowCenter(const QPoint& p);
+		void setRootFolder(const QString& folder);
+		void show(const QString& url);
 		void show();
 		void hide();
 
@@ -37,7 +40,19 @@ class QmlEditor : public QWidget
 	private:
 		QmlEditorPrivate* m_d;
 		float showRatio;
+};
 
+class CacheCleaner : public QObject
+{
+		Q_OBJECT
+	private:
+		static QQmlEngine* engine;
+
+	public:
+		explicit CacheCleaner (QObject* parent = 0) : QObject(parent) {}
+		Q_INVOKABLE inline void clear() { engine->clearComponentCache(); }
+		inline static void setEngine(QQmlEngine* e) { engine = e; }
+		inline static void registerQmlType() { qmlRegisterType<CacheCleaner>("com.objectwheel.editor",1,0,"CacheCleaner"); }
 };
 
 #endif // QMLEDITOR_H

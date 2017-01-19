@@ -108,6 +108,7 @@ void PropertyItem::fillCup()
 
 			widget->setReadOnly(true);
 			QCheckBox* enabler = new QCheckBox;
+			enabler->setCursor(Qt::PointingHandCursor);
 			connect(enabler, static_cast<void(QCheckBox::*)(int)>(&QCheckBox::stateChanged),[=](int checked){
 				if (checked == Qt::Unchecked) {
 					widget->setReadOnly(true);
@@ -133,12 +134,14 @@ void PropertyItem::fillCup()
 			widget->setRange(-9999,9999);
 			widget->setAccelerated(true);
 			widget->installEventFilter(this);
+			widget->setCursor(Qt::PointingHandCursor);
 			widget->setValue(m_Property.first.read(m_Property.second).toInt());
 			layout->addWidget(widget);
 			connect(widget,static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),[&](int b){applyValue(b);});
 
 			widget->findChild<QLineEdit*>()->setReadOnly(true);
 			QCheckBox* enabler = new QCheckBox;
+			enabler->setCursor(Qt::PointingHandCursor);
 			connect(enabler, static_cast<void(QCheckBox::*)(int)>(&QCheckBox::stateChanged),[=](int checked){
 				if (checked == Qt::Unchecked) {
 					widget->findChild<QLineEdit*>()->setReadOnly(true);
@@ -164,12 +167,14 @@ void PropertyItem::fillCup()
 			widget->setSingleStep(0.1);
 			widget->setRange(-9999,9999);
 			widget->setAccelerated(true);
+			widget->setCursor(Qt::PointingHandCursor);
 			widget->installEventFilter(this);
 			widget->setValue(m_Property.first.read(m_Property.second).toDouble());
 			connect(widget,static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),[&](double b){applyValue(b);});
 
 			widget->findChild<QLineEdit*>()->setReadOnly(true);
 			QCheckBox* enabler = new QCheckBox;
+			enabler->setCursor(Qt::PointingHandCursor);
 			connect(enabler, static_cast<void(QCheckBox::*)(int)>(&QCheckBox::stateChanged),[=](int checked){
 				if (checked == Qt::Unchecked) {
 					widget->findChild<QLineEdit*>()->setReadOnly(true);
@@ -192,6 +197,7 @@ void PropertyItem::fillCup()
 			widget->setCurrentFont(qvariant_cast<QFont>(m_Property.first.read(m_Property.second)));
 			widget->installEventFilter(this);
 			widget->setFixedHeight(fit(30));
+			widget->setCursor(Qt::PointingHandCursor);
 			widget->findChild<QLineEdit*>()->setReadOnly(true);
 			connect(widget,static_cast<void(QFontComboBox::*)(const QFont&)>(&QFontComboBox::currentFontChanged),
 					[&](const QFont& b){applyValue(b);});
@@ -203,6 +209,7 @@ void PropertyItem::fillCup()
 			size->setFixedHeight(fit(30));
 			size->setStyleSheet(CSS::SpinBox);
 			size->setRange(6, 72);
+			size->setCursor(Qt::PointingHandCursor);
 			size->setAlignment(Qt::AlignCenter);
 			size->findChild<QLineEdit*>()->setReadOnly(true);
 			size->setValue(qvariant_cast<QFont>(m_Property.first.read(m_Property.second)).pointSize());
@@ -218,6 +225,7 @@ void PropertyItem::fillCup()
 			weight->installEventFilter(this);
 			weight->setFixedHeight(fit(30));
 			weight->setEditable(false);
+			weight->setCursor(Qt::PointingHandCursor);
 			weight->addItem("Bold");
 			weight->addItem("Regular");
 			weight->addItem("Bold Italic");
@@ -290,6 +298,7 @@ void PropertyItem::fillId(QObject* const selectedItem, QQmlContext* const contex
 
 	widget->setReadOnly(true);
 	QCheckBox* enabler = new QCheckBox;
+	enabler->setCursor(Qt::PointingHandCursor);
 	connect(enabler, static_cast<void(QCheckBox::*)(int)>(&QCheckBox::stateChanged),[=](int checked){
 		if (checked == Qt::Unchecked) {
 			widget->setReadOnly(true);

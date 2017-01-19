@@ -39,7 +39,7 @@ AboutPrivate::AboutPrivate(QWidget* p, QWidget* cW)
 	parallelAnimationGroup.addAnimation(&aboutShifterAmination);
 
 	QPalette palette(parent->palette());
-	palette.setColor(QPalette::Window,"#333739");
+	palette.setColor(QPalette::Window, "#262626");
 	parent->setPalette(palette);
 
 	parent->setAutoFillBackground(true);

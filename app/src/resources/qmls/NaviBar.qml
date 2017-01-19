@@ -1,87 +1,121 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
+import QtQuick.Layouts 1.1
+import "fit.js" as Fit
 
 Rectangle {
     id: navigationBar
     width: parent.width
-    height: 44 * scaleRatio
+    height: Fit.fit(44)
     anchors {
         bottom: parent.bottom
         left: parent.left
+        bottomMargin: Fit.fit(5)
     }
     color: "transparent"
 
-    Rectangle {
-        id: repeater
-        border.color: "#007edf"
-        width: Math.floor(240 * scaleRatio)
-        height: Math.floor(29 * scaleRatio)
-        anchors.centerIn: parent
-        radius: 5 * scaleRatio
-        visible: false
-
-        Row {
-            Rectangle {
-                width: 80 * scaleRatio ; height: 29 * scaleRatio
-                color: splitState == 'editor' ? "#007edf" : "transparent"
-                Text {
-                    text: "Editor"
-                    color: splitState == 'editor' ? "white" : '#007edf'
-                    anchors.centerIn: parent
-                }
-            }
-            Rectangle {
-                width: 80 * scaleRatio; height: 29 * scaleRatio
-                border.color: "#007edf"
-                color: splitState == 'splitted' ? "#007edf" : "transparent"
-                Text {
-                    text: "Split"
-                    color: splitState == 'splitted' ? "white" : "#007edf"
-                    anchors.centerIn: parent
-                }
-            }
-            Rectangle {
-                width: 80 * scaleRatio; height: 29 * scaleRatio
-                color: splitState == 'viewer' ? "#007edf" : "transparent"
-                Text {
-                    text: "Viewer"
-                    color: splitState == 'viewer' ? "white" : "#007edf"
-                    anchors.centerIn: parent
-                }
-            }
-        }
-
-    }
     Rectangle {
         id: mask
         width: repeater.width
         height: repeater.height
         anchors.fill: repeater
-        radius: 5 * scaleRatio
+        radius: Fit.fit(5)
+        visible: false
+        color: "white"
     }
-    OpacityMask {
-        visible: (parent.state === 'view')
-        anchors.fill: repeater
-        source: repeater
-        maskSource: mask
+
+    Rectangle {
+        id: repeater
+        width: Fit.fit(240)
+        height: Fit.fit(29)
+        anchors.centerIn: parent
+        visible: true
+        color: "#2b5796"
+        layer.enabled: true
+        layer.effect: OpacityMask {
+            maskSource: mask
+        }
+        RowLayout {
+            id: viewRow
+            anchors.fill: parent
+            spacing: 0
+            Rectangle {
+                id: first
+                color: splitState == 'editor' ? "white" : "transparent"
+                Text {
+                    text: "Editor"
+                    color: splitState == 'editor' ? "#2b5796" : 'white'
+                    anchors.centerIn: parent
+                    font.bold: true
+                }
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+            }
+            Rectangle {
+                id: seperator
+                color: Qt.lighter("#2b5796", 1.12)
+                Layout.maximumWidth: Fit.fit(1)
+                Layout.minimumWidth: Fit.fit(1)
+                Layout.fillHeight: true
+                Layout.bottomMargin: Fit.fit(3)
+                Layout.topMargin: Fit.fit(3)
+            }
+            Rectangle {
+                id: second
+                color: splitState == 'splitted' ? "white" : "transparent"
+                Text {
+                    text: "Split"
+                    color: splitState == 'splitted' ? "#2b5796" : "white"
+                    anchors.centerIn: parent
+                    font.bold: true
+                }
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+            }
+            Rectangle {
+                id: seperator2
+                color: Qt.lighter("#2b5796", 1.12)
+                Layout.maximumWidth: Fit.fit(1)
+                Layout.minimumWidth: Fit.fit(1)
+                Layout.fillHeight: true
+                Layout.bottomMargin: Fit.fit(3)
+                Layout.topMargin: Fit.fit(3)
+            }
+            Rectangle {
+                id: third
+                color: splitState == 'viewer' ? "white" : "transparent"
+                Text {
+                    text: "Viewer"
+                    color: splitState == 'viewer' ? "#2b5796" : "white"
+                    anchors.centerIn: parent
+                    font.bold: true
+                }
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+            }
+        }
+
     }
 
     Row {
         anchors.centerIn: parent
         visible: (parent.state === 'view')
         MouseArea {
-            width: 80 * scaleRatio
-            height: 29 * scaleRatio
+            width: Fit.fit(80)
+            height: Fit.fit(29)
+            cursorShape: Qt.PointingHandCursor
             onPressed: splitState = 'editor'
         }
         MouseArea {
-            width: 80 * scaleRatio
-            height: 29 * scaleRatio
+            width: Fit.fit(80)
+            height: Fit.fit(29)
+            cursorShape: Qt.PointingHandCursor
             onPressed: splitState = 'splitted'
         }
         MouseArea {
-            width: 80 * scaleRatio
-            height: 29 * scaleRatio
+            width: Fit.fit(80)
+            height: Fit.fit(29)
+            cursorShape: Qt.PointingHandCursor
             onPressed: splitState = 'viewer'
         }
     }
@@ -91,13 +125,15 @@ Rectangle {
         anchors {
             right: parent.right
             verticalCenter: parent.verticalCenter
-            margins: 10 * scaleRatio
+            margins: Fit.fit(10)
         }
         text: "⏏"
-        color: 'grey'
+        color: "white"
+        font.bold: true
         MouseArea {
             anchors.fill: parent
-            anchors.margins: -5 * scaleRatio
+            anchors.margins: -Fit.fit(5)
+            cursorShape: Qt.PointingHandCursor
             onPressed: {
                 navigationBar.state = 'view';
                 editor.deselect();
@@ -108,24 +144,28 @@ Rectangle {
     Row {
         anchors.centerIn: parent
         visible: (parent.state === 'selection')
-        spacing: 20 * scaleRatio
+        spacing: Fit.fit(30)
         Text {
             visible: (editor.selectionStart !== editor.selectionEnd)
-            color: "#007edf"
+            color: "white"
             text: "Cut"
+            font.bold: true
             MouseArea {
                 anchors.fill: parent
-                anchors.margins: -5 * scaleRatio
+                anchors.margins: -Fit.fit(5)
+                cursorShape: Qt.PointingHandCursor
                 onPressed: editor.cut()
             }
         }
         Text {
             visible: (editor.selectionStart !== editor.selectionEnd)
-            color: "#007edf"
+            color: "white"
             text: "Copy"
+            font.bold: true
             MouseArea {
                 anchors.fill: parent
-                anchors.margins: -5 * scaleRatio
+                anchors.margins: -Fit.fit(5)
+                cursorShape: Qt.PointingHandCursor
                 onPressed: {
                     editor.copy()
                     editor.deselect()
@@ -134,34 +174,44 @@ Rectangle {
         }
         Text {
             visible: (editor.selectionStart === editor.selectionEnd)
-            color: "#007edf"
+            color: "white"
             text: "Select"
+            font.bold: true
             MouseArea {
                 anchors.fill: parent
-                anchors.margins: -5 * scaleRatio
+                anchors.margins: -Fit.fit(5)
+                cursorShape: Qt.PointingHandCursor
                 onPressed: editor.selectWord()
             }
         }
         Text {
             visible: (editor.selectionStart === editor.selectionEnd)
-            color: "#007edf"
+            color: "white"
             text: "Select All"
+            font.bold: true
             MouseArea {
                 anchors.fill: parent
-                anchors.margins: -5 * scaleRatio
+                anchors.margins: -Fit.fit(5)
+                cursorShape: Qt.PointingHandCursor
                 onPressed: editor.selectAll()
             }
         }
         Text {
             visible: (editor.canPaste === true)
-            color: "#007edf"
+            color: "white"
             text: "Paste"
+            font.bold: true
             MouseArea {
                 anchors.fill: parent
-                anchors.margins: -5 * scaleRatio
+                anchors.margins: -Fit.fit(5)
+                cursorShape: Qt.PointingHandCursor
                 onPressed: editor.paste()
             }
         }
+    }
+
+    onStateChanged: {
+        viewRow.visible = (state !== 'selection')
     }
 
     states: [

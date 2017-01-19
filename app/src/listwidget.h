@@ -22,6 +22,8 @@ class ListWidget : public QListWidget
 		inline const QMap<QListWidgetItem*, QList<QUrl>>& GetUrls() const { return m_Urls; }
 		inline void AddUrls(QListWidgetItem* item, const QList<QUrl>& urls) { m_Urls.insert(item, urls); }
 		inline void RemoveUrls(QListWidgetItem* item) { m_Urls.remove(item); }
+		inline QList<QUrl> GetUrls(QListWidgetItem* item) const { return m_Urls.value(item); }
+		inline void ClearUrls() { m_Urls.clear(); }
 
 	protected:
 		QMimeData* mimeData(const QList<QListWidgetItem *> items) const;

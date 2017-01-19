@@ -7,4 +7,5 @@ void Components::init()
 	AudioPlayer::registerQmlType();
 	AiSpeak::registerQmlType();
 	DocumentHandler::registerQmlType();
+	FileManager::registerQmlType();
 }

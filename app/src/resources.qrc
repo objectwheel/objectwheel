@@ -41,9 +41,6 @@
         <file>resources/tools/SpeakSurf.zip</file>
         <file>resources/images/bindingbuttonfilled.png</file>
         <file>resources/images/bindingbutton.png</file>
-        <file>resources/fonts/OpenSans-Regular.ttf</file>
-        <file>resources/fonts/OpenSans-Light.ttf</file>
-        <file>resources/fonts/OpenSans-Bold.ttf</file>
         <file>resources/images/down-arrow.png</file>
         <file>resources/images/plug-up.png</file>
         <file>resources/images/plug-down.png</file>
@@ -56,9 +53,6 @@
         <file>resources/images/editor.png</file>
         <file>resources/qmls/NaviBar.qml</file>
         <file>resources/qmls/qml-editor.qml</file>
-        <file>resources/images/mask.png</file>
-        <file>resources/images/shadow@2x.png</file>
-        <file>resources/images/shadow.png</file>
         <file>resources/images/right-arrow@2x.png</file>
         <file>resources/images/right-arrow.png</file>
         <file>resources/images/left-arrow@2x.png</file>
@@ -70,5 +64,46 @@
         <file>resources/images/pagesbutton.png</file>
         <file>resources/images/aboutus.png</file>
         <file>resources/images/loading.gif</file>
+        <file>resources/fonts/SFNSText.ttf</file>
+        <file>resources/images/file_explorer/text_icon@2x.png</file>
+        <file>resources/images/file_explorer/text_icon.png</file>
+        <file>resources/images/file_explorer/home@2x.png</file>
+        <file>resources/images/file_explorer/home.png</file>
+        <file>resources/images/file_explorer/new_folder_icon@2x.png</file>
+        <file>resources/images/file_explorer/new_folder_icon.png</file>
+        <file>resources/images/file_explorer/new_file_icon@2x.png</file>
+        <file>resources/images/file_explorer/new_file_icon.png</file>
+        <file>resources/images/file_explorer/back@2x.png</file>
+        <file>resources/images/file_explorer/back.png</file>
+        <file>resources/images/file_explorer/edit_icon@2x.png</file>
+        <file>resources/images/file_explorer/edit_icon.png</file>
+        <file>resources/images/file_explorer/remove_icon@2x.png</file>
+        <file>resources/images/file_explorer/remove_icon.png</file>
+        <file>resources/images/file_explorer/ok@2x.png</file>
+        <file>resources/images/file_explorer/ok.png</file>
+        <file>resources/images/file_explorer/qml_icon@2x.svg</file>
+        <file>resources/images/file_explorer/qml_icon.svg</file>
+        <file>resources/images/file_explorer/js_icon@2x.svg</file>
+        <file>resources/images/file_explorer/js_icon.svg</file>
+        <file>resources/images/file_explorer/image_icon@2x.svg</file>
+        <file>resources/images/file_explorer/image_icon.svg</file>
+        <file>resources/images/file_explorer/file_icon@2x.svg</file>
+        <file>resources/images/file_explorer/file_icon.svg</file>
+        <file>resources/qmls/PopupWindow.qml</file>
+        <file>resources/qmls/FancyButton.qml</file>
+        <file>resources/qmls/filemanager.js</file>
+        <file>resources/qmls/delaycaller.js</file>
+        <file>resources/qmls/FolderList.qml</file>
+        <file>resources/qmls/FolderBrowser.qml</file>
+        <file>resources/qmls/ShadowFactory.qml</file>
+        <file>resources/images/menu-icon.png</file>
+        <file>resources/images/back.png</file>
+        <file>resources/images/menu-icon@2x.png</file>
+        <file>resources/qmls/fit.js</file>
+        <file>resources/images/file_explorer/dir_icon@2x.png</file>
+        <file>resources/images/file_explorer/dir_icon.png</file>
+        <file>resources/images/handle@2x.png</file>
+        <file>resources/images/handle.png</file>
+        <file>resources/images/reset.png</file>
     </qresource>
 </RCC>

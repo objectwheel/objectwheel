@@ -232,6 +232,7 @@ TitleBar::TitleBar(QWidget *parent)
 	m_Settings->setMaximumSize(fit({32, 32}));
 	m_Settings->setStyleSheet(QString("QPushButton {border:0px; border-radius: %1px;} QPushButton::checked {background:rgba(0,0,0,40);} QPushButton::pressed {background:rgba(0,0,0,40);}").arg(fit(15)));
 	m_Settings->setCheckable(true);
+	m_Settings->setCursor(Qt::PointingHandCursor);
 
 	QPixmap menu;
 	menu.loadFromData(m_MenuIconData, sizeof(m_MenuIconData));
@@ -241,9 +242,10 @@ TitleBar::TitleBar(QWidget *parent)
 	m_Menu->setMaximumSize(fit({32, 32}));
 	m_Menu->setStyleSheet(QString("QPushButton {border:0px; border-radius: %1px;} QPushButton::checked {background:rgba(0,0,0,40);} QPushButton::pressed {background:rgba(0,0,0,40);}").arg(fit(15)));
 	m_Menu->setCheckable(true);
+	m_Menu->setCursor(Qt::PointingHandCursor);
 
 	m_Title->setAlignment(Qt::AlignCenter);
-	m_Title->setStyleSheet("background:transparent; color:white;");
+	m_Title->setStyleSheet("font:bold; background:transparent; color:white;");
 
 	m_UpperLayout->addWidget(m_Menu);
 	m_UpperLayout->addWidget(m_Title);

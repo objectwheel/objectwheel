@@ -28,6 +28,9 @@
 #include <bubblehead.h>
 #include <qmleditor.h>
 #include <pageswidget.h>
+#include <fit.h>
+
+using namespace Fit;
 
 QT_BEGIN_NAMESPACE
 
@@ -43,7 +46,14 @@ class MainWindowPrivate
 		FlatButton* editButton;
 		FlatButton* clearButton;
 		QSpacerItem* horizontalSpacer_2;
-		ListWidget* toolboxWidget;
+		QWidget* toolboxWidget;
+		QVBoxLayout* toolboxVLay;
+		QHBoxLayout* toolboxHLay;
+		ListWidget* toolboxList;
+		FlatButton* toolboxAddButton;
+		FlatButton* toolboxEditButton;
+		FlatButton* toolboxRemoveButton;
+		FlatButton* toolboxResetButton;
 		PropertiesWidget* propertiesWidget;
 		BindingWidget* bindingWidget;
 		PagesWidget* pagesWidget;
@@ -110,27 +120,96 @@ class MainWindowPrivate
 			buttonsLayout->addItem(horizontalSpacer_2);
 			verticalLayout->addLayout(buttonsLayout);
 
-			toolboxWidget = new ListWidget(centralWidget);
-			toolboxWidget->setObjectName(QStringLiteral("toolboxWidget"));
-			toolboxWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-			toolboxWidget->setFocusPolicy(Qt::NoFocus);
-			toolboxWidget->setStyleSheet(QLatin1String("QListView {\n"
-													   "	border:0px solid white;\n"
-													   "	background:#566573;\n"
-													   "	padding-right:5px;\n"
-													   "}\n"
-													   "\n"
-													   "QListView::item {\n"
-													   "	color:white;\n"
-													   "    border: 0px solid transparent;\n"
-													   "	padding:2px;\n"
-													   "}"));
-			toolboxWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-			toolboxWidget->setDragEnabled(true);
-			toolboxWidget->setDragDropMode(QAbstractItemView::DragOnly);
-			toolboxWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-			toolboxWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-			toolboxWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+			toolboxList = new ListWidget(centralWidget);
+			toolboxList->setObjectName(QStringLiteral("toolboxList"));
+			toolboxList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+			toolboxList->setFocusPolicy(Qt::NoFocus);
+			toolboxList->setStyleSheet(QLatin1String("QListView {\n"
+													 "	border:0px solid white;\n"
+													 "	background:#44504e;\n"
+													 "	padding-right:5px;\n"
+													 "}"
+													 "QListView::item {\n"
+													 "	color:white;\n"
+													 "    border: 0px solid transparent;\n"
+													 "	padding:2px;\n"
+													 "}"
+													 "QListView::item:selected {\n"
+													 "	color:black;\n"
+													 "  background: #e0e4e7;\n"
+													 "  border: 0px solid transparent;\n"
+													 "  border-radius: 3px;\n"
+													 "	padding:2px;\n"
+													 "  margin-right: 2px;\n"
+													 "}"));
+			toolboxList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+			toolboxList->setDragEnabled(true);
+			toolboxList->setDragDropMode(QAbstractItemView::InternalMove);
+			toolboxList->setSelectionBehavior(QAbstractItemView::SelectRows);
+			toolboxList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+			toolboxList->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+			toolboxWidget = new QWidget;
+			toolboxVLay = new QVBoxLayout;
+			toolboxHLay = new QHBoxLayout;
+
+			toolboxAddButton = new FlatButton;
+			toolboxAddButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+			toolboxAddButton->setColor("#1e8145");
+			toolboxAddButton->setFixedSize(fit(30),fit(30));
+			toolboxAddButton->setRadius(fit(15));
+			toolboxAddButton->setIconSize(QSize(fit(16),fit(16)));
+			toolboxAddButton->setIcon(QIcon(":/resources/images/plus.png"));
+			QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxAddButtonClicked()) );
+
+			toolboxRemoveButton = new FlatButton;
+			toolboxRemoveButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+			toolboxRemoveButton->setColor("#c03638");
+			toolboxRemoveButton->setFixedSize(fit(30),fit(30));
+			toolboxRemoveButton->setRadius(fit(15));
+			toolboxRemoveButton->setIconSize(QSize(fit(16),fit(16)));
+			toolboxRemoveButton->setIcon(QIcon(":/resources/images/minus.png"));
+			toolboxRemoveButton->setDisabled(true);
+			QObject::connect(toolboxRemoveButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxRemoveButtonClicked()) );
+
+			toolboxEditButton = new FlatButton;
+			toolboxEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+			toolboxEditButton->setColor("#2b5796");
+			toolboxEditButton->setFixedSize(fit(30),fit(30));
+			toolboxEditButton->setRadius(fit(15));
+			toolboxEditButton->setIconSize(QSize(fit(16),fit(16)));
+			toolboxEditButton->setIcon(QIcon(":/resources/images/edit.png"));
+			toolboxEditButton->setDisabled(true);
+			QObject::connect(toolboxEditButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxEditButtonClicked()) );
+
+			toolboxResetButton = new FlatButton;
+			toolboxResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+			toolboxResetButton->setColor("#ee8800");
+			toolboxResetButton->setFixedSize(fit(30),fit(30));
+			toolboxResetButton->setRadius(fit(15));
+			toolboxResetButton->setIconSize(QSize(fit(16),fit(16)));
+			toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
+			QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxResetButtonClicked()) );
+
+			toolboxHLay->addWidget(toolboxAddButton);
+			toolboxHLay->addStretch();
+			toolboxHLay->addWidget(toolboxRemoveButton);
+			toolboxHLay->addStretch();
+			toolboxHLay->addWidget(toolboxEditButton);
+			toolboxHLay->addStretch();
+			toolboxHLay->addWidget(toolboxResetButton);
+
+			toolboxVLay->addWidget(toolboxList);
+			toolboxVLay->addLayout(toolboxHLay);
+			toolboxWidget->setLayout(toolboxVLay);
+			toolboxWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+			toolboxHLay->setSpacing(0);
+			toolboxHLay->setContentsMargins(fit(4),fit(4),fit(10),fit(8));
+			toolboxVLay->setSpacing(0);
+			toolboxVLay->setContentsMargins(fit(6),0,0,0);
+
+			QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){toolboxRemoveButton->setEnabled(i>=0);});
+			QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){toolboxEditButton->setEnabled(i>=0);});
 
 			propertiesWidget = new PropertiesWidget(centralWidget);
 			propertiesWidget->setObjectName(QStringLiteral("propertiesWidget"));

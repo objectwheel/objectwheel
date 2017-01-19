@@ -6,6 +6,7 @@
 #include <audioplayer.h>
 #include <aispeak.h>
 #include <documenthandler.h>
+#include <filemanager.h>
 
 class Components
 {

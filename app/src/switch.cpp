@@ -16,6 +16,7 @@ Switch::Switch(QWidget *parent)
 	, m_activeColor("#1e8145")
 	, m_passiveColor("#c03638")
 {
+	setCursor(Qt::PointingHandCursor);
 	setCheckable(true);
 	m_shifterTimer->setInterval(10);
 	connect(m_shifterTimer, SIGNAL(timeout()), this, SLOT(shiftIndicator()));

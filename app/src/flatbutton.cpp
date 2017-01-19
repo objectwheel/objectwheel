@@ -34,6 +34,7 @@ FlatButton::FlatButton(QWidget *parent)
 	, m_IconButton(false)
 	, m_Down(false)
 {
+	setCursor(Qt::PointingHandCursor);
 	m_Shadow->setBlurRadius(fit(3));
 	m_Shadow->setOffset(0,fit(2));
 	m_Shadow->setColor(QColor(0, 0, 0, 70));

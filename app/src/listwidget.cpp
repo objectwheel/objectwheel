@@ -70,7 +70,7 @@ ListWidget::ListWidget(QWidget *parent)
 
 QMimeData* ListWidget::mimeData(const QList<QListWidgetItem*> items) const
 {
-	QMimeData *data = new QMimeData();
+	QMimeData *data = QListWidget::mimeData(items);
 	data->setUrls(m_Urls[items[0]]);
 	return data;
 }

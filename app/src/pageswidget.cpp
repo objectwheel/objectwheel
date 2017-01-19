@@ -13,23 +13,24 @@
 #include <QQuickItem>
 #include <QQmlContext>
 #include <QQmlProperty>
+#include <QMessageBox>
 
 using namespace Fit;
 
 #define PAGE_CODE "\
 import QtQuick 2.0 \n\
 Item { \n\
-id:%1 \n\
-\n\
-function show() { \n\
-	for (var i = 0; i < swipeView.count; i++) { \n\
-		if (swipeView.itemAt(i) === %1) { \n\
-			swipeView.currentIndex = i \n\
-		} \n\
-	} \n\
-} \n\
-\n\
-}"
+			id:%1 \n\
+				   \n\
+				   function show() { \n\
+				for (var i = 0; i < swipeView.count; i++) { \n\
+					if (swipeView.itemAt(i) === %1) { \n\
+						swipeView.currentIndex = i \n\
+													} \n\
+														  } \n\
+								   } \n\
+			\n\
+	 }"
 
 
 class PagesWidgetPrivate
@@ -156,29 +157,44 @@ void PagesWidgetPrivate::removeButtonClicked()
 {
 	if (pagesListWidget.count() > 1) {
 		auto name = pagesListWidget.currentItem()->text();
-		delete pagesListWidget.takeItem(pagesListWidget.currentRow());
-		auto v = rootContext->contextProperty(name);
-		auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
-		Q_ASSERT(selectedItem);
-		auto items = GetAllChildren(selectedItem);
-		for (auto item : items) {
-			if (itemList->contains(item)) {
-				rootContext->setContextProperty(rootContext->nameForObject(item), 0);
-				int i = itemList->indexOf(item);
-				itemList->removeOne(item);
-				urlList->removeAt(i);
+		QMessageBox msgBox;
+		msgBox.setText(QString("<b>This will delete %1 and its content.</b>").arg(name));
+		msgBox.setInformativeText("Do you want to continue?");
+		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+		msgBox.setDefaultButton(QMessageBox::No);
+		msgBox.setIcon(QMessageBox::Warning);
+		const int ret = msgBox.exec();
+		switch (ret) {
+			case QMessageBox::Yes: {
+				delete pagesListWidget.takeItem(pagesListWidget.currentRow());
+				auto v = rootContext->contextProperty(name);
+				auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
+				Q_ASSERT(selectedItem);
+				auto items = GetAllChildren(selectedItem);
+				for (auto item : items) {
+					if (itemList->contains(item)) {
+						rootContext->setContextProperty(rootContext->nameForObject(item), 0);
+						int i = itemList->indexOf(item);
+						itemList->removeOne(item);
+						urlList->removeAt(i);
+					}
+				}
+				rootContext->setContextProperty(rootContext->nameForObject(selectedItem), 0);
+				selectedItem->setParentItem(0);
+				selectedItem->deleteLater();
+				break;
+			} default: {
+				// Do nothing
+				break;
 			}
 		}
-		rootContext->setContextProperty(rootContext->nameForObject(selectedItem), 0);
-		selectedItem->setParentItem(0);
-		selectedItem->deleteLater();
 	}
 }
 
 void PagesWidgetPrivate::addButtonClicked()
 {
 	int count = pagesListWidget.count();
-	auto name = QString("page_%1").arg(count);
+	auto name = QString("page%1").arg(count);
 	for (int i = 0; i < pagesListWidget.count(); i++) {
 		if (pagesListWidget.item(i)->text() == name) {
 			name.remove(name.size() - 1, 1);

@@ -19,6 +19,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <scrollarea.h>
+#include <QMessageBox>
 
 using namespace Fit;
 
@@ -262,16 +263,30 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
 void BindingWidgetPrivate::removeButtonClicked()
 {
 	auto connectionName = bindingListWidget.currentItem()->text();
-	Binding binding;
-	for (auto b : bindings) {
-		if (b.connectionName == connectionName) {
-			binding = b;
+	QMessageBox msgBox;
+	msgBox.setText(QString("<b>This will delete %1 named binding.</b>").arg(connectionName));
+	msgBox.setInformativeText("Do you want to continue?");
+	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+	msgBox.setDefaultButton(QMessageBox::No);
+	msgBox.setIcon(QMessageBox::Warning);
+	const int ret = msgBox.exec();
+	switch (ret) {
+		case QMessageBox::Yes: {
+			Binding binding;
+			for (auto b : bindings) {
+				if (b.connectionName == connectionName) {
+					binding = b;
+				}
+			}
+			bindings.removeOne(binding);
+			QObject::disconnect(binding.connection);
+			delete bindingListWidget.takeItem(bindingListWidget.currentRow());
+			break;
+		} default: {
+			// Do nothing
+			break;
 		}
 	}
-
-	bindings.removeOne(binding);
-	QObject::disconnect(binding.connection);
-	delete bindingListWidget.takeItem(bindingListWidget.currentRow());
 }
 
 void BindingWidgetPrivate::addButtonClicked()

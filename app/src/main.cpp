@@ -36,11 +36,10 @@ int main(int argc, char *argv[])
 	QtWebView::initialize();
 
 	// Add system wide fonts and set default font
-	QFontDatabase::addApplicationFont(":/resources/fonts/OpenSans-Bold.ttf");
-	QFontDatabase::addApplicationFont(":/resources/fonts/OpenSans-Regular.ttf");
-	QFontDatabase::addApplicationFont(":/resources/fonts/OpenSans-Light.ttf");
+	QFontDatabase::addApplicationFont(":/resources/fonts/SFNSText.ttf");
 	QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
-	QFont font("OpenSans");
+	QFont font("System Font");
+	font.setWeight(QFont::Normal);
 	font.setPixelSize(Fit::fit(PIXEL_SIZE));
 	QApplication::setFont(font);
 
@@ -55,11 +54,10 @@ int main(int argc, char *argv[])
 	// Init Splash Screen
 	SplashScreen::init(&w);
 	SplashScreen::setTextColor(Qt::white);
-	SplashScreen::setBackgroundBrush(QColor("#2c9ecc"));
-	SplashScreen::setText("Launching...");
-//	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
-//	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
-	SplashScreen::setLoadingSize(Fit::fit(160), Fit::fit(120));
+	SplashScreen::setBackgroundBrush(QColor("#262626"));
+	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
+	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
+	SplashScreen::setLoadingSize(Fit::fit(30), Fit::fit(30));
 	SplashScreen::setLoadingDevice(&buff);
 	SplashScreen::show();
 

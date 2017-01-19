@@ -6,7 +6,8 @@ HEADERS     += $$PWD/apiai.h \
 			   $$PWD/audioplayer.h \
 			   $$PWD/aispeak.h \
 			   $$PWD/documenthandler.h \
-			   $$PWD/qmlhighlighter.h
+			   $$PWD/qmlhighlighter.h \
+			   $$PWD/filemanager.h
 
 SOURCES     += $$PWD/apiai.cpp \
                $$PWD/audiorecorder.cpp \
@@ -14,4 +15,5 @@ SOURCES     += $$PWD/apiai.cpp \
 			   $$PWD/audioplayer.cpp \
 			   $$PWD/aispeak.cpp \
 			   $$PWD/documenthandler.cpp \
-			   $$PWD/qmlhighlighter.cpp
+			   $$PWD/qmlhighlighter.cpp \
+			   $$PWD/filemanager.cpp

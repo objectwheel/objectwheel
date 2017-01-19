@@ -37,9 +37,9 @@ BubbleHeadPrivate::BubbleHeadPrivate(BubbleHead* p)
 {
 	moved = false;
 	borderColor = "#666666";
-	shadowEffect.setBlurRadius(fit(13));
-	shadowEffect.setOffset(0,fit(3));
-	shadowEffect.setColor("#99000000");
+	shadowEffect.setBlurRadius(fit(8));
+	shadowEffect.setOffset(0,fit(3.3));
+	shadowEffect.setColor("#aa000000");
 	parent->setGraphicsEffect(&shadowEffect);
 	QObject::connect((MainWindow*)parent->parent(), &MainWindow::resized, [this]{fixCoord();});
 }
@@ -177,8 +177,8 @@ void BubbleHead::paintEvent(QPaintEvent*)
 	painter.setBrush(g);
 	painter.drawRoundedRect(notfRect, fit(3), fit(3));
 
-	QFont f("OpenSans Bold");
-	f.setWeight(QFont::Black);
+	QFont f("System Font");
+	f.setWeight(QFont::Bold);
 
 	painter.setFont(f);
 	painter.setPen(Qt::white);

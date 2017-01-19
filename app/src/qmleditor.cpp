@@ -3,6 +3,7 @@
 #include <QQuickWidget>
 #include <QQuickItem>
 #include <QQmlContext>
+#include <QQmlEngine>
 #include <QQuickTextDocument>
 #include <QTextDocument>
 #include <QTextOption>
@@ -15,12 +16,12 @@
 #include <QPainterPath>
 #include <QPropertyAnimation>
 #include <QTimer>
+#include <QQmlProperty>
+#include <filemanager.h>
+#include <QFileInfo>
+#include <QDir>
 
-#if defined(Q_OS_IOS)
-#define DURATION 1
-#else
 #define DURATION 400
-#endif
 
 using namespace Fit;
 
@@ -28,6 +29,7 @@ class QmlEditorPrivate
 {
 	public:
 		QmlEditor* parent;
+		QQuickItem* rootItem;
 		QVBoxLayout mainLayout;
 		QQuickWidget quickWidget;
 		FlatButton minimizeButton;
@@ -44,6 +46,7 @@ class QmlEditorPrivate
 		void saved(const QString& text);
 		void selectionChanged();
 		const QList<QQuickItem*> GetAllChildren(QQuickItem* const item) const;
+		void show(const QString& url);
 		void show();
 		void hide();
 };
@@ -56,6 +59,9 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	mainLayout.setSpacing(0);
 	mainLayout.setContentsMargins(0, 0, 0, 0);
 
+	CacheCleaner::setEngine(quickWidget.engine());
+	CacheCleaner::registerQmlType();
+
 #if !defined(Q_OS_IOS) && !defined(Q_OS_WINPHONE) && !defined(Q_OS_ANDROID)
 	quickWidget.rootContext()->setContextProperty("isDesktop", true);
 #else
@@ -67,10 +73,10 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
 	quickWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	QObject *root = quickWidget.rootObject();
-	QObject::connect(root, SIGNAL(saved(QString)), parent, SLOT(saved(const QString&)));
+	rootItem = quickWidget.rootObject();
+	QObject::connect(rootItem, SIGNAL(saved(QString)), parent, SLOT(saved(const QString&)));
 
-	QObject *textEdit = root->findChild<QObject*>(QStringLiteral("editor"));
+	QObject *textEdit = rootItem->findChild<QObject*>(QStringLiteral("editor"));
 	QQuickTextDocument *quickTextDocument = textEdit->property("textDocument").value<QQuickTextDocument*>();
 	textDocument = quickTextDocument->textDocument();
 	QTextOption textOptions = textDocument->defaultTextOption();
@@ -88,8 +94,9 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	textDocument->setDefaultTextOption(textOptions);
 	minimizeButton.setParent(parent);
 	minimizeButton.setIconButton(true);
-	minimizeButton.setIcon(QIcon(":/resources/images/mask.png"));
-	minimizeButton.resize(fit(30), fit(30));
+	minimizeButton.setIcon(QIcon(":/resources/images/back.png"));
+	minimizeButton.resize(fit(35), fit(35));
+	minimizeButton.setCursor(Qt::PointingHandCursor);
 	QObject::connect(&minimizeButton, SIGNAL(clicked(bool)), parent, SLOT(hide()));
 
 	QTimer::singleShot(500, [this] {
@@ -103,7 +110,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 
 void QmlEditorPrivate::resize()
 {
-	minimizeButton.move(fit(10), parent->height() - minimizeButton.height() - fit(2));
+	minimizeButton.move(fit(8), parent->height() - minimizeButton.height() - fit(8));
 }
 
 void QmlEditorPrivate::saved(const QString& text)
@@ -185,9 +192,37 @@ const QList<QQuickItem*> QmlEditorPrivate::GetAllChildren(QQuickItem* const item
 	return childList;
 }
 
+void QmlEditorPrivate::show(const QString& url)
+{
+	QFileInfo info(url);
+	QQmlProperty::write(rootItem, "toolboxMode", true, rootContext);
+	QQmlProperty::write(rootItem, "folder", "file://" + info.dir().path(), rootContext);
+	QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
+
+	((QWidget*)parent)->show();
+
+	quickWidget.hide();
+	minimizeButton.hide();
+
+	QPropertyAnimation *animation = new QPropertyAnimation(parent, "showRatio");
+	animation->setDuration(DURATION);
+	animation->setStartValue(0.0);
+	animation->setEndValue(1.0);
+	animation->setEasingCurve(QEasingCurve::InExpo);
+	animation->start();
+	QObject::connect(animation, SIGNAL(finished()), &quickWidget, SLOT(show()));
+	QObject::connect(animation, SIGNAL(finished()), &minimizeButton, SLOT(show()));
+	QObject::connect(animation, SIGNAL(valueChanged(QVariant)), parent, SLOT(update()));
+	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+}
+
 void QmlEditorPrivate::show()
 {
 	((QWidget*)parent)->show();
+
+	QQmlProperty::write(rootItem, "toolboxMode", false, rootContext);
+	QQmlProperty::write(rootItem, "rootFolder", "file://" + QCoreApplication::applicationDirPath(), rootContext);
+	QQmlProperty::write(rootItem, "folder", "file://" + QCoreApplication::applicationDirPath(), rootContext);
 
 	quickWidget.hide();
 	minimizeButton.hide();
@@ -259,6 +294,16 @@ void QmlEditor::setShowCenter(const QPoint& p)
 	m_d->showCenter =  p;
 }
 
+void QmlEditor::setRootFolder(const QString& folder)
+{
+	QQmlProperty::write(m_d->rootItem, "rootFolder", "file://" + folder, m_d->rootContext);
+}
+
+void QmlEditor::show(const QString& url)
+{
+	m_d->show(url);
+}
+
 void QmlEditor::show()
 {
 	m_d->show();
@@ -304,4 +349,4 @@ void QmlEditor::setShowRatio(float value)
 	showRatio = value;
 }
 
-
+QQmlEngine* CacheCleaner::engine;
