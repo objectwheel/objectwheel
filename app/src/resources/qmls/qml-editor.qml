@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
@@ -24,13 +24,12 @@ import "delaycaller.js" as DelayCaller
 //TODO: Fix popup window colors
 //TODO: Add "Fit" lib to com.objectwheel.components
 //TODO: Save doesn't work
-//TODO: Update FileManager.js funcs
 //TODO: Show parent folder in folderList's upside
-//TODO: Open editor only for texts
-//TODO: Keşe alınan dosya silinirse ?
-//TODO: Keşe alınan dosyanın adı değişirse ?
-//FIX: indexOf(toolDir) bunları fixle
 //FIX: Seperator restores its size if I resize window
+//FIX: Main.qml should not be removed and icon
+//FIX: Editor "error" line corruption when page word wrapped
+//FIX: Clear "jsx" and "qmlc" cache files recursively
+//TODO: Add image viewer
 
 Item {
     id: root
@@ -46,84 +45,23 @@ Item {
         onEntryEdited: {
             from = from.toString().replace("file://", "")
             to = to.toString().replace("file://", "")
-            if (isdir) {
-                var updateSubCaches = function(dirold, dirnew) {
-                    var fileList = FileManager.lsfile(dirnew)
-                    for (var i = 0; i < fileList.length; i++) {
-                        for (var ii = 0; ii < urlCache.length; ii++) {
-                            if (urlCache[ii] === (dirold + "/" + fileList[i])) {
-                                urlCache[ii] = (dirnew + "/" + fileList[i])
-                            }
-                        }
-                    }
-
-                    var dirList = FileManager.lsdir(dirnew)
-                    for (var j = 0; j < dirList.length; j++) {
-                        updateSubCaches(dirold + "/" + dirList[j], dirnew + "/" + dirList[j])
-                    }
-                }
-                updateSubCaches(from, to)
-            } else if (isTextFile(from) && isTextFile(to)) {
-                for (var i = 0; i < urlCache.length; i++) {
-                    if (urlCache[i] === from) {
-                        urlCache[i] = to
-                    }
-                }
-            } else if (isTextFile(from) && !isTextFile(to)) {
-                for (var ii = 0; ii < urlCache.length; ii++) {
-                    if (urlCache[ii] === from) {
-                        FileManager.svfile(to, saveCache[ii])
-                        urlCache.splice(ii, 1)
-                        saveCache.splice(ii, 1)
-
-                        for (var j=0; j<folderBrowser.count;j++) {
-                            if (folderBrowser.itemAt(j) === "main.qml") {
-                                folderBrowser.currentIndex = j
-                            }
-                        }
-                    }
-                }
-            } else if (!isTextFile(from) && isTextFile(to)) {
-                root.url = to
-            }
-
-            reloadView()
+            updateCacheForRenamedEntry(from, to, isdir)
         }
         onEntryRemoved: {
             urlval = urlval.toString().replace("file://", "")
-            if (isdir) {
-                for (var i = 0; i < urlCache.length; i++) {
-                    if (urlCache[i].indexOf(urlval + "/") >= 0) {
-                        urlCache.splice(i, 1)
-                        saveCache.splice(i, 1)
-                    }
-                }
-
-                for (var j=0; j<folderBrowser.count;j++) {
-                    if (folderBrowser.itemAt(j) === "main.qml") {
-                        folderBrowser.currentIndex = j
-                    }
-                }
-            } else if (isTextFile(urlval)) {
-                for (var ii = 0; ii < urlCache.length; ii++) {
-                    if (urlCache[ii] === urlval) {
-                        urlCache.splice(ii, 1)
-                        saveCache.splice(ii, 1)
-                    }
-                }
-
-                for (var jj=0; jj<folderBrowser.count;jj++) {
-                    if (folderBrowser.itemAt(jj) === "main.qml") {
-                        folderBrowser.currentIndex = jj
-                    }
-                }
-            }
+            clearCacheFor(urlval, isdir)
         }
 
-        onSelectionChanged:{
+        onSelectionChanged: {
             urlval = urlval.toString().replace("file://", "")
             if (!isdir && isTextFile(urlval)) {
                 root.url = urlval
+                imageViewer.visible = false
+                flickable.visible = true
+            } else if (!isdir && isImageFile(urlval)) {
+                imageViewer.source = "file://" + urlval
+                imageViewer.visible = true
+                flickable.visible = false
             }
         }
 
@@ -141,7 +79,6 @@ Item {
         id: container
         anchors { left:folderBrowser.right; top:parent.top; bottom: parent.bottom; right: parent.right }
         clip: true
-
         Rectangle {
             id:toolBar
             z: 2
@@ -204,188 +141,195 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
             }
         }
-
         Rectangle  {
             id: editorContainer
             anchors{left:parent.left;right:parent.right;top:toolBar.bottom;bottom: parent.bottom}
             color: "#44504e"
             clip: true
-
             Item {
                 id: view
                 state: root.splitState
-                anchors { top: errorHead.bottom; right: parent.right; bottom: parent.bottom; left: seperator.right}
+                anchors { top: errorHead.bottom; right: parent.right; bottom: separator.bottom; left: separator.right
+                leftMargin: Fit.fit(5);topMargin: Fit.fit(5);rightMargin: Fit.fit(5)}
                 enabled: opacity > 0.98 ? true : false
                 clip: true
                 states: [
                     State {
                         name: "splitted"
                         PropertyChanges { target: view; opacity: 1 }
-                        PropertyChanges { target: background; opacity: 1 }
+                        PropertyChanges { target: flickable; opacity: 1 }
                         PropertyChanges { target: handle; opacity: 1 }
-                        PropertyChanges { target: seperator; x:parent.width/2.0 }
+                        PropertyChanges { target: separator; x:parent.width/2.0 }
                     },
                     State {
                         name: "editor"
                         PropertyChanges { target: view; opacity: 0}
-                        PropertyChanges { target: background; opacity: 1 }
+                        PropertyChanges { target: flickable; opacity: 1 }
                         PropertyChanges { target: handle; opacity: 0 }
-                        PropertyChanges { target: seperator; x:parent.width }
+                        PropertyChanges { target: separator; x:parent.width }
                     },
                     State {
                         name: "viewer"
                         PropertyChanges { target: view; opacity: 1 }
-                        PropertyChanges { target: background; opacity: 0}
+                        PropertyChanges { target: flickable; opacity: 0}
                         PropertyChanges { target: handle; opacity: 0 }
-                        PropertyChanges { target: seperator; x:Fit.fit(-1) }
+                        PropertyChanges { target: separator; x:Fit.fit(-1) }
                     }
                 ]
                 transitions: [
                     Transition {
                         to: "*"
-                        NumberAnimation { target: seperator; properties: "x"; duration: 300; easing.type: Easing.InOutQuad; }
+                        NumberAnimation { target: separator; properties: "x"; duration: 300; easing.type: Easing.InOutQuad; }
                         NumberAnimation { target: view; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
-                        NumberAnimation { target: background; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
+                        NumberAnimation { target: flickable; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
                         NumberAnimation { target: handle; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
                     }
                 ]
             }
-            Item {
-                id: background
-                anchors { top: parent.top; left: parent.left; bottom: parent.bottom; right:seperator.left}
+            Flickable {
+                id: flickable
+                anchors { top: parent.top; left: parent.left; bottom: separator.bottom; right:separator.left
+                    leftMargin: Fit.fit(10); topMargin: Fit.fit(10); rightMargin: Fit.fit(5)}
                 enabled: opacity > 0.98 ? true : false
+                flickableDirection: Flickable.VerticalFlick
+                boundsBehavior: Flickable.DragOverBounds
+                contentHeight: editor.paintedHeight
                 clip: true
-                Flickable {
-                    id: flickable
-                    anchors.fill: parent;
-                    flickableDirection: Flickable.VerticalFlick
-                    boundsBehavior: Flickable.DragOverBounds
-                    contentWidth: parent.width
-                    contentHeight: editor.height + toolBar.height
-                    clip: true
-                    ScrollBar.vertical: ScrollBar { }
+                ScrollBar.vertical: ScrollBar { }
 
-                    Column {
-                        id: lineNumber
-                        anchors { margins: Fit.fit(20); left: parent.left; top: parent.top }
-                        spacing: lineNumberSpacing
-                        Repeater {
-                            id: lineNumberRepeater
-                            model: editor.lineCount
-                            clip: true
-                            Text {
-                                property alias bgcolor: rect.color
-                                width: Fit.fit(20)
-                                text: index + 1
-                                height: editor.cursorRectangle.height
-                                color: "#e0e0e0"
-                                horizontalAlignment: TextEdit.AlignHCenter
-                                font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false
-                                Rectangle {
-                                    id: rect
-                                    color: 'transparent'
-                                    anchors.fill: parent
-                                    z:-1
-                                    radius: Fit.fit(1)
-                                }
+                Column {
+                    id: lineNumber
+                    width: maxWidth + Fit.fit(10)
+                    anchors { left: parent.left; top: parent.top }
+                    Repeater {
+                        id: lineNumberRepeater
+                        model: editor.lineCount
+                        clip: true
+                        Text {
+                            property alias bgcolor: rect.color
+                            rightPadding: Fit.fit(3)
+                            text: index + 1
+                            height: editor.cursorRectangle.height
+                            color: "#e0e0e0"
+                            width: maxWidth
+                            horizontalAlignment: TextEdit.AlignRight
+                            verticalAlignment: TextEdit.AlignVCenter
+                            font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false
+                            Component.onCompleted: if (contentWidth > maxWidth) maxWidth = contentWidth
+                            Rectangle {
+                                id: rect
+                                color: 'transparent'
+                                anchors.fill: parent
+                                z:-1
                             }
                         }
                     }
+                }
 
-                    Rectangle {
-                        id: editorCurrentLineHighlight
-                        anchors {
-                            left: lineNumber.right
-                            margins: lineNumberPadding
+                Rectangle {
+                    id: leftLine
+                    width: Fit.fit(1)
+                    height: parent.height
+                    anchors.top: parent.top
+                    anchors.right: lineNumber.right
+                    anchors.rightMargin: lineNumber.width - maxWidth - Fit.fit(4)
+                    color: Qt.lighter(editorContainer.color, 1.3)
+                }
+
+                Rectangle {
+                    id: editorCurrentLineHighlight
+                    anchors.left: lineNumber.left
+                    anchors.right: editor.right
+                    visible: editor.focus
+                    height: editor.cursorRectangle.height
+                    y: editor.cursorRectangle.y
+                    color: Qt.darker(editorContainer.color, 1.3)
+                    z: -1
+                }
+
+                TextEdit {
+                    id: editor
+                    objectName: "editor"
+                    anchors { left: lineNumber.right; right: parent.right; top: parent.top; bottom: parent.bottom }
+                    wrapMode: flickable.opacity > 0.98 ? TextEdit.WrapAtWordBoundaryOrAnywhere : TextEdit.NoWrap ;
+                    renderType: Text.NativeRendering
+                    onTextChanged: timer.restart();
+
+                    onSelectedTextChanged: {
+                        if (editor.selectedText === "") {
+                            navibar.state = 'view'
                         }
-                        visible: editor.focus
-                        width: editor.width
-                        height: editor.cursorRectangle.height
-                        y: editor.cursorRectangle.y + lineNumberPadding
-                        color: Qt.darker(editorContainer.color, 1.2)
                     }
-
-                    TextEdit {
-                        id: editor
-                        objectName: "editor"
-                        anchors {
-                            margins: lineNumberPadding
-                            left: lineNumber.right; right: parent.right; top: parent.top;
-                        }
-                        wrapMode: background.opacity > 0.98 ? TextEdit.WrapAtWordBoundaryOrAnywhere : TextEdit.NoWrap ;
-                        renderType: Text.NativeRendering
-                        onTextChanged: timer.restart();
-
-                        onSelectedTextChanged: {
-                            if (editor.selectedText === "") {
-                                navibar.state = 'view'
-                            }
-                        }
-                        // FIXME: stupid workaround for indent
-                        Keys.onPressed: {
-                            if (event.key == Qt.Key_BraceRight) {
-                                editor.select(0, cursorPosition)
-                                var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
-                                editor.deselect()
-                                var currentLine = previousContent[previousContent.length - 1]
-                                var leftBrace = /{/, rightBrace = /}/;
-                                if (!leftBrace.test(currentLine)) {
-                                    editor.remove(cursorPosition, cursorPosition - currentLine.length);
-                                    currentLine = currentLine.toString().replace(/ {1,4}$/, "");
-                                    editor.insert(cursorPosition, currentLine);
-                                }
-                            }
-                        }
-                        Keys.onReturnPressed: {
+                    // FIXME: stupid workaround for indent
+                    Keys.onPressed: {
+                        if (event.key == Qt.Key_BraceRight) {
                             editor.select(0, cursorPosition)
                             var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
                             editor.deselect()
                             var currentLine = previousContent[previousContent.length - 1]
                             var leftBrace = /{/, rightBrace = /}/;
-                            editor.insert(cursorPosition, "\n")
-                            var whitespaceAppend = currentLine.match(new RegExp(/^[ \t]*/))  // whitespace
-                            if (leftBrace.test(currentLine)) // indent
-                                whitespaceAppend += "    ";
-                            editor.insert(cursorPosition, whitespaceAppend)
+                            if (!leftBrace.test(currentLine)) {
+                                editor.remove(cursorPosition, cursorPosition - currentLine.length);
+                                currentLine = currentLine.toString().replace(/ {1,4}$/, "");
+                                editor.insert(cursorPosition, currentLine);
+                            }
                         }
+                    }
+                    Keys.onReturnPressed: {
+                        editor.select(0, cursorPosition)
+                        var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
+                        editor.deselect()
+                        var currentLine = previousContent[previousContent.length - 1]
+                        var leftBrace = /{/, rightBrace = /}/;
+                        editor.insert(cursorPosition, "\n")
+                        var whitespaceAppend = currentLine.match(new RegExp(/^[ \t]*/))  // whitespace
+                        if (leftBrace.test(currentLine)) // indent
+                            whitespaceAppend += "    ";
+                        editor.insert(cursorPosition, whitespaceAppend)
+                    }
 
-                        color: '#e0e0e0'
-                        selectionColor: '#0C75BC'
-                        selectByMouse: true
-                        text: documentHandler.text
-                        inputMethodHints: Qt.ImhNoPredictiveText
+                    color: '#e0e0e0'
+                    selectionColor: '#0C75BC'
+                    selectByMouse: true
+                    text: documentHandler.text
+                    inputMethodHints: Qt.ImhNoPredictiveText
 
-                        DocumentHandler {
-                            id: documentHandler
-                            target: editor
+                    DocumentHandler {
+                        id: documentHandler
+                        target: editor
+                    }
+
+                    MouseArea {
+                        id: handler
+                        visible: !isDesktop
+                        anchors.fill: parent
+                        propagateComposedEvents: true
+                        onPressed: {
+                            editor.cursorPosition = parent.positionAt(mouse.x, mouse.y);
+                            editor.focus = true
+                            navibar.state = 'view'
+                            Qt.inputMethod.show();
                         }
-
-
-                        MouseArea {
-                            id: handler
-                            enabled: !isDesktop
-                            anchors.fill: parent
-                            propagateComposedEvents: true
-                            onPressed: {
-                                editor.cursorPosition = parent.positionAt(mouse.x, mouse.y);
-                                editor.focus = true
-                                navibar.state = 'view'
-                                Qt.inputMethod.show();
-                            }
-                            onPressAndHold: {
-                                navibar.state = 'selection'
-                                Qt.inputMethod.hide();
-                            }
-                            onDoubleClicked: {
-                                editor.selectWord()
-                                navibar.state = 'selection'
-                            }
+                        onPressAndHold: {
+                            navibar.state = 'selection'
+                            Qt.inputMethod.hide();
+                        }
+                        onDoubleClicked: {
+                            editor.selectWord()
+                            navibar.state = 'selection'
                         }
                     }
                 }
             }
+            ImageViewer {
+                id: imageViewer
+                anchors.fill: flickable
+                visible: false
+                clip: true
+                defaultSize: Fit.fit(80)
+            }
             Rectangle {
-                id: seperator
+                id: separator
                 x: parent.width/2.0
                 color: Qt.lighter(parent.color, 1.5)
                 width: Fit.fit(1)
@@ -399,7 +343,7 @@ Item {
                     height: Fit.fit(22)
                     width: height
                     anchors.centerIn: parent
-                    drag.target: seperator;
+                    drag.target: separator;
                     drag.axis: "XAxis"
                     drag.minimumX: 0
                     drag.maximumX: container.width
@@ -522,7 +466,7 @@ Item {
         var clearUrls = []
         var toolDir = folderBrowser.rootFolder.toString().replace("file://","")
         for (var i = 0; i < urlCache.length; i++) {
-            if (urlCache[i].indexOf(toolDir) >= 0) {
+            if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 clearUrls.push(urlCache[i])
                 clearSaves.push(FileManager.rdfile(urlCache[i]))
             }
@@ -533,7 +477,7 @@ Item {
     function flushCachesToDisk() {
         var toolDir = folderBrowser.rootFolder.toString().replace("file://","")
         for (var i = 0; i < urlCache.length; i++) {
-            if (urlCache[i].indexOf(toolDir) >= 0) {
+            if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 var ret = FileManager.svfile(urlCache[i], saveCache[i])
             }
         }
@@ -547,18 +491,85 @@ Item {
         }
     }
 
-    property string splitState: 'splitted'
-    property int lineNumberPadding: Fit.fit(20)
-    property int lineNumberSpacing: 0
-    property var lastItem: null
-    property bool toolboxMode: false
+    function clearCache() {
+        urlCache = []
+        saveCache = []
+    }
 
-    property alias folder: folderBrowser.folder
-    property alias rootFolder: folderBrowser.rootFolder
-    property string url
-    property var urlCache: []
-    property var saveCache: []
-    signal saved(string code)
+    function clearCacheFor(urlval, isdir) {
+        if (isdir) {
+            for (var i = 0; i < urlCache.length; i++) {
+                if (urlCache[i].indexOf(urlval + FileManager.separator()) >= 0) {
+                    urlCache.splice(i, 1)
+                    saveCache.splice(i, 1)
+                }
+            }
+
+            for (var j=0; j<folderBrowser.count;j++) {
+                if (folderBrowser.itemAt(j) === "main.qml") {
+                    folderBrowser.currentIndex = j
+                }
+            }
+        } else if (isTextFile(urlval)) {
+            for (var ii = 0; ii < urlCache.length; ii++) {
+                if (urlCache[ii] === urlval) {
+                    urlCache.splice(ii, 1)
+                    saveCache.splice(ii, 1)
+                }
+            }
+
+            for (var jj=0; jj<folderBrowser.count;jj++) {
+                if (folderBrowser.itemAt(jj) === "main.qml") {
+                    folderBrowser.currentIndex = jj
+                }
+            }
+        }
+    }
+
+    function updateCacheForRenamedEntry(from, to, isdir) {
+        if (isdir) {
+            var updateSubCaches = function(dirold, dirnew) {
+                var fileList = FileManager.lsfile(dirnew)
+                for (var i = 0; i < fileList.length; i++) {
+                    for (var ii = 0; ii < urlCache.length; ii++) {
+                        if (urlCache[ii] === (dirold + FileManager.separator() + fileList[i])) {
+                            urlCache[ii] = (dirnew + FileManager.separator() + fileList[i])
+                        }
+                    }
+                }
+
+                var dirList = FileManager.lsdir(dirnew)
+                for (var j = 0; j < dirList.length; j++) {
+                    updateSubCaches(dirold + FileManager.separator() + dirList[j], dirnew + FileManager.separator() + dirList[j])
+                }
+            }
+            updateSubCaches(from, to)
+        } else if (isTextFile(from) && isTextFile(to)) {
+            for (var i = 0; i < urlCache.length; i++) {
+                if (urlCache[i] === from) {
+                    urlCache[i] = to
+                }
+            }
+        } else if (isTextFile(from) && !isTextFile(to)) {
+            for (var ii = 0; ii < urlCache.length; ii++) {
+                if (urlCache[ii] === from) {
+                    FileManager.svfile(to, saveCache[ii])
+                    urlCache.splice(ii, 1)
+                    saveCache.splice(ii, 1)
+
+                    for (var j=0; j<folderBrowser.count;j++) {
+                        if (folderBrowser.itemAt(j) === "main.qml") {
+                            folderBrowser.currentIndex = j
+                        }
+                    }
+                }
+            }
+        } else if (!isTextFile(from) && isTextFile(to)) {
+            root.url = to
+        }
+
+        reloadView()
+    }
 
     function show(url) {
         DelayCaller.delayCall(500, function() {
@@ -570,13 +581,6 @@ Item {
                 }
             }
         })
-    }
-
-    function randomFileName() {
-        function s4() {
-            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-        }
-        return s4() + s4();
     }
 
     function reloadView() {
@@ -640,4 +644,19 @@ Item {
                 FileManager.ftype(file) === "qml" ||
                 FileManager.ftype(file) === "js")
     }
+
+    function isImageFile(file) {
+        return (FileManager.ftype(file) === "img")
+    }
+
+    property real maxWidth: 0
+    property string splitState: 'splitted'
+    property var lastItem: null
+    property bool toolboxMode: false
+    property alias folder: folderBrowser.folder
+    property alias rootFolder: folderBrowser.rootFolder
+    property string url
+    property var urlCache: []
+    property var saveCache: []
+    signal saved(string code)
 }

@@ -842,6 +842,7 @@ void MainWindow::toolboxRemoveButtonClicked()
 	const int ret = msgBox.exec();
 	switch (ret) {
 		case QMessageBox::Yes: {
+			m_d->qmlEditor->clearCacheFor(m_ToolsDir + separator() + name, true);
 			rm(m_ToolsDir + separator() + name);
 			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
 			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
@@ -874,6 +875,7 @@ void MainWindow::toolboxResetButtonClicked()
 		case QMessageBox::Yes: {
 			m_d->toolboxList->ClearUrls();
 			m_d->toolboxList->clear();
+			m_d->qmlEditor->clearCache();
 			rm(m_ToolsDir);
 			DownloadTools(TOOLS_URL);
 			break;

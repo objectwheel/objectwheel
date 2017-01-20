@@ -304,6 +304,22 @@ void QmlEditor::show(const QString& url)
 	m_d->show(url);
 }
 
+void QmlEditor::clearCache()
+{
+	QMetaObject::invokeMethod(m_d->rootItem, "clearCache");
+}
+
+void QmlEditor::clearCacheFor(const QString& url, const bool isdir)
+{
+	QMetaObject::invokeMethod(m_d->rootItem, "clearCacheFor", Qt::AutoConnection, Q_ARG(QString,url),Q_ARG(bool,isdir));
+}
+
+void QmlEditor::updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir)
+{
+	QMetaObject::invokeMethod(m_d->rootItem, "updateCacheForRenamedEntry", Qt::AutoConnection,
+							  Q_ARG(QString,from), Q_ARG(QString,to), Q_ARG(bool,isdir));
+}
+
 void QmlEditor::show()
 {
 	m_d->show();

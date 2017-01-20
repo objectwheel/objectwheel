@@ -105,5 +105,6 @@
         <file>resources/images/handle@2x.png</file>
         <file>resources/images/handle.png</file>
         <file>resources/images/reset.png</file>
+        <file>resources/qmls/ImageViewer.qml</file>
     </qresource>
 </RCC>

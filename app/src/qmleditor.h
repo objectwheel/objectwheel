@@ -27,6 +27,9 @@ class QmlEditor : public QWidget
 		void setShowCenter(const QPoint& p);
 		void setRootFolder(const QString& folder);
 		void show(const QString& url);
+		void clearCache();
+		void clearCacheFor(const QString& url, const bool isdir);
+		void updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir);
 		void show();
 		void hide();
 
