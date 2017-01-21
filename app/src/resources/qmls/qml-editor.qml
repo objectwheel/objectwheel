@@ -25,7 +25,6 @@ import "delaycaller.js" as DelayCaller
 //TODO: Add "Fit" lib to com.objectwheel.components
 //TODO: Save doesn't work
 //TODO: Show parent folder in folderList's upside
-//FIX: Seperator restores its size if I resize window
 //FIX: Main.qml should not be removed and icon
 //FIX: Editor "error" line corruption when page word wrapped
 //FIX: Clear "jsx" and "qmlc" cache files recursively
@@ -91,6 +90,12 @@ Item {
             color: "#2b5796"
             clip: true
 
+            Timer {
+                interval: 10000
+                running: true
+                onTriggered: separator.x += 80
+            }
+
             RowLayout {
                 anchors.margins: Fit.fit(6)
                 anchors.fill: parent
@@ -102,6 +107,29 @@ Item {
                     checkable: true
                     height: parent.height
                     iconSource: "qrc:///resources/images/menu-icon.png"
+                    onCheckedChanged: {
+                        if (checked) {
+                            sepPrevXDiff = (separator.x - editorContainer.width/2.0)/(editorContainer.width)
+                            fixerAnim.start()
+                            fixerTimer.start()
+                        } else {
+                            fixerAnim.start()
+                            fixerTimer.start()
+                        }
+                    }
+
+                    NumberAnimation { id: fixerAnim; duration: 400; target:QtObject{} }
+
+                    Timer {
+                        id: fixerTimer
+                        interval: 1
+                        repeat: fixerAnim.running
+                        onTriggered: {
+                            separator.x = editorContainer.width/2.0 + menu.sepPrevXDiff * editorContainer.width
+                        }
+                    }
+
+                    property real sepPrevXDiff
                 }
 
                 Item { Layout.fillWidth: true }
