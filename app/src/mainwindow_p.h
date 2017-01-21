@@ -230,7 +230,7 @@ class MainWindowPrivate
 
 		void retranslateUi(QWidget *MainWindow)
 		{
-			MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Form", 0));
+			MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
 			editButton->setText(QApplication::translate("MainWindow", "Edit", 0));
 			clearButton->setText(QApplication::translate("MainWindow", "Clear", 0));
 		} // retranslateUi

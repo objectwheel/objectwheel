@@ -30,6 +30,7 @@ import "delaycaller.js" as DelayCaller
 //FIX: Editor "error" line corruption when page word wrapped
 //FIX: Clear "jsx" and "qmlc" cache files recursively
 //TODO: Add image viewer
+//TODO: Fix binding loops
 
 Item {
     id: root
@@ -75,10 +76,11 @@ Item {
         }
     }
 
-    Item {
+    Rectangle {
         id: container
         anchors { left:folderBrowser.right; top:parent.top; bottom: parent.bottom; right: parent.right }
         clip: true
+        color: "#44504e"
         Rectangle {
             id:toolBar
             z: 2
@@ -141,286 +143,329 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
             }
         }
-        Rectangle  {
-            id: editorContainer
-            anchors{left:parent.left;right:parent.right;top:toolBar.bottom;bottom: parent.bottom}
-            color: "#44504e"
-            clip: true
-            Item {
-                id: view
-                state: root.splitState
-                anchors { top: errorHead.bottom; right: parent.right; bottom: separator.bottom; left: separator.right
-                leftMargin: Fit.fit(5);topMargin: Fit.fit(5);rightMargin: Fit.fit(5)}
-                enabled: opacity > 0.98 ? true : false
-                clip: true
-                states: [
-                    State {
-                        name: "splitted"
-                        PropertyChanges { target: view; opacity: 1 }
-                        PropertyChanges { target: flickable; opacity: 1 }
-                        PropertyChanges { target: handle; opacity: 1 }
-                        PropertyChanges { target: separator; x:parent.width/2.0 }
-                    },
-                    State {
-                        name: "editor"
-                        PropertyChanges { target: view; opacity: 0}
-                        PropertyChanges { target: flickable; opacity: 1 }
-                        PropertyChanges { target: handle; opacity: 0 }
-                        PropertyChanges { target: separator; x:parent.width }
-                    },
-                    State {
-                        name: "viewer"
-                        PropertyChanges { target: view; opacity: 1 }
-                        PropertyChanges { target: flickable; opacity: 0}
-                        PropertyChanges { target: handle; opacity: 0 }
-                        PropertyChanges { target: separator; x:Fit.fit(-1) }
-                    }
-                ]
-                transitions: [
-                    Transition {
-                        to: "*"
-                        NumberAnimation { target: separator; properties: "x"; duration: 300; easing.type: Easing.InOutQuad; }
-                        NumberAnimation { target: view; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
-                        NumberAnimation { target: flickable; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
-                        NumberAnimation { target: handle; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
-                    }
-                ]
+        Item {
+            id: editorPadder
+            anchors{
+                left:parent.left
+                right:parent.right
+                top:toolBar.bottom
+                bottom: navibar.top
             }
-            Flickable {
-                id: flickable
-                anchors { top: parent.top; left: parent.left; bottom: separator.bottom; right:separator.left
-                    leftMargin: Fit.fit(10); topMargin: Fit.fit(10); rightMargin: Fit.fit(5)}
-                enabled: opacity > 0.98 ? true : false
-                flickableDirection: Flickable.VerticalFlick
-                boundsBehavior: Flickable.DragOverBounds
-                contentHeight: editor.paintedHeight
-                clip: true
-                ScrollBar.vertical: ScrollBar { }
+            Item {
+                id: topPadder
+                anchors { left:parent.left; right:parent.right; top:parent.top }
+                height: Fit.fit(10)
+            }
+            Item {
+                id: leftPadder
+                anchors { left:parent.left; bottom:parent.bottom; top:parent.top }
+                width: Fit.fit(10)
+            }
+            Item {
+                id: rightPadder
+                anchors { right:parent.right; bottom:parent.bottom; top:parent.top }
+                width: Fit.fit(10)
+            }
+            Item  {
+                id: editorContainer
+                anchors{
+                    left: leftPadder.right
+                    right: rightPadder.left
+                    top: topPadder.bottom
+                    bottom: parent.bottom
+                }
 
-                Column {
-                    id: lineNumber
-                    width: maxWidth + Fit.fit(10)
-                    anchors { left: parent.left; top: parent.top }
-                    Repeater {
-                        id: lineNumberRepeater
-                        model: editor.lineCount
-                        clip: true
-                        Text {
-                            property alias bgcolor: rect.color
-                            rightPadding: Fit.fit(3)
-                            text: index + 1
-                            height: editor.cursorRectangle.height
-                            color: "#e0e0e0"
-                            width: maxWidth
-                            horizontalAlignment: TextEdit.AlignRight
-                            verticalAlignment: TextEdit.AlignVCenter
-                            font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false
-                            Component.onCompleted: if (contentWidth > maxWidth) maxWidth = contentWidth
-                            Rectangle {
-                                id: rect
-                                color: 'transparent'
-                                anchors.fill: parent
-                                z:-1
+                Item {
+                    id: view
+                    state: root.splitState
+                    anchors { top: errorHead.bottom; right: parent.right; bottom: separator.bottom; left: separator.right }
+                    enabled: opacity > 0.98 ? true : false
+                    clip: true
+                    states: [
+                        State {
+                            name: "splitted"
+                            PropertyChanges { target: view; opacity: 1 }
+                            PropertyChanges { target: flickable; opacity: 1 }
+                            PropertyChanges { target: flickable; opacity: 1 }
+                            PropertyChanges { target: handle; opacity: 1 }
+                            PropertyChanges { target: separator; x:parent.width/2.0 }
+                        },
+                        State {
+                            name: "editor"
+                            PropertyChanges { target: view; opacity: 0}
+                            PropertyChanges { target: flickable; opacity: 1 }
+                            PropertyChanges { target: imageViewer; opacity: 1}
+                            PropertyChanges { target: handle; opacity: 0 }
+                            PropertyChanges { target: separator; x: parent.width - Fit.fit(1)}
+                        },
+                        State {
+                            name: "viewer"
+                            PropertyChanges { target: view; opacity: 1 }
+                            PropertyChanges { target: flickable; opacity: 0}
+                            PropertyChanges { target: imageViewer; opacity: 0}
+                            PropertyChanges { target: handle; opacity: 0 }
+                            PropertyChanges { target: separator; x: 0 }
+                        }
+                    ]
+                    transitions: [
+                        Transition {
+                            to: "*"
+                            NumberAnimation { target: separator; properties: "x"; duration: 300; easing.type: Easing.InOutQuad; }
+                            NumberAnimation { target: view; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
+                            NumberAnimation { target: flickable; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
+                            NumberAnimation { target: imageViewer; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
+                            NumberAnimation { target: handle; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
+                        }
+                    ]
+                }
+                Flickable {
+                    id: flickable
+                    anchors { top: parent.top; left: parent.left; bottom: separator.bottom; right:separator.left }
+                    enabled: opacity > 0.98 ? true : false
+                    flickableDirection: Flickable.VerticalFlick
+                    boundsBehavior: Flickable.DragOverBounds
+                    contentHeight: editor.paintedHeight
+                    clip: true
+                    ScrollBar.vertical: ScrollBar { }
+
+                    Column {
+                        id: lineNumber
+                        width: maxWidth
+                        anchors { left: parent.left; top: parent.top }
+                        Repeater {
+                            id: lineNumberRepeater
+                            model: editor.lineCount
+                            clip: true
+                            Text {
+                                property alias bgcolor: rect.color
+                                text: index + 1
+                                color: "#e0e0e0"
+                                width: maxWidth
+                                horizontalAlignment: TextEdit.AlignRight
+                                verticalAlignment: TextEdit.AlignVCenter
+                                font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false
+                                Component.onCompleted: if (contentWidth > maxWidth) maxWidth = contentWidth
+                                Rectangle {
+                                    id: rect
+                                    color: 'transparent'
+                                    anchors.fill: parent
+                                    z:-1
+                                }
                             }
                         }
                     }
-                }
 
-                Rectangle {
-                    id: leftLine
-                    width: Fit.fit(1)
-                    height: parent.height
-                    anchors.top: parent.top
-                    anchors.right: lineNumber.right
-                    anchors.rightMargin: lineNumber.width - maxWidth - Fit.fit(4)
-                    color: Qt.lighter(editorContainer.color, 1.3)
-                }
-
-                Rectangle {
-                    id: editorCurrentLineHighlight
-                    anchors.left: lineNumber.left
-                    anchors.right: editor.right
-                    visible: editor.focus
-                    height: editor.cursorRectangle.height
-                    y: editor.cursorRectangle.y
-                    color: Qt.darker(editorContainer.color, 1.3)
-                    z: -1
-                }
-
-                TextEdit {
-                    id: editor
-                    objectName: "editor"
-                    anchors { left: lineNumber.right; right: parent.right; top: parent.top; bottom: parent.bottom }
-                    wrapMode: flickable.opacity > 0.98 ? TextEdit.WrapAtWordBoundaryOrAnywhere : TextEdit.NoWrap ;
-                    renderType: Text.NativeRendering
-                    onTextChanged: timer.restart();
-
-                    onSelectedTextChanged: {
-                        if (editor.selectedText === "") {
-                            navibar.state = 'view'
-                        }
+                    Rectangle {
+                        id: leftLine
+                        width: Fit.fit(1)
+                        height: parent.height
+                        anchors.top: parent.top
+                        anchors.right: lineNumber.right
+                        anchors.rightMargin: lineNumber.width - maxWidth
+                        color: Qt.lighter(container.color, 1.3)
                     }
-                    // FIXME: stupid workaround for indent
-                    Keys.onPressed: {
-                        if (event.key == Qt.Key_BraceRight) {
+
+                    Rectangle {
+                        id: editorCurrentLineHighlight
+                        anchors.left: lineNumber.left
+                        anchors.right: editor.right
+                        visible: editor.focus
+                        height: editor.cursorRectangle.height
+                        y: editor.cursorRectangle.y
+                        color: Qt.darker(container.color, 1.3)
+                        z: -1
+                    }
+
+                    TextEdit {
+                        id: editor
+                        objectName: "editor"
+                        anchors { left: lineNumber.right; right: parent.right; top: parent.top; bottom: parent.bottom }
+                        wrapMode: flickable.opacity > 0.98 ? TextEdit.WrapAtWordBoundaryOrAnywhere : TextEdit.NoWrap ;
+                        renderType: Text.NativeRendering
+                        onTextChanged: timer.restart();
+
+                        onSelectedTextChanged: {
+                            if (editor.selectedText === "") {
+                                navibar.state = 'view'
+                            }
+                        }
+                        // FIXME: stupid workaround for indent
+                        Keys.onPressed: {
+                            if (event.key == Qt.Key_BraceRight) {
+                                editor.select(0, cursorPosition)
+                                var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
+                                editor.deselect()
+                                var currentLine = previousContent[previousContent.length - 1]
+                                var leftBrace = /{/, rightBrace = /}/;
+                                if (!leftBrace.test(currentLine)) {
+                                    editor.remove(cursorPosition, cursorPosition - currentLine.length);
+                                    currentLine = currentLine.toString().replace(/ {1,4}$/, "");
+                                    editor.insert(cursorPosition, currentLine);
+                                }
+                            }
+                        }
+                        Keys.onReturnPressed: {
                             editor.select(0, cursorPosition)
                             var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
                             editor.deselect()
                             var currentLine = previousContent[previousContent.length - 1]
                             var leftBrace = /{/, rightBrace = /}/;
-                            if (!leftBrace.test(currentLine)) {
-                                editor.remove(cursorPosition, cursorPosition - currentLine.length);
-                                currentLine = currentLine.toString().replace(/ {1,4}$/, "");
-                                editor.insert(cursorPosition, currentLine);
+                            editor.insert(cursorPosition, "\n")
+                            var whitespaceAppend = currentLine.match(new RegExp(/^[ \t]*/))  // whitespace
+                            if (leftBrace.test(currentLine)) // indent
+                                whitespaceAppend += "    ";
+                            editor.insert(cursorPosition, whitespaceAppend)
+                        }
+
+                        color: '#e0e0e0'
+                        selectionColor: '#0C75BC'
+                        selectByMouse: true
+                        text: documentHandler.text
+                        inputMethodHints: Qt.ImhNoPredictiveText
+
+                        DocumentHandler {
+                            id: documentHandler
+                            target: editor
+                        }
+
+                        MouseArea {
+                            id: handler
+                            visible: !isDesktop
+                            anchors.fill: parent
+                            propagateComposedEvents: true
+                            onPressed: {
+                                editor.cursorPosition = parent.positionAt(mouse.x, mouse.y);
+                                editor.focus = true
+                                navibar.state = 'view'
+                                Qt.inputMethod.show();
+                            }
+                            onPressAndHold: {
+                                navibar.state = 'selection'
+                                Qt.inputMethod.hide();
+                            }
+                            onDoubleClicked: {
+                                editor.selectWord()
+                                navibar.state = 'selection'
                             }
                         }
                     }
-                    Keys.onReturnPressed: {
-                        editor.select(0, cursorPosition)
-                        var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
-                        editor.deselect()
-                        var currentLine = previousContent[previousContent.length - 1]
-                        var leftBrace = /{/, rightBrace = /}/;
-                        editor.insert(cursorPosition, "\n")
-                        var whitespaceAppend = currentLine.match(new RegExp(/^[ \t]*/))  // whitespace
-                        if (leftBrace.test(currentLine)) // indent
-                            whitespaceAppend += "    ";
-                        editor.insert(cursorPosition, whitespaceAppend)
-                    }
-
-                    color: '#e0e0e0'
-                    selectionColor: '#0C75BC'
-                    selectByMouse: true
-                    text: documentHandler.text
-                    inputMethodHints: Qt.ImhNoPredictiveText
-
-                    DocumentHandler {
-                        id: documentHandler
-                        target: editor
+                }
+                ImageViewer {
+                    id: imageViewer
+                    anchors.fill: flickable
+                    visible: false
+                    clip: true
+                    defaultSize: Fit.fit(80)
+                }
+                Rectangle {
+                    id: separator
+                    x: parent.width/2.0
+                    color: Qt.lighter(container.color, 1.5)
+                    width: Fit.fit(1)
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    onXChanged: {
+                        if (view.state !== "splitted") {
+                            if (x === (editorContainer.width - Fit.fit(1)) || x === 0) {
+                                visible = false
+                            } else {
+                                visible = true
+                            }
+                        } else {
+                            visible = true
+                        }
                     }
 
                     MouseArea {
-                        id: handler
-                        visible: !isDesktop
-                        anchors.fill: parent
-                        propagateComposedEvents: true
-                        onPressed: {
-                            editor.cursorPosition = parent.positionAt(mouse.x, mouse.y);
-                            editor.focus = true
-                            navibar.state = 'view'
-                            Qt.inputMethod.show();
-                        }
-                        onPressAndHold: {
-                            navibar.state = 'selection'
-                            Qt.inputMethod.hide();
-                        }
-                        onDoubleClicked: {
-                            editor.selectWord()
-                            navibar.state = 'selection'
+                        id: handle
+                        height: Fit.fit(22)
+                        width: height
+                        anchors.centerIn: parent
+                        drag.target: separator;
+                        drag.axis: "XAxis"
+                        drag.minimumX: 0
+                        drag.maximumX: editorContainer.width - Fit.fit(1)
+                        drag.filterChildren: true
+                        drag.smoothed: false
+                        cursorShape: enabled ? Qt.SplitHCursor : Qt.ArrowCursor
+                        enabled: opacity > 0.8
+                        Image {
+                            id: handleImage
+                            anchors.fill: parent
+                            sourceSize: Qt.size(width,height)
+                            source: "qrc:///resources/images/handle.png"
                         }
                     }
-                }
-            }
-            ImageViewer {
-                id: imageViewer
-                anchors.fill: flickable
-                visible: false
-                clip: true
-                defaultSize: Fit.fit(80)
-            }
-            Rectangle {
-                id: separator
-                x: parent.width/2.0
-                color: Qt.lighter(parent.color, 1.5)
-                width: Fit.fit(1)
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: Fit.fit(50)
-                anchors.topMargin: Fit.fit(10)
 
-                MouseArea {
-                    id: handle
-                    height: Fit.fit(22)
-                    width: height
-                    anchors.centerIn: parent
-                    drag.target: separator;
-                    drag.axis: "XAxis"
-                    drag.minimumX: 0
-                    drag.maximumX: container.width
-                    drag.filterChildren: true
-                    drag.smoothed: false
-                    cursorShape: enabled ? Qt.SplitHCursor : Qt.ArrowCursor
-                    enabled: opacity > 0.8
-                    Image {
-                        id: handleImage
-                        anchors.fill: parent
-                        sourceSize: Qt.size(width,height)
-                        source: "qrc:///resources/images/handle.png"
-                    }
                 }
-
-            }
-            Rectangle {
-                id: errorHead
-                clip: true
-                color: "#1e8145"
-                anchors.horizontalCenter: view.horizontalCenter
-                width: view.width
-                height: Fit.fit(40)
-                y: -height
-                visible: 0.98 < Math.abs(y/height) ? false : true
-                Behavior on y {
-                    NumberAnimation { duration: 500; easing.type: Easing.OutExpo }
-                }
-
-                Text {
-                    id: errorMessage
-                    anchors { top: parent.top; left: parent.left; right: parent.right; bottom: parent.bottom }
-                    wrapMode: Text.WordWrap
-                    text: ""
-                    color: "white"
+                Rectangle {
+                    id: errorHead
                     clip: true
-                    font.pixelSize: Fit.fit(11)
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                Component.onCompleted: {
-                    errorMessage.textChanged.connect(handleError)
-                }
-
-                function handleError() {
-                    if (errorMessage.text != "") {
-                        y = 0
-                    } else {
-                        y = -height
+                    color: "#1e8145"
+                    anchors.horizontalCenter: view.horizontalCenter
+                    width: view.width
+                    height: Fit.fit(40)
+                    y: -height
+                    visible: 0.98 < Math.abs(y/height) ? false : true
+                    Behavior on y {
+                        NumberAnimation { duration: 500; easing.type: Easing.OutExpo }
                     }
-                }
 
-                Text {
-                    anchors {right: parent.right; bottom: parent.bottom; margins:Fit.fit(5)}
-                    text: "⏏"
-                    color: "white"
-                    font.bold: true
-                    clip: true
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            errorHead.y = -errorHead.height
+                    Text {
+                        id: errorMessage
+                        anchors { top: parent.top; left: parent.left; right: parent.right; bottom: parent.bottom }
+                        wrapMode: Text.WordWrap
+                        text: ""
+                        color: "white"
+                        clip: true
+                        font.pixelSize: Fit.fit(11)
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    Component.onCompleted: {
+                        errorMessage.textChanged.connect(handleError)
+                    }
+
+                    function handleError() {
+                        if (errorMessage.text != "") {
+                            y = 0
+                        } else {
+                            y = -height
+                        }
+                    }
+
+                    Text {
+                        anchors {right: parent.right; bottom: parent.bottom; margins:Fit.fit(5)}
+                        text: "⏏"
+                        color: "white"
+                        font.bold: true
+                        clip: true
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                errorHead.y = -errorHead.height
+                            }
                         }
                     }
                 }
             }
-            NaviBar {
-                state: "view"
-                id: navibar
+        }
+        NaviBar {
+            id: navibar
+            height: Fit.fit(49)
+            anchors {
+                bottom: parent.bottom
+                left: parent.left
+                right: parent.right
             }
-            Timer {
-                id: timer
-                interval: 500;
-                onTriggered: reloadView()
-            }
+            state: "view"
+        }
+        Timer {
+            id: timer
+            interval: 500;
+            onTriggered: reloadView()
         }
     }
 

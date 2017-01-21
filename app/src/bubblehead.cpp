@@ -41,6 +41,7 @@ BubbleHeadPrivate::BubbleHeadPrivate(BubbleHead* p)
 	shadowEffect.setOffset(0,fit(3.3));
 	shadowEffect.setColor("#aa000000");
 	parent->setGraphicsEffect(&shadowEffect);
+	parent->setCursor(Qt::PointingHandCursor);
 	QObject::connect((MainWindow*)parent->parent(), &MainWindow::resized, [this]{fixCoord();});
 }
 

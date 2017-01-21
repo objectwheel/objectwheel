@@ -3,25 +3,14 @@ import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.1
 import "fit.js" as Fit
 
-Rectangle {
+Item {
     id: navigationBar
-    width: parent.width
-    height: Fit.fit(44)
-    anchors {
-        bottom: parent.bottom
-        left: parent.left
-        bottomMargin: Fit.fit(5)
-    }
-    color: "transparent"
 
     Rectangle {
         id: mask
-        width: repeater.width
-        height: repeater.height
         anchors.fill: repeater
         radius: Fit.fit(5)
         visible: false
-        color: "white"
     }
 
     Rectangle {
