@@ -259,5 +259,3 @@ void PagesWidget::setCurrentPage(int index)
 {
 	m_d->pagesListWidget.setCurrentRow(index);
 }
-
-

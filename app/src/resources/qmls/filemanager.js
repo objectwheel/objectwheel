@@ -59,6 +59,11 @@ function rdfile(file) {
     return fileManager.rdfile(file)
 }
 
+function wrfile(file, data) {
+    init()
+    return fileManager.wrfile(file, data)
+}
+
 function fname(name) {
     init()
     return fileManager.fname(name)

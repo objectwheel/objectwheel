@@ -46,13 +46,15 @@ class MainWindow : public QWidget
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
 		void fixWebViewPosition(QQuickItem* const item);
+		void DownloadPixmap(const QUrl& url, QPixmap& pixmap);
 
 	private slots:
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
-		void toolboxAddButtonClicked();
+		void toolboxOpenEditorButtonClicked();
+		void toolboxEditButtonToggled(bool);
 		void toolboxRemoveButtonClicked();
-		void toolboxEditButtonClicked();
+		void toolboxAddButtonClicked();
 		void toolboxResetButtonClicked();
 		void fixWebViewPositions();
 		void HideSelectionTools();
@@ -64,6 +66,7 @@ class MainWindow : public QWidget
 		void centralWidgetMoved();
 		void selectionHided();
 		void selectionShowed(QObject* const selectedItem);
+
 };
 
 #endif // MAINWINDOW_H

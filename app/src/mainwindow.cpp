@@ -21,6 +21,16 @@
 #include <QFileInfo>
 
 #define TOOLS_URL (QUrl::fromUserInput("qrc:/resources/tools/tools.json"))
+#define CUSTOM_ITEM "\
+import QtQuick 2.0\n\
+\n\
+Rectangle {\n\
+   id: item\n\
+   width: 54\n\
+   height: 54\n\
+   radius: 5 * dpi\n\
+   color: \"#c7cbc4\"\n\
+}\n"
 
 #if defined(Q_OS_IOS)
 #include <ios.h>
@@ -627,8 +637,8 @@ void MainWindow::DownloadTools(const QUrl& url)
 			return;
 		}
 
-//		if (!QDir(m_ToolsDir).removeRecursively())
-//			Q_ASSERT_X(0, "GetTools()", "Can not remove tools dir");
+		//		if (!QDir(m_ToolsDir).removeRecursively())
+		//			Q_ASSERT_X(0, "GetTools()", "Can not remove tools dir");
 
 		for (int i = 0; i < toolsObject.size(); i++)
 		{
@@ -824,9 +834,21 @@ void MainWindow::on_editButton_clicked()
 	m_d->bindingWidget->clearList();
 }
 
-void MainWindow::toolboxAddButtonClicked()
+void MainWindow::toolboxEditButtonToggled(bool checked)
 {
-	qWarning("aaaaaaaaaaaaaaaa");
+	if (checked) {
+		m_d->showAdderArea();
+	} else {
+		m_d->hideAdderArea();
+	}
+}
+
+void MainWindow::toolboxOpenEditorButtonClicked()
+{
+	if (m_d->toolboxList->currentRow() < 0) return;
+	auto cItem = m_d->toolboxList->currentItem();
+	m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
+	m_d->qmlEditor->setRootFolder(m_ToolsDir + separator() + m_d->toolboxList->currentItem()->text());
 }
 
 void MainWindow::toolboxRemoveButtonClicked()
@@ -854,12 +876,37 @@ void MainWindow::toolboxRemoveButtonClicked()
 	}
 }
 
-void MainWindow::toolboxEditButtonClicked()
+void MainWindow::toolboxAddButtonClicked()
 {
-	if (m_d->toolboxList->currentRow() < 0) return;
-	auto cItem = m_d->toolboxList->currentItem();
-	m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
-	m_d->qmlEditor->setRootFolder(m_ToolsDir + separator() + m_d->toolboxList->currentItem()->text());
+	int count = 1;
+	auto name = QString("Item%1").arg(count);
+	for (int i = 0; i < m_d->toolboxList->count(); i++) {
+		if (m_d->toolboxList->item(i)->text() == name) {
+			name.remove(name.size() - 1, 1);
+			i = 0;
+			count++;
+			name += QString::number(count);
+		}
+	}
+
+	auto filePath = m_ToolsDir + "/" + name + "/main.qml";
+	int ret = wrfile(filePath, CUSTOM_ITEM);
+	if (ret < 0) return;
+
+	QPixmap pixmap;
+	QString iconPath = m_ToolsDir + "/" + name + "/icon.png";
+	pixmap.load(":/resources/images/item.png");
+	if (!pixmap.save(iconPath)) {
+		return;
+	}
+
+	QList<QUrl> urls;
+	QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), name);
+	urls << QUrl::fromLocalFile(filePath);
+	m_d->toolboxList->insertItem(0, item);
+	m_d->toolboxList->AddUrls(item,urls);
+	m_d->toolboxList->setCurrentRow(0);
+	m_d->toolboxEditButton->setChecked(true);
 }
 
 void MainWindow::toolboxResetButtonClicked()
@@ -884,6 +931,22 @@ void MainWindow::toolboxResetButtonClicked()
 			break;
 		}
 	}
+}
+
+void MainWindow::DownloadPixmap(const QUrl& url, QPixmap& pixmap)
+{
+	QNetworkAccessManager manager;
+	QEventLoop loop;
+
+	QNetworkReply *reply = manager.get(QNetworkRequest(url));
+	QObject::connect(reply, &QNetworkReply::finished, &loop, [&reply, &pixmap, &loop](){
+		if (reply->error() == QNetworkReply::NoError) {
+			pixmap.loadFromData(reply->readAll());
+		}
+		loop.quit();
+	});
+
+	loop.exec();
 }
 
 void MainWindow::SetToolsDir()

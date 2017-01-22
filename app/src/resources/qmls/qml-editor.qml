@@ -31,6 +31,7 @@ import "filemanager.js" as FileManager
 //FIX: Unexpectedly finishing problem because of CacheCleaner
 //FIX: Fix menu icon to file explorer icon
 //FIX: Jumping image viewer
+//TODO: That alignment lock bar
 
 Item {
     id: root

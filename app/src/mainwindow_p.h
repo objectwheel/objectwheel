@@ -29,6 +29,7 @@
 #include <qmleditor.h>
 #include <pageswidget.h>
 #include <fit.h>
+#include <lineedit.h>
 
 using namespace Fit;
 
@@ -54,6 +55,11 @@ class MainWindowPrivate
 		FlatButton* toolboxEditButton;
 		FlatButton* toolboxRemoveButton;
 		FlatButton* toolboxResetButton;
+		QVBoxLayout* toolboxAdderLayout;
+		QHBoxLayout* toolboxAdderHLay;
+		LineEdit* toolboxUrlBox;
+		LineEdit* toolBoxNameBox;
+		FlatButton* toolboxOpenEditorButton;
 		PropertiesWidget* propertiesWidget;
 		BindingWidget* bindingWidget;
 		PagesWidget* pagesWidget;
@@ -62,179 +68,272 @@ class MainWindowPrivate
 		BubbleHead* bubbleHead;
 		QmlEditor* qmlEditor;
 
-		void setupUi(QWidget *MainWindow)
-		{
-			MainWindow->setObjectName(QStringLiteral("MainWindow"));
-			MainWindow->setStyleSheet(QLatin1String("#centralWidget, #MainWindow{\n"
-													"background:\"#e0e4e7\";\n }"));
-			centralWidget = new QWidget(MainWindow);
-			centralWidget->setObjectName(QStringLiteral("centralWidget"));
-			verticalLayout = new QVBoxLayout(centralWidget);
-			verticalLayout->setSpacing(0);
-			verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-			verticalLayout->setContentsMargins(0, 0, 0, 0);
-			titleBar = new TitleBar(centralWidget);
-			titleBar->setObjectName(QStringLiteral("titleBar"));
-			titleBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-			titleBar->setMinimumSize(QSize(0, 48));
-			titleBar->setMaximumSize(QSize(16777215, 48));
-			verticalLayout->addWidget(titleBar);
-
-			designWidget = new QQuickWidget(centralWidget);
-			designWidget->setObjectName(QStringLiteral("designWidget"));
-			designWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-			designWidget->setMouseTracking(false);
-			designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
-			verticalLayout->addWidget(designWidget);
-
-			buttonsLayout = new QHBoxLayout();
-			buttonsLayout->setSpacing(0);
-			buttonsLayout->setObjectName(QStringLiteral("buttonsLayout"));
-			buttonsLayout->setContentsMargins(0, 0, 0, 0);
-			horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-			buttonsLayout->addItem(horizontalSpacer);
-
-			editButton = new FlatButton(centralWidget);
-			editButton->setObjectName(QStringLiteral("editButton"));
-			editButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-			editButton->setMinimumSize(QSize(82, 35));
-			editButton->setMaximumSize(QSize(82, 35));
-			QIcon icon;
-			icon.addFile(QStringLiteral(":/resources/images/edit-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
-			editButton->setIcon(icon);
-			editButton->setCheckable(true);
-			editButton->setChecked(false);
-			buttonsLayout->addWidget(editButton);
-
-			clearButton = new FlatButton(centralWidget);
-			clearButton->setObjectName(QStringLiteral("clearButton"));
-			clearButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-			clearButton->setMinimumSize(QSize(82, 35));
-			clearButton->setMaximumSize(QSize(82, 35));
-			QIcon icon1;
-			icon1.addFile(QStringLiteral(":/resources/images/trash-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
-			clearButton->setIcon(icon1);
-
-			buttonsLayout->addWidget(clearButton);
-			horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-			buttonsLayout->addItem(horizontalSpacer_2);
-			verticalLayout->addLayout(buttonsLayout);
-
-			toolboxList = new ListWidget(centralWidget);
-			toolboxList->setObjectName(QStringLiteral("toolboxList"));
-			toolboxList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-			toolboxList->setFocusPolicy(Qt::NoFocus);
-			toolboxList->setStyleSheet(QLatin1String("QListView {\n"
-													 "	border:0px solid white;\n"
-													 "	background:#44504e;\n"
-													 "	padding-right:5px;\n"
-													 "}"
-													 "QListView::item {\n"
-													 "	color:white;\n"
-													 "    border: 0px solid transparent;\n"
-													 "	padding:2px;\n"
-													 "}"
-													 "QListView::item:selected {\n"
-													 "	color:black;\n"
-													 "  background: #e0e4e7;\n"
-													 "  border: 0px solid transparent;\n"
-													 "  border-radius: 3px;\n"
-													 "	padding:2px;\n"
-													 "  margin-right: 2px;\n"
-													 "}"));
-			toolboxList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-			toolboxList->setDragEnabled(true);
-			toolboxList->setDragDropMode(QAbstractItemView::InternalMove);
-			toolboxList->setSelectionBehavior(QAbstractItemView::SelectRows);
-			toolboxList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-			toolboxList->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-
-			toolboxWidget = new QWidget;
-			toolboxVLay = new QVBoxLayout;
-			toolboxHLay = new QHBoxLayout;
-
-			toolboxAddButton = new FlatButton;
-			toolboxAddButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-			toolboxAddButton->setColor("#1e8145");
-			toolboxAddButton->setFixedSize(fit(30),fit(30));
-			toolboxAddButton->setRadius(fit(15));
-			toolboxAddButton->setIconSize(QSize(fit(16),fit(16)));
-			toolboxAddButton->setIcon(QIcon(":/resources/images/plus.png"));
-			QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxAddButtonClicked()) );
-
-			toolboxRemoveButton = new FlatButton;
-			toolboxRemoveButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-			toolboxRemoveButton->setColor("#c03638");
-			toolboxRemoveButton->setFixedSize(fit(30),fit(30));
-			toolboxRemoveButton->setRadius(fit(15));
-			toolboxRemoveButton->setIconSize(QSize(fit(16),fit(16)));
-			toolboxRemoveButton->setIcon(QIcon(":/resources/images/minus.png"));
-			toolboxRemoveButton->setDisabled(true);
-			QObject::connect(toolboxRemoveButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxRemoveButtonClicked()) );
-
-			toolboxEditButton = new FlatButton;
-			toolboxEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-			toolboxEditButton->setColor("#2b5796");
-			toolboxEditButton->setFixedSize(fit(30),fit(30));
-			toolboxEditButton->setRadius(fit(15));
-			toolboxEditButton->setIconSize(QSize(fit(16),fit(16)));
-			toolboxEditButton->setIcon(QIcon(":/resources/images/edit.png"));
-			toolboxEditButton->setDisabled(true);
-			QObject::connect(toolboxEditButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxEditButtonClicked()) );
-
-			toolboxResetButton = new FlatButton;
-			toolboxResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-			toolboxResetButton->setColor("#ee8800");
-			toolboxResetButton->setFixedSize(fit(30),fit(30));
-			toolboxResetButton->setRadius(fit(15));
-			toolboxResetButton->setIconSize(QSize(fit(16),fit(16)));
-			toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
-			QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxResetButtonClicked()) );
-
-			toolboxHLay->addWidget(toolboxAddButton);
-			toolboxHLay->addStretch();
-			toolboxHLay->addWidget(toolboxRemoveButton);
-			toolboxHLay->addStretch();
-			toolboxHLay->addWidget(toolboxEditButton);
-			toolboxHLay->addStretch();
-			toolboxHLay->addWidget(toolboxResetButton);
-
-			toolboxVLay->addWidget(toolboxList);
-			toolboxVLay->addLayout(toolboxHLay);
-			toolboxWidget->setLayout(toolboxVLay);
-			toolboxWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-			toolboxHLay->setSpacing(0);
-			toolboxHLay->setContentsMargins(fit(4),fit(4),fit(10),fit(8));
-			toolboxVLay->setSpacing(0);
-			toolboxVLay->setContentsMargins(fit(6),0,0,0);
-
-			QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){toolboxRemoveButton->setEnabled(i>=0);});
-			QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){toolboxEditButton->setEnabled(i>=0);});
-
-			propertiesWidget = new PropertiesWidget(centralWidget);
-			propertiesWidget->setObjectName(QStringLiteral("propertiesWidget"));
-			propertiesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-			bindingWidget = new BindingWidget(centralWidget);
-			bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
-			bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-			pagesWidget = new PagesWidget(centralWidget);
-			pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
-			pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-			retranslateUi(MainWindow);
-
-			QMetaObject::connectSlotsByName(MainWindow);
-		} // setupUi
-
-		void retranslateUi(QWidget *MainWindow)
-		{
-			MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
-			editButton->setText(QApplication::translate("MainWindow", "Edit", 0));
-			clearButton->setText(QApplication::translate("MainWindow", "Clear", 0));
-		} // retranslateUi
-
+		void setupUi(QWidget *MainWindow); // setupUi
+		void retranslateUi(QWidget *MainWindow); // retranslateUi
+		void showAdderArea();
+		void hideAdderArea();
 };
 
+void MainWindowPrivate::setupUi(QWidget* MainWindow)
+{
+	MainWindow->setObjectName(QStringLiteral("MainWindow"));
+	MainWindow->setStyleSheet(QLatin1String("#centralWidget, #MainWindow{\n"
+											"background:\"#e0e4e7\";\n }"));
+	centralWidget = new QWidget(MainWindow);
+	centralWidget->setObjectName(QStringLiteral("centralWidget"));
+	verticalLayout = new QVBoxLayout(centralWidget);
+	verticalLayout->setSpacing(0);
+	verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+	verticalLayout->setContentsMargins(0, 0, 0, 0);
+	titleBar = new TitleBar(centralWidget);
+	titleBar->setObjectName(QStringLiteral("titleBar"));
+	titleBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	titleBar->setMinimumSize(QSize(0, 48));
+	titleBar->setMaximumSize(QSize(16777215, 48));
+	verticalLayout->addWidget(titleBar);
+
+	designWidget = new QQuickWidget(centralWidget);
+	designWidget->setObjectName(QStringLiteral("designWidget"));
+	designWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	designWidget->setMouseTracking(false);
+	designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
+	verticalLayout->addWidget(designWidget);
+
+	buttonsLayout = new QHBoxLayout();
+	buttonsLayout->setSpacing(0);
+	buttonsLayout->setObjectName(QStringLiteral("buttonsLayout"));
+	buttonsLayout->setContentsMargins(0, 0, 0, 0);
+	horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	buttonsLayout->addItem(horizontalSpacer);
+
+	editButton = new FlatButton(centralWidget);
+	editButton->setObjectName(QStringLiteral("editButton"));
+	editButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	editButton->setMinimumSize(QSize(82, 35));
+	editButton->setMaximumSize(QSize(82, 35));
+	QIcon icon;
+	icon.addFile(QStringLiteral(":/resources/images/edit-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
+	editButton->setIcon(icon);
+	editButton->setCheckable(true);
+	editButton->setChecked(false);
+	buttonsLayout->addWidget(editButton);
+
+	clearButton = new FlatButton(centralWidget);
+	clearButton->setObjectName(QStringLiteral("clearButton"));
+	clearButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	clearButton->setMinimumSize(QSize(82, 35));
+	clearButton->setMaximumSize(QSize(82, 35));
+	QIcon icon1;
+	icon1.addFile(QStringLiteral(":/resources/images/trash-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
+	clearButton->setIcon(icon1);
+
+	buttonsLayout->addWidget(clearButton);
+	horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	buttonsLayout->addItem(horizontalSpacer_2);
+	verticalLayout->addLayout(buttonsLayout);
+
+	toolboxList = new ListWidget(centralWidget);
+	toolboxList->setObjectName(QStringLiteral("toolboxList"));
+	toolboxList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	toolboxList->setFocusPolicy(Qt::NoFocus);
+	toolboxList->setStyleSheet(QLatin1String("QListView {\n"
+											 "	border:0px solid white;\n"
+											 "	background:#44504e;\n"
+											 "	padding-right:5px;\n"
+											 "}"
+											 "QListView::item {\n"
+											 "	color:white;\n"
+											 "    border: 0px solid transparent;\n"
+											 "	padding:2px;\n"
+											 "}"
+											 "QListView::item:selected {\n"
+											 "	color:black;\n"
+											 "  background: #e0e4e7;\n"
+											 "  border: 0px solid transparent;\n"
+											 "  border-radius: 3px;\n"
+											 "	padding:2px;\n"
+											 "  margin-right: 2px;\n"
+											 "}"));
+	toolboxList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	toolboxList->setDragEnabled(true);
+	toolboxList->setDragDropMode(QAbstractItemView::InternalMove);
+	toolboxList->setSelectionBehavior(QAbstractItemView::SelectRows);
+	toolboxList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+	toolboxList->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+	toolboxWidget = new QWidget;
+	toolboxVLay = new QVBoxLayout;
+	toolboxHLay = new QHBoxLayout;
+
+	toolboxAddButton = new FlatButton;
+	toolboxAddButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	toolboxAddButton->setColor("#1e8145");
+	toolboxAddButton->setFixedSize(fit(30),fit(30));
+	toolboxAddButton->setRadius(fit(15));
+	toolboxAddButton->setIconSize(QSize(fit(16),fit(16)));
+	toolboxAddButton->setIcon(QIcon(":/resources/images/plus.png"));
+	QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxAddButtonClicked()) );
+
+	toolboxRemoveButton = new FlatButton;
+	toolboxRemoveButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	toolboxRemoveButton->setColor("#c03638");
+	toolboxRemoveButton->setFixedSize(fit(30),fit(30));
+	toolboxRemoveButton->setRadius(fit(15));
+	toolboxRemoveButton->setIconSize(QSize(fit(16),fit(16)));
+	toolboxRemoveButton->setIcon(QIcon(":/resources/images/minus.png"));
+	toolboxRemoveButton->setDisabled(true);
+	QObject::connect(toolboxRemoveButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxRemoveButtonClicked()) );
+
+	toolboxEditButton = new FlatButton;
+	toolboxEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	toolboxEditButton->setColor("#2b5796");
+	toolboxEditButton->setFixedSize(fit(30),fit(30));
+	toolboxEditButton->setRadius(fit(15));
+	toolboxEditButton->setCheckedColor(QColor("#2b5796").darker(150));
+	toolboxEditButton->setCheckable(true);
+	toolboxEditButton->setIconSize(QSize(fit(16),fit(16)));
+	toolboxEditButton->setIcon(QIcon(":/resources/images/edit.png"));
+	toolboxEditButton->setDisabled(true);
+	QObject::connect(toolboxEditButton, SIGNAL(toggled(bool)), MainWindow, SLOT(toolboxEditButtonToggled(bool)) );
+
+	toolboxResetButton = new FlatButton;
+	toolboxResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	toolboxResetButton->setColor("#ee8800");
+	toolboxResetButton->setFixedSize(fit(30),fit(30));
+	toolboxResetButton->setRadius(fit(15));
+	toolboxResetButton->setIconSize(QSize(fit(16),fit(16)));
+	toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
+	QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxResetButtonClicked()) );
+
+	toolboxHLay->addWidget(toolboxAddButton);
+	toolboxHLay->addStretch();
+	toolboxHLay->addWidget(toolboxRemoveButton);
+	toolboxHLay->addStretch();
+	toolboxHLay->addWidget(toolboxEditButton);
+	toolboxHLay->addStretch();
+	toolboxHLay->addWidget(toolboxResetButton);
+
+
+
+
+	toolboxUrlBox = new LineEdit;
+	toolboxUrlBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	toolboxUrlBox->setFixedHeight(fit(30));
+	toolboxUrlBox->setIcon(QIcon(":/resources/images/web.png"));
+	toolboxUrlBox->setPlaceholderText("Icon url");
+	toolboxUrlBox->setText(":/resources/images/item.png");
+	toolboxUrlBox->setDisabled(true);
+	toolboxUrlBox->setHidden(true);
+
+	toolBoxNameBox = new LineEdit;
+	toolBoxNameBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	toolBoxNameBox->setFixedHeight(fit(30));
+	toolBoxNameBox->setIcon(QIcon(":/resources/images/item.png"));
+	toolBoxNameBox->setPlaceholderText("Tool name");
+	//			toolBoxNameBox->setText(":/resources/images/web.png"); //TODO
+	toolBoxNameBox->setDisabled(true);
+	toolBoxNameBox->setHidden(true);
+
+	toolboxOpenEditorButton = new FlatButton;
+	toolboxOpenEditorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	toolboxOpenEditorButton->setColor("#1e8145");
+	toolboxOpenEditorButton->setFixedHeight(fit(30));
+	toolboxOpenEditorButton->setRadius(fit(15));
+	toolboxOpenEditorButton->setIconSize(QSize(fit(16),fit(16)));
+	toolboxOpenEditorButton->setIcon(QIcon(":/resources/images/edit.png"));
+	toolboxOpenEditorButton->setDisabled(true);
+	toolboxOpenEditorButton->setHidden(true);
+	toolboxOpenEditorButton->setText("Open in Editor");
+	toolboxOpenEditorButton->setTextColor(Qt::white);
+	QObject::connect(toolboxOpenEditorButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxOpenEditorButtonClicked()) );
+
+	toolboxAdderHLay = new QHBoxLayout;
+	toolboxAdderHLay->setSpacing(fit(6));
+	toolboxAdderHLay->addWidget(toolboxOpenEditorButton);
+	toolboxAdderHLay->setSpacing(0);
+	toolboxAdderHLay->setContentsMargins(0,0,0,0);
+
+	toolboxAdderLayout = new QVBoxLayout;
+	toolboxAdderLayout->addWidget(toolBoxNameBox);
+	toolboxAdderLayout->addWidget(toolboxUrlBox);
+	toolboxAdderLayout->addLayout(toolboxAdderHLay);
+	toolboxAdderLayout->setSpacing(0);
+	toolboxAdderLayout->setContentsMargins(0,0,0,0);
+
+	toolboxVLay->addWidget(toolboxList);
+	toolboxVLay->addLayout(toolboxHLay);
+	toolboxVLay->addLayout(toolboxAdderLayout);
+	toolboxWidget->setLayout(toolboxVLay);
+	toolboxWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	toolboxHLay->setSpacing(0);
+	toolboxHLay->setContentsMargins(fit(4),fit(4),fit(5),fit(8));
+	toolboxVLay->setSpacing(0);
+	toolboxVLay->setContentsMargins(fit(6),0,0,0);
+
+	QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
+		toolboxUrlBox->setEnabled(i>=0);
+		toolboxUrlBox->setText(toolboxList->GetUrls(toolboxList->currentItem())[0].toLocalFile());
+		toolBoxNameBox->setEnabled(i>=0);
+		toolBoxNameBox->setText(toolboxList->currentItem()->text());
+		toolboxOpenEditorButton->setEnabled(i>=0);
+		if (!toolboxEditButton->isChecked()) {
+			toolboxEditButton->setEnabled(i>=0);
+			toolboxRemoveButton->setEnabled(i>=0);
+		}
+	});
+
+
+
+
+	propertiesWidget = new PropertiesWidget(centralWidget);
+	propertiesWidget->setObjectName(QStringLiteral("propertiesWidget"));
+	propertiesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	bindingWidget = new BindingWidget(centralWidget);
+	bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
+	bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	pagesWidget = new PagesWidget(centralWidget);
+	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
+	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	retranslateUi(MainWindow);
+
+	QMetaObject::connectSlotsByName(MainWindow);
+}
+
+void MainWindowPrivate::retranslateUi(QWidget* MainWindow)
+{
+	MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
+	editButton->setText(QApplication::translate("MainWindow", "Edit", 0));
+	clearButton->setText(QApplication::translate("MainWindow", "Clear", 0));
+}
+
+void MainWindowPrivate::showAdderArea()
+{
+	toolboxOpenEditorButton->setHidden(false);
+	toolBoxNameBox->setHidden(false);
+	toolboxUrlBox->setHidden(false);
+	toolboxAdderLayout->setSpacing(fit(6));
+	toolboxAdderLayout->setContentsMargins(fit(4),fit(4),fit(10),fit(8));
+	toolboxAdderHLay->setSpacing(fit(6));
+	toolboxAdderHLay->setContentsMargins(fit(4),fit(4),fit(10),fit(8));
+	toolboxAddButton->setDisabled(true);
+	toolboxRemoveButton->setDisabled(true);
+	toolboxResetButton->setDisabled(true);
+}
+
+void MainWindowPrivate::hideAdderArea()
+{
+	toolboxOpenEditorButton->setHidden(true);
+	toolBoxNameBox->setHidden(true);
+	toolboxUrlBox->setHidden(true);
+	toolboxAdderLayout->setSpacing(0);
+	toolboxAdderLayout->setContentsMargins(0,0,0,0);
+	toolboxAdderHLay->setSpacing(0);
+	toolboxAdderHLay->setContentsMargins(0,0,0,0);
+	toolboxAddButton->setEnabled(true);
+	toolboxRemoveButton->setEnabled(true);
+	toolboxResetButton->setEnabled(true);
+}
 #endif // MAINWINDOW_P_H

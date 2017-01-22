@@ -134,6 +134,16 @@ QByteArray FileManager::rdfile(const QString& file) const
 	return cache;
 }
 
+int FileManager::wrfile(const QString& file, const QByteArray& data) const
+{
+	if (!mkfile(file)) return -1;
+	QFile writer(file);
+	if (!writer.open(QFile::WriteOnly)) return -1;
+	int ret = writer.write(data);
+	writer.close();
+	return ret;
+}
+
 //bool FileManager::cp(const QString& from, const QString& to) const
 //{
 //	if (!exists(from)) return false;
