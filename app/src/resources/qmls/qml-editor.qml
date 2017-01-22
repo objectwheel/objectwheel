@@ -8,7 +8,6 @@ import com.objectwheel.components 1.0
 import com.objectwheel.editor 1.0
 import "fit.js" as Fit
 import "filemanager.js" as FileManager
-import "delaycaller.js" as DelayCaller
 
 //TODO: Fix qml editor to start with a default main.qml and default root directory
 //TODO: Fix keyboard problems of qml editor
@@ -28,8 +27,10 @@ import "delaycaller.js" as DelayCaller
 //FIX: Main.qml should not be removed and icon
 //FIX: Editor "error" line corruption when page word wrapped
 //FIX: Clear "jsx" and "qmlc" cache files recursively
-//TODO: Add image viewer
-//TODO: Fix binding loops
+//FIX: If I don't select any oject from dashboard, it should not show editor via clicking on bubble head
+//FIX: Unexpectedly finishing problem because of CacheCleaner
+//FIX: Fix menu icon to file explorer icon
+//FIX: Jumping image viewer
 
 Item {
     id: root
@@ -77,7 +78,8 @@ Item {
 
     Rectangle {
         id: container
-        anchors { left:folderBrowser.right; top:parent.top; bottom: parent.bottom; right: parent.right }
+        anchors { left:folderBrowser.right; top:parent.top; bottom: parent.bottom; }
+        width: parent.width
         clip: true
         color: "#44504e"
         Rectangle {
@@ -90,12 +92,6 @@ Item {
             color: "#2b5796"
             clip: true
 
-            Timer {
-                interval: 10000
-                running: true
-                onTriggered: separator.x += 80
-            }
-
             RowLayout {
                 anchors.margins: Fit.fit(6)
                 anchors.fill: parent
@@ -107,29 +103,6 @@ Item {
                     checkable: true
                     height: parent.height
                     iconSource: "qrc:///resources/images/menu-icon.png"
-                    onCheckedChanged: {
-                        if (checked) {
-                            sepPrevXDiff = (separator.x - editorContainer.width/2.0)/(editorContainer.width)
-                            fixerAnim.start()
-                            fixerTimer.start()
-                        } else {
-                            fixerAnim.start()
-                            fixerTimer.start()
-                        }
-                    }
-
-                    NumberAnimation { id: fixerAnim; duration: 400; target:QtObject{} }
-
-                    Timer {
-                        id: fixerTimer
-                        interval: 1
-                        repeat: fixerAnim.running
-                        onTriggered: {
-                            separator.x = editorContainer.width/2.0 + menu.sepPrevXDiff * editorContainer.width
-                        }
-                    }
-
-                    property real sepPrevXDiff
                 }
 
                 Item { Layout.fillWidth: true }
@@ -140,7 +113,7 @@ Item {
                     enabled: ((errorMessage.text=="") && (editor.text!=""))
                     height: parent.height
                     iconSource: "qrc:///resources/images/save-icon.png"
-                    onClicked: (root.url === "") ? root.saved(editor.text) : root.savedUrl(editor.text)
+                    onClicked: !toolboxMode ? root.saved(editor.text) : undefined
                 }
 
                 FancyButton {
@@ -202,11 +175,10 @@ Item {
                     top: topPadder.bottom
                     bottom: parent.bottom
                 }
-
                 Item {
                     id: view
                     state: root.splitState
-                    anchors { top: errorHead.bottom; right: parent.right; bottom: separator.bottom; left: separator.right }
+                    anchors { top: parent.top; right: parent.right; bottom: separator.bottom; left: separator.right }
                     enabled: opacity > 0.98 ? true : false
                     clip: true
                     states: [
@@ -258,17 +230,16 @@ Item {
 
                     Column {
                         id: lineNumber
-                        width: maxWidth
                         anchors { left: parent.left; top: parent.top }
                         Repeater {
                             id: lineNumberRepeater
-                            model: editor.lineCount
                             clip: true
                             Text {
                                 property alias bgcolor: rect.color
                                 text: index + 1
                                 color: "#e0e0e0"
                                 width: maxWidth
+                                height: editor.cursorRectangle.height
                                 horizontalAlignment: TextEdit.AlignRight
                                 verticalAlignment: TextEdit.AlignVCenter
                                 font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false
@@ -288,8 +259,8 @@ Item {
                         width: Fit.fit(1)
                         height: parent.height
                         anchors.top: parent.top
-                        anchors.right: lineNumber.right
-                        anchors.rightMargin: lineNumber.width - maxWidth
+                        anchors.left: lineNumber.right
+                        anchors.leftMargin: Fit.fit(5)
                         color: Qt.lighter(container.color, 1.3)
                     }
 
@@ -307,7 +278,8 @@ Item {
                     TextEdit {
                         id: editor
                         objectName: "editor"
-                        anchors { left: lineNumber.right; right: parent.right; top: parent.top; bottom: parent.bottom }
+                        anchors { left: lineNumber.right; right: parent.right; top: parent.top; bottom: parent.bottom;
+                        leftMargin: Fit.fit(15)}
                         wrapMode: flickable.opacity > 0.98 ? TextEdit.WrapAtWordBoundaryOrAnywhere : TextEdit.NoWrap ;
                         renderType: Text.NativeRendering
                         onTextChanged: timer.restart();
@@ -343,6 +315,9 @@ Item {
                             if (leftBrace.test(currentLine)) // indent
                                 whitespaceAppend += "    ";
                             editor.insert(cursorPosition, whitespaceAppend)
+                        }
+                        onLineCountChanged: {
+                            lineNumberRepeater.model = editor.lineCount
                         }
 
                         color: '#e0e0e0'
@@ -426,55 +401,89 @@ Item {
                     }
 
                 }
-                Rectangle {
-                    id: errorHead
-                    clip: true
-                    color: "#1e8145"
-                    anchors.horizontalCenter: view.horizontalCenter
-                    width: view.width
-                    height: Fit.fit(40)
-                    y: -height
-                    visible: 0.98 < Math.abs(y/height) ? false : true
-                    Behavior on y {
-                        NumberAnimation { duration: 500; easing.type: Easing.OutExpo }
-                    }
+               }
+        }
+        Rectangle {
+            id: errorHead
+            clip: true
+            color: "#1e8145"
+            radius: Fit.fit(5)
+            x: container.width/2.0 - errorHead.width/2.0
+            width: parent.width / 1.618
+            height: Fit.fit(40) + radius
+            y: -height + toolBar.height - radius
 
-                    Text {
-                        id: errorMessage
-                        anchors { top: parent.top; left: parent.left; right: parent.right; bottom: parent.bottom }
-                        wrapMode: Text.WordWrap
-                        text: ""
-                        color: "white"
-                        clip: true
-                        font.pixelSize: Fit.fit(11)
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
+            Behavior on y {
+                NumberAnimation { duration: 500; easing.type: Easing.OutExpo }
+            }
 
-                    Component.onCompleted: {
-                        errorMessage.textChanged.connect(handleError)
-                    }
+            Behavior on width {
+                NumberAnimation { duration: 500; easing.type: Easing.OutExpo }
+            }
 
-                    function handleError() {
-                        if (errorMessage.text != "") {
-                            y = 0
+            Text {
+                id: errorMessage
+                anchors { top: parent.top; left: parent.left; right: parent.right; bottom: parent.bottom }
+                wrapMode: Text.WordWrap
+                color: "white"
+                clip: true
+                font.pixelSize: Fit.fit(11)
+                renderType: Text.NativeRendering
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                Behavior on opacity {
+                    NumberAnimation { duration: 500; easing.type: Easing.OutExpo }
+                }
+            }
+
+            Component.onCompleted: {
+                errorMessage.textChanged.connect(handleError)
+            }
+
+            function handleError() {
+                if (errorMessage.text != "") {
+                    y = toolBar.height  - radius
+                } else {
+                    y = - height + toolBar.height - radius
+                }
+            }
+
+            Text {
+                anchors { right: parent.right; bottom: parent.bottom; margins:Fit.fit(5) }
+                text: "➤"
+                width: Fit.fit(15)
+                height: Fit.fit(15)
+                color: "white"
+                font.bold: true
+                clip: true
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+
+                FancyButton {
+                    anchors.fill: parent
+                    cursorMark: Qt.PointingHandCursor
+                    checkable: true
+                    onCheckedChanged: {
+                        if (checked) {
+                            parent.rotation = 180
+                            errorMessage.opacity = 0.0
+                            parent.width = Fit.fit(15)
+                            parent.height = Fit.fit(15)
+                            parent.anchors.right = undefined
+                            parent.anchors.left = errorHead.left
+                            errorHead.anchors.horizontalCenter = undefined
+                            errorHead.anchors.right = container.right
+                            errorHead.width = Fit.fit(30)
                         } else {
-                            y = -height
-                        }
-                    }
-
-                    Text {
-                        anchors {right: parent.right; bottom: parent.bottom; margins:Fit.fit(5)}
-                        text: "⏏"
-                        color: "white"
-                        font.bold: true
-                        clip: true
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                errorHead.y = -errorHead.height
-                            }
+                            parent.rotation = 0
+                            errorMessage.opacity = 1.0
+                            parent.width = Fit.fit(15)
+                            parent.height = Fit.fit(15)
+                            parent.anchors.right = errorHead.right
+                            parent.anchors.left = undefined
+                            errorHead.anchors.horizontalCenter = container.horizontalCenter
+                            errorHead.anchors.right = undefined
+                            errorHead.width = container.width / 1.618
                         }
                     }
                 }
@@ -498,11 +507,18 @@ Item {
     }
 
     ShadowFactory {
-        targets: [toolBar, container, navibar, handleImage]
-        places: [Item.Bottom, Item.Left, Item.Bottom, Item.Bottom]
+        targets: [errorHead, container, navibar, handleImage, toolBar]
+        places: [Item.Bottom, Item.Left, Item.Bottom, Item.Bottom, Item.Bottom]
     }
 
     CacheCleaner { id: cacheCleaner }
+
+    onToolboxModeChanged: {
+        if (!toolboxMode) {
+            imageViewer.visible = false
+            flickable.visible = true
+        }
+    }
 
     onUrlChanged: {
         var index
@@ -645,15 +661,14 @@ Item {
     }
 
     function show(url) {
-        DelayCaller.delayCall(500, function() {
-            var name = FileManager.fname(url)
-            for (var i = 0; i < folderBrowser.count; i++ ) {
-                if (folderBrowser.itemAt(i) === name) {
-                    folderBrowser.currentIndex = i
-                    break
-                }
+        var name = FileManager.fname(url)
+        var entries = FileManager.ls(FileManager.dname(url))
+        for (var i = 0; i < entries.length; i++ ) {
+            if (entries[i] === name) {
+                folderBrowser.currentIndex = i
+                break
             }
-        })
+        }
     }
 
     function reloadView() {
@@ -701,8 +716,8 @@ Item {
             }
 
             revertClearSavesToDisk(clearSaves)
-            cacheCleaner.clear()
             FileManager.rmsuffix(toolDir, "qmlc")
+            cacheCleaner.clear()
         }
 
         if (lastItem != null) {

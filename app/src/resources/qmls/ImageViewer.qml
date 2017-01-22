@@ -10,8 +10,8 @@ Item {
         anchors.centerIn: parent
         antialiasing: true
         fillMode: Image.PreserveAspectFit
-        onSourceChanged: {
-            DelayCaller.delayCall(200, function() {
+        onStatusChanged: {
+            if (status === Image.Ready) {
                 if (Math.min(sourceSize.width,sourceSize.height) > defaultSize) {
                     if (sourceSize.width > sourceSize.height) {
                         width = defaultSize
@@ -19,28 +19,24 @@ Item {
                         height = defaultSize
                     }
                 }
-            })
+            }
         }
     }
 
     PinchArea {
         anchors.fill: parent
-        pinch.target: image
-        pinch.minimumRotation: -360
-        pinch.maximumRotation: 360
-        pinch.minimumScale: 0.2
-        pinch.maximumScale: 10
-        pinch.dragAxis: Pinch.NoDrag
-        onSmartZoom: {
-            if (pinch.scale > 0) {
-                image.scale = Math.min(root.width, root.height) / Math.max(image.sourceSize.width, image.sourceSize.height) * 0.85
-            } else {
-                image.scale = pinch.previousScale
-            }
+        onPinchUpdated: {
+            image.scale = pinch.scale
+        }
+        onPinchFinished: {
+            image.width *= pinch.scale
+            image.height *= pinch.scale
+            image.scale = 1.0
         }
 
         MouseArea {
             anchors.fill: parent
+            preventStealing: true
             cursorShape: Qt.OpenHandCursor
             onWheel: {
                 var ratio = image.scale * wheel.angleDelta.y / 120 / 10
