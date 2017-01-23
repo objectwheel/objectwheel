@@ -40,6 +40,7 @@ class QmlEditorPrivate
 		QQmlContext* rootContext;
 		QPixmap snapshot;
 		QPoint showCenter;
+		bool deactive;
 
 		QmlEditorPrivate(QmlEditor* p);
 		void resize();
@@ -53,6 +54,7 @@ class QmlEditorPrivate
 
 QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	: parent(p)
+	, deactive(true)
 {
 	parent->setLayout(&mainLayout);
 	mainLayout.addWidget(&quickWidget);
@@ -75,6 +77,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 
 	rootItem = quickWidget.rootObject();
 	QObject::connect(rootItem, SIGNAL(saved(QString)), parent, SLOT(saved(const QString&)));
+	QObject::connect(rootItem, SIGNAL(currentSaved()), parent, SLOT(hide()));
 
 	QObject *textEdit = rootItem->findChild<QObject*>(QStringLiteral("editor"));
 	QQuickTextDocument *quickTextDocument = textEdit->property("textDocument").value<QQuickTextDocument*>();
@@ -311,18 +314,25 @@ void QmlEditor::clearCache()
 
 void QmlEditor::clearCacheFor(const QString& url, const bool isdir)
 {
-	QMetaObject::invokeMethod(m_d->rootItem, "clearCacheFor", Qt::AutoConnection, Q_ARG(QString,url),Q_ARG(bool,isdir));
+	QMetaObject::invokeMethod(m_d->rootItem, "clearCacheFor", Qt::AutoConnection, Q_ARG(QVariant,url),Q_ARG(QVariant,isdir));
 }
 
 void QmlEditor::updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir)
 {
 	QMetaObject::invokeMethod(m_d->rootItem, "updateCacheForRenamedEntry", Qt::AutoConnection,
-							  Q_ARG(QString,from), Q_ARG(QString,to), Q_ARG(bool,isdir));
+							  Q_ARG(QVariant,from), Q_ARG(QVariant,to), Q_ARG(QVariant,isdir));
+}
+
+void QmlEditor::setDeactive(const bool d)
+{
+	m_d->deactive = d;
 }
 
 void QmlEditor::show()
 {
-	m_d->show();
+	if (!m_d->deactive) {
+		m_d->show();
+	}
 }
 
 void QmlEditor::hide()

@@ -46,11 +46,13 @@ class MainWindow : public QWidget
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
 		void fixWebViewPosition(QQuickItem* const item);
-		void DownloadPixmap(const QUrl& url, QPixmap& pixmap);
+		const QPixmap DownloadPixmap(const QUrl& url);
 
 	private slots:
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
+		void handleToolboxUrlboxChanges(const QString& text);
+		void handleToolboxNameboxChanges(QString name);
 		void toolboxOpenEditorButtonClicked();
 		void toolboxEditButtonToggled(bool);
 		void toolboxRemoveButtonClicked();

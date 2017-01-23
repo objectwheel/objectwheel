@@ -309,6 +309,10 @@ Item {
         });
 
         folderList.pressAndHold.connect(function(x, y) {
+            for (var i=0; i<readOnly.length; i++) {
+                if (readOnly[i] === folderList.itemAt(folderList.currentIndex))
+                    return;
+            }
             var pt = root.mapFromItem(folderList.currentItem, x, y)
             editPopup.show(pt.x, pt.y)
         })
@@ -317,6 +321,7 @@ Item {
     signal selectionChanged(url urlval, bool isdir)
     signal entryRemoved(url urlval, bool isdir)
     signal entryEdited(url from, url to, bool isdir)
+    property var readOnly: []
     property alias folder : folderList.folder
     property alias rootFolder : folderList.rootFolder
     property alias currentIndex: folderList.currentIndex

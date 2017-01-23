@@ -30,6 +30,8 @@
 #include <pageswidget.h>
 #include <fit.h>
 #include <lineedit.h>
+#include <QLineEdit>
+#include <filemanager.h>
 
 using namespace Fit;
 
@@ -224,15 +226,18 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxUrlBox->setText(":/resources/images/item.png");
 	toolboxUrlBox->setDisabled(true);
 	toolboxUrlBox->setHidden(true);
+	QObject::connect(toolboxUrlBox->lineEdit(), SIGNAL(textChanged(QString)),
+					 MainWindow, SLOT(handleToolboxUrlboxChanges(QString)));
 
 	toolBoxNameBox = new LineEdit;
 	toolBoxNameBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	toolBoxNameBox->setFixedHeight(fit(30));
 	toolBoxNameBox->setIcon(QIcon(":/resources/images/item.png"));
 	toolBoxNameBox->setPlaceholderText("Tool name");
-	//			toolBoxNameBox->setText(":/resources/images/web.png"); //TODO
 	toolBoxNameBox->setDisabled(true);
 	toolBoxNameBox->setHidden(true);
+	QObject::connect(toolBoxNameBox->lineEdit(), SIGNAL(textChanged(QString)),
+					 MainWindow, SLOT(handleToolboxNameboxChanges(QString)));
 
 	toolboxOpenEditorButton = new FlatButton;
 	toolboxOpenEditorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -271,10 +276,12 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxVLay->setContentsMargins(fit(6),0,0,0);
 
 	QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
-		toolboxUrlBox->setEnabled(i>=0);
-		toolboxUrlBox->setText(toolboxList->GetUrls(toolboxList->currentItem())[0].toLocalFile());
+		if (i>=0) {
+			toolboxUrlBox->setText(dname(toolboxList->GetUrls(toolboxList->currentItem())[0].toLocalFile()) + "/icon.png");
+			toolBoxNameBox->setText(toolboxList->currentItem()->text());
+		}
 		toolBoxNameBox->setEnabled(i>=0);
-		toolBoxNameBox->setText(toolboxList->currentItem()->text());
+		toolboxUrlBox->setEnabled(i>=0);
 		toolboxOpenEditorButton->setEnabled(i>=0);
 		if (!toolboxEditButton->isChecked()) {
 			toolboxEditButton->setEnabled(i>=0);
@@ -335,5 +342,6 @@ void MainWindowPrivate::hideAdderArea()
 	toolboxAddButton->setEnabled(true);
 	toolboxRemoveButton->setEnabled(true);
 	toolboxResetButton->setEnabled(true);
+	toolboxEditButton->setChecked(false);
 }
 #endif // MAINWINDOW_P_H

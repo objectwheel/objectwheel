@@ -770,6 +770,7 @@ const MainWindow::QQuickItemList MainWindow::GetAllChildren(QQuickItem* const it
 
 void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 {
+	m_d->qmlEditor->setDeactive(false);
 	m_ResizerTick->SetTrackedItem(selectedItem);
 	m_ResizerTick->show();
 	m_RotatorTick->SetTrackedItem(selectedItem);
@@ -791,6 +792,7 @@ void MainWindow::HideSelectionTools()
 	m_ResizerTick->hide();
 	m_RemoverTick->hide();
 	m_RotatorTick->hide();
+	m_d->qmlEditor->setDeactive(true);
 	emit selectionHided();
 }
 
@@ -834,6 +836,57 @@ void MainWindow::on_editButton_clicked()
 	m_d->bindingWidget->clearList();
 }
 
+void MainWindow::handleToolboxUrlboxChanges(const QString& text)
+{
+	auto url = QUrl::fromUserInput(text);
+	auto pixmap = DownloadPixmap(url);
+	if (pixmap.isNull()) return;
+	auto icon = dname(m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0].toLocalFile()) + "/icon.png";
+	QByteArray bArray;
+	QBuffer buffer(&bArray);
+	buffer.open(QIODevice::WriteOnly);
+	if (!pixmap.save(&buffer,"PNG")) return;
+	buffer.close();
+	if (!wrfile(icon, bArray)) return;
+	m_d->toolboxList->currentItem()->setIcon(QIcon(icon));
+}
+
+void MainWindow::handleToolboxNameboxChanges(QString name)
+{
+	if (name == m_d->toolboxList->currentItem()->text()) return;
+
+	int count = 1;
+	for (int i = 0; i < m_d->toolboxList->count(); i++) {
+		if (m_d->toolboxList->item(i)->text() == name) {
+			if (count > 1) {
+				name.remove(name.size() - 1, 1);
+			}
+			i = 0;
+			count++;
+			name += QString::number(count);
+		}
+	}
+
+	auto from = m_ToolsDir + "/" + m_d->toolboxList->currentItem()->text();
+	auto to = m_ToolsDir + "/" + name;
+	Q_ASSERT(mv(from, to));
+
+	m_d->toolboxList->currentItem()->setText(name);
+
+	QList<QUrl> urls;
+	urls << QUrl::fromLocalFile(to + "/main.qml");
+	m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
+	m_d->toolboxList->AddUrls(m_d->toolboxList->currentItem(),urls);
+
+	for (int i = 0; i < m_ItemUrls.size(); i++) {
+		if (m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
+			m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
+		}
+	}
+
+	m_d->qmlEditor->updateCacheForRenamedEntry(from, to, true);
+}
+
 void MainWindow::toolboxEditButtonToggled(bool checked)
 {
 	if (checked) {
@@ -849,6 +902,7 @@ void MainWindow::toolboxOpenEditorButtonClicked()
 	auto cItem = m_d->toolboxList->currentItem();
 	m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
 	m_d->qmlEditor->setRootFolder(m_ToolsDir + separator() + m_d->toolboxList->currentItem()->text());
+	m_d->hideAdderArea();
 }
 
 void MainWindow::toolboxRemoveButtonClicked()
@@ -856,7 +910,7 @@ void MainWindow::toolboxRemoveButtonClicked()
 	if (m_d->toolboxList->currentRow() < 0) return;
 	auto name = m_d->toolboxList->currentItem()->text();
 	QMessageBox msgBox;
-	msgBox.setText(QString("<b>This will remove %1 named tool from Tool Library.</b>").arg(name));
+	msgBox.setText(QString("<b>This will remove %1 from Tool Library and Dashboard.</b>").arg(name));
 	msgBox.setInformativeText("Do you want to continue?");
 	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
 	msgBox.setDefaultButton(QMessageBox::No);
@@ -868,6 +922,24 @@ void MainWindow::toolboxRemoveButtonClicked()
 			rm(m_ToolsDir + separator() + name);
 			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
 			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
+
+			for (int i = 0; i < m_ItemUrls.size(); i++) {
+				if (m_ItemUrls[i].toLocalFile() == (m_ToolsDir + separator() + name + "/main.qml")) {
+					auto items = GetAllChildren(m_Items[i]);
+					for (auto item : items) {
+						if (m_Items.contains(item)) {
+							m_d->designWidget->rootContext()->setContextProperty(
+										m_d->designWidget->rootContext()->nameForObject(item), 0);
+							int j = m_Items.indexOf(item);
+							m_Items.removeOne(item);
+							m_ItemUrls.removeAt(j);
+							m_d->bindingWidget->detachBindingsFor(item);
+							item->deleteLater();
+						}
+					}
+				}
+			}
+			HideSelectionTools();
 			break;
 		} default: {
 			// Do nothing
@@ -912,7 +984,7 @@ void MainWindow::toolboxAddButtonClicked()
 void MainWindow::toolboxResetButtonClicked()
 {
 	QMessageBox msgBox;
-	msgBox.setText("<b>This will reset Tool Library.</b>");
+	msgBox.setText("<b>This will clear Dashboard and reset Tool Library.</b>");
 	msgBox.setInformativeText("Do you want to continue?");
 	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
 	msgBox.setDefaultButton(QMessageBox::No);
@@ -925,6 +997,16 @@ void MainWindow::toolboxResetButtonClicked()
 			m_d->qmlEditor->clearCache();
 			rm(m_ToolsDir);
 			DownloadTools(TOOLS_URL);
+
+			for (auto item : m_Items) {
+				m_d->designWidget->rootContext()->setContextProperty(
+							m_d->designWidget->rootContext()->nameForObject(item), 0);
+				item->deleteLater();
+			}
+			m_d->bindingWidget->clearAllBindings();
+			m_Items.clear();
+			m_ItemUrls.clear();
+			HideSelectionTools();
 			break;
 		} default: {
 			// Do nothing
@@ -933,10 +1015,11 @@ void MainWindow::toolboxResetButtonClicked()
 	}
 }
 
-void MainWindow::DownloadPixmap(const QUrl& url, QPixmap& pixmap)
+const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 {
-	QNetworkAccessManager manager;
+	QPixmap pixmap;
 	QEventLoop loop;
+	QNetworkAccessManager manager;
 
 	QNetworkReply *reply = manager.get(QNetworkRequest(url));
 	QObject::connect(reply, &QNetworkReply::finished, &loop, [&reply, &pixmap, &loop](){
@@ -947,6 +1030,7 @@ void MainWindow::DownloadPixmap(const QUrl& url, QPixmap& pixmap)
 	});
 
 	loop.exec();
+	return pixmap;
 }
 
 void MainWindow::SetToolsDir()

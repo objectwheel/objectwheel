@@ -8,6 +8,7 @@ import com.objectwheel.components 1.0
 import com.objectwheel.editor 1.0
 import "fit.js" as Fit
 import "filemanager.js" as FileManager
+import "delaycaller.js" as DelayCaller
 
 //TODO: Fix qml editor to start with a default main.qml and default root directory
 //TODO: Fix keyboard problems of qml editor
@@ -24,14 +25,11 @@ import "filemanager.js" as FileManager
 //TODO: Add "Fit" lib to com.objectwheel.components
 //TODO: Save doesn't work
 //TODO: Show parent folder in folderList's upside
-//FIX: Main.qml should not be removed and icon
 //FIX: Editor "error" line corruption when page word wrapped
 //FIX: Clear "jsx" and "qmlc" cache files recursively
-//FIX: If I don't select any oject from dashboard, it should not show editor via clicking on bubble head
 //FIX: Unexpectedly finishing problem because of CacheCleaner
-//FIX: Fix menu icon to file explorer icon
 //FIX: Jumping image viewer
-//TODO: That alignment lock bar
+//TODO: That alignment lock bar/layout bar
 
 Item {
     id: root
@@ -39,6 +37,7 @@ Item {
     FolderBrowser {
         id: folderBrowser
         clip: true
+        readOnly: ["main.qml", "icon.png"]
         anchors { top: parent.top; bottom: parent.bottom; }
         width: Fit.fit(170)
         x: menu.checked ? 0 : -width
@@ -103,7 +102,7 @@ Item {
                     width: height
                     checkable: true
                     height: parent.height
-                    iconSource: "qrc:///resources/images/menu-icon.png"
+                    iconSource: "qrc:///resources/images/fexplorer.png"
                 }
 
                 Item { Layout.fillWidth: true }
@@ -114,7 +113,7 @@ Item {
                     enabled: ((errorMessage.text=="") && (editor.text!=""))
                     height: parent.height
                     iconSource: "qrc:///resources/images/save-icon.png"
-                    onClicked: !toolboxMode ? root.saved(editor.text) : undefined
+                    onClicked: !toolboxMode ? root.saved(editor.text) : saveCurrent()
                 }
 
                 FancyButton {
@@ -540,6 +539,32 @@ Item {
         }
     }
 
+    function saveCurrent() {
+        for (var i = 0; i < urlCache.length; i++) {
+            if (urlCache[i].indexOf(FileManager.dname(url) + FileManager.separator()) >= 0) {
+                FileManager.wrfile(urlCache[i], saveCache[i])
+                urlCache.splice(i, 1)
+                saveCache.splice(i, 1)
+            }
+        }
+        toolboxMode = false
+        currentSaved()
+    }
+
+    function show(url) {
+        var name = FileManager.fname(url)
+        var entries = FileManager.ls(FileManager.dname(url))
+        for (var i = 0; i < entries.length; i++ ) {
+            if (entries[i] === name) {
+                folderBrowser.currentIndex = i
+                DelayCaller.delayCall(500, function() {
+                    folderBrowser.currentIndex = i
+                })
+                break
+            }
+        }
+    }
+
     function updateCache() {
         var index = -1
         for (var i = 0; i < urlCache.length; i++) {
@@ -661,17 +686,6 @@ Item {
         reloadView()
     }
 
-    function show(url) {
-        var name = FileManager.fname(url)
-        var entries = FileManager.ls(FileManager.dname(url))
-        for (var i = 0; i < entries.length; i++ ) {
-            if (entries[i] === name) {
-                folderBrowser.currentIndex = i
-                break
-            }
-        }
-    }
-
     function reloadView() {
         if (lastItem != null) lastItem.destroy()
         for (var i=0; i<lineNumberRepeater.count; i++) lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
@@ -748,4 +762,5 @@ Item {
     property var urlCache: []
     property var saveCache: []
     signal saved(string code)
+    signal currentSaved()
 }

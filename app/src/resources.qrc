@@ -107,5 +107,6 @@
         <file>resources/images/reset.png</file>
         <file>resources/qmls/ImageViewer.qml</file>
         <file>resources/images/web.png</file>
+        <file>resources/images/fexplorer.png</file>
     </qresource>
 </RCC>

@@ -144,38 +144,6 @@ int FileManager::wrfile(const QString& file, const QByteArray& data) const
 	return ret;
 }
 
-//bool FileManager::cp(const QString& from, const QString& to) const
-//{
-//	if (!exists(from)) return false;
-//	if (!exists(to)) {
-//		if (QFileInfo(from).isDir()) {
-//			if (QFileInfo::exists(to + QDir::separator() + QFileInfo(from).fileName())) return false;
-//			if (!mkdir(to + QDir::separator() + QFileInfo(from).fileName())) return false;
-//			if (!copyDir(from, to + QDir::separator() + QFileInfo(from).fileName())) return false;
-//			return rm(from);
-//		} else {
-//			return QFile::rename(from, to);
-//		}
-//	} else {
-//		if (QFileInfo(from).isDir() && QFileInfo(to).isDir()) {
-//			if (QFileInfo::exists(to + QDir::separator() + QFileInfo(from).fileName())) return false;
-//			if (!mkdir(to + QDir::separator() + QFileInfo(from).fileName())) return false;
-//			if (!copyDir(from, to + QDir::separator() + QFileInfo(from).fileName())) return false;
-//			return rm(from);
-//		} else if (QFileInfo(from).isDir() && !QFileInfo(to).isDir()) {
-//			return false;
-//		} else if (!QFileInfo(from).isDir() && QFileInfo(to).isDir()) {
-//			if (!QFile::copy(from, to + QDir::separator() + QFileInfo(from).fileName())) return false;
-//			return QFile::remove(from);
-//		} else if (!QFileInfo(from).isDir() && !QFileInfo(to).isDir()) {
-//			if (!QFile::remove(to)) return false;
-//			return QFile::rename(from, to);
-//		} else {
-//			Q_ASSERT(0); // Unhandled state
-//		}
-//	}
-//}
-
 bool FileManager::isfile(const QString& name) const
 {
 	return QFileInfo(name).isFile();
@@ -200,16 +168,16 @@ bool FileManager::copyDir(QString from, QString to)
 	to += QDir::separator();
 
 	for (QString file : directory.entryList(QDir::Files)) {
-		QString from = from + file;
-		QString to = to + file;
-		if (!QFile::copy(from, to)) return false;
+		QString f = from + file;
+		QString t = to + file;
+		if (!QFile::copy(f, t)) return false;
 	}
 
 	for (QString dir : directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-		QString from = from + dir;
-		QString to = to + dir;
-		if (!directory.mkpath(to)) return false;
-		if (!copyDir(from, to)) return false;
+		QString f = from + dir;
+		QString t = to + dir;
+		if (!directory.mkpath(t)) return false;
+		if (!copyDir(f, t)) return false;
 	}
 
 	return true;

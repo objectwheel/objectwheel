@@ -30,6 +30,7 @@ class QmlEditor : public QWidget
 		void clearCache();
 		void clearCacheFor(const QString& url, const bool isdir);
 		void updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir);
+		void setDeactive(const bool);
 		void show();
 		void hide();
 
