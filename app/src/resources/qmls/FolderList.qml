@@ -22,9 +22,18 @@ Item {
 
         Component {
             id: fileDelegate
+
             Item {
                 height: Fit.fit(40)
                 width: parent.width;
+                visible: {
+                    for (var i=0; i<hiddenExtensions.length; i++) {
+                        if (hiddenExtensions[i] === fileSuffix) {
+                            return false
+                        }
+                    }
+                    return true
+                }
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -124,6 +133,7 @@ Item {
     property alias count: fileList.count
     property alias currentIndex: fileList.currentIndex
     property alias currentItem: fileList.currentItem
+    property var hiddenExtensions: []
     property string imageIcon: "qrc:///resources/images/file_explorer/image_icon.svg"
     property string qmlIcon: "qrc:///resources/images/file_explorer/qml_icon.svg"
     property string jsIcon: "qrc:///resources/images/file_explorer/js_icon.svg"

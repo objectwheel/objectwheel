@@ -26,7 +26,6 @@ import "delaycaller.js" as DelayCaller
 //TODO: Save doesn't work
 //TODO: Show parent folder in folderList's upside
 //FIX: Editor "error" line corruption when page word wrapped
-//FIX: Clear "jsx" and "qmlc" cache files recursively
 //FIX: Unexpectedly finishing problem because of CacheCleaner
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
@@ -42,6 +41,7 @@ Item {
         width: Fit.fit(170)
         x: menu.checked ? 0 : -width
         enabled: toolboxMode
+        hiddenExtensions: [ "qmlc", "jsc" ]
         Component.onCompleted: anim.enabled = true
         onEntryEdited: {
             from = from.toString().replace("file://", "")
@@ -731,7 +731,6 @@ Item {
             }
 
             revertClearSavesToDisk(clearSaves)
-            FileManager.rmsuffix(toolDir, "qmlc")
             cacheCleaner.clear()
         }
 

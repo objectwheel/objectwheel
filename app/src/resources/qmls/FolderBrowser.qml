@@ -120,6 +120,8 @@ Item {
             height: parent.height
             showDirsFirst : true
             showDotAndDotDot : false
+            nameFilters: folderList.nameFilters
+            hiddenExtensions: folderList.hiddenExtensions
             rootFolder: folderList.rootFolder
             highlightMoveDuration: 80
             highlightColor: Qt.darker(base.color, 1.25)
@@ -326,6 +328,7 @@ Item {
     property alias rootFolder : folderList.rootFolder
     property alias currentIndex: folderList.currentIndex
     property alias count : folderList.count
+    property alias hiddenExtensions: folderList.hiddenExtensions
     function itemAt(index) {
         return folderList.itemAt(index)
     }
