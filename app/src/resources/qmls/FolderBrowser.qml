@@ -86,7 +86,7 @@ Item {
 
             FancyButton {
                 id: downloadMedia
-                iconSource: "file:///home/kozmon/Masaüstü/download.png"
+                iconSource: "qrc:///resources/images/file_explorer/download.png"
                 anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 width: height

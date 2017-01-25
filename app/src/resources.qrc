@@ -108,5 +108,7 @@
         <file>resources/qmls/ImageViewer.qml</file>
         <file>resources/images/web.png</file>
         <file>resources/images/fexplorer.png</file>
+        <file>resources/images/file_explorer/download@2x.png</file>
+        <file>resources/images/file_explorer/download.png</file>
     </qresource>
 </RCC>
