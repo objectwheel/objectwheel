@@ -20,7 +20,6 @@ import "delaycaller.js" as DelayCaller
 //TODO: Fix bugs on binding editor
 //TODO: Fix popup window colors
 //TODO: Add "Fit" lib to com.objectwheel.components
-//TODO: Save doesn't work
 //FIX: Editor "error" line corruption when page word wrapped
 //FIX: Unexpectedly finishing problem because of CacheCleaner
 //FIX: Jumping image viewer

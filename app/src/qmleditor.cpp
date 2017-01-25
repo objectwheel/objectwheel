@@ -122,7 +122,7 @@ void QmlEditorPrivate::saved(const QString& text)
 	int index = itemList->indexOf(lastSelectedItem);
 	if (index < 0) return;
 	auto url = urlList->at(index);
-	component.setData(QByteArray().insert(0,text), url);
+	component.setData(QByteArray().insert(0,text), QUrl());
 
 	QQmlIncubator incubator;
 	component.create(incubator, rootContext);
