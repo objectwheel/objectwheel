@@ -64,6 +64,11 @@ function wrfile(file, data) {
     return fileManager.wrfile(file, data)
 }
 
+function dlfile(url) {
+    init()
+    return fileManager.dlfile(url)
+}
+
 function fname(name) {
     init()
     return fileManager.fname(name)

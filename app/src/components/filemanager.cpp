@@ -3,6 +3,9 @@
 #include <QFile>
 #include <QDir>
 #include <QDebug>
+#include <QEventLoop>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 FileManager::FileManager(QObject *parent)
 	: QObject(parent)
@@ -142,6 +145,30 @@ int FileManager::wrfile(const QString& file, const QByteArray& data) const
 	int ret = writer.write(data);
 	writer.close();
 	return ret;
+}
+
+QByteArray FileManager::dlfile(const QString& url)
+{
+	QByteArray data;
+	QEventLoop loop;
+	QNetworkReply* reply;
+	QNetworkRequest request;
+	QNetworkAccessManager manager;
+
+	request.setUrl(QUrl::fromUserInput(url));
+	request.setRawHeader("User-Agent", "Objectwheel");
+	reply = manager.get(request);
+
+	connect(reply, SIGNAL(sslErrors(QList<QSslError>)), reply, SLOT(ignoreSslErrors()));
+	connect(reply, (void(QNetworkReply::*)(QNetworkReply::NetworkError))(&QNetworkReply::error), [&loop] {
+		loop.quit();
+	});
+	connect(reply, &QNetworkReply::finished, [reply, &data, &loop] {
+		data = reply->readAll();
+		loop.quit();
+	});
+	loop.exec();
+	return data;
 }
 
 bool FileManager::isfile(const QString& name) const

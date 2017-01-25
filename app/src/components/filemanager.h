@@ -25,6 +25,7 @@ class FileManager : public QObject
 		bool svfile(const QString& to, const QString& data) const;
 		QByteArray rdfile(const QString& file) const;
 		int wrfile(const QString& file, const QByteArray& data) const;
+		QByteArray dlfile(const QString& url);
 		bool isfile(const QString& name) const;
 		bool isdir(const QString& name) const;
 		QChar separator() const;
@@ -54,6 +55,7 @@ static inline QString suffix(const QString& name) { return FileManager().suffix(
 static inline bool svfile(const QString& to, const QString& data) { return FileManager().svfile(to, data); }
 static inline QByteArray rdfile(const QString& file) { return FileManager().rdfile(file); }
 static inline int wrfile(const QString& file, const QByteArray& data) { return FileManager().wrfile(file, data); }
+static inline QByteArray dlfile(const QString& url) { return FileManager().dlfile(url); }
 static inline bool isfile(const QString& name) { return FileManager().isfile(name); }
 static inline bool isdir(const QString& name) { return FileManager().isdir(name); }
 static inline QChar separator() { return FileManager().separator(); }

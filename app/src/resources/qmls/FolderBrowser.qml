@@ -5,6 +5,7 @@ import QtQuick.Controls 2.0
 import QtQuick.Controls.Styles 1.4
 import "filemanager.js" as FileManager
 import "fit.js" as Fit
+import com.objectwheel.components 1.0
 
 Item {
     id: root
@@ -28,7 +29,7 @@ Item {
             FancyButton {
                 id: backButton
                 iconSource: "qrc:///resources/images/file_explorer/back.png"
-                anchors.centerIn: parent.Center
+                anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 width: height
                 onClicked: {
@@ -44,7 +45,7 @@ Item {
             FancyButton {
                 id: homeButton
                 iconSource: "qrc:///resources/images/file_explorer/home.png"
-                anchors.centerIn: parent.Center
+                anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 width: height
                 onClicked: {
@@ -58,7 +59,7 @@ Item {
             FancyButton {
                 id: newFolderButton
                 iconSource: "qrc:///resources/images/file_explorer/new_folder_icon.png"
-                anchors.centerIn: parent.Center
+                anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 width: height
                 onClicked: {
@@ -72,13 +73,27 @@ Item {
             FancyButton {
                 id: newFileButton
                 iconSource: "qrc:///resources/images/file_explorer/new_file_icon.png"
-                anchors.centerIn: parent.Center
+                anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 width: height
                 onClicked: {
                     popup.placeHolderText = "File name"
                     popup.textField.text = ""
                     popup.color = "#ca3d33"
+                    popup.show(x + width/2.0, y + height)
+                }
+            }
+
+            FancyButton {
+                id: downloadMedia
+                iconSource: "file:///home/kozmon/Masaüstü/download.png"
+                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height
+                width: height
+                onClicked: {
+                    popup.placeHolderText = "Url"
+                    popup.textField.text = ""
+                    popup.color = "#75706d"
                     popup.show(x + width/2.0, y + height)
                 }
             }
@@ -235,6 +250,8 @@ Item {
                         popup.buttonClicked("folder")
                     } else if (textField.placeholderText.indexOf("Edit") >= 0) {
                         popup.buttonClicked("edit")
+                    } else if (textField.placeholderText.indexOf("Url") >= 0) {
+                        popup.buttonClicked("downloadmedia")
                     }
                     popup.close()
                 }
@@ -281,7 +298,7 @@ Item {
                     onClicked: {
                         FileManager.rm(folderList.folder.toString().replace("file://", "") + "/" +folderList.itemAt(folderList.currentIndex))
                         entryRemoved(folderList.folder.toString() + "/" + folderList.itemAt(folderList.currentIndex),
-                                    folderList.isDir(folderList.currentIndex))
+                                     folderList.isDir(folderList.currentIndex))
                         editPopup.close()
                     }
                 }
@@ -307,6 +324,10 @@ Item {
                 FileManager.mv(folderList.folder.toString().replace("file://", "") + "/" +folderList.itemAt(folderList.currentIndex),newName)
                 entryEdited(folderList.folder.toString() + "/" + folderList.itemAt(folderList.currentIndex), newName,
                             folderList.isDir(folderList.currentIndex))
+            } else if (which === "downloadmedia") {
+                var data = FileManager.dlfile(textField.text)
+                var fname = FileManager.fname(textField.text)
+                FileManager.wrfile(folderList.folder.toString().replace("file://", "") + "/" + fname, data)
             }
         });
 

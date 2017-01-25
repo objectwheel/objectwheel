@@ -10,21 +10,17 @@ import "fit.js" as Fit
 import "filemanager.js" as FileManager
 import "delaycaller.js" as DelayCaller
 
-//TODO: Fix qml editor to start with a default main.qml and default root directory
 //TODO: Fix keyboard problems of qml editor
 //TODO: Fix popup window closing method
 //TODO: Fix android logo
 //TODO: Add IOS/MacOS/Linux/Windows logo on each platform
 //TODO: Fix objectwheel's to capital "Objectwheel" everywhere
 //TODO: Fix warnings on Visual Studio
-//TODO: Add custom media donwloader to folder browser
-//TODO: Add "custom control add" buttons to toolbox
 //TODO: Fix qml file names in resource
 //TODO: Fix bugs on binding editor
 //TODO: Fix popup window colors
 //TODO: Add "Fit" lib to com.objectwheel.components
 //TODO: Save doesn't work
-//TODO: Show parent folder in folderList's upside
 //FIX: Editor "error" line corruption when page word wrapped
 //FIX: Unexpectedly finishing problem because of CacheCleaner
 //FIX: Jumping image viewer
@@ -38,7 +34,7 @@ Item {
         clip: true
         readOnly: ["main.qml", "icon.png"]
         anchors { top: parent.top; bottom: parent.bottom; }
-        width: Fit.fit(170)
+        width: Fit.fit(180)
         x: menu.checked ? 0 : -width
         enabled: toolboxMode
         hiddenExtensions: [ "qmlc", "jsc" ]
