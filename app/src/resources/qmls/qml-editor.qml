@@ -24,8 +24,6 @@ import "delaycaller.js" as DelayCaller
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
 //TODO: Add animation popup to toolbox adder area
-//TODO: Fix copy paste bug
-//TODO: Remove "wrong" code saving prevent mechanism
 //TODO: Make it stopped after splashscreen getting collapsed
 //TODO: Fix logo color
 
@@ -109,7 +107,6 @@ Item {
                 FancyButton {
                     id: save
                     width: height
-                    enabled: ((errorMessage.text=="") && (editor.editor.text!=""))
                     height: parent.height
                     iconSource: "qrc:///resources/images/save-icon.png"
                     onClicked: !toolboxMode ? root.saved(editor.editor.text) : saveCurrent()
@@ -413,8 +410,6 @@ Item {
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf(FileManager.dname(url) + FileManager.separator()) >= 0) {
                 FileManager.wrfile(urlCache[i], saveCache[i])
-                urlCache.splice(i, 1)
-                saveCache.splice(i, 1)
             }
         }
         toolboxMode = false

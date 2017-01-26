@@ -378,6 +378,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 			case QEvent::Drop:
 			{
 				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
+				event->accept();
 
 				if (nullptr != pressedItem)
 				{
@@ -412,7 +413,6 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						}
 						fixWebViewPosition(pressedItem);
 						ShowSelectionTools(pressedItem);
-						event->accept();
 						return true;
 					}
 				}
@@ -421,7 +421,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
 				{
 					auto url = dropEvent->mimeData()->urls().at(0);
-					//						 m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+					m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
 					QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
 					component.loadUrl(url);
 
@@ -432,7 +432,15 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					}
 					QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
-					if (component.isError() || !qml) {qWarning() << component.errors(); qApp->quit();}
+					if (component.isError() || !qml) {
+						QMessageBox msgBox;
+						msgBox.setText("<b>This tool has some errors, please fix these first.</b>");
+						msgBox.setStandardButtons(QMessageBox::Ok);
+						msgBox.setDefaultButton(QMessageBox::Ok);
+						msgBox.setIcon(QMessageBox::Information);
+						msgBox.exec();
+						return true;
+					}
 
 					int count = 1;
 					QString componentName = qmlContext(qml)->nameForObject(qml);
@@ -456,7 +464,6 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 					QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
 					if (m_d->editButton->isChecked()) ShowSelectionTools(qml);
-					event->accept();
 					return true;
 				}
 				return false;
@@ -636,9 +643,6 @@ void MainWindow::DownloadTools(const QUrl& url)
 			reply->deleteLater();
 			return;
 		}
-
-		//		if (!QDir(m_ToolsDir).removeRecursively())
-		//			Q_ASSERT_X(0, "GetTools()", "Can not remove tools dir");
 
 		for (int i = 0; i < toolsObject.size(); i++)
 		{
