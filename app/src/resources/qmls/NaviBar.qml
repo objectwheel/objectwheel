@@ -125,7 +125,7 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onPressed: {
                 navigationBar.state = 'view';
-                editor.deselect();
+                editor.editor.deselect();
             }
         }
     }
@@ -133,9 +133,9 @@ Item {
     Row {
         anchors.centerIn: parent
         visible: (parent.state === 'selection')
-        spacing: Fit.fit(30)
+        spacing: Fit.fit(40)
         Text {
-            visible: (editor.selectionStart !== editor.selectionEnd)
+            visible: (editor.editor.selectionStart !== editor.editor.selectionEnd)
             color: "white"
             text: "Cut"
             font.bold: true
@@ -143,11 +143,11 @@ Item {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
                 cursorShape: Qt.PointingHandCursor
-                onPressed: editor.cut()
+                onPressed: editor.editor.cut()
             }
         }
         Text {
-            visible: (editor.selectionStart !== editor.selectionEnd)
+            visible: (editor.editor.selectionStart !== editor.editor.selectionEnd)
             color: "white"
             text: "Copy"
             font.bold: true
@@ -156,13 +156,13 @@ Item {
                 anchors.margins: -Fit.fit(5)
                 cursorShape: Qt.PointingHandCursor
                 onPressed: {
-                    editor.copy()
-                    editor.deselect()
+                    editor.editor.copy()
+                    editor.editor.deselect()
                 }
             }
         }
         Text {
-            visible: (editor.selectionStart === editor.selectionEnd)
+            visible: (editor.editor.selectionStart === editor.editor.selectionEnd)
             color: "white"
             text: "Select"
             font.bold: true
@@ -170,11 +170,11 @@ Item {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
                 cursorShape: Qt.PointingHandCursor
-                onPressed: editor.selectWord()
+                onPressed: editor.editor.selectWord()
             }
         }
         Text {
-            visible: (editor.selectionStart === editor.selectionEnd)
+            visible: (editor.editor.selectionStart === editor.editor.selectionEnd)
             color: "white"
             text: "Select All"
             font.bold: true
@@ -182,11 +182,11 @@ Item {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
                 cursorShape: Qt.PointingHandCursor
-                onPressed: editor.selectAll()
+                onPressed: editor.editor.selectAll()
             }
         }
         Text {
-            visible: (editor.canPaste === true)
+            visible: (editor.editor.canPaste === true)
             color: "white"
             text: "Paste"
             font.bold: true
@@ -194,7 +194,7 @@ Item {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
                 cursorShape: Qt.PointingHandCursor
-                onPressed: editor.paste()
+                onPressed: editor.editor.paste()
             }
         }
     }

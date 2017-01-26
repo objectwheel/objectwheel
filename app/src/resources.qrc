@@ -110,5 +110,6 @@
         <file>resources/images/fexplorer.png</file>
         <file>resources/images/file_explorer/download@2x.png</file>
         <file>resources/images/file_explorer/download.png</file>
+        <file>resources/qmls/TextEditor.qml</file>
     </qresource>
 </RCC>

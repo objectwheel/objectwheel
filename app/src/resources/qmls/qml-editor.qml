@@ -1,5 +1,4 @@
 import QtQuick 2.7
-import QtQuick.Controls 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.0
@@ -24,6 +23,11 @@ import "delaycaller.js" as DelayCaller
 //FIX: Unexpectedly finishing problem because of CacheCleaner
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
+//TODO: Add animation popup to toolbox adder area
+//TODO: Fix copy paste bug
+//TODO: Remove "wrong" code saving prevent mechanism
+//TODO: Make it stopped after splashscreen getting collapsed
+//TODO: Fix logo color
 
 Item {
     id: root
@@ -53,11 +57,11 @@ Item {
             if (!isdir && isTextFile(urlval)) {
                 root.url = urlval
                 imageViewer.visible = false
-                flickable.visible = true
+                editor.visible = true
             } else if (!isdir && isImageFile(urlval)) {
                 imageViewer.source = "file://" + urlval
                 imageViewer.visible = true
-                flickable.visible = false
+                editor.visible = false
             }
         }
 
@@ -105,28 +109,28 @@ Item {
                 FancyButton {
                     id: save
                     width: height
-                    enabled: ((errorMessage.text=="") && (editor.text!=""))
+                    enabled: ((errorMessage.text=="") && (editor.editor.text!=""))
                     height: parent.height
                     iconSource: "qrc:///resources/images/save-icon.png"
-                    onClicked: !toolboxMode ? root.saved(editor.text) : saveCurrent()
+                    onClicked: !toolboxMode ? root.saved(editor.editor.text) : saveCurrent()
                 }
 
                 FancyButton {
                     id: undo
                     width: height
                     height: parent.height
-                    enabled: editor.canUndo
+                    enabled: editor.editor.canUndo
                     iconSource: "qrc:///resources/images/left-arrow.png"
-                    onClicked: editor.undo()
+                    onClicked: editor.editor.undo()
                 }
 
                 FancyButton {
                     id: redo
                     width: height
                     height: parent.height
-                    enabled: editor.canRedo
+                    enabled: editor.editor.canRedo
                     iconSource: "qrc:///resources/images/right-arrow.png"
-                    onClicked: editor.redo()
+                    onClicked: editor.editor.redo()
                 }
             }
 
@@ -180,15 +184,15 @@ Item {
                         State {
                             name: "splitted"
                             PropertyChanges { target: view; opacity: 1 }
-                            PropertyChanges { target: flickable; opacity: 1 }
-                            PropertyChanges { target: flickable; opacity: 1 }
+                            PropertyChanges { target: editor; opacity: 1 }
+                            PropertyChanges { target: editor; opacity: 1 }
                             PropertyChanges { target: handle; opacity: 1 }
                             PropertyChanges { target: separator; x:parent.width/2.0 }
                         },
                         State {
                             name: "editor"
                             PropertyChanges { target: view; opacity: 0}
-                            PropertyChanges { target: flickable; opacity: 1 }
+                            PropertyChanges { target: editor; opacity: 1 }
                             PropertyChanges { target: imageViewer; opacity: 1}
                             PropertyChanges { target: handle; opacity: 0 }
                             PropertyChanges { target: separator; x: parent.width - Fit.fit(1)}
@@ -196,7 +200,7 @@ Item {
                         State {
                             name: "viewer"
                             PropertyChanges { target: view; opacity: 1 }
-                            PropertyChanges { target: flickable; opacity: 0}
+                            PropertyChanges { target: editor; opacity: 0}
                             PropertyChanges { target: imageViewer; opacity: 0}
                             PropertyChanges { target: handle; opacity: 0 }
                             PropertyChanges { target: separator; x: 0 }
@@ -207,150 +211,21 @@ Item {
                             to: "*"
                             NumberAnimation { target: separator; properties: "x"; duration: 300; easing.type: Easing.InOutQuad; }
                             NumberAnimation { target: view; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
-                            NumberAnimation { target: flickable; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
+                            NumberAnimation { target: editor; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
                             NumberAnimation { target: imageViewer; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
                             NumberAnimation { target: handle; properties: "opacity"; duration: 300; easing.type: Easing.InOutQuad; }
                         }
                     ]
                 }
-                Flickable {
-                    id: flickable
+                TextEditor {
+                    id: editor
+                    navbar: navibar
+                    timer: timer
                     anchors { top: parent.top; left: parent.left; bottom: separator.bottom; right:separator.left }
-                    enabled: opacity > 0.98 ? true : false
-                    flickableDirection: Flickable.VerticalFlick
-                    boundsBehavior: Flickable.DragOverBounds
-                    contentHeight: editor.paintedHeight
-                    clip: true
-                    ScrollBar.vertical: ScrollBar { }
-
-                    Column {
-                        id: lineNumber
-                        anchors { left: parent.left; top: parent.top }
-                        Repeater {
-                            id: lineNumberRepeater
-                            clip: true
-                            Text {
-                                property alias bgcolor: rect.color
-                                text: index + 1
-                                color: "#e0e0e0"
-                                width: maxWidth
-                                height: editor.cursorRectangle.height
-                                horizontalAlignment: TextEdit.AlignRight
-                                verticalAlignment: TextEdit.AlignVCenter
-                                font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false
-                                Component.onCompleted: if (contentWidth > maxWidth) maxWidth = contentWidth
-                                Rectangle {
-                                    id: rect
-                                    color: 'transparent'
-                                    anchors.fill: parent
-                                    z:-1
-                                }
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        id: leftLine
-                        width: Fit.fit(1)
-                        height: parent.height
-                        anchors.top: parent.top
-                        anchors.left: lineNumber.right
-                        anchors.leftMargin: Fit.fit(5)
-                        color: Qt.lighter(container.color, 1.3)
-                    }
-
-                    Rectangle {
-                        id: editorCurrentLineHighlight
-                        anchors.left: lineNumber.left
-                        anchors.right: editor.right
-                        visible: editor.focus
-                        height: editor.cursorRectangle.height
-                        y: editor.cursorRectangle.y
-                        color: Qt.darker(container.color, 1.3)
-                        z: -1
-                    }
-
-                    TextEdit {
-                        id: editor
-                        objectName: "editor"
-                        anchors { left: lineNumber.right; right: parent.right; top: parent.top; bottom: parent.bottom;
-                        leftMargin: Fit.fit(15)}
-                        wrapMode: flickable.opacity > 0.98 ? TextEdit.WrapAtWordBoundaryOrAnywhere : TextEdit.NoWrap ;
-                        renderType: Text.NativeRendering
-                        onTextChanged: timer.restart();
-
-                        onSelectedTextChanged: {
-                            if (editor.selectedText === "") {
-                                navibar.state = 'view'
-                            }
-                        }
-                        // FIXME: stupid workaround for indent
-                        Keys.onPressed: {
-                            if (event.key == Qt.Key_BraceRight) {
-                                editor.select(0, cursorPosition)
-                                var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
-                                editor.deselect()
-                                var currentLine = previousContent[previousContent.length - 1]
-                                var leftBrace = /{/, rightBrace = /}/;
-                                if (!leftBrace.test(currentLine)) {
-                                    editor.remove(cursorPosition, cursorPosition - currentLine.length);
-                                    currentLine = currentLine.toString().replace(/ {1,4}$/, "");
-                                    editor.insert(cursorPosition, currentLine);
-                                }
-                            }
-                        }
-                        Keys.onReturnPressed: {
-                            editor.select(0, cursorPosition)
-                            var previousContent = editor.selectedText.split(/\r\n|\r|\n/)
-                            editor.deselect()
-                            var currentLine = previousContent[previousContent.length - 1]
-                            var leftBrace = /{/, rightBrace = /}/;
-                            editor.insert(cursorPosition, "\n")
-                            var whitespaceAppend = currentLine.match(new RegExp(/^[ \t]*/))  // whitespace
-                            if (leftBrace.test(currentLine)) // indent
-                                whitespaceAppend += "    ";
-                            editor.insert(cursorPosition, whitespaceAppend)
-                        }
-                        onLineCountChanged: {
-                            lineNumberRepeater.model = editor.lineCount
-                        }
-
-                        color: '#e0e0e0'
-                        selectionColor: '#0C75BC'
-                        selectByMouse: true
-                        text: documentHandler.text
-                        inputMethodHints: Qt.ImhNoPredictiveText
-
-                        DocumentHandler {
-                            id: documentHandler
-                            target: editor
-                        }
-
-                        MouseArea {
-                            id: handler
-                            visible: !isDesktop
-                            anchors.fill: parent
-                            propagateComposedEvents: true
-                            onPressed: {
-                                editor.cursorPosition = parent.positionAt(mouse.x, mouse.y);
-                                editor.focus = true
-                                navibar.state = 'view'
-                                Qt.inputMethod.show();
-                            }
-                            onPressAndHold: {
-                                navibar.state = 'selection'
-                                Qt.inputMethod.hide();
-                            }
-                            onDoubleClicked: {
-                                editor.selectWord()
-                                navibar.state = 'selection'
-                            }
-                        }
-                    }
                 }
                 ImageViewer {
                     id: imageViewer
-                    anchors.fill: flickable
+                    anchors.fill: editor
                     visible: false
                     clip: true
                     defaultSize: Fit.fit(80)
@@ -511,7 +386,7 @@ Item {
     onToolboxModeChanged: {
         if (!toolboxMode) {
             imageViewer.visible = false
-            flickable.visible = true
+            editor.visible = true
         }
     }
 
@@ -526,11 +401,11 @@ Item {
             }
         }
         if (cacheFound) {
-            editor.text = saveCache[index]
+            editor.editor.text = saveCache[index]
         } else {
             urlCache.push(root.url)
             saveCache.push(FileManager.rdfile(root.url))
-            editor.text = saveCache[saveCache.length - 1]
+            editor.editor.text = saveCache[saveCache.length - 1]
         }
     }
 
@@ -568,7 +443,7 @@ Item {
                 break
             }
         }
-        if (index >= 0) saveCache[index] = editor.text
+        if (index >= 0) saveCache[index] = editor.editor.text
     }
 
     function getClearSaves() {
@@ -683,16 +558,16 @@ Item {
 
     function reloadView() {
         if (lastItem != null) lastItem.destroy()
-        for (var i=0; i<lineNumberRepeater.count; i++) lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
+        for (var i=0; i<editor.lineNumberRepeater.count; i++) editor.lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
         errorMessage.text = ""
 
         if (!toolboxMode) {
             try {
-                lastItem = Qt.createQmlObject(editor.text, view);
+                lastItem = Qt.createQmlObject(editor.editor.text, view);
             } catch (e) {
                 var error = e.qmlErrors[0];
                 errorMessage.text = "Error, line "+error.lineNumber+":"+error.columnNumber+" : "+error.message;
-                lineNumberRepeater.itemAt(error.lineNumber - 1).bgcolor = "#c74c3c"
+                editor.lineNumberRepeater.itemAt(error.lineNumber - 1).bgcolor = "#c74c3c"
                 return;
             }
         } else {
@@ -721,7 +596,7 @@ Item {
                 var ferror = "Error, line " + line + " in " + fname + ":" + message
                 errorMessage.text = ferror
                 if (FileManager.fname(root.url) === fname) {
-                    lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
+                    editor.lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
                 }
             }
 
