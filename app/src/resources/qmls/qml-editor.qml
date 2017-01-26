@@ -24,7 +24,6 @@ import "delaycaller.js" as DelayCaller
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
 //TODO: Add animation popup to toolbox adder area
-//TODO: Make it stopped after splashscreen getting collapsed
 
 Item {
     id: root
@@ -274,10 +273,10 @@ Item {
             clip: true
             color: "#1e8145"
             radius: Fit.fit(5)
-            x: container.width/2.0 - errorHead.width/2.0
-            width: parent.width / 1.618
+            x:  Math.floor(container.width/2.0 - errorHead.width/2.0)
+            width: Math.floor(parent.width / 1.618)
             height: Fit.fit(40) + radius
-            y: -height + toolBar.height - radius
+            y: Math.floor(-height + toolBar.height - radius)
 
             Behavior on y {
                 NumberAnimation { duration: 500; easing.type: Easing.OutExpo }
@@ -289,7 +288,7 @@ Item {
 
             Text {
                 id: errorMessage
-                anchors { top: parent.top; left: parent.left; right: parent.right; bottom: parent.bottom }
+                anchors{top:parent.top;left:parent.left;right:parent.right;bottom:parent.bottom;margins:Fit.fit(5)}
                 wrapMode: Text.WordWrap
                 color: "white"
                 clip: true
@@ -308,9 +307,9 @@ Item {
 
             function handleError() {
                 if (errorMessage.text != "") {
-                    y = toolBar.height  - radius
+                    y = Math.floor(toolBar.height  - radius)
                 } else {
-                    y = - height + toolBar.height - radius
+                    y = - Math.floor(height + toolBar.height - radius)
                 }
             }
 
@@ -349,7 +348,7 @@ Item {
                             parent.anchors.left = undefined
                             errorHead.anchors.horizontalCenter = container.horizontalCenter
                             errorHead.anchors.right = undefined
-                            errorHead.width = container.width / 1.618
+                            errorHead.width = Math.floor(container.width / 1.618)
                         }
                     }
                 }
