@@ -94,8 +94,7 @@ Flickable {
             cursorShape: Qt.IBeamCursor
             onPressed: {
                 editor.cursorPosition = parent.positionAt(mouse.x, mouse.y);
-                editor.focus = true
-                Qt.inputMethod.show();
+                Qt.inputMethod.hide();
                 if (isDesktop) {
                     mouse.accepted = false
                 }
@@ -105,8 +104,8 @@ Flickable {
                 Qt.inputMethod.hide();
             }
             onDoubleClicked: {
-                editor.selectWord()
-                navbar.state = 'selection'
+                editor.focus = true
+                Qt.inputMethod.show();
             }
         }
     }
