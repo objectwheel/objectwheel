@@ -23,7 +23,6 @@ import "delaycaller.js" as DelayCaller
 //FIX: Unexpectedly finishing problem because of CacheCleaner
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
-//TODO: Add animation popup to toolbox adder area
 
 Item {
     id: root

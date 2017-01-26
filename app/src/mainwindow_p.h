@@ -32,6 +32,10 @@
 #include <lineedit.h>
 #include <QLineEdit>
 #include <filemanager.h>
+#include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
+
+#define DURATION 500
 
 using namespace Fit;
 
@@ -51,14 +55,15 @@ class MainWindowPrivate
 		QSpacerItem* horizontalSpacer_2;
 		QWidget* toolboxWidget;
 		QVBoxLayout* toolboxVLay;
-		QHBoxLayout* toolboxHLay;
+		QWidget* toolboxAdderAreaWidget;
+		QVBoxLayout* toolboxAdderAreaVLay;
+		QHBoxLayout* toolboxAdderAreaButtonSideHLay;
 		ListWidget* toolboxList;
 		FlatButton* toolboxAddButton;
 		FlatButton* toolboxEditButton;
 		FlatButton* toolboxRemoveButton;
 		FlatButton* toolboxResetButton;
-		QVBoxLayout* toolboxAdderLayout;
-		QHBoxLayout* toolboxAdderHLay;
+		QVBoxLayout* toolboxAdderAreaEditingLayout;
 		LineEdit* toolboxUrlBox;
 		LineEdit* toolBoxNameBox;
 		FlatButton* toolboxOpenEditorButton;
@@ -165,7 +170,9 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 
 	toolboxWidget = new QWidget;
 	toolboxVLay = new QVBoxLayout;
-	toolboxHLay = new QHBoxLayout;
+	toolboxAdderAreaWidget = new QWidget;
+	toolboxAdderAreaVLay = new QVBoxLayout;
+	toolboxAdderAreaButtonSideHLay = new QHBoxLayout;
 
 	toolboxAddButton = new FlatButton;
 	toolboxAddButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -207,16 +214,13 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
 	QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxResetButtonClicked()) );
 
-	toolboxHLay->addWidget(toolboxAddButton);
-	toolboxHLay->addStretch();
-	toolboxHLay->addWidget(toolboxRemoveButton);
-	toolboxHLay->addStretch();
-	toolboxHLay->addWidget(toolboxEditButton);
-	toolboxHLay->addStretch();
-	toolboxHLay->addWidget(toolboxResetButton);
-
-
-
+	toolboxAdderAreaButtonSideHLay->addWidget(toolboxAddButton);
+	toolboxAdderAreaButtonSideHLay->addStretch();
+	toolboxAdderAreaButtonSideHLay->addWidget(toolboxRemoveButton);
+	toolboxAdderAreaButtonSideHLay->addStretch();
+	toolboxAdderAreaButtonSideHLay->addWidget(toolboxEditButton);
+	toolboxAdderAreaButtonSideHLay->addStretch();
+	toolboxAdderAreaButtonSideHLay->addWidget(toolboxResetButton);
 
 	toolboxUrlBox = new LineEdit;
 	toolboxUrlBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -252,28 +256,32 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxOpenEditorButton->setTextColor(Qt::white);
 	QObject::connect(toolboxOpenEditorButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxOpenEditorButtonClicked()) );
 
-	toolboxAdderHLay = new QHBoxLayout;
-	toolboxAdderHLay->setSpacing(fit(6));
-	toolboxAdderHLay->addWidget(toolboxOpenEditorButton);
-	toolboxAdderHLay->setSpacing(0);
-	toolboxAdderHLay->setContentsMargins(0,0,0,0);
+	toolboxAdderAreaEditingLayout = new QVBoxLayout;
+	toolboxAdderAreaEditingLayout->addWidget(toolBoxNameBox);
+	toolboxAdderAreaEditingLayout->addWidget(toolboxUrlBox);
+	toolboxAdderAreaEditingLayout->addWidget(toolboxOpenEditorButton);
+	toolboxAdderAreaEditingLayout->setSpacing(0);
+	toolboxAdderAreaEditingLayout->setContentsMargins(0,0,0,0);
 
-	toolboxAdderLayout = new QVBoxLayout;
-	toolboxAdderLayout->addWidget(toolBoxNameBox);
-	toolboxAdderLayout->addWidget(toolboxUrlBox);
-	toolboxAdderLayout->addLayout(toolboxAdderHLay);
-	toolboxAdderLayout->setSpacing(0);
-	toolboxAdderLayout->setContentsMargins(0,0,0,0);
+	toolboxAdderAreaButtonSideHLay->setSpacing(fit(6));
+	toolboxAdderAreaButtonSideHLay->setContentsMargins(0,0,0,0);
+	toolboxAdderAreaVLay->addLayout(toolboxAdderAreaButtonSideHLay);
+	toolboxAdderAreaVLay->addLayout(toolboxAdderAreaEditingLayout);
+	toolboxAdderAreaVLay->addStretch();
+	toolboxAdderAreaVLay->setSpacing(fit(6));
+	toolboxAdderAreaVLay->setContentsMargins(fit(6),fit(6),fit(6),fit(6));
+	toolboxAdderAreaWidget->setLayout(toolboxAdderAreaVLay);
+	toolboxAdderAreaWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	toolboxAdderAreaWidget->setFixedSize(fit(155), fit(42));
+	toolboxAdderAreaWidget->setObjectName("toolboxAdderAreaWidget");
+	toolboxAdderAreaWidget->setStyleSheet(QString("#toolboxAdderAreaWidget{border:none; border-radius:%1;}").arg(fit(5)));
 
 	toolboxVLay->addWidget(toolboxList);
-	toolboxVLay->addLayout(toolboxHLay);
-	toolboxVLay->addLayout(toolboxAdderLayout);
-	toolboxWidget->setLayout(toolboxVLay);
-	toolboxWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	toolboxHLay->setSpacing(0);
-	toolboxHLay->setContentsMargins(fit(4),fit(4),fit(5),fit(8));
+	toolboxVLay->addWidget(toolboxAdderAreaWidget);
 	toolboxVLay->setSpacing(0);
 	toolboxVLay->setContentsMargins(fit(6),0,0,0);
+	toolboxWidget->setLayout(toolboxVLay);
+	toolboxWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
 		if (i>=0) {
@@ -288,9 +296,6 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 			toolboxRemoveButton->setEnabled(i>=0);
 		}
 	});
-
-
-
 
 	propertiesWidget = new PropertiesWidget(centralWidget);
 	propertiesWidget->setObjectName(QStringLiteral("propertiesWidget"));
@@ -318,13 +323,31 @@ void MainWindowPrivate::retranslateUi(QWidget* MainWindow)
 
 void MainWindowPrivate::showAdderArea()
 {
+	QPropertyAnimation *animation = new QPropertyAnimation(toolboxAdderAreaWidget, "minimumHeight");
+	animation->setDuration(DURATION);
+	animation->setStartValue(fit(42));
+	animation->setEndValue(fit(150));
+	animation->setEasingCurve(QEasingCurve::OutExpo);
+	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+
+	QPropertyAnimation *animation2 = new QPropertyAnimation(toolboxAdderAreaWidget, "maximumHeight");
+	animation2->setDuration(DURATION);
+	animation2->setStartValue(fit(42));
+	animation2->setEndValue(fit(150));
+	animation2->setEasingCurve(QEasingCurve::OutExpo);
+	QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
+
+	QParallelAnimationGroup *group = new QParallelAnimationGroup;
+	group->addAnimation(animation);
+	group->addAnimation(animation2);
+	QObject::connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));
+	group->start();
+
+	toolboxAdderAreaEditingLayout->setSpacing(fit(6));
+	toolboxAdderAreaEditingLayout->setContentsMargins(0,0,0,0);
 	toolboxOpenEditorButton->setHidden(false);
 	toolBoxNameBox->setHidden(false);
 	toolboxUrlBox->setHidden(false);
-	toolboxAdderLayout->setSpacing(fit(6));
-	toolboxAdderLayout->setContentsMargins(fit(4),fit(4),fit(10),fit(8));
-	toolboxAdderHLay->setSpacing(fit(6));
-	toolboxAdderHLay->setContentsMargins(fit(4),fit(4),fit(10),fit(8));
 	toolboxAddButton->setDisabled(true);
 	toolboxRemoveButton->setDisabled(true);
 	toolboxResetButton->setDisabled(true);
@@ -332,16 +355,34 @@ void MainWindowPrivate::showAdderArea()
 
 void MainWindowPrivate::hideAdderArea()
 {
-	toolboxOpenEditorButton->setHidden(true);
-	toolBoxNameBox->setHidden(true);
-	toolboxUrlBox->setHidden(true);
-	toolboxAdderLayout->setSpacing(0);
-	toolboxAdderLayout->setContentsMargins(0,0,0,0);
-	toolboxAdderHLay->setSpacing(0);
-	toolboxAdderHLay->setContentsMargins(0,0,0,0);
+	QPropertyAnimation *animation = new QPropertyAnimation(toolboxAdderAreaWidget, "minimumHeight");
+	animation->setDuration(DURATION);
+	animation->setStartValue(fit(150));
+	animation->setEndValue(fit(42));
+	animation->setEasingCurve(QEasingCurve::OutExpo);
+	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+
+	QPropertyAnimation *animation2 = new QPropertyAnimation(toolboxAdderAreaWidget, "maximumHeight");
+	animation2->setDuration(DURATION);
+	animation2->setStartValue(fit(150));
+	animation2->setEndValue(fit(42));
+	animation2->setEasingCurve(QEasingCurve::OutExpo);
+	QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
+
+	QParallelAnimationGroup *group = new QParallelAnimationGroup;
+	group->addAnimation(animation);
+	group->addAnimation(animation2);
+	QObject::connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));
+	group->start();
+
+	toolboxAdderAreaEditingLayout->setSpacing(0);
+	toolboxAdderAreaEditingLayout->setContentsMargins(0,0,0,0);
 	toolboxAddButton->setEnabled(true);
 	toolboxRemoveButton->setEnabled(true);
 	toolboxResetButton->setEnabled(true);
 	toolboxEditButton->setChecked(false);
+	toolboxOpenEditorButton->setHidden(true);
+	toolBoxNameBox->setHidden(true);
+	toolboxUrlBox->setHidden(true);
 }
 #endif // MAINWINDOW_P_H
