@@ -25,7 +25,6 @@ import "delaycaller.js" as DelayCaller
 //TODO: That alignment lock bar/layout bar
 //TODO: Add animation popup to toolbox adder area
 //TODO: Make it stopped after splashscreen getting collapsed
-//TODO: Fix logo color
 
 Item {
     id: root
