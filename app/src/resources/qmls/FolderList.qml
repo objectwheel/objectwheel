@@ -25,7 +25,7 @@ Item {
 
             Item {
                 height: visible ? Fit.fit(40) : 0
-                enabled: visible ? undefined : 0
+                enabled: visible ? true : 0
                 width: parent.width;
                 visible: {
                     for (var i=0; i<hiddenExtensions.length; i++) {
