@@ -38,6 +38,7 @@ class QmlEditorPrivate
 		QQuickItem* lastSelectedItem;
 		QTextDocument* textDocument;
 		QQmlContext* rootContext;
+		QQmlContext* dashboardRootContext;
 		QPixmap snapshot;
 		QPoint showCenter;
 		bool deactive;
@@ -60,16 +61,15 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	mainLayout.addWidget(&quickWidget);
 	mainLayout.setSpacing(0);
 	mainLayout.setContentsMargins(0, 0, 0, 0);
-
-	CacheCleaner::setEngine(quickWidget.engine());
-	CacheCleaner::registerQmlType();
+	rootContext = quickWidget.rootContext();
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_WINPHONE) && !defined(Q_OS_ANDROID)
-	quickWidget.rootContext()->setContextProperty("isDesktop", true);
+	rootContext->setContextProperty("isDesktop", true);
 #else
-	quickWidget.rootContext()->setContextProperty("isDesktop", false);
+	rootContext->setContextProperty("isDesktop", false);
 #endif
-	quickWidget.rootContext()->setContextProperty("dpi", Fit::ratio());
+	rootContext->setContextProperty("dpi", Fit::ratio());
+	ComponentManager::registerQmlType();
 
 	quickWidget.setSource(QUrl("qrc:/resources/qmls/qml-editor.qml"));
 	quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -102,6 +102,10 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	minimizeButton.setCursor(Qt::PointingHandCursor);
 	QObject::connect(&minimizeButton, SIGNAL(clicked(bool)), parent, SLOT(hide()));
 
+	auto item = qobject_cast<QQuickItem*>(QQmlProperty::read(rootItem,"view", rootContext).value<QObject*>());
+	Q_ASSERT(item);
+	ComponentManager::setParentItem(item);
+
 	QTimer::singleShot(500, [this] {
 		auto snap = parent->grab();
 		if (!snap.isNull()) {
@@ -118,20 +122,20 @@ void QmlEditorPrivate::resize()
 
 void QmlEditorPrivate::saved(const QString& text)
 {
-	QQmlComponent component(rootContext->engine()); //TODO: Drop into another item?
+	QQmlComponent component(dashboardRootContext->engine()); //TODO: Drop into another item?
 	int index = itemList->indexOf(lastSelectedItem);
 	if (index < 0) return;
 	auto url = urlList->at(index);
 	component.setData(QByteArray().insert(0,text), QUrl());
 
 	QQmlIncubator incubator;
-	component.create(incubator, rootContext);
+	component.create(incubator, dashboardRootContext);
 	while (incubator.isLoading()) {
 		QApplication::processEvents(QEventLoop::AllEvents, 50);
 	}
 	QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
-	if (component.isError() || !qml) {qWarning() << component.errors(); return;}
+	if (component.isError() || !qml) {qWarning() << component.errorString(); return;}
 
 	auto previousParent = lastSelectedItem->parentItem();
 	auto previousPosition = lastSelectedItem->position();
@@ -152,14 +156,14 @@ void QmlEditorPrivate::saved(const QString& text)
 	QString componentName = qmlContext(qml)->nameForObject(qml);
 	if (componentName.isEmpty()) componentName = "anonymous";
 	for (int i=0; i<itemList->size();i++) {
-		if (componentName == QString(rootContext->nameForObject((*itemList)[i])) ||
+		if (componentName == QString(dashboardRootContext->nameForObject((*itemList)[i])) ||
 			componentName == QString("dpi") || componentName == QString("swipeView")) {
 			componentName += QString::number(count);
 			count++;
 			i = 0;
 		}
 	}
-	rootContext->setContextProperty(componentName, qml);
+	dashboardRootContext->setContextProperty(componentName, qml);
 	qml->setParentItem(previousParent);
 	qml->setPosition(previousPosition);
 	qml->setClip(true); // Even if it's not true
@@ -283,7 +287,7 @@ void QmlEditor::setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const 
 
 void QmlEditor::setRootContext(QQmlContext* const context)
 {
-	m_d->rootContext = context;
+	m_d->dashboardRootContext = context;
 }
 
 void QmlEditor::selectItem(QObject* const item)
@@ -375,4 +379,60 @@ void QmlEditor::setShowRatio(float value)
 	showRatio = value;
 }
 
-QQmlEngine* CacheCleaner::engine;
+/*! [*] Component Manager [*] !*/
+
+QQmlEngine* ComponentManager::engine;
+QString ComponentManager::lastError;
+QPointer<QQuickItem> ComponentManager::lastItem = nullptr;
+QQuickItem* ComponentManager::parentItem;
+
+void ComponentManager::setParentItem(QQuickItem* i)
+{
+	parentItem = i;
+}
+
+void ComponentManager::registerQmlType()
+{
+	qmlRegisterType<ComponentManager>("com.objectwheel.editor",1,0,"ComponentManager");
+	engine = new QQmlEngine;
+	engine->rootContext()->setContextProperty("dpi", Fit::ratio());
+}
+
+void ComponentManager::clear()
+{
+	if (lastItem) {
+		lastItem->deleteLater();
+	}
+	engine->clearComponentCache();
+}
+
+QString ComponentManager::error() const
+{
+	return lastError;
+}
+
+QQuickItem* ComponentManager::build(const QString& url)
+{
+	QQmlComponent component(engine);
+	component.loadUrl(QUrl::fromUserInput(url));
+
+	QQmlIncubator incubator;
+	component.create(incubator);
+	while (incubator.isLoading()) {
+		QApplication::processEvents(QEventLoop::AllEvents, 50);
+	}
+	lastItem = qobject_cast<QQuickItem*>(incubator.object());
+
+	if (component.isError() || !lastItem) {
+		lastError = component.errorString();
+		return nullptr;
+	}
+
+	lastItem->setParentItem(parentItem);
+	lastItem->setWidth(fit(lastItem->width()));
+	lastItem->setHeight(fit(lastItem->height()));
+	QVariant variant;
+	variant.setValue<QQuickItem*>(parentItem);
+	QQmlProperty::write(lastItem, "anchors.centerIn", variant);
+	return lastItem;
+}

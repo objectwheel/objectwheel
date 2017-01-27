@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QQmlEngine>
+#include <QPointer>
 
 class QmlEditorPrivate;
 class QQuickItem;
@@ -46,17 +47,24 @@ class QmlEditor : public QWidget
 		float showRatio;
 };
 
-class CacheCleaner : public QObject
+class ComponentManager : public QObject
 {
 		Q_OBJECT
 	private:
 		static QQmlEngine* engine;
+		static QString lastError;
+		static QPointer<QQuickItem> lastItem;
+		static QQuickItem* parentItem;
 
 	public:
-		explicit CacheCleaner (QObject* parent = 0) : QObject(parent) {}
-		Q_INVOKABLE inline void clear() { engine->clearComponentCache(); }
-		inline static void setEngine(QQmlEngine* e) { engine = e; }
-		inline static void registerQmlType() { qmlRegisterType<CacheCleaner>("com.objectwheel.editor",1,0,"CacheCleaner"); }
+		explicit ComponentManager (QObject* parent = 0) : QObject(parent) {}
+		static void setParentItem(QQuickItem* i);
+		static void registerQmlType();
+
+	public slots:
+		void clear();
+		QString error() const;
+		QQuickItem* build(const QString& url);
 };
 
 #endif // QMLEDITOR_H

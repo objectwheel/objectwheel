@@ -20,9 +20,10 @@ import "delaycaller.js" as DelayCaller
 //TODO: Fix popup window colors
 //TODO: Add "Fit" lib to com.objectwheel.components
 //FIX: Editor "error" line corruption when page word wrapped
-//FIX: Unexpectedly finishing problem because of CacheCleaner
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
+//FIX: LoadProgressBarStyle.qml cache error
+//FIX: Hide qmlc jsc files on explorer
 
 Item {
     id: root
@@ -214,7 +215,7 @@ Item {
                 TextEditor {
                     id: editor
                     navbar: navibar
-                    timer: timer
+                    clip: true
                     anchors { top: parent.top; left: parent.left; bottom: separator.bottom; right:separator.left }
                 }
                 ImageViewer {
@@ -367,6 +368,7 @@ Item {
             id: timer
             interval: 500;
             onTriggered: reloadView()
+            Component.onCompleted: editor.textChanged.connect(restart)
         }
     }
 
@@ -375,13 +377,14 @@ Item {
         places: [Item.Bottom, Item.Left, Item.Bottom, Item.Bottom, Item.Bottom]
     }
 
-    CacheCleaner { id: cacheCleaner }
+    ComponentManager { id: componentManager }
 
     onToolboxModeChanged: {
         if (!toolboxMode) {
             imageViewer.visible = false
             editor.visible = true
         }
+        reloadView()
     }
 
     onUrlChanged: {
@@ -401,6 +404,7 @@ Item {
             saveCache.push(FileManager.rdfile(root.url))
             editor.editor.text = saveCache[saveCache.length - 1]
         }
+        reloadView()
     }
 
     function saveCurrent() {
@@ -549,11 +553,12 @@ Item {
     }
 
     function reloadView() {
-        if (lastItem != null) lastItem.destroy()
         for (var i=0; i<editor.lineNumberRepeater.count; i++) editor.lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
         errorMessage.text = ""
+        componentManager.clear()
 
         if (!toolboxMode) {
+            if (lastItem != null) lastItem.destroy()
             try {
                 lastItem = Qt.createQmlObject(editor.editor.text, view);
             } catch (e) {
@@ -562,44 +567,38 @@ Item {
                 editor.lineNumberRepeater.itemAt(error.lineNumber - 1).bgcolor = "#c74c3c"
                 return;
             }
+            if (lastItem != null) {
+                lastItem.width = Fit.fit(lastItem.width)
+                lastItem.height = Fit.fit(lastItem.height)
+                lastItem.anchors.centerIn = view
+            }
         } else {
             updateCache()
             var clearSaves = getClearSaves()
             flushCachesToDisk()
-            var toolDir = folderBrowser.rootFolder.toString().replace("file://","")
-            var mainFileName = toolDir + "/main.qml"
 
-            lastItem = null
-            var component = Qt.createComponent("file://" + mainFileName)
-            if (component.status === Component.Ready) {
-                lastItem = component.createObject(view);
-                if (lastItem == null) {
+            if (!componentManager.build(folderBrowser.rootFolder.toString() + "/main.qml")) {
+                var errorString = componentManager.error()
+                if (errorString === "") {
                     errorMessage.text = "Error code 0x54."
-                }
-            } else {
-                var regex = /file:\/\/.*?:/g
-                var festring = component.errorString().split("\n")
-                var estring = festring[festring.length - 2]
-                var fpath = estring.match(regex)[0].replace("file://","").slice(0, -1)
-                var fname = FileManager.fname(fpath)
-                var cleare = estring.replace(regex, "")
-                var line = cleare.match(/[0-9]+/g)[0]
-                var message = cleare.match(/[^0-9].*/g)[0]
-                var ferror = "Error, line " + line + " in " + fname + ":" + message
-                errorMessage.text = ferror
-                if (FileManager.fname(root.url) === fname) {
-                    editor.lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
+                } else {
+                    var regex = /file:\/\/.*?:/g
+                    var festring = errorString.split("\n")
+                    var estring = festring[festring.length - 2]
+                    var fpath = estring.match(regex)[0].replace("file://","").slice(0, -1)
+                    var fname = FileManager.fname(fpath)
+                    var cleare = estring.replace(regex, "")
+                    var line = cleare.match(/[0-9]+/g)[0]
+                    var message = cleare.match(/[^0-9].*/g)[0]
+                    var ferror = "Error, line " + line + " in " + fname + ":" + message
+                    errorMessage.text = ferror
+                    if (FileManager.fname(root.url) === fname) {
+                        editor.lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
+                    }
                 }
             }
 
             revertClearSavesToDisk(clearSaves)
-            cacheCleaner.clear()
-        }
-
-        if (lastItem != null) {
-            lastItem.width = Fit.fit(lastItem.width)
-            lastItem.height = Fit.fit(lastItem.height)
-            lastItem.anchors.centerIn = view
         }
     }
 
@@ -613,6 +612,7 @@ Item {
         return (FileManager.ftype(file) === "img")
     }
 
+    property alias view: view
     property real maxWidth: 0
     property string splitState: 'splitted'
     property var lastItem: null

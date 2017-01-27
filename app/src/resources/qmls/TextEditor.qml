@@ -1,5 +1,7 @@
 ﻿import QtQuick 2.7
 import QtQuick.Controls 2.1
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
 import com.objectwheel.components 1.0
 import "fit.js" as Fit
 
@@ -8,10 +10,9 @@ Flickable {
     enabled: opacity > 0.98 ? true : false
     flickableDirection: Flickable.VerticalFlick
     boundsBehavior: Flickable.DragOverBounds
-    contentHeight: editor.paintedHeight
+    contentHeight: editor.contentHeight
     clip: true
     ScrollBar.vertical: ScrollBar { }
-
     Column {
         id: lineNumber
         anchors { left: parent.left; top: parent.top }
@@ -56,62 +57,39 @@ Flickable {
         color: Qt.darker(container.color, 1.3)
         z: -1
     }
-    TextEdit {
+    TextArea {
         id: editor
         objectName: "editor"
-        anchors {left:lineNumber.right;right:parent.right;top:parent.top;bottom:parent.bottom;leftMargin:Fit.fit(15)}
+        frameVisible: false
+        backgroundVisible: false
+        anchors {left:lineNumber.right;right:parent.right;top:parent.top;bottom:parent.bottom;leftMargin:Fit.fit(15);rightMargin: Fit.fit(10)}
         wrapMode: root.opacity > 0.98 ? TextEdit.WrapAtWordBoundaryOrAnywhere : TextEdit.NoWrap ;
-        renderType: Text.NativeRendering
-        onTextChanged: timer.restart();
+        selectByMouse: true
+        inputMethodHints: Qt.ImhNoPredictiveText
+        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+        verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+        onTextChanged: root.textChanged(text)
+        style: TextAreaStyle {
+            renderType: Text.NativeRendering
+            textColor: "#e0e0e0"
+            selectionColor: "#0C75BC"
+        }
         onSelectedTextChanged: {
-            if (editor.selectionStart !== editor.selectionEnd) {
-                navbar.state = 'selection'
-            } else if (editor.selectedText === "") {
+            if (editor.selectedText === "") {
                 navbar.state = 'view'
             }
         }
-
         onLineCountChanged: {
             lineNumberRepeater.model = editor.lineCount
         }
-
-        color: '#e0e0e0'
-        selectionColor: '#0C75BC'
-        selectByMouse: true
-        text: documentHandler.text
-        inputMethodHints: Qt.ImhNoPredictiveText
-
         DocumentHandler {
             id: documentHandler
             target: editor
         }
-
-        MouseArea {
-            id: handler
-            anchors.fill: parent
-            anchors.rightMargin: Fit.fit(10)
-            propagateComposedEvents: true
-            cursorShape: Qt.IBeamCursor
-            onPressed: {
-                editor.cursorPosition = parent.positionAt(mouse.x, mouse.y);
-                Qt.inputMethod.hide();
-                if (isDesktop) {
-                    mouse.accepted = false
-                }
-            }
-            onPressAndHold: {
-                navbar.state = 'selection'
-                Qt.inputMethod.hide();
-            }
-            onDoubleClicked: {
-                editor.focus = true
-                Qt.inputMethod.show();
-            }
-        }
     }
-
-    property var timer
+    signal textChanged(var text)
     property var navbar
+    property var tmr: null
     property alias editor: editor
     property alias lineNumberRepeater: lineNumberRepeater
 }
