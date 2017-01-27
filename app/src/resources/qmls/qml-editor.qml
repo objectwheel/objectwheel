@@ -23,7 +23,6 @@ import "delaycaller.js" as DelayCaller
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
 //FIX: LoadProgressBarStyle.qml cache error
-//FIX: Hide qmlc jsc files on explorer
 
 Item {
     id: root
