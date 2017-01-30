@@ -7,6 +7,7 @@
 #include <aispeak.h>
 #include <documenthandler.h>
 #include <filemanager.h>
+#include <qquickfolderlistmodel.h>
 
 class Components
 {

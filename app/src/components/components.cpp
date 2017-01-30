@@ -8,4 +8,5 @@ void Components::init()
 	AiSpeak::registerQmlType();
 	DocumentHandler::registerQmlType();
 	FileManager::registerQmlType();
+	QQuickFolderListModel::registerQmlType();
 }

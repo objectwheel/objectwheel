@@ -204,7 +204,9 @@ void QmlEditorPrivate::show(const QString& url)
 	QFileInfo info(url);
 	QQmlProperty::write(rootItem, "toolboxMode", true, rootContext);
 	QQmlProperty::write(rootItem, "folder", "file://" + info.dir().path(), rootContext);
-	QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
+	QTimer::singleShot(DURATION,[=] { //FIXME
+		QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
+	});
 
 	((QWidget*)parent)->show();
 

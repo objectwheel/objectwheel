@@ -65,52 +65,53 @@
         <file>resources/images/aboutus.png</file>
         <file>resources/images/loading.gif</file>
         <file>resources/fonts/SFNSText.ttf</file>
-        <file>resources/images/file_explorer/text_icon@2x.png</file>
-        <file>resources/images/file_explorer/text_icon.png</file>
-        <file>resources/images/file_explorer/home@2x.png</file>
-        <file>resources/images/file_explorer/home.png</file>
-        <file>resources/images/file_explorer/new_folder_icon@2x.png</file>
-        <file>resources/images/file_explorer/new_folder_icon.png</file>
-        <file>resources/images/file_explorer/new_file_icon@2x.png</file>
-        <file>resources/images/file_explorer/new_file_icon.png</file>
-        <file>resources/images/file_explorer/back@2x.png</file>
-        <file>resources/images/file_explorer/back.png</file>
-        <file>resources/images/file_explorer/edit_icon@2x.png</file>
-        <file>resources/images/file_explorer/edit_icon.png</file>
-        <file>resources/images/file_explorer/remove_icon@2x.png</file>
-        <file>resources/images/file_explorer/remove_icon.png</file>
-        <file>resources/images/file_explorer/ok@2x.png</file>
-        <file>resources/images/file_explorer/ok.png</file>
-        <file>resources/images/file_explorer/qml_icon@2x.svg</file>
-        <file>resources/images/file_explorer/qml_icon.svg</file>
-        <file>resources/images/file_explorer/js_icon@2x.svg</file>
-        <file>resources/images/file_explorer/js_icon.svg</file>
-        <file>resources/images/file_explorer/image_icon@2x.svg</file>
-        <file>resources/images/file_explorer/image_icon.svg</file>
-        <file>resources/images/file_explorer/file_icon@2x.svg</file>
-        <file>resources/images/file_explorer/file_icon.svg</file>
-        <file>resources/qmls/PopupWindow.qml</file>
         <file>resources/qmls/FancyButton.qml</file>
         <file>resources/qmls/filemanager.js</file>
         <file>resources/qmls/delaycaller.js</file>
-        <file>resources/qmls/FolderList.qml</file>
-        <file>resources/qmls/FolderBrowser.qml</file>
         <file>resources/qmls/ShadowFactory.qml</file>
         <file>resources/images/menu-icon.png</file>
         <file>resources/images/back.png</file>
         <file>resources/images/menu-icon@2x.png</file>
         <file>resources/qmls/fit.js</file>
-        <file>resources/images/file_explorer/dir_icon@2x.png</file>
-        <file>resources/images/file_explorer/dir_icon.png</file>
         <file>resources/images/handle@2x.png</file>
         <file>resources/images/handle.png</file>
         <file>resources/images/reset.png</file>
         <file>resources/qmls/ImageViewer.qml</file>
         <file>resources/images/web.png</file>
         <file>resources/images/fexplorer.png</file>
-        <file>resources/images/file_explorer/download@2x.png</file>
-        <file>resources/images/file_explorer/download.png</file>
         <file>resources/qmls/TextEditor.qml</file>
         <file>resources/images/fexplorer@2x.png</file>
+        <file>resources/qmls/Popup.qml</file>
+        <file>resources/qmls/FileExplorerToolBar.qml</file>
+        <file>resources/qmls/FileExplorerListView.qml</file>
+        <file>resources/qmls/FileExplorer.qml</file>
+        <file>resources/images/fileExplorer/text@2x.png</file>
+        <file>resources/images/fileExplorer/text.png</file>
+        <file>resources/images/fileExplorer/qml@2x.svg</file>
+        <file>resources/images/fileExplorer/qml.svg</file>
+        <file>resources/images/fileExplorer/ok@2x.png</file>
+        <file>resources/images/fileExplorer/ok.png</file>
+        <file>resources/images/fileExplorer/newFolder@2x.png</file>
+        <file>resources/images/fileExplorer/newFolder.png</file>
+        <file>resources/images/fileExplorer/newFile@2x.png</file>
+        <file>resources/images/fileExplorer/newFile.png</file>
+        <file>resources/images/fileExplorer/js@2x.svg</file>
+        <file>resources/images/fileExplorer/js.svg</file>
+        <file>resources/images/fileExplorer/image@2x.svg</file>
+        <file>resources/images/fileExplorer/image.svg</file>
+        <file>resources/images/fileExplorer/home@2x.png</file>
+        <file>resources/images/fileExplorer/home.png</file>
+        <file>resources/images/fileExplorer/edit@2x.png</file>
+        <file>resources/images/fileExplorer/edit.png</file>
+        <file>resources/images/fileExplorer/download@2x.png</file>
+        <file>resources/images/fileExplorer/download.png</file>
+        <file>resources/images/fileExplorer/dir@2x.png</file>
+        <file>resources/images/fileExplorer/dir.png</file>
+        <file>resources/images/fileExplorer/delete@2x.png</file>
+        <file>resources/images/fileExplorer/delete.png</file>
+        <file>resources/images/fileExplorer/bin@2x.svg</file>
+        <file>resources/images/fileExplorer/bin.svg</file>
+        <file>resources/images/fileExplorer/back@2x.png</file>
+        <file>resources/images/fileExplorer/back.png</file>
     </qresource>
 </RCC>

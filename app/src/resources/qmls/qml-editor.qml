@@ -23,31 +23,54 @@ import "delaycaller.js" as DelayCaller
 //FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
 //FIX: LoadProgressBarStyle.qml cache error
+//FIX: icon@2x.png add custom control button
 
 Item {
     id: root
-
-    FolderBrowser {
-        id: folderBrowser
+    FileExplorer {
+        id: fileExplorer
         clip: true
-        readOnly: ["main.qml", "icon.png"]
+        readOnly: ["main.qml", "icon.png", "icon@2x.png"]
         anchors { top: parent.top; bottom: parent.bottom; }
         width: Fit.fit(180)
         x: menu.checked ? 0 : -width
         enabled: toolboxMode
-        hiddenExtensions: [ "qmlc", "jsc" ]
         Component.onCompleted: anim.enabled = true
-        onEntryEdited: {
+        explorerToolBar {
+            backIcon: "qrc:///resources/images/fileExplorer/back.png"
+            homeIcon: "qrc:///resources/images/fileExplorer/home.png"
+            newFolderIcon: "qrc:///resources/images/fileExplorer/newFolder.png"
+            newFileIcon: "qrc:///resources/images/fileExplorer/newFile.png"
+            downloadIcon: "qrc:///resources/images/fileExplorer/download.png"
+        }
+        explorerListView {
+            folderListModel.showDirsFirst: true
+            folderListModel.folder: root.folder
+            folderListModel.rootFolder: root.rootFolder
+            folderListModel.hiddenSuffixes: ["qmlc", "jsc"]
+            elementHeight: Fit.fit(40)
+            textSize: Fit.fit(12)
+            textWidth: Fit.fit(120)
+            textColor: "white"
+            imageIcon: "qrc:///resources/images/fileExplorer/image.svg"
+            qmlIcon: "qrc:///resources/images/fileExplorer/qml.svg"
+            jsIcon: "qrc:///resources/images/fileExplorer/js.svg"
+            textIcon: "qrc:///resources/images/fileExplorer/text.png"
+            binIcon: "qrc:///resources/images/fileExplorer/bin.svg"
+            dirIcon: "qrc:///resources/images/fileExplorer/dir.png"
+        }
+        onEntryRenamed: {
             from = from.toString().replace("file://", "")
             to = to.toString().replace("file://", "")
             updateCacheForRenamedEntry(from, to, isdir)
         }
-        onEntryRemoved: {
-            urlval = urlval.toString().replace("file://", "")
-            clearCacheFor(urlval, isdir)
+        onEntryDeleted: {
+            name = name.toString().replace("file://", "")
+            clearCacheFor(name, isdir)
         }
-
-        onSelectionChanged: {
+        explorerListView.listView.onCurrentItemChanged: {
+            var urlval = explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileURL")
+            var isdir = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
             urlval = urlval.toString().replace("file://", "")
             if (!isdir && isTextFile(urlval)) {
                 root.url = urlval
@@ -59,7 +82,6 @@ Item {
                 editor.visible = false
             }
         }
-
         Behavior on x {
             id: anim
             enabled: false
@@ -69,10 +91,9 @@ Item {
             }
         }
     }
-
     Rectangle {
         id: container
-        anchors { left:folderBrowser.right; top:parent.top; bottom: parent.bottom; }
+        anchors { left:fileExplorer.right; top:parent.top; bottom: parent.bottom; }
         width: parent.width
         clip: true
         color: "#44504e"
@@ -370,22 +391,18 @@ Item {
             Component.onCompleted: editor.textChanged.connect(restart)
         }
     }
-
     ShadowFactory {
         targets: [errorHead, container, navibar, handleImage, toolBar]
         places: [Item.Bottom, Item.Left, Item.Bottom, Item.Bottom, Item.Bottom]
     }
-
     ComponentManager { id: componentManager }
-
     onToolboxModeChanged: {
         if (!toolboxMode) {
             imageViewer.visible = false
             editor.visible = true
+            reloadView()
         }
-        reloadView()
     }
-
     onUrlChanged: {
         var index
         var cacheFound = false
@@ -405,7 +422,6 @@ Item {
         }
         reloadView()
     }
-
     function saveCurrent() {
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf(FileManager.dname(url) + FileManager.separator()) >= 0) {
@@ -415,21 +431,16 @@ Item {
         toolboxMode = false
         currentSaved()
     }
-
     function show(url) {
         var name = FileManager.fname(url)
-        var entries = FileManager.ls(FileManager.dname(url))
-        for (var i = 0; i < entries.length; i++ ) {
-            if (entries[i] === name) {
-                folderBrowser.currentIndex = i
-                DelayCaller.delayCall(500, function() {
-                    folderBrowser.currentIndex = i
-                })
+        var fm = fileExplorer.explorerListView.folderListModel
+        for (var i = 0; i < fm.count; i++ ) {
+            if (fm.get(i, "fileName") === name) {
+                fileExplorer.explorerListView.listView.currentIndex = i
                 break
             }
         }
     }
-
     function updateCache() {
         var index = -1
         for (var i = 0; i < urlCache.length; i++) {
@@ -440,11 +451,10 @@ Item {
         }
         if (index >= 0) saveCache[index] = editor.editor.text
     }
-
     function getClearSaves() {
         var clearSaves = []
         var clearUrls = []
-        var toolDir = folderBrowser.rootFolder.toString().replace("file://","")
+        var toolDir = root.rootFolder.toString().replace("file://","")
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 clearUrls.push(urlCache[i])
@@ -453,16 +463,14 @@ Item {
         }
         return [clearUrls, clearSaves]
     }
-
     function flushCachesToDisk() {
-        var toolDir = folderBrowser.rootFolder.toString().replace("file://","")
+        var toolDir = root.rootFolder.toString().replace("file://","")
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 var ret = FileManager.svfile(urlCache[i], saveCache[i])
             }
         }
     }
-
     function revertClearSavesToDisk(clearSvs) {
         var clearUrls = clearSvs[0]
         var clearSaves = clearSvs[1]
@@ -470,12 +478,10 @@ Item {
             FileManager.svfile(clearUrls[i], clearSaves[i])
         }
     }
-
     function clearCache() {
         urlCache = []
         saveCache = []
     }
-
     function clearCacheFor(urlval, isdir) {
         if (isdir) {
             for (var i = 0; i < urlCache.length; i++) {
@@ -485,9 +491,9 @@ Item {
                 }
             }
 
-            for (var j=0; j<folderBrowser.count;j++) {
-                if (folderBrowser.itemAt(j) === "main.qml") {
-                    folderBrowser.currentIndex = j
+            for (var j=0; j<fileExplorer.explorerListView.folderListModel.count;j++) {
+                if (fileExplorer.explorerListView.folderListModel.get(j,"fileName") === "main.qml") {
+                    fileExplorer.explorerListView.listView.currentIndex = j
                 }
             }
         } else if (isTextFile(urlval)) {
@@ -498,14 +504,13 @@ Item {
                 }
             }
 
-            for (var jj=0; jj<folderBrowser.count;jj++) {
-                if (folderBrowser.itemAt(jj) === "main.qml") {
-                    folderBrowser.currentIndex = jj
+            for (var jj=0; jj<fileExplorer.explorerListView.folderListModel.count;jj++) {
+                if (fileExplorer.explorerListView.folderListModel.get(jj,"fileName") === "main.qml") {
+                    fileExplorer.explorerListView.listView.currentIndex = jj
                 }
             }
         }
     }
-
     function updateCacheForRenamedEntry(from, to, isdir) {
         if (isdir) {
             var updateSubCaches = function(dirold, dirnew) {
@@ -537,9 +542,9 @@ Item {
                     urlCache.splice(ii, 1)
                     saveCache.splice(ii, 1)
 
-                    for (var j=0; j<folderBrowser.count;j++) {
-                        if (folderBrowser.itemAt(j) === "main.qml") {
-                            folderBrowser.currentIndex = j
+                    for (var j=0; j<fileExplorer.explorerListView.folderListModel.count;j++) {
+                        if (fileExplorer.explorerListView.folderListModel.get(j,"fileName") === "main.qml") {
+                            fileExplorer.explorerListView.listView.currentIndex = j
                         }
                     }
                 }
@@ -550,7 +555,6 @@ Item {
 
         reloadView()
     }
-
     function reloadView() {
         for (var i=0; i<editor.lineNumberRepeater.count; i++) editor.lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
         errorMessage.text = ""
@@ -576,7 +580,7 @@ Item {
             var clearSaves = getClearSaves()
             flushCachesToDisk()
 
-            if (!componentManager.build(folderBrowser.rootFolder.toString() + "/main.qml")) {
+            if (!componentManager.build(root.rootFolder.toString() + "/main.qml")) {
                 var errorString = componentManager.error()
                 if (errorString === "") {
                     errorMessage.text = "Error code 0x54."
@@ -600,24 +604,21 @@ Item {
             revertClearSavesToDisk(clearSaves)
         }
     }
-
     function isTextFile(file) {
         return (FileManager.ftype(file) === "txt" ||
                 FileManager.ftype(file) === "qml" ||
                 FileManager.ftype(file) === "js")
     }
-
     function isImageFile(file) {
         return (FileManager.ftype(file) === "img")
     }
-
     property alias view: view
     property real maxWidth: 0
     property string splitState: 'splitted'
     property var lastItem: null
     property bool toolboxMode: false
-    property alias folder: folderBrowser.folder
-    property alias rootFolder: folderBrowser.rootFolder
+    property string folder
+    property string rootFolder
     property string url
     property var urlCache: []
     property var saveCache: []
