@@ -40,6 +40,11 @@ bool FileManager::rm(const QString& name) const
 	}
 }
 
+bool FileManager::rn(const QString& from, const QString& to) const
+{
+	return QDir().rename(from, to);
+}
+
 bool FileManager::rmsuffix(const QString& dir, const QString& suffix) const
 {
 	for (auto file : lsfile(dir)) {
@@ -60,6 +65,7 @@ bool FileManager::exists(const QString& name) const
 
 bool FileManager::mv(const QString& from, const QString& to) const
 {
+	if (from == to) return true;
 	if (!exists(from)) return false;
 	if (!exists(to)) {
 		if (QFileInfo(from).isDir()) {

@@ -84,12 +84,16 @@ Rectangle {
         containerItem.visible = true
     }
     function open() {
-        d.showBackground()
-        root.state = "open"
+        if (state === "close") {
+            d.showBackground()
+            root.state = "open"
+        }
     }
     function close() {
-        d.hideBackground()
-        root.state = "close"
+        if (state === "open") {
+            d.hideBackground()
+            root.state = "close"
+        }
     }
     property Item containerItem: null
     property color containerColor: "white"

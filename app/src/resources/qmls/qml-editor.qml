@@ -10,20 +10,25 @@ import "filemanager.js" as FileManager
 import "delaycaller.js" as DelayCaller
 
 //TODO: Fix keyboard problems of qml editor
-//TODO: Fix popup window closing method
 //TODO: Fix android logo
 //TODO: Add IOS/MacOS/Linux/Windows logo on each platform
 //TODO: Fix objectwheel's to capital "Objectwheel" everywhere
 //TODO: Fix warnings on Visual Studio
 //TODO: Fix qml file names in resource
 //TODO: Fix bugs on binding editor
-//TODO: Fix popup window colors
 //TODO: Add "Fit" lib to com.objectwheel.components
 //FIX: Editor "error" line corruption when page word wrapped
-//FIX: Jumping image viewer
 //TODO: That alignment lock bar/layout bar
-//FIX: LoadProgressBarStyle.qml cache error
-//FIX: icon@2x.png add custom control button
+//FIX: icon@2x.png add custom control button (so add icon.png as icon@2x.png also when I add new control)
+//TODO: Drag&Drop file copy on file explorer
+//FIX: If I try to download main.qml, is that override, or if I change a file's name to main.qml?
+//FIX: Custom control adder add item as item, change it to "control"
+//FIX: Reset tools not working if I donwload an image on "button" control's folder and change it's name to main.qml
+//FIX: Delete not works for nested folders
+//FIX: If I rename a png file to .js and back again, it'getting broken
+//FIX: Rename a file/folder into another one
+//TODO: Copy-Cut-Paste operations, select,select-all operations on folders/files
+//FIX: Open an control didn't worked, editor opened another control, because I did a file rename onto "same" named folder
 
 Item {
     id: root

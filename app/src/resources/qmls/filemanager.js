@@ -24,6 +24,11 @@ function rm(name) {
     return fileManager.rm(name)
 }
 
+function rn(from, to) {
+    init()
+    return fileManager.mv(from, to)
+}
+
 function rmsuffix(dir, suffix) {
     init()
     return fileManager.rmsuffix(dir, suffix)

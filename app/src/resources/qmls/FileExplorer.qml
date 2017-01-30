@@ -17,7 +17,6 @@ Rectangle {
         onNewFolderButtonClicked: { popup.containerItem = d.containers[2]; popup.open() }
         onHomeButtonClicked: { explorerListView.goRoot() }
         onBackButtonClicked: { explorerListView.goBack() }
-
     }
     FileExplorerListView {
         id: explorerListView
@@ -32,9 +31,11 @@ Rectangle {
                     return
                 }
             }
-
             popup.containerItem = d.containers[3];
             popup.open()
+        }
+        listView.onCurrentItemChanged: {
+            popup.close()
         }
     }
     ShadowFactory {
@@ -76,6 +77,13 @@ Rectangle {
                     placeholderText: "Enter url"
                     horizontalAlignment: Text.AlignHCenter
                     onVisibleChanged: { text = ""; focus = false }
+                    Keys.onReturnPressed: {
+                        var data = FileManager.dlfile(textField.text)
+                        var fname = FileManager.fname(textField.text)
+                        var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + fname
+                        FileManager.wrfile(lf, data)
+                        popup.close()
+                    }
                     style: TextFieldStyle {
                         textColor: d.textColor
                         selectionColor: d.containerColor
@@ -123,9 +131,9 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         text: "Download"
-                        color: enabled ? (msa.pressed ? d.containerColor : d.textColor) : Qt.darker(d.textColor, 1.2)
+                        color: enabled ? parent.clr : Qt.darker(d.textColor, 1.2)
                     }
-
+                    property color clr: d.textColor
                     MouseArea {
                         id: msa
                         anchors.fill: parent
@@ -133,16 +141,24 @@ Rectangle {
                         onPressed: {
                             topRect.color = d.pressedButtonColor
                             bottomRect.color = d.pressedButtonColor
+                            parent.clr = d.containerColor
                         }
                         onReleased: {
                             topRect.color = d.containerColor
                             bottomRect.color = d.containerColor
+                            parent.clr = d.textColor
                         }
                         onClicked: {
+                            topRect.color = d.pressedButtonColor
+                            bottomRect.color = d.pressedButtonColor
+                            parent.clr = d.containerColor
                             var data = FileManager.dlfile(textField.text)
                             var fname = FileManager.fname(textField.text)
                             var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + fname
                             FileManager.wrfile(lf, data)
+                            topRect.color = d.containerColor
+                            bottomRect.color = d.containerColor
+                            parent.clr = d.textColor
                             popup.close()
                         }
                     }
@@ -162,6 +178,11 @@ Rectangle {
                     placeholderText: "Enter file name"
                     horizontalAlignment: Text.AlignHCenter
                     onVisibleChanged: { text = ""; focus = false }
+                    Keys.onReturnPressed: {
+                        var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField2.text
+                        FileManager.mkfile(name)
+                        popup.close()
+                    }
                     style: TextFieldStyle {
                         textColor: d.textColor
                         selectionColor: d.containerColor
@@ -246,6 +267,11 @@ Rectangle {
                     placeholderText: "Enter folder name"
                     horizontalAlignment: Text.AlignHCenter
                     onVisibleChanged: { text = ""; focus = false }
+                    Keys.onReturnPressed: {
+                        var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField3.text
+                        FileManager.mkdir(name)
+                        popup.close()
+                    }
                     style: TextFieldStyle {
                         textColor: d.textColor
                         selectionColor: d.containerColor
@@ -309,7 +335,7 @@ Rectangle {
                             bottomRect3.color = d.containerColor
                         }
                         onClicked: {
-                            var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField2.text
+                            var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField3.text
                             FileManager.mkdir(name)
                             popup.close()
                         }
@@ -336,6 +362,15 @@ Rectangle {
                             focus = true
                             selectAll()
                         }
+                    }
+                    Keys.onReturnPressed: {
+                        var folder = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/"
+                        var oldName = folder + explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
+                        var newName = folder + textField4.text
+                        var isfolder = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
+                        FileManager.rn(oldName, newName)
+                        popup.close()
+                        entryRenamed("file://" + oldName, "file://" + newName, isfolder)
                     }
                     style: TextFieldStyle {
                         textColor: d.textColor
@@ -374,7 +409,6 @@ Rectangle {
                         text: "Rename"
                         color: enabled ? (msa4.pressed ? d.containerColor : d.textColor) : Qt.darker(d.textColor, 1.2)
                     }
-
                     MouseArea {
                         id: msa4
                         anchors.fill: parent
@@ -390,7 +424,7 @@ Rectangle {
                             var oldName = folder + explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
                             var newName = folder + textField4.text
                             var isfolder = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
-                            FileManager.mv(oldName, newName)
+                            FileManager.rn(oldName, newName)
                             popup.close()
                             entryRenamed("file://" + oldName, "file://" + newName, isfolder)
                         }
@@ -429,21 +463,18 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         text: "Delete"
-                        color: d.textColor
+                        color: d.deleteTextColor
                     }
-
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onPressed: {
                             topRect4.color = d.pressedButtonColor
                             bottomRect4.color = d.pressedButtonColor
-                            label5.color = d.deleteTextColor
                         }
                         onReleased: {
                             topRect4.color = d.containerColor
                             bottomRect4.color = d.containerColor
-                            label5.color = d.textColor
                         }
                         onClicked: {
                             var folder = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/"

@@ -13,6 +13,7 @@ class FileManager : public QObject
 		bool mkfile(const QString& name) const;
 		bool mkdir(const QString& name) const;
 		bool rm(const QString& name) const;
+		bool rn(const QString& from, const QString& to) const;
 		bool rmsuffix(const QString& dir, const QString& suffix) const;
 		bool exists(const QString& name) const;
 		bool mv(const QString& from, const QString& to) const;
@@ -43,6 +44,7 @@ class FileManager : public QObject
 static inline bool mkfile(const QString& name) { return FileManager().mkfile(name); }
 static inline bool mkdir(const QString& name) { return FileManager().mkdir(name); }
 static inline bool rm(const QString& name) { return FileManager().rm(name); }
+static inline bool rn(const QString& from, const QString& to) { return FileManager().rn(from, to); }
 static inline bool rmsuffix(const QString& dir, const QString& suffix) { return FileManager().rmsuffix(dir, suffix); }
 static inline bool exists(const QString& name) { return FileManager().exists(name); }
 static inline bool mv(const QString& from, const QString& to) { return FileManager().mv(from, to); }
