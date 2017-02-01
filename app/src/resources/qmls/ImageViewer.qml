@@ -1,12 +1,14 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.1
 import "delaycaller.js" as DelayCaller
+import "fit.js" as Fit
 
 Item {
     id: root
 
     Image {
-        id: image;
+        id: image
+        autoTransform: true
         anchors.centerIn: parent
         antialiasing: true
         fillMode: Image.PreserveAspectFit
@@ -19,10 +21,38 @@ Item {
                         height = defaultSize
                     }
                 }
+                errorText.visible = false
+            } else if (status === Image.Error) {
+                errorText.visible = true
+                console.log("saasas")
             }
         }
     }
-
+    Item {
+        id: errorText
+        anchors.fill: root
+        visible: false
+        clip: true
+        Image {
+            id: errorImage
+            width: Math.min(Fit.fit(80), 128)
+            height: width
+            x: Math.floor((root.width - width)/2.0)
+            y: Math.floor((root.height - height)/2.0)
+        }
+        Text {
+            clip: true
+            verticalAlignment: Text.AlignTop
+            horizontalAlignment: Text.AlignHCenter
+            anchors {bottom:parent.bottom; top:errorImage.bottom}
+            width: root.width - Fit.fit(50)
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "Unable to load image, please check actual image format with file suffix against possible conflicts."
+            wrapMode: Text.WordWrap
+            color: "white"
+            font.bold: true
+        }
+    }
     PinchArea {
         anchors.fill: parent
         onPinchUpdated: {
@@ -46,6 +76,7 @@ Item {
         }
     }
 
+    property alias warningImageSource : errorImage.source
     property real defaultSize: 80
     property alias source: image.source
 }

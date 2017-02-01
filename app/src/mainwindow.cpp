@@ -1011,6 +1011,7 @@ void MainWindow::toolboxResetButtonClicked()
 			m_Items.clear();
 			m_ItemUrls.clear();
 			HideSelectionTools();
+			m_d->toolboxList->setCurrentRow(-1);
 			break;
 		} default: {
 			// Do nothing

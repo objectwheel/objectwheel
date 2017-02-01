@@ -277,7 +277,7 @@ void FileInfoThread::getFileInfos(const QString &path)
         for (const QFileInfo &info : fileInfoList) {
 			bool isHidden = false;
 			for (auto suffix : hiddenSuffixes) {
-				if (info.suffix() == suffix) {
+				if (info.suffix().toLower() == suffix.toLower()) {
 					isHidden = true;
 					break;
 				}

@@ -27,7 +27,7 @@ Rectangle {
         onItemPressedAndHeld: {
             var fname = explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
             for (var i = 0; i < readOnly.length; i++) {
-                if (readOnly[i] === fname) {
+                if (readOnly[i].toLowerCase() === fname.toLowerCase()) {
                     return
                 }
             }
@@ -78,6 +78,7 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     onVisibleChanged: { text = ""; focus = false }
                     Keys.onReturnPressed: {
+                        if (!topRect.enabled) return
                         var data = FileManager.dlfile(textField.text)
                         var fname = FileManager.fname(textField.text)
                         var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + fname
@@ -110,7 +111,20 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    enabled: textField.text !== ""
+                    enabled: {
+                        if (textField.text === "") {
+                            return false
+                        } else {
+                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var el = FileManager.ls(dir)
+                            for (var j = 0; j < el.length; j++) {
+                                if (FileManager.fname(textField.text).toLowerCase() === el[j].toLowerCase()) {
+                                    return false
+                                }
+                            }
+                            return true
+                        }
+                    }
                     Rectangle {
                         id: topRect
                         color: d.containerColor
@@ -179,6 +193,7 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     onVisibleChanged: { text = ""; focus = false }
                     Keys.onReturnPressed: {
+                        if (!topRect2.enabled) return
                         var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField2.text
                         FileManager.mkfile(name)
                         popup.close()
@@ -209,7 +224,20 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    enabled: textField2.text !== ""
+                    enabled: {
+                        if (textField2.text === "") {
+                            return false
+                        } else {
+                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var el = FileManager.ls(dir)
+                            for (var j = 0; j < el.length; j++) {
+                                if (textField2.text.toLowerCase() === el[j].toLowerCase()) {
+                                    return false
+                                }
+                            }
+                            return true
+                        }
+                    }
                     Rectangle {
                         id: topRect2
                         color: d.containerColor
@@ -268,6 +296,7 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     onVisibleChanged: { text = ""; focus = false }
                     Keys.onReturnPressed: {
+                        if (!topRect3.enabled) return
                         var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField3.text
                         FileManager.mkdir(name)
                         popup.close()
@@ -298,7 +327,20 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    enabled: textField3.text !== ""
+                    enabled: {
+                        if (textField3.text === "") {
+                            return false
+                        } else {
+                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var el = FileManager.ls(dir)
+                            for (var j = 0; j < el.length; j++) {
+                                if (textField3.text.toLowerCase() === el[j].toLowerCase()) {
+                                    return false
+                                }
+                            }
+                            return true
+                        }
+                    }
                     Rectangle {
                         id: topRect3
                         color: d.containerColor
@@ -364,6 +406,7 @@ Rectangle {
                         }
                     }
                     Keys.onReturnPressed: {
+                        if (!ttopRect.enabled) return
                         var folder = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/"
                         var oldName = folder + explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
                         var newName = folder + textField4.text
@@ -400,7 +443,20 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: Fit.fit(34)
-                    enabled: textField4.text !== ""
+                    enabled: {
+                        if (textField4.text === "") {
+                            return false
+                        } else {
+                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var el = FileManager.ls(dir)
+                            for (var j = 0; j < el.length; j++) {
+                                if (textField4.text.toLowerCase() === el[j].toLowerCase()) {
+                                    return false
+                                }
+                            }
+                            return true
+                        }
+                    }
                     Text {
                         id: label4
                         anchors.fill: parent

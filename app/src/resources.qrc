@@ -113,5 +113,6 @@
         <file>resources/images/fileExplorer/bin.svg</file>
         <file>resources/images/fileExplorer/back@2x.png</file>
         <file>resources/images/fileExplorer/back.png</file>
+        <file>resources/images/sign_warning.png</file>
     </qresource>
 </RCC>

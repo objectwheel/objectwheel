@@ -109,6 +109,7 @@ function ftype(file) {
 }
 
 function stype(suffix) {
+    suffix = suffix.toLowerCase()
     if        ((suffix === "png") ||
                (suffix === "jpg") ||
                (suffix === "jpeg") ||

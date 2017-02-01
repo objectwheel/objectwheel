@@ -201,6 +201,7 @@ const QList<QQuickItem*> QmlEditorPrivate::GetAllChildren(QQuickItem* const item
 
 void QmlEditorPrivate::show(const QString& url)
 {
+	QQmlProperty::write(rootItem, "visible", true, rootContext);
 	QFileInfo info(url);
 	QQmlProperty::write(rootItem, "toolboxMode", true, rootContext);
 	QQmlProperty::write(rootItem, "folder", "file://" + info.dir().path(), rootContext);
@@ -227,6 +228,7 @@ void QmlEditorPrivate::show(const QString& url)
 
 void QmlEditorPrivate::show()
 {
+	QQmlProperty::write(rootItem, "visible", true, rootContext);
 	((QWidget*)parent)->show();
 
 	QQmlProperty::write(rootItem, "toolboxMode", false, rootContext);
@@ -250,6 +252,7 @@ void QmlEditorPrivate::show()
 
 void QmlEditorPrivate::hide()
 {
+	QQmlProperty::write(rootItem, "visible", false, rootContext);
 	auto snap = parent->grab();
 	if (!snap.isNull()) {
 		snapshot = snap;

@@ -23,8 +23,6 @@ import "delaycaller.js" as DelayCaller
 //FIX: If I try to download main.qml, is that override, or if I change a file's name to main.qml?
 //FIX: Custom control adder add item as item, change it to "control"
 //FIX: Reset tools not working if I donwload an image on "button" control's folder and change it's name to main.qml
-//FIX: Delete not works for nested folders
-//FIX: Rename a file/folder into another one
 //TODO: Copy-Cut-Paste operations, select,select-all operations on folders/files
 //FIX: Open an control didn't worked, editor opened another control, because I did a file rename onto "same" named folder, on previouse control
 //FIX: Prevent download button to try to download invalid urls
@@ -33,6 +31,7 @@ import "delaycaller.js" as DelayCaller
 
 Item {
     id: root
+
     FileExplorer {
         id: fileExplorer
         clip: true
@@ -250,6 +249,7 @@ Item {
                     visible: false
                     clip: true
                     defaultSize: Fit.fit(80)
+                    warningImageSource: "qrc:///resources/images/sign_warning.png"
                 }
                 Rectangle {
                     id: separator
@@ -374,7 +374,7 @@ Item {
                             parent.anchors.left = undefined
                             errorHead.anchors.horizontalCenter = container.horizontalCenter
                             errorHead.anchors.right = undefined
-                            errorHead.width = Math.floor(container.width / 1.618)
+                            errorHead.width = Qt.binding(function(){return Math.floor(container.width / 1.618)})
                         }
                     }
                 }
@@ -562,6 +562,7 @@ Item {
         reloadView()
     }
     function reloadView() {
+        if (!root.visible) return
         for (var i=0; i<editor.lineNumberRepeater.count; i++) editor.lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
         errorMessage.text = ""
         componentManager.clear()
