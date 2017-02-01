@@ -54,11 +54,6 @@ function isdir(name) {
     return fileManager.isdir(name)
 }
 
-function svfile(to, data) {
-    init()
-    return fileManager.svfile(to, data)
-}
-
 function rdfile(file) {
     init()
     return fileManager.rdfile(file)

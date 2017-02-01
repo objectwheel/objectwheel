@@ -123,16 +123,6 @@ QString FileManager::suffix(const QString& name) const
 	return QFileInfo(name).suffix();
 }
 
-bool FileManager::svfile(const QString& to, const QString& data) const
-{
-	QFile writer(to);
-	if (!writer.open(QFile::WriteOnly)) return false;
-	const int ret = writer.write(QByteArray().insert(0, data));
-	writer.close();
-	if (ret < 0) return false;
-	else return true;
-}
-
 QByteArray FileManager::rdfile(const QString& file) const
 {
 	QByteArray cache;

@@ -23,7 +23,6 @@ class FileManager : public QObject
 		QString fname(const QString& name) const;
 		QString dname(const QString& name) const;
 		QString suffix(const QString& name) const;
-		bool svfile(const QString& to, const QString& data) const;
 		QByteArray rdfile(const QString& file) const;
 		int wrfile(const QString& file, const QByteArray& data) const;
 		QByteArray dlfile(const QString& url);
@@ -54,7 +53,6 @@ static inline QStringList lsfile(const QString& dir) { return FileManager().lsfi
 static inline QString fname(const QString& name) { return FileManager().fname(name); }
 static inline QString dname(const QString& name) { return FileManager().dname(name); }
 static inline QString suffix(const QString& name) { return FileManager().suffix(name); }
-static inline bool svfile(const QString& to, const QString& data) { return FileManager().svfile(to, data); }
 static inline QByteArray rdfile(const QString& file) { return FileManager().rdfile(file); }
 static inline int wrfile(const QString& file, const QByteArray& data) { return FileManager().wrfile(file, data); }
 static inline QByteArray dlfile(const QString& url) { return FileManager().dlfile(url); }
