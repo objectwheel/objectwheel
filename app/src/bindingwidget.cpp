@@ -383,7 +383,7 @@ void BindingWidgetPrivate::popupOkButtonClicked()
 			for (int i = 0; i < bindingListWidget.count(); i++) {
 				if (bindingListWidget.item(i)->text() == connectionName) {
 					connectionName+="+";
-					i = 0;
+					i = -1;
 				}
 			}
 
@@ -434,7 +434,7 @@ void BindingWidgetPrivate::popupOkButtonClicked()
 			for (int i = 0; i < bindingListWidget.count(); i++) {
 				if (bindingListWidget.item(i)->text() != connName && bindingListWidget.item(i)->text() == connectionName) {
 					connectionName+="+";
-					i = 0;
+					i = -1;
 				}
 			}
 

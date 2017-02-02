@@ -20,18 +20,8 @@ import "delaycaller.js" as DelayCaller
 //FIX: Editor "error" line corruption when page word wrapped
 //TODO: That alignment lock bar/layout bar
 //TODO: Drag&Drop file copy on file explorer
-//FIX: If I try to download main.qml, is that override, or if I change a file's name to main.qml?
-//FIX: Custom control adder add item as item, change it to "control"
-//FIX: Reset tools not working if I donwload an image on "button" control's folder and change it's name to main.qml
+//FIX: Prompt user if it exit before save qml editor pages
 //TODO: Copy-Cut-Paste operations, select,select-all operations on folders/files
-//FIX: Open an control didn't worked, editor opened another control, because I did a file rename onto "same" named folder, on previouse control
-//FIX: Prevent download button to try to download invalid urls
-//FIX: Open an control didn't worked, after reset tool library
-//FIX: Prompt user it it exit before save qml editor pages
-//FIX: Reload url when I finish delete/rename
-//FIX: Edting dashboard controls not work
-//FIX: Download file even it's same name just change its name
-//FIX: Currentindex changing if things download
 
 Item {
     id: root

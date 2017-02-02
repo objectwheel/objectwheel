@@ -451,7 +451,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 							// FIXME: If it's conflict with page names?
 							componentName += QString::number(count);
 							count++;
-							i = 0;
+							i = -1;
 						}
 					}
 					m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
@@ -865,7 +865,7 @@ void MainWindow::handleToolboxNameboxChanges(QString name)
 			if (count > 1) {
 				name.remove(name.size() - 1, 1);
 			}
-			i = 0;
+			i = -1;
 			count++;
 			name += QString::number(count);
 		}
@@ -959,7 +959,7 @@ void MainWindow::toolboxAddButtonClicked()
 	for (int i = 0; i < m_d->toolboxList->count(); i++) {
 		if (m_d->toolboxList->item(i)->text() == name) {
 			name.remove(name.size() - 1, 1);
-			i = 0;
+			i = -1;
 			count++;
 			name += QString::number(count);
 		}

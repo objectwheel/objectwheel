@@ -198,7 +198,7 @@ void PagesWidgetPrivate::addButtonClicked()
 	for (int i = 0; i < pagesListWidget.count(); i++) {
 		if (pagesListWidget.item(i)->text() == name) {
 			name.remove(name.size() - 1, 1);
-			i = 0;
+			i = -1;
 			count++;
 			name += QString::number(count);
 		}

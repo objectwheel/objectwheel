@@ -58,7 +58,7 @@ void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlC
 			componentName == QString("dpi") || componentName == QString("swipeView")) {
 			componentName += QString::number(count);
 			count++;
-			i = 0;
+			i = -1;
 		}
 	}
 	context->setContextProperty(context->nameForObject(selectedItem), 0);

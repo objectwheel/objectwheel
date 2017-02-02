@@ -91,10 +91,24 @@ Rectangle {
                     onVisibleChanged: { text = ""; focus = false }
                     Keys.onReturnPressed: {
                         if (!topRect.enabled) return
+                        topRect.color = d.pressedButtonColor
+                        bottomRect.color = d.pressedButtonColor
+                        bottomItem.clr = d.containerColor
+                        var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                        var el = FileManager.ls(dir)
+                        var name = FileManager.fname(textField.text)
+                        for (var j = 0; j < el.length; j++) {
+                            if (name.toLowerCase() === el[j].toLowerCase()) {
+                                name = "copy_" + name
+                                j = -1
+                            }
+                        }
                         var data = FileManager.dlfile(textField.text)
-                        var fname = FileManager.fname(textField.text)
-                        var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + fname
+                        var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + name
                         FileManager.wrfile(lf, data)
+                        topRect.color = d.containerColor
+                        bottomRect.color = d.containerColor
+                        bottomItem.clr = d.textColor
                         popup.close()
                     }
                     style: TextFieldStyle {
@@ -119,24 +133,12 @@ Rectangle {
                     color: d.lineColor
                 }
                 Item {
+                    id: bottomItem
                     anchors.top: line.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    enabled: {
-                        if (textField.text === "") {
-                            return false
-                        } else {
-                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
-                            var el = FileManager.ls(dir)
-                            for (var j = 0; j < el.length; j++) {
-                                if (FileManager.fname(textField.text).toLowerCase() === el[j].toLowerCase()) {
-                                    return false
-                                }
-                            }
-                            return true
-                        }
-                    }
+                    enabled: textField.text !== ""
                     Rectangle {
                         id: topRect
                         color: d.containerColor
@@ -178,9 +180,17 @@ Rectangle {
                             topRect.color = d.pressedButtonColor
                             bottomRect.color = d.pressedButtonColor
                             parent.clr = d.containerColor
+                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var el = FileManager.ls(dir)
+                            var name = FileManager.fname(textField.text)
+                            for (var j = 0; j < el.length; j++) {
+                                if (name.toLowerCase() === el[j].toLowerCase()) {
+                                    name = "copy_" + name
+                                    j = -1
+                                }
+                            }
                             var data = FileManager.dlfile(textField.text)
-                            var fname = FileManager.fname(textField.text)
-                            var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + fname
+                            var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + name
                             FileManager.wrfile(lf, data)
                             topRect.color = d.containerColor
                             bottomRect.color = d.containerColor

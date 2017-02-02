@@ -160,7 +160,7 @@ void QmlEditorPrivate::saved(const QString& text)
 			componentName == QString("dpi") || componentName == QString("swipeView")) {
 			componentName += QString::number(count);
 			count++;
-			i = 0;
+			i = -1;
 		}
 	}
 	dashboardRootContext->setContextProperty(componentName, qml);

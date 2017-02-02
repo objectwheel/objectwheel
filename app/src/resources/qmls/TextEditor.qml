@@ -16,6 +16,7 @@ Flickable {
     Column {
         id: lineNumber
         anchors { left: parent.left; top: parent.top }
+        spacing: 0
         Repeater {
             id: lineNumberRepeater
             clip: true
@@ -73,6 +74,7 @@ Flickable {
             renderType: Text.NativeRendering
             textColor: "#e0e0e0"
             selectionColor: "#0C75BC"
+            textMargin: 0
         }
         onSelectedTextChanged: {
             if (editor.selectedText === "") {
