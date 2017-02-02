@@ -44,6 +44,11 @@ function mv(from, to) {
     return fileManager.mv(from, to)
 }
 
+function cp(from, toDir) {
+    init()
+    return fileManager.cp(from, toDir)
+}
+
 function isfile(name) {
     init()
     return fileManager.isfile(name)

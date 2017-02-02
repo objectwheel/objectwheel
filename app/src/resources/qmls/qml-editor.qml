@@ -19,7 +19,6 @@ import "delaycaller.js" as DelayCaller
 //TODO: Add "Fit" lib to com.objectwheel.components
 //FIX: Editor "error" line corruption when page word wrapped
 //TODO: That alignment lock bar/layout bar
-//TODO: Drag&Drop file copy on file explorer
 //FIX: Prompt user if it exit before save qml editor pages
 //TODO: Copy-Cut-Paste operations, select,select-all operations on folders/files
 
@@ -35,6 +34,7 @@ Item {
         x: menu.checked ? 0 : -width
         enabled: toolboxMode
         Component.onCompleted: anim.enabled = true
+        dropIcon: "qrc:///resources/images/fileExplorer/drop.png"
         explorerToolBar {
             backIcon: "qrc:///resources/images/fileExplorer/back.png"
             homeIcon: "qrc:///resources/images/fileExplorer/home.png"

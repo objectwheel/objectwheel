@@ -50,6 +50,32 @@ Rectangle {
             popup.close()
         }
     }
+    DropArea {
+        anchors.fill: explorerListView
+        enabled: !popup.opened
+        Rectangle {
+            anchors.fill: parent
+            color: "#65000000"
+            visible: parent.containsDrag
+            Image {
+                anchors.centerIn: parent
+                source: dropIcon
+                height: Fit.fit(69)
+                width: Fit.fit(160)
+                antialiasing: true
+            }
+        }
+        onDropped: {
+            if (drop.hasUrls) {
+                for (var i = 0; i < drop.urls.length; i++) {
+                    var from = drop.urls[i].toString().replace("file://","")
+                    var to = explorerListView.folderListModel.folder.toString().replace("file://","")
+                    console.log(from, to)
+                    FileManager.cp(from, to)
+                }
+            }
+        }
+    }
     ShadowFactory {
         targets: [explorerToolBar]
         places: [Item.Bottom]
@@ -575,6 +601,7 @@ Rectangle {
     signal entryRenamed(var from, var to, var isdir)
     signal entryDeleted(var name, var isdir)
     property var readOnly: []
+    property string dropIcon
     property alias explorerToolBar: explorerToolBar
     property alias explorerListView: explorerListView
 }

@@ -95,6 +95,7 @@ Rectangle {
             root.state = "close"
         }
     }
+    readonly property bool opened: state === "open"
     property Item containerItem: null
     property color containerColor: "white"
     property alias cancelButton: cancelButton

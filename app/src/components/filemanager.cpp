@@ -93,6 +93,18 @@ bool FileManager::mv(const QString& from, const QString& to) const
 	}
 }
 
+bool FileManager::cp(const QString& from, const QString& toDir) const
+{
+	if (from == toDir) return true;
+	if (!exists(from) || !exists(toDir)) return false;
+	if (QFileInfo(from).isDir()) {
+		if (!mkdir(toDir + separator() + fname(from))) return false;
+		return copyDir(from, toDir + separator() + fname(from));
+	} else {
+		return QFile::copy(from, toDir + separator() + fname(from));
+	}
+}
+
 QStringList FileManager::ls(const QString& dir) const
 {
 	return QDir(dir).entryList(QDir::AllEntries | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot);
