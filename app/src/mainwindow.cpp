@@ -857,7 +857,7 @@ void MainWindow::handleToolboxUrlboxChanges(const QString& text)
 
 void MainWindow::handleToolboxNameboxChanges(QString name)
 {
-	if (name == m_d->toolboxList->currentItem()->text()) return;
+	if (name == m_d->toolboxList->currentItem()->text() || name == "") return;
 
 	int count = 1;
 	for (int i = 0; i < m_d->toolboxList->count(); i++) {
@@ -873,7 +873,7 @@ void MainWindow::handleToolboxNameboxChanges(QString name)
 
 	auto from = m_ToolsDir + "/" + m_d->toolboxList->currentItem()->text();
 	auto to = m_ToolsDir + "/" + name;
-	Q_ASSERT(mv(from, to));
+	Q_ASSERT(rn(from, to));
 
 	m_d->toolboxList->currentItem()->setText(name);
 
