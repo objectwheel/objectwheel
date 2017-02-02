@@ -123,8 +123,8 @@ void FileInfoThread::setRootPath(const QString &path)
 #if QT_CONFIG(filesystemwatcher)
 void FileInfoThread::dirChanged(const QString &directoryPath)
 {
-    Q_UNUSED(directoryPath);
-    QMutexLocker locker(&mutex);
+	Q_UNUSED(directoryPath);
+	QMutexLocker locker(&mutex);
     folderUpdate = true;
     condition.wakeAll();
 }

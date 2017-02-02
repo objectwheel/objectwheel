@@ -83,17 +83,18 @@ Item {
             }
             MouseArea {
                 anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
                     listView.currentIndex = index
                     if (fileIsDir) {
                         var newFile = folderListModel.get(index, "fileURL").toString()
                         go(newFile, true)
                     }
-                    itemClicked(index)
+                    itemClicked(mouse, index)
                 }
                 onPressAndHold: {
                     listView.currentIndex = index
-                    itemPressedAndHeld(index)
+                    itemPressedAndHeld(mouse, index)
                 }
             }
         }
@@ -176,8 +177,8 @@ Item {
         }
     }
 
-    signal itemClicked(var index)
-    signal itemPressedAndHeld(var index)
+    signal itemClicked(var mouse, var index)
+    signal itemPressedAndHeld(var mouse, var index)
     property alias listView: listView
     property alias folderListModel: folderListModel
     property real elementHeight: Fit.fit(40)

@@ -25,7 +25,7 @@ Rectangle {
             bottom: parent.bottom; top: explorerToolBar.bottom; margins: Fit.fit(2)
         }
         onItemPressedAndHeld: {
-            var fname = explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
+            var fname = explorerListView.folderListModel.get(index, "fileName")
             for (var i = 0; i < readOnly.length; i++) {
                 if (readOnly[i].toLowerCase() === fname.toLowerCase()) {
                     return
@@ -33,6 +33,18 @@ Rectangle {
             }
             popup.containerItem = d.containers[3];
             popup.open()
+        }
+        onItemClicked: {
+            if (mouse.button === Qt.RightButton) {
+                var fname = explorerListView.folderListModel.get(index, "fileName")
+                for (var i = 0; i < readOnly.length; i++) {
+                    if (readOnly[i].toLowerCase() === fname.toLowerCase()) {
+                        return
+                    }
+                }
+                popup.containerItem = d.containers[3];
+                popup.open()
+            }
         }
         listView.onCurrentItemChanged: {
             popup.close()

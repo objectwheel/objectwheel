@@ -28,6 +28,10 @@ import "delaycaller.js" as DelayCaller
 //FIX: Prevent download button to try to download invalid urls
 //FIX: Open an control didn't worked, after reset tool library
 //FIX: Prompt user it it exit before save qml editor pages
+//FIX: Reload url when I finish delete/rename
+//FIX: Edting dashboard controls not work
+//FIX: Download file even it's same name just change its name
+//FIX: Currentindex changing if things download
 
 Item {
     id: root
@@ -50,8 +54,6 @@ Item {
         }
         explorerListView {
             folderListModel.showDirsFirst: true
-            folderListModel.folder: root.folder
-            folderListModel.rootFolder: root.rootFolder
             folderListModel.hiddenSuffixes: ["qmlc", "jsc"]
             elementHeight: Fit.fit(40)
             textSize: Fit.fit(12)
@@ -402,13 +404,6 @@ Item {
         places: [Item.Bottom, Item.Left, Item.Bottom, Item.Bottom, Item.Bottom]
     }
     ComponentManager { id: componentManager }
-    onToolboxModeChanged: {
-        if (!toolboxMode) {
-            imageViewer.visible = false
-            editor.visible = true
-            reloadView()
-        }
-    }
     onUrlChanged: {
         var index
         var cacheFound = false
@@ -438,6 +433,7 @@ Item {
         currentSaved()
     }
     function show(url) {
+        root.url = url
         var name = FileManager.fname(url)
         var fm = fileExplorer.explorerListView.folderListModel
         for (var i = 0; i < fm.count; i++ ) {
@@ -445,6 +441,22 @@ Item {
                 fileExplorer.explorerListView.listView.currentIndex = i
                 break
             }
+        }
+    }
+    function setRootFolder(path) {
+        fileExplorer.explorerListView.folderListModel.rootFolder = ""
+        fileExplorer.explorerListView.folderListModel.rootFolder = path
+    }
+    function setFolder(path) {
+        fileExplorer.explorerListView.folderListModel.folder = ""
+        fileExplorer.explorerListView.folderListModel.folder = path
+    }
+    function setToolboxMode(val) {
+        toolboxMode = val
+        if (!toolboxMode) {
+            imageViewer.visible = false
+            editor.visible = true
+            reloadView()
         }
     }
     function updateCache() {
@@ -460,7 +472,7 @@ Item {
     function getClearSaves() {
         var clearSaves = []
         var clearUrls = []
-        var toolDir = root.rootFolder.toString().replace("file://","")
+        var toolDir = fileExplorer.explorerListView.folderListModel.rootFolder.toString().replace("file://","")
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 clearUrls.push(urlCache[i])
@@ -470,7 +482,7 @@ Item {
         return [clearUrls, clearSaves]
     }
     function flushCachesToDisk() {
-        var toolDir = root.rootFolder.toString().replace("file://","")
+        var toolDir = fileExplorer.explorerListView.folderListModel.rootFolder.toString().replace("file://","")
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 var ret = FileManager.wrfile(urlCache[i], saveCache[i])
@@ -562,13 +574,13 @@ Item {
         reloadView()
     }
     function reloadView() {
+        if (lastItem != null) lastItem.destroy()
         if (!root.visible) return
         for (var i=0; i<editor.lineNumberRepeater.count; i++) editor.lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
         errorMessage.text = ""
         componentManager.clear()
 
         if (!toolboxMode) {
-            if (lastItem != null) lastItem.destroy()
             try {
                 lastItem = Qt.createQmlObject(editor.editor.text, view);
             } catch (e) {
@@ -587,7 +599,7 @@ Item {
             var clearSaves = getClearSaves()
             flushCachesToDisk()
 
-            if (!componentManager.build(root.rootFolder.toString() + "/main.qml")) {
+            if (!componentManager.build(fileExplorer.explorerListView.folderListModel.rootFolder.toString() + "/main.qml")) {
                 var errorString = componentManager.error()
                 if (errorString === "") {
                     errorMessage.text = "Error code 0x54."

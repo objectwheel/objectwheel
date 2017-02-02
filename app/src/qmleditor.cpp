@@ -203,8 +203,9 @@ void QmlEditorPrivate::show(const QString& url)
 {
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
 	QFileInfo info(url);
-	QQmlProperty::write(rootItem, "toolboxMode", true, rootContext);
-	QQmlProperty::write(rootItem, "folder", "file://" + info.dir().path(), rootContext);
+	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, true));
+	QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + info.dir().path()));
+
 	QTimer::singleShot(DURATION,[=] { //FIXME
 		QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
 	});
@@ -231,9 +232,9 @@ void QmlEditorPrivate::show()
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
 	((QWidget*)parent)->show();
 
-	QQmlProperty::write(rootItem, "toolboxMode", false, rootContext);
-	QQmlProperty::write(rootItem, "rootFolder", "file://" + QCoreApplication::applicationDirPath(), rootContext);
-	QQmlProperty::write(rootItem, "folder", "file://" + QCoreApplication::applicationDirPath(), rootContext);
+	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, false));
+	QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + QCoreApplication::applicationDirPath()));
+	QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + QCoreApplication::applicationDirPath()));
 
 	quickWidget.hide();
 	minimizeButton.hide();
@@ -308,7 +309,7 @@ void QmlEditor::setShowCenter(const QPoint& p)
 
 void QmlEditor::setRootFolder(const QString& folder)
 {
-	QQmlProperty::write(m_d->rootItem, "rootFolder", "file://" + folder, m_d->rootContext);
+	QMetaObject::invokeMethod(m_d->rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + folder));
 }
 
 void QmlEditor::show(const QString& url)

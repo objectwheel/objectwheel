@@ -408,7 +408,7 @@ QVariant QQuickFolderListModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> QQuickFolderListModel::roleNames() const
 {
     Q_D(const QQuickFolderListModel);
-    return d->roleNames;
+	return d->roleNames;
 }
 
 /*!
