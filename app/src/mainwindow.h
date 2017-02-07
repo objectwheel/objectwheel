@@ -58,6 +58,9 @@ class MainWindow : public QWidget
 		void toolboxRemoveButtonClicked();
 		void toolboxAddButtonClicked();
 		void toolboxResetButtonClicked();
+		void toolboxImportButtonClicked();
+		void toolboxExportButtonClicked();
+		void handleImports(const QStringList& fileNames);
 		void fixWebViewPositions();
 		void HideSelectionTools();
 		void ShowSelectionTools(QQuickItem* const selectedItem);

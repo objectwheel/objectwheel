@@ -11,7 +11,6 @@
         <file>resources/tools/Rectangle.zip</file>
         <file>resources/tools/BusyIndicator.zip</file>
         <file>resources/tools/Text.zip</file>
-        <file>resources/tools/Switch.zip</file>
         <file>resources/tools/Slider.zip</file>
         <file>resources/tools/TextField.zip</file>
         <file>resources/tools/ProgressBar.zip</file>
@@ -116,5 +115,6 @@
         <file>resources/images/sign_warning.png</file>
         <file>resources/images/fileExplorer/drop@2x.png</file>
         <file>resources/images/fileExplorer/drop.png</file>
+        <file>resources/tools/FlatSwitch.zip</file>
     </qresource>
 </RCC>

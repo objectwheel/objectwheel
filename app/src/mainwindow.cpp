@@ -1020,6 +1020,47 @@ void MainWindow::toolboxResetButtonClicked()
 	}
 }
 
+void MainWindow::toolboxImportButtonClicked()
+{
+	QFileDialog dialog(this);
+	dialog.setFileMode(QFileDialog::ExistingFiles);
+	dialog.setNameFilter(tr("Zip files (*.zip)"));
+	dialog.setViewMode(QFileDialog::Detail);
+	if (dialog.exec()) {
+		handleImports(dialog.selectedFiles());
+	}
+}
+
+void MainWindow::toolboxExportButtonClicked()
+{
+
+}
+
+void MainWindow::handleImports(const QStringList& fileNames)
+{
+	for (auto fileName : fileNames) {
+		auto name = fname(fileName.remove(fileName.size() - 4, 4));
+		int count = 1;
+		for (int i = 0; i < m_d->toolboxList->count(); i++) {
+			if (m_d->toolboxList->item(i)->text() == name) {
+				if (count > 1) {
+					name.remove(name.size() - 1, 1);
+				}
+				i = -1;
+				count++;
+				name += QString::number(count);
+			}
+		}
+
+		QFile file(fileName + ".zip");
+		if (!file.open(QFile::ReadOnly)) return;
+		if (!QDir(m_ToolsDir).mkpath(name)) return;
+		ExtractZip(file.readAll(), m_ToolsDir + "/" + name);
+		file.close();
+		AddTool(name);
+	}
+}
+
 const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 {
 	QPixmap pixmap;

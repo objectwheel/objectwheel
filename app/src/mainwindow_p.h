@@ -63,6 +63,8 @@ class MainWindowPrivate
 		FlatButton* toolboxEditButton;
 		FlatButton* toolboxRemoveButton;
 		FlatButton* toolboxResetButton;
+		FlatButton* toolboxExportButton;
+		FlatButton* toolboxImportButton;
 		QVBoxLayout* toolboxAdderAreaEditingLayout;
 		LineEdit* toolboxUrlBox;
 		LineEdit* toolBoxNameBox;
@@ -177,8 +179,8 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxAddButton = new FlatButton;
 	toolboxAddButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	toolboxAddButton->setColor("#1e8145");
-	toolboxAddButton->setFixedSize(fit(30),fit(30));
-	toolboxAddButton->setRadius(fit(15));
+	toolboxAddButton->setFixedSize(fit(20),fit(20));
+	toolboxAddButton->setRadius(fit(4));
 	toolboxAddButton->setIconSize(QSize(fit(16),fit(16)));
 	toolboxAddButton->setIcon(QIcon(":/resources/images/plus.png"));
 	QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxAddButtonClicked()) );
@@ -186,8 +188,8 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxRemoveButton = new FlatButton;
 	toolboxRemoveButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	toolboxRemoveButton->setColor("#c03638");
-	toolboxRemoveButton->setFixedSize(fit(30),fit(30));
-	toolboxRemoveButton->setRadius(fit(15));
+	toolboxRemoveButton->setFixedSize(fit(20),fit(20));
+	toolboxRemoveButton->setRadius(fit(4));
 	toolboxRemoveButton->setIconSize(QSize(fit(16),fit(16)));
 	toolboxRemoveButton->setIcon(QIcon(":/resources/images/minus.png"));
 	toolboxRemoveButton->setDisabled(true);
@@ -196,9 +198,9 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxEditButton = new FlatButton;
 	toolboxEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	toolboxEditButton->setColor("#2b5796");
-	toolboxEditButton->setFixedSize(fit(30),fit(30));
-	toolboxEditButton->setRadius(fit(15));
-	toolboxEditButton->setCheckedColor(QColor("#2b5796").darker(150));
+	toolboxEditButton->setFixedSize(fit(20),fit(20));
+	toolboxEditButton->setRadius(fit(4));
+	toolboxEditButton->setCheckedColor(QColor("#2b5796").darker(140));
 	toolboxEditButton->setCheckable(true);
 	toolboxEditButton->setIconSize(QSize(fit(16),fit(16)));
 	toolboxEditButton->setIcon(QIcon(":/resources/images/edit.png"));
@@ -208,11 +210,30 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxResetButton = new FlatButton;
 	toolboxResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	toolboxResetButton->setColor("#ee8800");
-	toolboxResetButton->setFixedSize(fit(30),fit(30));
-	toolboxResetButton->setRadius(fit(15));
+	toolboxResetButton->setFixedSize(fit(20),fit(20));
+	toolboxResetButton->setRadius(fit(4));
 	toolboxResetButton->setIconSize(QSize(fit(16),fit(16)));
 	toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
 	QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxResetButtonClicked()) );
+
+	toolboxImportButton = new FlatButton;
+	toolboxImportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	toolboxImportButton->setColor("#1e8145");
+	toolboxImportButton->setFixedSize(fit(20),fit(20));
+	toolboxImportButton->setRadius(fit(4));
+	toolboxImportButton->setIconSize(QSize(fit(16),fit(16)));
+	toolboxImportButton->setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(-90))));
+	QObject::connect(toolboxImportButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxImportButtonClicked()) );
+
+	toolboxExportButton = new FlatButton;
+	toolboxExportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	toolboxExportButton->setColor("#c03638");
+	toolboxExportButton->setFixedSize(fit(20),fit(20));
+	toolboxExportButton->setRadius(fit(4));
+	toolboxExportButton->setIconSize(QSize(fit(16),fit(16)));
+	toolboxExportButton->setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(90))));
+	toolboxExportButton->setDisabled(true);
+	QObject::connect(toolboxExportButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxExportButtonClicked()) );
 
 	toolboxAdderAreaButtonSideHLay->addWidget(toolboxAddButton);
 	toolboxAdderAreaButtonSideHLay->addStretch();
@@ -221,6 +242,9 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxAdderAreaButtonSideHLay->addWidget(toolboxEditButton);
 	toolboxAdderAreaButtonSideHLay->addStretch();
 	toolboxAdderAreaButtonSideHLay->addWidget(toolboxResetButton);
+	toolboxAdderAreaButtonSideHLay->addWidget(toolboxImportButton);
+	toolboxAdderAreaButtonSideHLay->addStretch();
+	toolboxAdderAreaButtonSideHLay->addWidget(toolboxExportButton);
 
 	toolboxUrlBox = new LineEdit;
 	toolboxUrlBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -272,7 +296,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxAdderAreaVLay->setContentsMargins(fit(6),fit(6),fit(6),fit(6));
 	toolboxAdderAreaWidget->setLayout(toolboxAdderAreaVLay);
 	toolboxAdderAreaWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	toolboxAdderAreaWidget->setFixedSize(fit(155), fit(42));
+	toolboxAdderAreaWidget->setFixedSize(fit(155), fit(32));
 	toolboxAdderAreaWidget->setObjectName("toolboxAdderAreaWidget");
 	toolboxAdderAreaWidget->setStyleSheet(QString("#toolboxAdderAreaWidget{border:none; border-radius:%1;}").arg(fit(5)));
 
@@ -294,6 +318,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 		if (!toolboxEditButton->isChecked()) {
 			toolboxEditButton->setEnabled(i>=0);
 			toolboxRemoveButton->setEnabled(i>=0);
+			toolboxExportButton->setEnabled(i>=0);
 		}
 	});
 
@@ -325,15 +350,15 @@ void MainWindowPrivate::showAdderArea()
 {
 	QPropertyAnimation *animation = new QPropertyAnimation(toolboxAdderAreaWidget, "minimumHeight");
 	animation->setDuration(DURATION);
-	animation->setStartValue(fit(42));
-	animation->setEndValue(fit(150));
+	animation->setStartValue(fit(32));
+	animation->setEndValue(fit(140));
 	animation->setEasingCurve(QEasingCurve::OutExpo);
 	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 
 	QPropertyAnimation *animation2 = new QPropertyAnimation(toolboxAdderAreaWidget, "maximumHeight");
 	animation2->setDuration(DURATION);
-	animation2->setStartValue(fit(42));
-	animation2->setEndValue(fit(150));
+	animation2->setStartValue(fit(32));
+	animation2->setEndValue(fit(140));
 	animation2->setEasingCurve(QEasingCurve::OutExpo);
 	QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
@@ -350,6 +375,8 @@ void MainWindowPrivate::showAdderArea()
 	toolboxUrlBox->setHidden(false);
 	toolboxAddButton->setDisabled(true);
 	toolboxRemoveButton->setDisabled(true);
+	toolboxImportButton->setDisabled(true);
+	toolboxExportButton->setDisabled(true);
 	toolboxResetButton->setDisabled(true);
 }
 
@@ -357,15 +384,15 @@ void MainWindowPrivate::hideAdderArea()
 {
 	QPropertyAnimation *animation = new QPropertyAnimation(toolboxAdderAreaWidget, "minimumHeight");
 	animation->setDuration(DURATION);
-	animation->setStartValue(fit(150));
-	animation->setEndValue(fit(42));
+	animation->setStartValue(fit(140));
+	animation->setEndValue(fit(32));
 	animation->setEasingCurve(QEasingCurve::OutExpo);
 	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 
 	QPropertyAnimation *animation2 = new QPropertyAnimation(toolboxAdderAreaWidget, "maximumHeight");
 	animation2->setDuration(DURATION);
-	animation2->setStartValue(fit(150));
-	animation2->setEndValue(fit(42));
+	animation2->setStartValue(fit(140));
+	animation2->setEndValue(fit(32));
 	animation2->setEasingCurve(QEasingCurve::OutExpo);
 	QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
@@ -379,6 +406,8 @@ void MainWindowPrivate::hideAdderArea()
 	toolboxAdderAreaEditingLayout->setContentsMargins(0,0,0,0);
 	toolboxAddButton->setEnabled(true);
 	toolboxRemoveButton->setEnabled(true);
+	toolboxImportButton->setEnabled(true);
+	toolboxExportButton->setEnabled(true);
 	toolboxResetButton->setEnabled(true);
 	toolboxEditButton->setChecked(false);
 	toolboxOpenEditorButton->setHidden(true);

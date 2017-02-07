@@ -34,9 +34,9 @@
         "toolUrl" : "qrc:/resources/tools/Text.zip"
     },
 
-    "Switch" :
+    "FlatSwitch" :
     {
-        "toolUrl" : "qrc:/resources/tools/Switch.zip"
+        "toolUrl" : "qrc:/resources/tools/FlatSwitch.zip"
     },
 
     "Slider" :
@@ -49,14 +49,14 @@
         "toolUrl" : "qrc:/resources/tools/TextField.zip"
     },
 
-    "ProgressBar" :
-    {
-        "toolUrl" : "qrc:/resources/tools/ProgressBar.zip"
-    },
-
     "RadioButton" :
     {
         "toolUrl" : "qrc:/resources/tools/RadioButton.zip"
+    },
+
+    "ProgressBar" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ProgressBar.zip"
     },
 
 	"CircularGauge" :
