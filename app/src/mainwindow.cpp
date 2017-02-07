@@ -746,6 +746,26 @@ void MainWindow::ExtractZip(const QByteArray& zipData, const QString& path) cons
 	mz_zip_reader_end(&zip);
 }
 
+void MainWindow::CompressDir(const QString& dir, const QString& outFileName, const QString& base) const
+{
+	for (auto file : lsfile(dir)) {
+		auto data = rdfile(dir + separator() + file);
+		if (!mz_zip_add_mem_to_archive_file_in_place(outFileName.toStdString().c_str(), base.isEmpty() ? file.toStdString().c_str() : (base + separator() + file).toStdString().c_str(), data.constData(), data.size(), NULL, 0, MZ_BEST_COMPRESSION))
+		{
+			qWarning() << "mz_zip_add_mem_to_archive_file_in_place failed! 0x01";
+			return;
+		}
+	}
+	for (auto dr : lsdir(dir)) {
+		if (!mz_zip_add_mem_to_archive_file_in_place(outFileName.toStdString().c_str(), base.isEmpty() ? (dr + separator()).toStdString().c_str() : (base + separator() + dr + separator()).toStdString().c_str(), NULL, 0, NULL, 0, MZ_BEST_COMPRESSION))
+		{
+			qWarning() << "mz_zip_add_mem_to_archive_file_in_place failed! 0x02";
+			return;
+		}
+		CompressDir(dir + separator() + dr, outFileName, base.isEmpty() ? dr : base + separator() + dr);
+	}
+}
+
 QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
 {
 	QPointF pt = point;
@@ -1033,7 +1053,15 @@ void MainWindow::toolboxImportButtonClicked()
 
 void MainWindow::toolboxExportButtonClicked()
 {
-
+	QFileDialog dialog(this);
+	dialog.setOption(QFileDialog::ShowDirsOnly, true);
+	dialog.setFileMode(QFileDialog::Directory);
+	dialog.setViewMode(QFileDialog::Detail);
+	if (dialog.exec()) {
+		auto dir = dname(m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0].toLocalFile());
+		auto toolName = m_d->toolboxList->currentItem()->text();
+		CompressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip");
+	}
 }
 
 void MainWindow::handleImports(const QStringList& fileNames)

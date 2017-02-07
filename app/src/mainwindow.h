@@ -41,6 +41,7 @@ class MainWindow : public QWidget
 		void DownloadTools(const QUrl& url);
 		void AddTool(const QString& name);
 		void ExtractZip(const QByteArray& zipData, const QString& path) const;
+		void CompressDir(const QString& dir, const QString& outFileName, const QString& base = "") const;
 		QQuickItem* GetDeepestDesignItemOnPoint(const QPoint& point) const;
 		const QQuickItemList GetAllChildren(QQuickItem* const item) const;
 		bool eventFilter(QObject* object, QEvent* event);
