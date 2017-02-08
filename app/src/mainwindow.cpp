@@ -458,6 +458,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					qml->setParentItem(m_CurrentPage);
 					qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
 					qml->setClip(true); // Even if it's not true
+					qml->setEnabled(!m_d->editButton->isChecked());
 					fit(qml, Fit::WidthHeight);
 					m_Items << qml;
 					m_ItemUrls << url;
