@@ -84,7 +84,8 @@ void MainWindow::SetupGui()
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
 
 	/* Remove deleted items from internal item list */
-	connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=] (QQuickItem* item) {
+    connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=]
+    (QQuickItem* item) {
 		int i = m_Items.indexOf(item);
 		if (i >= 0) {
 			m_d->designWidget->rootContext()->setContextProperty(m_d->designWidget->rootContext()->nameForObject(item), 0);
@@ -148,7 +149,7 @@ void MainWindow::SetupGui()
 
 	/* Pop-up toolbox widget's scrollbar */
 	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxList->showBar(); });
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar(); });
+    connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar();});
 	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
 
 	/* Set flat buttons' colors*/
@@ -187,7 +188,7 @@ void MainWindow::SetupGui()
 	leftToolbar->setStyleSheet(CSS::Toolbar);
 	leftToolbar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	leftToolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	leftToolbar->resize(leftToolbar->width(), 43);
+    leftToolbar->resize(leftToolbar->width(), 43);
 	fit(leftToolbar, Fit::Height, true);
 	QGraphicsDropShadowEffect* toolbarShadowEffect = new QGraphicsDropShadowEffect;
 	toolbarShadowEffect->setBlurRadius(fit(7));
@@ -335,8 +336,14 @@ void MainWindow::SetupGui()
 	m_d->qmlEditor->setItems(&m_Items, &m_ItemUrls);
 	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
-	connect(m_d->bubbleHead, SIGNAL(clicked(bool)), m_d->qmlEditor, SLOT(show()));
+    connect(m_d->bubbleHead, SIGNAL(clicked(bool)), this, SLOT(handleBubbleHeadClicked()));
 	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
+
+    QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
+        if (i>=0) {
+            HideSelectionTools();
+        }
+    });
 
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 	QTimer::singleShot(3000,[this] {
@@ -770,17 +777,19 @@ void MainWindow::CompressDir(const QString& dir, const QString& outFileName, con
 QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
 {
 	QPointF pt = point;
-	QQuickItem* parent = m_CurrentPage;
+    QQuickItem* parent = m_CurrentPage,*final = m_CurrentPage;
 	QQuickItem* item = parent->childAt(pt.x(), pt.y());
+    if (m_Items.contains(item)) final = item;
 
-	while (item && m_Items.contains(item)) {
+    while (item) {
 		pt = item->mapFromItem(parent, pt);
 		parent = item;
 		item = parent->childAt(pt.x(), pt.y());
-	}
+        if (m_Items.contains(item)) final = item;
+    }
 
-	if (parent == m_CurrentPage) return nullptr;
-	return parent;
+    if (final == m_CurrentPage) return nullptr;
+    return final;
 }
 
 const MainWindow::QQuickItemList MainWindow::GetAllChildren(QQuickItem* const item) const
@@ -801,7 +810,8 @@ void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 	m_RotatorTick->SetTrackedItem(selectedItem);
 	m_RotatorTick->show();
 	m_RemoverTick->SetTrackedItem(selectedItem);
-	m_RemoverTick->show();
+    m_RemoverTick->show();
+    m_d->toolboxList->setCurrentRow(-1);
 	emit selectionShowed(selectedItem);
 }
 
@@ -809,7 +819,19 @@ void MainWindow::handleCurrentPageChanges(const QVariant& CurrentPage, const QVa
 {
 	m_CurrentPage = qobject_cast<QQuickItem*>(CurrentPage.value<QObject*>());
 	Q_ASSERT(m_CurrentPage);
-	m_d->pagesWidget->setCurrentPage(index.toInt());
+    m_d->pagesWidget->setCurrentPage(index.toInt());
+}
+
+void MainWindow::handleBubbleHeadClicked()
+{
+    if(m_ResizerTick->isVisible()) {
+        m_d->qmlEditor->show();
+    } else {
+        if (m_d->toolboxList->currentRow() < 0) return;
+        auto cItem = m_d->toolboxList->currentItem();
+        m_d->qmlEditor->setRootFolder(m_ToolsDir + separator() + m_d->toolboxList->currentItem()->text());
+        m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
+    }
 }
 
 void MainWindow::HideSelectionTools()
@@ -919,15 +941,6 @@ void MainWindow::toolboxEditButtonToggled(bool checked)
 	} else {
 		m_d->hideAdderArea();
 	}
-}
-
-void MainWindow::toolboxOpenEditorButtonClicked()
-{
-	if (m_d->toolboxList->currentRow() < 0) return;
-	auto cItem = m_d->toolboxList->currentItem();
-	m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
-	m_d->qmlEditor->setRootFolder(m_ToolsDir + separator() + m_d->toolboxList->currentItem()->text());
-	m_d->hideAdderArea();
 }
 
 void MainWindow::toolboxRemoveButtonClicked()

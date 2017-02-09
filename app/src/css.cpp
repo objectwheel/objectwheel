@@ -156,16 +156,16 @@ void CSS::init()
 	Toolbar = QString(CSS_TOOLBAR).arg(fit(3));
 
 	/* ToolboxButton */
-	ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(32));
+    ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(32));
 
 	/* PropertiesButton */
-	PropertiesButton = QString(CSS_PROPERTIES_BUTTON).arg(fit(32));
+    PropertiesButton = QString(CSS_PROPERTIES_BUTTON).arg(fit(32));
 
 	/* BindingButton */
-	BindingButton = QString(CSS_BINDING_BUTTON).arg(fit(32));
+    BindingButton = QString(CSS_BINDING_BUTTON).arg(fit(32));
 
 	/* PagesButton */
-	PagesButton = QString(CSS_PAGES_BUTTON).arg(fit(32));
+    PagesButton = QString(CSS_PAGES_BUTTON).arg(fit(32));
 
 	/* BindingListWidget */
 	BindingListWidget = QString(CSS_BINDING_LISTWIDGET).arg(fit(5)).arg(fit(2));

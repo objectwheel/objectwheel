@@ -406,13 +406,13 @@ void ComponentManager::registerQmlType()
 
 void ComponentManager::clear()
 {
-	if (lastItem) {
-		lastItem->deleteLater();
-	}
-	engine->clearComponentCache();
+    if (lastItem) {
+        lastItem->deleteLater();
+    }
+    engine->clearComponentCache();
 }
 
-QString ComponentManager::error() const
+QString ComponentManager::error()
 {
 	return lastError;
 }

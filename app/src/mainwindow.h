@@ -54,7 +54,6 @@ class MainWindow : public QWidget
 		void on_editButton_clicked();
 		void handleToolboxUrlboxChanges(const QString& text);
 		void handleToolboxNameboxChanges(QString name);
-		void toolboxOpenEditorButtonClicked();
 		void toolboxEditButtonToggled(bool);
 		void toolboxRemoveButtonClicked();
 		void toolboxAddButtonClicked();
@@ -66,6 +65,7 @@ class MainWindow : public QWidget
 		void HideSelectionTools();
 		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index);
+        void handleBubbleHeadClicked();
 
 	signals:
 		void resized();

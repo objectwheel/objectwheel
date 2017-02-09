@@ -60,11 +60,9 @@ class ComponentManager : public QObject
 		explicit ComponentManager (QObject* parent = 0) : QObject(parent) {}
 		static void setParentItem(QQuickItem* i);
 		static void registerQmlType();
-
-	public slots:
-		void clear();
-		QString error() const;
-		QQuickItem* build(const QString& url);
+        Q_INVOKABLE static void clear();
+        Q_INVOKABLE static QString error();
+        Q_INVOKABLE static QQuickItem* build(const QString& url);
 };
 
 #endif // QMLEDITOR_H

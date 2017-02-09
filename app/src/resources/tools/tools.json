@@ -132,5 +132,15 @@
     "GridLayout" :
     {
     	"toolUrl" : "qrc:/resources/tools/GridLayout.zip"
+    },
+
+    "VerticalSpacer" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/VerticalSpacer.zip"
+    },
+
+    "HorizontalSpacer" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/HorizontalSpacer.zip"
     }
 }

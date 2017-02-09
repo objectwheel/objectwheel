@@ -116,5 +116,7 @@
         <file>resources/images/fileExplorer/drop@2x.png</file>
         <file>resources/images/fileExplorer/drop.png</file>
         <file>resources/tools/FlatSwitch.zip</file>
+        <file>resources/tools/VerticalSpacer.zip</file>
+        <file>resources/tools/HorizontalSpacer.zip</file>
     </qresource>
 </RCC>
