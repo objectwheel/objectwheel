@@ -118,5 +118,7 @@
         <file>resources/tools/FlatSwitch.zip</file>
         <file>resources/tools/VerticalSpacer.zip</file>
         <file>resources/tools/HorizontalSpacer.zip</file>
+        <file>resources/tools/WindRose.zip</file>
+        <file>resources/tools/DragonFire.zip</file>
     </qresource>
 </RCC>

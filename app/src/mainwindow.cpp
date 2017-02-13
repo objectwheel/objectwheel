@@ -456,6 +456,9 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_Items[i])) ||
 							componentName == QString("dpi") || componentName == QString("swipeView")) {
 							// FIXME: If it's conflict with page names?
+                            if (componentName.at(componentName.size() - 1).isNumber()) {
+                                componentName.remove(componentName.size() - 1, 1);
+                            }
 							componentName += QString::number(count);
 							count++;
 							i = -1;
@@ -1068,12 +1071,13 @@ void MainWindow::toolboxImportButtonClicked()
 void MainWindow::toolboxExportButtonClicked()
 {
 	QFileDialog dialog(this);
-	dialog.setOption(QFileDialog::ShowDirsOnly, true);
 	dialog.setFileMode(QFileDialog::Directory);
 	dialog.setViewMode(QFileDialog::Detail);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
 	if (dialog.exec()) {
 		auto dir = dname(m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0].toLocalFile());
 		auto toolName = m_d->toolboxList->currentItem()->text();
+        if (!rm(dialog.selectedFiles().at(0) + separator() + toolName + ".zip")) return;
 		CompressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip");
 	}
 }

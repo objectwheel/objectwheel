@@ -7,7 +7,7 @@
 #include <fit.h>
 #include <QApplication>
 
-#define TITLE_TEXT "<p><b>version</b> 1.582 <b>pbuild</b> 5c45866<br>Wed Feb 10 00:26:17 2017 +0300<br></p>"
+#define TITLE_TEXT "<p><b>version</b> 1.583 <b>pbuild</b> 570c920<br>Mon Feb 13 06:38:14 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
 using namespace Fit;

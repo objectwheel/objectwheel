@@ -70,7 +70,7 @@ Item {
             var isdir = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
             urlval = urlval.toString().replace("file://", "")
             if (!isdir && isTextFile(urlval)) {
-                root.url = urlval
+                setUrl(urlval)
                 imageViewer.visible = false
                 editor.visible = true
             } else if (!isdir && isImageFile(urlval)) {
@@ -394,17 +394,16 @@ Item {
         places: [Item.Bottom, Item.Left, Item.Bottom, Item.Bottom, Item.Bottom]
     }
     ComponentManager { id: componentManager }
-    onUrlChanged: {
-        var index
-        var cacheFound = false
+    function setUrl(urlval) {
+        root.url = urlval
+        var index = -1
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i] === root.url) {
-                cacheFound = true
                 index = i
                 break
             }
         }
-        if (cacheFound) {
+        if (index > 0) {
             editor.editor.text = saveCache[index]
         } else {
             urlCache.push(root.url)
@@ -423,7 +422,7 @@ Item {
         currentSaved()
     }
     function show(url) {
-        root.url = url
+        setUrl(url)
         var name = FileManager.fname(url)
         var fm = fileExplorer.explorerListView.folderListModel
         for (var i = 0; i < fm.count; i++ ) {
@@ -558,7 +557,7 @@ Item {
                 }
             }
         } else if (!isTextFile(from) && isTextFile(to)) {
-            root.url = to
+            setUrl(to)
         }
 
         reloadView()

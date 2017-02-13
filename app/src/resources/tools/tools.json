@@ -142,5 +142,15 @@
     "HorizontalSpacer" :
     {
     	"toolUrl" : "qrc:/resources/tools/HorizontalSpacer.zip"
+    },
+
+    "WindRose" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/WindRose.zip"
+    },
+
+    "DragonFire" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/DragonFire.zip"
     }
 }
