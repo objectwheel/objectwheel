@@ -403,7 +403,7 @@ Item {
                 break
             }
         }
-        if (index > 0) {
+        if (index >= 0) {
             editor.editor.text = saveCache[index]
         } else {
             urlCache.push(root.url)

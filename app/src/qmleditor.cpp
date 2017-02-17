@@ -88,7 +88,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	font.setFamily("Liberation Mono");
 	font.setStyleHint(QFont::Monospace);
 	font.setFixedPitch(true);
-	font.setPixelSize(fit(12));
+	font.setPixelSize(fit(13));
 	textEdit->setProperty("font", font);
 
 	const int tabStop = 4;  // 4 characters
