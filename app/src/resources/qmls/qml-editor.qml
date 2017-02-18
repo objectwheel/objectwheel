@@ -24,7 +24,7 @@ import "delaycaller.js" as DelayCaller
 
 Item {
     id: root
-
+    onVisibleChanged: if (!visible) componentManager.clear()
     FileExplorer {
         id: fileExplorer
         clip: true
