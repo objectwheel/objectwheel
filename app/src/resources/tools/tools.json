@@ -152,5 +152,15 @@
     "DragonFire" :
     {
     	"toolUrl" : "qrc:/resources/tools/DragonFire.zip"
+    },
+
+    "ScaledText" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/ScaledText.zip"
+    },
+
+    "ScaledTextField" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/ScaledTextField.zip"
     }
 }

@@ -120,5 +120,7 @@
         <file>resources/tools/HorizontalSpacer.zip</file>
         <file>resources/tools/WindRose.zip</file>
         <file>resources/tools/DragonFire.zip</file>
+        <file>resources/tools/ScaledTextField.zip</file>
+        <file>resources/tools/ScaledText.zip</file>
     </qresource>
 </RCC>
