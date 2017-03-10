@@ -4,3 +4,6 @@
 [submodule "contrib/miniz"]
 	path = contrib/miniz
 	url = http://github.com/omergoktas/miniz
+[submodule "contrib/aes"]
+	path = contrib/aes
+	url = https://github.com/omergoktas/aes

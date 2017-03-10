@@ -20,7 +20,12 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/qmleditor.h \
 							 $$PWD/pageswidget.h \
 							 $$PWD/splashscreen.h \
-							 $$PWD/splashscreen_p.h
+							 $$PWD/splashscreen_p.h \
+    $$PWD/usermanager.h \
+    $$PWD/savemanager.h \
+    $$PWD/projectmanager.h \
+    $$PWD/dirlocker.h \
+    $$PWD/zipper.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -42,7 +47,12 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/qmleditor.cpp \
 							 $$PWD/pageswidget.cpp \
 							 $$PWD/splashscreen.cpp \
-							 $$PWD/splashscreen_p.cpp
+							 $$PWD/splashscreen_p.cpp \
+    $$PWD/usermanager.cpp \
+    $$PWD/savemanager.cpp \
+    $$PWD/projectmanager.cpp \
+    $$PWD/dirlocker.cpp \
+    $$PWD/zipper.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

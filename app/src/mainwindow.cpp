@@ -1,5 +1,5 @@
 #include <fit.h>
-#include <miniz.h>
+#include <zipper.h>
 #include <string.h>
 #include <titlebar.h>
 #include <covermenu.h>
@@ -673,7 +673,7 @@ void MainWindow::DownloadTools(const QUrl& url)
 					this, [] { Q_ASSERT_X(0, "GetTools()", "Ssl Error"); });
 			connect(toolReply, &QNetworkReply::finished, this, [=]
 			{
-				ExtractZip(toolReply->readAll(), m_ToolsDir + "/" + toolName);
+				Zipper::extractZip(toolReply->readAll(), m_ToolsDir + "/" + toolName);
 				AddTool(toolName);
 				toolReply->deleteLater();
 			});
@@ -705,76 +705,6 @@ bool MainWindow::toolsExists(const QJsonObject& toolsObject) const
 	//			return false;
 	//	}
 	//	return true;
-}
-
-void MainWindow::ExtractZip(const QByteArray& zipData, const QString& path) const
-{
-	mz_zip_archive zip;
-	memset(&zip, 0, sizeof(zip));
-
-	if (!mz_zip_reader_init_mem(&zip, zipData.constData(), zipData.size(), 0))
-	{
-		Q_ASSERT_X(0, "ExtractZip()", "Zip file is corrupt");
-	}
-
-	// Spin for dirs
-	for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip); i++)
-	{
-		mz_zip_archive_file_stat file_stat;
-		if (!mz_zip_reader_file_stat(&zip, i, &file_stat))
-		{
-			Q_ASSERT_X(0, "ExtractZip()","mz_zip_reader_file_stat() failed!");
-			mz_zip_reader_end(&zip);
-		}
-
-		if (mz_zip_reader_is_file_a_directory(&zip, i))
-		{
-			QDir(path).mkpath(file_stat.m_filename);
-		}
-	}
-
-	// Spin for data
-	for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip); i++)
-	{
-		mz_zip_archive_file_stat file_stat;
-		if (!mz_zip_reader_file_stat(&zip, i, &file_stat))
-		{
-			Q_ASSERT_X(0, "ExtractZip()", "mz_zip_reader_file_stat() failed!");
-			mz_zip_reader_end(&zip);
-		}
-
-		if (!mz_zip_reader_is_file_a_directory(&zip, i))
-		{
-			if (!mz_zip_reader_extract_to_file(&zip, i, QString(path+"/"+file_stat.m_filename).toStdString().c_str(), 0))
-			{
-				Q_ASSERT_X(0, "ExtractZip()", "mz_zip_reader_extract_to_file() failed!");
-				mz_zip_reader_end(&zip);
-			}
-		}
-	}
-
-	// Close the archive, freeing any resources it was using
-	mz_zip_reader_end(&zip);
-}
-
-void MainWindow::CompressDir(const QString& dir, const QString& outFileName, const QString& base) const
-{
-	for (auto file : lsfile(dir)) {
-		auto data = rdfile(dir + separator() + file);
-		if (!mz_zip_add_mem_to_archive_file_in_place(outFileName.toStdString().c_str(), base.isEmpty() ? file.toStdString().c_str() : (base + separator() + file).toStdString().c_str(), data.constData(), data.size(), NULL, 0, MZ_BEST_COMPRESSION))
-		{
-			qWarning() << "mz_zip_add_mem_to_archive_file_in_place failed! 0x01";
-			return;
-		}
-	}
-	for (auto dr : lsdir(dir)) {
-		if (!mz_zip_add_mem_to_archive_file_in_place(outFileName.toStdString().c_str(), base.isEmpty() ? (dr + separator()).toStdString().c_str() : (base + separator() + dr + separator()).toStdString().c_str(), NULL, 0, NULL, 0, MZ_BEST_COMPRESSION))
-		{
-			qWarning() << "mz_zip_add_mem_to_archive_file_in_place failed! 0x02";
-			return;
-		}
-		CompressDir(dir + separator() + dr, outFileName, base.isEmpty() ? dr : base + separator() + dr);
-	}
 }
 
 QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
@@ -1078,7 +1008,7 @@ void MainWindow::toolboxExportButtonClicked()
 		auto dir = dname(m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0].toLocalFile());
 		auto toolName = m_d->toolboxList->currentItem()->text();
         if (!rm(dialog.selectedFiles().at(0) + separator() + toolName + ".zip")) return;
-		CompressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip");
+		Zipper::compressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip");
 	}
 }
 
@@ -1101,7 +1031,7 @@ void MainWindow::handleImports(const QStringList& fileNames)
 		QFile file(fileName + ".zip");
 		if (!file.open(QFile::ReadOnly)) return;
 		if (!QDir(m_ToolsDir).mkpath(name)) return;
-		ExtractZip(file.readAll(), m_ToolsDir + "/" + name);
+		Zipper::extractZip(file.readAll(), m_ToolsDir + "/" + name);
 		file.close();
 		AddTool(name);
 	}

@@ -134,7 +134,7 @@ void ListWidget::setBarOpacity(const int opacity)
 }
 
 int ListWidget::getBarOpacity() const
-{
+{ //FIXME:
 	QString styleSheet = verticalScrollBar()->styleSheet();
 	styleSheet = styleSheet.split("rgba(255,255,255,").at(1);
 	QString value;
