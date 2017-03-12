@@ -5,6 +5,7 @@
 #include <QCryptographicHash>
 #include <QByteArray>
 #include <dirlocker.h>
+#include <projectmanager.h>
 
 class UserManagerPrivate
 {
@@ -62,11 +63,10 @@ bool UserManager::exists(const QString& username)
 	return ::exists(m_d->generateUserDirectory(username));
 }
 
-bool UserManager::buildNewUser(const QString& username, const QString& password)
+bool UserManager::buildNewUser(const QString& username)
 {
-	if (!mkdir(m_d->generateUserDirectory(username))) return false;
-
-	/* TODO */
+	if (exists(username)) return false;
+	return mkdir(m_d->generateUserDirectory(username));
 }
 
 QString UserManager::dataDirictory()
@@ -76,16 +76,18 @@ QString UserManager::dataDirictory()
 
 QString UserManager::userDirectory(const QString& username)
 {
-	if (exists(username)) {
-		return m_d->generateUserDirectory(username);
-	} else {
-		return QString();
-	}
+	if (!exists(username)) return QString();
+	return m_d->generateUserDirectory(username);
 }
 
 QString UserManager::currentSessionsUser()
 {
 	return m_d->currentSessionsUser;
+}
+
+QString UserManager::currentSessionsKey()
+{
+	return m_d->currentSessionsKey;
 }
 
 bool UserManager::startUserSession(const QString& username, const QString& password)
@@ -98,24 +100,21 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
 		return false;
 	}
 
-	auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Md5).toHex();
-	if (!m_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
-		return false;
-	}
-
 	if (!m_d->currentSessionsUser.isEmpty()) {
 		stopUserSession();
 	}
 
+	auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Md5).toHex();
 	m_d->currentSessionsUser = username;
 	m_d->currentSessionsKey = keyHash;
 
-	if (!m_d->dirLocker.unlock(userDirectory(username), keyHash)) {
-		stopUserSession();
-		return false;
+	if (m_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
+		if (!m_d->dirLocker.unlock(userDirectory(username), keyHash)) {
+			m_d->currentSessionsUser = "";
+			m_d->currentSessionsKey = "";
+			return false;
+		}
 	}
-
-	emit instance()->currentSessionsUserChanged();
 	return true;
 }
 
@@ -125,17 +124,13 @@ void UserManager::stopUserSession()
 		return;
 	}
 
-	if (!exists(m_d->currentSessionsUser)) {
-		return;
-	}
+	ProjectManager::stopProject();
 
-	if (!m_d->dirLocker.locked(userDirectory(m_d->currentSessionsUser))) {
+	if (exists(m_d->currentSessionsUser) && !m_d->dirLocker.locked(userDirectory(m_d->currentSessionsUser))) {
 		Q_ASSERT(m_d->dirLocker.lock(userDirectory(m_d->currentSessionsUser), m_d->currentSessionsKey));
 	}
 
 	m_d->currentSessionsUser = "";
 	m_d->currentSessionsKey = "";
-
-	emit instance()->currentSessionsUserChanged();
 }
 

@@ -8,7 +8,6 @@
 #include <splashscreen.h>
 #include <QIcon>
 #include <QBuffer>
-#include <usermanager.h>
 
 #define PIXEL_SIZE 13
 #define REF_WIDTH 660
@@ -44,9 +43,6 @@ int main(int argc, char *argv[])
 	font.setPixelSize(Fit::fit(PIXEL_SIZE));
 	QApplication::setFont(font);
 
-	UserManager* userManager = new UserManager;
-	userManager->startUserSession("kozmon@hotmail.com", "password123");
-
 	// Start MainWidget
 	MainWindow w;
 	QFile loading(":/resources/images/loading.gif");
@@ -72,13 +68,6 @@ int main(int argc, char *argv[])
 # else
 	w.showFullScreen();
 # endif
-
-//	QByteArray key = "asdasdasdaaaaaaaaaaaaaaaaaaaaaaa"; //encryption key
-//	DirLocker* locker = new DirLocker; //dirlocker
-//	qDebug() << locker->lock("/Users/omergoktas/Desktop/test", key); //lock dir
-//	qDebug() << locker->canUnlock("/Users/omergoktas/Desktop/test", key); //check if locked
-//	qDebug() << locker->canUnlock("/Users/omergoktas/Desktop/test", key); //same
-//	qDebug() << locker->unlock("/Users/omergoktas/Desktop/test", key); //unlock dir, let's debugging
 
 	// Start main event loop
 	return a.exec();

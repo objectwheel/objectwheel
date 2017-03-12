@@ -39,7 +39,7 @@ void Zipper::extractZip(const QByteArray& zipData, const QString& path)
 		mz_zip_archive_file_stat file_stat;
 		Q_ASSERT(mz_zip_reader_file_stat(&zip, i, &file_stat));
 		if (!mz_zip_reader_is_file_a_directory(&zip, i)) {
-			Q_ASSERT(mz_zip_reader_extract_to_file(&zip, i, QString(path+"/"+file_stat.m_filename).toStdString().c_str(), 0));
+			Q_ASSERT(mz_zip_reader_extract_to_file(&zip, i, QString(path + separator() + file_stat.m_filename).toStdString().c_str(), 0));
 		}
 	}
 

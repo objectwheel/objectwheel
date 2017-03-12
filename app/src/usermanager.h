@@ -16,13 +16,13 @@ class UserManager : public QObject
 		static QString dataDirictory();
 		static QString userDirectory(const QString& username);
 		static bool exists(const QString& username);
-		static bool buildNewUser(const QString& username, const QString& password);
+		static bool buildNewUser(const QString& username);
 		static bool startUserSession(const QString& username, const QString& password);
-		static void stopUserSession();
 		static QString currentSessionsUser();
+		static QString currentSessionsKey();
 
-	signals:
-		void currentSessionsUserChanged() const;
+	public slots:
+		static void stopUserSession();
 
 	private:
 		static UserManagerPrivate* m_d;

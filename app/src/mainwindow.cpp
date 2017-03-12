@@ -19,8 +19,10 @@
 #include <QtNetwork>
 #include <filemanager.h>
 #include <QFileInfo>
+#include <projectmanager.h>
+#include <usermanager.h>
+#include <toolsmanager.h>
 
-#define TOOLS_URL (QUrl::fromUserInput("qrc:/resources/tools/tools.json"))
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
 \n\
@@ -50,9 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_RightMenu(new CoverMenu)
 {
 	m_d->setupUi(this);
-	SetToolsDir();
 	SetupGui();
-	DownloadTools(TOOLS_URL);
 }
 
 void MainWindow::SetupGui()
@@ -352,8 +352,19 @@ void MainWindow::SetupGui()
 #endif
 		SplashScreen::hide();
 	});
-}
 
+	//Let's add some custom controls to that project
+	ToolsManager::setListWidget(m_d->toolboxList);
+	auto userManager = new UserManager(this); //create new user manager
+	auto projectManager = new ProjectManager(this); //create new project manager
+	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
+	userManager->startUserSession("kozmon@hotmail.com", "password123"); //unlock user session
+	projectManager->buildNewProject("Project 2 Alpha"); //build a new project if doesn't exist already
+	projectManager->startProject("Project 2 Alpha"); //start project, tools database filled
+	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
+
+	qDebug() << ProjectManager::projects();
+}
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
@@ -630,83 +641,6 @@ void MainWindow::fixWebViewPositions()
 		fixWebViewPosition(item);
 }
 
-void MainWindow::DownloadTools(const QUrl& url)
-{
-	QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-	QNetworkRequest request;
-	request.setUrl(url);
-	request.setRawHeader("User-Agent", "objectwheel 1.0");
-
-	QNetworkReply *reply = manager->get(request);
-	connect(reply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-			this, [] { Q_ASSERT_X(0, "GetTools()", "Network Error"); });
-	connect(reply, &QNetworkReply::sslErrors,
-			this, [] { Q_ASSERT_X(0, "GetTools()", "Ssl Error"); });
-	connect(reply, &QNetworkReply::finished, this, [=]
-	{
-		QJsonDocument toolsDoc = QJsonDocument::fromJson(reply->readAll());
-		QJsonObject toolsObject = toolsDoc.object();
-
-		if (toolsExists(toolsObject)) {
-			for (auto toolName : lsdir(m_ToolsDir)) {
-				AddTool(toolName);
-			}
-			reply->deleteLater();
-			return;
-		}
-
-		for (int i = 0; i < toolsObject.size(); i++)
-		{
-			QString toolName = toolsObject.keys().at(i);
-			QDir(m_ToolsDir).mkpath(toolName);
-			QJsonObject toolObject = toolsObject.value(toolName).toObject();
-			QUrl toolUrl = QUrl::fromUserInput(toolObject.value("toolUrl").toString());
-
-			QNetworkRequest request;
-			request.setUrl(toolUrl);
-			request.setRawHeader("User-Agent", "objectwheel 1.0");
-
-			QNetworkReply *toolReply = manager->get(request);
-			connect(toolReply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>
-					(&QNetworkReply::error), this, [] { Q_ASSERT_X(0, "GetTools()", "Network Error"); });
-			connect(toolReply, &QNetworkReply::sslErrors,
-					this, [] { Q_ASSERT_X(0, "GetTools()", "Ssl Error"); });
-			connect(toolReply, &QNetworkReply::finished, this, [=]
-			{
-				Zipper::extractZip(toolReply->readAll(), m_ToolsDir + "/" + toolName);
-				AddTool(toolName);
-				toolReply->deleteLater();
-			});
-		}
-
-		reply->deleteLater();
-	});
-}
-
-void MainWindow::AddTool(const QString& name)
-{
-	QList<QUrl> urls;
-	QListWidgetItem* item = new QListWidgetItem(QIcon(m_ToolsDir + "/" + name + "/icon.png"), name);
-	urls << QUrl::fromLocalFile(m_ToolsDir + "/" + name + "/main.qml");
-	m_d->toolboxList->addItem(item);
-	m_d->toolboxList->AddUrls(item,urls);
-}
-
-bool MainWindow::toolsExists(const QJsonObject& toolsObject) const
-{ // Return true if tools exist
-	Q_UNUSED(toolsObject);
-	if (!QDir().exists(m_ToolsDir)) return false;
-	else return true;
-
-	//	for (int i = 0; i < toolsObject.size(); i++)
-	//	{
-	//		QString toolName = toolsObject.keys().at(i);
-	//		if (!QDir(m_ToolsDir).exists(toolName))
-	//			return false;
-	//	}
-	//	return true;
-}
-
 QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
 {
 	QPointF pt = point;
@@ -762,7 +696,7 @@ void MainWindow::handleBubbleHeadClicked()
     } else {
         if (m_d->toolboxList->currentRow() < 0) return;
         auto cItem = m_d->toolboxList->currentItem();
-        m_d->qmlEditor->setRootFolder(m_ToolsDir + separator() + m_d->toolboxList->currentItem()->text());
+		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
         m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
     }
 }
@@ -847,8 +781,8 @@ void MainWindow::handleToolboxNameboxChanges(QString name)
 		}
 	}
 
-	auto from = m_ToolsDir + "/" + m_d->toolboxList->currentItem()->text();
-	auto to = m_ToolsDir + "/" + name;
+	auto from = ToolsManager::toolsDir() + "/" + m_d->toolboxList->currentItem()->text();
+	auto to = ToolsManager::toolsDir() + "/" + name;
 	Q_ASSERT(rn(from, to));
 
 	m_d->toolboxList->currentItem()->setText(name);
@@ -889,13 +823,13 @@ void MainWindow::toolboxRemoveButtonClicked()
 	const int ret = msgBox.exec();
 	switch (ret) {
 		case QMessageBox::Yes: {
-			m_d->qmlEditor->clearCacheFor(m_ToolsDir + separator() + name, true);
-			rm(m_ToolsDir + separator() + name);
+			m_d->qmlEditor->clearCacheFor(ToolsManager::toolsDir() + separator() + name, true);
+			rm(ToolsManager::toolsDir() + separator() + name);
 			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
 			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
 
 			for (int i = 0; i < m_ItemUrls.size(); i++) {
-				if (m_ItemUrls[i].toLocalFile() == (m_ToolsDir + separator() + name + "/main.qml")) {
+				if (m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
 					auto items = GetAllChildren(m_Items[i]);
 					for (auto item : items) {
 						if (m_Items.contains(item)) {
@@ -932,12 +866,12 @@ void MainWindow::toolboxAddButtonClicked()
 		}
 	}
 
-	auto filePath = m_ToolsDir + "/" + name + "/main.qml";
+	auto filePath = ToolsManager::toolsDir() + "/" + name + "/main.qml";
 	int ret = wrfile(filePath, CUSTOM_ITEM);
 	if (ret < 0) return;
 
 	QPixmap pixmap;
-	QString iconPath = m_ToolsDir + "/" + name + "/icon.png";
+	QString iconPath = ToolsManager::toolsDir() + "/" + name + "/icon.png";
 	pixmap.load(":/resources/images/item.png");
 	if (!pixmap.save(iconPath)) {
 		return;
@@ -966,8 +900,7 @@ void MainWindow::toolboxResetButtonClicked()
 			m_d->toolboxList->ClearUrls();
 			m_d->toolboxList->clear();
 			m_d->qmlEditor->clearCache();
-			rm(m_ToolsDir);
-			DownloadTools(TOOLS_URL);
+			ToolsManager::resetTools();
 
 			for (auto item : m_Items) {
 				m_d->designWidget->rootContext()->setContextProperty(
@@ -1030,10 +963,10 @@ void MainWindow::handleImports(const QStringList& fileNames)
 
 		QFile file(fileName + ".zip");
 		if (!file.open(QFile::ReadOnly)) return;
-		if (!QDir(m_ToolsDir).mkpath(name)) return;
-		Zipper::extractZip(file.readAll(), m_ToolsDir + "/" + name);
+		if (!QDir(ToolsManager::toolsDir()).mkpath(name)) return;
+		Zipper::extractZip(file.readAll(), ToolsManager::toolsDir() + "/" + name);
 		file.close();
-		AddTool(name);
+		ToolsManager::addTool(name);
 	}
 }
 
@@ -1053,15 +986,6 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 	loop.exec();
 	return pixmap;
-}
-
-void MainWindow::SetToolsDir()
-{
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-	m_ToolsDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0) + "/tools";
-#else
-	m_ToolsDir = QCoreApplication::applicationDirPath() + separator() + "tools";
-#endif
 }
 
 MainWindow::~MainWindow()

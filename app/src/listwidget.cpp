@@ -53,6 +53,7 @@ ListWidget::ListWidget(QWidget *parent)
 	});
 
 	connect(m_HiderTimer, &QTimer::timeout, [&] {
+		m_HiderTimer->interval();
 		if (getBarOpacity() > m_Alpha + 2) {
 			m_HiderTimer->stop();
 			m_Running = false;

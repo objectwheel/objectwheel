@@ -21,7 +21,6 @@ class MainWindow : public QWidget
 
 	private:
 		MainWindowPrivate* m_d;
-		QString m_ToolsDir;
 		ResizerTick* m_ResizerTick;
 		RotatorTick* m_RotatorTick;
 		RemoverTick* m_RemoverTick;
@@ -35,11 +34,7 @@ class MainWindow : public QWidget
 	public:
 		explicit MainWindow(QWidget *parent = 0);
 		~MainWindow();
-		void SetToolsDir();
 		void SetupGui();
-		bool toolsExists(const QJsonObject& toolsObject) const;
-		void DownloadTools(const QUrl& url);
-		void AddTool(const QString& name);
 		QQuickItem* GetDeepestDesignItemOnPoint(const QPoint& point) const;
 		const QQuickItemList GetAllChildren(QQuickItem* const item) const;
 		bool eventFilter(QObject* object, QEvent* event);
