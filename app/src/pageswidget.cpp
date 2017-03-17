@@ -169,7 +169,7 @@ void PagesWidgetPrivate::removeButtonClicked()
 				delete pagesListWidget.takeItem(pagesListWidget.currentRow());
 				auto v = rootContext->contextProperty(name);
 				auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
-				Q_ASSERT(selectedItem);
+				if (!selectedItem) qFatal("PagesWidget : Error occurred");
 				auto items = GetAllChildren(selectedItem);
 				for (auto item : items) {
 					if (itemList->contains(item)) {
@@ -208,7 +208,7 @@ void PagesWidgetPrivate::addButtonClicked()
 	QQmlComponent c(qmlEngine((QObject*)swipeItem));
 	c.setData(QByteArray().insert(0,QString(PAGE_CODE).arg(name)), QUrl());
 	auto item = qobject_cast<QQuickItem*>(c.create(qmlContext((QObject*)swipeItem)));
-	Q_ASSERT(item);
+	if (!item) qFatal("PagesWidget : Error occurred");
 	item->setParentItem(swipeItem);
 	rootContext->setContextProperty(name, item);
 }
@@ -218,7 +218,7 @@ void PagesWidgetPrivate::saveButtonClicked()
 	auto name = pagesListWidget.currentItem()->text();
 	auto v = rootContext->contextProperty(name);
 	auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
-	Q_ASSERT(selectedItem);
+	if (!selectedItem) qFatal("PagesWidget : Error occurred");
 	rootContext->setContextProperty(name, 0);
 	rootContext->setContextProperty(nameEdit.text(), selectedItem);
 	pagesListWidget.currentItem()->setText(nameEdit.text());

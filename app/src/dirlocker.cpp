@@ -45,7 +45,7 @@ bool DirLocker::locked(const QString& dir)
 	QString lockedFileName = dir + separator() + LOCKED_FILENAME;
 	if (!exists(lockedFileName)) return false;
 	QFile reader(lockedFileName);
-	Q_ASSERT(reader.open(QFile::ReadOnly));
+	if (!reader.open(QFile::ReadOnly)) qFatal("DirLocker : Error occurred");
 	return Aes::encrypted(reader.read(128));
 }
 

@@ -7,7 +7,7 @@ class ProjectManagerPrivate
 {
 	public:
 		ProjectManagerPrivate(ProjectManager* uparent);
-		QString generateProjectDir(const QString& projectname);
+		QString generateProjectDir(const QString& projectname) const;
 
 	public:
 		ProjectManager* parent = nullptr;
@@ -19,7 +19,7 @@ ProjectManagerPrivate::ProjectManagerPrivate(ProjectManager* uparent)
 {
 }
 
-inline QString ProjectManagerPrivate::generateProjectDir(const QString& projectname)
+inline QString ProjectManagerPrivate::generateProjectDir(const QString& projectname) const
 {
 	auto userDir = UserManager::userDirectory(UserManager::currentSessionsUser());
 	if (userDir.isEmpty()) return userDir;
@@ -91,7 +91,7 @@ void ProjectManager::stopProject()
 
 	/* Clear designer */
 //	if (exists(m_d->currentSessionsUser) && !m_d->dirLocker.locked(userDirectory(m_d->currentSessionsUser))) {
-//		Q_ASSERT(m_d->dirLocker.lock(userDirectory(m_d->currentSessionsUser), m_d->currentSessionsKey));
+//		if (!m_d->dirLocker.lock(userDirectory(m_d->currentSessionsUser), m_d->currentSessionsKey)) qFatal("ProjectManager : Error occurred");
 //	}
 
 	m_d->currentProject = "";

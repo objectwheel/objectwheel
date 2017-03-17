@@ -27,7 +27,7 @@ namespace ToolsManager {
 QString ToolsManager::toolsDir()
 {
 	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	Q_ASSERT(!projectDir.isEmpty());
+	if (projectDir.isEmpty()) qFatal("ToolsManager : Error occurred");
 	return projectDir + separator() + TOOLS_DIRECTORY;
 }
 
@@ -55,9 +55,9 @@ void ToolsManager::downloadTools(const QUrl& url)
 	QEventLoop loop;
 	QNetworkReply *reply = manager->get(request);
 	QObject::connect(reply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-			[] { Q_ASSERT_X(0, "downloadTools()", "Network Error"); });
+			[] { qFatal("downloadTools() : Network Error"); });
 	QObject::connect(reply, &QNetworkReply::sslErrors,
-			[] { Q_ASSERT_X(0, "downloadTools()", "Ssl Error"); });
+			[] { qFatal("downloadTools() : Ssl Error"); });
 	QObject::connect(reply, &QNetworkReply::finished, [=,&loop]
 	{
 		QJsonDocument toolsDoc = QJsonDocument::fromJson(reply->readAll());
@@ -85,8 +85,8 @@ void ToolsManager::downloadTools(const QUrl& url)
 
 			QNetworkReply *toolReply = manager->get(request);
 			QObject::connect(toolReply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>
-					(&QNetworkReply::error), [] { Q_ASSERT_X(0, "downloadTools()", "Network Error"); });
-			QObject::connect(toolReply, &QNetworkReply::sslErrors, [] { Q_ASSERT_X(0, "downloadTools()", "Ssl Error"); });
+					(&QNetworkReply::error), [] { qFatal("downloadTools() : Network Error"); });
+			QObject::connect(toolReply, &QNetworkReply::sslErrors, [] { qFatal("downloadTools() : Ssl Error"); });
 			QObject::connect(toolReply, &QNetworkReply::finished, [=,&loop] {
 				Zipper::extractZip(toolReply->readAll(), ProjectManager::projectDirectory(ProjectManager::currentProject()) + separator() + TOOLS_DIRECTORY + separator() + toolName);
 				addTool(toolName);

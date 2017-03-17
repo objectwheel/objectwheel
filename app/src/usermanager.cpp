@@ -127,7 +127,9 @@ void UserManager::stopUserSession()
 	ProjectManager::stopProject();
 
 	if (exists(m_d->currentSessionsUser) && !m_d->dirLocker.locked(userDirectory(m_d->currentSessionsUser))) {
-		Q_ASSERT(m_d->dirLocker.lock(userDirectory(m_d->currentSessionsUser), m_d->currentSessionsKey));
+		if (!m_d->dirLocker.lock(userDirectory(m_d->currentSessionsUser), m_d->currentSessionsKey)) {
+			qFatal("ProjectManager : Error occurred");
+		}
 	}
 
 	m_d->currentSessionsUser = "";

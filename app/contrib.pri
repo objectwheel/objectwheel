@@ -9,3 +9,5 @@ LIBS            += -L$$PROJECT_ROOT/contrib/fit/$$BUILD_POSTFIX \
 LIBS            += -lfit \
 				   -lminiz \
 				   -laes
+
+include($$PWD/../contrib/qmlparser/qmlparser.pri)

@@ -88,7 +88,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	font.setFamily("Liberation Mono");
 	font.setStyleHint(QFont::Monospace);
 	font.setFixedPitch(true);
-	font.setPixelSize(fit(13));
+	font.setPixelSize(fit(12));
 	textEdit->setProperty("font", font);
 
 	const int tabStop = 4;  // 4 characters
@@ -103,7 +103,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	QObject::connect(&minimizeButton, SIGNAL(clicked(bool)), parent, SLOT(hide()));
 
 	auto item = qobject_cast<QQuickItem*>(QQmlProperty::read(rootItem,"view", rootContext).value<QObject*>());
-	Q_ASSERT(item);
+	if (!item) qFatal("QmlEditor : Error occurred");
 	ComponentManager::setParentItem(item);
 
 	QTimer::singleShot(500, [this] {
@@ -182,7 +182,7 @@ void QmlEditorPrivate::selectionChanged()
 	int index = itemList->indexOf(lastSelectedItem);
 	if (index >= 0) {
 		QFile file(urlList->at(index).toLocalFile());
-		Q_ASSERT(file.open(QIODevice::ReadOnly));
+		if (!file.open(QIODevice::ReadOnly)) qFatal("QmlEditor : Error occurred");
 		QTextStream reader(&file);
 		textDocument->setPlainText(reader.readAll());
 		file.close();

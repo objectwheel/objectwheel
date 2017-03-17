@@ -60,7 +60,7 @@ QWidget* CoverMenu::coverWidget() const
 
 void CoverMenu::setCoverWidget(QWidget* const coverWidget)
 {
-	Q_ASSERT_X(coverWidget->parentWidget() != nullptr, "CoverMenu::setCoverWidget() ", "Cover widget must be a child widget.");
+	if (coverWidget->parentWidget() == nullptr) qFatal("CoverMenu::setCoverWidget() : Cover widget must be a child widget.");
 	setParent(coverWidget->parentWidget());
 	m_CoverWidget = coverWidget;
 }
@@ -135,7 +135,7 @@ void CoverMenu::setAnimationState(const QAbstractAnimation::State animationState
 
 void CoverMenu::cover()
 {
-	Q_ASSERT_X(m_CoverWidget != nullptr, "CoverMenu::cover() ", "Set cover widget first.");
+	if (m_CoverWidget == nullptr) qFatal("CoverMenu::cover() : Set cover widget first.");
 
 	if (isVisible() || QParallelAnimationGroup::Running == m_AnimationState)
 		return;
@@ -204,7 +204,7 @@ void CoverMenu::cover()
 
 void CoverMenu::uncover()
 {
-	Q_ASSERT_X(m_CoverWidget != nullptr, "CoverMenu::cover() ", "Set cover widget first.");
+	if (m_CoverWidget == nullptr) qFatal("CoverMenu::cover() : Set cover widget first.");
 
 	if (isHidden() || QParallelAnimationGroup::Running == m_AnimationState)
 		return;

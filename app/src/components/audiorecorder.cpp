@@ -17,7 +17,7 @@ AudioRecorder::AudioRecorder(QObject* parent)
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::SignedInt);
 
-	Q_ASSERT(QAudioDeviceInfo::defaultInputDevice().isFormatSupported(format));
+	if (!QAudioDeviceInfo::defaultInputDevice().isFormatSupported(format)) qFatal("AudioRecorder : Error occurred.");
 
 	m_audioInput = new QAudioInput(format, this);
 	m_audioInput->setBufferSize(4096);

@@ -12,7 +12,7 @@
 #define PIXEL_SIZE 13
 #define REF_WIDTH 660
 #define REF_HEIGHT 400
-#define REF_DPI 102
+#define REF_DPI 127
 
 int main(int argc, char *argv[])
 {
@@ -36,17 +36,15 @@ int main(int argc, char *argv[])
 	QtWebView::initialize();
 
 	// Add system wide fonts and set default font
-	QFontDatabase::addApplicationFont(":/resources/fonts/SFNSText.ttf");
 	QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
-	QFont font("System Font");
-	font.setWeight(QFont::Normal);
+	QFont font;
 	font.setPixelSize(Fit::fit(PIXEL_SIZE));
 	QApplication::setFont(font);
 
 	// Start MainWidget
 	MainWindow w;
 	QFile loading(":/resources/images/loading.gif");
-	Q_ASSERT(loading.open(QIODevice::ReadOnly));
+	if (!loading.open(QIODevice::ReadOnly)) qFatal("main : Error occurred");
 	auto data = loading.readAll();
 	QBuffer buff(&data);
 	buff.open(QBuffer::ReadOnly);

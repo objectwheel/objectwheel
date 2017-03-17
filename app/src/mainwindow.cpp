@@ -22,12 +22,13 @@
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <toolsmanager.h>
+#include <savemanager.h>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
 \n\
 Rectangle {\n\
-   id: item\n\
+   id: customItem\n\
    width: 54\n\
    height: 54\n\
    radius: 5 * dpi\n\
@@ -291,15 +292,15 @@ void MainWindow::SetupGui()
 				this, SLOT(handleCurrentPageChanges(QVariant, QVariant)));
 		auto v = QQmlProperty::read(m_RootItem, "current_page", m_d->designWidget->rootContext());
 		m_CurrentPage = qobject_cast<QQuickItem*>(v.value<QObject*>());
-		Q_ASSERT(m_CurrentPage);
+		if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
 		auto v2 = QQmlProperty::read(m_RootItem, "swipeView", m_d->designWidget->rootContext());
 		auto view = qobject_cast<QQuickItem*>(v2.value<QObject*>());
 		connect(view, SIGNAL(currentIndexChanged()), this, SLOT(HideSelectionTools()));
-		Q_ASSERT(view);
+		if (!view) qFatal("MainWindow : Error occurred");
 		m_d->designWidget->rootContext()->setContextProperty("swipeView", view);
 		auto v3 = qmlContext(view)->contextProperty("page1");
 		auto item = qobject_cast<QQuickItem*>(v3.value<QObject*>());
-		Q_ASSERT(item);
+		if (!item) qFatal("MainWindow : Error occurred");
 		m_d->designWidget->rootContext()->setContextProperty("page1", item);
 		m_d->pagesWidget->setSwipeItem(view);
 		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
@@ -357,13 +358,12 @@ void MainWindow::SetupGui()
 	ToolsManager::setListWidget(m_d->toolboxList);
 	auto userManager = new UserManager(this); //create new user manager
 	auto projectManager = new ProjectManager(this); //create new project manager
+	auto saveManager = new SaveManager(this);
 	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
 	userManager->startUserSession("kozmon@hotmail.com", "password123"); //unlock user session
-	projectManager->buildNewProject("Project 2 Alpha"); //build a new project if doesn't exist already
-	projectManager->startProject("Project 2 Alpha"); //start project, tools database filled
+	projectManager->buildNewProject("Project 3"); //build a new project if doesn't exist already
+	projectManager->startProject("Project 3"); //start project, tools database filled
 	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
-
-	qDebug() << ProjectManager::projects();
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
@@ -483,6 +483,11 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					fit(qml, Fit::WidthHeight);
 					m_Items << qml;
 					m_ItemUrls << url;
+					SaveManager::addSave(componentName, url.toLocalFile());
+					SaveManager::setVariantProperty(componentName, "x", qml->x());
+					SaveManager::setVariantProperty(componentName, "y", qml->y());
+					SaveManager::setVariantProperty(componentName, "clip", qml->clip());
+					SaveManager::setVariantProperty(componentName, "enabled", qml->isEnabled());
 
 					QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
 					if (m_d->editButton->isChecked()) ShowSelectionTools(qml);
@@ -685,7 +690,7 @@ void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
 void MainWindow::handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index)
 {
 	m_CurrentPage = qobject_cast<QQuickItem*>(CurrentPage.value<QObject*>());
-	Q_ASSERT(m_CurrentPage);
+	if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
     m_d->pagesWidget->setCurrentPage(index.toInt());
 }
 
@@ -783,7 +788,7 @@ void MainWindow::handleToolboxNameboxChanges(QString name)
 
 	auto from = ToolsManager::toolsDir() + "/" + m_d->toolboxList->currentItem()->text();
 	auto to = ToolsManager::toolsDir() + "/" + name;
-	Q_ASSERT(rn(from, to));
+	if (!rn(from, to)) qFatal("MainWindow : Error occurred");
 
 	m_d->toolboxList->currentItem()->setText(name);
 

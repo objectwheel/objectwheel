@@ -63,7 +63,6 @@
         <file>resources/images/pagesbutton.png</file>
         <file>resources/images/aboutus.png</file>
         <file>resources/images/loading.gif</file>
-        <file>resources/fonts/SFNSText.ttf</file>
         <file>resources/qmls/FancyButton.qml</file>
         <file>resources/qmls/filemanager.js</file>
         <file>resources/qmls/delaycaller.js</file>
