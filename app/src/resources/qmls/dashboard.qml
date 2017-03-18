@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.0
 
 Rectangle {
-    id: designArea
+    id: dashboard
     x: 0; y: 0
     width: 100
     height: 100
@@ -16,7 +16,7 @@ Rectangle {
         id: swipeView
         anchors.fill: parent
         onCurrentItemChanged: {
-            designArea.currentPageChanged(swipeView.currentItem, swipeView.currentIndex)
+            dashboard.currentPageChanged(swipeView.currentItem, swipeView.currentIndex)
         }
         Item {
             id: page1

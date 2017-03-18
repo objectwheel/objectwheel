@@ -20,6 +20,8 @@
 #include <filemanager.h>
 #include <QFileInfo>
 #include <QDir>
+#include <savemanager.h>
+#include <bindingwidget.h>
 
 #define DURATION 400
 
@@ -30,6 +32,7 @@ class QmlEditorPrivate
 	public:
 		QmlEditor* parent;
 		QQuickItem* rootItem;
+		BindingWidget* bindingWidget;
 		QVBoxLayout mainLayout;
 		QQuickWidget quickWidget;
 		FlatButton minimizeButton;
@@ -126,6 +129,11 @@ void QmlEditorPrivate::saved(const QString& text)
 	int index = itemList->indexOf(lastSelectedItem);
 	if (index < 0) return;
 	auto url = urlList->at(index);
+	itemList->removeAt(index);
+	urlList->removeAt(index);
+	SaveManager::removeParentalRelationship(dashboardRootContext->nameForObject(lastSelectedItem));
+	bindingWidget->detachBindingsFor(lastSelectedItem);
+
 	component.setData(QByteArray().insert(0,text), QUrl());
 
 	QQmlIncubator incubator;
@@ -136,21 +144,6 @@ void QmlEditorPrivate::saved(const QString& text)
 	QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
 	if (component.isError() || !qml) {qWarning() << component.errorString(); return;}
-
-	auto previousParent = lastSelectedItem->parentItem();
-	auto previousPosition = lastSelectedItem->position();
-
-	auto childs = GetAllChildren(lastSelectedItem);
-	for (auto child : childs) {
-		if (itemList->contains(child)) {
-			int index = itemList->indexOf(child);
-			itemList->removeAt(index);
-			urlList->removeAt(index);
-		}
-	}
-	lastSelectedItem->deleteLater();
-	lastSelectedItem = qml;
-	qml->setEnabled(false);
 
 	int count = 1;
 	QString componentName = qmlContext(qml)->nameForObject(qml);
@@ -163,13 +156,33 @@ void QmlEditorPrivate::saved(const QString& text)
 			i = -1;
 		}
 	}
-	dashboardRootContext->setContextProperty(componentName, qml);
-	qml->setParentItem(previousParent);
-	qml->setPosition(previousPosition);
+	dashboardRootContext->setContextProperty(dashboardRootContext->nameForObject(qml), 0);
+	dashboardRootContext->setContextProperty(componentName, qml); //WARNING:
+	qml->setParentItem(lastSelectedItem->parentItem());
+	SaveManager::addParentalRelationship(dashboardRootContext->nameForObject(qml),
+										 dashboardRootContext->nameForObject(lastSelectedItem->parentItem()));
+	qml->setPosition(lastSelectedItem->position());
 	qml->setClip(true); // Even if it's not true
+	qml->setEnabled(false);
 	fit(qml, Fit::WidthHeight);
 	*itemList << qml;
 	*urlList << url;
+
+	auto childs = GetAllChildren(lastSelectedItem);
+	for (auto child : childs) {
+		if (itemList->contains(child) && lastSelectedItem!=child) {
+			auto prevPos = child->position();
+			child->setParentItem(qml);
+			SaveManager::addParentalRelationship(dashboardRootContext->nameForObject(child),
+												 dashboardRootContext->nameForObject(qml));
+			child->setPosition(prevPos);
+		}
+	}
+	if (dashboardRootContext->nameForObject(lastSelectedItem) != componentName) {
+		dashboardRootContext->setContextProperty(dashboardRootContext->nameForObject(lastSelectedItem), 0);
+	}
+	lastSelectedItem->deleteLater();
+	lastSelectedItem = qml;
 
 	QMetaObject::invokeMethod(parent->parent(), "ShowSelectionTools", Qt::AutoConnection,
 							  Q_ARG(QQuickItem*const,lastSelectedItem));
@@ -294,6 +307,11 @@ void QmlEditor::setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const 
 void QmlEditor::setRootContext(QQmlContext* const context)
 {
 	m_d->dashboardRootContext = context;
+}
+
+void QmlEditor::setBindingWidget(BindingWidget* bindngWidget)
+{
+	m_d->bindingWidget = bindngWidget;
 }
 
 void QmlEditor::selectItem(QObject* const item)

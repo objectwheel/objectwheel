@@ -104,7 +104,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	designWidget->setObjectName(QStringLiteral("designWidget"));
 	designWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	designWidget->setMouseTracking(false);
-	designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
+	designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
 	verticalLayout->addWidget(designWidget);
 
 	buttonsLayout = new QHBoxLayout();

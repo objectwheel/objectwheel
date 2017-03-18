@@ -6,6 +6,7 @@
 class PagesWidgetPrivate;
 class QQuickItem;
 class QQmlContext;
+class BindingWidget;
 
 class PagesWidget : public QWidget
 {
@@ -17,6 +18,7 @@ class PagesWidget : public QWidget
 		void setRootContext(QQmlContext* context);
 		void setItemList(QList<QQuickItem*>* items);
 		void setUrlList(QList<QUrl>* items);
+		void setBindingWidget(BindingWidget* bindingWidget);
 		void setCurrentPage(int index);
 		~PagesWidget();
 

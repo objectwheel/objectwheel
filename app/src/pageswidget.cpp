@@ -14,6 +14,8 @@
 #include <QQmlContext>
 #include <QQmlProperty>
 #include <QMessageBox>
+#include <savemanager.h>
+#include <bindingwidget.h>
 
 using namespace Fit;
 
@@ -39,6 +41,7 @@ class PagesWidgetPrivate
 		PagesWidget* parent;
 		QQuickItem* swipeItem;
 		QQmlContext* rootContext;
+		BindingWidget* bindingWidget;
 		QList<QQuickItem*>* itemList;
 		QList<QUrl>* urlList;
 		QVBoxLayout verticalLayout;
@@ -173,12 +176,16 @@ void PagesWidgetPrivate::removeButtonClicked()
 				auto items = GetAllChildren(selectedItem);
 				for (auto item : items) {
 					if (itemList->contains(item)) {
+						SaveManager::removeSave(rootContext->nameForObject(item));
+						SaveManager::removeParentalRelationship(rootContext->nameForObject(item));
+						bindingWidget->detachBindingsFor(item);
 						rootContext->setContextProperty(rootContext->nameForObject(item), 0);
 						int i = itemList->indexOf(item);
 						itemList->removeOne(item);
 						urlList->removeAt(i);
 					}
 				}
+				SaveManager::removePageOrder(rootContext->nameForObject(selectedItem));
 				rootContext->setContextProperty(rootContext->nameForObject(selectedItem), 0);
 				selectedItem->setParentItem(0);
 				selectedItem->deleteLater();
@@ -211,6 +218,7 @@ void PagesWidgetPrivate::addButtonClicked()
 	if (!item) qFatal("PagesWidget : Error occurred");
 	item->setParentItem(swipeItem);
 	rootContext->setContextProperty(name, item);
+	SaveManager::addPageOrder(name);
 }
 
 void PagesWidgetPrivate::saveButtonClicked()
@@ -222,6 +230,7 @@ void PagesWidgetPrivate::saveButtonClicked()
 	rootContext->setContextProperty(name, 0);
 	rootContext->setContextProperty(nameEdit.text(), selectedItem);
 	pagesListWidget.currentItem()->setText(nameEdit.text());
+	SaveManager::changePageOrder(name, nameEdit.text());
 }
 
 PagesWidget::PagesWidget(QWidget *parent)
@@ -253,6 +262,11 @@ void PagesWidget::setItemList(QList<QQuickItem*>* items)
 void PagesWidget::setUrlList(QList<QUrl>* items)
 {
 	m_d->urlList = items;
+}
+
+void PagesWidget::setBindingWidget(BindingWidget* bindingWidget)
+{
+	m_d->bindingWidget = bindingWidget;
 }
 
 void PagesWidget::setCurrentPage(int index)

@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/qmls/design-area.qml</file>
+        <file>resources/qmls/dashboard.qml</file>
         <file>resources/tools/tools.json</file>
         <file>resources/tools/Dial.zip</file>
         <file>resources/tools/Button.zip</file>

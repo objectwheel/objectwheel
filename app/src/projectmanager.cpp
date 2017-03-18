@@ -2,6 +2,7 @@
 #include <usermanager.h>
 #include <filemanager.h>
 #include <toolsmanager.h>
+#include <savemanager.h>
 
 class ProjectManagerPrivate
 {
@@ -58,6 +59,8 @@ bool ProjectManager::buildNewProject(const QString& projectname)
 	if (UserManager::currentSessionsUser().isEmpty()) return false;
 	if (exists(projectname)) return false;
 	if (!mkdir(m_d->generateProjectDir(projectname))) return false;
+	if (!SaveManager::buildNewDatabase(m_d->generateProjectDir(projectname))) return false;
+	return true;
 }
 
 bool ProjectManager::startProject(const QString& projectname)
@@ -79,6 +82,8 @@ bool ProjectManager::startProject(const QString& projectname)
 	m_d->currentProject = projectname;
 
 	ToolsManager::downloadTools();
+
+	return true;
 }
 
 void ProjectManager::stopProject()

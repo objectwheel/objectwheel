@@ -8,6 +8,7 @@
 class QmlEditorPrivate;
 class QQuickItem;
 class QQmlContext;
+class BindingWidget;
 
 class QmlEditor : public QWidget
 {
@@ -18,6 +19,7 @@ class QmlEditor : public QWidget
 		explicit QmlEditor(QWidget *parent = 0);
 		void setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const urlList);
 		void setRootContext(QQmlContext* const context);
+		void setBindingWidget(BindingWidget* bindngWidget);
 		~QmlEditor();
 
 		float getShowRatio() const;

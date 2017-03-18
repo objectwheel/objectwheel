@@ -87,11 +87,19 @@ void MainWindow::SetupGui()
 	/* Remove deleted items from internal item list */
     connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=]
     (QQuickItem* item) {
-		int i = m_Items.indexOf(item);
-		if (i >= 0) {
-			m_d->designWidget->rootContext()->setContextProperty(m_d->designWidget->rootContext()->nameForObject(item), 0);
-			m_Items.removeAt(i);
-			m_ItemUrls.removeAt(i);
+		if (m_Items.contains(item)) {
+			auto childs = GetAllChildren(item);
+			for (auto child : childs) {
+				qDebug() << child;
+				if (m_Items.contains(child)) {
+					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(child));
+					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(child));
+					int i = m_Items.indexOf(child);
+					m_Items.removeAt(i);
+					m_ItemUrls.removeAt(i);
+					m_d->designWidget->rootContext()->setContextProperty(m_d->designWidget->rootContext()->nameForObject(child), 0);
+				}
+			}
 		}
 	});
 
@@ -283,7 +291,7 @@ void MainWindow::SetupGui()
 
 	QTimer::singleShot(0, [=] {
 #if !defined(Q_OS_DARWIN)
-		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/design-area.qml"));
+		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
 #endif
 		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 		/* Assign design area's root object */
@@ -306,6 +314,7 @@ void MainWindow::SetupGui()
 		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
 		m_d->pagesWidget->setItemList(&m_Items);
 		m_d->pagesWidget->setUrlList(&m_ItemUrls);
+		m_d->pagesWidget->setBindingWidget(m_d->bindingWidget);
 	});
 
 	m_d->bubbleHead = new BubbleHead(this);
@@ -336,6 +345,7 @@ void MainWindow::SetupGui()
 	m_d->qmlEditor->setHidden(true);
 	m_d->qmlEditor->setItems(&m_Items, &m_ItemUrls);
 	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
+	m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
     connect(m_d->bubbleHead, SIGNAL(clicked(bool)), this, SLOT(handleBubbleHeadClicked()));
 	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
@@ -401,7 +411,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				if (nullptr != pressedItem)
 				{
 					/* Handled drops coming from design area itself */
-					if (true == dropEvent->mimeData()->hasFormat("designarea/x-qquickitem"))
+					if (true == dropEvent->mimeData()->hasFormat("dashboard/x-qquickitem"))
 					{
 						/* Get deepest item under the dropped point */
 						QQuickItem* itemAtDroppedPoint = GetDeepestDesignItemOnPoint(dropEvent->pos());
@@ -417,6 +427,10 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						if (nullptr == itemAtDroppedPoint)
 						{
 							pressedItem->setParentItem(m_CurrentPage);
+							SaveManager::addParentalRelationship(m_d->designWidget->rootContext()
+																 ->nameForObject(pressedItem),
+																 m_d->designWidget->rootContext()
+																 ->nameForObject(m_CurrentPage));
 							pressedItem->setPosition(droppedPoint);
 						}
 						else if (true == childItems.contains(itemAtDroppedPoint))
@@ -427,6 +441,10 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						{
 							QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_CurrentPage, droppedPoint);
 							pressedItem->setParentItem(itemAtDroppedPoint);
+							SaveManager::addParentalRelationship(m_d->designWidget->rootContext()
+																 ->nameForObject(pressedItem),
+																 m_d->designWidget->rootContext()
+																 ->nameForObject(itemAtDroppedPoint));
 							pressedItem->setPosition(mappedPoint);
 						}
 						fixWebViewPosition(pressedItem);
@@ -484,6 +502,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					m_Items << qml;
 					m_ItemUrls << url;
 					SaveManager::addSave(componentName, url.toLocalFile());
+					SaveManager::addParentalRelationship(componentName, m_d->designWidget->rootContext()->nameForObject(m_CurrentPage));
 					SaveManager::setVariantProperty(componentName, "x", qml->x());
 					SaveManager::setVariantProperty(componentName, "y", qml->y());
 					SaveManager::setVariantProperty(componentName, "clip", qml->clip());
@@ -545,7 +564,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						QVariant variant;
 						variant.setValue<QQuickItem*>(pressedItem);
 
-						QString mimeType = "designarea/x-qquickitem";
+						QString mimeType = "dashboard/x-qquickitem";
 						QMimeData *mimeData = new QMimeData;
 						mimeData->setData(mimeType, variant.toByteArray());
 
@@ -729,6 +748,8 @@ void MainWindow::on_clearButton_clicked()
 			auto items = GetAllChildren(m_CurrentPage);
 			for (auto item : items) {
 				if (m_Items.contains(item)) {
+					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
+					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
 					m_d->designWidget->rootContext()->setContextProperty(
 								m_d->designWidget->rootContext()->nameForObject(item), 0);
 					int i = m_Items.indexOf(item);
@@ -838,6 +859,8 @@ void MainWindow::toolboxRemoveButtonClicked()
 					auto items = GetAllChildren(m_Items[i]);
 					for (auto item : items) {
 						if (m_Items.contains(item)) {
+							SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
+							SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
 							m_d->designWidget->rootContext()->setContextProperty(
 										m_d->designWidget->rootContext()->nameForObject(item), 0);
 							int j = m_Items.indexOf(item);
@@ -908,6 +931,8 @@ void MainWindow::toolboxResetButtonClicked()
 			ToolsManager::resetTools();
 
 			for (auto item : m_Items) {
+				SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
+				SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
 				m_d->designWidget->rootContext()->setContextProperty(
 							m_d->designWidget->rootContext()->nameForObject(item), 0);
 				item->deleteLater();

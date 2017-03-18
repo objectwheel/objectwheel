@@ -8,16 +8,36 @@
 #include <splashscreen.h>
 #include <QIcon>
 #include <QBuffer>
+#include <QSharedMemory>
+#include <QMessageBox>
 
 #define PIXEL_SIZE 13
-#define REF_WIDTH 660
-#define REF_HEIGHT 400
+#define REF_WIDTH 700
+#define REF_HEIGHT 430
 #define REF_DPI 127
+
+// m_Items.removeAt ve deleteLater olan her yerde context'i temizlemeyi unutma (ilgili nesneyi 0 layarak)
+// m_Items.removeAt ve deleteLater olan her yerde removeParentalRelations yapmayı unutma
+// removeParentalRelations olan her yerde removeSave yapmayı unutma
 
 int main(int argc, char *argv[])
 {
-	// Initialize application base with style
+	// Init application
 	QApplication a(argc, argv);
+
+	// Multiple instances protection
+	QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
+	if(!sharedMemory.create(1)) {
+		sharedMemory.attach();
+		sharedMemory.detach();
+		if(!sharedMemory.create(1)) {
+		   QMessageBox::warning(NULL, "Warning!", "Another instance already running!");
+		   a.exit(); // exit already a process running
+		   return 0;
+		}
+	}
+
+	// Init application settings
 	QApplication::setStyle("fusion");
 	qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
 	qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
