@@ -17,7 +17,7 @@ class FileManager : public QObject
 		bool rmsuffix(const QString& dir, const QString& suffix) const;
 		bool exists(const QString& name) const;
 		bool mv(const QString& from, const QString& to) const;
-		bool cp(const QString& from, const QString& toDir) const;
+		bool cp(const QString& from, const QString& toDir, const bool content = false) const;
 		QStringList ls(const QString& dir) const;
 		QStringList lsdir(const QString& dir) const;
 		QStringList lsfile(const QString& dir) const;
@@ -48,7 +48,7 @@ static inline bool rn(const QString& from, const QString& to) { return FileManag
 static inline bool rmsuffix(const QString& dir, const QString& suffix) { return FileManager().rmsuffix(dir, suffix); }
 static inline bool exists(const QString& name) { return FileManager().exists(name); }
 static inline bool mv(const QString& from, const QString& to) { return FileManager().mv(from, to); }
-static inline bool cp(const QString& from, const QString& toDir) { return FileManager().cp(from, toDir); }
+static inline bool cp(const QString& from, const QString& toDir, const bool content = false) { return FileManager().cp(from, toDir, content); }
 static inline QStringList ls(const QString& dir) { return FileManager().ls(dir); }
 static inline QStringList lsdir(const QString& dir) { return FileManager().lsdir(dir); }
 static inline QStringList lsfile(const QString& dir) { return FileManager().lsfile(dir); }

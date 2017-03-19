@@ -170,8 +170,8 @@ void SaveManager::addSave(const QString& id, const QString& url)
 	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 	if (projectDir.isEmpty()) return;
 	auto saveBaseDir = projectDir + separator() + SAVE_DIRECTORY;
-	cp(dname(url), saveBaseDir);
-	rn(saveBaseDir + separator() + fname(dname(url)), saveBaseDir + separator() + id);
+	if (!mkdir(saveBaseDir + separator() + id)) return;
+	cp(dname(url), saveBaseDir + separator() + id, true);
 }
 
 void SaveManager::removeSave(const QString& id)
