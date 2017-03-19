@@ -40,10 +40,10 @@ Rectangle {\n\
 #endif
 
 using namespace Fit;
+MainWindowPrivate* MainWindow::m_d = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QWidget(parent)
-	, m_d(new MainWindowPrivate)
 	, m_ResizerTick(new ResizerTick)
 	, m_RotatorTick(new RotatorTick)
 	, m_RemoverTick(new RemoverTick)
@@ -52,8 +52,11 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_LeftMenu(new CoverMenu)
 	, m_RightMenu(new CoverMenu)
 {
+	if (m_d) return;
+	m_d = new MainWindowPrivate(this);
 	m_d->setupUi(this);
 	SetupGui();
+	QTimer::singleShot(300, [=] { SetupManagers(); });
 }
 
 void MainWindow::SetupGui()
@@ -65,7 +68,7 @@ void MainWindow::SetupGui()
 	m_d->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
 	m_d->buttonsLayout->setSpacing(fit(5));
 	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
-	m_d->bindingWidget->setItemSource(&m_Items);
+	m_d->bindingWidget->setItemSource(&m_d->m_Items);
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
 	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
@@ -87,16 +90,16 @@ void MainWindow::SetupGui()
 	/* Remove deleted items from internal item list */
     connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=]
     (QQuickItem* item) {
-		if (m_Items.contains(item)) {
+		if (m_d->m_Items.contains(item)) {
 			auto childs = GetAllChildren(item);
 			for (auto child : childs) {
 				qDebug() << child;
-				if (m_Items.contains(child)) {
+				if (m_d->m_Items.contains(child)) {
 					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(child));
 					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(child));
-					int i = m_Items.indexOf(child);
-					m_Items.removeAt(i);
-					m_ItemUrls.removeAt(i);
+					int i = m_d->m_Items.indexOf(child);
+					m_d->m_Items.removeAt(i);
+					m_d->m_ItemUrls.removeAt(i);
 					m_d->designWidget->rootContext()->setContextProperty(m_d->designWidget->rootContext()->nameForObject(child), 0);
 				}
 			}
@@ -284,7 +287,7 @@ void MainWindow::SetupGui()
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
 	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
-	m_d->propertiesWidget->setItemSource(&m_Items);
+	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
 	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
 
 	m_d->centralWidget->installEventFilter(this);
@@ -312,8 +315,8 @@ void MainWindow::SetupGui()
 		m_d->designWidget->rootContext()->setContextProperty("page1", item);
 		m_d->pagesWidget->setSwipeItem(view);
 		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
-		m_d->pagesWidget->setItemList(&m_Items);
-		m_d->pagesWidget->setUrlList(&m_ItemUrls);
+		m_d->pagesWidget->setItemList(&m_d->m_Items);
+		m_d->pagesWidget->setUrlList(&m_d->m_ItemUrls);
 		m_d->pagesWidget->setBindingWidget(m_d->bindingWidget);
 	});
 
@@ -343,7 +346,7 @@ void MainWindow::SetupGui()
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
-	m_d->qmlEditor->setItems(&m_Items, &m_ItemUrls);
+	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
 	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
 	m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
@@ -363,7 +366,10 @@ void MainWindow::SetupGui()
 #endif
 		SplashScreen::hide();
 	});
+}
 
+void MainWindow::SetupManagers()
+{
 	//Let's add some custom controls to that project
 	ToolsManager::setListWidget(m_d->toolboxList);
 	auto userManager = new UserManager(this); //create new user manager
@@ -481,8 +487,8 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					int count = 1;
 					QString componentName = qmlContext(qml)->nameForObject(qml);
 					if (componentName.isEmpty()) componentName = "anonymous";
-					for (int i=0; i<m_Items.size();i++) {
-						if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_Items[i])) ||
+					for (int i=0; i<m_d->m_Items.size();i++) {
+						if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_d->m_Items[i])) ||
 							componentName == QString("dpi") || componentName == QString("swipeView")) {
 							// FIXME: If it's conflict with page names?
                             if (componentName.at(componentName.size() - 1).isNumber()) {
@@ -499,8 +505,8 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					qml->setClip(true); // Even if it's not true
 					qml->setEnabled(!m_d->editButton->isChecked());
 					fit(qml, Fit::WidthHeight);
-					m_Items << qml;
-					m_ItemUrls << url;
+					m_d->m_Items << qml;
+					m_d->m_ItemUrls << url;
 					SaveManager::addSave(componentName, url.toLocalFile());
 					SaveManager::addParentalRelationship(componentName, m_d->designWidget->rootContext()->nameForObject(m_CurrentPage));
 					SaveManager::setVariantProperty(componentName, "x", qml->x());
@@ -630,7 +636,7 @@ void MainWindow::fixWebViewPosition(QQuickItem* const item)
 	if (!main_window) return;
 
 	int count = 0;
-	for (auto citem : m_Items) {
+	for (auto citem : m_d->m_Items) {
 		if (citem == item) break;
 		for (auto ccitem : citem->findChildren<QObject*>()) {
 			if (QString(ccitem->metaObject()->className()) == "QQuickWebView")
@@ -661,7 +667,7 @@ void MainWindow::fixWebViewPosition(QQuickItem* const item)
 
 void MainWindow::fixWebViewPositions()
 {
-	for (auto item : m_Items)
+	for (auto item : m_d->m_Items)
 		fixWebViewPosition(item);
 }
 
@@ -670,13 +676,13 @@ QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
 	QPointF pt = point;
     QQuickItem* parent = m_CurrentPage,*final = m_CurrentPage;
 	QQuickItem* item = parent->childAt(pt.x(), pt.y());
-    if (m_Items.contains(item)) final = item;
+	if (m_d->m_Items.contains(item)) final = item;
 
     while (item) {
 		pt = item->mapFromItem(parent, pt);
 		parent = item;
 		item = parent->childAt(pt.x(), pt.y());
-        if (m_Items.contains(item)) final = item;
+		if (m_d->m_Items.contains(item)) final = item;
     }
 
     if (final == m_CurrentPage) return nullptr;
@@ -747,14 +753,14 @@ void MainWindow::on_clearButton_clicked()
 		case QMessageBox::Yes: {
 			auto items = GetAllChildren(m_CurrentPage);
 			for (auto item : items) {
-				if (m_Items.contains(item)) {
+				if (m_d->m_Items.contains(item)) {
 					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
 					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
 					m_d->designWidget->rootContext()->setContextProperty(
 								m_d->designWidget->rootContext()->nameForObject(item), 0);
-					int i = m_Items.indexOf(item);
-					m_Items.removeOne(item);
-					m_ItemUrls.removeAt(i);
+					int i = m_d->m_Items.indexOf(item);
+					m_d->m_Items.removeOne(item);
+					m_d->m_ItemUrls.removeAt(i);
 					m_d->bindingWidget->detachBindingsFor(item);
 					item->deleteLater();
 				}
@@ -769,7 +775,7 @@ void MainWindow::on_clearButton_clicked()
 
 void MainWindow::on_editButton_clicked()
 {
-	for (auto item : m_Items) {
+	for (auto item : m_d->m_Items) {
 		item->setEnabled(!m_d->editButton->isChecked());
 	}
 	m_d->propertiesWidget->clearList();
@@ -818,9 +824,9 @@ void MainWindow::handleToolboxNameboxChanges(QString name)
 	m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
 	m_d->toolboxList->AddUrls(m_d->toolboxList->currentItem(),urls);
 
-	for (int i = 0; i < m_ItemUrls.size(); i++) {
-		if (m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
-			m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
+	for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
+		if (m_d->m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
+			m_d->m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
 		}
 	}
 
@@ -854,18 +860,18 @@ void MainWindow::toolboxRemoveButtonClicked()
 			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
 			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
 
-			for (int i = 0; i < m_ItemUrls.size(); i++) {
-				if (m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
-					auto items = GetAllChildren(m_Items[i]);
+			for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
+				if (m_d->m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
+					auto items = GetAllChildren(m_d->m_Items[i]);
 					for (auto item : items) {
-						if (m_Items.contains(item)) {
+						if (m_d->m_Items.contains(item)) {
 							SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
 							SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
 							m_d->designWidget->rootContext()->setContextProperty(
 										m_d->designWidget->rootContext()->nameForObject(item), 0);
-							int j = m_Items.indexOf(item);
-							m_Items.removeOne(item);
-							m_ItemUrls.removeAt(j);
+							int j = m_d->m_Items.indexOf(item);
+							m_d->m_Items.removeOne(item);
+							m_d->m_ItemUrls.removeAt(j);
 							m_d->bindingWidget->detachBindingsFor(item);
 							item->deleteLater();
 						}
@@ -930,7 +936,7 @@ void MainWindow::toolboxResetButtonClicked()
 			m_d->qmlEditor->clearCache();
 			ToolsManager::resetTools();
 
-			for (auto item : m_Items) {
+			for (auto item : m_d->m_Items) {
 				SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
 				SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
 				m_d->designWidget->rootContext()->setContextProperty(
@@ -938,8 +944,8 @@ void MainWindow::toolboxResetButtonClicked()
 				item->deleteLater();
 			}
 			m_d->bindingWidget->clearAllBindings();
-			m_Items.clear();
-			m_ItemUrls.clear();
+			m_d->m_Items.clear();
+			m_d->m_ItemUrls.clear();
 			HideSelectionTools();
 			m_d->toolboxList->setCurrentRow(-1);
 			break;
@@ -1016,6 +1022,53 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 	loop.exec();
 	return pixmap;
+}
+
+bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
+{
+	m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+	QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
+	component.loadUrl(url);
+
+	QQmlIncubator incubator;
+	component.create(incubator, m_d->designWidget->rootContext());
+	while (incubator.isLoading()) {
+		QApplication::processEvents(QEventLoop::AllEvents, 50);
+	}
+	QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
+	if (component.isError() || !qml) return false;
+
+	int count = 1;
+	QString componentName = qmlContext(qml)->nameForObject(qml);
+	if (componentName.isEmpty()) componentName = "anonymous";
+	for (int i=0; i<m_d->m_Items.size();i++) {
+		if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_d->m_Items[i])) ||
+			componentName == QString("dpi") || componentName == QString("swipeView")) {
+			// FIXME: If it's conflict with page names?
+			if (componentName.at(componentName.size() - 1).isNumber()) {
+				componentName.remove(componentName.size() - 1, 1);
+			}
+			componentName += QString::number(count);
+			count++;
+			i = -1;
+		}
+	}
+
+	auto parentProperty = m_d->designWidget->rootContext()->contextProperty(parent);
+	auto parentItem = qobject_cast<QQuickItem*>(parentProperty.value<QObject*>());
+	if (!parentItem) qFatal("MainWindow::addControlWithoutSave : Error occurred");
+	m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
+	qml->setParentItem(parentItem);
+//	qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
+	qml->setClip(true); // Even if it's not true
+	qml->setEnabled(!m_d->editButton->isChecked());
+	fit(qml, Fit::WidthHeight);
+	m_d->m_Items << qml;
+	m_d->m_ItemUrls << url;
+
+	QTimer::singleShot(200, [qml] { m_d->parent->fixWebViewPosition(qml); });
+	if (m_d->editButton->isChecked()) m_d->parent->ShowSelectionTools(qml);
+	return true;
 }
 
 MainWindow::~MainWindow()

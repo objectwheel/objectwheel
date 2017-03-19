@@ -11,6 +11,7 @@ class BindingWidget;
 class PagesWidget : public QWidget
 {
 		Q_OBJECT
+		Q_DISABLE_COPY(PagesWidget)
 
 	public:
 		explicit PagesWidget(QWidget *parent = 0);
@@ -19,11 +20,14 @@ class PagesWidget : public QWidget
 		void setItemList(QList<QQuickItem*>* items);
 		void setUrlList(QList<QUrl>* items);
 		void setBindingWidget(BindingWidget* bindingWidget);
-		void setCurrentPage(int index);
 		~PagesWidget();
 
+		static void setCurrentPage(int index);
+		static void addPageWithoutSave(QString& name);
+		static void changePageWithoutSave(const QString& from, QString& to);
+
 	private:
-		PagesWidgetPrivate* m_d;
+		static PagesWidgetPrivate* m_d;
 };
 
 #endif // PAGESWIDGET_H

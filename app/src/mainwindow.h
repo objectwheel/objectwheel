@@ -14,20 +14,19 @@ class TitleBar;
 class MainWindow : public QWidget
 {
 		Q_OBJECT
+		Q_DISABLE_COPY(MainWindow)
 
 	public:
 		typedef QList<QQuickItem*> QQuickItemList;
 		typedef QList<QUrl> QQuickUrlList;
 
 	private:
-		MainWindowPrivate* m_d;
+		static MainWindowPrivate* m_d;
 		ResizerTick* m_ResizerTick;
 		RotatorTick* m_RotatorTick;
 		RemoverTick* m_RemoverTick;
 		QQuickItem* m_RootItem;
 		QQuickItem* m_CurrentPage;
-		QQuickItemList m_Items;
-		QQuickUrlList m_ItemUrls;
 		CoverMenu* m_LeftMenu;
 		CoverMenu* m_RightMenu;
 
@@ -35,12 +34,14 @@ class MainWindow : public QWidget
 		explicit MainWindow(QWidget *parent = 0);
 		~MainWindow();
 		void SetupGui();
+		void SetupManagers();
 		QQuickItem* GetDeepestDesignItemOnPoint(const QPoint& point) const;
 		const QQuickItemList GetAllChildren(QQuickItem* const item) const;
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
 		void fixWebViewPosition(QQuickItem* const item);
 		const QPixmap DownloadPixmap(const QUrl& url);
+		static bool addControlWithoutSave(const QUrl& url, const QString& parent);
 
 	private slots:
 		void on_clearButton_clicked();

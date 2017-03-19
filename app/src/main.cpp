@@ -16,9 +16,13 @@
 #define REF_HEIGHT 430
 #define REF_DPI 127
 
-// m_Items.removeAt ve deleteLater olan her yerde context'i temizlemeyi unutma (ilgili nesneyi 0 layarak)
-// m_Items.removeAt ve deleteLater olan her yerde removeParentalRelations yapmayı unutma
-// removeParentalRelations olan her yerde removeSave yapmayı unutma
+// Build gui equals
+// Git integration
+// Undo-redo
+// Procecess property changes (and others like bindings) into db
+// Fix qml editor according to dashboard database editing
+// Run project full screen
+// load latest database when opening
 
 int main(int argc, char *argv[])
 {
@@ -31,8 +35,8 @@ int main(int argc, char *argv[])
 		sharedMemory.attach();
 		sharedMemory.detach();
 		if(!sharedMemory.create(1)) {
-		   QMessageBox::warning(NULL, "Warning!", "Another instance already running!");
-		   a.exit(); // exit already a process running
+		   QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
+		   a.exit();
 		   return 0;
 		}
 	}

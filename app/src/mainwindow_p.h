@@ -34,6 +34,7 @@
 #include <filemanager.h>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
+#include <mainwindow.h>
 
 #define DURATION 500
 
@@ -43,7 +44,11 @@ QT_BEGIN_NAMESPACE
 
 class MainWindowPrivate
 {
+		typedef QList<QQuickItem*> QQuickItemList;
+		typedef QList<QUrl> QQuickUrlList;
+
 	public:
+		MainWindow* parent;
 		QWidget* centralWidget;
 		QVBoxLayout* verticalLayout;
 		TitleBar* titleBar;
@@ -75,12 +80,20 @@ class MainWindowPrivate
 		FlatButton* aboutButton;
 		BubbleHead* bubbleHead;
 		QmlEditor* qmlEditor;
+		QQuickItemList m_Items;
+		QQuickUrlList m_ItemUrls;
 
+		MainWindowPrivate(MainWindow* uparent);
 		void setupUi(QWidget *MainWindow); // setupUi
 		void retranslateUi(QWidget *MainWindow); // retranslateUi
 		void showAdderArea();
 		void hideAdderArea();
 };
+
+MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
+	: parent(uparent)
+{
+}
 
 void MainWindowPrivate::setupUi(QWidget* MainWindow)
 {

@@ -13,6 +13,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <pageswidget.h>
+#include <mainwindow.h>
 
 #define SAVE_DIRECTORY "dashboard"
 #define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
@@ -29,6 +31,10 @@ class SaveManagerPrivate
 		void parseImportDirectories(const QString& dir);
 		void initPageOrder(const QString& file) const;
 		void initEmptyParentalFile(const QString& file) const;
+		QJsonObject getParentalRelationship() const;
+		QJsonArray getPageOrder() const;
+		void createPages(const QJsonArray& pages);
+		bool fillDashboard(const QJsonObject& parentalRelationships);
 
 	public:
 		SaveManager* parent = nullptr;
@@ -82,6 +88,43 @@ void SaveManagerPrivate::initEmptyParentalFile(const QString& file) const
 	wrfile(file, jDoc.toJson());
 }
 
+QJsonObject SaveManagerPrivate::getParentalRelationship() const
+{
+	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projDir.isEmpty()) return QJsonObject();
+	auto parentalFile = projDir + separator() + SAVE_DIRECTORY + separator() + PARENTAL_RELATIONSHIP_FILE;
+	return QJsonDocument::fromJson(rdfile(parentalFile)).object();
+}
+
+QJsonArray SaveManagerPrivate::getPageOrder() const
+{
+	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projDir.isEmpty()) return QJsonArray();
+	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
+	return QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
+}
+
+void SaveManagerPrivate::createPages(const QJsonArray& pages)
+{
+	auto firstPage = pages[0].toString();
+	PagesWidget::changePageWithoutSave("page1", firstPage);
+	for (int i = 1; i < pages.size(); i++) {
+		auto currPage = pages[i].toString();
+		PagesWidget::addPageWithoutSave(currPage);
+	}
+}
+
+bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships)
+{
+	for (auto jKey : parentalRelationships.keys()) {
+		auto saveId = parent->saveDirectory(jKey);
+		if (saveId.isEmpty()) return false;
+		if (!MainWindow::addControlWithoutSave(QUrl::fromLocalFile(saveId + separator() + "main.qml"), parentalRelationships[jKey].toString()))
+			return false;
+	}
+	return true;
+}
+
 SaveManagerPrivate* SaveManager::m_d = nullptr;
 
 SaveManager::SaveManager(QObject *parent)
@@ -107,6 +150,18 @@ bool SaveManager::exists(const QString& id)
 	auto saveDir = m_d->generateSaveDirectory(id);
 	if (saveDir.isEmpty()) return false;
 	return ::exists(saveDir);
+}
+
+QStringList SaveManager::saves()
+{
+	QStringList saveList;
+	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projectDir.isEmpty()) return saveList;
+	auto saveBaseDir = projectDir + separator() + SAVE_DIRECTORY;
+	for (auto save : lsdir(saveBaseDir)) {
+		saveList << save;
+	}
+	return saveList;
 }
 
 void SaveManager::addSave(const QString& id, const QString& url)
@@ -136,13 +191,14 @@ bool SaveManager::buildNewDatabase(const QString& projDir)
 	return true;
 }
 
-QStringList SaveManager::saves()
+bool SaveManager::loadDatabase()
 {
-	QStringList saveList;
-	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projectDir.isEmpty()) return saveList;
-	for (auto savename : lsdir(projectDir)) saveList << savename;
-	return saveList;
+	QJsonArray pageOrder = m_d->getPageOrder();
+	QJsonObject parentalRelationship = m_d->getParentalRelationship();
+	if (pageOrder.isEmpty()) return false;
+	if (parentalRelationship.size() != saves().size()) return false;
+	m_d->createPages(pageOrder);
+	return m_d->fillDashboard(parentalRelationship);
 }
 
 void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
@@ -194,7 +250,7 @@ void SaveManager::removePageOrder(const QString& pageId)
 	if (projDir.isEmpty()) return;
 	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
 	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-	for (int i = 0; i < jArr.count(); i++) {
+	for (int i = 0; i < jArr.size(); i++) {
 		if (jArr.at(i) == pageId) {
 			jArr.removeAt(i);
 			wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
@@ -209,7 +265,7 @@ void SaveManager::changePageOrder(const QString& fromPageId, const QString& toPa
 	if (projDir.isEmpty()) return;
 	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
 	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-	for (int i = 0; i < jArr.count(); i++) {
+	for (int i = 0; i < jArr.size(); i++) {
 		if (jArr.at(i) == fromPageId) {
 			jArr[i] = toPageId;
 			wrfile(pageOrderFile, QJsonDocument(jArr).toJson());

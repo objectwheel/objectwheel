@@ -54,8 +54,9 @@ class PagesWidgetPrivate
 		LineEdit nameEdit;
 		PagesWidgetPrivate(PagesWidget* p);
 		const QList<QQuickItem*> GetAllChildren(QQuickItem* const item) const;
+		bool checkName(const QString& name) const;
 
-	private slots:
+	public slots:
 		void removeButtonClicked();
 		void addButtonClicked();
 		void saveButtonClicked();
@@ -120,6 +121,8 @@ PagesWidgetPrivate::PagesWidgetPrivate(PagesWidget* p)
 					 [=] (const QString& text) {
 		if (text.isEmpty()) {
 			saveButton.setDisabled(true);
+		} else if (!checkName(text)) {
+			saveButton.setDisabled(true);
 		} else {
 			if (pagesListWidget.currentRow() >= 0)
 				saveButton.setEnabled(true);
@@ -154,6 +157,16 @@ const QList<QQuickItem*> PagesWidgetPrivate::GetAllChildren(QQuickItem* const it
 		childList << GetAllChildren(child);
 	childList << item;
 	return childList;
+}
+
+bool PagesWidgetPrivate::checkName(const QString& name) const
+{
+	for (int i = 0; i < pagesListWidget.count(); i++) {
+		if (pagesListWidget.item(i)->text() == name) {
+			return false;
+		}
+	}
+	return true;
 }
 
 void PagesWidgetPrivate::removeButtonClicked()
@@ -202,22 +215,7 @@ void PagesWidgetPrivate::addButtonClicked()
 {
 	int count = pagesListWidget.count();
 	auto name = QString("page%1").arg(count);
-	for (int i = 0; i < pagesListWidget.count(); i++) {
-		if (pagesListWidget.item(i)->text() == name) {
-			name.remove(name.size() - 1, 1);
-			i = -1;
-			count++;
-			name += QString::number(count);
-		}
-	}
-	pagesListWidget.addItem(name);
-
-	QQmlComponent c(qmlEngine((QObject*)swipeItem));
-	c.setData(QByteArray().insert(0,QString(PAGE_CODE).arg(name)), QUrl());
-	auto item = qobject_cast<QQuickItem*>(c.create(qmlContext((QObject*)swipeItem)));
-	if (!item) qFatal("PagesWidget : Error occurred");
-	item->setParentItem(swipeItem);
-	rootContext->setContextProperty(name, item);
+	parent->addPageWithoutSave(name);
 	SaveManager::addPageOrder(name);
 }
 
@@ -233,10 +231,13 @@ void PagesWidgetPrivate::saveButtonClicked()
 	SaveManager::changePageOrder(name, nameEdit.text());
 }
 
+PagesWidgetPrivate* PagesWidget::m_d = nullptr;
+
 PagesWidget::PagesWidget(QWidget *parent)
 	: QWidget(parent)
-	, m_d(new PagesWidgetPrivate(this))
 {
+	if (m_d) return;
+	m_d = new PagesWidgetPrivate(this);
 }
 
 PagesWidget::~PagesWidget()
@@ -272,4 +273,56 @@ void PagesWidget::setBindingWidget(BindingWidget* bindingWidget)
 void PagesWidget::setCurrentPage(int index)
 {
 	m_d->pagesListWidget.setCurrentRow(index);
+}
+
+void PagesWidget::addPageWithoutSave(QString& name)
+{
+	int count = m_d->pagesListWidget.count();
+	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
+		if (m_d->pagesListWidget.item(i)->text() == name) {
+			if (name.at(name.size() - 1).isNumber()) {
+				name.remove(name.size() - 1, 1);
+			}
+			i = -1;
+			count++;
+			name += QString::number(count);
+		}
+	}
+	m_d->pagesListWidget.addItem(name);
+
+	QQmlComponent c(qmlEngine((QObject*)m_d->swipeItem));
+	c.setData(QByteArray().insert(0,QString(PAGE_CODE).arg(name)), QUrl());
+	auto item = qobject_cast<QQuickItem*>(c.create(qmlContext((QObject*)m_d->swipeItem)));
+	if (!item) qFatal("PagesWidget : Error occurred");
+	item->setParentItem(m_d->swipeItem);
+	m_d->rootContext->setContextProperty(name, item);
+}
+
+void PagesWidget::changePageWithoutSave(const QString& from, QString& to)
+{
+	if (from == to) return;
+	int index = -1;
+	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
+		if (m_d->pagesListWidget.item(i)->text() == from) {
+			index = i;
+		}
+	}
+	if (index < 0) return;
+	int count = m_d->pagesListWidget.count();
+	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
+		if (m_d->pagesListWidget.item(i)->text() == to) {
+			if (to.at(to.size() - 1).isNumber()) {
+				to.remove(to.size() - 1, 1);
+			}
+			i = -1;
+			count++;
+			to += QString::number(count);
+		}
+	}
+	auto v = m_d->rootContext->contextProperty(from);
+	auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
+	if (!selectedItem) qFatal("PagesWidget : Error occurred");
+	m_d->rootContext->setContextProperty(from, 0);
+	m_d->rootContext->setContextProperty(to, selectedItem);
+	m_d->pagesListWidget.item(index)->setText(to);
 }
