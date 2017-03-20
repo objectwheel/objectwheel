@@ -174,6 +174,14 @@ void SaveManager::addSave(const QString& id, const QString& url)
 	cp(dname(url), saveBaseDir + separator() + id, true);
 }
 
+void SaveManager::changeSave(const QString& fromId, QString toId)
+{
+	if (!exists(fromId) || saves().contains(toId)) return;
+	auto saveDir = saveDirectory(fromId);
+	if (saveDir.isEmpty()) return;
+	rn(saveDir, dname(saveDir) + separator() + toId);
+}
+
 void SaveManager::removeSave(const QString& id)
 {
 	if (!exists(id)) return;
@@ -232,6 +240,12 @@ void SaveManager::removeParentalRelationship(const QString& id)
 	QJsonObject jObj = QJsonDocument::fromJson(rdfile(parentalFile)).object();
 	jObj.remove(id);
 	wrfile(parentalFile, QJsonDocument(jObj).toJson());
+}
+
+QString SaveManager::parentalRelationship(const QString& id)
+{
+	auto jObj = m_d->getParentalRelationship();
+	return jObj[id].toString();
 }
 
 void SaveManager::addPageOrder(const QString& pageId)

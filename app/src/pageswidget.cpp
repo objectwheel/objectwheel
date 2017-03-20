@@ -229,6 +229,12 @@ void PagesWidgetPrivate::saveButtonClicked()
 	rootContext->setContextProperty(nameEdit.text(), selectedItem);
 	pagesListWidget.currentItem()->setText(nameEdit.text());
 	SaveManager::changePageOrder(name, nameEdit.text());
+	auto items = GetAllChildren(selectedItem);
+	for (auto item : items) {
+		if (itemList->contains(item)) {
+			SaveManager::addParentalRelationship(rootContext->nameForObject(item), nameEdit.text());
+		}
+	}
 }
 
 PagesWidgetPrivate* PagesWidget::m_d = nullptr;

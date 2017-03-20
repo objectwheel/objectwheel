@@ -20,11 +20,13 @@ class SaveManager : public QObject
 		static bool exists(const QString& id);
 		static QStringList saves();
 		static void addSave(const QString& id, const QString& url);
+		static void changeSave(const QString& fromId, QString toId);
 		static void removeSave(const QString& id);
 		static QString saveDirectory(const QString& id);
 
 		static void addParentalRelationship(const QString& id, const QString& parent);
 		static void removeParentalRelationship(const QString& id);
+		static QString parentalRelationship(const QString& id);
 
 		static void addPageOrder(const QString& pageId);
 		static void removePageOrder(const QString& pageId);

@@ -689,7 +689,7 @@ QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
     return final;
 }
 
-const MainWindow::QQuickItemList MainWindow::GetAllChildren(QQuickItem* const item) const
+const MainWindow::QQuickItemList MainWindow::GetAllChildren(QQuickItem* const item)
 {
 	/* Return all child items of item including item itself */
 	QQuickItemList childList;

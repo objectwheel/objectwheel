@@ -19,9 +19,9 @@ class MainWindow : public QWidget
 	public:
 		typedef QList<QQuickItem*> QQuickItemList;
 		typedef QList<QUrl> QQuickUrlList;
+		static MainWindowPrivate* m_d;
 
 	private:
-		static MainWindowPrivate* m_d;
 		ResizerTick* m_ResizerTick;
 		RotatorTick* m_RotatorTick;
 		RemoverTick* m_RemoverTick;
@@ -36,7 +36,7 @@ class MainWindow : public QWidget
 		void SetupGui();
 		void SetupManagers();
 		QQuickItem* GetDeepestDesignItemOnPoint(const QPoint& point) const;
-		const QQuickItemList GetAllChildren(QQuickItem* const item) const;
+		static const QQuickItemList GetAllChildren(QQuickItem* const item);
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
 		void fixWebViewPosition(QQuickItem* const item);
