@@ -580,8 +580,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						drag->setHotSpot(diffPoint.toPoint());
 
 						QSharedPointer<QQuickItemGrabResult> result = pressedItem->grabToImage(); // FIXME: On IOS
-						connect(result.data(), &QQuickItemGrabResult::ready, this, [=]
-						{
+						connect(result.data(), &QQuickItemGrabResult::ready, this, [=] {
 							drag->setPixmap(QPixmap::fromImage(result->image()));
 							drag->exec();
 						});

@@ -24,6 +24,9 @@ class SaveManager : public QObject
 		static void removeSave(const QString& id);
 		static QString saveDirectory(const QString& id);
 
+		static QJsonObject getParentalRelationships();
+		static QJsonArray getPageOrders();
+
 		static void addParentalRelationship(const QString& id, const QString& parent);
 		static void removeParentalRelationship(const QString& id);
 		static QString parentalRelationship(const QString& id);

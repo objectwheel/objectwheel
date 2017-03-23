@@ -31,10 +31,8 @@ class SaveManagerPrivate
 		void parseImportDirectories(const QString& dir);
 		void initPageOrder(const QString& file) const;
 		void initEmptyParentalFile(const QString& file) const;
-		QJsonObject getParentalRelationship() const;
-		QJsonArray getPageOrder() const;
 		void createPages(const QJsonArray& pages);
-		bool fillDashboard(const QJsonObject& parentalRelationships);
+		bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages);
 
 	public:
 		SaveManager* parent = nullptr;
@@ -88,22 +86,6 @@ void SaveManagerPrivate::initEmptyParentalFile(const QString& file) const
 	wrfile(file, jDoc.toJson());
 }
 
-QJsonObject SaveManagerPrivate::getParentalRelationship() const
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonObject();
-	auto parentalFile = projDir + separator() + SAVE_DIRECTORY + separator() + PARENTAL_RELATIONSHIP_FILE;
-	return QJsonDocument::fromJson(rdfile(parentalFile)).object();
-}
-
-QJsonArray SaveManagerPrivate::getPageOrder() const
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonArray();
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	return QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-}
-
 void SaveManagerPrivate::createPages(const QJsonArray& pages)
 {
 	auto firstPage = pages[0].toString();
@@ -114,13 +96,24 @@ void SaveManagerPrivate::createPages(const QJsonArray& pages)
 	}
 }
 
-bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships)
+bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages)
 {
-	for (auto jKey : parentalRelationships.keys()) {
-		auto saveId = parent->saveDirectory(jKey);
-		if (saveId.isEmpty()) return false;
-		if (!MainWindow::addControlWithoutSave(QUrl::fromLocalFile(saveId + separator() + "main.qml"), parentalRelationships[jKey].toString()))
-			return false;
+	QStringList createdObjects;
+	for (auto page : pages) {
+		createdObjects << page.toString();
+	}
+	while (!createdObjects.isEmpty()) {
+		for (auto key : parentalRelationships.keys()) {
+			if (parentalRelationships[key].toString() == createdObjects[0]) {
+				auto saveId = parent->saveDirectory(key);
+				if (saveId.isEmpty()) return false;
+				if (!MainWindow::addControlWithoutSave(QUrl::fromLocalFile(saveId + separator() + "main.qml"),
+													   parentalRelationships[key].toString()))
+					return false;
+				createdObjects.append(key);
+			}
+		}
+		createdObjects.removeFirst();
 	}
 	return true;
 }
@@ -143,6 +136,22 @@ QString SaveManager::saveDirectory(const QString& id)
 {
 	if (!exists(id)) return QString();
 	return m_d->generateSaveDirectory(id);
+}
+
+QJsonObject SaveManager::getParentalRelationships()
+{
+	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projDir.isEmpty()) return QJsonObject();
+	auto parentalFile = projDir + separator() + SAVE_DIRECTORY + separator() + PARENTAL_RELATIONSHIP_FILE;
+	return QJsonDocument::fromJson(rdfile(parentalFile)).object();
+}
+
+QJsonArray SaveManager::getPageOrders()
+{
+	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projDir.isEmpty()) return QJsonArray();
+	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
+	return QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
 }
 
 bool SaveManager::exists(const QString& id)
@@ -201,12 +210,12 @@ bool SaveManager::buildNewDatabase(const QString& projDir)
 
 bool SaveManager::loadDatabase()
 {
-	QJsonArray pageOrder = m_d->getPageOrder();
-	QJsonObject parentalRelationship = m_d->getParentalRelationship();
+	QJsonArray pageOrder = getPageOrders();
+	QJsonObject parentalRelationship = getParentalRelationships();
 	if (pageOrder.isEmpty()) return false;
 	if (parentalRelationship.size() != saves().size()) return false;
 	m_d->createPages(pageOrder);
-	return m_d->fillDashboard(parentalRelationship);
+	return m_d->fillDashboard(parentalRelationship, pageOrder);
 }
 
 void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
@@ -244,7 +253,7 @@ void SaveManager::removeParentalRelationship(const QString& id)
 
 QString SaveManager::parentalRelationship(const QString& id)
 {
-	auto jObj = m_d->getParentalRelationship();
+	auto jObj = getParentalRelationships();
 	return jObj[id].toString();
 }
 
