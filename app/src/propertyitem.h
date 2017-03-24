@@ -17,7 +17,7 @@ class PropertyItem : public QWidget
 		QList<QQuickItem*>* m_Items;
 
 	public:
-		explicit PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidget *parent = 0);
+		explicit PropertyItem(const QPair<QMetaProperty, QObject*>& property, QQmlContext* const context, QWidget *parent = 0);
 		explicit PropertyItem(QObject* const selectedItem, QQmlContext* const context, QWidget *parent = 0);
 		const QPair<QMetaProperty, QObject*>& property() const;
 		QList<QQuickItem*>* itemSource() const;
@@ -25,9 +25,10 @@ class PropertyItem : public QWidget
 		inline bool isValid() const { return m_Valid; }
 
 	protected:
-		void fillCup();
+		void fillCup(QQmlContext* const context);
 		void fillId(QObject* const selectedItem, QQmlContext* const context);
-		void applyValue(const QVariant& value);
+		void applyValue(const QVariant& value, QQmlContext* const ctx);
+		void applyFont(const QFont& font, QQmlContext* const ctx);
 		bool eventFilter(QObject* o, QEvent* e);
 		void paintEvent(QPaintEvent *e);
 

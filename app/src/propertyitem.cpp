@@ -11,14 +11,14 @@
 
 using namespace Fit;
 
-PropertyItem::PropertyItem(const QPair<QMetaProperty, QObject*>& property, QWidget* parent)
+PropertyItem::PropertyItem(const QPair<QMetaProperty, QObject*>& property, QQmlContext* const context, QWidget* parent)
 	: QWidget(parent)
 	, m_Property(property)
 	, m_Valid(true)
 {
 	setObjectName("propertyItem"); //for css
 	setStyleSheet(CSS::PropertyItem);
-	fillCup();
+	fillCup(context);
 }
 
 PropertyItem::PropertyItem(QObject* const selectedItem, QQmlContext* const context, QWidget *parent)
@@ -45,10 +45,22 @@ const QPair<QMetaProperty, QObject*>& PropertyItem::property() const
 	return m_Property;
 }
 
-void PropertyItem::applyValue(const QVariant& value)
+void PropertyItem::applyValue(const QVariant& value, QQmlContext* const ctx)
 {
 	m_Property.second->setProperty(m_Property.first.name(), value);
+	SaveManager::setVariantProperty(ctx->nameForObject(m_Property.second), m_Property.first.name(), value);
 	emit valueApplied();
+}
+
+void PropertyItem::applyFont(const QFont& font, QQmlContext* const ctx)
+{
+	auto id = ctx->nameForObject(m_Property.second);
+	m_Property.second->setProperty(m_Property.first.name(), font);
+	SaveManager::setVariantProperty(id, "font.family", font.family());
+	SaveManager::setVariantProperty(id, "font.bold", font.bold());
+	SaveManager::setVariantProperty(id, "font.italic", font.italic());
+	SaveManager::setVariantProperty(id, "font.pointSize", font.pointSize());
+//	emit valueApplied();
 }
 
 void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlContext* const context)
@@ -84,7 +96,7 @@ void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlC
 	context->setContextProperty(componentName, selectedItem);
 }
 
-void PropertyItem::fillCup()
+void PropertyItem::fillCup(QQmlContext* const context)
 {
 	QString name = m_Property.first.name();
 	name[0] = name.at(0).toUpper();
@@ -112,7 +124,7 @@ void PropertyItem::fillCup()
 			widget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 			widget->setChecked(m_Property.first.read(m_Property.second).toBool());
 			layout->addWidget(widget);
-			connect(widget,static_cast<void(Switch::*)(bool)>(&Switch::toggled),[&](bool b){applyValue(b);});
+			connect(widget,static_cast<void(Switch::*)(bool)>(&Switch::toggled),[&, context](bool b){applyValue(b, context);});
 			break;
 
 		} case QVariant::String: {
@@ -123,7 +135,7 @@ void PropertyItem::fillCup()
 			widget->setFixedHeight(fit(30));
 			widget->setText(m_Property.first.read(m_Property.second).toString());
 			layout->addWidget(widget);
-			connect(widget,static_cast<void(QLineEdit::*)(const QString&)>(&QLineEdit::textChanged),[&](const QString& b){applyValue(b);});
+			connect(widget,static_cast<void(QLineEdit::*)(const QString&)>(&QLineEdit::textChanged),[&, context](const QString& b){applyValue(b, context);});
 
 			widget->setReadOnly(true);
 			QCheckBox* enabler = new QCheckBox;
@@ -156,7 +168,7 @@ void PropertyItem::fillCup()
 			widget->setCursor(Qt::PointingHandCursor);
 			widget->setValue(m_Property.first.read(m_Property.second).toInt());
 			layout->addWidget(widget);
-			connect(widget,static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),[&](int b){applyValue(b);});
+			connect(widget,static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),[&, context](int b){applyValue(b, context);});
 
 			widget->findChild<QLineEdit*>()->setReadOnly(true);
 			QCheckBox* enabler = new QCheckBox;
@@ -189,7 +201,7 @@ void PropertyItem::fillCup()
 			widget->setCursor(Qt::PointingHandCursor);
 			widget->installEventFilter(this);
 			widget->setValue(m_Property.first.read(m_Property.second).toDouble());
-			connect(widget,static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),[&](double b){applyValue(b);});
+			connect(widget,static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),[&, context](double b){applyValue(b, context);});
 
 			widget->findChild<QLineEdit*>()->setReadOnly(true);
 			QCheckBox* enabler = new QCheckBox;
@@ -219,7 +231,7 @@ void PropertyItem::fillCup()
 			widget->setCursor(Qt::PointingHandCursor);
 			widget->findChild<QLineEdit*>()->setReadOnly(true);
 			connect(widget,static_cast<void(QFontComboBox::*)(const QFont&)>(&QFontComboBox::currentFontChanged),
-					[&](const QFont& b){applyValue(b);});
+					[&, context](const QFont& b){applyFont(b, context);});
 
 			QSpinBox* size = new QSpinBox;
 			size->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -235,7 +247,7 @@ void PropertyItem::fillCup()
 			connect(size,static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),[=](int b){
 				QFont f(qvariant_cast<QFont>(m_Property.first.read(m_Property.second)));
 				f.setPointSize(b);
-				m_Property.second->setProperty("font", f);
+				applyFont(f, context);
 			});
 
 			QComboBox* weight = new QComboBox;
@@ -274,7 +286,7 @@ void PropertyItem::fillCup()
 					f.setBold(false);
 					f.setItalic(true);
 				}
-				m_Property.second->setProperty("font", f);
+				applyFont(f, context);
 			});
 
 			layout->addWidget(widget);

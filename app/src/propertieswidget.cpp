@@ -392,7 +392,7 @@ void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
 
 	for (auto property : m_Properties) {
 		QListWidgetItem* item = new QListWidgetItem;
-		PropertyItem* propertyItem = new PropertyItem(property);
+		PropertyItem* propertyItem = new PropertyItem(property, m_rootContext);
 		propertyItem->setItemSource(m_Items);
 		if (!propertyItem->isValid()) {
 			delete item;

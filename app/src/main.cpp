@@ -22,9 +22,6 @@
 // Procecess property changes (and others like bindings) into db
 // Fix qml editor according to dashboard database editing
 // Run project full screen
-// load latest database when opening
-/* fix: we have to load database "saves" in order, according to their parental_relationships.
-   older should be loaded first. */
 
 int main(int argc, char *argv[])
 {

@@ -453,6 +453,12 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 																 ->nameForObject(itemAtDroppedPoint));
 							pressedItem->setPosition(mappedPoint);
 						}
+						SaveManager::setVariantProperty(m_d->designWidget->rootContext()
+														->nameForObject(pressedItem),
+														"x",pressedItem->x());
+						SaveManager::setVariantProperty(m_d->designWidget->rootContext()
+														->nameForObject(pressedItem),
+														"y",pressedItem->y());
 						fixWebViewPosition(pressedItem);
 						ShowSelectionTools(pressedItem);
 						return true;
@@ -579,7 +585,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						QPointF diffPoint = dragStartPoint - m_CurrentPage->mapFromItem(pressedItem->parentItem(), pressedItem->position());
 						drag->setHotSpot(diffPoint.toPoint());
 
-						QSharedPointer<QQuickItemGrabResult> result = pressedItem->grabToImage(); // FIXME: On IOS
+						QSharedPointer<QQuickItemGrabResult> result = pressedItem->grabToImage();
 						connect(result.data(), &QQuickItemGrabResult::ready, this, [=] {
 							drag->setPixmap(QPixmap::fromImage(result->image()));
 							drag->exec();
@@ -1058,7 +1064,7 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 	if (!parentItem) qFatal("MainWindow::addControlWithoutSave : Error occurred");
 	m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
 	qml->setParentItem(parentItem);
-//	qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
+//	qml->setPosition({10,10});
 	qml->setClip(true); // Even if it's not true
 	qml->setEnabled(!m_d->editButton->isChecked());
 	fit(qml, Fit::WidthHeight);
