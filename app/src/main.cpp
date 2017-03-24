@@ -35,17 +35,22 @@ int main(int argc, char *argv[])
 	// Init application
 	QApplication a(argc, argv);
 
-	// Multiple instances protection
-	QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
-	if(!sharedMemory.create(1)) {
-		sharedMemory.attach();
-		sharedMemory.detach();
-		if(!sharedMemory.create(1)) {
-		   QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
-		   a.exit();
-		   return 0;
-		}
-	}
+    
+    
+# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
+    // Multiple instances protection
+    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
+    if(!sharedMemory.create(1)) {
+        sharedMemory.attach();
+        sharedMemory.detach();
+        if(!sharedMemory.create(1)) {
+            QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
+            a.exit();
+            return 0;
+        }
+    }
+# endif
+
 
 	// Init application settings
 	QApplication::setStyle("fusion");
