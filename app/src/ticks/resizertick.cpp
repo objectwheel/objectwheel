@@ -7,6 +7,8 @@
 #include <QQuickItem>
 #include <QQuickWidget>
 #include <QApplication>
+#include <savemanager.h>
+#include <QQmlContext>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 #    define RESIZERTICK_SIZE 15
@@ -15,11 +17,13 @@
 #endif
 
 using namespace Fit;
+qreal width, height;
 
 ResizerTick::ResizerTick(QWidget* const parent)
 	: QPushButton(parent)
 	, m_TrackedItem(nullptr)
 {
+	connect(&m_SavingTimer, SIGNAL(timeout()), this, SLOT(handleSavingTimeout()));
 	setCursor(QCursor(Qt::SizeFDiagCursor));
 	resize(RESIZERTICK_SIZE, RESIZERTICK_SIZE);
 	fit(this);
@@ -36,6 +40,11 @@ void ResizerTick::SetTrackedItem(QQuickItem* const trackedItem)
 	FixCoord();
 }
 
+void ResizerTick::SetRootContext(QQmlContext* const context)
+{
+	m_RootContext = context;
+}
+
 void ResizerTick::FixCoord()
 {
 	QQuickWidget* parent = qobject_cast<QQuickWidget*>(this->parent());
@@ -43,6 +52,13 @@ void ResizerTick::FixCoord()
 	QPointF point = rootObject->mapFromItem(m_TrackedItem->parentItem(), m_TrackedItem->position());
 	move({static_cast<int>(point.x() + m_TrackedItem->width()),
 		  static_cast<int>(point.y() + m_TrackedItem->height())});
+}
+
+void ResizerTick::handleSavingTimeout()
+{
+	SaveManager::setVariantProperty(m_RootContext->nameForObject(m_TrackedItem), "width", ::width);
+	SaveManager::setVariantProperty(m_RootContext->nameForObject(m_TrackedItem), "height", ::height);
+	m_SavingTimer.stop();
 }
 
 void ResizerTick::paintEvent(QPaintEvent* const)
@@ -69,6 +85,9 @@ void ResizerTick::mouseMoveEvent(QMouseEvent* const event)
 	move(pos() + event->pos() - m_HotspotDifference);
 	m_TrackedItem->setWidth(pos().x() - point.x());
 	m_TrackedItem->setHeight(pos().y() - point.y());
+	::width = pos().x() - point.x();
+	::height = pos().y() - point.y();
+	m_SavingTimer.start(200);
 	emit ItemResized(m_TrackedItem);
 }
 

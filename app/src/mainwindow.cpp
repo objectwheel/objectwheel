@@ -74,6 +74,10 @@ void MainWindow::SetupGui()
 	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
 	m_RotatorTick->setIcon(QIcon(":/resources/images/rotate-icon.png"));
 
+	/* Set ticks' root contexts */
+	m_ResizerTick->SetRootContext(m_d->designWidget->rootContext());
+	m_RotatorTick->SetRootContext(m_d->designWidget->rootContext());
+
 	/* Toolbox stylizing */
 	m_d->toolboxList->setIconSize(fit({30, 30}));
 
