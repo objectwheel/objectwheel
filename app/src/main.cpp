@@ -16,12 +16,19 @@
 #define REF_HEIGHT 430
 #define REF_DPI 127
 
+/* Far tasks */
 // Build gui equals
-// Git integration
+// Verisoning-Git integration
 // Undo-redo
-// Procecess property changes (and others like bindings) into db
-// Fix qml editor according to dashboard database editing
 // Run project full screen
+// Cloud part-sync-login etc
+
+/* Near tasks */
+// Process bindings into db
+// Fix qml editor according to dashboard database editing
+// Fix parser errors
+// Fix  parser slowness
+// General bug fixing
 
 int main(int argc, char *argv[])
 {
