@@ -288,7 +288,7 @@ void MainWindow::SetupGui()
 	leftMenuLayout->setSpacing(fit(8));
 	leftMenuLayout->addWidget(leftToolbar);
 	leftMenuLayout->addWidget(leftContainer);
-	m_LeftMenu->attachWidget(leftMenuWidget);
+	m_RightMenu->attachWidget(leftMenuWidget);
 
 	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->propertiesWidget->setItemSource(&m_d->m_Items);

@@ -8,7 +8,7 @@
 #include <QQmlComponent>
 #include <QQuickItem>
 
-#define DURATION 800
+#define DURATION 1500
 #define LOADING_TIME 800
 using namespace Fit;
 
@@ -55,7 +55,7 @@ void SplashScreenPrivate::hide()
 	animation->setDuration(DURATION);
 	animation->setStartValue(1.0);
 	animation->setEndValue(0.001);
-	animation->setEasingCurve(QEasingCurve::OutExpo);
+	animation->setEasingCurve(QEasingCurve::OutCubic);
 	animation->start();
 	QObject::connect(animation, SIGNAL(valueChanged(QVariant)), this, SLOT(update()));
 	QObject::connect(animation, &QPropertyAnimation::finished, [this]{setHidden(true);showRatio=1;});
