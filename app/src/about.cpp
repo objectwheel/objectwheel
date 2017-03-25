@@ -7,7 +7,7 @@
 #include <fit.h>
 #include <QApplication>
 
-#define TITLE_TEXT "<p><b>version</b> 1.588 <b>pbuild</b> d225624<br>Sat Mar 25 00:55:14 2017 +0300<br></p>"
+#define TITLE_TEXT "<p><b>version</b> 1.588 <b>pbuild</b> ee30820<br>Sat Mar 25 01:00:00 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
 using namespace Fit;
@@ -39,7 +39,7 @@ AboutPrivate::AboutPrivate(QWidget* p, QWidget* cW)
 	parallelAnimationGroup.addAnimation(&aboutShifterAmination);
 
 	QPalette palette(parent->palette());
-	palette.setColor(QPalette::Window, "#262626");
+	palette.setColor(QPalette::Window, "#e0e4e7");
 	parent->setPalette(palette);
 
 	parent->setAutoFillBackground(true);
@@ -57,11 +57,11 @@ AboutPrivate::AboutPrivate(QWidget* p, QWidget* cW)
 	iconLayout.addWidget(&iconLabel);
 	iconLayout.addStretch();
 
-	titleLabel.setStyleSheet("background:transparent;color:white;");
+	titleLabel.setStyleSheet("background:transparent;color:#2e3a41;");
 	titleLabel.setText(TITLE_TEXT);
 	titleLabel.setAlignment(Qt::AlignCenter);
 
-	legalLabel.setStyleSheet("background:transparent;color:white;");
+	legalLabel.setStyleSheet("background:transparent;color:#2e3a41;");
 	legalLabel.setText(LEGAL_TEXT);
 	legalLabel.setAlignment(Qt::AlignCenter);
 

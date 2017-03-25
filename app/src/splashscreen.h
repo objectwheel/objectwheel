@@ -18,7 +18,7 @@ namespace SplashScreen
 	void setText(const QString& text);
 	void setTextColor(const QColor& color);
 	void setBackgroundBrush(const QBrush& brush);
-	void setLoadingDevice(QIODevice* device);
+	void setLoadingImageFilename(const QString& loadingImageFilename);
 	void show();
 	void hide();
 }

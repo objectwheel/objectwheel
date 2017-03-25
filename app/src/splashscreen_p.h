@@ -8,6 +8,7 @@
 #include <QBrush>
 #include <QMovie>
 #include <QIODevice>
+#include <QQuickWidget>
 
 class SplashScreenPrivate : public QWidget
 {
@@ -21,15 +22,18 @@ class SplashScreenPrivate : public QWidget
 		QString text;
 		QColor textColor;
 		QBrush backgroundBrush;
-		QMovie movie;
+		QQuickWidget loadingWidget;
+		QString loadingImageFilename;
+		QQuickItem* prevBusyIndicator;
 		float showRatio;
+
 		explicit SplashScreenPrivate(QWidget *parent = 0);
 		bool eventFilter(QObject *watched, QEvent *event) override;
-		void setLoadingDevice(QIODevice* device);
 		void paintEvent(QPaintEvent *event) override;
 		float getShowRatio() const;
 		void setShowRatio(float value);
 		void hide();
+		void show();
 };
 
 #endif // SPLASHSCREEN_P_H

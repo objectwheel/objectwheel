@@ -159,7 +159,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxList->setFocusPolicy(Qt::NoFocus);
 	toolboxList->setStyleSheet(QLatin1String("QListView {\n"
 											 "	border:0px solid white;\n"
-											 "	background:#44504e;\n"
+											 "	background:#566573;\n"
 											 "	padding-right:5px;\n"
 											 "}"
 											 "QListView::item {\n"

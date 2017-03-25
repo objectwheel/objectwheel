@@ -32,7 +32,7 @@ namespace SplashScreen
 
 	void show()
 	{
-		d->showFullScreen();
+		d->show();
 	}
 
 	void hide()
@@ -45,14 +45,14 @@ namespace SplashScreen
 		d->iconSize = QSize(w, h);
 	}
 
-	void setLoadingDevice(QIODevice* device)
-	{
-		d->setLoadingDevice(device);
-	}
-
 	void setLoadingSize(const int w, const int h)
 	{
 		d->loadingSize = QSize(w, h);
+	}
+
+	void setLoadingImageFilename(const QString& loadingImageFilename)
+	{
+		d->loadingImageFilename = loadingImageFilename;
 	}
 
 }

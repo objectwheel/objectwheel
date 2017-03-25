@@ -78,21 +78,6 @@ int main(int argc, char *argv[])
 
 	// Start MainWidget
 	MainWindow w;
-	QFile loading(":/resources/images/loading.gif");
-	if (!loading.open(QIODevice::ReadOnly)) qFatal("main : Error occurred");
-	auto data = loading.readAll();
-	QBuffer buff(&data);
-	buff.open(QBuffer::ReadOnly);
-
-	// Init Splash Screen
-	SplashScreen::init(&w);
-	SplashScreen::setTextColor(Qt::white);
-	SplashScreen::setBackgroundBrush(QColor("#262626"));
-	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
-	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
-	SplashScreen::setLoadingSize(Fit::fit(30), Fit::fit(30));
-	SplashScreen::setLoadingDevice(&buff);
-	SplashScreen::show();
 
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 	w.resize({REF_WIDTH, REF_HEIGHT});
@@ -101,6 +86,17 @@ int main(int argc, char *argv[])
 # else
 	w.showFullScreen();
 # endif
+
+	// Init Splash Screen
+	SplashScreen::init(&w);
+	SplashScreen::setText("Loading");
+	SplashScreen::setTextColor("#2e3a41");
+	SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
+	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
+	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
+	SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
+	SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
+	SplashScreen::show();
 
 	// Start main event loop
 	return a.exec();

@@ -62,7 +62,6 @@
         <file>resources/images/pagesbuttonfilled.png</file>
         <file>resources/images/pagesbutton.png</file>
         <file>resources/images/aboutus.png</file>
-        <file>resources/images/loading.gif</file>
         <file>resources/qmls/FancyButton.qml</file>
         <file>resources/qmls/filemanager.js</file>
         <file>resources/qmls/delaycaller.js</file>
@@ -121,5 +120,7 @@
         <file>resources/tools/DragonFire.zip</file>
         <file>resources/tools/ScaledTextField.zip</file>
         <file>resources/tools/ScaledText.zip</file>
+        <file>resources/qmls/empty-item.qml</file>
+        <file>resources/images/loading.png</file>
     </qresource>
 </RCC>

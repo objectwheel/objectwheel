@@ -263,21 +263,21 @@ void MainWindow::SetupGui()
 
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
-	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
+	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
 	connect(m_d->bindingWidget, &BindingWidget::popupShowed, [=] {
 		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#2b5796;}");
 	});
 	connect(m_d->bindingWidget, &BindingWidget::popupHid, [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
 	});
 	connect(toolboxButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
 	});
 	connect(propertiesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
 	});
 	connect(pagesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#44504e;}");
+		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
 	});
 	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
 		if (m_d->bindingWidget->hasPopupOpen())
