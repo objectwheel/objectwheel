@@ -3,25 +3,26 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.0
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.0
+import "../fit.js" as Fit
 
 Item {
     Rectangle {
         id: title
         color: "#25000000"
         anchors { top: parent.top; left: parent.left; right: parent.right;}
-        height: fit(40)
+        height: Fit.fit(40)
         Image {
             id: projectsettingsTextImage
             source: "images/projectsettings.png"
             anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter }
             fillMode: Image.PreserveAspectFit
-            height: fit(16)
+            height: Fit.fit(16)
         }
         Item {
             id: btnCancelOutCont
-            anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: fit(10) }
-            width: fit(80)
-            height: fit(28)
+            anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: Fit.fit(10) }
+            width: Fit.fit(80)
+            height: Fit.fit(28)
             Item {
                 id: btnCancelInCont
                 anchors.fill: parent
@@ -36,18 +37,18 @@ Item {
                     }
                     Row {
                         anchors.centerIn: parent
-                        spacing: fit(6)
+                        spacing: Fit.fit(6)
                         Text {
                             text: "Cancel"
                             color: "white"
                             verticalAlignment: Text.AlignVCenter
                             height: btnCancelImg.height
-                            font.pixelSize: fit(13)
+                            font.pixelSize: Fit.fit(13)
                         }
                         Image {
                             id: btnCancelImg
                             source: "images/cancel.png"
-                            height: btnCancel.height - fit(14)
+                            height: btnCancel.height - Fit.fit(14)
                             fillMode: Image.PreserveAspectFit
                         }
                     }
@@ -69,12 +70,12 @@ Item {
             Rectangle {
                 id: btnCancelMask;
                 anchors.fill: parent;
-                radius: fit(6);
+                radius: Fit.fit(6);
                 Rectangle {
                     height: parent.height
                     width: parent.width / 2
                     anchors.right: parent.right
-                    radius: fit(2)
+                    radius: Fit.fit(2)
                 }
                 visible: false;
             }
@@ -88,9 +89,9 @@ Item {
             DropShadow {
                 anchors.fill: btnCancelOpMask
                 horizontalOffset: 0
-                verticalOffset: fit(1)
-                radius: fit(6.0)
-                samples: fit(14)
+                verticalOffset: Fit.fit(1)
+                radius: Fit.fit(6.0)
+                samples: Fit.fit(14)
                 color: "#80000000"
                 source: btnCancelOpMask
             }
@@ -105,9 +106,9 @@ Item {
         }
         Item {
             id: btnOkOutCont
-            anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: fit(10) }
-            width: fit(80)
-            height: fit(28)
+            anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: Fit.fit(10) }
+            width: Fit.fit(80)
+            height: Fit.fit(28)
             Item {
                 id: btnOkInCont
                 anchors.fill: parent
@@ -122,11 +123,11 @@ Item {
                     }
                     Row {
                         anchors.centerIn: parent
-                        spacing: fit(6)
+                        spacing: Fit.fit(6)
                         Image {
                             id: btnOkImg
                             source: "images/ok.png"
-                            height: btnOk.height - fit(14)
+                            height: btnOk.height - Fit.fit(14)
                             fillMode: Image.PreserveAspectFit
                         }
                         Text {
@@ -134,7 +135,7 @@ Item {
                             color: "white"
                             verticalAlignment: Text.AlignVCenter
                             height: btnOkImg.height
-                            font.pixelSize: fit(13)
+                            font.pixelSize: Fit.fit(13)
                         }
                     }
                     signal clicked();
@@ -155,12 +156,12 @@ Item {
             Rectangle {
                 id: btnOkMask;
                 anchors.fill: parent;
-                radius: fit(6);
+                radius: Fit.fit(6);
                 Rectangle {
                     height: parent.height
                     width: parent.width / 2
                     anchors.left: parent.left
-                    radius: fit(2)
+                    radius: Fit.fit(2)
                 }
                 visible: false;
             }
@@ -174,9 +175,9 @@ Item {
             DropShadow {
                 anchors.fill: btnOkOpMask
                 horizontalOffset: 0
-                verticalOffset: fit(1)
-                radius: fit(6.0)
-                samples: fit(14)
+                verticalOffset: Fit.fit(1)
+                radius: Fit.fit(6.0)
+                samples: Fit.fit(14)
                 color: "#80000000"
                 source: btnOkOpMask
             }
@@ -193,7 +194,7 @@ Item {
             id: titleLine
             anchors.bottom: parent.bottom
             width: parent.width
-            height: fit(1)
+            height: Fit.fit(1)
             color: "#25000000"
         }
     }
@@ -215,16 +216,16 @@ Item {
                 id: projectnameContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "#07000000"
                 border.color: "#14000000"
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: projectnameTitle
                         text: "Project Name"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -235,7 +236,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -243,16 +244,16 @@ Item {
                 id: descriptionContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "transparent"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: descriptionTitle
                         text: "Description"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -263,7 +264,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -271,16 +272,16 @@ Item {
                 id: orgnameContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "#07000000"
                 border.color: "#14000000"
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: orgnameTitle
                         text: "Organization Name"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -291,7 +292,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -299,16 +300,16 @@ Item {
                 id: orgIdentContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "transparent"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: orgIdentTitle
                         text: "Organization Identifier"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -319,7 +320,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -327,16 +328,16 @@ Item {
                 id: projectVersionContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "#07000000"
                 border.color: "#14000000"
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: projectVersionTitle
                         text: "Project Version"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -347,7 +348,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -355,15 +356,15 @@ Item {
                 id: projectIdentContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "transparent"
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: projectIdentTitle
                         text: "Project Identifier"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -373,7 +374,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -381,16 +382,16 @@ Item {
                 id: ownerContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "#07000000"
                 border.color: "#14000000"
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: ownerTitle
                         text: "Owner"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -400,7 +401,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -408,16 +409,16 @@ Item {
                 id: crDateContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "transparent"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: crDateTitle
                         text: "Creation Date"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -427,7 +428,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -435,16 +436,16 @@ Item {
                 id: mfDateContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "#07000000"
                 border.color: "#14000000"
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: mfDateTitle
                         text: "Last Modification Date"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -454,7 +455,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -462,16 +463,16 @@ Item {
                 id: sizeContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "transparent"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: sizeTitle
                         text: "Size On Disk"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -481,7 +482,7 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -489,25 +490,25 @@ Item {
                 id: imExProjectContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "#07000000"
                 border.color: "#14000000"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: imExProjectTitle
                         text: "Import/Export Project"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
                     Item { Layout.fillWidth: true; Layout.fillHeight: true; }
                     Item {
                         id: btnImExOutCont
-                        width: fit(160)
-                        height: fit(28)
+                        width: Fit.fit(160)
+                        height: Fit.fit(28)
                         Item {
                             id: btnImExInCont
                             anchors.fill: parent
@@ -524,18 +525,18 @@ Item {
                                 }
                                 Row {
                                     anchors.centerIn: parent
-                                    spacing: fit(6)
+                                    spacing: Fit.fit(6)
                                     Text {
                                         text: "Import"
                                         color: "white"
                                         verticalAlignment: Text.AlignVCenter
                                         height: btnImExImgLeft.height
-                                        font.pixelSize: fit(13)
+                                        font.pixelSize: Fit.fit(13)
                                     }
                                     Image {
                                         id: btnImExImgLeft
                                         source: "images/load.png"
-                                        height: btnImExLeft.height - fit(14)
+                                        height: btnImExLeft.height - Fit.fit(14)
                                         fillMode: Image.PreserveAspectFit
                                     }
                                 }
@@ -558,11 +559,11 @@ Item {
                                 }
                                 Row {
                                     anchors.centerIn: parent
-                                    spacing: fit(6)
+                                    spacing: Fit.fit(6)
                                     Image {
                                         id: btnImExRightImg
                                         source: "images/unload.png"
-                                        height: btnImExRight.height - fit(14)
+                                        height: btnImExRight.height - Fit.fit(14)
                                         fillMode: Image.PreserveAspectFit
                                     }
                                     Text {
@@ -570,7 +571,7 @@ Item {
                                         color: "white"
                                         verticalAlignment: Text.AlignVCenter
                                         height: btnImExRightImg.height
-                                        font.pixelSize: fit(13)
+                                        font.pixelSize: Fit.fit(13)
                                     }
                                 }
                                 signal clicked();
@@ -598,7 +599,7 @@ Item {
                         Rectangle {
                             id: btnImExMask;
                             anchors.fill: parent;
-                            radius: fit(6);
+                            radius: Fit.fit(6);
                             visible: false;
                         }
                         OpacityMask {
@@ -611,14 +612,14 @@ Item {
                         DropShadow {
                             anchors.fill: btnImExOpMask
                             horizontalOffset: 0
-                            verticalOffset: fit(1)
-                            radius: fit(6.0)
-                            samples: fit(14)
+                            verticalOffset: Fit.fit(1)
+                            radius: Fit.fit(6.0)
+                            samples: Fit.fit(14)
                             color: "#80000000"
                             source: btnImExOpMask
                         }
                         Rectangle {
-                            width: fit(1)
+                            width: Fit.fit(1)
                             anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; bottom: parent.bottom}
                             color: "#30545454"
                         }
@@ -649,23 +650,23 @@ Item {
                 id: delProjectContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
-                height: fit(40)
+                height: Fit.fit(40)
                 color: "transparent"
                 RowLayout {
                     anchors.fill: parent
-                    anchors { leftMargin: fit(10); rightMargin: fit(10); }
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
                         id: delProjectTitle
                         text: "Delete Project"
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
                     Item { Layout.fillWidth: true; Layout.fillHeight: true; }
                     Item {
                         id: btnDelProjectOutCont
-                        width: fit(80)
-                        height: fit(28)
+                        width: Fit.fit(80)
+                        height: Fit.fit(28)
                         Item {
                             id: btnDelProjectInCont
                             anchors.fill: parent
@@ -680,11 +681,11 @@ Item {
                                 }
                                 Row {
                                     anchors.centerIn: parent
-                                    spacing: fit(6)
+                                    spacing: Fit.fit(6)
                                     Image {
                                         id: btnDelProjectImg
                                         source: "images/cancel.png"
-                                        height: btnDelProject.height - fit(14)
+                                        height: btnDelProject.height - Fit.fit(14)
                                         fillMode: Image.PreserveAspectFit
                                     }
                                     Text {
@@ -692,7 +693,7 @@ Item {
                                         color: "white"
                                         verticalAlignment: Text.AlignVCenter
                                         height: btnDelProjectImg.height
-                                        font.pixelSize: fit(13)
+                                        font.pixelSize: Fit.fit(13)
                                     }
                                 }
                                 signal clicked();
@@ -713,7 +714,7 @@ Item {
                         Rectangle {
                             id: btnDelProjectMask;
                             anchors.fill: parent;
-                            radius: fit(6);
+                            radius: Fit.fit(6);
                             visible: false;
                         }
                         OpacityMask {
@@ -726,9 +727,9 @@ Item {
                         DropShadow {
                             anchors.fill: btnDelProjectOpMask
                             horizontalOffset: 0
-                            verticalOffset: fit(1)
-                            radius: fit(6.0)
-                            samples: fit(14)
+                            verticalOffset: Fit.fit(1)
+                            radius: Fit.fit(6.0)
+                            samples: Fit.fit(14)
                             color: "#80000000"
                             source: btnDelProjectOpMask
                         }
@@ -768,5 +769,4 @@ Item {
     property alias btnExport: btnImExRight
     property alias btnOk: btnOk
     property alias btnCancel: btnCancel
-    function fit(val) { return val }
 }

@@ -1,13 +1,14 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtGraphicalEffects 1.0
+import "../fit.js" as Fit
 
 Item {
 
     Rectangle {
         id: base
         anchors.fill: parent
-        radius: fit(5)
+        radius: Fit.fit(5)
         visible: false
         color: "#d0d4d7"
         border.color: "#c2c6c9"
@@ -16,9 +17,9 @@ Item {
     DropShadow {
         anchors.fill: base
         horizontalOffset: 0
-        verticalOffset: fit(1)
-        radius: fit(7.0)
-        samples: fit(25)
+        verticalOffset: Fit.fit(1)
+        radius: Fit.fit(7.0)
+        samples: Fit.fit(25)
         color: "#20000000"
         source: base
     }
@@ -26,7 +27,7 @@ Item {
     Rectangle {
         id: mask
         anchors.fill: listView
-        radius: fit(5)
+        radius: Fit.fit(5)
         visible: false
     }
 
@@ -61,7 +62,7 @@ Item {
         id: highlight
         Rectangle {
             width: listView.width
-            height: fit(48)
+            height: Fit.fit(48)
             color: "#10000000"
             border.color: "#15000000"
         }
@@ -70,34 +71,69 @@ Item {
     Component {
         id: projectListDelegate
         Item {
-            height: fit(48)
+            height: Fit.fit(48)
             width: parent.width
             Row {
                 anchors.fill: parent
-                anchors.margins: fit(4)
-                spacing: fit(5)
+                anchors.margins: Fit.fit(4)
+                spacing: Fit.fit(5)
                 Image {
                     source: "images/fileicon.png"
                     height: parent.height
                     fillMode: Image.PreserveAspectFit
                     anchors.verticalCenter: parent.verticalCenter
+
+                    RadialGradient {
+                        id: activeGradient
+                        width: Fit.fit(10)
+                        height: width
+                        visible: false
+                        anchors { left: parent.left; top: parent.top; topMargin: Fit.fit(-0.5); leftMargin: Fit.fit(3) }
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "#6bcb36" }
+                            GradientStop { position: 0.5; color: "#4db025" }
+                        }
+                    }
+                    Rectangle {
+                        id: mask
+                        visible: false
+                        radius: activeGradient.width / 2.0
+                        anchors.fill: activeGradient
+                    }
+                    OpacityMask {
+                        id: opMask
+                        source: activeGradient
+                        anchors.fill: activeGradient
+                        maskSource: mask
+                        visible: false
+                    }
+                    DropShadow {
+                        anchors.fill: opMask
+                        horizontalOffset: 0
+                        verticalOffset: Fit.fit(1)
+                        radius: Fit.fit(6.0)
+                        samples: Fit.fit(25)
+                        color: "#70000000"
+                        source: opMask
+                        visible: active
+                    }
                 }
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     Text {
-                        width: fit(320)
+                        width: Fit.fit(320)
                         elide: Text.ElideRight
                         color: "#2e2a21"
                         text: projectName
                         font.bold: true
-                        font.pixelSize: fit(13)
+                        font.pixelSize: Fit.fit(13)
                     }
                     Text {
-                        width: fit(320)
+                        width: Fit.fit(320)
                         elide: Text.ElideRight
                         color: Qt.lighter("#2e2a21", 1.2)
                         text: lastEdited
-                        font.pixelSize: fit(12)
+                        font.pixelSize: Fit.fit(12)
                     }
                 }
             }
@@ -112,7 +148,7 @@ Item {
                 source: "images/info.png"
                 height: Math.floor(parent.height / 2.5)
                 fillMode: Image.PreserveAspectFit
-                anchors {verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: fit(5) }
+                anchors {verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: Fit.fit(5) }
                 visible: listView.currentItem == parent
                 MouseArea {
                     anchors.fill: parent
@@ -123,11 +159,9 @@ Item {
                     }
                 }
             }
-
         }
     }
     signal infoClicked(var projectName)
     property string selectedProjectname
     property alias listView : listView
-    function fit(val) { return val }
 }

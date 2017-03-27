@@ -1,12 +1,13 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
+import "../fit.js" as Fit
 
 Item {
 
     Rectangle {
         id: mask
         anchors.fill: parent
-        radius: fit(8)
+        radius: Fit.fit(8)
         visible: false
     }
 
@@ -27,20 +28,20 @@ Item {
 
             Row {
                 anchors.centerIn: parent
-                spacing: fit(6)
+                spacing: Fit.fit(6)
                 Text {
                     id: txtLoad
                     text: "New Project"
                     color: "white"
                     verticalAlignment: Text.AlignVCenter
                     height: imgLoad.height
-                    font.pixelSize: fit(13)
+                    font.pixelSize: Fit.fit(13)
                 }
 
                 Image {
                     id: imgLoad
                     source: "images/new.png"
-                    height: btnLeft.height - fit(14)
+                    height: btnLeft.height - Fit.fit(14)
                     fillMode: Image.PreserveAspectFit
                 }
             }
@@ -66,18 +67,18 @@ Item {
 
             Row {
                 anchors.centerIn: parent
-                spacing: fit(6)
+                spacing: Fit.fit(6)
                 Image {
                     id: imgLoad2
                     source: "images/load.png"
-                    height: btnRight.height - fit(14)
+                    height: btnRight.height - Fit.fit(14)
                     fillMode: Image.PreserveAspectFit
                 }
                 Text {
                     id: txtLoad2
                     text: "Load Project"
                     color: "white"
-                    font.pixelSize: fit(13)
+                    font.pixelSize: Fit.fit(13)
                     verticalAlignment: Text.AlignVCenter
                     height: imgLoad.height
                 }
@@ -117,9 +118,9 @@ Item {
     DropShadow {
         anchors.fill: opMask
         horizontalOffset: 0
-        verticalOffset: fit(1)
-        radius: fit(6.0)
-        samples: fit(14)
+        verticalOffset: Fit.fit(1)
+        radius: Fit.fit(6.0)
+        samples: Fit.fit(14)
         color: "#80000000"
         source: opMask
     }
@@ -144,12 +145,11 @@ Item {
         }
     }
     Rectangle {
-        width: fit(1)
+        width: Fit.fit(1)
         anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; bottom: parent.bottom}
         color: "#30545454"
     }
     property bool loadButtonDisabled : false
     signal newButtonClicked()
     signal loadButtonClicked()
-    function fit(val) { return val }
 }
