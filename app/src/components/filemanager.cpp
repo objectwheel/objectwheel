@@ -134,6 +134,23 @@ QString FileManager::dname(const QString& name) const
 	return QFileInfo(name).path();
 }
 
+quint64 FileManager::fsize(const QString& name) const
+{
+	return QFileInfo(name).size();
+}
+
+quint64 FileManager::dsize(const QString& name) const
+{
+	quint64 sz = 0;
+	for (auto filename : lsfile(name)) {
+		sz += fsize(name + separator() + filename);
+	}
+	for (auto dirname : lsdir(name)) {
+		sz += dsize(name + separator() + dirname);
+	}
+	return sz;
+}
+
 QString FileManager::suffix(const QString& name) const
 {
 	return QFileInfo(name).suffix();

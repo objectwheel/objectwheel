@@ -25,6 +25,7 @@
 #include <savemanager.h>
 #include <splashscreen.h>
 #include <scenemanager.h>
+#include <QtConcurrent>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
@@ -382,19 +383,21 @@ void MainWindow::SetupManagers()
 	//Let's add some custom controls to that project
 	ToolsManager::setListWidget(m_d->toolboxList);
 	auto userManager = new UserManager(this); //create new user manager
-	auto projectManager = new ProjectManager(this); //create new project manager
-	auto saveManager = new SaveManager(this);
+	new ProjectManager(this); //create new project manager
+	new SaveManager(this);
 	auto sceneManager = new SceneManager;
 	sceneManager->setMainWindow(this);
 	sceneManager->addScene("studioScene", m_d->centralWidget);
 	sceneManager->addScene("projectsScene", m_d->projectsScreen);
-	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
-	userManager->startUserSession("kozmon@hotmail.com", "password123"); //unlock user session
-	projectManager->buildNewProject("Project 3"); //build a new project if doesn't exist already
-	projectManager->startProject("Project 3"); //start project, tools database filled
-	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
 	sceneManager->setCurrent("projectsScene");
 	SplashScreen::raise();
+	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
+	auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession),
+					  QString("kozmon@hotmail.com"), QString("password123")); //unlock user session
+	while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 50);
+	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
+//	projectManager->buildNewProject("Project 3"); //build a new project if doesn't exist already
+//	projectManager->startProject("Project 3"); //start project, tools database filled
 	SplashScreen::hide();
 }
 
@@ -628,7 +631,6 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-	m_d->centralWidget->setGeometry(0, 0, width(), height());
 	m_d->qmlEditor->setGeometry(0, 0, width(), height());
 	m_d->aboutButton->setGeometry(width()-fit(40), height()-fit(40), fit(30),fit(30));
 	QWidget::resizeEvent(event);

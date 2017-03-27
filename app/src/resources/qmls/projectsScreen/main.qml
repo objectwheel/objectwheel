@@ -11,7 +11,7 @@ Rectangle {
         ProjectsPage {
             id: projectsPage
             logoPath: "qrc:///resources/images/logo.png"
-            projectList.listView.model: ListModel {
+            /*projectList.listView.model: ListModel {
                 ListElement {
                     projectName: "Bill Smith"
                     lastEdited: "555 3264"
@@ -27,7 +27,7 @@ Rectangle {
                     lastEdited: "555 0473"
                     active: false
                 }
-            }
+            }*/
         }
 
         ProjectSettings {

@@ -4,6 +4,10 @@
 #include <toolsmanager.h>
 #include <savemanager.h>
 #include <QMessageBox>
+#include <QJsonDocument>
+#include <QJsonObject>
+
+#define INF_FILE "inf.json"
 
 class ProjectManagerPrivate
 {
@@ -62,6 +66,43 @@ bool ProjectManager::buildNewProject(const QString& projectname)
 	if (!mkdir(m_d->generateProjectDir(projectname))) return false;
 	if (!SaveManager::buildNewDatabase(m_d->generateProjectDir(projectname))) return false;
 	return true;
+}
+
+bool ProjectManager::fillProjectInformation(const QString& projectname,
+											const QString& description,
+											const QString& orgname,
+											const QString& orgIdent,
+											const QString& projectVersion,
+											const QString& projectIdent,
+											const QString& owner,
+											const QString& crDate,
+											const QString& mfDate,
+											const QString& size)
+{
+	auto projDir = projectDirectory(projectname);
+	if (projDir.isEmpty()) return false;
+	QJsonObject jObj;
+	jObj["projectName"] = projectname;
+	jObj["description"] = description;
+	jObj["orgName"] = orgname;
+	jObj["orgIdent"] = orgIdent;
+	jObj["projectVersion"] = projectVersion;
+	jObj["projectIdent"] = projectIdent;
+	jObj["owner"] = owner;
+	jObj["crDate"] = crDate;
+	jObj["mfDate"] = mfDate;
+	jObj["size"] = size;
+	QJsonDocument jDoc(jObj);
+	if (wrfile(projDir + separator() + INF_FILE, jDoc.toJson()) < 0) return false;
+	else return true;
+}
+
+QJsonObject ProjectManager::projectInformation(const QString& projectname)
+{
+	auto projDir = projectDirectory(projectname);
+	if (projDir.isEmpty()) return QJsonObject();
+	if (!::exists(projDir + separator() + INF_FILE)) return QJsonObject();
+	return QJsonDocument::fromJson(rdfile(projDir + separator() + INF_FILE)).object();
 }
 
 bool ProjectManager::startProject(const QString& projectname)

@@ -16,6 +16,17 @@ class ProjectManager : public QObject
 		static QString projectDirectory(const QString& projectname);
 		static bool exists(const QString& projectname);
 		static bool buildNewProject(const QString& projectname);
+		static bool fillProjectInformation(const QString& projectname,
+										   const QString& description,
+										   const QString& orgname,
+										   const QString& orgIdent,
+										   const QString& projectVersion,
+										   const QString& projectIdent,
+										   const QString& owner,
+										   const QString& crDate,
+										   const QString& mfDate,
+										   const QString& size);
+		static QJsonObject projectInformation(const QString& projectname);
 		static bool startProject(const QString& projectname);
 		static void stopProject();
 		static QString currentProject();

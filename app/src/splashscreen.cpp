@@ -1,5 +1,6 @@
 #include <splashscreen.h>
 #include <splashscreen_p.h>
+#include <QTimer>
 
 namespace SplashScreen
 {
@@ -30,14 +31,16 @@ namespace SplashScreen
 		d->backgroundBrush = brush;
 	}
 
-	void show()
+	void show(const int msec)
 	{
 		d->show();
+		if (msec > 0) QTimer::singleShot(msec, [=] { d->hide(); });
 	}
 
-	void hide()
+	void hide(const int msec)
 	{
-		d->hide();
+		if (msec > 0) QTimer::singleShot(msec, [=] { d->hide(); });
+		else d->hide();
 	}
 
 	void raise()
@@ -59,5 +62,4 @@ namespace SplashScreen
 	{
 		d->loadingImageFilename = loadingImageFilename;
 	}
-
 }

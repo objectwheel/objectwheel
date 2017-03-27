@@ -20,8 +20,8 @@ namespace SplashScreen
 	void setBackgroundBrush(const QBrush& brush);
 	void setLoadingImageFilename(const QString& loadingImageFilename);
 	void raise();
-	void show();
-	void hide();
+	void hide(const int msec = 0);
+	void show(const int msec = 0);
 }
 
 #endif // SPLASHSCREEN_H
