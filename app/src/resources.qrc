@@ -122,5 +122,31 @@
         <file>resources/tools/ScaledText.zip</file>
         <file>resources/qmls/empty-item.qml</file>
         <file>resources/images/loading.png</file>
+        <file>resources/qmls/projectsScreen/main.qml</file>
+        <file>resources/qmls/projectsScreen/ProjectButton.qml</file>
+        <file>resources/qmls/projectsScreen/ProjectList.qml</file>
+        <file>resources/qmls/projectsScreen/ProjectSettings.qml</file>
+        <file>resources/qmls/projectsScreen/ProjectsPage.qml</file>
+        <file>resources/qmls/projectsScreen/images/cancel.png</file>
+        <file>resources/qmls/projectsScreen/images/cancel@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/fileicon.png</file>
+        <file>resources/qmls/projectsScreen/images/fileicon@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/info.png</file>
+        <file>resources/qmls/projectsScreen/images/info@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/load.png</file>
+        <file>resources/qmls/projectsScreen/images/load@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/new.png</file>
+        <file>resources/qmls/projectsScreen/images/new@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/ok.png</file>
+        <file>resources/qmls/projectsScreen/images/ok@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/projectsettings.png</file>
+        <file>resources/qmls/projectsScreen/images/projectsettings@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/unload.png</file>
+        <file>resources/qmls/projectsScreen/images/unload@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/version.png</file>
+        <file>resources/qmls/projectsScreen/images/version@2x.png</file>
+        <file>resources/qmls/projectsScreen/images/welcome.png</file>
+        <file>resources/qmls/projectsScreen/images/welcome@2x.png</file>
+        <file>resources/images/logo@2x.png</file>
     </qresource>
 </RCC>

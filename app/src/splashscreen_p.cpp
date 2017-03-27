@@ -8,7 +8,7 @@
 #include <QQmlComponent>
 #include <QQuickItem>
 
-#define DURATION 1500
+#define DURATION 1000
 #define LOADING_TIME 800
 using namespace Fit;
 
