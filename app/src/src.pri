@@ -26,7 +26,9 @@ HEADERS                   += $$PWD/mainwindow.h \
     $$PWD/projectmanager.h \
     $$PWD/dirlocker.h \
     $$PWD/zipper.h \
-    $$PWD/toolsmanager.h
+    $$PWD/toolsmanager.h \
+    $$PWD/scenemanager.h \
+    $$PWD/projectsscreen.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -54,7 +56,9 @@ SOURCES                   += $$PWD/main.cpp\
     $$PWD/projectmanager.cpp \
     $$PWD/dirlocker.cpp \
     $$PWD/zipper.cpp \
-    $$PWD/toolsmanager.cpp
+    $$PWD/toolsmanager.cpp \
+    $$PWD/scenemanager.cpp \
+    $$PWD/projectsscreen.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

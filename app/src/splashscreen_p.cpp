@@ -91,7 +91,8 @@ void SplashScreenPrivate::show()
 	prevBusyIndicator->setParentItem(loadingWidget.rootObject());
 
 	loadingWidget.show();
-	QWidget::showFullScreen();
+	showFullScreen();
+	raise();
 }
 
 void SplashScreenPrivate::paintEvent(QPaintEvent* event)

@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <components.h>
 #include <mainwindow.h>
+#include <scenemanager.h>
 #include <QApplication>
 #include <QFontDatabase>
 #include <QtWebView>
@@ -35,8 +36,6 @@ int main(int argc, char *argv[])
 	// Init application
 	QApplication a(argc, argv);
 
-    
-    
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     // Multiple instances protection
     QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
@@ -50,7 +49,6 @@ int main(int argc, char *argv[])
         }
     }
 # endif
-
 
 	// Init application settings
 	QApplication::setStyle("fusion");
@@ -78,7 +76,6 @@ int main(int argc, char *argv[])
 
 	// Start MainWidget
 	MainWindow w;
-
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
 	w.resize({REF_WIDTH, REF_HEIGHT});
 	Fit::fit(&w, Fit::WidthHeight);
@@ -86,17 +83,6 @@ int main(int argc, char *argv[])
 # else
 	w.showFullScreen();
 # endif
-
-	// Init Splash Screen
-	SplashScreen::init(&w);
-	SplashScreen::setText("Loading");
-	SplashScreen::setTextColor("#2e3a41");
-	SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
-	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
-	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
-	SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
-	SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
-	SplashScreen::show();
 
 	// Start main event loop
 	return a.exec();

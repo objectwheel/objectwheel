@@ -6,18 +6,13 @@ import QtQuick.Controls.Styles 1.4
 
 // mark active/open project in the list
 
-Window {
-    visible: true
-    width: 700
-    height: 430
-    title: qsTr("Objectwheel")
+Rectangle {
     color: "#E0E4E7"
-
     SwipeView {
         anchors.fill: parent
         ProjectsPage {
             id: projectsPage
-            logoPath: "images/logo.png"
+            logoPath: "qrc:///resources/images/logo.png"
             projectList.listView.model: ListModel {
                 ListElement {
                     projectName: "Bill Smith"
@@ -39,14 +34,5 @@ Window {
         }
 
     }
-//    Timer {
-//        running: true
-//        interval: 5000
-//        onTriggered: {
-//            console.log(projectsPage.projectList.selectedProjectname);
-//            projectsPage.projectList.listView.model.append({"projectName": "Ömer Göktaş", "lastEdited":"11.04.2017"})
-//        }
-//    }
-
     function fit(val) { return val }
 }

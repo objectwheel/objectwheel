@@ -123,18 +123,18 @@ Item {
                     Row {
                         anchors.centerIn: parent
                         spacing: fit(6)
+                        Image {
+                            id: btnOkImg
+                            source: "images/ok.png"
+                            height: btnOk.height - fit(14)
+                            fillMode: Image.PreserveAspectFit
+                        }
                         Text {
                             text: "Ok"
                             color: "white"
                             verticalAlignment: Text.AlignVCenter
                             height: btnOkImg.height
                             font.pixelSize: fit(13)
-                        }
-                        Image {
-                            id: btnOkImg
-                            source: "images/ok.png"
-                            height: btnOk.height - fit(14)
-                            fillMode: Image.PreserveAspectFit
                         }
                     }
                     signal clicked();
@@ -681,18 +681,18 @@ Item {
                                 Row {
                                     anchors.centerIn: parent
                                     spacing: fit(6)
+                                    Image {
+                                        id: btnDelProjectImg
+                                        source: "images/cancel.png"
+                                        height: btnDelProject.height - fit(14)
+                                        fillMode: Image.PreserveAspectFit
+                                    }
                                     Text {
                                         text: "Delete"
                                         color: "white"
                                         verticalAlignment: Text.AlignVCenter
                                         height: btnDelProjectImg.height
                                         font.pixelSize: fit(13)
-                                    }
-                                    Image {
-                                        id: btnDelProjectImg
-                                        source: "images/cancel.png"
-                                        height: btnDelProject.height - fit(14)
-                                        fillMode: Image.PreserveAspectFit
                                     }
                                 }
                                 signal clicked();
@@ -751,6 +751,7 @@ Item {
         text: "This will delete the project and its content."
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: btnDelProject.clicked()
+        icon: StandardIcon.Warning
     }
     property alias projectnameTextInput: projectnameTextInput;
     property alias descriptionTextInput: descriptionTextInput;

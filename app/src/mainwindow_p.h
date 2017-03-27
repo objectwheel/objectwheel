@@ -35,6 +35,7 @@
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <mainwindow.h>
+#include <projectsscreen.h>
 
 #define DURATION 500
 
@@ -50,6 +51,7 @@ class MainWindowPrivate
 	public:
 		MainWindow* parent;
 		QWidget* centralWidget;
+		ProjectsScreen* projectsScreen;
 		QVBoxLayout* verticalLayout;
 		TitleBar* titleBar;
 		QQuickWidget* designWidget;
@@ -112,6 +114,8 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	titleBar->setMinimumSize(QSize(0, 48));
 	titleBar->setMaximumSize(QSize(16777215, 48));
 	verticalLayout->addWidget(titleBar);
+
+	projectsScreen = new ProjectsScreen(MainWindow);
 
 	designWidget = new QQuickWidget(centralWidget);
 	designWidget->setObjectName(QStringLiteral("designWidget"));

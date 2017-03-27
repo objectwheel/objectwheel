@@ -23,6 +23,8 @@
 #include <usermanager.h>
 #include <toolsmanager.h>
 #include <savemanager.h>
+#include <splashscreen.h>
+#include <scenemanager.h>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
@@ -363,13 +365,16 @@ void MainWindow::SetupGui()
         }
     });
 
-# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-	QTimer::singleShot(3000,[this] {
-#else
-	QTimer::singleShot(5000,[this] {
-#endif
-		SplashScreen::hide();
-	});
+	// Init Splash Screen
+	SplashScreen::init(this);
+	SplashScreen::setText("Loading");
+	SplashScreen::setTextColor("#2e3a41");
+	SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
+	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
+	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
+	SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
+	SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
+	SplashScreen::show();
 }
 
 void MainWindow::SetupManagers()
@@ -379,11 +384,18 @@ void MainWindow::SetupManagers()
 	auto userManager = new UserManager(this); //create new user manager
 	auto projectManager = new ProjectManager(this); //create new project manager
 	auto saveManager = new SaveManager(this);
+	auto sceneManager = new SceneManager;
+	sceneManager->setMainWindow(this);
+	sceneManager->addScene("studioScene", m_d->centralWidget);
+	sceneManager->addScene("projectsScene", m_d->projectsScreen);
 	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
 	userManager->startUserSession("kozmon@hotmail.com", "password123"); //unlock user session
 	projectManager->buildNewProject("Project 3"); //build a new project if doesn't exist already
 	projectManager->startProject("Project 3"); //start project, tools database filled
 	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
+	sceneManager->setCurrent("projectsScene");
+	SplashScreen::raise();
+	SplashScreen::hide();
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)

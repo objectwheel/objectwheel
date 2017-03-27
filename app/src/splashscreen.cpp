@@ -40,6 +40,11 @@ namespace SplashScreen
 		d->hide();
 	}
 
+	void raise()
+	{
+		d->raise();
+	}
+
 	void setIconSize(const int w, const int h)
 	{
 		d->iconSize = QSize(w, h);

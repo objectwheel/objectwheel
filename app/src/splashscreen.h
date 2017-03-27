@@ -19,6 +19,7 @@ namespace SplashScreen
 	void setTextColor(const QColor& color);
 	void setBackgroundBrush(const QBrush& brush);
 	void setLoadingImageFilename(const QString& loadingImageFilename);
+	void raise();
 	void show();
 	void hide();
 }
