@@ -66,7 +66,25 @@ bool ProjectManager::buildNewProject(const QString& projectname)
 	if (exists(projectname)) return false;
 	if (!mkdir(m_d->generateProjectDir(projectname))) return false;
 	if (!SaveManager::buildNewDatabase(m_d->generateProjectDir(projectname))) return false;
-	return true;
+	if (!infUpdateLastModification()) return false;
+	return infUpdateSize();
+}
+
+bool ProjectManager::renameProject(const QString& from, const QString& to)
+{
+	if (!exists(from) || exists(to)) return false;
+	auto fromDir = m_d->generateProjectDir(from);
+	auto toDir = m_d->generateProjectDir(to);
+	if (fromDir.isEmpty() || toDir.isEmpty()) return false;
+	if (m_d->currentProject == from) {
+		stopProject();
+		if (!rn(fromDir, toDir)) return false;
+		if (!startProject(to)) return false;
+		return infUpdateLastModification();
+	} else {
+		if (!rn(fromDir, toDir)) return false;
+		return 	infUpdateLastModification();
+	}
 }
 
 bool ProjectManager::fillProjectInformation(const QString& projectname,

@@ -227,6 +227,7 @@ Item {
                     Text {
                         id: projectnameTitle
                         text: "Project Name"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -256,6 +257,7 @@ Item {
                     Text {
                         id: descriptionTitle
                         text: "Description"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -284,6 +286,7 @@ Item {
                     Text {
                         id: orgnameTitle
                         text: "Organization Name"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -312,6 +315,7 @@ Item {
                     Text {
                         id: orgIdentTitle
                         text: "Organization Identifier"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -341,6 +345,7 @@ Item {
                     Text {
                         id: projectVersionTitle
                         text: "Project Version"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -369,6 +374,7 @@ Item {
                         id: projectIdentTitle
                         text: "Project Identifier"
                         font.pixelSize: Fit.fit(13)
+                        font.bold: true
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -400,6 +406,7 @@ Item {
                     Text {
                         id: ownerTitle
                         text: "Owner"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -427,6 +434,7 @@ Item {
                     Text {
                         id: crDateTitle
                         text: "Creation Date"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -454,6 +462,7 @@ Item {
                     Text {
                         id: mfDateTitle
                         text: "Last Modification Date"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -481,6 +490,7 @@ Item {
                     Text {
                         id: sizeTitle
                         text: "Size On Disk"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -509,6 +519,7 @@ Item {
                     Text {
                         id: imExProjectTitle
                         text: "Import/Export Project"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -667,6 +678,7 @@ Item {
                     Text {
                         id: delProjectTitle
                         text: "Delete Project"
+                        font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
@@ -814,7 +826,7 @@ Item {
     MessageDialog {
         id: deleteProjectMessageDialog
         title: "Do you want to continue?"
-        text: "This will delete the project and its content."
+        text: "This will delete the entire project and its content. You can not get this back."
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: btnDelProject.clicked()
         icon: StandardIcon.Warning

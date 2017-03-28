@@ -149,11 +149,20 @@ Item {
                 height: Math.floor(parent.height / 2.5)
                 fillMode: Image.PreserveAspectFit
                 anchors {verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: Fit.fit(5) }
+                visible: false
+            }
+            ColorOverlay {
+                id: infColorOverlay
+                source: infImage
+                anchors.fill: infImage
+                color: "#01000000"
                 visible: listView.currentItem == parent
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
+                    onPressed: infColorOverlay.color = "#50000000"
+                    onReleased: infColorOverlay.color = "#01000000"
                     onClicked: {
                         infoClicked(projectName)
                     }

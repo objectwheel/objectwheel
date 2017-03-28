@@ -368,7 +368,8 @@ void MainWindow::SetupGui()
 
 	// Init Splash Screen
 	SplashScreen::init(this);
-	SplashScreen::setText("Loading");
+	SplashScreen::setText("Wait");
+	QTimer::singleShot(300, [=] { SplashScreen::setText("Decrypting the user's files"); });
 	SplashScreen::setTextColor("#2e3a41");
 	SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
 	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
@@ -397,8 +398,6 @@ void MainWindow::SetupManagers()
 	while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 50);
 	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
 	m_d->projectsScreen->refreshProjectList();
-//	projectManager->buildNewProject("Project 3"); //build a new project if doesn't exist already
-//	projectManager->startProject("Project 3"); //start project, tools database filled
 	SplashScreen::hide();
 }
 

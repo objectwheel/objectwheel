@@ -148,5 +148,6 @@
         <file>resources/qmls/projectsScreen/images/welcome.png</file>
         <file>resources/qmls/projectsScreen/images/welcome@2x.png</file>
         <file>resources/images/logo@2x.png</file>
+        <file>resources/images/loading@2x.png</file>
     </qresource>
 </RCC>

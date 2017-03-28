@@ -7,8 +7,10 @@
 #include <usermanager.h>
 #include <QDateTime>
 #include <QTimer>
+#include <QMessageBox>
 #include <splashscreen.h>
 #include <scenemanager.h>
+#include <filemanager.h>
 
 QQuickItem* swipeView;
 QQuickItem* projectsPage;
@@ -67,6 +69,9 @@ ProjectsScreen::ProjectsScreen(QWidget *parent)
 	connect(projectButton, SIGNAL(newButtonClicked()), this, SLOT(handleNewButtonClicked()));
 	connect(projectButton, SIGNAL(loadButtonClicked()), this, SLOT(handleLoadButtonClicked()));
 	connect(projectList, SIGNAL(infoClicked(QVariant)), this, SLOT(handleInfoButtonClicks(QVariant)));
+	connect(btnCancel, SIGNAL(clicked()), this, SLOT(handleBtnCancelClicked()));
+	connect(btnDelete, SIGNAL(clicked()), this, SLOT(handleBtnDeleteClicked()));
+	connect(btnOk, SIGNAL(clicked()), this, SLOT(handleBtnOkClicked()));
 
 	QVariant v;
 	v.setValue<ProjectListModel*>(&model);
@@ -102,7 +107,7 @@ void ProjectsScreen::handleNewButtonClicked()
 	orgnameTextInput->setProperty("text", "Example Corp.");
 	descriptionTextInput->setProperty("text", "Simple description here.");
 	projectnameTextInput->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole]));
-	QTimer::singleShot(800, [=]{ swipeView->setProperty("currentIndex", 1); });
+	QTimer::singleShot(400, [=]{ swipeView->setProperty("currentIndex", 1); });
 }
 
 void ProjectsScreen::handleInfoButtonClicks(const QVariant& projectname)
@@ -120,24 +125,90 @@ void ProjectsScreen::handleInfoButtonClicks(const QVariant& projectname)
 	swipeView->setProperty("currentIndex", 1);
 }
 
+void ProjectsScreen::handleBtnCancelClicked()
+{
+	refreshProjectList(ProjectManager::currentProject());
+	swipeView->setProperty("currentIndex", 0);
+}
+
+void ProjectsScreen::handleBtnDeleteClicked()
+{
+	QString currentProject;
+	auto projectName = model.get(listView->property("currentIndex").toInt(),
+								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
+	if (!ProjectManager::exists(projectName)) goto finish;
+	currentProject = ProjectManager::currentProject();
+	if (!currentProject.isEmpty() && currentProject == projectName) {
+		ProjectManager::stopProject();
+		currentProject = "";
+		return;
+	}
+
+	rm(ProjectManager::projectDirectory(projectName));
+
+finish:
+	refreshProjectList(currentProject);
+	swipeView->setProperty("currentIndex", 0);
+}
+
+void ProjectsScreen::handleBtnOkClicked()
+{
+	auto projectnametext = projectnameTextInput->property("text").toString();
+	auto descriptiontext = descriptionTextInput->property("text").toString();
+	auto orgnametext = orgnameTextInput->property("text").toString();
+	auto orgidenttext = orgIdentTextInput->property("text").toString();
+	auto projectversiontext = projectVersionTextInput->property("text").toString();
+	auto projectidenttext = projectIdentText->property("text").toString();
+	auto sizetext = sizeText->property("text").toString();
+	auto mfdatetext = mfDateText->property("text").toString();
+	auto crdatetext = crDateText->property("text").toString();
+	auto ownertext = ownerText->property("text").toString();
+	auto prevprojectname = model.get(listView->property("currentIndex").toInt(),
+									 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
+
+	if (projectnametext.isEmpty() || descriptiontext.isEmpty() ||
+		orgnametext.isEmpty() || orgidenttext.isEmpty() || projectversiontext.isEmpty()) {
+		QMetaObject::invokeMethod(warning, "show");
+		return;
+	}
+
+	if (prevprojectname != projectnametext) {
+		if (!ProjectManager::exists(prevprojectname)) {
+			if (!ProjectManager::buildNewProject(projectnametext)) {
+				qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error. 0x01");
+			}
+		} else {
+			if (ProjectManager::exists(projectnametext)) {
+				QMessageBox::warning(NULL, "Oops!", "There is another project with the same name, please change your project name.");
+				return;
+			}
+			if (!ProjectManager::renameProject(prevprojectname, projectnametext)) {
+				qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error. 0x02");
+			}
+		}
+	}
+
+	if (!ProjectManager::fillProjectInformation(projectnametext, descriptiontext, orgnametext, orgidenttext, projectversiontext,
+												projectidenttext, ownertext, crdatetext, mfdatetext, sizetext))
+		qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error. 0x03");
+	refreshProjectList(ProjectManager::currentProject());
+	swipeView->setProperty("currentIndex", 0);
+}
+
 void ProjectsScreen::handleLoadButtonClicked()
 {
 	auto projectName = model.get(listView->property("currentIndex").toInt(),
 								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
 	auto currentProject = ProjectManager::currentProject();
-	auto count = listView->property("count").toInt();
-	if (!currentProject.isEmpty()) {
-		for (;count--;) {
-			if (model.get(count - 1, model.roleNames()[ProjectListModel::ActiveRole]).toBool() &&
-				currentProject == projectName) {
-				SceneManager::show("studioScene", SceneManager::ToLeft);
-				return;
-			}
-		}
+	if (!currentProject.isEmpty() && currentProject == projectName) {
+		SceneManager::show("studioScene", SceneManager::ToLeft);
+		return;
 	}
+
+	SplashScreen::setText("Loading project");
 	SplashScreen::show(3000); //FIXME:
 	ProjectManager::stopProject();
-	ProjectManager::startProject(projectName);
+	if (!ProjectManager::startProject(projectName)) qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error.");
 	QTimer::singleShot(4000, [=] { SceneManager::show("studioScene", SceneManager::ToLeft); });
 }
 
