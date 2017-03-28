@@ -20,6 +20,7 @@ class PagesWidget : public QWidget
 		void setItemList(QList<QQuickItem*>* items);
 		void setUrlList(QList<QUrl>* items);
 		void setBindingWidget(BindingWidget* bindingWidget);
+		QList<QQuickItem*> pages();
 		~PagesWidget();
 
 		static void setCurrentPage(int index);

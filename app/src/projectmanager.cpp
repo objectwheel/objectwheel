@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
+#include <mainwindow.h>
 
 #define INF_FILENAME "inf.json"
 
@@ -15,10 +16,12 @@ class ProjectManagerPrivate
 	public:
 		ProjectManagerPrivate(ProjectManager* uparent);
 		QString generateProjectDir(const QString& projectname) const;
+		QString bytesString(const qint64 size);
 
 	public:
 		ProjectManager* parent = nullptr;
 		QString currentProject;
+		MainWindow* mainWindow;
 };
 
 ProjectManagerPrivate::ProjectManagerPrivate(ProjectManager* uparent)
@@ -33,6 +36,30 @@ inline QString ProjectManagerPrivate::generateProjectDir(const QString& projectn
 	return userDir + separator() + QByteArray().insert(0, projectname).toHex();
 }
 
+QString ProjectManagerPrivate::bytesString(const qint64 size)
+{
+	QString ret;
+	float kb = 1024.0f;
+	float mb = 1048576.0f;
+	float gb = 1073741824.0f;
+
+	if (size < kb) {
+		ret = QString::number(size);
+		ret += " Bytes";
+	} else if (size < mb) {
+		ret = QString::number(size / kb, 'f', 1);
+		ret += " KB";
+	} else if (size < gb) {
+		ret = QString::number(size / mb, 'f', 1);
+		ret += " MB";
+	} else {
+		ret = QString::number(size / gb, 'f', 2);
+		ret += " GB";
+	}
+
+	return ret;
+}
+
 ProjectManagerPrivate* ProjectManager::m_d = nullptr;
 
 ProjectManager::ProjectManager(QObject *parent)
@@ -45,6 +72,11 @@ ProjectManager::ProjectManager(QObject *parent)
 ProjectManager* ProjectManager::instance()
 {
 	return m_d->parent;
+}
+
+void ProjectManager::setMainWindow(MainWindow* mainWindow)
+{
+	m_d->mainWindow = mainWindow;
 }
 
 QString ProjectManager::projectDirectory(const QString& projectname)
@@ -65,9 +97,7 @@ bool ProjectManager::buildNewProject(const QString& projectname)
 	if (UserManager::currentSessionsUser().isEmpty()) return false;
 	if (exists(projectname)) return false;
 	if (!mkdir(m_d->generateProjectDir(projectname))) return false;
-	if (!SaveManager::buildNewDatabase(m_d->generateProjectDir(projectname))) return false;
-	if (!infUpdateLastModification()) return false;
-	return infUpdateSize();
+	return SaveManager::buildNewDatabase(m_d->generateProjectDir(projectname));
 }
 
 bool ProjectManager::renameProject(const QString& from, const QString& to)
@@ -82,8 +112,7 @@ bool ProjectManager::renameProject(const QString& from, const QString& to)
 		if (!startProject(to)) return false;
 		return infUpdateLastModification();
 	} else {
-		if (!rn(fromDir, toDir)) return false;
-		return 	infUpdateLastModification();
+		return rn(fromDir, toDir);
 	}
 }
 
@@ -131,7 +160,7 @@ bool ProjectManager::infUpdateSize()
 	if (jObj.isEmpty()) return false;
 	auto projDir = projectDirectory(m_d->currentProject);
 	if (projDir.isEmpty()) return false;
-	jObj[INF_SIZE] = dsize(projDir);
+	jObj[INF_SIZE] = m_d->bytesString(dsize(projDir));
 	QJsonDocument jDoc(jObj);
 	if (wrfile(projDir + separator() + INF_FILENAME, jDoc.toJson()) < 0) return false;
 	else return true;
@@ -144,7 +173,7 @@ bool ProjectManager::infUpdateLastModification()
 	if (jObj.isEmpty()) return false;
 	auto projDir = projectDirectory(m_d->currentProject);
 	if (projDir.isEmpty()) return false;
-	jObj[INF_MFDATE] = QDateTime::currentDateTime().toString(Qt::ISODate);
+	jObj[INF_MFDATE] = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
 	QJsonDocument jDoc(jObj);
 	if (wrfile(projDir + separator() + INF_FILENAME, jDoc.toJson()) < 0) return false;
 	else return true;
@@ -189,10 +218,7 @@ void ProjectManager::stopProject()
 	infUpdateSize();
 	infUpdateLastModification();
 
-	/* Clear designer */
-//	if (exists(m_d->currentSessionsUser) && !m_d->dirLocker.locked(userDirectory(m_d->currentSessionsUser))) {
-//		if (!m_d->dirLocker.lock(userDirectory(m_d->currentSessionsUser), m_d->currentSessionsKey)) qFatal("ProjectManager : Error occurred");
-//	}
+	m_d->mainWindow->clearStudio();
 
 	m_d->currentProject = "";
 }

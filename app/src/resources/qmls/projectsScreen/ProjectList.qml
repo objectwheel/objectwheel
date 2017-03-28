@@ -13,7 +13,6 @@ Item {
         color: "#d0d4d7"
         border.color: "#c2c6c9"
     }
-
     DropShadow {
         anchors.fill: base
         horizontalOffset: 0
@@ -23,14 +22,12 @@ Item {
         color: "#20000000"
         source: base
     }
-
     Rectangle {
         id: mask
         anchors.fill: listView
         radius: Fit.fit(5)
         visible: false
     }
-
     ListView {
         id: listView
         anchors.fill: parent
@@ -50,14 +47,12 @@ Item {
             selectedProjectname = model.get(currentIndex).projectName
         }
     }
-
     Text {
         anchors.centerIn: parent
         text: "No Project"
         color: "#909497"
         visible: listView.count < 1
     }
-
     Component {
         id: highlight
         Rectangle {
@@ -67,7 +62,6 @@ Item {
             border.color: "#15000000"
         }
     }
-
     Component {
         id: projectListDelegate
         Item {

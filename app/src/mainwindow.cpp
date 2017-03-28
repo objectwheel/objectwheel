@@ -384,7 +384,8 @@ void MainWindow::SetupManagers()
 	//Let's add some custom controls to that project
 	ToolsManager::setListWidget(m_d->toolboxList);
 	auto userManager = new UserManager(this); //create new user manager
-	new ProjectManager(this); //create new project manager
+	auto projectManager = new ProjectManager(this); //create new project manager
+	projectManager->setMainWindow(this);
 	new SaveManager(this);
 	auto sceneManager = new SceneManager;
 	sceneManager->setMainWindow(this);
@@ -751,7 +752,36 @@ void MainWindow::handleBubbleHeadClicked()
         auto cItem = m_d->toolboxList->currentItem();
 		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
         m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
-    }
+	}
+}
+
+void MainWindow::clearStudio()
+{
+	m_d->toolboxList->ClearUrls();
+	m_d->toolboxList->clear();
+	m_d->qmlEditor->clearCache();
+
+	for (auto item : m_d->m_Items) {
+		m_d->designWidget->rootContext()->setContextProperty(
+					m_d->designWidget->rootContext()->nameForObject(item), 0);
+		item->deleteLater();
+	}
+
+	auto pages = m_d->pagesWidget->pages();
+	for (int i = pages.count() - 1; i--;) {
+		m_d->designWidget->rootContext()->setContextProperty(
+					m_d->designWidget->rootContext()->nameForObject(pages[i - 1]), 0);
+		pages[i - 1]->deleteLater();
+		pages.removeAt(i - 1);
+	}
+	QString page1Name = "page1";
+	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages.first()), page1Name);
+
+	m_d->bindingWidget->clearAllBindings();
+	m_d->m_Items.clear();
+	m_d->m_ItemUrls.clear();
+	HideSelectionTools();
+	m_d->toolboxList->setCurrentRow(-1);
 }
 
 void MainWindow::HideSelectionTools()

@@ -382,6 +382,7 @@ Item {
                         id: projectIdentText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
+                        font.underline: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)
@@ -415,6 +416,7 @@ Item {
                         id: ownerText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
+                        font.underline: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)
@@ -443,6 +445,7 @@ Item {
                         id: crDateText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
+                        font.underline: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)
@@ -471,6 +474,7 @@ Item {
                         id: mfDateText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
+                        font.underline: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)
@@ -499,6 +503,7 @@ Item {
                         id: sizeText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
+                        font.underline: true
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)

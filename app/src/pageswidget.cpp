@@ -276,6 +276,16 @@ void PagesWidget::setBindingWidget(BindingWidget* bindingWidget)
 	m_d->bindingWidget = bindingWidget;
 }
 
+QList<QQuickItem*> PagesWidget::pages()
+{
+	QList<QQuickItem*> itemList;
+	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
+		auto v = m_d->rootContext->contextProperty(m_d->pagesListWidget.item(i)->text());
+		itemList << qobject_cast<QQuickItem*>(v.value<QObject*>());
+	}
+	return itemList;
+}
+
 void PagesWidget::setCurrentPage(int index)
 {
 	m_d->pagesListWidget.setCurrentRow(index);

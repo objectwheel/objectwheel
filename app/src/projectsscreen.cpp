@@ -96,7 +96,7 @@ void ProjectsScreen::handleNewButtonClicked()
 	model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole], projectName);
 	model.set(lastIndex, model.roleNames()[ProjectListModel::ActiveRole], false);
 	model.set(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole],
-			QDateTime::currentDateTime().toString(Qt::ISODate));
+			QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " "));
 
 	sizeText->setProperty("text", "0 bytes");
 	mfDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
@@ -160,7 +160,7 @@ void ProjectsScreen::handleBtnOkClicked()
 	auto projectversiontext = projectVersionTextInput->property("text").toString();
 	auto projectidenttext = projectIdentText->property("text").toString();
 	auto sizetext = sizeText->property("text").toString();
-	auto mfdatetext = mfDateText->property("text").toString();
+	auto mfdatetext = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
 	auto crdatetext = crDateText->property("text").toString();
 	auto ownertext = ownerText->property("text").toString();
 	auto prevprojectname = model.get(listView->property("currentIndex").toInt(),
@@ -172,19 +172,17 @@ void ProjectsScreen::handleBtnOkClicked()
 		return;
 	}
 
-	if (prevprojectname != projectnametext) {
-		if (!ProjectManager::exists(prevprojectname)) {
-			if (!ProjectManager::buildNewProject(projectnametext)) {
-				qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error. 0x01");
-			}
-		} else {
-			if (ProjectManager::exists(projectnametext)) {
-				QMessageBox::warning(NULL, "Oops!", "There is another project with the same name, please change your project name.");
-				return;
-			}
-			if (!ProjectManager::renameProject(prevprojectname, projectnametext)) {
-				qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error. 0x02");
-			}
+	if (!ProjectManager::exists(prevprojectname)) {
+		if (!ProjectManager::buildNewProject(projectnametext)) {
+			qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error. 0x01");
+		}
+	} else if (prevprojectname != projectnametext) {
+		if (ProjectManager::exists(projectnametext)) {
+			QMessageBox::warning(NULL, "Oops!", "There is another project with the same name, please change your project name.");
+			return;
+		}
+		if (!ProjectManager::renameProject(prevprojectname, projectnametext)) {
+			qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error. 0x02");
 		}
 	}
 
@@ -209,7 +207,7 @@ void ProjectsScreen::handleLoadButtonClicked()
 	SplashScreen::show(3000); //FIXME:
 	ProjectManager::stopProject();
 	if (!ProjectManager::startProject(projectName)) qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error.");
-	QTimer::singleShot(4000, [=] { SceneManager::show("studioScene", SceneManager::ToLeft); });
+	QTimer::singleShot(3600, [=] { SceneManager::show("studioScene", SceneManager::ToLeft); });
 }
 
 void ProjectsScreen::refreshProjectList(const QString& activeProject)
@@ -224,7 +222,7 @@ void ProjectsScreen::refreshProjectList(const QString& activeProject)
 		model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole], project);
 		model.set(lastIndex, model.roleNames()[ProjectListModel::ActiveRole], project == activeProject);
 		model.set(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole],
-				ProjectManager::projectInformation(project)[INF_MFDATE].toString());
+				"Last edited: " + ProjectManager::projectInformation(project)[INF_MFDATE].toString());
 	}
 	listView->setProperty("currentIndex", 0);
 }

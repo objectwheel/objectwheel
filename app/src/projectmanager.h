@@ -15,6 +15,7 @@
 #define INF_SIZE "size"
 
 class ProjectManagerPrivate;
+class MainWindow;
 
 class ProjectManager : public QObject
 {
@@ -24,6 +25,7 @@ class ProjectManager : public QObject
 	public:
 		explicit ProjectManager(QObject *parent = 0);
 		static ProjectManager* instance();
+		static void setMainWindow(MainWindow* mainWindow);
 		static QString projectDirectory(const QString& projectname);
 		static bool exists(const QString& projectname);
 		static bool buildNewProject(const QString& projectname);

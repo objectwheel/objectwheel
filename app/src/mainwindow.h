@@ -42,6 +42,7 @@ class MainWindow : public QWidget
 		void fixWebViewPosition(QQuickItem* const item);
 		const QPixmap DownloadPixmap(const QUrl& url);
 		static bool addControlWithoutSave(const QUrl& url, const QString& parent);
+		void clearStudio();
 
 	private slots:
 		void on_clearButton_clicked();
