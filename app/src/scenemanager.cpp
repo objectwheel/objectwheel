@@ -48,6 +48,7 @@ SceneManager* SceneManager::instance()
 void SceneManager::addScene(const QString& key, QWidget* scene)
 {
 	m_d->sceneMap.insert(key, scene);
+	scene->hide();
 }
 
 void SceneManager::show(const QString& key, SceneManager::Direction direction)
@@ -85,6 +86,8 @@ void SceneManager::show(const QString& key, SceneManager::Direction direction)
 	m_d->currentKey = key;
 	m_d->parallelAnimationGroup.start();
 	m_d->connection = QObject::connect(&m_d->parallelAnimationGroup, &QParallelAnimationGroup::finished, [=] { cs->hide(); });
+	m_d->connection = QObject::connect(&m_d->parallelAnimationGroup, &QParallelAnimationGroup::finished,
+									   [=] { emit instance()->currentSceneChanged(key); });
 	ns->show();
 	ns->raise();
 }
@@ -97,6 +100,7 @@ void SceneManager::setCurrent(const QString& key)
 	m_d->sceneMap[key]->setGeometry(m_d->mainWindow->rect());
 	m_d->sceneMap[key]->show();
 	m_d->sceneMap[key]->raise();
+	emit instance()->currentSceneChanged(key);
 }
 
 void SceneManager::setMainWindow(QWidget* mainWindow)

@@ -22,6 +22,9 @@ class SceneManager : public QObject
 		static void setMainWindow(QWidget* mainWindow);
 		bool eventFilter(QObject *watched, QEvent *event);
 
+	signals:
+		void currentSceneChanged(const QString& key);
+
 	private:
 		static SceneManagerPrivate* m_d;
 };

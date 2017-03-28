@@ -334,23 +334,6 @@ void MainWindow::SetupGui()
 		m_d->bubbleHead->move(fit(20), height()-fit(75));
 	});
 
-	m_d->aboutWidget = new About(m_d->centralWidget, this);
-	m_d->aboutButton = new FlatButton(this);
-	m_d->aboutButton->setIcon(QIcon(":/resources/images/aboutus.png"));
-	m_d->aboutButton->setIconButton(true);
-	m_d->aboutButton->setCheckable(true);
-	connect(m_d->aboutButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=]{
-		m_LeftMenu->hide();
-		m_d->titleBar->setMenuChecked(false);
-		m_RightMenu->hide();
-		m_d->titleBar->setSettingsChecked(false);
-	});
-	connect(this,&MainWindow::resized, [=]{
-		m_d->aboutWidget->hide();
-		m_d->aboutButton->setChecked(false);
-	});
-	connect(m_d->aboutButton, SIGNAL(clicked(bool)), m_d->aboutWidget, SLOT(show(bool)));
-
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
 	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
@@ -365,6 +348,8 @@ void MainWindow::SetupGui()
             HideSelectionTools();
         }
     });
+
+	m_d->aboutWidget = new About(this);
 
 	// Init Splash Screen
 	SplashScreen::init(this);
@@ -391,7 +376,19 @@ void MainWindow::SetupManagers()
 	sceneManager->setMainWindow(this);
 	sceneManager->addScene("studioScene", m_d->centralWidget);
 	sceneManager->addScene("projectsScene", m_d->projectsScreen);
+	sceneManager->addScene("aboutScene", m_d->aboutWidget);
 	sceneManager->setCurrent("projectsScene");
+	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
+			[=](const QString& key){
+		m_LeftMenu->hide();
+		m_d->titleBar->setMenuChecked(false);
+		m_RightMenu->hide();
+		m_d->titleBar->setSettingsChecked(false);
+
+		if (key == "studioScene") {
+			m_d->bubbleHead->raise();
+		}
+	});
 	SplashScreen::raise();
 	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
 	auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession),
@@ -633,7 +630,6 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	m_d->qmlEditor->setGeometry(0, 0, width(), height());
-	m_d->aboutButton->setGeometry(width()-fit(40), height()-fit(40), fit(30),fit(30));
 	QWidget::resizeEvent(event);
 	emit resized();
 }
@@ -781,6 +777,7 @@ void MainWindow::clearStudio()
 	m_d->m_Items.clear();
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
+	m_d->bubbleHead->move(fit(20), height()-fit(75));
 	m_d->toolboxList->setCurrentRow(-1);
 }
 

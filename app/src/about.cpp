@@ -14,16 +14,8 @@ using namespace Fit;
 
 struct AboutPrivate
 {
-		AboutPrivate(QWidget*, QWidget*);
-		void show(bool show);
-
+		AboutPrivate(QWidget*);
 		QWidget* parent;
-		QWidget* centralWidget;
-		QParallelAnimationGroup parallelAnimationGroup;
-		QPropertyAnimation aboutShifterAmination;
-		QPropertyAnimation cwShifterAmination;
-		QMetaObject::Connection connection;
-
 		QVBoxLayout mainLayout;
 		QHBoxLayout iconLayout;
 		QLabel iconLabel;
@@ -31,19 +23,14 @@ struct AboutPrivate
 		QLabel legalLabel;
 };
 
-AboutPrivate::AboutPrivate(QWidget* p, QWidget* cW)
+AboutPrivate::AboutPrivate(QWidget* p)
 	: parent(p)
-	, centralWidget(cW)
 {
-	parallelAnimationGroup.addAnimation(&cwShifterAmination);
-	parallelAnimationGroup.addAnimation(&aboutShifterAmination);
-
 	QPalette palette(parent->palette());
 	palette.setColor(QPalette::Window, "#e0e4e7");
 	parent->setPalette(palette);
 
 	parent->setAutoFillBackground(true);
-	parent->setGeometry(QRect(centralWidget->width(), 0, centralWidget->width(), centralWidget->height()));
 	parent->setLayout(&mainLayout);
 
 	iconLabel.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -72,68 +59,13 @@ AboutPrivate::AboutPrivate(QWidget* p, QWidget* cW)
 	mainLayout.addWidget(&legalLabel);
 }
 
-void AboutPrivate::show(bool show)
-{
-	if (show) {
-		cwShifterAmination.stop();
-		aboutShifterAmination.stop();
-		parallelAnimationGroup.stop();
-
-		QObject::disconnect(connection);
-
-		cwShifterAmination.setTargetObject(centralWidget);
-		cwShifterAmination.setPropertyName("geometry");
-		cwShifterAmination.setDuration(500);
-		cwShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
-		cwShifterAmination.setStartValue(QRect(0, 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-		cwShifterAmination.setEndValue(QRect(-((QWidget*)parent->parent())->width(), 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-
-		aboutShifterAmination.setTargetObject(parent);
-		aboutShifterAmination.setPropertyName("geometry");
-		aboutShifterAmination.setDuration(500);
-		aboutShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
-		aboutShifterAmination.setStartValue(QRect(((QWidget*)parent->parent())->width(), 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-		aboutShifterAmination.setEndValue(QRect(0, 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-
-		parallelAnimationGroup.start();
-		parent->show();
-	} else {
-		cwShifterAmination.stop();
-		aboutShifterAmination.stop();
-		parallelAnimationGroup.stop();
-
-		cwShifterAmination.setTargetObject(centralWidget);
-		cwShifterAmination.setPropertyName("geometry");
-		cwShifterAmination.setDuration(500);
-		cwShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
-		cwShifterAmination.setStartValue(QRect(-((QWidget*)parent->parent())->width(), 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-		cwShifterAmination.setEndValue(QRect(0, 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-
-		aboutShifterAmination.setTargetObject(parent);
-		aboutShifterAmination.setPropertyName("geometry");
-		aboutShifterAmination.setDuration(500);
-		aboutShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
-		aboutShifterAmination.setStartValue(QRect(0, 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-		aboutShifterAmination.setEndValue(QRect(((QWidget*)parent->parent())->width(), 0, ((QWidget*)parent->parent())->width(), ((QWidget*)parent->parent())->height()));
-
-		parallelAnimationGroup.start();
-		connection = QObject::connect(&parallelAnimationGroup, &QParallelAnimationGroup::finished, [&]{parent->hide();});
-	}
-}
-
-About::About(QWidget* centralWidget, QWidget *parent)
+About::About(QWidget *parent)
 	: QWidget(parent)
-	, m_d(new AboutPrivate(this, centralWidget))
+	, m_d(new AboutPrivate(this))
 {
-	setHidden(true);
 }
 
 About::~About()
 {
 	delete m_d;
-}
-
-void About::show(bool show)
-{
-	m_d->show(show);
 }
