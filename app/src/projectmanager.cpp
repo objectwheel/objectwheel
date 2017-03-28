@@ -6,8 +6,19 @@
 #include <QMessageBox>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDateTime>
 
-#define INF_FILE "inf.json"
+#define INF_FILENAME "inf.json"
+#define INF_PROJECTNAME "projectName"
+#define INF_DESCRIPTION "description"
+#define INF_ORGNAME "orgName"
+#define INF_ORGIDENT "orgIdent"
+#define INF_PROJECT_VERSION "projectVersion"
+#define INF_PROJECT_IDENT "projectIdent"
+#define INF_OWNER "owner"
+#define INF_CRDATE "crDate"
+#define INF_MFDATE "mfDate"
+#define INF_SIZE "size"
 
 class ProjectManagerPrivate
 {
@@ -93,7 +104,7 @@ bool ProjectManager::fillProjectInformation(const QString& projectname,
 	jObj["mfDate"] = mfDate;
 	jObj["size"] = size;
 	QJsonDocument jDoc(jObj);
-	if (wrfile(projDir + separator() + INF_FILE, jDoc.toJson()) < 0) return false;
+	if (wrfile(projDir + separator() + INF_FILENAME, jDoc.toJson()) < 0) return false;
 	else return true;
 }
 
@@ -101,8 +112,34 @@ QJsonObject ProjectManager::projectInformation(const QString& projectname)
 {
 	auto projDir = projectDirectory(projectname);
 	if (projDir.isEmpty()) return QJsonObject();
-	if (!::exists(projDir + separator() + INF_FILE)) return QJsonObject();
-	return QJsonDocument::fromJson(rdfile(projDir + separator() + INF_FILE)).object();
+	if (!::exists(projDir + separator() + INF_FILENAME)) return QJsonObject();
+	return QJsonDocument::fromJson(rdfile(projDir + separator() + INF_FILENAME)).object();
+}
+
+bool ProjectManager::infUpdateSize()
+{
+	if (m_d->currentProject.isEmpty()) return false;
+	auto jObj = projectInformation(m_d->currentProject);
+	if (jObj.isEmpty()) return false;
+	auto projDir = projectDirectory(m_d->currentProject);
+	if (projDir.isEmpty()) return false;
+	jObj[INF_SIZE] = dsize(projDir);
+	QJsonDocument jDoc(jObj);
+	if (wrfile(projDir + separator() + INF_FILENAME, jDoc.toJson()) < 0) return false;
+	else return true;
+}
+
+bool ProjectManager::infUpdateLastModification()
+{
+	if (m_d->currentProject.isEmpty()) return false;
+	auto jObj = projectInformation(m_d->currentProject);
+	if (jObj.isEmpty()) return false;
+	auto projDir = projectDirectory(m_d->currentProject);
+	if (projDir.isEmpty()) return false;
+	jObj[INF_MFDATE] = QDateTime::currentDateTime().toString(Qt::ISODate);
+	QJsonDocument jDoc(jObj);
+	if (wrfile(projDir + separator() + INF_FILENAME, jDoc.toJson()) < 0) return false;
+	else return true;
 }
 
 bool ProjectManager::startProject(const QString& projectname)
@@ -140,6 +177,9 @@ void ProjectManager::stopProject()
 	if (m_d->currentProject.isEmpty()) {
 		return;
 	}
+
+	infUpdateSize();
+	infUpdateLastModification();
 
 	/* Clear designer */
 //	if (exists(m_d->currentSessionsUser) && !m_d->dirLocker.locked(userDirectory(m_d->currentSessionsUser))) {

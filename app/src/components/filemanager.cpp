@@ -134,12 +134,12 @@ QString FileManager::dname(const QString& name) const
 	return QFileInfo(name).path();
 }
 
-quint64 FileManager::fsize(const QString& name) const
+qint64 FileManager::fsize(const QString& name) const
 {
 	return QFileInfo(name).size();
 }
 
-quint64 FileManager::dsize(const QString& name) const
+qint64 FileManager::dsize(const QString& name) const
 {
 	quint64 sz = 0;
 	for (auto filename : lsfile(name)) {

@@ -23,8 +23,8 @@ class FileManager : public QObject
 		QStringList lsfile(const QString& dir) const;
 		QString fname(const QString& name) const;
 		QString dname(const QString& name) const;
-		quint64 fsize(const QString& name) const;
-		quint64 dsize(const QString& name) const;
+		qint64 fsize(const QString& name) const;
+		qint64 dsize(const QString& name) const;
 		QString suffix(const QString& name) const;
 		QByteArray rdfile(const QString& file) const;
 		int wrfile(const QString& file, const QByteArray& data) const;
@@ -56,8 +56,8 @@ static inline QStringList lsdir(const QString& dir) { return FileManager().lsdir
 static inline QStringList lsfile(const QString& dir) { return FileManager().lsfile(dir); }
 static inline QString fname(const QString& name) { return FileManager().fname(name); }
 static inline QString dname(const QString& name) { return FileManager().dname(name); }
-static inline quint64 fsize(const QString& name) { return FileManager().fsize(name); }
-static inline quint64 dsize(const QString& name) { return FileManager().dsize(name); }
+static inline qint64 fsize(const QString& name) { return FileManager().fsize(name); }
+static inline qint64 dsize(const QString& name) { return FileManager().dsize(name); }
 static inline QString suffix(const QString& name) { return FileManager().suffix(name); }
 static inline QByteArray rdfile(const QString& file) { return FileManager().rdfile(file); }
 static inline int wrfile(const QString& file, const QByteArray& data) { return FileManager().wrfile(file, data); }

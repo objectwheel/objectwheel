@@ -27,6 +27,8 @@ class ProjectManager : public QObject
 										   const QString& mfDate,
 										   const QString& size);
 		static QJsonObject projectInformation(const QString& projectname);
+		static bool infUpdateSize();
+		static bool infUpdateLastModification();
 		static bool startProject(const QString& projectname);
 		static void stopProject();
 		static QString currentProject();

@@ -7,11 +7,13 @@ import QtQuick.Controls.Styles 1.4
 Rectangle {
     color: "#E0E4E7"
     SwipeView {
+        id: swipeView
         anchors.fill: parent
+        interactive: false
         ProjectsPage {
             id: projectsPage
             logoPath: "qrc:///resources/images/logo.png"
-            /*projectList.listView.model: ListModel {
+            projectList.listView.model: ListModel {
                 ListElement {
                     projectName: "Bill Smith"
                     lastEdited: "555 3264"
@@ -27,11 +29,15 @@ Rectangle {
                     lastEdited: "555 0473"
                     active: false
                 }
-            }*/
+            }
         }
 
         ProjectSettings {
             id: projectSettings
         }
     }
+
+    property alias swipeView: swipeView
+    property alias projectSettings: projectSettings
+    property alias projectsPage: projectsPage
 }

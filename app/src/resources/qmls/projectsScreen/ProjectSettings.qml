@@ -4,8 +4,10 @@ import QtQuick.Controls 2.0
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.0
 import "../fit.js" as Fit
+import "../delaycaller.js" as DelayCaller
 
 Item {
+    id: root
     Rectangle {
         id: title
         color: "#25000000"
@@ -237,6 +239,7 @@ Item {
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)
+                        onTextChanged: projectIdentContainer.update()
                     }
                 }
             }
@@ -321,6 +324,7 @@ Item {
                         verticalAlignment: TextInput.AlignVCenter
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)
+                        onTextChanged: projectIdentContainer.update()
                     }
                 }
             }
@@ -376,6 +380,11 @@ Item {
                         horizontalAlignment: TextInput.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
+                }
+                function update() {
+                    var projectNameText = projectnameTextInput.text.replace(/\s+/g, "-")
+                    var orgIdentText = orgIdentTextInput.text.replace(/\s+/g, "-")
+                    projectIdentText.text = orgIdentText + "." + projectNameText
                 }
             }
             Rectangle {
@@ -746,6 +755,62 @@ Item {
             }
         }
     }
+    Item {
+        id: warning
+        y: -height - Fit.fit(10)
+        width: parent.width / 2.4
+        height: Fit.fit(55)
+        anchors.horizontalCenter: parent.horizontalCenter
+        Rectangle {
+            id: base
+            anchors.fill: parent
+            radius: Fit.fit(7)
+            visible: false
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.lighter("#C0C3C5",1.03) }
+                GradientStop { position: 1.0; color: Qt.darker("#C0C3C5",1.03) }
+            }
+            border.color: "#B0AFB0"
+        }
+        DropShadow {
+            anchors.fill: parent
+            horizontalOffset: 0
+            verticalOffset: Fit.fit(1)
+            radius: Fit.fit(2.0)
+            samples: Fit.fit(17)
+            color: "#40000000"
+            source: base
+        }
+        Text {
+            font.pixelSize: Fit.fit(13)
+            text: "Please fill all the fields."
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            y: parent.height/2.0 -contentHeight/2.0 + Fit.fit(4)
+            color: "#302E30"
+
+            Text {
+                font.pixelSize: Fit.fit(16)
+                font.bold: true
+                text: "*"
+                anchors.verticalCenter: parent.verticalCenter
+                x: parent.width/2.0 - parent.contentWidth/2.0 - Fit.fit(10)
+                color: "#bb3333"
+            }
+        }
+        Behavior on y {
+            NumberAnimation {
+                duration: 350
+                easing.type: Easing.InExpo
+            }
+        }
+        function show() {
+            y = -Fit.fit(10)
+            DelayCaller.delayCall(4000, function() {
+                y = -height - Fit.fit(10)
+            })
+        }
+    }
     MessageDialog {
         id: deleteProjectMessageDialog
         title: "Do you want to continue?"
@@ -754,15 +819,16 @@ Item {
         onYes: btnDelProject.clicked()
         icon: StandardIcon.Warning
     }
-    property alias projectnameTextInput: projectnameTextInput;
-    property alias descriptionTextInput: descriptionTextInput;
-    property alias orgnameTextInput: orgnameTextInput;
-    property alias orgIdentTextInput: orgIdentTextInput;
-    property alias projectVersionTextInput: projectVersionTextInput;
-    property alias projectIdentText: projectIdentText;
-    property alias ownerText: ownerText;
-    property alias crDateText: crDateText;
-    property alias mfDateText: mfDateText;
+    property alias warning: warning
+    property alias projectnameTextInput: projectnameTextInput
+    property alias descriptionTextInput: descriptionTextInput
+    property alias orgnameTextInput: orgnameTextInput
+    property alias orgIdentTextInput: orgIdentTextInput
+    property alias projectVersionTextInput: projectVersionTextInput
+    property alias projectIdentText: projectIdentText
+    property alias ownerText: ownerText
+    property alias crDateText: crDateText
+    property alias mfDateText: mfDateText
     property alias sizeText: sizeText
     property alias btnDelete: btnDelProject
     property alias btnImport: btnImExLeft

@@ -163,5 +163,5 @@ Item {
     }
     signal infoClicked(var projectName)
     property string selectedProjectname
-    property alias listView : listView
+    property alias listView: listView
 }
