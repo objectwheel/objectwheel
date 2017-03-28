@@ -203,6 +203,14 @@ void ProjectsScreen::handleLoadButtonClicked()
 		return;
 	}
 
+	for (int i = model.rowCount(); i--;) {
+		if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
+			model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
+		}
+	}
+	model.set(listView->property("currentIndex").toInt(),
+			  model.roleNames()[ProjectListModel::ActiveRole], true);
+
 	SplashScreen::setText("Loading project");
 	SplashScreen::show(3000); //FIXME:
 	ProjectManager::stopProject();

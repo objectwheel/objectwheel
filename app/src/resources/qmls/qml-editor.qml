@@ -149,7 +149,6 @@ Item {
             Text {
                 anchors.fill: parent
                 text: "Objectwheel QML Editor"
-                font.bold: true
                 color: "white"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
@@ -337,7 +336,6 @@ Item {
                 width: Fit.fit(15)
                 height: Fit.fit(15)
                 color: "white"
-                font.bold: true
                 clip: true
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter

@@ -6,6 +6,7 @@
 class SceneManagerPrivate;
 class QWidget;
 class QMainWindow;
+class ListWidget;
 
 class SceneManager : public QObject
 {
@@ -16,10 +17,14 @@ class SceneManager : public QObject
 		enum Direction { ToLeft, ToRight };
 		explicit SceneManager(QObject *parent = 0);
 		static SceneManager* instance();
+		static QStringList scenes();
+		static QString cuurrentScene();
+		static QWidget* scene(const QString& key);
 		static void addScene(const QString& key, QWidget* scene);
 		static void show(const QString& key, Direction direction);
 		static void setCurrent(const QString& key);
 		static void setMainWindow(QWidget* mainWindow);
+		static void setSceneListWidget(ListWidget* listWidget);
 		bool eventFilter(QObject *watched, QEvent *event);
 
 	signals:

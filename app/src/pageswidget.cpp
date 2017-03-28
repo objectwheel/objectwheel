@@ -314,6 +314,11 @@ void PagesWidget::addPageWithoutSave(QString& name)
 	m_d->rootContext->setContextProperty(name, item);
 }
 
+void PagesWidget::showBar()
+{
+	m_d->pagesListWidget.showBar();
+}
+
 void PagesWidget::changePageWithoutSave(const QString& from, QString& to)
 {
 	if (from == to) return;
@@ -341,4 +346,34 @@ void PagesWidget::changePageWithoutSave(const QString& from, QString& to)
 	m_d->rootContext->setContextProperty(from, 0);
 	m_d->rootContext->setContextProperty(to, selectedItem);
 	m_d->pagesListWidget.item(index)->setText(to);
+}
+
+void PagesWidget::removePageWithoutSave(const QString& name)
+{
+	if (m_d->pagesListWidget.count() > 1) {
+		int index = -1;
+		for (int i = m_d->pagesListWidget.count(); i--;) {
+			if (m_d->pagesListWidget.item(i)->text() == name) {
+				index = i;
+			}
+		}
+		if (index < 0) return;
+		delete m_d->pagesListWidget.takeItem(index);
+		auto v = m_d->rootContext->contextProperty(name);
+		auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
+		if (!selectedItem) qFatal("PagesWidget : Error occurred");
+		auto items = m_d->GetAllChildren(selectedItem);
+		for (auto item : items) {
+			if (m_d->itemList->contains(item)) {
+				m_d->bindingWidget->detachBindingsFor(item);
+				m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(item), 0);
+				int i = m_d->itemList->indexOf(item);
+				m_d->itemList->removeOne(item);
+				m_d->urlList->removeAt(i);
+			}
+		}
+		m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(selectedItem), 0);
+		selectedItem->setParentItem(0);
+		selectedItem->deleteLater();
+	}
 }

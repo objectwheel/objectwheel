@@ -35,7 +35,6 @@ Item {
                     text: "Editor"
                     color: splitState == 'editor' ? "#2b5796" : 'white'
                     anchors.centerIn: parent
-                    font.bold: true
                 }
                 Layout.fillHeight: true
                 Layout.fillWidth: true
@@ -56,7 +55,6 @@ Item {
                     text: "Split"
                     color: splitState == 'splitted' ? "#2b5796" : "white"
                     anchors.centerIn: parent
-                    font.bold: true
                 }
                 Layout.fillHeight: true
                 Layout.fillWidth: true
@@ -77,7 +75,6 @@ Item {
                     text: "Viewer"
                     color: splitState == 'viewer' ? "#2b5796" : "white"
                     anchors.centerIn: parent
-                    font.bold: true
                 }
                 Layout.fillHeight: true
                 Layout.fillWidth: true
@@ -118,7 +115,6 @@ Item {
         }
         text: "⏏"
         color: "white"
-        font.bold: true
         MouseArea {
             anchors.fill: parent
             anchors.margins: -Fit.fit(5)
@@ -138,7 +134,6 @@ Item {
             visible: (editor.editor.selectionStart !== editor.editor.selectionEnd)
             color: "white"
             text: "Cut"
-            font.bold: true
             MouseArea {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
@@ -150,7 +145,6 @@ Item {
             visible: (editor.editor.selectionStart !== editor.editor.selectionEnd)
             color: "white"
             text: "Copy"
-            font.bold: true
             MouseArea {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
@@ -165,7 +159,6 @@ Item {
             visible: (editor.editor.selectionStart === editor.editor.selectionEnd)
             color: "white"
             text: "Select"
-            font.bold: true
             MouseArea {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
@@ -177,7 +170,6 @@ Item {
             visible: (editor.editor.selectionStart === editor.editor.selectionEnd)
             color: "white"
             text: "Select All"
-            font.bold: true
             MouseArea {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)
@@ -189,7 +181,6 @@ Item {
             visible: (editor.editor.canPaste === true)
             color: "white"
             text: "Paste"
-            font.bold: true
             MouseArea {
                 anchors.fill: parent
                 anchors.margins: -Fit.fit(5)

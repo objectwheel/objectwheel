@@ -245,7 +245,7 @@ TitleBar::TitleBar(QWidget *parent)
 	m_Menu->setCursor(Qt::PointingHandCursor);
 
 	m_Title->setAlignment(Qt::AlignCenter);
-	m_Title->setStyleSheet("font:bold; background:transparent; color:white;");
+	m_Title->setStyleSheet("background:transparent; color:white;");
 
 	m_UpperLayout->addWidget(m_Menu);
 	m_UpperLayout->addWidget(m_Title);

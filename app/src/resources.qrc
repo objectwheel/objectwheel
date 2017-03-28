@@ -149,5 +149,11 @@
         <file>resources/qmls/projectsScreen/images/welcome@2x.png</file>
         <file>resources/images/logo@2x.png</file>
         <file>resources/images/loading@2x.png</file>
+        <file>resources/images/studioSceneIcon.png</file>
+        <file>resources/images/projectsSceneIcon.png</file>
+        <file>resources/images/aboutSceneIcon.png</file>
+        <file>resources/images/aboutSceneIcon@2x.png</file>
+        <file>resources/images/projectsSceneIcon@2x.png</file>
+        <file>resources/images/studioSceneIcon@2x.png</file>
     </qresource>
 </RCC>

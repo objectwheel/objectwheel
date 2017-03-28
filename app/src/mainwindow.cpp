@@ -81,9 +81,6 @@ void MainWindow::SetupGui()
 	m_ResizerTick->SetRootContext(m_d->designWidget->rootContext());
 	m_RotatorTick->SetRootContext(m_d->designWidget->rootContext());
 
-	/* Toolbox stylizing */
-	m_d->toolboxList->setIconSize(fit({30, 30}));
-
 	/* Start filtering design area */
 	m_d->designWidget->installEventFilter(this);
 
@@ -165,11 +162,6 @@ void MainWindow::SetupGui()
 	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
 	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
-
-	/* Pop-up toolbox widget's scrollbar */
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxList->showBar(); });
-    connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar();});
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
 
 	/* Set flat buttons' colors*/
 	m_d->editButton->setColor(QColor("#2b5796"));
@@ -351,6 +343,33 @@ void MainWindow::SetupGui()
 
 	m_d->aboutWidget = new About(this);
 
+	QWidget* sceneListWidget = new QWidget(this);
+	sceneListWidget->setStyleSheet("background:#566573;");
+	m_LeftMenu->attachWidget(sceneListWidget);
+	QVBoxLayout* sceneListWidgetLayout = new QVBoxLayout(sceneListWidget);
+	sceneListWidgetLayout->setSpacing(fit(15));
+	sceneListWidgetLayout->setContentsMargins(0, 0, 0, 0);
+	QLabel* sceneListTitle = new QLabel(this);
+	sceneListTitle->setText("◉ Menu");
+	sceneListTitle->setAlignment(Qt::AlignCenter);
+	QGraphicsDropShadowEffect* sceneListTitleShadowEffect = new QGraphicsDropShadowEffect;
+	sceneListTitleShadowEffect->setBlurRadius(fit(5));
+	sceneListTitleShadowEffect->setOffset(0, fit(4));
+	sceneListTitleShadowEffect->setColor(QColor(0, 0, 0, 60));
+	sceneListTitle->setGraphicsEffect(sceneListTitleShadowEffect);
+	sceneListTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	sceneListTitle->setFixedHeight(fit(43));
+	sceneListTitle->setStyleSheet("color: white; background:#C03638;");
+	sceneListWidgetLayout->addWidget(sceneListTitle);
+	sceneListWidgetLayout->addWidget(m_d->sceneList);
+
+	/* Pop-up toolbox widget's scrollbar */
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->sceneList->showBar(); });
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxList->showBar(); });
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar();});
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->pagesWidget->showBar(); });
+
 	// Init Splash Screen
 	SplashScreen::init(this);
 	SplashScreen::setText("Wait");
@@ -374,10 +393,12 @@ void MainWindow::SetupManagers()
 	new SaveManager(this);
 	auto sceneManager = new SceneManager;
 	sceneManager->setMainWindow(this);
+	sceneManager->setSceneListWidget(m_d->sceneList);
 	sceneManager->addScene("studioScene", m_d->centralWidget);
 	sceneManager->addScene("projectsScene", m_d->projectsScreen);
 	sceneManager->addScene("aboutScene", m_d->aboutWidget);
 	sceneManager->setCurrent("projectsScene");
+	SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
 		m_LeftMenu->hide();
@@ -389,7 +410,23 @@ void MainWindow::SetupManagers()
 			m_d->bubbleHead->raise();
 		}
 	});
-	SplashScreen::raise();
+	for (auto scene : sceneManager->scenes()) {
+		QList<QUrl> urls;
+		QString sceneName;
+		QString iconPath = ":/resources/images/" + scene + "Icon.png";
+		if (scene == "projectsScene") {
+			sceneName = "Projects";
+		} else if (scene == "studioScene") {
+			sceneName = "Studio";
+		} else if (scene == "aboutScene") {
+			sceneName = "About";
+		}
+		urls << scene;
+		QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), sceneName);
+		m_d->sceneList->insertItem(0, item);
+		m_d->sceneList->AddUrls(item, urls);
+	}
+
 	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
 	auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession),
 					  QString("kozmon@hotmail.com"), QString("password123")); //unlock user session
@@ -749,6 +786,7 @@ void MainWindow::handleBubbleHeadClicked()
 		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
         m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
 	}
+	m_d->qmlEditor->raise();
 }
 
 void MainWindow::clearStudio()
@@ -764,14 +802,13 @@ void MainWindow::clearStudio()
 	}
 
 	auto pages = m_d->pagesWidget->pages();
-	for (int i = pages.count() - 1; i--;) {
-		m_d->designWidget->rootContext()->setContextProperty(
-					m_d->designWidget->rootContext()->nameForObject(pages[i - 1]), 0);
-		pages[i - 1]->deleteLater();
-		pages.removeAt(i - 1);
+	for (int i = pages.count(); i--;) {
+		if (pages[i] != m_CurrentPage) {
+			m_d->pagesWidget->removePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages[i]));
+		}
 	}
 	QString page1Name = "page1";
-	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages.first()), page1Name);
+	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentPage), page1Name);
 
 	m_d->bindingWidget->clearAllBindings();
 	m_d->m_Items.clear();

@@ -178,10 +178,6 @@ void BubbleHead::paintEvent(QPaintEvent*)
 	painter.setBrush(g);
 	painter.drawRoundedRect(notfRect, fit(3), fit(3));
 
-	QFont f("System Font");
-	f.setWeight(QFont::Bold);
-
-	painter.setFont(f);
 	painter.setPen(Qt::white);
 	painter.drawText(notfRect, m_d->notificationText, QTextOption(Qt::AlignCenter));
 }

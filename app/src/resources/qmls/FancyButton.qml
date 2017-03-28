@@ -47,6 +47,7 @@ Item {
 
     MouseArea {
         id: mouse
+        hoverEnabled: true
         anchors.fill: parent
         cursorShape: cursorMark
         onClicked: {

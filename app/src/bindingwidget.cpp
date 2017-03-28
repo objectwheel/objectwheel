@@ -221,7 +221,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
 	QObject::connect(&popupOkButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {popupOkButtonClicked();});
 
 	popupTitle.setText("Binding Editor");
-	popupTitle.setStyleSheet("background:transparent;color:white;font:bold;text-decoration:underline;");
+	popupTitle.setStyleSheet("background:transparent;color:white;text-decoration:underline;");
 	popupItemNameTextBox.setPlaceholderText("Select target item...");
 	popupItemNameTextBox.lineEdit()->setReadOnly(true);
 	popupItemNameTextBox.setIcon(QIcon(":/resources/images/item.png"));

@@ -50,7 +50,6 @@ Item {
             text: "Unable to load image, please check actual image format with file suffix against possible conflicts."
             wrapMode: Text.WordWrap
             color: "white"
-            font.bold: true
         }
     }
     PinchArea {

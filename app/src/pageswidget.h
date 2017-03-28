@@ -15,6 +15,7 @@ class PagesWidget : public QWidget
 
 	public:
 		explicit PagesWidget(QWidget *parent = 0);
+		void showBar();
 		void setSwipeItem(QQuickItem* swipeItem);
 		void setRootContext(QQmlContext* context);
 		void setItemList(QList<QQuickItem*>* items);
@@ -26,6 +27,7 @@ class PagesWidget : public QWidget
 		static void setCurrentPage(int index);
 		static void addPageWithoutSave(QString& name);
 		static void changePageWithoutSave(const QString& from, QString& to);
+		static void removePageWithoutSave(const QString& name);
 
 	private:
 		static PagesWidgetPrivate* m_d;
