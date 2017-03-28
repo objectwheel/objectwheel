@@ -35,7 +35,7 @@
 //CoverMenu ile SceneManager uyumlu çalışsın
 //ListWidget hatasını çöz
 //Import/Export project
-//Düzelt TextInput of ProjectsSettins page
+//About'tan çıkış
 
 int main(int argc, char *argv[])
 {

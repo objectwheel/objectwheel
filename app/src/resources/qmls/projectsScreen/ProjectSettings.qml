@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.0
+import QtQuick.Controls 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.0
 import "../fit.js" as Fit
@@ -232,13 +233,18 @@ Item {
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
-                    TextInput {
+                    TextArea {
                         id: projectnameTextInput
                         clip: true
+                        selectByKeyboard: true
+                        selectByMouse: true
+                        frameVisible: false
+                        backgroundVisible: false
+                        inputMethodHints: Qt.ImhNoPredictiveText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
                         onTextChanged: projectIdentContainer.update()
                     }
@@ -262,13 +268,18 @@ Item {
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
-                    TextInput {
+                    TextArea {
                         id: descriptionTextInput
                         clip: true
+                        selectByKeyboard: true
+                        selectByMouse: true
+                        frameVisible: false
+                        backgroundVisible: false
+                        inputMethodHints: Qt.ImhNoPredictiveText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
@@ -291,13 +302,18 @@ Item {
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
-                    TextInput {
+                    TextArea {
                         id: orgnameTextInput
                         clip: true
+                        selectByKeyboard: true
+                        selectByMouse: true
+                        frameVisible: false
+                        backgroundVisible: false
+                        inputMethodHints: Qt.ImhNoPredictiveText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
@@ -320,13 +336,18 @@ Item {
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
-                    TextInput {
+                    TextArea {
                         id: orgIdentTextInput
                         clip: true
+                        selectByKeyboard: true
+                        selectByMouse: true
+                        frameVisible: false
+                        backgroundVisible: false
+                        inputMethodHints: Qt.ImhNoPredictiveText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
                         onTextChanged: projectIdentContainer.update()
                     }
@@ -350,13 +371,18 @@ Item {
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
-                    TextInput {
+                    TextArea {
                         id: projectVersionTextInput
                         clip: true
+                        selectByKeyboard: true
+                        selectByMouse: true
+                        frameVisible: false
+                        backgroundVisible: false
+                        inputMethodHints: Qt.ImhNoPredictiveText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
@@ -383,8 +409,8 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         font.underline: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
@@ -417,8 +443,8 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         font.underline: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
@@ -446,8 +472,8 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         font.underline: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
@@ -475,8 +501,8 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         font.underline: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
@@ -504,8 +530,8 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         font.underline: true
-                        verticalAlignment: TextInput.AlignVCenter
-                        horizontalAlignment: TextInput.AlignRight
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
