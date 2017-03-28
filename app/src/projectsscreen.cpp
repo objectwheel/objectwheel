@@ -7,6 +7,8 @@
 #include <usermanager.h>
 #include <QDateTime>
 #include <QTimer>
+#include <splashscreen.h>
+#include <scenemanager.h>
 
 QQuickItem* swipeView;
 QQuickItem* projectsPage;
@@ -63,6 +65,8 @@ ProjectsScreen::ProjectsScreen(QWidget *parent)
 	listView = (QQuickItem*)QQmlProperty::read(projectList, "listView", engine()).value<QObject*>();
 
 	connect(projectButton, SIGNAL(newButtonClicked()), this, SLOT(handleNewButtonClicked()));
+	connect(projectButton, SIGNAL(loadButtonClicked()), this, SLOT(handleLoadButtonClicked()));
+	connect(projectList, SIGNAL(infoClicked(QVariant)), this, SLOT(handleInfoButtonClicks(QVariant)));
 
 	QVariant v;
 	v.setValue<ProjectListModel*>(&model);
@@ -99,4 +103,57 @@ void ProjectsScreen::handleNewButtonClicked()
 	descriptionTextInput->setProperty("text", "Simple description here.");
 	projectnameTextInput->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole]));
 	QTimer::singleShot(800, [=]{ swipeView->setProperty("currentIndex", 1); });
+}
+
+void ProjectsScreen::handleInfoButtonClicks(const QVariant& projectname)
+{
+	auto projectName = projectname.toString();
+	sizeText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_SIZE].toString());
+	mfDateText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_MFDATE].toString());
+	crDateText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_CRDATE].toString());
+	ownerText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_OWNER].toString());
+	projectVersionTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_PROJECT_VERSION].toString());
+	orgIdentTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_ORGIDENT].toString());
+	orgnameTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_ORGNAME].toString());
+	descriptionTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_DESCRIPTION].toString());
+	projectnameTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_PROJECTNAME].toString());
+	swipeView->setProperty("currentIndex", 1);
+}
+
+void ProjectsScreen::handleLoadButtonClicked()
+{
+	auto projectName = model.get(listView->property("currentIndex").toInt(),
+								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
+	auto currentProject = ProjectManager::currentProject();
+	auto count = listView->property("count").toInt();
+	if (!currentProject.isEmpty()) {
+		for (;count--;) {
+			if (model.get(count - 1, model.roleNames()[ProjectListModel::ActiveRole]).toBool() &&
+				currentProject == projectName) {
+				SceneManager::show("studioScene", SceneManager::ToLeft);
+				return;
+			}
+		}
+	}
+	SplashScreen::show(3000); //FIXME:
+	ProjectManager::stopProject();
+	ProjectManager::startProject(projectName);
+	QTimer::singleShot(4000, [=] { SceneManager::show("studioScene", SceneManager::ToLeft); });
+}
+
+void ProjectsScreen::refreshProjectList(const QString& activeProject)
+{
+	model.clear();
+	if (UserManager::userDirectory(UserManager::currentSessionsUser()).isEmpty()) return;
+	auto projects = ProjectManager::projects();
+	if (projects.size() < 1) return;
+	for (auto project : projects) {
+		int lastIndex = model.rowCount();
+		model.insertRow(lastIndex);
+		model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole], project);
+		model.set(lastIndex, model.roleNames()[ProjectListModel::ActiveRole], project == activeProject);
+		model.set(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole],
+				ProjectManager::projectInformation(project)[INF_MFDATE].toString());
+	}
+	listView->setProperty("currentIndex", 0);
 }

@@ -396,6 +396,7 @@ void MainWindow::SetupManagers()
 					  QString("kozmon@hotmail.com"), QString("password123")); //unlock user session
 	while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 50);
 	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
+	m_d->projectsScreen->refreshProjectList();
 //	projectManager->buildNewProject("Project 3"); //build a new project if doesn't exist already
 //	projectManager->startProject("Project 3"); //start project, tools database filled
 	SplashScreen::hide();

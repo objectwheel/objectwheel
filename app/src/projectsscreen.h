@@ -16,7 +16,9 @@ class ProjectsScreen : public QQuickWidget
 
 	public slots:
 		void handleNewButtonClicked();
-
+		void handleLoadButtonClicked();
+		void handleInfoButtonClicks(const QVariant& projectname);
+		void refreshProjectList(const QString& activeProject = QString());
 };
 
 class ProjectListModel : public QAbstractListModel

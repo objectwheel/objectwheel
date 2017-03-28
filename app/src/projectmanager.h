@@ -3,6 +3,17 @@
 
 #include <QObject>
 
+#define INF_PROJECTNAME "projectName"
+#define INF_DESCRIPTION "description"
+#define INF_ORGNAME "orgName"
+#define INF_ORGIDENT "orgIdent"
+#define INF_PROJECT_VERSION "projectVersion"
+#define INF_PROJECT_IDENT "projectIdent"
+#define INF_OWNER "owner"
+#define INF_CRDATE "crDate"
+#define INF_MFDATE "mfDate"
+#define INF_SIZE "size"
+
 class ProjectManagerPrivate;
 
 class ProjectManager : public QObject

@@ -27,6 +27,8 @@ class SceneManagerPrivate
 SceneManagerPrivate::SceneManagerPrivate(SceneManager* uparent)
 	: parent(uparent)
 {
+	parallelAnimationGroup.addAnimation(&csShifterAmination);
+	parallelAnimationGroup.addAnimation(&nsShifterAmination);
 }
 
 SceneManagerPrivate* SceneManager::m_d = nullptr;
