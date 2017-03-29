@@ -36,6 +36,9 @@
 //ListWidget hatasını çöz
 //Import/Export project
 //About'tan çıkış
+//Menü ile tool'ların yerini değiştir
+//Sürükle & bırak resimler
+//Güvenli çıkış
 
 int main(int argc, char *argv[])
 {

@@ -10,12 +10,14 @@
 
 #define CHECK_FILENAME "check.lock"
 #define LOCKED_FILENAME "data.lock"
+#define ZIPPED_FILENAME "data.tmp"
 #define CHECK_SIGN "VEdFZ2FXeGhhR1VnYVd4c1lXeHNZV2dzSUUxMWFHRnRiV1ZrZFc0Z2NtVnpkV3gxYkd4aGFB"
 
 class DirLockerPrivate
 {
 	public:
 		DirLockerPrivate(DirLocker* uparent);
+		void clearTrashes(const QString& dir);
 
 	public:
 		DirLocker* parent = nullptr;
@@ -24,6 +26,13 @@ class DirLockerPrivate
 DirLockerPrivate::DirLockerPrivate(DirLocker* uparent)
 	: parent(uparent)
 {
+}
+
+void DirLockerPrivate::clearTrashes(const QString& dir)
+{
+	rm(dir + separator() + CHECK_FILENAME);
+	rm(dir + separator() + LOCKED_FILENAME);
+	rm(dir + separator() + ZIPPED_FILENAME);
 }
 
 DirLockerPrivate* DirLocker::m_d = nullptr;
@@ -62,7 +71,8 @@ bool DirLocker::canUnlock(const QString& dir, const QByteArray& key)
 bool DirLocker::lock(const QString& dir, const QByteArray& key)
 {
 	if (locked(dir)) return false;
-	QString zippedFileName = dir + separator() + "data.zip";
+	m_d->clearTrashes(dir);
+	QString zippedFileName = dir + separator() + ZIPPED_FILENAME;
 	Zipper::compressDir(dir, zippedFileName);
 	auto checkData = QByteArray(CHECK_SIGN);
 	auto zippedData = rdfile(zippedFileName);
