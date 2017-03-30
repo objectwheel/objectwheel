@@ -24,12 +24,6 @@
 ****************************************************************************/
 
 #include "exception.h"
-
-#ifdef Q_OS_LINUX
-#include <execinfo.h>
-#include <cxxabi.h>
-#endif
-
 #include <QCoreApplication>
 
 /*!
@@ -48,26 +42,10 @@
 
 namespace QmlDesigner {
 
-#ifdef Q_OS_LINUX
-const char* demangle(const char* name)
-{
-   char buf[1024];
-   size_t size = 1024;
-   int status;
-   char* res;
-   res = abi::__cxa_demangle(name,
-     buf,
-     &size,
-     &status);
-   return res;
-}
-#else
 const char* demangle(const char* name)
 {
    return name;
 }
-#endif
-
 
 bool Exception::s_shouldAssert = false;
 
@@ -98,18 +76,6 @@ Exception::Exception(int line,
     m_function(QString::fromUtf8(_function)),
     m_file(QString::fromUtf8(_file))
 {
-#ifdef Q_OS_LINUX
-    void * array[50];
-    int nSize = backtrace(array, 50);
-    char ** symbols = backtrace_symbols(array, nSize);
-
-    for (int i = 0; i < nSize; i++)
-    {
-        m_backTrace.append(QString("%1\n").arg(QLatin1String(symbols[i])));
-    }
-
-    free(symbols);
-#endif
 
 if (s_shouldAssert)
     Q_ASSERT_X(false, _function, QString(QStringLiteral("%1:%2 - %3")).arg(m_file).arg(m_line).arg(m_function).toUtf8());
