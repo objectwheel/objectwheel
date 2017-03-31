@@ -372,8 +372,7 @@ void MainWindow::SetupGui()
 
 	// Init Splash Screen
 	SplashScreen::init(this);
-	SplashScreen::setText("Wait");
-	QTimer::singleShot(300, [=] { SplashScreen::setText("Decrypting the user's files"); });
+	SplashScreen::setText("Decrypting user files");
 	SplashScreen::setTextColor("#2e3a41");
 	SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
 	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));

@@ -10,12 +10,14 @@
 
 #define DURATION 1000
 #define LOADING_TIME 800
+#define WAIT_EFFECT_INTERVAL 800
 using namespace Fit;
 
 SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
 	: QWidget(parent)
 	, loadingWidget(this)
 	, prevBusyIndicator(nullptr)
+	, waitEffectTimer(this)
 	, showRatio(1.0)
 {
 	move(0,0);
@@ -27,6 +29,20 @@ SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
 	loadingWidget.setAttribute(Qt::WA_AlwaysStackOnTop);
 	loadingWidget.setClearColor(Qt::transparent);
 	loadingWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
+
+	waitEffectTimer.setInterval(WAIT_EFFECT_INTERVAL);
+	connect(&waitEffectTimer, &QTimer::timeout, [=] {
+		if (waitEffectString.size() < 1) {
+			waitEffectString = ".";
+		} else if (waitEffectString.size() < 2) {
+			waitEffectString = "..";
+		} else if (waitEffectString.size() < 3) {
+			waitEffectString = "...";
+		} else {
+			waitEffectString = "";
+		}
+		update();
+	});
 }
 
 bool SplashScreenPrivate::eventFilter(QObject* watched, QEvent* event)
@@ -50,6 +66,7 @@ void SplashScreenPrivate::setShowRatio(float value)
 
 void SplashScreenPrivate::hide()
 {
+	waitEffectTimer.stop();
 	loadingWidget.hide();
 	QPropertyAnimation *animation = new QPropertyAnimation(this, "showRatio");
 	animation->setDuration(DURATION);
@@ -90,6 +107,7 @@ void SplashScreenPrivate::show()
 	if (component.isError() || !prevBusyIndicator) qFatal("asa");
 	prevBusyIndicator->setParentItem(loadingWidget.rootObject());
 
+	waitEffectTimer.start();
 	loadingWidget.show();
 	showFullScreen();
 	raise();
@@ -124,5 +142,5 @@ void SplashScreenPrivate::paintEvent(QPaintEvent* event)
 
 	y += (loadingSize.height());
 	painter.setPen(textColor);
-	painter.drawText(0, y - fit(10), width(), fit(20), Qt::AlignCenter, text);
+	painter.drawText(0, y - fit(10), width(), fit(20), Qt::AlignCenter, text + waitEffectString);
 }

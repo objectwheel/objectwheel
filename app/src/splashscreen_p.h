@@ -9,6 +9,7 @@
 #include <QMovie>
 #include <QIODevice>
 #include <QQuickWidget>
+#include <QTimer>
 
 class SplashScreenPrivate : public QWidget
 {
@@ -25,6 +26,8 @@ class SplashScreenPrivate : public QWidget
 		QQuickWidget loadingWidget;
 		QString loadingImageFilename;
 		QQuickItem* prevBusyIndicator;
+		QTimer waitEffectTimer;
+		QString waitEffectString;
 		float showRatio;
 
 		explicit SplashScreenPrivate(QWidget *parent = 0);
