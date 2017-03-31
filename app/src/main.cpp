@@ -31,14 +31,13 @@
 // Fix  parser slowness
 // General bug fixing
 
-
 //CoverMenu ile SceneManager uyumlu çalışsın
 //ListWidget hatasını çöz
 //Import/Export project
 //About'tan çıkış
-//Menü ile tool'ların yerini değiştir
 //Sürükle & bırak resimler
 //Güvenli çıkış
+// Android drag & drop hatasını düzelt
 
 int main(int argc, char *argv[])
 {

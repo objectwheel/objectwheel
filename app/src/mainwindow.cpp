@@ -52,8 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_RemoverTick(new RemoverTick)
 	, m_RootItem(nullptr)
 	, m_CurrentPage(nullptr)
-	, m_LeftMenu(new CoverMenu)
 	, m_RightMenu(new CoverMenu)
+	, m_LeftMenu(new CoverMenu)
 {
 	if (m_d) return;
 	m_d = new MainWindowPrivate(this);
@@ -136,15 +136,15 @@ void MainWindow::SetupGui()
 	m_RotatorTick->hide();
 
 	/* Add Tool Menu */
-	m_LeftMenu->setCoverWidget(m_d->centralWidget);
-	m_LeftMenu->setCoverSide(CoverMenu::FromLeft);
-	connect(this,SIGNAL(resized()),m_LeftMenu,SLOT(hide()));
-	connect(this,&MainWindow::resized, [this] { m_d->titleBar->setMenuChecked(false); });
-
-	/* Add Properties Menu */
 	m_RightMenu->setCoverWidget(m_d->centralWidget);
 	m_RightMenu->setCoverSide(CoverMenu::FromRight);
 	connect(this,SIGNAL(resized()),m_RightMenu,SLOT(hide()));
+	connect(this,&MainWindow::resized, [this] { m_d->titleBar->setMenuChecked(false); });
+
+	/* Add Properties Menu */
+	m_LeftMenu->setCoverWidget(m_d->centralWidget);
+	m_LeftMenu->setCoverSide(CoverMenu::FromLeft);
+	connect(this,SIGNAL(resized()),m_LeftMenu,SLOT(hide()));
 	connect(this,&MainWindow::resized, [this] { m_d->titleBar->setSettingsChecked(false); });
 
 	/* Add Title Bar */
@@ -152,10 +152,10 @@ void MainWindow::SetupGui()
 	m_d->titleBar->setText("Objectwheel Studio");
 	m_d->titleBar->setColor("#2b5796");
 	m_d->titleBar->setShadowColor("#e0e4e7");
-	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
-	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
-	connect(m_LeftMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setMenuChecked(bool)));
-	connect(m_RightMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setSettingsChecked(bool)));
+	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
+	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
+	connect(m_RightMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setMenuChecked(bool)));
+	connect(m_LeftMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setSettingsChecked(bool)));
 
 	/* Prepare Properties Widget */
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
@@ -283,7 +283,7 @@ void MainWindow::SetupGui()
 	leftMenuLayout->setSpacing(fit(8));
 	leftMenuLayout->addWidget(leftToolbar);
 	leftMenuLayout->addWidget(leftContainer);
-	m_RightMenu->attachWidget(leftMenuWidget);
+	m_LeftMenu->attachWidget(leftMenuWidget);
 
 	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
@@ -345,7 +345,7 @@ void MainWindow::SetupGui()
 
 	QWidget* sceneListWidget = new QWidget(this);
 	sceneListWidget->setStyleSheet("background:#566573;");
-	m_LeftMenu->attachWidget(sceneListWidget);
+	m_RightMenu->attachWidget(sceneListWidget);
 	QVBoxLayout* sceneListWidgetLayout = new QVBoxLayout(sceneListWidget);
 	sceneListWidgetLayout->setSpacing(fit(15));
 	sceneListWidgetLayout->setContentsMargins(0, 0, 0, 0);
@@ -364,11 +364,11 @@ void MainWindow::SetupGui()
 	sceneListWidgetLayout->addWidget(m_d->sceneList);
 
 	/* Pop-up toolbox widget's scrollbar */
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->sceneList->showBar(); });
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxList->showBar(); });
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar();});
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->pagesWidget->showBar(); });
+	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->sceneList->showBar(); });
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxList->showBar(); });
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar();});
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
+	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->pagesWidget->showBar(); });
 
 	// Init Splash Screen
 	SplashScreen::init(this);
@@ -401,9 +401,9 @@ void MainWindow::SetupManagers()
 	SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
-		m_LeftMenu->hide();
-		m_d->titleBar->setMenuChecked(false);
 		m_RightMenu->hide();
+		m_d->titleBar->setMenuChecked(false);
+		m_LeftMenu->hide();
 		m_d->titleBar->setSettingsChecked(false);
 
 		if (key == "studioScene") {

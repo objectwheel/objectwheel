@@ -27,8 +27,8 @@ class MainWindow : public QWidget
 		RemoverTick* m_RemoverTick;
 		QQuickItem* m_RootItem;
 		QQuickItem* m_CurrentPage;
-		CoverMenu* m_LeftMenu;
 		CoverMenu* m_RightMenu;
+		CoverMenu* m_LeftMenu;
 
 	public:
 		explicit MainWindow(QWidget *parent = 0);
