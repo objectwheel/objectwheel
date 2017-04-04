@@ -29,6 +29,7 @@ class PropertiesWidget : public QWidget
 		LineEdit* m_SearchEdit;
 		QQmlContext* m_rootContext;
 		QList<QQuickItem*>* m_Items;
+        QList<QUrl>* m_UrlList;
 
 	public:
 		explicit PropertiesWidget(QWidget *parent = 0);
@@ -40,6 +41,8 @@ class PropertiesWidget : public QWidget
 
 		QList<QQuickItem*>* itemSource() const;
 		void setItemSource(QList<QQuickItem*>* ItemSource);
+        QList<QUrl>* urlList() const;
+        void setUrlList(QList<QUrl>* urlList);
 
 	protected:
 		void refreshListWidget(QObject* const selectedItem);

@@ -11,6 +11,14 @@ class SaveManager : public QObject
 		Q_DISABLE_COPY(SaveManager)
 
 	public:
+		struct BindingInf {
+				QString sourceId;
+				QString sourceProperty;
+				QString targetId;
+				QString targetProperty;
+				QString bindingName;
+		};
+
 		explicit SaveManager(QObject *parent = 0);
 		static SaveManager* instance();
 
@@ -24,6 +32,11 @@ class SaveManager : public QObject
 		static void removeSave(const QString& id);
 		static QString saveDirectory(const QString& id);
 
+		static QJsonObject getBindingSaves();
+		static void addBindingSave(const BindingInf& bindingInf);
+		static void changeBindingSave(const QString& bindingName, const BindingInf& toBindingInf);
+		static void removeBindingSave(const QString& bindingName);
+
 		static QJsonObject getParentalRelationships();
 		static QJsonArray getPageOrders();
 
@@ -35,7 +48,10 @@ class SaveManager : public QObject
 		static void removePageOrder(const QString& pageId);
 		static void changePageOrder(const QString& fromPageId, const QString& toPageId);
 
+        static void setId(const QString& id, const QString& newId);
 		static void setVariantProperty(const QString& id, const QString& property, const QVariant& value);
+		static void setBindingProperty(const QString& id, const QString& property, const QString& expression);
+		static void removeProperty(const QString& id, const QString& property);
 
 	private:
 		static SaveManagerPrivate* m_d;

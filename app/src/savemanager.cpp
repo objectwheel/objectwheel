@@ -15,10 +15,17 @@
 #include <QJsonObject>
 #include <pageswidget.h>
 #include <mainwindow.h>
+#include <bindingproperty.h>
+#include <bindingwidget.h>
 
 #define SAVE_DIRECTORY "dashboard"
 #define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
 #define PAGE_ORDER_FILE "page_order.json"
+#define BINDINGS_FILE "bindings.json"
+#define BINDING_SOURCE_ID_LABEL "sourceId"
+#define BINDING_SOURCE_PROPERTY_LABEL "sourceProperty"
+#define BINDING_TARGET_ID_LABEL "targetId"
+#define BINDING_TARGET_PROPERTY_LABEL "targetProperty"
 
 using namespace QmlDesigner;
 using namespace QmlJS;
@@ -33,14 +40,12 @@ class SaveManagerPrivate
 		void initEmptyParentalFile(const QString& file) const;
 		void createPages(const QJsonArray& pages);
 		bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages);
+        void fillBindings(const QJsonObject& bindingSaves);
 
 	public:
 		SaveManager* parent = nullptr;
 		QPlainTextEdit* plainTextEdit;
 		ModelManagerInterface* modelManager;
-		Model* model;
-		RewriterView* rewriterView;
-		NotIndentingTextEditModifier* textModifier;
 };
 
 SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
@@ -50,12 +55,6 @@ SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
 	plainTextEdit->setHidden(true);
 	modelManager = new ModelManagerInterface;
 	for (auto importPath : QQmlEngine().importPathList()) parseImportDirectories(importPath);
-	model = Model::create("QtQuick.Item", 1, 0);
-	rewriterView = new RewriterView(RewriterView::Amend, model);
-	textModifier = new NotIndentingTextEditModifier(plainTextEdit);
-	plainTextEdit->setPlainText("import QtQuick 2.0\nItem {id: test}");
-	model->setTextModifier(textModifier);
-	model->setRewriterView(rewriterView);
 }
 
 inline QString SaveManagerPrivate::generateSaveDirectory(const QString& id) const
@@ -118,6 +117,19 @@ bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships,
 	return true;
 }
 
+void SaveManagerPrivate::fillBindings(const QJsonObject& bindingSaves)
+{
+    SaveManager::BindingInf inf;
+    for (auto bindingKey : bindingSaves.keys()) {
+        inf.bindingName = bindingKey;
+        inf.sourceId = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_ID_LABEL].toString();
+        inf.sourceProperty = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_PROPERTY_LABEL].toString();
+        inf.targetId = bindingSaves[bindingKey].toObject()[BINDING_TARGET_ID_LABEL].toString();
+        inf.targetProperty = bindingSaves[bindingKey].toObject()[BINDING_TARGET_PROPERTY_LABEL].toString();
+        BindingWidget::addBindingWithoutSave(inf);
+    }
+}
+
 SaveManagerPrivate* SaveManager::m_d = nullptr;
 
 SaveManager::SaveManager(QObject *parent)
@@ -136,6 +148,49 @@ QString SaveManager::saveDirectory(const QString& id)
 {
 	if (!exists(id)) return QString();
 	return m_d->generateSaveDirectory(id);
+}
+
+QJsonObject SaveManager::getBindingSaves()
+{
+	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projDir.isEmpty()) return QJsonObject();
+	auto bindingsFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
+	return QJsonDocument::fromJson(rdfile(bindingsFile)).object();
+}
+
+void SaveManager::addBindingSave(const SaveManager::BindingInf& bindingInf)
+{
+	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projDir.isEmpty()) return;
+	auto bindingFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
+	QJsonObject cObj;
+	cObj[BINDING_SOURCE_ID_LABEL] = bindingInf.sourceId;
+	cObj[BINDING_SOURCE_PROPERTY_LABEL] = bindingInf.sourceProperty;
+	cObj[BINDING_TARGET_ID_LABEL] = bindingInf.targetId;
+	cObj[BINDING_TARGET_PROPERTY_LABEL] = bindingInf.targetProperty;
+	QJsonObject pObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
+	pObj[bindingInf.bindingName] = cObj;
+	wrfile(bindingFile, QJsonDocument(pObj).toJson());
+//	setBindingProperty(bindingInf.targetId, bindingInf.targetProperty, QString("%1.%2").
+//					   arg(bindingInf.sourceId).arg(bindingInf.sourceProperty));
+}
+
+void SaveManager::changeBindingSave(const QString& bindingName, const SaveManager::BindingInf& toBindingInf)
+{
+	removeBindingSave(bindingName);
+	addBindingSave(toBindingInf);
+}
+
+void SaveManager::removeBindingSave(const QString& bindingName)
+{
+	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+	if (projDir.isEmpty()) return;
+	auto bindingFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
+//    auto binding = getBindingSaves()[bindingName].toObject();
+	QJsonObject jObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
+	jObj.remove(bindingName);
+    wrfile(bindingFile, QJsonDocument(jObj).toJson());
+//	removeProperty(binding[BINDING_TARGET_ID_LABEL].toString(), binding[BINDING_TARGET_PROPERTY_LABEL].toString());
 }
 
 QJsonObject SaveManager::getParentalRelationships()
@@ -189,6 +244,27 @@ void SaveManager::changeSave(const QString& fromId, QString toId)
 	auto saveDir = saveDirectory(fromId);
 	if (saveDir.isEmpty()) return;
 	rn(saveDir, dname(saveDir) + separator() + toId);
+    SaveManager::BindingInf inf;
+    auto bindingSaves = getBindingSaves();
+    for (auto bindingKey : bindingSaves.keys()) {
+        inf.bindingName = bindingKey;
+        inf.sourceId = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_ID_LABEL].toString();
+        inf.sourceProperty = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_PROPERTY_LABEL].toString();
+        inf.targetId = bindingSaves[bindingKey].toObject()[BINDING_TARGET_ID_LABEL].toString();
+        inf.targetProperty = bindingSaves[bindingKey].toObject()[BINDING_TARGET_PROPERTY_LABEL].toString();
+
+        if (inf.targetId == fromId && inf.sourceId == fromId) {
+            inf.targetId = toId;
+            inf.sourceId = toId;
+        } else if (inf.targetId == fromId) {
+            inf.targetId = toId;
+        } else if(inf.sourceId == fromId) {
+            inf.sourceId = toId;
+        } else {
+            continue;
+        }
+        changeBindingSave(inf.bindingName, inf);
+    }
 }
 
 void SaveManager::removeSave(const QString& id)
@@ -212,10 +288,13 @@ bool SaveManager::loadDatabase()
 {
 	QJsonArray pageOrder = getPageOrders();
 	QJsonObject parentalRelationship = getParentalRelationships();
+	QJsonObject bindingSaves = getBindingSaves();
 	if (pageOrder.isEmpty()) return false;
 	if (parentalRelationship.size() != saves().size()) return false;
 	m_d->createPages(pageOrder);
-	return m_d->fillDashboard(parentalRelationship, pageOrder);
+	if (!m_d->fillDashboard(parentalRelationship, pageOrder)) return false;
+    m_d->fillBindings(bindingSaves);
+    return true;
 }
 
 void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
@@ -225,10 +304,61 @@ void SaveManager::setVariantProperty(const QString& id, const QString& property,
 	QString mainQmlContent = rdfile(mainQmlFilename);
 	if (mainQmlContent.isEmpty()) return;
 	m_d->plainTextEdit->setPlainText(mainQmlContent);
-	ModelNode rootNode = m_d->rewriterView->rootModelNode();
-	m_d->model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+    auto model = Model::create("QtQuick.Item", 1, 0);
+    auto rewriterView = new RewriterView(RewriterView::Amend, model);
+    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+    model->setTextModifier(textModifier);
+    model->setRewriterView(rewriterView);
+    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+    auto rootNode = rewriterView->rootModelNode();
 	QmlObjectNode(rootNode).setVariantProperty(QByteArray().insert(0, property), value);
 	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+    delete rewriterView;
+    delete textModifier;
+    delete model;
+}
+
+void SaveManager::setBindingProperty(const QString& id, const QString& property, const QString& expression) //FIXME:
+{
+	if (saveDirectory(id).isEmpty()) return;
+	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
+	QString mainQmlContent = rdfile(mainQmlFilename);
+	if (mainQmlContent.isEmpty()) return;
+	m_d->plainTextEdit->setPlainText(mainQmlContent);
+    auto model = Model::create("QtQuick.Item", 1, 0);
+    auto rewriterView = new RewriterView(RewriterView::Amend, model);
+    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+    model->setTextModifier(textModifier);
+    model->setRewriterView(rewriterView);
+    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+    ModelNode rootNode = rewriterView->rootModelNode();
+	QmlObjectNode(rootNode).setBindingProperty(QByteArray().insert(0, property), expression);
+	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+    delete rewriterView;
+    delete textModifier;
+    delete model;
+}
+
+void SaveManager::removeProperty(const QString& id, const QString& property) //FIXME: FOR BINDING PROPERTIES
+{
+	if (saveDirectory(id).isEmpty()) return;
+	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
+	QString mainQmlContent = rdfile(mainQmlFilename);
+	if (mainQmlContent.isEmpty()) return;
+	m_d->plainTextEdit->setPlainText(mainQmlContent);
+    auto model = Model::create("QtQuick.Item", 1, 0);
+    auto rewriterView = new RewriterView(RewriterView::Amend, model);
+    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+    model->setTextModifier(textModifier);
+    model->setRewriterView(rewriterView);
+    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+    ModelNode rootNode = rewriterView->rootModelNode();
+    rootNode.removeProperty(QByteArray().insert(0, property));
+    QmlObjectNode(rootNode).removeProperty(QByteArray().insert(0, property));
+    wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+    delete rewriterView;
+    delete textModifier;
+    delete model;
 }
 
 void SaveManager::addParentalRelationship(const QString& id, const QString& parent)
@@ -294,5 +424,26 @@ void SaveManager::changePageOrder(const QString& fromPageId, const QString& toPa
 			wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
 			break;
 		}
-	}
+    }
+}
+
+void SaveManager::setId(const QString& id, const QString& newId) //FIXME:
+{
+    if (saveDirectory(id).isEmpty()) return;
+    auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
+    QString mainQmlContent = rdfile(mainQmlFilename);
+    if (mainQmlContent.isEmpty()) return;
+    m_d->plainTextEdit->setPlainText(mainQmlContent);
+    auto model = Model::create("QtQuick.Item", 1, 0);
+    auto rewriterView = new RewriterView(RewriterView::Amend, model);
+    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+    model->setTextModifier(textModifier);
+    model->setRewriterView(rewriterView);
+    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+    ModelNode rootNode = rewriterView->rootModelNode();
+    QmlObjectNode(rootNode).setId(newId);
+    QTimer::singleShot(1000, [=]{wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));});
+    delete rewriterView;
+    delete textModifier;
+    delete model;
 }

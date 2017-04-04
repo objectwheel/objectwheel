@@ -166,7 +166,7 @@ void QmlEditorPrivate::saved(const QString& text)
 	qml->setEnabled(false);
 	fit(qml, Fit::WidthHeight);
 	*itemList << qml;
-	*urlList << url;
+    *urlList << url;
 
 	auto childs = GetAllChildren(lastSelectedItem);
 	for (auto child : childs) {
@@ -184,10 +184,27 @@ void QmlEditorPrivate::saved(const QString& text)
 	lastSelectedItem->deleteLater();
 	lastSelectedItem = qml;
 
+    auto items = GetAllChildren((QQuickItem*)lastSelectedItem);
+    for (auto item : items) {
+        auto ctxId = dashboardRootContext->nameForObject((QObject*)item);
+        if (item == (QQuickItem*)lastSelectedItem) {
+            auto prevParent = SaveManager::parentalRelationship(ctxId);
+            SaveManager::removeParentalRelationship(ctxId);
+            SaveManager::addParentalRelationship(componentName, prevParent);
+            SaveManager::changeSave(ctxId, componentName);
+            if (itemList->indexOf(item) >= 0) {
+                auto oldUrl = (*urlList)[itemList->indexOf(item)].toLocalFile();
+                auto newUrl = dname(dname(oldUrl)) + separator() + componentName + separator() + "main.qml";
+                (*urlList)[itemList->indexOf(item)] = QUrl::fromLocalFile(newUrl);
+            }
+        } else if (itemList->contains(item)) {
+            SaveManager::addParentalRelationship(ctxId, componentName);
+        }
+    }
+
 	QMetaObject::invokeMethod(parent->parent(), "ShowSelectionTools", Qt::AutoConnection,
 							  Q_ARG(QQuickItem*const,lastSelectedItem));
 	parent->hide();
-
 }
 
 void QmlEditorPrivate::selectionChanged()

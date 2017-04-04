@@ -287,6 +287,7 @@ void MainWindow::SetupGui()
 
 	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
+    m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
 	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
 
 	m_d->centralWidget->installEventFilter(this);
@@ -522,7 +523,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
 				{
 					auto url = dropEvent->mimeData()->urls().at(0);
-					m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+//					m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
 					QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
 					component.loadUrl(url);
 
@@ -559,6 +560,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						}
 					}
 					m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
+                    SaveManager::setId(componentName, componentName);
 					qml->setParentItem(m_CurrentPage);
 					qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
 					qml->setClip(true); // Even if it's not true
@@ -1112,7 +1114,7 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 {
-	m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+//	m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
 	QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
 	component.loadUrl(url);
 
@@ -1124,22 +1126,7 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 	QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 	if (component.isError() || !qml) return false;
 
-	int count = 1;
-	QString componentName = qmlContext(qml)->nameForObject(qml);
-	if (componentName.isEmpty()) componentName = "anonymous";
-	for (int i=0; i<m_d->m_Items.size();i++) {
-		if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_d->m_Items[i])) ||
-			componentName == QString("dpi") || componentName == QString("swipeView")) {
-			// FIXME: If it's conflict with page names?
-			if (componentName.at(componentName.size() - 1).isNumber()) {
-				componentName.remove(componentName.size() - 1, 1);
-			}
-			componentName += QString::number(count);
-			count++;
-			i = -1;
-		}
-	}
-
+    QString componentName = fname(dname(url.toLocalFile()));
 	auto parentProperty = m_d->designWidget->rootContext()->contextProperty(parent);
 	auto parentItem = qobject_cast<QQuickItem*>(parentProperty.value<QObject*>());
 	if (!parentItem) qFatal("MainWindow::addControlWithoutSave : Error occurred");
@@ -1162,7 +1149,6 @@ MainWindow::~MainWindow()
 	delete m_d;
 }
 
-// TODO: Pop-up loading screen
 // TODO: Make a object clone tick
 // TODO: Make it possible to resize(zoom) and rotate operations with fingers
 // TODO: Layouts?

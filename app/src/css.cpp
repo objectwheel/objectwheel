@@ -153,7 +153,7 @@ void CSS::init()
 	PropertyItem = QString(CSS_PROPERTY_ITEM).arg(fit(4)).arg(fit(2)).arg(fit(5));
 
 	/* Toolbar */
-	Toolbar = QString(CSS_TOOLBAR).arg(fit(3));
+    Toolbar = QString(CSS_TOOLBAR).arg(fit(6));
 
 	/* ToolboxButton */
 	ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(26));

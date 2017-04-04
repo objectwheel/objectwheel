@@ -25,19 +25,19 @@
 // Cloud part-sync-login etc
 
 /* Near tasks */
-// Process bindings into db
 // Fix qml editor according to dashboard database editing
 // Fix parser errors
 // Fix  parser slowness
 // General bug fixing
+// Import/Export project
 
 //CoverMenu ile SceneManager uyumlu çalışsın
 //ListWidget hatasını çöz
-//Import/Export project
 //About'tan çıkış
 //Sürükle & bırak resimler
 //Güvenli çıkış
 // Android drag & drop hatasını düzelt
+// dashboarda bırakılan nesnelerin savelerinde id'leri set et
 
 int main(int argc, char *argv[])
 {

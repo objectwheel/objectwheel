@@ -195,6 +195,8 @@ bool ProjectManager::startProject(const QString& projectname)
 		stopProject();
 	}
 
+	m_d->mainWindow->clearStudio();
+
 	m_d->currentProject = projectname;
 
 	if (!SaveManager::loadDatabase()) {
@@ -217,8 +219,6 @@ void ProjectManager::stopProject()
 
 	infUpdateSize();
 	infUpdateLastModification();
-
-	m_d->mainWindow->clearStudio();
 
 	m_d->currentProject = "";
 }

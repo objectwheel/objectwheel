@@ -8,6 +8,7 @@
 #include <QtWidgets>
 #include <savemanager.h>
 #include <mainwindow.h>
+#include <filemanager.h>
 
 using namespace Fit;
 
@@ -37,7 +38,12 @@ QList<QQuickItem*>* PropertyItem::itemSource() const
 
 void PropertyItem::setItemSource(QList<QQuickItem*>* items)
 {
-	m_Items = items;
+    m_Items = items;
+}
+
+void PropertyItem::setUrlList(QList<QUrl>* urlList)
+{
+    m_UrlList = urlList;
 }
 
 const QPair<QMetaProperty, QObject*>& PropertyItem::property() const
@@ -87,13 +93,18 @@ void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlC
 			SaveManager::removeParentalRelationship(ctxId);
 			SaveManager::addParentalRelationship(componentName, prevParent);
 			SaveManager::changeSave(ctxId, componentName);
+            if (m_Items->indexOf(item) >= 0) {
+                auto oldUrl = (*m_UrlList)[m_Items->indexOf(item)].toLocalFile();
+                auto newUrl = dname(dname(oldUrl)) + separator() + componentName + separator() + "main.qml";
+                (*m_UrlList)[m_Items->indexOf(item)] = QUrl::fromLocalFile(newUrl);
+            }
 		} else if (m_Items->contains(item)) {
 			SaveManager::addParentalRelationship(ctxId, componentName);
 		}
 	}
-
 	context->setContextProperty(context->nameForObject(selectedItem), 0);
 	context->setContextProperty(componentName, selectedItem);
+    SaveManager::setId(componentName, componentName);
 }
 
 void PropertyItem::fillCup(QQmlContext* const context)

@@ -2,6 +2,7 @@
 #define BINDINGWIDGET_H
 
 #include <QWidget>
+#include <savemanager.h>
 
 class BindingWidgetPrivate;
 class QQuickItem;
@@ -15,6 +16,7 @@ class BindingWidget : public QWidget
 
 	public:
 		explicit BindingWidget(QWidget *parent = 0);
+        static BindingWidget* instance();
 		~BindingWidget();
 
 		const QList<QQuickItem*>* itemSource() const;
@@ -22,6 +24,8 @@ class BindingWidget : public QWidget
 
 		const QQmlContext* rootContext() const;
 		void setRootContext(QQmlContext* const rootContext);
+
+        static void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
 	public slots:
 		void clearList();
@@ -39,7 +43,7 @@ class BindingWidget : public QWidget
 		void popupHid();
 
 	private:
-		BindingWidgetPrivate* m_d;
+        static BindingWidgetPrivate* m_d;
 };
 
 #endif // BINDINGWIDGET_H

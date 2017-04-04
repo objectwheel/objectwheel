@@ -324,7 +324,17 @@ QList<QQuickItem*>* PropertiesWidget::itemSource() const
 
 void PropertiesWidget::setItemSource(QList<QQuickItem*>* items)
 {
-	m_Items = items;
+    m_Items = items;
+}
+
+QList<QUrl>*PropertiesWidget::urlList() const
+{
+    return m_UrlList;
+}
+
+void PropertiesWidget::setUrlList(QList<QUrl>* urlList)
+{
+    m_UrlList = urlList;
 }
 
 void PropertiesWidget::setRootContext(QQmlContext* const context)
@@ -374,6 +384,7 @@ void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
 	QListWidgetItem* item = new QListWidgetItem;
 	PropertyItem* propertyItem = new PropertyItem(selectedItem, m_rootContext);
 	propertyItem->setItemSource(m_Items);
+    propertyItem->setUrlList(m_UrlList);
 	if (!propertyItem->isValid()) {
 		delete item;
 		propertyItem->deleteLater();
@@ -394,6 +405,7 @@ void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
 		QListWidgetItem* item = new QListWidgetItem;
 		PropertyItem* propertyItem = new PropertyItem(property, m_rootContext);
 		propertyItem->setItemSource(m_Items);
+        propertyItem->setUrlList(m_UrlList);
 		if (!propertyItem->isValid()) {
 			delete item;
 			propertyItem->deleteLater();

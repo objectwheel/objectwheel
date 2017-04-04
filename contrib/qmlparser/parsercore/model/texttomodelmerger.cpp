@@ -1695,8 +1695,8 @@ void ModelValidator::propertyAbsentFromQml(AbstractProperty &modelProperty)
 {
     Q_UNUSED(modelProperty)
 
-    Q_ASSERT(!modelProperty.isValid());
-    Q_ASSERT(0);
+//    Q_ASSERT(!modelProperty.isValid());
+//    Q_ASSERT(0);
 }
 
 void ModelValidator::idsDiffer(ModelNode &modelNode, const QString &qmlId)

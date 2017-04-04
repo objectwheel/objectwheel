@@ -15,6 +15,7 @@ class PropertyItem : public QWidget
 		QPair<QMetaProperty, QObject*> m_Property;
 		bool m_Valid;
 		QList<QQuickItem*>* m_Items;
+        QList<QUrl>* m_UrlList;
 
 	public:
 		explicit PropertyItem(const QPair<QMetaProperty, QObject*>& property, QQmlContext* const context, QWidget *parent = 0);
@@ -22,6 +23,7 @@ class PropertyItem : public QWidget
 		const QPair<QMetaProperty, QObject*>& property() const;
 		QList<QQuickItem*>* itemSource() const;
 		void setItemSource(QList<QQuickItem*>* ItemSource);
+        void setUrlList(QList<QUrl>* urlList);
 		inline bool isValid() const { return m_Valid; }
 
 	protected:
