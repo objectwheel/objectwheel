@@ -230,7 +230,7 @@ QStringList SaveManager::saves()
 	for (auto save : lsdir(saveBaseDir)) {
 		saveList << save;
 	}
-	return saveList;
+    return saveList;
 }
 
 void SaveManager::addSave(const QString& id, const QString& url)

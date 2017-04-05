@@ -48,8 +48,7 @@ class QmlEditorPrivate
 
 		QmlEditorPrivate(QmlEditor* p);
 		void resize();
-		void saved(const QString& text);
-		void selectionChanged();
+        void saved(const QString& qmlPath);
 		const QList<QQuickItem*> GetAllChildren(QQuickItem* const item) const;
 		void show(const QString& url);
 		void show();
@@ -123,7 +122,7 @@ void QmlEditorPrivate::resize()
 	minimizeButton.move(fit(8), parent->height() - minimizeButton.height() - fit(8));
 }
 
-void QmlEditorPrivate::saved(const QString& text)
+void QmlEditorPrivate::saved(const QString& qmlPath)
 {
 	QQmlComponent component(dashboardRootContext->engine()); //TODO: Drop into another item?
 	int index = itemList->indexOf(lastSelectedItem);
@@ -134,7 +133,8 @@ void QmlEditorPrivate::saved(const QString& text)
 	SaveManager::removeParentalRelationship(dashboardRootContext->nameForObject(lastSelectedItem));
 	bindingWidget->detachBindingsFor(lastSelectedItem);
 
-	component.setData(QByteArray().insert(0,text), QUrl());
+    qDebug() << qmlPath;
+    component.loadUrl(qmlPath);
 
 	QQmlIncubator incubator;
 	component.create(incubator, dashboardRootContext);
@@ -207,18 +207,6 @@ void QmlEditorPrivate::saved(const QString& text)
 	parent->hide();
 }
 
-void QmlEditorPrivate::selectionChanged()
-{
-	int index = itemList->indexOf(lastSelectedItem);
-	if (index >= 0) {
-		QFile file(urlList->at(index).toLocalFile());
-		if (!file.open(QIODevice::ReadOnly)) qFatal("QmlEditor : Error occurred");
-		QTextStream reader(&file);
-		textDocument->setPlainText(reader.readAll());
-		file.close();
-	}
-}
-
 const QList<QQuickItem*> QmlEditorPrivate::GetAllChildren(QQuickItem* const item) const
 {
 	/* Return all child items of item including item itself */
@@ -231,8 +219,8 @@ const QList<QQuickItem*> QmlEditorPrivate::GetAllChildren(QQuickItem* const item
 
 void QmlEditorPrivate::show(const QString& url)
 {
+    QFileInfo info(url);
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
-	QFileInfo info(url);
 	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, true));
 	QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + info.dir().path()));
 
@@ -259,12 +247,17 @@ void QmlEditorPrivate::show(const QString& url)
 
 void QmlEditorPrivate::show()
 {
+    QString controlPath = SaveManager::saveDirectory(dashboardRootContext->nameForObject(lastSelectedItem));
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
-	((QWidget*)parent)->show();
-
 	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, false));
-	QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + QCoreApplication::applicationDirPath()));
-	QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + QCoreApplication::applicationDirPath()));
+    QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + controlPath));
+    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + controlPath));
+
+    QTimer::singleShot(DURATION,[=] { //FIXME
+        QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, controlPath + separator() + "main.qml"));
+    });
+
+    ((QWidget*)parent)->show();
 
 	quickWidget.hide();
 	minimizeButton.hide();
@@ -334,7 +327,6 @@ void QmlEditor::setBindingWidget(BindingWidget* bindngWidget)
 void QmlEditor::selectItem(QObject* const item)
 {
 	m_d->lastSelectedItem = (QQuickItem*)item;
-	m_d->selectionChanged();
 }
 
 void QmlEditor::setShowCenter(const QPoint& p)
@@ -385,9 +377,9 @@ void QmlEditor::hide()
 	m_d->hide();
 }
 
-void QmlEditor::saved(const QString& text)
+void QmlEditor::saved(const QString& qmlPath)
 {
-	m_d->saved(text);
+    m_d->saved(qmlPath);
 }
 
 void QmlEditor::resizeEvent(QResizeEvent* event)

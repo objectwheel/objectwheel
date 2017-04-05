@@ -25,10 +25,10 @@
 // Cloud part-sync-login etc
 // Clear parser's ugly console outputs
 // General bug fixing (continuous task)
+// Replace Edit-Play-Clear buttons
 
 /* Near tasks */
 /*------------*/
-// Fix qml editor according to dashboard database editing
 // Fix parser errors
 // Fix  parser slowness
 // Import/Export project

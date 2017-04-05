@@ -32,7 +32,6 @@ Item {
         anchors { top: parent.top; bottom: parent.bottom; }
         width: Fit.fit(180)
         x: menu.checked ? 0 : -width
-        enabled: toolboxMode
         Component.onCompleted: anim.enabled = true
         dropIcon: "qrc:///resources/images/fileExplorer/drop.png"
         explorerToolBar {
@@ -124,7 +123,10 @@ Item {
                     width: height
                     height: parent.height
                     iconSource: "qrc:///resources/images/save-icon.png"
-                    onClicked: !toolboxMode ? root.saved(editor.editor.text) : saveCurrent()
+                    onClicked: {
+                        if (!toolboxMode) root.saved(root.url.toLocaleString());
+                        saveCurrent();
+                    }
                 }
 
                 FancyButton {
@@ -440,11 +442,6 @@ Item {
     }
     function setToolboxMode(val) {
         toolboxMode = val
-        if (!toolboxMode) {
-            imageViewer.visible = false
-            editor.visible = true
-            reloadView()
-        }
     }
     function updateCache() {
         var index = -1
@@ -567,48 +564,33 @@ Item {
         errorMessage.text = ""
         componentManager.clear()
 
-        if (!toolboxMode) {
-            try {
-                lastItem = Qt.createQmlObject(editor.editor.text, view);
-            } catch (e) {
-                var error = e.qmlErrors[0];
-                errorMessage.text = "Error, line "+error.lineNumber+":"+error.columnNumber+" : "+error.message;
-                editor.lineNumberRepeater.itemAt(error.lineNumber - 1).bgcolor = "#c74c3c"
-                return;
-            }
-            if (lastItem != null) {
-                lastItem.width = Fit.fit(lastItem.width)
-                lastItem.height = Fit.fit(lastItem.height)
-                lastItem.anchors.centerIn = view
-            }
-        } else {
-            updateCache()
-            var clearSaves = getClearSaves()
-            flushCachesToDisk()
+        updateCache()
+        var clearSaves = getClearSaves()
+        flushCachesToDisk()
 
-            if (!componentManager.build(fileExplorer.explorerListView.folderListModel.rootFolder.toString() + "/main.qml")) {
-                var errorString = componentManager.error()
-                if (errorString === "") {
-                    errorMessage.text = "Error code 0x54."
-                } else {
-                    var regex = /file:\/\/.*?:/g
-                    var festring = errorString.split("\n")
-                    var estring = festring[festring.length - 2]
-                    var fpath = estring.match(regex)[0].replace("file://","").slice(0, -1)
-                    var fname = FileManager.fname(fpath)
-                    var cleare = estring.replace(regex, "")
-                    var line = cleare.match(/[0-9]+/g)[0]
-                    var message = cleare.match(/[^0-9].*/g)[0]
-                    var ferror = "Error, line " + line + " in " + fname + ":" + message
-                    errorMessage.text = ferror
-                    if (FileManager.fname(root.url) === fname) {
-                        editor.lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
-                    }
+        if (!componentManager.build(fileExplorer.explorerListView.folderListModel.rootFolder.toString() + "/main.qml")) {
+            var errorString = componentManager.error()
+            if (errorString === "") {
+                errorMessage.text = "Error code 0x54."
+            } else {
+                var regex = /file:\/\/.*?:/g
+                var festring = errorString.split("\n")
+                var estring = festring[festring.length - 2]
+                var fpath = estring.match(regex)[0].replace("file://","").slice(0, -1)
+                var fname = FileManager.fname(fpath)
+                var cleare = estring.replace(regex, "")
+                var line = cleare.match(/[0-9]+/g)[0]
+                var message = cleare.match(/[^0-9].*/g)[0]
+                var ferror = "Error, line " + line + " in " + fname + ":" + message
+                errorMessage.text = ferror
+                if (FileManager.fname(root.url) === fname) {
+                    editor.lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
                 }
             }
-
-            revertClearSavesToDisk(clearSaves)
         }
+
+        revertClearSavesToDisk(clearSaves)
+
     }
     function isTextFile(file) {
         return (FileManager.ftype(file) === "txt" ||
@@ -628,6 +610,6 @@ Item {
     property string url
     property var urlCache: []
     property var saveCache: []
-    signal saved(string code)
+    signal saved(string qmlPath)
     signal currentSaved()
 }

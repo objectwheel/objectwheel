@@ -199,7 +199,7 @@ void ProjectsScreen::handleLoadButtonClicked()
 								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
 	auto currentProject = ProjectManager::currentProject();
 	if (!currentProject.isEmpty() && currentProject == projectName) {
-		SceneManager::show("studioScene", SceneManager::ToLeft);
+        SceneManager::show("studioScene", SceneManager::ToRight);
 		return;
 	}
 
@@ -215,7 +215,7 @@ void ProjectsScreen::handleLoadButtonClicked()
     SplashScreen::show(true, 3000); //FIXME:
 	ProjectManager::stopProject();
 	if (!ProjectManager::startProject(projectName)) qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error.");
-	QTimer::singleShot(3600, [=] { SceneManager::show("studioScene", SceneManager::ToLeft); });
+    QTimer::singleShot(3600, [=] { SceneManager::show("studioScene", SceneManager::ToRight); });
 }
 
 void ProjectsScreen::refreshProjectList(const QString& activeProject)

@@ -38,7 +38,7 @@ class QmlEditor : public QWidget
 		void hide();
 
 	private slots:
-		void saved(const QString& text);
+        void saved(const QString& qmlPath);
 
 	protected:
 		void resizeEvent(QResizeEvent *event) override;
