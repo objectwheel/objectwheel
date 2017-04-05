@@ -520,7 +520,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
 				{
 					auto url = dropEvent->mimeData()->urls().at(0);
-//					m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+                    m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
 					QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
 					component.loadUrl(url);
 
@@ -560,7 +560,6 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
                     SaveManager::setId(componentName, componentName);
 					qml->setParentItem(m_CurrentPage);
 					qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
-					qml->setClip(true); // Even if it's not true
 					qml->setEnabled(!m_d->editButton->isChecked());
 					fit(qml, Fit::WidthHeight);
 					m_d->m_Items << qml;
@@ -1152,7 +1151,7 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 {
-//	m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
+    m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
 	QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
 	component.loadUrl(url);
 
@@ -1170,8 +1169,6 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 	if (!parentItem) qFatal("MainWindow::addControlWithoutSave : Error occurred");
 	m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
 	qml->setParentItem(parentItem);
-//	qml->setPosition({10,10});
-	qml->setClip(true); // Even if it's not true
 	qml->setEnabled(!m_d->editButton->isChecked());
 	fit(qml, Fit::WidthHeight);
 	m_d->m_Items << qml;

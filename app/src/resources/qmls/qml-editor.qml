@@ -124,8 +124,8 @@ Item {
                     height: parent.height
                     iconSource: "qrc:///resources/images/save-icon.png"
                     onClicked: {
-                        if (!toolboxMode) root.saved(root.url.toLocaleString());
                         saveCurrent();
+                        if (!toolboxMode) root.saved(root.url.toLocaleString());
                     }
                 }
 

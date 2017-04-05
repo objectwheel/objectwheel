@@ -124,17 +124,14 @@ void QmlEditorPrivate::resize()
 
 void QmlEditorPrivate::saved(const QString& qmlPath)
 {
-	QQmlComponent component(dashboardRootContext->engine()); //TODO: Drop into another item?
+    dashboardRootContext->engine()->clearComponentCache();
+    QQmlComponent component(dashboardRootContext->engine(), qmlPath); //TODO: Drop into another item?
 	int index = itemList->indexOf(lastSelectedItem);
 	if (index < 0) return;
-	auto url = urlList->at(index);
 	itemList->removeAt(index);
 	urlList->removeAt(index);
 	SaveManager::removeParentalRelationship(dashboardRootContext->nameForObject(lastSelectedItem));
-	bindingWidget->detachBindingsFor(lastSelectedItem);
-
-    qDebug() << qmlPath;
-    component.loadUrl(qmlPath);
+    bindingWidget->detachBindingsFor(lastSelectedItem);
 
 	QQmlIncubator incubator;
 	component.create(incubator, dashboardRootContext);
@@ -162,11 +159,10 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
 	SaveManager::addParentalRelationship(dashboardRootContext->nameForObject(qml),
 										 dashboardRootContext->nameForObject(lastSelectedItem->parentItem()));
 	qml->setPosition(lastSelectedItem->position());
-	qml->setClip(true); // Even if it's not true
 	qml->setEnabled(false);
 	fit(qml, Fit::WidthHeight);
 	*itemList << qml;
-    *urlList << url;
+    *urlList << qmlPath;
 
 	auto childs = GetAllChildren(lastSelectedItem);
 	for (auto child : childs) {
