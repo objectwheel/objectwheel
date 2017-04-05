@@ -293,10 +293,14 @@ void QmlEditorPrivate::hide()
 	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 }
 
+QmlEditorPrivate* QmlEditor::m_d = nullptr;
+float QmlEditor::showRatio;
+
 QmlEditor::QmlEditor(QWidget *parent)
 	: QWidget(parent)
-	, m_d(new QmlEditorPrivate(this))
 {
+    if (m_d) return;
+    m_d = new QmlEditorPrivate(this);
 }
 
 QmlEditor::~QmlEditor()
@@ -398,7 +402,7 @@ void QmlEditor::paintEvent(QPaintEvent* event)
 	}
 }
 
-float QmlEditor::getShowRatio() const
+float QmlEditor::getShowRatio()
 {
 	return showRatio;
 }

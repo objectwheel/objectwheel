@@ -17,6 +17,7 @@
 #include <mainwindow.h>
 #include <bindingproperty.h>
 #include <bindingwidget.h>
+#include <qmleditor.h>
 
 #define SAVE_DIRECTORY "dashboard"
 #define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
@@ -318,6 +319,7 @@ void SaveManager::setVariantProperty(const QString& id, const QString& property,
     auto rootNode = rewriterView->rootModelNode();
 	QmlObjectNode(rootNode).setVariantProperty(QByteArray().insert(0, property), value);
 	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+    QmlEditor::clearCacheFor(saveDirectory(id), true);
     delete rewriterView;
     delete textModifier;
     delete model;

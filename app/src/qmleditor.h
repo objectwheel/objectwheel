@@ -13,29 +13,30 @@ class BindingWidget;
 class QmlEditor : public QWidget
 {
 		Q_OBJECT
+        Q_DISABLE_COPY(QmlEditor)
 		Q_PROPERTY(float showRatio READ getShowRatio WRITE setShowRatio)
 
 	public:
 		explicit QmlEditor(QWidget *parent = 0);
-		void setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const urlList);
-		void setRootContext(QQmlContext* const context);
-		void setBindingWidget(BindingWidget* bindngWidget);
+        static void setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const urlList);
+        static void setRootContext(QQmlContext* const context);
+        static void setBindingWidget(BindingWidget* bindngWidget);
 		~QmlEditor();
 
-		float getShowRatio() const;
-		void setShowRatio(float value);
+        static float getShowRatio();
+        static void setShowRatio(float value);
 
 	public slots:
-		void selectItem(QObject* const item);
-		void setShowCenter(const QPoint& p);
-		void setRootFolder(const QString& folder);
-		void show(const QString& url);
-		void clearCache();
-		void clearCacheFor(const QString& url, const bool isdir);
-		void updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir);
-		void setDeactive(const bool);
-		void show();
-		void hide();
+        static void selectItem(QObject* const item);
+        static void setShowCenter(const QPoint& p);
+        static void setRootFolder(const QString& folder);
+        static void show(const QString& url);
+        static void clearCache();
+        static void clearCacheFor(const QString& url, const bool isdir);
+        static void updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir);
+        static void setDeactive(const bool);
+        static void show();
+        static void hide();
 
 	private slots:
         void saved(const QString& qmlPath);
@@ -45,8 +46,8 @@ class QmlEditor : public QWidget
 		void paintEvent(QPaintEvent *event) override;
 
 	private:
-		QmlEditorPrivate* m_d;
-		float showRatio;
+        static QmlEditorPrivate* m_d;
+        static float showRatio;
 };
 
 class ComponentManager : public QObject
