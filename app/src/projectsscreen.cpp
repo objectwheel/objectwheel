@@ -212,7 +212,7 @@ void ProjectsScreen::handleLoadButtonClicked()
 			  model.roleNames()[ProjectListModel::ActiveRole], true);
 
 	SplashScreen::setText("Loading project");
-	SplashScreen::show(3000); //FIXME:
+    SplashScreen::show(true, 3000); //FIXME:
 	ProjectManager::stopProject();
 	if (!ProjectManager::startProject(projectName)) qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error.");
 	QTimer::singleShot(3600, [=] { SceneManager::show("studioScene", SceneManager::ToLeft); });

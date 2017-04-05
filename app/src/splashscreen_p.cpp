@@ -11,6 +11,8 @@
 #define DURATION 1000
 #define LOADING_TIME 800
 #define WAIT_EFFECT_INTERVAL 800
+#define SHOWER_TIMER_INTERVAL 200
+
 using namespace Fit;
 
 SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
@@ -23,6 +25,8 @@ SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
 	move(0,0);
 	resize(parent->size());
 	parent->installEventFilter(this);
+    opacityEffect.setOpacity(1);
+    setGraphicsEffect(&opacityEffect);
 
 	loadingWidget.setSource(QUrl("qrc:/resources/qmls/empty-item.qml"));
 	loadingWidget.setStyleSheet("background:transparent;");
@@ -43,6 +47,17 @@ SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
 		}
 		update();
 	});
+
+    showerTimer.setInterval(17); //For 60fps
+    QObject::connect(&showerTimer, &QTimer::timeout, [=]{
+        static qreal step = 1.0 / (SHOWER_TIMER_INTERVAL/17.0);
+        if (opacityEffect.opacity() < 1) {
+            opacityEffect.setOpacity(opacityEffect.opacity() + step);
+        } else {
+            opacityEffect.setOpacity(1);
+            showerTimer.stop();
+        }
+    });
 }
 
 bool SplashScreenPrivate::eventFilter(QObject* watched, QEvent* event)
@@ -68,18 +83,18 @@ void SplashScreenPrivate::hide()
 {
 	waitEffectTimer.stop();
 	loadingWidget.hide();
-	QPropertyAnimation *animation = new QPropertyAnimation(this, "showRatio");
-	animation->setDuration(DURATION);
-	animation->setStartValue(1.0);
-	animation->setEndValue(0.001);
-	animation->setEasingCurve(QEasingCurve::OutCubic);
-	animation->start();
-	QObject::connect(animation, SIGNAL(valueChanged(QVariant)), this, SLOT(update()));
-	QObject::connect(animation, &QPropertyAnimation::finished, [this]{setHidden(true);showRatio=1;});
-	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+    QPropertyAnimation *animation = new QPropertyAnimation(this, "showRatio");
+    animation->setDuration(DURATION);
+    animation->setStartValue(1.0);
+    animation->setEndValue(0.001);
+    animation->setEasingCurve(QEasingCurve::OutCubic);
+    animation->start();
+    QObject::connect(animation, SIGNAL(valueChanged(QVariant)), this, SLOT(update()));
+    QObject::connect(animation, &QPropertyAnimation::finished, [this]{setHidden(true);showRatio=1;});
+    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 }
 
-void SplashScreenPrivate::show()
+void SplashScreenPrivate::show(const bool animated)
 {
 	if (prevBusyIndicator) prevBusyIndicator->deleteLater();
 
@@ -111,6 +126,11 @@ void SplashScreenPrivate::show()
 	loadingWidget.show();
 	showFullScreen();
 	raise();
+
+    if(animated) {
+        opacityEffect.setOpacity(0);
+        showerTimer.start();
+    }
 }
 
 void SplashScreenPrivate::paintEvent(QPaintEvent* event)

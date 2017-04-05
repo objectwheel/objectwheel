@@ -10,6 +10,7 @@
 #include <QIODevice>
 #include <QQuickWidget>
 #include <QTimer>
+#include <QGraphicsOpacityEffect>
 
 class SplashScreenPrivate : public QWidget
 {
@@ -23,12 +24,14 @@ class SplashScreenPrivate : public QWidget
 		QString text;
 		QColor textColor;
 		QBrush backgroundBrush;
-		QQuickWidget loadingWidget;
+        QQuickWidget loadingWidget;
 		QString loadingImageFilename;
 		QQuickItem* prevBusyIndicator;
 		QTimer waitEffectTimer;
 		QString waitEffectString;
 		float showRatio;
+        QTimer showerTimer;
+        QGraphicsOpacityEffect opacityEffect;
 
 		explicit SplashScreenPrivate(QWidget *parent = 0);
 		bool eventFilter(QObject *watched, QEvent *event) override;
@@ -36,7 +39,7 @@ class SplashScreenPrivate : public QWidget
 		float getShowRatio() const;
 		void setShowRatio(float value);
 		void hide();
-		void show();
+        void show(const bool animated);
 };
 
 #endif // SPLASHSCREEN_P_H

@@ -59,6 +59,7 @@ class MainWindowPrivate
 		QSpacerItem* horizontalSpacer;
 		FlatButton* editButton;
 		FlatButton* clearButton;
+        FlatButton* playButton;
 		QSpacerItem* horizontalSpacer_2;
 		QWidget* toolboxWidget;
 		QVBoxLayout* toolboxVLay;
@@ -144,16 +145,26 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	editButton->setChecked(false);
 	buttonsLayout->addWidget(editButton);
 
-	clearButton = new FlatButton(centralWidget);
+    clearButton = new FlatButton(centralWidget);
 	clearButton->setObjectName(QStringLiteral("clearButton"));
 	clearButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	clearButton->setMinimumSize(QSize(82, 35));
-	clearButton->setMaximumSize(QSize(82, 35));
+    clearButton->setMinimumSize(QSize(82, 35));
+    clearButton->setMaximumSize(QSize(82, 35));
 	QIcon icon1;
 	icon1.addFile(QStringLiteral(":/resources/images/trash-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
 	clearButton->setIcon(icon1);
 
-	buttonsLayout->addWidget(clearButton);
+    playButton = new FlatButton(centralWidget);
+    playButton->setObjectName(QStringLiteral("playButton"));
+    playButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    playButton->setMinimumSize(QSize(82, 35));
+    playButton->setMaximumSize(QSize(82, 35));
+    QIcon icon2;
+    icon2.addFile(QStringLiteral(":/resources/images/play.png"), QSize(), QIcon::Normal, QIcon::Off);
+    playButton->setIcon(icon2);
+
+    buttonsLayout->addWidget(playButton);
+    buttonsLayout->addWidget(clearButton);
 	horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 	buttonsLayout->addItem(horizontalSpacer_2);
 	verticalLayout->addLayout(buttonsLayout);
@@ -378,6 +389,7 @@ void MainWindowPrivate::retranslateUi(QWidget* MainWindow)
 	MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
 	editButton->setText(QApplication::translate("MainWindow", "Edit", 0));
 	clearButton->setText(QApplication::translate("MainWindow", "Clear", 0));
+    playButton->setText(QApplication::translate("MainWindow", "Play", 0));
 }
 
 void MainWindowPrivate::showAdderArea()

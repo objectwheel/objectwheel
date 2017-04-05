@@ -31,9 +31,9 @@ namespace SplashScreen
 		d->backgroundBrush = brush;
 	}
 
-	void show(const int msec)
+    void show(const bool animate, const int msec)
 	{
-		d->show();
+        d->show(animate);
 		if (msec > 0) QTimer::singleShot(msec, [=] { d->hide(); });
 	}
 

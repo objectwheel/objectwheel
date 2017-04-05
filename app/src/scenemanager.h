@@ -21,8 +21,9 @@ class SceneManager : public QObject
 		static QString cuurrentScene();
 		static QWidget* scene(const QString& key);
 		static void addScene(const QString& key, QWidget* scene);
-		static void show(const QString& key, Direction direction);
-		static void setCurrent(const QString& key);
+        static void removeScene(const QString& key);
+        static void show(const QString& key, Direction direction);
+        static void setCurrent(const QString& key, const bool animated = true);
 		static void setMainWindow(QWidget* mainWindow);
 		static void setSceneListWidget(ListWidget* listWidget);
 		bool eventFilter(QObject *watched, QEvent *event);

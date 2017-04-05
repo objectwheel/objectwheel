@@ -21,7 +21,7 @@ namespace SplashScreen
 	void setLoadingImageFilename(const QString& loadingImageFilename);
 	void raise();
 	void hide(const int msec = 0);
-	void show(const int msec = 0);
+    void show(const bool animate, const int msec = 0);
 }
 
 #endif // SPLASHSCREEN_H

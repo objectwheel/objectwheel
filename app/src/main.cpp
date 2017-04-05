@@ -23,6 +23,7 @@
 // Undo-redo
 // Run project full screen
 // Cloud part-sync-login etc
+// Clear parser console outputs
 
 /* Near tasks */
 // Fix qml editor according to dashboard database editing

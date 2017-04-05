@@ -67,6 +67,7 @@ void MainWindow::SetupGui()
 	/* Scaling things */
 	fit(m_d->editButton, Fit::WidthHeight, true);
 	fit(m_d->clearButton, Fit::WidthHeight, true);
+    fit(m_d->playButton, Fit::WidthHeight, true);
 
 	m_d->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
 	m_d->buttonsLayout->setSpacing(fit(5));
@@ -125,7 +126,7 @@ void MainWindow::SetupGui()
 
 	/* Enable/Disable other controls when editButton clicked */
 	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->propertiesWidget->setEnabled(checked);});
-	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->clearButton->setEnabled(!checked);});
+//	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->clearButton->setEnabled(!checked);});
 
 	/* Set ticks' Parents and hide ticks */
 	m_ResizerTick->setParent(m_d->designWidget);
@@ -171,7 +172,10 @@ void MainWindow::SetupGui()
 	m_d->clearButton->setDisabledColor(Qt::darkGray);
 	m_d->clearButton->setDisabledTextColor(QColor("#444444"));
 	m_d->clearButton->setTextColor(Qt::white);
-
+    m_d->playButton->setColor(QColor("#464E54").lighter(125));
+    m_d->playButton->setDisabledColor(Qt::darkGray);
+    m_d->playButton->setDisabledTextColor(QColor("#444444"));
+    m_d->playButton->setTextColor(Qt::white);
 	/* Fix Coords of ticks when property changed */
 	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RotatorTick, &RotatorTick::FixCoord);
@@ -380,7 +384,7 @@ void MainWindow::SetupGui()
 	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
 	SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
 	SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
-	SplashScreen::show();
+    SplashScreen::show(false);
 }
 
 void MainWindow::SetupManagers()
@@ -395,9 +399,9 @@ void MainWindow::SetupManagers()
 	sceneManager->setMainWindow(this);
 	sceneManager->setSceneListWidget(m_d->sceneList);
 	sceneManager->addScene("studioScene", m_d->centralWidget);
-	sceneManager->addScene("projectsScene", m_d->projectsScreen);
-	sceneManager->addScene("aboutScene", m_d->aboutWidget);
-	sceneManager->setCurrent("projectsScene");
+    sceneManager->addScene("projectsScene", m_d->projectsScreen);
+    sceneManager->addScene("aboutScene", m_d->aboutWidget);
+    sceneManager->setCurrent("projectsScene", false);
 	SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
@@ -830,6 +834,7 @@ void MainWindow::HideSelectionTools()
 
 void MainWindow::on_clearButton_clicked()
 {
+    if (GetAllChildren(m_CurrentPage).size() < 2) return;
 	QMessageBox msgBox;
 	msgBox.setText("<b>This will clear the current page's content.</b>");
 	msgBox.setInformativeText("Do you want to continue?");
@@ -851,6 +856,7 @@ void MainWindow::on_clearButton_clicked()
 					m_d->m_ItemUrls.removeAt(i);
 					m_d->bindingWidget->detachBindingsFor(item);
 					item->deleteLater();
+                    HideSelectionTools();
 				}
 			}
 			break;
@@ -867,7 +873,35 @@ void MainWindow::on_editButton_clicked()
 		item->setEnabled(!m_d->editButton->isChecked());
 	}
 	m_d->propertiesWidget->clearList();
-	m_d->bindingWidget->clearList();
+    m_d->bindingWidget->clearList();
+}
+
+void MainWindow::on_playButton_clicked()
+{
+    if (m_d->editButton->isChecked()) { // Edit mode on
+        for (auto item : m_d->m_Items) {
+            item->setEnabled(true);
+        }
+        HideSelectionTools();
+    }
+    m_d->designWidget->setParent(this);
+    SceneManager::addScene("playScene", m_d->designWidget);
+    SceneManager::setCurrent("playScene");
+
+    FlatButton* exitButton = new FlatButton;
+    exitButton->setParent(this);
+    exitButton->setIconButton(true);
+    exitButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
+    exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));
+    fit(exitButton, Fit::WidthHeight);
+    exitButton->show();
+
+    connect(exitButton, &FlatButton::clicked, [=]{
+        exitButton->deleteLater();
+        m_d->verticalLayout->insertWidget(1, m_d->designWidget);
+        SceneManager::removeScene("playScene");
+        SceneManager::setCurrent("studioScene", false);
+    });
 }
 
 void MainWindow::handleToolboxUrlboxChanges(const QString& text)

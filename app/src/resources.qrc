@@ -155,5 +155,6 @@
         <file>resources/images/aboutSceneIcon@2x.png</file>
         <file>resources/images/projectsSceneIcon@2x.png</file>
         <file>resources/images/studioSceneIcon@2x.png</file>
+        <file>resources/images/play.png</file>
     </qresource>
 </RCC>

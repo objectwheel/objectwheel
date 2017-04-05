@@ -47,6 +47,7 @@ class MainWindow : public QWidget
 	private slots:
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
+        void on_playButton_clicked();
 		void handleToolboxUrlboxChanges(const QString& text);
 		void handleToolboxNameboxChanges(QString name);
 		void toolboxEditButtonToggled(bool);
