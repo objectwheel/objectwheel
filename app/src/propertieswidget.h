@@ -55,7 +55,6 @@ class PropertiesWidget : public QWidget
 		void idChanged(const QString& newId);
 
 	public slots:
-		inline void showBar() { m_ListWidget->showBar(); }
 		void refreshList(QObject* const selectedItem, const QString& filter = QString());
 		void clearList();
 };

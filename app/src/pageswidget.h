@@ -15,7 +15,6 @@ class PagesWidget : public QWidget
 
 	public:
 		explicit PagesWidget(QWidget *parent = 0);
-		void showBar();
 		void setSwipeItem(QQuickItem* swipeItem);
 		void setRootContext(QQmlContext* context);
 		void setItemList(QList<QQuickItem*>* items);

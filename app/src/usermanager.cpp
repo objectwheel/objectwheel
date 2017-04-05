@@ -50,7 +50,12 @@ UserManager::UserManager(QObject *parent)
 	: QObject(parent)
 {
 	if (m_d) return;
-	m_d = new UserManagerPrivate(this);
+    m_d = new UserManagerPrivate(this);
+}
+
+UserManager::~UserManager()
+{
+    delete m_d;
 }
 
 UserManager* UserManager::instance()

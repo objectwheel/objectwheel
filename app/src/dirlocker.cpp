@@ -49,6 +49,11 @@ DirLocker* DirLocker::instance()
 	return m_d->parent;
 }
 
+DirLocker::~DirLocker()
+{
+    delete m_d;
+}
+
 bool DirLocker::locked(const QString& dir)
 {
 	QString lockedFileName = dir + separator() + LOCKED_FILENAME;

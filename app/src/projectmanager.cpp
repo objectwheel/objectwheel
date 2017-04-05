@@ -66,7 +66,12 @@ ProjectManager::ProjectManager(QObject *parent)
 	: QObject(parent)
 {
 	if (m_d) return;
-	m_d = new ProjectManagerPrivate(this);
+    m_d = new ProjectManagerPrivate(this);
+}
+
+ProjectManager::~ProjectManager()
+{
+    delete m_d;
 }
 
 ProjectManager* ProjectManager::instance()

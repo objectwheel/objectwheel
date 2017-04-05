@@ -12,6 +12,7 @@ class UserManager : public QObject
 
 	public:
 		explicit UserManager(QObject *parent = 0);
+        ~UserManager();
 		static UserManager* instance();
 		static QString dataDirictory();
 		static QString userDirectory(const QString& username);

@@ -16,6 +16,7 @@ class SceneManager : public QObject
 	public:
 		enum Direction { ToLeft, ToRight };
 		explicit SceneManager(QObject *parent = 0);
+        ~SceneManager();
 		static SceneManager* instance();
 		static QStringList scenes();
 		static QString cuurrentScene();

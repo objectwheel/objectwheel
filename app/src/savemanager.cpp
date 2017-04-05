@@ -136,7 +136,12 @@ SaveManager::SaveManager(QObject *parent)
 	: QObject(parent)
 {
 	if (m_d) return;
-	m_d = new SaveManagerPrivate(this);
+    m_d = new SaveManagerPrivate(this);
+}
+
+SaveManager::~SaveManager()
+{
+    delete m_d;
 }
 
 SaveManager* SaveManager::instance()

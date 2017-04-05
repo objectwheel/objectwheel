@@ -37,6 +37,9 @@ class TitleBar : public QWidget
 		const QColor& ShadowColor() const;
 		void setShadowColor(const QColor& ShadowColor);
 
+    protected:
+        void paintEvent(QPaintEvent *event) override;
+
 	signals:
 		void MenuToggled(bool);
 		void SettingsToggled(bool);

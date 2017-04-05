@@ -365,8 +365,6 @@ void PropertiesWidget::refreshList(QObject* const selectedItem, const QString& f
 
 	setEnabled(true);
 
-	m_ListWidget->showBar();
-
 	m_LastObject = selectedItem;
 
 	emit listRefreshed();

@@ -29,22 +29,23 @@ class SceneManagerPrivate
 		QMetaObject::Connection connection;
 		QMetaObject::Connection connection2;
         QTimer showerTimer;
-        QGraphicsOpacityEffect opacityEffect;
+        QGraphicsOpacityEffect* opacityEffect;
 };
 
 SceneManagerPrivate::SceneManagerPrivate(SceneManager* uparent)
 	: parent(uparent)
+    , opacityEffect(new QGraphicsOpacityEffect)
 {
 	parallelAnimationGroup.addAnimation(&csShifterAmination);
 	parallelAnimationGroup.addAnimation(&nsShifterAmination);
-    opacityEffect.setOpacity(1);
+    opacityEffect->setOpacity(1);
     showerTimer.setInterval(17); //For 60fps
     QObject::connect(&showerTimer, &QTimer::timeout, [=]{
         static qreal step = 1.0 / (SHOWER_TIMER_INTERVAL/17.0);
-        if (opacityEffect.opacity() < 1) {
-            opacityEffect.setOpacity(opacityEffect.opacity() + step);
+        if (opacityEffect->opacity() < 1) {
+            opacityEffect->setOpacity(opacityEffect->opacity() + step);
         } else {
-            opacityEffect.setOpacity(1);
+            opacityEffect->setOpacity(1);
             showerTimer.stop();
         }
 
@@ -64,7 +65,12 @@ SceneManager::SceneManager(QObject *parent)
 	: QObject(parent)
 {
 	if (m_d) return;
-	m_d = new SceneManagerPrivate(this);
+    m_d = new SceneManagerPrivate(this);
+}
+
+SceneManager::~SceneManager()
+{
+    delete m_d;
 }
 
 SceneManager* SceneManager::instance()
@@ -155,8 +161,8 @@ void SceneManager::setCurrent(const QString& key, const bool animated)
     m_d->sceneMap[key]->show();
     m_d->sceneMap[key]->raise();
     if(animated) {
-        m_d->sceneMap[key]->setGraphicsEffect(&m_d->opacityEffect);
-        m_d->opacityEffect.setOpacity(0);
+        m_d->sceneMap[key]->setGraphicsEffect(m_d->opacityEffect);
+        m_d->opacityEffect->setOpacity(0);
         m_d->showerTimer.start();
     }
     emit instance()->currentSceneChanged(key);
@@ -177,8 +183,6 @@ void SceneManager::setSceneListWidget(ListWidget* listWidget)
 	m_d->connection2 = connect(listWidget,
 	(void (ListWidget::*)(QListWidgetItem*, QListWidgetItem*))&ListWidget::currentItemChanged, [](QListWidgetItem*c, QListWidgetItem*) {
 		auto sceneName = m_d->sceneListWidget->GetUrls(c)[0].toString();
-//		SceneManager::Direction direction;
-//		if (sceneName == "aboutScene" && SceneManager::cuurrentScene() == )
 		QTimer::singleShot(300, [=] { SceneManager::show(sceneName, SceneManager::ToLeft); });
 	});
 }

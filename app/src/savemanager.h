@@ -20,6 +20,7 @@ class SaveManager : public QObject
 		};
 
 		explicit SaveManager(QObject *parent = 0);
+        ~SaveManager();
 		static SaveManager* instance();
 
 		static bool buildNewDatabase(const QString& projDir);

@@ -368,13 +368,6 @@ void MainWindow::SetupGui()
 	sceneListWidgetLayout->addWidget(sceneListTitle);
 	sceneListWidgetLayout->addWidget(m_d->sceneList);
 
-	/* Pop-up toolbox widget's scrollbar */
-	connect(m_RightMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->sceneList->showBar(); });
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->toolboxList->showBar(); });
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->propertiesWidget->showBar();});
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->bindingWidget->showBar(); });
-	connect(m_LeftMenu, &CoverMenu::toggled, [this](bool checked) {if (checked) m_d->pagesWidget->showBar(); });
-
 	// Init Splash Screen
 	SplashScreen::init(this);
 	SplashScreen::setText("Decrypting user files");
@@ -889,10 +882,21 @@ void MainWindow::on_playButton_clicked()
     SceneManager::setCurrent("playScene");
 
     FlatButton* exitButton = new FlatButton;
-    exitButton->setParent(this);
+    exitButton->setParent(m_d->designWidget);
     exitButton->setIconButton(true);
     exitButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
+#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
+#else
     exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));
+#endif
+    connect(this, &MainWindow::resized, [=]{
+#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
+#else
+    exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));
+#endif
+    });
     fit(exitButton, Fit::WidthHeight);
     exitButton->show();
 
@@ -900,7 +904,7 @@ void MainWindow::on_playButton_clicked()
         exitButton->deleteLater();
         m_d->verticalLayout->insertWidget(1, m_d->designWidget);
         SceneManager::removeScene("playScene");
-        SceneManager::setCurrent("studioScene", false);
+        SceneManager::setCurrent("studioScene");
     });
 }
 

@@ -16,7 +16,6 @@ class FlatButton : public QPushButton
 		QColor m_TextColor;
 		QColor m_DisabledTextColor;
 		QColor m_CheckedTextColor;
-		QGraphicsDropShadowEffect* m_Shadow;
 		int m_Radius;
 		bool m_IconButton;
 		bool m_Down;

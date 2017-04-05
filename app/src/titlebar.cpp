@@ -5,6 +5,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QStyleOption>
+#include <QPainter>
 
 using namespace Fit;
 
@@ -356,17 +358,13 @@ TitleBar::TitleBar(QWidget *parent)
     , m_Title(new QLabel)
     , m_Menu(new QPushButton)
     , m_Settings(new QPushButton)
-    , m_Color(QColor("#47a3da"))
     , m_ShadowWidgetBackground(new QWidget(this))
     , m_ShadowWidget(new QWidget(m_ShadowWidgetBackground))
 {
     connect(m_Menu, SIGNAL(toggled(bool)), this, SIGNAL(MenuToggled(bool)));
     connect(m_Settings, SIGNAL(toggled(bool)), this, SIGNAL(SettingsToggled(bool)));
 
-    setAutoFillBackground(true);
-    QPalette p(palette());
-    p.setColor(QPalette::Window, m_Color);
-    setPalette(p);
+    setObjectName("titleBar");
 
     m_UpperLayout->setContentsMargins(fit(10), 0, fit(10), 0);
 
@@ -406,10 +404,8 @@ TitleBar::TitleBar(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_ShadowWidget);
 
-    QPalette p2(m_ShadowWidgetBackground->palette());
-    p2.setColor(QPalette::Window, Qt::white);
-    m_ShadowWidgetBackground->setAutoFillBackground(true);
-    m_ShadowWidgetBackground->setPalette(p2);
+    m_ShadowWidgetBackground->setStyleSheet(QString("background:rgb(%1,%2,%3);").arg(m_ShadowWidgetColor.red())
+                                            .arg(m_ShadowWidgetColor.green()).arg(m_ShadowWidgetColor.blue()));
     m_ShadowWidgetBackground->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_ShadowWidgetBackground->setMinimumHeight(fit(5));
     m_ShadowWidgetBackground->setMaximumHeight(fit(5));
@@ -430,9 +426,7 @@ const QColor& TitleBar::Color() const
 void TitleBar::setColor(const QColor& Color)
 {
     m_Color = Color;
-    QPalette p(palette());
-    p.setColor(QPalette::Window, m_Color);
-    setPalette(p);
+    setStyleSheet(QString("#titleBar{background:rgb(%1,%2,%3);}").arg(m_Color.red()).arg(m_Color.green()).arg(m_Color.blue()));
 }
 
 const QString& TitleBar::Text() const
@@ -476,7 +470,16 @@ const QColor& TitleBar::ShadowColor() const
 void TitleBar::setShadowColor(const QColor& ShadowColor)
 {
     m_ShadowWidgetColor = ShadowColor;
-    QPalette p(m_ShadowWidgetBackground->palette());
-    p.setColor(QPalette::Window, m_ShadowWidgetColor);
-    m_ShadowWidgetBackground->setPalette(p);
+    m_ShadowWidgetBackground->setStyleSheet(QString("background:rgb(%1,%2,%3);").arg(m_ShadowWidgetColor.red())
+                                            .arg(m_ShadowWidgetColor.green()).arg(m_ShadowWidgetColor.blue()));
+
+}
+
+void TitleBar::paintEvent(QPaintEvent* event)
+{
+    QWidget::paintEvent(event);
+    QStyleOption o;
+    o.initFrom(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &o, &p, this);
 }

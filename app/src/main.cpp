@@ -18,27 +18,24 @@
 #define REF_DPI 127
 
 /* Far tasks */
-// Build gui equals
+/*-----------*/
+// Build gui equals (continuous task)
 // Verisoning-Git integration
 // Undo-redo
-// Run project full screen
 // Cloud part-sync-login etc
-// Clear parser console outputs
+// Clear parser's ugly console outputs
+// General bug fixing (continuous task)
 
 /* Near tasks */
+/*------------*/
 // Fix qml editor according to dashboard database editing
 // Fix parser errors
 // Fix  parser slowness
-// General bug fixing
 // Import/Export project
-
-//CoverMenu ile SceneManager uyumlu çalışsın
-//ListWidget hatasını çöz
-//About'tan çıkış
-//Sürükle & bırak resimler
-//Güvenli çıkış
-// Android drag & drop hatasını düzelt
-// dashboarda bırakılan nesnelerin savelerinde id'leri set et
+// Add (secure)exit button
+// Drag & Drop image files transforms into controls
+// Fix Android's control drag & drop error
+// Apply id changes into qml files
 
 int main(int argc, char *argv[])
 {

@@ -6,6 +6,8 @@
 #include <QHBoxLayout>
 #include <fit.h>
 #include <QApplication>
+#include <flatbutton.h>
+#include <scenemanager.h>
 
 #define TITLE_TEXT "<p><b>version</b> 1.589 <b>pbuild</b> ee30820<br>Sat Mar 25 01:00:00 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
@@ -20,7 +22,8 @@ struct AboutPrivate
 		QHBoxLayout iconLayout;
 		QLabel iconLabel;
 		QLabel titleLabel;
-		QLabel legalLabel;
+        QLabel legalLabel;
+        FlatButton exitButton;
 };
 
 AboutPrivate::AboutPrivate(QWidget* p)
@@ -57,6 +60,28 @@ AboutPrivate::AboutPrivate(QWidget* p)
 	mainLayout.addWidget(&titleLabel);
 	mainLayout.addStretch();
 	mainLayout.addWidget(&legalLabel);
+
+    exitButton.setParent(parent);
+    exitButton.setIconButton(true);
+    exitButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
+#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+    exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
+#else
+    exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));
+#endif
+    QObject::connect((About*)parent,  &About::resized, [=]{
+#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+        exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
+#else
+        exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));
+#endif
+    });
+    fit(&exitButton, Fit::WidthHeight);
+    exitButton.show();
+
+    QObject::connect(&exitButton, &FlatButton::clicked, [=]{
+        SceneManager::show("studioScene", SceneManager::ToRight);
+    });
 }
 
 About::About(QWidget *parent)
@@ -67,5 +92,11 @@ About::About(QWidget *parent)
 
 About::~About()
 {
-	delete m_d;
+    delete m_d;
+}
+
+void About::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    emit resized();
 }

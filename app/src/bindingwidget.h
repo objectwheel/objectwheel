@@ -32,7 +32,6 @@ class BindingWidget : public QWidget
 		void selectItem(QObject* const);
 		void detachBindingsFor(QObject* const);
 		void clearAllBindings();
-		void showBar();
 		bool hasPopupOpen();
 
 	protected slots:

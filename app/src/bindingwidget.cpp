@@ -111,7 +111,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     addButton.setColor("#1e8145");
     addButton.setFixedSize(fit(30),fit(30));
-    addButton.setRadius(fit(15));
+    addButton.setRadius(fit(14));
     addButton.setIconSize(QSize(fit(16),fit(16)));
     addButton.setIcon(QIcon(":/resources/images/plus.png"));
     QObject::connect(&addButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {addButtonClicked();});
@@ -119,7 +119,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     removeButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     removeButton.setColor("#c03638");
     removeButton.setFixedSize(fit(30),fit(30));
-    removeButton.setRadius(fit(15));
+    removeButton.setRadius(fit(14));
     removeButton.setIconSize(QSize(fit(16),fit(16)));
     removeButton.setIcon(QIcon(":/resources/images/minus.png"));
     removeButton.setDisabled(true);
@@ -128,7 +128,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     editButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     editButton.setColor("#2b5796");
     editButton.setFixedSize(fit(30),fit(30));
-    editButton.setRadius(fit(15));
+    editButton.setRadius(fit(14));
     editButton.setIconSize(QSize(fit(16),fit(16)));
     editButton.setIcon(QIcon(":/resources/images/edit.png"));
     editButton.setDisabled(true);
@@ -605,11 +605,6 @@ void BindingWidget::setRootContext(QQmlContext* const rootContext)
 void BindingWidget::addBindingWithoutSave(const SaveManager::BindingInf& inf)
 {
     m_d->addBindingWithoutSave(inf);
-}
-
-void BindingWidget::showBar()
-{
-    m_d->bindingListWidget.showBar();
 }
 
 bool BindingWidget::hasPopupOpen()

@@ -12,10 +12,6 @@ class ListWidget : public QListWidget
 		QMap<QListWidgetItem*, QList<QUrl>> m_Urls;
 		QPoint m_PreviousPoint;
 		QList<qreal> m_AngleList;
-		QTimer* m_HiderTimer;
-		QTimer* m_DelayTimer;
-		int m_Alpha;
-		bool m_Running;
 
 	public:
 		explicit ListWidget(QWidget *parent = 0);
@@ -28,14 +24,7 @@ class ListWidget : public QListWidget
 	protected:
 		QMimeData* mimeData(const QList<QListWidgetItem *> items) const;
 		void mousePressEvent(QMouseEvent* const event);
-		void mouseMoveEvent(QMouseEvent* const event);
-		void wheelEvent(QWheelEvent* const event);
-		void setBarOpacity(const int opacity);
-		int getBarOpacity() const;
-
-	public slots:
-		void showBar();
-		void hideBar();
+        void mouseMoveEvent(QMouseEvent* const event);
 };
 
 #endif // TREEWIDGET_H

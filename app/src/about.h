@@ -12,6 +12,12 @@ class About : public QWidget
 		explicit About(QWidget *parent = 0);
 		~About();
 
+    protected:
+        void resizeEvent(QResizeEvent *event) override;
+
+    signals:
+        void resized() const;
+
 	private:
 		AboutPrivate* m_d;
 };

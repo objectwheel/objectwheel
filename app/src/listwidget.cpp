@@ -11,15 +11,14 @@
 #include <QScroller>
 #include <QWheelEvent>
 
-#define ALPHA 150
 #define STYLE_SHEET "\
 QScrollBar:vertical { \
 	background: transparent; \
-	width: %2px; \
+    width: %2px; \
 } QScrollBar::handle:vertical { \
 	background: rgba(255,255,255,%4); \
 	min-height: %1px; \
-	border-radius: %3px; \
+    border-radius: %3px; \
 } QScrollBar::add-line:vertical { \
 	background: none; \
 } QScrollBar::sub-line:vertical { \
@@ -34,11 +33,10 @@ using namespace Fit;
 
 ListWidget::ListWidget(QWidget *parent)
 	: QListWidget(parent)
-	, m_HiderTimer(new QTimer)
-	, m_DelayTimer(new QTimer)
-	, m_Running(false)
 {
-	setBarOpacity(ALPHA);
+    QString styleSheet(STYLE_SHEET);
+    styleSheet = styleSheet.arg(fit(15)).arg(fit(4)).arg(fit(2)).arg(150);
+    verticalScrollBar()->setStyleSheet(styleSheet);
 
 	QScroller::grabGesture(viewport(), QScroller::TouchGesture);
 	QScrollerProperties prop = QScroller::scroller(viewport())->scrollerProperties();
@@ -46,27 +44,6 @@ ListWidget::ListWidget(QWidget *parent)
 	prop.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
 	prop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.009);
 	QScroller::scroller(viewport())->setScrollerProperties(prop);
-
-	connect(m_DelayTimer, &QTimer::timeout, [&]{
-		m_DelayTimer->stop();
-		hideBar();
-	});
-
-	connect(m_HiderTimer, &QTimer::timeout, [&] {
-		m_HiderTimer->interval();
-		if (getBarOpacity() > m_Alpha + 2) {
-			m_HiderTimer->stop();
-			m_Running = false;
-		}
-
-		setBarOpacity(m_Alpha);
-		m_Alpha-=2;
-
-		if (m_Alpha < 2) { // this "2" is constant
-			m_HiderTimer->stop();
-			m_Running = false;
-		}
-	});
 }
 
 QMimeData* ListWidget::mimeData(const QList<QListWidgetItem*> items) const
@@ -85,8 +62,6 @@ void ListWidget::mousePressEvent(QMouseEvent* const event)
 
 void ListWidget::mouseMoveEvent(QMouseEvent* const event)
 {
-	showBar();
-
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WINPHONE)
 	/* Make dragging if direction is right out of the list widget */
 	if (state() == DraggingState)
@@ -119,48 +94,4 @@ void ListWidget::mouseMoveEvent(QMouseEvent* const event)
 #endif
 
 	QListWidget::mouseMoveEvent(event);
-}
-
-void ListWidget::wheelEvent(QWheelEvent* const event)
-{
-	showBar();
-	QListWidget::wheelEvent(event);
-}
-
-void ListWidget::setBarOpacity(const int opacity)
-{
-	QString styleSheet(STYLE_SHEET);
-	styleSheet = styleSheet.arg(fit(15)).arg(fit(4)).arg(fit(2)).arg(opacity);
-	verticalScrollBar()->setStyleSheet(styleSheet);
-}
-
-int ListWidget::getBarOpacity() const
-{ //FIXME:
-	QString styleSheet = verticalScrollBar()->styleSheet();
-	styleSheet = styleSheet.split("rgba(255,255,255,").at(1);
-	QString value;
-	if (styleSheet[0].isNumber())
-		value.append(styleSheet.at(0));
-	if (styleSheet[1].isNumber())
-		value.append(styleSheet.at(1));
-	if (styleSheet[2].isNumber())
-		value.append(styleSheet.at(2));
-	return value.toInt();
-}
-
-void ListWidget::showBar()
-{
-	setBarOpacity(ALPHA);
-	m_DelayTimer->stop();
-	m_DelayTimer->start(1000);
-}
-
-void ListWidget::hideBar()
-{
-	if (true == m_Running)
-		return;
-
-	m_Alpha = ALPHA;
-	m_Running = true;
-	m_HiderTimer->start(10);
 }

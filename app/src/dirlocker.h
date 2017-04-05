@@ -12,6 +12,7 @@ class DirLocker : public QObject
 
 	public:
 		explicit DirLocker(QObject *parent = 0);
+        ~DirLocker();
 		static DirLocker* instance();
 		static bool locked(const QString& dir);
 		static bool canUnlock(const QString& dir, const QByteArray& key);
