@@ -20,6 +20,7 @@ class UserManager : public QObject
 		static bool buildNewUser(const QString& username);
 		static bool startUserSession(const QString& username, const QString& password);
 		static QString currentSessionsUser();
+        static QString currentSessionsToken();
 		static QString currentSessionsKey();
 
 	public slots:

@@ -201,15 +201,17 @@ void ProjectsScreen::handleLoadButtonClicked()
 	if (!currentProject.isEmpty() && currentProject == projectName) {
         SceneManager::show("studioScene", SceneManager::ToRight);
 		return;
-	}
+    }
 
-	for (int i = model.rowCount(); i--;) {
-		if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
-			model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
-		}
-	}
-	model.set(listView->property("currentIndex").toInt(),
-			  model.roleNames()[ProjectListModel::ActiveRole], true);
+    QTimer::singleShot(2000, [=] {
+        for (int i = model.rowCount(); i--;) {
+            if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
+                model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
+            }
+        }
+        model.set(listView->property("currentIndex").toInt(),
+                  model.roleNames()[ProjectListModel::ActiveRole], true);
+    });
 
 	SplashScreen::setText("Loading project");
     SplashScreen::show(true, 3000); //FIXME:

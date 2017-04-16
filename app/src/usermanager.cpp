@@ -13,10 +13,12 @@ class UserManagerPrivate
 		UserManagerPrivate(UserManager* uparent);
 		QString defaultDataDirectory() const;
 		QString generateUserDirectory(const QString& username) const;
+        QString generateToken(const QString& password, const QString& username) const;
 
 	public:
 		UserManager* parent = nullptr;
 		QString dataDirectory;
+        QString currentSessionsToken;
 		QString currentSessionsUser;
 		QByteArray currentSessionsKey;
 		DirLocker dirLocker;
@@ -41,7 +43,14 @@ inline QString UserManagerPrivate::defaultDataDirectory() const
 
 QString UserManagerPrivate::generateUserDirectory(const QString& username) const
 {
-	return dataDirectory + separator() + QCryptographicHash::hash(QByteArray().insert(0, username), QCryptographicHash::Md5).toHex();
+    return dataDirectory + separator() + QCryptographicHash::hash(QByteArray().insert(0, username), QCryptographicHash::Md5).toHex();
+}
+
+QString UserManagerPrivate::generateToken(const QString& password, const QString& username) const
+{
+    QString hash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha512).toHex();
+    auto json = QByteArray().insert(0, QString("{ \"email\" : \"%1\", \"hash\" : \"%2\" }").arg(username).arg(hash));
+    return json.toBase64();
 }
 
 UserManagerPrivate* UserManager::m_d = nullptr;
@@ -90,6 +99,11 @@ QString UserManager::currentSessionsUser()
 	return m_d->currentSessionsUser;
 }
 
+QString UserManager::currentSessionsToken()
+{
+    return m_d->currentSessionsToken;
+}
+
 QString UserManager::currentSessionsKey()
 {
 	return m_d->currentSessionsKey;
@@ -109,14 +123,17 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
 		stopUserSession();
 	}
 
-	auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Md5).toHex();
+    auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha3_512);
+    keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
 	m_d->currentSessionsUser = username;
 	m_d->currentSessionsKey = keyHash;
+    m_d->currentSessionsToken = m_d->generateToken(password, username);
 
-	if (m_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
+    if (m_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
 		if (!m_d->dirLocker.unlock(userDirectory(username), keyHash)) {
 			m_d->currentSessionsUser = "";
 			m_d->currentSessionsKey = "";
+            m_d->currentSessionsToken = "";
 			return false;
 		}
 	}
@@ -139,5 +156,6 @@ void UserManager::stopUserSession()
 
 	m_d->currentSessionsUser = "";
 	m_d->currentSessionsKey = "";
+    m_d->currentSessionsToken = "";
 }
 
