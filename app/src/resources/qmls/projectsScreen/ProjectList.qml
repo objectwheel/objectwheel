@@ -72,7 +72,7 @@ Item {
                 anchors.margins: Fit.fit(4)
                 spacing: Fit.fit(5)
                 Image {
-                    source: "images/fileicon.png"
+                    source: "qrc:///resources/images/fileicon.png"
                     height: parent.height
                     fillMode: Image.PreserveAspectFit
                     anchors.verticalCenter: parent.verticalCenter
@@ -139,7 +139,7 @@ Item {
             }
             Image {
                 id: infImage
-                source: "images/info.png"
+                source: "qrc:///resources/images/info.png"
                 height: Math.floor(parent.height / 2.5)
                 fillMode: Image.PreserveAspectFit
                 anchors {verticalCenter: parent.verticalCenter; right: parent.right; rightMargin: Fit.fit(5) }

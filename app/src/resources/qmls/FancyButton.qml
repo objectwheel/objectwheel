@@ -8,12 +8,12 @@ Item {
     Rectangle {
         id: base
         anchors.fill: parent
-        visible: !notIconButton ? false : !pressingEffect.visible
+        visible: iconButton ? false : !pressingEffect.visible
     }
     Rectangle {
         id: checkedEffect
         anchors.fill: parent
-        radius: Math.min(width / 2.0, height / 2.0)
+        radius: iconButton ? Math.min(width / 2.0, height / 2.0) : base.radius
         color: "#30000000"
         visible: checkable ? checked : false
     }
@@ -23,13 +23,13 @@ Item {
         anchors.fill: parent
         anchors.margins: Fit.fit(4)
         sourceSize: Qt.size(width, height)
-        visible: notIconButton ? false : !pressingEffect.visible
+        visible: !iconButton ? false : !pressingEffect.visible
     }
 
     ColorOverlay {
         id: pressingEffect
-        anchors.fill: notIconButton ? base : iconImage
-        source: notIconButton ? base : iconImage
+        anchors.fill: !iconButton ? base : iconImage
+        source: !iconButton ? base : iconImage
         color: pressedColor
         visible: {
             if (!root.enabled) return true;
@@ -54,12 +54,13 @@ Item {
             if (checkable) checked = !checked
             root.clicked();
         }
-        onPressed: root.pressed()
-        onReleased: root.released()
+        onPressed: { root.pressed(); pressing = true; }
+        onReleased: { root.released(); pressing = false; }
         onPressAndHold: root.pressAndHold()
     }
 
-    property bool notIconButton: false
+    property bool pressing: false
+    property bool iconButton: true
     property color pressedColor: "#15000000"
     property alias text: text
     property alias base: base

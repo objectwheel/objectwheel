@@ -15,7 +15,7 @@ Item {
 
     Image {
         id: welcomeTextImage
-        source: "images/welcome.png"
+        source: "qrc:///resources/images/welcome.png"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: welcomeImage.bottom
         anchors.topMargin: Fit.fit(10)
@@ -25,7 +25,7 @@ Item {
 
     Image {
         id: versionTextImage
-        source: "images/version.png"
+        source: "qrc:///resources/images/version.png"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: welcomeTextImage.bottom
         anchors.topMargin: Fit.fit(15)

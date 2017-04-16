@@ -61,7 +61,6 @@
         <file>resources/fonts/LiberationMono-Regular.ttf</file>
         <file>resources/images/pagesbuttonfilled.png</file>
         <file>resources/images/pagesbutton.png</file>
-        <file>resources/images/aboutus.png</file>
         <file>resources/qmls/FancyButton.qml</file>
         <file>resources/qmls/filemanager.js</file>
         <file>resources/qmls/delaycaller.js</file>
@@ -127,26 +126,6 @@
         <file>resources/qmls/projectsScreen/ProjectList.qml</file>
         <file>resources/qmls/projectsScreen/ProjectSettings.qml</file>
         <file>resources/qmls/projectsScreen/ProjectsPage.qml</file>
-        <file>resources/qmls/projectsScreen/images/cancel.png</file>
-        <file>resources/qmls/projectsScreen/images/cancel@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/fileicon.png</file>
-        <file>resources/qmls/projectsScreen/images/fileicon@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/info.png</file>
-        <file>resources/qmls/projectsScreen/images/info@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/load.png</file>
-        <file>resources/qmls/projectsScreen/images/load@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/new.png</file>
-        <file>resources/qmls/projectsScreen/images/new@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/ok.png</file>
-        <file>resources/qmls/projectsScreen/images/ok@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/projectsettings.png</file>
-        <file>resources/qmls/projectsScreen/images/projectsettings@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/unload.png</file>
-        <file>resources/qmls/projectsScreen/images/unload@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/version.png</file>
-        <file>resources/qmls/projectsScreen/images/version@2x.png</file>
-        <file>resources/qmls/projectsScreen/images/welcome.png</file>
-        <file>resources/qmls/projectsScreen/images/welcome@2x.png</file>
         <file>resources/images/logo@2x.png</file>
         <file>resources/images/loading@2x.png</file>
         <file>resources/images/studioSceneIcon.png</file>
@@ -156,5 +135,45 @@
         <file>resources/images/projectsSceneIcon@2x.png</file>
         <file>resources/images/studioSceneIcon@2x.png</file>
         <file>resources/images/play.png</file>
+        <file>resources/images/cancel.png</file>
+        <file>resources/images/cancel@2x.png</file>
+        <file>resources/images/fileicon.png</file>
+        <file>resources/images/fileicon@2x.png</file>
+        <file>resources/images/info.png</file>
+        <file>resources/images/info@2x.png</file>
+        <file>resources/images/load.png</file>
+        <file>resources/images/load@2x.png</file>
+        <file>resources/images/new.png</file>
+        <file>resources/images/new@2x.png</file>
+        <file>resources/images/ok.png</file>
+        <file>resources/images/ok@2x.png</file>
+        <file>resources/images/projectsettings.png</file>
+        <file>resources/images/projectsettings@2x.png</file>
+        <file>resources/images/unload.png</file>
+        <file>resources/images/unload@2x.png</file>
+        <file>resources/images/version.png</file>
+        <file>resources/images/version@2x.png</file>
+        <file>resources/images/welcome.png</file>
+        <file>resources/images/welcome@2x.png</file>
+        <file>resources/images/aboutus.png</file>
+        <file>resources/images/aboutus@2x.png</file>
+        <file>resources/images/complete.gif</file>
+        <file>resources/images/complete@2x.gif</file>
+        <file>resources/images/find.png</file>
+        <file>resources/images/find@2x.png</file>
+        <file>resources/images/key.png</file>
+        <file>resources/images/key@2x.png</file>
+        <file>resources/images/login.png</file>
+        <file>resources/images/login@2x.png</file>
+        <file>resources/images/objectwheel.png</file>
+        <file>resources/images/objectwheel@2x.png</file>
+        <file>resources/images/registration.png</file>
+        <file>resources/images/registration@2x.png</file>
+        <file>resources/qmls/loginScreen/LoginButton.qml</file>
+        <file>resources/qmls/loginScreen/LoginScreen.qml</file>
+        <file>resources/qmls/loginScreen/main.qml</file>
+        <file>resources/qmls/loginScreen/PopupScreen.qml</file>
+        <file>resources/qmls/loginScreen/RegistrationComplete.qml</file>
+        <file>resources/qmls/loginScreen/RegistrationScreen.qml</file>
     </qresource>
 </RCC>

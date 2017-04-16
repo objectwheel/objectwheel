@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.0
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.0
 import "../fit.js" as Fit
@@ -16,7 +17,7 @@ Item {
         height: Fit.fit(40)
         Image {
             id: projectsettingsTextImage
-            source: "qrc:///resources/images/projectsettings.png"
+            source: "qrc:///resources/images/registration.png"
             anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter }
             fillMode: Image.PreserveAspectFit
             height: Fit.fit(16)
@@ -104,7 +105,7 @@ Item {
                 cursorShape: btnCancel.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onPressed: btnCancel.glow()
                 onReleased: btnCancel.unglow()
-                onClicked: btnCancel.enabled ? btnCancel.clicked() : 0
+                onClicked: btnCancel.clicked()
             }
         }
         Item {
@@ -190,7 +191,67 @@ Item {
                 cursorShape: btnOk.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onPressed: btnOk.glow()
                 onReleased: btnOk.unglow()
-                onClicked: btnOk.enabled ? btnOk.clicked() : 0
+                onClicked: {
+                    if (firstnameTextInput.text === '' ||
+                            lastnameTextInput.text === '' ||
+                            emailTextInput.text === '' ||
+                            passwordTextInput.text === '') {
+                        warningText.text = "Please fill all required fields."
+                        warning.show()
+                    } else if (passwordTextInput.text !== passwordTextInput2.text) {
+                        warningText.text = "Passwords do not match."
+                        warning.show()
+                    } else if (emailTextInput.text !== emailTextInput2.text) {
+                        warningText.text = "Emails do not match."
+                        warning.show()
+                    } else if (!validateEmail(emailTextInput.text)) {
+                        warningText.text = "Please make sure your email\naddress is correct."
+                        warning.show()
+                    } else if (!validatePassword(passwordTextInput.text)) {
+                        warningText.text = "Please make sure your password's length\nis in between 6 and 20."
+                        warning.show()
+                    } else {
+                        var url = "http://139.59.149.173/api/v1/registration/register";
+                        var body = {
+                            first: firstnameTextInput.text,
+                            last: lastnameTextInput.text,
+                            email: emailTextInput.text,
+                            pw: passwordTextInput.text,
+                            country: countryTextInput.text,
+                            company: companyTextInput.text,
+                            title: titleTextInput.text,
+                            phone: phoneTextInput.text
+                        }
+                        var http = new XMLHttpRequest();
+                        http.open("POST", url, true);
+                        http.setRequestHeader("content-type", "application/json");
+                        http.onreadystatechange = function() {
+                            if(http.readyState == 4 && http.status == 200) {
+                                var data = JSON.parse(http.responseText);
+                                if (data.result === 'OK') {
+                                    firstnameTextInput.text = ""
+                                    lastnameTextInput.text = ""
+                                    emailTextInput.text = ""
+                                    emailTextInput2.text = ""
+                                    passwordTextInput.text = ""
+                                    passwordTextInput2.text = ""
+                                    countryTextInput.text = ""
+                                    companyTextInput.text = ""
+                                    titleTextInput.text = ""
+                                    phoneTextInput.text = ""
+                                    btnOk.clicked()
+                                } else {
+                                    warningText.text = "Given email address has already been\nused. Please check your mailbox\nfor verification, or try to login."
+                                    warning.show()
+                                }
+                            } else if (http.status != 200) {
+                                warningText.text = "Please check your\ninternet connection"
+                                warning.show()
+                            }
+                        }
+                        http.send(JSON.stringify(body));
+                    }
+                }
             }
         }
         Rectangle {
@@ -207,16 +268,15 @@ Item {
         anchors { top: title.bottom; bottom: parent.bottom; right: parent.right; left:parent.left; }
         ScrollBar.vertical: ScrollBar { }
         contentWidth: width
-        contentHeight: projectnameContainer.height + descriptionContainer.height +
-                       orgnameContainer.height + orgIdentContainer.height +
-                       projectIdentContainer.height + crDateContainer.height +
-                       ownerContainer.height + sizeContainer.height +
-                       mfDateContainer.height + projectVersionContainer.height +
-                       delProjectContainer.height + imExProjectContainer.height
+        contentHeight: firstnameContainer.height + lastnameContainer.height +
+                       emailContainer.height + passwordContainer.height +
+                       emailContainer2.height + passwordContainer2.height +
+                       countryContainer.height + companyContainer.height +
+                       titleContainer.height + phoneContainer.height
         Column {
             anchors.fill: parent
             Rectangle {
-                id: projectnameContainer
+                id: firstnameContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 height: Fit.fit(40)
@@ -226,50 +286,15 @@ Item {
                     anchors.fill: parent
                     anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
-                        id: projectnameTitle
-                        text: "Project Name"
+                        id: firstnameTitle
+                        text: "First Name*"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
                     TextArea {
-                        id: projectnameTextInput
-                        clip: true
-                        selectByKeyboard: true
-                        selectByMouse: true
-                        frameVisible: false
-                        backgroundVisible: false
-                        inputMethodHints: Qt.ImhNoPredictiveText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        verticalAlignment: TextArea.AlignVCenter
-                        horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                        onTextChanged: projectIdentContainer.update()
-                    }
-                }
-            }
-            Rectangle {
-                id: descriptionContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "transparent"
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: descriptionTitle
-                        text: "Description"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    TextArea {
-                        id: descriptionTextInput
+                        id: firstnameTextInput
                         clip: true
                         selectByKeyboard: true
                         selectByMouse: true
@@ -285,25 +310,25 @@ Item {
                 }
             }
             Rectangle {
-                id: orgnameContainer
+                id: lastnameContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 height: Fit.fit(40)
-                color: "#07000000"
-                border.color: "#14000000"
+                color: "transparent"
+
                 RowLayout {
                     anchors.fill: parent
                     anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
-                        id: orgnameTitle
-                        text: "Organization Name"
+                        id: lastnameTitle
+                        text: "Last Name*"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
                     TextArea {
-                        id: orgnameTextInput
+                        id: lastnameTextInput
                         clip: true
                         selectByKeyboard: true
                         selectByMouse: true
@@ -319,7 +344,120 @@ Item {
                 }
             }
             Rectangle {
-                id: orgIdentContainer
+                id: emailContainer
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                height: Fit.fit(40)
+                color: "#07000000"
+                border.color: "#14000000"
+                RowLayout {
+                    anchors.fill: parent
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
+                    Text {
+                        id: emailTitle
+                        text: "Email*"
+                        font.bold: true
+                        font.pixelSize: Fit.fit(13)
+                        verticalAlignment: Text.AlignVCenter
+                        Layout.fillHeight: true
+                    }
+                    TextField {
+                        id: emailTextInput
+                        clip: true
+                        validator: RegExpValidator { regExp: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/ }
+                        selectByMouse: true
+                        inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhEmailCharactersOnly
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
+                        font.pixelSize: Fit.fit(13)
+                        style: TextFieldStyle {
+                            background: Rectangle {
+                                radius: 2
+                                color: "transparent"
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: emailContainer2
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                height: Fit.fit(40)
+                color: "transparent"
+                RowLayout {
+                    anchors.fill: parent
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
+                    Text {
+                        id: emailTitle2
+                        text: "Confirm Email*"
+                        font.bold: true
+                        font.pixelSize: Fit.fit(13)
+                        verticalAlignment: Text.AlignVCenter
+                        Layout.fillHeight: true
+                    }
+                    TextField {
+                        id: emailTextInput2
+                        clip: true
+                        validator: RegExpValidator { regExp: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/ }
+                        selectByMouse: true
+                        inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhEmailCharactersOnly
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
+                        font.pixelSize: Fit.fit(13)
+                        style: TextFieldStyle {
+                            background: Rectangle {
+                                radius: 2
+                                color: "transparent"
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: passwordContainer
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                height: Fit.fit(40)
+                color: "#07000000"
+                border.color: "#14000000"
+                RowLayout {
+                    anchors.fill: parent
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
+                    Text {
+                        id: passwordTitle
+                        text: "Password*"
+                        font.bold: true
+                        font.pixelSize: Fit.fit(13)
+                        verticalAlignment: Text.AlignVCenter
+                        Layout.fillHeight: true
+                    }
+                    TextField {
+                        id: passwordTextInput
+                        validator: RegExpValidator { regExp: /^[><{}\[\]*!@\-#$%^&+=~\.\,\:a-zA-Z0-9]{6,25}$/ }
+                        selectByMouse: true
+                        echoMode: TextInput.Password
+                        inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
+                        font.pixelSize: Fit.fit(13)
+                        style: TextFieldStyle {
+                            background: Rectangle {
+                                radius: 2
+                                color: "transparent"
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: passwordContainer2
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 height: Fit.fit(40)
@@ -329,15 +467,53 @@ Item {
                     anchors.fill: parent
                     anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
-                        id: orgIdentTitle
-                        text: "Organization Identifier"
+                        id: passwordTitle2
+                        text: "Confirm Password*"
+                        font.bold: true
+                        font.pixelSize: Fit.fit(13)
+                        verticalAlignment: Text.AlignVCenter
+                        Layout.fillHeight: true
+                    }
+                    TextField {
+                        id: passwordTextInput2
+                        validator: RegExpValidator { regExp: /^[><{}\[\]*!@\-#$%^&+=~\.\,\:a-zA-Z0-9]{6,25}$/ }
+                        selectByMouse: true
+                        echoMode: TextInput.Password
+                        inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
+                        font.pixelSize: Fit.fit(13)
+                        style: TextFieldStyle {
+                            background: Rectangle {
+                                radius: 2
+                                color: "transparent"
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: countryContainer
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                height: Fit.fit(40)
+                color: "#07000000"
+                border.color: "#14000000"
+                RowLayout {
+                    anchors.fill: parent
+                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
+                    Text {
+                        id: countryTitle
+                        text: "Country"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
                     TextArea {
-                        id: orgIdentTextInput
+                        id: countryTextInput
                         clip: true
                         selectByKeyboard: true
                         selectByMouse: true
@@ -349,30 +525,28 @@ Item {
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
-                        onTextChanged: projectIdentContainer.update()
                     }
                 }
             }
             Rectangle {
-                id: projectVersionContainer
+                id: companyContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 height: Fit.fit(40)
-                color: "#07000000"
-                border.color: "#14000000"
+                color: "transparent"
                 RowLayout {
                     anchors.fill: parent
                     anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
-                        id: projectVersionTitle
-                        text: "Project Version"
+                        id: companyTitle
+                        text: "Company"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
                     TextArea {
-                        id: projectVersionTextInput
+                        id: companyTextInput
                         clip: true
                         selectByKeyboard: true
                         selectByMouse: true
@@ -388,40 +562,7 @@ Item {
                 }
             }
             Rectangle {
-                id: projectIdentContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "transparent"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: projectIdentTitle
-                        text: "Project Identifier"
-                        font.pixelSize: Fit.fit(13)
-                        font.bold: true
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    Text {
-                        id: projectIdentText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        font.underline: true
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                    }
-                }
-                function update() {
-                    var projectNameText = projectnameTextInput.text.replace(/\s+/g, "-")
-                    var orgIdentText = orgIdentTextInput.text.replace(/\s+/g, "-")
-                    projectIdentText.text = orgIdentText + "." + projectNameText
-                }
-            }
-            Rectangle {
-                id: ownerContainer
+                id: titleContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 height: Fit.fit(40)
@@ -431,274 +572,31 @@ Item {
                     anchors.fill: parent
                     anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
-                        id: ownerTitle
-                        text: "Owner"
+                        id: titleTitle
+                        text: "Title"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
-                    Text {
-                        id: ownerText
+                    TextArea {
+                        id: titleTextInput
+                        clip: true
+                        selectByKeyboard: true
+                        selectByMouse: true
+                        frameVisible: false
+                        backgroundVisible: false
+                        inputMethodHints: Qt.ImhNoPredictiveText
                         Layout.fillHeight: true
                         Layout.fillWidth: true
-                        font.underline: true
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
                 }
             }
             Rectangle {
-                id: crDateContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "transparent"
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: crDateTitle
-                        text: "Creation Date"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    Text {
-                        id: crDateText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        font.underline: true
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                    }
-                }
-            }
-            Rectangle {
-                id: mfDateContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "#07000000"
-                border.color: "#14000000"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: mfDateTitle
-                        text: "Last Modification Date"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    Text {
-                        id: mfDateText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        font.underline: true
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                    }
-                }
-            }
-            Rectangle {
-                id: sizeContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "transparent"
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: sizeTitle
-                        text: "Size On Disk"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    Text {
-                        id: sizeText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        font.underline: true
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                    }
-                }
-            }
-            Rectangle {
-                id: imExProjectContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "#07000000"
-                border.color: "#14000000"
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: imExProjectTitle
-                        text: "Import/Export Project"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    Item { Layout.fillWidth: true; Layout.fillHeight: true; }
-                    Item {
-                        id: btnImExOutCont
-                        width: Fit.fit(160)
-                        height: Fit.fit(28)
-                        Item {
-                            id: btnImExInCont
-                            anchors.fill: parent
-                            visible: false
-
-                            Rectangle {
-                                id: btnImExLeft
-                                anchors { left: parent.left; top: parent.top; bottom: parent.bottom}
-                                width: parent.width / 2.0
-                                visible: false
-                                gradient: Gradient {
-                                    GradientStop { position: 0.0; color: "#C55DFF" }
-                                    GradientStop { position: 1.0; color: "#A336FF" }
-                                }
-                                Row {
-                                    anchors.centerIn: parent
-                                    spacing: Fit.fit(6)
-                                    Text {
-                                        text: "Import"
-                                        color: "white"
-                                        verticalAlignment: Text.AlignVCenter
-                                        height: btnImExImgLeft.height
-                                        font.pixelSize: Fit.fit(13)
-                                    }
-                                    Image {
-                                        id: btnImExImgLeft
-                                        source: "qrc:///resources/images/load.png"
-                                        height: btnImExLeft.height - Fit.fit(14)
-                                        fillMode: Image.PreserveAspectFit
-                                    }
-                                }
-                                signal clicked();
-                                function glow() {
-                                    btnImExLeftOverlay.color = "#30000000"
-                                }
-                                function unglow() {
-                                    btnImExLeftOverlay.color = "#00ffffff"
-                                }
-                            }
-                            Rectangle {
-                                id: btnImExRight
-                                anchors { right: parent.right; top: parent.top; bottom: parent.bottom}
-                                width: parent.width / 2.0
-                                visible: false
-                                gradient: Gradient {
-                                    GradientStop { position: 0.0; color: "#5bc5f8" }
-                                    GradientStop { position: 1.0; color: "#2491f9" }
-                                }
-                                Row {
-                                    anchors.centerIn: parent
-                                    spacing: Fit.fit(6)
-                                    Image {
-                                        id: btnImExRightImg
-                                        source: "qrc:///resources/images/unload.png"
-                                        height: btnImExRight.height - Fit.fit(14)
-                                        fillMode: Image.PreserveAspectFit
-                                    }
-                                    Text {
-                                        text: "Export"
-                                        color: "white"
-                                        verticalAlignment: Text.AlignVCenter
-                                        height: btnImExRightImg.height
-                                        font.pixelSize: Fit.fit(13)
-                                    }
-                                }
-                                signal clicked();
-                                function glow() {
-                                    btnImExRightOverlay.color = "#30000000"
-                                }
-                                function unglow() {
-                                    btnImExRightOverlay.color = "#00ffffff"
-                                }
-                            }
-
-                            ColorOverlay {
-                                id: btnImExRightOverlay
-                                anchors.fill: btnImExRight
-                                source: btnImExRight
-                                color: "#00ffffff"
-                            }
-                            ColorOverlay {
-                                id: btnImExLeftOverlay
-                                anchors.fill: btnImExLeft
-                                source: btnImExLeft
-                                color: "#00ffffff"
-                            }
-                        }
-                        Rectangle {
-                            id: btnImExMask;
-                            anchors.fill: parent;
-                            radius: Fit.fit(6);
-                            visible: false;
-                        }
-                        OpacityMask {
-                            id: btnImExOpMask
-                            visible: false
-                            anchors.fill: btnImExInCont
-                            source: btnImExInCont
-                            maskSource: btnImExMask
-                        }
-                        DropShadow {
-                            anchors.fill: btnImExOpMask
-                            horizontalOffset: 0
-                            verticalOffset: Fit.fit(1)
-                            radius: Fit.fit(6.0)
-                            samples: Fit.fit(14)
-                            color: "#80000000"
-                            source: btnImExOpMask
-                        }
-                        Rectangle {
-                            width: Fit.fit(1)
-                            anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; bottom: parent.bottom}
-                            color: "#30545454"
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: {
-                                if (mouseX < parent.width / 2.0 && btnImExLeft.enabled) Qt.PointingHandCursor
-                                else if (mouseX >= parent.width / 2.0 && btnImExRight.enabled) Qt.PointingHandCursor
-                                else Qt.ArrowCursor
-                            }
-                            onPressed: {
-                                if (mouse.x < parent.width / 2.0 && btnImExLeft.enabled) btnImExLeft.glow()
-                                else if (mouse.x >= parent.width / 2.0 && btnImExRight.enabled) btnImExRight.glow()
-                            }
-                            onReleased: {
-                                btnImExLeft.unglow(); btnImExRight.unglow()
-                            }
-                            onClicked: {
-                                if (mouse.x < parent.width / 2.0 && btnImExLeft.enabled) btnImExLeft.clicked()
-                                else if (mouse.x >= parent.width / 2.0 && btnImExRight.enabled) btnImExRight.clicked()
-                            }
-                        }
-                    }
-                }
-            }
-            Rectangle {
-                id: delProjectContainer
+                id: phoneContainer
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 height: Fit.fit(40)
@@ -707,92 +605,26 @@ Item {
                     anchors.fill: parent
                     anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
                     Text {
-                        id: delProjectTitle
-                        text: "Delete Project"
+                        id: phoneTitle
+                        text: "Phone"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
-                    Item { Layout.fillWidth: true; Layout.fillHeight: true; }
-                    Item {
-                        id: btnDelProjectOutCont
-                        width: Fit.fit(80)
-                        height: Fit.fit(28)
-                        Item {
-                            id: btnDelProjectInCont
-                            anchors.fill: parent
-                            visible: false
-                            Rectangle {
-                                id: btnDelProject
-                                anchors.fill: parent
-                                visible: false
-                                gradient: Gradient {
-                                    GradientStop { position: 0.0; color: "#f2474a" }
-                                    GradientStop { position: 1.0; color: "#CB2023" }
-                                }
-                                Row {
-                                    anchors.centerIn: parent
-                                    spacing: Fit.fit(6)
-                                    Image {
-                                        id: btnDelProjectImg
-                                        source: "qrc:///resources/images/cancel.png"
-                                        height: btnDelProject.height - Fit.fit(14)
-                                        fillMode: Image.PreserveAspectFit
-                                    }
-                                    Text {
-                                        text: "Delete"
-                                        color: "white"
-                                        verticalAlignment: Text.AlignVCenter
-                                        height: btnDelProjectImg.height
-                                        font.pixelSize: Fit.fit(13)
-                                    }
-                                }
-                                signal clicked();
-                                function glow() {
-                                    btnDelProjectOverlay.color = "#30000000"
-                                }
-                                function unglow() {
-                                    btnDelProjectOverlay.color = "#00ffffff"
-                                }
-                            }
-                            ColorOverlay {
-                                id: btnDelProjectOverlay
-                                anchors.fill: btnDelProject
-                                source: btnDelProject
-                                color: "#00ffffff"
-                            }
-                        }
-                        Rectangle {
-                            id: btnDelProjectMask;
-                            anchors.fill: parent;
-                            radius: Fit.fit(6);
-                            visible: false;
-                        }
-                        OpacityMask {
-                            id: btnDelProjectOpMask
-                            visible: false
-                            anchors.fill: btnDelProjectInCont
-                            source: btnDelProjectInCont
-                            maskSource: btnDelProjectMask
-                        }
-                        DropShadow {
-                            anchors.fill: btnDelProjectOpMask
-                            horizontalOffset: 0
-                            verticalOffset: Fit.fit(1)
-                            radius: Fit.fit(6.0)
-                            samples: Fit.fit(14)
-                            color: "#80000000"
-                            source: btnDelProjectOpMask
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: btnDelProject.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            onPressed: btnDelProject.glow()
-                            onReleased: btnDelProject.unglow()
-                            onClicked: btnDelProject.enabled ? deleteProjectMessageDialog.visible = true : 0
-                        }
+                    TextArea {
+                        id: phoneTextInput
+                        clip: true
+                        selectByKeyboard: true
+                        selectByMouse: true
+                        frameVisible: false
+                        backgroundVisible: false
+                        inputMethodHints: Qt.ImhNoPredictiveText
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        verticalAlignment: TextArea.AlignVCenter
+                        horizontalAlignment: TextArea.AlignRight
+                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -802,7 +634,7 @@ Item {
         id: warning
         y: -height - Fit.fit(10)
         width: parent.width / 2.4
-        height: Fit.fit(55)
+        height: Fit.fit(65)
         anchors.horizontalCenter: parent.horizontalCenter
         Rectangle {
             id: base
@@ -825,8 +657,8 @@ Item {
             source: base
         }
         Text {
+            id: warningText
             font.pixelSize: Fit.fit(13)
-            text: "Please fill all the fields."
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             y: parent.height/2.0 -contentHeight/2.0 + Fit.fit(4)
@@ -849,33 +681,19 @@ Item {
         }
         function show() {
             y = -Fit.fit(10)
-            DelayCaller.delayCall(4000, function() {
+            DelayCaller.delayCall(5000, function() {
                 y = -height - Fit.fit(10)
             })
         }
     }
-    MessageDialog {
-        id: deleteProjectMessageDialog
-        title: "Do you want to continue?"
-        text: "This will delete the entire project and its content. You can not get this back."
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: btnDelProject.clicked()
-        icon: StandardIcon.Warning
+    function validatePassword(pw) {
+        var re = /^[><{}\[\]*!@\-#$%^&+=~\.\,\:a-zA-Z0-9]{6,25}$/
+        return re.test(pw);
     }
-    property alias warning: warning
-    property alias projectnameTextInput: projectnameTextInput
-    property alias descriptionTextInput: descriptionTextInput
-    property alias orgnameTextInput: orgnameTextInput
-    property alias orgIdentTextInput: orgIdentTextInput
-    property alias projectVersionTextInput: projectVersionTextInput
-    property alias projectIdentText: projectIdentText
-    property alias ownerText: ownerText
-    property alias crDateText: crDateText
-    property alias mfDateText: mfDateText
-    property alias sizeText: sizeText
-    property alias btnDelete: btnDelProject
-    property alias btnImport: btnImExLeft
-    property alias btnExport: btnImExRight
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return re.test(email);
+    }
     property alias btnOk: btnOk
     property alias btnCancel: btnCancel
 }

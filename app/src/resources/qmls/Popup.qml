@@ -26,7 +26,7 @@ Rectangle {
             text.text: "Cancel"
             text.font.bold: true
             text.color: "#0061ea"
-            notIconButton: true
+            iconButton: false
             Layout.preferredHeight: d.cancelButtonHeight
             Layout.fillWidth: true
             onClicked: close()
