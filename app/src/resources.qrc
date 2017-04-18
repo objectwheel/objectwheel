@@ -155,8 +155,6 @@
         <file>resources/images/version@2x.png</file>
         <file>resources/images/welcome.png</file>
         <file>resources/images/welcome@2x.png</file>
-        <file>resources/images/aboutus.png</file>
-        <file>resources/images/aboutus@2x.png</file>
         <file>resources/images/complete.gif</file>
         <file>resources/images/complete@2x.gif</file>
         <file>resources/images/find.png</file>
@@ -175,5 +173,7 @@
         <file>resources/qmls/loginScreen/PopupScreen.qml</file>
         <file>resources/qmls/loginScreen/RegistrationComplete.qml</file>
         <file>resources/qmls/loginScreen/RegistrationScreen.qml</file>
+        <file>resources/qmls/loginScreen/Toast.qml</file>
+        <file>resources/images/exit.png</file>
     </qresource>
 </RCC>

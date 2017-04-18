@@ -48,6 +48,7 @@ class MainWindow : public QWidget
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
         void on_playButton_clicked();
+        void on_secureExitButton_clicked();
 		void handleToolboxUrlboxChanges(const QString& text);
 		void handleToolboxNameboxChanges(QString name);
 		void toolboxEditButtonToggled(bool);

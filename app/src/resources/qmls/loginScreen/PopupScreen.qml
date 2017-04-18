@@ -44,8 +44,9 @@ Rectangle {
             duration: 500
             easing.type: Easing.OutExpo
         }
-        OpacityAnimator {
+        PropertyAnimation {
             id: animationForth2
+            property: "opacity"
             target: root
             from: 0
             to: 1
@@ -60,8 +61,9 @@ Rectangle {
             duration: 400
             easing.type: Easing.InExpo
         }
-        OpacityAnimator {
+        PropertyAnimation {
             id: animationBack2
+            property: "opacity"
             target: root
             from: 1
             to: 0

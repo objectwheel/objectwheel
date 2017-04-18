@@ -5,8 +5,10 @@ import QtQuick.Controls 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import "../fit.js" as Fit
+import "../"
 
 Column {
+    id: root
     spacing: Fit.fit(12)
     Image {
         id: welcomeImage
@@ -84,8 +86,15 @@ Column {
                     horizontalAlignment: TextArea.AlignRight
                     font.pixelSize: Fit.fit(13)
                     Layout.rightMargin: Fit.fit(10)
+                    Keys.onReturnPressed: {
+                        var json = {
+                            email: emailTextInput.text,
+                            password: passwordTextInput.text
+                        }
+                        loginButton.loginButtonClicked(JSON.stringify(json))
+                    }
                     style: TextFieldStyle {
-                        textColor: "#e0000000"
+                        textColor: "#2E3A41"
                         background: Rectangle {
                             radius: 2
                             color: "transparent"
@@ -137,8 +146,15 @@ Column {
                     horizontalAlignment: TextArea.AlignRight
                     font.pixelSize: Fit.fit(13)
                     Layout.rightMargin: Fit.fit(10)
+                    Keys.onReturnPressed: {
+                        var json = {
+                            email: emailTextInput.text,
+                            password: passwordTextInput.text
+                        }
+                        loginButton.loginButtonClicked(JSON.stringify(json))
+                    }
                     style: TextFieldStyle {
-                        textColor: "#e0000000"
+                        textColor: "#2E3A41"
                         background: Rectangle {
                             radius: 2
                             color: "transparent"
@@ -244,7 +260,7 @@ Column {
                 verticalAlignment: Text.AlignVCenter
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                color: "#4E5051"
+                color: "#2E3A41"
             }
         }
     }
@@ -279,7 +295,6 @@ Column {
         height: Fit.fit(28)
         width: Fit.fit(300)
         loginButtonDisabled: !validateEmail(emailTextInput.text) || !validatePassword(passwordTextInput.text)
-        onLoginButtonClicked: animateWrongPass()
     }
     FancyButton {
         id: infoButton
@@ -288,9 +303,12 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         height: width
         width: Fit.fit(25)
-        onClicked: popup.show()
+        onClicked: {
+            popup.contentItem = popupContent
+            popup.show()
+        }
     }
-    Component.onCompleted: popup.contentItem = ctx.createObject(null)
+    Component.onCompleted: popupContent = ctx.createObject(null)
     Component {
         id: ctx
         Item {
@@ -312,13 +330,14 @@ Column {
             FancyButton {
                 id: lostPassButton
                 text.text: "Lost your password?"
-                text.color: "#4E5051"
+                text.color: "#2E3A41"
                 text.font.pixelSize: Fit.fit(13)
                 width: parent.width
                 height: (parent.height - img.height - padder.height) / 2
                 anchors.top: img.bottom
                 iconButton: false
                 base.color: pressing ? "#20000000" : "transparent"
+                onClicked: popup.hide()
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
                     x: Fit.fit(35)
@@ -326,6 +345,7 @@ Column {
                     height: Fit.fit(16)
                     fillMode: Image.PreserveAspectFit
                 }
+                Component.onCompleted: root.lostPassButton = lostPassButton
             }
             Rectangle {
                 id: line
@@ -337,20 +357,22 @@ Column {
             FancyButton {
                 id: aboutButton
                 text.text: "About Objectwheel"
-                text.color: "#4E5051"
+                text.color: "#2E3A41"
                 text.font.pixelSize: Fit.fit(13)
                 width: parent.width
                 height: (parent.height - img.height - padder.height) / 2
                 anchors.top: line.bottom
                 iconButton: false
                 base.color: "transparent"
+                onClicked: popup.hide()
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
                     x: Fit.fit(40)
-                    source: "qrc:///resources/images/aboutus.png"
+                    source: "qrc:///resources/images/aboutSceneIcon.png"
                     height: Fit.fit(16)
                     fillMode: Image.PreserveAspectFit
                 }
+                Component.onCompleted: root.aboutButton = aboutButton
             }
             Rectangle {
                 id: shadow
@@ -389,16 +411,26 @@ Column {
     function animateWrongPass() {
         if (wrongPassAnim.running) return
         wrongPassAnim.restart()
+        emailLabel.color = "#45000000"
+        passwordLabel.color = "#45000000"
         colorAnim.target = passwordLabel
         colorAnim.restart()
     }
     function animateWrongEmail() {
         if (wrongEmailAnim.running) return
         wrongEmailAnim.restart()
+        emailLabel.color = "#45000000"
+        passwordLabel.color = "#45000000"
         colorAnim.target = emailLabel
         colorAnim.restart()
     }
+    property alias emailTextInput : emailTextInput
+    property alias passwordTextInput : passwordTextInput
     property alias loginButton : loginButton
+    property alias autologinSwitch: autologinSwitch
+    property var aboutButton
+    property var lostPassButton
     property var popup
+    property var popupContent
     property string logoPath
 }

@@ -55,8 +55,8 @@ Item {
             width: parent.width / 2.0
             visible: false
             gradient: Gradient {
-                GradientStop { position: 0.0; color: loginButtonDisabled ? "#888888" : "#8bbb56" }
-                GradientStop { position: 1.0; color: loginButtonDisabled ? "#656565" : "#6d9f45" }
+                GradientStop { position: 0.0; color: loginButtonDisabled ? Qt.lighter("#707477", 1.2) : "#8bbb56" }
+                GradientStop { position: 1.0; color: loginButtonDisabled ? "#707477" : "#6d9f45" }
             }
             Row {
                 anchors.centerIn: parent
@@ -129,7 +129,13 @@ Item {
         }
         onClicked: {
             if (mouse.x < parent.width / 2.0) signupButtonClicked()
-            else if (!loginButtonDisabled) loginButtonClicked()
+            else if (!loginButtonDisabled) {
+                var json = {
+                    email: emailTextInput.text,
+                    password: passwordTextInput.text
+                }
+                loginButtonClicked(JSON.stringify(json))
+            }
         }
     }
     Rectangle {
@@ -139,5 +145,5 @@ Item {
     }
     property bool loginButtonDisabled : false
     signal signupButtonClicked()
-    signal loginButtonClicked()
+    signal loginButtonClicked(var json)
 }

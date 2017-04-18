@@ -353,7 +353,7 @@ void MainWindow::SetupGui()
 	m_RightMenu->attachWidget(sceneListWidget);
 	QVBoxLayout* sceneListWidgetLayout = new QVBoxLayout(sceneListWidget);
 	sceneListWidgetLayout->setSpacing(fit(15));
-	sceneListWidgetLayout->setContentsMargins(0, 0, 0, 0);
+    sceneListWidgetLayout->setContentsMargins(0, 0, 0, fit(10));
 	QLabel* sceneListTitle = new QLabel(this);
 	sceneListTitle->setText("◉ Menu");
 	sceneListTitle->setAlignment(Qt::AlignCenter);
@@ -368,9 +368,23 @@ void MainWindow::SetupGui()
 	sceneListWidgetLayout->addWidget(sceneListTitle);
 	sceneListWidgetLayout->addWidget(m_d->sceneList);
 
+    auto secureExitButton = new FlatButton(sceneListWidget);
+    secureExitButton->setObjectName(QStringLiteral("secureExitButton"));
+    secureExitButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    secureExitButton->setMinimumSize(fit(150), fit(35));
+    secureExitButton->setMaximumSize(fit(150), fit(35));
+    secureExitButton->setText("Secure Exit");
+    secureExitButton->setColor(QColor("#2b5796"));
+    secureExitButton->setCheckedColor(QColor("#1e8145"));
+    secureExitButton->setTextColor(Qt::white);
+    secureExitButton->setIcon(QIcon(":/resources/images/exit.png"));
+    sceneListWidgetLayout->addWidget(secureExitButton);
+    sceneListWidgetLayout->setAlignment(secureExitButton, Qt::AlignHCenter);
+    connect(secureExitButton, SIGNAL(clicked(bool)), this, SLOT(on_secureExitButton_clicked()));
+
 	// Init Splash Screen
 	SplashScreen::init(this);
-	SplashScreen::setText("Decrypting user files");
+    SplashScreen::setText("Loading");
 	SplashScreen::setTextColor("#2e3a41");
 	SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
 	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
@@ -393,8 +407,9 @@ void MainWindow::SetupManagers()
 	sceneManager->setSceneListWidget(m_d->sceneList);
 	sceneManager->addScene("studioScene", m_d->centralWidget);
     sceneManager->addScene("projectsScene", m_d->projectsScreen);
+    sceneManager->addScene("loginScene", m_d->loginScreen);
     sceneManager->addScene("aboutScene", m_d->aboutWidget);
-    sceneManager->setCurrent("projectsScene", false);
+    sceneManager->setCurrent("loginScene", false);
 	SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
@@ -417,20 +432,25 @@ void MainWindow::SetupManagers()
 			sceneName = "Studio";
 		} else if (scene == "aboutScene") {
 			sceneName = "About";
-		}
+        } else if (scene == "loginScene") {
+            continue;
+        }
 		urls << scene;
 		QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), sceneName);
 		m_d->sceneList->insertItem(0, item);
 		m_d->sceneList->AddUrls(item, urls);
-	}
+    }
+    connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
 
-	userManager->buildNewUser("kozmon@hotmail.com"); //build new user if doesn't exist already
-	auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession),
-					  QString("kozmon@hotmail.com"), QString("password123")); //unlock user session
-	while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 50);
-	connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
-	m_d->projectsScreen->refreshProjectList();
-	SplashScreen::hide();
+    auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
+    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+    if (ret.result()) {
+        ProjectsScreen::refreshProjectList();
+        SplashScreen::hide();
+        SceneManager::show("projectsScene", SceneManager::ToLeft);
+    } else {
+        SplashScreen::hide();
+    }
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
@@ -905,6 +925,18 @@ void MainWindow::on_playButton_clicked()
         SceneManager::removeScene("playScene");
         SceneManager::setCurrent("studioScene");
     });
+}
+
+void MainWindow::on_secureExitButton_clicked()
+{
+    SplashScreen::setText("Encrypting user data.. stopping session");
+    SplashScreen::show(true);
+    UserManager::clearAutoLogin();
+    auto ret = QtConcurrent::run(&UserManager::stopUserSession);
+    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+    SplashScreen::hide();
+    SplashScreen::setText("Loading");
+    SceneManager::show("loginScene", SceneManager::ToLeft);
 }
 
 void MainWindow::handleToolboxUrlboxChanges(const QString& text)

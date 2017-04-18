@@ -12,6 +12,7 @@
 #include <scenemanager.h>
 #include <filemanager.h>
 
+ProjectsScreen* instance = nullptr;
 QQuickItem* swipeView;
 QQuickItem* projectsPage;
 QQuickItem* projectSettings;
@@ -39,6 +40,8 @@ ProjectListModel model;
 ProjectsScreen::ProjectsScreen(QWidget *parent)
 	: QQuickWidget(parent)
 {
+    if (::instance) return;
+    ::instance = this;
 	rootContext()->setContextProperty("dpi", Fit::ratio());
 	setSource(QUrl("qrc:/resources/qmls/projectsScreen/main.qml"));
 	setResizeMode(SizeRootObjectToView);
@@ -75,7 +78,12 @@ ProjectsScreen::ProjectsScreen(QWidget *parent)
 
 	QVariant v;
 	v.setValue<ProjectListModel*>(&model);
-	listView->setProperty("model", v);
+    listView->setProperty("model", v);
+}
+
+ProjectsScreen* ProjectsScreen::instance()
+{
+    return ::instance;
 }
 
 void ProjectsScreen::handleNewButtonClicked()

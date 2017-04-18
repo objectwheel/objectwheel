@@ -13,6 +13,7 @@ class ProjectsScreen : public QQuickWidget
 		Q_OBJECT
 	public:
 		explicit ProjectsScreen(QWidget *parent = 0);
+        static ProjectsScreen* instance();
 
 	public slots:
 		void handleNewButtonClicked();
@@ -21,7 +22,7 @@ class ProjectsScreen : public QQuickWidget
 		void handleBtnCancelClicked();
 		void handleBtnDeleteClicked();
 		void handleBtnOkClicked();
-		void refreshProjectList(const QString& activeProject = QString());
+        static void refreshProjectList(const QString& activeProject = QString());
 };
 
 class ProjectListModel : public QAbstractListModel

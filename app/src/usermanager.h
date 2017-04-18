@@ -16,14 +16,20 @@ class UserManager : public QObject
 		static UserManager* instance();
 		static QString dataDirictory();
 		static QString userDirectory(const QString& username);
+        static void setAutoLogin(const QString& password);
+        static void clearAutoLogin();
+        static bool hasAutoLogin();
+        static bool tryAutoLogin();
 		static bool exists(const QString& username);
 		static bool buildNewUser(const QString& username);
 		static bool startUserSession(const QString& username, const QString& password);
+        static bool startUserSessionWithHash(const QString& username, const QByteArray& hash);
 		static QString currentSessionsUser();
         static QString currentSessionsToken();
 		static QString currentSessionsKey();
+        static QString generateToken(const QString& username, const QString& password);
 
-	public slots:
+    public slots:
 		static void stopUserSession();
 
 	private:

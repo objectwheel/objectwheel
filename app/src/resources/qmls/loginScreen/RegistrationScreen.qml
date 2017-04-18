@@ -210,7 +210,7 @@ Item {
                     } else if (!validatePassword(passwordTextInput.text)) {
                         warningText.text = "Please make sure your password's length\nis in between 6 and 20."
                         warning.show()
-                    } else {
+                    } else { //FIXME: http -> https | change ip with domain name
                         var url = "http://139.59.149.173/api/v1/registration/register";
                         var body = {
                             first: firstnameTextInput.text,
@@ -288,6 +288,7 @@ Item {
                     Text {
                         id: firstnameTitle
                         text: "First Name*"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -296,6 +297,7 @@ Item {
                     TextArea {
                         id: firstnameTextInput
                         clip: true
+                        textColor: "#2E3A41"
                         selectByKeyboard: true
                         selectByMouse: true
                         frameVisible: false
@@ -322,6 +324,7 @@ Item {
                     Text {
                         id: lastnameTitle
                         text: "Last Name*"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -330,6 +333,7 @@ Item {
                     TextArea {
                         id: lastnameTextInput
                         clip: true
+                        textColor: "#2E3A41"
                         selectByKeyboard: true
                         selectByMouse: true
                         frameVisible: false
@@ -356,6 +360,7 @@ Item {
                     Text {
                         id: emailTitle
                         text: "Email*"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -364,6 +369,7 @@ Item {
                     TextField {
                         id: emailTextInput
                         clip: true
+                        textColor: "#2E3A41"
                         validator: RegExpValidator { regExp: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/ }
                         selectByMouse: true
                         inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhEmailCharactersOnly
@@ -393,6 +399,7 @@ Item {
                     Text {
                         id: emailTitle2
                         text: "Confirm Email*"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -401,6 +408,7 @@ Item {
                     TextField {
                         id: emailTextInput2
                         clip: true
+                        textColor: "#2E3A41"
                         validator: RegExpValidator { regExp: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/ }
                         selectByMouse: true
                         inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhEmailCharactersOnly
@@ -431,6 +439,7 @@ Item {
                     Text {
                         id: passwordTitle
                         text: "Password*"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -438,6 +447,7 @@ Item {
                     }
                     TextField {
                         id: passwordTextInput
+                        textColor: "#2E3A41"
                         validator: RegExpValidator { regExp: /^[><{}\[\]*!@\-#$%^&+=~\.\,\:a-zA-Z0-9]{6,25}$/ }
                         selectByMouse: true
                         echoMode: TextInput.Password
@@ -469,6 +479,7 @@ Item {
                     Text {
                         id: passwordTitle2
                         text: "Confirm Password*"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -476,6 +487,7 @@ Item {
                     }
                     TextField {
                         id: passwordTextInput2
+                        textColor: "#2E3A41"
                         validator: RegExpValidator { regExp: /^[><{}\[\]*!@\-#$%^&+=~\.\,\:a-zA-Z0-9]{6,25}$/ }
                         selectByMouse: true
                         echoMode: TextInput.Password
@@ -507,6 +519,7 @@ Item {
                     Text {
                         id: countryTitle
                         text: "Country"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -515,6 +528,7 @@ Item {
                     TextArea {
                         id: countryTextInput
                         clip: true
+                        textColor: "#2E3A41"
                         selectByKeyboard: true
                         selectByMouse: true
                         frameVisible: false
@@ -540,6 +554,7 @@ Item {
                     Text {
                         id: companyTitle
                         text: "Company"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -548,6 +563,7 @@ Item {
                     TextArea {
                         id: companyTextInput
                         clip: true
+                        textColor: "#2E3A41"
                         selectByKeyboard: true
                         selectByMouse: true
                         frameVisible: false
@@ -574,6 +590,7 @@ Item {
                     Text {
                         id: titleTitle
                         text: "Title"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -582,6 +599,7 @@ Item {
                     TextArea {
                         id: titleTextInput
                         clip: true
+                        textColor: "#2E3A41"
                         selectByKeyboard: true
                         selectByMouse: true
                         frameVisible: false
@@ -607,6 +625,7 @@ Item {
                     Text {
                         id: phoneTitle
                         text: "Phone"
+                        color: "#2E3A41"
                         font.bold: true
                         font.pixelSize: Fit.fit(13)
                         verticalAlignment: Text.AlignVCenter
@@ -615,6 +634,7 @@ Item {
                     TextArea {
                         id: phoneTextInput
                         clip: true
+                        textColor: "#2E3A41"
                         selectByKeyboard: true
                         selectByMouse: true
                         frameVisible: false
@@ -662,7 +682,7 @@ Item {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             y: parent.height/2.0 -contentHeight/2.0 + Fit.fit(4)
-            color: "#302E30"
+            color: "#2E3A41"
 
             Text {
                 font.pixelSize: Fit.fit(16)

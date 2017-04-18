@@ -13,15 +13,18 @@ Rectangle {
         id: swipeView
         anchors.fill: parent
         interactive: false
+        clip: true
 
         Item {
             LoginScreen {
+                id: loginScreen
                 popup: popup
                 y: parent.height/2.0 - height/2.0 - Fit.fit(15)
                 x: parent.width/2.0 - width/2.0
                 logoPath: "qrc:///resources/images/logo.png"
                 loginButton.onSignupButtonClicked: swipeView.currentIndex = 1
             }
+            clip: true
         }
         RegistrationScreen {
             Component.onCompleted: {
@@ -33,6 +36,7 @@ Rectangle {
                     regCompleteScreen.animate()
                 })
             }
+            clip: true
         }
         RegistrationComplete {
             id: regCompleteScreen
@@ -41,6 +45,7 @@ Rectangle {
                     swipeView.currentIndex = 0
                 })
             }
+            clip: true
         }
     }
 
@@ -50,8 +55,16 @@ Rectangle {
         anchors.bottom: parent.bottom
         font.pixelSize: Fit.fit(13)
         font.bold: true
-        color: "#4E5051"
+        color: "#2E3A41"
         anchors.bottomMargin:  Fit.fit(2)
+        opacity: swipeView.currentIndex == 0
+        Behavior on opacity {
+            PropertyAnimation {}
+        }
+    }
+    Toast {
+        id: toast
+        anchors.fill: parent
     }
     PopupScreen {
         id: popup
@@ -62,5 +75,6 @@ Rectangle {
         base.color: "#D0D4D7"
         base.border.color: "#a0a4a7"
     }
-    Component.onCompleted: if (Qt.platform.os === 'android' || Qt.platform.os === 'ios' || Qt.platform.os === 'winphone') showFullScreen()
+    property alias toast: toast
+    property alias loginScreen: loginScreen
 }

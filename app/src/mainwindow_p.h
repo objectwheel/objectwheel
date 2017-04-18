@@ -36,6 +36,7 @@
 #include <QParallelAnimationGroup>
 #include <mainwindow.h>
 #include <projectsscreen.h>
+#include <loginscreen.h>
 
 #define DURATION 500
 
@@ -52,6 +53,7 @@ class MainWindowPrivate
 		MainWindow* parent;
 		QWidget* centralWidget;
 		ProjectsScreen* projectsScreen;
+        LoginScreen* loginScreen;
 		QVBoxLayout* verticalLayout;
 		TitleBar* titleBar;
 		QQuickWidget* designWidget;
@@ -118,6 +120,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	verticalLayout->addWidget(titleBar);
 
 	projectsScreen = new ProjectsScreen(MainWindow);
+    loginScreen = new LoginScreen(MainWindow);
 
 	designWidget = new QQuickWidget(centralWidget);
 	designWidget->setObjectName(QStringLiteral("designWidget"));

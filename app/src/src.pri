@@ -21,14 +21,15 @@ HEADERS                   += $$PWD/mainwindow.h \
 							 $$PWD/pageswidget.h \
 							 $$PWD/splashscreen.h \
 							 $$PWD/splashscreen_p.h \
-    $$PWD/usermanager.h \
-    $$PWD/savemanager.h \
-    $$PWD/projectmanager.h \
-    $$PWD/dirlocker.h \
-    $$PWD/zipper.h \
-    $$PWD/toolsmanager.h \
-    $$PWD/scenemanager.h \
-    $$PWD/projectsscreen.h
+                             $$PWD/usermanager.h \
+                             $$PWD/savemanager.h \
+                             $$PWD/projectmanager.h \
+                             $$PWD/dirlocker.h \
+                             $$PWD/zipper.h \
+                             $$PWD/toolsmanager.h \
+                             $$PWD/scenemanager.h \
+                             $$PWD/projectsscreen.h \
+                             $$PWD/loginscreen.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -51,14 +52,15 @@ SOURCES                   += $$PWD/main.cpp\
 							 $$PWD/pageswidget.cpp \
 							 $$PWD/splashscreen.cpp \
 							 $$PWD/splashscreen_p.cpp \
-    $$PWD/usermanager.cpp \
-    $$PWD/savemanager.cpp \
-    $$PWD/projectmanager.cpp \
-    $$PWD/dirlocker.cpp \
-    $$PWD/zipper.cpp \
-    $$PWD/toolsmanager.cpp \
-    $$PWD/scenemanager.cpp \
-    $$PWD/projectsscreen.cpp
+                             $$PWD/usermanager.cpp \
+                             $$PWD/savemanager.cpp \
+                             $$PWD/projectmanager.cpp \
+                             $$PWD/dirlocker.cpp \
+                             $$PWD/zipper.cpp \
+                             $$PWD/toolsmanager.cpp \
+                             $$PWD/scenemanager.cpp \
+                             $$PWD/projectsscreen.cpp \
+                             $$PWD/loginscreen.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

@@ -8,8 +8,9 @@
 #include <QApplication>
 #include <flatbutton.h>
 #include <scenemanager.h>
+#include <usermanager.h>
 
-#define TITLE_TEXT "<p><b>version</b> 1.589 <b>pbuild</b> ee30820<br>Sat Mar 25 01:00:00 2017 +0300<br></p>"
+#define TITLE_TEXT "<p><b>version</b> 1.590 <b>pbuild</b> 62c8eca<br>Tue Apr 18 06:50:20 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
 using namespace Fit;
@@ -80,7 +81,11 @@ AboutPrivate::AboutPrivate(QWidget* p)
     exitButton.show();
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
-        SceneManager::show("studioScene", SceneManager::ToRight);
+        if (UserManager::currentSessionsUser().isEmpty()) {
+            SceneManager::show("loginScene", SceneManager::ToRight);
+        } else {
+            SceneManager::show("studioScene", SceneManager::ToRight);
+        }
     });
 }
 

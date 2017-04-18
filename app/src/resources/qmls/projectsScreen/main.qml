@@ -10,30 +10,16 @@ Rectangle {
         id: swipeView
         anchors.fill: parent
         interactive: false
+        clip: true
         ProjectsPage {
             id: projectsPage
+            clip: true
             logoPath: "qrc:///resources/images/logo.png"
-            projectList.listView.model: ListModel {
-                ListElement {
-                    projectName: "Bill Smith"
-                    lastEdited: "555 3264"
-                    active: false
-                }
-                ListElement {
-                    projectName: "John Brown"
-                    lastEdited: "555 8426"
-                    active: true
-                }
-                ListElement {
-                    projectName: "Sam Wise"
-                    lastEdited: "555 0473"
-                    active: false
-                }
-            }
         }
 
         ProjectSettings {
             id: projectSettings
+            clip: true
         }
     }
 
