@@ -6,43 +6,72 @@
 #include <QGraphicsDropShadowEffect>
 #include <mainwindow.h>
 #include <QApplication>
+#include <QVariantAnimation>
+#include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
+#include <QTimer>
+#include <QDebug>
+#include <QtMath>
 
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
 #define MOBILE_FACTOR 1.3
 #else
 #define MOBILE_FACTOR 1.0
 #endif
-#define FIXED_SIZE (50.0 * (MOBILE_FACTOR))
-#define PEN_SIZE 1.0
+#define SMALL_SIZE (48.0 * (MOBILE_FACTOR))
+#define BIG_SIZE (96.0 * (MOBILE_FACTOR))
+#define DURATION 400
 
 using namespace Fit;
 
 class BubbleHeadPrivate
 {
 	public:
-		BubbleHeadPrivate(BubbleHead* p);
-		BubbleHead* parent;
-		QPoint hotPoint;
-		QIcon icon;
-		QColor borderColor;
-		QGraphicsDropShadowEffect shadowEffect;
-		QString notificationText;
-		bool moved;
-		void fixCoord();
-};
+        BubbleHeadPrivate(BubbleHead* p);
+        void fixCoord();
+        void handleClick();
+        void spin(bool up);
 
+        BubbleHead* parent;
+        QPoint hotPoint;
+        QIcon icon;
+        QGraphicsDropShadowEffect shadowEffect;
+        bool moved;
+
+        QPainterPath centerPath;
+        QParallelAnimationGroup animDriver;
+        QPropertyAnimation moveAnim;
+        QVariantAnimation rotateAnim;
+        QVariantAnimation centerAnim;
+};
 
 BubbleHeadPrivate::BubbleHeadPrivate(BubbleHead* p)
 	: parent(p)
 {
 	moved = false;
-	borderColor = "#666666";
-	shadowEffect.setBlurRadius(fit(8));
-	shadowEffect.setOffset(0,fit(3.3));
-	shadowEffect.setColor("#aa000000");
+    shadowEffect.setBlurRadius(fit(8));
+    shadowEffect.setOffset(0, fit(2.0));
+    shadowEffect.setColor("#88000000");
 	parent->setGraphicsEffect(&shadowEffect);
 	parent->setCursor(Qt::PointingHandCursor);
+    parent->setCheckable(true);
+    parent->resize(fit(SMALL_SIZE), fit(SMALL_SIZE));
+    parent->updatePathes();
+    moveAnim.setTargetObject(parent);
+    moveAnim.setPropertyName("geometry");
+    animDriver.addAnimation(&rotateAnim);
+    animDriver.addAnimation(&moveAnim);
+    animDriver.addAnimation(&centerAnim);
+    moveAnim.setEasingCurve(QEasingCurve::OutExpo);
+    rotateAnim.setEasingCurve(QEasingCurve::OutExpo);
+    centerAnim.setEasingCurve(QEasingCurve::OutExpo);
+    centerAnim.setKeyValueAt(0, fit(SMALL_SIZE / 2.0));
+    QObject::connect(&centerAnim, &QVariantAnimation::valueChanged, [this]{parent->updatePathes();});
+    QObject::connect(&rotateAnim, &QVariantAnimation::valueChanged, [this]{parent->updatePathes();});
+    QObject::connect(&moveAnim, &QPropertyAnimation::valueChanged, [this]{parent->updatePathes();});
+    QObject::connect(&moveAnim, &QPropertyAnimation::finished, [this]{fixCoord();});
 	QObject::connect((MainWindow*)parent->parent(), &MainWindow::resized, [this]{fixCoord();});
+    QObject::connect(parent, &BubbleHead::clicked, [this]{handleClick();});
 }
 
 void BubbleHeadPrivate::fixCoord()
@@ -58,10 +87,13 @@ void BubbleHeadPrivate::fixCoord()
 	emit parent->moved(newPos+QPoint(parent->width()/2.0, parent->height()/2.0));
 }
 
+BubbleHeadPrivate* BubbleHead::m_d = nullptr;
+
 BubbleHead::BubbleHead(QWidget *parent)
 	: QPushButton(parent)
-	, m_d(new BubbleHeadPrivate(this))
 {
+    if (m_d) return;
+    m_d = new BubbleHeadPrivate(this);
 }
 
 BubbleHead::~BubbleHead()
@@ -74,29 +106,9 @@ void BubbleHead::setIcon(const QIcon& icon)
 	m_d->icon = icon;
 }
 
-const QIcon& BubbleHead::icon() const
+const QIcon& BubbleHead::icon()
 {
 	return m_d->icon;
-}
-
-void BubbleHead::setBorderColor(const QColor& color)
-{
-	m_d->borderColor = color;
-}
-
-const QColor&BubbleHead::borderColor() const
-{
-	return m_d->borderColor;
-}
-
-void BubbleHead::setNotificationText(const QString& text)
-{
-	m_d->notificationText = text;
-}
-
-const QString& BubbleHead::notificationText() const
-{
-	return m_d->notificationText;
 }
 
 void BubbleHead::mousePressEvent(QMouseEvent* event)
@@ -130,60 +142,107 @@ void BubbleHead::mouseReleaseEvent(QMouseEvent* event)
 	} else {
 		event->accept();
 		setDown(false);
-	}
+    }
 }
 
-void BubbleHead::resizeEvent(QResizeEvent*)
+void BubbleHead::updatePathes()
 {
-	resize(fit(FIXED_SIZE), fit(FIXED_SIZE));
+    if (m_buttonList.size() < 1) return;
+    const qreal step = 360.0 / m_buttonList.size();
+    for (int  i = 0; i < m_buttonList.size(); i++) {
+        QPainterPath path;
+        path.moveTo(QRectF(rect()).center());
+        path.arcTo(QRectF(rect()), m_d->rotateAnim.currentValue().toInt() + 90 + step * i, step);
+        path.closeSubpath();
+        m_buttonList[i]->path = path;
+    }
+
+    QPainterPath path;
+    auto centerCal = m_d->centerAnim.currentValue().isValid() ? m_d->centerAnim.currentValue().toReal() : (qFloor(fit(SMALL_SIZE)) / 2.0);
+    path.addEllipse(QRectF(rect()).center(), centerCal, centerCal);
+    m_d->centerPath = path;
+
+    update();
 }
 
 void BubbleHead::paintEvent(QPaintEvent*)
 {
-	QPen p;
-	p.setWidthF(fit(PEN_SIZE));
-	p.setColor(m_d->borderColor);
+    QPainter painter(this);
+    QPen pen;
+    pen.setWidthF(fit(1));
+    pen.setColor(QColor("#10404447"));
+    painter.setPen(pen);
+    painter.setBrush(Qt::NoBrush);
+    painter.setRenderHint(QPainter::Antialiasing);
+    for (auto button: m_buttonList) {
+        painter.setClipPath(button->path);
+        painter.drawPixmap(button->path.boundingRect().toRect(), button->icon.pixmap(button->path.boundingRect().toRect().size()));
+        painter.drawPath(button->path);
+    }
 
-	QPainterPath path;
-	QRectF bgRect = QRectF(fit(PEN_SIZE/2.0),fit(PEN_SIZE/2.0),width()-fit(PEN_SIZE),height()-fit(PEN_SIZE));
-	path.addEllipse(rect());
-
-	QPainter painter(this);
-	painter.setPen(p);
-	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setClipPath(path);
-	painter.drawPixmap(rect(),  m_d->icon.pixmap(size()));
-	painter.setClipping(false);
-	painter.setBrush(Qt::NoBrush);
-	painter.drawEllipse(bgRect);
-
-	if (isDown()) {
-		painter.setBrush(QColor("#30000000"));
-		painter.drawEllipse(bgRect);
-	}
-
-	QRect notfRect = QRect(fit(1),fit(3),fit(13.85*MOBILE_FACTOR),fit(16.15*MOBILE_FACTOR));
-
-	QPen p2;
-	p2.setWidthF(fit(1));
-	p2.setColor("#30000000");
-
-	QLinearGradient g;
-	g.setStart(fit(9), 0);
-	g.setFinalStop(fit(9), fit(21));
-	g.setColorAt(0, "#ed323f");
-	g.setColorAt(1, "#da0220");
-
-	painter.setPen(p2);
-	painter.setBrush(g);
-	painter.drawRoundedRect(notfRect, fit(3), fit(3));
-
-	painter.setPen(Qt::white);
-	painter.drawText(notfRect, m_d->notificationText, QTextOption(Qt::AlignCenter));
+    painter.setClipPath(m_d->centerPath);
+    painter.drawPixmap(m_d->centerPath.boundingRect().toRect().adjusted(-1,-1,1,1),  m_d->icon.pixmap(m_d->centerPath.boundingRect().toRect().adjusted(-1,-1,1,1).size()));
+    painter.setClipping(false);
+    auto centerCal = m_d->centerAnim.currentValue().isValid() ? m_d->centerAnim.currentValue().toReal() : (qFloor(fit(SMALL_SIZE)) / 2.0);
+    painter.drawEllipse(QRectF(rect()).adjusted(pen.widthF(), pen.widthF(),0,0).center(), centerCal, centerCal);
+    painter.drawEllipse(QRectF(rect()).adjusted(pen.widthF(), pen.widthF(),0,0).center(), width() / 2.0, width() / 2.0);
 }
 
 void BubbleHead::moveEvent(QMoveEvent* event)
 {
-	QWidget::moveEvent(event);
-	emit moved(event->pos()+QPoint(width()/2.0, height()/2.0));
+    QWidget::moveEvent(event);
+    emit moved(event->pos()+QPoint(width()/2.0, height()/2.0));
+}
+
+void BubbleHeadPrivate::handleClick()
+{
+    if (parent->isChecked()) {
+        spin(true);
+    } else {
+        spin(false);
+        if (centerPath.contains(parent->mapFromGlobal(QCursor::pos()))) return;
+        for (auto button : parent->m_buttonList) {
+            if (button->path.contains(parent->mapFromGlobal(QCursor::pos()))) {
+                button->call();
+            }
+        }
+    }
+}
+
+void BubbleHeadPrivate::spin(bool up)
+{
+    animDriver.stop();
+    if (up) {
+        moveAnim.setDuration(DURATION);
+        centerAnim.setDuration(DURATION);
+        rotateAnim.setDuration(DURATION * 5);
+
+        centerAnim.setStartValue((qFloor(fit(SMALL_SIZE)) / 2.0));
+        centerAnim.setEndValue((qFloor(fit(SMALL_SIZE)) / 4.0));
+
+        rotateAnim.setStartValue(360);
+        rotateAnim.setEndValue(0);
+
+        moveAnim.setStartValue(parent->geometry());
+        moveAnim.setEndValue(QRect(parent->x() - fit(BIG_SIZE - SMALL_SIZE)/2.0,
+                                   parent->y() - fit(BIG_SIZE - SMALL_SIZE)/2.0,
+                                   fit(BIG_SIZE), fit(BIG_SIZE)));
+        animDriver.start();
+    } else {
+        moveAnim.setDuration(DURATION * 2);
+        centerAnim.setDuration(DURATION * 2);
+        rotateAnim.setDuration(DURATION * 5);
+
+        centerAnim.setStartValue((qFloor(fit(SMALL_SIZE)) / 4.0));
+        centerAnim.setEndValue((qFloor(fit(SMALL_SIZE)) / 2.0));
+
+        rotateAnim.setStartValue(0);
+        rotateAnim.setEndValue(360);
+
+        moveAnim.setStartValue(parent->geometry());
+        moveAnim.setEndValue(QRect(parent->x() + fit(BIG_SIZE - SMALL_SIZE)/2.0,
+                                   parent->y() + fit(BIG_SIZE - SMALL_SIZE)/2.0,
+                                   fit(SMALL_SIZE), fit(SMALL_SIZE)));
+        animDriver.start();
+    }
 }

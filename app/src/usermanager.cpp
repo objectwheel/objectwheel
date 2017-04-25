@@ -180,7 +180,7 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
     m_d->currentSessionsToken = m_d->generateToken(username, password);
 
     if (m_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
-        SplashScreen::setText("Decrypting user data.. starting session");
+        SplashScreen::setText("Starting user session");
 		if (!m_d->dirLocker.unlock(userDirectory(username), keyHash)) {
 			m_d->currentSessionsUser = "";
 			m_d->currentSessionsKey = "";

@@ -325,11 +325,14 @@ void MainWindow::SetupGui()
 	});
 
 	m_d->bubbleHead = new BubbleHead(this);
-	m_d->bubbleHead->setIcon(QIcon(":/resources/images/editor.png"));
-	m_d->bubbleHead->setNotificationText("E");
+    m_d->bubbleHead->setIcon(QIcon("/Users/omergoktas/Desktop/tool.png"));
 	QTimer::singleShot(200,[this] {
 		m_d->bubbleHead->move(fit(20), height()-fit(75));
 	});
+    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/launch-icon.png"), this, &MainWindow::on_playButton_clicked);
+    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/editor.png"), this, &MainWindow::on_editButton_clicked);
+    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/ccleaner-icon.png"), this, &MainWindow::on_clearButton_clicked);
+    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/build.png"), m_d->bubbleHead, &BubbleHead::hide);
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
@@ -929,7 +932,7 @@ void MainWindow::on_playButton_clicked()
 
 void MainWindow::on_secureExitButton_clicked()
 {
-    SplashScreen::setText("Encrypting user data.. stopping session");
+    SplashScreen::setText("Stopping user session");
     SplashScreen::show(true);
     UserManager::clearAutoLogin();
     auto ret = QtConcurrent::run(&UserManager::stopUserSession);
