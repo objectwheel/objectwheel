@@ -175,5 +175,7 @@
         <file>resources/qmls/loginScreen/RegistrationScreen.qml</file>
         <file>resources/qmls/loginScreen/Toast.qml</file>
         <file>resources/images/exit.png</file>
+        <file>resources/images/bubblehead.png</file>
+        <file>resources/images/build.png</file>
     </qresource>
 </RCC>

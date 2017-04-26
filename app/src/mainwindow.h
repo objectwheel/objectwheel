@@ -62,7 +62,7 @@ class MainWindow : public QWidget
 		void HideSelectionTools();
 		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index);
-        void handleBubbleHeadClicked();
+        void handleEditorOpenButtonClicked();
 
 	signals:
 		void resized();

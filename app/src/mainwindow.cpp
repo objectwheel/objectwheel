@@ -64,13 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::SetupGui()
 {
-	/* Scaling things */
-	fit(m_d->editButton, Fit::WidthHeight, true);
-	fit(m_d->clearButton, Fit::WidthHeight, true);
-    fit(m_d->playButton, Fit::WidthHeight, true);
-
 	m_d->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
-	m_d->buttonsLayout->setSpacing(fit(5));
 	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->bindingWidget->setItemSource(&m_d->m_Items);
 	/* Set ticks' icons */
@@ -119,15 +113,6 @@ void MainWindow::SetupGui()
 	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_ResizerTick, &ResizerTick::FixCoord);
 
-	/* Hide ticks when editButton clicked */
-	connect(m_d->editButton, &QPushButton::clicked, m_ResizerTick, &ResizerTick::hide);
-	connect(m_d->editButton, &QPushButton::clicked, m_RemoverTick, &RemoverTick::hide);
-	connect(m_d->editButton, &QPushButton::clicked, m_RotatorTick, &RotatorTick::hide);
-
-	/* Enable/Disable other controls when editButton clicked */
-	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->propertiesWidget->setEnabled(checked);});
-//	connect(m_d->editButton, &QPushButton::toggled, [this](bool checked) {m_d->clearButton->setEnabled(!checked);});
-
 	/* Set ticks' Parents and hide ticks */
 	m_ResizerTick->setParent(m_d->designWidget);
 	m_RemoverTick->setParent(m_d->designWidget);
@@ -164,18 +149,6 @@ void MainWindow::SetupGui()
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
 	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
 
-	/* Set flat buttons' colors*/
-	m_d->editButton->setColor(QColor("#2b5796"));
-	m_d->editButton->setCheckedColor(QColor("#1e8145"));
-	m_d->editButton->setTextColor(Qt::white);
-	m_d->clearButton->setColor(QColor("#c03638"));
-	m_d->clearButton->setDisabledColor(Qt::darkGray);
-	m_d->clearButton->setDisabledTextColor(QColor("#444444"));
-	m_d->clearButton->setTextColor(Qt::white);
-    m_d->playButton->setColor(QColor("#464E54").lighter(125));
-    m_d->playButton->setDisabledColor(Qt::darkGray);
-    m_d->playButton->setDisabledTextColor(QColor("#444444"));
-    m_d->playButton->setTextColor(Qt::white);
 	/* Fix Coords of ticks when property changed */
 	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RotatorTick, &RotatorTick::FixCoord);
@@ -325,14 +298,15 @@ void MainWindow::SetupGui()
 	});
 
 	m_d->bubbleHead = new BubbleHead(this);
-    m_d->bubbleHead->setIcon(QIcon("/Users/omergoktas/Desktop/tool.png"));
+    m_d->bubbleHead->setIcon(QIcon(":/resources/images/bubblehead.png"));
 	QTimer::singleShot(200,[this] {
 		m_d->bubbleHead->move(fit(20), height()-fit(75));
 	});
-    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/launch-icon.png"), this, &MainWindow::on_playButton_clicked);
-    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/editor.png"), this, &MainWindow::on_editButton_clicked);
-    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/ccleaner-icon.png"), this, &MainWindow::on_clearButton_clicked);
-    m_d->bubbleHead->addButton(QIcon("/Users/omergoktas/Desktop/build.png"), m_d->bubbleHead, &BubbleHead::hide);
+    m_d->bubbleHead->addButton(QIcon(":/resources/images/edit-icon.png"), this, &MainWindow::on_editButton_clicked);
+    m_d->bubbleHead->addButton(QIcon(":/resources/images/play.png"), this, &MainWindow::on_playButton_clicked);
+    m_d->bubbleHead->addButton(QIcon(":/resources/images/editor.png"), this, &MainWindow::handleEditorOpenButtonClicked);
+    m_d->bubbleHead->addButton(QIcon(":/resources/images/trash-icon.png"), this, &MainWindow::on_clearButton_clicked);
+    m_d->bubbleHead->addButton(QIcon(":/resources/images/build.png"), this, &MainWindow::update);
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
@@ -340,7 +314,6 @@ void MainWindow::SetupGui()
 	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
 	m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
-    connect(m_d->bubbleHead, SIGNAL(clicked(bool)), this, SLOT(handleBubbleHeadClicked()));
 	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 
     QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
@@ -583,7 +556,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
                     SaveManager::setId(componentName, componentName);
 					qml->setParentItem(m_CurrentPage);
 					qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
-					qml->setEnabled(!m_d->editButton->isChecked());
+                    qml->setEnabled(!m_d->editMode);
 					fit(qml, Fit::WidthHeight);
 					m_d->m_Items << qml;
 					m_d->m_ItemUrls << url;
@@ -595,7 +568,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					SaveManager::setVariantProperty(componentName, "enabled", qml->isEnabled());
 
 					QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
-					if (m_d->editButton->isChecked()) ShowSelectionTools(qml);
+                    if (m_d->editMode) ShowSelectionTools(qml);
 					return true;
 				}
 				return false;
@@ -606,7 +579,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 
 				/* Edit mode things */
-				if (m_d->editButton->isChecked())
+                if (m_d->editMode)
 				{
 					/* Get deepest item under the pressed point */
 					pressedItem = GetDeepestDesignItemOnPoint(mouseEvent->pos());
@@ -636,7 +609,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 
 				/* Edit mode things */
-				if (m_d->editButton->isChecked())
+                if (m_d->editMode)
 				{
 					/* Made Drags from design area */
 					if (nullptr != pressedItem)
@@ -796,7 +769,7 @@ void MainWindow::handleCurrentPageChanges(const QVariant& CurrentPage, const QVa
     m_d->pagesWidget->setCurrentPage(index.toInt());
 }
 
-void MainWindow::handleBubbleHeadClicked()
+void MainWindow::handleEditorOpenButtonClicked()
 {
     if(m_ResizerTick->isVisible()) {
         m_d->qmlEditor->show();
@@ -884,16 +857,22 @@ void MainWindow::on_clearButton_clicked()
 
 void MainWindow::on_editButton_clicked()
 {
+    m_d->editMode = !m_d->editMode;
 	for (auto item : m_d->m_Items) {
-		item->setEnabled(!m_d->editButton->isChecked());
+        item->setEnabled(!m_d->editMode);
 	}
 	m_d->propertiesWidget->clearList();
     m_d->bindingWidget->clearList();
+
+    m_ResizerTick->hide();
+    m_RemoverTick->hide();
+    m_RotatorTick->hide();
+    m_d->propertiesWidget->setEnabled(m_d->editMode);
 }
 
 void MainWindow::on_playButton_clicked()
 {
-    if (m_d->editButton->isChecked()) { // Edit mode on
+    if (m_d->editMode) { // Edit mode on
         for (auto item : m_d->m_Items) {
             item->setEnabled(true);
         }
@@ -1204,13 +1183,13 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 	if (!parentItem) qFatal("MainWindow::addControlWithoutSave : Error occurred");
 	m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
 	qml->setParentItem(parentItem);
-	qml->setEnabled(!m_d->editButton->isChecked());
+    qml->setEnabled(!m_d->editMode);
 	fit(qml, Fit::WidthHeight);
 	m_d->m_Items << qml;
 	m_d->m_ItemUrls << url;
 
 	QTimer::singleShot(200, [qml] { m_d->parent->fixWebViewPosition(qml); });
-	if (m_d->editButton->isChecked()) m_d->parent->ShowSelectionTools(qml);
+    if (m_d->editMode) m_d->parent->ShowSelectionTools(qml);
 	return true;
 }
 

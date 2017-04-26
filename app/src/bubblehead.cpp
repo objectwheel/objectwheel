@@ -215,7 +215,7 @@ void BubbleHeadPrivate::spin(bool up)
     if (up) {
         moveAnim.setDuration(DURATION);
         centerAnim.setDuration(DURATION);
-        rotateAnim.setDuration(DURATION * 5);
+        rotateAnim.setDuration(DURATION);
 
         centerAnim.setStartValue((qFloor(fit(SMALL_SIZE)) / 2.0));
         centerAnim.setEndValue((qFloor(fit(SMALL_SIZE)) / 4.0));
@@ -229,9 +229,9 @@ void BubbleHeadPrivate::spin(bool up)
                                    fit(BIG_SIZE), fit(BIG_SIZE)));
         animDriver.start();
     } else {
-        moveAnim.setDuration(DURATION * 2);
-        centerAnim.setDuration(DURATION * 2);
-        rotateAnim.setDuration(DURATION * 5);
+        moveAnim.setDuration(DURATION);
+        centerAnim.setDuration(DURATION);
+        rotateAnim.setDuration(DURATION);
 
         centerAnim.setStartValue((qFloor(fit(SMALL_SIZE)) / 4.0));
         centerAnim.setEndValue((qFloor(fit(SMALL_SIZE)) / 2.0));

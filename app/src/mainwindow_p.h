@@ -57,12 +57,6 @@ class MainWindowPrivate
 		QVBoxLayout* verticalLayout;
 		TitleBar* titleBar;
 		QQuickWidget* designWidget;
-		QHBoxLayout* buttonsLayout;
-		QSpacerItem* horizontalSpacer;
-		FlatButton* editButton;
-		FlatButton* clearButton;
-        FlatButton* playButton;
-		QSpacerItem* horizontalSpacer_2;
 		QWidget* toolboxWidget;
 		QVBoxLayout* toolboxVLay;
 		QWidget* toolboxAdderAreaWidget;
@@ -88,6 +82,7 @@ class MainWindowPrivate
 		QmlEditor* qmlEditor;
 		QQuickItemList m_Items;
 		QQuickUrlList m_ItemUrls;
+        bool editMode;
 
 		MainWindowPrivate(MainWindow* uparent);
 		void setupUi(QWidget *MainWindow); // setupUi
@@ -99,6 +94,7 @@ class MainWindowPrivate
 MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
 	: parent(uparent)
 {
+    editMode = false;
 }
 
 void MainWindowPrivate::setupUi(QWidget* MainWindow)
@@ -128,49 +124,6 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	designWidget->setMouseTracking(false);
 	designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
 	verticalLayout->addWidget(designWidget);
-
-	buttonsLayout = new QHBoxLayout();
-	buttonsLayout->setSpacing(0);
-	buttonsLayout->setObjectName(QStringLiteral("buttonsLayout"));
-	buttonsLayout->setContentsMargins(0, 0, 0, 0);
-	horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	buttonsLayout->addItem(horizontalSpacer);
-
-	editButton = new FlatButton(centralWidget);
-	editButton->setObjectName(QStringLiteral("editButton"));
-	editButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	editButton->setMinimumSize(QSize(82, 35));
-	editButton->setMaximumSize(QSize(82, 35));
-	QIcon icon;
-	icon.addFile(QStringLiteral(":/resources/images/edit-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
-	editButton->setIcon(icon);
-	editButton->setCheckable(true);
-	editButton->setChecked(false);
-	buttonsLayout->addWidget(editButton);
-
-    clearButton = new FlatButton(centralWidget);
-	clearButton->setObjectName(QStringLiteral("clearButton"));
-	clearButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    clearButton->setMinimumSize(QSize(82, 35));
-    clearButton->setMaximumSize(QSize(82, 35));
-	QIcon icon1;
-	icon1.addFile(QStringLiteral(":/resources/images/trash-icon.png"), QSize(), QIcon::Normal, QIcon::Off);
-	clearButton->setIcon(icon1);
-
-    playButton = new FlatButton(centralWidget);
-    playButton->setObjectName(QStringLiteral("playButton"));
-    playButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    playButton->setMinimumSize(QSize(82, 35));
-    playButton->setMaximumSize(QSize(82, 35));
-    QIcon icon2;
-    icon2.addFile(QStringLiteral(":/resources/images/play.png"), QSize(), QIcon::Normal, QIcon::Off);
-    playButton->setIcon(icon2);
-
-    buttonsLayout->addWidget(playButton);
-    buttonsLayout->addWidget(clearButton);
-	horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	buttonsLayout->addItem(horizontalSpacer_2);
-	verticalLayout->addLayout(buttonsLayout);
 
 	toolboxList = new ListWidget(centralWidget);
 	toolboxList->setIconSize(fit({30, 30}));
@@ -390,9 +343,6 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 void MainWindowPrivate::retranslateUi(QWidget* MainWindow)
 {
 	MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
-	editButton->setText(QApplication::translate("MainWindow", "Edit", 0));
-	clearButton->setText(QApplication::translate("MainWindow", "Clear", 0));
-    playButton->setText(QApplication::translate("MainWindow", "Play", 0));
 }
 
 void MainWindowPrivate::showAdderArea()
