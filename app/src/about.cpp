@@ -10,7 +10,7 @@
 #include <scenemanager.h>
 #include <usermanager.h>
 
-#define TITLE_TEXT "<p><b>version</b> 1.590 <b>pbuild</b> 62c8eca<br>Tue Apr 18 06:50:20 2017 +0300<br></p>"
+#define TITLE_TEXT "<p><b>version</b> 1.591 <b>pbuild</b> cb0dde6<br>Wed Apr 26 05:10:42 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
 using namespace Fit;
@@ -65,13 +65,13 @@ AboutPrivate::AboutPrivate(QWidget* p)
     exitButton.setParent(parent);
     exitButton.setIconButton(true);
     exitButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
-#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
     exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
 #else
     exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));
 #endif
     QObject::connect((About*)parent,  &About::resized, [=]{
-#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
         exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
 #else
         exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));

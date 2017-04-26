@@ -886,13 +886,13 @@ void MainWindow::on_playButton_clicked()
     exitButton->setParent(m_d->designWidget);
     exitButton->setIconButton(true);
     exitButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
-#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
     exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
 #else
     exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));
 #endif
     connect(this, &MainWindow::resized, [=]{
-#if defined(Q_OS_IOS) || defined(Q_OS_IOS) || defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
     exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
 #else
     exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));

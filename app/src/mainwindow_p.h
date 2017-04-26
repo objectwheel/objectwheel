@@ -335,9 +335,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
 	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-	retranslateUi(MainWindow);
-
-	QMetaObject::connectSlotsByName(MainWindow);
+    retranslateUi(MainWindow);
 }
 
 void MainWindowPrivate::retranslateUi(QWidget* MainWindow)
