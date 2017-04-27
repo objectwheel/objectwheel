@@ -107,7 +107,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	verticalLayout = new QVBoxLayout(centralWidget);
 	verticalLayout->setSpacing(0);
 	verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-	verticalLayout->setContentsMargins(0, 0, 0, 0);
+    verticalLayout->setContentsMargins(0, 0, 0, 0);
 	titleBar = new TitleBar(centralWidget);
 	titleBar->setObjectName(QStringLiteral("titleBar"));
 	titleBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -137,7 +137,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 											 "}"
 											 "QListView::item {\n"
 											 "	color:white;\n"
-											 "    border: 0px solid transparent;\n"
+                                             "  border: 0px solid transparent;\n"
 											 "	padding:2px;\n"
 											 "}"
 											 "QListView::item:selected {\n"
@@ -156,34 +156,34 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxList->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
 	sceneList = new ListWidget(centralWidget);
-	sceneList->setIconSize(fit({30, 30}));
-	sceneList->setObjectName(QStringLiteral("sceneList"));
-	sceneList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	sceneList->setFocusPolicy(Qt::NoFocus);
-	sceneList->setStyleSheet(QLatin1String("QListView {\n"
-											 "	border:0px solid white;\n"
-											 "	background:#566573;\n"
-											 "	padding-right:5px;\n"
-											 "  padding-left:10px;\n"
-											 "}"
-											 "QListView::item {\n"
-											 "	color:white;\n"
-											 "  order: 0px solid transparent;\n"
-											 "	padding:5px;\n"
-											 "}"
-											 "QListView::item:selected {\n"
-											 "	color:black;\n"
-											 "  background: #e0e4e7;\n"
-											 "  border: 0px solid transparent;\n"
-											 "  border-radius: 3px;\n"
-											 "	padding:2px;\n"
-											 "  margin-right: 2px;\n"
-											 "}"));
-	sceneList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	sceneList->setDragEnabled(false);
-	sceneList->setDragDropMode(QAbstractItemView::NoDragDrop);
-	sceneList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	sceneList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    sceneList->setIconSize(fit({30, 30}));
+    sceneList->setObjectName(QStringLiteral("sceneList"));
+    sceneList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    sceneList->setFocusPolicy(Qt::NoFocus);
+    sceneList->setStyleSheet(QLatin1String("QListView {\n"
+                                           "	border:0px solid white;\n"
+                                           "	background:#566573;\n"
+                                           "	padding-right:5px;\n"
+                                           "    padding-left:10px;\n"
+                                           "}"
+                                           "QListView::item {\n"
+                                           "	color:white;\n"
+                                           "    border: 0px solid transparent;\n"
+                                           "	padding:5px;\n"
+                                           "}"
+                                           "QListView::item:selected {\n"
+                                           "	color:black;\n"
+                                           "    background: #e0e4e7;\n"
+                                           "    border: 0px solid transparent;\n"
+                                           "    border-radius: 3px;\n"
+                                           "	padding:2px;\n"
+                                           "    margin-right: 2px;\n"
+                                           "}"));
+    sceneList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    sceneList->setDragEnabled(false);
+    sceneList->setDragDropMode(QAbstractItemView::NoDragDrop);
+    sceneList->setSelectionBehavior(QAbstractItemView::SelectRows);
+    sceneList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 	sceneList->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
 	toolboxWidget = new QWidget;

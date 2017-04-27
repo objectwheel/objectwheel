@@ -25,14 +25,12 @@
 // Cloud part-sync-login etc
 // Clear parser's ugly console outputs
 // General bug fixing (continuous task)
-// Replace Edit-Play-Clear buttons
 
 /* Near tasks */
 /*------------*/
 // Fix parser errors
 // Fix  parser slowness
 // Import/Export project
-// Add (secure)exit button
 // Drag & Drop image files transforms into controls
 // Fix Android's control drag & drop error
 // Apply id changes into qml files
@@ -60,8 +58,8 @@ int main(int argc, char *argv[])
 
 	// Init application settings
 	QApplication::setStyle("fusion");
-	qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
-	qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
+    qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
+    qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
 	qsrand(QDateTime::currentMSecsSinceEpoch());
 
 	// Init Fit

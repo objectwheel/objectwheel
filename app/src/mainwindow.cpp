@@ -64,7 +64,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::SetupGui()
 {
-	m_d->centralWidget->layout()->setContentsMargins(0,0,0,fit(8));
 	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->bindingWidget->setItemSource(&m_d->m_Items);
 	/* Set ticks' icons */
@@ -299,9 +298,7 @@ void MainWindow::SetupGui()
 
 	m_d->bubbleHead = new BubbleHead(this);
     m_d->bubbleHead->setIcon(QIcon(":/resources/images/bubblehead.png"));
-	QTimer::singleShot(200,[this] {
-		m_d->bubbleHead->move(fit(20), height()-fit(75));
-	});
+
     m_d->bubbleHead->addButton(QIcon(":/resources/images/edit-icon.png"), this, &MainWindow::on_editButton_clicked);
     m_d->bubbleHead->addButton(QIcon(":/resources/images/play.png"), this, &MainWindow::on_playButton_clicked);
     m_d->bubbleHead->addButton(QIcon(":/resources/images/editor.png"), this, &MainWindow::handleEditorOpenButtonClicked);
@@ -807,7 +804,7 @@ void MainWindow::clearStudio()
 	m_d->m_Items.clear();
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
-	m_d->bubbleHead->move(fit(20), height()-fit(75));
+    m_d->bubbleHead->move(fit(10), height()-fit(55));
 	m_d->toolboxList->setCurrentRow(-1);
 }
 

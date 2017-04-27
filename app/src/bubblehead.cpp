@@ -176,7 +176,8 @@ void BubbleHead::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
     for (auto button: m_buttonList) {
         painter.setClipPath(button->path);
-        painter.drawPixmap(button->path.boundingRect().toRect(), button->icon.pixmap(button->path.boundingRect().toRect().size()));
+        QPixmap p(button->icon.pixmap(button->path.boundingRect().toRect().size()));
+        painter.drawPixmap(button->path.boundingRect().toRect(), p);
         painter.drawPath(button->path);
     }
 
