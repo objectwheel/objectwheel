@@ -18,6 +18,8 @@ class BuildsScreen : public QQuickWidget
 
     public slots:
         void handleBuildButtonClicked();
+        void handleBtnOkClicked();
+        void handleBtnCancelClicked();
 };
 
 #endif // BUILDSSCREEN_H

@@ -72,7 +72,7 @@ Item {
             onTriggered: {
                 root.opacity = 0
                 DelayCaller.delayCall(anim.duration, function() {
-                    if (opacity == 0) {
+                    if (root.opacity == 0) {
                         root.visible = false
                     }
                 })
@@ -83,6 +83,18 @@ Item {
         root.visible = true
         root.opacity = 1
         d.timer.restart()
+    }
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            d.timer.stop()
+            root.opacity = 0
+            DelayCaller.delayCall(anim.duration, function() {
+                if (root.opacity == 0) {
+                    root.visible = false
+                }
+            })
+        }
     }
     property int duration: 5000
     property alias text: text

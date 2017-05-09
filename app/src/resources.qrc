@@ -202,5 +202,9 @@
         <file>resources/images/back-line@2x.png</file>
         <file>resources/images/construction.gif</file>
         <file>resources/images/construction@2x.gif</file>
+        <file>resources/images/build_inprogress.png</file>
+        <file>resources/images/build_inprogress@2x.png</file>
+        <file>resources/images/bouncing_arrow.png</file>
+        <file>resources/images/bouncing_arrow@2x.png</file>
     </qresource>
 </RCC>

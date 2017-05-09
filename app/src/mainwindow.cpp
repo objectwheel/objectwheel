@@ -385,6 +385,7 @@ void MainWindow::SetupManagers()
     sceneManager->addScene("aboutScene", m_d->aboutWidget);
     sceneManager->addScene("buildsScene", m_d->buildsScreen);
     sceneManager->setCurrent("loginScene", false);
+//    sceneManager->setCurrent("buildsScene", false);
 	SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){

@@ -170,9 +170,30 @@ Item {
             }
             MouseArea {
                 anchors.fill: parent
+                enabled: enabledBuilds[index]
                 onClicked: {
                     listView.currentIndex = index
                 }
+            }
+            Image {
+                id: warnIcon
+                source: "qrc:///resources/images/sign_warning.png"
+                width: Fit.fit(12)
+                fillMode: Image.PreserveAspectFit
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                anchors.rightMargin: Fit.fit(10)
+                visible: false
+            }
+            DropShadow {
+                anchors.fill: warnIcon
+                horizontalOffset: 0
+                verticalOffset: 0
+                radius: Fit.fit(7)
+                samples: Fit.fit(26)
+                color: "#85000000"
+                source: warnIcon
+                visible: !enabledBuilds[index]
             }
         }
     }
@@ -187,6 +208,7 @@ Item {
     }
     signal btnBuildClicked()
     property string currentBuildLabel: ""
+    property var enabledBuilds: [true, true, false, false, false, false, false, false, false]
     property var buildLabels: ["android-armeabi-v7a", "android-x86", "ios", "windows-x86", "windows-x64", "macos", "linux-x86", "linux-x64", "raspi"]
     property var platforms: ["Android 4.2+", "Android 4.2+", "IOS 10+", "Windows 7+", "Windows 7+", "macOS 10.10+", "Linux", "Linux", "Raspberry Pi"]
     property var arches: ["Architecture: armeabi-v7a", "Architecture: x86", "Architectures: armv7s, arm64", "Architecture: x86", "Architecture: x64", "Architecture: x64", "Architecture: x86", "Architecture: x64", "Version: Pi 2+"]

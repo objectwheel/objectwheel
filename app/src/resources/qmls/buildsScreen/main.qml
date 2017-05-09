@@ -4,12 +4,13 @@ import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.1
 import "../fit.js" as Fit
 import "../delaycaller.js" as DelayCaller
+import "../loginScreen/"
 
 Rectangle {
     id: root
     color: swipeView.currentIndex == 0 ? "#E0E4E7" : "#135D52"
     Behavior on color {
-        ColorAnimation { duration: 500 }
+        ColorAnimation { duration: 300 }
     }
 
     Image {
@@ -44,13 +45,12 @@ Rectangle {
     }
     Image {
         id: selectmsg
-        source: "qrc:///resources/images/selectmsg.png"
+        source: swipeView.currentIndex == 0 ? "qrc:///resources/images/selectmsg.png" : "qrc:///resources/images/build_inprogress.png"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: title.bottom
         anchors.topMargin: Fit.fit(15)
         height: Fit.fit(17)
         fillMode: Image.PreserveAspectFit
-        visible: swipeView.currentIndex == 0
     }
     ColorOverlay {
         anchors.fill: title
@@ -81,12 +81,18 @@ Rectangle {
             clip: true
         }
     }
-
+    Toast {
+        id: toast
+        anchors.fill: parent
+    }
     Timer {
         running: true
-        onTriggered: swipeView.currentIndex = 1
+//        onTriggered: swipeView.currentIndex = 1
         interval: 3000
     }
 
+    property alias toast: toast
     property alias buildPage: buildPage
+    property alias progressPage: progressPage
+    property alias swipeView: swipeView
 }
