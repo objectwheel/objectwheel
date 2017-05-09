@@ -8,9 +8,9 @@ HEADERS     += $$PWD/apiai.h \
 			   $$PWD/documenthandler.h \
 			   $$PWD/qmlhighlighter.h \
 			   $$PWD/filemanager.h \
-    $$PWD/qquickfolderlistmodel.h \
-    $$PWD/fileproperty_p.h \
-    $$PWD/fileinfothread_p.h
+               $$PWD/qquickfolderlistmodel.h \
+               $$PWD/fileproperty_p.h \
+               $$PWD/fileinfothread_p.h
 
 SOURCES     += $$PWD/apiai.cpp \
                $$PWD/audiorecorder.cpp \
@@ -19,6 +19,6 @@ SOURCES     += $$PWD/apiai.cpp \
 			   $$PWD/aispeak.cpp \
 			   $$PWD/documenthandler.cpp \
 			   $$PWD/qmlhighlighter.cpp \
-			   $$PWD/filemanager.cpp \
-    $$PWD/qquickfolderlistmodel.cpp \
-    $$PWD/fileinfothread.cpp
+               $$PWD/filemanager.cpp \
+               $$PWD/qquickfolderlistmodel.cpp \
+               $$PWD/fileinfothread.cpp

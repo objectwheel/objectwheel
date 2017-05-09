@@ -29,7 +29,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/toolsmanager.h \
                              $$PWD/scenemanager.h \
                              $$PWD/projectsscreen.h \
-                             $$PWD/loginscreen.h
+                             $$PWD/loginscreen.h \
+    $$PWD/buildsscreen.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -60,7 +61,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/toolsmanager.cpp \
                              $$PWD/scenemanager.cpp \
                              $$PWD/projectsscreen.cpp \
-                             $$PWD/loginscreen.cpp
+                             $$PWD/loginscreen.cpp \
+    $$PWD/buildsscreen.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

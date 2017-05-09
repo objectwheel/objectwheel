@@ -45,6 +45,7 @@ class MainWindow : public QWidget
 		void clearStudio();
 
 	private slots:
+        void on_buildsButton_clicked();
 		void on_clearButton_clicked();
 		void on_editButton_clicked();
         void on_playButton_clicked();

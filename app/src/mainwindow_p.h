@@ -37,6 +37,7 @@
 #include <mainwindow.h>
 #include <projectsscreen.h>
 #include <loginscreen.h>
+#include <buildsscreen.h>
 
 #define DURATION 500
 
@@ -77,6 +78,7 @@ class MainWindowPrivate
 		BindingWidget* bindingWidget;
 		PagesWidget* pagesWidget;
 		About* aboutWidget;
+        BuildsScreen* buildsScreen;
 		FlatButton* aboutButton;
 		BubbleHead* bubbleHead;
 		QmlEditor* qmlEditor;

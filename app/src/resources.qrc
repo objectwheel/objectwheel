@@ -177,5 +177,30 @@
         <file>resources/images/exit.png</file>
         <file>resources/images/bubblehead.png</file>
         <file>resources/images/build.png</file>
+        <file>resources/images/android.png</file>
+        <file>resources/images/android@2x.png</file>
+        <file>resources/images/builds.png</file>
+        <file>resources/images/builds@2x.png</file>
+        <file>resources/images/helmet.png</file>
+        <file>resources/images/helmet@2x.png</file>
+        <file>resources/images/ios.png</file>
+        <file>resources/images/ios@2x.png</file>
+        <file>resources/images/linux.png</file>
+        <file>resources/images/linux@2x.png</file>
+        <file>resources/images/macos.png</file>
+        <file>resources/images/macos@2x.png</file>
+        <file>resources/images/raspi.png</file>
+        <file>resources/images/raspi@2x.png</file>
+        <file>resources/images/selectmsg.png</file>
+        <file>resources/images/selectmsg@2x.png</file>
+        <file>resources/images/windows.png</file>
+        <file>resources/images/windows@2x.png</file>
+        <file>resources/qmls/buildsScreen/BuildPage.qml</file>
+        <file>resources/qmls/buildsScreen/main.qml</file>
+        <file>resources/qmls/buildsScreen/ProgressPage.qml</file>
+        <file>resources/images/back-line.png</file>
+        <file>resources/images/back-line@2x.png</file>
+        <file>resources/images/construction.gif</file>
+        <file>resources/images/construction@2x.gif</file>
     </qresource>
 </RCC>

@@ -303,7 +303,7 @@ void MainWindow::SetupGui()
     m_d->bubbleHead->addButton(QIcon(":/resources/images/play.png"), this, &MainWindow::on_playButton_clicked);
     m_d->bubbleHead->addButton(QIcon(":/resources/images/editor.png"), this, &MainWindow::handleEditorOpenButtonClicked);
     m_d->bubbleHead->addButton(QIcon(":/resources/images/trash-icon.png"), this, &MainWindow::on_clearButton_clicked);
-    m_d->bubbleHead->addButton(QIcon(":/resources/images/build.png"), this, &MainWindow::update);
+    m_d->bubbleHead->addButton(QIcon(":/resources/images/build.png"), this, &MainWindow::on_buildsButton_clicked);
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
@@ -320,6 +320,7 @@ void MainWindow::SetupGui()
     });
 
 	m_d->aboutWidget = new About(this);
+    m_d->buildsScreen = new BuildsScreen(this);
 
 	QWidget* sceneListWidget = new QWidget(this);
 	sceneListWidget->setStyleSheet("background:#566573;");
@@ -382,6 +383,7 @@ void MainWindow::SetupManagers()
     sceneManager->addScene("projectsScene", m_d->projectsScreen);
     sceneManager->addScene("loginScene", m_d->loginScreen);
     sceneManager->addScene("aboutScene", m_d->aboutWidget);
+    sceneManager->addScene("buildsScene", m_d->buildsScreen);
     sceneManager->setCurrent("loginScene", false);
 	SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
@@ -805,7 +807,12 @@ void MainWindow::clearStudio()
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
     m_d->bubbleHead->move(fit(10), height()-fit(55));
-	m_d->toolboxList->setCurrentRow(-1);
+    m_d->toolboxList->setCurrentRow(-1);
+}
+
+void MainWindow::on_buildsButton_clicked()
+{
+    SceneManager::show("buildsScene", SceneManager::ToLeft);
 }
 
 void MainWindow::HideSelectionTools()

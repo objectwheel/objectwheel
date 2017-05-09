@@ -32,6 +32,7 @@ class SaveManager : public QObject
 		static void changeSave(const QString& fromId, QString toId);
 		static void removeSave(const QString& id);
 		static QString saveDirectory(const QString& id);
+        static QString savesDirectory();
 
 		static QJsonObject getBindingSaves();
 		static void addBindingSave(const BindingInf& bindingInf);

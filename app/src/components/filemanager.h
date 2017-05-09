@@ -2,6 +2,7 @@
 #define FILEMANAGER_H
 
 #include <QObject>
+#include <QVariant>
 
 class FileManager : public QObject
 {
@@ -28,7 +29,9 @@ class FileManager : public QObject
 		QString suffix(const QString& name) const;
 		QByteArray rdfile(const QString& file) const;
 		int wrfile(const QString& file, const QByteArray& data) const;
-		QByteArray dlfile(const QString& url);
+#ifdef QT_NETWORK_LIB
+        QByteArray dlfile(const QString& url);
+#endif
 		bool isfile(const QString& name) const;
 		bool isdir(const QString& name) const;
 		QChar separator() const;
@@ -61,7 +64,9 @@ static inline qint64 dsize(const QString& name) { return FileManager().dsize(nam
 static inline QString suffix(const QString& name) { return FileManager().suffix(name); }
 static inline QByteArray rdfile(const QString& file) { return FileManager().rdfile(file); }
 static inline int wrfile(const QString& file, const QByteArray& data) { return FileManager().wrfile(file, data); }
+#ifdef QT_NETWORK_LIB
 static inline QByteArray dlfile(const QString& url) { return FileManager().dlfile(url); }
+#endif
 static inline bool isfile(const QString& name) { return FileManager().isfile(name); }
 static inline bool isdir(const QString& name) { return FileManager().isdir(name); }
 static inline QChar separator() { return FileManager().separator(); }

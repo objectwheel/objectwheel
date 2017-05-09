@@ -35,6 +35,7 @@ class SaveManagerPrivate
 {
 	public:
 		SaveManagerPrivate(SaveManager* uparent);
+        QString generateSavesDirectory() const;
 		QString generateSaveDirectory(const QString& id) const;
 		void parseImportDirectories(const QString& dir);
 		void initPageOrder(const QString& file) const;
@@ -55,14 +56,21 @@ SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
 	plainTextEdit = new QPlainTextEdit;
 	plainTextEdit->setHidden(true);
 	modelManager = new ModelManagerInterface;
-	for (auto importPath : QQmlEngine().importPathList()) parseImportDirectories(importPath);
+    for (auto importPath : QQmlEngine().importPathList()) parseImportDirectories(importPath);
+}
+
+QString SaveManagerPrivate::generateSavesDirectory() const
+{
+    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    if (projectDir.isEmpty()) return projectDir;
+    return projectDir + separator() + SAVE_DIRECTORY;
 }
 
 inline QString SaveManagerPrivate::generateSaveDirectory(const QString& id) const
 {
-	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projectDir.isEmpty()) return projectDir;
-	return projectDir + separator() + SAVE_DIRECTORY + separator() + id;
+    auto baseDir = generateSavesDirectory();
+    if (baseDir.isEmpty()) return baseDir;
+    return baseDir + separator() + id;
 }
 
 void SaveManagerPrivate::parseImportDirectories(const QString& dir)
@@ -153,7 +161,12 @@ SaveManager* SaveManager::instance()
 QString SaveManager::saveDirectory(const QString& id)
 {
 	if (!exists(id)) return QString();
-	return m_d->generateSaveDirectory(id);
+    return m_d->generateSaveDirectory(id);
+}
+
+QString SaveManager::savesDirectory()
+{
+    return m_d->generateSavesDirectory();
 }
 
 QJsonObject SaveManager::getBindingSaves()

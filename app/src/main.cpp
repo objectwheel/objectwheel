@@ -36,6 +36,7 @@
 // Apply id changes into qml files
 // Warn if files changes out of qml editor, to reload or not.
 // Add play button to welcome screen
+// Auto edit mode on if user drop tools
 
 int main(int argc, char *argv[])
 {
