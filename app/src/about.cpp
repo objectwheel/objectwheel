@@ -10,7 +10,7 @@
 #include <scenemanager.h>
 #include <usermanager.h>
 
-#define TITLE_TEXT "<p><b>version</b> 1.591 <b>pbuild</b> cb0dde6<br>Wed Apr 26 05:10:42 2017 +0300<br></p>"
+#define TITLE_TEXT "<p><b>version</b> 1.592 <b>pbuild</b> 529e042<br>Wed May 10 03:32:18 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
 using namespace Fit;

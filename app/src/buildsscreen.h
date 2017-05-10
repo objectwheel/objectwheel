@@ -15,6 +15,10 @@ class BuildsScreen : public QQuickWidget
 
     private:
         static BuildsScreenPrivate* m_d;
+        void resizeEvent(QResizeEvent *event) override;
+
+    signals:
+        void resized() const;
 
     public slots:
         void handleBuildButtonClicked();

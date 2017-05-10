@@ -32,8 +32,12 @@
 #include <QElapsedTimer>
 #include <QString>
 #include <QApplication>
+#include <QPointer>
+#include <flatbutton.h>
 
-#define URL QString("https://127.0.0.1/api/v1/build/")
+#define URL QString("https://139.59.149.173/api/v1/build/")
+
+using namespace Fit;
 
 class BuildsScreenPrivate {
 
@@ -48,7 +52,8 @@ class BuildsScreenPrivate {
         QQuickItem* toast;
         QQuickItem* swipeView;
         QNetworkAccessManager* manager;
-        QNetworkReply* reply;
+        QPointer<QNetworkReply> reply;
+        FlatButton exitButton;
         QString bytesString(const qint64 size, bool withExt);
         QString determineBuildExtension(const QString label);
 };
@@ -62,6 +67,28 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     parent->rootContext()->setContextProperty("dpi", Fit::ratio());
     parent->setSource(QUrl("qrc:/resources/qmls/buildsScreen/main.qml"));
     parent->setResizeMode(QQuickWidget::SizeRootObjectToView);
+
+    exitButton.setParent(parent);
+    exitButton.setIconButton(true);
+    exitButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+    exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
+#else
+    exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));
+#endif
+    QObject::connect((BuildsScreen*)parent,  &BuildsScreen::resized, [=]{
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+        exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
+#else
+        exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));
+#endif
+    });
+    fit(&exitButton, Fit::WidthHeight);
+    exitButton.show();
+
+    QObject::connect(&exitButton, &FlatButton::clicked, [=]{
+        SceneManager::show("studioScene", SceneManager::ToRight);
+    });
 
     buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "buildPage", parent->engine()).value<QObject*>();
     progressPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "progressPage", parent->engine()).value<QObject*>();
@@ -133,6 +160,12 @@ BuildsScreen::BuildsScreen(QWidget *parent) : QQuickWidget(parent)
     m_d = new BuildsScreenPrivate(this);
 }
 
+void BuildsScreen::resizeEvent(QResizeEvent* event)
+{
+    QQuickWidget::resizeEvent(event);
+    emit resized();
+}
+
 void BuildsScreen::handleBuildButtonClicked()
 {
     auto buildLabel = QQmlProperty::read(m_d->buildPage, "currentBuildLabel").toString();
@@ -161,13 +194,14 @@ void BuildsScreen::handleBuildButtonClicked()
     QQmlProperty::write(m_d->progressPage, "progressbarValue", 0.0);
     QMetaObject::invokeMethod(m_d->progressPage, "startWaitEffect");
     QMetaObject::invokeMethod(m_d->progressPage, "showBtnCancel");
+    m_d->exitButton.hide();
 
     connect(m_d->reply, &QNetworkReply::finished, [=] {
         if (!m_d->reply->isOpen() || !m_d->reply->isReadable() || m_d->reply->error() != QNetworkReply::NoError) {
             m_d->elapsedTimer.invalidate();
             m_d->times.clear();
             m_d->bytes.clear();
-            m_d->reply->deleteLater();
+            if (m_d->reply) m_d->reply->deleteLater();
             return;
         }
 
@@ -196,7 +230,7 @@ void BuildsScreen::handleBuildButtonClicked()
         m_d->elapsedTimer.invalidate();
         m_d->times.clear();
         m_d->bytes.clear();
-        m_d->reply->deleteLater();
+        if (m_d->reply) m_d->reply->deleteLater();
     });
     connect(m_d->reply, (void (QNetworkReply::*)(qint64, qint64))&QNetworkReply::downloadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
         QQmlProperty::write(m_d->progressPage, "informativeText", "Downloading your build");
@@ -302,6 +336,7 @@ void BuildsScreen::handleBuildButtonClicked()
             QQmlProperty::write(m_d->toast, "base.height", 95);
             QQmlProperty::write(m_d->toast, "duration", 10000);
             QMetaObject::invokeMethod(m_d->toast, "show");
+            m_d->exitButton.show();
         }
     });
 }
@@ -312,13 +347,15 @@ void BuildsScreen::handleBtnOkClicked()
     m_d->times.clear();
     m_d->bytes.clear();
     QQmlProperty::write(m_d->swipeView, "currentIndex", 0);
+    m_d->exitButton.show();
 }
 
 void BuildsScreen::handleBtnCancelClicked()
 {
-    m_d->reply->abort();
+    if (m_d->reply) m_d->reply->abort();
     m_d->elapsedTimer.invalidate();
     m_d->times.clear();
     m_d->bytes.clear();
     QQmlProperty::write(m_d->swipeView, "currentIndex", 0);
+    m_d->exitButton.show();
 }
