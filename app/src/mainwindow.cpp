@@ -385,8 +385,8 @@ void MainWindow::SetupManagers()
     sceneManager->addScene("aboutScene", m_d->aboutWidget);
     sceneManager->addScene("buildsScene", m_d->buildsScreen);
     sceneManager->setCurrent("loginScene", false);
-//    sceneManager->setCurrent("buildsScene", false);
-	SplashScreen::raise();
+
+    SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
 		m_RightMenu->hide();
@@ -409,6 +409,8 @@ void MainWindow::SetupManagers()
 		} else if (scene == "aboutScene") {
 			sceneName = "About";
         } else if (scene == "loginScene") {
+            continue;
+        } else if (scene == "buildsScene") {
             continue;
         }
 		urls << scene;
