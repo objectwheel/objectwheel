@@ -106,7 +106,6 @@ void SaveManagerPrivate::createPages(const QJsonArray& pages)
 	for (int i = 1; i < pages.size(); i++) {
 		auto currPage = pages[i].toString();
 		PagesWidget::addPageWithoutSave(currPage);
-        qApp->processEvents(QEventLoop::AllEvents, 50);
 	}
 }
 
@@ -126,7 +125,6 @@ bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships,
 					return false;
 				createdObjects.append(key);
 			}
-            qApp->processEvents(QEventLoop::AllEvents, 50);
 		}
 		createdObjects.removeFirst();
 	}
@@ -143,7 +141,6 @@ void SaveManagerPrivate::fillBindings(const QJsonObject& bindingSaves)
         inf.targetId = bindingSaves[bindingKey].toObject()[BINDING_TARGET_ID_LABEL].toString();
         inf.targetProperty = bindingSaves[bindingKey].toObject()[BINDING_TARGET_PROPERTY_LABEL].toString();
         BindingWidget::addBindingWithoutSave(inf);
-        qApp->processEvents(QEventLoop::AllEvents, 50);
     }
 }
 

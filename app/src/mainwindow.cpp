@@ -799,7 +799,6 @@ void MainWindow::clearStudio()
 		m_d->designWidget->rootContext()->setContextProperty(
 					m_d->designWidget->rootContext()->nameForObject(item), 0);
 		item->deleteLater();
-        qApp->processEvents(QEventLoop::AllEvents, 10);
 	}
 
 	auto pages = m_d->pagesWidget->pages();
@@ -807,7 +806,6 @@ void MainWindow::clearStudio()
 		if (pages[i] != m_CurrentPage) {
 			m_d->pagesWidget->removePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages[i]));
 		}
-        qApp->processEvents(QEventLoop::AllEvents, 10);
 	}
 	QString page1Name = "page1";
 	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentPage), page1Name);

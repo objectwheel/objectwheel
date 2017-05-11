@@ -213,16 +213,25 @@ void ProjectsScreen::handleLoadButtonClicked()
 
 	SplashScreen::setText("Loading project");
     SplashScreen::show(true);
-	ProjectManager::stopProject();
-    if (!ProjectManager::startProject(projectName)) {
-        for (int i = model.rowCount(); i--;) {
-            if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
-                model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
+    ProjectManager::stopProject();
+
+    /* Start Project */
+    QEventLoop e;
+    QTimer::singleShot(300, [=, &e] {
+        if (!ProjectManager::startProject(projectName)) {
+            for (int i = model.rowCount(); i--;) {
+                if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
+                    model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
+                }
             }
+            SplashScreen::hide();
+            e.exit(1);
+        } else {
+            e.exit(0);
         }
-        SplashScreen::hide();
-        return;
-    }
+    });
+    if (e.exec()) return;
+
     SplashScreen::hide();
     QTimer::singleShot(600, [=] {
         SceneManager::show("studioScene", SceneManager::ToRight);

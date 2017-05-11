@@ -196,21 +196,21 @@ bool ProjectManager::startProject(const QString& projectname)
 		return false;
 	}
 
-	if (!m_d->currentProject.isEmpty()) {
-		stopProject();
-	}
+    if (!m_d->currentProject.isEmpty()) {
+        stopProject();
+    }
 
-	m_d->mainWindow->clearStudio();
+    m_d->mainWindow->clearStudio();
 
-	m_d->currentProject = projectname;
+    m_d->currentProject = projectname;
 
-	if (!SaveManager::loadDatabase()) {
+    if (!SaveManager::loadDatabase()) {
         m_d->currentProject = "";
         QMessageBox::warning(NULL, "Oops", "The database is corrupted. Please contact to support.");
-		return false;
-	}
+        return false;
+    }
 
-	ToolsManager::downloadTools();
+    ToolsManager::downloadTools();
 
 	return true;
 }
