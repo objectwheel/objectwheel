@@ -55,7 +55,10 @@ class SaveManager : public QObject
 		static void setBindingProperty(const QString& id, const QString& property, const QString& expression);
 		static void removeProperty(const QString& id, const QString& property);
 
-	private:
+    public slots:
+        void idApplier();
+
+    private:
 		static SaveManagerPrivate* m_d;
 };
 
