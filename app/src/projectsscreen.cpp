@@ -211,7 +211,22 @@ void ProjectsScreen::handleLoadButtonClicked()
 		return;
     }
 
-    QTimer::singleShot(2000, [=] {
+	SplashScreen::setText("Loading project");
+    SplashScreen::show(true);
+	ProjectManager::stopProject();
+    if (!ProjectManager::startProject(projectName)) {
+        for (int i = model.rowCount(); i--;) {
+            if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
+                model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
+            }
+        }
+        SplashScreen::hide();
+        return;
+    }
+    SplashScreen::hide();
+    QTimer::singleShot(600, [=] {
+        SceneManager::show("studioScene", SceneManager::ToRight);
+
         for (int i = model.rowCount(); i--;) {
             if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
                 model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
@@ -220,12 +235,6 @@ void ProjectsScreen::handleLoadButtonClicked()
         model.set(listView->property("currentIndex").toInt(),
                   model.roleNames()[ProjectListModel::ActiveRole], true);
     });
-
-	SplashScreen::setText("Loading project");
-    SplashScreen::show(true, 3000); //FIXME:
-	ProjectManager::stopProject();
-	if (!ProjectManager::startProject(projectName)) qFatal("ProjectsScreen::handleBtnOkClicked() : Fatal Error.");
-    QTimer::singleShot(3600, [=] { SceneManager::show("studioScene", SceneManager::ToRight); });
 }
 
 void ProjectsScreen::refreshProjectList(const QString& activeProject)

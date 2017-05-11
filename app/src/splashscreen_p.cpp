@@ -8,7 +8,7 @@
 #include <QQmlComponent>
 #include <QQuickItem>
 
-#define DURATION 1000
+#define DURATION 600
 #define LOADING_TIME 800
 #define WAIT_EFFECT_INTERVAL 800
 #define SHOWER_TIMER_INTERVAL 200
