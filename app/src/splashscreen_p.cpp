@@ -18,7 +18,7 @@ using namespace Fit;
 SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
 	: QWidget(parent)
 	, loadingWidget(this)
-	, prevBusyIndicator(nullptr)
+    , busyIndicator(nullptr)
 	, waitEffectTimer(this)
 	, showRatio(1.0)
 {
@@ -100,32 +100,6 @@ void SplashScreenPrivate::hide()
 
 void SplashScreenPrivate::show(const bool animated)
 {
-	if (prevBusyIndicator) prevBusyIndicator->deleteLater();
-
-	QQmlComponent component(loadingWidget.engine());
-	component.setData(QByteArray().insert(0, QString("import QtQuick 2.7\n\
-					  import QtQuick.Controls 1.4\n\
-					  import QtQuick.Controls.Styles 1.4\n\
-					  BusyIndicator {\n\
-					  anchors.fill: parent\n\
-					  style: BusyIndicatorStyle {\n\
-					  indicator: Image {\n\
-						  visible: control.running\n\
-						  source: \"%1\"\n\
-						  width: parent.width\n\
-						  height: parent.height\n\
-						  RotationAnimator on rotation {\n\
-							  running: control.running\n\
-							  loops: Animation.Infinite\n\
-							  duration: %2\n\
-							  from: 0 ; to: 360\n\
-						  }\n\
-					  }\n\
-				  }}").arg(loadingImageFilename).arg(LOADING_TIME)), QUrl());
-	prevBusyIndicator = (QQuickItem*)component.create(loadingWidget.rootContext());
-	if (component.isError() || !prevBusyIndicator) qFatal("asa");
-	prevBusyIndicator->setParentItem(loadingWidget.rootObject());
-
 	waitEffectTimer.start();
 	loadingWidget.show();
 	showFullScreen();
@@ -144,10 +118,6 @@ void SplashScreenPrivate::paintEvent(QPaintEvent* event)
 	QPainter painter(this);
 	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::TextAntialiasing);
 	if (showRatio > 0.0 && showRatio < 1.0) {
-//		int caliber = qMax(width(), height()) / 2.0;
-//		QPainterPath path;
-//		path.addEllipse(rect().center(), caliber * showRatio, caliber * showRatio);
-//		painter.setClipPath(path);
 		painter.setOpacity(showRatio);
 	}
 	painter.setPen(Qt::NoPen);
@@ -166,5 +136,33 @@ void SplashScreenPrivate::paintEvent(QPaintEvent* event)
 
 	y += (loadingSize.height());
 	painter.setPen(textColor);
-	painter.drawText(0, y - fit(10), width(), fit(20), Qt::AlignCenter, text + waitEffectString);
+    painter.drawText(0, y - fit(10), width(), fit(20), Qt::AlignCenter, text + waitEffectString);
+}
+
+void SplashScreenPrivate::setLoadingImage(const QString& filename)
+{
+    if (busyIndicator) busyIndicator->deleteLater();
+    QQmlComponent component(loadingWidget.engine());
+    component.setData(QByteArray().insert(0, QString("import QtQuick 2.7\n\
+                      import QtQuick.Controls 1.4\n\
+                      import QtQuick.Controls.Styles 1.4\n\
+                      BusyIndicator {\n\
+                      anchors.fill: parent\n\
+                      style: BusyIndicatorStyle {\n\
+                      indicator: Image {\n\
+                          visible: control.running\n\
+                          source: \"%1\"\n\
+                          width: parent.width\n\
+                          height: parent.height\n\
+                          RotationAnimator on rotation {\n\
+                              running: control.running\n\
+                              loops: Animation.Infinite\n\
+                              duration: %2\n\
+                              from: 0 ; to: 360\n\
+                          }\n\
+                      }\n\
+                  }}").arg(filename).arg(LOADING_TIME)), QUrl());
+    busyIndicator = (QQuickItem*)component.create(loadingWidget.rootContext());
+    if (component.isError() || !busyIndicator) qFatal("SplashScreenPrivate::show : 0x01");
+    busyIndicator->setParentItem(loadingWidget.rootObject());
 }

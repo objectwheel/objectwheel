@@ -25,8 +25,7 @@ class SplashScreenPrivate : public QWidget
 		QColor textColor;
 		QBrush backgroundBrush;
         QQuickWidget loadingWidget;
-		QString loadingImageFilename;
-		QQuickItem* prevBusyIndicator;
+        QQuickItem* busyIndicator;
 		QTimer waitEffectTimer;
 		QString waitEffectString;
 		float showRatio;
@@ -36,6 +35,7 @@ class SplashScreenPrivate : public QWidget
 		explicit SplashScreenPrivate(QWidget *parent = 0);
 		bool eventFilter(QObject *watched, QEvent *event) override;
 		void paintEvent(QPaintEvent *event) override;
+        void setLoadingImage(const QString& filename);
 		float getShowRatio() const;
 		void setShowRatio(float value);
 		void hide();

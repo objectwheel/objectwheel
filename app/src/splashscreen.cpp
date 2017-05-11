@@ -60,6 +60,6 @@ namespace SplashScreen
 
 	void setLoadingImageFilename(const QString& loadingImageFilename)
 	{
-		d->loadingImageFilename = loadingImageFilename;
+        d->setLoadingImage(loadingImageFilename);
 	}
 }
