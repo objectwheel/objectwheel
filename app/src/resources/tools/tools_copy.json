@@ -19,14 +19,49 @@
         "toolUrl" : "qrc:/resources/tools/Rectangle.zip"
     },
 
+    "SpeakSurf" :
+    {
+        "toolUrl" : "qrc:/resources/tools/SpeakSurf.zip"
+    },
+
     "BusyIndicator" :
     {
         "toolUrl" : "qrc:/resources/tools/BusyIndicator.zip"
     },
 
+    "Text" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Text.zip"
+    },
+
     "FlatSwitch" :
     {
         "toolUrl" : "qrc:/resources/tools/FlatSwitch.zip"
+    },
+
+    "Slider" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Slider.zip"
+    },
+
+    "TextField" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TextField.zip"
+    },
+
+    "RadioButton" :
+    {
+        "toolUrl" : "qrc:/resources/tools/RadioButton.zip"
+    },
+
+    "ProgressBar" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ProgressBar.zip"
+    },
+
+	"CircularGauge" :
+    {
+        "toolUrl" : "qrc:/resources/tools/CircularGauge.zip"
     },
 
 	"Thermometer" :
@@ -64,6 +99,16 @@
         "toolUrl" : "qrc:/resources/tools/Compass.zip"
     },
 
+    "TextReader" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TextReader.zip"
+    },
+
+    "WebSurfer" :
+    {
+        "toolUrl" : "qrc:/resources/tools/WebSurfer.zip"
+    },
+
     "ComboBox" :
     {
     	"toolUrl" : "qrc:/resources/tools/ComboBox.zip"
@@ -77,6 +122,11 @@
     "RowLayout" :
     {
     	"toolUrl" : "qrc:/resources/tools/RowLayout.zip"
+    },
+
+    "ColumnLayout" :
+    {
+    	"toolUrl" : "qrc:/resources/tools/ColumnLayout.zip"
     },
 
     "GridLayout" :

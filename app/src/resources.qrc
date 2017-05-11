@@ -206,5 +206,6 @@
         <file>resources/images/build_inprogress@2x.png</file>
         <file>resources/images/bouncing_arrow.png</file>
         <file>resources/images/bouncing_arrow@2x.png</file>
+        <file>resources/tools/tools_copy.json</file>
     </qresource>
 </RCC>
