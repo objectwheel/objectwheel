@@ -90,27 +90,72 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
     keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
 
     if (userManager->exists(email)) {
-        if (DirLocker::canUnlock(userManager->userDirectory(email), keyHash)) {
-            SplashScreen::show(true);
-            auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
-            while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
-            if (ret.result()) {
-                if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
-                ProjectsScreen::refreshProjectList();
-                SplashScreen::hide();
-                SceneManager::show("projectsScene", SceneManager::ToLeft);
-                clearGUI();
+        if (DirLocker::locked(userManager->userDirectory(email))) {
+            if (DirLocker::canUnlock(userManager->userDirectory(email), keyHash)) {
+                SplashScreen::show(true);
+                auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
+                while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+                if (ret.result()) {
+                    if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
+                    ProjectsScreen::refreshProjectList();
+                    SplashScreen::hide();
+                    SceneManager::show("projectsScene", SceneManager::ToLeft);
+                    clearGUI();
+                } else {
+                    QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x01");
+                    QQmlProperty::write(toast, "base.width", 280);
+                    QQmlProperty::write(toast, "base.height", 65);
+                    QQmlProperty::write(toast, "duration", 5000);
+                    QMetaObject::invokeMethod(toast, "show");
+                    //FIXME: when sync part done.
+                }
             } else {
-                QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted.");
-                QQmlProperty::write(toast, "base.width", 280);
-                QQmlProperty::write(toast, "base.height", 65);
-                QQmlProperty::write(toast, "duration", 5000);
-                QMetaObject::invokeMethod(toast, "show");
-                //FIXME: when sync part done.
+                SplashScreen::hide();
+                QMetaObject::invokeMethod(loginScreen, "animateWrongPass");
             }
         } else {
-            SplashScreen::hide();
-            QMetaObject::invokeMethod(loginScreen, "animateWrongPass");
+            auto manager = new QNetworkAccessManager(this);
+            auto body = QString("{\"token\" : \"%1\"}").arg(userManager->generateToken(email, password));
+            auto url = QUrl("https://139.59.149.173/api/v1/registration/check");
+            QNetworkRequest http(url);
+            http.setRawHeader("content-type", "application/json");
+            QNetworkReply* reply = manager->post(http, QByteArray().insert(0, body));
+            connect(reply, &QNetworkReply::finished, [=] {
+                auto jobj = QJsonDocument::fromJson(reply->readAll()).object();
+                if (jobj["result"].toString() == "OK") {
+                    SplashScreen::show(true);
+                    auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
+                    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+                    if (ret.result()) {
+                        if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
+                        ProjectsScreen::refreshProjectList();
+                        SplashScreen::hide();
+                        SceneManager::show("projectsScene", SceneManager::ToLeft);
+                        clearGUI();
+                    } else {
+                        QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
+                        QQmlProperty::write(toast, "base.width", 280);
+                        QQmlProperty::write(toast, "base.height", 65);
+                        QQmlProperty::write(toast, "duration", 5000);
+                        QMetaObject::invokeMethod(toast, "show");
+                        //FIXME: when sync part done.
+                    }
+                } else if (jobj["result"].toString() == "EMAIL") {
+                    QMetaObject::invokeMethod(loginScreen, "animateWrongEmail");
+                } else if (jobj["result"].toString() == "PASSWORD") {
+                    QMetaObject::invokeMethod(loginScreen, "animateWrongPass");
+                }
+                reply->deleteLater();
+            });
+            connect(reply, (void (QNetworkReply::*)(QList<QSslError>))&QNetworkReply::sslErrors, [=] { reply->ignoreSslErrors(); });
+            connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=]
+            {
+                QQmlProperty::write(toast, "text.text", "Your local data is unencrypted therefore we cannot verify your account locally. Please connect to the internet for login.");
+                QQmlProperty::write(toast, "base.width", 330);
+                QQmlProperty::write(toast, "base.height", 95);
+                QQmlProperty::write(toast, "duration", 10000);
+                QMetaObject::invokeMethod(toast, "show");
+            });
         }
     } else {
         auto manager = new QNetworkAccessManager(this);
@@ -135,6 +180,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             } else if (jobj["result"].toString() == "PASSWORD") {
                 QMetaObject::invokeMethod(loginScreen, "animateWrongPass");
             }
+            reply->deleteLater();
         });
         connect(reply, (void (QNetworkReply::*)(QList<QSslError>))&QNetworkReply::sslErrors, [=] { reply->ignoreSslErrors(); });
         connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=]

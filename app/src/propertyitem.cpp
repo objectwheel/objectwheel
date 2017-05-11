@@ -90,7 +90,7 @@ void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlC
 		auto ctxId = context->nameForObject((QObject*)item);
 		if (item == (QQuickItem*)selectedItem) {
 			auto prevParent = SaveManager::parentalRelationship(ctxId);
-			SaveManager::removeParentalRelationship(ctxId);
+            SaveManager::removeParentalRelationship(ctxId);
 			SaveManager::addParentalRelationship(componentName, prevParent);
 			SaveManager::changeSave(ctxId, componentName);
             if (m_Items->indexOf(item) >= 0) {
@@ -324,7 +324,7 @@ void PropertyItem::fillId(QObject* const selectedItem, QQmlContext* const contex
 	label->setStyleSheet("color:white;");
 	label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-	QVBoxLayout* layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setSpacing(0);
 	layout->setContentsMargins(fit(5), fit(5), fit(7), fit(10));
 	layout->addWidget(label);

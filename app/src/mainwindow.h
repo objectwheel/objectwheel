@@ -64,6 +64,7 @@ class MainWindow : public QWidget
 		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index);
         void handleEditorOpenButtonClicked();
+        void cleanupObjectwheel();
 
 	signals:
 		void resized();

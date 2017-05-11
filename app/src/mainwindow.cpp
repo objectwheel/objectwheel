@@ -419,7 +419,7 @@ void MainWindow::SetupManagers()
 		m_d->sceneList->AddUrls(item, urls);
     }
     connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
-
+    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanupObjectwheel()));
     auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
     while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
     if (ret.result()) {
@@ -781,7 +781,12 @@ void MainWindow::handleEditorOpenButtonClicked()
 		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
         m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
 	}
-	m_d->qmlEditor->raise();
+    m_d->qmlEditor->raise();
+}
+
+void MainWindow::cleanupObjectwheel()
+{
+    qApp->processEvents(QEventLoop::AllEvents);
 }
 
 void MainWindow::clearStudio()

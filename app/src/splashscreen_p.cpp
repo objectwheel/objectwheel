@@ -90,7 +90,11 @@ void SplashScreenPrivate::hide()
     animation->setEasingCurve(QEasingCurve::OutCubic);
     animation->start();
     QObject::connect(animation, SIGNAL(valueChanged(QVariant)), this, SLOT(update()));
-    QObject::connect(animation, &QPropertyAnimation::finished, [this]{setHidden(true);showRatio=1;});
+    QObject::connect(animation, &QPropertyAnimation::finished, [this]
+    {
+        setHidden(true);
+        showRatio=1;
+    });
     QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 }
 

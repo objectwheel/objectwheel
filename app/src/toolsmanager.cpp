@@ -52,13 +52,13 @@ void ToolsManager::downloadTools(const QUrl& url)
 	else request.setUrl(QUrl::fromUserInput(TOOLS_URL));
 	request.setRawHeader("User-Agent", "objectwheel 1.0");
 
-	QEventLoop loop;
+    QSharedPointer<QEventLoop> loop(new QEventLoop);
 	QNetworkReply *reply = manager->get(request);
 	QObject::connect(reply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
 			[] { qFatal("downloadTools() : Network Error"); });
 	QObject::connect(reply, &QNetworkReply::sslErrors,
 			[] { qFatal("downloadTools() : Ssl Error"); });
-	QObject::connect(reply, &QNetworkReply::finished, [=,&loop]
+    QObject::connect(reply, &QNetworkReply::finished, [=]
 	{
 		QJsonDocument toolsDoc = QJsonDocument::fromJson(reply->readAll());
 		QJsonObject toolsObject = toolsDoc.object();
@@ -68,7 +68,7 @@ void ToolsManager::downloadTools(const QUrl& url)
 				addTool(toolName);
 			}
 			reply->deleteLater();
-			loop.quit();
+            if (loop) loop->quit();
 			return;
 		}
 
@@ -87,17 +87,17 @@ void ToolsManager::downloadTools(const QUrl& url)
 			QObject::connect(toolReply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>
 					(&QNetworkReply::error), [] { qFatal("downloadTools() : Network Error"); });
 			QObject::connect(toolReply, &QNetworkReply::sslErrors, [] { qFatal("downloadTools() : Ssl Error"); });
-			QObject::connect(toolReply, &QNetworkReply::finished, [=,&loop] {
+            QObject::connect(toolReply, &QNetworkReply::finished, [=] {
 				Zipper::extractZip(toolReply->readAll(), ProjectManager::projectDirectory(ProjectManager::currentProject()) + separator() + TOOLS_DIRECTORY + separator() + toolName);
 				addTool(toolName);
 				toolReply->deleteLater();
-				loop.quit();
+                if (loop) loop->quit();
 			});
 		}
 
 		reply->deleteLater();
 	});
-	loop.exec();
+    loop->exec();
 }
 
 void ToolsManager::addTool(const QString& name)

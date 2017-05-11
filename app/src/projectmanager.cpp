@@ -206,7 +206,7 @@ bool ProjectManager::startProject(const QString& projectname)
 
 	if (!SaveManager::loadDatabase()) {
         m_d->currentProject = "";
-        QMessageBox::warning(NULL, "Oops", "The database is corrupted.");
+        QMessageBox::warning(NULL, "Oops", "The database is corrupted. Please contact to support.");
 		return false;
 	}
 
