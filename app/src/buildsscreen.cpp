@@ -138,7 +138,7 @@ QString BuildsScreenPrivate::determineBuildExtension(const QString label)
     } else if (label.contains("raspi")) {
         return QString(".run");
     }  else if (label.contains("macos")) {
-        return QString(".zip");
+        return QString(".tar.gz");
     } else {
         return QString();
     }
