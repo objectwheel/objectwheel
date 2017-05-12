@@ -208,10 +208,11 @@ Item {
     }
     signal btnBuildClicked()
     property string currentBuildLabel: ""
-    property var enabledBuilds: [true, true, false, false, false, false, false, false, false]
-    property var buildLabels: ["android-armeabi-v7a", "android-x86", "ios", "windows-x86", "windows-x64", "macos", "linux-x86", "linux-x64", "raspi"]
-    property var platforms: ["Android 4.2+", "Android 4.2+", "IOS 10+", "Windows 7+", "Windows 7+", "macOS 10.10+", "Linux", "Linux", "Raspberry Pi"]
-    property var arches: ["Architecture: armeabi-v7a", "Architecture: x86", "Architectures: armv7s, arm64", "Architecture: x86", "Architecture: x64", "Architecture: x64", "Architecture: x86", "Architecture: x64", "Version: Pi 2+"]
-    property var platformIcons: ["qrc:///resources/images/android.png", "qrc:///resources/images/android.png", "qrc:///resources/images/ios.png", "qrc:///resources/images/windows.png", "qrc:///resources/images/windows.png",
-        "qrc:///resources/images/macos.png", "qrc:///resources/images/linux.png", "qrc:///resources/images/linux.png", "qrc:///resources/images/raspi.png"]
+    property var enabledBuilds: [true, true, true, false, false, false, false, false, false]
+    property var buildLabels: ["android-armeabi-v7a", "android-x86", "macos", "linux-x86", "linux-x64", "raspi", "ios", "windows-x86", "windows-x64"]
+    property var platforms: ["Android 4.2+", "Android 4.2+", "macOS 10.10+", "Linux", "Linux", "Raspberry Pi", "IOS 10+", "Windows 7+", "Windows 7+"]
+    property var arches: ["Architecture: armeabi-v7a", "Architecture: x86", "Architecture: x64", "Architecture: x86", "Architecture: x64", "Version: Pi 2+", "Architectures: armv7s, arm64", "Architecture: x86", "Architecture: x64"]
+    property var platformIcons: ["qrc:///resources/images/android.png", "qrc:///resources/images/android.png",
+        "qrc:///resources/images/macos.png", "qrc:///resources/images/linux.png", "qrc:///resources/images/linux.png",
+        "qrc:///resources/images/raspi.png", "qrc:///resources/images/ios.png", "qrc:///resources/images/windows.png", "qrc:///resources/images/windows.png"]
 }

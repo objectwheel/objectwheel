@@ -138,7 +138,7 @@ QString BuildsScreenPrivate::determineBuildExtension(const QString label)
     } else if (label.contains("raspi")) {
         return QString(".run");
     }  else if (label.contains("macos")) {
-        return QString(".dmg");
+        return QString(".zip");
     } else {
         return QString();
     }
@@ -184,6 +184,7 @@ void BuildsScreen::handleBuildButtonClicked()
 
     QNetworkRequest request(QUrl(URL + buildLabel));
     request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
+    request.setRawHeader("token", QByteArray().insert(0, QString("{\"token\" : \"%1\"}").arg(UserManager::currentSessionsToken())));
     request.setHeader(QNetworkRequest::ContentLengthHeader,body.size());
     m_d->reply = m_d->manager->post(request, body);
 
@@ -330,11 +331,34 @@ void BuildsScreen::handleBuildButtonClicked()
         if (e != QNetworkReply::OperationCanceledError) {
             QQmlProperty::write(m_d->swipeView, "currentIndex", 0);
             QMetaEnum metaEnum = QMetaEnum::fromType<QNetworkReply::NetworkError>();
-            QQmlProperty::write(m_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
-                                "<p>Either check your internet connection or contact to support.</p>");
-            QQmlProperty::write(m_d->toast, "base.width", 330);
-            QQmlProperty::write(m_d->toast, "base.height", 95);
-            QQmlProperty::write(m_d->toast, "duration", 10000);
+
+            if (e == QNetworkReply::AuthenticationRequiredError) {
+                QQmlProperty::write(m_d->toast, "text.text", "<p><b>Authentication Error</b></p>"
+                                    "<p>Your email address or password is wrong. Please contact to support.</p>");
+                QQmlProperty::write(m_d->toast, "base.width", 330);
+                QQmlProperty::write(m_d->toast, "base.height", 95);
+                QQmlProperty::write(m_d->toast, "duration", 10000);
+            } else if (e == QNetworkReply::ContentOperationNotPermittedError) {
+                QQmlProperty::write(m_d->toast, "text.text", "<p><b>Access Denied</b></p>"
+                                    "<p>Your account doesn't have any permission to use this feature, please upgrade your subscription plan.</p>");
+                QQmlProperty::write(m_d->toast, "base.width", 330);
+                QQmlProperty::write(m_d->toast, "base.height", 110);
+                QQmlProperty::write(m_d->toast, "duration", 10000);
+            }  else if (e == QNetworkReply::ServiceUnavailableError ||
+                        e == QNetworkReply::UnknownServerError ||
+                        e == QNetworkReply::InternalServerError ) {
+                QQmlProperty::write(m_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
+                                    "<p>Server error has occurred, please try again later.</p>");
+                QQmlProperty::write(m_d->toast, "base.width", 330);
+                QQmlProperty::write(m_d->toast, "base.height", 95);
+                QQmlProperty::write(m_d->toast, "duration", 10000);
+            } else {
+                QQmlProperty::write(m_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
+                                    "<p>Either check your internet connection or contact to support.</p>");
+                QQmlProperty::write(m_d->toast, "base.width", 330);
+                QQmlProperty::write(m_d->toast, "base.height", 95);
+                QQmlProperty::write(m_d->toast, "duration", 10000);
+            }
             QMetaObject::invokeMethod(m_d->toast, "show");
             m_d->exitButton.show();
         }
