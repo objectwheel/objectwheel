@@ -113,8 +113,8 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	titleBar = new TitleBar(centralWidget);
 	titleBar->setObjectName(QStringLiteral("titleBar"));
 	titleBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	titleBar->setMinimumSize(QSize(0, 48));
-	titleBar->setMaximumSize(QSize(16777215, 48));
+    titleBar->setMinimumSize(QSize(0, 46));
+    titleBar->setMaximumSize(QSize(16777215, 46));
 	verticalLayout->addWidget(titleBar);
 
 	projectsScreen = new ProjectsScreen(MainWindow);
@@ -132,24 +132,24 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxList->setObjectName(QStringLiteral("toolboxList"));
 	toolboxList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	toolboxList->setFocusPolicy(Qt::NoFocus);
-	toolboxList->setStyleSheet(QLatin1String("QListView {\n"
-											 "	border:0px solid white;\n"
-											 "	background:#566573;\n"
-											 "	padding-right:5px;\n"
-											 "}"
-											 "QListView::item {\n"
-											 "	color:white;\n"
+    toolboxList->setStyleSheet(QString("QListView {\n"
+                                             "	border:0px solid white;\n"
+                                             "	background:#566573;\n"
+                                             "	padding-right:%1px;\n"
+                                             "}"
+                                             "QListView::item {\n"
+                                             "	color:white;\n"
                                              "  border: 0px solid transparent;\n"
-											 "	padding:2px;\n"
-											 "}"
-											 "QListView::item:selected {\n"
-											 "	color:black;\n"
-											 "  background: #e0e4e7;\n"
-											 "  border: 0px solid transparent;\n"
-											 "  border-radius: 3px;\n"
-											 "	padding:2px;\n"
-											 "  margin-right: 2px;\n"
-											 "}"));
+                                             "	padding:%2px;\n"
+                                             "}"
+                                             "QListView::item:selected {\n"
+                                             "	color:black;\n"
+                                             "  background: #e0e4e7;\n"
+                                             "  border: 0px solid transparent;\n"
+                                             "  border-radius: %3px;\n"
+                                             "	padding:%4px;\n"
+                                             "  margin-right: %4px;\n"
+                                             "}").arg(5).arg(2).arg(3).arg(2));
 	toolboxList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	toolboxList->setDragEnabled(true);
 	toolboxList->setDragDropMode(QAbstractItemView::InternalMove);
@@ -162,25 +162,25 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
     sceneList->setObjectName(QStringLiteral("sceneList"));
     sceneList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sceneList->setFocusPolicy(Qt::NoFocus);
-    sceneList->setStyleSheet(QLatin1String("QListView {\n"
+    sceneList->setStyleSheet(QString("QListView {\n"
                                            "	border:0px solid white;\n"
                                            "	background:#566573;\n"
-                                           "	padding-right:5px;\n"
-                                           "    padding-left:10px;\n"
+                                           "	padding-right:%1px;\n"
+                                           "    padding-left:%2px;\n"
                                            "}"
                                            "QListView::item {\n"
                                            "	color:white;\n"
                                            "    border: 0px solid transparent;\n"
-                                           "	padding:5px;\n"
+                                           "	padding:%3px;\n"
                                            "}"
                                            "QListView::item:selected {\n"
                                            "	color:black;\n"
                                            "    background: #e0e4e7;\n"
                                            "    border: 0px solid transparent;\n"
-                                           "    border-radius: 3px;\n"
-                                           "	padding:2px;\n"
-                                           "    margin-right: 2px;\n"
-                                           "}"));
+                                           "    border-radius: %4px;\n"
+                                           "	padding:%5px;\n"
+                                           "    margin-right: %5px;\n"
+                                           "}").arg(5).arg(10).arg(5).arg(3).arg(2));
     sceneList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     sceneList->setDragEnabled(false);
     sceneList->setDragDropMode(QAbstractItemView::NoDragDrop);
@@ -199,7 +199,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxAddButton->setColor("#1e8145");
 	toolboxAddButton->setFixedSize(fit(20),fit(20));
 	toolboxAddButton->setRadius(fit(4));
-	toolboxAddButton->setIconSize(QSize(fit(16),fit(16)));
+    toolboxAddButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxAddButton->setIcon(QIcon(":/resources/images/plus.png"));
 	QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxAddButtonClicked()) );
 
@@ -208,7 +208,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxRemoveButton->setColor("#c03638");
 	toolboxRemoveButton->setFixedSize(fit(20),fit(20));
 	toolboxRemoveButton->setRadius(fit(4));
-	toolboxRemoveButton->setIconSize(QSize(fit(16),fit(16)));
+    toolboxRemoveButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxRemoveButton->setIcon(QIcon(":/resources/images/minus.png"));
 	toolboxRemoveButton->setDisabled(true);
 	QObject::connect(toolboxRemoveButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxRemoveButtonClicked()) );
@@ -220,17 +220,17 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxEditButton->setRadius(fit(4));
     toolboxEditButton->setCheckedColor(QColor("#2b5796").darker(    110));
 	toolboxEditButton->setCheckable(true);
-	toolboxEditButton->setIconSize(QSize(fit(16),fit(16)));
+    toolboxEditButton->setIconSize(QSize(fit(13),fit(13)));
 	toolboxEditButton->setIcon(QIcon(":/resources/images/edit.png"));
 	toolboxEditButton->setDisabled(true);
 	QObject::connect(toolboxEditButton, SIGNAL(toggled(bool)), MainWindow, SLOT(toolboxEditButtonToggled(bool)) );
 
 	toolboxResetButton = new FlatButton;
 	toolboxResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	toolboxResetButton->setColor("#ee8800");
-	toolboxResetButton->setFixedSize(fit(20),fit(20));
+    toolboxResetButton->setColor("#ee8800");
+    toolboxResetButton->setFixedSize(fit(20),fit(20));
 	toolboxResetButton->setRadius(fit(4));
-	toolboxResetButton->setIconSize(QSize(fit(16),fit(16)));
+    toolboxResetButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
 	QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxResetButtonClicked()) );
 
@@ -239,7 +239,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxImportButton->setColor("#1e8145");
 	toolboxImportButton->setFixedSize(fit(20),fit(20));
 	toolboxImportButton->setRadius(fit(4));
-	toolboxImportButton->setIconSize(QSize(fit(16),fit(16)));
+    toolboxImportButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxImportButton->setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(-90))));
 	QObject::connect(toolboxImportButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxImportButtonClicked()) );
 
@@ -248,7 +248,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxExportButton->setColor("#c03638");
 	toolboxExportButton->setFixedSize(fit(20),fit(20));
 	toolboxExportButton->setRadius(fit(4));
-	toolboxExportButton->setIconSize(QSize(fit(16),fit(16)));
+    toolboxExportButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxExportButton->setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(90))));
 	toolboxExportButton->setDisabled(true);
 	QObject::connect(toolboxExportButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxExportButtonClicked()) );

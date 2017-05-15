@@ -136,6 +136,7 @@ QString BinaryVersionToolTipEventFilter::toolVersion(const QString &binary, cons
 //    if (response.result != SynchronousProcessResponse::Finished)
 //        return QString();
 //    return response.allOutput();
+    return QString();
 }
 
 // Extends BinaryVersionToolTipEventFilter to prepend the existing pathchooser
@@ -208,6 +209,7 @@ QString PathChooserPrivate::expandedPath(const QString &input) const
 //        break;
 //    }
 //    return path;
+    return QString();
 }
 
 PathChooser::PathChooser(QWidget *parent) :
@@ -340,6 +342,7 @@ QString PathChooser::expandedDirectory(const QString &input, const Environment &
 //    if (!baseDir.isEmpty() && QFileInfo(path).isRelative())
 //        return QFileInfo(baseDir + QLatin1Char('/') + path).absoluteFilePath();
 //    return path;
+    return QString();
 }
 
 void PathChooser::setPath(const QString &path)

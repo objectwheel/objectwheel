@@ -371,6 +371,8 @@ TitleBar::TitleBar(QWidget *parent)
     m_Title->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_Menu->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_Settings->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_Menu->setFocusPolicy(Qt::NoFocus);
+    m_Settings->setFocusPolicy(Qt::NoFocus);
 
     QPixmap settings;
     settings.loadFromData(m_SettingsIconData, sizeof(m_SettingsIconData));
@@ -407,10 +409,10 @@ TitleBar::TitleBar(QWidget *parent)
     m_ShadowWidgetBackground->setStyleSheet(QString("background:rgb(%1,%2,%3);").arg(m_ShadowWidgetColor.red())
                                             .arg(m_ShadowWidgetColor.green()).arg(m_ShadowWidgetColor.blue()));
     m_ShadowWidgetBackground->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    m_ShadowWidgetBackground->setMinimumHeight(fit(5));
-    m_ShadowWidgetBackground->setMaximumHeight(fit(5));
+    m_ShadowWidgetBackground->setMinimumHeight(fit(3));
+    m_ShadowWidgetBackground->setMaximumHeight(fit(3));
     m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,stop:0 "
-                                  "rgba(0, 0, 0, 100), stop:0.6 rgba(0, 0, 0, 20), stop:1 rgba(0, 0, 0, 0));");
+                                  "rgba(0, 0, 0, 115), stop:0.6 rgba(0, 0, 0, 70), stop:1 rgba(0, 0, 0, 0));");
 
     m_Layout->setSpacing(0);
     m_Layout->setContentsMargins(0, 0, 0, 0);

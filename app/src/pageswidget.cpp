@@ -87,7 +87,7 @@ PagesWidgetPrivate::PagesWidgetPrivate(PagesWidget* p)
 	addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	addButton.setColor("#1e8145");
 	addButton.setFixedSize(fit(30),fit(30));
-    addButton.setRadius(fit(14));
+    addButton.setRadius(fit(13));
 	addButton.setIconSize(QSize(fit(16),fit(16)));
 	addButton.setIcon(QIcon(":/resources/images/plus.png"));
 	QObject::connect(&addButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {addButtonClicked();});
@@ -95,7 +95,7 @@ PagesWidgetPrivate::PagesWidgetPrivate(PagesWidget* p)
 	removeButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	removeButton.setColor("#c03638");
 	removeButton.setFixedSize(fit(30),fit(30));
-    removeButton.setRadius(fit(14));
+    removeButton.setRadius(fit(13));
 	removeButton.setIconSize(QSize(fit(16),fit(16)));
 	removeButton.setIcon(QIcon(":/resources/images/minus.png"));
 	removeButton.setDisabled(true);
@@ -104,7 +104,7 @@ PagesWidgetPrivate::PagesWidgetPrivate(PagesWidget* p)
 	saveButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	saveButton.setColor("#2b5796");
 	saveButton.setFixedSize(fit(30),fit(30));
-    saveButton.setRadius(fit(14));
+    saveButton.setRadius(fit(13));
 	saveButton.setIconSize(QSize(fit(16),fit(16)));
 	saveButton.setIcon(QIcon(":/resources/images/save-icon.png"));
 	saveButton.setDisabled(true);

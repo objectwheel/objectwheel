@@ -19,7 +19,7 @@ Item {
         Rectangle {
             id: btnLeft
             anchors { left: parent.left; top: parent.top; bottom: parent.bottom}
-            width: parent.width / 2.0
+            width: btnRight.width
             visible: false
             gradient: Gradient {
                 GradientStop { position: 0.0; color: "#5bc5f8" }
@@ -58,7 +58,7 @@ Item {
             id: btnRight
             enabled: !loadButtonDisabled
             anchors { right: parent.right; top: parent.top; bottom: parent.bottom}
-            width: parent.width / 2.0
+            width: Math.floor(parent.width / 2.0)
             visible: false
             gradient: Gradient {
                 GradientStop { position: 0.0; color: loadButtonDisabled ? "#888888" : "#8bbb56" }
@@ -119,8 +119,8 @@ Item {
         anchors.fill: opMask
         horizontalOffset: 0
         verticalOffset: Fit.fit(1)
-        radius: Fit.fit(6.0)
-        samples: Fit.fit(14)
+        radius: (6.0)
+        samples: (14)
         color: "#80000000"
         source: opMask
     }

@@ -24,9 +24,9 @@ LineEdit::LineEdit(QWidget* parent)
 	, m_d(new LineEditPrivate)
 {
 	QGraphicsDropShadowEffect* shadowEffect = new QGraphicsDropShadowEffect;
-	shadowEffect->setBlurRadius(fit(7));
-	shadowEffect->setOffset(0, fit(4));
-	shadowEffect->setColor(QColor(0, 0, 0, 50));
+    shadowEffect->setBlurRadius(fit(5));
+    shadowEffect->setOffset(0, fit(3));
+    shadowEffect->setColor(QColor(0, 0, 0, 60));
 	setGraphicsEffect(shadowEffect);
 
 	m_d->lineEdit.setStyleSheet(QString("background:white;border:none; border-top-right-radius:%1px;"

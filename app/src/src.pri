@@ -1,26 +1,26 @@
 INCLUDEPATH               += $$PWD
 
 HEADERS                   += $$PWD/mainwindow.h \
-							 $$PWD/mainwindow_p.h \
+                             $$PWD/mainwindow_p.h \
                              $$PWD/listwidget.h \
                              $$PWD/covermenu.h \
                              $$PWD/titlebar.h \
                              $$PWD/flatbutton.h \
-							 $$PWD/propertieswidget.h \
-							 $$PWD/propertyitem.h \
-							 $$PWD/css.h \
-							 $$PWD/switch.h \
-							 $$PWD/container.h \
-							 $$PWD/bindingwidget.h \
-							 $$PWD/lineedit.h \
-							 $$PWD/combobox.h \
-							 $$PWD/scrollarea.h \
-							 $$PWD/about.h \
-							 $$PWD/bubblehead.h \
-							 $$PWD/qmleditor.h \
-							 $$PWD/pageswidget.h \
-							 $$PWD/splashscreen.h \
-							 $$PWD/splashscreen_p.h \
+                             $$PWD/propertieswidget.h \
+                             $$PWD/propertyitem.h \
+                             $$PWD/css.h \
+                             $$PWD/switch.h \
+                             $$PWD/container.h \
+                             $$PWD/bindingwidget.h \
+                             $$PWD/lineedit.h \
+                             $$PWD/combobox.h \
+                             $$PWD/scrollarea.h \
+                             $$PWD/about.h \
+                             $$PWD/bubblehead.h \
+                             $$PWD/qmleditor.h \
+                             $$PWD/pageswidget.h \
+                             $$PWD/splashscreen.h \
+                             $$PWD/splashscreen_p.h \
                              $$PWD/usermanager.h \
                              $$PWD/savemanager.h \
                              $$PWD/projectmanager.h \
@@ -30,7 +30,10 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/scenemanager.h \
                              $$PWD/projectsscreen.h \
                              $$PWD/loginscreen.h \
-    $$PWD/buildsscreen.h
+                             $$PWD/buildsscreen.h \
+                             $$PWD/removertick.h \
+                             $$PWD/resizertick.h \
+                             $$PWD/rotatortick.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -38,21 +41,21 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/covermenu.cpp \
                              $$PWD/titlebar.cpp \
                              $$PWD/flatbutton.cpp \
-							 $$PWD/propertieswidget.cpp \
-							 $$PWD/propertyitem.cpp \
-							 $$PWD/css.cpp \
-							 $$PWD/switch.cpp \
-							 $$PWD/container.cpp \
-							 $$PWD/bindingwidget.cpp \
-							 $$PWD/lineedit.cpp \
-							 $$PWD/combobox.cpp \
-							 $$PWD/scrollarea.cpp \
-							 $$PWD/about.cpp \
-							 $$PWD/bubblehead.cpp \
-							 $$PWD/qmleditor.cpp \
-							 $$PWD/pageswidget.cpp \
-							 $$PWD/splashscreen.cpp \
-							 $$PWD/splashscreen_p.cpp \
+                             $$PWD/propertieswidget.cpp \
+                             $$PWD/propertyitem.cpp \
+                             $$PWD/css.cpp \
+                             $$PWD/switch.cpp \
+                             $$PWD/container.cpp \
+                             $$PWD/bindingwidget.cpp \
+                             $$PWD/lineedit.cpp \
+                             $$PWD/combobox.cpp \
+                             $$PWD/scrollarea.cpp \
+                             $$PWD/about.cpp \
+                             $$PWD/bubblehead.cpp \
+                             $$PWD/qmleditor.cpp \
+                             $$PWD/pageswidget.cpp \
+                             $$PWD/splashscreen.cpp \
+                             $$PWD/splashscreen_p.cpp \
                              $$PWD/usermanager.cpp \
                              $$PWD/savemanager.cpp \
                              $$PWD/projectmanager.cpp \
@@ -62,7 +65,10 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/scenemanager.cpp \
                              $$PWD/projectsscreen.cpp \
                              $$PWD/loginscreen.cpp \
-    $$PWD/buildsscreen.cpp
+                             $$PWD/buildsscreen.cpp \
+                             $$PWD/resizertick.cpp \
+                             $$PWD/rotatortick.cpp \
+                             $$PWD/removertick.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
@@ -75,6 +81,5 @@ DISTFILES                 += android/AndroidManifest.xml \
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
-include($$PWD/ticks/ticks.pri)
 include($$PWD/components/components.pri)
 include($$PWD/platform_spesific/ios/ios.pri)

@@ -293,6 +293,7 @@ QByteArray MacroExpander::expand(const QByteArray &stringWithVariables) const
 QString MacroExpander::expandProcessArgs(const QString &argsWithVariables) const
 {
 //    return QtcProcess::expandMacros(argsWithVariables, d);
+    return QString();
 }
 
 static QByteArray fullPrefix(const QByteArray &prefix)

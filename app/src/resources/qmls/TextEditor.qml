@@ -26,6 +26,7 @@ Flickable {
                 color: "#e0e0e0"
                 width: maxWidth
                 height: editor.cursorRectangle.height
+                font.pixelSize: editor.font.pixelSize
                 horizontalAlignment: TextEdit.AlignRight
                 verticalAlignment: TextEdit.AlignVCenter
                 font.bold: Qt.colorEqual(bgcolor, "#c74c3c") ? true : false

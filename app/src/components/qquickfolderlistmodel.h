@@ -62,7 +62,7 @@ class QQuickFolderListModel : public QAbstractListModel, public QQmlParserStatus
 
 //![class props]
     Q_PROPERTY(QUrl folder READ folder WRITE setFolder NOTIFY folderChanged)
-    Q_PROPERTY(QUrl rootFolder READ rootFolder WRITE setRootFolder)
+    Q_PROPERTY(QString rootFolder READ rootFolder WRITE setRootFolder)
     Q_PROPERTY(QUrl parentFolder READ parentFolder NOTIFY folderChanged)
     Q_PROPERTY(QStringList nameFilters READ nameFilters WRITE setNameFilters)
 	Q_PROPERTY(QStringList hiddenSuffixes READ hiddenSuffixes WRITE setHiddenSuffixes)
@@ -108,8 +108,8 @@ public:
 //![prop funcs]
     QUrl folder() const;
     void setFolder(const QUrl &folder);
-    QUrl rootFolder() const;
-    void setRootFolder(const QUrl &path);
+    QString rootFolder() const;
+    void setRootFolder(const QString &path);
 
     QUrl parentFolder() const;
 

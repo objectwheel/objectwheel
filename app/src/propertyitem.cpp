@@ -48,7 +48,7 @@ void PropertyItem::setUrlList(QList<QUrl>* urlList)
 
 const QPair<QMetaProperty, QObject*>& PropertyItem::property() const
 {
-	return m_Property;
+    return m_Property;
 }
 
 void PropertyItem::applyValue(const QVariant& value, QQmlContext* const ctx)

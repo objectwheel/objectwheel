@@ -17,8 +17,8 @@ Item {
         anchors.fill: base
         horizontalOffset: 0
         verticalOffset: Fit.fit(1)
-        radius: Fit.fit(7.0)
-        samples: Fit.fit(25)
+        radius: (7.0)
+        samples: (25)
         color: "#20000000"
         source: base
     }
@@ -105,8 +105,8 @@ Item {
                         anchors.fill: opMask
                         horizontalOffset: 0
                         verticalOffset: Fit.fit(1)
-                        radius: Fit.fit(6.0)
-                        samples: Fit.fit(25)
+                        radius: (6.0)
+                        samples: (25)
                         color: "#70000000"
                         source: opMask
                         visible: active

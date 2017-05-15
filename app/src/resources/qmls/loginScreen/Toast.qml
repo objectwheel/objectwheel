@@ -33,8 +33,8 @@ Item {
             anchors.fill: img
             horizontalOffset: 0
             verticalOffset: 0
-            radius: Fit.fit(7)
-            samples: Fit.fit(26)
+            radius: (7)
+            samples: (26)
             color: "#85000000"
             source: img
         }
@@ -60,8 +60,8 @@ Item {
         anchors.fill: base
         horizontalOffset: 0
         verticalOffset: Fit.fit(1)
-        radius: Fit.fit(10)
-        samples: Fit.fit(14)
+        radius: (10)
+        samples: (14)
         color: "#40000000"
         source: base
     }

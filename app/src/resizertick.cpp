@@ -61,7 +61,7 @@ void ResizerTick::handleSavingTimeout()
 	m_SavingTimer.stop();
 }
 
-void ResizerTick::paintEvent(QPaintEvent* const)
+void ResizerTick::paintEvent(QPaintEvent*)
 {
 	QPainter p(this);
 	p.setRenderHint(QPainter::Antialiasing);
@@ -71,7 +71,7 @@ void ResizerTick::paintEvent(QPaintEvent* const)
 	p.drawPixmap(rect().adjusted(2, 2, -2, -2), icon().pixmap(size() - QSize(4, 4)));
 }
 
-void ResizerTick::mouseMoveEvent(QMouseEvent* const event)
+void ResizerTick::mouseMoveEvent(QMouseEvent* event)
 {
 	if (!(event->buttons() & Qt::LeftButton))
 		return;
@@ -91,7 +91,7 @@ void ResizerTick::mouseMoveEvent(QMouseEvent* const event)
 	emit ItemResized(m_TrackedItem);
 }
 
-void ResizerTick::mousePressEvent(QMouseEvent* const event)
+void ResizerTick::mousePressEvent(QMouseEvent* event)
 {
 	m_HotspotDifference = event->pos();
 }

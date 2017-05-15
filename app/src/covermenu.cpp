@@ -95,29 +95,29 @@ void CoverMenu::fixShadow()
 		case FromLeft:
 			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:1, y1:0.5, x2:0, y2:0.5,stop:0 "
 										  "rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
-			m_ShadowWidget->move(width() - (int)fit(8), 0);
-			m_ShadowWidget->resize(fit(8), height());
+            m_ShadowWidget->move(width() - (int)fit(4), 0);
+            m_ShadowWidget->resize(fit(4), height());
 			break;
 
 		case FromRight:
 			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5,stop:0 "
 										  "rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
 			m_ShadowWidget->move(0, 0);
-			m_ShadowWidget->resize(fit(8), height());
+            m_ShadowWidget->resize(fit(4), height());
 			break;
 
 		case FromTop:
 			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0,stop:0 "
 										  "rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
-			m_ShadowWidget->move(0, height() - (int)fit(8));
-			m_ShadowWidget->resize(width(), fit(8));
+            m_ShadowWidget->move(0, height() - (int)fit(4));
+            m_ShadowWidget->resize(width(), fit(4));
 			break;
 
 		case FromBottom:
 			m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,stop:0 "
 										  "rgba(0, 0, 0, 120), stop:0.6 rgba(0, 0, 0, 30), stop:1 rgba(0, 0, 0, 0));");
 			m_ShadowWidget->move(0, 0);
-			m_ShadowWidget->resize(width(), fit(8));
+            m_ShadowWidget->resize(width(), fit(4));
 			break;
 
 		default:

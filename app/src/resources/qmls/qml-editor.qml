@@ -65,9 +65,8 @@ Item {
             clearCacheFor(name, isdir)
         }
         explorerListView.listView.onCurrentItemChanged: {
-            var urlval = explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileURL")
+            var urlval = explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "filePath")
             var isdir = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
-            urlval = urlval.toString().replace("file://", "")
             if (!isdir && isTextFile(urlval)) {
                 setUrl(urlval)
                 imageViewer.visible = false
@@ -568,7 +567,7 @@ Item {
         var clearSaves = getClearSaves()
         flushCachesToDisk()
 
-        if (!componentManager.build(fileExplorer.explorerListView.folderListModel.rootFolder.toString() + "/main.qml")) {
+        if (!componentManager.build(fileExplorer.explorerListView.folderListModel.rootFolder.toString().replace("file://", "") + "/main.qml")) {
             var errorString = componentManager.error()
             if (errorString === "") {
                 errorMessage.text = "Error code 0x54."

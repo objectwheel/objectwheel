@@ -10,7 +10,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QGraphicsDropShadowEffect>
 #include <QQmlContext>
 #include <QIcon>
 

@@ -135,7 +135,7 @@ void MainWindow::SetupGui()
 	/* Add Title Bar */
 	fit(m_d->titleBar, Fit::Height, true);
 	m_d->titleBar->setText("Objectwheel Studio");
-	m_d->titleBar->setColor("#2b5796");
+    m_d->titleBar->setColor("#2b5796");
 	m_d->titleBar->setShadowColor("#e0e4e7");
 	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
 	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
@@ -178,9 +178,9 @@ void MainWindow::SetupGui()
     leftToolbar->resize(leftToolbar->width(), 43);
 	fit(leftToolbar, Fit::Height, true);
 	QGraphicsDropShadowEffect* toolbarShadowEffect = new QGraphicsDropShadowEffect;
-	toolbarShadowEffect->setBlurRadius(fit(7));
-	toolbarShadowEffect->setOffset(0, fit(4));
-	toolbarShadowEffect->setColor(QColor(0, 0, 0, 50));
+    toolbarShadowEffect->setBlurRadius(fit(4));
+    toolbarShadowEffect->setOffset(0, fit(2));
+    toolbarShadowEffect->setColor(QColor(0, 0, 0, 60));
 	leftToolbar->setGraphicsEffect(toolbarShadowEffect);
 
 	QRadioButton* toolboxButton = new QRadioButton;
@@ -332,9 +332,9 @@ void MainWindow::SetupGui()
 	sceneListTitle->setText("◉ Menu");
 	sceneListTitle->setAlignment(Qt::AlignCenter);
 	QGraphicsDropShadowEffect* sceneListTitleShadowEffect = new QGraphicsDropShadowEffect;
-	sceneListTitleShadowEffect->setBlurRadius(fit(5));
-	sceneListTitleShadowEffect->setOffset(0, fit(4));
-	sceneListTitleShadowEffect->setColor(QColor(0, 0, 0, 60));
+    sceneListTitleShadowEffect->setBlurRadius(fit(4));
+    sceneListTitleShadowEffect->setOffset(0, fit(2));
+    sceneListTitleShadowEffect->setColor(QColor(0, 0, 0, 60));
 	sceneListTitle->setGraphicsEffect(sceneListTitleShadowEffect);
 	sceneListTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	sceneListTitle->setFixedHeight(fit(43));
@@ -462,6 +462,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 			{
 				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
 				event->accept();
+                qApp->processEvents();
 
 				if (nullptr != pressedItem)
 				{
@@ -884,11 +885,14 @@ void MainWindow::on_editButton_clicked()
 
 void MainWindow::on_playButton_clicked()
 {
+    static bool editModeState;
+    editModeState = m_d->editMode;
     if (m_d->editMode) { // Edit mode on
         for (auto item : m_d->m_Items) {
             item->setEnabled(true);
         }
         HideSelectionTools();
+        m_d->editMode = false;
     }
     m_d->designWidget->setParent(this);
     SceneManager::addScene("playScene", m_d->designWidget);
@@ -910,7 +914,6 @@ void MainWindow::on_playButton_clicked()
     exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));
 #endif
     });
-    fit(exitButton, Fit::WidthHeight);
     exitButton->show();
 
     connect(exitButton, &FlatButton::clicked, [=]{
@@ -918,6 +921,7 @@ void MainWindow::on_playButton_clicked()
         m_d->verticalLayout->insertWidget(1, m_d->designWidget);
         SceneManager::removeScene("playScene");
         SceneManager::setCurrent("studioScene");
+        m_d->editMode = editModeState;
     });
 }
 

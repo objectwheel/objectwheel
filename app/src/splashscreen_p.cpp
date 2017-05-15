@@ -148,8 +148,10 @@ void SplashScreenPrivate::setLoadingImage(const QString& filename)
                       import QtQuick.Controls.Styles 1.4\n\
                       BusyIndicator {\n\
                       anchors.fill: parent\n\
+                      antialiasing: true\n\
                       style: BusyIndicatorStyle {\n\
                       indicator: Image {\n\
+                          antialiasing: true\n\
                           visible: control.running\n\
                           source: \"%1\"\n\
                           width: parent.width\n\

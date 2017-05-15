@@ -49,9 +49,9 @@ BubbleHeadPrivate::BubbleHeadPrivate(BubbleHead* p)
 	: parent(p)
 {
 	moved = false;
-    shadowEffect.setBlurRadius(fit(8));
-    shadowEffect.setOffset(0, fit(2.0));
-    shadowEffect.setColor("#88000000");
+    shadowEffect.setBlurRadius(fit(4));
+    shadowEffect.setOffset(0, fit(1.5));
+    shadowEffect.setColor("#70000000");
 	parent->setGraphicsEffect(&shadowEffect);
 	parent->setCursor(Qt::PointingHandCursor);
     parent->setCheckable(true);

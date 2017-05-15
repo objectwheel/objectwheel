@@ -6,9 +6,9 @@ Item {
     property var targets: []
     property var places:  []
     property int offset: 3 * dpi
-    property real radius: 6.0 * dpi
-    property int samples: 15 * dpi
-    property color color: "#40000000"
+    property real radius: 6.0
+    property int samples: 15
+    property color color: "#28000000"
 
     id: root
 

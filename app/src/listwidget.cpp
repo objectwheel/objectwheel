@@ -53,14 +53,14 @@ QMimeData* ListWidget::mimeData(const QList<QListWidgetItem*> items) const
 	return data;
 }
 
-void ListWidget::mousePressEvent(QMouseEvent* const event)
+void ListWidget::mousePressEvent(QMouseEvent* event)
 {
 	m_AngleList.clear();
 	m_PreviousPoint = event->pos();
 	QListWidget::mousePressEvent(event);
 }
 
-void ListWidget::mouseMoveEvent(QMouseEvent* const event)
+void ListWidget::mouseMoveEvent(QMouseEvent *event)
 {
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WINPHONE)
 	/* Make dragging if direction is right out of the list widget */

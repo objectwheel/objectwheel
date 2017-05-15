@@ -25,6 +25,8 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
+using namespace Fit;
+
 static bool autologin = false;
 QQuickItem* loginScreen;
 QQuickItem* emailTextInput;
@@ -62,8 +64,8 @@ void LoginScreen::handleAutoLoginButtonClicked()
     autologin = !autologin;
     if (autologin) {
         QQmlProperty::write(toast, "text.text", "We do not recommend automatic login for security reasons.");
-        QQmlProperty::write(toast, "base.width", 280);
-        QQmlProperty::write(toast, "base.height", 65);
+        QQmlProperty::write(toast, "base.width", qFloor(fit(280)));
+        QQmlProperty::write(toast, "base.height", qFloor(fit(65)));
         QQmlProperty::write(toast, "duration", 5000);
         QMetaObject::invokeMethod(toast, "show");
     }
@@ -103,8 +105,8 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                     clearGUI();
                 } else {
                     QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x01");
-                    QQmlProperty::write(toast, "base.width", 280);
-                    QQmlProperty::write(toast, "base.height", 65);
+                    QQmlProperty::write(toast, "base.width", qFloor(fit(280)));
+                    QQmlProperty::write(toast, "base.height", qFloor(fit(65)));
                     QQmlProperty::write(toast, "duration", 5000);
                     QMetaObject::invokeMethod(toast, "show");
                     //FIXME: when sync part done.
@@ -134,8 +136,8 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                         clearGUI();
                     } else {
                         QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
-                        QQmlProperty::write(toast, "base.width", 280);
-                        QQmlProperty::write(toast, "base.height", 65);
+                        QQmlProperty::write(toast, "base.width", qFloor(fit(280)));
+                        QQmlProperty::write(toast, "base.height", qFloor(fit(65)));
                         QQmlProperty::write(toast, "duration", 5000);
                         QMetaObject::invokeMethod(toast, "show");
                         //FIXME: when sync part done.
@@ -151,8 +153,8 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=]
             {
                 QQmlProperty::write(toast, "text.text", "Your local data is unencrypted therefore we cannot verify your account locally. Please connect to the internet for login.");
-                QQmlProperty::write(toast, "base.width", 330);
-                QQmlProperty::write(toast, "base.height", 95);
+                QQmlProperty::write(toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(toast, "base.height", qFloor(fit(95)));
                 QQmlProperty::write(toast, "duration", 10000);
                 QMetaObject::invokeMethod(toast, "show");
             });
@@ -186,8 +188,8 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
         connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=]
         {
             QQmlProperty::write(toast, "text.text", "In order to activate your account, internet connection is required for the first time login.");
-            QQmlProperty::write(toast, "base.width", 330);
-            QQmlProperty::write(toast, "base.height", 80);
+            QQmlProperty::write(toast, "base.width", qFloor(fit(330)));
+            QQmlProperty::write(toast, "base.height", qFloor(fit(80)));
             QQmlProperty::write(toast, "duration", 10000);
             QMetaObject::invokeMethod(toast, "show");
         });

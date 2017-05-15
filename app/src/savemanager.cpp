@@ -19,6 +19,7 @@
 #include <bindingwidget.h>
 #include <qmleditor.h>
 #include <QApplication>
+#include <QFileSystemWatcher>
 
 #define SAVE_DIRECTORY "dashboard"
 #define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
@@ -44,6 +45,7 @@ class SaveManagerPrivate
 		void createPages(const QJsonArray& pages);
 		bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages);
         void fillBindings(const QJsonObject& bindingSaves);
+        void clearQmlCaches();
 
 	public:
 		SaveManager* parent = nullptr;
@@ -51,6 +53,7 @@ class SaveManagerPrivate
 		ModelManagerInterface* modelManager;
         QTimer applierTimer;
         QString id, newId;
+        QFileSystemWatcher fsWatcher;
 };
 
 SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
@@ -61,6 +64,8 @@ SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
 	modelManager = new ModelManagerInterface;
     applierTimer.setInterval(500);
     QObject::connect(&applierTimer, SIGNAL(timeout()), parent, SLOT(idApplier()));
+    QObject::connect(&fsWatcher, (void(QFileSystemWatcher::*)(QString))(&QFileSystemWatcher::directoryChanged),
+                     [=](QString){ qDebug() << "assasas"; clearQmlCaches(); });
     for (auto importPath : QQmlEngine().importPathList()) parseImportDirectories(importPath);
 }
 
@@ -124,6 +129,8 @@ bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships,
 													   parentalRelationships[key].toString()))
 					return false;
 				createdObjects.append(key);
+                fsWatcher.addPath(generateSaveDirectory(key));
+                clearQmlCaches();
 			}
 		}
 		createdObjects.removeFirst();
@@ -142,6 +149,13 @@ void SaveManagerPrivate::fillBindings(const QJsonObject& bindingSaves)
         inf.targetProperty = bindingSaves[bindingKey].toObject()[BINDING_TARGET_PROPERTY_LABEL].toString();
         BindingWidget::addBindingWithoutSave(inf);
     }
+}
+
+void SaveManagerPrivate::clearQmlCaches()
+{
+//    for (auto save : parent->saves()) {
+//        rm(parent->saveDirectory(save) + separator() + "main.qmlc");
+//    }
 }
 
 SaveManagerPrivate* SaveManager::m_d = nullptr;
@@ -259,7 +273,9 @@ void SaveManager::addSave(const QString& id, const QString& url)
 	if (projectDir.isEmpty()) return;
 	auto saveBaseDir = projectDir + separator() + SAVE_DIRECTORY;
 	if (!mkdir(saveBaseDir + separator() + id)) return;
-	cp(dname(url), saveBaseDir + separator() + id, true);
+    cp(dname(url), saveBaseDir + separator() + id, true);
+    m_d->clearQmlCaches();
+    m_d->fsWatcher.addPath(m_d->generateSaveDirectory(id));
 }
 
 void SaveManager::changeSave(const QString& fromId, QString toId)
@@ -294,7 +310,9 @@ void SaveManager::changeSave(const QString& fromId, QString toId)
 void SaveManager::removeSave(const QString& id)
 {
 	if (!exists(id)) return;
-	rm(m_d->generateSaveDirectory(id));
+    rm(m_d->generateSaveDirectory(id));
+    m_d->clearQmlCaches();
+    m_d->fsWatcher.removePath(m_d->generateSaveDirectory(id));
 }
 
 bool SaveManager::buildNewDatabase(const QString& projDir)

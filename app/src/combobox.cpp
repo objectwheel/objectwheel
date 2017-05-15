@@ -3,7 +3,6 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <css.h>
-#include <QGraphicsDropShadowEffect>
 #include <fit.h>
 #include <QColor>
 #include <QLabel>

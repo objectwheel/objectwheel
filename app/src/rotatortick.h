@@ -24,8 +24,8 @@ class RotatorTick : public QPushButton
 		void SetRootContext(QQmlContext* const context);
 
 	protected:
-		void paintEvent(QPaintEvent* const event);
-		void mouseMoveEvent(QMouseEvent* const event);
+        void paintEvent(QPaintEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* event) override;
 
 	public slots:
 		void FixCoord();

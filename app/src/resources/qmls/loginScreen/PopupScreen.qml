@@ -30,8 +30,8 @@ Rectangle {
             anchors.fill: line
             horizontalOffset: 0
             verticalOffset: Fit.fit(2)
-            radius: Fit.fit(6)
-            samples: Fit.fit(18)
+            radius: (6)
+            samples: (18)
             color: "#20000000"
             source: line
         }
@@ -74,8 +74,8 @@ Rectangle {
         anchors.fill: base
         horizontalOffset: 0
         verticalOffset: Fit.fit(3)
-        radius: Fit.fit(8.0)
-        samples: Fit.fit(18)
+        radius: (8.0)
+        samples: (18)
         color: "#10000000"
         source: base
     }

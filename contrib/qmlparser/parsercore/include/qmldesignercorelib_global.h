@@ -31,9 +31,9 @@
 // Unnecessary since core isn't a dll any more.
 
 #if defined(DESIGNER_CORE_LIBRARY)
-#  define QMLDESIGNERCORE_EXPORT Q_DECL_EXPORT
+#  define QMLDESIGNERCORE_EXPORT
 #else
-#  define QMLDESIGNERCORE_EXPORT Q_DECL_IMPORT
+#  define QMLDESIGNERCORE_EXPORT
 #endif
 namespace QmlDesigner {
 typedef QByteArray PropertyName;

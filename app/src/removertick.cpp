@@ -54,7 +54,7 @@ void RemoverTick::RemoveItem()
 	emit ItemRemoved(widget);
 }
 
-void RemoverTick::paintEvent(QPaintEvent* const)
+void RemoverTick::paintEvent(QPaintEvent *)
 {
 	QPainter p(this);
 	p.setRenderHint(QPainter::Antialiasing);

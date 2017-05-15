@@ -93,8 +93,8 @@ Item {
                 anchors.fill: btnCancelOpMask
                 horizontalOffset: 0
                 verticalOffset: Fit.fit(1)
-                radius: Fit.fit(6.0)
-                samples: Fit.fit(14)
+                radius: (6.0)
+                samples: (14)
                 color: "#80000000"
                 source: btnCancelOpMask
             }
@@ -179,8 +179,8 @@ Item {
                 anchors.fill: btnOkOpMask
                 horizontalOffset: 0
                 verticalOffset: Fit.fit(1)
-                radius: Fit.fit(6.0)
-                samples: Fit.fit(14)
+                radius: (6.0)
+                samples: (14)
                 color: "#80000000"
                 source: btnOkOpMask
             }
@@ -664,8 +664,8 @@ Item {
                             anchors.fill: btnImExOpMask
                             horizontalOffset: 0
                             verticalOffset: Fit.fit(1)
-                            radius: Fit.fit(6.0)
-                            samples: Fit.fit(14)
+                            radius: (6.0)
+                            samples: (14)
                             color: "#80000000"
                             source: btnImExOpMask
                         }
@@ -780,8 +780,8 @@ Item {
                             anchors.fill: btnDelProjectOpMask
                             horizontalOffset: 0
                             verticalOffset: Fit.fit(1)
-                            radius: Fit.fit(6.0)
-                            samples: Fit.fit(14)
+                            radius: (6.0)
+                            samples: (14)
                             color: "#80000000"
                             source: btnDelProjectOpMask
                         }
@@ -819,8 +819,8 @@ Item {
             anchors.fill: parent
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: Fit.fit(2.0)
-            samples: Fit.fit(17)
+            radius: (2.0)
+            samples: (17)
             color: "#40000000"
             source: base
         }

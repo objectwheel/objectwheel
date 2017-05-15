@@ -21,8 +21,8 @@ Item {
         anchors.fill: base
         horizontalOffset: 0
         verticalOffset: Fit.fit(1)
-        radius: Fit.fit(7.0)
-        samples: Fit.fit(25)
+        radius: (7.0)
+        samples: (25)
         color: "#20000000"
         source: base
     }
@@ -120,8 +120,8 @@ Item {
             anchors.fill: btnBuildOpMask
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: Fit.fit(6.0)
-            samples: Fit.fit(14)
+            radius: (6.0)
+            samples: (14)
             color: "#80000000"
             source: btnBuildOpMask
         }
@@ -189,8 +189,8 @@ Item {
                 anchors.fill: warnIcon
                 horizontalOffset: 0
                 verticalOffset: 0
-                radius: Fit.fit(7)
-                samples: Fit.fit(26)
+                radius: (7)
+                samples: (26)
                 color: "#85000000"
                 source: warnIcon
                 visible: !enabledBuilds[index]

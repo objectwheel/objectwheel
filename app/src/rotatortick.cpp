@@ -62,7 +62,7 @@ void RotatorTick::FixCoord()
 		  static_cast<int>(point.y() - height())});
 }
 
-void RotatorTick::paintEvent(QPaintEvent* const)
+void RotatorTick::paintEvent(QPaintEvent*)
 {
 	QPainter p(this);
 	p.setRenderHint(QPainter::Antialiasing);
@@ -83,7 +83,7 @@ void RotatorTick::paintEvent(QPaintEvent* const)
 	p.drawPixmap(rect().adjusted(2, 2, -2, -2), icon().pixmap(size() - QSize(4, 4)));
 }
 
-void RotatorTick::mouseMoveEvent(QMouseEvent* const event)
+void RotatorTick::mouseMoveEvent(QMouseEvent *event)
 {
 	if (!(event->buttons() & Qt::LeftButton))
 		return;

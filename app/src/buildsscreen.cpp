@@ -335,28 +335,28 @@ void BuildsScreen::handleBuildButtonClicked()
             if (e == QNetworkReply::AuthenticationRequiredError) {
                 QQmlProperty::write(m_d->toast, "text.text", "<p><b>Authentication Error</b></p>"
                                     "<p>Your email address or password is wrong. Please contact to support.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", 330);
-                QQmlProperty::write(m_d->toast, "base.height", 95);
+                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(m_d->toast, "base.height", qFloor(fit(95)));
                 QQmlProperty::write(m_d->toast, "duration", 10000);
             } else if (e == QNetworkReply::ContentOperationNotPermittedError) {
                 QQmlProperty::write(m_d->toast, "text.text", "<p><b>Access Denied</b></p>"
                                     "<p>Your account doesn't have any permission to use this feature, please upgrade your subscription plan.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", 330);
-                QQmlProperty::write(m_d->toast, "base.height", 110);
+                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(m_d->toast, "base.height", qFloor(fit(110)));
                 QQmlProperty::write(m_d->toast, "duration", 10000);
             }  else if (e == QNetworkReply::ServiceUnavailableError ||
                         e == QNetworkReply::UnknownServerError ||
                         e == QNetworkReply::InternalServerError ) {
                 QQmlProperty::write(m_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
                                     "<p>Server error has occurred, please try again later.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", 330);
-                QQmlProperty::write(m_d->toast, "base.height", 95);
+                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(m_d->toast, "base.height",qFloor(fit(95)));
                 QQmlProperty::write(m_d->toast, "duration", 10000);
             } else {
                 QQmlProperty::write(m_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
                                     "<p>Either check your internet connection or contact to support.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", 330);
-                QQmlProperty::write(m_d->toast, "base.height", 95);
+                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(m_d->toast, "base.height", qFloor(fit(95)));
                 QQmlProperty::write(m_d->toast, "duration", 10000);
             }
             QMetaObject::invokeMethod(m_d->toast, "show");

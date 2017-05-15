@@ -2,9 +2,9 @@ VERSION          = 1.0
 QT              += core gui widgets network qml quick quickwidgets webview websockets multimedia sensors svg concurrent
 TEMPLATE         = app
 CONFIG          += c++11
-CONFIG          -= debug_and_release debug_and_release_target
 TARGET           = objectwheel
 PROJECT_ROOT     = $$clean_path($$PWD/..)
+RC_ICONS         = $$PWD/owicon.ico
 
 include($$PWD/detect_build.pri) # BUILD_POSTFIX
 

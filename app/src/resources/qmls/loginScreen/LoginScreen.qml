@@ -41,8 +41,8 @@ Column {
             anchors.fill: base
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: Fit.fit(7.0)
-            samples: Fit.fit(25)
+            radius: (7.0)
+            samples: (25)
             color: "#20000000"
             source: base
         }
@@ -198,8 +198,8 @@ Column {
             anchors.fill: base2
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: Fit.fit(7.0)
-            samples: Fit.fit(25)
+            radius: (7.0)
+            samples: (25)
             color: "#20000000"
             source: base2
         }
@@ -240,8 +240,8 @@ Column {
                             anchors.fill: handle
                             horizontalOffset: 0
                             verticalOffset: Fit.fit(2.0)
-                            radius: Fit.fit(8)
-                            samples: Fit.fit(15)
+                            radius: (8)
+                            samples: (15)
                             color: "#35000000"
                             source: handle
                         }

@@ -1,12 +1,13 @@
 #include <fit.h>
 #include <flatbutton.h>
 #include <QPainter>
+#include <QDebug>
 
 #define STYLE_SHEET "\
 QPushButton {\
     margin-bottom: %23px;\
     border:0px;\
-	border-radius: %1px;\
+    border-radius: %1px;\
     color:rgb(%2,%3,%4);\
     background:rgb(%5,%6,%7);\
 } QPushButton::pressed {\
@@ -33,6 +34,7 @@ FlatButton::FlatButton(QWidget *parent)
 	, m_IconButton(false)
 	, m_Down(false)
 {
+    setFocusPolicy(Qt::NoFocus);
 	setCursor(Qt::PointingHandCursor);
 	applyTheme();
 }
@@ -160,7 +162,7 @@ void FlatButton::paintEvent(QPaintEvent* e)
     } else {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.setBrush(QColor(0,0,0,60));
+        painter.setBrush(QColor(0,0,0,40));
         painter.setPen(Qt::NoPen);
         painter.drawRoundedRect(rect(), m_Radius, m_Radius);
         QPushButton::paintEvent(e);

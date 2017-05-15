@@ -226,7 +226,7 @@ bool FileManager::isdir(const QString& name) const
 
 QChar FileManager::separator() const
 {
-    return QDir::separator();
+    return '/'/*QDir::separator()*/;
 }
 
 bool FileManager::copyDir(QString from, QString to)

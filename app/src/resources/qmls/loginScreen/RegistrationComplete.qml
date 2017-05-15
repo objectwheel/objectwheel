@@ -116,8 +116,8 @@ Item {
             anchors.fill: btnOkayOpMask
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: Fit.fit(6.0)
-            samples: Fit.fit(14)
+            radius: (6.0)
+            samples: (14)
             color: "#80000000"
             source: btnOkayOpMask
         }

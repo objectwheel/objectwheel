@@ -23,8 +23,8 @@ class ListWidget : public QListWidget
 
 	protected:
 		QMimeData* mimeData(const QList<QListWidgetItem *> items) const;
-		void mousePressEvent(QMouseEvent* const event);
-        void mouseMoveEvent(QMouseEvent* const event);
+        void mousePressEvent(QMouseEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* event) override;
 };
 
 #endif // TREEWIDGET_H

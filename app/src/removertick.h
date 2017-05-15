@@ -18,7 +18,7 @@ class RemoverTick : public QPushButton
 		void SetTrackedItem(QQuickItem* const trackedItem);
 
 	protected:
-		void paintEvent(QPaintEvent* const event);
+        void paintEvent(QPaintEvent* event) override;
 
 	signals:
 		void ItemRemoved(QQuickItem* const item) const;

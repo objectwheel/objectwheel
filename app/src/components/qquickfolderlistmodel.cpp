@@ -68,7 +68,7 @@ public:
 
     QQuickFolderListModel *q_ptr;
     QUrl currentDir;
-    QUrl rootDir;
+    QString rootDir;
     FileInfoThread fileInfoThread;
     QList<FileProperty> data;
     QHash<int, QByteArray> roleNames;
@@ -481,13 +481,13 @@ void QQuickFolderListModel::setFolder(const QUrl &folder)
    be treated as the root in the file system, so that
    you can only traverse subfolders within it.
 */
-QUrl QQuickFolderListModel::rootFolder() const
+QString QQuickFolderListModel::rootFolder() const
 {
     Q_D(const QQuickFolderListModel);
     return d->rootDir;
 }
 
-void QQuickFolderListModel::setRootFolder(const QUrl &path)
+void QQuickFolderListModel::setRootFolder(const QString &path)
 {
     Q_D(QQuickFolderListModel);
 
