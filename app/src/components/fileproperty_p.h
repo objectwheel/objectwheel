@@ -60,7 +60,7 @@ public:
     FileProperty(const QFileInfo &info)
     {
         mFileName = info.fileName();
-        mFilePath = info.filePath();
+        mFilePath = info.absoluteFilePath();
         mBaseName = info.baseName();
         mSize = info.size();
 		mSuffix = info.suffix();

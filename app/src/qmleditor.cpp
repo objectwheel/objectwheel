@@ -456,7 +456,7 @@ QQuickItem* ComponentManager::build(const QString& url)
 	lastItem = qobject_cast<QQuickItem*>(incubator.object());
 
 	if (component.isError() || !lastItem) {
-		lastError = component.errorString();
+        lastError = component.errorString();
 		return nullptr;
 	}
 

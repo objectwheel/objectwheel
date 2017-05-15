@@ -65,7 +65,7 @@ SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
     applierTimer.setInterval(500);
     QObject::connect(&applierTimer, SIGNAL(timeout()), parent, SLOT(idApplier()));
     QObject::connect(&fsWatcher, (void(QFileSystemWatcher::*)(QString))(&QFileSystemWatcher::directoryChanged),
-                     [=](QString){ qDebug() << "assasas"; clearQmlCaches(); });
+                     [=](QString){ clearQmlCaches(); });
     for (auto importPath : QQmlEngine().importPathList()) parseImportDirectories(importPath);
 }
 
