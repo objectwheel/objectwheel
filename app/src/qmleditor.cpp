@@ -89,7 +89,7 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	QFont font;
 	font.setFamily("Liberation Mono");
 	font.setStyleHint(QFont::Monospace);
-    font.setPixelSize(fit(11));
+    font.setPixelSize(fit(12));
     textEdit->setProperty("font", font);
 
 	const int tabStop = 4;  // 4 characters
@@ -217,7 +217,7 @@ void QmlEditorPrivate::show(const QString& url)
     QFileInfo info(url);
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
 	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, true));
-	QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + info.dir().path()));
+    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + info.dir().path()));
 
 	QTimer::singleShot(DURATION,[=] { //FIXME
 		QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
@@ -335,7 +335,7 @@ void QmlEditor::setShowCenter(const QPoint& p)
 
 void QmlEditor::setRootFolder(const QString& folder)
 {
-	QMetaObject::invokeMethod(m_d->rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + folder));
+    QMetaObject::invokeMethod(m_d->rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + folder));
 }
 
 void QmlEditor::show(const QString& url)
@@ -414,7 +414,7 @@ void QmlEditor::setShowRatio(float value)
 /*! [*] Component Manager [*] !*/
 
 QQmlEngine* ComponentManager::engine;
-QString ComponentManager::lastError;
+QStringList ComponentManager::lastErrors;
 QPointer<QQuickItem> ComponentManager::lastItem = nullptr;
 QQuickItem* ComponentManager::parentItem;
 
@@ -438,17 +438,17 @@ void ComponentManager::clear()
     engine->clearComponentCache();
 }
 
-QString ComponentManager::error()
+QStringList ComponentManager::errors()
 {
-	return lastError;
+    return lastErrors;
 }
 
 QQuickItem* ComponentManager::build(const QString& url)
 {
 	QQmlComponent component(engine);
-	component.loadUrl(QUrl::fromUserInput(url));
+    component.loadUrl(QUrl::fromUserInput(url));
 
-	QQmlIncubator incubator;
+    QQmlIncubator incubator;
 	component.create(incubator);
 	while (incubator.isLoading()) {
 		QApplication::processEvents(QEventLoop::AllEvents, 50);
@@ -456,7 +456,16 @@ QQuickItem* ComponentManager::build(const QString& url)
 	lastItem = qobject_cast<QQuickItem*>(incubator.object());
 
 	if (component.isError() || !lastItem) {
-        lastError = component.errorString();
+        QStringList errors;
+        for (auto e : component.errors()) {
+            QJsonObject error;
+            error["description"] = e.description();
+            error["line"] = e.line();
+            error["column"] = e.column();
+            error["path"] = e.url().toLocalFile();
+            errors.append(QJsonDocument(error).toJson());
+        }
+        lastErrors = errors;
 		return nullptr;
 	}
 

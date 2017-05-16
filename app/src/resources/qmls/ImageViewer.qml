@@ -24,7 +24,6 @@ Item {
                 errorText.visible = false
             } else if (status === Image.Error) {
                 errorText.visible = true
-                console.log("saasas")
             }
         }
     }

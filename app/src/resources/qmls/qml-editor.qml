@@ -71,10 +71,12 @@ Item {
                 setUrl(urlval)
                 imageViewer.visible = false
                 editor.visible = true
+                currFileNameText.text = FileManager.fname(urlval)
             } else if (!isdir && isImageFile(urlval)) {
-                imageViewer.source = "file://" + urlval
+                imageViewer.source = componentManager.urlOfPath(urlval)
                 imageViewer.visible = true
                 editor.visible = false
+                currFileNameText.text = FileManager.fname(urlval)
             }
         }
         Behavior on x {
@@ -234,6 +236,7 @@ Item {
                     navbar: navibar
                     clip: true
                     anchors { top: parent.top; left: parent.left; bottom: separator.bottom; right:separator.left }
+                    editor.font.pixelSize: fontSlider.value
                 }
                 ImageViewer {
                     id: imageViewer
@@ -380,6 +383,45 @@ Item {
                 right: parent.right
             }
             state: "view"
+
+            Rectangle {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                height: currFileNameText.contentHeight + Fit.fit(3)
+                width: currFileNameText.contentWidth + Fit.fit(10)
+                radius: Fit.fit(3)
+                color: "#2b5796"
+                Rectangle {
+                    anchors.right: parent.right
+                    height: parent.height
+                    width: parent.radius
+                }
+
+                Text {
+                    id: currFileNameText
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: Fit.fit(5)
+                    text: qsTr("filename.qml")
+                    font.pixelSize: Fit.fit(12)
+                    color: "white"
+                }
+            }
+
+            Slider {
+                id: fontSlider
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: Fit.fit(40)
+                updateValueWhileDragging: true
+                tickmarksEnabled: true
+                value: Fit.fit(12)
+                maximumValue: Fit.fit(24)
+                minimumValue: Fit.fit(6)
+                stepSize: 3
+                width: Fit.fit(100)
+            }
+
         }
         Timer {
             id: timer
@@ -568,24 +610,11 @@ Item {
         flushCachesToDisk()
 
         if (!componentManager.build(fileExplorer.explorerListView.folderListModel.rootFolder.toString().replace("file://", "") + "/main.qml")) {
-            var errorString = componentManager.error()
-            if (errorString === "") {
-                errorMessage.text = "Error code 0x54."
-            } else {
-                var regex = /file:\/\/.*?:/g
-                var festring = errorString.split("\n")
-                var estring = festring[festring.length - 2]
-                var fpath = estring.match(regex)[0].replace("file://","").slice(0, -1)
-                var fname = FileManager.fname(fpath)
-                var cleare = estring.replace(regex, "")
-                var line = cleare.match(/[0-9]+/g)[0]
-                var message = cleare.match(/[^0-9].*/g)[0]
-                var ferror = "Error, line " + line + " in " + fname + ":" + message
-                errorMessage.text = ferror
-                if (FileManager.fname(root.url) === fname) {
-                    editor.lineNumberRepeater.itemAt(line - 1).bgcolor = "#c74c3c"
-                }
+            var errObj = JSON.parse(componentManager.errors()[0])
+            if (root.url === errObj.path) {
+                editor.lineNumberRepeater.itemAt(errObj.line - 1).bgcolor = "#c74c3c"
             }
+            errorMessage.text = "<b>Error, line " + errObj.line + ':' + errObj.column + " in " +  FileManager.fname(errObj.path) + " : </b>" + errObj.description
         }
 
         revertClearSavesToDisk(clearSaves)

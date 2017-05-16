@@ -815,7 +815,8 @@ void MainWindow::clearStudio()
 	m_d->m_Items.clear();
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
-    m_d->bubbleHead->move(fit(10), height()-fit(55));
+    if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
+    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(fit(10), height()-fit(55)); });
     m_d->toolboxList->setCurrentRow(-1);
 }
 

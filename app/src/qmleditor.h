@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QQmlEngine>
 #include <QPointer>
+#include <QUrl>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 class QmlEditorPrivate;
 class QQuickItem;
@@ -55,7 +58,7 @@ class ComponentManager : public QObject
 		Q_OBJECT
 	private:
 		static QQmlEngine* engine;
-		static QString lastError;
+        static QStringList lastErrors;
 		static QPointer<QQuickItem> lastItem;
 		static QQuickItem* parentItem;
 
@@ -64,8 +67,9 @@ class ComponentManager : public QObject
 		static void setParentItem(QQuickItem* i);
 		static void registerQmlType();
         Q_INVOKABLE static void clear();
-        Q_INVOKABLE static QString error();
-        Q_INVOKABLE static QQuickItem* build(const QString& url);
+        Q_INVOKABLE static QStringList errors();
+        Q_INVOKABLE static QQuickItem* build(const QString &url);
+        Q_INVOKABLE static inline QUrl urlOfPath(const QString& path) { return QUrl::fromUserInput(path); }
 };
 
 #endif // QMLEDITOR_H

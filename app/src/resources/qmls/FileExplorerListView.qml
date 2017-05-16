@@ -86,7 +86,7 @@ Item {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
                     listView.currentIndex = index
-                    if (fileIsDir) {
+                    if (fileIsDir && mouse.button !== Qt.RightButton) {
                         var newFile = folderListModel.get(index, "fileURL").toString()
                         go(newFile, true)
                     }
