@@ -93,7 +93,7 @@ Item {
         anchors { left:fileExplorer.right; top:parent.top; bottom: parent.bottom; }
         width: parent.width
         clip: true
-        color: "#44504e"
+        color: "#4E5B67"
         Rectangle {
             id:toolBar
             z: 2
@@ -101,7 +101,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: Fit.fit(42)
-            color: "#2b5796"
+            color: "#0D74C8"
             clip: true
 
             RowLayout {
@@ -292,7 +292,7 @@ Item {
         Rectangle {
             id: errorHead
             clip: true
-            color: "#1e8145"
+            color: "#6BB64B"
             radius: Fit.fit(5)
             x:  Math.floor(container.width/2.0 - errorHead.width/2.0)
             width: Math.floor(parent.width / 1.618)
@@ -390,7 +390,7 @@ Item {
                 height: currFileNameText.contentHeight + Fit.fit(3)
                 width: currFileNameText.contentWidth + Fit.fit(10)
                 radius: Fit.fit(3)
-                color: "#2b5796"
+                color: "#0D74C8"
                 Rectangle {
                     anchors.right: parent.right
                     height: parent.height

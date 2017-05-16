@@ -9,7 +9,7 @@ QPushButton {\
     border:0px;\
     border-radius: %1px;\
     color:rgb(%2,%3,%4);\
-    background:rgb(%5,%6,%7);\
+    background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:%5 %6, stop:1 %7);\
 } QPushButton::pressed {\
     background:rgb(%8,%9,%10);\
 } QPushButton::checked {\
@@ -134,13 +134,13 @@ void FlatButton::applyTheme()
 
     setStyleSheet(QString(STYLE_SHEET).arg(m_Radius)
                   .arg(m_TextColor.red()).arg(m_TextColor.green()).arg(m_TextColor.blue())
-                  .arg(m_Color.red()).arg(m_Color.green()).arg(m_Color.blue())
+                  .arg("0").arg(m_Color.name()).arg(m_Color.darker(115).name())
                   .arg(mix.red()).arg(mix.green()).arg(mix.blue())
                   .arg(m_CheckedColor.red()).arg(m_CheckedColor.green()).arg(m_CheckedColor.blue())
                   .arg(m_CheckedTextColor.red()).arg(m_CheckedTextColor.green()).arg(m_CheckedTextColor.blue())
                   .arg(m_DisabledColor.red()).arg(m_DisabledColor.green()).arg(m_DisabledColor.blue())
                   .arg(m_DisabledTextColor.red()).arg(m_DisabledTextColor.green()).arg(m_DisabledTextColor.blue())
-                  .arg(fit(2)));
+                  .arg(fit(1)));
 }
 
 void FlatButton::paintEvent(QPaintEvent* e)
@@ -162,7 +162,7 @@ void FlatButton::paintEvent(QPaintEvent* e)
     } else {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.setBrush(QColor(0,0,0,40));
+        painter.setBrush(QColor(0,0,0,30));
         painter.setPen(Qt::NoPen);
         painter.drawRoundedRect(rect(), m_Radius, m_Radius);
         QPushButton::paintEvent(e);

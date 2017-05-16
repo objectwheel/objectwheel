@@ -1,5 +1,6 @@
 #include <css.h>
 #include <fit.h>
+#include <QColor>
 
 #define CSS_SPINBOX "\
 QAbstractSpinBox { \
@@ -14,7 +15,7 @@ QAbstractSpinBox { \
 	position: absolute; \
 	top: 0px; right: 0px; bottom: 0px; \
 	width: %3; \
-	background:#1e8145; \
+    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %6, stop:1 %7); \
 	border-top-right-radius:%4; \
 	border-bottom-right-radius:%4; \
 } QAbstractSpinBox::up-button:pressed { \
@@ -31,7 +32,7 @@ QAbstractSpinBox { \
 	position: absolute; \
 	top: 0px; left: 0px; bottom: 0px; \
 	width: %3; \
-	background:#c03638; \
+    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %8, stop:1 %9); \
 	border-top-left-radius:%4;	 \
 	border-bottom-left-radius:%4; \
 } QAbstractSpinBox::down-button:pressed { \
@@ -67,7 +68,7 @@ QLineEdit {\
 QToolBar { \
 	padding-left: %1px; \
 	spacing: %1px; \
-	background: #1e8145; \
+    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %2, stop:1 %3); \
 	border: none;\
 }"
 
@@ -113,7 +114,7 @@ QRadioButton::indicator { \
 
 #define CSS_BINDING_LISTWIDGET \
 "QListView {\
-	background:#566573;\
+    background:#52616D;\
 	padding: %1px;\
 	border: 1px solid #465563;\
 	border-radius: %2px;\
@@ -142,9 +143,10 @@ QString CSS::BindingListWidget;
 
 void CSS::init()
 {
-	/* SpinBox */
+    /* SpinBox */
 	SpinBox = QString(CSS_SPINBOX).arg(fit(1)).arg(fit(5))
-				  .arg(fit(30)).arg(fit(4)).arg(fit(15));
+                  .arg(fit(30)).arg(fit(4)).arg(fit(15)).arg(QColor("#6BB64B").name()).arg(QColor("#6BB64B").darker(115).name())
+            .arg(QColor("#C61717").name()).arg(QColor("#C61717").darker(115).name());
 
 	/* LineEdit */
 	LineEdit = QString(CSS_LINEEDIT).arg(fit(2));
@@ -153,7 +155,7 @@ void CSS::init()
 	PropertyItem = QString(CSS_PROPERTY_ITEM).arg(fit(4)).arg(fit(2)).arg(fit(5));
 
 	/* Toolbar */
-    Toolbar = QString(CSS_TOOLBAR).arg(fit(6));
+    Toolbar = QString(CSS_TOOLBAR).arg(fit(6)).arg(QColor("#6BB64B").name()).arg(QColor("#6BB64B").darker(115).name());
 
 	/* ToolboxButton */
 	ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(26));

@@ -6,12 +6,12 @@ import "filemanager.js" as FileManager
 
 Rectangle {
     id: root
-    color: "#52605e"
+    color: "#434B52"
     FileExplorerToolBar {
         id: explorerToolBar
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: Fit.fit(42)
-        color: "#1e8145"
+        color: "#6BB64B"
         onDownloadButtonClicked: { popup.containerItem = d.containers[0]; popup.open() }
         onNewFileButtonClicked: { popup.containerItem = d.containers[1]; popup.open() }
         onNewFolderButtonClicked: { popup.containerItem = d.containers[2]; popup.open() }
@@ -592,10 +592,10 @@ Rectangle {
                 }
             }
         ]
-        property color containerColor: "#44504e"
+        property color containerColor: "#52616D"
         property color textColor: "white"
         property color deleteTextColor: "#f83e29"
-        property color lineColor: Qt.darker("#44504e", 1.15)
+        property color lineColor: Qt.darker("#52616D", 1.15)
         property color pressedButtonColor: "white"
     }
     signal entryRenamed(var from, var to, var isdir)

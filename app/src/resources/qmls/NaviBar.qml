@@ -19,7 +19,7 @@ Item {
         height: Fit.fit(29)
         anchors.centerIn: parent
         visible: true
-        color: "#2b5796"
+        color: "#0D74C8"
         layer.enabled: true
         layer.effect: OpacityMask {
             maskSource: mask
@@ -33,7 +33,7 @@ Item {
                 color: splitState == 'editor' ? "white" : "transparent"
                 Text {
                     text: "Editor"
-                    color: splitState == 'editor' ? "#2b5796" : 'white'
+                    color: splitState == 'editor' ? "#0D74C8" : 'white'
                     anchors.centerIn: parent
                 }
                 Layout.fillHeight: true
@@ -41,7 +41,7 @@ Item {
             }
             Rectangle {
                 id: seperator
-                color: Qt.lighter("#2b5796", 1.12)
+                color: Qt.lighter("#0D74C8", 1.12)
                 Layout.maximumWidth: Fit.fit(1)
                 Layout.minimumWidth: Fit.fit(1)
                 Layout.fillHeight: true
@@ -53,7 +53,7 @@ Item {
                 color: splitState == 'splitted' ? "white" : "transparent"
                 Text {
                     text: "Split"
-                    color: splitState == 'splitted' ? "#2b5796" : "white"
+                    color: splitState == 'splitted' ? "#0D74C8" : "white"
                     anchors.centerIn: parent
                 }
                 Layout.fillHeight: true
@@ -61,7 +61,7 @@ Item {
             }
             Rectangle {
                 id: seperator2
-                color: Qt.lighter("#2b5796", 1.12)
+                color: Qt.lighter("#0D74C8", 1.12)
                 Layout.maximumWidth: Fit.fit(1)
                 Layout.minimumWidth: Fit.fit(1)
                 Layout.fillHeight: true
@@ -73,7 +73,7 @@ Item {
                 color: splitState == 'viewer' ? "white" : "transparent"
                 Text {
                     text: "Viewer"
-                    color: splitState == 'viewer' ? "#2b5796" : "white"
+                    color: splitState == 'viewer' ? "#0D74C8" : "white"
                     anchors.centerIn: parent
                 }
                 Layout.fillHeight: true

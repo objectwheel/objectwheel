@@ -409,10 +409,10 @@ TitleBar::TitleBar(QWidget *parent)
     m_ShadowWidgetBackground->setStyleSheet(QString("background:rgb(%1,%2,%3);").arg(m_ShadowWidgetColor.red())
                                             .arg(m_ShadowWidgetColor.green()).arg(m_ShadowWidgetColor.blue()));
     m_ShadowWidgetBackground->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    m_ShadowWidgetBackground->setMinimumHeight(fit(3));
-    m_ShadowWidgetBackground->setMaximumHeight(fit(3));
+    m_ShadowWidgetBackground->setMinimumHeight(fit(2));
+    m_ShadowWidgetBackground->setMaximumHeight(fit(2));
     m_ShadowWidget->setStyleSheet("background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,stop:0 "
-                                  "rgba(0, 0, 0, 115), stop:0.6 rgba(0, 0, 0, 70), stop:1 rgba(0, 0, 0, 0));");
+                                  "rgba(0, 0, 0, 115), stop:0.6 rgba(0, 0, 0, 65), stop:1 rgba(0, 0, 0, 0));");
 
     m_Layout->setSpacing(0);
     m_Layout->setContentsMargins(0, 0, 0, 0);
@@ -428,7 +428,7 @@ const QColor& TitleBar::Color() const
 void TitleBar::setColor(const QColor& Color)
 {
     m_Color = Color;
-    setStyleSheet(QString("#titleBar{background:rgb(%1,%2,%3);}").arg(m_Color.red()).arg(m_Color.green()).arg(m_Color.blue()));
+    setStyleSheet(QString("#titleBar{background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);}").arg(m_Color.name()).arg(m_Color.darker(115).name()));
 }
 
 const QString& TitleBar::Text() const

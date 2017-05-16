@@ -135,7 +135,7 @@ void MainWindow::SetupGui()
 	/* Add Title Bar */
 	fit(m_d->titleBar, Fit::Height, true);
 	m_d->titleBar->setText("Objectwheel Studio");
-    m_d->titleBar->setColor("#2b5796");
+    m_d->titleBar->setColor("#0D74C8");
 	m_d->titleBar->setShadowColor("#e0e4e7");
 	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
 	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
@@ -179,8 +179,8 @@ void MainWindow::SetupGui()
 	fit(leftToolbar, Fit::Height, true);
 	QGraphicsDropShadowEffect* toolbarShadowEffect = new QGraphicsDropShadowEffect;
     toolbarShadowEffect->setBlurRadius(fit(4));
-    toolbarShadowEffect->setOffset(0, fit(2));
-    toolbarShadowEffect->setColor(QColor(0, 0, 0, 60));
+    toolbarShadowEffect->setOffset(0, fit(1));
+    toolbarShadowEffect->setColor(QColor(0, 0, 0, 50));
 	leftToolbar->setGraphicsEffect(toolbarShadowEffect);
 
 	QRadioButton* toolboxButton = new QRadioButton;
@@ -234,25 +234,25 @@ void MainWindow::SetupGui()
 
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
-	leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+    leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	connect(m_d->bindingWidget, &BindingWidget::popupShowed, [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#2b5796;}");
+        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
 	});
 	connect(m_d->bindingWidget, &BindingWidget::popupHid, [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
 	connect(toolboxButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
 	connect(propertiesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
 	connect(pagesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#566573;}");
+        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
 	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
 		if (m_d->bindingWidget->hasPopupOpen())
-			leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#2b5796;}");
+            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
 	});
 	QVBoxLayout* leftMenuLayout = new QVBoxLayout(leftMenuWidget);
 	leftMenuLayout->setContentsMargins(0, 0, 0, 0);
@@ -319,11 +319,15 @@ void MainWindow::SetupGui()
         }
     });
 
+    QObject::connect(this, &MainWindow::resized, [&]{
+        m_d->emIndicator->move(-fit(3), height() - m_d->emIndicator->height() - fit(15));
+    });
+
 	m_d->aboutWidget = new About(this);
     m_d->buildsScreen = new BuildsScreen(this);
 
 	QWidget* sceneListWidget = new QWidget(this);
-	sceneListWidget->setStyleSheet("background:#566573;");
+    sceneListWidget->setStyleSheet("background:#52616D;");
 	m_RightMenu->attachWidget(sceneListWidget);
 	QVBoxLayout* sceneListWidgetLayout = new QVBoxLayout(sceneListWidget);
 	sceneListWidgetLayout->setSpacing(fit(15));
@@ -332,13 +336,13 @@ void MainWindow::SetupGui()
 	sceneListTitle->setText("◉ Menu");
 	sceneListTitle->setAlignment(Qt::AlignCenter);
 	QGraphicsDropShadowEffect* sceneListTitleShadowEffect = new QGraphicsDropShadowEffect;
-    sceneListTitleShadowEffect->setBlurRadius(fit(4));
-    sceneListTitleShadowEffect->setOffset(0, fit(2));
-    sceneListTitleShadowEffect->setColor(QColor(0, 0, 0, 60));
+    sceneListTitleShadowEffect->setBlurRadius(fit(3));
+    sceneListTitleShadowEffect->setOffset(0, fit(1));
+    sceneListTitleShadowEffect->setColor(QColor(0, 0, 0, 40));
 	sceneListTitle->setGraphicsEffect(sceneListTitleShadowEffect);
 	sceneListTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	sceneListTitle->setFixedHeight(fit(43));
-	sceneListTitle->setStyleSheet("color: white; background:#C03638;");
+    sceneListTitle->setStyleSheet(QString("color: white; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);").arg(QColor("#C61717").name()).arg(QColor("#C61717").darker(115).name()));
 	sceneListWidgetLayout->addWidget(sceneListTitle);
 	sceneListWidgetLayout->addWidget(m_d->sceneList);
 
@@ -348,8 +352,7 @@ void MainWindow::SetupGui()
     secureExitButton->setMinimumSize(fit(150), fit(35));
     secureExitButton->setMaximumSize(fit(150), fit(35));
     secureExitButton->setText("Secure Exit");
-    secureExitButton->setColor(QColor("#2b5796"));
-    secureExitButton->setCheckedColor(QColor("#1e8145"));
+    secureExitButton->setColor(QColor("#0078D7"));
     secureExitButton->setTextColor(Qt::white);
     secureExitButton->setIcon(QIcon(":/resources/images/exit.png"));
     sceneListWidgetLayout->addWidget(secureExitButton);
@@ -373,7 +376,7 @@ void MainWindow::SetupManagers()
 	//Let's add some custom controls to that project
 	ToolsManager::setListWidget(m_d->toolboxList);
 	auto userManager = new UserManager(this); //create new user manager
-	auto projectManager = new ProjectManager(this); //create new project manager
+    auto* projectManager = new ProjectManager(this); //create new project manager
 	projectManager->setMainWindow(this);
 	new SaveManager(this);
 	auto sceneManager = new SceneManager;
@@ -395,7 +398,8 @@ void MainWindow::SetupManagers()
 		m_d->titleBar->setSettingsChecked(false);
 
 		if (key == "studioScene") {
-			m_d->bubbleHead->raise();
+            m_d->bubbleHead->raise();
+            m_d->emIndicator->raise();
 		}
 	});
 	for (auto scene : sceneManager->scenes()) {
@@ -816,7 +820,7 @@ void MainWindow::clearStudio()
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
     if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
-    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(fit(10), height()-fit(55)); });
+    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(65), height()-fit(65)); });
     m_d->toolboxList->setCurrentRow(-1);
 }
 
@@ -872,6 +876,8 @@ void MainWindow::on_clearButton_clicked()
 void MainWindow::on_editButton_clicked()
 {
     m_d->editMode = !m_d->editMode;
+    m_d->emIndicator->setOn(m_d->editMode);
+
 	for (auto item : m_d->m_Items) {
         item->setEnabled(!m_d->editMode);
 	}
@@ -894,6 +900,7 @@ void MainWindow::on_playButton_clicked()
         }
         HideSelectionTools();
         m_d->editMode = false;
+        m_d->emIndicator->setOn(false);
     }
     m_d->designWidget->setParent(this);
     SceneManager::addScene("playScene", m_d->designWidget);
@@ -923,6 +930,7 @@ void MainWindow::on_playButton_clicked()
         SceneManager::removeScene("playScene");
         SceneManager::setCurrent("studioScene");
         m_d->editMode = editModeState;
+        m_d->emIndicator->setOn(m_d->editMode);
     });
 }
 

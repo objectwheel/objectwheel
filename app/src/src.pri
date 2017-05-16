@@ -33,7 +33,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/buildsscreen.h \
                              $$PWD/removertick.h \
                              $$PWD/resizertick.h \
-                             $$PWD/rotatortick.h
+                             $$PWD/rotatortick.h \
+                             $$PWD/editmodeindicator.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -68,7 +69,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/buildsscreen.cpp \
                              $$PWD/resizertick.cpp \
                              $$PWD/rotatortick.cpp \
-                             $$PWD/removertick.cpp
+                             $$PWD/removertick.cpp \
+                             $$PWD/editmodeindicator.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

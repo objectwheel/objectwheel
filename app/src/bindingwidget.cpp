@@ -109,7 +109,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     QObject::connect(&bindingListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){editButton.setEnabled(i>=0);});
 
     addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    addButton.setColor("#1e8145");
+    addButton.setColor("#6BB64B");
     addButton.setFixedSize(fit(30),fit(30));
     addButton.setRadius(fit(13));
     addButton.setIconSize(QSize(fit(16),fit(16)));
@@ -117,7 +117,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     QObject::connect(&addButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {addButtonClicked();});
 
     removeButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    removeButton.setColor("#c03638");
+    removeButton.setColor("#C61717");
     removeButton.setFixedSize(fit(30),fit(30));
     removeButton.setRadius(fit(13));
     removeButton.setIconSize(QSize(fit(16),fit(16)));
@@ -126,7 +126,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     QObject::connect(&removeButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {removeButtonClicked();});
 
     editButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    editButton.setColor("#2b5796");
+    editButton.setColor("#0D74C8");
     editButton.setFixedSize(fit(30),fit(30));
     editButton.setRadius(fit(13));
     editButton.setIconSize(QSize(fit(16),fit(16)));
@@ -148,12 +148,12 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     /* ----------------------------- */
     popupWidget.setParent(parent);
     popupWidget.setObjectName("popupWindow");
-    popupWidget.setStyleSheet("#popupWindow{background:#2b5796;border:none;}");
+    popupWidget.setStyleSheet("#popupWindow{background:#0D74C8;border:none;}");
     popupWidget.setHidden(true);
     popupWidget.setLayout(&popupVLayout);
 
     popupHideButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    popupHideButton.setColor("#c03638");
+    popupHideButton.setColor("#C61717");
     popupHideButton.setFixedSize(fit(20),fit(16));
     popupHideButton.setRadius(fit(2));
     popupHideButton.setIconSize(QSize(fit(10),fit(10)));
@@ -170,7 +170,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     targetPropertyCombobox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     targetPropertyCombobox.setFixedHeight(fit(40));
     targetPropertyCombobox.setIcon(QIcon(":/resources/images/plug-up.png"));
-    targetPropertyCombobox.setColor("#c03638");
+    targetPropertyCombobox.setColor("#C61717");
     targetPropertyCombobox.setPlaceHolderText("Target property");
     targetPropertyCombobox.show();
     QObject::connect(&targetPropertyCombobox, &ComboBox::popupShowed, [=] {ensureComboboxVisible(&targetPropertyCombobox);});
@@ -178,7 +178,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     sourceItemCombobox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     sourceItemCombobox.setFixedHeight(fit(40));
     sourceItemCombobox.setIcon(QIcon(":/resources/images/down-arrow.png"));
-    sourceItemCombobox.setColor("#c03638");
+    sourceItemCombobox.setColor("#C61717");
     sourceItemCombobox.setPlaceHolderText("Source item");
     sourceItemCombobox.show();
     QObject::connect(&sourceItemCombobox, &ComboBox::popupShowed, [=] {ensureComboboxVisible(&sourceItemCombobox);});
@@ -209,12 +209,12 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     sourcePropertyCombobox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     sourcePropertyCombobox.setFixedHeight(fit(40));
     sourcePropertyCombobox.setIcon(QIcon(":/resources/images/plug-down.png"));
-    sourcePropertyCombobox.setColor("#c03638");
+    sourcePropertyCombobox.setColor("#C61717");
     sourcePropertyCombobox.setPlaceHolderText("Source property");
     sourcePropertyCombobox.show();
     QObject::connect(&sourcePropertyCombobox, &ComboBox::popupShowed, [=] {ensureComboboxVisible(&sourcePropertyCombobox);});
 
-    popupOkButton.setColor(QColor("#1e8145"));
+    popupOkButton.setColor(QColor("#6BB64B"));
     popupOkButton.setTextColor(Qt::white);
     popupOkButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     popupOkButton.setFixedHeight(fit(30));

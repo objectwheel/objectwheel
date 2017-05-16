@@ -13,8 +13,8 @@ Switch::Switch(QWidget *parent)
 	, m_indicatorWidth(height() - 2.0 * fit(DIFF))
 	, m_shifterTimer(new QTimer(this))
 	, m_indicatorColor(Qt::white)
-	, m_activeColor("#1e8145")
-	, m_passiveColor("#c03638")
+	, m_activeColor("#6BB64B")
+	, m_passiveColor("#C61717")
 {
 	setCursor(Qt::PointingHandCursor);
 	setCheckable(true);
@@ -42,9 +42,12 @@ void Switch::paintEvent(QPaintEvent*)
 		p.setBrush(gradient);
 		p.drawEllipse(QRectF(m_x, 2.0 * fit(DIFF), m_indicatorWidth, m_indicatorWidth));
 
-		/* Draw indicator */
-		p.setBrush(m_indicatorColor);
-		p.drawEllipse(QRectF(m_x, fit(DIFF), m_indicatorWidth, m_indicatorWidth));
+        /* Draw indicator */
+        QLinearGradient gradient2(m_x + m_indicatorWidth/2.0, fit(DIFF), m_x + m_indicatorWidth/2.0, fit(DIFF) + m_indicatorWidth);
+        gradient2.setColorAt(0, m_indicatorColor);
+        gradient2.setColorAt(1, m_indicatorColor.darker(110));
+        p.setBrush(gradient2);
+        p.drawEllipse(QRectF(m_x, fit(DIFF), m_indicatorWidth, m_indicatorWidth));
 
 		/* Draw background border */
 		QPen pen(QColor(0,0,0,40));

@@ -38,6 +38,7 @@
 #include <projectsscreen.h>
 #include <loginscreen.h>
 #include <buildsscreen.h>
+#include <editmodeindicator.h>
 
 #define DURATION 500
 
@@ -84,6 +85,7 @@ class MainWindowPrivate
 		QmlEditor* qmlEditor;
 		QQuickItemList m_Items;
 		QQuickUrlList m_ItemUrls;
+        EditModeIndicator* emIndicator;
         bool editMode;
 
 		MainWindowPrivate(MainWindow* uparent);
@@ -96,7 +98,7 @@ class MainWindowPrivate
 MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
 	: parent(uparent)
 {
-    editMode = false;
+    editMode = true;
 }
 
 void MainWindowPrivate::setupUi(QWidget* MainWindow)
@@ -113,8 +115,8 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	titleBar = new TitleBar(centralWidget);
 	titleBar->setObjectName(QStringLiteral("titleBar"));
 	titleBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    titleBar->setMinimumSize(QSize(0, 46));
-    titleBar->setMaximumSize(QSize(16777215, 46));
+    titleBar->setMinimumSize(QSize(0, 45));
+    titleBar->setMaximumSize(QSize(16777215, 45));
 	verticalLayout->addWidget(titleBar);
 
 	projectsScreen = new ProjectsScreen(MainWindow);
@@ -134,7 +136,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxList->setFocusPolicy(Qt::NoFocus);
     toolboxList->setStyleSheet(QString("QListView {\n"
                                              "	border:0px solid white;\n"
-                                             "	background:#566573;\n"
+                                             "	background:#52616D;\n"
                                              "	padding-right:%1px;\n"
                                              "}"
                                              "QListView::item {\n"
@@ -164,7 +166,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
     sceneList->setFocusPolicy(Qt::NoFocus);
     sceneList->setStyleSheet(QString("QListView {\n"
                                            "	border:0px solid white;\n"
-                                           "	background:#566573;\n"
+                                           "	background:#52616D;\n"
                                            "	padding-right:%1px;\n"
                                            "    padding-left:%2px;\n"
                                            "}"
@@ -196,7 +198,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 
 	toolboxAddButton = new FlatButton;
 	toolboxAddButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	toolboxAddButton->setColor("#1e8145");
+    toolboxAddButton->setColor("#6BB64B");
 	toolboxAddButton->setFixedSize(fit(20),fit(20));
 	toolboxAddButton->setRadius(fit(4));
     toolboxAddButton->setIconSize(QSize(fit(15),fit(15)));
@@ -205,7 +207,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 
 	toolboxRemoveButton = new FlatButton;
 	toolboxRemoveButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	toolboxRemoveButton->setColor("#c03638");
+    toolboxRemoveButton->setColor("#C61717");
 	toolboxRemoveButton->setFixedSize(fit(20),fit(20));
 	toolboxRemoveButton->setRadius(fit(4));
     toolboxRemoveButton->setIconSize(QSize(fit(15),fit(15)));
@@ -215,10 +217,10 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 
 	toolboxEditButton = new FlatButton;
 	toolboxEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	toolboxEditButton->setColor("#2b5796");
+    toolboxEditButton->setColor("#0D74C8");
 	toolboxEditButton->setFixedSize(fit(20),fit(20));
 	toolboxEditButton->setRadius(fit(4));
-    toolboxEditButton->setCheckedColor(QColor("#2b5796").darker(    110));
+    toolboxEditButton->setCheckedColor(QColor("#0D74C8").darker(    110));
 	toolboxEditButton->setCheckable(true);
     toolboxEditButton->setIconSize(QSize(fit(13),fit(13)));
 	toolboxEditButton->setIcon(QIcon(":/resources/images/edit.png"));
@@ -236,7 +238,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 
 	toolboxImportButton = new FlatButton;
 	toolboxImportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	toolboxImportButton->setColor("#1e8145");
+    toolboxImportButton->setColor("#6BB64B");
 	toolboxImportButton->setFixedSize(fit(20),fit(20));
 	toolboxImportButton->setRadius(fit(4));
     toolboxImportButton->setIconSize(QSize(fit(15),fit(15)));
@@ -245,7 +247,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 
 	toolboxExportButton = new FlatButton;
 	toolboxExportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	toolboxExportButton->setColor("#c03638");
+    toolboxExportButton->setColor("#C61717");
 	toolboxExportButton->setFixedSize(fit(20),fit(20));
 	toolboxExportButton->setRadius(fit(4));
     toolboxExportButton->setIconSize(QSize(fit(15),fit(15)));
@@ -336,6 +338,8 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	pagesWidget = new PagesWidget(centralWidget);
 	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
 	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    emIndicator = new EditModeIndicator(centralWidget);
 
     retranslateUi(MainWindow);
 }

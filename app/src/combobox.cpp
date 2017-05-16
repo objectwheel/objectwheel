@@ -19,7 +19,7 @@
 
 #define CSS_COMBOBOX_LISTWIDGET \
 "QListView {\
-	background:#566573;border:none;\
+    background:#52616D;border:none;\
 	border-bottom-left-radius:%1px;\
 	border-bottom-right-radius:%1px\
 } QListView::item {\
@@ -135,7 +135,7 @@ void ComboBox::paintEvent(QPaintEvent* event)
 
 	if (!m_d->collapsed) {
 		painter.setPen(QColor("#444444"));
-		painter.setBrush(QColor("#566573"));
+        painter.setBrush(QColor("#52616D"));
 		painter.drawRoundedRect(rect().adjusted(0,0,-fit(1),-fit(1)), fit(2), fit(2));
 	}
 
