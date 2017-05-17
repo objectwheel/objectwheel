@@ -93,7 +93,7 @@ Item {
         anchors { left:fileExplorer.right; top:parent.top; bottom: parent.bottom; }
         width: parent.width
         clip: true
-        color: "#4E5B67"
+        color: "#44504e"
         Rectangle {
             id:toolBar
             z: 2
@@ -101,7 +101,10 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: Fit.fit(42)
-            color: "#0D74C8"
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#0D74C8" }
+                GradientStop { position: 1.0; color: Qt.darker("#0D74C8", 1.2) }
+            }
             clip: true
 
             RowLayout {
@@ -390,7 +393,10 @@ Item {
                 height: currFileNameText.contentHeight + Fit.fit(3)
                 width: currFileNameText.contentWidth + Fit.fit(10)
                 radius: Fit.fit(3)
-                color: "#0D74C8"
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#0D74C8" }
+                    GradientStop { position: 1.0; color: Qt.darker("#0D74C8", 1.2) }
+                }
                 Rectangle {
                     anchors.right: parent.right
                     height: parent.height
@@ -418,8 +424,40 @@ Item {
                 value: Fit.fit(12)
                 maximumValue: Fit.fit(24)
                 minimumValue: Fit.fit(6)
-                stepSize: 3
+                stepSize: Fit.fit(3)
                 width: Fit.fit(100)
+                style: SliderStyle {
+                          groove: Rectangle {
+                              implicitWidth: Fit.fit(200)
+                              implicitHeight: Fit.fit(4)
+                              gradient: Gradient {
+                                  GradientStop { position: 0.0; color: Qt.lighter("#44504E", 1.5) }
+                                  GradientStop { position: 1.0; color: Qt.lighter("#44504E", 1.3) }
+                              }
+                              radius: Fit.fit(2)
+                          }
+                          handle: Rectangle {
+                              anchors.centerIn: parent
+                              border.color: Qt.darker("#0D74C8", 1.3)
+                              gradient: Gradient {
+                                  GradientStop { position: 0.0; color: control.pressed ? Qt.darker("#0D74C8", 1.1) : "#0D74C8" }
+                                  GradientStop { position: 1.0; color: control.pressed ? Qt.darker("#0D74C8", 1.2) : Qt.darker("#0D74C8", 1.1) }
+                              }
+                              implicitWidth: Fit.fit(12)
+                              implicitHeight: Fit.fit(12)
+                              radius: Fit.fit(6)
+                          }
+                      }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    propagateComposedEvents: true
+                    onClicked: mouse.accepted = false
+                    onPressed: mouse.accepted = false
+                    onReleased: mouse.accepted = false
+                }
             }
 
         }

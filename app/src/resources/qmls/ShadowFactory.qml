@@ -5,10 +5,10 @@ import "fit.js" as Fit
 Item {
     property var targets: []
     property var places:  []
-    property int offset: 3 * dpi
-    property real radius: 6.0
+    property int offset: 1 * dpi
+    property real radius: 4.0
     property int samples: 15
-    property color color: "#28000000"
+    property color color: "#40000000"
 
     id: root
 

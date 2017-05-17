@@ -32,7 +32,7 @@ SplashScreenPrivate::SplashScreenPrivate(QWidget *parent)
 	loadingWidget.setStyleSheet("background:transparent;");
 	loadingWidget.setAttribute(Qt::WA_AlwaysStackOnTop);
 	loadingWidget.setClearColor(Qt::transparent);
-	loadingWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
+    loadingWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
 
 	waitEffectTimer.setInterval(WAIT_EFFECT_INTERVAL);
 	connect(&waitEffectTimer, &QTimer::timeout, [=] {

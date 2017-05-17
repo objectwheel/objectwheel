@@ -34,7 +34,7 @@ Item {
         clip: true
         Image {
             id: errorImage
-            width: Math.min(Fit.fit(80), 128)
+            width: Math.min(Fit.fit(64), 128)
             height: width
             x: Math.floor((root.width - width)/2.0)
             y: Math.floor((root.height - height)/2.0)

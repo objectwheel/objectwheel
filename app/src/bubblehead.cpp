@@ -20,7 +20,7 @@
 #endif
 #define SMALL_SIZE (48.0 * (MOBILE_FACTOR))
 #define BIG_SIZE (96.0 * (MOBILE_FACTOR))
-#define DURATION 400
+#define DURATION 250
 
 using namespace Fit;
 

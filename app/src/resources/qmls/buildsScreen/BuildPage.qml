@@ -21,9 +21,9 @@ Item {
         anchors.fill: base
         horizontalOffset: 0
         verticalOffset: Fit.fit(1)
-        radius: (7.0)
-        samples: (25)
-        color: "#20000000"
+        radius: (3.0)
+        samples: (15)
+        color: "#30000000"
         source: base
     }
     Rectangle {
@@ -120,9 +120,9 @@ Item {
             anchors.fill: btnBuildOpMask
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: (6.0)
-            samples: (14)
-            color: "#80000000"
+            radius: 4
+            samples: 15
+            color: "#30000000"
             source: btnBuildOpMask
         }
         MouseArea {
@@ -183,17 +183,8 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 anchors.rightMargin: Fit.fit(10)
-                visible: false
-            }
-            DropShadow {
-                anchors.fill: warnIcon
-                horizontalOffset: 0
-                verticalOffset: 0
-                radius: (7)
-                samples: (26)
-                color: "#85000000"
-                source: warnIcon
                 visible: !enabledBuilds[index]
+                mipmap: true
             }
         }
     }

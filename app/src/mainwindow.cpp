@@ -366,7 +366,7 @@ void MainWindow::SetupGui()
 	SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
 	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
 	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
-	SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
+    SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
 	SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
     SplashScreen::show(false);
 }
@@ -820,7 +820,7 @@ void MainWindow::clearStudio()
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
     if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
-    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(65), height()-fit(65)); });
+    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(72), height() - fit(72)); });
     m_d->toolboxList->setCurrentRow(-1);
 }
 

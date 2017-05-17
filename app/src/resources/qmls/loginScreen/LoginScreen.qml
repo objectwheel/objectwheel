@@ -41,8 +41,8 @@ Column {
             anchors.fill: base
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: (7.0)
-            samples: (25)
+            radius: 3
+            samples: 17
             color: "#20000000"
             source: base
         }
@@ -198,8 +198,8 @@ Column {
             anchors.fill: base2
             horizontalOffset: 0
             verticalOffset: Fit.fit(1)
-            radius: (7.0)
-            samples: (25)
+            radius: 3
+            samples: 17
             color: "#20000000"
             source: base2
         }
@@ -240,9 +240,9 @@ Column {
                             anchors.fill: handle
                             horizontalOffset: 0
                             verticalOffset: Fit.fit(2.0)
-                            radius: (8)
-                            samples: (15)
-                            color: "#35000000"
+                            radius: 4
+                            samples: 15
+                            color: "#30000000"
                             source: handle
                         }
                     }
@@ -292,8 +292,8 @@ Column {
     }
     LoginButton {
         id: loginButton
-        height: Fit.fit(28)
-        width: Fit.fit(300)
+        height: Fit.fit(28) - (Fit.fit(28) % 1)
+        width: Fit.fit(300) - (Fit.fit(300) % 2)
         loginButtonDisabled: !validateEmail(emailTextInput.text) || !validatePassword(passwordTextInput.text)
     }
     FancyButton {

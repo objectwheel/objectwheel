@@ -28,15 +28,7 @@ Item {
             source: "qrc:///resources/images/sign_warning.png"
             fillMode: Image.PreserveAspectFit
             height: Fit.fit(16)
-        }
-        DropShadow {
-            anchors.fill: img
-            horizontalOffset: 0
-            verticalOffset: 0
-            radius: (7)
-            samples: (26)
-            color: "#85000000"
-            source: img
+            mipmap: true
         }
         Text {
             id: text
@@ -60,9 +52,9 @@ Item {
         anchors.fill: base
         horizontalOffset: 0
         verticalOffset: Fit.fit(1)
-        radius: (10)
+        radius: (5)
         samples: (14)
-        color: "#40000000"
+        color: "#30000000"
         source: base
     }
     QtObject {

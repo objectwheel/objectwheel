@@ -28,9 +28,9 @@ Rectangle {
         anchors.fill: helmetIcon
         horizontalOffset: 0
         verticalOffset: Fit.fit(1)
-        radius: 5.0
-        samples: 14
-        color: "#30000000"
+        radius: 2
+        samples: 18
+        color: "#35000000"
         source: helmetIcon
     }
     Image {

@@ -22,7 +22,7 @@ class ListWidget : public QListWidget
 		inline void ClearUrls() { m_Urls.clear(); }
 
 	protected:
-		QMimeData* mimeData(const QList<QListWidgetItem *> items) const;
+        QMimeData* mimeData(const QList<QListWidgetItem *> items) const override;
         void mousePressEvent(QMouseEvent* event) override;
         void mouseMoveEvent(QMouseEvent* event) override;
 };

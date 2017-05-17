@@ -24,16 +24,6 @@ Rectangle {
             color: base.color
             width: parent.width
             height: base.radius+Fit.fit(5)
-            visible: false
-        }
-        DropShadow {
-            anchors.fill: line
-            horizontalOffset: 0
-            verticalOffset: Fit.fit(2)
-            radius: (6)
-            samples: (18)
-            color: "#20000000"
-            source: line
         }
         PropertyAnimation {
             id: animationForth
@@ -73,9 +63,9 @@ Rectangle {
     DropShadow {
         anchors.fill: base
         horizontalOffset: 0
-        verticalOffset: Fit.fit(3)
-        radius: (8.0)
-        samples: (18)
+        verticalOffset: Fit.fit(1)
+        radius: 4
+        samples: 18
         color: "#10000000"
         source: base
     }

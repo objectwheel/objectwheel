@@ -214,9 +214,9 @@ Item {
                 anchors.fill: btnCancelOpMask
                 horizontalOffset: 0
                 verticalOffset: Fit.fit(1)
-                radius: (6.0)
-                samples: (14)
-                color: "#80000000"
+                radius: 2
+                samples: 18
+                color: "#30000000"
                 source: btnCancelOpMask
             }
             MouseArea {
@@ -298,9 +298,9 @@ Item {
                 anchors.fill: btnOkOpMask
                 horizontalOffset: 0
                 verticalOffset: Fit.fit(1)
-                radius: (6.0)
-                samples: (14)
-                color: "#80000000"
+                radius: 3
+                samples: 15
+                color: "#30000000"
                 source: btnOkOpMask
             }
             MouseArea {

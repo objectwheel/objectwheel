@@ -19,7 +19,10 @@ Item {
         height: Fit.fit(29)
         anchors.centerIn: parent
         visible: true
-        color: "#0D74C8"
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#0D74C8" }
+            GradientStop { position: 1.0; color: Qt.darker("#0D74C8", 1.2) }
+        }
         layer.enabled: true
         layer.effect: OpacityMask {
             maskSource: mask
@@ -30,10 +33,13 @@ Item {
             spacing: 0
             Rectangle {
                 id: first
-                color: splitState == 'editor' ? "white" : "transparent"
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: splitState == 'editor' ? "white" : "transparent" }
+                    GradientStop { position: 1.0; color: splitState == 'editor' ? Qt.darker("white", 1.1) : "transparent" }
+                }
                 Text {
                     text: "Editor"
-                    color: splitState == 'editor' ? "#0D74C8" : 'white'
+                    color: splitState == 'editor' ? Qt.darker("#0D74C8", 1.1) : 'white'
                     anchors.centerIn: parent
                 }
                 Layout.fillHeight: true
@@ -41,7 +47,7 @@ Item {
             }
             Rectangle {
                 id: seperator
-                color: Qt.lighter("#0D74C8", 1.12)
+                color: Qt.darker("#0D74C8", 1.3)
                 Layout.maximumWidth: Fit.fit(1)
                 Layout.minimumWidth: Fit.fit(1)
                 Layout.fillHeight: true
@@ -50,10 +56,13 @@ Item {
             }
             Rectangle {
                 id: second
-                color: splitState == 'splitted' ? "white" : "transparent"
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: splitState == 'splitted' ? "white" : "transparent" }
+                    GradientStop { position: 1.0; color: splitState == 'splitted' ? Qt.darker("white", 1.1) : "transparent" }
+                }
                 Text {
                     text: "Split"
-                    color: splitState == 'splitted' ? "#0D74C8" : "white"
+                    color: splitState == 'splitted' ? Qt.darker("#0D74C8", 1.1) : "white"
                     anchors.centerIn: parent
                 }
                 Layout.fillHeight: true
@@ -61,7 +70,7 @@ Item {
             }
             Rectangle {
                 id: seperator2
-                color: Qt.lighter("#0D74C8", 1.12)
+                color: Qt.darker("#0D74C8", 1.3)
                 Layout.maximumWidth: Fit.fit(1)
                 Layout.minimumWidth: Fit.fit(1)
                 Layout.fillHeight: true
@@ -70,10 +79,13 @@ Item {
             }
             Rectangle {
                 id: third
-                color: splitState == 'viewer' ? "white" : "transparent"
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: splitState == 'viewer' ? "white" : "transparent" }
+                    GradientStop { position: 1.0; color: splitState == 'viewer' ? Qt.darker("white", 1.1) : "transparent" }
+                }
                 Text {
                     text: "Viewer"
-                    color: splitState == 'viewer' ? "#0D74C8" : "white"
+                    color: splitState == 'viewer' ? Qt.darker("#0D74C8", 1.1) : "white"
                     anchors.centerIn: parent
                 }
                 Layout.fillHeight: true

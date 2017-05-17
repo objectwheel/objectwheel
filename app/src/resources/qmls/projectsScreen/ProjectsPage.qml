@@ -58,8 +58,8 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Fit.fit(15)
-        height: Fit.fit(28)
-        width: Fit.fit(240)
+        height: Fit.fit(28) - (Fit.fit(28) % 1)
+        width: Fit.fit(240) - (Fit.fit(240) % 2)
         loadButtonDisabled: projectList.listView.count < 1
     }
     property alias projectList : projectList
