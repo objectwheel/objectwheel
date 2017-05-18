@@ -1126,7 +1126,8 @@ void MainWindow::toolboxImportButtonClicked()
 	dialog.setNameFilter(tr("Zip files (*.zip)"));
 	dialog.setViewMode(QFileDialog::Detail);
 	if (dialog.exec()) {
-		handleImports(dialog.selectedFiles());
+        handleImports(dialog.selectedFiles());
+        QMessageBox::information(this, "Finished", "Tool import has successfully finished.");
 	}
 }
 
@@ -1141,6 +1142,7 @@ void MainWindow::toolboxExportButtonClicked()
 		auto toolName = m_d->toolboxList->currentItem()->text();
         if (!rm(dialog.selectedFiles().at(0) + separator() + toolName + ".zip")) return;
 		Zipper::compressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip");
+        QMessageBox::information(this, "Finished", "Tool export has successfully finished.");
 	}
 }
 

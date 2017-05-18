@@ -444,7 +444,7 @@ QUrl QQuickFolderListModel::folder() const
     Q_D(const QQuickFolderListModel);
     return d->currentDir;
 }
-
+#include <QDebug>
 void QQuickFolderListModel::setFolder(const QUrl &folder)
 {
     Q_D(QQuickFolderListModel);

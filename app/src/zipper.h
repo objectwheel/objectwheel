@@ -6,8 +6,8 @@
 
 namespace Zipper
 {
-    void compressDir(const QString& dir, const QString& outFilename, const QString& base = QString());
-    void extractZip(const QByteArray& zipData, const QString& path);
+    bool compressDir(const QString& dir, const QString& outFilename, const QString& base = QString());
+    bool extractZip(const QByteArray& zipData, const QString& path);
 }
 
 #endif // ZIPPER_H

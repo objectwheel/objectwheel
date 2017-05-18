@@ -56,12 +56,12 @@ Item {
             dirIcon: "qrc:///resources/images/fileExplorer/dir.png"
         }
         onEntryRenamed: {
-            from = from.toString().replace("file://", "")
-            to = to.toString().replace("file://", "")
+            from = componentManager.pathOfUrl(from)
+            to = componentManager.pathOfUrl(to)
             updateCacheForRenamedEntry(from, to, isdir)
         }
         onEntryDeleted: {
-            name = name.toString().replace("file://", "")
+            name = componentManager.pathOfUrl(name)
             clearCacheFor(name, isdir)
         }
         explorerListView.listView.onCurrentItemChanged: {
@@ -537,7 +537,7 @@ Item {
     function getClearSaves() {
         var clearSaves = []
         var clearUrls = []
-        var toolDir = fileExplorer.explorerListView.folderListModel.rootFolder.toString().replace("file://","")
+        var toolDir = componentManager.pathOfUrl(fileExplorer.explorerListView.folderListModel.rootFolder)
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 clearUrls.push(urlCache[i])
@@ -547,7 +547,7 @@ Item {
         return [clearUrls, clearSaves]
     }
     function flushCachesToDisk() {
-        var toolDir = fileExplorer.explorerListView.folderListModel.rootFolder.toString().replace("file://","")
+        var toolDir = componentManager.pathOfUrl(fileExplorer.explorerListView.folderListModel.rootFolder)
         for (var i = 0; i < urlCache.length; i++) {
             if (urlCache[i].indexOf((toolDir + FileManager.separator())) >= 0) {
                 var ret = FileManager.wrfile(urlCache[i], saveCache[i])
@@ -649,7 +649,7 @@ Item {
         var clearSaves = getClearSaves()
         flushCachesToDisk()
 
-        if (!componentManager.build(fileExplorer.explorerListView.folderListModel.rootFolder.toString().replace("file://", "") + "/main.qml")) {
+        if (!componentManager.build(componentManager.pathOfUrl(fileExplorer.explorerListView.folderListModel.rootFolder) + "/main.qml")) {
             var errObj = JSON.parse(componentManager.errors()[0])
             if (root.url === errObj.path) {
                 editor.lineNumberRepeater.itemAt(errObj.line - 1).bgcolor = "#c74c3c"

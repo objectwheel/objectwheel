@@ -70,6 +70,7 @@ class ComponentManager : public QObject
         Q_INVOKABLE static QStringList errors();
         Q_INVOKABLE static QQuickItem* build(const QString &url);
         Q_INVOKABLE static inline QUrl urlOfPath(const QString& path) { return QUrl::fromUserInput(path); }
+        Q_INVOKABLE static inline QString pathOfUrl(const QUrl& url) { return url.toLocalFile(); }
 };
 
 #endif // QMLEDITOR_H

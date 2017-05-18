@@ -6,7 +6,7 @@ import "filemanager.js" as FileManager
 
 Rectangle {
     id: root
-    color: "#3A4644"
+    color: Qt.lighter("#3A4644", 1.35)
     FileExplorerToolBar {
         id: explorerToolBar
         anchors { top: parent.top; left: parent.left; right: parent.right }
@@ -71,9 +71,8 @@ Rectangle {
         onDropped: {
             if (drop.hasUrls) {
                 for (var i = 0; i < drop.urls.length; i++) {
-                    var from = drop.urls[i].toString().replace("file://","")
-                    var to = explorerListView.folderListModel.folder.toString().replace("file://","")
-                    console.log(from, to)
+                    var from = componentManager.pathOfUrl(drop.urls[i])
+                    var to = componentManager.pathOfUrl(explorerListView.folderListModel.folder)
                     FileManager.cp(from, to)
                 }
             }
@@ -123,7 +122,7 @@ Rectangle {
                         topRect.color = d.pressedButtonColor
                         bottomRect.color = d.pressedButtonColor
                         bottomItem.clr = d.containerColor
-                        var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                        var dir = componentManager.pathOfUrl(root.explorerListView.folderListModel.folder)
                         var el = FileManager.ls(dir)
                         var name = FileManager.fname(textField.text)
                         for (var j = 0; j < el.length; j++) {
@@ -133,7 +132,7 @@ Rectangle {
                             }
                         }
                         var data = FileManager.dlfile(textField.text)
-                        var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + name
+                        var lf = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/" + name
                         FileManager.wrfile(lf, data)
                         topRect.color = d.containerColor
                         bottomRect.color = d.containerColor
@@ -209,7 +208,7 @@ Rectangle {
                             topRect.color = d.pressedButtonColor
                             bottomRect.color = d.pressedButtonColor
                             parent.clr = d.containerColor
-                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var dir = componentManager.pathOfUrl(root.explorerListView.folderListModel.folder)
                             var el = FileManager.ls(dir)
                             var name = FileManager.fname(textField.text)
                             for (var j = 0; j < el.length; j++) {
@@ -219,7 +218,7 @@ Rectangle {
                                 }
                             }
                             var data = FileManager.dlfile(textField.text)
-                            var lf = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + name
+                            var lf =componentManager.pathOfUrl( explorerListView.folderListModel.folder) + "/" + name
                             FileManager.wrfile(lf, data)
                             topRect.color = d.containerColor
                             bottomRect.color = d.containerColor
@@ -245,7 +244,8 @@ Rectangle {
                     onVisibleChanged: { text = ""; focus = false }
                     Keys.onReturnPressed: {
                         if (!topRect2.enabled) return
-                        var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField2.text
+                        var name = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/" + textField2.text
+                        console.log(name)
                         FileManager.mkfile(name)
                         popup.close()
                     }
@@ -279,7 +279,7 @@ Rectangle {
                         if (textField2.text === "") {
                             return false
                         } else {
-                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var dir = componentManager.pathOfUrl(root.explorerListView.folderListModel.folder)
                             var el = FileManager.ls(dir)
                             for (var j = 0; j < el.length; j++) {
                                 if (textField2.text.toLowerCase() === el[j].toLowerCase()) {
@@ -325,7 +325,7 @@ Rectangle {
                             bottomRect2.color = d.containerColor
                         }
                         onClicked: {
-                            var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField2.text
+                            var name = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/" + textField2.text
                             FileManager.mkfile(name)
                             popup.close()
                         }
@@ -348,7 +348,7 @@ Rectangle {
                     onVisibleChanged: { text = ""; focus = false }
                     Keys.onReturnPressed: {
                         if (!topRect3.enabled) return
-                        var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField3.text
+                        var name = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/" + textField3.text
                         FileManager.mkdir(name)
                         popup.close()
                     }
@@ -382,7 +382,7 @@ Rectangle {
                         if (textField3.text === "") {
                             return false
                         } else {
-                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var dir = componentManager.pathOfUrl(root.explorerListView.folderListModel.folder)
                             var el = FileManager.ls(dir)
                             for (var j = 0; j < el.length; j++) {
                                 if (textField3.text.toLowerCase() === el[j].toLowerCase()) {
@@ -428,7 +428,7 @@ Rectangle {
                             bottomRect3.color = d.containerColor
                         }
                         onClicked: {
-                            var name = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/" + textField3.text
+                            var name = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/" + textField3.text
                             FileManager.mkdir(name)
                             popup.close()
                         }
@@ -458,13 +458,13 @@ Rectangle {
                     }
                     Keys.onReturnPressed: {
                         if (!ttopRect.enabled) return
-                        var folder = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/"
+                        var folder = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/"
                         var oldName = folder + explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
                         var newName = folder + textField4.text
                         var isfolder = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
                         FileManager.rn(oldName, newName)
                         popup.close()
-                        entryRenamed("file://" + oldName, "file://" + newName, isfolder)
+                        entryRenamed(componentManager.urlOfPath(oldName), componentManager.urlOfPath(newName), isfolder)
                     }
                     style: TextFieldStyle {
                         textColor: d.textColor
@@ -498,7 +498,7 @@ Rectangle {
                         if (textField4.text === "") {
                             return false
                         } else {
-                            var dir = root.explorerListView.folderListModel.folder.toString().replace("file://","")
+                            var dir = componentManager.pathOfUrl(root.explorerListView.folderListModel.folder)
                             var el = FileManager.ls(dir)
                             for (var j = 0; j < el.length; j++) {
                                 if (textField4.text.toLowerCase() === el[j].toLowerCase()) {
@@ -527,13 +527,13 @@ Rectangle {
                             ttopRect.color = d.containerColor
                         }
                         onClicked: {
-                            var folder = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/"
+                            var folder = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/"
                             var oldName = folder + explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
                             var newName = folder + textField4.text
                             var isfolder = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
                             FileManager.rn(oldName, newName)
                             popup.close()
-                            entryRenamed("file://" + oldName, "file://" + newName, isfolder)
+                            entryRenamed(componentManager.urlOfPath(oldName), componentManager.urlOfPath(newName), isfolder)
                         }
                     }
                 }
@@ -584,12 +584,12 @@ Rectangle {
                             bottomRect4.color = d.containerColor
                         }
                         onClicked: {
-                            var folder = explorerListView.folderListModel.folder.toString().replace("file://", "") + "/"
+                            var folder = componentManager.pathOfUrl(explorerListView.folderListModel.folder) + "/"
                             var name = folder + explorerListView.folderListModel.get(explorerListView.listView.currentIndex, "fileName")
                             var isfolder = explorerListView.folderListModel.isFolder(explorerListView.listView.currentIndex)
                             FileManager.rm(name)
                             popup.close()
-                            entryDeleted("file://" + name, isfolder)
+                            entryDeleted(componentManager.urlOfPath(name), isfolder)
                         }
                     }
                 }

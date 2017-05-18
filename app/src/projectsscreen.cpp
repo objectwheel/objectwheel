@@ -11,6 +11,7 @@
 #include <splashscreen.h>
 #include <scenemanager.h>
 #include <filemanager.h>
+#include <QFileDialog>
 
 ProjectsScreen* instance = nullptr;
 QQuickItem* swipeView;
@@ -75,6 +76,8 @@ ProjectsScreen::ProjectsScreen(QWidget *parent)
 	connect(btnCancel, SIGNAL(clicked()), this, SLOT(handleBtnCancelClicked()));
 	connect(btnDelete, SIGNAL(clicked()), this, SLOT(handleBtnDeleteClicked()));
 	connect(btnOk, SIGNAL(clicked()), this, SLOT(handleBtnOkClicked()));
+    connect(btnImport, SIGNAL(clicked()), this, SLOT(handleBtnImportClicked()));
+    connect(btnExport, SIGNAL(clicked()), this, SLOT(handleBtnExportClicked()));
 
 	QVariant v;
 	v.setValue<ProjectListModel*>(&model);
@@ -156,6 +159,43 @@ void ProjectsScreen::handleBtnDeleteClicked()
 finish:
 	refreshProjectList(currentProject);
     swipeView->setProperty("currentIndex", 0);
+}
+
+void ProjectsScreen::handleBtnImportClicked()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setNameFilter(tr("Zip files (*.zip)"));
+    dialog.setViewMode(QFileDialog::Detail);
+    if (dialog.exec()) {
+        for (auto fileName : dialog.selectedFiles()) {
+            if (!ProjectManager::importProject(fileName)) {
+                QMessageBox::warning(this, "Operation Stopped", "One or more projects exists. Please rename your existing projects to another name."
+                                     "Or one or more import file corrupted.");
+                return;
+            }
+        }
+        refreshProjectList(ProjectManager::currentProject());
+        swipeView->setProperty("currentIndex", 0);
+        QMessageBox::information(this, "Finished", "Tool import has successfully finished.");
+    }
+}
+
+void ProjectsScreen::handleBtnExportClicked()
+{
+    auto projectName = model.get(listView->property("currentIndex").toInt(),
+                                 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
+    if (projectName.isEmpty()) return;
+
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    if (dialog.exec()) {
+        if (!rm(dialog.selectedFiles().at(0) + separator() + projectName + ".zip")) return;
+        if (!ProjectManager::exportProject(projectName, dialog.selectedFiles().at(0) + separator() + projectName + ".zip")) return;
+        QMessageBox::information(this, "Finished", "Project export has successfully finished.");
+    }
 }
 
 void ProjectsScreen::handleBtnOkClicked()

@@ -22,6 +22,8 @@ class ProjectsScreen : public QQuickWidget
 		void handleBtnCancelClicked();
 		void handleBtnDeleteClicked();
 		void handleBtnOkClicked();
+        void handleBtnImportClicked();
+        void handleBtnExportClicked();
         static void refreshProjectList(const QString& activeProject = QString());
 };
 

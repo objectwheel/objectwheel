@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QDateTime>
 #include <mainwindow.h>
+#include <zipper.h>
 
 #define INF_FILENAME "inf.json"
 
@@ -111,14 +112,31 @@ bool ProjectManager::renameProject(const QString& from, const QString& to)
 	auto fromDir = m_d->generateProjectDir(from);
 	auto toDir = m_d->generateProjectDir(to);
 	if (fromDir.isEmpty() || toDir.isEmpty()) return false;
-	if (m_d->currentProject == from) {
-		stopProject();
-		if (!rn(fromDir, toDir)) return false;
-		if (!startProject(to)) return false;
+    if (m_d->currentProject == from) {
+        stopProject();
+        m_d->mainWindow->clearStudio();
+        if (!rn(fromDir, toDir)) return false;
+        if (!startProject(to)) return false;
 		return infUpdateLastModification();
 	} else {
 		return rn(fromDir, toDir);
-	}
+    }
+}
+
+bool ProjectManager::exportProject(const QString& projectname, const QString& filepath)
+{
+    if (!exists(projectname)) return false;
+    auto projDir = m_d->generateProjectDir(projectname);
+    return Zipper::compressDir(projDir, filepath, fname(projDir));
+}
+
+bool ProjectManager::importProject(const QString &filepath)
+{
+    auto zipData = rdfile(filepath);
+    if (zipData.isEmpty()) return false;
+    auto userDir = UserManager::userDirectory(UserManager::currentSessionsUser());
+    if (userDir.isEmpty()) return false;
+    return Zipper::extractZip(zipData, userDir);
 }
 
 bool ProjectManager::fillProjectInformation(const QString& projectname,

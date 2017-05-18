@@ -217,7 +217,7 @@ void QmlEditorPrivate::show(const QString& url)
     QFileInfo info(url);
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
 	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, true));
-    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + info.dir().path()));
+    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(info.dir().path())));
 
 	QTimer::singleShot(DURATION,[=] { //FIXME
 		QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
@@ -245,8 +245,8 @@ void QmlEditorPrivate::show()
     QString controlPath = SaveManager::saveDirectory(dashboardRootContext->nameForObject(lastSelectedItem));
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
 	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, false));
-    QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + controlPath));
-    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + controlPath));
+    QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
+    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
 
     QTimer::singleShot(DURATION,[=] { //FIXME
         QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, controlPath + separator() + "main.qml"));
@@ -335,7 +335,7 @@ void QmlEditor::setShowCenter(const QPoint& p)
 
 void QmlEditor::setRootFolder(const QString& folder)
 {
-    QMetaObject::invokeMethod(m_d->rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, "file://" + folder));
+    QMetaObject::invokeMethod(m_d->rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(folder)));
 }
 
 void QmlEditor::show(const QString& url)

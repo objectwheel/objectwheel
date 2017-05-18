@@ -31,6 +31,8 @@ class ProjectManager : public QObject
 		static bool exists(const QString& projectname);
 		static bool buildNewProject(const QString& projectname);
 		static bool renameProject(const QString& from, const QString& to);
+        static bool exportProject(const QString& projectname, const QString& filepath);
+        static bool importProject(const QString& filepath);
 		static bool fillProjectInformation(const QString& projectname,
 										   const QString& description,
 										   const QString& orgname,

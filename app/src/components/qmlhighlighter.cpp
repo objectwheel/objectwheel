@@ -4,11 +4,11 @@
 void QMLHighlighter::highlightBlock(const QString &text)
 {
 	QTextCharFormat typeFormat;
-    typeFormat.setForeground(QColor("#317dc9")); // Type
+    typeFormat.setForeground(QColor("#298FF5")); // Type
 	QTextCharFormat commentFormat;
     commentFormat.setForeground(QColor("#757575")); // Comment
 	QTextCharFormat numericConstantFormat;
-	numericConstantFormat.setForeground(QColor("#c74c3c")); // Constant
+    numericConstantFormat.setForeground(QColor("#DC5B49")); // Constant
 	QTextCharFormat stringConstantFormat;
 	stringConstantFormat.setForeground(QColor("#8ccc29"));
 
