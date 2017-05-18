@@ -91,6 +91,16 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
     auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha3_512);
     keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
 
+//    userManager->buildNewUser(email);
+//    auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
+//    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+//    if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
+//    ProjectsScreen::refreshProjectList();
+//    SplashScreen::hide();
+//    SceneManager::show("projectsScene", SceneManager::ToLeft);
+//    clearGUI();
+//    return;
+
     if (userManager->exists(email)) {
         if (DirLocker::locked(userManager->userDirectory(email))) {
             if (DirLocker::canUnlock(userManager->userDirectory(email), keyHash)) {

@@ -62,10 +62,16 @@ void RotatorTick::FixCoord()
 		  static_cast<int>(point.y() - height())});
 }
 
+void RotatorTick::ResetRotation()
+{
+    m_TrackedItem->setRotation(0);
+    SaveManager::setVariantProperty(m_RootContext->nameForObject(m_TrackedItem), "rotation", ::rotation);
+}
+
 void RotatorTick::paintEvent(QPaintEvent*)
 {
-	QPainter p(this);
-	p.setRenderHint(QPainter::Antialiasing);
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
 	if (isDown())
 	{
 		QBrush b(QColor("#d88c05"));

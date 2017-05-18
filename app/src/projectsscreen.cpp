@@ -143,20 +143,19 @@ void ProjectsScreen::handleBtnDeleteClicked()
 {
 	QString currentProject;
 	auto projectName = model.get(listView->property("currentIndex").toInt(),
-								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
-	if (!ProjectManager::exists(projectName)) goto finish;
-	currentProject = ProjectManager::currentProject();
-	if (!currentProject.isEmpty() && currentProject == projectName) {
+                                 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
+    if (!ProjectManager::exists(projectName)) goto finish;
+    currentProject = ProjectManager::currentProject();
+    if (!currentProject.isEmpty() && currentProject == projectName) {
 		ProjectManager::stopProject();
 		currentProject = "";
-		return;
-	}
+    }
 
 	rm(ProjectManager::projectDirectory(projectName));
 
 finish:
 	refreshProjectList(currentProject);
-	swipeView->setProperty("currentIndex", 0);
+    swipeView->setProperty("currentIndex", 0);
 }
 
 void ProjectsScreen::handleBtnOkClicked()

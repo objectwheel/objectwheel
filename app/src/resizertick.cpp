@@ -56,8 +56,8 @@ void ResizerTick::FixCoord()
 
 void ResizerTick::handleSavingTimeout()
 {
-	SaveManager::setVariantProperty(m_RootContext->nameForObject(m_TrackedItem), "width", ::width);
-	SaveManager::setVariantProperty(m_RootContext->nameForObject(m_TrackedItem), "height", ::height);
+    SaveManager::setVariantProperty(m_RootContext->nameForObject(m_TrackedItem), "width", ::width / Fit::ratio());
+    SaveManager::setVariantProperty(m_RootContext->nameForObject(m_TrackedItem), "height", ::height / Fit::ratio());
 	m_SavingTimer.stop();
 }
 

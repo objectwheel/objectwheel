@@ -19,7 +19,6 @@
 #include <bindingwidget.h>
 #include <qmleditor.h>
 #include <QApplication>
-#include <QFileSystemWatcher>
 
 #define SAVE_DIRECTORY "dashboard"
 #define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"

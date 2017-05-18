@@ -29,7 +29,7 @@ class RotatorTick : public QPushButton
 
 	public slots:
 		void FixCoord();
-		inline void ResetRotation() { m_TrackedItem->setRotation(0); }
+        void ResetRotation();
 		void handleSavingTimeout();
 
 	signals:

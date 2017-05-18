@@ -187,13 +187,16 @@ void BubbleHead::paintEvent(QPaintEvent*)
             painter.drawPixmap(button->path.boundingRect().toRect(), p);
             painter.drawPath(button->path);
         }
+     }
+
+    if (m_d->rotateAnim2.state() == QVariantAnimation::Running) {
+        QTransform tr;
+        tr.translate(width() / 2.0, width() / 2.0);
+        tr.rotate(m_d->rotateAnim2.currentValue().toInt());
+        tr.translate(-width() / 2.0, -width() / 2.0);
+        painter.setTransform(tr);
     }
 
-    QTransform tr;
-    tr.translate(width() / 2.0, width() / 2.0);
-    tr.rotate(m_d->rotateAnim2.currentValue().toInt());
-    tr.translate(-width() / 2.0, -width() / 2.0);
-    painter.setTransform(tr);
     painter.setClipping(false);
     pen.setColor(QColor("#0D74C8").dark(109));
     painter.setPen(pen);
@@ -239,14 +242,14 @@ void BubbleHeadPrivate::spin(bool up)
         moveAnim.setDuration(DURATION);
         centerAnim.setDuration(DURATION);
         rotateAnim.setDuration(DURATION);
-        rotateAnim2.setDuration(7 * DURATION);
+        rotateAnim2.setDuration(6 * DURATION);
 
         centerAnim.setStartValue(fit(SMALL_SIZE) / 2.0 - fit(0.5));
         centerAnim.setEndValue(fit(SMALL_SIZE) / 4.0 - fit(0.5));
 
         rotateAnim.setStartValue(360);
         rotateAnim.setEndValue(0);
-        rotateAnim2.setStartValue(360);
+        rotateAnim2.setStartValue(720);
         rotateAnim2.setEndValue(0);
 
         moveAnim.setStartValue(parent->geometry());
@@ -258,7 +261,7 @@ void BubbleHeadPrivate::spin(bool up)
         moveAnim.setDuration(DURATION);
         centerAnim.setDuration(DURATION);
         rotateAnim.setDuration(DURATION);
-        rotateAnim2.setDuration(7 * DURATION);
+        rotateAnim2.setDuration(6 * DURATION);
 
         centerAnim.setStartValue(fit(SMALL_SIZE) / 4.0 - fit(0.5));
         centerAnim.setEndValue(fit(SMALL_SIZE) / 2.0 - fit(0.5));
@@ -266,7 +269,7 @@ void BubbleHeadPrivate::spin(bool up)
         rotateAnim.setStartValue(0);
         rotateAnim.setEndValue(360);
         rotateAnim2.setStartValue(0);
-        rotateAnim2.setEndValue(360);
+        rotateAnim2.setEndValue(720);
 
         moveAnim.setStartValue(parent->geometry());
         moveAnim.setEndValue(QRect(parent->x() + fit(BIG_SIZE - SMALL_SIZE)/2.0,
