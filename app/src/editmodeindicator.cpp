@@ -5,8 +5,6 @@
 
 using namespace Fit;
 
-QGraphicsDropShadowEffect eff;
-
 void EditModeIndicator::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
