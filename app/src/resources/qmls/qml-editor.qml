@@ -416,6 +416,7 @@ Item {
 
             Slider {
                 id: fontSlider
+                visible: !imageViewer.visible && (view.state == "splitted" || view.state == "editor")
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.leftMargin: Fit.fit(40)
