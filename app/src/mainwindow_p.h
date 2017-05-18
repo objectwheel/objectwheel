@@ -89,8 +89,7 @@ class MainWindowPrivate
         bool editMode;
 
 		MainWindowPrivate(MainWindow* uparent);
-		void setupUi(QWidget *MainWindow); // setupUi
-		void retranslateUi(QWidget *MainWindow); // retranslateUi
+        void setupUi(); // setupUi
 		void showAdderArea();
 		void hideAdderArea();
 };
@@ -101,12 +100,13 @@ MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
     editMode = true;
 }
 
-void MainWindowPrivate::setupUi(QWidget* MainWindow)
+void MainWindowPrivate::setupUi()
 {
-	MainWindow->setObjectName(QStringLiteral("MainWindow"));
-	MainWindow->setStyleSheet(QLatin1String("#centralWidget, #MainWindow{\n"
+    parent->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
+    parent->setObjectName(QStringLiteral("MainWindow"));
+    parent->setStyleSheet(QLatin1String("#centralWidget, #MainWindow{\n"
 											"background:\"#e0e4e7\";\n }"));
-	centralWidget = new QWidget(MainWindow);
+    centralWidget = new QWidget(parent);
 	centralWidget->setObjectName(QStringLiteral("centralWidget"));
 	verticalLayout = new QVBoxLayout(centralWidget);
 	verticalLayout->setSpacing(0);
@@ -119,8 +119,8 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
     titleBar->setMaximumSize(QSize(16777215, 45));
 	verticalLayout->addWidget(titleBar);
 
-	projectsScreen = new ProjectsScreen(MainWindow);
-    loginScreen = new LoginScreen(MainWindow);
+    projectsScreen = new ProjectsScreen(parent);
+    loginScreen = new LoginScreen(parent);
 
 	designWidget = new QQuickWidget(centralWidget);
 	designWidget->setObjectName(QStringLiteral("designWidget"));
@@ -203,7 +203,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxAddButton->setRadius(fit(4));
     toolboxAddButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxAddButton->setIcon(QIcon(":/resources/images/plus.png"));
-	QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxAddButtonClicked()) );
+    QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxAddButtonClicked()) );
 
 	toolboxRemoveButton = new FlatButton;
 	toolboxRemoveButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -213,7 +213,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
     toolboxRemoveButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxRemoveButton->setIcon(QIcon(":/resources/images/minus.png"));
 	toolboxRemoveButton->setDisabled(true);
-	QObject::connect(toolboxRemoveButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxRemoveButtonClicked()) );
+    QObject::connect(toolboxRemoveButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxRemoveButtonClicked()) );
 
 	toolboxEditButton = new FlatButton;
 	toolboxEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -225,7 +225,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
     toolboxEditButton->setIconSize(QSize(fit(13),fit(13)));
 	toolboxEditButton->setIcon(QIcon(":/resources/images/edit.png"));
 	toolboxEditButton->setDisabled(true);
-	QObject::connect(toolboxEditButton, SIGNAL(toggled(bool)), MainWindow, SLOT(toolboxEditButtonToggled(bool)) );
+    QObject::connect(toolboxEditButton, SIGNAL(toggled(bool)), parent, SLOT(toolboxEditButtonToggled(bool)) );
 
 	toolboxResetButton = new FlatButton;
 	toolboxResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -234,7 +234,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxResetButton->setRadius(fit(4));
     toolboxResetButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
-	QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxResetButtonClicked()) );
+    QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxResetButtonClicked()) );
 
 	toolboxImportButton = new FlatButton;
 	toolboxImportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -243,7 +243,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxImportButton->setRadius(fit(4));
     toolboxImportButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxImportButton->setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(-90))));
-	QObject::connect(toolboxImportButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxImportButtonClicked()) );
+    QObject::connect(toolboxImportButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxImportButtonClicked()) );
 
 	toolboxExportButton = new FlatButton;
 	toolboxExportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -253,7 +253,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
     toolboxExportButton->setIconSize(QSize(fit(15),fit(15)));
 	toolboxExportButton->setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(90))));
 	toolboxExportButton->setDisabled(true);
-	QObject::connect(toolboxExportButton, SIGNAL(clicked(bool)), MainWindow, SLOT(toolboxExportButtonClicked()) );
+    QObject::connect(toolboxExportButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxExportButtonClicked()) );
 
 	toolboxAdderAreaButtonSideHLay->addWidget(toolboxAddButton);
 	toolboxAdderAreaButtonSideHLay->addStretch();
@@ -275,7 +275,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolboxUrlBox->setDisabled(true);
 	toolboxUrlBox->setHidden(true);
 	QObject::connect(toolboxUrlBox->lineEdit(), SIGNAL(textChanged(QString)),
-					 MainWindow, SLOT(handleToolboxUrlboxChanges(QString)));
+                     parent, SLOT(handleToolboxUrlboxChanges(QString)));
 
 	toolBoxNameBox = new LineEdit;
 	toolBoxNameBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -285,7 +285,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	toolBoxNameBox->setDisabled(true);
 	toolBoxNameBox->setHidden(true);
 	QObject::connect(toolBoxNameBox->lineEdit(), SIGNAL(textChanged(QString)),
-					 MainWindow, SLOT(handleToolboxNameboxChanges(QString)));
+                     parent, SLOT(handleToolboxNameboxChanges(QString)));
 
     toolboxAdderAreaEditingLayout = new QVBoxLayout;
 	toolboxAdderAreaEditingLayout->addWidget(toolBoxNameBox);
@@ -339,14 +339,7 @@ void MainWindowPrivate::setupUi(QWidget* MainWindow)
 	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
 	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    emIndicator = new EditModeIndicator(centralWidget);
-
-    retranslateUi(MainWindow);
-}
-
-void MainWindowPrivate::retranslateUi(QWidget* MainWindow)
-{
-	MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
+    emIndicator = new EditModeIndicator(parent);
 }
 
 void MainWindowPrivate::showAdderArea()

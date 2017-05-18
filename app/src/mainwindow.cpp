@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	if (m_d) return;
 	m_d = new MainWindowPrivate(this);
-	m_d->setupUi(this);
+    m_d->setupUi();
 	SetupGui();
 	QTimer::singleShot(300, [=] { SetupManagers(); });
 }
