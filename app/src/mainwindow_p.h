@@ -339,7 +339,7 @@ void MainWindowPrivate::setupUi()
 	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
 	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    emIndicator = new EditModeIndicator(parent);
+    emIndicator = new EditModeIndicator(centralWidget);
 }
 
 void MainWindowPrivate::showAdderArea()

@@ -393,6 +393,7 @@ Item {
                 height: currFileNameText.contentHeight + Fit.fit(3)
                 width: currFileNameText.contentWidth + Fit.fit(10)
                 radius: Fit.fit(3)
+                visible: (root.width > root.height)
                 gradient: Gradient {
                     GradientStop { position: 0.0; color: "#0D74C8" }
                     GradientStop { position: 1.0; color: Qt.darker("#0D74C8", 1.2) }
@@ -416,7 +417,7 @@ Item {
 
             Slider {
                 id: fontSlider
-                visible: !imageViewer.visible && (view.state == "splitted" || view.state == "editor")
+                visible: !imageViewer.visible && (view.state == "splitted" || view.state == "editor") && (root.width > root.height)
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.leftMargin: Fit.fit(40)
@@ -439,10 +440,10 @@ Item {
                           }
                           handle: Rectangle {
                               anchors.centerIn: parent
-                              border.color: Qt.darker("#0D74C8", 1.3)
+                              border.color: control.pressed ? Qt.darker("#44504E", 1.1) : "#44504E"
                               gradient: Gradient {
-                                  GradientStop { position: 0.0; color: control.pressed ? Qt.darker("#0D74C8", 1.1) : "#0D74C8" }
-                                  GradientStop { position: 1.0; color: control.pressed ? Qt.darker("#0D74C8", 1.2) : Qt.darker("#0D74C8", 1.1) }
+                                  GradientStop { position: 0.0; color: control.pressed ? Qt.lighter("#44504E", 1.6) : Qt.lighter("#44504E", 1.8) }
+                                  GradientStop { position: 1.0; color: control.pressed ? Qt.lighter("#44504E", 1.5) : Qt.lighter("#44504E", 1.7) }
                               }
                               implicitWidth: Fit.fit(12)
                               implicitHeight: Fit.fit(12)
