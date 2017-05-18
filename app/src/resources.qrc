@@ -209,5 +209,6 @@
         <file>resources/tools/tools_copy.json</file>
         <file>resources/images/sign_warning@2x.png</file>
         <file>resources/images/delete-icon@2x.png</file>
+        <file>resources/images/tribune.png</file>
     </qresource>
 </RCC>

@@ -79,7 +79,8 @@ DISTFILES                 += android/AndroidManifest.xml \
                              android/build.gradle \
                              android/res/drawable-mdpi/icon.png \
                              android/res/drawable-ldpi/icon.png \
-                             android/res/drawable-hdpi/icon.png
+                             android/res/drawable-hdpi/icon.png \
+    $$PWD/resources/images/tribune.png
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
