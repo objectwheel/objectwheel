@@ -34,7 +34,7 @@ class QmlEditorPrivate
 		QQuickItem* rootItem;
 		BindingWidget* bindingWidget;
 		QVBoxLayout mainLayout;
-		QQuickWidget quickWidget;
+        QQuickWidget quickWidget;
 		FlatButton minimizeButton;
 		QList<QQuickItem*>* itemList;
 		QList<QUrl>* urlList;
@@ -47,7 +47,8 @@ class QmlEditorPrivate
 		bool deactive;
 
 		QmlEditorPrivate(QmlEditor* p);
-		void resize();
+        void rebuildEditor();
+        void resize();
         void saved(const QString& qmlPath);
 		const QList<QQuickItem*> GetAllChildren(QQuickItem* const item) const;
 		void show(const QString& url);
@@ -65,55 +66,65 @@ QmlEditorPrivate::QmlEditorPrivate(QmlEditor* p)
 	mainLayout.setContentsMargins(0, 0, 0, 0);
 	rootContext = quickWidget.rootContext();
 
-#if !defined(Q_OS_IOS) && !defined(Q_OS_WINPHONE) && !defined(Q_OS_ANDROID)
-	rootContext->setContextProperty("isDesktop", true);
-#else
-	rootContext->setContextProperty("isDesktop", false);
-#endif
 	rootContext->setContextProperty("dpi", Fit::ratio());
 	ComponentManager::registerQmlType();
 
-	quickWidget.setSource(QUrl("qrc:/resources/qmls/qml-editor.qml"));
-	quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
-	quickWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    minimizeButton.setParent(parent);
+    minimizeButton.setIconButton(true);
+    minimizeButton.setIcon(QIcon(":/resources/images/back.png"));
+    minimizeButton.resize(fit(35), fit(35));
+    minimizeButton.setCursor(Qt::PointingHandCursor);
+    QObject::connect(&minimizeButton, SIGNAL(clicked(bool)), parent, SLOT(hide()));
 
-	rootItem = quickWidget.rootObject();
-	QObject::connect(rootItem, SIGNAL(saved(QString)), parent, SLOT(saved(const QString&)));
-	QObject::connect(rootItem, SIGNAL(currentSaved()), parent, SLOT(hide()));
+    rebuildEditor();
 
-	QObject *textEdit = rootItem->findChild<QObject*>(QStringLiteral("editor"));
-	QQuickTextDocument *quickTextDocument = textEdit->property("textDocument").value<QQuickTextDocument*>();
-	textDocument = quickTextDocument->textDocument();
-	QTextOption textOptions = textDocument->defaultTextOption();
+    QTimer::singleShot(500, [this] {
+        auto snap = parent->grab();
+        if (!snap.isNull()) {
+            snapshot = snap;
+            snapshot.setDevicePixelRatio(qApp->devicePixelRatio());
+        }
+    });
+}
 
-	QFont font;
-	font.setFamily("Liberation Mono");
-	font.setStyleHint(QFont::Monospace);
+void QmlEditorPrivate::rebuildEditor()
+{
+    quickWidget.setSource(QUrl("qrc:/resources/qmls/empty-item.qml"));
+    quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
+    quickWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QEventLoop loop;
+    QTimer::singleShot(100, [&]{ loop.quit(); });
+    loop.exec();
+
+    quickWidget.setSource(QUrl("qrc:/resources/qmls/qml-editor.qml"));
+    quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
+    quickWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    rootItem = quickWidget.rootObject();
+    QObject::connect(rootItem, SIGNAL(saved(QString)), parent, SLOT(saved(const QString&)));
+    QObject::connect(rootItem, SIGNAL(currentSaved()), parent, SLOT(hide()));
+
+    QObject *textEdit = rootItem->findChild<QObject*>(QStringLiteral("editor"));
+    QQuickTextDocument *quickTextDocument = textEdit->property("textDocument").value<QQuickTextDocument*>();
+    textDocument = quickTextDocument->textDocument();
+    QTextOption textOptions = textDocument->defaultTextOption();
+
+    QFont font;
+    font.setFamily("Liberation Mono");
+    font.setStyleHint(QFont::Monospace);
     font.setPixelSize(fit(12));
     textEdit->setProperty("font", font);
 
-	const int tabStop = 4;  // 4 characters
-	QFontMetrics metrics(font);
-	textOptions.setTabStop(tabStop * metrics.width(' '));
-	textDocument->setDefaultTextOption(textOptions);
-	minimizeButton.setParent(parent);
-	minimizeButton.setIconButton(true);
-	minimizeButton.setIcon(QIcon(":/resources/images/back.png"));
-	minimizeButton.resize(fit(35), fit(35));
-	minimizeButton.setCursor(Qt::PointingHandCursor);
-	QObject::connect(&minimizeButton, SIGNAL(clicked(bool)), parent, SLOT(hide()));
+    const int tabStop = 4;  // 4 characters
+    QFontMetrics metrics(font);
+    textOptions.setTabStop(tabStop * metrics.width(' '));
+    textDocument->setDefaultTextOption(textOptions);
 
-	auto item = qobject_cast<QQuickItem*>(QQmlProperty::read(rootItem,"view", rootContext).value<QObject*>());
-	if (!item) qFatal("QmlEditor : Error occurred");
-	ComponentManager::setParentItem(item);
-
-	QTimer::singleShot(500, [this] {
-		auto snap = parent->grab();
-		if (!snap.isNull()) {
-			snapshot = snap;
-			snapshot.setDevicePixelRatio(qApp->devicePixelRatio());
-		}
-	});
+    auto item = qobject_cast<QQuickItem*>(QQmlProperty::read(rootItem,"view", rootContext).value<QObject*>());
+    if (!item) qFatal("QmlEditor : Error occurred");
+    ComponentManager::setParentItem(item);
+    ComponentManager::rebuildEngine();
 }
 
 void QmlEditorPrivate::resize()
@@ -215,13 +226,13 @@ const QList<QQuickItem*> QmlEditorPrivate::GetAllChildren(QQuickItem* const item
 void QmlEditorPrivate::show(const QString& url)
 {
     QFileInfo info(url);
-	QQmlProperty::write(rootItem, "visible", true, rootContext);
-	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, true));
+    QQmlProperty::write(rootItem, "visible", true, rootContext);
+    QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, true));
     QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(info.dir().path())));
 
-	QTimer::singleShot(DURATION,[=] { //FIXME
-		QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
-	});
+    QTimer::singleShot(DURATION,[=] { //FIXME
+        QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
+    });
 
 	((QWidget*)parent)->show();
 
@@ -244,7 +255,7 @@ void QmlEditorPrivate::show()
 {
     QString controlPath = SaveManager::saveDirectory(dashboardRootContext->nameForObject(lastSelectedItem));
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
-	QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, false));
+    QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, false));
     QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
     QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
 
@@ -340,7 +351,12 @@ void QmlEditor::setRootFolder(const QString& folder)
 
 void QmlEditor::show(const QString& url)
 {
-	m_d->show(url);
+    m_d->show(url);
+}
+
+void QmlEditor::clearEditor()
+{
+    m_d->rebuildEditor();
 }
 
 void QmlEditor::clearCache()
@@ -427,7 +443,17 @@ void ComponentManager::registerQmlType()
 {
 	qmlRegisterType<ComponentManager>("com.objectwheel.editor",1,0,"ComponentManager");
 	engine = new QQmlEngine;
-	engine->rootContext()->setContextProperty("dpi", Fit::ratio());
+    engine->rootContext()->setContextProperty("dpi", Fit::ratio());
+}
+
+void ComponentManager::rebuildEngine()
+{
+    clear();
+    lastItem = nullptr;
+    lastErrors.clear();
+    engine->deleteLater();
+    engine = new QQmlEngine;
+    engine->rootContext()->setContextProperty("dpi", Fit::ratio());
 }
 
 void ComponentManager::clear()

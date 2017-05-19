@@ -100,6 +100,7 @@ bool FileManager::mv(const QString& from, const QString& to) const
             return QFile::rename(from, to);
         } else {
             Q_ASSERT(0); // Unhandled state
+            return false;
         }
     }
 }

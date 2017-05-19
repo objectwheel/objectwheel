@@ -797,7 +797,7 @@ void MainWindow::clearStudio()
 {
 	m_d->toolboxList->ClearUrls();
 	m_d->toolboxList->clear();
-	m_d->qmlEditor->clearCache();
+    m_d->qmlEditor->clearEditor();
 
 	for (auto item : m_d->m_Items) {
 		m_d->designWidget->rootContext()->setContextProperty(
@@ -821,6 +821,9 @@ void MainWindow::clearStudio()
     if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
     QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(72), height() - fit(72)); });
     m_d->toolboxList->setCurrentRow(-1);
+    QEventLoop loop;
+    QTimer::singleShot(100, [&]{ loop.quit(); });
+    loop.exec();
 }
 
 void MainWindow::on_buildsButton_clicked()

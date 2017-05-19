@@ -34,6 +34,7 @@ class QmlEditor : public QWidget
         static void setShowCenter(const QPoint& p);
         static void setRootFolder(const QString& folder);
         static void show(const QString& url);
+        static void clearEditor();
         static void clearCache();
         static void clearCacheFor(const QString& url, const bool isdir);
         static void updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir);
@@ -66,6 +67,7 @@ class ComponentManager : public QObject
 		explicit ComponentManager (QObject* parent = 0) : QObject(parent) {}
 		static void setParentItem(QQuickItem* i);
 		static void registerQmlType();
+        Q_INVOKABLE static void rebuildEngine();
         Q_INVOKABLE static void clear();
         Q_INVOKABLE static QStringList errors();
         Q_INVOKABLE static QQuickItem* build(const QString &url);
