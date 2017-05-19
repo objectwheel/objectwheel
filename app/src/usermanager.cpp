@@ -181,6 +181,23 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
 
     if (m_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
         SplashScreen::setText("Starting user session");
+
+        /* Clear all previous trash project folders if locked versions already exists */
+        auto dirlockersFiles = m_d->dirLocker.dirlockersFilenames();
+        for (auto entry : ls(userDirectory(username))) {
+            /* Check if necessary files */
+            bool breakit = false;
+            for (auto dlentry : dirlockersFiles) {
+                if (entry == dlentry) {
+                    breakit = true;
+                }
+            }
+
+            if (breakit) continue;
+
+            rm(userDirectory(username) + separator() + entry);
+        }
+
 		if (!m_d->dirLocker.unlock(userDirectory(username), keyHash)) {
 			m_d->currentSessionsUser = "";
 			m_d->currentSessionsKey = "";

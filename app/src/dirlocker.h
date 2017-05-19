@@ -18,6 +18,7 @@ class DirLocker : public QObject
 		static bool canUnlock(const QString& dir, const QByteArray& key);
 		static bool lock(const QString& dir, const QByteArray& key);
 		static bool unlock(const QString& dir, const QByteArray& key);
+        static QStringList dirlockersFilenames();
 
 	private:
 		static DirLockerPrivate* m_d;

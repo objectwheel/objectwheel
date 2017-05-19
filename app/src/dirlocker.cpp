@@ -65,8 +65,8 @@ bool DirLocker::locked(const QString& dir)
 
 bool DirLocker::canUnlock(const QString& dir, const QByteArray& key)
 {
-	QString checkFileName = dir + separator() + CHECK_FILENAME;
-	if (!locked(dir) || !exists(checkFileName)) return false;
+    QString checkFileName = dir + separator() + CHECK_FILENAME;
+    if (!locked(dir) || !exists(checkFileName)) return false;
 	auto checkData = rdfile(checkFileName);
 	if (!Aes::encrypted(checkData)) return false;
 	auto keyHash = QCryptographicHash::hash(key, QCryptographicHash::Md5).toHex();
@@ -101,5 +101,13 @@ bool DirLocker::unlock(const QString& dir, const QByteArray& key)
 	Aes::decrypt(key, zipData);
 	rm(dir + separator() + LOCKED_FILENAME), rm(dir + separator() + CHECK_FILENAME);
 	Zipper::extractZip(zipData, dir);
-	return true;
+    return true;
+}
+
+QStringList DirLocker::dirlockersFilenames()
+{
+    QStringList names;
+    names << CHECK_FILENAME;
+    names << LOCKED_FILENAME;
+    return names;
 }
