@@ -8,7 +8,7 @@
 #include <QQuickWidget>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#    define REMOVERTICK_SIZE 15
+#    define REMOVERTICK_SIZE 12
 #else
 #    define REMOVERTICK_SIZE 25
 #endif
@@ -72,5 +72,5 @@ void RemoverTick::paintEvent(QPaintEvent *)
 		p.setBrush(b);
 		p.drawEllipse(rect().adjusted(1, 1, -1, -1));
 	}
-	p.drawPixmap(rect().adjusted(2, 2, -2, -2), icon().pixmap(size() - QSize(4, 4)));
+    p.drawPixmap(rect().adjusted(4, 4, -4, -4), icon().pixmap(size()));
 }

@@ -66,9 +66,9 @@ QLineEdit {\
 
 #define CSS_TOOLBAR "\
 QToolBar { \
-	padding-left: %1px; \
-	spacing: %1px; \
-    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %2, stop:1 %3); \
+    padding-left: %1px; \
+    spacing: %2px; \
+    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %3, stop:1 %4); \
 	border: none;\
 }"
 
@@ -100,6 +100,16 @@ QRadioButton::indicator { \
 	border-image: url(:/resources/images/bindingbuttonfilled.png); \
 } QRadioButton::indicator::unchecked { \
 	border-image: url(:/resources/images/bindingbutton.png); \
+}"
+
+#define CSS_EVENTS_BUTTON "\
+QRadioButton::indicator { \
+    width: %1px; \
+    height: %1px; \
+} QRadioButton::indicator::checked { \
+    border-image: url(:/resources/images/eventsbuttonfilled.png); \
+} QRadioButton::indicator::unchecked { \
+    border-image: url(:/resources/images/eventsbutton.png); \
 }"
 
 #define CSS_PAGES_BUTTON "\
@@ -138,6 +148,7 @@ QString CSS::Toolbar;
 QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
 QString CSS::BindingButton;
+QString CSS::EventsButton;
 QString CSS::PagesButton;
 QString CSS::BindingListWidget;
 
@@ -155,19 +166,22 @@ void CSS::init()
 	PropertyItem = QString(CSS_PROPERTY_ITEM).arg(fit(4)).arg(fit(2)).arg(fit(5));
 
 	/* Toolbar */
-    Toolbar = QString(CSS_TOOLBAR).arg(fit(6)).arg(QColor("#6BB64B").name()).arg(QColor("#6BB64B").darker(115).name());
+    Toolbar = QString(CSS_TOOLBAR).arg(fit(12)).arg(fit(2)).arg(QColor("#6BB64B").name()).arg(QColor("#6BB64B").darker(115).name());
 
 	/* ToolboxButton */
-	ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(26));
+    ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(20));
 
 	/* PropertiesButton */
-	PropertiesButton = QString(CSS_PROPERTIES_BUTTON).arg(fit(26));
+    PropertiesButton = QString(CSS_PROPERTIES_BUTTON).arg(fit(20));
 
 	/* BindingButton */
-	BindingButton = QString(CSS_BINDING_BUTTON).arg(fit(26));
+    BindingButton = QString(CSS_BINDING_BUTTON).arg(fit(20));
+
+    /* EventsButton */
+    EventsButton = QString(CSS_EVENTS_BUTTON).arg(fit(20));
 
 	/* PagesButton */
-	PagesButton = QString(CSS_PAGES_BUTTON).arg(fit(26));
+    PagesButton = QString(CSS_PAGES_BUTTON).arg(fit(20));
 
 	/* BindingListWidget */
 	BindingListWidget = QString(CSS_BINDING_LISTWIDGET).arg(fit(5)).arg(fit(2));

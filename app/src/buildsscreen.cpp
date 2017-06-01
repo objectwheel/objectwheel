@@ -74,13 +74,13 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
     exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
 #else
-    exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));
+    exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(8), fit(8));
 #endif
     QObject::connect((BuildsScreen*)parent,  &BuildsScreen::resized, [=]{
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
         exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
 #else
-        exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(10), fit(10));
+        exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(8), fit(8));
 #endif
     });
     fit(&exitButton, Fit::WidthHeight);

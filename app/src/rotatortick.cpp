@@ -12,7 +12,7 @@
 #include <QQmlContext>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#    define ROTATORTICK_SIZE 15
+#    define ROTATORTICK_SIZE 12
 #else
 #    define ROTATORTICK_SIZE 25
 #endif

@@ -23,6 +23,7 @@
 #include <listwidget.h>
 #include <propertieswidget.h>
 #include <bindingwidget.h>
+#include <eventswidget.h>
 #include <titlebar.h>
 #include <about.h>
 #include <bubblehead.h>
@@ -77,6 +78,7 @@ class MainWindowPrivate
 		LineEdit* toolBoxNameBox;
         PropertiesWidget* propertiesWidget;
 		BindingWidget* bindingWidget;
+        EventsWidget* eventsWidget;
 		PagesWidget* pagesWidget;
 		About* aboutWidget;
         BuildsScreen* buildsScreen;
@@ -334,6 +336,10 @@ void MainWindowPrivate::setupUi()
 	bindingWidget = new BindingWidget(centralWidget);
 	bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
 	bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    eventsWidget = new EventsWidget(centralWidget);
+    eventsWidget->setObjectName(QStringLiteral("eventsWidget"));
+    eventsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
 	pagesWidget = new PagesWidget(centralWidget);
 	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));

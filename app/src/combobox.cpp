@@ -131,71 +131,70 @@ ComboBox::~ComboBox()
 void ComboBox::paintEvent(QPaintEvent* event)
 {
 	QPainter painter(this);
-	painter.save();
+    painter.save();
 
-	if (!m_d->collapsed) {
-		painter.setPen(QColor("#444444"));
+    if (!m_d->collapsed) {
+        painter.setPen(QColor("#444444"));
         painter.setBrush(QColor("#52616D"));
-		painter.drawRoundedRect(rect().adjusted(0,0,-fit(1),-fit(1)), fit(2), fit(2));
-	}
+        painter.drawRoundedRect(rect().adjusted(0,0,-fit(1),-fit(1)), fit(2), fit(2));
+    }
 
-	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setPen(Qt::NoPen);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
 
-	/**/
-	QLinearGradient baseShadow;
-	baseShadow.setStart(width()/2.0, 0);
-	baseShadow.setFinalStop(width()/2.0, fit(30));
-	baseShadow.setColorAt(0, "#50000000");
-	baseShadow.setColorAt(1, "#20000000");
-	painter.setBrush(baseShadow);
-	painter.drawRoundedRect(0, fit(23), width(), fit(8), fit(2), fit(2));
+    /**/
+    QLinearGradient baseShadow;
+    baseShadow.setStart(width()/2.0, 0);
+    baseShadow.setFinalStop(width()/2.0, fit(30));
+    baseShadow.setColorAt(0, "#99000000");
+    baseShadow.setColorAt(1, "#20000000");
+    painter.setBrush(baseShadow);
+    painter.drawRoundedRect(0, fit(28), width(), fit(4), fit(2), fit(2));
 
-	/**/
-	static const QPointF pts[3] = {
-		QPointF(m_d->indicatorRect.center().x() - fit(6), fit(31)),
-		QPointF(m_d->indicatorRect.center().x() + fit(6), fit(31)),
-		QPointF(m_d->indicatorRect.center().x(), fit(40))
-	};
-	painter.setBrush(QColor("#20000000"));
-	painter.drawConvexPolygon(pts, 3);
+    /**/
+    const QPointF pts[3] = {
+        QPointF(m_d->indicatorRect.center().x() - fit(6), fit(31)),
+        QPointF(m_d->indicatorRect.center().x() + fit(6), fit(31)),
+        QPointF(m_d->indicatorRect.center().x(), fit(40))
+    };
+    painter.setBrush(QColor("#20000000"));
+    painter.drawConvexPolygon(pts, 3);
 
-	/**/
-	painter.setBrush(Qt::white);
-	painter.drawRoundedRect(0, 0, width() - fit(2), fit(29), fit(2), fit(2));
+    /**/
+    painter.setBrush(Qt::white);
+    painter.drawRoundedRect(0, 0, width() - fit(2), fit(29), fit(2), fit(2));
 
-	/**/
-	QColor color;
-	if (m_d->down) {
-		color = m_d->color.darker(120);
-	} else {
-		color = m_d->color;
-	}
-	painter.setBrush(color);
-	painter.drawRect(m_d->indicatorRect.adjusted(0, 0, -fit(2), 0));
-	painter.drawRoundedRect(m_d->indicatorRect, fit(2), fit(2));
+    /**/
+    QColor color;
+    if (m_d->down) {
+        color = m_d->color.darker(120);
+    } else {
+        color = m_d->color;
+    }
+    painter.setBrush(color);
+    painter.drawRect(m_d->indicatorRect.adjusted(0, 0, -fit(2), 0));
+    painter.drawRoundedRect(m_d->indicatorRect, fit(2), fit(2));
 
-	/**/
-	static const QPointF points[3] = {
-		QPointF(m_d->indicatorRect.center().x() - fit(6), fit(29)),
-		QPointF(m_d->indicatorRect.center().x() + fit(6), fit(29)),
-		QPointF(m_d->indicatorRect.center().x(), fit(37))
-	};
-	painter.setBrush(color);
-	painter.drawConvexPolygon(points, 3);
+    /**/
+    const QPointF points[3] = {
+        QPointF(m_d->indicatorRect.center().x() - fit(6), fit(29)),
+        QPointF(m_d->indicatorRect.center().x() + fit(6), fit(29)),
+        QPointF(m_d->indicatorRect.center().x(), fit(37))
+    };
+    painter.setBrush(color);
+    painter.drawConvexPolygon(points, 3);
 
-	/**/
-	if (!m_d->icon.isNull()) {
-		QPixmap p(m_d->icon.pixmap(m_d->indicatorRect.size().toSize()));
-		painter.drawPixmap(m_d->indicatorRect.toRect(), p);
-	}
+    /**/
+    if (!m_d->icon.isNull()) {
+        QPixmap p(m_d->icon.pixmap(m_d->indicatorRect.size().toSize()));
+        painter.drawPixmap(m_d->indicatorRect.toRect(), p);
+    }
 
-	painter.restore();
-	if (!m_d->collapsed) {
-		painter.setPen("#444444");
-		painter.drawLine(0, fit(29), width() - fit(30), fit(29));
-	}
-	QWidget::paintEvent(event);
+    painter.restore();
+    if (!m_d->collapsed) {
+        painter.setPen("#444444");
+        painter.drawLine(0, fit(29), width() - fit(30), fit(29));
+    }
 }
 
 void ComboBox::mousePressEvent(QMouseEvent* event)

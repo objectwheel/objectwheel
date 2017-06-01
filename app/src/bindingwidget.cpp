@@ -218,7 +218,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     popupOkButton.setTextColor(Qt::white);
     popupOkButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     popupOkButton.setFixedHeight(fit(30));
-    popupOkButton.setText("OK");
+    popupOkButton.setText("Add");
     QObject::connect(&popupOkButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {popupOkButtonClicked();});
 
     popupTitle.setText("Binding Editor");

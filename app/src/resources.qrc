@@ -209,5 +209,8 @@
         <file>resources/images/sign_warning@2x.png</file>
         <file>resources/images/delete-icon@2x.png</file>
         <file>resources/images/tribune.png</file>
+        <file>resources/images/eventsbutton.png</file>
+        <file>resources/images/eventsbuttonfilled.png</file>
+        <file>resources/images/script.png</file>
     </qresource>
 </RCC>

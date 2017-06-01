@@ -18,6 +18,7 @@ class CSS
 		static QString ToolboxButton;
 		static QString PropertiesButton;
 		static QString BindingButton;
+        static QString EventsButton;
 		static QString PagesButton;
 		static QString BindingListWidget;
 };

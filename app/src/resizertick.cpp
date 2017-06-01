@@ -11,7 +11,7 @@
 #include <QQmlContext>
 
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-#    define RESIZERTICK_SIZE 15
+#    define RESIZERTICK_SIZE 12
 #else
 #    define RESIZERTICK_SIZE 25
 #endif

@@ -66,6 +66,10 @@ void MainWindow::SetupGui()
 {
 	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->bindingWidget->setItemSource(&m_d->m_Items);
+
+    m_d->eventsWidget->setRootContext(m_d->designWidget->rootContext());
+    m_d->eventsWidget->setItemSource(&m_d->m_Items);
+
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
 	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
@@ -84,6 +88,8 @@ void MainWindow::SetupGui()
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
+    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
+    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachBindingsFor);
 
 	/* Remove deleted items from internal item list */
     connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=]
@@ -146,7 +152,9 @@ void MainWindow::SetupGui()
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
 	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
+    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->eventsWidget, SLOT(selectItem(QObject*const)));
 	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
+    connect(this, SIGNAL(selectionHided()), m_d->eventsWidget, SLOT(clearList()));
 
 	/* Fix Coords of ticks when property changed */
 	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
@@ -162,12 +170,15 @@ void MainWindow::SetupGui()
 	propertiesVariant.setValue<QWidget*>(m_d->propertiesWidget);
 	QVariant bindingVariant;
 	bindingVariant.setValue<QWidget*>(m_d->bindingWidget);
+    QVariant eventsVariant;
+    eventsVariant.setValue<QWidget*>(m_d->eventsWidget);
 	QVariant pagesVariant;
 	pagesVariant.setValue<QWidget*>(m_d->pagesWidget);
 	Container* leftContainer = new Container;
 	leftContainer->addWidget(m_d->toolboxWidget);
 	leftContainer->addWidget(m_d->propertiesWidget);
 	leftContainer->addWidget(m_d->bindingWidget);
+    leftContainer->addWidget(m_d->eventsWidget);
 	leftContainer->addWidget(m_d->pagesWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -220,6 +231,18 @@ void MainWindow::SetupGui()
 	connect(bindingButton, SIGNAL(clicked(bool)), bindingButtonAction, SLOT(trigger()));
 	connect(bindingButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
+    QRadioButton* eventsButton = new QRadioButton;
+    eventsButton->setCursor(Qt::PointingHandCursor);
+    eventsButton->setStyleSheet(CSS::EventsButton);
+    eventsButton->setCheckable(true);
+    QWidgetAction* eventsButtonAction = new QWidgetAction(this);
+    eventsButtonAction->setDefaultWidget(eventsButton);
+    eventsButtonAction->setData(eventsVariant);
+    eventsButtonAction->setCheckable(true);
+    leftToolbar->addAction(eventsButtonAction);
+    connect(eventsButton, SIGNAL(clicked(bool)), eventsButtonAction, SLOT(trigger()));
+    connect(eventsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+
 	QRadioButton* pagesButton = new QRadioButton;
 	pagesButton->setCursor(Qt::PointingHandCursor);
 	pagesButton->setStyleSheet(CSS::PagesButton);
@@ -241,6 +264,12 @@ void MainWindow::SetupGui()
 	connect(m_d->bindingWidget, &BindingWidget::popupHid, [=] {
         leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
+    connect(m_d->eventsWidget, &EventsWidget::popupShowed, [=] {
+        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
+    });
+    connect(m_d->eventsWidget, &EventsWidget::popupHid, [=] {
+        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
+    });
 	connect(toolboxButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
         leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
@@ -253,7 +282,15 @@ void MainWindow::SetupGui()
 	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
 		if (m_d->bindingWidget->hasPopupOpen())
             leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
+        else
+            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
+    connect(eventsButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
+        if (m_d->eventsWidget->hasPopupOpen())
+            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
+        else
+            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
+    });
 	QVBoxLayout* leftMenuLayout = new QVBoxLayout(leftMenuWidget);
 	leftMenuLayout->setContentsMargins(0, 0, 0, 0);
 	leftMenuLayout->setSpacing(fit(8));
@@ -265,6 +302,7 @@ void MainWindow::SetupGui()
 	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
     m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
 	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
+    m_d->eventsWidget->setRootContext(m_d->designWidget->rootContext());
 
 	m_d->centralWidget->installEventFilter(this);
 
@@ -308,7 +346,7 @@ void MainWindow::SetupGui()
 	m_d->qmlEditor->setHidden(true);
 	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
 	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
-	m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
+    m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
 	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 
@@ -815,6 +853,7 @@ void MainWindow::clearStudio()
 	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentPage), page1Name);
 
 	m_d->bindingWidget->clearAllBindings();
+    m_d->eventsWidget->clearAllBindings();
 	m_d->m_Items.clear();
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
@@ -863,6 +902,7 @@ void MainWindow::on_clearButton_clicked()
 					m_d->m_Items.removeOne(item);
 					m_d->m_ItemUrls.removeAt(i);
 					m_d->bindingWidget->detachBindingsFor(item);
+                    m_d->eventsWidget->detachBindingsFor(item);
 					item->deleteLater();
                     HideSelectionTools();
 				}
@@ -885,6 +925,7 @@ void MainWindow::on_editButton_clicked()
 	}
 	m_d->propertiesWidget->clearList();
     m_d->bindingWidget->clearList();
+    m_d->eventsWidget->clearList();
 
     m_ResizerTick->hide();
     m_RemoverTick->hide();
@@ -915,18 +956,19 @@ void MainWindow::on_playButton_clicked()
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
     exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
 #else
-    exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));
+    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
 #endif
-    connect(this, &MainWindow::resized, [=]{
+    auto connection = connect(this, &MainWindow::resized, [=]{
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
     exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
 #else
-    exitButton->setGeometry(width() - fit(15), fit(5), fit(10), fit(10));
+    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
 #endif
     });
     exitButton->show();
 
     connect(exitButton, &FlatButton::clicked, [=]{
+        disconnect(connection);
         exitButton->deleteLater();
         m_d->verticalLayout->insertWidget(1, m_d->designWidget);
         SceneManager::removeScene("playScene");
@@ -1039,6 +1081,7 @@ void MainWindow::toolboxRemoveButtonClicked()
 							m_d->m_Items.removeOne(item);
 							m_d->m_ItemUrls.removeAt(j);
 							m_d->bindingWidget->detachBindingsFor(item);
+                            m_d->eventsWidget->detachBindingsFor(item);
 							item->deleteLater();
 						}
 					}
@@ -1110,6 +1153,7 @@ void MainWindow::toolboxResetButtonClicked()
 				item->deleteLater();
 			}
 			m_d->bindingWidget->clearAllBindings();
+            m_d->eventsWidget->clearAllBindings();
 			m_d->m_Items.clear();
 			m_d->m_ItemUrls.clear();
 			HideSelectionTools();
