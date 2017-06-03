@@ -12,6 +12,7 @@ class QmlEditorPrivate;
 class QQuickItem;
 class QQmlContext;
 class BindingWidget;
+class EventsWidget;
 
 class QmlEditor : public QWidget
 {
@@ -24,7 +25,8 @@ class QmlEditor : public QWidget
         static QmlEditor* instance();
         static void setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const urlList);
         static void setRootContext(QQmlContext* const context);
-        static void setBindingWidget(BindingWidget* bindngWidget);
+        static void setBindingWidget(BindingWidget* bindingWidget);
+        static void setEventWidget(EventsWidget* eventWidget);
 		~QmlEditor();
 
         static float getShowRatio();

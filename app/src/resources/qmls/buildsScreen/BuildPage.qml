@@ -13,18 +13,8 @@ Item {
         id: base
         anchors.fill: listView
         radius: Fit.fit(5)
-        visible: false
         color: "#d0d4d7"
         border.color: "#c2c6c9"
-    }
-    DropShadow {
-        anchors.fill: base
-        horizontalOffset: 0
-        verticalOffset: Fit.fit(1)
-        radius: (3.0)
-        samples: (15)
-        color: "#30000000"
-        source: base
     }
     Rectangle {
         id: mask

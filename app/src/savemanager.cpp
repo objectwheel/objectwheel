@@ -17,6 +17,7 @@
 #include <mainwindow.h>
 #include <bindingproperty.h>
 #include <bindingwidget.h>
+#include <eventswidget.h>
 #include <qmleditor.h>
 #include <QApplication>
 
@@ -28,6 +29,11 @@
 #define BINDING_SOURCE_PROPERTY_LABEL "sourceProperty"
 #define BINDING_TARGET_ID_LABEL "targetId"
 #define BINDING_TARGET_PROPERTY_LABEL "targetProperty"
+
+#define EVENTS_FILE "events.json"
+#define EVENT_TARGET_ID_LABEL "targetId"
+#define EVENT_TARGET_EVENTNAME_LABEL "targetEventname"
+#define EVENT_EVENT_CODE_LABEL "eventCode"
 
 using namespace QmlDesigner;
 using namespace QmlJS;
@@ -44,6 +50,7 @@ class SaveManagerPrivate
 		void createPages(const QJsonArray& pages);
 		bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages);
         void fillBindings(const QJsonObject& bindingSaves);
+        void fillEvents(const QJsonObject& eventSaves);
 
 	public:
 		SaveManager* parent = nullptr;
@@ -144,6 +151,18 @@ void SaveManagerPrivate::fillBindings(const QJsonObject& bindingSaves)
     }
 }
 
+void SaveManagerPrivate::fillEvents(const QJsonObject& eventSaves)
+{
+    SaveManager::EventInf inf;
+    for (auto eventKey : eventSaves.keys()) {
+        inf.eventName = eventKey;
+        inf.targetId = eventSaves[eventKey].toObject()[EVENT_TARGET_ID_LABEL].toString();
+        inf.targetEventname = eventSaves[eventKey].toObject()[EVENT_TARGET_EVENTNAME_LABEL].toString();
+        inf.eventCode = QString(QByteArray::fromBase64(QByteArray().insert(0, eventSaves[eventKey].toObject()[EVENT_EVENT_CODE_LABEL].toString())));
+        EventsWidget::addEventWithoutSave(inf);
+    }
+}
+
 SaveManagerPrivate* SaveManager::m_d = nullptr;
 
 SaveManager::SaveManager(QObject *parent)
@@ -214,7 +233,45 @@ void SaveManager::removeBindingSave(const QString& bindingName)
 	QJsonObject jObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
 	jObj.remove(bindingName);
     wrfile(bindingFile, QJsonDocument(jObj).toJson());
-//	removeProperty(binding[BINDING_TARGET_ID_LABEL].toString(), binding[BINDING_TARGET_PROPERTY_LABEL].toString());
+    //	removeProperty(binding[BINDING_TARGET_ID_LABEL].toString(), binding[BINDING_TARGET_PROPERTY_LABEL].toString());
+}
+
+QJsonObject SaveManager::getEventSaves()
+{
+    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    if (projDir.isEmpty()) return QJsonObject();
+    auto eventsFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
+    return QJsonDocument::fromJson(rdfile(eventsFile)).object();
+}
+
+void SaveManager::addEventSave(const SaveManager::EventInf& eventInf)
+{
+    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    if (projDir.isEmpty()) return;
+    auto eventFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
+    QJsonObject cObj;
+    cObj[EVENT_TARGET_ID_LABEL] = eventInf.targetId;
+    cObj[EVENT_TARGET_EVENTNAME_LABEL] = eventInf.targetEventname;
+    cObj[EVENT_EVENT_CODE_LABEL] = QString(QByteArray().insert(0, eventInf.eventCode).toBase64());
+    QJsonObject pObj = QJsonDocument::fromJson(rdfile(eventFile)).object();
+    pObj[eventInf.eventName] = cObj;
+    wrfile(eventFile, QJsonDocument(pObj).toJson());
+}
+
+void SaveManager::changeEventSave(const QString& eventName, const SaveManager::EventInf& toEventInf)
+{
+    removeEventSave(eventName);
+    addEventSave(toEventInf);
+}
+
+void SaveManager::removeEventSave(const QString& eventName)
+{
+    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    if (projDir.isEmpty()) return;
+    auto eventFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
+    QJsonObject jObj = QJsonDocument::fromJson(rdfile(eventFile)).object();
+    jObj.remove(eventName);
+    wrfile(eventFile, QJsonDocument(jObj).toJson());
 }
 
 QJsonObject SaveManager::getParentalRelationships()
@@ -289,6 +346,22 @@ void SaveManager::changeSave(const QString& fromId, QString toId)
         }
         changeBindingSave(inf.bindingName, inf);
     }
+
+    SaveManager::EventInf einf;
+    auto eventSaves = getEventSaves();
+    for (auto eventKey : eventSaves.keys()) {
+        einf.eventName = eventKey;
+        einf.targetId = eventSaves[eventKey].toObject()[EVENT_TARGET_ID_LABEL].toString();
+        einf.targetEventname = eventSaves[eventKey].toObject()[EVENT_TARGET_EVENTNAME_LABEL].toString();
+        einf.eventCode = QString(QByteArray::fromBase64(QByteArray().insert(0, eventSaves[eventKey].toObject()[EVENT_EVENT_CODE_LABEL].toString())));
+
+        if (einf.targetId == fromId) {
+            einf.targetId = toId;
+        } else {
+            continue;
+        }
+        changeEventSave(einf.eventName, einf);
+    }
 }
 
 void SaveManager::removeSave(const QString& id)
@@ -313,11 +386,13 @@ bool SaveManager::loadDatabase()
 	QJsonArray pageOrder = getPageOrders();
 	QJsonObject parentalRelationship = getParentalRelationships();
 	QJsonObject bindingSaves = getBindingSaves();
+    QJsonObject eventSaves = getEventSaves();
 	if (pageOrder.isEmpty()) return false;
 	if (parentalRelationship.size() != saves().size()) return false;
 	m_d->createPages(pageOrder);
 	if (!m_d->fillDashboard(parentalRelationship, pageOrder)) return false;
     m_d->fillBindings(bindingSaves);
+    m_d->fillEvents(eventSaves);
     return true;
 }
 

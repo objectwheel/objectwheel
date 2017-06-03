@@ -333,6 +333,7 @@ void MainWindow::SetupGui()
 		m_d->pagesWidget->setItemList(&m_d->m_Items);
 		m_d->pagesWidget->setUrlList(&m_d->m_ItemUrls);
 		m_d->pagesWidget->setBindingWidget(m_d->bindingWidget);
+        m_d->pagesWidget->setEventWidget(m_d->eventsWidget);
 	});
 
 	m_d->bubbleHead = new BubbleHead(this);
@@ -348,6 +349,7 @@ void MainWindow::SetupGui()
 	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
 	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
     m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
+    m_d->qmlEditor->setEventWidget(m_d->eventsWidget);
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
 	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 

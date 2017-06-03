@@ -19,6 +19,13 @@ class SaveManager : public QObject
 				QString bindingName;
 		};
 
+        struct EventInf {
+                QString targetId;
+                QString targetEventname;
+                QString eventCode;
+                QString eventName;
+        };
+
 		explicit SaveManager(QObject *parent = 0);
         ~SaveManager();
 		static SaveManager* instance();
@@ -38,6 +45,11 @@ class SaveManager : public QObject
 		static void addBindingSave(const BindingInf& bindingInf);
 		static void changeBindingSave(const QString& bindingName, const BindingInf& toBindingInf);
 		static void removeBindingSave(const QString& bindingName);
+
+        static QJsonObject getEventSaves();
+        static void addEventSave(const EventInf& eventInf);
+        static void changeEventSave(const QString& eventName, const EventInf& toEventInf);
+        static void removeEventSave(const QString& eventName);
 
 		static QJsonObject getParentalRelationships();
 		static QJsonArray getPageOrders();

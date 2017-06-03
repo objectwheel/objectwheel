@@ -80,7 +80,7 @@ class EventsWidgetPrivate
         };
         QList<Event> events;
         EventsWidgetPrivate(EventsWidget* parent);
-        void addBindingWithoutSave(const SaveManager::BindingInf& inf);
+        void addEventWithoutSave(const SaveManager::EventInf& inf);
 
     private slots:
         void removeButtonClicked();
@@ -236,42 +236,60 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     popupVLayout.addWidget(&popupOkButton);
 }
 
-void EventsWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& inf)
+void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
 {
-//    if (!inf.targetProperty.isEmpty() && !inf.targetId.isEmpty() &&
-//        !inf.sourceId.isEmpty() && !inf.sourceProperty.isEmpty() && !inf.bindingName.isEmpty()) {
-//        QQuickItem* sourceItem = nullptr;
-//        QQuickItem* targetItem = nullptr;
-//        for (auto item : *items) {
-//            auto itemName = rootContext->nameForObject(item);
-//            if (itemName == inf.sourceId) {
-//                sourceItem = item;
-//            }
-//            if (itemName == inf.targetId) {
-//                targetItem = item;
-//            }
-//        }
-//        if (!sourceItem || !targetItem) return;
+    if (!inf.targetEventname.isEmpty() && !inf.targetId.isEmpty() &&
+        !inf.eventCode.isEmpty() && !inf.eventName.isEmpty()) {
+        QQuickItem* targetItem = nullptr;
+        for (auto item : *items) {
+            if (rootContext->nameForObject(item) == inf.targetId) {
+                targetItem = item;
+            }
+        }
 
-//        QMetaMethod sourceSign;
-//        for (int i = 0; i < sourceItem->metaObject()->propertyCount(); i++)
-//            if (QString(sourceItem->metaObject()->property(i).name()) == inf.sourceProperty)
-//                sourceSign = sourceItem->metaObject()->property(i).notifySignal();
-//        if (!sourceSign.isValid()) return;
+        if (!targetItem) return;
 
-//        auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
-//        auto connectionName = inf.bindingName;
+        QMetaMethod targetSign;
+        for (int i = 0; i < targetItem->metaObject()->methodCount(); i++)
+            if (QString(targetItem->metaObject()->method(i).name()) == inf.targetEventname) {
+                targetSign = targetItem->metaObject()->method(i);
+            }
+        if (!targetSign.isValid()) return;
 
-//        Binding eventData;
-//        eventData.sourceItem = sourceItem; //Source item
-//        eventData.sourceProperty = inf.sourceProperty; //Source property
-//        eventData.targetItem = targetItem; //Target item
-//        eventData.targetProperty = inf.targetProperty; //Target property
-//        eventData.connection = connection;
-//        eventData.connectionName = connectionName;
-//        bindings << eventData;
-//        eventsListWidget.addItem(connectionName);
-//    }
+        QMetaObject::Connection connection;
+        bool shouldConnect = true;
+        for (auto event: events) {
+            if (event.targetItem == targetItem &&
+                event.targetEventname == inf.targetEventname) {
+                shouldConnect = false;
+                break;
+            }
+        }
+        if (shouldConnect) {
+            connection = QObject::connect(targetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
+        }
+
+        auto connectionName = inf.eventName;
+        if (connectionName.isEmpty()) {
+            connectionName = QString("Event %1").arg(eventsListWidget.count());
+        }
+
+        for (int i = 0; i < eventsListWidget.count(); i++) {
+            if (eventsListWidget.item(i)->text() == connectionName) {
+                connectionName+="+";
+                i = -1;
+            }
+        }
+
+        Event eventData;
+        eventData.targetItem = targetItem; //Target item
+        eventData.targetEventname = inf.targetEventname;
+        eventData.eventCode = inf.eventCode;
+        eventData.connection = connection;
+        eventData.connectionName = connectionName;
+        events << eventData;
+        eventsListWidget.addItem(connectionName);
+    }
 }
 
 void EventsWidgetPrivate::removeButtonClicked()
@@ -292,7 +310,7 @@ void EventsWidgetPrivate::removeButtonClicked()
                     event = e;
                 }
             }
-//            SaveManager::removeBindingSave(binding.connectionName);
+            SaveManager::removeEventSave(event.connectionName);
             events.removeOne(event);
 
             bool shouldRemove = true;
@@ -428,13 +446,12 @@ void EventsWidgetPrivate::popupOkButtonClicked()
             eventData.connection = connection;
             eventData.connectionName = connectionName;
             events << eventData;
-//            SaveManager::BindingInf binf;
-//            binf.bindingName = connectionName;
-//            binf.sourceId = rootContext->nameForObject(sourceItem);
-//            binf.sourceProperty = sourcePropertyCombobox.currentItem();
-//            binf.targetId = rootContext->nameForObject(lastTargetItem);
-//            binf.targetProperty = targetEventCombobox.currentItem();
-//            SaveManager::addBindingSave(binf);
+            SaveManager::EventInf einf;
+            einf.eventName = connectionName;
+            einf.targetId = rootContext->nameForObject(lastTargetItem);
+            einf.targetEventname = targetEventCombobox.currentItem();
+            einf.eventCode = codeEdit.text();
+            SaveManager::addEventSave(einf);
             eventsListWidget.addItem(connectionName);
             popupHideButtonClicked();
         } else {
@@ -502,13 +519,12 @@ void EventsWidgetPrivate::popupOkButtonClicked()
             eventData.connection = connection;
             eventData.connectionName = connectionName;
             events << eventData;
-//            SaveManager::BindingInf binf;
-//            binf.bindingName = connectionName;
-//            binf.sourceId = rootContext->nameForObject(sourceItem);
-//            binf.sourceProperty = sourcePropertyCombobox.currentItem();
-//            binf.targetId = rootContext->nameForObject(lastTargetItem);
-//            binf.targetProperty = targetEventCombobox.currentItem();
-//            SaveManager::changeBindingSave(binding.connectionName, binf);
+            SaveManager::EventInf einf;
+            einf.eventName = connectionName;
+            einf.targetId = rootContext->nameForObject(lastTargetItem);
+            einf.targetEventname = targetEventCombobox.currentItem();
+            einf.eventCode = codeEdit.text();
+            SaveManager::changeEventSave(event.connectionName, einf);
             eventsListWidget.item(eventsListWidget.currentRow())->setText(connectionName);
             popupHideButtonClicked();
         }
@@ -589,7 +605,7 @@ void EventsWidget::detachEventsFor(QObject* const item)
     while (i.hasNext()) {
         auto event = i.next();
         if (event.targetItem == item) {
-//            SaveManager::removeBindingSave(event.connectionName);
+            SaveManager::removeEventSave(event.connectionName);
             m_d->events.removeOne(event);
             bool shouldRemove = true;
             if (event.connection) {
@@ -650,9 +666,9 @@ void EventsWidget::setRootObject(QObject* const rootObject)
     m_d->rootObject = rootObject;
 }
 
-void EventsWidget::addBindingWithoutSave(const SaveManager::BindingInf& inf)
+void EventsWidget::addEventWithoutSave(const SaveManager::EventInf& inf)
 {
-    m_d->addBindingWithoutSave(inf);
+    m_d->addEventWithoutSave(inf);
 }
 
 bool EventsWidget::hasPopupOpen()

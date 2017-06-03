@@ -28,7 +28,7 @@ class EventsWidget : public QWidget
         const QObject* rootObject() const;
         void setRootObject(QObject* const rootObject);
 
-        static void addBindingWithoutSave(const SaveManager::BindingInf& inf);
+        static void addEventWithoutSave(const SaveManager::EventInf& inf);
 
 	public slots:
 		void clearList();

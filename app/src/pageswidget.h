@@ -7,6 +7,7 @@ class PagesWidgetPrivate;
 class QQuickItem;
 class QQmlContext;
 class BindingWidget;
+class EventsWidget;
 
 class PagesWidget : public QWidget
 {
@@ -20,6 +21,7 @@ class PagesWidget : public QWidget
 		void setItemList(QList<QQuickItem*>* items);
 		void setUrlList(QList<QUrl>* items);
 		void setBindingWidget(BindingWidget* bindingWidget);
+        void setEventWidget(EventsWidget* eventWidget);
 		QList<QQuickItem*> pages();
 		~PagesWidget();
 

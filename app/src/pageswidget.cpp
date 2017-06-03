@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <savemanager.h>
 #include <bindingwidget.h>
+#include <eventswidget.h>
 
 using namespace Fit;
 
@@ -42,6 +43,7 @@ class PagesWidgetPrivate
 		QQuickItem* swipeItem;
 		QQmlContext* rootContext;
 		BindingWidget* bindingWidget;
+        EventsWidget* eventWidget;
 		QList<QQuickItem*>* itemList;
 		QList<QUrl>* urlList;
 		QVBoxLayout verticalLayout;
@@ -192,6 +194,7 @@ void PagesWidgetPrivate::removeButtonClicked()
 						SaveManager::removeSave(rootContext->nameForObject(item));
 						SaveManager::removeParentalRelationship(rootContext->nameForObject(item));
 						bindingWidget->detachBindingsFor(item);
+                        eventWidget->detachEventsFor(item);
 						rootContext->setContextProperty(rootContext->nameForObject(item), 0);
 						int i = itemList->indexOf(item);
 						itemList->removeOne(item);
@@ -274,6 +277,11 @@ void PagesWidget::setUrlList(QList<QUrl>* items)
 void PagesWidget::setBindingWidget(BindingWidget* bindingWidget)
 {
 	m_d->bindingWidget = bindingWidget;
+}
+
+void PagesWidget::setEventWidget(EventsWidget* eventWidget)
+{
+    m_d->eventWidget = eventWidget;
 }
 
 QList<QQuickItem*> PagesWidget::pages()
@@ -361,6 +369,7 @@ void PagesWidget::removePageWithoutSave(const QString& name)
 		for (auto item : items) {
 			if (m_d->itemList->contains(item)) {
 				m_d->bindingWidget->detachBindingsFor(item);
+                m_d->eventWidget->detachEventsFor(item);
 				m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(item), 0);
 				int i = m_d->itemList->indexOf(item);
 				m_d->itemList->removeOne(item);
