@@ -26,6 +26,7 @@
 #include <splashscreen.h>
 #include <scenemanager.h>
 #include <QtConcurrent>
+#include <delayer.h>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
@@ -89,7 +90,7 @@ void MainWindow::SetupGui()
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
 	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
     connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
-    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachBindingsFor);
+    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
 
 	/* Remove deleted items from internal item list */
     connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=]
@@ -151,10 +152,10 @@ void MainWindow::SetupGui()
 	/* Prepare Properties Widget */
 	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
 	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
-	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
-    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->eventsWidget, SLOT(selectItem(QObject*const)));
 	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
     connect(this, SIGNAL(selectionHided()), m_d->eventsWidget, SLOT(clearList()));
+    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
+    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->eventsWidget, SLOT(selectItem(QObject*const)));
 
 	/* Fix Coords of ticks when property changed */
 	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
@@ -853,16 +854,14 @@ void MainWindow::clearStudio()
 	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentPage), page1Name);
 
 	m_d->bindingWidget->clearAllBindings();
-    m_d->eventsWidget->clearAllBindings();
+    m_d->eventsWidget->clearAllEvents();
 	m_d->m_Items.clear();
 	m_d->m_ItemUrls.clear();
 	HideSelectionTools();
     if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
     QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(72), height() - fit(72)); });
     m_d->toolboxList->setCurrentRow(-1);
-    QEventLoop loop;
-    QTimer::singleShot(100, [&]{ loop.quit(); });
-    loop.exec();
+    Delayer::delay(100);
 }
 
 void MainWindow::on_buildsButton_clicked()
@@ -902,7 +901,7 @@ void MainWindow::on_clearButton_clicked()
 					m_d->m_Items.removeOne(item);
 					m_d->m_ItemUrls.removeAt(i);
 					m_d->bindingWidget->detachBindingsFor(item);
-                    m_d->eventsWidget->detachBindingsFor(item);
+                    m_d->eventsWidget->detachEventsFor(item);
 					item->deleteLater();
                     HideSelectionTools();
 				}
@@ -1081,7 +1080,7 @@ void MainWindow::toolboxRemoveButtonClicked()
 							m_d->m_Items.removeOne(item);
 							m_d->m_ItemUrls.removeAt(j);
 							m_d->bindingWidget->detachBindingsFor(item);
-                            m_d->eventsWidget->detachBindingsFor(item);
+                            m_d->eventsWidget->detachEventsFor(item);
 							item->deleteLater();
 						}
 					}
@@ -1153,7 +1152,7 @@ void MainWindow::toolboxResetButtonClicked()
 				item->deleteLater();
 			}
 			m_d->bindingWidget->clearAllBindings();
-            m_d->eventsWidget->clearAllBindings();
+            m_d->eventsWidget->clearAllEvents();
 			m_d->m_Items.clear();
 			m_d->m_ItemUrls.clear();
 			HideSelectionTools();

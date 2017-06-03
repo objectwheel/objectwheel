@@ -22,6 +22,7 @@
 #include <QDir>
 #include <savemanager.h>
 #include <bindingwidget.h>
+#include <delayer.h>
 
 #define DURATION 400
 
@@ -52,7 +53,8 @@ class QmlEditorPrivate
         void saved(const QString& qmlPath);
 		const QList<QQuickItem*> GetAllChildren(QQuickItem* const item) const;
 		void show(const QString& url);
-		void show();
+        void showTextOnly(const QString& text);
+        void show();
 		void hide();
 };
 
@@ -93,9 +95,7 @@ void QmlEditorPrivate::rebuildEditor()
     quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
     quickWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    QEventLoop loop;
-    QTimer::singleShot(100, [&]{ loop.quit(); });
-    loop.exec();
+    Delayer::delay(100);
 
     quickWidget.setSource(QUrl("qrc:/resources/qmls/qml-editor.qml"));
     quickWidget.setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -103,6 +103,7 @@ void QmlEditorPrivate::rebuildEditor()
 
     rootItem = quickWidget.rootObject();
     QObject::connect(rootItem, SIGNAL(saved(QString)), parent, SLOT(saved(const QString&)));
+    QObject::connect(rootItem, SIGNAL(savedTextOnly(QString)), parent, SIGNAL(savedTextOnly(const QString&)));
     QObject::connect(rootItem, SIGNAL(currentSaved()), parent, SLOT(hide()));
 
     QObject *textEdit = rootItem->findChild<QObject*>(QStringLiteral("editor"));
@@ -197,8 +198,8 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
             auto prevParent = SaveManager::parentalRelationship(ctxId);
             SaveManager::removeParentalRelationship(ctxId);
             SaveManager::addParentalRelationship(componentName, prevParent);
-            SaveManager::changeSave(ctxId, componentName);
-            if (itemList->indexOf(item) >= 0) {
+            SaveManager::changeSave(ctxId, componentName); //BUG: KLASÖR İSMİ DEĞİŞMİYOR
+            if (itemList->indexOf(item) >= 0) {            //BUG: AYNI TARGETITEM'E IKI TANE AYNI EVENTTEN EKLEYINCE BOZULUYOR
                 auto oldUrl = (*urlList)[itemList->indexOf(item)].toLocalFile();
                 auto newUrl = dname(dname(oldUrl)) + separator() + componentName + separator() + "main.qml";
                 (*urlList)[itemList->indexOf(item)] = QUrl::fromLocalFile(newUrl);
@@ -229,6 +230,7 @@ void QmlEditorPrivate::show(const QString& url)
     QQmlProperty::write(rootItem, "visible", true, rootContext);
     QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, true));
     QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(info.dir().path())));
+    QMetaObject::invokeMethod(rootItem, "setTextOnly", Qt::AutoConnection, Q_ARG(QVariant, false));
 
     QTimer::singleShot(DURATION,[=] { //FIXME
         QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, url));
@@ -240,7 +242,7 @@ void QmlEditorPrivate::show(const QString& url)
 	minimizeButton.hide();
 
 	QPropertyAnimation *animation = new QPropertyAnimation(parent, "showRatio");
-	animation->setDuration(DURATION);
+    animation->setDuration(DURATION);
 	animation->setStartValue(0.0);
 	animation->setEndValue(1.0);
 	animation->setEasingCurve(QEasingCurve::InExpo);
@@ -248,7 +250,30 @@ void QmlEditorPrivate::show(const QString& url)
 	QObject::connect(animation, SIGNAL(finished()), &quickWidget, SLOT(show()));
 	QObject::connect(animation, SIGNAL(finished()), &minimizeButton, SLOT(show()));
 	QObject::connect(animation, SIGNAL(valueChanged(QVariant)), parent, SLOT(update()));
-	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+}
+
+void QmlEditorPrivate::showTextOnly(const QString& text)
+{
+    QQmlProperty::write(rootItem, "visible", true, rootContext);
+    textDocument->setPlainText(text);
+    QMetaObject::invokeMethod(rootItem, "setTextOnly", Qt::AutoConnection, Q_ARG(QVariant, true));
+
+    ((QWidget*)parent)->show();
+
+    quickWidget.hide();
+    minimizeButton.hide();
+
+    QPropertyAnimation *animation = new QPropertyAnimation(parent, "showRatio");
+    animation->setDuration(DURATION);
+    animation->setStartValue(0.0);
+    animation->setEndValue(1.0);
+    animation->setEasingCurve(QEasingCurve::InExpo);
+    animation->start();
+    QObject::connect(animation, SIGNAL(finished()), &quickWidget, SLOT(show()));
+    QObject::connect(animation, SIGNAL(finished()), &minimizeButton, SLOT(show()));
+    QObject::connect(animation, SIGNAL(valueChanged(QVariant)), parent, SLOT(update()));
+    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 }
 
 void QmlEditorPrivate::show()
@@ -258,6 +283,7 @@ void QmlEditorPrivate::show()
     QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, false));
     QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
     QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
+    QMetaObject::invokeMethod(rootItem, "setTextOnly", Qt::AutoConnection, Q_ARG(QVariant, false));
 
     QTimer::singleShot(DURATION,[=] { //FIXME
         QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, controlPath + separator() + "main.qml"));
@@ -311,6 +337,11 @@ QmlEditor::QmlEditor(QWidget *parent)
 {
     if (m_d) return;
     m_d = new QmlEditorPrivate(this);
+}
+
+QmlEditor* QmlEditor::instance()
+{
+    return m_d->parent;
 }
 
 QmlEditor::~QmlEditor()
@@ -389,7 +420,12 @@ void QmlEditor::show()
 
 void QmlEditor::hide()
 {
-	m_d->hide();
+    m_d->hide();
+}
+
+void QmlEditor::showTextOnly(const QString& text)
+{
+    m_d->showTextOnly(text);
 }
 
 void QmlEditor::saved(const QString& qmlPath)

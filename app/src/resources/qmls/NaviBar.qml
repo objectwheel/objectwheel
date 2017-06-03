@@ -18,7 +18,7 @@ Item {
         width: Fit.fit(240)
         height: Fit.fit(29)
         anchors.centerIn: parent
-        visible: true
+        visible: barVisible
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#0D74C8" }
             GradientStop { position: 1.0; color: Qt.darker("#0D74C8", 1.2) }
@@ -97,7 +97,7 @@ Item {
 
     Row {
         anchors.centerIn: parent
-        visible: (parent.state === 'view')
+        visible: barVisible ? (parent.state === 'view') : false
         MouseArea {
             width: Fit.fit(80)
             height: Fit.fit(29)
@@ -119,7 +119,7 @@ Item {
     }
 
     Text {
-        visible: (parent.state == 'selection')
+        visible: barVisible ? (parent.state == 'selection') : false
         anchors {
             right: parent.right
             verticalCenter: parent.verticalCenter
@@ -140,7 +140,7 @@ Item {
 
     Row {
         anchors.centerIn: parent
-        visible: (parent.state === 'selection')
+        visible: barVisible ? (parent.state === 'selection') : false
         spacing: Fit.fit(40)
         Text {
             visible: (editor.editor.selectionStart !== editor.editor.selectionEnd)
@@ -214,4 +214,6 @@ Item {
             name: "selection"
         }
     ]
+
+    property bool barVisible: true
 }

@@ -228,6 +228,8 @@ bool ProjectManager::startProject(const QString& projectname)
         return false;
     }
 
+    m_d->mainWindow->HideSelectionTools();
+
     ToolsManager::downloadTools();
 
 	return true;

@@ -31,7 +31,7 @@ Item {
         readOnly: ["main.qml", "icon.png"]
         anchors { top: parent.top; bottom: parent.bottom; }
         width: Fit.fit(180)
-        x: menu.checked ? 0 : -width
+        x: root.textOnlyMode ? -width : (menu.checked ? 0 : -width)
         Component.onCompleted: anim.enabled = true
         dropIcon: "qrc:///resources/images/fileExplorer/drop.png"
         explorerToolBar {
@@ -117,6 +117,7 @@ Item {
                     width: height
                     checkable: true
                     height: parent.height
+                    visible: !root.textOnlyMode
                     iconSource: "qrc:///resources/images/fexplorer.png"
                 }
 
@@ -128,8 +129,9 @@ Item {
                     height: parent.height
                     iconSource: "qrc:///resources/images/save-icon.png"
                     onClicked: {
-                        saveCurrent();
-                        if (!toolboxMode) root.saved(root.url.toLocaleString());
+                        if (!textOnlyMode) saveCurrent()
+                        if (!toolboxMode && !textOnlyMode) root.saved(root.url.toLocaleString())
+                        else if (textOnlyMode) root.savedTextOnly(editor.editor.text)
                     }
                 }
 
@@ -154,7 +156,7 @@ Item {
 
             Text {
                 anchors.fill: parent
-                text: "Objectwheel QML Editor"
+                text: root.textOnlyMode ? "Objectwheel JavaScript Editor" : "Objectwheel QML Editor"
                 color: "white"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
@@ -193,7 +195,7 @@ Item {
                 }
                 Item {
                     id: view
-                    state: root.splitState
+                    state: root.textOnlyMode ? 'editor' : root.splitState
                     anchors { top: parent.top; right: parent.right; bottom: separator.bottom; left: separator.right }
                     enabled: opacity > 0.98 ? true : false
                     clip: true
@@ -386,6 +388,7 @@ Item {
                 right: parent.right
             }
             state: "view"
+            barVisible: !textOnlyMode
 
             Rectangle {
                 anchors.right: parent.right
@@ -393,7 +396,7 @@ Item {
                 height: currFileNameText.contentHeight + Fit.fit(3)
                 width: currFileNameText.contentWidth + Fit.fit(10)
                 radius: Fit.fit(3)
-                visible: (root.width > root.height)
+                visible: root.textOnlyMode ? false : (root.width > root.height)
                 gradient: Gradient {
                     GradientStop { position: 0.0; color: "#0D74C8" }
                     GradientStop { position: 1.0; color: Qt.darker("#0D74C8", 1.2) }
@@ -475,6 +478,13 @@ Item {
         places: [Item.Bottom, Item.Left, Item.Bottom, Item.Bottom, Item.Bottom]
     }
     ComponentManager { id: componentManager }
+    function setTextOnly(mode) {
+        textOnlyMode = mode
+        if (mode) {
+            editor.editor.cursorPosition = editor.editor.text.indexOf('\n') > 0 ? editor.editor.text.indexOf('\n') + 1 : 0
+            editor.editor.forceActiveFocus()
+        }
+    }
     function setUrl(urlval) {
         root.url = urlval
         var index = -1
@@ -639,26 +649,27 @@ Item {
         reloadView()
     }
     function reloadView() {
-        if (lastItem != null) lastItem.destroy()
-        if (!root.visible) return
-        for (var i=0; i<editor.lineNumberRepeater.count; i++) editor.lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
-        errorMessage.text = ""
-        componentManager.clear()
+        if (!textOnlyMode) {
+            if (lastItem != null) lastItem.destroy()
+            if (!root.visible) return
+            for (var i=0; i<editor.lineNumberRepeater.count; i++) editor.lineNumberRepeater.itemAt(i).bgcolor = 'transparent'
+            errorMessage.text = ""
+            componentManager.clear()
 
-        updateCache()
-        var clearSaves = getClearSaves()
-        flushCachesToDisk()
+            updateCache()
+            var clearSaves = getClearSaves()
+            flushCachesToDisk()
 
-        if (!componentManager.build(componentManager.pathOfUrl(fileExplorer.explorerListView.folderListModel.rootFolder) + "/main.qml")) {
-            var errObj = JSON.parse(componentManager.errors()[0])
-            if (root.url === errObj.path) {
-                editor.lineNumberRepeater.itemAt(errObj.line - 1).bgcolor = "#c74c3c"
+            if (!componentManager.build(componentManager.pathOfUrl(fileExplorer.explorerListView.folderListModel.rootFolder) + "/main.qml")) {
+                var errObj = JSON.parse(componentManager.errors()[0])
+                if (root.url === errObj.path) {
+                    editor.lineNumberRepeater.itemAt(errObj.line - 1).bgcolor = "#c74c3c"
+                }
+                errorMessage.text = "<b>Error, line " + errObj.line + ':' + errObj.column + " in " +  FileManager.fname(errObj.path) + " : </b>" + errObj.description
             }
-            errorMessage.text = "<b>Error, line " + errObj.line + ':' + errObj.column + " in " +  FileManager.fname(errObj.path) + " : </b>" + errObj.description
+
+            revertClearSavesToDisk(clearSaves)
         }
-
-        revertClearSavesToDisk(clearSaves)
-
     }
     function isTextFile(file) {
         return (FileManager.ftype(file) === "txt" ||
@@ -673,11 +684,13 @@ Item {
     property string splitState: 'splitted'
     property var lastItem: null
     property bool toolboxMode: false
+    property bool textOnlyMode: false
     property string folder
     property string rootFolder
     property string url
     property var urlCache: []
     property var saveCache: []
     signal saved(string qmlPath)
+    signal savedTextOnly(string text)
     signal currentSaved()
 }

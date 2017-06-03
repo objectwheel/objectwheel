@@ -25,17 +25,20 @@ class EventsWidget : public QWidget
 		const QQmlContext* rootContext() const;
 		void setRootContext(QQmlContext* const rootContext);
 
+        const QObject* rootObject() const;
+        void setRootObject(QObject* const rootObject);
+
         static void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
 	public slots:
 		void clearList();
 		void selectItem(QObject* const);
-		void detachBindingsFor(QObject* const);
-		void clearAllBindings();
+        void detachEventsFor(QObject* const);
+        void clearAllEvents();
 		bool hasPopupOpen();
 
 	protected slots:
-		void processBindings();
+        void processEvents();
 
 	signals:
 		void popupShowed();

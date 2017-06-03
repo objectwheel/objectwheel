@@ -44,7 +44,7 @@ class MainWindow : public QWidget
 		static bool addControlWithoutSave(const QUrl& url, const QString& parent);
 		void clearStudio();
 
-	private slots:
+    public slots:
         void on_buildsButton_clicked();
 		void on_clearButton_clicked();
 		void on_editButton_clicked();

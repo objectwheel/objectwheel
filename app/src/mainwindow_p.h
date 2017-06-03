@@ -91,6 +91,7 @@ class MainWindowPrivate
         bool editMode;
 
 		MainWindowPrivate(MainWindow* uparent);
+        ~MainWindowPrivate();
         void setupUi(); // setupUi
 		void showAdderArea();
 		void hideAdderArea();
@@ -100,6 +101,12 @@ MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
 	: parent(uparent)
 {
     editMode = true;
+}
+
+MainWindowPrivate::~MainWindowPrivate()
+{
+    verticalLayout->takeAt(verticalLayout->indexOf(designWidget));
+    designWidget->deleteLater();
 }
 
 void MainWindowPrivate::setupUi()
@@ -192,13 +199,13 @@ void MainWindowPrivate::setupUi()
     sceneList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 	sceneList->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-	toolboxWidget = new QWidget;
-	toolboxVLay = new QVBoxLayout;
-	toolboxAdderAreaWidget = new QWidget;
-	toolboxAdderAreaVLay = new QVBoxLayout;
-	toolboxAdderAreaButtonSideHLay = new QHBoxLayout;
+    toolboxWidget = new QWidget(parent);
+    toolboxVLay = new QVBoxLayout;
+    toolboxAdderAreaWidget = new QWidget(parent);
+    toolboxAdderAreaVLay = new QVBoxLayout;
+    toolboxAdderAreaButtonSideHLay = new QHBoxLayout;
 
-	toolboxAddButton = new FlatButton;
+    toolboxAddButton = new FlatButton(parent);
 	toolboxAddButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     toolboxAddButton->setColor("#6BB64B");
 	toolboxAddButton->setFixedSize(fit(20),fit(20));
@@ -207,7 +214,7 @@ void MainWindowPrivate::setupUi()
 	toolboxAddButton->setIcon(QIcon(":/resources/images/plus.png"));
     QObject::connect(toolboxAddButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxAddButtonClicked()) );
 
-	toolboxRemoveButton = new FlatButton;
+    toolboxRemoveButton = new FlatButton(parent);
 	toolboxRemoveButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     toolboxRemoveButton->setColor("#C61717");
 	toolboxRemoveButton->setFixedSize(fit(20),fit(20));
@@ -217,7 +224,7 @@ void MainWindowPrivate::setupUi()
 	toolboxRemoveButton->setDisabled(true);
     QObject::connect(toolboxRemoveButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxRemoveButtonClicked()) );
 
-	toolboxEditButton = new FlatButton;
+    toolboxEditButton = new FlatButton(parent);
 	toolboxEditButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     toolboxEditButton->setColor("#0D74C8");
 	toolboxEditButton->setFixedSize(fit(20),fit(20));
@@ -229,7 +236,7 @@ void MainWindowPrivate::setupUi()
 	toolboxEditButton->setDisabled(true);
     QObject::connect(toolboxEditButton, SIGNAL(toggled(bool)), parent, SLOT(toolboxEditButtonToggled(bool)) );
 
-	toolboxResetButton = new FlatButton;
+    toolboxResetButton = new FlatButton(parent);
 	toolboxResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     toolboxResetButton->setColor("#ee8800");
     toolboxResetButton->setFixedSize(fit(20),fit(20));
@@ -238,7 +245,7 @@ void MainWindowPrivate::setupUi()
 	toolboxResetButton->setIcon(QIcon(":/resources/images/reset.png"));
     QObject::connect(toolboxResetButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxResetButtonClicked()) );
 
-	toolboxImportButton = new FlatButton;
+    toolboxImportButton = new FlatButton(parent);
 	toolboxImportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     toolboxImportButton->setColor("#6BB64B");
 	toolboxImportButton->setFixedSize(fit(20),fit(20));
@@ -247,7 +254,7 @@ void MainWindowPrivate::setupUi()
 	toolboxImportButton->setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(-90))));
     QObject::connect(toolboxImportButton, SIGNAL(clicked(bool)), parent, SLOT(toolboxImportButtonClicked()) );
 
-	toolboxExportButton = new FlatButton;
+    toolboxExportButton = new FlatButton(parent);
 	toolboxExportButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     toolboxExportButton->setColor("#C61717");
 	toolboxExportButton->setFixedSize(fit(20),fit(20));
@@ -268,7 +275,7 @@ void MainWindowPrivate::setupUi()
 	toolboxAdderAreaButtonSideHLay->addStretch();
 	toolboxAdderAreaButtonSideHLay->addWidget(toolboxExportButton);
 
-	toolboxUrlBox = new LineEdit;
+    toolboxUrlBox = new LineEdit(parent);
 	toolboxUrlBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	toolboxUrlBox->setFixedHeight(fit(30));
 	toolboxUrlBox->setIcon(QIcon(":/resources/images/web.png"));
@@ -279,7 +286,7 @@ void MainWindowPrivate::setupUi()
 	QObject::connect(toolboxUrlBox->lineEdit(), SIGNAL(textChanged(QString)),
                      parent, SLOT(handleToolboxUrlboxChanges(QString)));
 
-	toolBoxNameBox = new LineEdit;
+    toolBoxNameBox = new LineEdit(parent);
 	toolBoxNameBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	toolBoxNameBox->setFixedHeight(fit(30));
 	toolBoxNameBox->setIcon(QIcon(":/resources/images/item.png"));
@@ -364,7 +371,7 @@ void MainWindowPrivate::showAdderArea()
 	animation2->setEasingCurve(QEasingCurve::OutExpo);
 	QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
-	QParallelAnimationGroup *group = new QParallelAnimationGroup;
+    QParallelAnimationGroup *group = new QParallelAnimationGroup(parent);
 	group->addAnimation(animation);
 	group->addAnimation(animation2);
 	QObject::connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));
@@ -397,7 +404,7 @@ void MainWindowPrivate::hideAdderArea()
 	animation2->setEasingCurve(QEasingCurve::OutExpo);
 	QObject::connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
-	QParallelAnimationGroup *group = new QParallelAnimationGroup;
+    QParallelAnimationGroup *group = new QParallelAnimationGroup(parent);
 	group->addAnimation(animation);
 	group->addAnimation(animation2);
 	QObject::connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));

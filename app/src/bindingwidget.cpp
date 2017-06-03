@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <scrollarea.h>
 #include <QMessageBox>
+#include <QPointer>
 
 using namespace Fit;
 
@@ -43,7 +44,6 @@ class BindingWidgetPrivate
         LineEdit nameEdit;
         QLabel popupTitle;
         LineEdit popupItemNameTextBox;
-        QQuickItem* targetItem;
         ScrollArea popupScrollArea;
         QWidget popupScrollAreaWidget;
         QVBoxLayout popupScrollAreaVLayout;
@@ -51,7 +51,7 @@ class BindingWidgetPrivate
         ComboBox targetPropertyCombobox;
         ComboBox sourceItemCombobox;
         ComboBox sourcePropertyCombobox;
-        QQuickItem* lastTargetItem;
+        QPointer<QQuickItem> lastTargetItem;
         FlatButton popupOkButton;
         QLabel popupSeperateLine;
 
@@ -342,7 +342,6 @@ void BindingWidgetPrivate::addButtonClicked()
     popupWidget.raise();
     popupHideButton.raise();
     popupHideButton.move(popupWidget.width()-fit(24), 0);
-    parent->clearList();
     hasPopupOpen = true;
     emit parent->popupShowed();
 }
@@ -359,7 +358,7 @@ void BindingWidgetPrivate::editButtonClicked()
     popupWidget.show();
     popupWidget.raise();
     popupHideButton.raise();
-    popupHideButton.move(popupWidget.width()-fit(30), fit(10));
+    popupHideButton.move(popupWidget.width()-fit(24), 0);
     editMode = true;
 
     Binding b;
@@ -536,14 +535,14 @@ void BindingWidget::clearList()
     m_d->sourceItemCombobox.clear();
     m_d->sourcePropertyCombobox.clear();
     m_d->nameEdit.setText("");
+    m_d->popupItemNameTextBox.setText("");
 }
 
 void BindingWidget::selectItem(QObject* const selectedItem)
 {
     m_d->lastTargetItem = qobject_cast<QQuickItem*>(selectedItem);
     m_d->targetPropertyCombobox.clear();
-    m_d->targetItem = qobject_cast<QQuickItem*>(selectedItem);
-    m_d->popupItemNameTextBox.setText(m_d->rootContext->nameForObject(m_d->targetItem));
+    m_d->popupItemNameTextBox.setText(m_d->rootContext->nameForObject(m_d->lastTargetItem));
     auto metaObject = selectedItem->metaObject();
     for (int i = 0; i < metaObject->propertyCount(); i++) {
         if (metaObject->property(i).isWritable() && !QString(metaObject->property(i).name()).startsWith("__"))

@@ -21,6 +21,7 @@ class QmlEditor : public QWidget
 
 	public:
 		explicit QmlEditor(QWidget *parent = 0);
+        static QmlEditor* instance();
         static void setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const urlList);
         static void setRootContext(QQmlContext* const context);
         static void setBindingWidget(BindingWidget* bindngWidget);
@@ -41,6 +42,7 @@ class QmlEditor : public QWidget
         static void setDeactive(const bool);
         static void show();
         static void hide();
+        static void showTextOnly(const QString& text);
 
 	private slots:
         void saved(const QString& qmlPath);
@@ -48,6 +50,9 @@ class QmlEditor : public QWidget
 	protected:
 		void resizeEvent(QResizeEvent *event) override;
 		void paintEvent(QPaintEvent *event) override;
+
+    signals:
+        void savedTextOnly(const QString& text);
 
 	private:
         static QmlEditorPrivate* m_d;

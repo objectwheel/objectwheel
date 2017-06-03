@@ -20,6 +20,9 @@
 #include <QLabel>
 #include <scrollarea.h>
 #include <QMessageBox>
+#include <qmleditor.h>
+#include <QQmlExpression>
+#include <QPointer>
 
 using namespace Fit;
 
@@ -28,48 +31,45 @@ class EventsWidgetPrivate
     public:
         EventsWidget* parent;
         const QList<QQuickItem*>* items;
+        QObject* rootObject;
         QQmlContext* rootContext;
         QVBoxLayout verticalLayout;
         QHBoxLayout horizontalLayout;
         FlatButton addButton;
         FlatButton editButton;
         FlatButton removeButton;
-        ListWidget bindingListWidget;
+        ListWidget eventsListWidget;
         bool hasPopupOpen = false;
 
         QWidget popupWidget;
         QVBoxLayout popupVLayout;
-        FlatButton popupHideButton;
-        QHBoxLayout codeLayout;
+        FlatButton popupHideButton;      
         LineEdit nameEdit;
-        LineEdit codeEdit;
-        FlatButton btnEditCode;
         QLabel popupTitle;
         LineEdit popupItemNameTextBox;
-        QQuickItem* targetItem;
         ScrollArea popupScrollArea;
         QWidget popupScrollAreaWidget;
         QVBoxLayout popupScrollAreaVLayout;
+        QHBoxLayout codeLayout;
+        LineEdit codeEdit;
+        FlatButton btnEditCode;
         ComboBox targetEventCombobox;
-        QQuickItem* lastTargetItem;
+        QPointer<QQuickItem> lastTargetItem;
         FlatButton popupOkButton;
-
         bool editMode = false;
 
-        struct Binding
+        struct Event
         {
-                QObject* sourceItem;
-                QString sourceProperty;
                 QObject* targetItem;
-                QString targetProperty;
+                QString targetEventname;
+                QString eventCode;
                 QMetaObject::Connection connection;
                 QString connectionName;
 
-                bool operator== (const Binding& x) {
-                    if (x.sourceItem == this->sourceItem &&
-                        x.sourceProperty == this->sourceProperty &&
+                bool operator== (const Event& x) {
+                    if (x.eventCode == this->eventCode &&
                         x.targetItem == this->targetItem &&
-                        x.targetProperty == this->targetProperty &&
+                        x.targetEventname == this->targetEventname &&
                         x.connection == this->connection &&
                         x.connectionName == this->connectionName) {
                         return true;
@@ -78,7 +78,7 @@ class EventsWidgetPrivate
                     }
                 }
         };
-        QList<Binding> bindings;
+        QList<Event> events;
         EventsWidgetPrivate(EventsWidget* parent);
         void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
@@ -96,17 +96,17 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     : parent(p)
     , items(nullptr)
 {
-    bindingListWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    bindingListWidget.setFocusPolicy(Qt::NoFocus);
-    bindingListWidget.setStyleSheet(CSS::BindingListWidget);
-    bindingListWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    bindingListWidget.setDragDropMode(QAbstractItemView::NoDragDrop);
-    bindingListWidget.setSelectionBehavior(QAbstractItemView::SelectRows);
-    bindingListWidget.setSelectionMode(ListWidget::SingleSelection);
-    bindingListWidget.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    bindingListWidget.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-    QObject::connect(&bindingListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){removeButton.setEnabled(i>=0);});
-    QObject::connect(&bindingListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){editButton.setEnabled(i>=0);});
+    eventsListWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    eventsListWidget.setFocusPolicy(Qt::NoFocus);
+    eventsListWidget.setStyleSheet(CSS::BindingListWidget);
+    eventsListWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    eventsListWidget.setDragDropMode(QAbstractItemView::NoDragDrop);
+    eventsListWidget.setSelectionBehavior(QAbstractItemView::SelectRows);
+    eventsListWidget.setSelectionMode(ListWidget::SingleSelection);
+    eventsListWidget.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    eventsListWidget.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    QObject::connect(&eventsListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){removeButton.setEnabled(i>=0);});
+    QObject::connect(&eventsListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){editButton.setEnabled(i>=0);});
 
     addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     addButton.setColor("#6BB64B");
@@ -140,7 +140,8 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     horizontalLayout.addStretch();
     horizontalLayout.addWidget(&editButton);
 
-    verticalLayout.addWidget(&bindingListWidget);
+    codeLayout.setSpacing(fit(3));
+    verticalLayout.addWidget(&eventsListWidget);
     verticalLayout.addLayout(&horizontalLayout);
     verticalLayout.setContentsMargins(fit(6), 0, fit(8), fit(8));
     parent->setLayout(&verticalLayout);
@@ -182,6 +183,12 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     targetEventCombobox.setPlaceHolderText("Target event");
     targetEventCombobox.show();
     QObject::connect(&targetEventCombobox, &ComboBox::popupShowed, [=] {ensureComboboxVisible(&targetEventCombobox);});
+    QObject::connect(&targetEventCombobox, (void(ComboBox::*)(QString&))(&ComboBox::currentTextChanged), [=] (QString text){
+        if (!text.isEmpty()) {
+            codeEdit.setEnabled(true);
+            btnEditCode.setEnabled(true);
+        }
+    });
 
     popupOkButton.setColor(QColor("#6BB64B"));
     popupOkButton.setTextColor(Qt::white);
@@ -252,24 +259,24 @@ void EventsWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& i
 //                sourceSign = sourceItem->metaObject()->property(i).notifySignal();
 //        if (!sourceSign.isValid()) return;
 
-//        auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processBindings()")));
+//        auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
 //        auto connectionName = inf.bindingName;
 
-//        Binding bindingData;
-//        bindingData.sourceItem = sourceItem; //Source item
-//        bindingData.sourceProperty = inf.sourceProperty; //Source property
-//        bindingData.targetItem = targetItem; //Target item
-//        bindingData.targetProperty = inf.targetProperty; //Target property
-//        bindingData.connection = connection;
-//        bindingData.connectionName = connectionName;
-//        bindings << bindingData;
-//        bindingListWidget.addItem(connectionName);
+//        Binding eventData;
+//        eventData.sourceItem = sourceItem; //Source item
+//        eventData.sourceProperty = inf.sourceProperty; //Source property
+//        eventData.targetItem = targetItem; //Target item
+//        eventData.targetProperty = inf.targetProperty; //Target property
+//        eventData.connection = connection;
+//        eventData.connectionName = connectionName;
+//        bindings << eventData;
+//        eventsListWidget.addItem(connectionName);
 //    }
 }
 
 void EventsWidgetPrivate::removeButtonClicked()
 {
-    auto connectionName = bindingListWidget.currentItem()->text();
+    auto connectionName = eventsListWidget.currentItem()->text();
     QMessageBox msgBox;
     msgBox.setText(QString("<b>This will delete %1 named event.</b>").arg(connectionName));
     msgBox.setInformativeText("Do you want to continue?");
@@ -279,16 +286,31 @@ void EventsWidgetPrivate::removeButtonClicked()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-            Binding binding;
-            for (auto b : bindings) {
-                if (b.connectionName == connectionName) {
-                    binding = b;
+            Event event;
+            for (auto e : events) {
+                if (e.connectionName == connectionName) {
+                    event = e;
                 }
             }
-            SaveManager::removeBindingSave(binding.connectionName);
-            bindings.removeOne(binding);
-            QObject::disconnect(binding.connection);
-            delete bindingListWidget.takeItem(bindingListWidget.currentRow());
+//            SaveManager::removeBindingSave(binding.connectionName);
+            events.removeOne(event);
+
+            bool shouldRemove = true;
+            if (event.connection) {
+                for (auto& e : events) {
+                    if (e.targetItem == event.targetItem &&
+                        e.targetEventname == event.targetEventname) {
+                        e.connection = event.connection;
+                        shouldRemove = false;
+                        break;
+                    }
+                }
+                if (shouldRemove) {
+                    QObject::disconnect(event.connection);
+                }
+            }
+
+            delete eventsListWidget.takeItem(eventsListWidget.currentRow());
             break;
         } default: {
             // Do nothing
@@ -310,7 +332,6 @@ void EventsWidgetPrivate::addButtonClicked()
     popupWidget.raise();
     popupHideButton.raise();
     popupHideButton.move(popupWidget.width()-fit(24), 0);
-    parent->clearList();
     hasPopupOpen = true;
     emit parent->popupShowed();
 }
@@ -327,17 +348,18 @@ void EventsWidgetPrivate::editButtonClicked()
     popupWidget.show();
     popupWidget.raise();
     popupHideButton.raise();
-    popupHideButton.move(popupWidget.width()-fit(30), fit(10));
+    popupHideButton.move(popupWidget.width()-fit(24), 0);
     editMode = true;
 
-    Binding b;
-    for (auto binding : bindings)
-        if (binding.connectionName == bindingListWidget.currentItem()->text())
-            b = binding;
-    parent->selectItem(b.targetItem);
+    Event e;
+    for (auto event : events)
+        if (event.connectionName == eventsListWidget.currentItem()->text())
+            e = event;
+    parent->selectItem(e.targetItem);
 
-    targetEventCombobox.setCurrentItem(b.targetProperty);
-    nameEdit.setText(bindingListWidget.currentItem()->text());
+    targetEventCombobox.setCurrentItem(e.targetEventname);
+    nameEdit.setText(eventsListWidget.currentItem()->text());
+    codeEdit.setText(e.eventCode);
     hasPopupOpen = true;
     emit parent->popupShowed();
 }
@@ -359,48 +381,53 @@ void EventsWidgetPrivate::popupHideButtonClicked()
 
 void EventsWidgetPrivate::popupOkButtonClicked()
 {
-//    if (!targetEventCombobox.currentItem().isEmpty() &&
-//        !sourceItemCombobox.currentItem().isEmpty() &&
-//        !sourcePropertyCombobox.currentItem().isEmpty()) {
-//        if (!editMode) {
-//            QQuickItem* sourceItem = nullptr;
-//            for (auto item : *items) {
-//                auto itemName = rootContext->nameForObject(item);
-//                if (itemName == sourceItemCombobox.currentItem()) {
-//                    sourceItem = item;
-//                }
-//            }
-//            if (!sourceItem) return;
-//            if (!lastTargetItem) return;
+    if (!targetEventCombobox.currentItem().isEmpty() &&
+        !codeEdit.text().isEmpty() &&
+        !popupItemNameTextBox.text().isEmpty()) {
+        if (!editMode) {
+            if (!lastTargetItem) return;
 
-//            QMetaMethod sourceSign;
-//            for (int i = 0; i < sourceItem->metaObject()->propertyCount(); i++)
-//                if (QString(sourceItem->metaObject()->property(i).name()) == sourcePropertyCombobox.currentItem())
-//                    sourceSign = sourceItem->metaObject()->property(i).notifySignal();
-//            if (!sourceSign.isValid()) return;
+            QString targetEventname;
+            QMetaMethod targetSign;
+            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
+                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
+                    targetSign = lastTargetItem->metaObject()->method(i);
+                    targetEventname = lastTargetItem->metaObject()->method(i).name();
+                }
+            if (!targetSign.isValid()) return;
 
-//            auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processBindings()")));
+            QMetaObject::Connection connection;
+            bool shouldConnect = true;
+            for (auto event: events) {
+                if (event.targetItem == lastTargetItem &&
+                    event.targetEventname == targetEventname) {
+                    shouldConnect = false;
+                    break;
+                }
+            }
+            if (shouldConnect) {
+                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
+            }
 
-//            auto connectionName = nameEdit.text();
-//            if (connectionName.isEmpty()) {
-//                connectionName = QString("Binding %1").arg(bindingListWidget.count());
-//            }
+            auto connectionName = nameEdit.text();
+            if (connectionName.isEmpty()) {
+                connectionName = QString("Event %1").arg(eventsListWidget.count());
+            }
 
-//            for (int i = 0; i < bindingListWidget.count(); i++) {
-//                if (bindingListWidget.item(i)->text() == connectionName) {
-//                    connectionName+="+";
-//                    i = -1;
-//                }
-//            }
+            for (int i = 0; i < eventsListWidget.count(); i++) {
+                if (eventsListWidget.item(i)->text() == connectionName) {
+                    connectionName+="+";
+                    i = -1;
+                }
+            }
 
-//            Binding bindingData;
-//            bindingData.sourceItem = sourceItem; //Source item
-//            bindingData.sourceProperty = sourcePropertyCombobox.currentItem(); //Source property
-//            bindingData.targetItem = lastTargetItem; //Target item
-//            bindingData.targetProperty = targetEventCombobox.currentItem(); //Target property
-//            bindingData.connection = connection;
-//            bindingData.connectionName = connectionName;
-//            bindings << bindingData;
+            Event eventData;
+            eventData.targetItem = lastTargetItem; //Target item
+            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
+            eventData.eventCode = codeEdit.text();
+            eventData.connection = connection;
+            eventData.connectionName = connectionName;
+            events << eventData;
 //            SaveManager::BindingInf binf;
 //            binf.bindingName = connectionName;
 //            binf.sourceId = rootContext->nameForObject(sourceItem);
@@ -408,57 +435,73 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 //            binf.targetId = rootContext->nameForObject(lastTargetItem);
 //            binf.targetProperty = targetEventCombobox.currentItem();
 //            SaveManager::addBindingSave(binf);
-//            bindingListWidget.addItem(connectionName);
-//            popupHideButtonClicked();
-//        } else {
-//            auto connName = bindingListWidget.currentItem()->text();
-//            Binding binding;
-//            for (auto b : bindings) {
-//                if (b.connectionName == connName) {
-//                    binding = b;
-//                }
-//            }
-//            bindings.removeOne(binding);
-//            QObject::disconnect(binding.connection);
+            eventsListWidget.addItem(connectionName);
+            popupHideButtonClicked();
+        } else {
+            if (!lastTargetItem) return;
+            auto connName = eventsListWidget.currentItem()->text();
+            Event event;
+            for (auto e : events) {
+                if (e.connectionName == connName) {
+                    event = e;
+                }
+            }
+            events.removeOne(event);
 
-//            QQuickItem* sourceItem = nullptr;
-//            for (auto item : *items) {
-//                auto itemName = rootContext->nameForObject(item);
-//                if (itemName == sourceItemCombobox.currentItem()) {
-//                    sourceItem = item;
-//                }
-//            }
-//            if (!sourceItem) return;
-//            if (!lastTargetItem) return;
+            bool shouldRemove = true;
+            if (event.connection) {
+                for (auto& e : events) {
+                    if (e.targetItem == event.targetItem &&
+                        e.targetEventname == event.targetEventname) {
+                        e.connection = event.connection;
+                        shouldRemove = false;
+                        break;
+                    }
+                }
+                if (shouldRemove) {
+                    QObject::disconnect(event.connection);
+                }
+            }
 
-//            QMetaMethod sourceSign;
-//            for (int i = 0; i < sourceItem->metaObject()->propertyCount(); i++)
-//                if (QString(sourceItem->metaObject()->property(i).name()) == sourcePropertyCombobox.currentItem())
-//                    sourceSign = sourceItem->metaObject()->property(i).notifySignal();
-//            if (!sourceSign.isValid()) return;
+            QString targetEventname;
+            QMetaMethod targetSign;
+            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
+                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
+                    targetSign = lastTargetItem->metaObject()->method(i);
+                    targetEventname = lastTargetItem->metaObject()->method(i).name();
+                }
+            if (!targetSign.isValid()) return;
 
-//            auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processBindings()")));
+            QMetaObject::Connection connection;
+            bool shouldConnect = true;
+            for (auto event: events) {
+                if (event.targetItem == lastTargetItem &&
+                    event.targetEventname == targetEventname)
+                    shouldConnect = false;
+            }
+            if (shouldConnect) {
+                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
+            }
 
-//            auto connectionName = nameEdit.text();
-//            if (connectionName.isEmpty()) {
-//                connectionName = QString("Binding %1").arg(bindingListWidget.count());
-//            }
+            auto connectionName = nameEdit.text();
+            if (connectionName.isEmpty()) {
+                connectionName = QString("Event %1").arg(eventsListWidget.count());
+            }
 
-//            for (int i = 0; i < bindingListWidget.count(); i++) {
-//                if (bindingListWidget.item(i)->text() != connName && bindingListWidget.item(i)->text() == connectionName) {
-//                    connectionName+="+";
-//                    i = -1;
-//                }
-//            }
+            for (int i = 0; i < eventsListWidget.count(); i++) {
+                if (eventsListWidget.item(i)->text() != connName && eventsListWidget.item(i)->text() == connectionName) {
+                    connectionName+="+";
+                    i = -1;
+                }
+            }
 
-//            Binding bindingData;
-//            bindingData.sourceItem = sourceItem; //Source item
-//            bindingData.sourceProperty = sourcePropertyCombobox.currentItem(); //Source property
-//            bindingData.targetItem = lastTargetItem; //Target item
-//            bindingData.targetProperty = targetEventCombobox.currentItem(); //Target property
-//            bindingData.connection = connection;
-//            bindingData.connectionName = connectionName;
-//            bindings << bindingData;
+            Event eventData;
+            eventData.targetItem = lastTargetItem; //Target item
+            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
+            eventData.eventCode = codeEdit.text();
+            eventData.connection = connection;
+            eventData.connectionName = connectionName;
+            events << eventData;
 //            SaveManager::BindingInf binf;
 //            binf.bindingName = connectionName;
 //            binf.sourceId = rootContext->nameForObject(sourceItem);
@@ -466,16 +509,28 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 //            binf.targetId = rootContext->nameForObject(lastTargetItem);
 //            binf.targetProperty = targetEventCombobox.currentItem();
 //            SaveManager::changeBindingSave(binding.connectionName, binf);
-//            bindingListWidget.item(bindingListWidget.currentRow())->setText(connectionName);
-//            popupHideButtonClicked();
-//        }
-//    }
+            eventsListWidget.item(eventsListWidget.currentRow())->setText(connectionName);
+            popupHideButtonClicked();
+        }
+    }
 
 }
 
 void EventsWidgetPrivate::btnEditCodeClicked()
 {
-
+    static QMetaObject::Connection conn;
+    if (codeEdit.text().isEmpty()) {
+        QmlEditor::showTextOnly("// " + rootContext->nameForObject(lastTargetItem) + ".on" +
+                                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
+    } else {
+        QmlEditor::showTextOnly(codeEdit.text());
+    }
+    QmlEditor::instance()->raise();
+    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
+        codeEdit.setText(text);
+        QObject::disconnect(conn);
+        QmlEditor::hide();
+    });
 }
 
 void EventsWidgetPrivate::ensureComboboxVisible(const QObject* obj)
@@ -506,14 +561,17 @@ void EventsWidget::clearList()
 {
     m_d->targetEventCombobox.clear();
     m_d->nameEdit.setText("");
+    m_d->popupItemNameTextBox.setText("");
+    m_d->codeEdit.setText("");
+    m_d->codeEdit.setDisabled(true);
+    m_d->btnEditCode.setDisabled(true);
 }
 
 void EventsWidget::selectItem(QObject* const selectedItem)
 {
     m_d->lastTargetItem = qobject_cast<QQuickItem*>(selectedItem);
     m_d->targetEventCombobox.clear();
-    m_d->targetItem = qobject_cast<QQuickItem*>(selectedItem);
-    m_d->popupItemNameTextBox.setText(m_d->rootContext->nameForObject(m_d->targetItem));
+    m_d->popupItemNameTextBox.setText(m_d->rootContext->nameForObject(m_d->lastTargetItem));
 
     auto metaObject = selectedItem->metaObject();
     for (int i = metaObject->methodCount(); --i;) {
@@ -525,27 +583,40 @@ void EventsWidget::selectItem(QObject* const selectedItem)
     setEnabled(true);
 }
 
-void EventsWidget::detachBindingsFor(QObject* const item)
+void EventsWidget::detachEventsFor(QObject* const item)
 {
-//    QListIterator<EventsWidgetPrivate::Binding> i(m_d->bindings);
-//    while (i.hasNext()) {
-//        auto binding = i.next();
-//        if (binding.sourceItem == item || binding.targetItem == item) {
-//            SaveManager::removeBindingSave(binding.connectionName);
-//            disconnect(binding.connection);
-//            m_d->bindings.removeOne(binding);
-//            for (int i=0; i < m_d->bindingListWidget.count(); i++) {
-//                if (m_d->bindingListWidget.item(i)->text() == binding.connectionName)
-//                    m_d->bindingListWidget.takeItem(i);
-//            }
-//        }
-//    }
+    QListIterator<EventsWidgetPrivate::Event> i(m_d->events);
+    while (i.hasNext()) {
+        auto event = i.next();
+        if (event.targetItem == item) {
+//            SaveManager::removeBindingSave(event.connectionName);
+            m_d->events.removeOne(event);
+            bool shouldRemove = true;
+            if (event.connection) {
+                for (auto& e : m_d->events) {
+                    if (e.targetItem == event.targetItem &&
+                        e.targetEventname == event.targetEventname) {
+                        e.connection = event.connection;
+                        shouldRemove = false;
+                        break;
+                    }
+                }
+                if (shouldRemove) {
+                    QObject::disconnect(event.connection);
+                }
+            }
+            for (int i=0; i < m_d->eventsListWidget.count(); i++) {
+                if (m_d->eventsListWidget.item(i)->text() == event.connectionName)
+                    m_d->eventsListWidget.takeItem(i);
+            }
+        }
+    }
 }
 
-void EventsWidget::clearAllBindings()
+void EventsWidget::clearAllEvents()
 {
     for (auto item : *m_d->items) {
-        detachBindingsFor(item);
+        detachEventsFor(item);
     }
 }
 
@@ -569,6 +640,16 @@ void EventsWidget::setRootContext(QQmlContext* const rootContext)
     m_d->rootContext = rootContext;
 }
 
+const QObject* EventsWidget::rootObject() const
+{
+    return m_d->rootObject;
+}
+
+void EventsWidget::setRootObject(QObject* const rootObject)
+{
+    m_d->rootObject = rootObject;
+}
+
 void EventsWidget::addBindingWithoutSave(const SaveManager::BindingInf& inf)
 {
     m_d->addBindingWithoutSave(inf);
@@ -579,24 +660,24 @@ bool EventsWidget::hasPopupOpen()
     return m_d->hasPopupOpen;
 }
 
-void EventsWidget::processBindings()
+void EventsWidget::processEvents()
 {
-//    auto sourceSignalIndex = senderSignalIndex();
-//    auto sourceItem = sender();
-//    if (!sourceItem || sourceSignalIndex < 0) { qWarning("Event error! 0x00"); return; }
+    auto targetSignalIndex = senderSignalIndex();
+    auto targetItem = sender();
+    if (!targetItem || targetSignalIndex < 0) { qWarning("Event error! 0x00"); return; }
 
-//    QString sourceProperty;
-//    for (int i = 0; i < sourceItem->metaObject()->propertyCount(); i++) {
-//        if (sourceSignalIndex == sourceItem->metaObject()->property(i).notifySignalIndex())
-//            sourceProperty = sourceItem->metaObject()->property(i).name();
-//    }
-//    if (sourceProperty.isEmpty()) { qWarning("Event error! 0x01"); return; }
+    QString targetEventname;
+    for (int i = 0; i < targetItem->metaObject()->methodCount(); i++) {
+        if (targetSignalIndex == targetItem->metaObject()->method(i).methodIndex())
+            targetEventname = targetItem->metaObject()->method(i).name();
+    }
+    if (targetEventname.isEmpty()) { qWarning("Event error! 0x01"); return; }
 
-//    auto value = sourceItem->property(sourceProperty.toStdString().c_str());
-//    for (auto binding : m_d->bindings) {
-//        if (binding.sourceItem == sourceItem &&
-//            binding.sourceProperty == sourceProperty) {
-//            binding.targetItem->setProperty(binding.targetProperty.toStdString().c_str(), value);
-//        }
-//    }
+    for (auto event : m_d->events) {
+        if (event.targetItem == targetItem &&
+            event.targetEventname == targetEventname) {
+            QQmlExpression script(m_d->rootContext, event.targetItem, event.eventCode);
+            script.evaluate();
+        }
+    }
 }
