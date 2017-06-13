@@ -663,9 +663,9 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 					{
 						if (!(mouseEvent->buttons() & Qt::LeftButton))
 							return false;
-						if ((mouseEvent->pos() - dragStartPoint).manhattanLength()
-							< QApplication::startDragDistance())
-							return false;
+//						if ((mouseEvent->pos() - dragStartPoint).manhattanLength()
+//							< QApplication::startDragDistance())
+//							return false;
 
 						QVariant variant;
 						variant.setValue<QQuickItem*>(pressedItem);

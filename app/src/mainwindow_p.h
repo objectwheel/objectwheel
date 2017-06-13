@@ -40,6 +40,7 @@
 #include <loginscreen.h>
 #include <buildsscreen.h>
 #include <editmodeindicator.h>
+#include <designmanager.h>
 
 #define DURATION 500
 
@@ -88,6 +89,7 @@ class MainWindowPrivate
 		QQuickItemList m_Items;
 		QQuickUrlList m_ItemUrls;
         EditModeIndicator* emIndicator;
+        DesignManager* designManager;
         bool editMode;
 
 		MainWindowPrivate(MainWindow* uparent);
@@ -353,6 +355,10 @@ void MainWindowPrivate::setupUi()
 	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     emIndicator = new EditModeIndicator(centralWidget);
+
+    designManager = new DesignManager;
+    designManager->setSettleWidget(nullptr);
+    designManager->showWidget();
 }
 
 void MainWindowPrivate::showAdderArea()

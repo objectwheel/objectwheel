@@ -36,7 +36,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/rotatortick.h \
                              $$PWD/editmodeindicator.h \
                              $$PWD/eventswidget.h \
-                             $$PWD/delayer.h
+                             $$PWD/delayer.h \
+                             $$PWD/designmanager.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -74,7 +75,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/removertick.cpp \
                              $$PWD/editmodeindicator.cpp \
                              $$PWD/eventswidget.cpp \
-                             $$PWD/delayer.cpp
+                             $$PWD/delayer.cpp \
+                             $$PWD/designmanager.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
