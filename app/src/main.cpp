@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
+    qApp->setWindowIcon(QIcon(":/resources/images/owicon.png"));
 	qsrand(QDateTime::currentMSecsSinceEpoch());
 
 	// Init Fit
