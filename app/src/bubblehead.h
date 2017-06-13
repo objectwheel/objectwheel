@@ -4,12 +4,13 @@
 #include <QIcon>
 #include <QPushButton>
 #include <QSharedPointer>
+#include <QApplication>
 
 struct Callback {
         virtual ~Callback() = 0;
         virtual void call() = 0;
 
-        QIcon icon;
+        QPixmap icon;
         QPainterPath path;
 };
 inline Callback::~Callback() {}
@@ -34,13 +35,15 @@ class BubbleHead : public QPushButton
 		explicit BubbleHead(QWidget *parent = 0);
 		~BubbleHead();
 
-        static void setIcon(const QIcon& icon);
-        static const QIcon& icon();
+        static void setIcon(const QPixmap& icon);
+        static const QPixmap& icon();
 
         template<typename T>
-        void addButton(const QIcon& icon, void* object, void (T::*method)()) {
+        void addButton(const QPixmap& icon, void* object, void (T::*method)()) {
             Button<T>* button = new Button<T>;
             button->icon = icon;
+            if (icon.devicePixelRatio() != qApp->devicePixelRatio())
+                button->icon.setDevicePixelRatio(qApp->devicePixelRatio());
             button->object = (T*)object;
             button->method = method;
             m_buttonList.append(QSharedPointer<Callback>(button));

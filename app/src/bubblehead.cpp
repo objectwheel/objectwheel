@@ -5,7 +5,6 @@
 #include <QIcon>
 #include <QGraphicsDropShadowEffect>
 #include <mainwindow.h>
-#include <QApplication>
 #include <QVariantAnimation>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
@@ -34,7 +33,7 @@ class BubbleHeadPrivate
 
         BubbleHead* parent;
         QPoint hotPoint;
-        QIcon icon;
+        QPixmap icon;
         QGraphicsDropShadowEffect shadowEffect;
         bool moved;
 
@@ -106,12 +105,14 @@ BubbleHead::~BubbleHead()
 	delete m_d;
 }
 
-void BubbleHead::setIcon(const QIcon& icon)
+void BubbleHead::setIcon(const QPixmap& icon)
 {
 	m_d->icon = icon;
+    if (icon.devicePixelRatio() != qApp->devicePixelRatio())
+        m_d->icon.setDevicePixelRatio(qApp->devicePixelRatio());
 }
 
-const QIcon& BubbleHead::icon()
+const QPixmap& BubbleHead::icon()
 {
 	return m_d->icon;
 }
@@ -183,7 +184,7 @@ void BubbleHead::paintEvent(QPaintEvent*)
         painter.setBrush(Qt::NoBrush);
         for (auto button: m_buttonList) {
             painter.setClipPath(button->path);
-            QPixmap p(button->icon.pixmap(button->path.boundingRect().toRect().size()));
+            QPixmap p(button->icon.scaled(button->path.boundingRect().toRect().size() * qApp->devicePixelRatio(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             painter.drawPixmap(button->path.boundingRect().toRect(), p);
             painter.drawPath(button->path);
         }
@@ -207,11 +208,11 @@ void BubbleHead::paintEvent(QPaintEvent*)
     painter.setBrush(gradient);
     painter.drawPath(m_d->centerPath);
 
-    painter.drawPixmap(m_d->centerPath.boundingRect().toRect().adjusted(width() > fit(SMALL_SIZE + 2) ? 0 : 1,
-                                                                        width() > fit(SMALL_SIZE + 2) ? 0 : 1,
-                                                                        width() > fit(SMALL_SIZE + 2) ? -1 : 0,
-                                                                        width() > fit(SMALL_SIZE + 2) ? -1 : 0),
-                     m_d->icon.pixmap(m_d->centerPath.boundingRect().toRect().size()));
+    auto rectArea = m_d->centerPath.boundingRect().toRect().adjusted(width() > fit(SMALL_SIZE + 2) ? 0 : 1,
+                                                                     width() > fit(SMALL_SIZE + 2) ? 0 : 1,
+                                                                     width() > fit(SMALL_SIZE + 2) ? -1 : 0,
+                                                                     width() > fit(SMALL_SIZE + 2) ? -1 : 0);
+    painter.drawPixmap(rectArea, m_d->icon.scaled(rectArea.size() * qApp->devicePixelRatio(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void BubbleHead::moveEvent(QMoveEvent* event)

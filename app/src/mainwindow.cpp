@@ -337,12 +337,12 @@ void MainWindow::SetupGui()
 	});
 
 	m_d->bubbleHead = new BubbleHead(this);
-    m_d->bubbleHead->setIcon(QIcon(":/resources/images/tribune.png"));
-    m_d->bubbleHead->addButton(QIcon(":/resources/images/edit-icon.png"), this, &MainWindow::on_editButton_clicked);
-    m_d->bubbleHead->addButton(QIcon(":/resources/images/play.png"), this, &MainWindow::on_playButton_clicked);
-    m_d->bubbleHead->addButton(QIcon(":/resources/images/editor.png"), this, &MainWindow::handleEditorOpenButtonClicked);
-    m_d->bubbleHead->addButton(QIcon(":/resources/images/trash-icon.png"), this, &MainWindow::on_clearButton_clicked);
-    m_d->bubbleHead->addButton(QIcon(":/resources/images/build.png"), this, &MainWindow::on_buildsButton_clicked);
+    m_d->bubbleHead->setIcon(QPixmap(":/resources/images/tribune.png"));
+    m_d->bubbleHead->addButton(QPixmap(":/resources/images/edit-icon.png"), this, &MainWindow::on_editButton_clicked);
+    m_d->bubbleHead->addButton(QPixmap(":/resources/images/play.png"), this, &MainWindow::on_playButton_clicked);
+    m_d->bubbleHead->addButton(QPixmap(":/resources/images/editor.png"), this, &MainWindow::handleEditorOpenButtonClicked);
+    m_d->bubbleHead->addButton(QPixmap(":/resources/images/trash-icon.png"), this, &MainWindow::on_clearButton_clicked);
+    m_d->bubbleHead->addButton(QPixmap(":/resources/images/build.png"), this, &MainWindow::on_buildsButton_clicked);
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
