@@ -37,7 +37,10 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/editmodeindicator.h \
                              $$PWD/eventswidget.h \
                              $$PWD/delayer.h \
-                             $$PWD/designmanager.h
+                             $$PWD/designmanager.h \
+    $$PWD/control.h \
+    $$PWD/designerscene.h \
+    $$PWD/designerview.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -76,7 +79,10 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/editmodeindicator.cpp \
                              $$PWD/eventswidget.cpp \
                              $$PWD/delayer.cpp \
-                             $$PWD/designmanager.cpp
+                             $$PWD/designmanager.cpp \
+    $$PWD/control.cpp \
+    $$PWD/designerscene.cpp \
+    $$PWD/designerview.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

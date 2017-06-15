@@ -2,34 +2,9 @@
 #define DESIGNMANAGER_H
 
 #include <QObject>
-#include <QUrl>
-#include <QRect>
-#include <QList>
 
-class DesignManagerPrivate;
 class QWidget;
-
-class Control {
-    public: // variables
-        QString id;
-        QUrl url;
-        QRect boundingRect;
-        Control* parent = nullptr;
-        QList<Control*> children;
-
-    public: // functions
-        QList<Control*> findChildren(const QString& id, Qt::FindChildOptions option = Qt::FindChildrenRecursively) const;
-
-    private:
-        QList<Control*> findChildrenRecursively(const QString& id, QList<Control*> parent) const;
-};
-
-class Item : Control { };
-
-class Page : Control {
-    public: // variables
-        bool mainPage = false;
-};
+class DesignManagerPrivate;
 
 class DesignManager : public QObject
 {

@@ -1,50 +1,27 @@
 #include <designmanager.h>
+#include <designerscene.h>
+#include <designerview.h>
+#include <control.h>
 #include <QWidget>
 #include <QList>
 
-QList<Control*> Control::findChildren(const QString& id, Qt::FindChildOptions option) const
+class DesignManagerPrivate
 {
-    QList<Control*> foundChilds;
-    if (option == Qt::FindChildrenRecursively) {
-        foundChilds = findChildrenRecursively(id, children);
-    } else {
-        for (auto child : children) {
-            if (child->id == id)
-                foundChilds << child;
-        }
-    }
-    return foundChilds;
-}
-
-QList<Control*> Control::findChildrenRecursively(const QString& id, QList<Control*> parent) const
-{
-    QList<Control*> foundChilds;
-    for (auto child : parent) {
-        if (child->id == id) {
-            foundChilds << child;
-        }
-        foundChilds << findChildrenRecursively(id, child->children);
-    }
-    return foundChilds;
-}
-
-class DesignManagerPrivate {
-
-    public: // variables
-        DesignManager* parent;
-        QWidget* settleWidget = nullptr;
-        QWidget widget;
-        QList<Page*> pages;
-        QList<Item*> items;
-
-    public: // functions
+    public:
         DesignManagerPrivate(DesignManager* parent);
         ~DesignManagerPrivate();
+
+    public:
+        DesignManager* parent;
+        QWidget* settleWidget = nullptr;
+        DesignerScene designerScene;
+        DesignerView designerView;
+        QList<Page*> pages;
 };
 
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent) :
     parent(parent),
-    widget(settleWidget)
+    designerView(&designerScene, settleWidget)
 {
 }
 
@@ -75,15 +52,15 @@ DesignManager::~DesignManager()
 void DesignManager::setSettleWidget(QWidget* widget)
 {
     _d->settleWidget = widget;
-    _d->widget.setParent(_d->settleWidget);
+    _d->designerView.setParent(_d->settleWidget);
 }
 
 void DesignManager::showWidget()
 {
-    _d->widget.show();
+    _d->designerView.show();
 }
 
 void DesignManager::hideWidget()
 {
-    _d->widget.hide();
+    _d->designerView.hide();
 }
