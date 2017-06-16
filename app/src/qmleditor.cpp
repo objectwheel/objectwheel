@@ -149,9 +149,7 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
 
 	QQmlIncubator incubator;
 	component.create(incubator, dashboardRootContext);
-	while (incubator.isLoading()) {
-		QApplication::processEvents(QEventLoop::AllEvents, 50);
-	}
+    Delayer::delay(&incubator, &QQmlIncubator::isLoading);
 	QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
 	if (component.isError() || !qml) {qWarning() << component.errorString(); return;}
@@ -520,9 +518,7 @@ QQuickItem* ComponentManager::build(const QString& url)
 
     QQmlIncubator incubator;
 	component.create(incubator);
-	while (incubator.isLoading()) {
-		QApplication::processEvents(QEventLoop::AllEvents, 50);
-	}
+    Delayer::delay(&incubator, &QQmlIncubator::isLoading);
 	lastItem = qobject_cast<QQuickItem*>(incubator.object());
 
 	if (component.isError() || !lastItem) {

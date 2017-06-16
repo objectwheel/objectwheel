@@ -39,7 +39,7 @@ class BubbleHead : public QPushButton
         static const QPixmap& icon();
 
         template<typename T>
-        void addButton(const QPixmap& icon, void* object, void (T::*method)()) {
+        void addButton(const QPixmap& icon, void* const object, void (T::*method)()) {
             Button<T>* button = new Button<T>;
             button->icon = icon;
             if (icon.devicePixelRatio() != qApp->devicePixelRatio())

@@ -1,5 +1,6 @@
 #include <loginscreen.h>
 #include <fit.h>
+#include <delayer.h>
 #include <projectmanager.h>
 #include <QQmlContext>
 #include <QQmlProperty>
@@ -106,7 +107,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             if (DirLocker::canUnlock(userManager->userDirectory(email), keyHash)) {
                 SplashScreen::show(true);
                 auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
-                while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+                Delayer::delay(&ret, &QFuture<bool>::isRunning);
                 if (ret.result()) {
                     if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                     ProjectsScreen::refreshProjectList();
@@ -137,7 +138,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                 if (jobj["result"].toString() == "OK") {
                     SplashScreen::show(true);
                     auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
-                    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+                    Delayer::delay(&ret, &QFuture<void>::isRunning);
                     if (ret.result()) {
                         if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                         ProjectsScreen::refreshProjectList();
@@ -181,7 +182,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             if (jobj["result"].toString() == "OK") {
                 userManager->buildNewUser(email);
                 auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
-                while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+                Delayer::delay(&ret, &QFuture<void>::isRunning);
                 if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                 ProjectsScreen::refreshProjectList();
                 SplashScreen::hide();

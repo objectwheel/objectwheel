@@ -465,7 +465,7 @@ void MainWindow::SetupManagers()
     connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanupObjectwheel()));
     auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
-    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+    Delayer::delay(&ret, &QFuture<bool>::isRunning);
     if (ret.result()) {
         ProjectsScreen::refreshProjectList();
         SplashScreen::hide();
@@ -569,12 +569,10 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 
 					QQmlIncubator incubator;
 					component.create(incubator, m_d->designWidget->rootContext());
-					while (incubator.isLoading()) {
-						QApplication::processEvents(QEventLoop::AllEvents, 50);
-					}
+                    Delayer::delay(&incubator, &QQmlIncubator::isLoading);
 					QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 
-					if (component.isError() || !qml) {
+                    if (component.isError() || !qml) {
 						QMessageBox msgBox;
 						msgBox.setText("<b>This tool has some errors, please fix these first.</b>");
 						msgBox.setStandardButtons(QMessageBox::Ok);
@@ -831,7 +829,7 @@ void MainWindow::handleEditorOpenButtonClicked()
 
 void MainWindow::cleanupObjectwheel()
 {
-    qApp->processEvents(QEventLoop::AllEvents);
+    qApp->processEvents();
 }
 
 void MainWindow::clearStudio()
@@ -985,7 +983,7 @@ void MainWindow::on_secureExitButton_clicked()
     SplashScreen::show(true);
     UserManager::clearAutoLogin();
     auto ret = QtConcurrent::run(&UserManager::stopUserSession);
-    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+    Delayer::delay(&ret, &QFuture<void>::isRunning);
     SplashScreen::hide();
     SplashScreen::setText("Loading");
     SceneManager::show("loginScene", SceneManager::ToLeft);
@@ -1245,9 +1243,7 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 
 	QQmlIncubator incubator;
 	component.create(incubator, m_d->designWidget->rootContext());
-	while (incubator.isLoading()) {
-		QApplication::processEvents(QEventLoop::AllEvents, 50);
-	}
+    Delayer::delay(&incubator, &QQmlIncubator::isLoading);
 	QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
 	if (component.isError() || !qml) return false;
 
