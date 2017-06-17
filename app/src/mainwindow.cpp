@@ -414,7 +414,7 @@ void MainWindow::SetupGui()
 void MainWindow::SetupManagers()
 {
 	//Let's add some custom controls to that project
-	ToolsManager::setListWidget(m_d->toolboxList);
+    ToolsManager::setListWidget(m_d->toolboxList);
 	auto userManager = new UserManager(this); //create new user manager
     auto* projectManager = new ProjectManager(this); //create new project manager
 	projectManager->setMainWindow(this);

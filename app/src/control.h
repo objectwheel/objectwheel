@@ -13,10 +13,14 @@ class Control : public QGraphicsItem
         explicit Control(Control *parent = Q_NULLPTR);
         virtual ~Control();
         QList<Control*> findChildren(const QString& id = QString(), Qt::FindChildOptions option = Qt::FindChildrenRecursively) const;
+
         QString id() const;
         void setId(const QString& id);
         QUrl url() const;
         void setUrl(const QUrl& url);
+
+        static QWidget* puppetWidget();
+        static void setPuppetWidget(QWidget* puppetWidget);
 
     protected:
         virtual QRectF boundingRect() const override;
@@ -30,6 +34,7 @@ class Control : public QGraphicsItem
         ControlPrivate* _d;
         QString _id;
         QUrl _url;
+        static QPointer<QWidget> _puppetWidget;
 };
 
 class Item : Control { };

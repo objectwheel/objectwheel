@@ -1,6 +1,8 @@
 #include <control.h>
+#include <delayer.h>
 
 #include <QDebug>
+#include <QTimer>
 #include <QPainter>
 #include <QApplication>
 #include <QQuickWidget>
@@ -9,6 +11,7 @@
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QSharedPointer>
+#include <QPointer>
 
 //! ********************** [Control] **********************
 
@@ -18,15 +21,18 @@ class ControlPrivate
         ControlPrivate(Control* parent);
 
     public:
-        Control* _parent;
+        Control* parent;
         QPixmap itemPixmap;
         QRectF itemRect;
 };
 
+
 ControlPrivate::ControlPrivate(Control* parent)
-    : _parent(parent)
+    : parent(parent)
 {
 }
+
+QPointer<QWidget> Control::_puppetWidget = nullptr;
 
 Control::Control(Control* parent)
     : QGraphicsItem(parent)
@@ -63,12 +69,14 @@ QList<Control*> Control::findChildrenRecursively(const QString& id, QList<QGraph
     QList<Control*> foundChilds;
     for (auto c : parent) {
         auto child = dynamic_cast<Control*>(c);
-        if (!child) continue;
-        if (id.isEmpty()) {
+
+        if (!child)
+            continue;
+        else if (id.isEmpty())
             foundChilds << child;
-        } else if (child->id() == id) {
+        else if (child->id() == id)
             foundChilds << child;
-        }
+
         foundChilds << findChildrenRecursively(id, child->childItems());
     }
     return foundChilds;
@@ -93,22 +101,46 @@ void Control::setUrl(const QUrl& url)
 {
     _url = url;
     refresh();
+    QTimer::singleShot(500, [this] { refresh(); }); //TODO: Improve this
 }
-#include <delayer.h>
+
+QWidget* Control::puppetWidget()
+{
+    return _puppetWidget;
+}
+
+void Control::setPuppetWidget(QWidget* puppetWidget)
+{
+    _puppetWidget = puppetWidget;
+}
+
 void Control::refresh()
 {
-    if (!_url.isValid()) return;
-    QSharedPointer<QQuickWidget> quickWidget(new QQuickWidget);
-//    quickWidget->setAttribute(Qt::WA_AlwaysStackOnTop);
-    quickWidget->setAttribute(Qt::WA_TranslucentBackground);
+    if (!_url.isValid() || !_puppetWidget) return;
+
+    QSize grabSize;
+    QQuickItem* item;
+    QSharedPointer<QQuickItemGrabResult> grabResult;
+    QQuickWidget* quickWidget(new QQuickWidget(_puppetWidget));
+
     quickWidget->setSource(_url);
-    auto item = quickWidget->rootObject();
+    quickWidget->show();
+    quickWidget->lower();
+
+    item = quickWidget->rootObject();
     _d->itemRect = QRectF(item->x(), item->y(), item->width(), item->height());
-    auto pixmap = QPixmap(quickWidget->grab());
-    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-    _d->itemPixmap = pixmap;
-    pixmap.save("/users/omergoktas/desktop/anan.png");
-    update();
+    grabSize = (QSizeF(item->width(), item->height()) * qApp->devicePixelRatio()).toSize();
+    grabResult = item->grabToImage(grabSize);
+
+    item->setVisible(false);
+
+    QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
+        QPixmap pixmap = QPixmap::fromImage(grabResult->image());
+        pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
+        _d->itemPixmap = pixmap;
+        quickWidget->deleteLater();
+        update();
+    });
 }
 
 QRectF Control::boundingRect() const
