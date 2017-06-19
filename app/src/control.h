@@ -1,13 +1,13 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <QGraphicsItem>
+#include <QGraphicsWidget>
 #include <QUrl>
 #include <QList>
 
 class ControlPrivate;
 
-class Control : public QGraphicsItem
+class Control : public QGraphicsWidget
 {
     public:
         explicit Control(Control *parent = Q_NULLPTR);
@@ -26,16 +26,8 @@ class Control : public QGraphicsItem
         static QWidget* puppetWidget();
         static void setPuppetWidget(QWidget* puppetWidget);
 
-        QSizeF size() const;
-        void resize(const QSizeF& size);
-
-        QRectF geometry() const;
-        void setGeometry(const QRectF& geometry);
-
     protected:
-        virtual QRectF boundingRect() const override;
         virtual void refresh();
-
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -43,8 +35,9 @@ class Control : public QGraphicsItem
         virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+        virtual void resizeEvent(QGraphicsSceneResizeEvent *event) override;
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+        virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
     private:
         QList<Control*> findChildrenRecursively(const QString& id, QList<QGraphicsItem*> parent) const;
@@ -53,7 +46,6 @@ class Control : public QGraphicsItem
         ControlPrivate* _d;
         QString _id;
         QUrl _url;
-        QSizeF _size;
         bool _showOutline;
         static QPointer<QWidget> _puppetWidget;
 };

@@ -23,6 +23,11 @@
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 #define RESIZER_SIZE (fit(6.0))
+#define HIGHLIGHT_COLOR ("#20404447")
+#define SELECTION_COLOR ("#444444")
+#define OUTLINE_COLOR (Qt::gray)
+#define RESIZER_COLOR (Qt::white)
+#define RESIZER_OUTLINE_COLOR ("#252525")
 
 using namespace Fit;
 
@@ -78,8 +83,8 @@ QRectF Resizer::boundingRect() const
 void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QColor("#252525"));
-    painter->setBrush(Qt::white);
+    painter->setPen(RESIZER_OUTLINE_COLOR);
+    painter->setBrush(RESIZER_COLOR);
     painter->drawRoundedRect(boundingRect().adjusted(0.5, 0.5, -0.5, -0.5), RESIZER_SIZE / 4.0, RESIZER_SIZE / 4.0);
 }
 
@@ -206,7 +211,6 @@ class ControlPrivate
     public:
         ControlPrivate(Control* parent);
         void scratchPixmapIfEmpty(QPixmap& pixmap);
-        QPixmap highlightPixmap(const QPixmap& pixmap);
         void fixResizerCoordinates();
         void hideResizers();
         void showResizers();
@@ -214,7 +218,6 @@ class ControlPrivate
     public:
         Control* parent;
         QPixmap itemPixmap;
-        QRectF itemRect;
         Resizer resizers[8];
         bool dragIn = false;
 };
@@ -253,58 +256,50 @@ void ControlPrivate::scratchPixmapIfEmpty(QPixmap& pixmap)
     painter.drawRect(pixmap.rect());
 }
 
-QPixmap ControlPrivate::highlightPixmap(const QPixmap& pixmap)
-{
-    auto buff = QPixmap(pixmap.size()).toImage();
-    auto mask = pixmap.mask().toImage();
-    for (int i = 0; i < mask.width(); i++) {
-        for (int j = 0; j < mask.height(); j++) {
-            buff.setPixel(i, j, !mask.pixelColor(i, j).red() ?
-                              QColor("#70ffffff").rgba() : QColor("#00000000").rgba());
-        }
-    }
-    return QPixmap::fromImage(buff);
-}
-
 void ControlPrivate::fixResizerCoordinates()
 {
     for (auto& resizer : resizers) {
         switch (resizer.placement()) {
             case Resizer::Top:
-                resizer.setPos(parent->size().width() / 2.0 - RESIZER_SIZE / 2.0, 0);
+                resizer.setPos(parent->size().width() / 2.0 - RESIZER_SIZE / 2.0,
+                               - RESIZER_SIZE / 2.0 + 0.5);
                 break;
 
             case Resizer::Right:
-                resizer.setPos(parent->size().width() - RESIZER_SIZE,
+                resizer.setPos(parent->size().width() - RESIZER_SIZE / 2.0 - 0.5,
                                parent->size().height() / 2.0 - RESIZER_SIZE / 2.0);
                 break;
 
             case Resizer::Bottom:
                 resizer.setPos(parent->size().width() / 2.0 - RESIZER_SIZE / 2.0,
-                               parent->size().height() - RESIZER_SIZE);
+                               parent->size().height() - RESIZER_SIZE / 2.0 - 0.5);
                 break;
 
             case Resizer::Left:
-                resizer.setPos(0, parent->size().height() / 2.0 - RESIZER_SIZE / 2.0);
+                resizer.setPos(- RESIZER_SIZE / 2.0 + 0.5,
+                               parent->size().height() / 2.0 - RESIZER_SIZE / 2.0);
                 break;
 
             case Resizer::TopLeft:
-                resizer.setPos(0, 0);
+                resizer.setPos(- RESIZER_SIZE / 2.0 + 0.5, - RESIZER_SIZE / 2.0 + 0.5);
                 break;
 
             case Resizer::TopRight:
-                resizer.setPos(parent->size().width() - RESIZER_SIZE, 0);
+                resizer.setPos(parent->size().width() - RESIZER_SIZE / 2.0 - 0.5,
+                               - RESIZER_SIZE / 2.0 + 0.5);
                 break;
 
             case Resizer::BottomRight:
-                resizer.setPos(parent->size().width() - RESIZER_SIZE,
-                               parent->size().height() - RESIZER_SIZE);
+                resizer.setPos(parent->size().width() - RESIZER_SIZE / 2.0 - 0.5,
+                               parent->size().height() - RESIZER_SIZE / 2.0 - 0.5);
                 break;
 
             case Resizer::BottomLeft:
-                resizer.setPos(0, parent->size().height() - RESIZER_SIZE);
+                resizer.setPos( - RESIZER_SIZE / 2.0 + 0.5,
+                                parent->size().height() - RESIZER_SIZE / 2.0 - 0.5);
                 break;
         }
+        resizer.setZValue(1);
     }
 }
 
@@ -329,16 +324,13 @@ void ControlPrivate::showResizers()
 QPointer<QWidget> Control::_puppetWidget = nullptr;
 
 Control::Control(Control* parent)
-    : QGraphicsItem(parent)
+    : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
     , _showOutline(true)
 {
     setFlag(ItemIsFocusable);
     setFlag(ItemIsSelectable);
     setFlag(ItemIsMovable);
-    setFlag(ItemSendsGeometryChanges);
-    setFlag(ItemClipsToShape);
-    setFlag(ItemClipsChildrenToShape);
     setFlag(ItemSendsGeometryChanges);
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
@@ -385,34 +377,6 @@ QList<Control*> Control::findChildrenRecursively(const QString& id, QList<QGraph
         foundChilds << findChildrenRecursively(id, child->childItems());
     }
     return foundChilds;
-}
-
-QRectF Control::geometry() const
-{
-    return QRectF(pos(), _size);
-}
-
-void Control::setGeometry(const QRectF& geometry)
-{
-    setPos(geometry.topLeft());
-    resize(geometry.size());
-}
-
-QSizeF Control::size() const
-{
-    return _size;
-}
-
-void Control::resize(const QSizeF& size)
-{
-    prepareGeometryChange();
-    _size = size;
-    _d->fixResizerCoordinates();
-}
-
-QRectF Control::boundingRect() const
-{
-    return QRectF(QPointF(0, 0), _size);
 }
 
 bool Control::showOutline() const
@@ -476,13 +440,12 @@ void Control::refresh()
     }
 
     item = quickWidget->rootObject();
-    _d->itemRect = QRectF(RESIZER_SIZE, RESIZER_SIZE, item->width(), item->height());
-    grabSize = _d->itemRect.size() * qApp->devicePixelRatio();
+    item->setVisible(false);
+    resize(item->width(), item->height());
+
+    grabSize = size() * qApp->devicePixelRatio();
     grabSize = QSize(qCeil(grabSize.width()), qCeil(grabSize.height()));
     grabResult = item->grabToImage(grabSize.toSize());
-
-    item->setVisible(false);
-    resize(_d->itemRect.adjusted(-RESIZER_SIZE, -RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE).size());
 
     QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
         QPixmap pixmap = QPixmap::fromImage(grabResult->image());
@@ -532,22 +495,28 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mousePressEvent(event);
+    QGraphicsWidget::mousePressEvent(event);
     event->accept();
 }
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mouseMoveEvent(event);
+    QGraphicsWidget::mouseMoveEvent(event);
     event->accept();
     setCursor(Qt::SizeAllCursor);
 }
 
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mouseReleaseEvent(event);
+    QGraphicsWidget::mouseReleaseEvent(event);
     event->accept();
     setCursor(Qt::ArrowCursor);
+}
+
+void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
+{
+    QGraphicsWidget::resizeEvent(event);
+    _d->fixResizerCoordinates();
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -563,38 +532,33 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
         default:
             break;
     }
-    return QGraphicsItem::itemChange(change, value);
+    return QGraphicsWidget::itemChange(change, value);
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     if (_d->itemPixmap.isNull()) return;
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(_d->itemRect, _d->itemPixmap, _d->itemPixmap.rect());
+    painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5), _d->itemPixmap, _d->itemPixmap.rect());
+
     if (_d->dragIn) {
-        painter->fillRect(boundingRect().adjusted(RESIZER_SIZE / 2.0 + 0.5, RESIZER_SIZE / 2.0 + 0.5,
-                                                  -RESIZER_SIZE / 2.0 - 0.5, -RESIZER_SIZE / 2.0 - 0.5),
-                          QColor("#100088ff"));
+        painter->fillRect(rect().adjusted(0.5, 0.5, -0.5, -0.5), HIGHLIGHT_COLOR);
     }
 
-    { // Draw selection and outline
+    if (isSelected() || _showOutline) {
         QPen pen;
-        QRectF selectionRect;
         pen.setStyle(Qt::DotLine);
         pen.setJoinStyle(Qt::MiterJoin);
         painter->setBrush(Qt::transparent);
 
         if (isSelected()) {
-            pen.setColor("#444444");
+            pen.setColor(SELECTION_COLOR);
         } else if (_showOutline) {
-            pen.setColor(Qt::darkGray);
+            pen.setColor(OUTLINE_COLOR);
         }
 
-        selectionRect = QRectF(RESIZER_SIZE / 2.0, RESIZER_SIZE / 2.0,
-                               _size.width() - RESIZER_SIZE,
-                               _size.height() - RESIZER_SIZE);
         painter->setPen(pen);
-        painter->drawRect(selectionRect);
+        painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
     }
 }
 
