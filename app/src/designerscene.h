@@ -6,14 +6,9 @@
 class DesignerScene : public QGraphicsScene
 {
         Q_OBJECT
-    public:
-        explicit DesignerScene(QObject *parent = 0);
 
-    protected:
-        virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
-        virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
-        virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
-        virtual void dropEvent(QGraphicsSceneDragDropEvent *event) override;
+    public:
+        explicit DesignerScene(qreal x, qreal y, qreal width, qreal height, QObject *parent = Q_NULLPTR);
 };
 
 #endif // DESIGNERSCENE_H

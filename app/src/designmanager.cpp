@@ -24,12 +24,21 @@ class DesignManagerPrivate
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     : parent(parent)
     , puppetWidget(settleWidget)
+    , designerScene(-300, -300, 600, 600)
     , designerView(&designerScene, &puppetWidget)
 {
     auto layout = new QVBoxLayout(&puppetWidget);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(&designerView);
+
+    designerView.setRenderHint(QPainter::Antialiasing);
+    designerView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
+    designerView.setDragMode(QGraphicsView::RubberBandDrag);
+    designerView.setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    designerView.setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    designerView.setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    designerView.setBackgroundBrush(QColor("#e0e4e7"));
 
     // TODO: Find out a better solution to catch control previews
     Control::setPuppetWidget(&puppetWidget);

@@ -9,6 +9,8 @@ class DesignerView : public QGraphicsView
     public:
         explicit DesignerView(QGraphicsScene* scene, QWidget* parent = 0);
 
+    protected:
+        virtual void resizeEvent(QResizeEvent*) override {}
 };
 
 #endif // DESIGNERVIEW_H

@@ -11,6 +11,8 @@
 #include <QScroller>
 #include <QWheelEvent>
 
+#define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
+
 #define STYLE_SHEET "\
 QScrollBar:vertical { \
 	background: transparent; \
@@ -50,6 +52,7 @@ QMimeData* ListWidget::mimeData(const QList<QListWidgetItem*> items) const
 {
 	QMimeData *data = QListWidget::mimeData(items);
 	data->setUrls(m_Urls[items[0]]);
+    data->setText(TOOLBOX_ITEM_KEY);
 	return data;
 }
 
