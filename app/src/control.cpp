@@ -28,6 +28,7 @@
 #define OUTLINE_COLOR (Qt::gray)
 #define RESIZER_COLOR (Qt::white)
 #define RESIZER_OUTLINE_COLOR ("#252525")
+#define PREVIEW_REFRESH_INTERVAL 10
 
 using namespace Fit;
 
@@ -206,8 +207,10 @@ void Resizer::setPlacement(const Resizer::Placement& placement)
 //! ****************** [Control Private] ******************
 //!
 
-class ControlPrivate
+class ControlPrivate : public QObject
 {
+        Q_OBJECT
+
     public:
         ControlPrivate(Control* parent);
         void scratchPixmapIfEmpty(QPixmap& pixmap);
@@ -215,10 +218,14 @@ class ControlPrivate
         void hideResizers();
         void showResizers();
 
+    public slots:
+        void refreshPreview();
+
     public:
         Control* parent;
         QPixmap itemPixmap;
         Resizer resizers[8];
+        QTimer refreshTimer;
         bool dragIn = false;
 };
 
@@ -231,6 +238,9 @@ ControlPrivate::ControlPrivate(Control* parent)
         resizer.setParentItem(parent);
         resizer.setPlacement(Resizer::Placement(i++));
     }
+
+    refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
+    QObject::connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
 }
 
 void ControlPrivate::scratchPixmapIfEmpty(QPixmap& pixmap)
@@ -317,6 +327,48 @@ void ControlPrivate::showResizers()
     }
 }
 
+void ControlPrivate::refreshPreview()
+{
+    refreshTimer.stop();
+
+    if (!parent->url().isValid() || !parent->puppetWidget()) return;
+
+    QSizeF grabSize;
+    QQuickItem* item;
+    QSharedPointer<QQuickItemGrabResult> grabResult;
+    QQuickWidget* quickWidget(new QQuickWidget(parent->puppetWidget()));
+
+    quickWidget->setSource(parent->url());
+    quickWidget->show();
+    quickWidget->lower();
+
+    if (!quickWidget->errors().isEmpty()) {
+        quickWidget->deleteLater();
+        return;
+    }
+
+    item = quickWidget->rootObject();
+    item->setVisible(false);
+
+    if (parent->size().width() == 0 && parent->size().height() == 0)
+        parent->resize(item->width(), item->height());
+    else
+        item->setSize(parent->size());
+
+    grabSize = parent->size() * qApp->devicePixelRatio();
+    grabSize = QSize(qCeil(grabSize.width()), qCeil(grabSize.height()));
+    grabResult = item->grabToImage(grabSize.toSize());
+
+    QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
+        QPixmap pixmap = QPixmap::fromImage(grabResult->image());
+        pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
+        itemPixmap = pixmap;
+        scratchPixmapIfEmpty(itemPixmap);
+        quickWidget->deleteLater();
+        parent->update();
+    });
+}
+
 //!
 //! ********************** [Control] **********************
 //!
@@ -334,6 +386,7 @@ Control::Control(Control* parent)
     setFlag(ItemSendsGeometryChanges);
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
+    setGeometry(0, 0, 0, 0);
 }
 
 Control::~Control()
@@ -423,38 +476,7 @@ void Control::setPuppetWidget(QWidget* puppetWidget)
 
 void Control::refresh()
 {
-    if (!_url.isValid() || !_puppetWidget) return;
-
-    QSizeF grabSize;
-    QQuickItem* item;
-    QSharedPointer<QQuickItemGrabResult> grabResult;
-    QQuickWidget* quickWidget(new QQuickWidget(_puppetWidget));
-
-    quickWidget->setSource(_url);
-    quickWidget->show();
-    quickWidget->lower();
-
-    if (!quickWidget->errors().isEmpty()) {
-        quickWidget->deleteLater();
-        return;
-    }
-
-    item = quickWidget->rootObject();
-    item->setVisible(false);
-    resize(item->width(), item->height());
-
-    grabSize = size() * qApp->devicePixelRatio();
-    grabSize = QSize(qCeil(grabSize.width()), qCeil(grabSize.height()));
-    grabResult = item->grabToImage(grabSize.toSize());
-
-    QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
-        QPixmap pixmap = QPixmap::fromImage(grabResult->image());
-        pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-        _d->itemPixmap = pixmap;
-        _d->scratchPixmapIfEmpty(_d->itemPixmap);
-        quickWidget->deleteLater();
-        update();
-    });
+    _d->refreshTimer.start();
 }
 
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
@@ -490,7 +512,9 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     item->setParentItem(this);
     item->setPos(event->pos());
     scene()->addItem(item);
+    _d->dragIn = false;
     event->accept();
+    update();
 }
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
@@ -517,6 +541,7 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
     _d->fixResizerCoordinates();
+    refresh();
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -542,7 +567,16 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5), _d->itemPixmap, _d->itemPixmap.rect());
 
     if (_d->dragIn) {
-        painter->fillRect(rect().adjusted(0.5, 0.5, -0.5, -0.5), HIGHLIGHT_COLOR);
+        if (_showOutline) {
+            painter->fillRect(rect().adjusted(0.5, 0.5, -0.5, -0.5), HIGHLIGHT_COLOR);
+        } else {
+            QPixmap highlight(_d->itemPixmap);
+            QPainter p(&highlight);
+            p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
+            p.fillRect(_d->itemPixmap.rect(), HIGHLIGHT_COLOR);
+            p.end();
+            painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5), highlight, _d->itemPixmap.rect());
+        }
     }
 
     if (isSelected() || _showOutline) {
@@ -574,3 +608,4 @@ void Page::setMain(const bool main)
     _main = main;
 }
 
+#include "control.moc"
