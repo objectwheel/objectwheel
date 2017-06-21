@@ -40,7 +40,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/designmanager.h \
                              $$PWD/control.h \
                              $$PWD/designerscene.h \
-                             $$PWD/designerview.h
+                             $$PWD/designerview.h \
+    $$PWD/qmlpreviewer.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -82,7 +83,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/designmanager.cpp \
                              $$PWD/control.cpp \
                              $$PWD/designerscene.cpp \
-                             $$PWD/designerview.cpp
+                             $$PWD/designerview.cpp \
+    $$PWD/qmlpreviewer.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

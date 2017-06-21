@@ -2,9 +2,12 @@
 #include <designerscene.h>
 #include <designerview.h>
 #include <control.h>
+#include <qmlpreviewer.h>
+
 #include <QWidget>
 #include <QList>
 #include <QVBoxLayout>
+#include <QTimer>
 
 class DesignManagerPrivate
 {
@@ -18,7 +21,7 @@ class DesignManagerPrivate
         QWidget puppetWidget;
         DesignerScene designerScene;
         DesignerView designerView;
-        QList<Page*> pages;
+        QmlPreviewer qmlPreviewer;
 };
 
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
@@ -32,16 +35,25 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     layout->setSpacing(0);
     layout->addWidget(&designerView);
 
+    // TODO: Find out a better solution to catch control previews
+    QmlPreviewer::setPuppetWidget(&puppetWidget);
+
     designerView.setRenderHint(QPainter::Antialiasing);
     designerView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
     designerView.setDragMode(QGraphicsView::RubberBandDrag);
-    designerView.setOptimizationFlags(QGraphicsView::DontSavePainterState);
-    designerView.setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    designerView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     designerView.setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     designerView.setBackgroundBrush(QColor("#e0e4e7"));
 
-    // TODO: Find out a better solution to catch control previews
-    Control::setPuppetWidget(&puppetWidget);
+    QTimer::singleShot(3000, [this] {
+        auto item = new Item;
+        item->setId("eben");
+        item->setUrl(QUrl("file:///Users/omergoktas/Projeler/Git/objectwheel/build/macos-x86_64-debug/Objectwheel.app/Contents/MacOS/data/4168122e4024a427b612af60ad3620c1/4e65772050726f6a6563742d31/tools/DragonFire/main.qml"));
+        item->setPos(0, 0);
+        designerScene.addItem(item);
+    });
+
+
 }
 
 DesignManagerPrivate::~DesignManagerPrivate()

@@ -214,5 +214,6 @@
         <file>resources/images/script.png</file>
         <file>resources/images/owicon.png</file>
         <file>resources/images/owicon@2x.png</file>
+        <file>resources/qmls/mainPage.qml</file>
     </qresource>
 </RCC>

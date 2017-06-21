@@ -1,23 +1,27 @@
 #include <control.h>
 #include <delayer.h>
 #include <fit.h>
+#include <qmlpreviewer.h>
 
 #include <QDebug>
 #include <QTimer>
 #include <QtMath>
 #include <QPen>
+#include <QQuickWindow>
+#include <QWidget>
 #include <QPainter>
 #include <QBitmap>
+#include <QVector>
 #include <QMimeData>
 #include <QGraphicsScene>
 #include <QApplication>
+#include <QQmlEngine>
 #include <QQuickWidget>
 #include <QQmlComponent>
 #include <QQmlIncubator>
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QSharedPointer>
-#include <QPointer>
 #include <QGraphicsSceneDragDropEvent>
 #include <QGraphicsSceneMouseEvent>
 
@@ -28,7 +32,7 @@
 #define OUTLINE_COLOR (Qt::gray)
 #define RESIZER_COLOR (Qt::white)
 #define RESIZER_OUTLINE_COLOR ("#252525")
-#define PREVIEW_REFRESH_INTERVAL 10
+#define PREVIEW_REFRESH_INTERVAL 100
 
 using namespace Fit;
 
@@ -213,25 +217,27 @@ class ControlPrivate : public QObject
 
     public:
         ControlPrivate(Control* parent);
-        void scratchPixmapIfEmpty(QPixmap& pixmap);
         void fixResizerCoordinates();
         void hideResizers();
         void showResizers();
 
     public slots:
         void refreshPreview();
+        void updatePreview(const QPixmap& preview);
 
     public:
         Control* parent;
         QPixmap itemPixmap;
         Resizer resizers[8];
         QTimer refreshTimer;
+        QmlPreviewer qmlPreviewer;
         bool dragIn = false;
 };
 
 
 ControlPrivate::ControlPrivate(Control* parent)
-    : parent(parent)
+    : QObject(parent)
+    , parent(parent)
 {
     int i = 0;
     for (auto& resizer : resizers) {
@@ -241,29 +247,7 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
     QObject::connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-}
-
-void ControlPrivate::scratchPixmapIfEmpty(QPixmap& pixmap)
-{
-    // Check 10 pixels atleast that has alpha > 250
-    int totalAlpha = 0;
-    QImage img = pixmap.toImage();
-    for (int i = 0; i < img.width(); i++) {
-        for (int j = 0; j < img.height(); j++) {
-            totalAlpha += qAlpha(img.pixel(i, j));
-            if (totalAlpha > (250 * 10)) {
-                return;
-            }
-        }
-    }
-
-    QBrush brush;
-    QPainter painter(&pixmap);
-    brush.setColor(Qt::lightGray);
-    brush.setStyle(Qt::DiagCrossPattern);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(brush);
-    painter.drawRect(pixmap.rect());
+    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap)), SLOT(updatePreview(QPixmap)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -330,50 +314,25 @@ void ControlPrivate::showResizers()
 void ControlPrivate::refreshPreview()
 {
     refreshTimer.stop();
+    if (!parent->url().isValid()) return;
 
-    if (!parent->url().isValid() || !parent->puppetWidget()) return;
+    QSizeF size;
+    if (!parent->size().isNull())
+        size = parent->size();
 
-    QSizeF grabSize;
-    QQuickItem* item;
-    QSharedPointer<QQuickItemGrabResult> grabResult;
-    QQuickWidget* quickWidget(new QQuickWidget(parent->puppetWidget()));
+    qmlPreviewer.requestReview(parent->url(), size);
+}
 
-    quickWidget->setSource(parent->url());
-    quickWidget->show();
-    quickWidget->lower();
-
-    if (!quickWidget->errors().isEmpty()) {
-        quickWidget->deleteLater();
-        return;
-    }
-
-    item = quickWidget->rootObject();
-    item->setVisible(false);
-
-    if (parent->size().width() == 0 && parent->size().height() == 0)
-        parent->resize(item->width(), item->height());
-    else
-        item->setSize(parent->size());
-
-    grabSize = parent->size() * qApp->devicePixelRatio();
-    grabSize = QSize(qCeil(grabSize.width()), qCeil(grabSize.height()));
-    grabResult = item->grabToImage(grabSize.toSize());
-
-    QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
-        QPixmap pixmap = QPixmap::fromImage(grabResult->image());
-        pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-        itemPixmap = pixmap;
-        scratchPixmapIfEmpty(itemPixmap);
-        quickWidget->deleteLater();
-        parent->update();
-    });
+void ControlPrivate::updatePreview(const QPixmap& preview)
+{
+    itemPixmap = preview;
+    parent->resize(preview.size() / qApp->devicePixelRatio());
+    parent->update();
 }
 
 //!
 //! ********************** [Control] **********************
 //!
-
-QPointer<QWidget> Control::_puppetWidget = nullptr;
 
 Control::Control(Control* parent)
     : QGraphicsWidget(parent)
@@ -461,17 +420,6 @@ void Control::setUrl(const QUrl& url)
 {
     _url = url;
     refresh();
-    QTimer::singleShot(1000, [this] { refresh(); }); //TODO: Improve this
-}
-
-QWidget* Control::puppetWidget()
-{
-    return _puppetWidget;
-}
-
-void Control::setPuppetWidget(QWidget* puppetWidget)
-{
-    _puppetWidget = puppetWidget;
 }
 
 void Control::refresh()
@@ -598,14 +546,49 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
 //! ********************** [Page] **********************
 
-bool Page::isMain() const
+
+class PagePrivate : public QObject
 {
-    return _main;
+        Q_OBJECT
+    public:
+        explicit PagePrivate(Page* parent);
+        QVector<QLineF> centerGuidelines(const QPointF& center) const;
+
+    public:
+        Page* parent;
+
+};
+
+PagePrivate::PagePrivate(Page* parent)
+    : QObject(parent)
+    , parent(parent)
+{
 }
 
-void Page::setMain(const bool main)
+QVector<QLineF> PagePrivate::centerGuidelines(const QPointF& center) const
 {
-    _main = main;
+//    parent->items();
+
 }
 
+bool Page::mainPage() const
+{
+    return _mainPage;
+}
+
+void Page::setMainPage(bool mainPage)
+{
+    _mainPage = mainPage;
+}
+
+void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+    //    if (selectedItems().size() > 0) {
+    //        painter->setRenderHint(QPainter::Antialiasing);
+    //        painter->drawLines(_d->centerGuidelines(selectedItems().at(0)->pos()
+    //                          + selectedItems().at(0)->boundingRect().center()));
+    //    } else {
+    //        DesignerScene::drawForeground(painter, rect);
+    //    }
+}
 #include "control.moc"

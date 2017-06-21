@@ -23,9 +23,6 @@ class Control : public QGraphicsWidget
         bool showOutline() const;
         void setShowOutline(const bool value);
 
-        static QWidget* puppetWidget();
-        static void setPuppetWidget(QWidget* puppetWidget);
-
     protected:
         virtual void refresh();
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -47,7 +44,6 @@ class Control : public QGraphicsWidget
         QString _id;
         QUrl _url;
         bool _showOutline;
-        static QPointer<QWidget> _puppetWidget;
 };
 
 class Item : public Control { };
@@ -55,11 +51,14 @@ class Item : public Control { };
 class Page : public Control
 {
     private:
-        bool _main = false;
+        bool _mainPage = false;
+
+    private:
+        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
 
     public:
-        bool isMain() const;
-        void setMain(const bool main);
+        bool mainPage() const;
+        void setMainPage(bool mainPage);
 };
 
 #endif // CONTROL_H
