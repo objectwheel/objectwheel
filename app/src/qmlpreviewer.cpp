@@ -6,11 +6,14 @@
 #include <QSharedPointer>
 #include <QQuickItemGrabResult>
 #include <QQuickItem>
+#include <QQmlEngine>
+#include <QQmlComponent>
 #include <QPixmap>
 #include <QPainter>
 #include <QBrush>
 #include <QImage>
 #include <QtMath>
+#include <QTimer>
 
 class QmlPreviewerPrivate
 {
@@ -85,109 +88,78 @@ void QmlPreviewer::setPuppetWidget(QWidget* puppetWidget)
 
 void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
 {
-    if (!_puppetWidget) return;
-
-    QQuickItem* item;
-    QSharedPointer<QQuickItemGrabResult> grabResult;
-    QQuickWidget* quickWidget(new QQuickWidget(_puppetWidget));
-
-    quickWidget->setSource(url);
-    quickWidget->show();
-    quickWidget->lower();
-
-    if (!quickWidget->errors().isEmpty()) {
-        quickWidget->deleteLater();
+    if (!_puppetWidget || !url.isValid())
         return;
-    }
 
-    item = quickWidget->rootObject();
-    item->setVisible(false);
+    QObject* qmlObject;
+    QSharedPointer<QQmlEngine> qmlEngine(new QQmlEngine);
+    QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
+    QQuickWidget* quickWidget(new QQuickWidget(qmlEngine.data(), _puppetWidget));
+    QSharedPointer<QQuickWindow> window;
 
-    QSizeF gs;
-    if (size.isValid()) {
-        item->setSize(size);
-        gs = size * qApp->devicePixelRatio();
+    quickWidget->hide();
+    qmlComponent->loadUrl(url);
+    qmlObject = qmlComponent->create();
+
+    if (!qmlComponent->errors().isEmpty())
+        return;
+
+    window = QSharedPointer<QQuickWindow>(_d->processWindows(qmlObject));
+
+    if (window) {
+        window->setFlags(Qt::FramelessWindowHint);
+        window->setOpacity(0);
+        window->hide();
+
+        QSizeF gs;
+        if (size.isValid()) {
+            window->show();
+            window->resize(size.toSize());
+            window->hide();
+            gs = size * qApp->devicePixelRatio();
+        } else {
+            gs = QSizeF(window->width(), window->height()) * qApp->devicePixelRatio();
+        }
+        gs = QSize(qCeil(gs.width()), qCeil(gs.height()));
+
+        QTimer::singleShot(100, [=] {
+            QPixmap preview = QPixmap::fromImage(window->grabWindow());
+            preview.setDevicePixelRatio(qApp->devicePixelRatio());
+            _d->scratchPixmapIfEmpty(preview);
+            emit previewReady(preview, size);
+        });
     } else {
-        gs = QSizeF(item->width(), item->height()) * qApp->devicePixelRatio();
+        QQuickItem* item;
+        QSharedPointer<QQuickItemGrabResult> grabResult;
+
+        quickWidget->setSource(url);
+        quickWidget->show();
+        quickWidget->lower();
+
+        if (!quickWidget->errors().isEmpty()) {
+            quickWidget->deleteLater();
+            return;
+        }
+
+        item = quickWidget->rootObject();
+        item->setVisible(false);
+
+        QSizeF gs;
+        if (size.isValid()) {
+            item->setSize(size);
+            gs = size * qApp->devicePixelRatio();
+        } else {
+            gs = QSizeF(item->width(), item->height()) * qApp->devicePixelRatio();
+        }
+        gs = QSize(qCeil(gs.width()), qCeil(gs.height()));
+        grabResult = item->grabToImage(gs.toSize());
+
+        QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
+            QPixmap preview = QPixmap::fromImage(grabResult->image());
+            preview.setDevicePixelRatio(qApp->devicePixelRatio());
+            _d->scratchPixmapIfEmpty(preview);
+            emit previewReady(preview, size);
+        });
     }
-    gs = QSize(qCeil(gs.width()), qCeil(gs.height()));
-    grabResult = item->grabToImage(gs.toSize());
-
-    QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
-        QPixmap preview = QPixmap::fromImage(grabResult->image());
-        preview.setDevicePixelRatio(qApp->devicePixelRatio());
-        _d->scratchPixmapIfEmpty(preview);
-        quickWidget->deleteLater();
-        emit previewReady(preview);
-    });
-
-
-//    QSizeF grabSize;
-//    QObject* qmlObject;
-//    QQuickItem* quickItem;
-//    QQuickWindow* rootWindow;
-//    QSharedPointer<QQuickItemGrabResult> grabResult;
-//    QQuickWidget* quickWidget = new QQuickWidget(parent->puppetWidget());
-//    QQmlComponent qmlComponent(quickWidget->engine());
-
-//    quickWidget->show();
-//    quickWidget->lower();
-//    qmlComponent.loadUrl(parent->url());
-
-//    if (!qmlComponent.errors().isEmpty()) {
-//        quickWidget->deleteLater();
-//        return;
-//    }
-
-//    qmlObject = qmlComponent.create();
-//    rootWindow = processWindows(qmlObject);
-
-//    if (rootWindow) {
-//        //        QWidget* container = QWidget::createWindowContainer(rootWindow, quickWidget);
-
-//        //        if (parent->size().width() == 0 && parent->size().height() == 0)
-//        parent->resize(rootWindow->size());
-//        //        else
-//        //            rootWindow->resize(parent->size().toSize());
-
-//        QPixmap pixmap = QPixmap::fromImage(rootWindow->grabWindow());
-//        pixmap.save("/users/omergoktas/desktop/ee.png");
-//        qDebug() << pixmap;
-//        pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-//        itemPixmap = pixmap;
-//        //        scratchPixmapIfEmpty(itemPixmap);
-//        //        quickWidget->deleteLater();
-//        //        rootWindow->deleteLater();
-//        //        container->deleteLater();
-//        parent->update();
-
-//    } else {
-//        quickItem = qobject_cast<QQuickItem*>(qmlObject);
-
-//        if (!quickItem)
-//            return;
-
-//        quickItem->setParentItem(quickWidget->quickWindow()->contentItem());
-//        quickItem->setVisible(false);
-
-//        if (parent->size().width() == 0 && parent->size().height() == 0)
-//            parent->resize(quickItem->width(), quickItem->height());
-//        else
-//            quickItem->setSize(parent->size());
-
-//        grabSize = parent->size() * qApp->devicePixelRatio();
-//        grabSize = QSize(qCeil(grabSize.width()), qCeil(grabSize.height()));
-//        grabResult = quickItem->grabToImage(grabSize.toSize());
-
-//        QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, [=] {
-//            QPixmap pixmap = QPixmap::fromImage(grabResult->image());
-//            pixmap.save("/users/omergoktas/desktop/ee.png");
-//            pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-//            itemPixmap = pixmap;
-//            scratchPixmapIfEmpty(itemPixmap);
-//            quickItem->deleteLater();
-//            parent->update();
-//        });
-//    }
 }
 

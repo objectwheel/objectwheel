@@ -18,7 +18,7 @@ class QmlPreviewer : public QObject
         static void setPuppetWidget(QWidget* puppetWidget);
 
     signals:
-        void previewReady(const QPixmap& preview) const;
+        void previewReady(const QPixmap& preview, const QSizeF& size) const;
 
     public slots:
         void requestReview(const QUrl& url, const QSizeF& size = QSizeF());

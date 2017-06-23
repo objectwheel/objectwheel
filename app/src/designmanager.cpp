@@ -46,11 +46,16 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     designerView.setBackgroundBrush(QColor("#e0e4e7"));
 
     QTimer::singleShot(3000, [this] {
-        auto item = new Item;
-        item->setId("eben");
-        item->setUrl(QUrl("file:///Users/omergoktas/Projeler/Git/objectwheel/build/macos-x86_64-debug/Objectwheel.app/Contents/MacOS/data/4168122e4024a427b612af60ad3620c1/4e65772050726f6a6563742d31/tools/DragonFire/main.qml"));
-        item->setPos(0, 0);
-        designerScene.addItem(item);
+//        auto item = new Item;
+//        item->setId("eben");
+//        item->setUrl(QUrl("file:///Users/omergoktas/Projeler/Git/objectwheel/build/macos-x86_64-debug/Objectwheel.app/Contents/MacOS/data/4168122e4024a427b612af60ad3620c1/4e65772050726f6a6563742d31/tools/DragonFire/main.qml"));
+//        item->setPos(0, 0);
+//        designerScene.addItem(item);
+
+        auto page = new Page;
+        page->setId("applicationWindow");
+        page->setUrl(QUrl("qrc:/resources/qmls/mainPage.qml"));
+        designerScene.addPage(page);
     });
 
 

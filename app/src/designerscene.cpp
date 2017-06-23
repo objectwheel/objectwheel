@@ -1,10 +1,26 @@
 #include <designerscene.h>
+#include <QGraphicsSceneMouseEvent>
+
+#define NO_SKIN_SIZE (QSize(400, 400))
+#define PHONE_PORTRAIT_SIZE (QSize(256, 455))
+#define PHONE_LANDSCAPE_SIZE (QSize(455, 256))
+#define DESKTOP_SIZE (QSize(500, 350))
+
+#define PHONE_PORTRAIT_FRAME_RECT (QRectF(-((293 - PHONE_PORTRAIT_SIZE.width())/2.0), -((600 - PHONE_PORTRAIT_SIZE.height())/2.0), 294, 600))
+#define PHONE_LANDSCAPE_FRAME_RECT (QRectF(-((293 - PHONE_PORTRAIT_SIZE.width())/2.0), -((600 - PHONE_PORTRAIT_SIZE.height())/2.0), 294, 600))
+#define DESKTOP_FRAME_RECT (QRectF(-((293 - PHONE_PORTRAIT_SIZE.width())/2.0), -((600 - PHONE_PORTRAIT_SIZE.height())/2.0), 294, 600))
+
+#define PHONE_PORTRAIT_SKIN_PATH (":/resources/images/phone.png")
+#define PHONE_LANDSCAPE_SKIN_PATH (":/resources/images/phone.png")
+#define DESKTOP_SKIN_PATH (":/resources/images/phone.png")
 
 class DesignerScenePrivate : public QObject
 {
         Q_OBJECT
     public:
         explicit DesignerScenePrivate(DesignerScene* parent);
+        inline QSize skinSize(const DesignerScene::Skin& skin) const;
+        inline Page::SkinSetting* skinSetting(const DesignerScene::Skin& skin) const;
 
     public:
         DesignerScene* parent;
@@ -17,11 +33,54 @@ DesignerScenePrivate::DesignerScenePrivate(DesignerScene* parent)
 {
 }
 
+QSize DesignerScenePrivate::skinSize(const DesignerScene::Skin& skin) const
+{
+    switch (skin) {
+        case DesignerScene::NoSkin:
+            return NO_SKIN_SIZE;
+            break;
+
+        case DesignerScene::PhonePortrait:
+            return PHONE_PORTRAIT_SIZE;
+            break;
+
+        case DesignerScene::PhoneLandscape:
+            return PHONE_LANDSCAPE_SIZE;
+            break;
+
+        case DesignerScene::Desktop:
+            return DESKTOP_SIZE;
+            break;
+    }
+}
+
+Page::SkinSetting* DesignerScenePrivate::skinSetting(const DesignerScene::Skin& skin) const
+{
+    switch (skin) {
+        case DesignerScene::NoSkin:
+            return new Page::SkinSetting();
+            break;
+
+        case DesignerScene::PhonePortrait:
+            return new Page::SkinSetting(QPixmap(PHONE_PORTRAIT_SKIN_PATH), PHONE_PORTRAIT_FRAME_RECT, false);
+            break;
+
+        case DesignerScene::PhoneLandscape:
+            return new Page::SkinSetting(QPixmap(PHONE_LANDSCAPE_SKIN_PATH), PHONE_LANDSCAPE_FRAME_RECT, false);
+            break;
+
+        case DesignerScene::Desktop:
+            return new Page::SkinSetting(QPixmap(DESKTOP_SKIN_PATH), DESKTOP_FRAME_RECT, true);
+            break;
+    }
+}
+
 DesignerScene::DesignerScene(qreal x, qreal y, qreal width, qreal height, QObject *parent)
     : QGraphicsScene(x, y, width, height, parent)
     , _d(new DesignerScenePrivate(this))
     , _currentPage(nullptr)
 {
+    setSkin(PhonePortrait);
 }
 
 const QList<Page*>& DesignerScene::pages() const
@@ -34,8 +93,10 @@ void DesignerScene::addPage(Page* page)
     if (_pages.contains(page))
         return;
 
-    page->setVisible(false);
     addItem(page);
+    page->setVisible(false);
+    page->setZValue(-1);
+    page->resize(_d->skinSize(skin()));
 
     _pages.append(page);
 
@@ -74,6 +135,75 @@ void DesignerScene::setCurrentPage(Page* currentPage)
 
     _currentPage = currentPage;
     _currentPage->setVisible(true);
+}
+
+QList<Control*> DesignerScene::controls(Qt::SortOrder order) const
+{
+    QList<Control*> controls;
+    for (auto item : items(order)) {
+        if (dynamic_cast<Control*>(item)) {
+            controls << static_cast<Control*>(item);
+        }
+    }
+    return controls;
+}
+
+QList<Control*> DesignerScene::selectedControls() const
+{
+    QList<Control*> selectedControls;
+    for (auto item : selectedItems()) {
+        if (dynamic_cast<Control*>(item)) {
+            selectedControls << static_cast<Control*>(item);
+        }
+    }
+    return selectedControls;
+}
+
+void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsScene::mousePressEvent(event);
+
+    const auto&  sControls = selectedControls();
+    if (sControls.size() > 0 && _currentPage &&
+        !sControls.contains(_currentPage)) {
+        for (auto control : _currentPage->childControls()) {
+            if (sControls.contains(control))
+                control->setZValue(1); //BUG
+            else
+                control->setZValue(0);
+        }
+    }
+}
+
+DesignerScene::Skin DesignerScene::skin() const
+{
+    return _skin;
+}
+
+void DesignerScene::setSkin(const Skin& skin)
+{
+    _skin = skin;
+    if (Page::skinSetting())
+        delete Page::skinSetting();
+    Page::setSkinSetting(_d->skinSetting(skin));
+    for (auto page : pages()) {
+        page->setResizable(Page::skinSetting()->resizable);
+        page->resize(_d->skinSize(skin));
+        page->update();
+    }
+}
+
+bool DesignerScene::showOutlines() const
+{
+    return Control::showOutline();;
+}
+
+void DesignerScene::setShowOutlines(bool value)
+{
+    Control::setShowOutline(value);
+    for (auto control : controls()) {
+        control->update();
+    }
 }
 
 #include "designerscene.moc"

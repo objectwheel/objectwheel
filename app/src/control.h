@@ -4,15 +4,16 @@
 #include <QGraphicsWidget>
 #include <QUrl>
 #include <QList>
+#include <QPixmap>
 
 class ControlPrivate;
 
 class Control : public QGraphicsWidget
 {
+        Q_OBJECT
     public:
-        explicit Control(Control *parent = Q_NULLPTR);
+        explicit Control(Control* parent = Q_NULLPTR);
         virtual ~Control();
-        QList<Control*> findChildren(const QString& id = QString(), Qt::FindChildOptions option = Qt::FindChildrenRecursively) const;
 
         QString id() const;
         void setId(const QString& id);
@@ -20,8 +21,10 @@ class Control : public QGraphicsWidget
         QUrl url() const;
         void setUrl(const QUrl& url);
 
-        bool showOutline() const;
-        void setShowOutline(const bool value);
+        static bool showOutline();
+        static void setShowOutline(const bool value);
+
+        QList<Control*> childControls() const;
 
     protected:
         virtual void refresh();
@@ -36,29 +39,54 @@ class Control : public QGraphicsWidget
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
         virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
-    private:
-        QList<Control*> findChildrenRecursively(const QString& id, QList<QGraphicsItem*> parent) const;
+    protected:
+        ControlPrivate* _d;
 
     private:
-        ControlPrivate* _d;
         QString _id;
         QUrl _url;
-        bool _showOutline;
+        static bool _showOutline;
 };
 
-class Item : public Control { };
 
 class Page : public Control
 {
-    private:
-        bool _mainPage = false;
-
-    private:
-        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+        Q_OBJECT
 
     public:
+        struct SkinSetting {
+                SkinSetting() : resizable(true) {}
+                SkinSetting(const QPixmap& p, const QRectF& r, bool b)
+                    : pixmap(p), rect(r), resizable(b) {}
+                QPixmap pixmap;
+                QRectF rect;
+                bool resizable;
+        };
+
+        explicit Page(Page* parent = Q_NULLPTR);
+
         bool mainPage() const;
         void setMainPage(bool mainPage);
+
+        static void setSkinSetting(const SkinSetting* skinSetting);
+        static const SkinSetting* skinSetting();
+
+        bool resizable() const;
+        void setResizable(bool resizable);
+
+    public slots:
+        void centralize();
+
+    protected:
+        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+        void resizeEvent(QGraphicsSceneResizeEvent *event) override;
+        void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+
+    private:
+        bool _mainPage = false;
+        QList<Control*> _controls;
+        static const SkinSetting* _skinSetting;
+        bool _resizable;
 };
 
 #endif // CONTROL_H

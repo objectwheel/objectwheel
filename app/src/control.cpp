@@ -60,6 +60,9 @@ class Resizer : public QGraphicsItem
         Placement placement() const;
         void setPlacement(const Placement& placement);
 
+        bool disabled() const;
+        void setDisabled(bool disabled);
+
     protected:
         virtual QRectF boundingRect() const override;
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
@@ -69,11 +72,13 @@ class Resizer : public QGraphicsItem
 
     private:
         Placement _placement;
+        bool _disabled;
 };
 
 Resizer::Resizer(Control *parent)
     : QGraphicsItem(parent)
     , _placement(Top)
+    , _disabled(false)
 {
     setVisible(false);
     setAcceptedMouseButtons(Qt::LeftButton);
@@ -102,6 +107,9 @@ void Resizer::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
+
+    if (_disabled)
+        return;
 
     qreal diff_x, diff_y;
     auto* parent = static_cast<Control*>(parentItem());
@@ -161,6 +169,16 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void Resizer::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
+}
+
+bool Resizer::disabled() const
+{
+    return _disabled;
+}
+
+void Resizer::setDisabled(bool disabled)
+{
+    _disabled = disabled;
 }
 
 Resizer::Placement Resizer::placement() const
@@ -223,7 +241,7 @@ class ControlPrivate : public QObject
 
     public slots:
         void refreshPreview();
-        void updatePreview(const QPixmap& preview);
+        void updatePreview(const QPixmap& preview, const QSizeF& size);
 
     public:
         Control* parent;
@@ -247,7 +265,7 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
     QObject::connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap)), SLOT(updatePreview(QPixmap)));
+    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap, QSizeF)), SLOT(updatePreview(QPixmap, QSizeF)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -314,7 +332,6 @@ void ControlPrivate::showResizers()
 void ControlPrivate::refreshPreview()
 {
     refreshTimer.stop();
-    if (!parent->url().isValid()) return;
 
     QSizeF size;
     if (!parent->size().isNull())
@@ -323,10 +340,12 @@ void ControlPrivate::refreshPreview()
     qmlPreviewer.requestReview(parent->url(), size);
 }
 
-void ControlPrivate::updatePreview(const QPixmap& preview)
+void ControlPrivate::updatePreview(const QPixmap& preview, const QSizeF& size)
 {
+    if (!size.isValid())
+        parent->resize(preview.size() / qApp->devicePixelRatio());
+
     itemPixmap = preview;
-    parent->resize(preview.size() / qApp->devicePixelRatio());
     parent->update();
 }
 
@@ -334,10 +353,11 @@ void ControlPrivate::updatePreview(const QPixmap& preview)
 //! ********************** [Control] **********************
 //!
 
+bool Control::_showOutline = false;
+
 Control::Control(Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
-    , _showOutline(true)
 {
     setFlag(ItemIsFocusable);
     setFlag(ItemIsSelectable);
@@ -353,45 +373,7 @@ Control::~Control()
     delete _d;
 }
 
-QList<Control*> Control::findChildren(const QString& id, Qt::FindChildOptions option) const
-{
-    QList<Control*> foundChilds;
-    if (option == Qt::FindChildrenRecursively) {
-        foundChilds = findChildrenRecursively(id, childItems());
-    } else {
-        for (auto c : childItems()) {
-            auto child = dynamic_cast<Control*>(c);
-
-            if (!child)
-                continue;
-            else if (id.isEmpty())
-                foundChilds << child;
-            else if (child->id() == id)
-                foundChilds << child;
-        }
-    }
-    return foundChilds;
-}
-
-QList<Control*> Control::findChildrenRecursively(const QString& id, QList<QGraphicsItem*> parent) const
-{
-    QList<Control*> foundChilds;
-    for (auto c : parent) {
-        auto child = dynamic_cast<Control*>(c);
-
-        if (!child)
-            continue;
-        else if (id.isEmpty())
-            foundChilds << child;
-        else if (child->id() == id)
-            foundChilds << child;
-
-        foundChilds << findChildrenRecursively(id, child->childItems());
-    }
-    return foundChilds;
-}
-
-bool Control::showOutline() const
+bool Control::showOutline()
 {
     return _showOutline;
 }
@@ -399,6 +381,17 @@ bool Control::showOutline() const
 void Control::setShowOutline(const bool value)
 {
     _showOutline = value;
+}
+
+QList<Control*> Control::childControls() const
+{
+    QList<Control*> controls;
+    for (auto item : childItems()) {
+        if (dynamic_cast<Control*>(item)) {
+            controls << static_cast<Control*>(item);
+        }
+    }
+    return controls;
 }
 
 QString Control::id() const
@@ -420,6 +413,7 @@ void Control::setUrl(const QUrl& url)
 {
     _url = url;
     refresh();
+    QTimer::singleShot(1200, [=] { refresh(); });
 }
 
 void Control::refresh()
@@ -454,12 +448,12 @@ void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
-    auto item = new Item;
-    item->setId("eben");
-    item->setUrl(event->mimeData()->urls().at(0));
-    item->setParentItem(this);
-    item->setPos(event->pos());
-    scene()->addItem(item);
+    auto control = new Control;
+    control->setId("eben");
+    control->setUrl(event->mimeData()->urls().at(0));
+    control->setParentItem(this);
+    control->setPos(event->pos());
+    scene()->addItem(control);
     _d->dragIn = false;
     event->accept();
     update();
@@ -469,13 +463,14 @@ void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mousePressEvent(event);
     event->accept();
+    if (event->button() == Qt::LeftButton)
+        setCursor(Qt::SizeAllCursor);
 }
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseMoveEvent(event);
     event->accept();
-    setCursor(Qt::SizeAllCursor);
 }
 
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
@@ -567,8 +562,74 @@ PagePrivate::PagePrivate(Page* parent)
 
 QVector<QLineF> PagePrivate::centerGuidelines(const QPointF& center) const
 {
-//    parent->items();
+    //    parent->items();
 
+}
+
+const Page::SkinSetting* Page::_skinSetting = nullptr;
+
+Page::Page(Page* parent)
+    : Control(parent)
+{
+    setFlag(ItemIsMovable, false);
+
+    if (_skinSetting)
+        _resizable = _skinSetting->resizable;
+    else
+        _resizable = true;
+
+    for (auto& resizer : _d->resizers) {
+        resizer.setDisabled(!_resizable);
+    }
+}
+
+void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+    //        if (selectedItems().size() > 0) {
+    //        painter->setRenderHint(QPainter::Antialiasing);
+    //        painter->drawLines(_d->centerGuidelines(selectedItems().at(0)->pos()
+    //                          + selectedItems().at(0)->boundingRect().center()));
+    //        } else {
+    Control::paint(painter, option, widget);
+
+    if (!isSelected() && !showOutline()) {
+        QPen pen;
+        pen.setStyle(Qt::DotLine);
+        pen.setJoinStyle(Qt::MiterJoin);
+        painter->setBrush(Qt::transparent);
+        pen.setColor(OUTLINE_COLOR);
+        painter->setPen(pen);
+        painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
+    }
+
+    if (_skinSetting && !_skinSetting->pixmap.isNull() && _skinSetting->rect.isValid())
+        painter->drawPixmap(_skinSetting->rect, _skinSetting->pixmap, _skinSetting->pixmap.rect());
+
+}
+
+void Page::resizeEvent(QGraphicsSceneResizeEvent* event)
+{
+    Control::resizeEvent(event);
+    centralize();
+}
+
+void Page::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    Control::mousePressEvent(event);
+    setCursor(Qt::ArrowCursor);
+}
+
+bool Page::resizable() const
+{
+    return _resizable;
+}
+
+void Page::setResizable(bool resizable)
+{
+    _resizable = resizable;
+    for (auto& resizer : _d->resizers) {
+        resizer.setDisabled(!_resizable);
+    }
 }
 
 bool Page::mainPage() const
@@ -581,14 +642,19 @@ void Page::setMainPage(bool mainPage)
     _mainPage = mainPage;
 }
 
-void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void Page::centralize()
 {
-    //    if (selectedItems().size() > 0) {
-    //        painter->setRenderHint(QPainter::Antialiasing);
-    //        painter->drawLines(_d->centerGuidelines(selectedItems().at(0)->pos()
-    //                          + selectedItems().at(0)->boundingRect().center()));
-    //    } else {
-    //        DesignerScene::drawForeground(painter, rect);
-    //    }
+    setPos(- size().width() / 2.0, - size().height() / 2.0);
 }
+
+void Page::setSkinSetting(const SkinSetting* skinSetting)
+{
+    _skinSetting = skinSetting;
+}
+
+const Page::SkinSetting* Page::skinSetting()
+{
+    return _skinSetting;
+}
+
 #include "control.moc"
