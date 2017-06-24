@@ -35,6 +35,8 @@
 #define RESIZER_OUTLINE_COLOR ("#252525")
 #define PREVIEW_REFRESH_INTERVAL 100
 
+#define MAGNETIC_FIELD (fit(5))
+
 using namespace Fit;
 
 //!
@@ -416,7 +418,6 @@ void Control::setUrl(const QUrl& url)
 {
     _url = url;
     refresh();
-    QTimer::singleShot(1200, [=] { refresh(); });
 }
 
 void Control::refresh()
@@ -553,7 +554,7 @@ class PagePrivate : public QObject
 
     public:
         explicit PagePrivate(Page* parent);
-        QVector<QLineF> centerGuidelines(const Control* control) const;
+        QVector<QLineF> centerGuidelines(Control* control) const;
 };
 
 PagePrivate::PagePrivate(Page* parent)
@@ -561,16 +562,22 @@ PagePrivate::PagePrivate(Page* parent)
 {
 }
 
-QVector<QLineF> PagePrivate::centerGuidelines(const Control* control) const
+QVector<QLineF> PagePrivate::centerGuidelines(Control* control) const
 {
     QVector<QLineF> lines;
     auto parent = static_cast<Control*>(control->parentWidget());
     auto center = control->geometry().center();
-    if ((int)center.y() == (int) (parent->size().height() / 2.0)) {
+    if (center.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
+        center.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
+        control->setPos(control->x(), parent->size().height() / 2.0 - control->size().height() / 2.0);
+        center = control->geometry().center();
         lines << QLineF(parent->mapToScene(QPointF(0, center.y())),
                         parent->mapToScene(QPointF(parent->size().width(), center.y())));
     }
-    if ((int)center.x() == (int) (parent->size().width() / 2.0)) {
+    if (center.x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
+        center.x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
+        control->setPos(parent->size().width() / 2.0 - control->size().width() / 2.0, control->y());
+        center = control->geometry().center();
         lines << QLineF(parent->mapToScene(QPointF(center.x(), 0)),
                         parent->mapToScene(QPointF(center.x(), parent->size().height())));
     }

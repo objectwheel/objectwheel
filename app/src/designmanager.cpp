@@ -9,8 +9,7 @@
 #include <QVBoxLayout>
 #include <QTimer>
 
-// DelayButton gözükmüyor, fixle
-// DesignView hep en üstte olmalı
+// DelayButton gözükmüyor, fixle ??
 
 class DesignManagerPrivate
 {

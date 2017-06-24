@@ -3,6 +3,7 @@
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <QDebug>
 
 #define NO_SKIN_SIZE (QSize(400, 400))
 #define PHONE_PORTRAIT_SIZE (QSize(256, 455))
@@ -17,6 +18,8 @@
 #define PHONE_LANDSCAPE_SKIN_PATH (":/resources/images/phone.png")
 #define DESKTOP_SKIN_PATH (":/resources/images/phone.png")
 
+#define GLUE_PIXEL (fit(10))
+
 using namespace Fit;
 
 class DesignerScenePrivate : public QObject
@@ -30,13 +33,15 @@ class DesignerScenePrivate : public QObject
 
     public:
         DesignerScene* parent;
-        bool moving;
+        bool itemPressed;
+        bool itemMoving;
 };
 
 DesignerScenePrivate::DesignerScenePrivate(DesignerScene* parent)
     : QObject(parent)
     , parent(parent)
-    , moving(false)
+    , itemPressed(false)
+    , itemMoving(false)
 {
 }
 
@@ -84,7 +89,7 @@ Page::SkinSetting* DesignerScenePrivate::skinSetting(const DesignerScene::Skin& 
 
 bool DesignerScenePrivate::guideLineBlocks(QGraphicsSceneMouseEvent* event) const
 {
-    QPointF blockPos;
+    static QPointF blockPos;
     static bool blocked = false;
     bool vertical = false, horizontal = false;
     auto guideLines = parent->_currentPage->guideLines();
@@ -104,7 +109,7 @@ bool DesignerScenePrivate::guideLineBlocks(QGraphicsSceneMouseEvent* event) cons
             blockPos = event->scenePos();
         blocked = true;
 
-        if ((event->scenePos() - blockPos).manhattanLength() < 10)
+        if ((event->scenePos() - blockPos).manhattanLength() < GLUE_PIXEL)
             selectedControl->setPos(selectedControl->x(), selectedControl->y());
         else {
             blocked = false;
@@ -115,7 +120,7 @@ bool DesignerScenePrivate::guideLineBlocks(QGraphicsSceneMouseEvent* event) cons
             blockPos = event->scenePos();
         blocked = true;
 
-        if (qAbs(event->scenePos().y() - blockPos.y()) < 10)
+        if (qAbs(event->scenePos().y() - blockPos.y()) < GLUE_PIXEL)
             selectedControl->setPos(selectedControl->parentItem()->mapFromScene(event->scenePos()).x() -
                                     selectedControl->mapFromScene(event->lastScenePos()).x(),
                                     selectedControl->y());
@@ -128,7 +133,7 @@ bool DesignerScenePrivate::guideLineBlocks(QGraphicsSceneMouseEvent* event) cons
             blockPos = event->scenePos();
         blocked = true;
 
-        if (qAbs(event->scenePos().x() - blockPos.x()) < 10)
+        if (qAbs(event->scenePos().x() - blockPos.x()) < GLUE_PIXEL)
             selectedControl->setPos(selectedControl->x(),
                                     selectedControl->parentItem()->mapFromScene(event->scenePos()).y() -
                                     selectedControl->mapFromScene(event->lastScenePos()).y());
@@ -150,7 +155,7 @@ DesignerScene::DesignerScene(qreal x, qreal y, qreal width, qreal height, QObjec
     , _d(new DesignerScenePrivate(this))
     , _currentPage(nullptr)
 {
-    setSkin(NoSkin);
+    setSkin(PhonePortrait);
 }
 
 const QList<Page*>& DesignerScene::pages() const
@@ -244,17 +249,20 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
         }
     }
 
-    _d->moving = false;
+    if (itemAt(event->scenePos(), QTransform())) {
+        _d->itemPressed = true;
+    }
+    _d->itemMoving = false;
     update();
 }
-#include <QCursor>
+
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-
     if (_currentPage &&
         selectedControls().size() > 0 &&
-        !_pages.contains((Page*)selectedControls()[0]) ) {
-        _d->moving = true;
+        !_pages.contains((Page*)selectedControls()[0]) &&
+        _d->itemPressed) {
+        _d->itemMoving = true;
 
         if (_d->guideLineBlocks(event)) {
             event->accept();
@@ -269,7 +277,8 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseReleaseEvent(event);
-    _d->moving = false;
+    _d->itemPressed = false;
+    _d->itemMoving = false;
     update();
 }
 
@@ -277,7 +286,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    if (_d->moving) {
+    if (_d->itemMoving) {
         painter->setPen(Qt::blue);
         painter->drawLines(_currentPage->guideLines());
     }
