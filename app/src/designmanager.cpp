@@ -9,6 +9,9 @@
 #include <QVBoxLayout>
 #include <QTimer>
 
+// DelayButton gözükmüyor, fixle
+// DesignView hep en üstte olmalı
+
 class DesignManagerPrivate
 {
     public:
@@ -27,16 +30,13 @@ class DesignManagerPrivate
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     : parent(parent)
     , puppetWidget(settleWidget)
-    , designerScene(-300, -300, 600, 600)
+    , designerScene(-200, -325, 400, 650)
     , designerView(&designerScene, &puppetWidget)
 {
     auto layout = new QVBoxLayout(&puppetWidget);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(&designerView);
-
-    // TODO: Find out a better solution to catch control previews
-    QmlPreviewer::setPuppetWidget(&puppetWidget);
 
     designerView.setRenderHint(QPainter::Antialiasing);
     designerView.setRubberBandSelectionMode(Qt::IntersectsItemShape);

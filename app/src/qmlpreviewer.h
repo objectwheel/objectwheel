@@ -14,9 +14,6 @@ class QmlPreviewer : public QObject
     public:
         explicit QmlPreviewer(QObject *parent = 0);
 
-        static QWidget* puppetWidget();
-        static void setPuppetWidget(QWidget* puppetWidget);
-
     signals:
         void previewReady(const QPixmap& preview, const QSizeF& size) const;
 
@@ -25,7 +22,6 @@ class QmlPreviewer : public QObject
 
     private:
         QmlPreviewerPrivate* _d;
-        static QPointer<QWidget> _puppetWidget;
 };
 
 #endif // QMLPREVIEWER_H

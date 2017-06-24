@@ -1,5 +1,8 @@
 #include <designerscene.h>
+#include <fit.h>
+
 #include <QGraphicsSceneMouseEvent>
+#include <QPainter>
 
 #define NO_SKIN_SIZE (QSize(400, 400))
 #define PHONE_PORTRAIT_SIZE (QSize(256, 455))
@@ -14,6 +17,8 @@
 #define PHONE_LANDSCAPE_SKIN_PATH (":/resources/images/phone.png")
 #define DESKTOP_SKIN_PATH (":/resources/images/phone.png")
 
+using namespace Fit;
+
 class DesignerScenePrivate : public QObject
 {
         Q_OBJECT
@@ -21,15 +26,17 @@ class DesignerScenePrivate : public QObject
         explicit DesignerScenePrivate(DesignerScene* parent);
         inline QSize skinSize(const DesignerScene::Skin& skin) const;
         inline Page::SkinSetting* skinSetting(const DesignerScene::Skin& skin) const;
+        inline bool guideLineBlocks(QGraphicsSceneMouseEvent* event) const;
 
     public:
         DesignerScene* parent;
-
+        bool moving;
 };
 
 DesignerScenePrivate::DesignerScenePrivate(DesignerScene* parent)
     : QObject(parent)
     , parent(parent)
+    , moving(false)
 {
 }
 
@@ -75,12 +82,75 @@ Page::SkinSetting* DesignerScenePrivate::skinSetting(const DesignerScene::Skin& 
     }
 }
 
+bool DesignerScenePrivate::guideLineBlocks(QGraphicsSceneMouseEvent* event) const
+{
+    QPointF blockPos;
+    static bool blocked = false;
+    bool vertical = false, horizontal = false;
+    auto guideLines = parent->_currentPage->guideLines();
+    auto selectedControl = parent->selectedControls()[0];
+
+    for (auto guideLine : guideLines) {
+        if (guideLine.dx() > 0)
+            vertical = true;
+        if (guideLine.dy() > 0)
+            horizontal = true;
+        if (horizontal && vertical)
+            break;
+    }
+
+    if (vertical && horizontal) {
+        if (!blocked)
+            blockPos = event->scenePos();
+        blocked = true;
+
+        if ((event->scenePos() - blockPos).manhattanLength() < 10)
+            selectedControl->setPos(selectedControl->x(), selectedControl->y());
+        else {
+            blocked = false;
+            return false;
+        }
+    } else if (vertical) {
+        if (!blocked)
+            blockPos = event->scenePos();
+        blocked = true;
+
+        if (qAbs(event->scenePos().y() - blockPos.y()) < 10)
+            selectedControl->setPos(selectedControl->parentItem()->mapFromScene(event->scenePos()).x() -
+                                    selectedControl->mapFromScene(event->lastScenePos()).x(),
+                                    selectedControl->y());
+        else {
+            blocked = false;
+            return false;
+        }
+    } else if (horizontal) {
+        if (!blocked)
+            blockPos = event->scenePos();
+        blocked = true;
+
+        if (qAbs(event->scenePos().x() - blockPos.x()) < 10)
+            selectedControl->setPos(selectedControl->x(),
+                                    selectedControl->parentItem()->mapFromScene(event->scenePos()).y() -
+                                    selectedControl->mapFromScene(event->lastScenePos()).y());
+        else {
+            blocked = false;
+            return false;
+        }
+    }
+
+    if (vertical || horizontal)
+        return true;
+
+    blocked = false;
+    return false;
+}
+
 DesignerScene::DesignerScene(qreal x, qreal y, qreal width, qreal height, QObject *parent)
     : QGraphicsScene(x, y, width, height, parent)
     , _d(new DesignerScenePrivate(this))
     , _currentPage(nullptr)
 {
-    setSkin(PhonePortrait);
+    setSkin(NoSkin);
 }
 
 const QList<Page*>& DesignerScene::pages() const
@@ -172,6 +242,44 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
             else
                 control->setZValue(0);
         }
+    }
+
+    _d->moving = false;
+    update();
+}
+#include <QCursor>
+void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+
+    if (_currentPage &&
+        selectedControls().size() > 0 &&
+        !_pages.contains((Page*)selectedControls()[0]) ) {
+        _d->moving = true;
+
+        if (_d->guideLineBlocks(event)) {
+            event->accept();
+            return;
+        }
+    }
+
+    QGraphicsScene::mouseMoveEvent(event);
+    update();
+}
+
+void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsScene::mouseReleaseEvent(event);
+    _d->moving = false;
+    update();
+}
+
+void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
+{
+    QGraphicsScene::drawForeground(painter, rect);
+
+    if (_d->moving) {
+        painter->setPen(Qt::blue);
+        painter->drawLines(_currentPage->guideLines());
     }
 }
 

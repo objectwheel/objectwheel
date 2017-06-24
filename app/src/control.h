@@ -7,10 +7,12 @@
 #include <QPixmap>
 
 class ControlPrivate;
+class PagePrivate;
 
 class Control : public QGraphicsWidget
 {
         Q_OBJECT
+
     public:
         explicit Control(Control* parent = Q_NULLPTR);
         virtual ~Control();
@@ -48,7 +50,6 @@ class Control : public QGraphicsWidget
         static bool _showOutline;
 };
 
-
 class Page : public Control
 {
         Q_OBJECT
@@ -74,6 +75,8 @@ class Page : public Control
         bool resizable() const;
         void setResizable(bool resizable);
 
+        QVector<QLineF> guideLines() const;
+
     public slots:
         void centralize();
 
@@ -83,6 +86,7 @@ class Page : public Control
         void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     private:
+        PagePrivate* _d;
         bool _mainPage = false;
         QList<Control*> _controls;
         static const SkinSetting* _skinSetting;

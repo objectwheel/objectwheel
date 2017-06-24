@@ -2,6 +2,7 @@
 #include <delayer.h>
 #include <fit.h>
 #include <qmlpreviewer.h>
+#include <designerscene.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -95,7 +96,8 @@ void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(RESIZER_OUTLINE_COLOR);
     painter->setBrush(RESIZER_COLOR);
-    painter->drawRoundedRect(boundingRect().adjusted(0.5, 0.5, -0.5, -0.5), RESIZER_SIZE / 4.0, RESIZER_SIZE / 4.0);
+    painter->drawRoundedRect(boundingRect().adjusted(0.5, 0.5, -0.5, -0.5),
+                             RESIZER_SIZE / 4.0, RESIZER_SIZE / 4.0);
 }
 
 void Resizer::mousePressEvent(QGraphicsSceneMouseEvent* event)
@@ -265,7 +267,8 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
     QObject::connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap, QSizeF)), SLOT(updatePreview(QPixmap, QSizeF)));
+    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap, QSizeF)),
+                     SLOT(updatePreview(QPixmap, QSizeF)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -507,7 +510,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 {
     if (_d->itemPixmap.isNull()) return;
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5), _d->itemPixmap, _d->itemPixmap.rect());
+    painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5),
+                        _d->itemPixmap, _d->itemPixmap.rect());
 
     if (_d->dragIn) {
         if (_showOutline) {
@@ -518,7 +522,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(_d->itemPixmap.rect(), HIGHLIGHT_COLOR);
             p.end();
-            painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5), highlight, _d->itemPixmap.rect());
+            painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5),
+                                highlight, _d->itemPixmap.rect());
         }
     }
 
@@ -545,31 +550,38 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 class PagePrivate : public QObject
 {
         Q_OBJECT
+
     public:
         explicit PagePrivate(Page* parent);
-        QVector<QLineF> centerGuidelines(const QPointF& center) const;
-
-    public:
-        Page* parent;
-
+        QVector<QLineF> centerGuidelines(const Control* control) const;
 };
 
 PagePrivate::PagePrivate(Page* parent)
     : QObject(parent)
-    , parent(parent)
 {
 }
 
-QVector<QLineF> PagePrivate::centerGuidelines(const QPointF& center) const
+QVector<QLineF> PagePrivate::centerGuidelines(const Control* control) const
 {
-    //    parent->items();
-
+    QVector<QLineF> lines;
+    auto parent = static_cast<Control*>(control->parentWidget());
+    auto center = control->geometry().center();
+    if ((int)center.y() == (int) (parent->size().height() / 2.0)) {
+        lines << QLineF(parent->mapToScene(QPointF(0, center.y())),
+                        parent->mapToScene(QPointF(parent->size().width(), center.y())));
+    }
+    if ((int)center.x() == (int) (parent->size().width() / 2.0)) {
+        lines << QLineF(parent->mapToScene(QPointF(center.x(), 0)),
+                        parent->mapToScene(QPointF(center.x(), parent->size().height())));
+    }
+    return lines;
 }
 
 const Page::SkinSetting* Page::_skinSetting = nullptr;
 
 Page::Page(Page* parent)
     : Control(parent)
+    , _d(new PagePrivate(this))
 {
     setFlag(ItemIsMovable, false);
 
@@ -578,18 +590,13 @@ Page::Page(Page* parent)
     else
         _resizable = true;
 
-    for (auto& resizer : _d->resizers) {
+    for (auto& resizer : Control::_d->resizers) {
         resizer.setDisabled(!_resizable);
     }
 }
 
 void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    //        if (selectedItems().size() > 0) {
-    //        painter->setRenderHint(QPainter::Antialiasing);
-    //        painter->drawLines(_d->centerGuidelines(selectedItems().at(0)->pos()
-    //                          + selectedItems().at(0)->boundingRect().center()));
-    //        } else {
     Control::paint(painter, option, widget);
 
     if (!isSelected() && !showOutline()) {
@@ -603,8 +610,8 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     }
 
     if (_skinSetting && !_skinSetting->pixmap.isNull() && _skinSetting->rect.isValid())
-        painter->drawPixmap(_skinSetting->rect, _skinSetting->pixmap, _skinSetting->pixmap.rect());
-
+        painter->drawPixmap(_skinSetting->rect,
+                            _skinSetting->pixmap, _skinSetting->pixmap.rect());
 }
 
 void Page::resizeEvent(QGraphicsSceneResizeEvent* event)
@@ -627,9 +634,20 @@ bool Page::resizable() const
 void Page::setResizable(bool resizable)
 {
     _resizable = resizable;
-    for (auto& resizer : _d->resizers) {
+    for (auto& resizer : Control::_d->resizers) {
         resizer.setDisabled(!_resizable);
     }
+}
+
+QVector<QLineF> Page::guideLines() const
+{
+    QVector<QLineF> lines;
+    auto s = static_cast<DesignerScene*>(scene());
+    auto selectedControls = s->selectedControls();
+    if (selectedControls.size() > 0) {
+        lines << _d->centerGuidelines(selectedControls[0]);
+    }
+    return lines;
 }
 
 bool Page::mainPage() const

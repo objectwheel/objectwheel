@@ -6,6 +6,7 @@
 DesignerView::DesignerView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
 {
+    setMouseTracking(true);
 }
 
 void DesignerView::resizeEvent(QResizeEvent* event)

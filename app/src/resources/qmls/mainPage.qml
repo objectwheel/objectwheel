@@ -6,6 +6,6 @@ ApplicationWindow {
     width: 256
     height: 455
     visible: true
-    color: "#d8dcdf"
+    color: "#e0e4e7"
     title: qsTr("Hello World")
 }

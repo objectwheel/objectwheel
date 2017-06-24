@@ -9,6 +9,7 @@ class DesignerScenePrivate;
 class DesignerScene : public QGraphicsScene
 {
         Q_OBJECT
+        friend class DesignerScenePrivate;
 
     public:
         enum Skin {
@@ -38,6 +39,9 @@ class DesignerScene : public QGraphicsScene
 
     protected:
         void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+        void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+        void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+        void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     private:
         DesignerScenePrivate* _d;
