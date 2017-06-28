@@ -27,6 +27,7 @@ class Control : public QGraphicsWidget
         static void setShowOutline(const bool value);
 
         QList<Control*> childControls() const;
+        Control* parentControl() const;
 
     protected:
         virtual void refresh();
@@ -75,6 +76,7 @@ class Page : public Control
         bool resizable() const;
         void setResizable(bool resizable);
 
+        bool stickSelectedControlToGuideLines() const;
         QVector<QLineF> guideLines() const;
 
     public slots:

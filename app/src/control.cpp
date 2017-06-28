@@ -35,7 +35,7 @@
 #define RESIZER_OUTLINE_COLOR ("#252525")
 #define PREVIEW_REFRESH_INTERVAL 100
 
-#define MAGNETIC_FIELD (fit(5))
+#define MAGNETIC_FIELD (fit(3))
 
 using namespace Fit;
 
@@ -399,6 +399,11 @@ QList<Control*> Control::childControls() const
     return controls;
 }
 
+Control* Control::parentControl() const
+{
+    return dynamic_cast<Control*>(parentItem());
+}
+
 QString Control::id() const
 {
     return _id;
@@ -545,7 +550,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
-//! ********************** [Page] **********************
+//! ****************** [Page Private] ******************
 
 
 class PagePrivate : public QObject
@@ -554,7 +559,8 @@ class PagePrivate : public QObject
 
     public:
         explicit PagePrivate(Page* parent);
-        QVector<QLineF> centerGuidelines(Control* control) const;
+        void pullMeNearLine(Control* control) const;
+        QVector<QLineF> guidelinesFor(const Control* control) const;
 };
 
 PagePrivate::PagePrivate(Page* parent)
@@ -562,27 +568,7 @@ PagePrivate::PagePrivate(Page* parent)
 {
 }
 
-QVector<QLineF> PagePrivate::centerGuidelines(Control* control) const
-{
-    QVector<QLineF> lines;
-    auto parent = static_cast<Control*>(control->parentWidget());
-    auto center = control->geometry().center();
-    if (center.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
-        center.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
-        control->setPos(control->x(), parent->size().height() / 2.0 - control->size().height() / 2.0);
-        center = control->geometry().center();
-        lines << QLineF(parent->mapToScene(QPointF(0, center.y())),
-                        parent->mapToScene(QPointF(parent->size().width(), center.y())));
-    }
-    if (center.x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
-        center.x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
-        control->setPos(parent->size().width() / 2.0 - control->size().width() / 2.0, control->y());
-        center = control->geometry().center();
-        lines << QLineF(parent->mapToScene(QPointF(center.x(), 0)),
-                        parent->mapToScene(QPointF(center.x(), parent->size().height())));
-    }
-    return lines;
-}
+//! ********************** [Page] **********************
 
 const Page::SkinSetting* Page::_skinSetting = nullptr;
 
@@ -646,13 +632,283 @@ void Page::setResizable(bool resizable)
     }
 }
 
+bool Page::stickSelectedControlToGuideLines() const
+{
+    bool ret = false;
+    auto scene = static_cast<DesignerScene*>(this->scene());
+    auto selectedControls = scene->selectedControls();
+
+    if (selectedControls.size() <= 0)
+        return ret;
+
+    auto control = selectedControls[0];
+    auto parent = control->parentControl();
+    auto geometry = control->geometry();
+    auto center = geometry.center();
+
+    /* Child center <-> Parent center */
+    if (center.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
+        center.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
+        control->setPos(control->x(), parent->size().height() / 2.0 - control->size().height() / 2.0);
+        geometry = control->geometry();
+        center = geometry.center();
+        ret = true;
+    }
+
+    if (center.x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
+        center.x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
+        control->setPos(parent->size().width() / 2.0 - control->size().width() / 2.0, control->y());
+        geometry = control->geometry();
+        center = geometry.center();
+        ret = true;
+    }
+
+    /* Child left <-> Parent center */
+    if (geometry.topLeft().x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
+        geometry.topLeft().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
+        control->setPos(parent->size().width() / 2.0, control->y());
+        geometry = control->geometry();
+        center = geometry.center();
+        ret = true;
+    }
+
+    /* Child left <-> Parent left */
+    if (geometry.topLeft().x() <= MAGNETIC_FIELD &&
+        geometry.topLeft().x() >= - MAGNETIC_FIELD) {
+        control->setPos(0, control->y());
+        geometry = control->geometry();
+        center = geometry.center();
+        ret = true;
+    }
+
+    /* Child right <-> Parent center */
+    if (geometry.topRight().x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
+        geometry.topRight().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
+        geometry.moveTopRight({parent->size().width() / 2.0, control->y()});
+        control->setPos(geometry.topLeft());
+        center = geometry.center();
+        ret = true;
+    }
+
+    /* Child right <-> Parent right */
+    if (geometry.topRight().x() <= parent->size().width() + MAGNETIC_FIELD &&
+        geometry.topRight().x() >= parent->size().width() - MAGNETIC_FIELD) {
+        geometry.moveTopRight({parent->size().width(), control->y()});
+        control->setPos(geometry.topLeft());
+        center = geometry.center();
+        ret = true;
+    }
+
+    for (auto childControl : parent->childControls()) {
+        if (childControl == control)
+            continue;
+
+        auto cgeometry = childControl->geometry();
+        auto ccenter = cgeometry.center();
+
+        /* Item1 center <-> Item2 center */
+        if (center.x() <= ccenter.x() + MAGNETIC_FIELD &&
+            center.x() >= ccenter.x() - MAGNETIC_FIELD) {
+            geometry.moveCenter({ccenter.x(), center.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        if (center.y() <= ccenter.y() + MAGNETIC_FIELD &&
+            center.y() >= ccenter.y() - MAGNETIC_FIELD) {
+            geometry.moveCenter({center.x(), ccenter.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 center <-> Item2 left */
+        if (center.x() <= cgeometry.topLeft().x() + MAGNETIC_FIELD &&
+            center.x() >= cgeometry.topLeft().x() - MAGNETIC_FIELD) {
+            geometry.moveCenter({cgeometry.topLeft().x(), center.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 center <-> Item2 top */
+        if (center.y() <= cgeometry.topLeft().y() + MAGNETIC_FIELD &&
+            center.y() >= cgeometry.topLeft().y() - MAGNETIC_FIELD) {
+            geometry.moveCenter({center.x(), cgeometry.topLeft().y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 center <-> Item2 right */
+        if (center.x() <= cgeometry.bottomRight().x() + MAGNETIC_FIELD &&
+            center.x() >= cgeometry.bottomRight().x() - MAGNETIC_FIELD) {
+            geometry.moveCenter({cgeometry.bottomRight().x(), center.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 center <-> Item2 bottom */
+        if (center.y() <= cgeometry.bottomRight().y() + MAGNETIC_FIELD &&
+            center.y() >= cgeometry.bottomRight().y() - MAGNETIC_FIELD) {
+            geometry.moveCenter({center.x(), cgeometry.bottomRight().y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 left <-> Item2 left */
+        if (geometry.x() <= cgeometry.x() + MAGNETIC_FIELD &&
+            geometry.x() >= cgeometry.x() - MAGNETIC_FIELD) {
+            geometry.moveTopLeft({cgeometry.x(), geometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 left <-> Item2 center */
+        if (geometry.x() <= ccenter.x() + MAGNETIC_FIELD &&
+            geometry.x() >= ccenter.x() - MAGNETIC_FIELD) {
+            geometry.moveTopLeft({ccenter.x(), geometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 left <-> Item2 right */
+        if (geometry.x() <= cgeometry.topRight().x() + MAGNETIC_FIELD &&
+            geometry.x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
+            geometry.moveTopLeft({cgeometry.topRight().x(), geometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 right <-> Item2 left */
+        if (geometry.topRight().x() <= cgeometry.x() + MAGNETIC_FIELD &&
+            geometry.topRight().x() >= cgeometry.x() - MAGNETIC_FIELD) {
+            geometry.moveTopRight({cgeometry.x(), geometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 right <-> Item2 center */
+        if (geometry.topRight().x() <= ccenter.x() + MAGNETIC_FIELD &&
+            geometry.topRight().x() >= ccenter.x() - MAGNETIC_FIELD) {
+            geometry.moveTopRight({ccenter.x(), geometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 right <-> Item2 right */
+        if (geometry.topRight().x() <= cgeometry.topRight().x() + MAGNETIC_FIELD &&
+            geometry.topRight().x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
+            geometry.moveTopRight({cgeometry.topRight().x(), geometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+    }
+
+    return ret;
+}
+
 QVector<QLineF> Page::guideLines() const
 {
+    auto scene = static_cast<DesignerScene*>(this->scene());
+    auto selectedControls = scene->selectedControls();
+
+    if (selectedControls.size() <= 0)
+        return QVector<QLineF>();
+
     QVector<QLineF> lines;
-    auto s = static_cast<DesignerScene*>(scene());
-    auto selectedControls = s->selectedControls();
-    if (selectedControls.size() > 0) {
-        lines << _d->centerGuidelines(selectedControls[0]);
+    auto control = selectedControls[0];
+    auto parent = control->parentControl();
+    auto geometry = control->geometry();
+    auto center = geometry.center();
+
+    /* Child center <-> Parent center */
+    if (int(center.y()) == int(parent->size().height() / 2.0))
+        lines << QLineF(parent->mapToScene(center),
+                        parent->mapToScene(QPointF(parent->size().width() / 2.0, center.y())));
+
+    if (int(center.x()) == int(parent->size().width() / 2.0))
+        lines << QLineF(parent->mapToScene(center),
+                        parent->mapToScene(QPointF(center.x(), parent->size().height() / 2.0)));
+
+    /* Child left <-> Parent center */
+    if (int(geometry.x()) == int(parent->size().width() / 2.0))
+        lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
+                        parent->mapToScene(QPointF(geometry.x(), parent->size().height() / 2.0)));
+
+    /* Child left <-> Parent left */
+    if (int(geometry.x()) == 0)
+        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
+                        parent->mapToScene(parent->rect().bottomLeft()));
+
+    /* Child right <-> Parent center */
+    if (int(geometry.topRight().x()) == int(parent->size().width() / 2.0))
+        lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
+                        parent->mapToScene(QPointF(geometry.topRight().x(), parent->size().height() / 2.0)));
+
+    /* Child right <-> Parent right */
+    if (int(geometry.topRight().x()) == int(parent->size().width()))
+        lines << QLineF(parent->mapToScene(QPointF(parent->size().width(), 0)),
+                        parent->mapToScene(QPointF(parent->size().width(), parent->size().height())));
+
+    for (auto childControl : parent->childControls()) {
+        if (childControl == control)
+            continue;
+
+        auto cgeometry = childControl->geometry();
+        auto ccenter = cgeometry.center();
+
+        /* Item1 center <-> Item2 center */
+        if (int(center.x()) == int(ccenter.x()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
+
+        if (int(center.y()) == int(ccenter.y()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
+
+        /* Item1 center <-> Item2 left */
+        if (int(center.x()) == int(cgeometry.topLeft().x()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
+
+        /* Item1 center <-> Item2 top */
+        if (int(center.y()) == int(cgeometry.topLeft().y()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
+
+        /* Item1 center <-> Item2 right */
+        if (int(center.x()) == int(cgeometry.bottomRight().x()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
+
+        /* Item1 center <-> Item2 bottom */
+        if (int(center.y()) == int(cgeometry.bottomRight().y()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
+
+        /* Item1 left <-> Item2 left/center/right */
+        if (int(geometry.x()) == int(cgeometry.x()) ||
+            int(geometry.x()) == int(ccenter.x()) ||
+            int(geometry.x()) == int(cgeometry.topRight().x()))
+            lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
+                            parent->mapToScene(QPointF(geometry.x(), ccenter.y())));
+
+        /* Item1 right <-> Item2 left/center/right */
+        if (int(geometry.topRight().x()) == int(cgeometry.x()) ||
+            int(geometry.topRight().x()) == int(ccenter.x()) ||
+            int(geometry.topRight().x()) == int(cgeometry.topRight().x()))
+            lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
+                            parent->mapToScene(QPointF(geometry.topRight().x(), ccenter.y())));
     }
     return lines;
 }

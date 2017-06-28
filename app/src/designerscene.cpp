@@ -18,18 +18,17 @@
 #define PHONE_LANDSCAPE_SKIN_PATH (":/resources/images/phone.png")
 #define DESKTOP_SKIN_PATH (":/resources/images/phone.png")
 
-#define GLUE_PIXEL (fit(10))
-
 using namespace Fit;
 
 class DesignerScenePrivate : public QObject
 {
         Q_OBJECT
+        enum LockWay { NoLock, Vertical, Horizontal, Both };
+
     public:
         explicit DesignerScenePrivate(DesignerScene* parent);
         inline QSize skinSize(const DesignerScene::Skin& skin) const;
         inline Page::SkinSetting* skinSetting(const DesignerScene::Skin& skin) const;
-        inline bool guideLineBlocks(QGraphicsSceneMouseEvent* event) const;
 
     public:
         DesignerScene* parent;
@@ -85,69 +84,6 @@ Page::SkinSetting* DesignerScenePrivate::skinSetting(const DesignerScene::Skin& 
             return new Page::SkinSetting(QPixmap(DESKTOP_SKIN_PATH), DESKTOP_FRAME_RECT, true);
             break;
     }
-}
-
-bool DesignerScenePrivate::guideLineBlocks(QGraphicsSceneMouseEvent* event) const
-{
-    static QPointF blockPos;
-    static bool blocked = false;
-    bool vertical = false, horizontal = false;
-    auto guideLines = parent->_currentPage->guideLines();
-    auto selectedControl = parent->selectedControls()[0];
-
-    for (auto guideLine : guideLines) {
-        if (guideLine.dx() > 0)
-            vertical = true;
-        if (guideLine.dy() > 0)
-            horizontal = true;
-        if (horizontal && vertical)
-            break;
-    }
-
-    if (vertical && horizontal) {
-        if (!blocked)
-            blockPos = event->scenePos();
-        blocked = true;
-
-        if ((event->scenePos() - blockPos).manhattanLength() < GLUE_PIXEL)
-            selectedControl->setPos(selectedControl->x(), selectedControl->y());
-        else {
-            blocked = false;
-            return false;
-        }
-    } else if (vertical) {
-        if (!blocked)
-            blockPos = event->scenePos();
-        blocked = true;
-
-        if (qAbs(event->scenePos().y() - blockPos.y()) < GLUE_PIXEL)
-            selectedControl->setPos(selectedControl->parentItem()->mapFromScene(event->scenePos()).x() -
-                                    selectedControl->mapFromScene(event->lastScenePos()).x(),
-                                    selectedControl->y());
-        else {
-            blocked = false;
-            return false;
-        }
-    } else if (horizontal) {
-        if (!blocked)
-            blockPos = event->scenePos();
-        blocked = true;
-
-        if (qAbs(event->scenePos().x() - blockPos.x()) < GLUE_PIXEL)
-            selectedControl->setPos(selectedControl->x(),
-                                    selectedControl->parentItem()->mapFromScene(event->scenePos()).y() -
-                                    selectedControl->mapFromScene(event->lastScenePos()).y());
-        else {
-            blocked = false;
-            return false;
-        }
-    }
-
-    if (vertical || horizontal)
-        return true;
-
-    blocked = false;
-    return false;
 }
 
 DesignerScene::DesignerScene(qreal x, qreal y, qreal width, qreal height, QObject *parent)
@@ -249,28 +185,25 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
         }
     }
 
-    if (itemAt(event->scenePos(), QTransform())) {
+    if (itemAt(event->scenePos(), QTransform()))
         _d->itemPressed = true;
-    }
+
     _d->itemMoving = false;
     update();
 }
 
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
+    QGraphicsScene::mouseMoveEvent(event);
+
     if (_currentPage &&
         selectedControls().size() > 0 &&
         !_pages.contains((Page*)selectedControls()[0]) &&
         _d->itemPressed) {
         _d->itemMoving = true;
-
-        if (_d->guideLineBlocks(event)) {
-            event->accept();
-            return;
-        }
+        _currentPage->stickSelectedControlToGuideLines();
     }
 
-    QGraphicsScene::mouseMoveEvent(event);
     update();
 }
 
