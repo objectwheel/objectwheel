@@ -220,7 +220,9 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
     QGraphicsScene::drawForeground(painter, rect);
 
     if (_d->itemMoving) {
-        painter->setPen(Qt::blue);
+        QPen pen(Qt::magenta);
+        pen.setWidthF(fit(1.0));
+        painter->setPen(pen);
         painter->drawLines(_currentPage->guideLines());
     }
 }

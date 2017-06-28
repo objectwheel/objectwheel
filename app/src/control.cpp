@@ -699,6 +699,42 @@ bool Page::stickSelectedControlToGuideLines() const
         ret = true;
     }
 
+    /* Child top <-> Parent center */
+    if (geometry.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
+        geometry.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
+        geometry.moveTopLeft({control->x(), parent->size().height() / 2.0});
+        control->setPos(geometry.topLeft());
+        center = geometry.center();
+        ret = true;
+    }
+
+    /* Child top <-> Parent top */
+    if (geometry.y() <= MAGNETIC_FIELD &&
+        geometry.y() >= - MAGNETIC_FIELD) {
+        geometry.moveTopLeft({control->x(), 0});
+        control->setPos(geometry.topLeft());
+        center = geometry.center();
+        ret = true;
+    }
+
+    /* Child bottom <-> Parent center */
+    if (geometry.bottomLeft().y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
+        geometry.bottomLeft().y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
+        geometry.moveBottomLeft({control->x(), parent->size().height() / 2.0});
+        control->setPos(geometry.topLeft());
+        center = geometry.center();
+        ret = true;
+    }
+
+    /* Child bottom <-> Parent bottom */
+    if (geometry.bottomLeft().y() <= parent->size().height() + MAGNETIC_FIELD &&
+        geometry.bottomLeft().y() >= parent->size().height() - MAGNETIC_FIELD) {
+        geometry.moveBottomLeft({control->x(), parent->size().height()});
+        control->setPos(geometry.topLeft());
+        center = geometry.center();
+        ret = true;
+    }
+
     for (auto childControl : parent->childControls()) {
         if (childControl == control)
             continue;
@@ -812,6 +848,60 @@ bool Page::stickSelectedControlToGuideLines() const
             center = geometry.center();
             ret = true;
         }
+
+        /* Item1 top <-> Item2 top */
+        if (geometry.y() <= cgeometry.y() + MAGNETIC_FIELD &&
+            geometry.y() >= cgeometry.y() - MAGNETIC_FIELD) {
+            geometry.moveTopLeft({geometry.x(), cgeometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 top <-> Item2 center */
+        if (geometry.y() <= ccenter.y() + MAGNETIC_FIELD &&
+            geometry.y() >= ccenter.y() - MAGNETIC_FIELD) {
+            geometry.moveTopLeft({geometry.x(), ccenter.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 top <-> Item2 bottom */
+        if (geometry.y() <= cgeometry.bottomLeft().y() + MAGNETIC_FIELD &&
+            geometry.y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
+            geometry.moveTopLeft({geometry.x(), cgeometry.bottomLeft().y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 bottom <-> Item2 top */
+        if (geometry.bottomLeft().y() <= cgeometry.y() + MAGNETIC_FIELD &&
+            geometry.bottomLeft().y() >= cgeometry.y() - MAGNETIC_FIELD) {
+            geometry.moveBottomLeft({geometry.x(), cgeometry.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 bottom <-> Item2 center */
+        if (geometry.bottomLeft().y() <= ccenter.y() + MAGNETIC_FIELD &&
+            geometry.bottomLeft().y() >= ccenter.y() - MAGNETIC_FIELD) {
+            geometry.moveBottomLeft({geometry.x(), ccenter.y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
+
+        /* Item1 bottom <-> Item2 bottom */
+        if (geometry.bottomLeft().y() <= cgeometry.bottomLeft().y() + MAGNETIC_FIELD &&
+            geometry.bottomLeft().y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
+            geometry.moveBottomLeft({geometry.x(), cgeometry.bottomLeft().y()});
+            control->setPos(geometry.topLeft());
+            center = geometry.center();
+            ret = true;
+        }
     }
 
     return ret;
@@ -858,6 +948,26 @@ QVector<QLineF> Page::guideLines() const
     /* Child right <-> Parent right */
     if (int(geometry.topRight().x()) == int(parent->size().width()))
         lines << QLineF(parent->mapToScene(QPointF(parent->size().width(), 0)),
+                        parent->mapToScene(QPointF(parent->size().width(), parent->size().height())));
+
+    /* Child top <-> Parent center */
+    if (int(geometry.y()) == int(parent->size().height() / 2.0))
+        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->size().height() / 2.0)),
+                        parent->mapToScene(QPointF(parent->size().width() / 2.0, parent->size().height() / 2.0)));
+
+    /* Child top <-> Parent top */
+    if (int(geometry.y()) == 0)
+        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
+                        parent->mapToScene(QPointF(parent->size().width(), 0)));
+
+    /* Child bottom <-> Parent center */
+    if (int(geometry.bottomLeft().y()) == int(parent->size().height() / 2.0))
+        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->size().height() / 2.0)),
+                        parent->mapToScene(QPointF(parent->size().width() / 2.0, parent->size().height() / 2.0)));
+
+    /* Child bottom <-> Parent bottom */
+    if (int(geometry.bottomLeft().y()) == int(parent->size().height()))
+        lines << QLineF(parent->mapToScene(QPointF(0, parent->size().height())),
                         parent->mapToScene(QPointF(parent->size().width(), parent->size().height())));
 
     for (auto childControl : parent->childControls()) {
@@ -909,6 +1019,20 @@ QVector<QLineF> Page::guideLines() const
             int(geometry.topRight().x()) == int(cgeometry.topRight().x()))
             lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
                             parent->mapToScene(QPointF(geometry.topRight().x(), ccenter.y())));
+
+        /* Item1 top <-> Item2 top/center/bottom */
+        if (int(geometry.y()) == int(cgeometry.y()) ||
+            int(geometry.y()) == int(ccenter.y()) ||
+            int(geometry.y()) == int(cgeometry.bottomLeft().y()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.y())),
+                            parent->mapToScene(QPointF(ccenter.x(), geometry.y())));
+
+        /* Item1 bottom <-> Item2 top/center/bottom */
+        if (int(geometry.bottomLeft().y()) == int(cgeometry.y()) ||
+            int(geometry.bottomLeft().y()) == int(ccenter.y()) ||
+            int(geometry.bottomLeft().y()) == int(cgeometry.bottomLeft().y()))
+            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.bottomLeft().y())),
+                            parent->mapToScene(QPointF(ccenter.x(), geometry.bottomLeft().y())));
     }
     return lines;
 }
