@@ -95,4 +95,42 @@ class Page : public Control
         bool _resizable;
 };
 
+class Resizer : public QGraphicsItem
+{
+    public:
+        enum Placement {
+            Top,
+            Right,
+            Bottom,
+            Left,
+            TopLeft,
+            TopRight,
+            BottomRight,
+            BottomLeft
+        };
+
+        explicit Resizer(Control *parent = Q_NULLPTR);
+        virtual ~Resizer() {}
+
+        Placement placement() const;
+        void setPlacement(const Placement& placement);
+
+        bool disabled() const;
+        void setDisabled(bool disabled);
+
+        static bool resizing();
+
+    protected:
+        virtual QRectF boundingRect() const override;
+        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+    private:
+        Placement _placement;
+        bool _disabled;
+        static bool _resizing;
+};
+
 #endif // CONTROL_H

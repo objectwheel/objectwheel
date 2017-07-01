@@ -19,7 +19,7 @@ class DesignerScene : public QGraphicsScene
             Desktop
         };
 
-        explicit DesignerScene(qreal x, qreal y, qreal width, qreal height, QObject *parent = Q_NULLPTR);
+        explicit DesignerScene(QObject *parent = Q_NULLPTR);
 
         const QList<Page*>& pages() const;
         void addPage(Page* page);

@@ -42,41 +42,7 @@ using namespace Fit;
 //!
 //! ********************** [Resizer] **********************
 //!
-
-class Resizer : public QGraphicsItem
-{
-    public:
-        enum Placement {
-            Top,
-            Right,
-            Bottom,
-            Left,
-            TopLeft,
-            TopRight,
-            BottomRight,
-            BottomLeft
-        };
-
-        explicit Resizer(Control *parent = Q_NULLPTR);
-        virtual ~Resizer() {}
-
-        Placement placement() const;
-        void setPlacement(const Placement& placement);
-
-        bool disabled() const;
-        void setDisabled(bool disabled);
-
-    protected:
-        virtual QRectF boundingRect() const override;
-        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
-        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-
-    private:
-        Placement _placement;
-        bool _disabled;
-};
+bool Resizer::_resizing = false;
 
 Resizer::Resizer(Control *parent)
     : QGraphicsItem(parent)
@@ -106,6 +72,7 @@ void Resizer::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mousePressEvent(event);
     event->accept();
+    _resizing = true;
 }
 
 void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
@@ -173,6 +140,7 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void Resizer::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
+    _resizing = false;
 }
 
 bool Resizer::disabled() const
@@ -183,6 +151,11 @@ bool Resizer::disabled() const
 void Resizer::setDisabled(bool disabled)
 {
     _disabled = disabled;
+}
+
+bool Resizer::resizing()
+{
+    return _resizing;
 }
 
 Resizer::Placement Resizer::placement() const
@@ -474,12 +447,17 @@ void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
     event->accept();
     if (event->button() == Qt::LeftButton)
         setCursor(Qt::SizeAllCursor);
+    else if (event->button() == Qt::MidButton)
+        event->ignore();
 }
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseMoveEvent(event);
-    event->accept();
+    if (event->button() == Qt::MidButton)
+        event->ignore();
+    else
+        event->accept();
 }
 
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
@@ -516,8 +494,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 {
     if (_d->itemPixmap.isNull()) return;
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5),
-                        _d->itemPixmap, _d->itemPixmap.rect());
+    painter->drawPixmap(rect(), _d->itemPixmap, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
 
     if (_d->dragIn) {
         if (_showOutline) {
@@ -528,8 +505,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(_d->itemPixmap.rect(), HIGHLIGHT_COLOR);
             p.end();
-            painter->drawPixmap(rect().adjusted(0.5, 0.5, -0.5, -0.5),
-                                highlight, _d->itemPixmap.rect());
+            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
         }
     }
 
@@ -576,8 +552,6 @@ Page::Page(Page* parent)
     : Control(parent)
     , _d(new PagePrivate(this))
 {
-    setFlag(ItemIsMovable, false);
-
     if (_skinSetting)
         _resizable = _skinSetting->resizable;
     else
@@ -586,6 +560,9 @@ Page::Page(Page* parent)
     for (auto& resizer : Control::_d->resizers) {
         resizer.setDisabled(!_resizable);
     }
+
+    setFlag(ItemIsMovable, false);
+    setFlag(ItemIsSelectable, _resizable);
 }
 
 void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -615,8 +592,7 @@ void Page::resizeEvent(QGraphicsSceneResizeEvent* event)
 
 void Page::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    Control::mousePressEvent(event);
-    setCursor(Qt::ArrowCursor);
+    event->ignore();
 }
 
 bool Page::resizable() const
@@ -627,6 +603,7 @@ bool Page::resizable() const
 void Page::setResizable(bool resizable)
 {
     _resizable = resizable;
+    setFlag(ItemIsSelectable, _resizable);
     for (auto& resizer : Control::_d->resizers) {
         resizer.setDisabled(!_resizable);
     }

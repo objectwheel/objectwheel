@@ -5,17 +5,17 @@
 #include <QPainter>
 #include <QDebug>
 
-#define NO_SKIN_SIZE (QSize(400, 400))
-#define PHONE_PORTRAIT_SIZE (QSize(256, 455))
-#define PHONE_LANDSCAPE_SIZE (QSize(455, 256))
-#define DESKTOP_SIZE (QSize(500, 350))
+#define NO_SKIN_SIZE (fit(QSize(400, 400)))
+#define PHONE_PORTRAIT_SIZE (fit(QSize(213, 379)))
+#define PHONE_LANDSCAPE_SIZE (fit(QSize(379, 213)))
+#define DESKTOP_SIZE (fit(QSize(500, 350)))
 
-#define PHONE_PORTRAIT_FRAME_RECT (QRectF(-((293 - PHONE_PORTRAIT_SIZE.width())/2.0), -((600 - PHONE_PORTRAIT_SIZE.height())/2.0), 294, 600))
-#define PHONE_LANDSCAPE_FRAME_RECT (QRectF(-((293 - PHONE_PORTRAIT_SIZE.width())/2.0), -((600 - PHONE_PORTRAIT_SIZE.height())/2.0), 294, 600))
-#define DESKTOP_FRAME_RECT (QRectF(-((293 - PHONE_PORTRAIT_SIZE.width())/2.0), -((600 - PHONE_PORTRAIT_SIZE.height())/2.0), 294, 600))
+#define PHONE_PORTRAIT_FRAME_RECT (QRectF(-((fit(244) - PHONE_PORTRAIT_SIZE.width())/2.0), -((fit(500) - PHONE_PORTRAIT_SIZE.height())/2.0), fit(245), fit(500)))
+#define PHONE_LANDSCAPE_FRAME_RECT (QRectF(-((fit(244) - PHONE_PORTRAIT_SIZE.width())/2.0), -((fit(500) - PHONE_PORTRAIT_SIZE.height())/2.0), fit(500), fit(245)))
+#define DESKTOP_FRAME_RECT (QRectF(-((fit(244) - PHONE_PORTRAIT_SIZE.width())/2.0), -((fit(500) - PHONE_PORTRAIT_SIZE.height())/2.0), fit(245), fit(500)))
 
 #define PHONE_PORTRAIT_SKIN_PATH (":/resources/images/phone.png")
-#define PHONE_LANDSCAPE_SKIN_PATH (":/resources/images/phone.png")
+#define PHONE_LANDSCAPE_SKIN_PATH (":/resources/images/phonel.png")
 #define DESKTOP_SKIN_PATH (":/resources/images/phone.png")
 
 using namespace Fit;
@@ -86,8 +86,8 @@ Page::SkinSetting* DesignerScenePrivate::skinSetting(const DesignerScene::Skin& 
     }
 }
 
-DesignerScene::DesignerScene(qreal x, qreal y, qreal width, qreal height, QObject *parent)
-    : QGraphicsScene(x, y, width, height, parent)
+DesignerScene::DesignerScene(QObject *parent)
+    : QGraphicsScene(parent)
     , _d(new DesignerScenePrivate(this))
     , _currentPage(nullptr)
 {
@@ -163,7 +163,7 @@ QList<Control*> DesignerScene::selectedControls() const
 {
     QList<Control*> selectedControls;
     for (auto item : selectedItems()) {
-        if (dynamic_cast<Control*>(item)) {
+        if (dynamic_cast<Control*>(item) && !dynamic_cast<Page*>(item)) {
             selectedControls << static_cast<Control*>(item);
         }
     }
@@ -175,8 +175,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsScene::mousePressEvent(event);
 
     const auto&  sControls = selectedControls();
-    if (sControls.size() > 0 && _currentPage &&
-        !sControls.contains(_currentPage)) {
+    if (sControls.size() > 0 && _currentPage) {
         for (auto control : _currentPage->childControls()) {
             if (sControls.contains(control))
                 control->setZValue(1); //BUG
@@ -185,7 +184,8 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
         }
     }
 
-    if (itemAt(event->scenePos(), QTransform()))
+    auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
+    if (selectedControls().contains((Control*)itemUnderMouse))
         _d->itemPressed = true;
 
     _d->itemMoving = false;
@@ -196,10 +196,8 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
-    if (_currentPage &&
-        selectedControls().size() > 0 &&
-        !_pages.contains((Page*)selectedControls()[0]) &&
-        _d->itemPressed) {
+    if (_currentPage && selectedControls().size() > 0 &&
+        _d->itemPressed && !Resizer::resizing()) {
         _d->itemMoving = true;
         _currentPage->stickSelectedControlToGuideLines();
     }
@@ -219,11 +217,23 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    if (_d->itemMoving) {
-        QPen pen(Qt::magenta);
+    if (_d->itemMoving || Resizer::resizing()) {
+        auto guideLines = _currentPage->guideLines();
+        QPen pen("#DB4C41");
         pen.setWidthF(fit(1.0));
+        pen.setJoinStyle(Qt::RoundJoin);
+        pen.setCapStyle(Qt::RoundCap);
+        pen.setStyle(Qt::DashLine);
         painter->setPen(pen);
-        painter->drawLines(_currentPage->guideLines());
+        painter->setBrush(pen.color());
+        painter->drawLines(guideLines);
+
+        for (QLineF line : guideLines) {
+            pen.setStyle(Qt::SolidLine);
+            painter->setPen(pen);
+            painter->drawRoundedRect(QRectF(line.p1() - QPointF(fit(2.0), fit(2.0)), QSizeF(fit(4.0), fit(4.0))), fit(2.0), fit(2.0));
+            painter->drawRoundedRect(QRectF(line.p2() - QPointF(fit(2.0), fit(2.0)), QSizeF(fit(4.0), fit(4.0))), fit(2.0), fit(2.0));
+        }
     }
 }
 

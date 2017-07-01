@@ -357,7 +357,7 @@ void MainWindowPrivate::setupUi()
     emIndicator = new EditModeIndicator(centralWidget);
 
     designManager = new DesignManager;
-    designManager->setSettleWidget(nullptr);
+    designManager->setSettleWidget(designWidget);
     designManager->showWidget();
 }
 

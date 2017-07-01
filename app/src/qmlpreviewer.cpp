@@ -1,4 +1,5 @@
 #include <qmlpreviewer.h>
+#include <fit.h>
 
 #include <QApplication>
 #include <QQuickWindow>
@@ -14,6 +15,8 @@
 #include <QtMath>
 #include <QTimer>
 
+using namespace Fit;
+
 class QmlPreviewerPrivate
 {
     public:
@@ -23,10 +26,12 @@ class QmlPreviewerPrivate
 
     public:
         QmlPreviewer* parent;
+        bool locked;
 };
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : parent(parent)
+    , locked(false)
 {
 }
 
@@ -91,41 +96,35 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
 
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
 
-    if (!window) {
+    if (window == nullptr) {
         auto item = static_cast<QQuickItem*>(qmlObject);
         window = QSharedPointer<QQuickWindow>(new QQuickWindow);
         item->setParentItem(window->contentItem());
-        if (!size.isValid())
-            window->resize(item->width(), item->height());
-        else
+        if (size.isValid())
             item->setSize(size);
+        else
+            item->setSize(QSizeF(fit(item->width()), fit(item->height())));
 
+        window->resize(qCeil(item->width()), qCeil(item->height()));
         window->setClearBeforeRendering(true);
         window->setColor(QColor(Qt::transparent));
+    } else {
+        if (size.isValid())
+            window->resize(QSize(qCeil(size.width()), qCeil(size.height())));
+        else
+            window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
     }
 
     window->setFlags(Qt::FramelessWindowHint);
     window->setOpacity(0);
     window->hide();
 
-    QSizeF gs;
-    if (size.isValid()) {
-        window->show();
-        window->resize(size.toSize());
-        window->hide();
-        gs = size * qApp->devicePixelRatio();
-    } else {
-        gs = QSizeF(window->width(), window->height()) * qApp->devicePixelRatio();
-    }
-    gs = QSize(qCeil(gs.width()), qCeil(gs.height()));
-
     QTimer::singleShot(100, [=] {
+        Q_UNUSED(qmlEngine);
+        Q_UNUSED(qmlComponent);
         QPixmap preview = QPixmap::fromImage(window->grabWindow());
         preview.setDevicePixelRatio(qApp->devicePixelRatio());
         _d->scratchPixmapIfEmpty(preview);
-        window->deleteLater();
-        qmlComponent->deleteLater();
-        qmlEngine->deleteLater();
         emit previewReady(preview, size);
     });
 }

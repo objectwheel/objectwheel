@@ -13,8 +13,8 @@
 #include <QMessageBox>
 
 #define PIXEL_SIZE 13
-#define REF_WIDTH 800
-#define REF_HEIGHT 500
+#define REF_WIDTH 940
+#define REF_HEIGHT 555
 #define REF_DPI 127
 
 /* Far tasks */
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 # endif
 
 	// Init application settings
-	QApplication::setStyle("fusion");
+//    QApplication::setStyle("fusion");
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -78,10 +78,10 @@ int main(int argc, char *argv[])
 	QtWebView::initialize();
 
 	// Add system wide fonts and set default font
-	QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
-	QFont font;
-	font.setPixelSize(Fit::fit(PIXEL_SIZE));
-	QApplication::setFont(font);
+    QFont font;
+    font.setPixelSize(Fit::fit(PIXEL_SIZE));
+    QApplication::setFont(font);
+    QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
 
 	// Start MainWidget
 	MainWindow w;

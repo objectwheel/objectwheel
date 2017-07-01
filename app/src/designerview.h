@@ -3,6 +3,8 @@
 
 #include <QGraphicsView>
 
+class DesignerViewPrivate;
+
 class DesignerView : public QGraphicsView
 {
         Q_OBJECT
@@ -11,6 +13,10 @@ class DesignerView : public QGraphicsView
 
     protected:
         virtual void resizeEvent(QResizeEvent* event) override;
+        virtual void contextMenuEvent(QContextMenuEvent *event) override;
+
+    private:
+        DesignerViewPrivate* _d;
 };
 
 #endif // DESIGNERVIEW_H
