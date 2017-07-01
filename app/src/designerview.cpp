@@ -1,18 +1,36 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <control.h>
+#include <fit.h>
 
 #include <QTimer>
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
 #include <QApplication>
+#include <QDebug>
+
+using namespace Fit;
+
 class DesignerViewPrivate : public QObject
 {
         Q_OBJECT
 
     public:
         DesignerViewPrivate(DesignerView* parent);
+
+    private slots:
+        void handleUndoAction();
+        void handleRedoAction();
+        void handleCutAction();
+        void handleCopyAction();
+        void handlePasteAction();
+        void handleDeleteAction();
+        void handleSelectAllAction();
+        void handleMoveUpAction();
+        void handleMoveDownAction();
+        void handleMoveRightAction();
+        void handleMoveLeftAction();
 
     public:
         DesignerView* parent;
@@ -25,6 +43,10 @@ class DesignerViewPrivate : public QObject
         QAction pasteAct;
         QAction selectAllAct;
         QAction deleteAct;
+        QAction moveUpAct;
+        QAction moveDownAct;
+        QAction moveRightAct;
+        QAction moveLeftAct;
         QMenu menu;
 };
 
@@ -33,27 +55,24 @@ DesignerViewPrivate::DesignerViewPrivate(DesignerView* parent)
 {
     sendBackAct.setText("Send to Back");
     bringFrontAct.setText("Bring to Front");
-
     undoAct.setText("Undo");
     undoAct.setShortcut(QKeySequence::Undo);
-
     redoAct.setText("Redo");
     redoAct.setShortcut(QKeySequence::Redo);
-
     cutAct.setText("Cut");
     cutAct.setShortcut(QKeySequence::Cut);
-
     copyAct.setText("Copy");
     copyAct.setShortcut(QKeySequence::Copy);
-
     pasteAct.setText("Paste");
     pasteAct.setShortcut(QKeySequence::Paste);
-
-    selectAllAct.setText("Select All");
-    selectAllAct.setShortcut(QKeySequence::SelectAll);
-
     deleteAct.setText("Delete");
     deleteAct.setShortcut(QKeySequence::Delete);
+    selectAllAct.setText("Select All");
+    selectAllAct.setShortcut(QKeySequence::SelectAll);
+    moveUpAct.setShortcut(Qt::Key_Up);
+    moveDownAct.setShortcut(Qt::Key_Down);
+    moveRightAct.setShortcut(Qt::Key_Right);
+    moveLeftAct.setShortcut(Qt::Key_Left);
 
     menu.addAction(&sendBackAct);
     menu.addAction(&bringFrontAct);
@@ -67,6 +86,102 @@ DesignerViewPrivate::DesignerViewPrivate(DesignerView* parent)
     menu.addAction(&deleteAct);
     menu.addSeparator();
     menu.addAction(&selectAllAct);
+
+    parent->addAction(&undoAct);
+    parent->addAction(&redoAct);
+    parent->addAction(&cutAct);
+    parent->addAction(&copyAct);
+    parent->addAction(&pasteAct);
+    parent->addAction(&deleteAct);
+    parent->addAction(&selectAllAct);
+    parent->addAction(&moveUpAct);
+    parent->addAction(&moveDownAct);
+    parent->addAction(&moveRightAct);
+    parent->addAction(&moveLeftAct);
+
+    connect(&undoAct, SIGNAL(triggered()), SLOT(handleUndoAction()));
+    connect(&redoAct, SIGNAL(triggered()), SLOT(handleRedoAction()));
+    connect(&cutAct, SIGNAL(triggered()), SLOT(handleCutAction()));
+    connect(&copyAct, SIGNAL(triggered()), SLOT(handleCopyAction()));
+    connect(&pasteAct, SIGNAL(triggered()), SLOT(handlePasteAction()));
+    connect(&deleteAct, SIGNAL(triggered()), SLOT(handleDeleteAction()));
+    connect(&selectAllAct, SIGNAL(triggered()), SLOT(handleSelectAllAction()));
+    connect(&moveUpAct, SIGNAL(triggered()), SLOT(handleMoveUpAction()));
+    connect(&moveDownAct, SIGNAL(triggered()), SLOT(handleMoveDownAction()));
+    connect(&moveRightAct, SIGNAL(triggered()), SLOT(handleMoveRightAction()));
+    connect(&moveLeftAct, SIGNAL(triggered()), SLOT(handleMoveLeftAction()));
+
+}
+
+void DesignerViewPrivate::handleUndoAction()
+{
+    //TODO
+}
+
+void DesignerViewPrivate::handleRedoAction()
+{
+    //TODO
+}
+
+void DesignerViewPrivate::handleCutAction()
+{
+    //TODO
+}
+
+void DesignerViewPrivate::handleCopyAction()
+{
+    //TODO
+}
+
+void DesignerViewPrivate::handlePasteAction()
+{
+    //TODO
+}
+
+void DesignerViewPrivate::handleDeleteAction()
+{
+    //TODO
+    qDebug() << "delete triggered";
+}
+
+void DesignerViewPrivate::handleSelectAllAction()
+{
+    auto currentPage = ((DesignerScene*)parent->scene())->currentPage();
+    for (auto control : currentPage->childControls()) {
+        control->setSelected(true);
+    }
+}
+
+void DesignerViewPrivate::handleMoveUpAction()
+{
+    auto scene = static_cast<DesignerScene*>(parent->scene());
+    for (auto control : scene->selectedControls()) {
+        control->moveBy(0, - fit(1));
+    }
+}
+
+void DesignerViewPrivate::handleMoveDownAction()
+{
+    auto scene = static_cast<DesignerScene*>(parent->scene());
+    for (auto control : scene->selectedControls()) {
+        control->moveBy(0, fit(1));
+    }
+}
+
+void DesignerViewPrivate::handleMoveRightAction()
+{
+    auto scene = static_cast<DesignerScene*>(parent->scene());
+    for (auto control : scene->selectedControls()) {
+        control->moveBy(fit(1), 0);
+    }
+}
+
+void DesignerViewPrivate::handleMoveLeftAction()
+{
+    auto scene = static_cast<DesignerScene*>(parent->scene());
+    for (auto control : scene->selectedControls()) {
+        control->moveBy(- fit(1), 0);
+    }
 }
 
 DesignerView::DesignerView(QGraphicsScene* scene, QWidget* parent)
