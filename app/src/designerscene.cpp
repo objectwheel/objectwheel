@@ -152,7 +152,7 @@ QList<Control*> DesignerScene::controls(Qt::SortOrder order) const
 {
     QList<Control*> controls;
     for (auto item : items(order)) {
-        if (dynamic_cast<Control*>(item)) {
+        if (dynamic_cast<Control*>(item) && !dynamic_cast<Page*>(item)) {
             controls << static_cast<Control*>(item);
         }
     }

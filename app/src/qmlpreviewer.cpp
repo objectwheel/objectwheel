@@ -83,6 +83,7 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
     if (!url.isValid())
         return;
 
+    QSizeF rsize;
     QObject* qmlObject;
     QSharedPointer<QQmlEngine> qmlEngine(new QQmlEngine);
     QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
@@ -105,6 +106,8 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
         else
             item->setSize(QSizeF(fit(item->width()), fit(item->height())));
 
+        rsize = QSizeF(item->width(), item->height());
+
         window->resize(qCeil(item->width()), qCeil(item->height()));
         window->setClearBeforeRendering(true);
         window->setColor(QColor(Qt::transparent));
@@ -113,6 +116,8 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
             window->resize(QSize(qCeil(size.width()), qCeil(size.height())));
         else
             window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
+
+        rsize = window->size();
     }
 
     window->setFlags(Qt::FramelessWindowHint);
@@ -125,7 +130,7 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
         QPixmap preview = QPixmap::fromImage(window->grabWindow());
         preview.setDevicePixelRatio(qApp->devicePixelRatio());
         _d->scratchPixmapIfEmpty(preview);
-        emit previewReady(preview, size);
+        emit previewReady(preview, rsize, size.isValid());
     });
 }
 

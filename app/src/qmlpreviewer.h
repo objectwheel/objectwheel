@@ -15,7 +15,7 @@ class QmlPreviewer : public QObject
         explicit QmlPreviewer(QObject *parent = 0);
 
     signals:
-        void previewReady(const QPixmap& preview, const QSizeF& size) const;
+        void previewReady(const QPixmap& preview, const QSizeF& size, const bool valid) const;
 
     public slots:
         void requestReview(const QUrl& url, const QSizeF& size = QSizeF());

@@ -218,7 +218,7 @@ class ControlPrivate : public QObject
 
     public slots:
         void refreshPreview();
-        void updatePreview(const QPixmap& preview, const QSizeF& size);
+        void updatePreview(const QPixmap& preview, const QSizeF& size, const bool valid);
 
     public:
         Control* parent;
@@ -242,8 +242,8 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
     QObject::connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap, QSizeF)),
-                     SLOT(updatePreview(QPixmap, QSizeF)));
+    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap, QSizeF, bool)),
+                     SLOT(updatePreview(QPixmap, QSizeF, bool)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -318,10 +318,10 @@ void ControlPrivate::refreshPreview()
     qmlPreviewer.requestReview(parent->url(), size);
 }
 
-void ControlPrivate::updatePreview(const QPixmap& preview, const QSizeF& size)
+void ControlPrivate::updatePreview(const QPixmap& preview, const QSizeF& size, const bool valid)
 {
-    if (!size.isValid())
-        parent->resize(preview.size() / qApp->devicePixelRatio());
+    if (!valid)
+        parent->resize(size);
 
     itemPixmap = preview;
     parent->update();
