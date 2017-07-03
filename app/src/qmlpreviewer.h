@@ -4,8 +4,17 @@
 #include <QObject>
 #include <QPointer>
 #include <QWidget>
+#include <QQmlError>
+#include <QList>
 
 class QmlPreviewerPrivate;
+
+struct PreviewResult {
+        QPixmap preview;
+        QSizeF size;
+        QString id;
+        bool initial;
+};
 
 class QmlPreviewer : public QObject
 {
@@ -15,7 +24,8 @@ class QmlPreviewer : public QObject
         explicit QmlPreviewer(QObject *parent = 0);
 
     signals:
-        void previewReady(const QPixmap& preview, const QSizeF& size, const bool valid) const;
+        void previewReady(const PreviewResult& result);
+        void errorsOccurred(const QList<QQmlError>& errors);
 
     public slots:
         void requestReview(const QUrl& url, const QSizeF& size = QSizeF());

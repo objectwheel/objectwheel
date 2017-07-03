@@ -49,6 +49,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
         auto page = new Page;
         page->setId("applicationWindow");
         page->setUrl(QUrl("qrc:/resources/qmls/mainPage.qml"));
+        page->refresh();
         designerScene.addPage(page);
     });
 

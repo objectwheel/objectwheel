@@ -29,8 +29,10 @@ class Control : public QGraphicsWidget
         QList<Control*> childControls() const;
         Control* parentControl() const;
 
-    protected:
+    public slots:
         virtual void refresh();
+
+    protected:
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -78,6 +80,9 @@ class Page : public Control
 
         bool stickSelectedControlToGuideLines() const;
         QVector<QLineF> guideLines() const;
+
+        using Control::contains;
+        bool contains(const QString& id) const;
 
     public slots:
         void centralize();

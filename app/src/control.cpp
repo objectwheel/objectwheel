@@ -3,6 +3,7 @@
 #include <fit.h>
 #include <qmlpreviewer.h>
 #include <designerscene.h>
+#include <savemanager.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -25,6 +26,7 @@
 #include <QSharedPointer>
 #include <QGraphicsSceneDragDropEvent>
 #include <QGraphicsSceneMouseEvent>
+#include <QMessageBox>
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 #define RESIZER_SIZE (fit(6.0))
@@ -218,7 +220,8 @@ class ControlPrivate : public QObject
 
     public slots:
         void refreshPreview();
-        void updatePreview(const QPixmap& preview, const QSizeF& size, const bool valid);
+        void updatePreview(const PreviewResult& result);
+        void handlePreviewErrors(QList<QQmlError> errors);
 
     public:
         Control* parent;
@@ -241,9 +244,11 @@ ControlPrivate::ControlPrivate(Control* parent)
     }
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
-    QObject::connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    QObject::connect(&qmlPreviewer, SIGNAL(previewReady(QPixmap, QSizeF, bool)),
-                     SLOT(updatePreview(QPixmap, QSizeF, bool)));
+    connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
+    connect(&qmlPreviewer, SIGNAL(errorsOccurred(QList<QQmlError>)),
+            SLOT(handlePreviewErrors(QList<QQmlError>)));
+    connect(&qmlPreviewer, SIGNAL(previewReady(PreviewResult)),
+            SLOT(updatePreview(PreviewResult)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -318,13 +323,41 @@ void ControlPrivate::refreshPreview()
     qmlPreviewer.requestReview(parent->url(), size);
 }
 
-void ControlPrivate::updatePreview(const QPixmap& preview, const QSizeF& size, const bool valid)
+void ControlPrivate::updatePreview(const PreviewResult& result)
 {
-    if (!valid)
-        parent->resize(size);
+    if (result.initial) {
+        auto scene = static_cast<DesignerScene*>(parent->scene());
+        auto currentPage = scene->currentPage();
+        auto id = result.id;
 
-    itemPixmap = preview;
+        for (int i = 1; currentPage->contains(id); i++)
+            id = result.id + QString::number(i);
+
+        parent->setId(id);
+        parent->resize(result.size);
+
+        SaveManager::addSave(id, parent->url().toLocalFile());
+        SaveManager::setId(id, id);
+        SaveManager::addParentalRelationship(id, parent->parentControl()->id());
+        SaveManager::setVariantProperty(id, "x", parent->x());
+        SaveManager::setVariantProperty(id, "y", parent->y());
+    }
+
+    itemPixmap = result.preview;
     parent->update();
+}
+
+void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors)
+{
+    QMessageBox box;
+    box.setText("<b>This tool has some errors, please fix these first.</b>");
+    box.setInformativeText(errors[0].description());
+    box.setStandardButtons(QMessageBox::Ok);
+    box.setDefaultButton(QMessageBox::Ok);
+    box.setIcon(QMessageBox::Information);
+    box.exec();
+
+    parent->scene()->removeItem(parent);
 }
 
 //!
@@ -395,7 +428,6 @@ QUrl Control::url() const
 void Control::setUrl(const QUrl& url)
 {
     _url = url;
-    refresh();
 }
 
 void Control::refresh()
@@ -430,13 +462,18 @@ void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
+    _d->dragIn = false;
+
+    scene()->clearSelection();
+
     auto control = new Control;
-    control->setId("eben");
     control->setUrl(event->mimeData()->urls().at(0));
     control->setParentItem(this);
     control->setPos(event->pos());
+    control->setSelected(true);
+    control->refresh();
+
     scene()->addItem(control);
-    _d->dragIn = false;
     event->accept();
     update();
 }
@@ -1012,6 +1049,15 @@ QVector<QLineF> Page::guideLines() const
                             parent->mapToScene(QPointF(ccenter.x(), geometry.bottomLeft().y())));
     }
     return lines;
+}
+
+bool Page::contains(const QString& id) const
+{
+    for (auto control : childControls()) {
+        if (control->id() == id)
+            return true;
+    }
+    return false;
 }
 
 bool Page::mainPage() const

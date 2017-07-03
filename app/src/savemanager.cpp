@@ -534,7 +534,7 @@ void SaveManager::setId(const QString& id, const QString& newId)
     m_d->applierTimer.start();
 }
 
-void SaveManager::idApplier()
+void SaveManager::idApplier() // BUG
 {
     m_d->applierTimer.stop();
    if (saveDirectory(m_d->id).isEmpty()) return;

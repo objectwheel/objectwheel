@@ -8,6 +8,7 @@
 #include <QQuickItem>
 #include <QQmlEngine>
 #include <QQmlComponent>
+#include <QQmlContext>
 #include <QPixmap>
 #include <QPainter>
 #include <QBrush>
@@ -26,12 +27,10 @@ class QmlPreviewerPrivate
 
     public:
         QmlPreviewer* parent;
-        bool locked;
 };
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : parent(parent)
-    , locked(false)
 {
 }
 
@@ -80,11 +79,15 @@ QmlPreviewer::QmlPreviewer(QObject *parent)
 
 void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
 {
-    if (!url.isValid())
+    if (!url.isValid()) {
+        QQmlError error;
+        error.setDescription("Invalid url");
+        emit errorsOccurred(QList<QQmlError>() << error);
         return;
+    }
 
-    QSizeF rsize;
     QObject* qmlObject;
+    PreviewResult result;
     QSharedPointer<QQmlEngine> qmlEngine(new QQmlEngine);
     QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
     QSharedPointer<QQuickWindow> window;
@@ -92,21 +95,26 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
     qmlComponent->loadUrl(url);
     qmlObject = qmlComponent->create();
 
-    if (!qmlComponent->errors().isEmpty())
+    if (!qmlComponent->errors().isEmpty()) {
+        emit errorsOccurred(qmlComponent->errors());
         return;
+    }
 
+    result.initial = !size.isValid();
+    result.id = qmlContext(qmlObject)->nameForObject(qmlObject);
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
 
     if (window == nullptr) {
         auto item = static_cast<QQuickItem*>(qmlObject);
         window = QSharedPointer<QQuickWindow>(new QQuickWindow);
         item->setParentItem(window->contentItem());
+
         if (size.isValid())
             item->setSize(size);
         else
             item->setSize(QSizeF(fit(item->width()), fit(item->height())));
 
-        rsize = QSizeF(item->width(), item->height());
+        result.size = QSizeF(item->width(), item->height());
 
         window->resize(qCeil(item->width()), qCeil(item->height()));
         window->setClearBeforeRendering(true);
@@ -117,20 +125,24 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
         else
             window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
 
-        rsize = window->size();
+        result.size = window->size();
     }
 
     window->setFlags(Qt::FramelessWindowHint);
     window->setOpacity(0);
     window->hide();
 
-    QTimer::singleShot(100, [=] {
-        Q_UNUSED(qmlEngine);
-        Q_UNUSED(qmlComponent);
+    QTimer::singleShot(100, [=] () mutable {
+        Q_UNUSED(qmlEngine)
+        Q_UNUSED(qmlComponent)
+
         QPixmap preview = QPixmap::fromImage(window->grabWindow());
         preview.setDevicePixelRatio(qApp->devicePixelRatio());
         _d->scratchPixmapIfEmpty(preview);
-        emit previewReady(preview, rsize, size.isValid());
+
+        result.preview = preview;
+
+        emit previewReady(result);
     });
 }
 
