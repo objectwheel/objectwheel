@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <control.h>
 #include <fit.h>
+#include <savemanager.h>
 
 #include <QTimer>
 #include <QContextMenuEvent>
@@ -140,8 +141,19 @@ void DesignerViewPrivate::handlePasteAction()
 
 void DesignerViewPrivate::handleDeleteAction()
 {
-    //TODO
-    qDebug() << "delete triggered";
+    auto scene = static_cast<DesignerScene*>(parent->scene());
+
+    auto removeControl = [scene] (Control* control) {
+        SaveManager::removeSave(control->id());
+        SaveManager::removeParentalRelationship(control->id());
+        scene->removeItem(control);
+    };
+
+    for (auto control : scene->selectedControls()) {
+        for (auto childControl : control->childControls())
+            removeControl(childControl);
+        removeControl(control);
+    }
 }
 
 void DesignerViewPrivate::handleSelectAllAction()

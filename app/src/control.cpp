@@ -4,6 +4,7 @@
 #include <qmlpreviewer.h>
 #include <designerscene.h>
 #include <savemanager.h>
+#include <delayer.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -325,6 +326,8 @@ void ControlPrivate::refreshPreview()
 
 void ControlPrivate::updatePreview(const PreviewResult& result)
 {
+    itemPixmap = result.preview;
+
     if (result.initial) {
         auto scene = static_cast<DesignerScene*>(parent->scene());
         auto currentPage = scene->currentPage();
@@ -335,6 +338,7 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 
         parent->setId(id);
         parent->resize(result.size);
+        Delayer::delay(100);
 
         SaveManager::addSave(id, parent->url().toLocalFile());
         SaveManager::setId(id, id);
@@ -343,7 +347,6 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         SaveManager::setVariantProperty(id, "y", parent->y());
     }
 
-    itemPixmap = result.preview;
     parent->update();
 }
 
@@ -599,7 +602,7 @@ Page::Page(Page* parent)
     }
 
     setFlag(ItemIsMovable, false);
-    setFlag(ItemIsSelectable, _resizable);
+//    setFlag(ItemIsSelectable, _resizable);
 }
 
 void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -640,7 +643,7 @@ bool Page::resizable() const
 void Page::setResizable(bool resizable)
 {
     _resizable = resizable;
-    setFlag(ItemIsSelectable, _resizable);
+//    setFlag(ItemIsSelectable, _resizable);
     for (auto& resizer : Control::_d->resizers) {
         resizer.setDisabled(!_resizable);
     }

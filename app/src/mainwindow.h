@@ -39,7 +39,6 @@ class MainWindow : public QWidget
 		static const QQuickItemList GetAllChildren(QQuickItem* const item);
 		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
-		void fixWebViewPosition(QQuickItem* const item);
 		const QPixmap DownloadPixmap(const QUrl& url);
 		static bool addControlWithoutSave(const QUrl& url, const QString& parent);
 		void clearStudio();
@@ -59,7 +58,6 @@ class MainWindow : public QWidget
 		void toolboxImportButtonClicked();
 		void toolboxExportButtonClicked();
 		void handleImports(const QStringList& fileNames);
-		void fixWebViewPositions();
 		void HideSelectionTools();
 		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index);

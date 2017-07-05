@@ -553,69 +553,12 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 						SaveManager::setVariantProperty(m_d->designWidget->rootContext()
 														->nameForObject(pressedItem),
 														"y",pressedItem->y());
-						fixWebViewPosition(pressedItem);
+//						fixWebViewPosition(pressedItem);
 						ShowSelectionTools(pressedItem);
 						return true;
 					}
 				}
 
-				/* Handled drops coming from toolbox */
-				if (dropEvent->mimeData()->hasUrls()) // WARNING: All kind of urls enter!
-				{
-					auto url = dropEvent->mimeData()->urls().at(0);
-                    m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
-					QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
-					component.loadUrl(url);
-
-					QQmlIncubator incubator;
-					component.create(incubator, m_d->designWidget->rootContext());
-                    Delayer::delay(&incubator, &QQmlIncubator::isLoading);
-					QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
-
-                    if (component.isError() || !qml) {
-						QMessageBox msgBox;
-						msgBox.setText("<b>This tool has some errors, please fix these first.</b>");
-						msgBox.setStandardButtons(QMessageBox::Ok);
-						msgBox.setDefaultButton(QMessageBox::Ok);
-						msgBox.setIcon(QMessageBox::Information);
-						msgBox.exec();
-						return true;
-					}
-
-					int count = 1;
-					QString componentName = qmlContext(qml)->nameForObject(qml);
-					if (componentName.isEmpty()) componentName = "anonymous";
-					for (int i=0; i<m_d->m_Items.size();i++) {
-						if (componentName == QString(m_d->designWidget->rootContext()->nameForObject(m_d->m_Items[i])) ||
-							componentName == QString("dpi") || componentName == QString("swipeView")) {
-							// FIXME: If it's conflict with page names?
-                            if (componentName.at(componentName.size() - 1).isNumber()) {
-                                componentName.remove(componentName.size() - 1, 1);
-                            }
-							componentName += QString::number(count);
-							count++;
-							i = -1;
-						}
-					}
-					m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
-                    SaveManager::setId(componentName, componentName);
-					qml->setParentItem(m_CurrentPage);
-					qml->setPosition(qml->mapFromItem(m_CurrentPage, dropEvent->pos()));
-                    qml->setEnabled(!m_d->editMode);
-					fit(qml, Fit::WidthHeight);
-					m_d->m_Items << qml;
-					m_d->m_ItemUrls << url;
-					SaveManager::addSave(componentName, url.toLocalFile());
-					SaveManager::addParentalRelationship(componentName, m_d->designWidget->rootContext()->nameForObject(m_CurrentPage));
-					SaveManager::setVariantProperty(componentName, "x", qml->x());
-					SaveManager::setVariantProperty(componentName, "y", qml->y());
-					SaveManager::setVariantProperty(componentName, "clip", qml->clip());
-					SaveManager::setVariantProperty(componentName, "enabled", qml->isEnabled());
-
-					QTimer::singleShot(200, [qml, this] { fixWebViewPosition(qml); });
-                    if (m_d->editMode) ShowSelectionTools(qml);
-					return true;
-				}
 				return false;
 			}
 
@@ -693,7 +636,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 		}
 	} else if (object == m_d->centralWidget) {
 		if (event->type() == QEvent::Move) {
-			fixWebViewPositions();
+//			fixWebViewPositions();
 			return false;
 		}
 	} else {
@@ -707,63 +650,6 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 	m_d->qmlEditor->setGeometry(0, 0, width(), height());
 	QWidget::resizeEvent(event);
 	emit resized();
-}
-
-void MainWindow::fixWebViewPosition(QQuickItem* const item)
-{
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WINPHONE)
-	// FIXME: If object resized or rotated
-	// WARNING: All controls could only have one single webview
-	QQuickItem* view = nullptr;
-	for (auto ccitem : item->findChildren<QObject*>()) {
-		if (QString(ccitem->metaObject()->className()) == "QQuickWebView")
-			view = qobject_cast<QQuickItem*>(ccitem);
-	}
-	if (!view) return;
-
-	QWindow* main_window = nullptr;
-	for (auto window : QApplication::allWindows()) {
-		if (QString(window->metaObject()->className()) == "QWidgetWindow" &&
-			window->objectName() == "MainWindowWindow") {
-			main_window = window;
-		}
-	}
-	if (!main_window) return;
-
-	int count = 0;
-	for (auto citem : m_d->m_Items) {
-		if (citem == item) break;
-		for (auto ccitem : citem->findChildren<QObject*>()) {
-			if (QString(ccitem->metaObject()->className()) == "QQuickWebView")
-				count++;
-		}
-	}
-
-#if defined(Q_OS_IOS)
-	IOS::fixCoordOfWebView(main_window, view, count);
-#else
-	int count_2 = 0;
-	for (auto child : main_window->children()) { //WARNING: We assume all child windows of QWidgetWindow are WebViews
-		auto window = qobject_cast<QWindow*>(child);
-		if (!window) continue;
-		if (count_2 == count) {
-			window->setPosition(view->parentItem()->mapToGlobal(view->position()).toPoint());
-			QApplication::processEvents(QEventLoop::AllEvents);
-			break;
-		}
-		count_2++;
-	}
-#endif
-
-#else
-	Q_UNUSED(item)
-#endif
-}
-
-void MainWindow::fixWebViewPositions()
-{
-	for (auto item : m_d->m_Items)
-		fixWebViewPosition(item);
 }
 
 QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
@@ -1258,7 +1144,7 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 	m_d->m_Items << qml;
 	m_d->m_ItemUrls << url;
 
-	QTimer::singleShot(200, [qml] { m_d->parent->fixWebViewPosition(qml); });
+//	QTimer::singleShot(200, [qml] { m_d->parent->fixWebViewPosition(qml); });
     if (m_d->editMode) m_d->parent->ShowSelectionTools(qml);
 	return true;
 }
