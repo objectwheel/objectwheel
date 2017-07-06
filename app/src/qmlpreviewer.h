@@ -13,6 +13,7 @@ struct PreviewResult {
         QPixmap preview;
         QSizeF size;
         QString id;
+        bool clip;
         bool initial;
 };
 

@@ -31,13 +31,13 @@
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 #define RESIZER_SIZE (fit(6.0))
-#define HIGHLIGHT_COLOR ("#20404447")
+#define HIGHLIGHT_COLOR ("#100085ff")
 #define SELECTION_COLOR ("#444444")
 #define OUTLINE_COLOR (Qt::gray)
 #define RESIZER_COLOR (Qt::white)
 #define RESIZER_OUTLINE_COLOR ("#252525")
 #define PREVIEW_REFRESH_INTERVAL 100
-
+#define RESIZE_TRANSACTION_INTERVAL 800
 #define MAGNETIC_FIELD (fit(3))
 
 using namespace Fit;
@@ -48,13 +48,16 @@ using namespace Fit;
 bool Resizer::_resizing = false;
 
 Resizer::Resizer(Control *parent)
-    : QGraphicsItem(parent)
+    : QGraphicsWidget(parent)
     , _placement(Top)
     , _disabled(false)
 {
     setVisible(false);
     setAcceptedMouseButtons(Qt::LeftButton);
     setAcceptHoverEvents(true);
+
+    _transactionTimer.setInterval(RESIZE_TRANSACTION_INTERVAL);
+    connect(&_transactionTimer, SIGNAL(timeout()), SLOT(startTransaction()));
 }
 
 QRectF Resizer::boundingRect() const
@@ -138,12 +141,24 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         parent->size().height() < RESIZER_SIZE) {
         parent->resize(startSize);
     }
+
+    _transactionTimer.start();
 }
 
 void Resizer::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
     _resizing = false;
+}
+
+void Resizer::startTransaction()
+{
+    _transactionTimer.stop();
+    auto* parent = static_cast<Control*>(parentItem());
+    SaveManager::setVariantProperty(parent->id(), "x", parent->x());
+    SaveManager::setVariantProperty(parent->id(), "y", parent->y());
+    SaveManager::setVariantProperty(parent->id(), "width", parent->size().width());
+    SaveManager::setVariantProperty(parent->id(), "height", parent->size().height());
 }
 
 bool Resizer::disabled() const
@@ -230,7 +245,6 @@ class ControlPrivate : public QObject
         Resizer resizers[8];
         QTimer refreshTimer;
         QmlPreviewer qmlPreviewer;
-        bool dragIn = false;
 };
 
 
@@ -338,6 +352,7 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 
         parent->setId(id);
         parent->resize(result.size);
+        parent->setClip(result.clip);
         Delayer::delay(100);
 
         SaveManager::addSave(id, parent->url().toLocalFile());
@@ -372,6 +387,9 @@ bool Control::_showOutline = false;
 Control::Control(Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
+    , _dragging(false)
+    , _dragIn(false)
+    , _clip(true)
 {
     setFlag(ItemIsFocusable);
     setFlag(ItemIsSelectable);
@@ -403,6 +421,7 @@ QList<Control*> Control::childControls() const
     for (auto item : childItems()) {
         if (dynamic_cast<Control*>(item)) {
             controls << static_cast<Control*>(item);
+            controls << controls.last()->childControls();
         }
     }
     return controls;
@@ -411,6 +430,17 @@ QList<Control*> Control::childControls() const
 Control* Control::parentControl() const
 {
     return dynamic_cast<Control*>(parentItem());
+}
+
+QList<Control*> Control::collidingControls(Qt::ItemSelectionMode mode) const
+{
+    QList<Control*> list;
+    for (auto item : collidingItems(mode)) {
+        auto control = dynamic_cast<Control*>(item);
+        if (control)
+            list << control;
+    }
+    return list;
 }
 
 QString Control::id() const
@@ -438,12 +468,24 @@ void Control::refresh()
     _d->refreshTimer.start();
 }
 
+void Control::dropControl(Control* control)
+{
+    control->setPos(mapFromItem(control->parentItem(), control->pos()));
+    control->setParentItem(this);
+    control->refresh();
+
+    SaveManager::addParentalRelationship(control->id(), id());
+    SaveManager::setVariantProperty(control->id(), "x", control->x());
+    SaveManager::setVariantProperty(control->id(), "y", control->y());
+    update();
+}
+
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
     auto mimeData = event->mimeData();
     if (mimeData->hasUrls() && mimeData->hasText() &&
         mimeData->text() == TOOLBOX_ITEM_KEY) {
-        _d->dragIn = true;
+        _dragIn = true;
         event->accept();
     } else {
         event->ignore();
@@ -453,7 +495,7 @@ void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
 {
-    _d->dragIn = false;
+    _dragIn = false;
     event->accept();
     update();
 }
@@ -465,7 +507,7 @@ void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
-    _d->dragIn = false;
+    _dragIn = false;
 
     scene()->clearSelection();
 
@@ -484,16 +526,32 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mousePressEvent(event);
-    event->accept();
-    if (event->button() == Qt::LeftButton)
-        setCursor(Qt::SizeAllCursor);
-    else if (event->button() == Qt::MidButton)
+
+    if (event->button() == Qt::MidButton)
         event->ignore();
+    else
+        event->accept();
 }
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseMoveEvent(event);
+
+    Control* control = nullptr;
+    auto items = scene()->items(event->scenePos());
+    if (_dragging && items.size() > 1 && (control = dynamic_cast<Control*>(items[1])) &&
+        control != this) {
+        control->setDragIn(true);
+
+        auto scene = static_cast<DesignerScene*>(this->scene());
+        for (auto c : scene->currentPage()->childControls())
+            if (c != control)
+                c->setDragIn(false);
+
+        if (scene->currentPage() != control)
+            scene->currentPage()->setDragIn(false);
+    }
+
     if (event->button() == Qt::MidButton)
         event->ignore();
     else
@@ -503,8 +561,28 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseReleaseEvent(event);
+
+    auto scene = static_cast<DesignerScene*>(this->scene());
+
+    for (auto control : scene->currentPage()->childControls()) {
+        if (control->dragIn() && dragging() &&
+            parentControl() != control) {
+            control->dropControl(this);
+            scene->clearSelection();
+            control->setSelected(true);
+        }
+        control->setDragIn(false);
+    }
+
+    if (scene->currentPage()->dragIn() && dragging() &&
+        parentControl() != scene->currentPage()) {
+        scene->currentPage()->dropControl(this);
+        scene->clearSelection();
+        scene->currentPage()->setSelected(true);
+    }
+    scene->currentPage()->setDragIn(false);
+
     event->accept();
-    setCursor(Qt::ArrowCursor);
 }
 
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
@@ -530,13 +608,54 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
     return QGraphicsWidget::itemChange(change, value);
 }
 
+bool Control::clip() const
+{
+    return _clip;
+}
+
+void Control::setClip(bool clip)
+{
+    _clip = clip;
+}
+
+bool Control::dragIn() const
+{
+    return _dragIn;
+}
+
+void Control::setDragIn(bool dragIn)
+{
+    _dragIn = dragIn;
+}
+
+bool Control::dragging() const
+{
+    return _dragging;
+}
+
+void Control::setDragging(bool dragging)
+{
+    _dragging = dragging;
+
+    if (dragging)
+        setCursor(Qt::SizeAllCursor);
+    else
+        setCursor(Qt::ArrowCursor);
+}
+
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (_d->itemPixmap.isNull()) return;
+    if (_d->itemPixmap.isNull())
+        return;
+
+    if (parentControl() && parentControl()->clip() && !_dragging)
+        painter->setClipRect(rect().intersected(parentControl()->mapToItem(this, parentControl()->rect().adjusted(1, 1, -1, -1))
+                                                .boundingRect()));
+
     painter->setRenderHint(QPainter::Antialiasing);
     painter->drawPixmap(rect(), _d->itemPixmap, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
 
-    if (_d->dragIn) {
+    if (_dragIn) {
         if (_showOutline) {
             painter->fillRect(rect().adjusted(0.5, 0.5, -0.5, -0.5), HIGHLIGHT_COLOR);
         } else {

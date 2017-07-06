@@ -92,25 +92,6 @@ void MainWindow::SetupGui()
     connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
     connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
 
-	/* Remove deleted items from internal item list */
-    connect(m_RemoverTick, static_cast<void (RemoverTick::*)(QQuickItem* const item)const>(&RemoverTick::ItemRemoved), [=]
-    (QQuickItem* item) {
-		if (m_d->m_Items.contains(item)) {
-			auto childs = GetAllChildren(item);
-			for (auto child : childs) {
-				qDebug() << child;
-				if (m_d->m_Items.contains(child)) {
-					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(child));
-					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(child));
-					int i = m_d->m_Items.indexOf(child);
-					m_d->m_Items.removeAt(i);
-					m_d->m_ItemUrls.removeAt(i);
-					m_d->designWidget->rootContext()->setContextProperty(m_d->designWidget->rootContext()->nameForObject(child), 0);
-				}
-			}
-		}
-	});
-
 	/* Re-move ticks when tracked item resized */
 	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RemoverTick, &RemoverTick::FixCoord);
 	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RotatorTick, &RotatorTick::FixCoord);

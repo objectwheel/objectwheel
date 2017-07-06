@@ -115,6 +115,7 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
             item->setSize(QSizeF(fit(item->width()), fit(item->height())));
 
         result.size = QSizeF(item->width(), item->height());
+        result.clip = item->clip();
 
         window->resize(qCeil(item->width()), qCeil(item->height()));
         window->setClearBeforeRendering(true);
@@ -126,6 +127,7 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
             window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
 
         result.size = window->size();
+        result.clip = true;
     }
 
     window->setFlags(Qt::FramelessWindowHint);

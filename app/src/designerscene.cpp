@@ -174,10 +174,10 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mousePressEvent(event);
 
-    const auto&  sControls = selectedControls();
-    if (sControls.size() > 0 && _currentPage) {
+    const auto&  selectedControls = this->selectedControls();
+    if (selectedControls.size() > 0 && _currentPage) {
         for (auto control : _currentPage->childControls()) {
-            if (sControls.contains(control))
+            if (selectedControls.contains(control))
                 control->setZValue(1); //BUG
             else
                 control->setZValue(0);
@@ -185,10 +185,14 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     }
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
-    if (selectedControls().contains((Control*)itemUnderMouse))
+    if (this->selectedControls().contains((Control*)itemUnderMouse))
         _d->itemPressed = true;
 
     _d->itemMoving = false;
+
+    for (auto control : currentPage()->childControls())
+        control->setDragging(false);
+
     update();
 }
 
@@ -202,6 +206,12 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         _currentPage->stickSelectedControlToGuideLines();
     }
 
+    if (_d->itemMoving) {
+        for (auto selectedControl : selectedControls()) {
+            selectedControl->setDragging(true);
+        }
+    }
+
     update();
 }
 
@@ -210,6 +220,10 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsScene::mouseReleaseEvent(event);
     _d->itemPressed = false;
     _d->itemMoving = false;
+
+    for (auto control : currentPage()->childControls())
+        control->setDragging(false);
+
     update();
 }
 

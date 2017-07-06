@@ -5,6 +5,7 @@
 #include <QUrl>
 #include <QList>
 #include <QPixmap>
+#include <QTimer>
 
 class ControlPrivate;
 class PagePrivate;
@@ -29,10 +30,22 @@ class Control : public QGraphicsWidget
         QList<Control*> childControls() const;
         Control* parentControl() const;
 
+        QList<Control*> collidingControls(Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
+
+        bool dragging() const;
+        void setDragging(bool dragging);
+
+        bool dragIn() const;
+        void setDragIn(bool dragIn);
+
+        bool clip() const;
+        void setClip(bool clip);
+
     public slots:
         virtual void refresh();
 
     protected:
+        virtual void dropControl(Control* control);
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -50,6 +63,9 @@ class Control : public QGraphicsWidget
     private:
         QString _id;
         QUrl _url;
+        bool _dragging;
+        bool _dragIn;
+        bool _clip;
         static bool _showOutline;
 };
 
@@ -100,8 +116,10 @@ class Page : public Control
         bool _resizable;
 };
 
-class Resizer : public QGraphicsItem
+class Resizer : public QGraphicsWidget
 {
+        Q_OBJECT
+
     public:
         enum Placement {
             Top,
@@ -132,10 +150,14 @@ class Resizer : public QGraphicsItem
         virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
+    private slots:
+        void startTransaction();
+
     private:
         Placement _placement;
         bool _disabled;
         static bool _resizing;
+        QTimer _transactionTimer;
 };
 
 #endif // CONTROL_H
