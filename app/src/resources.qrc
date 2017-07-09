@@ -217,5 +217,19 @@
         <file>resources/qmls/mainPage.qml</file>
         <file>resources/images/phone.png</file>
         <file>resources/images/phonel.png</file>
+        <file>resources/images/break.png</file>
+        <file>resources/images/clean.png</file>
+        <file>resources/images/fit.png</file>
+        <file>resources/images/grid.png</file>
+        <file>resources/images/hort.png</file>
+        <file>resources/images/outline.png</file>
+        <file>resources/images/redo.png</file>
+        <file>resources/images/refresh.png</file>
+        <file>resources/images/undo.png</file>
+        <file>resources/images/vert.png</file>
+        <file>resources/images/landscape.png</file>
+        <file>resources/images/portrait.png</file>
+        <file>resources/images/desktop.png</file>
+        <file>resources/images/free.png</file>
     </qresource>
 </RCC>

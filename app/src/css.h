@@ -15,6 +15,7 @@ class CSS
 		static QString LineEdit;
 		static QString PropertyItem;
 		static QString Toolbar;
+        static QString DesignerToolbar;
 		static QString ToolboxButton;
 		static QString PropertiesButton;
 		static QString BindingButton;

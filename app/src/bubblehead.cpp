@@ -179,7 +179,7 @@ void BubbleHead::paintEvent(QPaintEvent*)
 
     if (width() > fit(SMALL_SIZE + 2)) {
         pen.setWidthF(fit(1));
-        pen.setColor(QColor("#10404447"));
+        pen.setColor(QColor("#15404447"));
         painter.setPen(pen);
         painter.setBrush(Qt::NoBrush);
         for (auto button: m_buttonList) {
@@ -199,7 +199,7 @@ void BubbleHead::paintEvent(QPaintEvent*)
     }
 
     painter.setClipping(false);
-    pen.setColor(QColor("#0D74C8").dark(109));
+    pen.setColor(QColor("#0D74C8").darker(109));
     painter.setPen(pen);
     QLinearGradient gradient(m_d->centerPath.boundingRect().toRect().center().x(), m_d->centerPath.boundingRect().toRect().topLeft().y(),
                              m_d->centerPath.boundingRect().toRect().center().x(), m_d->centerPath.boundingRect().toRect().bottomLeft().y());

@@ -13,8 +13,8 @@
 #include <QMessageBox>
 
 #define PIXEL_SIZE 13
-#define REF_WIDTH 940
-#define REF_HEIGHT 555
+#define REF_WIDTH 1000
+#define REF_HEIGHT 600
 #define REF_DPI 127
 
 /* Far tasks */

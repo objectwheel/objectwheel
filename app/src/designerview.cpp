@@ -10,6 +10,12 @@
 #include <QAction>
 #include <QApplication>
 #include <QDebug>
+#include <QClipboard>
+#include <QMimeData>
+#include <QJsonObject>
+#include <QJsonDocument>
+
+#define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 
 using namespace Fit;
 
@@ -35,6 +41,7 @@ class DesignerViewPrivate : public QObject
 
     public:
         DesignerView* parent;
+        QMenu menu;
         QAction sendBackAct;
         QAction bringFrontAct;
         QAction undoAct;
@@ -48,7 +55,6 @@ class DesignerViewPrivate : public QObject
         QAction moveDownAct;
         QAction moveRightAct;
         QAction moveLeftAct;
-        QMenu menu;
 };
 
 DesignerViewPrivate::DesignerViewPrivate(DesignerView* parent)
@@ -126,7 +132,25 @@ void DesignerViewPrivate::handleRedoAction()
 
 void DesignerViewPrivate::handleCutAction()
 {
-    //TODO
+    // TODO
+//    QJsonObject pr;
+//    QList<QUrl> urls;
+//    auto mimeData = new QMimeData;
+//    auto clipboard = QApplication::clipboard();
+//    auto scene = static_cast<DesignerScene*>(parent->scene());
+
+//    for (auto control : scene->selectedControls()) {
+//        for (auto childControl : control->childControls()) {
+//            pr[childControl->id()] = control->id();
+//            urls << childControl->url();
+//        }
+//        pr[control->id()] = control->parentControl()->id();
+//        urls << control->url();
+//    }
+
+//    mimeData->setUrls(m_Urls[items[0]]);
+//    mimeData->setText(TOOLBOX_ITEM_KEY);
+//    mimeData->setHtml(QJsonDocument(pr));
 }
 
 void DesignerViewPrivate::handleCopyAction()

@@ -33,7 +33,7 @@
 #define RESIZER_SIZE (fit(6.0))
 #define HIGHLIGHT_COLOR ("#100085ff")
 #define SELECTION_COLOR ("#444444")
-#define OUTLINE_COLOR (Qt::gray)
+#define OUTLINE_COLOR (Qt::darkGray)
 #define RESIZER_COLOR (Qt::white)
 #define RESIZER_OUTLINE_COLOR ("#252525")
 #define PREVIEW_REFRESH_INTERVAL 100
@@ -382,7 +382,7 @@ void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors)
 //! ********************** [Control] **********************
 //!
 
-bool Control::_showOutline = false;
+bool Control::_showOutline = true;
 
 Control::Control(Control* parent)
     : QGraphicsWidget(parent)

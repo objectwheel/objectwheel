@@ -72,6 +72,12 @@ QToolBar { \
 	border: none;\
 }"
 
+#define CSS_DESIGNER_TOOLBAR "\
+QToolBar { \
+    border-bottom: 1px solid %1;\
+    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %2, stop:1 %3); \
+}"
+
 #define CSS_TOOLBOX_BUTTON "\
 QRadioButton::indicator { \
 	width: %1px; \
@@ -145,6 +151,7 @@ QString CSS::SpinBox;
 QString CSS::LineEdit;
 QString CSS::PropertyItem;
 QString CSS::Toolbar;
+QString CSS::DesignerToolbar;
 QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
 QString CSS::BindingButton;
@@ -167,6 +174,9 @@ void CSS::init()
 
 	/* Toolbar */
     Toolbar = QString(CSS_TOOLBAR).arg(fit(12)).arg(fit(2)).arg(QColor("#6BB64B").name()).arg(QColor("#6BB64B").darker(115).name());
+
+    /* Designer Toolbar */
+    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(QColor("#ABAFB2").name()).arg(QColor("#EAEEF1").name()).arg(QColor("#C7CBCE").name());
 
 	/* ToolboxButton */
     ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(20));

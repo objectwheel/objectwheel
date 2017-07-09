@@ -124,7 +124,7 @@ void MainWindow::SetupGui()
 	fit(m_d->titleBar, Fit::Height, true);
 	m_d->titleBar->setText("Objectwheel Studio");
     m_d->titleBar->setColor("#0D74C8");
-	m_d->titleBar->setShadowColor("#e0e4e7");
+    m_d->titleBar->setShadowColor("#EAEEF1");
 	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
 	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
 	connect(m_RightMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setMenuChecked(bool)));
