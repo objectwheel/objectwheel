@@ -36,6 +36,10 @@ class DesignManagerPrivate : public QObject
         void handleShowOutlineAction(bool value);
         void handleFitInSceneAction();
         void handleZoomLevelChange(const QString& text);
+        void handlePhonePortraitButtonClicked();
+        void handlePhoneLandscapeButtonClicked();
+        void handleDesktopSkinButtonClicked();
+        void handleNoSkinButtonClicked();
 
     public:
         DesignManager* parent;
@@ -116,6 +120,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 
     phonePortraitButton.setCheckable(true);
     phonePortraitButton.setChecked(true);
+    phonePortraitButton.setDisabled(true);
     phoneLandscapeButton.setCheckable(true);
     desktopSkinButton.setCheckable(true);
     noSkinButton.setCheckable(true);
@@ -170,6 +175,11 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     connect(&showOutlineButton, SIGNAL(toggled(bool)), SLOT(handleShowOutlineAction(bool)));
     connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
     connect(&fitInSceneButton, SIGNAL(clicked(bool)), SLOT(handleFitInSceneAction()));
+
+    connect(&phonePortraitButton, SIGNAL(clicked(bool)), SLOT(handlePhonePortraitButtonClicked()));
+    connect(&phoneLandscapeButton, SIGNAL(clicked(bool)), SLOT(handlePhoneLandscapeButtonClicked()));
+    connect(&desktopSkinButton, SIGNAL(clicked(bool)), SLOT(handleDesktopSkinButtonClicked()));
+    connect(&noSkinButton, SIGNAL(clicked(bool)), SLOT(handleNoSkinButtonClicked()));
 
     toolbar.addWidget(&undoButton);
     toolbar.addWidget(&redoButton);
@@ -330,6 +340,54 @@ void DesignManagerPrivate::handleZoomLevelChange(const QString& text)
 {
     qreal ratio = findRatio(text);
     scaleScene(ratio);
+}
+
+void DesignManagerPrivate::handlePhonePortraitButtonClicked()
+{
+    designerScene.setSkin(DesignerScene::PhonePortrait);
+    phonePortraitButton.setDisabled(true);
+    phoneLandscapeButton.setChecked(false);
+    desktopSkinButton.setChecked(false);
+    noSkinButton.setChecked(false);
+    phoneLandscapeButton.setEnabled(true);
+    desktopSkinButton.setEnabled(true);
+    noSkinButton.setEnabled(true);
+}
+
+void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
+{
+    designerScene.setSkin(DesignerScene::PhoneLandscape);
+    phoneLandscapeButton.setDisabled(true);
+    phonePortraitButton.setChecked(false);
+    desktopSkinButton.setChecked(false);
+    noSkinButton.setChecked(false);
+    phonePortraitButton.setEnabled(true);
+    desktopSkinButton.setEnabled(true);
+    noSkinButton.setEnabled(true);
+}
+
+void DesignManagerPrivate::handleDesktopSkinButtonClicked()
+{
+    designerScene.setSkin(DesignerScene::Desktop);
+    desktopSkinButton.setDisabled(true);
+    phoneLandscapeButton.setChecked(false);
+    phonePortraitButton.setChecked(false);
+    noSkinButton.setChecked(false);
+    phonePortraitButton.setEnabled(true);
+    phoneLandscapeButton.setEnabled(true);
+    noSkinButton.setEnabled(true);
+}
+
+void DesignManagerPrivate::handleNoSkinButtonClicked()
+{
+    designerScene.setSkin(DesignerScene::NoSkin);
+    noSkinButton.setDisabled(true);
+    phoneLandscapeButton.setChecked(false);
+    desktopSkinButton.setChecked(false);
+    phonePortraitButton.setChecked(false);
+    phonePortraitButton.setEnabled(true);
+    phoneLandscapeButton.setEnabled(true);
+    desktopSkinButton.setEnabled(true);
 }
 
 DesignManagerPrivate* DesignManager::_d = nullptr;
