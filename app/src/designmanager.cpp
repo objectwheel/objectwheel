@@ -26,6 +26,17 @@ class DesignManagerPrivate : public QObject
         DesignManagerPrivate(DesignManager* parent);
         ~DesignManagerPrivate();
 
+    private:
+        qreal roundRatio(qreal ratio);
+        qreal findRatio(const QString& text);
+        QString findText(qreal ratio);
+        void scaleScene(qreal ratio);
+
+    private slots:
+        void handleShowOutlineAction(bool value);
+        void handleFitInSceneAction();
+        void handleZoomLevelChange(const QString& text);
+
     public:
         DesignManager* parent;
         QWidget* settleWidget = nullptr;
@@ -33,17 +44,16 @@ class DesignManagerPrivate : public QObject
         DesignerScene designerScene;
         DesignerView designerView;
         QmlPreviewer qmlPreviewer;
+        qreal lastScale;
         QToolBar toolbar;
         QToolButton refreshPreviewButton;
         QToolButton clearPageButton;
         QToolButton undoButton;
         QToolButton redoButton;
-
         QToolButton phonePortraitButton;
         QToolButton phoneLandscapeButton;
         QToolButton desktopSkinButton;
         QToolButton noSkinButton;
-
         QToolButton showOutlineButton;
         QToolButton fitInSceneButton;
         QComboBox zoomlLevelCombobox;
@@ -56,6 +66,7 @@ class DesignManagerPrivate : public QObject
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     : parent(parent)
     , designerView(&designerScene)
+    , lastScale(1.0)
 {
     layout.setContentsMargins(0, 0, 0, 0);
     layout.setSpacing(0);
@@ -156,6 +167,10 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     layItGridButton.setIcon(QIcon(":/resources/images/grid.png"));
     breakLayoutButton.setIcon(QIcon(":/resources/images/break.png"));
 
+    connect(&showOutlineButton, SIGNAL(toggled(bool)), SLOT(handleShowOutlineAction(bool)));
+    connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
+    connect(&fitInSceneButton, SIGNAL(clicked(bool)), SLOT(handleFitInSceneAction()));
+
     toolbar.addWidget(&undoButton);
     toolbar.addWidget(&redoButton);
     toolbar.addSeparator();
@@ -184,6 +199,137 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 DesignManagerPrivate::~DesignManagerPrivate()
 {
     /* delete stuff */
+}
+
+qreal DesignManagerPrivate::roundRatio(qreal ratio)
+{
+    if (ratio < 0.1)
+        return 0.1;
+    else if (ratio >= 0.1 && ratio < 0.25)
+        return 0.1;
+    else if (ratio >= 0.25 && ratio < 0.5)
+        return 0.25;
+    else if (ratio >= 0.5 && ratio < 0.75)
+        return 0.5;
+    else if (ratio >= 0.75 && ratio < 0.9)
+        return 0.75;
+    else if (ratio >= 0.9 && ratio < 1.0)
+        return 0.9;
+    else if (ratio >= 1.0 && ratio < 1.25)
+        return 1.0;
+    else if (ratio >= 1.25 && ratio < 1.5)
+        return 1.25;
+    else if (ratio >= 1.5 && ratio < 1.75)
+        return 1.5;
+    else if (ratio >= 1.75 && ratio < 2.0)
+        return 1.75;
+    else if (ratio >= 2.0 && ratio < 3.0)
+        return 2.0;
+    else if (ratio >= 3.0 && ratio < 5.0)
+        return 3.0;
+    else if (ratio >= 5.0 && ratio < 10.0)
+        return 5.0;
+    else
+        return 10.0;
+}
+
+qreal DesignManagerPrivate::findRatio(const QString& text)
+{
+    if (text == "10 %")
+        return 0.1;
+    else if (text == "25 %")
+        return 0.25;
+    else if (text == "50 %")
+        return 0.50;
+    else if (text == "75 %")
+        return 0.75;
+    else if (text == "90 %")
+        return 0.90;
+    else if (text == "100 %")
+        return 1.0;
+    else if (text == "125 %")
+        return 1.25;
+    else if (text == "150 %")
+        return 1.50;
+    else if (text == "175 %")
+        return 1.75;
+    else if (text == "200 %")
+        return 2.0;
+    else if (text == "300 %")
+        return 3.0;
+    else if (text == "500 %")
+        return 5.0;
+    else if (text == "1000 %")
+        return 10.0;
+    else
+        return 1.0;
+}
+
+QString DesignManagerPrivate::findText(qreal ratio)
+{
+    if (ratio == 0.1)
+        return "10 %";
+    else if (ratio == 0.25)
+        return "25 %";
+    else if (ratio == 0.50)
+        return "50 %";
+    else if (ratio == 0.75)
+        return "75 %";
+    else if (ratio == 0.90)
+        return "90 %";
+    else if (ratio == 1.0)
+        return "100 %";
+    else if (ratio == 1.25)
+        return "125 %";
+    else if (ratio == 1.50)
+        return "150 %";
+    else if (ratio == 1.75)
+        return "175 %";
+    else if (ratio == 2.0)
+        return "200 %";
+    else if (ratio == 3.0)
+        return "300 %";
+    else if (ratio == 5.0)
+        return "500 %";
+    else if (ratio == 10.0)
+        return "1000 %";
+    else
+        return "100 %";
+}
+
+void DesignManagerPrivate::scaleScene(qreal ratio)
+{
+    designerView.scale((1.0 / lastScale) * ratio, (1.0 / lastScale) * ratio);
+    lastScale = ratio;
+}
+
+void DesignManagerPrivate::handleShowOutlineAction(bool value)
+{
+    designerScene.setShowOutlines(value);
+}
+
+void DesignManagerPrivate::handleFitInSceneAction()
+{
+    auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
+    auto diff = designerView.width() / designerScene.width();
+    for (auto ratio : ratios) {
+        if (roundRatio(diff) == ratio) {
+            auto itemText = findText(ratio);
+            for (int i = 0; i < zoomlLevelCombobox.count(); i++) {
+                if (zoomlLevelCombobox.itemText(i) == itemText) {
+                    zoomlLevelCombobox.setCurrentIndex(i);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+}
+
+void DesignManagerPrivate::handleZoomLevelChange(const QString& text)
+{
+    qreal ratio = findRatio(text);
+    scaleScene(ratio);
 }
 
 DesignManagerPrivate* DesignManager::_d = nullptr;

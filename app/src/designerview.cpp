@@ -224,8 +224,6 @@ DesignerView::DesignerView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
     , _d(new DesignerViewPrivate(this))
 {
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void DesignerView::resizeEvent(QResizeEvent* event)
