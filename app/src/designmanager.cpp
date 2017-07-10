@@ -33,6 +33,7 @@ class DesignManagerPrivate : public QObject
         void scaleScene(qreal ratio);
 
     private slots:
+        void handleSnappingAction(bool value);
         void handleShowOutlineAction(bool value);
         void handleFitInSceneAction();
         void handleZoomLevelChange(const QString& text);
@@ -58,6 +59,7 @@ class DesignManagerPrivate : public QObject
         QToolButton phoneLandscapeButton;
         QToolButton desktopSkinButton;
         QToolButton noSkinButton;
+        QToolButton snappingButton;
         QToolButton showOutlineButton;
         QToolButton fitInSceneButton;
         QComboBox zoomlLevelCombobox;
@@ -117,6 +119,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 
     showOutlineButton.setCheckable(true);
     showOutlineButton.setChecked(Control::showOutline());
+    snappingButton.setCheckable(true);
+    snappingButton.setChecked(designerScene.snapping());
 
     phonePortraitButton.setCheckable(true);
     phonePortraitButton.setChecked(true);
@@ -133,6 +137,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     phoneLandscapeButton.setCursor(Qt::PointingHandCursor);
     desktopSkinButton.setCursor(Qt::PointingHandCursor);
     noSkinButton.setCursor(Qt::PointingHandCursor);
+    snappingButton.setCursor(Qt::PointingHandCursor);
     showOutlineButton.setCursor(Qt::PointingHandCursor);
     fitInSceneButton.setCursor(Qt::PointingHandCursor);
     zoomlLevelCombobox.setCursor(Qt::PointingHandCursor);
@@ -149,6 +154,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     phoneLandscapeButton.setToolTip("Skin: Phone landscape.");
     desktopSkinButton.setToolTip("Skin: Desktop.");
     noSkinButton.setToolTip("No skin (free).");
+    snappingButton.setToolTip("Enable snapping to help aligning of controls to each others.");
     showOutlineButton.setToolTip("Show outline frame for controls.");
     fitInSceneButton.setToolTip("Fit scene into the Dashboard.");
     zoomlLevelCombobox.setToolTip("Change zoom level.");
@@ -165,6 +171,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     phoneLandscapeButton.setIcon(QIcon(":/resources/images/landscape.png"));
     desktopSkinButton.setIcon(QIcon(":/resources/images/desktop.png"));
     noSkinButton.setIcon(QIcon(":/resources/images/free.png"));
+    snappingButton.setIcon(QIcon(":/resources/images/snap.png"));
     showOutlineButton.setIcon(QIcon(":/resources/images/outline.png"));
     fitInSceneButton.setIcon(QIcon(":/resources/images/fit.png"));
     layItVertButton.setIcon(QIcon(":/resources/images/vert.png"));
@@ -172,6 +179,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     layItGridButton.setIcon(QIcon(":/resources/images/grid.png"));
     breakLayoutButton.setIcon(QIcon(":/resources/images/break.png"));
 
+    connect(&snappingButton, SIGNAL(toggled(bool)), SLOT(handleSnappingAction(bool)));
     connect(&showOutlineButton, SIGNAL(toggled(bool)), SLOT(handleShowOutlineAction(bool)));
     connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
     connect(&fitInSceneButton, SIGNAL(clicked(bool)), SLOT(handleFitInSceneAction()));
@@ -192,6 +200,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar.addWidget(&desktopSkinButton);
     toolbar.addWidget(&noSkinButton);
     toolbar.addSeparator();
+    toolbar.addWidget(&snappingButton);
     toolbar.addWidget(&showOutlineButton);
     toolbar.addWidget(&fitInSceneButton);
     toolbar.addWidget(&zoomlLevelCombobox);
@@ -311,6 +320,11 @@ void DesignManagerPrivate::scaleScene(qreal ratio)
 {
     designerView.scale((1.0 / lastScale) * ratio, (1.0 / lastScale) * ratio);
     lastScale = ratio;
+}
+
+void DesignManagerPrivate::handleSnappingAction(bool value)
+{
+    designerScene.setSnapping(value);
 }
 
 void DesignManagerPrivate::handleShowOutlineAction(bool value)

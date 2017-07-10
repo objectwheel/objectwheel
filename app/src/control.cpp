@@ -721,7 +721,6 @@ Page::Page(Page* parent)
     }
 
     setFlag(ItemIsMovable, false);
-//    setFlag(ItemIsSelectable, _resizable);
 }
 
 void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -762,7 +761,6 @@ bool Page::resizable() const
 void Page::setResizable(bool resizable)
 {
     _resizable = resizable;
-//    setFlag(ItemIsSelectable, _resizable);
     for (auto& resizer : Control::_d->resizers) {
         resizer.setDisabled(!_resizable);
     }

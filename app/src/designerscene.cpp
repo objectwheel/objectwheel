@@ -90,6 +90,7 @@ DesignerScene::DesignerScene(QObject *parent)
     : QGraphicsScene(parent)
     , _d(new DesignerScenePrivate(this))
     , _currentPage(nullptr)
+    , _snapping(true)
 {
     setSkin(PhonePortrait);
 }
@@ -203,7 +204,8 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (_currentPage && selectedControls().size() > 0 &&
         _d->itemPressed && !Resizer::resizing()) {
         _d->itemMoving = true;
-        _currentPage->stickSelectedControlToGuideLines();
+        if (_snapping)
+            _currentPage->stickSelectedControlToGuideLines();
     }
 
     if (_d->itemMoving) {
@@ -231,7 +233,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    if (_d->itemMoving || Resizer::resizing()) {
+    if ((_d->itemMoving || Resizer::resizing()) && _snapping) {
         auto guideLines = _currentPage->guideLines();
         QPen pen("#DB4C41");
         pen.setWidthF(fit(1.0));
@@ -249,6 +251,16 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(fit(2.0), fit(2.0)), QSizeF(fit(4.0), fit(4.0))), fit(2.0), fit(2.0));
         }
     }
+}
+
+bool DesignerScene::snapping() const
+{
+    return _snapping;
+}
+
+void DesignerScene::setSnapping(bool snapping)
+{
+    _snapping = snapping;
 }
 
 DesignerScene::Skin DesignerScene::skin() const

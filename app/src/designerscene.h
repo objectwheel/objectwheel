@@ -37,6 +37,9 @@ class DesignerScene : public QGraphicsScene
         Skin skin() const;
         void setSkin(const Skin& skin);
 
+        bool snapping() const;
+        void setSnapping(bool snapping);
+
     protected:
         void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
         void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
@@ -47,6 +50,7 @@ class DesignerScene : public QGraphicsScene
         DesignerScenePrivate* _d;
         QList<Page*> _pages;
         Page* _currentPage;
+        bool _snapping;
         Skin _skin;
 };
 
