@@ -32,10 +32,10 @@
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 #define RESIZER_SIZE (fit(6.0))
 #define HIGHLIGHT_COLOR ("#100085ff")
-#define SELECTION_COLOR ("#444444")
-#define OUTLINE_COLOR (Qt::darkGray)
+#define SELECTION_COLOR ("#404447")
+#define OUTLINE_COLOR ("#808487")
 #define RESIZER_COLOR (Qt::white)
-#define RESIZER_OUTLINE_COLOR ("#252525")
+#define RESIZER_OUTLINE_COLOR ("#202427")
 #define PREVIEW_REFRESH_INTERVAL 100
 #define RESIZE_TRANSACTION_INTERVAL 800
 #define MAGNETIC_FIELD (fit(3))
@@ -245,12 +245,14 @@ class ControlPrivate : public QObject
         Resizer resizers[8];
         QTimer refreshTimer;
         QmlPreviewer qmlPreviewer;
+        bool hoverOn;
 };
 
 
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
+    , hoverOn(false)
 {
     int i = 0;
     for (auto& resizer : resizers) {
@@ -523,6 +525,20 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     update();
 }
 
+void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsWidget::hoverEnterEvent(event);
+    _d->hoverOn = true;
+    update();
+}
+
+void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsWidget::hoverLeaveEvent(event);
+    _d->hoverOn = false;
+    update();
+}
+
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mousePressEvent(event);
@@ -648,6 +664,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     if (_d->itemPixmap.isNull())
         return;
 
+    auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
+
     if (parentControl() && parentControl()->clip() && !_dragging)
         painter->setClipRect(rect().intersected(parentControl()->mapToItem(this, parentControl()->rect().adjusted(1, 1, -1, -1))
                                                 .boundingRect()));
@@ -657,7 +675,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     if (_dragIn) {
         if (_showOutline) {
-            painter->fillRect(rect().adjusted(0.5, 0.5, -0.5, -0.5), HIGHLIGHT_COLOR);
+            painter->fillRect(innerRect, HIGHLIGHT_COLOR);
         } else {
             QPixmap highlight(_d->itemPixmap);
             QPainter p(&highlight);
@@ -671,17 +689,30 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     if (isSelected() || _showOutline) {
         QPen pen;
         pen.setStyle(Qt::DotLine);
-        pen.setJoinStyle(Qt::MiterJoin);
         painter->setBrush(Qt::transparent);
 
         if (isSelected()) {
             pen.setColor(SELECTION_COLOR);
         } else if (_showOutline) {
+            if (_d->hoverOn)
+                pen.setStyle(Qt::SolidLine);
             pen.setColor(OUTLINE_COLOR);
         }
 
         painter->setPen(pen);
-        painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
+        painter->drawRect(innerRect);
+
+        // Draw corner lines
+        pen.setStyle(Qt::SolidLine);
+        painter->setPen(pen);
+        painter->drawLine(innerRect.topLeft(), innerRect.topLeft() + QPointF(2, 0));
+        painter->drawLine(innerRect.topLeft(), innerRect.topLeft() + QPointF(0, 2));
+        painter->drawLine(innerRect.bottomLeft(), innerRect.bottomLeft() + QPointF(2, 0));
+        painter->drawLine(innerRect.bottomLeft(), innerRect.bottomLeft() + QPointF(0, -2));
+        painter->drawLine(innerRect.topRight(), innerRect.topRight() + QPointF(-2, 0));
+        painter->drawLine(innerRect.topRight(), innerRect.topRight() + QPointF(0, 2));
+        painter->drawLine(innerRect.bottomRight(), innerRect.bottomRight() + QPointF(-2, 0));
+        painter->drawLine(innerRect.bottomRight(), innerRect.bottomRight() + QPointF(0, -2));
     }
 }
 

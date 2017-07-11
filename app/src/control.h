@@ -50,6 +50,8 @@ class Control : public QGraphicsWidget
         virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dropEvent(QGraphicsSceneDragDropEvent *event) override;
+        virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+        virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
         virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
