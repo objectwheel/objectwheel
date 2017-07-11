@@ -907,6 +907,10 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
         }
     }
 
+    painter->setCompositionMode(QPainter::CompositionMode_Clear);
+    painter->drawRect(innerRect);
+    painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+
     Control::paint(painter, option, widget);
 
     if (!isSelected() && !showOutline()) {
