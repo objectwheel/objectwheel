@@ -44,7 +44,7 @@
 #define PAGE_PP_SIZE (fit(QSize(250, 415)))
 #define PAGE_PL_SIZE (fit(QSize(415, 250)))
 #define PAGE_TOP_MARGIN (fit(14))
-#define MOBILE_SKIN_COLOR (QColor("#485560"))
+#define MOBILE_SKIN_COLOR (QColor("#424E59"))
 
 using namespace Fit;
 
@@ -739,6 +739,7 @@ class PagePrivate : public QObject
     public:
         explicit PagePrivate(Page* parent);
         static void applySkinChange();
+        void updateSceneRect();
 
     public:
         Page* parent;
@@ -789,6 +790,20 @@ void PagePrivate::applySkinChange()
     }
 }
 
+void PagePrivate::updateSceneRect()
+{
+    QRectF rect;
+    if (parent->_skin == Page::PhonePortrait || parent->_skin == Page::PhoneLandscape)
+        rect = QRectF({QPointF(-skinSize.width() / 2.0, -skinSize.height() / 2.0), skinSize});
+    else if (parent->_skin == Page::NoSkin)
+        rect = QRectF({QPointF(-parent->size().width() / 2.0, -parent->size().height() / 2.0), parent->size()});
+    else
+        rect = QRectF(-parent->size().width() / 2.0, -parent->size().height() / 2.0,
+                      parent->size().width(), parent->size().height() + PAGE_TOP_MARGIN / 1.5);
+    if (parent->scene()->sceneRect() != rect)
+        parent->scene()->setSceneRect(rect);
+}
+
 //! ********************** [Page] **********************
 
 Page::Skin Page::_skin = Page::PhonePortrait;
@@ -817,7 +832,7 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             skinRect.moveTop(skinRect.top() + PAGE_TOP_MARGIN);
             painter->setBrush(MOBILE_SKIN_COLOR);
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->drawRoundedRect(skinRect, fit(16), fit(16));
+            painter->drawRoundedRect(skinRect, fit(10), fit(10));
             painter->setCompositionMode(QPainter::CompositionMode_Clear);
             painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 3.0, skinRect.top() + PAGE_TOP_MARGIN / 1.5,
                                            skinRect.width() / 3.0, PAGE_TOP_MARGIN / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
@@ -832,7 +847,7 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             skinRect.moveLeft(skinRect.left() + PAGE_TOP_MARGIN);
             painter->setBrush(MOBILE_SKIN_COLOR);
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->drawRoundedRect(skinRect, fit(16), fit(16));
+            painter->drawRoundedRect(skinRect, fit(10), fit(10));
             painter->setCompositionMode(QPainter::CompositionMode_Clear);
             painter->drawRoundedRect(QRect(skinRect.left() + PAGE_TOP_MARGIN / 1.5, skinRect.y() + skinRect.height() / 3.0,
                                            PAGE_TOP_MARGIN / 3.0, skinRect.height() / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
@@ -851,11 +866,11 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             path.addRoundedRect(skinRect.adjusted(0, 0, 0, -skinRect.height() + fit(15)), fit(3), fit(3));
 
             QLinearGradient gradient(skinRect.center().x(), skinRect.y(),
-                                     skinRect.center().x(), skinRect.y() + fit(2.0 * PAGE_TOP_MARGIN / 1.35));
+                                     skinRect.center().x(), skinRect.y() + fit(2.2 * PAGE_TOP_MARGIN / 1.35));
             gradient.setColorAt(0, QColor("#E8ECEF"));
             gradient.setColorAt(1, QColor("#D3D7DA"));
             painter->setBrush(gradient);
-            painter->setPen(QColor("#D3D7DA").darker(105));
+            painter->setPen(QColor("#D3D7DA").darker(106));
             painter->drawPath(path.simplified());
 
             auto btnExtRect = QRectF(skinRect.left() + fit(8), skinRect.top() + fit(4.5), fit(11), fit(11));
@@ -907,9 +922,8 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
 void Page::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
+    _d->updateSceneRect();
     Control::resizeEvent(event);
-    if (_skin == Desktop)
-        _d->skinSize = size() + QSizeF(2, 16);
     centralize();
 }
 
@@ -1355,12 +1369,12 @@ const Page::Skin& Page::skin()
 
 void Page::centralize()
 {
-    if (_skin == NoSkin)
-        setPos(- size().width() / 2.0, - size().height() / 2.0);
-    else if (_skin == PhonePortrait)
+    if (_skin == PhonePortrait)
         setPos(- size().width() / 2.0, - size().height() / 2.0 - PAGE_TOP_MARGIN);
     else if (_skin == PhoneLandscape)
         setPos(- size().width() / 2.0 - PAGE_TOP_MARGIN, - size().height() / 2.0);
+    else if (_skin == NoSkin)
+        setPos(- size().width() / 2.0, - size().height() / 2.0);
     else
         setPos(- size().width() / 2.0, - size().height() / 2.0 + PAGE_TOP_MARGIN / 1.5);
 }

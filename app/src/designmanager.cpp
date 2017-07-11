@@ -33,14 +33,15 @@ class DesignManagerPrivate : public QObject
         void scaleScene(qreal ratio);
 
     private slots:
-        void handleSnappingAction(bool value);
-        void handleShowOutlineAction(bool value);
-        void handleFitInSceneAction();
+        void handleSnappingClicked(bool value);
+        void handleShowOutlineClicked(bool value);
+        void handleFitInSceneClicked();
         void handleZoomLevelChange(const QString& text);
         void handlePhonePortraitButtonClicked();
         void handlePhoneLandscapeButtonClicked();
         void handleDesktopSkinButtonClicked();
         void handleNoSkinButtonClicked();
+        void handleRefreshPreviewClicked();
 
     public:
         DesignManager* parent;
@@ -83,12 +84,9 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     designerView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
     designerView.setDragMode(QGraphicsView::RubberBandDrag);
     designerView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    designerView.setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    designerView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     designerView.setBackgroundBrush(QColor("#e0e4e7"));
     designerView.setFrameShape(QFrame::NoFrame);
-
-    designerScene.setSceneRect(designerView.rect().adjusted(- designerView.width() / 2.0,
-                                                            - designerView.height() / 2.0, 0, 0));
 
     QTimer::singleShot(3000, [this] {
         auto page = new Page;
@@ -179,11 +177,11 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     layItGridButton.setIcon(QIcon(":/resources/images/grid.png"));
     breakLayoutButton.setIcon(QIcon(":/resources/images/break.png"));
 
-    connect(&snappingButton, SIGNAL(toggled(bool)), SLOT(handleSnappingAction(bool)));
-    connect(&showOutlineButton, SIGNAL(toggled(bool)), SLOT(handleShowOutlineAction(bool)));
+    connect(&snappingButton, SIGNAL(toggled(bool)), SLOT(handleSnappingClicked(bool)));
+    connect(&showOutlineButton, SIGNAL(toggled(bool)), SLOT(handleShowOutlineClicked(bool)));
     connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
-    connect(&fitInSceneButton, SIGNAL(clicked(bool)), SLOT(handleFitInSceneAction()));
-
+    connect(&fitInSceneButton, SIGNAL(clicked(bool)), SLOT(handleFitInSceneClicked()));
+    connect(&refreshPreviewButton, SIGNAL(clicked(bool)), SLOT(handleRefreshPreviewClicked()));
     connect(&phonePortraitButton, SIGNAL(clicked(bool)), SLOT(handlePhonePortraitButtonClicked()));
     connect(&phoneLandscapeButton, SIGNAL(clicked(bool)), SLOT(handlePhoneLandscapeButtonClicked()));
     connect(&desktopSkinButton, SIGNAL(clicked(bool)), SLOT(handleDesktopSkinButtonClicked()));
@@ -234,22 +232,8 @@ qreal DesignManagerPrivate::roundRatio(qreal ratio)
         return 0.75;
     else if (ratio >= 0.9 && ratio < 1.0)
         return 0.9;
-    else if (ratio >= 1.0 && ratio < 1.25)
-        return 1.0;
-    else if (ratio >= 1.25 && ratio < 1.5)
-        return 1.25;
-    else if (ratio >= 1.5 && ratio < 1.75)
-        return 1.5;
-    else if (ratio >= 1.75 && ratio < 2.0)
-        return 1.75;
-    else if (ratio >= 2.0 && ratio < 3.0)
-        return 2.0;
-    else if (ratio >= 3.0 && ratio < 5.0)
-        return 3.0;
-    else if (ratio >= 5.0 && ratio < 10.0)
-        return 5.0;
     else
-        return 10.0;
+        return 1.0;
 }
 
 qreal DesignManagerPrivate::findRatio(const QString& text)
@@ -322,20 +306,21 @@ void DesignManagerPrivate::scaleScene(qreal ratio)
     lastScale = ratio;
 }
 
-void DesignManagerPrivate::handleSnappingAction(bool value)
+void DesignManagerPrivate::handleSnappingClicked(bool value)
 {
     designerScene.setSnapping(value);
 }
 
-void DesignManagerPrivate::handleShowOutlineAction(bool value)
+void DesignManagerPrivate::handleShowOutlineClicked(bool value)
 {
     designerScene.setShowOutlines(value);
 }
 
-void DesignManagerPrivate::handleFitInSceneAction()
+void DesignManagerPrivate::handleFitInSceneClicked()
 {
     auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
-    auto diff = designerView.width() / designerScene.width();
+    auto diff = qMin(designerView.width() / designerScene.width(),
+                     designerView.height() / designerScene.height());
     for (auto ratio : ratios) {
         if (roundRatio(diff) == ratio) {
             auto itemText = findText(ratio);
@@ -402,6 +387,14 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
+}
+
+void DesignManagerPrivate::handleRefreshPreviewClicked()
+{
+    for (auto page : designerScene.pages())
+        page->refresh();
+    for (auto control : designerScene.controls())
+        control->refresh();
 }
 
 DesignManagerPrivate* DesignManager::_d = nullptr;

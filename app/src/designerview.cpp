@@ -234,8 +234,6 @@ void DesignerView::resizeEvent(QResizeEvent* event)
     auto currentPage = _scene->currentPage();
     if (currentPage)
         currentPage->centralize();
-
-    setSceneRect(QRectF(- width() / 2.0, - height() / 2.0, width(), height()));
 }
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)
