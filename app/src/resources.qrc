@@ -232,5 +232,6 @@
         <file>resources/images/desktop.png</file>
         <file>resources/images/free.png</file>
         <file>resources/images/snap.png</file>
+        <file>resources/images/ciks.png</file>
     </qresource>
 </RCC>

@@ -358,7 +358,7 @@ void DesignManagerPrivate::handleZoomLevelChange(const QString& text)
 
 void DesignManagerPrivate::handlePhonePortraitButtonClicked()
 {
-    designerScene.setSkin(DesignerScene::PhonePortrait);
+    Page::setSkin(Page::PhonePortrait);
     phonePortraitButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -370,7 +370,7 @@ void DesignManagerPrivate::handlePhonePortraitButtonClicked()
 
 void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
 {
-    designerScene.setSkin(DesignerScene::PhoneLandscape);
+    Page::setSkin(Page::PhoneLandscape);
     phoneLandscapeButton.setDisabled(true);
     phonePortraitButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -382,7 +382,7 @@ void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
 
 void DesignManagerPrivate::handleDesktopSkinButtonClicked()
 {
-    designerScene.setSkin(DesignerScene::Desktop);
+    Page::setSkin(Page::Desktop);
     desktopSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     phonePortraitButton.setChecked(false);
@@ -394,7 +394,7 @@ void DesignManagerPrivate::handleDesktopSkinButtonClicked()
 
 void DesignManagerPrivate::handleNoSkinButtonClicked()
 {
-    designerScene.setSkin(DesignerScene::NoSkin);
+    Page::setSkin(Page::NoSkin);
     noSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);

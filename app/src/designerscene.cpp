@@ -5,19 +5,6 @@
 #include <QPainter>
 #include <QDebug>
 
-#define NO_SKIN_SIZE (fit(QSize(400, 400)))
-#define PHONE_PORTRAIT_SIZE (fit(QSize(213, 379)))
-#define PHONE_LANDSCAPE_SIZE (fit(QSize(379, 213)))
-#define DESKTOP_SIZE (fit(QSize(500, 350)))
-
-#define PHONE_PORTRAIT_FRAME_RECT (QRectF(-((fit(244) - PHONE_PORTRAIT_SIZE.width())/2.0), -((fit(500) - PHONE_PORTRAIT_SIZE.height())/2.0), fit(245), fit(500)))
-#define PHONE_LANDSCAPE_FRAME_RECT (QRectF(-((fit(244) - PHONE_PORTRAIT_SIZE.width())/2.0), -((fit(500) - PHONE_PORTRAIT_SIZE.height())/2.0), fit(500), fit(245)))
-#define DESKTOP_FRAME_RECT (QRectF(-((fit(244) - PHONE_PORTRAIT_SIZE.width())/2.0), -((fit(500) - PHONE_PORTRAIT_SIZE.height())/2.0), fit(245), fit(500)))
-
-#define PHONE_PORTRAIT_SKIN_PATH (":/resources/images/phone.png")
-#define PHONE_LANDSCAPE_SKIN_PATH (":/resources/images/phonel.png")
-#define DESKTOP_SKIN_PATH (":/resources/images/phone.png")
-
 using namespace Fit;
 
 class DesignerScenePrivate : public QObject
@@ -27,8 +14,6 @@ class DesignerScenePrivate : public QObject
 
     public:
         explicit DesignerScenePrivate(DesignerScene* parent);
-        inline QSize skinSize(const DesignerScene::Skin& skin) const;
-        inline Page::SkinSetting* skinSetting(const DesignerScene::Skin& skin) const;
 
     public:
         DesignerScene* parent;
@@ -44,58 +29,21 @@ DesignerScenePrivate::DesignerScenePrivate(DesignerScene* parent)
 {
 }
 
-QSize DesignerScenePrivate::skinSize(const DesignerScene::Skin& skin) const
-{
-    switch (skin) {
-        case DesignerScene::NoSkin:
-            return NO_SKIN_SIZE;
-            break;
-
-        case DesignerScene::PhonePortrait:
-            return PHONE_PORTRAIT_SIZE;
-            break;
-
-        case DesignerScene::PhoneLandscape:
-            return PHONE_LANDSCAPE_SIZE;
-            break;
-
-        case DesignerScene::Desktop:
-            return DESKTOP_SIZE;
-            break;
-    }
-}
-
-Page::SkinSetting* DesignerScenePrivate::skinSetting(const DesignerScene::Skin& skin) const
-{
-    switch (skin) {
-        case DesignerScene::NoSkin:
-            return new Page::SkinSetting();
-            break;
-
-        case DesignerScene::PhonePortrait:
-            return new Page::SkinSetting(QPixmap(PHONE_PORTRAIT_SKIN_PATH), PHONE_PORTRAIT_FRAME_RECT, false);
-            break;
-
-        case DesignerScene::PhoneLandscape:
-            return new Page::SkinSetting(QPixmap(PHONE_LANDSCAPE_SKIN_PATH), PHONE_LANDSCAPE_FRAME_RECT, false);
-            break;
-
-        case DesignerScene::Desktop:
-            return new Page::SkinSetting(QPixmap(DESKTOP_SKIN_PATH), DESKTOP_FRAME_RECT, true);
-            break;
-    }
-}
+DesignerScenePrivate* DesignerScene::_d = nullptr;
+QList<Page*> DesignerScene::_pages;
+Page* DesignerScene::_currentPage = nullptr;
+bool DesignerScene::_snapping = true;
+QPointF DesignerScene::_lastMousePos;
 
 DesignerScene::DesignerScene(QObject *parent)
     : QGraphicsScene(parent)
-    , _d(new DesignerScenePrivate(this))
-    , _currentPage(nullptr)
-    , _snapping(true)
 {
-    setSkin(PhonePortrait);
+    if (_d)
+        return;
+    _d = new DesignerScenePrivate(this);
 }
 
-const QList<Page*>& DesignerScene::pages() const
+const QList<Page*>& DesignerScene::pages()
 {
     return _pages;
 }
@@ -105,10 +53,9 @@ void DesignerScene::addPage(Page* page)
     if (_pages.contains(page))
         return;
 
-    addItem(page);
+    _d->parent->addItem(page);
     page->setVisible(false);
     page->setZValue(-1);
-    page->resize(_d->skinSize(skin()));
 
     _pages.append(page);
 
@@ -121,7 +68,7 @@ void DesignerScene::removePage(Page* page)
     if (!_pages.contains(page))
         return;
 
-    removeItem(page);
+    _d->parent->removeItem(page);
     _pages.removeOne(page);
 
     if (_currentPage == page) {
@@ -132,7 +79,7 @@ void DesignerScene::removePage(Page* page)
     }
 }
 
-Page* DesignerScene::currentPage() const
+Page* DesignerScene::currentPage()
 {
     return _currentPage;
 }
@@ -149,10 +96,10 @@ void DesignerScene::setCurrentPage(Page* currentPage)
     _currentPage->setVisible(true);
 }
 
-QList<Control*> DesignerScene::controls(Qt::SortOrder order) const
+QList<Control*> DesignerScene::controls(Qt::SortOrder order)
 {
     QList<Control*> controls;
-    for (auto item : items(order)) {
+    for (auto item : _d->parent->items(order)) {
         if (dynamic_cast<Control*>(item) && !dynamic_cast<Page*>(item)) {
             controls << static_cast<Control*>(item);
         }
@@ -160,10 +107,10 @@ QList<Control*> DesignerScene::controls(Qt::SortOrder order) const
     return controls;
 }
 
-QList<Control*> DesignerScene::selectedControls() const
+QList<Control*> DesignerScene::selectedControls()
 {
     QList<Control*> selectedControls;
-    for (auto item : selectedItems()) {
+    for (auto item : _d->parent->selectedItems()) {
         if (dynamic_cast<Control*>(item) && !dynamic_cast<Page*>(item)) {
             selectedControls << static_cast<Control*>(item);
         }
@@ -214,6 +161,8 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         }
     }
 
+    _lastMousePos = event->scenePos();
+
     update();
 }
 
@@ -253,7 +202,12 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
     }
 }
 
-bool DesignerScene::snapping() const
+QPointF DesignerScene::lastMousePos()
+{
+    return _lastMousePos;
+}
+
+bool DesignerScene::snapping()
 {
     return _snapping;
 }
@@ -263,25 +217,7 @@ void DesignerScene::setSnapping(bool snapping)
     _snapping = snapping;
 }
 
-DesignerScene::Skin DesignerScene::skin() const
-{
-    return _skin;
-}
-
-void DesignerScene::setSkin(const Skin& skin)
-{
-    _skin = skin;
-    if (Page::skinSetting())
-        delete Page::skinSetting();
-    Page::setSkinSetting(_d->skinSetting(skin));
-    for (auto page : pages()) {
-        page->setResizable(Page::skinSetting()->resizable);
-        page->resize(_d->skinSize(skin));
-        page->update();
-    }
-}
-
-bool DesignerScene::showOutlines() const
+bool DesignerScene::showOutlines()
 {
     return Control::showOutline();;
 }

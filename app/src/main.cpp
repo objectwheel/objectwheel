@@ -40,59 +40,57 @@
 
 int main(int argc, char *argv[])
 {
-	// Init application
-	QApplication a(argc, argv);
+    // Init application
+    QApplication a(argc, argv);
 
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     // Multiple instances protection
-//    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
-//    if(!sharedMemory.create(1)) {
-//        sharedMemory.attach();
-//        sharedMemory.detach();
-//        if(!sharedMemory.create(1)) {
-//            QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
-//            a.exit();
-//            return 0;
-//        }
-//    }
+    //    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
+    //    if(!sharedMemory.create(1)) {
+    //        sharedMemory.attach();
+    //        sharedMemory.detach();
+    //        if(!sharedMemory.create(1)) {
+    //            QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
+    //            a.exit();
+    //            return 0;
+    //        }
+    //    }
 # endif
 
-	// Init application settings
-//    QApplication::setStyle("fusion");
+    // Init application settings
+    //    QApplication::setStyle("fusion");
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
     qApp->setWindowIcon(QIcon(":/resources/images/owicon.png"));
-	qsrand(QDateTime::currentMSecsSinceEpoch());
+    qsrand(QDateTime::currentMSecsSinceEpoch());
 
-	// Init Fit
-	Fit::init(REF_WIDTH, REF_HEIGHT, REF_DPI);
+    // Init CSS
+    CSS::init();
 
-	// Init CSS
-	CSS::init();
+    // Init Components
+    Components::init();
 
-	// Init Components
-	Components::init();
+    // Initialize Web View
+    QtWebView::initialize();
 
-	// Initialize Web View
-	QtWebView::initialize();
+    // Start MainWidget
+    MainWindow w;
+# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
+    w.resize({REF_WIDTH, REF_HEIGHT});
+    Fit::fit(&w, Fit::WidthHeight);
+    w.show();
+# else
+    Fit::init(REF_WIDTH, REF_HEIGHT, REF_DPI);
+    w.showFullScreen();
+# endif
 
-	// Add system wide fonts and set default font
+    // Add system wide fonts and set default font
     QFont font;
     font.setPixelSize(Fit::fit(PIXEL_SIZE));
     QApplication::setFont(font);
     QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
 
-	// Start MainWidget
-	MainWindow w;
-# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-	w.resize({REF_WIDTH, REF_HEIGHT});
-	Fit::fit(&w, Fit::WidthHeight);
-	w.show();
-# else
-	w.showFullScreen();
-# endif
-
-	// Start main event loop
-	return a.exec();
+    // Start main event loop
+    return a.exec();
 }

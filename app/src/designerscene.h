@@ -9,36 +9,29 @@ class DesignerScenePrivate;
 class DesignerScene : public QGraphicsScene
 {
         Q_OBJECT
+        Q_DISABLE_COPY(DesignerScene)
         friend class DesignerScenePrivate;
 
     public:
-        enum Skin {
-            NoSkin,
-            PhonePortrait,
-            PhoneLandscape,
-            Desktop
-        };
-
         explicit DesignerScene(QObject *parent = Q_NULLPTR);
 
-        const QList<Page*>& pages() const;
-        void addPage(Page* page);
-        void removePage(Page* page);
+        static const QList<Page*>& pages();
+        static void addPage(Page* page);
+        static void removePage(Page* page);
 
-        Page* currentPage() const;
-        void setCurrentPage(Page* currentPage);
+        static Page* currentPage();
+        static void setCurrentPage(Page* currentPage);
 
-        QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder) const;
-        QList<Control*> selectedControls() const;
+        static QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder);
+        static QList<Control*> selectedControls();
 
-        bool showOutlines() const;
-        void setShowOutlines(bool value);
+        static bool showOutlines();
+        static void setShowOutlines(bool value);
 
-        Skin skin() const;
-        void setSkin(const Skin& skin);
+        static bool snapping();
+        static void setSnapping(bool snapping);
 
-        bool snapping() const;
-        void setSnapping(bool snapping);
+        static QPointF lastMousePos();
 
     protected:
         void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -47,11 +40,12 @@ class DesignerScene : public QGraphicsScene
         void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     private:
-        DesignerScenePrivate* _d;
-        QList<Page*> _pages;
-        Page* _currentPage;
-        bool _snapping;
-        Skin _skin;
+        static DesignerScenePrivate* _d;
+        static QList<Page*> _pages;
+        static Page* _currentPage;
+        static bool _snapping;
+        static QPointF _lastMousePos;
+
 };
 
 #endif // DESIGNERSCENE_H

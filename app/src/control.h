@@ -7,12 +7,58 @@
 #include <QPixmap>
 #include <QTimer>
 
+class Control;
 class ControlPrivate;
 class PagePrivate;
+
+class Resizer : public QGraphicsWidget
+{
+        Q_OBJECT
+
+    public:
+        enum Placement {
+            Top,
+            Right,
+            Bottom,
+            Left,
+            TopLeft,
+            TopRight,
+            BottomRight,
+            BottomLeft
+        };
+
+        explicit Resizer(Control* parent = Q_NULLPTR);
+        virtual ~Resizer() {}
+
+        Placement placement() const;
+        void setPlacement(const Placement& placement);
+
+        bool disabled() const;
+        void setDisabled(bool disabled);
+
+        static bool resizing();
+
+    protected:
+        virtual QRectF boundingRect() const override;
+        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+    private slots:
+        void startTransaction();
+
+    private:
+        Placement _placement;
+        bool _disabled;
+        static bool _resizing;
+        QTimer _transactionTimer;
+};
 
 class Control : public QGraphicsWidget
 {
         Q_OBJECT
+        friend class ControlPrivate;
 
     public:
         explicit Control(Control* parent = Q_NULLPTR);
@@ -59,7 +105,11 @@ class Control : public QGraphicsWidget
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
         virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
+    signals:
+        void previewChanged();
+
     protected:
+        Resizer _resizers[8];
         ControlPrivate* _d;
 
     private:
@@ -74,15 +124,14 @@ class Control : public QGraphicsWidget
 class Page : public Control
 {
         Q_OBJECT
+        friend class PagePrivate;
 
     public:
-        struct SkinSetting {
-                SkinSetting() : resizable(true) {}
-                SkinSetting(const QPixmap& p, const QRectF& r, bool b)
-                    : pixmap(p), rect(r), resizable(b) {}
-                QPixmap pixmap;
-                QRectF rect;
-                bool resizable;
+        enum Skin {
+            NoSkin,
+            PhonePortrait,
+            PhoneLandscape,
+            Desktop
         };
 
         explicit Page(Page* parent = Q_NULLPTR);
@@ -90,11 +139,8 @@ class Page : public Control
         bool mainPage() const;
         void setMainPage(bool mainPage);
 
-        static void setSkinSetting(const SkinSetting* skinSetting);
-        static const SkinSetting* skinSetting();
-
-        bool resizable() const;
-        void setResizable(bool resizable);
+        static void setSkin(const Skin& skin);
+        static const Skin& skin();
 
         bool stickSelectedControlToGuideLines() const;
         QVector<QLineF> guideLines() const;
@@ -114,52 +160,7 @@ class Page : public Control
         PagePrivate* _d;
         bool _mainPage = false;
         QList<Control*> _controls;
-        static const SkinSetting* _skinSetting;
-        bool _resizable;
-};
-
-class Resizer : public QGraphicsWidget
-{
-        Q_OBJECT
-
-    public:
-        enum Placement {
-            Top,
-            Right,
-            Bottom,
-            Left,
-            TopLeft,
-            TopRight,
-            BottomRight,
-            BottomLeft
-        };
-
-        explicit Resizer(Control *parent = Q_NULLPTR);
-        virtual ~Resizer() {}
-
-        Placement placement() const;
-        void setPlacement(const Placement& placement);
-
-        bool disabled() const;
-        void setDisabled(bool disabled);
-
-        static bool resizing();
-
-    protected:
-        virtual QRectF boundingRect() const override;
-        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
-        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-
-    private slots:
-        void startTransaction();
-
-    private:
-        Placement _placement;
-        bool _disabled;
-        static bool _resizing;
-        QTimer _transactionTimer;
+        static Skin _skin;
 };
 
 #endif // CONTROL_H
