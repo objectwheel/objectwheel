@@ -739,7 +739,6 @@ class PagePrivate : public QObject
     public:
         explicit PagePrivate(Page* parent);
         static void applySkinChange();
-        void updateSceneRect();
 
     public:
         Page* parent;
@@ -788,20 +787,6 @@ void PagePrivate::applySkinChange()
             resizer.setDisabled(!resizable);
         }
     }
-}
-
-void PagePrivate::updateSceneRect()
-{
-    QRectF rect;
-    if (parent->_skin == Page::PhonePortrait || parent->_skin == Page::PhoneLandscape)
-        rect = QRectF({QPointF(-skinSize.width() / 2.0, -skinSize.height() / 2.0), skinSize});
-    else if (parent->_skin == Page::NoSkin)
-        rect = QRectF({QPointF(-parent->size().width() / 2.0, -parent->size().height() / 2.0), parent->size()});
-    else
-        rect = QRectF(-parent->size().width() / 2.0, -parent->size().height() / 2.0,
-                      parent->size().width(), parent->size().height() + PAGE_TOP_MARGIN / 1.5);
-    if (parent->scene()->sceneRect() != rect)
-        parent->scene()->setSceneRect(rect);
 }
 
 //! ********************** [Page] **********************
@@ -926,14 +911,28 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
 void Page::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
-    _d->updateSceneRect();
     Control::resizeEvent(event);
+    updateSceneRect();
     centralize();
 }
 
 void Page::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
+}
+
+void Page::updateSceneRect()
+{
+    QRectF rect;
+    if (_skin == PhonePortrait || _skin == PhoneLandscape)
+        rect = QRectF({QPointF(-_d->skinSize.width() / 2.0 - fit(8), -_d->skinSize.height() / 2.0 - fit(8)), _d->skinSize + QSizeF(fit(16), fit(16))});
+    else if (_skin == NoSkin)
+        rect = QRectF({QPointF(-size().width() / 2.0 - fit(8), -size().height() / 2.0 - fit(8)), size() + QSizeF(fit(16), fit(16))});
+    else
+        rect = QRectF(-size().width() / 2.0 - fit(8), -size().height() / 2.0 - PAGE_TOP_MARGIN / 1.5 - fit(8),
+                      size().width() + fit(16), size().height() + 2.0 * PAGE_TOP_MARGIN / 1.5 + fit(16));
+    if (scene()->sceneRect() != rect)
+        scene()->setSceneRect(rect);
 }
 
 bool Page::stickSelectedControlToGuideLines() const

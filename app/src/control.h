@@ -150,6 +150,7 @@ class Page : public Control
 
     public slots:
         void centralize();
+        void updateSceneRect();
 
     protected:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;

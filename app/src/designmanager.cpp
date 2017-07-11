@@ -351,6 +351,8 @@ void DesignManagerPrivate::handlePhonePortraitButtonClicked()
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
+    designerScene.currentPage()->updateSceneRect();
+    designerScene.currentPage()->centralize();
 }
 
 void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
@@ -363,6 +365,8 @@ void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
     phonePortraitButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
+    designerScene.currentPage()->updateSceneRect();
+    designerScene.currentPage()->centralize();
 }
 
 void DesignManagerPrivate::handleDesktopSkinButtonClicked()
@@ -375,6 +379,8 @@ void DesignManagerPrivate::handleDesktopSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     noSkinButton.setEnabled(true);
+    designerScene.currentPage()->updateSceneRect();
+    designerScene.currentPage()->centralize();
 }
 
 void DesignManagerPrivate::handleNoSkinButtonClicked()
@@ -387,6 +393,8 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
+    designerScene.currentPage()->updateSceneRect();
+    designerScene.currentPage()->centralize();
 }
 
 void DesignManagerPrivate::handleRefreshPreviewClicked()
