@@ -392,7 +392,7 @@ void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors)
 //! ********************** [Control] **********************
 //!
 
-bool Control::_showOutline = true;
+bool Control::_showOutline = false;
 
 Control::Control(Control* parent)
     : QGraphicsWidget(parent)
