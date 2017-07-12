@@ -41,6 +41,10 @@ DesignerScene::DesignerScene(QObject *parent)
     if (_d)
         return;
     _d = new DesignerScenePrivate(this);
+
+    connect(this, &DesignerScene::changed, [=] {
+        setSceneRect(currentPage()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
+    });
 }
 
 const QList<Page*>& DesignerScene::pages()

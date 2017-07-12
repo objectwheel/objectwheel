@@ -912,27 +912,12 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 void Page::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     Control::resizeEvent(event);
-    updateSceneRect();
     centralize();
 }
 
 void Page::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
-}
-
-void Page::updateSceneRect()
-{
-    QRectF rect;
-    if (_skin == PhonePortrait || _skin == PhoneLandscape)
-        rect = QRectF({QPointF(-_d->skinSize.width() / 2.0 - fit(8), -_d->skinSize.height() / 2.0 - fit(8)), _d->skinSize + QSizeF(fit(16), fit(16))});
-    else if (_skin == NoSkin)
-        rect = QRectF({QPointF(-size().width() / 2.0 - fit(8), -size().height() / 2.0 - fit(8)), size() + QSizeF(fit(16), fit(16))});
-    else
-        rect = QRectF(-size().width() / 2.0 - fit(8), -size().height() / 2.0 - PAGE_TOP_MARGIN / 1.5 - fit(8),
-                      size().width() + fit(16), size().height() + 2.0 * PAGE_TOP_MARGIN / 1.5 + fit(16));
-    if (scene()->sceneRect() != rect)
-        scene()->setSceneRect(rect);
 }
 
 bool Page::stickSelectedControlToGuideLines() const
@@ -1347,6 +1332,19 @@ bool Page::contains(const QString& id) const
             return true;
     }
     return false;
+}
+
+QRectF Page::frameGeometry() const
+{
+    QRectF rect;
+    if (_skin == PhonePortrait || _skin == PhoneLandscape)
+        rect = QRectF({QPointF(-_d->skinSize.width() / 2.0, -_d->skinSize.height() / 2.0), _d->skinSize});
+    else if (_skin == NoSkin)
+        rect = QRectF({QPointF(-size().width() / 2.0, -size().height() / 2.0), size()});
+    else
+        rect = QRectF(-size().width() / 2.0, -size().height() / 2.0 - PAGE_TOP_MARGIN / 1.5,
+                      size().width(), size().height() + 2.0 * PAGE_TOP_MARGIN / 1.5);
+    return rect;
 }
 
 bool Page::mainPage() const

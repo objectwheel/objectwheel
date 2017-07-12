@@ -148,9 +148,10 @@ class Page : public Control
         using Control::contains;
         bool contains(const QString& id) const;
 
+        QRectF frameGeometry() const;
+
     public slots:
         void centralize();
-        void updateSceneRect();
 
     protected:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
