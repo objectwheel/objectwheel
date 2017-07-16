@@ -102,7 +102,7 @@ BubbleHead::BubbleHead(QWidget *parent)
 
 BubbleHead::~BubbleHead()
 {
-	delete m_d;
+    delete m_d;
 }
 
 void BubbleHead::setIcon(const QPixmap& icon)

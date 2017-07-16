@@ -13,8 +13,8 @@ class ControlTransaction : public QObject
         explicit ControlTransaction(Control* watched, QObject *parent = 0);
 
     public slots:
-        void handleGeometryChange();
-        void handleParentChange();
+        void flushGeometryChange();
+        void flushParentChange();
 
     private:
         Control* _watched;

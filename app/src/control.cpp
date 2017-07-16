@@ -345,10 +345,7 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         parent->setId(id);
         parent->resize(result.size);
         parent->setClip(result.clip);
-
-
-        SaveManager::setVariantProperty(id, "x", parent->x());
-        SaveManager::setVariantProperty(id, "y", parent->y());
+        parent->_controlTransaction.flushParentChange();
     }
 
     parent->update();
@@ -505,7 +502,6 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     control->setSelected(true);
     control->refresh();
 
-    scene()->addItem(control);
     event->accept();
     update();
 }

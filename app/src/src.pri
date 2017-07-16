@@ -42,7 +42,9 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/designerscene.h \
                              $$PWD/designerview.h \
                              $$PWD/qmlpreviewer.h \
-    $$PWD/controltransaction.h
+                             $$PWD/controltransaction.h \
+                             $$PWD/parserworker.h \
+                             $$PWD/parsercontroller.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -86,7 +88,9 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/designerscene.cpp \
                              $$PWD/designerview.cpp \
                              $$PWD/qmlpreviewer.cpp \
-    $$PWD/controltransaction.cpp
+                             $$PWD/controltransaction.cpp \
+                             $$PWD/parserworker.cpp \
+                             $$PWD/parsercontroller.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

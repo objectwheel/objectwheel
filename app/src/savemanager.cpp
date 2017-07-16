@@ -1,25 +1,19 @@
 #include <savemanager.h>
 #include <filemanager.h>
 #include <projectmanager.h>
-#include <model.h>
-#include <rewriterview.h>
-#include <qmljs/qmljsmodelmanagerinterface.h>
-#include <modelnode.h>
-#include <plaintexteditmodifier.h>
-#include <qmlobjectnode.h>
-#include <variantproperty.h>
-#include <QPlainTextEdit>
+#include <parsercontroller.h>
+#include <pageswidget.h>
+#include <mainwindow.h>
+#include <bindingwidget.h>
+#include <eventswidget.h>
+#include <qmleditor.h>
+
 #include <QQmlEngine>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <pageswidget.h>
-#include <mainwindow.h>
-#include <bindingproperty.h>
-#include <bindingwidget.h>
-#include <eventswidget.h>
-#include <qmleditor.h>
 #include <QApplication>
+#include <QTimer>
 
 #define SAVE_DIRECTORY "dashboard"
 #define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
@@ -34,9 +28,6 @@
 #define EVENT_TARGET_ID_LABEL "targetId"
 #define EVENT_TARGET_EVENTNAME_LABEL "targetEventname"
 #define EVENT_EVENT_CODE_LABEL "eventCode"
-
-using namespace QmlDesigner;
-using namespace QmlJS;
 
 class SaveManagerPrivate
 {
@@ -53,19 +44,13 @@ class SaveManagerPrivate
         void fillEvents(const QJsonObject& eventSaves);
 
 	public:
-		SaveManager* parent = nullptr;
-		ModelManagerInterface* modelManager;
-        QTimer applierTimer;
-        QString id, newId;
+        SaveManager* parent = nullptr;
+        ParserController parserController;
 };
 
 SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
-	: parent(uparent)
+    : parent(uparent)
 {
-	modelManager = new ModelManagerInterface;
-    applierTimer.setInterval(500);
-    QObject::connect(&applierTimer, SIGNAL(timeout()), parent, SLOT(idApplier()));
-    for (auto importPath : QQmlEngine().importPathList()) parseImportDirectories(importPath);
 }
 
 QString SaveManagerPrivate::generateSavesDirectory() const
@@ -80,12 +65,6 @@ inline QString SaveManagerPrivate::generateSaveDirectory(const QString& id) cons
     auto baseDir = generateSavesDirectory();
     if (baseDir.isEmpty()) return baseDir;
     return baseDir + separator() + id;
-}
-
-void SaveManagerPrivate::parseImportDirectories(const QString& dir)
-{
-	modelManager->updateLibraryInfo(dir, LibraryInfo(LibraryInfo::Found));
-	for (auto subdir: lsdir(dir)) parseImportDirectories(dir + separator() + subdir);
 }
 
 void SaveManagerPrivate::initPageOrder(const QString& file) const
@@ -396,23 +375,9 @@ bool SaveManager::loadDatabase()
 void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
 {
     if (saveDirectory(id).isEmpty()) return;
-    auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-    QString mainQmlContent = rdfile(mainQmlFilename);
-    if (mainQmlContent.isEmpty()) return;
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier;
-    textModifier->setText(mainQmlContent);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-    auto rootNode = rewriterView->rootModelNode();
-    QmlObjectNode(rootNode).setVariantProperty(QByteArray().insert(0, property), value);
-    wrfile(mainQmlFilename, QByteArray().insert(0, textModifier->text()));
+    auto filename = saveDirectory(id) + separator() + "main.qml";
+    ParserController::setVariantProperty(filename, property, value);
     QmlEditor::clearCacheFor(saveDirectory(id), true);
-    delete rewriterView;
-    delete textModifier;
-    delete model;
 }
 
 void SaveManager::setBindingProperty(const QString& id, const QString& property, const QString& expression) //FIXME:
@@ -522,33 +487,4 @@ void SaveManager::changePageOrder(const QString& fromPageId, const QString& toPa
 			break;
 		}
     }
-}
-
-void SaveManager::setId(const QString& id, const QString& newId)
-{
-    m_d->id = id;
-    m_d->newId = newId;
-    m_d->applierTimer.start();
-}
-
-void SaveManager::idApplier() // BUG
-{
-//    m_d->applierTimer.stop();
-//   if (saveDirectory(m_d->id).isEmpty()) return;
-//   auto mainQmlFilename = saveDirectory(m_d->id) + separator() + "main.qml";
-//   QString mainQmlContent = rdfile(mainQmlFilename);
-//   if (mainQmlContent.isEmpty()) return;
-//   m_d->plainTextEdit->setPlainText(mainQmlContent);
-//   auto model = Model::create("QtQuick.Item", 1, 0);
-//   auto rewriterView = new RewriterView(RewriterView::Amend, model);
-//   auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-//   model->setTextModifier(textModifier);
-//   model->setRewriterView(rewriterView);
-//   model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-//   ModelNode rootNode = rewriterView->rootModelNode();
-//   QmlObjectNode(rootNode).setId(m_d->newId);
-//   wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-//   delete rewriterView;
-//   delete textModifier;
-//   delete model;
 }

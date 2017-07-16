@@ -466,7 +466,7 @@ public:
         if (parentObject)
             *parentObject = objectValue;
         if (!value) {
-            qWarning() << Q_FUNC_INFO << "Skipping invalid property name" << propertyName;
+//            qWarning() << Q_FUNC_INFO << "Skipping invalid property name" << propertyName;
             return false;
         }
 
@@ -547,9 +547,9 @@ public:
         const ObjectValue *containingObject = 0;
         QString name;
         if (!lookupProperty(propertyPrefix, propertyId, &property, &containingObject, &name)) {
-            qWarning() << Q_FUNC_INFO << "Unknown property" << propertyPrefix + QLatin1Char('.') + toString(propertyId)
-                       << "on line" << propertyId->identifierToken.startLine
-                       << "column" << propertyId->identifierToken.startColumn;
+//            qWarning() << Q_FUNC_INFO << "Unknown property" << propertyPrefix + QLatin1Char('.') + toString(propertyId)
+//                       << "on line" << propertyId->identifierToken.startLine
+//                       << "column" << propertyId->identifierToken.startColumn;
             return hasQuotes ? QVariant(cleanedValue) : cleverConvert(cleanedValue);
         }
 
@@ -1024,7 +1024,7 @@ void TextToModelMerger::syncNode(ModelNode &modelNode,
         defaultPropertyName = modelNode.metaInfo().defaultPropertyName();
 
     if (typeName.isEmpty()) {
-        qWarning() << "Skipping node with unknown type" << toString(astObjectType);
+//        qWarning() << "Skipping node with unknown type" << toString(astObjectType);
         return;
     }
 
@@ -1081,8 +1081,8 @@ void TextToModelMerger::syncNode(ModelNode &modelNode,
                 syncArrayProperty(modelProperty, arrayMembers, context, differenceHandler);
                 modelPropertyNames.remove(astPropertyName.toUtf8());
             } else {
-                qWarning() << "Skipping invalid array property" << astPropertyName
-                           << "for node type" << modelNode.type();
+//                qWarning() << "Skipping invalid array property" << astPropertyName
+//                           << "for node type" << modelNode.type();
             }
         } else if (AST::UiObjectDefinition *def = AST::cast<AST::UiObjectDefinition *>(member)) {
             const QString &name = def->qualifiedTypeNameId->name.toString();
@@ -1115,8 +1115,8 @@ void TextToModelMerger::syncNode(ModelNode &modelNode,
                         syncNodeProperty(modelProperty, binding, context, TypeName(), differenceHandler);
                     modelPropertyNames.remove(astPropertyName.toUtf8());
                 } else {
-                    qWarning() << "Syncing unknown node property" << astPropertyName
-                               << "for node type" << modelNode.type();
+//                    qWarning() << "Syncing unknown node property" << astPropertyName
+//                               << "for node type" << modelNode.type();
                     AbstractProperty modelProperty = modelNode.property(astPropertyName.toUtf8());
                     syncNodeProperty(modelProperty, binding, context, TypeName(), differenceHandler);
                     modelPropertyNames.remove(astPropertyName.toUtf8());
@@ -1149,8 +1149,8 @@ void TextToModelMerger::syncNode(ModelNode &modelNode,
             if (property->binding) {
                 if (AST::UiObjectBinding *binding = AST::cast<AST::UiObjectBinding *>(property->binding))
                     syncNodeProperty(modelProperty, binding, context, astType, differenceHandler);
-                else
-                    qWarning() << "Arrays are not yet supported";
+//                else
+//                    qWarning() << "Arrays are not yet supported";
             } else if (!property->statement || isLiteralValue(property->statement)) {
                 const QVariant variantValue = convertDynamicPropertyValueToVariant(astValue, QString::fromLatin1(astType));
                 syncVariantProperty(modelProperty, variantValue, astType, differenceHandler);
@@ -1159,7 +1159,7 @@ void TextToModelMerger::syncNode(ModelNode &modelNode,
             }
             modelPropertyNames.remove(astName.toUtf8());
         } else {
-            qWarning() << "Found an unknown QML value.";
+//            qWarning() << "Found an unknown QML value.";
         }
     }
 
@@ -1167,7 +1167,7 @@ void TextToModelMerger::syncNode(ModelNode &modelNode,
         if (isComponentType(modelNode.type()))
             setupComponentDelayed(modelNode, differenceHandler.isValidator());
         if (defaultPropertyName.isEmpty()) {
-            qWarning() << "No default property for node type" << modelNode.type() << ", ignoring child items.";
+//            qWarning() << "No default property for node type" << modelNode.type() << ", ignoring child items.";
         } else {
             AbstractProperty modelProperty = modelNode.property(defaultPropertyName);
             if (modelProperty.isNodeListProperty()) {
@@ -1289,8 +1289,8 @@ QmlDesigner::PropertyName TextToModelMerger::syncScriptBinding(ModelNode &modelN
                 syncVariantProperty(modelProperty, variantValue, TypeName(), differenceHandler);
                 return astPropertyName.toUtf8();
             } else {
-                qWarning() << "Skipping invalid variant property" << astPropertyName
-                           << "for node type" << modelNode.type();
+//                qWarning() << "Skipping invalid variant property" << astPropertyName
+//                           << "for node type" << modelNode.type();
                 return PropertyName();
             }
         }
@@ -1310,8 +1310,8 @@ QmlDesigner::PropertyName TextToModelMerger::syncScriptBinding(ModelNode &modelN
             syncExpressionProperty(modelProperty, astValue, TypeName(), differenceHandler); // TODO: parse type
             return astPropertyName.toUtf8();
         } else {
-            qWarning() << Q_FUNC_INFO << "Skipping invalid expression property" << astPropertyName
-                    << "for node type" << modelNode.type();
+//            qWarning() << Q_FUNC_INFO << "Skipping invalid expression property" << astPropertyName
+//                    << "for node type" << modelNode.type();
             return PropertyName();
         }
     }
@@ -1354,7 +1354,7 @@ void TextToModelMerger::syncNodeProperty(AbstractProperty &modelProperty,
 
 
     if (typeName.isEmpty()) {
-        qWarning() << "Skipping node with unknown type" << toString(binding->qualifiedTypeNameId);
+//        qWarning() << "Skipping node with unknown type" << toString(binding->qualifiedTypeNameId);
         return;
     }
 
@@ -1624,7 +1624,7 @@ void ModelValidator::variantValuesDiffer(VariantProperty &modelProperty, const Q
 
 
 
-    QTC_ASSERT(equals(modelProperty.value(), qmlVariantValue), qWarning() << modelProperty.value() << qmlVariantValue);
+//    QTC_ASSERT(equals(modelProperty.value(), qmlVariantValue), qWarning() << modelProperty.value() << qmlVariantValue);
     QTC_ASSERT(0, return);
 }
 
@@ -1682,8 +1682,8 @@ void ModelValidator::typeDiffers(bool /*isRootNode*/,
     QTC_ASSERT(modelNode.type() == typeName, return);
 
     if (modelNode.majorVersion() != majorVersion) {
-        qDebug() << Q_FUNC_INFO << modelNode;
-        qDebug() << typeName << modelNode.majorVersion() << majorVersion;
+//        qDebug() << Q_FUNC_INFO << modelNode;
+//        qDebug() << typeName << modelNode.majorVersion() << majorVersion;
     }
 
     QTC_ASSERT(modelNode.majorVersion() == majorVersion, return);
@@ -1852,7 +1852,7 @@ ModelNode ModelAmender::listPropertyMissingModelNode(NodeListProperty &modelProp
     TypeName typeName = typeNameString.toUtf8();
 
     if (typeName.isEmpty()) {
-        qWarning() << "Skipping node with unknown type" << toString(astObjectType);
+//        qWarning() << "Skipping node with unknown type" << toString(astObjectType);
         return ModelNode();
     }
 

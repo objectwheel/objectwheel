@@ -1301,7 +1301,7 @@ void NodeMetaInfoPrivate::initialiseProperties()
 
     m_propertiesSetup = true;
 
-    QTC_ASSERT(m_objectValue, qDebug() << qualfiedTypeName(); return);
+//    QTC_ASSERT(m_objectValue, qDebug() << qualfiedTypeName(); return);
 
     setupPropertyInfo(getTypes(m_objectValue, context()));
     setupLocalPropertyInfo(getTypes(m_objectValue, context(), true));
@@ -1530,7 +1530,7 @@ bool NodeMetaInfo::availableInVersion(int majorVersion, int minorVersion) const
 bool NodeMetaInfo::isSubclassOf(const TypeName &type, int majorVersion, int minorVersion) const
 {
     if (!isValid()) {
-        qWarning() << "NodeMetaInfo is invalid";
+//        qWarning() << "NodeMetaInfo is invalid";
         return false;
     }
 

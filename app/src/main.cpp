@@ -11,6 +11,7 @@
 #include <QBuffer>
 #include <QSharedMemory>
 #include <QMessageBox>
+#include <QLoggingCategory>
 
 #define PIXEL_SIZE 13
 #define REF_WIDTH 1000
@@ -90,6 +91,12 @@ int main(int argc, char *argv[])
     font.setPixelSize(Fit::fit(PIXEL_SIZE));
     QApplication::setFont(font);
     QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
+
+    /* Disable Qml Parser warnings */
+    QLoggingCategory::setFilterRules(QStringLiteral("qtc*.info=false\n"
+                                                    "qtc*.debug=false\n"
+                                                    "qtc*.warning=false\n"
+                                                    "qtc*.critical=false"));
 
     // Start main event loop
     return a.exec();

@@ -36,7 +36,7 @@ class QmlEditorPrivate
 		QQuickItem* rootItem;
 		BindingWidget* bindingWidget;
         EventsWidget* eventWidget;
-		QVBoxLayout mainLayout;
+        QVBoxLayout mainLayout;
         QQuickWidget quickWidget;
 		FlatButton minimizeButton;
 		QList<QQuickItem*>* itemList;

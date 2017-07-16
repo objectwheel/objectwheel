@@ -104,7 +104,6 @@ void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlC
 	}
 	context->setContextProperty(context->nameForObject(selectedItem), 0);
 	context->setContextProperty(componentName, selectedItem);
-    SaveManager::setId(componentName, componentName);
 }
 
 void PropertyItem::fillCup(QQmlContext* const context)

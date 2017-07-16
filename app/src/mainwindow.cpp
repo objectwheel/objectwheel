@@ -1125,14 +1125,13 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 	m_d->m_Items << qml;
 	m_d->m_ItemUrls << url;
 
-//	QTimer::singleShot(200, [qml] { m_d->parent->fixWebViewPosition(qml); });
     if (m_d->editMode) m_d->parent->ShowSelectionTools(qml);
 	return true;
 }
 
 MainWindow::~MainWindow()
 {
-	delete m_d;
+    delete m_d;
 }
 
 // TODO: Make a object clone tick
