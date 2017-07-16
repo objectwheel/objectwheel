@@ -28,39 +28,33 @@
 #include <utils/changeset.h>
 #include <qmljs/qmljsmodelmanagerinterface.h>
 
-#include <QPlainTextEdit>
-
+#include <QTextDocument>
 #include <QDebug>
 
 using namespace Utils;
 using namespace QmlDesigner;
 
-PlainTextEditModifier::PlainTextEditModifier(QPlainTextEdit *textEdit):
+PlainTextEditModifier::PlainTextEditModifier():
         m_changeSet(0),
-        m_textEdit(textEdit),
+        m_textDocument(new QTextDocument),
+        m_textCursor(m_textDocument),
         m_changeSignalsEnabled(true),
         m_pendingChangeSignal(false),
         m_ongoingTextChange(false)
 {
-    Q_ASSERT(textEdit);
-
-    connect(m_textEdit, SIGNAL(textChanged()),
+    connect(m_textDocument, SIGNAL(contentsChanged()),
             this, SLOT(textEditChanged()));
+    connect(m_textDocument, SIGNAL(cursorPositionChanged(QTextCursor)),
+            this, SLOT(setTextCursor(QTextCursor)));
 }
 
 PlainTextEditModifier::~PlainTextEditModifier()
 {
+    delete m_textDocument;
 }
 
 void PlainTextEditModifier::replace(int offset, int length, const QString &replacement)
 {
-#if 0
-    qDebug() << "Original:"    << m_textEdit->toPlainText();
-    qDebug() << "Replacement:" << replacement;
-    qDebug() << "     offset:" << offset;
-    qDebug() << "     length:" << length;
-#endif
-
     Q_ASSERT(offset >= 0);
     Q_ASSERT(length >= 0);
 
@@ -79,17 +73,6 @@ void PlainTextEditModifier::replace(int offset, int length, const QString &repla
 
 void PlainTextEditModifier::move(const MoveInfo &moveInfo)
 {
-#if 0
-    qDebug() << "Original:"    << m_textEdit->toPlainText();
-    qDebug() << "Move:" << m_textEdit->toPlainText().mid(moveInfo.objectStart, moveInfo.objectEnd - moveInfo.objectStart);
-    qDebug() << "     prefix:" << moveInfo.prefixToInsert;
-    qDebug() << "     suffix:" <<  moveInfo.suffixToInsert;
-    qDebug() << "     leadingCharsToRemove:" <<  moveInfo.leadingCharsToRemove;
-    qDebug() << "                          " <<  m_textEdit->toPlainText().mid(moveInfo.objectStart - moveInfo.leadingCharsToRemove,  moveInfo.leadingCharsToRemove);
-    qDebug() << "     trailingCharsToRemove:" <<  moveInfo.trailingCharsToRemove;
-    qDebug() << "                           " <<  m_textEdit->toPlainText().mid(moveInfo.objectEnd, moveInfo.trailingCharsToRemove);
-#endif
-
     Q_ASSERT(moveInfo.objectStart >= 0);
     Q_ASSERT(moveInfo.objectEnd > moveInfo.objectStart);
     Q_ASSERT(moveInfo.destination >= 0);
@@ -160,17 +143,22 @@ void PlainTextEditModifier::runRewriting(ChangeSet *changeSet)
 
 QTextDocument *PlainTextEditModifier::textDocument() const
 {
-    return m_textEdit->document();
+    return m_textDocument;
 }
 
 QString PlainTextEditModifier::text() const
 {
-    return m_textEdit->toPlainText();
+    return m_textDocument->toPlainText();
+}
+
+void PlainTextEditModifier::setText(const QString& text)
+{
+    m_textDocument->setPlainText(text);
 }
 
 QTextCursor PlainTextEditModifier::textCursor() const
 {
-    return m_textEdit->textCursor();
+    return m_textCursor;
 }
 
 void PlainTextEditModifier::deactivateChangeSignals()

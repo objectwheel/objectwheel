@@ -54,7 +54,6 @@ class SaveManagerPrivate
 
 	public:
 		SaveManager* parent = nullptr;
-		QPlainTextEdit* plainTextEdit;
 		ModelManagerInterface* modelManager;
         QTimer applierTimer;
         QString id, newId;
@@ -63,8 +62,6 @@ class SaveManagerPrivate
 SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
 	: parent(uparent)
 {
-	plainTextEdit = new QPlainTextEdit;
-	plainTextEdit->setHidden(true);
 	modelManager = new ModelManagerInterface;
     applierTimer.setInterval(500);
     QObject::connect(&applierTimer, SIGNAL(timeout()), parent, SLOT(idApplier()));
@@ -311,7 +308,7 @@ QStringList SaveManager::saves()
 
 void SaveManager::addSave(const QString& id, const QString& url)
 {
-	if (exists(id)) return;
+    if (exists(id)  || url.isEmpty()) return;
 	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 	if (projectDir.isEmpty()) return;
 	auto saveBaseDir = projectDir + separator() + SAVE_DIRECTORY;
@@ -398,20 +395,20 @@ bool SaveManager::loadDatabase()
 
 void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
 {
-	if (saveDirectory(id).isEmpty()) return;
-	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-	QString mainQmlContent = rdfile(mainQmlFilename);
-	if (mainQmlContent.isEmpty()) return;
-	m_d->plainTextEdit->setPlainText(mainQmlContent);
+    if (saveDirectory(id).isEmpty()) return;
+    auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
+    QString mainQmlContent = rdfile(mainQmlFilename);
+    if (mainQmlContent.isEmpty()) return;
     auto model = Model::create("QtQuick.Item", 1, 0);
     auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+    auto textModifier = new NotIndentingTextEditModifier;
+    textModifier->setText(mainQmlContent);
     model->setTextModifier(textModifier);
     model->setRewriterView(rewriterView);
     model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
     auto rootNode = rewriterView->rootModelNode();
-	QmlObjectNode(rootNode).setVariantProperty(QByteArray().insert(0, property), value);
-	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+    QmlObjectNode(rootNode).setVariantProperty(QByteArray().insert(0, property), value);
+    wrfile(mainQmlFilename, QByteArray().insert(0, textModifier->text()));
     QmlEditor::clearCacheFor(saveDirectory(id), true);
     delete rewriterView;
     delete textModifier;
@@ -420,45 +417,45 @@ void SaveManager::setVariantProperty(const QString& id, const QString& property,
 
 void SaveManager::setBindingProperty(const QString& id, const QString& property, const QString& expression) //FIXME:
 {
-	if (saveDirectory(id).isEmpty()) return;
-	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-	QString mainQmlContent = rdfile(mainQmlFilename);
-	if (mainQmlContent.isEmpty()) return;
-	m_d->plainTextEdit->setPlainText(mainQmlContent);
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-    ModelNode rootNode = rewriterView->rootModelNode();
-	QmlObjectNode(rootNode).setBindingProperty(QByteArray().insert(0, property), expression);
-	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-    delete rewriterView;
-    delete textModifier;
-    delete model;
+//	if (saveDirectory(id).isEmpty()) return;
+//	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
+//	QString mainQmlContent = rdfile(mainQmlFilename);
+//	if (mainQmlContent.isEmpty()) return;
+//	m_d->plainTextEdit->setPlainText(mainQmlContent);
+//    auto model = Model::create("QtQuick.Item", 1, 0);
+//    auto rewriterView = new RewriterView(RewriterView::Amend, model);
+//    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+//    model->setTextModifier(textModifier);
+//    model->setRewriterView(rewriterView);
+//    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+//    ModelNode rootNode = rewriterView->rootModelNode();
+//	QmlObjectNode(rootNode).setBindingProperty(QByteArray().insert(0, property), expression);
+//	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+//    delete rewriterView;
+//    delete textModifier;
+//    delete model;
 }
 
 void SaveManager::removeProperty(const QString& id, const QString& property) //FIXME: FOR BINDING PROPERTIES
 {
-	if (saveDirectory(id).isEmpty()) return;
-	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-	QString mainQmlContent = rdfile(mainQmlFilename);
-	if (mainQmlContent.isEmpty()) return;
-	m_d->plainTextEdit->setPlainText(mainQmlContent);
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-    ModelNode rootNode = rewriterView->rootModelNode();
-    rootNode.removeProperty(QByteArray().insert(0, property));
-    QmlObjectNode(rootNode).removeProperty(QByteArray().insert(0, property));
-    wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-    delete rewriterView;
-    delete textModifier;
-    delete model;
+//	if (saveDirectory(id).isEmpty()) return;
+//	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
+//	QString mainQmlContent = rdfile(mainQmlFilename);
+//	if (mainQmlContent.isEmpty()) return;
+//	m_d->plainTextEdit->setPlainText(mainQmlContent);
+//    auto model = Model::create("QtQuick.Item", 1, 0);
+//    auto rewriterView = new RewriterView(RewriterView::Amend, model);
+//    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+//    model->setTextModifier(textModifier);
+//    model->setRewriterView(rewriterView);
+//    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+//    ModelNode rootNode = rewriterView->rootModelNode();
+//    rootNode.removeProperty(QByteArray().insert(0, property));
+//    QmlObjectNode(rootNode).removeProperty(QByteArray().insert(0, property));
+//    wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+//    delete rewriterView;
+//    delete textModifier;
+//    delete model;
 }
 
 void SaveManager::addParentalRelationship(const QString& id, const QString& parent)
@@ -536,22 +533,22 @@ void SaveManager::setId(const QString& id, const QString& newId)
 
 void SaveManager::idApplier() // BUG
 {
-    m_d->applierTimer.stop();
-   if (saveDirectory(m_d->id).isEmpty()) return;
-   auto mainQmlFilename = saveDirectory(m_d->id) + separator() + "main.qml";
-   QString mainQmlContent = rdfile(mainQmlFilename);
-   if (mainQmlContent.isEmpty()) return;
-   m_d->plainTextEdit->setPlainText(mainQmlContent);
-   auto model = Model::create("QtQuick.Item", 1, 0);
-   auto rewriterView = new RewriterView(RewriterView::Amend, model);
-   auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-   model->setTextModifier(textModifier);
-   model->setRewriterView(rewriterView);
-   model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-   ModelNode rootNode = rewriterView->rootModelNode();
-   QmlObjectNode(rootNode).setId(m_d->newId);
-   wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-   delete rewriterView;
-   delete textModifier;
-   delete model;
+//    m_d->applierTimer.stop();
+//   if (saveDirectory(m_d->id).isEmpty()) return;
+//   auto mainQmlFilename = saveDirectory(m_d->id) + separator() + "main.qml";
+//   QString mainQmlContent = rdfile(mainQmlFilename);
+//   if (mainQmlContent.isEmpty()) return;
+//   m_d->plainTextEdit->setPlainText(mainQmlContent);
+//   auto model = Model::create("QtQuick.Item", 1, 0);
+//   auto rewriterView = new RewriterView(RewriterView::Amend, model);
+//   auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
+//   model->setTextModifier(textModifier);
+//   model->setRewriterView(rewriterView);
+//   model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
+//   ModelNode rootNode = rewriterView->rootModelNode();
+//   QmlObjectNode(rootNode).setId(m_d->newId);
+//   wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
+//   delete rewriterView;
+//   delete textModifier;
+//   delete model;
 }

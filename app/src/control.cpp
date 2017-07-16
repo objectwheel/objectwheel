@@ -1,10 +1,8 @@
 #include <control.h>
-#include <delayer.h>
 #include <fit.h>
 #include <qmlpreviewer.h>
 #include <designerscene.h>
 #include <savemanager.h>
-#include <delayer.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -62,9 +60,6 @@ Resizer::Resizer(Control *parent)
     setVisible(false);
     setAcceptedMouseButtons(Qt::LeftButton);
     setAcceptHoverEvents(true);
-
-    _transactionTimer.setInterval(RESIZE_TRANSACTION_INTERVAL);
-    connect(&_transactionTimer, SIGNAL(timeout()), SLOT(startTransaction()));
 }
 
 QRectF Resizer::boundingRect() const
@@ -148,24 +143,12 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         parent->size().height() < RESIZER_SIZE) {
         parent->resize(startSize);
     }
-
-    _transactionTimer.start();
 }
 
 void Resizer::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
     _resizing = false;
-}
-
-void Resizer::startTransaction()
-{
-    _transactionTimer.stop();
-    auto* parent = static_cast<Control*>(parentItem());
-    SaveManager::setVariantProperty(parent->id(), "x", parent->x());
-    SaveManager::setVariantProperty(parent->id(), "y", parent->y());
-    SaveManager::setVariantProperty(parent->id(), "width", parent->size().width());
-    SaveManager::setVariantProperty(parent->id(), "height", parent->size().height());
 }
 
 bool Resizer::disabled() const
@@ -253,7 +236,6 @@ class ControlPrivate : public QObject
         QmlPreviewer qmlPreviewer;
         bool hoverOn;
 };
-
 
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
@@ -358,17 +340,15 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         for (int i = 1; currentPage->contains(id); i++)
             id = result.id + QString::number(i);
 
+        SaveManager::addSave(id, parent->url().toLocalFile());
+
         parent->setId(id);
         parent->resize(result.size);
         parent->setClip(result.clip);
-        Delayer::delay(100);
 
-//        SaveManager::addSave(id, parent->url().toLocalFile());
-//        SaveManager::setId(id, id);
-//        SaveManager::setVariantProperty(id, "x", parent->x());
-//        SaveManager::setVariantProperty(id, "y", parent->y());
-//        if (parent->parentControl())
-//            SaveManager::addParentalRelationship(id, parent->parentControl()->id());
+
+        SaveManager::setVariantProperty(id, "x", parent->x());
+        SaveManager::setVariantProperty(id, "y", parent->y());
     }
 
     parent->update();
@@ -397,6 +377,7 @@ bool Control::_showOutline = false;
 Control::Control(Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
+    , _controlTransaction(this)
     , _dragging(false)
     , _dragIn(false)
     , _clip(true)
@@ -483,10 +464,6 @@ void Control::dropControl(Control* control)
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
     control->setParentItem(this);
     control->refresh();
-
-    SaveManager::addParentalRelationship(control->id(), id());
-    SaveManager::setVariantProperty(control->id(), "x", control->x());
-    SaveManager::setVariantProperty(control->id(), "y", control->y());
     update();
 }
 

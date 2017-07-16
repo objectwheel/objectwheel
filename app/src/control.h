@@ -6,6 +6,7 @@
 #include <QList>
 #include <QPixmap>
 #include <QTimer>
+#include <controltransaction.h>
 
 class Control;
 class ControlPrivate;
@@ -45,14 +46,10 @@ class Resizer : public QGraphicsWidget
         virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
-    private slots:
-        void startTransaction();
-
     private:
         Placement _placement;
         bool _disabled;
         static bool _resizing;
-        QTimer _transactionTimer;
 };
 
 class Control : public QGraphicsWidget
@@ -113,6 +110,7 @@ class Control : public QGraphicsWidget
         ControlPrivate* _d;
 
     private:
+        ControlTransaction _controlTransaction;
         QString _id;
         QUrl _url;
         bool _dragging;

@@ -17,7 +17,7 @@
 #include <savemanager.h>
 #include <splashscreen.h>
 #include <scenemanager.h>
-#include <QtConcurrent>
+#include <QtMath>
 #include <QQmlEngine>
 #include <projectsscreen.h>
 #include <dirlocker.h>

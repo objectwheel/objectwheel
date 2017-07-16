@@ -30,7 +30,6 @@
 
 QT_BEGIN_NAMESPACE
 class QIODevice;
-class QPlainTextEdit;
 QT_END_NAMESPACE
 
 namespace Utils { class ChangeSet; }
@@ -46,11 +45,10 @@ private:
     PlainTextEditModifier &operator=(const PlainTextEditModifier &);
 
 public:
-    PlainTextEditModifier(QPlainTextEdit *textEdit);
+    PlainTextEditModifier();
     ~PlainTextEditModifier();
 
     QTextDocument *textDocument() const override;
-    QString text() const override;
     QTextCursor textCursor() const override;
 
     void replace(int offset, int length, const QString &replacement) override;
@@ -76,19 +74,20 @@ public:
     bool moveToComponent(int /* nodeOffset */) override
     { return false; }
 
-protected:
-    QPlainTextEdit *plainTextEdit() const
-    { return m_textEdit; }
+    QString text() const override;
+    void setText(const QString& text);
 
 private slots:
     void textEditChanged();
+    void setTextCursor(const QTextCursor& cursor) { m_textCursor = cursor; }
 
 private:
     void runRewriting(Utils::ChangeSet *writer);
 
 private:
     Utils::ChangeSet *m_changeSet;
-    QPlainTextEdit *m_textEdit;
+    QTextDocument *m_textDocument;
+    QTextCursor m_textCursor;
     bool m_changeSignalsEnabled;
     bool m_pendingChangeSignal;
     bool m_ongoingTextChange;
@@ -97,8 +96,8 @@ private:
 class QMLDESIGNERCORE_EXPORT NotIndentingTextEditModifier: public PlainTextEditModifier
 {
 public:
-    NotIndentingTextEditModifier(QPlainTextEdit *textEdit)
-        : PlainTextEditModifier(textEdit)
+    NotIndentingTextEditModifier()
+        : PlainTextEditModifier()
     {}
 
     void indent(int /*offset*/, int /*length*/) override
