@@ -65,8 +65,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::SetupGui()
 {
-	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
-	m_d->bindingWidget->setItemSource(&m_d->m_Items);
+//	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
+//	m_d->bindingWidget->setItemSource(&m_d->m_Items);
 
     m_d->eventsWidget->setRootContext(m_d->designWidget->rootContext());
     m_d->eventsWidget->setItemSource(&m_d->m_Items);
@@ -83,14 +83,14 @@ void MainWindow::SetupGui()
 	/* Start filtering design area */
 	m_d->designWidget->installEventFilter(this);
 
-	/* Hide ticks when tracked item removed */
-	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
-	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
-	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
-	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
-	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
-    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
-    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
+//	/* Hide ticks when tracked item removed */
+//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
+//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
+//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
+////	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
+//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
+//    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
+//    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
 
 	/* Re-move ticks when tracked item resized */
 	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RemoverTick, &RemoverTick::FixCoord);
@@ -131,12 +131,12 @@ void MainWindow::SetupGui()
 	connect(m_LeftMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setSettingsChecked(bool)));
 
 	/* Prepare Properties Widget */
-	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
-	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
-	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
-    connect(this, SIGNAL(selectionHided()), m_d->eventsWidget, SLOT(clearList()));
-    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
-    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->eventsWidget, SLOT(selectItem(QObject*const)));
+//	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
+//	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
+//	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
+//    connect(this, SIGNAL(selectionHided()), m_d->eventsWidget, SLOT(clearList()));
+//    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
+//    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->eventsWidget, SLOT(selectItem(QObject*const)));
 
 	/* Fix Coords of ticks when property changed */
 	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
@@ -283,7 +283,7 @@ void MainWindow::SetupGui()
 	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
     m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
-	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
+//	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
     m_d->eventsWidget->setRootContext(m_d->designWidget->rootContext());
 
 	m_d->centralWidget->installEventFilter(this);
@@ -767,7 +767,7 @@ void MainWindow::on_clearButton_clicked()
 					int i = m_d->m_Items.indexOf(item);
 					m_d->m_Items.removeOne(item);
 					m_d->m_ItemUrls.removeAt(i);
-					m_d->bindingWidget->detachBindingsFor(item);
+//					m_d->bindingWidget->detachBindingsFor(item);
                     m_d->eventsWidget->detachEventsFor(item);
 					item->deleteLater();
                     HideSelectionTools();
@@ -783,20 +783,20 @@ void MainWindow::on_clearButton_clicked()
 
 void MainWindow::on_editButton_clicked()
 {
-    m_d->editMode = !m_d->editMode;
-    m_d->emIndicator->setOn(m_d->editMode);
+//    m_d->editMode = !m_d->editMode;
+//    m_d->emIndicator->setOn(m_d->editMode);
 
-	for (auto item : m_d->m_Items) {
-        item->setEnabled(!m_d->editMode);
-	}
-	m_d->propertiesWidget->clearList();
-    m_d->bindingWidget->clearList();
-    m_d->eventsWidget->clearList();
+//	for (auto item : m_d->m_Items) {
+//        item->setEnabled(!m_d->editMode);
+//	}
+//	m_d->propertiesWidget->clearList();
+//    m_d->bindingWidget->clearList();
+//    m_d->eventsWidget->clearList();
 
-    m_ResizerTick->hide();
-    m_RemoverTick->hide();
-    m_RotatorTick->hide();
-    m_d->propertiesWidget->setEnabled(m_d->editMode);
+//    m_ResizerTick->hide();
+//    m_RemoverTick->hide();
+//    m_RotatorTick->hide();
+//    m_d->propertiesWidget->setEnabled(m_d->editMode);
 }
 
 void MainWindow::on_playButton_clicked()
@@ -946,7 +946,7 @@ void MainWindow::toolboxRemoveButtonClicked()
 							int j = m_d->m_Items.indexOf(item);
 							m_d->m_Items.removeOne(item);
 							m_d->m_ItemUrls.removeAt(j);
-							m_d->bindingWidget->detachBindingsFor(item);
+//							m_d->bindingWidget->detachBindingsFor(item);
                             m_d->eventsWidget->detachEventsFor(item);
 							item->deleteLater();
 						}

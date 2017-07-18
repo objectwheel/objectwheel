@@ -5,8 +5,8 @@
 #include <savemanager.h>
 
 class BindingWidgetPrivate;
-class QQuickItem;
-class QQmlContext;
+class Page;
+class Control;
 
 class BindingWidget : public QWidget
 {
@@ -19,23 +19,16 @@ class BindingWidget : public QWidget
         static BindingWidget* instance();
 		~BindingWidget();
 
-		const QList<QQuickItem*>* itemSource() const;
-		void setItemSource(const QList<QQuickItem*>* const ItemSource);
-
-		const QQmlContext* rootContext() const;
-		void setRootContext(QQmlContext* const rootContext);
-
         static void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
 	public slots:
-		void clearList();
-		void selectItem(QObject* const);
-		void detachBindingsFor(QObject* const);
+        void detachBindingsFor(Control*);
 		void clearAllBindings();
 		bool hasPopupOpen();
 
 	protected slots:
-		void processBindings();
+        void handleSelectionChange();
+        void clearList();
 
 	signals:
 		void popupShowed();

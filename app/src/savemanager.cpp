@@ -15,20 +15,6 @@
 #include <QApplication>
 #include <QTimer>
 
-#define SAVE_DIRECTORY "dashboard"
-#define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
-#define PAGE_ORDER_FILE "page_order.json"
-#define BINDINGS_FILE "bindings.json"
-#define BINDING_SOURCE_ID_LABEL "sourceId"
-#define BINDING_SOURCE_PROPERTY_LABEL "sourceProperty"
-#define BINDING_TARGET_ID_LABEL "targetId"
-#define BINDING_TARGET_PROPERTY_LABEL "targetProperty"
-
-#define EVENTS_FILE "events.json"
-#define EVENT_TARGET_ID_LABEL "targetId"
-#define EVENT_TARGET_EVENTNAME_LABEL "targetEventname"
-#define EVENT_EVENT_CODE_LABEL "eventCode"
-
 class SaveManagerPrivate
 {
 	public:

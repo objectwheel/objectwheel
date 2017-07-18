@@ -140,6 +140,10 @@ void MainWindowPrivate::setupUi()
 	designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
 	verticalLayout->addWidget(designWidget);
 
+    designManager = new DesignManager;
+    designManager->setSettleWidget(designWidget);
+    designManager->showWidget();
+
 	toolboxList = new ListWidget(centralWidget);
 	toolboxList->setIconSize(fit({30, 30}));
 	toolboxList->setObjectName(QStringLiteral("toolboxList"));
@@ -355,10 +359,6 @@ void MainWindowPrivate::setupUi()
 	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     emIndicator = new EditModeIndicator(centralWidget);
-
-    designManager = new DesignManager;
-    designManager->setSettleWidget(designWidget);
-    designManager->showWidget();
 }
 
 void MainWindowPrivate::showAdderArea()

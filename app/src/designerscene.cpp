@@ -47,6 +47,11 @@ DesignerScene::DesignerScene(QObject *parent)
     });
 }
 
+DesignerScene* DesignerScene::instance()
+{
+    return _d->parent;
+}
+
 const QList<Page*>& DesignerScene::pages()
 {
     return _pages;

@@ -193,7 +193,7 @@ void PagesWidgetPrivate::removeButtonClicked()
 					if (itemList->contains(item)) {
 						SaveManager::removeSave(rootContext->nameForObject(item));
 						SaveManager::removeParentalRelationship(rootContext->nameForObject(item));
-						bindingWidget->detachBindingsFor(item);
+//						bindingWidget->detachBindingsFor(item);
                         eventWidget->detachEventsFor(item);
 						rootContext->setContextProperty(rootContext->nameForObject(item), 0);
 						int i = itemList->indexOf(item);
@@ -368,7 +368,7 @@ void PagesWidget::removePageWithoutSave(const QString& name)
 		auto items = m_d->GetAllChildren(selectedItem);
 		for (auto item : items) {
 			if (m_d->itemList->contains(item)) {
-				m_d->bindingWidget->detachBindingsFor(item);
+//				m_d->bindingWidget->detachBindingsFor(item);
                 m_d->eventWidget->detachEventsFor(item);
 				m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(item), 0);
 				int i = m_d->itemList->indexOf(item);

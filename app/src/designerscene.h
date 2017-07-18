@@ -14,6 +14,7 @@ class DesignerScene : public QGraphicsScene
 
     public:
         explicit DesignerScene(QObject *parent = Q_NULLPTR);
+        static DesignerScene* instance();
 
         static const QList<Page*>& pages();
         static void addPage(Page* page);

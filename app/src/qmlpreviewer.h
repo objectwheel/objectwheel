@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QQmlError>
 #include <QList>
+#include <QMap>
 
 class QmlPreviewerPrivate;
 
@@ -13,6 +14,8 @@ struct PreviewResult {
         QPixmap preview;
         QSizeF size;
         QString id;
+        QList<QString> events;
+        QMap<QString, QVariant::Type> properties;
         bool clip;
         bool initial;
 };

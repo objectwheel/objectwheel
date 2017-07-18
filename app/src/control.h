@@ -84,6 +84,12 @@ class Control : public QGraphicsWidget
         bool clip() const;
         void setClip(bool clip);
 
+        QMap<QString, QVariant::Type> properties() const;
+        void setProperties(const QMap<QString, QVariant::Type>& properties);
+
+        QList<QString> events() const;
+        void setEvents(const QList<QString>& events);
+
     public slots:
         virtual void refresh();
 
@@ -112,6 +118,8 @@ class Control : public QGraphicsWidget
     private:
         ControlTransaction _controlTransaction;
         QString _id;
+        QList<QString> _events;
+        QMap<QString, QVariant::Type> _properties;
         QUrl _url;
         bool _dragging;
         bool _dragIn;

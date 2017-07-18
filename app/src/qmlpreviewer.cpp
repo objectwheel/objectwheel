@@ -24,6 +24,8 @@ class QmlPreviewerPrivate
         QmlPreviewerPrivate(QmlPreviewer* parent);
         void scratchPixmapIfEmpty(QPixmap& pixmap);
         QQuickWindow* handleWindowsIfAny(QObject* object);
+        QMap<QString, QVariant::Type> extractProperties(const QObject* object);
+        QList<QString> extractEvents(const QObject* object);
 
     public:
         QmlPreviewer* parent;
@@ -71,6 +73,30 @@ QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object)
     return ret;
 }
 
+QMap<QString, QVariant::Type> QmlPreviewerPrivate::extractProperties(const QObject* object)
+{
+    QMap<QString, QVariant::Type> properties;
+    auto metaObject = object->metaObject();
+    for (int i = 0; i < metaObject->propertyCount(); i++) {
+        if (metaObject->property(i).isWritable() &&
+            !QString(metaObject->property(i).name()).startsWith("__"))
+            properties[(metaObject->property(i).name())] = metaObject->property(i).type();
+    }
+    return properties;
+}
+
+QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object)
+{
+    QList<QString> events;
+    auto metaObject = object->metaObject();
+    for (int i = metaObject->methodCount(); --i;) {
+        if (metaObject->method(i).methodType() == QMetaMethod::Signal
+            && !metaObject->method(i).name().startsWith("__"))
+            events << metaObject->method(i).name();
+    }
+    return events;
+}
+
 QmlPreviewer::QmlPreviewer(QObject *parent)
     : QObject(parent)
     , _d(new QmlPreviewerPrivate(this))
@@ -102,6 +128,8 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
 
     result.initial = !size.isValid();
     result.id = qmlContext(qmlObject)->nameForObject(qmlObject);
+    result.properties = _d->extractProperties(qmlObject);
+    result.events = _d->extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
 
     if (window == nullptr) {

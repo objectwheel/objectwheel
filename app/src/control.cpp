@@ -342,9 +342,14 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 
         SaveManager::addSave(id, parent->url().toLocalFile());
 
+        scene->clearSelection();
+
         parent->setId(id);
         parent->resize(result.size);
         parent->setClip(result.clip);
+        parent->setProperties(result.properties);
+        parent->setEvents(result.events);
+        parent->setSelected(true);
         parent->_controlTransaction.flushParentChange();
     }
 
@@ -493,13 +498,10 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     _dragIn = false;
 
-    scene()->clearSelection();
-
     auto control = new Control;
     control->setUrl(event->mimeData()->urls().at(0));
     control->setParentItem(this);
     control->setPos(event->pos());
-    control->setSelected(true);
     control->refresh();
 
     event->accept();
@@ -603,6 +605,26 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             break;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+QList<QString> Control::events() const
+{
+    return _events;
+}
+
+void Control::setEvents(const QList<QString>& events)
+{
+    _events = events;
+}
+
+QMap<QString, QVariant::Type> Control::properties() const
+{
+    return _properties;
+}
+
+void Control::setProperties(const QMap<QString, QVariant::Type>& properties)
+{
+    _properties = properties;
 }
 
 bool Control::clip() const

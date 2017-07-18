@@ -67,15 +67,11 @@ class EventsWidgetPrivate
                 QString connectionName;
 
                 bool operator== (const Event& x) {
-                    if (x.eventCode == this->eventCode &&
-                        x.targetItem == this->targetItem &&
-                        x.targetEventname == this->targetEventname &&
-                        x.connection == this->connection &&
-                        x.connectionName == this->connectionName) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return (x.eventCode == this->eventCode &&
+                            x.targetItem == this->targetItem &&
+                            x.targetEventname == this->targetEventname &&
+                            x.connection == this->connection &&
+                            x.connectionName == this->connectionName);
                 }
         };
         QList<Event> events;

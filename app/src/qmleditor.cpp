@@ -144,7 +144,7 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
 	itemList->removeAt(index);
 	urlList->removeAt(index);
 	SaveManager::removeParentalRelationship(dashboardRootContext->nameForObject(lastSelectedItem));
-    bindingWidget->detachBindingsFor(lastSelectedItem);
+//    bindingWidget->detachBindingsFor(lastSelectedItem);
     eventWidget->detachEventsFor(lastSelectedItem);
 
 	QQmlIncubator incubator;
