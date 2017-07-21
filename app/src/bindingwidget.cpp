@@ -35,7 +35,6 @@ class BindingWidgetPrivate
         QVBoxLayout verticalLayout;
         QHBoxLayout horizontalLayout;
         FlatButton addButton;
-        FlatButton editButton;
         FlatButton removeButton;
         ListWidget bindingListWidget;
         bool hasPopupOpen = false;
@@ -56,8 +55,6 @@ class BindingWidgetPrivate
         FlatButton popupOkButton;
         QLabel popupSeperateLine;
 
-        bool editMode = false;
-
         struct Binding
         {
                 QObject* sourceItem;
@@ -65,7 +62,7 @@ class BindingWidgetPrivate
                 QObject* targetItem;
                 QString targetProperty;
                 QMetaObject::Connection connection;
-                QString connectionName;
+                QString bindingName;
 
                 bool operator== (const Binding& x) {
                     return (x.sourceItem == this->sourceItem &&
@@ -73,20 +70,20 @@ class BindingWidgetPrivate
                             x.targetItem == this->targetItem &&
                             x.targetProperty == this->targetProperty &&
                             x.connection == this->connection &&
-                            x.connectionName == this->connectionName);
+                            x.bindingName == this->bindingName);
                 }
         };
         QList<Binding> bindings;
         BindingWidgetPrivate(BindingWidget* parent);
         void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
-    private slots:
+    private:
         void removeButtonClicked();
         void addButtonClicked();
-        void editButtonClicked();
         void popupHideButtonClicked();
         void popupOkButtonClicked();
         void ensureComboboxVisible(const QObject* obj);
+        void updateSourcePropertyCombobox();
 };
 
 BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
@@ -102,7 +99,6 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     bindingListWidget.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     bindingListWidget.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     QObject::connect(&bindingListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){removeButton.setEnabled(i>=0);});
-    QObject::connect(&bindingListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){editButton.setEnabled(i>=0);});
 
     addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     addButton.setColor("#6BB64B");
@@ -121,20 +117,9 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     removeButton.setDisabled(true);
     QObject::connect(&removeButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {removeButtonClicked();});
 
-    editButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    editButton.setColor("#0D74C8");
-    editButton.setFixedSize(fit(30),fit(30));
-    editButton.setRadius(fit(13));
-    editButton.setIconSize(QSize(fit(16),fit(16)));
-    editButton.setIcon(QIcon(":/resources/images/edit.png"));
-    editButton.setDisabled(true);
-    QObject::connect(&editButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {editButtonClicked();});
-
     horizontalLayout.addWidget(&addButton);
     horizontalLayout.addStretch();
     horizontalLayout.addWidget(&removeButton);
-    horizontalLayout.addStretch();
-    horizontalLayout.addWidget(&editButton);
 
     verticalLayout.addWidget(&bindingListWidget);
     verticalLayout.addLayout(&horizontalLayout);
@@ -170,6 +155,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     targetPropertyCombobox.setPlaceHolderText("Target property");
     targetPropertyCombobox.show();
     QObject::connect(&targetPropertyCombobox, &ComboBox::popupShowed, [=] {ensureComboboxVisible(&targetPropertyCombobox);});
+    QObject::connect(&targetPropertyCombobox, &ComboBox::currentTextChanged, [=] { updateSourcePropertyCombobox(); });
 
     sourceItemCombobox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     sourceItemCombobox.setFixedHeight(fit(40));
@@ -178,28 +164,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     sourceItemCombobox.setPlaceHolderText("Source item");
     sourceItemCombobox.show();
     QObject::connect(&sourceItemCombobox, &ComboBox::popupShowed, [=] {ensureComboboxVisible(&sourceItemCombobox);});
-
-    QObject::connect(&sourceItemCombobox,(void(ComboBox::*)(const QString&))(&ComboBox::currentTextChanged), [=](const QString& text){
-        sourcePropertyCombobox.clear();
-        if (targetPropertyCombobox.currentItem().isEmpty() ||
-            sourceItemCombobox.currentItem().isEmpty())
-            return;
-
-        auto scene = DesignerScene::instance();
-//        for (auto control : scene->controls())
-//            if (control->id() == )
-//        if (!sourceItem) return;
-//        if (!lastTargetItem) return;
-//        auto targetItemPropertyType = lastTargetItem->property(targetPropertyCombobox.currentItem().toStdString().c_str()).type();
-//        auto metaObject = sourceItem->metaObject();
-//        for (int i = 0; i < metaObject->propertyCount(); i++) {
-//            if (metaObject->property(i).isReadable() &&
-//                metaObject->property(i).hasNotifySignal() &&
-//                !QString(metaObject->property(i).name()).startsWith("__") &&
-//                metaObject->property(i).type() == targetItemPropertyType)
-//                sourcePropertyCombobox.addItem(metaObject->property(i).name());
-//        }
-    });
+    QObject::connect(&sourceItemCombobox, &ComboBox::currentTextChanged, [=] { updateSourcePropertyCombobox(); });
 
     sourcePropertyCombobox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     sourcePropertyCombobox.setFixedHeight(fit(40));
@@ -282,7 +247,7 @@ void BindingWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& 
         if (!sourceSign.isValid()) return;
 
         auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processBindings()")));
-        auto connectionName = inf.bindingName;
+        auto bindingName = inf.bindingName;
 
         Binding bindingData;
         bindingData.sourceItem = sourceItem; //Source item
@@ -290,17 +255,17 @@ void BindingWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& 
         bindingData.targetItem = targetItem; //Target item
         bindingData.targetProperty = inf.targetProperty; //Target property
         bindingData.connection = connection;
-        bindingData.connectionName = connectionName;
+        bindingData.bindingName = bindingName;
         bindings << bindingData;
-        bindingListWidget.addItem(connectionName);
+        bindingListWidget.addItem(bindingName);
     }
 }
 
 void BindingWidgetPrivate::removeButtonClicked()
 {
-    auto connectionName = bindingListWidget.currentItem()->text();
+    auto bindingName = bindingListWidget.currentItem()->text();
     QMessageBox msgBox;
-    msgBox.setText(QString("<b>This will delete %1 named binding.</b>").arg(connectionName));
+    msgBox.setText(QString("<b>This will delete %1 named binding.</b>").arg(bindingName));
     msgBox.setInformativeText("Do you want to continue?");
     msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
     msgBox.setDefaultButton(QMessageBox::No);
@@ -310,11 +275,11 @@ void BindingWidgetPrivate::removeButtonClicked()
         case QMessageBox::Yes: {
             Binding binding;
             for (auto b : bindings) {
-                if (b.connectionName == connectionName) {
+                if (b.bindingName == bindingName) {
                     binding = b;
                 }
             }
-            SaveManager::removeBindingSave(binding.connectionName);
+            SaveManager::removeBindingSave(binding.bindingName);
             bindings.removeOne(binding);
             QObject::disconnect(binding.connection);
             delete bindingListWidget.takeItem(bindingListWidget.currentRow());
@@ -343,38 +308,8 @@ void BindingWidgetPrivate::addButtonClicked()
     emit parent->popupShowed();
 }
 
-void BindingWidgetPrivate::editButtonClicked()
-{
-    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
-    animation->setDuration(500);
-    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
-    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
-    animation->setEasingCurve(QEasingCurve::OutExpo);
-    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
-    animation->start();
-    popupWidget.show();
-    popupWidget.raise();
-    popupHideButton.raise();
-    popupHideButton.move(popupWidget.width()-fit(24), 0);
-    editMode = true;
-
-    Binding b;
-    for (auto binding : bindings)
-        if (binding.connectionName == bindingListWidget.currentItem()->text())
-            b = binding;
-//    parent->selectItem(b.targetItem);
-
-    targetPropertyCombobox.setCurrentItem(b.targetProperty);
-//    sourceItemCombobox.setCurrentItem(rootContext->nameForObject(b.sourceItem));
-    sourcePropertyCombobox.setCurrentItem(b.sourceProperty);
-    nameEdit.setText(bindingListWidget.currentItem()->text());
-    hasPopupOpen = true;
-    emit parent->popupShowed();
-}
-
 void BindingWidgetPrivate::popupHideButtonClicked()
 {
-    editMode = false;
     auto animation = new QPropertyAnimation(&popupWidget, "geometry");
     animation->setDuration(500);
     animation->setEndValue(QRect(0, parent->height(), parent->width(), parent->height()));
@@ -389,122 +324,78 @@ void BindingWidgetPrivate::popupHideButtonClicked()
 
 void BindingWidgetPrivate::popupOkButtonClicked()
 {
-//    if (!targetPropertyCombobox.currentItem().isEmpty() &&
-//        !sourceItemCombobox.currentItem().isEmpty() &&
-//        !sourcePropertyCombobox.currentItem().isEmpty()) {
-//        if (!editMode) {
-//            QQuickItem* sourceItem = nullptr;
-////            for (auto item : *items) {
-////                auto itemName = rootContext->nameForObject(item);
-////                if (itemName == sourceItemCombobox.currentItem()) {
-////                    sourceItem = item;
-////                }
-//            }
-////            if (!sourceItem) return;
-////            if (!lastTargetItem) return;
+    if (targetPropertyCombobox.currentItem().isEmpty() ||
+        sourceItemCombobox.currentItem().isEmpty() ||
+        sourcePropertyCombobox.currentItem().isEmpty() ||
+        popupItemNameTextBox.text().isEmpty())
+        return;
 
-//            QMetaMethod sourceSign;
-////            for (int i = 0; i < sourceItem->metaObject()->propertyCount(); i++)
-////                if (QString(sourceItem->metaObject()->property(i).name()) == sourcePropertyCombobox.currentItem())
-////                    sourceSign = sourceItem->metaObject()->property(i).notifySignal();
-////            if (!sourceSign.isValid()) return;
+    if (nameEdit.text().isEmpty())
+        nameEdit.setText("Binding");
 
-////            auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processBindings()")));
+    auto bindingName = nameEdit.text();
+    for (int i = 1; bindingListWidget.contains(bindingName); i++)
+        bindingName = nameEdit.text() + QString::number(i);
 
-//            auto connectionName = nameEdit.text();
-//            if (connectionName.isEmpty()) {
-//                connectionName = QString("Binding %1").arg(bindingListWidget.count());
-//            }
+    bindingListWidget.addItem(bindingName);
 
-//            for (int i = 0; i < bindingListWidget.count(); i++) {
-//                if (bindingListWidget.item(i)->text() == connectionName) {
-//                    connectionName+="+";
-//                    i = -1;
-//                }
-//            }
+    SaveManager::BindingInf binf;
+    binf.bindingName = bindingName;
+    binf.sourceId = sourceItemCombobox.currentItem();
+    binf.sourceProperty = sourcePropertyCombobox.currentItem();
+    binf.targetId = popupItemNameTextBox.text();
+    binf.targetProperty = targetPropertyCombobox.currentItem();
+    SaveManager::addBindingSave(binf);
 
-//            Binding bindingData;
-//            bindingData.sourceItem = sourceItem; //Source item
-//            bindingData.sourceProperty = sourcePropertyCombobox.currentItem(); //Source property
-//            bindingData.targetItem = lastTargetItem; //Target item
-//            bindingData.targetProperty = targetPropertyCombobox.currentItem(); //Target property
-//            bindingData.connection = connection;
-//            bindingData.connectionName = connectionName;
-//            bindings << bindingData;
-//            SaveManager::BindingInf binf;
-//            binf.bindingName = connectionName;
-////            binf.sourceId = rootContext->nameForObject(sourceItem);
-//            binf.sourceProperty = sourcePropertyCombobox.currentItem();
-////            binf.targetId = rootContext->nameForObject(lastTargetItem);
-//            binf.targetProperty = targetPropertyCombobox.currentItem();
-//            SaveManager::addBindingSave(binf);
-//            bindingListWidget.addItem(connectionName);
-//            popupHideButtonClicked();
-//        } else {
-//            auto connName = bindingListWidget.currentItem()->text();
-//            Binding binding;
-//            for (auto b : bindings) {
-//                if (b.connectionName == connName) {
-//                    binding = b;
-//                }
-//            }
-//            bindings.removeOne(binding);
-//            QObject::disconnect(binding.connection);
+    parent->clearList();
+    parent->handleSelectionChange();
 
-//            QQuickItem* sourceItem = nullptr;
-////            for (auto item : *items) {
-////                auto itemName = rootContext->nameForObject(item);
-//                if (itemName == sourceItemCombobox.currentItem()) {
-//                    sourceItem = item;
-//                }
-//            }
-//            if (!sourceItem) return;
-////            if (!lastTargetItem) return;
-
-//            QMetaMethod sourceSign;
-//            for (int i = 0; i < sourceItem->metaObject()->propertyCount(); i++)
-//                if (QString(sourceItem->metaObject()->property(i).name()) == sourcePropertyCombobox.currentItem())
-//                    sourceSign = sourceItem->metaObject()->property(i).notifySignal();
-//            if (!sourceSign.isValid()) return;
-
-//            auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processBindings()")));
-
-//            auto connectionName = nameEdit.text();
-//            if (connectionName.isEmpty()) {
-//                connectionName = QString("Binding %1").arg(bindingListWidget.count());
-//            }
-
-//            for (int i = 0; i < bindingListWidget.count(); i++) {
-//                if (bindingListWidget.item(i)->text() != connName && bindingListWidget.item(i)->text() == connectionName) {
-//                    connectionName+="+";
-//                    i = -1;
-//                }
-//            }
-
-//            Binding bindingData;
-//            bindingData.sourceItem = sourceItem; //Source item
-//            bindingData.sourceProperty = sourcePropertyCombobox.currentItem(); //Source property
-////            bindingData.targetItem = lastTargetItem; //Target item
-//            bindingData.targetProperty = targetPropertyCombobox.currentItem(); //Target property
-//            bindingData.connection = connection;
-//            bindingData.connectionName = connectionName;
-//            bindings << bindingData;
-//            SaveManager::BindingInf binf;
-//            binf.bindingName = connectionName;
-//            binf.sourceId = rootContext->nameForObject(sourceItem);
-//            binf.sourceProperty = sourcePropertyCombobox.currentItem();
-//            binf.targetId = rootContext->nameForObject(lastTargetItem);
-//            binf.targetProperty = targetPropertyCombobox.currentItem();
-//            SaveManager::changeBindingSave(binding.connectionName, binf);
-//            bindingListWidget.item(bindingListWidget.currentRow())->setText(connectionName);
-//            popupHideButtonClicked();
-//        }
-//    }
+    popupHideButtonClicked();
 }
 
 void BindingWidgetPrivate::ensureComboboxVisible(const QObject* obj)
 {
     popupScrollArea.ensureWidgetVisible((QWidget*)obj);
+}
+
+void BindingWidgetPrivate::updateSourcePropertyCombobox()
+{
+    sourcePropertyCombobox.clear();
+    if (targetPropertyCombobox.currentItem().isEmpty() ||
+        sourceItemCombobox.currentItem().isEmpty())
+        return;
+
+    auto scene = DesignerScene::instance();
+    auto selectedControls = scene->selectedControls();
+
+    if (scene->currentPage()->isSelected())
+        selectedControls << scene->currentPage();
+
+    if (selectedControls.isEmpty() ||
+        selectedControls.size() > 1 ||
+        selectedControls[0]->id().isEmpty()) {
+        return;
+    }
+
+    QVariant::Type targetType = selectedControls[0]->properties()[targetPropertyCombobox.currentItem()];
+
+    QStringList sourcePropertyList;
+    if (scene->currentPage()->id() == sourceItemCombobox.currentItem()) {
+        for (auto property : scene->currentPage()->properties().keys())
+            if (scene->currentPage()->properties()[property] == targetType)
+                sourcePropertyList << property;
+    } else {
+        for (auto control : scene->currentPage()->childControls())
+            if (control->id() == sourceItemCombobox.currentItem()) {
+                for (auto property : control->properties().keys())
+                    if (control->properties()[property] == targetType)
+                        sourcePropertyList << property;
+                break;
+            }
+    }
+
+    for (auto property : sourcePropertyList)
+        sourcePropertyCombobox.addItem(property);
 }
 
 BindingWidgetPrivate* BindingWidget::m_d = nullptr;
@@ -534,25 +425,6 @@ void BindingWidget::clearList()
     m_d->nameEdit.setText("");
     m_d->popupItemNameTextBox.setText("");
 }
-
-//void BindingWidget::selectItem(Control* selectedItem)
-//{
-//    m_d->lastTargetItem = qobject_cast<QQuickItem*>(selectedItem);
-//    m_d->targetPropertyCombobox.clear();
-//    m_d->popupItemNameTextBox.setText(m_d->rootContext->nameForObject(m_d->lastTargetItem));
-//    auto metaObject = selectedItem->metaObject();
-//    for (int i = 0; i < metaObject->propertyCount(); i++) {
-//        if (metaObject->property(i).isWritable() && !QString(metaObject->property(i).name()).startsWith("__"))
-//            m_d->targetPropertyCombobox.addItem(metaObject->property(i).name());
-//    }
-
-//    m_d->sourceItemCombobox.clear();
-//    for (auto item : *m_d->items) {
-//        //		if (item != m_d->lastTargetItem)
-//        m_d->sourceItemCombobox.addItem(m_d->rootContext->nameForObject(item));
-//    }
-//    setEnabled(true);
-//}
 
 void BindingWidget::detachBindingsFor(Control* control)
 {
@@ -594,9 +466,8 @@ void BindingWidget::handleSelectionChange()
 {
     auto scene = DesignerScene::instance();
     auto selectedControls = scene->selectedControls();
-    for (auto page : scene->pages())
-        if (page->isSelected())
-            selectedControls << page;
+    if (scene->currentPage()->isSelected())
+        selectedControls << scene->currentPage();
 
     clearList();
     if (selectedControls.isEmpty() ||

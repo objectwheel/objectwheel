@@ -20,6 +20,7 @@ class ListWidget : public QListWidget
 		inline void RemoveUrls(QListWidgetItem* item) { m_Urls.remove(item); }
 		inline QList<QUrl> GetUrls(QListWidgetItem* item) const { return m_Urls.value(item); }
 		inline void ClearUrls() { m_Urls.clear(); }
+        bool contains(const QString& itemName);
 
 	protected:
         QMimeData* mimeData(const QList<QListWidgetItem *> items) const override;

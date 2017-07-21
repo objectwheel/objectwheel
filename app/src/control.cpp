@@ -337,7 +337,11 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         auto currentPage = scene->currentPage();
         auto id = result.id;
 
-        for (int i = 1; currentPage->contains(id); i++)
+        QStringList pageNames;
+        for (auto page : scene->pages())
+            pageNames << page->id();
+
+        for (int i = 1; currentPage->contains(id) || pageNames.contains(id); i++)
             id = result.id + QString::number(i);
 
         SaveManager::addSave(id, parent->url().toLocalFile());

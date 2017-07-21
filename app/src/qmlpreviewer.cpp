@@ -132,6 +132,9 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
     result.events = _d->extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
 
+    if (result.id.isEmpty())
+        result.id = "control";
+
     if (window == nullptr) {
         auto item = static_cast<QQuickItem*>(qmlObject);
         window = QSharedPointer<QQuickWindow>(new QQuickWindow);

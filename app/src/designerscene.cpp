@@ -160,7 +160,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (_currentPage && selectedControls().size() > 0 &&
         _d->itemPressed && !Resizer::resizing()) {
         _d->itemMoving = true;
-        if (_snapping)
+        if (_snapping && selectedControls().size() == 1)
             _currentPage->stickSelectedControlToGuideLines();
     }
 

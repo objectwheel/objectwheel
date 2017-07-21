@@ -45,7 +45,16 @@ ListWidget::ListWidget(QWidget *parent)
 	prop.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
 	prop.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
 	prop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.009);
-	QScroller::scroller(viewport())->setScrollerProperties(prop);
+    QScroller::scroller(viewport())->setScrollerProperties(prop);
+}
+
+bool ListWidget::contains(const QString& itemName)
+{
+    for (int i = 0; i < count(); i++)
+        if (item(i)->text() == itemName)
+            return true;
+
+    return false;
 }
 
 QMimeData* ListWidget::mimeData(const QList<QListWidgetItem*> items) const
