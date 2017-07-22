@@ -15,7 +15,8 @@ class ParserController : public QObject
 
     public:
         enum TransactionType {
-            VariantPropertyTransaction
+            VariantProperty,
+            RemoveVariantProperty
         };
 
         struct Transaction {
@@ -34,6 +35,7 @@ class ParserController : public QObject
     public:
         explicit ParserController(QObject *parent = 0);
         static void setVariantProperty(const QString& fileName, const QString& property, const QVariant& value);
+        static void removeVariantProperty(const QString& fileName, const QString& property);
 
     private slots:
         void processWaitingTransactions();

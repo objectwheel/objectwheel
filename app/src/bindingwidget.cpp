@@ -55,25 +55,7 @@ class BindingWidgetPrivate
         FlatButton popupOkButton;
         QLabel popupSeperateLine;
 
-        struct Binding
-        {
-                QObject* sourceItem;
-                QString sourceProperty;
-                QObject* targetItem;
-                QString targetProperty;
-                QMetaObject::Connection connection;
-                QString bindingName;
-
-                bool operator== (const Binding& x) {
-                    return (x.sourceItem == this->sourceItem &&
-                            x.sourceProperty == this->sourceProperty &&
-                            x.targetItem == this->targetItem &&
-                            x.targetProperty == this->targetProperty &&
-                            x.connection == this->connection &&
-                            x.bindingName == this->bindingName);
-                }
-        };
-        QList<Binding> bindings;
+    public:
         BindingWidgetPrivate(BindingWidget* parent);
         void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
@@ -225,40 +207,12 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
 
 void BindingWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& inf)
 {
-    if (!inf.targetProperty.isEmpty() && !inf.targetId.isEmpty() &&
-        !inf.sourceId.isEmpty() && !inf.sourceProperty.isEmpty() && !inf.bindingName.isEmpty()) {
-        QQuickItem* sourceItem = nullptr;
-        QQuickItem* targetItem = nullptr;
-//        for (auto item : *items) {
-//            auto itemName = rootContext->nameForObject(item);
-//            if (itemName == inf.sourceId) {
-//                sourceItem = item;
-//            }
-//            if (itemName == inf.targetId) {
-//                targetItem = item;
-//            }
-//        }
-        if (!sourceItem || !targetItem) return;
+    if (inf.targetProperty.isEmpty() || inf.targetId.isEmpty() ||
+        inf.sourceId.isEmpty() || inf.sourceProperty.isEmpty() ||
+        inf.bindingName.isEmpty())
+        return;
 
-        QMetaMethod sourceSign;
-        for (int i = 0; i < sourceItem->metaObject()->propertyCount(); i++)
-            if (QString(sourceItem->metaObject()->property(i).name()) == inf.sourceProperty)
-                sourceSign = sourceItem->metaObject()->property(i).notifySignal();
-        if (!sourceSign.isValid()) return;
-
-        auto connection = QObject::connect(sourceItem, sourceSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processBindings()")));
-        auto bindingName = inf.bindingName;
-
-        Binding bindingData;
-        bindingData.sourceItem = sourceItem; //Source item
-        bindingData.sourceProperty = inf.sourceProperty; //Source property
-        bindingData.targetItem = targetItem; //Target item
-        bindingData.targetProperty = inf.targetProperty; //Target property
-        bindingData.connection = connection;
-        bindingData.bindingName = bindingName;
-        bindings << bindingData;
-        bindingListWidget.addItem(bindingName);
-    }
+    bindingListWidget.addItem(inf.bindingName);
 }
 
 void BindingWidgetPrivate::removeButtonClicked()
@@ -273,15 +227,7 @@ void BindingWidgetPrivate::removeButtonClicked()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-            Binding binding;
-            for (auto b : bindings) {
-                if (b.bindingName == bindingName) {
-                    binding = b;
-                }
-            }
-            SaveManager::removeBindingSave(binding.bindingName);
-            bindings.removeOne(binding);
-            QObject::disconnect(binding.connection);
+            SaveManager::removeBindingSave(bindingName);
             delete bindingListWidget.takeItem(bindingListWidget.currentRow());
             break;
         } default: {

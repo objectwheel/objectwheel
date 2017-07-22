@@ -366,47 +366,11 @@ void SaveManager::setVariantProperty(const QString& id, const QString& property,
     QmlEditor::clearCacheFor(saveDirectory(id), true);
 }
 
-void SaveManager::setBindingProperty(const QString& id, const QString& property, const QString& expression) //FIXME:
+void SaveManager::removeVariantProperty(const QString& id, const QString& property) //FIXME: FOR BINDING PROPERTIES
 {
-//	if (saveDirectory(id).isEmpty()) return;
-//	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-//	QString mainQmlContent = rdfile(mainQmlFilename);
-//	if (mainQmlContent.isEmpty()) return;
-//	m_d->plainTextEdit->setPlainText(mainQmlContent);
-//    auto model = Model::create("QtQuick.Item", 1, 0);
-//    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-//    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-//    model->setTextModifier(textModifier);
-//    model->setRewriterView(rewriterView);
-//    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-//    ModelNode rootNode = rewriterView->rootModelNode();
-//	QmlObjectNode(rootNode).setBindingProperty(QByteArray().insert(0, property), expression);
-//	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-//    delete rewriterView;
-//    delete textModifier;
-//    delete model;
-}
-
-void SaveManager::removeProperty(const QString& id, const QString& property) //FIXME: FOR BINDING PROPERTIES
-{
-//	if (saveDirectory(id).isEmpty()) return;
-//	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-//	QString mainQmlContent = rdfile(mainQmlFilename);
-//	if (mainQmlContent.isEmpty()) return;
-//	m_d->plainTextEdit->setPlainText(mainQmlContent);
-//    auto model = Model::create("QtQuick.Item", 1, 0);
-//    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-//    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-//    model->setTextModifier(textModifier);
-//    model->setRewriterView(rewriterView);
-//    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-//    ModelNode rootNode = rewriterView->rootModelNode();
-//    rootNode.removeProperty(QByteArray().insert(0, property));
-//    QmlObjectNode(rootNode).removeProperty(QByteArray().insert(0, property));
-//    wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-//    delete rewriterView;
-//    delete textModifier;
-//    delete model;
+    if (saveDirectory(id).isEmpty()) return;
+    auto filename = saveDirectory(id) + separator() + "main.qml";
+    ParserController::removeVariantProperty(filename, property);
 }
 
 void SaveManager::addParentalRelationship(const QString& id, const QString& parent)

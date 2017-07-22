@@ -77,8 +77,7 @@ class SaveManager : public QObject
 		static void changePageOrder(const QString& fromPageId, const QString& toPageId);
 
         static void setVariantProperty(const QString& id, const QString& property, const QVariant& value);
-		static void setBindingProperty(const QString& id, const QString& property, const QString& expression);
-		static void removeProperty(const QString& id, const QString& property);
+        static void removeVariantProperty(const QString& id, const QString& property);
 
     private:
 		static SaveManagerPrivate* m_d;

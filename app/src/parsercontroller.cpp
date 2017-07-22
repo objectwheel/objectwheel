@@ -30,7 +30,21 @@ void ParserController::setVariantProperty(const QString& fileName, const QString
     transaction.fileName = fileName;
     transaction.property = property;
     transaction.value = value;
-    transaction.type = VariantPropertyTransaction;
+    transaction.type = VariantProperty;
+
+    if (_transactionList.contains(transaction))
+        _transactionList.removeAll(transaction);
+    _transactionList.append(transaction);
+
+    _transactionTimer->start();
+}
+
+void ParserController::removeVariantProperty(const QString& fileName, const QString& property)
+{
+    Transaction transaction;
+    transaction.fileName = fileName;
+    transaction.property = property;
+    transaction.type = RemoveVariantProperty;
 
     if (_transactionList.contains(transaction))
         _transactionList.removeAll(transaction);
@@ -50,12 +64,18 @@ void ParserController::processWaitingTransactions()
 
     auto transaction = _transactionList.first();
     switch (transaction.type) {
-        case VariantPropertyTransaction:
+        case VariantProperty:
             QMetaObject::invokeMethod(_parserWorker, "setVariantProperty",
                                       Qt::QueuedConnection,
                                       Q_ARG(QString, transaction.fileName),
                                       Q_ARG(QString, transaction.property),
                                       Q_ARG(QVariant, transaction.value));
+            break;
+        case RemoveVariantProperty:
+            QMetaObject::invokeMethod(_parserWorker, "removeVariantProperty",
+                                      Qt::QueuedConnection,
+                                      Q_ARG(QString, transaction.fileName),
+                                      Q_ARG(QString, transaction.property));
             break;
         default:
             break;

@@ -22,6 +22,7 @@ class ParserWorker : public QObject
 
     private slots:
         void setVariantProperty(const QString& fileName, const QString& property, const QVariant& value);
+        void removeVariantProperty(const QString& fileName, const QString& property);
 
     private:
         QmlJS::ModelManagerInterface* _modelManager;

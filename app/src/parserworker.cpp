@@ -55,3 +55,30 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
     delete textModifier;
     delete model;
 }
+
+void ParserWorker::removeVariantProperty(const QString& fileName, const QString& property)
+{
+    auto fileContent = rdfile(fileName);
+    if (fileContent.isEmpty())
+        return;
+
+    auto bproperty = QByteArray().insert(0, property);
+    auto model = Model::create("QtQuick.Item", 1, 0);
+    auto rewriterView = new RewriterView(RewriterView::Amend, model);
+    auto textModifier = new NotIndentingTextEditModifier;
+
+    textModifier->setText(fileContent);
+    model->setTextModifier(textModifier);
+    model->setRewriterView(rewriterView);
+    model->setFileUrl(QUrl::fromLocalFile(fileName));
+
+    auto rootNode = rewriterView->rootModelNode();
+    auto objectNode = QmlObjectNode(rootNode);
+
+    objectNode.removeProperty(bproperty);
+    wrfile(fileName, QByteArray().insert(0, textModifier->text()));
+
+    delete rewriterView;
+    delete textModifier;
+    delete model;
+}
