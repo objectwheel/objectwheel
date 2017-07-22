@@ -5,8 +5,7 @@
 #include <savemanager.h>
 
 class EventsWidgetPrivate;
-class QQuickItem;
-class QQmlContext;
+class Control;
 
 class EventsWidget : public QWidget
 {
@@ -19,26 +18,16 @@ class EventsWidget : public QWidget
         static EventsWidget* instance();
         ~EventsWidget();
 
-		const QList<QQuickItem*>* itemSource() const;
-		void setItemSource(const QList<QQuickItem*>* const ItemSource);
-
-		const QQmlContext* rootContext() const;
-		void setRootContext(QQmlContext* const rootContext);
-
-        const QObject* rootObject() const;
-        void setRootObject(QObject* const rootObject);
-
         static void addEventWithoutSave(const SaveManager::EventInf& inf);
 
 	public slots:
-		void clearList();
-		void selectItem(QObject* const);
-        void detachEventsFor(QObject* const);
+        void detachEventsFor(Control*);
         void clearAllEvents();
 		bool hasPopupOpen();
 
-	protected slots:
-        void processEvents();
+    protected slots:
+        void clearList();
+        void handleSelectionChange();
 
 	signals:
 		void popupShowed();

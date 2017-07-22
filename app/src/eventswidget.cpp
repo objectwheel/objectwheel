@@ -1,28 +1,25 @@
 #include <eventswidget.h>
+#include <combobox.h>
 #include <listwidget.h>
 #include <flatbutton.h>
 #include <fit.h>
+#include <qmleditor.h>
+#include <css.h>
+#include <lineedit.h>
+#include <scrollarea.h>
+#include <designerscene.h>
+#include <control.h>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <lineedit.h>
-#include <css.h>
 #include <QPropertyAnimation>
 #include <QEasingCurve>
 #include <QTimer>
-#include <combobox.h>
 #include <QComboBox>
-#include <QQuickItem>
-#include <QQmlEngine>
-#include <QQmlContext>
-#include <QQmlProperty>
 #include <QPair>
 #include <QLineEdit>
 #include <QLabel>
-#include <scrollarea.h>
 #include <QMessageBox>
-#include <qmleditor.h>
-#include <QQmlExpression>
-#include <QPointer>
 
 using namespace Fit;
 
@@ -30,9 +27,6 @@ class EventsWidgetPrivate
 {
     public:
         EventsWidget* parent;
-        const QList<QQuickItem*>* items;
-        QObject* rootObject;
-        QQmlContext* rootContext;
         QVBoxLayout verticalLayout;
         QHBoxLayout horizontalLayout;
         FlatButton addButton;
@@ -54,31 +48,14 @@ class EventsWidgetPrivate
         LineEdit codeEdit;
         FlatButton btnEditCode;
         ComboBox targetEventCombobox;
-        QPointer<QQuickItem> lastTargetItem;
         FlatButton popupOkButton;
         bool editMode = false;
 
-        struct Event
-        {
-                QObject* targetItem;
-                QString targetEventname;
-                QString eventCode;
-                QMetaObject::Connection connection;
-                QString connectionName;
-
-                bool operator== (const Event& x) {
-                    return (x.eventCode == this->eventCode &&
-                            x.targetItem == this->targetItem &&
-                            x.targetEventname == this->targetEventname &&
-                            x.connection == this->connection &&
-                            x.connectionName == this->connectionName);
-                }
-        };
-        QList<Event> events;
+    public:
         EventsWidgetPrivate(EventsWidget* parent);
         void addEventWithoutSave(const SaveManager::EventInf& inf);
 
-    private slots:
+    private:
         void removeButtonClicked();
         void addButtonClicked();
         void editButtonClicked();
@@ -90,7 +67,6 @@ class EventsWidgetPrivate
 
 EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     : parent(p)
-    , items(nullptr)
 {
     eventsListWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     eventsListWidget.setFocusPolicy(Qt::NoFocus);
@@ -230,62 +206,17 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     popupVLayout.addWidget(&popupItemNameTextBox);
     popupVLayout.addWidget(&popupScrollArea);
     popupVLayout.addWidget(&popupOkButton);
+
+    QObject::connect(DesignerScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 
 void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
 {
-    if (!inf.targetEventname.isEmpty() && !inf.targetId.isEmpty() &&
-        !inf.eventCode.isEmpty() && !inf.eventName.isEmpty()) {
-        QQuickItem* targetItem = nullptr;
-        for (auto item : *items) {
-            if (rootContext->nameForObject(item) == inf.targetId) {
-                targetItem = item;
-            }
-        }
+    if (inf.targetEventname.isEmpty() ||inf.targetId.isEmpty() ||
+        inf.eventCode.isEmpty() || inf.eventName.isEmpty())
+        return;
 
-        if (!targetItem) return;
-
-        QMetaMethod targetSign;
-        for (int i = 0; i < targetItem->metaObject()->methodCount(); i++)
-            if (QString(targetItem->metaObject()->method(i).name()) == inf.targetEventname) {
-                targetSign = targetItem->metaObject()->method(i);
-            }
-        if (!targetSign.isValid()) return;
-
-        QMetaObject::Connection connection;
-        bool shouldConnect = true;
-        for (auto event: events) {
-            if (event.targetItem == targetItem &&
-                event.targetEventname == inf.targetEventname) {
-                shouldConnect = false;
-                break;
-            }
-        }
-        if (shouldConnect) {
-            connection = QObject::connect(targetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
-        }
-
-        auto connectionName = inf.eventName;
-        if (connectionName.isEmpty()) {
-            connectionName = QString("Event %1").arg(eventsListWidget.count());
-        }
-
-        for (int i = 0; i < eventsListWidget.count(); i++) {
-            if (eventsListWidget.item(i)->text() == connectionName) {
-                connectionName+="+";
-                i = -1;
-            }
-        }
-
-        Event eventData;
-        eventData.targetItem = targetItem; //Target item
-        eventData.targetEventname = inf.targetEventname;
-        eventData.eventCode = inf.eventCode;
-        eventData.connection = connection;
-        eventData.connectionName = connectionName;
-        events << eventData;
-        eventsListWidget.addItem(connectionName);
-    }
+        eventsListWidget.addItem(inf.eventName);
 }
 
 void EventsWidgetPrivate::removeButtonClicked()
@@ -300,30 +231,7 @@ void EventsWidgetPrivate::removeButtonClicked()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-            Event event;
-            for (auto e : events) {
-                if (e.connectionName == connectionName) {
-                    event = e;
-                }
-            }
-            SaveManager::removeEventSave(event.connectionName);
-            events.removeOne(event);
-
-            bool shouldRemove = true;
-            if (event.connection) {
-                for (auto& e : events) {
-                    if (e.targetItem == event.targetItem &&
-                        e.targetEventname == event.targetEventname) {
-                        e.connection = event.connection;
-                        shouldRemove = false;
-                        break;
-                    }
-                }
-                if (shouldRemove) {
-                    QObject::disconnect(event.connection);
-                }
-            }
-
+            SaveManager::removeEventSave(connectionName);
             delete eventsListWidget.takeItem(eventsListWidget.currentRow());
             break;
         } default: {
@@ -352,30 +260,30 @@ void EventsWidgetPrivate::addButtonClicked()
 
 void EventsWidgetPrivate::editButtonClicked()
 {
-    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
-    animation->setDuration(500);
-    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
-    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
-    animation->setEasingCurve(QEasingCurve::OutExpo);
-    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
-    animation->start();
-    popupWidget.show();
-    popupWidget.raise();
-    popupHideButton.raise();
-    popupHideButton.move(popupWidget.width()-fit(24), 0);
-    editMode = true;
+//    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
+//    animation->setDuration(500);
+//    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
+//    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
+//    animation->setEasingCurve(QEasingCurve::OutExpo);
+//    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+//    animation->start();
+//    popupWidget.show();
+//    popupWidget.raise();
+//    popupHideButton.raise();
+//    popupHideButton.move(popupWidget.width()-fit(24), 0);
+//    editMode = true;
 
-    Event e;
-    for (auto event : events)
-        if (event.connectionName == eventsListWidget.currentItem()->text())
-            e = event;
-    parent->selectItem(e.targetItem);
+//    Event e;
+//    for (auto event : events)
+//        if (event.connectionName == eventsListWidget.currentItem()->text())
+//            e = event;
+//    parent->selectItem(e.targetItem);
 
-    targetEventCombobox.setCurrentItem(e.targetEventname);
-    nameEdit.setText(eventsListWidget.currentItem()->text());
-    codeEdit.setText(e.eventCode);
-    hasPopupOpen = true;
-    emit parent->popupShowed();
+//    targetEventCombobox.setCurrentItem(e.targetEventname);
+//    nameEdit.setText(eventsListWidget.currentItem()->text());
+//    codeEdit.setText(e.eventCode);
+//    hasPopupOpen = true;
+//    emit parent->popupShowed();
 }
 
 void EventsWidgetPrivate::popupHideButtonClicked()
@@ -395,154 +303,154 @@ void EventsWidgetPrivate::popupHideButtonClicked()
 
 void EventsWidgetPrivate::popupOkButtonClicked()
 {
-    if (!targetEventCombobox.currentItem().isEmpty() &&
-        !codeEdit.text().isEmpty() &&
-        !popupItemNameTextBox.text().isEmpty()) {
-        if (!editMode) {
-            if (!lastTargetItem) return;
+//    if (!targetEventCombobox.currentItem().isEmpty() &&
+//        !codeEdit.text().isEmpty() &&
+//        !popupItemNameTextBox.text().isEmpty()) {
+//        if (!editMode) {
+//            if (!lastTargetItem) return;
 
-            QString targetEventname;
-            QMetaMethod targetSign;
-            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
-                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
-                    targetSign = lastTargetItem->metaObject()->method(i);
-                    targetEventname = lastTargetItem->metaObject()->method(i).name();
-                }
-            if (!targetSign.isValid()) return;
+//            QString targetEventname;
+//            QMetaMethod targetSign;
+//            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
+//                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
+//                    targetSign = lastTargetItem->metaObject()->method(i);
+//                    targetEventname = lastTargetItem->metaObject()->method(i).name();
+//                }
+//            if (!targetSign.isValid()) return;
 
-            QMetaObject::Connection connection;
-            bool shouldConnect = true;
-            for (auto event: events) {
-                if (event.targetItem == lastTargetItem &&
-                    event.targetEventname == targetEventname) {
-                    shouldConnect = false;
-                    break;
-                }
-            }
-            if (shouldConnect) {
-                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
-            }
+//            QMetaObject::Connection connection;
+//            bool shouldConnect = true;
+//            for (auto event: events) {
+//                if (event.targetItem == lastTargetItem &&
+//                    event.targetEventname == targetEventname) {
+//                    shouldConnect = false;
+//                    break;
+//                }
+//            }
+//            if (shouldConnect) {
+//                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
+//            }
 
-            auto connectionName = nameEdit.text();
-            if (connectionName.isEmpty()) {
-                connectionName = QString("Event %1").arg(eventsListWidget.count());
-            }
+//            auto connectionName = nameEdit.text();
+//            if (connectionName.isEmpty()) {
+//                connectionName = QString("Event %1").arg(eventsListWidget.count());
+//            }
 
-            for (int i = 0; i < eventsListWidget.count(); i++) {
-                if (eventsListWidget.item(i)->text() == connectionName) {
-                    connectionName+="+";
-                    i = -1;
-                }
-            }
+//            for (int i = 0; i < eventsListWidget.count(); i++) {
+//                if (eventsListWidget.item(i)->text() == connectionName) {
+//                    connectionName+="+";
+//                    i = -1;
+//                }
+//            }
 
-            Event eventData;
-            eventData.targetItem = lastTargetItem; //Target item
-            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
-            eventData.eventCode = codeEdit.text();
-            eventData.connection = connection;
-            eventData.connectionName = connectionName;
-            events << eventData;
-            SaveManager::EventInf einf;
-            einf.eventName = connectionName;
-            einf.targetId = rootContext->nameForObject(lastTargetItem);
-            einf.targetEventname = targetEventCombobox.currentItem();
-            einf.eventCode = codeEdit.text();
-            SaveManager::addEventSave(einf);
-            eventsListWidget.addItem(connectionName);
-            popupHideButtonClicked();
-        } else {
-            if (!lastTargetItem) return;
-            auto connName = eventsListWidget.currentItem()->text();
-            Event event;
-            for (auto e : events) {
-                if (e.connectionName == connName) {
-                    event = e;
-                }
-            }
-            events.removeOne(event);
+//            Event eventData;
+//            eventData.targetItem = lastTargetItem; //Target item
+//            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
+//            eventData.eventCode = codeEdit.text();
+//            eventData.connection = connection;
+//            eventData.connectionName = connectionName;
+//            events << eventData;
+//            SaveManager::EventInf einf;
+//            einf.eventName = connectionName;
+//            einf.targetId = rootContext->nameForObject(lastTargetItem);
+//            einf.targetEventname = targetEventCombobox.currentItem();
+//            einf.eventCode = codeEdit.text();
+//            SaveManager::addEventSave(einf);
+//            eventsListWidget.addItem(connectionName);
+//            popupHideButtonClicked();
+//        } else {
+//            if (!lastTargetItem) return;
+//            auto connName = eventsListWidget.currentItem()->text();
+//            Event event;
+//            for (auto e : events) {
+//                if (e.connectionName == connName) {
+//                    event = e;
+//                }
+//            }
+//            events.removeOne(event);
 
-            bool shouldRemove = true;
-            if (event.connection) {
-                for (auto& e : events) {
-                    if (e.targetItem == event.targetItem &&
-                        e.targetEventname == event.targetEventname) {
-                        e.connection = event.connection;
-                        shouldRemove = false;
-                        break;
-                    }
-                }
-                if (shouldRemove) {
-                    QObject::disconnect(event.connection);
-                }
-            }
+//            bool shouldRemove = true;
+//            if (event.connection) {
+//                for (auto& e : events) {
+//                    if (e.targetItem == event.targetItem &&
+//                        e.targetEventname == event.targetEventname) {
+//                        e.connection = event.connection;
+//                        shouldRemove = false;
+//                        break;
+//                    }
+//                }
+//                if (shouldRemove) {
+//                    QObject::disconnect(event.connection);
+//                }
+//            }
 
-            QString targetEventname;
-            QMetaMethod targetSign;
-            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
-                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
-                    targetSign = lastTargetItem->metaObject()->method(i);
-                    targetEventname = lastTargetItem->metaObject()->method(i).name();
-                }
-            if (!targetSign.isValid()) return;
+//            QString targetEventname;
+//            QMetaMethod targetSign;
+//            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
+//                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
+//                    targetSign = lastTargetItem->metaObject()->method(i);
+//                    targetEventname = lastTargetItem->metaObject()->method(i).name();
+//                }
+//            if (!targetSign.isValid()) return;
 
-            QMetaObject::Connection connection;
-            bool shouldConnect = true;
-            for (auto event: events) {
-                if (event.targetItem == lastTargetItem &&
-                    event.targetEventname == targetEventname)
-                    shouldConnect = false;
-            }
-            if (shouldConnect) {
-                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
-            }
+//            QMetaObject::Connection connection;
+//            bool shouldConnect = true;
+//            for (auto event: events) {
+//                if (event.targetItem == lastTargetItem &&
+//                    event.targetEventname == targetEventname)
+//                    shouldConnect = false;
+//            }
+//            if (shouldConnect) {
+//                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
+//            }
 
-            auto connectionName = nameEdit.text();
-            if (connectionName.isEmpty()) {
-                connectionName = QString("Event %1").arg(eventsListWidget.count());
-            }
+//            auto connectionName = nameEdit.text();
+//            if (connectionName.isEmpty()) {
+//                connectionName = QString("Event %1").arg(eventsListWidget.count());
+//            }
 
-            for (int i = 0; i < eventsListWidget.count(); i++) {
-                if (eventsListWidget.item(i)->text() != connName && eventsListWidget.item(i)->text() == connectionName) {
-                    connectionName+="+";
-                    i = -1;
-                }
-            }
+//            for (int i = 0; i < eventsListWidget.count(); i++) {
+//                if (eventsListWidget.item(i)->text() != connName && eventsListWidget.item(i)->text() == connectionName) {
+//                    connectionName+="+";
+//                    i = -1;
+//                }
+//            }
 
-            Event eventData;
-            eventData.targetItem = lastTargetItem; //Target item
-            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
-            eventData.eventCode = codeEdit.text();
-            eventData.connection = connection;
-            eventData.connectionName = connectionName;
-            events << eventData;
-            SaveManager::EventInf einf;
-            einf.eventName = connectionName;
-            einf.targetId = rootContext->nameForObject(lastTargetItem);
-            einf.targetEventname = targetEventCombobox.currentItem();
-            einf.eventCode = codeEdit.text();
-            SaveManager::changeEventSave(event.connectionName, einf);
-            eventsListWidget.item(eventsListWidget.currentRow())->setText(connectionName);
-            popupHideButtonClicked();
-        }
-    }
+//            Event eventData;
+//            eventData.targetItem = lastTargetItem; //Target item
+//            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
+//            eventData.eventCode = codeEdit.text();
+//            eventData.connection = connection;
+//            eventData.connectionName = connectionName;
+//            events << eventData;
+//            SaveManager::EventInf einf;
+//            einf.eventName = connectionName;
+//            einf.targetId = rootContext->nameForObject(lastTargetItem);
+//            einf.targetEventname = targetEventCombobox.currentItem();
+//            einf.eventCode = codeEdit.text();
+//            SaveManager::changeEventSave(event.connectionName, einf);
+//            eventsListWidget.item(eventsListWidget.currentRow())->setText(connectionName);
+//            popupHideButtonClicked();
+//        }
+//    }
 
 }
 
 void EventsWidgetPrivate::btnEditCodeClicked()
 {
-    static QMetaObject::Connection conn;
-    if (codeEdit.text().isEmpty()) {
-        QmlEditor::showTextOnly("// " + rootContext->nameForObject(lastTargetItem) + ".on" +
-                                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
-    } else {
-        QmlEditor::showTextOnly(codeEdit.text());
-    }
-    QmlEditor::instance()->raise();
-    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
-        codeEdit.setText(text);
-        QObject::disconnect(conn);
-        QmlEditor::hide();
-    });
+//    static QMetaObject::Connection conn;
+//    if (codeEdit.text().isEmpty()) {
+//        QmlEditor::showTextOnly("// " + rootContext->nameForObject(lastTargetItem) + ".on" +
+//                                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
+//    } else {
+//        QmlEditor::showTextOnly(codeEdit.text());
+//    }
+//    QmlEditor::instance()->raise();
+//    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
+//        codeEdit.setText(text);
+//        QObject::disconnect(conn);
+//        QmlEditor::hide();
+//    });
 }
 
 void EventsWidgetPrivate::ensureComboboxVisible(const QObject* obj)
@@ -579,46 +487,34 @@ void EventsWidget::clearList()
     m_d->btnEditCode.setDisabled(true);
 }
 
-void EventsWidget::selectItem(QObject* const selectedItem)
+void EventsWidget::handleSelectionChange()
 {
-    m_d->lastTargetItem = qobject_cast<QQuickItem*>(selectedItem);
-    m_d->targetEventCombobox.clear();
-    m_d->popupItemNameTextBox.setText(m_d->rootContext->nameForObject(m_d->lastTargetItem));
+    auto scene = DesignerScene::instance();
+    auto selectedControls = scene->selectedControls();
+    if (scene->currentPage()->isSelected())
+        selectedControls << scene->currentPage();
 
-    auto metaObject = selectedItem->metaObject();
-    for (int i = metaObject->methodCount(); --i;) {
-        if (metaObject->method(i).methodType() == QMetaMethod::Signal
-            && !metaObject->method(i).name().startsWith("__"))
-            m_d->targetEventCombobox.addItem(metaObject->method(i).name());
+    clearList();
+    if (selectedControls.isEmpty() ||
+        selectedControls.size() > 1 ||
+        selectedControls[0]->id().isEmpty()) {
+        return;
+    } else {
+        m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
+        for (auto event : selectedControls[0]->events())
+            m_d->targetEventCombobox.addItem(event);
     }
-
-    setEnabled(true);
 }
 
-void EventsWidget::detachEventsFor(QObject* const item)
+void EventsWidget::detachEventsFor(Control* control)
 {
-    QListIterator<EventsWidgetPrivate::Event> i(m_d->events);
-    while (i.hasNext()) {
-        auto event = i.next();
-        if (event.targetItem == item) {
-            SaveManager::removeEventSave(event.connectionName);
-            m_d->events.removeOne(event);
-            bool shouldRemove = true;
-            if (event.connection) {
-                for (auto& e : m_d->events) {
-                    if (e.targetItem == event.targetItem &&
-                        e.targetEventname == event.targetEventname) {
-                        e.connection = event.connection;
-                        shouldRemove = false;
-                        break;
-                    }
-                }
-                if (shouldRemove) {
-                    QObject::disconnect(event.connection);
-                }
-            }
+    auto saves = SaveManager::getEventSaves();
+    for (auto key : saves.keys()) {
+        auto save = saves[key].toObject();
+        if (save[EVENT_TARGET_ID_LABEL] == control->id()) {
+            SaveManager::removeEventSave(key);
             for (int i=0; i < m_d->eventsListWidget.count(); i++) {
-                if (m_d->eventsListWidget.item(i)->text() == event.connectionName)
+                if (m_d->eventsListWidget.item(i)->text() == key)
                     m_d->eventsListWidget.takeItem(i);
             }
         }
@@ -627,39 +523,12 @@ void EventsWidget::detachEventsFor(QObject* const item)
 
 void EventsWidget::clearAllEvents()
 {
-    for (auto item : *m_d->items) {
-        detachEventsFor(item);
+    auto saves = SaveManager::getEventSaves();
+    for (auto key : saves.keys()) {
+        SaveManager::removeEventSave(key);
     }
-}
-
-const QList<QQuickItem*>* EventsWidget::itemSource() const
-{
-    return m_d->items;
-}
-
-void EventsWidget::setItemSource(const QList<QQuickItem*>* const items)
-{
-    m_d->items = items;
-}
-
-const QQmlContext* EventsWidget::rootContext() const
-{
-    return m_d->rootContext;
-}
-
-void EventsWidget::setRootContext(QQmlContext* const rootContext)
-{
-    m_d->rootContext = rootContext;
-}
-
-const QObject* EventsWidget::rootObject() const
-{
-    return m_d->rootObject;
-}
-
-void EventsWidget::setRootObject(QObject* const rootObject)
-{
-    m_d->rootObject = rootObject;
+    m_d->eventsListWidget.clear();
+    clearList();
 }
 
 void EventsWidget::addEventWithoutSave(const SaveManager::EventInf& inf)
@@ -670,26 +539,4 @@ void EventsWidget::addEventWithoutSave(const SaveManager::EventInf& inf)
 bool EventsWidget::hasPopupOpen()
 {
     return m_d->hasPopupOpen;
-}
-
-void EventsWidget::processEvents()
-{
-    auto targetSignalIndex = senderSignalIndex();
-    auto targetItem = sender();
-    if (!targetItem || targetSignalIndex < 0) { qWarning("Event error! 0x00"); return; }
-
-    QString targetEventname;
-    for (int i = 0; i < targetItem->metaObject()->methodCount(); i++) {
-        if (targetSignalIndex == targetItem->metaObject()->method(i).methodIndex())
-            targetEventname = targetItem->metaObject()->method(i).name();
-    }
-    if (targetEventname.isEmpty()) { qWarning("Event error! 0x01"); return; }
-
-    for (auto event : m_d->events) {
-        if (event.targetItem == targetItem &&
-            event.targetEventname == targetEventname) {
-            QQmlExpression script(m_d->rootContext, event.targetItem, event.eventCode);
-            script.evaluate();
-        }
-    }
 }

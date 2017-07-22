@@ -65,12 +65,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::SetupGui()
 {
-//	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
-//	m_d->bindingWidget->setItemSource(&m_d->m_Items);
-
-    m_d->eventsWidget->setRootContext(m_d->designWidget->rootContext());
-    m_d->eventsWidget->setItemSource(&m_d->m_Items);
-
 	/* Set ticks' icons */
 	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
 	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
@@ -87,7 +81,7 @@ void MainWindow::SetupGui()
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
-////	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
+//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
 //    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
 //    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
@@ -283,8 +277,6 @@ void MainWindow::SetupGui()
 	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
 	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
     m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
-//	m_d->bindingWidget->setRootContext(m_d->designWidget->rootContext());
-    m_d->eventsWidget->setRootContext(m_d->designWidget->rootContext());
 
 	m_d->centralWidget->installEventFilter(this);
 
@@ -768,7 +760,7 @@ void MainWindow::on_clearButton_clicked()
 					m_d->m_Items.removeOne(item);
 					m_d->m_ItemUrls.removeAt(i);
 //					m_d->bindingWidget->detachBindingsFor(item);
-                    m_d->eventsWidget->detachEventsFor(item);
+//                    m_d->eventsWidget->detachEventsFor(item);
 					item->deleteLater();
                     HideSelectionTools();
 				}
@@ -947,7 +939,7 @@ void MainWindow::toolboxRemoveButtonClicked()
 							m_d->m_Items.removeOne(item);
 							m_d->m_ItemUrls.removeAt(j);
 //							m_d->bindingWidget->detachBindingsFor(item);
-                            m_d->eventsWidget->detachEventsFor(item);
+//                            m_d->eventsWidget->detachEventsFor(item);
 							item->deleteLater();
 						}
 					}
