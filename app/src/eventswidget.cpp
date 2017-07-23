@@ -37,7 +37,7 @@ class EventsWidgetPrivate
 
         QWidget popupWidget;
         QVBoxLayout popupVLayout;
-        FlatButton popupHideButton;      
+        FlatButton popupHideButton;
         LineEdit nameEdit;
         QLabel popupTitle;
         LineEdit popupItemNameTextBox;
@@ -50,6 +50,7 @@ class EventsWidgetPrivate
         ComboBox targetEventCombobox;
         FlatButton popupOkButton;
         bool editMode = false;
+        QString editingEventName;
 
     public:
         EventsWidgetPrivate(EventsWidget* parent);
@@ -216,7 +217,7 @@ void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
         inf.eventCode.isEmpty() || inf.eventName.isEmpty())
         return;
 
-        eventsListWidget.addItem(inf.eventName);
+    eventsListWidget.addItem(inf.eventName);
 }
 
 void EventsWidgetPrivate::removeButtonClicked()
@@ -260,30 +261,38 @@ void EventsWidgetPrivate::addButtonClicked()
 
 void EventsWidgetPrivate::editButtonClicked()
 {
-//    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
-//    animation->setDuration(500);
-//    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
-//    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
-//    animation->setEasingCurve(QEasingCurve::OutExpo);
-//    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
-//    animation->start();
-//    popupWidget.show();
-//    popupWidget.raise();
-//    popupHideButton.raise();
-//    popupHideButton.move(popupWidget.width()-fit(24), 0);
-//    editMode = true;
+    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
+    animation->setDuration(500);
+    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
+    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
+    animation->setEasingCurve(QEasingCurve::OutExpo);
+    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+    animation->start();
+    popupWidget.show();
+    popupWidget.raise();
+    popupHideButton.raise();
+    popupHideButton.move(popupWidget.width()-fit(24), 0);
+    editMode = true;
+    editingEventName = eventsListWidget.currentItem()->text();
 
-//    Event e;
-//    for (auto event : events)
-//        if (event.connectionName == eventsListWidget.currentItem()->text())
-//            e = event;
-//    parent->selectItem(e.targetItem);
+    auto issuerEvent = SaveManager::getEventSaves()[editingEventName].toObject();
+    if (issuerEvent.isEmpty())
+        return;
 
-//    targetEventCombobox.setCurrentItem(e.targetEventname);
-//    nameEdit.setText(eventsListWidget.currentItem()->text());
-//    codeEdit.setText(e.eventCode);
-//    hasPopupOpen = true;
-//    emit parent->popupShowed();
+    auto controls = DesignerScene::currentPage()->childControls();
+    controls << DesignerScene::currentPage();
+
+    DesignerScene::instance()->clearSelection();
+    for (auto control : controls)
+        if (control->id() == issuerEvent[EVENT_TARGET_ID_LABEL].toString())
+            control->setSelected(true);
+
+    nameEdit.setText(editingEventName);
+    targetEventCombobox.setCurrentItem(issuerEvent[EVENT_TARGET_EVENTNAME_LABEL].toString());
+    codeEdit.setText(QByteArray::fromBase64(QByteArray().insert(0, issuerEvent[EVENT_EVENT_CODE_LABEL].toString())));
+
+    hasPopupOpen = true;
+    emit parent->popupShowed();
 }
 
 void EventsWidgetPrivate::popupHideButtonClicked()
@@ -303,154 +312,66 @@ void EventsWidgetPrivate::popupHideButtonClicked()
 
 void EventsWidgetPrivate::popupOkButtonClicked()
 {
-//    if (!targetEventCombobox.currentItem().isEmpty() &&
-//        !codeEdit.text().isEmpty() &&
-//        !popupItemNameTextBox.text().isEmpty()) {
-//        if (!editMode) {
-//            if (!lastTargetItem) return;
+    if (targetEventCombobox.currentItem().isEmpty() ||
+        codeEdit.text().isEmpty() ||
+        popupItemNameTextBox.text().isEmpty())
+        return;
 
-//            QString targetEventname;
-//            QMetaMethod targetSign;
-//            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
-//                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
-//                    targetSign = lastTargetItem->metaObject()->method(i);
-//                    targetEventname = lastTargetItem->metaObject()->method(i).name();
-//                }
-//            if (!targetSign.isValid()) return;
+    if (editMode)
+        delete eventsListWidget.takeItem(eventsListWidget.currentRow());
 
-//            QMetaObject::Connection connection;
-//            bool shouldConnect = true;
-//            for (auto event: events) {
-//                if (event.targetItem == lastTargetItem &&
-//                    event.targetEventname == targetEventname) {
-//                    shouldConnect = false;
-//                    break;
-//                }
-//            }
-//            if (shouldConnect) {
-//                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
-//            }
+    if (nameEdit.text().isEmpty())
+        nameEdit.setText("Event");
 
-//            auto connectionName = nameEdit.text();
-//            if (connectionName.isEmpty()) {
-//                connectionName = QString("Event %1").arg(eventsListWidget.count());
-//            }
+    auto eventName = nameEdit.text();
+    for (int i = 1; eventsListWidget.contains(eventName); i++)
+        eventName = nameEdit.text() + QString::number(i);
 
-//            for (int i = 0; i < eventsListWidget.count(); i++) {
-//                if (eventsListWidget.item(i)->text() == connectionName) {
-//                    connectionName+="+";
-//                    i = -1;
-//                }
-//            }
+    eventsListWidget.addItem(eventName);
 
-//            Event eventData;
-//            eventData.targetItem = lastTargetItem; //Target item
-//            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
-//            eventData.eventCode = codeEdit.text();
-//            eventData.connection = connection;
-//            eventData.connectionName = connectionName;
-//            events << eventData;
-//            SaveManager::EventInf einf;
-//            einf.eventName = connectionName;
-//            einf.targetId = rootContext->nameForObject(lastTargetItem);
-//            einf.targetEventname = targetEventCombobox.currentItem();
-//            einf.eventCode = codeEdit.text();
-//            SaveManager::addEventSave(einf);
-//            eventsListWidget.addItem(connectionName);
-//            popupHideButtonClicked();
-//        } else {
-//            if (!lastTargetItem) return;
-//            auto connName = eventsListWidget.currentItem()->text();
-//            Event event;
-//            for (auto e : events) {
-//                if (e.connectionName == connName) {
-//                    event = e;
-//                }
-//            }
-//            events.removeOne(event);
+    SaveManager::EventInf einf;
+    einf.eventName = eventName;
+    einf.targetId = popupItemNameTextBox.text();
+    einf.targetEventname = targetEventCombobox.currentItem();
+    einf.eventCode = codeEdit.text();
 
-//            bool shouldRemove = true;
-//            if (event.connection) {
-//                for (auto& e : events) {
-//                    if (e.targetItem == event.targetItem &&
-//                        e.targetEventname == event.targetEventname) {
-//                        e.connection = event.connection;
-//                        shouldRemove = false;
-//                        break;
-//                    }
-//                }
-//                if (shouldRemove) {
-//                    QObject::disconnect(event.connection);
-//                }
-//            }
+    if (editMode)
+        SaveManager::changeEventSave(editingEventName, einf);
+    else
+        SaveManager::addEventSave(einf);
 
-//            QString targetEventname;
-//            QMetaMethod targetSign;
-//            for (int i = 0; i < lastTargetItem->metaObject()->methodCount(); i++)
-//                if (QString(lastTargetItem->metaObject()->method(i).name()) == targetEventCombobox.currentItem()) {
-//                    targetSign = lastTargetItem->metaObject()->method(i);
-//                    targetEventname = lastTargetItem->metaObject()->method(i).name();
-//                }
-//            if (!targetSign.isValid()) return;
-
-//            QMetaObject::Connection connection;
-//            bool shouldConnect = true;
-//            for (auto event: events) {
-//                if (event.targetItem == lastTargetItem &&
-//                    event.targetEventname == targetEventname)
-//                    shouldConnect = false;
-//            }
-//            if (shouldConnect) {
-//                connection = QObject::connect(lastTargetItem, targetSign, parent, parent->metaObject()->method(parent->metaObject()->indexOfSlot("processEvents()")));
-//            }
-
-//            auto connectionName = nameEdit.text();
-//            if (connectionName.isEmpty()) {
-//                connectionName = QString("Event %1").arg(eventsListWidget.count());
-//            }
-
-//            for (int i = 0; i < eventsListWidget.count(); i++) {
-//                if (eventsListWidget.item(i)->text() != connName && eventsListWidget.item(i)->text() == connectionName) {
-//                    connectionName+="+";
-//                    i = -1;
-//                }
-//            }
-
-//            Event eventData;
-//            eventData.targetItem = lastTargetItem; //Target item
-//            eventData.targetEventname = targetEventCombobox.currentItem(); //Target event name
-//            eventData.eventCode = codeEdit.text();
-//            eventData.connection = connection;
-//            eventData.connectionName = connectionName;
-//            events << eventData;
-//            SaveManager::EventInf einf;
-//            einf.eventName = connectionName;
-//            einf.targetId = rootContext->nameForObject(lastTargetItem);
-//            einf.targetEventname = targetEventCombobox.currentItem();
-//            einf.eventCode = codeEdit.text();
-//            SaveManager::changeEventSave(event.connectionName, einf);
-//            eventsListWidget.item(eventsListWidget.currentRow())->setText(connectionName);
-//            popupHideButtonClicked();
-//        }
-//    }
-
+    parent->clearList();
+    parent->handleSelectionChange();
+    eventsListWidget.clearSelection();
+    popupHideButtonClicked();
 }
 
 void EventsWidgetPrivate::btnEditCodeClicked()
 {
-//    static QMetaObject::Connection conn;
-//    if (codeEdit.text().isEmpty()) {
-//        QmlEditor::showTextOnly("// " + rootContext->nameForObject(lastTargetItem) + ".on" +
-//                                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
-//    } else {
-//        QmlEditor::showTextOnly(codeEdit.text());
-//    }
-//    QmlEditor::instance()->raise();
-//    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
-//        codeEdit.setText(text);
-//        QObject::disconnect(conn);
-//        QmlEditor::hide();
-//    });
+    static QMetaObject::Connection conn;
+    auto scene = DesignerScene::instance();
+    auto selectedControls = scene->selectedControls();
+
+    if (scene->currentPage()->isSelected())
+        selectedControls << scene->currentPage();
+
+    if (selectedControls.isEmpty() ||
+        selectedControls.size() > 1 ||
+        selectedControls[0]->id().isEmpty())
+        return;
+
+    if (codeEdit.text().isEmpty()) {
+        QmlEditor::showTextOnly("// " + selectedControls[0]->id() + ".on" +
+                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
+    } else {
+        QmlEditor::showTextOnly(codeEdit.text());
+    }
+    QmlEditor::instance()->raise();
+    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
+        codeEdit.setText(text);
+        QObject::disconnect(conn);
+        QmlEditor::hide();
+    });
 }
 
 void EventsWidgetPrivate::ensureComboboxVisible(const QObject* obj)

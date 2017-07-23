@@ -35,6 +35,7 @@ class BindingWidgetPrivate
         QVBoxLayout verticalLayout;
         QHBoxLayout horizontalLayout;
         FlatButton addButton;
+        FlatButton editButton;
         FlatButton removeButton;
         ListWidget bindingListWidget;
         bool hasPopupOpen = false;
@@ -54,6 +55,8 @@ class BindingWidgetPrivate
         ComboBox sourcePropertyCombobox;
         FlatButton popupOkButton;
         QLabel popupSeperateLine;
+        bool editMode = false;
+        QString editingBindingName;
 
     public:
         BindingWidgetPrivate(BindingWidget* parent);
@@ -62,6 +65,7 @@ class BindingWidgetPrivate
     private:
         void removeButtonClicked();
         void addButtonClicked();
+        void editButtonClicked();
         void popupHideButtonClicked();
         void popupOkButtonClicked();
         void ensureComboboxVisible(const QObject* obj);
@@ -81,6 +85,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     bindingListWidget.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     bindingListWidget.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     QObject::connect(&bindingListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){removeButton.setEnabled(i>=0);});
+    QObject::connect(&bindingListWidget,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){editButton.setEnabled(i>=0);});
 
     addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     addButton.setColor("#6BB64B");
@@ -99,9 +104,20 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     removeButton.setDisabled(true);
     QObject::connect(&removeButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {removeButtonClicked();});
 
+    editButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    editButton.setColor("#0D74C8");
+    editButton.setFixedSize(fit(30),fit(30));
+    editButton.setRadius(fit(13));
+    editButton.setIconSize(QSize(fit(16),fit(16)));
+    editButton.setIcon(QIcon(":/resources/images/edit.png"));
+    editButton.setDisabled(true);
+    QObject::connect(&editButton, (void(FlatButton::*)(bool))(&FlatButton::clicked), [=] {editButtonClicked();});
+
     horizontalLayout.addWidget(&addButton);
     horizontalLayout.addStretch();
     horizontalLayout.addWidget(&removeButton);
+    horizontalLayout.addStretch();
+    horizontalLayout.addWidget(&editButton);
 
     verticalLayout.addWidget(&bindingListWidget);
     verticalLayout.addLayout(&horizontalLayout);
@@ -204,6 +220,42 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
 
     QObject::connect(DesignerScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
+void BindingWidgetPrivate::editButtonClicked()
+{
+    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
+    animation->setDuration(500);
+    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
+    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
+    animation->setEasingCurve(QEasingCurve::OutExpo);
+    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+    animation->start();
+    popupWidget.show();
+    popupWidget.raise();
+    popupHideButton.raise();
+    popupHideButton.move(popupWidget.width()-fit(24), 0);
+    editMode = true;
+    editingBindingName = bindingListWidget.currentItem()->text();
+
+    auto issuerBinding = SaveManager::getBindingSaves()[editingBindingName].toObject();
+    if (issuerBinding.isEmpty())
+        return;
+
+    auto controls = DesignerScene::currentPage()->childControls();
+    controls << DesignerScene::currentPage();
+
+    DesignerScene::instance()->clearSelection();
+    for (auto control : controls)
+        if (control->id() == issuerBinding[BINDING_TARGET_ID_LABEL].toString())
+            control->setSelected(true);
+
+    nameEdit.setText(editingBindingName);
+    targetPropertyCombobox.setCurrentItem(issuerBinding[BINDING_TARGET_PROPERTY_LABEL].toString());
+    sourceItemCombobox.setCurrentItem(issuerBinding[BINDING_SOURCE_ID_LABEL].toString());
+    sourcePropertyCombobox.setCurrentItem(issuerBinding[BINDING_SOURCE_PROPERTY_LABEL].toString());
+
+    hasPopupOpen = true;
+    emit parent->popupShowed();
+}
 
 void BindingWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& inf)
 {
@@ -256,6 +308,7 @@ void BindingWidgetPrivate::addButtonClicked()
 
 void BindingWidgetPrivate::popupHideButtonClicked()
 {
+    editMode = false;
     auto animation = new QPropertyAnimation(&popupWidget, "geometry");
     animation->setDuration(500);
     animation->setEndValue(QRect(0, parent->height(), parent->width(), parent->height()));
@@ -276,6 +329,9 @@ void BindingWidgetPrivate::popupOkButtonClicked()
         popupItemNameTextBox.text().isEmpty())
         return;
 
+    if (editMode)
+        delete bindingListWidget.takeItem(bindingListWidget.currentRow());
+
     if (nameEdit.text().isEmpty())
         nameEdit.setText("Binding");
 
@@ -291,11 +347,15 @@ void BindingWidgetPrivate::popupOkButtonClicked()
     binf.sourceProperty = sourcePropertyCombobox.currentItem();
     binf.targetId = popupItemNameTextBox.text();
     binf.targetProperty = targetPropertyCombobox.currentItem();
-    SaveManager::addBindingSave(binf);
+
+    if (editMode)
+        SaveManager::changeBindingSave(editingBindingName, binf);
+    else
+        SaveManager::addBindingSave(binf);
 
     parent->clearList();
     parent->handleSelectionChange();
-
+    bindingListWidget.clearSelection();
     popupHideButtonClicked();
 }
 

@@ -5,7 +5,6 @@
 #include <savemanager.h>
 
 class BindingWidgetPrivate;
-class Page;
 class Control;
 
 class BindingWidget : public QWidget
@@ -27,8 +26,8 @@ class BindingWidget : public QWidget
 		bool hasPopupOpen();
 
 	protected slots:
-        void handleSelectionChange();
         void clearList();
+        void handleSelectionChange();
 
 	signals:
 		void popupShowed();
