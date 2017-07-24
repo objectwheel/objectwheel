@@ -83,6 +83,7 @@ class MainWindowPrivate
 		FlatButton* aboutButton;
 		QmlEditor* qmlEditor;
         DesignManager* designManager;
+        QWidget* settleWidget;
 
 		MainWindowPrivate(MainWindow* uparent);
         ~MainWindowPrivate();
@@ -122,8 +123,12 @@ void MainWindowPrivate::setupUi()
     projectsScreen = new ProjectsScreen(parent);
     loginScreen = new LoginScreen(parent);
 
+    settleWidget = new QWidget;
+    settleWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    verticalLayout->addWidget(settleWidget);
+
     designManager = new DesignManager;
-//    designManager->setSettleWidget(designWidget);
+    designManager->setSettleWidget(settleWidget);
     designManager->showWidget();
 
 	toolboxList = new ListWidget(centralWidget);
