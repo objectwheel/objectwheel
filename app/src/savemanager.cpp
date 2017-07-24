@@ -286,6 +286,11 @@ void SaveManager::changeSave(const QString& fromId, QString toId)
 	if (!exists(fromId) || saves().contains(toId)) return;
 	auto saveDir = saveDirectory(fromId);
 	if (saveDir.isEmpty()) return;
+
+    auto prevParent = parentalRelationship(fromId);
+    SaveManager::removeParentalRelationship(fromId);
+    SaveManager::addParentalRelationship(toId, prevParent);
+
 	rn(saveDir, dname(saveDir) + separator() + toId);
     SaveManager::BindingInf inf;
     auto bindingSaves = getBindingSaves();
@@ -324,6 +329,8 @@ void SaveManager::changeSave(const QString& fromId, QString toId)
         }
         changeEventSave(einf.eventName, einf);
     }
+
+    //TODO: QML EDITOR CACHE CHANGE
 }
 
 void SaveManager::removeSave(const QString& id)
@@ -371,6 +378,11 @@ void SaveManager::removeVariantProperty(const QString& id, const QString& proper
     if (saveDirectory(id).isEmpty()) return;
     auto filename = saveDirectory(id) + separator() + "main.qml";
     ParserController::removeVariantProperty(filename, property);
+}
+
+bool SaveManager::inprogress()
+{
+    return m_d->parserController.running();
 }
 
 void SaveManager::addParentalRelationship(const QString& id, const QString& parent)

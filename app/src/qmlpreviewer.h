@@ -12,12 +12,14 @@ class QmlPreviewerPrivate;
 
 struct PreviewResult {
         QPixmap preview;
+        QPointF pos;
         QSizeF size;
         QString id;
         QList<QString> events;
         QMap<QString, QVariant::Type> properties;
         bool clip;
         bool initial;
+        int zValue;
 };
 
 class QmlPreviewer : public QObject

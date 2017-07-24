@@ -89,9 +89,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     designerView.setFrameShape(QFrame::NoFrame);
 
     QTimer::singleShot(3000, [this] {
-        auto page = new Page;
-        page->setId("applicationWindow");
-        page->setUrl(QUrl("qrc:/resources/qmls/mainPage.qml"));
+        auto page = new Page(QUrl("qrc:/resources/qmls/mainPage.qml"));
         page->refresh();
         designerScene.addPage(page);
     });

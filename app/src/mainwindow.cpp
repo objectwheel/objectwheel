@@ -27,6 +27,8 @@
 #include <scenemanager.h>
 #include <QtConcurrent>
 #include <delayer.h>
+#include <control.h>
+#include <designerscene.h>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
@@ -391,7 +393,7 @@ void MainWindow::SetupManagers()
 	auto userManager = new UserManager(this); //create new user manager
     auto* projectManager = new ProjectManager(this); //create new project manager
 	projectManager->setMainWindow(this);
-	new SaveManager(this);
+    new SaveManager(this);
 	auto sceneManager = new SceneManager;
 	sceneManager->setMainWindow(this);
 	sceneManager->setSceneListWidget(m_d->sceneList);
@@ -435,8 +437,8 @@ void MainWindow::SetupManagers()
 		m_d->sceneList->insertItem(0, item);
 		m_d->sceneList->AddUrls(item, urls);
     }
-    connect(qApp, SIGNAL(aboutToQuit()), userManager, SLOT(stopUserSession()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanupObjectwheel()));
+
     auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
     Delayer::delay(&ret, &QFuture<bool>::isRunning);
     if (ret.result()) {
@@ -688,6 +690,11 @@ void MainWindow::handleEditorOpenButtonClicked()
 
 void MainWindow::cleanupObjectwheel()
 {
+    while(SaveManager::inprogress())
+        Delayer::delay(100);
+
+    UserManager::stopUserSession();
+
     qApp->processEvents();
 }
 
@@ -1096,39 +1103,23 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 {
-    m_d->designWidget->engine()->clearComponentCache(); //WARNING: Performance issues?
-	QQmlComponent component(m_d->designWidget->engine()); //TODO: Drop into another item?
-	component.loadUrl(url);
+    auto control = new Control(url);
 
-	QQmlIncubator incubator;
-	component.create(incubator, m_d->designWidget->rootContext());
-    Delayer::delay(&incubator, &QQmlIncubator::isLoading);
-	QQuickItem *qml = qobject_cast<QQuickItem*>(incubator.object());
-	if (component.isError() || !qml) return false;
+    auto controls = DesignerScene::currentPage()->childControls();
+    for (auto page : DesignerScene::pages())
+        controls << page;
+    for (auto ctrl : controls)
+        if (ctrl->id() == parent) {
+            control->setParentItem(ctrl);
+            control->refresh();
+            return true;
+        }
 
-    QString componentName = fname(dname(url.toLocalFile()));
-	auto parentProperty = m_d->designWidget->rootContext()->contextProperty(parent);
-	auto parentItem = qobject_cast<QQuickItem*>(parentProperty.value<QObject*>());
-	if (!parentItem) qFatal("MainWindow::addControlWithoutSave : Error occurred");
-	m_d->designWidget->rootContext()->setContextProperty(componentName, qml);
-	qml->setParentItem(parentItem);
-    qml->setEnabled(!m_d->editMode);
-	fit(qml, Fit::WidthHeight);
-	m_d->m_Items << qml;
-	m_d->m_ItemUrls << url;
-
-    if (m_d->editMode) m_d->parent->ShowSelectionTools(qml);
-	return true;
+    control->deleteLater();
+    return false;
 }
 
 MainWindow::~MainWindow()
 {
     delete m_d;
 }
-
-// TODO: Make a object clone tick
-// TODO: Make it possible to resize(zoom) and rotate operations with fingers
-// TODO: Layouts?
-// TODO: Code a version numberer for tools' objectNames
-// FIXME: Make toolsExists function works
-// FIXME: changed qml file doesn't make changes on designer due to source url is same

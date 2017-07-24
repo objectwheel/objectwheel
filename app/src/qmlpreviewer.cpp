@@ -1,5 +1,6 @@
 #include <qmlpreviewer.h>
 #include <fit.h>
+#include <designerscene.h>
 
 #include <QApplication>
 #include <QQuickWindow>
@@ -145,9 +146,12 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
         else
             item->setSize(QSizeF(fit(item->width()), fit(item->height())));
 
+        result.pos = item->position();
         result.size = QSizeF(item->width(), item->height());
         result.clip = item->clip();
+        result.zValue = item->z();
 
+        item->setPosition({0,0});
         window->resize(qCeil(item->width()), qCeil(item->height()));
         window->setClearBeforeRendering(true);
         window->setColor(QColor(Qt::transparent));
@@ -158,6 +162,7 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
             window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
 
         result.size = window->size();
+        result.zValue = 0;
         result.clip = true;
     }
 

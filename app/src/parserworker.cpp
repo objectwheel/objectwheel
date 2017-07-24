@@ -32,8 +32,10 @@ ParserWorker::ParserWorker(QObject *parent) : QObject(parent)
 void ParserWorker::setVariantProperty(const QString& fileName, const QString& property, const QVariant& value)
 {
     auto fileContent = rdfile(fileName);
-    if (fileContent.isEmpty())
+    if (fileContent.isEmpty()) {
+        emit done();
         return;
+    }
 
     auto bproperty = QByteArray().insert(0, property);
     auto model = Model::create("QtQuick.Item", 1, 0);
@@ -54,13 +56,16 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
     delete rewriterView;
     delete textModifier;
     delete model;
+    emit done();
 }
 
 void ParserWorker::removeVariantProperty(const QString& fileName, const QString& property)
 {
     auto fileContent = rdfile(fileName);
-    if (fileContent.isEmpty())
+    if (fileContent.isEmpty()) {
+        emit done();
         return;
+    }
 
     auto bproperty = QByteArray().insert(0, property);
     auto model = Model::create("QtQuick.Item", 1, 0);
@@ -81,4 +86,5 @@ void ParserWorker::removeVariantProperty(const QString& fileName, const QString&
     delete rewriterView;
     delete textModifier;
     delete model;
+    emit done();
 }

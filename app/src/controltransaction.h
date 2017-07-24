@@ -15,6 +15,8 @@ class ControlTransaction : public QObject
     public slots:
         void flushGeometryChange();
         void flushParentChange();
+        void flushZChange();
+        void flushIdChange(const QString& prevId);
 
     private:
         Control* _watched;

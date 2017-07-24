@@ -64,7 +64,6 @@ void DesignerScene::addPage(Page* page)
 
     _d->parent->addItem(page);
     page->setVisible(false);
-    page->setZValue(-1);
 
     _pages.append(page);
 
@@ -131,15 +130,11 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mousePressEvent(event);
 
-    const auto&  selectedControls = this->selectedControls();
-    if (selectedControls.size() > 0 && _currentPage) {
-        for (auto control : _currentPage->childControls()) {
-            if (selectedControls.contains(control))
-                control->setZValue(1); //BUG
-            else
-                control->setZValue(0);
-        }
-    }
+    auto selectedControls = this->selectedControls();
+    for (auto control : selectedControls)
+        if (_currentPage->higherZValue() != control->zValue())
+            control->setZValue(_currentPage->higherZValue() == -MAX_Z_VALUE
+                               ? 0 : _currentPage->higherZValue() + 1);
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
     if (this->selectedControls().contains((Control*)itemUnderMouse))

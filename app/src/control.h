@@ -8,6 +8,8 @@
 #include <QTimer>
 #include <controltransaction.h>
 
+#define MAX_Z_VALUE (9999999)
+
 class Control;
 class ControlPrivate;
 class PagePrivate;
@@ -58,14 +60,13 @@ class Control : public QGraphicsWidget
         friend class ControlPrivate;
 
     public:
-        explicit Control(Control* parent = Q_NULLPTR);
+        explicit Control(const QUrl& url, Control* parent = Q_NULLPTR);
         virtual ~Control();
 
         QString id() const;
         void setId(const QString& id);
 
         QUrl url() const;
-        void setUrl(const QUrl& url);
 
         static bool showOutline();
         static void setShowOutline(const bool value);
@@ -109,7 +110,9 @@ class Control : public QGraphicsWidget
         virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
     signals:
+        void idChanged(const QString&);
         void previewChanged();
+        void initialized();
 
     protected:
         Resizer _resizers[8];
@@ -120,7 +123,7 @@ class Control : public QGraphicsWidget
         QString _id;
         QList<QString> _events;
         QMap<QString, QVariant::Type> _properties;
-        QUrl _url;
+        const QUrl _url;
         bool _dragging;
         bool _dragIn;
         bool _clip;
@@ -140,7 +143,7 @@ class Page : public Control
             Desktop
         };
 
-        explicit Page(Page* parent = Q_NULLPTR);
+        explicit Page(const QUrl& url, Page* parent = Q_NULLPTR);
 
         bool mainPage() const;
         void setMainPage(bool mainPage);
@@ -155,6 +158,9 @@ class Page : public Control
         bool contains(const QString& id) const;
 
         QRectF frameGeometry() const;
+
+        int higherZValue() const;
+        int lowerZValue() const;
 
     public slots:
         void centralize();

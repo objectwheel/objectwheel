@@ -38,7 +38,6 @@
 #define PREVIEW_REFRESH_INTERVAL 100
 #define RESIZE_TRANSACTION_INTERVAL 800
 #define MAGNETIC_FIELD (fit(3))
-
 #define PAGE_PP_SIZE (fit(QSize(250, 415)))
 #define PAGE_PL_SIZE (fit(QSize(415, 250)))
 #define PAGE_TOP_MARGIN (fit(14))
@@ -299,7 +298,7 @@ void ControlPrivate::fixResizerCoordinates()
                                 parent->size().height() - RESIZER_SIZE / 2.0 - 0.5);
                 break;
         }
-        resizer.setZValue(1);
+        resizer.setZValue(MAX_Z_VALUE);
     }
 }
 
@@ -339,7 +338,10 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 
         QStringList pageNames;
         for (auto page : scene->pages())
-            pageNames << page->id();
+            if (page == parent)
+                continue;
+            else
+                pageNames << page->id();
 
         for (int i = 1; currentPage->contains(id) || pageNames.contains(id); i++)
             id = result.id + QString::number(i);
@@ -349,8 +351,10 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         scene->clearSelection();
 
         parent->setId(id);
+        parent->setPos(result.pos);
         parent->resize(result.size);
         parent->setClip(result.clip);
+        parent->setZValue(result.zValue);
         parent->setProperties(result.properties);
         parent->setEvents(result.events);
         parent->setSelected(true);
@@ -358,6 +362,10 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
     }
 
     parent->update();
+
+    if (result.initial)
+        emit parent->initialized();
+
     emit parent->previewChanged();
 }
 
@@ -380,10 +388,11 @@ void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors)
 
 bool Control::_showOutline = false;
 
-Control::Control(Control* parent)
+Control::Control(const QUrl& url, Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
     , _controlTransaction(this)
+    , _url(url)
     , _dragging(false)
     , _dragIn(false)
     , _clip(true)
@@ -447,17 +456,14 @@ QString Control::id() const
 
 void Control::setId(const QString& id)
 {
+    QString prevId = _id;
     _id = id;
+    emit idChanged(prevId);
 }
 
 QUrl Control::url() const
 {
     return _url;
-}
-
-void Control::setUrl(const QUrl& url)
-{
-    _url = url;
 }
 
 void Control::refresh()
@@ -502,11 +508,13 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     _dragIn = false;
 
-    auto control = new Control;
-    control->setUrl(event->mimeData()->urls().at(0));
+    auto pos = event->pos();
+    auto control = new Control(event->mimeData()->urls().at(0));
     control->setParentItem(this);
-    control->setPos(event->pos());
     control->refresh();
+    connect(control, &Control::initialized, [=] {
+        control->setPos(pos);
+    });
 
     event->accept();
     update();
@@ -792,8 +800,8 @@ void PagePrivate::applySkinChange()
 
 Page::Skin Page::_skin = Page::PhonePortrait;
 
-Page::Page(Page* parent)
-    : Control(parent)
+Page::Page(const QUrl& url, Page* parent)
+    : Control(url, parent)
     , _d(new PagePrivate(this))
 {
     setFlag(ItemIsMovable, false);
@@ -1344,6 +1352,24 @@ QRectF Page::frameGeometry() const
         rect = QRectF(-size().width() / 2.0, -size().height() / 2.0 - PAGE_TOP_MARGIN / 1.5,
                       size().width(), size().height() + 2.0 * PAGE_TOP_MARGIN / 1.5);
     return rect;
+}
+
+int Page::higherZValue() const
+{
+    int z = -MAX_Z_VALUE;
+    for (auto control : childControls())
+        if (control->zValue() > z)
+            z = control->zValue();
+    return z;
+}
+
+int Page::lowerZValue() const
+{
+    int z = MAX_Z_VALUE;
+    for (auto control : childControls())
+        if (control->zValue() < z)
+            z = control->zValue();
+    return z;
 }
 
 bool Page::mainPage() const

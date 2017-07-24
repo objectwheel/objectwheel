@@ -7,6 +7,7 @@ ParserWorker* ParserController::_parserWorker = nullptr;
 QThread* ParserController::_workerThread = nullptr;
 QList<ParserController::Transaction> ParserController::_transactionList;
 QTimer* ParserController::_transactionTimer = nullptr;
+bool ParserController::_running = false;
 
 ParserController::ParserController(QObject *parent)
     : QObject(parent)
@@ -21,6 +22,7 @@ ParserController::ParserController(QObject *parent)
     _workerThread = new QThread(this);
     _parserWorker = new ParserWorker;
     _parserWorker->moveToThread(_workerThread);
+    connect(_parserWorker, SIGNAL(done()), SLOT(checkRunning()));
     _workerThread->start();
 }
 
@@ -53,14 +55,19 @@ void ParserController::removeVariantProperty(const QString& fileName, const QStr
     _transactionTimer->start();
 }
 
+bool ParserController::running()
+{
+    return _transactionList.size() > 0;
+}
+
 void ParserController::processWaitingTransactions()
 {
     _transactionTimer->stop();
 
     if (_transactionList.isEmpty())
         return;
-    else if (_transactionList.size() > 1)
-        _transactionTimer->start();
+
+    _running = true;
 
     auto transaction = _transactionList.first();
     switch (transaction.type) {
@@ -80,5 +87,15 @@ void ParserController::processWaitingTransactions()
         default:
             break;
     }
+
+    if (_transactionList.size() > 1)
+        _transactionTimer->start();
+
     _transactionList.removeOne(transaction);
+}
+
+void ParserController::checkRunning()
+{
+    if (_transactionList.isEmpty())
+        _running = false;
 }

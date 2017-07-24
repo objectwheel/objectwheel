@@ -38,6 +38,8 @@ class DesignerViewPrivate : public QObject
         void handleMoveDownAction();
         void handleMoveRightAction();
         void handleMoveLeftAction();
+        void handleSendBackActAction();
+        void handleBringFrontActAction();
 
     public:
         DesignerView* parent;
@@ -117,7 +119,8 @@ DesignerViewPrivate::DesignerViewPrivate(DesignerView* parent)
     connect(&moveDownAct, SIGNAL(triggered()), SLOT(handleMoveDownAction()));
     connect(&moveRightAct, SIGNAL(triggered()), SLOT(handleMoveRightAction()));
     connect(&moveLeftAct, SIGNAL(triggered()), SLOT(handleMoveLeftAction()));
-
+    connect(&sendBackAct, SIGNAL(triggered()), SLOT(handleSendBackActAction()));
+    connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
 }
 
 void DesignerViewPrivate::handleUndoAction()
@@ -183,41 +186,52 @@ void DesignerViewPrivate::handleDeleteAction()
 void DesignerViewPrivate::handleSelectAllAction()
 {
     auto currentPage = ((DesignerScene*)parent->scene())->currentPage();
-    for (auto control : currentPage->childControls()) {
+    for (auto control : currentPage->childControls())
         control->setSelected(true);
-    }
 }
 
 void DesignerViewPrivate::handleMoveUpAction()
 {
     auto scene = static_cast<DesignerScene*>(parent->scene());
-    for (auto control : scene->selectedControls()) {
+    for (auto control : scene->selectedControls())
         control->moveBy(0, - fit(1));
-    }
 }
 
 void DesignerViewPrivate::handleMoveDownAction()
 {
     auto scene = static_cast<DesignerScene*>(parent->scene());
-    for (auto control : scene->selectedControls()) {
+    for (auto control : scene->selectedControls())
         control->moveBy(0, fit(1));
-    }
 }
 
 void DesignerViewPrivate::handleMoveRightAction()
 {
     auto scene = static_cast<DesignerScene*>(parent->scene());
-    for (auto control : scene->selectedControls()) {
+    for (auto control : scene->selectedControls())
         control->moveBy(fit(1), 0);
-    }
 }
 
 void DesignerViewPrivate::handleMoveLeftAction()
 {
     auto scene = static_cast<DesignerScene*>(parent->scene());
-    for (auto control : scene->selectedControls()) {
+    for (auto control : scene->selectedControls())
         control->moveBy(- fit(1), 0);
-    }
+}
+
+void DesignerViewPrivate::handleSendBackActAction()
+{
+    auto scene = static_cast<DesignerScene*>(parent->scene());
+    for (auto control : scene->selectedControls())
+        control->setZValue(scene->currentPage()->lowerZValue() == MAX_Z_VALUE
+                           ? 0 : scene->currentPage()->lowerZValue() - 1);
+}
+
+void DesignerViewPrivate::handleBringFrontActAction()
+{
+    auto scene = static_cast<DesignerScene*>(parent->scene());
+    for (auto control : scene->selectedControls())
+        control->setZValue(scene->currentPage()->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : scene->currentPage()->higherZValue() + 1);
 }
 
 DesignerView::DesignerView(QGraphicsScene* scene, QWidget* parent)

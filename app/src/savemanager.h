@@ -79,6 +79,8 @@ class SaveManager : public QObject
         static void setVariantProperty(const QString& id, const QString& property, const QVariant& value);
         static void removeVariantProperty(const QString& id, const QString& property);
 
+        static bool inprogress();
+
     private:
 		static SaveManagerPrivate* m_d;
 };

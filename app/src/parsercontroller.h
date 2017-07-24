@@ -36,15 +36,18 @@ class ParserController : public QObject
         explicit ParserController(QObject *parent = 0);
         static void setVariantProperty(const QString& fileName, const QString& property, const QVariant& value);
         static void removeVariantProperty(const QString& fileName, const QString& property);
+        static bool running();
 
     private slots:
         void processWaitingTransactions();
+        void checkRunning();
 
     private:
         static QThread* _workerThread;
         static ParserWorker* _parserWorker;
         static QTimer* _transactionTimer;
         static QList<Transaction> _transactionList;
+        static bool _running;
 };
 
 #endif // PARSERCONTROLLER_H
