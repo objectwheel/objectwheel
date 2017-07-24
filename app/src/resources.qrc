@@ -15,8 +15,6 @@
         <file>resources/tools/TextField.zip</file>
         <file>resources/tools/ProgressBar.zip</file>
         <file>resources/tools/RadioButton.zip</file>
-        <file>resources/images/edit-icon.png</file>
-        <file>resources/images/trash-icon.png</file>
         <file>resources/images/resize-icon.png</file>
         <file>resources/images/delete-icon.png</file>
         <file>resources/images/rotate-icon.png</file>
@@ -49,7 +47,6 @@
         <file>resources/tools/ComboBox.zip</file>
         <file>resources/tools/TextArea.zip</file>
         <file>resources/images/logo.png</file>
-        <file>resources/images/editor.png</file>
         <file>resources/qmls/NaviBar.qml</file>
         <file>resources/qmls/qml-editor.qml</file>
         <file>resources/images/right-arrow@2x.png</file>
@@ -134,7 +131,6 @@
         <file>resources/images/aboutSceneIcon@2x.png</file>
         <file>resources/images/projectsSceneIcon@2x.png</file>
         <file>resources/images/studioSceneIcon@2x.png</file>
-        <file>resources/images/play.png</file>
         <file>resources/images/cancel.png</file>
         <file>resources/images/cancel@2x.png</file>
         <file>resources/images/fileicon.png</file>
@@ -175,7 +171,6 @@
         <file>resources/qmls/loginScreen/RegistrationScreen.qml</file>
         <file>resources/qmls/loginScreen/Toast.qml</file>
         <file>resources/images/exit.png</file>
-        <file>resources/images/build.png</file>
         <file>resources/images/android.png</file>
         <file>resources/images/android@2x.png</file>
         <file>resources/images/builds.png</file>
@@ -208,7 +203,6 @@
         <file>resources/tools/tools_copy.json</file>
         <file>resources/images/sign_warning@2x.png</file>
         <file>resources/images/delete-icon@2x.png</file>
-        <file>resources/images/tribune.png</file>
         <file>resources/images/eventsbutton.png</file>
         <file>resources/images/eventsbuttonfilled.png</file>
         <file>resources/images/script.png</file>

@@ -26,6 +26,12 @@ ParserController::ParserController(QObject *parent)
     _workerThread->start();
 }
 
+ParserController::~ParserController()
+{
+    _workerThread->quit();
+    _workerThread->wait();
+}
+
 void ParserController::setVariantProperty(const QString& fileName, const QString& property, const QVariant& value)
 {
     Transaction transaction;

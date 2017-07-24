@@ -70,12 +70,12 @@ void SaveManagerPrivate::initEmptyParentalFile(const QString& file) const
 
 void SaveManagerPrivate::createPages(const QJsonArray& pages)
 {
-	auto firstPage = pages[0].toString();
-	PagesWidget::changePageWithoutSave("page1", firstPage);
-	for (int i = 1; i < pages.size(); i++) {
-		auto currPage = pages[i].toString();
-		PagesWidget::addPageWithoutSave(currPage);
-	}
+//	auto firstPage = pages[0].toString();
+//	PagesWidget::changePageWithoutSave("page1", firstPage);
+//	for (int i = 1; i < pages.size(); i++) {
+//		auto currPage = pages[i].toString();
+//		PagesWidget::addPageWithoutSave(currPage);
+//	}
 }
 
 bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages)

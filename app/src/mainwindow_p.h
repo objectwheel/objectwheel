@@ -26,7 +26,6 @@
 #include <eventswidget.h>
 #include <titlebar.h>
 #include <about.h>
-#include <bubblehead.h>
 #include <qmleditor.h>
 #include <pageswidget.h>
 #include <fit.h>
@@ -39,7 +38,6 @@
 #include <projectsscreen.h>
 #include <loginscreen.h>
 #include <buildsscreen.h>
-#include <editmodeindicator.h>
 #include <designmanager.h>
 
 #define DURATION 500
@@ -60,7 +58,6 @@ class MainWindowPrivate
         LoginScreen* loginScreen;
 		QVBoxLayout* verticalLayout;
 		TitleBar* titleBar;
-		QQuickWidget* designWidget;
 		QWidget* toolboxWidget;
 		QVBoxLayout* toolboxVLay;
 		QWidget* toolboxAdderAreaWidget;
@@ -84,13 +81,8 @@ class MainWindowPrivate
 		About* aboutWidget;
         BuildsScreen* buildsScreen;
 		FlatButton* aboutButton;
-		BubbleHead* bubbleHead;
 		QmlEditor* qmlEditor;
-		QQuickItemList m_Items;
-		QQuickUrlList m_ItemUrls;
-        EditModeIndicator* emIndicator;
         DesignManager* designManager;
-        bool editMode;
 
 		MainWindowPrivate(MainWindow* uparent);
         ~MainWindowPrivate();
@@ -102,13 +94,10 @@ class MainWindowPrivate
 MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
 	: parent(uparent)
 {
-    editMode = true;
 }
 
 MainWindowPrivate::~MainWindowPrivate()
 {
-    verticalLayout->takeAt(verticalLayout->indexOf(designWidget));
-    designWidget->deleteLater();
 }
 
 void MainWindowPrivate::setupUi()
@@ -133,15 +122,8 @@ void MainWindowPrivate::setupUi()
     projectsScreen = new ProjectsScreen(parent);
     loginScreen = new LoginScreen(parent);
 
-	designWidget = new QQuickWidget(centralWidget);
-	designWidget->setObjectName(QStringLiteral("designWidget"));
-	designWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	designWidget->setMouseTracking(false);
-	designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
-	verticalLayout->addWidget(designWidget);
-
     designManager = new DesignManager;
-    designManager->setSettleWidget(designWidget);
+//    designManager->setSettleWidget(designWidget);
     designManager->showWidget();
 
 	toolboxList = new ListWidget(centralWidget);
@@ -357,8 +339,6 @@ void MainWindowPrivate::setupUi()
 	pagesWidget = new PagesWidget(centralWidget);
 	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
 	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    emIndicator = new EditModeIndicator(centralWidget);
 }
 
 void MainWindowPrivate::showAdderArea()

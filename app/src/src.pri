@@ -16,7 +16,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/combobox.h \
                              $$PWD/scrollarea.h \
                              $$PWD/about.h \
-                             $$PWD/bubblehead.h \
                              $$PWD/qmleditor.h \
                              $$PWD/pageswidget.h \
                              $$PWD/splashscreen.h \
@@ -31,10 +30,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/projectsscreen.h \
                              $$PWD/loginscreen.h \
                              $$PWD/buildsscreen.h \
-                             $$PWD/removertick.h \
-                             $$PWD/resizertick.h \
-                             $$PWD/rotatortick.h \
-                             $$PWD/editmodeindicator.h \
                              $$PWD/eventswidget.h \
                              $$PWD/delayer.h \
                              $$PWD/designmanager.h \
@@ -62,7 +57,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/combobox.cpp \
                              $$PWD/scrollarea.cpp \
                              $$PWD/about.cpp \
-                             $$PWD/bubblehead.cpp \
                              $$PWD/qmleditor.cpp \
                              $$PWD/pageswidget.cpp \
                              $$PWD/splashscreen.cpp \
@@ -77,10 +71,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/projectsscreen.cpp \
                              $$PWD/loginscreen.cpp \
                              $$PWD/buildsscreen.cpp \
-                             $$PWD/resizertick.cpp \
-                             $$PWD/rotatortick.cpp \
-                             $$PWD/removertick.cpp \
-                             $$PWD/editmodeindicator.cpp \
                              $$PWD/eventswidget.cpp \
                              $$PWD/delayer.cpp \
                              $$PWD/designmanager.cpp \

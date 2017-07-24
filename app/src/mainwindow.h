@@ -17,16 +17,9 @@ class MainWindow : public QWidget
 		Q_DISABLE_COPY(MainWindow)
 
 	public:
-		typedef QList<QQuickItem*> QQuickItemList;
-		typedef QList<QUrl> QQuickUrlList;
 		static MainWindowPrivate* m_d;
 
 	private:
-		ResizerTick* m_ResizerTick;
-		RotatorTick* m_RotatorTick;
-		RemoverTick* m_RemoverTick;
-		QQuickItem* m_RootItem;
-		QQuickItem* m_CurrentPage;
 		CoverMenu* m_RightMenu;
 		CoverMenu* m_LeftMenu;
 
@@ -35,9 +28,6 @@ class MainWindow : public QWidget
 		~MainWindow();
 		void SetupGui();
 		void SetupManagers();
-		QQuickItem* GetDeepestDesignItemOnPoint(const QPoint& point) const;
-		static const QQuickItemList GetAllChildren(QQuickItem* const item);
-		bool eventFilter(QObject* object, QEvent* event);
 		void resizeEvent(QResizeEvent *event);
 		const QPixmap DownloadPixmap(const QUrl& url);
 		static bool addControlWithoutSave(const QUrl& url, const QString& parent);
@@ -46,7 +36,6 @@ class MainWindow : public QWidget
     public slots:
         void on_buildsButton_clicked();
 		void on_clearButton_clicked();
-		void on_editButton_clicked();
         void on_playButton_clicked();
         void on_secureExitButton_clicked();
 		void handleToolboxUrlboxChanges(const QString& text);
@@ -58,8 +47,6 @@ class MainWindow : public QWidget
 		void toolboxImportButtonClicked();
 		void toolboxExportButtonClicked();
 		void handleImports(const QStringList& fileNames);
-		void HideSelectionTools();
-		void ShowSelectionTools(QQuickItem* const selectedItem);
 		void handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index);
         void handleEditorOpenButtonClicked();
         void cleanupObjectwheel();
@@ -67,9 +54,6 @@ class MainWindow : public QWidget
 	signals:
 		void resized();
 		void centralWidgetMoved();
-		void selectionHided();
-		void selectionShowed(QObject* const selectedItem);
-
 };
 
 #endif // MAINWINDOW_H

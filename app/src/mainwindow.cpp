@@ -5,9 +5,6 @@
 #include <covermenu.h>
 #include <listwidget.h>
 #include <mainwindow.h>
-#include <resizertick.h>
-#include <rotatortick.h>
-#include <removertick.h>
 #include <mainwindow_p.h>
 #include <container.h>
 #include <css.h>
@@ -50,11 +47,6 @@ MainWindowPrivate* MainWindow::m_d = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QWidget(parent)
-	, m_ResizerTick(new ResizerTick)
-	, m_RotatorTick(new RotatorTick)
-	, m_RemoverTick(new RemoverTick)
-	, m_RootItem(nullptr)
-	, m_CurrentPage(nullptr)
 	, m_RightMenu(new CoverMenu)
 	, m_LeftMenu(new CoverMenu)
 {
@@ -67,42 +59,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::SetupGui()
 {
-	/* Set ticks' icons */
-	m_ResizerTick->setIcon(QIcon(":/resources/images/resize-icon.png"));
-	m_RemoverTick->setIcon(QIcon(":/resources/images/delete-icon.png"));
-	m_RotatorTick->setIcon(QIcon(":/resources/images/rotate-icon.png"));
-
-	/* Set ticks' root contexts */
-	m_ResizerTick->SetRootContext(m_d->designWidget->rootContext());
-	m_RotatorTick->SetRootContext(m_d->designWidget->rootContext());
-
-	/* Start filtering design area */
-	m_d->designWidget->installEventFilter(this);
-
 //	/* Hide ticks when tracked item removed */
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
 //	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
-//    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
-//    connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
-
-	/* Re-move ticks when tracked item resized */
-	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RemoverTick, &RemoverTick::FixCoord);
-	connect(m_ResizerTick, &ResizerTick::ItemResized, m_RotatorTick, &RotatorTick::FixCoord);
-
-	/* Re-move ticks when tracked item rotated */
-	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_RemoverTick, &RemoverTick::FixCoord);
-	connect(m_RotatorTick, &RotatorTick::ItemRotated, m_ResizerTick, &ResizerTick::FixCoord);
-
-	/* Set ticks' Parents and hide ticks */
-	m_ResizerTick->setParent(m_d->designWidget);
-	m_RemoverTick->setParent(m_d->designWidget);
-	m_RotatorTick->setParent(m_d->designWidget);
-	m_ResizerTick->hide();
-	m_RemoverTick->hide();
-	m_RotatorTick->hide();
+//  connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
+//  connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
 
 	/* Add Tool Menu */
 	m_RightMenu->setCoverWidget(m_d->centralWidget);
@@ -133,13 +97,6 @@ void MainWindow::SetupGui()
 //    connect(this, SIGNAL(selectionHided()), m_d->eventsWidget, SLOT(clearList()));
 //    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
 //    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->eventsWidget, SLOT(selectItem(QObject*const)));
-
-	/* Fix Coords of ticks when property changed */
-	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RemoverTick, &RemoverTick::FixCoord);
-	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_RotatorTick, &RotatorTick::FixCoord);
-	connect(m_d->propertiesWidget, &PropertiesWidget::propertyChanged, m_ResizerTick, &ResizerTick::FixCoord);
-
-	m_d->designWidget->rootContext()->setContextProperty("dpi", Fit::ratio());
 
 	/* Init Left Container */
 	QVariant toolboxVariant;
@@ -276,66 +233,54 @@ void MainWindow::SetupGui()
 	leftMenuLayout->addWidget(leftContainer);
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
-	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
-	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
-    m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
+//	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
+//	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
+//    m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
 
 	m_d->centralWidget->installEventFilter(this);
 
 	QTimer::singleShot(0, [=] {
-#if !defined(Q_OS_DARWIN)
-		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
-#endif
-		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-		/* Assign design area's root object */
-		m_RootItem = m_d->designWidget->rootObject();
-		connect(m_RootItem, SIGNAL(currentPageChanged(QVariant, QVariant)),
-				this, SLOT(handleCurrentPageChanges(QVariant, QVariant)));
-		auto v = QQmlProperty::read(m_RootItem, "current_page", m_d->designWidget->rootContext());
-		m_CurrentPage = qobject_cast<QQuickItem*>(v.value<QObject*>());
-		if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
-		auto v2 = QQmlProperty::read(m_RootItem, "swipeView", m_d->designWidget->rootContext());
-		auto view = qobject_cast<QQuickItem*>(v2.value<QObject*>());
-		connect(view, SIGNAL(currentIndexChanged()), this, SLOT(HideSelectionTools()));
-		if (!view) qFatal("MainWindow : Error occurred");
-		m_d->designWidget->rootContext()->setContextProperty("swipeView", view);
-		auto v3 = qmlContext(view)->contextProperty("page1");
-		auto item = qobject_cast<QQuickItem*>(v3.value<QObject*>());
-		if (!item) qFatal("MainWindow : Error occurred");
-		m_d->designWidget->rootContext()->setContextProperty("page1", item);
-		m_d->pagesWidget->setSwipeItem(view);
-		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
-		m_d->pagesWidget->setItemList(&m_d->m_Items);
-		m_d->pagesWidget->setUrlList(&m_d->m_ItemUrls);
-		m_d->pagesWidget->setBindingWidget(m_d->bindingWidget);
-        m_d->pagesWidget->setEventWidget(m_d->eventsWidget);
+//#if !defined(Q_OS_DARWIN)
+//		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
+//#endif
+//		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+//		/* Assign design area's root object */
+//		m_RootItem = m_d->designWidget->rootObject();
+//		connect(m_RootItem, SIGNAL(currentPageChanged(QVariant, QVariant)),
+//				this, SLOT(handleCurrentPageChanges(QVariant, QVariant)));
+//		auto v = QQmlProperty::read(m_RootItem, "current_page", m_d->designWidget->rootContext());
+//		m_CurrentPage = qobject_cast<QQuickItem*>(v.value<QObject*>());
+//		if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
+//		auto v2 = QQmlProperty::read(m_RootItem, "swipeView", m_d->designWidget->rootContext());
+//		auto view = qobject_cast<QQuickItem*>(v2.value<QObject*>());
+//		connect(view, SIGNAL(currentIndexChanged()), this, SLOT(HideSelectionTools()));
+//		if (!view) qFatal("MainWindow : Error occurred");
+//		m_d->designWidget->rootContext()->setContextProperty("swipeView", view);
+//		auto v3 = qmlContext(view)->contextProperty("page1");
+//		auto item = qobject_cast<QQuickItem*>(v3.value<QObject*>());
+//		if (!item) qFatal("MainWindow : Error occurred");
+//		m_d->designWidget->rootContext()->setContextProperty("page1", item);
+//		m_d->pagesWidget->setSwipeItem(view);
+//		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
+//		m_d->pagesWidget->setItemList(&m_d->m_Items);
+//		m_d->pagesWidget->setUrlList(&m_d->m_ItemUrls);
+//		m_d->pagesWidget->setBindingWidget(m_d->bindingWidget);
+//        m_d->pagesWidget->setEventWidget(m_d->eventsWidget);
 	});
-
-	m_d->bubbleHead = new BubbleHead(this);
-    m_d->bubbleHead->setIcon(QPixmap(":/resources/images/tribune.png"));
-    m_d->bubbleHead->addButton(QPixmap(":/resources/images/edit-icon.png"), this, &MainWindow::on_editButton_clicked);
-    m_d->bubbleHead->addButton(QPixmap(":/resources/images/play.png"), this, &MainWindow::on_playButton_clicked);
-    m_d->bubbleHead->addButton(QPixmap(":/resources/images/editor.png"), this, &MainWindow::handleEditorOpenButtonClicked);
-    m_d->bubbleHead->addButton(QPixmap(":/resources/images/trash-icon.png"), this, &MainWindow::on_clearButton_clicked);
-    m_d->bubbleHead->addButton(QPixmap(":/resources/images/build.png"), this, &MainWindow::on_buildsButton_clicked);
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
-	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
-	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
+//	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
+//	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
     m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
     m_d->qmlEditor->setEventWidget(m_d->eventsWidget);
-	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
-	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
+//	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
+//	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 
     QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
-            HideSelectionTools();
+            DesignerScene::instance()->clearSelection();
         }
-    });
-
-    QObject::connect(this, &MainWindow::resized, [&]{
-        m_d->emIndicator->move(-fit(3), height() - m_d->emIndicator->height() - fit(15));
     });
 
 	m_d->aboutWidget = new About(this);
@@ -411,11 +356,6 @@ void MainWindow::SetupManagers()
 		m_d->titleBar->setMenuChecked(false);
 		m_LeftMenu->hide();
 		m_d->titleBar->setSettingsChecked(false);
-
-		if (key == "studioScene") {
-            m_d->bubbleHead->raise();
-            m_d->emIndicator->raise();
-		}
 	});
 	for (auto scene : sceneManager->scenes()) {
 		QList<QUrl> urls;
@@ -449,177 +389,6 @@ void MainWindow::SetupManagers()
         SplashScreen::hide();
     }
 }
-
-bool MainWindow::eventFilter(QObject* object, QEvent* event)
-{
-	/* Handle events which are happening on design area */
-	if (object == m_d->designWidget)
-	{
-		/* Design area's events' shared variables */
-		static QPoint dragStartPoint;
-		static QQuickItem* pressedItem;
-
-		switch (event->type())
-		{
-			case QEvent::DragEnter:
-			{
-				event->accept();
-				return true;
-			}
-			case QEvent::DragLeave:
-			{
-				event->accept();
-				return true;
-			}
-			case QEvent::DragMove:
-			{
-				event->accept();
-				return true;
-			}
-
-			case QEvent::Drop:
-			{
-				QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
-				event->accept();
-                qApp->processEvents();
-
-				if (nullptr != pressedItem)
-				{
-					/* Handled drops coming from design area itself */
-					if (true == dropEvent->mimeData()->hasFormat("dashboard/x-qquickitem"))
-					{
-						/* Get deepest item under the dropped point */
-						QQuickItem* itemAtDroppedPoint = GetDeepestDesignItemOnPoint(dropEvent->pos());
-
-						/* Get all children */
-						QQuickItemList childItems = GetAllChildren(pressedItem);
-
-						/* Get fixed dropped point as in desing area coord system */
-						QPointF droppedPoint = dropEvent->pos() - dragStartPoint +
-											   m_CurrentPage->mapFromItem(pressedItem->parentItem(), pressedItem->position());
-
-						/* Move related item to its new position */
-						if (nullptr == itemAtDroppedPoint)
-						{
-							pressedItem->setParentItem(m_CurrentPage);
-							SaveManager::addParentalRelationship(m_d->designWidget->rootContext()
-																 ->nameForObject(pressedItem),
-																 m_d->designWidget->rootContext()
-																 ->nameForObject(m_CurrentPage));
-							pressedItem->setPosition(droppedPoint);
-						}
-						else if (true == childItems.contains(itemAtDroppedPoint))
-						{
-							pressedItem->setPosition(pressedItem->parentItem()->mapFromItem(m_CurrentPage, droppedPoint));
-						}
-						else if (pressedItem != itemAtDroppedPoint) // else handled in previous else if
-						{
-							QPointF mappedPoint = itemAtDroppedPoint->mapFromItem(m_CurrentPage, droppedPoint);
-							pressedItem->setParentItem(itemAtDroppedPoint);
-							SaveManager::addParentalRelationship(m_d->designWidget->rootContext()
-																 ->nameForObject(pressedItem),
-																 m_d->designWidget->rootContext()
-																 ->nameForObject(itemAtDroppedPoint));
-							pressedItem->setPosition(mappedPoint);
-						}
-						SaveManager::setVariantProperty(m_d->designWidget->rootContext()
-														->nameForObject(pressedItem),
-														"x",pressedItem->x());
-						SaveManager::setVariantProperty(m_d->designWidget->rootContext()
-														->nameForObject(pressedItem),
-														"y",pressedItem->y());
-//						fixWebViewPosition(pressedItem);
-						ShowSelectionTools(pressedItem);
-						return true;
-					}
-				}
-
-				return false;
-			}
-
-			case QMouseEvent::MouseButtonPress:
-			{
-				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-
-				/* Edit mode things */
-                if (m_d->editMode)
-				{
-					/* Get deepest item under the pressed point */
-					pressedItem = GetDeepestDesignItemOnPoint(mouseEvent->pos());
-
-					/* Show selection tools */
-					if (nullptr != pressedItem)
-					{
-						if (m_ResizerTick->TrackedItem() != pressedItem)
-							ShowSelectionTools(pressedItem);
-						else if (m_ResizerTick->isHidden())
-							ShowSelectionTools(pressedItem);
-						else
-							HideSelectionTools();
-					}
-					else
-						HideSelectionTools();
-
-					/* Capture drag start point for drags made within design area */
-					dragStartPoint = mouseEvent->pos();
-				}
-
-				return false;
-			}
-
-			case QMouseEvent::MouseMove:
-			{
-				QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-
-				/* Edit mode things */
-                if (m_d->editMode)
-				{
-					/* Made Drags from design area */
-					if (nullptr != pressedItem)
-					{
-						if (!(mouseEvent->buttons() & Qt::LeftButton))
-							return false;
-//						if ((mouseEvent->pos() - dragStartPoint).manhattanLength()
-//							< QApplication::startDragDistance())
-//							return false;
-
-						QVariant variant;
-						variant.setValue<QQuickItem*>(pressedItem);
-
-						QString mimeType = "dashboard/x-qquickitem";
-						QMimeData *mimeData = new QMimeData;
-						mimeData->setData(mimeType, variant.toByteArray());
-
-						QDrag *drag = new QDrag(this);
-						drag->setMimeData(mimeData);
-						QPointF diffPoint = dragStartPoint - m_CurrentPage->mapFromItem(pressedItem->parentItem(), pressedItem->position());
-						drag->setHotSpot(diffPoint.toPoint());
-
-						QSharedPointer<QQuickItemGrabResult> result = pressedItem->grabToImage();
-						connect(result.data(), &QQuickItemGrabResult::ready, this, [=] {
-							drag->setPixmap(QPixmap::fromImage(result->image()));
-							drag->exec();
-						});
-					}
-				}
-
-				return false;
-			}
-
-			default:
-				return false;
-		}
-	} else if (object == m_d->centralWidget) {
-		if (event->type() == QEvent::Move) {
-//			fixWebViewPositions();
-			return false;
-		}
-	} else {
-		return QWidget::eventFilter(object,event);
-	}
-	return false;
-}
-
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	m_d->qmlEditor->setGeometry(0, 0, width(), height());
@@ -627,65 +396,24 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 	emit resized();
 }
 
-QQuickItem* MainWindow::GetDeepestDesignItemOnPoint(const QPoint& point) const
-{
-	QPointF pt = point;
-    QQuickItem* parent = m_CurrentPage,*final = m_CurrentPage;
-	QQuickItem* item = parent->childAt(pt.x(), pt.y());
-	if (m_d->m_Items.contains(item)) final = item;
-
-    while (item) {
-		pt = item->mapFromItem(parent, pt);
-		parent = item;
-		item = parent->childAt(pt.x(), pt.y());
-		if (m_d->m_Items.contains(item)) final = item;
-    }
-
-    if (final == m_CurrentPage) return nullptr;
-    return final;
-}
-
-const MainWindow::QQuickItemList MainWindow::GetAllChildren(QQuickItem* const item)
-{
-	/* Return all child items of item including item itself */
-	QQuickItemList childList;
-	for (auto child : item->childItems())
-		childList << GetAllChildren(child);
-	childList << item;
-	return childList;
-}
-
-void MainWindow::ShowSelectionTools(QQuickItem* const selectedItem)
-{
-	m_d->qmlEditor->setDeactive(false);
-	m_ResizerTick->SetTrackedItem(selectedItem);
-	m_ResizerTick->show();
-	m_RotatorTick->SetTrackedItem(selectedItem);
-	m_RotatorTick->show();
-	m_RemoverTick->SetTrackedItem(selectedItem);
-    m_RemoverTick->show();
-    m_d->toolboxList->setCurrentRow(-1);
-	emit selectionShowed(selectedItem);
-}
-
 void MainWindow::handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index)
 {
-	m_CurrentPage = qobject_cast<QQuickItem*>(CurrentPage.value<QObject*>());
-	if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
-    m_d->pagesWidget->setCurrentPage(index.toInt());
+//	m_CurrentPage = qobject_cast<QQuickItem*>(CurrentPage.value<QObject*>());
+//	if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
+//    m_d->pagesWidget->setCurrentPage(index.toInt());
 }
 
 void MainWindow::handleEditorOpenButtonClicked()
 {
-    if(m_ResizerTick->isVisible()) {
-        m_d->qmlEditor->show();
-    } else {
-        if (m_d->toolboxList->currentRow() < 0) return;
-        auto cItem = m_d->toolboxList->currentItem();
-		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
-        m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
-	}
-    m_d->qmlEditor->raise();
+//    if(m_ResizerTick->isVisible()) {
+//        m_d->qmlEditor->show();
+//    } else {
+//        if (m_d->toolboxList->currentRow() < 0) return;
+//        auto cItem = m_d->toolboxList->currentItem();
+//		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
+//        m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
+//	}
+//    m_d->qmlEditor->raise();
 }
 
 void MainWindow::cleanupObjectwheel()
@@ -700,34 +428,34 @@ void MainWindow::cleanupObjectwheel()
 
 void MainWindow::clearStudio()
 {
-	m_d->toolboxList->ClearUrls();
-	m_d->toolboxList->clear();
-    m_d->qmlEditor->clearEditor();
+//	m_d->toolboxList->ClearUrls();
+//	m_d->toolboxList->clear();
+//    m_d->qmlEditor->clearEditor();
 
-	for (auto item : m_d->m_Items) {
-		m_d->designWidget->rootContext()->setContextProperty(
-					m_d->designWidget->rootContext()->nameForObject(item), 0);
-		item->deleteLater();
-	}
+//	for (auto item : m_d->m_Items) {
+//		m_d->designWidget->rootContext()->setContextProperty(
+//					m_d->designWidget->rootContext()->nameForObject(item), 0);
+//		item->deleteLater();
+//	}
 
-	auto pages = m_d->pagesWidget->pages();
-	for (int i = pages.count(); i--;) {
-		if (pages[i] != m_CurrentPage) {
-			m_d->pagesWidget->removePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages[i]));
-		}
-	}
-	QString page1Name = "page1";
-	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentPage), page1Name);
+//	auto pages = m_d->pagesWidget->pages();
+//	for (int i = pages.count(); i--;) {
+//		if (pages[i] != m_CurrentPage) {
+//			m_d->pagesWidget->removePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages[i]));
+//		}
+//	}
+//	QString page1Name = "page1";
+//	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentPage), page1Name);
 
-	m_d->bindingWidget->clearAllBindings();
-    m_d->eventsWidget->clearAllEvents();
-	m_d->m_Items.clear();
-	m_d->m_ItemUrls.clear();
-	HideSelectionTools();
-    if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
-    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(72), height() - fit(72)); });
-    m_d->toolboxList->setCurrentRow(-1);
-    Delayer::delay(100);
+//	m_d->bindingWidget->clearAllBindings();
+//    m_d->eventsWidget->clearAllEvents();
+//	m_d->m_Items.clear();
+//	m_d->m_ItemUrls.clear();
+//	HideSelectionTools();
+//    if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
+//    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(72), height() - fit(72)); });
+//    m_d->toolboxList->setCurrentRow(-1);
+//    Delayer::delay(100);
 }
 
 void MainWindow::on_buildsButton_clicked()
@@ -735,112 +463,85 @@ void MainWindow::on_buildsButton_clicked()
     SceneManager::show("buildsScene", SceneManager::ToLeft);
 }
 
-void MainWindow::HideSelectionTools()
-{
-	m_ResizerTick->hide();
-	m_RemoverTick->hide();
-	m_RotatorTick->hide();
-	m_d->qmlEditor->setDeactive(true);
-	emit selectionHided();
-}
-
 void MainWindow::on_clearButton_clicked()
 {
-    if (GetAllChildren(m_CurrentPage).size() < 2) return;
-	QMessageBox msgBox;
-	msgBox.setText("<b>This will clear the current page's content.</b>");
-	msgBox.setInformativeText("Do you want to continue?");
-	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-	msgBox.setDefaultButton(QMessageBox::No);
-	msgBox.setIcon(QMessageBox::Warning);
-	const int ret = msgBox.exec();
-	switch (ret) {
-		case QMessageBox::Yes: {
-			auto items = GetAllChildren(m_CurrentPage);
-			for (auto item : items) {
-				if (m_d->m_Items.contains(item)) {
-					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
-					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
-					m_d->designWidget->rootContext()->setContextProperty(
-								m_d->designWidget->rootContext()->nameForObject(item), 0);
-					int i = m_d->m_Items.indexOf(item);
-					m_d->m_Items.removeOne(item);
-					m_d->m_ItemUrls.removeAt(i);
-//					m_d->bindingWidget->detachBindingsFor(item);
-//                    m_d->eventsWidget->detachEventsFor(item);
-					item->deleteLater();
-                    HideSelectionTools();
-				}
-			}
-			break;
-		} default: {
-			// Do nothing
-			break;
-		}
-	}
-}
-
-void MainWindow::on_editButton_clicked()
-{
-//    m_d->editMode = !m_d->editMode;
-//    m_d->emIndicator->setOn(m_d->editMode);
-
-//	for (auto item : m_d->m_Items) {
-//        item->setEnabled(!m_d->editMode);
+//    if (GetAllChildren(m_CurrentPage).size() < 2) return;
+//	QMessageBox msgBox;
+//	msgBox.setText("<b>This will clear the current page's content.</b>");
+//	msgBox.setInformativeText("Do you want to continue?");
+//	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+//	msgBox.setDefaultButton(QMessageBox::No);
+//	msgBox.setIcon(QMessageBox::Warning);
+//	const int ret = msgBox.exec();
+//	switch (ret) {
+//		case QMessageBox::Yes: {
+//			auto items = GetAllChildren(m_CurrentPage);
+//			for (auto item : items) {
+//				if (m_d->m_Items.contains(item)) {
+//					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
+//					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
+//					m_d->designWidget->rootContext()->setContextProperty(
+//								m_d->designWidget->rootContext()->nameForObject(item), 0);
+//					int i = m_d->m_Items.indexOf(item);
+//					m_d->m_Items.removeOne(item);
+//					m_d->m_ItemUrls.removeAt(i);
+////					m_d->bindingWidget->detachBindingsFor(item);
+////                    m_d->eventsWidget->detachEventsFor(item);
+//					item->deleteLater();
+//                    HideSelectionTools();
+//				}
+//			}
+//			break;
+//		} default: {
+//			// Do nothing
+//			break;
+//		}
 //	}
-//	m_d->propertiesWidget->clearList();
-//    m_d->bindingWidget->clearList();
-//    m_d->eventsWidget->clearList();
-
-//    m_ResizerTick->hide();
-//    m_RemoverTick->hide();
-//    m_RotatorTick->hide();
-//    m_d->propertiesWidget->setEnabled(m_d->editMode);
 }
 
 void MainWindow::on_playButton_clicked()
 {
-    static bool editModeState;
-    editModeState = m_d->editMode;
-    if (m_d->editMode) { // Edit mode on
-        for (auto item : m_d->m_Items) {
-            item->setEnabled(true);
-        }
-        HideSelectionTools();
-        m_d->editMode = false;
-        m_d->emIndicator->setOn(false);
-    }
-    m_d->designWidget->setParent(this);
-    SceneManager::addScene("playScene", m_d->designWidget);
-    SceneManager::setCurrent("playScene");
+//    static bool editModeState;
+//    editModeState = m_d->editMode;
+//    if (m_d->editMode) { // Edit mode on
+//        for (auto item : m_d->m_Items) {
+//            item->setEnabled(true);
+//        }
+//        HideSelectionTools();
+//        m_d->editMode = false;
+//        m_d->emIndicator->setOn(false);
+//    }
+//    m_d->designWidget->setParent(this);
+//    SceneManager::addScene("playScene", m_d->designWidget);
+//    SceneManager::setCurrent("playScene");
 
-    FlatButton* exitButton = new FlatButton;
-    exitButton->setParent(m_d->designWidget);
-    exitButton->setIconButton(true);
-    exitButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
-#else
-    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
-#endif
-    auto connection = connect(this, &MainWindow::resized, [=]{
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
-#else
-    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
-#endif
-    });
-    exitButton->show();
+//    FlatButton* exitButton = new FlatButton;
+//    exitButton->setParent(m_d->designWidget);
+//    exitButton->setIconButton(true);
+//    exitButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
+//#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+//    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
+//#else
+//    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
+//#endif
+//    auto connection = connect(this, &MainWindow::resized, [=]{
+//#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+//    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
+//#else
+//    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
+//#endif
+//    });
+//    exitButton->show();
 
-    connect(exitButton, &FlatButton::clicked, [=]{
-        disconnect(connection);
-        exitButton->deleteLater();
-        m_d->verticalLayout->insertWidget(1, m_d->designWidget);
-        SceneManager::removeScene("playScene");
-        SceneManager::setCurrent("studioScene");
-        m_d->editMode = editModeState;
-        m_d->emIndicator->setOn(m_d->editMode);
-    });
+//    connect(exitButton, &FlatButton::clicked, [=]{
+//        disconnect(connection);
+//        exitButton->deleteLater();
+//        m_d->verticalLayout->insertWidget(1, m_d->designWidget);
+//        SceneManager::removeScene("playScene");
+//        SceneManager::setCurrent("studioScene");
+//        m_d->editMode = editModeState;
+//        m_d->emIndicator->setOn(m_d->editMode);
+//    });
 }
 
 void MainWindow::on_secureExitButton_clicked()
@@ -872,38 +573,38 @@ void MainWindow::handleToolboxUrlboxChanges(const QString& text)
 
 void MainWindow::handleToolboxNameboxChanges(QString name)
 {
-	if (name == m_d->toolboxList->currentItem()->text() || name == "") return;
+//	if (name == m_d->toolboxList->currentItem()->text() || name == "") return;
 
-	int count = 1;
-	for (int i = 0; i < m_d->toolboxList->count(); i++) {
-		if (m_d->toolboxList->item(i)->text() == name) {
-			if (count > 1) {
-				name.remove(name.size() - 1, 1);
-			}
-			i = -1;
-			count++;
-			name += QString::number(count);
-		}
-	}
+//	int count = 1;
+//	for (int i = 0; i < m_d->toolboxList->count(); i++) {
+//		if (m_d->toolboxList->item(i)->text() == name) {
+//			if (count > 1) {
+//				name.remove(name.size() - 1, 1);
+//			}
+//			i = -1;
+//			count++;
+//			name += QString::number(count);
+//		}
+//	}
 
-	auto from = ToolsManager::toolsDir() + "/" + m_d->toolboxList->currentItem()->text();
-	auto to = ToolsManager::toolsDir() + "/" + name;
-	if (!rn(from, to)) qFatal("MainWindow : Error occurred");
+//	auto from = ToolsManager::toolsDir() + "/" + m_d->toolboxList->currentItem()->text();
+//	auto to = ToolsManager::toolsDir() + "/" + name;
+//	if (!rn(from, to)) qFatal("MainWindow : Error occurred");
 
-	m_d->toolboxList->currentItem()->setText(name);
+//	m_d->toolboxList->currentItem()->setText(name);
 
-	QList<QUrl> urls;
-	urls << QUrl::fromLocalFile(to + "/main.qml");
-	m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
-	m_d->toolboxList->AddUrls(m_d->toolboxList->currentItem(),urls);
+//	QList<QUrl> urls;
+//	urls << QUrl::fromLocalFile(to + "/main.qml");
+//	m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
+//	m_d->toolboxList->AddUrls(m_d->toolboxList->currentItem(),urls);
 
-	for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
-		if (m_d->m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
-			m_d->m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
-		}
-	}
+//	for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
+//		if (m_d->m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
+//			m_d->m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
+//		}
+//	}
 
-	m_d->qmlEditor->updateCacheForRenamedEntry(from, to, true);
+//	m_d->qmlEditor->updateCacheForRenamedEntry(from, to, true);
 }
 
 void MainWindow::toolboxEditButtonToggled(bool checked)
@@ -917,48 +618,48 @@ void MainWindow::toolboxEditButtonToggled(bool checked)
 
 void MainWindow::toolboxRemoveButtonClicked()
 {
-	if (m_d->toolboxList->currentRow() < 0) return;
-	auto name = m_d->toolboxList->currentItem()->text();
-	QMessageBox msgBox;
-	msgBox.setText(QString("<b>This will remove %1 from Tool Library and Dashboard.</b>").arg(name));
-	msgBox.setInformativeText("Do you want to continue?");
-	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-	msgBox.setDefaultButton(QMessageBox::No);
-	msgBox.setIcon(QMessageBox::Warning);
-	const int ret = msgBox.exec();
-	switch (ret) {
-		case QMessageBox::Yes: {
-			m_d->qmlEditor->clearCacheFor(ToolsManager::toolsDir() + separator() + name, true);
-			rm(ToolsManager::toolsDir() + separator() + name);
-			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
-			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
+//	if (m_d->toolboxList->currentRow() < 0) return;
+//	auto name = m_d->toolboxList->currentItem()->text();
+//	QMessageBox msgBox;
+//	msgBox.setText(QString("<b>This will remove %1 from Tool Library and Dashboard.</b>").arg(name));
+//	msgBox.setInformativeText("Do you want to continue?");
+//	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+//	msgBox.setDefaultButton(QMessageBox::No);
+//	msgBox.setIcon(QMessageBox::Warning);
+//	const int ret = msgBox.exec();
+//	switch (ret) {
+//		case QMessageBox::Yes: {
+//			m_d->qmlEditor->clearCacheFor(ToolsManager::toolsDir() + separator() + name, true);
+//			rm(ToolsManager::toolsDir() + separator() + name);
+//			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
+//			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
 
-			for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
-				if (m_d->m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
-					auto items = GetAllChildren(m_d->m_Items[i]);
-					for (auto item : items) {
-						if (m_d->m_Items.contains(item)) {
-							SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
-							SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
-							m_d->designWidget->rootContext()->setContextProperty(
-										m_d->designWidget->rootContext()->nameForObject(item), 0);
-							int j = m_d->m_Items.indexOf(item);
-							m_d->m_Items.removeOne(item);
-							m_d->m_ItemUrls.removeAt(j);
-//							m_d->bindingWidget->detachBindingsFor(item);
-//                            m_d->eventsWidget->detachEventsFor(item);
-							item->deleteLater();
-						}
-					}
-				}
-			}
-			HideSelectionTools();
-			break;
-		} default: {
-			// Do nothing
-			break;
-		}
-	}
+//			for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
+//				if (m_d->m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
+//					auto items = GetAllChildren(m_d->m_Items[i]);
+//					for (auto item : items) {
+//						if (m_d->m_Items.contains(item)) {
+//							SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
+//							SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
+//							m_d->designWidget->rootContext()->setContextProperty(
+//										m_d->designWidget->rootContext()->nameForObject(item), 0);
+//							int j = m_d->m_Items.indexOf(item);
+//							m_d->m_Items.removeOne(item);
+//							m_d->m_ItemUrls.removeAt(j);
+////							m_d->bindingWidget->detachBindingsFor(item);
+////                            m_d->eventsWidget->detachEventsFor(item);
+//							item->deleteLater();
+//						}
+//					}
+//				}
+//			}
+//			HideSelectionTools();
+//			break;
+//		} default: {
+//			// Do nothing
+//			break;
+//		}
+//	}
 }
 
 void MainWindow::toolboxAddButtonClicked()
@@ -996,39 +697,39 @@ void MainWindow::toolboxAddButtonClicked()
 
 void MainWindow::toolboxResetButtonClicked()
 {
-	QMessageBox msgBox;
-	msgBox.setText("<b>This will clear Dashboard and reset Tool Library.</b>");
-	msgBox.setInformativeText("Do you want to continue?");
-	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-	msgBox.setDefaultButton(QMessageBox::No);
-	msgBox.setIcon(QMessageBox::Warning);
-	const int ret = msgBox.exec();
-	switch (ret) {
-		case QMessageBox::Yes: {
-			m_d->toolboxList->ClearUrls();
-			m_d->toolboxList->clear();
-			m_d->qmlEditor->clearCache();
-			ToolsManager::resetTools();
+//	QMessageBox msgBox;
+//	msgBox.setText("<b>This will clear Dashboard and reset Tool Library.</b>");
+//	msgBox.setInformativeText("Do you want to continue?");
+//	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+//	msgBox.setDefaultButton(QMessageBox::No);
+//	msgBox.setIcon(QMessageBox::Warning);
+//	const int ret = msgBox.exec();
+//	switch (ret) {
+//		case QMessageBox::Yes: {
+//			m_d->toolboxList->ClearUrls();
+//			m_d->toolboxList->clear();
+//			m_d->qmlEditor->clearCache();
+//			ToolsManager::resetTools();
 
-			for (auto item : m_d->m_Items) {
-				SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
-				SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
-				m_d->designWidget->rootContext()->setContextProperty(
-							m_d->designWidget->rootContext()->nameForObject(item), 0);
-				item->deleteLater();
-			}
-			m_d->bindingWidget->clearAllBindings();
-            m_d->eventsWidget->clearAllEvents();
-			m_d->m_Items.clear();
-			m_d->m_ItemUrls.clear();
-			HideSelectionTools();
-			m_d->toolboxList->setCurrentRow(-1);
-			break;
-		} default: {
-			// Do nothing
-			break;
-		}
-	}
+//			for (auto item : m_d->m_Items) {
+//				SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
+//				SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
+//				m_d->designWidget->rootContext()->setContextProperty(
+//							m_d->designWidget->rootContext()->nameForObject(item), 0);
+//				item->deleteLater();
+//			}
+//			m_d->bindingWidget->clearAllBindings();
+//            m_d->eventsWidget->clearAllEvents();
+//			m_d->m_Items.clear();
+//			m_d->m_ItemUrls.clear();
+//			HideSelectionTools();
+//			m_d->toolboxList->setCurrentRow(-1);
+//			break;
+//		} default: {
+//			// Do nothing
+//			break;
+//		}
+//	}
 }
 
 void MainWindow::toolboxImportButtonClicked()

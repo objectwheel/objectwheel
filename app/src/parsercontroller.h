@@ -34,6 +34,7 @@ class ParserController : public QObject
 
     public:
         explicit ParserController(QObject *parent = 0);
+        ~ParserController();
         static void setVariantProperty(const QString& fileName, const QString& property, const QVariant& value);
         static void removeVariantProperty(const QString& fileName, const QString& property);
         static bool running();

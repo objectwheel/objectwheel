@@ -71,39 +71,39 @@ void PropertyItem::applyFont(const QFont& font, QQmlContext* const ctx)
 
 void PropertyItem::applyId(const QString& id, QObject* const selectedItem, QQmlContext* const context)
 {
-	int count = 1;
-	QString componentName = id;
-	for (int i=0; i<m_Items->size();i++) {
-		if (componentName == QString(context->nameForObject((QObject*)(m_Items->at(i)))) ||
-			componentName == QString("dpi") || componentName == QString("swipeView")) {
-			if (componentName.at(componentName.size() - 1).isNumber()) {
-				componentName.remove(componentName.size() - 1, 1);
-			}
-			componentName += QString::number(count);
-			count++;
-			i = -1;
-		}
-	}
+//	int count = 1;
+//	QString componentName = id;
+//	for (int i=0; i<m_Items->size();i++) {
+//		if (componentName == QString(context->nameForObject((QObject*)(m_Items->at(i)))) ||
+//			componentName == QString("dpi") || componentName == QString("swipeView")) {
+//			if (componentName.at(componentName.size() - 1).isNumber()) {
+//				componentName.remove(componentName.size() - 1, 1);
+//			}
+//			componentName += QString::number(count);
+//			count++;
+//			i = -1;
+//		}
+//	}
 
-	auto items = MainWindow::GetAllChildren((QQuickItem*)selectedItem);
-	for (auto item : items) {
-		auto ctxId = context->nameForObject((QObject*)item);
-		if (item == (QQuickItem*)selectedItem) {
-			auto prevParent = SaveManager::parentalRelationship(ctxId);
-            SaveManager::removeParentalRelationship(ctxId);
-			SaveManager::addParentalRelationship(componentName, prevParent);
-			SaveManager::changeSave(ctxId, componentName);
-            if (m_Items->indexOf(item) >= 0) {
-                auto oldUrl = (*m_UrlList)[m_Items->indexOf(item)].toLocalFile();
-                auto newUrl = dname(dname(oldUrl)) + separator() + componentName + separator() + "main.qml";
-                (*m_UrlList)[m_Items->indexOf(item)] = QUrl::fromLocalFile(newUrl);
-            }
-		} else if (m_Items->contains(item)) {
-			SaveManager::addParentalRelationship(ctxId, componentName);
-		}
-	}
-	context->setContextProperty(context->nameForObject(selectedItem), 0);
-	context->setContextProperty(componentName, selectedItem);
+//	auto items = MainWindow::GetAllChildren((QQuickItem*)selectedItem);
+//	for (auto item : items) {
+//		auto ctxId = context->nameForObject((QObject*)item);
+//		if (item == (QQuickItem*)selectedItem) {
+//			auto prevParent = SaveManager::parentalRelationship(ctxId);
+//            SaveManager::removeParentalRelationship(ctxId);
+//			SaveManager::addParentalRelationship(componentName, prevParent);
+//			SaveManager::changeSave(ctxId, componentName);
+//            if (m_Items->indexOf(item) >= 0) {
+//                auto oldUrl = (*m_UrlList)[m_Items->indexOf(item)].toLocalFile();
+//                auto newUrl = dname(dname(oldUrl)) + separator() + componentName + separator() + "main.qml";
+//                (*m_UrlList)[m_Items->indexOf(item)] = QUrl::fromLocalFile(newUrl);
+//            }
+//		} else if (m_Items->contains(item)) {
+//			SaveManager::addParentalRelationship(ctxId, componentName);
+//		}
+//	}
+//	context->setContextProperty(context->nameForObject(selectedItem), 0);
+//	context->setContextProperty(componentName, selectedItem);
 }
 
 void PropertyItem::fillCup(QQmlContext* const context)
