@@ -406,11 +406,6 @@ Control::Control(const QUrl& url, Control* parent)
     setGeometry(0, 0, 0, 0);
 }
 
-Control::~Control()
-{
-    delete _d;
-}
-
 bool Control::showOutline()
 {
     return _showOutline;
@@ -1403,6 +1398,11 @@ void Page::centralize()
         setPos(- size().width() / 2.0, - size().height() / 2.0);
     else
         setPos(- size().width() / 2.0, - size().height() / 2.0 + PAGE_TOP_MARGIN / 1.5);
+}
+
+void Page::cleanPage()
+{
+    DesignerScene::removeChildControlsOnly(this);
 }
 
 #include "control.moc"

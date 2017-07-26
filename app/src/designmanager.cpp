@@ -2,7 +2,6 @@
 #include <designerscene.h>
 #include <designerview.h>
 #include <control.h>
-#include <qmlpreviewer.h>
 #include <fit.h>
 #include <css.h>
 
@@ -45,11 +44,11 @@ class DesignManagerPrivate : public QObject
 
     public:
         DesignManager* parent;
+        QWidget dummyWidget;
         QWidget* settleWidget = nullptr;
         QVBoxLayout layout;
         DesignerScene designerScene;
         DesignerView designerView;
-        QmlPreviewer qmlPreviewer;
         qreal lastScale;
         QToolBar toolbar;
         QToolButton refreshPreviewButton;
@@ -71,10 +70,13 @@ class DesignManagerPrivate : public QObject
 };
 
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
-    : parent(parent)
+    : QObject(parent)
+    , parent(parent)
     , designerView(&designerScene)
     , lastScale(1.0)
 {
+    dummyWidget.setHidden(true);
+
     layout.setContentsMargins(0, 0, 0, 0);
     layout.setSpacing(0);
     layout.addWidget(&toolbar);
@@ -201,7 +203,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar.addWidget(&fitInSceneButton);
     toolbar.addWidget(&zoomlLevelCombobox);
 
-    QWidget* empty = new QWidget();
+    QWidget* empty = new QWidget;
     empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolbar.addWidget(empty);
 
@@ -213,7 +215,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 
 DesignManagerPrivate::~DesignManagerPrivate()
 {
-    /* delete stuff */
+    dummyWidget.setLayout(&layout);
+    QObject::~QObject();
 }
 
 qreal DesignManagerPrivate::roundRatio(qreal ratio)
@@ -411,11 +414,6 @@ DesignManager::DesignManager(QObject *parent)
 DesignManager* DesignManager::instance()
 {
     return _d->parent;
-}
-
-DesignManager::~DesignManager()
-{
-    delete _d;
 }
 
 void DesignManager::setSettleWidget(QWidget* widget)

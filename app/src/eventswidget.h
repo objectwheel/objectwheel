@@ -20,7 +20,8 @@ class EventsWidget : public QWidget
 
         static void addEventWithoutSave(const SaveManager::EventInf& inf);
 
-	public slots:
+    public slots:
+        void detachEventsFor(const QString& id);
         void detachEventsFor(Control*);
         void clearAllEvents();
 		bool hasPopupOpen();

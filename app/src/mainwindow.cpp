@@ -47,8 +47,8 @@ MainWindowPrivate* MainWindow::m_d = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QWidget(parent)
-	, m_RightMenu(new CoverMenu)
-	, m_LeftMenu(new CoverMenu)
+    , m_RightMenu(new CoverMenu)
+    , m_LeftMenu(new CoverMenu)
 {
 	if (m_d) return;
 	m_d = new MainWindowPrivate(this);
@@ -59,26 +59,17 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::SetupGui()
 {
-//	/* Hide ticks when tracked item removed */
-//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_ResizerTick, &ResizerTick::hide);
-//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_RotatorTick, &RotatorTick::hide);
-//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->propertiesWidget, &PropertiesWidget::clearList);
-//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::clearList);
-//	connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->bindingWidget, &BindingWidget::detachBindingsFor);
-//  connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::clearList);
-//  connect(m_RemoverTick, &RemoverTick::ItemRemoved, m_d->eventsWidget, &EventsWidget::detachEventsFor);
-
 	/* Add Tool Menu */
-	m_RightMenu->setCoverWidget(m_d->centralWidget);
-	m_RightMenu->setCoverSide(CoverMenu::FromRight);
-	connect(this,SIGNAL(resized()),m_RightMenu,SLOT(hide()));
-	connect(this,&MainWindow::resized, [this] { m_d->titleBar->setMenuChecked(false); });
+    m_RightMenu->setCoverWidget(m_d->centralWidget);
+    m_RightMenu->setCoverSide(CoverMenu::FromRight);
+    connect(this,SIGNAL(resized()),m_RightMenu,SLOT(hide()));
+    connect(this,&MainWindow::resized, [this] { m_d->titleBar->setMenuChecked(false); });
 
 	/* Add Properties Menu */
-	m_LeftMenu->setCoverWidget(m_d->centralWidget);
-	m_LeftMenu->setCoverSide(CoverMenu::FromLeft);
-	connect(this,SIGNAL(resized()),m_LeftMenu,SLOT(hide()));
-	connect(this,&MainWindow::resized, [this] { m_d->titleBar->setSettingsChecked(false); });
+    m_LeftMenu->setCoverWidget(m_d->centralWidget);
+    m_LeftMenu->setCoverSide(CoverMenu::FromLeft);
+    connect(this,SIGNAL(resized()),m_LeftMenu,SLOT(hide()));
+    connect(this,&MainWindow::resized, [this] { m_d->titleBar->setSettingsChecked(false); });
 
 	/* Add Title Bar */
 	fit(m_d->titleBar, Fit::Height, true);
@@ -465,38 +456,23 @@ void MainWindow::on_buildsButton_clicked()
 
 void MainWindow::on_clearButton_clicked()
 {
-//    if (GetAllChildren(m_CurrentPage).size() < 2) return;
-//	QMessageBox msgBox;
-//	msgBox.setText("<b>This will clear the current page's content.</b>");
-//	msgBox.setInformativeText("Do you want to continue?");
-//	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-//	msgBox.setDefaultButton(QMessageBox::No);
-//	msgBox.setIcon(QMessageBox::Warning);
-//	const int ret = msgBox.exec();
-//	switch (ret) {
-//		case QMessageBox::Yes: {
-//			auto items = GetAllChildren(m_CurrentPage);
-//			for (auto item : items) {
-//				if (m_d->m_Items.contains(item)) {
-//					SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
-//					SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
-//					m_d->designWidget->rootContext()->setContextProperty(
-//								m_d->designWidget->rootContext()->nameForObject(item), 0);
-//					int i = m_d->m_Items.indexOf(item);
-//					m_d->m_Items.removeOne(item);
-//					m_d->m_ItemUrls.removeAt(i);
-////					m_d->bindingWidget->detachBindingsFor(item);
-////                    m_d->eventsWidget->detachEventsFor(item);
-//					item->deleteLater();
-//                    HideSelectionTools();
-//				}
-//			}
-//			break;
-//		} default: {
-//			// Do nothing
-//			break;
-//		}
-//	}
+    if (DesignerScene::currentPage()->childControls().size() < 1)
+        return;
+
+    QMessageBox msgBox;
+    msgBox.setText("<b>This will clear the current page's content.</b>");
+    msgBox.setInformativeText("Do you want to continue?");
+    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setIcon(QMessageBox::Warning);
+
+    switch (msgBox.exec()) {
+        case QMessageBox::Yes:
+            DesignerScene::currentPage()->cleanPage();
+            break;
+        default:
+            break;
+    }
 }
 
 void MainWindow::on_playButton_clicked()

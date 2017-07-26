@@ -48,9 +48,6 @@ QT_BEGIN_NAMESPACE
 
 class MainWindowPrivate
 {
-		typedef QList<QQuickItem*> QQuickItemList;
-		typedef QList<QUrl> QQuickUrlList;
-
 	public:
 		MainWindow* parent;
 		QWidget* centralWidget;
@@ -82,8 +79,8 @@ class MainWindowPrivate
         BuildsScreen* buildsScreen;
 		FlatButton* aboutButton;
 		QmlEditor* qmlEditor;
-        DesignManager* designManager;
         QWidget* settleWidget;
+        DesignManager* designManager;
 
 		MainWindowPrivate(MainWindow* uparent);
         ~MainWindowPrivate();
@@ -99,6 +96,37 @@ MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
 
 MainWindowPrivate::~MainWindowPrivate()
 {
+    delete designManager;
+    delete settleWidget;
+    delete qmlEditor;
+    delete aboutButton;
+    delete buildsScreen;
+    delete aboutWidget;
+    delete pagesWidget;
+    delete eventsWidget;
+    delete bindingWidget;
+    delete propertiesWidget;
+    delete toolBoxNameBox;
+    delete toolboxUrlBox;
+    delete toolboxAdderAreaEditingLayout;
+    delete toolboxImportButton;
+    delete toolboxExportButton;
+    delete toolboxResetButton;
+    delete toolboxRemoveButton;
+    delete toolboxEditButton;
+    delete toolboxAddButton;
+    delete sceneList;
+    delete toolboxList;
+    delete toolboxAdderAreaButtonSideHLay;
+    delete toolboxAdderAreaVLay;
+    delete toolboxAdderAreaWidget;
+    delete toolboxVLay;
+    delete toolboxWidget;
+    delete titleBar;
+    delete verticalLayout;
+    delete loginScreen;
+    delete projectsScreen;
+    delete centralWidget;
 }
 
 void MainWindowPrivate::setupUi()

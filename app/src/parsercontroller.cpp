@@ -20,7 +20,7 @@ ParserController::ParserController(QObject *parent)
     connect(_transactionTimer, SIGNAL(timeout()), SLOT(processWaitingTransactions()));
 
     _workerThread = new QThread(this);
-    _parserWorker = new ParserWorker;
+    _parserWorker = new ParserWorker(this);
     _parserWorker->moveToThread(_workerThread);
     connect(_parserWorker, SIGNAL(done()), SLOT(checkRunning()));
     _workerThread->start();

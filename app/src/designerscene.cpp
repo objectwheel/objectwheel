@@ -1,5 +1,6 @@
 #include <designerscene.h>
 #include <fit.h>
+#include <savemanager.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -102,6 +103,20 @@ void DesignerScene::setCurrentPage(Page* currentPage)
 
     _currentPage = currentPage;
     _currentPage->setVisible(true);
+}
+
+void DesignerScene::removeControl(Control* control)
+{
+    SaveManager::removeSave(control->id());
+    DesignerScene::instance()->removeItem(control);
+}
+
+void DesignerScene::removeChildControlsOnly(Control* parent)
+{
+    SaveManager::removeChildSavesOnly(parent->id());
+
+    for (auto control : parent->childControls())
+        DesignerScene::instance()->removeItem(control);
 }
 
 QList<Control*> DesignerScene::controls(Qt::SortOrder order)

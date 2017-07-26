@@ -429,10 +429,15 @@ void EventsWidget::handleSelectionChange()
 
 void EventsWidget::detachEventsFor(Control* control)
 {
+    detachEventsFor(control->id());
+}
+
+void EventsWidget::detachEventsFor(const QString& id)
+{
     auto saves = SaveManager::getEventSaves();
     for (auto key : saves.keys()) {
         auto save = saves[key].toObject();
-        if (save[EVENT_TARGET_ID_LABEL] == control->id()) {
+        if (save[EVENT_TARGET_ID_LABEL] == id) {
             SaveManager::removeEventSave(key);
             for (int i=0; i < m_d->eventsListWidget.count(); i++) {
                 if (m_d->eventsListWidget.item(i)->text() == key)

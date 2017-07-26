@@ -31,7 +31,6 @@ class Resizer : public QGraphicsWidget
         };
 
         explicit Resizer(Control* parent = Q_NULLPTR);
-        virtual ~Resizer() {}
 
         Placement placement() const;
         void setPlacement(const Placement& placement);
@@ -61,7 +60,6 @@ class Control : public QGraphicsWidget
 
     public:
         explicit Control(const QUrl& url, Control* parent = Q_NULLPTR);
-        virtual ~Control();
 
         QString id() const;
         void setId(const QString& id);
@@ -164,6 +162,7 @@ class Page : public Control
 
     public slots:
         void centralize();
+        void cleanPage();
 
     protected:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;

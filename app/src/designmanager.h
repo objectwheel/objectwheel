@@ -16,7 +16,6 @@ class DesignManager : public QObject
 
     public:
         explicit DesignManager(QObject *parent = 0);
-        ~DesignManager();
         static DesignManager* instance();
         static void setSettleWidget(QWidget* widget);
         static void showWidget();

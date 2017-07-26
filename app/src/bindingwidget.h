@@ -21,6 +21,7 @@ class BindingWidget : public QWidget
         static void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
 	public slots:
+        void detachBindingsFor(const QString& id);
         void detachBindingsFor(Control*);
 		void clearAllBindings();
 		bool hasPopupOpen();

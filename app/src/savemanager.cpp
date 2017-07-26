@@ -7,6 +7,8 @@
 #include <bindingwidget.h>
 #include <eventswidget.h>
 #include <qmleditor.h>
+#include <eventswidget.h>
+#include <bindingwidget.h>
 
 #include <QQmlEngine>
 #include <QJsonArray>
@@ -28,6 +30,7 @@ class SaveManagerPrivate
 		bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages);
         void fillBindings(const QJsonObject& bindingSaves);
         void fillEvents(const QJsonObject& eventSaves);
+        void removeSave(const QString& id);
 
 	public:
         SaveManager* parent = nullptr;
@@ -123,6 +126,16 @@ void SaveManagerPrivate::fillEvents(const QJsonObject& eventSaves)
         inf.eventCode = QString(QByteArray::fromBase64(QByteArray().insert(0, eventSaves[eventKey].toObject()[EVENT_EVENT_CODE_LABEL].toString())));
         EventsWidget::addEventWithoutSave(inf);
     }
+}
+
+void SaveManagerPrivate::removeSave(const QString& id)
+{
+    if (!parent->exists(id)) return;
+    rm(generateSaveDirectory(id));
+    SaveManager::removeParentalRelationship(id);
+    BindingWidget::instance()->detachBindingsFor(id);
+    EventsWidget::instance()->detachEventsFor(id);
+    QmlEditor::clearCacheFor(parent->saveDirectory(id), true);
 }
 
 SaveManagerPrivate* SaveManager::m_d = nullptr;
@@ -271,6 +284,18 @@ QStringList SaveManager::saves()
     return saveList;
 }
 
+QStringList SaveManager::childSaves(const QString& id)
+{
+    QStringList childSaves;
+    for (auto save : saves()) {
+        if (parentalRelationship(save) == id) {
+            childSaves << save;
+            childSaves << SaveManager::childSaves(save);
+        }
+    }
+    return childSaves;
+}
+
 void SaveManager::addSave(const QString& id, const QString& url)
 {
     if (exists(id)  || url.isEmpty()) return;
@@ -287,9 +312,15 @@ void SaveManager::changeSave(const QString& fromId, QString toId)
 	auto saveDir = saveDirectory(fromId);
 	if (saveDir.isEmpty()) return;
 
+    for (auto save : childSaves(fromId))
+        if (parentalRelationship(save) == fromId)
+            SaveManager::addParentalRelationship(save, toId);
+
     auto prevParent = parentalRelationship(fromId);
-    SaveManager::removeParentalRelationship(fromId);
-    SaveManager::addParentalRelationship(toId, prevParent);
+    if (!prevParent.isEmpty()) {
+        SaveManager::removeParentalRelationship(fromId);
+        SaveManager::addParentalRelationship(toId, prevParent);
+    }
 
 	rn(saveDir, dname(saveDir) + separator() + toId);
     SaveManager::BindingInf inf;
@@ -330,13 +361,19 @@ void SaveManager::changeSave(const QString& fromId, QString toId)
         changeEventSave(einf.eventName, einf);
     }
 
-    //TODO: QML EDITOR CACHE CHANGE
+   QmlEditor::updateCacheForRenamedEntry(saveDir, dname(saveDir) + separator() + toId, true);
 }
 
 void SaveManager::removeSave(const QString& id)
 {
-	if (!exists(id)) return;
-    rm(m_d->generateSaveDirectory(id));
+    m_d->removeSave(id);
+    removeChildSavesOnly(id);
+}
+
+void SaveManager::removeChildSavesOnly(const QString& id)
+{
+    for (auto save : childSaves(id))
+        removeSave(save);
 }
 
 bool SaveManager::buildNewDatabase(const QString& projDir)

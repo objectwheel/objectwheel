@@ -20,9 +20,10 @@ static void parseImportDirectories(const QString& dir, ModelManagerInterface* mo
         parseImportDirectories(dir + separator() + subdir, modelManager);
 }
 
-ParserWorker::ParserWorker(QObject *parent) : QObject(parent)
+ParserWorker::ParserWorker(QObject *parent)
+    : QObject(parent)
 {
-    _modelManager = new ModelManagerInterface;
+    _modelManager = new ModelManagerInterface(this);
 
     QQmlEngine engine;
     for (auto importPath : engine.importPathList())
@@ -53,9 +54,9 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
     objectNode.setVariantProperty(bproperty, value);
     wrfile(fileName, QByteArray().insert(0, textModifier->text()));
 
-    delete rewriterView;
-    delete textModifier;
-    delete model;
+    textModifier->deleteLater();
+    rewriterView->deleteLater();
+    model->deleteLater();
     emit done();
 }
 
@@ -83,8 +84,8 @@ void ParserWorker::removeVariantProperty(const QString& fileName, const QString&
     objectNode.removeProperty(bproperty);
     wrfile(fileName, QByteArray().insert(0, textModifier->text()));
 
-    delete rewriterView;
-    delete textModifier;
-    delete model;
+    textModifier->deleteLater();
+    rewriterView->deleteLater();
+    model->deleteLater();
     emit done();
 }

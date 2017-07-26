@@ -434,11 +434,16 @@ void BindingWidget::clearList()
 
 void BindingWidget::detachBindingsFor(Control* control)
 {
+    detachBindingsFor(control->id());
+}
+
+void BindingWidget::detachBindingsFor(const QString& id)
+{
     auto saves = SaveManager::getBindingSaves();
     for (auto key : saves.keys()) {
         auto save = saves[key].toObject();
-        if (save[BINDING_SOURCE_ID_LABEL] == control->id() ||
-            save[BINDING_TARGET_ID_LABEL] == control->id()) {
+        if (save[BINDING_SOURCE_ID_LABEL] == id ||
+            save[BINDING_TARGET_ID_LABEL] == id) {
             SaveManager::removeBindingSave(key);
             for (int i=0; i < m_d->bindingListWidget.count(); i++) {
                 if (m_d->bindingListWidget.item(i)->text() == key)
@@ -462,6 +467,7 @@ void BindingWidget::addBindingWithoutSave(const SaveManager::BindingInf& inf)
 {
     m_d->addBindingWithoutSave(inf);
 }
+
 
 bool BindingWidget::hasPopupOpen()
 {

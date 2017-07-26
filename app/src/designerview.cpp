@@ -60,7 +60,8 @@ class DesignerViewPrivate : public QObject
 };
 
 DesignerViewPrivate::DesignerViewPrivate(DesignerView* parent)
-    : parent(parent)
+    : QObject(parent)
+    , parent(parent)
 {
     sendBackAct.setText("Send to Back");
     bringFrontAct.setText("Bring to Front");
@@ -169,17 +170,10 @@ void DesignerViewPrivate::handlePasteAction()
 void DesignerViewPrivate::handleDeleteAction()
 {
     auto scene = static_cast<DesignerScene*>(parent->scene());
-
-    auto removeControl = [scene] (Control* control) {
-        SaveManager::removeSave(control->id());
-        SaveManager::removeParentalRelationship(control->id());
-        scene->removeItem(control);
-    };
-
     for (auto control : scene->selectedControls()) {
         for (auto childControl : control->childControls())
-            removeControl(childControl);
-        removeControl(control);
+            scene->removeControl(childControl);
+        scene->removeControl(control);
     }
 }
 

@@ -104,6 +104,11 @@ QmlPreviewer::QmlPreviewer(QObject *parent)
 {
 }
 
+QmlPreviewer::~QmlPreviewer()
+{
+    delete _d;
+}
+
 void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
 {
     if (!url.isValid()) {

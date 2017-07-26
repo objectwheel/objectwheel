@@ -23,6 +23,8 @@ class DesignerScene : public QGraphicsScene
         static Page* currentPage();
         static void setCurrentPage(Page* currentPage);
 
+        static void removeControl(Control* control);
+        static void removeChildControlsOnly(Control* parent);
         static QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder);
         static QList<Control*> selectedControls();
 

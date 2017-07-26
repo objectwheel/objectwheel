@@ -49,9 +49,11 @@ class SaveManager : public QObject
 
 		static bool exists(const QString& id);
 		static QStringList saves();
+        static QStringList childSaves(const QString& id);
 		static void addSave(const QString& id, const QString& url);
 		static void changeSave(const QString& fromId, QString toId);
 		static void removeSave(const QString& id);
+        static void removeChildSavesOnly(const QString& id);
 		static QString saveDirectory(const QString& id);
         static QString savesDirectory();
 

@@ -200,6 +200,7 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
             SaveManager::removeParentalRelationship(ctxId);
             SaveManager::addParentalRelationship(componentName, prevParent);
             SaveManager::changeSave(ctxId, componentName); //BUG: KLASÖR İSMİ DEĞİŞMİYOR
+            //control.setId(ctxId, componentName); //TODO:
             if (itemList->indexOf(item) >= 0) {            //BUG: AYNI TARGETITEM'E IKI TANE AYNI EVENTTEN EKLEYINCE BOZULUYOR
                 auto oldUrl = (*urlList)[itemList->indexOf(item)].toLocalFile();
                 auto newUrl = dname(dname(oldUrl)) + separator() + componentName + separator() + "main.qml";

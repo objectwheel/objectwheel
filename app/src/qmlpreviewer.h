@@ -28,6 +28,7 @@ class QmlPreviewer : public QObject
 
     public:
         explicit QmlPreviewer(QObject *parent = 0);
+        ~QmlPreviewer();
 
     signals:
         void previewReady(const PreviewResult& result);
