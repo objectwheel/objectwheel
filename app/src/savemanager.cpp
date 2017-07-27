@@ -188,9 +188,7 @@ void SaveManager::addBindingSave(const SaveManager::BindingInf& bindingInf)
 	cObj[BINDING_TARGET_PROPERTY_LABEL] = bindingInf.targetProperty;
 	QJsonObject pObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
 	pObj[bindingInf.bindingName] = cObj;
-	wrfile(bindingFile, QJsonDocument(pObj).toJson());
-//	setBindingProperty(bindingInf.targetId, bindingInf.targetProperty, QString("%1.%2").
-//					   arg(bindingInf.sourceId).arg(bindingInf.sourceProperty));
+    wrfile(bindingFile, QJsonDocument(pObj).toJson());
 }
 
 void SaveManager::changeBindingSave(const QString& bindingName, const SaveManager::BindingInf& toBindingInf)
@@ -204,11 +202,9 @@ void SaveManager::removeBindingSave(const QString& bindingName)
 	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 	if (projDir.isEmpty()) return;
 	auto bindingFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
-//    auto binding = getBindingSaves()[bindingName].toObject();
 	QJsonObject jObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
 	jObj.remove(bindingName);
     wrfile(bindingFile, QJsonDocument(jObj).toJson());
-    //	removeProperty(binding[BINDING_TARGET_ID_LABEL].toString(), binding[BINDING_TARGET_PROPERTY_LABEL].toString());
 }
 
 QJsonObject SaveManager::getEventSaves()

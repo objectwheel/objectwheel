@@ -46,7 +46,8 @@ class DesignManagerPrivate : public QObject
         DesignManager* parent;
         QWidget dummyWidget;
         QWidget* settleWidget = nullptr;
-        QVBoxLayout layout;
+        QVBoxLayout vlayout;
+        QHBoxLayout hlayout;
         DesignerScene designerScene;
         DesignerView designerView;
         qreal lastScale;
@@ -67,6 +68,10 @@ class DesignManagerPrivate : public QObject
         QToolButton layItHorzButton;
         QToolButton layItGridButton;
         QToolButton breakLayoutButton;
+        QToolBar toolbar_2;
+        QToolButton editButton;
+        QToolButton playButton;
+        QToolButton buildButton;
 };
 
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
@@ -77,10 +82,15 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 {
     dummyWidget.setHidden(true);
 
-    layout.setContentsMargins(0, 0, 0, 0);
-    layout.setSpacing(0);
-    layout.addWidget(&toolbar);
-    layout.addWidget(&designerView);
+    vlayout.setContentsMargins(0, 0, 0, 0);
+    vlayout.setSpacing(0);
+    vlayout.addWidget(&toolbar);
+    vlayout.addLayout(&hlayout);
+
+    hlayout.setContentsMargins(0, 0, 0, 0);
+    hlayout.setSpacing(0);
+    hlayout.addWidget(&designerView);
+    hlayout.addWidget(&toolbar_2);
 
     designerView.setRenderHint(QPainter::Antialiasing);
     designerView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -96,6 +106,10 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
         designerScene.addPage(page);
     });
 
+    // Toolbar settings
+    QWidget* spacer = new QWidget;
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
     zoomlLevelCombobox.addItem("10 %");
     zoomlLevelCombobox.addItem("25 %");
     zoomlLevelCombobox.addItem("50 %");
@@ -110,10 +124,6 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     zoomlLevelCombobox.addItem("500 %");
     zoomlLevelCombobox.addItem("1000 %");
     zoomlLevelCombobox.setCurrentIndex(5);
-
-    toolbar.setStyleSheet(CSS::DesignerToolbar);
-    toolbar.setIconSize(QSize(fit(14), fit(14)));
-    toolbar.setFixedHeight(fit(26));
 
     showOutlineButton.setCheckable(true);
     showOutlineButton.setChecked(Control::showOutline());
@@ -187,6 +197,9 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     connect(&desktopSkinButton, SIGNAL(clicked(bool)), SLOT(handleDesktopSkinButtonClicked()));
     connect(&noSkinButton, SIGNAL(clicked(bool)), SLOT(handleNoSkinButtonClicked()));
 
+    toolbar.setStyleSheet(CSS::DesignerToolbar);
+    toolbar.setIconSize(QSize(fit(14), fit(14)));
+    toolbar.setFixedHeight(fit(26));
     toolbar.addWidget(&undoButton);
     toolbar.addWidget(&redoButton);
     toolbar.addSeparator();
@@ -202,20 +215,46 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar.addWidget(&showOutlineButton);
     toolbar.addWidget(&fitInSceneButton);
     toolbar.addWidget(&zoomlLevelCombobox);
-
-    QWidget* empty = new QWidget;
-    empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    toolbar.addWidget(empty);
-
+    toolbar.addWidget(spacer);
     toolbar.addWidget(&layItVertButton);
     toolbar.addWidget(&layItHorzButton);
     toolbar.addWidget(&layItGridButton);
     toolbar.addWidget(&breakLayoutButton);
+
+    // Toolbar_2 settings
+    QWidget* spacer_2 = new QWidget;
+    spacer_2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+    editButton.setCursor(Qt::PointingHandCursor);
+    playButton.setCursor(Qt::PointingHandCursor);
+    buildButton.setCursor(Qt::PointingHandCursor);
+
+    editButton.setToolTip("Open QML Editor for selected control or tool.");
+    playButton.setToolTip("Run your application.");
+    buildButton.setToolTip("Show build options.");
+
+    editButton.setIcon(QIcon(":/resources/images/text.png"));
+    playButton.setIcon(QIcon(":/resources/images/play.png"));
+    buildButton.setIcon(QIcon(":/resources/images/build.png"));
+
+    connect(&editButton, SIGNAL(clicked(bool)), SLOT(handleShowOutlineClicked(bool)));
+    connect(&playButton, SIGNAL(clicked(bool)), SLOT(handleShowOutlineClicked(bool)));
+    connect(&buildButton, SIGNAL(clicked(bool)), SLOT(handleShowOutlineClicked(bool)));
+
+    toolbar_2.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    toolbar_2.setOrientation(Qt::Vertical);
+    toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
+    toolbar_2.setIconSize(QSize(fit(27), fit(27)));
+    toolbar_2.setFixedWidth(fit(40));
+    toolbar_2.addWidget(&editButton);
+    toolbar_2.addWidget(spacer_2);
+    toolbar_2.addWidget(&playButton);
+    toolbar_2.addWidget(&buildButton);
 }
 
 DesignManagerPrivate::~DesignManagerPrivate()
 {
-    dummyWidget.setLayout(&layout);
+    dummyWidget.setLayout(&vlayout);
     QObject::~QObject();
 }
 
@@ -420,7 +459,7 @@ void DesignManager::setSettleWidget(QWidget* widget)
 {
     _d->settleWidget = widget;
     if (_d->settleWidget)
-        _d->settleWidget->setLayout(&_d->layout);
+        _d->settleWidget->setLayout(&_d->vlayout);
 }
 
 void DesignManager::showWidget()

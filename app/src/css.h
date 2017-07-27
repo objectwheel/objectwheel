@@ -16,6 +16,7 @@ class CSS
 		static QString PropertyItem;
 		static QString Toolbar;
         static QString DesignerToolbar;
+        static QString DesignerToolbarV;
 		static QString ToolboxButton;
 		static QString PropertiesButton;
 		static QString BindingButton;

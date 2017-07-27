@@ -227,5 +227,8 @@
         <file>resources/images/free.png</file>
         <file>resources/images/snap.png</file>
         <file>resources/images/ciks.png</file>
+        <file>resources/images/build.png</file>
+        <file>resources/images/play.png</file>
+        <file>resources/images/text.png</file>
     </qresource>
 </RCC>

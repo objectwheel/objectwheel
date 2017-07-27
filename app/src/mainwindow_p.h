@@ -134,7 +134,7 @@ void MainWindowPrivate::setupUi()
     parent->setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
     parent->setObjectName(QStringLiteral("MainWindow"));
     parent->setStyleSheet(QLatin1String("#centralWidget, #MainWindow{\n"
-											"background:\"#e0e4e7\";\n }"));
+                                            "background:\"#e0e4e7\";\n }"));
     centralWidget = new QWidget(parent);
 	centralWidget->setObjectName(QStringLiteral("centralWidget"));
 	verticalLayout = new QVBoxLayout(centralWidget);
