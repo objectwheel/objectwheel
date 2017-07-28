@@ -821,6 +821,7 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             painter->setBrush(MOBILE_SKIN_COLOR);
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(skinRect, fit(10), fit(10));
+            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->setBrush(scene()->views().first()->backgroundBrush());
             painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 3.0, skinRect.top() + PAGE_TOP_MARGIN / 1.5,
                                            skinRect.width() / 3.0, PAGE_TOP_MARGIN / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
@@ -836,6 +837,7 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(skinRect, fit(10), fit(10));
             painter->setBrush(scene()->views().first()->backgroundBrush());
+            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(QRect(skinRect.left() + PAGE_TOP_MARGIN / 1.5, skinRect.y() + skinRect.height() / 3.0,
                                            PAGE_TOP_MARGIN / 3.0, skinRect.height() / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
             painter->drawRoundedRect(QRect(skinRect.right() - PAGE_TOP_MARGIN / 1.5 - 2 * PAGE_TOP_MARGIN,
@@ -900,9 +902,8 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
     if (!isSelected() && !showOutline()) {
         QPen pen;
-        pen.setStyle(Qt::DotLine);
         pen.setJoinStyle(Qt::MiterJoin);
-        pen.setColor(OUTLINE_COLOR);
+        pen.setColor(MOBILE_SKIN_COLOR.darker(110));
         painter->setPen(pen);
         painter->setBrush(Qt::transparent);
         painter->drawRect(innerRect);

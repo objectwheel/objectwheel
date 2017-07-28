@@ -80,7 +80,7 @@ QToolBar { \
 
 #define CSS_DESIGNER_TOOLBAR_V "\
 QToolBar { \
-    border-left: 1px solid %1;\
+    border-right: 1px solid %1;\
     background: qlineargradient(spread:pad, x1:1, y1:0.5, x2:0, y2:0.5, stop:1 %2, stop:0 %3); \
 }"
 
@@ -183,12 +183,12 @@ void CSS::init()
     Toolbar = QString(CSS_TOOLBAR).arg(fit(12)).arg(fit(2)).arg(QColor("#6BB64B").name()).arg(QColor("#6BB64B").darker(115).name());
 
     /* DesignerToolbar */
-    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(QColor("#ABAFB2").name()).arg(QColor("#EAEEF1").name()).arg(QColor("#C7CBCE").name());
+    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(QColor("#ABAFB2").name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name());
 
     /* DesignerToolbarV */
-    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(QColor("#ABAFB2").name()).arg(QColor("#EAEEF1").name()).arg(QColor("#C7CBCE").name());
+    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(QColor("#ABAFB2").name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name());
 
-	/* ToolboxButton */
+    /* ToolboxButton */
     ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(20));
 
 	/* PropertiesButton */

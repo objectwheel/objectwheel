@@ -89,8 +89,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 
     hlayout.setContentsMargins(0, 0, 0, 0);
     hlayout.setSpacing(0);
-    hlayout.addWidget(&designerView);
     hlayout.addWidget(&toolbar_2);
+    hlayout.addWidget(&designerView);
 
     designerView.setRenderHint(QPainter::Antialiasing);
     designerView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -244,8 +244,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar_2.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     toolbar_2.setOrientation(Qt::Vertical);
     toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
-    toolbar_2.setIconSize(QSize(fit(27), fit(27)));
-    toolbar_2.setFixedWidth(fit(40));
+    toolbar_2.setIconSize(QSize(fit(20), fit(20)));
+    toolbar_2.setFixedWidth(fit(30));
     toolbar_2.addWidget(&editButton);
     toolbar_2.addWidget(spacer_2);
     toolbar_2.addWidget(&playButton);
