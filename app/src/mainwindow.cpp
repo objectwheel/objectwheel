@@ -277,38 +277,42 @@ void MainWindow::SetupGui()
 	m_d->aboutWidget = new About(this);
     m_d->buildsScreen = new BuildsScreen(this);
 
-	QWidget* sceneListWidget = new QWidget(this);
-    sceneListWidget->setStyleSheet("background:#52616D;");
-	m_RightMenu->attachWidget(sceneListWidget);
+    QWidget* sceneListWidget = new QWidget;
+    sceneListWidget->setStyleSheet("background:#52616D; border:none;");
+    m_RightMenu->attachWidget(sceneListWidget);
+
 	QVBoxLayout* sceneListWidgetLayout = new QVBoxLayout(sceneListWidget);
-	sceneListWidgetLayout->setSpacing(fit(15));
-    sceneListWidgetLayout->setContentsMargins(0, 0, 0, fit(10));
-	QLabel* sceneListTitle = new QLabel(this);
-	sceneListTitle->setText("◉ Menu");
-	sceneListTitle->setAlignment(Qt::AlignCenter);
-	QGraphicsDropShadowEffect* sceneListTitleShadowEffect = new QGraphicsDropShadowEffect;
+    sceneListWidgetLayout->setSpacing(fit(10));
+    sceneListWidgetLayout->setContentsMargins(0, 0, 0, fit(8));
+
+    QGraphicsDropShadowEffect* sceneListTitleShadowEffect = new QGraphicsDropShadowEffect;
     sceneListTitleShadowEffect->setBlurRadius(fit(3));
     sceneListTitleShadowEffect->setOffset(0, fit(1));
     sceneListTitleShadowEffect->setColor(QColor(0, 0, 0, 40));
-	sceneListTitle->setGraphicsEffect(sceneListTitleShadowEffect);
-	sceneListTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	sceneListTitle->setFixedHeight(fit(43));
-    sceneListTitle->setStyleSheet(QString("color: white; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);").arg(QColor("#C61717").name()).arg(QColor("#C61717").darker(115).name()));
-	sceneListWidgetLayout->addWidget(sceneListTitle);
-	sceneListWidgetLayout->addWidget(m_d->sceneList);
 
-    auto secureExitButton = new FlatButton(sceneListWidget);
-    secureExitButton->setObjectName(QStringLiteral("secureExitButton"));
+    QLabel* sceneListTitle = new QLabel;
+	sceneListTitle->setText("◉ Menu");
+	sceneListTitle->setAlignment(Qt::AlignCenter);
+	sceneListTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    sceneListTitle->setFixedHeight(fit(43));
+    sceneListTitle->setGraphicsEffect(sceneListTitleShadowEffect);
+    sceneListTitle->setStyleSheet(QString("color: white; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);").arg(QColor("#C61717").name()).arg(QColor("#C61717").darker(115).name()));
+
+    auto secureExitButton = new FlatButton;
     secureExitButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     secureExitButton->setMinimumSize(fit(150), fit(35));
     secureExitButton->setMaximumSize(fit(150), fit(35));
     secureExitButton->setText("Secure Exit");
+    secureExitButton->setObjectName(QStringLiteral("secureExitButton"));
+    secureExitButton->setIcon(QIcon(":/resources/images/exit.png"));
     secureExitButton->setColor(QColor("#0078D7"));
     secureExitButton->setTextColor(Qt::white);
-    secureExitButton->setIcon(QIcon(":/resources/images/exit.png"));
+    connect(secureExitButton, SIGNAL(clicked(bool)), this, SLOT(on_secureExitButton_clicked()));
+
+    sceneListWidgetLayout->addWidget(sceneListTitle);
+    sceneListWidgetLayout->addWidget(m_d->sceneList);
     sceneListWidgetLayout->addWidget(secureExitButton);
     sceneListWidgetLayout->setAlignment(secureExitButton, Qt::AlignHCenter);
-    connect(secureExitButton, SIGNAL(clicked(bool)), this, SLOT(on_secureExitButton_clicked()));
 
 	// Init Splash Screen
 	SplashScreen::init(this);
