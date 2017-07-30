@@ -171,9 +171,7 @@ void DesignerViewPrivate::handleDeleteAction()
 {
     auto scene = static_cast<DesignerScene*>(parent->scene());
     for (auto control : scene->selectedControls()) {
-        for (auto childControl : control->childControls())
-            scene->removeControl(childControl);
-        scene->removeControl(control);
+        DesignerScene::removeControl(control);
     }
 }
 

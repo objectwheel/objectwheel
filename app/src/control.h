@@ -143,8 +143,8 @@ class Page : public Control
 
         explicit Page(const QUrl& url, Page* parent = Q_NULLPTR);
 
-        bool mainPage() const;
-        void setMainPage(bool mainPage);
+        bool isMain() const;
+        void setMain(bool value);
 
         static void setSkin(const Skin& skin);
         static const Skin& skin();
@@ -171,7 +171,7 @@ class Page : public Control
 
     private:
         PagePrivate* _d;
-        bool _mainPage = false;
+        bool _main = false;
         QList<Control*> _controls;
         static Skin _skin;
 };

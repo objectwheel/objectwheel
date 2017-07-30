@@ -17,35 +17,21 @@
 #include <savemanager.h>
 #include <bindingwidget.h>
 #include <eventswidget.h>
+#include <designerscene.h>
 
 using namespace Fit;
 
-#define PAGE_CODE "\
-import QtQuick 2.0 \n\
-Item { \n\
-			id:%1 \n\
-				   \n\
-				   function show() { \n\
-				for (var i = 0; i < swipeView.count; i++) { \n\
-					if (swipeView.itemAt(i) === %1) { \n\
-						swipeView.currentIndex = i \n\
-													} \n\
-														  } \n\
-								   } \n\
-			\n\
-	 }"
-
+#define PAGE_CODE \
+    "import QtQuick 2.0\n"\
+    "import QtQuick.Window 2.0\n\n"\
+    "Window {\n"\
+    "    id:%1\n"\
+    "}"
 
 class PagesWidgetPrivate
 {
-	public:
+    public:
 		PagesWidget* parent;
-		QQuickItem* swipeItem;
-		QQmlContext* rootContext;
-		BindingWidget* bindingWidget;
-        EventsWidget* eventWidget;
-		QList<QQuickItem*>* itemList;
-		QList<QUrl>* urlList;
 		QVBoxLayout verticalLayout;
 		QHBoxLayout horizontalLayout;
 		QHBoxLayout horizontalLayout_2;
@@ -55,7 +41,6 @@ class PagesWidgetPrivate
 		ListWidget pagesListWidget;
 		LineEdit nameEdit;
 		PagesWidgetPrivate(PagesWidget* p);
-		const QList<QQuickItem*> GetAllChildren(QQuickItem* const item) const;
 		bool checkName(const QString& name) const;
 
 	public slots:
@@ -82,8 +67,7 @@ PagesWidgetPrivate::PagesWidgetPrivate(PagesWidget* p)
 		if (i>=0) {
 			saveButton.setEnabled(i>=0);
 			nameEdit.setText(pagesListWidget.currentItem()->text());
-			swipeItem->setProperty("currentIndex", pagesListWidget.currentRow());
-		}
+        }
 	});
 
 	addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -151,16 +135,6 @@ PagesWidgetPrivate::PagesWidgetPrivate(PagesWidget* p)
 	pagesListWidget.addItem("page1");
 }
 
-const QList<QQuickItem*> PagesWidgetPrivate::GetAllChildren(QQuickItem* const item) const
-{
-	/* Return all child items of item including item itself */
-	QList<QQuickItem*> childList;
-	for (auto child : item->childItems())
-		childList << GetAllChildren(child);
-	childList << item;
-	return childList;
-}
-
 bool PagesWidgetPrivate::checkName(const QString& name) const
 {
 	for (int i = 0; i < pagesListWidget.count(); i++) {
@@ -173,45 +147,67 @@ bool PagesWidgetPrivate::checkName(const QString& name) const
 
 void PagesWidgetPrivate::removeButtonClicked()
 {
-	if (pagesListWidget.count() > 1) {
-		auto name = pagesListWidget.currentItem()->text();
-		QMessageBox msgBox;
-		msgBox.setText(QString("<b>This will delete %1 and its content.</b>").arg(name));
-		msgBox.setInformativeText("Do you want to continue?");
-		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-		msgBox.setDefaultButton(QMessageBox::No);
-		msgBox.setIcon(QMessageBox::Warning);
-		const int ret = msgBox.exec();
-		switch (ret) {
-			case QMessageBox::Yes: {
-				delete pagesListWidget.takeItem(pagesListWidget.currentRow());
-				auto v = rootContext->contextProperty(name);
-				auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
-				if (!selectedItem) qFatal("PagesWidget : Error occurred");
-				auto items = GetAllChildren(selectedItem);
-				for (auto item : items) {
-					if (itemList->contains(item)) {
-						SaveManager::removeSave(rootContext->nameForObject(item));
-						SaveManager::removeParentalRelationship(rootContext->nameForObject(item));
-//						bindingWidget->detachBindingsFor(item);
-//                        eventWidget->detachEventsFor(item);
-						rootContext->setContextProperty(rootContext->nameForObject(item), 0);
-						int i = itemList->indexOf(item);
-						itemList->removeOne(item);
-						urlList->removeAt(i);
-					}
-				}
-				SaveManager::removePageOrder(rootContext->nameForObject(selectedItem));
-				rootContext->setContextProperty(rootContext->nameForObject(selectedItem), 0);
-				selectedItem->setParentItem(0);
-				selectedItem->deleteLater();
-				break;
-			} default: {
-				// Do nothing
-				break;
-			}
-		}
-	}
+//    auto bindingName = bindingListWidget.currentItem()->text();
+//    QMessageBox msgBox;
+//    msgBox.setText(QString("<b>This will delete %1 named binding.</b>").arg(bindingName));
+//    msgBox.setInformativeText("Do you want to continue?");
+//    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+//    msgBox.setDefaultButton(QMessageBox::No);
+//    msgBox.setIcon(QMessageBox::Warning);
+//    const int ret = msgBox.exec();
+//    switch (ret) {
+//        case QMessageBox::Yes: {
+//            SaveManager::removeBindingSave(bindingName);
+//            delete bindingListWidget.takeItem(bindingListWidget.currentRow());
+//            break;
+//        } default: {
+//            // Do nothing
+//            break;
+//        }
+//    }
+
+
+//    auto pageName = pagesListWidget.currentItem()->text();
+//    for (auto page : DesignerScene::pages())
+//        if (page->id() == pageName && page->isMain())
+//            return;
+
+//    QMessageBox msgBox;
+//    msgBox.setText(QString("<b>This will delete %1 and its content.</b>").arg(pageName));
+//    msgBox.setInformativeText("Do you want to continue?");
+//    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+//    msgBox.setDefaultButton(QMessageBox::No);
+//    msgBox.setIcon(QMessageBox::Warning);
+//    const int ret = msgBox.exec();
+//    switch (ret) {
+//        case QMessageBox::Yes: {
+//            delete pagesListWidget.takeItem(pagesListWidget.currentRow());
+//            auto v = rootContext->contextProperty(pageName);
+//            auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
+//            if (!selectedItem) qFatal("PagesWidget : Error occurred");
+//            auto items = GetAllChildren(selectedItem);
+//            for (auto item : items) {
+//                if (itemList->contains(item)) {
+//                    SaveManager::removeSave(rootContext->nameForObject(item));
+//                    SaveManager::removeParentalRelationship(rootContext->nameForObject(item));
+//                    //						bindingWidget->detachBindingsFor(item);
+//                    //                        eventWidget->detachEventsFor(item);
+//                    rootContext->setContextProperty(rootContext->nameForObject(item), 0);
+//                    int i = itemList->indexOf(item);
+//                    itemList->removeOne(item);
+//                    urlList->removeAt(i);
+//                }
+//            }
+//            SaveManager::removePageOrder(rootContext->nameForObject(selectedItem));
+//            rootContext->setContextProperty(rootContext->nameForObject(selectedItem), 0);
+//            selectedItem->setParentItem(0);
+//            selectedItem->deleteLater();
+//            break;
+//        } default: {
+//            // Do nothing
+//            break;
+//        }
+//    }
 }
 
 void PagesWidgetPrivate::addButtonClicked()
@@ -224,20 +220,20 @@ void PagesWidgetPrivate::addButtonClicked()
 
 void PagesWidgetPrivate::saveButtonClicked()
 {
-	auto name = pagesListWidget.currentItem()->text();
-	auto v = rootContext->contextProperty(name);
-	auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
-	if (!selectedItem) qFatal("PagesWidget : Error occurred");
-	rootContext->setContextProperty(name, 0);
-	rootContext->setContextProperty(nameEdit.text(), selectedItem);
-	pagesListWidget.currentItem()->setText(nameEdit.text());
-	SaveManager::changePageOrder(name, nameEdit.text());
-	auto items = GetAllChildren(selectedItem);
-	for (auto item : items) {
-		if (itemList->contains(item)) {
-			SaveManager::addParentalRelationship(rootContext->nameForObject(item), nameEdit.text());
-		}
-	}
+//	auto name = pagesListWidget.currentItem()->text();
+//	auto v = rootContext->contextProperty(name);
+//	auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
+//	if (!selectedItem) qFatal("PagesWidget : Error occurred");
+//	rootContext->setContextProperty(name, 0);
+//	rootContext->setContextProperty(nameEdit.text(), selectedItem);
+//	pagesListWidget.currentItem()->setText(nameEdit.text());
+//	SaveManager::changePageOrder(name, nameEdit.text());
+//	auto items = GetAllChildren(selectedItem);
+//	for (auto item : items) {
+//		if (itemList->contains(item)) {
+//			SaveManager::addParentalRelationship(rootContext->nameForObject(item), nameEdit.text());
+//		}
+//	}
 }
 
 PagesWidgetPrivate* PagesWidget::m_d = nullptr;
@@ -246,52 +242,17 @@ PagesWidget::PagesWidget(QWidget *parent)
 	: QWidget(parent)
 {
 	if (m_d) return;
-	m_d = new PagesWidgetPrivate(this);
+    m_d = new PagesWidgetPrivate(this);
+}
+
+PagesWidget* PagesWidget::instance()
+{
+    return m_d->parent;
 }
 
 PagesWidget::~PagesWidget()
 {
 	delete m_d;
-}
-
-void PagesWidget::setSwipeItem(QQuickItem* swipeItem)
-{
-	m_d->swipeItem = swipeItem;
-}
-
-void PagesWidget::setRootContext(QQmlContext* context)
-{
-	m_d->rootContext = context;
-}
-
-void PagesWidget::setItemList(QList<QQuickItem*>* items)
-{
-	m_d->itemList = items;
-}
-
-void PagesWidget::setUrlList(QList<QUrl>* items)
-{
-	m_d->urlList = items;
-}
-
-void PagesWidget::setBindingWidget(BindingWidget* bindingWidget)
-{
-	m_d->bindingWidget = bindingWidget;
-}
-
-void PagesWidget::setEventWidget(EventsWidget* eventWidget)
-{
-    m_d->eventWidget = eventWidget;
-}
-
-QList<QQuickItem*> PagesWidget::pages()
-{
-	QList<QQuickItem*> itemList;
-	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
-		auto v = m_d->rootContext->contextProperty(m_d->pagesListWidget.item(i)->text());
-		itemList << qobject_cast<QQuickItem*>(v.value<QObject*>());
-	}
-	return itemList;
 }
 
 void PagesWidget::setCurrentPage(int index)
@@ -301,83 +262,83 @@ void PagesWidget::setCurrentPage(int index)
 
 void PagesWidget::addPageWithoutSave(QString& name)
 {
-	int count = m_d->pagesListWidget.count();
-	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
-		if (m_d->pagesListWidget.item(i)->text() == name) {
-			if (name.at(name.size() - 1).isNumber()) {
-				name.remove(name.size() - 1, 1);
-			}
-			i = -1;
-			count++;
-			name += QString::number(count);
-		}
-	}
-	m_d->pagesListWidget.addItem(name);
+//	int count = m_d->pagesListWidget.count();
+//	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
+//		if (m_d->pagesListWidget.item(i)->text() == name) {
+//			if (name.at(name.size() - 1).isNumber()) {
+//				name.remove(name.size() - 1, 1);
+//			}
+//			i = -1;
+//			count++;
+//			name += QString::number(count);
+//		}
+//	}
+//	m_d->pagesListWidget.addItem(name);
 
-	QQmlComponent c(qmlEngine((QObject*)m_d->swipeItem));
-	c.setData(QByteArray().insert(0,QString(PAGE_CODE).arg(name)), QUrl());
-	auto item = qobject_cast<QQuickItem*>(c.create(qmlContext((QObject*)m_d->swipeItem)));
-	if (!item) qFatal("PagesWidget : Error occurred");
-	item->setParentItem(m_d->swipeItem);
-	m_d->rootContext->setContextProperty(name, item);
+//	QQmlComponent c(qmlEngine((QObject*)m_d->swipeItem));
+//	c.setData(QByteArray().insert(0,QString(PAGE_CODE).arg(name)), QUrl());
+//	auto item = qobject_cast<QQuickItem*>(c.create(qmlContext((QObject*)m_d->swipeItem)));
+//	if (!item) qFatal("PagesWidget : Error occurred");
+//	item->setParentItem(m_d->swipeItem);
+//	m_d->rootContext->setContextProperty(name, item);
 }
 
 void PagesWidget::changePageWithoutSave(const QString& from, QString& to)
 {
-	if (from == to) return;
-	int index = -1;
-	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
-		if (m_d->pagesListWidget.item(i)->text() == from) {
-			index = i;
-		}
-	}
-	if (index < 0) return;
-	int count = m_d->pagesListWidget.count();
-	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
-		if (m_d->pagesListWidget.item(i)->text() == to) {
-			if (to.at(to.size() - 1).isNumber()) {
-				to.remove(to.size() - 1, 1);
-			}
-			i = -1;
-			count++;
-			to += QString::number(count);
-		}
-	}
-	auto v = m_d->rootContext->contextProperty(from);
-	auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
-	if (!selectedItem) qFatal("PagesWidget : Error occurred");
-	m_d->rootContext->setContextProperty(from, 0);
-	m_d->rootContext->setContextProperty(to, selectedItem);
-	m_d->pagesListWidget.item(index)->setText(to);
+//	if (from == to) return;
+//	int index = -1;
+//	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
+//		if (m_d->pagesListWidget.item(i)->text() == from) {
+//			index = i;
+//		}
+//	}
+//	if (index < 0) return;
+//	int count = m_d->pagesListWidget.count();
+//	for (int i = 0; i < m_d->pagesListWidget.count(); i++) {
+//		if (m_d->pagesListWidget.item(i)->text() == to) {
+//			if (to.at(to.size() - 1).isNumber()) {
+//				to.remove(to.size() - 1, 1);
+//			}
+//			i = -1;
+//			count++;
+//			to += QString::number(count);
+//		}
+//	}
+//	auto v = m_d->rootContext->contextProperty(from);
+//	auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
+//	if (!selectedItem) qFatal("PagesWidget : Error occurred");
+//	m_d->rootContext->setContextProperty(from, 0);
+//	m_d->rootContext->setContextProperty(to, selectedItem);
+//	m_d->pagesListWidget.item(index)->setText(to);
 }
 
 void PagesWidget::removePageWithoutSave(const QString& name)
 {
-	if (m_d->pagesListWidget.count() > 1) {
-		int index = -1;
-		for (int i = m_d->pagesListWidget.count(); i--;) {
-			if (m_d->pagesListWidget.item(i)->text() == name) {
-				index = i;
-			}
-		}
-		if (index < 0) return;
-		delete m_d->pagesListWidget.takeItem(index);
-		auto v = m_d->rootContext->contextProperty(name);
-		auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
-		if (!selectedItem) qFatal("PagesWidget : Error occurred");
-		auto items = m_d->GetAllChildren(selectedItem);
-		for (auto item : items) {
-			if (m_d->itemList->contains(item)) {
-//				m_d->bindingWidget->detachBindingsFor(item);
-//                m_d->eventWidget->detachEventsFor(item);
-				m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(item), 0);
-				int i = m_d->itemList->indexOf(item);
-				m_d->itemList->removeOne(item);
-				m_d->urlList->removeAt(i);
-			}
-		}
-		m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(selectedItem), 0);
-		selectedItem->setParentItem(0);
-		selectedItem->deleteLater();
-	}
+//	if (m_d->pagesListWidget.count() > 1) {
+//		int index = -1;
+//		for (int i = m_d->pagesListWidget.count(); i--;) {
+//			if (m_d->pagesListWidget.item(i)->text() == name) {
+//				index = i;
+//			}
+//		}
+//		if (index < 0) return;
+//		delete m_d->pagesListWidget.takeItem(index);
+//		auto v = m_d->rootContext->contextProperty(name);
+//		auto selectedItem = qobject_cast<QQuickItem*>(v.value<QObject*>());
+//		if (!selectedItem) qFatal("PagesWidget : Error occurred");
+//		auto items = m_d->GetAllChildren(selectedItem);
+//		for (auto item : items) {
+//			if (m_d->itemList->contains(item)) {
+////				m_d->bindingWidget->detachBindingsFor(item);
+////                m_d->eventWidget->detachEventsFor(item);
+//				m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(item), 0);
+//				int i = m_d->itemList->indexOf(item);
+//				m_d->itemList->removeOne(item);
+//				m_d->urlList->removeAt(i);
+//			}
+//		}
+//		m_d->rootContext->setContextProperty(m_d->rootContext->nameForObject(selectedItem), 0);
+//		selectedItem->setParentItem(0);
+//		selectedItem->deleteLater();
+//	}
 }

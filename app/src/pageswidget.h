@@ -15,14 +15,8 @@ class PagesWidget : public QWidget
 		Q_DISABLE_COPY(PagesWidget)
 
 	public:
-		explicit PagesWidget(QWidget *parent = 0);
-		void setSwipeItem(QQuickItem* swipeItem);
-		void setRootContext(QQmlContext* context);
-		void setItemList(QList<QQuickItem*>* items);
-		void setUrlList(QList<QUrl>* items);
-		void setBindingWidget(BindingWidget* bindingWidget);
-        void setEventWidget(EventsWidget* eventWidget);
-		QList<QQuickItem*> pages();
+        explicit PagesWidget(QWidget *parent = 0);
+        static PagesWidget* instance();
 		~PagesWidget();
 
 		static void setCurrentPage(int index);

@@ -1366,14 +1366,14 @@ int Page::lowerZValue() const
     return z;
 }
 
-bool Page::mainPage() const
+bool Page::isMain() const
 {
-    return _mainPage;
+    return _main;
 }
 
-void Page::setMainPage(bool mainPage)
+void Page::setMain(bool value)
 {
-    _mainPage = mainPage;
+    _main = value;
 }
 
 void Page::setSkin(const Skin& skin)
