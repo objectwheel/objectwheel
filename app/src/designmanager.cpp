@@ -1,5 +1,5 @@
 #include <designmanager.h>
-#include <designerscene.h>
+#include <windowscene.h>
 #include <designerview.h>
 #include <control.h>
 #include <fit.h>
@@ -48,7 +48,7 @@ class DesignManagerPrivate : public QObject
         QWidget* settleWidget = nullptr;
         QVBoxLayout vlayout;
         QHBoxLayout hlayout;
-        DesignerScene designerScene;
+        WindowScene designerScene;
         DesignerView designerView;
         qreal lastScale;
         QToolBar toolbar;

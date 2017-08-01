@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include <mainwindow.h>
 #include <zipper.h>
-#include <designerscene.h>
+#include <windowscene.h>
 
 #define INF_FILENAME "inf.json"
 
@@ -229,7 +229,7 @@ bool ProjectManager::startProject(const QString& projectname)
         return false;
     }
 
-    DesignerScene::instance()->clearSelection();
+    WindowScene::instance()->clearSelection();
 
     ToolsManager::downloadTools();
 

@@ -17,7 +17,7 @@
 #include <savemanager.h>
 #include <bindingwidget.h>
 #include <eventswidget.h>
-#include <designerscene.h>
+#include <windowscene.h>
 
 using namespace Fit;
 
@@ -168,7 +168,7 @@ void PagesWidgetPrivate::removeButtonClicked()
 
 
 //    auto pageName = pagesListWidget.currentItem()->text();
-//    for (auto page : DesignerScene::pages())
+//    for (auto page : WindowScene::pages())
 //        if (page->id() == pageName && page->isMain())
 //            return;
 

@@ -1,4 +1,4 @@
-#include <designerscene.h>
+#include <windowscene.h>
 #include <fit.h>
 #include <savemanager.h>
 
@@ -6,23 +6,25 @@
 #include <QPainter>
 #include <QDebug>
 
+#define GUIDELINE_COLOR ("#0D80E7")
+
 using namespace Fit;
 
-class DesignerScenePrivate : public QObject
+class WindowScenePrivate : public QObject
 {
         Q_OBJECT
         enum LockWay { NoLock, Vertical, Horizontal, Both };
 
     public:
-        explicit DesignerScenePrivate(DesignerScene* parent);
+        explicit WindowScenePrivate(WindowScene* parent);
 
     public:
-        DesignerScene* parent;
+        WindowScene* parent;
         bool itemPressed;
         bool itemMoving;
 };
 
-DesignerScenePrivate::DesignerScenePrivate(DesignerScene* parent)
+WindowScenePrivate::WindowScenePrivate(WindowScene* parent)
     : QObject(parent)
     , parent(parent)
     , itemPressed(false)
@@ -30,35 +32,35 @@ DesignerScenePrivate::DesignerScenePrivate(DesignerScene* parent)
 {
 }
 
-DesignerScenePrivate* DesignerScene::_d = nullptr;
-QList<Page*> DesignerScene::_pages;
-Page* DesignerScene::_currentPage = nullptr;
-bool DesignerScene::_snapping = true;
-QPointF DesignerScene::_lastMousePos;
+WindowScenePrivate* WindowScene::_d = nullptr;
+QList<Page*> WindowScene::_pages;
+Page* WindowScene::_currentPage = nullptr;
+bool WindowScene::_snapping = true;
+QPointF WindowScene::_lastMousePos;
 
-DesignerScene::DesignerScene(QObject *parent)
+WindowScene::WindowScene(QObject *parent)
     : QGraphicsScene(parent)
 {
     if (_d)
         return;
-    _d = new DesignerScenePrivate(this);
+    _d = new WindowScenePrivate(this);
 
-    connect(this, &DesignerScene::changed, [=] {
+    connect(this, &WindowScene::changed, [=] {
         setSceneRect(currentPage()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
     });
 }
 
-DesignerScene* DesignerScene::instance()
+WindowScene* WindowScene::instance()
 {
     return _d->parent;
 }
 
-const QList<Page*>& DesignerScene::pages()
+const QList<Page*>& WindowScene::pages()
 {
     return _pages;
 }
 
-void DesignerScene::addPage(Page* page)
+void WindowScene::addPage(Page* page)
 {
     if (_pages.contains(page))
         return;
@@ -72,7 +74,7 @@ void DesignerScene::addPage(Page* page)
         setCurrentPage(page);
 }
 
-void DesignerScene::removePage(Page* page)
+void WindowScene::removePage(Page* page)
 {
     if (!_pages.contains(page))
         return;
@@ -88,12 +90,12 @@ void DesignerScene::removePage(Page* page)
     }
 }
 
-Page* DesignerScene::currentPage()
+Page* WindowScene::currentPage()
 {
     return _currentPage;
 }
 
-void DesignerScene::setCurrentPage(Page* currentPage)
+void WindowScene::setCurrentPage(Page* currentPage)
 {
     if (!_pages.contains(currentPage) || _currentPage == currentPage)
         return;
@@ -105,21 +107,21 @@ void DesignerScene::setCurrentPage(Page* currentPage)
     _currentPage->setVisible(true);
 }
 
-void DesignerScene::removeControl(Control* control)
+void WindowScene::removeControl(Control* control)
 {
     SaveManager::removeSave(control->id());
-    DesignerScene::instance()->removeItem(control);
+    WindowScene::instance()->removeItem(control);
 }
 
-void DesignerScene::removeChildControlsOnly(Control* parent)
+void WindowScene::removeChildControlsOnly(Control* parent)
 {
     SaveManager::removeChildSavesOnly(parent->id());
 
     for (auto control : parent->childControls())
-        DesignerScene::instance()->removeItem(control);
+        WindowScene::instance()->removeItem(control);
 }
 
-QList<Control*> DesignerScene::controls(Qt::SortOrder order)
+QList<Control*> WindowScene::controls(Qt::SortOrder order)
 {
     QList<Control*> controls;
     for (auto item : _d->parent->items(order)) {
@@ -130,7 +132,7 @@ QList<Control*> DesignerScene::controls(Qt::SortOrder order)
     return controls;
 }
 
-QList<Control*> DesignerScene::selectedControls()
+QList<Control*> WindowScene::selectedControls()
 {
     QList<Control*> selectedControls;
     for (auto item : _d->parent->selectedItems()) {
@@ -141,7 +143,7 @@ QList<Control*> DesignerScene::selectedControls()
     return selectedControls;
 }
 
-void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void WindowScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mousePressEvent(event);
 
@@ -163,7 +165,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     update();
 }
 
-void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void WindowScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
@@ -185,7 +187,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     update();
 }
 
-void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void WindowScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseReleaseEvent(event);
     _d->itemPressed = false;
@@ -197,14 +199,14 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     update();
 }
 
-void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
+void WindowScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
     if ((_d->itemMoving || Resizer::resizing()) && _snapping) {
         auto guideLines = _currentPage->guideLines();
-        QPen pen("#DB4C41");
-        pen.setWidthF(fit(1.0));
+        QPen pen(GUIDELINE_COLOR);
+        pen.setWidthF(1.0);
         pen.setJoinStyle(Qt::RoundJoin);
         pen.setCapStyle(Qt::RoundCap);
         pen.setStyle(Qt::DashLine);
@@ -215,33 +217,33 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
         for (QLineF line : guideLines) {
             pen.setStyle(Qt::SolidLine);
             painter->setPen(pen);
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(fit(2.0), fit(2.0)), QSizeF(fit(4.0), fit(4.0))), fit(2.0), fit(2.0));
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(fit(2.0), fit(2.0)), QSizeF(fit(4.0), fit(4.0))), fit(2.0), fit(2.0));
+            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
+            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
         }
     }
 }
 
-QPointF DesignerScene::lastMousePos()
+QPointF WindowScene::lastMousePos()
 {
     return _lastMousePos;
 }
 
-bool DesignerScene::snapping()
+bool WindowScene::snapping()
 {
     return _snapping;
 }
 
-void DesignerScene::setSnapping(bool snapping)
+void WindowScene::setSnapping(bool snapping)
 {
     _snapping = snapping;
 }
 
-bool DesignerScene::showOutlines()
+bool WindowScene::showOutlines()
 {
     return Control::showOutline();;
 }
 
-void DesignerScene::setShowOutlines(bool value)
+void WindowScene::setShowOutlines(bool value)
 {
     Control::setShowOutline(value);
     for (auto control : controls()) {
@@ -249,5 +251,5 @@ void DesignerScene::setShowOutlines(bool value)
     }
 }
 
-#include "designerscene.moc"
+#include "windowscene.moc"
 

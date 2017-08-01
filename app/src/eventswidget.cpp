@@ -7,7 +7,7 @@
 #include <css.h>
 #include <lineedit.h>
 #include <scrollarea.h>
-#include <designerscene.h>
+#include <windowscene.h>
 #include <control.h>
 
 #include <QVBoxLayout>
@@ -208,7 +208,7 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     popupVLayout.addWidget(&popupScrollArea);
     popupVLayout.addWidget(&popupOkButton);
 
-    QObject::connect(DesignerScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
+    QObject::connect(WindowScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 
 void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
@@ -279,10 +279,10 @@ void EventsWidgetPrivate::editButtonClicked()
     if (issuerEvent.isEmpty())
         return;
 
-    auto controls = DesignerScene::currentPage()->childControls();
-    controls << DesignerScene::currentPage();
+    auto controls = WindowScene::currentPage()->childControls();
+    controls << WindowScene::currentPage();
 
-    DesignerScene::instance()->clearSelection();
+    WindowScene::instance()->clearSelection();
     for (auto control : controls)
         if (control->id() == issuerEvent[EVENT_TARGET_ID_LABEL].toString())
             control->setSelected(true);
@@ -349,7 +349,7 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 void EventsWidgetPrivate::btnEditCodeClicked()
 {
     static QMetaObject::Connection conn;
-    auto scene = DesignerScene::instance();
+    auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
 
     if (scene->currentPage()->isSelected())
@@ -410,7 +410,7 @@ void EventsWidget::clearList()
 
 void EventsWidget::handleSelectionChange()
 {
-    auto scene = DesignerScene::instance();
+    auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
     if (scene->currentPage()->isSelected())
         selectedControls << scene->currentPage();

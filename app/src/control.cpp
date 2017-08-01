@@ -1,7 +1,7 @@
 #include <control.h>
 #include <fit.h>
 #include <qmlpreviewer.h>
-#include <designerscene.h>
+#include <windowscene.h>
 #include <savemanager.h>
 
 #include <QDebug>
@@ -31,7 +31,7 @@
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 #define RESIZER_SIZE (fit(6.0))
-#define HIGHLIGHT_COLOR (QColor("#140C6EBD"))
+#define HIGHLIGHT_COLOR (QColor("#174C4E4D"))
 #define SELECTION_COLOR ("#404447")
 #define OUTLINE_COLOR ("#808487")
 #define RESIZER_COLOR (Qt::white)
@@ -42,7 +42,7 @@
 #define PAGE_PP_SIZE (fit(QSize(250, 415)))
 #define PAGE_PL_SIZE (fit(QSize(415, 250)))
 #define PAGE_TOP_MARGIN (fit(14))
-#define MOBILE_SKIN_COLOR (QColor("#424E59"))
+#define MOBILE_SKIN_COLOR (QColor("#52616D"))
 
 using namespace Fit;
 
@@ -333,7 +333,7 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
     itemPixmap = result.preview;
 
     if (result.initial) {
-        auto scene = static_cast<DesignerScene*>(parent->scene());
+        auto scene = static_cast<WindowScene*>(parent->scene());
         auto currentPage = scene->currentPage();
         auto id = result.id;
 
@@ -550,7 +550,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         control != this) {
         control->setDragIn(true);
 
-        auto scene = static_cast<DesignerScene*>(this->scene());
+        auto scene = static_cast<WindowScene*>(this->scene());
         for (auto c : scene->currentPage()->childControls())
             if (c != control)
                 c->setDragIn(false);
@@ -569,7 +569,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseReleaseEvent(event);
 
-    auto scene = static_cast<DesignerScene*>(this->scene());
+    auto scene = static_cast<WindowScene*>(this->scene());
 
     for (auto control : scene->currentPage()->childControls()) {
         if (control->dragIn() && dragging() &&
@@ -780,7 +780,7 @@ void PagePrivate::applySkinChange()
             break;
     }
 
-    for (auto page : DesignerScene::pages()) {
+    for (auto page : WindowScene::pages()) {
         if (Page::_skin == Page::PhonePortrait ||
             Page::_skin == Page::PhoneLandscape)
             page->resize(size);
@@ -878,7 +878,7 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             painter->drawEllipse(btnMaxRect);
 
             if (mapToScene(QRectF(btnExtRect.topLeft(), btnMaxRect.bottomRight())).containsPoint
-                (DesignerScene::lastMousePos(), Qt::WindingFill)) {
+                (WindowScene::lastMousePos(), Qt::WindingFill)) {
                 auto ciks = QPixmap(":/resources/images/ciks.png");
                 painter->setPen(QColor("#4c0102"));
                 painter->drawLine(btnExtRect.topLeft() + QPoint(fit(3), fit(3)), btnExtRect.bottomRight() + QPoint(-fit(3), -fit(3)));
@@ -888,7 +888,6 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
                                   QPointF(btnMinRect.right() - fit(2.5), btnMinRect.center().y()));
                 painter->drawPixmap(btnMaxRect.adjusted(fit(2.0), fit(2.0), -fit(2.0), -fit(2.0)), ciks, ciks.rect());
             }
-
             break;
         } case NoSkin: {
             break;
@@ -903,7 +902,12 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     if (!isSelected() && !showOutline()) {
         QPen pen;
         pen.setJoinStyle(Qt::MiterJoin);
-        pen.setColor(MOBILE_SKIN_COLOR.darker(110));
+        if (_skin == PhonePortrait || _skin == PhoneLandscape) {
+            pen.setColor(MOBILE_SKIN_COLOR.darker(110));
+        } else {
+            pen.setStyle(Qt::DotLine);
+            pen.setColor(OUTLINE_COLOR);
+        }
         painter->setPen(pen);
         painter->setBrush(Qt::transparent);
         painter->drawRect(innerRect);
@@ -924,7 +928,7 @@ void Page::mousePressEvent(QGraphicsSceneMouseEvent* event)
 bool Page::stickSelectedControlToGuideLines() const
 {
     bool ret = false;
-    auto scene = static_cast<DesignerScene*>(this->scene());
+    auto scene = static_cast<WindowScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
 
     if (selectedControls.size() <= 0)
@@ -1198,7 +1202,7 @@ bool Page::stickSelectedControlToGuideLines() const
 
 QVector<QLineF> Page::guideLines() const
 {
-    auto scene = static_cast<DesignerScene*>(this->scene());
+    auto scene = static_cast<WindowScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
 
     if (selectedControls.size() <= 0)
@@ -1401,7 +1405,7 @@ void Page::centralize()
 
 void Page::cleanPage()
 {
-    DesignerScene::removeChildControlsOnly(this);
+    WindowScene::removeChildControlsOnly(this);
 }
 
 #include "control.moc"

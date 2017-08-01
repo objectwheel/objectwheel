@@ -25,7 +25,7 @@
 #include <QtConcurrent>
 #include <delayer.h>
 #include <control.h>
-#include <designerscene.h>
+#include <windowscene.h>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
@@ -270,7 +270,7 @@ void MainWindow::SetupGui()
 
     QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
-            DesignerScene::instance()->clearSelection();
+            WindowScene::instance()->clearSelection();
         }
     });
 
@@ -460,7 +460,7 @@ void MainWindow::on_buildsButton_clicked()
 
 void MainWindow::on_clearButton_clicked()
 {
-    if (DesignerScene::currentPage()->childControls().size() < 1)
+    if (WindowScene::currentPage()->childControls().size() < 1)
         return;
 
     QMessageBox msgBox;
@@ -472,7 +472,7 @@ void MainWindow::on_clearButton_clicked()
 
     switch (msgBox.exec()) {
         case QMessageBox::Yes:
-            DesignerScene::currentPage()->cleanPage();
+            WindowScene::currentPage()->cleanPage();
             break;
         default:
             break;
@@ -786,8 +786,8 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 {
     auto control = new Control(url);
 
-    auto controls = DesignerScene::currentPage()->childControls();
-    for (auto page : DesignerScene::pages())
+    auto controls = WindowScene::currentPage()->childControls();
+    for (auto page : WindowScene::pages())
         controls << page;
     for (auto ctrl : controls)
         if (ctrl->id() == parent) {

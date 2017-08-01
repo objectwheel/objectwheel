@@ -2,7 +2,7 @@
 #include <listwidget.h>
 #include <flatbutton.h>
 #include <fit.h>
-#include <designerscene.h>
+#include <windowscene.h>
 #include <control.h>
 
 #include <QVBoxLayout>
@@ -218,7 +218,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     popupVLayout.addWidget(&popupScrollArea);
     popupVLayout.addWidget(&popupOkButton);
 
-    QObject::connect(DesignerScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
+    QObject::connect(WindowScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 void BindingWidgetPrivate::editButtonClicked()
 {
@@ -240,10 +240,10 @@ void BindingWidgetPrivate::editButtonClicked()
     if (issuerBinding.isEmpty())
         return;
 
-    auto controls = DesignerScene::currentPage()->childControls();
-    controls << DesignerScene::currentPage();
+    auto controls = WindowScene::currentPage()->childControls();
+    controls << WindowScene::currentPage();
 
-    DesignerScene::instance()->clearSelection();
+    WindowScene::instance()->clearSelection();
     for (auto control : controls)
         if (control->id() == issuerBinding[BINDING_TARGET_ID_LABEL].toString())
             control->setSelected(true);
@@ -371,7 +371,7 @@ void BindingWidgetPrivate::updateSourcePropertyCombobox()
         sourceItemCombobox.currentItem().isEmpty())
         return;
 
-    auto scene = DesignerScene::instance();
+    auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
 
     if (scene->currentPage()->isSelected())
@@ -476,7 +476,7 @@ bool BindingWidget::hasPopupOpen()
 
 void BindingWidget::handleSelectionChange()
 {
-    auto scene = DesignerScene::instance();
+    auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
     if (scene->currentPage()->isSelected())
         selectedControls << scene->currentPage();

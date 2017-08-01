@@ -1,5 +1,5 @@
 #include <designerview.h>
-#include <designerscene.h>
+#include <windowscene.h>
 #include <control.h>
 #include <fit.h>
 #include <savemanager.h>
@@ -141,7 +141,7 @@ void DesignerViewPrivate::handleCutAction()
 //    QList<QUrl> urls;
 //    auto mimeData = new QMimeData;
 //    auto clipboard = QApplication::clipboard();
-//    auto scene = static_cast<DesignerScene*>(parent->scene());
+//    auto scene = static_cast<WindowScene*>(parent->scene());
 
 //    for (auto control : scene->selectedControls()) {
 //        for (auto childControl : control->childControls()) {
@@ -169,50 +169,50 @@ void DesignerViewPrivate::handlePasteAction()
 
 void DesignerViewPrivate::handleDeleteAction()
 {
-    auto scene = static_cast<DesignerScene*>(parent->scene());
+    auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls()) {
-        DesignerScene::removeControl(control);
+        WindowScene::removeControl(control);
     }
 }
 
 void DesignerViewPrivate::handleSelectAllAction()
 {
-    auto currentPage = ((DesignerScene*)parent->scene())->currentPage();
+    auto currentPage = ((WindowScene*)parent->scene())->currentPage();
     for (auto control : currentPage->childControls())
         control->setSelected(true);
 }
 
 void DesignerViewPrivate::handleMoveUpAction()
 {
-    auto scene = static_cast<DesignerScene*>(parent->scene());
+    auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(0, - fit(1));
 }
 
 void DesignerViewPrivate::handleMoveDownAction()
 {
-    auto scene = static_cast<DesignerScene*>(parent->scene());
+    auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(0, fit(1));
 }
 
 void DesignerViewPrivate::handleMoveRightAction()
 {
-    auto scene = static_cast<DesignerScene*>(parent->scene());
+    auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(fit(1), 0);
 }
 
 void DesignerViewPrivate::handleMoveLeftAction()
 {
-    auto scene = static_cast<DesignerScene*>(parent->scene());
+    auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(- fit(1), 0);
 }
 
 void DesignerViewPrivate::handleSendBackActAction()
 {
-    auto scene = static_cast<DesignerScene*>(parent->scene());
+    auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->setZValue(scene->currentPage()->lowerZValue() == MAX_Z_VALUE
                            ? 0 : scene->currentPage()->lowerZValue() - 1);
@@ -220,7 +220,7 @@ void DesignerViewPrivate::handleSendBackActAction()
 
 void DesignerViewPrivate::handleBringFrontActAction()
 {
-    auto scene = static_cast<DesignerScene*>(parent->scene());
+    auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->setZValue(scene->currentPage()->higherZValue() == -MAX_Z_VALUE
                            ? 0 : scene->currentPage()->higherZValue() + 1);
@@ -236,7 +236,7 @@ void DesignerView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
 
-    auto _scene = static_cast<DesignerScene*>(scene());
+    auto _scene = static_cast<WindowScene*>(scene());
     auto currentPage = _scene->currentPage();
     if (currentPage)
         currentPage->centralize();
@@ -246,7 +246,7 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
 {
     QGraphicsView::contextMenuEvent(event);
 
-    auto scene = static_cast<DesignerScene*>(this->scene());
+    auto scene = static_cast<WindowScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
 
     if (selectedControls.size() <= 0) {

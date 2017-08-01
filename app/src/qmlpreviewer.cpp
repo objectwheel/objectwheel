@@ -1,6 +1,6 @@
 #include <qmlpreviewer.h>
 #include <fit.h>
-#include <designerscene.h>
+#include <windowscene.h>
 
 #include <QApplication>
 #include <QQuickWindow>

@@ -34,7 +34,7 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/delayer.h \
                              $$PWD/designmanager.h \
                              $$PWD/control.h \
-                             $$PWD/designerscene.h \
+                             $$PWD/windowscene.h \
                              $$PWD/designerview.h \
                              $$PWD/qmlpreviewer.h \
                              $$PWD/controltransaction.h \
@@ -75,7 +75,7 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/delayer.cpp \
                              $$PWD/designmanager.cpp \
                              $$PWD/control.cpp \
-                             $$PWD/designerscene.cpp \
+                             $$PWD/windowscene.cpp \
                              $$PWD/designerview.cpp \
                              $$PWD/qmlpreviewer.cpp \
                              $$PWD/controltransaction.cpp \

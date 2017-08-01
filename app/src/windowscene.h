@@ -1,20 +1,20 @@
-#ifndef DESIGNERSCENE_H
-#define DESIGNERSCENE_H
+#ifndef WINDOWSCENE_H
+#define WINDOWSCENE_H
 
 #include <control.h>
 #include <QGraphicsScene>
 
-class DesignerScenePrivate;
+class WindowScenePrivate;
 
-class DesignerScene : public QGraphicsScene
+class WindowScene : public QGraphicsScene
 {
         Q_OBJECT
-        Q_DISABLE_COPY(DesignerScene)
-        friend class DesignerScenePrivate;
+        Q_DISABLE_COPY(WindowScene)
+        friend class WindowScenePrivate;
 
     public:
-        explicit DesignerScene(QObject *parent = Q_NULLPTR);
-        static DesignerScene* instance();
+        explicit WindowScene(QObject *parent = Q_NULLPTR);
+        static WindowScene* instance();
 
         static const QList<Page*>& pages();
         static void addPage(Page* page);
@@ -43,7 +43,7 @@ class DesignerScene : public QGraphicsScene
         void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     private:
-        static DesignerScenePrivate* _d;
+        static WindowScenePrivate* _d;
         static QList<Page*> _pages;
         static Page* _currentPage;
         static bool _snapping;
@@ -51,4 +51,4 @@ class DesignerScene : public QGraphicsScene
 
 };
 
-#endif // DESIGNERSCENE_H
+#endif // WINDOWSCENE_H
