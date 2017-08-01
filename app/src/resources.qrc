@@ -208,7 +208,6 @@
         <file>resources/images/script.png</file>
         <file>resources/images/owicon.png</file>
         <file>resources/images/owicon@2x.png</file>
-        <file>resources/qmls/mainPage.qml</file>
         <file>resources/images/phone.png</file>
         <file>resources/images/phonel.png</file>
         <file>resources/images/break.png</file>
@@ -230,5 +229,6 @@
         <file>resources/images/build.png</file>
         <file>resources/images/play.png</file>
         <file>resources/images/text.png</file>
+        <file>resources/qmls/applicationWindow.qml</file>
     </qresource>
 </RCC>

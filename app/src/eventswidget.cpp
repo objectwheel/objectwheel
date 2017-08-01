@@ -279,8 +279,8 @@ void EventsWidgetPrivate::editButtonClicked()
     if (issuerEvent.isEmpty())
         return;
 
-    auto controls = WindowScene::currentPage()->childControls();
-    controls << WindowScene::currentPage();
+    auto controls = WindowScene::currentWindow()->childControls();
+    controls << WindowScene::currentWindow();
 
     WindowScene::instance()->clearSelection();
     for (auto control : controls)
@@ -352,8 +352,8 @@ void EventsWidgetPrivate::btnEditCodeClicked()
     auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
 
-    if (scene->currentPage()->isSelected())
-        selectedControls << scene->currentPage();
+    if (scene->currentWindow()->isSelected())
+        selectedControls << scene->currentWindow();
 
     if (selectedControls.isEmpty() ||
         selectedControls.size() > 1 ||
@@ -412,8 +412,8 @@ void EventsWidget::handleSelectionChange()
 {
     auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
-    if (scene->currentPage()->isSelected())
-        selectedControls << scene->currentPage();
+    if (scene->currentWindow()->isSelected())
+        selectedControls << scene->currentWindow();
 
     clearList();
     if (selectedControls.isEmpty() ||

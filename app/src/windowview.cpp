@@ -1,4 +1,4 @@
-#include <designerview.h>
+#include <windowview.h>
 #include <windowscene.h>
 #include <control.h>
 #include <fit.h>
@@ -19,12 +19,12 @@
 
 using namespace Fit;
 
-class DesignerViewPrivate : public QObject
+class WindowViewPrivate : public QObject
 {
         Q_OBJECT
 
     public:
-        DesignerViewPrivate(DesignerView* parent);
+        WindowViewPrivate(WindowView* parent);
 
     private slots:
         void handleUndoAction();
@@ -42,7 +42,7 @@ class DesignerViewPrivate : public QObject
         void handleBringFrontActAction();
 
     public:
-        DesignerView* parent;
+        WindowView* parent;
         QMenu menu;
         QAction sendBackAct;
         QAction bringFrontAct;
@@ -59,7 +59,7 @@ class DesignerViewPrivate : public QObject
         QAction moveLeftAct;
 };
 
-DesignerViewPrivate::DesignerViewPrivate(DesignerView* parent)
+WindowViewPrivate::WindowViewPrivate(WindowView* parent)
     : QObject(parent)
     , parent(parent)
 {
@@ -124,17 +124,17 @@ DesignerViewPrivate::DesignerViewPrivate(DesignerView* parent)
     connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
 }
 
-void DesignerViewPrivate::handleUndoAction()
+void WindowViewPrivate::handleUndoAction()
 {
     //TODO
 }
 
-void DesignerViewPrivate::handleRedoAction()
+void WindowViewPrivate::handleRedoAction()
 {
     //TODO
 }
 
-void DesignerViewPrivate::handleCutAction()
+void WindowViewPrivate::handleCutAction()
 {
     // TODO
 //    QJsonObject pr;
@@ -157,17 +157,17 @@ void DesignerViewPrivate::handleCutAction()
 //    mimeData->setHtml(QJsonDocument(pr));
 }
 
-void DesignerViewPrivate::handleCopyAction()
+void WindowViewPrivate::handleCopyAction()
 {
     //TODO
 }
 
-void DesignerViewPrivate::handlePasteAction()
+void WindowViewPrivate::handlePasteAction()
 {
     //TODO
 }
 
-void DesignerViewPrivate::handleDeleteAction()
+void WindowViewPrivate::handleDeleteAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls()) {
@@ -175,74 +175,74 @@ void DesignerViewPrivate::handleDeleteAction()
     }
 }
 
-void DesignerViewPrivate::handleSelectAllAction()
+void WindowViewPrivate::handleSelectAllAction()
 {
-    auto currentPage = ((WindowScene*)parent->scene())->currentPage();
-    for (auto control : currentPage->childControls())
+    auto currentWindow = ((WindowScene*)parent->scene())->currentWindow();
+    for (auto control : currentWindow->childControls())
         control->setSelected(true);
 }
 
-void DesignerViewPrivate::handleMoveUpAction()
+void WindowViewPrivate::handleMoveUpAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(0, - fit(1));
 }
 
-void DesignerViewPrivate::handleMoveDownAction()
+void WindowViewPrivate::handleMoveDownAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(0, fit(1));
 }
 
-void DesignerViewPrivate::handleMoveRightAction()
+void WindowViewPrivate::handleMoveRightAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(fit(1), 0);
 }
 
-void DesignerViewPrivate::handleMoveLeftAction()
+void WindowViewPrivate::handleMoveLeftAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
         control->moveBy(- fit(1), 0);
 }
 
-void DesignerViewPrivate::handleSendBackActAction()
+void WindowViewPrivate::handleSendBackActAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
-        control->setZValue(scene->currentPage()->lowerZValue() == MAX_Z_VALUE
-                           ? 0 : scene->currentPage()->lowerZValue() - 1);
+        control->setZValue(scene->currentWindow()->lowerZValue() == MAX_Z_VALUE
+                           ? 0 : scene->currentWindow()->lowerZValue() - 1);
 }
 
-void DesignerViewPrivate::handleBringFrontActAction()
+void WindowViewPrivate::handleBringFrontActAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
     for (auto control : scene->selectedControls())
-        control->setZValue(scene->currentPage()->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : scene->currentPage()->higherZValue() + 1);
+        control->setZValue(scene->currentWindow()->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : scene->currentWindow()->higherZValue() + 1);
 }
 
-DesignerView::DesignerView(QGraphicsScene* scene, QWidget* parent)
+WindowView::WindowView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
-    , _d(new DesignerViewPrivate(this))
+    , _d(new WindowViewPrivate(this))
 {
 }
 
-void DesignerView::resizeEvent(QResizeEvent* event)
+void WindowView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
 
     auto _scene = static_cast<WindowScene*>(scene());
-    auto currentPage = _scene->currentPage();
-    if (currentPage)
-        currentPage->centralize();
+    auto currentWindow = _scene->currentWindow();
+    if (currentWindow)
+        currentWindow->centralize();
 }
 
-void DesignerView::contextMenuEvent(QContextMenuEvent* event)
+void WindowView::contextMenuEvent(QContextMenuEvent* event)
 {
     QGraphicsView::contextMenuEvent(event);
 
@@ -265,4 +265,4 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
     _d->menu.exec(event->globalPos());
 }
 
-#include "designerview.moc"
+#include "windowview.moc"

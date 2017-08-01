@@ -17,7 +17,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/scrollarea.h \
                              $$PWD/about.h \
                              $$PWD/qmleditor.h \
-                             $$PWD/pageswidget.h \
                              $$PWD/splashscreen.h \
                              $$PWD/splashscreen_p.h \
                              $$PWD/usermanager.h \
@@ -35,11 +34,12 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/designmanager.h \
                              $$PWD/control.h \
                              $$PWD/windowscene.h \
-                             $$PWD/designerview.h \
                              $$PWD/qmlpreviewer.h \
                              $$PWD/controltransaction.h \
                              $$PWD/parserworker.h \
-                             $$PWD/parsercontroller.h
+                             $$PWD/parsercontroller.h \
+                             $$PWD/windowview.h \
+                             $$PWD/windowswidget.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -58,7 +58,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/scrollarea.cpp \
                              $$PWD/about.cpp \
                              $$PWD/qmleditor.cpp \
-                             $$PWD/pageswidget.cpp \
                              $$PWD/splashscreen.cpp \
                              $$PWD/splashscreen_p.cpp \
                              $$PWD/usermanager.cpp \
@@ -76,11 +75,12 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/designmanager.cpp \
                              $$PWD/control.cpp \
                              $$PWD/windowscene.cpp \
-                             $$PWD/designerview.cpp \
                              $$PWD/qmlpreviewer.cpp \
                              $$PWD/controltransaction.cpp \
                              $$PWD/parserworker.cpp \
-                             $$PWD/parsercontroller.cpp
+                             $$PWD/parsercontroller.cpp \
+                             $$PWD/windowview.cpp \
+                             $$PWD/windowswidget.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

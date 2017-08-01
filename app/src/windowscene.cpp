@@ -33,8 +33,8 @@ WindowScenePrivate::WindowScenePrivate(WindowScene* parent)
 }
 
 WindowScenePrivate* WindowScene::_d = nullptr;
-QList<Page*> WindowScene::_pages;
-Page* WindowScene::_currentPage = nullptr;
+QList<Window*> WindowScene::_windows;
+Window* WindowScene::_currentWindow = nullptr;
 bool WindowScene::_snapping = true;
 QPointF WindowScene::_lastMousePos;
 
@@ -46,7 +46,7 @@ WindowScene::WindowScene(QObject *parent)
     _d = new WindowScenePrivate(this);
 
     connect(this, &WindowScene::changed, [=] {
-        setSceneRect(currentPage()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
+        setSceneRect(currentWindow()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
     });
 }
 
@@ -55,56 +55,56 @@ WindowScene* WindowScene::instance()
     return _d->parent;
 }
 
-const QList<Page*>& WindowScene::pages()
+const QList<Window*>& WindowScene::windows()
 {
-    return _pages;
+    return _windows;
 }
 
-void WindowScene::addPage(Page* page)
+void WindowScene::addWindow(Window* window)
 {
-    if (_pages.contains(page))
+    if (_windows.contains(window))
         return;
 
-    _d->parent->addItem(page);
-    page->setVisible(false);
+    _d->parent->addItem(window);
+    window->setVisible(false);
 
-    _pages.append(page);
+    _windows.append(window);
 
-    if (!_currentPage)
-        setCurrentPage(page);
+    if (!_currentWindow)
+        setCurrentWindow(window);
 }
 
-void WindowScene::removePage(Page* page)
+void WindowScene::removeWindow(Window* window)
 {
-    if (!_pages.contains(page))
+    if (!_windows.contains(window))
         return;
 
-    _d->parent->removeItem(page);
-    _pages.removeOne(page);
+    _d->parent->removeItem(window);
+    _windows.removeOne(window);
 
-    if (_currentPage == page) {
-        if (_pages.size() > 0)
-            setCurrentPage(_pages[0]);
+    if (_currentWindow == window) {
+        if (_windows.size() > 0)
+            setCurrentWindow(_windows[0]);
         else
-            _currentPage = nullptr;
+            _currentWindow = nullptr;
     }
 }
 
-Page* WindowScene::currentPage()
+Window* WindowScene::currentWindow()
 {
-    return _currentPage;
+    return _currentWindow;
 }
 
-void WindowScene::setCurrentPage(Page* currentPage)
+void WindowScene::setCurrentWindow(Window* currentWindow)
 {
-    if (!_pages.contains(currentPage) || _currentPage == currentPage)
+    if (!_windows.contains(currentWindow) || _currentWindow == currentWindow)
         return;
 
-    if (_currentPage)
-        _currentPage->setVisible(false);
+    if (_currentWindow)
+        _currentWindow->setVisible(false);
 
-    _currentPage = currentPage;
-    _currentPage->setVisible(true);
+    _currentWindow = currentWindow;
+    _currentWindow->setVisible(true);
 }
 
 void WindowScene::removeControl(Control* control)
@@ -125,7 +125,7 @@ QList<Control*> WindowScene::controls(Qt::SortOrder order)
 {
     QList<Control*> controls;
     for (auto item : _d->parent->items(order)) {
-        if (dynamic_cast<Control*>(item) && !dynamic_cast<Page*>(item)) {
+        if (dynamic_cast<Control*>(item) && !dynamic_cast<Window*>(item)) {
             controls << static_cast<Control*>(item);
         }
     }
@@ -136,7 +136,7 @@ QList<Control*> WindowScene::selectedControls()
 {
     QList<Control*> selectedControls;
     for (auto item : _d->parent->selectedItems()) {
-        if (dynamic_cast<Control*>(item) && !dynamic_cast<Page*>(item)) {
+        if (dynamic_cast<Control*>(item) && !dynamic_cast<Window*>(item)) {
             selectedControls << static_cast<Control*>(item);
         }
     }
@@ -149,9 +149,9 @@ void WindowScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
     auto selectedControls = this->selectedControls();
     for (auto control : selectedControls)
-        if (_currentPage->higherZValue() != control->zValue())
-            control->setZValue(_currentPage->higherZValue() == -MAX_Z_VALUE
-                               ? 0 : _currentPage->higherZValue() + 1);
+        if (_currentWindow->higherZValue() != control->zValue())
+            control->setZValue(_currentWindow->higherZValue() == -MAX_Z_VALUE
+                               ? 0 : _currentWindow->higherZValue() + 1);
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
     if (this->selectedControls().contains((Control*)itemUnderMouse))
@@ -159,7 +159,7 @@ void WindowScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
     _d->itemMoving = false;
 
-    for (auto control : currentPage()->childControls())
+    for (auto control : currentWindow()->childControls())
         control->setDragging(false);
 
     update();
@@ -169,11 +169,11 @@ void WindowScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
-    if (_currentPage && selectedControls().size() > 0 &&
+    if (_currentWindow && selectedControls().size() > 0 &&
         _d->itemPressed && !Resizer::resizing()) {
         _d->itemMoving = true;
         if (_snapping && selectedControls().size() == 1)
-            _currentPage->stickSelectedControlToGuideLines();
+            _currentWindow->stickSelectedControlToGuideLines();
     }
 
     if (_d->itemMoving) {
@@ -193,7 +193,7 @@ void WindowScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     _d->itemPressed = false;
     _d->itemMoving = false;
 
-    for (auto control : currentPage()->childControls())
+    for (auto control : currentWindow()->childControls())
         control->setDragging(false);
 
     update();
@@ -204,7 +204,7 @@ void WindowScene::drawForeground(QPainter* painter, const QRectF& rect)
     QGraphicsScene::drawForeground(painter, rect);
 
     if ((_d->itemMoving || Resizer::resizing()) && _snapping) {
-        auto guideLines = _currentPage->guideLines();
+        auto guideLines = _currentWindow->guideLines();
         QPen pen(GUIDELINE_COLOR);
         pen.setWidthF(1.0);
         pen.setJoinStyle(Qt::RoundJoin);

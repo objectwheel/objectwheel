@@ -163,7 +163,7 @@ QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
 QString CSS::BindingButton;
 QString CSS::EventsButton;
-QString CSS::PagesButton;
+QString CSS::WindowsButton;
 QString CSS::BindingListWidget;
 
 void CSS::init()
@@ -200,8 +200,8 @@ void CSS::init()
     /* EventsButton */
     EventsButton = QString(CSS_EVENTS_BUTTON).arg(fit(20));
 
-	/* PagesButton */
-    PagesButton = QString(CSS_PAGES_BUTTON).arg(fit(20));
+    /* WindowsButton */
+    WindowsButton = QString(CSS_PAGES_BUTTON).arg(fit(20));
 
 	/* BindingListWidget */
 	BindingListWidget = QString(CSS_BINDING_LISTWIDGET).arg(fit(5)).arg(fit(2));

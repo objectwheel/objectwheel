@@ -98,14 +98,14 @@ void MainWindow::SetupGui()
 	bindingVariant.setValue<QWidget*>(m_d->bindingWidget);
     QVariant eventsVariant;
     eventsVariant.setValue<QWidget*>(m_d->eventsWidget);
-	QVariant pagesVariant;
-	pagesVariant.setValue<QWidget*>(m_d->pagesWidget);
+    QVariant windowsVariant;
+    windowsVariant.setValue<QWidget*>(m_d->windowsWidget);
 	Container* leftContainer = new Container;
 	leftContainer->addWidget(m_d->toolboxWidget);
 	leftContainer->addWidget(m_d->propertiesWidget);
 	leftContainer->addWidget(m_d->bindingWidget);
     leftContainer->addWidget(m_d->eventsWidget);
-	leftContainer->addWidget(m_d->pagesWidget);
+    leftContainer->addWidget(m_d->windowsWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QToolBar* leftToolbar = new QToolBar;
@@ -169,17 +169,17 @@ void MainWindow::SetupGui()
     connect(eventsButton, SIGNAL(clicked(bool)), eventsButtonAction, SLOT(trigger()));
     connect(eventsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
-	QRadioButton* pagesButton = new QRadioButton;
-	pagesButton->setCursor(Qt::PointingHandCursor);
-	pagesButton->setStyleSheet(CSS::PagesButton);
-	pagesButton->setCheckable(true);
-	QWidgetAction* pagesButtonAction = new QWidgetAction(this);
-	pagesButtonAction->setDefaultWidget(pagesButton);
-	pagesButtonAction->setData(pagesVariant);
-	pagesButtonAction->setCheckable(true);
-	leftToolbar->addAction(pagesButtonAction);
-	connect(pagesButton, SIGNAL(clicked(bool)), pagesButtonAction, SLOT(trigger()));
-	connect(pagesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+    QRadioButton* windowsButton = new QRadioButton;
+    windowsButton->setCursor(Qt::PointingHandCursor);
+    windowsButton->setStyleSheet(CSS::WindowsButton);
+    windowsButton->setCheckable(true);
+    QWidgetAction* windowsButtonAction = new QWidgetAction(this);
+    windowsButtonAction->setDefaultWidget(windowsButton);
+    windowsButtonAction->setData(windowsVariant);
+    windowsButtonAction->setCheckable(true);
+    leftToolbar->addAction(windowsButtonAction);
+    connect(windowsButton, SIGNAL(clicked(bool)), windowsButtonAction, SLOT(trigger()));
+    connect(windowsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
@@ -202,7 +202,7 @@ void MainWindow::SetupGui()
 	connect(propertiesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
         leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
-	connect(pagesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
+    connect(windowsButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
         leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
 	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
@@ -230,34 +230,11 @@ void MainWindow::SetupGui()
 
 	m_d->centralWidget->installEventFilter(this);
 
-	QTimer::singleShot(0, [=] {
-//#if !defined(Q_OS_DARWIN)
-//		m_d->designWidget->setSource(QUrl("qrc:/resources/qmls/dashboard.qml"));
-//#endif
-//		m_d->designWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-//		/* Assign design area's root object */
-//		m_RootItem = m_d->designWidget->rootObject();
-//		connect(m_RootItem, SIGNAL(currentPageChanged(QVariant, QVariant)),
-//				this, SLOT(handleCurrentPageChanges(QVariant, QVariant)));
-//		auto v = QQmlProperty::read(m_RootItem, "current_page", m_d->designWidget->rootContext());
-//		m_CurrentPage = qobject_cast<QQuickItem*>(v.value<QObject*>());
-//		if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
-//		auto v2 = QQmlProperty::read(m_RootItem, "swipeView", m_d->designWidget->rootContext());
-//		auto view = qobject_cast<QQuickItem*>(v2.value<QObject*>());
-//		connect(view, SIGNAL(currentIndexChanged()), this, SLOT(HideSelectionTools()));
-//		if (!view) qFatal("MainWindow : Error occurred");
-//		m_d->designWidget->rootContext()->setContextProperty("swipeView", view);
-//		auto v3 = qmlContext(view)->contextProperty("page1");
-//		auto item = qobject_cast<QQuickItem*>(v3.value<QObject*>());
-//		if (!item) qFatal("MainWindow : Error occurred");
-//		m_d->designWidget->rootContext()->setContextProperty("page1", item);
-//		m_d->pagesWidget->setSwipeItem(view);
-//		m_d->pagesWidget->setRootContext(m_d->designWidget->rootContext());
-//		m_d->pagesWidget->setItemList(&m_d->m_Items);
-//		m_d->pagesWidget->setUrlList(&m_d->m_ItemUrls);
-//		m_d->pagesWidget->setBindingWidget(m_d->bindingWidget);
-//        m_d->pagesWidget->setEventWidget(m_d->eventsWidget);
-	});
+    QTimer::singleShot(0, [=] {
+        auto window = new Window(QUrl("qrc:/resources/qmls/applicationWindow.qml"));
+        window->refresh();
+        WindowScene::addWindow(window);
+    });
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
@@ -391,11 +368,11 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 	emit resized();
 }
 
-void MainWindow::handleCurrentPageChanges(const QVariant& CurrentPage, const QVariant& index)
+void MainWindow::handleCurrentWindowChanges(const QVariant& CurrentWindow, const QVariant& index)
 {
-//	m_CurrentPage = qobject_cast<QQuickItem*>(CurrentPage.value<QObject*>());
-//	if (!m_CurrentPage) qFatal("MainWindow : Error occurred");
-//    m_d->pagesWidget->setCurrentPage(index.toInt());
+//	m_CurrentWindow = qobject_cast<QQuickItem*>(CurrentWindow.value<QObject*>());
+//	if (!m_CurrentWindow) qFatal("MainWindow : Error occurred");
+//    m_d->pagesWidget->setCurrentWindow(index.toInt());
 }
 
 void MainWindow::handleEditorOpenButtonClicked()
@@ -435,12 +412,12 @@ void MainWindow::clearStudio()
 
 //	auto pages = m_d->pagesWidget->pages();
 //	for (int i = pages.count(); i--;) {
-//		if (pages[i] != m_CurrentPage) {
-//			m_d->pagesWidget->removePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages[i]));
+//		if (pages[i] != m_CurrentWindow) {
+//			m_d->pagesWidget->removeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages[i]));
 //		}
 //	}
 //	QString page1Name = "page1";
-//	m_d->pagesWidget->changePageWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentPage), page1Name);
+//	m_d->pagesWidget->changeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentWindow), page1Name);
 
 //	m_d->bindingWidget->clearAllBindings();
 //    m_d->eventsWidget->clearAllEvents();
@@ -460,11 +437,11 @@ void MainWindow::on_buildsButton_clicked()
 
 void MainWindow::on_clearButton_clicked()
 {
-    if (WindowScene::currentPage()->childControls().size() < 1)
+    if (WindowScene::currentWindow()->childControls().size() < 1)
         return;
 
     QMessageBox msgBox;
-    msgBox.setText("<b>This will clear the current page's content.</b>");
+    msgBox.setText("<b>This will clear the current window's content.</b>");
     msgBox.setInformativeText("Do you want to continue?");
     msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
     msgBox.setDefaultButton(QMessageBox::No);
@@ -472,7 +449,7 @@ void MainWindow::on_clearButton_clicked()
 
     switch (msgBox.exec()) {
         case QMessageBox::Yes:
-            WindowScene::currentPage()->cleanPage();
+            WindowScene::currentWindow()->cleanWindow();
             break;
         default:
             break;
@@ -786,9 +763,9 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 {
     auto control = new Control(url);
 
-    auto controls = WindowScene::currentPage()->childControls();
-    for (auto page : WindowScene::pages())
-        controls << page;
+    auto controls = WindowScene::currentWindow()->childControls();
+    for (auto window : WindowScene::windows())
+        controls << window;
     for (auto ctrl : controls)
         if (ctrl->id() == parent) {
             control->setParentItem(ctrl);

@@ -334,17 +334,17 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 
     if (result.initial) {
         auto scene = static_cast<WindowScene*>(parent->scene());
-        auto currentPage = scene->currentPage();
+        auto currentWindow = scene->currentWindow();
         auto id = result.id;
 
-        QStringList pageNames;
-        for (auto page : scene->pages())
-            if (page == parent)
+        QStringList windowNames;
+        for (auto window : scene->windows())
+            if (window == parent)
                 continue;
             else
-                pageNames << page->id();
+                windowNames << window->id();
 
-        for (int i = 1; currentPage->contains(id) || pageNames.contains(id); i++)
+        for (int i = 1; currentWindow->contains(id) || windowNames.contains(id); i++)
             id = result.id + QString::number(i);
 
         SaveManager::addSave(id, parent->url().toLocalFile());
@@ -432,17 +432,6 @@ QList<Control*> Control::childControls() const
 Control* Control::parentControl() const
 {
     return dynamic_cast<Control*>(parentItem());
-}
-
-QList<Control*> Control::collidingControls(Qt::ItemSelectionMode mode) const
-{
-    QList<Control*> list;
-    for (auto item : collidingItems(mode)) {
-        auto control = dynamic_cast<Control*>(item);
-        if (control)
-            list << control;
-    }
-    return list;
 }
 
 QString Control::id() const
@@ -551,12 +540,12 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         control->setDragIn(true);
 
         auto scene = static_cast<WindowScene*>(this->scene());
-        for (auto c : scene->currentPage()->childControls())
+        for (auto c : scene->currentWindow()->childControls())
             if (c != control)
                 c->setDragIn(false);
 
-        if (scene->currentPage() != control)
-            scene->currentPage()->setDragIn(false);
+        if (scene->currentWindow() != control)
+            scene->currentWindow()->setDragIn(false);
     }
 
     if (event->button() == Qt::MidButton)
@@ -571,7 +560,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
     auto scene = static_cast<WindowScene*>(this->scene());
 
-    for (auto control : scene->currentPage()->childControls()) {
+    for (auto control : scene->currentWindow()->childControls()) {
         if (control->dragIn() && dragging() &&
             parentControl() != control) {
             control->dropControl(this);
@@ -581,13 +570,13 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         control->setDragIn(false);
     }
 
-    if (scene->currentPage()->dragIn() && dragging() &&
-        parentControl() != scene->currentPage()) {
-        scene->currentPage()->dropControl(this);
+    if (scene->currentWindow()->dragIn() && dragging() &&
+        parentControl() != scene->currentWindow()) {
+        scene->currentWindow()->dropControl(this);
         scene->clearSelection();
-        scene->currentPage()->setSelected(true);
+        scene->currentWindow()->setSelected(true);
     }
-    scene->currentPage()->setDragIn(false);
+    scene->currentWindow()->setDragIn(false);
 
     event->accept();
 }
@@ -732,90 +721,90 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
-//! ****************** [Page Private] ******************
+//! ****************** [Window Private] ******************
 
 
-class PagePrivate : public QObject
+class WindowPrivate : public QObject
 {
         Q_OBJECT
 
     public:
-        explicit PagePrivate(Page* parent);
+        explicit WindowPrivate(Window* parent);
         static void applySkinChange();
 
     public:
-        Page* parent;
+        Window* parent;
         static QSizeF skinSize;
 };
 
-QSizeF PagePrivate::skinSize;
+QSizeF WindowPrivate::skinSize;
 
-PagePrivate::PagePrivate(Page* parent)
+WindowPrivate::WindowPrivate(Window* parent)
     : QObject(parent)
     , parent(parent)
 {
 }
 
-void PagePrivate::applySkinChange()
+void WindowPrivate::applySkinChange()
 {
     QSize size;
     bool resizable;
 
-    switch (Page::_skin) {
-        case Page::PhonePortrait:
+    switch (Window::_skin) {
+        case Window::PhonePortrait:
             resizable = false;
             size = PAGE_PP_SIZE;
             skinSize = PAGE_PP_SIZE + QSize(16, 75);
             break;
 
-        case Page::PhoneLandscape:
+        case Window::PhoneLandscape:
             resizable = false;
             size = PAGE_PL_SIZE;
             skinSize = PAGE_PL_SIZE + QSize(75, 16);
             break;
 
-        case Page::Desktop:
-        case Page::NoSkin :
+        case Window::Desktop:
+        case Window::NoSkin :
             resizable = true;
             break;
     }
 
-    for (auto page : WindowScene::pages()) {
-        if (Page::_skin == Page::PhonePortrait ||
-            Page::_skin == Page::PhoneLandscape)
-            page->resize(size);
+    for (auto window : WindowScene::windows()) {
+        if (Window::_skin == Window::PhonePortrait ||
+            Window::_skin == Window::PhoneLandscape)
+            window->resize(size);
         else
-            page->update();
-        for (auto& resizer : page->_resizers) {
+            window->update();
+        for (auto& resizer : window->_resizers) {
             resizer.setDisabled(!resizable);
         }
     }
 }
 
-//! ********************** [Page] **********************
+//! ********************** [Window] **********************
 
-Page::Skin Page::_skin = Page::PhonePortrait;
+Window::Skin Window::_skin = Window::PhonePortrait;
 
-Page::Page(const QUrl& url, Page* parent)
+Window::Window(const QUrl& url, Window* parent)
     : Control(url, parent)
-    , _d(new PagePrivate(this))
+    , _d(new WindowPrivate(this))
 {
     setFlag(ItemIsMovable, false);
 
-    connect(this, &Page::previewChanged, [=] {
-        PagePrivate::applySkinChange();
+    connect(this, &Window::previewChanged, [=] {
+        WindowPrivate::applySkinChange();
         this->disconnect(SIGNAL(previewChanged()));
     });
 }
 
-void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
     painter->setRenderHint(QPainter::Antialiasing);
 
     switch (_skin) {
         case PhonePortrait: {
-            auto skinRect = QRectF({0, 0}, PagePrivate::skinSize);
+            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
             skinRect.moveCenter(innerRect.center());
             skinRect.moveTop(skinRect.top() + PAGE_TOP_MARGIN);
             painter->setBrush(MOBILE_SKIN_COLOR);
@@ -830,7 +819,7 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
                                            2 * PAGE_TOP_MARGIN, 2 * PAGE_TOP_MARGIN), PAGE_TOP_MARGIN, PAGE_TOP_MARGIN);
             break;
         } case PhoneLandscape: {
-            auto skinRect = QRectF({0, 0}, PagePrivate::skinSize);
+            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
             skinRect.moveCenter(innerRect.center());
             skinRect.moveLeft(skinRect.left() + PAGE_TOP_MARGIN);
             painter->setBrush(MOBILE_SKIN_COLOR);
@@ -914,18 +903,18 @@ void Page::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     }
 }
 
-void Page::resizeEvent(QGraphicsSceneResizeEvent* event)
+void Window::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     Control::resizeEvent(event);
     centralize();
 }
 
-void Page::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void Window::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
 }
 
-bool Page::stickSelectedControlToGuideLines() const
+bool Window::stickSelectedControlToGuideLines() const
 {
     bool ret = false;
     auto scene = static_cast<WindowScene*>(this->scene());
@@ -1200,7 +1189,7 @@ bool Page::stickSelectedControlToGuideLines() const
     return ret;
 }
 
-QVector<QLineF> Page::guideLines() const
+QVector<QLineF> Window::guideLines() const
 {
     auto scene = static_cast<WindowScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
@@ -1330,7 +1319,7 @@ QVector<QLineF> Page::guideLines() const
     return lines;
 }
 
-bool Page::contains(const QString& id) const
+bool Window::contains(const QString& id) const
 {
     for (auto control : childControls()) {
         if (control->id() == id)
@@ -1339,7 +1328,7 @@ bool Page::contains(const QString& id) const
     return false;
 }
 
-QRectF Page::frameGeometry() const
+QRectF Window::frameGeometry() const
 {
     QRectF rect;
     if (_skin == PhonePortrait || _skin == PhoneLandscape)
@@ -1352,7 +1341,7 @@ QRectF Page::frameGeometry() const
     return rect;
 }
 
-int Page::higherZValue() const
+int Window::higherZValue() const
 {
     int z = -MAX_Z_VALUE;
     for (auto control : childControls())
@@ -1361,7 +1350,7 @@ int Page::higherZValue() const
     return z;
 }
 
-int Page::lowerZValue() const
+int Window::lowerZValue() const
 {
     int z = MAX_Z_VALUE;
     for (auto control : childControls())
@@ -1370,28 +1359,28 @@ int Page::lowerZValue() const
     return z;
 }
 
-bool Page::isMain() const
+bool Window::isMain() const
 {
     return _main;
 }
 
-void Page::setMain(bool value)
+void Window::setMain(bool value)
 {
     _main = value;
 }
 
-void Page::setSkin(const Skin& skin)
+void Window::setSkin(const Skin& skin)
 {
     _skin = skin;
-    PagePrivate::applySkinChange();
+    WindowPrivate::applySkinChange();
 }
 
-const Page::Skin& Page::skin()
+const Window::Skin& Window::skin()
 {
     return _skin;
 }
 
-void Page::centralize()
+void Window::centralize()
 {
     if (_skin == PhonePortrait)
         setPos(- size().width() / 2.0, - size().height() / 2.0 - PAGE_TOP_MARGIN);
@@ -1403,7 +1392,7 @@ void Page::centralize()
         setPos(- size().width() / 2.0, - size().height() / 2.0 + PAGE_TOP_MARGIN / 1.5);
 }
 
-void Page::cleanPage()
+void Window::cleanWindow()
 {
     WindowScene::removeChildControlsOnly(this);
 }

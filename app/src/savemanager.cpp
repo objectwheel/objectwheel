@@ -2,7 +2,7 @@
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <parsercontroller.h>
-#include <pageswidget.h>
+#include <windowswidget.h>
 #include <mainwindow.h>
 #include <bindingwidget.h>
 #include <eventswidget.h>

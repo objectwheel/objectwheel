@@ -1,4 +1,4 @@
-#include <pageswidget.h>
+#include <windowswidget.h>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <flatbutton.h>

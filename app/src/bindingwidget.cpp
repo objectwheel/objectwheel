@@ -240,8 +240,8 @@ void BindingWidgetPrivate::editButtonClicked()
     if (issuerBinding.isEmpty())
         return;
 
-    auto controls = WindowScene::currentPage()->childControls();
-    controls << WindowScene::currentPage();
+    auto controls = WindowScene::currentWindow()->childControls();
+    controls << WindowScene::currentWindow();
 
     WindowScene::instance()->clearSelection();
     for (auto control : controls)
@@ -374,8 +374,8 @@ void BindingWidgetPrivate::updateSourcePropertyCombobox()
     auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
 
-    if (scene->currentPage()->isSelected())
-        selectedControls << scene->currentPage();
+    if (scene->currentWindow()->isSelected())
+        selectedControls << scene->currentWindow();
 
     if (selectedControls.isEmpty() ||
         selectedControls.size() > 1 ||
@@ -386,12 +386,12 @@ void BindingWidgetPrivate::updateSourcePropertyCombobox()
     QVariant::Type targetType = selectedControls[0]->properties()[targetPropertyCombobox.currentItem()];
 
     QStringList sourcePropertyList;
-    if (scene->currentPage()->id() == sourceItemCombobox.currentItem()) {
-        for (auto property : scene->currentPage()->properties().keys())
-            if (scene->currentPage()->properties()[property] == targetType)
+    if (scene->currentWindow()->id() == sourceItemCombobox.currentItem()) {
+        for (auto property : scene->currentWindow()->properties().keys())
+            if (scene->currentWindow()->properties()[property] == targetType)
                 sourcePropertyList << property;
     } else {
-        for (auto control : scene->currentPage()->childControls())
+        for (auto control : scene->currentWindow()->childControls())
             if (control->id() == sourceItemCombobox.currentItem()) {
                 for (auto property : control->properties().keys())
                     if (control->properties()[property] == targetType)
@@ -478,8 +478,8 @@ void BindingWidget::handleSelectionChange()
 {
     auto scene = WindowScene::instance();
     auto selectedControls = scene->selectedControls();
-    if (scene->currentPage()->isSelected())
-        selectedControls << scene->currentPage();
+    if (scene->currentWindow()->isSelected())
+        selectedControls << scene->currentWindow();
 
     clearList();
     if (selectedControls.isEmpty() ||
@@ -490,8 +490,8 @@ void BindingWidget::handleSelectionChange()
         m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
         for (auto property : selectedControls[0]->properties().keys())
             m_d->targetPropertyCombobox.addItem(property);
-        for (auto page : scene->pages())
-            m_d->sourceItemCombobox.addItem(page->id());
+        for (auto window : scene->windows())
+            m_d->sourceItemCombobox.addItem(window->id());
         for (auto control : scene->controls())
             m_d->sourceItemCombobox.addItem(control->id());
     }

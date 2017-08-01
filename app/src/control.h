@@ -12,7 +12,7 @@
 
 class Control;
 class ControlPrivate;
-class PagePrivate;
+class WindowPrivate;
 
 class Resizer : public QGraphicsWidget
 {
@@ -57,42 +57,34 @@ class Control : public QGraphicsWidget
 {
         Q_OBJECT
         friend class ControlPrivate;
+        friend class WindowScene;
 
     public:
         explicit Control(const QUrl& url, Control* parent = Q_NULLPTR);
-
         QString id() const;
         void setId(const QString& id);
-
         QUrl url() const;
-
-        static bool showOutline();
-        static void setShowOutline(const bool value);
-
+        bool dragging() const;
+        bool dragIn() const;
+        bool clip() const;
+        QMap<QString, QVariant::Type> properties() const;
+        QList<QString> events() const;
         QList<Control*> childControls() const;
         Control* parentControl() const;
 
-        QList<Control*> collidingControls(Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
-
-        bool dragging() const;
-        void setDragging(bool dragging);
-
-        bool dragIn() const;
-        void setDragIn(bool dragIn);
-
-        bool clip() const;
-        void setClip(bool clip);
-
-        QMap<QString, QVariant::Type> properties() const;
-        void setProperties(const QMap<QString, QVariant::Type>& properties);
-
-        QList<QString> events() const;
-        void setEvents(const QList<QString>& events);
+        static bool showOutline();
+        static void setShowOutline(const bool value);
 
     public slots:
         virtual void refresh();
 
     protected:
+        void setDragging(bool dragging);
+        void setDragIn(bool dragIn);
+        void setClip(bool clip);
+        void setProperties(const QMap<QString, QVariant::Type>& properties);
+        void setEvents(const QList<QString>& events);
+
         virtual void dropControl(Control* control);
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -128,10 +120,10 @@ class Control : public QGraphicsWidget
         static bool _showOutline;
 };
 
-class Page : public Control
+class Window : public Control
 {
         Q_OBJECT
-        friend class PagePrivate;
+        friend class WindowPrivate;
 
     public:
         enum Skin {
@@ -141,13 +133,10 @@ class Page : public Control
             Desktop
         };
 
-        explicit Page(const QUrl& url, Page* parent = Q_NULLPTR);
+        explicit Window(const QUrl& url, Window* parent = Q_NULLPTR);
 
         bool isMain() const;
         void setMain(bool value);
-
-        static void setSkin(const Skin& skin);
-        static const Skin& skin();
 
         bool stickSelectedControlToGuideLines() const;
         QVector<QLineF> guideLines() const;
@@ -160,9 +149,12 @@ class Page : public Control
         int higherZValue() const;
         int lowerZValue() const;
 
+        static void setSkin(const Skin& skin);
+        static const Skin& skin();
+
     public slots:
         void centralize();
-        void cleanPage();
+        void cleanWindow();
 
     protected:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
@@ -170,7 +162,7 @@ class Page : public Control
         void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     private:
-        PagePrivate* _d;
+        WindowPrivate* _d;
         bool _main = false;
         QList<Control*> _controls;
         static Skin _skin;

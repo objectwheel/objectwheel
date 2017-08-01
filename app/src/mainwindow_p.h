@@ -27,7 +27,7 @@
 #include <titlebar.h>
 #include <about.h>
 #include <qmleditor.h>
-#include <pageswidget.h>
+#include <windowswidget.h>
 #include <fit.h>
 #include <lineedit.h>
 #include <QLineEdit>
@@ -74,7 +74,7 @@ class MainWindowPrivate
         PropertiesWidget* propertiesWidget;
 		BindingWidget* bindingWidget;
         EventsWidget* eventsWidget;
-		PagesWidget* pagesWidget;
+        PagesWidget* windowsWidget;
 		About* aboutWidget;
         BuildsScreen* buildsScreen;
 		FlatButton* aboutButton;
@@ -102,7 +102,7 @@ MainWindowPrivate::~MainWindowPrivate()
     delete aboutButton;
     delete buildsScreen;
     delete aboutWidget;
-    delete pagesWidget;
+    delete windowsWidget;
     delete eventsWidget;
     delete bindingWidget;
     delete propertiesWidget;
@@ -369,9 +369,9 @@ void MainWindowPrivate::setupUi()
     eventsWidget->setObjectName(QStringLiteral("eventsWidget"));
     eventsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-	pagesWidget = new PagesWidget(centralWidget);
-	pagesWidget->setObjectName(QStringLiteral("pagesWidget"));
-	pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    windowsWidget = new PagesWidget(centralWidget);
+    windowsWidget->setObjectName(QStringLiteral("windowsWidget"));
+    windowsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
 
 void MainWindowPrivate::showAdderArea()

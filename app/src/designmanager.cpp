@@ -1,6 +1,6 @@
 #include <designmanager.h>
 #include <windowscene.h>
-#include <designerview.h>
+#include <windowview.h>
 #include <control.h>
 #include <fit.h>
 #include <css.h>
@@ -48,12 +48,12 @@ class DesignManagerPrivate : public QObject
         QWidget* settleWidget = nullptr;
         QVBoxLayout vlayout;
         QHBoxLayout hlayout;
-        WindowScene designerScene;
-        DesignerView designerView;
+        WindowScene windowScene;
+        WindowView windowView;
         qreal lastScale;
         QToolBar toolbar;
         QToolButton refreshPreviewButton;
-        QToolButton clearPageButton;
+        QToolButton clearWindowButton;
         QToolButton undoButton;
         QToolButton redoButton;
         QToolButton phonePortraitButton;
@@ -77,7 +77,7 @@ class DesignManagerPrivate : public QObject
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     : QObject(parent)
     , parent(parent)
-    , designerView(&designerScene)
+    , windowView(&windowScene)
     , lastScale(1.0)
 {
     dummyWidget.setHidden(true);
@@ -90,21 +90,15 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     hlayout.setContentsMargins(0, 0, 0, 0);
     hlayout.setSpacing(0);
     hlayout.addWidget(&toolbar_2);
-    hlayout.addWidget(&designerView);
+    hlayout.addWidget(&windowView);
 
-    designerView.setRenderHint(QPainter::Antialiasing);
-    designerView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
-    designerView.setDragMode(QGraphicsView::RubberBandDrag);
-    designerView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    designerView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
-    designerView.setBackgroundBrush(QColor("#e0e4e7"));
-    designerView.setFrameShape(QFrame::NoFrame);
-
-    QTimer::singleShot(3000, [this] {
-        auto page = new Page(QUrl("qrc:/resources/qmls/mainPage.qml"));
-        page->refresh();
-        designerScene.addPage(page);
-    });
+    windowView.setRenderHint(QPainter::Antialiasing);
+    windowView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
+    windowView.setDragMode(QGraphicsView::RubberBandDrag);
+    windowView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    windowView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+    windowView.setBackgroundBrush(QColor("#e0e4e7"));
+    windowView.setFrameShape(QFrame::NoFrame);
 
     // Toolbar settings
     QWidget* spacer = new QWidget;
@@ -128,7 +122,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     showOutlineButton.setCheckable(true);
     showOutlineButton.setChecked(Control::showOutline());
     snappingButton.setCheckable(true);
-    snappingButton.setChecked(designerScene.snapping());
+    snappingButton.setChecked(windowScene.snapping());
 
     phonePortraitButton.setCheckable(true);
     phonePortraitButton.setChecked(true);
@@ -138,7 +132,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     noSkinButton.setCheckable(true);
 
     refreshPreviewButton.setCursor(Qt::PointingHandCursor);
-    clearPageButton.setCursor(Qt::PointingHandCursor);
+    clearWindowButton.setCursor(Qt::PointingHandCursor);
     undoButton.setCursor(Qt::PointingHandCursor);
     redoButton.setCursor(Qt::PointingHandCursor);
     phonePortraitButton.setCursor(Qt::PointingHandCursor);
@@ -155,7 +149,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     breakLayoutButton.setCursor(Qt::PointingHandCursor);
 
     refreshPreviewButton.setToolTip("Refresh control previews on the Dashboard.");
-    clearPageButton.setToolTip("Clear controls on the Dashboard.");
+    clearWindowButton.setToolTip("Clear controls on the Dashboard.");
     undoButton.setToolTip("Undo action.");
     redoButton.setToolTip("Redo action.");
     phonePortraitButton.setToolTip("Skin: Phone portrait.");
@@ -172,7 +166,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     breakLayoutButton.setToolTip("Break layouts for selected controls.");
 
     refreshPreviewButton.setIcon(QIcon(":/resources/images/refresh.png"));
-    clearPageButton.setIcon(QIcon(":/resources/images/clean.png"));
+    clearWindowButton.setIcon(QIcon(":/resources/images/clean.png"));
     undoButton.setIcon(QIcon(":/resources/images/undo.png"));
     redoButton.setIcon(QIcon(":/resources/images/redo.png"));
     phonePortraitButton.setIcon(QIcon(":/resources/images/portrait.png"));
@@ -204,7 +198,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar.addWidget(&redoButton);
     toolbar.addSeparator();
     toolbar.addWidget(&refreshPreviewButton);
-    toolbar.addWidget(&clearPageButton);
+    toolbar.addWidget(&clearWindowButton);
     toolbar.addSeparator();
     toolbar.addWidget(&phonePortraitButton);
     toolbar.addWidget(&phoneLandscapeButton);
@@ -342,25 +336,25 @@ QString DesignManagerPrivate::findText(qreal ratio)
 
 void DesignManagerPrivate::scaleScene(qreal ratio)
 {
-    designerView.scale((1.0 / lastScale) * ratio, (1.0 / lastScale) * ratio);
+    windowView.scale((1.0 / lastScale) * ratio, (1.0 / lastScale) * ratio);
     lastScale = ratio;
 }
 
 void DesignManagerPrivate::handleSnappingClicked(bool value)
 {
-    designerScene.setSnapping(value);
+    windowScene.setSnapping(value);
 }
 
 void DesignManagerPrivate::handleShowOutlineClicked(bool value)
 {
-    designerScene.setShowOutlines(value);
+    windowScene.setShowOutlines(value);
 }
 
 void DesignManagerPrivate::handleFitInSceneClicked()
 {
     auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
-    auto diff = qMin(designerView.width() / designerScene.width(),
-                     designerView.height() / designerScene.height());
+    auto diff = qMin(windowView.width() / windowScene.width(),
+                     windowView.height() / windowScene.height());
     for (auto ratio : ratios) {
         if (roundRatio(diff) == ratio) {
             auto itemText = findText(ratio);
@@ -383,7 +377,7 @@ void DesignManagerPrivate::handleZoomLevelChange(const QString& text)
 
 void DesignManagerPrivate::handlePhonePortraitButtonClicked()
 {
-    Page::setSkin(Page::PhonePortrait);
+    Window::setSkin(Window::PhonePortrait);
     phonePortraitButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -391,12 +385,12 @@ void DesignManagerPrivate::handlePhonePortraitButtonClicked()
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    designerScene.currentPage()->centralize();
+    windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
 {
-    Page::setSkin(Page::PhoneLandscape);
+    Window::setSkin(Window::PhoneLandscape);
     phoneLandscapeButton.setDisabled(true);
     phonePortraitButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -404,12 +398,12 @@ void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
     phonePortraitButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    designerScene.currentPage()->centralize();
+    windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handleDesktopSkinButtonClicked()
 {
-    Page::setSkin(Page::Desktop);
+    Window::setSkin(Window::Desktop);
     desktopSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     phonePortraitButton.setChecked(false);
@@ -417,12 +411,12 @@ void DesignManagerPrivate::handleDesktopSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    designerScene.currentPage()->centralize();
+    windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handleNoSkinButtonClicked()
 {
-    Page::setSkin(Page::NoSkin);
+    Window::setSkin(Window::NoSkin);
     noSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -430,14 +424,14 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
-    designerScene.currentPage()->centralize();
+    windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handleRefreshPreviewClicked()
 {
-    for (auto page : designerScene.pages())
-        page->refresh();
-    for (auto control : designerScene.controls())
+    for (auto window : windowScene.windows())
+        window->refresh();
+    for (auto control : windowScene.controls())
         control->refresh();
 }
 
@@ -464,12 +458,12 @@ void DesignManager::setSettleWidget(QWidget* widget)
 
 void DesignManager::showWidget()
 {
-    _d->designerView.show();
+    _d->windowView.show();
 }
 
 void DesignManager::hideWidget()
 {
-    _d->designerView.hide();
+    _d->windowView.hide();
 }
 
 #include "designmanager.moc"

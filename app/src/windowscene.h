@@ -16,12 +16,12 @@ class WindowScene : public QGraphicsScene
         explicit WindowScene(QObject *parent = Q_NULLPTR);
         static WindowScene* instance();
 
-        static const QList<Page*>& pages();
-        static void addPage(Page* page);
-        static void removePage(Page* page);
+        static const QList<Window*>& windows();
+        static void addWindow(Window* window);
+        static void removeWindow(Window* window);
 
-        static Page* currentPage();
-        static void setCurrentPage(Page* currentPage);
+        static Window* currentWindow();
+        static void setCurrentWindow(Window* currentWindow);
 
         static void removeControl(Control* control);
         static void removeChildControlsOnly(Control* parent);
@@ -44,8 +44,8 @@ class WindowScene : public QGraphicsScene
 
     private:
         static WindowScenePrivate* _d;
-        static QList<Page*> _pages;
-        static Page* _currentPage;
+        static QList<Window*> _windows;
+        static Window* _currentWindow;
         static bool _snapping;
         static QPointF _lastMousePos;
 
