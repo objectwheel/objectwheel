@@ -57,6 +57,8 @@ class Control : public QGraphicsWidget
 {
         Q_OBJECT
         friend class ControlPrivate;
+        friend class ControlScene;
+        friend class ControlView;
         friend class WindowScene;
 
     public:
@@ -71,6 +73,10 @@ class Control : public QGraphicsWidget
         QList<QString> events() const;
         QList<Control*> childControls() const;
         Control* parentControl() const;
+        int higherZValue() const;
+        int lowerZValue() const;
+        bool stickSelectedControlToGuideLines() const;
+        QVector<QLineF> guideLines() const;
 
         static bool showOutline();
         static void setShowOutline(const bool value);
@@ -85,6 +91,8 @@ class Control : public QGraphicsWidget
         void setProperties(const QMap<QString, QVariant::Type>& properties);
         void setEvents(const QList<QString>& events);
 
+        virtual void centralize();
+        virtual QRectF frameGeometry() const;
         virtual void dropControl(Control* control);
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -138,22 +146,16 @@ class Window : public Control
         bool isMain() const;
         void setMain(bool value);
 
-        bool stickSelectedControlToGuideLines() const;
-        QVector<QLineF> guideLines() const;
-
         using Control::contains;
         bool contains(const QString& id) const;
 
-        QRectF frameGeometry() const;
-
-        int higherZValue() const;
-        int lowerZValue() const;
+        QRectF frameGeometry() const override;
 
         static void setSkin(const Skin& skin);
         static const Skin& skin();
 
     public slots:
-        void centralize();
+        void centralize() override;
         void cleanWindow();
 
     protected:

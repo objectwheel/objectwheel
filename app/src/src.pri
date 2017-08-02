@@ -39,7 +39,9 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/parserworker.h \
                              $$PWD/parsercontroller.h \
                              $$PWD/windowview.h \
-                             $$PWD/windowswidget.h
+                             $$PWD/windowswidget.h \
+                             $$PWD/controlscene.h \
+                             $$PWD/controlview.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -80,7 +82,9 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/parserworker.cpp \
                              $$PWD/parsercontroller.cpp \
                              $$PWD/windowview.cpp \
-                             $$PWD/windowswidget.cpp
+                             $$PWD/windowswidget.cpp \
+                             $$PWD/controlscene.cpp \
+                             $$PWD/controlview.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

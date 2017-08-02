@@ -230,5 +230,6 @@
         <file>resources/images/play.png</file>
         <file>resources/images/text.png</file>
         <file>resources/qmls/applicationWindow.qml</file>
+        <file>resources/images/gui.png</file>
     </qresource>
 </RCC>

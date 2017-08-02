@@ -1,6 +1,8 @@
 #include <designmanager.h>
 #include <windowscene.h>
 #include <windowview.h>
+#include <controlscene.h>
+#include <controlview.h>
 #include <control.h>
 #include <fit.h>
 #include <css.h>
@@ -21,6 +23,13 @@ using namespace Fit;
 class DesignManagerPrivate : public QObject
 {
         Q_OBJECT
+    public:
+        enum Mode {
+            ControlGUI,
+            WindowGUI,
+            CodeEdit
+        };
+
     public:
         DesignManagerPrivate(DesignManager* parent);
         ~DesignManagerPrivate();
@@ -44,13 +53,17 @@ class DesignManagerPrivate : public QObject
 
     public:
         DesignManager* parent;
+        Mode mode;
         QWidget dummyWidget;
         QWidget* settleWidget = nullptr;
         QVBoxLayout vlayout;
         QHBoxLayout hlayout;
         WindowScene windowScene;
         WindowView windowView;
-        qreal lastScale;
+        ControlScene controlScene;
+        ControlView controlView;
+        qreal lastScaleOfWv;
+        qreal lastScaleOfCv;
         QToolBar toolbar;
         QToolButton refreshPreviewButton;
         QToolButton clearWindowButton;
@@ -77,8 +90,11 @@ class DesignManagerPrivate : public QObject
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     : QObject(parent)
     , parent(parent)
+    , mode(WindowGUI)
     , windowView(&windowScene)
-    , lastScale(1.0)
+    , controlView(&controlScene)
+    , lastScaleOfWv(1.0)
+    , lastScaleOfCv(1.0)
 {
     dummyWidget.setHidden(true);
 
@@ -91,6 +107,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     hlayout.setSpacing(0);
     hlayout.addWidget(&toolbar_2);
     hlayout.addWidget(&windowView);
+    hlayout.addWidget(&controlView);
 
     windowView.setRenderHint(QPainter::Antialiasing);
     windowView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -99,6 +116,14 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     windowView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     windowView.setBackgroundBrush(QColor("#e0e4e7"));
     windowView.setFrameShape(QFrame::NoFrame);
+
+    controlView.setRenderHint(QPainter::Antialiasing);
+    controlView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
+    controlView.setDragMode(QGraphicsView::RubberBandDrag);
+    controlView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    controlView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+    controlView.setBackgroundBrush(QColor("#e0e4e7"));
+    controlView.setFrameShape(QFrame::NoFrame);
 
     // Toolbar settings
     QWidget* spacer = new QWidget;
@@ -336,8 +361,13 @@ QString DesignManagerPrivate::findText(qreal ratio)
 
 void DesignManagerPrivate::scaleScene(qreal ratio)
 {
-    windowView.scale((1.0 / lastScale) * ratio, (1.0 / lastScale) * ratio);
-    lastScale = ratio;
+    if (mode == WindowGUI) {
+        windowView.scale((1.0 / lastScaleOfWv) * ratio, (1.0 / lastScaleOfWv) * ratio);
+        lastScaleOfWv = ratio;
+    } else {
+        controlView.scale((1.0 / lastScaleOfCv) * ratio, (1.0 / lastScaleOfCv) * ratio);
+        lastScaleOfCv = ratio;
+    }
 }
 
 void DesignManagerPrivate::handleSnappingClicked(bool value)

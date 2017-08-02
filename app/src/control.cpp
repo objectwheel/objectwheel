@@ -456,6 +456,16 @@ void Control::refresh()
     _d->refreshTimer.start();
 }
 
+void Control::centralize()
+{
+    setPos(- size().width() / 2.0, - size().height() / 2.0);
+}
+
+QRectF Control::frameGeometry() const
+{
+    return QRectF({QPointF(-size().width() / 2.0, -size().height() / 2.0), size()});
+}
+
 void Control::dropControl(Control* control)
 {
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
@@ -659,6 +669,24 @@ void Control::setDragging(bool dragging)
         setCursor(Qt::ArrowCursor);
 }
 
+int Control::higherZValue() const
+{
+    int z = -MAX_Z_VALUE;
+    for (auto control : childControls())
+        if (control->zValue() > z)
+            z = control->zValue();
+    return z;
+}
+
+int Control::lowerZValue() const
+{
+    int z = MAX_Z_VALUE;
+    for (auto control : childControls())
+        if (control->zValue() < z)
+            z = control->zValue();
+    return z;
+}
+
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     if (_d->itemPixmap.isNull())
@@ -721,200 +749,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
-//! ****************** [Window Private] ******************
-
-
-class WindowPrivate : public QObject
-{
-        Q_OBJECT
-
-    public:
-        explicit WindowPrivate(Window* parent);
-        static void applySkinChange();
-
-    public:
-        Window* parent;
-        static QSizeF skinSize;
-};
-
-QSizeF WindowPrivate::skinSize;
-
-WindowPrivate::WindowPrivate(Window* parent)
-    : QObject(parent)
-    , parent(parent)
-{
-}
-
-void WindowPrivate::applySkinChange()
-{
-    QSize size;
-    bool resizable;
-
-    switch (Window::_skin) {
-        case Window::PhonePortrait:
-            resizable = false;
-            size = PAGE_PP_SIZE;
-            skinSize = PAGE_PP_SIZE + QSize(16, 75);
-            break;
-
-        case Window::PhoneLandscape:
-            resizable = false;
-            size = PAGE_PL_SIZE;
-            skinSize = PAGE_PL_SIZE + QSize(75, 16);
-            break;
-
-        case Window::Desktop:
-        case Window::NoSkin :
-            resizable = true;
-            break;
-    }
-
-    for (auto window : WindowScene::windows()) {
-        if (Window::_skin == Window::PhonePortrait ||
-            Window::_skin == Window::PhoneLandscape)
-            window->resize(size);
-        else
-            window->update();
-        for (auto& resizer : window->_resizers) {
-            resizer.setDisabled(!resizable);
-        }
-    }
-}
-
-//! ********************** [Window] **********************
-
-Window::Skin Window::_skin = Window::PhonePortrait;
-
-Window::Window(const QUrl& url, Window* parent)
-    : Control(url, parent)
-    , _d(new WindowPrivate(this))
-{
-    setFlag(ItemIsMovable, false);
-
-    connect(this, &Window::previewChanged, [=] {
-        WindowPrivate::applySkinChange();
-        this->disconnect(SIGNAL(previewChanged()));
-    });
-}
-
-void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
-{
-    auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    switch (_skin) {
-        case PhonePortrait: {
-            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
-            skinRect.moveCenter(innerRect.center());
-            skinRect.moveTop(skinRect.top() + PAGE_TOP_MARGIN);
-            painter->setBrush(MOBILE_SKIN_COLOR);
-            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->drawRoundedRect(skinRect, fit(10), fit(10));
-            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->setBrush(scene()->views().first()->backgroundBrush());
-            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 3.0, skinRect.top() + PAGE_TOP_MARGIN / 1.5,
-                                           skinRect.width() / 3.0, PAGE_TOP_MARGIN / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
-            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 2.0 - PAGE_TOP_MARGIN,
-                                           skinRect.bottom() - PAGE_TOP_MARGIN / 1.5 - 2 * PAGE_TOP_MARGIN,
-                                           2 * PAGE_TOP_MARGIN, 2 * PAGE_TOP_MARGIN), PAGE_TOP_MARGIN, PAGE_TOP_MARGIN);
-            break;
-        } case PhoneLandscape: {
-            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
-            skinRect.moveCenter(innerRect.center());
-            skinRect.moveLeft(skinRect.left() + PAGE_TOP_MARGIN);
-            painter->setBrush(MOBILE_SKIN_COLOR);
-            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->drawRoundedRect(skinRect, fit(10), fit(10));
-            painter->setBrush(scene()->views().first()->backgroundBrush());
-            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->drawRoundedRect(QRect(skinRect.left() + PAGE_TOP_MARGIN / 1.5, skinRect.y() + skinRect.height() / 3.0,
-                                           PAGE_TOP_MARGIN / 3.0, skinRect.height() / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
-            painter->drawRoundedRect(QRect(skinRect.right() - PAGE_TOP_MARGIN / 1.5 - 2 * PAGE_TOP_MARGIN,
-                                           skinRect.y() + skinRect.height() / 2.0 - PAGE_TOP_MARGIN,
-                                           2 * PAGE_TOP_MARGIN, 2 * PAGE_TOP_MARGIN), PAGE_TOP_MARGIN, PAGE_TOP_MARGIN);
-            break;
-        } case Desktop: {
-            auto skinRect = QRectF({0, 0}, size() + QSizeF(fit(2), fit(2.0 * PAGE_TOP_MARGIN / 1.35)));
-            skinRect.moveCenter(innerRect.center());
-            skinRect.moveTop(skinRect.top() - PAGE_TOP_MARGIN / 1.5);
-            QPainterPath path;
-            path.setFillRule(Qt::WindingFill);
-            path.addRect(skinRect.adjusted(0, fit(10), 0, 0));
-            path.addRoundedRect(skinRect.adjusted(0, 0, 0, -skinRect.height() + fit(15)), fit(3), fit(3));
-
-            QLinearGradient gradient(skinRect.center().x(), skinRect.y(),
-                                     skinRect.center().x(), skinRect.y() + fit(2.2 * PAGE_TOP_MARGIN / 1.35));
-            gradient.setColorAt(0, QColor("#E8ECEF"));
-            gradient.setColorAt(1, QColor("#D3D7DA"));
-            painter->setBrush(gradient);
-            painter->setPen(QColor("#D3D7DA").darker(106));
-            painter->drawPath(path.simplified());
-
-            auto btnExtRect = QRectF(skinRect.left() + fit(8), skinRect.top() + fit(4.5), fit(11), fit(11));
-            auto btnMinRect = QRectF(skinRect.left() + fit(27), skinRect.top() + fit(4.5), fit(11), fit(11));
-            auto btnMaxRect = QRectF(skinRect.left() + fit(46), skinRect.top() + fit(4.5), fit(11), fit(11));
-
-            painter->setPen(QColor("#de4643"));
-            painter->setBrush(QColor("#fc625d"));
-            painter->drawEllipse(btnExtRect);
-
-            painter->setPen(QColor("#dd9e33"));
-            painter->setBrush(QColor("#fdbc40"));
-            painter->drawEllipse(btnMinRect);
-
-            painter->setPen(QColor("#26a934"));
-            painter->setBrush(QColor("#34c84a"));
-            painter->drawEllipse(btnMaxRect);
-
-            if (mapToScene(QRectF(btnExtRect.topLeft(), btnMaxRect.bottomRight())).containsPoint
-                (WindowScene::lastMousePos(), Qt::WindingFill)) {
-                auto ciks = QPixmap(":/resources/images/ciks.png");
-                painter->setPen(QColor("#4c0102"));
-                painter->drawLine(btnExtRect.topLeft() + QPoint(fit(3), fit(3)), btnExtRect.bottomRight() + QPoint(-fit(3), -fit(3)));
-                painter->drawLine(btnExtRect.topRight() + QPoint(-fit(3), fit(3)), btnExtRect.bottomLeft() + QPoint(fit(3), -fit(3)));
-                painter->setPen(QColor("#985712"));
-                painter->drawLine(QPointF(btnMinRect.left() + fit(2.5), btnMinRect.center().y()),
-                                  QPointF(btnMinRect.right() - fit(2.5), btnMinRect.center().y()));
-                painter->drawPixmap(btnMaxRect.adjusted(fit(2.0), fit(2.0), -fit(2.0), -fit(2.0)), ciks, ciks.rect());
-            }
-            break;
-        } case NoSkin: {
-            break;
-        }
-    }
-
-    painter->setBrush(scene()->views().first()->backgroundBrush());
-    painter->drawRect(innerRect);
-
-    Control::paint(painter, option, widget);
-
-    if (!isSelected() && !showOutline()) {
-        QPen pen;
-        pen.setJoinStyle(Qt::MiterJoin);
-        if (_skin == PhonePortrait || _skin == PhoneLandscape) {
-            pen.setColor(MOBILE_SKIN_COLOR.darker(110));
-        } else {
-            pen.setStyle(Qt::DotLine);
-            pen.setColor(OUTLINE_COLOR);
-        }
-        painter->setPen(pen);
-        painter->setBrush(Qt::transparent);
-        painter->drawRect(innerRect);
-    }
-}
-
-void Window::resizeEvent(QGraphicsSceneResizeEvent* event)
-{
-    Control::resizeEvent(event);
-    centralize();
-}
-
-void Window::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    event->ignore();
-}
-
-bool Window::stickSelectedControlToGuideLines() const
+bool Control::stickSelectedControlToGuideLines() const
 {
     bool ret = false;
     auto scene = static_cast<WindowScene*>(this->scene());
@@ -1189,7 +1024,7 @@ bool Window::stickSelectedControlToGuideLines() const
     return ret;
 }
 
-QVector<QLineF> Window::guideLines() const
+QVector<QLineF> Control::guideLines() const
 {
     auto scene = static_cast<WindowScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
@@ -1319,6 +1154,199 @@ QVector<QLineF> Window::guideLines() const
     return lines;
 }
 
+//! ****************** [Window Private] ******************
+
+
+class WindowPrivate : public QObject
+{
+        Q_OBJECT
+
+    public:
+        explicit WindowPrivate(Window* parent);
+        static void applySkinChange();
+
+    public:
+        Window* parent;
+        static QSizeF skinSize;
+};
+
+QSizeF WindowPrivate::skinSize;
+
+WindowPrivate::WindowPrivate(Window* parent)
+    : QObject(parent)
+    , parent(parent)
+{
+}
+
+void WindowPrivate::applySkinChange()
+{
+    QSize size;
+    bool resizable;
+
+    switch (Window::_skin) {
+        case Window::PhonePortrait:
+            resizable = false;
+            size = PAGE_PP_SIZE;
+            skinSize = PAGE_PP_SIZE + QSize(16, 75);
+            break;
+
+        case Window::PhoneLandscape:
+            resizable = false;
+            size = PAGE_PL_SIZE;
+            skinSize = PAGE_PL_SIZE + QSize(75, 16);
+            break;
+
+        case Window::Desktop:
+        case Window::NoSkin :
+            resizable = true;
+            break;
+    }
+
+    for (auto window : WindowScene::windows()) {
+        if (Window::_skin == Window::PhonePortrait ||
+            Window::_skin == Window::PhoneLandscape)
+            window->resize(size);
+        else
+            window->update();
+        for (auto& resizer : window->_resizers) {
+            resizer.setDisabled(!resizable);
+        }
+    }
+}
+
+//! ********************** [Window] **********************
+
+Window::Skin Window::_skin = Window::PhonePortrait;
+
+Window::Window(const QUrl& url, Window* parent)
+    : Control(url, parent)
+    , _d(new WindowPrivate(this))
+{
+    setFlag(ItemIsMovable, false);
+
+    connect(this, &Window::previewChanged, [=] {
+        WindowPrivate::applySkinChange();
+        this->disconnect(SIGNAL(previewChanged()));
+    });
+}
+
+void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+    auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    switch (_skin) {
+        case PhonePortrait: {
+            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
+            skinRect.moveCenter(innerRect.center());
+            skinRect.moveTop(skinRect.top() + PAGE_TOP_MARGIN);
+            painter->setBrush(MOBILE_SKIN_COLOR);
+            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
+            painter->drawRoundedRect(skinRect, fit(10), fit(10));
+            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
+            painter->setBrush(scene()->views().first()->backgroundBrush());
+            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 3.0, skinRect.top() + PAGE_TOP_MARGIN / 1.5,
+                                           skinRect.width() / 3.0, PAGE_TOP_MARGIN / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
+            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 2.0 - PAGE_TOP_MARGIN,
+                                           skinRect.bottom() - PAGE_TOP_MARGIN / 1.5 - 2 * PAGE_TOP_MARGIN,
+                                           2 * PAGE_TOP_MARGIN, 2 * PAGE_TOP_MARGIN), PAGE_TOP_MARGIN, PAGE_TOP_MARGIN);
+            break;
+        } case PhoneLandscape: {
+            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
+            skinRect.moveCenter(innerRect.center());
+            skinRect.moveLeft(skinRect.left() + PAGE_TOP_MARGIN);
+            painter->setBrush(MOBILE_SKIN_COLOR);
+            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
+            painter->drawRoundedRect(skinRect, fit(10), fit(10));
+            painter->setBrush(scene()->views().first()->backgroundBrush());
+            painter->setPen(MOBILE_SKIN_COLOR.darker(110));
+            painter->drawRoundedRect(QRect(skinRect.left() + PAGE_TOP_MARGIN / 1.5, skinRect.y() + skinRect.height() / 3.0,
+                                           PAGE_TOP_MARGIN / 3.0, skinRect.height() / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
+            painter->drawRoundedRect(QRect(skinRect.right() - PAGE_TOP_MARGIN / 1.5 - 2 * PAGE_TOP_MARGIN,
+                                           skinRect.y() + skinRect.height() / 2.0 - PAGE_TOP_MARGIN,
+                                           2 * PAGE_TOP_MARGIN, 2 * PAGE_TOP_MARGIN), PAGE_TOP_MARGIN, PAGE_TOP_MARGIN);
+            break;
+        } case Desktop: {
+            auto skinRect = QRectF({0, 0}, size() + QSizeF(fit(2), fit(2.0 * PAGE_TOP_MARGIN / 1.35)));
+            skinRect.moveCenter(innerRect.center());
+            skinRect.moveTop(skinRect.top() - PAGE_TOP_MARGIN / 1.5);
+            QPainterPath path;
+            path.setFillRule(Qt::WindingFill);
+            path.addRect(skinRect.adjusted(0, fit(10), 0, 0));
+            path.addRoundedRect(skinRect.adjusted(0, 0, 0, -skinRect.height() + fit(15)), fit(3), fit(3));
+
+            QLinearGradient gradient(skinRect.center().x(), skinRect.y(),
+                                     skinRect.center().x(), skinRect.y() + fit(2.2 * PAGE_TOP_MARGIN / 1.35));
+            gradient.setColorAt(0, QColor("#E8ECEF"));
+            gradient.setColorAt(1, QColor("#D3D7DA"));
+            painter->setBrush(gradient);
+            painter->setPen(QColor("#D3D7DA").darker(106));
+            painter->drawPath(path.simplified());
+
+            auto btnExtRect = QRectF(skinRect.left() + fit(8), skinRect.top() + fit(4.5), fit(11), fit(11));
+            auto btnMinRect = QRectF(skinRect.left() + fit(27), skinRect.top() + fit(4.5), fit(11), fit(11));
+            auto btnMaxRect = QRectF(skinRect.left() + fit(46), skinRect.top() + fit(4.5), fit(11), fit(11));
+
+            painter->setPen(QColor("#de4643"));
+            painter->setBrush(QColor("#fc625d"));
+            painter->drawEllipse(btnExtRect);
+
+            painter->setPen(QColor("#dd9e33"));
+            painter->setBrush(QColor("#fdbc40"));
+            painter->drawEllipse(btnMinRect);
+
+            painter->setPen(QColor("#26a934"));
+            painter->setBrush(QColor("#34c84a"));
+            painter->drawEllipse(btnMaxRect);
+
+            if (mapToScene(QRectF(btnExtRect.topLeft(), btnMaxRect.bottomRight())).containsPoint
+                (WindowScene::lastMousePos(), Qt::WindingFill)) {
+                auto ciks = QPixmap(":/resources/images/ciks.png");
+                painter->setPen(QColor("#4c0102"));
+                painter->drawLine(btnExtRect.topLeft() + QPoint(fit(3), fit(3)), btnExtRect.bottomRight() + QPoint(-fit(3), -fit(3)));
+                painter->drawLine(btnExtRect.topRight() + QPoint(-fit(3), fit(3)), btnExtRect.bottomLeft() + QPoint(fit(3), -fit(3)));
+                painter->setPen(QColor("#985712"));
+                painter->drawLine(QPointF(btnMinRect.left() + fit(2.5), btnMinRect.center().y()),
+                                  QPointF(btnMinRect.right() - fit(2.5), btnMinRect.center().y()));
+                painter->drawPixmap(btnMaxRect.adjusted(fit(2.0), fit(2.0), -fit(2.0), -fit(2.0)), ciks, ciks.rect());
+            }
+            break;
+        } case NoSkin: {
+            break;
+        }
+    }
+
+    painter->setBrush(scene()->views().first()->backgroundBrush());
+    painter->drawRect(innerRect);
+
+    Control::paint(painter, option, widget);
+
+    if (!isSelected() && !showOutline()) {
+        QPen pen;
+        pen.setJoinStyle(Qt::MiterJoin);
+        if (_skin == PhonePortrait || _skin == PhoneLandscape) {
+            pen.setColor(MOBILE_SKIN_COLOR.darker(110));
+        } else {
+            pen.setStyle(Qt::DotLine);
+            pen.setColor(OUTLINE_COLOR);
+        }
+        painter->setPen(pen);
+        painter->setBrush(Qt::transparent);
+        painter->drawRect(innerRect);
+    }
+}
+
+void Window::resizeEvent(QGraphicsSceneResizeEvent* event)
+{
+    Control::resizeEvent(event);
+    centralize();
+}
+
+void Window::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    event->ignore();
+}
+
 bool Window::contains(const QString& id) const
 {
     for (auto control : childControls()) {
@@ -1339,24 +1367,6 @@ QRectF Window::frameGeometry() const
         rect = QRectF(-size().width() / 2.0, -size().height() / 2.0 - PAGE_TOP_MARGIN / 1.5,
                       size().width(), size().height() + 2.0 * PAGE_TOP_MARGIN / 1.5);
     return rect;
-}
-
-int Window::higherZValue() const
-{
-    int z = -MAX_Z_VALUE;
-    for (auto control : childControls())
-        if (control->zValue() > z)
-            z = control->zValue();
-    return z;
-}
-
-int Window::lowerZValue() const
-{
-    int z = MAX_Z_VALUE;
-    for (auto control : childControls())
-        if (control->zValue() < z)
-            z = control->zValue();
-    return z;
 }
 
 bool Window::isMain() const

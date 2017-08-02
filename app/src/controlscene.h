@@ -1,29 +1,25 @@
-#ifndef WINDOWSCENE_H
-#define WINDOWSCENE_H
+#ifndef CONTROLSCENE_H
+#define CONTROLSCENE_H
 
 #include <control.h>
 
 #include <QGraphicsScene>
 #include <QPointer>
 
-class WindowScenePrivate;
+class ControlScenePrivate;
 
-class WindowScene : public QGraphicsScene
+class ControlScene : public QGraphicsScene
 {
         Q_OBJECT
-        Q_DISABLE_COPY(WindowScene)
-        friend class WindowScenePrivate;
+        Q_DISABLE_COPY(ControlScene)
+        friend class ControlScenePrivate;
 
     public:
-        explicit WindowScene(QObject *parent = Q_NULLPTR);
-        static WindowScene* instance();
+        explicit ControlScene(QObject *parent = Q_NULLPTR);
+        static ControlScene* instance();
 
-        static const QList<Window*>& windows();
-        static void addWindow(Window* window);
-        static void removeWindow(Window* window);
-
-        static Window* currentWindow();
-        static void setCurrentWindow(Window* currentWindow);
+        static Control* currentControl();
+        static void setCurrentControl(Control* currentControl);
 
         static void removeControl(Control* control);
         static void removeChildControlsOnly(Control* parent);
@@ -45,12 +41,11 @@ class WindowScene : public QGraphicsScene
         void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     private:
-        static WindowScenePrivate* _d;
-        static QList<Window*> _windows;
-        static QPointer<Window> _currentWindow;
+        static ControlScenePrivate* _d;
+        static QPointer<Control> _currentControl;
         static bool _snapping;
         static QPointF _lastMousePos;
 
 };
 
-#endif // WINDOWSCENE_H
+#endif // CONTROLSCENE_H

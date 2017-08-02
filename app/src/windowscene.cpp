@@ -34,7 +34,7 @@ WindowScenePrivate::WindowScenePrivate(WindowScene* parent)
 
 WindowScenePrivate* WindowScene::_d = nullptr;
 QList<Window*> WindowScene::_windows;
-Window* WindowScene::_currentWindow = nullptr;
+QPointer<Window> WindowScene::_currentWindow = nullptr;
 bool WindowScene::_snapping = true;
 QPointF WindowScene::_lastMousePos;
 
@@ -46,7 +46,8 @@ WindowScene::WindowScene(QObject *parent)
     _d = new WindowScenePrivate(this);
 
     connect(this, &WindowScene::changed, [=] {
-        setSceneRect(currentWindow()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
+        if (_currentWindow)
+            setSceneRect(currentWindow()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
     });
 }
 
