@@ -231,5 +231,6 @@
         <file>resources/images/text.png</file>
         <file>resources/qmls/applicationWindow.qml</file>
         <file>resources/images/gui.png</file>
+        <file>resources/images/window.png</file>
     </qresource>
 </RCC>

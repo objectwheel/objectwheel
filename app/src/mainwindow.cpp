@@ -230,7 +230,7 @@ void MainWindow::SetupGui()
 
 	m_d->centralWidget->installEventFilter(this);
 
-    QTimer::singleShot(0, [=] {
+    QTimer::singleShot(3000, [=] {
         auto window = new Window(QUrl("qrc:/resources/qmls/applicationWindow.qml"));
         window->refresh();
         WindowScene::addWindow(window);

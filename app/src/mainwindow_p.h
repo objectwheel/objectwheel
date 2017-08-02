@@ -157,7 +157,6 @@ void MainWindowPrivate::setupUi()
 
     designManager = new DesignManager;
     designManager->setSettleWidget(settleWidget);
-    designManager->showWidget();
 
 	toolboxList = new ListWidget(centralWidget);
 	toolboxList->setIconSize(fit({30, 30}));

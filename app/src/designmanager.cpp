@@ -23,12 +23,6 @@ using namespace Fit;
 class DesignManagerPrivate : public QObject
 {
         Q_OBJECT
-    public:
-        enum Mode {
-            ControlGUI,
-            WindowGUI,
-            CodeEdit
-        };
 
     public:
         DesignManagerPrivate(DesignManager* parent);
@@ -40,6 +34,9 @@ class DesignManagerPrivate : public QObject
         QString findText(qreal ratio);
         void scaleScene(qreal ratio);
 
+    public slots:
+        void handleModeChange();
+
     private slots:
         void handleSnappingClicked(bool value);
         void handleShowOutlineClicked(bool value);
@@ -50,10 +47,14 @@ class DesignManagerPrivate : public QObject
         void handleDesktopSkinButtonClicked();
         void handleNoSkinButtonClicked();
         void handleRefreshPreviewClicked();
+        void handleEditorModeButtonClicked();
+        void handleCGuiModeButtonClicked();
+        void handleWGuiModeButtonClicked();
+        void handlePlayButtonClicked();
+        void handleBuildButtonClicked();
 
     public:
         DesignManager* parent;
-        Mode mode;
         QWidget dummyWidget;
         QWidget* settleWidget = nullptr;
         QVBoxLayout vlayout;
@@ -82,7 +83,9 @@ class DesignManagerPrivate : public QObject
         QToolButton layItGridButton;
         QToolButton breakLayoutButton;
         QToolBar toolbar_2;
-        QToolButton editButton;
+        QToolButton editorModeButton;
+        QToolButton wGuiModeButton;
+        QToolButton cGuiModeButton;
         QToolButton playButton;
         QToolButton buildButton;
 };
@@ -90,7 +93,6 @@ class DesignManagerPrivate : public QObject
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     : QObject(parent)
     , parent(parent)
-    , mode(WindowGUI)
     , windowView(&windowScene)
     , controlView(&controlScene)
     , lastScaleOfWv(1.0)
@@ -244,28 +246,44 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     QWidget* spacer_2 = new QWidget;
     spacer_2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    editButton.setCursor(Qt::PointingHandCursor);
+    editorModeButton.setCheckable(true);
+    wGuiModeButton.setCheckable(true);
+    cGuiModeButton.setCheckable(true);
+    wGuiModeButton.setChecked(true);
+    wGuiModeButton.setDisabled(true);
+
+    editorModeButton.setCursor(Qt::PointingHandCursor);
+    wGuiModeButton.setCursor(Qt::PointingHandCursor);
+    cGuiModeButton.setCursor(Qt::PointingHandCursor);
     playButton.setCursor(Qt::PointingHandCursor);
     buildButton.setCursor(Qt::PointingHandCursor);
 
-    editButton.setToolTip("Open QML Editor for selected control or tool.");
+    editorModeButton.setToolTip("Switch to QML Editor for selected control or tool.");
+    cGuiModeButton.setToolTip("Switch to Control GUI Editor for selected control or tool.");
+    wGuiModeButton.setToolTip("Switch to Application GUI Editor.");
     playButton.setToolTip("Run your application.");
     buildButton.setToolTip("Show build options.");
 
-    editButton.setIcon(QIcon(":/resources/images/text.png"));
+    editorModeButton.setIcon(QIcon(":/resources/images/text.png"));
+    cGuiModeButton.setIcon(QIcon(":/resources/images/gui.png"));
+    wGuiModeButton.setIcon(QIcon(":/resources/images/window.png"));
     playButton.setIcon(QIcon(":/resources/images/play.png"));
     buildButton.setIcon(QIcon(":/resources/images/build.png"));
 
-    connect(&editButton, SIGNAL(clicked(bool)), SLOT(handleShowOutlineClicked(bool)));
-    connect(&playButton, SIGNAL(clicked(bool)), SLOT(handleShowOutlineClicked(bool)));
-    connect(&buildButton, SIGNAL(clicked(bool)), SLOT(handleShowOutlineClicked(bool)));
+    connect(&editorModeButton, SIGNAL(clicked(bool)), SLOT(handleEditorModeButtonClicked()));
+    connect(&cGuiModeButton, SIGNAL(clicked(bool)), SLOT(handleCGuiModeButtonClicked()));
+    connect(&wGuiModeButton, SIGNAL(clicked(bool)), SLOT(handleWGuiModeButtonClicked()));
+    connect(&playButton, SIGNAL(clicked(bool)), SLOT(handlePlayButtonClicked()));
+    connect(&buildButton, SIGNAL(clicked(bool)), SLOT(handleBuildButtonClicked()));
 
     toolbar_2.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     toolbar_2.setOrientation(Qt::Vertical);
     toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
     toolbar_2.setIconSize(QSize(fit(20), fit(20)));
     toolbar_2.setFixedWidth(fit(30));
-    toolbar_2.addWidget(&editButton);
+    toolbar_2.addWidget(&wGuiModeButton);
+    toolbar_2.addWidget(&cGuiModeButton);
+    toolbar_2.addWidget(&editorModeButton);
     toolbar_2.addWidget(spacer_2);
     toolbar_2.addWidget(&playButton);
     toolbar_2.addWidget(&buildButton);
@@ -361,7 +379,7 @@ QString DesignManagerPrivate::findText(qreal ratio)
 
 void DesignManagerPrivate::scaleScene(qreal ratio)
 {
-    if (mode == WindowGUI) {
+    if (DesignManager::_mode == DesignManager::WindowGUI) {
         windowView.scale((1.0 / lastScaleOfWv) * ratio, (1.0 / lastScaleOfWv) * ratio);
         lastScaleOfWv = ratio;
     } else {
@@ -372,31 +390,29 @@ void DesignManagerPrivate::scaleScene(qreal ratio)
 
 void DesignManagerPrivate::handleSnappingClicked(bool value)
 {
-    windowScene.setSnapping(value);
+    if (DesignManager::_mode == DesignManager::WindowGUI)
+        windowScene.setSnapping(value);
+    else
+        controlScene.setSnapping(value);
 }
 
 void DesignManagerPrivate::handleShowOutlineClicked(bool value)
 {
     windowScene.setShowOutlines(value);
+    controlScene.setShowOutlines(value);
 }
 
 void DesignManagerPrivate::handleFitInSceneClicked()
 {
     auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
-    auto diff = qMin(windowView.width() / windowScene.width(),
-                     windowView.height() / windowScene.height());
-    for (auto ratio : ratios) {
-        if (roundRatio(diff) == ratio) {
-            auto itemText = findText(ratio);
-            for (int i = 0; i < zoomlLevelCombobox.count(); i++) {
-                if (zoomlLevelCombobox.itemText(i) == itemText) {
-                    zoomlLevelCombobox.setCurrentIndex(i);
-                    break;
-                }
-            }
-            break;
-        }
-    }
+    auto diff = DesignManager::_mode == DesignManager::WindowGUI ?
+                    qMin(windowView.width() / windowScene.width(),
+                         windowView.height() / windowScene.height()) :
+                    qMin(controlView.width() / controlScene.width(),
+                         controlView.height() / controlScene.height());;
+    for (auto ratio : ratios)
+        if (roundRatio(diff) == ratio)
+            zoomlLevelCombobox.setCurrentText(findText(ratio));
 }
 
 void DesignManagerPrivate::handleZoomLevelChange(const QString& text)
@@ -415,7 +431,8 @@ void DesignManagerPrivate::handlePhonePortraitButtonClicked()
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    windowScene.currentWindow()->centralize();
+    if (windowScene.currentWindow())
+        windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
@@ -428,7 +445,8 @@ void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
     phonePortraitButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    windowScene.currentWindow()->centralize();
+    if (windowScene.currentWindow())
+        windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handleDesktopSkinButtonClicked()
@@ -441,7 +459,8 @@ void DesignManagerPrivate::handleDesktopSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    windowScene.currentWindow()->centralize();
+    if (windowScene.currentWindow())
+        windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handleNoSkinButtonClicked()
@@ -454,24 +473,117 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
-    windowScene.currentWindow()->centralize();
+    if (windowScene.currentWindow())
+        windowScene.currentWindow()->centralize();
 }
 
 void DesignManagerPrivate::handleRefreshPreviewClicked()
 {
-    for (auto window : windowScene.windows())
-        window->refresh();
-    for (auto control : windowScene.controls())
-        control->refresh();
+    if (DesignManager::_mode == DesignManager::WindowGUI) {
+        for (auto window : windowScene.windows())
+            window->refresh();
+        for (auto control : windowScene.controls())
+            control->refresh();
+    } else {
+        if (controlScene.currentControl())
+            controlScene.currentControl()->refresh();
+        for (auto control : controlScene.controls())
+            control->refresh();
+    }
+}
+
+void DesignManagerPrivate::handleEditorModeButtonClicked()
+{
+    editorModeButton.setChecked(true);
+    editorModeButton.setDisabled(true);
+    cGuiModeButton.setChecked(false);
+    wGuiModeButton.setChecked(false);
+    cGuiModeButton.setEnabled(true);
+    wGuiModeButton.setEnabled(true);
+    DesignManager::setMode(DesignManager::CodeEdit);
+}
+
+void DesignManagerPrivate::handleCGuiModeButtonClicked()
+{
+    cGuiModeButton.setChecked(true);
+    cGuiModeButton.setDisabled(true);
+    editorModeButton.setChecked(false);
+    wGuiModeButton.setChecked(false);
+    editorModeButton.setEnabled(true);
+    wGuiModeButton.setEnabled(true);
+    DesignManager::setMode(DesignManager::ControlGUI);
+}
+
+void DesignManagerPrivate::handleWGuiModeButtonClicked()
+{
+    wGuiModeButton.setChecked(true);
+    wGuiModeButton.setDisabled(true);
+    cGuiModeButton.setChecked(false);
+    editorModeButton.setChecked(false);
+    cGuiModeButton.setEnabled(true);
+    editorModeButton.setEnabled(true);
+    DesignManager::setMode(DesignManager::WindowGUI);
+}
+
+void DesignManagerPrivate::handlePlayButtonClicked()
+{
+    //TODO
+}
+
+void DesignManagerPrivate::handleBuildButtonClicked()
+{
+    //TODO
+}
+
+void DesignManagerPrivate::handleModeChange()
+{
+    if (DesignManager::_mode == DesignManager::WindowGUI) {
+        if (Window::skin() == Window::Desktop) {
+            desktopSkinButton.setChecked(true);
+            handleDesktopSkinButtonClicked();
+        } else if (Window::skin() == Window::NoSkin) {
+            noSkinButton.setChecked(true);
+            handleNoSkinButtonClicked();
+        } else if (Window::skin() == Window::PhonePortrait) {
+            phonePortraitButton.setChecked(true);
+            handlePhonePortraitButtonClicked();
+        } else {
+            phoneLandscapeButton.setChecked(true);
+            handlePhoneLandscapeButtonClicked();
+        }
+        snappingButton.setChecked(windowScene.snapping());
+        zoomlLevelCombobox.setCurrentText(findText(lastScaleOfWv));
+        controlView.hide();
+        windowView.show();
+    } else if (DesignManager::_mode == DesignManager::ControlGUI) {
+        noSkinButton.setChecked(true);
+        phoneLandscapeButton.setChecked(false);
+        phonePortraitButton.setChecked(false);
+        desktopSkinButton.setChecked(false);
+        noSkinButton.setDisabled(true);
+        phonePortraitButton.setDisabled(true);
+        phoneLandscapeButton.setDisabled(true);
+        desktopSkinButton.setDisabled(true);
+        if (controlScene.currentControl())
+            controlScene.currentControl()->centralize();
+        snappingButton.setChecked(controlScene.snapping());
+        zoomlLevelCombobox.setCurrentText(findText(lastScaleOfCv));
+        windowView.hide();
+        controlView.show();
+    }
 }
 
 DesignManagerPrivate* DesignManager::_d = nullptr;
+DesignManager::Mode DesignManager::_mode = DesignManager::WindowGUI;
 
 DesignManager::DesignManager(QObject *parent)
     : QObject(parent)
 {
     if (_d) return;
     _d = new DesignManagerPrivate(this);
+
+    _d->handleModeChange();
+    connect(this, SIGNAL(modeChanged()), _d, SLOT(handleModeChange()));
 }
 
 DesignManager* DesignManager::instance()
@@ -486,14 +598,15 @@ void DesignManager::setSettleWidget(QWidget* widget)
         _d->settleWidget->setLayout(&_d->vlayout);
 }
 
-void DesignManager::showWidget()
+const DesignManager::Mode& DesignManager::mode()
 {
-    _d->windowView.show();
+    return _mode;
 }
 
-void DesignManager::hideWidget()
+void DesignManager::setMode(const Mode& mode)
 {
-    _d->windowView.hide();
+    _mode = mode;
+    emit _d->parent->modeChanged();
 }
 
 #include "designmanager.moc"

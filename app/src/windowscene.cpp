@@ -150,9 +150,8 @@ void WindowScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
     auto selectedControls = this->selectedControls();
     for (auto control : selectedControls)
-        if (_currentWindow->higherZValue() != control->zValue())
-            control->setZValue(_currentWindow->higherZValue() == -MAX_Z_VALUE
-                               ? 0 : _currentWindow->higherZValue() + 1);
+        control->setZValue(_currentWindow->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : _currentWindow->higherZValue() + 1);
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
     if (this->selectedControls().contains((Control*)itemUnderMouse))

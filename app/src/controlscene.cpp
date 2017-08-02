@@ -7,6 +7,7 @@
 #include <QDebug>
 
 #define GUIDELINE_COLOR ("#0D80E7")
+#define LINE_COLOR ("#606467")
 
 using namespace Fit;
 
@@ -109,11 +110,13 @@ void ControlScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mousePressEvent(event);
 
+    if (_currentControl == nullptr)
+        return;
+
     auto selectedControls = this->selectedControls();
     for (auto control : selectedControls)
-        if (_currentControl->higherZValue() != control->zValue())
-            control->setZValue(_currentControl->higherZValue() == -MAX_Z_VALUE
-                               ? 0 : _currentControl->higherZValue() + 1);
+        control->setZValue(_currentControl->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : _currentControl->higherZValue() + 1);
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
     if (this->selectedControls().contains((Control*)itemUnderMouse))
@@ -130,6 +133,9 @@ void ControlScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
+
+    if (_currentControl == nullptr)
+        return;
 
     if (_currentControl && selectedControls().size() > 0 &&
         _d->itemPressed && !Resizer::resizing()) {
@@ -155,6 +161,9 @@ void ControlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     _d->itemPressed = false;
     _d->itemMoving = false;
 
+    if (_currentControl == nullptr)
+        return;
+
     for (auto control : currentControl()->childControls())
         control->setDragging(false);
 
@@ -165,7 +174,7 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    if ((_d->itemMoving || Resizer::resizing()) && _snapping) {
+    if ((_d->itemMoving || Resizer::resizing()) && _snapping && _currentControl != nullptr) {
         auto guideLines = _currentControl->guideLines();
         QPen pen(GUIDELINE_COLOR);
         pen.setWidthF(1.0);
@@ -182,6 +191,18 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
             painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
         }
+    }
+
+
+    if (_currentControl == nullptr) {
+        QPen pen;
+        QRectF rect(0, 0, fit(150), fit(60));
+        rect.moveCenter(sceneRect().center());
+        pen.setStyle(Qt::DotLine);
+        pen.setColor(LINE_COLOR);
+        painter->setPen(pen);
+        painter->drawRect(rect);
+        painter->drawText(rect, "No Items Selected", QTextOption(Qt::AlignCenter));
     }
 }
 

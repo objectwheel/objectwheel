@@ -60,6 +60,8 @@ class Control : public QGraphicsWidget
         friend class ControlScene;
         friend class ControlView;
         friend class WindowScene;
+        friend class DesignManager;
+        friend class DesignManagerPrivate;
 
     public:
         explicit Control(const QUrl& url, Control* parent = Q_NULLPTR);
