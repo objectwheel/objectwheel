@@ -8,6 +8,8 @@
 #include <QList>
 #include <QMap>
 
+#define NONGUI_CONTROL_SIZE (fit(40))
+
 class QmlPreviewerPrivate;
 
 struct PreviewResult {
@@ -18,7 +20,7 @@ struct PreviewResult {
         QList<QString> events;
         QMap<QString, QVariant::Type> properties;
         bool clip;
-        bool initial;
+        bool gui;
         int zValue;
 };
 

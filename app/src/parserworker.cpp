@@ -38,25 +38,30 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
         return;
     }
 
-    auto bproperty = QByteArray().insert(0, property);
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier;
+    try {
+        auto bproperty = QByteArray().insert(0, property);
+        auto model = Model::create("QtQuick.Item", 1, 0);
+        auto rewriterView = new RewriterView(RewriterView::Amend, model);
+        auto textModifier = new NotIndentingTextEditModifier;
 
-    textModifier->setText(fileContent);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(fileName));
+        textModifier->setText(fileContent);
+        model->setTextModifier(textModifier);
+        model->setRewriterView(rewriterView);
+        model->setFileUrl(QUrl::fromLocalFile(fileName));
 
-    auto rootNode = rewriterView->rootModelNode();
-    auto objectNode = QmlObjectNode(rootNode);
+        auto rootNode = rewriterView->rootModelNode();
+        auto objectNode = QmlObjectNode(rootNode);
 
-    objectNode.setVariantProperty(bproperty, value);
-    wrfile(fileName, QByteArray().insert(0, textModifier->text()));
+        objectNode.setVariantProperty(bproperty, value);
+        wrfile(fileName, QByteArray().insert(0, textModifier->text()));
 
-    textModifier->deleteLater();
-    rewriterView->deleteLater();
-    model->deleteLater();
+        textModifier->deleteLater();
+        rewriterView->deleteLater();
+        model->deleteLater();
+    } catch (Exception& e) {
+        // TODO
+    }
+
     emit done();
 }
 
@@ -68,24 +73,29 @@ void ParserWorker::removeVariantProperty(const QString& fileName, const QString&
         return;
     }
 
-    auto bproperty = QByteArray().insert(0, property);
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier;
+    try {
+        auto bproperty = QByteArray().insert(0, property);
+        auto model = Model::create("QtQuick.Item", 1, 0);
+        auto rewriterView = new RewriterView(RewriterView::Amend, model);
+        auto textModifier = new NotIndentingTextEditModifier;
 
-    textModifier->setText(fileContent);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(fileName));
+        textModifier->setText(fileContent);
+        model->setTextModifier(textModifier);
+        model->setRewriterView(rewriterView);
+        model->setFileUrl(QUrl::fromLocalFile(fileName));
 
-    auto rootNode = rewriterView->rootModelNode();
-    auto objectNode = QmlObjectNode(rootNode);
+        auto rootNode = rewriterView->rootModelNode();
+        auto objectNode = QmlObjectNode(rootNode);
 
-    objectNode.removeProperty(bproperty);
-    wrfile(fileName, QByteArray().insert(0, textModifier->text()));
+        objectNode.removeProperty(bproperty);
+        wrfile(fileName, QByteArray().insert(0, textModifier->text()));
 
-    textModifier->deleteLater();
-    rewriterView->deleteLater();
-    model->deleteLater();
+        textModifier->deleteLater();
+        rewriterView->deleteLater();
+        model->deleteLater();
+    } catch (Exception& e) {
+        // TODO
+    }
+
     emit done();
 }

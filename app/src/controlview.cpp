@@ -230,6 +230,7 @@ ControlView::ControlView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
     , _d(new ControlViewPrivate(this))
 {
+    setViewportUpdateMode(FullViewportUpdate);
 }
 
 void ControlView::resizeEvent(QResizeEvent* event)

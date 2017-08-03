@@ -79,14 +79,17 @@ class Control : public QGraphicsWidget
         int lowerZValue() const;
         bool stickSelectedControlToGuideLines() const;
         QVector<QLineF> guideLines() const;
+        bool gui() const;
 
         static bool showOutline();
         static void setShowOutline(const bool value);
+
 
     public slots:
         virtual void refresh();
 
     protected:
+        void setGui(bool value);
         void setDragging(bool dragging);
         void setDragIn(bool dragIn);
         void setClip(bool clip);
@@ -127,6 +130,7 @@ class Control : public QGraphicsWidget
         bool _dragging;
         bool _dragIn;
         bool _clip;
+        bool _gui;
         static bool _showOutline;
 };
 

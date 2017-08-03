@@ -41,7 +41,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/windowview.h \
                              $$PWD/windowswidget.h \
                              $$PWD/controlscene.h \
-                             $$PWD/controlview.h
+                             $$PWD/controlview.h \
+    $$PWD/controlsscrollpanel.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -84,7 +85,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/windowview.cpp \
                              $$PWD/windowswidget.cpp \
                              $$PWD/controlscene.cpp \
-                             $$PWD/controlview.cpp
+                             $$PWD/controlview.cpp \
+    $$PWD/controlsscrollpanel.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

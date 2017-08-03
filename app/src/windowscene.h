@@ -2,7 +2,7 @@
 #define WINDOWSCENE_H
 
 #include <control.h>
-
+#include <controlsscrollpanel.h>
 #include <QGraphicsScene>
 #include <QPointer>
 
@@ -38,6 +38,8 @@ class WindowScene : public QGraphicsScene
 
         static QPointF lastMousePos();
 
+        static ControlsScrollPanel* nonGuiControlsPanel();
+
     protected:
         void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
         void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
@@ -50,6 +52,7 @@ class WindowScene : public QGraphicsScene
         static QPointer<Window> _currentWindow;
         static bool _snapping;
         static QPointF _lastMousePos;
+        static ControlsScrollPanel _nonGuiControlsPanel;
 
 };
 

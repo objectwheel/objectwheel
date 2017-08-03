@@ -1,6 +1,7 @@
 #include <qmlpreviewer.h>
 #include <fit.h>
 #include <windowscene.h>
+#include <filemanager.h>
 
 #include <QApplication>
 #include <QQuickWindow>
@@ -132,14 +133,21 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
         return;
     }
 
-    result.initial = !size.isValid();
     result.id = qmlContext(qmlObject)->nameForObject(qmlObject);
     result.properties = _d->extractProperties(qmlObject);
     result.events = _d->extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
+    result.gui = (qmlObject->inherits("QQuickItem") || window);
 
     if (result.id.isEmpty())
         result.id = "control";
+
+    if (result.gui == false) {
+        result.preview = QPixmap(dname(url.toLocalFile()) + separator() + "icon.png")
+                         .scaled(NONGUI_CONTROL_SIZE * qApp->devicePixelRatio(), NONGUI_CONTROL_SIZE * qApp->devicePixelRatio());
+        emit previewReady(result);
+        return;
+    }
 
     if (window == nullptr) {
         auto item = static_cast<QQuickItem*>(qmlObject);

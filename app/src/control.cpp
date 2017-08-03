@@ -235,12 +235,14 @@ class ControlPrivate : public QObject
         QTimer refreshTimer;
         QmlPreviewer qmlPreviewer;
         bool hoverOn;
+        bool initialized;
 };
 
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
     , hoverOn(false)
+    , initialized(false)
 {
     int i = 0;
     for (auto& resizer : parent->_resizers) {
@@ -321,18 +323,26 @@ void ControlPrivate::refreshPreview()
 {
     refreshTimer.stop();
 
-    QSizeF size;
-    if (!parent->size().isNull())
-        size = parent->size();
-
-    qmlPreviewer.requestReview(parent->url(), size);
+    if (initialized)
+        qmlPreviewer.requestReview(parent->url(), parent->size());
+    else
+        qmlPreviewer.requestReview(parent->url());
 }
 
+
+
+#include <QLabel>
+#include <QScrollArea>
+#include <QImage>
+#include <QPixmap>
+#include <QPalette>
+#include <QGraphicsProxyWidget>
+#include <controlscene.h>
 void ControlPrivate::updatePreview(const PreviewResult& result)
 {
     itemPixmap = result.preview;
 
-    if (result.initial) {
+    if (initialized == false) {
         auto scene = static_cast<WindowScene*>(parent->scene());
         auto currentWindow = scene->currentWindow();
         auto id = result.id;
@@ -351,21 +361,43 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 
         scene->clearSelection();
 
+        parent->setFlag(Control::ItemIsFocusable);
+        parent->setFlag(Control::ItemIsSelectable);
+        parent->setAcceptHoverEvents(true);
         parent->setId(id);
-        parent->setPos(result.pos);
-        parent->resize(result.size);
-        parent->setClip(result.clip);
-        parent->setZValue(result.zValue);
+        parent->setGui(result.gui);
         parent->setProperties(result.properties);
         parent->setEvents(result.events);
         parent->setSelected(true);
+
+        if (result.gui == false) {
+            parent->setParentItem(WindowScene::currentWindow()); //BUG
+            parent->_controlTransaction.flushParentChange();
+            parent->_controlTransaction.setGeometryTransactionsEnabled(false);
+            parent->_controlTransaction.setParentTransactionsEnabled(false);
+            parent->_controlTransaction.setZTransactionsEnabled(false);
+            WindowScene::nonGuiControlsPanel()->addControl(parent);
+            parent->resize(NONGUI_CONTROL_SIZE, NONGUI_CONTROL_SIZE);
+            for (auto& resizer : parent->_resizers)
+                resizer.setDisabled(true);
+        } else {
+            parent->setFlag(Control::ItemIsMovable);
+            parent->setFlag(Control::ItemSendsGeometryChanges);
+            parent->setAcceptDrops(true);
+            parent->setPos(result.pos);
+            parent->resize(result.size);
+            parent->setClip(result.clip);
+            parent->setZValue(result.zValue);
+        }
         parent->_controlTransaction.flushParentChange();
     }
 
     parent->update();
 
-    if (result.initial)
+    if (initialized == false) {
+        initialized = true;
         emit parent->initialized();
+    }
 
     emit parent->previewChanged();
 }
@@ -398,12 +430,6 @@ Control::Control(const QUrl& url, Control* parent)
     , _dragIn(false)
     , _clip(true)
 {
-    setFlag(ItemIsFocusable);
-    setFlag(ItemIsSelectable);
-    setFlag(ItemIsMovable);
-    setFlag(ItemSendsGeometryChanges);
-    setAcceptDrops(true);
-    setAcceptHoverEvents(true);
     setGeometry(0, 0, 0, 0);
 }
 
@@ -612,6 +638,16 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             break;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+bool Control::gui() const
+{
+    return _gui;
+}
+
+void Control::setGui(bool value)
+{
+    _gui = value;
 }
 
 QList<QString> Control::events() const
@@ -1208,9 +1244,9 @@ void WindowPrivate::applySkinChange()
             window->resize(size);
         else
             window->update();
-        for (auto& resizer : window->_resizers) {
+
+        for (auto& resizer : window->_resizers)
             resizer.setDisabled(!resizable);
-        }
     }
 }
 

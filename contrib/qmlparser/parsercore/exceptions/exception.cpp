@@ -61,7 +61,7 @@ bool Exception::shouldAssert()
 
 bool Exception::warnAboutException()
 {
-    return true;
+    return false;
 }
 
 /*!
