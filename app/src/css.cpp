@@ -183,10 +183,10 @@ void CSS::init()
     Toolbar = QString(CSS_TOOLBAR).arg(fit(12)).arg(fit(2)).arg(QColor("#6BB64B").name()).arg(QColor("#6BB64B").darker(115).name());
 
     /* DesignerToolbar */
-    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(QColor("#ABAFB2").name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name());
+    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(QColor("#ABAFB2").lighter(110).name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name());
 
     /* DesignerToolbarV */
-    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(QColor("#ABAFB2").name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name());
+    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(QColor("#ABAFB2").lighter(110).name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name());
 
     /* ToolboxButton */
     ToolboxButton = QString(CSS_TOOLBOX_BUTTON).arg(fit(20));

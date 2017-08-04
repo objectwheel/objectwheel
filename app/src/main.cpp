@@ -16,7 +16,7 @@
 #define PIXEL_SIZE 13
 #define REF_WIDTH 1000
 #define REF_HEIGHT 600
-#define REF_DPI 127
+#define REF_DPI 144
 
 /* Far tasks */
 /*-----------*/

@@ -4,25 +4,9 @@
 #include <control.h>
 #include <QGraphicsWidget>
 #include <QMarginsF>
+#include <QScrollBar>
 
-class ControlsScrollPanel;
 class ControlsScrollPanelPrivate;
-
-class ControlsScrollBar : public QGraphicsWidget
-{
-        Q_OBJECT
-    public:
-        explicit ControlsScrollBar(QGraphicsWidget* parent = 0);
-
-        Qt::Orientation orientation() const;
-        void setOrientation(const Qt::Orientation& orientation);
-
-    private:
-        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
-
-    private:
-        Qt::Orientation _orientation;
-};
 
 class ControlsScrollPanel : public QGraphicsWidget
 {
@@ -30,7 +14,7 @@ class ControlsScrollPanel : public QGraphicsWidget
         friend class ControlsScrollPanelPrivate;
 
     public:
-        explicit ControlsScrollPanel(QGraphicsWidget *parent = 0);
+        explicit ControlsScrollPanel(QGraphicsScene* scene, QGraphicsWidget *parent = 0);
 
         Qt::Orientation orientation() const;
         void setOrientation(const Qt::Orientation& orientation);
@@ -42,8 +26,8 @@ class ControlsScrollPanel : public QGraphicsWidget
         QMarginsF margins() const;
         void setMargins(const QMarginsF& margins);
 
-        int spacing() const;
-        void setSpacing(int spacing);
+        qreal spacing() const;
+        void setSpacing(qreal spacing);
 
         Qt::ScrollBarPolicy horizontalScrollBarPolicy() const;
         void setHorizontalScrollBarPolicy(const Qt::ScrollBarPolicy& horizontalScrollBarPolicy);
@@ -54,23 +38,27 @@ class ControlsScrollPanel : public QGraphicsWidget
         bool showIds() const;
         void setShowIds(bool showIds);
 
+    private slots:
+        void handleHBarValueChange(int value);
+        void handleVBarValueChange(int value);
+
     private:
         void resizeEvent(QGraphicsSceneResizeEvent *event) override;
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+        void wheelEvent(QGraphicsSceneWheelEvent *event) override;
 
     private:
         ControlsScrollPanelPrivate* _d;
         QGraphicsWidget _viewport;
         Qt::Orientation _orientation;
-        Qt::Alignment _alignment;
         QList<Control*> _controls;
         QMarginsF _margins;
-        int _spacing;
+        qreal _spacing;
         Qt::ScrollBarPolicy _horizontalScrollBarPolicy;
         Qt::ScrollBarPolicy _verticalScrollBarPolicy;
         bool _showIds;
-        ControlsScrollBar _horizontalScrollBar;
-        ControlsScrollBar _verticalScrollBar;
+        QScrollBar _horizontalScrollBar;
+        QScrollBar _verticalScrollBar;
 };
 
 #endif // CONTROLSSCROLLPANEL_H

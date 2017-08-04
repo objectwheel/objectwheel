@@ -368,7 +368,6 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         parent->setGui(result.gui);
         parent->setProperties(result.properties);
         parent->setEvents(result.events);
-        parent->setSelected(true);
 
         if (result.gui == false) {
             parent->setParentItem(WindowScene::currentWindow()); //BUG
@@ -376,8 +375,8 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
             parent->_controlTransaction.setGeometryTransactionsEnabled(false);
             parent->_controlTransaction.setParentTransactionsEnabled(false);
             parent->_controlTransaction.setZTransactionsEnabled(false);
-            WindowScene::nonGuiControlsPanel()->addControl(parent);
             parent->resize(NONGUI_CONTROL_SIZE, NONGUI_CONTROL_SIZE);
+            WindowScene::nonGuiControlsPanel()->addControl(parent);
             for (auto& resizer : parent->_resizers)
                 resizer.setDisabled(true);
         } else {
@@ -389,6 +388,8 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
             parent->setClip(result.clip);
             parent->setZValue(result.zValue);
         }
+
+        parent->setSelected(true);
         parent->_controlTransaction.flushParentChange();
     }
 

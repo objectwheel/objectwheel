@@ -37,7 +37,7 @@ QList<Window*> WindowScene::_windows;
 QPointer<Window> WindowScene::_currentWindow = nullptr;
 bool WindowScene::_snapping = true;
 QPointF WindowScene::_lastMousePos;
-ControlsScrollPanel WindowScene::_nonGuiControlsPanel;
+ControlsScrollPanel* WindowScene::_nonGuiControlsPanel = nullptr;
 
 WindowScene::WindowScene(QObject *parent)
     : QGraphicsScene(parent)
@@ -46,12 +46,12 @@ WindowScene::WindowScene(QObject *parent)
         return;
     _d = new WindowScenePrivate(this);
 
-    addItem(&_nonGuiControlsPanel);
+    _nonGuiControlsPanel = new ControlsScrollPanel(this);
     connect(this, &WindowScene::changed, [=] {
         if (_currentWindow) {
             setSceneRect(currentWindow()->frameGeometry().adjusted(-fit(30), -fit(8), fit(30), fit(8)));
-            _nonGuiControlsPanel.setGeometry(sceneRect().width() / 2.0 - fit(25), -sceneRect().height() / 2.0 + fit(8),
-                                             fit(50), sceneRect().height() - fit(16));
+            _nonGuiControlsPanel->setGeometry(sceneRect().width() / 2.0 - fit(27), -sceneRect().height() / 2.0 + fit(8),
+                                             fit(54), sceneRect().height() - fit(16));
         }
     });
 }
@@ -230,7 +230,7 @@ void WindowScene::drawForeground(QPainter* painter, const QRectF& rect)
 
 ControlsScrollPanel* WindowScene::nonGuiControlsPanel()
 {
-    return &_nonGuiControlsPanel;
+    return _nonGuiControlsPanel;
 }
 
 QPointF WindowScene::lastMousePos()

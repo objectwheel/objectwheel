@@ -52,7 +52,7 @@ class WindowScene : public QGraphicsScene
         static QPointer<Window> _currentWindow;
         static bool _snapping;
         static QPointF _lastMousePos;
-        static ControlsScrollPanel _nonGuiControlsPanel;
+        static ControlsScrollPanel* _nonGuiControlsPanel;
 
 };
 
