@@ -38,6 +38,9 @@ class ControlsScrollPanel : public QGraphicsWidget
         bool showIds() const;
         void setShowIds(bool showIds);
 
+    public slots:
+        void clear();
+
     private slots:
         void handleHBarValueChange(int value);
         void handleVBarValueChange(int value);

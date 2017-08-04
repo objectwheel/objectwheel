@@ -10,7 +10,8 @@
 using namespace Fit;
 
 #define SCROLLBAR_LENGTH (fit(6))
-#define ID_LABEL_LENGTH (fit(6))
+#define ID_LABEL_LENGTH (fit(10))
+#define FONT_PIXELSIZE (fit(8))
 #define STYLE_SHEET "\
 QScrollBar { \
     background: transparent; \
@@ -53,6 +54,7 @@ class ControlsScrollPanelPrivate : public QObject
 
     public:
         ControlsScrollPanel* parent;
+        QList<QGraphicsSimpleTextItem*> idTexts;
 };
 
 
@@ -114,7 +116,7 @@ QList<qreal> ControlsScrollPanelPrivate::findYs(const QList<Control*>& controls,
 
 void ControlsScrollPanelPrivate::updateViewport()
 {
-    if (parent->controls().size() < 1) {
+    if (parent->_controls.size() < 1) {
         parent->_horizontalScrollBar.hide();
         parent->_verticalScrollBar.hide();
         parent->hide();
@@ -148,11 +150,11 @@ void ControlsScrollPanelPrivate::updateViewport()
     }
 
     if (parent->_orientation == Qt::Vertical) {
-        totalHeight += (parent->controls().size() - 1) * parent->_spacing;
-        totalHeight += parent->_showIds ? parent->controls().size() * ID_LABEL_LENGTH : 0;
+        totalHeight += (parent->_controls.size() - 1) * parent->_spacing;
+        totalHeight += parent->_showIds ? parent->_controls.size() * ID_LABEL_LENGTH : 0;
     } else {
-        totalWidth += (parent->controls().size() - 1) * parent->_spacing;
-        totalWidth += parent->_showIds ? parent->controls().size() * ID_LABEL_LENGTH : 0;
+        totalWidth += (parent->_controls.size() - 1) * parent->_spacing;
+        totalWidth += parent->_showIds ? parent->_controls.size() * ID_LABEL_LENGTH : 0;
     }
 
     if (parent->_verticalScrollBarPolicy == Qt::ScrollBarAlwaysOn) {
@@ -212,8 +214,22 @@ void ControlsScrollPanelPrivate::updateViewport()
                                     parent->_spacing,
                                     parent->_showIds);
 
-    for (int i = 0; i < parent->_controls.size(); i++)
-        parent->_controls[i]->setPos(xS[i], yS[i]);
+    QFont font;
+    font.setPixelSize(FONT_PIXELSIZE);
+    for (int i = 0; i < parent->_controls.size(); i++) {
+        auto control = parent->_controls[i];
+        control->setPos(xS[i], yS[i]);
+        if (parent->_showIds) {
+            QRectF rect(control->rect().bottomLeft(), idTexts[i]->boundingRect().size());
+            rect.adjust(0, fit(2), 0, fit(2));
+            rect.moveCenter({control->x(), rect.y()});
+            idTexts[i]->setFont(font);
+            idTexts[i]->setText(control->id());
+            idTexts[i]->setPos(control->rect().bottomLeft());
+            idTexts[i]->setToolTip(control->id());
+            // idTexts[i]->set
+        }
+    }
 
     parent->update();
 }
@@ -227,8 +243,8 @@ ControlsScrollPanel::ControlsScrollPanel(QGraphicsScene* scene, QGraphicsWidget 
     , _d(new ControlsScrollPanelPrivate(this))
     , _viewport(this)
     , _orientation(Qt::Vertical)
-    , _margins(fit(3), fit(3), fit(3), fit(3))
-    , _spacing(fit(6))
+    , _margins(fit(5), fit(5), fit(5), fit(5))
+    , _spacing(fit(5))
     , _horizontalScrollBarPolicy(Qt::ScrollBarAsNeeded)
     , _verticalScrollBarPolicy(Qt::ScrollBarAsNeeded)
     , _showIds(false)
@@ -272,15 +288,22 @@ void ControlsScrollPanel::setOrientation(const Qt::Orientation& orientation)
 void ControlsScrollPanel::addControl(Control* control)
 {
     _controls << control;
-    control->setParentItem(&_viewport);
     connect(control, SIGNAL(geometryChanged()), _d, SLOT(updateViewport()));
+//    connect(control, SIGNAL(destroyed(QObject*)), _d, SLOT(updateViewport()));
+    if (_showIds)
+        _d->idTexts << new QGraphicsSimpleTextItem(this);
     _d->updateViewport();
 }
 
 void ControlsScrollPanel::removeControl(Control* control)
 {
+    if (_showIds) {
+        int index = _controls.indexOf(control);
+        scene()->removeItem(_d->idTexts.at(index));
+        delete _d->idTexts.at(index);
+        _d->idTexts.removeAt(index);
+    }
     _controls.removeOne(control);
-    control->setParentItem(0); //FIXME
     control->disconnect(_d);
     _d->updateViewport();
 }
@@ -337,7 +360,23 @@ bool ControlsScrollPanel::showIds() const
 void ControlsScrollPanel::setShowIds(bool showIds)
 {
     _showIds = showIds;
+    if (_showIds) {
+        for (int i = _controls.size(); i--;)
+            _d->idTexts << new QGraphicsSimpleTextItem(this);
+    } else {
+        for (auto textItem : _d->idTexts) {
+            scene()->removeItem(textItem);
+            delete textItem;
+        }
+        _d->idTexts.clear();
+    }
     _d->updateViewport();
+}
+
+void ControlsScrollPanel::clear()
+{
+    for (auto control : _controls)
+        removeControl(control);
 }
 
 void ControlsScrollPanel::handleHBarValueChange(int value)

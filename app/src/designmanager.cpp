@@ -292,7 +292,6 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 DesignManagerPrivate::~DesignManagerPrivate()
 {
     dummyWidget.setLayout(&vlayout);
-    QObject::~QObject();
 }
 
 qreal DesignManagerPrivate::roundRatio(qreal ratio)

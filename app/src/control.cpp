@@ -329,15 +329,6 @@ void ControlPrivate::refreshPreview()
         qmlPreviewer.requestReview(parent->url());
 }
 
-
-
-#include <QLabel>
-#include <QScrollArea>
-#include <QImage>
-#include <QPixmap>
-#include <QPalette>
-#include <QGraphicsProxyWidget>
-#include <controlscene.h>
 void ControlPrivate::updatePreview(const PreviewResult& result)
 {
     itemPixmap = result.preview;
@@ -370,7 +361,7 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         parent->setEvents(result.events);
 
         if (result.gui == false) {
-            parent->setParentItem(WindowScene::currentWindow()); //BUG
+            parent->setParentItem(WindowScene::currentWindow()); //BUG: occurs when database loading
             parent->_controlTransaction.flushParentChange();
             parent->_controlTransaction.setGeometryTransactionsEnabled(false);
             parent->_controlTransaction.setParentTransactionsEnabled(false);
@@ -470,6 +461,7 @@ void Control::setId(const QString& id)
 {
     QString prevId = _id;
     _id = id;
+    setToolTip(id);
     emit idChanged(prevId);
 }
 
@@ -731,7 +723,10 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
 
-    if (parentControl() && parentControl()->clip() && !_dragging)
+    if (gui() && parentControl() && parentControl()->clip() && !_dragging)
+        painter->setClipRect(rect().intersected(parentControl()->mapToItem(this, parentControl()->rect().adjusted(1, 1, -1, -1))
+                                                .boundingRect()));
+    if (gui() == false) //FIXME
         painter->setClipRect(rect().intersected(parentControl()->mapToItem(this, parentControl()->rect().adjusted(1, 1, -1, -1))
                                                 .boundingRect()));
 
@@ -1259,8 +1254,9 @@ Window::Window(const QUrl& url, Window* parent)
     : Control(url, parent)
     , _d(new WindowPrivate(this))
 {
-    setFlag(ItemIsMovable, false);
-
+    connect(this, &Window::initialized, [=] {
+        setFlag(ItemIsMovable, false);
+    });
     connect(this, &Window::previewChanged, [=] {
         WindowPrivate::applySkinChange();
         this->disconnect(SIGNAL(previewChanged()));

@@ -47,11 +47,14 @@ WindowScene::WindowScene(QObject *parent)
     _d = new WindowScenePrivate(this);
 
     _nonGuiControlsPanel = new ControlsScrollPanel(this);
+    _nonGuiControlsPanel->setShowIds(true);
+    _nonGuiControlsPanel->setMargins({fit(26), fit(3), fit(3), fit(3)});
     connect(this, &WindowScene::changed, [=] {
         if (_currentWindow) {
-            setSceneRect(currentWindow()->frameGeometry().adjusted(-fit(30), -fit(8), fit(30), fit(8)));
-            _nonGuiControlsPanel->setGeometry(sceneRect().width() / 2.0 - fit(27), -sceneRect().height() / 2.0 + fit(8),
-                                             fit(54), sceneRect().height() - fit(16));
+            setSceneRect(currentWindow()->frameGeometry().adjusted(-fit(108), -fit(8), fit(108), fit(8)));
+            _nonGuiControlsPanel->setGeometry(currentWindow()->frameGeometry().width() / 2.0 + fit(4),
+                                              -currentWindow()->frameGeometry().height() / 2.0,
+                                             fit(100), currentWindow()->frameGeometry().height());
         }
     });
 }
@@ -82,18 +85,15 @@ void WindowScene::addWindow(Window* window)
 
 void WindowScene::removeWindow(Window* window)
 {
-    if (!_windows.contains(window))
+    if (_windows.contains(window) == false ||
+        window->isMain())
         return;
 
     _d->parent->removeItem(window);
     _windows.removeOne(window);
 
-    if (_currentWindow == window) {
-        if (_windows.size() > 0)
-            setCurrentWindow(_windows[0]);
-        else
-            _currentWindow = nullptr;
-    }
+    if (_currentWindow == window)
+        setCurrentWindow(_windows[0]);
 }
 
 Window* WindowScene::currentWindow()
@@ -103,7 +103,8 @@ Window* WindowScene::currentWindow()
 
 void WindowScene::setCurrentWindow(Window* currentWindow)
 {
-    if (!_windows.contains(currentWindow) || _currentWindow == currentWindow)
+    if (_windows.contains(currentWindow) == false ||
+        _currentWindow == currentWindow)
         return;
 
     if (_currentWindow)
@@ -111,6 +112,11 @@ void WindowScene::setCurrentWindow(Window* currentWindow)
 
     _currentWindow = currentWindow;
     _currentWindow->setVisible(true);
+
+    _nonGuiControlsPanel->clear();
+    for (auto control : currentWindow->childControls())
+        if (control->gui() == false)
+            _nonGuiControlsPanel->addControl(control);
 }
 
 void WindowScene::removeControl(Control* control)

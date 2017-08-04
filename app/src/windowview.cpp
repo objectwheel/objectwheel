@@ -261,6 +261,12 @@ void WindowView::contextMenuEvent(QContextMenuEvent* event)
         _d->cutAct.setDisabled(false);
         _d->copyAct.setDisabled(false);
         _d->deleteAct.setDisabled(false);
+        for (auto sc : selectedControls) {
+            if (sc->gui() == false) {
+                _d->sendBackAct.setDisabled(true);
+                _d->bringFrontAct.setDisabled(true);
+            }
+        }
     }
     _d->menu.exec(event->globalPos());
 }
