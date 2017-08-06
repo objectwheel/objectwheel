@@ -26,13 +26,13 @@ Item {
     onTargetsChanged: {
         if (targets.length > 0 && places.length == targets.length) {
             for(var i = 0; i < targets.length; i++) {
-                if (places[i] == Item.Top) {
+                if (places[i] === Item.Top) {
                     shadowComponent.createObject(targets[i].parent, {"anchors.fill": targets[i], "source": targets[i],
                                                      "verticalOffset": - offset})
-                } else if (places[i] == Item.Bottom) {
+                } else if (places[i] === Item.Bottom) {
                     shadowComponent.createObject(targets[i].parent, {"anchors.fill": targets[i], "source": targets[i],
                                                      "verticalOffset": offset})
-                } else if (places[i] == Item.Right) {
+                } else if (places[i] === Item.Right) {
                     shadowComponent.createObject(targets[i].parent, {"anchors.fill": targets[i], "source": targets[i],
                                                      "horizontalOffset": offset})
                 } else {

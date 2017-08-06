@@ -3,6 +3,7 @@
 #include <qmlpreviewer.h>
 #include <windowscene.h>
 #include <savemanager.h>
+#include <designmanager.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -334,18 +335,23 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
     itemPixmap = result.preview;
 
     if (initialized == false) {
-        auto scene = static_cast<WindowScene*>(parent->scene());
-        auto currentWindow = scene->currentWindow();
+        auto scene = static_cast<ControlScene*>(parent->scene());
+        auto mainControl = scene->mainControl();
         auto id = result.id;
 
         QStringList windowNames;
-        for (auto window : scene->windows())
-            if (window == parent)
-                continue;
-            else
-                windowNames << window->id();
+        if (DesignManager::mode() == DesignManager::WindowGUI) {
+            for (auto window : DesignManager::windowScene()->windows()) {
+                if (window == parent)
+                    continue;
+                else
+                    windowNames << window->id();
+            }
+        } else {
+            windowNames << DesignManager::controlScene()->mainControl()->id();
+        }
 
-        for (int i = 1; currentWindow->contains(id) || windowNames.contains(id); i++)
+        for (int i = 1; mainControl->contains(id) || windowNames.contains(id); i++)
             id = result.id + QString::number(i);
 
         SaveManager::addSave(id, parent->url().toLocalFile());
@@ -361,13 +367,13 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         parent->setEvents(result.events);
 
         if (result.gui == false) {
-            parent->setParentItem(WindowScene::currentWindow()); //BUG: occurs when database loading
+            parent->setParentItem(DesignManager::currentScene()->mainControl()); //BUG: occurs when database loading
             parent->_controlTransaction.flushParentChange();
             parent->_controlTransaction.setGeometryTransactionsEnabled(false);
             parent->_controlTransaction.setParentTransactionsEnabled(false);
             parent->_controlTransaction.setZTransactionsEnabled(false);
             parent->resize(NONGUI_CONTROL_SIZE, NONGUI_CONTROL_SIZE);
-            WindowScene::nonGuiControlsPanel()->addControl(parent);
+            DesignManager::currentScene()->nonGuiControlsPanel()->addControl(parent);
             for (auto& resizer : parent->_resizers)
                 resizer.setDisabled(true);
         } else {
@@ -423,6 +429,9 @@ Control::Control(const QUrl& url, Control* parent)
     , _clip(true)
 {
     setGeometry(0, 0, 0, 0);
+    connect(this, &Control::visibleChanged, [=] {
+        refresh();
+    });
 }
 
 bool Control::showOutline()
@@ -470,9 +479,19 @@ QUrl Control::url() const
     return _url;
 }
 
+bool Control::contains(const QString& id) const
+{
+    for (auto control : childControls()) {
+        if (control->id() == id)
+            return true;
+    }
+    return false;
+}
+
 void Control::refresh()
 {
-    _d->refreshTimer.start();
+    if (scene())
+        _d->refreshTimer.start();
 }
 
 void Control::centralize()
@@ -568,13 +587,13 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         control != this) {
         control->setDragIn(true);
 
-        auto scene = static_cast<WindowScene*>(this->scene());
-        for (auto c : scene->currentWindow()->childControls())
+        auto scene = static_cast<ControlScene*>(this->scene());
+        for (auto c : scene->mainControl()->childControls())
             if (c != control)
                 c->setDragIn(false);
 
-        if (scene->currentWindow() != control)
-            scene->currentWindow()->setDragIn(false);
+        if (scene->mainControl() != control)
+            scene->mainControl()->setDragIn(false);
     }
 
     if (event->button() == Qt::MidButton)
@@ -587,9 +606,9 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseReleaseEvent(event);
 
-    auto scene = static_cast<WindowScene*>(this->scene());
+    auto scene = static_cast<ControlScene*>(this->scene());
 
-    for (auto control : scene->currentWindow()->childControls()) {
+    for (auto control : scene->mainControl()->childControls()) {
         if (control->dragIn() && dragging() &&
             parentControl() != control) {
             control->dropControl(this);
@@ -599,13 +618,13 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         control->setDragIn(false);
     }
 
-    if (scene->currentWindow()->dragIn() && dragging() &&
-        parentControl() != scene->currentWindow()) {
-        scene->currentWindow()->dropControl(this);
+    if (scene->mainControl()->dragIn() && dragging() &&
+        parentControl() != scene->mainControl()) {
+        scene->mainControl()->dropControl(this);
         scene->clearSelection();
-        scene->currentWindow()->setSelected(true);
+        scene->mainControl()->setSelected(true);
     }
-    scene->currentWindow()->setDragIn(false);
+    scene->mainControl()->setDragIn(false);
 
     event->accept();
 }
@@ -781,11 +800,26 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
+void Control::cleanContent()
+{
+    auto scene = static_cast<ControlScene*>(this->scene());
+
+    if (scene == nullptr)
+        return;
+
+    scene->removeChildControlsOnly(this);
+}
+
 bool Control::stickSelectedControlToGuideLines() const
 {
     bool ret = false;
-    auto scene = static_cast<WindowScene*>(this->scene());
+    auto scene = static_cast<ControlScene*>(this->scene());
+
+    if (scene == nullptr)
+        return ret;
+
     auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
 
     if (selectedControls.size() <= 0)
         return ret;
@@ -1058,13 +1092,18 @@ bool Control::stickSelectedControlToGuideLines() const
 
 QVector<QLineF> Control::guideLines() const
 {
-    auto scene = static_cast<WindowScene*>(this->scene());
+    QVector<QLineF> lines;
+    auto scene = static_cast<ControlScene*>(this->scene());
+
+    if (scene == nullptr)
+        return lines;
+
     auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
 
     if (selectedControls.size() <= 0)
-        return QVector<QLineF>();
+        return lines;
 
-    QVector<QLineF> lines;
     auto control = selectedControls[0];
     auto parent = control->parentControl();
     auto geometry = control->geometry();
@@ -1234,7 +1273,7 @@ void WindowPrivate::applySkinChange()
             break;
     }
 
-    for (auto window : WindowScene::windows()) {
+    for (auto window : DesignManager::windowScene()->windows()) { //FIXME
         if (Window::_skin == Window::PhonePortrait ||
             Window::_skin == Window::PhoneLandscape)
             window->resize(size);
@@ -1261,11 +1300,15 @@ Window::Window(const QUrl& url, Window* parent)
         WindowPrivate::applySkinChange();
         this->disconnect(SIGNAL(previewChanged()));
     });
+    connect(this, &Window::visibleChanged, [=] {
+        _d->applySkinChange();
+    });
 }
 
 void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
+    auto scene = static_cast<WindowScene*>(this->scene());
     painter->setRenderHint(QPainter::Antialiasing);
 
     switch (_skin) {
@@ -1277,7 +1320,7 @@ void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(skinRect, fit(10), fit(10));
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->setBrush(scene()->views().first()->backgroundBrush());
+            painter->setBrush(scene->views().first()->backgroundBrush());
             painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 3.0, skinRect.top() + PAGE_TOP_MARGIN / 1.5,
                                            skinRect.width() / 3.0, PAGE_TOP_MARGIN / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
             painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 2.0 - PAGE_TOP_MARGIN,
@@ -1291,7 +1334,7 @@ void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->setBrush(MOBILE_SKIN_COLOR);
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(skinRect, fit(10), fit(10));
-            painter->setBrush(scene()->views().first()->backgroundBrush());
+            painter->setBrush(scene->views().first()->backgroundBrush());
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(QRect(skinRect.left() + PAGE_TOP_MARGIN / 1.5, skinRect.y() + skinRect.height() / 3.0,
                                            PAGE_TOP_MARGIN / 3.0, skinRect.height() / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
@@ -1333,7 +1376,7 @@ void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->drawEllipse(btnMaxRect);
 
             if (mapToScene(QRectF(btnExtRect.topLeft(), btnMaxRect.bottomRight())).containsPoint
-                (WindowScene::lastMousePos(), Qt::WindingFill)) {
+                (scene->lastMousePos(), Qt::WindingFill)) {
                 auto ciks = QPixmap(":/resources/images/ciks.png");
                 painter->setPen(QColor("#4c0102"));
                 painter->drawLine(btnExtRect.topLeft() + QPoint(fit(3), fit(3)), btnExtRect.bottomRight() + QPoint(-fit(3), -fit(3)));
@@ -1349,7 +1392,7 @@ void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         }
     }
 
-    painter->setBrush(scene()->views().first()->backgroundBrush());
+    painter->setBrush(scene->views().first()->backgroundBrush());
     painter->drawRect(innerRect);
 
     Control::paint(painter, option, widget);
@@ -1378,15 +1421,6 @@ void Window::resizeEvent(QGraphicsSceneResizeEvent* event)
 void Window::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
-}
-
-bool Window::contains(const QString& id) const
-{
-    for (auto control : childControls()) {
-        if (control->id() == id)
-            return true;
-    }
-    return false;
 }
 
 QRectF Window::frameGeometry() const
@@ -1433,11 +1467,6 @@ void Window::centralize()
         setPos(- size().width() / 2.0, - size().height() / 2.0);
     else
         setPos(- size().width() / 2.0, - size().height() / 2.0 + PAGE_TOP_MARGIN / 1.5);
-}
-
-void Window::cleanWindow()
-{
-    WindowScene::removeChildControlsOnly(this);
 }
 
 #include "control.moc"

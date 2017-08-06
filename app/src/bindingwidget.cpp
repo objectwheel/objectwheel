@@ -26,6 +26,8 @@
 #include <QPointer>
 #include <QJsonObject>
 
+//TODO: Fix this
+
 using namespace Fit;
 
 class BindingWidgetPrivate
@@ -218,43 +220,43 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     popupVLayout.addWidget(&popupScrollArea);
     popupVLayout.addWidget(&popupOkButton);
 
-    QObject::connect(WindowScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
+//    QObject::connect(WindowScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 void BindingWidgetPrivate::editButtonClicked()
 {
-    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
-    animation->setDuration(500);
-    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
-    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
-    animation->setEasingCurve(QEasingCurve::OutExpo);
-    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
-    animation->start();
-    popupWidget.show();
-    popupWidget.raise();
-    popupHideButton.raise();
-    popupHideButton.move(popupWidget.width()-fit(24), 0);
-    editMode = true;
-    editingBindingName = bindingListWidget.currentItem()->text();
+//    auto animation = new QPropertyAnimation(&popupWidget, "geometry");
+//    animation->setDuration(500);
+//    animation->setStartValue(QRect(0, parent->height(), parent->width(), parent->height()));
+//    animation->setEndValue(QRect(0, 0, parent->width(), parent->height()));
+//    animation->setEasingCurve(QEasingCurve::OutExpo);
+//    QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
+//    animation->start();
+//    popupWidget.show();
+//    popupWidget.raise();
+//    popupHideButton.raise();
+//    popupHideButton.move(popupWidget.width()-fit(24), 0);
+//    editMode = true;
+//    editingBindingName = bindingListWidget.currentItem()->text();
 
-    auto issuerBinding = SaveManager::getBindingSaves()[editingBindingName].toObject();
-    if (issuerBinding.isEmpty())
-        return;
+//    auto issuerBinding = SaveManager::getBindingSaves()[editingBindingName].toObject();
+//    if (issuerBinding.isEmpty())
+//        return;
 
-    auto controls = WindowScene::currentWindow()->childControls();
-    controls << WindowScene::currentWindow();
+//    auto controls = WindowScene::currentWindow()->childControls();
+//    controls << WindowScene::currentWindow();
 
-    WindowScene::instance()->clearSelection();
-    for (auto control : controls)
-        if (control->id() == issuerBinding[BINDING_TARGET_ID_LABEL].toString())
-            control->setSelected(true);
+//    WindowScene::instance()->clearSelection();
+//    for (auto control : controls)
+//        if (control->id() == issuerBinding[BINDING_TARGET_ID_LABEL].toString())
+//            control->setSelected(true);
 
-    nameEdit.setText(editingBindingName);
-    targetPropertyCombobox.setCurrentItem(issuerBinding[BINDING_TARGET_PROPERTY_LABEL].toString());
-    sourceItemCombobox.setCurrentItem(issuerBinding[BINDING_SOURCE_ID_LABEL].toString());
-    sourcePropertyCombobox.setCurrentItem(issuerBinding[BINDING_SOURCE_PROPERTY_LABEL].toString());
+//    nameEdit.setText(editingBindingName);
+//    targetPropertyCombobox.setCurrentItem(issuerBinding[BINDING_TARGET_PROPERTY_LABEL].toString());
+//    sourceItemCombobox.setCurrentItem(issuerBinding[BINDING_SOURCE_ID_LABEL].toString());
+//    sourcePropertyCombobox.setCurrentItem(issuerBinding[BINDING_SOURCE_PROPERTY_LABEL].toString());
 
-    hasPopupOpen = true;
-    emit parent->popupShowed();
+//    hasPopupOpen = true;
+//    emit parent->popupShowed();
 }
 
 void BindingWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& inf)
@@ -366,42 +368,37 @@ void BindingWidgetPrivate::ensureComboboxVisible(const QObject* obj)
 
 void BindingWidgetPrivate::updateSourcePropertyCombobox()
 {
-    sourcePropertyCombobox.clear();
-    if (targetPropertyCombobox.currentItem().isEmpty() ||
-        sourceItemCombobox.currentItem().isEmpty())
-        return;
+//    sourcePropertyCombobox.clear();
+//    if (targetPropertyCombobox.currentItem().isEmpty() ||
+//        sourceItemCombobox.currentItem().isEmpty())
+//        return;
 
-    auto scene = WindowScene::instance();
-    auto selectedControls = scene->selectedControls();
+//    auto scene = WindowScene::instance();
+//    auto selectedControls = scene->selectedControls();
 
-    if (scene->currentWindow()->isSelected())
-        selectedControls << scene->currentWindow();
+//    if (selectedControls.size() != 1 ||
+//        selectedControls[0]->id().isEmpty())
+//        return;
 
-    if (selectedControls.isEmpty() ||
-        selectedControls.size() > 1 ||
-        selectedControls[0]->id().isEmpty()) {
-        return;
-    }
+//    QVariant::Type targetType = selectedControls[0]->properties()[targetPropertyCombobox.currentItem()];
 
-    QVariant::Type targetType = selectedControls[0]->properties()[targetPropertyCombobox.currentItem()];
+//    QStringList sourcePropertyList;
+//    if (scene->currentWindow()->id() == sourceItemCombobox.currentItem()) {
+//        for (auto property : scene->currentWindow()->properties().keys())
+//            if (scene->currentWindow()->properties()[property] == targetType)
+//                sourcePropertyList << property;
+//    } else {
+//        for (auto control : scene->currentWindow()->childControls())
+//            if (control->id() == sourceItemCombobox.currentItem()) {
+//                for (auto property : control->properties().keys())
+//                    if (control->properties()[property] == targetType)
+//                        sourcePropertyList << property;
+//                break;
+//            }
+//    }
 
-    QStringList sourcePropertyList;
-    if (scene->currentWindow()->id() == sourceItemCombobox.currentItem()) {
-        for (auto property : scene->currentWindow()->properties().keys())
-            if (scene->currentWindow()->properties()[property] == targetType)
-                sourcePropertyList << property;
-    } else {
-        for (auto control : scene->currentWindow()->childControls())
-            if (control->id() == sourceItemCombobox.currentItem()) {
-                for (auto property : control->properties().keys())
-                    if (control->properties()[property] == targetType)
-                        sourcePropertyList << property;
-                break;
-            }
-    }
-
-    for (auto property : sourcePropertyList)
-        sourcePropertyCombobox.addItem(property);
+//    for (auto property : sourcePropertyList)
+//        sourcePropertyCombobox.addItem(property);
 }
 
 BindingWidgetPrivate* BindingWidget::m_d = nullptr;
@@ -476,23 +473,20 @@ bool BindingWidget::hasPopupOpen()
 
 void BindingWidget::handleSelectionChange()
 {
-    auto scene = WindowScene::instance();
-    auto selectedControls = scene->selectedControls();
-    if (scene->currentWindow()->isSelected())
-        selectedControls << scene->currentWindow();
+//    auto scene = WindowScene::instance();
+//    auto selectedControls = scene->selectedControls();
 
-    clearList();
-    if (selectedControls.isEmpty() ||
-        selectedControls.size() > 1 ||
-        selectedControls[0]->id().isEmpty()) {
-        return;
-    } else {
-        m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
-        for (auto property : selectedControls[0]->properties().keys())
-            m_d->targetPropertyCombobox.addItem(property);
-        for (auto window : scene->windows())
-            m_d->sourceItemCombobox.addItem(window->id());
-        for (auto control : scene->controls())
-            m_d->sourceItemCombobox.addItem(control->id());
-    }
+//    clearList();
+//    if (selectedControls.size() != 1 ||
+//        selectedControls[0]->id().isEmpty()) {
+//        return;
+//    } else {
+//        m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
+//        for (auto property : selectedControls[0]->properties().keys())
+//            m_d->targetPropertyCombobox.addItem(property);
+//        for (auto window : scene->windows())
+//            m_d->sourceItemCombobox.addItem(window->id());
+//        for (auto control : scene->currentWindow()->childControls())
+//            m_d->sourceItemCombobox.addItem(control->id());
+//    }
 }

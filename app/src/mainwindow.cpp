@@ -232,8 +232,7 @@ void MainWindow::SetupGui()
 
     QTimer::singleShot(3000, [=] {
         auto window = new Window(QUrl("qrc:/resources/qmls/applicationWindow.qml"));
-        window->refresh();
-        WindowScene::addWindow(window);
+        DesignManager::windowScene()->addWindow(window);
     });
 
 	m_d->qmlEditor = new QmlEditor(this);
@@ -247,7 +246,8 @@ void MainWindow::SetupGui()
 
     QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
-            WindowScene::instance()->clearSelection();
+           DesignManager::windowScene()->clearSelection();
+           DesignManager::controlScene()->clearSelection();
         }
     });
 
@@ -437,7 +437,7 @@ void MainWindow::on_buildsButton_clicked()
 
 void MainWindow::on_clearButton_clicked()
 {
-    if (WindowScene::currentWindow()->childControls().size() < 1)
+    if (DesignManager::currentScene()->mainControl()->childControls().size() < 1)
         return;
 
     QMessageBox msgBox;
@@ -449,7 +449,7 @@ void MainWindow::on_clearButton_clicked()
 
     switch (msgBox.exec()) {
         case QMessageBox::Yes:
-            WindowScene::currentWindow()->cleanWindow();
+            DesignManager::currentScene()->mainControl()->cleanContent();
             break;
         default:
             break;
@@ -761,19 +761,19 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 {
-    auto control = new Control(url);
+//    auto control = new Control(url);
 
-    auto controls = WindowScene::currentWindow()->childControls();
-    for (auto window : WindowScene::windows())
-        controls << window;
-    for (auto ctrl : controls)
-        if (ctrl->id() == parent) {
-            control->setParentItem(ctrl);
-            control->refresh();
-            return true;
-        }
+//    auto controls = WindowScene::currentWindow()->childControls();
+//    for (auto window : WindowScene::windows())
+//        controls << window;
+//    for (auto ctrl : controls)
+//        if (ctrl->id() == parent) {
+//            control->setParentItem(ctrl);
+//            control->refresh();
+//            return true;
+//        }
 
-    control->deleteLater();
+//    control->deleteLater();
     return false;
 }
 

@@ -8,13 +8,13 @@
 
 #define GUIDELINE_COLOR ("#0D80E7")
 #define LINE_COLOR ("#606467")
+#define NGCS_PANEL_WIDTH (fit(100))
 
 using namespace Fit;
 
 class ControlScenePrivate : public QObject
 {
         Q_OBJECT
-        enum LockWay { NoLock, Vertical, Horizontal, Both };
 
     public:
         explicit ControlScenePrivate(ControlScene* parent);
@@ -33,76 +33,72 @@ ControlScenePrivate::ControlScenePrivate(ControlScene* parent)
 {
 }
 
-ControlScenePrivate* ControlScene::_d = nullptr;
-QPointer<Control> ControlScene::_currentControl = nullptr;
-bool ControlScene::_snapping = true;
-QPointF ControlScene::_lastMousePos;
-
 ControlScene::ControlScene(QObject *parent)
     : QGraphicsScene(parent)
+    , _mainControl(nullptr)
+    , _d(new ControlScenePrivate(this))
+    , _snapping(true)
+    , _nonGuiControlsPanel(new ControlsScrollPanel(this))
 {
-    if (_d)
-        return;
-    _d = new ControlScenePrivate(this);
-
     connect(this, &ControlScene::changed, [=] {
-        if (_currentControl)
-            setSceneRect(currentControl()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
+        if (_mainControl)
+            setSceneRect(mainControl()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
+    });
+
+    _nonGuiControlsPanel->setShowIds(true);
+    _nonGuiControlsPanel->setMargins({fit(26), fit(3), fit(3), fit(3)});
+    connect(this, &ControlScene::changed, [=] {
+        if (_mainControl) {
+            setSceneRect(mainControl()->frameGeometry().adjusted(-fit(8) - NGCS_PANEL_WIDTH, -fit(8),
+                                                                 NGCS_PANEL_WIDTH + fit(8), fit(8)));
+            _nonGuiControlsPanel->setGeometry(mainControl()->frameGeometry().width() / 2.0 + fit(4),
+                                              -mainControl()->frameGeometry().height() / 2.0,
+                                             NGCS_PANEL_WIDTH, mainControl()->frameGeometry().height());
+        }
     });
 }
 
-ControlScene* ControlScene::instance()
+Control* ControlScene::mainControl()
 {
-    return _d->parent;
+    return _mainControl;
 }
 
-Control* ControlScene::currentControl()
+void ControlScene::setMainControl(Control* mainControl)
 {
-    return _currentControl;
-}
-
-void ControlScene::setCurrentControl(Control* currentControl)
-{
-    if (_currentControl)
-        _d->parent->removeItem(_currentControl);
-
-    _currentControl = currentControl;
-    _d->parent->addItem(_currentControl);
+    if (_mainControl)
+        removeItem(_mainControl);
+    _mainControl = mainControl;
+    addItem(_mainControl);
 }
 
 void ControlScene::removeControl(Control* control)
 {
     SaveManager::removeSave(control->id());
-    ControlScene::instance()->removeItem(control);
+    removeItem(control);
 }
 
 void ControlScene::removeChildControlsOnly(Control* parent)
 {
     SaveManager::removeChildSavesOnly(parent->id());
-
     for (auto control : parent->childControls())
-        ControlScene::instance()->removeItem(control);
+        removeItem(control);
 }
 
 QList<Control*> ControlScene::controls(Qt::SortOrder order)
 {
     QList<Control*> controls;
-    for (auto item : _d->parent->items(order)) {
-        if (dynamic_cast<Control*>(item) && !dynamic_cast<Control*>(item)) {
+    for (auto item : items(order))
+        if (dynamic_cast<Control*>(item))
             controls << static_cast<Control*>(item);
-        }
-    }
     return controls;
 }
 
 QList<Control*> ControlScene::selectedControls()
 {
     QList<Control*> selectedControls;
-    for (auto item : _d->parent->selectedItems()) {
-        if (dynamic_cast<Control*>(item) && !dynamic_cast<Control*>(item)) {
+    for (auto item : selectedItems())
+        if (dynamic_cast<Control*>(item))
             selectedControls << static_cast<Control*>(item);
-        }
-    }
     return selectedControls;
 }
 
@@ -110,21 +106,23 @@ void ControlScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mousePressEvent(event);
 
-    if (_currentControl == nullptr)
+    if (_mainControl == nullptr)
         return;
 
     auto selectedControls = this->selectedControls();
+    selectedControls.removeOne(mainControl());
+
     for (auto control : selectedControls)
-        control->setZValue(_currentControl->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : _currentControl->higherZValue() + 1);
+        control->setZValue(_mainControl->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : _mainControl->higherZValue() + 1);
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
-    if (this->selectedControls().contains((Control*)itemUnderMouse))
+    if (selectedControls.contains((Control*)itemUnderMouse))
         _d->itemPressed = true;
 
     _d->itemMoving = false;
 
-    for (auto control : currentControl()->childControls())
+    for (auto control : mainControl()->childControls())
         control->setDragging(false);
 
     update();
@@ -134,21 +132,22 @@ void ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
-    if (_currentControl == nullptr)
+    if (_mainControl == nullptr)
         return;
 
-    if (_currentControl && selectedControls().size() > 0 &&
+    auto selectedControls = this->selectedControls();
+    selectedControls.removeOne(mainControl());
+
+    if (_mainControl && selectedControls.size() > 0 &&
         _d->itemPressed && !Resizer::resizing()) {
         _d->itemMoving = true;
-        if (_snapping && selectedControls().size() == 1)
-            _currentControl->stickSelectedControlToGuideLines();
+        if (_snapping && selectedControls.size() == 1)
+            _mainControl->stickSelectedControlToGuideLines();
     }
 
-    if (_d->itemMoving) {
-        for (auto selectedControl : selectedControls()) {
+    if (_d->itemMoving)
+        for (auto selectedControl : selectedControls)
             selectedControl->setDragging(true);
-        }
-    }
 
     _lastMousePos = event->scenePos();
 
@@ -161,10 +160,10 @@ void ControlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     _d->itemPressed = false;
     _d->itemMoving = false;
 
-    if (_currentControl == nullptr)
+    if (_mainControl == nullptr)
         return;
 
-    for (auto control : currentControl()->childControls())
+    for (auto control : mainControl()->childControls())
         control->setDragging(false);
 
     update();
@@ -174,8 +173,8 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    if ((_d->itemMoving || Resizer::resizing()) && _snapping && _currentControl != nullptr) {
-        auto guideLines = _currentControl->guideLines();
+    if ((_d->itemMoving || Resizer::resizing()) && _snapping && _mainControl != nullptr) {
+        auto guideLines = _mainControl->guideLines();
         QPen pen(GUIDELINE_COLOR);
         pen.setWidthF(1.0);
         pen.setJoinStyle(Qt::RoundJoin);
@@ -194,7 +193,7 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
     }
 
 
-    if (_currentControl == nullptr) {
+    if (_mainControl == nullptr) {
         QPen pen;
         QRectF rect(0, 0, fit(150), fit(60));
         rect.moveCenter(sceneRect().center());
@@ -204,6 +203,11 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
         painter->drawRect(rect);
         painter->drawText(rect, "No Items Selected", QTextOption(Qt::AlignCenter));
     }
+}
+
+ControlsScrollPanel* ControlScene::nonGuiControlsPanel()
+{
+    return _nonGuiControlsPanel;
 }
 
 QPointF ControlScene::lastMousePos()
@@ -229,9 +233,8 @@ bool ControlScene::showOutlines()
 void ControlScene::setShowOutlines(bool value)
 {
     Control::setShowOutline(value);
-    for (auto control : controls()) {
+    for (auto control : controls())
         control->update();
-    }
 }
 
 #include "controlscene.moc"

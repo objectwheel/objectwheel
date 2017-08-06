@@ -430,8 +430,8 @@ void DesignManagerPrivate::handlePhonePortraitButtonClicked()
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    if (windowScene.currentWindow())
-        windowScene.currentWindow()->centralize();
+    if (windowScene.mainControl())
+        windowScene.mainControl()->centralize();
 }
 
 void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
@@ -444,8 +444,8 @@ void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
     phonePortraitButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    if (windowScene.currentWindow())
-        windowScene.currentWindow()->centralize();
+    if (windowScene.mainControl())
+        windowScene.mainControl()->centralize();
 }
 
 void DesignManagerPrivate::handleDesktopSkinButtonClicked()
@@ -458,8 +458,8 @@ void DesignManagerPrivate::handleDesktopSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     noSkinButton.setEnabled(true);
-    if (windowScene.currentWindow())
-        windowScene.currentWindow()->centralize();
+    if (windowScene.mainControl())
+        windowScene.mainControl()->centralize();
 }
 
 void DesignManagerPrivate::handleNoSkinButtonClicked()
@@ -472,20 +472,16 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
     phonePortraitButton.setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
-    if (windowScene.currentWindow())
-        windowScene.currentWindow()->centralize();
+    if (windowScene.mainControl())
+        windowScene.mainControl()->centralize();
 }
 
 void DesignManagerPrivate::handleRefreshPreviewClicked()
 {
     if (DesignManager::_mode == DesignManager::WindowGUI) {
-        for (auto window : windowScene.windows())
-            window->refresh();
         for (auto control : windowScene.controls())
             control->refresh();
     } else {
-        if (controlScene.currentControl())
-            controlScene.currentControl()->refresh();
         for (auto control : controlScene.controls())
             control->refresh();
     }
@@ -554,6 +550,7 @@ void DesignManagerPrivate::handleModeChange()
         zoomlLevelCombobox.setCurrentText(findText(lastScaleOfWv));
         controlView.hide();
         windowView.show();
+        parent->_currentScene = &windowScene;
     } else if (DesignManager::_mode == DesignManager::ControlGUI) {
         noSkinButton.setChecked(true);
         phoneLandscapeButton.setChecked(false);
@@ -563,17 +560,19 @@ void DesignManagerPrivate::handleModeChange()
         phonePortraitButton.setDisabled(true);
         phoneLandscapeButton.setDisabled(true);
         desktopSkinButton.setDisabled(true);
-        if (controlScene.currentControl())
-            controlScene.currentControl()->centralize();
+        if (controlScene.mainControl())
+            controlScene.mainControl()->centralize();
         snappingButton.setChecked(controlScene.snapping());
         zoomlLevelCombobox.setCurrentText(findText(lastScaleOfCv));
         windowView.hide();
         controlView.show();
+        parent->_currentScene = &controlScene;
     }
 }
 
 DesignManagerPrivate* DesignManager::_d = nullptr;
 DesignManager::Mode DesignManager::_mode = DesignManager::WindowGUI;
+ControlScene* DesignManager::_currentScene = nullptr;
 
 DesignManager::DesignManager(QObject *parent)
     : QObject(parent)
@@ -606,6 +605,21 @@ void DesignManager::setMode(const Mode& mode)
 {
     _mode = mode;
     emit _d->parent->modeChanged();
+}
+
+ControlScene* DesignManager::currentScene()
+{
+    return _currentScene;
+}
+
+ControlScene*DesignManager::controlScene()
+{
+    return &_d->controlScene;
+}
+
+WindowScene*DesignManager::windowScene()
+{
+    return &_d->windowScene;
 }
 
 #include "designmanager.moc"

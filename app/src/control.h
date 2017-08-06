@@ -80,12 +80,15 @@ class Control : public QGraphicsWidget
         bool stickSelectedControlToGuideLines() const;
         QVector<QLineF> guideLines() const;
         bool gui() const;
+        using QGraphicsWidget::contains;
+        bool contains(const QString& id) const;
 
         static bool showOutline();
         static void setShowOutline(const bool value);
 
 
     public slots:
+        void cleanContent();
         virtual void refresh();
 
     protected:
@@ -152,9 +155,6 @@ class Window : public Control
         bool isMain() const;
         void setMain(bool value);
 
-        using Control::contains;
-        bool contains(const QString& id) const;
-
         QRectF frameGeometry() const override;
 
         static void setSkin(const Skin& skin);
@@ -162,7 +162,6 @@ class Window : public Control
 
     public slots:
         void centralize() override;
-        void cleanWindow();
 
     protected:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;

@@ -170,60 +170,74 @@ void WindowViewPrivate::handlePasteAction()
 void WindowViewPrivate::handleDeleteAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
-    for (auto control : scene->selectedControls()) {
-        WindowScene::removeControl(control);
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls) {
+       scene->removeControl(control);
     }
 }
 
 void WindowViewPrivate::handleSelectAllAction()
 {
-    auto currentWindow = ((WindowScene*)parent->scene())->currentWindow();
-    for (auto control : currentWindow->childControls())
+    auto mainWindow = ((WindowScene*)parent->scene())->mainWindow();
+    for (auto control : mainWindow->childControls())
         control->setSelected(true);
 }
 
 void WindowViewPrivate::handleMoveUpAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(0, - fit(1));
 }
 
 void WindowViewPrivate::handleMoveDownAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(0, fit(1));
 }
 
 void WindowViewPrivate::handleMoveRightAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(fit(1), 0);
 }
 
 void WindowViewPrivate::handleMoveLeftAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(- fit(1), 0);
 }
 
 void WindowViewPrivate::handleSendBackActAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
-        control->setZValue(scene->currentWindow()->lowerZValue() == MAX_Z_VALUE
-                           ? 0 : scene->currentWindow()->lowerZValue() - 1);
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
+        control->setZValue(scene->mainWindow()->lowerZValue() == MAX_Z_VALUE
+                           ? 0 : scene->mainWindow()->lowerZValue() - 1);
 }
 
 void WindowViewPrivate::handleBringFrontActAction()
 {
     auto scene = static_cast<WindowScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
-        control->setZValue(scene->currentWindow()->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : scene->currentWindow()->higherZValue() + 1);
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
+        control->setZValue(scene->mainWindow()->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : scene->mainWindow()->higherZValue() + 1);
 }
 
 WindowView::WindowView(QGraphicsScene* scene, QWidget* parent)
@@ -237,9 +251,9 @@ void WindowView::resizeEvent(QResizeEvent* event)
     QGraphicsView::resizeEvent(event);
 
     auto _scene = static_cast<WindowScene*>(scene());
-    auto currentWindow = _scene->currentWindow();
-    if (currentWindow)
-        currentWindow->centralize();
+    auto mainWindow = _scene->mainWindow();
+    if (mainWindow)
+        mainWindow->centralize();
 }
 
 void WindowView::contextMenuEvent(QContextMenuEvent* event)
@@ -248,6 +262,7 @@ void WindowView::contextMenuEvent(QContextMenuEvent* event)
 
     auto scene = static_cast<WindowScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
 
     if (selectedControls.size() <= 0) {
         _d->sendBackAct.setDisabled(true);

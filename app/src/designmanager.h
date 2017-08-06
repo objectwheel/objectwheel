@@ -1,6 +1,7 @@
 #ifndef DESIGNMANAGER_H
 #define DESIGNMANAGER_H
 
+#include <windowscene.h>
 #include <QObject>
 
 class QWidget;
@@ -25,6 +26,9 @@ class DesignManager : public QObject
         static void setSettleWidget(QWidget* widget);
         static const Mode& mode();
         static void setMode(const Mode& mode);
+        static ControlScene* currentScene();
+        static ControlScene* controlScene();
+        static WindowScene* windowScene();
 
     signals:
         void modeChanged();
@@ -32,6 +36,7 @@ class DesignManager : public QObject
     private:
         static DesignManagerPrivate* _d;
         static Mode _mode;
+        static ControlScene* _currentScene;
 };
 
 #endif // DESIGNMANAGER_H

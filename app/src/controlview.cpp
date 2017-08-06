@@ -137,24 +137,6 @@ void ControlViewPrivate::handleRedoAction()
 void ControlViewPrivate::handleCutAction()
 {
     // TODO
-//    QJsonObject pr;
-//    QList<QUrl> urls;
-//    auto mimeData = new QMimeData;
-//    auto clipboard = QApplication::clipboard();
-//    auto scene = static_cast<ControlScene*>(parent->scene());
-
-//    for (auto control : scene->selectedControls()) {
-//        for (auto childControl : control->childControls()) {
-//            pr[childControl->id()] = control->id();
-//            urls << childControl->url();
-//        }
-//        pr[control->id()] = control->parentControl()->id();
-//        urls << control->url();
-//    }
-
-//    mimeData->setUrls(m_Urls[items[0]]);
-//    mimeData->setText(TOOLBOX_ITEM_KEY);
-//    mimeData->setHtml(QJsonDocument(pr));
 }
 
 void ControlViewPrivate::handleCopyAction()
@@ -170,67 +152,80 @@ void ControlViewPrivate::handlePasteAction()
 void ControlViewPrivate::handleDeleteAction()
 {
     auto scene = static_cast<ControlScene*>(parent->scene());
-    for (auto control : scene->selectedControls()) {
-        ControlScene::removeControl(control);
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls) {
+        scene->removeControl(control);
     }
 }
 
 void ControlViewPrivate::handleSelectAllAction()
 {
-    auto currentControl = ((ControlScene*)parent->scene())->currentControl();
-    for (auto control : currentControl->childControls())
+    auto mainControl = ((ControlScene*)parent->scene())->mainControl();
+    for (auto control : mainControl->childControls())
         control->setSelected(true);
 }
 
 void ControlViewPrivate::handleMoveUpAction()
 {
     auto scene = static_cast<ControlScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(0, - fit(1));
 }
 
 void ControlViewPrivate::handleMoveDownAction()
 {
     auto scene = static_cast<ControlScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(0, fit(1));
 }
 
 void ControlViewPrivate::handleMoveRightAction()
 {
     auto scene = static_cast<ControlScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(fit(1), 0);
 }
 
 void ControlViewPrivate::handleMoveLeftAction()
 {
     auto scene = static_cast<ControlScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
         control->moveBy(- fit(1), 0);
 }
 
 void ControlViewPrivate::handleSendBackActAction()
 {
     auto scene = static_cast<ControlScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
-        control->setZValue(scene->currentControl()->lowerZValue() == MAX_Z_VALUE
-                           ? 0 : scene->currentControl()->lowerZValue() - 1);
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
+        control->setZValue(scene->mainControl()->lowerZValue() == MAX_Z_VALUE
+                           ? 0 : scene->mainControl()->lowerZValue() - 1);
 }
 
 void ControlViewPrivate::handleBringFrontActAction()
 {
     auto scene = static_cast<ControlScene*>(parent->scene());
-    for (auto control : scene->selectedControls())
-        control->setZValue(scene->currentControl()->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : scene->currentControl()->higherZValue() + 1);
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    for (auto control : selectedControls)
+        control->setZValue(scene->mainControl()->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : scene->mainControl()->higherZValue() + 1);
 }
 
 ControlView::ControlView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
     , _d(new ControlViewPrivate(this))
 {
-    setViewportUpdateMode(FullViewportUpdate);
 }
 
 void ControlView::resizeEvent(QResizeEvent* event)
@@ -238,9 +233,9 @@ void ControlView::resizeEvent(QResizeEvent* event)
     QGraphicsView::resizeEvent(event);
 
     auto _scene = static_cast<ControlScene*>(scene());
-    auto currentControl = _scene->currentControl();
-    if (currentControl)
-        currentControl->centralize();
+    auto mainControl = _scene->mainControl();
+    if (mainControl)
+        mainControl->centralize();
 }
 
 void ControlView::contextMenuEvent(QContextMenuEvent* event)
@@ -249,6 +244,7 @@ void ControlView::contextMenuEvent(QContextMenuEvent* event)
 
     auto scene = static_cast<ControlScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
 
     if (selectedControls.size() <= 0) {
         _d->sendBackAct.setDisabled(true);
@@ -262,6 +258,12 @@ void ControlView::contextMenuEvent(QContextMenuEvent* event)
         _d->cutAct.setDisabled(false);
         _d->copyAct.setDisabled(false);
         _d->deleteAct.setDisabled(false);
+        for (auto sc : selectedControls) {
+            if (sc->gui() == false) {
+                _d->sendBackAct.setDisabled(true);
+                _d->bringFrontAct.setDisabled(true);
+            }
+        }
     }
     _d->menu.exec(event->globalPos());
 }

@@ -7,7 +7,7 @@
 #include <css.h>
 #include <lineedit.h>
 #include <scrollarea.h>
-#include <windowscene.h>
+#include <designmanager.h>
 #include <control.h>
 
 #include <QVBoxLayout>
@@ -20,6 +20,8 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QMessageBox>
+
+//TODO: Fix this
 
 using namespace Fit;
 
@@ -208,7 +210,8 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     popupVLayout.addWidget(&popupScrollArea);
     popupVLayout.addWidget(&popupOkButton);
 
-    QObject::connect(WindowScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
+    QObject::connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
+    QObject::connect(DesignManager::windowScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 
 void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
@@ -279,13 +282,13 @@ void EventsWidgetPrivate::editButtonClicked()
     if (issuerEvent.isEmpty())
         return;
 
-    auto controls = WindowScene::currentWindow()->childControls();
-    controls << WindowScene::currentWindow();
+//    auto controls = WindowScene::currentWindow()->childControls();
+//    controls << WindowScene::currentWindow();
 
-    WindowScene::instance()->clearSelection();
-    for (auto control : controls)
-        if (control->id() == issuerEvent[EVENT_TARGET_ID_LABEL].toString())
-            control->setSelected(true);
+//    WindowScene::instance()->clearSelection();
+//    for (auto control : controls)
+//        if (control->id() == issuerEvent[EVENT_TARGET_ID_LABEL].toString())
+//            control->setSelected(true);
 
     nameEdit.setText(editingEventName);
     targetEventCombobox.setCurrentItem(issuerEvent[EVENT_TARGET_EVENTNAME_LABEL].toString());
@@ -348,30 +351,26 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 
 void EventsWidgetPrivate::btnEditCodeClicked()
 {
-    static QMetaObject::Connection conn;
-    auto scene = WindowScene::instance();
-    auto selectedControls = scene->selectedControls();
+//    static QMetaObject::Connection conn;
+//    auto scene = WindowScene::instance();
+//    auto selectedControls = scene->selectedControls();
 
-    if (scene->currentWindow()->isSelected())
-        selectedControls << scene->currentWindow();
+//    if (selectedControls.size() != 1 ||
+//        selectedControls[0]->id().isEmpty())
+//        return;
 
-    if (selectedControls.isEmpty() ||
-        selectedControls.size() > 1 ||
-        selectedControls[0]->id().isEmpty())
-        return;
-
-    if (codeEdit.text().isEmpty()) {
-        QmlEditor::showTextOnly("// " + selectedControls[0]->id() + ".on" +
-                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
-    } else {
-        QmlEditor::showTextOnly(codeEdit.text());
-    }
-    QmlEditor::instance()->raise();
-    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
-        codeEdit.setText(text);
-        QObject::disconnect(conn);
-        QmlEditor::hide();
-    });
+//    if (codeEdit.text().isEmpty()) {
+//        QmlEditor::showTextOnly("// " + selectedControls[0]->id() + ".on" +
+//                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
+//    } else {
+//        QmlEditor::showTextOnly(codeEdit.text());
+//    }
+//    QmlEditor::instance()->raise();
+//    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
+//        codeEdit.setText(text);
+//        QObject::disconnect(conn);
+//        QmlEditor::hide();
+//    });
 }
 
 void EventsWidgetPrivate::ensureComboboxVisible(const QObject* obj)
@@ -410,21 +409,18 @@ void EventsWidget::clearList()
 
 void EventsWidget::handleSelectionChange()
 {
-    auto scene = WindowScene::instance();
-    auto selectedControls = scene->selectedControls();
-    if (scene->currentWindow()->isSelected())
-        selectedControls << scene->currentWindow();
+//    auto scene = WindowScene::instance();
+//    auto selectedControls = scene->selectedControls();
 
-    clearList();
-    if (selectedControls.isEmpty() ||
-        selectedControls.size() > 1 ||
-        selectedControls[0]->id().isEmpty()) {
-        return;
-    } else {
-        m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
-        for (auto event : selectedControls[0]->events())
-            m_d->targetEventCombobox.addItem(event);
-    }
+//    clearList();
+//    if (selectedControls.size() != 1 ||
+//        selectedControls[0]->id().isEmpty()) {
+//        return;
+//    } else {
+//        m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
+//        for (auto event : selectedControls[0]->events())
+//            m_d->targetEventCombobox.addItem(event);
+//    }
 }
 
 void EventsWidget::detachEventsFor(Control* control)

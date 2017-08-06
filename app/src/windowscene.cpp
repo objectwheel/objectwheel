@@ -1,72 +1,8 @@
 #include <windowscene.h>
-#include <fit.h>
-#include <savemanager.h>
-
-#include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include <QDebug>
-
-#define GUIDELINE_COLOR ("#0D80E7")
-
-using namespace Fit;
-
-class WindowScenePrivate : public QObject
-{
-        Q_OBJECT
-        enum LockWay { NoLock, Vertical, Horizontal, Both };
-
-    public:
-        explicit WindowScenePrivate(WindowScene* parent);
-
-    public:
-        WindowScene* parent;
-        bool itemPressed;
-        bool itemMoving;
-};
-
-WindowScenePrivate::WindowScenePrivate(WindowScene* parent)
-    : QObject(parent)
-    , parent(parent)
-    , itemPressed(false)
-    , itemMoving(false)
-{
-}
-
-WindowScenePrivate* WindowScene::_d = nullptr;
-QList<Window*> WindowScene::_windows;
-QPointer<Window> WindowScene::_currentWindow = nullptr;
-bool WindowScene::_snapping = true;
-QPointF WindowScene::_lastMousePos;
-ControlsScrollPanel* WindowScene::_nonGuiControlsPanel = nullptr;
 
 WindowScene::WindowScene(QObject *parent)
-    : QGraphicsScene(parent)
+    : ControlScene(parent)
 {
-    if (_d)
-        return;
-    _d = new WindowScenePrivate(this);
-
-    _nonGuiControlsPanel = new ControlsScrollPanel(this);
-    _nonGuiControlsPanel->setShowIds(true);
-    _nonGuiControlsPanel->setMargins({fit(26), fit(3), fit(3), fit(3)});
-    connect(this, &WindowScene::changed, [=] {
-        if (_currentWindow) {
-            setSceneRect(currentWindow()->frameGeometry().adjusted(-fit(108), -fit(8), fit(108), fit(8)));
-            _nonGuiControlsPanel->setGeometry(currentWindow()->frameGeometry().width() / 2.0 + fit(4),
-                                              -currentWindow()->frameGeometry().height() / 2.0,
-                                             fit(100), currentWindow()->frameGeometry().height());
-        }
-    });
-}
-
-WindowScene* WindowScene::instance()
-{
-    return _d->parent;
-}
-
-const QList<Window*>& WindowScene::windows()
-{
-    return _windows;
 }
 
 void WindowScene::addWindow(Window* window)
@@ -74,13 +10,13 @@ void WindowScene::addWindow(Window* window)
     if (_windows.contains(window))
         return;
 
-    _d->parent->addItem(window);
+    addItem(window);
     window->setVisible(false);
 
     _windows.append(window);
 
-    if (!_currentWindow)
-        setCurrentWindow(window);
+    if (!_mainControl)
+        setMainControl(window);
 }
 
 void WindowScene::removeWindow(Window* window)
@@ -89,183 +25,39 @@ void WindowScene::removeWindow(Window* window)
         window->isMain())
         return;
 
-    _d->parent->removeItem(window);
+    removeItem(window);
     _windows.removeOne(window);
 
-    if (_currentWindow == window)
-        setCurrentWindow(_windows[0]);
+    if (_mainControl == window)
+        setMainControl(_windows[0]);
 }
 
-Window* WindowScene::currentWindow()
+Window* WindowScene::mainWindow()
 {
-    return _currentWindow;
+    return (Window*)_mainControl.data();
 }
 
-void WindowScene::setCurrentWindow(Window* currentWindow)
+void WindowScene::setMainWindow(Window* mainWindow)
 {
-    if (_windows.contains(currentWindow) == false ||
-        _currentWindow == currentWindow)
+    if (_windows.contains(mainWindow) == false ||
+        _mainControl == mainWindow)
         return;
 
-    if (_currentWindow)
-        _currentWindow->setVisible(false);
+    if (_mainControl)
+        _mainControl->setVisible(false);
 
-    _currentWindow = currentWindow;
-    _currentWindow->setVisible(true);
+    _mainControl = mainWindow;
+    _mainControl->setVisible(true);
 
-    _nonGuiControlsPanel->clear();
-    for (auto control : currentWindow->childControls())
+    nonGuiControlsPanel()->clear();
+    for (auto control : mainWindow->childControls())
         if (control->gui() == false)
-            _nonGuiControlsPanel->addControl(control);
+            nonGuiControlsPanel()->addControl(control);
 }
 
-void WindowScene::removeControl(Control* control)
+void WindowScene::setMainControl(Control* mainControl)
 {
-    SaveManager::removeSave(control->id());
-    WindowScene::instance()->removeItem(control);
+    Window* window;
+    if ((window = dynamic_cast<Window*>(mainControl)))
+        setMainWindow(window);
 }
-
-void WindowScene::removeChildControlsOnly(Control* parent)
-{
-    SaveManager::removeChildSavesOnly(parent->id());
-
-    for (auto control : parent->childControls())
-        WindowScene::instance()->removeItem(control);
-}
-
-QList<Control*> WindowScene::controls(Qt::SortOrder order)
-{
-    QList<Control*> controls;
-    for (auto item : _d->parent->items(order)) {
-        if (dynamic_cast<Control*>(item) && !dynamic_cast<Window*>(item)) {
-            controls << static_cast<Control*>(item);
-        }
-    }
-    return controls;
-}
-
-QList<Control*> WindowScene::selectedControls()
-{
-    QList<Control*> selectedControls;
-    for (auto item : _d->parent->selectedItems()) {
-        if (dynamic_cast<Control*>(item) && !dynamic_cast<Window*>(item)) {
-            selectedControls << static_cast<Control*>(item);
-        }
-    }
-    return selectedControls;
-}
-
-void WindowScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsScene::mousePressEvent(event);
-
-    auto selectedControls = this->selectedControls();
-    for (auto control : selectedControls)
-        control->setZValue(_currentWindow->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : _currentWindow->higherZValue() + 1);
-
-    auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
-    if (this->selectedControls().contains((Control*)itemUnderMouse))
-        _d->itemPressed = true;
-
-    _d->itemMoving = false;
-
-    for (auto control : currentWindow()->childControls())
-        control->setDragging(false);
-
-    update();
-}
-
-void WindowScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsScene::mouseMoveEvent(event);
-
-    if (_currentWindow && selectedControls().size() > 0 &&
-        _d->itemPressed && !Resizer::resizing()) {
-        _d->itemMoving = true;
-        if (_snapping && selectedControls().size() == 1)
-            _currentWindow->stickSelectedControlToGuideLines();
-    }
-
-    if (_d->itemMoving) {
-        for (auto selectedControl : selectedControls()) {
-            selectedControl->setDragging(true);
-        }
-    }
-
-    _lastMousePos = event->scenePos();
-
-    update();
-}
-
-void WindowScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsScene::mouseReleaseEvent(event);
-    _d->itemPressed = false;
-    _d->itemMoving = false;
-
-    for (auto control : currentWindow()->childControls())
-        control->setDragging(false);
-
-    update();
-}
-
-void WindowScene::drawForeground(QPainter* painter, const QRectF& rect)
-{
-    QGraphicsScene::drawForeground(painter, rect);
-
-    if ((_d->itemMoving || Resizer::resizing()) && _snapping) {
-        auto guideLines = _currentWindow->guideLines();
-        QPen pen(GUIDELINE_COLOR);
-        pen.setWidthF(1.0);
-        pen.setJoinStyle(Qt::RoundJoin);
-        pen.setCapStyle(Qt::RoundCap);
-        pen.setStyle(Qt::DashLine);
-        painter->setPen(pen);
-        painter->setBrush(pen.color());
-        painter->drawLines(guideLines);
-
-        for (QLineF line : guideLines) {
-            pen.setStyle(Qt::SolidLine);
-            painter->setPen(pen);
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
-        }
-    }
-}
-
-ControlsScrollPanel* WindowScene::nonGuiControlsPanel()
-{
-    return _nonGuiControlsPanel;
-}
-
-QPointF WindowScene::lastMousePos()
-{
-    return _lastMousePos;
-}
-
-bool WindowScene::snapping()
-{
-    return _snapping;
-}
-
-void WindowScene::setSnapping(bool snapping)
-{
-    _snapping = snapping;
-}
-
-bool WindowScene::showOutlines()
-{
-    return Control::showOutline();;
-}
-
-void WindowScene::setShowOutlines(bool value)
-{
-    Control::setShowOutline(value);
-    for (auto control : controls()) {
-        control->update();
-    }
-}
-
-#include "windowscene.moc"
-

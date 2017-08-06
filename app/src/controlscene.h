@@ -2,7 +2,7 @@
 #define CONTROLSCENE_H
 
 #include <control.h>
-
+#include <controlsscrollpanel.h>
 #include <QGraphicsScene>
 #include <QPointer>
 
@@ -11,41 +11,42 @@ class ControlScenePrivate;
 class ControlScene : public QGraphicsScene
 {
         Q_OBJECT
-        Q_DISABLE_COPY(ControlScene)
         friend class ControlScenePrivate;
 
     public:
         explicit ControlScene(QObject *parent = Q_NULLPTR);
-        static ControlScene* instance();
 
-        static Control* currentControl();
-        static void setCurrentControl(Control* currentControl);
+        Control* mainControl();
+        virtual void setMainControl(Control* mainControl);
 
-        static void removeControl(Control* control);
-        static void removeChildControlsOnly(Control* parent);
-        static QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder);
-        static QList<Control*> selectedControls();
+        void removeControl(Control* control);
+        void removeChildControlsOnly(Control* parent);
+        QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder);
+        QList<Control*> selectedControls();
 
-        static bool showOutlines();
-        static void setShowOutlines(bool value);
+        bool showOutlines();
+        void setShowOutlines(bool value);
 
-        static bool snapping();
-        static void setSnapping(bool snapping);
+        bool snapping();
+        void setSnapping(bool snapping);
 
-        static QPointF lastMousePos();
+        QPointF lastMousePos();
+        ControlsScrollPanel* nonGuiControlsPanel();
 
     protected:
-        void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-        void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-        void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-        void drawForeground(QPainter *painter, const QRectF &rect) override;
+        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void drawForeground(QPainter *painter, const QRectF &rect) override;
+
+    protected:
+        QPointer<Control> _mainControl;
 
     private:
-        static ControlScenePrivate* _d;
-        static QPointer<Control> _currentControl;
-        static bool _snapping;
-        static QPointF _lastMousePos;
-
+        ControlScenePrivate* _d;
+        bool _snapping;
+        QPointF _lastMousePos;
+        ControlsScrollPanel* _nonGuiControlsPanel;
 };
 
 #endif // CONTROLSCENE_H
