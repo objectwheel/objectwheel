@@ -222,8 +222,6 @@ class ControlPrivate : public QObject
     public:
         ControlPrivate(Control* parent);
         void fixResizerCoordinates();
-        void hideResizers();
-        void showResizers();
 
     public slots:
         void refreshPreview();
@@ -303,20 +301,6 @@ void ControlPrivate::fixResizerCoordinates()
                 break;
         }
         resizer.setZValue(MAX_Z_VALUE);
-    }
-}
-
-void ControlPrivate::hideResizers()
-{
-    for (auto& resizer : parent->_resizers) {
-        resizer.hide();
-    }
-}
-
-void ControlPrivate::showResizers()
-{
-    for (auto& resizer : parent->_resizers) {
-        resizer.show();
     }
 }
 
@@ -427,6 +411,8 @@ Control::Control(const QUrl& url, Control* parent)
     , _dragging(false)
     , _dragIn(false)
     , _clip(true)
+    , _gui(true)
+    , _hideSelection(false)
 {
     setGeometry(0, 0, 0, 0);
     connect(this, &Control::visibleChanged, [=] {
@@ -444,6 +430,22 @@ void Control::setShowOutline(const bool value)
     _showOutline = value;
 }
 
+void Control::hideSelection()
+{
+    if (isSelected()) {
+        _hideSelection = true;
+        hideResizers();
+    }
+}
+
+void Control::showSelection()
+{
+    if (isSelected()) {
+        _hideSelection = false;
+        showResizers();
+    }
+}
+
 QList<Control*> Control::childControls() const
 {
     QList<Control*> controls;
@@ -454,6 +456,22 @@ QList<Control*> Control::childControls() const
         }
     }
     return controls;
+}
+
+void Control::hideResizers()
+{
+    for (auto& resizer : _resizers) {
+        resizer.hide();
+    }
+}
+
+void Control::showResizers()
+{
+    if (_hideSelection)
+        return;
+    for (auto& resizer : _resizers) {
+        resizer.show();
+    }
 }
 
 Control* Control::parentControl() const
@@ -640,11 +658,10 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
 {
     switch (change) {
         case ItemSelectedHasChanged:
-            if (value.toBool()) {
-                _d->showResizers();
-            } else {
-                _d->hideResizers();
-            }
+            if (value.toBool())
+                showResizers();
+            else
+                hideResizers();
             break;
         default:
             break;
@@ -745,9 +762,11 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     if (gui() && parentControl() && parentControl()->clip() && !_dragging)
         painter->setClipRect(rect().intersected(parentControl()->mapToItem(this, parentControl()->rect().adjusted(1, 1, -1, -1))
                                                 .boundingRect()));
-    if (gui() == false) //FIXME
-        painter->setClipRect(rect().intersected(parentControl()->mapToItem(this, parentControl()->rect().adjusted(1, 1, -1, -1))
-                                                .boundingRect()));
+    if (gui() == false) {
+        auto view = ((ControlScene*)scene())->nonGuiControlsPanel();
+        auto clipRect = rect().intersected(view->mapToItem(this, view->rect().adjusted(1, 1, -1, -1)).boundingRect());
+        painter->setClipRect(clipRect);
+    }
 
     painter->setRenderHint(QPainter::Antialiasing);
     painter->drawPixmap(rect(), _d->itemPixmap, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
@@ -770,7 +789,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
     }
 
-    if (isSelected() || _showOutline) {
+    if ((isSelected() && !_hideSelection) || _showOutline) {
         QPen pen;
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);
@@ -820,6 +839,10 @@ bool Control::stickSelectedControlToGuideLines() const
 
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
+
+    for (auto control : selectedControls)
+        if (control->gui() == false)
+            selectedControls.removeOne(control);
 
     if (selectedControls.size() <= 0)
         return ret;
@@ -919,7 +942,7 @@ bool Control::stickSelectedControlToGuideLines() const
     }
 
     for (auto childControl : parent->childControls()) {
-        if (childControl == control)
+        if (childControl == control || childControl->gui() == false)
             continue;
 
         auto cgeometry = childControl->geometry();
@@ -1101,6 +1124,10 @@ QVector<QLineF> Control::guideLines() const
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
 
+    for (auto control : selectedControls)
+        if (control->gui() == false)
+            selectedControls.removeOne(control);
+
     if (selectedControls.size() <= 0)
         return lines;
 
@@ -1159,7 +1186,7 @@ QVector<QLineF> Control::guideLines() const
                         parent->mapToScene(QPointF(parent->size().width(), parent->size().height())));
 
     for (auto childControl : parent->childControls()) {
-        if (childControl == control)
+        if (childControl == control || childControl->gui() == false)
             continue;
 
         auto cgeometry = childControl->geometry();

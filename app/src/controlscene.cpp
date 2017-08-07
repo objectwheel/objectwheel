@@ -47,6 +47,7 @@ ControlScene::ControlScene(QObject *parent)
 
     _nonGuiControlsPanel->setShowIds(true);
     _nonGuiControlsPanel->setMargins({fit(26), fit(3), fit(3), fit(3)});
+    _nonGuiControlsPanel->setSpacing(fit(10));
     connect(this, &ControlScene::changed, [=] {
         if (_mainControl) {
             setSceneRect(mainControl()->frameGeometry().adjusted(-fit(8) - NGCS_PANEL_WIDTH, -fit(8),
@@ -69,12 +70,18 @@ void ControlScene::setMainControl(Control* mainControl)
         removeItem(_mainControl);
     _mainControl = mainControl;
     addItem(_mainControl);
+
+    _nonGuiControlsPanel->clear();
+    for (auto control : mainControl->childControls())
+        if (control->gui() == false)
+            nonGuiControlsPanel()->addControl(control);
 }
 
 void ControlScene::removeControl(Control* control)
 {
     SaveManager::removeSave(control->id());
     removeItem(control);
+    emit controlRemoved(control);
 }
 
 void ControlScene::removeChildControlsOnly(Control* parent)

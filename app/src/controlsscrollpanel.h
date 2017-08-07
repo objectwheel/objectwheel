@@ -21,7 +21,7 @@ class ControlsScrollPanel : public QGraphicsWidget
 
         QList<Control*> controls() const;
         void addControl(Control* control);
-        void removeControl(Control* control);
+        Q_INVOKABLE void removeControl(Control* control);
 
         QMarginsF margins() const;
         void setMargins(const QMarginsF& margins);
@@ -37,6 +37,8 @@ class ControlsScrollPanel : public QGraphicsWidget
 
         bool showIds() const;
         void setShowIds(bool showIds);
+
+        QGraphicsWidget* viewport();
 
     public slots:
         void clear();

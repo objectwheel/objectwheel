@@ -86,8 +86,11 @@ class Control : public QGraphicsWidget
         static bool showOutline();
         static void setShowOutline(const bool value);
 
-
     public slots:
+        void hideSelection();
+        void showSelection();
+        void hideResizers();
+        void showResizers();
         void cleanContent();
         virtual void refresh();
 
@@ -134,6 +137,7 @@ class Control : public QGraphicsWidget
         bool _dragIn;
         bool _clip;
         bool _gui;
+        bool _hideSelection;
         static bool _showOutline;
 };
 

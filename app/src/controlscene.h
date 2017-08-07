@@ -39,6 +39,9 @@ class ControlScene : public QGraphicsScene
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void drawForeground(QPainter *painter, const QRectF &rect) override;
 
+    signals:
+        void controlRemoved(Control* control);
+
     protected:
         QPointer<Control> _mainControl;
 

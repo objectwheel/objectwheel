@@ -1,4 +1,5 @@
 #include <controlsscrollpanel.h>
+#include <controlscene.h>
 #include <fit.h>
 
 #include <QGraphicsGridLayout>
@@ -7,11 +8,13 @@
 #include <QGraphicsProxyWidget>
 #include <QGraphicsSceneWheelEvent>
 
+//TODO: Horizontal mode
+
 using namespace Fit;
 
 #define SCROLLBAR_LENGTH (fit(6))
-#define ID_LABEL_LENGTH (fit(10))
-#define FONT_PIXELSIZE (fit(8))
+#define ID_LABEL_LENGTH (fit(12))
+#define FONT_PIXELSIZE (fit(11))
 #define STYLE_SHEET "\
 QScrollBar { \
     background: transparent; \
@@ -43,14 +46,17 @@ class ControlsScrollPanelPrivate : public QObject
         QList<qreal> findXs(const QList<Control*>& controls,
                             Qt::Orientation orientation,
                             const QMarginsF& margins,
-                            qreal spacing);
+                            qreal spacing,
+                            QGraphicsWidget* viewport);
         QList<qreal> findYs(const QList<Control*>& controls,
                             Qt::Orientation orientation,
                             const QMarginsF& margins,
                             qreal spacing,
-                            bool showIds);
+                            bool showIds, QGraphicsWidget* viewport);
     public slots:
         void updateViewport();
+        void fixCoords();
+        void fixSelection();
 
     public:
         ControlsScrollPanel* parent;
@@ -62,26 +68,27 @@ ControlsScrollPanelPrivate::ControlsScrollPanelPrivate(ControlsScrollPanel* pare
     : QObject(parent)
     , parent(parent)
 {
-
 }
 
 QList<qreal> ControlsScrollPanelPrivate::findXs(const QList<Control*>& controls,
                                                 Qt::Orientation orientation,
                                                 const QMarginsF& margins,
-                                                qreal spacing)
+                                                qreal spacing,
+                                                QGraphicsWidget* viewport)
 {
     QList<qreal> xS;
     for (int i = 0; i < controls.size(); i++) {
         switch (orientation) {
             case Qt::Vertical: {
-                xS << margins.left();
+                xS << viewport->mapToItem(controls[i]->parentControl(), margins.left(), 0).x();
                 break;
             }
             case Qt::Horizontal: {
                 qreal prevLengths = 0;
                 for (int j = 0; j < i; j++)
                     prevLengths += controls[j]->size().width();
-                xS << (margins.left() + prevLengths + i * spacing);
+                xS <<   viewport->mapToItem(controls[i]->parentControl(),
+                                            margins.left() + prevLengths + i * spacing, 0).x();
                 break;
             }
         }
@@ -93,7 +100,8 @@ QList<qreal> ControlsScrollPanelPrivate::findYs(const QList<Control*>& controls,
                                                 Qt::Orientation orientation,
                                                 const QMarginsF& margins,
                                                 qreal spacing,
-                                                bool showIds)
+                                                bool showIds,
+                                                QGraphicsWidget* viewport)
 {
     QList<qreal> yS;
     for (int i = 0; i < controls.size(); i++) {
@@ -102,11 +110,12 @@ QList<qreal> ControlsScrollPanelPrivate::findYs(const QList<Control*>& controls,
                 qreal prevLengths = 0;
                 for (int j = 0; j < i; j++)
                     prevLengths += controls[j]->size().height();
-                yS << (margins.top() + prevLengths + (showIds ? i * ID_LABEL_LENGTH : 0) + i * spacing);
+                yS << viewport->mapToItem(controls[i]->parentControl(), 0,
+                                          (margins.top() + prevLengths + (showIds ? i * ID_LABEL_LENGTH : 0) + i * spacing)).y();
                 break;
             }
             case Qt::Horizontal: {
-                yS << margins.top();
+                yS << viewport->mapToItem(controls[i]->parentControl(), 0, margins.top()).y();
                 break;
             }
         }
@@ -207,12 +216,14 @@ void ControlsScrollPanelPrivate::updateViewport()
     const QList<qreal>& xS = findXs(parent->_controls,
                                     parent->_orientation,
                                     parent->_margins,
-                                    parent->_spacing);
+                                    parent->_spacing,
+                                    &parent->_viewport);
     const QList<qreal>& yS = findYs(parent->_controls,
                                     parent->_orientation,
                                     parent->_margins,
                                     parent->_spacing,
-                                    parent->_showIds);
+                                    parent->_showIds,
+                                    &parent->_viewport);
 
     QFont font;
     font.setPixelSize(FONT_PIXELSIZE);
@@ -220,18 +231,61 @@ void ControlsScrollPanelPrivate::updateViewport()
         auto control = parent->_controls[i];
         control->setPos(xS[i], yS[i]);
         if (parent->_showIds) {
-            QRectF rect(control->rect().bottomLeft(), idTexts[i]->boundingRect().size());
-            rect.adjust(0, fit(2), 0, fit(2));
-            rect.moveCenter({control->x(), rect.y()});
             idTexts[i]->setFont(font);
             idTexts[i]->setText(control->id());
-            idTexts[i]->setPos(control->rect().bottomLeft());
             idTexts[i]->setToolTip(control->id());
-            // idTexts[i]->set
+            auto vrect = parent->viewport()->mapFromItem(control, control->rect()).boundingRect();
+            auto diff = parent->size().width() - SCROLLBAR_LENGTH - idTexts[i]->boundingRect().width();
+            auto x = diff > 0 ? diff/2.0 : fit(1);
+            idTexts[i]->setPos(x, vrect.bottom() + (ID_LABEL_LENGTH - FONT_PIXELSIZE));
         }
     }
 
+    fixSelection();
+
     parent->update();
+}
+
+void ControlsScrollPanelPrivate::fixCoords()
+{
+    const QList<qreal>& yS = findYs(parent->_controls,
+                                    parent->_orientation,
+                                    parent->_margins,
+                                    parent->_spacing,
+                                    parent->_showIds,
+                                    &parent->_viewport);
+
+    for (int i = 0; i < parent->_controls.size(); i++) {
+        auto control = parent->_controls[i];
+        control->setPos(control->x(), yS[i]);
+
+        auto vrect = parent->viewport()->mapFromItem(control, control->rect()).boundingRect();
+        auto diff = parent->size().width() - SCROLLBAR_LENGTH - idTexts[i]->boundingRect().width();
+        auto x = diff > 0 ? diff/2.0 : fit(1);
+        idTexts[i]->setPos(x, vrect.bottom() + (ID_LABEL_LENGTH - FONT_PIXELSIZE));
+
+        fixSelection();
+        control->update();
+    }
+}
+
+void ControlsScrollPanelPrivate::fixSelection()
+{
+    for (auto control : parent->_controls) {
+        auto clipRect = control->rect().intersected(parent->
+                         mapToItem(control, parent->rect().
+                         adjusted(1, 1, -1, -1)).boundingRect());
+        if (clipRect.isValid())
+            control->show();
+        else
+            control->hide();
+
+        if (!parent->rect().contains(parent->
+            mapFromItem(control, control->rect()).boundingRect()))
+            control->hideSelection();
+        else
+            control->showSelection();
+    }
 }
 
 //!
@@ -252,6 +306,10 @@ ControlsScrollPanel::ControlsScrollPanel(QGraphicsScene* scene, QGraphicsWidget 
     scene->addItem(this);
     setFlag(ItemClipsToShape);
     setFlag(ItemClipsChildrenToShape);
+    connect(&_viewport, SIGNAL(geometryChanged()), _d, SLOT(fixCoords()));
+    connect(scene, SIGNAL(selectionChanged()), _d, SLOT(fixSelection()));
+    connect(scene, SIGNAL(controlRemoved(Control*)), SLOT(removeControl(Control*)));
+
     _horizontalScrollBar.setOrientation(Qt::Horizontal);
     _verticalScrollBar.setOrientation(Qt::Vertical);
 
@@ -288,10 +346,9 @@ void ControlsScrollPanel::setOrientation(const Qt::Orientation& orientation)
 void ControlsScrollPanel::addControl(Control* control)
 {
     _controls << control;
-    connect(control, SIGNAL(geometryChanged()), _d, SLOT(updateViewport()));
-//    connect(control, SIGNAL(destroyed(QObject*)), _d, SLOT(updateViewport()));
+    connect(control, SIGNAL(initialized()), _d, SLOT(updateViewport()));
     if (_showIds)
-        _d->idTexts << new QGraphicsSimpleTextItem(this);
+        _d->idTexts << new QGraphicsSimpleTextItem(&_viewport);
     _d->updateViewport();
 }
 
@@ -299,6 +356,8 @@ void ControlsScrollPanel::removeControl(Control* control)
 {
     if (_showIds) {
         int index = _controls.indexOf(control);
+        if (index < 0)
+            return;
         scene()->removeItem(_d->idTexts.at(index));
         delete _d->idTexts.at(index);
         _d->idTexts.removeAt(index);
@@ -449,6 +508,11 @@ void ControlsScrollPanel::wheelEvent(QGraphicsSceneWheelEvent* event)
     if (event->orientation() == Qt::Horizontal && _horizontalScrollBar.isVisible())
         _horizontalScrollBar.setValue(_horizontalScrollBar.value() - event->delta() / 15.0);
     QGraphicsWidget::wheelEvent(event);
+}
+
+QGraphicsWidget* ControlsScrollPanel::viewport()
+{
+    return &_viewport;
 }
 
 #include "controlsscrollpanel.moc"
