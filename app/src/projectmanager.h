@@ -26,7 +26,7 @@ class ProjectManager : public QObject
 		explicit ProjectManager(QObject *parent = 0);
         ~ProjectManager();
 		static ProjectManager* instance();
-		static void setMainWindow(MainWindow* mainWindow);
+        static void setMainWindow(MainWindow* mainWindow);
 		static QString projectDirectory(const QString& projectname);
 		static bool exists(const QString& projectname);
 		static bool buildNewProject(const QString& projectname);

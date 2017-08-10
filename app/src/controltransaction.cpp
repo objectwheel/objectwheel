@@ -1,7 +1,7 @@
 #include <controltransaction.h>
 #include <savemanager.h>
 #include <control.h>
-#include <windowscene.h>
+#include <formscene.h>
 
 ControlTransaction::ControlTransaction(Control* watched, QObject *parent)
     : QObject(parent)

@@ -56,8 +56,6 @@
         <file>resources/images/save-icon@2x.png</file>
         <file>resources/images/save-icon.png</file>
         <file>resources/fonts/LiberationMono-Regular.ttf</file>
-        <file>resources/images/pagesbuttonfilled.png</file>
-        <file>resources/images/pagesbutton.png</file>
         <file>resources/qmls/FancyButton.qml</file>
         <file>resources/qmls/filemanager.js</file>
         <file>resources/qmls/delaycaller.js</file>
@@ -231,6 +229,8 @@
         <file>resources/images/text.png</file>
         <file>resources/qmls/applicationWindow.qml</file>
         <file>resources/images/gui.png</file>
-        <file>resources/images/window.png</file>
+        <file>resources/images/form.png</file>
+        <file>resources/images/formsbutton.png</file>
+        <file>resources/images/formsbuttonfilled.png</file>
     </qresource>
 </RCC>

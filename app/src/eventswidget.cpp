@@ -211,7 +211,7 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     popupVLayout.addWidget(&popupOkButton);
 
     QObject::connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
-    QObject::connect(DesignManager::windowScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
+    QObject::connect(DesignManager::formScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 
 void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
@@ -282,10 +282,10 @@ void EventsWidgetPrivate::editButtonClicked()
     if (issuerEvent.isEmpty())
         return;
 
-//    auto controls = WindowScene::currentWindow()->childControls();
-//    controls << WindowScene::currentWindow();
+//    auto controls = FormScene::currentForm()->childControls();
+//    controls << FormScene::currentForm();
 
-//    WindowScene::instance()->clearSelection();
+//    FormScene::instance()->clearSelection();
 //    for (auto control : controls)
 //        if (control->id() == issuerEvent[EVENT_TARGET_ID_LABEL].toString())
 //            control->setSelected(true);
@@ -352,7 +352,7 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 void EventsWidgetPrivate::btnEditCodeClicked()
 {
 //    static QMetaObject::Connection conn;
-//    auto scene = WindowScene::instance();
+//    auto scene = FormScene::instance();
 //    auto selectedControls = scene->selectedControls();
 
 //    if (selectedControls.size() != 1 ||
@@ -409,7 +409,7 @@ void EventsWidget::clearList()
 
 void EventsWidget::handleSelectionChange()
 {
-//    auto scene = WindowScene::instance();
+//    auto scene = FormScene::instance();
 //    auto selectedControls = scene->selectedControls();
 
 //    clearList();

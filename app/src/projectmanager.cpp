@@ -23,7 +23,7 @@ class ProjectManagerPrivate
 	public:
 		ProjectManager* parent = nullptr;
 		QString currentProject;
-		MainWindow* mainWindow;
+        MainWindow* mainWindow;
 };
 
 ProjectManagerPrivate::ProjectManagerPrivate(ProjectManager* uparent)
@@ -230,7 +230,7 @@ bool ProjectManager::startProject(const QString& projectname)
     }
 
     DesignManager::controlScene()->clearSelection();
-    DesignManager::windowScene()->clearSelection();
+    DesignManager::formScene()->clearSelection();
 
     ToolsManager::downloadTools();
 

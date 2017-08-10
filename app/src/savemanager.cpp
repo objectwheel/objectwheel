@@ -2,7 +2,7 @@
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <parsercontroller.h>
-#include <windowswidget.h>
+#include <formswidget.h>
 #include <mainwindow.h>
 #include <bindingwidget.h>
 #include <eventswidget.h>
@@ -24,10 +24,10 @@ class SaveManagerPrivate
         QString generateSavesDirectory() const;
 		QString generateSaveDirectory(const QString& id) const;
 		void parseImportDirectories(const QString& dir);
-		void initPageOrder(const QString& file) const;
+        void initFormOrder(const QString& file) const;
 		void initEmptyParentalFile(const QString& file) const;
-		void createPages(const QJsonArray& pages);
-		bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages);
+        void createForms(const QJsonArray& forms);
+        bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& forms);
         void fillBindings(const QJsonObject& bindingSaves);
         void fillEvents(const QJsonObject& eventSaves);
         void removeSave(const QString& id);
@@ -56,10 +56,10 @@ inline QString SaveManagerPrivate::generateSaveDirectory(const QString& id) cons
     return baseDir + separator() + id;
 }
 
-void SaveManagerPrivate::initPageOrder(const QString& file) const
+void SaveManagerPrivate::initFormOrder(const QString& file) const
 {
 	QJsonArray jArray;
-	jArray.append("page1");
+    jArray.append("form1"); //FIXME
 	QJsonDocument jDoc(jArray);
 	wrfile(file, jDoc.toJson());
 }
@@ -71,21 +71,21 @@ void SaveManagerPrivate::initEmptyParentalFile(const QString& file) const
 	wrfile(file, jDoc.toJson());
 }
 
-void SaveManagerPrivate::createPages(const QJsonArray& pages)
+void SaveManagerPrivate::createForms(const QJsonArray& forms)
 {
-//	auto firstPage = pages[0].toString();
-//	PagesWidget::changePageWithoutSave("page1", firstPage);
-//	for (int i = 1; i < pages.size(); i++) {
-//		auto currPage = pages[i].toString();
-//		PagesWidget::addPageWithoutSave(currPage);
+//	auto firstForm = forms[0].toString();
+//	FormsWidget::changeFormWithoutSave("form1", firstForm);
+//	for (int i = 1; i < forms.size(); i++) {
+//		auto currForm = forms[i].toString();
+//		FormsWidget::addFormWithoutSave(currForm);
 //	}
 }
 
-bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages)
+bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& forms)
 {
 	QStringList createdObjects;
-	for (auto page : pages) {
-		createdObjects << page.toString();
+    for (auto form : forms) {
+        createdObjects << form.toString();
 	}
 	while (!createdObjects.isEmpty()) {
 		for (auto key : parentalRelationships.keys()) {
@@ -253,12 +253,12 @@ QJsonObject SaveManager::getParentalRelationships()
 	return QJsonDocument::fromJson(rdfile(parentalFile)).object();
 }
 
-QJsonArray SaveManager::getPageOrders()
+QJsonArray SaveManager::getFormOrders()
 {
 	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 	if (projDir.isEmpty()) return QJsonArray();
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	return QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
+    auto formOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + FORM_ORDER_FILE;
+    return QJsonDocument::fromJson(rdfile(formOrderFile)).array();
 }
 
 bool SaveManager::exists(const QString& id)
@@ -377,22 +377,22 @@ bool SaveManager::buildNewDatabase(const QString& projDir)
 	auto saveBaseDir = projDir + separator() + SAVE_DIRECTORY;
 	if (!mkdir(saveBaseDir)) return false;
 	if (!mkfile(saveBaseDir + separator() + PARENTAL_RELATIONSHIP_FILE)) return false;
-	if (!mkfile(saveBaseDir + separator() + PAGE_ORDER_FILE)) return false;
-	m_d->initPageOrder(saveBaseDir + separator() + PAGE_ORDER_FILE);
+    if (!mkfile(saveBaseDir + separator() + FORM_ORDER_FILE)) return false;
+    m_d->initFormOrder(saveBaseDir + separator() + FORM_ORDER_FILE);
 	m_d->initEmptyParentalFile(saveBaseDir + separator() + PARENTAL_RELATIONSHIP_FILE);
 	return true;
 }
 
 bool SaveManager::loadDatabase()
 {
-	QJsonArray pageOrder = getPageOrders();
+    QJsonArray formOrder = getFormOrders();
 	QJsonObject parentalRelationship = getParentalRelationships();
 	QJsonObject bindingSaves = getBindingSaves();
     QJsonObject eventSaves = getEventSaves();
-	if (pageOrder.isEmpty()) return false;
+    if (formOrder.isEmpty()) return false;
 	if (parentalRelationship.size() != saves().size()) return false;
-	m_d->createPages(pageOrder);
-	if (!m_d->fillDashboard(parentalRelationship, pageOrder)) return false;
+    m_d->createForms(formOrder);
+    if (!m_d->fillDashboard(parentalRelationship, formOrder)) return false;
     m_d->fillBindings(bindingSaves);
     m_d->fillEvents(eventSaves);
     return true;
@@ -444,41 +444,41 @@ QString SaveManager::parentalRelationship(const QString& id)
 	return jObj[id].toString();
 }
 
-void SaveManager::addPageOrder(const QString& pageId)
+void SaveManager::addFormOrder(const QString& formId)
 {
 	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 	if (projDir.isEmpty()) return;
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-	jArr.append(pageId);
-	wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
+    auto formOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + FORM_ORDER_FILE;
+    QJsonArray jArr = QJsonDocument::fromJson(rdfile(formOrderFile)).array();
+    jArr.append(formId);
+    wrfile(formOrderFile, QJsonDocument(jArr).toJson());
 }
 
-void SaveManager::removePageOrder(const QString& pageId)
+void SaveManager::removeFormOrder(const QString& formId)
 {
 	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 	if (projDir.isEmpty()) return;
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
+    auto formOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + FORM_ORDER_FILE;
+    QJsonArray jArr = QJsonDocument::fromJson(rdfile(formOrderFile)).array();
 	for (int i = 0; i < jArr.size(); i++) {
-		if (jArr.at(i) == pageId) {
+        if (jArr.at(i) == formId) {
 			jArr.removeAt(i);
-			wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
+            wrfile(formOrderFile, QJsonDocument(jArr).toJson());
 			break;
 		}
 	}
 }
 
-void SaveManager::changePageOrder(const QString& fromPageId, const QString& toPageId)
+void SaveManager::changeFormOrder(const QString& fromFormId, const QString& toFormId)
 {
 	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 	if (projDir.isEmpty()) return;
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
+    auto formOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + FORM_ORDER_FILE;
+    QJsonArray jArr = QJsonDocument::fromJson(rdfile(formOrderFile)).array();
 	for (int i = 0; i < jArr.size(); i++) {
-		if (jArr.at(i) == fromPageId) {
-			jArr[i] = toPageId;
-			wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
+        if (jArr.at(i) == fromFormId) {
+            jArr[i] = toFormId;
+            wrfile(formOrderFile, QJsonDocument(jArr).toJson());
 			break;
 		}
     }

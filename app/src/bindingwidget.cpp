@@ -2,7 +2,7 @@
 #include <listwidget.h>
 #include <flatbutton.h>
 #include <fit.h>
-#include <windowscene.h>
+#include <formscene.h>
 #include <control.h>
 
 #include <QVBoxLayout>
@@ -220,7 +220,7 @@ BindingWidgetPrivate::BindingWidgetPrivate(BindingWidget* p)
     popupVLayout.addWidget(&popupScrollArea);
     popupVLayout.addWidget(&popupOkButton);
 
-//    QObject::connect(WindowScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
+//    QObject::connect(FormScene::instance(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 void BindingWidgetPrivate::editButtonClicked()
 {
@@ -242,10 +242,10 @@ void BindingWidgetPrivate::editButtonClicked()
 //    if (issuerBinding.isEmpty())
 //        return;
 
-//    auto controls = WindowScene::currentWindow()->childControls();
-//    controls << WindowScene::currentWindow();
+//    auto controls = FormScene::currentForm()->childControls();
+//    controls << FormScene::currentForm();
 
-//    WindowScene::instance()->clearSelection();
+//    FormScene::instance()->clearSelection();
 //    for (auto control : controls)
 //        if (control->id() == issuerBinding[BINDING_TARGET_ID_LABEL].toString())
 //            control->setSelected(true);
@@ -373,7 +373,7 @@ void BindingWidgetPrivate::updateSourcePropertyCombobox()
 //        sourceItemCombobox.currentItem().isEmpty())
 //        return;
 
-//    auto scene = WindowScene::instance();
+//    auto scene = FormScene::instance();
 //    auto selectedControls = scene->selectedControls();
 
 //    if (selectedControls.size() != 1 ||
@@ -383,12 +383,12 @@ void BindingWidgetPrivate::updateSourcePropertyCombobox()
 //    QVariant::Type targetType = selectedControls[0]->properties()[targetPropertyCombobox.currentItem()];
 
 //    QStringList sourcePropertyList;
-//    if (scene->currentWindow()->id() == sourceItemCombobox.currentItem()) {
-//        for (auto property : scene->currentWindow()->properties().keys())
-//            if (scene->currentWindow()->properties()[property] == targetType)
+//    if (scene->currentForm()->id() == sourceItemCombobox.currentItem()) {
+//        for (auto property : scene->currentForm()->properties().keys())
+//            if (scene->currentForm()->properties()[property] == targetType)
 //                sourcePropertyList << property;
 //    } else {
-//        for (auto control : scene->currentWindow()->childControls())
+//        for (auto control : scene->currentForm()->childControls())
 //            if (control->id() == sourceItemCombobox.currentItem()) {
 //                for (auto property : control->properties().keys())
 //                    if (control->properties()[property] == targetType)
@@ -473,7 +473,7 @@ bool BindingWidget::hasPopupOpen()
 
 void BindingWidget::handleSelectionChange()
 {
-//    auto scene = WindowScene::instance();
+//    auto scene = FormScene::instance();
 //    auto selectedControls = scene->selectedControls();
 
 //    clearList();
@@ -484,9 +484,9 @@ void BindingWidget::handleSelectionChange()
 //        m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
 //        for (auto property : selectedControls[0]->properties().keys())
 //            m_d->targetPropertyCombobox.addItem(property);
-//        for (auto window : scene->windows())
-//            m_d->sourceItemCombobox.addItem(window->id());
-//        for (auto control : scene->currentWindow()->childControls())
+//        for (auto form : scene->forms())
+//            m_d->sourceItemCombobox.addItem(form->id());
+//        for (auto control : scene->currentForm()->childControls())
 //            m_d->sourceItemCombobox.addItem(control->id());
 //    }
 }

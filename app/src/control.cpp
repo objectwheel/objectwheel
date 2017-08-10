@@ -1,7 +1,7 @@
 #include <control.h>
 #include <fit.h>
 #include <qmlpreviewer.h>
-#include <windowscene.h>
+#include <formscene.h>
 #include <savemanager.h>
 #include <designmanager.h>
 
@@ -40,9 +40,9 @@
 #define PREVIEW_REFRESH_INTERVAL 100
 #define RESIZE_TRANSACTION_INTERVAL 800
 #define MAGNETIC_FIELD (fit(3))
-#define PAGE_PP_SIZE (fit(QSize(250, 415)))
-#define PAGE_PL_SIZE (fit(QSize(415, 250)))
-#define PAGE_TOP_MARGIN (fit(14))
+#define FORM_PP_SIZE (fit(QSize(250, 415)))
+#define FORM_PL_SIZE (fit(QSize(415, 250)))
+#define FORM_TOP_MARGIN (fit(14))
 #define MOBILE_SKIN_COLOR (QColor("#52616D"))
 
 using namespace Fit;
@@ -323,19 +323,19 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         auto mainControl = scene->mainControl();
         auto id = result.id;
 
-        QStringList windowNames;
-        if (DesignManager::mode() == DesignManager::WindowGUI) {
-            for (auto window : DesignManager::windowScene()->windows()) {
-                if (window == parent)
+        QStringList formNames;
+        if (DesignManager::mode() == DesignManager::FormGUI) {
+            for (auto form : DesignManager::formScene()->forms()) {
+                if (form == parent)
                     continue;
                 else
-                    windowNames << window->id();
+                    formNames << form->id();
             }
         } else {
-            windowNames << DesignManager::controlScene()->mainControl()->id();
+            formNames << DesignManager::controlScene()->mainControl()->id();
         }
 
-        for (int i = 1; mainControl->contains(id) || windowNames.contains(id); i++)
+        for (int i = 1; mainControl->contains(id) || formNames.contains(id); i++)
             id = result.id + QString::number(i);
 
         SaveManager::addSave(id, parent->url().toLocalFile());
@@ -1252,134 +1252,134 @@ QVector<QLineF> Control::guideLines() const
     return lines;
 }
 
-//! ****************** [Window Private] ******************
+//! ****************** [Form Private] ******************
 
 
-class WindowPrivate : public QObject
+class FormPrivate : public QObject
 {
         Q_OBJECT
 
     public:
-        explicit WindowPrivate(Window* parent);
+        explicit FormPrivate(Form* parent);
         static void applySkinChange();
 
     public:
-        Window* parent;
+        Form* parent;
         static QSizeF skinSize;
 };
 
-QSizeF WindowPrivate::skinSize;
+QSizeF FormPrivate::skinSize;
 
-WindowPrivate::WindowPrivate(Window* parent)
+FormPrivate::FormPrivate(Form* parent)
     : QObject(parent)
     , parent(parent)
 {
 }
 
-void WindowPrivate::applySkinChange()
+void FormPrivate::applySkinChange()
 {
     QSize size;
     bool resizable;
 
-    switch (Window::_skin) {
-        case Window::PhonePortrait:
+    switch (Form::_skin) {
+        case Form::PhonePortrait:
             resizable = false;
-            size = PAGE_PP_SIZE;
-            skinSize = PAGE_PP_SIZE + QSize(16, 75);
+            size = FORM_PP_SIZE;
+            skinSize = FORM_PP_SIZE + QSize(16, 75);
             break;
 
-        case Window::PhoneLandscape:
+        case Form::PhoneLandscape:
             resizable = false;
-            size = PAGE_PL_SIZE;
-            skinSize = PAGE_PL_SIZE + QSize(75, 16);
+            size = FORM_PL_SIZE;
+            skinSize = FORM_PL_SIZE + QSize(75, 16);
             break;
 
-        case Window::Desktop:
-        case Window::NoSkin :
+        case Form::Desktop:
+        case Form::NoSkin :
             resizable = true;
             break;
     }
 
-    for (auto window : DesignManager::windowScene()->windows()) { //FIXME
-        if (Window::_skin == Window::PhonePortrait ||
-            Window::_skin == Window::PhoneLandscape)
-            window->resize(size);
+    for (auto form : DesignManager::formScene()->forms()) { //FIXME
+        if (Form::_skin == Form::PhonePortrait ||
+            Form::_skin == Form::PhoneLandscape)
+            form->resize(size);
         else
-            window->update();
+            form->update();
 
-        for (auto& resizer : window->_resizers)
+        for (auto& resizer : form->_resizers)
             resizer.setDisabled(!resizable);
     }
 }
 
-//! ********************** [Window] **********************
+//! ********************** [Form] **********************
 
-Window::Skin Window::_skin = Window::PhonePortrait;
+Form::Skin Form::_skin = Form::PhonePortrait;
 
-Window::Window(const QUrl& url, Window* parent)
+Form::Form(const QUrl& url, Form* parent)
     : Control(url, parent)
-    , _d(new WindowPrivate(this))
+    , _d(new FormPrivate(this))
 {
-    connect(this, &Window::initialized, [=] {
+    connect(this, &Form::initialized, [=] {
         setFlag(ItemIsMovable, false);
     });
-    connect(this, &Window::previewChanged, [=] {
-        WindowPrivate::applySkinChange();
+    connect(this, &Form::previewChanged, [=] {
+        FormPrivate::applySkinChange();
         this->disconnect(SIGNAL(previewChanged()));
     });
-    connect(this, &Window::visibleChanged, [=] {
+    connect(this, &Form::visibleChanged, [=] {
         _d->applySkinChange();
     });
 }
 
-void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
-    auto scene = static_cast<WindowScene*>(this->scene());
+    auto scene = static_cast<FormScene*>(this->scene());
     painter->setRenderHint(QPainter::Antialiasing);
 
     switch (_skin) {
         case PhonePortrait: {
-            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
+            auto skinRect = QRectF({0, 0}, FormPrivate::skinSize);
             skinRect.moveCenter(innerRect.center());
-            skinRect.moveTop(skinRect.top() + PAGE_TOP_MARGIN);
+            skinRect.moveTop(skinRect.top() + FORM_TOP_MARGIN);
             painter->setBrush(MOBILE_SKIN_COLOR);
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(skinRect, fit(10), fit(10));
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->setBrush(scene->views().first()->backgroundBrush());
-            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 3.0, skinRect.top() + PAGE_TOP_MARGIN / 1.5,
-                                           skinRect.width() / 3.0, PAGE_TOP_MARGIN / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
-            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 2.0 - PAGE_TOP_MARGIN,
-                                           skinRect.bottom() - PAGE_TOP_MARGIN / 1.5 - 2 * PAGE_TOP_MARGIN,
-                                           2 * PAGE_TOP_MARGIN, 2 * PAGE_TOP_MARGIN), PAGE_TOP_MARGIN, PAGE_TOP_MARGIN);
+            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 3.0, skinRect.top() + FORM_TOP_MARGIN / 1.5,
+                                           skinRect.width() / 3.0, FORM_TOP_MARGIN / 3.0), FORM_TOP_MARGIN / 6.0, FORM_TOP_MARGIN / 6.0);
+            painter->drawRoundedRect(QRect(skinRect.x() + skinRect.width() / 2.0 - FORM_TOP_MARGIN,
+                                           skinRect.bottom() - FORM_TOP_MARGIN / 1.5 - 2 * FORM_TOP_MARGIN,
+                                           2 * FORM_TOP_MARGIN, 2 * FORM_TOP_MARGIN), FORM_TOP_MARGIN, FORM_TOP_MARGIN);
             break;
         } case PhoneLandscape: {
-            auto skinRect = QRectF({0, 0}, WindowPrivate::skinSize);
+            auto skinRect = QRectF({0, 0}, FormPrivate::skinSize);
             skinRect.moveCenter(innerRect.center());
-            skinRect.moveLeft(skinRect.left() + PAGE_TOP_MARGIN);
+            skinRect.moveLeft(skinRect.left() + FORM_TOP_MARGIN);
             painter->setBrush(MOBILE_SKIN_COLOR);
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
             painter->drawRoundedRect(skinRect, fit(10), fit(10));
             painter->setBrush(scene->views().first()->backgroundBrush());
             painter->setPen(MOBILE_SKIN_COLOR.darker(110));
-            painter->drawRoundedRect(QRect(skinRect.left() + PAGE_TOP_MARGIN / 1.5, skinRect.y() + skinRect.height() / 3.0,
-                                           PAGE_TOP_MARGIN / 3.0, skinRect.height() / 3.0), PAGE_TOP_MARGIN / 6.0, PAGE_TOP_MARGIN / 6.0);
-            painter->drawRoundedRect(QRect(skinRect.right() - PAGE_TOP_MARGIN / 1.5 - 2 * PAGE_TOP_MARGIN,
-                                           skinRect.y() + skinRect.height() / 2.0 - PAGE_TOP_MARGIN,
-                                           2 * PAGE_TOP_MARGIN, 2 * PAGE_TOP_MARGIN), PAGE_TOP_MARGIN, PAGE_TOP_MARGIN);
+            painter->drawRoundedRect(QRect(skinRect.left() + FORM_TOP_MARGIN / 1.5, skinRect.y() + skinRect.height() / 3.0,
+                                           FORM_TOP_MARGIN / 3.0, skinRect.height() / 3.0), FORM_TOP_MARGIN / 6.0, FORM_TOP_MARGIN / 6.0);
+            painter->drawRoundedRect(QRect(skinRect.right() - FORM_TOP_MARGIN / 1.5 - 2 * FORM_TOP_MARGIN,
+                                           skinRect.y() + skinRect.height() / 2.0 - FORM_TOP_MARGIN,
+                                           2 * FORM_TOP_MARGIN, 2 * FORM_TOP_MARGIN), FORM_TOP_MARGIN, FORM_TOP_MARGIN);
             break;
         } case Desktop: {
-            auto skinRect = QRectF({0, 0}, size() + QSizeF(fit(2), fit(2.0 * PAGE_TOP_MARGIN / 1.35)));
+            auto skinRect = QRectF({0, 0}, size() + QSizeF(fit(2), fit(2.0 * FORM_TOP_MARGIN / 1.35)));
             skinRect.moveCenter(innerRect.center());
-            skinRect.moveTop(skinRect.top() - PAGE_TOP_MARGIN / 1.5);
+            skinRect.moveTop(skinRect.top() - FORM_TOP_MARGIN / 1.5);
             QPainterPath path;
             path.setFillRule(Qt::WindingFill);
             path.addRect(skinRect.adjusted(0, fit(10), 0, 0));
             path.addRoundedRect(skinRect.adjusted(0, 0, 0, -skinRect.height() + fit(15)), fit(3), fit(3));
 
             QLinearGradient gradient(skinRect.center().x(), skinRect.y(),
-                                     skinRect.center().x(), skinRect.y() + fit(2.2 * PAGE_TOP_MARGIN / 1.35));
+                                     skinRect.center().x(), skinRect.y() + fit(2.2 * FORM_TOP_MARGIN / 1.35));
             gradient.setColorAt(0, QColor("#E8ECEF"));
             gradient.setColorAt(1, QColor("#D3D7DA"));
             painter->setBrush(gradient);
@@ -1439,18 +1439,18 @@ void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     }
 }
 
-void Window::resizeEvent(QGraphicsSceneResizeEvent* event)
+void Form::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     Control::resizeEvent(event);
     centralize();
 }
 
-void Window::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
 }
 
-QRectF Window::frameGeometry() const
+QRectF Form::frameGeometry() const
 {
     QRectF rect;
     if (_skin == PhonePortrait || _skin == PhoneLandscape)
@@ -1458,42 +1458,42 @@ QRectF Window::frameGeometry() const
     else if (_skin == NoSkin)
         rect = QRectF({QPointF(-size().width() / 2.0, -size().height() / 2.0), size()});
     else
-        rect = QRectF(-size().width() / 2.0, -size().height() / 2.0 - PAGE_TOP_MARGIN / 1.5,
-                      size().width(), size().height() + 2.0 * PAGE_TOP_MARGIN / 1.5);
+        rect = QRectF(-size().width() / 2.0, -size().height() / 2.0 - FORM_TOP_MARGIN / 1.5,
+                      size().width(), size().height() + 2.0 * FORM_TOP_MARGIN / 1.5);
     return rect;
 }
 
-bool Window::isMain() const
+bool Form::isMain() const
 {
     return _main;
 }
 
-void Window::setMain(bool value)
+void Form::setMain(bool value)
 {
     _main = value;
 }
 
-void Window::setSkin(const Skin& skin)
+void Form::setSkin(const Skin& skin)
 {
     _skin = skin;
-    WindowPrivate::applySkinChange();
+    FormPrivate::applySkinChange();
 }
 
-const Window::Skin& Window::skin()
+const Form::Skin& Form::skin()
 {
     return _skin;
 }
 
-void Window::centralize()
+void Form::centralize()
 {
     if (_skin == PhonePortrait)
-        setPos(- size().width() / 2.0, - size().height() / 2.0 - PAGE_TOP_MARGIN);
+        setPos(- size().width() / 2.0, - size().height() / 2.0 - FORM_TOP_MARGIN);
     else if (_skin == PhoneLandscape)
-        setPos(- size().width() / 2.0 - PAGE_TOP_MARGIN, - size().height() / 2.0);
+        setPos(- size().width() / 2.0 - FORM_TOP_MARGIN, - size().height() / 2.0);
     else if (_skin == NoSkin)
         setPos(- size().width() / 2.0, - size().height() / 2.0);
     else
-        setPos(- size().width() / 2.0, - size().height() / 2.0 + PAGE_TOP_MARGIN / 1.5);
+        setPos(- size().width() / 2.0, - size().height() / 2.0 + FORM_TOP_MARGIN / 1.5);
 }
 
 #include "control.moc"

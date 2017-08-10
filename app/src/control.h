@@ -12,7 +12,7 @@
 
 class Control;
 class ControlPrivate;
-class WindowPrivate;
+class FormPrivate;
 
 class Resizer : public QGraphicsWidget
 {
@@ -59,7 +59,7 @@ class Control : public QGraphicsWidget
         friend class ControlPrivate;
         friend class ControlScene;
         friend class ControlView;
-        friend class WindowScene;
+        friend class FormScene;
         friend class DesignManager;
         friend class DesignManagerPrivate;
 
@@ -141,10 +141,10 @@ class Control : public QGraphicsWidget
         static bool _showOutline;
 };
 
-class Window : public Control
+class Form : public Control
 {
         Q_OBJECT
-        friend class WindowPrivate;
+        friend class FormPrivate;
 
     public:
         enum Skin {
@@ -154,7 +154,7 @@ class Window : public Control
             Desktop
         };
 
-        explicit Window(const QUrl& url, Window* parent = Q_NULLPTR);
+        explicit Form(const QUrl& url, Form* parent = Q_NULLPTR);
 
         bool isMain() const;
         void setMain(bool value);
@@ -173,7 +173,7 @@ class Window : public Control
         void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     private:
-        WindowPrivate* _d;
+        FormPrivate* _d;
         bool _main = false;
         QList<Control*> _controls;
         static Skin _skin;

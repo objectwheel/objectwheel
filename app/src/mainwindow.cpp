@@ -25,7 +25,7 @@
 #include <QtConcurrent>
 #include <delayer.h>
 #include <control.h>
-#include <windowscene.h>
+#include <formscene.h>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
@@ -98,14 +98,14 @@ void MainWindow::SetupGui()
 	bindingVariant.setValue<QWidget*>(m_d->bindingWidget);
     QVariant eventsVariant;
     eventsVariant.setValue<QWidget*>(m_d->eventsWidget);
-    QVariant windowsVariant;
-    windowsVariant.setValue<QWidget*>(m_d->windowsWidget);
+    QVariant formsVariant;
+    formsVariant.setValue<QWidget*>(m_d->formsWidget);
 	Container* leftContainer = new Container;
 	leftContainer->addWidget(m_d->toolboxWidget);
 	leftContainer->addWidget(m_d->propertiesWidget);
 	leftContainer->addWidget(m_d->bindingWidget);
     leftContainer->addWidget(m_d->eventsWidget);
-    leftContainer->addWidget(m_d->windowsWidget);
+    leftContainer->addWidget(m_d->formsWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QToolBar* leftToolbar = new QToolBar;
@@ -169,17 +169,17 @@ void MainWindow::SetupGui()
     connect(eventsButton, SIGNAL(clicked(bool)), eventsButtonAction, SLOT(trigger()));
     connect(eventsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
-    QRadioButton* windowsButton = new QRadioButton;
-    windowsButton->setCursor(Qt::PointingHandCursor);
-    windowsButton->setStyleSheet(CSS::WindowsButton);
-    windowsButton->setCheckable(true);
-    QWidgetAction* windowsButtonAction = new QWidgetAction(this);
-    windowsButtonAction->setDefaultWidget(windowsButton);
-    windowsButtonAction->setData(windowsVariant);
-    windowsButtonAction->setCheckable(true);
-    leftToolbar->addAction(windowsButtonAction);
-    connect(windowsButton, SIGNAL(clicked(bool)), windowsButtonAction, SLOT(trigger()));
-    connect(windowsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
+    QRadioButton* formsButton = new QRadioButton;
+    formsButton->setCursor(Qt::PointingHandCursor);
+    formsButton->setStyleSheet(CSS::FormsButton);
+    formsButton->setCheckable(true);
+    QWidgetAction* formsButtonAction = new QWidgetAction(this);
+    formsButtonAction->setDefaultWidget(formsButton);
+    formsButtonAction->setData(formsVariant);
+    formsButtonAction->setCheckable(true);
+    leftToolbar->addAction(formsButtonAction);
+    connect(formsButton, SIGNAL(clicked(bool)), formsButtonAction, SLOT(trigger()));
+    connect(formsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
@@ -202,7 +202,7 @@ void MainWindow::SetupGui()
 	connect(propertiesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
         leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
-    connect(windowsButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
+    connect(formsButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
         leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
 	});
 	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
@@ -231,8 +231,8 @@ void MainWindow::SetupGui()
 	m_d->centralWidget->installEventFilter(this);
 
     QTimer::singleShot(3000, [=] {
-        auto window = new Window(QUrl("qrc:/resources/qmls/applicationWindow.qml"));
-        DesignManager::windowScene()->addWindow(window);
+        auto form = new Form(QUrl("qrc:/resources/qmls/applicationWindow.qml"));
+        DesignManager::formScene()->addForm(form);
     });
 
 	m_d->qmlEditor = new QmlEditor(this);
@@ -246,7 +246,7 @@ void MainWindow::SetupGui()
 
     QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
-           DesignManager::windowScene()->clearSelection();
+           DesignManager::formScene()->clearSelection();
            DesignManager::controlScene()->clearSelection();
         }
     });
@@ -312,7 +312,7 @@ void MainWindow::SetupManagers()
 	projectManager->setMainWindow(this);
     new SaveManager(this);
 	auto sceneManager = new SceneManager;
-	sceneManager->setMainWindow(this);
+    sceneManager->setMainWindow(this);
 	sceneManager->setSceneListWidget(m_d->sceneList);
 	sceneManager->addScene("studioScene", m_d->centralWidget);
     sceneManager->addScene("projectsScene", m_d->projectsScreen);
@@ -368,11 +368,11 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 	emit resized();
 }
 
-void MainWindow::handleCurrentWindowChanges(const QVariant& CurrentWindow, const QVariant& index)
+void MainWindow::handleCurrentFormChanges(const QVariant& CurrentForm, const QVariant& index)
 {
-//	m_CurrentWindow = qobject_cast<QQuickItem*>(CurrentWindow.value<QObject*>());
-//	if (!m_CurrentWindow) qFatal("MainWindow : Error occurred");
-//    m_d->pagesWidget->setCurrentWindow(index.toInt());
+//	m_CurrentForm = qobject_cast<QQuickItem*>(CurrentForm.value<QObject*>());
+//	if (!m_CurrentForm) qFatal("MainForm : Error occurred");
+//    m_d->formsWidget->setCurrentForm(index.toInt());
 }
 
 void MainWindow::handleEditorOpenButtonClicked()
@@ -410,14 +410,14 @@ void MainWindow::clearStudio()
 //		item->deleteLater();
 //	}
 
-//	auto pages = m_d->pagesWidget->pages();
-//	for (int i = pages.count(); i--;) {
-//		if (pages[i] != m_CurrentWindow) {
-//			m_d->pagesWidget->removeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(pages[i]));
+//	auto forms = m_d->formsWidget->forms();
+//	for (int i = forms.count(); i--;) {
+//		if (forms[i] != m_CurrentWindow) {
+//			m_d->formsWidget->removeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(forms[i]));
 //		}
 //	}
 //	QString page1Name = "page1";
-//	m_d->pagesWidget->changeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentWindow), page1Name);
+//	m_d->formsWidget->changeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentWindow), page1Name);
 
 //	m_d->bindingWidget->clearAllBindings();
 //    m_d->eventsWidget->clearAllEvents();
@@ -441,7 +441,7 @@ void MainWindow::on_clearButton_clicked()
         return;
 
     QMessageBox msgBox;
-    msgBox.setText("<b>This will clear the current window's content.</b>");
+    msgBox.setText("<b>This will clear the current form's content.</b>");
     msgBox.setInformativeText("Do you want to continue?");
     msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
     msgBox.setDefaultButton(QMessageBox::No);
@@ -763,9 +763,9 @@ bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
 {
 //    auto control = new Control(url);
 
-//    auto controls = WindowScene::currentWindow()->childControls();
-//    for (auto window : WindowScene::windows())
-//        controls << window;
+//    auto controls = FormScene::currentForm()->childControls();
+//    for (auto form : FormScene::forms())
+//        controls << form;
 //    for (auto ctrl : controls)
 //        if (ctrl->id() == parent) {
 //            control->setParentItem(ctrl);

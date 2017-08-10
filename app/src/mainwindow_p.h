@@ -1,11 +1,3 @@
-/********************************************************************************
-** Form generated from reading UI file 'mainwindow.ui'
-**
-** Created by: Qt User Interface Compiler version 5.7.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
-
 #ifndef MAINWINDOW_P_H
 #define MAINWINDOW_P_H
 
@@ -27,7 +19,7 @@
 #include <titlebar.h>
 #include <about.h>
 #include <qmleditor.h>
-#include <windowswidget.h>
+#include <formswidget.h>
 #include <fit.h>
 #include <lineedit.h>
 #include <QLineEdit>
@@ -49,7 +41,7 @@ QT_BEGIN_NAMESPACE
 class MainWindowPrivate
 {
 	public:
-		MainWindow* parent;
+        MainWindow* parent;
 		QWidget* centralWidget;
 		ProjectsScreen* projectsScreen;
         LoginScreen* loginScreen;
@@ -74,7 +66,7 @@ class MainWindowPrivate
         PropertiesWidget* propertiesWidget;
 		BindingWidget* bindingWidget;
         EventsWidget* eventsWidget;
-        PagesWidget* windowsWidget;
+        FormsWidget* formsWidget;
 		About* aboutWidget;
         BuildsScreen* buildsScreen;
 		FlatButton* aboutButton;
@@ -82,7 +74,7 @@ class MainWindowPrivate
         QWidget* settleWidget;
         DesignManager* designManager;
 
-		MainWindowPrivate(MainWindow* uparent);
+        MainWindowPrivate(MainWindow* uparent);
         ~MainWindowPrivate();
         void setupUi(); // setupUi
 		void showAdderArea();
@@ -102,7 +94,7 @@ MainWindowPrivate::~MainWindowPrivate()
     delete aboutButton;
     delete buildsScreen;
     delete aboutWidget;
-    delete windowsWidget;
+    delete formsWidget;
     delete eventsWidget;
     delete bindingWidget;
     delete propertiesWidget;
@@ -368,9 +360,9 @@ void MainWindowPrivate::setupUi()
     eventsWidget->setObjectName(QStringLiteral("eventsWidget"));
     eventsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    windowsWidget = new PagesWidget(centralWidget);
-    windowsWidget->setObjectName(QStringLiteral("windowsWidget"));
-    windowsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    formsWidget = new FormsWidget(centralWidget);
+    formsWidget->setObjectName(QStringLiteral("formsWidget"));
+    formsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
 
 void MainWindowPrivate::showAdderArea()

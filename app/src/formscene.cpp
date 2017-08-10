@@ -1,0 +1,63 @@
+#include <formscene.h>
+
+FormScene::FormScene(QObject *parent)
+    : ControlScene(parent)
+{
+}
+
+void FormScene::addForm(Form* form)
+{
+    if (_forms.contains(form))
+        return;
+
+    addItem(form);
+    form->setVisible(false);
+
+    _forms.append(form);
+
+    if (!_mainControl)
+        setMainControl(form);
+}
+
+void FormScene::removeForm(Form* form)
+{
+    if (_forms.contains(form) == false ||
+        form->isMain())
+        return;
+
+    removeItem(form);
+    _forms.removeOne(form);
+
+    if (_mainControl == form)
+        setMainControl(_forms[0]);
+}
+
+Form* FormScene::mainForm()
+{
+    return (Form*)_mainControl.data();
+}
+
+void FormScene::setMainForm(Form* mainForm)
+{
+    if (_forms.contains(mainForm) == false ||
+        _mainControl == mainForm)
+        return;
+
+    if (_mainControl)
+        _mainControl->setVisible(false);
+
+    _mainControl = mainForm;
+    _mainControl->setVisible(true);
+
+    nonGuiControlsPanel()->clear();
+    for (auto control : mainForm->childControls())
+        if (control->gui() == false)
+            nonGuiControlsPanel()->addControl(control);
+}
+
+void FormScene::setMainControl(Control* mainControl)
+{
+    Form* form;
+    if ((form = dynamic_cast<Form*>(mainControl)))
+        setMainForm(form);
+}

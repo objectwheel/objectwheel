@@ -8,7 +8,7 @@
 #import <UIKit/UIWindow.h>
 #import <UIKit/UIViewController.h>
 
-void IOS::fixCoordOfWebView(QWindow* main_window, QQuickItem* item, int count)
+void IOS::fixCoordOfWebView(QForm* main_window, QQuickItem* item, int count)
 {
 	UIView* view = reinterpret_cast<UIView *>(main_window->winId());
 

@@ -47,7 +47,7 @@ class MainWindow : public QWidget
 		void toolboxImportButtonClicked();
 		void toolboxExportButtonClicked();
 		void handleImports(const QStringList& fileNames);
-        void handleCurrentWindowChanges(const QVariant& CurrentWindow, const QVariant& index);
+        void handleCurrentFormChanges(const QVariant& CurrentForm, const QVariant& index);
         void handleEditorOpenButtonClicked();
         void cleanupObjectwheel();
 

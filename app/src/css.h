@@ -21,7 +21,7 @@ class CSS
 		static QString PropertiesButton;
 		static QString BindingButton;
         static QString EventsButton;
-        static QString WindowsButton;
+        static QString FormsButton;
 		static QString BindingListWidget;
 };
 

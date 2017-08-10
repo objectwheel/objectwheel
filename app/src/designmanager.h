@@ -1,7 +1,7 @@
 #ifndef DESIGNMANAGER_H
 #define DESIGNMANAGER_H
 
-#include <windowscene.h>
+#include <formscene.h>
 #include <QObject>
 
 class QWidget;
@@ -16,7 +16,7 @@ class DesignManager : public QObject
     public:
         enum Mode {
             ControlGUI,
-            WindowGUI,
+            FormGUI,
             CodeEdit
         };
 
@@ -28,7 +28,7 @@ class DesignManager : public QObject
         static void setMode(const Mode& mode);
         static ControlScene* currentScene();
         static ControlScene* controlScene();
-        static WindowScene* windowScene();
+        static FormScene* formScene();
 
     signals:
         void modeChanged();

@@ -124,14 +124,14 @@ QRadioButton::indicator { \
     border-image: url(:/resources/images/eventsbutton.png); \
 }"
 
-#define CSS_PAGES_BUTTON "\
+#define CSS_FORMS_BUTTON "\
 QRadioButton::indicator { \
 	width: %1px; \
 	height: %1px; \
 } QRadioButton::indicator::checked { \
-	border-image: url(:/resources/images/pagesbuttonfilled.png); \
+    border-image: url(:/resources/images/formsbuttonfilled.png); \
 } QRadioButton::indicator::unchecked { \
-	border-image: url(:/resources/images/pagesbutton.png); \
+    border-image: url(:/resources/images/formsbutton.png); \
 }"
 
 #define CSS_BINDING_LISTWIDGET \
@@ -163,7 +163,7 @@ QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
 QString CSS::BindingButton;
 QString CSS::EventsButton;
-QString CSS::WindowsButton;
+QString CSS::FormsButton;
 QString CSS::BindingListWidget;
 
 void CSS::init()
@@ -200,8 +200,8 @@ void CSS::init()
     /* EventsButton */
     EventsButton = QString(CSS_EVENTS_BUTTON).arg(fit(20));
 
-    /* WindowsButton */
-    WindowsButton = QString(CSS_PAGES_BUTTON).arg(fit(20));
+    /* FormsButton */
+    FormsButton = QString(CSS_FORMS_BUTTON).arg(fit(20));
 
 	/* BindingListWidget */
 	BindingListWidget = QString(CSS_BINDING_LISTWIDGET).arg(fit(5)).arg(fit(2));

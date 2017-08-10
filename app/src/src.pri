@@ -33,16 +33,16 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/delayer.h \
                              $$PWD/designmanager.h \
                              $$PWD/control.h \
-                             $$PWD/windowscene.h \
+                             $$PWD/formscene.h \
                              $$PWD/qmlpreviewer.h \
                              $$PWD/controltransaction.h \
                              $$PWD/parserworker.h \
                              $$PWD/parsercontroller.h \
-                             $$PWD/windowview.h \
-                             $$PWD/windowswidget.h \
                              $$PWD/controlscene.h \
                              $$PWD/controlview.h \
-    $$PWD/controlsscrollpanel.h
+                             $$PWD/controlsscrollpanel.h \
+                             $$PWD/formview.h \
+                             $$PWD/formswidget.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -77,16 +77,16 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/delayer.cpp \
                              $$PWD/designmanager.cpp \
                              $$PWD/control.cpp \
-                             $$PWD/windowscene.cpp \
+                             $$PWD/formscene.cpp \
                              $$PWD/qmlpreviewer.cpp \
                              $$PWD/controltransaction.cpp \
                              $$PWD/parserworker.cpp \
                              $$PWD/parsercontroller.cpp \
-                             $$PWD/windowview.cpp \
-                             $$PWD/windowswidget.cpp \
                              $$PWD/controlscene.cpp \
                              $$PWD/controlview.cpp \
-    $$PWD/controlsscrollpanel.cpp
+                             $$PWD/controlsscrollpanel.cpp \
+                             $$PWD/formview.cpp \
+                             $$PWD/formswidget.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

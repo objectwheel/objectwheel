@@ -1,5 +1,5 @@
-#include <windowview.h>
-#include <windowscene.h>
+#include <formview.h>
+#include <formscene.h>
 #include <control.h>
 #include <fit.h>
 #include <savemanager.h>
@@ -19,12 +19,12 @@
 
 using namespace Fit;
 
-class WindowViewPrivate : public QObject
+class FormViewPrivate : public QObject
 {
         Q_OBJECT
 
     public:
-        WindowViewPrivate(WindowView* parent);
+        FormViewPrivate(FormView* parent);
 
     private slots:
         void handleUndoAction();
@@ -42,7 +42,7 @@ class WindowViewPrivate : public QObject
         void handleBringFrontActAction();
 
     public:
-        WindowView* parent;
+        FormView* parent;
         QMenu menu;
         QAction sendBackAct;
         QAction bringFrontAct;
@@ -59,7 +59,7 @@ class WindowViewPrivate : public QObject
         QAction moveLeftAct;
 };
 
-WindowViewPrivate::WindowViewPrivate(WindowView* parent)
+FormViewPrivate::FormViewPrivate(FormView* parent)
     : QObject(parent)
     , parent(parent)
 {
@@ -124,24 +124,24 @@ WindowViewPrivate::WindowViewPrivate(WindowView* parent)
     connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
 }
 
-void WindowViewPrivate::handleUndoAction()
+void FormViewPrivate::handleUndoAction()
 {
     //TODO
 }
 
-void WindowViewPrivate::handleRedoAction()
+void FormViewPrivate::handleRedoAction()
 {
     //TODO
 }
 
-void WindowViewPrivate::handleCutAction()
+void FormViewPrivate::handleCutAction()
 {
     // TODO
 //    QJsonObject pr;
 //    QList<QUrl> urls;
 //    auto mimeData = new QMimeData;
 //    auto clipboard = QApplication::clipboard();
-//    auto scene = static_cast<WindowScene*>(parent->scene());
+//    auto scene = static_cast<FormScene*>(parent->scene());
 
 //    for (auto control : scene->selectedControls()) {
 //        for (auto childControl : control->childControls()) {
@@ -157,19 +157,19 @@ void WindowViewPrivate::handleCutAction()
 //    mimeData->setHtml(QJsonDocument(pr));
 }
 
-void WindowViewPrivate::handleCopyAction()
+void FormViewPrivate::handleCopyAction()
 {
     //TODO
 }
 
-void WindowViewPrivate::handlePasteAction()
+void FormViewPrivate::handlePasteAction()
 {
     //TODO
 }
 
-void WindowViewPrivate::handleDeleteAction()
+void FormViewPrivate::handleDeleteAction()
 {
-    auto scene = static_cast<WindowScene*>(parent->scene());
+    auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls) {
@@ -177,90 +177,90 @@ void WindowViewPrivate::handleDeleteAction()
     }
 }
 
-void WindowViewPrivate::handleSelectAllAction()
+void FormViewPrivate::handleSelectAllAction()
 {
-    auto mainWindow = ((WindowScene*)parent->scene())->mainWindow();
-    for (auto control : mainWindow->childControls())
+    auto mainForm = ((FormScene*)parent->scene())->mainForm();
+    for (auto control : mainForm->childControls())
         control->setSelected(true);
 }
 
-void WindowViewPrivate::handleMoveUpAction()
+void FormViewPrivate::handleMoveUpAction()
 {
-    auto scene = static_cast<WindowScene*>(parent->scene());
+    auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
         control->moveBy(0, - fit(1));
 }
 
-void WindowViewPrivate::handleMoveDownAction()
+void FormViewPrivate::handleMoveDownAction()
 {
-    auto scene = static_cast<WindowScene*>(parent->scene());
+    auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
         control->moveBy(0, fit(1));
 }
 
-void WindowViewPrivate::handleMoveRightAction()
+void FormViewPrivate::handleMoveRightAction()
 {
-    auto scene = static_cast<WindowScene*>(parent->scene());
+    auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
         control->moveBy(fit(1), 0);
 }
 
-void WindowViewPrivate::handleMoveLeftAction()
+void FormViewPrivate::handleMoveLeftAction()
 {
-    auto scene = static_cast<WindowScene*>(parent->scene());
+    auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
         control->moveBy(- fit(1), 0);
 }
 
-void WindowViewPrivate::handleSendBackActAction()
+void FormViewPrivate::handleSendBackActAction()
 {
-    auto scene = static_cast<WindowScene*>(parent->scene());
+    auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainWindow()->lowerZValue() == MAX_Z_VALUE
-                           ? 0 : scene->mainWindow()->lowerZValue() - 1);
+        control->setZValue(scene->mainForm()->lowerZValue() == MAX_Z_VALUE
+                           ? 0 : scene->mainForm()->lowerZValue() - 1);
 }
 
-void WindowViewPrivate::handleBringFrontActAction()
+void FormViewPrivate::handleBringFrontActAction()
 {
-    auto scene = static_cast<WindowScene*>(parent->scene());
+    auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainWindow()->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : scene->mainWindow()->higherZValue() + 1);
+        control->setZValue(scene->mainForm()->higherZValue() == -MAX_Z_VALUE
+                           ? 0 : scene->mainForm()->higherZValue() + 1);
 }
 
-WindowView::WindowView(QGraphicsScene* scene, QWidget* parent)
+FormView::FormView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
-    , _d(new WindowViewPrivate(this))
+    , _d(new FormViewPrivate(this))
 {
 }
 
-void WindowView::resizeEvent(QResizeEvent* event)
+void FormView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
 
-    auto _scene = static_cast<WindowScene*>(scene());
-    auto mainWindow = _scene->mainWindow();
-    if (mainWindow)
-        mainWindow->centralize();
+    auto _scene = static_cast<FormScene*>(scene());
+    auto mainForm = _scene->mainForm();
+    if (mainForm)
+        mainForm->centralize();
 }
 
-void WindowView::contextMenuEvent(QContextMenuEvent* event)
+void FormView::contextMenuEvent(QContextMenuEvent* event)
 {
     QGraphicsView::contextMenuEvent(event);
 
-    auto scene = static_cast<WindowScene*>(this->scene());
+    auto scene = static_cast<FormScene*>(this->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
 
@@ -286,4 +286,4 @@ void WindowView::contextMenuEvent(QContextMenuEvent* event)
     _d->menu.exec(event->globalPos());
 }
 
-#include "windowview.moc"
+#include "formview.moc"

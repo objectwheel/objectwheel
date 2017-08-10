@@ -5,7 +5,7 @@
 
 #define SAVE_DIRECTORY "dashboard"
 #define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
-#define PAGE_ORDER_FILE "page_order.json"
+#define FORM_ORDER_FILE "form_order.json"
 #define BINDINGS_FILE "bindings.json"
 #define BINDING_SOURCE_ID_LABEL "sourceId"
 #define BINDING_SOURCE_PROPERTY_LABEL "sourceProperty"
@@ -68,15 +68,15 @@ class SaveManager : public QObject
         static void removeEventSave(const QString& eventName);
 
 		static QJsonObject getParentalRelationships();
-		static QJsonArray getPageOrders();
+        static QJsonArray getFormOrders();
 
 		static void addParentalRelationship(const QString& id, const QString& parent);
 		static void removeParentalRelationship(const QString& id);
 		static QString parentalRelationship(const QString& id);
 
-		static void addPageOrder(const QString& pageId);
-		static void removePageOrder(const QString& pageId);
-		static void changePageOrder(const QString& fromPageId, const QString& toPageId);
+        static void addFormOrder(const QString& formId);
+        static void removeFormOrder(const QString& formId);
+        static void changeFormOrder(const QString& fromFormId, const QString& toFormId);
 
         static void setVariantProperty(const QString& id, const QString& property, const QVariant& value);
         static void removeVariantProperty(const QString& id, const QString& property);

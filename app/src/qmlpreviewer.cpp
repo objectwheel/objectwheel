@@ -1,6 +1,6 @@
 #include <qmlpreviewer.h>
 #include <fit.h>
-#include <windowscene.h>
+#include <formscene.h>
 #include <filemanager.h>
 
 #include <QApplication>
