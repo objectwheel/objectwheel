@@ -4,6 +4,7 @@
 #include <formscene.h>
 #include <savemanager.h>
 #include <designmanager.h>
+#include <random>
 
 #include <QDebug>
 #include <QTimer>
@@ -29,6 +30,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QMessageBox>
 #include <QMetaObject>
+#include <QDateTime>
+#include <QCryptographicHash>
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 #define RESIZER_SIZE (fit(6.0))
@@ -222,6 +225,7 @@ class ControlPrivate : public QObject
     public:
         ControlPrivate(Control* parent);
         void fixResizerCoordinates();
+        QString generateUid() const;
 
     public slots:
         void refreshPreview();
@@ -235,7 +239,15 @@ class ControlPrivate : public QObject
         QmlPreviewer qmlPreviewer;
         bool hoverOn;
         bool initialized;
+        static std::random_device rd;
+        static std::mt19937 mt;
+        static std::uniform_int_distribution<qint32> rand_dist;
+
 };
+
+std::random_device ControlPrivate::rd;
+std::mt19937 ControlPrivate::mt(rd());
+std::uniform_int_distribution<qint32> ControlPrivate::rand_dist(-2147483648, 2147483647);
 
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
@@ -302,6 +314,18 @@ void ControlPrivate::fixResizerCoordinates()
         }
         resizer.setZValue(MAX_Z_VALUE);
     }
+}
+
+QString ControlPrivate::generateUid() const
+{
+    QByteArray uidData;
+    auto randNum = rand_dist(mt);
+    auto randNum1 = rand_dist(mt);
+    auto dateMs = QDateTime::currentMSecsSinceEpoch();
+    uidData.insert(0, QString::number(dateMs));
+    uidData.insert(0, QString::number(randNum));
+    uidData.insert(0, QString::number(randNum1));
+    return QCryptographicHash::hash(uidData, QCryptographicHash::Sha256).toHex();
 }
 
 void ControlPrivate::refreshPreview()
@@ -407,6 +431,7 @@ Control::Control(const QUrl& url, Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
     , _controlTransaction(this)
+    , _uid(_d->generateUid())
     , _url(url)
     , _dragging(false)
     , _dragIn(false)
@@ -418,6 +443,8 @@ Control::Control(const QUrl& url, Control* parent)
     connect(this, &Control::visibleChanged, [=] {
         refresh();
     });
+
+    qDebug() << _uid;
 }
 
 bool Control::showOutline()
@@ -504,6 +531,11 @@ bool Control::contains(const QString& id) const
             return true;
     }
     return false;
+}
+
+bool Control::form() const
+{
+    return (dynamic_cast<const Form*>(this) != nullptr);
 }
 
 void Control::refresh()
@@ -667,6 +699,11 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             break;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+QString Control::uid() const
+{
+    return _uid;
 }
 
 bool Control::gui() const

@@ -62,7 +62,6 @@ class BindingWidgetPrivate
 
     public:
         BindingWidgetPrivate(BindingWidget* parent);
-        void addBindingWithoutSave(const SaveManager::BindingInf& inf);
 
     private:
         void removeButtonClicked();
@@ -259,16 +258,6 @@ void BindingWidgetPrivate::editButtonClicked()
 //    emit parent->popupShowed();
 }
 
-void BindingWidgetPrivate::addBindingWithoutSave(const SaveManager::BindingInf& inf)
-{
-    if (inf.targetProperty.isEmpty() || inf.targetId.isEmpty() ||
-        inf.sourceId.isEmpty() || inf.sourceProperty.isEmpty() ||
-        inf.bindingName.isEmpty())
-        return;
-
-    bindingListWidget.addItem(inf.bindingName);
-}
-
 void BindingWidgetPrivate::removeButtonClicked()
 {
     auto bindingName = bindingListWidget.currentItem()->text();
@@ -281,7 +270,7 @@ void BindingWidgetPrivate::removeButtonClicked()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-            SaveManager::removeBindingSave(bindingName);
+//            SaveManager::removeBinding(bindingName);
             delete bindingListWidget.takeItem(bindingListWidget.currentRow());
             break;
         } default: {
@@ -459,12 +448,6 @@ void BindingWidget::clearAllBindings()
     m_d->bindingListWidget.clear();
     clearList();
 }
-
-void BindingWidget::addBindingWithoutSave(const SaveManager::BindingInf& inf)
-{
-    m_d->addBindingWithoutSave(inf);
-}
-
 
 bool BindingWidget::hasPopupOpen()
 {

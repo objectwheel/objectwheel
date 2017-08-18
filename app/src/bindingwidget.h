@@ -18,8 +18,6 @@ class BindingWidget : public QWidget
         static BindingWidget* instance();
 		~BindingWidget();
 
-        static void addBindingWithoutSave(const SaveManager::BindingInf& inf);
-
 	public slots:
         void detachBindingsFor(const QString& id);
         void detachBindingsFor(Control*);

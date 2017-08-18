@@ -3,88 +3,76 @@
 
 #include <QObject>
 
-#define SAVE_DIRECTORY "dashboard"
-#define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
-#define FORM_ORDER_FILE "form_order.json"
-#define BINDINGS_FILE "bindings.json"
-#define BINDING_SOURCE_ID_LABEL "sourceId"
-#define BINDING_SOURCE_PROPERTY_LABEL "sourceProperty"
-#define BINDING_TARGET_ID_LABEL "targetId"
-#define BINDING_TARGET_PROPERTY_LABEL "targetProperty"
-
+#define FORMS_DIR "forms"
 #define EVENTS_FILE "events.json"
-#define EVENT_TARGET_ID_LABEL "targetId"
-#define EVENT_TARGET_EVENTNAME_LABEL "targetEventname"
-#define EVENT_EVENT_CODE_LABEL "eventCode"
+#define TARGET_EVENT_TAG "event"
+#define EVENT_CODE_TAG "code"
 
 class SaveManagerPrivate;
+class Control;
+class Form;
 
 class SaveManager : public QObject
 {
-		Q_OBJECT
-		Q_DISABLE_COPY(SaveManager)
+        Q_OBJECT
+        Q_DISABLE_COPY(SaveManager)
 
-	public:
-		struct BindingInf {
-				QString sourceId;
-				QString sourceProperty;
-				QString targetId;
-				QString targetProperty;
-				QString bindingName;
-		};
-
-        struct EventInf {
-                QString targetId;
-                QString targetEventname;
-                QString eventCode;
-                QString eventName;
+    public:
+        struct Binding {
+                QString sing;
+                Control* source;
+                QString sourceProperty;
+                QString targetProperty;
         };
 
-		explicit SaveManager(QObject *parent = 0);
+        struct Event {
+                QString sign;
+                QString methodName;
+                QString methodCode;
+        };
+
+        explicit SaveManager(QObject *parent = 0);
+        static SaveManager* instance();
         ~SaveManager();
-		static SaveManager* instance();
 
-		static bool buildNewDatabase(const QString& projDir);
-		static bool loadDatabase();
+        static bool buildNewDatabase(const QString& projDir);
+        static bool loadDatabase();
 
-		static bool exists(const QString& id);
-		static QStringList saves();
-        static QStringList childSaves(const QString& id);
-		static void addSave(const QString& id, const QString& url);
-		static void changeSave(const QString& fromId, QString toId);
-		static void removeSave(const QString& id);
-        static void removeChildSavesOnly(const QString& id);
-		static QString saveDirectory(const QString& id);
-        static QString savesDirectory();
+        static bool exists(const Control* control);
+        static void addForm(const Form* form);
+        static void removeForm(const Form* form);
+        static void addControl(const Control* control, const Control* parentControl);
+        static void removeControl(const Control* control);
 
-		static QJsonObject getBindingSaves();
-		static void addBindingSave(const BindingInf& bindingInf);
-		static void changeBindingSave(const QString& bindingName, const BindingInf& toBindingInf);
-		static void removeBindingSave(const QString& bindingName);
+        static void setProperty(const Control* control, const QString& property, const QVariant& value);
+        static void removeProperty(const Control* control, const QString& property);
 
-        static QJsonObject getEventSaves();
-        static void addEventSave(const EventInf& eventInf);
-        static void changeEventSave(const QString& eventName, const EventInf& toEventInf);
-        static void removeEventSave(const QString& eventName);
+        static void setEvent(const Control* control, const Event& event);
+        static void updateEvent(const Control* control, const QString& sign, const Event& event);
+        static void removeEvent(const Control* control, const QString& sign);
 
-		static QJsonObject getParentalRelationships();
-        static QJsonArray getFormOrders();
+//        static void setBinding(const Control* control, const Binding& binding);
+//        static void updateBinding(const Control* control, const QString& sign, const Binding& binding);
+//        static void removeBinding(const Control* control, const QString& sign);
 
-		static void addParentalRelationship(const QString& id, const QString& parent);
-		static void removeParentalRelationship(const QString& id);
-		static QString parentalRelationship(const QString& id);
+//		static QStringList saves();
+//      static QStringList childSaves(const QString& id);
+//      static void removeChildSavesOnly(const QString& id);
+//		static QString saveDirectory(const QString& id);
+//      static QString savesDirectory();
 
-        static void addFormOrder(const QString& formId);
-        static void removeFormOrder(const QString& formId);
-        static void changeFormOrder(const QString& fromFormId, const QString& toFormId);
+//		static QJsonObject getBindingSaves();
+//      static QJsonObject getEventSaves();
+//		static QJsonObject getParentalRelationships();
+//      static QJsonArray getFormOrders();
 
-        static void setVariantProperty(const QString& id, const QString& property, const QVariant& value);
-        static void removeVariantProperty(const QString& id, const QString& property);
+//      static bool inprogress();
 
-        static bool inprogress();
+    signals:
+        void databaseChanged();
 
     private:
-		static SaveManagerPrivate* m_d;
+        static SaveManagerPrivate* m_d;
 };
 
 #endif // SAVEMANAGER_H

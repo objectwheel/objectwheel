@@ -65,6 +65,7 @@ class Control : public QGraphicsWidget
 
     public:
         explicit Control(const QUrl& url, Control* parent = Q_NULLPTR);
+        QString uid() const;
         QString id() const;
         void setId(const QString& id);
         QUrl url() const;
@@ -82,7 +83,7 @@ class Control : public QGraphicsWidget
         bool gui() const;
         using QGraphicsWidget::contains;
         bool contains(const QString& id) const;
-
+        bool form() const;
         static bool showOutline();
         static void setShowOutline(const bool value);
 
@@ -129,6 +130,7 @@ class Control : public QGraphicsWidget
 
     private:
         ControlTransaction _controlTransaction;
+        const QString _uid;
         QString _id;
         QList<QString> _events;
         QMap<QString, QVariant::Type> _properties;

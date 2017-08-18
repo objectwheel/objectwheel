@@ -17,28 +17,23 @@
 #include <QApplication>
 #include <QTimer>
 
-class SaveManagerPrivate
+class SaveManagerPrivate : public QObject
 {
+        Q_OBJECT
+
 	public:
-		SaveManagerPrivate(SaveManager* uparent);
+        SaveManagerPrivate(SaveManager* parent);
         QString generateSavesDirectory() const;
 		QString generateSaveDirectory(const QString& id) const;
-		void parseImportDirectories(const QString& dir);
-        void initFormOrder(const QString& file) const;
-		void initEmptyParentalFile(const QString& file) const;
-        void createForms(const QJsonArray& forms);
-        bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& forms);
-        void fillBindings(const QJsonObject& bindingSaves);
-        void fillEvents(const QJsonObject& eventSaves);
-        void removeSave(const QString& id);
 
 	public:
         SaveManager* parent = nullptr;
         ParserController parserController;
 };
 
-SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
-    : parent(uparent)
+SaveManagerPrivate::SaveManagerPrivate(SaveManager* parent)
+    : QObject(parent)
+    , parent(parent)
 {
 }
 
@@ -56,88 +51,6 @@ inline QString SaveManagerPrivate::generateSaveDirectory(const QString& id) cons
     return baseDir + separator() + id;
 }
 
-void SaveManagerPrivate::initFormOrder(const QString& file) const
-{
-	QJsonArray jArray;
-    jArray.append("form1"); //FIXME
-	QJsonDocument jDoc(jArray);
-	wrfile(file, jDoc.toJson());
-}
-
-void SaveManagerPrivate::initEmptyParentalFile(const QString& file) const
-{
-	QJsonObject jObj;
-	QJsonDocument jDoc(jObj);
-	wrfile(file, jDoc.toJson());
-}
-
-void SaveManagerPrivate::createForms(const QJsonArray& forms)
-{
-//	auto firstForm = forms[0].toString();
-//	FormsWidget::changeFormWithoutSave("form1", firstForm);
-//	for (int i = 1; i < forms.size(); i++) {
-//		auto currForm = forms[i].toString();
-//		FormsWidget::addFormWithoutSave(currForm);
-//	}
-}
-
-bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& forms)
-{
-	QStringList createdObjects;
-    for (auto form : forms) {
-        createdObjects << form.toString();
-	}
-	while (!createdObjects.isEmpty()) {
-		for (auto key : parentalRelationships.keys()) {
-			if (parentalRelationships[key].toString() == createdObjects[0]) {
-				auto saveId = parent->saveDirectory(key);
-				if (saveId.isEmpty()) return false;
-				if (!MainWindow::addControlWithoutSave(QUrl::fromLocalFile(saveId + separator() + "main.qml"),
-													   parentalRelationships[key].toString()))
-					return false;
-				createdObjects.append(key);
-			}
-		}
-		createdObjects.removeFirst();
-	}
-	return true;
-}
-
-void SaveManagerPrivate::fillBindings(const QJsonObject& bindingSaves)
-{
-    SaveManager::BindingInf inf;
-    for (auto bindingKey : bindingSaves.keys()) {
-        inf.bindingName = bindingKey;
-        inf.sourceId = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_ID_LABEL].toString();
-        inf.sourceProperty = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_PROPERTY_LABEL].toString();
-        inf.targetId = bindingSaves[bindingKey].toObject()[BINDING_TARGET_ID_LABEL].toString();
-        inf.targetProperty = bindingSaves[bindingKey].toObject()[BINDING_TARGET_PROPERTY_LABEL].toString();
-        BindingWidget::addBindingWithoutSave(inf);
-    }
-}
-
-void SaveManagerPrivate::fillEvents(const QJsonObject& eventSaves)
-{
-    SaveManager::EventInf inf;
-    for (auto eventKey : eventSaves.keys()) {
-        inf.eventName = eventKey;
-        inf.targetId = eventSaves[eventKey].toObject()[EVENT_TARGET_ID_LABEL].toString();
-        inf.targetEventname = eventSaves[eventKey].toObject()[EVENT_TARGET_EVENTNAME_LABEL].toString();
-        inf.eventCode = QString(QByteArray::fromBase64(QByteArray().insert(0, eventSaves[eventKey].toObject()[EVENT_EVENT_CODE_LABEL].toString())));
-        EventsWidget::addEventWithoutSave(inf);
-    }
-}
-
-void SaveManagerPrivate::removeSave(const QString& id)
-{
-    if (!parent->exists(id)) return;
-    rm(generateSaveDirectory(id));
-    SaveManager::removeParentalRelationship(id);
-    BindingWidget::instance()->detachBindingsFor(id);
-    EventsWidget::instance()->detachEventsFor(id);
-    QmlEditor::clearCacheFor(parent->saveDirectory(id), true);
-}
-
 SaveManagerPrivate* SaveManager::m_d = nullptr;
 
 SaveManager::SaveManager(QObject *parent)
@@ -147,118 +60,9 @@ SaveManager::SaveManager(QObject *parent)
     m_d = new SaveManagerPrivate(this);
 }
 
-SaveManager::~SaveManager()
-{
-    delete m_d;
-}
-
 SaveManager* SaveManager::instance()
 {
 	return m_d->parent;
-}
-
-QString SaveManager::saveDirectory(const QString& id)
-{
-	if (!exists(id)) return QString();
-    return m_d->generateSaveDirectory(id);
-}
-
-QString SaveManager::savesDirectory()
-{
-    return m_d->generateSavesDirectory();
-}
-
-QJsonObject SaveManager::getBindingSaves()
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonObject();
-	auto bindingsFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
-	return QJsonDocument::fromJson(rdfile(bindingsFile)).object();
-}
-
-void SaveManager::addBindingSave(const SaveManager::BindingInf& bindingInf)
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto bindingFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
-	QJsonObject cObj;
-	cObj[BINDING_SOURCE_ID_LABEL] = bindingInf.sourceId;
-	cObj[BINDING_SOURCE_PROPERTY_LABEL] = bindingInf.sourceProperty;
-	cObj[BINDING_TARGET_ID_LABEL] = bindingInf.targetId;
-	cObj[BINDING_TARGET_PROPERTY_LABEL] = bindingInf.targetProperty;
-	QJsonObject pObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
-	pObj[bindingInf.bindingName] = cObj;
-    wrfile(bindingFile, QJsonDocument(pObj).toJson());
-}
-
-void SaveManager::changeBindingSave(const QString& bindingName, const SaveManager::BindingInf& toBindingInf)
-{
-	removeBindingSave(bindingName);
-	addBindingSave(toBindingInf);
-}
-
-void SaveManager::removeBindingSave(const QString& bindingName)
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto bindingFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
-	QJsonObject jObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
-	jObj.remove(bindingName);
-    wrfile(bindingFile, QJsonDocument(jObj).toJson());
-}
-
-QJsonObject SaveManager::getEventSaves()
-{
-    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projDir.isEmpty()) return QJsonObject();
-    auto eventsFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
-    return QJsonDocument::fromJson(rdfile(eventsFile)).object();
-}
-
-void SaveManager::addEventSave(const SaveManager::EventInf& eventInf)
-{
-    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projDir.isEmpty()) return;
-    auto eventFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
-    QJsonObject cObj;
-    cObj[EVENT_TARGET_ID_LABEL] = eventInf.targetId;
-    cObj[EVENT_TARGET_EVENTNAME_LABEL] = eventInf.targetEventname;
-    cObj[EVENT_EVENT_CODE_LABEL] = QString(QByteArray().insert(0, eventInf.eventCode).toBase64());
-    QJsonObject pObj = QJsonDocument::fromJson(rdfile(eventFile)).object();
-    pObj[eventInf.eventName] = cObj;
-    wrfile(eventFile, QJsonDocument(pObj).toJson());
-}
-
-void SaveManager::changeEventSave(const QString& eventName, const SaveManager::EventInf& toEventInf)
-{
-    removeEventSave(eventName);
-    addEventSave(toEventInf);
-}
-
-void SaveManager::removeEventSave(const QString& eventName)
-{
-    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projDir.isEmpty()) return;
-    auto eventFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
-    QJsonObject jObj = QJsonDocument::fromJson(rdfile(eventFile)).object();
-    jObj.remove(eventName);
-    wrfile(eventFile, QJsonDocument(jObj).toJson());
-}
-
-QJsonObject SaveManager::getParentalRelationships()
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonObject();
-	auto parentalFile = projDir + separator() + SAVE_DIRECTORY + separator() + PARENTAL_RELATIONSHIP_FILE;
-	return QJsonDocument::fromJson(rdfile(parentalFile)).object();
-}
-
-QJsonArray SaveManager::getFormOrders()
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonArray();
-    auto formOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + FORM_ORDER_FILE;
-    return QJsonDocument::fromJson(rdfile(formOrderFile)).array();
 }
 
 bool SaveManager::exists(const QString& id)
