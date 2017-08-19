@@ -103,8 +103,7 @@ bool ProjectManager::buildNewProject(const QString& projectname)
 {
 	if (UserManager::currentSessionsUser().isEmpty()) return false;
 	if (exists(projectname)) return false;
-	if (!mkdir(m_d->generateProjectDir(projectname))) return false;
-	return SaveManager::buildNewDatabase(m_d->generateProjectDir(projectname));
+    return !mkdir(m_d->generateProjectDir(projectname));
 }
 
 bool ProjectManager::renameProject(const QString& from, const QString& to)
@@ -223,7 +222,7 @@ bool ProjectManager::startProject(const QString& projectname)
 
     m_d->currentProject = projectname;
 
-    if (!SaveManager::loadDatabase()) {
+    if (!SaveManager::exposeProject()) {
         m_d->currentProject = "";
         QMessageBox::warning(NULL, "Oops", "The database is corrupted. Please contact to support.");
         return false;

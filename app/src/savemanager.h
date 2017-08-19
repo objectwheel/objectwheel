@@ -3,10 +3,16 @@
 
 #include <QObject>
 
-#define FORMS_DIR "forms"
-#define EVENTS_FILE "events.json"
-#define TARGET_EVENT_TAG "event"
-#define EVENT_CODE_TAG "code"
+#define SIGN_OWDB "T3dkYl92Mi4w"
+#define DIR_THIS "t"
+#define DIR_CHILDREN "c"
+#define DIR_FORMS "forms"
+#define FILE_EVENTS "_events.json"
+#define FILE_PROPERTIES "_properties.json"
+#define TAG_TARGET_EVENT "event"
+#define TAG_EVENT_CODE "code"
+#define TAG_ID "id"
+#define TAG_OWDB_SIGN "_owdbsign"
 
 class SaveManagerPrivate;
 class Control;
@@ -35,8 +41,9 @@ class SaveManager : public QObject
         static SaveManager* instance();
         ~SaveManager();
 
-        static bool buildNewDatabase(const QString& projDir);
-        static bool loadDatabase();
+        static bool execProject();
+        static bool exposeProject();
+        static Control* exposeControl(const QString& basePath);
 
         static bool exists(const Control* control);
         static void addForm(const Form* form);
@@ -72,7 +79,7 @@ class SaveManager : public QObject
         void databaseChanged();
 
     private:
-        static SaveManagerPrivate* m_d;
+        static SaveManagerPrivate* _d;
 };
 
 #endif // SAVEMANAGER_H

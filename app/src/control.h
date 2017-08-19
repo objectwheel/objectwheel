@@ -86,6 +86,8 @@ class Control : public QGraphicsWidget
         bool form() const;
         static bool showOutline();
         static void setShowOutline(const bool value);
+        QString dir() const;
+        void setDir(const QString& dir);
 
     public slots:
         void hideSelection();
@@ -135,6 +137,7 @@ class Control : public QGraphicsWidget
         QList<QString> _events;
         QMap<QString, QVariant::Type> _properties;
         const QUrl _url;
+        QString _dir;
         bool _dragging;
         bool _dragIn;
         bool _clip;

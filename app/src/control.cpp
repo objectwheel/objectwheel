@@ -701,6 +701,16 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
     return QGraphicsWidget::itemChange(change, value);
 }
 
+void Control::setDir(const QString& dir)
+{
+    _dir = dir;
+}
+
+QString Control::dir() const
+{
+    return _dir;
+}
+
 QString Control::uid() const
 {
     return _uid;
