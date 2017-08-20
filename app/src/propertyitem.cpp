@@ -54,7 +54,7 @@ const QPair<QMetaProperty, QObject*>& PropertyItem::property() const
 void PropertyItem::applyValue(const QVariant& value, QQmlContext* const ctx)
 {
 	m_Property.second->setProperty(m_Property.first.name(), value);
-	SaveManager::setVariantProperty(ctx->nameForObject(m_Property.second), m_Property.first.name(), value);
+//	SaveManager::setVariantProperty(ctx->nameForObject(m_Property.second), m_Property.first.name(), value);
 	emit valueApplied();
 }
 
@@ -62,10 +62,10 @@ void PropertyItem::applyFont(const QFont& font, QQmlContext* const ctx)
 {
 	auto id = ctx->nameForObject(m_Property.second);
 	m_Property.second->setProperty(m_Property.first.name(), font);
-	SaveManager::setVariantProperty(id, "font.family", font.family());
-	SaveManager::setVariantProperty(id, "font.bold", font.bold());
-	SaveManager::setVariantProperty(id, "font.italic", font.italic());
-	SaveManager::setVariantProperty(id, "font.pointSize", font.pointSize());
+//	SaveManager::setVariantProperty(id, "font.family", font.family());
+//	SaveManager::setVariantProperty(id, "font.bold", font.bold());
+//	SaveManager::setVariantProperty(id, "font.italic", font.italic());
+//	SaveManager::setVariantProperty(id, "font.pointSize", font.pointSize());
 //	emit valueApplied();
 }
 

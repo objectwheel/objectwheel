@@ -39,7 +39,6 @@ class SaveManager : public QObject
 
         explicit SaveManager(QObject *parent = 0);
         static SaveManager* instance();
-        ~SaveManager();
 
         static bool execProject();
         static bool exposeProject();
@@ -74,7 +73,7 @@ class SaveManager : public QObject
 //		static QJsonObject getParentalRelationships();
 //      static QJsonArray getFormOrders();
 
-//      static bool inprogress();
+      static bool inprogress();
 
     signals:
         void databaseChanged();

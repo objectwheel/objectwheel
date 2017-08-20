@@ -143,7 +143,7 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
 	if (index < 0) return;
 	itemList->removeAt(index);
 	urlList->removeAt(index);
-	SaveManager::removeParentalRelationship(dashboardRootContext->nameForObject(lastSelectedItem));
+//	SaveManager::removeParentalRelationship(dashboardRootContext->nameForObject(lastSelectedItem));
 //    bindingWidget->detachBindingsFor(lastSelectedItem);
 //    eventWidget->detachEventsFor(lastSelectedItem);
 
@@ -168,8 +168,8 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
 	dashboardRootContext->setContextProperty(dashboardRootContext->nameForObject(qml), 0);
 	dashboardRootContext->setContextProperty(componentName, qml); //WARNING:
 	qml->setParentItem(lastSelectedItem->parentItem());
-	SaveManager::addParentalRelationship(dashboardRootContext->nameForObject(qml),
-										 dashboardRootContext->nameForObject(lastSelectedItem->parentItem()));
+//	SaveManager::addParentalRelationship(dashboardRootContext->nameForObject(qml),
+//										 dashboardRootContext->nameForObject(lastSelectedItem->parentItem()));
 	qml->setPosition(lastSelectedItem->position());
 	qml->setEnabled(false);
 	fit(qml, Fit::WidthHeight);
@@ -181,8 +181,8 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
 		if (itemList->contains(child) && lastSelectedItem!=child) {
 			auto prevPos = child->position();
 			child->setParentItem(qml);
-			SaveManager::addParentalRelationship(dashboardRootContext->nameForObject(child),
-												 dashboardRootContext->nameForObject(qml));
+//			SaveManager::addParentalRelationship(dashboardRootContext->nameForObject(child),
+//												 dashboardRootContext->nameForObject(qml));
 			child->setPosition(prevPos);
 		}
 	}
@@ -196,10 +196,10 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
     for (auto item : items) {
         auto ctxId = dashboardRootContext->nameForObject((QObject*)item);
         if (item == (QQuickItem*)lastSelectedItem) {
-            auto prevParent = SaveManager::parentalRelationship(ctxId);
-            SaveManager::removeParentalRelationship(ctxId);
-            SaveManager::addParentalRelationship(componentName, prevParent);
-            SaveManager::changeSave(ctxId, componentName); //BUG: KLASÖR İSMİ DEĞİŞMİYOR
+//            auto prevParent = SaveManager::parentalRelationship(ctxId);
+//            SaveManager::removeParentalRelationship(ctxId);
+//            SaveManager::addParentalRelationship(componentName, prevParent);
+//            SaveManager::changeSave(ctxId, componentName); //BUG: KLASÖR İSMİ DEĞİŞMİYOR
             //control.setId(ctxId, componentName); //TODO:
             if (itemList->indexOf(item) >= 0) {            //BUG: AYNI TARGETITEM'E IKI TANE AYNI EVENTTEN EKLEYINCE BOZULUYOR
                 auto oldUrl = (*urlList)[itemList->indexOf(item)].toLocalFile();
@@ -207,7 +207,7 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
                 (*urlList)[itemList->indexOf(item)] = QUrl::fromLocalFile(newUrl);
             }
         } else if (itemList->contains(item)) {
-            SaveManager::addParentalRelationship(ctxId, componentName);
+//            SaveManager::addParentalRelationship(ctxId, componentName);
         }
     }
 
@@ -280,16 +280,16 @@ void QmlEditorPrivate::showTextOnly(const QString& text)
 
 void QmlEditorPrivate::show()
 {
-    QString controlPath = SaveManager::saveDirectory(dashboardRootContext->nameForObject(lastSelectedItem));
+//    QString controlPath = SaveManager::saveDirectory(dashboardRootContext->nameForObject(lastSelectedItem));
 	QQmlProperty::write(rootItem, "visible", true, rootContext);
     QMetaObject::invokeMethod(rootItem, "setToolboxMode", Qt::AutoConnection, Q_ARG(QVariant, false));
-    QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
-    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
+//    QMetaObject::invokeMethod(rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
+//    QMetaObject::invokeMethod(rootItem, "setFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(controlPath)));
     QMetaObject::invokeMethod(rootItem, "setTextOnly", Qt::AutoConnection, Q_ARG(QVariant, false));
 
-    QTimer::singleShot(DURATION,[=] { //FIXME
-        QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, controlPath + separator() + "main.qml"));
-    });
+//    QTimer::singleShot(DURATION,[=] { //FIXME
+//        QMetaObject::invokeMethod(rootItem, "show", Qt::AutoConnection, Q_ARG(QVariant, controlPath + separator() + "main.qml"));
+//    });
 
     ((QWidget*)parent)->show();
 

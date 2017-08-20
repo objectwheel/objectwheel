@@ -56,7 +56,6 @@ class EventsWidgetPrivate
 
     public:
         EventsWidgetPrivate(EventsWidget* parent);
-        void addEventWithoutSave(const SaveManager::EventInf& inf);
 
     private:
         void removeButtonClicked();
@@ -214,14 +213,14 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     QObject::connect(DesignManager::formScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
 
-void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
-{
-    if (inf.targetEventname.isEmpty() ||inf.targetId.isEmpty() ||
-        inf.eventCode.isEmpty() || inf.eventName.isEmpty())
-        return;
+//void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
+//{
+//    if (inf.targetEventname.isEmpty() ||inf.targetId.isEmpty() ||
+//        inf.eventCode.isEmpty() || inf.eventName.isEmpty())
+//        return;
 
-    eventsListWidget.addItem(inf.eventName);
-}
+//    eventsListWidget.addItem(inf.eventName);
+//}
 
 void EventsWidgetPrivate::removeButtonClicked()
 {
@@ -235,7 +234,7 @@ void EventsWidgetPrivate::removeButtonClicked()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-            SaveManager::removeEventSave(connectionName);
+//            SaveManager::removeEventSave(connectionName);
             delete eventsListWidget.takeItem(eventsListWidget.currentRow());
             break;
         } default: {
@@ -278,9 +277,9 @@ void EventsWidgetPrivate::editButtonClicked()
     editMode = true;
     editingEventName = eventsListWidget.currentItem()->text();
 
-    auto issuerEvent = SaveManager::getEventSaves()[editingEventName].toObject();
-    if (issuerEvent.isEmpty())
-        return;
+//    auto issuerEvent = SaveManager::getEventSaves()[editingEventName].toObject();
+//    if (issuerEvent.isEmpty())
+//        return;
 
 //    auto controls = FormScene::currentForm()->childControls();
 //    controls << FormScene::currentForm();
@@ -291,8 +290,8 @@ void EventsWidgetPrivate::editButtonClicked()
 //            control->setSelected(true);
 
     nameEdit.setText(editingEventName);
-    targetEventCombobox.setCurrentItem(issuerEvent[EVENT_TARGET_EVENTNAME_LABEL].toString());
-    codeEdit.setText(QByteArray::fromBase64(QByteArray().insert(0, issuerEvent[EVENT_EVENT_CODE_LABEL].toString())));
+//    targetEventCombobox.setCurrentItem(issuerEvent[EVENT_TARGET_EVENTNAME_LABEL].toString());
+//    codeEdit.setText(QByteArray::fromBase64(QByteArray().insert(0, issuerEvent[EVENT_EVENT_CODE_LABEL].toString())));
 
     hasPopupOpen = true;
     emit parent->popupShowed();
@@ -332,16 +331,16 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 
     eventsListWidget.addItem(eventName);
 
-    SaveManager::EventInf einf;
-    einf.eventName = eventName;
-    einf.targetId = popupItemNameTextBox.text();
-    einf.targetEventname = targetEventCombobox.currentItem();
-    einf.eventCode = codeEdit.text();
+//    SaveManager::EventInf einf;
+//    einf.eventName = eventName;
+//    einf.targetId = popupItemNameTextBox.text();
+//    einf.targetEventname = targetEventCombobox.currentItem();
+//    einf.eventCode = codeEdit.text();
 
-    if (editMode)
-        SaveManager::changeEventSave(editingEventName, einf);
-    else
-        SaveManager::addEventSave(einf);
+//    if (editMode)
+//        SaveManager::changeEventSave(editingEventName, einf);
+//    else
+//        SaveManager::addEventSave(einf);
 
     parent->clearList();
     parent->handleSelectionChange();
@@ -430,32 +429,27 @@ void EventsWidget::detachEventsFor(Control* control)
 
 void EventsWidget::detachEventsFor(const QString& id)
 {
-    auto saves = SaveManager::getEventSaves();
-    for (auto key : saves.keys()) {
-        auto save = saves[key].toObject();
-        if (save[EVENT_TARGET_ID_LABEL] == id) {
-            SaveManager::removeEventSave(key);
-            for (int i=0; i < m_d->eventsListWidget.count(); i++) {
-                if (m_d->eventsListWidget.item(i)->text() == key)
-                    m_d->eventsListWidget.takeItem(i);
-            }
-        }
-    }
+//    auto saves = SaveManager::getEventSaves();
+//    for (auto key : saves.keys()) {
+//        auto save = saves[key].toObject();
+//        if (save[EVENT_TARGET_ID_LABEL] == id) {
+//            SaveManager::removeEventSave(key);
+//            for (int i=0; i < m_d->eventsListWidget.count(); i++) {
+//                if (m_d->eventsListWidget.item(i)->text() == key)
+//                    m_d->eventsListWidget.takeItem(i);
+//            }
+//        }
+//    }
 }
 
 void EventsWidget::clearAllEvents()
 {
-    auto saves = SaveManager::getEventSaves();
-    for (auto key : saves.keys()) {
-        SaveManager::removeEventSave(key);
-    }
-    m_d->eventsListWidget.clear();
-    clearList();
-}
-
-void EventsWidget::addEventWithoutSave(const SaveManager::EventInf& inf)
-{
-    m_d->addEventWithoutSave(inf);
+//    auto saves = SaveManager::getEventSaves();
+//    for (auto key : saves.keys()) {
+//        SaveManager::removeEventSave(key);
+//    }
+//    m_d->eventsListWidget.clear();
+//    clearList();
 }
 
 bool EventsWidget::hasPopupOpen()

@@ -40,7 +40,7 @@ class SaveManagerPrivate : public QObject
         // Returns paths of main.qml files (DIR_THIS).
         // Searches in current project dir if basePath is empty.
         // Base path cannot be DIR_THIS of any control.
-        QStringList controlPaths(QString& basePath = QString()) const;
+        QStringList controlPaths(const QString& basePath = QString()) const;
 
         // Returns biggest nubmer from integer named dirs.
         // If no integer named dir exists, 0 returned.
@@ -88,7 +88,7 @@ bool SaveManagerPrivate::existsForm(const Form* form) const
 
 bool SaveManagerPrivate::existsControl(const Control* control, const Control* parentControl) const
 {
-    if (parentControl && parentControl->form() && existsForm(control))
+    if (parentControl && parentControl->form() /*&& existsForm(control)*/)
         return true;
 
     for (auto path : controlPaths(parentControl ? dname(parentControl->dir()) : QString())) {
@@ -109,7 +109,7 @@ QStringList SaveManagerPrivate::formPaths() const
     if (projectDir.isEmpty())
         return paths;
 
-    auto baseDir = projectDirectory + separator() + DIR_FORMS;
+    auto baseDir = projectDir + separator() + DIR_FORMS;
 
     for (auto dir : lsdir(baseDir)) {
         auto propertyPath = baseDir + separator() + dir + separator() +
@@ -123,7 +123,7 @@ QStringList SaveManagerPrivate::formPaths() const
     return paths;
 }
 
-QStringList SaveManagerPrivate::controlPaths(QString& basePath) const
+QStringList SaveManagerPrivate::controlPaths(const QString& basePath) const
 {
     // TODO:
 }
@@ -199,7 +199,7 @@ bool SaveManager::isOwdb(const QString& rootPath)
 
 bool SaveManager::exists(const Control* control, const Control* parentControl)
 {
-    return control->form() ? _d->existsForm(control) : _d->existsControl(control, parentControl);
+    return control->form() ? _d->existsForm((Form*)control) : _d->existsControl(control, parentControl);
 }
 
 void SaveManager::addForm(Form* form)
@@ -207,7 +207,7 @@ void SaveManager::addForm(Form* form)
     if (form->id().isEmpty() || !form->url().isValid())
         return;
 
-    if (!isOwdb(dname(dname(form->url()))))
+    if (!isOwdb(dname(dname(form->url().toLocalFile()))))
         return;
 
     if (exists(form))
@@ -218,18 +218,16 @@ void SaveManager::addForm(Form* form)
     if (projectDir.isEmpty())
         return;
 
-    auto baseDir = projectDirectory + separator() + DIR_FORMS;
-    auto formDir = baseDir + separator() + QString::number(biggestDir(baseDir) + 1);
+    auto baseDir = projectDir + separator() + DIR_FORMS;
+    auto formDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
 
     if (!mkdir(formDir))
         return;
 
-    if (!cp(dname(dname(form->url())), formDir, true))
+    if (!cp(dname(dname(form->url().toLocalFile())), formDir, true))
         return;
 
     form->setDir(formDir + separator() + DIR_THIS);
-
-    return true;
 }
 
 void SaveManager::addControl(Control* control, const Control* parentControl)
@@ -240,43 +238,42 @@ void SaveManager::addControl(Control* control, const Control* parentControl)
     if (parentControl->dir().isEmpty())
         return;
 
-    if (!isOwdb(dname(dname(control->url()))))
+    if (!isOwdb(dname(dname(control->url().toLocalFile()))))
         return;
 
     if (exists(control, parentControl))
         return;
 
     auto baseDir = dname(parentControl->dir()) + separator() + DIR_CHILDREN;
-    auto controlDir = baseDir + separator() + QString::number(biggestDir(baseDir) + 1);
+    auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
 
     if (!mkdir(controlDir))
         return;
 
-    if (!cp(dname(dname(control->url())), controlDir, true))
+    if (!cp(dname(dname(control->url().toLocalFile())), controlDir, true))
         return;
 
     control->setDir(controlDir + separator() + DIR_THIS);
-
-    return true;
 }
 
-void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
-{
-    if (saveDirectory(id).isEmpty()) return;
-    auto filename = saveDirectory(id) + separator() + "main.qml";
-    ParserController::setVariantProperty(filename, property, value);
-    QmlEditor::clearCacheFor(saveDirectory(id), true);
-}
+//void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
+//{
+//    if (saveDirectory(id).isEmpty()) return;
+//    auto filename = saveDirectory(id) + separator() + "main.qml";
+//    ParserController::setVariantProperty(filename, property, value);
+//    QmlEditor::clearCacheFor(saveDirectory(id), true);
+//}
 
-void SaveManager::removeVariantProperty(const QString& id, const QString& property) //FIXME: FOR BINDING PROPERTIES
-{
-    if (saveDirectory(id).isEmpty()) return;
-    auto filename = saveDirectory(id) + separator() + "main.qml";
-    ParserController::removeVariantProperty(filename, property);
-}
+//void SaveManager::removeVariantProperty(const QString& id, const QString& property) //FIXME: FOR BINDING PROPERTIES
+//{
+//    if (saveDirectory(id).isEmpty()) return;
+//    auto filename = saveDirectory(id) + separator() + "main.qml";
+//    ParserController::removeVariantProperty(filename, property);
+//}
 
 bool SaveManager::inprogress()
 {
     return _d->parserController.running();
 }
 
+#include "savemanager.moc"

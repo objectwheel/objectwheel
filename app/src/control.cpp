@@ -362,7 +362,7 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         for (int i = 1; mainControl->contains(id) || formNames.contains(id); i++)
             id = result.id + QString::number(i);
 
-        SaveManager::addSave(id, parent->url().toLocalFile());
+//        SaveManager::addSave(id, parent->url().toLocalFile());
 
         scene->clearSelection();
 

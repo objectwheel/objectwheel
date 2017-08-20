@@ -18,8 +18,6 @@ class EventsWidget : public QWidget
         static EventsWidget* instance();
         ~EventsWidget();
 
-        static void addEventWithoutSave(const SaveManager::EventInf& inf);
-
     public slots:
         void detachEventsFor(const QString& id);
         void detachEventsFor(Control*);

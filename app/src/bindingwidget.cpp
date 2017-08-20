@@ -332,17 +332,17 @@ void BindingWidgetPrivate::popupOkButtonClicked()
 
     bindingListWidget.addItem(bindingName);
 
-    SaveManager::BindingInf binf;
-    binf.bindingName = bindingName;
-    binf.sourceId = sourceItemCombobox.currentItem();
-    binf.sourceProperty = sourcePropertyCombobox.currentItem();
-    binf.targetId = popupItemNameTextBox.text();
-    binf.targetProperty = targetPropertyCombobox.currentItem();
+//    SaveManager::BindingInf binf;
+//    binf.bindingName = bindingName;
+//    binf.sourceId = sourceItemCombobox.currentItem();
+//    binf.sourceProperty = sourcePropertyCombobox.currentItem();
+//    binf.targetId = popupItemNameTextBox.text();
+//    binf.targetProperty = targetPropertyCombobox.currentItem();
 
-    if (editMode)
-        SaveManager::changeBindingSave(editingBindingName, binf);
-    else
-        SaveManager::addBindingSave(binf);
+//    if (editMode)
+//        SaveManager::changeBindingSave(editingBindingName, binf);
+//    else
+//        SaveManager::addBindingSave(binf);
 
     parent->clearList();
     parent->handleSelectionChange();
@@ -425,28 +425,28 @@ void BindingWidget::detachBindingsFor(Control* control)
 
 void BindingWidget::detachBindingsFor(const QString& id)
 {
-    auto saves = SaveManager::getBindingSaves();
-    for (auto key : saves.keys()) {
-        auto save = saves[key].toObject();
-        if (save[BINDING_SOURCE_ID_LABEL] == id ||
-            save[BINDING_TARGET_ID_LABEL] == id) {
-            SaveManager::removeBindingSave(key);
-            for (int i=0; i < m_d->bindingListWidget.count(); i++) {
-                if (m_d->bindingListWidget.item(i)->text() == key)
-                    m_d->bindingListWidget.takeItem(i);
-            }
-        }
-    }
+//    auto saves = SaveManager::getBindingSaves();
+//    for (auto key : saves.keys()) {
+//        auto save = saves[key].toObject();
+//        if (save[BINDING_SOURCE_ID_LABEL] == id ||
+//            save[BINDING_TARGET_ID_LABEL] == id) {
+//            SaveManager::removeBindingSave(key);
+//            for (int i=0; i < m_d->bindingListWidget.count(); i++) {
+//                if (m_d->bindingListWidget.item(i)->text() == key)
+//                    m_d->bindingListWidget.takeItem(i);
+//            }
+//        }
+//    }
 }
 
 void BindingWidget::clearAllBindings()
 {
-    auto saves = SaveManager::getBindingSaves();
-    for (auto key : saves.keys()) {
-        SaveManager::removeBindingSave(key);
-    }
-    m_d->bindingListWidget.clear();
-    clearList();
+//    auto saves = SaveManager::getBindingSaves();
+//    for (auto key : saves.keys()) {
+//        SaveManager::removeBindingSave(key);
+//    }
+//    m_d->bindingListWidget.clear();
+//    clearList();
 }
 
 bool BindingWidget::hasPopupOpen()

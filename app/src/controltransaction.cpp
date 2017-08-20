@@ -43,10 +43,10 @@ void ControlTransaction::flushGeometryChange()
         !_geometryTransactionsEnabled)
         return;
 
-    SaveManager::setVariantProperty(_watched->id(), "x", _watched->x());
-    SaveManager::setVariantProperty(_watched->id(), "y", _watched->y());
-    SaveManager::setVariantProperty(_watched->id(), "width", _watched->size().width());
-    SaveManager::setVariantProperty(_watched->id(), "height", _watched->size().height());
+//    SaveManager::setVariantProperty(_watched->id(), "x", _watched->x());
+//    SaveManager::setVariantProperty(_watched->id(), "y", _watched->y());
+//    SaveManager::setVariantProperty(_watched->id(), "width", _watched->size().width());
+//    SaveManager::setVariantProperty(_watched->id(), "height", _watched->size().height());
 }
 
 void ControlTransaction::flushParentChange()
@@ -56,7 +56,7 @@ void ControlTransaction::flushParentChange()
         !_parentTransactionsEnabled)
         return;
 
-    SaveManager::addParentalRelationship(_watched->id(), _watched->parentControl()->id());
+//    SaveManager::addParentalRelationship(_watched->id(), _watched->parentControl()->id());
 }
 
 void ControlTransaction::flushZChange()
@@ -65,7 +65,7 @@ void ControlTransaction::flushZChange()
         !_zTransactionsEnabled)
         return;
 
-    SaveManager::setVariantProperty(_watched->id(), "z", _watched->zValue());
+//    SaveManager::setVariantProperty(_watched->id(), "z", _watched->zValue());
 }
 
 void ControlTransaction::flushIdChange(const QString& prevId)
@@ -75,5 +75,5 @@ void ControlTransaction::flushIdChange(const QString& prevId)
         !_idTransactionsEnabled)
         return;
 
-    SaveManager::changeSave(prevId, _watched->id());
+//    SaveManager::changeSave(prevId, _watched->id());
 }

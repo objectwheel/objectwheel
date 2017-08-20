@@ -169,10 +169,10 @@ void BuildsScreen::resizeEvent(QResizeEvent* event)
 void BuildsScreen::handleBuildButtonClicked()
 {
     auto buildLabel = QQmlProperty::read(m_d->buildPage, "currentBuildLabel").toString();
-    auto savesDir = SaveManager::savesDirectory();
-    if (savesDir.isEmpty()) return;
+//    auto savesDir = SaveManager::savesDirectory();
+//    if (savesDir.isEmpty()) return;
     auto projectFilename = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0] + separator() + "objectwheel_project.zip";
-    Zipper::compressDir(savesDir, projectFilename, "dashboard");
+//    Zipper::compressDir(savesDir, projectFilename, "dashboard");
     QByteArray data = rdfile(projectFilename);
     rm(projectFilename);
     QByteArray boundary = "-----------------------------7d935033608e2";

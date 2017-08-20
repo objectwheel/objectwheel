@@ -217,7 +217,7 @@ void FormsWidgetPrivate::addButtonClicked()
     int count = formsListWidget.count();
     auto name = QString("form%1").arg(count);
     parent->addFormWithoutSave(name);
-    SaveManager::addFormOrder(name);
+//    SaveManager::addFormOrder(name);
 }
 
 void FormsWidgetPrivate::saveButtonClicked()

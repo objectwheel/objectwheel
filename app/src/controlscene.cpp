@@ -79,14 +79,14 @@ void ControlScene::setMainControl(Control* mainControl)
 
 void ControlScene::removeControl(Control* control)
 {
-    SaveManager::removeSave(control->id());
+//    SaveManager::removeSave(control->id());
     removeItem(control);
     emit controlRemoved(control);
 }
 
 void ControlScene::removeChildControlsOnly(Control* parent)
 {
-    SaveManager::removeChildSavesOnly(parent->id());
+//    SaveManager::removeChildSavesOnly(parent->id());
     for (auto control : parent->childControls())
         removeItem(control);
 }
