@@ -31,7 +31,7 @@ class SaveManagerPrivate : public QObject
         SaveManagerPrivate(SaveManager* parent);
         bool isOwdb(const QByteArray& propertyData) const;
         bool existsForm(const Form* form) const; // Searches by id.
-        bool existsControl(const Control* form) const; // Searches by id.
+        bool existsControl(const Control* control, const Control* parentControl) const; // Searches by id.
 
         // Searches in current project dir.
         // Returns paths of main.qml files (DIR_THIS).
@@ -86,13 +86,16 @@ bool SaveManagerPrivate::existsForm(const Form* form) const
     return false;
 }
 
-bool SaveManagerPrivate::existsControl(const Control* form) const
+bool SaveManagerPrivate::existsControl(const Control* control, const Control* parentControl) const
 {
-    for (auto path : controlPaths()) {
+    if (parentControl && parentControl->form() && existsForm(control))
+        return true;
+
+    for (auto path : controlPaths(parentControl ? dname(parentControl->dir()) : QString())) {
         auto propertyFile = rdfile(path + separator() + FILE_PROPERTIES);
         auto jobj = QJsonDocument::fromJson(propertyFile).object();
         auto id = jobj[TAG_ID].toString();
-        return (id == form->id());
+        return (id == control->id());
     }
 
     return false;
@@ -186,14 +189,25 @@ Control* SaveManager::exposeControl(const QString& basePath)
 
 }
 
-bool SaveManager::exists(const Control* control)
+bool SaveManager::isOwdb(const QString& rootPath)
 {
-    return control->form() ? _d->existsForm(control) : _d->existsControl(control);
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyFile = rdfile(propertyPath);
+    return _d->isOwdb(propertyFile);
+}
+
+bool SaveManager::exists(const Control* control, const Control* parentControl)
+{
+    return control->form() ? _d->existsForm(control) : _d->existsControl(control, parentControl);
 }
 
 void SaveManager::addForm(Form* form)
 {
-    if (form->id().isEmpty())
+    if (form->id().isEmpty() || !form->url().isValid())
+        return;
+
+    if (!isOwdb(dname(dname(form->url()))))
         return;
 
     if (exists(form))
@@ -205,25 +219,31 @@ void SaveManager::addForm(Form* form)
         return;
 
     auto baseDir = projectDirectory + separator() + DIR_FORMS;
+    auto formDir = baseDir + separator() + QString::number(biggestDir(baseDir) + 1);
 
-    if (!_d->buildControlSkeleton(form, baseDir))
+    if (!mkdir(formDir))
         return;
 
-    auto formDir = baseDir + separator() + QString::number(biggestDir(baseDir));
+    if (!cp(dname(dname(form->url())), formDir, true))
+        return;
+
     form->setDir(formDir + separator() + DIR_THIS);
 
-    return cp(dname(form->url()), formDir + separator() + DIR_THIS, true);
+    return true;
 }
 
 void SaveManager::addControl(Control* control, const Control* parentControl)
 {
-    if (control->id().isEmpty())
-        return;
-
-    if (exists(control))
+    if (control->id().isEmpty() || !control->url().isValid())
         return;
 
     if (parentControl->dir().isEmpty())
+        return;
+
+    if (!isOwdb(dname(dname(control->url()))))
+        return;
+
+    if (exists(control, parentControl))
         return;
 
     auto baseDir = dname(parentControl->dir()) + separator() + DIR_CHILDREN;
@@ -233,9 +253,6 @@ void SaveManager::addControl(Control* control, const Control* parentControl)
         return;
 
     if (!cp(dname(dname(control->url())), controlDir, true))
-        return;
-
-    if (!_d->buildControlSkeleton(control, controlDir))
         return;
 
     control->setDir(controlDir + separator() + DIR_THIS);

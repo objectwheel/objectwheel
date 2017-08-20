@@ -45,10 +45,11 @@ class SaveManager : public QObject
         static bool exposeProject();
         static Control* exposeControl(const QString& basePath);
 
-        static bool exists(const Control* control);
-        static void addForm(const Form* form);
+        static bool isOwdb(const QString& rootPath);
+        static bool exists(const Control* control, const Control* parentControl = nullptr);
+        static void addForm(Form* form);
         static void removeForm(const Form* form);
-        static void addControl(const Control* control, const Control* parentControl);
+        static void addControl(Control* control, const Control* parentControl);
         static void removeControl(const Control* control);
 
         static void setProperty(const Control* control, const QString& property, const QVariant& value);
