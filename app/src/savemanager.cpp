@@ -25,32 +25,48 @@
 class SaveManagerPrivate : public QObject
 {
         Q_OBJECT
-        // None of these functions checks whether given control's id is valid or not.
+        // Forms: All forms (children not included).
+        // Form Scope: All forms + Primary children of them.
+        // Parent Scope: Parent + Primary children of Parent.
+        // None of member functions checks whether given controls' ids or dirs are valid or not.
 
 	public:
         SaveManagerPrivate(SaveManager* parent);
-        bool isOwdb(const QByteArray& propertyData) const;
-        bool existsForm(const Form* form) const; // Searches by id.
-        bool existsControl(const Control* control, const Control* parentControl) const; // Searches by id.
+        QJsonValue property(const QByteArray& propertyData, const QString& property) const;
+        bool isOwctrl(const QByteArray& propertyData) const;
 
-        // Searches in current project dir.
-        // Returns paths of main.qml files (DIR_THIS).
+        // Searches by id.
+        // Searches control only in forms (in current project)
+        // If current project is empty, then returns false.
+        bool existsInForms(const Control* control) const;
+
+        // Searches by id.
+        // Searches control in form scope (in current project)
+        // If current project is empty, then returns false.
+        bool existsInFormScope(const Control* control) const; // Searches by id.
+
+        // Searches by id.
+        // Searches control in given parent's scope
+        // If given parent control is is empty, then returns existsInFormScope().
+        bool existsInParentScope(const Control* control, const Control* parentControl) const; // Searches by id.
+
+        // Returns all children paths (DIR_THIS) within given root path.
+        // Returns children only if they have match between their and given guid.
+        // If given guid is empty then rootPath's uid is taken.
+        QStringList childrenPaths(const QString& rootPath, QString guid = QString()) const;
+
+        // Returns (only) form paths.
+        // Returned paths are paths of main.qml files (DIR_THIS).
         QStringList formPaths() const;
 
-        // Returns paths of main.qml files (DIR_THIS).
-        // Searches in current project dir if basePath is empty.
-        // Base path cannot be DIR_THIS of any control.
-        QStringList controlPaths(const QString& basePath = QString()) const;
+        // Returns all control paths in form scope.
+        // Returned paths are paths of main.qml files (DIR_THIS).
+        QStringList formScopePaths() const;
 
-        // Returns biggest nubmer from integer named dirs.
+        // Returns biggest number from integer named dirs.
         // If no integer named dir exists, 0 returned.
         // If no dir exists or dirs are smaller than zero, 0 returned.
         int biggestDir(const QString& basePath) const;
-
-        // Builds and updates necessary files and folders for a control.
-        // Control dir has to be the root dir of control.
-        // It doesn't check whether control already exists or not in the database.
-        bool buildControlSkeleton(const Control* control, const QString& controlDir) const;
 
 	public:
         SaveManager* parent = nullptr;
@@ -63,42 +79,108 @@ SaveManagerPrivate::SaveManagerPrivate(SaveManager* parent)
 {
 }
 
-bool SaveManagerPrivate::isOwdb(const QByteArray& propertyData) const
+QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QString& property) const
 {
     if (propertyData.isEmpty())
-        return false;
+        return QJsonValue();
 
     auto jobj = QJsonDocument::fromJson(propertyData).object();
-    auto sign = jobj[TAG_OWDB_SIGN].toString();
-
-    return (sign == SIGN_OWDB);
+    return jobj[property];
 }
 
-bool SaveManagerPrivate::existsForm(const Form* form) const
+bool SaveManagerPrivate::isOwctrl(const QByteArray& propertyData) const
+{
+    auto sign = property(propertyData, TAG_OWCTRL_SIGN).toString();
+    return (sign == SIGN_OWCTRL);
+}
+
+bool SaveManagerPrivate::existsInForms(const Control* control) const
 {
     for (auto path : formPaths()) {
         auto propertyFile = rdfile(path + separator() + FILE_PROPERTIES);
-        auto jobj = QJsonDocument::fromJson(propertyFile).object();
-        auto id = jobj[TAG_ID].toString();
-        return (id == form->id());
+        auto id = property(propertyFile, TAG_ID).toString();
+
+        if (id == control->id())
+            return true;
     }
 
     return false;
 }
 
-bool SaveManagerPrivate::existsControl(const Control* control, const Control* parentControl) const
+bool SaveManagerPrivate::existsInFormScope(const Control* control) const
 {
-    if (parentControl && parentControl->form() /*&& existsForm(control)*/)
-        return true;
-
-    for (auto path : controlPaths(parentControl ? dname(parentControl->dir()) : QString())) {
+    for (auto path : formScopePaths()) {
         auto propertyFile = rdfile(path + separator() + FILE_PROPERTIES);
-        auto jobj = QJsonDocument::fromJson(propertyFile).object();
-        auto id = jobj[TAG_ID].toString();
-        return (id == control->id());
+        auto id = property(propertyFile, TAG_ID).toString();
+
+        if (id == control->id())
+            return true;
     }
 
     return false;
+}
+
+bool SaveManagerPrivate::existsInParentScope(const Control* control, const Control* parentControl) const
+{
+    if (parentControl) {
+        if (parentControl->form()) {
+            if (existsInForms(control))
+                return true;
+
+            for (auto path : childrenPaths(dname(parentControl->dir()))) {
+                auto propertyFile = rdfile(path + separator() + FILE_PROPERTIES);
+                auto id = property(propertyFile, TAG_ID).toString();
+
+                if (id == control->id())
+                    return true;
+            }
+
+            return false;
+        } else {
+            QStringList paths(parentControl->dir());
+            paths << childrenPaths(dname(parentControl->dir()));
+
+            for (auto path : paths) {
+                auto propertyFile = rdfile(path + separator() + FILE_PROPERTIES);
+                auto id = property(propertyFile, TAG_ID).toString();
+
+                if (id == control->id())
+                    return true;
+            }
+
+            return false;
+        }
+    } else {
+        return existsInFormScope(control);
+    }
+}
+
+QStringList SaveManagerPrivate::childrenPaths(const QString& rootPath, QString guid) const
+{
+    QStringList paths;
+
+    if (rootPath.isEmpty())
+        return paths;
+
+    if (guid.isEmpty()) {
+        auto propertyPath = rootPath + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyFile = rdfile(propertyPath);
+        guid = property(propertyFile, TAG_UID).toString();
+    }
+
+    auto childrenPath = rootPath + separator() + DIR_CHILDREN;
+    for (auto dir : lsdir(childrenPath)) {
+        auto propertyPath = childrenPath + separator() + dir + separator() +
+                            DIR_THIS + separator() + FILE_PROPERTIES;
+        auto propertyFile = rdfile(propertyPath);
+
+        if (isOwctrl(propertyFile) && property(propertyFile, TAG_GUID).toString() == guid) {
+            paths << dname(propertyPath);
+            paths << childrenPaths(dname(dname(propertyPath)), guid);
+        }
+    }
+    return paths;
 }
 
 QStringList SaveManagerPrivate::formPaths() const
@@ -116,16 +198,22 @@ QStringList SaveManagerPrivate::formPaths() const
                             DIR_THIS + separator() + FILE_PROPERTIES;
         auto propertyFile = rdfile(propertyPath);
 
-        if (isOwdb(propertyFile))
+        if (isOwctrl(propertyFile))
             paths << dname(propertyPath);
     }
 
     return paths;
 }
 
-QStringList SaveManagerPrivate::controlPaths(const QString& basePath) const
+QStringList SaveManagerPrivate::formScopePaths() const
 {
-    // TODO:
+    const QStringList fpaths = formPaths();
+    QStringList paths(fpaths);
+
+    for (auto fpath : fpaths)
+        paths << childrenPaths(dname(fpath));
+
+    return paths;
 }
 
 int SaveManagerPrivate::biggestDir(const QString& basePath) const
@@ -135,24 +223,6 @@ int SaveManagerPrivate::biggestDir(const QString& basePath) const
         if (dir.toInt() > num)
             num = dir.toInt();
     return num;
-}
-
-bool SaveManagerPrivate::buildControlSkeleton(const Control* control, const QString& controlDir) const
-{
-    if (!(mkdir(controlDir) &&
-          mkdir(controlDir + separator() + DIR_THIS) &&
-          mkdir(controlDir + separator() + DIR_CHILDREN) &&
-          mkfile(controlDir + separator() + DIR_THIS + separator() + FILE_PROPERTIES) &&
-          mkfile(controlDir + separator() + DIR_THIS + separator() + FILE_EVENTS)
-          /* TODO: Add mkfile bindings */ ))
-        return false;
-
-    auto propertyData = rdfile(controlDir + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
-    QJsonDocument jdoc(QJsonDocument::fromJson(propertyData));
-    QJsonObject jobj(jdoc.object());
-    jobj[TAG_OWDB_SIGN] = SIGN_OWDB;
-    jobj[TAG_ID] = control->id();
-    return (wrfile(controlDir + separator() + DIR_THIS + separator() + FILE_PROPERTIES, jdoc.toJson()) > 0);
 }
 
 //!
@@ -189,45 +259,47 @@ Control* SaveManager::exposeControl(const QString& basePath)
 
 }
 
-bool SaveManager::isOwdb(const QString& rootPath)
+bool SaveManager::isOwctrl(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
     auto propertyFile = rdfile(propertyPath);
-    return _d->isOwdb(propertyFile);
+    return _d->isOwctrl(propertyFile);
 }
 
 bool SaveManager::exists(const Control* control, const Control* parentControl)
 {
-    return control->form() ? _d->existsForm((Form*)control) : _d->existsControl(control, parentControl);
+    return control->form() ? _d->existsInFormScope(control) : _d->existsInParentScope(control, parentControl);
 }
 
-void SaveManager::addForm(Form* form)
+bool SaveManager::addForm(Form* form)
 {
     if (form->id().isEmpty() || !form->url().isValid())
-        return;
+        return false;
 
-    if (!isOwdb(dname(dname(form->url().toLocalFile()))))
-        return;
+    if (!isOwctrl(dname(dname(form->url().toLocalFile()))))
+        return false;
 
     if (exists(form))
-        return;
+        return false;
 
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
     if (projectDir.isEmpty())
-        return;
+        return false;
 
     auto baseDir = projectDir + separator() + DIR_FORMS;
     auto formDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
 
     if (!mkdir(formDir))
-        return;
+        return false;
 
     if (!cp(dname(dname(form->url().toLocalFile())), formDir, true))
-        return;
+        return false;
 
     form->setDir(formDir + separator() + DIR_THIS);
+
+    return true;
 }
 
 void SaveManager::addControl(Control* control, const Control* parentControl)
@@ -238,7 +310,7 @@ void SaveManager::addControl(Control* control, const Control* parentControl)
     if (parentControl->dir().isEmpty())
         return;
 
-    if (!isOwdb(dname(dname(control->url().toLocalFile()))))
+    if (!isOwctrl(dname(dname(control->url().toLocalFile()))))
         return;
 
     if (exists(control, parentControl))
