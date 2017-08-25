@@ -101,9 +101,10 @@ bool ProjectManager::exists(const QString& projectname)
 
 bool ProjectManager::buildNewProject(const QString& projectname)
 {
-	if (UserManager::currentSessionsUser().isEmpty()) return false;
-	if (exists(projectname)) return false;
-    return !mkdir(m_d->generateProjectDir(projectname));
+    return (!UserManager::currentSessionsUser().isEmpty() &&
+            !exists(projectname) &&
+            mkdir(m_d->generateProjectDir(projectname)) &&
+            SaveManager::initProject(m_d->generateProjectDir(projectname)));
 }
 
 bool ProjectManager::renameProject(const QString& from, const QString& to)

@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <formscene.h>
 #include <filemanager.h>
+#include <savemanager.h>
 
 #include <QApplication>
 #include <QQuickWindow>
@@ -110,11 +111,11 @@ QmlPreviewer::~QmlPreviewer()
     delete _d;
 }
 
-void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
+void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
 {
-    if (!url.isValid()) {
+    if (url.isEmpty() || !SaveManager::isOwctrl(dname(dname(url)))) {
         QQmlError error;
-        error.setDescription("Invalid url");
+        error.setDescription("Invalid url or control.");
         emit errorsOccurred(QList<QQmlError>() << error);
         return;
     }
@@ -133,7 +134,7 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
         return;
     }
 
-    result.id = qmlContext(qmlObject)->nameForObject(qmlObject);
+    result.id = SaveManager::id(dname(dname(url)));
     result.properties = _d->extractProperties(qmlObject);
     result.events = _d->extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
@@ -143,7 +144,7 @@ void QmlPreviewer::requestReview(const QUrl& url, const QSizeF& size)
         result.id = "control";
 
     if (result.gui == false) {
-        result.preview = QPixmap(dname(url.toLocalFile()) + separator() + "icon.png")
+        result.preview = QPixmap(dname(url) + separator() + "icon.png")
                          .scaled(NONGUI_CONTROL_SIZE * qApp->devicePixelRatio(), NONGUI_CONTROL_SIZE * qApp->devicePixelRatio());
         emit previewReady(result);
         return;

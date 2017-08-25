@@ -230,10 +230,10 @@ void MainWindow::SetupGui()
 
 	m_d->centralWidget->installEventFilter(this);
 
-    QTimer::singleShot(3000, [=] {
-        auto form = new Form(QUrl("qrc:/resources/qmls/applicationWindow.qml"));
-        DesignManager::formScene()->addForm(form);
-    });
+//    QTimer::singleShot(3000, [=] {
+//        auto form = new Form("qrc:/resources/qmls/mainForm/t/main.qml");
+//        DesignManager::formScene()->addForm(form);
+//    });
 
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
@@ -299,7 +299,7 @@ void MainWindow::SetupGui()
 	SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
 	SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
     SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
-	SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
+    SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
     SplashScreen::show(false);
 }
 

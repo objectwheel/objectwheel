@@ -7,7 +7,9 @@
 #define SIGN_OWCTRL "T3djdHJsX3YyLjA"
 #define DIR_THIS "t"
 #define DIR_CHILDREN "c"
-#define DIR_FORMS "forms"
+#define DIR_OWDB "owdb"
+#define DIR_MAINFORM "1"
+#define DIR_QRC_OWDB ":/resources/qmls/owdb"
 #define FILE_EVENTS "_events.json"
 #define FILE_PROPERTIES "_properties.json"
 #define TAG_TARGET_EVENT "event"
@@ -15,9 +17,6 @@
 #define TAG_ID "id"
 #define TAG_UID "_uid"
 #define TAG_GUID "_guid"
-#define TAG_DEPTH "_depth"
-#define TAG_GUI "_gui"
-#define TAG_MAINFORM "_mainform"
 #define TAG_OWDB_SIGN "_owdbsign"
 #define TAG_OWCTRL_SIGN "_owctrlsign"
 
@@ -47,11 +46,13 @@ class SaveManager : public QObject
         explicit SaveManager(QObject *parent = 0);
         static SaveManager* instance();
 
-        static bool execProject();
+        static bool initProject(const QString& projectDirectory);
         static bool exposeProject();
-        static Control* exposeControl(const QString& basePath);
+        static bool execProject();
 
         static bool isOwctrl(const QString& rootPath);
+        static QString id(const QString& rootPath);
+        static QString uid(const QString& rootPath);
         static bool exists(const Control* control, const Control* parentControl = nullptr);
         static bool addForm(Form* form);
         static void removeForm(const Form* form);

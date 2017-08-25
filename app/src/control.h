@@ -64,11 +64,11 @@ class Control : public QGraphicsWidget
         friend class DesignManagerPrivate;
 
     public:
-        explicit Control(const QUrl& url, Control* parent = Q_NULLPTR);
+        explicit Control(const QString& url, Control* parent = Q_NULLPTR);
         QString uid() const;
         QString id() const;
         void setId(const QString& id);
-        QUrl url() const;
+        QString url() const;
         bool dragging() const;
         bool dragIn() const;
         bool clip() const;
@@ -86,6 +86,7 @@ class Control : public QGraphicsWidget
         bool form() const;
         static bool showOutline();
         static void setShowOutline(const bool value);
+        static QString generateUid();
         QString dir() const;
         void setDir(const QString& dir);
 
@@ -136,7 +137,7 @@ class Control : public QGraphicsWidget
         QString _id;
         QList<QString> _events;
         QMap<QString, QVariant::Type> _properties;
-        const QUrl _url;
+        const QString _url;
         QString _dir;
         bool _dragging;
         bool _dragIn;
@@ -159,7 +160,7 @@ class Form : public Control
             Desktop
         };
 
-        explicit Form(const QUrl& url, Form* parent = Q_NULLPTR);
+        explicit Form(const QString& url, Form* parent = Q_NULLPTR);
 
         bool isMain() const;
         void setMain(bool value);

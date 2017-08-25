@@ -50,6 +50,10 @@
 
 using namespace Fit;
 
+static std::random_device rd;
+static std::mt19937 mt(rd());
+static std::uniform_int_distribution<qint32> rand_dist(-2147483648, 2147483647);
+
 //!
 //! ********************** [Resizer] **********************
 //!
@@ -225,7 +229,6 @@ class ControlPrivate : public QObject
     public:
         ControlPrivate(Control* parent);
         void fixResizerCoordinates();
-        QString generateUid() const;
 
     public slots:
         void refreshPreview();
@@ -239,15 +242,7 @@ class ControlPrivate : public QObject
         QmlPreviewer qmlPreviewer;
         bool hoverOn;
         bool initialized;
-        static std::random_device rd;
-        static std::mt19937 mt;
-        static std::uniform_int_distribution<qint32> rand_dist;
-
 };
-
-std::random_device ControlPrivate::rd;
-std::mt19937 ControlPrivate::mt(rd());
-std::uniform_int_distribution<qint32> ControlPrivate::rand_dist(-2147483648, 2147483647);
 
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
@@ -314,18 +309,6 @@ void ControlPrivate::fixResizerCoordinates()
         }
         resizer.setZValue(MAX_Z_VALUE);
     }
-}
-
-QString ControlPrivate::generateUid() const
-{
-    QByteArray uidData;
-    auto randNum = rand_dist(mt);
-    auto randNum1 = rand_dist(mt);
-    auto dateMs = QDateTime::currentMSecsSinceEpoch();
-    uidData.insert(0, QString::number(dateMs));
-    uidData.insert(0, QString::number(randNum));
-    uidData.insert(0, QString::number(randNum1));
-    return QCryptographicHash::hash(uidData, QCryptographicHash::Sha256).toHex();
 }
 
 void ControlPrivate::refreshPreview()
@@ -427,24 +410,21 @@ void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors)
 
 bool Control::_showOutline = false;
 
-Control::Control(const QUrl& url, Control* parent)
+Control::Control(const QString& url, Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
     , _controlTransaction(this)
-    , _uid(_d->generateUid())
     , _url(url)
     , _dragging(false)
     , _dragIn(false)
     , _clip(true)
     , _gui(true)
     , _hideSelection(false)
-{
+{    
     setGeometry(0, 0, 0, 0);
     connect(this, &Control::visibleChanged, [=] {
         refresh();
     });
-
-    qDebug() << _uid;
 }
 
 bool Control::showOutline()
@@ -455,6 +435,20 @@ bool Control::showOutline()
 void Control::setShowOutline(const bool value)
 {
     _showOutline = value;
+}
+
+QString Control::generateUid()
+{
+    QByteArray uidData;
+    auto randNum = rand_dist(mt);
+    auto randNum1 = rand_dist(mt);
+    auto randNum2 = rand_dist(mt);
+    auto dateMs = QDateTime::currentMSecsSinceEpoch();
+    uidData.insert(0, QString::number(dateMs));
+    uidData.insert(0, QString::number(randNum));
+    uidData.insert(0, QString::number(randNum1));
+    uidData.insert(0, QString::number(randNum2));
+    return QCryptographicHash::hash(uidData, QCryptographicHash::Sha256).toHex();
 }
 
 void Control::hideSelection()
@@ -519,7 +513,7 @@ void Control::setId(const QString& id)
     emit idChanged(prevId);
 }
 
-QUrl Control::url() const
+QString Control::url() const
 {
     return _url;
 }
@@ -592,7 +586,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     _dragIn = false;
 
     auto pos = event->pos();
-    auto control = new Control(event->mimeData()->urls().at(0));
+    auto control = new Control(event->mimeData()->urls().at(0).toLocalFile());
     control->setParentItem(this);
     control->refresh();
     connect(control, &Control::initialized, [=] {
@@ -1363,7 +1357,7 @@ void FormPrivate::applySkinChange()
 
 Form::Skin Form::_skin = Form::PhonePortrait;
 
-Form::Form(const QUrl& url, Form* parent)
+Form::Form(const QString& url, Form* parent)
     : Control(url, parent)
     , _d(new FormPrivate(this))
 {

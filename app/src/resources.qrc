@@ -227,10 +227,12 @@
         <file>resources/images/build.png</file>
         <file>resources/images/play.png</file>
         <file>resources/images/text.png</file>
-        <file>resources/qmls/applicationWindow.qml</file>
         <file>resources/images/gui.png</file>
         <file>resources/images/form.png</file>
         <file>resources/images/formsbutton.png</file>
         <file>resources/images/formsbuttonfilled.png</file>
+        <file>resources/qmls/owdb/_properties.json</file>
+        <file>resources/qmls/owdb/1/t/_properties.json</file>
+        <file>resources/qmls/owdb/1/t/main.qml</file>
     </qresource>
 </RCC>

@@ -17,6 +17,7 @@ struct PreviewResult {
         QPointF pos;
         QSizeF size;
         QString id;
+        QString uid;
         QList<QString> events;
         QMap<QString, QVariant::Type> properties;
         bool clip;
@@ -37,7 +38,7 @@ class QmlPreviewer : public QObject
         void errorsOccurred(const QList<QQmlError>& errors);
 
     public slots:
-        void requestReview(const QUrl& url, const QSizeF& size = QSizeF());
+        void requestReview(const QString& url, const QSizeF& size = QSizeF());
 
     private:
         QmlPreviewerPrivate* _d;

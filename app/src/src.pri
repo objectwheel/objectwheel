@@ -88,7 +88,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/formview.cpp \
                              $$PWD/formswidget.cpp
 
-RESOURCES                 += $$PWD/resources.qrc
+RESOURCES                 += \
+    $$PWD/resources.qrc
 
 DISTFILES                 += android/AndroidManifest.xml \
                              android/res/values/libs.xml \

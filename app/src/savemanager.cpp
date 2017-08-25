@@ -17,6 +17,7 @@
 #include <QJsonObject>
 #include <QApplication>
 #include <QTimer>
+#include <QDebug>
 
 //!
 //! ******************* [SaveManagerPrivate] *******************
@@ -32,6 +33,7 @@ class SaveManagerPrivate : public QObject
 
 	public:
         SaveManagerPrivate(SaveManager* parent);
+        void setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const;
         QJsonValue property(const QByteArray& propertyData, const QString& property) const;
         bool isOwctrl(const QByteArray& propertyData) const;
 
@@ -79,6 +81,16 @@ SaveManagerPrivate::SaveManagerPrivate(SaveManager* parent)
 {
 }
 
+void SaveManagerPrivate::setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const
+{
+    if (propertyData.isEmpty())
+        return;
+
+    auto jobj = QJsonDocument::fromJson(propertyData).object();
+    jobj[property] = value;
+    propertyData = QJsonDocument(jobj).toJson();
+}
+
 QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QString& property) const
 {
     if (propertyData.isEmpty())
@@ -91,7 +103,8 @@ QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QS
 bool SaveManagerPrivate::isOwctrl(const QByteArray& propertyData) const
 {
     auto sign = property(propertyData, TAG_OWCTRL_SIGN).toString();
-    return (sign == SIGN_OWCTRL);
+    auto uid = property(propertyData, TAG_OWCTRL_SIGN).toString();
+    return (sign == SIGN_OWCTRL && !uid.isEmpty());
 }
 
 bool SaveManagerPrivate::existsInForms(const Control* control) const
@@ -191,7 +204,7 @@ QStringList SaveManagerPrivate::formPaths() const
     if (projectDir.isEmpty())
         return paths;
 
-    auto baseDir = projectDir + separator() + DIR_FORMS;
+    auto baseDir = projectDir + separator() + DIR_OWDB;
 
     for (auto dir : lsdir(baseDir)) {
         auto propertyPath = baseDir + separator() + dir + separator() +
@@ -244,17 +257,29 @@ SaveManager* SaveManager::instance()
     return _d->parent;
 }
 
+bool SaveManager::initProject(const QString& projectDirectory)
+{
+    if (projectDirectory.isEmpty() ||
+        !::exists(projectDirectory) ||
+        ::exists(projectDirectory + separator() + DIR_OWDB) ||
+        !cp(DIR_QRC_OWDB, projectDirectory, false, true))
+        return false;
+
+    auto propertyPath = projectDirectory + separator() + DIR_OWDB +
+                        separator() + DIR_MAINFORM + separator() +
+                        DIR_THIS + separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    _d->setProperty(propertyData, TAG_UID, Control::generateUid());
+
+    return wrfile(propertyPath, propertyData);
+}
+
 bool SaveManager::execProject()
 {
 
 }
 
 bool SaveManager::exposeProject()
-{
-
-}
-
-Control* SaveManager::exposeControl(const QString& basePath)
 {
 
 }
@@ -267,6 +292,22 @@ bool SaveManager::isOwctrl(const QString& rootPath)
     return _d->isOwctrl(propertyFile);
 }
 
+QString SaveManager::id(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyFile = rdfile(propertyPath);
+    return _d->property(propertyFile, TAG_ID).toString();
+}
+
+QString SaveManager::uid(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyFile = rdfile(propertyPath);
+    return _d->property(propertyFile, TAG_UID).toString();
+}
+
 bool SaveManager::exists(const Control* control, const Control* parentControl)
 {
     return control->form() ? _d->existsInFormScope(control) : _d->existsInParentScope(control, parentControl);
@@ -274,10 +315,10 @@ bool SaveManager::exists(const Control* control, const Control* parentControl)
 
 bool SaveManager::addForm(Form* form)
 {
-    if (form->id().isEmpty() || !form->url().isValid())
+    if (form->id().isEmpty() || form->url().isEmpty())
         return false;
 
-    if (!isOwctrl(dname(dname(form->url().toLocalFile()))))
+    if (!isOwctrl(dname(dname(form->url()))))
         return false;
 
     if (exists(form))
@@ -288,13 +329,13 @@ bool SaveManager::addForm(Form* form)
     if (projectDir.isEmpty())
         return false;
 
-    auto baseDir = projectDir + separator() + DIR_FORMS;
+    auto baseDir = projectDir + separator() + DIR_OWDB;
     auto formDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
 
     if (!mkdir(formDir))
         return false;
 
-    if (!cp(dname(dname(form->url().toLocalFile())), formDir, true))
+    if (!cp(dname(dname(form->url())), formDir, true))
         return false;
 
     form->setDir(formDir + separator() + DIR_THIS);
@@ -304,13 +345,13 @@ bool SaveManager::addForm(Form* form)
 
 void SaveManager::addControl(Control* control, const Control* parentControl)
 {
-    if (control->id().isEmpty() || !control->url().isValid())
+    if (control->id().isEmpty() || control->url().isEmpty())
         return;
 
     if (parentControl->dir().isEmpty())
         return;
 
-    if (!isOwctrl(dname(dname(control->url().toLocalFile()))))
+    if (!isOwctrl(dname(dname(control->url()))))
         return;
 
     if (exists(control, parentControl))
@@ -322,7 +363,7 @@ void SaveManager::addControl(Control* control, const Control* parentControl)
     if (!mkdir(controlDir))
         return;
 
-    if (!cp(dname(dname(control->url().toLocalFile())), controlDir, true))
+    if (!cp(dname(dname(control->url())), controlDir, true))
         return;
 
     control->setDir(controlDir + separator() + DIR_THIS);
