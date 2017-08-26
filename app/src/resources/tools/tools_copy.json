@@ -149,9 +149,9 @@
     	"toolUrl" : "qrc:/resources/tools/WindRose.zip"
     },
 
-    "DragonFire" :
+    "AnimatedImage" :
     {
-    	"toolUrl" : "qrc:/resources/tools/DragonFire.zip"
+    	"toolUrl" : "qrc:/resources/tools/AnimatedImage.zip"
     },
 
     "ScaledText" :

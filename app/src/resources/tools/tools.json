@@ -4,6 +4,26 @@
         "toolUrl" : "qrc:/resources/tools/Dial.zip"
     },
 
+    "Slider" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Slider.zip"
+    },
+
+    "Text" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Text.zip"
+    },
+
+    "TextField" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TextField.zip"
+    },
+
+    "RadioButton" :
+    {
+        "toolUrl" : "qrc:/resources/tools/RadioButton.zip"
+    },
+
     "Button" :
     {
         "toolUrl" : "qrc:/resources/tools/Button.zip"
@@ -28,12 +48,7 @@
     {
         "toolUrl" : "qrc:/resources/tools/FlatSwitch.zip"
     },
-
-	"Thermometer" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Thermometer.zip"
-    },
-
+    
     "ToggleButton" :
     {
         "toolUrl" : "qrc:/resources/tools/ToggleButton.zip"
@@ -74,34 +89,14 @@
     	"toolUrl" : "qrc:/resources/tools/TextArea.zip"
     },
 
-    "RowLayout" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/RowLayout.zip"
-    },
-
-    "GridLayout" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/GridLayout.zip"
-    },
-
-    "VerticalSpacer" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/VerticalSpacer.zip"
-    },
-
-    "HorizontalSpacer" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/HorizontalSpacer.zip"
-    },
-
     "WindRose" :
     {
     	"toolUrl" : "qrc:/resources/tools/WindRose.zip"
     },
 
-    "DragonFire" :
+    "AnimatedImage" :
     {
-    	"toolUrl" : "qrc:/resources/tools/DragonFire.zip"
+    	"toolUrl" : "qrc:/resources/tools/AnimatedImage.zip"
     },
 
     "ScaledText" :
@@ -112,5 +107,10 @@
     "ScaledTextField" :
     {
     	"toolUrl" : "qrc:/resources/tools/ScaledTextField.zip"
+    },
+
+    "ProgressBar" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ProgressBar.zip"
     }
 }

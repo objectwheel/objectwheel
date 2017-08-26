@@ -27,7 +27,6 @@
         <file>resources/tools/Tumbler.zip</file>
         <file>resources/images/plus.png</file>
         <file>resources/images/minus.png</file>
-        <file>resources/tools/Thermometer.zip</file>
         <file>resources/tools/Compass.zip</file>
         <file>resources/tools/TextReader.zip</file>
         <file>resources/images/toolboxbuttonfilled.png</file>
@@ -111,7 +110,6 @@
         <file>resources/tools/VerticalSpacer.zip</file>
         <file>resources/tools/HorizontalSpacer.zip</file>
         <file>resources/tools/WindRose.zip</file>
-        <file>resources/tools/DragonFire.zip</file>
         <file>resources/tools/ScaledTextField.zip</file>
         <file>resources/tools/ScaledText.zip</file>
         <file>resources/qmls/empty-item.qml</file>
@@ -234,5 +232,6 @@
         <file>resources/qmls/owdb/_properties.json</file>
         <file>resources/qmls/owdb/1/t/_properties.json</file>
         <file>resources/qmls/owdb/1/t/main.qml</file>
+        <file>resources/tools/AnimatedImage.zip</file>
     </qresource>
 </RCC>

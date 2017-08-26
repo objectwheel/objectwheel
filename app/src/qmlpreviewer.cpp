@@ -128,6 +128,7 @@ void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
     QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
     QSharedPointer<QQuickWindow> window;
 
+    qmlEngine->rootContext()->setContextProperty("dpi", Fit::ratio());
     qmlComponent->loadUrl(url);
     qmlObject = qmlComponent->create();
     result.id = SaveManager::id(dname(dname(url)));
