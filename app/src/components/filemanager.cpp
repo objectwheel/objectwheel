@@ -140,6 +140,19 @@ QStringList FileManager::lsfile(const QString& dir) const
     return QDir(dir).entryList(QDir::Files| QDir::System | QDir::Hidden | QDir::NoDotAndDotDot);
 }
 
+QStringList FileManager::fps(const QString& file, const QString& dir) const
+{
+    QStringList paths;
+    for (auto fn : lsfile(dir))
+        if (fn == file)
+            paths << dir + separator() + fn;
+
+    for (auto dr : lsdir(dir))
+        paths << fps(file, dir + separator() + dr);
+
+    return paths;
+}
+
 QString FileManager::fname(const QString& name) const
 {
     return QFileInfo(name).fileName();

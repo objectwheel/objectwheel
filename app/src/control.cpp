@@ -5,6 +5,7 @@
 #include <savemanager.h>
 #include <designmanager.h>
 #include <random>
+#include <filemanager.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -409,22 +410,30 @@ void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors)
 //!
 
 bool Control::_showOutline = false;
+QList<Control*> Control::_controls;
 
-Control::Control(const QString& url, Control* parent)
+Control::Control(const QString& url, const QString& uid, Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
     , _controlTransaction(this)
+    , _uid(uid.isEmpty() ? SaveManager::uid(dname(dname(url))) : uid)
     , _url(url)
     , _dragging(false)
     , _dragIn(false)
     , _clip(true)
     , _gui(true)
     , _hideSelection(false)
-{    
+{
+    _controls << this;
     setGeometry(0, 0, 0, 0);
     connect(this, &Control::visibleChanged, [=] {
         refresh();
     });
+}
+
+Control::~Control()
+{
+    _controls.removeOne(this);
 }
 
 bool Control::showOutline()
@@ -435,6 +444,12 @@ bool Control::showOutline()
 void Control::setShowOutline(const bool value)
 {
     _showOutline = value;
+}
+
+void Control::updateUids()
+{
+    for (auto control : _controls)
+        control->updateUid();
 }
 
 QString Control::generateUid()
@@ -538,6 +553,11 @@ void Control::refresh()
         _d->refreshTimer.start();
 }
 
+void Control::updateUid()
+{
+    _uid = SaveManager::uid(dname(dir()));
+}
+
 void Control::centralize()
 {
     setPos(- size().width() / 2.0, - size().height() / 2.0);
@@ -591,6 +611,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     control->refresh();
     connect(control, &Control::initialized, [=] {
         control->setPos(pos);
+        SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid());
     });
 
     event->accept();
@@ -1357,8 +1378,8 @@ void FormPrivate::applySkinChange()
 
 Form::Skin Form::_skin = Form::PhonePortrait;
 
-Form::Form(const QString& url, Form* parent)
-    : Control(url, parent)
+Form::Form(const QString& url, const QString& uid, Form* parent)
+    : Control(url, uid, parent)
     , _d(new FormPrivate(this))
 {
     connect(this, &Form::initialized, [=] {

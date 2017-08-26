@@ -47,7 +47,7 @@ class SaveManager : public QObject
         static SaveManager* instance();
 
         static bool initProject(const QString& projectDirectory);
-        static bool exposeProject();
+        static void exposeProject();
         static bool execProject();
 
         static bool isOwctrl(const QString& rootPath);
@@ -56,7 +56,7 @@ class SaveManager : public QObject
         static bool exists(const Control* control, const Control* parentControl = nullptr);
         static bool addForm(Form* form);
         static void removeForm(const Form* form);
-        static void addControl(Control* control, const Control* parentControl);
+        static bool addControl(Control* control, const Control* parentControl, const QString& guid);
         static void removeControl(const Control* control);
 
         static void setProperty(const Control* control, const QString& property, const QVariant& value);

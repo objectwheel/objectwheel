@@ -22,6 +22,7 @@ class FileManager : public QObject
 		QStringList ls(const QString& dir) const;
 		QStringList lsdir(const QString& dir) const;
 		QStringList lsfile(const QString& dir) const;
+        QStringList fps(const QString& file, const QString& dir) const;
 		QString fname(const QString& name) const;
 		QString dname(const QString& name) const;
 		qint64 fsize(const QString& name) const;
@@ -57,6 +58,7 @@ static inline bool cp(const QString& from, const QString& toDir, const bool cont
 static inline QStringList ls(const QString& dir) { return FileManager().ls(dir); }
 static inline QStringList lsdir(const QString& dir) { return FileManager().lsdir(dir); }
 static inline QStringList lsfile(const QString& dir) { return FileManager().lsfile(dir); }
+static inline QStringList fps(const QString& file, const QString& dir) { return FileManager().fps(file, dir); }
 static inline QString fname(const QString& name) { return FileManager().fname(name); }
 static inline QString dname(const QString& name) { return FileManager().dname(name); }
 static inline qint64 fsize(const QString& name) { return FileManager().fsize(name); }

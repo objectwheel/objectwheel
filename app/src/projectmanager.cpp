@@ -223,12 +223,7 @@ bool ProjectManager::startProject(const QString& projectname)
 
     m_d->currentProject = projectname;
 
-    if (!SaveManager::exposeProject()) {
-        m_d->currentProject = "";
-        QMessageBox::warning(NULL, "Oops", "The database is corrupted. Please contact to support.");
-        return false;
-    }
-
+    SaveManager::exposeProject();
     DesignManager::controlScene()->clearSelection();
     DesignManager::formScene()->clearSelection();
 

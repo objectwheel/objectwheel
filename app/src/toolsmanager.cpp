@@ -2,6 +2,9 @@
 #include <filemanager.h>
 #include <zipper.h>
 #include <projectmanager.h>
+#include <listwidget.h>
+#include <savemanager.h>
+
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -13,7 +16,6 @@
 #include <QList>
 #include <QIcon>
 #include <QDir>
-#include <listwidget.h>
 #include <QListWidgetItem>
 #include <QEventLoop>
 
@@ -104,10 +106,15 @@ void ToolsManager::addTool(const QString& name)
 {
 	if (ProjectManager::currentProject().isEmpty()) return;
 	QList<QUrl> urls;
-	QListWidgetItem* item = new QListWidgetItem(QIcon(ProjectManager::projectDirectory(ProjectManager::currentProject()) + separator() + TOOLS_DIRECTORY + separator() + name + separator() + "icon.png"), name);
-	urls << QUrl::fromLocalFile(ProjectManager::projectDirectory(ProjectManager::currentProject()) + separator() + TOOLS_DIRECTORY + separator() + name + separator() + "main.qml");
+    auto dir = ProjectManager::projectDirectory(
+                   ProjectManager::currentProject()) +
+                   separator() + TOOLS_DIRECTORY +
+                   separator() + name + separator() +
+                   DIR_THIS + separator();
+    QListWidgetItem* item = new QListWidgetItem(QIcon(dir + "icon.png"), name);
+    urls << QUrl::fromLocalFile(dir + "main.qml");
 	m_listWidget->addItem(item);
-	m_listWidget->AddUrls(item,urls);
+    m_listWidget->AddUrls(item, urls);
 }
 
 bool ToolsManager::toolsExists(const QJsonObject& toolsObject)

@@ -64,7 +64,8 @@ class Control : public QGraphicsWidget
         friend class DesignManagerPrivate;
 
     public:
-        explicit Control(const QString& url, Control* parent = Q_NULLPTR);
+        explicit Control(const QString& url, const QString& uid = QString(), Control* parent = Q_NULLPTR);
+        ~Control();
         QString uid() const;
         QString id() const;
         void setId(const QString& id);
@@ -86,6 +87,7 @@ class Control : public QGraphicsWidget
         bool form() const;
         static bool showOutline();
         static void setShowOutline(const bool value);
+        static void updateUids();
         static QString generateUid();
         QString dir() const;
         void setDir(const QString& dir);
@@ -97,6 +99,9 @@ class Control : public QGraphicsWidget
         void showResizers();
         void cleanContent();
         virtual void refresh();
+
+    protected slots:
+        void updateUid();
 
     protected:
         void setGui(bool value);
@@ -133,7 +138,7 @@ class Control : public QGraphicsWidget
 
     private:
         ControlTransaction _controlTransaction;
-        const QString _uid;
+        QString _uid;
         QString _id;
         QList<QString> _events;
         QMap<QString, QVariant::Type> _properties;
@@ -145,6 +150,7 @@ class Control : public QGraphicsWidget
         bool _gui;
         bool _hideSelection;
         static bool _showOutline;
+        static QList<Control*> _controls;
 };
 
 class Form : public Control
@@ -160,7 +166,7 @@ class Form : public Control
             Desktop
         };
 
-        explicit Form(const QString& url, Form* parent = Q_NULLPTR);
+        explicit Form(const QString& url, const QString& uid = QString(), Form* parent = Q_NULLPTR);
 
         bool isMain() const;
         void setMain(bool value);
