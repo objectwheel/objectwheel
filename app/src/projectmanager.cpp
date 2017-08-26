@@ -34,7 +34,7 @@ ProjectManagerPrivate::ProjectManagerPrivate(ProjectManager* uparent)
 inline QString ProjectManagerPrivate::generateProjectDir(const QString& projectname) const
 {
 	auto userDir = UserManager::userDirectory(UserManager::currentSessionsUser());
-	if (userDir.isEmpty()) return userDir;
+    if (userDir.isEmpty()) return userDir;
 	return userDir + separator() + QByteArray().insert(0, projectname).toHex();
 }
 
@@ -88,8 +88,8 @@ void ProjectManager::setMainWindow(MainWindow* mainWindow)
 
 QString ProjectManager::projectDirectory(const QString& projectname)
 {
-	if (!exists(projectname)) return QString();
-	return m_d->generateProjectDir(projectname);
+    if (!exists(projectname)) return QString();
+    return m_d->generateProjectDir(projectname);
 }
 
 bool ProjectManager::exists(const QString& projectname)

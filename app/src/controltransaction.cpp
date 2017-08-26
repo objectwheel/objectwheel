@@ -43,10 +43,10 @@ void ControlTransaction::flushGeometryChange()
         !_geometryTransactionsEnabled)
         return;
 
-//    SaveManager::setVariantProperty(_watched->id(), "x", _watched->x());
-//    SaveManager::setVariantProperty(_watched->id(), "y", _watched->y());
-//    SaveManager::setVariantProperty(_watched->id(), "width", _watched->size().width());
-//    SaveManager::setVariantProperty(_watched->id(), "height", _watched->size().height());
+    SaveManager::setProperty(_watched, "x", _watched->form() ? int(_watched->x()) : _watched->x());
+    SaveManager::setProperty(_watched, "y", _watched->form() ? int(_watched->y()) : _watched->y());
+    SaveManager::setProperty(_watched, "width", _watched->form() ? int(_watched->size().width()) : _watched->size().width());
+    SaveManager::setProperty(_watched, "height", _watched->form() ? int(_watched->size().height()) : _watched->size().height());
 }
 
 void ControlTransaction::flushParentChange()
@@ -65,7 +65,7 @@ void ControlTransaction::flushZChange()
         !_zTransactionsEnabled)
         return;
 
-//    SaveManager::setVariantProperty(_watched->id(), "z", _watched->zValue());
+    SaveManager::setProperty(_watched, "z", _watched->zValue());
 }
 
 void ControlTransaction::flushIdChange(const QString& prevId)

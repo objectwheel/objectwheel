@@ -234,7 +234,7 @@ class ControlPrivate : public QObject
     public slots:
         void refreshPreview();
         void updatePreview(const PreviewResult& result);
-        void handlePreviewErrors(QList<QQmlError> errors);
+        void handlePreviewErrors(QList<QQmlError> errors, const PreviewResult& result);
 
     public:
         Control* parent;
@@ -259,8 +259,8 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
     connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    connect(&qmlPreviewer, SIGNAL(errorsOccurred(QList<QQmlError>)),
-            SLOT(handlePreviewErrors(QList<QQmlError>)));
+    connect(&qmlPreviewer, SIGNAL(errorsOccurred(QList<QQmlError>, const PreviewResult&)),
+            SLOT(handlePreviewErrors(QList<QQmlError>, const PreviewResult&)));
     connect(&qmlPreviewer, SIGNAL(previewReady(PreviewResult)),
             SLOT(updatePreview(PreviewResult)));
 }
@@ -392,11 +392,11 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
     emit parent->previewChanged();
 }
 
-void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors)
+void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors, const PreviewResult& result)
 {
     QMessageBox box;
     box.setText("<b>This tool has some errors, please fix these first.</b>");
-    box.setInformativeText(errors[0].description());
+    box.setInformativeText("<b>Control</b>: " +  result.id + ", <b>Error</b>: " + errors[0].description());
     box.setStandardButtons(QMessageBox::Ok);
     box.setDefaultButton(QMessageBox::Ok);
     box.setIcon(QMessageBox::Information);
@@ -555,7 +555,7 @@ void Control::refresh()
 
 void Control::updateUid()
 {
-    _uid = SaveManager::uid(dname(dir()));
+    _uid = SaveManager::uid(dir());
 }
 
 void Control::centralize()
@@ -716,14 +716,14 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
     return QGraphicsWidget::itemChange(change, value);
 }
 
-void Control::setDir(const QString& dir)
+void Control::setUrl(const QString& url)
 {
-    _dir = dir;
+    _url = url;
 }
 
-QString Control::dir() const
+QString Control::dir() const // Returns root path
 {
-    return _dir;
+    return dname(dname(_url));
 }
 
 QString Control::uid() const

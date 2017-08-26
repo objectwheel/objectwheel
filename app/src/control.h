@@ -70,6 +70,8 @@ class Control : public QGraphicsWidget
         QString id() const;
         void setId(const QString& id);
         QString url() const;
+        void setUrl(const QString& url);
+        QString dir() const;
         bool dragging() const;
         bool dragIn() const;
         bool clip() const;
@@ -89,8 +91,6 @@ class Control : public QGraphicsWidget
         static void setShowOutline(const bool value);
         static void updateUids();
         static QString generateUid();
-        QString dir() const;
-        void setDir(const QString& dir);
 
     public slots:
         void hideSelection();
@@ -142,8 +142,7 @@ class Control : public QGraphicsWidget
         QString _id;
         QList<QString> _events;
         QMap<QString, QVariant::Type> _properties;
-        const QString _url;
-        QString _dir;
+        QString _url;
         bool _dragging;
         bool _dragIn;
         bool _clip;

@@ -16,7 +16,7 @@
 #define TAG_EVENT_CODE "code"
 #define TAG_ID "id"
 #define TAG_UID "_uid"
-#define TAG_GUID "_guid"
+#define TAG_SUID "_suid"
 #define TAG_OWDB_SIGN "_owdbsign"
 #define TAG_OWCTRL_SIGN "_owctrlsign"
 
@@ -53,10 +53,11 @@ class SaveManager : public QObject
         static bool isOwctrl(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
-        static bool exists(const Control* control, const Control* parentControl = nullptr);
+        static QString suid(const QString& rootPath);
+        static bool exists(const Control* control, const QString& suid = QString());
         static bool addForm(Form* form);
         static void removeForm(const Form* form);
-        static bool addControl(Control* control, const Control* parentControl, const QString& guid);
+        static bool addControl(Control* control, const Control* parentControl, const QString& suid);
         static void removeControl(const Control* control);
 
         static void setProperty(const Control* control, const QString& property, const QVariant& value);

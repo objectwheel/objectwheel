@@ -35,7 +35,7 @@ class QmlPreviewer : public QObject
 
     signals:
         void previewReady(const PreviewResult& result);
-        void errorsOccurred(const QList<QQmlError>& errors);
+        void errorsOccurred(const QList<QQmlError>& errors, const PreviewResult& result);
 
     public slots:
         void requestReview(const QString& url, const QSizeF& size = QSizeF());

@@ -113,28 +113,30 @@ QmlPreviewer::~QmlPreviewer()
 
 void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
 {
+    PreviewResult result;
+    result.id = "none";
+
     if (url.isEmpty() || !SaveManager::isOwctrl(dname(dname(url)))) {
         QQmlError error;
         error.setDescription("Invalid url or control.");
-        emit errorsOccurred(QList<QQmlError>() << error);
+        emit errorsOccurred(QList<QQmlError>() << error, result);
         return;
     }
 
     QObject* qmlObject;
-    PreviewResult result;
     QSharedPointer<QQmlEngine> qmlEngine(new QQmlEngine);
     QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
     QSharedPointer<QQuickWindow> window;
 
     qmlComponent->loadUrl(url);
     qmlObject = qmlComponent->create();
+    result.id = SaveManager::id(dname(dname(url)));
 
     if (!qmlComponent->errors().isEmpty()) {
-        emit errorsOccurred(qmlComponent->errors());
+        emit errorsOccurred(qmlComponent->errors(), result);
         return;
     }
 
-    result.id = SaveManager::id(dname(dname(url)));
     result.properties = _d->extractProperties(qmlObject);
     result.events = _d->extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
