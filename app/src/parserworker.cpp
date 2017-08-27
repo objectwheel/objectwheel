@@ -7,7 +7,6 @@
 #include <qmlobjectnode.h>
 #include <variantproperty.h>
 #include <filemanager.h>
-
 #include <QQmlEngine>
 
 using namespace QmlDesigner;
@@ -37,8 +36,6 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
         emit done();
         return;
     }
-
-    qDebug() << "Test test , parser in progress.";
 
     try {
         auto bproperty = QByteArray().insert(0, property);

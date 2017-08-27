@@ -611,8 +611,8 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     control->setParentItem(this);
     control->refresh();
     connect(control, &Control::initialized, [=] {
-        control->setPos(pos);
         SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid());
+        control->setPos(pos);
     });
 
     event->accept();
