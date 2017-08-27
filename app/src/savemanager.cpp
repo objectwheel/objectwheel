@@ -389,6 +389,9 @@ void SaveManager::exposeProject()
 
         auto form = new Form(path + separator() + "main.qml");
         DesignManager::formScene()->addForm(form);
+        connect(form, &Form::initialized, [=] {
+            form->controlTransaction()->setTransactionsEnabled(true);
+        });
 
         Control* parentControl;
         for (auto child : _d->childrenPaths(dname(path))) {
@@ -398,6 +401,9 @@ void SaveManager::exposeProject()
             auto control = new Control(child + separator() + "main.qml");
             control->setParentItem(parentControl);
             control->refresh();
+            connect(control, &Control::initialized, [=] {
+                control->controlTransaction()->setTransactionsEnabled(true);
+            });
 
             parentControl = control;
         }

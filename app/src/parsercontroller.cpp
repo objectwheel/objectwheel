@@ -65,9 +65,11 @@ bool ParserController::running()
 {
     return _transactionList.size() > 0;
 }
-
+#include <QDebug>
 void ParserController::processWaitingTransactions()
 {
+    qDebug() << _transactionList.size();
+
     _transactionTimer->stop();
 
     if (_transactionList.isEmpty())

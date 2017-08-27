@@ -6,6 +6,7 @@
 ControlTransaction::ControlTransaction(Control* watched, QObject *parent)
     : QObject(parent)
     , _watched(watched)
+    , _transactionsEnabled(false)
     , _geometryTransactionsEnabled(true)
     , _parentTransactionsEnabled(true)
     , _zTransactionsEnabled(true)
@@ -37,10 +38,16 @@ void ControlTransaction::setIdTransactionsEnabled(bool value)
     _idTransactionsEnabled = value;
 }
 
+void ControlTransaction::setTransactionsEnabled(bool value)
+{
+    _transactionsEnabled = value;
+}
+
 void ControlTransaction::flushGeometryChange()
 {
     if (_watched->id().isEmpty() ||
-        !_geometryTransactionsEnabled)
+        !_geometryTransactionsEnabled ||
+        !_transactionsEnabled)
         return;
 
     SaveManager::setProperty(_watched, "x", _watched->form() ? int(_watched->x()) : _watched->x());
@@ -53,7 +60,8 @@ void ControlTransaction::flushParentChange()
 {
     if (_watched->parentControl() == nullptr ||
         _watched->id().isEmpty() ||
-        !_parentTransactionsEnabled)
+        !_parentTransactionsEnabled ||
+        !_transactionsEnabled)
         return;
 
 //    SaveManager::addParentalRelationship(_watched->id(), _watched->parentControl()->id());
@@ -62,7 +70,8 @@ void ControlTransaction::flushParentChange()
 void ControlTransaction::flushZChange()
 {
     if (_watched->id().isEmpty() ||
-        !_zTransactionsEnabled)
+        !_zTransactionsEnabled ||
+        !_transactionsEnabled)
         return;
 
     SaveManager::setProperty(_watched, "z", _watched->zValue());
@@ -72,7 +81,8 @@ void ControlTransaction::flushIdChange(const QString& prevId)
 {
     if (_watched->id().isEmpty() ||
         prevId.isEmpty() ||
-        !_idTransactionsEnabled)
+        !_idTransactionsEnabled ||
+        !_transactionsEnabled)
         return;
 
 //    SaveManager::changeSave(prevId, _watched->id());

@@ -91,6 +91,8 @@ class Control : public QGraphicsWidget
         static void setShowOutline(const bool value);
         static void updateUids();
         static QString generateUid();
+        ControlTransaction* controlTransaction();
+        static const QList<Control*>& controls();
 
     public slots:
         void hideSelection();

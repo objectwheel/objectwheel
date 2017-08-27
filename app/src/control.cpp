@@ -607,6 +607,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 
     auto pos = event->pos();
     auto control = new Control(event->mimeData()->urls().at(0).toLocalFile());
+    control->controlTransaction()->setTransactionsEnabled(true);
     control->setParentItem(this);
     control->refresh();
     connect(control, &Control::initialized, [=] {
@@ -714,6 +715,16 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             break;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+const QList<Control*>& Control::controls()
+{
+    return _controls;
+}
+
+ControlTransaction* Control::controlTransaction()
+{
+    return &_controlTransaction;
 }
 
 void Control::setUrl(const QString& url)

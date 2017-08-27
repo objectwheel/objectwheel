@@ -16,6 +16,7 @@ class ControlTransaction : public QObject
         void setParentTransactionsEnabled(bool value);
         void setZTransactionsEnabled(bool value);
         void setIdTransactionsEnabled(bool value);
+        void setTransactionsEnabled(bool value);
 
     public slots:
         void flushGeometryChange();
@@ -25,6 +26,7 @@ class ControlTransaction : public QObject
 
     private:
         Control* _watched;
+        bool _transactionsEnabled;
         bool _geometryTransactionsEnabled;
         bool _parentTransactionsEnabled;
         bool _zTransactionsEnabled;

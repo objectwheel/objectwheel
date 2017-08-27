@@ -38,6 +38,8 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
         return;
     }
 
+    qDebug() << "Test test , parser in progress.";
+
     try {
         auto bproperty = QByteArray().insert(0, property);
         auto model = Model::create("QtQuick.Item", 1, 0);
