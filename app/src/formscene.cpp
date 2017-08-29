@@ -58,6 +58,8 @@ void FormScene::setMainForm(Form* mainForm)
 void FormScene::setMainControl(Control* mainControl)
 {
     Form* form;
-    if ((form = dynamic_cast<Form*>(mainControl)))
+    if ((form = dynamic_cast<Form*>(mainControl))) {
         setMainForm(form);
+        emit mainControlChanged(mainControl);
+    }
 }

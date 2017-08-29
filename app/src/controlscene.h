@@ -41,6 +41,7 @@ class ControlScene : public QGraphicsScene
 
     signals:
         void controlRemoved(Control* control);
+        void mainControlChanged(Control* mainControl);
 
     protected:
         QPointer<Control> _mainControl;

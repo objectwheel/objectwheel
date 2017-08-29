@@ -64,7 +64,8 @@ void ControlTransaction::flushParentChange()
         !_transactionsEnabled)
         return;
 
-//    SaveManager::addParentalRelationship(_watched->id(), _watched->parentControl()->id());
+    SaveManager::moveControl(_watched, _watched->parentControl());
+    flushGeometryChange();
 }
 
 void ControlTransaction::flushZChange()
@@ -85,5 +86,5 @@ void ControlTransaction::flushIdChange(const QString& prevId)
         !_transactionsEnabled)
         return;
 
-//    SaveManager::changeSave(prevId, _watched->id());
+    SaveManager::setProperty(_watched, "id", _watched->id());
 }

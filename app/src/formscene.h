@@ -16,6 +16,9 @@ class FormScene : public ControlScene
         void setMainForm(Form* mainForm);
         void setMainControl(Control* mainControl) override;
 
+    signals:
+        void mainControlChanged(Control* mainControl);
+
     private:
         QList<Form*> _forms;
 };

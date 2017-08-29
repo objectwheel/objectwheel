@@ -607,9 +607,9 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 
     auto pos = event->pos();
     auto control = new Control(event->mimeData()->urls().at(0).toLocalFile());
-    control->controlTransaction()->setTransactionsEnabled(true);
     control->setParentItem(this);
     control->refresh();
+    control->controlTransaction()->setTransactionsEnabled(true);
     connect(control, &Control::initialized, [=] {
         SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid());
         control->setPos(pos);

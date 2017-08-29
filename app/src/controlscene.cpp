@@ -75,6 +75,8 @@ void ControlScene::setMainControl(Control* mainControl)
     for (auto control : mainControl->childControls())
         if (control->gui() == false)
             nonGuiControlsPanel()->addControl(control);
+
+    emit mainControlChanged(mainControl);
 }
 
 void ControlScene::removeControl(Control* control)

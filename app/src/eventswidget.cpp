@@ -25,8 +25,10 @@
 
 using namespace Fit;
 
-class EventsWidgetPrivate
+class EventsWidgetPrivate : public QObject
 {
+        Q_OBJECT
+
     public:
         EventsWidget* parent;
         QVBoxLayout verticalLayout;
@@ -57,7 +59,7 @@ class EventsWidgetPrivate
     public:
         EventsWidgetPrivate(EventsWidget* parent);
 
-    private:
+    public:
         void removeButtonClicked();
         void addButtonClicked();
         void editButtonClicked();
@@ -65,10 +67,12 @@ class EventsWidgetPrivate
         void popupOkButtonClicked();
         void btnEditCodeClicked();
         void ensureComboboxVisible(const QObject* obj);
+        void fetchList();
 };
 
 EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
-    : parent(p)
+    : QObject(p)
+    , parent(p)
 {
     eventsListWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     eventsListWidget.setFocusPolicy(Qt::NoFocus);
@@ -212,15 +216,6 @@ EventsWidgetPrivate::EventsWidgetPrivate(EventsWidget* p)
     QObject::connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
     QObject::connect(DesignManager::formScene(), SIGNAL(selectionChanged()), parent, SLOT(handleSelectionChange()));
 }
-
-//void EventsWidgetPrivate::addEventWithoutSave(const SaveManager::EventInf& inf)
-//{
-//    if (inf.targetEventname.isEmpty() ||inf.targetId.isEmpty() ||
-//        inf.eventCode.isEmpty() || inf.eventName.isEmpty())
-//        return;
-
-//    eventsListWidget.addItem(inf.eventName);
-//}
 
 void EventsWidgetPrivate::removeButtonClicked()
 {
@@ -377,82 +372,88 @@ void EventsWidgetPrivate::ensureComboboxVisible(const QObject* obj)
     popupScrollArea.ensureWidgetVisible((QWidget*)obj);
 }
 
-EventsWidgetPrivate* EventsWidget::m_d = nullptr;
+void EventsWidgetPrivate::fetchList()
+{
+
+}
+
+EventsWidgetPrivate* EventsWidget::_d = nullptr;
+QPointer<Control> EventsWidget::_mainControl = nullptr;
 
 EventsWidget::EventsWidget(QWidget *parent)
     : QWidget(parent)
 {
-    if (m_d) return;
-    m_d = new EventsWidgetPrivate(this);
+    if (_d) return;
+    _d = new EventsWidgetPrivate(this);
+
+    connect(DesignManager::instance(), SIGNAL(modeChanged()), SLOT(handleDesignerModeChange()));
+    connect(DesignManager::controlScene(), SIGNAL(mainControlChanged(Control*)), SLOT(handleMainControlChange(Control*)));
+    connect(DesignManager::formScene(), SIGNAL(mainControlChanged(Control*)), SLOT(handleMainControlChange(Control*)));
 }
 
 EventsWidget* EventsWidget::instance()
 {
-    return m_d->parent;
-}
-
-EventsWidget::~EventsWidget()
-{
-    delete m_d;
+    return _d->parent;
 }
 
 void EventsWidget::clearList()
 {
-    m_d->targetEventCombobox.clear();
-    m_d->nameEdit.setText("");
-    m_d->popupItemNameTextBox.setText("");
-    m_d->codeEdit.setText("");
-    m_d->codeEdit.setDisabled(true);
-    m_d->btnEditCode.setDisabled(true);
+    _d->targetEventCombobox.clear();
+    _d->nameEdit.setText("");
+    _d->popupItemNameTextBox.setText("");
+    _d->codeEdit.setText("");
+    _d->codeEdit.setDisabled(true);
+    _d->btnEditCode.setDisabled(true);
 }
 
 void EventsWidget::handleSelectionChange()
 {
-//    auto scene = FormScene::instance();
-//    auto selectedControls = scene->selectedControls();
+    auto scene = DesignManager::currentScene();
+    auto selectedControls = scene->selectedControls();
 
-//    clearList();
-//    if (selectedControls.size() != 1 ||
-//        selectedControls[0]->id().isEmpty()) {
-//        return;
-//    } else {
-//        m_d->popupItemNameTextBox.setText(selectedControls[0]->id());
-//        for (auto event : selectedControls[0]->events())
-//            m_d->targetEventCombobox.addItem(event);
-//    }
+    clearList();
+    if (selectedControls.size() != 1 ||
+        selectedControls[0]->id().isEmpty()) {
+        return;
+    } else {
+        _d->popupItemNameTextBox.setText(selectedControls[0]->id());
+        for (auto event : selectedControls[0]->events())
+            _d->targetEventCombobox.addItem(event);
+    }
 }
 
-void EventsWidget::detachEventsFor(Control* control)
+void EventsWidget::handleMainControlChange(Control* control)
 {
-    detachEventsFor(control->id());
+    if (control == nullptr)
+        return;
+
+    if (control->scene() == DesignManager::currentScene()) {
+        _mainControl = control;
+        if (_d->editMode)
+            _d->popupHideButtonClicked();
+        _d->eventsListWidget.clear();
+        clearList();
+        _d->fetchList();
+        handleSelectionChange();
+    }
 }
 
-void EventsWidget::detachEventsFor(const QString& id)
+void EventsWidget::handleDesignerModeChange()
 {
-//    auto saves = SaveManager::getEventSaves();
-//    for (auto key : saves.keys()) {
-//        auto save = saves[key].toObject();
-//        if (save[EVENT_TARGET_ID_LABEL] == id) {
-//            SaveManager::removeEventSave(key);
-//            for (int i=0; i < m_d->eventsListWidget.count(); i++) {
-//                if (m_d->eventsListWidget.item(i)->text() == key)
-//                    m_d->eventsListWidget.takeItem(i);
-//            }
-//        }
-//    }
-}
-
-void EventsWidget::clearAllEvents()
-{
-//    auto saves = SaveManager::getEventSaves();
-//    for (auto key : saves.keys()) {
-//        SaveManager::removeEventSave(key);
-//    }
-//    m_d->eventsListWidget.clear();
-//    clearList();
+    if (DesignManager::mode() == DesignManager::CodeEdit) {
+        if (_d->editMode)
+            _d->popupHideButtonClicked();
+        _d->eventsListWidget.clear();
+        clearList();
+        handleSelectionChange();
+    } else {
+        handleMainControlChange(DesignManager::currentScene()->mainControl());
+    }
 }
 
 bool EventsWidget::hasPopupOpen()
 {
-    return m_d->hasPopupOpen;
+    return _d->hasPopupOpen;
 }
+
+#include "eventswidget.moc"

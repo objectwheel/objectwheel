@@ -10,30 +10,28 @@ class Control;
 class EventsWidget : public QWidget
 {
 		Q_OBJECT
-
         friend class EventsWidgetPrivate;
 
 	public:
         explicit EventsWidget(QWidget *parent = 0);
         static EventsWidget* instance();
-        ~EventsWidget();
 
     public slots:
-        void detachEventsFor(const QString& id);
-        void detachEventsFor(Control*);
-        void clearAllEvents();
 		bool hasPopupOpen();
 
     protected slots:
         void clearList();
         void handleSelectionChange();
+        void handleMainControlChange(Control* control);
+        void handleDesignerModeChange();
 
-	signals:
+    signals:
 		void popupShowed();
 		void popupHid();
 
 	private:
-        static EventsWidgetPrivate* m_d;
+        static EventsWidgetPrivate* _d;
+        static QPointer<Control> _mainControl;
 };
 
 #endif // EVENTSWIDGET_H

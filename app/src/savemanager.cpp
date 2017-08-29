@@ -36,6 +36,7 @@ class SaveManagerPrivate : public QObject
         SaveManagerPrivate(SaveManager* parent);
         void setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const;
         QJsonValue property(const QByteArray& propertyData, const QString& property) const;
+        void flushId(const Control* control, const QString& id) const;
         void flushSuid(const Control* control, const QString& suid) const;
         bool isOwctrl(const QByteArray& propertyData) const;
 
@@ -89,6 +90,9 @@ class SaveManagerPrivate : public QObject
         // Searches in current project directory if given rootPath is empty
         QString findByUid(const QString& uid, const QString& rootPath = QString()) const;
 
+        // Returns root path (of parent) if given control has a parent control
+        QString parentDir(const Control* control) const;
+
 	public:
         SaveManager* parent = nullptr;
         ParserController parserController;
@@ -117,6 +121,15 @@ QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QS
 
     auto jobj = QJsonDocument::fromJson(propertyData).object();
     return jobj[property];
+}
+
+void SaveManagerPrivate::flushId(const Control* control, const QString& id) const
+{
+    auto propertyPath = control->dir() + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    setProperty(propertyData, TAG_ID, id);
+    wrfile(propertyPath, propertyData);
 }
 
 void SaveManagerPrivate::flushSuid(const Control* control, const QString& suid) const
@@ -340,6 +353,16 @@ QString SaveManagerPrivate::findByUid(const QString& uid, const QString& rootPat
     return QString();
 }
 
+QString SaveManagerPrivate::parentDir(const Control* control) const
+{
+    if (control->form() ||
+        control->dir().isEmpty() ||
+        !parent->isOwctrl(control->dir()))
+        return QString();
+
+    return dname(dname(control->dir()));
+}
+
 //!
 //! ********************** [SaveManager] **********************
 //!
@@ -474,6 +497,7 @@ bool SaveManager::addForm(Form* form)
 
     form->setUrl(formDir + separator() + DIR_THIS + separator() + "main.qml");
 
+    _d->flushId(form, form->id());
     _d->recalculateUids(form);
 
     emit _d->parent->databaseChanged();
@@ -489,7 +513,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     if (parentControl->dir().isEmpty())
         return false;
 
-    if (!isOwctrl(control->dir()))
+    if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
         return false;
 
     if (exists(control, suid))
@@ -506,6 +530,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
 
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
+    _d->flushId(control, control->id());
     _d->flushSuid(control, suid);
     _d->recalculateUids(control);
 
@@ -514,8 +539,45 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     return true;
 }
 
-// TODO: inprogress mi çalışmıyor?
-// TODO: Tüm toolları Owctrl'ye göre ayarla
+bool SaveManager::moveControl(Control* control, const Control* parentControl)
+{
+    if (_d->parentDir(control) == parentControl->dir())
+        return true;
+
+    if (control->id().isEmpty() || control->url().isEmpty())
+        return false;
+
+    if (parentControl->dir().isEmpty())
+        return false;
+
+    if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
+        return false;
+
+    if (suid(control->dir()) != suid(parentControl->dir()))
+        return false;
+
+    if (!exists(control, suid(control->dir())) ||
+        !exists(parentControl, suid(parentControl->dir())))
+        return false;
+
+    auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
+    auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
+
+    if (!mkdir(controlDir))
+        return false;
+
+    if (!cp(control->dir(), controlDir, true))
+        return false;
+
+    if (!rm(control->dir()))
+        return false;
+
+    control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
+
+    emit _d->parent->databaseChanged();
+
+    return true;
+}
 
 void SaveManager::setProperty(const Control* control, const QString& property, const QVariant& value)
 {
@@ -546,6 +608,43 @@ void SaveManager::removeProperty(const Control* control, const QString& property
     auto fileName = control->dir() + separator() + DIR_THIS +
                     separator() + "main.qml";
     ParserController::removeVariantProperty(fileName, property);
+}
+
+void SaveManager::setEvent(const Control* control, const SaveManager::Event& event)
+{
+    if (control->dir().isEmpty() || !isOwctrl(control->dir()))
+        return;
+
+    auto eventsPath = control->dir() + separator() + DIR_THIS +
+                      separator() + FILE_EVENTS;
+    auto eventsData = rdfile(eventsPath);
+
+    QJsonObject jobj;
+    jobj[TAG_EVENT_NAME] = event.name;
+    jobj[TAG_EVENT_CODE] = QString(QByteArray().insert(0, event.code).toBase64());
+    QJsonObject job1 = QJsonDocument::fromJson(eventsData).object();
+    job1[event.sign] = jobj;
+    wrfile(eventsPath, QJsonDocument(job1).toJson());
+}
+
+void SaveManager::updateEvent(const Control* control, const QString& sign, const SaveManager::Event& event)
+{
+    removeEvent(control, sign);
+    setEvent(control, event);
+}
+
+void SaveManager::removeEvent(const Control* control, const QString& sign)
+{
+    if (control->dir().isEmpty() || !isOwctrl(control->dir()))
+        return;
+
+    auto eventsPath = control->dir() + separator() + DIR_THIS +
+                      separator() + FILE_EVENTS;
+    auto eventsData = rdfile(eventsPath);
+
+    QJsonObject jobj = QJsonDocument::fromJson(eventsData).object();
+    jobj.remove(sign);
+    wrfile(eventsPath, QJsonDocument(jobj).toJson());
 }
 
 bool SaveManager::inprogress()

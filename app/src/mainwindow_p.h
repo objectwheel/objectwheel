@@ -75,7 +75,6 @@ class MainWindowPrivate
         DesignManager* designManager;
 
         MainWindowPrivate(MainWindow* uparent);
-        ~MainWindowPrivate();
         void setupUi(); // setupUi
 		void showAdderArea();
 		void hideAdderArea();
@@ -84,41 +83,6 @@ class MainWindowPrivate
 MainWindowPrivate::MainWindowPrivate(MainWindow* uparent)
 	: parent(uparent)
 {
-}
-
-MainWindowPrivate::~MainWindowPrivate()
-{
-    delete designManager;
-    delete settleWidget;
-    delete qmlEditor;
-    delete aboutButton;
-    delete buildsScreen;
-    delete aboutWidget;
-    delete formsWidget;
-    delete eventsWidget;
-    delete bindingWidget;
-    delete propertiesWidget;
-    delete toolBoxNameBox;
-    delete toolboxUrlBox;
-    delete toolboxAdderAreaEditingLayout;
-    delete toolboxImportButton;
-    delete toolboxExportButton;
-    delete toolboxResetButton;
-    delete toolboxRemoveButton;
-    delete toolboxEditButton;
-    delete toolboxAddButton;
-    delete sceneList;
-    delete toolboxList;
-    delete toolboxAdderAreaButtonSideHLay;
-    delete toolboxAdderAreaVLay;
-    delete toolboxAdderAreaWidget;
-    delete toolboxVLay;
-    delete toolboxWidget;
-    delete titleBar;
-    delete verticalLayout;
-    delete loginScreen;
-    delete projectsScreen;
-    delete centralWidget;
 }
 
 void MainWindowPrivate::setupUi()
@@ -147,7 +111,7 @@ void MainWindowPrivate::setupUi()
     settleWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     verticalLayout->addWidget(settleWidget);
 
-    designManager = new DesignManager;
+    designManager = new DesignManager(parent);
     designManager->setSettleWidget(settleWidget);
 
 	toolboxList = new ListWidget(centralWidget);

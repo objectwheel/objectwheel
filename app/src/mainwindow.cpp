@@ -84,10 +84,6 @@ void MainWindow::SetupGui()
 	/* Prepare Properties Widget */
 //	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
 //	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
-//	connect(this, SIGNAL(selectionHided()), m_d->bindingWidget, SLOT(clearList()));
-//    connect(this, SIGNAL(selectionHided()), m_d->eventsWidget, SLOT(clearList()));
-//    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->bindingWidget, SLOT(selectItem(QObject*const)));
-//    connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->eventsWidget, SLOT(selectItem(QObject*const)));
 
 	/* Init Left Container */
 	QVariant toolboxVariant;

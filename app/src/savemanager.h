@@ -12,7 +12,7 @@
 #define DIR_QRC_OWDB ":/resources/qmls/owdb"
 #define FILE_EVENTS "_events.json"
 #define FILE_PROPERTIES "_properties.json"
-#define TAG_TARGET_EVENT "event"
+#define TAG_EVENT_NAME "name"
 #define TAG_EVENT_CODE "code"
 #define TAG_ID "id"
 #define TAG_UID "_uid"
@@ -39,8 +39,8 @@ class SaveManager : public QObject
 
         struct Event {
                 QString sign;
-                QString methodName;
-                QString methodCode;
+                QString name;
+                QString code;
         };
 
         explicit SaveManager(QObject *parent = 0);
@@ -58,6 +58,7 @@ class SaveManager : public QObject
         static bool addForm(Form* form);
         static void removeForm(const Form* form);
         static bool addControl(Control* control, const Control* parentControl, const QString& suid);
+        static bool moveControl(Control* control, const Control* parentControl);
         static void removeControl(const Control* control);
 
         static void setProperty(const Control* control, const QString& property, const QVariant& value);
