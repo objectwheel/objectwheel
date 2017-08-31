@@ -41,6 +41,12 @@ class SaveManager : public QObject
                 QString sign;
                 QString name;
                 QString code;
+                explicit operator bool() const
+                {
+                    return (!sign.isEmpty() &&
+                            !name.isEmpty() &&
+                            !code.isEmpty());
+                }
         };
 
         explicit SaveManager(QObject *parent = 0);
@@ -50,6 +56,7 @@ class SaveManager : public QObject
         static void exposeProject();
         static bool execProject();
 
+        static QString basePath();
         static bool isOwctrl(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
@@ -65,8 +72,12 @@ class SaveManager : public QObject
         static void removeProperty(const Control* control, const QString& property);
 
         static void setEvent(const Control* control, const Event& event);
+        static void setEvent(const QString& rootPath, const Event& event);
         static void updateEvent(const QString& suid, const QString& sign, const Event& event);
         static void removeEvent(const QString& suid, const QString& sign);
+        static Event event(const QString& suid, const QString& sign, const QString& rootPath = QString());
+        static QString idOfEventOwner(const QString& suid, const QString& sign, const QString& rootPath = QString());
+        static QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString());
 
 //        static void setBinding(const Control* control, const Binding& binding);
 //        static void updateBinding(const Control* control, const QString& sign, const Binding& binding);

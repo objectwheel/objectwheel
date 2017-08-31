@@ -272,21 +272,24 @@ void EventsWidgetPrivate::editButtonClicked()
     editMode = true;
     editingEventName = eventsListWidget.currentItem()->text();
 
-//    auto issuerEvent = SaveManager::getEventSaves()[editingEventName].toObject();
-//    if (issuerEvent.isEmpty())
-//        return;
+    auto issuerEvent = SaveManager::event(SaveManager::uid(DesignManager::currentScene()->mainControl()->dir()),
+                                          editingEventName, DesignManager::currentScene()->mainControl()->dir());
+    auto issuerEventId = SaveManager::idOfEventOwner(SaveManager::uid(DesignManager::currentScene()->mainControl()->dir()),
+                                                     editingEventName, DesignManager::currentScene()->mainControl()->dir());
+    if (!issuerEvent || issuerEventId.isEmpty())
+        return;
 
-//    auto controls = FormScene::currentForm()->childControls();
-//    controls << FormScene::currentForm();
+    auto controls = DesignManager::currentScene()->mainControl()->childControls();
+    controls << DesignManager::currentScene()->mainControl();
 
-//    FormScene::instance()->clearSelection();
-//    for (auto control : controls)
-//        if (control->id() == issuerEvent[EVENT_TARGET_ID_LABEL].toString())
-//            control->setSelected(true);
+    DesignManager::currentScene()->clearSelection();
+    for (auto control : controls)
+        if (control->id() == issuerEventId)
+            control->setSelected(true);
 
     nameEdit.setText(editingEventName);
-//    targetEventCombobox.setCurrentItem(issuerEvent[EVENT_TARGET_EVENTNAME_LABEL].toString());
-//    codeEdit.setText(QByteArray::fromBase64(QByteArray().insert(0, issuerEvent[EVENT_EVENT_CODE_LABEL].toString())));
+    targetEventCombobox.setCurrentItem(issuerEvent.name);
+    codeEdit.setText(QByteArray::fromBase64(QByteArray().insert(0, issuerEvent.code)));
 
     hasPopupOpen = true;
     emit parent->popupShowed();
@@ -326,16 +329,19 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 
     eventsListWidget.addItem(eventName);
 
-//    SaveManager::EventInf einf;
-//    einf.eventName = eventName;
-//    einf.targetId = popupItemNameTextBox.text();
-//    einf.targetEventname = targetEventCombobox.currentItem();
-//    einf.eventCode = codeEdit.text();
+    SaveManager::Event event;
+    event.name = eventName;
+    event.name = targetEventCombobox.currentItem();
+    event.code = codeEdit.text();
 
-//    if (editMode)
-//        SaveManager::changeEventSave(editingEventName, einf);
-//    else
-//        SaveManager::addEventSave(einf);
+    auto controlPath = SaveManager::pathOfId(SaveManager::uid(DesignManager::currentScene()->mainControl()->dir()),
+                                             popupItemNameTextBox.text(), DesignManager::currentScene()->mainControl()->dir());
+
+    if (editMode)
+        SaveManager::updateEvent(SaveManager::uid(DesignManager::currentScene()->mainControl()->dir()),
+                                 editingEventName, event);
+    else
+        SaveManager::setEvent(controlPath, event);
 
     parent->clearList();
     parent->handleSelectionChange();
@@ -345,26 +351,25 @@ void EventsWidgetPrivate::popupOkButtonClicked()
 
 void EventsWidgetPrivate::btnEditCodeClicked()
 {
-//    static QMetaObject::Connection conn;
-//    auto scene = FormScene::instance();
-//    auto selectedControls = scene->selectedControls();
+    static QMetaObject::Connection conn;
+    auto selectedControls = DesignManager::currentScene()->selectedControls();
 
-//    if (selectedControls.size() != 1 ||
-//        selectedControls[0]->id().isEmpty())
-//        return;
+    if (selectedControls.size() != 1 ||
+        selectedControls[0]->id().isEmpty())
+        return;
 
-//    if (codeEdit.text().isEmpty()) {
-//        QmlEditor::showTextOnly("// " + selectedControls[0]->id() + ".on" +
-//                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
-//    } else {
-//        QmlEditor::showTextOnly(codeEdit.text());
-//    }
-//    QmlEditor::instance()->raise();
-//    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
-//        codeEdit.setText(text);
-//        QObject::disconnect(conn);
-//        QmlEditor::hide();
-//    });
+    if (codeEdit.text().isEmpty()) {
+        QmlEditor::showTextOnly("// " + selectedControls[0]->id() + ".on" +
+                targetEventCombobox.currentItem().left(1).toUpper() + targetEventCombobox.currentItem().mid(1) + ":\n");
+    } else {
+        QmlEditor::showTextOnly(codeEdit.text());
+    }
+    QmlEditor::instance()->raise();
+    conn = QObject::connect(QmlEditor::instance(), (void(QmlEditor::*)(QString&))(&QmlEditor::savedTextOnly), [=](QString& text) {
+        codeEdit.setText(text);
+        QObject::disconnect(conn);
+        QmlEditor::hide();
+    });
 }
 
 void EventsWidgetPrivate::ensureComboboxVisible(const QObject* obj)
