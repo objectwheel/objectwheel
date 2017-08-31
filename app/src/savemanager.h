@@ -65,8 +65,8 @@ class SaveManager : public QObject
         static void removeProperty(const Control* control, const QString& property);
 
         static void setEvent(const Control* control, const Event& event);
-        static void updateEvent(const Control* control, const QString& sign, const Event& event);
-        static void removeEvent(const Control* control, const QString& sign);
+        static void updateEvent(const QString& suid, const QString& sign, const Event& event);
+        static void removeEvent(const QString& suid, const QString& sign);
 
 //        static void setBinding(const Control* control, const Binding& binding);
 //        static void updateBinding(const Control* control, const QString& sign, const Binding& binding);

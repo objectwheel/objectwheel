@@ -229,7 +229,7 @@ void EventsWidgetPrivate::removeButtonClicked()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-//            SaveManager::removeEventSave(connectionName);
+            SaveManager::removeEvent(SaveManager::uid(DesignManager::currentScene()->mainControl()->dir()), connectionName);
             delete eventsListWidget.takeItem(eventsListWidget.currentRow());
             break;
         } default: {
