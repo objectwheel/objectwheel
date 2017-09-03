@@ -6,8 +6,6 @@
 class FormsWidgetPrivate;
 class QQuickItem;
 class QQmlContext;
-class BindingWidget;
-class EventsWidget;
 
 class FormsWidget : public QWidget
 {
@@ -20,9 +18,6 @@ class FormsWidget : public QWidget
         ~FormsWidget();
 
         static void setCurrentForm(int index);
-        static void addFormWithoutSave(QString& name);
-        static void changeFormWithoutSave(const QString& from, QString& to);
-        static void removeFormWithoutSave(const QString& name);
 
 	private:
         static FormsWidgetPrivate* m_d;

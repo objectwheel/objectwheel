@@ -10,10 +10,7 @@
 #define DIR_OWDB "owdb"
 #define DIR_MAINFORM "1"
 #define DIR_QRC_OWDB ":/resources/qmls/owdb"
-#define FILE_EVENTS "_events.json"
 #define FILE_PROPERTIES "_properties.json"
-#define TAG_EVENT_NAME "name"
-#define TAG_EVENT_CODE "code"
 #define TAG_ID "id"
 #define TAG_UID "_uid"
 #define TAG_SUID "_suid"
@@ -30,25 +27,6 @@ class SaveManager : public QObject
         Q_DISABLE_COPY(SaveManager)
 
     public:
-        struct Binding {
-                QString sing;
-                Control* source;
-                QString sourceProperty;
-                QString targetProperty;
-        };
-
-        struct Event {
-                QString sign;
-                QString name;
-                QString code;
-                explicit operator bool() const
-                {
-                    return (!sign.isEmpty() &&
-                            !name.isEmpty() &&
-                            !code.isEmpty());
-                }
-        };
-
         explicit SaveManager(QObject *parent = 0);
         static SaveManager* instance();
 
@@ -71,28 +49,7 @@ class SaveManager : public QObject
         static void setProperty(const Control* control, const QString& property, const QVariant& value);
         static void removeProperty(const Control* control, const QString& property);
 
-        static void setEvent(const Control* control, const Event& event);
-        static void setEvent(const QString& rootPath, const Event& event);
-        static void updateEvent(const QString& suid, const QString& sign, const Event& event);
-        static void removeEvent(const QString& suid, const QString& sign);
-        static Event event(const QString& suid, const QString& sign, const QString& rootPath = QString());
-        static QString idOfEventOwner(const QString& suid, const QString& sign, const QString& rootPath = QString());
         static QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString());
-
-//        static void setBinding(const Control* control, const Binding& binding);
-//        static void updateBinding(const Control* control, const QString& sign, const Binding& binding);
-//        static void removeBinding(const Control* control, const QString& sign);
-
-//		static QStringList saves();
-//      static QStringList childSaves(const QString& id);
-//      static void removeChildSavesOnly(const QString& id);
-//		static QString saveDirectory(const QString& id);
-//      static QString savesDirectory();
-
-//		static QJsonObject getBindingSaves();
-//      static QJsonObject getEventSaves();
-//		static QJsonObject getParentalRelationships();
-//      static QJsonArray getFormOrders();
 
       static bool inprogress();
 

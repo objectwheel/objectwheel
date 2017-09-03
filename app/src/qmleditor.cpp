@@ -21,8 +21,6 @@
 #include <QFileInfo>
 #include <QDir>
 #include <savemanager.h>
-#include <bindingwidget.h>
-#include <eventswidget.h>
 #include <delayer.h>
 
 #define DURATION 400
@@ -34,8 +32,6 @@ class QmlEditorPrivate
 	public:
 		QmlEditor* parent;
 		QQuickItem* rootItem;
-		BindingWidget* bindingWidget;
-        EventsWidget* eventWidget;
         QVBoxLayout mainLayout;
         QQuickWidget quickWidget;
 		FlatButton minimizeButton;
@@ -143,9 +139,6 @@ void QmlEditorPrivate::saved(const QString& qmlPath)
 	if (index < 0) return;
 	itemList->removeAt(index);
 	urlList->removeAt(index);
-//	SaveManager::removeParentalRelationship(dashboardRootContext->nameForObject(lastSelectedItem));
-//    bindingWidget->detachBindingsFor(lastSelectedItem);
-//    eventWidget->detachEventsFor(lastSelectedItem);
 
 	QQmlIncubator incubator;
 	component.create(incubator, dashboardRootContext);
@@ -360,16 +353,6 @@ void QmlEditor::setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const 
 void QmlEditor::setRootContext(QQmlContext* const context)
 {
 	m_d->dashboardRootContext = context;
-}
-
-void QmlEditor::setBindingWidget(BindingWidget* bindingWidget)
-{
-    m_d->bindingWidget = bindingWidget;
-}
-
-void QmlEditor::setEventWidget(EventsWidget* eventWidget)
-{
-    m_d->eventWidget = eventWidget;
 }
 
 void QmlEditor::selectItem(QObject* const item)

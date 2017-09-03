@@ -104,26 +104,6 @@ QRadioButton::indicator { \
 	border-image: url(:/resources/images/propertiesbutton.png); \
 }"
 
-#define CSS_BINDING_BUTTON "\
-QRadioButton::indicator { \
-	width: %1px; \
-	height: %1px; \
-} QRadioButton::indicator::checked { \
-	border-image: url(:/resources/images/bindingbuttonfilled.png); \
-} QRadioButton::indicator::unchecked { \
-	border-image: url(:/resources/images/bindingbutton.png); \
-}"
-
-#define CSS_EVENTS_BUTTON "\
-QRadioButton::indicator { \
-    width: %1px; \
-    height: %1px; \
-} QRadioButton::indicator::checked { \
-    border-image: url(:/resources/images/eventsbuttonfilled.png); \
-} QRadioButton::indicator::unchecked { \
-    border-image: url(:/resources/images/eventsbutton.png); \
-}"
-
 #define CSS_FORMS_BUTTON "\
 QRadioButton::indicator { \
 	width: %1px; \
@@ -134,7 +114,7 @@ QRadioButton::indicator { \
     border-image: url(:/resources/images/formsbutton.png); \
 }"
 
-#define CSS_BINDING_LISTWIDGET \
+#define CSS_FORMS_LISTWIDGET \
 "QListView {\
     background:#52616D;\
 	padding: %1px;\
@@ -161,10 +141,8 @@ QString CSS::DesignerToolbar;
 QString CSS::DesignerToolbarV;
 QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
-QString CSS::BindingButton;
-QString CSS::EventsButton;
 QString CSS::FormsButton;
-QString CSS::BindingListWidget;
+QString CSS::FormsListWidget;
 
 void CSS::init()
 {
@@ -194,15 +172,9 @@ void CSS::init()
 	/* PropertiesButton */
     PropertiesButton = QString(CSS_PROPERTIES_BUTTON).arg(fit(20));
 
-	/* BindingButton */
-    BindingButton = QString(CSS_BINDING_BUTTON).arg(fit(20));
-
-    /* EventsButton */
-    EventsButton = QString(CSS_EVENTS_BUTTON).arg(fit(20));
-
     /* FormsButton */
     FormsButton = QString(CSS_FORMS_BUTTON).arg(fit(20));
 
-	/* BindingListWidget */
-	BindingListWidget = QString(CSS_BINDING_LISTWIDGET).arg(fit(5)).arg(fit(2));
+    /* FormsListWidget */
+    FormsListWidget = QString(CSS_FORMS_LISTWIDGET).arg(fit(5)).arg(fit(2));
 }

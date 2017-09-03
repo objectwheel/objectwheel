@@ -19,10 +19,8 @@ class CSS
         static QString DesignerToolbarV;
 		static QString ToolboxButton;
 		static QString PropertiesButton;
-		static QString BindingButton;
-        static QString EventsButton;
         static QString FormsButton;
-		static QString BindingListWidget;
+        static QString FormsListWidget;
 };
 
 #endif // CSS_H

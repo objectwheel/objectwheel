@@ -35,8 +35,6 @@
         <file>resources/images/propertiesbuttonfilled.png</file>
         <file>resources/tools/WebSurfer.zip</file>
         <file>resources/tools/SpeakSurf.zip</file>
-        <file>resources/images/bindingbuttonfilled.png</file>
-        <file>resources/images/bindingbutton.png</file>
         <file>resources/images/down-arrow.png</file>
         <file>resources/images/plug-up.png</file>
         <file>resources/images/plug-down.png</file>
@@ -199,8 +197,6 @@
         <file>resources/tools/tools_copy.json</file>
         <file>resources/images/sign_warning@2x.png</file>
         <file>resources/images/delete-icon@2x.png</file>
-        <file>resources/images/eventsbutton.png</file>
-        <file>resources/images/eventsbuttonfilled.png</file>
         <file>resources/images/script.png</file>
         <file>resources/images/owicon.png</file>
         <file>resources/images/owicon@2x.png</file>

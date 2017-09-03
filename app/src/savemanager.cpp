@@ -4,11 +4,7 @@
 #include <parsercontroller.h>
 #include <formswidget.h>
 #include <mainwindow.h>
-#include <bindingwidget.h>
-#include <eventswidget.h>
 #include <qmleditor.h>
-#include <eventswidget.h>
-#include <bindingwidget.h>
 #include <control.h>
 #include <designmanager.h>
 
@@ -36,8 +32,6 @@ class SaveManagerPrivate : public QObject
         SaveManagerPrivate(SaveManager* parent);
         void setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const;
         QJsonValue property(const QByteArray& propertyData, const QString& property) const;
-        using QObject::event;
-        QJsonValue event(const QByteArray& eventsData, const QString& sign) const;
         void flushId(const Control* control, const QString& id) const;
         void flushSuid(const Control* control, const QString& suid) const;
         bool isOwctrl(const QByteArray& propertyData) const;
@@ -76,7 +70,6 @@ class SaveManagerPrivate : public QObject
         int biggestDir(const QString& basePath) const;
 
         // Recalculates all uids belongs to given control and its children (all).
-        // All events/bindings/suids are updated too.
         // Both database and in-memory data are updated.
         void recalculateUids(Control* control) const;
 
@@ -98,10 +91,6 @@ class SaveManagerPrivate : public QObject
         // Searches in current project directory if given rootPath is empty
         // Only suid scope controls in the given rootPath are returned
         QString findById(const QString& suid, const QString& id, const QString& rootPath = QString()) const;
-
-        // Searches inside the suid scope
-        // Returns the rootPath of a control that has the given event sign
-        QString findByEventSign(const QString& suid, const QString& sign, const QString& rootPath = QString()) const;
 
         // Returns root path (of parent) if given control has a parent control
         QString parentDir(const Control* control) const;
@@ -134,15 +123,6 @@ QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QS
 
     auto jobj = QJsonDocument::fromJson(propertyData).object();
     return jobj[property];
-}
-
-QJsonValue SaveManagerPrivate::event(const QByteArray& eventsData, const QString& sign) const
-{
-    if (eventsData.isEmpty())
-        return QJsonValue();
-
-    auto jobj = QJsonDocument::fromJson(eventsData).object();
-    return jobj[sign];
 }
 
 void SaveManagerPrivate::flushId(const Control* control, const QString& id) const
@@ -313,8 +293,6 @@ void SaveManagerPrivate::recalculateUids(Control* control) const
 
     properties << fps(FILE_PROPERTIES, control->dir());
     paths << properties;
-    paths << fps(FILE_EVENTS, control->dir());
-    //TODO: Bindings
 
     for (auto pfile : properties) {
         auto propertyData = rdfile(pfile);
@@ -400,38 +378,6 @@ QString SaveManagerPrivate::findById(const QString& suid, const QString& id, con
         auto _id = property(propertyData, TAG_ID).toString();
 
         if (_id == id)
-            return dname(dname(path));
-    }
-
-    return QString();
-}
-
-QString SaveManagerPrivate::findByEventSign(const QString& suid, const QString& sign, const QString& rootPath) const
-{
-    QString baseDir;
-    if (rootPath.isEmpty()) {
-        auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-
-        if (projectDir.isEmpty())
-            return QString();
-
-        baseDir = projectDir;
-    } else {
-        baseDir = rootPath;
-    }
-
-    for (auto path : fps(FILE_EVENTS, baseDir)) {
-        auto eventsData = rdfile(path);
-        auto propertyData = rdfile(dname(path) + separator() + FILE_PROPERTIES);
-
-        if (!isOwctrl(propertyData) ||
-            (parent->uid(dname(dname(path))) != suid &&
-             parent->suid(dname(dname(path))) != suid))
-            continue;
-
-        auto _event = event(eventsData, sign);
-
-        if (!_event.isUndefined())
             return dname(dname(path));
     }
 
@@ -703,96 +649,6 @@ void SaveManager::removeProperty(const Control* control, const QString& property
     auto fileName = control->dir() + separator() + DIR_THIS +
                     separator() + "main.qml";
     ParserController::removeVariantProperty(fileName, property);
-}
-
-void SaveManager::setEvent(const Control* control, const SaveManager::Event& event)
-{
-    setEvent(control->dir(), event);
-}
-
-void SaveManager::setEvent(const QString& rootPath, const SaveManager::Event& event)
-{
-    if (!_d->findByEventSign(suid(rootPath), event.sign).isEmpty())
-        return;
-
-    if (rootPath.isEmpty() || !isOwctrl(rootPath))
-        return;
-
-    auto eventsPath = rootPath + separator() + DIR_THIS +
-                      separator() + FILE_EVENTS;
-    auto eventsData = rdfile(eventsPath);
-
-    QJsonObject jobj;
-    jobj[TAG_EVENT_NAME] = event.name;
-    jobj[TAG_EVENT_CODE] = QString(QByteArray().insert(0, event.code).toBase64());
-    QJsonObject job1 = QJsonDocument::fromJson(eventsData).object();
-    job1[event.sign] = jobj;
-    wrfile(eventsPath, QJsonDocument(job1).toJson());
-}
-
-void SaveManager::updateEvent(const QString& suid, const QString& sign, const SaveManager::Event& event)
-{
-    auto rootPath = _d->findByEventSign(suid, sign);
-
-    if (rootPath.isEmpty())
-        return;
-
-    removeEvent(suid, sign);
-    setEvent(rootPath, event);
-}
-
-void SaveManager::removeEvent(const QString& suid, const QString& sign)
-{
-    auto rootPath = _d->findByEventSign(suid, sign);
-
-    if (rootPath.isEmpty() || !isOwctrl(rootPath))
-        return;
-
-    auto eventsPath = rootPath + separator() + DIR_THIS +
-                      separator() + FILE_EVENTS;
-    auto eventsData = rdfile(eventsPath);
-
-    QJsonObject jobj = QJsonDocument::fromJson(eventsData).object();
-    jobj.remove(sign);
-    wrfile(eventsPath, QJsonDocument(jobj).toJson());
-}
-
-SaveManager::Event SaveManager::event(const QString& suid, const QString& sign, const QString& rootPath)
-{
-    Event event;
-    auto path = _d->findByEventSign(suid, sign, rootPath);
-
-    if (path.isEmpty())
-        return event;
-
-    auto eventsPath = path + separator() + DIR_THIS +
-                      separator() + FILE_EVENTS;
-    auto eventsData = rdfile(eventsPath);
-
-    auto jobj = QJsonDocument::fromJson(eventsData).object()[sign].toObject();
-
-    if (jobj.isEmpty())
-        return event;
-
-    event.sign = sign;
-    event.name = jobj[TAG_EVENT_NAME].toString();
-    event.code = jobj[TAG_EVENT_CODE].toString();
-
-    return event;
-}
-
-QString SaveManager::idOfEventOwner(const QString& suid, const QString& sign, const QString& rootPath)
-{
-    auto path = _d->findByEventSign(suid, sign, rootPath);
-
-    if (path.isEmpty())
-        return QString();
-
-    auto propertyPath = path + separator() + DIR_THIS +
-                        separator() + FILE_PROPERTIES;
-    auto propertyData = rdfile(propertyPath);
-
-    return _d->property(propertyData, TAG_ID).toString();
 }
 
 QString SaveManager::pathOfId(const QString& suid, const QString& id, const QString& rootPath)

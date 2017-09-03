@@ -14,8 +14,6 @@
 #include <flatbutton.h>
 #include <listwidget.h>
 #include <propertieswidget.h>
-#include <bindingwidget.h>
-#include <eventswidget.h>
 #include <titlebar.h>
 #include <about.h>
 #include <qmleditor.h>
@@ -64,8 +62,6 @@ class MainWindowPrivate
 		LineEdit* toolboxUrlBox;
 		LineEdit* toolBoxNameBox;
         PropertiesWidget* propertiesWidget;
-		BindingWidget* bindingWidget;
-        EventsWidget* eventsWidget;
         FormsWidget* formsWidget;
 		About* aboutWidget;
         BuildsScreen* buildsScreen;
@@ -315,14 +311,6 @@ void MainWindowPrivate::setupUi()
 	propertiesWidget = new PropertiesWidget(centralWidget);
 	propertiesWidget->setObjectName(QStringLiteral("propertiesWidget"));
 	propertiesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-	bindingWidget = new BindingWidget(centralWidget);
-	bindingWidget->setObjectName(QStringLiteral("bindingWidget"));
-	bindingWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    eventsWidget = new EventsWidget(centralWidget);
-    eventsWidget->setObjectName(QStringLiteral("eventsWidget"));
-    eventsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     formsWidget = new FormsWidget(centralWidget);
     formsWidget->setObjectName(QStringLiteral("formsWidget"));

@@ -11,7 +11,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/css.h \
                              $$PWD/switch.h \
                              $$PWD/container.h \
-                             $$PWD/bindingwidget.h \
                              $$PWD/lineedit.h \
                              $$PWD/combobox.h \
                              $$PWD/scrollarea.h \
@@ -29,7 +28,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/projectsscreen.h \
                              $$PWD/loginscreen.h \
                              $$PWD/buildsscreen.h \
-                             $$PWD/eventswidget.h \
                              $$PWD/delayer.h \
                              $$PWD/designmanager.h \
                              $$PWD/control.h \
@@ -55,7 +53,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/css.cpp \
                              $$PWD/switch.cpp \
                              $$PWD/container.cpp \
-                             $$PWD/bindingwidget.cpp \
                              $$PWD/lineedit.cpp \
                              $$PWD/combobox.cpp \
                              $$PWD/scrollarea.cpp \
@@ -73,7 +70,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/projectsscreen.cpp \
                              $$PWD/loginscreen.cpp \
                              $$PWD/buildsscreen.cpp \
-                             $$PWD/eventswidget.cpp \
                              $$PWD/delayer.cpp \
                              $$PWD/designmanager.cpp \
                              $$PWD/control.cpp \

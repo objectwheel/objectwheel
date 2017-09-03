@@ -90,17 +90,11 @@ void MainWindow::SetupGui()
 	toolboxVariant.setValue<QWidget*>(m_d->toolboxWidget);
 	QVariant propertiesVariant;
 	propertiesVariant.setValue<QWidget*>(m_d->propertiesWidget);
-	QVariant bindingVariant;
-	bindingVariant.setValue<QWidget*>(m_d->bindingWidget);
-    QVariant eventsVariant;
-    eventsVariant.setValue<QWidget*>(m_d->eventsWidget);
     QVariant formsVariant;
     formsVariant.setValue<QWidget*>(m_d->formsWidget);
 	Container* leftContainer = new Container;
 	leftContainer->addWidget(m_d->toolboxWidget);
 	leftContainer->addWidget(m_d->propertiesWidget);
-	leftContainer->addWidget(m_d->bindingWidget);
-    leftContainer->addWidget(m_d->eventsWidget);
     leftContainer->addWidget(m_d->formsWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -141,30 +135,6 @@ void MainWindow::SetupGui()
 	connect(propertiesButton, SIGNAL(clicked(bool)), propertiesButtonAction, SLOT(trigger()));
 	connect(propertiesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
-	QRadioButton* bindingButton = new QRadioButton;
-	bindingButton->setCursor(Qt::PointingHandCursor);
-	bindingButton->setStyleSheet(CSS::BindingButton);
-	bindingButton->setCheckable(true);
-	QWidgetAction* bindingButtonAction = new QWidgetAction(this);
-	bindingButtonAction->setDefaultWidget(bindingButton);
-	bindingButtonAction->setData(bindingVariant);
-	bindingButtonAction->setCheckable(true);
-	leftToolbar->addAction(bindingButtonAction);
-	connect(bindingButton, SIGNAL(clicked(bool)), bindingButtonAction, SLOT(trigger()));
-	connect(bindingButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
-
-    QRadioButton* eventsButton = new QRadioButton;
-    eventsButton->setCursor(Qt::PointingHandCursor);
-    eventsButton->setStyleSheet(CSS::EventsButton);
-    eventsButton->setCheckable(true);
-    QWidgetAction* eventsButtonAction = new QWidgetAction(this);
-    eventsButtonAction->setDefaultWidget(eventsButton);
-    eventsButtonAction->setData(eventsVariant);
-    eventsButtonAction->setCheckable(true);
-    leftToolbar->addAction(eventsButtonAction);
-    connect(eventsButton, SIGNAL(clicked(bool)), eventsButtonAction, SLOT(trigger()));
-    connect(eventsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
-
     QRadioButton* formsButton = new QRadioButton;
     formsButton->setCursor(Qt::PointingHandCursor);
     formsButton->setStyleSheet(CSS::FormsButton);
@@ -180,39 +150,7 @@ void MainWindow::SetupGui()
 	QWidget* leftMenuWidget = new QWidget;
 	leftMenuWidget->setObjectName("leftMenuWidget");
     leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-	connect(m_d->bindingWidget, &BindingWidget::popupShowed, [=] {
-        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
-	});
-	connect(m_d->bindingWidget, &BindingWidget::popupHid, [=] {
-        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-	});
-    connect(m_d->eventsWidget, &EventsWidget::popupShowed, [=] {
-        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
-    });
-    connect(m_d->eventsWidget, &EventsWidget::popupHid, [=] {
-        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-    });
-	connect(toolboxButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-	});
-	connect(propertiesButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-	});
-    connect(formsButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-        leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-	});
-	connect(bindingButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-		if (m_d->bindingWidget->hasPopupOpen())
-            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
-        else
-            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-	});
-    connect(eventsButtonAction, (void(QWidgetAction::*)(bool))(&QWidgetAction::triggered), [=] {
-        if (m_d->eventsWidget->hasPopupOpen())
-            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#0D74C8;}");
-        else
-            leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-    });
+
 	QVBoxLayout* leftMenuLayout = new QVBoxLayout(leftMenuWidget);
 	leftMenuLayout->setContentsMargins(0, 0, 0, 0);
 	leftMenuLayout->setSpacing(fit(8));
@@ -224,19 +162,10 @@ void MainWindow::SetupGui()
 //	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
 //    m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
 
-	m_d->centralWidget->installEventFilter(this);
-
-//    QTimer::singleShot(3000, [=] {
-//        auto form = new Form("qrc:/resources/qmls/mainForm/t/main.qml");
-//        DesignManager::formScene()->addForm(form);
-//    });
-
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
 //	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
 //	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
-    m_d->qmlEditor->setBindingWidget(m_d->bindingWidget);
-    m_d->qmlEditor->setEventWidget(m_d->eventsWidget);
 //	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
 //	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 
@@ -415,8 +344,6 @@ void MainWindow::clearStudio()
 //	QString page1Name = "page1";
 //	m_d->formsWidget->changeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentWindow), page1Name);
 
-//	m_d->bindingWidget->clearAllBindings();
-//    m_d->eventsWidget->clearAllEvents();
 //	m_d->m_Items.clear();
 //	m_d->m_ItemUrls.clear();
 //	HideSelectionTools();
@@ -599,8 +526,6 @@ void MainWindow::toolboxRemoveButtonClicked()
 //							int j = m_d->m_Items.indexOf(item);
 //							m_d->m_Items.removeOne(item);
 //							m_d->m_ItemUrls.removeAt(j);
-////							m_d->bindingWidget->detachBindingsFor(item);
-////                            m_d->eventsWidget->detachEventsFor(item);
 //							item->deleteLater();
 //						}
 //					}
@@ -671,8 +596,6 @@ void MainWindow::toolboxResetButtonClicked()
 //							m_d->designWidget->rootContext()->nameForObject(item), 0);
 //				item->deleteLater();
 //			}
-//			m_d->bindingWidget->clearAllBindings();
-//            m_d->eventsWidget->clearAllEvents();
 //			m_d->m_Items.clear();
 //			m_d->m_ItemUrls.clear();
 //			HideSelectionTools();
@@ -753,24 +676,6 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 	loop.exec();
 	return pixmap;
-}
-
-bool MainWindow::addControlWithoutSave(const QUrl& url, const QString& parent)
-{
-//    auto control = new Control(url);
-
-//    auto controls = FormScene::currentForm()->childControls();
-//    for (auto form : FormScene::forms())
-//        controls << form;
-//    for (auto ctrl : controls)
-//        if (ctrl->id() == parent) {
-//            control->setParentItem(ctrl);
-//            control->refresh();
-//            return true;
-//        }
-
-//    control->deleteLater();
-    return false;
 }
 
 MainWindow::~MainWindow()
