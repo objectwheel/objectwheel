@@ -19,7 +19,7 @@ struct PreviewResult {
         QString id;
         QString uid;
         QList<QString> events;
-        QMap<QString, QVariant::Type> properties;
+        QMap<QString, QVariant> properties;
         bool clip;
         bool gui;
         int zValue;

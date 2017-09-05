@@ -2,43 +2,35 @@
 #define PROPERTYITEM_H
 
 #include <QWidget>
-#include <QMetaProperty>
+#include <QPointer>
 
-class QQuickItem;
-class QQmlContext;
+class Control;
 
 class PropertyItem : public QWidget
 {
-		Q_OBJECT
+        Q_OBJECT
+    private:
+        QPointer<Control> _control;
+        QString _property;
+        bool _valid;
 
-	private:
-		QPair<QMetaProperty, QObject*> m_Property;
-		bool m_Valid;
-		QList<QQuickItem*>* m_Items;
-        QList<QUrl>* m_UrlList;
+    public:
+        explicit PropertyItem(Control* control, const QString& property, QWidget *parent = 0);
+        Control* control() const;
+        QString property() const;
+        bool isValid() const { return _valid; }
 
-	public:
-		explicit PropertyItem(const QPair<QMetaProperty, QObject*>& property, QQmlContext* const context, QWidget *parent = 0);
-		explicit PropertyItem(QObject* const selectedItem, QQmlContext* const context, QWidget *parent = 0);
-		const QPair<QMetaProperty, QObject*>& property() const;
-		QList<QQuickItem*>* itemSource() const;
-		void setItemSource(QList<QQuickItem*>* ItemSource);
-        void setUrlList(QList<QUrl>* urlList);
-		inline bool isValid() const { return m_Valid; }
+    protected slots:
+        void fillCup();
+        void applyFont(const QFont& font);
+        void applyValue(const QVariant& value);
 
-	protected:
-		void fillCup(QQmlContext* const context);
-		void fillId(QObject* const selectedItem, QQmlContext* const context);
-		void applyValue(const QVariant& value, QQmlContext* const ctx);
-		void applyFont(const QFont& font, QQmlContext* const ctx);
-		bool eventFilter(QObject* o, QEvent* e);
-		void paintEvent(QPaintEvent *e);
+    protected:
+        bool eventFilter(QObject* o, QEvent* e);
+        void paintEvent(QPaintEvent *e);
 
-	protected slots:
-		void applyId(const QString& id, QObject* const selectedItem, QQmlContext* const context);
-
-	signals:
-		void valueApplied();
+    signals:
+        void valueApplied();
 };
 
 #endif // PROPERTYITEM_H

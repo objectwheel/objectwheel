@@ -81,10 +81,6 @@ void MainWindow::SetupGui()
 	connect(m_RightMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setMenuChecked(bool)));
 	connect(m_LeftMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setSettingsChecked(bool)));
 
-	/* Prepare Properties Widget */
-//	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->propertiesWidget, SLOT(refreshList(QObject*const)));
-//	connect(this, &MainWindow::selectionHided, [this] { m_d->propertiesWidget->setDisabled(true); });
-
 	/* Init Left Container */
 	QVariant toolboxVariant;
 	toolboxVariant.setValue<QWidget*>(m_d->toolboxWidget);

@@ -10,12 +10,10 @@ ControlTransaction::ControlTransaction(Control* watched, QObject *parent)
     , _geometryTransactionsEnabled(true)
     , _parentTransactionsEnabled(true)
     , _zTransactionsEnabled(true)
-    , _idTransactionsEnabled(true)
 {
     connect(_watched, SIGNAL(geometryChanged()), this, SLOT(flushGeometryChange()));
     connect(_watched, SIGNAL(parentChanged()), this, SLOT(flushParentChange()));
     connect(_watched, SIGNAL(zChanged()), this, SLOT(flushZChange()));
-    connect(_watched, SIGNAL(idChanged(const QString&)), this, SLOT(flushIdChange(const QString&)));
 }
 
 void ControlTransaction::setGeometryTransactionsEnabled(bool value)
@@ -33,11 +31,6 @@ void ControlTransaction::setZTransactionsEnabled(bool value)
     _zTransactionsEnabled = value;
 }
 
-void ControlTransaction::setIdTransactionsEnabled(bool value)
-{
-    _idTransactionsEnabled = value;
-}
-
 void ControlTransaction::setTransactionsEnabled(bool value)
 {
     _transactionsEnabled = value;
@@ -50,8 +43,10 @@ void ControlTransaction::flushGeometryChange()
         !_transactionsEnabled)
         return;
 
-    SaveManager::setProperty(_watched, "x", _watched->form() ? int(_watched->x()) : _watched->x());
-    SaveManager::setProperty(_watched, "y", _watched->form() ? int(_watched->y()) : _watched->y());
+    if (!_watched->form()) {
+        SaveManager::setProperty(_watched, "x", _watched->x());
+        SaveManager::setProperty(_watched, "y", _watched->y());
+    }
     SaveManager::setProperty(_watched, "width", _watched->form() ? int(_watched->size().width()) : _watched->size().width());
     SaveManager::setProperty(_watched, "height", _watched->form() ? int(_watched->size().height()) : _watched->size().height());
 }
@@ -76,15 +71,4 @@ void ControlTransaction::flushZChange()
         return;
 
     SaveManager::setProperty(_watched, "z", _watched->zValue());
-}
-
-void ControlTransaction::flushIdChange(const QString& prevId)
-{
-    if (_watched->id().isEmpty() ||
-        prevId.isEmpty() ||
-        !_idTransactionsEnabled ||
-        !_transactionsEnabled)
-        return;
-
-    SaveManager::setProperty(_watched, "id", _watched->id());
 }

@@ -242,14 +242,12 @@ class ControlPrivate : public QObject
         QTimer refreshTimer;
         QmlPreviewer qmlPreviewer;
         bool hoverOn;
-        bool initialized;
 };
 
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
     , hoverOn(false)
-    , initialized(false)
 {
     int i = 0;
     for (auto& resizer : parent->_resizers) {
@@ -316,7 +314,7 @@ void ControlPrivate::refreshPreview()
 {
     refreshTimer.stop();
 
-    if (initialized)
+    if (parent->_initialized)
         qmlPreviewer.requestReview(parent->url(), parent->size());
     else
         qmlPreviewer.requestReview(parent->url());
@@ -326,66 +324,47 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 {
     itemPixmap = result.preview;
 
-    if (initialized == false) {
+    if (parent->_initialized == false) {
         auto scene = static_cast<ControlScene*>(parent->scene());
-        auto mainControl = scene->mainControl();
-        auto id = result.id;
-
-        QStringList formNames;
-        if (DesignManager::mode() == DesignManager::FormGUI) {
-            for (auto form : DesignManager::formScene()->forms()) {
-                if (form == parent)
-                    continue;
-                else
-                    formNames << form->id();
-            }
-        } else {
-            formNames << DesignManager::controlScene()->mainControl()->id();
-        }
-
-        for (int i = 1; mainControl->contains(id) || formNames.contains(id); i++)
-            id = result.id + QString::number(i);
-
-//        SaveManager::addSave(id, parent->url().toLocalFile());
-
         scene->clearSelection();
 
         parent->setFlag(Control::ItemIsFocusable);
         parent->setFlag(Control::ItemIsSelectable);
         parent->setAcceptHoverEvents(true);
-        parent->setId(id);
-        parent->setGui(result.gui);
-        parent->setProperties(result.properties);
-        parent->setEvents(result.events);
-
-        if (result.gui == false) {
-            parent->setParentItem(DesignManager::currentScene()->mainControl()); //BUG: occurs when database loading
-            parent->_controlTransaction.flushParentChange();
-            parent->_controlTransaction.setGeometryTransactionsEnabled(false);
-            parent->_controlTransaction.setParentTransactionsEnabled(false);
-            parent->_controlTransaction.setZTransactionsEnabled(false);
-            parent->resize(NONGUI_CONTROL_SIZE, NONGUI_CONTROL_SIZE);
-            DesignManager::currentScene()->nonGuiControlsPanel()->addControl(parent);
-            for (auto& resizer : parent->_resizers)
-                resizer.setDisabled(true);
-        } else {
-            parent->setFlag(Control::ItemIsMovable);
-            parent->setFlag(Control::ItemSendsGeometryChanges);
-            parent->setAcceptDrops(true);
-            parent->setPos(result.pos);
-            parent->resize(result.size);
-            parent->setClip(result.clip);
-            parent->setZValue(result.zValue);
-        }
-
-        parent->setSelected(true);
         parent->_controlTransaction.flushParentChange();
+    }
+
+    parent->setId(result.id);
+    parent->setGui(result.gui);
+    parent->setProperties(result.properties);
+    parent->setEvents(result.events);
+
+    if (result.gui == false) {
+        parent->setParentItem(DesignManager::currentScene()->mainControl()); //BUG: occurs when database loading
+        parent->_controlTransaction.flushParentChange();
+        parent->_controlTransaction.setGeometryTransactionsEnabled(false);
+        parent->_controlTransaction.setParentTransactionsEnabled(false);
+        parent->_controlTransaction.setZTransactionsEnabled(false);
+        parent->resize(NONGUI_CONTROL_SIZE, NONGUI_CONTROL_SIZE);
+        DesignManager::currentScene()->nonGuiControlsPanel()->addControl(parent);
+        for (auto& resizer : parent->_resizers)
+            resizer.setDisabled(true);
+    } else {
+        parent->setFlag(Control::ItemIsMovable);
+        parent->setFlag(Control::ItemSendsGeometryChanges);
+        parent->setAcceptDrops(true);
+        parent->setPos(result.pos);
+        parent->resize(result.size);
+        refreshTimer.stop();
+        parent->setClip(result.clip);
+        parent->setZValue(result.zValue);
     }
 
     parent->update();
 
-    if (initialized == false) {
-        initialized = true;
+    if (parent->_initialized == false) {
+        parent->_initialized = true;
+        parent->setSelected(true);
         emit parent->initialized();
     }
 
@@ -423,6 +402,7 @@ Control::Control(const QString& url, const QString& uid, Control* parent)
     , _clip(true)
     , _gui(true)
     , _hideSelection(false)
+    , _initialized(false)
 {
     _controls << this;
     setGeometry(0, 0, 0, 0);
@@ -522,10 +502,8 @@ QString Control::id() const
 
 void Control::setId(const QString& id)
 {
-    QString prevId = _id;
     _id = id;
     setToolTip(id);
-    emit idChanged(prevId);
 }
 
 QString Control::url() const
@@ -609,9 +587,9 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     auto control = new Control(event->mimeData()->urls().at(0).toLocalFile());
     control->setParentItem(this);
     control->refresh();
-    control->controlTransaction()->setTransactionsEnabled(true);
     connect(control, &Control::initialized, [=] {
         SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid());
+        control->controlTransaction()->setTransactionsEnabled(true);
         control->setPos(pos);
     });
 
@@ -762,12 +740,12 @@ void Control::setEvents(const QList<QString>& events)
     _events = events;
 }
 
-QMap<QString, QVariant::Type> Control::properties() const
+QMap<QString, QVariant> Control::properties() const
 {
     return _properties;
 }
 
-void Control::setProperties(const QMap<QString, QVariant::Type>& properties)
+void Control::setProperties(const QMap<QString, QVariant>& properties)
 {
     _properties = properties;
 }
@@ -775,6 +753,11 @@ void Control::setProperties(const QMap<QString, QVariant::Type>& properties)
 bool Control::clip() const
 {
     return _clip;
+}
+
+bool Control::init() const
+{
+    return _initialized;
 }
 
 void Control::setClip(bool clip)

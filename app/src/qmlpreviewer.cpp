@@ -27,7 +27,7 @@ class QmlPreviewerPrivate
         QmlPreviewerPrivate(QmlPreviewer* parent);
         void scratchPixmapIfEmpty(QPixmap& pixmap);
         QQuickWindow* handleWindowsIfAny(QObject* object);
-        QMap<QString, QVariant::Type> extractProperties(const QObject* object);
+        QMap<QString, QVariant> extractProperties(const QObject* object);
         QList<QString> extractEvents(const QObject* object);
 
     public:
@@ -76,14 +76,14 @@ QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object)
     return ret;
 }
 
-QMap<QString, QVariant::Type> QmlPreviewerPrivate::extractProperties(const QObject* object)
+QMap<QString, QVariant> QmlPreviewerPrivate::extractProperties(const QObject* object)
 {
-    QMap<QString, QVariant::Type> properties;
+    QMap<QString, QVariant> properties;
     auto metaObject = object->metaObject();
     for (int i = 0; i < metaObject->propertyCount(); i++) {
         if (metaObject->property(i).isWritable() &&
             !QString(metaObject->property(i).name()).startsWith("__"))
-            properties[(metaObject->property(i).name())] = metaObject->property(i).type();
+            properties[(metaObject->property(i).name())] = metaObject->property(i).read(object);
     }
     return properties;
 }
@@ -132,6 +132,7 @@ void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
     qmlComponent->loadUrl(url);
     qmlObject = qmlComponent->create();
     result.id = SaveManager::id(dname(dname(url)));
+    result.properties["id"] = result.id;
 
     if (!qmlComponent->errors().isEmpty()) {
         emit errorsOccurred(qmlComponent->errors(), result);
@@ -142,9 +143,6 @@ void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
     result.events = _d->extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
     result.gui = (qmlObject->inherits("QQuickItem") || window);
-
-    if (result.id.isEmpty())
-        result.id = "control";
 
     if (result.gui == false) {
         result.preview = QPixmap(dname(url) + separator() + "icon.png")

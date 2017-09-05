@@ -73,6 +73,10 @@ class SaveManagerPrivate : public QObject
         // Both database and in-memory data are updated.
         void recalculateUids(Control* control) const;
 
+        // Refactor control's id if it's already exists in db
+        // If suid empty, project root searched
+        void refactorId(Control* control, const QString& suid = QString()) const;
+
         // Update all matching 'from's to 'to's within given file
         void updateFile(const QString& filePath, const QString& from, const QString& to) const;
 
@@ -310,6 +314,17 @@ void SaveManagerPrivate::recalculateUids(Control* control) const
     Control::updateUids();
 }
 
+void SaveManagerPrivate::refactorId(Control* control, const QString& suid) const
+{
+    if (control->id().isEmpty())
+        control->setId("control");
+
+    const auto id = control->id();
+
+    for (int i = 1; parent->exists(control, suid); i++)
+        control->setId(id + QString::number(i));
+}
+
 void SaveManagerPrivate::updateFile(const QString& filePath, const QString& from, const QString& to) const
 {
     auto data = rdfile(filePath);
@@ -513,14 +528,13 @@ bool SaveManager::exists(const Control* control, const QString& suid)
 
 bool SaveManager::addForm(Form* form)
 {
-    if (form->id().isEmpty() || form->url().isEmpty())
+    if (form->url().isEmpty())
         return false;
 
     if (!isOwctrl(form->dir()))
         return false;
 
-    if (exists(form))
-        return false;
+    _d->refactorId(form);
 
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
@@ -548,7 +562,7 @@ bool SaveManager::addForm(Form* form)
 
 bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid)
 {
-    if (control->id().isEmpty() || control->url().isEmpty())
+    if (control->url().isEmpty())
         return false;
 
     if (parentControl->dir().isEmpty())
@@ -557,8 +571,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
         return false;
 
-    if (exists(control, suid))
-        return false;
+    _d->refactorId(control, suid);
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
     auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
@@ -620,14 +633,16 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     return true;
 }
 
-void SaveManager::setProperty(const Control* control, const QString& property, const QVariant& value)
+void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value)
 {
     if (control->dir().isEmpty() || !isOwctrl(control->dir()))
         return;
 
     if (property == TAG_ID) {
         auto _suid = suid(control->dir());
-        Q_ASSERT(_suid.isEmpty() || !exists(control, _suid));
+        Q_ASSERT(_suid.isEmpty());
+
+        _d->refactorId(control, _suid);
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;

@@ -3,6 +3,7 @@
 #include <fit.h>
 #include <listwidget.h>
 #include <lineedit.h>
+#include <designmanager.h>
 
 #include <QStyleOption>
 #include <QPainter>
@@ -255,52 +256,44 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 	: QWidget(parent)
 	, m_ListWidget(new ListWidget)
 	, m_Layout(new QVBoxLayout(this))
+    , m_SearchEdit(new LineEdit)
     , m_Color(QColor("#52616D"))
-	, m_LastObject(nullptr)
-	, m_SearchEdit(nullptr)
-	, m_rootContext(nullptr)
 {
 	setAutoFillBackground(true);
 	QPalette p(palette());
-	p.setColor(QPalette::Window, m_Color);
-	setPalette(p);
+    p.setColor(QPalette::Window, m_Color);
+    setPalette(p);
 
-	m_ListWidget->setStyleSheet(QString("QListView::item{background:none;border: 0px solid transparent;}"
-										"QListView { border:0px solid white;background:rgba(%1,%2,%3,%4);}")
-								.arg(m_Color.red()).arg(m_Color.green())
-								.arg(m_Color.blue()).arg(m_Color.alpha()));
-	m_ListWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_ListWidget->setHorizontalScrollMode(ListWidget::ScrollPerPixel);
-	m_ListWidget->setVerticalScrollMode(ListWidget::ScrollPerPixel);
-	m_ListWidget->setSelectionBehavior(ListWidget::SelectRows);
-	m_ListWidget->setFocusPolicy(Qt::NoFocus);
-	m_ListWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_Layout->setSpacing(fit(10));
-	m_Layout->setContentsMargins(fit(10), fit(5), fit(5), fit(10));
+    m_ListWidget->setStyleSheet(QString("QListView::item{background:none;border: 0px solid transparent;}"
+                                        "QListView { border:0px solid white;background:rgba(%1,%2,%3,%4);}")
+                                .arg(m_Color.red()).arg(m_Color.green())
+                                .arg(m_Color.blue()).arg(m_Color.alpha()));
+    m_ListWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_ListWidget->setHorizontalScrollMode(ListWidget::ScrollPerPixel);
+    m_ListWidget->setVerticalScrollMode(ListWidget::ScrollPerPixel);
+    m_ListWidget->setSelectionBehavior(ListWidget::SelectRows);
+    m_ListWidget->setFocusPolicy(Qt::NoFocus);
+    m_ListWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_Layout->setSpacing(fit(10));
+    m_Layout->setContentsMargins(fit(10), fit(5), fit(5), fit(10));
 
 
 	QPixmap pm;
 	pm.loadFromData(rawData, sizeof(rawData));
 	pm = pm.scaled(fit(30), fit(30), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	m_SearchEdit = new LineEdit;
 	m_SearchEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	m_SearchEdit->setFixedHeight(fit(30));
 	m_SearchEdit->setIcon(QIcon(pm));
 	m_SearchEdit->setPlaceholderText("Search");
 	m_SearchEdit->show();
-	connect(m_SearchEdit->lineEdit(), (void(QLineEdit::*)(const QString&))(&QLineEdit::textEdited), [=] (const QString& str){
-		if (m_LastObject) {
-			refreshList(m_LastObject, str);
-		}
-	});
+    connect(m_SearchEdit->lineEdit(), SIGNAL(textEdited(QString)), SLOT(refreshList()));
 
 	m_Layout->addWidget(m_SearchEdit);
 	m_Layout->addWidget(m_ListWidget);
-}
 
-const PropertiesWidget::Properties& PropertiesWidget::properties() const
-{
-	return m_Properties;
+    /* Prepare Properties Widget */
+    connect(DesignManager::formScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
+    connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
 }
 
 const QColor& PropertiesWidget::color() const
@@ -316,113 +309,60 @@ void PropertiesWidget::setColor(const QColor& color)
 	setPalette(p);
 }
 
-QList<QQuickItem*>* PropertiesWidget::itemSource() const
-{
-	return m_Items;
-}
-
-void PropertiesWidget::setItemSource(QList<QQuickItem*>* items)
-{
-    m_Items = items;
-}
-
-QList<QUrl>*PropertiesWidget::urlList() const
-{
-    return m_UrlList;
-}
-
-void PropertiesWidget::setUrlList(QList<QUrl>* urlList)
-{
-    m_UrlList = urlList;
-}
-
-void PropertiesWidget::setRootContext(QQmlContext* const context)
-{
-	m_rootContext = context;
-}
-
-void PropertiesWidget::refreshList(QObject* const selectedItem, const QString& filter)
-{
-	clearList();
-
-	if (filter.isEmpty() && m_LastObject != selectedItem) {
-		m_SearchEdit->lineEdit()->clear();
-	}
-
-	/* Get selected item's properties */
-	auto meta = selectedItem->metaObject();
-	int count = meta->propertyCount();
-	for (int i = 0; i < count; i++) {
-		auto property = meta->property(i);
-		if (!QString(property.name()).startsWith("__") && QString(property.name()).contains(filter, Qt::CaseInsensitive)) {
-			m_Properties << Property(property, selectedItem);
-		}
-	}
-
-	/* Update list widget */
-	refreshListWidget(selectedItem);
-
-	setEnabled(true);
-
-	m_LastObject = selectedItem;
-
-	emit listRefreshed();
-}
-
 void PropertiesWidget::clearList()
 {
-	m_ListWidget->clear();
-	m_Properties.clear();
-	m_LastObject = nullptr;
+    for (int i = 0; i < m_ListWidget->count(); i++) {
+        auto item = m_ListWidget->item(i);
+        auto itemWidget =  m_ListWidget->itemWidget(item);
+        if (itemWidget)
+            itemWidget->deleteLater();
+    }
+    m_ListWidget->clear();
 }
 
-void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
+void PropertiesWidget::refreshList()
 {
-	QListWidgetItem* item = new QListWidgetItem;
-	PropertyItem* propertyItem = new PropertyItem(selectedItem, m_rootContext);
-	propertyItem->setItemSource(m_Items);
-    propertyItem->setUrlList(m_UrlList);
-	if (!propertyItem->isValid()) {
-		delete item;
-		propertyItem->deleteLater();
-		return;
-	}
-	connect(propertyItem, &PropertyItem::valueApplied, [&] {
-		emit idChanged(m_rootContext->nameForObject(selectedItem));
-	});
-	propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
-	propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
-	item->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
-	m_ListWidget->addItem(item);
-	m_ListWidget->setItemWidget(item, propertyItem);
+    clearList();
 
-	// ***
+    auto selectedControls = DesignManager::currentScene()->selectedControls();
 
-	for (auto property : m_Properties) {
-		QListWidgetItem* item = new QListWidgetItem;
-		PropertyItem* propertyItem = new PropertyItem(property, m_rootContext);
-		propertyItem->setItemSource(m_Items);
-        propertyItem->setUrlList(m_UrlList);
-		if (!propertyItem->isValid()) {
-			delete item;
-			propertyItem->deleteLater();
-			continue;
-		}
-		connect(propertyItem, &PropertyItem::valueApplied, [&] {
-			emit propertyChanged(property);
-		});
-		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
-		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
-		item->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
-		m_ListWidget->addItem(item);
-		m_ListWidget->setItemWidget(item, propertyItem);
-	}
+    if (selectedControls.size() != 1)
+        return;
+
+    auto properties = selectedControls[0]->properties();
+    for (auto property : properties.keys()) {
+        if (!property.contains(m_SearchEdit->text(), Qt::CaseInsensitive))
+            continue;
+
+        QListWidgetItem* item = new QListWidgetItem;
+        PropertyItem* propertyItem = new PropertyItem(selectedControls[0], property);
+
+        if (!propertyItem->isValid()) {
+            delete item;
+            propertyItem->deleteLater();
+            continue;
+        }
+
+        propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
+        propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
+        item->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
+        m_ListWidget->addItem(item);
+        m_ListWidget->setItemWidget(item, propertyItem);
+    }
 }
 
-void PropertiesWidget::showEvent(QShowEvent* event)
+void PropertiesWidget::handleSelectionChange()
 {
-	fixItemsGeometry();
-	QWidget::showEvent(event);
+    auto selectedControls = DesignManager::currentScene()->selectedControls();
+
+    if (selectedControls.size() != 1) {
+        setDisabled(true);
+        return;
+    }
+
+    setEnabled(true);
+
+    refreshList();
 }
 
 void PropertiesWidget::fixItemsGeometry()
@@ -433,4 +373,10 @@ void PropertiesWidget::fixItemsGeometry()
 		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
 		m_ListWidget->item(i)->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
 	}
+}
+
+void PropertiesWidget::showEvent(QShowEvent* event)
+{
+    fixItemsGeometry();
+    QWidget::showEvent(event);
 }

@@ -7,56 +7,32 @@
 #include <QPair>
 #include <QMetaProperty>
 
-class QQmlContext;
 class QVBoxLayout;
 class LineEdit;
-class QQuickItem;
 
 class PropertiesWidget : public QWidget
 {
 		Q_OBJECT
 
-	public:
-		typedef QPair<QMetaProperty, QObject*> Property;
-		typedef QList<Property> Properties;
-
-	private:
-		Properties m_Properties;
-		ListWidget* m_ListWidget;
+    private:
+        ListWidget* m_ListWidget;
 		QVBoxLayout* m_Layout;
-		QColor m_Color;
-		QObject* m_LastObject;
 		LineEdit* m_SearchEdit;
-		QQmlContext* m_rootContext;
-		QList<QQuickItem*>* m_Items;
-        QList<QUrl>* m_UrlList;
+        QColor m_Color;
 
 	public:
 		explicit PropertiesWidget(QWidget *parent = 0);
-		const Properties& properties() const;
-
 		const QColor& color() const;
 		void setColor(const QColor& color);
-		void setRootContext(QQmlContext* const context);
-
-		QList<QQuickItem*>* itemSource() const;
-		void setItemSource(QList<QQuickItem*>* ItemSource);
-        QList<QUrl>* urlList() const;
-        void setUrlList(QList<QUrl>* urlList);
 
 	protected:
-		void refreshListWidget(QObject* const selectedItem);
-		void showEvent(QShowEvent *event);
 		void fixItemsGeometry();
-
-	signals:
-		void listRefreshed();
-		void propertyChanged(const Property& property);
-		void idChanged(const QString& newId);
+        void showEvent(QShowEvent *event);
 
 	public slots:
-		void refreshList(QObject* const selectedItem, const QString& filter = QString());
-		void clearList();
+        void clearList();
+        void refreshList();
+        void handleSelectionChange();
 };
 
 #endif // PROPERTIESWIDGET_H

@@ -75,7 +75,8 @@ class Control : public QGraphicsWidget
         bool dragging() const;
         bool dragIn() const;
         bool clip() const;
-        QMap<QString, QVariant::Type> properties() const;
+        bool init() const;
+        QMap<QString, QVariant> properties() const;
         QList<QString> events() const;
         QList<Control*> childControls() const;
         Control* parentControl() const;
@@ -110,7 +111,7 @@ class Control : public QGraphicsWidget
         void setDragging(bool dragging);
         void setDragIn(bool dragIn);
         void setClip(bool clip);
-        void setProperties(const QMap<QString, QVariant::Type>& properties);
+        void setProperties(const QMap<QString, QVariant>& properties);
         void setEvents(const QList<QString>& events);
 
         virtual void centralize();
@@ -130,7 +131,6 @@ class Control : public QGraphicsWidget
         virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
     signals:
-        void idChanged(const QString&);
         void previewChanged();
         void initialized();
 
@@ -143,13 +143,14 @@ class Control : public QGraphicsWidget
         QString _uid;
         QString _id;
         QList<QString> _events;
-        QMap<QString, QVariant::Type> _properties;
+        QMap<QString, QVariant> _properties;
         QString _url;
         bool _dragging;
         bool _dragIn;
         bool _clip;
         bool _gui;
         bool _hideSelection;
+        bool _initialized;
         static bool _showOutline;
         static QList<Control*> _controls;
 };
