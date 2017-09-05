@@ -170,7 +170,7 @@ class Form : public Control
 
         explicit Form(const QString& url, const QString& uid = QString(), Form* parent = Q_NULLPTR);
 
-        bool isMain() const;
+        bool main() const;
         void setMain(bool value);
 
         QRectF frameGeometry() const override;

@@ -229,5 +229,7 @@
         <file>resources/qmls/owdb/1/t/_properties.json</file>
         <file>resources/qmls/owdb/1/t/main.qml</file>
         <file>resources/tools/AnimatedImage.zip</file>
+        <file>resources/qmls/form/t/_properties.json</file>
+        <file>resources/qmls/form/t/main.qml</file>
     </qresource>
 </RCC>

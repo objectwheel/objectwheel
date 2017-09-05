@@ -353,7 +353,8 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
         parent->setFlag(Control::ItemIsMovable);
         parent->setFlag(Control::ItemSendsGeometryChanges);
         parent->setAcceptDrops(true);
-        parent->setPos(result.pos);
+        if (!parent->form())
+            parent->setPos(result.pos);
         parent->resize(result.size);
         refreshTimer.stop();
         parent->setClip(result.clip);
@@ -1519,7 +1520,7 @@ QRectF Form::frameGeometry() const
     return rect;
 }
 
-bool Form::isMain() const
+bool Form::main() const
 {
     return _main;
 }

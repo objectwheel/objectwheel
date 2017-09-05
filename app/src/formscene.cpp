@@ -22,7 +22,7 @@ void FormScene::addForm(Form* form)
 void FormScene::removeForm(Form* form)
 {
     if (_forms.contains(form) == false ||
-        form->isMain())
+        form->main())
         return;
 
     removeItem(form);

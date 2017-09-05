@@ -4,8 +4,6 @@
 #include <QWidget>
 
 class FormsWidgetPrivate;
-class QQuickItem;
-class QQmlContext;
 
 class FormsWidget : public QWidget
 {
@@ -15,12 +13,10 @@ class FormsWidget : public QWidget
 	public:
         explicit FormsWidget(QWidget *parent = 0);
         static FormsWidget* instance();
-        ~FormsWidget();
-
         static void setCurrentForm(int index);
 
 	private:
-        static FormsWidgetPrivate* m_d;
+        static FormsWidgetPrivate* _d;
 };
 
 #endif // FORMSWIDGET_H

@@ -4,5 +4,5 @@ import QtQuick.Controls 1.4
 ApplicationWindow {
     visible: true
     color: "#e0e4e7"
-    title: qsTr("Hello World")
+    title: qsTr("Application Window")
 }

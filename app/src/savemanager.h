@@ -10,6 +10,7 @@
 #define DIR_OWDB "owdb"
 #define DIR_MAINFORM "1"
 #define DIR_QRC_OWDB ":/resources/qmls/owdb"
+#define DIR_QRC_FORM ":/resources/qmls/form"
 #define FILE_PROPERTIES "_properties.json"
 #define TAG_ID "id"
 #define TAG_UID "_uid"
@@ -35,6 +36,7 @@ class SaveManager : public QObject
         static bool execProject();
 
         static QString basePath();
+        static QStringList formsPaths();
         static bool isOwctrl(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
@@ -55,6 +57,7 @@ class SaveManager : public QObject
 
     signals:
         void databaseChanged();
+        void projectExposed();
 
     private:
         static SaveManagerPrivate* _d;

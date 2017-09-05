@@ -425,7 +425,7 @@ SaveManager::SaveManager(QObject *parent)
 
 SaveManager* SaveManager::instance()
 {
-    return _d->parent;
+    return _d ? _d->parent : nullptr;
 }
 
 bool SaveManager::initProject(const QString& projectDirectory)
@@ -460,6 +460,14 @@ QString SaveManager::basePath()
     return (projectDir + separator() + DIR_OWDB);
 }
 
+QStringList SaveManager::formsPaths()
+{
+    QStringList paths;
+    for (auto path : _d->formPaths())
+        paths << dname(path);
+    return paths;
+}
+
 void SaveManager::exposeProject()
 {
     auto fpaths = _d->formPaths();
@@ -487,6 +495,7 @@ void SaveManager::exposeProject()
             parentControl = control;
         }
     }
+    emit instance()->projectExposed();
 }
 
 bool SaveManager::isOwctrl(const QString& rootPath)
@@ -558,6 +567,11 @@ bool SaveManager::addForm(Form* form)
     emit _d->parent->databaseChanged();
 
     return true;
+}
+
+void SaveManager::removeForm(const Form* form)
+{
+
 }
 
 bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid)
@@ -633,6 +647,11 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     return true;
 }
 
+void SaveManager::removeControl(const Control* control)
+{
+
+}
+
 void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value)
 {
     if (control->dir().isEmpty() || !isOwctrl(control->dir()))
@@ -654,6 +673,7 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
                         separator() + "main.qml";
         ParserController::setVariantProperty(fileName, property, value);
     }
+    emit _d->parent->databaseChanged();
 }
 
 void SaveManager::removeProperty(const Control* control, const QString& property)
@@ -664,6 +684,7 @@ void SaveManager::removeProperty(const Control* control, const QString& property
     auto fileName = control->dir() + separator() + DIR_THIS +
                     separator() + "main.qml";
     ParserController::removeVariantProperty(fileName, property);
+    emit _d->parent->databaseChanged();
 }
 
 QString SaveManager::pathOfId(const QString& suid, const QString& id, const QString& rootPath)
