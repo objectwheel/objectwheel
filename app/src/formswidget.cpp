@@ -91,14 +91,16 @@ void FormsWidgetPrivate::removeButtonClicked()
     auto form = DesignManager::formScene()->mainForm();
     if (!form || !form->form() || form->main())
         return;
-    SaveManager::removeForm((Form*)form);
-    DesignManager::currentScene()->removeControl(form);
+//    SaveManager::removeForm((Form*)form);
+    DesignManager::formScene()->removeForm(form);
 }
 
 void FormsWidgetPrivate::addButtonClicked()
 {
     auto tempPath = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0];
     tempPath = tempPath + separator() + "Objectwheel";
+
+    rm(tempPath);
 
     if (!mkdir(tempPath) || !cp(DIR_QRC_FORM, tempPath, true, true))
         return;

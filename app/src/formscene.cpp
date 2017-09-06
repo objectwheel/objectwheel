@@ -30,6 +30,8 @@ void FormScene::removeForm(Form* form)
 
     if (_mainControl == form)
         setMainControl(_forms[0]);
+
+    form->deleteLater();
 }
 
 Form* FormScene::mainForm()

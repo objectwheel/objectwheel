@@ -81,16 +81,17 @@ void ControlScene::setMainControl(Control* mainControl)
 
 void ControlScene::removeControl(Control* control)
 {
-//    SaveManager::removeSave(control->id());
     removeItem(control);
+    control->deleteLater();
     emit controlRemoved(control);
 }
 
 void ControlScene::removeChildControlsOnly(Control* parent)
 {
-//    SaveManager::removeChildSavesOnly(parent->id());
-    for (auto control : parent->childControls())
+    for (auto control : parent->childControls()) {
         removeItem(control);
+        control->deleteLater();
+    }
 }
 
 QList<Control*> ControlScene::controls(Qt::SortOrder order)

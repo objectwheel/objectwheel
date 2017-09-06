@@ -475,6 +475,8 @@ void SaveManager::exposeProject()
     for (auto path : fpaths) {
 
         auto form = new Form(path + separator() + "main.qml");
+        if (fname(dname(path)) == DIR_MAINFORM)
+            form->setMain(true);
         DesignManager::formScene()->addForm(form);
         connect(form, &Form::initialized, [=] {
             form->controlTransaction()->setTransactionsEnabled(true);
@@ -571,7 +573,15 @@ bool SaveManager::addForm(Form* form)
 
 void SaveManager::removeForm(const Form* form)
 {
+    if (form->id().isEmpty() || form->url().isEmpty())
+        return;
 
+    if (form->main() || !isOwctrl(form->dir()) || !exists(form))
+        return;
+
+    rm(form->dir());
+
+    emit _d->parent->databaseChanged();
 }
 
 bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid)
@@ -649,7 +659,15 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
 
 void SaveManager::removeControl(const Control* control)
 {
+    if (control->id().isEmpty() || control->url().isEmpty())
+        return;
 
+    if (!isOwctrl(control->dir()) || !exists(control))
+        return;
+
+    rm(control->dir());
+
+    emit _d->parent->databaseChanged();
 }
 
 void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value)

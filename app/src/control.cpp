@@ -383,6 +383,7 @@ void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors, const PreviewR
     box.exec();
 
     parent->scene()->removeItem(parent);
+    parent->deleteLater();
 }
 
 //!
