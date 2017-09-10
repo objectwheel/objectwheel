@@ -123,7 +123,7 @@ void FormsWidgetPrivate::handleDatabaseChange()
 
     formsListWidget.clear();
 
-    for (auto path : SaveManager::formsPaths()) {
+    for (auto path : SaveManager::formPaths()) {
         auto _id = SaveManager::id(path);
         if (id == _id)
             row = formsListWidget.count();

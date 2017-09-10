@@ -47,9 +47,9 @@ class SaveManagerPrivate : public QObject
         bool existsInFormScope(const Control* control) const; // Searches by id.
 
         // Searches by id.
-        // Searches control within given suid
+        // Searches control within given suid, search starts within rootPath
         // If given suid is is empty, then returns existsInFormScope().
-        bool existsInParentScope(const Control* control, const QString& suid) const;
+        bool existsInParentScope(const Control* control, const QString& suid, const QString topPath) const;
 
         // Returns all children paths (DIR_THIS) within given root path.
         // Returns children only if they have match between their and given suid.
@@ -75,7 +75,7 @@ class SaveManagerPrivate : public QObject
 
         // Refactor control's id if it's already exists in db
         // If suid empty, project root searched
-        void refactorId(Control* control, const QString& suid = QString()) const;
+        void refactorId(Control* control, const QString& suid = QString(), const QString& topPath = QString()) const;
 
         // Update all matching 'from's to 'to's within given file
         void updateFile(const QString& filePath, const QString& from, const QString& to) const;
@@ -88,7 +88,7 @@ class SaveManagerPrivate : public QObject
         // Searches within given rootPath (root control included)
         // Searches in current project directory if given rootPath is empty
         // All controls in the given rootPath are included to search
-        QString findByUid(const QString& uid, const QString& rootPath = QString()) const;
+        QString findByUid(const QString& uid, const QString& rootPath/* = QString()*/) const;
 
         // Returns root path if given id belongs to a control
         // Searches within given rootPath (root control included)
@@ -180,10 +180,10 @@ bool SaveManagerPrivate::existsInFormScope(const Control* control) const
     return false;
 }
 
-bool SaveManagerPrivate::existsInParentScope(const Control* control, const QString& suid) const
+bool SaveManagerPrivate::existsInParentScope(const Control* control, const QString& suid, const QString topPath) const
 {
     if (!suid.isEmpty()) {
-        auto parentRootPath = findByUid(suid);
+        auto parentRootPath = findByUid(suid, topPath);
         if (parentRootPath.isEmpty())
             return false;
         if (isForm(parentRootPath)) {
@@ -314,14 +314,14 @@ void SaveManagerPrivate::recalculateUids(Control* control) const
     Control::updateUids();
 }
 
-void SaveManagerPrivate::refactorId(Control* control, const QString& suid) const
+void SaveManagerPrivate::refactorId(Control* control, const QString& suid, const QString& topPath) const
 {
     if (control->id().isEmpty())
         control->setId("control");
 
     const auto id = control->id();
 
-    for (int i = 1; parent->exists(control, suid); i++)
+    for (int i = 1; parent->exists(control, suid, topPath); i++)
         control->setId(id + QString::number(i));
 }
 
@@ -460,7 +460,7 @@ QString SaveManager::basePath()
     return (projectDir + separator() + DIR_OWDB);
 }
 
-QStringList SaveManager::formsPaths()
+QStringList SaveManager::formPaths()
 {
     QStringList paths;
     for (auto path : _d->formPaths())
@@ -532,9 +532,9 @@ QString SaveManager::suid(const QString& rootPath)
     return _d->property(propertyData, TAG_SUID).toString();
 }
 
-bool SaveManager::exists(const Control* control, const QString& suid)
+bool SaveManager::exists(const Control* control, const QString& suid, const QString& topPath)
 {
-    return control->form() ? _d->existsInFormScope(control) : _d->existsInParentScope(control, suid);
+    return control->form() ? _d->existsInFormScope(control) : _d->existsInParentScope(control, suid, topPath);
 }
 
 bool SaveManager::addForm(Form* form)
@@ -584,7 +584,7 @@ void SaveManager::removeForm(const Form* form)
     emit _d->parent->databaseChanged();
 }
 
-bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid)
+bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
 {
     if (control->url().isEmpty())
         return false;
@@ -595,7 +595,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
         return false;
 
-    _d->refactorId(control, suid);
+    _d->refactorId(control, suid, topPath);
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
     auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
@@ -670,16 +670,15 @@ void SaveManager::removeControl(const Control* control)
     emit _d->parent->databaseChanged();
 }
 
-void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value)
+void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath)
 {
     if (control->dir().isEmpty() || !isOwctrl(control->dir()))
         return;
 
     if (property == TAG_ID) {
         auto _suid = suid(control->dir());
-        Q_ASSERT(_suid.isEmpty());
 
-        _d->refactorId(control, _suid);
+        _d->refactorId(control, _suid, topPath);
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;

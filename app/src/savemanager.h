@@ -31,24 +31,25 @@ class SaveManager : public QObject
         explicit SaveManager(QObject *parent = 0);
         static SaveManager* instance();
 
-        static bool initProject(const QString& projectDirectory);
-        static void exposeProject();
         static bool execProject();
+        static void exposeProject();
+        static bool initProject(const QString& projectDirectory);
 
         static QString basePath();
-        static QStringList formsPaths();
+        static QStringList formPaths();
         static bool isOwctrl(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);
-        static bool exists(const Control* control, const QString& suid = QString());
+
+        static bool exists(const Control* control, const QString& suid = QString(), const QString& topPath = QString());
         static bool addForm(Form* form);
         static void removeForm(const Form* form);
-        static bool addControl(Control* control, const Control* parentControl, const QString& suid);
+        static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
         static bool moveControl(Control* control, const Control* parentControl);
         static void removeControl(const Control* control);
 
-        static void setProperty(Control* control, const QString& property, const QVariant& value);
+        static void setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath = QString());
         static void removeProperty(const Control* control, const QString& property);
 
         static QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString());

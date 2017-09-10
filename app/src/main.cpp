@@ -18,48 +18,27 @@
 #define REF_HEIGHT 600
 #define REF_DPI 144
 
-/* Far tasks */
-/*-----------*/
-// Build gui equals (continuous task)
-// Verisoning-Git integration
-// Undo-redo
-// Cloud part-sync-login etc
-// Clear parser's ugly console outputs
-// General bug fixing (continuous task)
-
-/* Near tasks */
-/*------------*/
-// Fix parser errors
-// Fix  parser slowness
-// Import/Export project
-// Drag & Drop image files transforms into controls
-// Fix Android's control drag & drop error
-// Apply id changes into qml files
-// Warn if files changes out of qml editor, to reload or not.
-// Add play button to welcome screen
-// Auto edit mode on if user drop tools
-
 int main(int argc, char *argv[])
 {
     // Init application
     QApplication a(argc, argv);
 
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-    // Multiple instances protection
-    //    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
-    //    if(!sharedMemory.create(1)) {
-    //        sharedMemory.attach();
-    //        sharedMemory.detach();
-    //        if(!sharedMemory.create(1)) {
-    //            QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
-    //            a.exit();
-    //            return 0;
-    //        }
-    //    }
+    //    Multiple instances protection
+    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
+    if(!sharedMemory.create(1)) {
+        sharedMemory.attach();
+        sharedMemory.detach();
+        if(!sharedMemory.create(1)) {
+            QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
+            a.exit();
+            return 0;
+        }
+    }
 # endif
 
     // Init application settings
-    //    QApplication::setStyle("fusion");
+    QApplication::setStyle("fusion");
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
