@@ -489,34 +489,16 @@ void DesignManagerPrivate::handleRefreshPreviewClicked()
 
 void DesignManagerPrivate::handleEditorModeButtonClicked()
 {
-    editorModeButton.setChecked(true);
-    editorModeButton.setDisabled(true);
-    cGuiModeButton.setChecked(false);
-    wGuiModeButton.setChecked(false);
-    cGuiModeButton.setEnabled(true);
-    wGuiModeButton.setEnabled(true);
     DesignManager::setMode(DesignManager::CodeEdit);
 }
 
 void DesignManagerPrivate::handleCGuiModeButtonClicked()
 {
-    cGuiModeButton.setChecked(true);
-    cGuiModeButton.setDisabled(true);
-    editorModeButton.setChecked(false);
-    wGuiModeButton.setChecked(false);
-    editorModeButton.setEnabled(true);
-    wGuiModeButton.setEnabled(true);
     DesignManager::setMode(DesignManager::ControlGUI);
 }
 
 void DesignManagerPrivate::handleWGuiModeButtonClicked()
 {
-    wGuiModeButton.setChecked(true);
-    wGuiModeButton.setDisabled(true);
-    cGuiModeButton.setChecked(false);
-    editorModeButton.setChecked(false);
-    cGuiModeButton.setEnabled(true);
-    editorModeButton.setEnabled(true);
     DesignManager::setMode(DesignManager::FormGUI);
 }
 
@@ -533,6 +515,13 @@ void DesignManagerPrivate::handleBuildButtonClicked()
 void DesignManagerPrivate::handleModeChange()
 {
     if (DesignManager::_mode == DesignManager::FormGUI) {
+        wGuiModeButton.setChecked(true);
+        wGuiModeButton.setDisabled(true);
+        cGuiModeButton.setChecked(false);
+        editorModeButton.setChecked(false);
+        cGuiModeButton.setEnabled(true);
+        editorModeButton.setEnabled(true);
+
         if (Form::skin() == Form::Desktop) {
             desktopSkinButton.setChecked(true);
             handleDesktopSkinButtonClicked();
@@ -552,6 +541,12 @@ void DesignManagerPrivate::handleModeChange()
         formView.show();
         parent->_currentScene = &formScene;
     } else if (DesignManager::_mode == DesignManager::ControlGUI) {
+        cGuiModeButton.setChecked(true);
+        cGuiModeButton.setDisabled(true);
+        editorModeButton.setChecked(false);
+        wGuiModeButton.setChecked(false);
+        editorModeButton.setEnabled(true);
+        wGuiModeButton.setEnabled(true);
         noSkinButton.setChecked(true);
         phoneLandscapeButton.setChecked(false);
         phonePortraitButton.setChecked(false);
@@ -567,6 +562,14 @@ void DesignManagerPrivate::handleModeChange()
         formView.hide();
         controlView.show();
         parent->_currentScene = &controlScene;
+    } else {
+        editorModeButton.setChecked(true);
+        editorModeButton.setDisabled(true);
+        cGuiModeButton.setChecked(false);
+        wGuiModeButton.setChecked(false);
+        cGuiModeButton.setEnabled(true);
+        wGuiModeButton.setEnabled(true);
+        //TODO:
     }
 }
 

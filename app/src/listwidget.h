@@ -3,6 +3,7 @@
 
 #include <QUrl>
 #include <QListWidget>
+#include <flatbutton.h>
 
 class ListWidget : public QListWidget
 {
@@ -12,6 +13,7 @@ class ListWidget : public QListWidget
 		QMap<QListWidgetItem*, QList<QUrl>> m_Urls;
 		QPoint m_PreviousPoint;
 		QList<qreal> m_AngleList;
+        FlatButton m_IndicatorButton;
 
 	public:
 		explicit ListWidget(QWidget *parent = 0);
@@ -21,8 +23,9 @@ class ListWidget : public QListWidget
 		inline QList<QUrl> GetUrls(QListWidgetItem* item) const { return m_Urls.value(item); }
 		inline void ClearUrls() { m_Urls.clear(); }
         bool contains(const QString& itemName);
+        FlatButton* indicatorButton();
 
-	protected:
+    protected:
         QMimeData* mimeData(const QList<QListWidgetItem *> items) const override;
         void mousePressEvent(QMouseEvent* event) override;
         void mouseMoveEvent(QMouseEvent* event) override;

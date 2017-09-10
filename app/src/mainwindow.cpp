@@ -222,13 +222,34 @@ void MainWindow::SetupGui()
     SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
     SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
     SplashScreen::show(false);
+
+
+    m_d->toolboxList->indicatorButton()->setIcon(QIcon(":/resources/images/right-arrow.png"));
+    m_d->toolboxList->indicatorButton()->setColor(QColor("#0D74C8"));
+    m_d->toolboxList->indicatorButton()->setRadius(fit(7));
+    m_d->toolboxList->indicatorButton()->setIconSize(QSize(fit(10), fit(10)));
+    m_d->toolboxList->indicatorButton()->resize(fit(15), fit(15));
+    connect(m_d->toolboxList->indicatorButton(), &FlatButton::clicked, [=] {
+        auto previousControl = DesignManager::currentScene()->mainControl();
+        if (previousControl)
+            previousControl->deleteLater();
+        auto url = m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0];
+        auto control = new Control(url.toLocalFile());
+        DesignManager::controlScene()->setMainControl(control);
+        control->refresh();
+        connect(control, &Control::initialized, [=] {
+            control->controlTransaction()->setTransactionsEnabled(true);
+        });
+        DesignManager::setMode(DesignManager::ControlGUI);
+    });
 }
 
 void MainWindow::SetupManagers()
 {
 	//Let's add some custom controls to that project
     ToolsManager::setListWidget(m_d->toolboxList);
-	auto userManager = new UserManager(this); //create new user manager
+    auto userManager = new UserManager(this); //create new user manager
+    Q_UNUSED(userManager);
     auto* projectManager = new ProjectManager(this); //create new project manager
 	projectManager->setMainWindow(this);
     new SaveManager(this);

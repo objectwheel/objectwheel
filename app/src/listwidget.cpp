@@ -33,8 +33,11 @@ QScrollBar:vertical { \
 
 using namespace Fit;
 
-ListWidget::ListWidget(QWidget *parent)
-	: QListWidget(parent)
+
+
+    ListWidget::ListWidget(QWidget *parent)
+        : QListWidget(parent)
+        , m_IndicatorButton(this)
 {
     QString styleSheet(STYLE_SHEET);
     styleSheet = styleSheet.arg(fit(15)).arg(fit(4)).arg(fit(2)).arg(150);
@@ -46,6 +49,34 @@ ListWidget::ListWidget(QWidget *parent)
 	prop.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
 	prop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.009);
     QScroller::scroller(viewport())->setScrollerProperties(prop);
+
+    m_IndicatorButton.hide();
+
+    connect(this, &ListWidget::currentItemChanged, [=]{
+        if (count() < 1) {
+            m_IndicatorButton.hide();
+            return;
+        }
+        auto rect = visualItemRect(currentItem());
+        m_IndicatorButton.move(rect.width() - m_IndicatorButton.width() - fit(5),
+                               rect.y() + rect.height()/2.0 - m_IndicatorButton.height()/2.0);
+        m_IndicatorButton.show();
+    });
+    connect(verticalScrollBar(), &QSlider::valueChanged , [=]{
+        if (count() < 1) {
+            m_IndicatorButton.hide();
+            return;
+        }
+        auto rect = visualItemRect(currentItem());
+        m_IndicatorButton.move(rect.width() - m_IndicatorButton.width() - fit(5),
+                               rect.y() + rect.height()/2.0 - m_IndicatorButton.height()/2.0);
+        m_IndicatorButton.show();
+    });
+}
+
+FlatButton* ListWidget::indicatorButton()
+{
+   return &m_IndicatorButton;
 }
 
 bool ListWidget::contains(const QString& itemName)
