@@ -42,7 +42,7 @@ class SaveManager : public QObject
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);
 
-        static bool exists(const Control* control, const QString& suid = QString(), const QString& topPath = QString());
+        static bool exists(const Control* control, const QString& suid , const QString& topPath = QString());
         static bool addForm(Form* form);
         static void removeForm(const Form* form);
         static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());

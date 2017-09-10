@@ -30,7 +30,6 @@ class MainWindow : public QWidget
 		void SetupManagers();
 		void resizeEvent(QResizeEvent *event);
 		const QPixmap DownloadPixmap(const QUrl& url);
-		static bool addControlWithoutSave(const QUrl& url, const QString& parent);
 		void clearStudio();
 
     public slots:

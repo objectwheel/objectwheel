@@ -47,8 +47,8 @@ class SaveManagerPrivate : public QObject
         bool existsInFormScope(const Control* control) const; // Searches by id.
 
         // Searches by id.
-        // Searches control within given suid, search starts within rootPath
-        // If given suid is is empty, then returns existsInFormScope().
+        // Searches control within given suid, search starts within topPath
+        // Given suid has to be valid
         bool existsInParentScope(const Control* control, const QString& suid, const QString topPath) const;
 
         // Returns all children paths (DIR_THIS) within given root path.
@@ -75,7 +75,7 @@ class SaveManagerPrivate : public QObject
 
         // Refactor control's id if it's already exists in db
         // If suid empty, project root searched
-        void refactorId(Control* control, const QString& suid = QString(), const QString& topPath = QString()) const;
+        void refactorId(Control* control, const QString& suid, const QString& topPath = QString()) const;
 
         // Update all matching 'from's to 'to's within given file
         void updateFile(const QString& filePath, const QString& from, const QString& to) const;
@@ -169,6 +169,7 @@ bool SaveManagerPrivate::existsInForms(const Control* control) const
 
 bool SaveManagerPrivate::existsInFormScope(const Control* control) const
 {
+    Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
         auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
         auto id = property(propertyData, TAG_ID).toString();
@@ -182,39 +183,40 @@ bool SaveManagerPrivate::existsInFormScope(const Control* control) const
 
 bool SaveManagerPrivate::existsInParentScope(const Control* control, const QString& suid, const QString topPath) const
 {
-    if (!suid.isEmpty()) {
-        auto parentRootPath = findByUid(suid, topPath);
-        if (parentRootPath.isEmpty())
-            return false;
-        if (isForm(parentRootPath)) {
-            if (existsInForms(control))
+    if (control->form())
+            return existsInFormScope(control);
+
+    Q_ASSERT(!suid.isEmpty());
+
+    auto parentRootPath = findByUid(suid, topPath);
+    if (parentRootPath.isEmpty())
+        return false;
+    if (isForm(parentRootPath)) {
+        if (existsInForms(control))
+            return true;
+
+        for (auto path : childrenPaths(parentRootPath)) {
+            auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
+            auto id = property(propertyData, TAG_ID).toString();
+
+            if (id == control->id())
                 return true;
-
-            for (auto path : childrenPaths(parentRootPath)) {
-                auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
-                auto id = property(propertyData, TAG_ID).toString();
-
-                if (id == control->id())
-                    return true;
-            }
-
-            return false;
-        } else {
-            QStringList paths(parentRootPath + separator() + DIR_THIS);
-            paths << childrenPaths(parentRootPath);
-
-            for (auto path : paths) {
-                auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
-                auto id = property(propertyData, TAG_ID).toString();
-
-                if (id == control->id())
-                    return true;
-            }
-
-            return false;
         }
+
+        return false;
     } else {
-        return existsInFormScope(control);
+        QStringList paths(parentRootPath + separator() + DIR_THIS);
+        paths << childrenPaths(parentRootPath);
+
+        for (auto path : paths) {
+            auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
+            auto id = property(propertyData, TAG_ID).toString();
+
+            if (id == control->id())
+                return true;
+        }
+
+        return false;
     }
 }
 
@@ -532,6 +534,9 @@ QString SaveManager::suid(const QString& rootPath)
     return _d->property(propertyData, TAG_SUID).toString();
 }
 
+// You have to provide an valid suid, except if control is a form
+// If topPath is empty, then top level project directory searched
+// So, suid and topPath have to be in a valid logical relationship.
 bool SaveManager::exists(const Control* control, const QString& suid, const QString& topPath)
 {
     return control->form() ? _d->existsInFormScope(control) : _d->existsInParentScope(control, suid, topPath);
@@ -545,7 +550,7 @@ bool SaveManager::addForm(Form* form)
     if (!isOwctrl(form->dir()))
         return false;
 
-    _d->refactorId(form);
+    _d->refactorId(form, QString());
 
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
@@ -576,7 +581,7 @@ void SaveManager::removeForm(const Form* form)
     if (form->id().isEmpty() || form->url().isEmpty())
         return;
 
-    if (form->main() || !isOwctrl(form->dir()) || !exists(form))
+    if (form->main() || !isOwctrl(form->dir()) || !exists(form, QString()))
         return;
 
     rm(form->dir());
@@ -617,6 +622,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     return true;
 }
 
+// You can only move controls within current suid scope of related control
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
 {
     if (_d->parentDir(control) == parentControl->dir())
@@ -625,17 +631,13 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     if (control->id().isEmpty() || control->url().isEmpty())
         return false;
 
-    if (parentControl->dir().isEmpty())
+    if (parentControl->url().isEmpty())
         return false;
 
     if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
         return false;
 
     if (suid(control->dir()) != suid(parentControl->dir()))
-        return false;
-
-    if (!exists(control, suid(control->dir())) ||
-        !exists(parentControl, suid(parentControl->dir())))
         return false;
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
@@ -662,7 +664,7 @@ void SaveManager::removeControl(const Control* control)
     if (control->id().isEmpty() || control->url().isEmpty())
         return;
 
-    if (!isOwctrl(control->dir()) || !exists(control))
+    if (!isOwctrl(control->dir()))
         return;
 
     rm(control->dir());
@@ -670,6 +672,12 @@ void SaveManager::removeControl(const Control* control)
     emit _d->parent->databaseChanged();
 }
 
+// You can not set id property of a top control if it's not exist in the project database
+// If you want to set id property of a control that is not exist in the project database,
+// then you have to provide a valid topPath
+// If topPath is empty, then top level project directory searched
+// So, suid and topPath have to be in a valid logical relationship.
+// topPath is only necessary if property is an "id" set.
 void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath)
 {
     if (control->dir().isEmpty() || !isOwctrl(control->dir()))

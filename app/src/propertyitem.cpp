@@ -6,6 +6,7 @@
 #include <savemanager.h>
 #include <filemanager.h>
 #include <control.h>
+#include <designmanager.h>
 
 #include <QtWidgets>
 
@@ -34,7 +35,10 @@ QString PropertyItem::property() const
 
 void PropertyItem::applyValue(const QVariant& value)
 {
-    SaveManager::setProperty(_control, _property, value);
+    if (DesignManager::mode() == DesignManager::ControlGUI && _property == TAG_ID)
+        SaveManager::setProperty(_control, _property, value, DesignManager::controlScene()->mainControl()->dir());
+    else
+        SaveManager::setProperty(_control, _property, value);
     Delayer::delay(&SaveManager::inprogress);
     _control->refresh();
 	emit valueApplied();
@@ -71,6 +75,11 @@ void PropertyItem::fillCup()
 	layout->addWidget(label);
 
     if (!_control->properties().contains(_property)) {
+        _valid = false;
+        return;
+    }
+
+    if (_property == TAG_ID && _control == DesignManager::controlScene()->mainControl()) {
         _valid = false;
         return;
     }

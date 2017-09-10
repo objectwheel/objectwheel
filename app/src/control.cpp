@@ -590,7 +590,8 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     control->setParentItem(this);
     control->refresh();
     connect(control, &Control::initialized, [=] {
-        SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid());
+        SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid(),
+                                DesignManager::currentScene()->mainControl()->dir());
         control->controlTransaction()->setTransactionsEnabled(true);
         control->setPos(pos);
     });
