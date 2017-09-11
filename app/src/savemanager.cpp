@@ -44,7 +44,7 @@ class SaveManagerPrivate : public QObject
         // Searches by id.
         // Searches control in form scope (in current project)
         // If current project is empty, then returns false.
-        bool existsInFormScope(const Control* control) const; // Searches by id.
+        bool existsInFormScope(const Control* control) const;
 
         // Searches by id.
         // Searches control within given suid, search starts within topPath
@@ -95,6 +95,9 @@ class SaveManagerPrivate : public QObject
         // Searches in current project directory if given rootPath is empty
         // Only suid scope controls in the given rootPath are returned
         QString findById(const QString& suid, const QString& id, const QString& rootPath = QString()) const;
+
+        // Returns true if given path is inside of owdb
+        bool isInOwdb(const QString& path) const;
 
         // Returns root path (of parent) if given control has a parent control
         QString parentDir(const Control* control) const;
@@ -401,6 +404,16 @@ QString SaveManagerPrivate::findById(const QString& suid, const QString& id, con
     return QString();
 }
 
+bool SaveManagerPrivate::isInOwdb(const QString& path) const
+{
+    auto projectDirectory = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+    Q_ASSERT(!projectDirectory.isEmpty());
+
+    QString owdbPath = projectDirectory + separator() + DIR_OWDB;
+    return path.contains(owdbPath, Qt::CaseInsensitive);
+}
+
 QString SaveManagerPrivate::parentDir(const Control* control) const
 {
     if (control->form() ||
@@ -500,6 +513,29 @@ void SaveManager::exposeProject()
         }
     }
     emit instance()->projectExposed();
+}
+
+Control* SaveManager::exposeControl(const QString& rootPath)
+{
+    auto control = new Control(rootPath + separator() + DIR_THIS +
+                               separator() + "main.qml");
+
+    Control* parentControl;
+    for (auto child : _d->childrenPaths(rootPath)) {
+        if (dname(dname(dname(child))) == rootPath)
+            parentControl = control;
+
+        auto control = new Control(child + separator() + "main.qml");
+        control->setParentItem(parentControl);
+        control->refresh();
+        connect(control, &Control::initialized, [=] {
+            control->controlTransaction()->setTransactionsEnabled(true);
+        });
+
+        parentControl = control;
+    }
+
+    return control;
 }
 
 bool SaveManager::isOwctrl(const QString& rootPath)
@@ -617,7 +653,8 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     _d->flushSuid(control, suid);
     _d->recalculateUids(control);
 
-    emit _d->parent->databaseChanged();
+    if (_d->isInOwdb(control->dir()))
+         emit _d->parent->databaseChanged();
 
     return true;
 }
@@ -654,7 +691,8 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
 
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
-    emit _d->parent->databaseChanged();
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 
     return true;
 }
@@ -669,7 +707,8 @@ void SaveManager::removeControl(const Control* control)
 
     rm(control->dir());
 
-    emit _d->parent->databaseChanged();
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 }
 
 // You can not set id property of a top control if it's not exist in the project database
@@ -698,7 +737,9 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
                         separator() + "main.qml";
         ParserController::setVariantProperty(fileName, property, value);
     }
-    emit _d->parent->databaseChanged();
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 }
 
 void SaveManager::removeProperty(const Control* control, const QString& property)
@@ -709,7 +750,9 @@ void SaveManager::removeProperty(const Control* control, const QString& property
     auto fileName = control->dir() + separator() + DIR_THIS +
                     separator() + "main.qml";
     ParserController::removeVariantProperty(fileName, property);
-    emit _d->parent->databaseChanged();
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 }
 
 QString SaveManager::pathOfId(const QString& suid, const QString& id, const QString& rootPath)

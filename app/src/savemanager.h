@@ -21,6 +21,7 @@
 class SaveManagerPrivate;
 class Control;
 class Form;
+class ControlScene;
 
 class SaveManager : public QObject
 {
@@ -33,6 +34,7 @@ class SaveManager : public QObject
 
         static bool execProject();
         static void exposeProject();
+        static Control* exposeControl(const QString& rootPath);
         static bool initProject(const QString& projectDirectory);
 
         static QString basePath();
