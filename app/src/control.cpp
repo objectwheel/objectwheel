@@ -247,6 +247,7 @@ class ControlPrivate : public QObject
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
+    , qmlPreviewer(parent)
     , hoverOn(false)
 {
     int i = 0;
@@ -315,9 +316,9 @@ void ControlPrivate::refreshPreview()
     refreshTimer.stop();
 
     if (parent->_initialized)
-        qmlPreviewer.requestReview(parent->url(), parent->size());
+        qmlPreviewer.requestPreview(parent->size());
     else
-        qmlPreviewer.requestReview(parent->url());
+        qmlPreviewer.requestPreview();
 }
 
 void ControlPrivate::updatePreview(const PreviewResult& result)

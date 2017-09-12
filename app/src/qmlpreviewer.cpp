@@ -3,6 +3,7 @@
 #include <formscene.h>
 #include <filemanager.h>
 #include <savemanager.h>
+#include <control.h>
 
 #include <QApplication>
 #include <QQuickWindow>
@@ -21,25 +22,37 @@
 
 using namespace Fit;
 
-class QmlPreviewerPrivate
+class QmlPreviewerPrivate : public QObject
 {
+        Q_OBJECT
+
     public:
         QmlPreviewerPrivate(QmlPreviewer* parent);
-        void scratchPixmapIfEmpty(QPixmap& pixmap);
-        QQuickWindow* handleWindowsIfAny(QObject* object);
-        QMap<QString, QVariant> extractProperties(const QObject* object);
-        QList<QString> extractEvents(const QObject* object);
+        void scratchPixmapIfEmpty(QPixmap& pixmap) const;
+        QQuickWindow* handleWindowsIfAny(QObject* object) const;
+        QMap<QString, QVariant> extractProperties(const QObject* object) const;
+        QList<QString> extractEvents(const QObject* object) const;
+
+    public slots:
+        void requestPreview(const QString& url, const QSizeF& size) const;
+
+    signals:
+        void previewReady(const PreviewResult& result) const;
+        void errorsOccurred(const QList<QQmlError>& errors, const PreviewResult& result) const;
 
     public:
         QmlPreviewer* parent;
+        bool working;
 };
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
-    : parent(parent)
+    : QObject(parent)
+    , parent(parent)
+    , working(false)
 {
 }
 
-void QmlPreviewerPrivate::scratchPixmapIfEmpty(QPixmap& pixmap)
+void QmlPreviewerPrivate::scratchPixmapIfEmpty(QPixmap& pixmap) const
 {
     // Check 10 pixels atleast that has alpha > 250
     int totalAlpha = 0;
@@ -62,7 +75,7 @@ void QmlPreviewerPrivate::scratchPixmapIfEmpty(QPixmap& pixmap)
     painter.drawRect(pixmap.rect());
 }
 
-QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object)
+QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object) const
 {
     QQuickWindow* ret = nullptr;
 
@@ -76,7 +89,7 @@ QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object)
     return ret;
 }
 
-QMap<QString, QVariant> QmlPreviewerPrivate::extractProperties(const QObject* object)
+QMap<QString, QVariant> QmlPreviewerPrivate::extractProperties(const QObject* object) const
 {
     QMap<QString, QVariant> properties;
     auto metaObject = object->metaObject();
@@ -88,7 +101,7 @@ QMap<QString, QVariant> QmlPreviewerPrivate::extractProperties(const QObject* ob
     return properties;
 }
 
-QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object)
+QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
 {
     QList<QString> events;
     auto metaObject = object->metaObject();
@@ -100,18 +113,7 @@ QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object)
     return events;
 }
 
-QmlPreviewer::QmlPreviewer(QObject *parent)
-    : QObject(parent)
-    , _d(new QmlPreviewerPrivate(this))
-{
-}
-
-QmlPreviewer::~QmlPreviewer()
-{
-    delete _d;
-}
-
-void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
+void QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size) const
 {
     PreviewResult result;
     result.id = "none";
@@ -139,9 +141,9 @@ void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
         return;
     }
 
-    result.properties = _d->extractProperties(qmlObject);
-    result.events = _d->extractEvents(qmlObject);
-    window = QSharedPointer<QQuickWindow>(_d->handleWindowsIfAny(qmlObject));
+    result.properties = extractProperties(qmlObject);
+    result.events = extractEvents(qmlObject);
+    window = QSharedPointer<QQuickWindow>(handleWindowsIfAny(qmlObject));
     result.gui = (qmlObject->inherits("QQuickItem") || window);
 
     if (result.gui == false) {
@@ -191,7 +193,7 @@ void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
 
         QPixmap preview = QPixmap::fromImage(window->grabWindow());
         preview.setDevicePixelRatio(qApp->devicePixelRatio());
-        _d->scratchPixmapIfEmpty(preview);
+        scratchPixmapIfEmpty(preview);
 
         result.preview = preview;
 
@@ -199,3 +201,21 @@ void QmlPreviewer::requestReview(const QString& url, const QSizeF& size)
     });
 }
 
+QmlPreviewer::QmlPreviewer(Control* watched, QObject *parent)
+    : QObject(parent)
+    , _d(new QmlPreviewerPrivate(this))
+    , _watched(watched)
+{
+}
+
+void QmlPreviewer::requestPreview(const QSizeF& size)
+{
+    if (_d->working)
+        return;
+    _d->working = true;
+
+    auto url = _watched->url();
+
+}
+
+#include "qmlpreviewer.moc"
