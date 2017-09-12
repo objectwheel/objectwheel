@@ -7,6 +7,7 @@
 #include <qmleditor.h>
 #include <control.h>
 #include <designmanager.h>
+#include <algorithm>
 
 #include <QQmlEngine>
 #include <QJsonArray>
@@ -51,17 +52,16 @@ class SaveManagerPrivate : public QObject
         // Given suid has to be valid
         bool existsInParentScope(const Control* control, const QString& suid, const QString topPath) const;
 
-        // Returns all children paths (DIR_THIS) within given root path.
-        // Returns children only if they have match between their and given suid.
-        // If given suid is empty then rootPath's uid is taken.
-        QStringList childrenPaths(const QString& rootPath, QString suid = QString()) const;
+        // Searches for all controls paths, starting from topPath.
+        // Returns all control paths (rootPaths) within given topPath.
+        QStringList controlPaths(const QString& topPath) const;
 
         // Returns (only) form paths.
-        // Returned paths are paths of main.qml files (DIR_THIS).
+        // Returned paths are rootPaths.
         QStringList formPaths() const;
 
         // Returns all control paths in form scope.
-        // Returned paths are paths of main.qml files (DIR_THIS).
+        // Returned paths are rootPaths.
         QStringList formScopePaths() const;
 
         // Returns biggest number from integer named dirs.
@@ -160,7 +160,7 @@ bool SaveManagerPrivate::isOwctrl(const QByteArray& propertyData) const
 bool SaveManagerPrivate::existsInForms(const Control* control) const
 {
     for (auto path : formPaths()) {
-        auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
+        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
         auto id = property(propertyData, TAG_ID).toString();
 
         if (id == control->id())
@@ -174,7 +174,7 @@ bool SaveManagerPrivate::existsInFormScope(const Control* control) const
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
-        auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
+        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
         auto id = property(propertyData, TAG_ID).toString();
 
         if (id == control->id())
@@ -198,8 +198,9 @@ bool SaveManagerPrivate::existsInParentScope(const Control* control, const QStri
         if (existsInForms(control))
             return true;
 
-        for (auto path : childrenPaths(parentRootPath)) {
-            auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
+        for (auto path : parent->childrenPaths(parentRootPath)) {
+            auto propertyData = rdfile(path + separator() + DIR_THIS +
+                                       separator() + FILE_PROPERTIES);
             auto id = property(propertyData, TAG_ID).toString();
 
             if (id == control->id())
@@ -209,10 +210,11 @@ bool SaveManagerPrivate::existsInParentScope(const Control* control, const QStri
         return false;
     } else {
         QStringList paths(parentRootPath + separator() + DIR_THIS);
-        paths << childrenPaths(parentRootPath);
+        paths << parent->childrenPaths(parentRootPath);
 
         for (auto path : paths) {
-            auto propertyData = rdfile(path + separator() + FILE_PROPERTIES);
+            auto propertyData = rdfile(path + separator() + DIR_THIS +
+                                       separator() + FILE_PROPERTIES);
             auto id = property(propertyData, TAG_ID).toString();
 
             if (id == control->id())
@@ -223,31 +225,19 @@ bool SaveManagerPrivate::existsInParentScope(const Control* control, const QStri
     }
 }
 
-QStringList SaveManagerPrivate::childrenPaths(const QString& rootPath, QString suid) const
+QStringList SaveManagerPrivate::controlPaths(const QString& topPath) const
 {
     QStringList paths;
 
-    if (rootPath.isEmpty())
+    if (topPath.isEmpty())
         return paths;
 
-    if (suid.isEmpty()) {
-        auto propertyPath = rootPath + separator() + DIR_THIS +
-                            separator() + FILE_PROPERTIES;
-        auto propertyData = rdfile(propertyPath);
-        suid = property(propertyData, TAG_UID).toString();
+    for (auto path : fps(FILE_PROPERTIES, topPath)) {
+        auto propertyData = rdfile(path);
+        if (isOwctrl(propertyData))
+            paths << dname(dname(path));
     }
 
-    auto childrenPath = rootPath + separator() + DIR_CHILDREN;
-    for (auto dir : lsdir(childrenPath)) {
-        auto propertyPath = childrenPath + separator() + dir + separator() +
-                            DIR_THIS + separator() + FILE_PROPERTIES;
-        auto propertyData = rdfile(propertyPath);
-
-        if (isOwctrl(propertyData) && property(propertyData, TAG_SUID).toString() == suid) {
-            paths << dname(propertyPath);
-            paths << childrenPaths(dname(dname(propertyPath)), suid);
-        }
-    }
     return paths;
 }
 
@@ -267,7 +257,7 @@ QStringList SaveManagerPrivate::formPaths() const
         auto propertyData = rdfile(propertyPath);
 
         if (isOwctrl(propertyData))
-            paths << dname(propertyPath);
+            paths << dname(dname(propertyPath));
     }
 
     return paths;
@@ -279,7 +269,7 @@ QStringList SaveManagerPrivate::formScopePaths() const
     QStringList paths(fpaths);
 
     for (auto path : fpaths)
-        paths << childrenPaths(dname(path));
+        paths << parent->childrenPaths(dname(path));
 
     return paths;
 }
@@ -462,7 +452,7 @@ bool SaveManager::initProject(const QString& projectDirectory)
 
 bool SaveManager::execProject()
 {
-
+    //TODO
 }
 
 QString SaveManager::basePath()
@@ -477,9 +467,59 @@ QString SaveManager::basePath()
 
 QStringList SaveManager::formPaths()
 {
+    return _d->formPaths();
+}
+
+// Returns all children paths (rootPath) within given root path.
+// Returns children only if they have match between their and given suid.
+// If given suid is empty then rootPath's uid is taken.
+QStringList SaveManager::childrenPaths(const QString& rootPath, QString suid)
+{
     QStringList paths;
-    for (auto path : _d->formPaths())
-        paths << dname(path);
+
+    if (rootPath.isEmpty())
+        return paths;
+
+    if (suid.isEmpty()) {
+        auto propertyPath = rootPath + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        suid = _d->property(propertyData, TAG_UID).toString();
+    }
+
+    auto childrenPath = rootPath + separator() + DIR_CHILDREN;
+    for (auto dir : lsdir(childrenPath)) {
+        auto propertyPath = childrenPath + separator() + dir + separator() +
+                            DIR_THIS + separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+
+        if (_d->isOwctrl(propertyData) && _d->property(propertyData, TAG_SUID).toString() == suid) {
+            paths << dname(dname(propertyPath));
+            paths << childrenPaths(dname(dname(propertyPath)), suid);
+        }
+    }
+    return paths;
+}
+
+QStringList SaveManager::masterPaths(const QString& topPath)
+{
+    QStringList paths;
+    auto controlPaths = _d->controlPaths(topPath);
+
+    QStringList foundSuids;
+    for (auto path : controlPaths) {
+        auto _suid = suid(path);
+        if (!_suid.isEmpty() && !foundSuids.contains(_suid))
+            foundSuids << _suid;
+    }
+
+    for (auto path : controlPaths) {
+        if (foundSuids.contains(uid(path)))
+            paths << path;
+    }
+
+    std::sort(paths.begin(), paths.end(), std::greater<QString>());
+
     return paths;
 }
 
@@ -489,8 +529,8 @@ void SaveManager::exposeProject()
 
     for (auto path : fpaths) {
 
-        auto form = new Form(path + separator() + "main.qml");
-        if (fname(dname(path)) == DIR_MAINFORM)
+        auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
+        if (fname(path) == DIR_MAINFORM)
             form->setMain(true);
         DesignManager::formScene()->addForm(form);
         connect(form, &Form::initialized, [=] {
@@ -498,11 +538,11 @@ void SaveManager::exposeProject()
         });
 
         Control* parentControl;
-        for (auto child : _d->childrenPaths(dname(path))) {
-            if ((dname(dname(dname(child))) + separator() + DIR_THIS) == path)
+        for (auto child : childrenPaths(path)) {
+            if (dname(dname(child)) == path)
                 parentControl = form;
 
-            auto control = new Control(child + separator() + "main.qml");
+            auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
             control->setParentItem(parentControl);
             control->refresh();
             connect(control, &Control::initialized, [=] {
@@ -521,11 +561,11 @@ Control* SaveManager::exposeControl(const QString& rootPath)
                                separator() + "main.qml");
 
     Control* parentControl;
-    for (auto child : _d->childrenPaths(rootPath)) {
-        if (dname(dname(dname(child))) == rootPath)
+    for (auto child : childrenPaths(rootPath)) {
+        if (dname(dname(child)) == rootPath)
             parentControl = control;
 
-        auto control = new Control(child + separator() + "main.qml");
+        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         control->setParentItem(parentControl);
         control->refresh();
         connect(control, &Control::initialized, [=] {

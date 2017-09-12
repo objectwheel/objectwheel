@@ -4,6 +4,7 @@
 #include <filemanager.h>
 #include <savemanager.h>
 #include <control.h>
+#include <delayer.h>
 
 #include <QApplication>
 #include <QQuickWindow>
@@ -34,7 +35,7 @@ class QmlPreviewerPrivate : public QObject
         QList<QString> extractEvents(const QObject* object) const;
 
     public slots:
-        void requestPreview(const QString& url, const QSizeF& size) const;
+        PreviewResult requestPreview(const QString& url, const QSizeF& size) const;
 
     signals:
         void previewReady(const PreviewResult& result) const;
@@ -113,7 +114,7 @@ QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
     return events;
 }
 
-void QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size) const
+PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size) const
 {
     PreviewResult result;
     result.id = "none";
@@ -122,7 +123,7 @@ void QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size)
         QQmlError error;
         error.setDescription("Invalid url or control.");
         emit errorsOccurred(QList<QQmlError>() << error, result);
-        return;
+        return PreviewResult();
     }
 
     QObject* qmlObject;
@@ -138,7 +139,7 @@ void QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size)
 
     if (!qmlComponent->errors().isEmpty()) {
         emit errorsOccurred(qmlComponent->errors(), result);
-        return;
+        return PreviewResult();
     }
 
     result.properties = extractProperties(qmlObject);
@@ -150,7 +151,7 @@ void QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size)
         result.preview = QPixmap(dname(url) + separator() + "icon.png")
                          .scaled(NONGUI_CONTROL_SIZE * qApp->devicePixelRatio(), NONGUI_CONTROL_SIZE * qApp->devicePixelRatio());
         emit previewReady(result);
-        return;
+        return PreviewResult();
     }
 
     if (window == nullptr) {
@@ -187,18 +188,13 @@ void QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size)
     window->setOpacity(0);
     window->hide();
 
-    QTimer::singleShot(100, [=] () mutable {
-        Q_UNUSED(qmlEngine)
-        Q_UNUSED(qmlComponent)
+    Delayer::delay(100);
 
-        QPixmap preview = QPixmap::fromImage(window->grabWindow());
-        preview.setDevicePixelRatio(qApp->devicePixelRatio());
-        scratchPixmapIfEmpty(preview);
-
-        result.preview = preview;
-
-        emit previewReady(result);
-    });
+    QPixmap preview = QPixmap::fromImage(window->grabWindow());
+    preview.setDevicePixelRatio(qApp->devicePixelRatio());
+    scratchPixmapIfEmpty(preview);
+    result.preview = preview;
+    return result;
 }
 
 QmlPreviewer::QmlPreviewer(Control* watched, QObject *parent)
@@ -208,14 +204,52 @@ QmlPreviewer::QmlPreviewer(Control* watched, QObject *parent)
 {
 }
 
+#include <QPainter>
+
 void QmlPreviewer::requestPreview(const QSizeF& size)
 {
     if (_d->working)
         return;
     _d->working = true;
 
-    auto url = _watched->url();
+    PreviewResult finalResult;
+    auto dir = _watched->dir();
+    auto masterPaths = SaveManager::masterPaths(dir);
+    QMap<QString, PreviewResult> masterResults;
 
+    for (auto path : masterPaths) {
+        QMap<QString, PreviewResult> results;
+        auto childrenPaths = SaveManager::childrenPaths(path);
+        for (auto childPath : childrenPaths) {
+            int index = masterPaths.indexOf(childPath);
+            if (index >= 0)
+                results[masterPaths[index]] = masterResults[masterPaths[index]];
+            else
+                results[childPath] = _d->requestPreview(childPath + separator() + DIR_THIS + separator() + "main.qml", QSize());
+        }
+
+        if (masterPaths.last() == path) {
+            masterResults[path] = _d->requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", size);
+            finalResult = masterResults[path];
+        } else {
+            masterResults[path] = _d->requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", QSize());
+        }
+
+        QPixmap* pixmap;
+        for (auto result : results.keys()) {
+            if (dname(dname(result)) == path)
+                pixmap = &masterResults[path].preview;
+
+            QPainter p(pixmap);
+            p.drawPixmap(results[result].pos, results[result].preview);
+            p.end();
+
+            pixmap = &results[result].preview;
+        }
+    }
+
+    _d->working = false;
+    emit previewReady(finalResult);
 }
 
 #include "qmlpreviewer.moc"
