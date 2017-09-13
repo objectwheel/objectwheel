@@ -20,6 +20,10 @@
 #include <QImage>
 #include <QtMath>
 #include <QTimer>
+#include <QPainter>
+#include <QTimer>
+
+#define TASK_TIMEOUT 100
 
 using namespace Fit;
 
@@ -36,6 +40,7 @@ class QmlPreviewerPrivate : public QObject
 
     public slots:
         PreviewResult requestPreview(const QString& url, const QSizeF& size) const;
+        void taskHandler();
 
     signals:
         void previewReady(const PreviewResult& result) const;
@@ -43,14 +48,19 @@ class QmlPreviewerPrivate : public QObject
 
     public:
         QmlPreviewer* parent;
-        bool working;
+        QList<QSizeF> taskList;
+        QTimer taskTimer;
+        static bool working;
 };
+
+bool QmlPreviewerPrivate::working = false;
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : QObject(parent)
     , parent(parent)
-    , working(false)
 {
+    taskTimer.setInterval(TASK_TIMEOUT);
+    connect(&taskTimer, SIGNAL(timeout()), SLOT(taskHandler()));
 }
 
 void QmlPreviewerPrivate::scratchPixmapIfEmpty(QPixmap& pixmap) const
@@ -197,23 +207,30 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
     return result;
 }
 
-QmlPreviewer::QmlPreviewer(Control* watched, QObject *parent)
-    : QObject(parent)
-    , _d(new QmlPreviewerPrivate(this))
-    , _watched(watched)
+void QmlPreviewerPrivate::taskHandler()
 {
-}
-
-#include <QPainter>
-
-void QmlPreviewer::requestPreview(const QSizeF& size)
-{
-    if (_d->working)
+    if (working)
         return;
-    _d->working = true;
 
-    PreviewResult finalResult;
-    auto dir = _watched->dir();
+    if (taskList.isEmpty()) {
+        taskTimer.stop();
+        return;
+    }
+    working = true;
+
+    auto size = taskList.takeFirst();
+    auto dir = parent->_watched->dir();
+
+    if (SaveManager::suid(dir).isEmpty()) {
+        auto res = requestPreview(dir + separator() + DIR_THIS +
+                                      separator() + "main.qml", size);
+        if (!res.isNull())
+            emit parent->previewReady(res);
+        working = false;
+        return;
+    }
+
+    PreviewResult* finalResult = nullptr;
     auto masterPaths = SaveManager::masterPaths(dir);
     QMap<QString, PreviewResult> masterResults;
 
@@ -222,34 +239,63 @@ void QmlPreviewer::requestPreview(const QSizeF& size)
         auto childrenPaths = SaveManager::childrenPaths(path);
         for (auto childPath : childrenPaths) {
             int index = masterPaths.indexOf(childPath);
-            if (index >= 0)
-                results[masterPaths[index]] = masterResults[masterPaths[index]];
-            else
-                results[childPath] = _d->requestPreview(childPath + separator() + DIR_THIS + separator() + "main.qml", QSize());
+            if (index >= 0) {
+                results[childPath] = masterResults[childPath];
+            } else {
+                results[childPath] = requestPreview(childPath + separator() + DIR_THIS + separator() + "main.qml", QSize());
+                if (results[childPath].isNull()) {
+                    working = false;
+                    return;
+                }
+            }
         }
 
         if (masterPaths.last() == path) {
-            masterResults[path] = _d->requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", size);
-            finalResult = masterResults[path];
+            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", size);
+            finalResult = &masterResults[path];
+            if (masterResults[path].isNull()) {
+                working = false;
+                return;
+            }
         } else {
-            masterResults[path] = _d->requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", QSize());
+            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", QSize());
+            if (masterResults[path].isNull()) {
+                working = false;
+                return;
+            }
         }
 
-        QPixmap* pixmap;
+        QPixmap* parentPixmap;
         for (auto result : results.keys()) {
             if (dname(dname(result)) == path)
-                pixmap = &masterResults[path].preview;
+                parentPixmap = &masterResults[path].preview;
 
-            QPainter p(pixmap);
-            p.drawPixmap(results[result].pos, results[result].preview);
+            QPainter p(parentPixmap);
+            p.drawPixmap(QRectF(results[result].pos, results[result].size),
+                         results[result].preview, QRectF(QPointF(0, 0),
+                         results[result].size * qApp->devicePixelRatio()));
             p.end();
 
-            pixmap = &results[result].preview;
+            parentPixmap = &results[result].preview;
         }
     }
 
-    _d->working = false;
-    emit previewReady(finalResult);
+    if (finalResult) //FIXME
+        emit parent->previewReady(*finalResult);
+    working = false;
+}
+
+QmlPreviewer::QmlPreviewer(Control* watched, QObject *parent)
+    : QObject(parent)
+    , _d(new QmlPreviewerPrivate(this))
+    , _watched(watched)
+{
+}
+
+void QmlPreviewer::requestPreview(const QSizeF& size)
+{
+    _d->taskList.append(size);
+    _d->taskTimer.start();
 }
 
 #include "qmlpreviewer.moc"

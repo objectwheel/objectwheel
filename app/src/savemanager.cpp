@@ -518,7 +518,9 @@ QStringList SaveManager::masterPaths(const QString& topPath)
             paths << path;
     }
 
-    std::sort(paths.begin(), paths.end(), std::greater<QString>());
+    std::sort(paths.begin(), paths.end(),
+              [](const QString& a, const QString& b)
+              { return a.size() > b.size(); });
 
     return paths;
 }

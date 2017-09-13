@@ -233,8 +233,8 @@ class ControlPrivate : public QObject
 
     public slots:
         void refreshPreview();
-        void updatePreview(const PreviewResult& result);
-        void handlePreviewErrors(QList<QQmlError> errors, const PreviewResult& result);
+        void updatePreview(PreviewResult result);
+        void handlePreviewErrors(QList<QQmlError> errors, PreviewResult result);
 
     public:
         Control* parent;
@@ -258,8 +258,8 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
     connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    connect(&qmlPreviewer, SIGNAL(errorsOccurred(QList<QQmlError>, const PreviewResult&)),
-            SLOT(handlePreviewErrors(QList<QQmlError>, const PreviewResult&)));
+    connect(&qmlPreviewer, SIGNAL(errorsOccurred(QList<QQmlError>, PreviewResult)),
+            SLOT(handlePreviewErrors(QList<QQmlError>, PreviewResult)));
     connect(&qmlPreviewer, SIGNAL(previewReady(PreviewResult)),
             SLOT(updatePreview(PreviewResult)));
 }
@@ -321,7 +321,7 @@ void ControlPrivate::refreshPreview()
         qmlPreviewer.requestPreview();
 }
 
-void ControlPrivate::updatePreview(const PreviewResult& result)
+void ControlPrivate::updatePreview(PreviewResult result)
 {
     itemPixmap = result.preview;
 
@@ -373,7 +373,7 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
     emit parent->previewChanged();
 }
 
-void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors, const PreviewResult& result)
+void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors, PreviewResult result)
 {
     QMessageBox box;
     box.setText("<b>This tool has some errors, please fix these first.</b>");

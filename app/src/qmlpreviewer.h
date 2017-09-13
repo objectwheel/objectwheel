@@ -18,17 +18,18 @@ struct PreviewResult {
         QPointF pos;
         QSizeF size;
         QString id;
-        QString uid;
         QList<QString> events;
         QMap<QString, QVariant> properties;
         bool clip;
         bool gui;
         int zValue;
+        bool isNull() { return preview.isNull(); }
 };
 
 class QmlPreviewer : public QObject
 {
         Q_OBJECT
+        friend class QmlPreviewerPrivate;
 
     public:
         explicit QmlPreviewer(Control* watched, QObject *parent = 0);
