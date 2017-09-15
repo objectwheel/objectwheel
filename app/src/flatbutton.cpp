@@ -25,14 +25,14 @@ using namespace Fit;
 FlatButton::FlatButton(QWidget *parent)
 	: QPushButton(parent)
 	, m_Color("#f0f0f0")
-	, m_DisabledColor("#666666")
+	, _disabledColor("#666666")
 	, m_CheckedColor("#a5adb8")
 	, m_TextColor(Qt::black)
-	, m_DisabledTextColor("#444444")
+	, _disabledTextColor("#444444")
 	, m_CheckedTextColor(Qt::white)
 	, m_Radius(fit(4))
 	, m_IconButton(false)
-	, m_Down(false)
+	, _down(false)
 {
     setFocusPolicy(Qt::NoFocus);
 	setCursor(Qt::PointingHandCursor);
@@ -73,12 +73,12 @@ void FlatButton::setColor(const QColor& Color)
 
 const QColor& FlatButton::DisabledColor() const
 {
-	return m_DisabledColor;
+	return _disabledColor;
 }
 
 void FlatButton::setDisabledColor(const QColor& Color)
 {
-	m_DisabledColor = Color;
+	_disabledColor = Color;
 	applyTheme();
 }
 
@@ -106,12 +106,12 @@ void FlatButton::setTextColor(const QColor& TextColor)
 
 const QColor& FlatButton::DisabledTextColor() const
 {
-	return m_DisabledTextColor;
+	return _disabledTextColor;
 }
 
 void FlatButton::setDisabledTextColor(const QColor& TextColor)
 {
-	m_DisabledTextColor = TextColor;
+	_disabledTextColor = TextColor;
 	applyTheme();
 }
 
@@ -138,8 +138,8 @@ void FlatButton::applyTheme()
                   .arg(mix.red()).arg(mix.green()).arg(mix.blue())
                   .arg(m_CheckedColor.red()).arg(m_CheckedColor.green()).arg(m_CheckedColor.blue())
                   .arg(m_CheckedTextColor.red()).arg(m_CheckedTextColor.green()).arg(m_CheckedTextColor.blue())
-                  .arg(m_DisabledColor.red()).arg(m_DisabledColor.green()).arg(m_DisabledColor.blue())
-                  .arg(m_DisabledTextColor.red()).arg(m_DisabledTextColor.green()).arg(m_DisabledTextColor.blue())
+                  .arg(_disabledColor.red()).arg(_disabledColor.green()).arg(_disabledColor.blue())
+                  .arg(_disabledTextColor.red()).arg(_disabledTextColor.green()).arg(_disabledTextColor.blue())
                   .arg(fit(1)));
 }
 

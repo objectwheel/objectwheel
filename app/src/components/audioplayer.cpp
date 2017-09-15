@@ -118,7 +118,7 @@ void AudioPlayer::setData(const QByteArray& data)
 		m_audioOutput->deleteLater();
 	}
 
-	m_data = data;
+	_data = data;
 
 	m_audioOutput = new QAudioOutput(m_format, this);
 	m_audioOutput->setVolume(m_volume);
@@ -126,7 +126,7 @@ void AudioPlayer::setData(const QByteArray& data)
 	connect(m_audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 
 	QBuffer* buffer = new QBuffer(m_audioOutput);
-	buffer->setData(m_data);
+	buffer->setData(_data);
 	buffer->open(QBuffer::ReadOnly);
 	m_audioOutput->start(buffer);
 	m_audioOutput->suspend();
@@ -134,7 +134,7 @@ void AudioPlayer::setData(const QByteArray& data)
 
 const QByteArray&AudioPlayer::data() const
 {
-	return m_data;
+	return _data;
 }
 
 void AudioPlayer::play()
@@ -170,7 +170,7 @@ void AudioPlayer::handleStateChanged(QAudio::State newState)
 	switch (newState) {
 		case QAudio::IdleState:
 		case QAudio::StoppedState: {
-			setData(m_data);
+			setData(_data);
 			break;
 		}
 

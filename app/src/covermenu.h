@@ -20,7 +20,7 @@ class CoverMenu : public QWidget
 		QWidget* m_AttachedWidget;
 		QVBoxLayout* m_Layout;
 		int m_MenuWidth;
-		int m_Duration;
+		int _duration;
 		QAbstractAnimation::State m_AnimationState;
 		QWidget* m_ShadowWidget;
 

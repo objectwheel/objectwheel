@@ -33,7 +33,7 @@ class UserManager : public QObject
 		static void stopUserSession();
 
 	private:
-		static UserManagerPrivate* m_d;
+		static UserManagerPrivate* _d;
 };
 
 #endif // USERMANAGER_H

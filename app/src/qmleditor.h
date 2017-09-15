@@ -53,7 +53,7 @@ class QmlEditor : public QWidget
         void savedTextOnly(const QString& text);
 
 	private:
-        static QmlEditorPrivate* m_d;
+        static QmlEditorPrivate* _d;
         static float showRatio;
 };
 

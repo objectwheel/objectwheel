@@ -42,16 +42,16 @@ Rectangle {\n\
 #endif
 
 using namespace Fit;
-MainWindowPrivate* MainWindow::m_d = nullptr;
+MainWindowPrivate* MainWindow::_d = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QWidget(parent)
     , m_RightMenu(new CoverMenu)
     , m_LeftMenu(new CoverMenu)
 {
-	if (m_d) return;
-	m_d = new MainWindowPrivate(this);
-    m_d->setupUi();
+    if (_d) return;
+    _d = new MainWindowPrivate(this);
+    _d->setupUi();
 	SetupGui();
 	QTimer::singleShot(300, [=] { SetupManagers(); });
 }
@@ -59,38 +59,38 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::SetupGui()
 {
 	/* Add Tool Menu */
-    m_RightMenu->setCoverWidget(m_d->centralWidget);
+    m_RightMenu->setCoverWidget(_d->centralWidget);
     m_RightMenu->setCoverSide(CoverMenu::FromRight);
     connect(this,SIGNAL(resized()),m_RightMenu,SLOT(hide()));
-    connect(this,&MainWindow::resized, [this] { m_d->titleBar->setMenuChecked(false); });
+    connect(this,&MainWindow::resized, [this] { _d->titleBar->setMenuChecked(false); });
 
 	/* Add Properties Menu */
-    m_LeftMenu->setCoverWidget(m_d->centralWidget);
+    m_LeftMenu->setCoverWidget(_d->centralWidget);
     m_LeftMenu->setCoverSide(CoverMenu::FromLeft);
     connect(this,SIGNAL(resized()),m_LeftMenu,SLOT(hide()));
-    connect(this,&MainWindow::resized, [this] { m_d->titleBar->setSettingsChecked(false); });
+    connect(this,&MainWindow::resized, [this] { _d->titleBar->setSettingsChecked(false); });
 
 	/* Add Title Bar */
-	fit(m_d->titleBar, Fit::Height, true);
-	m_d->titleBar->setText("Objectwheel Studio");
-    m_d->titleBar->setColor("#0D74C8");
-    m_d->titleBar->setShadowColor("#EAEEF1");
-	connect(m_d->titleBar, SIGNAL(MenuToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
-	connect(m_d->titleBar, SIGNAL(SettingsToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
-	connect(m_RightMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setMenuChecked(bool)));
-	connect(m_LeftMenu, SIGNAL(toggled(bool)), m_d->titleBar, SLOT(setSettingsChecked(bool)));
+    fit(_d->titleBar, Fit::Height, true);
+    _d->titleBar->setText("Objectwheel Studio");
+    _d->titleBar->setColor("#0D74C8");
+    _d->titleBar->setShadowColor("#EAEEF1");
+    connect(_d->titleBar, SIGNAL(MenuToggled(bool)), m_RightMenu, SLOT(setCovered(bool)));
+    connect(_d->titleBar, SIGNAL(SettingsToggled(bool)), m_LeftMenu, SLOT(setCovered(bool)));
+    connect(m_RightMenu, SIGNAL(toggled(bool)), _d->titleBar, SLOT(setMenuChecked(bool)));
+    connect(m_LeftMenu, SIGNAL(toggled(bool)), _d->titleBar, SLOT(setSettingsChecked(bool)));
 
 	/* Init Left Container */
 	QVariant toolboxVariant;
-	toolboxVariant.setValue<QWidget*>(m_d->toolboxWidget);
+    toolboxVariant.setValue<QWidget*>(_d->toolboxWidget);
 	QVariant propertiesVariant;
-	propertiesVariant.setValue<QWidget*>(m_d->propertiesWidget);
+    propertiesVariant.setValue<QWidget*>(_d->propertiesWidget);
     QVariant formsVariant;
-    formsVariant.setValue<QWidget*>(m_d->formsWidget);
+    formsVariant.setValue<QWidget*>(_d->formsWidget);
 	Container* leftContainer = new Container;
-	leftContainer->addWidget(m_d->toolboxWidget);
-	leftContainer->addWidget(m_d->propertiesWidget);
-    leftContainer->addWidget(m_d->formsWidget);
+    leftContainer->addWidget(_d->toolboxWidget);
+    leftContainer->addWidget(_d->propertiesWidget);
+    leftContainer->addWidget(_d->formsWidget);
 	leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QToolBar* leftToolbar = new QToolBar;
@@ -153,18 +153,18 @@ void MainWindow::SetupGui()
 	leftMenuLayout->addWidget(leftContainer);
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
-	m_d->qmlEditor = new QmlEditor(this);
-	m_d->qmlEditor->setHidden(true);
+    _d->qmlEditor = new QmlEditor(this);
+    _d->qmlEditor->setHidden(true);
 
-    QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
+    QObject::connect(_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
            DesignManager::formScene()->clearSelection();
            DesignManager::controlScene()->clearSelection();
         }
     });
 
-	m_d->aboutWidget = new About(this);
-    m_d->buildsScreen = new BuildsScreen(this);
+    _d->aboutWidget = new About(this);
+    _d->buildsScreen = new BuildsScreen(this);
 
     QWidget* sceneListWidget = new QWidget;
     sceneListWidget->setStyleSheet("background:#52616D; border:none;");
@@ -187,16 +187,16 @@ void MainWindow::SetupGui()
     sceneListTitle->setGraphicsEffect(sceneListTitleShadowEffect);
     sceneListTitle->setStyleSheet(QString("color: white; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);").arg(QColor("#C61717").name()).arg(QColor("#C61717").darker(115).name()));
 
-    m_d->toolboxList->indicatorButton()->setIcon(QIcon(":/resources/images/right-arrow.png"));
-    m_d->toolboxList->indicatorButton()->setColor(QColor("#0D74C8"));
-    m_d->toolboxList->indicatorButton()->setRadius(fit(7));
-    m_d->toolboxList->indicatorButton()->setIconSize(QSize(fit(10), fit(10)));
-    m_d->toolboxList->indicatorButton()->resize(fit(15), fit(15));
-    connect(m_d->toolboxList->indicatorButton(), &FlatButton::clicked, [=] {
+    _d->toolboxList->indicatorButton()->setIcon(QIcon(":/resources/images/right-arrow.png"));
+    _d->toolboxList->indicatorButton()->setColor(QColor("#0D74C8"));
+    _d->toolboxList->indicatorButton()->setRadius(fit(7));
+    _d->toolboxList->indicatorButton()->setIconSize(QSize(fit(10), fit(10)));
+    _d->toolboxList->indicatorButton()->resize(fit(15), fit(15));
+    connect(_d->toolboxList->indicatorButton(), &FlatButton::clicked, [=] {
         auto previousControl = DesignManager::currentScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
-        auto url = m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0];
+        auto url = _d->toolboxList->GetUrls(_d->toolboxList->currentItem())[0];
         auto control = SaveManager::exposeControl(dname(dname(url.toLocalFile())));
         DesignManager::controlScene()->setMainControl(control);
         DesignManager::setMode(DesignManager::ControlGUI);
@@ -220,7 +220,7 @@ void MainWindow::SetupGui()
     connect(secureExitButton, SIGNAL(clicked(bool)), this, SLOT(on_secureExitButton_clicked()));
 
     sceneListWidgetLayout->addWidget(sceneListTitle);
-    sceneListWidgetLayout->addWidget(m_d->sceneList);
+    sceneListWidgetLayout->addWidget(_d->sceneList);
     sceneListWidgetLayout->addWidget(secureExitButton);
     sceneListWidgetLayout->setAlignment(secureExitButton, Qt::AlignHCenter);
 
@@ -239,7 +239,7 @@ void MainWindow::SetupGui()
 void MainWindow::SetupManagers()
 {
 	//Let's add some custom controls to that project
-    ToolsManager::setListWidget(m_d->toolboxList);
+    ToolsManager::setListWidget(_d->toolboxList);
     auto userManager = new UserManager(this); //create new user manager
     Q_UNUSED(userManager);
     auto* projectManager = new ProjectManager(this); //create new project manager
@@ -248,12 +248,12 @@ void MainWindow::SetupManagers()
     new QmlPreviewer(this);
 	auto sceneManager = new SceneManager;
     sceneManager->setMainWindow(this);
-	sceneManager->setSceneListWidget(m_d->sceneList);
-	sceneManager->addScene("studioScene", m_d->centralWidget);
-    sceneManager->addScene("projectsScene", m_d->projectsScreen);
-    sceneManager->addScene("loginScene", m_d->loginScreen);
-    sceneManager->addScene("aboutScene", m_d->aboutWidget);
-    sceneManager->addScene("buildsScene", m_d->buildsScreen);
+    sceneManager->setSceneListWidget(_d->sceneList);
+    sceneManager->addScene("studioScene", _d->centralWidget);
+    sceneManager->addScene("projectsScene", _d->projectsScreen);
+    sceneManager->addScene("loginScene", _d->loginScreen);
+    sceneManager->addScene("aboutScene", _d->aboutWidget);
+    sceneManager->addScene("buildsScene", _d->buildsScreen);
     sceneManager->setCurrent("loginScene", false);
 
     connect(SaveManager::instance(), SIGNAL(parserRunningChanged(bool)), SLOT(handleIndicatorChanges()));
@@ -263,9 +263,9 @@ void MainWindow::SetupManagers()
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
 		m_RightMenu->hide();
-		m_d->titleBar->setMenuChecked(false);
+        _d->titleBar->setMenuChecked(false);
 		m_LeftMenu->hide();
-		m_d->titleBar->setSettingsChecked(false);
+        _d->titleBar->setSettingsChecked(false);
 	});
 	for (auto scene : sceneManager->scenes()) {
 		QList<QUrl> urls;
@@ -284,8 +284,8 @@ void MainWindow::SetupManagers()
         }
 		urls << scene;
 		QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), sceneName);
-		m_d->sceneList->insertItem(0, item);
-		m_d->sceneList->AddUrls(item, urls);
+        _d->sceneList->insertItem(0, item);
+        _d->sceneList->AddUrls(item, urls);
     }
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanupObjectwheel()));
 
@@ -301,7 +301,7 @@ void MainWindow::SetupManagers()
 }
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-	m_d->qmlEditor->setGeometry(0, 0, width(), height());
+    _d->qmlEditor->setGeometry(0, 0, width(), height());
     QWidget::resizeEvent(event);
 	emit resized();
 }
@@ -343,23 +343,23 @@ void MainWindow::handleToolboxUrlboxChanges(const QString& text)
 	auto url = QUrl::fromUserInput(text);
 	auto pixmap = DownloadPixmap(url);
 	if (pixmap.isNull()) return;
-	auto icon = dname(m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0].toLocalFile()) + "/icon.png";
+    auto icon = dname(_d->toolboxList->GetUrls(_d->toolboxList->currentItem())[0].toLocalFile()) + "/icon.png";
 	QByteArray bArray;
 	QBuffer buffer(&bArray);
 	buffer.open(QIODevice::WriteOnly);
 	if (!pixmap.save(&buffer,"PNG")) return;
 	buffer.close();
 	if (!wrfile(icon, bArray)) return;
-	m_d->toolboxList->currentItem()->setIcon(QIcon(icon));
+    _d->toolboxList->currentItem()->setIcon(QIcon(icon));
 }
 
 void MainWindow::handleToolboxNameboxChanges(QString name)
 {
-//	if (name == m_d->toolboxList->currentItem()->text() || name == "") return;
+//	if (name == _d->toolboxList->currentItem()->text() || name == "") return;
 
 //	int count = 1;
-//	for (int i = 0; i < m_d->toolboxList->count(); i++) {
-//		if (m_d->toolboxList->item(i)->text() == name) {
+//	for (int i = 0; i < _d->toolboxList->count(); i++) {
+//		if (_d->toolboxList->item(i)->text() == name) {
 //			if (count > 1) {
 //				name.remove(name.size() - 1, 1);
 //			}
@@ -369,39 +369,39 @@ void MainWindow::handleToolboxNameboxChanges(QString name)
 //		}
 //	}
 
-//	auto from = ToolsManager::toolsDir() + "/" + m_d->toolboxList->currentItem()->text();
+//	auto from = ToolsManager::toolsDir() + "/" + _d->toolboxList->currentItem()->text();
 //	auto to = ToolsManager::toolsDir() + "/" + name;
 //	if (!rn(from, to)) qFatal("MainWindow : Error occurred");
 
-//	m_d->toolboxList->currentItem()->setText(name);
+//	_d->toolboxList->currentItem()->setText(name);
 
 //	QList<QUrl> urls;
 //	urls << QUrl::fromLocalFile(to + "/main.qml");
-//	m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
-//	m_d->toolboxList->AddUrls(m_d->toolboxList->currentItem(),urls);
+//	_d->toolboxList->RemoveUrls(_d->toolboxList->currentItem());
+//	_d->toolboxList->AddUrls(_d->toolboxList->currentItem(),urls);
 
-//	for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
-//		if (m_d->m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
-//			m_d->m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
+//	for (int i = 0; i < _d->m_ItemUrls.size(); i++) {
+//		if (_d->m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
+//			_d->m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
 //		}
 //	}
 
-//	m_d->qmlEditor->updateCacheForRenamedEntry(from, to, true);
+//	_d->qmlEditor->updateCacheForRenamedEntry(from, to, true);
 }
 
 void MainWindow::toolboxEditButtonToggled(bool checked)
 {
 	if (checked) {
-		m_d->showAdderArea();
+        _d->showAdderArea();
 	} else {
-		m_d->hideAdderArea();
+        _d->hideAdderArea();
 	}
 }
 
 void MainWindow::toolboxRemoveButtonClicked()
 {
-//	if (m_d->toolboxList->currentRow() < 0) return;
-//	auto name = m_d->toolboxList->currentItem()->text();
+//	if (_d->toolboxList->currentRow() < 0) return;
+//	auto name = _d->toolboxList->currentItem()->text();
 //	QMessageBox msgBox;
 //	msgBox.setText(QString("<b>This will remove %1 from Tool Library and Dashboard.</b>").arg(name));
 //	msgBox.setInformativeText("Do you want to continue?");
@@ -411,23 +411,23 @@ void MainWindow::toolboxRemoveButtonClicked()
 //	const int ret = msgBox.exec();
 //	switch (ret) {
 //		case QMessageBox::Yes: {
-//			m_d->qmlEditor->clearCacheFor(ToolsManager::toolsDir() + separator() + name, true);
+//			_d->qmlEditor->clearCacheFor(ToolsManager::toolsDir() + separator() + name, true);
 //			rm(ToolsManager::toolsDir() + separator() + name);
-//			m_d->toolboxList->RemoveUrls(m_d->toolboxList->currentItem());
-//			delete m_d->toolboxList->takeItem(m_d->toolboxList->currentRow());
+//			_d->toolboxList->RemoveUrls(_d->toolboxList->currentItem());
+//			delete _d->toolboxList->takeItem(_d->toolboxList->currentRow());
 
-//			for (int i = 0; i < m_d->m_ItemUrls.size(); i++) {
-//				if (m_d->m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
-//					auto items = GetAllChildren(m_d->m_Items[i]);
+//			for (int i = 0; i < _d->m_ItemUrls.size(); i++) {
+//				if (_d->m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
+//					auto items = GetAllChildren(_d->m_Items[i]);
 //					for (auto item : items) {
-//						if (m_d->m_Items.contains(item)) {
-//							SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
-//							SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
-//							m_d->designWidget->rootContext()->setContextProperty(
-//										m_d->designWidget->rootContext()->nameForObject(item), 0);
-//							int j = m_d->m_Items.indexOf(item);
-//							m_d->m_Items.removeOne(item);
-//							m_d->m_ItemUrls.removeAt(j);
+//						if (_d->m_Items.contains(item)) {
+//							SaveManager::removeSave(_d->designWidget->rootContext()->nameForObject(item));
+//							SaveManager::removeParentalRelationship(_d->designWidget->rootContext()->nameForObject(item));
+//							_d->designWidget->rootContext()->setContextProperty(
+//										_d->designWidget->rootContext()->nameForObject(item), 0);
+//							int j = _d->m_Items.indexOf(item);
+//							_d->m_Items.removeOne(item);
+//							_d->m_ItemUrls.removeAt(j);
 //							item->deleteLater();
 //						}
 //					}
@@ -446,8 +446,8 @@ void MainWindow::toolboxAddButtonClicked()
 {
 	int count = 1;
 	auto name = QString("Item%1").arg(count);
-	for (int i = 0; i < m_d->toolboxList->count(); i++) {
-		if (m_d->toolboxList->item(i)->text() == name) {
+    for (int i = 0; i < _d->toolboxList->count(); i++) {
+        if (_d->toolboxList->item(i)->text() == name) {
 			name.remove(name.size() - 1, 1);
 			i = -1;
 			count++;
@@ -469,10 +469,10 @@ void MainWindow::toolboxAddButtonClicked()
 	QList<QUrl> urls;
 	QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), name);
 	urls << QUrl::fromLocalFile(filePath);
-	m_d->toolboxList->insertItem(0, item);
-	m_d->toolboxList->AddUrls(item,urls);
-	m_d->toolboxList->setCurrentRow(0);
-	m_d->toolboxEditButton->setChecked(true);
+    _d->toolboxList->insertItem(0, item);
+    _d->toolboxList->AddUrls(item,urls);
+    _d->toolboxList->setCurrentRow(0);
+    _d->toolboxEditButton->setChecked(true);
 }
 
 void MainWindow::toolboxResetButtonClicked()
@@ -486,22 +486,22 @@ void MainWindow::toolboxResetButtonClicked()
 //	const int ret = msgBox.exec();
 //	switch (ret) {
 //		case QMessageBox::Yes: {
-//			m_d->toolboxList->ClearUrls();
-//			m_d->toolboxList->clear();
-//			m_d->qmlEditor->clearCache();
+//			_d->toolboxList->ClearUrls();
+//			_d->toolboxList->clear();
+//			_d->qmlEditor->clearCache();
 //			ToolsManager::resetTools();
 
-//			for (auto item : m_d->m_Items) {
-//				SaveManager::removeSave(m_d->designWidget->rootContext()->nameForObject(item));
-//				SaveManager::removeParentalRelationship(m_d->designWidget->rootContext()->nameForObject(item));
-//				m_d->designWidget->rootContext()->setContextProperty(
-//							m_d->designWidget->rootContext()->nameForObject(item), 0);
+//			for (auto item : _d->m_Items) {
+//				SaveManager::removeSave(_d->designWidget->rootContext()->nameForObject(item));
+//				SaveManager::removeParentalRelationship(_d->designWidget->rootContext()->nameForObject(item));
+//				_d->designWidget->rootContext()->setContextProperty(
+//							_d->designWidget->rootContext()->nameForObject(item), 0);
 //				item->deleteLater();
 //			}
-//			m_d->m_Items.clear();
-//			m_d->m_ItemUrls.clear();
+//			_d->m_Items.clear();
+//			_d->m_ItemUrls.clear();
 //			HideSelectionTools();
-//			m_d->toolboxList->setCurrentRow(-1);
+//			_d->toolboxList->setCurrentRow(-1);
 //			break;
 //		} default: {
 //			// Do nothing
@@ -529,8 +529,8 @@ void MainWindow::toolboxExportButtonClicked()
 	dialog.setViewMode(QFileDialog::Detail);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
 	if (dialog.exec()) {
-		auto dir = dname(m_d->toolboxList->GetUrls(m_d->toolboxList->currentItem())[0].toLocalFile());
-		auto toolName = m_d->toolboxList->currentItem()->text();
+        auto dir = dname(_d->toolboxList->GetUrls(_d->toolboxList->currentItem())[0].toLocalFile());
+        auto toolName = _d->toolboxList->currentItem()->text();
         if (!rm(dialog.selectedFiles().at(0) + separator() + toolName + ".zip")) return;
 		Zipper::compressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip");
         QMessageBox::information(this, "Finished", "Tool export has successfully finished.");
@@ -542,8 +542,8 @@ void MainWindow::handleImports(const QStringList& fileNames)
 	for (auto fileName : fileNames) {
 		auto name = fname(fileName.remove(fileName.size() - 4, 4));
 		int count = 1;
-		for (int i = 0; i < m_d->toolboxList->count(); i++) {
-			if (m_d->toolboxList->item(i)->text() == name) {
+        for (int i = 0; i < _d->toolboxList->count(); i++) {
+            if (_d->toolboxList->item(i)->text() == name) {
 				if (count > 1) {
 					name.remove(name.size() - 1, 1);
 				}
@@ -582,5 +582,5 @@ const QPixmap MainWindow::DownloadPixmap(const QUrl& url)
 
 MainWindow::~MainWindow()
 {
-    delete m_d;
+    delete _d;
 }

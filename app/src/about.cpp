@@ -91,13 +91,13 @@ AboutPrivate::AboutPrivate(QWidget* p)
 
 About::About(QWidget *parent)
 	: QWidget(parent)
-	, m_d(new AboutPrivate(this))
+	, _d(new AboutPrivate(this))
 {
 }
 
 About::~About()
 {
-    delete m_d;
+    delete _d;
 }
 
 void About::resizeEvent(QResizeEvent* event)

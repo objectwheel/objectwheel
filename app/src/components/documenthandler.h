@@ -97,7 +97,7 @@ class DocumentHandler : public QObject
 		void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
 
 		QQuickItem *m_target;
-		QTextDocument *m_doc;
+		QTextDocument *_doc;
 
 		int m_cursorPosition;
 		int m_selectionStart;

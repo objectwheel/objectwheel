@@ -324,122 +324,122 @@ void QmlEditorPrivate::hide()
 	QObject::connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 }
 
-QmlEditorPrivate* QmlEditor::m_d = nullptr;
+QmlEditorPrivate* QmlEditor::_d = nullptr;
 float QmlEditor::showRatio;
 
 QmlEditor::QmlEditor(QWidget *parent)
 	: QWidget(parent)
 {
-    if (m_d) return;
-    m_d = new QmlEditorPrivate(this);
+    if (_d) return;
+    _d = new QmlEditorPrivate(this);
 }
 
 QmlEditor* QmlEditor::instance()
 {
-    return m_d->parent;
+    return _d->parent;
 }
 
 QmlEditor::~QmlEditor()
 {
-	delete m_d;
+    delete _d;
 }
 
 void QmlEditor::setItems(QList<QQuickItem*>* const itemList, QList<QUrl>* const urlList)
 {
-	m_d->itemList = itemList;
-	m_d->urlList = urlList;
+    _d->itemList = itemList;
+    _d->urlList = urlList;
 }
 
 void QmlEditor::setRootContext(QQmlContext* const context)
 {
-	m_d->dashboardRootContext = context;
+    _d->dashboardRootContext = context;
 }
 
 void QmlEditor::selectItem(QObject* const item)
 {
-	m_d->lastSelectedItem = (QQuickItem*)item;
+    _d->lastSelectedItem = (QQuickItem*)item;
 }
 
 void QmlEditor::setShowCenter(const QPoint& p)
 {
-	m_d->showCenter =  p;
+    _d->showCenter =  p;
 }
 
 void QmlEditor::setRootFolder(const QString& folder)
 {
-    QMetaObject::invokeMethod(m_d->rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(folder)));
+    QMetaObject::invokeMethod(_d->rootItem, "setRootFolder", Qt::AutoConnection, Q_ARG(QVariant, QUrl::fromLocalFile(folder)));
 }
 
 void QmlEditor::show(const QString& url)
 {
-    m_d->show(url);
+    _d->show(url);
 }
 
 void QmlEditor::clearEditor()
 {
-    m_d->rebuildEditor();
+    _d->rebuildEditor();
 }
 
 void QmlEditor::clearCache()
 {
-	QMetaObject::invokeMethod(m_d->rootItem, "clearCache");
+    QMetaObject::invokeMethod(_d->rootItem, "clearCache");
 }
 
 void QmlEditor::clearCacheFor(const QString& url, const bool isdir)
 {
-	QMetaObject::invokeMethod(m_d->rootItem, "clearCacheFor", Qt::AutoConnection, Q_ARG(QVariant,url),Q_ARG(QVariant,isdir));
+    QMetaObject::invokeMethod(_d->rootItem, "clearCacheFor", Qt::AutoConnection, Q_ARG(QVariant,url),Q_ARG(QVariant,isdir));
 }
 
 void QmlEditor::updateCacheForRenamedEntry(const QString& from, const QString& to, const bool isdir)
 {
-	QMetaObject::invokeMethod(m_d->rootItem, "updateCacheForRenamedEntry", Qt::AutoConnection,
+    QMetaObject::invokeMethod(_d->rootItem, "updateCacheForRenamedEntry", Qt::AutoConnection,
 							  Q_ARG(QVariant,from), Q_ARG(QVariant,to), Q_ARG(QVariant,isdir));
 }
 
 void QmlEditor::setDeactive(const bool d)
 {
-	m_d->deactive = d;
+    _d->deactive = d;
 }
 
 void QmlEditor::show()
 {
-	if (!m_d->deactive) {
-		m_d->show();
+    if (!_d->deactive) {
+        _d->show();
 	}
 }
 
 void QmlEditor::hide()
 {
-    m_d->hide();
+    _d->hide();
 }
 
 void QmlEditor::showTextOnly(const QString& text)
 {
-    m_d->showTextOnly(text);
+    _d->showTextOnly(text);
 }
 
 void QmlEditor::saved(const QString& qmlPath)
 {
-    m_d->saved(qmlPath);
+    _d->saved(qmlPath);
 }
 
 void QmlEditor::resizeEvent(QResizeEvent* event)
 {
-	m_d->resize();
+    _d->resize();
 	QWidget::resizeEvent(event);
 }
 
 void QmlEditor::paintEvent(QPaintEvent* event)
 {
 	QWidget::paintEvent(event);
-	if ((showRatio > 0 || showRatio < 1) && !m_d->snapshot.isNull()) {
+    if ((showRatio > 0 || showRatio < 1) && !_d->snapshot.isNull()) {
 		QPainter painter(this);
 		QPainterPath path;
 		int caliber = qMax(width(), height());
-		path.addEllipse(m_d->showCenter, caliber * showRatio, caliber * showRatio);
+        path.addEllipse(_d->showCenter, caliber * showRatio, caliber * showRatio);
 		painter.setClipPath(path);
 		painter.setPen(Qt::NoPen);
-		painter.drawPixmap(rect(), m_d->snapshot);
+        painter.drawPixmap(rect(), _d->snapshot);
 	}
 }
 

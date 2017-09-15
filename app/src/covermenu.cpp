@@ -14,7 +14,7 @@ CoverMenu::CoverMenu(QWidget *parent)
 	, m_AttachedWidget(nullptr)
 	, m_Layout(new QVBoxLayout(this))
 	, m_MenuWidth(fit(170))
-	, m_Duration(500)
+	, _duration(500)
 	, m_AnimationState(QParallelAnimationGroup::Stopped)
 	, m_ShadowWidget(new QWidget(this))
 {
@@ -35,12 +35,12 @@ void CoverMenu::setMenuWidth(const int menuWidth)
 
 int CoverMenu::duration() const
 {
-	return m_Duration;
+	return _duration;
 }
 
 void CoverMenu::setDuration(const int duration)
 {
-	m_Duration = duration;
+	_duration = duration;
 }
 
 void CoverMenu::setCoverSide(const CoverSide& coverSide)
@@ -141,11 +141,11 @@ void CoverMenu::cover()
 		return;
 
 	QPropertyAnimation *first = new QPropertyAnimation(this, "pos");
-	first->setDuration(m_Duration);
+	first->setDuration(_duration);
 	first->setEasingCurve(QEasingCurve::OutExpo);
 
 	QPropertyAnimation *second = new QPropertyAnimation(m_CoverWidget, "pos");
-	second->setDuration(m_Duration);
+	second->setDuration(_duration);
 	second->setEasingCurve(QEasingCurve::OutExpo);
 
 	QParallelAnimationGroup *group = new QParallelAnimationGroup;
@@ -210,11 +210,11 @@ void CoverMenu::uncover()
 		return;
 
 	QPropertyAnimation *first = new QPropertyAnimation(this, "pos");
-	first->setDuration(m_Duration);
+	first->setDuration(_duration);
 	first->setEasingCurve(QEasingCurve::OutExpo);
 
 	QPropertyAnimation *second = new QPropertyAnimation(m_CoverWidget, "pos");
-	second->setDuration(m_Duration);
+	second->setDuration(_duration);
 	second->setEasingCurve(QEasingCurve::OutExpo);
 
 	QParallelAnimationGroup *group = new QParallelAnimationGroup;

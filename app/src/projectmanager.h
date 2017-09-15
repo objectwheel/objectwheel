@@ -52,7 +52,7 @@ class ProjectManager : public QObject
 		static QStringList projects();
 
 	private:
-		static ProjectManagerPrivate* m_d;
+		static ProjectManagerPrivate* _d;
 };
 
 #endif // PROJECTMANAGER_H

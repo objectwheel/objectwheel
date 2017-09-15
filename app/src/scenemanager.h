@@ -33,7 +33,7 @@ class SceneManager : public QObject
 		void currentSceneChanged(const QString& key);
 
 	private:
-		static SceneManagerPrivate* m_d;
+		static SceneManagerPrivate* _d;
 };
 
 #endif // SCENEMANAGER_H

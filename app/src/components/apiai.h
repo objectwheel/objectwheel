@@ -15,7 +15,7 @@ class ApiAi : public QObject
 		Q_PROPERTY(bool error READ error)
 
 	private:
-		ApiAiPrivate* m_d;
+		ApiAiPrivate* _d;
 		QWebSocket* m_webSocket;
 		QString m_token;
 		QString m_language;

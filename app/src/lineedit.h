@@ -21,7 +21,7 @@ class LineEdit : public QWidget
 		~LineEdit();
 
 	private:
-		LineEditPrivate* m_d;
+		LineEditPrivate* _d;
 };
 
 

@@ -46,7 +46,7 @@
 
 DocumentHandler::DocumentHandler()
     : m_target(0)
-    , m_doc(0)
+    , _doc(0)
     , m_cursorPosition(-1)
     , m_selectionStart(0)
     , m_selectionEnd(0)
@@ -56,7 +56,7 @@ DocumentHandler::DocumentHandler()
 
 void DocumentHandler::setTarget(QQuickItem *target)
 {
-    m_doc = 0;
+    _doc = 0;
     m_highlighter = 0;
     m_target = target;
     if (!m_target)
@@ -66,8 +66,8 @@ void DocumentHandler::setTarget(QQuickItem *target)
     if (doc.canConvert<QQuickTextDocument*>()) {
         QQuickTextDocument *qqdoc = doc.value<QQuickTextDocument*>();
 		if (qqdoc){
-            m_doc = qqdoc->textDocument();
-            m_highlighter = new QMLHighlighter(m_doc);
+            _doc = qqdoc->textDocument();
+            m_highlighter = new QMLHighlighter(_doc);
 		}
     }
     emit targetChanged();
@@ -104,7 +104,7 @@ void DocumentHandler::reset()
 
 QTextCursor DocumentHandler::textCursor() const
 {
-    QTextCursor cursor = QTextCursor(m_doc);
+    QTextCursor cursor = QTextCursor(_doc);
     if (m_selectionStart != m_selectionEnd) {
         cursor.setPosition(m_selectionStart);
         cursor.setPosition(m_selectionEnd, QTextCursor::KeepAnchor);

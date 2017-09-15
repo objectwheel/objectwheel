@@ -62,39 +62,39 @@ QString ProjectManagerPrivate::bytesString(const qint64 size)
 	return ret;
 }
 
-ProjectManagerPrivate* ProjectManager::m_d = nullptr;
+ProjectManagerPrivate* ProjectManager::_d = nullptr;
 
 ProjectManager::ProjectManager(QObject *parent)
 	: QObject(parent)
 {
-	if (m_d) return;
-    m_d = new ProjectManagerPrivate(this);
+	if (_d) return;
+    _d = new ProjectManagerPrivate(this);
 }
 
 ProjectManager::~ProjectManager()
 {
-    delete m_d;
+    delete _d;
 }
 
 ProjectManager* ProjectManager::instance()
 {
-	return m_d->parent;
+	return _d->parent;
 }
 
 void ProjectManager::setMainWindow(MainWindow* mainWindow)
 {
-	m_d->mainWindow = mainWindow;
+	_d->mainWindow = mainWindow;
 }
 
 QString ProjectManager::projectDirectory(const QString& projectname)
 {
     if (!exists(projectname)) return QString();
-    return m_d->generateProjectDir(projectname);
+    return _d->generateProjectDir(projectname);
 }
 
 bool ProjectManager::exists(const QString& projectname)
 {
-	auto projectDir = m_d->generateProjectDir(projectname);
+	auto projectDir = _d->generateProjectDir(projectname);
 	if (projectDir.isEmpty()) return false;
 	return ::exists(projectDir);
 }
@@ -103,19 +103,19 @@ bool ProjectManager::buildNewProject(const QString& projectname)
 {
     return (!UserManager::currentSessionsUser().isEmpty() &&
             !exists(projectname) &&
-            mkdir(m_d->generateProjectDir(projectname)) &&
-            SaveManager::initProject(m_d->generateProjectDir(projectname)));
+            mkdir(_d->generateProjectDir(projectname)) &&
+            SaveManager::initProject(_d->generateProjectDir(projectname)));
 }
 
 bool ProjectManager::renameProject(const QString& from, const QString& to)
 {
 	if (!exists(from) || exists(to)) return false;
-	auto fromDir = m_d->generateProjectDir(from);
-	auto toDir = m_d->generateProjectDir(to);
+	auto fromDir = _d->generateProjectDir(from);
+	auto toDir = _d->generateProjectDir(to);
 	if (fromDir.isEmpty() || toDir.isEmpty()) return false;
-    if (m_d->currentProject == from) {
+    if (_d->currentProject == from) {
         stopProject();
-        m_d->mainWindow->clearStudio();
+        _d->mainWindow->clearStudio();
         if (!rn(fromDir, toDir)) return false;
         if (!startProject(to)) return false;
 		return infUpdateLastModification();
@@ -127,7 +127,7 @@ bool ProjectManager::renameProject(const QString& from, const QString& to)
 bool ProjectManager::exportProject(const QString& projectname, const QString& filepath)
 {
     if (!exists(projectname)) return false;
-    auto projDir = m_d->generateProjectDir(projectname);
+    auto projDir = _d->generateProjectDir(projectname);
     return Zipper::compressDir(projDir, filepath, fname(projDir));
 }
 
@@ -179,12 +179,12 @@ QJsonObject ProjectManager::projectInformation(const QString& projectname)
 
 bool ProjectManager::infUpdateSize()
 {
-	if (m_d->currentProject.isEmpty()) return false;
-	auto jObj = projectInformation(m_d->currentProject);
+	if (_d->currentProject.isEmpty()) return false;
+	auto jObj = projectInformation(_d->currentProject);
 	if (jObj.isEmpty()) return false;
-	auto projDir = projectDirectory(m_d->currentProject);
+	auto projDir = projectDirectory(_d->currentProject);
 	if (projDir.isEmpty()) return false;
-	jObj[INF_SIZE] = m_d->bytesString(dsize(projDir));
+	jObj[INF_SIZE] = _d->bytesString(dsize(projDir));
 	QJsonDocument jDoc(jObj);
 	if (wrfile(projDir + separator() + INF_FILENAME, jDoc.toJson()) < 0) return false;
 	else return true;
@@ -192,10 +192,10 @@ bool ProjectManager::infUpdateSize()
 
 bool ProjectManager::infUpdateLastModification()
 {
-	if (m_d->currentProject.isEmpty()) return false;
-	auto jObj = projectInformation(m_d->currentProject);
+	if (_d->currentProject.isEmpty()) return false;
+	auto jObj = projectInformation(_d->currentProject);
 	if (jObj.isEmpty()) return false;
-	auto projDir = projectDirectory(m_d->currentProject);
+	auto projDir = projectDirectory(_d->currentProject);
 	if (projDir.isEmpty()) return false;
 	jObj[INF_MFDATE] = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
 	QJsonDocument jDoc(jObj);
@@ -207,7 +207,7 @@ bool ProjectManager::startProject(const QString& projectname)
 {
 	if (UserManager::currentSessionsUser().isEmpty()) return false;
 
-	if (m_d->currentProject == projectname) {
+	if (_d->currentProject == projectname) {
 		return true;
 	}
 
@@ -215,13 +215,13 @@ bool ProjectManager::startProject(const QString& projectname)
 		return false;
 	}
 
-    if (!m_d->currentProject.isEmpty()) {
+    if (!_d->currentProject.isEmpty()) {
         stopProject();
     }
 
-    m_d->mainWindow->clearStudio();
+    _d->mainWindow->clearStudio();
 
-    m_d->currentProject = projectname;
+    _d->currentProject = projectname;
 
     SaveManager::exposeProject();
     DesignManager::controlScene()->clearSelection();
@@ -236,19 +236,19 @@ void ProjectManager::stopProject()
 {
 	if (UserManager::currentSessionsUser().isEmpty()) return;
 
-	if (m_d->currentProject.isEmpty()) {
+	if (_d->currentProject.isEmpty()) {
 		return;
 	}
 
 	infUpdateSize();
 	infUpdateLastModification();
 
-	m_d->currentProject = "";
+	_d->currentProject = "";
 }
 
 QString ProjectManager::currentProject()
 {
-	return m_d->currentProject;
+	return _d->currentProject;
 }
 
 QStringList ProjectManager::projects()

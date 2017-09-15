@@ -11,14 +11,14 @@ class FlatButton : public QPushButton
 
 	private:
 		QColor m_Color;
-		QColor m_DisabledColor;
+		QColor _disabledColor;
 		QColor m_CheckedColor;
 		QColor m_TextColor;
-		QColor m_DisabledTextColor;
+		QColor _disabledTextColor;
 		QColor m_CheckedTextColor;
 		int m_Radius;
 		bool m_IconButton;
-		bool m_Down;
+		bool _down;
 
 	public:
 		explicit FlatButton(QWidget *parent = 0);

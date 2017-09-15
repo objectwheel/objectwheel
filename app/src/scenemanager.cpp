@@ -59,90 +59,90 @@ SceneManagerPrivate::SceneManagerPrivate(SceneManager* uparent)
     });
 }
 
-SceneManagerPrivate* SceneManager::m_d = nullptr;
+SceneManagerPrivate* SceneManager::_d = nullptr;
 
 SceneManager::SceneManager(QObject *parent)
 	: QObject(parent)
 {
-	if (m_d) return;
-    m_d = new SceneManagerPrivate(this);
+	if (_d) return;
+    _d = new SceneManagerPrivate(this);
 }
 
 SceneManager::~SceneManager()
 {
-    delete m_d;
+    delete _d;
 }
 
 SceneManager* SceneManager::instance()
 {
-	return m_d->parent;
+	return _d->parent;
 }
 
 QStringList SceneManager::scenes()
 {
-	return m_d->sceneMap.keys();
+	return _d->sceneMap.keys();
 }
 
 QString SceneManager::cuurrentScene()
 {
-	return m_d->currentKey;
+	return _d->currentKey;
 }
 
 QWidget* SceneManager::scene(const QString& key)
 {
-	return m_d->sceneMap[key];
+	return _d->sceneMap[key];
 }
 
 void SceneManager::addScene(const QString& key, QWidget* scene)
 {
-	m_d->sceneMap.insert(key, scene);
+	_d->sceneMap.insert(key, scene);
     scene->hide();
 }
 
 void SceneManager::removeScene(const QString& key)
 {
-    m_d->sceneMap.remove(key);
+    _d->sceneMap.remove(key);
 }
 
 void SceneManager::show(const QString& key, SceneManager::Direction direction)
 {
-    if (!m_d->sceneMap.contains(key)) return;
-    if (!m_d->sceneMap.contains(m_d->currentKey)) {
+    if (!_d->sceneMap.contains(key)) return;
+    if (!_d->sceneMap.contains(_d->currentKey)) {
         setCurrent(key, false);
         return;
     }
-    auto cs = m_d->sceneMap[m_d->currentKey];
-    auto ns = m_d->sceneMap[key];
+    auto cs = _d->sceneMap[_d->currentKey];
+    auto ns = _d->sceneMap[key];
     if (cs == ns) return;
 
-    auto leftRect = m_d->mainWindow->rect().adjusted(-m_d->mainWindow->width(), 0, -m_d->mainWindow->width(), 0);
-    auto rightRect = m_d->mainWindow->rect().adjusted(m_d->mainWindow->width(), 0, m_d->mainWindow->width(), 0);
+    auto leftRect = _d->mainWindow->rect().adjusted(-_d->mainWindow->width(), 0, -_d->mainWindow->width(), 0);
+    auto rightRect = _d->mainWindow->rect().adjusted(_d->mainWindow->width(), 0, _d->mainWindow->width(), 0);
 
-    disconnect(m_d->connection);
-    m_d->csShifterAmination.stop();
-    m_d->nsShifterAmination.stop();
-    m_d->parallelAnimationGroup.stop();
+    disconnect(_d->connection);
+    _d->csShifterAmination.stop();
+    _d->nsShifterAmination.stop();
+    _d->parallelAnimationGroup.stop();
 
-    m_d->csShifterAmination.setTargetObject(cs);
-    m_d->csShifterAmination.setPropertyName("geometry");
-    m_d->csShifterAmination.setDuration(DURATION);
-    m_d->csShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
-    m_d->csShifterAmination.setStartValue(m_d->mainWindow->rect());
-    m_d->csShifterAmination.setEndValue(direction == ToLeft ? leftRect : rightRect);
+    _d->csShifterAmination.setTargetObject(cs);
+    _d->csShifterAmination.setPropertyName("geometry");
+    _d->csShifterAmination.setDuration(DURATION);
+    _d->csShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
+    _d->csShifterAmination.setStartValue(_d->mainWindow->rect());
+    _d->csShifterAmination.setEndValue(direction == ToLeft ? leftRect : rightRect);
 
-    m_d->nsShifterAmination.setTargetObject(ns);
-    m_d->nsShifterAmination.setPropertyName("geometry");
-    m_d->nsShifterAmination.setDuration(DURATION);
-    m_d->nsShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
-    m_d->nsShifterAmination.setEndValue(m_d->mainWindow->rect());
-    m_d->nsShifterAmination.setStartValue(direction == ToLeft ? rightRect : leftRect);
+    _d->nsShifterAmination.setTargetObject(ns);
+    _d->nsShifterAmination.setPropertyName("geometry");
+    _d->nsShifterAmination.setDuration(DURATION);
+    _d->nsShifterAmination.setEasingCurve(QEasingCurve::OutExpo);
+    _d->nsShifterAmination.setEndValue(_d->mainWindow->rect());
+    _d->nsShifterAmination.setStartValue(direction == ToLeft ? rightRect : leftRect);
 
-    m_d->currentKey = key;
-    m_d->parallelAnimationGroup.start();
-    m_d->connection = QObject::connect(&m_d->parallelAnimationGroup, &QParallelAnimationGroup::finished, [=] {
-        for (int i = m_d->sceneListWidget->count(); i--;) {
-            if (m_d->sceneListWidget->GetUrls(m_d->sceneListWidget->item(i))[0].toString() == key) {
-                m_d->sceneListWidget->setCurrentRow(i);
+    _d->currentKey = key;
+    _d->parallelAnimationGroup.start();
+    _d->connection = QObject::connect(&_d->parallelAnimationGroup, &QParallelAnimationGroup::finished, [=] {
+        for (int i = _d->sceneListWidget->count(); i--;) {
+            if (_d->sceneListWidget->GetUrls(_d->sceneListWidget->item(i))[0].toString() == key) {
+                _d->sceneListWidget->setCurrentRow(i);
             }
         }
         cs->hide();
@@ -154,44 +154,44 @@ void SceneManager::show(const QString& key, SceneManager::Direction direction)
 
 void SceneManager::setCurrent(const QString& key, const bool animated)
 {
-    if (!m_d->sceneMap.contains(key)) return;
-    if (m_d->sceneMap.contains(m_d->currentKey)) m_d->sceneMap[m_d->currentKey]->hide();
-    m_d->currentKey = key;
-    m_d->sceneMap[key]->setGeometry(m_d->mainWindow->rect());
-    m_d->sceneMap[key]->show();
-    m_d->sceneMap[key]->raise();
+    if (!_d->sceneMap.contains(key)) return;
+    if (_d->sceneMap.contains(_d->currentKey)) _d->sceneMap[_d->currentKey]->hide();
+    _d->currentKey = key;
+    _d->sceneMap[key]->setGeometry(_d->mainWindow->rect());
+    _d->sceneMap[key]->show();
+    _d->sceneMap[key]->raise();
     if(animated) {
-        m_d->sceneMap[key]->setGraphicsEffect(m_d->opacityEffect);
-        m_d->opacityEffect->setOpacity(0);
-        m_d->showerTimer.start();
+        _d->sceneMap[key]->setGraphicsEffect(_d->opacityEffect);
+        _d->opacityEffect->setOpacity(0);
+        _d->showerTimer.start();
     }
     emit instance()->currentSceneChanged(key);
 }
 
 void SceneManager::setMainWindow(QWidget* mainWindow)
 {
-	if (m_d->mainWindow) m_d->mainWindow->removeEventFilter(m_d->parent);
-	mainWindow->installEventFilter(m_d->parent);
-	m_d->mainWindow = mainWindow;
-	if (m_d->sceneMap.contains(m_d->currentKey)) m_d->sceneMap[m_d->currentKey]->setGeometry(m_d->mainWindow->rect());
+	if (_d->mainWindow) _d->mainWindow->removeEventFilter(_d->parent);
+	mainWindow->installEventFilter(_d->parent);
+	_d->mainWindow = mainWindow;
+	if (_d->sceneMap.contains(_d->currentKey)) _d->sceneMap[_d->currentKey]->setGeometry(_d->mainWindow->rect());
 }
 
 void SceneManager::setSceneListWidget(ListWidget* listWidget)
 {
-	disconnect(m_d->connection2);
-	m_d->sceneListWidget = listWidget;
-	m_d->connection2 = connect(listWidget,
+	disconnect(_d->connection2);
+	_d->sceneListWidget = listWidget;
+	_d->connection2 = connect(listWidget,
 	(void (ListWidget::*)(QListWidgetItem*, QListWidgetItem*))&ListWidget::currentItemChanged, [](QListWidgetItem*c, QListWidgetItem*) {
-		auto sceneName = m_d->sceneListWidget->GetUrls(c)[0].toString();
+		auto sceneName = _d->sceneListWidget->GetUrls(c)[0].toString();
 		QTimer::singleShot(300, [=] { SceneManager::show(sceneName, SceneManager::ToLeft); });
 	});
 }
 
 bool SceneManager::eventFilter(QObject* watched, QEvent* event)
 {
-	if (event->type() == QEvent::Resize && watched == m_d->mainWindow) {
-		if (m_d->sceneMap.contains(m_d->currentKey)) {
-			m_d->sceneMap[m_d->currentKey]->setGeometry(m_d->mainWindow->rect());
+	if (event->type() == QEvent::Resize && watched == _d->mainWindow) {
+		if (_d->sceneMap.contains(_d->currentKey)) {
+			_d->sceneMap[_d->currentKey]->setGeometry(_d->mainWindow->rect());
 		}
 	}
 	return false;

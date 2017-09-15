@@ -17,7 +17,7 @@ class MainWindow : public QWidget
 		Q_DISABLE_COPY(MainWindow)
 
 	public:
-		static MainWindowPrivate* m_d;
+        static MainWindowPrivate* _d;
 
 	private:
 		CoverMenu* m_RightMenu;

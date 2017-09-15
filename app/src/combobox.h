@@ -37,7 +37,7 @@ class ComboBox : public QWidget
 		void popupHided() const;
 
 	private:
-		ComboBoxPrivate* m_d;
+		ComboBoxPrivate* _d;
 };
 
 #endif // COMBOBOX_H

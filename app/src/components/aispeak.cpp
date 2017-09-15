@@ -15,14 +15,14 @@ class AiSpeakPrivate
 
 AiSpeak::AiSpeak(QObject *parent)
 	: QObject(parent)
-	, m_d(new AiSpeakPrivate)
+	, _d(new AiSpeakPrivate)
 	, m_language("en")
 {
 }
 
 AiSpeak::~AiSpeak()
 {
-	delete m_d;
+	delete _d;
 }
 
 const QString& AiSpeak::token() const
@@ -52,25 +52,25 @@ void AiSpeak::speak(const QString& text)
 	http.setRawHeader("Authorization", QString("Bearer " + m_token).toStdString().c_str());
 	http.setRawHeader("Accept-Language", m_language.toStdString().c_str());
 
-	m_d->reply = m_d->manager->get(http);
+	_d->reply = _d->manager->get(http);
 
-	connect(m_d->reply, SIGNAL(sslErrors(QList<QSslError>)), m_d->reply, SLOT(ignoreSslErrors()));
-	connect(m_d->reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleError(QNetworkReply::NetworkError)));
-	connect(m_d->reply, SIGNAL(finished()), this, SLOT(handleResponse()));
+	connect(_d->reply, SIGNAL(sslErrors(QList<QSslError>)), _d->reply, SLOT(ignoreSslErrors()));
+	connect(_d->reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleError(QNetworkReply::NetworkError)));
+	connect(_d->reply, SIGNAL(finished()), this, SLOT(handleResponse()));
 }
 
 void AiSpeak::handleResponse()
 {
-	auto data = m_d->reply->readAll();
-	if (m_d->reply->error() == QNetworkReply::NoError)
+	auto data = _d->reply->readAll();
+	if (_d->reply->error() == QNetworkReply::NoError)
 		emit readySpeak(data);
-	m_d->reply->deleteLater();
+	_d->reply->deleteLater();
 }
 
 void AiSpeak::handleError(QNetworkReply::NetworkError error)
 {
 	qWarning() << "AiSpeak::speak() :" << error;
-	m_d->reply->deleteLater();
+	_d->reply->deleteLater();
 	emit errorOccurred();
 }
 

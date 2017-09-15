@@ -57,48 +57,48 @@ class ComboBoxPrivate
 
 ComboBox::ComboBox(QWidget *parent)
 	: QWidget(parent)
-	, m_d(new ComboBoxPrivate(this))
+	, _d(new ComboBoxPrivate(this))
 {
 	setCursor(Qt::PointingHandCursor);
-	connect(&m_d->itemListWidget, SIGNAL(currentTextChanged(QString)), this, SIGNAL(currentTextChanged(QString)));
+	connect(&_d->itemListWidget, SIGNAL(currentTextChanged(QString)), this, SIGNAL(currentTextChanged(QString)));
 }
 
 void ComboBox::setColor(const QColor& color)
 {
-	m_d->color = color;
+	_d->color = color;
 }
 
 void ComboBox::setIcon(const QIcon& icon)
 {
-	m_d->icon = icon;
+	_d->icon = icon;
 }
 
 void ComboBox::setPlaceHolderText(const QString& text)
 {
-	m_d->searchEdit.setPlaceholderText(text);
+	_d->searchEdit.setPlaceholderText(text);
 }
 
 void ComboBox::addItem(const QString& item)
 {
-	m_d->items << item;
-	m_d->itemListWidget.addItem(item);
+	_d->items << item;
+	_d->itemListWidget.addItem(item);
 }
 
 const QString ComboBox::item(const int index) const
 {
-	return m_d->itemListWidget.item(index)->text();
+	return _d->itemListWidget.item(index)->text();
 }
 
 void ComboBox::clear()
 {
-	m_d->items.clear();
-	m_d->itemListWidget.clear();
-	m_d->searchEdit.clear();
+	_d->items.clear();
+	_d->itemListWidget.clear();
+	_d->searchEdit.clear();
 }
 
 const QString ComboBox::currentItem() const
 {
-	auto currentItem =  m_d->itemListWidget.currentItem();
+	auto currentItem =  _d->itemListWidget.currentItem();
 	if (!currentItem) return QString();
 	return currentItem->text();
 }
@@ -106,26 +106,26 @@ const QString ComboBox::currentItem() const
 void ComboBox::setCurrentItem(const QString& text)
 {
 	int row = -1;
-	for (int i = 0; i < m_d->itemListWidget.count(); i++)
-		if (m_d->itemListWidget.item(i)->text() == text)
+	for (int i = 0; i < _d->itemListWidget.count(); i++)
+		if (_d->itemListWidget.item(i)->text() == text)
 			row = i;
 	if (row >= 0) {
-		m_d->itemListWidget.setCurrentRow(row);
-		m_d->searchEdit.setText(text);
+		_d->itemListWidget.setCurrentRow(row);
+		_d->searchEdit.setText(text);
 	}
 }
 
 const QStringList ComboBox::items() const
 {
 	QStringList list;
-	for (int i = 0; i < m_d->itemListWidget.count(); i++)
-		list << m_d->itemListWidget.item(i)->text();
+	for (int i = 0; i < _d->itemListWidget.count(); i++)
+		list << _d->itemListWidget.item(i)->text();
 	return list;
 }
 
 ComboBox::~ComboBox()
 {
-	delete m_d;
+	delete _d;
 }
 
 void ComboBox::paintEvent(QPaintEvent* event)
@@ -133,7 +133,7 @@ void ComboBox::paintEvent(QPaintEvent* event)
 	QPainter painter(this);
     painter.save();
 
-    if (!m_d->collapsed) {
+    if (!_d->collapsed) {
         painter.setPen(QColor("#444444"));
         painter.setBrush(QColor("#52616D"));
         painter.drawRoundedRect(rect().adjusted(0,0,-fit(1),-fit(1)), fit(2), fit(2));
@@ -153,9 +153,9 @@ void ComboBox::paintEvent(QPaintEvent* event)
 
     /**/
     const QPointF pts[3] = {
-        QPointF(m_d->indicatorRect.center().x() - fit(6), fit(31)),
-        QPointF(m_d->indicatorRect.center().x() + fit(6), fit(31)),
-        QPointF(m_d->indicatorRect.center().x(), fit(40))
+        QPointF(_d->indicatorRect.center().x() - fit(6), fit(31)),
+        QPointF(_d->indicatorRect.center().x() + fit(6), fit(31)),
+        QPointF(_d->indicatorRect.center().x(), fit(40))
     };
     painter.setBrush(QColor("#20000000"));
     painter.drawConvexPolygon(pts, 3);
@@ -166,32 +166,32 @@ void ComboBox::paintEvent(QPaintEvent* event)
 
     /**/
     QColor color;
-    if (m_d->down) {
-        color = m_d->color.darker(120);
+    if (_d->down) {
+        color = _d->color.darker(120);
     } else {
-        color = m_d->color;
+        color = _d->color;
     }
     painter.setBrush(color);
-    painter.drawRect(m_d->indicatorRect.adjusted(0, 0, -fit(2), 0));
-    painter.drawRoundedRect(m_d->indicatorRect, fit(2), fit(2));
+    painter.drawRect(_d->indicatorRect.adjusted(0, 0, -fit(2), 0));
+    painter.drawRoundedRect(_d->indicatorRect, fit(2), fit(2));
 
     /**/
     const QPointF points[3] = {
-        QPointF(m_d->indicatorRect.center().x() - fit(6), fit(29)),
-        QPointF(m_d->indicatorRect.center().x() + fit(6), fit(29)),
-        QPointF(m_d->indicatorRect.center().x(), fit(37))
+        QPointF(_d->indicatorRect.center().x() - fit(6), fit(29)),
+        QPointF(_d->indicatorRect.center().x() + fit(6), fit(29)),
+        QPointF(_d->indicatorRect.center().x(), fit(37))
     };
     painter.setBrush(color);
     painter.drawConvexPolygon(points, 3);
 
     /**/
-    if (!m_d->icon.isNull()) {
-        QPixmap p(m_d->icon.pixmap(m_d->indicatorRect.size().toSize()));
-        painter.drawPixmap(m_d->indicatorRect.toRect(), p);
+    if (!_d->icon.isNull()) {
+        QPixmap p(_d->icon.pixmap(_d->indicatorRect.size().toSize()));
+        painter.drawPixmap(_d->indicatorRect.toRect(), p);
     }
 
     painter.restore();
-    if (!m_d->collapsed) {
+    if (!_d->collapsed) {
         painter.setPen("#444444");
         painter.drawLine(0, fit(29), width() - fit(30), fit(29));
     }
@@ -199,37 +199,37 @@ void ComboBox::paintEvent(QPaintEvent* event)
 
 void ComboBox::mousePressEvent(QMouseEvent* event)
 {
-	if (m_d->indicatorRect.contains(event->pos())) {
-		m_d->down = !m_d->down;
+	if (_d->indicatorRect.contains(event->pos())) {
+		_d->down = !_d->down;
 		update();
-		m_d->indicatorClickHandler(m_d->down);
+		_d->indicatorClickHandler(_d->down);
 	}
 	QWidget::mousePressEvent(event);
 }
 
 void ComboBox::resizeEvent(QResizeEvent* event)
 {
-	m_d->indicatorRect = QRectF(width() - fit(30), 0, fit(30), fit(30));
-	m_d->searchEdit.setGeometry(fit(2),fit(2),width()-fit(34),fit(26));
-	m_d->itemListWidget.setGeometry(fit(1), fit(40), width() - fit(1), m_d->itemListWidget.height());
+	_d->indicatorRect = QRectF(width() - fit(30), 0, fit(30), fit(30));
+	_d->searchEdit.setGeometry(fit(2),fit(2),width()-fit(34),fit(26));
+	_d->itemListWidget.setGeometry(fit(1), fit(40), width() - fit(1), _d->itemListWidget.height());
 	QWidget::resizeEvent(event);
 }
 
 void ComboBox::showPopup()
 {
-	if (!m_d->down) {
-		m_d->down = !m_d->down;
+	if (!_d->down) {
+		_d->down = !_d->down;
 		update();
-		m_d->indicatorClickHandler(true);
+		_d->indicatorClickHandler(true);
 	}
 }
 
 void ComboBox::hidePopup()
 {
-	if (m_d->down) {
-		m_d->down = !m_d->down;
+	if (_d->down) {
+		_d->down = !_d->down;
 		update();
-		m_d->indicatorClickHandler(false);
+		_d->indicatorClickHandler(false);
 	}
 }
 
