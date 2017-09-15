@@ -231,5 +231,6 @@
         <file>resources/tools/AnimatedImage.zip</file>
         <file>resources/qmls/form/t/_properties.json</file>
         <file>resources/qmls/form/t/main.qml</file>
+        <file>resources/images/preloader.gif</file>
     </qresource>
 </RCC>

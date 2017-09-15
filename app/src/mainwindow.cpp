@@ -264,6 +264,9 @@ void MainWindow::SetupManagers()
     sceneManager->addScene("buildsScene", m_d->buildsScreen);
     sceneManager->setCurrent("loginScene", false);
 
+    connect(SaveManager::instance(), &SaveManager::databaseChanged, [] {
+
+    });
     SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
@@ -307,7 +310,9 @@ void MainWindow::SetupManagers()
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	m_d->qmlEditor->setGeometry(0, 0, width(), height());
-	QWidget::resizeEvent(event);
+    m_d->loadingIndicator->move(m_d->settleWidget->width() - m_d->loadingIndicator->width(),
+                                m_d->settleWidget->height() - m_d->loadingIndicator->height());
+    QWidget::resizeEvent(event);
 	emit resized();
 }
 

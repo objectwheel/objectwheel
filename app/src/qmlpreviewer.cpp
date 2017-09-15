@@ -23,7 +23,7 @@
 #include <QPainter>
 #include <QTimer>
 
-#define TASK_TIMEOUT 100
+#define TASK_TIMEOUT 10
 
 using namespace Fit;
 
@@ -198,7 +198,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
     window->setOpacity(0);
     window->hide();
 
-    Delayer::delay(100);
+    Delayer::delay(10);
 
     QPixmap preview = QPixmap::fromImage(window->grabWindow());
     preview.setDevicePixelRatio(qApp->devicePixelRatio());
@@ -220,8 +220,9 @@ void QmlPreviewerPrivate::taskHandler()
 
     auto size = taskList.takeFirst();
     auto dir = parent->_watched->dir();
+    auto masterPaths = SaveManager::masterPaths(dir);
 
-    if (SaveManager::suid(dir).isEmpty()) {
+    if (SaveManager::suid(dir).isEmpty() || masterPaths.isEmpty()) {
         auto res = requestPreview(dir + separator() + DIR_THIS +
                                       separator() + "main.qml", size);
         if (!res.isNull())
@@ -231,7 +232,6 @@ void QmlPreviewerPrivate::taskHandler()
     }
 
     PreviewResult* finalResult = nullptr;
-    auto masterPaths = SaveManager::masterPaths(dir);
     QMap<QString, PreviewResult> masterResults;
 
     for (auto path : masterPaths) {
@@ -280,8 +280,8 @@ void QmlPreviewerPrivate::taskHandler()
         }
     }
 
-    if (finalResult) //FIXME
-        emit parent->previewReady(*finalResult);
+    emit parent->previewReady(*finalResult);
+
     working = false;
 }
 

@@ -29,6 +29,7 @@
 #include <loginscreen.h>
 #include <buildsscreen.h>
 #include <designmanager.h>
+#include <loadingindicator.h>
 
 #define DURATION 500
 
@@ -41,6 +42,7 @@ class MainWindowPrivate
 	public:
         MainWindow* parent;
 		QWidget* centralWidget;
+        LoadingIndicator* loadingIndicator;
 		ProjectsScreen* projectsScreen;
         LoginScreen* loginScreen;
 		QVBoxLayout* verticalLayout;
@@ -109,6 +111,8 @@ void MainWindowPrivate::setupUi()
 
     designManager = new DesignManager(parent);
     designManager->setSettleWidget(settleWidget);
+
+    loadingIndicator = new LoadingIndicator(settleWidget);
 
 	toolboxList = new ListWidget(centralWidget);
 	toolboxList->setIconSize(fit({30, 30}));
@@ -315,6 +319,7 @@ void MainWindowPrivate::setupUi()
     formsWidget = new FormsWidget(centralWidget);
     formsWidget->setObjectName(QStringLiteral("formsWidget"));
     formsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
 }
 
 void MainWindowPrivate::showAdderArea()

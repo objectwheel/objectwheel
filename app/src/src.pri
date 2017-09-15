@@ -40,7 +40,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/controlview.h \
                              $$PWD/controlsscrollpanel.h \
                              $$PWD/formview.h \
-                             $$PWD/formswidget.h
+                             $$PWD/formswidget.h \
+    $$PWD/loadingindicator.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -82,7 +83,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/controlview.cpp \
                              $$PWD/controlsscrollpanel.cpp \
                              $$PWD/formview.cpp \
-                             $$PWD/formswidget.cpp
+                             $$PWD/formswidget.cpp \
+    $$PWD/loadingindicator.cpp
 
 RESOURCES                 += \
     $$PWD/resources.qrc
