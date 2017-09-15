@@ -33,9 +33,6 @@ class MainWindow : public QWidget
 		void clearStudio();
 
     public slots:
-        void on_buildsButton_clicked();
-		void on_clearButton_clicked();
-        void on_playButton_clicked();
         void on_secureExitButton_clicked();
 		void handleToolboxUrlboxChanges(const QString& text);
 		void handleToolboxNameboxChanges(QString name);
@@ -46,14 +43,11 @@ class MainWindow : public QWidget
 		void toolboxImportButtonClicked();
 		void toolboxExportButtonClicked();
 		void handleImports(const QStringList& fileNames);
-        void handleCurrentFormChanges(const QVariant& CurrentForm, const QVariant& index);
-        void handleEditorOpenButtonClicked();
         void handleIndicatorChanges();
         void cleanupObjectwheel();
 
 	signals:
 		void resized();
-		void centralWidgetMoved();
 };
 
 #endif // MAINWINDOW_H

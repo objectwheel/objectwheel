@@ -153,16 +153,8 @@ void MainWindow::SetupGui()
 	leftMenuLayout->addWidget(leftContainer);
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
-//	m_d->propertiesWidget->setRootContext(m_d->designWidget->rootContext());
-//	m_d->propertiesWidget->setItemSource(&m_d->m_Items);
-//    m_d->propertiesWidget->setUrlList(&m_d->m_ItemUrls);
-
 	m_d->qmlEditor = new QmlEditor(this);
 	m_d->qmlEditor->setHidden(true);
-//	m_d->qmlEditor->setItems(&m_d->m_Items, &m_d->m_ItemUrls);
-//	m_d->qmlEditor->setRootContext(m_d->designWidget->rootContext());
-//	connect(this, SIGNAL(selectionShowed(QObject*const)), m_d->qmlEditor, SLOT(selectItem(QObject*const)));
-//	connect(m_d->bubbleHead, SIGNAL(moved(QPoint)), m_d->qmlEditor, SLOT(setShowCenter(QPoint)));
 
     QObject::connect(m_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
@@ -314,26 +306,6 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 	emit resized();
 }
 
-void MainWindow::handleCurrentFormChanges(const QVariant& CurrentForm, const QVariant& index)
-{
-//	m_CurrentForm = qobject_cast<QQuickItem*>(CurrentForm.value<QObject*>());
-//	if (!m_CurrentForm) qFatal("MainForm : Error occurred");
-//    m_d->formsWidget->setCurrentForm(index.toInt());
-}
-
-void MainWindow::handleEditorOpenButtonClicked()
-{
-//    if(m_ResizerTick->isVisible()) {
-//        m_d->qmlEditor->show();
-//    } else {
-//        if (m_d->toolboxList->currentRow() < 0) return;
-//        auto cItem = m_d->toolboxList->currentItem();
-//		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
-//        m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
-//	}
-    //    m_d->qmlEditor->raise();
-}
-
 void MainWindow::handleIndicatorChanges()
 {
     DesignManager::loadingIndicator()->setRunning(SaveManager::parserWorking() || QmlPreviewer::working());
@@ -351,103 +323,7 @@ void MainWindow::cleanupObjectwheel()
 
 void MainWindow::clearStudio()
 {
-//	m_d->toolboxList->ClearUrls();
-//	m_d->toolboxList->clear();
-//    m_d->qmlEditor->clearEditor();
 
-//	for (auto item : m_d->m_Items) {
-//		m_d->designWidget->rootContext()->setContextProperty(
-//					m_d->designWidget->rootContext()->nameForObject(item), 0);
-//		item->deleteLater();
-//	}
-
-//	auto forms = m_d->formsWidget->forms();
-//	for (int i = forms.count(); i--;) {
-//		if (forms[i] != m_CurrentWindow) {
-//			m_d->formsWidget->removeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(forms[i]));
-//		}
-//	}
-//	QString page1Name = "page1";
-//	m_d->formsWidget->changeWindowWithoutSave(m_d->designWidget->rootContext()->nameForObject(m_CurrentWindow), page1Name);
-
-//	m_d->m_Items.clear();
-//	m_d->m_ItemUrls.clear();
-//	HideSelectionTools();
-//    if (m_d->bubbleHead->isChecked()) m_d->bubbleHead->click();
-//    QTimer::singleShot(450, [=]{ m_d->bubbleHead->move(width() - fit(72), height() - fit(72)); });
-//    m_d->toolboxList->setCurrentRow(-1);
-//    Delayer::delay(100);
-}
-
-void MainWindow::on_buildsButton_clicked()
-{
-    SceneManager::show("buildsScene", SceneManager::ToLeft);
-}
-
-void MainWindow::on_clearButton_clicked()
-{
-    if (DesignManager::currentScene()->mainControl()->childControls().size() < 1)
-        return;
-
-    QMessageBox msgBox;
-    msgBox.setText("<b>This will clear the current form's content.</b>");
-    msgBox.setInformativeText("Do you want to continue?");
-    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setIcon(QMessageBox::Warning);
-
-    switch (msgBox.exec()) {
-        case QMessageBox::Yes:
-            DesignManager::currentScene()->mainControl()->cleanContent();
-            break;
-        default:
-            break;
-    }
-}
-
-void MainWindow::on_playButton_clicked()
-{
-//    static bool editModeState;
-//    editModeState = m_d->editMode;
-//    if (m_d->editMode) { // Edit mode on
-//        for (auto item : m_d->m_Items) {
-//            item->setEnabled(true);
-//        }
-//        HideSelectionTools();
-//        m_d->editMode = false;
-//        m_d->emIndicator->setOn(false);
-//    }
-//    m_d->designWidget->setParent(this);
-//    SceneManager::addScene("playScene", m_d->designWidget);
-//    SceneManager::setCurrent("playScene");
-
-//    FlatButton* exitButton = new FlatButton;
-//    exitButton->setParent(m_d->designWidget);
-//    exitButton->setIconButton(true);
-//    exitButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
-//#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-//    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
-//#else
-//    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
-//#endif
-//    auto connection = connect(this, &MainWindow::resized, [=]{
-//#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-//    exitButton->setGeometry(width() - fit(26), fit(8), fit(18), fit(18));
-//#else
-//    exitButton->setGeometry(width() - fit(15), fit(5), fit(8), fit(8));
-//#endif
-//    });
-//    exitButton->show();
-
-//    connect(exitButton, &FlatButton::clicked, [=]{
-//        disconnect(connection);
-//        exitButton->deleteLater();
-//        m_d->verticalLayout->insertWidget(1, m_d->designWidget);
-//        SceneManager::removeScene("playScene");
-//        SceneManager::setCurrent("studioScene");
-//        m_d->editMode = editModeState;
-//        m_d->emIndicator->setOn(m_d->editMode);
-//    });
 }
 
 void MainWindow::on_secureExitButton_clicked()

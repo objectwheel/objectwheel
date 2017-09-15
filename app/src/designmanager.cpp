@@ -189,6 +189,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     showOutlineButton.setToolTip("Show outline frame for controls.");
     fitInSceneButton.setToolTip("Fit scene into the Dashboard.");
     zoomlLevelCombobox.setToolTip("Change zoom level.");
+    loadingIndicator.setToolTip("Background operations indicator.");
     layItVertButton.setToolTip("Lay out selected controls vertically.");
     layItHorzButton.setToolTip("Lay out selected controls horizontally.");
     layItGridButton.setToolTip("Lay out selected controls as grid.");
