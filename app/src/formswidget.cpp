@@ -53,7 +53,7 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     formsListWidget.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     formsListWidget.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    QTimer::singleShot(200, [=] {
+    QTimer::singleShot(10000, [=] { //FIXME
         Delayer::delay([]()->bool {if (SaveManager::instance()) return false; else return true;});
         connect(SaveManager::instance(), SIGNAL(projectExposed()), SLOT(handleDatabaseChange()));
         connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));

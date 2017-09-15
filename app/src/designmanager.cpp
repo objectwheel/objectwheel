@@ -6,6 +6,7 @@
 #include <control.h>
 #include <fit.h>
 #include <css.h>
+#include <loadingindicator.h>
 
 #include <QWidget>
 #include <QList>
@@ -78,6 +79,7 @@ class DesignManagerPrivate : public QObject
         QToolButton showOutlineButton;
         QToolButton fitInSceneButton;
         QComboBox zoomlLevelCombobox;
+        LoadingIndicator loadingIndicator;
         QToolButton layItVertButton;
         QToolButton layItHorzButton;
         QToolButton layItGridButton;
@@ -236,6 +238,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar.addWidget(&showOutlineButton);
     toolbar.addWidget(&fitInSceneButton);
     toolbar.addWidget(&zoomlLevelCombobox);
+    toolbar.addSeparator();
+    toolbar.addWidget(&loadingIndicator);
     toolbar.addWidget(spacer);
     toolbar.addWidget(&layItVertButton);
     toolbar.addWidget(&layItHorzButton);
@@ -623,6 +627,11 @@ ControlScene*DesignManager::controlScene()
 FormScene*DesignManager::formScene()
 {
     return &_d->formScene;
+}
+
+LoadingIndicator* DesignManager::loadingIndicator()
+{
+    return &_d->loadingIndicator;
 }
 
 #include "designmanager.moc"

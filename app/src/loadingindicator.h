@@ -9,6 +9,8 @@ class LoadingIndicator : public QWidget
     public:
         explicit LoadingIndicator(QWidget *parent = 0);
         static bool running();
+
+    public slots:
         static void setRunning(bool running);
 
     protected:

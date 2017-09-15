@@ -8,7 +8,7 @@
 using namespace Fit;
 
 QMovie* _movie = nullptr;
-bool LoadingIndicator::_running = true;
+bool LoadingIndicator::_running = false;
 
 LoadingIndicator::LoadingIndicator(QWidget *parent)
     : QWidget(parent)

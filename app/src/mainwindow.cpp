@@ -9,23 +9,22 @@
 #include <container.h>
 #include <css.h>
 #include <splashscreen.h>
-#include <QtQml>
-#include <QtCore>
-#include <QtQuick>
-#include <QtWidgets>
-#include <QtNetwork>
 #include <filemanager.h>
-#include <QFileInfo>
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <toolsmanager.h>
 #include <savemanager.h>
 #include <splashscreen.h>
 #include <scenemanager.h>
-#include <QtConcurrent>
 #include <delayer.h>
 #include <control.h>
 #include <formscene.h>
+#include <qmlpreviewer.h>
+#include <loadingindicator.h>
+
+#include <QtConcurrent>
+#include <QtWidgets>
+#include <QtNetwork>
 
 #define CUSTOM_ITEM "\
 import QtQuick 2.0\n\
@@ -254,6 +253,7 @@ void MainWindow::SetupManagers()
     auto* projectManager = new ProjectManager(this); //create new project manager
 	projectManager->setMainWindow(this);
     new SaveManager(this);
+    new QmlPreviewer(this);
 	auto sceneManager = new SceneManager;
     sceneManager->setMainWindow(this);
 	sceneManager->setSceneListWidget(m_d->sceneList);
@@ -264,9 +264,9 @@ void MainWindow::SetupManagers()
     sceneManager->addScene("buildsScene", m_d->buildsScreen);
     sceneManager->setCurrent("loginScene", false);
 
-    connect(SaveManager::instance(), &SaveManager::databaseChanged, [] {
+    connect(SaveManager::instance(), SIGNAL(parserRunningChanged(bool)), SLOT(handleIndicatorChanges()));
+    connect(QmlPreviewer::instance(), SIGNAL(workingChanged(bool)), SLOT(handleIndicatorChanges()));
 
-    });
     SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
 			[=](const QString& key){
@@ -310,8 +310,6 @@ void MainWindow::SetupManagers()
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	m_d->qmlEditor->setGeometry(0, 0, width(), height());
-    m_d->loadingIndicator->move(m_d->settleWidget->width() - m_d->loadingIndicator->width(),
-                                m_d->settleWidget->height() - m_d->loadingIndicator->height());
     QWidget::resizeEvent(event);
 	emit resized();
 }
@@ -333,12 +331,17 @@ void MainWindow::handleEditorOpenButtonClicked()
 //		m_d->qmlEditor->setRootFolder(ToolsManager::toolsDir() + separator() + m_d->toolboxList->currentItem()->text());
 //        m_d->qmlEditor->show(m_d->toolboxList->GetUrls(cItem)[0].toLocalFile());
 //	}
-//    m_d->qmlEditor->raise();
+    //    m_d->qmlEditor->raise();
+}
+
+void MainWindow::handleIndicatorChanges()
+{
+    DesignManager::loadingIndicator()->setRunning(SaveManager::parserWorking() || QmlPreviewer::working());
 }
 
 void MainWindow::cleanupObjectwheel()
 {
-    while(SaveManager::inprogress())
+    while(SaveManager::parserWorking())
         Delayer::delay(100);
 
     UserManager::stopUserSession();

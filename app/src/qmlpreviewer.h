@@ -32,18 +32,19 @@ class QmlPreviewer : public QObject
         friend class QmlPreviewerPrivate;
 
     public:
-        explicit QmlPreviewer(Control* watched, QObject *parent = 0);
+        explicit QmlPreviewer(QObject *parent = 0);
+        static QmlPreviewer* instance();
+        static void requestPreview(Control* control, const QSizeF& size = QSizeF());
+        static bool working();
 
     signals:
-        void previewReady(const PreviewResult& result);
-        void errorsOccurred(const QList<QQmlError>& errors, const PreviewResult& result);
-
-    public slots:
-        void requestPreview(const QSizeF& size = QSizeF());
+        void previewReady(Control* control, const PreviewResult& result);
+        void errorsOccurred(Control* control, const QList<QQmlError>& errors, const PreviewResult& result);
+        void workingChanged(bool value);
 
     private:
-        QmlPreviewerPrivate* _d;
-        Control* _watched;
+        static QmlPreviewerPrivate* _d;
+        static bool _working;
 };
 
 #endif // QMLPREVIEWER_H

@@ -98,10 +98,13 @@ void ParserController::processWaitingTransactions()
         _transactionTimer->start();
 
     _transactionList.removeOne(transaction);
+    emit runningChanged(_running);
 }
 
 void ParserController::checkRunning()
 {
-    if (_transactionList.isEmpty())
+    if (_transactionList.isEmpty()) {
         _running = false;
+        emit runningChanged(_running);
+    }
 }

@@ -48,6 +48,7 @@ class MainWindow : public QWidget
 		void handleImports(const QStringList& fileNames);
         void handleCurrentFormChanges(const QVariant& CurrentForm, const QVariant& index);
         void handleEditorOpenButtonClicked();
+        void handleIndicatorChanges();
         void cleanupObjectwheel();
 
 	signals:

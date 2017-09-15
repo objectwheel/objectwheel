@@ -39,7 +39,7 @@ void PropertyItem::applyValue(const QVariant& value)
         SaveManager::setProperty(_control, _property, value, DesignManager::controlScene()->mainControl()->dir());
     else
         SaveManager::setProperty(_control, _property, value);
-    Delayer::delay(&SaveManager::inprogress);
+    Delayer::delay(&SaveManager::parserWorking);
     _control->refresh();
 	emit valueApplied();
 }
@@ -50,7 +50,7 @@ void PropertyItem::applyFont(const QFont& font)
     SaveManager::setProperty(_control, "font.bold", font.bold());
     SaveManager::setProperty(_control, "font.italic", font.italic());
     SaveManager::setProperty(_control, "font.pointSize", font.pointSize());
-    Delayer::delay(&SaveManager::inprogress);
+    Delayer::delay(&SaveManager::parserWorking);
     _control->refresh();
     emit valueApplied();
 }

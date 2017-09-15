@@ -58,9 +58,10 @@ class SaveManager : public QObject
 
         static QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString());
 
-      static bool inprogress();
+        static bool parserWorking();
 
     signals:
+        void parserRunningChanged(bool running);
         void databaseChanged();
         void projectExposed();
 

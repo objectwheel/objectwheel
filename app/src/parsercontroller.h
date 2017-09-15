@@ -43,6 +43,9 @@ class ParserController : public QObject
         void processWaitingTransactions();
         void checkRunning();
 
+    signals:
+        void runningChanged(bool running);
+
     private:
         static QThread* _workerThread;
         static ParserWorker* _parserWorker;

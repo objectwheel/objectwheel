@@ -426,6 +426,7 @@ SaveManager::SaveManager(QObject *parent)
     if (_d)
         return;
     _d = new SaveManagerPrivate(this);
+    connect(&_d->parserController, SIGNAL(runningChanged(bool)), SIGNAL(parserRunningChanged(bool)));
 }
 
 SaveManager* SaveManager::instance()
@@ -802,7 +803,7 @@ QString SaveManager::pathOfId(const QString& suid, const QString& id, const QStr
     return _d->findById(suid, id, rootPath);
 }
 
-bool SaveManager::inprogress()
+bool SaveManager::parserWorking()
 {
     return _d->parserController.running();
 }

@@ -6,6 +6,7 @@
 
 class QWidget;
 class DesignManagerPrivate;
+class LoadingIndicator;
 
 class DesignManager : public QObject
 {
@@ -29,6 +30,7 @@ class DesignManager : public QObject
         static ControlScene* currentScene();
         static ControlScene* controlScene();
         static FormScene* formScene();
+        static LoadingIndicator* loadingIndicator();
 
     signals:
         void modeChanged();

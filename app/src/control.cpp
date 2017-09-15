@@ -233,21 +233,19 @@ class ControlPrivate : public QObject
 
     public slots:
         void refreshPreview();
-        void updatePreview(PreviewResult result);
-        void handlePreviewErrors(QList<QQmlError> errors, PreviewResult result);
+        void updatePreview(Control* control, PreviewResult result);
+        void handlePreviewErrors(Control* control, QList<QQmlError> errors, PreviewResult result);
 
     public:
         Control* parent;
         QPixmap itemPixmap;
         QTimer refreshTimer;
-        QmlPreviewer qmlPreviewer;
         bool hoverOn;
 };
 
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
-    , qmlPreviewer(parent)
     , hoverOn(false)
 {
     int i = 0;
@@ -258,10 +256,10 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
     connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    connect(&qmlPreviewer, SIGNAL(errorsOccurred(QList<QQmlError>, PreviewResult)),
-            SLOT(handlePreviewErrors(QList<QQmlError>, PreviewResult)));
-    connect(&qmlPreviewer, SIGNAL(previewReady(PreviewResult)),
-            SLOT(updatePreview(PreviewResult)));
+    connect(QmlPreviewer::instance(), SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)),
+            SLOT(handlePreviewErrors(Control*,QList<QQmlError>,PreviewResult)));
+    connect(QmlPreviewer::instance(), SIGNAL(previewReady(Control*,PreviewResult)),
+            SLOT(updatePreview(Control*,PreviewResult)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -316,13 +314,16 @@ void ControlPrivate::refreshPreview()
     refreshTimer.stop();
 
     if (parent->_initialized)
-        qmlPreviewer.requestPreview(parent->size());
+        QmlPreviewer::requestPreview(parent, parent->size());
     else
-        qmlPreviewer.requestPreview();
+        QmlPreviewer::requestPreview(parent);
 }
 
-void ControlPrivate::updatePreview(PreviewResult result)
+void ControlPrivate::updatePreview(Control* control, PreviewResult result)
 {
+    if (control != parent)
+        return;
+
     itemPixmap = result.preview;
 
     if (parent->_initialized == false) {
@@ -373,8 +374,11 @@ void ControlPrivate::updatePreview(PreviewResult result)
     emit parent->previewChanged();
 }
 
-void ControlPrivate::handlePreviewErrors(QList<QQmlError> errors, PreviewResult result)
+void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> errors, PreviewResult result)
 {
+    if (control != parent)
+        return;
+
     QMessageBox box;
     box.setText("<b>This tool has some errors, please fix these first.</b>");
     box.setInformativeText("<b>Control</b>: " +  result.id + ", <b>Error</b>: " + errors[0].description());

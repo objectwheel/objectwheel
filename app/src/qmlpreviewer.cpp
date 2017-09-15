@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <QTimer>
+#include <QPair>
 
 #define TASK_TIMEOUT 10
 
@@ -48,12 +49,9 @@ class QmlPreviewerPrivate : public QObject
 
     public:
         QmlPreviewer* parent;
-        QList<QSizeF> taskList;
+        QList<QPair<QSizeF, Control*>> taskList;
         QTimer taskTimer;
-        static bool working;
 };
-
-bool QmlPreviewerPrivate::working = false;
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : QObject(parent)
@@ -209,25 +207,27 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
 
 void QmlPreviewerPrivate::taskHandler()
 {
-    if (working)
+    if (parent->_working)
         return;
 
     if (taskList.isEmpty()) {
         taskTimer.stop();
         return;
     }
-    working = true;
+    parent->_working = true;
+    emit parent->workingChanged(parent->_working);
 
-    auto size = taskList.takeFirst();
-    auto dir = parent->_watched->dir();
+    auto task = taskList.takeFirst();
+    auto dir = task.second->dir();
     auto masterPaths = SaveManager::masterPaths(dir);
 
     if (SaveManager::suid(dir).isEmpty() || masterPaths.isEmpty()) {
         auto res = requestPreview(dir + separator() + DIR_THIS +
-                                      separator() + "main.qml", size);
+                                      separator() + "main.qml", task.first);
         if (!res.isNull())
-            emit parent->previewReady(res);
-        working = false;
+            emit parent->previewReady(task.second, res);
+        parent->_working = false;
+        emit parent->workingChanged(parent->_working);
         return;
     }
 
@@ -244,23 +244,26 @@ void QmlPreviewerPrivate::taskHandler()
             } else {
                 results[childPath] = requestPreview(childPath + separator() + DIR_THIS + separator() + "main.qml", QSize());
                 if (results[childPath].isNull()) {
-                    working = false;
+                    parent->_working = false;
+                    emit parent->workingChanged(parent->_working);
                     return;
                 }
             }
         }
 
         if (masterPaths.last() == path) {
-            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", size);
+            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", task.first);
             finalResult = &masterResults[path];
             if (masterResults[path].isNull()) {
-                working = false;
+                parent->_working = false;
+                emit parent->workingChanged(parent->_working);
                 return;
             }
         } else {
             masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", QSize());
             if (masterResults[path].isNull()) {
-                working = false;
+                parent->_working = false;
+                emit parent->workingChanged(parent->_working);
                 return;
             }
         }
@@ -280,22 +283,37 @@ void QmlPreviewerPrivate::taskHandler()
         }
     }
 
-    emit parent->previewReady(*finalResult);
+    emit parent->previewReady(task.second, *finalResult);
 
-    working = false;
+    parent->_working = false;
+    emit parent->workingChanged(parent->_working);
 }
 
-QmlPreviewer::QmlPreviewer(Control* watched, QObject *parent)
-    : QObject(parent)
-    , _d(new QmlPreviewerPrivate(this))
-    , _watched(watched)
+bool QmlPreviewer::_working = false;
+QmlPreviewerPrivate* QmlPreviewer::_d = nullptr;
+
+QmlPreviewer::QmlPreviewer(QObject *parent) : QObject(parent)
 {
+    if (_d)
+        return;
+
+    _d = new QmlPreviewerPrivate(this);
 }
 
-void QmlPreviewer::requestPreview(const QSizeF& size)
+QmlPreviewer* QmlPreviewer::instance()
 {
-    _d->taskList.append(size);
+    return _d ? _d->parent : nullptr;
+}
+
+void QmlPreviewer::requestPreview(Control* control, const QSizeF& size)
+{
+    _d->taskList.append(QPair<QSizeF, Control*>(size, control));
     _d->taskTimer.start();
+}
+
+bool QmlPreviewer::working()
+{
+    return _working;
 }
 
 #include "qmlpreviewer.moc"
