@@ -506,10 +506,11 @@ void DesignManagerPrivate::handleWGuiModeButtonClicked()
 {
     DesignManager::setMode(DesignManager::FormGUI);
 }
-
+#include <savemanager.h>
 void DesignManagerPrivate::handlePlayButtonClicked()
 {
     //TODO
+    SaveManager::execProject();
 }
 
 void DesignManagerPrivate::handleBuildButtonClicked()

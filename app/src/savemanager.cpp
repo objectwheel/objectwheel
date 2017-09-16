@@ -16,6 +16,12 @@
 #include <QApplication>
 #include <QTimer>
 #include <QDebug>
+#include <QQuickItem>
+#include <QQmlProperty>
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QQmlComponent>
+#include <QQuickView>
 
 //!
 //! ******************* [SaveManagerPrivate] *******************
@@ -101,6 +107,12 @@ class SaveManagerPrivate : public QObject
 
         // Returns root path (of parent) if given control has a parent control
         QString parentDir(const Control* control) const;
+
+        // Build qml object form url
+        QObject* requestItem(const QString& path, QQmlEngine* engine) const;
+
+        // Returns true if the given object is an instance of QQuickItem
+        bool isGuiObject(QObject* object) const;
 
 	public:
         SaveManager* parent = nullptr;
@@ -414,6 +426,20 @@ QString SaveManagerPrivate::parentDir(const Control* control) const
     return dname(dname(control->dir()));
 }
 
+QObject* SaveManagerPrivate::requestItem(const QString& path, QQmlEngine* engine) const
+{
+    QObject* item;
+    QQmlComponent comp(engine, QUrl(path));
+    item = comp.create();
+    qDebug() << comp.errors();
+    return item;
+}
+
+bool SaveManagerPrivate::isGuiObject(QObject* object) const
+{
+    return (qobject_cast<QQuickItem*>(object) != nullptr || object->isWindowType());
+}
+
 //!
 //! ********************** [SaveManager] **********************
 //!
@@ -451,9 +477,61 @@ bool SaveManager::initProject(const QString& projectDirectory)
     return wrfile(propertyPath, propertyData);
 }
 
+
 bool SaveManager::execProject()
 {
-    //TODO
+    auto dir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+    if(dir.isEmpty())
+        return false;
+
+    dir = dir + separator() + DIR_OWDB;
+    auto* engine = new QQmlEngine(_d->parent);
+    auto _masterPaths = masterPaths(dir);
+    QMap<QString, QObject*> masterResults;
+
+    QObject* rootObject;
+    for (auto path : _masterPaths) {
+        QMap<QString, QObject*> results;
+        auto _childrenPaths = childrenPaths(path);
+        for (auto childPath : _childrenPaths) {
+            int index = _masterPaths.indexOf(childPath);
+            if (index >= 0) {
+                results[childPath] = masterResults[childPath];
+            } else {
+                results[childPath] = _d->requestItem(childPath + separator() + DIR_THIS + separator() + "main.qml", engine);
+                if (results[childPath] == nullptr)
+                    return false;
+            }
+        }
+
+        if (_masterPaths.last() == path) {
+            masterResults[path] = _d->requestItem(path + separator() + DIR_THIS + separator() + "main.qml", engine);
+            rootObject = masterResults[path];
+            if (masterResults[path] == nullptr)
+                return false;
+        } else {
+            masterResults[path] = _d->requestItem(path + separator() + DIR_THIS + separator() + "main.qml", engine);
+            if (masterResults[path] == nullptr)
+                return false;
+        }
+
+        QObject* parentObject;
+        for (auto result : results.keys()) {
+            if (dname(dname(result)) == path)
+                parentObject = masterResults[path];
+
+            if(_d->isGuiObject(parentObject) && _d->isGuiObject(results[result]))
+                if (parentObject->isWindowType())
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(parentObject)->contentItem());
+                else
+                qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(parentObject));
+
+            parentObject = results[result];
+        }
+    }
+
+    return true;
 }
 
 QString SaveManager::basePath()
