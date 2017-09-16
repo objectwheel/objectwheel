@@ -17,7 +17,6 @@ struct PreviewResult {
         QPixmap preview;
         QPointF pos;
         QSizeF size;
-        QString id;
         QList<QString> events;
         QMap<QString, QVariant> properties;
         bool clip;

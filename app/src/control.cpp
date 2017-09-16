@@ -320,7 +320,7 @@ void ControlPrivate::refreshPreview()
 }
 
 void ControlPrivate::updatePreview(Control* control, PreviewResult result)
-{
+{ //FIXME: Resize and move operations are getting broken because of ongoing preview updates
     if (control != parent)
         return;
 
@@ -336,7 +336,6 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         parent->_controlTransaction.flushParentChange();
     }
 
-    parent->setId(result.id);
     parent->setGui(result.gui);
     parent->setProperties(result.properties);
     parent->setEvents(result.events);
@@ -374,14 +373,14 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
     emit parent->previewChanged();
 }
 
-void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> errors, PreviewResult result)
+void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> errors, PreviewResult)
 {
     if (control != parent)
         return;
 
     QMessageBox box;
     box.setText("<b>This tool has some errors, please fix these first.</b>");
-    box.setInformativeText("<b>Control</b>: " +  result.id + ", <b>Error</b>: " + errors[0].description());
+    box.setInformativeText("<b>Control</b>: " +  parent->id() + ", <b>Error</b>: " + errors[0].description());
     box.setStandardButtons(QMessageBox::Ok);
     box.setDefaultButton(QMessageBox::Ok);
     box.setIcon(QMessageBox::Information);
@@ -411,6 +410,7 @@ Control::Control(const QString& url, const QString& uid, Control* parent)
     , _hideSelection(false)
     , _initialized(false)
 {
+    setId(SaveManager::id(dname(dname(url))));
     _controls << this;
     setGeometry(0, 0, 0, 0);
     connect(this, &Control::visibleChanged, [=] {
@@ -593,10 +593,10 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     auto pos = event->pos();
     auto control = new Control(event->mimeData()->urls().at(0).toLocalFile());
     control->setParentItem(this);
+    SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid(),
+                            DesignManager::currentScene()->mainControl()->dir());
     control->refresh();
     connect(control, &Control::initialized, [=] {
-        SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid(),
-                                DesignManager::currentScene()->mainControl()->dir());
         control->controlTransaction()->setTransactionsEnabled(true);
         control->setPos(pos);
     });

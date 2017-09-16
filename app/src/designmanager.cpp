@@ -263,11 +263,11 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     playButton.setCursor(Qt::PointingHandCursor);
     buildButton.setCursor(Qt::PointingHandCursor);
 
-    editorModeButton.setToolTip("Switch to QML Editor for selected control or tool.");
-    cGuiModeButton.setToolTip("Switch to Control GUI Editor for selected control or tool.");
-    wGuiModeButton.setToolTip("Switch to Application GUI Editor.");
-    playButton.setToolTip("Run your application.");
-    buildButton.setToolTip("Show build options.");
+    editorModeButton.setToolTip("Switch to Qml Editor.");
+    cGuiModeButton.setToolTip("Switch to Control Editor.");
+    wGuiModeButton.setToolTip("Switch to Form Editor.");
+    playButton.setToolTip("Run project.");
+    buildButton.setToolTip("Get builds.");
 
     editorModeButton.setIcon(QIcon(":/resources/images/text.png"));
     cGuiModeButton.setIcon(QIcon(":/resources/images/gui.png"));

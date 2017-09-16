@@ -704,7 +704,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
 
 // You can only move controls within current suid scope of related control
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
-{
+{ //FIXME: Some controls are disappearing after moving
     if (_d->parentDir(control) == parentControl->dir())
         return true;
 

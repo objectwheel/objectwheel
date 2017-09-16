@@ -81,6 +81,8 @@ void ControlScene::setMainControl(Control* mainControl)
 
 void ControlScene::removeControl(Control* control)
 {
+    if (control == mainControl())
+        return;
     removeItem(control);
     control->deleteLater();
     emit controlRemoved(control);

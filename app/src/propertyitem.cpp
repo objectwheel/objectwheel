@@ -34,7 +34,7 @@ QString PropertyItem::property() const
 }
 
 void PropertyItem::applyValue(const QVariant& value)
-{
+{ //FIXME: For id property
     if (DesignManager::mode() == DesignManager::ControlGUI && _property == TAG_ID)
         SaveManager::setProperty(_control, _property, value, DesignManager::controlScene()->mainControl()->dir());
     else

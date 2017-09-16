@@ -174,6 +174,7 @@ void FormViewPrivate::handleDeleteAction()
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls) {
        scene->removeControl(control);
+       SaveManager::removeControl(control);
     }
 }
 

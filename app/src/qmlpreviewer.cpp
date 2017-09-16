@@ -24,7 +24,7 @@
 #include <QTimer>
 #include <QPair>
 
-#define TASK_TIMEOUT 10
+#define TASK_TIMEOUT 100
 
 using namespace Fit;
 
@@ -125,7 +125,6 @@ QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
 PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size) const
 {
     PreviewResult result;
-    result.id = "none";
 
     if (url.isEmpty() || !SaveManager::isOwctrl(dname(dname(url)))) {
         QQmlError error;
@@ -142,8 +141,6 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
     qmlEngine->rootContext()->setContextProperty("dpi", Fit::ratio());
     qmlComponent->loadUrl(url);
     qmlObject = qmlComponent->create();
-    result.id = SaveManager::id(dname(dname(url)));
-    result.properties["id"] = result.id;
 
     if (!qmlComponent->errors().isEmpty()) {
         emit errorsOccurred(qmlComponent->errors(), result);
@@ -223,7 +220,7 @@ void QmlPreviewerPrivate::taskHandler()
 
     if (SaveManager::suid(dir).isEmpty() || masterPaths.isEmpty()) {
         auto res = requestPreview(dir + separator() + DIR_THIS +
-                                      separator() + "main.qml", task.first);
+                                  separator() + "main.qml", task.first);
         if (!res.isNull())
             emit parent->previewReady(task.second, res);
         parent->_working = false;
@@ -269,7 +266,7 @@ void QmlPreviewerPrivate::taskHandler()
         }
 
         QPixmap* parentPixmap;
-        for (auto result : results.keys()) {
+        for (auto result : results.keys()) { //FIXME
             if (dname(dname(result)) == path)
                 parentPixmap = &masterResults[path].preview;
 

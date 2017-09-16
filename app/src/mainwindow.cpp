@@ -193,7 +193,7 @@ void MainWindow::SetupGui()
     _d->toolboxList->indicatorButton()->setIconSize(QSize(fit(10), fit(10)));
     _d->toolboxList->indicatorButton()->resize(fit(15), fit(15));
     connect(_d->toolboxList->indicatorButton(), &FlatButton::clicked, [=] {
-        auto previousControl = DesignManager::currentScene()->mainControl();
+        auto previousControl = DesignManager::controlScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
         auto url = _d->toolboxList->GetUrls(_d->toolboxList->currentItem())[0];
