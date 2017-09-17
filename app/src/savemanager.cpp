@@ -35,7 +35,14 @@ class SaveManagerPrivate : public QObject
         // Parent Scope: Parent + Primary children of Parent.
         // None of member functions checks whether given controls' ids or dirs are valid or not.
 
-	public:
+    public:
+        enum Type {
+            Quick,
+            Window,
+            NonGui
+        };
+
+    public:
         SaveManagerPrivate(SaveManager* parent);
         void setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const;
         QJsonValue property(const QByteArray& propertyData, const QString& property) const;
@@ -109,12 +116,12 @@ class SaveManagerPrivate : public QObject
         QString parentDir(const Control* control) const;
 
         // Build qml object form url
-        QObject* requestItem(const QString& path, QQmlEngine* engine) const;
+        QObject* requestItem(const QString& path, QQmlEngine* engine, QQmlContext* context) const;
 
         // Returns true if the given object is an instance of QQuickItem
-        bool isGuiObject(QObject* object) const;
+        Type type(QObject* object) const;
 
-	public:
+    public:
         SaveManager* parent = nullptr;
         ParserController parserController;
 };
@@ -199,7 +206,7 @@ bool SaveManagerPrivate::existsInFormScope(const Control* control) const
 bool SaveManagerPrivate::existsInParentScope(const Control* control, const QString& suid, const QString topPath) const
 {
     if (control->form())
-            return existsInFormScope(control);
+        return existsInFormScope(control);
 
     Q_ASSERT(!suid.isEmpty());
 
@@ -426,18 +433,21 @@ QString SaveManagerPrivate::parentDir(const Control* control) const
     return dname(dname(control->dir()));
 }
 
-QObject* SaveManagerPrivate::requestItem(const QString& path, QQmlEngine* engine) const
+QObject* SaveManagerPrivate::requestItem(const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
-    QObject* item;
-    QQmlComponent comp(engine, QUrl(path));
-    item = comp.create();
+    QQmlComponent comp(engine, QUrl(path + separator() + DIR_THIS + separator() + "main.qml"));
+    auto item = comp.create(context);
     qDebug() << comp.errors();
     return item;
 }
 
-bool SaveManagerPrivate::isGuiObject(QObject* object) const
+SaveManagerPrivate::Type SaveManagerPrivate::type(QObject* object) const
 {
-    return (qobject_cast<QQuickItem*>(object) != nullptr || object->isWindowType());
+    if (qobject_cast<QQuickItem*>(object) != nullptr)
+        return Type::Quick;
+    if (object->isWindowType())
+        return Type::Window;
+    return Type::NonGui;
 }
 
 //!
@@ -477,7 +487,6 @@ bool SaveManager::initProject(const QString& projectDirectory)
     return wrfile(propertyPath, propertyData);
 }
 
-
 bool SaveManager::execProject()
 {
     auto dir = ProjectManager::projectDirectory(ProjectManager::currentProject());
@@ -485,51 +494,80 @@ bool SaveManager::execProject()
     if(dir.isEmpty())
         return false;
 
-    dir = dir + separator() + DIR_OWDB;
-    auto* engine = new QQmlEngine(_d->parent);
-    auto _masterPaths = masterPaths(dir);
-    QMap<QString, QObject*> masterResults;
+    QMap<QString, QQmlContext*> contexes;
+    auto engine = new QQmlEngine(_d->parent);
 
-    QObject* rootObject;
-    for (auto path : _masterPaths) {
-        QMap<QString, QObject*> results;
-        auto _childrenPaths = childrenPaths(path);
-        for (auto childPath : _childrenPaths) {
-            int index = _masterPaths.indexOf(childPath);
-            if (index >= 0) {
-                results[childPath] = masterResults[childPath];
+    for (auto formPath : formPaths()) {
+        auto _masterPaths = masterPaths(formPath);
+        QMap<QString, QObject*> masterResults;
+
+        QObject* form = nullptr;
+        for (auto path : _masterPaths) {
+            auto masterContext = new QQmlContext(engine, engine);
+            QMap<QString, QObject*> results;
+            auto _childrenPaths = childrenPaths(path);
+            for (auto childPath : _childrenPaths) {
+                int index = _masterPaths.indexOf(childPath);
+                if (index >= 0) {
+                    results[childPath] = masterResults[childPath];
+                } else {
+                    results[childPath] = _d->requestItem(childPath, engine, masterContext);
+                    if (results[childPath] == nullptr)
+                        return false;
+                }
+                masterContext->setContextProperty(id(childPath), results[childPath]);
+            }
+
+            if (_masterPaths.last() == path) {
+                masterResults[path] = _d->requestItem(path, engine, masterContext);
+                if (masterResults[path] == nullptr)
+                    return false;
+                form = masterResults[path];
+                contexes[path] = masterContext;
             } else {
-                results[childPath] = _d->requestItem(childPath + separator() + DIR_THIS + separator() + "main.qml", engine);
-                if (results[childPath] == nullptr)
+                masterResults[path] = _d->requestItem(path, engine, masterContext);
+                if (masterResults[path] == nullptr)
                     return false;
             }
-        }
+            masterContext->setContextProperty(id(path), masterResults[path]);
 
-        if (_masterPaths.last() == path) {
-            masterResults[path] = _d->requestItem(path + separator() + DIR_THIS + separator() + "main.qml", engine);
-            rootObject = masterResults[path];
-            if (masterResults[path] == nullptr)
-                return false;
-        } else {
-            masterResults[path] = _d->requestItem(path + separator() + DIR_THIS + separator() + "main.qml", engine);
-            if (masterResults[path] == nullptr)
-                return false;
-        }
+            QObject* parentObject;
+            for (auto result : results.keys()) {
+                if (dname(dname(result)) == path)
+                    parentObject = masterResults[path];
 
-        QObject* parentObject;
-        for (auto result : results.keys()) {
-            if (dname(dname(result)) == path)
-                parentObject = masterResults[path];
+                if (_d->type(results[result]) == SaveManagerPrivate::Type::Window ||
+                    _d->type(parentObject) == SaveManagerPrivate::Type::NonGui)
+                    return false;
+                if (_d->type(results[result]) == SaveManagerPrivate::Type::NonGui)
+                    continue;
 
-            if(_d->isGuiObject(parentObject) && _d->isGuiObject(results[result]))
+                // All children are quick (not nongui/window)
+                // All forms are quick or window (not nongui)
+
                 if (parentObject->isWindowType())
                     qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(parentObject)->contentItem());
                 else
-                qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(parentObject));
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(parentObject));
 
-            parentObject = results[result];
+                parentObject = results[result];
+            }
+
+            for (auto result : results.keys()) {
+                if (_d->type(results[result]) != SaveManagerPrivate::Type::NonGui)
+                    continue;
+
+                if (form->isWindowType())
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(form)->contentItem());
+                else
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(form));
+            }
         }
     }
+
+    for (auto path : contexes.keys())
+        for (auto p : contexes.keys())
+            contexes[path]->setContextProperty(id(p), contexes[p]);
 
     return true;
 }
@@ -599,7 +637,7 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 
     std::sort(paths.begin(), paths.end(),
               [](const QString& a, const QString& b)
-              { return a.size() > b.size(); });
+    { return a.size() > b.size(); });
 
     return paths;
 }
@@ -775,7 +813,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     _d->recalculateUids(control);
 
     if (_d->isInOwdb(control->dir()))
-         emit _d->parent->databaseChanged();
+        emit _d->parent->databaseChanged();
 
     return true;
 }
