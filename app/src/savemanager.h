@@ -52,6 +52,7 @@ class SaveManager : public QObject
         static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
         static bool moveControl(Control* control, const Control* parentControl);
         static void removeControl(const Control* control);
+        static void removeChildControlsOnly(const Control* control);
 
         static void setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath = QString());
         static void removeProperty(const Control* control, const QString& property);

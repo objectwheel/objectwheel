@@ -7,6 +7,7 @@
 #include <fit.h>
 #include <css.h>
 #include <loadingindicator.h>
+#include <savemanager.h>
 
 #include <QWidget>
 #include <QList>
@@ -18,6 +19,7 @@
 #include <QToolButton>
 #include <QMenu>
 #include <QComboBox>
+#include <QMessageBox>
 
 using namespace Fit;
 
@@ -48,6 +50,7 @@ class DesignManagerPrivate : public QObject
         void handleDesktopSkinButtonClicked();
         void handleNoSkinButtonClicked();
         void handleRefreshPreviewClicked();
+        void handleClearControls();
         void handleEditorModeButtonClicked();
         void handleCGuiModeButtonClicked();
         void handleWGuiModeButtonClicked();
@@ -216,6 +219,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
     connect(&fitInSceneButton, SIGNAL(clicked(bool)), SLOT(handleFitInSceneClicked()));
     connect(&refreshPreviewButton, SIGNAL(clicked(bool)), SLOT(handleRefreshPreviewClicked()));
+    connect(&clearFormButton, SIGNAL(clicked(bool)), SLOT(handleClearControls()));
     connect(&phonePortraitButton, SIGNAL(clicked(bool)), SLOT(handlePhonePortraitButtonClicked()));
     connect(&phoneLandscapeButton, SIGNAL(clicked(bool)), SLOT(handlePhoneLandscapeButtonClicked()));
     connect(&desktopSkinButton, SIGNAL(clicked(bool)), SLOT(handleDesktopSkinButtonClicked()));
@@ -492,6 +496,28 @@ void DesignManagerPrivate::handleRefreshPreviewClicked()
     }
 }
 
+void DesignManagerPrivate::handleClearControls()
+{
+    QMessageBox msgBox;
+    msgBox.setText("<b>This will remove current scene's content.</b>");
+    msgBox.setInformativeText("Do you want to continue?");
+    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setIcon(QMessageBox::Question);
+    const int ret = msgBox.exec();
+    switch (ret) {
+        case QMessageBox::Yes: {
+            auto scene = parent->currentScene();
+            scene->removeChildControlsOnly(scene->mainControl());
+            SaveManager::removeChildControlsOnly(scene->mainControl());
+            break;
+        } default: {
+            // Do nothing
+            break;
+        }
+    }
+}
+
 void DesignManagerPrivate::handleEditorModeButtonClicked()
 {
     DesignManager::setMode(DesignManager::CodeEdit);
@@ -506,10 +532,8 @@ void DesignManagerPrivate::handleWGuiModeButtonClicked()
 {
     DesignManager::setMode(DesignManager::FormGUI);
 }
-#include <savemanager.h>
 void DesignManagerPrivate::handlePlayButtonClicked()
 {
-    //TODO
     SaveManager::execProject();
 }
 

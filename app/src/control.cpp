@@ -469,13 +469,14 @@ void Control::showSelection()
     }
 }
 
-QList<Control*> Control::childControls() const
+QList<Control*> Control::childControls(bool dive) const
 {
     QList<Control*> controls;
     for (auto item : childItems()) {
         if (dynamic_cast<Control*>(item)) {
             controls << static_cast<Control*>(item);
-            controls << controls.last()->childControls();
+            if (dive)
+                controls << controls.last()->childControls(dive);
         }
     }
     return controls;
@@ -881,16 +882,6 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         painter->drawLine(innerRect.bottomRight(), innerRect.bottomRight() + QPointF(-2, 0));
         painter->drawLine(innerRect.bottomRight(), innerRect.bottomRight() + QPointF(0, -2));
     }
-}
-
-void Control::cleanContent()
-{
-    auto scene = static_cast<ControlScene*>(this->scene());
-
-    if (scene == nullptr)
-        return;
-
-    scene->removeChildControlsOnly(this);
 }
 
 bool Control::stickSelectedControlToGuideLines() const

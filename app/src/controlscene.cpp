@@ -90,10 +90,10 @@ void ControlScene::removeControl(Control* control)
 
 void ControlScene::removeChildControlsOnly(Control* parent)
 {
-    for (auto control : parent->childControls()) {
-        removeItem(control);
+    for (auto control : parent->childControls())
         control->deleteLater();
-    }
+    for (auto control : parent->childControls(false))
+        removeItem(control);
 }
 
 QList<Control*> ControlScene::controls(Qt::SortOrder order)

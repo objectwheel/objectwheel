@@ -261,7 +261,7 @@ void MainWindow::SetupManagers()
 
     SplashScreen::raise();
 	connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
-			[=](const QString& key){
+            [=](const QString& /*key*/){
 		m_RightMenu->hide();
         _d->titleBar->setMenuChecked(false);
 		m_LeftMenu->hide();
@@ -353,7 +353,7 @@ void MainWindow::handleToolboxUrlboxChanges(const QString& text)
     _d->toolboxList->currentItem()->setIcon(QIcon(icon));
 }
 
-void MainWindow::handleToolboxNameboxChanges(QString name)
+void MainWindow::handleToolboxNameboxChanges(QString /*name*/)
 {
 //	if (name == _d->toolboxList->currentItem()->text() || name == "") return;
 

@@ -10,7 +10,6 @@
 #include <delayer.h>
 
 #include <QStandardPaths>
-#include <QMessageBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 

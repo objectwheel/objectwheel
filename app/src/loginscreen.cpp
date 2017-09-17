@@ -8,8 +8,6 @@
 #include <usermanager.h>
 #include <QDateTime>
 #include <QTimer>
-#include <QMessageBox>
-#include <splashscreen.h>
 #include <scenemanager.h>
 #include <filemanager.h>
 #include <projectmanager.h>

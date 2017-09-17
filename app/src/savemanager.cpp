@@ -870,6 +870,20 @@ void SaveManager::removeControl(const Control* control)
         emit _d->parent->databaseChanged();
 }
 
+void SaveManager::removeChildControlsOnly(const Control* control)
+{
+    if (control->id().isEmpty() || control->url().isEmpty())
+        return;
+
+    if (!isOwctrl(control->dir()))
+        return;
+
+    rm(control->dir() + separator() + DIR_CHILDREN);
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
+}
+
 // You can not set id property of a top control if it's not exist in the project database
 // If you want to set id property of a control that is not exist in the project database,
 // then you have to provide a valid topPath

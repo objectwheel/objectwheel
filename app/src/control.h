@@ -78,7 +78,7 @@ class Control : public QGraphicsWidget
         bool init() const;
         QMap<QString, QVariant> properties() const;
         QList<QString> events() const;
-        QList<Control*> childControls() const;
+        QList<Control*> childControls(bool dive = true) const;
         Control* parentControl() const;
         int higherZValue() const;
         int lowerZValue() const;
@@ -100,7 +100,6 @@ class Control : public QGraphicsWidget
         void showSelection();
         void hideResizers();
         void showResizers();
-        void cleanContent();
         virtual void refresh();
 
     protected slots:
