@@ -325,7 +325,7 @@ void SaveManagerPrivate::recalculateUids(Control* control) const
             updateFile(file, uid, newUid);
     }
 
-    Control::updateUids();
+    Control::updateUids(); // FIXME: Change with childControls()->updateUid();
 }
 
 void SaveManagerPrivate::refactorId(Control* control, const QString& suid, const QString& topPath) const
@@ -674,13 +674,13 @@ void SaveManager::exposeProject()
     emit instance()->projectExposed();
 }
 
-Control* SaveManager::exposeControl(const QString& rootPath)
+Control* SaveManager::exposeControl(const QString& rootPath, QString suid)
 {
     auto control = new Control(rootPath + separator() + DIR_THIS +
                                separator() + "main.qml");
 
     Control* parentControl;
-    for (auto child : childrenPaths(rootPath)) {
+    for (auto child : childrenPaths(rootPath, suid)) {
         if (dname(dname(child)) == rootPath)
             parentControl = control;
 
@@ -796,6 +796,8 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
         return false;
 
     _d->refactorId(control, suid, topPath);
+    for (auto child : control->childControls())
+        _d->refactorId(child, suid, topPath);
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
     auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
@@ -809,6 +811,9 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
     _d->flushId(control, control->id());
+    for (auto child : control->childControls())
+        _d->flushId(child, child->id());
+
     _d->flushSuid(control, suid);
     _d->recalculateUids(control);
 

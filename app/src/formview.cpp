@@ -3,6 +3,8 @@
 #include <control.h>
 #include <fit.h>
 #include <savemanager.h>
+#include <designmanager.h>
+#include <filemanager.h>
 
 #include <QTimer>
 #include <QContextMenuEvent>
@@ -12,8 +14,9 @@
 #include <QDebug>
 #include <QClipboard>
 #include <QMimeData>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonValue>
+#include <QJsonObject>
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 
@@ -25,6 +28,7 @@ class FormViewPrivate : public QObject
 
     public:
         FormViewPrivate(FormView* parent);
+        void fixSuids(const QString& topPath, const QString& from, const QString& to);
 
     private slots:
         void handleUndoAction();
@@ -124,6 +128,18 @@ FormViewPrivate::FormViewPrivate(FormView* parent)
     connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
 }
 
+void FormViewPrivate::fixSuids(const QString& topPath, const QString& from, const QString& to)
+{
+    for (auto path : fps(FILE_PROPERTIES, topPath)) {
+        if (SaveManager::suid(dname(dname(path))) != from)
+            continue;
+        auto propertyData = rdfile(path);
+        auto jobj = QJsonDocument::fromJson(propertyData).object();
+        jobj[TAG_SUID] = to;
+        wrfile(path, propertyData);
+    }
+}
+
 void FormViewPrivate::handleUndoAction()
 {
     //TODO
@@ -136,35 +152,109 @@ void FormViewPrivate::handleRedoAction()
 
 void FormViewPrivate::handleCutAction()
 {
-    // TODO
-//    QJsonObject pr;
-//    QList<QUrl> urls;
-//    auto mimeData = new QMimeData;
-//    auto clipboard = QApplication::clipboard();
-//    auto scene = static_cast<FormScene*>(parent->scene());
+    QList<QUrl> urls;
+    QByteArray controls;
+    QDataStream dstream(&controls, QIODevice::WriteOnly);
+    auto mimeData = new QMimeData;
+    auto clipboard = QApplication::clipboard();
+    auto scene = DesignManager::formScene();
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
+    mimeData->setData("objectwheel/cut", "1");
+    mimeData->setData("objectwheel/fscene", ""); //WARNING
 
-//    for (auto control : scene->selectedControls()) {
-//        for (auto childControl : control->childControls()) {
-//            pr[childControl->id()] = control->id();
-//            urls << childControl->url();
-//        }
-//        pr[control->id()] = control->parentControl()->id();
-//        urls << control->url();
-//    }
+    for (auto control : selectedControls)
+        for (auto ctrl : selectedControls)
+            if (control->childControls().contains(ctrl))
+                selectedControls.removeAll(ctrl);
 
-//    mimeData->setUrls(m_Urls[items[0]]);
-//    mimeData->setText(TOOLBOX_ITEM_KEY);
-//    mimeData->setHtml(QJsonDocument(pr));
+    for (auto control : selectedControls) {
+        urls << QUrl::fromLocalFile(control->dir());
+        dstream << (quint64)control;
+    }
+
+    mimeData->setData("objectwheel/dstreamsize", QString::number(selectedControls.size()).toUtf8());
+    mimeData->setData("objectwheel/dstream", controls);
+    mimeData->setUrls(urls);
+    mimeData->setText(TOOLBOX_ITEM_KEY);
+    clipboard->setMimeData(mimeData);
 }
 
 void FormViewPrivate::handleCopyAction()
 {
-    //TODO
+    QList<QUrl> urls;
+    auto mimeData = new QMimeData;
+    auto clipboard = QApplication::clipboard();
+    auto scene = DesignManager::formScene();
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
+
+    for (auto control : selectedControls)
+        for (auto ctrl : selectedControls)
+            if (control->childControls().contains(ctrl))
+                selectedControls.removeAll(ctrl);
+
+    for (auto control : selectedControls)
+        urls << QUrl::fromLocalFile(control->dir());
+
+    mimeData->setUrls(urls);
+    mimeData->setText(TOOLBOX_ITEM_KEY);
+    clipboard->setMimeData(mimeData);
 }
 
 void FormViewPrivate::handlePasteAction()
 {
-    //TODO
+    auto clipboard = QApplication::clipboard();
+    auto mimeData = clipboard->mimeData();
+    auto mainControl = DesignManager::formScene()->mainControl();
+    QString uid = mimeData->data("objectwheel/uid");
+    if (!mimeData->hasUrls() || !mimeData->hasText() ||
+        mimeData->text() != TOOLBOX_ITEM_KEY || uid.isEmpty())
+        return;
+
+    QList<Control*> controls;
+    for (auto url : mimeData->urls()) {
+        auto control = SaveManager::exposeControl(url.toLocalFile(), uid);
+        SaveManager::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
+        fixSuids(control->dir(), uid, mainControl->uid());
+        control->setParentItem(mainControl);
+        control->refresh();
+        controls << control;
+        connect(control, &Control::initialized, [=] {
+            control->controlTransaction()->setTransactionsEnabled(true);
+            if (url == mimeData->urls().last()) {
+                DesignManager::formScene()->clearSelection();
+                for (auto control : controls)
+                    control->setSelected(true);
+
+                if (!mimeData->data("objectwheel/cut").isEmpty()) {
+                    ControlScene* scene;
+                    if (mimeData->data("objectwheel/fscene").isEmpty())
+                        scene = DesignManager::formScene();
+                    else
+                        scene = DesignManager::controlScene();
+
+                    QDataStream dstream(mimeData->data("objectwheel/dstream"));
+                    int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
+                    QList<Control*> cutControls;
+                    for (int i = 0; i < size; i++) {
+                        quint64 buff;
+                        dstream >> buff;
+                        cutControls << (Control*)buff;
+                    }
+
+                    for (auto control : cutControls) {
+                        scene->removeControl(control);
+                        SaveManager::removeControl(control);
+                    }
+                }
+            }
+        });
+        for (auto childControl : control->childControls())
+            childControl->refresh();
+    }
 }
 
 void FormViewPrivate::handleDeleteAction()

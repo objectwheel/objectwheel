@@ -204,8 +204,8 @@ void MainWindow::SetupGui()
         connect(control, &Control::initialized, [=] {
             control->controlTransaction()->setTransactionsEnabled(true);
         });
-        for (auto chilControl : control->controls())
-            chilControl->refresh();
+        for (auto childControl : control->childControls())
+            childControl->refresh();
     });
 
     auto secureExitButton = new FlatButton;

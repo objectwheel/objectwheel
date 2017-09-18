@@ -34,7 +34,7 @@ class SaveManager : public QObject
 
         static bool execProject();
         static void exposeProject();
-        static Control* exposeControl(const QString& rootPath);
+        static Control* exposeControl(const QString& rootPath, QString suid = QString());
         static bool initProject(const QString& projectDirectory);
 
         static QString basePath();

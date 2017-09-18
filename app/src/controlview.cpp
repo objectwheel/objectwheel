@@ -3,6 +3,8 @@
 #include <control.h>
 #include <fit.h>
 #include <savemanager.h>
+#include <designmanager.h>
+#include <filemanager.h>
 
 #include <QTimer>
 #include <QContextMenuEvent>
@@ -25,6 +27,7 @@ class ControlViewPrivate : public QObject
 
     public:
         ControlViewPrivate(ControlView* parent);
+        void fixSuids(const QString& topPath, const QString& from, const QString& to);
 
     private slots:
         void handleUndoAction();
@@ -124,6 +127,18 @@ ControlViewPrivate::ControlViewPrivate(ControlView* parent)
     connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
 }
 
+void ControlViewPrivate::fixSuids(const QString& topPath, const QString& from, const QString& to)
+{
+    for (auto path : fps(FILE_PROPERTIES, topPath)) {
+        if (SaveManager::suid(dname(dname(path))) != from)
+            continue;
+        auto propertyData = rdfile(path);
+        auto jobj = QJsonDocument::fromJson(propertyData).object();
+        jobj[TAG_SUID] = to;
+        wrfile(path, propertyData);
+    }
+}
+
 void ControlViewPrivate::handleUndoAction()
 {
     //TODO
@@ -136,17 +151,109 @@ void ControlViewPrivate::handleRedoAction()
 
 void ControlViewPrivate::handleCutAction()
 {
-    // TODO
+    QList<QUrl> urls;
+    QByteArray controls;
+    QDataStream dstream(&controls, QIODevice::WriteOnly);
+    auto mimeData = new QMimeData;
+    auto clipboard = QApplication::clipboard();
+    auto scene = DesignManager::controlScene();
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
+    mimeData->setData("objectwheel/cut", "1");
+    mimeData->setData("objectwheel/fscene", "1"); //WARNING
+
+    for (auto control : selectedControls)
+        for (auto ctrl : selectedControls)
+            if (control->childControls().contains(ctrl))
+                selectedControls.removeAll(ctrl);
+
+    for (auto control : selectedControls) {
+        urls << QUrl::fromLocalFile(control->dir());
+        dstream << (quint64)control;
+    }
+
+    mimeData->setData("objectwheel/dstreamsize", QString::number(selectedControls.size()).toUtf8());
+    mimeData->setData("objectwheel/dstream", controls);
+    mimeData->setUrls(urls);
+    mimeData->setText(TOOLBOX_ITEM_KEY);
+    clipboard->setMimeData(mimeData);
 }
 
 void ControlViewPrivate::handleCopyAction()
 {
-    //TODO
+    QList<QUrl> urls;
+    auto mimeData = new QMimeData;
+    auto clipboard = QApplication::clipboard();
+    auto scene = DesignManager::controlScene();
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
+    mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
+
+    for (auto control : selectedControls)
+        for (auto ctrl : selectedControls)
+            if (control->childControls().contains(ctrl))
+                selectedControls.removeAll(ctrl);
+
+    for (auto control : selectedControls)
+        urls << QUrl::fromLocalFile(control->dir());
+
+    mimeData->setUrls(urls);
+    mimeData->setText(TOOLBOX_ITEM_KEY);
+    clipboard->setMimeData(mimeData);
 }
 
 void ControlViewPrivate::handlePasteAction()
 {
-    //TODO
+    auto clipboard = QApplication::clipboard();
+    auto mimeData = clipboard->mimeData();
+    auto mainControl = DesignManager::controlScene()->mainControl();
+    QString uid = mimeData->data("objectwheel/uid");
+    if (!mimeData->hasUrls() || !mimeData->hasText() ||
+        mimeData->text() != TOOLBOX_ITEM_KEY || uid.isEmpty())
+        return;
+
+    QList<Control*> controls;
+    for (auto url : mimeData->urls()) {
+        auto control = SaveManager::exposeControl(url.toLocalFile(), uid);
+        SaveManager::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
+        fixSuids(control->dir(), uid, mainControl->uid());
+        control->setParentItem(mainControl);
+        control->refresh();
+        controls << control;
+        connect(control, &Control::initialized, [=] {
+            control->controlTransaction()->setTransactionsEnabled(true);
+            if (url == mimeData->urls().last()) {
+                DesignManager::controlScene()->clearSelection();
+                for (auto control : controls)
+                    control->setSelected(true);
+
+                if (!mimeData->data("objectwheel/cut").isEmpty()) {
+                    ControlScene* scene;
+                    if (mimeData->data("objectwheel/fscene").isEmpty())
+                        scene = DesignManager::controlScene();
+                    else
+                        scene = DesignManager::controlScene();
+
+                    QDataStream dstream(mimeData->data("objectwheel/dstream"));
+                    int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
+                    QList<Control*> cutControls;
+                    for (int i = 0; i < size; i++) {
+                        quint64 buff;
+                        dstream >> buff;
+                        cutControls << (Control*)buff;
+                    }
+
+                    for (auto control : cutControls) {
+                        scene->removeControl(control);
+                        SaveManager::removeControl(control);
+                    }
+                }
+            }
+        });
+        for (auto childControl : control->childControls())
+            childControl->refresh();
+    }
 }
 
 void ControlViewPrivate::handleDeleteAction()
