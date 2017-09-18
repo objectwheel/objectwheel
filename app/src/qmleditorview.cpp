@@ -5,7 +5,7 @@
 #include <savemanager.h>
 #include <designmanager.h>
 #include <filemanager.h>
-#include <qmltexteditor.h>
+#include <qmlcodeeditor.h>
 #include <css.h>
 
 #include <QDebug>
@@ -48,7 +48,7 @@ class QmlEditorViewPrivate : public QObject
         QVBoxLayout vBoxLayout;
         QWidget containerWidget;
         QVBoxLayout containerVBoxLayout;
-        QmlTextEditor textEditor;
+        QmlCodeEditor textEditor;
         QToolBar toolbar;
         QToolButton pinButton;
         QToolButton undoButton;
@@ -63,7 +63,6 @@ class QmlEditorViewPrivate : public QObject
         QComboBox documentsCombobox;
         QComboBox zoomlLevelCombobox;
         QLabel lineColLabel;
-
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
@@ -81,15 +80,13 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     containerVBoxLayout.addWidget(&toolbar);
     containerVBoxLayout.addWidget(&textEditor);
 
-    containerWidget.setWindowIcon(QIcon(":/resources/images/owicon.png"));
     containerWidget.setWindowTitle("Objectwheel Qml Editor");
 
     QFont font;
     font.setFamily("Liberation Mono");
     font.setStyleHint(QFont::Monospace);
     textEditor.setFont(font);
-    textEditor.setText(TEST_TEXT);
-    textEditor.setStyleSheet("background: #f3f6f9;");
+    textEditor.setPlainText(TEST_TEXT);
     textEditor.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     connect(&textEditor, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));
     connect(&pinButton, SIGNAL(clicked(bool)), SLOT(handlePinButtonClicked()));
@@ -158,10 +155,10 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar.addWidget(&backButton);
     toolbar.addWidget(&forthButton);
     toolbar.addSeparator();
-    toolbar.addWidget(&saveButton);
     toolbar.addWidget(&cutButton);
     toolbar.addWidget(&copyButton);
     toolbar.addWidget(&pasteButton);
+    toolbar.addWidget(&saveButton);
     toolbar.addSeparator();
     toolbar.addWidget(&closeButton);
     toolbar.addWidget(&documentsCombobox);

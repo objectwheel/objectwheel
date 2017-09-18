@@ -43,7 +43,7 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/formswidget.h \
     $$PWD/loadingindicator.h \
     $$PWD/qmleditorview.h \
-    $$PWD/qmltexteditor.h
+    $$PWD/qmlcodeeditor.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -88,7 +88,7 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/formswidget.cpp \
     $$PWD/loadingindicator.cpp \
     $$PWD/qmleditorview.cpp \
-    $$PWD/qmltexteditor.cpp
+    $$PWD/qmlcodeeditor.cpp
 
 RESOURCES                 += \
     $$PWD/resources.qrc
