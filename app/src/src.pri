@@ -41,7 +41,9 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/controlsscrollpanel.h \
                              $$PWD/formview.h \
                              $$PWD/formswidget.h \
-    $$PWD/loadingindicator.h
+    $$PWD/loadingindicator.h \
+    $$PWD/qmleditorview.h \
+    $$PWD/qmltexteditor.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -84,7 +86,9 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/controlsscrollpanel.cpp \
                              $$PWD/formview.cpp \
                              $$PWD/formswidget.cpp \
-    $$PWD/loadingindicator.cpp
+    $$PWD/loadingindicator.cpp \
+    $$PWD/qmleditorview.cpp \
+    $$PWD/qmltexteditor.cpp
 
 RESOURCES                 += \
     $$PWD/resources.qrc

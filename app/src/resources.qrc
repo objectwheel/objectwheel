@@ -232,5 +232,13 @@
         <file>resources/qmls/form/t/_properties.json</file>
         <file>resources/qmls/form/t/main.qml</file>
         <file>resources/images/preloader.gif</file>
+        <file>resources/images/dback.png</file>
+        <file>resources/images/dforth.png</file>
+        <file>resources/images/pin.png</file>
+        <file>resources/images/save.png</file>
+        <file>resources/images/unpin.png</file>
+        <file>resources/images/copy.png</file>
+        <file>resources/images/cut.png</file>
+        <file>resources/images/paste.png</file>
     </qresource>
 </RCC>

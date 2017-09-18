@@ -3,6 +3,7 @@
 #include <formview.h>
 #include <controlscene.h>
 #include <controlview.h>
+#include <qmleditorview.h>
 #include <control.h>
 #include <fit.h>
 #include <css.h>
@@ -67,6 +68,7 @@ class DesignManagerPrivate : public QObject
         FormView formView;
         ControlScene controlScene;
         ControlView controlView;
+        QmlEditorView qmlEditorView;
         qreal lastScaleOfWv;
         qreal lastScaleOfCv;
         QToolBar toolbar;
@@ -115,6 +117,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     hlayout.addWidget(&toolbar_2);
     hlayout.addWidget(&formView);
     hlayout.addWidget(&controlView);
+    hlayout.addWidget(&qmlEditorView);
 
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -400,14 +403,17 @@ void DesignManagerPrivate::handleSnappingClicked(bool value)
 {
     if (DesignManager::_mode == DesignManager::FormGUI)
         formScene.setSnapping(value);
-    else
+    else if (DesignManager::_mode == DesignManager::ControlGUI)
         controlScene.setSnapping(value);
 }
 
 void DesignManagerPrivate::handleShowOutlineClicked(bool value)
 {
-    formScene.setShowOutlines(value);
-    controlScene.setShowOutlines(value);
+    if (DesignManager::_mode == DesignManager::FormGUI ||
+        DesignManager::_mode == DesignManager::ControlGUI) {
+        formScene.setShowOutlines(value);
+        controlScene.setShowOutlines(value);
+    }
 }
 
 void DesignManagerPrivate::handleFitInSceneClicked()
@@ -498,6 +504,10 @@ void DesignManagerPrivate::handleRefreshPreviewClicked()
 
 void DesignManagerPrivate::handleClearControls()
 {
+    auto scene = parent->currentScene();
+    if (!scene || !scene->mainControl())
+        return;
+
     QMessageBox msgBox;
     msgBox.setText("<b>This will remove current scene's content.</b>");
     msgBox.setInformativeText("Do you want to continue?");
@@ -507,7 +517,6 @@ void DesignManagerPrivate::handleClearControls()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-            auto scene = parent->currentScene();
             scene->removeChildControlsOnly(scene->mainControl());
             SaveManager::removeChildControlsOnly(scene->mainControl());
             break;
@@ -566,9 +575,21 @@ void DesignManagerPrivate::handleModeChange()
             handlePhoneLandscapeButtonClicked();
         }
         snappingButton.setChecked(formScene.snapping());
+        snappingButton.setEnabled(true);
+        refreshPreviewButton.setEnabled(true);
+        clearFormButton.setEnabled(true);
+        showOutlineButton.setChecked(formScene.showOutlines());
+        showOutlineButton.setEnabled(true);
+        fitInSceneButton.setEnabled(true);
+        layItVertButton.setEnabled(true);
+        layItHorzButton.setEnabled(true);
+        layItGridButton.setEnabled(true);
+        breakLayoutButton.setEnabled(true);
         zoomlLevelCombobox.setCurrentText(findText(lastScaleOfWv));
         controlView.hide();
+        qmlEditorView.hide();
         formView.show();
+        toolbar.show();
         parent->_currentScene = &formScene;
     } else if (DesignManager::_mode == DesignManager::ControlGUI) {
         cGuiModeButton.setChecked(true);
@@ -588,9 +609,21 @@ void DesignManagerPrivate::handleModeChange()
         if (controlScene.mainControl())
             controlScene.mainControl()->centralize();
         snappingButton.setChecked(controlScene.snapping());
+        snappingButton.setEnabled(true);
+        refreshPreviewButton.setEnabled(true);
+        clearFormButton.setEnabled(true);
+        showOutlineButton.setChecked(controlScene.showOutlines());
+        showOutlineButton.setEnabled(true);
+        fitInSceneButton.setEnabled(true);
+        layItVertButton.setEnabled(true);
+        layItHorzButton.setEnabled(true);
+        layItGridButton.setEnabled(true);
+        breakLayoutButton.setEnabled(true);
         zoomlLevelCombobox.setCurrentText(findText(lastScaleOfCv));
         formView.hide();
+        qmlEditorView.hide();
         controlView.show();
+        toolbar.show();
         parent->_currentScene = &controlScene;
     } else {
         editorModeButton.setChecked(true);
@@ -599,7 +632,29 @@ void DesignManagerPrivate::handleModeChange()
         wGuiModeButton.setChecked(false);
         cGuiModeButton.setEnabled(true);
         wGuiModeButton.setEnabled(true);
-        //TODO:
+        noSkinButton.setChecked(false);
+        phoneLandscapeButton.setChecked(false);
+        phonePortraitButton.setChecked(false);
+        desktopSkinButton.setChecked(false);
+        noSkinButton.setDisabled(true);
+        phonePortraitButton.setDisabled(true);
+        phoneLandscapeButton.setDisabled(true);
+        desktopSkinButton.setDisabled(true);
+        snappingButton.setChecked(false);
+        snappingButton.setDisabled(true);
+        showOutlineButton.setChecked(false);
+        showOutlineButton.setDisabled(true);
+        refreshPreviewButton.setDisabled(true);
+        clearFormButton.setDisabled(true);
+        fitInSceneButton.setDisabled(true);
+        layItVertButton.setDisabled(true);
+        layItHorzButton.setDisabled(true);
+        layItGridButton.setDisabled(true);
+        breakLayoutButton.setDisabled(true);
+        toolbar.hide();
+        formView.hide();
+        controlView.hide();
+        qmlEditorView.show();
     }
 }
 
@@ -645,12 +700,12 @@ ControlScene* DesignManager::currentScene()
     return _currentScene;
 }
 
-ControlScene*DesignManager::controlScene()
+ControlScene* DesignManager::controlScene()
 {
     return &_d->controlScene;
 }
 
-FormScene*DesignManager::formScene()
+FormScene* DesignManager::formScene()
 {
     return &_d->formScene;
 }
