@@ -4,7 +4,6 @@
 #include <parsercontroller.h>
 #include <formswidget.h>
 #include <mainwindow.h>
-#include <qmleditor.h>
 #include <control.h>
 #include <designmanager.h>
 #include <algorithm>

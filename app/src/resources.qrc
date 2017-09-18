@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/qmls/dashboard.qml</file>
         <file>resources/tools/tools.json</file>
         <file>resources/tools/Dial.zip</file>
         <file>resources/tools/Button.zip</file>
@@ -44,8 +43,6 @@
         <file>resources/tools/ComboBox.zip</file>
         <file>resources/tools/TextArea.zip</file>
         <file>resources/images/logo.png</file>
-        <file>resources/qmls/NaviBar.qml</file>
-        <file>resources/qmls/qml-editor.qml</file>
         <file>resources/images/right-arrow@2x.png</file>
         <file>resources/images/right-arrow.png</file>
         <file>resources/images/left-arrow@2x.png</file>
@@ -64,10 +61,8 @@
         <file>resources/images/handle@2x.png</file>
         <file>resources/images/handle.png</file>
         <file>resources/images/reset.png</file>
-        <file>resources/qmls/ImageViewer.qml</file>
         <file>resources/images/web.png</file>
         <file>resources/images/fexplorer.png</file>
-        <file>resources/qmls/TextEditor.qml</file>
         <file>resources/images/fexplorer@2x.png</file>
         <file>resources/qmls/Popup.qml</file>
         <file>resources/qmls/FileExplorerToolBar.qml</file>

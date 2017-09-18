@@ -15,7 +15,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/combobox.h \
                              $$PWD/scrollarea.h \
                              $$PWD/about.h \
-                             $$PWD/qmleditor.h \
                              $$PWD/splashscreen.h \
                              $$PWD/splashscreen_p.h \
                              $$PWD/usermanager.h \
@@ -41,9 +40,10 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/controlsscrollpanel.h \
                              $$PWD/formview.h \
                              $$PWD/formswidget.h \
-    $$PWD/loadingindicator.h \
-    $$PWD/qmleditorview.h \
-    $$PWD/qmlcodeeditor.h
+                             $$PWD/loadingindicator.h \
+                             $$PWD/qmleditorview.h \
+                             $$PWD/qmlcodeeditor.h \
+                             $$PWD/qmlhighlighter.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -60,7 +60,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/combobox.cpp \
                              $$PWD/scrollarea.cpp \
                              $$PWD/about.cpp \
-                             $$PWD/qmleditor.cpp \
                              $$PWD/splashscreen.cpp \
                              $$PWD/splashscreen_p.cpp \
                              $$PWD/usermanager.cpp \
@@ -86,12 +85,12 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/controlsscrollpanel.cpp \
                              $$PWD/formview.cpp \
                              $$PWD/formswidget.cpp \
-    $$PWD/loadingindicator.cpp \
-    $$PWD/qmleditorview.cpp \
-    $$PWD/qmlcodeeditor.cpp
+                             $$PWD/loadingindicator.cpp \
+                             $$PWD/qmleditorview.cpp \
+                             $$PWD/qmlcodeeditor.cpp \
+                             $$PWD/qmlhighlighter.cpp
 
-RESOURCES                 += \
-    $$PWD/resources.qrc
+RESOURCES                 += $$PWD/resources.qrc
 
 DISTFILES                 += android/AndroidManifest.xml \
                              android/res/values/libs.xml \

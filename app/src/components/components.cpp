@@ -6,7 +6,6 @@ void Components::init()
 	AudioRecorder::registerQmlType();
 	AudioPlayer::registerQmlType();
 	AiSpeak::registerQmlType();
-	DocumentHandler::registerQmlType();
 	FileManager::registerQmlType();
 	QQuickFolderListModel::registerQmlType();
 }

@@ -153,9 +153,6 @@ void MainWindow::SetupGui()
 	leftMenuLayout->addWidget(leftContainer);
 	m_LeftMenu->attachWidget(leftMenuWidget);
 
-    _d->qmlEditor = new QmlEditor(this);
-    _d->qmlEditor->setHidden(true);
-
     QObject::connect(_d->toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
            DesignManager::formScene()->clearSelection();
@@ -301,7 +298,6 @@ void MainWindow::SetupManagers()
 }
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-    _d->qmlEditor->setGeometry(0, 0, width(), height());
     QWidget::resizeEvent(event);
 	emit resized();
 }

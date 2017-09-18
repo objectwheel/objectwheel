@@ -5,35 +5,36 @@
 
 #define COLOR_LINENUMBERAREA (QColor("#E3E7EA"))
 #define COLOR_CURRENTHIGHLIGHT (QColor("#D8EBFF"))
-#define COLOR_LINENUMBERTEXT (QColor("#A3A7AB"))
+#define COLOR_LINENUMBERTEXT (QColor("#A0A4A7"))
+#define COLOR_EDITORBACKGROUND (QColor("#F3F7FA"))
 #define SPACE_LINENUMBERAREALEFT fit(25)
 #define SPACE_LINENUMBERAREARIGHT fit(5)
-#define COLOR_EDITORBACKGROUND (QColor("#F3F7FA"))
 
 using namespace Fit;
 
 class LineNumberArea : public QWidget
 {
-public:
-    LineNumberArea(QmlCodeEditor *editor) : QWidget(editor) {
-        codeEditor = editor;
-    }
+    public:
+        LineNumberArea(QmlCodeEditor *editor) : QWidget(editor) {
+            codeEditor = editor;
+        }
 
-    QSize sizeHint() const override {
-        return QSize(codeEditor->lineNumberAreaWidth(), 0);
-    }
+        QSize sizeHint() const override {
+            return QSize(codeEditor->lineNumberAreaWidth(), 0);
+        }
 
-protected:
-    void paintEvent(QPaintEvent *event) override {
-        codeEditor->lineNumberAreaPaintEvent(event);
-    }
+    protected:
+        void paintEvent(QPaintEvent *event) override {
+            codeEditor->lineNumberAreaPaintEvent(event);
+        }
 
-private:
-    QmlCodeEditor *codeEditor;
+    private:
+        QmlCodeEditor *codeEditor;
 };
 
 QmlCodeEditor::QmlCodeEditor(QWidget *parent)
     : QPlainTextEdit(parent)
+    , highlighter(document())
 {
     QPalette p(palette());
     p.setColor(QPalette::Base, COLOR_EDITORBACKGROUND);
@@ -118,10 +119,27 @@ void QmlCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
+            QPen pen;
+            QFont font;
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(COLOR_LINENUMBERTEXT);
-            painter.drawText(0, top, lineNumberArea->width() - SPACE_LINENUMBERAREARIGHT, fontMetrics().height(),
-                             Qt::AlignRight, number);
+
+            if (textCursor().hasSelection() &&
+                top >= blockBoundingGeometry(document()->findBlock(textCursor().selectionStart())).translated(contentOffset()).top() &&
+                bottom <= blockBoundingGeometry(document()->findBlock(textCursor().selectionEnd())).translated(contentOffset()).bottom()) {
+                font.setBold(true);
+                pen.setColor(COLOR_LINENUMBERTEXT.darker());
+            } else if (!textCursor().hasSelection() && textCursor().blockNumber() == blockNumber) {
+                font.setBold(true);
+                pen.setColor(COLOR_LINENUMBERTEXT.darker());
+            } else {
+                font.setBold(false);
+                pen.setColor(COLOR_LINENUMBERTEXT);
+            }
+
+            painter.setFont(font);
+            painter.setPen(pen);
+            painter.drawText(0, top, lineNumberArea->width() - SPACE_LINENUMBERAREARIGHT,
+                             fontMetrics().height(), Qt::AlignRight, number);
         }
 
         block = block.next();

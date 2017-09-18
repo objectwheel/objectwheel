@@ -4,12 +4,7 @@
 #include <QWidget>
 
 class MainWindowPrivate;
-class QQuickItem;
-class ResizerTick;
-class RotatorTick;
-class RemoverTick;
 class CoverMenu;
-class TitleBar;
 
 class MainWindow : public QWidget
 {

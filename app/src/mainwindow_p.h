@@ -16,7 +16,6 @@
 #include <propertieswidget.h>
 #include <titlebar.h>
 #include <about.h>
-#include <qmleditor.h>
 #include <formswidget.h>
 #include <fit.h>
 #include <lineedit.h>
@@ -66,7 +65,6 @@ class MainWindowPrivate
 		About* aboutWidget;
         BuildsScreen* buildsScreen;
 		FlatButton* aboutButton;
-		QmlEditor* qmlEditor;
         QWidget* settleWidget;
         DesignManager* designManager;
 
