@@ -78,6 +78,9 @@ class QmlHighlighter : public QSyntaxHighlighter
         QRegExp commentEndExpression;
 
         QTextCharFormat keywordFormat;
+        QTextCharFormat numericFormat;
+        QTextCharFormat typeFormat;
+        QTextCharFormat propertyFormat;
         QTextCharFormat classFormat;
         QTextCharFormat singleLineCommentFormat;
         QTextCharFormat multiLineCommentFormat;

@@ -162,6 +162,7 @@ Item {
             listViewAnimation.to = 0
             imageAnimation.start()
             listViewAnimation.start()
+
         })
     }
     function goBack() {

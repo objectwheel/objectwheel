@@ -50,12 +50,20 @@
 
 #include <qmlhighlighter.h>
 
+#define COLOR_KEYWORDS (QColor("#807F17"))
+#define COLOR_QMLTYPE (QColor("#7F0F7E"))
+#define COLOR_COMMMENTS (QColor("#0F7F12"))
+#define COLOR_STRING (QColor("#0F7F12"))
+#define COLOR_PROPERTIES (QColor("#7E0308"))
+#define COLOR_FUNCTION (QColor("#020C7E"))
+#define COLOR_NUMERICS (QColor("#369CF3"))
+
 QmlHighlighter::QmlHighlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
 
-    keywordFormat.setForeground(Qt::darkBlue);
+    keywordFormat.setForeground(COLOR_KEYWORDS);
     keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b"
@@ -67,33 +75,76 @@ QmlHighlighter::QmlHighlighter(QTextDocument *parent)
                     << "\\bslots\\b" << "\\bstatic\\b" << "\\bstruct\\b"
                     << "\\btemplate\\b" << "\\btypedef\\b" << "\\btypename\\b"
                     << "\\bunion\\b" << "\\bunsigned\\b" << "\\bvirtual\\b"
-                    << "\\bvoid\\b" << "\\bvolatile\\b";
+                    << "\\bvoid\\b" << "\\bvolatile\\b" << "\\bproperty\\b"
+                    << "\\bvector4d\\b" << "\\bvector3d\\b" << "\\bvector2d\\b"
+                    << "\\bvar\\b" << "\\bvariant\\b" << "\\burl\\b"
+                    << "\\btime\\b" << "\\bstring\\b" << "\\bsize\\b"
+                    << "\\brect\\b" << "\\breal\\b" << "\\bquaternion\\b"
+                    << "\\bpoint\\b" << "\\bmatrix4x4\\b" << "\\blist\\b"
+                    << "\\bfont\\b" << "\\benumeration\\b" << "\\bdate\\b"
+                    << "\\bcolor\\b" << "\\baction\\b" << "\\bon\\b"
+                    << "\\bimport\\b" << "\\breadonly\\b" << "\\bproperty\\b"
+                    << "\\bsignal\\b" << "\\balias\\b" << "\\byield\\b"
+                    << "\\btry\\b" << "\\bthrow\\b" << "\\bsuper\\b"
+                    << "\\bnull\\b" << "\\blet\\b" << "\\bin\\b"
+                    << "\\bgoto\\b" << "\\bfinally\\b" << "\\bexport\\b"
+                    << "\\bbreak\\b" << "\\babstract\\b" << "\\bbyte\\b"
+                    << "\\bdefault\\b" << "\\belse\\b" << "\\bextends\\b"
+                    << "\\bif\\b" << "\\binstanceof\\b" << "\\bpackage\\b"
+                    << "\\breturn\\b" << "\\bswitch\\b" << "\\bthrows\\b"
+                    << "\\btypeof\\b" << "\\bwhile\\b" << "\\bawait\\b"
+                    << "\\bcase\\b" << "\\bdelete\\b" << "\\bfalse\\b"
+                    << "\\bfor\\b" << "\\bimplements\\b" << "\\bnative\\b"
+                    << "\\bprivate\\b" << "\\bsynchronized\\b" << "\\btransient\\b"
+                    << "\\bwith\\b" << "\\bboolean\\b" << "\\bcatch\\b"
+                    << "\\bcontinue\\b" << "\\bdo\\b" << "\\beval\\b"
+                    << "\\bfinal\\b" << "\\bfunction\\b" << "\\binterface\\b"
+                    << "\\bnew\\b" << "\\bthis\\b" << "\\btrue\\b" ;
+
     foreach (const QString &pattern, keywordPatterns) {
         rule.pattern = QRegExp(pattern);
         rule.format = keywordFormat;
         highlightingRules.append(rule);
     }
 
+    numericFormat.setFontWeight(QFont::Bold);
+    numericFormat.setForeground(COLOR_NUMERICS);
+    rule.pattern = QRegExp("[0-9]+\\.?[0-9]*");
+    rule.format = numericFormat;
+    highlightingRules.append(rule);
+
+    typeFormat.setFontWeight(QFont::Bold);
+    typeFormat.setForeground(COLOR_QMLTYPE);
+    rule.pattern = QRegExp("\\b[A-Z][A-Za-z]+\\b");
+    rule.format = typeFormat;
+    highlightingRules.append(rule);
+
+    propertyFormat.setFontWeight(QFont::Bold);
+    propertyFormat.setForeground(COLOR_PROPERTIES);
+    rule.pattern = QRegExp("^(!?(\\s+)?)[a-z][\\w\\.]+([ \\t ]+)?(?=:)");
+    rule.format = propertyFormat;
+    highlightingRules.append(rule);
+
     classFormat.setFontWeight(QFont::Bold);
-    classFormat.setForeground(Qt::darkMagenta);
+    classFormat.setForeground(COLOR_QMLTYPE);
     rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
     rule.format = classFormat;
     highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(Qt::red);
+    singleLineCommentFormat.setForeground(COLOR_COMMMENTS);
     rule.pattern = QRegExp("//[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
-    multiLineCommentFormat.setForeground(Qt::red);
+    multiLineCommentFormat.setForeground(COLOR_COMMMENTS);
 
-    quotationFormat.setForeground(Qt::darkGreen);
+    quotationFormat.setForeground(COLOR_STRING);
     rule.pattern = QRegExp("\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
     functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
+    functionFormat.setForeground(COLOR_FUNCTION);
     rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\()");
     rule.format = functionFormat;
     highlightingRules.append(rule);
