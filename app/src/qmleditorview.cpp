@@ -7,6 +7,7 @@
 #include <filemanager.h>
 #include <qmlcodeeditor.h>
 #include <css.h>
+#include <fileexplorer.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -17,6 +18,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSplitter>
 
 #define LINE_COLOR ("#606467")
 #define TEST_TEXT "#include <QtGui>\n"\
@@ -52,7 +54,7 @@ class QmlEditorViewPrivate : public QObject
         QVBoxLayout vBoxLayout;
         QWidget containerWidget;
         QVBoxLayout containerVBoxLayout;
-        QmlCodeEditor textEditor;
+
         QToolBar toolbar;
         QToolButton pinButton;
         QToolButton undoButton;
@@ -68,6 +70,19 @@ class QmlEditorViewPrivate : public QObject
         QComboBox zoomlLevelCombobox;
         QLabel lineColLabel;
         int previousRatio;
+
+        QSplitter splitter;
+        QWidget editorWrapper;
+        QVBoxLayout editorWrapperVBoxLayout;
+        QmlCodeEditor textEditor;
+        QWidget explorerWrapper;
+        QHBoxLayout explorerWrapperHBoxLayout;
+        QToolBar toolbar_2;
+        QToolButton hideShowButton;
+        QToolButton textEditorButton;
+        QToolButton imageEditorButton;
+        QToolButton hexEditorButton;
+        FileExplorer fileExplorer;
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
@@ -76,6 +91,8 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     , vBoxLayout(parent)
     , containerVBoxLayout(&containerWidget)
     , previousRatio(0)
+    , editorWrapperVBoxLayout(&editorWrapper)
+    , explorerWrapperHBoxLayout(&explorerWrapper)
 {
     vBoxLayout.setContentsMargins(0, 0, 0, 0);
     vBoxLayout.setSpacing(0);
@@ -84,7 +101,20 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     containerVBoxLayout.setContentsMargins(0, 0, 0, 0);
     containerVBoxLayout.setSpacing(0);
     containerVBoxLayout.addWidget(&toolbar);
-    containerVBoxLayout.addWidget(&textEditor);
+    containerVBoxLayout.addWidget(&splitter);
+
+    splitter.setStyleSheet("QSplitter{background: #e0e4e7;}");
+    splitter.addWidget(&editorWrapper);
+    splitter.addWidget(&explorerWrapper);
+
+    editorWrapperVBoxLayout.setContentsMargins(0, 0, 0, 0);
+    editorWrapperVBoxLayout.setSpacing(0);
+    editorWrapperVBoxLayout.addWidget(&textEditor);
+
+    explorerWrapperHBoxLayout.setContentsMargins(0, 0, 0, 0);
+    explorerWrapperHBoxLayout.setSpacing(0);
+    explorerWrapperHBoxLayout.addWidget(&toolbar_2);
+    explorerWrapperHBoxLayout.addWidget(&fileExplorer);
 
     containerWidget.setWindowTitle("Objectwheel Qml Editor");
 
@@ -139,8 +169,8 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     copyButton.setCursor(Qt::PointingHandCursor);
     pasteButton.setCursor(Qt::PointingHandCursor);
 
-    pinButton.setToolTip("Unpin Editor");
-    backButton.setToolTip("Go cursor back");
+    pinButton.setToolTip("Unpin Editor.");
+    backButton.setToolTip("Go cursor back.");
     forthButton.setToolTip("Go cursor forth.");
     undoButton.setToolTip("Undo action.");
     redoButton.setToolTip("Redo action.");
@@ -167,7 +197,6 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     QWidget* spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    toolbar.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolbar.setStyleSheet(CSS::DesignerToolbar);
     toolbar.setIconSize(QSize(fit(14), fit(14)));
     toolbar.setFixedHeight(fit(26));
@@ -189,6 +218,32 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar.addWidget(&zoomlLevelCombobox);
     toolbar.addWidget(spacer);
     toolbar.addWidget(&lineColLabel);
+
+    // Toolbar_2 assets
+    hideShowButton.setCursor(Qt::PointingHandCursor);
+    textEditorButton.setCursor(Qt::PointingHandCursor);
+    imageEditorButton.setCursor(Qt::PointingHandCursor);
+    hexEditorButton.setCursor(Qt::PointingHandCursor);
+
+    hideShowButton.setToolTip("Hide File Explorer.");
+    textEditorButton.setToolTip("Open Text Editor.");
+    imageEditorButton.setToolTip("Open Image Viewer.");
+    hexEditorButton.setToolTip("Open Hex Editor.");
+
+    hideShowButton.setIcon(QIcon(":/resources/images/unpin.png"));
+    textEditorButton.setIcon(QIcon(":/resources/images/dback.png"));
+    imageEditorButton.setIcon(QIcon(":/resources/images/dforth.png"));
+    hexEditorButton.setIcon(QIcon(":/resources/images/undo.png"));
+
+    toolbar_2.setOrientation(Qt::Vertical);
+    toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
+    toolbar_2.setIconSize(QSize(fit(14), fit(14)));
+    toolbar_2.setFixedWidth(fit(26));
+    toolbar_2.addWidget(&hideShowButton);
+    toolbar_2.addSeparator();
+    toolbar_2.addWidget(&textEditorButton);
+    toolbar_2.addWidget(&imageEditorButton);
+    toolbar_2.addWidget(&hexEditorButton);
 }
 
 int QmlEditorViewPrivate::findRatio(const QString& text)

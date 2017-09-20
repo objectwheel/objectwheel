@@ -44,7 +44,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/qmleditorview.h \
                              $$PWD/qmlcodeeditor.h \
                              $$PWD/qmlhighlighter.h \
-    $$PWD/completionhelper.h
+    $$PWD/completionhelper.h \
+    $$PWD/fileexplorer.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -90,7 +91,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/qmleditorview.cpp \
                              $$PWD/qmlcodeeditor.cpp \
                              $$PWD/qmlhighlighter.cpp \
-    $$PWD/completionhelper.cpp
+    $$PWD/completionhelper.cpp \
+    $$PWD/fileexplorer.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
