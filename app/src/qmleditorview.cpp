@@ -39,9 +39,13 @@ class QmlEditorViewPrivate : public QObject
     public:
         QmlEditorViewPrivate(QmlEditorView* parent);
 
+    private:
+        int findRatio(const QString& text);
+
     public slots:
         void handleCursorPositionChanged();
         void handlePinButtonClicked();
+        void handleZoomLevelChange(const QString& text);
 
     public:
         QmlEditorView* parent;
@@ -63,6 +67,7 @@ class QmlEditorViewPrivate : public QObject
         QComboBox documentsCombobox;
         QComboBox zoomlLevelCombobox;
         QLabel lineColLabel;
+        int previousRatio;
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
@@ -70,6 +75,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     , parent(parent)
     , vBoxLayout(parent)
     , containerVBoxLayout(&containerWidget)
+    , previousRatio(0)
 {
     vBoxLayout.setContentsMargins(0, 0, 0, 0);
     vBoxLayout.setSpacing(0);
@@ -82,14 +88,30 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     containerWidget.setWindowTitle("Objectwheel Qml Editor");
 
+    undoButton.setDisabled(true);
+    redoButton.setDisabled(true);
+    copyButton.setDisabled(true);
+    cutButton.setDisabled(true);
+
     QFont font;
     font.setFamily("Liberation Mono");
     font.setStyleHint(QFont::Monospace);
     textEditor.setFont(font);
     textEditor.setPlainText(TEST_TEXT);
     textEditor.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     connect(&textEditor, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));
     connect(&pinButton, SIGNAL(clicked(bool)), SLOT(handlePinButtonClicked()));
+    connect(&undoButton, SIGNAL(clicked(bool)), &textEditor, SLOT(undo()));
+    connect(&redoButton, SIGNAL(clicked(bool)), &textEditor, SLOT(redo()));
+    connect(&textEditor, SIGNAL(undoAvailable(bool)), &undoButton, SLOT(setEnabled(bool)));
+    connect(&textEditor, SIGNAL(redoAvailable(bool)), &redoButton, SLOT(setEnabled(bool)));
+    connect(&copyButton, SIGNAL(clicked(bool)), &textEditor, SLOT(copy()));
+    connect(&cutButton, SIGNAL(clicked(bool)), &textEditor, SLOT(cut()));
+    connect(&pasteButton, SIGNAL(clicked(bool)), &textEditor, SLOT(paste()));
+    connect(&textEditor, SIGNAL(copyAvailable(bool)), &copyButton, SLOT(setEnabled(bool)));
+    connect(&textEditor, SIGNAL(copyAvailable(bool)), &cutButton, SLOT(setEnabled(bool)));
+    connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
 
     zoomlLevelCombobox.addItem("25 %");
     zoomlLevelCombobox.addItem("50 %");
@@ -100,6 +122,8 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     zoomlLevelCombobox.addItem("175 %");
     zoomlLevelCombobox.addItem("200 %");
     zoomlLevelCombobox.addItem("300 %");
+    zoomlLevelCombobox.addItem("500 %");
+    zoomlLevelCombobox.addItem("900 %");
     zoomlLevelCombobox.setCurrentIndex(3);
 
     pinButton.setCursor(Qt::PointingHandCursor);
@@ -167,6 +191,34 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar.addWidget(&lineColLabel);
 }
 
+int QmlEditorViewPrivate::findRatio(const QString& text)
+{
+    if (text == "25 %")
+        return -4;
+    else if (text == "50 %")
+        return -2;
+    else if (text == "75 %")
+        return -1;
+    else if (text == "100 %")
+        return 0;
+    else if (text == "125 %")
+        return 1;
+    else if (text == "150 %")
+        return 2;
+    else if (text == "175 %")
+        return 3;
+    else if (text == "200 %")
+        return 4;
+    else if (text == "300 %")
+        return 5;
+    else if (text == "500 %")
+        return 7;
+    else if (text == "900 %")
+        return 9;
+    else
+        return 0;
+}
+
 void QmlEditorViewPrivate::handleCursorPositionChanged()
 {
     auto textCursor = textEditor.textCursor();
@@ -187,6 +239,24 @@ void QmlEditorViewPrivate::handlePinButtonClicked()
         pinButton.setIcon(QIcon(":/resources/images/unpin.png"));
         vBoxLayout.addWidget(&containerWidget);
     }
+}
+
+void QmlEditorViewPrivate::handleZoomLevelChange(const QString& text)
+{
+    int ratio = findRatio(text);
+
+    if (previousRatio > 0)
+        textEditor.zoomOut(previousRatio);
+    else
+        textEditor.zoomIn(-previousRatio);
+
+    if (ratio > 0)
+        textEditor.zoomIn(ratio);
+    else
+        textEditor.zoomOut(-ratio);
+
+    previousRatio = ratio;
+
 }
 
 QmlEditorView::QmlEditorView(QWidget* parent)
