@@ -25,7 +25,7 @@ macx {
     QMAKE_MAC_SDK    = macosx10.10
     QMAKE_INFO_PLIST = $$PWD/src/platform_spesific/mac/Info.plist
     ICON             = $$PWD/src/platform_spesific/mac/icon.icns
-    #QMAKE_POST_LINK += macdeployqt $$BUILD_DIR/Objectwheel.app/ -qmldir=$$PWD/src/resources/qmls/ -verbose=1 -dmg
+#    QMAKE_POST_LINK += macdeployqt $$BUILD_DIR/Objectwheel.app/ -qmldir=$$PWD/src/resources/qmls/ -verbose=1 -dmg
 }
 
 include($$PWD/contrib.pri)

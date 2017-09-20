@@ -52,13 +52,14 @@
 
 #define COLOR_KEYWORDS (QColor("#807F17"))
 #define COLOR_QMLTYPE (QColor("#7F0F7E"))
+#define COLOR_QTCLASS (QColor("#7F0F7E"))
 #define COLOR_COMMMENTS (QColor("#0F7F12"))
 #define COLOR_STRING (QColor("#0F7F12"))
 #define COLOR_PROPERTIES (QColor("#7E0308"))
 #define COLOR_FUNCTION (QColor("#020C7E"))
 #define COLOR_NUMERICS (QColor("#369CF3"))
 
-QmlHighlighter::QmlHighlighter(QTextDocument *parent)
+QmlHighlighter::QmlHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
@@ -126,7 +127,7 @@ QmlHighlighter::QmlHighlighter(QTextDocument *parent)
     highlightingRules.append(rule);
 
     classFormat.setFontWeight(QFont::Bold);
-    classFormat.setForeground(COLOR_QMLTYPE);
+    classFormat.setForeground(COLOR_QTCLASS);
     rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
     rule.format = classFormat;
     highlightingRules.append(rule);
