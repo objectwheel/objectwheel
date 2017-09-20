@@ -274,7 +274,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent* e)
     bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
     QString completionPrefix = textUnderCursor();
 
-    if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 3
+    if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 1
                         || eow.contains(e->text().right(1)))) {
         _completer.popup()->hide();
         return;
