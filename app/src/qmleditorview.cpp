@@ -21,6 +21,8 @@
 #include <QSplitter>
 
 #define LINE_COLOR ("#606467")
+#define MINWIDTH_FILEEXPLORER (fit(170))
+
 #define TEST_TEXT "#include <QtGui>\n"\
 "\n"\
 "int main(int argv, char** argc)\n"\
@@ -48,6 +50,7 @@ class QmlEditorViewPrivate : public QObject
         void handleCursorPositionChanged();
         void handlePinButtonClicked();
         void handleZoomLevelChange(const QString& text);
+        void handleHideShowButtonClicked();
 
     public:
         QmlEditorView* parent;
@@ -83,6 +86,7 @@ class QmlEditorViewPrivate : public QObject
         QToolButton imageEditorButton;
         QToolButton hexEditorButton;
         FileExplorer fileExplorer;
+        int lastWidthOfExplorerWrapper;
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
@@ -93,6 +97,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     , previousRatio(0)
     , editorWrapperVBoxLayout(&editorWrapper)
     , explorerWrapperHBoxLayout(&explorerWrapper)
+    , lastWidthOfExplorerWrapper(MINWIDTH_FILEEXPLORER)
 {
     vBoxLayout.setContentsMargins(0, 0, 0, 0);
     vBoxLayout.setSpacing(0);
@@ -106,6 +111,8 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     splitter.setStyleSheet("QSplitter{background: #e0e4e7;}");
     splitter.addWidget(&editorWrapper);
     splitter.addWidget(&explorerWrapper);
+    splitter.setCollapsible(0, false);;
+    splitter.setCollapsible(1, false);;
 
     editorWrapperVBoxLayout.setContentsMargins(0, 0, 0, 0);
     editorWrapperVBoxLayout.setSpacing(0);
@@ -116,9 +123,11 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     explorerWrapperHBoxLayout.addWidget(&toolbar_2);
     explorerWrapperHBoxLayout.addWidget(&fileExplorer);
 
+    fileExplorer.hide();
+    fileExplorer.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     containerWidget.setWindowTitle("Objectwheel Qml Editor");
 
-    undoButton.setDisabled(true);
     redoButton.setDisabled(true);
     copyButton.setDisabled(true);
     cutButton.setDisabled(true);
@@ -142,6 +151,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     connect(&textEditor, SIGNAL(copyAvailable(bool)), &copyButton, SLOT(setEnabled(bool)));
     connect(&textEditor, SIGNAL(copyAvailable(bool)), &cutButton, SLOT(setEnabled(bool)));
     connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
+    connect(&hideShowButton, SIGNAL(clicked(bool)), SLOT(handleHideShowButtonClicked()));
 
     zoomlLevelCombobox.addItem("25 %");
     zoomlLevelCombobox.addItem("50 %");
@@ -225,16 +235,17 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     imageEditorButton.setCursor(Qt::PointingHandCursor);
     hexEditorButton.setCursor(Qt::PointingHandCursor);
 
-    hideShowButton.setToolTip("Hide File Explorer.");
+    hideShowButton.setToolTip("Show File Explorer.");
     textEditorButton.setToolTip("Open Text Editor.");
     imageEditorButton.setToolTip("Open Image Viewer.");
     hexEditorButton.setToolTip("Open Hex Editor.");
 
-    hideShowButton.setIcon(QIcon(":/resources/images/unpin.png"));
-    textEditorButton.setIcon(QIcon(":/resources/images/dback.png"));
-    imageEditorButton.setIcon(QIcon(":/resources/images/dforth.png"));
-    hexEditorButton.setIcon(QIcon(":/resources/images/undo.png"));
+    hideShowButton.setIcon(QIcon(":/resources/images/show.png"));
+    textEditorButton.setIcon(QIcon(":/resources/images/code.png"));
+    imageEditorButton.setIcon(QIcon(":/resources/images/image.png"));
+    hexEditorButton.setIcon(QIcon(":/resources/images/hex.png"));
 
+    toolbar_2.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     toolbar_2.setOrientation(Qt::Vertical);
     toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
     toolbar_2.setIconSize(QSize(fit(14), fit(14)));
@@ -244,6 +255,12 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar_2.addWidget(&textEditorButton);
     toolbar_2.addWidget(&imageEditorButton);
     toolbar_2.addWidget(&hexEditorButton);
+
+    editorWrapper.setMinimumWidth(MINWIDTH_FILEEXPLORER);
+    explorerWrapper.setFixedWidth(toolbar_2.width());
+    connect(&splitter, &QSplitter::splitterMoved, [=] {
+        lastWidthOfExplorerWrapper = explorerWrapper.width();
+    });
 }
 
 int QmlEditorViewPrivate::findRatio(const QString& text)
@@ -312,6 +329,30 @@ void QmlEditorViewPrivate::handleZoomLevelChange(const QString& text)
 
     previousRatio = ratio;
 
+}
+
+void QmlEditorViewPrivate::handleHideShowButtonClicked()
+{
+    if (hideShowButton.toolTip().contains("Hide")) {
+        hideShowButton.setIcon(QIcon(":/resources/images/show.png"));
+        hideShowButton.setToolTip("Show File Explorer.");
+        fileExplorer.hide();
+        explorerWrapper.setFixedWidth(toolbar_2.width());
+        QList<int> sizes;
+        sizes << containerWidget.width() - toolbar_2.width();
+        sizes << toolbar_2.width();
+        splitter.setSizes(sizes);
+    } else {
+        hideShowButton.setIcon(QIcon(":/resources/images/hide.png"));
+        hideShowButton.setToolTip("Hide File Explorer.");
+        fileExplorer.show();
+        explorerWrapper.setMinimumWidth(MINWIDTH_FILEEXPLORER);
+        explorerWrapper.setMaximumWidth(9999);
+        QList<int> sizes;
+        sizes << containerWidget.width() - lastWidthOfExplorerWrapper;
+        sizes << lastWidthOfExplorerWrapper;
+        splitter.setSizes(sizes);
+    }
 }
 
 QmlEditorView::QmlEditorView(QWidget* parent)

@@ -239,5 +239,10 @@
         <file>resources/images/keyword.png</file>
         <file>resources/images/property.png</file>
         <file>resources/images/type.png</file>
+        <file>resources/images/hide.png</file>
+        <file>resources/images/show.png</file>
+        <file>resources/images/code.png</file>
+        <file>resources/images/hex.png</file>
+        <file>resources/images/image.png</file>
     </qresource>
 </RCC>
