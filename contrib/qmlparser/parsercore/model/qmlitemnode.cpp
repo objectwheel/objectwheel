@@ -60,7 +60,7 @@ bool QmlItemNode::isItemOrWindow(const ModelNode &modelNode)
     return false;
 }
 
-static QmlItemNode createQmlItemNodeFromSource(AbstractView *view, const QString &source, const QPointF &position)
+static QmlItemNode createQmlItemNodeFromSource(AbstractView *, const QString &, const QPointF &)
 {
 //    QScopedPointer<Model> inputModel(Model::create("QtQuick.Item", 1, 0, view->model()));
 //    inputModel->setFileUrl(view->model()->fileUrl());

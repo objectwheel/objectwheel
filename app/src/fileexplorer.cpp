@@ -56,6 +56,7 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     vBoxLayout.addWidget(&fileList);
 
     deleteButton.setDisabled(true);
+    copyButton.setDisabled(true);
 
     upButton.setCursor(Qt::PointingHandCursor);
     homeButton.setCursor(Qt::PointingHandCursor);
@@ -206,17 +207,17 @@ void FileExplorerPrivate::handleDeleteButtonClicked()
 
 void FileExplorerPrivate::handleNewFileButtonClicked()
 {
-
+    //TODO
 }
 
 void FileExplorerPrivate::handleNewFolderButtonClicked()
 {
-
+    //TODO
 }
 
 void FileExplorerPrivate::handleDownloadButtonClicked()
 {
-
+    //TODO
 }
 
 void FileExplorerPrivate::handleFileListSelectionChanged()
@@ -236,6 +237,22 @@ FileExplorer::FileExplorer(QWidget *parent)
     p.setColor(QPalette::Background, COLOR_BACKGROUND);
     p.setColor(QPalette::Base, COLOR_BACKGROUND);
     setPalette(p);
+}
+
+void FileExplorer::setRootPath(const QString& rootPath)
+{
+    _d->fileList.setModel(_d->fileList.fileModel());
+    _d->fileList.fileModel()->setRootPath(rootPath);
+    auto index = _d->fileList.fileModel()->index(rootPath);
+    if (!index.isValid())
+        _d->fileList.setModel(nullptr);
+    else
+        _d->fileList.setRootIndex(index);
+}
+
+QString FileExplorer::rootPath() const
+{
+    return _d->fileList.fileModel()->rootPath();
 }
 
 #include "fileexplorer.moc"

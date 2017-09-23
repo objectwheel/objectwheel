@@ -107,17 +107,17 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 {
     dummyWidget.setHidden(true);
 
-    vlayout.setContentsMargins(0, 0, 0, 0);
-    vlayout.setSpacing(0);
-    vlayout.addWidget(&toolbar);
-    vlayout.addLayout(&hlayout);
-
     hlayout.setContentsMargins(0, 0, 0, 0);
     hlayout.setSpacing(0);
     hlayout.addWidget(&toolbar_2);
-    hlayout.addWidget(&formView);
-    hlayout.addWidget(&controlView);
-    hlayout.addWidget(&qmlEditorView);
+    hlayout.addLayout(&vlayout);
+
+    vlayout.setContentsMargins(0, 0, 0, 0);
+    vlayout.setSpacing(0);
+    vlayout.addWidget(&toolbar);
+    vlayout.addWidget(&formView);
+    vlayout.addWidget(&controlView);
+    vlayout.addWidget(&qmlEditorView);
 
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -303,7 +303,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 
 DesignManagerPrivate::~DesignManagerPrivate()
 {
-    dummyWidget.setLayout(&vlayout);
+    dummyWidget.setLayout(&hlayout);
 }
 
 qreal DesignManagerPrivate::roundRatio(qreal ratio)
@@ -681,7 +681,7 @@ void DesignManager::setSettleWidget(QWidget* widget)
 {
     _d->settleWidget = widget;
     if (_d->settleWidget)
-        _d->settleWidget->setLayout(&_d->vlayout);
+        _d->settleWidget->setLayout(&_d->hlayout);
 }
 
 const DesignManager::Mode& DesignManager::mode()

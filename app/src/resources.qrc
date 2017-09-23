@@ -53,7 +53,6 @@
         <file>resources/qmls/FancyButton.qml</file>
         <file>resources/qmls/filemanager.js</file>
         <file>resources/qmls/delaycaller.js</file>
-        <file>resources/qmls/ShadowFactory.qml</file>
         <file>resources/images/menu-icon.png</file>
         <file>resources/images/back.png</file>
         <file>resources/images/menu-icon@2x.png</file>
@@ -64,10 +63,6 @@
         <file>resources/images/web.png</file>
         <file>resources/images/fexplorer.png</file>
         <file>resources/images/fexplorer@2x.png</file>
-        <file>resources/qmls/Popup.qml</file>
-        <file>resources/qmls/FileExplorerToolBar.qml</file>
-        <file>resources/qmls/FileExplorerListView.qml</file>
-        <file>resources/qmls/FileExplorer.qml</file>
         <file>resources/images/fileExplorer/text@2x.png</file>
         <file>resources/images/fileExplorer/text.png</file>
         <file>resources/images/fileExplorer/qml@2x.svg</file>

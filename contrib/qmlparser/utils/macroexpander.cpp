@@ -43,7 +43,6 @@ const char kFilePathPostfix[] = ":FilePath";
 const char kPathPostfix[] = ":Path";
 const char kNativeFilePathPostfix[] = ":NativeFilePath";
 const char kNativePathPostfix[] = ":NativePath";
-const char kFileNamePostfix[] = ":FileName";
 const char kFileBaseNamePostfix[] = ":FileBaseName";
 
 class MacroExpanderPrivate : public AbstractMacroExpander
@@ -290,7 +289,7 @@ QByteArray MacroExpander::expand(const QByteArray &stringWithVariables) const
     return expand(QString::fromLatin1(stringWithVariables)).toLatin1();
 }
 
-QString MacroExpander::expandProcessArgs(const QString &argsWithVariables) const
+QString MacroExpander::expandProcessArgs(const QString &) const
 {
 //    return QtcProcess::expandMacros(argsWithVariables, d);
     return QString();

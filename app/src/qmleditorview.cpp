@@ -127,6 +127,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     fileExplorer.hide();
     fileExplorer.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    fileExplorer.setRootPath("67asdta8d9yaghqbj4");
 
     containerWidget.setWindowTitle("Objectwheel Qml Editor");
 

@@ -126,7 +126,7 @@ bool BinaryVersionToolTipEventFilter::eventFilter(QObject *o, QEvent *e)
     return false;
 }
 
-QString BinaryVersionToolTipEventFilter::toolVersion(const QString &binary, const QStringList &arguments)
+QString BinaryVersionToolTipEventFilter::toolVersion(const QString &, const QStringList &)
 {
 //    if (binary.isEmpty())
 //        return QString();
@@ -184,7 +184,7 @@ PathChooserPrivate::PathChooserPrivate() :
 {
 }
 
-QString PathChooserPrivate::expandedPath(const QString &input) const
+QString PathChooserPrivate::expandedPath(const QString &) const
 {
 //    if (input.isEmpty())
 //        return input;
@@ -300,7 +300,7 @@ void PathChooser::setBaseFileName(const FileName &base)
     triggerChanged();
 }
 
-void PathChooser::setEnvironment(const Environment &env)
+void PathChooser::setEnvironment(const Environment &)
 {
 //    QString oldExpand = path();
 //    d->m_environment = env;
@@ -331,8 +331,8 @@ FileName PathChooser::fileName() const
 }
 
 // FIXME: try to remove again
-QString PathChooser::expandedDirectory(const QString &input, const Environment &env,
-                                       const QString &baseDir)
+QString PathChooser::expandedDirectory(const QString &, const Environment &,
+                                       const QString &)
 {
 //    if (input.isEmpty())
 //        return input;

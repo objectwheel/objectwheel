@@ -298,6 +298,7 @@ Column {
         height: Fit.fit(28) - (Fit.fit(28) % 1)
         width: Fit.fit(300) - (Fit.fit(300) % 2)
 //        loginButtonDisabled: !validateEmail(emailTextInput.text) || !validatePassword(passwordTextInput.text)
+        //BUG
     }
     FancyButton {
         id: infoButton
