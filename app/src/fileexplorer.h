@@ -3,14 +3,17 @@
 
 #include <QWidget>
 
+class FileExplorerPrivate;
+
 class FileExplorer : public QWidget
 {
         Q_OBJECT
     public:
         explicit FileExplorer(QWidget *parent = 0);
 
-    protected:
-        virtual QSize sizeHint() const override;
+    private:
+        FileExplorerPrivate* _d;
+
 };
 
 #endif // FILEEXPLORER_H

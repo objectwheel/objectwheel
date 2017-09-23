@@ -71,7 +71,7 @@ Column {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: emailTextInput.focus = true
+                        onClicked: {emailTextInput.focus = true; Qt.inputMethod.show(); emailTextInput.forceActiveFocus(); }
                     }
                 }
                 TextField {
@@ -99,6 +99,9 @@ Column {
                             radius: 2
                             color: "transparent"
                         }
+                    }
+                    onFocusChanged: {
+                        Qt.inputMethod.show()
                     }
                 }
             }
@@ -294,7 +297,7 @@ Column {
         id: loginButton
         height: Fit.fit(28) - (Fit.fit(28) % 1)
         width: Fit.fit(300) - (Fit.fit(300) % 2)
-        loginButtonDisabled: !validateEmail(emailTextInput.text) || !validatePassword(passwordTextInput.text)
+//        loginButtonDisabled: !validateEmail(emailTextInput.text) || !validatePassword(passwordTextInput.text)
     }
     FancyButton {
         id: infoButton

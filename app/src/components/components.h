@@ -6,7 +6,6 @@
 #include <audioplayer.h>
 #include <aispeak.h>
 #include <filemanager.h>
-#include <qquickfolderlistmodel.h>
 
 class Components
 {

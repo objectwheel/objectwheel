@@ -45,7 +45,9 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/qmlcodeeditor.h \
                              $$PWD/qmlhighlighter.h \
     $$PWD/completionhelper.h \
-    $$PWD/fileexplorer.h
+    $$PWD/fileexplorer.h \
+    $$PWD/filelist.h \
+    $$PWD/fileinfowidget.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -92,7 +94,9 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/qmlcodeeditor.cpp \
                              $$PWD/qmlhighlighter.cpp \
     $$PWD/completionhelper.cpp \
-    $$PWD/fileexplorer.cpp
+    $$PWD/fileexplorer.cpp \
+    $$PWD/filelist.cpp \
+    $$PWD/fileinfowidget.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
@@ -106,4 +110,3 @@ DISTFILES                 += android/AndroidManifest.xml \
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 include($$PWD/components/components.pri)
-include($$PWD/platform_spesific/ios/ios.pri)

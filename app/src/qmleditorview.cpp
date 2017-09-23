@@ -21,7 +21,9 @@
 #include <QSplitter>
 
 #define LINE_COLOR ("#606467")
-#define MINWIDTH_FILEEXPLORER (fit(170))
+#define INITIALWIDTH_FILEEXPLORER (fit(450))
+#define MINWIDTH_FILEEXPLORER (fit(200))
+#define MINWIDTH_EDITOR (fit(200))
 
 #define TEST_TEXT "#include <QtGui>\n"\
 "\n"\
@@ -97,7 +99,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     , previousRatio(0)
     , editorWrapperVBoxLayout(&editorWrapper)
     , explorerWrapperHBoxLayout(&explorerWrapper)
-    , lastWidthOfExplorerWrapper(MINWIDTH_FILEEXPLORER)
+    , lastWidthOfExplorerWrapper(INITIALWIDTH_FILEEXPLORER)
 {
     vBoxLayout.setContentsMargins(0, 0, 0, 0);
     vBoxLayout.setSpacing(0);
@@ -256,6 +258,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar_2.addWidget(&imageEditorButton);
     toolbar_2.addWidget(&hexEditorButton);
 
+    splitter.handle(1)->setDisabled(true);
     editorWrapper.setMinimumWidth(MINWIDTH_FILEEXPLORER);
     explorerWrapper.setFixedWidth(toolbar_2.width());
     connect(&splitter, &QSplitter::splitterMoved, [=] {
@@ -336,6 +339,7 @@ void QmlEditorViewPrivate::handleHideShowButtonClicked()
     if (hideShowButton.toolTip().contains("Hide")) {
         hideShowButton.setIcon(QIcon(":/resources/images/show.png"));
         hideShowButton.setToolTip("Show File Explorer.");
+        splitter.handle(1)->setDisabled(true);
         fileExplorer.hide();
         explorerWrapper.setFixedWidth(toolbar_2.width());
         QList<int> sizes;
@@ -345,6 +349,7 @@ void QmlEditorViewPrivate::handleHideShowButtonClicked()
     } else {
         hideShowButton.setIcon(QIcon(":/resources/images/hide.png"));
         hideShowButton.setToolTip("Hide File Explorer.");
+        splitter.handle(1)->setEnabled(true);
         fileExplorer.show();
         explorerWrapper.setMinimumWidth(MINWIDTH_FILEEXPLORER);
         explorerWrapper.setMaximumWidth(9999);

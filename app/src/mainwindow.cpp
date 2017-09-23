@@ -37,10 +37,6 @@ Rectangle {\n\
    color: \"#c7cbc4\"\n\
 }\n"
 
-#if defined(Q_OS_IOS)
-#include <ios.h>
-#endif
-
 using namespace Fit;
 MainWindowPrivate* MainWindow::_d = nullptr;
 
