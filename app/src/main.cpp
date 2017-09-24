@@ -12,6 +12,7 @@
 #include <QSharedMemory>
 #include <QMessageBox>
 #include <QLoggingCategory>
+#include <QTimer>
 
 #define PIXEL_SIZE 13
 #define REF_WIDTH 1000
@@ -76,6 +77,8 @@ int main(int argc, char *argv[])
                                                     "qtc*.debug=false\n"
                                                     "qtc*.warning=false\n"
                                                     "qtc*.critical=false"));
+
+    QTimer::singleShot(1000, [&] { w.raise(); });
 
     // Start main event loop
     return a.exec();

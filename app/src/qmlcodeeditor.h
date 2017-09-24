@@ -25,6 +25,9 @@ class QmlCodeEditor : public QPlainTextEdit
         void lineNumberAreaPaintEvent(QPaintEvent* event);
         int lineNumberAreaWidth();
 
+    public slots:
+        void updateCompletion();
+
     protected:
         void resizeEvent(QResizeEvent* event) override;
         void keyPressEvent(QKeyEvent* e) override;

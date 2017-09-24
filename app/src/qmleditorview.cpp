@@ -71,8 +71,6 @@ class QmlEditorViewPrivate : public QObject
         QToolButton pasteButton;
         QComboBox itemsCombobox;
         QComboBox documentsCombobox;
-        QLabel itemsChangeIndicator;
-        QLabel documentsChangeIndicator;
         QComboBox zoomlLevelCombobox;
         QLabel lineColLabel;
         Control* currentControl;
@@ -603,6 +601,7 @@ void QmlEditorView::openControl(Control* control)
 
             _d->currentControl = item.control;
             _d->codeEditor.setDocument(item.documents[item.currentFileRelativePath].document);
+            _d->codeEditor.updateCompletion();
             _d->itemsCombobox.setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
             _d->documentsCombobox.clear();
             _d->documentsCombobox.addItems(item.documents.keys());

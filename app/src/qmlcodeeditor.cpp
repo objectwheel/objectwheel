@@ -8,7 +8,7 @@
 #define COLOR_EDITORBACKGROUND (QColor("#F3F7FA"))
 #define SPACE_LINENUMBERAREALEFT fit(20)
 #define SPACE_LINENUMBERAREARIGHT fit(5)
-#define INTERVAL_COMPLETIONTIMER (5000)
+#define INTERVAL_COMPLETIONTIMER (10000)
 
 using namespace Fit;
 
@@ -63,11 +63,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent)
     _completionThread.start();
 
     _completionTimer.setInterval(INTERVAL_COMPLETIONTIMER);
-    connect(&_completionTimer, &QTimer::timeout, [=]{
-        QMetaObject::invokeMethod(&_completionHelper, "extractCompletions",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(QString, toPlainText()));
-    });
+    connect(&_completionTimer, SIGNAL(timeout()), SLOT(updateCompletion()));
     _completionTimer.start();
 }
 
@@ -228,6 +224,13 @@ void QmlCodeEditor::handleExtractionResult(const ExtractionResult& result)
     }
 
     _completer.setModel(&_model);
+}
+
+void QmlCodeEditor::updateCompletion()
+{
+    QMetaObject::invokeMethod(&_completionHelper, "extractCompletions",
+                              Qt::QueuedConnection,
+                              Q_ARG(QString, toPlainText()));
 }
 
 QString QmlCodeEditor::textUnderCursor() const
