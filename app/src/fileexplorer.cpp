@@ -20,7 +20,7 @@ class FileExplorerPrivate : public QObject
     public:
         FileExplorerPrivate(FileExplorer* parent);
 
-    private slots:
+    public slots:
         void handleUpButtonClicked();
         void handleHomeButtonClicked();
         void handleCopyButtonClicked();
@@ -42,7 +42,7 @@ class FileExplorerPrivate : public QObject
         QToolButton newFolderButton;
         QToolButton downloadFileButton;
         FileList fileList;
-
+        QMetaObject::Connection previousSelectionModelConnection;
 };
 
 FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
@@ -89,8 +89,8 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     connect(&newFileButton, SIGNAL(clicked(bool)), SLOT(handleNewFileButtonClicked()));
     connect(&newFolderButton, SIGNAL(clicked(bool)), SLOT(handleNewFolderButtonClicked()));
     connect(&downloadFileButton, SIGNAL(clicked(bool)), SLOT(handleDownloadButtonClicked()));
-    connect(fileList.selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-            SLOT(handleFileListSelectionChanged()));
+    previousSelectionModelConnection = connect(fileList.selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+                                               SLOT(handleFileListSelectionChanged()));
 
     toolbar.setStyleSheet(CSS::DesignerToolbar);
     toolbar.setIconSize(QSize(fit(14), fit(14)));
@@ -249,6 +249,10 @@ void FileExplorer::setRootPath(const QString& rootPath)
         _d->fileList.setModel(nullptr);
     else
         _d->fileList.setRootIndex(index);
+    disconnect(_d->previousSelectionModelConnection);
+    _d->previousSelectionModelConnection = connect(_d->fileList.selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+                                                   _d, SLOT(handleFileListSelectionChanged()));
+    _d->handleFileListSelectionChanged();
 }
 
 QString FileExplorer::rootPath() const

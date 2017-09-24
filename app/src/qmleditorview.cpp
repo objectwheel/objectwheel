@@ -22,6 +22,7 @@
 #include <QSplitter>
 
 #define LINE_COLOR ("#606467")
+#define CHAR_SEPARATION ("<->")
 #define INITIALWIDTH_FILEEXPLORER (fit(450))
 #define MINWIDTH_FILEEXPLORER (fit(200))
 #define MINWIDTH_EDITOR (fit(200))
@@ -36,7 +37,7 @@ class QmlEditorViewPrivate : public QObject
         QmlEditorViewPrivate(QmlEditorView* parent);
 
     private:
-        int findRatio(const QString& text);
+        qreal findPixelSize(const QString& text);
 
     public slots:
         void handleCursorPositionChanged();
@@ -52,7 +53,6 @@ class QmlEditorViewPrivate : public QObject
         void handleItemsComboboxActivated(const QString& text);
         void handleDocumentsComboboxActivated(const QString& text);
 
-
     public:
         QmlEditorView* parent;
         QVBoxLayout vBoxLayout;
@@ -63,8 +63,6 @@ class QmlEditorViewPrivate : public QObject
         QToolButton pinButton;
         QToolButton undoButton;
         QToolButton redoButton;
-        QToolButton backButton;
-        QToolButton forthButton;
         QToolButton closeButton;
         QToolButton saveButton;
         QToolButton cutButton;
@@ -74,7 +72,6 @@ class QmlEditorViewPrivate : public QObject
         QComboBox documentsCombobox;
         QComboBox zoomlLevelCombobox;
         QLabel lineColLabel;
-        int previousRatio;
         Control* currentControl;
 
         QSplitter splitter;
@@ -92,6 +89,9 @@ class QmlEditorViewPrivate : public QObject
         QToolButton hexEditorButton;
         FileExplorer fileExplorer;
         int lastWidthOfExplorerWrapper;
+        QFont defaultFont;
+        QMetaObject::Connection previousUndoConnection;
+        QMetaObject::Connection previousRedoConnection;
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
@@ -99,7 +99,6 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     , parent(parent)
     , vBoxLayout(parent)
     , containerVBoxLayout(&containerWidget)
-    , previousRatio(0)
     , editorWrapperVBoxLayout(&editorWrapper)
     , explorerWrapperHBoxLayout(&explorerWrapper)
     , lastWidthOfExplorerWrapper(INITIALWIDTH_FILEEXPLORER)
@@ -112,6 +111,9 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     containerVBoxLayout.setSpacing(0);
     containerVBoxLayout.addWidget(&toolbar);
     containerVBoxLayout.addWidget(&splitter);
+
+    containerWidget.setWindowTitle("Objectwheel Qml Editor");
+    containerWidget.setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
 
     splitter.setStyleSheet("QSplitter{background: #e0e4e7;}");
     splitter.addWidget(&editorWrapper);
@@ -134,8 +136,6 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     fileExplorer.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     fileExplorer.setRootPath("67asdta8d9yaghqbj4");
 
-    containerWidget.setWindowTitle("Objectwheel Qml Editor");
-
     itemsCombobox.setFixedWidth(fit(200));
     documentsCombobox.setFixedWidth(fit(200));
 
@@ -145,19 +145,20 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     codeEditor.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+    defaultFont.setFamily("Liberation Mono");
+    defaultFont.setStyleHint(QFont::Monospace);
+
     connect(parent, SIGNAL(modeChanged()), SLOT(handleModeChange()));
     connect(&codeEditor, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));
     connect(&pinButton, SIGNAL(clicked(bool)), SLOT(handlePinButtonClicked()));
     connect(&undoButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(undo()));
     connect(&redoButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(redo()));
-    connect(&codeEditor, SIGNAL(undoAvailable(bool)), &undoButton, SLOT(setEnabled(bool)));
-    connect(&codeEditor, SIGNAL(redoAvailable(bool)), &redoButton, SLOT(setEnabled(bool)));
     connect(&copyButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(copy()));
     connect(&cutButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(cut()));
     connect(&pasteButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(paste()));
     connect(&codeEditor, SIGNAL(copyAvailable(bool)), &copyButton, SLOT(setEnabled(bool)));
     connect(&codeEditor, SIGNAL(copyAvailable(bool)), &cutButton, SLOT(setEnabled(bool)));
-    connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
+    connect(&zoomlLevelCombobox, SIGNAL(activated(QString)), SLOT(handleZoomLevelChange(QString)));
     connect(&hideShowButton, SIGNAL(clicked(bool)), SLOT(handleHideShowButtonClicked()));
     connect(&codeEditorButton, SIGNAL(clicked(bool)), SLOT(handleCodeEditorButtonClicked()));
     connect(&imageEditorButton, SIGNAL(clicked(bool)), SLOT(handleImageEditorButtonClicked()));
@@ -170,22 +171,24 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
         connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
     });
 
-    zoomlLevelCombobox.addItem("25 %");
+    zoomlLevelCombobox.addItem("35 %");
     zoomlLevelCombobox.addItem("50 %");
+    zoomlLevelCombobox.addItem("65 %");
     zoomlLevelCombobox.addItem("75 %");
+    zoomlLevelCombobox.addItem("90 %");
     zoomlLevelCombobox.addItem("100 %");
-    zoomlLevelCombobox.addItem("125 %");
-    zoomlLevelCombobox.addItem("150 %");
-    zoomlLevelCombobox.addItem("175 %");
+    zoomlLevelCombobox.addItem("110 %");
+    zoomlLevelCombobox.addItem("120 %");
+    zoomlLevelCombobox.addItem("140 %");
+    zoomlLevelCombobox.addItem("170 %");
     zoomlLevelCombobox.addItem("200 %");
+    zoomlLevelCombobox.addItem("250 %");
     zoomlLevelCombobox.addItem("300 %");
+    zoomlLevelCombobox.addItem("400 %");
     zoomlLevelCombobox.addItem("500 %");
-    zoomlLevelCombobox.addItem("900 %");
-    zoomlLevelCombobox.setCurrentIndex(3);
+    zoomlLevelCombobox.setCurrentIndex(5);
 
     pinButton.setCursor(Qt::PointingHandCursor);
-    backButton.setCursor(Qt::PointingHandCursor);
-    forthButton.setCursor(Qt::PointingHandCursor);
     undoButton.setCursor(Qt::PointingHandCursor);
     redoButton.setCursor(Qt::PointingHandCursor);
     closeButton.setCursor(Qt::PointingHandCursor);
@@ -198,14 +201,12 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     pasteButton.setCursor(Qt::PointingHandCursor);
 
     pinButton.setToolTip("Unpin Editor.");
-    backButton.setToolTip("Go cursor back.");
-    forthButton.setToolTip("Go cursor forth.");
     undoButton.setToolTip("Undo action.");
     redoButton.setToolTip("Redo action.");
     closeButton.setToolTip("Close document.");
     zoomlLevelCombobox.setToolTip("Change zoom level.");
-    documentsCombobox.setToolTip("Change document.");
-    itemsCombobox.setToolTip("Change control.");
+    documentsCombobox.setToolTip("See open document.");
+    itemsCombobox.setToolTip("See open controls.");
     lineColLabel.setToolTip("Cursor line/column indicator.");
     saveButton.setToolTip("Save document.");
     cutButton.setToolTip("Cut selection.");
@@ -213,8 +214,6 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     pasteButton.setToolTip("Paste from clipboard.");
 
     pinButton.setIcon(QIcon(":/resources/images/unpin.png"));
-    backButton.setIcon(QIcon(":/resources/images/dback.png"));
-    forthButton.setIcon(QIcon(":/resources/images/dforth.png"));
     undoButton.setIcon(QIcon(":/resources/images/undo.png"));
     redoButton.setIcon(QIcon(":/resources/images/redo.png"));
     closeButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
@@ -233,9 +232,6 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar.addSeparator();
     toolbar.addWidget(&undoButton);
     toolbar.addWidget(&redoButton);
-    toolbar.addSeparator();
-    toolbar.addWidget(&backButton);
-    toolbar.addWidget(&forthButton);
     toolbar.addSeparator();
     toolbar.addWidget(&cutButton);
     toolbar.addWidget(&copyButton);
@@ -290,32 +286,42 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     });
 }
 
-int QmlEditorViewPrivate::findRatio(const QString& text)
+qreal QmlEditorViewPrivate::findPixelSize(const QString& text)
 {
-    if (text == "25 %")
-        return -4;
+    qreal base = QFont().pixelSize();
+
+    if (text == "35 %")
+        return (base * 0.35);
     else if (text == "50 %")
-        return -2;
+        return (base * 0.50);
+    else if (text == "65 %")
+        return (base * 0.65);
     else if (text == "75 %")
-        return -1;
+        return (base * 0.75);
+    else if (text == "90 %")
+        return (base * 0.90);
     else if (text == "100 %")
-        return 0;
-    else if (text == "125 %")
-        return 1;
-    else if (text == "150 %")
-        return 2;
-    else if (text == "175 %")
-        return 3;
+        return base;
+    else if (text == "110 %")
+        return (base * 1.10);
+    else if (text == "120 %")
+        return (base * 1.20);
+    else if (text == "140 %")
+        return (base * 1.40);
+    else if (text == "170 %")
+        return (base * 1.70);
     else if (text == "200 %")
-        return 4;
+        return (base * 2.00);
+    else if (text == "250 %")
+        return (base * 2.50);
     else if (text == "300 %")
-        return 5;
+        return (base * 3.00);
+    else if (text == "400 %")
+        return (base * 4.00);
     else if (text == "500 %")
-        return 7;
-    else if (text == "900 %")
-        return 9;
+        return (base * 5.00);
     else
-        return 0;
+        return base;
 }
 
 void QmlEditorViewPrivate::handleCursorPositionChanged()
@@ -342,20 +348,8 @@ void QmlEditorViewPrivate::handlePinButtonClicked()
 
 void QmlEditorViewPrivate::handleZoomLevelChange(const QString& text)
 {
-    int ratio = findRatio(text);
-
-    if (previousRatio > 0)
-        codeEditor.zoomOut(previousRatio);
-    else
-        codeEditor.zoomIn(-previousRatio);
-
-    if (ratio > 0)
-        codeEditor.zoomIn(ratio);
-    else
-        codeEditor.zoomOut(-ratio);
-
-    previousRatio = ratio;
-
+    defaultFont.setPixelSize(findPixelSize(text));
+    codeEditor.document()->setDefaultFont(defaultFont);
 }
 
 void QmlEditorViewPrivate::handleHideShowButtonClicked()
@@ -450,21 +444,12 @@ void QmlEditorViewPrivate::handleDatabaseChange()
     itemsCombobox.clear();
     documentsCombobox.clear();
     for (auto& item : parent->_editorItems) {
-        if (item.control->parentControl() != nullptr)
-            itemsCombobox.addItem(item.control->parentControl()->id() + ">" + item.control->id());
-        else
-            itemsCombobox.addItem(">" + item.control->id());
+        itemsCombobox.addItem(item.control->id() + CHAR_SEPARATION + item.control->uid());
 
         if (item.control == currentControl) {
             documentsCombobox.addItems(item.documents.keys());
-
-            if (item.control->parentControl() != nullptr)
-                itemsCombobox.setCurrentText(item.control->parentControl()->id() + ">" + item.control->id());
-            else
-                itemsCombobox.setCurrentText(">" + item.control->id());
-
+            itemsCombobox.setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
             documentsCombobox.setCurrentText(item.currentFileRelativePath);
-
             fileExplorer.setRootPath(item.control->dir() + separator() + DIR_THIS);
         }
     }
@@ -474,7 +459,17 @@ void QmlEditorViewPrivate::handleItemsComboboxActivated(const QString& text)
 {
     if (text.isEmpty())
         return;
-    //TODO:
+
+    auto strList = text.split(CHAR_SEPARATION);
+
+    if (strList.size() != 2)
+        return;
+
+    auto uid = strList[1];
+
+    for (auto& item : parent->_editorItems)
+        if (item.control->uid() == uid)
+            parent->openControl(item.control);
 }
 
 void QmlEditorViewPrivate::handleDocumentsComboboxActivated(const QString& text)
@@ -522,6 +517,11 @@ void QmlEditorView::setMode(const Mode& mode)
     emit _d->parent->modeChanged();
 }
 
+bool QmlEditorView::pinned() const
+{
+    return _d->pinButton.toolTip().contains("Unpin");
+}
+
 void QmlEditorView::addControl(Control* control)
 {
     for (auto& item : _editorItems)
@@ -538,17 +538,8 @@ void QmlEditorView::addControl(Control* control)
     item.documents[relativePath]->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath]));
     item.documents[relativePath]->setPlainText(rdfile(control->url()));
     new QmlHighlighter(item.documents[relativePath]);
-    QFont font;
-    font.setFamily("Liberation Mono");
-    font.setStyleHint(QFont::Monospace);
-    item.documents[relativePath]->setDefaultFont(font);
     _editorItems.append(item);
-
-    if (control->parentControl() != nullptr)
-        _d->itemsCombobox.addItem(control->parentControl()->id() + ">" + control->id());
-    else
-        _d->itemsCombobox.addItem(">" + control->id());
-
+    _d->itemsCombobox.addItem(control->id() + CHAR_SEPARATION + control->uid());
     _d->documentsCombobox.addItem(relativePath);
 }
 
@@ -594,18 +585,28 @@ void QmlEditorView::openControl(Control* control)
         if (item.control == control) {
             _d->currentControl = item.control;
             _d->codeEditor.setDocument(item.documents[item.currentFileRelativePath]);
-
-            if (item.control->parentControl() != nullptr)
-                _d->itemsCombobox.setCurrentText(item.control->parentControl()->id() + ">" + item.control->id());
-            else
-                _d->itemsCombobox.setCurrentText(">" + item.control->id());
-
+            _d->itemsCombobox.setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
             _d->documentsCombobox.clear();
             _d->documentsCombobox.addItems(item.documents.keys());
             _d->documentsCombobox.setCurrentText(item.currentFileRelativePath);
-            _d->fileExplorer.setRootPath(control->dir() + separator() + DIR_THIS);
+            if (_d->fileExplorer.rootPath() != (control->dir() + separator() + DIR_THIS))
+                _d->fileExplorer.setRootPath(control->dir() + separator() + DIR_THIS);
+            _d->codeEditor.document()->setDefaultFont(_d->defaultFont);
+            disconnect(_d->previousUndoConnection);
+            disconnect(_d->previousRedoConnection);
+            _d->previousUndoConnection = connect(_d->codeEditor.document(), SIGNAL(undoAvailable(bool)),
+                                                 &_d->undoButton, SLOT(setEnabled(bool)));
+            _d->previousRedoConnection = connect(_d->codeEditor.document(), SIGNAL(redoAvailable(bool)),
+                                                 &_d->redoButton, SLOT(setEnabled(bool)));
+            _d->undoButton.setEnabled(_d->codeEditor.document()->isUndoAvailable());
+            _d->redoButton.setEnabled(_d->codeEditor.document()->isRedoAvailable());
         }
     }
+}
+
+void QmlEditorView::raiseContainer()
+{
+    _d->containerWidget.raise();
 }
 
 #include "qmleditorview.moc"

@@ -686,9 +686,11 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
     DesignManager::qmlEditorView()->addControl(this);
-    DesignManager::setMode(DesignManager::CodeEdit);
+    if (DesignManager::qmlEditorView()->pinned())
+        DesignManager::setMode(DesignManager::CodeEdit);
     DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
     DesignManager::qmlEditorView()->openControl(this);
+    DesignManager::qmlEditorView()->raiseContainer();
 }
 
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)

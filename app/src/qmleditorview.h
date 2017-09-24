@@ -28,14 +28,16 @@ class QmlEditorView : public QWidget
 
     public:
         explicit QmlEditorView(QWidget *parent = 0);
-
         Mode mode() const;
         void setMode(const Mode& mode);
-
+        bool pinned() const;
         void addControl(Control* control);
         void addDocument(Control* control, const QString& documentPath);
         void setCurrentDocument(Control* control, const QString& documentPath);
         void openControl(Control* control);
+
+    public slots:
+        void raiseContainer();
 
     protected:
         virtual void paintEvent(QPaintEvent *event) override;

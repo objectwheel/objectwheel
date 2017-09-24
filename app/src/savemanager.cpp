@@ -7,6 +7,7 @@
 #include <control.h>
 #include <designmanager.h>
 #include <algorithm>
+#include <delayer.h>
 
 #include <QQmlEngine>
 #include <QJsonArray>
@@ -645,6 +646,8 @@ void SaveManager::exposeProject()
 {
     auto fpaths = _d->formPaths();
 
+    Control* lastControl;
+
     for (auto path : fpaths) {
 
         auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
@@ -668,8 +671,12 @@ void SaveManager::exposeProject()
             });
 
             parentControl = control;
+            lastControl = control;
         }
     }
+
+    Delayer::delay(lastControl, &Control::init, true);
+
     emit instance()->projectExposed();
 }
 
