@@ -23,6 +23,7 @@
 
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
+#define CHAR_CHANGEINDICATOR ("*")
 #define INITIALWIDTH_FILEEXPLORER (fit(450))
 #define MINWIDTH_FILEEXPLORER (fit(200))
 #define MINWIDTH_EDITOR (fit(200))
@@ -49,10 +50,9 @@ class QmlEditorViewPrivate : public QObject
         void handleCodeEditorButtonClicked();
         void handleImageEditorButtonClicked();
         void handleHexEditorButtonClicked();
-        void handleDatabaseChange();
-        void handleItemsComboboxActivated(const QString& text);
-        void handleDocumentsComboboxActivated(const QString& text);
-        void handleDocumentChanges(bool value);
+        void updateOpenDocHistory();
+        void handleItemsComboboxActivated(QString text);
+        void handleDocumentsComboboxActivated(QString text);
 
     public:
         QmlEditorView* parent;
@@ -170,7 +170,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     connect(&documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
 
     QTimer::singleShot(1000, [=] {
-        connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
+        connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
     });
 
     zoomlLevelCombobox.addItem("35 %");
@@ -441,26 +441,45 @@ void QmlEditorViewPrivate::handleHexEditorButtonClicked()
 
 // Update when changes made by file explorer
 // Update when toolbox controls are changed
-void QmlEditorViewPrivate::handleDatabaseChange()
+void QmlEditorViewPrivate::updateOpenDocHistory()
 {
     itemsCombobox.clear();
     documentsCombobox.clear();
     for (auto& item : parent->_editorItems) {
-        itemsCombobox.addItem(item.control->id() + CHAR_SEPARATION + item.control->uid());
+
+        auto itemText = item.control->id() + CHAR_SEPARATION + item.control->uid();
+        for (auto path : item.documents.keys()) {
+            if (item.documents[path].document->isModified()) {
+                itemText = CHAR_CHANGEINDICATOR + itemText;
+                break;
+            }
+        }
+        itemsCombobox.addItem(itemText);
 
         if (item.control == currentControl) {
-            documentsCombobox.addItems(item.documents.keys());
+
+            for (auto path : item.documents.keys())
+                if (item.documents[path].document->isModified())
+                    documentsCombobox.addItem(CHAR_CHANGEINDICATOR + path);
+                else
+                    documentsCombobox.addItem(path);
+
             itemsCombobox.setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
+            itemsCombobox.setCurrentText(CHAR_CHANGEINDICATOR + item.control->id() + CHAR_SEPARATION + item.control->uid());
             documentsCombobox.setCurrentText(item.currentFileRelativePath);
+            documentsCombobox.setCurrentText(CHAR_CHANGEINDICATOR + item.currentFileRelativePath);
             fileExplorer.setRootPath(item.control->dir() + separator() + DIR_THIS);
         }
     }
 }
 
-void QmlEditorViewPrivate::handleItemsComboboxActivated(const QString& text)
+void QmlEditorViewPrivate::handleItemsComboboxActivated(QString text)
 {
     if (text.isEmpty())
         return;
+
+    if (text.at(0) == CHAR_CHANGEINDICATOR)
+        text.remove(0, 1);
 
     auto strList = text.split(CHAR_SEPARATION);
 
@@ -474,10 +493,13 @@ void QmlEditorViewPrivate::handleItemsComboboxActivated(const QString& text)
             parent->openControl(item.control);
 }
 
-void QmlEditorViewPrivate::handleDocumentsComboboxActivated(const QString& text)
+void QmlEditorViewPrivate::handleDocumentsComboboxActivated(QString text)
 {
     if (text.isEmpty())
         return;
+
+    if (text.at(0) == CHAR_CHANGEINDICATOR)
+        text.remove(0, 1);
 
     for (auto& item : parent->_editorItems) {
         if (item.control == currentControl &&
@@ -487,11 +509,6 @@ void QmlEditorViewPrivate::handleDocumentsComboboxActivated(const QString& text)
                                        separator() + DIR_THIS + separator() + text);
         }
     }
-}
-
-void QmlEditorViewPrivate::handleDocumentChanges(bool value)
-{
-
 }
 
 QmlEditorView::QmlEditorView(QWidget* parent)
@@ -544,6 +561,7 @@ void QmlEditorView::addControl(Control* control)
     item.documents[relativePath].document = new QTextDocument(this);
     item.documents[relativePath].document->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath].document));
     item.documents[relativePath].document->setPlainText(rdfile(control->url()));
+    item.documents[relativePath].document->setModified(false);
     new QmlHighlighter(item.documents[relativePath].document);
     _editorItems.append(item);
     _d->itemsCombobox.addItem(control->id() + CHAR_SEPARATION + control->uid());
@@ -561,6 +579,7 @@ void QmlEditorView::addDocument(Control* control, const QString& documentPath)
             item.documents[relativePath].document = new QTextDocument(this);
             item.documents[relativePath].document->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath].document));
             item.documents[relativePath].document->setPlainText(rdfile(documentPath));
+            item.documents[relativePath].document->setModified(false);
             new QmlHighlighter(item.documents[relativePath].document);
             _d->documentsCombobox.addItem(relativePath);
         }
@@ -603,9 +622,10 @@ void QmlEditorView::openControl(Control* control)
             _d->codeEditor.setDocument(item.documents[item.currentFileRelativePath].document);
             _d->codeEditor.updateCompletion();
             _d->itemsCombobox.setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
-            _d->documentsCombobox.clear();
-            _d->documentsCombobox.addItems(item.documents.keys());
+            _d->itemsCombobox.setCurrentText(CHAR_CHANGEINDICATOR + item.control->id() + CHAR_SEPARATION + item.control->uid());
+            _d->updateOpenDocHistory();
             _d->documentsCombobox.setCurrentText(item.currentFileRelativePath);
+            _d->documentsCombobox.setCurrentText(CHAR_CHANGEINDICATOR + item.currentFileRelativePath);
             if (_d->fileExplorer.rootPath() != (control->dir() + separator() + DIR_THIS))
                 _d->fileExplorer.setRootPath(control->dir() + separator() + DIR_THIS);
             _d->codeEditor.document()->setDefaultFont(_d->defaultFont);
@@ -622,7 +642,7 @@ void QmlEditorView::openControl(Control* control)
             for (auto key : item.documents.keys())
                 item.documents[key].modificationConnection =
                 connect(item.documents[key].document,
-                SIGNAL(modificationChanged(bool)), _d, SLOT(handleDocumentChanges(bool)));
+                SIGNAL(modificationChanged(bool)), _d, SLOT(updateOpenDocHistory()));
 
             if (!item.documents[item.currentFileRelativePath].cursor.isNull())
                 _d->codeEditor.setTextCursor(item.documents[item.currentFileRelativePath].cursor);
