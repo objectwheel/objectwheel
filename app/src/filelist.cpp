@@ -6,26 +6,32 @@
 FileList::FileList(QWidget *parent) : QTreeView(parent)
 {
     _fileModel.setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
-    _fileModel.setRootPath(QDir::currentPath());
-
-    setModel(&_fileModel);
-    setRootIndex(_fileModel.index(QDir::currentPath()));
     setItemsExpandable(false);
     setRootIsDecorated(false);
     setSortingEnabled(true);
     header()->setSectionsMovable(false);
+
+    _filterProxyModel.setDynamicSortFilter(true);
+    _filterProxyModel.setFilterKeyColumn(0);
+    _filterProxyModel.setSourceModel(&_fileModel);
 }
 
 void FileList::mouseDoubleClickEvent(QMouseEvent* event)
 {
-    auto _index = indexAt(event->pos());
-    auto index = _fileModel.index(_index.row(), 0, rootIndex());
+    auto _index = _filterProxyModel.mapToSource(indexAt(event->pos()));
+    auto index = _fileModel.index(_index.row(), 0, _filterProxyModel.
+                                  mapToSource(rootIndex()));
     if (!index.isValid())
         return;
     if (_fileModel.isDir(index))
-        setRootIndex(index);
+        setRootIndex(_filterProxyModel.mapFromSource(index));
     else
         emit fileOpened(_fileModel.filePath(index));
+}
+
+FileFilterProxyModel* FileList::filterProxyModel()
+{
+    return &_filterProxyModel;
 }
 
 QFileSystemModel* FileList::fileModel()
@@ -35,10 +41,10 @@ QFileSystemModel* FileList::fileModel()
 
 QString FileList::currentPath() const
 {
-    return _fileModel.filePath(rootIndex());
+    return _fileModel.filePath(_filterProxyModel.mapToSource(rootIndex()));
 }
 
 void FileList::goPath(const QString& path)
 {
-    setRootIndex(_fileModel.index(path));
+    setRootIndex(_filterProxyModel.mapFromSource(_fileModel.index(path)));
 }

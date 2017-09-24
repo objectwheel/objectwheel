@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTextDocument>
+#include <QTextCursor>
 
 class QmlEditorViewPrivate;
 class Control;
@@ -13,10 +14,16 @@ class QmlEditorView : public QWidget
         friend class QmlEditorViewPrivate;
 
     public:
+        struct DocumentData {
+                QTextDocument* document;
+                QTextCursor cursor;
+                QMetaObject::Connection modificationConnection;
+        };
+
         struct EditorItem {
                 Control* control;
                 QString currentFileRelativePath;
-                QMap<QString /* path */, QTextDocument* /* document */> documents;
+                QMap<QString /* path */, DocumentData /* documentData */> documents;
         };
 
     public:

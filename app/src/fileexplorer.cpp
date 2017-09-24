@@ -89,8 +89,6 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     connect(&newFileButton, SIGNAL(clicked(bool)), SLOT(handleNewFileButtonClicked()));
     connect(&newFolderButton, SIGNAL(clicked(bool)), SLOT(handleNewFolderButtonClicked()));
     connect(&downloadFileButton, SIGNAL(clicked(bool)), SLOT(handleDownloadButtonClicked()));
-    previousSelectionModelConnection = connect(fileList.selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-                                               SLOT(handleFileListSelectionChanged()));
 
     toolbar.setStyleSheet(CSS::DesignerToolbar);
     toolbar.setIconSize(QSize(fit(14), fit(14)));
@@ -127,8 +125,9 @@ void FileExplorerPrivate::handleHomeButtonClicked()
 
 void FileExplorerPrivate::handleCopyButtonClicked()
 {
-    auto _index = fileList.currentIndex();
-    auto index = fileList.fileModel()->index(_index.row(), 0, fileList.rootIndex());
+    auto _index = fileList.filterProxyModel()->mapToSource(fileList.currentIndex());
+    auto index = fileList.fileModel()->index(_index.row(), 0, fileList.
+                 filterProxyModel()->mapToSource(fileList.rootIndex()));
     auto fileName = fileList.fileModel()->fileName(index);
     auto filePath = fileList.fileModel()->filePath(index);
 
@@ -178,8 +177,9 @@ void FileExplorerPrivate::handleCopyButtonClicked()
 
 void FileExplorerPrivate::handleDeleteButtonClicked()
 {
-    auto _index = fileList.currentIndex();
-    auto index = fileList.fileModel()->index(_index.row(), 0, fileList.rootIndex());
+    auto _index = fileList.filterProxyModel()->mapToSource(fileList.currentIndex());
+    auto index = fileList.fileModel()->index(_index.row(), 0, fileList.
+                 filterProxyModel()->mapToSource(fileList.rootIndex()));
     auto fileName = fileList.fileModel()->fileName(index);
     auto filePath = fileList.fileModel()->filePath(index);
 
@@ -222,8 +222,9 @@ void FileExplorerPrivate::handleDownloadButtonClicked()
 
 void FileExplorerPrivate::handleFileListSelectionChanged()
 {
-    auto _index = fileList.currentIndex();
-    auto index = fileList.fileModel()->index(_index.row(), 0, fileList.rootIndex());
+    auto _index = fileList.filterProxyModel()->mapToSource(fileList.currentIndex());
+    auto index = fileList.fileModel()->index(_index.row(), 0, fileList.
+                 filterProxyModel()->mapToSource(fileList.rootIndex()));
     deleteButton.setEnabled(index.isValid());
     copyButton.setEnabled(index.isValid());
 }
@@ -242,13 +243,13 @@ FileExplorer::FileExplorer(QWidget *parent)
 
 void FileExplorer::setRootPath(const QString& rootPath)
 {
-    _d->fileList.setModel(_d->fileList.fileModel());
     _d->fileList.fileModel()->setRootPath(rootPath);
+    _d->fileList.setModel(_d->fileList.filterProxyModel());
     auto index = _d->fileList.fileModel()->index(rootPath);
     if (!index.isValid())
         _d->fileList.setModel(nullptr);
     else
-        _d->fileList.setRootIndex(index);
+        _d->fileList.setRootIndex(_d->fileList.filterProxyModel()->mapFromSource(index));
     disconnect(_d->previousSelectionModelConnection);
     _d->previousSelectionModelConnection = connect(_d->fileList.selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
                                                    _d, SLOT(handleFileListSelectionChanged()));

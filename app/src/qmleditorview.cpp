@@ -22,7 +22,7 @@
 #include <QSplitter>
 
 #define LINE_COLOR ("#606467")
-#define CHAR_SEPARATION ("<->")
+#define CHAR_SEPARATION ("::")
 #define INITIALWIDTH_FILEEXPLORER (fit(450))
 #define MINWIDTH_FILEEXPLORER (fit(200))
 #define MINWIDTH_EDITOR (fit(200))
@@ -52,6 +52,7 @@ class QmlEditorViewPrivate : public QObject
         void handleDatabaseChange();
         void handleItemsComboboxActivated(const QString& text);
         void handleDocumentsComboboxActivated(const QString& text);
+        void handleDocumentChanges(bool value);
 
     public:
         QmlEditorView* parent;
@@ -70,6 +71,8 @@ class QmlEditorViewPrivate : public QObject
         QToolButton pasteButton;
         QComboBox itemsCombobox;
         QComboBox documentsCombobox;
+        QLabel itemsChangeIndicator;
+        QLabel documentsChangeIndicator;
         QComboBox zoomlLevelCombobox;
         QLabel lineColLabel;
         Control* currentControl;
@@ -144,6 +147,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     cutButton.setDisabled(true);
 
     codeEditor.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    codeEditor.setDocument(nullptr);
 
     defaultFont.setFamily("Liberation Mono");
     defaultFont.setStyleHint(QFont::Monospace);
@@ -487,6 +491,11 @@ void QmlEditorViewPrivate::handleDocumentsComboboxActivated(const QString& text)
     }
 }
 
+void QmlEditorViewPrivate::handleDocumentChanges(bool value)
+{
+
+}
+
 QmlEditorView::QmlEditorView(QWidget* parent)
     : QWidget(parent)
     , _d(new QmlEditorViewPrivate(this))
@@ -534,10 +543,10 @@ void QmlEditorView::addControl(Control* control)
     EditorItem item;
     item.control = control;
     item.currentFileRelativePath = relativePath;
-    item.documents[relativePath] = new QTextDocument(this);
-    item.documents[relativePath]->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath]));
-    item.documents[relativePath]->setPlainText(rdfile(control->url()));
-    new QmlHighlighter(item.documents[relativePath]);
+    item.documents[relativePath].document = new QTextDocument(this);
+    item.documents[relativePath].document->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath].document));
+    item.documents[relativePath].document->setPlainText(rdfile(control->url()));
+    new QmlHighlighter(item.documents[relativePath].document);
     _editorItems.append(item);
     _d->itemsCombobox.addItem(control->id() + CHAR_SEPARATION + control->uid());
     _d->documentsCombobox.addItem(relativePath);
@@ -551,14 +560,10 @@ void QmlEditorView::addDocument(Control* control, const QString& documentPath)
             relativePath.remove(control->dir() + separator() + DIR_THIS + separator());
             if (item.documents.keys().contains(relativePath))
                 return;
-            item.documents[relativePath] = new QTextDocument(this);
-            item.documents[relativePath]->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath]));
-            item.documents[relativePath]->setPlainText(rdfile(documentPath));
-            new QmlHighlighter(item.documents[relativePath]);
-            QFont font;
-            font.setFamily("Liberation Mono");
-            font.setStyleHint(QFont::Monospace);
-            item.documents[relativePath]->setDefaultFont(font);
+            item.documents[relativePath].document = new QTextDocument(this);
+            item.documents[relativePath].document->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath].document));
+            item.documents[relativePath].document->setPlainText(rdfile(documentPath));
+            new QmlHighlighter(item.documents[relativePath].document);
             _d->documentsCombobox.addItem(relativePath);
         }
     }
@@ -583,8 +588,21 @@ void QmlEditorView::openControl(Control* control)
 {
     for (auto& item : _editorItems) {
         if (item.control == control) {
+
+            for (auto& item : _editorItems) {
+                if (item.control == _d->currentControl) {
+                    QString previousRelativePath;
+                    for (auto key : item.documents.keys())
+                        if (item.documents[key].document == _d->codeEditor.document())
+                            previousRelativePath = key;
+                    item.documents[previousRelativePath].cursor = _d->codeEditor.textCursor();
+                    for (auto key : item.documents.keys())
+                        disconnect(item.documents[key].modificationConnection);
+                }
+            }
+
             _d->currentControl = item.control;
-            _d->codeEditor.setDocument(item.documents[item.currentFileRelativePath]);
+            _d->codeEditor.setDocument(item.documents[item.currentFileRelativePath].document);
             _d->itemsCombobox.setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
             _d->documentsCombobox.clear();
             _d->documentsCombobox.addItems(item.documents.keys());
@@ -600,6 +618,15 @@ void QmlEditorView::openControl(Control* control)
                                                  &_d->redoButton, SLOT(setEnabled(bool)));
             _d->undoButton.setEnabled(_d->codeEditor.document()->isUndoAvailable());
             _d->redoButton.setEnabled(_d->codeEditor.document()->isRedoAvailable());
+
+
+            for (auto key : item.documents.keys())
+                item.documents[key].modificationConnection =
+                connect(item.documents[key].document,
+                SIGNAL(modificationChanged(bool)), _d, SLOT(handleDocumentChanges(bool)));
+
+            if (!item.documents[item.currentFileRelativePath].cursor.isNull())
+                _d->codeEditor.setTextCursor(item.documents[item.currentFileRelativePath].cursor);
         }
     }
 }
