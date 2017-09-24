@@ -245,5 +245,6 @@
         <file>resources/images/newfile.png</file>
         <file>resources/images/newfolder.png</file>
         <file>resources/images/up.png</file>
+        <file>resources/images/rename.png</file>
     </qresource>
 </RCC>

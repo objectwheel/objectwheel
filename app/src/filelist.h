@@ -12,7 +12,8 @@ class FileFilterProxyModel : public QSortFilterProxyModel
         {
             QModelIndex _index = sourceModel()->index(sourceRow, 0, sourceParent);
             QFileSystemModel* fileModel = qobject_cast<QFileSystemModel*>(sourceModel());
-            if (fileModel->fileName(_index).startsWith("_"))
+            auto fileName = fileModel->fileName(_index);
+            if (fileName.startsWith("_") || fileName == "icon.png")
                 return false;
             else
                 return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);

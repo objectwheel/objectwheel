@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QDebug>
+#include <QInputDialog>
+#include <QtNetwork>
 
 #define COLOR_BACKGROUND (QColor("#F3F7FA"))
 
@@ -26,6 +28,7 @@ class FileExplorerPrivate : public QObject
         void handleCopyButtonClicked();
         void handleDeleteButtonClicked();
         void handleNewFileButtonClicked();
+        void handleRenameButtonClicked();
         void handleNewFolderButtonClicked();
         void handleDownloadButtonClicked();
         void handleFileListSelectionChanged();
@@ -38,6 +41,7 @@ class FileExplorerPrivate : public QObject
         QToolButton homeButton;
         QToolButton copyButton;
         QToolButton deleteButton;
+        QToolButton renameButton;
         QToolButton newFileButton;
         QToolButton newFolderButton;
         QToolButton downloadFileButton;
@@ -62,6 +66,7 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     homeButton.setCursor(Qt::PointingHandCursor);
     copyButton.setCursor(Qt::PointingHandCursor);
     deleteButton.setCursor(Qt::PointingHandCursor);
+    renameButton.setCursor(Qt::PointingHandCursor);
     newFileButton.setCursor(Qt::PointingHandCursor);
     newFolderButton.setCursor(Qt::PointingHandCursor);
     downloadFileButton.setCursor(Qt::PointingHandCursor);
@@ -70,6 +75,7 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     homeButton.setToolTip("Go home.");
     copyButton.setToolTip("Copy file/folder.");
     deleteButton.setToolTip("Delete file/folder.");
+    renameButton.setToolTip("Rename file/folder.");
     newFileButton.setToolTip("New file.");
     newFolderButton.setToolTip("New folder.");
     downloadFileButton.setToolTip("Download file from url.");
@@ -78,6 +84,7 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     homeButton.setIcon(QIcon(":/resources/images/home.png"));
     copyButton.setIcon(QIcon(":/resources/images/copy.png"));
     deleteButton.setIcon(QIcon(":/resources/images/delete.png"));
+    renameButton.setIcon(QIcon(":/resources/images/rename.png"));
     newFileButton.setIcon(QIcon(":/resources/images/newfile.png"));
     newFolderButton.setIcon(QIcon(":/resources/images/newfolder.png"));
     downloadFileButton.setIcon(QIcon(":/resources/images/downloadfile.png"));
@@ -86,6 +93,7 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     connect(&homeButton, SIGNAL(clicked(bool)), SLOT(handleHomeButtonClicked()));
     connect(&copyButton, SIGNAL(clicked(bool)), SLOT(handleCopyButtonClicked()));
     connect(&deleteButton, SIGNAL(clicked(bool)), SLOT(handleDeleteButtonClicked()));
+    connect(&renameButton, SIGNAL(clicked(bool)), SLOT(handleRenameButtonClicked()));
     connect(&newFileButton, SIGNAL(clicked(bool)), SLOT(handleNewFileButtonClicked()));
     connect(&newFolderButton, SIGNAL(clicked(bool)), SLOT(handleNewFolderButtonClicked()));
     connect(&downloadFileButton, SIGNAL(clicked(bool)), SLOT(handleDownloadButtonClicked()));
@@ -99,6 +107,7 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     toolbar.addWidget(&copyButton);
     toolbar.addWidget(&deleteButton);
     toolbar.addSeparator();
+    toolbar.addWidget(&renameButton);
     toolbar.addWidget(&newFileButton);
     toolbar.addWidget(&newFolderButton);
     toolbar.addWidget(&downloadFileButton);
@@ -183,6 +192,9 @@ void FileExplorerPrivate::handleDeleteButtonClicked()
     auto fileName = fileList.fileModel()->fileName(index);
     auto filePath = fileList.fileModel()->filePath(index);
 
+    if (fileName.startsWith("_") || fileName == "icon.png" || fileName == "main.qml")
+        return;
+
     if (!index.isValid() || fileName.isEmpty() || filePath.isEmpty())
         return;
 
@@ -205,19 +217,87 @@ void FileExplorerPrivate::handleDeleteButtonClicked()
     }
 }
 
+void FileExplorerPrivate::handleRenameButtonClicked()
+{
+    bool ok;
+    auto _index = fileList.filterProxyModel()->mapToSource(fileList.currentIndex());
+    auto index = fileList.fileModel()->index(_index.row(), 0, fileList.
+                 filterProxyModel()->mapToSource(fileList.rootIndex()));
+    auto filePath = fileList.fileModel()->filePath(index);
+    auto fileName = fileList.fileModel()->fileName(index);
+
+    if (fileName.startsWith("_") || fileName == "icon.png" || fileName == "main.qml")
+        return;
+
+    QString text = QInputDialog::getText(parent, tr("Rename file/folder"),
+                                         tr("New name:"), QLineEdit::Normal,
+                                         fileName, &ok);
+
+    if (text.startsWith("_") || text == "icon.png" || text == "main.qml")
+        return;
+
+    if (index.isValid() && ok && !text.isEmpty() && text != fileName)
+        rn(filePath, dname(filePath) + separator() + text);
+}
+
 void FileExplorerPrivate::handleNewFileButtonClicked()
 {
-    //TODO
+    bool ok;
+    auto index = fileList.filterProxyModel()->mapToSource(fileList.rootIndex());
+    auto path = fileList.fileModel()->filePath(index);
+    QString text = QInputDialog::getText(parent, tr("Create new file"),
+                                         tr("File name:"), QLineEdit::Normal,
+                                         QString(), &ok);
+
+    if (text.startsWith("_") || text == "icon.png" || text == "main.qml")
+        return;
+
+    if (index.isValid() && ok && !text.isEmpty() && !exists(path + separator() + text))
+        mkfile(path + separator() + text);
 }
+
 
 void FileExplorerPrivate::handleNewFolderButtonClicked()
 {
-    //TODO
+    bool ok;
+    auto index = fileList.filterProxyModel()->mapToSource(fileList.rootIndex());
+    auto path = fileList.fileModel()->filePath(index);
+    QString text = QInputDialog::getText(parent, tr("Create new folder"),
+                                         tr("Folder name:"), QLineEdit::Normal,
+                                         QString(), &ok);
+
+    if (text.startsWith("_") || text == "icon.png" || text == "main.qml")
+        return;
+
+    if (index.isValid() && ok && !text.isEmpty() && !exists(path + separator() + text))
+        mkdir(path + separator() + text);
 }
 
 void FileExplorerPrivate::handleDownloadButtonClicked()
 {
-    //TODO
+    bool ok, ok_2;
+    auto index = fileList.filterProxyModel()->mapToSource(fileList.rootIndex());
+    auto path = fileList.fileModel()->filePath(index);
+    QString text = QInputDialog::getText(parent, tr("Download file"),
+                                         tr("Url:"), QLineEdit::Normal,
+                                         QString(), &ok);
+
+    if (!ok || text.isEmpty())
+        return;
+
+    QString text_2 = QInputDialog::getText(parent, tr("Download file"),
+                                         tr("File name:"), QLineEdit::Normal,
+                                         QString(), &ok_2);
+
+    if (text_2.startsWith("_") || text_2 == "icon.png" || text_2 == "main.qml")
+        return;
+
+    if (index.isValid() && ok_2 && !text_2.isEmpty() && !exists(path + separator() + text_2)) {
+        const auto& data = dlfile(text);
+        if (data.isEmpty())
+            return;
+        wrfile(path + separator() + text_2, data);
+    }
 }
 
 void FileExplorerPrivate::handleFileListSelectionChanged()
