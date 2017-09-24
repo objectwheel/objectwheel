@@ -658,6 +658,8 @@ void SaveManager::exposeProject()
             form->controlTransaction()->setTransactionsEnabled(true);
         });
 
+        lastControl = form;
+
         Control* parentControl;
         for (auto child : childrenPaths(path)) {
             if (dname(dname(child)) == path)
