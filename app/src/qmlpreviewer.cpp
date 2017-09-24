@@ -191,9 +191,10 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
 
     window->setFlags(Qt::FramelessWindowHint);
     window->setOpacity(0);
+    window->show(); //FIXME: It should be "hide", broken since Qt5.9.1
     window->hide();
 
-    Delayer::delay(10);
+    Delayer::delay(100);
 
     QPixmap preview = QPixmap::fromImage(window->grabWindow());
     preview.setDevicePixelRatio(qApp->devicePixelRatio());

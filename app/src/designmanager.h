@@ -2,6 +2,8 @@
 #define DESIGNMANAGER_H
 
 #include <formscene.h>
+#include <qmleditorview.h>
+
 #include <QObject>
 
 class QWidget;
@@ -30,6 +32,7 @@ class DesignManager : public QObject
         static ControlScene* currentScene();
         static ControlScene* controlScene();
         static FormScene* formScene();
+        static QmlEditorView* qmlEditorView();
         static LoadingIndicator* loadingIndicator();
 
     signals:

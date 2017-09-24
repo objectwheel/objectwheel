@@ -237,6 +237,7 @@ FileExplorer::FileExplorer(QWidget *parent)
     p.setColor(QPalette::Background, COLOR_BACKGROUND);
     p.setColor(QPalette::Base, COLOR_BACKGROUND);
     setPalette(p);
+    connect(&_d->fileList, SIGNAL(fileOpened(QString)), SIGNAL(fileOpened(QString)));
 }
 
 void FileExplorer::setRootPath(const QString& rootPath)

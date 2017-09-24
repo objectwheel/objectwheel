@@ -710,6 +710,11 @@ FormScene* DesignManager::formScene()
     return &_d->formScene;
 }
 
+QmlEditorView* DesignManager::qmlEditorView()
+{
+    return &_d->qmlEditorView;
+}
+
 LoadingIndicator* DesignManager::loadingIndicator()
 {
     return &_d->loadingIndicator;

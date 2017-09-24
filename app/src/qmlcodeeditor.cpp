@@ -1,6 +1,5 @@
 #include <qmlcodeeditor.h>
 #include <fit.h>
-
 #include <QtWidgets>
 
 #define COLOR_LINENUMBERAREA (QColor("#E3E7EA"))
@@ -35,7 +34,6 @@ class LineNumberArea : public QWidget
 
 QmlCodeEditor::QmlCodeEditor(QWidget* parent)
     : QPlainTextEdit(parent)
-    , highlighter(document())
 {
     QPalette p(palette());
     p.setColor(QPalette::Base, COLOR_EDITORBACKGROUND);

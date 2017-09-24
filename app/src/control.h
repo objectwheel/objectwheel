@@ -125,6 +125,7 @@ class Control : public QGraphicsWidget
         virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
         virtual void resizeEvent(QGraphicsSceneResizeEvent *event) override;
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
         virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;

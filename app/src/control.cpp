@@ -6,6 +6,7 @@
 #include <designmanager.h>
 #include <random>
 #include <filemanager.h>
+#include <qmleditorview.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -680,6 +681,14 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     scene->mainControl()->setDragIn(false);
 
     event->accept();
+}
+
+void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
+{
+    DesignManager::qmlEditorView()->addControl(this);
+    DesignManager::setMode(DesignManager::CodeEdit);
+    DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
+    DesignManager::qmlEditorView()->openControl(this);
 }
 
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)

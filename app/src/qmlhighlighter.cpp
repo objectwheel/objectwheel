@@ -65,7 +65,6 @@ QmlHighlighter::QmlHighlighter(QTextDocument* parent)
     HighlightingRule rule;
 
     keywordFormat.setForeground(COLOR_KEYWORDS);
-    keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b"
                     << "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
@@ -108,25 +107,21 @@ QmlHighlighter::QmlHighlighter(QTextDocument* parent)
         highlightingRules.append(rule);
     }
 
-    numericFormat.setFontWeight(QFont::Bold);
     numericFormat.setForeground(COLOR_NUMERICS);
     rule.pattern = QRegExp("[0-9]+\\.?[0-9]*");
     rule.format = numericFormat;
     highlightingRules.append(rule);
 
-    typeFormat.setFontWeight(QFont::Bold);
     typeFormat.setForeground(COLOR_QMLTYPE);
     rule.pattern = QRegExp("\\b[A-Z][A-Za-z]+\\b");
     rule.format = typeFormat;
     highlightingRules.append(rule);
 
-    propertyFormat.setFontWeight(QFont::Bold);
     propertyFormat.setForeground(COLOR_PROPERTIES);
     rule.pattern = QRegExp("^(!?(\\s+)?)[a-z][\\w\\.]+([ \\t ]+)?(?=:)");
     rule.format = propertyFormat;
     highlightingRules.append(rule);
 
-    classFormat.setFontWeight(QFont::Bold);
     classFormat.setForeground(COLOR_QTCLASS);
     rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
     rule.format = classFormat;

@@ -1,7 +1,6 @@
 #ifndef QMLCODEEDITOR_H
 #define QMLCODEEDITOR_H
 
-#include <qmlhighlighter.h>
 #include <QPlainTextEdit>
 #include <QThread>
 #include <QTimer>
@@ -43,7 +42,6 @@ class QmlCodeEditor : public QPlainTextEdit
 
     private:
         QWidget* lineNumberArea;
-        QmlHighlighter highlighter;
         QCompleter _completer;
         QStandardItemModel _model;
         CompletionHelper _completionHelper;
