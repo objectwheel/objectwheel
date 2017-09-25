@@ -208,7 +208,8 @@ void FileExplorerPrivate::handleDeleteButtonClicked()
 
     switch (ret) {
         case QMessageBox::Yes: {
-            rm(filePath);
+            if (rm(filePath))
+                emit parent->fileDeleted(filePath);
             break;
         } default: {
             // Do nothing
@@ -237,7 +238,8 @@ void FileExplorerPrivate::handleRenameButtonClicked()
         return;
 
     if (index.isValid() && ok && !text.isEmpty() && text != fileName)
-        rn(filePath, dname(filePath) + separator() + text);
+        if (rn(filePath, dname(filePath) + separator() + text))
+            emit parent->fileRenamed(filePath, dname(filePath) + separator() + text);
 }
 
 void FileExplorerPrivate::handleNewFileButtonClicked()

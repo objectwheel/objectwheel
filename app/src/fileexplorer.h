@@ -16,6 +16,8 @@ class FileExplorer : public QWidget
 
     signals:
         void fileOpened(const QString& filePath);
+        void fileDeleted(const QString& filePath);
+        void fileRenamed(const QString& filePathFrom, const QString& filePathTo);
 
     private:
         FileExplorerPrivate* _d;

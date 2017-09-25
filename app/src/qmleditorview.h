@@ -44,8 +44,10 @@ class QmlEditorView : public QWidget
         void addDocument(Control* control, const QString& documentPath);
         void setCurrentDocument(Control* control, const QString& documentPath);
         void openControl(Control* control);
-        void closeControl(Control* control);
-        void closeDocument(Control* control, const QString& documentPath);
+        void closeControl(Control* control, const bool ask = true);
+        void closeDocument(Control* control, const QString& documentPath, const bool ask = true);
+        void saveControl(Control* control);
+        void saveDocument(Control* control, const QString& documentPath);
 
     public slots:
         void raiseContainer();

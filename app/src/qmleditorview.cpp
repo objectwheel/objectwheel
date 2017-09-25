@@ -46,6 +46,8 @@ class QmlEditorViewPrivate : public QObject
         void handleCursorPositionChanged();
         void handleModeChange();
         void handleFileExplorerFileOpen(const QString& filePath);
+        void handleFileExplorerFileDeleted(const QString& filePath);
+        void handleFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo);
         void handlePinButtonClicked();
         void handleCloseButtonClicked();
         void handleZoomLevelChange(const QString& text);
@@ -182,6 +184,8 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     connect(&imageEditorButton, SIGNAL(clicked(bool)), SLOT(handleImageEditorButtonClicked()));
     connect(&hexEditorButton, SIGNAL(clicked(bool)), SLOT(handleHexEditorButtonClicked()));
     connect(&fileExplorer, SIGNAL(fileOpened(QString)), SLOT(handleFileExplorerFileOpen(QString)));
+    connect(&fileExplorer, SIGNAL(fileDeleted(QString)), SLOT(handleFileExplorerFileDeleted(QString)));
+    connect(&fileExplorer, SIGNAL(fileRenamed(QString,QString)), SLOT(handleFileExplorerFileRenamed(QString,QString)));
     connect(&itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
     connect(&documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
 
@@ -259,6 +263,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar.addWidget(&itemsCombobox);
     toolbar.addWidget(&documentsCombobox);
     toolbar.addWidget(&closeButton);
+    toolbar.addSeparator();
     toolbar.addWidget(&zoomlLevelCombobox);
     toolbar.addWidget(spacer);
     toolbar.addWidget(&lineColLabel);
@@ -450,6 +455,33 @@ void QmlEditorViewPrivate::handleFileExplorerFileOpen(const QString& filePath)
     parent->setCurrentDocument(currentControl, filePath);
 }
 
+void QmlEditorViewPrivate::handleFileExplorerFileDeleted(const QString& filePath)
+{
+    parent->closeDocument(currentControl, filePath, false);
+}
+
+void QmlEditorViewPrivate::handleFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo)
+{
+    auto relativePath = filePathFrom;
+    relativePath.remove(currentControl->dir() + separator() + DIR_THIS + separator());
+
+    auto relativePath_2 = filePathTo;
+    relativePath_2.remove(currentControl->dir() + separator() + DIR_THIS + separator());
+
+    for (auto& item : parent->_editorItems) {
+        if (item.control == currentControl && item.documents.keys().contains(relativePath)) {
+            if (item.currentFileRelativePath == relativePath)
+                item.currentFileRelativePath = relativePath_2;
+
+            item.documents[relativePath_2] = item.documents.value(relativePath);
+            item.documents.remove(relativePath);
+            break;
+        }
+    }
+
+    updateOpenDocHistory();
+}
+
 void QmlEditorViewPrivate::handleCodeEditorButtonClicked()
 {
     parent->setMode(QmlEditorView::CodeEditor);
@@ -465,7 +497,6 @@ void QmlEditorViewPrivate::handleHexEditorButtonClicked()
     parent->setMode(QmlEditorView::HexEditor);
 }
 
-// TODO: Update when changes made by file explorer
 // TODO: Update when toolbox controls are changed
 void QmlEditorViewPrivate::updateOpenDocHistory()
 {
@@ -687,12 +718,40 @@ void QmlEditorView::openControl(Control* control)
     }
 }
 
- void QmlEditorView::closeControl(Control* control)
+void QmlEditorView::closeControl(Control* control, const bool ask)
 {
+    for (auto& item : _editorItems) {
+        if (item.control == control)  {
+            if (ask) {
+                QMessageBox msgBox;
+                msgBox.setText(QString("The control %1 has been modified in Qml Editor.").arg(control->id()));
+                msgBox.setInformativeText("Do you want to save all your changes for this control?");
+                msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Save);
+                int ret = msgBox.exec();
+                switch (ret) {
+                    case QMessageBox::Cancel:
+                        return;
+                        break;
 
+                    case QMessageBox::Save:
+                        saveControl(control);
+                        break;
+
+                    case QMessageBox::Discard:
+                    default:
+                        break;
+                }
+            }
+
+            for (auto path : item.documents.keys())
+                closeDocument(control, path, false);
+        }
+        break;
+    }
 }
 
-void QmlEditorView::closeDocument(Control* control, const QString& documentPath)
+void QmlEditorView::closeDocument(Control* control, const QString& documentPath, const bool ask)
 {
     auto relativePath = documentPath;
     relativePath.remove(control->dir() + separator() + DIR_THIS + separator());
@@ -711,9 +770,9 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath)
     if (!issuerItem->documents.keys().contains(relativePath))
         return;
 
-    if (issuerItem->documents.value(relativePath).document->isModified()) {
+    if (ask && issuerItem->documents.value(relativePath).document->isModified()) {
         QMessageBox msgBox;
-        msgBox.setText("The document has been modified.");
+        msgBox.setText(QString("The document %1 has been modified.").arg(relativePath));
         msgBox.setInformativeText("Do you want to save your changes?");
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
@@ -724,7 +783,7 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath)
                 break;
 
             case QMessageBox::Save:
-                // TODO: Save changes
+                saveDocument(control, documentPath);
                 break;
 
             case QMessageBox::Discard:
@@ -765,6 +824,16 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath)
     }
 
     _d->updateOpenDocHistory();
+}
+
+void QmlEditorView::saveControl(Control* control)
+{
+
+}
+
+void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
+{
+
 }
 
 void QmlEditorView::raiseContainer()
