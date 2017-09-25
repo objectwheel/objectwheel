@@ -50,6 +50,7 @@ class QmlEditorViewPrivate : public QObject
         void handleFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo);
         void handlePinButtonClicked();
         void handleCloseButtonClicked();
+        void handleSaveButtonClicked();
         void handleZoomLevelChange(const QString& text);
         void handleHideShowButtonClicked();
         void handleCodeEditorButtonClicked();
@@ -151,6 +152,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     redoButton.setDisabled(true);
     copyButton.setDisabled(true);
     cutButton.setDisabled(true);
+    saveButton.setDisabled(true);
 
     codeEditor.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     codeEditor.setDocument(nullptr);
@@ -180,6 +182,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     connect(&zoomlLevelCombobox, SIGNAL(activated(QString)), SLOT(handleZoomLevelChange(QString)));
     connect(&hideShowButton, SIGNAL(clicked(bool)), SLOT(handleHideShowButtonClicked()));
     connect(&closeButton, SIGNAL(clicked(bool)), SLOT(handleCloseButtonClicked()));
+    connect(&saveButton, SIGNAL(clicked(bool)), SLOT(handleSaveButtonClicked()));
     connect(&codeEditorButton, SIGNAL(clicked(bool)), SLOT(handleCodeEditorButtonClicked()));
     connect(&imageEditorButton, SIGNAL(clicked(bool)), SLOT(handleImageEditorButtonClicked()));
     connect(&hexEditorButton, SIGNAL(clicked(bool)), SLOT(handleHexEditorButtonClicked()));
@@ -373,7 +376,19 @@ void QmlEditorViewPrivate::handleCloseButtonClicked()
 {
     for (auto& item : parent->_editorItems) {
         if (item.control == currentControl) {
-            parent->closeDocument(item.control, item.currentFileRelativePath);
+            parent->closeDocument(item.control, item.control->dir() + separator() +
+                                  DIR_THIS + separator() + item.currentFileRelativePath);
+            break;
+        }
+    }
+}
+
+void QmlEditorViewPrivate::handleSaveButtonClicked()
+{
+    for (auto& item : parent->_editorItems) {
+        if (item.control == currentControl) {
+            parent->saveDocument(item.control, item.control->dir() + separator() +
+                                  DIR_THIS + separator() + item.currentFileRelativePath);
             break;
         }
     }
@@ -514,7 +529,7 @@ void QmlEditorViewPrivate::updateOpenDocHistory()
         itemsCombobox.addItem(itemText);
 
         if (item.control == currentControl) {
-
+            saveButton.setEnabled(item.documents.value(item.currentFileRelativePath).document->isModified());
             for (auto path : item.documents.keys())
                 if (item.documents.value(path).document->isModified())
                     documentsCombobox.addItem(CHAR_CHANGEINDICATOR + path);
@@ -745,7 +760,7 @@ void QmlEditorView::closeControl(Control* control, const bool ask)
             }
 
             for (auto path : item.documents.keys())
-                closeDocument(control, path, false);
+                closeDocument(control, control->dir() + separator() + DIR_THIS + separator() + path, false);
         }
         break;
     }
@@ -833,7 +848,21 @@ void QmlEditorView::saveControl(Control* control)
 
 void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
 {
+    auto relativePath = documentPath;
+    relativePath.remove(control->dir() + separator() + DIR_THIS + separator());
 
+    for (auto& item : _editorItems) {
+        if (item.control == control &&
+            item.documents.keys().contains(relativePath)) {
+            wrfile(documentPath, item.documents.value
+                   (relativePath).document->toPlainText().toUtf8());
+            item.documents.value(relativePath).document->setModified(false);
+            control->refresh();
+            break;
+        }
+    }
+
+    _d->updateOpenDocHistory();
 }
 
 void QmlEditorView::raiseContainer()

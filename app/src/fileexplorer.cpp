@@ -328,10 +328,12 @@ void FileExplorer::setRootPath(const QString& rootPath)
     _d->fileList.fileModel()->setRootPath(rootPath);
     _d->fileList.setModel(_d->fileList.filterProxyModel());
     auto index = _d->fileList.fileModel()->index(rootPath);
-    if (!index.isValid())
+    if (!index.isValid()) {
         _d->fileList.setModel(nullptr);
-    else
+        _d->fileList.fileModel()->setRootPath(QDir::currentPath());
+    } else {
         _d->fileList.setRootIndex(_d->fileList.filterProxyModel()->mapFromSource(index));
+    }
     disconnect(_d->previousSelectionModelConnection);
     _d->previousSelectionModelConnection = connect(_d->fileList.selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
                                                    _d, SLOT(handleFileListSelectionChanged()));
