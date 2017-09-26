@@ -737,6 +737,30 @@ QString SaveManager::suid(const QString& rootPath)
     return _d->property(propertyData, TAG_SUID).toString();
 }
 
+void SaveManager::refreshToolUid(const QString& toolRootPath)
+{
+    if (toolRootPath.isEmpty())
+        return;
+
+    QStringList paths, properties;
+
+    properties << fps(FILE_PROPERTIES, toolRootPath);
+    paths << properties;
+
+    for (auto pfile : properties) {
+        auto propertyData = rdfile(pfile);
+
+        if (!_d->isOwctrl(propertyData))
+            continue;
+
+        auto uid = _d->property(propertyData, TAG_UID).toString();
+        auto newUid = Control::generateUid();
+
+        for (auto file : paths)
+            _d->updateFile(file, uid, newUid);
+    }
+}
+
 // You have to provide an valid suid, except if control is a form
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.

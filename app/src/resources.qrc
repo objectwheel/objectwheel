@@ -246,5 +246,8 @@
         <file>resources/images/newfolder.png</file>
         <file>resources/images/up.png</file>
         <file>resources/images/rename.png</file>
+        <file>resources/qmls/item/t/_properties.json</file>
+        <file>resources/qmls/item/t/icon.png</file>
+        <file>resources/qmls/item/t/main.qml</file>
     </qresource>
 </RCC>

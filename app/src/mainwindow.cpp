@@ -26,17 +26,6 @@
 #include <QtWidgets>
 #include <QtNetwork>
 
-#define CUSTOM_ITEM "\
-import QtQuick 2.0\n\
-\n\
-Rectangle {\n\
-   id: customItem\n\
-   width: 54\n\
-   height: 54\n\
-   radius: 5 * dpi\n\
-   color: \"#c7cbc4\"\n\
-}\n"
-
 using namespace Fit;
 MainWindowPrivate* MainWindow::_d = nullptr;
 
@@ -445,24 +434,23 @@ void MainWindow::toolboxAddButtonClicked()
 			count++;
 			name += QString::number(count);
 		}
-	}
+    }
 
-	auto filePath = ToolsManager::toolsDir() + "/" + name + "/main.qml";
-	int ret = wrfile(filePath, CUSTOM_ITEM);
-	if (ret < 0) return;
+    auto itemPath = ToolsManager::toolsDir() + separator() + name;
+    auto iconPath = itemPath + separator() + DIR_THIS + separator() + "icon.png";
+    auto qmlPath = itemPath + separator() + DIR_THIS + separator() + "main.png";
 
-	QPixmap pixmap;
-	QString iconPath = ToolsManager::toolsDir() + "/" + name + "/icon.png";
-	pixmap.load(":/resources/images/item.png");
-	if (!pixmap.save(iconPath)) {
-		return;
-	}
+    if (!mkdir(itemPath) || !cp(DIR_QRC_ITEM, itemPath, true, true))
+        return;
+
+    SaveManager::refreshToolUid(itemPath);
 
 	QList<QUrl> urls;
-	QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), name);
-	urls << QUrl::fromLocalFile(filePath);
+    urls << QUrl::fromLocalFile(qmlPath);
+
+    QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), name);
     _d->toolboxList->insertItem(0, item);
-    _d->toolboxList->AddUrls(item,urls);
+    _d->toolboxList->AddUrls(item, urls);
     _d->toolboxList->setCurrentRow(0);
     _d->toolboxEditButton->setChecked(true);
 }
