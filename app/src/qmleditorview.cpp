@@ -102,6 +102,7 @@ class QmlEditorViewPrivate : public QObject
         QFont defaultFont;
         QMetaObject::Connection previousUndoConnection;
         QMetaObject::Connection previousRedoConnection;
+        QAction saveAction;
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
@@ -125,6 +126,10 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     containerWidget.setWindowTitle("Objectwheel Qml Editor");
     containerWidget.setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+    containerWidget.addAction(&saveAction);
+
+    saveAction.setText("Save document");
+    saveAction.setShortcut(QKeySequence::Save);
 
     splitter.setStyleSheet("QSplitter{background: #e0e4e7;}");
     splitter.addWidget(&editorWrapper);
@@ -193,6 +198,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     connect(&fileExplorer, SIGNAL(fileRenamed(QString,QString)), SLOT(handleFileExplorerFileRenamed(QString,QString)));
     connect(&itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
     connect(&documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
+    connect(&saveAction, SIGNAL(triggered()), SLOT(handleSaveButtonClicked()));
 
     //TODO: form or control removal will be handled
 
