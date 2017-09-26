@@ -9,6 +9,7 @@
 #include <css.h>
 #include <fileexplorer.h>
 #include <qmlhighlighter.h>
+#include <control.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -59,6 +60,7 @@ class QmlEditorViewPrivate : public QObject
         void updateOpenDocHistory();
         void handleItemsComboboxActivated(QString text);
         void handleDocumentsComboboxActivated(QString text);
+        void handleControlRemoval(Control* control);
 
     public:
         QmlEditorView* parent;
@@ -192,8 +194,12 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     connect(&itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
     connect(&documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
 
+    //TODO: form or control removal will be handled
+
     QTimer::singleShot(1000, [=] {
         connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
+        connect(DesignManager::controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+        connect(DesignManager::formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
     });
 
     zoomlLevelCombobox.addItem("35 %");
@@ -589,6 +595,11 @@ void QmlEditorViewPrivate::handleDocumentsComboboxActivated(QString text)
     }
 }
 
+void QmlEditorViewPrivate::handleControlRemoval(Control* control)
+{
+    parent->closeControl(control, false);
+}
+
 QmlEditorView::QmlEditorView(QWidget* parent)
     : QWidget(parent)
     , _d(new QmlEditorViewPrivate(this))
@@ -761,8 +772,8 @@ void QmlEditorView::closeControl(Control* control, const bool ask)
 
             for (auto path : item.documents.keys())
                 closeDocument(control, control->dir() + separator() + DIR_THIS + separator() + path, false);
+            break;
         }
-        break;
     }
 }
 

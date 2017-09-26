@@ -354,10 +354,11 @@ void ControlsScrollPanel::addControl(Control* control)
 
 void ControlsScrollPanel::removeControl(Control* control)
 {
+    //FIXME: For form removal, child controls?
+    int index = _controls.indexOf(control);
+    if (index < 0)
+        return;
     if (_showIds) {
-        int index = _controls.indexOf(control);
-        if (index < 0)
-            return;
         scene()->removeItem(_d->idTexts.at(index));
         delete _d->idTexts.at(index);
         _d->idTexts.removeAt(index);

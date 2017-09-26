@@ -40,6 +40,7 @@ class ControlScene : public QGraphicsScene
         virtual void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     signals:
+        void aboutToRemove(Control* control);
         void controlRemoved(Control* control);
         void mainControlChanged(Control* mainControl);
 

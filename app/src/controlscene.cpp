@@ -83,6 +83,9 @@ void ControlScene::removeControl(Control* control)
 {
     if (control == mainControl())
         return;
+    for (auto ctrl : control->childControls())
+        emit aboutToRemove(ctrl);
+    emit aboutToRemove(control);
     removeItem(control);
     control->deleteLater();
     emit controlRemoved(control);
@@ -90,6 +93,8 @@ void ControlScene::removeControl(Control* control)
 
 void ControlScene::removeChildControlsOnly(Control* parent)
 {
+    for (auto control : parent->childControls())
+        emit aboutToRemove(control);
     for (auto control : parent->childControls())
         control->deleteLater();
     for (auto control : parent->childControls(false))

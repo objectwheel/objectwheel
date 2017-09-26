@@ -25,6 +25,10 @@ void FormScene::removeForm(Form* form)
         form->main())
         return;
 
+    for (auto ctrl : form->childControls())
+        emit aboutToRemove(ctrl);
+    emit aboutToRemove(form);
+
     removeItem(form);
     _forms.removeOne(form);
 
@@ -32,6 +36,7 @@ void FormScene::removeForm(Form* form)
         setMainControl(_forms[0]);
 
     form->deleteLater();
+    emit controlRemoved(form);
 }
 
 Form* FormScene::mainForm()
