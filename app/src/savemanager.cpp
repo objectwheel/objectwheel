@@ -494,6 +494,7 @@ bool SaveManager::execProject()
     if(dir.isEmpty())
         return false;
 
+    QList<QObject*> forms;
     QMap<QString, QQmlContext*> contexes;
     auto engine = new QQmlEngine(_d->parent);
 
@@ -523,6 +524,7 @@ bool SaveManager::execProject()
                 if (masterResults[path] == nullptr)
                     return false;
                 form = masterResults[path];
+                forms << form;
                 contexes[path] = masterContext;
             } else {
                 masterResults[path] = _d->requestItem(path, engine, masterContext);
@@ -566,8 +568,8 @@ bool SaveManager::execProject()
     }
 
     for (auto path : contexes.keys())
-        for (auto p : contexes.keys())
-            contexes[path]->setContextProperty(id(p), contexes[p]);
+        for (int i = 0; i < contexes.keys().size(); i++)
+            contexes[path]->setContextProperty(id(contexes.keys().at(i)), forms.at(i));
 
     return true;
 }

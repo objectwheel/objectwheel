@@ -1,7 +1,6 @@
 INCLUDEPATH               += $$PWD
 
 HEADERS                   += $$PWD/mainwindow.h \
-                             $$PWD/mainwindow_p.h \
                              $$PWD/listwidget.h \
                              $$PWD/covermenu.h \
                              $$PWD/titlebar.h \
@@ -44,9 +43,9 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/qmleditorview.h \
                              $$PWD/qmlcodeeditor.h \
                              $$PWD/qmlhighlighter.h \
-    $$PWD/completionhelper.h \
-    $$PWD/fileexplorer.h \
-    $$PWD/filelist.h
+                             $$PWD/completionhelper.h \
+                             $$PWD/fileexplorer.h \
+                             $$PWD/filelist.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -92,9 +91,9 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/qmleditorview.cpp \
                              $$PWD/qmlcodeeditor.cpp \
                              $$PWD/qmlhighlighter.cpp \
-    $$PWD/completionhelper.cpp \
-    $$PWD/fileexplorer.cpp \
-    $$PWD/filelist.cpp
+                             $$PWD/completionhelper.cpp \
+                             $$PWD/fileexplorer.cpp \
+                             $$PWD/filelist.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
