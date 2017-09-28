@@ -191,7 +191,6 @@ void MainWindow::SetupGui()
     toolboxAdderAreaButtonSideHLay->addStretch();
     toolboxAdderAreaButtonSideHLay->addWidget(toolboxEditButton);
     toolboxAdderAreaButtonSideHLay->addStretch();
-    toolboxAdderAreaButtonSideHLay->addWidget(toolboxResetButton);
     toolboxAdderAreaButtonSideHLay->addWidget(toolboxImportButton);
     toolboxAdderAreaButtonSideHLay->addStretch();
     toolboxAdderAreaButtonSideHLay->addWidget(toolboxExportButton);
@@ -470,7 +469,6 @@ void MainWindow::showAdderArea()
     toolboxRemoveButton->setDisabled(true);
     toolboxImportButton->setDisabled(true);
     toolboxExportButton->setDisabled(true);
-    toolboxResetButton->setDisabled(true);
 }
 void MainWindow::hideAdderArea()
 {
@@ -500,7 +498,6 @@ void MainWindow::hideAdderArea()
     toolboxRemoveButton->setEnabled(true);
     toolboxImportButton->setEnabled(true);
     toolboxExportButton->setEnabled(true);
-    toolboxResetButton->setEnabled(true);
     toolboxEditButton->setChecked(false);
     toolBoxNameBox->setHidden(true);
     toolboxUrlBox->setHidden(true);

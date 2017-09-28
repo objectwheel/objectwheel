@@ -32,7 +32,7 @@
 #include "qmljsdialect.h"
 
 //#include <cplusplus/CppDocument.h>
-#include <utils/environment.h>
+//#include <utils/environment.h>
 
 #include <QFuture>
 #include <QHash>

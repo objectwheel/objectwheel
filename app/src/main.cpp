@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 # endif
 
     // Init application settings
-    QApplication::setStyle("fusion");
+//    QApplication::setStyle("fusion");
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
