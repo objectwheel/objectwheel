@@ -1,5 +1,7 @@
 #include <qmlcodeeditor.h>
 #include <fit.h>
+#include <qmlformatter.h>
+
 #include <QtWidgets>
 
 #define COLOR_LINENUMBERAREA (QColor("#E3E7EA"))
@@ -9,6 +11,7 @@
 #define SPACE_LINENUMBERAREALEFT fit(20)
 #define SPACE_LINENUMBERAREARIGHT fit(5)
 #define INTERVAL_COMPLETIONTIMER (10000)
+#define TAB_SPACE ("    ")
 
 using namespace Fit;
 
@@ -32,12 +35,129 @@ class LineNumberArea : public QWidget
         QmlCodeEditor* codeEditor;
 };
 
+bool blockVisible(const QString& block)
+{
+    for (int i = 0; i < block.size(); i++)
+        if (!block.at(i).isSpace())
+            return true;
+    return false;
+}
+
+int leftCount(QString block)
+{
+    if (block[0] == 8233) //WARNING: Weird bug fix
+        block.remove(0, 1);
+
+    int leftCount = 0;
+    for (int i = 0; i < block.size(); i++)
+        if (block.at(i).isSpace())
+            leftCount++;
+        else
+            break;
+    return leftCount;
+}
+
+bool leftBracket(const QString& block)
+{
+    for (int i = block.size(); i > 0; i--) {
+        if (block.at(i - 1) == '{')
+            return true;
+        if (block.at(i - 1) == '}')
+            return false;
+    }
+    return false;
+}
+
+bool rightBracket(const QString& block)
+{
+    for (int i = 0; i < block.size(); i++) {
+        if (block.at(i) == '}')
+            return true;
+        if (block.at(i) == '{')
+            return false;
+    }
+    return false;
+}
+
+void alignBlock(QTextCursor textCursor, bool nonvisible = false)
+{
+    if (textCursor.isNull())
+        return;
+
+    auto cursor = textCursor;
+    cursor.select(QTextCursor::BlockUnderCursor);
+    auto currentLine = cursor.selectedText();
+
+    if (nonvisible || blockVisible(currentLine)) {
+        bool succeed;
+        QString selectedText;
+        int currentLeftCount = leftCount(currentLine);
+
+        do {
+            cursor.clearSelection();
+            succeed = cursor.movePosition(QTextCursor::PreviousBlock);
+            cursor.select(QTextCursor::BlockUnderCursor);
+            selectedText = cursor.selectedText();
+        } while (succeed && !blockVisible(selectedText));
+
+        if (!blockVisible(selectedText)) {
+            cursor = textCursor;
+            cursor.movePosition(QTextCursor::StartOfBlock);
+            cursor.insertText(TAB_SPACE);
+            return;
+        }
+
+        int spaceCount = 0;
+        int prevLeftCount = leftCount(selectedText);
+
+        if (rightBracket(currentLine)) {
+            cursor = textCursor;
+            do {
+                cursor.clearSelection();
+                succeed = cursor.movePosition(QTextCursor::PreviousBlock);
+                cursor.select(QTextCursor::BlockUnderCursor);
+                selectedText = cursor.selectedText();
+            } while (succeed && !leftBracket(selectedText));
+
+            if (!leftBracket(selectedText)) {
+                cursor = textCursor;
+                cursor.movePosition(QTextCursor::StartOfBlock);
+                cursor.insertText(TAB_SPACE);
+                return;
+            }
+
+            prevLeftCount = leftCount(selectedText);
+            spaceCount = prevLeftCount - currentLeftCount;
+        } else {
+            if (leftBracket(selectedText))
+                spaceCount = prevLeftCount + QString(TAB_SPACE).size() - currentLeftCount;
+            else
+                spaceCount = prevLeftCount - currentLeftCount;
+        }
+
+        cursor = textCursor;
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        if (spaceCount > 0)
+            for (int i = 0; i < spaceCount; i++)
+                cursor.insertText(" ");
+        else
+            for (int i = 0; i < qAbs(spaceCount); i++)
+                cursor.deleteChar();
+    } else {
+        cursor.clearSelection();
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        cursor.insertText(TAB_SPACE);
+    }
+}
+
 QmlCodeEditor::QmlCodeEditor(QWidget* parent)
     : QPlainTextEdit(parent)
 {
     QPalette p(palette());
     p.setColor(QPalette::Base, COLOR_EDITORBACKGROUND);
     setPalette(p);
+
+    setWordWrapMode(QTextOption::NoWrap);
 
     lineNumberArea = new LineNumberArea(this);
 
@@ -261,6 +381,56 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent* e)
             default:
                 break;
         }
+    } else {
+        if ((e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) &&
+            ((e->modifiers() & Qt::ShiftModifier) == Qt::ShiftModifier))
+            e->setModifiers(e->modifiers()&Qt::MetaModifier&Qt::KeypadModifier);
+    }
+
+    if (e->key() == Qt::Key_Tab) {
+        if (textCursor().hasSelection()) {
+            auto selectedText = textCursor().selectedText();
+            QString prefix, suffix;
+            for (int i = 0; i < selectedText.size() && selectedText.at(i).isSpace(); i++)
+                prefix.append(selectedText.at(i));
+            for (int i = selectedText.size(); i > 0 && selectedText.at(i - 1).isSpace(); i--)
+                suffix.prepend(selectedText.at(i - 1));
+            QmlFormatter::format(selectedText);
+            if (!selectedText.simplified().replace( " ", "" ).isEmpty()) {
+                auto finalText = selectedText.trimmed();
+                finalText = prefix + finalText + suffix;
+                textCursor().insertText(finalText);
+            } else {
+                QTextBlock block = textCursor().block();
+                do {
+                    alignBlock(QTextCursor(block));
+                    block = block.next();
+                } while (block.isValid() && block.position() < textCursor().selectionEnd());
+
+            }
+        } else {
+            alignBlock(textCursor());
+        }
+
+        return;
+    }
+
+    if (!textCursor().hasSelection() &&
+        (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return)) {
+
+        auto cursor = textCursor();
+        cursor.select(QTextCursor::BlockUnderCursor);
+        auto firstLine = cursor.selectedText();
+
+        textCursor().insertBlock();
+        alignBlock(textCursor(), true);
+
+        if (leftBracket(firstLine)) {
+            QTextCursor(textCursor().block().next()).insertText("}\n");
+            alignBlock(QTextCursor(textCursor().block().next()));
+        }
+
+        return;
     }
 
     bool isShortcut = ((e->modifiers() & Qt::AltModifier) && e->key() == Qt::Key_Space); // ALT + Space
@@ -275,7 +445,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent* e)
     bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
     QString completionPrefix = textUnderCursor();
 
-    if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 1
+    if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 2
                         || eow.contains(e->text().right(1)))) {
         _completer.popup()->hide();
         return;

@@ -30,6 +30,7 @@
 #define MINWIDTH_FILEEXPLORER (fit(200))
 #define MINWIDTH_EDITOR (fit(200))
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
+#define TAB_SPACE ("    ")
 
 using namespace Fit;
 
@@ -723,6 +724,9 @@ void QmlEditorView::openControl(Control* control)
             _d->updateOpenDocHistory();
 
             _d->codeEditor.document()->setDefaultFont(_d->defaultFont);
+            QFontMetrics metrics(_d->defaultFont);
+            _d->codeEditor.setTabStopWidth(metrics.width(TAB_SPACE));
+
 
             disconnect(_d->previousUndoConnection);
             disconnect(_d->previousRedoConnection);
