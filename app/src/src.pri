@@ -2,14 +2,12 @@ INCLUDEPATH               += $$PWD
 
 HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/listwidget.h \
-                             $$PWD/covermenu.h \
                              $$PWD/titlebar.h \
                              $$PWD/flatbutton.h \
                              $$PWD/propertieswidget.h \
                              $$PWD/propertyitem.h \
                              $$PWD/css.h \
                              $$PWD/switch.h \
-                             $$PWD/container.h \
                              $$PWD/lineedit.h \
                              $$PWD/combobox.h \
                              $$PWD/scrollarea.h \
@@ -51,14 +49,12 @@ HEADERS                   += $$PWD/mainwindow.h \
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
                              $$PWD/listwidget.cpp \
-                             $$PWD/covermenu.cpp \
                              $$PWD/titlebar.cpp \
                              $$PWD/flatbutton.cpp \
                              $$PWD/propertieswidget.cpp \
                              $$PWD/propertyitem.cpp \
                              $$PWD/css.cpp \
                              $$PWD/switch.cpp \
-                             $$PWD/container.cpp \
                              $$PWD/lineedit.cpp \
                              $$PWD/combobox.cpp \
                              $$PWD/scrollarea.cpp \

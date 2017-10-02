@@ -2,10 +2,8 @@
 #include <zipper.h>
 #include <string.h>
 #include <titlebar.h>
-#include <covermenu.h>
 #include <listwidget.h>
 #include <mainwindow.h>
-#include <container.h>
 #include <css.h>
 #include <splashscreen.h>
 #include <filemanager.h>
@@ -22,31 +20,28 @@
 #include <loadingindicator.h>
 
 #include <QtConcurrent>
-#include <QtWidgets>
 #include <QtNetwork>
 
 #define DURATION 500
 
 using namespace Fit;
 
-MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    SetupGui();
-    QTimer::singleShot(300, [=] { SetupManagers(); });
+    setupGui();
+    QTimer::singleShot(300, [=] { setupManagers(); });
 }
 
-void MainWindow::SetupGui()
+void MainWindow::setupGui()
 {
     setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
     setObjectName(QStringLiteral("MainWindow"));
     setStyleSheet(QLatin1String("#_centralWidget, #MainWindow{\n"
                                 "background:\"#e0e4e7\";\n }"));
 
-    _rightMenu = new CoverMenu;
-    _leftMenu = new CoverMenu;
-
     _centralWidget = new QWidget(this);
     _centralWidget->setObjectName(QStringLiteral("_centralWidget"));
+    setCentralWidget(_centralWidget);
     verticalLayout = new QVBoxLayout(_centralWidget);
     verticalLayout->setSpacing(0);
     verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
@@ -264,27 +259,11 @@ void MainWindow::SetupGui()
     formsWidget->setObjectName(QStringLiteral("formsWidget"));
     formsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    /* Add Tool Menu */
-    _rightMenu->setCoverWidget(_centralWidget);
-    _rightMenu->setCoverSide(CoverMenu::FromRight);
-    connect(this,SIGNAL(resized()),_rightMenu,SLOT(hide()));
-    connect(this,&MainWindow::resized, [this] { titleBar->setMenuChecked(false); });
-
-    /* Add Properties Menu */
-    _leftMenu->setCoverWidget(_centralWidget);
-    _leftMenu->setCoverSide(CoverMenu::FromLeft);
-    connect(this,SIGNAL(resized()),_leftMenu,SLOT(hide()));
-    connect(this,&MainWindow::resized, [this] { titleBar->setSettingsChecked(false); });
-
     /* Add Title Bar */
     fit(titleBar, Fit::Height, true);
     titleBar->setText("Objectwheel Studio");
     titleBar->setColor("#0D74C8");
     titleBar->setShadowColor("#EAEEF1");
-    connect(titleBar, SIGNAL(MenuToggled(bool)), _rightMenu, SLOT(setCovered(bool)));
-    connect(titleBar, SIGNAL(SettingsToggled(bool)), _leftMenu, SLOT(setCovered(bool)));
-    connect(_rightMenu, SIGNAL(toggled(bool)), titleBar, SLOT(setMenuChecked(bool)));
-    connect(_leftMenu, SIGNAL(toggled(bool)), titleBar, SLOT(setSettingsChecked(bool)));
 
     /* Init Left Container */
     QVariant toolboxVariant;
@@ -293,11 +272,6 @@ void MainWindow::SetupGui()
     propertiesVariant.setValue<QWidget*>(propertiesWidget);
     QVariant formsVariant;
     formsVariant.setValue<QWidget*>(formsWidget);
-    Container* leftContainer = new Container;
-    leftContainer->addWidget(toolboxWidget);
-    leftContainer->addWidget(propertiesWidget);
-    leftContainer->addWidget(formsWidget);
-    leftContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QToolBar* leftToolbar = new QToolBar;
     leftToolbar->setStyleSheet(CSS::Toolbar);
@@ -322,7 +296,6 @@ void MainWindow::SetupGui()
     toolboxButtonAction->setCheckable(true);
     leftToolbar->addAction(toolboxButtonAction);
     connect(toolboxButton, SIGNAL(clicked(bool)), toolboxButtonAction, SLOT(trigger()));
-    connect(toolboxButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
     QRadioButton* propertiesButton = new QRadioButton;
     propertiesButton->setCursor(Qt::PointingHandCursor);
@@ -334,7 +307,6 @@ void MainWindow::SetupGui()
     propertiesButtonAction->setCheckable(true);
     leftToolbar->addAction(propertiesButtonAction);
     connect(propertiesButton, SIGNAL(clicked(bool)), propertiesButtonAction, SLOT(trigger()));
-    connect(propertiesButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
 
     QRadioButton* formsButton = new QRadioButton;
     formsButton->setCursor(Qt::PointingHandCursor);
@@ -346,18 +318,6 @@ void MainWindow::SetupGui()
     formsButtonAction->setCheckable(true);
     leftToolbar->addAction(formsButtonAction);
     connect(formsButton, SIGNAL(clicked(bool)), formsButtonAction, SLOT(trigger()));
-    connect(formsButtonAction, SIGNAL(triggered(bool)), leftContainer, SLOT(handleAction()));
-
-    QWidget* leftMenuWidget = new QWidget;
-    leftMenuWidget->setObjectName("leftMenuWidget");
-    leftMenuWidget->setStyleSheet("#leftMenuWidget{background:#52616D;}");
-
-    QVBoxLayout* leftMenuLayout = new QVBoxLayout(leftMenuWidget);
-    leftMenuLayout->setContentsMargins(0, 0, 0, 0);
-    leftMenuLayout->setSpacing(fit(8));
-    leftMenuLayout->addWidget(leftToolbar);
-    leftMenuLayout->addWidget(leftContainer);
-    _leftMenu->attachWidget(leftMenuWidget);
 
     QObject::connect(toolboxList,(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
@@ -371,7 +331,6 @@ void MainWindow::SetupGui()
 
     QWidget* sceneListWidget = new QWidget;
     sceneListWidget->setStyleSheet("background:#52616D; border:none;");
-    _rightMenu->attachWidget(sceneListWidget);
 
     QVBoxLayout* sceneListWidgetLayout = new QVBoxLayout(sceneListWidget);
     sceneListWidgetLayout->setSpacing(fit(10));
@@ -426,6 +385,10 @@ void MainWindow::SetupGui()
     sceneListWidgetLayout->addWidget(sceneList);
     sceneListWidgetLayout->addWidget(secureExitButton);
     sceneListWidgetLayout->setAlignment(secureExitButton, Qt::AlignHCenter);
+
+    _toolboxDockwidget.setWidget(toolboxWidget);
+    _toolboxDockwidget.setFloating(true);
+    addDockWidget(Qt::RightDockWidgetArea, &_toolboxDockwidget);
 
     // Init Splash Screen
     SplashScreen::init(this);
@@ -502,13 +465,12 @@ void MainWindow::hideAdderArea()
     toolBoxNameBox->setHidden(true);
     toolboxUrlBox->setHidden(true);
 }
-void MainWindow::SetupManagers()
+void MainWindow::setupManagers()
 {
-    //Let's add some custom controls to that project
     ToolsManager::setListWidget(toolboxList);
-    auto userManager = new UserManager(this); //create new user manager
+    auto userManager = new UserManager(this);
     Q_UNUSED(userManager);
-    auto* projectManager = new ProjectManager(this); //create new project manager
+    auto* projectManager = new ProjectManager(this);
     projectManager->setMainWindow(this);
     new SaveManager(this);
     new QmlPreviewer(this);
@@ -526,13 +488,7 @@ void MainWindow::SetupManagers()
     connect(QmlPreviewer::instance(), SIGNAL(workingChanged(bool)), SLOT(handleIndicatorChanges()));
 
     SplashScreen::raise();
-    connect(sceneManager, (void(SceneManager::*)(const QString&))(&SceneManager::currentSceneChanged),
-            [=](const QString& /*key*/){
-        _rightMenu->hide();
-        titleBar->setMenuChecked(false);
-        _leftMenu->hide();
-        titleBar->setSettingsChecked(false);
-    });
+
     for (auto scene : sceneManager->scenes()) {
         QList<QUrl> urls;
         QString sceneName;
@@ -565,11 +521,7 @@ void MainWindow::SetupManagers()
         SplashScreen::hide();
     }
 }
-void MainWindow::resizeEvent(QResizeEvent* event)
-{
-    QWidget::resizeEvent(event);
-    emit resized();
-}
+
 void MainWindow::handleIndicatorChanges()
 {
     DesignManager::loadingIndicator()->setRunning(SaveManager::parserWorking() || QmlPreviewer::working());

@@ -437,7 +437,7 @@ QObject* SaveManagerPrivate::requestItem(const QString& path, QQmlEngine* engine
 {
     QQmlComponent comp(engine, QUrl(path + separator() + DIR_THIS + separator() + "main.qml"));
     auto item = comp.create(context);
-    qDebug() << comp.errors();
+    // qDebug() << comp.errors();
     return item;
 }
 

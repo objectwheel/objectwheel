@@ -1,20 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QWidget>
-#include <QVariant>
-#include <QApplication>
-#include <QButtonGroup>
-#include <QHBoxLayout>
-#include <QHeaderView>
-#include <QSpacerItem>
-#include <QVBoxLayout>
-#include <QWidget>
-#include <QQuickWidget>
-#include <QQuickItem>
-#include <QLineEdit>
-#include <QPropertyAnimation>
-#include <QParallelAnimationGroup>
+#include <QtWidgets>
 
 #include <flatbutton.h>
 #include <listwidget.h>
@@ -34,13 +21,11 @@
 class MainWindowPrivate;
 class CoverMenu;
 
-class MainWindow : public QWidget
+class MainWindow : public QMainWindow
 {
         Q_OBJECT
 
     private:
-        CoverMenu* _rightMenu;
-        CoverMenu* _leftMenu;
         QWidget* _centralWidget;
         ProjectsScreen* _projectsScreen;
         LoginScreen* _loginScreen;
@@ -70,11 +55,12 @@ class MainWindow : public QWidget
         QWidget* settleWidget;
         DesignManager* designManager;
 
+        QDockWidget _toolboxDockwidget;
+
     public:
         explicit MainWindow(QWidget *parent = 0);
-        void SetupGui();
-        void SetupManagers();
-        void resizeEvent(QResizeEvent *event);
+        void setupGui();
+        void setupManagers();
         void clearStudio();
         void showAdderArea();
         void hideAdderArea();
@@ -91,9 +77,6 @@ class MainWindow : public QWidget
         void handleImports(const QStringList& fileNames);
         void handleIndicatorChanges();
         void cleanupObjectwheel();
-
-    signals:
-        void resized();
 };
 
 #endif // MAINWINDOW_H
