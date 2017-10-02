@@ -19,43 +19,46 @@
 #include <designmanager.h>
 
 class MainWindowPrivate;
-class CoverMenu;
 
 class MainWindow : public QMainWindow
 {
         Q_OBJECT
 
     private:
-        QWidget* _centralWidget;
-        ProjectsScreen* _projectsScreen;
-        LoginScreen* _loginScreen;
-        QVBoxLayout* verticalLayout;
-        TitleBar* titleBar;
-        QWidget* toolboxWidget;
-        QVBoxLayout* toolboxVLay;
-        QWidget* toolboxAdderAreaWidget;
-        QVBoxLayout* toolboxAdderAreaVLay;
-        QHBoxLayout* toolboxAdderAreaButtonSideHLay;
-        ListWidget* toolboxList;
-        ListWidget* sceneList;
-        FlatButton* toolboxAddButton;
-        FlatButton* toolboxEditButton;
-        FlatButton* toolboxRemoveButton;
-        FlatButton* toolboxResetButton;
-        FlatButton* toolboxExportButton;
-        FlatButton* toolboxImportButton;
-        QVBoxLayout* toolboxAdderAreaEditingLayout;
-        LineEdit* toolboxUrlBox;
-        LineEdit* toolBoxNameBox;
-        PropertiesWidget* propertiesWidget;
-        FormsWidget* formsWidget;
-        About* aboutWidget;
-        BuildsScreen* buildsScreen;
-        FlatButton* aboutButton;
-        QWidget* settleWidget;
-        DesignManager* designManager;
+        ProjectsScreen _projectsScreen;
+        LoginScreen _loginScreen;
+        BuildsScreen buildsScreen;
+
+        QWidget _centralWidget;
+        QWidget settleWidget;
+        QVBoxLayout verticalLayout;
+        TitleBar titleBar;
+        DesignManager designManager;
 
         QDockWidget _toolboxDockwidget;
+        QDockWidget _propertiesDockwidget;
+        QDockWidget _formsDockwidget;
+
+        QWidget toolboxWidget;
+        PropertiesWidget propertiesWidget;
+        FormsWidget formsWidget;
+
+        QVBoxLayout toolboxVLay;
+        ListWidget toolboxList;
+        QWidget toolboxAdderAreaWidget;
+        QVBoxLayout toolboxAdderAreaVLay;
+        QHBoxLayout toolboxAdderAreaButtonSideHLay;
+        FlatButton toolboxAddButton;
+        FlatButton toolboxEditButton;
+        FlatButton toolboxRemoveButton;
+        FlatButton toolboxResetButton;
+        FlatButton toolboxExportButton;
+        FlatButton toolboxImportButton;
+        QVBoxLayout toolboxAdderAreaEditingLayout;
+        LineEdit toolboxUrlBox;
+        LineEdit toolBoxNameBox;
+
+        About aboutWidget;
 
     public:
         explicit MainWindow(QWidget *parent = 0);

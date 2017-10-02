@@ -37,6 +37,7 @@ class QmlEditorView : public QWidget
 
     public:
         explicit QmlEditorView(QWidget *parent = 0);
+        ~QmlEditorView(){}
         Mode mode() const;
         void setMode(const Mode& mode);
         bool pinned() const;

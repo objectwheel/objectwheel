@@ -62,11 +62,19 @@ class DesignManagerPrivate : public QObject
         DesignManager* parent;
         QWidget dummyWidget;
         QWidget* settleWidget = nullptr;
-        QVBoxLayout vlayout;
         QHBoxLayout hlayout;
+
+        QToolBar toolbar_2;
+        QToolButton editorModeButton;
+        QToolButton wGuiModeButton;
+        QToolButton cGuiModeButton;
+        QToolButton playButton;
+        QToolButton buildButton;
+
+        QVBoxLayout vlayout;
         FormScene formScene;
-        FormView formView;
         ControlScene controlScene;
+        FormView formView;
         ControlView controlView;
         QmlEditorView qmlEditorView;
         qreal lastScaleOfWv;
@@ -89,12 +97,6 @@ class DesignManagerPrivate : public QObject
         QToolButton layItHorzButton;
         QToolButton layItGridButton;
         QToolButton breakLayoutButton;
-        QToolBar toolbar_2;
-        QToolButton editorModeButton;
-        QToolButton wGuiModeButton;
-        QToolButton cGuiModeButton;
-        QToolButton playButton;
-        QToolButton buildButton;
 };
 
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)

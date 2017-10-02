@@ -32,10 +32,10 @@ class FormsWidgetPrivate : public QObject
     public:
         FormsWidget* parent;
         QVBoxLayout verticalLayout;
+        ListWidget formsListWidget;
         QHBoxLayout horizontalLayout;
         FlatButton addButton;
         FlatButton removeButton;
-        ListWidget formsListWidget;
 };
 
 FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)

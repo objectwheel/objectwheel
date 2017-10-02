@@ -140,13 +140,14 @@ void SceneManager::show(const QString& key, SceneManager::Direction direction)
     _d->currentKey = key;
     _d->parallelAnimationGroup.start();
     _d->connection = QObject::connect(&_d->parallelAnimationGroup, &QParallelAnimationGroup::finished, [=] {
-        for (int i = _d->sceneListWidget->count(); i--;) {
-            if (_d->sceneListWidget->GetUrls(_d->sceneListWidget->item(i))[0].toString() == key) {
-                _d->sceneListWidget->setCurrentRow(i);
-            }
-        }
-        cs->hide();
-        emit instance()->currentSceneChanged(key);
+//        for (int i = _d->sceneListWidget->count(); i--;) {
+//            if (_d->sceneListWidget->GetUrls(_d->sceneListWidget->item(i))[0].toString() == key) {
+//                _d->sceneListWidget->setCurrentRow(i);
+//            }
+//        }
+//        cs->hide();
+//        emit instance()->currentSceneChanged(key);
+// FIXME
     });
     ns->show();
     ns->raise();

@@ -69,6 +69,13 @@ class QmlEditorViewPrivate : public QObject
         QWidget containerWidget;
         QVBoxLayout containerVBoxLayout;
 
+        Control* currentControl;
+        int lastWidthOfExplorerWrapper;
+        QFont defaultFont;
+        QMetaObject::Connection previousUndoConnection;
+        QMetaObject::Connection previousRedoConnection;
+        QAction saveAction;
+
         QToolBar toolbar;
         QToolButton pinButton;
         QToolButton undoButton;
@@ -82,7 +89,6 @@ class QmlEditorViewPrivate : public QObject
         QComboBox documentsCombobox;
         QComboBox zoomlLevelCombobox;
         QLabel lineColLabel;
-        Control* currentControl;
 
         QSplitter splitter;
         QWidget editorWrapper;
@@ -91,6 +97,7 @@ class QmlEditorViewPrivate : public QObject
         QWidget imageEditor;
         QWidget hexEditor;
         QLabel noDocumentIndicator;
+
         QWidget explorerWrapper;
         QHBoxLayout explorerWrapperHBoxLayout;
         QToolBar toolbar_2;
@@ -99,11 +106,6 @@ class QmlEditorViewPrivate : public QObject
         QToolButton imageEditorButton;
         QToolButton hexEditorButton;
         FileExplorer fileExplorer;
-        int lastWidthOfExplorerWrapper;
-        QFont defaultFont;
-        QMetaObject::Connection previousUndoConnection;
-        QMetaObject::Connection previousRedoConnection;
-        QAction saveAction;
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
@@ -112,9 +114,9 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     , vBoxLayout(parent)
     , containerVBoxLayout(&containerWidget)
     , currentControl(nullptr)
+    , lastWidthOfExplorerWrapper(INITIALWIDTH_FILEEXPLORER)
     , editorWrapperVBoxLayout(&editorWrapper)
     , explorerWrapperHBoxLayout(&explorerWrapper)
-    , lastWidthOfExplorerWrapper(INITIALWIDTH_FILEEXPLORER)
 {
     vBoxLayout.setContentsMargins(0, 0, 0, 0);
     vBoxLayout.setSpacing(0);
