@@ -1,5 +1,5 @@
 #include <formswidget.h>
-#include <flatbutton.h>
+#include <flatButton.h>
 #include <listwidget.h>
 #include <savemanager.h>
 #include <formscene.h>
@@ -31,58 +31,63 @@ class FormsWidgetPrivate : public QObject
 
     public:
         FormsWidget* parent;
-        QVBoxLayout verticalLayout;
-        ListWidget formsListWidget;
-        QHBoxLayout horizontalLayout;
-        FlatButton addButton;
-        FlatButton removeButton;
+        QVBoxLayout* verticalLayout;
+        ListWidget* formsListWidget;
+        QHBoxLayout* horizontalLayout;
+        FlatButton* addButton;
+        FlatButton* removeButton;
 };
 
 FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     : QObject(parent)
     , parent(parent)
+    , verticalLayout(new QVBoxLayout)
+    , formsListWidget(new ListWidget)
+    , horizontalLayout(new QHBoxLayout)
+    , addButton(new FlatButton)
+    , removeButton(new FlatButton)
 {
-    formsListWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    formsListWidget.setFocusPolicy(Qt::NoFocus);
-    formsListWidget.setStyleSheet(CSS::FormsListWidget);
-    formsListWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    formsListWidget.setDragDropMode(QAbstractItemView::NoDragDrop);
-    formsListWidget.setSelectionBehavior(QAbstractItemView::SelectRows);
-    formsListWidget.setSelectionMode(ListWidget::SingleSelection);
-    formsListWidget.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    formsListWidget.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    formsListWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    formsListWidget->setFocusPolicy(Qt::NoFocus);
+    formsListWidget->setStyleSheet(CSS::FormsListWidget);
+    formsListWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    formsListWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
+    formsListWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    formsListWidget->setSelectionMode(ListWidget::SingleSelection);
+    formsListWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    formsListWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     QTimer::singleShot(10000, [=] { //FIXME
         Delayer::delay([]()->bool {if (SaveManager::instance()) return false; else return true;});
         connect(SaveManager::instance(), SIGNAL(projectExposed()), SLOT(handleDatabaseChange()));
         connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
-        connect(&formsListWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
+        connect(formsListWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
     });
 
-	addButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	addButton.setColor("#6BB64B");
-	addButton.setFixedSize(fit(30),fit(30));
-    addButton.setRadius(fit(13));
-	addButton.setIconSize(QSize(fit(16),fit(16)));
-	addButton.setIcon(QIcon(":/resources/images/plus.png"));
-    connect(&addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
+    addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    addButton->setColor("#6BB64B");
+    addButton->setFixedSize(fit(30),fit(30));
+    addButton->setRadius(fit(13));
+    addButton->setIconSize(QSize(fit(16),fit(16)));
+    addButton->setIcon(QIcon(":/resources/images/plus.png"));
+    connect(addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
 
-	removeButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	removeButton.setColor("#C61717");
-	removeButton.setFixedSize(fit(30),fit(30));
-    removeButton.setRadius(fit(13));
-	removeButton.setIconSize(QSize(fit(16),fit(16)));
-	removeButton.setIcon(QIcon(":/resources/images/minus.png"));
-    connect(&removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
+    removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    removeButton->setColor("#C61717");
+    removeButton->setFixedSize(fit(30),fit(30));
+    removeButton->setRadius(fit(13));
+    removeButton->setIconSize(QSize(fit(16),fit(16)));
+    removeButton->setIcon(QIcon(":/resources/images/minus.png"));
+    connect(removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
 
-	horizontalLayout.addWidget(&addButton);
-	horizontalLayout.addStretch();
-	horizontalLayout.addWidget(&removeButton);
+    horizontalLayout->addWidget(addButton);
+    horizontalLayout->addStretch();
+    horizontalLayout->addWidget(removeButton);
 
-    verticalLayout.addWidget(&formsListWidget);
-	verticalLayout.addLayout(&horizontalLayout);
-	verticalLayout.setContentsMargins(fit(6), 0, fit(8), fit(8));
-	parent->setLayout(&verticalLayout);
+    verticalLayout->addWidget(formsListWidget);
+    verticalLayout->addLayout(horizontalLayout);
+    verticalLayout->setContentsMargins(fit(6), 0, fit(8), fit(8));
+    parent->setLayout(verticalLayout);
 }
 
 void FormsWidgetPrivate::removeButtonClicked()
@@ -117,26 +122,26 @@ void FormsWidgetPrivate::handleDatabaseChange()
 {
     int row = 0;
     QString id;
-    if (formsListWidget.currentItem())
-        id = formsListWidget.currentItem()->text();
+    if (formsListWidget->currentItem())
+        id = formsListWidget->currentItem()->text();
 
-    formsListWidget.clear();
+    formsListWidget->clear();
 
     for (auto path : SaveManager::formPaths()) {
         auto _id = SaveManager::id(path);
         if (id == _id)
-            row = formsListWidget.count();
-        formsListWidget.addItem(_id);
+            row = formsListWidget->count();
+        formsListWidget->addItem(_id);
     }
-    formsListWidget.setCurrentRow(row);
+    formsListWidget->setCurrentRow(row);
 }
 
 void FormsWidgetPrivate::handleCurrentFormChange()
 {
-    if (!formsListWidget.currentItem())
+    if (!formsListWidget->currentItem())
         return;
 
-    auto id = formsListWidget.currentItem()->text();
+    auto id = formsListWidget->currentItem()->text();
     for (auto form : DesignManager::formScene()->forms())
         if (form->id() == id)
             DesignManager::formScene()->setMainForm(form);
@@ -159,7 +164,7 @@ FormsWidget* FormsWidget::instance()
 
 void FormsWidget::setCurrentForm(int index)
 {
-    _d->formsListWidget.setCurrentRow(index);
+    _d->formsListWidget->setCurrentRow(index);
 }
 
 #include "formswidget.moc"

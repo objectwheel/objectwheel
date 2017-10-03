@@ -65,9 +65,9 @@ class QmlEditorViewPrivate : public QObject
 
     public:
         QmlEditorView* parent;
-        QVBoxLayout vBoxLayout;
-        QWidget containerWidget;
-        QVBoxLayout containerVBoxLayout;
+        QVBoxLayout* vBoxLayout;
+        QWidget* containerWidget;
+        QVBoxLayout* containerVBoxLayout;
 
         Control* currentControl;
         int lastWidthOfExplorerWrapper;
@@ -76,131 +76,158 @@ class QmlEditorViewPrivate : public QObject
         QMetaObject::Connection previousRedoConnection;
         QAction saveAction;
 
-        QToolBar toolbar;
-        QToolButton pinButton;
-        QToolButton undoButton;
-        QToolButton redoButton;
-        QToolButton closeButton;
-        QToolButton saveButton;
-        QToolButton cutButton;
-        QToolButton copyButton;
-        QToolButton pasteButton;
-        QComboBox itemsCombobox;
-        QComboBox documentsCombobox;
-        QComboBox zoomlLevelCombobox;
-        QLabel lineColLabel;
+        QToolBar* toolbar;
+        QToolButton* pinButton;
+        QToolButton* undoButton;
+        QToolButton* redoButton;
+        QToolButton* closeButton;
+        QToolButton* saveButton;
+        QToolButton* cutButton;
+        QToolButton* copyButton;
+        QToolButton* pasteButton;
+        QComboBox* itemsCombobox;
+        QComboBox* documentsCombobox;
+        QComboBox* zoomlLevelCombobox;
+        QLabel* lineColLabel;
 
-        QSplitter splitter;
-        QWidget editorWrapper;
-        QVBoxLayout editorWrapperVBoxLayout;
-        QmlCodeEditor codeEditor;
-        QWidget imageEditor;
-        QWidget hexEditor;
-        QLabel noDocumentIndicator;
+        QSplitter* splitter;
+        QWidget* editorWrapper;
+        QVBoxLayout* editorWrapperVBoxLayout;
+        QmlCodeEditor* codeEditor;
+        QWidget* imageEditor;
+        QWidget* hexEditor;
+        QLabel* noDocumentIndicator;
 
-        QWidget explorerWrapper;
-        QHBoxLayout explorerWrapperHBoxLayout;
-        QToolBar toolbar_2;
-        QToolButton hideShowButton;
-        QToolButton codeEditorButton;
-        QToolButton imageEditorButton;
-        QToolButton hexEditorButton;
-        FileExplorer fileExplorer;
+        QWidget* explorerWrapper;
+        QHBoxLayout* explorerWrapperHBoxLayout;
+        QToolBar* toolbar_2;
+        QToolButton* hideShowButton;
+        QToolButton* codeEditorButton;
+        QToolButton* imageEditorButton;
+        QToolButton* hexEditorButton;
+        FileExplorer* fileExplorer;
 };
 
 QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     : QObject(parent)
     , parent(parent)
-    , vBoxLayout(parent)
-    , containerVBoxLayout(&containerWidget)
+    , vBoxLayout(new QVBoxLayout(parent))
+    , containerWidget(new QWidget)
+    , containerVBoxLayout(new QVBoxLayout(containerWidget))
     , currentControl(nullptr)
     , lastWidthOfExplorerWrapper(INITIALWIDTH_FILEEXPLORER)
-    , editorWrapperVBoxLayout(&editorWrapper)
-    , explorerWrapperHBoxLayout(&explorerWrapper)
+    , toolbar(new QToolBar)
+    , pinButton(new QToolButton)
+    , undoButton(new QToolButton)
+    , redoButton(new QToolButton)
+    , closeButton(new QToolButton)
+    , saveButton(new QToolButton)
+    , cutButton(new QToolButton)
+    , copyButton(new QToolButton)
+    , pasteButton(new QToolButton)
+    , itemsCombobox(new QComboBox)
+    , documentsCombobox(new QComboBox)
+    , zoomlLevelCombobox(new QComboBox)
+    , lineColLabel(new QLabel)
+    , splitter(new QSplitter)
+    , editorWrapper(new QWidget)
+    , editorWrapperVBoxLayout(new QVBoxLayout(editorWrapper))
+    , codeEditor(new QmlCodeEditor)
+    , imageEditor(new QWidget)
+    , hexEditor(new QWidget)
+    , noDocumentIndicator(new QLabel)
+    , explorerWrapper(new QWidget)
+    , explorerWrapperHBoxLayout(new QHBoxLayout(explorerWrapper))
+    , toolbar_2(new QToolBar)
+    , hideShowButton(new QToolButton)
+    , codeEditorButton(new QToolButton)
+    , imageEditorButton(new QToolButton)
+    , hexEditorButton(new QToolButton)
+    , fileExplorer(new FileExplorer)
 {
-    vBoxLayout.setContentsMargins(0, 0, 0, 0);
-    vBoxLayout.setSpacing(0);
-    vBoxLayout.addWidget(&containerWidget);
+    vBoxLayout->setContentsMargins(0, 0, 0, 0);
+    vBoxLayout->setSpacing(0);
+    vBoxLayout->addWidget(containerWidget);
 
-    containerVBoxLayout.setContentsMargins(0, 0, 0, 0);
-    containerVBoxLayout.setSpacing(0);
-    containerVBoxLayout.addWidget(&toolbar);
-    containerVBoxLayout.addWidget(&splitter);
+    containerVBoxLayout->setContentsMargins(0, 0, 0, 0);
+    containerVBoxLayout->setSpacing(0);
+    containerVBoxLayout->addWidget(toolbar);
+    containerVBoxLayout->addWidget(splitter);
 
-    containerWidget.setWindowTitle("Objectwheel Qml Editor");
-    containerWidget.setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
-    containerWidget.addAction(&saveAction);
+    containerWidget->setWindowTitle("Objectwheel Qml Editor");
+    containerWidget->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+    containerWidget->addAction(&saveAction);
 
     saveAction.setText("Save document");
     saveAction.setShortcut(QKeySequence::Save);
 
-    splitter.setStyleSheet("QSplitter{background: #e0e4e7;}");
-    splitter.addWidget(&editorWrapper);
-    splitter.addWidget(&explorerWrapper);
-    splitter.setCollapsible(0, false);;
-    splitter.setCollapsible(1, false);;
+    splitter->setStyleSheet("QSplitter{background: #e0e4e7;}");
+    splitter->addWidget(editorWrapper);
+    splitter->addWidget(explorerWrapper);
+    splitter->setCollapsible(0, false);;
+    splitter->setCollapsible(1, false);;
 
-    editorWrapperVBoxLayout.setContentsMargins(0, 0, 0, 0);
-    editorWrapperVBoxLayout.setSpacing(0);
-    editorWrapperVBoxLayout.addWidget(&codeEditor);
-    editorWrapperVBoxLayout.addWidget(&imageEditor);
-    editorWrapperVBoxLayout.addWidget(&hexEditor);
-    editorWrapperVBoxLayout.addWidget(&noDocumentIndicator);
+    editorWrapperVBoxLayout->setContentsMargins(0, 0, 0, 0);
+    editorWrapperVBoxLayout->setSpacing(0);
+    editorWrapperVBoxLayout->addWidget(codeEditor);
+    editorWrapperVBoxLayout->addWidget(imageEditor);
+    editorWrapperVBoxLayout->addWidget(hexEditor);
+    editorWrapperVBoxLayout->addWidget(noDocumentIndicator);
 
-    explorerWrapperHBoxLayout.setContentsMargins(0, 0, 0, 0);
-    explorerWrapperHBoxLayout.setSpacing(0);
-    explorerWrapperHBoxLayout.addWidget(&toolbar_2);
-    explorerWrapperHBoxLayout.addWidget(&fileExplorer);
+    explorerWrapperHBoxLayout->setContentsMargins(0, 0, 0, 0);
+    explorerWrapperHBoxLayout->setSpacing(0);
+    explorerWrapperHBoxLayout->addWidget(toolbar_2);
+    explorerWrapperHBoxLayout->addWidget(fileExplorer);
 
-    fileExplorer.hide();
-    fileExplorer.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    fileExplorer.setRootPath(UNKNOWN_PATH);
+    fileExplorer->hide();
+    fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    fileExplorer->setRootPath(UNKNOWN_PATH);
 
-    itemsCombobox.setFixedWidth(fit(200));
-    documentsCombobox.setFixedWidth(fit(200));
+    itemsCombobox->setFixedWidth(fit(200));
+    documentsCombobox->setFixedWidth(fit(200));
 
-    redoButton.setDisabled(true);
-    copyButton.setDisabled(true);
-    cutButton.setDisabled(true);
-    saveButton.setDisabled(true);
+    redoButton->setDisabled(true);
+    copyButton->setDisabled(true);
+    cutButton->setDisabled(true);
+    saveButton->setDisabled(true);
 
-    codeEditor.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    codeEditor.setDocument(nullptr);
-    codeEditor.hide();
+    codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    codeEditor->setDocument(nullptr);
+    codeEditor->hide();
 
-    noDocumentIndicator.setStyleSheet("QLabel {"
+    noDocumentIndicator->setStyleSheet("QLabel {"
                                       "color: #606467;"
                                       "}");
-    noDocumentIndicator.setText("No documents open");
-    noDocumentIndicator.setAlignment(Qt::AlignCenter);
-    noDocumentIndicator.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    noDocumentIndicator.show();
+    noDocumentIndicator->setText("No documents open");
+    noDocumentIndicator->setAlignment(Qt::AlignCenter);
+    noDocumentIndicator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    noDocumentIndicator->show();
 
     defaultFont.setFamily("Liberation Mono");
     defaultFont.setStyleHint(QFont::Monospace);
 
     connect(parent, SIGNAL(modeChanged()), SLOT(handleModeChange()));
-    connect(&codeEditor, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));
-    connect(&pinButton, SIGNAL(clicked(bool)), SLOT(handlePinButtonClicked()));
-    connect(&undoButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(undo()));
-    connect(&redoButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(redo()));
-    connect(&copyButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(copy()));
-    connect(&cutButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(cut()));
-    connect(&pasteButton, SIGNAL(clicked(bool)), &codeEditor, SLOT(paste()));
-    connect(&codeEditor, SIGNAL(copyAvailable(bool)), &copyButton, SLOT(setEnabled(bool)));
-    connect(&codeEditor, SIGNAL(copyAvailable(bool)), &cutButton, SLOT(setEnabled(bool)));
-    connect(&zoomlLevelCombobox, SIGNAL(activated(QString)), SLOT(handleZoomLevelChange(QString)));
-    connect(&hideShowButton, SIGNAL(clicked(bool)), SLOT(handleHideShowButtonClicked()));
-    connect(&closeButton, SIGNAL(clicked(bool)), SLOT(handleCloseButtonClicked()));
-    connect(&saveButton, SIGNAL(clicked(bool)), SLOT(handleSaveButtonClicked()));
-    connect(&codeEditorButton, SIGNAL(clicked(bool)), SLOT(handleCodeEditorButtonClicked()));
-    connect(&imageEditorButton, SIGNAL(clicked(bool)), SLOT(handleImageEditorButtonClicked()));
-    connect(&hexEditorButton, SIGNAL(clicked(bool)), SLOT(handleHexEditorButtonClicked()));
-    connect(&fileExplorer, SIGNAL(fileOpened(QString)), SLOT(handleFileExplorerFileOpen(QString)));
-    connect(&fileExplorer, SIGNAL(fileDeleted(QString)), SLOT(handleFileExplorerFileDeleted(QString)));
-    connect(&fileExplorer, SIGNAL(fileRenamed(QString,QString)), SLOT(handleFileExplorerFileRenamed(QString,QString)));
-    connect(&itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
-    connect(&documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
+    connect(codeEditor, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));
+    connect(pinButton, SIGNAL(clicked(bool)), SLOT(handlePinButtonClicked()));
+    connect(undoButton, SIGNAL(clicked(bool)), codeEditor, SLOT(undo()));
+    connect(redoButton, SIGNAL(clicked(bool)), codeEditor, SLOT(redo()));
+    connect(copyButton, SIGNAL(clicked(bool)), codeEditor, SLOT(copy()));
+    connect(cutButton, SIGNAL(clicked(bool)), codeEditor, SLOT(cut()));
+    connect(pasteButton, SIGNAL(clicked(bool)), codeEditor, SLOT(paste()));
+    connect(codeEditor, SIGNAL(copyAvailable(bool)), copyButton, SLOT(setEnabled(bool)));
+    connect(codeEditor, SIGNAL(copyAvailable(bool)), cutButton, SLOT(setEnabled(bool)));
+    connect(zoomlLevelCombobox, SIGNAL(activated(QString)), SLOT(handleZoomLevelChange(QString)));
+    connect(hideShowButton, SIGNAL(clicked(bool)), SLOT(handleHideShowButtonClicked()));
+    connect(closeButton, SIGNAL(clicked(bool)), SLOT(handleCloseButtonClicked()));
+    connect(saveButton, SIGNAL(clicked(bool)), SLOT(handleSaveButtonClicked()));
+    connect(codeEditorButton, SIGNAL(clicked(bool)), SLOT(handleCodeEditorButtonClicked()));
+    connect(imageEditorButton, SIGNAL(clicked(bool)), SLOT(handleImageEditorButtonClicked()));
+    connect(hexEditorButton, SIGNAL(clicked(bool)), SLOT(handleHexEditorButtonClicked()));
+    connect(fileExplorer, SIGNAL(fileOpened(QString)), SLOT(handleFileExplorerFileOpen(QString)));
+    connect(fileExplorer, SIGNAL(fileDeleted(QString)), SLOT(handleFileExplorerFileDeleted(QString)));
+    connect(fileExplorer, SIGNAL(fileRenamed(QString,QString)), SLOT(handleFileExplorerFileRenamed(QString,QString)));
+    connect(itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
+    connect(documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
     connect(&saveAction, SIGNAL(triggered()), SLOT(handleSaveButtonClicked()));
 
     //TODO: form or control removal will be handled
@@ -211,119 +238,119 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
         connect(DesignManager::formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
     });
 
-    zoomlLevelCombobox.addItem("35 %");
-    zoomlLevelCombobox.addItem("50 %");
-    zoomlLevelCombobox.addItem("65 %");
-    zoomlLevelCombobox.addItem("75 %");
-    zoomlLevelCombobox.addItem("90 %");
-    zoomlLevelCombobox.addItem("100 %");
-    zoomlLevelCombobox.addItem("110 %");
-    zoomlLevelCombobox.addItem("120 %");
-    zoomlLevelCombobox.addItem("140 %");
-    zoomlLevelCombobox.addItem("170 %");
-    zoomlLevelCombobox.addItem("200 %");
-    zoomlLevelCombobox.addItem("250 %");
-    zoomlLevelCombobox.addItem("300 %");
-    zoomlLevelCombobox.addItem("400 %");
-    zoomlLevelCombobox.addItem("500 %");
-    zoomlLevelCombobox.setCurrentIndex(5);
+    zoomlLevelCombobox->addItem("35 %");
+    zoomlLevelCombobox->addItem("50 %");
+    zoomlLevelCombobox->addItem("65 %");
+    zoomlLevelCombobox->addItem("75 %");
+    zoomlLevelCombobox->addItem("90 %");
+    zoomlLevelCombobox->addItem("100 %");
+    zoomlLevelCombobox->addItem("110 %");
+    zoomlLevelCombobox->addItem("120 %");
+    zoomlLevelCombobox->addItem("140 %");
+    zoomlLevelCombobox->addItem("170 %");
+    zoomlLevelCombobox->addItem("200 %");
+    zoomlLevelCombobox->addItem("250 %");
+    zoomlLevelCombobox->addItem("300 %");
+    zoomlLevelCombobox->addItem("400 %");
+    zoomlLevelCombobox->addItem("500 %");
+    zoomlLevelCombobox->setCurrentIndex(5);
 
-    pinButton.setCursor(Qt::PointingHandCursor);
-    undoButton.setCursor(Qt::PointingHandCursor);
-    redoButton.setCursor(Qt::PointingHandCursor);
-    closeButton.setCursor(Qt::PointingHandCursor);
-    zoomlLevelCombobox.setCursor(Qt::PointingHandCursor);
-    documentsCombobox.setCursor(Qt::PointingHandCursor);
-    itemsCombobox.setCursor(Qt::PointingHandCursor);
-    saveButton.setCursor(Qt::PointingHandCursor);
-    cutButton.setCursor(Qt::PointingHandCursor);
-    copyButton.setCursor(Qt::PointingHandCursor);
-    pasteButton.setCursor(Qt::PointingHandCursor);
+    pinButton->setCursor(Qt::PointingHandCursor);
+    undoButton->setCursor(Qt::PointingHandCursor);
+    redoButton->setCursor(Qt::PointingHandCursor);
+    closeButton->setCursor(Qt::PointingHandCursor);
+    zoomlLevelCombobox->setCursor(Qt::PointingHandCursor);
+    documentsCombobox->setCursor(Qt::PointingHandCursor);
+    itemsCombobox->setCursor(Qt::PointingHandCursor);
+    saveButton->setCursor(Qt::PointingHandCursor);
+    cutButton->setCursor(Qt::PointingHandCursor);
+    copyButton->setCursor(Qt::PointingHandCursor);
+    pasteButton->setCursor(Qt::PointingHandCursor);
 
-    pinButton.setToolTip("Unpin Editor.");
-    undoButton.setToolTip("Undo action.");
-    redoButton.setToolTip("Redo action.");
-    closeButton.setToolTip("Close document.");
-    zoomlLevelCombobox.setToolTip("Change zoom level.");
-    documentsCombobox.setToolTip("See open document.");
-    itemsCombobox.setToolTip("See open controls.");
-    lineColLabel.setToolTip("Cursor line/column indicator.");
-    saveButton.setToolTip("Save document.");
-    cutButton.setToolTip("Cut selection.");
-    copyButton.setToolTip("Copy selection.");
-    pasteButton.setToolTip("Paste from clipboard.");
+    pinButton->setToolTip("Unpin Editor->");
+    undoButton->setToolTip("Undo action.");
+    redoButton->setToolTip("Redo action.");
+    closeButton->setToolTip("Close document.");
+    zoomlLevelCombobox->setToolTip("Change zoom level.");
+    documentsCombobox->setToolTip("See open document.");
+    itemsCombobox->setToolTip("See open controls.");
+    lineColLabel->setToolTip("Cursor line/column indicator.");
+    saveButton->setToolTip("Save document.");
+    cutButton->setToolTip("Cut selection.");
+    copyButton->setToolTip("Copy selection.");
+    pasteButton->setToolTip("Paste from clipboard.");
 
-    pinButton.setIcon(QIcon(":/resources/images/unpin.png"));
-    undoButton.setIcon(QIcon(":/resources/images/undo.png"));
-    redoButton.setIcon(QIcon(":/resources/images/redo.png"));
-    closeButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
-    saveButton.setIcon(QIcon(":/resources/images/save.png"));
-    cutButton.setIcon(QIcon(":/resources/images/cut.png"));
-    copyButton.setIcon(QIcon(":/resources/images/copy.png"));
-    pasteButton.setIcon(QIcon(":/resources/images/paste.png"));
+    pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    undoButton->setIcon(QIcon(":/resources/images/undo.png"));
+    redoButton->setIcon(QIcon(":/resources/images/redo.png"));
+    closeButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
+    saveButton->setIcon(QIcon(":/resources/images/save.png"));
+    cutButton->setIcon(QIcon(":/resources/images/cut.png"));
+    copyButton->setIcon(QIcon(":/resources/images/copy.png"));
+    pasteButton->setIcon(QIcon(":/resources/images/paste.png"));
 
     QWidget* spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    toolbar.setStyleSheet(CSS::DesignerToolbar);
-    toolbar.setIconSize(QSize(fit(14), fit(14)));
-    toolbar.setFixedHeight(fit(26));
-    toolbar.addWidget(&pinButton);
-    toolbar.addSeparator();
-    toolbar.addWidget(&undoButton);
-    toolbar.addWidget(&redoButton);
-    toolbar.addSeparator();
-    toolbar.addWidget(&cutButton);
-    toolbar.addWidget(&copyButton);
-    toolbar.addWidget(&pasteButton);
-    toolbar.addWidget(&saveButton);
-    toolbar.addSeparator();
-    toolbar.addWidget(&itemsCombobox);
-    toolbar.addWidget(&documentsCombobox);
-    toolbar.addWidget(&closeButton);
-    toolbar.addSeparator();
-    toolbar.addWidget(&zoomlLevelCombobox);
-    toolbar.addWidget(spacer);
-    toolbar.addWidget(&lineColLabel);
+    toolbar->setStyleSheet(CSS::DesignerToolbar);
+    toolbar->setIconSize(QSize(fit(14), fit(14)));
+    toolbar->setFixedHeight(fit(26));
+    toolbar->addWidget(pinButton);
+    toolbar->addSeparator();
+    toolbar->addWidget(undoButton);
+    toolbar->addWidget(redoButton);
+    toolbar->addSeparator();
+    toolbar->addWidget(cutButton);
+    toolbar->addWidget(copyButton);
+    toolbar->addWidget(pasteButton);
+    toolbar->addWidget(saveButton);
+    toolbar->addSeparator();
+    toolbar->addWidget(itemsCombobox);
+    toolbar->addWidget(documentsCombobox);
+    toolbar->addWidget(closeButton);
+    toolbar->addSeparator();
+    toolbar->addWidget(zoomlLevelCombobox);
+    toolbar->addWidget(spacer);
+    toolbar->addWidget(lineColLabel);
 
     // Toolbar_2 assets
-    codeEditorButton.setCheckable(true);
-    imageEditorButton.setCheckable(true);
-    hexEditorButton.setCheckable(true);
-    codeEditorButton.setChecked(true);
-    codeEditorButton.setDisabled(true);
+    codeEditorButton->setCheckable(true);
+    imageEditorButton->setCheckable(true);
+    hexEditorButton->setCheckable(true);
+    codeEditorButton->setChecked(true);
+    codeEditorButton->setDisabled(true);
 
-    hideShowButton.setCursor(Qt::PointingHandCursor);
-    codeEditorButton.setCursor(Qt::PointingHandCursor);
-    imageEditorButton.setCursor(Qt::PointingHandCursor);
-    hexEditorButton.setCursor(Qt::PointingHandCursor);
+    hideShowButton->setCursor(Qt::PointingHandCursor);
+    codeEditorButton->setCursor(Qt::PointingHandCursor);
+    imageEditorButton->setCursor(Qt::PointingHandCursor);
+    hexEditorButton->setCursor(Qt::PointingHandCursor);
 
-    hideShowButton.setToolTip("Show File Explorer.");
-    codeEditorButton.setToolTip("Open Text Editor.");
-    imageEditorButton.setToolTip("Open Image Editor.");
-    hexEditorButton.setToolTip("Open Hex Editor.");
+    hideShowButton->setToolTip("Show File Explorer.");
+    codeEditorButton->setToolTip("Open Text Editor->");
+    imageEditorButton->setToolTip("Open Image Editor->");
+    hexEditorButton->setToolTip("Open Hex Editor->");
 
-    hideShowButton.setIcon(QIcon(":/resources/images/show.png"));
-    codeEditorButton.setIcon(QIcon(":/resources/images/code.png"));
-    imageEditorButton.setIcon(QIcon(":/resources/images/image.png"));
-    hexEditorButton.setIcon(QIcon(":/resources/images/hex.png"));
+    hideShowButton->setIcon(QIcon(":/resources/images/show.png"));
+    codeEditorButton->setIcon(QIcon(":/resources/images/code.png"));
+    imageEditorButton->setIcon(QIcon(":/resources/images/image.png"));
+    hexEditorButton->setIcon(QIcon(":/resources/images/hex.png"));
 
-    toolbar_2.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    toolbar_2.setOrientation(Qt::Vertical);
-    toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
-    toolbar_2.setIconSize(QSize(fit(14), fit(14)));
-    toolbar_2.setFixedWidth(fit(26));
-    toolbar_2.addWidget(&hideShowButton);
-    toolbar_2.addSeparator();
-    toolbar_2.addWidget(&codeEditorButton);
-    toolbar_2.addWidget(&imageEditorButton);
-    toolbar_2.addWidget(&hexEditorButton);
+    toolbar_2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    toolbar_2->setOrientation(Qt::Vertical);
+    toolbar_2->setStyleSheet(CSS::DesignerToolbarV);
+    toolbar_2->setIconSize(QSize(fit(14), fit(14)));
+    toolbar_2->setFixedWidth(fit(26));
+    toolbar_2->addWidget(hideShowButton);
+    toolbar_2->addSeparator();
+    toolbar_2->addWidget(codeEditorButton);
+    toolbar_2->addWidget(imageEditorButton);
+    toolbar_2->addWidget(hexEditorButton);
 
-    splitter.handle(1)->setDisabled(true);
-    editorWrapper.setMinimumWidth(MINWIDTH_FILEEXPLORER);
-    explorerWrapper.setFixedWidth(toolbar_2.width());
-    connect(&splitter, &QSplitter::splitterMoved, [=] {
-        lastWidthOfExplorerWrapper = explorerWrapper.width();
+    splitter->handle(1)->setDisabled(true);
+    editorWrapper->setMinimumWidth(MINWIDTH_FILEEXPLORER);
+    explorerWrapper->setFixedWidth(toolbar_2->width());
+    connect(splitter, &QSplitter::splitterMoved, [=] {
+        lastWidthOfExplorerWrapper = explorerWrapper->width();
     });
 }
 
@@ -367,23 +394,23 @@ qreal QmlEditorViewPrivate::findPixelSize(const QString& text)
 
 void QmlEditorViewPrivate::handleCursorPositionChanged()
 {
-    auto textCursor = codeEditor.textCursor();
+    auto textCursor = codeEditor->textCursor();
     QString lineColText("# Line: %1, Col: %2");
-    lineColLabel.setText(lineColText.arg(textCursor.blockNumber() + 1).arg(textCursor.columnNumber()));
+    lineColLabel->setText(lineColText.arg(textCursor.blockNumber() + 1).arg(textCursor.columnNumber()));
 }
 
 void QmlEditorViewPrivate::handlePinButtonClicked()
 {
-    if (pinButton.toolTip().contains("Unpin")) {
-        pinButton.setToolTip("Pin Editor.");
-        pinButton.setIcon(QIcon(":/resources/images/pin.png"));
-        containerWidget.setParent(nullptr);
-        containerWidget.show();
-        containerWidget.setWindowIcon(QIcon(":/resources/images/owicon.png"));
+    if (pinButton->toolTip().contains("Unpin")) {
+        pinButton->setToolTip("Pin Editor->");
+        pinButton->setIcon(QIcon(":/resources/images/pin.png"));
+        containerWidget->setParent(nullptr);
+        containerWidget->show();
+        containerWidget->setWindowIcon(QIcon(":/resources/images/owicon.png"));
     } else {
-        pinButton.setToolTip("Unpin Editor.");
-        pinButton.setIcon(QIcon(":/resources/images/unpin.png"));
-        vBoxLayout.addWidget(&containerWidget);
+        pinButton->setToolTip("Unpin Editor->");
+        pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+        vBoxLayout->addWidget(containerWidget);
     }
 }
 
@@ -412,70 +439,70 @@ void QmlEditorViewPrivate::handleSaveButtonClicked()
 void QmlEditorViewPrivate::handleZoomLevelChange(const QString& text)
 {
     defaultFont.setPixelSize(findPixelSize(text));
-    codeEditor.document()->setDefaultFont(defaultFont);
+    codeEditor->document()->setDefaultFont(defaultFont);
 }
 
 void QmlEditorViewPrivate::handleHideShowButtonClicked()
 {
-    if (hideShowButton.toolTip().contains("Hide")) {
-        hideShowButton.setIcon(QIcon(":/resources/images/show.png"));
-        hideShowButton.setToolTip("Show File Explorer.");
-        splitter.handle(1)->setDisabled(true);
-        fileExplorer.hide();
-        explorerWrapper.setFixedWidth(toolbar_2.width());
+    if (hideShowButton->toolTip().contains("Hide")) {
+        hideShowButton->setIcon(QIcon(":/resources/images/show.png"));
+        hideShowButton->setToolTip("Show File Explorer.");
+        splitter->handle(1)->setDisabled(true);
+        fileExplorer->hide();
+        explorerWrapper->setFixedWidth(toolbar_2->width());
         QList<int> sizes;
-        sizes << containerWidget.width() - toolbar_2.width();
-        sizes << toolbar_2.width();
-        splitter.setSizes(sizes);
+        sizes << containerWidget->width() - toolbar_2->width();
+        sizes << toolbar_2->width();
+        splitter->setSizes(sizes);
     } else {
-        hideShowButton.setIcon(QIcon(":/resources/images/hide.png"));
-        hideShowButton.setToolTip("Hide File Explorer.");
-        splitter.handle(1)->setEnabled(true);
-        fileExplorer.show();
-        explorerWrapper.setMinimumWidth(MINWIDTH_FILEEXPLORER);
-        explorerWrapper.setMaximumWidth(9999);
+        hideShowButton->setIcon(QIcon(":/resources/images/hide.png"));
+        hideShowButton->setToolTip("Hide File Explorer.");
+        splitter->handle(1)->setEnabled(true);
+        fileExplorer->show();
+        explorerWrapper->setMinimumWidth(MINWIDTH_FILEEXPLORER);
+        explorerWrapper->setMaximumWidth(9999);
         QList<int> sizes;
-        sizes << containerWidget.width() - lastWidthOfExplorerWrapper;
+        sizes << containerWidget->width() - lastWidthOfExplorerWrapper;
         sizes << lastWidthOfExplorerWrapper;
-        splitter.setSizes(sizes);
+        splitter->setSizes(sizes);
     }
 }
 
 void QmlEditorViewPrivate::handleModeChange()
 {
     if (parent->_mode == QmlEditorView::CodeEditor) {
-        codeEditorButton.setChecked(true);
-        codeEditorButton.setDisabled(true);
-        imageEditorButton.setChecked(false);
-        hexEditorButton.setChecked(false);
-        imageEditorButton.setEnabled(true);
-        hexEditorButton.setEnabled(true);
+        codeEditorButton->setChecked(true);
+        codeEditorButton->setDisabled(true);
+        imageEditorButton->setChecked(false);
+        hexEditorButton->setChecked(false);
+        imageEditorButton->setEnabled(true);
+        hexEditorButton->setEnabled(true);
 
-        imageEditor.hide();
-        hexEditor.hide();
-        codeEditor.show();
+        imageEditor->hide();
+        hexEditor->hide();
+        codeEditor->show();
     } else if (parent->_mode == QmlEditorView::ImageEditor) {
-        imageEditorButton.setChecked(true);
-        imageEditorButton.setDisabled(true);
-        codeEditorButton.setChecked(false);
-        hexEditorButton.setChecked(false);
-        codeEditorButton.setEnabled(true);
-        hexEditorButton.setEnabled(true);
+        imageEditorButton->setChecked(true);
+        imageEditorButton->setDisabled(true);
+        codeEditorButton->setChecked(false);
+        hexEditorButton->setChecked(false);
+        codeEditorButton->setEnabled(true);
+        hexEditorButton->setEnabled(true);
 
-        codeEditor.hide();
-        hexEditor.hide();
-        imageEditor.show();
+        codeEditor->hide();
+        hexEditor->hide();
+        imageEditor->show();
     } else {
-        hexEditorButton.setChecked(true);
-        hexEditorButton.setDisabled(true);
-        imageEditorButton.setChecked(false);
-        codeEditorButton.setChecked(false);
-        imageEditorButton.setEnabled(true);
-        codeEditorButton.setEnabled(true);
+        hexEditorButton->setChecked(true);
+        hexEditorButton->setDisabled(true);
+        imageEditorButton->setChecked(false);
+        codeEditorButton->setChecked(false);
+        imageEditorButton->setEnabled(true);
+        codeEditorButton->setEnabled(true);
 
-        imageEditor.hide();
-        codeEditor.hide();
-        hexEditor.show();
+        imageEditor->hide();
+        codeEditor->hide();
+        hexEditor->show();
     }
 }
 
@@ -530,8 +557,8 @@ void QmlEditorViewPrivate::handleHexEditorButtonClicked()
 // TODO: Update when toolbox controls are changed
 void QmlEditorViewPrivate::updateOpenDocHistory()
 {
-    itemsCombobox.clear();
-    documentsCombobox.clear();
+    itemsCombobox->clear();
+    documentsCombobox->clear();
     for (auto& item : parent->_editorItems) {
 
         auto itemText = item.control->id() + CHAR_SEPARATION + item.control->uid();
@@ -541,23 +568,23 @@ void QmlEditorViewPrivate::updateOpenDocHistory()
                 break;
             }
         }
-        itemsCombobox.addItem(itemText);
+        itemsCombobox->addItem(itemText);
 
         if (item.control == currentControl) {
-            saveButton.setEnabled(item.documents.value(item.currentFileRelativePath).document->isModified());
+            saveButton->setEnabled(item.documents.value(item.currentFileRelativePath).document->isModified());
             for (auto path : item.documents.keys())
                 if (item.documents.value(path).document->isModified())
-                    documentsCombobox.addItem(CHAR_CHANGEINDICATOR + path);
+                    documentsCombobox->addItem(CHAR_CHANGEINDICATOR + path);
                 else
-                    documentsCombobox.addItem(path);
+                    documentsCombobox->addItem(path);
 
-            itemsCombobox.setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
-            itemsCombobox.setCurrentText(CHAR_CHANGEINDICATOR + item.control->id() + CHAR_SEPARATION + item.control->uid());
-            documentsCombobox.setCurrentText(item.currentFileRelativePath);
-            documentsCombobox.setCurrentText(CHAR_CHANGEINDICATOR + item.currentFileRelativePath);
+            itemsCombobox->setCurrentText(item.control->id() + CHAR_SEPARATION + item.control->uid());
+            itemsCombobox->setCurrentText(CHAR_CHANGEINDICATOR + item.control->id() + CHAR_SEPARATION + item.control->uid());
+            documentsCombobox->setCurrentText(item.currentFileRelativePath);
+            documentsCombobox->setCurrentText(CHAR_CHANGEINDICATOR + item.currentFileRelativePath);
 
-            if (fileExplorer.rootPath() != (item.control->dir() + separator() + DIR_THIS))
-                fileExplorer.setRootPath(item.control->dir() + separator() + DIR_THIS);
+            if (fileExplorer->rootPath() != (item.control->dir() + separator() + DIR_THIS))
+                fileExplorer->setRootPath(item.control->dir() + separator() + DIR_THIS);
         }
     }
 }
@@ -641,7 +668,7 @@ void QmlEditorView::setMode(const Mode& mode)
 
 bool QmlEditorView::pinned() const
 {
-    return _d->pinButton.toolTip().contains("Unpin");
+    return _d->pinButton->toolTip().contains("Unpin");
 }
 
 void QmlEditorView::addControl(Control* control)
@@ -662,8 +689,8 @@ void QmlEditorView::addControl(Control* control)
     item.documents[relativePath].document->setModified(false);
     new QmlHighlighter(item.documents.value(relativePath).document);
     _editorItems.append(item);
-    _d->itemsCombobox.addItem(control->id() + CHAR_SEPARATION + control->uid());
-    _d->documentsCombobox.addItem(relativePath);
+    _d->itemsCombobox->addItem(control->id() + CHAR_SEPARATION + control->uid());
+    _d->documentsCombobox->addItem(relativePath);
 }
 
 void QmlEditorView::addDocument(Control* control, const QString& documentPath)
@@ -679,7 +706,7 @@ void QmlEditorView::addDocument(Control* control, const QString& documentPath)
             item.documents[relativePath].document->setPlainText(rdfile(documentPath));
             item.documents[relativePath].document->setModified(false);
             new QmlHighlighter(item.documents.value(relativePath).document);
-            _d->documentsCombobox.addItem(relativePath);
+            _d->documentsCombobox->addItem(relativePath);
             break;
         }
     }
@@ -710,10 +737,10 @@ void QmlEditorView::openControl(Control* control)
                 if (item.control == _d->currentControl) {
                     QString previousRelativePath;
                     for (auto key : item.documents.keys())
-                        if (item.documents.value(key).document == _d->codeEditor.document())
+                        if (item.documents.value(key).document == _d->codeEditor->document())
                             previousRelativePath = key;
                     if (!previousRelativePath.isEmpty())
-                        item.documents[previousRelativePath].cursor = _d->codeEditor.textCursor();
+                        item.documents[previousRelativePath].cursor = _d->codeEditor->textCursor();
                     for (auto key : item.documents.keys())
                         disconnect(item.documents.value(key).modificationConnection);
                     break;
@@ -721,23 +748,23 @@ void QmlEditorView::openControl(Control* control)
             }
 
             _d->currentControl = item.control;
-            _d->codeEditor.setDocument(item.documents.value(item.currentFileRelativePath).document);
-            _d->codeEditor.updateCompletion();
+            _d->codeEditor->setDocument(item.documents.value(item.currentFileRelativePath).document);
+            _d->codeEditor->updateCompletion();
             _d->updateOpenDocHistory();
 
-            _d->codeEditor.document()->setDefaultFont(_d->defaultFont);
+            _d->codeEditor->document()->setDefaultFont(_d->defaultFont);
             QFontMetrics metrics(_d->defaultFont);
-            _d->codeEditor.setTabStopWidth(metrics.width(TAB_SPACE));
+            _d->codeEditor->setTabStopWidth(metrics.width(TAB_SPACE));
 
 
             disconnect(_d->previousUndoConnection);
             disconnect(_d->previousRedoConnection);
-            _d->previousUndoConnection = connect(_d->codeEditor.document(), SIGNAL(undoAvailable(bool)),
-                                                 &_d->undoButton, SLOT(setEnabled(bool)));
-            _d->previousRedoConnection = connect(_d->codeEditor.document(), SIGNAL(redoAvailable(bool)),
-                                                 &_d->redoButton, SLOT(setEnabled(bool)));
-            _d->undoButton.setEnabled(_d->codeEditor.document()->isUndoAvailable());
-            _d->redoButton.setEnabled(_d->codeEditor.document()->isRedoAvailable());
+            _d->previousUndoConnection = connect(_d->codeEditor->document(), SIGNAL(undoAvailable(bool)),
+                                                 _d->undoButton, SLOT(setEnabled(bool)));
+            _d->previousRedoConnection = connect(_d->codeEditor->document(), SIGNAL(redoAvailable(bool)),
+                                                 _d->redoButton, SLOT(setEnabled(bool)));
+            _d->undoButton->setEnabled(_d->codeEditor->document()->isUndoAvailable());
+            _d->redoButton->setEnabled(_d->codeEditor->document()->isRedoAvailable());
 
             for (auto key : item.documents.keys())
                 item.documents[key].modificationConnection =
@@ -745,11 +772,11 @@ void QmlEditorView::openControl(Control* control)
                 SIGNAL(modificationChanged(bool)), _d, SLOT(updateOpenDocHistory()));
 
             if (!item.documents.value(item.currentFileRelativePath).cursor.isNull())
-                _d->codeEditor.setTextCursor(item.documents.value(item.currentFileRelativePath).cursor);
+                _d->codeEditor->setTextCursor(item.documents.value(item.currentFileRelativePath).cursor);
 
-            if (_d->noDocumentIndicator.isVisible()) {
-                _d->codeEditor.show();
-                _d->noDocumentIndicator.hide();
+            if (_d->noDocumentIndicator->isVisible()) {
+                _d->codeEditor->show();
+                _d->noDocumentIndicator->hide();
             }
             break;
         }
@@ -762,7 +789,7 @@ void QmlEditorView::closeControl(Control* control, const bool ask)
         if (item.control == control)  {
             if (ask) {
                 QMessageBox msgBox;
-                msgBox.setText(QString("The control %1 has been modified in Qml Editor.").arg(control->id()));
+                msgBox.setText(QString("The control %1 has been modified in Qml Editor->").arg(control->id()));
                 msgBox.setInformativeText("Do you want to save all your changes for this control?");
                 msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
                 msgBox.setDefaultButton(QMessageBox::Save);
@@ -832,9 +859,9 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath,
 
     if (_d->currentControl == issuerItem->control &&
         issuerItem->currentFileRelativePath == relativePath) {
-        _d->codeEditor.setDocument(nullptr);
-        _d->codeEditor.hide();
-        _d->noDocumentIndicator.show();
+        _d->codeEditor->setDocument(nullptr);
+        _d->codeEditor->hide();
+        _d->noDocumentIndicator->show();
     }
 
     issuerItem->documents.value(relativePath).document->deleteLater();
@@ -852,7 +879,7 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath,
     }
 
     if (!_d->currentControl)
-        _d->fileExplorer.setRootPath(UNKNOWN_PATH);
+        _d->fileExplorer->setRootPath(UNKNOWN_PATH);
 
     if (_editorItems.size() > 0) {
         if(_d->currentControl)
@@ -890,7 +917,7 @@ void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
 
 void QmlEditorView::raiseContainer()
 {
-    _d->containerWidget.raise();
+    _d->containerWidget->raise();
 }
 
 #include "qmleditorview.moc"
