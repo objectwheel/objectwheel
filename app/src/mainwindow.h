@@ -6,7 +6,6 @@
 #include <flatbutton.h>
 #include <listwidget.h>
 #include <propertieswidget.h>
-#include <titlebar.h>
 #include <about.h>
 #include <formswidget.h>
 #include <fit.h>
@@ -40,9 +39,7 @@ class MainWindow : public QMainWindow
         LoginScreen _loginScreen;
         BuildsScreen _buildsScreen;
         QWidget _centralWidget;
-        QWidget _settleWidget;
-        QVBoxLayout _verticalLayout;
-        TitleBar _titleBar;
+        QToolBar _titleBar;
         DesignManager _designManager;
         QDockWidget _toolboxDockwidget;
         QDockWidget _propertiesDockwidget;

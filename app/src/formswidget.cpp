@@ -12,6 +12,9 @@
 #include <QStandardPaths>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QPainter>
+
+#define COLOR_BACKGROUND (QColor("#52616D"))
 
 using namespace Fit;
 
@@ -57,7 +60,7 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     formsListWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     formsListWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    QTimer::singleShot(10000, [=] { //FIXME
+    QTimer::singleShot(1000, [=] { //FIXME
         Delayer::delay([]()->bool {if (SaveManager::instance()) return false; else return true;});
         connect(SaveManager::instance(), SIGNAL(projectExposed()), SLOT(handleDatabaseChange()));
         connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
@@ -66,17 +69,17 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
 
     addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     addButton->setColor("#6BB64B");
-    addButton->setFixedSize(fit(30),fit(30));
-    addButton->setRadius(fit(13));
-    addButton->setIconSize(QSize(fit(16),fit(16)));
+    addButton->setFixedSize(fit(20),fit(20));
+    addButton->setRadius(fit(4));
+    addButton->setIconSize(QSize(fit(15),fit(15)));
     addButton->setIcon(QIcon(":/resources/images/plus.png"));
     connect(addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
 
     removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     removeButton->setColor("#C61717");
-    removeButton->setFixedSize(fit(30),fit(30));
-    removeButton->setRadius(fit(13));
-    removeButton->setIconSize(QSize(fit(16),fit(16)));
+    removeButton->setFixedSize(fit(20),fit(20));
+    removeButton->setRadius(fit(4));
+    removeButton->setIconSize(QSize(fit(15),fit(15)));
     removeButton->setIcon(QIcon(":/resources/images/minus.png"));
     connect(removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
 
@@ -86,7 +89,8 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
 
     verticalLayout->addWidget(formsListWidget);
     verticalLayout->addLayout(horizontalLayout);
-    verticalLayout->setContentsMargins(fit(6), 0, fit(8), fit(8));
+    verticalLayout->setSpacing(fit(4));
+    verticalLayout->setContentsMargins(fit(4), fit(4), fit(4), fit(4));
     parent->setLayout(verticalLayout);
 }
 
@@ -165,6 +169,17 @@ FormsWidget* FormsWidget::instance()
 void FormsWidget::setCurrentForm(int index)
 {
     _d->formsListWidget->setCurrentRow(index);
+}
+
+void FormsWidget::paintEvent(QPaintEvent*)
+{
+    QPainter p(this);
+    p.fillRect(rect(), COLOR_BACKGROUND);
+}
+
+QSize FormsWidget::sizeHint() const
+{
+    return QSize(fit(190), fit(100));
 }
 
 #include "formswidget.moc"

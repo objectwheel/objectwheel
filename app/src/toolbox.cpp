@@ -16,6 +16,7 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     _toolboxList.indicatorButton()->setRadius(fit(7));
     _toolboxList.indicatorButton()->setIconSize(QSize(fit(10), fit(10)));
     _toolboxList.indicatorButton()->resize(fit(15), fit(15));
+    _toolboxList.setIndicatorButtonVisible(true);
 
     _toolboxList.setIconSize(fit({30, 30}));
     _toolboxList.setObjectName(QStringLiteral("_toolboxList"));
@@ -39,7 +40,7 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
                                        "    border-radius: %3px;\n"
                                        "	padding:%4px;\n"
                                        "    margin-right: %4px;\n"
-                                       "}").arg(fit(5)).arg(fit(2)).arg(fit(3)).arg(fit(2)).arg(fit(6)));
+                                       "}").arg(fit(2)).arg(fit(2)).arg(fit(3)).arg(fit(2)).arg(fit(6)));
     _toolboxList.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _toolboxList.setDragEnabled(true);
     _toolboxList.setDragDropMode(QAbstractItemView::InternalMove);
@@ -139,8 +140,8 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
 
     _toolboxVLay.addWidget(&_toolboxList);
     _toolboxVLay.addWidget(&_toolboxAdderAreaWidget);
-    _toolboxVLay.setSpacing(0);
-    _toolboxVLay.setContentsMargins(0,0,0,0);
+    _toolboxVLay.setSpacing(fit(2));
+    _toolboxVLay.setContentsMargins(0, fit(2), 0, 0);
     setLayout(&_toolboxVLay);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 

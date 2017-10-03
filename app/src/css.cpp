@@ -117,7 +117,7 @@ QRadioButton::indicator { \
 #define CSS_FORMS_LISTWIDGET \
 "QListView {\
     background:#52616D;\
-	padding: %1px;\
+    padding: %1px;\
 	border: 1px solid #465563;\
 	border-radius: %2px;\
 } QListView::item {\

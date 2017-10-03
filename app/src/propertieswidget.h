@@ -27,7 +27,8 @@ class PropertiesWidget : public QWidget
 
 	protected:
 		void fixItemsGeometry();
-        void showEvent(QShowEvent *event);
+        void showEvent(QShowEvent *event) override;
+        virtual QSize sizeHint() const override;
 
 	public slots:
         void clearList();

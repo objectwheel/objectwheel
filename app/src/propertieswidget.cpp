@@ -380,3 +380,8 @@ void PropertiesWidget::showEvent(QShowEvent* event)
     fixItemsGeometry();
     QWidget::showEvent(event);
 }
+
+QSize PropertiesWidget::sizeHint() const
+{
+    return QSize(fit(190), fit(400));
+}

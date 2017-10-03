@@ -128,7 +128,7 @@ ComboBox::~ComboBox()
 	delete _d;
 }
 
-void ComboBox::paintEvent(QPaintEvent* event)
+void ComboBox::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
     painter.save();

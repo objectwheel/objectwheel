@@ -1,7 +1,6 @@
 #include <fit.h>
 #include <zipper.h>
 #include <string.h>
-#include <titleBar.h>
 #include <listwidget.h>
 #include <mainwindow.h>
 #include <css.h>
@@ -34,44 +33,50 @@ void MainWindow::setupGui()
 {
     setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
     setObjectName(QStringLiteral("MainWindow"));
+    _centralWidget.setObjectName(QStringLiteral("_centralWidget"));
     setStyleSheet(QLatin1String("#_centralWidget, #MainWindow{\n"
                                 "background:\"#e0e4e7\";\n }"));
 
-    _centralWidget.setObjectName(QStringLiteral("_centralWidget"));
     setCentralWidget(&_centralWidget);
-    _verticalLayout.setSpacing(0);
-    _verticalLayout.setObjectName(QStringLiteral("_verticalLayout"));
-    _verticalLayout.setContentsMargins(0, 0, 0, 0);
-    _centralWidget.setLayout(&_verticalLayout);
+    _designManager.setSettleWidget(&_centralWidget);
 
-    _titleBar.setObjectName(QStringLiteral("_titleBar"));
-    _titleBar.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    _titleBar.setMinimumSize(QSize(0, 45));
-    _titleBar.setMaximumSize(QSize(16777215, 45));
-    _verticalLayout.addWidget(&_titleBar);
-
-    _settleWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _verticalLayout.addWidget(&_settleWidget);
-
-    _designManager.setSettleWidget(&_settleWidget);
-
-    _propertiesWidget.setObjectName(QStringLiteral("_propertiesWidget"));
-    _propertiesWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    _formsWidget.setObjectName(QStringLiteral("_formsWidget"));
-    _formsWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    _formsWidget.setParent(this);
+    // Toolbar settings
+    QLabel* titleText = new QLabel;
+    titleText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    titleText->setText("Objectwheel Studio");
+    titleText->setAlignment(Qt::AlignCenter);
+    titleText->setStyleSheet("background: transparent; color:white;");
 
     /* Add Title Bar */
-    fit(&_titleBar, Fit::Height, true);
-    _titleBar.setText("Objectwheel Studio");
-    _titleBar.setColor("#0D74C8");
-    _titleBar.setShadowColor("#EAEEF1");
+    addToolBar(Qt::TopToolBarArea, &_titleBar);
+    _titleBar.setFixedHeight(fit(42));
+    _titleBar.setFloatable(false);
+    _titleBar.setMovable(false);
+    _titleBar.addWidget(titleText);
+    _titleBar.setStyleSheet(QString("border: none; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
+                            .arg(QColor("#0D74C8").name()).arg(QColor("#0D74C8").darker(115).name()));
+
+    _propertiesDockwidget.setWidget(&_propertiesWidget);
+    _propertiesDockwidget.setWindowTitle("Properties");
+    _propertiesDockwidget.setFloating(true);
+    _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, &_propertiesDockwidget);
+
+    _propertiesWidget.setObjectName(QStringLiteral("_propertiesWidget"));
+
+    _formsDockwidget.setWidget(&_formsWidget);
+    _formsDockwidget.setWindowTitle("Forms");
+    _formsDockwidget.setFloating(true);
+    _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, &_formsDockwidget);
+
+    _formsWidget.setObjectName(QStringLiteral("_formsWidget"));
 
     _toolboxDockwidget.setWidget(&_toolbox);
     _toolboxDockwidget.setWindowTitle("Toolbox");
     _toolboxDockwidget.setFloating(true);
-    addDockWidget(Qt::RightDockWidgetArea, &_toolboxDockwidget);
+    _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::LeftDockWidgetArea, &_toolboxDockwidget);
 
     connect(_toolbox.toolboxList(),(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {

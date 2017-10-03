@@ -9,12 +9,6 @@ class ListWidget : public QListWidget
 {
 		Q_OBJECT
 
-	private:
-		QMap<QListWidgetItem*, QList<QUrl>> m_Urls;
-		QPoint m_PreviousPoint;
-		QList<qreal> m_AngleList;
-        FlatButton m_IndicatorButton;
-
 	public:
 		explicit ListWidget(QWidget *parent = 0);
 		inline const QMap<QListWidgetItem*, QList<QUrl>>& GetUrls() const { return m_Urls; }
@@ -24,11 +18,19 @@ class ListWidget : public QListWidget
 		inline void ClearUrls() { m_Urls.clear(); }
         bool contains(const QString& itemName);
         FlatButton* indicatorButton();
+        void setIndicatorButtonVisible(bool value);
 
     protected:
         QMimeData* mimeData(const QList<QListWidgetItem *> items) const override;
         void mousePressEvent(QMouseEvent* event) override;
         void mouseMoveEvent(QMouseEvent* event) override;
+
+    private:
+        QMap<QListWidgetItem*, QList<QUrl>> m_Urls;
+        QPoint m_PreviousPoint;
+        QList<qreal> m_AngleList;
+        FlatButton m_IndicatorButton;
+        bool m_IndicatorButtonVisible;
 };
 
 #endif // TREEWIDGET_H
