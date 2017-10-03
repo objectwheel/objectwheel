@@ -364,8 +364,6 @@ TitleBar::TitleBar(QWidget *parent)
     connect(m_Menu, SIGNAL(toggled(bool)), this, SIGNAL(MenuToggled(bool)));
     connect(m_Settings, SIGNAL(toggled(bool)), this, SIGNAL(SettingsToggled(bool)));
 
-    setObjectName("titleBar");
-
     m_UpperLayout->setContentsMargins(fit(10), 0, fit(10), 0);
 
     m_Title->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -428,7 +426,7 @@ const QColor& TitleBar::Color() const
 void TitleBar::setColor(const QColor& Color)
 {
     m_Color = Color;
-    setStyleSheet(QString("#titleBar{background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);}").arg(m_Color.name()).arg(m_Color.darker(115).name()));
+    setStyleSheet(QString("#%3{background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);}").arg(m_Color.name()).arg(m_Color.darker(115).name()).arg(objectName()));
 }
 
 const QString& TitleBar::Text() const
