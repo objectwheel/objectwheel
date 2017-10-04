@@ -6,7 +6,6 @@
 #include <flatbutton.h>
 #include <listwidget.h>
 #include <fit.h>
-#include <lineedit.h>
 
 class ToolBox : public QWidget
 {
@@ -43,8 +42,8 @@ class ToolBox : public QWidget
         FlatButton _toolboxExportButton;
         FlatButton _toolboxImportButton;
         QVBoxLayout _toolboxAdderAreaEditingLayout;
-        LineEdit _toolboxUrlBox;
-        LineEdit _toolBoxNameBox;
+        QLineEdit _toolboxUrlBox;
+        QLineEdit _toolBoxNameBox;
 };
 
 #endif // TOOLBOX_H

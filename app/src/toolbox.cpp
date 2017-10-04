@@ -23,20 +23,20 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     _toolboxList.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _toolboxList.setFocusPolicy(Qt::NoFocus);
     _toolboxList.setStyleSheet(QString("QListView {\n"
-                                       "	border:0px solid white;\n"
+                                       "	border: none;\n"
                                        "	background:#52616D;\n"
                                        "	padding-right:%1px;\n"
                                        "	padding-left:%5px;\n"
                                        "}"
                                        "QListView::item {\n"
                                        "	color:white;\n"
-                                       "    border: 0px solid transparent;\n"
+                                       "    border: none;\n"
                                        "	padding:%2px;\n"
                                        "}"
                                        "QListView::item:selected {\n"
                                        "	color:black;\n"
                                        "    background: #e0e4e7;\n"
-                                       "    border: 0px solid transparent;\n"
+                                       "    border: none;\n"
                                        "    border-radius: %3px;\n"
                                        "	padding:%4px;\n"
                                        "    margin-right: %4px;\n"
@@ -103,21 +103,19 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
 
     _toolboxUrlBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     _toolboxUrlBox.setFixedHeight(fit(30));
-    _toolboxUrlBox.setIcon(QIcon(":/resources/images/web.png"));
     _toolboxUrlBox.setPlaceholderText("Icon url");
     _toolboxUrlBox.setText(":/resources/images/item.png");
     _toolboxUrlBox.setDisabled(true);
     _toolboxUrlBox.setHidden(true);
-    connect(_toolboxUrlBox.lineEdit(), SIGNAL(textChanged(QString)),
+    connect(&_toolboxUrlBox, SIGNAL(textChanged(QString)),
             SLOT(handleToolboxUrlboxChanges(QString)));
 
     _toolBoxNameBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     _toolBoxNameBox.setFixedHeight(fit(30));
-    _toolBoxNameBox.setIcon(QIcon(":/resources/images/item.png"));
     _toolBoxNameBox.setPlaceholderText("Tool name");
     _toolBoxNameBox.setDisabled(true);
     _toolBoxNameBox.setHidden(true);
-    connect(_toolBoxNameBox.lineEdit(), SIGNAL(textChanged(QString)),
+    connect(&_toolBoxNameBox, SIGNAL(textChanged(QString)),
             SLOT(handleToolboxNameboxChanges(QString)));
 
     _toolboxAdderAreaEditingLayout.addWidget(&_toolBoxNameBox);
@@ -147,8 +145,8 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
 
     connect(&_toolboxList, (void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
         if (i>=0) {
-            _toolboxUrlBox.setText(dname(_toolboxList.GetUrls(_toolboxList.currentItem())[0].toLocalFile()) + "/icon.png");
-            _toolBoxNameBox.setText(_toolboxList.currentItem()->text());
+//            _toolboxUrlBox.setText(dname(_toolboxList.GetUrls(_toolboxList.currentItem())[0].toLocalFile()) + "/icon.png");
+//            _toolBoxNameBox.setText(_toolboxList.currentItem()->text());
         }
         _toolBoxNameBox.setEnabled(i>=0);
         _toolboxUrlBox.setEnabled(i>=0);

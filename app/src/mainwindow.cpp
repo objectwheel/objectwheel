@@ -58,7 +58,6 @@ void MainWindow::setupGui()
 
     _propertiesDockwidget.setWidget(&_propertiesWidget);
     _propertiesDockwidget.setWindowTitle("Properties");
-    _propertiesDockwidget.setFloating(true);
     _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, &_propertiesDockwidget);
 
@@ -66,7 +65,6 @@ void MainWindow::setupGui()
 
     _formsDockwidget.setWidget(&_formsWidget);
     _formsDockwidget.setWindowTitle("Forms");
-    _formsDockwidget.setFloating(true);
     _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, &_formsDockwidget);
 
@@ -74,7 +72,6 @@ void MainWindow::setupGui()
 
     _toolboxDockwidget.setWidget(&_toolbox);
     _toolboxDockwidget.setWindowTitle("Toolbox");
-    _toolboxDockwidget.setFloating(true);
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, &_toolboxDockwidget);
 

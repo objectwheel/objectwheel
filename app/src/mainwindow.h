@@ -9,7 +9,6 @@
 #include <about.h>
 #include <formswidget.h>
 #include <fit.h>
-#include <lineedit.h>
 #include <filemanager.h>
 #include <mainwindow.h>
 #include <projectsscreen.h>

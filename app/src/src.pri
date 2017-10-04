@@ -7,7 +7,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/propertyitem.h \
                              $$PWD/css.h \
                              $$PWD/switch.h \
-                             $$PWD/lineedit.h \
                              $$PWD/combobox.h \
                              $$PWD/scrollarea.h \
                              $$PWD/about.h \
@@ -54,7 +53,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/propertyitem.cpp \
                              $$PWD/css.cpp \
                              $$PWD/switch.cpp \
-                             $$PWD/lineedit.cpp \
                              $$PWD/combobox.cpp \
                              $$PWD/scrollarea.cpp \
                              $$PWD/about.cpp \
