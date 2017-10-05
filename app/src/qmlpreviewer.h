@@ -13,12 +13,15 @@
 class Control;
 class QmlPreviewerPrivate;
 
+typedef QMap<QString, QVariant> PropertyMap;
+typedef QList<QPair<QString, PropertyMap>> SuperClassList;
+
 struct PreviewResult {
         QPixmap preview;
         QPointF pos;
         QSizeF size;
         QList<QString> events;
-        QMap<QString, QVariant> properties;
+        SuperClassList properties;
         bool clip;
         bool gui;
         int zValue;

@@ -56,20 +56,76 @@ void MainWindow::setupGui()
     _titleBar.setStyleSheet(QString("border: none; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
                             .arg(QColor("#0D74C8").name()).arg(QColor("#0D74C8").darker(115).name()));
 
+    /*** PROPERTIES DOCK WIDGET ***/
+    QLabel* label = new QLabel;
+    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    label->setText(" Properties");
+
+    QToolButton* pinButton = new QToolButton;
+    pinButton->setToolTip("Pin/Unpin pane.");
+    pinButton->setCursor(Qt::PointingHandCursor);
+    pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(pinButton, &QToolButton::clicked, [=]{
+        _propertiesDockwidget.setFloating(!_propertiesDockwidget.isFloating());
+    });
+
+    QToolBar* toolbar = new QToolBar;
+    toolbar->addWidget(label);
+    toolbar->addWidget(pinButton);
+    toolbar->setStyleSheet(CSS::DesignerToolbar);
+    toolbar->setIconSize(QSize(fit(11), fit(11)));
+
+    _propertiesDockwidget.setTitleBarWidget(toolbar);
     _propertiesDockwidget.setWidget(&_propertiesWidget);
     _propertiesDockwidget.setWindowTitle("Properties");
     _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, &_propertiesDockwidget);
 
-    _propertiesWidget.setObjectName(QStringLiteral("_propertiesWidget"));
+    /*** FORMS DOCK WIDGET ***/
+    QLabel* label2 = new QLabel;
+    label2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    label2->setText(" Forms");
 
+    QToolButton* pinButton2 = new QToolButton;
+    pinButton2->setToolTip("Pin/Unpin pane.");
+    pinButton2->setCursor(Qt::PointingHandCursor);
+    pinButton2->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(pinButton2, &QToolButton::clicked, [=]{
+        _formsDockwidget.setFloating(!_formsDockwidget.isFloating());
+    });
+
+    QToolBar* toolbar2 = new QToolBar;
+    toolbar2->addWidget(label2);
+    toolbar2->addWidget(pinButton2);
+    toolbar2->setStyleSheet(CSS::DesignerToolbar);
+    toolbar2->setIconSize(QSize(fit(11), fit(11)));
+
+    _formsDockwidget.setTitleBarWidget(toolbar2);
     _formsDockwidget.setWidget(&_formsWidget);
     _formsDockwidget.setWindowTitle("Forms");
     _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, &_formsDockwidget);
 
-    _formsWidget.setObjectName(QStringLiteral("_formsWidget"));
+    /*** TOOLBOX DOCK WIDGET ***/
+    QLabel* label3 = new QLabel;
+    label3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    label3->setText(" Toolbox");
 
+    QToolButton* pinButton3 = new QToolButton;
+    pinButton3->setToolTip("Pin/Unpin pane.");
+    pinButton3->setCursor(Qt::PointingHandCursor);
+    pinButton3->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(pinButton3, &QToolButton::clicked, [=]{
+        _toolboxDockwidget.setFloating(!_toolboxDockwidget.isFloating());
+    });
+
+    QToolBar* toolbar3 = new QToolBar;
+    toolbar3->addWidget(label3);
+    toolbar3->addWidget(pinButton3);
+    toolbar3->setStyleSheet(CSS::DesignerToolbar);
+    toolbar3->setIconSize(QSize(fit(11), fit(11)));
+
+    _toolboxDockwidget.setTitleBarWidget(toolbar3);
     _toolboxDockwidget.setWidget(&_toolbox);
     _toolboxDockwidget.setWindowTitle("Toolbox");
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);

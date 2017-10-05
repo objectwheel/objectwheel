@@ -20,7 +20,6 @@ class CSS
 		static QString ToolboxButton;
 		static QString PropertiesButton;
         static QString FormsButton;
-        static QString FormsListWidget;
 };
 
 #endif // CSS_H

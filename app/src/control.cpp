@@ -1,6 +1,5 @@
 #include <control.h>
 #include <fit.h>
-#include <qmlpreviewer.h>
 #include <formscene.h>
 #include <savemanager.h>
 #include <designmanager.h>
@@ -760,12 +759,12 @@ void Control::setEvents(const QList<QString>& events)
     _events = events;
 }
 
-QMap<QString, QVariant> Control::properties() const
+SuperClassList Control::properties() const
 {
     return _properties;
 }
 
-void Control::setProperties(const QMap<QString, QVariant>& properties)
+void Control::setProperties(const SuperClassList& properties)
 {
     _properties = properties;
 }

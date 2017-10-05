@@ -13,8 +13,9 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPainter>
+#include <QPalette>
 
-#define COLOR_BACKGROUND (QColor("#52616D"))
+#define COLOR_BACKGROUND (QColor("#e0e4e7"))
 
 using namespace Fit;
 
@@ -50,9 +51,18 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     , addButton(new FlatButton)
     , removeButton(new FlatButton)
 {
+    parent->setAutoFillBackground(true);
+    QPalette p(parent->palette());
+    p.setColor(QPalette::Window, COLOR_BACKGROUND);
+    parent->setPalette(p);
+
+    QPalette p2(formsListWidget->palette());
+    p2.setColor(QPalette::Base, QColor("#F3F7FA"));
+    p2.setColor(QPalette::Background, COLOR_BACKGROUND);
+    formsListWidget->setPalette(p2);
+
     formsListWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     formsListWidget->setFocusPolicy(Qt::NoFocus);
-    formsListWidget->setStyleSheet(CSS::FormsListWidget);
     formsListWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     formsListWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
     formsListWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -171,15 +181,9 @@ void FormsWidget::setCurrentForm(int index)
     _d->formsListWidget->setCurrentRow(index);
 }
 
-void FormsWidget::paintEvent(QPaintEvent*)
-{
-    QPainter p(this);
-    p.fillRect(rect(), COLOR_BACKGROUND);
-}
-
 QSize FormsWidget::sizeHint() const
 {
-    return QSize(fit(190), fit(100));
+    return QSize(fit(260), fit(100));
 }
 
 #include "formswidget.moc"

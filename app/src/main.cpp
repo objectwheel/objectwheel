@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
         sharedMemory.attach();
         sharedMemory.detach();
         if(!sharedMemory.create(1)) {
-            QMessageBox::warning(NULL, "Quitting", "Another instance already running.");
+            QMessageBox::warning(NULL, "Quitting", "Another instance is already running.");
             a.exit();
             return 0;
         }
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 # endif
 
     // Init application settings
-    QApplication::setStyle("fusion");
+//    QApplication::setStyle("fusion");
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);

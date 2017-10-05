@@ -267,7 +267,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     copyButton->setCursor(Qt::PointingHandCursor);
     pasteButton->setCursor(Qt::PointingHandCursor);
 
-    pinButton->setToolTip("Unpin Editor->");
+    pinButton->setToolTip("Unpin Editor.");
     undoButton->setToolTip("Undo action.");
     redoButton->setToolTip("Redo action.");
     closeButton->setToolTip("Close document.");
@@ -326,9 +326,9 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     hexEditorButton->setCursor(Qt::PointingHandCursor);
 
     hideShowButton->setToolTip("Show File Explorer.");
-    codeEditorButton->setToolTip("Open Text Editor->");
-    imageEditorButton->setToolTip("Open Image Editor->");
-    hexEditorButton->setToolTip("Open Hex Editor->");
+    codeEditorButton->setToolTip("Open Text Editor.");
+    imageEditorButton->setToolTip("Open Image Editor.");
+    hexEditorButton->setToolTip("Open Hex Editor.");
 
     hideShowButton->setIcon(QIcon(":/resources/images/show.png"));
     codeEditorButton->setIcon(QIcon(":/resources/images/code.png"));
@@ -402,13 +402,13 @@ void QmlEditorViewPrivate::handleCursorPositionChanged()
 void QmlEditorViewPrivate::handlePinButtonClicked()
 {
     if (pinButton->toolTip().contains("Unpin")) {
-        pinButton->setToolTip("Pin Editor->");
+        pinButton->setToolTip("Pin Editor.");
         pinButton->setIcon(QIcon(":/resources/images/pin.png"));
         containerWidget->setParent(nullptr);
         containerWidget->show();
         containerWidget->setWindowIcon(QIcon(":/resources/images/owicon.png"));
     } else {
-        pinButton->setToolTip("Unpin Editor->");
+        pinButton->setToolTip("Unpin Editor.");
         pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
         vBoxLayout->addWidget(containerWidget);
     }
@@ -789,7 +789,7 @@ void QmlEditorView::closeControl(Control* control, const bool ask)
         if (item.control == control)  {
             if (ask) {
                 QMessageBox msgBox;
-                msgBox.setText(QString("The control %1 has been modified in Qml Editor->").arg(control->id()));
+                msgBox.setText(QString("The control %1 has been modified in Qml Editor.").arg(control->id()));
                 msgBox.setInformativeText("Do you want to save all your changes for this control?");
                 msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
                 msgBox.setDefaultButton(QMessageBox::Save);

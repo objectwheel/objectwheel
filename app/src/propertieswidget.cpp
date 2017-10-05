@@ -12,37 +12,43 @@
 #include <QLineEdit>
 #include <QQmlContext>
 #include <QIcon>
+#include <QHeaderView>
 
 using namespace Fit;
 
-PropertiesWidget::PropertiesWidget(QWidget *parent)
-	: QWidget(parent)
-    , _color(QColor("#52616D"))
+#define COLOR_BACKGROUND (QColor("#e0e4e7"))
+
+PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent)
 {
 	setAutoFillBackground(true);
-	QPalette p(palette());
-    p.setColor(QPalette::Window, _color);
+    QPalette p(palette());
+    p.setColor(QPalette::Window, COLOR_BACKGROUND);
     setPalette(p);
 
-    _listWidget.setStyleSheet(QString("QListView::item{background:none;border: 0px solid transparent;}"
-                                        "QListView { border:0px solid white;background:rgba(%1,%2,%3,%4);}")
-                                .arg(_color.red()).arg(_color.green())
-                                .arg(_color.blue()).arg(_color.alpha()));
-    _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget.setHorizontalScrollMode(ListWidget::ScrollPerPixel);
-    _listWidget.setVerticalScrollMode(ListWidget::ScrollPerPixel);
-    _listWidget.setSelectionBehavior(ListWidget::SelectRows);
-    _listWidget.setFocusPolicy(Qt::NoFocus);
-    _listWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _layout.setSpacing(fit(10));
-    _layout.setContentsMargins(fit(10), fit(5), fit(5), fit(10));
+    QPalette p2(_treeWidget.palette());
+    p2.setColor(QPalette::Base, QColor("#F3F7FA"));
+    p2.setColor(QPalette::Background, COLOR_BACKGROUND);
+    _treeWidget.setPalette(p2);
+
+    _treeWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _treeWidget.setHorizontalScrollMode(ListWidget::ScrollPerPixel);
+    _treeWidget.setVerticalScrollMode(ListWidget::ScrollPerPixel);
+    _treeWidget.setSelectionBehavior(ListWidget::SelectRows);
+    _treeWidget.setFocusPolicy(Qt::NoFocus);
+    _treeWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    _treeWidget.setColumnCount(2);
+    _treeWidget.headerItem()->setText(0, "Property");
+    _treeWidget.headerItem()->setText(1, "Value");
+
+    _layout.setSpacing(fit(2));
+    _layout.setContentsMargins(fit(3), fit(3), fit(3), fit(3));
 
     _searchEdit.setPlaceholderText("Filter");
     _searchEdit.show();
     connect(&_searchEdit, SIGNAL(textEdited(QString)), SLOT(refreshList()));
 
     _layout.addWidget(&_searchEdit);
-    _layout.addWidget(&_listWidget);
+    _layout.addWidget(&_treeWidget);
 
     setLayout(&_layout);
 
@@ -51,28 +57,15 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
     connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
 }
 
-const QColor& PropertiesWidget::color() const
-{
-    return _color;
-}
-
-void PropertiesWidget::setColor(const QColor& color)
-{
-    _color = color;
-	QPalette p(palette());
-    p.setColor(QPalette::Window, _color);
-	setPalette(p);
-}
-
 void PropertiesWidget::clearList()
 {
-    for (int i = 0; i < _listWidget.count(); i++) {
-        auto item = _listWidget.item(i);
-        auto itemWidget =  _listWidget.itemWidget(item);
+    for (int i = 0; i < _treeWidget.topLevelItemCount(); i++) {
+        auto item = _treeWidget.topLevelItem(i);
+        auto itemWidget = _treeWidget.itemWidget(item, 1);
         if (itemWidget)
             itemWidget->deleteLater();
     }
-    _listWidget.clear();
+    _treeWidget.clear();
 }
 
 void PropertiesWidget::refreshList()
@@ -85,24 +78,45 @@ void PropertiesWidget::refreshList()
         return;
 
     auto properties = selectedControls[0]->properties();
-    for (auto property : properties.keys()) {
-        if (!property.contains(_searchEdit.text(), Qt::CaseInsensitive))
-            continue;
 
-        QListWidgetItem* item = new QListWidgetItem;
-        PropertyItem* propertyItem = new PropertyItem(selectedControls[0], property);
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem;
+        item->setText(0, "Type");
+        {
+            QTreeWidgetItem* iitem = new QTreeWidgetItem;
+            iitem->setText(0, "Type");
+            iitem->setText(1, properties.first().first);
+            item->addChild(iitem);
 
-        if (!propertyItem->isValid()) {
-            delete item;
-            propertyItem->deleteLater();
-            continue;
+            QTreeWidgetItem* jitem = new QTreeWidgetItem;
+            jitem->setText(0, "id");
+            jitem->setText(1, selectedControls[0]->id());
+            item->addChild(jitem);
         }
+        _treeWidget.addTopLevelItem(item);
+        _treeWidget.expandItem(item);
+    }
 
-        propertyItem->resize(_listWidget.width() - fit(4), propertyItem->height());
-        propertyItem->setFixedWidth(_listWidget.width() - fit(4));
-        item->setSizeHint(QSize(_listWidget.width() - fit(4),propertyItem->sizeHint().height()));
-        _listWidget.addItem(item);
-        _listWidget.setItemWidget(item, propertyItem);
+    for (auto property : properties) {
+        if (property.second.isEmpty())
+            continue;
+
+        QTreeWidgetItem* item = new QTreeWidgetItem;
+        item->setText(0, property.first);
+
+        for (auto propertyName : property.second.keys()) {
+            //            if (superClass->property(i).isWritable() &&
+            //                !QString(superClass->property(i).name()).startsWith("__") &&
+            //                !QString(superClass->property(i).read(object).typeName())
+            //                .contains(QRegExp("Q([A-Za-z_][A-Za-z0-9_]*)\\*")))
+
+            QTreeWidgetItem* iitem = new QTreeWidgetItem;
+            iitem->setText(0, propertyName);
+            iitem->setText(1, property.second[propertyName].typeName());
+            item->addChild(iitem);
+        }
+        _treeWidget.addTopLevelItem(item);
+        _treeWidget.expandItem(item);
     }
 }
 
@@ -122,5 +136,5 @@ void PropertiesWidget::handleSelectionChange()
 
 QSize PropertiesWidget::sizeHint() const
 {
-    return QSize(fit(190), fit(400));
+    return QSize(fit(260), fit(400));
 }

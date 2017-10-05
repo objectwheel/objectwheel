@@ -11,6 +11,11 @@ using namespace Fit;
 
 ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
 {
+    setAutoFillBackground(true);
+    QPalette p(palette());
+    p.setColor(QPalette::Window, COLOR_BACKGROUND);
+    setPalette(p);
+
     _toolboxList.indicatorButton()->setIcon(QIcon(":/resources/images/right-arrow.png"));
     _toolboxList.indicatorButton()->setColor(QColor("#0D74C8"));
     _toolboxList.indicatorButton()->setRadius(fit(7));
@@ -134,7 +139,7 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     _toolboxAdderAreaWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     _toolboxAdderAreaWidget.setFixedHeight(fit(32));
     _toolboxAdderAreaWidget.setObjectName("_toolboxAdderAreaWidget");
-    _toolboxAdderAreaWidget.setStyleSheet(QString("#_toolboxAdderAreaWidget{background: #485560;border-top:1px solid #3F4A54;}"));
+    _toolboxAdderAreaWidget.setStyleSheet(QString("#_toolboxAdderAreaWidget{background: #4E5C68;border-top:1px solid #405060;}"));
 
     _toolboxVLay.addWidget(&_toolboxList);
     _toolboxVLay.addWidget(&_toolboxAdderAreaWidget);
@@ -161,12 +166,6 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
 ListWidget* ToolBox::toolboxList()
 {
     return &_toolboxList;
-}
-
-void ToolBox::paintEvent(QPaintEvent*)
-{
-    QPainter p(this);
-    p.fillRect(rect(), COLOR_BACKGROUND);
 }
 
 QSize ToolBox::sizeHint() const

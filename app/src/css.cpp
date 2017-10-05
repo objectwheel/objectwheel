@@ -114,23 +114,6 @@ QRadioButton::indicator { \
     border-image: url(:/resources/images/formsbutton.png); \
 }"
 
-#define CSS_FORMS_LISTWIDGET \
-"QListView {\
-    background:#52616D;\
-    padding: %1px;\
-	border: 1px solid #465563;\
-	border-radius: %2px;\
-} QListView::item {\
-	color:white;\
-	border: none;\
-	border-radius: %2px;\
-	padding: %2px;\
-	margin: %2px;\
-} QListView::item:selected {\
-	background: white;\
-	color: black\
-}"
-
 using namespace Fit;
 
 QString CSS::SpinBox;
@@ -142,7 +125,6 @@ QString CSS::DesignerToolbarV;
 QString CSS::ToolboxButton;
 QString CSS::PropertiesButton;
 QString CSS::FormsButton;
-QString CSS::FormsListWidget;
 
 void CSS::init()
 {
@@ -174,7 +156,4 @@ void CSS::init()
 
     /* FormsButton */
     FormsButton = QString(CSS_FORMS_BUTTON).arg(fit(20));
-
-    /* FormsListWidget */
-    FormsListWidget = QString(CSS_FORMS_LISTWIDGET).arg(fit(5)).arg(fit(2));
 }

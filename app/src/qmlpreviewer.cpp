@@ -36,7 +36,7 @@ class QmlPreviewerPrivate : public QObject
         QmlPreviewerPrivate(QmlPreviewer* parent);
         void scratchPixmapIfEmpty(QPixmap& pixmap) const;
         QQuickWindow* handleWindowsIfAny(QObject* object) const;
-        QMap<QString, QVariant> extractProperties(const QObject* object) const;
+        SuperClassList extractProperties(const QObject* object) const;
         QList<QString> extractEvents(const QObject* object) const;
 
     public slots:
@@ -98,15 +98,46 @@ QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object) const
     return ret;
 }
 
-QMap<QString, QVariant> QmlPreviewerPrivate::extractProperties(const QObject* object) const
+SuperClassList QmlPreviewerPrivate::extractProperties(const QObject* object) const
 {
-    QMap<QString, QVariant> properties;
-    auto metaObject = object->metaObject();
-    for (int i = 0; i < metaObject->propertyCount(); i++) {
-        if (metaObject->property(i).isWritable() &&
-            !QString(metaObject->property(i).name()).startsWith("__"))
-            properties[(metaObject->property(i).name())] = metaObject->property(i).read(object);
+    SuperClassList properties;
+    auto superClass = object->metaObject();
+    while (superClass) {
+        PropertyMap propertyMap;
+        QString className = superClass->className();
+
+        if (className == "QObject" ||
+            (superClass->propertyOffset() - superClass->propertyCount()) == 0) {
+            superClass = superClass->superClass();
+            continue;
+        }
+
+        for (int i = superClass->propertyOffset();
+             i < superClass->propertyCount(); i++) {
+                propertyMap[(superClass->property(i).name())] = superClass->property(i).read(object);
+        }
+
+        className = className.split("_QMLTYPE").at(0);
+        className.remove("QQuick");
+        properties << QPair<QString, PropertyMap>(className, propertyMap);
+        superClass = superClass->superClass();
     }
+
+    // ** Attached Properties **
+    //    #include <QtQml>
+    //    #include <QtQml/private/qqmldata_p.h>
+    //    QQmlData *data = QQmlData::get(object);
+    //    if (data && data->hasExtendedData()) {
+    //        auto attachedProperties = data->attachedProperties();
+    //        for (auto key : attachedProperties->keys()) {
+    //            auto metaObject = attachedProperties->value(key)->metaObject();
+    //            qDebug() << metaObject->className();
+    //            for (int i = metaObject->propertyCount(); --i;) {
+    //                    qDebug() << metaObject->property(i).name();
+    //            }
+    //        }
+    //    }
+
     return properties;
 }
 

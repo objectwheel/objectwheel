@@ -16,7 +16,6 @@ class FormsWidget : public QWidget
         static void setCurrentForm(int index);
 
     protected:
-        virtual void paintEvent(QPaintEvent *event) override;
         virtual QSize sizeHint() const override;
 
 	private:

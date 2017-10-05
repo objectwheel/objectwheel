@@ -15,7 +15,6 @@ class ToolBox : public QWidget
         ListWidget* toolboxList();
 
     protected:
-        virtual void paintEvent(QPaintEvent *event) override;
         virtual QSize sizeHint() const override;
 
     private slots:

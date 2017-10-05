@@ -18,7 +18,7 @@ QScrollBar:vertical { \
 	background: transparent; \
     width: %2px; \
 } QScrollBar::handle:vertical { \
-	background: rgba(255,255,255,%4); \
+    background: rgba(255,255,255,%4); \
 	min-height: %1px; \
     border-radius: %3px; \
 } QScrollBar::add-line:vertical { \

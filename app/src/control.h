@@ -7,6 +7,7 @@
 #include <QPixmap>
 #include <QTimer>
 #include <controltransaction.h>
+#include <qmlpreviewer.h>
 
 #define MAX_Z_VALUE (9999999)
 
@@ -76,7 +77,7 @@ class Control : public QGraphicsWidget
         bool dragIn() const;
         bool clip() const;
         bool init() const;
-        QMap<QString, QVariant> properties() const;
+        SuperClassList properties() const;
         QList<QString> events() const;
         QList<Control*> childControls(bool dive = true) const;
         Control* parentControl() const;
@@ -110,7 +111,7 @@ class Control : public QGraphicsWidget
         void setDragging(bool dragging);
         void setDragIn(bool dragIn);
         void setClip(bool clip);
-        void setProperties(const QMap<QString, QVariant>& properties);
+        void setProperties(const SuperClassList& properties);
         void setEvents(const QList<QString>& events);
 
         virtual void centralize();
@@ -143,7 +144,7 @@ class Control : public QGraphicsWidget
         QString _uid;
         QString _id;
         QList<QString> _events;
-        QMap<QString, QVariant> _properties;
+        SuperClassList _properties;
         QString _url;
         bool _dragging;
         bool _dragIn;
