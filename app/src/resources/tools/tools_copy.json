@@ -162,5 +162,10 @@
     "ScaledTextField" :
     {
     	"toolUrl" : "qrc:/resources/tools/ScaledTextField.zip"
+    },
+
+    "Timer" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Timer.zip"
     }
 }

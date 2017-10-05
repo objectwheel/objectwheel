@@ -763,6 +763,17 @@ void SaveManager::refreshToolUid(const QString& toolRootPath)
     }
 }
 
+QString SaveManager::toolCategory(const QString& toolRootPath)
+{
+    if (toolRootPath.isEmpty())
+        return QString();
+
+    auto propertyPath = toolRootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_CATEGORY).toString();
+}
+
 // You have to provide an valid suid, except if control is a form
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.

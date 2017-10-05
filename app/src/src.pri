@@ -1,13 +1,10 @@
 INCLUDEPATH               += $$PWD
 
 HEADERS                   += $$PWD/mainwindow.h \
-                             $$PWD/listwidget.h \
                              $$PWD/flatbutton.h \
                              $$PWD/propertieswidget.h \
                              $$PWD/propertyitem.h \
                              $$PWD/css.h \
-                             $$PWD/switch.h \
-                             $$PWD/combobox.h \
                              $$PWD/scrollarea.h \
                              $$PWD/about.h \
                              $$PWD/splashscreen.h \
@@ -43,17 +40,15 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/fileexplorer.h \
                              $$PWD/filelist.h \
     $$PWD/qmlformatter.h \
-    $$PWD/toolbox.h
+    $$PWD/toolbox.h \
+    $$PWD/toolboxtree.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
-                             $$PWD/listwidget.cpp \
                              $$PWD/flatbutton.cpp \
                              $$PWD/propertieswidget.cpp \
                              $$PWD/propertyitem.cpp \
                              $$PWD/css.cpp \
-                             $$PWD/switch.cpp \
-                             $$PWD/combobox.cpp \
                              $$PWD/scrollarea.cpp \
                              $$PWD/about.cpp \
                              $$PWD/splashscreen.cpp \
@@ -89,7 +84,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/fileexplorer.cpp \
                              $$PWD/filelist.cpp \
     $$PWD/qmlformatter.cpp \
-    $$PWD/toolbox.cpp
+    $$PWD/toolbox.cpp \
+    $$PWD/toolboxtree.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

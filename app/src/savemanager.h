@@ -16,6 +16,7 @@
 #define TAG_ID "id"
 #define TAG_UID "_uid"
 #define TAG_SUID "_suid"
+#define TAG_CATEGORY "_category"
 #define TAG_OWDB_SIGN "_owdbsign"
 #define TAG_OWCTRL_SIGN "_owctrlsign"
 
@@ -47,6 +48,7 @@ class SaveManager : public QObject
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);
         static void refreshToolUid(const QString& toolRootPath);
+        static QString toolCategory(const QString& toolRootPath);
 
         static bool exists(const Control* control, const QString& suid , const QString& topPath = QString());
         static bool addForm(Form* form);

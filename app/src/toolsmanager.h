@@ -5,16 +5,17 @@
 
 class QJsonObject;
 class QString;
-class ListWidget;
+class ToolboxTree;
 
 namespace ToolsManager
 {
 	void resetTools();
-	void setListWidget(ListWidget* listWidget);
+    void setToolboxTree(ToolboxTree* toolboxTree);
 	void downloadTools(const QUrl& url = QUrl());
 	void addTool(const QString& name);
 	bool toolsExists(const QJsonObject& toolsObject);
 	QString toolsDir();
+    QStringList categories();
 }
 
 #endif // TOOLSMANAGER_H

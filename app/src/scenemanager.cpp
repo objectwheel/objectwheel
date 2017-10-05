@@ -5,7 +5,7 @@
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QEvent>
-#include <listwidget.h>
+#include <toolboxtree.h>
 #include <QTimer>
 #include <QGraphicsOpacityEffect>
 
@@ -141,7 +141,7 @@ void SceneManager::show(const QString& key, SceneManager::Direction direction)
     _d->parallelAnimationGroup.start();
     _d->connection = QObject::connect(&_d->parallelAnimationGroup, &QParallelAnimationGroup::finished, [=] {
 //        for (int i = _d->sceneListWidget->count(); i--;) {
-//            if (_d->sceneListWidget->GetUrls(_d->sceneListWidget->item(i))[0].toString() == key) {
+//            if (_d->sceneListWidget->urls(_d->sceneListWidget->item(i))[0].toString() == key) {
 //                _d->sceneListWidget->setCurrentRow(i);
 //            }
 //        }
@@ -179,13 +179,13 @@ void SceneManager::setMainWindow(QWidget* mainWindow)
 
 void SceneManager::setSceneListWidget(ListWidget* listWidget)
 {
-	disconnect(_d->connection2);
-	_d->sceneListWidget = listWidget;
-	_d->connection2 = connect(listWidget,
-	(void (ListWidget::*)(QListWidgetItem*, QListWidgetItem*))&ListWidget::currentItemChanged, [](QListWidgetItem*c, QListWidgetItem*) {
-		auto sceneName = _d->sceneListWidget->GetUrls(c)[0].toString();
-		QTimer::singleShot(300, [=] { SceneManager::show(sceneName, SceneManager::ToLeft); });
-	});
+//	disconnect(_d->connection2);
+//	_d->sceneListWidget = listWidget;
+//	_d->connection2 = connect(listWidget,
+//	(void (ListWidget::*)(QListWidgetItem*, QListWidgetItem*))&ListWidget::currentItemChanged, [](QListWidgetItem*c, QListWidgetItem*) {
+//		auto sceneName = _d->sceneListWidget->urls(c)[0].toString();
+//		QTimer::singleShot(300, [=] { SceneManager::show(sceneName, SceneManager::ToLeft); });
+//	});
 }
 
 bool SceneManager::eventFilter(QObject* watched, QEvent* event)

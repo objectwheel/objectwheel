@@ -1,7 +1,7 @@
 #include <fit.h>
 #include <zipper.h>
 #include <string.h>
-#include <listwidget.h>
+#include <toolboxtree.h>
 #include <mainwindow.h>
 #include <css.h>
 #include <splashscreen.h>
@@ -131,18 +131,11 @@ void MainWindow::setupGui()
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, &_toolboxDockwidget);
 
-    connect(_toolbox.toolboxList(),(void(ListWidget::*)(int))(&ListWidget::currentRowChanged),[=](int i){
-        if (i>=0) {
-            DesignManager::formScene()->clearSelection();
-            DesignManager::controlScene()->clearSelection();
-        }
-    });
-
-    connect(_toolbox.toolboxList()->indicatorButton(), &FlatButton::clicked, [=] {
+    connect(_toolbox.toolboxTree()->indicatorButton(), &FlatButton::clicked, [=] {
         auto previousControl = DesignManager::controlScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
-        auto url = _toolbox.toolboxList()->GetUrls(_toolbox.toolboxList()->currentItem())[0];
+        auto url = _toolbox.toolboxTree()->urls(_toolbox.toolboxTree()->currentItem())[0];
         auto control = SaveManager::exposeControl(dname(dname(url.toLocalFile())));
         DesignManager::controlScene()->setMainControl(control);
         DesignManager::setMode(DesignManager::ControlGUI);
@@ -168,7 +161,7 @@ void MainWindow::setupGui()
 
 void MainWindow::setupManagers()
 {
-    ToolsManager::setListWidget(_toolbox.toolboxList());
+    ToolsManager::setToolboxTree(_toolbox.toolboxTree());
     auto userManager = new UserManager(this);
     Q_UNUSED(userManager);
     auto* projectManager = new ProjectManager(this);
@@ -208,7 +201,7 @@ void MainWindow::setupManagers()
         urls << scene;
 //        QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), sceneName);
 //        sceneList.insertItem(0, item);
-//        sceneList.AddUrls(item, urls);
+//        sceneList.addUrls(item, urls);
     }
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanupObjectwheel()));
 

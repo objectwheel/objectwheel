@@ -1,8 +1,9 @@
 #include <propertieswidget.h>
 #include <propertyitem.h>
 #include <fit.h>
-#include <listwidget.h>
+#include <toolboxtree.h>
 #include <designmanager.h>
+#include <css.h>
 
 #include <QStyleOption>
 #include <QPainter>
@@ -16,29 +17,29 @@
 
 using namespace Fit;
 
-#define COLOR_BACKGROUND (QColor("#e0e4e7"))
-
 PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent)
 {
 	setAutoFillBackground(true);
     QPalette p(palette());
-    p.setColor(QPalette::Window, COLOR_BACKGROUND);
+    p.setColor(QPalette::Window, QColor("#E0E4E7"));
     setPalette(p);
 
     QPalette p2(_treeWidget.palette());
     p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Background, COLOR_BACKGROUND);
+    p2.setColor(QPalette::Highlight, QColor("#D0D4D7"));
+    p2.setColor(QPalette::Text, QColor("#202427"));
     _treeWidget.setPalette(p2);
 
-    _treeWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _treeWidget.setHorizontalScrollMode(ListWidget::ScrollPerPixel);
-    _treeWidget.setVerticalScrollMode(ListWidget::ScrollPerPixel);
-    _treeWidget.setSelectionBehavior(ListWidget::SelectRows);
+    _treeWidget.setHorizontalScrollMode(ToolboxTree::ScrollPerPixel);
+    _treeWidget.setVerticalScrollMode(ToolboxTree::ScrollPerPixel);
+    _treeWidget.setSelectionBehavior(ToolboxTree::SelectRows);
     _treeWidget.setFocusPolicy(Qt::NoFocus);
     _treeWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _treeWidget.setColumnCount(2);
     _treeWidget.headerItem()->setText(0, "Property");
     _treeWidget.headerItem()->setText(1, "Value");
+    _treeWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _treeWidget.horizontalScrollBar()->setStyleSheet(CSS::ScrollBar);
 
     _layout.setSpacing(fit(2));
     _layout.setContentsMargins(fit(3), fit(3), fit(3), fit(3));
@@ -138,3 +139,5 @@ QSize PropertiesWidget::sizeHint() const
 {
     return QSize(fit(260), fit(400));
 }
+
+#include "propertieswidget.moc"

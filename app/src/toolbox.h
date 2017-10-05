@@ -4,7 +4,7 @@
 #include <QtWidgets>
 
 #include <flatbutton.h>
-#include <listwidget.h>
+#include <toolboxtree.h>
 #include <fit.h>
 
 class ToolBox : public QWidget
@@ -12,7 +12,7 @@ class ToolBox : public QWidget
         Q_OBJECT
     public:
         explicit ToolBox(QWidget *parent = nullptr);
-        ListWidget* toolboxList();
+        ToolboxTree* toolboxTree();
 
     protected:
         virtual QSize sizeHint() const override;
@@ -31,7 +31,7 @@ class ToolBox : public QWidget
 
     private:
         QVBoxLayout _toolboxVLay;
-        ListWidget _toolboxList;
+        ToolboxTree _toolboxTree;
         QWidget _toolboxAdderAreaWidget;
         QVBoxLayout _toolboxAdderAreaVLay;
         QHBoxLayout _toolboxAdderAreaButtonSideHLay;

@@ -2,7 +2,6 @@
 #include <fit.h>
 #include <delayer.h>
 #include <propertyitem.h>
-#include <switch.h>
 #include <savemanager.h>
 #include <filemanager.h>
 #include <control.h>
@@ -19,7 +18,7 @@ PropertyItem::PropertyItem(Control* control, const QString& property, QWidget* p
     , _valid(true)
 {
     setObjectName("propertyItem"); //for css
-	setStyleSheet(CSS::PropertyItem);
+//	setStyleSheet(CSS::PropertyItem);
     fillCup();
 }
 

@@ -1,6 +1,6 @@
 #include <formswidget.h>
 #include <flatButton.h>
-#include <listwidget.h>
+#include <toolboxtree.h>
 #include <savemanager.h>
 #include <formscene.h>
 #include <designmanager.h>
@@ -14,8 +14,7 @@
 #include <QHBoxLayout>
 #include <QPainter>
 #include <QPalette>
-
-#define COLOR_BACKGROUND (QColor("#e0e4e7"))
+#include <QListWidget>
 
 using namespace Fit;
 
@@ -36,7 +35,7 @@ class FormsWidgetPrivate : public QObject
     public:
         FormsWidget* parent;
         QVBoxLayout* verticalLayout;
-        ListWidget* formsListWidget;
+        QListWidget* formsListWidget;
         QHBoxLayout* horizontalLayout;
         FlatButton* addButton;
         FlatButton* removeButton;
@@ -46,19 +45,20 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     : QObject(parent)
     , parent(parent)
     , verticalLayout(new QVBoxLayout)
-    , formsListWidget(new ListWidget)
+    , formsListWidget(new QListWidget)
     , horizontalLayout(new QHBoxLayout)
     , addButton(new FlatButton)
     , removeButton(new FlatButton)
 {
     parent->setAutoFillBackground(true);
     QPalette p(parent->palette());
-    p.setColor(QPalette::Window, COLOR_BACKGROUND);
+    p.setColor(QPalette::Window, QColor("#E0E4E7"));
     parent->setPalette(p);
 
     QPalette p2(formsListWidget->palette());
     p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Background, COLOR_BACKGROUND);
+    p2.setColor(QPalette::Highlight, QColor("#D0D4D7"));
+    p2.setColor(QPalette::Text, QColor("#202427"));
     formsListWidget->setPalette(p2);
 
     formsListWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -66,9 +66,10 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     formsListWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     formsListWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
     formsListWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    formsListWidget->setSelectionMode(ListWidget::SingleSelection);
+    formsListWidget->setSelectionMode(QListWidget::SingleSelection);
     formsListWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     formsListWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    formsListWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
 
     QTimer::singleShot(1000, [=] { //FIXME
         Delayer::delay([]()->bool {if (SaveManager::instance()) return false; else return true;});
@@ -99,8 +100,8 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
 
     verticalLayout->addWidget(formsListWidget);
     verticalLayout->addLayout(horizontalLayout);
-    verticalLayout->setSpacing(fit(4));
-    verticalLayout->setContentsMargins(fit(4), fit(4), fit(4), fit(4));
+    verticalLayout->setSpacing(fit(2));
+    verticalLayout->setContentsMargins(fit(3), fit(3), fit(3), fit(3));
     parent->setLayout(verticalLayout);
 }
 

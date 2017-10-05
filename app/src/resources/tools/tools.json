@@ -112,5 +112,10 @@
     "ProgressBar" :
     {
         "toolUrl" : "qrc:/resources/tools/ProgressBar.zip"
+    },
+
+    "Timer" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Timer.zip"
     }
 }

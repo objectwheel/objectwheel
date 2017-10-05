@@ -4,7 +4,7 @@
 #include <QtWidgets>
 
 #include <flatbutton.h>
-#include <listwidget.h>
+#include <toolboxtree.h>
 #include <propertieswidget.h>
 #include <about.h>
 #include <formswidget.h>
