@@ -61,7 +61,7 @@ void MainWindow::setupGui()
 
     /* Add Title Bar */
     addToolBar(Qt::TopToolBarArea, &_titleBar);
-    _titleBar.setFixedHeight(fit(42));
+    _titleBar.setFixedHeight(fit(34));
     _titleBar.setFloatable(false);
     _titleBar.setMovable(false);
     _titleBar.addWidget(titleText);
