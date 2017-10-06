@@ -23,10 +23,22 @@
 
 using namespace Fit;
 
+MainWindow* MainWindow::_instance = nullptr;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    if (_instance) {
+        deleteLater();
+        return;
+    }
+
+    _instance = this;
     setupGui();
     QTimer::singleShot(300, [=] { setupManagers(); });
+}
+
+MainWindow* MainWindow::instance()
+{
+    return _instance;
 }
 
 void MainWindow::setupGui()
@@ -74,6 +86,7 @@ void MainWindow::setupGui()
     toolbar->addWidget(pinButton);
     toolbar->setStyleSheet(CSS::DesignerToolbar);
     toolbar->setIconSize(QSize(fit(11), fit(11)));
+    toolbar->setFixedHeight(fit(21));
 
     _propertiesDockwidget.setTitleBarWidget(toolbar);
     _propertiesDockwidget.setWidget(&_propertiesWidget);
@@ -99,6 +112,7 @@ void MainWindow::setupGui()
     toolbar2->addWidget(pinButton2);
     toolbar2->setStyleSheet(CSS::DesignerToolbar);
     toolbar2->setIconSize(QSize(fit(11), fit(11)));
+    toolbar2->setFixedHeight(fit(21));
 
     _formsDockwidget.setTitleBarWidget(toolbar2);
     _formsDockwidget.setWidget(&_formsWidget);
@@ -124,6 +138,7 @@ void MainWindow::setupGui()
     toolbar3->addWidget(pinButton3);
     toolbar3->setStyleSheet(CSS::DesignerToolbar);
     toolbar3->setIconSize(QSize(fit(11), fit(11)));
+    toolbar3->setFixedHeight(fit(21));
 
     _toolboxDockwidget.setTitleBarWidget(toolbar3);
     _toolboxDockwidget.setWidget(&_toolbox);
@@ -229,6 +244,20 @@ void MainWindow::cleanupObjectwheel()
     UserManager::stopUserSession();
 
     qApp->processEvents();
+}
+
+void MainWindow::showDockWidgets()
+{
+    _formsDockwidget.show();
+    _propertiesDockwidget.show();
+    _toolboxDockwidget.show();
+}
+
+void MainWindow::hideDockWidgets()
+{
+    _formsDockwidget.hide();
+    _propertiesDockwidget.hide();
+    _toolboxDockwidget.hide();
 }
 
 void MainWindow::clearStudio()

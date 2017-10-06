@@ -9,6 +9,7 @@
 #include <css.h>
 #include <loadingindicator.h>
 #include <savemanager.h>
+#include <mainwindow.h>
 
 #include <QWidget>
 #include <QList>
@@ -231,8 +232,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     connect(&noSkinButton, SIGNAL(clicked(bool)), SLOT(handleNoSkinButtonClicked()));
 
     toolbar.setStyleSheet(CSS::DesignerToolbar);
+    toolbar.setFixedHeight(fit(21));
     toolbar.setIconSize(QSize(fit(14), fit(14)));
-    toolbar.setFixedHeight(fit(26));
     toolbar.addWidget(&undoButton);
     toolbar.addWidget(&redoButton);
     toolbar.addSeparator();
@@ -293,8 +294,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar_2.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     toolbar_2.setOrientation(Qt::Vertical);
     toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
-    toolbar_2.setIconSize(QSize(fit(20), fit(20)));
-    toolbar_2.setFixedWidth(fit(30));
+    toolbar_2.setFixedWidth(fit(21));
+    toolbar_2.setIconSize(QSize(fit(16), fit(16)));
     toolbar_2.addWidget(&wGuiModeButton);
     toolbar_2.addWidget(&cGuiModeButton);
     toolbar_2.addWidget(&editorModeButton);
@@ -556,6 +557,8 @@ void DesignManagerPrivate::handleBuildButtonClicked()
 void DesignManagerPrivate::handleModeChange()
 {
     if (DesignManager::_mode == DesignManager::FormGUI) {
+        if (MainWindow::instance())
+            MainWindow::instance()->showDockWidgets();
         wGuiModeButton.setChecked(true);
         wGuiModeButton.setDisabled(true);
         cGuiModeButton.setChecked(false);
@@ -594,6 +597,8 @@ void DesignManagerPrivate::handleModeChange()
         toolbar.show();
         parent->_currentScene = &formScene;
     } else if (DesignManager::_mode == DesignManager::ControlGUI) {
+        if (MainWindow::instance())
+            MainWindow::instance()->showDockWidgets();
         cGuiModeButton.setChecked(true);
         cGuiModeButton.setDisabled(true);
         editorModeButton.setChecked(false);
@@ -628,6 +633,8 @@ void DesignManagerPrivate::handleModeChange()
         toolbar.show();
         parent->_currentScene = &controlScene;
     } else {
+        if (MainWindow::instance())
+            MainWindow::instance()->hideDockWidgets();
         editorModeButton.setChecked(true);
         editorModeButton.setDisabled(true);
         cGuiModeButton.setChecked(false);

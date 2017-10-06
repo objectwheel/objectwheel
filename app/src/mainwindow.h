@@ -17,14 +17,14 @@
 #include <designmanager.h>
 #include <toolbox.h>
 
-class MainWindowPrivate;
-
 class MainWindow : public QMainWindow
 {
         Q_OBJECT
 
     public:
         explicit MainWindow(QWidget *parent = 0);
+        static MainWindow* instance();
+
         void setupGui();
         void setupManagers();
         void clearStudio();
@@ -32,17 +32,20 @@ class MainWindow : public QMainWindow
     public slots:
         void handleIndicatorChanges();
         void cleanupObjectwheel();
+        void showDockWidgets();
+        void hideDockWidgets();
 
     private:
+        static MainWindow* _instance;
         ProjectsScreen _projectsScreen;
         LoginScreen _loginScreen;
         BuildsScreen _buildsScreen;
         QWidget _centralWidget;
         QToolBar _titleBar;
-        DesignManager _designManager;
         QDockWidget _toolboxDockwidget;
         QDockWidget _propertiesDockwidget;
         QDockWidget _formsDockwidget;
+        DesignManager _designManager;
         ToolBox _toolbox;
         PropertiesWidget _propertiesWidget;
         FormsWidget _formsWidget;

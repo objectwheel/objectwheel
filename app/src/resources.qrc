@@ -16,7 +16,6 @@
         <file>resources/tools/RadioButton.zip</file>
         <file>resources/images/resize-icon.png</file>
         <file>resources/images/delete-icon.png</file>
-        <file>resources/images/rotate-icon.png</file>
         <file>resources/tools/CircularGauge.zip</file>
         <file>resources/qmls/module-resolver.qml</file>
         <file>resources/tools/DelayButton.zip</file>
@@ -38,7 +37,6 @@
         <file>resources/images/plug-up.png</file>
         <file>resources/images/plug-down.png</file>
         <file>resources/images/item.png</file>
-        <file>resources/images/advanced.png</file>
         <file>resources/images/edit.png</file>
         <file>resources/tools/ComboBox.zip</file>
         <file>resources/tools/TextArea.zip</file>
@@ -57,10 +55,7 @@
         <file>resources/images/back.png</file>
         <file>resources/images/menu-icon@2x.png</file>
         <file>resources/qmls/fit.js</file>
-        <file>resources/images/handle@2x.png</file>
-        <file>resources/images/handle.png</file>
         <file>resources/images/reset.png</file>
-        <file>resources/images/web.png</file>
         <file>resources/images/fexplorer.png</file>
         <file>resources/images/fexplorer@2x.png</file>
         <file>resources/images/fileExplorer/text@2x.png</file>
@@ -154,7 +149,6 @@
         <file>resources/qmls/loginScreen/RegistrationComplete.qml</file>
         <file>resources/qmls/loginScreen/RegistrationScreen.qml</file>
         <file>resources/qmls/loginScreen/Toast.qml</file>
-        <file>resources/images/exit.png</file>
         <file>resources/images/android.png</file>
         <file>resources/images/android@2x.png</file>
         <file>resources/images/builds.png</file>
@@ -187,7 +181,6 @@
         <file>resources/tools/tools_copy.json</file>
         <file>resources/images/sign_warning@2x.png</file>
         <file>resources/images/delete-icon@2x.png</file>
-        <file>resources/images/script.png</file>
         <file>resources/images/owicon.png</file>
         <file>resources/images/owicon@2x.png</file>
         <file>resources/images/phone.png</file>
@@ -222,8 +215,6 @@
         <file>resources/qmls/form/t/_properties.json</file>
         <file>resources/qmls/form/t/main.qml</file>
         <file>resources/images/preloader.gif</file>
-        <file>resources/images/dback.png</file>
-        <file>resources/images/dforth.png</file>
         <file>resources/images/pin.png</file>
         <file>resources/images/save.png</file>
         <file>resources/images/unpin.png</file>

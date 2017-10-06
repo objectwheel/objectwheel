@@ -12,6 +12,7 @@ class CSS
 		static void init();
 
         static QString ScrollBar;
+        static QString ScrollBarH;
         static QString DesignerToolbar;
         static QString DesignerToolbarV;
 };

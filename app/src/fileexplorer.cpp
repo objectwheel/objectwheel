@@ -110,7 +110,7 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
 
     toolbar->setStyleSheet(CSS::DesignerToolbar);
     toolbar->setIconSize(QSize(fit(14), fit(14)));
-    toolbar->setFixedHeight(fit(26));
+    toolbar->setFixedHeight(fit(21));
     toolbar->addWidget(upButton);
     toolbar->addWidget(homeButton);
     toolbar->addSeparator();

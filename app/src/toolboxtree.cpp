@@ -30,6 +30,8 @@ ToolboxTree::ToolboxTree(QWidget *parent)
     _indicatorButton.setVisible(_indicatorButtonVisible);
 
     connect(this, &ToolboxTree::currentItemChanged, [=] {
+        if (currentItem() == 0)
+            return;
         if (model()->rowCount() < 1) {
             _indicatorButton.hide();
             return;
@@ -37,9 +39,11 @@ ToolboxTree::ToolboxTree(QWidget *parent)
         auto rect = visualItemRect(currentItem());
         _indicatorButton.move(rect.width() - _indicatorButton.width() - fit(5),
                                rect.y() + rect.height()/2.0 - _indicatorButton.height()/2.0);
-        _indicatorButton.setVisible(_indicatorButtonVisible);
+        _indicatorButton.setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
     });
     connect(verticalScrollBar(), &QSlider::valueChanged , [=] {
+        if (currentItem() == 0)
+            return;
         if (model()->rowCount() < 1) {
             _indicatorButton.hide();
             return;
@@ -47,8 +51,33 @@ ToolboxTree::ToolboxTree(QWidget *parent)
         auto rect = visualItemRect(currentItem());
         _indicatorButton.move(rect.width() - _indicatorButton.width() - fit(5),
                                rect.y() + rect.height()/2.0 - _indicatorButton.height()/2.0);
-        _indicatorButton.setVisible(_indicatorButtonVisible);
+        _indicatorButton.setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
     });
+}
+
+void ToolboxTree::addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls)
+{
+    _urls.insert(item, urls);
+}
+
+void ToolboxTree::removeUrls(QTreeWidgetItem* item)
+{
+    _urls.remove(item);
+}
+
+void ToolboxTree::clearUrls()
+{
+    _urls.clear();
+}
+
+const QMap<QTreeWidgetItem*, QList<QUrl>>& ToolboxTree::allUrls() const
+{
+    return _urls;
+}
+
+QList<QUrl> ToolboxTree::urls(QTreeWidgetItem* item) const
+{
+    return _urls.value(item);
 }
 
 FlatButton* ToolboxTree::indicatorButton()

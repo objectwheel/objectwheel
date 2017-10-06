@@ -294,7 +294,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     toolbar->setStyleSheet(CSS::DesignerToolbar);
     toolbar->setIconSize(QSize(fit(14), fit(14)));
-    toolbar->setFixedHeight(fit(26));
+    toolbar->setFixedHeight(fit(21));
     toolbar->addWidget(pinButton);
     toolbar->addSeparator();
     toolbar->addWidget(undoButton);
@@ -339,7 +339,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     toolbar_2->setOrientation(Qt::Vertical);
     toolbar_2->setStyleSheet(CSS::DesignerToolbarV);
     toolbar_2->setIconSize(QSize(fit(14), fit(14)));
-    toolbar_2->setFixedWidth(fit(26));
+    toolbar_2->setFixedWidth(fit(21));
     toolbar_2->addWidget(hideShowButton);
     toolbar_2->addSeparator();
     toolbar_2->addWidget(codeEditorButton);

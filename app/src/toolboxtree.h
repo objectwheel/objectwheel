@@ -12,11 +12,12 @@ class ToolboxTree : public QTreeWidget
 	public:
         explicit ToolboxTree(QWidget *parent = 0);
 
-        inline const QMap<QTreeWidgetItem*, QList<QUrl>>& allUrls() const { return _urls; }
-        inline void addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls) { _urls.insert(item, urls); }
-        inline void removeUrls(QTreeWidgetItem* item) { _urls.remove(item); }
-        inline QList<QUrl> urls(QTreeWidgetItem* item) const { return _urls.value(item); }
-        inline void clearUrls() { _urls.clear(); }
+        void addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls);
+        void removeUrls(QTreeWidgetItem* item);
+        void clearUrls();
+
+        const QMap<QTreeWidgetItem*, QList<QUrl>>& allUrls() const;
+        QList<QUrl> urls(QTreeWidgetItem* item) const;
 
         bool contains(const QString& itemName);
         bool categoryContains(const QString& categoryName);

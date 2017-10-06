@@ -85,13 +85,13 @@ void SheetDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         static const int i = 9; // ### hardcoded in qcommonstyle.cpp
         QRect r = option.rect;
         branchOption.rect = QRect(r.left() + i/2, r.top() + (r.height() - i)/2, i, i);
-        branchOption.palette = option.palette;
+        branchOption.palette = QPalette();
         branchOption.state = QStyle::State_Children;
 
         if (m_view->isExpanded(index))
             branchOption.state |= QStyle::State_Open;
 
-        m_view->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
+        qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
 
         // draw text
         QRect textrect = QRect(r.left() + i*2, r.top(), r.width() - ((5*i)/2), r.height());
@@ -125,54 +125,60 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     p2.setColor(QPalette::Text, QColor("#202427"));
     _toolboxTree.setPalette(p2);
 
-    _toolboxTree.setItemDelegate(new SheetDelegate(&_toolboxTree, &_toolboxTree));
     _toolboxTree.setIndicatorButtonVisible(true);
-    _toolboxTree.setIconSize(fit({30, 30}));
+    _toolboxTree.setIconSize(fit({24, 24}));
     _toolboxTree.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _toolboxTree.setFocusPolicy(Qt::NoFocus);
     _toolboxTree.setIndentation(0);
     _toolboxTree.setRootIsDecorated(false);
+    _toolboxTree.setSortingEnabled(true);
     _toolboxTree.setColumnCount(1);
     _toolboxTree.header()->hide();
     _toolboxTree.header()->setSectionResizeMode(QHeaderView::Stretch);
     _toolboxTree.setTextElideMode(Qt::ElideMiddle);
     _toolboxTree.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
 
-    _toolboxTree.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _toolboxTree.setDragEnabled(true);
-    _toolboxTree.setDragDropMode(QAbstractItemView::InternalMove);
+    _toolboxTree.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _toolboxTree.setDragDropMode(QAbstractItemView::DragOnly);
     _toolboxTree.setSelectionBehavior(QAbstractItemView::SelectRows);
     _toolboxTree.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     _toolboxTree.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    _toolboxTree.setItemDelegate(new SheetDelegate(&_toolboxTree, &_toolboxTree));
 
     _toolboxTree.indicatorButton()->setIcon(QIcon(":/resources/images/right-arrow.png"));
     _toolboxTree.indicatorButton()->setColor(QColor("#0D74C8"));
     _toolboxTree.indicatorButton()->setRadius(fit(7));
     _toolboxTree.indicatorButton()->setIconSize(QSize(fit(10), fit(10)));
-    _toolboxTree.indicatorButton()->resize(fit(15), fit(15));
+    _toolboxTree.indicatorButton()->setFixedSize(fit(15), fit(15));
+    connect(&_toolboxTree, &QTreeWidget::itemPressed, this, &ToolBox::handleMousePress);
+    connect(&_toolboxTree, &QTreeWidget::itemSelectionChanged, this, &ToolBox::handleSelectionChange);
+
+    _searchEdit.setPlaceholderText("Filter");
+    connect(&_searchEdit, SIGNAL(textEdited(QString)), SLOT(refreshList()));
 
     _toolboxAddButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _toolboxAddButton.setColor("#6BB64B");
-    _toolboxAddButton.setFixedSize(fit(20),fit(20));
-    _toolboxAddButton.setRadius(fit(4));
-    _toolboxAddButton.setIconSize(QSize(fit(15),fit(15)));
+    _toolboxAddButton.setFixedSize(fit(17),fit(17));
+    _toolboxAddButton.setRadius(fit(8));
+    _toolboxAddButton.setIconSize(QSize(fit(13),fit(13)));
     _toolboxAddButton.setIcon(QIcon(":/resources/images/plus.png"));
     connect(&_toolboxAddButton, SIGNAL(clicked(bool)), SLOT(toolboxAddButtonClicked()) );
 
     _toolboxRemoveButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _toolboxRemoveButton.setColor("#C1131D");
-    _toolboxRemoveButton.setFixedSize(fit(20),fit(20));
-    _toolboxRemoveButton.setRadius(fit(4));
-    _toolboxRemoveButton.setIconSize(QSize(fit(15),fit(15)));
+    _toolboxRemoveButton.setColor("#C61717");
+    _toolboxRemoveButton.setFixedSize(fit(17),fit(17));
+    _toolboxRemoveButton.setRadius(fit(8));
+    _toolboxRemoveButton.setIconSize(QSize(fit(13),fit(13)));
     _toolboxRemoveButton.setIcon(QIcon(":/resources/images/minus.png"));
     _toolboxRemoveButton.setDisabled(true);
     connect(&_toolboxRemoveButton, SIGNAL(clicked(bool)), SLOT(toolboxRemoveButtonClicked()) );
 
     _toolboxEditButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _toolboxEditButton.setColor("#0D74C8");
-    _toolboxEditButton.setFixedSize(fit(20),fit(20));
-    _toolboxEditButton.setRadius(fit(4));
-    _toolboxEditButton.setCheckedColor(QColor("#0D74C8").darker(110));
+    _toolboxEditButton.setColor("#697D8C");
+    _toolboxEditButton.setFixedSize(fit(17),fit(17));
+    _toolboxEditButton.setRadius(fit(8));
+    _toolboxEditButton.setCheckedColor(QColor("#6BB64B"));
     _toolboxEditButton.setCheckable(true);
     _toolboxEditButton.setIconSize(QSize(fit(13),fit(13)));
     _toolboxEditButton.setIcon(QIcon(":/resources/images/edit.png"));
@@ -180,18 +186,18 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     connect(&_toolboxEditButton, SIGNAL(toggled(bool)), SLOT(toolboxEditButtonToggled(bool)) );
 
     _toolboxImportButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _toolboxImportButton.setColor("#F28E24");
-    _toolboxImportButton.setFixedSize(fit(20),fit(20));
-    _toolboxImportButton.setRadius(fit(4));
-    _toolboxImportButton.setIconSize(QSize(fit(15),fit(15)));
+    _toolboxImportButton.setColor("#3498DB");
+    _toolboxImportButton.setFixedSize(fit(17),fit(17));
+    _toolboxImportButton.setRadius(fit(8));
+    _toolboxImportButton.setIconSize(QSize(fit(13),fit(13)));
     _toolboxImportButton.setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(-90))));
     connect(&_toolboxImportButton, SIGNAL(clicked(bool)), SLOT(toolboxImportButtonClicked()) );
 
     _toolboxExportButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _toolboxExportButton.setColor("#6BB64B");
-    _toolboxExportButton.setFixedSize(fit(20),fit(20));
-    _toolboxExportButton.setRadius(fit(4));
-    _toolboxExportButton.setIconSize(QSize(fit(15),fit(15)));
+    _toolboxExportButton.setColor("#E8BC43");
+    _toolboxExportButton.setFixedSize(fit(17),fit(17));
+    _toolboxExportButton.setRadius(fit(8));
+    _toolboxExportButton.setIconSize(QSize(fit(13),fit(13)));
     _toolboxExportButton.setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(90))));
     _toolboxExportButton.setDisabled(true);
     connect(&_toolboxExportButton, SIGNAL(clicked(bool)), SLOT(toolboxExportButtonClicked()) );
@@ -237,8 +243,9 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     _toolboxAdderAreaVLay.setContentsMargins(0, 0, 0, 0);
     _toolboxAdderAreaWidget.setLayout(&_toolboxAdderAreaVLay);
     _toolboxAdderAreaWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    _toolboxAdderAreaWidget.setFixedHeight(fit(21));
+    _toolboxAdderAreaWidget.setFixedHeight(fit(17));
 
+    _toolboxVLay.addWidget(&_searchEdit);
     _toolboxVLay.addWidget(&_toolboxTree);
     _toolboxVLay.addWidget(&_toolboxAdderAreaWidget);
     _toolboxVLay.setSpacing(fit(2));
@@ -246,20 +253,20 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
 
     setLayout(&_toolboxVLay);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
 
-    connect(&_toolboxTree, &ToolboxTree::itemSelectionChanged,[=] {
-        if (_toolboxTree.selectedItems().size() == 1) {
-            _toolboxUrlBox.setText(dname(_toolboxTree.urls(_toolboxTree.currentItem())[0].toLocalFile()) + "/icon.png");
-            _toolBoxNameBox.setText(_toolboxTree.currentItem()->text(0));
-        }
-        _toolBoxNameBox.setEnabled(_toolboxTree.selectedItems().size() == 1);
-        _toolboxUrlBox.setEnabled(_toolboxTree.selectedItems().size() == 1);
-        if (!_toolboxEditButton.isChecked()) {
-            _toolboxEditButton.setEnabled(_toolboxTree.selectedItems().size() == 1);
-            _toolboxRemoveButton.setEnabled(_toolboxTree.selectedItems().size() == 1);
-            _toolboxExportButton.setEnabled(_toolboxTree.selectedItems().size() == 1);
-        }
-    });
+void ToolBox::handleMousePress(QTreeWidgetItem *item)
+{
+    if (item == 0)
+        return;
+
+    if (QApplication::mouseButtons() != Qt::LeftButton)
+        return;
+
+    if (item->parent() == 0) {
+        _toolboxTree.setItemExpanded(item, !_toolboxTree.isItemExpanded(item));
+        return;
+    }
 }
 
 ToolboxTree* ToolBox::toolboxTree()
@@ -272,19 +279,24 @@ QSize ToolBox::sizeHint() const
     return QSize(fit(200), fit(400));
 }
 
+void ToolBox::refreshList()
+{
+
+}
+
 void ToolBox::showAdderArea()
 {
     QPropertyAnimation *animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
     animation->setDuration(DURATION);
-    animation->setStartValue(fit(21));
-    animation->setEndValue(fit(110));
+    animation->setStartValue(fit(17));
+    animation->setEndValue(fit(88));
     animation->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 
     QPropertyAnimation *animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
     animation2->setDuration(DURATION);
-    animation2->setStartValue(fit(21));
-    animation2->setEndValue(fit(    110));
+    animation2->setStartValue(fit(17));
+    animation2->setEndValue(fit(88));
     animation2->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
@@ -308,15 +320,15 @@ void ToolBox::hideAdderArea()
 {
     QPropertyAnimation *animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
     animation->setDuration(DURATION);
-    animation->setStartValue(fit(    110));
-    animation->setEndValue(fit(21));
+    animation->setStartValue(fit(88));
+    animation->setEndValue(fit(17));
     animation->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 
     QPropertyAnimation *animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
     animation2->setDuration(DURATION);
-    animation2->setStartValue(fit(    110));
-    animation2->setEndValue(fit(21));
+    animation2->setStartValue(fit(88));
+    animation2->setEndValue(fit(17));
     animation2->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
@@ -335,6 +347,24 @@ void ToolBox::hideAdderArea()
     _toolboxEditButton.setChecked(false);
     _toolBoxNameBox.setHidden(true);
     _toolboxUrlBox.setHidden(true);
+}
+
+void ToolBox::handleSelectionChange()
+{
+    auto item = _toolboxTree.currentItem();
+    bool enable = (_toolboxTree.selectedItems().size() == 1 && item->parent() != 0);
+
+    if (enable) {
+        _toolboxUrlBox.setText(dname(_toolboxTree.urls(_toolboxTree.currentItem())[0].toLocalFile()) + "/icon.png");
+        _toolBoxNameBox.setText(_toolboxTree.currentItem()->text(0));
+    }
+    _toolBoxNameBox.setEnabled(enable);
+    _toolboxUrlBox.setEnabled(enable);
+    if (!_toolboxEditButton.isChecked()) {
+        _toolboxEditButton.setEnabled(enable);
+        _toolboxRemoveButton.setEnabled(enable);
+        _toolboxExportButton.setEnabled(enable);
+    }
 }
 
 void ToolBox::handleToolboxUrlboxChanges(const QString& text)

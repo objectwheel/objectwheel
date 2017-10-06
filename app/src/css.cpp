@@ -20,6 +20,24 @@ QScrollBar:vertical { \
     background: none; \
 }"
 
+#define CSS_SCROLLBAR_H "\
+QScrollBar:horizontal { \
+    background: transparent; \
+    height: %2px; \
+} QScrollBar::handle:horizontal { \
+    background: #909497; \
+    min-width: %1px; \
+    border-radius: %3px; \
+} QScrollBar::add-line:horizontal { \
+    background: none; \
+} QScrollBar::sub-line:horizontal { \
+    background: none; \
+} QScrollBar::left-arrow:horizontal, QScrollBar::right-arrow:horizontal { \
+    background: none; \
+} QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { \
+    background: none; \
+}"
+
 #define CSS_DESIGNER_TOOLBAR "\
 QToolBar { \
     border-bottom: 1px solid %1;\
@@ -35,6 +53,7 @@ QToolBar { \
 using namespace Fit;
 
 QString CSS::ScrollBar;
+QString CSS::ScrollBarH;
 QString CSS::DesignerToolbar;
 QString CSS::DesignerToolbarV;
 
@@ -42,6 +61,9 @@ void CSS::init()
 {
     /* ScrollBar */
     ScrollBar = QString(CSS_SCROLLBAR).arg(fit(15)).arg(fit(6)).arg(fit(3));
+
+    /* ScrollBarH */
+    ScrollBarH = QString(CSS_SCROLLBAR_H).arg(fit(15)).arg(fit(6)).arg(fit(3));
 
     /* DesignerToolbar */
     DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(QColor("#ABAFB2").lighter(110).name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name());

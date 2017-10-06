@@ -80,17 +80,17 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
 
     addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     addButton->setColor("#6BB64B");
-    addButton->setFixedSize(fit(20),fit(20));
-    addButton->setRadius(fit(4));
-    addButton->setIconSize(QSize(fit(15),fit(15)));
+    addButton->setFixedSize(fit(17),fit(17));
+    addButton->setRadius(fit(8));
+    addButton->setIconSize(QSize(fit(11),fit(11)));
     addButton->setIcon(QIcon(":/resources/images/plus.png"));
     connect(addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
 
     removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     removeButton->setColor("#C61717");
-    removeButton->setFixedSize(fit(20),fit(20));
-    removeButton->setRadius(fit(4));
-    removeButton->setIconSize(QSize(fit(15),fit(15)));
+    removeButton->setFixedSize(fit(17),fit(17));
+    removeButton->setRadius(fit(8));
+    removeButton->setIconSize(QSize(fit(11),fit(11)));
     removeButton->setIcon(QIcon(":/resources/images/minus.png"));
     connect(removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
 
@@ -184,7 +184,7 @@ void FormsWidget::setCurrentForm(int index)
 
 QSize FormsWidget::sizeHint() const
 {
-    return QSize(fit(260), fit(100));
+    return QSize(fit(200), fit(100));
 }
 
 #include "formswidget.moc"

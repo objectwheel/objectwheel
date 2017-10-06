@@ -39,13 +39,13 @@ PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent)
     _treeWidget.headerItem()->setText(0, "Property");
     _treeWidget.headerItem()->setText(1, "Value");
     _treeWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    _treeWidget.horizontalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _treeWidget.horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    _treeWidget.setIndentation(fit(10));
 
     _layout.setSpacing(fit(2));
     _layout.setContentsMargins(fit(3), fit(3), fit(3), fit(3));
 
     _searchEdit.setPlaceholderText("Filter");
-    _searchEdit.show();
     connect(&_searchEdit, SIGNAL(textEdited(QString)), SLOT(refreshList()));
 
     _layout.addWidget(&_searchEdit);
@@ -56,6 +56,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent)
     /* Prepare Properties Widget */
     connect(DesignManager::formScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
+    connect(DesignManager::instance(), SIGNAL(modeChanged()), SLOT(handleSelectionChange()));
 }
 
 void PropertiesWidget::clearList()
@@ -126,18 +127,16 @@ void PropertiesWidget::handleSelectionChange()
     auto selectedControls = DesignManager::currentScene()->selectedControls();
 
     if (selectedControls.size() != 1) {
-        setDisabled(true);
+        clearList();
         return;
     }
-
-    setEnabled(true);
 
     refreshList();
 }
 
 QSize PropertiesWidget::sizeHint() const
 {
-    return QSize(fit(260), fit(400));
+    return QSize(fit(280), fit(400));
 }
 
 #include "propertieswidget.moc"

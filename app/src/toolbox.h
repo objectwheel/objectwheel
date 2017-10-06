@@ -18,8 +18,11 @@ class ToolBox : public QWidget
         virtual QSize sizeHint() const override;
 
     private slots:
+        void refreshList();
         void showAdderArea();
         void hideAdderArea();
+        void handleSelectionChange();
+        void handleMousePress(QTreeWidgetItem* item);
         void handleToolboxUrlboxChanges(const QString& text);
         void handleToolboxNameboxChanges(QString name);
         void toolboxEditButtonToggled(bool);
@@ -31,6 +34,7 @@ class ToolBox : public QWidget
 
     private:
         QVBoxLayout _toolboxVLay;
+        QLineEdit _searchEdit;
         ToolboxTree _toolboxTree;
         QWidget _toolboxAdderAreaWidget;
         QVBoxLayout _toolboxAdderAreaVLay;
