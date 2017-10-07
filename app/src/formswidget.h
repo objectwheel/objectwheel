@@ -7,10 +7,10 @@ class FormsWidgetPrivate;
 
 class FormsWidget : public QWidget
 {
-		Q_OBJECT
+        Q_OBJECT
         Q_DISABLE_COPY(FormsWidget)
 
-	public:
+    public:
         explicit FormsWidget(QWidget *parent = 0);
         static FormsWidget* instance();
         static void setCurrentForm(int index);
@@ -18,7 +18,7 @@ class FormsWidget : public QWidget
     protected:
         virtual QSize sizeHint() const override;
 
-	private:
+    private:
         static FormsWidgetPrivate* _d;
 };
 

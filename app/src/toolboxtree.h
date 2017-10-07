@@ -7,9 +7,9 @@
 
 class ToolboxTree : public QTreeWidget
 {
-		Q_OBJECT
+        Q_OBJECT
 
-	public:
+    public:
         explicit ToolboxTree(QWidget *parent = 0);
 
         void addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls);

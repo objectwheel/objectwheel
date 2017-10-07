@@ -24,11 +24,11 @@ class FormsWidgetPrivate : public QObject
 
     public:
         FormsWidgetPrivate(FormsWidget* parent);
-		bool checkName(const QString& name) const;
+        bool checkName(const QString& name) const;
 
-	public slots:
-		void removeButtonClicked();
-		void addButtonClicked();
+    public slots:
+        void removeButtonClicked();
+        void addButtonClicked();
         void handleDatabaseChange();
         void handleCurrentFormChange();
 
@@ -57,7 +57,7 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
 
     QPalette p2(formsListWidget->palette());
     p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Highlight, QColor("#D0D4D7"));
+    p2.setColor(QPalette::Highlight, QColor("#E0E4E7"));
     p2.setColor(QPalette::Text, QColor("#202427"));
     formsListWidget->setPalette(p2);
 
@@ -110,7 +110,7 @@ void FormsWidgetPrivate::removeButtonClicked()
     auto form = DesignManager::formScene()->mainForm();
     if (!form || !form->form() || form->main())
         return;
-//    SaveManager::removeForm((Form*)form);
+    //    SaveManager::removeForm((Form*)form);
     DesignManager::formScene()->removeForm(form);
 }
 
@@ -165,7 +165,7 @@ void FormsWidgetPrivate::handleCurrentFormChange()
 FormsWidgetPrivate* FormsWidget::_d = nullptr;
 
 FormsWidget::FormsWidget(QWidget *parent)
-	: QWidget(parent)
+    : QWidget(parent)
 {
     if (_d)
         return;

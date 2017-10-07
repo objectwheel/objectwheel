@@ -16,15 +16,15 @@ using namespace Fit;
 
 class SheetDelegate: public QStyledItemDelegate
 {
-    Q_OBJECT
-public:
-    SheetDelegate(QTreeView *view, QWidget *parent);
+        Q_OBJECT
+    public:
+        SheetDelegate(QTreeView *view, QWidget *parent);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
-    QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const Q_DECL_OVERRIDE;
+        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
+        QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const Q_DECL_OVERRIDE;
 
-private:
-    QTreeView *m_view;
+    private:
+        QTreeView *m_view;
 };
 
 SheetDelegate::SheetDelegate(QTreeView *view, QWidget *parent)
@@ -85,7 +85,6 @@ void SheetDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         static const int i = 9; // ### hardcoded in qcommonstyle.cpp
         QRect r = option.rect;
         branchOption.rect = QRect(r.left() + i/2, r.top() + (r.height() - i)/2, i, i);
-        branchOption.palette = QPalette();
         branchOption.state = QStyle::State_Children;
 
         if (m_view->isExpanded(index))
@@ -96,9 +95,9 @@ void SheetDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         // draw text
         QRect textrect = QRect(r.left() + i*2, r.top(), r.width() - ((5*i)/2), r.height());
         QString text = elidedText(option.fontMetrics, textrect.width(), Qt::ElideMiddle,
-            model->data(index, Qt::DisplayRole).toString());
+                                  model->data(index, Qt::DisplayRole).toString());
         m_view->style()->drawItemText(painter, textrect, Qt::AlignCenter,
-            option.palette, m_view->isEnabled(), text);
+                                      option.palette, m_view->isEnabled(), text);
 
     } else {
         QStyledItemDelegate::paint(painter, option, index);
@@ -121,7 +120,7 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
 
     QPalette p2(_toolboxTree.palette());
     p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Highlight, QColor("#D0D4D7"));
+    p2.setColor(QPalette::Highlight, QColor("#E0E4E7"));
     p2.setColor(QPalette::Text, QColor("#202427"));
     _toolboxTree.setPalette(p2);
 

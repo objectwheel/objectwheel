@@ -5,180 +5,412 @@
 #include <designmanager.h>
 #include <css.h>
 
-#include <QStyleOption>
-#include <QPainter>
+#include <QtWidgets>
 #include <QQuickItem>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
 #include <QQmlContext>
-#include <QIcon>
-#include <QHeaderView>
-#include <QItemDelegate>
-#include <QApplication>
 
 using namespace Fit;
 
-class ColorDelegate : public QItemDelegate
-{
-    Q_OBJECT
-        enum { BrushRole = 33 };
-public:
-    explicit ColorDelegate(QTreeView *view, QObject *parent = 0);
+enum NodeType {
+    FontFamily,
+    FontPtSize,
+    FontPixSize,
+    FontBold,
+    FontItalic,
+    FontUnderline,
+    FontOverline,
+    FontStrikeout
+};
+Q_DECLARE_METATYPE(NodeType)
 
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                          const QModelIndex &index) const Q_DECL_OVERRIDE;
-
-    void setEditorData(QWidget *ed, const QModelIndex &index) const Q_DECL_OVERRIDE;
-    void setModelData(QWidget *ed, QAbstractItemModel *model,
-                      const QModelIndex &index) const Q_DECL_OVERRIDE;
-
-    void updateEditorGeometry(QWidget *ed, const QStyleOptionViewItem &option,
-                              const QModelIndex &index) const Q_DECL_OVERRIDE;
-
-    void paint(QPainter *painter, const QStyleOptionViewItem &opt,
-               const QModelIndex &index) const Q_DECL_OVERRIDE;
-    QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const Q_DECL_OVERRIDE;
-private:
-    QTreeView *m_view;
+enum NodeRole {
+    Type = Qt::UserRole + 1,
+    Data
 };
 
-ColorDelegate::ColorDelegate(QTreeView *view, QObject *parent) :
-    QItemDelegate(parent),
+class ColorDelegate : public QStyledItemDelegate
+{
+        Q_OBJECT
+        enum { BrushRole = 33 };
+    public:
+        explicit ColorDelegate(QTreeWidget* view, QObject* parent = 0);
+
+        QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option,
+                              const QModelIndex &index) const override;
+
+        void setEditorData(QWidget* ed, const QModelIndex &index) const override;
+        void setModelData(QWidget* ed, QAbstractItemModel* model,
+                          const QModelIndex &index) const override;
+
+        void updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem &option,
+                                  const QModelIndex &index) const override;
+
+        void paint(QPainter* painter, const QStyleOptionViewItem &opt,
+                   const QModelIndex &index) const override;
+        QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const override;
+
+    public slots:
+        void saveChanges(QTreeWidgetItem *item, int column) const;
+
+    private:
+        QTreeWidget* m_view;
+};
+
+ColorDelegate::ColorDelegate(QTreeWidget* view, QObject* parent) :
+    QStyledItemDelegate(parent),
     m_view(view)
 {
+    connect(m_view, &QTreeWidget::itemChanged,
+            this, &ColorDelegate::saveChanges);
 }
 
-QWidget *ColorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &,
-                const QModelIndex &index) const
+QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
+                                     const QModelIndex &index) const
 {
-    QWidget *ed = 0;
-    if (index.column() == 0) {
-//        RoleEditor *editor = new RoleEditor(parent);
-//        connect(editor, &RoleEditor::changed, this, &ColorDelegate::commitData);
-        //editor->setFocusPolicy(Qt::NoFocus);
-        //editor->installEventFilter(const_cast<ColorDelegate *>(this));
-//        ed = editor;
-    } else {
-//        typedef void (BrushEditor::*BrushEditorWidgetSignal)(QWidget *);
+    QWidget* ed = 0;
 
-//        BrushEditor *editor = new BrushEditor(m_view, parent);
-//        connect(editor, static_cast<BrushEditorWidgetSignal>(&BrushEditor::changed),
-//                this, &ColorDelegate::commitData);
-//        editor->setFocusPolicy(Qt::NoFocus);
-//        editor->installEventFilter(const_cast<ColorDelegate *>(this));
-//        ed = editor;
+    if (index.column() == 0)
+        return ed;
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+
+    switch (type) {
+        case FontFamily: {
+            QComboBox* editor = new QComboBox(parent);
+            editor->addItems(QFontDatabase().families());
+            connect(editor, &QComboBox::currentTextChanged,
+                    [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::NoFocus);
+            ed = editor;
+            break;
+        }
+
+        case FontPtSize:
+        case FontPixSize: {
+            QSpinBox* editor = new QSpinBox(parent);
+            connect(editor, &QSpinBox::editingFinished,
+                    [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::NoFocus);
+            editor->setMaximum(72);
+            editor->setMinimum(0);
+            ed = editor;
+            break;
+        }
+
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout: {
+            QCheckBox* editor = new QCheckBox(parent);
+            connect(editor, &QCheckBox::toggled,
+                    [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::NoFocus);
+            ed = editor;
+            break;
+        }
+        default:
+            break;
     }
+
     return ed;
 }
 
-void ColorDelegate::setEditorData(QWidget *ed, const QModelIndex &index) const
+void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
 {
-    if (index.column() == 0) {
-//        const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
-//        RoleEditor *editor = static_cast<RoleEditor *>(ed);
-//        editor->setEdited(mask);
-//        const QString colorName = qvariant_cast<QString>(index.model()->data(index, Qt::DisplayRole));
-//        editor->setLabel(colorName);
-    } else {
-//        const QBrush br = qvariant_cast<QBrush>(index.model()->data(index, BrushRole));
-//        BrushEditor *editor = static_cast<BrushEditor *>(ed);
-//        editor->setBrush(br);
+    if (index.column() == 0)
+        return;
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+
+    switch (type) {
+        case FontFamily: {
+            const QString val = index.model()->data(index, NodeRole::Data).value<QString>();
+            QComboBox* editor = static_cast<QComboBox*>(ed);
+            editor->setCurrentText(val);
+            break;
+        }
+
+        case FontPtSize:
+        case FontPixSize: {
+            const int val = index.model()->data(index, NodeRole::Data).value<int>();
+            QSpinBox* editor = static_cast<QSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout: {
+            const int val = index.model()->data(index, NodeRole::Data).value<bool>();
+            QCheckBox* editor = static_cast<QCheckBox*>(ed);
+            editor->setChecked(val);
+            break;
+        }
+
+        default:
+            break;
     }
 }
 
-void ColorDelegate::setModelData(QWidget *ed, QAbstractItemModel *model,
-                const QModelIndex &index) const
+void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
+                                 const QModelIndex &index) const
 {
-//    if (index.column() == 0) {
-//        RoleEditor *editor = static_cast<RoleEditor *>(ed);
-//        const bool mask = editor->edited();
-//        model->setData(index, mask, Qt::EditRole);
-//    } else {
-//        BrushEditor *editor = static_cast<BrushEditor *>(ed);
-//        if (editor->changed()) {
-//            QBrush br = editor->brush();
-//            model->setData(index, br, BrushRole);
-//        }
-//    }
+    if (index.column() == 0)
+        return;
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+
+    switch (type) {
+        case FontFamily: {
+            QComboBox* editor = static_cast<QComboBox*>(ed);
+            QString val = editor->currentText();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            break;
+        }
+
+        case FontPtSize:
+        case FontPixSize: {
+            QSpinBox* editor = static_cast<QSpinBox*>(ed);
+            editor->interpretText();
+            int val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            break;
+        }
+
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout: {
+            QCheckBox* editor = static_cast<QCheckBox*>(ed);
+            int val = editor->isChecked();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
-void ColorDelegate::updateEditorGeometry(QWidget *ed,
-                const QStyleOptionViewItem &option, const QModelIndex &index) const
+static void processFont(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
 {
-    QItemDelegate::updateEditorGeometry(ed, option, index);
+    QFont value = map[propertyName].value<QFont>();
+    QTreeWidgetItem* iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, QString::fromUtf8("[%1, %2]").
+                   arg(value.family()).arg(value.pointSize() < 0 ? 0 : value.pointSize()));
+
+    QTreeWidgetItem* item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "Family");
+    item1->setData(1, Qt::EditRole, value.family());
+    item1->setData(1, NodeRole::Type, NodeType::FontFamily);
+    item1->setData(1, NodeRole::Data, value.family());
+    iitem->addChild(item1);
+
+    QTreeWidgetItem* item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "Point size");
+    item2->setData(1, Qt::EditRole, value.pointSize() < 0 ? 0 : value.pointSize());
+    item2->setData(1, NodeRole::Type, NodeType::FontPtSize);
+    item2->setData(1, NodeRole::Data, value.pointSize() < 0 ? 0 : value.pointSize());
+    iitem->addChild(item2);
+
+    QTreeWidgetItem* item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "Pixel size");
+    item3->setData(1, Qt::EditRole, value.pixelSize() < 0 ? 0 : value.pixelSize());
+    item3->setData(1, NodeRole::Type, NodeType::FontPixSize);
+    item3->setData(1, NodeRole::Data, value.pixelSize() < 0 ? 0 : value.pixelSize());
+    iitem->addChild(item3);
+
+    QTreeWidgetItem* item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "Bold");
+    item4->setData(1, NodeRole::Type, NodeType::FontBold);
+    item4->setData(1, NodeRole::Data, value.bold());
+    iitem->addChild(item4);
+
+    QTreeWidgetItem* item5 = new QTreeWidgetItem;
+    item5->setFlags(item5->flags() | Qt::ItemIsEditable);
+    item5->setText(0, "Italic");
+    item5->setData(1, NodeRole::Type, NodeType::FontItalic);
+    item5->setData(1, NodeRole::Data, value.italic());
+    iitem->addChild(item5);
+
+    QTreeWidgetItem* item6 = new QTreeWidgetItem;
+    item6->setFlags(item6->flags() | Qt::ItemIsEditable);
+    item6->setText(0, "Underline");
+    item6->setData(1, NodeRole::Type, NodeType::FontUnderline);
+    item6->setData(1, NodeRole::Data, value.underline());
+    iitem->addChild(item6);
+
+    QTreeWidgetItem* item7 = new QTreeWidgetItem;
+    item7->setFlags(item7->flags() | Qt::ItemIsEditable);
+    item7->setText(0, "Overline");
+    item7->setData(1, NodeRole::Type, NodeType::FontOverline);
+    item7->setData(1, NodeRole::Data, value.overline());
+    iitem->addChild(item7);
+
+    QTreeWidgetItem* item8 = new QTreeWidgetItem;
+    item8->setFlags(item8->flags() | Qt::ItemIsEditable);
+    item8->setText(0, "Strikeout");
+    item8->setData(1, NodeRole::Type, NodeType::FontStrikeout);
+    item8->setData(1, NodeRole::Data, value.strikeOut());
+    iitem->addChild(item8);
+
+    item->addChild(iitem);
+}
+
+void ColorDelegate::updateEditorGeometry(QWidget* ed,
+                                         const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QStyledItemDelegate::updateEditorGeometry(ed, option, index);
     ed->setGeometry(ed->geometry().adjusted(0, 0, -1, -1));
 }
 
-void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt,
-            const QModelIndex &index) const
+void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
+                          const QModelIndex &index) const
 {
-    const QAbstractItemModel *model = index.model();
+    QStyleOptionViewItem option = opt;
+    const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
 
-    QStyleOptionViewItem option = opt;
+    if (model->parent(index).isValid()) {
+        if (index.row() % 2) {
+            if (index.column() == 0) {
+                QRectF mrect(option.rect);
+                mrect.setX(0.5);
+                painter->fillRect(mrect, QColor("#EDF3FE"));
+            } else {
+                painter->fillRect(option.rect, QColor("#EDF3FE"));
+            }
+        }
+    } else {
+        painter->fillRect(option.rect, QColor("#C5C9CC"));
+        option.palette.setColor(QPalette::Highlight, QColor("#C5C9CC"));
+    }
+
+    if (index.column() == 0) {
+        QRectF branchRect = QRectF(0, option.rect.top(),
+                                   option.rect.x(), option.rect.height());
+
+        QBrush branchColor = option.palette.base();
+        if(option.state & QStyle::State_Selected) {
+            branchColor = option.palette.highlight();
+        } else {
+            if (!model->parent(index).isValid())
+                branchColor = QColor("#C5C9CC");
+            else if (index.row() % 2)
+                branchColor = QColor("#EDF3FE");
+        }
+        painter->fillRect(branchRect, branchColor);
+
+        if (model->rowCount(index)) {
+            static const int i = 9; // ### hardcoded in qcommonstyle.cpp
+            QRect r = option.rect;
+            QStyleOption branchOption;
+            branchOption.rect = QRect(r.left() - i,
+                                      r.top() + (r.height() - i)/2, i, i);
+            branchOption.state = QStyle::State_Children;
+
+            if (m_view->isExpanded(index))
+                branchOption.state |= QStyle::State_Open;
+
+            qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
+        }
+    }
+
     const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
     if (!model->parent(index).isValid() && mask) {
         option.font.setBold(true);
     }
-    QBrush br = qvariant_cast<QBrush>(index.model()->data(index, BrushRole));
-    if (br.style() == Qt::LinearGradientPattern ||
-            br.style() == Qt::RadialGradientPattern ||
-            br.style() == Qt::ConicalGradientPattern) {
-        painter->save();
-        painter->translate(option.rect.x(), option.rect.y());
-        painter->scale(option.rect.width(), option.rect.height());
-        QGradient gr = *(br.gradient());
-        gr.setCoordinateMode(QGradient::LogicalMode);
-        br = QBrush(gr);
-        painter->fillRect(0, 0, 1, 1, br);
-        painter->restore();
-    } else {
-        painter->save();
-        painter->setBrushOrigin(option.rect.x(), option.rect.y());
-        painter->fillRect(option.rect, br);
-        painter->restore();
-    }
-    QItemDelegate::paint(painter, option, index);
 
+    QStyledItemDelegate::paint(painter, option, index);
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+    QStyleOptionButton eoption;
+    eoption.initFrom(m_view);
+    eoption.rect = option.rect;
+
+    switch (type) {
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout: {
+            auto value = index.data(NodeRole::Data).value<bool>();
+            eoption.state |= value ? QStyle::State_On : QStyle::State_Off;
+            m_view->style()->drawControl(QStyle::CE_CheckBox, &eoption, painter, m_view);
+            break;
+        }
+
+        default:
+            break;
+    }
 
     const QColor color = static_cast<QRgb>(qApp->style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
     const QPen oldPen = painter->pen();
     painter->setPen(QPen(color));
 
     if (index.column() == 0) {
-        painter->drawLine(QPointF(0.5, option.rect.y()),
-                          QPointF(0.5, option.rect.bottom()));
+        painter->drawLine(QPointF(0.5, option.rect.y() + 0.5),
+                          QPointF(0.5, option.rect.bottom() + 0.5));
         if (model->parent(index).isValid()) {
-            painter->drawLine(option.rect.right(), option.rect.y(),
-                              option.rect.right(), option.rect.bottom());
+            painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
+                              option.rect.right() + 0.5, option.rect.bottom() + 0.5);
         }
     } else {
-        painter->drawLine(option.rect.right(), option.rect.y(),
-                          option.rect.right(), option.rect.bottom());
+        painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
+                          option.rect.right() + 0.5, option.rect.bottom() + 0.5);
     }
 
-    painter->drawLine(QPointF(0.5, option.rect.bottom()),
-                      QPointF(option.rect.right(), option.rect.bottom()));
+    painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
+                      QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
     painter->setPen(oldPen);
+
 }
 
 QSize ColorDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
 {
-    return QItemDelegate::sizeHint(opt, index) + QSize(4, 4);
+    return QStyledItemDelegate::sizeHint(opt, index) + QSize(4, 4);
 }
 
-PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent)
+void ColorDelegate::saveChanges(QTreeWidgetItem* item, int column) const
 {
-	setAutoFillBackground(true);
+    //TODO
+}
+
+static void cleanProperties(PropertyMap& map)
+{
+    for (auto key : map.keys()) {
+        if (key.startsWith("__") ||
+            QString::fromUtf8(map.value(key).typeName()).isEmpty() ||
+            QString::fromUtf8(map.value(key).typeName()).
+            contains(QRegExp("Q([A-Za-z_][A-Za-z0-9_]*)\\*")))
+            map.remove(key);
+    }
+}
+
+PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
+{
+    setAutoFillBackground(true);
     QPalette p(palette());
     p.setColor(QPalette::Window, QColor("#E0E4E7"));
     setPalette(p);
 
     QPalette p2(_treeWidget.palette());
     p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Highlight, QColor("#D0D4D7"));
+    p2.setColor(QPalette::Highlight, QColor("#E0E4E7"));
     p2.setColor(QPalette::Text, QColor("#202427"));
+    p2.setColor(QPalette::HighlightedText, QColor("#202427"));
     _treeWidget.setPalette(p2);
 
     _treeWidget.setHorizontalScrollMode(ToolboxTree::ScrollPerPixel);
@@ -196,6 +428,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent)
     _treeWidget.horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     _treeWidget.setIndentation(fit(10));
     _treeWidget.setItemDelegate(new ColorDelegate(&_treeWidget, &_treeWidget));
+    _treeWidget.header()->resizeSection(0, fit(170));
 
     _layout.setSpacing(fit(2));
     _layout.setContentsMargins(fit(3), fit(3), fit(3), fit(3));
@@ -255,22 +488,31 @@ void PropertiesWidget::refreshList()
     }
 
     for (auto property : properties) {
-        if (property.second.isEmpty())
+        PropertyMap map = property.second;
+        cleanProperties(map);
+
+        if (map.isEmpty())
             continue;
 
         QTreeWidgetItem* item = new QTreeWidgetItem;
         item->setText(0, property.first);
 
-        for (auto propertyName : property.second.keys()) {
-            //            if (superClass->property(i).isWritable() &&
-            //                !QString(superClass->property(i).name()).startsWith("__") &&
-            //                !QString(superClass->property(i).read(object).typeName())
-            //                .contains(QRegExp("Q([A-Za-z_][A-Za-z0-9_]*)\\*")))
+        for (auto propertyName : map.keys()) {
+            switch (map[propertyName].type())
+            {
+                case QVariant::Font: {
+                    processFont(item, propertyName, map);
+                    break;
+                }
 
-            QTreeWidgetItem* iitem = new QTreeWidgetItem;
-            iitem->setText(0, propertyName);
-            iitem->setText(1, property.second[propertyName].typeName());
-            item->addChild(iitem);
+                default: {
+                    QTreeWidgetItem* iitem = new QTreeWidgetItem;
+                    iitem->setText(0, propertyName);
+                    iitem->setText(1, map[propertyName].typeName());
+                    item->addChild(iitem);
+                    break;
+                }
+            }
         }
         _treeWidget.addTopLevelItem(item);
         _treeWidget.expandItem(item);
@@ -291,7 +533,7 @@ void PropertiesWidget::handleSelectionChange()
 
 QSize PropertiesWidget::sizeHint() const
 {
-    return QSize(fit(280), fit(400));
+    return QSize(fit(300), fit(400));
 }
 
 #include "propertieswidget.moc"
