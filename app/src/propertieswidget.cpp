@@ -4,17 +4,17 @@
 #include <toolboxtree.h>
 #include <designmanager.h>
 #include <css.h>
+#include <savemanager.h>
+#include <delayer.h>
 
 #include <QtWidgets>
-#include <QQuickItem>
-#include <QQmlContext>
 
 using namespace Fit;
 
 enum NodeType {
     FontFamily,
     FontPtSize,
-    FontPixSize,
+    FontPxSize,
     FontBold,
     FontItalic,
     FontUnderline,
@@ -50,7 +50,7 @@ class ColorDelegate : public QStyledItemDelegate
         QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const override;
 
     public slots:
-        void saveChanges(QTreeWidgetItem *item, int column) const;
+        void saveChanges(const NodeType& type, const QVariant& value) const;
 
     private:
         QTreeWidget* m_view;
@@ -60,8 +60,6 @@ ColorDelegate::ColorDelegate(QTreeWidget* view, QObject* parent) :
     QStyledItemDelegate(parent),
     m_view(view)
 {
-    connect(m_view, &QTreeWidget::itemChanged,
-            this, &ColorDelegate::saveChanges);
 }
 
 QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
@@ -76,21 +74,21 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
 
     switch (type) {
         case FontFamily: {
-            QComboBox* editor = new QComboBox(parent);
+            auto editor = new QComboBox(parent);
             editor->addItems(QFontDatabase().families());
-            connect(editor, &QComboBox::currentTextChanged,
+            connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
                     [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::NoFocus);
+            editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
         }
 
         case FontPtSize:
-        case FontPixSize: {
-            QSpinBox* editor = new QSpinBox(parent);
-            connect(editor, &QSpinBox::editingFinished,
+        case FontPxSize: {
+            auto editor = new QSpinBox(parent);
+            connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
                     [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::NoFocus);
+            editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(72);
             editor->setMinimum(0);
             ed = editor;
@@ -102,10 +100,10 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case FontUnderline:
         case FontOverline:
         case FontStrikeout: {
-            QCheckBox* editor = new QCheckBox(parent);
+            auto editor = new QCheckBox(parent);
             connect(editor, &QCheckBox::toggled,
                     [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::NoFocus);
+            editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
         }
@@ -125,16 +123,16 @@ void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
 
     switch (type) {
         case FontFamily: {
-            const QString val = index.model()->data(index, NodeRole::Data).value<QString>();
-            QComboBox* editor = static_cast<QComboBox*>(ed);
+            auto val = index.model()->data(index, NodeRole::Data).value<QString>();
+            auto editor = static_cast<QComboBox*>(ed);
             editor->setCurrentText(val);
             break;
         }
 
         case FontPtSize:
-        case FontPixSize: {
-            const int val = index.model()->data(index, NodeRole::Data).value<int>();
-            QSpinBox* editor = static_cast<QSpinBox*>(ed);
+        case FontPxSize: {
+            auto val = index.model()->data(index, NodeRole::Data).value<int>();
+            auto editor = static_cast<QSpinBox*>(ed);
             editor->setValue(val);
             break;
         }
@@ -144,8 +142,8 @@ void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
         case FontUnderline:
         case FontOverline:
         case FontStrikeout: {
-            const int val = index.model()->data(index, NodeRole::Data).value<bool>();
-            QCheckBox* editor = static_cast<QCheckBox*>(ed);
+            auto val = index.model()->data(index, NodeRole::Data).value<bool>();
+            auto editor = static_cast<QCheckBox*>(ed);
             editor->setChecked(val);
             break;
         }
@@ -161,24 +159,48 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
     if (index.column() == 0)
         return;
 
+    QVariant val;
     auto type = index.data(NodeRole::Type).value<NodeType>();
 
     switch (type) {
         case FontFamily: {
-            QComboBox* editor = static_cast<QComboBox*>(ed);
-            QString val = editor->currentText();
+            auto editor = static_cast<QComboBox*>(ed);
+            val = editor->currentText();
+            auto preVal = model->data(index, Qt::EditRole).toString();
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
+            pVal.replace(preVal, val.toString());
+            model->setData(pIndex, pVal, Qt::DisplayRole);
             break;
         }
 
         case FontPtSize:
-        case FontPixSize: {
-            QSpinBox* editor = static_cast<QSpinBox*>(ed);
-            editor->interpretText();
-            int val = editor->value();
+        case FontPxSize: {
+            auto editor = static_cast<QSpinBox*>(ed);
+            val = editor->value();
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            int pxSize, ptSize;
+            if (type == FontPtSize) {
+                auto bIndex = model->index(index.row() + 1, 1, index.parent());
+                pxSize = model->data(bIndex, NodeRole::Data).toInt();
+                ptSize = val.toInt();
+            } else {
+                auto bIndex = model->index(index.row() - 1, 1, index.parent());
+                ptSize = model->data(bIndex, NodeRole::Data).toInt();
+                pxSize = val.toInt();
+            }
+            bool px = pxSize > 0 ? true : false;
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
+            pVal.replace(QRegExp(",.*"), ", " + QString::number(px ? pxSize : ptSize) + (px ? "px]" : "pt]"));
+            model->setData(pIndex, pVal, Qt::DisplayRole);
             break;
         }
 
@@ -187,27 +209,30 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case FontUnderline:
         case FontOverline:
         case FontStrikeout: {
-            QCheckBox* editor = static_cast<QCheckBox*>(ed);
-            int val = editor->isChecked();
+            auto editor = static_cast<QCheckBox*>(ed);
+            val = editor->isChecked();
             model->setData(index, val, NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
             break;
         }
 
         default:
             break;
     }
+    saveChanges(type, val);
 }
 
 static void processFont(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
 {
-    QFont value = map[propertyName].value<QFont>();
-    QTreeWidgetItem* iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setText(1, QString::fromUtf8("[%1, %2]").
-                   arg(value.family()).arg(value.pointSize() < 0 ? 0 : value.pointSize()));
+    const auto value = map[propertyName].value<QFont>();
+    const auto px = value.pixelSize() > 0 ? true : false;
+    const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
+        .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
 
-    QTreeWidgetItem* item1 = new QTreeWidgetItem;
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, ft);
+
+    auto item1 = new QTreeWidgetItem;
     item1->setFlags(item1->flags() | Qt::ItemIsEditable);
     item1->setText(0, "Family");
     item1->setData(1, Qt::EditRole, value.family());
@@ -215,7 +240,7 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, Prop
     item1->setData(1, NodeRole::Data, value.family());
     iitem->addChild(item1);
 
-    QTreeWidgetItem* item2 = new QTreeWidgetItem;
+    auto item2 = new QTreeWidgetItem;
     item2->setFlags(item2->flags() | Qt::ItemIsEditable);
     item2->setText(0, "Point size");
     item2->setData(1, Qt::EditRole, value.pointSize() < 0 ? 0 : value.pointSize());
@@ -223,43 +248,43 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, Prop
     item2->setData(1, NodeRole::Data, value.pointSize() < 0 ? 0 : value.pointSize());
     iitem->addChild(item2);
 
-    QTreeWidgetItem* item3 = new QTreeWidgetItem;
+    auto item3 = new QTreeWidgetItem;
     item3->setFlags(item3->flags() | Qt::ItemIsEditable);
     item3->setText(0, "Pixel size");
     item3->setData(1, Qt::EditRole, value.pixelSize() < 0 ? 0 : value.pixelSize());
-    item3->setData(1, NodeRole::Type, NodeType::FontPixSize);
+    item3->setData(1, NodeRole::Type, NodeType::FontPxSize);
     item3->setData(1, NodeRole::Data, value.pixelSize() < 0 ? 0 : value.pixelSize());
     iitem->addChild(item3);
 
-    QTreeWidgetItem* item4 = new QTreeWidgetItem;
+    auto item4 = new QTreeWidgetItem;
     item4->setFlags(item4->flags() | Qt::ItemIsEditable);
     item4->setText(0, "Bold");
     item4->setData(1, NodeRole::Type, NodeType::FontBold);
     item4->setData(1, NodeRole::Data, value.bold());
     iitem->addChild(item4);
 
-    QTreeWidgetItem* item5 = new QTreeWidgetItem;
+    auto item5 = new QTreeWidgetItem;
     item5->setFlags(item5->flags() | Qt::ItemIsEditable);
     item5->setText(0, "Italic");
     item5->setData(1, NodeRole::Type, NodeType::FontItalic);
     item5->setData(1, NodeRole::Data, value.italic());
     iitem->addChild(item5);
 
-    QTreeWidgetItem* item6 = new QTreeWidgetItem;
+    auto item6 = new QTreeWidgetItem;
     item6->setFlags(item6->flags() | Qt::ItemIsEditable);
     item6->setText(0, "Underline");
     item6->setData(1, NodeRole::Type, NodeType::FontUnderline);
     item6->setData(1, NodeRole::Data, value.underline());
     iitem->addChild(item6);
 
-    QTreeWidgetItem* item7 = new QTreeWidgetItem;
+    auto item7 = new QTreeWidgetItem;
     item7->setFlags(item7->flags() | Qt::ItemIsEditable);
     item7->setText(0, "Overline");
     item7->setData(1, NodeRole::Type, NodeType::FontOverline);
     item7->setData(1, NodeRole::Data, value.overline());
     iitem->addChild(item7);
 
-    QTreeWidgetItem* item8 = new QTreeWidgetItem;
+    auto item8 = new QTreeWidgetItem;
     item8->setFlags(item8->flags() | Qt::ItemIsEditable);
     item8->setText(0, "Strikeout");
     item8->setData(1, NodeRole::Type, NodeType::FontStrikeout);
@@ -346,7 +371,7 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
         case FontUnderline:
         case FontOverline:
         case FontStrikeout: {
-            auto value = index.data(NodeRole::Data).value<bool>();
+            bool value = index.data(NodeRole::Data).value<bool>();
             eoption.state |= value ? QStyle::State_On : QStyle::State_Off;
             m_view->style()->drawControl(QStyle::CE_CheckBox, &eoption, painter, m_view);
             break;
@@ -383,9 +408,55 @@ QSize ColorDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex
     return QStyledItemDelegate::sizeHint(opt, index) + QSize(4, 4);
 }
 
-void ColorDelegate::saveChanges(QTreeWidgetItem* item, int column) const
+void ColorDelegate::saveChanges(const NodeType& type, const QVariant& value) const
 {
-    //TODO
+    auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
+
+    switch (type) {
+        case FontFamily:
+            SaveManager::setProperty(selectedControl, "font.family", value);
+            break;
+
+        case FontPtSize:
+            SaveManager::setProperty(selectedControl, "font.pointSize", value);
+            break;
+
+        case FontPxSize:
+            SaveManager::setProperty(selectedControl, "font.pixelSize", value);
+            break;
+
+        case FontBold:
+            SaveManager::setProperty(selectedControl, "font.bold", value);
+            break;
+
+        case FontItalic:
+            SaveManager::setProperty(selectedControl, "font.italic", value);
+            break;
+
+        case FontUnderline:
+            SaveManager::setProperty(selectedControl, "font.underline", value);
+            break;
+
+        case FontOverline:
+            SaveManager::setProperty(selectedControl, "font.overline", value);
+            break;
+
+        case FontStrikeout:
+            SaveManager::setProperty(selectedControl, "font.strikeout", value);
+            break;
+
+        default:
+            break;
+    }
+
+    QMetaObject::Connection connection;
+    connection = connect(SaveManager::instance(), &SaveManager::parserRunningChanged,
+      [selectedControl, connection] {
+        if (SaveManager::parserWorking() == false) {
+            selectedControl->refresh();
+            disconnect(connection);
+        }
+    });
 }
 
 static void cleanProperties(PropertyMap& map)
