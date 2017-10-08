@@ -20,7 +20,9 @@ enum NodeType {
     FontUnderline,
     FontOverline,
     FontStrikeout,
-    Color
+    Color,
+    Bool,
+    String
 };
 Q_DECLARE_METATYPE(NodeType)
 
@@ -51,6 +53,7 @@ class ColorDelegate : public QStyledItemDelegate
         QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const override;
 
     public slots:
+        void saveChanges(const QString& property, const QVariant& value) const;
         void saveChanges(const NodeType& type, const QVariant& value) const;
 
     private:
@@ -72,6 +75,8 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         return ed;
 
     auto type = index.data(NodeRole::Type).value<NodeType>();
+    auto pIndex = m_view->model()->index(index.row(), 0, index.parent());
+    auto property = m_view->model()->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
         case FontFamily: {
@@ -100,7 +105,8 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case FontItalic:
         case FontUnderline:
         case FontOverline:
-        case FontStrikeout: {
+        case FontStrikeout:
+        case Bool: {
             auto editor = new QCheckBox(parent);
             connect(editor, &QCheckBox::toggled,
                 [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
@@ -115,7 +121,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             editor->setText("Change Color");
             ed = editor;
 
-            connect(editor, &QCheckBox::clicked, [this, type, index] ()
+            connect(editor, &QCheckBox::clicked, [this, property, index] ()
             {
                 auto color = index.data(NodeRole::Data).value<QColor>();
                 color = QColorDialog::getColor(color, m_view, "Choose Color",
@@ -123,9 +129,18 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
                 if (color.isValid()) {
                     m_view->model()->setData(index, color, NodeRole::Data);
                     m_view->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
-                    saveChanges(type, color);
+                    saveChanges(property, color);
                 }
             });
+            break;
+        }
+
+        case String: {
+            auto editor = new QLineEdit(parent);
+            connect(editor, &QLineEdit::textEdited,
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
             break;
         }
 
@@ -163,10 +178,18 @@ void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
         case FontItalic:
         case FontUnderline:
         case FontOverline:
-        case FontStrikeout: {
+        case FontStrikeout:
+        case Bool: {
             auto val = index.model()->data(index, NodeRole::Data).value<bool>();
             auto editor = static_cast<QCheckBox*>(ed);
             editor->setChecked(val);
+            break;
+        }
+
+        case String: {
+            auto val = index.model()->data(index, NodeRole::Data).value<QString>();
+            auto editor = static_cast<QLineEdit*>(ed);
+            editor->setText(val);
             break;
         }
 
@@ -183,6 +206,8 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
 
     QVariant val;
     auto type = index.data(NodeRole::Type).value<NodeType>();
+    auto pIndex = model->index(index.row(), 0, index.parent());
+    auto property = model->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
         case FontFamily: {
@@ -197,6 +222,7 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
             pVal.replace(preVal, val.toString());
             model->setData(pIndex, pVal, Qt::DisplayRole);
+            saveChanges(type, val);
             break;
         }
 
@@ -223,6 +249,7 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
             pVal.replace(QRegExp(",.*"), ", " + QString::number(px ? pxSize : ptSize) + (px ? "px]" : "pt]"));
             model->setData(pIndex, pVal, Qt::DisplayRole);
+            saveChanges(type, val);
             break;
         }
 
@@ -234,13 +261,30 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             auto editor = static_cast<QCheckBox*>(ed);
             val = editor->isChecked();
             model->setData(index, val, NodeRole::Data);
+            saveChanges(type, val);
+            break;
+        }
+
+        case Bool: {
+            auto editor = static_cast<QCheckBox*>(ed);
+            val = editor->isChecked();
+            model->setData(index, val, NodeRole::Data);
+            saveChanges(property, val);
+            break;
+        }
+
+        case String: {
+            auto editor = static_cast<QLineEdit*>(ed);
+            val = editor->text();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
             break;
         }
 
         default:
             break;
     }
-    saveChanges(type, val);
 }
 
 static void processFont(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
@@ -331,6 +375,33 @@ static void processColor(QTreeWidgetItem* item, const QString& propertyName, Pro
     item->addChild(iitem);
 }
 
+static void processBool(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+{
+    const auto value = map[propertyName].value<bool>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Bool);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+static void processString(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+{
+    const auto value = map[propertyName].value<QString>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::String);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
 void ColorDelegate::updateEditorGeometry(QWidget* ed,
     const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
@@ -414,7 +485,8 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
         case FontItalic:
         case FontUnderline:
         case FontOverline:
-        case FontStrikeout: {
+        case FontStrikeout:
+        case Bool: {
             bool value = index.data(NodeRole::Data).value<bool>();
             eoption.state |= value ? QStyle::State_On : QStyle::State_Off;
             m_view->style()->drawControl(QStyle::CE_CheckBox, &eoption, painter, m_view);
@@ -454,48 +526,51 @@ QSize ColorDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex
 
 void ColorDelegate::saveChanges(const NodeType& type, const QVariant& value) const
 {
-    auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
-
+    QString property;
     switch (type) {
         case FontFamily:
-            SaveManager::setProperty(selectedControl, "font.family", value);
+            property = "font.family";
             break;
 
         case FontPtSize:
-            SaveManager::setProperty(selectedControl, "font.pointSize", value);
+            property = "font.pointSize";
             break;
 
         case FontPxSize:
-            SaveManager::setProperty(selectedControl, "font.pixelSize", value);
+            property = "font.pixelSize";
             break;
 
         case FontBold:
-            SaveManager::setProperty(selectedControl, "font.bold", value);
+            property = "font.bold";
             break;
 
         case FontItalic:
-            SaveManager::setProperty(selectedControl, "font.italic", value);
+            property = "font.italic";
             break;
 
         case FontUnderline:
-            SaveManager::setProperty(selectedControl, "font.underline", value);
+            property = "font.underline";
             break;
 
         case FontOverline:
-            SaveManager::setProperty(selectedControl, "font.overline", value);
+            property = "font.overline";
             break;
 
         case FontStrikeout:
-            SaveManager::setProperty(selectedControl, "font.strikeout", value);
-            break;
-
-        case Color:
-            SaveManager::setProperty(selectedControl, "color", value);
+            property = "font.strikeout";
             break;
 
         default:
             break;
     }
+    saveChanges(property, value);
+}
+
+void ColorDelegate::saveChanges(const QString& property, const QVariant& value) const
+{
+    auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
+
+    SaveManager::setProperty(selectedControl, property, value);
 
     QMetaObject::Connection connection;
     connection = connect(SaveManager::instance(), &SaveManager::parserRunningChanged,
@@ -626,6 +701,16 @@ void PropertiesWidget::refreshList()
 
                 case QVariant::Color: {
                     processColor(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::Bool: {
+                    processBool(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::String: {
+                    processString(item, propertyName, map);
                     break;
                 }
 
