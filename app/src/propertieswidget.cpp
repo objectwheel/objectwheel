@@ -19,7 +19,8 @@ enum NodeType {
     FontItalic,
     FontUnderline,
     FontOverline,
-    FontStrikeout
+    FontStrikeout,
+    Color
 };
 Q_DECLARE_METATYPE(NodeType)
 
@@ -63,7 +64,7 @@ ColorDelegate::ColorDelegate(QTreeWidget* view, QObject* parent) :
 }
 
 QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
-                                     const QModelIndex &index) const
+    const QModelIndex &index) const
 {
     QWidget* ed = 0;
 
@@ -77,7 +78,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             auto editor = new QComboBox(parent);
             editor->addItems(QFontDatabase().families());
             connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-                    [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -87,7 +88,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case FontPxSize: {
             auto editor = new QSpinBox(parent);
             connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-                    [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(72);
             editor->setMinimum(0);
@@ -102,11 +103,32 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case FontStrikeout: {
             auto editor = new QCheckBox(parent);
             connect(editor, &QCheckBox::toggled,
-                    [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
         }
+
+        case Color: {
+            auto editor = new QToolButton(parent);
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setText("Change Color");
+            ed = editor;
+
+            connect(editor, &QCheckBox::clicked, [this, type, index] ()
+            {
+                auto color = index.data(NodeRole::Data).value<QColor>();
+                color = QColorDialog::getColor(color, m_view, "Choose Color",
+                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+                if (color.isValid()) {
+                    m_view->model()->setData(index, color, NodeRole::Data);
+                    m_view->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
+                    saveChanges(type, color);
+                }
+            });
+            break;
+        }
+
         default:
             break;
     }
@@ -294,11 +316,33 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, Prop
     item->addChild(iitem);
 }
 
+static void processColor(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+{
+    const auto value = map[propertyName].value<QColor>();
+    const auto cc = value.name(QColor::HexArgb);
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, cc);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Color);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
 void ColorDelegate::updateEditorGeometry(QWidget* ed,
-                                         const QStyleOptionViewItem &option, const QModelIndex &index) const
+    const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QStyledItemDelegate::updateEditorGeometry(ed, option, index);
-    ed->setGeometry(ed->geometry().adjusted(0, 0, -1, -1));
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+
+    switch (type) {
+        default:
+            ed->setGeometry(ed->geometry().adjusted(0, 0, -1, -1));
+            break;
+    }
 }
 
 void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
@@ -445,6 +489,10 @@ void ColorDelegate::saveChanges(const NodeType& type, const QVariant& value) con
             SaveManager::setProperty(selectedControl, "font.strikeout", value);
             break;
 
+        case Color:
+            SaveManager::setProperty(selectedControl, "color", value);
+            break;
+
         default:
             break;
     }
@@ -573,6 +621,11 @@ void PropertiesWidget::refreshList()
             {
                 case QVariant::Font: {
                     processFont(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::Color: {
+                    processColor(item, propertyName, map);
                     break;
                 }
 
