@@ -22,7 +22,17 @@ enum NodeType {
     FontStrikeout,
     Color,
     Bool,
-    String
+    String,
+    Double,
+    Int,
+    GeometryX,
+    GeometryY,
+    GeometryWidth,
+    GeometryHeight,
+    GeometryFX,
+    GeometryFY,
+    GeometryFWidth,
+    GeometryFHeight
 };
 Q_DECLARE_METATYPE(NodeType)
 
@@ -144,6 +154,62 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             break;
         }
 
+        case Double: {
+            auto editor = new QDoubleSpinBox(parent);
+            connect(editor, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            if (property == "opacity") {
+                editor->setMaximum(1.0);
+                editor->setMinimum(0.0);
+                editor->setSingleStep(0.1);
+            } else {
+                editor->setMaximum(std::numeric_limits<double>::max());
+                editor->setMinimum(std::numeric_limits<double>::min());
+            }
+            ed = editor;
+            break;
+        }
+
+        case Int: {
+            auto editor = new QSpinBox(parent);
+            connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setMaximum(std::numeric_limits<int>::max());
+            editor->setMinimum(std::numeric_limits<int>::min());
+            ed = editor;
+            break;
+        }
+
+        case GeometryX:
+        case GeometryY:
+        case GeometryWidth:
+        case GeometryHeight: {
+            auto editor = new QSpinBox(parent);
+            connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setMaximum(std::numeric_limits<int>::max());
+            editor->setMinimum(std::numeric_limits<int>::min());
+            ed = editor;
+            break;
+        }
+
+        case GeometryFX:
+        case GeometryFY:
+        case GeometryFWidth:
+        case GeometryFHeight: {
+            auto editor = new QDoubleSpinBox(parent);
+            connect(editor, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setMaximum(std::numeric_limits<double>::max());
+            editor->setMinimum(std::numeric_limits<double>::min());
+            ed = editor;
+            break;
+        }
+
         default:
             break;
     }
@@ -193,13 +259,47 @@ void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
             break;
         }
 
+        case Double: {
+            auto val = index.model()->data(index, NodeRole::Data).value<double>();
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case Int: {
+            auto val = index.model()->data(index, NodeRole::Data).value<int>();
+            auto editor = static_cast<QSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case GeometryX:
+        case GeometryY:
+        case GeometryWidth:
+        case GeometryHeight: {
+            auto val = index.model()->data(index, NodeRole::Data).value<int>();
+            auto editor = static_cast<QSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case GeometryFX:
+        case GeometryFY:
+        case GeometryFWidth:
+        case GeometryFHeight: {
+            auto val = index.model()->data(index, NodeRole::Data).value<double>();
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
         default:
             break;
     }
 }
 
 void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
-                                 const QModelIndex &index) const
+    const QModelIndex &index) const
 {
     if (index.column() == 0)
         return;
@@ -282,6 +382,72 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             break;
         }
 
+        case Double: {
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
+            break;
+        }
+
+        case Int: {
+            auto editor = static_cast<QSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
+            break;
+        }
+
+        case GeometryX:
+        case GeometryY:
+        case GeometryWidth:
+        case GeometryHeight: {
+            auto editor = static_cast<QSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toInt();
+            auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toInt();
+            auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toInt();
+            auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toInt();
+
+            const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+                arg(x).arg(y).arg(w).arg(h);
+
+            model->setData(pIndex, gt, Qt::DisplayRole);
+            saveChanges(type, val);
+            break;
+        }
+
+        case GeometryFX:
+        case GeometryFY:
+        case GeometryFWidth:
+        case GeometryFHeight: {
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toReal();
+            auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toReal();
+            auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toReal();
+            auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toReal();
+
+            const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+                arg(x).arg(y).arg(w).arg(h);
+
+            model->setData(pIndex, gt, Qt::DisplayRole);
+            saveChanges(type, val);
+            break;
+        }
+
         default:
             break;
     }
@@ -360,6 +526,99 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, Prop
     item->addChild(iitem);
 }
 
+static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+{
+    const auto value = QRect(map["x"].toInt(), map["y"].toInt(),
+        map["width"].toInt(), map["height"].toInt());
+    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+        arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, gt);
+
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "X");
+    item1->setData(1, Qt::EditRole, value.x());
+    item1->setData(1, NodeRole::Type, NodeType::GeometryX);
+    item1->setData(1, NodeRole::Data, value.x());
+    iitem->addChild(item1);
+
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "Y");
+    item2->setData(1, Qt::EditRole, value.y());
+    item2->setData(1, NodeRole::Type, NodeType::GeometryY);
+    item2->setData(1, NodeRole::Data, value.y());
+    iitem->addChild(item2);
+
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "Width");
+    item3->setData(1, Qt::EditRole, value.width());
+    item3->setData(1, NodeRole::Type, NodeType::GeometryWidth);
+    item3->setData(1, NodeRole::Data, value.width());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "Height");
+    item4->setData(1, Qt::EditRole, value.height());
+    item4->setData(1, NodeRole::Type, NodeType::GeometryHeight);
+    item4->setData(1, NodeRole::Data, value.height());
+    iitem->addChild(item4);
+
+    item->addChild(iitem);
+}
+
+static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+{
+    const auto value = QRectF(map["x"].toReal(), map["y"].toReal(),
+        map["width"].toReal(), map["height"].toReal());
+    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+        arg((int)value.x()).arg((int)value.y()).
+        arg((int)value.width()).arg((int)value.height());
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, gt);
+
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "X");
+    item1->setData(1, Qt::EditRole, value.x());
+    item1->setData(1, NodeRole::Type, NodeType::GeometryFX);
+    item1->setData(1, NodeRole::Data, value.x());
+    iitem->addChild(item1);
+
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "Y");
+    item2->setData(1, Qt::EditRole, value.y());
+    item2->setData(1, NodeRole::Type, NodeType::GeometryFY);
+    item2->setData(1, NodeRole::Data, value.y());
+    iitem->addChild(item2);
+
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "Width");
+    item3->setData(1, Qt::EditRole, value.width());
+    item3->setData(1, NodeRole::Type, NodeType::GeometryFWidth);
+    item3->setData(1, NodeRole::Data, value.width());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "Height");
+    item4->setData(1, Qt::EditRole, value.height());
+    item4->setData(1, NodeRole::Type, NodeType::GeometryFHeight);
+    item4->setData(1, NodeRole::Data, value.height());
+    iitem->addChild(item4);
+
+    item->addChild(iitem);
+}
+
 static void processColor(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
 {
     const auto value = map[propertyName].value<QColor>();
@@ -397,6 +656,34 @@ static void processString(QTreeWidgetItem* item, const QString& propertyName, Pr
     iitem->setData(1, Qt::EditRole, value);
     iitem->setData(1, NodeRole::Data, value);
     iitem->setData(1, NodeRole::Type, NodeType::String);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+static void processDouble(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+{
+    const auto value = map[propertyName].value<double>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Double);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+static void processInt(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+{
+    const auto value = map[propertyName].value<int>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Int);
     iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
 
     item->addChild(iitem);
@@ -466,11 +753,6 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
 
             qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
         }
-    }
-
-    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
-    if (!model->parent(index).isValid() && mask) {
-        option.font.setBold(true);
     }
 
     QStyledItemDelegate::paint(painter, option, index);
@@ -558,6 +840,26 @@ void ColorDelegate::saveChanges(const NodeType& type, const QVariant& value) con
 
         case FontStrikeout:
             property = "font.strikeout";
+            break;
+
+        case GeometryX:
+        case GeometryFX:
+            property = "x";
+            break;
+
+        case GeometryY:
+        case GeometryFY:
+            property = "y";
+            break;
+
+        case GeometryWidth:
+        case GeometryFWidth:
+            property = "width";
+            break;
+
+        case GeometryHeight:
+        case GeometryFHeight:
+            property = "height";
             break;
 
         default:
@@ -714,6 +1016,29 @@ void PropertiesWidget::refreshList()
                     break;
                 }
 
+                case QVariant::Double: {
+                    if (propertyName == "x" || propertyName == "y" ||
+                        propertyName == "width" || propertyName == "height") {
+                        if (propertyName == "x")
+                            processGeometryF(item, "geometry", map);
+                    } else {
+                        processDouble(item, propertyName, map);
+                    }
+                    break;
+                }
+
+                case QVariant::Int: {
+                    // TODO: if (filterEnumerator)
+                    if (propertyName == "x" || propertyName == "y" ||
+                        propertyName == "width" || propertyName == "height") {
+                        if (propertyName == "x")
+                            processGeometry(item, "geometry", map);
+                    } else {
+                        processInt(item, propertyName, map);
+                    }
+                    break;
+                }
+
                 default: {
                     QTreeWidgetItem* iitem = new QTreeWidgetItem;
                     iitem->setText(0, propertyName);
@@ -742,7 +1067,7 @@ void PropertiesWidget::handleSelectionChange()
 
 QSize PropertiesWidget::sizeHint() const
 {
-    return QSize(fit(300), fit(400));
+    return QSize(fit(340), fit(400));
 }
 
 #include "propertieswidget.moc"

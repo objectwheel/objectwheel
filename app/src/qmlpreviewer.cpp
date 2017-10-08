@@ -102,6 +102,7 @@ SuperClassList QmlPreviewerPrivate::extractProperties(const QObject* object) con
 {
     SuperClassList properties;
     auto superClass = object->metaObject();
+
     while (superClass) {
         PropertyMap propertyMap;
         QString className = superClass->className();
@@ -114,7 +115,8 @@ SuperClassList QmlPreviewerPrivate::extractProperties(const QObject* object) con
 
         for (int i = superClass->propertyOffset();
              i < superClass->propertyCount(); i++) {
-                propertyMap[(superClass->property(i).name())] = superClass->property(i).read(object);
+            if (superClass->property(i).isWritable())
+                 propertyMap[(superClass->property(i).name())] = superClass->property(i).read(object);
         }
 
         className = className.split("_QMLTYPE").at(0);
