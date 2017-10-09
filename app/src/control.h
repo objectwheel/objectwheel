@@ -77,7 +77,7 @@ class Control : public QGraphicsWidget
         bool dragIn() const;
         bool clip() const;
         bool init() const;
-        SuperClassList properties() const;
+        PropertyNodes properties() const;
         QList<QString> events() const;
         QList<Control*> childControls(bool dive = true) const;
         Control* parentControl() const;
@@ -111,7 +111,7 @@ class Control : public QGraphicsWidget
         void setDragging(bool dragging);
         void setDragIn(bool dragIn);
         void setClip(bool clip);
-        void setProperties(const SuperClassList& properties);
+        void setProperties(const PropertyNodes& properties);
         void setEvents(const QList<QString>& events);
 
         virtual void centralize();
@@ -144,7 +144,7 @@ class Control : public QGraphicsWidget
         QString _uid;
         QString _id;
         QList<QString> _events;
-        SuperClassList _properties;
+        PropertyNodes _properties;
         QString _url;
         bool _dragging;
         bool _dragIn;

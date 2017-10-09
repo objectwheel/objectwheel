@@ -759,12 +759,12 @@ void Control::setEvents(const QList<QString>& events)
     _events = events;
 }
 
-SuperClassList Control::properties() const
+PropertyNodes Control::properties() const
 {
     return _properties;
 }
 
-void Control::setProperties(const SuperClassList& properties)
+void Control::setProperties(const PropertyNodes& properties)
 {
     _properties = properties;
 }

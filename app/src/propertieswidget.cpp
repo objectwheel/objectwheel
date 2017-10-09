@@ -453,7 +453,7 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
     }
 }
 
-static void processFont(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processFont(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<QFont>();
     const auto px = value.pixelSize() > 0 ? true : false;
@@ -526,7 +526,7 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, Prop
     item->addChild(iitem);
 }
 
-static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = QRect(map["x"].toInt(), map["y"].toInt(),
         map["width"].toInt(), map["height"].toInt());
@@ -572,7 +572,7 @@ static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, 
     item->addChild(iitem);
 }
 
-static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = QRectF(map["x"].toReal(), map["y"].toReal(),
         map["width"].toReal(), map["height"].toReal());
@@ -619,7 +619,7 @@ static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName,
     item->addChild(iitem);
 }
 
-static void processColor(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processColor(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<QColor>();
     const auto cc = value.name(QColor::HexArgb);
@@ -634,7 +634,7 @@ static void processColor(QTreeWidgetItem* item, const QString& propertyName, Pro
     item->addChild(iitem);
 }
 
-static void processBool(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processBool(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<bool>();
 
@@ -647,7 +647,7 @@ static void processBool(QTreeWidgetItem* item, const QString& propertyName, Prop
     item->addChild(iitem);
 }
 
-static void processString(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processString(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<QString>();
 
@@ -661,7 +661,7 @@ static void processString(QTreeWidgetItem* item, const QString& propertyName, Pr
     item->addChild(iitem);
 }
 
-static void processDouble(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processDouble(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<double>();
 
@@ -675,9 +675,43 @@ static void processDouble(QTreeWidgetItem* item, const QString& propertyName, Pr
     item->addChild(iitem);
 }
 
-static void processInt(QTreeWidgetItem* item, const QString& propertyName, PropertyMap& map)
+static void processInt(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<int>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Int);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+static void processEnumerator(QTreeWidgetItem* item, const QString& propertyName, const PropertyNode& node)
+{
+    const auto value = node.propertyMap[propertyName].value<int>();
+
+    QMetaProperty mp;
+    for (int i = 0; i < node.metaObject->propertyCount(); i++)
+        if (node.metaObject->property(i).name() == propertyName)
+            mp = node.metaObject->property(i);
+
+    if (mp.isValid() && mp.isEnumType()) {
+
+    } else if (mp.isValid() && mp.isFlagType()) {
+
+    } else if(
+              propertyName == "inputMethodHints" ||
+              propertyName == "horizontalAlignment" ||
+              propertyName == "verticalAlignment" ||
+              propertyName == "wrapMode" ||
+              propertyName == "orientation" ||
+              propertyName == "tickmarkAlignment" ||
+              propertyName == "echoMode") {
+
+    }
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -755,6 +789,11 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
         }
     }
 
+    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
+    if (!model->parent(index).isValid() && mask) {
+        option.font.setWeight(QFont::DemiBold);
+    }
+
     QStyledItemDelegate::paint(painter, option, index);
 
     auto type = index.data(NodeRole::Type).value<NodeType>();
@@ -798,7 +837,6 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
     painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
                       QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
     painter->setPen(oldPen);
-
 }
 
 QSize ColorDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
@@ -963,7 +1001,7 @@ void PropertiesWidget::refreshList()
     if (selectedControls.size() != 1)
         return;
 
-    auto properties = selectedControls[0]->properties();
+    auto propertyNodes = selectedControls[0]->properties();
 
     {
         QTreeWidgetItem* item = new QTreeWidgetItem;
@@ -971,7 +1009,7 @@ void PropertiesWidget::refreshList()
         {
             QTreeWidgetItem* iitem = new QTreeWidgetItem;
             iitem->setText(0, "Type");
-            iitem->setText(1, properties.first().first);
+            iitem->setText(1, propertyNodes.first().cleanClassName);
             item->addChild(iitem);
 
             QTreeWidgetItem* jitem = new QTreeWidgetItem;
@@ -983,15 +1021,16 @@ void PropertiesWidget::refreshList()
         _treeWidget.expandItem(item);
     }
 
-    for (auto property : properties) {
-        PropertyMap map = property.second;
+    for (const auto& propertyNode : propertyNodes) {
+        auto metaObject = propertyNode.metaObject;
+        auto map = propertyNode.propertyMap;
         cleanProperties(map);
 
         if (map.isEmpty())
             continue;
 
-        QTreeWidgetItem* item = new QTreeWidgetItem;
-        item->setText(0, property.first);
+        auto item = new QTreeWidgetItem;
+        item->setText(0, propertyNode.cleanClassName);
 
         for (auto propertyName : map.keys()) {
             switch (map[propertyName].type())
@@ -1028,8 +1067,21 @@ void PropertiesWidget::refreshList()
                 }
 
                 case QVariant::Int: {
-                    // TODO: if (filterEnumerator)
-                    if (propertyName == "x" || propertyName == "y" ||
+                    QMetaProperty mp;
+                    for (int i = 0; i < metaObject->propertyCount(); i++)
+                        if (metaObject->property(i).name() == propertyName)
+                            mp = metaObject->property(i);
+
+                    if ((mp.isValid() && (mp.isEnumType() || mp.isFlagType())) ||
+                        propertyName == "inputMethodHints" ||
+                        propertyName == "horizontalAlignment" ||
+                        propertyName == "verticalAlignment" ||
+                        propertyName == "wrapMode" ||
+                        propertyName == "orientation" ||
+                        propertyName == "tickmarkAlignment" ||
+                        propertyName == "echoMode") {
+                        processEnumerator(item, propertyName, propertyNode);
+                    } else if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                         if (propertyName == "x")
                             processGeometry(item, "geometry", map);

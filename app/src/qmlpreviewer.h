@@ -14,14 +14,21 @@ class Control;
 class QmlPreviewerPrivate;
 
 typedef QMap<QString, QVariant> PropertyMap;
-typedef QList<QPair<QString, PropertyMap>> SuperClassList;
+
+struct PropertyNode {
+        QString cleanClassName;
+        const QMetaObject* metaObject;
+        PropertyMap propertyMap;
+};
+
+typedef QList<PropertyNode> PropertyNodes;
 
 struct PreviewResult {
         QPixmap preview;
         QPointF pos;
         QSizeF size;
         QList<QString> events;
-        SuperClassList properties;
+        PropertyNodes properties;
         bool clip;
         bool gui;
         int zValue;

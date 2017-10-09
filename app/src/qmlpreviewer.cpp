@@ -36,7 +36,7 @@ class QmlPreviewerPrivate : public QObject
         QmlPreviewerPrivate(QmlPreviewer* parent);
         void scratchPixmapIfEmpty(QPixmap& pixmap) const;
         QQuickWindow* handleWindowsIfAny(QObject* object) const;
-        SuperClassList extractProperties(const QObject* object) const;
+        PropertyNodes extractProperties(const QObject* object) const;
         QList<QString> extractEvents(const QObject* object) const;
 
     public slots:
@@ -98,31 +98,42 @@ QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object) const
     return ret;
 }
 
-SuperClassList QmlPreviewerPrivate::extractProperties(const QObject* object) const
+PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object) const
 {
-    SuperClassList properties;
-    auto superClass = object->metaObject();
+    PropertyNodes propertyNodes;
+    auto metaObject = object->metaObject();
 
-    while (superClass) {
-        PropertyMap propertyMap;
-        QString className = superClass->className();
-
+    while (metaObject) {
+        QString className = metaObject->className();
         if (className == "QObject" ||
-            (superClass->propertyOffset() - superClass->propertyCount()) == 0) {
-            superClass = superClass->superClass();
+            (metaObject->propertyOffset() -
+             metaObject->propertyCount()) == 0) {
+            metaObject = metaObject->superClass();
             continue;
         }
 
-        for (int i = superClass->propertyOffset();
-             i < superClass->propertyCount(); i++) {
-            if (superClass->property(i).isWritable())
-                 propertyMap[(superClass->property(i).name())] = superClass->property(i).read(object);
+        PropertyNode propertyNode;
+        PropertyMap propertyMap;
+
+        for (int i = metaObject->propertyOffset();
+             i < metaObject->propertyCount(); i++) {
+            if (metaObject->property(i).isWritable()) {
+                auto name = metaObject->property(i).name();
+                auto val = metaObject->property(i).read(object);
+                propertyMap[name] = val;
+            }
         }
 
         className = className.split("_QMLTYPE").at(0);
         className.remove("QQuick");
-        properties << QPair<QString, PropertyMap>(className, propertyMap);
-        superClass = superClass->superClass();
+
+        propertyNode.cleanClassName = className;
+        propertyNode.propertyMap = propertyMap;
+        propertyNode.metaObject = metaObject;
+
+        propertyNodes << propertyNode;
+
+        metaObject = metaObject->superClass();
     }
 
     // ** Attached Properties **
@@ -140,7 +151,7 @@ SuperClassList QmlPreviewerPrivate::extractProperties(const QObject* object) con
     //        }
     //    }
 
-    return properties;
+    return propertyNodes;
 }
 
 QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
