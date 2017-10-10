@@ -946,14 +946,17 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
         return;
 
     if (property == TAG_ID) {
-        auto _suid = suid(control->dir());
+        if (control->id() == value.toString())
+            return;
 
+        auto _suid = suid(control->dir());
+        control->setId(value.toString());
         _d->refactorId(control, _suid, topPath);
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;
         auto propertyData = rdfile(propertyPath);
-        _d->setProperty(propertyData, TAG_ID, QJsonValue::fromVariant(value));
+        _d->setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
     } else {
         auto fileName = control->dir() + separator() + DIR_THIS +

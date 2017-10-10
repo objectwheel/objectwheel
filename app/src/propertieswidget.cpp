@@ -1,5 +1,4 @@
 #include <propertieswidget.h>
-#include <propertyitem.h>
 #include <fit.h>
 #include <toolboxtree.h>
 #include <designmanager.h>
@@ -23,6 +22,7 @@ enum NodeType {
     Color,
     Bool,
     String,
+    Id,
     Url,
     Double,
     Int,
@@ -155,6 +155,18 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             break;
         }
 
+        case Id: {
+            auto editor = new QLineEdit(parent);
+            QRegExp rx("[a-z_][a-zA-Z0-9_]+");
+            QValidator* validator = new QRegExpValidator(rx, editor);
+            connect(editor, &QLineEdit::editingFinished,
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setValidator(validator);
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
         case Url: {
             auto editor = new QLineEdit(parent);
             connect(editor, &QLineEdit::textEdited,
@@ -262,6 +274,7 @@ void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
             break;
         }
 
+        case Id:
         case String: {
             auto val = index.model()->data(index, NodeRole::Data).value<QString>();
             auto editor = static_cast<QLineEdit*>(ed);
@@ -390,6 +403,7 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             break;
         }
 
+        case Id:
         case String: {
             auto editor = static_cast<QLineEdit*>(ed);
             val = editor->text();
@@ -916,7 +930,11 @@ void ColorDelegate::saveChanges(const QString& property, const QVariant& value) 
 {
     auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
 
-    SaveManager::setProperty(selectedControl, property, value);
+    if (DesignManager::mode() == DesignManager::ControlGUI && property == TAG_ID)
+        SaveManager::setProperty(selectedControl, property, value,
+            DesignManager::controlScene()->mainControl()->dir());
+    else
+        SaveManager::setProperty(selectedControl, property, value);
 
     QMetaObject::Connection connection;
     connection = connect(SaveManager::instance(), &SaveManager::parserRunningChanged,
@@ -1020,7 +1038,10 @@ void PropertiesWidget::refreshList()
 
             QTreeWidgetItem* jitem = new QTreeWidgetItem;
             jitem->setText(0, "id");
-            jitem->setText(1, selectedControls[0]->id());
+            jitem->setData(1, Qt::EditRole, selectedControls[0]->id());
+            jitem->setData(1, NodeRole::Data, selectedControls[0]->id());
+            jitem->setData(1, NodeRole::Type, NodeType::Id);
+            jitem->setFlags(jitem->flags() | Qt::ItemIsEditable);
             item->addChild(jitem);
         }
         _treeWidget.addTopLevelItem(item);
@@ -1087,6 +1108,8 @@ void PropertiesWidget::refreshList()
                         propertyName == "inputMethodHints" ||
                         propertyName == "horizontalAlignment" ||
                         propertyName == "verticalAlignment" ||
+                        propertyName == "horizontalScrollBarPolicy" ||
+                        propertyName == "verticalScrollBarPolicy" ||
                         propertyName == "wrapMode" ||
                         propertyName == "orientation" ||
                         propertyName == "tickmarkAlignment" ||
