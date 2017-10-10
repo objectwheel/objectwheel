@@ -42,12 +42,12 @@ enum NodeRole {
     Data
 };
 
-class ColorDelegate : public QStyledItemDelegate
+class PropertiesDelegate : public QStyledItemDelegate
 {
         Q_OBJECT
         enum { BrushRole = 33 };
     public:
-        explicit ColorDelegate(QTreeWidget* view, QObject* parent = 0);
+        explicit PropertiesDelegate(QTreeWidget* view, QObject* parent = 0);
 
         QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option,
                               const QModelIndex &index) const override;
@@ -71,13 +71,13 @@ class ColorDelegate : public QStyledItemDelegate
         QTreeWidget* m_view;
 };
 
-ColorDelegate::ColorDelegate(QTreeWidget* view, QObject* parent) :
+PropertiesDelegate::PropertiesDelegate(QTreeWidget* view, QObject* parent) :
     QStyledItemDelegate(parent),
     m_view(view)
 {
 }
 
-QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
+QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
     const QModelIndex &index) const
 {
     QWidget* ed = 0;
@@ -94,7 +94,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             auto editor = new QComboBox(parent);
             editor->addItems(QFontDatabase().families());
             connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -104,7 +104,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case FontPxSize: {
             auto editor = new QSpinBox(parent);
             connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(72);
             editor->setMinimum(0);
@@ -120,7 +120,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case Bool: {
             auto editor = new QCheckBox(parent);
             connect(editor, &QCheckBox::toggled,
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -149,7 +149,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case String: {
             auto editor = new QLineEdit(parent);
             connect(editor, &QLineEdit::textEdited,
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -160,7 +160,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             QRegExp rx("[a-z_][a-zA-Z0-9_]+");
             QValidator* validator = new QRegExpValidator(rx, editor);
             connect(editor, &QLineEdit::editingFinished,
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setValidator(validator);
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
@@ -170,7 +170,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case Url: {
             auto editor = new QLineEdit(parent);
             connect(editor, &QLineEdit::textEdited,
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -179,7 +179,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case Double: {
             auto editor = new QDoubleSpinBox(parent);
             connect(editor, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             if (property == "opacity") {
                 editor->setMaximum(1.0);
@@ -196,7 +196,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case Int: {
             auto editor = new QSpinBox(parent);
             connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<int>::max());
             editor->setMinimum(std::numeric_limits<int>::min());
@@ -210,7 +210,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case GeometryHeight: {
             auto editor = new QSpinBox(parent);
             connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<int>::max());
             editor->setMinimum(std::numeric_limits<int>::min());
@@ -224,7 +224,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         case GeometryFHeight: {
             auto editor = new QDoubleSpinBox(parent);
             connect(editor, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<double>::max());
             editor->setMinimum(std::numeric_limits<double>::min());
@@ -239,7 +239,7 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     return ed;
 }
 
-void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
+void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
 {
     if (index.column() == 0)
         return;
@@ -328,7 +328,7 @@ void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
     }
 }
 
-void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
+void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
     const QModelIndex &index) const
 {
     if (index.column() == 0)
@@ -743,7 +743,7 @@ static void processInt(QTreeWidgetItem* item, const QString& propertyName, const
     item->addChild(iitem);
 }
 
-void ColorDelegate::updateEditorGeometry(QWidget* ed,
+void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
     const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QStyledItemDelegate::updateEditorGeometry(ed, option, index);
@@ -757,7 +757,7 @@ void ColorDelegate::updateEditorGeometry(QWidget* ed,
     }
 }
 
-void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
+void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
                           const QModelIndex &index) const
 {
     QStyleOptionViewItem option = opt;
@@ -859,12 +859,12 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
     painter->setPen(oldPen);
 }
 
-QSize ColorDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
+QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
 {
     return QStyledItemDelegate::sizeHint(opt, index) + QSize(4, 4);
 }
 
-void ColorDelegate::saveChanges(const NodeType& type, const QVariant& value) const
+void PropertiesDelegate::saveChanges(const NodeType& type, const QVariant& value) const
 {
     QString property;
     switch (type) {
@@ -926,7 +926,7 @@ void ColorDelegate::saveChanges(const NodeType& type, const QVariant& value) con
     saveChanges(property, value);
 }
 
-void ColorDelegate::saveChanges(const QString& property, const QVariant& value) const
+void PropertiesDelegate::saveChanges(const QString& property, const QVariant& value) const
 {
     auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
 
@@ -985,14 +985,15 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     _treeWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _treeWidget.horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     _treeWidget.setIndentation(fit(10));
-    _treeWidget.setItemDelegate(new ColorDelegate(&_treeWidget, &_treeWidget));
+    _treeWidget.setItemDelegate(new PropertiesDelegate(&_treeWidget, &_treeWidget));
     _treeWidget.header()->resizeSection(0, fit(170));
 
     _layout.setSpacing(fit(2));
     _layout.setContentsMargins(fit(3), fit(3), fit(3), fit(3));
 
     _searchEdit.setPlaceholderText("Filter");
-    connect(&_searchEdit, SIGNAL(textEdited(QString)), SLOT(refreshList()));
+    _searchEdit.setClearButtonEnabled(true);
+    connect(&_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
 
     _layout.addWidget(&_searchEdit);
     _layout.addWidget(&_treeWidget);
@@ -1140,6 +1141,8 @@ void PropertiesWidget::refreshList()
         _treeWidget.addTopLevelItem(item);
         _treeWidget.expandItem(item);
     }
+
+    filterList(_searchEdit.text());
 }
 
 void PropertiesWidget::handleSelectionChange()
@@ -1152,6 +1155,38 @@ void PropertiesWidget::handleSelectionChange()
     }
 
     refreshList();
+}
+
+void PropertiesWidget::filterList(const QString& filter)
+{
+    for (int i = 0; i < _treeWidget.topLevelItemCount(); i++) {
+        auto tli = _treeWidget.topLevelItem(i);
+        auto tlv = false;
+
+        for (int j = 0; j < tli->childCount(); j++) {
+            auto tci = tli->child(j);
+            auto tcv = false;
+            auto vv = tci->text(0).contains(filter, Qt::CaseInsensitive);
+
+            for (int z = 0; z < tci->childCount(); z++) {
+                auto tdi = tci->child(z);
+                auto v = (filter.isEmpty() || vv) ? true :
+                    tdi->text(0).contains(filter, Qt::CaseInsensitive);
+
+                tdi->setHidden(!v);
+                if (v)
+                    tcv = v;
+            }
+
+            auto v = filter.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
+            tci->setHidden(!v);
+            if (v)
+                tlv = v;
+        }
+
+        auto v = filter.isEmpty() ? true : tlv;
+        tli->setHidden(!v);
+    }
 }
 
 QSize PropertiesWidget::sizeHint() const

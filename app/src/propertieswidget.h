@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QTreeWidget>
 #include <QVBoxLayout>
-#include <QLineEdit>
+#include <filterlineedit.h>
 
 class PropertiesWidget : public QWidget
 {
@@ -18,13 +18,16 @@ class PropertiesWidget : public QWidget
         void refreshList();
         void handleSelectionChange();
 
+    private slots:
+        void filterList(const QString& filter);
+
     protected:
         virtual QSize sizeHint() const override;
 
     private:
         QVBoxLayout _layout;
         QTreeWidget _treeWidget;
-        QLineEdit _searchEdit;
+        FilterLineEdit _searchEdit;
 };
 
 #endif // PROPERTIESWIDGET_H

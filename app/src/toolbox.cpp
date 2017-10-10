@@ -14,11 +14,11 @@
 
 using namespace Fit;
 
-class SheetDelegate: public QStyledItemDelegate
+class ToolboxDelegate: public QStyledItemDelegate
 {
         Q_OBJECT
     public:
-        SheetDelegate(QTreeView *view, QWidget *parent);
+        ToolboxDelegate(QTreeView *view, QWidget *parent);
 
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
         QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const Q_DECL_OVERRIDE;
@@ -27,13 +27,13 @@ class SheetDelegate: public QStyledItemDelegate
         QTreeView *m_view;
 };
 
-SheetDelegate::SheetDelegate(QTreeView *view, QWidget *parent)
+ToolboxDelegate::ToolboxDelegate(QTreeView *view, QWidget *parent)
     : QStyledItemDelegate(parent),
       m_view(view)
 {
 }
 
-void SheetDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void ToolboxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     const QAbstractItemModel *model = index.model();
     Q_ASSERT(model);
@@ -104,7 +104,7 @@ void SheetDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     }
 }
 
-QSize SheetDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
+QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
 {
     QStyleOptionViewItem option = opt;
     QSize sz = QStyledItemDelegate::sizeHint(opt, index) + QSize(2, 2);
@@ -143,7 +143,7 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     _toolboxTree.setSelectionBehavior(QAbstractItemView::SelectRows);
     _toolboxTree.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     _toolboxTree.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-    _toolboxTree.setItemDelegate(new SheetDelegate(&_toolboxTree, &_toolboxTree));
+    _toolboxTree.setItemDelegate(new ToolboxDelegate(&_toolboxTree, &_toolboxTree));
 
     _toolboxTree.indicatorButton()->setIcon(QIcon(":/resources/images/right-arrow.png"));
     _toolboxTree.indicatorButton()->setColor(QColor("#0D74C8"));
@@ -154,7 +154,8 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     connect(&_toolboxTree, &QTreeWidget::itemSelectionChanged, this, &ToolBox::handleSelectionChange);
 
     _searchEdit.setPlaceholderText("Filter");
-    connect(&_searchEdit, SIGNAL(textEdited(QString)), SLOT(refreshList()));
+    _searchEdit.setClearButtonEnabled(true);
+    connect(&_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
 
     _toolboxAddButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _toolboxAddButton.setColor("#6BB64B");
@@ -278,9 +279,25 @@ QSize ToolBox::sizeHint() const
     return QSize(fit(200), fit(400));
 }
 
-void ToolBox::refreshList()
+void ToolBox::filterList(const QString& filter)
 {
+    for (int i = 0; i < _toolboxTree.topLevelItemCount(); i++) {
+        auto tli = _toolboxTree.topLevelItem(i);
+        auto tlv = false;
 
+        for (int j = 0; j < tli->childCount(); j++) {
+            auto tci = tli->child(j);
+            auto v = filter.isEmpty() ? true :
+                tci->text(0).contains(filter, Qt::CaseInsensitive);
+
+            tci->setHidden(!v);
+            if (v)
+                tlv = v;
+        }
+
+        auto v = filter.isEmpty() ? true : tlv;
+        tli->setHidden(!v);
+    }
 }
 
 void ToolBox::showAdderArea()

@@ -6,6 +6,7 @@
 #include <flatbutton.h>
 #include <toolboxtree.h>
 #include <fit.h>
+#include <filterlineedit.h>
 
 class ToolBox : public QWidget
 {
@@ -18,7 +19,7 @@ class ToolBox : public QWidget
         virtual QSize sizeHint() const override;
 
     private slots:
-        void refreshList();
+        void filterList(const QString& filter);
         void showAdderArea();
         void hideAdderArea();
         void handleSelectionChange();
@@ -34,7 +35,7 @@ class ToolBox : public QWidget
 
     private:
         QVBoxLayout _toolboxVLay;
-        QLineEdit _searchEdit;
+        FilterLineEdit _searchEdit;
         ToolboxTree _toolboxTree;
         QWidget _toolboxAdderAreaWidget;
         QVBoxLayout _toolboxAdderAreaVLay;

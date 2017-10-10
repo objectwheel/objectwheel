@@ -40,7 +40,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/filelist.h \
     $$PWD/qmlformatter.h \
     $$PWD/toolbox.h \
-    $$PWD/toolboxtree.h
+    $$PWD/toolboxtree.h \
+    $$PWD/filterlineedit.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -83,7 +84,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/filelist.cpp \
     $$PWD/qmlformatter.cpp \
     $$PWD/toolbox.cpp \
-    $$PWD/toolboxtree.cpp
+    $$PWD/toolboxtree.cpp \
+    $$PWD/filterlineedit.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
