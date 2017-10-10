@@ -23,6 +23,7 @@ enum NodeType {
     Color,
     Bool,
     String,
+    Url,
     Double,
     Int,
     GeometryX,
@@ -154,6 +155,15 @@ QWidget* ColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             break;
         }
 
+        case Url: {
+            auto editor = new QLineEdit(parent);
+            connect(editor, &QLineEdit::textEdited,
+                [this, editor] () { ((ColorDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
         case Double: {
             auto editor = new QDoubleSpinBox(parent);
             connect(editor, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -256,6 +266,13 @@ void ColorDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
             auto val = index.model()->data(index, NodeRole::Data).value<QString>();
             auto editor = static_cast<QLineEdit*>(ed);
             editor->setText(val);
+            break;
+        }
+
+        case Url: {
+            auto val = index.model()->data(index, NodeRole::Data).value<QUrl>();
+            auto editor = static_cast<QLineEdit*>(ed);
+            editor->setText(val.toDisplayString());
             break;
         }
 
@@ -376,6 +393,15 @@ void ColorDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case String: {
             auto editor = static_cast<QLineEdit*>(ed);
             val = editor->text();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
+            break;
+        }
+
+        case Url: {
+            auto editor = static_cast<QLineEdit*>(ed);
+            val = QUrl::fromUserInput(editor->text());
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
             saveChanges(property, val);
@@ -661,6 +687,20 @@ static void processString(QTreeWidgetItem* item, const QString& propertyName, co
     item->addChild(iitem);
 }
 
+static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+{
+    const auto value = map[propertyName].value<QString>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Url);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
 static void processDouble(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<double>();
@@ -678,40 +718,6 @@ static void processDouble(QTreeWidgetItem* item, const QString& propertyName, co
 static void processInt(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = map[propertyName].value<int>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, value);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, NodeType::Int);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-static void processEnumerator(QTreeWidgetItem* item, const QString& propertyName, const PropertyNode& node)
-{
-    const auto value = node.propertyMap[propertyName].value<int>();
-
-    QMetaProperty mp;
-    for (int i = 0; i < node.metaObject->propertyCount(); i++)
-        if (node.metaObject->property(i).name() == propertyName)
-            mp = node.metaObject->property(i);
-
-    if (mp.isValid() && mp.isEnumType()) {
-
-    } else if (mp.isValid() && mp.isFlagType()) {
-
-    } else if(
-              propertyName == "inputMethodHints" ||
-              propertyName == "horizontalAlignment" ||
-              propertyName == "verticalAlignment" ||
-              propertyName == "wrapMode" ||
-              propertyName == "orientation" ||
-              propertyName == "tickmarkAlignment" ||
-              propertyName == "echoMode") {
-
-    }
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -1055,6 +1061,11 @@ void PropertiesWidget::refreshList()
                     break;
                 }
 
+                case QVariant::Url: {
+                    processUrl(item, propertyName, map);
+                    break;
+                }
+
                 case QVariant::Double: {
                     if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
@@ -1080,8 +1091,10 @@ void PropertiesWidget::refreshList()
                         propertyName == "orientation" ||
                         propertyName == "tickmarkAlignment" ||
                         propertyName == "echoMode") {
-                        processEnumerator(item, propertyName, propertyNode);
-                    } else if (propertyName == "x" || propertyName == "y" ||
+                        continue;
+                    }
+
+                    if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                         if (propertyName == "x")
                             processGeometry(item, "geometry", map);
@@ -1092,11 +1105,12 @@ void PropertiesWidget::refreshList()
                 }
 
                 default: {
-                    QTreeWidgetItem* iitem = new QTreeWidgetItem;
-                    iitem->setText(0, propertyName);
-                    iitem->setText(1, map[propertyName].typeName());
-                    item->addChild(iitem);
-                    break;
+                    continue;
+                    // QTreeWidgetItem* iitem = new QTreeWidgetItem;
+                    // iitem->setText(0, propertyName);
+                    // iitem->setText(1, map[propertyName].typeName());
+                    // item->addChild(iitem);
+                    // break;
                 }
             }
         }

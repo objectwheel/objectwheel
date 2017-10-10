@@ -3,7 +3,6 @@ INCLUDEPATH               += $$PWD
 HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/flatbutton.h \
                              $$PWD/propertieswidget.h \
-                             $$PWD/propertyitem.h \
                              $$PWD/css.h \
                              $$PWD/scrollarea.h \
                              $$PWD/about.h \
@@ -47,7 +46,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
                              $$PWD/flatbutton.cpp \
                              $$PWD/propertieswidget.cpp \
-                             $$PWD/propertyitem.cpp \
                              $$PWD/css.cpp \
                              $$PWD/scrollarea.cpp \
                              $$PWD/about.cpp \
