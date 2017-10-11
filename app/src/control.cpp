@@ -51,12 +51,35 @@
 
 using namespace Fit;
 
+//!
+//! ************************* [global] **************************
+//!
+
 static std::random_device rd;
 static std::mt19937 mt(rd());
 static std::uniform_int_distribution<qint32> rand_dist(-2147483648, 2147483647);
+static ControlWatcher controlWatcher;
 
 //!
-//! ********************** [Resizer] **********************
+//! ********************** [ControlWatcher] **********************
+//!
+
+ControlWatcher* ControlWatcher::_instance = nullptr;
+
+ControlWatcher::ControlWatcher(QObject* parent)
+    : QObject(parent)
+{
+    if (!_instance)
+        _instance = this;
+}
+
+ControlWatcher* ControlWatcher::instance()
+{
+    return _instance;
+}
+
+//!
+//! ************************** [Resizer] **************************
 //!
 
 bool Resizer::_resizing = false;
@@ -359,7 +382,7 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         parent->resize(result.size);
         refreshTimer.stop();
         parent->setClip(result.clip);
-        parent->setZValue(result.zValue);
+        parent->setZValue(result.zValue); //BUG: PropertiesWidget proper z val update
     }
 
     parent->update();
@@ -415,6 +438,20 @@ Control::Control(const QString& url, const QString& uid, Control* parent)
     setGeometry(0, 0, 0, 0);
     connect(this, &Control::visibleChanged, [=] {
         refresh();
+    });
+
+    connect(this, &Control::geometryChanged, [=] {
+        for (auto& pnode : _properties) {
+            auto& map = pnode.propertyMap;
+            if (map.contains("x") && map.contains("y")) {
+                const bool isInt = (map["x"].type() == QVariant::Int);
+                map["x"] = isInt ? int(x()) : x();
+                map["y"] = isInt ? int(y()) : y();
+                map["width"] = isInt ? int(size().width()) : size().width();
+                map["height"] = isInt ? int(size().height()) : size().height();
+            }
+        }
+        emit controlWatcher.geometryChanged();
     });
 }
 
@@ -749,7 +786,7 @@ void Control::setGui(bool value)
     _gui = value;
 }
 
-QList<QString> Control::events() const
+const QList<QString>& Control::events() const
 {
     return _events;
 }
@@ -759,7 +796,7 @@ void Control::setEvents(const QList<QString>& events)
     _events = events;
 }
 
-PropertyNodes Control::properties() const
+const PropertyNodes& Control::properties() const
 {
     return _properties;
 }

@@ -1027,6 +1027,7 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     connect(DesignManager::formScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     connect(DesignManager::instance(), SIGNAL(modeChanged()), SLOT(handleSelectionChange()));
+    connect(ControlWatcher::instance(), SIGNAL(geometryChanged()), SLOT(handleSelectionChange()));
 }
 
 void PropertiesWidget::clearList()

@@ -15,6 +15,19 @@ class Control;
 class ControlPrivate;
 class FormPrivate;
 
+class ControlWatcher : public QObject {
+        Q_OBJECT
+    public:
+        explicit ControlWatcher(QObject* parent = Q_NULLPTR);
+        static ControlWatcher* instance();
+
+    signals:
+        void geometryChanged();
+
+    private:
+        static ControlWatcher* _instance;
+};
+
 class Resizer : public QGraphicsWidget
 {
         Q_OBJECT
@@ -77,8 +90,8 @@ class Control : public QGraphicsWidget
         bool dragIn() const;
         bool clip() const;
         bool init() const;
-        PropertyNodes properties() const;
-        QList<QString> events() const;
+        const PropertyNodes& properties() const;
+        const QList<QString>& events() const;
         QList<Control*> childControls(bool dive = true) const;
         Control* parentControl() const;
         int higherZValue() const;
