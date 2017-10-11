@@ -5,6 +5,7 @@
 #include <savemanager.h>
 #include <control.h>
 #include <delayer.h>
+#include <parserworker.h>
 
 #include <QApplication>
 #include <QQuickWindow>
@@ -178,12 +179,19 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
     }
 
     QObject* qmlObject;
+    QByteArray qmlData;
     QSharedPointer<QQmlEngine> qmlEngine(new QQmlEngine);
     QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
     QSharedPointer<QQuickWindow> window;
 
     qmlEngine->rootContext()->setContextProperty("dpi", Fit::ratio());
-    qmlComponent->loadUrl(url);
+
+    qmlData = rdfile(url);
+    ParserWorker parserWorker;
+    if (parserWorker.typeName(qmlData).contains("Window"))
+        parserWorker.setVariantProperty(qmlData, url, "visible", false);
+
+    qmlComponent->setData(qmlData, QUrl::fromLocalFile(url));
     qmlObject = qmlComponent->create();
 
     if (!qmlComponent->errors().isEmpty()) {
@@ -198,7 +206,8 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
 
     if (result.gui == false) {
         result.preview = QPixmap(dname(url) + separator() + "icon.png")
-                         .scaled(NONGUI_CONTROL_SIZE * qApp->devicePixelRatio(), NONGUI_CONTROL_SIZE * qApp->devicePixelRatio());
+                         .scaled(NONGUI_CONTROL_SIZE * qApp->devicePixelRatio(),
+                                 NONGUI_CONTROL_SIZE * qApp->devicePixelRatio());
         emit previewReady(result);
         return PreviewResult();
     }
@@ -235,6 +244,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
 
     window->setFlags(Qt::Window | Qt::FramelessWindowHint);
     window->setOpacity(0);
+    window->hide();
     window->create();
 
     Delayer::delay(100);
@@ -243,6 +253,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
     preview.setDevicePixelRatio(qApp->devicePixelRatio());
     scratchPixmapIfEmpty(preview);
     result.preview = preview;
+
     return result;
 }
 

@@ -84,7 +84,7 @@ void MainWindow::setupGui()
     QToolBar* toolbar = new QToolBar;
     toolbar->addWidget(label);
     toolbar->addWidget(pinButton);
-    toolbar->setStyleSheet(CSS::DesignerToolbar);
+    toolbar->setStyleSheet(CSS::DesignerPinbar);
     toolbar->setIconSize(QSize(fit(11), fit(11)));
     toolbar->setFixedHeight(fit(21));
 
@@ -110,7 +110,7 @@ void MainWindow::setupGui()
     QToolBar* toolbar2 = new QToolBar;
     toolbar2->addWidget(label2);
     toolbar2->addWidget(pinButton2);
-    toolbar2->setStyleSheet(CSS::DesignerToolbar);
+    toolbar2->setStyleSheet(CSS::DesignerPinbar);
     toolbar2->setIconSize(QSize(fit(11), fit(11)));
     toolbar2->setFixedHeight(fit(21));
 
@@ -136,7 +136,7 @@ void MainWindow::setupGui()
     QToolBar* toolbar3 = new QToolBar;
     toolbar3->addWidget(label3);
     toolbar3->addWidget(pinButton3);
-    toolbar3->setStyleSheet(CSS::DesignerToolbar);
+    toolbar3->setStyleSheet(CSS::DesignerPinbar);
     toolbar3->setIconSize(QSize(fit(11), fit(11)));
     toolbar3->setFixedHeight(fit(21));
 

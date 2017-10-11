@@ -14,28 +14,37 @@
 
 using namespace Fit;
 
+//!
+//! *********************** [ToolboxDelegate] ***********************
+//!
+
 class ToolboxDelegate: public QStyledItemDelegate
 {
         Q_OBJECT
-    public:
-        ToolboxDelegate(QTreeView *view, QWidget *parent);
 
-        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
-        QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const Q_DECL_OVERRIDE;
+    public:
+        ToolboxDelegate(QTreeView* view, QWidget* parent);
+
+        void paint(QPainter* painter, const QStyleOptionViewItem &option,
+                   const QModelIndex &index) const override;
+
+        QSize sizeHint(const QStyleOptionViewItem &opt,
+                       const QModelIndex &index) const override;
 
     private:
-        QTreeView *m_view;
+        QTreeView* m_view;
 };
 
-ToolboxDelegate::ToolboxDelegate(QTreeView *view, QWidget *parent)
-    : QStyledItemDelegate(parent),
-      m_view(view)
+ToolboxDelegate::ToolboxDelegate(QTreeView* view, QWidget* parent)
+    : QStyledItemDelegate(parent)
+    , m_view(view)
 {
 }
 
-void ToolboxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
+    const QModelIndex &index) const
 {
-    const QAbstractItemModel *model = index.model();
+    const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
 
     if (!model->parent(index).isValid()) {
@@ -72,10 +81,13 @@ void ToolboxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
         painter->setPen(Qt::NoPen);
         painter->setBrush(gradient);
         painter->drawRect(option.rect);
-        painter->setPen(highlightColor);
+        QPen p(highlightColor);
+        p.setWidthF(0.5);
+        painter->setPen(p);
         painter->drawLine(option.rect.topLeft() + QPoint(0, highlightOffset),
                           option.rect.topRight() + QPoint(0, highlightOffset));
-        painter->setPen(outlineColor);
+        p.setColor(outlineColor);
+        painter->setPen(p);
         if (drawTopline)
             painter->drawLine(option.rect.topLeft(), option.rect.topRight());
         painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
@@ -111,7 +123,11 @@ QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelInd
     return sz;
 }
 
-ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
+//!
+//! *********************** [ToolBox] ***********************
+//!
+
+ToolBox::ToolBox(QWidget* parent) : QWidget(parent)
 {
     setAutoFillBackground(true);
     QPalette p(palette());
@@ -255,7 +271,7 @@ ToolBox::ToolBox(QWidget *parent) : QWidget(parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
-void ToolBox::handleMousePress(QTreeWidgetItem *item)
+void ToolBox::handleMousePress(QTreeWidgetItem* item)
 {
     if (item == 0)
         return;
@@ -302,21 +318,21 @@ void ToolBox::filterList(const QString& filter)
 
 void ToolBox::showAdderArea()
 {
-    QPropertyAnimation *animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
+    QPropertyAnimation* animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
     animation->setDuration(DURATION);
     animation->setStartValue(fit(17));
     animation->setEndValue(fit(88));
     animation->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 
-    QPropertyAnimation *animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
+    QPropertyAnimation* animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
     animation2->setDuration(DURATION);
     animation2->setStartValue(fit(17));
     animation2->setEndValue(fit(88));
     animation2->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
-    QParallelAnimationGroup *group = new QParallelAnimationGroup(this);
+    QParallelAnimationGroup* group = new QParallelAnimationGroup(this);
     group->addAnimation(animation);
     group->addAnimation(animation2);
     connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));
@@ -334,21 +350,21 @@ void ToolBox::showAdderArea()
 
 void ToolBox::hideAdderArea()
 {
-    QPropertyAnimation *animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
+    QPropertyAnimation* animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
     animation->setDuration(DURATION);
     animation->setStartValue(fit(88));
     animation->setEndValue(fit(17));
     animation->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
 
-    QPropertyAnimation *animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
+    QPropertyAnimation* animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
     animation2->setDuration(DURATION);
     animation2->setStartValue(fit(88));
     animation2->setEndValue(fit(17));
     animation2->setEasingCurve(QEasingCurve::OutExpo);
     connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
 
-    QParallelAnimationGroup *group = new QParallelAnimationGroup(this);
+    QParallelAnimationGroup* group = new QParallelAnimationGroup(this);
     group->addAnimation(animation);
     group->addAnimation(animation2);
     connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));

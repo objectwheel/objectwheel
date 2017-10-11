@@ -19,14 +19,79 @@ static void parseImportDirectories(const QString& dir, ModelManagerInterface* mo
         parseImportDirectories(dir + separator() + subdir, modelManager);
 }
 
+QmlJS::ModelManagerInterface* ParserWorker::_modelManager = nullptr;
+
 ParserWorker::ParserWorker(QObject *parent)
     : QObject(parent)
 {
-    _modelManager = new ModelManagerInterface(this);
+    if (!_modelManager) {
+        _modelManager = new ModelManagerInterface(this);
 
-    QQmlEngine engine;
-    for (auto importPath : engine.importPathList())
-        parseImportDirectories(importPath, _modelManager);
+        QQmlEngine engine;
+        for (auto importPath : engine.importPathList())
+            parseImportDirectories(importPath, _modelManager);
+    }
+}
+
+QString ParserWorker::typeName(const QByteArray& data) const
+{
+    QString type;
+    if (data.isEmpty())
+        return type;
+
+    try {
+        auto model = Model::create("QtQuick.Item", 1, 0);
+        auto rewriterView = new RewriterView(RewriterView::Amend, model);
+        auto textModifier = new NotIndentingTextEditModifier;
+
+        textModifier->setText(data);
+        model->setTextModifier(textModifier);
+        model->setRewriterView(rewriterView);
+
+        auto rootNode = rewriterView->rootModelNode();
+        type = rootNode.simplifiedTypeName();
+
+        textModifier->deleteLater();
+        rewriterView->deleteLater();
+        model->deleteLater();
+    } catch (Exception& e) {
+        // TODO
+    }
+    return type;
+}
+
+void ParserWorker::setVariantProperty(QByteArray& data, const QString& fileName, const QString& property, const QVariant& value)
+{
+    if (data.isEmpty()) {
+        emit done();
+        return;
+    }
+
+    try {
+        auto bproperty = QByteArray().insert(0, property);
+        auto model = Model::create("QtQuick.Item", 1, 0);
+        auto rewriterView = new RewriterView(RewriterView::Amend, model);
+        auto textModifier = new NotIndentingTextEditModifier;
+
+        textModifier->setText(data);
+        model->setTextModifier(textModifier);
+        model->setRewriterView(rewriterView);
+        model->setFileUrl(QUrl::fromLocalFile(fileName));
+
+        auto rootNode = rewriterView->rootModelNode();
+        auto objectNode = QmlObjectNode(rootNode);
+
+        objectNode.setVariantProperty(bproperty, value);
+        data = QByteArray().insert(0, textModifier->text());
+
+        textModifier->deleteLater();
+        rewriterView->deleteLater();
+        model->deleteLater();
+    } catch (Exception& e) {
+        // TODO
+    }
+
+    emit done();
 }
 
 void ParserWorker::setVariantProperty(const QString& fileName, const QString& property, const QVariant& value)

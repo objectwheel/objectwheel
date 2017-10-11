@@ -11,7 +11,6 @@ class ControlTransaction : public QObject
 
     public:
         explicit ControlTransaction(Control* watched, QObject *parent = 0);
-
         void setGeometryTransactionsEnabled(bool value);
         void setParentTransactionsEnabled(bool value);
         void setZTransactionsEnabled(bool value);

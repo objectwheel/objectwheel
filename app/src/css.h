@@ -15,6 +15,7 @@ class CSS
         static QString ScrollBarH;
         static QString DesignerToolbar;
         static QString DesignerToolbarV;
+        static QString DesignerPinbar;
 };
 
 #endif // CSS_H
