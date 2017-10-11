@@ -241,5 +241,6 @@
         <file>resources/qmls/item/t/icon.png</file>
         <file>resources/qmls/item/t/main.qml</file>
         <file>resources/tools/Timer.zip</file>
+        <file>resources/tools/Image.zip</file>
     </qresource>
 </RCC>

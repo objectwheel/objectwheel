@@ -117,5 +117,10 @@
     "Timer" :
     {
         "toolUrl" : "qrc:/resources/tools/Timer.zip"
+    },
+
+    "Image" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Image.zip"
     }
 }
