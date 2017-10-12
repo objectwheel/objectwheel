@@ -2,27 +2,30 @@
 #include <fit.h>
 #include <delayer.h>
 #include <projectmanager.h>
-#include <QQmlContext>
-#include <QQmlProperty>
-#include <QQuickItem>
 #include <usermanager.h>
-#include <QDateTime>
-#include <QTimer>
-#include <scenemanager.h>
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <toolsmanager.h>
 #include <savemanager.h>
-#include <splashscreen.h>
-#include <scenemanager.h>
-#include <QtConcurrent>
-#include <QQmlEngine>
 #include <projectsscreen.h>
 #include <dirlocker.h>
+#include <mainwindow.h>
+#include <screens.h>
+
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QtConcurrent>
+#include <QQmlEngine>
+#include <QDateTime>
+#include <QTimer>
+#include <QQmlContext>
+#include <QQmlProperty>
+#include <QQuickItem>
+
+#define cW (MainWindow::instance()->centralWidget())
+#define pW (MainWindow::instance()->progressWidget())
 
 using namespace Fit;
 
@@ -72,7 +75,7 @@ void LoginScreen::handleAutoLoginButtonClicked()
 
 void LoginScreen::handleAboutButtonClicked()
 {
-    SceneManager::show("aboutScene", SceneManager::ToLeft);
+    cW->showWidget(Screen::ABOUT);
 }
 
 void LoginScreen::handleLostPasswordButtonClicked()
@@ -96,22 +99,22 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
 //    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
 //    if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
 //    ProjectsScreen::refreshProjectList();
-//    SplashScreen::hide();
-//    SceneManager::show("projectsScene", SceneManager::ToLeft);
+//    pW->hideProgress();
+//    cW->showWidget(Screen::PROJECTS);
 //    clearGUI();
 //    return;
 
     if (userManager->exists(email)) {
         if (DirLocker::locked(userManager->userDirectory(email))) {
             if (DirLocker::canUnlock(userManager->userDirectory(email), keyHash)) {
-                SplashScreen::show(true);
+                pW->showProgress();
                 auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
                 Delayer::delay(&ret, &QFuture<bool>::isRunning);
                 if (ret.result()) {
                     if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                     ProjectsScreen::refreshProjectList();
-                    SplashScreen::hide();
-                    SceneManager::show("projectsScene", SceneManager::ToLeft);
+                    pW->hideProgress();
+                    cW->showWidget(Screen::PROJECTS);
                     clearGUI();
                 } else {
                     QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x01");
@@ -122,7 +125,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                     //FIXME: when sync part done.
                 }
             } else {
-                SplashScreen::hide();
+                pW->hideProgress();
                 QMetaObject::invokeMethod(loginScreen, "animateWrongPass");
             }
         } else {
@@ -135,14 +138,14 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             connect(reply, &QNetworkReply::finished, [=] {
                 auto jobj = QJsonDocument::fromJson(reply->readAll()).object();
                 if (jobj["result"].toString() == "OK") {
-                    SplashScreen::show(true);
+                    pW->showProgress();
                     auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
                     Delayer::delay(&ret, &QFuture<void>::isRunning);
                     if (ret.result()) {
                         if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                         ProjectsScreen::refreshProjectList();
-                        SplashScreen::hide();
-                        SceneManager::show("projectsScene", SceneManager::ToLeft);
+                        pW->hideProgress();
+                        cW->showWidget(Screen::PROJECTS);
                         clearGUI();
                     } else {
                         QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
@@ -184,8 +187,8 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                 Delayer::delay(&ret, &QFuture<void>::isRunning);
                 if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                 ProjectsScreen::refreshProjectList();
-                SplashScreen::hide();
-                SceneManager::show("projectsScene", SceneManager::ToLeft);
+                pW->hideProgress();
+                cW->showWidget(Screen::PROJECTS);
                 clearGUI();
             } else if (jobj["result"].toString() == "EMAIL") {
                 QMetaObject::invokeMethod(loginScreen, "animateWrongEmail");

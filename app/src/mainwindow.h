@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 
+#include <centralwidget.h>
 #include <flatbutton.h>
 #include <toolboxtree.h>
 #include <propertieswidget.h>
@@ -16,6 +17,7 @@
 #include <buildsScreen.h>
 #include <designmanager.h>
 #include <toolbox.h>
+#include <progresswidget.h>
 
 class MainWindow : public QMainWindow
 {
@@ -24,6 +26,8 @@ class MainWindow : public QMainWindow
     public:
         explicit MainWindow(QWidget *parent = 0);
         static MainWindow* instance();
+        CentralWidget* centralWidget();
+        ProgressWidget* progressWidget();
 
         void setupGui();
         void setupManagers();
@@ -37,10 +41,12 @@ class MainWindow : public QMainWindow
 
     private:
         static MainWindow* _instance;
+        CentralWidget _centralWidget;
+        ProgressWidget _progressWidget;
         ProjectsScreen _projectsScreen;
         LoginScreen _loginScreen;
         BuildsScreen _buildsScreen;
-        QWidget _centralWidget;
+        QWidget _settleWidget;
         QToolBar _titleBar;
         QDockWidget _toolboxDockwidget;
         QDockWidget _propertiesDockwidget;

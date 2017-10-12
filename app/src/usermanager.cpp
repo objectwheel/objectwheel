@@ -6,11 +6,14 @@
 #include <QByteArray>
 #include <dirlocker.h>
 #include <projectmanager.h>
-#include <splashscreen.h>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <aes.h>
+#include <screens.h>
+#include <mainwindow.h>
 
+#define cW (MainWindow::instance()->centralWidget())
+#define pW (MainWindow::instance()->progressWidget())
 #define AUTOLOGIN_FILENAME "alg.inf"
 #define AUTOLOGIN_PROTECTOR "QWxsYWggaXMgZ3JlYXRlc3Qu"
 
@@ -180,7 +183,7 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
     _d->currentSessionsToken = _d->generateToken(username, password);
 
     if (_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
-        SplashScreen::setText("Starting user session");
+        pW->showProgress("Starting user session");
 
         /* Clear all previous trash project folders if locked versions already exists */
         auto dirlockersFiles = _d->dirLocker.dirlockersFilenames();

@@ -4,27 +4,27 @@
 #include <toolboxtree.h>
 #include <mainwindow.h>
 #include <css.h>
-#include <splashscreen.h>
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <toolsmanager.h>
 #include <savemanager.h>
-#include <splashscreen.h>
-#include <scenemanager.h>
 #include <delayer.h>
 #include <control.h>
 #include <formscene.h>
 #include <qmlpreviewer.h>
 #include <loadingindicator.h>
-
+#include <screens.h>
 #include <QtConcurrent>
 #include <QtNetwork>
 
 using namespace Fit;
 
 MainWindow* MainWindow::_instance = nullptr;
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , _centralWidget(this)
+    , _progressWidget(&_centralWidget)
 {
     if (_instance) {
         deleteLater();
@@ -43,14 +43,30 @@ MainWindow* MainWindow::instance()
 
 void MainWindow::setupGui()
 {
-    setWindowTitle(QApplication::translate("MainWindow", "Objectwheel", 0));
-    setObjectName(QStringLiteral("MainWindow"));
-    _centralWidget.setObjectName(QStringLiteral("_centralWidget"));
-    setStyleSheet(QLatin1String("#_centralWidget, #MainWindow{\n"
-                                "background:\"#e0e4e7\";\n }"));
+    setWindowTitle("Objectwheel");
+    _designManager.setSettleWidget(&_settleWidget);
 
-    setCentralWidget(&_centralWidget);
-    _designManager.setSettleWidget(&_centralWidget);
+    _centralWidget.addWidget(Screen::STUDIO, &_settleWidget);
+    _centralWidget.addWidget(Screen::PROJECTS, &_projectsScreen);
+    _centralWidget.addWidget(Screen::LOGIN, &_loginScreen);
+    _centralWidget.addWidget(Screen::ABOUT, &_aboutWidget);
+    _centralWidget.addWidget(Screen::BUILDS, &_buildsScreen);
+    _centralWidget.showWidget(Screen::LOGIN);
+    _progressWidget.showProgress("Loading");
+    connect(&_centralWidget, &CentralWidget::visibleWidgetChanged, [=]()
+    {
+        if (_centralWidget.visibleUid() == Screen::STUDIO) {
+            _titleBar.show();
+            _formsDockwidget.show();
+            _propertiesDockwidget.show();
+            _toolboxDockwidget.show();
+        } else {
+            _titleBar.hide();
+            _formsDockwidget.hide();
+            _propertiesDockwidget.hide();
+            _toolboxDockwidget.hide();
+        }
+    });
 
     // Toolbar settings
     QLabel* titleText = new QLabel;
@@ -61,6 +77,7 @@ void MainWindow::setupGui()
 
     /* Add Title Bar */
     addToolBar(Qt::TopToolBarArea, &_titleBar);
+    _titleBar.setVisible(false);
     _titleBar.setFixedHeight(fit(34));
     _titleBar.setFloatable(false);
     _titleBar.setMovable(false);
@@ -91,6 +108,7 @@ void MainWindow::setupGui()
     _propertiesDockwidget.setTitleBarWidget(toolbar);
     _propertiesDockwidget.setWidget(&_propertiesWidget);
     _propertiesDockwidget.setWindowTitle("Properties");
+    _propertiesDockwidget.setVisible(false);
     _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, &_propertiesDockwidget);
 
@@ -117,6 +135,7 @@ void MainWindow::setupGui()
     _formsDockwidget.setTitleBarWidget(toolbar2);
     _formsDockwidget.setWidget(&_formsWidget);
     _formsDockwidget.setWindowTitle("Forms");
+    _formsDockwidget.setVisible(false);
     _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, &_formsDockwidget);
 
@@ -143,6 +162,7 @@ void MainWindow::setupGui()
     _toolboxDockwidget.setTitleBarWidget(toolbar3);
     _toolboxDockwidget.setWidget(&_toolbox);
     _toolboxDockwidget.setWindowTitle("Toolbox");
+    _toolboxDockwidget.setVisible(false);
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, &_toolboxDockwidget);
 
@@ -161,17 +181,6 @@ void MainWindow::setupGui()
         for (auto childControl : control->childControls())
             childControl->refresh();
     });
-
-    // Init Splash Screen
-    SplashScreen::init(this);
-    SplashScreen::setText("Loading");
-    SplashScreen::setTextColor("#2e3a41");
-    SplashScreen::setBackgroundBrush(QColor("#e0e4e7"));
-    SplashScreen::setIcon(QIcon(":/resources/images/logo.png"));
-    SplashScreen::setIconSize(Fit::fit(160), Fit::fit(80));
-    SplashScreen::setLoadingSize(Fit::fit(24), Fit::fit(24));
-    SplashScreen::setLoadingImageFilename("qrc:///resources/images/loading.png");
-    SplashScreen::show(false);
 }
 
 void MainWindow::setupManagers()
@@ -183,51 +192,19 @@ void MainWindow::setupManagers()
     projectManager->setMainWindow(this);
     new SaveManager(this);
     new QmlPreviewer(this);
-    auto sceneManager = new SceneManager;
-    sceneManager->setMainWindow(this);
-//    sceneManager->setSceneListWidget(&sceneList);
-    sceneManager->addScene("studioScene", &_centralWidget);
-    sceneManager->addScene("projectsScene", &_projectsScreen);
-    sceneManager->addScene("loginScene", &_loginScreen);
-    sceneManager->addScene("aboutScene", &_aboutWidget);
-    sceneManager->addScene("buildsScene", &_buildsScreen);
-    sceneManager->setCurrent("loginScene", false);
 
     connect(SaveManager::instance(), SIGNAL(parserRunningChanged(bool)), SLOT(handleIndicatorChanges()));
     connect(QmlPreviewer::instance(), SIGNAL(workingChanged(bool)), SLOT(handleIndicatorChanges()));
-
-    SplashScreen::raise();
-
-    for (auto scene : sceneManager->scenes()) {
-        QList<QUrl> urls;
-        QString sceneName;
-        QString iconPath = ":/resources/images/" + scene + "Icon.png";
-        if (scene == "projectsScene") {
-            sceneName = "Projects";
-        } else if (scene == "studioScene") {
-            sceneName = "Studio";
-        } else if (scene == "aboutScene") {
-            sceneName = "About";
-        } else if (scene == "loginScene") {
-            continue;
-        } else if (scene == "buildsScene") {
-            continue;
-        }
-        urls << scene;
-//        QListWidgetItem* item = new QListWidgetItem(QIcon(iconPath), sceneName);
-//        sceneList.insertItem(0, item);
-//        sceneList.addUrls(item, urls);
-    }
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(cleanupObjectwheel()));
 
     auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
     Delayer::delay(&ret, &QFuture<bool>::isRunning);
     if (ret.result()) {
         ProjectsScreen::refreshProjectList();
-        SplashScreen::hide();
-        SceneManager::show("projectsScene", SceneManager::ToLeft);
+        _progressWidget.hideProgress();
+        _centralWidget.showWidget(Screen::PROJECTS);
     } else {
-        SplashScreen::hide();
+        _progressWidget.hideProgress();
     }
 }
 
@@ -263,6 +240,16 @@ void MainWindow::hideDockWidgets()
 void MainWindow::clearStudio()
 {
 
+}
+
+CentralWidget* MainWindow::centralWidget()
+{
+    return &_centralWidget;
+}
+
+ProgressWidget*MainWindow::progressWidget()
+{
+    return &_progressWidget;
 }
 
 //void MainWindow::on_secureExitButton_clicked()

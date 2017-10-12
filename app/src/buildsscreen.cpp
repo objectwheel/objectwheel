@@ -1,28 +1,19 @@
 #include <buildsscreen.h>
 #include <fit.h>
 #include <projectmanager.h>
-#include <QQmlContext>
-#include <QQmlProperty>
-#include <QQuickItem>
 #include <usermanager.h>
-#include <QDateTime>
-#include <QTimer>
-#include <QMessageBox>
-#include <splashscreen.h>
-#include <scenemanager.h>
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <toolsmanager.h>
 #include <savemanager.h>
-#include <splashscreen.h>
-#include <scenemanager.h>
-#include <QtMath>
-#include <QQmlEngine>
 #include <projectsscreen.h>
 #include <dirlocker.h>
-#include <QDebug>
 #include <zipper.h>
+#include <flatbutton.h>
+#include <screens.h>
+#include <mainwindow.h>
+
 #include <QStandardPaths>
 #include <QUrl>
 #include <QNetworkAccessManager>
@@ -33,8 +24,18 @@
 #include <QString>
 #include <QApplication>
 #include <QPointer>
-#include <flatbutton.h>
+#include <QDebug>
+#include <QtMath>
+#include <QQmlEngine>
+#include <QDateTime>
+#include <QTimer>
+#include <QMessageBox>
+#include <QQmlContext>
+#include <QQmlProperty>
+#include <QQuickItem>
 
+#define cW (MainWindow::instance()->centralWidget())
+#define pW (MainWindow::instance()->progressWidget())
 #define URL QString("https://139.59.149.173/api/v1/build/")
 
 using namespace Fit;
@@ -87,7 +88,7 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     exitButton.show();
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
-        SceneManager::show("studioScene", SceneManager::ToRight);
+        cW->showWidget(Screen::STUDIO);
     });
 
     buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "buildPage", parent->engine()).value<QObject*>();

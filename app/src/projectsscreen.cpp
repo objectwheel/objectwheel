@@ -1,17 +1,21 @@
 #include <projectsscreen.h>
 #include <fit.h>
+#include <mainwindow.h>
+#include <screens.h>
 #include <projectmanager.h>
+#include <filemanager.h>
+#include <usermanager.h>
+
+#include <QDateTime>
 #include <QQmlContext>
 #include <QQmlProperty>
 #include <QQuickItem>
-#include <usermanager.h>
-#include <QDateTime>
 #include <QTimer>
 #include <QMessageBox>
-#include <splashscreen.h>
-#include <scenemanager.h>
-#include <filemanager.h>
 #include <QFileDialog>
+
+#define cW (MainWindow::instance()->centralWidget())
+#define pW (MainWindow::instance()->progressWidget())
 
 ProjectsScreen* instance = nullptr;
 QQuickItem* swipeView;
@@ -246,12 +250,11 @@ void ProjectsScreen::handleLoadButtonClicked()
 								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
 	auto currentProject = ProjectManager::currentProject();
 	if (!currentProject.isEmpty() && currentProject == projectName) {
-        SceneManager::show("studioScene", SceneManager::ToRight);
+        cW->showWidget(Screen::STUDIO);
 		return;
     }
 
-	SplashScreen::setText("Loading project");
-    SplashScreen::show(true);
+    pW->showProgress("Loading project");
     ProjectManager::stopProject();
 
     /* Start Project */
@@ -263,7 +266,7 @@ void ProjectsScreen::handleLoadButtonClicked()
                     model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
                 }
             }
-            SplashScreen::hide();
+            pW->hideProgress();
             e.exit(1);
         } else {
             e.exit(0);
@@ -271,18 +274,16 @@ void ProjectsScreen::handleLoadButtonClicked()
     });
     if (e.exec()) return;
 
-    SplashScreen::hide();
-    QTimer::singleShot(600, [=] {
-        SceneManager::show("studioScene", SceneManager::ToRight);
+    pW->hideProgress();
+    cW->showWidget(Screen::STUDIO);
 
-        for (int i = model.rowCount(); i--;) {
-            if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
-                model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
-            }
+    for (int i = model.rowCount(); i--;) {
+        if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
+            model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
         }
-        model.set(listView->property("currentIndex").toInt(),
-                  model.roleNames()[ProjectListModel::ActiveRole], true);
-    });
+    }
+    model.set(listView->property("currentIndex").toInt(),
+        model.roleNames()[ProjectListModel::ActiveRole], true);
 }
 
 void ProjectsScreen::refreshProjectList(const QString& activeProject)

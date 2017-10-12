@@ -6,15 +6,12 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/css.h \
                              $$PWD/scrollarea.h \
                              $$PWD/about.h \
-                             $$PWD/splashscreen.h \
-                             $$PWD/splashscreen_p.h \
                              $$PWD/usermanager.h \
                              $$PWD/savemanager.h \
                              $$PWD/projectmanager.h \
                              $$PWD/dirlocker.h \
                              $$PWD/zipper.h \
                              $$PWD/toolsmanager.h \
-                             $$PWD/scenemanager.h \
                              $$PWD/projectsscreen.h \
                              $$PWD/loginscreen.h \
                              $$PWD/buildsscreen.h \
@@ -38,10 +35,13 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/completionhelper.h \
                              $$PWD/fileexplorer.h \
                              $$PWD/filelist.h \
-    $$PWD/qmlformatter.h \
-    $$PWD/toolbox.h \
-    $$PWD/toolboxtree.h \
-    $$PWD/filterlineedit.h
+                             $$PWD/qmlformatter.h \
+                             $$PWD/toolbox.h \
+                             $$PWD/toolboxtree.h \
+                             $$PWD/filterlineedit.h \
+                             $$PWD/centralwidget.h \
+                             $$PWD/progresswidget.h \
+                             $$PWD/screens.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -50,15 +50,12 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/css.cpp \
                              $$PWD/scrollarea.cpp \
                              $$PWD/about.cpp \
-                             $$PWD/splashscreen.cpp \
-                             $$PWD/splashscreen_p.cpp \
                              $$PWD/usermanager.cpp \
                              $$PWD/savemanager.cpp \
                              $$PWD/projectmanager.cpp \
                              $$PWD/dirlocker.cpp \
                              $$PWD/zipper.cpp \
                              $$PWD/toolsmanager.cpp \
-                             $$PWD/scenemanager.cpp \
                              $$PWD/projectsscreen.cpp \
                              $$PWD/loginscreen.cpp \
                              $$PWD/buildsscreen.cpp \
@@ -82,10 +79,12 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/completionhelper.cpp \
                              $$PWD/fileexplorer.cpp \
                              $$PWD/filelist.cpp \
-    $$PWD/qmlformatter.cpp \
-    $$PWD/toolbox.cpp \
-    $$PWD/toolboxtree.cpp \
-    $$PWD/filterlineedit.cpp
+                             $$PWD/qmlformatter.cpp \
+                             $$PWD/toolbox.cpp \
+                             $$PWD/toolboxtree.cpp \
+                             $$PWD/filterlineedit.cpp \
+                             $$PWD/centralwidget.cpp \
+                             $$PWD/progresswidget.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

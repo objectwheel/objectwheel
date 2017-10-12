@@ -2,11 +2,9 @@
 #include <fit.h>
 #include <components.h>
 #include <mainwindow.h>
-#include <scenemanager.h>
 #include <QApplication>
 #include <QFontDatabase>
 #include <QtWebView>
-#include <splashscreen.h>
 #include <QIcon>
 #include <QBuffer>
 #include <QSharedMemory>

@@ -1,15 +1,19 @@
 #include <about.h>
+#include <fit.h>
+#include <flatbutton.h>
+#include <usermanager.h>
+#include <screens.h>
+#include <mainwindow.h>
+
+#include <QApplication>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <fit.h>
-#include <QApplication>
-#include <flatbutton.h>
-#include <scenemanager.h>
-#include <usermanager.h>
 
+#define cW (MainWindow::instance()->centralWidget())
+#define pW (MainWindow::instance()->progressWidget())
 #define TITLE_TEXT "<p><b>version</b> 1.592 <b>pbuild</b> 529e042<br>Wed May 10 03:32:18 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
@@ -82,9 +86,9 @@ AboutPrivate::AboutPrivate(QWidget* p)
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
         if (UserManager::currentSessionsUser().isEmpty()) {
-            SceneManager::show("loginScene", SceneManager::ToRight);
+            cW->showWidget(Screen::LOGIN);
         } else {
-            SceneManager::show("studioScene", SceneManager::ToRight);
+            cW->showWidget(Screen::STUDIO);
         }
     });
 }
