@@ -242,5 +242,30 @@
         <file>resources/qmls/item/t/main.qml</file>
         <file>resources/tools/Timer.zip</file>
         <file>resources/tools/Image.zip</file>
+        <file>resources/tools/Calendar.zip</file>
+        <file>resources/tools/GroupBox.zip</file>
+        <file>resources/tools/Label.zip</file>
+        <file>resources/tools/SpinBox.zip</file>
+        <file>resources/tools/TableView.zip</file>
+        <file>resources/tools/BusyIndicator-2.zip</file>
+        <file>resources/tools/Button-2.zip</file>
+        <file>resources/tools/CheckBox-2.zip</file>
+        <file>resources/tools/ComboBox-2.zip</file>
+        <file>resources/tools/Dial-2.zip</file>
+        <file>resources/tools/GroupBox-2.zip</file>
+        <file>resources/tools/Label-2.zip</file>
+        <file>resources/tools/ProgressBar-2.zip</file>
+        <file>resources/tools/RadioButton-2.zip</file>
+        <file>resources/tools/Slider-2.zip</file>
+        <file>resources/tools/SpinBox-2.zip</file>
+        <file>resources/tools/Switch-2.zip</file>
+        <file>resources/tools/TextArea-2.zip</file>
+        <file>resources/tools/TextField-2.zip</file>
+        <file>resources/tools/Tumbler-2.zip</file>
+        <file>resources/tools/DelayButton-2.zip</file>
+        <file>resources/tools/Frame-2.zip</file>
+        <file>resources/tools/PageIndicator-2.zip</file>
+        <file>resources/tools/RangeSlider-2.zip</file>
+        <file>resources/tools/RoundButton-2.zip</file>
     </qresource>
 </RCC>

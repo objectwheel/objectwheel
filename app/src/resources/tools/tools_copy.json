@@ -172,5 +172,130 @@
     "Image" :
     {
         "toolUrl" : "qrc:/resources/tools/Image.zip"
+    },
+
+    "GroupBox" :
+    {
+        "toolUrl" : "qrc:/resources/tools/GroupBox.zip"
+    },
+
+    "Calendar" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Calendar.zip"
+    },
+
+    "Label" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Label.zip"
+    },
+
+    "SpinBox" :
+    {
+        "toolUrl" : "qrc:/resources/tools/SpinBox.zip"
+    },
+
+    "TableView" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TableView.zip"
+    },
+
+    "Tumbler-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Tumbler-2.zip"
+    },
+
+    "RadioButton-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/RadioButton-2.zip"
+    },
+
+    "SpinBox-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/SpinBox-2.zip"
+    },
+
+    "TextArea-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TextArea-2.zip"
+    },
+
+    "TextField-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/TextField-2.zip"
+    },
+
+    "Slider-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Slider-2.zip"
+    },
+
+    "ProgressBar-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ProgressBar-2.zip"
+    },
+
+    "BusyIndicator-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/BusyIndicator-2.zip"
+    },
+
+    "Label-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Label-2.zip"
+    },
+
+    "CheckBox-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/CheckBox-2.zip"
+    },
+
+    "ComboBox-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/ComboBox-2.zip"
+    },
+
+    "Button-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Button-2.zip"
+    },
+
+    "Switch-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Switch-2.zip"
+    },
+
+    "Dial-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Dial-2.zip"
+    },
+
+    "GroupBox-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/GroupBox-2.zip"
+    },
+
+    "RoundButton-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/RoundButton-2.zip"
+    },
+
+    "PageIndicator-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/PageIndicator-2.zip"
+    },
+
+    "RangeSlider-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/RangeSlider-2.zip"
+    },
+
+    "Frame-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/Frame-2.zip"
+    },
+
+    "DelayButton-2" :
+    {
+        "toolUrl" : "qrc:/resources/tools/DelayButton-2.zip"
     }
 }

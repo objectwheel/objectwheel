@@ -3,6 +3,6 @@ import QtQuick.Controls 1.4
 
 ApplicationWindow {
     visible: true
-    color: "#e0e4e7"
+    color: "#f0f4f7"
     title: "Application Window"
 }

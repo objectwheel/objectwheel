@@ -76,8 +76,6 @@ int main(int argc, char *argv[])
                                                     "qtc*.warning=false\n"
                                                     "qtc*.critical=false"));
 
-    QTimer::singleShot(1000, [&] { w.raise(); });
-
     // Start main event loop
     return a.exec();
 }

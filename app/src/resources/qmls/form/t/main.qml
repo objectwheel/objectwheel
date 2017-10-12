@@ -3,6 +3,6 @@ import QtQuick.Window 2.2
 
 Window {
     visible: true
-    color: "#e0e4e7"
-    title: qsTr("Form")
+    color: "#f0f4f7"
+    title: "Form"
 }
