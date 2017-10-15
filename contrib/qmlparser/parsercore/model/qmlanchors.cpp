@@ -257,7 +257,7 @@ bool detectVerticalCycle(const ModelNode &node, QList<ModelNode> knownNodeList)
     return false;
 }
 
-bool QmlAnchors::canAnchor(const QmlItemNode &targetModelNode) const
+bool QmlAnchors::canAnchor(const QmlItemNode &) const
 {
     if (!qmlItemNode().isInBaseState())
         return false;
@@ -317,7 +317,7 @@ void QmlAnchors::setMargin(AnchorLineType sourceAnchorLineType, double margin) c
     qmlItemNode().setVariantProperty(propertyName, qRound(margin));
 }
 
-static bool checkForHorizontalCycleRecusive(const QmlAnchors &anchors, QList<QmlItemNode> &visitedItems)
+static bool checkForHorizontalCycleRecusive(const QmlAnchors &anchors, QList<QmlItemNode> &)
 {
     if (!anchors.isValid())
         return false;

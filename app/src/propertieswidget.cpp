@@ -1215,7 +1215,7 @@ void PropertiesWidget::filterList(const QString& filter)
 
 QSize PropertiesWidget::sizeHint() const
 {
-    return QSize(fit(340), fit(400));
+    return QSize(fit(340), fit(2600)); //FIXME:
 }
 
 #include "propertieswidget.moc"

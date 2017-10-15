@@ -891,9 +891,9 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath,
     _d->updateOpenDocHistory();
 }
 
-void QmlEditorView::saveControl(Control* control)
+void QmlEditorView::saveControl(Control*)
 {
-
+    //TODO
 }
 
 void QmlEditorView::saveDocument(Control* control, const QString& documentPath)

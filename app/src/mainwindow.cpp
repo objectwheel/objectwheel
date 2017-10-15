@@ -44,6 +44,12 @@ MainWindow* MainWindow::instance()
 void MainWindow::setupGui()
 {
     setWindowTitle("Objectwheel");
+    setAutoFillBackground(true);
+
+    QPalette p(palette());
+    p.setColor(QPalette::Window, QColor("#E0E4E7"));
+    setPalette(p);
+
     _designManager.setSettleWidget(&_settleWidget);
 
     _centralWidget.addWidget(Screen::STUDIO, &_settleWidget);

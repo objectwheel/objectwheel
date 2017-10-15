@@ -14,7 +14,7 @@
 #include <mainwindow.h>
 #include <projectsscreen.h>
 #include <loginscreen.h>
-#include <buildsScreen.h>
+#include <buildsscreen.h>
 #include <designmanager.h>
 #include <toolbox.h>
 #include <progresswidget.h>

@@ -1,5 +1,5 @@
 #include <formswidget.h>
-#include <flatButton.h>
+#include <flatbutton.h>
 #include <toolboxtree.h>
 #include <savemanager.h>
 #include <formscene.h>
@@ -110,7 +110,7 @@ void FormsWidgetPrivate::removeButtonClicked()
     auto form = DesignManager::formScene()->mainForm();
     if (!form || !form->form() || form->main())
         return;
-    //    SaveManager::removeForm((Form*)form);
+    SaveManager::removeForm((Form*)form);
     DesignManager::formScene()->removeForm(form);
 }
 
@@ -184,7 +184,7 @@ void FormsWidget::setCurrentForm(int index)
 
 QSize FormsWidget::sizeHint() const
 {
-    return QSize(fit(200), fit(100));
+    return QSize(fit(200), fit(10));
 }
 
 #include "formswidget.moc"
