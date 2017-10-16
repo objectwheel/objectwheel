@@ -41,7 +41,7 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/filterlineedit.h \
                              $$PWD/centralwidget.h \
                              $$PWD/progresswidget.h \
-                             $$PWD/screens.h
+    $$PWD/global.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \

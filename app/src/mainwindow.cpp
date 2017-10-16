@@ -14,7 +14,7 @@
 #include <formscene.h>
 #include <qmlpreviewer.h>
 #include <loadingindicator.h>
-#include <screens.h>
+#include <global.h>
 #include <QtConcurrent>
 #include <QtNetwork>
 
@@ -253,7 +253,7 @@ CentralWidget* MainWindow::centralWidget()
     return &_centralWidget;
 }
 
-ProgressWidget*MainWindow::progressWidget()
+ProgressWidget* MainWindow::progressWidget()
 {
     return &_progressWidget;
 }

@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <controltransaction.h>
 #include <qmlpreviewer.h>
+#include <global.h>
 
 #define MAX_Z_VALUE (9999999)
 
@@ -115,6 +116,7 @@ class Control : public QGraphicsWidget
         void hideResizers();
         void showResizers();
         virtual void refresh();
+        virtual void centralize();
 
     protected slots:
         void updateUid();
@@ -127,7 +129,6 @@ class Control : public QGraphicsWidget
         void setProperties(const PropertyNodes& properties);
         void setEvents(const QList<QString>& events);
 
-        virtual void centralize();
         virtual QRectF frameGeometry() const;
         virtual void dropControl(Control* control);
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -175,25 +176,14 @@ class Form : public Control
         friend class FormPrivate;
 
     public:
-        enum Skin {
-            NoSkin,
-            PhonePortrait,
-            PhoneLandscape,
-            Desktop
-        };
-
         explicit Form(const QString& url, const QString& uid = QString(), Form* parent = Q_NULLPTR);
 
         bool main() const;
         void setMain(bool value);
+        void setSkin(const Skin& skin);
+        const Skin& skin();
 
         QRectF frameGeometry() const override;
-
-        static void setSkin(const Skin& skin);
-        static const Skin& skin();
-
-    public slots:
-        void centralize() override;
 
     protected:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
@@ -204,7 +194,7 @@ class Form : public Control
         FormPrivate* _d;
         bool _main = false;
         QList<Control*> _controls;
-        static Skin _skin;
+        Skin _skin;
 };
 
 #endif // CONTROL_H

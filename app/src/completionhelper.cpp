@@ -70,8 +70,9 @@ QStringList generateKeywords()
 
 QStringList generateProperties(const QString& text)
 {   
-    QRegularExpression regex("^(!?(\\s+)?)[a-z][\\w\\.]+([ \\t ]+)?(?=:)", QRegularExpression::MultilineOption
-                             | QRegularExpression::DotMatchesEverythingOption);
+    QRegularExpression regex("^(!?(\\s+)?)[a-z][\\w\\.]+([ \\t ]+)?(?=:)",
+                             QRegularExpression::MultilineOption |
+                             QRegularExpression::DotMatchesEverythingOption);
     auto i = regex.globalMatch(text);
     QStringList words;
     while (i.hasNext()) {

@@ -1,5 +1,5 @@
 #include <progresswidget.h>
-#include <screens.h>
+#include <global.h>
 #include <fit.h>
 #include <QPainter>
 #include <QApplication>

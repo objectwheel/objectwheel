@@ -11,7 +11,7 @@
 #include <dirlocker.h>
 #include <zipper.h>
 #include <flatbutton.h>
-#include <screens.h>
+#include <global.h>
 #include <mainwindow.h>
 
 #include <QStandardPaths>

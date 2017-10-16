@@ -2,7 +2,7 @@
 #include <fit.h>
 #include <flatbutton.h>
 #include <usermanager.h>
-#include <screens.h>
+#include <global.h>
 #include <mainwindow.h>
 
 #include <QApplication>

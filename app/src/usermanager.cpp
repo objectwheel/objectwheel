@@ -9,7 +9,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <aes.h>
-#include <screens.h>
+#include <global.h>
 #include <mainwindow.h>
 
 #define cW (MainWindow::instance()->centralWidget())
@@ -183,7 +183,8 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
     _d->currentSessionsToken = _d->generateToken(username, password);
 
     if (_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
-        pW->showProgress("Starting user session");
+        QMetaObject::invokeMethod(pW, "showProgress", Qt::QueuedConnection,
+                                  Q_ARG(QString, "Starting user session"));
 
         /* Clear all previous trash project folders if locked versions already exists */
         auto dirlockersFiles = _d->dirLocker.dirlockersFilenames();

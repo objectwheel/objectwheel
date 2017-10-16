@@ -1,7 +1,7 @@
 #include <projectsscreen.h>
 #include <fit.h>
 #include <mainwindow.h>
-#include <screens.h>
+#include <global.h>
 #include <projectmanager.h>
 #include <filemanager.h>
 #include <usermanager.h>

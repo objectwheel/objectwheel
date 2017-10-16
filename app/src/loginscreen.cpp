@@ -11,7 +11,7 @@
 #include <projectsscreen.h>
 #include <dirlocker.h>
 #include <mainwindow.h>
-#include <screens.h>
+#include <global.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>

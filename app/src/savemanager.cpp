@@ -653,6 +653,7 @@ void SaveManager::exposeProject()
     for (auto path : fpaths) {
 
         auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
+        form->setSkin(skin(form->dir()));
         if (fname(path) == DIR_MAINFORM)
             form->setMain(true);
         DesignManager::formScene()->addForm(form);
@@ -713,6 +714,14 @@ bool SaveManager::isOwctrl(const QString& rootPath)
                         separator() + FILE_PROPERTIES;
     auto propertyData = rdfile(propertyPath);
     return _d->isOwctrl(propertyData);
+}
+
+Skin SaveManager::skin(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return Skin(_d->property(propertyData, TAG_SKIN).toInt());
 }
 
 QString SaveManager::id(const QString& rootPath)
@@ -957,6 +966,15 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
                             separator() + FILE_PROPERTIES;
         auto propertyData = rdfile(propertyPath);
         _d->setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
+        wrfile(propertyPath, propertyData);
+    } if (property == TAG_SKIN) {
+        if (control->dir().isEmpty() || !control->form())
+            return;
+
+        auto propertyPath = control->dir() + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        _d->setProperty(propertyData, TAG_SKIN, value.toInt());
         wrfile(propertyPath, propertyData);
     } else {
         auto fileName = control->dir() + separator() + DIR_THIS +

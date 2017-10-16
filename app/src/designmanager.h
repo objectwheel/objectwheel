@@ -35,6 +35,9 @@ class DesignManager : public QObject
         static QmlEditorView* qmlEditorView();
         static LoadingIndicator* loadingIndicator();
 
+    public slots:
+        void handleModeChange();
+
     signals:
         void modeChanged();
 

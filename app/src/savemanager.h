@@ -2,6 +2,7 @@
 #define SAVEMANAGER_H
 
 #include <QObject>
+#include <global.h>
 
 #define SIGN_OWDB "T3dkYl92Mi4w"
 #define SIGN_OWCTRL "T3djdHJsX3YyLjA"
@@ -16,6 +17,7 @@
 #define TAG_ID "id"
 #define TAG_UID "_uid"
 #define TAG_SUID "_suid"
+#define TAG_SKIN "_skin"
 #define TAG_CATEGORY "_category"
 #define TAG_OWDB_SIGN "_owdbsign"
 #define TAG_OWCTRL_SIGN "_owctrlsign"
@@ -44,13 +46,14 @@ class SaveManager : public QObject
         static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
         static QStringList masterPaths(const QString& topPath);
         static bool isOwctrl(const QString& rootPath);
+        static Skin skin(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);
         static void refreshToolUid(const QString& toolRootPath);
         static QString toolCategory(const QString& toolRootPath);
 
-        static bool exists(const Control* control, const QString& suid , const QString& topPath = QString());
+        static bool exists(const Control* control, const QString& suid, const QString& topPath = QString());
         static bool addForm(Form* form);
         static void removeForm(const Form* form);
         static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());

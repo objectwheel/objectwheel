@@ -151,7 +151,7 @@ QmlHighlighter::QmlHighlighter(QTextDocument* parent)
 
 void QmlHighlighter::highlightBlock(const QString &text)
 {
-    foreach (const HighlightingRule &rule, highlightingRules) {
+    for (const auto& rule : highlightingRules) {
         QRegExp expression(rule.pattern);
         int index = expression.indexIn(text);
         while (index >= 0) {
