@@ -12,6 +12,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
+#define pS (QApplication::primaryScreen())
 #define cW (MainWindow::instance()->centralWidget())
 #define pW (MainWindow::instance()->progressWidget())
 #define TITLE_TEXT "<p><b>version</b> 1.592 <b>pbuild</b> 529e042<br>Wed May 10 03:32:18 2017 +0300<br></p>"
@@ -44,8 +45,8 @@ AboutPrivate::AboutPrivate(QWidget* p)
 	iconLabel.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	iconLabel.setFixedSize(fit(150), fit(74.5));
     QPixmap pixmap(":/resources/images/logo.png");
-    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-	iconLabel.setPixmap(pixmap.scaled(fit(150)*qApp->devicePixelRatio(), fit(74.5)*qApp->devicePixelRatio(),
+    pixmap.setDevicePixelRatio(pS->devicePixelRatio());
+    iconLabel.setPixmap(pixmap.scaled(fit(150) * pS->devicePixelRatio(), fit(74.5) * pS->devicePixelRatio(),
 									  Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 
 	iconLayout.addStretch();

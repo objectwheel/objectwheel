@@ -3,12 +3,14 @@
 #include <fit.h>
 #include <QPainter>
 #include <QApplication>
+#include <QScreen>
 
 #define PATH_GIF (":/resources/images/preloader.gif")
 #define PATH_LOGO (":/resources/images/logo.png")
 #define SIZE_GIF (QSize(fit(24), fit(24)))
 #define SIZE_LOGO (QSize(fit(160), fit(80)))
 #define INTERVAL_WAITEFFECT 600
+#define pS (QApplication::primaryScreen())
 
 using namespace Fit;
 
@@ -26,7 +28,7 @@ ProgressWidget::ProgressWidget(CentralWidget* parent)
     setPalette(p);
 
     _movie.setFileName(PATH_GIF);
-    _movie.setScaledSize(SIZE_GIF * qApp->devicePixelRatio());
+    _movie.setScaledSize(SIZE_GIF * pS->devicePixelRatio());
     _movie.setSpeed(230);
     _movie.start();
     connect(&_movie, SIGNAL(frameChanged(int)), SLOT(update()));

@@ -50,6 +50,7 @@
 #define SIZE_SKIN (fit(QSize(320, 662)))
 #define SIZE_FORM (fit(QSize(285, 535)))
 #define MARGIN_TOP (fit(14))
+#define pS (QApplication::primaryScreen())
 
 using namespace Fit;
 
@@ -890,7 +891,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect(), _d->itemPixmap, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
+    painter->drawPixmap(rect(), _d->itemPixmap, QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
 
     QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
                              innerRect.center().x(), innerRect.bottom());
@@ -906,7 +907,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(_d->itemPixmap.rect(), gradient);
             p.end();
-            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
+            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
         }
     }
 

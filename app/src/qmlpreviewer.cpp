@@ -24,8 +24,10 @@
 #include <QPainter>
 #include <QTimer>
 #include <QPair>
+#include <QScreen>
 
 #define TASK_TIMEOUT 100
+#define pS (QApplication::primaryScreen())
 
 using namespace Fit;
 
@@ -207,8 +209,8 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
 
     if (result.gui == false) {
         result.preview = QPixmap(dname(url) + separator() + "icon.png")
-                         .scaled(NONGUI_CONTROL_SIZE * qApp->devicePixelRatio(),
-                                 NONGUI_CONTROL_SIZE * qApp->devicePixelRatio());
+                         .scaled(NONGUI_CONTROL_SIZE * pS->devicePixelRatio(),
+                                 NONGUI_CONTROL_SIZE * pS->devicePixelRatio());
         emit previewReady(result);
         return PreviewResult();
     }
@@ -251,7 +253,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
     Delayer::delay(100);
 
     QPixmap preview = QPixmap::fromImage(window->grabWindow());
-    preview.setDevicePixelRatio(qApp->devicePixelRatio());
+    preview.setDevicePixelRatio(pS->devicePixelRatio());
     scratchPixmapIfEmpty(preview);
     result.preview = preview;
 
@@ -329,7 +331,7 @@ void QmlPreviewerPrivate::taskHandler()
             QPainter p(parentPixmap);
             p.drawPixmap(QRectF(results[result].pos, results[result].size),
                          results[result].preview, QRectF(QPointF(0, 0),
-                         results[result].size * qApp->devicePixelRatio()));
+                         results[result].size * pS->devicePixelRatio()));
             p.end();
 
             parentPixmap = &results[result].preview;
