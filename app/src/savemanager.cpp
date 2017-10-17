@@ -437,7 +437,7 @@ QObject* SaveManagerPrivate::requestItem(const QString& path, QQmlEngine* engine
 {
     QQmlComponent comp(engine, QUrl(path + separator() + DIR_THIS + separator() + "main.qml"));
     auto item = comp.create(context);
-    // qDebug() << comp.errors();
+    qApp->processEvents(QEventLoop::AllEvents, 20);
     return item;
 }
 
@@ -497,6 +497,7 @@ bool SaveManager::execProject()
     QList<QObject*> forms;
     QMap<QString, QQmlContext*> contexes;
     auto engine = new QQmlEngine(_d->parent);
+    engine->rootContext()->setContextProperty("dpi", Fit::ratio());
 
     for (auto formPath : formPaths()) {
         auto _masterPaths = masterPaths(formPath);
@@ -512,7 +513,7 @@ bool SaveManager::execProject()
                 if (index >= 0) {
                     results[childPath] = masterResults[childPath];
                 } else {
-                    results[childPath] = _d->requestItem(childPath, engine, masterContext);
+                    results[childPath] = _d->requestItem(childPath, engine, masterContext); //Async
                     if (results[childPath] == nullptr)
                         return false;
                 }
@@ -520,14 +521,14 @@ bool SaveManager::execProject()
             }
 
             if (_masterPaths.last() == path) {
-                masterResults[path] = _d->requestItem(path, engine, masterContext);
+                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
                 if (masterResults[path] == nullptr)
                     return false;
                 form = masterResults[path];
                 forms << form;
                 contexes[path] = masterContext;
             } else {
-                masterResults[path] = _d->requestItem(path, engine, masterContext);
+                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
                 if (masterResults[path] == nullptr)
                     return false;
             }
@@ -640,6 +641,9 @@ QStringList SaveManager::masterPaths(const QString& topPath)
     std::sort(paths.begin(), paths.end(),
               [](const QString& a, const QString& b)
     { return a.size() > b.size(); });
+
+    if (paths.isEmpty() && _d->isForm(topPath))
+        paths << topPath;
 
     return paths;
 }
