@@ -177,7 +177,6 @@ class Form : public Control
 
     public:
         explicit Form(const QString& url, const QString& uid = QString(), Form* parent = Q_NULLPTR);
-
         bool main() const;
         void setMain(bool value);
         void setSkin(const Skin& skin);

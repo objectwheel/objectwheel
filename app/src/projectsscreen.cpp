@@ -258,21 +258,14 @@ void ProjectsScreen::handleLoadButtonClicked()
     ProjectManager::stopProject();
 
     /* Start Project */
-    QEventLoop e;
-    QTimer::singleShot(300, [=, &e] {
-        if (!ProjectManager::startProject(projectName)) {
-            for (int i = model.rowCount(); i--;) {
-                if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
-                    model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
-                }
+    if (!ProjectManager::startProject(projectName)) { // Asynchronous Operation
+        for (int i = model.rowCount(); i--;) {
+            if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
+                model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
             }
-            pW->hideProgress();
-            e.exit(1);
-        } else {
-            e.exit(0);
         }
-    });
-    if (e.exec()) return;
+        pW->hideProgress();
+    }
 
     pW->hideProgress();
     cW->showWidget(Screen::STUDIO);

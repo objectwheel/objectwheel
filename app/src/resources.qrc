@@ -267,5 +267,7 @@
         <file>resources/tools/PageIndicator-2.zip</file>
         <file>resources/tools/RangeSlider-2.zip</file>
         <file>resources/tools/RoundButton-2.zip</file>
+        <file>resources/images/phnh.svg</file>
+        <file>resources/images/phnv.svg</file>
     </qresource>
 </RCC>

@@ -34,9 +34,7 @@ class DesignManager : public QObject
         static FormScene* formScene();
         static QmlEditorView* qmlEditorView();
         static LoadingIndicator* loadingIndicator();
-
-    public slots:
-        void handleModeChange();
+        static void updateSkin();
 
     signals:
         void modeChanged();

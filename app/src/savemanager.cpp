@@ -653,7 +653,6 @@ void SaveManager::exposeProject()
     for (auto path : fpaths) {
 
         auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
-        form->setSkin(skin(form->dir()));
         if (fname(path) == DIR_MAINFORM)
             form->setMain(true);
         DesignManager::formScene()->addForm(form);
@@ -788,7 +787,8 @@ QString SaveManager::toolCategory(const QString& toolRootPath)
 // So, suid and topPath have to be in a valid logical relationship.
 bool SaveManager::exists(const Control* control, const QString& suid, const QString& topPath)
 {
-    return control->form() ? _d->existsInFormScope(control) : _d->existsInParentScope(control, suid, topPath);
+    return control->form() ? _d->existsInFormScope(control) :
+                             _d->existsInParentScope(control, suid, topPath);
 }
 
 bool SaveManager::addForm(Form* form)

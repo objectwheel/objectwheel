@@ -34,10 +34,10 @@ class ControlScene : public QGraphicsScene
         ControlsScrollPanel* nonGuiControlsPanel();
 
     protected:
-        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void drawForeground(QPainter *painter, const QRectF &rect) override;
+        void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+        void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+        void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+        void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     signals:
         void aboutToRemove(Control* control);

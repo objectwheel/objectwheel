@@ -7,6 +7,7 @@
 #include <QQmlError>
 #include <QList>
 #include <QMap>
+#include <global.h>
 
 #define NONGUI_CONTROL_SIZE (fit(40))
 
@@ -32,6 +33,7 @@ struct PreviewResult {
         bool clip;
         bool gui;
         int zValue;
+        Skin skin;
         bool isNull() { return preview.isNull(); }
 };
 

@@ -86,7 +86,7 @@ ControlWatcher* ControlWatcher::instance()
 
 bool Resizer::_resizing = false;
 
-Resizer::Resizer(Control *parent)
+Resizer::Resizer(Control* parent)
     : QGraphicsWidget(parent)
     , _placement(Top)
     , _disabled(false)
@@ -376,7 +376,11 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         for (auto& resizer : parent->_resizers)
             resizer.setDisabled(true);
     } else {
-        parent->setFlag(Control::ItemIsMovable);
+        if (parent->form())
+            parent->setFlag(Control::ItemIsMovable, false);
+        else
+            parent->setFlag(Control::ItemIsMovable);
+
         parent->setFlag(Control::ItemSendsGeometryChanges);
         parent->setAcceptDrops(true);
         if (!parent->form())
@@ -386,6 +390,9 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         parent->setClip(result.clip);
         parent->setZValue(result.zValue); //BUG: PropertiesWidget proper z val update
     }
+
+    if (parent->form())
+        ((Form*)parent)->setSkin(result.skin);
 
     parent->update();
 
@@ -585,7 +592,7 @@ void Control::updateUid()
 
 void Control::centralize()
 {
-    setPos(- size().width() / 2.0, - size().height() / 2.0);
+    setPos(-size().width() / 2.0, -size().height() / 2.0);
 }
 
 QRectF Control::frameGeometry() const
@@ -1397,20 +1404,19 @@ void FormPrivate::applySkinChange()
         case Skin::NoSkin :
             resizable = true;
             break;
+        default:
+            break;
     }
 
-    for (auto form : DesignManager::formScene()->forms()) { //FIXME
-        if (parent->_skin == Skin::PhonePortrait ||
-            parent->_skin == Skin::PhoneLandscape)
-            form->resize(size);
-        else
-            form->update();
+    if (parent->_skin == Skin::PhonePortrait ||
+        parent->_skin == Skin::PhoneLandscape)
+        parent->resize(size);
 
-        for (auto& resizer : form->_resizers)
-            resizer.setDisabled(!resizable);
-    }
+    for (auto& resizer : parent->_resizers)
+        resizer.setDisabled(!resizable);
 
-    DesignManager::instance()->handleModeChange();
+    parent->update();
+    DesignManager::updateSkin();
 }
 
 //! ********************** [Form] **********************
@@ -1418,18 +1424,8 @@ void FormPrivate::applySkinChange()
 Form::Form(const QString& url, const QString& uid, Form* parent)
     : Control(url, uid, parent)
     , _d(new FormPrivate(this))
+    , _skin(Skin::Invalid)
 {
-    connect(this, &Form::initialized, [=] {
-        setFlag(ItemIsMovable, false);
-        _d->applySkinChange();
-    });
-    connect(this, &Form::previewChanged, [=] {
-//        setSkin(SaveManager::skin(dir()));
-        this->disconnect(SIGNAL(previewChanged()));
-    });
-    connect(this, &Form::visibleChanged, [=] {
-        _d->applySkinChange();
-    });
 }
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -1442,13 +1438,13 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
         case PhonePortrait: {
             auto skinRect = QRectF({0, 0}, SIZE_SKIN);
             skinRect.moveCenter(innerRect.center());
-            QSvgRenderer svg(QString("/Users/omergoktas/Desktop/phn0.svg"));
+            QSvgRenderer svg(QString(":/resources/images/phnv.svg"));
             svg.render(painter, skinRect);
             break;
         } case PhoneLandscape: {
             auto skinRect = QRectF({0, 0}, SIZE_SKIN.transposed());
             skinRect.moveCenter(innerRect.center());
-            QSvgRenderer svg(QString("/Users/omergoktas/Desktop/phn0h.svg"));
+            QSvgRenderer svg(QString(":/resources/images/phnh.svg"));
             svg.render(painter, skinRect);
             break;
         } case Desktop: {
@@ -1496,15 +1492,29 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
                 painter->drawPixmap(btnMaxRect.adjusted(fit(2.0), fit(2.0), -fit(2.0), -fit(2.0)), ciks, ciks.rect());
             }
             break;
-        } case NoSkin: {
-            break;
         }
+        default:
+            break;
     }
 
     painter->setBrush(BACKGROUND_COLOR);
     painter->drawRect(innerRect);
 
     Control::paint(painter, option, widget);
+
+    if (!isSelected() && !showOutline()) {
+        QPen pen;
+        pen.setJoinStyle(Qt::MiterJoin);
+        if (_skin == PhonePortrait || _skin == PhoneLandscape) {
+            pen.setColor(Qt::black);
+        } else {
+            pen.setStyle(Qt::DotLine);
+            pen.setColor(OUTLINE_COLOR);
+        }
+        painter->setPen(pen);
+        painter->setBrush(Qt::transparent);
+        painter->drawRect(innerRect);
+    }
 }
 
 void Form::resizeEvent(QGraphicsSceneResizeEvent* event)
@@ -1543,8 +1553,9 @@ void Form::setMain(bool value)
 
 void Form::setSkin(const Skin& skin)
 {
+    if (skin == _skin)
+        return;
     _skin = skin;
-    SaveManager::setProperty(this, TAG_SKIN, skin);
     _d->applySkinChange();
 }
 

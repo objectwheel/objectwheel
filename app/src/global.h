@@ -11,6 +11,7 @@ enum Screen {
 };
 
 enum Skin {
+    Invalid,
     PhonePortrait,
     PhoneLandscape,
     Desktop,

@@ -9,12 +9,13 @@ class FormScene : public ControlScene
 
     public:
         explicit FormScene(QObject *parent = Q_NULLPTR);
-        const QList<Form*>& forms() const { return _forms; }
+        void setMainControl(Control* mainControl) override;
+
+        const QList<Form*>& forms() const;
         void addForm(Form* form);
         void removeForm(Form* form);
-        Form* mainForm();
         void setMainForm(Form* mainForm);
-        void setMainControl(Control* mainControl) override;
+        Form* mainForm();
 
     signals:
         void mainControlChanged(Control* mainControl);

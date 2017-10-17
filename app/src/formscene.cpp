@@ -70,3 +70,8 @@ void FormScene::setMainControl(Control* mainControl)
         emit mainControlChanged(mainControl);
     }
 }
+
+const QList<Form*>& FormScene::forms() const
+{
+    return _forms;
+}

@@ -33,12 +33,16 @@ class DesignManagerPrivate : public QObject
         DesignManagerPrivate(DesignManager* parent);
         ~DesignManagerPrivate();
 
+    private:
         qreal roundRatio(qreal ratio);
         qreal findRatio(const QString& text);
         QString findText(qreal ratio);
         void scaleScene(qreal ratio);
 
     public slots:
+        void handleModeChange();
+
+    private slots:
         void handleSnappingClicked(bool value);
         void handleShowOutlineClicked(bool value);
         void handleFitInSceneClicked();
@@ -438,6 +442,7 @@ void DesignManagerPrivate::handlePhonePortraitButtonClicked()
 {
     auto form = DesignManager::formScene()->mainForm();
     form->setSkin(Skin::PhonePortrait);
+    SaveManager::setProperty(form, TAG_SKIN, Skin::PhonePortrait);
     phonePortraitButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -453,6 +458,7 @@ void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
 {
     auto form = DesignManager::formScene()->mainForm();
     form->setSkin(Skin::PhoneLandscape);
+    SaveManager::setProperty(form, TAG_SKIN, Skin::PhoneLandscape);
     phoneLandscapeButton.setDisabled(true);
     phonePortraitButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -468,6 +474,7 @@ void DesignManagerPrivate::handleDesktopSkinButtonClicked()
 {
     auto form = DesignManager::formScene()->mainForm();
     form->setSkin(Skin::Desktop);
+    SaveManager::setProperty(form, TAG_SKIN, Skin::Desktop);
     desktopSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     phonePortraitButton.setChecked(false);
@@ -483,6 +490,7 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
 {
     auto form = DesignManager::formScene()->mainForm();
     form->setSkin(Skin::NoSkin);
+    SaveManager::setProperty(form, TAG_SKIN, Skin::NoSkin);
     noSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -554,120 +562,120 @@ void DesignManagerPrivate::handleBuildButtonClicked()
     //TODO
 }
 
-void DesignManager::handleModeChange()
+void DesignManagerPrivate::handleModeChange()
 {
     if (DesignManager::_mode == DesignManager::FormGUI) {
         if (MainWindow::instance())
             MainWindow::instance()->showDockWidgets();
-        _d->wGuiModeButton.setChecked(true);
-        _d->wGuiModeButton.setDisabled(true);
-        _d->cGuiModeButton.setChecked(false);
-        _d->editorModeButton.setChecked(false);
-        _d->cGuiModeButton.setEnabled(true);
-        _d->editorModeButton.setEnabled(true);
+        wGuiModeButton.setChecked(true);
+        wGuiModeButton.setDisabled(true);
+        cGuiModeButton.setChecked(false);
+        editorModeButton.setChecked(false);
+        cGuiModeButton.setEnabled(true);
+        editorModeButton.setEnabled(true);
 
         auto form = DesignManager::formScene()->mainForm();
         if (form) {
             if (form->skin() == Skin::Desktop) {
-                _d->desktopSkinButton.setChecked(true);
-                _d->handleDesktopSkinButtonClicked();
+                desktopSkinButton.setChecked(true);
+                handleDesktopSkinButtonClicked();
             } else if (form->skin() == Skin::NoSkin) {
-                _d->noSkinButton.setChecked(true);
-                _d->handleNoSkinButtonClicked();
+                noSkinButton.setChecked(true);
+                handleNoSkinButtonClicked();
             } else if (form->skin() == Skin::PhonePortrait) {
-                _d->phonePortraitButton.setChecked(true);
-                _d->handlePhonePortraitButtonClicked();
+                phonePortraitButton.setChecked(true);
+                handlePhonePortraitButtonClicked();
             } else {
-                _d->phoneLandscapeButton.setChecked(true);
-                _d->handlePhoneLandscapeButtonClicked();
+                phoneLandscapeButton.setChecked(true);
+                handlePhoneLandscapeButtonClicked();
             }
         }
 
-        _d->snappingButton.setChecked(_d->formScene.snapping());
-        _d->snappingButton.setEnabled(true);
-        _d->refreshPreviewButton.setEnabled(true);
-        _d->clearFormButton.setEnabled(true);
-        _d->showOutlineButton.setChecked(_d->formScene.showOutlines());
-        _d->showOutlineButton.setEnabled(true);
-        _d->fitInSceneButton.setEnabled(true);
-        _d->layItVertButton.setEnabled(true);
-        _d->layItHorzButton.setEnabled(true);
-        _d->layItGridButton.setEnabled(true);
-        _d->breakLayoutButton.setEnabled(true);
-        _d->zoomlLevelCombobox.setCurrentText(_d->findText(_d->lastScaleOfWv));
-        _d->controlView.hide();
-        _d->qmlEditorView.hide();
-        _d->formView.show();
-        _d->toolbar.show();
-        _currentScene = &_d->formScene;
+        snappingButton.setChecked(formScene.snapping());
+        snappingButton.setEnabled(true);
+        refreshPreviewButton.setEnabled(true);
+        clearFormButton.setEnabled(true);
+        showOutlineButton.setChecked(formScene.showOutlines());
+        showOutlineButton.setEnabled(true);
+        fitInSceneButton.setEnabled(true);
+        layItVertButton.setEnabled(true);
+        layItHorzButton.setEnabled(true);
+        layItGridButton.setEnabled(true);
+        breakLayoutButton.setEnabled(true);
+        zoomlLevelCombobox.setCurrentText(findText(lastScaleOfWv));
+        controlView.hide();
+        qmlEditorView.hide();
+        formView.show();
+        toolbar.show();
+        parent->_currentScene = &formScene;
     } else if (DesignManager::_mode == DesignManager::ControlGUI) {
         if (MainWindow::instance())
             MainWindow::instance()->showDockWidgets();
-        _d->cGuiModeButton.setChecked(true);
-        _d->cGuiModeButton.setDisabled(true);
-        _d->editorModeButton.setChecked(false);
-        _d->wGuiModeButton.setChecked(false);
-        _d->editorModeButton.setEnabled(true);
-        _d->wGuiModeButton.setEnabled(true);
-        _d->noSkinButton.setChecked(true);
-        _d->phoneLandscapeButton.setChecked(false);
-        _d->phonePortraitButton.setChecked(false);
-        _d->desktopSkinButton.setChecked(false);
-        _d->noSkinButton.setDisabled(true);
-        _d->phonePortraitButton.setDisabled(true);
-        _d->phoneLandscapeButton.setDisabled(true);
-        _d->desktopSkinButton.setDisabled(true);
-        if (_d->controlScene.mainControl())
-            _d->controlScene.mainControl()->centralize();
-        _d->snappingButton.setChecked(_d->controlScene.snapping());
-        _d->snappingButton.setEnabled(true);
-        _d->refreshPreviewButton.setEnabled(true);
-        _d->clearFormButton.setEnabled(true);
-        _d->showOutlineButton.setChecked(_d->controlScene.showOutlines());
-        _d->showOutlineButton.setEnabled(true);
-        _d->fitInSceneButton.setEnabled(true);
-        _d->layItVertButton.setEnabled(true);
-        _d->layItHorzButton.setEnabled(true);
-        _d->layItGridButton.setEnabled(true);
-        _d->breakLayoutButton.setEnabled(true);
-        _d->zoomlLevelCombobox.setCurrentText(_d->findText(_d->lastScaleOfCv));
-        _d->formView.hide();
-        _d->qmlEditorView.hide();
-        _d->controlView.show();
-        _d->toolbar.show();
-        _currentScene = &_d->controlScene;
+        cGuiModeButton.setChecked(true);
+        cGuiModeButton.setDisabled(true);
+        editorModeButton.setChecked(false);
+        wGuiModeButton.setChecked(false);
+        editorModeButton.setEnabled(true);
+        wGuiModeButton.setEnabled(true);
+        noSkinButton.setChecked(true);
+        phoneLandscapeButton.setChecked(false);
+        phonePortraitButton.setChecked(false);
+        desktopSkinButton.setChecked(false);
+        noSkinButton.setDisabled(true);
+        phonePortraitButton.setDisabled(true);
+        phoneLandscapeButton.setDisabled(true);
+        desktopSkinButton.setDisabled(true);
+        if (controlScene.mainControl())
+            controlScene.mainControl()->centralize();
+        snappingButton.setChecked(controlScene.snapping());
+        snappingButton.setEnabled(true);
+        refreshPreviewButton.setEnabled(true);
+        clearFormButton.setEnabled(true);
+        showOutlineButton.setChecked(controlScene.showOutlines());
+        showOutlineButton.setEnabled(true);
+        fitInSceneButton.setEnabled(true);
+        layItVertButton.setEnabled(true);
+        layItHorzButton.setEnabled(true);
+        layItGridButton.setEnabled(true);
+        breakLayoutButton.setEnabled(true);
+        zoomlLevelCombobox.setCurrentText(findText(lastScaleOfCv));
+        formView.hide();
+        qmlEditorView.hide();
+        controlView.show();
+        toolbar.show();
+        parent->_currentScene = &controlScene;
     } else {
         if (MainWindow::instance())
             MainWindow::instance()->hideDockWidgets();
-        _d->editorModeButton.setChecked(true);
-        _d->editorModeButton.setDisabled(true);
-        _d->cGuiModeButton.setChecked(false);
-        _d->wGuiModeButton.setChecked(false);
-        _d->cGuiModeButton.setEnabled(true);
-        _d->wGuiModeButton.setEnabled(true);
-        _d->noSkinButton.setChecked(false);
-        _d->phoneLandscapeButton.setChecked(false);
-        _d->phonePortraitButton.setChecked(false);
-        _d->desktopSkinButton.setChecked(false);
-        _d->noSkinButton.setDisabled(true);
-        _d->phonePortraitButton.setDisabled(true);
-        _d->phoneLandscapeButton.setDisabled(true);
-        _d->desktopSkinButton.setDisabled(true);
-        _d->snappingButton.setChecked(false);
-        _d->snappingButton.setDisabled(true);
-        _d->showOutlineButton.setChecked(false);
-        _d->showOutlineButton.setDisabled(true);
-        _d->refreshPreviewButton.setDisabled(true);
-        _d->clearFormButton.setDisabled(true);
-        _d->fitInSceneButton.setDisabled(true);
-        _d->layItVertButton.setDisabled(true);
-        _d->layItHorzButton.setDisabled(true);
-        _d->layItGridButton.setDisabled(true);
-        _d->breakLayoutButton.setDisabled(true);
-        _d->toolbar.hide();
-        _d->formView.hide();
-        _d->controlView.hide();
-        _d->qmlEditorView.show();
+        editorModeButton.setChecked(true);
+        editorModeButton.setDisabled(true);
+        cGuiModeButton.setChecked(false);
+        wGuiModeButton.setChecked(false);
+        cGuiModeButton.setEnabled(true);
+        wGuiModeButton.setEnabled(true);
+        noSkinButton.setChecked(false);
+        phoneLandscapeButton.setChecked(false);
+        phonePortraitButton.setChecked(false);
+        desktopSkinButton.setChecked(false);
+        noSkinButton.setDisabled(true);
+        phonePortraitButton.setDisabled(true);
+        phoneLandscapeButton.setDisabled(true);
+        desktopSkinButton.setDisabled(true);
+        snappingButton.setChecked(false);
+        snappingButton.setDisabled(true);
+        showOutlineButton.setChecked(false);
+        showOutlineButton.setDisabled(true);
+        refreshPreviewButton.setDisabled(true);
+        clearFormButton.setDisabled(true);
+        fitInSceneButton.setDisabled(true);
+        layItVertButton.setDisabled(true);
+        layItHorzButton.setDisabled(true);
+        layItGridButton.setDisabled(true);
+        breakLayoutButton.setDisabled(true);
+        toolbar.hide();
+        formView.hide();
+        controlView.hide();
+        qmlEditorView.show();
     }
 }
 
@@ -680,7 +688,8 @@ DesignManager::DesignManager(QObject *parent)
 {
     if (_d) return;
     _d = new DesignManagerPrivate(this);
-    connect(this, SIGNAL(modeChanged()), SLOT(handleModeChange()));
+    connect(this, SIGNAL(modeChanged()), _d, SLOT(handleModeChange()));
+    _d->handleModeChange();
 }
 
 DesignManager* DesignManager::instance()
@@ -729,6 +738,35 @@ QmlEditorView* DesignManager::qmlEditorView()
 LoadingIndicator* DesignManager::loadingIndicator()
 {
     return &_d->loadingIndicator;
+}
+
+void DesignManager::updateSkin()
+{
+    auto form = DesignManager::formScene()->mainForm();
+    if (form) {
+        _d->noSkinButton.setChecked(false);
+        _d->phoneLandscapeButton.setChecked(false);
+        _d->phonePortraitButton.setChecked(false);
+        _d->desktopSkinButton.setChecked(false);
+        _d->noSkinButton.setEnabled(true);
+        _d->phoneLandscapeButton.setEnabled(true);
+        _d->phonePortraitButton.setEnabled(true);
+        _d->desktopSkinButton.setEnabled(true);
+
+        if (form->skin() == Skin::Desktop) {
+            _d->desktopSkinButton.setChecked(true);
+            _d->desktopSkinButton.setEnabled(false);
+        } else if (form->skin() == Skin::NoSkin) {
+            _d->noSkinButton.setChecked(true);
+            _d->noSkinButton.setEnabled(false);
+        } else if (form->skin() == Skin::PhonePortrait) {
+            _d->phonePortraitButton.setChecked(true);
+            _d->phonePortraitButton.setEnabled(false);
+        } else {
+            _d->phoneLandscapeButton.setChecked(true);
+            _d->phoneLandscapeButton.setEnabled(false);
+        }
+    }
 }
 
 #include "designmanager.moc"

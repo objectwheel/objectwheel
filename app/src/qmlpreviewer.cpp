@@ -199,6 +199,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
         return PreviewResult();
     }
 
+    result.skin = SaveManager::skin(dname(dname(url)));
     result.properties = extractProperties(qmlObject);
     result.events = extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(handleWindowsIfAny(qmlObject));
