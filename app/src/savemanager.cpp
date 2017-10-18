@@ -487,94 +487,6 @@ bool SaveManager::initProject(const QString& projectDirectory)
     return wrfile(propertyPath, propertyData);
 }
 
-bool SaveManager::execProject()
-{
-    auto dir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-
-    if(dir.isEmpty())
-        return false;
-
-    QList<QObject*> forms;
-    QMap<QString, QQmlContext*> contexes;
-    auto engine = new QQmlEngine(_d->parent);
-    engine->rootContext()->setContextProperty("dpi", Fit::ratio());
-
-    for (auto formPath : formPaths()) {
-        auto _masterPaths = masterPaths(formPath);
-        QMap<QString, QObject*> masterResults;
-
-        QObject* form = nullptr;
-        for (auto path : _masterPaths) {
-            auto masterContext = new QQmlContext(engine, engine);
-            QMap<QString, QObject*> results;
-            auto _childrenPaths = childrenPaths(path);
-            for (auto childPath : _childrenPaths) {
-                int index = _masterPaths.indexOf(childPath);
-                if (index >= 0) {
-                    results[childPath] = masterResults[childPath];
-                } else {
-                    results[childPath] = _d->requestItem(childPath, engine, masterContext); //Async
-                    if (results[childPath] == nullptr)
-                        return false;
-                }
-                masterContext->setContextProperty(id(childPath), results[childPath]);
-            }
-
-            if (_masterPaths.last() == path) {
-                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
-                if (masterResults[path] == nullptr)
-                    return false;
-                form = masterResults[path];
-                forms << form;
-                contexes[path] = masterContext;
-            } else {
-                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
-                if (masterResults[path] == nullptr)
-                    return false;
-            }
-            masterContext->setContextProperty(id(path), masterResults[path]);
-
-            QObject* parentObject;
-            for (auto result : results.keys()) {
-                if (dname(dname(result)) == path)
-                    parentObject = masterResults[path];
-
-                if (_d->type(results[result]) == SaveManagerPrivate::Type::Window ||
-                    _d->type(parentObject) == SaveManagerPrivate::Type::NonGui)
-                    return false;
-                if (_d->type(results[result]) == SaveManagerPrivate::Type::NonGui)
-                    continue;
-
-                // All children are quick (not nongui/window)
-                // All forms are quick or window (not nongui)
-
-                if (parentObject->isWindowType())
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(parentObject)->contentItem());
-                else
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(parentObject));
-
-                parentObject = results[result];
-            }
-
-            for (auto result : results.keys()) {
-                if (_d->type(results[result]) != SaveManagerPrivate::Type::NonGui)
-                    continue;
-
-                if (form->isWindowType())
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(form)->contentItem());
-                else
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(form));
-            }
-        }
-    }
-
-    for (auto path : contexes.keys())
-        for (int i = 0; i < contexes.keys().size(); i++)
-            contexes[path]->setContextProperty(id(contexes.keys().at(i)), forms.at(i));
-
-    return true;
-}
-
 QString SaveManager::basePath()
 {
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
@@ -648,6 +560,91 @@ QStringList SaveManager::masterPaths(const QString& topPath)
     return paths;
 }
 
+bool SaveManager::execProject()
+{
+    auto dir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+    if(dir.isEmpty())
+        return false;
+
+    QList<QObject*> forms;
+    QMap<QString, QQmlContext*> contexes;
+    auto engine = new QQmlEngine(_d->parent);
+    engine->rootContext()->setContextProperty("dpi", Fit::ratio());
+
+    for (auto formPath : formPaths()) {
+        auto _masterPaths = masterPaths(formPath);
+        QMap<QString, QObject*> masterResults;
+        QObject* form = nullptr;
+        for (auto path : _masterPaths) {
+            auto masterContext = new QQmlContext(engine, engine);
+            QMap<QString, QObject*> results;
+            for (auto childPath : childrenPaths(path)) {
+                int index = _masterPaths.indexOf(childPath);
+                if (index >= 0) {
+                    results[childPath] = masterResults[childPath];
+                } else {
+                    results[childPath] = _d->requestItem(childPath, engine, masterContext); //Async
+                    if (results[childPath] == nullptr)
+                        return false;
+                }
+                masterContext->setContextProperty(id(childPath), results[childPath]);
+            }
+
+            if (_masterPaths.last() == path) {
+                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
+                if (masterResults[path] == nullptr)
+                    return false;
+                form = masterResults[path];
+                forms << form;
+                contexes[path] = masterContext;
+            } else {
+                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
+                if (masterResults[path] == nullptr)
+                    return false;
+            }
+            masterContext->setContextProperty(id(path), masterResults[path]);
+
+            QMap<QString, QObject*> pmap;
+            pmap[path] = masterResults[path];
+            for (auto result : results.keys()) {
+                auto pobject = pmap.value(dname(dname(result)));
+                if (_d->type(results[result]) == SaveManagerPrivate::Type::Window ||
+                    _d->type(pobject) == SaveManagerPrivate::Type::NonGui)
+                    return false;
+                if (_d->type(results[result]) == SaveManagerPrivate::Type::NonGui)
+                    continue;
+
+                // All children are quick (not nongui/window)
+                // All forms are quick or window (not nongui)
+
+                if (pobject->isWindowType())
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(pobject)->contentItem());
+                else
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(pobject));
+
+                pmap[result] = results[result];
+            }
+
+            for (auto result : results.keys()) {
+                if (_d->type(results[result]) != SaveManagerPrivate::Type::NonGui)
+                    continue;
+
+                if (form->isWindowType())
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(form)->contentItem());
+                else
+                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(form));
+            }
+        }
+    }
+
+    for (auto path : contexes.keys())
+        for (int i = 0; i < contexes.keys().size(); i++)
+            contexes[path]->setContextProperty(id(contexes.keys().at(i)), forms.at(i));
+
+    return true;
+}
+
 void SaveManager::exposeProject()
 {
     auto fpaths = _d->formPaths();
@@ -666,20 +663,19 @@ void SaveManager::exposeProject()
 
         lastControl = form;
 
-        Control* parentControl;
+        QMap<QString, Control*> pmap;
+        pmap[path] = form;
         for (auto child : childrenPaths(path)) {
-            if (dname(dname(child)) == path)
-                parentControl = form;
-
+            auto pcontrol = pmap.value(dname(dname(child)));
             auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-            control->setParentItem(parentControl);
+            control->setParentItem(pcontrol);
             control->refresh();
             connect(control, &Control::initialized, [=] {
                 control->controlTransaction()->setTransactionsEnabled(true);
             });
 
-            parentControl = control;
             lastControl = control;
+            pmap[child] = control;
         }
     }
 
@@ -693,19 +689,18 @@ Control* SaveManager::exposeControl(const QString& rootPath, QString suid)
     auto control = new Control(rootPath + separator() + DIR_THIS +
                                separator() + "main.qml");
 
-    Control* parentControl;
+    QMap<QString, Control*> pmap;
+    pmap[rootPath] = control;
     for (auto child : childrenPaths(rootPath, suid)) {
-        if (dname(dname(child)) == rootPath)
-            parentControl = control;
-
+        auto pcontrol = pmap.value(dname(dname(child)));
         auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        control->setParentItem(parentControl);
+        control->setParentItem(pcontrol);
         control->refresh();
         connect(control, &Control::initialized, [=] {
             control->controlTransaction()->setTransactionsEnabled(true);
         });
 
-        parentControl = control;
+        pmap[child] = control;
     }
 
     return control;

@@ -355,7 +355,6 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
     if (parent->_initialized == false) {
         auto scene = static_cast<ControlScene*>(parent->scene());
         scene->clearSelection();
-
         parent->setFlag(Control::ItemIsFocusable);
         parent->setFlag(Control::ItemIsSelectable);
         parent->setAcceptHoverEvents(true);
@@ -367,6 +366,8 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
     parent->setEvents(result.events);
 
     if (result.gui == false) {
+        parent->setFlag(Control::ItemIsMovable, false);
+        parent->setFlag(Control::ItemSendsGeometryChanges, false);
         parent->setParentItem(DesignManager::currentScene()->mainControl()); //BUG: occurs when database loading
         parent->_controlTransaction.flushParentChange();
         parent->_controlTransaction.setGeometryTransactionsEnabled(false);
@@ -377,6 +378,9 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         for (auto& resizer : parent->_resizers)
             resizer.setDisabled(true);
     } else {
+
+        bool te = parent->controlTransaction()->transactionsEnabled();
+        parent->controlTransaction()->setTransactionsEnabled(false);
         if (parent->form())
             parent->setFlag(Control::ItemIsMovable, false);
         else
@@ -390,6 +394,7 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         refreshTimer.stop();
         parent->setClip(result.clip);
         parent->setZValue(result.zValue); //BUG: PropertiesWidget proper z val update
+        parent->controlTransaction()->setTransactionsEnabled(te);
     }
 
     if (parent->form())
@@ -601,14 +606,6 @@ QRectF Control::frameGeometry() const
     return QRectF({QPointF(-size().width() / 2.0, -size().height() / 2.0), size()});
 }
 
-void Control::dropControl(Control* control)
-{
-    control->setPos(mapFromItem(control->parentItem(), control->pos()));
-    control->setParentItem(this);
-    control->refresh();
-    update();
-}
-
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
     auto mimeData = event->mimeData();
@@ -650,6 +647,13 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     });
 
     event->accept();
+    update();
+}
+
+void Control::dropControl(Control* control)
+{
+    control->setPos(mapFromItem(control->parentItem(), control->pos()));
+    control->setParentItem(this);
     update();
 }
 
@@ -743,7 +747,6 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
     _d->fixResizerCoordinates();
-    refresh();
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
