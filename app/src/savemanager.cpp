@@ -896,7 +896,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
         return false;
 
-    if (suid(control->dir()) != suid(parentControl->dir()))
+    if (!parentControl->form() && suid(control->dir()) != suid(parentControl->dir()))
         return false;
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
