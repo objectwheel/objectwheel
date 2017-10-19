@@ -309,7 +309,7 @@ static void saveChanges(const QString& property, const QVariant& value)
     if (scs.isEmpty())
         return;
 
-    auto selectedControl = scs.at(0);
+    QPointer<Control> selectedControl = scs.at(0);
 
     if (DesignManager::mode() == DesignManager::ControlGUI && property == TAG_ID)
         SaveManager::setProperty(selectedControl, property, value,
@@ -321,10 +321,10 @@ static void saveChanges(const QString& property, const QVariant& value)
     connection = QObject::connect(SaveManager::instance(),
      &SaveManager::parserRunningChanged,
       [selectedControl, connection] {
-        if (SaveManager::parserWorking() == false) {
+        if (!selectedControl.isNull() && SaveManager::parserWorking() == false) {
             selectedControl->refresh();
-            QObject::disconnect(connection);
         }
+        QObject::disconnect(connection);
     });
 }
 
