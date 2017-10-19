@@ -43,7 +43,7 @@ class QmlPreviewerPrivate : public QObject
         QList<QString> extractEvents(const QObject* object) const;
 
     public slots:
-        PreviewResult requestPreview(const QString& url, const QSizeF& size) const;
+        PreviewResult requestPreview(const QString& url) const;
         void taskHandler();
 
     signals:
@@ -52,7 +52,7 @@ class QmlPreviewerPrivate : public QObject
 
     public:
         QmlPreviewer* parent;
-        QList<QPair<QSizeF, QPointer<Control>>> taskList;
+        QList<QPointer<Control>> taskList;
         QTimer taskTimer;
 };
 
@@ -169,7 +169,7 @@ QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
     return events;
 }
 
-PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSizeF& size) const
+PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url) const
 {
     PreviewResult result;
 
@@ -186,6 +186,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
     QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
     QSharedPointer<QQuickWindow> window;
 
+    qmlEngine->setOutputWarningsToStandardError(false);
     qmlEngine->rootContext()->setContextProperty("dpi", Fit::ratio());
 
     qmlData = rdfile(url);
@@ -219,11 +220,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
         auto item = static_cast<QQuickItem*>(qmlObject);
         window = QSharedPointer<QQuickWindow>(new QQuickWindow);
         item->setParentItem(window->contentItem());
-
-        if (size.isValid())
-            item->setSize(size);
-        else
-            item->setSize(QSizeF(fit(item->width()), fit(item->height())));
+        item->setSize(QSizeF(fit(item->width()), fit(item->height())));
 
         result.pos = item->position();
         result.size = QSizeF(item->width(), item->height());
@@ -235,11 +232,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url, const QSiz
         window->setClearBeforeRendering(true);
         window->setColor(QColor(Qt::transparent));
     } else {
-        if (size.isValid())
-            window->resize(QSize(qCeil(size.width()), qCeil(size.height())));
-        else
-            window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
-
+        window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
         result.size = window->size();
         result.zValue = 0;
         result.clip = true;
@@ -272,22 +265,22 @@ void QmlPreviewerPrivate::taskHandler()
     parent->_working = true;
     emit parent->workingChanged(parent->_working);
 
-    auto task = taskList.takeFirst();
+    auto control = taskList.takeFirst();
 
-    if (!task.second) {
+    if (!control) {
         parent->_working = false;
         emit parent->workingChanged(parent->_working);
         return;
     }
 
-    auto dir = task.second->dir();
+    auto dir = control->dir();
     auto masterPaths = SaveManager::masterPaths(dir);
 
     if (SaveManager::suid(dir).isEmpty() || masterPaths.isEmpty()) {
         auto res = requestPreview(dir + separator() + DIR_THIS +
-                                  separator() + "main.qml", task.first);
+                                  separator() + "main.qml");
         if (!res.isNull())
-            emit parent->previewReady(task.second, res);
+            emit parent->previewReady(control, res);
         parent->_working = false;
         emit parent->workingChanged(parent->_working);
         return;
@@ -304,7 +297,7 @@ void QmlPreviewerPrivate::taskHandler()
             if (index >= 0) {
                 results[childPath] = masterResults[childPath];
             } else {
-                results[childPath] = requestPreview(childPath + separator() + DIR_THIS + separator() + "main.qml", QSize());
+                results[childPath] = requestPreview(childPath + separator() + DIR_THIS + separator() + "main.qml");
                 if (results[childPath].isNull()) {
                     parent->_working = false;
                     emit parent->workingChanged(parent->_working);
@@ -314,7 +307,7 @@ void QmlPreviewerPrivate::taskHandler()
         }
 
         if (masterPaths.last() == path) {
-            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", task.first);
+            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml");
             finalResult = &masterResults[path];
             if (masterResults[path].isNull()) {
                 parent->_working = false;
@@ -322,7 +315,7 @@ void QmlPreviewerPrivate::taskHandler()
                 return;
             }
         } else {
-            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml", QSize());
+            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml");
             if (masterResults[path].isNull()) {
                 parent->_working = false;
                 emit parent->workingChanged(parent->_working);
@@ -345,7 +338,7 @@ void QmlPreviewerPrivate::taskHandler()
         }
     }
 
-    emit parent->previewReady(task.second, *finalResult);
+    emit parent->previewReady(control, *finalResult);
 
     parent->_working = false;
     emit parent->workingChanged(parent->_working);
@@ -367,9 +360,9 @@ QmlPreviewer* QmlPreviewer::instance()
     return _d ? _d->parent : nullptr;
 }
 
-void QmlPreviewer::requestPreview(Control* control, const QSizeF& size)
+void QmlPreviewer::requestPreview(Control* control)
 {
-    _d->taskList.append(QPair<QSizeF, Control*>(size, control));
+    _d->taskList.append(control);
     _d->taskTimer.start();
 }
 

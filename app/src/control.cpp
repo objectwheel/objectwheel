@@ -19,12 +19,6 @@
 #include <QMimeData>
 #include <QGraphicsScene>
 #include <QApplication>
-#include <QQmlEngine>
-#include <QQuickWidget>
-#include <QQmlComponent>
-#include <QQmlIncubator>
-#include <QQuickItem>
-#include <QQuickItemGrabResult>
 #include <QSharedPointer>
 #include <QGraphicsView>
 #include <QGraphicsSceneDragDropEvent>
@@ -338,11 +332,7 @@ void ControlPrivate::fixResizerCoordinates()
 void ControlPrivate::refreshPreview()
 {
     refreshTimer.stop();
-
-    if (parent->_initialized)
-        QmlPreviewer::requestPreview(parent, parent->size());
-    else
-        QmlPreviewer::requestPreview(parent);
+    QmlPreviewer::requestPreview(parent);
 }
 
 void ControlPrivate::updatePreview(Control* control, PreviewResult result)
@@ -452,7 +442,8 @@ Control::Control(const QString& url, const QString& uid, Control* parent)
     _controls << this;
     setGeometry(0, 0, 0, 0);
     connect(this, &Control::visibleChanged, [=] {
-        refresh();
+        if (size().width() < 2 || size().height() < 2)
+            refresh();
     });
 
     connect(this, &Control::geometryChanged, [=] {

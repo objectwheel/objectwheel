@@ -4,6 +4,7 @@ TEMPLATE         = app
 CONFIG          += c++11
 TARGET           = Objectwheel
 PROJECT_ROOT     = $$clean_path($$PWD/..)
+DEFINES         += QT_QML_DEBUG_NO_WARNING
 
 include($$PWD/detect_build.pri) # BUILD_POSTFIX
 

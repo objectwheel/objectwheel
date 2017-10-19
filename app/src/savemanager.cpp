@@ -9,17 +9,16 @@
 #include <algorithm>
 #include <delayer.h>
 
-#include <QQmlEngine>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QApplication>
 #include <QTimer>
 #include <QDebug>
+#include <QQmlEngine>
 #include <QQuickItem>
 #include <QQmlProperty>
 #include <QQmlContext>
-#include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQuickView>
 
@@ -571,6 +570,7 @@ bool SaveManager::execProject()
     QMap<QString, QQmlContext*> contexes;
     auto engine = new QQmlEngine(_d->parent);
     engine->rootContext()->setContextProperty("dpi", Fit::ratio());
+    engine->setOutputWarningsToStandardError(false);
 
     for (auto formPath : formPaths()) {
         auto _masterPaths = masterPaths(formPath);

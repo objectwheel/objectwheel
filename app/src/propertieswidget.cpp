@@ -467,7 +467,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case FontPtSize:
         case FontPxSize: {
             auto editor = new QSpinBox(parent);
-            connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            connect(editor, &QSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(72);
@@ -512,7 +512,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
 
         case String: {
             auto editor = new QLineEdit(parent);
-            connect(editor, &QLineEdit::textEdited,
+            connect(editor, &QLineEdit::editingFinished,
                 [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
@@ -542,7 +542,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
 
         case Double: {
             auto editor = new QDoubleSpinBox(parent);
-            connect(editor, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            connect(editor, &QDoubleSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             if (property == "opacity") {
@@ -559,7 +559,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
 
         case Int: {
             auto editor = new QSpinBox(parent);
-            connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            connect(editor, &QSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<int>::max());
@@ -573,7 +573,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case GeometryWidth:
         case GeometryHeight: {
             auto editor = new QSpinBox(parent);
-            connect(editor, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            connect(editor, &QSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<int>::max());
@@ -587,7 +587,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case GeometryFWidth:
         case GeometryFHeight: {
             auto editor = new QDoubleSpinBox(parent);
-            connect(editor, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            connect(editor, &QDoubleSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<double>::max());

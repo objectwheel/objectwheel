@@ -45,7 +45,7 @@ class QmlPreviewer : public QObject
     public:
         explicit QmlPreviewer(QObject *parent = 0);
         static QmlPreviewer* instance();
-        static void requestPreview(Control* control, const QSizeF& size = QSizeF());
+        static void requestPreview(Control* control);
         static bool working();
 
     signals:
