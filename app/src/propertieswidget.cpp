@@ -1032,12 +1032,9 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
 
 void PropertiesWidget::clearList()
 {
-    for (int i = 0; i < _treeWidget.topLevelItemCount(); i++) {
-        auto item = _treeWidget.topLevelItem(i);
-        auto itemWidget = _treeWidget.itemWidget(item, 1);
-        if (itemWidget)
-            itemWidget->deleteLater();
-    }
+    for (int i = 0; i < _treeWidget.topLevelItemCount(); ++i)
+        qDeleteAll(_treeWidget.topLevelItem(i)->takeChildren());
+
     _treeWidget.clear();
 }
 
