@@ -18,7 +18,11 @@ ControlTransaction::ControlTransaction(Control* watched, QObject *parent)
 
     connect(SaveManager::instance(), &SaveManager::parserRunningChanged,
       this, [this](bool running) {
-        if (_watched && _activated && running == false) {
+        if (_watched.isNull()) {
+            _activated = false;
+            return;
+        }
+        if(_activated && running == false) {
             _activated = false;
             _watched->refresh();
         }
@@ -47,7 +51,7 @@ void ControlTransaction::setTransactionsEnabled(bool value)
 
 void ControlTransaction::flushGeometryChange()
 {
-    if (_watched || _watched->id().isEmpty() ||
+    if (_watched.isNull() || _watched->id().isEmpty() ||
         !_geometryTransactionsEnabled ||
         !_transactionsEnabled)
         return;
@@ -65,7 +69,7 @@ void ControlTransaction::flushGeometryChange()
 
 void ControlTransaction::flushParentChange()
 {
-    if (_watched || _watched->parentControl() == nullptr ||
+    if (_watched.isNull() || _watched->parentControl() == nullptr ||
         _watched->id().isEmpty() ||
         !_parentTransactionsEnabled ||
         !_transactionsEnabled)
@@ -78,7 +82,7 @@ void ControlTransaction::flushParentChange()
 
 void ControlTransaction::flushZChange()
 {
-    if (_watched || _watched->id().isEmpty() ||
+    if (_watched.isNull() || _watched->id().isEmpty() ||
         !_zTransactionsEnabled ||
         !_transactionsEnabled)
         return;

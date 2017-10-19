@@ -309,22 +309,25 @@ static void saveChanges(const QString& property, const QVariant& value)
     if (scs.isEmpty())
         return;
 
-    QPointer<Control> selectedControl = scs.at(0);
+    QPointer<Control> sc = scs.at(0);
 
     if (DesignManager::mode() == DesignManager::ControlGUI && property == TAG_ID)
-        SaveManager::setProperty(selectedControl, property, value,
+        SaveManager::setProperty(sc, property, value,
             DesignManager::controlScene()->mainControl()->dir());
     else
-        SaveManager::setProperty(selectedControl, property, value);
+        SaveManager::setProperty(sc, property, value);
 
-    QMetaObject::Connection connection;
-    connection = QObject::connect(SaveManager::instance(),
-     &SaveManager::parserRunningChanged,
-      [selectedControl, connection] {
-        if (!selectedControl.isNull() && SaveManager::parserWorking() == false) {
-            selectedControl->refresh();
+    QMetaObject::Connection con;
+    con = QObject::connect(SaveManager::instance(),
+      &SaveManager::parserRunningChanged, [sc, con] {
+        if (sc.isNull()) {
+            QObject::disconnect(con);
+            return;
         }
-        QObject::disconnect(connection);
+        if (SaveManager::parserWorking() == false) {
+            sc->refresh();
+            QObject::disconnect(con);
+        }
     });
 }
 
