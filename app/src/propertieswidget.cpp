@@ -304,7 +304,12 @@ static void processInt(QTreeWidgetItem* item, const QString& propertyName, const
 
 static void saveChanges(const QString& property, const QVariant& value)
 {
-    auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
+    auto scs = DesignManager::currentScene()->selectedControls();
+
+    if (scs.isEmpty())
+        return;
+
+    auto selectedControl = scs.at(0);
 
     if (DesignManager::mode() == DesignManager::ControlGUI && property == TAG_ID)
         SaveManager::setProperty(selectedControl, property, value,

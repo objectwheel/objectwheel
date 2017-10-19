@@ -2,6 +2,7 @@
 #define CONTROLTRANSACTION_H
 
 #include <QObject>
+#include <QPointer>
 
 class Control;
 
@@ -23,7 +24,7 @@ class ControlTransaction : public QObject
         void flushZChange();
 
     private:
-        Control* _watched;
+        QPointer<Control> _watched;
         bool _transactionsEnabled;
         bool _geometryTransactionsEnabled;
         bool _parentTransactionsEnabled;

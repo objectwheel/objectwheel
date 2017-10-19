@@ -316,8 +316,8 @@ void ControlViewPrivate::handleSendBackActAction()
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainControl()->lowerZValue() == MAX_Z_VALUE
-                           ? 0 : scene->mainControl()->lowerZValue() - 1);
+        if (control->parentControl())
+            control->setZValue(control->parentControl()->lowerZValue() - 1);
 }
 
 void ControlViewPrivate::handleBringFrontActAction()
@@ -326,8 +326,8 @@ void ControlViewPrivate::handleBringFrontActAction()
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainControl()->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : scene->mainControl()->higherZValue() + 1);
+        if (control->parentControl())
+            control->setZValue(control->parentControl()->higherZValue() + 1);
 }
 
 ControlView::ControlView(QGraphicsScene* scene, QWidget* parent)

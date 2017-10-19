@@ -862,19 +862,19 @@ void Control::setDragging(bool dragging)
 int Control::higherZValue() const
 {
     int z = -MAX_Z_VALUE;
-    for (auto control : childControls())
+    for (const auto& control : childControls())
         if (control->zValue() > z)
             z = control->zValue();
-    return z;
+    return z == -MAX_Z_VALUE ? 0 : z;
 }
 
 int Control::lowerZValue() const
 {
     int z = MAX_Z_VALUE;
-    for (auto control : childControls())
+    for (const auto& control : childControls())
         if (control->zValue() < z)
             z = control->zValue();
-    return z;
+    return z == MAX_Z_VALUE ? 1 : z;
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

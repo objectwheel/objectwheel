@@ -52,7 +52,7 @@ class QmlPreviewerPrivate : public QObject
 
     public:
         QmlPreviewer* parent;
-        QList<QPair<QSizeF, Control*>> taskList;
+        QList<QPair<QSizeF, QPointer<Control>>> taskList;
         QTimer taskTimer;
 };
 
@@ -273,6 +273,13 @@ void QmlPreviewerPrivate::taskHandler()
     emit parent->workingChanged(parent->_working);
 
     auto task = taskList.takeFirst();
+
+    if (!task.second) {
+        parent->_working = false;
+        emit parent->workingChanged(parent->_working);
+        return;
+    }
+
     auto dir = task.second->dir();
     auto masterPaths = SaveManager::masterPaths(dir);
 
