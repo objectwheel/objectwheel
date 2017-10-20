@@ -41,8 +41,6 @@
 #define PREVIEW_REFRESH_INTERVAL 100
 #define RESIZE_TRANSACTION_INTERVAL 800
 #define MAGNETIC_FIELD (fit(3))
-#define SIZE_SKIN (fit(QSize(320, 662)))
-#define SIZE_FORM (fit(QSize(285, 535)))
 #define MARGIN_TOP (fit(14))
 #define pS (QApplication::primaryScreen())
 

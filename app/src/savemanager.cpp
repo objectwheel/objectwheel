@@ -8,6 +8,7 @@
 #include <designmanager.h>
 #include <algorithm>
 #include <delayer.h>
+#include <executivewidget.h>
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -561,18 +562,30 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 
 bool SaveManager::execProject()
 {
+    static auto* phoneWidget = new ExecutiveWidget;
+
+    Skin mainSkin = Skin::Invalid;
     auto dir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
     if(dir.isEmpty())
         return false;
 
+    for (auto form : DesignManager::formScene()->forms())
+        if (form->main())
+            mainSkin = form->skin();
+
+    if (mainSkin == Skin::Invalid)
+        return false;
+
     QList<QObject*> forms;
+    QQuickWindow* mainWindow = nullptr;
     QMap<QString, QQmlContext*> contexes;
     auto engine = new QQmlEngine(_d->parent);
     engine->rootContext()->setContextProperty("dpi", Fit::ratio());
     engine->setOutputWarningsToStandardError(false);
 
     for (auto formPath : formPaths()) {
+        const bool isMain = (fname(formPath) == DIR_MAINFORM);
         auto _masterPaths = masterPaths(formPath);
         QMap<QString, QObject*> masterResults;
         QObject* form = nullptr;
@@ -597,6 +610,13 @@ bool SaveManager::execProject()
                     return false;
                 form = masterResults[path];
                 forms << form;
+                if (isMain)
+                    mainWindow = qobject_cast<QQuickWindow*>(form);
+
+                if (mainWindow == nullptr) {
+                    engine->deleteLater();
+                    return false;
+                }
                 contexes[path] = masterContext;
             } else {
                 masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
@@ -637,11 +657,22 @@ bool SaveManager::execProject()
             }
         }
     }
-
+    //TODO: Block if phone skin has multiple windows
     for (auto path : contexes.keys())
         for (int i = 0; i < contexes.keys().size(); i++)
             contexes[path]->setContextProperty(id(contexes.keys().at(i)), forms.at(i));
 
+    if (mainWindow == nullptr) {
+        engine->deleteLater();
+        return false;
+    }
+
+    if (mainSkin == Skin::PhonePortrait ||
+        mainSkin == Skin::PhoneLandscape) {
+        phoneWidget->setSkin(mainSkin);
+        phoneWidget->setData(engine, mainWindow);
+        phoneWidget->show();
+    }
     return true;
 }
 
