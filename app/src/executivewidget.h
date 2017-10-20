@@ -3,11 +3,9 @@
 
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QQuickWindow>
 #include <flatbutton.h>
 #include <global.h>
-
-class QQmlEngine;
-class QQuickWindow;
 
 class ExecutiveWidget : public QWidget
 {
@@ -33,8 +31,10 @@ class ExecutiveWidget : public QWidget
         FlatButton _exitButton;
         int _x, _y;
         bool _pressed;
-        QQmlEngine* _engine;
+        QQuickWindow _window;
         QWidget* _containerWidget;
+        QQmlEngine* _engine;
+        QQuickItem* _contentItem;
 };
 
 #endif // EXECUTIVEWIDGET_H

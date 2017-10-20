@@ -4,6 +4,7 @@
 #include <QSvgRenderer>
 #include <QQmlEngine>
 #include <QMouseEvent>
+#include <QQuickItem>
 
 using namespace Fit;
 
@@ -17,14 +18,20 @@ ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
 
+    _layout.setSpacing(0);
+    _layout.setContentsMargins(0, 0, 0, 0);
+
+    _containerWidget = createWindowContainer(&_window);
+    _layout.addWidget(_containerWidget);
+    _layout.setAlignment(_containerWidget, Qt::AlignCenter);
+
     _exitButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _exitButton.setColor("#D11919");
     _exitButton.setFixedSize(fit(20),fit(20));
-    _exitButton.setRadius(fit(9));
+    _exitButton.setRadius(fit(7));
     _exitButton.setIconSize(QSize(fit(17),fit(17)));
     _exitButton.setIcon(QIcon(":/resources/images/down-arrow.png"));
     connect(&_exitButton, SIGNAL(clicked(bool)), SLOT(handleExitButtonClick()));
-
 }
 
 Skin ExecutiveWidget::skin() const
@@ -37,36 +44,42 @@ void ExecutiveWidget::setSkin(const Skin& skin)
     _skin = skin;
     if (_skin == PhonePortrait) {
         setFixedSize(SIZE_SKIN);
+        _containerWidget->setFixedSize(SIZE_FORM);
         _exitButton.setGeometry(SIZE_SKIN.width() - fit(55),
             fit(26), fit(20), fit(20));
     } else {
         setFixedSize(SIZE_SKIN.transposed());
+        _containerWidget->setFixedSize(SIZE_FORM.transposed());
         _exitButton.setGeometry(SIZE_SKIN.transposed().width()
             - fit(44), fit(27), fit(20), fit(20));
     }
 }
-#include <QQuickWindow>
-#include <QQuickItem>
-#include <QTimer>
-#include <QQuickView>
+
 void ExecutiveWidget::setData(QQmlEngine* engine, QQuickWindow* window)
 {
-    QQuickView* view = new QQuickView;
-    view->setResizeMode(QQuickView::SizeRootObjectToView);
+    window->hide();
     _engine = engine;
-    _containerWidget = createWindowContainer(view);
-    _containerWidget->setFixedSize(SIZE_FORM);
-    _layout.addWidget(_containerWidget);
-    window->contentItem()->setParentItem(view->contentItem());
-    window->contentItem()->setPosition({0, 0});
-    //TODO
+    _contentItem = window->contentItem();
+    _contentItem->setParentItem(_window.contentItem());
+    _layout.update();
+
+    /* Property sync between window and _window */
+    auto mO = _window.metaObject();
+    while (mO) {
+        for (int i = mO->propertyOffset(); i < mO->propertyCount(); i++) {
+            if (mO->property(i).isWritable() && mO->property(i).isReadable()) {
+                _window.setProperty(mO->property(i).name(), mO->property(i).read(window));
+            }
+        }
+        mO = mO->superClass();
+    }
 }
 
 void ExecutiveWidget::handleExitButtonClick()
 {
     hide();
+    _contentItem->setParentItem(nullptr);
     _engine->deleteLater();
-    _containerWidget->deleteLater();
 }
 
 void ExecutiveWidget::mousePressEvent(QMouseEvent *event)

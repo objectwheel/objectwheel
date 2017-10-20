@@ -124,6 +124,8 @@ class SaveManagerPrivate : public QObject
     public:
         SaveManager* parent = nullptr;
         ParserController parserController;
+        ExecutiveWidget executiveWidget;
+
 };
 
 SaveManagerPrivate::SaveManagerPrivate(SaveManager* parent)
@@ -437,6 +439,7 @@ QObject* SaveManagerPrivate::requestItem(const QString& path, QQmlEngine* engine
 {
     QQmlComponent comp(engine, QUrl(path + separator() + DIR_THIS + separator() + "main.qml"));
     auto item = comp.create(context);
+    engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
     qApp->processEvents(QEventLoop::AllEvents, 20);
     return item;
 }
@@ -562,8 +565,6 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 
 bool SaveManager::execProject()
 {
-    static auto* phoneWidget = new ExecutiveWidget;
-
     Skin mainSkin = Skin::Invalid;
     auto dir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
@@ -669,9 +670,9 @@ bool SaveManager::execProject()
 
     if (mainSkin == Skin::PhonePortrait ||
         mainSkin == Skin::PhoneLandscape) {
-        phoneWidget->setSkin(mainSkin);
-        phoneWidget->setData(engine, mainWindow);
-        phoneWidget->show();
+        _d->executiveWidget.setSkin(mainSkin);
+        _d->executiveWidget.setData(engine, mainWindow);
+        _d->executiveWidget.show();
     }
     return true;
 }
