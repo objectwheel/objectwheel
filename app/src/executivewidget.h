@@ -14,7 +14,7 @@ class ExecutiveWidget : public QWidget
         explicit ExecutiveWidget(QWidget *parent = nullptr);
         Skin skin() const;
         void setSkin(const Skin& skin);
-        void setData(QQmlEngine* engine, QQuickWindow* window);
+        void setWindow(QQuickWindow* window);
 
     public slots:
         void handleExitButtonClick();
@@ -25,6 +25,9 @@ class ExecutiveWidget : public QWidget
         void mouseMoveEvent(QMouseEvent *event) override;
         void mouseReleaseEvent(QMouseEvent *event) override;
 
+    signals:
+        void done() const;
+
     private:
         Skin _skin;
         QVBoxLayout _layout;
@@ -33,7 +36,6 @@ class ExecutiveWidget : public QWidget
         bool _pressed;
         QQuickWindow _window;
         QWidget* _containerWidget;
-        QQmlEngine* _engine;
         QQuickItem* _contentItem;
 };
 

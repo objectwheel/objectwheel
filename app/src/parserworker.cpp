@@ -60,7 +60,34 @@ QString ParserWorker::typeName(const QByteArray& data) const
     return type;
 }
 
-void ParserWorker::setVariantProperty(QByteArray& data, const QString& fileName, const QString& property, const QVariant& value)
+QVariant ParserWorker::variantProperty(const QByteArray& data, const QString& name) const
+{
+    QVariant value;
+    if (data.isEmpty())
+        return value;
+
+    try {
+        auto model = Model::create("QtQuick.Item", 1, 0);
+        auto rewriterView = new RewriterView(RewriterView::Amend, model);
+        auto textModifier = new NotIndentingTextEditModifier;
+
+        textModifier->setText(data);
+        model->setTextModifier(textModifier);
+        model->setRewriterView(rewriterView);
+
+        auto rootNode = rewriterView->rootModelNode();
+        value = rootNode.property(name.toUtf8()).toVariantProperty().value();
+
+        textModifier->deleteLater();
+        rewriterView->deleteLater();
+        model->deleteLater();
+    } catch (Exception& e) {
+        // TODO
+    }
+    return value;
+}
+
+void ParserWorker::setVariantProperty(QByteArray& data, const QString& fileName, const QString& property, const QVariant& value) const
 {
     if (data.isEmpty()) {
         emit done();
@@ -94,7 +121,7 @@ void ParserWorker::setVariantProperty(QByteArray& data, const QString& fileName,
     emit done();
 }
 
-void ParserWorker::setVariantProperty(const QString& fileName, const QString& property, const QVariant& value)
+void ParserWorker::setVariantProperty(const QString& fileName, const QString& property, const QVariant& value) const
 {
     auto fileContent = rdfile(fileName);
     if (fileContent.isEmpty()) {
@@ -129,7 +156,7 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
     emit done();
 }
 
-void ParserWorker::removeVariantProperty(const QString& fileName, const QString& property)
+void ParserWorker::removeVariantProperty(const QString& fileName, const QString& property) const
 {
     auto fileContent = rdfile(fileName);
     if (fileContent.isEmpty()) {

@@ -25,6 +25,8 @@
 
 using namespace Fit;
 
+// TODO: Prevent NoSkin option for main form
+
 class DesignManagerPrivate : public QObject
 {
         Q_OBJECT

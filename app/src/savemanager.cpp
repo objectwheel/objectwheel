@@ -617,10 +617,8 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 //WARNING: Problem with scope resolution,
 //         Component.onCompleted: Why items names are not reachable in this slot?
 //WARNING: Check and make sure non-gui elements are added to master item of each control
-//TODO: Clean unnecessary local variables below
 //FIXME: Change the name of default context property 'dpi' everywhere
 //FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
-//FIXME: Make windows invisible at starting
 ExecError SaveManager::execProject()
 {
     ExecError error;
@@ -651,7 +649,7 @@ ExecError SaveManager::execProject()
         // Spin for masters inside the form (form itself included)
         QMap<QString, QObject*> masterResults;
         for (auto masterPath : _masterPaths) {
-            QByteArray formData;
+            const bool isForm = (_masterPaths.last() == masterPath);
             auto masterContext = new QQmlContext(engine, engine);
 
             //! Spin for child items of the master
@@ -675,44 +673,42 @@ ExecError SaveManager::execProject()
                 }
                 masterContext->setContextProperty(id(childPath),
                   childResults[childPath]);
+                qApp->processEvents(QEventLoop::AllEvents, 20);
             }
 
-            //BUG: Possible bug if property 'visible' is a binding
             //! Make form invisible, if it's a window type
-            if (_masterPaths.last() == masterPath) { // Check If it's a form (top level master)
+            if (isForm && (mainSkin == Skin::PhonePortrait ||
+              mainSkin == Skin::PhoneLandscape)) { // Check If it's a form (top level master) and skin is mobile
                 auto url = masterPath + separator() +
                   DIR_THIS + separator() + "main.qml";
-                formData = rdfile(url);
+                auto formData = rdfile(url);
                 ParserWorker parserWorker;
                 bool isWindow = parserWorker.typeName(formData).contains("Window");
-
-                if (isWindow) //If form is a window type
+                if (isWindow) {//If form is a window type
+                    //BUG: Possible bug if property 'visible' is a binding
+                    qApp->processEvents(QEventLoop::AllEvents, 20);
                     parserWorker.setVariantProperty(formData, url, "visible", false);
-
-                if (!_d->isMain(masterPath) && isWindow &&
-                  (mainSkin == Skin::PhonePortrait ||
-                    mainSkin == Skin::PhoneLandscape)) {
+                }
+                if (isWindow && !_d->isMain(masterPath)) {
                     engine->deleteLater();
                     error.type = MultipleWindowsForMobileError;
                     return error;
                 }
-            }
-
-            //! Build this (current spin's) master item
-            if (formData.isEmpty()) {
-                masterResults[masterPath] = _d->requestItem(error,
-                  masterPath, engine, masterContext);
-            } else {
                 masterResults[masterPath] = _d->requestItem(error,
                   formData, masterPath, engine, masterContext);
+            } else {
+                masterResults[masterPath] = _d->requestItem(error,
+                  masterPath, engine, masterContext);
             }
+
+            qApp->processEvents(QEventLoop::AllEvents, 20);
             if (masterResults[masterPath] == nullptr) {
                 engine->deleteLater();
                 return error;
             }
 
             //! Catch this (current spin's) master item
-            if (!formData.isEmpty()) { // If it's a form (top level master)
+            if (isForm) { // If it's a form (top level master)
                 auto form = masterResults[masterPath];
                 if (_d->type(form) == NonGui) {
                     engine->deleteLater();
@@ -766,6 +762,7 @@ ExecError SaveManager::execProject()
                 }
 
                 pmap[result] = childResults[result];
+                qApp->processEvents(QEventLoop::AllEvents, 20);
             }
         }
     }
@@ -777,22 +774,27 @@ ExecError SaveManager::execProject()
     }
 
     for (auto formPath : formContexes.keys()) {
-        for (int i = 0; i < formContexes.size(); i++) {
+        for (int i = 0; i < formContexes.keys().size(); i++) { //Don't change 'keys().size()'
             formContexes[formPath]->setContextProperty(
               id(formContexes.keys().at(i)), forms.at(i));
         }
     }
 
+    qApp->processEvents(QEventLoop::AllEvents, 20);
+
+    QEventLoop loop;
     if (mainSkin == Skin::PhonePortrait ||
         mainSkin == Skin::PhoneLandscape) {
         _d->executiveWidget.setSkin(mainSkin);
-        _d->executiveWidget.setData(engine, mainWindow);
+        _d->executiveWidget.setWindow(mainWindow);
         _d->executiveWidget.show();
+        connect(&_d->executiveWidget, SIGNAL(done()), &loop, SLOT(quit()));
     } else {
-        // TODO : Make this function Async
-        // TODO : Wait till all windows are closed
+        connect(mainWindow, SIGNAL(closing(QQuickCloseEvent*)), &loop, SLOT(quit()));
     }
+    loop.exec();
 
+    engine->deleteLater();
     return error;
 }
 

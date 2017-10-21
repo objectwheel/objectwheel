@@ -56,10 +56,9 @@ void ExecutiveWidget::setSkin(const Skin& skin)
     }
 }
 
-void ExecutiveWidget::setData(QQmlEngine* engine, QQuickWindow* window)
+void ExecutiveWidget::setWindow(QQuickWindow* window)
 {
     window->hide();
-    _engine = engine;
     _contentItem = window->contentItem();
     _contentItem->setParentItem(_window.contentItem());
     _layout.update();
@@ -80,7 +79,7 @@ void ExecutiveWidget::handleExitButtonClick()
 {
     hide();
     _contentItem->setParentItem(nullptr);
-    _engine->deleteLater();
+    emit done();
 }
 
 void ExecutiveWidget::mousePressEvent(QMouseEvent *event)

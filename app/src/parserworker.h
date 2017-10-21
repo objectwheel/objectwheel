@@ -20,14 +20,15 @@ class ParserWorker : public QObject
     public:
         explicit ParserWorker(QObject *parent = 0);
         QString typeName(const QByteArray& data) const;
+        QVariant variantProperty(const QByteArray& data, const QString& name) const;
 
     public slots:
-        void setVariantProperty(QByteArray& data, const QString& fileName, const QString& property, const QVariant& value);
-        void setVariantProperty(const QString& fileName, const QString& property, const QVariant& value);
-        void removeVariantProperty(const QString& fileName, const QString& property);
+        void setVariantProperty(QByteArray& data, const QString& fileName, const QString& property, const QVariant& value) const;
+        void setVariantProperty(const QString& fileName, const QString& property, const QVariant& value) const;
+        void removeVariantProperty(const QString& fileName, const QString& property) const;
 
     signals:
-        void done();
+        void done() const;
 
     private:
         static QmlJS::ModelManagerInterface* _modelManager;
