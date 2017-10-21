@@ -5,10 +5,10 @@
 #include <formswidget.h>
 #include <mainwindow.h>
 #include <control.h>
-#include <designmanager.h>
 #include <algorithm>
 #include <delayer.h>
 #include <executivewidget.h>
+#include <parserworker.h>
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -23,9 +23,33 @@
 #include <QQmlComponent>
 #include <QQuickView>
 
+/******************************************************************/
+/**          D A T A B A S E  I N F R A S T R U C T U R E        **/
+/******************************************************************/
+/** POPERTIES:                                                   **/
+/*  Elements: Main-form(master), Ordinary-form(master),           */
+/*            Child-item(master), Child-item(non-master)          */
+/*  Types:    Quick, Non-gui, Window                              */
+/*                                                                */
+/** RULES:                                                       **/
+/* - Non-gui elements can not be master (or form)                 */
+/* - Main form has to be window type                              */
+/* - Other forms could be quick item or window type (not non-gui) */
+/*   unless main form has a Phone skin, in this case other forms  */
+/*   (except main form) has to be item (not window or non-gui)    */
+/* - Children could be non-gui or quick item type (not window)    */
+/* - A form has to be master item                                 */
+/******************************************************************/
+
 //!
 //! ******************* [SaveManagerPrivate] *******************
 //!
+
+enum Type {
+    Quick,
+    Window,
+    NonGui
+};
 
 class SaveManagerPrivate : public QObject
 {
@@ -34,13 +58,6 @@ class SaveManagerPrivate : public QObject
         // Form Scope: All forms + Primary children of them.
         // Parent Scope: Parent + Primary children of Parent.
         // None of member functions checks whether given controls' ids or dirs are valid or not.
-
-    public:
-        enum Type {
-            Quick,
-            Window,
-            NonGui
-        };
 
     public:
         SaveManagerPrivate(SaveManager* parent);
@@ -76,6 +93,10 @@ class SaveManagerPrivate : public QObject
         // Returns all control paths in form scope.
         // Returned paths are rootPaths.
         QStringList formScopePaths() const;
+
+        // Returns true if given path belongs to main form
+        // It doesn't check whether rootPath belong to a form or not.
+        bool isMain(const QString& rootPath);
 
         // Returns biggest number from integer named dirs.
         // If no integer named dir exists, 0 returned.
@@ -116,7 +137,10 @@ class SaveManagerPrivate : public QObject
         QString parentDir(const Control* control) const;
 
         // Build qml object form url
-        QObject* requestItem(const QString& path, QQmlEngine* engine, QQmlContext* context) const;
+        QObject* requestItem(ExecError& err, const QString& path, QQmlEngine* engine, QQmlContext* context) const;
+
+        // Build qml object form data
+        QObject* requestItem(ExecError& err, const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const;
 
         // Returns true if the given object is an instance of QQuickItem
         Type type(QObject* object) const;
@@ -295,6 +319,11 @@ QStringList SaveManagerPrivate::formScopePaths() const
     return paths;
 }
 
+bool SaveManagerPrivate::isMain(const QString& rootPath)
+{
+    return (fname(rootPath) == DIR_MAINFORM);
+}
+
 int SaveManagerPrivate::biggestDir(const QString& basePath) const
 {
     int num = 0;
@@ -435,22 +464,44 @@ QString SaveManagerPrivate::parentDir(const Control* control) const
     return dname(dname(control->dir()));
 }
 
-QObject* SaveManagerPrivate::requestItem(const QString& path, QQmlEngine* engine, QQmlContext* context) const
+QObject* SaveManagerPrivate::requestItem(ExecError& err,
+  const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
-    QQmlComponent comp(engine, QUrl(path + separator() + DIR_THIS + separator() + "main.qml"));
+    QQmlComponent comp(engine, QUrl(path + separator() +
+      DIR_THIS + separator() + "main.qml"));
     auto item = comp.create(context);
-    engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
-    qApp->processEvents(QEventLoop::AllEvents, 20);
+    if (!comp.errors().isEmpty()) {
+        err.type = CodeError;
+        err.errors = comp.errors();
+    } else {
+        engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
+    }
     return item;
 }
 
-SaveManagerPrivate::Type SaveManagerPrivate::type(QObject* object) const
+QObject* SaveManagerPrivate::requestItem(ExecError& err, const QByteArray& data,
+  const QString& path, QQmlEngine* engine, QQmlContext* context) const
+{
+    QQmlComponent comp(engine);
+    comp.setData(data, QUrl(path + separator() +
+      DIR_THIS + separator() + "main.qml"));
+    auto item = comp.create(context);
+    if (!comp.errors().isEmpty()) {
+        err.type = CodeError;
+        err.errors = comp.errors();
+    } else {
+        engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
+    }
+    return item;
+}
+
+Type SaveManagerPrivate::type(QObject* object) const
 {
     if (qobject_cast<QQuickItem*>(object) != nullptr)
-        return Type::Quick;
+        return Quick;
     if (object->isWindowType())
-        return Type::Window;
-    return Type::NonGui;
+        return Window;
+    return NonGui;
 }
 
 //!
@@ -563,109 +614,173 @@ QStringList SaveManager::masterPaths(const QString& topPath)
     return paths;
 }
 
-bool SaveManager::execProject()
+//WARNING: Problem with scope resolution,
+//         Component.onCompleted: Why items names are not reachable in this slot?
+//WARNING: Check and make sure non-gui elements are added to master item of each control
+//TODO: Clean unnecessary local variables below
+//FIXME: Change the name of default context property 'dpi' everywhere
+//FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
+//FIXME: Make windows invisible at starting
+ExecError SaveManager::execProject()
 {
+    ExecError error;
     Skin mainSkin = Skin::Invalid;
-    auto dir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
-    if(dir.isEmpty())
-        return false;
+    for (auto formPath : formPaths()) {
+        if (_d->isMain(formPath))
+            mainSkin = skin(formPath);
+    }
 
-    for (auto form : DesignManager::formScene()->forms())
-        if (form->main())
-            mainSkin = form->skin();
-
-    if (mainSkin == Skin::Invalid)
-        return false;
+    if (mainSkin == Skin::Invalid) {
+        error.type = CommonError;
+        return error;
+    }
 
     QList<QObject*> forms;
     QQuickWindow* mainWindow = nullptr;
-    QMap<QString, QQmlContext*> contexes;
+    QMap<QString, QQmlContext*> formContexes;
     auto engine = new QQmlEngine(_d->parent);
+
     engine->rootContext()->setContextProperty("dpi", Fit::ratio());
     engine->setOutputWarningsToStandardError(false);
 
+    // Spin for forms (top level masters)
     for (auto formPath : formPaths()) {
-        const bool isMain = (fname(formPath) == DIR_MAINFORM);
         auto _masterPaths = masterPaths(formPath);
+
+        // Spin for masters inside the form (form itself included)
         QMap<QString, QObject*> masterResults;
-        QObject* form = nullptr;
-        for (auto path : _masterPaths) {
+        for (auto masterPath : _masterPaths) {
+            QByteArray formData;
             auto masterContext = new QQmlContext(engine, engine);
-            QMap<QString, QObject*> results;
-            for (auto childPath : childrenPaths(path)) {
+
+            //! Spin for child items of the master
+            QMap<QString, QObject*> childResults;
+            for (auto childPath : childrenPaths(masterPath)) {
                 int index = _masterPaths.indexOf(childPath);
                 if (index >= 0) {
-                    results[childPath] = masterResults[childPath];
+                    childResults[childPath] = masterResults[childPath];
                 } else {
-                    results[childPath] = _d->requestItem(childPath, engine, masterContext); //Async
-                    if (results[childPath] == nullptr)
-                        return false;
+                    childResults[childPath] = _d->requestItem(error,
+                      childPath, engine, masterContext);
+                    if (childResults[childPath] == nullptr) {
+                        engine->deleteLater();
+                        return error;
+                    }
+                    if (_d->type(childResults[childPath]) == Window) {
+                        engine->deleteLater();
+                        error.type = ChildIsWindowError;
+                        return error;
+                    }
                 }
-                masterContext->setContextProperty(id(childPath), results[childPath]);
+                masterContext->setContextProperty(id(childPath),
+                  childResults[childPath]);
             }
 
-            if (_masterPaths.last() == path) {
-                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
-                if (masterResults[path] == nullptr)
-                    return false;
-                form = masterResults[path];
-                forms << form;
-                if (isMain)
-                    mainWindow = qobject_cast<QQuickWindow*>(form);
+            //BUG: Possible bug if property 'visible' is a binding
+            //! Make form invisible, if it's a window type
+            if (_masterPaths.last() == masterPath) { // Check If it's a form (top level master)
+                auto url = masterPath + separator() +
+                  DIR_THIS + separator() + "main.qml";
+                formData = rdfile(url);
+                ParserWorker parserWorker;
+                bool isWindow = parserWorker.typeName(formData).contains("Window");
 
-                if (mainWindow == nullptr) {
+                if (isWindow) //If form is a window type
+                    parserWorker.setVariantProperty(formData, url, "visible", false);
+
+                if (!_d->isMain(masterPath) && isWindow &&
+                  (mainSkin == Skin::PhonePortrait ||
+                    mainSkin == Skin::PhoneLandscape)) {
                     engine->deleteLater();
-                    return false;
+                    error.type = MultipleWindowsForMobileError;
+                    return error;
                 }
-                contexes[path] = masterContext;
+            }
+
+            //! Build this (current spin's) master item
+            if (formData.isEmpty()) {
+                masterResults[masterPath] = _d->requestItem(error,
+                  masterPath, engine, masterContext);
             } else {
-                masterResults[path] = _d->requestItem(path, engine, masterContext); //Async
-                if (masterResults[path] == nullptr)
-                    return false;
+                masterResults[masterPath] = _d->requestItem(error,
+                  formData, masterPath, engine, masterContext);
             }
-            masterContext->setContextProperty(id(path), masterResults[path]);
+            if (masterResults[masterPath] == nullptr) {
+                engine->deleteLater();
+                return error;
+            }
 
+            //! Catch this (current spin's) master item
+            if (!formData.isEmpty()) { // If it's a form (top level master)
+                auto form = masterResults[masterPath];
+                if (_d->type(form) == NonGui) {
+                    engine->deleteLater();
+                    error.type = FormIsNonGui;
+                    return error;
+                }
+                if (_d->isMain(masterPath)) {
+                    if (!(mainWindow = qobject_cast<QQuickWindow*>(form))) {
+                        engine->deleteLater();
+                        error.type = MainFormIsntWindowError;
+                        return error;
+                    }
+                }
+                forms << form;
+                formContexes[masterPath] = masterContext;
+            } else { // If it's a "master child inside of the form"
+                auto masterItem = masterResults[masterPath];
+                if (_d->type(masterItem) == Window) {
+                    engine->deleteLater();
+                    error.type = ChildIsWindowError;
+                    return error;
+                }
+                if (_d->type(masterItem) == NonGui) {
+                    engine->deleteLater();
+                    error.type = MasterIsNonGui;
+                    return error;
+                }
+            }
+            masterContext->setContextProperty(id(masterPath),
+              masterResults[masterPath]);
+
+            //! Place child items into master item visually
+            // Only non-master nongui children were passed (because they don't have a visual parent)
+            // Others are handled in anyway, either here or above(invalid cases)
             QMap<QString, QObject*> pmap;
-            pmap[path] = masterResults[path];
-            for (auto result : results.keys()) {
-                auto pobject = pmap.value(dname(dname(result)));
-                if (_d->type(results[result]) == SaveManagerPrivate::Type::Window ||
-                    _d->type(pobject) == SaveManagerPrivate::Type::NonGui)
-                    return false;
-                if (_d->type(results[result]) == SaveManagerPrivate::Type::NonGui)
+            pmap[masterPath] = masterResults[masterPath];
+            for (auto result : childResults.keys()) { //WARNING: Does it spin from parent to children?
+                auto pobject = pmap.value(dname(dname(result))); // Master item (a form(master) or a child master)
+                if (_d->type(childResults[result]) == NonGui) // Child item (master or non-master, but not form)
                     continue;
 
-                // All children are quick (not nongui/window)
-                // All forms are quick or window (not nongui)
+                // All childs are quick (not nongui/window)
+                // All masters are quick or window (not nongui)
 
-                if (pobject->isWindowType())
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(pobject)->contentItem());
-                else
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(pobject));
+                if (_d->type(pobject) == Window) {
+                    static_cast<QQuickItem*>(childResults[result])->setParentItem(
+                      static_cast<QQuickWindow*>(pobject)->contentItem()); //FIXME: ApplicationWindow qml type?
+                 } else {                                                  //header, footer, and contentItem?
+                    static_cast<QQuickItem*>(childResults[result])->setParentItem(
+                      static_cast<QQuickItem*>(pobject));
+                }
 
-                pmap[result] = results[result];
-            }
-
-            for (auto result : results.keys()) {
-                if (_d->type(results[result]) != SaveManagerPrivate::Type::NonGui)
-                    continue;
-
-                if (form->isWindowType())
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickWindow*>(form)->contentItem());
-                else
-                    qobject_cast<QQuickItem*>(results[result])->setParentItem(qobject_cast<QQuickItem*>(form));
+                pmap[result] = childResults[result];
             }
         }
     }
-    //TODO: Block if phone skin has multiple windows
-    for (auto path : contexes.keys())
-        for (int i = 0; i < contexes.keys().size(); i++)
-            contexes[path]->setContextProperty(id(contexes.keys().at(i)), forms.at(i));
 
     if (mainWindow == nullptr) {
         engine->deleteLater();
-        return false;
+        error.type = NoMainForm;
+        return error;
+    }
+
+    for (auto formPath : formContexes.keys()) {
+        for (int i = 0; i < formContexes.size(); i++) {
+            formContexes[formPath]->setContextProperty(
+              id(formContexes.keys().at(i)), forms.at(i));
+        }
     }
 
     if (mainSkin == Skin::PhonePortrait ||
@@ -673,8 +788,12 @@ bool SaveManager::execProject()
         _d->executiveWidget.setSkin(mainSkin);
         _d->executiveWidget.setData(engine, mainWindow);
         _d->executiveWidget.show();
+    } else {
+        // TODO : Make this function Async
+        // TODO : Wait till all windows are closed
     }
-    return true;
+
+    return error;
 }
 
 void SaveManager::exposeProject()
@@ -686,7 +805,7 @@ void SaveManager::exposeProject()
     for (auto path : fpaths) {
 
         auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
-        if (fname(path) == DIR_MAINFORM)
+        if (_d->isMain(path))
             form->setMain(true);
         DesignManager::formScene()->addForm(form);
         connect(form, &Form::initialized, [=] {

@@ -43,12 +43,12 @@ class QmlPreviewerPrivate : public QObject
         QList<QString> extractEvents(const QObject* object) const;
 
     public slots:
-        PreviewResult requestPreview(const QString& url) const;
+        PreviewResult requestPreview(Control* control, const QString& url) const;
         void taskHandler();
 
     signals:
         void previewReady(const PreviewResult& result) const;
-        void errorsOccurred(const QList<QQmlError>& errors, const PreviewResult& result) const;
+        void errorsOccurred(Control*, const QList<QQmlError>& errors, const PreviewResult& result) const;
 
     public:
         QmlPreviewer* parent;
@@ -62,6 +62,8 @@ QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
 {
     taskTimer.setInterval(TASK_TIMEOUT);
     connect(&taskTimer, SIGNAL(timeout()), SLOT(taskHandler()));
+    connect(this, SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)),
+        parent, SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)));
 }
 
 void QmlPreviewerPrivate::scratchPixmapIfEmpty(QPixmap& pixmap) const
@@ -169,19 +171,19 @@ QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
     return events;
 }
 
-PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url) const
+PreviewResult QmlPreviewerPrivate::requestPreview(Control* control, const QString& url) const
 {
+    bool isWindow = false;
     PreviewResult result;
 
     if (url.isEmpty() || !SaveManager::isOwctrl(dname(dname(url)))) {
         QQmlError error;
         error.setDescription("Invalid url or control.");
-        emit errorsOccurred(QList<QQmlError>() << error, result);
+        emit errorsOccurred(control, QList<QQmlError>() << error, result);
         return PreviewResult();
     }
 
     QObject* qmlObject;
-    QByteArray qmlData;
     QSharedPointer<QQmlEngine> qmlEngine(new QQmlEngine);
     QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
     QSharedPointer<QQuickWindow> window;
@@ -189,16 +191,25 @@ PreviewResult QmlPreviewerPrivate::requestPreview(const QString& url) const
     qmlEngine->setOutputWarningsToStandardError(false);
     qmlEngine->rootContext()->setContextProperty("dpi", Fit::ratio());
 
-    qmlData = rdfile(url);
-    ParserWorker parserWorker;
-    if (parserWorker.typeName(qmlData).contains("Window"))
+    auto qmlData = rdfile(url);
+    ParserWorker parserWorker; //FIXME
+    if (parserWorker.typeName(qmlData).contains("Window")) {
         parserWorker.setVariantProperty(qmlData, url, "visible", false);
+        isWindow = true;
+    }
+
+    if (isWindow && !control->form()) {
+        QQmlError error;
+        error.setDescription("Only forms can be 'Window' qml type.");
+        emit errorsOccurred(control, QList<QQmlError>() << error, result);
+        return PreviewResult();
+    }
 
     qmlComponent->setData(qmlData, QUrl::fromLocalFile(url));
     qmlObject = qmlComponent->create();
 
     if (!qmlComponent->errors().isEmpty()) {
-        emit errorsOccurred(qmlComponent->errors(), result);
+        emit errorsOccurred(control, qmlComponent->errors(), result);
         return PreviewResult();
     }
 
@@ -277,7 +288,7 @@ void QmlPreviewerPrivate::taskHandler()
     auto masterPaths = SaveManager::masterPaths(dir);
 
     if (SaveManager::suid(dir).isEmpty() || masterPaths.isEmpty()) {
-        auto res = requestPreview(dir + separator() + DIR_THIS +
+        auto res = requestPreview(control, dir + separator() + DIR_THIS +
                                   separator() + "main.qml");
         if (!res.isNull())
             emit parent->previewReady(control, res);
@@ -297,7 +308,7 @@ void QmlPreviewerPrivate::taskHandler()
             if (index >= 0) {
                 results[childPath] = masterResults[childPath];
             } else {
-                results[childPath] = requestPreview(childPath + separator() + DIR_THIS + separator() + "main.qml");
+                results[childPath] = requestPreview(control, childPath + separator() + DIR_THIS + separator() + "main.qml");
                 if (results[childPath].isNull()) {
                     parent->_working = false;
                     emit parent->workingChanged(parent->_working);
@@ -307,7 +318,7 @@ void QmlPreviewerPrivate::taskHandler()
         }
 
         if (masterPaths.last() == path) {
-            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml");
+            masterResults[path] = requestPreview(control, path + separator() + DIR_THIS + separator() + "main.qml");
             finalResult = &masterResults[path];
             if (masterResults[path].isNull()) {
                 parent->_working = false;
@@ -315,7 +326,7 @@ void QmlPreviewerPrivate::taskHandler()
                 return;
             }
         } else {
-            masterResults[path] = requestPreview(path + separator() + DIR_THIS + separator() + "main.qml");
+            masterResults[path] = requestPreview(control, path + separator() + DIR_THIS + separator() + "main.qml");
             if (masterResults[path].isNull()) {
                 parent->_working = false;
                 emit parent->workingChanged(parent->_working);

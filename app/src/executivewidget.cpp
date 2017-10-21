@@ -8,6 +8,7 @@
 
 using namespace Fit;
 
+//TODO: Close me when whole objectwheel about to quit
 ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     : QWidget(parent)
     , _layout(this)

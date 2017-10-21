@@ -2,6 +2,7 @@
 #define SAVEMANAGER_H
 
 #include <QObject>
+#include <QQmlError>
 #include <global.h>
 
 #define SIGN_OWDB "T3dkYl92Mi4w"
@@ -27,6 +28,23 @@ class Control;
 class Form;
 class ControlScene;
 
+enum ExecErrorType {
+    NoError,
+    CommonError,
+    ChildIsWindowError,
+    MasterIsNonGui,
+    FormIsNonGui,
+    MainFormIsntWindowError,
+    MultipleWindowsForMobileError,
+    NoMainForm,
+    CodeError
+};
+
+struct ExecError {
+        ExecErrorType type = NoError;
+        QList<QQmlError> errors;
+};
+
 class SaveManager : public QObject
 {
         Q_OBJECT
@@ -36,7 +54,7 @@ class SaveManager : public QObject
         explicit SaveManager(QObject *parent = 0);
         static SaveManager* instance();
 
-        static bool execProject();
+        static ExecError execProject();
         static void exposeProject();
         static Control* exposeControl(const QString& rootPath, QString suid = QString());
         static bool initProject(const QString& projectDirectory);

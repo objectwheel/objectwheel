@@ -405,15 +405,25 @@ void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> erro
         return;
 
     QMessageBox box;
-    box.setText("<b>This tool has some errors, please fix these first.</b>");
-    box.setInformativeText("<b>Control</b>: " +  parent->id() + ", <b>Error</b>: " + errors[0].description());
+    box.setText("<b>Following control has some errors.</b>");
+    box.setInformativeText("<b>Control</b>: " +  parent->id() + ", <b>\n\rReason</b>: " + errors[0].description());
     box.setStandardButtons(QMessageBox::Ok);
     box.setDefaultButton(QMessageBox::Ok);
     box.setIcon(QMessageBox::Information);
     box.exec();
 
-    parent->scene()->removeItem(parent);
-    parent->deleteLater();
+    if (parent->_initialized == false) {
+        auto scene = static_cast<ControlScene*>(parent->scene());
+        scene->clearSelection();
+        parent->setFlag(Control::ItemIsFocusable);
+        parent->setFlag(Control::ItemIsSelectable);
+        parent->setAcceptHoverEvents(true);
+        parent->_controlTransaction.flushParentChange();
+        parent->_initialized = true;
+        emit parent->initialized();
+    }
+
+    parent->hide();
 }
 
 //!
