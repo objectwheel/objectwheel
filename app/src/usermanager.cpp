@@ -184,7 +184,7 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
 
     if (_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
         QMetaObject::invokeMethod(pW, "showProgress", Qt::QueuedConnection,
-                                  Q_ARG(QString, "Starting user session"));
+                                  Q_ARG(QString, "Decryption in progress"));
 
         /* Clear all previous trash project folders if locked versions already exists */
         auto dirlockersFiles = _d->dirLocker.dirlockersFilenames();

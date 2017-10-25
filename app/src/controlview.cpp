@@ -209,6 +209,7 @@ void ControlViewPrivate::handlePasteAction()
         controls << control;
         connect(control, &Control::initialized, [=] {
             control->controlTransaction()->setTransactionsEnabled(true);
+            control->setPos(control->pos() + QPoint(fit(5), fit(5)));
             if (url == mimeData->urls().last()) {
                 DesignManager::controlScene()->clearSelection();
                 for (auto control : controls)

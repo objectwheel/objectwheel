@@ -14,10 +14,13 @@
 
 using namespace Fit;
 
+
 ProgressWidget::ProgressWidget(CentralWidget* parent)
     : QWidget(parent)
     , _centralWidget(parent)
     , _lastUid(-1)
+    , _logoPixmap(QPixmap(PATH_LOGO).scaled(SIZE_LOGO * pS->devicePixelRatio(),
+       Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
 {
     _centralWidget->addWidget(Screen::PROGRESS, this);
     setAutoFillBackground(true);
@@ -90,14 +93,18 @@ void ProgressWidget::paintEvent(QPaintEvent* event)
     int spacing = fit(40);
     int x = width() / 2.0;
     int y = height() - height()/1.618;
-    painter.drawPixmap(x - SIZE_LOGO.width()/2.0, y - SIZE_LOGO.height()/2.0,
-        SIZE_LOGO.width(), SIZE_LOGO.height(), QPixmap(PATH_LOGO));
+    auto rect = QRectF(x - SIZE_LOGO.width()/2.0, y - SIZE_LOGO.height()/2.0,
+      SIZE_LOGO.width(), SIZE_LOGO.height());
+    painter.drawPixmap(rect, _logoPixmap, QRectF(QPointF(),
+      rect.size() * pS->devicePixelRatio()));
 
     y += (spacing + SIZE_LOGO.height());
-    painter.drawPixmap(x - SIZE_GIF.width()/2.0, y - SIZE_GIF.height()/2.0,
-        SIZE_GIF.width(), SIZE_GIF.height(),  _movie.currentPixmap());
+    rect = QRectF(x - SIZE_GIF.width()/2.0, y - SIZE_GIF.height()/2.0,
+      SIZE_GIF.width(), SIZE_GIF.height());
+    painter.drawPixmap(rect, _movie.currentPixmap(), QRectF(QPointF(),
+      rect.size() * pS->devicePixelRatio()));
 
     y += (SIZE_GIF.height());
     painter.drawText(0, y - fit(10), width(), fit(20),
-        Qt::AlignCenter, _msg + _waitEffectString);
+      Qt::AlignCenter, _msg + _waitEffectString);
 }

@@ -507,10 +507,12 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
 void DesignManagerPrivate::handleRefreshPreviewClicked()
 {
     if (DesignManager::_mode == DesignManager::FormGUI) {
-        for (auto control : formScene.controls())
+        formScene.mainForm()->refresh();
+        for (auto control : formScene.mainForm()->childControls())
             control->refresh();
     } else {
-        for (auto control : controlScene.controls())
+        controlScene.mainControl()->refresh();
+        for (auto control : controlScene.mainControl()->childControls())
             control->refresh();
     }
 }

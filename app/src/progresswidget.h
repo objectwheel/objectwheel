@@ -30,6 +30,8 @@ class ProgressWidget : public QWidget
         QMovie _movie;
         QTimer _waitEffectTimer;
         QString _waitEffectString;
+        const QPixmap _logoPixmap;
+
 };
 
 #endif // PROGRESSWIDGET_H
