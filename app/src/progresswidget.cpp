@@ -14,7 +14,6 @@
 
 using namespace Fit;
 
-
 ProgressWidget::ProgressWidget(CentralWidget* parent)
     : QWidget(parent)
     , _centralWidget(parent)
@@ -106,5 +105,5 @@ void ProgressWidget::paintEvent(QPaintEvent* event)
 
     y += (SIZE_GIF.height());
     painter.drawText(0, y - fit(10), width(), fit(20),
-      Qt::AlignCenter, _msg + _waitEffectString);
+                     Qt::AlignCenter, _msg + _waitEffectString);
 }

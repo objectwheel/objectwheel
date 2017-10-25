@@ -1002,6 +1002,13 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     p2.setColor(QPalette::HighlightedText, QColor("#202427"));
     _treeWidget.setPalette(p2);
 
+    QPalette p3(_lblMsg.palette());
+    p3.setColor(QPalette::WindowText, "#a0a4a7");
+    _lblMsg.setParent(&_treeWidget);
+    _lblMsg.setText("No items selected");
+    _lblMsg.setAlignment(Qt::AlignCenter);
+    _lblMsg.setPalette(p3);
+
     _treeWidget.setHorizontalScrollMode(ToolboxTree::ScrollPerPixel);
     _treeWidget.setVerticalScrollMode(ToolboxTree::ScrollPerPixel);
     _treeWidget.setSelectionBehavior(ToolboxTree::SelectRows);
@@ -1044,6 +1051,7 @@ void PropertiesWidget::clearList()
         qDeleteAll(_treeWidget.topLevelItem(i)->takeChildren());
 
     _treeWidget.clear();
+    _lblMsg.setVisible(true);
 }
 
 void PropertiesWidget::refreshList()
@@ -1172,6 +1180,7 @@ void PropertiesWidget::refreshList()
     }
 
     filterList(_searchEdit.text());
+    _lblMsg.setHidden(_treeWidget.topLevelItemCount() > 0);
 }
 
 void PropertiesWidget::handleSelectionChange()
@@ -1221,6 +1230,12 @@ void PropertiesWidget::filterList(const QString& filter)
 QSize PropertiesWidget::sizeHint() const
 {
     return QSize(fit(340), fit(2600)); //FIXME:
+}
+
+void PropertiesWidget::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    _lblMsg.setGeometry(rect());
 }
 
 #include "propertieswidget.moc"

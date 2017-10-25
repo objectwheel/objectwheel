@@ -31,7 +31,6 @@ class ProgressWidget : public QWidget
         QTimer _waitEffectTimer;
         QString _waitEffectString;
         const QPixmap _logoPixmap;
-
 };
 
 #endif // PROGRESSWIDGET_H

@@ -2,6 +2,7 @@
 #define PROPERTIESWIDGET_H
 
 #include <QWidget>
+#include <QLabel>
 #include <QTreeWidget>
 #include <QVBoxLayout>
 #include <filterlineedit.h>
@@ -23,11 +24,13 @@ class PropertiesWidget : public QWidget
 
     protected:
         virtual QSize sizeHint() const override;
+        virtual void resizeEvent(QResizeEvent *event) override;
 
     private:
         QVBoxLayout _layout;
         QTreeWidget _treeWidget;
         FilterLineEdit _searchEdit;
+        QLabel _lblMsg;
 };
 
 #endif // PROPERTIESWIDGET_H
