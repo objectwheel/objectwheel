@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QQuickWindow>
+#include <QPointer>
+
 #include <flatbutton.h>
 #include <global.h>
 
@@ -36,7 +38,7 @@ class ExecutiveWidget : public QWidget
         bool _pressed;
         QQuickWindow _window;
         QWidget* _containerWidget;
-        QQuickItem* _contentItem;
+        QPointer<QQuickItem> _contentItem;
 };
 
 #endif // EXECUTIVEWIDGET_H

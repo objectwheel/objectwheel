@@ -28,7 +28,6 @@ class FormViewPrivate : public QObject
 
     public:
         FormViewPrivate(FormView* parent);
-        void fixSuids(const QString& topPath, const QString& from, const QString& to);
 
     private slots:
         void handleUndoAction();
@@ -128,18 +127,6 @@ FormViewPrivate::FormViewPrivate(FormView* parent)
     connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
 }
 
-void FormViewPrivate::fixSuids(const QString& topPath, const QString& from, const QString& to)
-{
-    for (auto path : fps(FILE_PROPERTIES, topPath)) {
-        if (SaveManager::suid(dname(dname(path))) != from)
-            continue;
-        auto propertyData = rdfile(path);
-        auto jobj = QJsonDocument::fromJson(propertyData).object();
-        jobj[TAG_SUID] = to;
-        wrfile(path, propertyData);
-    }
-}
-
 void FormViewPrivate::handleUndoAction()
 {
     //TODO
@@ -208,7 +195,7 @@ void FormViewPrivate::handlePasteAction()
 {
     auto clipboard = QApplication::clipboard();
     auto mimeData = clipboard->mimeData();
-    auto mainControl = DesignManager::formScene()->mainControl();
+    auto mainControl = DesignManager::formScene()->mainForm();
     QString uid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
         mimeData->text() != TOOLBOX_ITEM_KEY || uid.isEmpty())
@@ -218,7 +205,6 @@ void FormViewPrivate::handlePasteAction()
     for (auto url : mimeData->urls()) {
         auto control = SaveManager::exposeControl(url.toLocalFile(), uid);
         SaveManager::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
-        fixSuids(control->dir(), uid, mainControl->uid());
         control->setParentItem(mainControl);
         control->refresh();
         controls << control;

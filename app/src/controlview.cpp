@@ -27,7 +27,6 @@ class ControlViewPrivate : public QObject
 
     public:
         ControlViewPrivate(ControlView* parent);
-        void fixSuids(const QString& topPath, const QString& from, const QString& to);
 
     private slots:
         void handleUndoAction();
@@ -127,18 +126,6 @@ ControlViewPrivate::ControlViewPrivate(ControlView* parent)
     connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
 }
 
-void ControlViewPrivate::fixSuids(const QString& topPath, const QString& from, const QString& to)
-{
-    for (auto path : fps(FILE_PROPERTIES, topPath)) {
-        if (SaveManager::suid(dname(dname(path))) != from)
-            continue;
-        auto propertyData = rdfile(path);
-        auto jobj = QJsonDocument::fromJson(propertyData).object();
-        jobj[TAG_SUID] = to;
-        wrfile(path, propertyData);
-    }
-}
-
 void ControlViewPrivate::handleUndoAction()
 {
     //TODO
@@ -217,7 +204,6 @@ void ControlViewPrivate::handlePasteAction()
     for (auto url : mimeData->urls()) {
         auto control = SaveManager::exposeControl(url.toLocalFile(), uid);
         SaveManager::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
-        fixSuids(control->dir(), uid, mainControl->uid());
         control->setParentItem(mainControl);
         control->refresh();
         controls << control;
@@ -231,7 +217,7 @@ void ControlViewPrivate::handlePasteAction()
                 if (!mimeData->data("objectwheel/cut").isEmpty()) {
                     ControlScene* scene;
                     if (mimeData->data("objectwheel/fscene").isEmpty())
-                        scene = DesignManager::controlScene();
+                        scene = DesignManager::formScene();
                     else
                         scene = DesignManager::controlScene();
 

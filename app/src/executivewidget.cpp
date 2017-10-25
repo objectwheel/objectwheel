@@ -8,7 +8,6 @@
 
 using namespace Fit;
 
-//TODO: Close me when whole objectwheel about to quit
 ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     : QWidget(parent)
     , _layout(this)
@@ -18,6 +17,7 @@ ExecutiveWidget::ExecutiveWidget(QWidget *parent)
 {
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
+    setAttribute(Qt::WA_QuitOnClose, false);
 
     _layout.setSpacing(0);
     _layout.setContentsMargins(0, 0, 0, 0);
@@ -27,12 +27,13 @@ ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     _layout.setAlignment(_containerWidget, Qt::AlignCenter);
 
     _exitButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _exitButton.setColor("#D11919");
+    _exitButton.setColor("#C61717");
     _exitButton.setFixedSize(fit(20),fit(20));
-    _exitButton.setRadius(fit(7));
+    _exitButton.setRadius(fit(9));
     _exitButton.setIconSize(QSize(fit(17),fit(17)));
     _exitButton.setIcon(QIcon(":/resources/images/down-arrow.png"));
     connect(&_exitButton, SIGNAL(clicked(bool)), SLOT(handleExitButtonClick()));
+    connect(qApp, SIGNAL(aboutToQuit()), SLOT(handleExitButtonClick()));
 }
 
 Skin ExecutiveWidget::skin() const
@@ -78,7 +79,8 @@ void ExecutiveWidget::setWindow(QQuickWindow* window)
 void ExecutiveWidget::handleExitButtonClick()
 {
     hide();
-    _contentItem->setParentItem(nullptr);
+    if (_contentItem)
+        _contentItem->setParentItem(nullptr);
     emit done();
 }
 

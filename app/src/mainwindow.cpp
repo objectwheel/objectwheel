@@ -243,6 +243,12 @@ void MainWindow::hideDockWidgets()
     _toolboxDockwidget.hide();
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    QMainWindow::closeEvent(event);
+    emit quitting();
+}
+
 void MainWindow::clearStudio()
 {
 

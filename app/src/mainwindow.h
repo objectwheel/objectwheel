@@ -39,6 +39,12 @@ class MainWindow : public QMainWindow
         void showDockWidgets();
         void hideDockWidgets();
 
+    protected:
+        void closeEvent(QCloseEvent *event) override;
+
+    signals:
+        void quitting() const;
+
     private:
         static MainWindow* _instance;
         CentralWidget _centralWidget;

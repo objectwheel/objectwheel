@@ -198,7 +198,7 @@ QByteArray FileManager::rdfile(const QString& file) const
 int FileManager::wrfile(const QString& file, const QByteArray& data) const
 {
     if (data.isEmpty()) return -1;
-    if (!mkfile(file)) return -1;
+    if (!exists(file) && !mkfile(file)) return -1;
     QFile writer(file);
     if (!writer.open(QFile::WriteOnly)) return -1;
     int ret = writer.write(data);

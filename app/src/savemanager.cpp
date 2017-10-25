@@ -188,11 +188,25 @@ void SaveManagerPrivate::flushId(const Control* control, const QString& id) cons
 
 void SaveManagerPrivate::flushSuid(const Control* control, const QString& suid) const
 {
-    auto propertyPath = control->dir() + separator() + DIR_THIS +
-                        separator() + FILE_PROPERTIES;
-    auto propertyData = rdfile(propertyPath);
-    setProperty(propertyData, TAG_SUID, suid);
-    wrfile(propertyPath, propertyData);
+    auto topPath = control->dir();
+    auto fromUid = parent->suid(topPath);
+    if (!fromUid.isEmpty()) {
+        for (auto path : fps(FILE_PROPERTIES, topPath)) {
+            if (SaveManager::suid(dname(dname(path))) == fromUid) {
+                auto propertyData = rdfile(path);
+                auto jobj = QJsonDocument::fromJson(propertyData).object();
+                jobj[TAG_SUID] = suid;
+                propertyData = QJsonDocument(jobj).toJson();
+                wrfile(path, propertyData);
+            }
+        }
+    } else {
+        auto propertyPath = control->dir() + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        setProperty(propertyData, TAG_SUID, suid);
+        wrfile(propertyPath, propertyData);
+    }
 }
 
 bool SaveManagerPrivate::isOwctrl(const QByteArray& propertyData) const
@@ -465,10 +479,10 @@ QString SaveManagerPrivate::parentDir(const Control* control) const
 }
 
 QObject* SaveManagerPrivate::requestItem(ExecError& err,
-  const QString& path, QQmlEngine* engine, QQmlContext* context) const
+                                         const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QQmlComponent comp(engine, QUrl(path + separator() +
-      DIR_THIS + separator() + "main.qml"));
+                                    DIR_THIS + separator() + "main.qml"));
     auto item = comp.create(context);
     if (!comp.errors().isEmpty()) {
         err.type = CodeError;
@@ -480,11 +494,11 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err,
 }
 
 QObject* SaveManagerPrivate::requestItem(ExecError& err, const QByteArray& data,
-  const QString& path, QQmlEngine* engine, QQmlContext* context) const
+                                         const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QQmlComponent comp(engine);
     comp.setData(data, QUrl(path + separator() +
-      DIR_THIS + separator() + "main.qml"));
+                            DIR_THIS + separator() + "main.qml"));
     auto item = comp.create(context);
     if (!comp.errors().isEmpty()) {
         err.type = CodeError;
@@ -660,7 +674,7 @@ ExecError SaveManager::execProject()
                     childResults[childPath] = masterResults[childPath];
                 } else {
                     childResults[childPath] = _d->requestItem(error,
-                      childPath, engine, masterContext);
+                                                              childPath, engine, masterContext);
                     if (childResults[childPath] == nullptr) {
                         engine->deleteLater();
                         return error;
@@ -672,15 +686,15 @@ ExecError SaveManager::execProject()
                     }
                 }
                 masterContext->setContextProperty(id(childPath),
-                  childResults[childPath]);
+                                                  childResults[childPath]);
                 qApp->processEvents(QEventLoop::AllEvents, 20);
             }
 
             //! Make form invisible, if it's a window type
             if (isForm && (mainSkin == Skin::PhonePortrait ||
-              mainSkin == Skin::PhoneLandscape)) { // Check If it's a form (top level master) and skin is mobile
+                           mainSkin == Skin::PhoneLandscape)) { // Check If it's a form (top level master) and skin is mobile
                 auto url = masterPath + separator() +
-                  DIR_THIS + separator() + "main.qml";
+                           DIR_THIS + separator() + "main.qml";
                 auto formData = rdfile(url);
                 ParserWorker parserWorker;
                 bool isWindow = parserWorker.typeName(formData).contains("Window");
@@ -695,10 +709,10 @@ ExecError SaveManager::execProject()
                     return error;
                 }
                 masterResults[masterPath] = _d->requestItem(error,
-                  formData, masterPath, engine, masterContext);
+                                                            formData, masterPath, engine, masterContext);
             } else {
                 masterResults[masterPath] = _d->requestItem(error,
-                  masterPath, engine, masterContext);
+                                                            masterPath, engine, masterContext);
             }
 
             qApp->processEvents(QEventLoop::AllEvents, 20);
@@ -738,7 +752,7 @@ ExecError SaveManager::execProject()
                 }
             }
             masterContext->setContextProperty(id(masterPath),
-              masterResults[masterPath]);
+                                              masterResults[masterPath]);
 
             //! Place child items into master item visually
             // Only non-master nongui children were passed (because they don't have a visual parent)
@@ -755,10 +769,10 @@ ExecError SaveManager::execProject()
 
                 if (_d->type(pobject) == Window) {
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
-                      static_cast<QQuickWindow*>(pobject)->contentItem()); //FIXME: ApplicationWindow qml type?
-                 } else {                                                  //header, footer, and contentItem?
+                                static_cast<QQuickWindow*>(pobject)->contentItem()); //FIXME: ApplicationWindow qml type?
+                } else {                                                  //header, footer, and contentItem?
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
-                      static_cast<QQuickItem*>(pobject));
+                                static_cast<QQuickItem*>(pobject));
                 }
 
                 pmap[result] = childResults[result];
@@ -776,7 +790,7 @@ ExecError SaveManager::execProject()
     for (auto formPath : formContexes.keys()) {
         for (int i = 0; i < formContexes.keys().size(); i++) { //Don't change 'keys().size()'
             formContexes[formPath]->setContextProperty(
-              id(formContexes.keys().at(i)), forms.at(i));
+                        id(formContexes.keys().at(i)), forms.at(i));
         }
     }
 
@@ -790,6 +804,7 @@ ExecError SaveManager::execProject()
         _d->executiveWidget.show();
         connect(&_d->executiveWidget, SIGNAL(done()), &loop, SLOT(quit()));
     } else {
+        connect(MainWindow::instance(), SIGNAL(quitting()), &loop, SLOT(quit()));
         connect(mainWindow, SIGNAL(closing(QQuickCloseEvent*)), &loop, SLOT(quit()));
     }
     loop.exec();
@@ -1014,6 +1029,9 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     if (!cp(control->dir(), controlDir, true))
         return false;
 
+    for (auto child : control->childControls())
+        child->setUrl(child->url().replace(control->dir(), controlDir));
+
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
     _d->flushId(control, control->id());
@@ -1021,7 +1039,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
         _d->flushId(child, child->id());
 
     _d->flushSuid(control, suid);
-    _d->recalculateUids(control);
+    _d->recalculateUids(control); //for all
 
     if (_d->isInOwdb(control->dir()))
         emit _d->parent->databaseChanged();
