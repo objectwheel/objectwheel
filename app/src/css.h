@@ -11,16 +11,11 @@ class CSS
 	public:
 		static void init();
 
-		static QString SpinBox;
-		static QString LineEdit;
-		static QString PropertyItem;
-		static QString Toolbar;
-		static QString ToolboxButton;
-		static QString PropertiesButton;
-		static QString BindingButton;
-        static QString EventsButton;
-		static QString PagesButton;
-		static QString BindingListWidget;
+        static QString ScrollBar;
+        static QString ScrollBarH;
+        static QString DesignerToolbar;
+        static QString DesignerToolbarV;
+        static QString DesignerPinbar;
 };
 
 #endif // CSS_H

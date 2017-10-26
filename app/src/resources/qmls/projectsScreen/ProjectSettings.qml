@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtQuick.Dialogs 1.2
+import QtQuick.Dialogs 1.2 as Dgl
 import QtQuick.Controls 2.0
 import QtQuick.Controls 1.4
 import QtGraphicalEffects 1.0
@@ -854,13 +854,14 @@ Item {
             })
         }
     }
-    MessageDialog {
+    Dgl.MessageDialog {
         id: deleteProjectMessageDialog
-        title: "Do you want to continue?"
-        text: "This will delete the entire project and its content. You can not get this back."
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: btnDelProject.clicked()
-        icon: StandardIcon.Warning
+        title: "Delete Project"
+        text: "This will delete entire project. Are you sure?"
+         standardButtons: Dgl.StandardButton.Yes | Dgl.StandardButton.No
+         icon: Dgl.StandardIcon.Warning
+         onYes: btnDelProject.clicked()
+        // BUG: on IOS
     }
     property alias warning: warning
     property alias projectnameTextInput: projectnameTextInput

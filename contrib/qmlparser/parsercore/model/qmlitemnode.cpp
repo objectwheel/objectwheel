@@ -60,30 +60,30 @@ bool QmlItemNode::isItemOrWindow(const ModelNode &modelNode)
     return false;
 }
 
-static QmlItemNode createQmlItemNodeFromSource(AbstractView *view, const QString &source, const QPointF &position)
+static QmlItemNode createQmlItemNodeFromSource(AbstractView *, const QString &, const QPointF &)
 {
-    QScopedPointer<Model> inputModel(Model::create("QtQuick.Item", 1, 0, view->model()));
-    inputModel->setFileUrl(view->model()->fileUrl());
-    QPlainTextEdit textEdit;
+//    QScopedPointer<Model> inputModel(Model::create("QtQuick.Item", 1, 0, view->model()));
+//    inputModel->setFileUrl(view->model()->fileUrl());
+//    QPlainTextEdit textEdit;
 
-    textEdit.setPlainText(source);
-    NotIndentingTextEditModifier modifier(&textEdit);
+//    textEdit.setPlainText(source);
+//    NotIndentingTextEditModifier modifier(&textEdit);
 
-    QScopedPointer<RewriterView> rewriterView(new RewriterView(RewriterView::Amend, 0));
-    rewriterView->setCheckSemanticErrors(false);
-    rewriterView->setTextModifier(&modifier);
-    inputModel->setRewriterView(rewriterView.data());
+//    QScopedPointer<RewriterView> rewriterView(new RewriterView(RewriterView::Amend, 0));
+//    rewriterView->setCheckSemanticErrors(false);
+//    rewriterView->setTextModifier(&modifier);
+//    inputModel->setRewriterView(rewriterView.data());
 
-    if (rewriterView->errors().isEmpty() && rewriterView->rootModelNode().isValid()) {
-        ModelNode rootModelNode = rewriterView->rootModelNode();
-        inputModel->detachView(rewriterView.data());
+//    if (rewriterView->errors().isEmpty() && rewriterView->rootModelNode().isValid()) {
+//        ModelNode rootModelNode = rewriterView->rootModelNode();
+//        inputModel->detachView(rewriterView.data());
 
-        rootModelNode.variantProperty("x").setValue(qRound(position.x()));
-        rootModelNode.variantProperty("y").setValue(qRound(position.y()));
+//        rootModelNode.variantProperty("x").setValue(qRound(position.x()));
+//        rootModelNode.variantProperty("y").setValue(qRound(position.y()));
 
-        ModelMerger merger(view);
-        return merger.insertModel(rootModelNode);
-    }
+//        ModelMerger merger(view);
+//        return merger.insertModel(rootModelNode);
+//    }
 
     return QmlItemNode();
 }

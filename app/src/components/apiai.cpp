@@ -21,7 +21,7 @@ class ApiAiPrivate
 
 ApiAi::ApiAi(QObject *parent)
 	: QObject(parent)
-	, m_d(new ApiAiPrivate)
+	, _d(new ApiAiPrivate)
 	, m_webSocket(new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this))
 	, m_language("en")
 	, m_error(false)
@@ -34,7 +34,7 @@ ApiAi::ApiAi(QObject *parent)
 
 ApiAi::~ApiAi()
 {
-	delete m_d;
+	delete _d;
 }
 
 const QString& ApiAi::token() const
@@ -75,8 +75,8 @@ void ApiAi::open()
 {
 	if (m_webSocket->state() == QAbstractSocket::UnconnectedState) {
 		m_error = false;
-		m_d->flushed = true;
-		QString url = QString(URL).arg(m_token).arg(m_d->id);
+		_d->flushed = true;
+		QString url = QString(URL).arg(m_token).arg(_d->id);
 		m_webSocket->open(QUrl(url));
 		emit stateChanged();
 	}
@@ -85,9 +85,9 @@ void ApiAi::open()
 void ApiAi::send(const QByteArray& data)
 {
 	if (m_webSocket->state() == QAbstractSocket::ConnectedState && !m_error) {
-		if (m_d->flushed) {
-			m_d->flushed = false;
-			QString config = QString(CONFIG).arg(m_language).arg(m_d->id);
+		if (_d->flushed) {
+			_d->flushed = false;
+			QString config = QString(CONFIG).arg(m_language).arg(_d->id);
 			m_webSocket->sendTextMessage(config);
 		}
 		int buffSize = 4096;
@@ -104,7 +104,7 @@ void ApiAi::flush()
 {
 	if (m_webSocket->state() == QAbstractSocket::ConnectedState && !m_error) {
 		m_webSocket->sendTextMessage("EOS");
-		m_d->flushed = true;
+		_d->flushed = true;
 	} else {
 		qWarning() << "ApiAi::flush() : Flush failed, socket is closed.";
 	}
@@ -113,7 +113,7 @@ void ApiAi::flush()
 void ApiAi::close()
 {
 	if (m_webSocket->state() != QAbstractSocket::UnconnectedState && !m_error) {
-		m_d->flushed = true;
+		_d->flushed = true;
 		m_webSocket->close();
 		emit stateChanged();
 	}
@@ -122,7 +122,7 @@ void ApiAi::close()
 void ApiAi::handleError(QAbstractSocket::SocketError error)
 {
 	m_error = true;
-	m_d->flushed = true;
+	_d->flushed = true;
 	qWarning() << "ApiAi::handleError() : Connection error." << error;
 	emit stateChanged();
 }
@@ -130,7 +130,7 @@ void ApiAi::handleError(QAbstractSocket::SocketError error)
 void ApiAi::handleStateChanges(QAbstractSocket::SocketState state)
 {
 	if (!m_error && state == QAbstractSocket::UnconnectedState) {
-		m_d->flushed = true;
+		_d->flushed = true;
 		qWarning() << "ApiAi::handleStateChanges() : Time limit reached or connection lost.";
 		emit stateChanged();
 	}

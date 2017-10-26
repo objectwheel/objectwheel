@@ -2,6 +2,9 @@
 #include <filemanager.h>
 #include <zipper.h>
 #include <projectmanager.h>
+#include <toolboxtree.h>
+#include <savemanager.h>
+
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -13,15 +16,14 @@
 #include <QList>
 #include <QIcon>
 #include <QDir>
-#include <listwidget.h>
-#include <QListWidgetItem>
+#include <QTreeWidgetItem>
 #include <QEventLoop>
 
 #define TOOLS_DIRECTORY "tools"
 #define TOOLS_URL "qrc:/resources/tools/tools.json"
 
 namespace ToolsManager {
-	ListWidget* m_listWidget;
+    ToolboxTree* _toolboxTree;
 }
 
 QString ToolsManager::toolsDir()
@@ -31,6 +33,18 @@ QString ToolsManager::toolsDir()
 	return projectDir + separator() + TOOLS_DIRECTORY;
 }
 
+QStringList ToolsManager::categories()
+{
+    QStringList categories;
+    for (auto dir : lsdir(toolsDir())) {
+        auto toolPath = toolsDir() + separator() + dir;
+        auto category = SaveManager::toolCategory(toolPath);
+        if (!categories.contains(category))
+            categories << category;
+    }
+    return categories;
+}
+
 void ToolsManager::resetTools()
 {
 	if (ProjectManager::currentProject().isEmpty()) return;
@@ -38,9 +52,9 @@ void ToolsManager::resetTools()
 	downloadTools();
 }
 
-void ToolsManager::setListWidget(ListWidget* listWidget)
+void ToolsManager::setToolboxTree(ToolboxTree* toolboxTree)
 {
-	m_listWidget = listWidget;
+    _toolboxTree = toolboxTree;
 }
 
 void ToolsManager::downloadTools(const QUrl& url)
@@ -102,12 +116,31 @@ void ToolsManager::downloadTools(const QUrl& url)
 
 void ToolsManager::addTool(const QString& name)
 {
-	if (ProjectManager::currentProject().isEmpty()) return;
-	QList<QUrl> urls;
-	QListWidgetItem* item = new QListWidgetItem(QIcon(ProjectManager::projectDirectory(ProjectManager::currentProject()) + separator() + TOOLS_DIRECTORY + separator() + name + separator() + "icon.png"), name);
-	urls << QUrl::fromLocalFile(ProjectManager::projectDirectory(ProjectManager::currentProject()) + separator() + TOOLS_DIRECTORY + separator() + name + separator() + "main.qml");
-	m_listWidget->addItem(item);
-	m_listWidget->AddUrls(item,urls);
+    if (ProjectManager::currentProject().isEmpty())
+        return;
+
+    QList<QUrl> urls;
+    auto toolPath = ProjectManager::projectDirectory(
+                    ProjectManager::currentProject()) +
+                    separator() + TOOLS_DIRECTORY +
+                    separator() + name;
+    auto dir = toolPath + separator() + DIR_THIS + separator();
+    auto category = SaveManager::toolCategory(toolPath);
+    urls << QUrl::fromLocalFile(dir + "main.qml");
+
+    auto topItem = _toolboxTree->categoryItem(category);
+    if (!topItem) {
+        topItem = new QTreeWidgetItem;
+        topItem->setText(0, category);
+        _toolboxTree->addTopLevelItem(topItem);
+        topItem->setExpanded(true);
+    }
+
+    QTreeWidgetItem* item = new QTreeWidgetItem;
+    item->setText(0, name);
+    item->setIcon(0, QIcon(dir + "icon.png"));
+    topItem->addChild(item);
+    _toolboxTree->addUrls(item, urls);
 }
 
 bool ToolsManager::toolsExists(const QJsonObject& toolsObject)

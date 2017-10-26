@@ -13,7 +13,7 @@ class AiSpeak : public QObject
 		Q_PROPERTY(QString language READ language WRITE setLanguage)
 
 	private:
-		AiSpeakPrivate* m_d;
+		AiSpeakPrivate* _d;
 		QString m_token;
 		QString m_language;
 

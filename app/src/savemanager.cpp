@@ -1,557 +1,1182 @@
 #include <savemanager.h>
 #include <filemanager.h>
 #include <projectmanager.h>
-#include <model.h>
-#include <rewriterview.h>
-#include <qmljs/qmljsmodelmanagerinterface.h>
-#include <modelnode.h>
-#include <plaintexteditmodifier.h>
-#include <qmlobjectnode.h>
-#include <variantproperty.h>
-#include <QPlainTextEdit>
-#include <QQmlEngine>
+#include <parsercontroller.h>
+#include <formswidget.h>
+#include <mainwindow.h>
+#include <control.h>
+#include <algorithm>
+#include <delayer.h>
+#include <executivewidget.h>
+#include <parserworker.h>
+
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <pageswidget.h>
-#include <mainwindow.h>
-#include <bindingproperty.h>
-#include <bindingwidget.h>
-#include <eventswidget.h>
-#include <qmleditor.h>
 #include <QApplication>
+#include <QTimer>
+#include <QDebug>
+#include <QQmlEngine>
+#include <QQuickItem>
+#include <QQmlProperty>
+#include <QQmlContext>
+#include <QQmlComponent>
+#include <QQuickView>
 
-#define SAVE_DIRECTORY "dashboard"
-#define PARENTAL_RELATIONSHIP_FILE "parental_relationship.json"
-#define PAGE_ORDER_FILE "page_order.json"
-#define BINDINGS_FILE "bindings.json"
-#define BINDING_SOURCE_ID_LABEL "sourceId"
-#define BINDING_SOURCE_PROPERTY_LABEL "sourceProperty"
-#define BINDING_TARGET_ID_LABEL "targetId"
-#define BINDING_TARGET_PROPERTY_LABEL "targetProperty"
+/******************************************************************/
+/**          D A T A B A S E  I N F R A S T R U C T U R E        **/
+/******************************************************************/
+/** POPERTIES:                                                   **/
+/*  Elements: Main-form(master), Ordinary-form(master),           */
+/*            Child-item(master), Child-item(non-master)          */
+/*  Types:    Quick, Non-gui, Window                              */
+/*                                                                */
+/** RULES:                                                       **/
+/* - Non-gui elements can not be master (or form)                 */
+/* - Main form has to be window type                              */
+/* - Other forms could be quick item or window type (not non-gui) */
+/*   unless main form has a Phone skin, in this case other forms  */
+/*   (except main form) has to be item (not window or non-gui)    */
+/* - Children could be non-gui or quick item type (not window)    */
+/* - A form has to be master item                                 */
+/******************************************************************/
 
-#define EVENTS_FILE "events.json"
-#define EVENT_TARGET_ID_LABEL "targetId"
-#define EVENT_TARGET_EVENTNAME_LABEL "targetEventname"
-#define EVENT_EVENT_CODE_LABEL "eventCode"
+//!
+//! ******************* [SaveManagerPrivate] *******************
+//!
 
-using namespace QmlDesigner;
-using namespace QmlJS;
-
-class SaveManagerPrivate
-{
-	public:
-		SaveManagerPrivate(SaveManager* uparent);
-        QString generateSavesDirectory() const;
-		QString generateSaveDirectory(const QString& id) const;
-		void parseImportDirectories(const QString& dir);
-		void initPageOrder(const QString& file) const;
-		void initEmptyParentalFile(const QString& file) const;
-		void createPages(const QJsonArray& pages);
-		bool fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages);
-        void fillBindings(const QJsonObject& bindingSaves);
-        void fillEvents(const QJsonObject& eventSaves);
-
-	public:
-		SaveManager* parent = nullptr;
-		QPlainTextEdit* plainTextEdit;
-		ModelManagerInterface* modelManager;
-        QTimer applierTimer;
-        QString id, newId;
+enum Type {
+    Quick,
+    Window,
+    NonGui
 };
 
-SaveManagerPrivate::SaveManagerPrivate(SaveManager* uparent)
-	: parent(uparent)
+class SaveManagerPrivate : public QObject
 {
-	plainTextEdit = new QPlainTextEdit;
-	plainTextEdit->setHidden(true);
-	modelManager = new ModelManagerInterface;
-    applierTimer.setInterval(500);
-    QObject::connect(&applierTimer, SIGNAL(timeout()), parent, SLOT(idApplier()));
-    for (auto importPath : QQmlEngine().importPathList()) parseImportDirectories(importPath);
+        Q_OBJECT
+        // Forms: All forms (children not included).
+        // Form Scope: All forms + Primary children of them.
+        // Parent Scope: Parent + Primary children of Parent.
+        // None of member functions checks whether given controls' ids or dirs are valid or not.
+
+    public:
+        SaveManagerPrivate(SaveManager* parent);
+        void setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const;
+        QJsonValue property(const QByteArray& propertyData, const QString& property) const;
+        void flushId(const Control* control, const QString& id) const;
+        void flushSuid(const Control* control, const QString& suid) const;
+        bool isOwctrl(const QByteArray& propertyData) const;
+
+        // Searches by id.
+        // Searches control only in forms (in current project)
+        // If current project is empty, then returns false.
+        bool existsInForms(const Control* control) const;
+
+        // Searches by id.
+        // Searches control in form scope (in current project)
+        // If current project is empty, then returns false.
+        bool existsInFormScope(const Control* control) const;
+
+        // Searches by id.
+        // Searches control within given suid, search starts within topPath
+        // Given suid has to be valid
+        bool existsInParentScope(const Control* control, const QString& suid, const QString topPath) const;
+
+        // Searches for all controls paths, starting from topPath.
+        // Returns all control paths (rootPaths) within given topPath.
+        QStringList controlPaths(const QString& topPath) const;
+
+        // Returns (only) form paths.
+        // Returned paths are rootPaths.
+        QStringList formPaths() const;
+
+        // Returns all control paths in form scope.
+        // Returned paths are rootPaths.
+        QStringList formScopePaths() const;
+
+        // Returns true if given path belongs to main form
+        // It doesn't check whether rootPath belong to a form or not.
+        bool isMain(const QString& rootPath);
+
+        // Returns biggest number from integer named dirs.
+        // If no integer named dir exists, 0 returned.
+        // If no dir exists or dirs are smaller than zero, 0 returned.
+        int biggestDir(const QString& basePath) const;
+
+        // Recalculates all uids belongs to given control and its children (all).
+        // Both database and in-memory data are updated.
+        void recalculateUids(Control* control) const;
+
+        // Refactor control's id if it's already exists in db
+        // If suid empty, project root searched
+        void refactorId(Control* control, const QString& suid, const QString& topPath = QString()) const;
+
+        // Update all matching 'from's to 'to's within given file
+        void updateFile(const QString& filePath, const QString& from, const QString& to) const;
+
+        // Returns true if given root path belongs to a form
+        // Searches within current project's path
+        bool isForm(const QString& rootPath) const;
+
+        // Returns root path if given uid belongs to a control
+        // Searches within given rootPath (root control included)
+        // Searches in current project directory if given rootPath is empty
+        // All controls in the given rootPath are included to search
+        QString findByUid(const QString& uid, const QString& rootPath/* = QString()*/) const;
+
+        // Returns root path if given id belongs to a control
+        // Searches within given rootPath (root control included)
+        // Searches in current project directory if given rootPath is empty
+        // Only suid scope controls in the given rootPath are returned
+        QString findById(const QString& suid, const QString& id, const QString& rootPath = QString()) const;
+
+        // Returns true if given path is inside of owdb
+        bool isInOwdb(const QString& path) const;
+
+        // Returns root path (of parent) if given control has a parent control
+        QString parentDir(const Control* control) const;
+
+        // Build qml object form url
+        QObject* requestItem(ExecError& err, const QString& path, QQmlEngine* engine, QQmlContext* context) const;
+
+        // Build qml object form data
+        QObject* requestItem(ExecError& err, const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const;
+
+        // Returns true if the given object is an instance of QQuickItem
+        Type type(QObject* object) const;
+
+    public:
+        SaveManager* parent = nullptr;
+        ParserController parserController;
+        ExecutiveWidget executiveWidget;
+
+};
+
+SaveManagerPrivate::SaveManagerPrivate(SaveManager* parent)
+    : QObject(parent)
+    , parent(parent)
+{
 }
 
-QString SaveManagerPrivate::generateSavesDirectory() const
+void SaveManagerPrivate::setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const
+{
+    if (propertyData.isEmpty())
+        return;
+
+    auto jobj = QJsonDocument::fromJson(propertyData).object();
+    jobj[property] = value;
+    propertyData = QJsonDocument(jobj).toJson();
+}
+
+QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QString& property) const
+{
+    if (propertyData.isEmpty())
+        return QJsonValue();
+
+    auto jobj = QJsonDocument::fromJson(propertyData).object();
+    return jobj[property];
+}
+
+void SaveManagerPrivate::flushId(const Control* control, const QString& id) const
+{
+    auto propertyPath = control->dir() + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    setProperty(propertyData, TAG_ID, id);
+    wrfile(propertyPath, propertyData);
+}
+
+void SaveManagerPrivate::flushSuid(const Control* control, const QString& suid) const
+{
+    auto topPath = control->dir();
+    auto fromUid = parent->suid(topPath);
+    if (!fromUid.isEmpty()) {
+        for (auto path : fps(FILE_PROPERTIES, topPath)) {
+            if (SaveManager::suid(dname(dname(path))) == fromUid) {
+                auto propertyData = rdfile(path);
+                auto jobj = QJsonDocument::fromJson(propertyData).object();
+                jobj[TAG_SUID] = suid;
+                propertyData = QJsonDocument(jobj).toJson();
+                wrfile(path, propertyData);
+            }
+        }
+    } else {
+        auto propertyPath = control->dir() + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        setProperty(propertyData, TAG_SUID, suid);
+        wrfile(propertyPath, propertyData);
+    }
+}
+
+bool SaveManagerPrivate::isOwctrl(const QByteArray& propertyData) const
+{
+    auto sign = property(propertyData, TAG_OWCTRL_SIGN).toString();
+    auto uid = property(propertyData, TAG_OWCTRL_SIGN).toString();
+    return (sign == SIGN_OWCTRL && !uid.isEmpty());
+}
+
+bool SaveManagerPrivate::existsInForms(const Control* control) const
+{
+    for (auto path : formPaths()) {
+        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
+        auto id = property(propertyData, TAG_ID).toString();
+
+        if (id == control->id())
+            return true;
+    }
+
+    return false;
+}
+
+bool SaveManagerPrivate::existsInFormScope(const Control* control) const
+{
+    Q_ASSERT(control->form());
+    for (auto path : formScopePaths()) {
+        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
+        auto id = property(propertyData, TAG_ID).toString();
+
+        if (id == control->id())
+            return true;
+    }
+
+    return false;
+}
+
+bool SaveManagerPrivate::existsInParentScope(const Control* control, const QString& suid, const QString topPath) const
+{
+    if (control->form())
+        return existsInFormScope(control);
+
+    Q_ASSERT(!suid.isEmpty());
+
+    auto parentRootPath = findByUid(suid, topPath);
+    if (parentRootPath.isEmpty())
+        return false;
+    if (isForm(parentRootPath)) {
+        if (existsInForms(control))
+            return true;
+
+        for (auto path : parent->childrenPaths(parentRootPath)) {
+            auto propertyData = rdfile(path + separator() + DIR_THIS +
+                                       separator() + FILE_PROPERTIES);
+            auto id = property(propertyData, TAG_ID).toString();
+
+            if (id == control->id())
+                return true;
+        }
+
+        return false;
+    } else {
+        QStringList paths(parentRootPath + separator() + DIR_THIS);
+        paths << parent->childrenPaths(parentRootPath);
+
+        for (auto path : paths) {
+            auto propertyData = rdfile(path + separator() + DIR_THIS +
+                                       separator() + FILE_PROPERTIES);
+            auto id = property(propertyData, TAG_ID).toString();
+
+            if (id == control->id())
+                return true;
+        }
+
+        return false;
+    }
+}
+
+QStringList SaveManagerPrivate::controlPaths(const QString& topPath) const
+{
+    QStringList paths;
+
+    if (topPath.isEmpty())
+        return paths;
+
+    for (auto path : fps(FILE_PROPERTIES, topPath)) {
+        auto propertyData = rdfile(path);
+        if (isOwctrl(propertyData))
+            paths << dname(dname(path));
+    }
+
+    return paths;
+}
+
+QStringList SaveManagerPrivate::formPaths() const
+{
+    QStringList paths;
+    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+    if (projectDir.isEmpty())
+        return paths;
+
+    auto baseDir = projectDir + separator() + DIR_OWDB;
+
+    for (auto dir : lsdir(baseDir)) {
+        auto propertyPath = baseDir + separator() + dir + separator() +
+                            DIR_THIS + separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+
+        if (isOwctrl(propertyData))
+            paths << dname(dname(propertyPath));
+    }
+
+    return paths;
+}
+
+QStringList SaveManagerPrivate::formScopePaths() const
+{
+    const QStringList fpaths = formPaths();
+    QStringList paths(fpaths);
+
+    for (auto path : fpaths)
+        paths << parent->childrenPaths(dname(path));
+
+    return paths;
+}
+
+bool SaveManagerPrivate::isMain(const QString& rootPath)
+{
+    return (fname(rootPath) == DIR_MAINFORM);
+}
+
+int SaveManagerPrivate::biggestDir(const QString& basePath) const
+{
+    int num = 0;
+    for (auto dir : lsdir(basePath))
+        if (dir.toInt() > num)
+            num = dir.toInt();
+    return num;
+}
+
+void SaveManagerPrivate::recalculateUids(Control* control) const
+{
+    if (control->dir().isEmpty())
+        return;
+
+    QStringList paths, properties;
+
+    properties << fps(FILE_PROPERTIES, control->dir());
+    paths << properties;
+
+    for (auto pfile : properties) {
+        auto propertyData = rdfile(pfile);
+
+        if (!isOwctrl(propertyData))
+            continue;
+
+        auto uid = property(propertyData, TAG_UID).toString();
+        auto newUid = Control::generateUid();
+
+        for (auto file : paths)
+            updateFile(file, uid, newUid);
+    }
+
+    Control::updateUids(); // FIXME: Change with childControls()->updateUid();
+}
+
+void SaveManagerPrivate::refactorId(Control* control, const QString& suid, const QString& topPath) const
+{
+    if (control->id().isEmpty())
+        control->setId("control");
+
+    const auto id = control->id();
+
+    for (int i = 1; parent->exists(control, suid, topPath); i++)
+        control->setId(id + QString::number(i));
+}
+
+void SaveManagerPrivate::updateFile(const QString& filePath, const QString& from, const QString& to) const
+{
+    auto data = rdfile(filePath);
+    data.replace(from.toUtf8(), to.toUtf8());
+    wrfile(filePath, data);
+}
+
+bool SaveManagerPrivate::isForm(const QString& rootPath) const
 {
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projectDir.isEmpty()) return projectDir;
-    return projectDir + separator() + SAVE_DIRECTORY;
+    auto baseDir = projectDir + separator() + DIR_OWDB;
+    return (baseDir == dname(rootPath));
 }
 
-inline QString SaveManagerPrivate::generateSaveDirectory(const QString& id) const
+QString SaveManagerPrivate::findByUid(const QString& uid, const QString& rootPath) const
 {
-    auto baseDir = generateSavesDirectory();
-    if (baseDir.isEmpty()) return baseDir;
-    return baseDir + separator() + id;
-}
+    QString baseDir;
+    if (rootPath.isEmpty()) {
+        auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
-void SaveManagerPrivate::parseImportDirectories(const QString& dir)
-{
-	modelManager->updateLibraryInfo(dir, LibraryInfo(LibraryInfo::Found));
-	for (auto subdir: lsdir(dir)) parseImportDirectories(dir + separator() + subdir);
-}
+        if (projectDir.isEmpty())
+            return QString();
 
-void SaveManagerPrivate::initPageOrder(const QString& file) const
-{
-	QJsonArray jArray;
-	jArray.append("page1");
-	QJsonDocument jDoc(jArray);
-	wrfile(file, jDoc.toJson());
-}
-
-void SaveManagerPrivate::initEmptyParentalFile(const QString& file) const
-{
-	QJsonObject jObj;
-	QJsonDocument jDoc(jObj);
-	wrfile(file, jDoc.toJson());
-}
-
-void SaveManagerPrivate::createPages(const QJsonArray& pages)
-{
-	auto firstPage = pages[0].toString();
-	PagesWidget::changePageWithoutSave("page1", firstPage);
-	for (int i = 1; i < pages.size(); i++) {
-		auto currPage = pages[i].toString();
-		PagesWidget::addPageWithoutSave(currPage);
-	}
-}
-
-bool SaveManagerPrivate::fillDashboard(const QJsonObject& parentalRelationships, const QJsonArray& pages)
-{
-	QStringList createdObjects;
-	for (auto page : pages) {
-		createdObjects << page.toString();
-	}
-	while (!createdObjects.isEmpty()) {
-		for (auto key : parentalRelationships.keys()) {
-			if (parentalRelationships[key].toString() == createdObjects[0]) {
-				auto saveId = parent->saveDirectory(key);
-				if (saveId.isEmpty()) return false;
-				if (!MainWindow::addControlWithoutSave(QUrl::fromLocalFile(saveId + separator() + "main.qml"),
-													   parentalRelationships[key].toString()))
-					return false;
-				createdObjects.append(key);
-			}
-		}
-		createdObjects.removeFirst();
-	}
-	return true;
-}
-
-void SaveManagerPrivate::fillBindings(const QJsonObject& bindingSaves)
-{
-    SaveManager::BindingInf inf;
-    for (auto bindingKey : bindingSaves.keys()) {
-        inf.bindingName = bindingKey;
-        inf.sourceId = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_ID_LABEL].toString();
-        inf.sourceProperty = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_PROPERTY_LABEL].toString();
-        inf.targetId = bindingSaves[bindingKey].toObject()[BINDING_TARGET_ID_LABEL].toString();
-        inf.targetProperty = bindingSaves[bindingKey].toObject()[BINDING_TARGET_PROPERTY_LABEL].toString();
-        BindingWidget::addBindingWithoutSave(inf);
+        baseDir = projectDir;
+    } else {
+        baseDir = rootPath;
     }
-}
 
-void SaveManagerPrivate::fillEvents(const QJsonObject& eventSaves)
-{
-    SaveManager::EventInf inf;
-    for (auto eventKey : eventSaves.keys()) {
-        inf.eventName = eventKey;
-        inf.targetId = eventSaves[eventKey].toObject()[EVENT_TARGET_ID_LABEL].toString();
-        inf.targetEventname = eventSaves[eventKey].toObject()[EVENT_TARGET_EVENTNAME_LABEL].toString();
-        inf.eventCode = QString(QByteArray::fromBase64(QByteArray().insert(0, eventSaves[eventKey].toObject()[EVENT_EVENT_CODE_LABEL].toString())));
-        EventsWidget::addEventWithoutSave(inf);
+    for (auto path : fps(FILE_PROPERTIES, baseDir)) {
+        auto propertyData = rdfile(path);
+
+        if (!isOwctrl(propertyData))
+            continue;
+
+        auto _uid = property(propertyData, TAG_UID).toString();
+
+        if (_uid == uid)
+            return dname(dname(path));
     }
+
+    return QString();
 }
 
-SaveManagerPrivate* SaveManager::m_d = nullptr;
+QString SaveManagerPrivate::findById(const QString& suid, const QString& id, const QString& rootPath) const
+{
+    QString baseDir;
+    if (rootPath.isEmpty()) {
+        auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+        if (projectDir.isEmpty())
+            return QString();
+
+        baseDir = projectDir;
+    } else {
+        baseDir = rootPath;
+    }
+
+    for (auto path : fps(FILE_PROPERTIES, baseDir)) {
+        auto propertyData = rdfile(path);
+
+        if (!isOwctrl(propertyData) ||
+            (parent->uid(dname(dname(path))) != suid &&
+             parent->suid(dname(dname(path))) != suid))
+            continue;
+
+        auto _id = property(propertyData, TAG_ID).toString();
+
+        if (_id == id)
+            return dname(dname(path));
+    }
+
+    return QString();
+}
+
+bool SaveManagerPrivate::isInOwdb(const QString& path) const
+{
+    auto projectDirectory = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+    Q_ASSERT(!projectDirectory.isEmpty());
+
+    QString owdbPath = projectDirectory + separator() + DIR_OWDB;
+    return path.contains(owdbPath, Qt::CaseInsensitive);
+}
+
+QString SaveManagerPrivate::parentDir(const Control* control) const
+{
+    if (control->form() ||
+        control->dir().isEmpty() ||
+        !parent->isOwctrl(control->dir()))
+        return QString();
+
+    return dname(dname(control->dir()));
+}
+
+QObject* SaveManagerPrivate::requestItem(ExecError& err,
+                                         const QString& path, QQmlEngine* engine, QQmlContext* context) const
+{
+    QQmlComponent comp(engine, QUrl(path + separator() +
+                                    DIR_THIS + separator() + "main.qml"));
+    auto item = comp.create(context);
+    if (!comp.errors().isEmpty()) {
+        err.type = CodeError;
+        err.errors = comp.errors();
+    } else {
+        engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
+    }
+    return item;
+}
+
+QObject* SaveManagerPrivate::requestItem(ExecError& err, const QByteArray& data,
+                                         const QString& path, QQmlEngine* engine, QQmlContext* context) const
+{
+    QQmlComponent comp(engine);
+    comp.setData(data, QUrl(path + separator() +
+                            DIR_THIS + separator() + "main.qml"));
+    auto item = comp.create(context);
+    if (!comp.errors().isEmpty()) {
+        err.type = CodeError;
+        err.errors = comp.errors();
+    } else {
+        engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
+    }
+    return item;
+}
+
+Type SaveManagerPrivate::type(QObject* object) const
+{
+    if (qobject_cast<QQuickItem*>(object) != nullptr)
+        return Quick;
+    if (object->isWindowType())
+        return Window;
+    return NonGui;
+}
+
+//!
+//! ********************** [SaveManager] **********************
+//!
+
+SaveManagerPrivate* SaveManager::_d = nullptr;
 
 SaveManager::SaveManager(QObject *parent)
-	: QObject(parent)
+    : QObject(parent)
 {
-	if (m_d) return;
-    m_d = new SaveManagerPrivate(this);
-}
-
-SaveManager::~SaveManager()
-{
-    delete m_d;
+    if (_d)
+        return;
+    _d = new SaveManagerPrivate(this);
+    connect(&_d->parserController, SIGNAL(runningChanged(bool)), SIGNAL(parserRunningChanged(bool)));
 }
 
 SaveManager* SaveManager::instance()
 {
-	return m_d->parent;
+    return _d ? _d->parent : nullptr;
 }
 
-QString SaveManager::saveDirectory(const QString& id)
+bool SaveManager::initProject(const QString& projectDirectory)
 {
-	if (!exists(id)) return QString();
-    return m_d->generateSaveDirectory(id);
+    if (projectDirectory.isEmpty() ||
+        !::exists(projectDirectory) ||
+        ::exists(projectDirectory + separator() + DIR_OWDB) ||
+        !cp(DIR_QRC_OWDB, projectDirectory, false, true))
+        return false;
+
+    auto propertyPath = projectDirectory + separator() + DIR_OWDB +
+                        separator() + DIR_MAINFORM + separator() +
+                        DIR_THIS + separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    _d->setProperty(propertyData, TAG_UID, Control::generateUid());
+
+    return wrfile(propertyPath, propertyData);
 }
 
-QString SaveManager::savesDirectory()
+QString SaveManager::basePath()
 {
-    return m_d->generateSavesDirectory();
+    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+    if (projectDir.isEmpty())
+        return QString();
+
+    return (projectDir + separator() + DIR_OWDB);
 }
 
-QJsonObject SaveManager::getBindingSaves()
+QStringList SaveManager::formPaths()
 {
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonObject();
-	auto bindingsFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
-	return QJsonDocument::fromJson(rdfile(bindingsFile)).object();
+    return _d->formPaths();
 }
 
-void SaveManager::addBindingSave(const SaveManager::BindingInf& bindingInf)
+// Returns all children paths (rootPath) within given root path.
+// Returns children only if they have match between their and given suid.
+// If given suid is empty then rootPath's uid is taken.
+QStringList SaveManager::childrenPaths(const QString& rootPath, QString suid)
 {
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto bindingFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
-	QJsonObject cObj;
-	cObj[BINDING_SOURCE_ID_LABEL] = bindingInf.sourceId;
-	cObj[BINDING_SOURCE_PROPERTY_LABEL] = bindingInf.sourceProperty;
-	cObj[BINDING_TARGET_ID_LABEL] = bindingInf.targetId;
-	cObj[BINDING_TARGET_PROPERTY_LABEL] = bindingInf.targetProperty;
-	QJsonObject pObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
-	pObj[bindingInf.bindingName] = cObj;
-	wrfile(bindingFile, QJsonDocument(pObj).toJson());
-//	setBindingProperty(bindingInf.targetId, bindingInf.targetProperty, QString("%1.%2").
-//					   arg(bindingInf.sourceId).arg(bindingInf.sourceProperty));
-}
+    QStringList paths;
 
-void SaveManager::changeBindingSave(const QString& bindingName, const SaveManager::BindingInf& toBindingInf)
-{
-	removeBindingSave(bindingName);
-	addBindingSave(toBindingInf);
-}
+    if (rootPath.isEmpty())
+        return paths;
 
-void SaveManager::removeBindingSave(const QString& bindingName)
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto bindingFile = projDir + separator() + SAVE_DIRECTORY + separator() + BINDINGS_FILE;
-//    auto binding = getBindingSaves()[bindingName].toObject();
-	QJsonObject jObj = QJsonDocument::fromJson(rdfile(bindingFile)).object();
-	jObj.remove(bindingName);
-    wrfile(bindingFile, QJsonDocument(jObj).toJson());
-    //	removeProperty(binding[BINDING_TARGET_ID_LABEL].toString(), binding[BINDING_TARGET_PROPERTY_LABEL].toString());
-}
-
-QJsonObject SaveManager::getEventSaves()
-{
-    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projDir.isEmpty()) return QJsonObject();
-    auto eventsFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
-    return QJsonDocument::fromJson(rdfile(eventsFile)).object();
-}
-
-void SaveManager::addEventSave(const SaveManager::EventInf& eventInf)
-{
-    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projDir.isEmpty()) return;
-    auto eventFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
-    QJsonObject cObj;
-    cObj[EVENT_TARGET_ID_LABEL] = eventInf.targetId;
-    cObj[EVENT_TARGET_EVENTNAME_LABEL] = eventInf.targetEventname;
-    cObj[EVENT_EVENT_CODE_LABEL] = QString(QByteArray().insert(0, eventInf.eventCode).toBase64());
-    QJsonObject pObj = QJsonDocument::fromJson(rdfile(eventFile)).object();
-    pObj[eventInf.eventName] = cObj;
-    wrfile(eventFile, QJsonDocument(pObj).toJson());
-}
-
-void SaveManager::changeEventSave(const QString& eventName, const SaveManager::EventInf& toEventInf)
-{
-    removeEventSave(eventName);
-    addEventSave(toEventInf);
-}
-
-void SaveManager::removeEventSave(const QString& eventName)
-{
-    auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projDir.isEmpty()) return;
-    auto eventFile = projDir + separator() + SAVE_DIRECTORY + separator() + EVENTS_FILE;
-    QJsonObject jObj = QJsonDocument::fromJson(rdfile(eventFile)).object();
-    jObj.remove(eventName);
-    wrfile(eventFile, QJsonDocument(jObj).toJson());
-}
-
-QJsonObject SaveManager::getParentalRelationships()
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonObject();
-	auto parentalFile = projDir + separator() + SAVE_DIRECTORY + separator() + PARENTAL_RELATIONSHIP_FILE;
-	return QJsonDocument::fromJson(rdfile(parentalFile)).object();
-}
-
-QJsonArray SaveManager::getPageOrders()
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return QJsonArray();
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	return QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-}
-
-bool SaveManager::exists(const QString& id)
-{
-	auto saveDir = m_d->generateSaveDirectory(id);
-	if (saveDir.isEmpty()) return false;
-	return ::exists(saveDir);
-}
-
-QStringList SaveManager::saves()
-{
-	QStringList saveList;
-	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projectDir.isEmpty()) return saveList;
-	auto saveBaseDir = projectDir + separator() + SAVE_DIRECTORY;
-	for (auto save : lsdir(saveBaseDir)) {
-		saveList << save;
-	}
-    return saveList;
-}
-
-void SaveManager::addSave(const QString& id, const QString& url)
-{
-	if (exists(id)) return;
-	auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projectDir.isEmpty()) return;
-	auto saveBaseDir = projectDir + separator() + SAVE_DIRECTORY;
-	if (!mkdir(saveBaseDir + separator() + id)) return;
-    cp(dname(url), saveBaseDir + separator() + id, true);
-}
-
-void SaveManager::changeSave(const QString& fromId, QString toId)
-{
-	if (!exists(fromId) || saves().contains(toId)) return;
-	auto saveDir = saveDirectory(fromId);
-	if (saveDir.isEmpty()) return;
-	rn(saveDir, dname(saveDir) + separator() + toId);
-    SaveManager::BindingInf inf;
-    auto bindingSaves = getBindingSaves();
-    for (auto bindingKey : bindingSaves.keys()) {
-        inf.bindingName = bindingKey;
-        inf.sourceId = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_ID_LABEL].toString();
-        inf.sourceProperty = bindingSaves[bindingKey].toObject()[BINDING_SOURCE_PROPERTY_LABEL].toString();
-        inf.targetId = bindingSaves[bindingKey].toObject()[BINDING_TARGET_ID_LABEL].toString();
-        inf.targetProperty = bindingSaves[bindingKey].toObject()[BINDING_TARGET_PROPERTY_LABEL].toString();
-
-        if (inf.targetId == fromId && inf.sourceId == fromId) {
-            inf.targetId = toId;
-            inf.sourceId = toId;
-        } else if (inf.targetId == fromId) {
-            inf.targetId = toId;
-        } else if(inf.sourceId == fromId) {
-            inf.sourceId = toId;
-        } else {
-            continue;
-        }
-        changeBindingSave(inf.bindingName, inf);
+    if (suid.isEmpty()) {
+        auto propertyPath = rootPath + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        suid = _d->property(propertyData, TAG_UID).toString();
     }
 
-    SaveManager::EventInf einf;
-    auto eventSaves = getEventSaves();
-    for (auto eventKey : eventSaves.keys()) {
-        einf.eventName = eventKey;
-        einf.targetId = eventSaves[eventKey].toObject()[EVENT_TARGET_ID_LABEL].toString();
-        einf.targetEventname = eventSaves[eventKey].toObject()[EVENT_TARGET_EVENTNAME_LABEL].toString();
-        einf.eventCode = QString(QByteArray::fromBase64(QByteArray().insert(0, eventSaves[eventKey].toObject()[EVENT_EVENT_CODE_LABEL].toString())));
+    auto childrenPath = rootPath + separator() + DIR_CHILDREN;
+    for (auto dir : lsdir(childrenPath)) {
+        auto propertyPath = childrenPath + separator() + dir + separator() +
+                            DIR_THIS + separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
 
-        if (einf.targetId == fromId) {
-            einf.targetId = toId;
-        } else {
-            continue;
+        if (_d->isOwctrl(propertyData) && _d->property(propertyData, TAG_SUID).toString() == suid) {
+            paths << dname(dname(propertyPath));
+            paths << childrenPaths(dname(dname(propertyPath)), suid);
         }
-        changeEventSave(einf.eventName, einf);
+    }
+    return paths;
+}
+
+QStringList SaveManager::masterPaths(const QString& topPath)
+{
+    QStringList paths;
+    auto controlPaths = _d->controlPaths(topPath);
+
+    QStringList foundSuids;
+    for (auto path : controlPaths) {
+        auto _suid = suid(path);
+        if (!_suid.isEmpty() && !foundSuids.contains(_suid))
+            foundSuids << _suid;
+    }
+
+    for (auto path : controlPaths) {
+        if (foundSuids.contains(uid(path)))
+            paths << path;
+    }
+
+    std::sort(paths.begin(), paths.end(),
+              [](const QString& a, const QString& b)
+    { return a.size() > b.size(); });
+
+    if (paths.isEmpty() && _d->isForm(topPath))
+        paths << topPath;
+
+    return paths;
+}
+
+//WARNING: Problem with scope resolution,
+//         Component.onCompleted: Why items names are not reachable in this slot?
+//WARNING: Check and make sure non-gui elements are added to master item of each control
+//FIXME: Change the name of default context property 'dpi' everywhere
+//FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
+ExecError SaveManager::execProject()
+{
+    ExecError error;
+    Skin mainSkin = Skin::Invalid;
+
+    for (auto formPath : formPaths()) {
+        if (_d->isMain(formPath))
+            mainSkin = skin(formPath);
+    }
+
+    if (mainSkin == Skin::Invalid) {
+        error.type = CommonError;
+        return error;
+    }
+
+    QList<QObject*> forms;
+    QQuickWindow* mainWindow = nullptr;
+    QMap<QString, QQmlContext*> formContexes;
+    auto engine = new QQmlEngine(_d->parent);
+
+    engine->rootContext()->setContextProperty("dpi", Fit::ratio());
+    engine->setOutputWarningsToStandardError(false);
+
+    // Spin for forms (top level masters)
+    for (auto formPath : formPaths()) {
+        auto _masterPaths = masterPaths(formPath);
+
+        // Spin for masters inside the form (form itself included)
+        QMap<QString, QObject*> masterResults;
+        for (auto masterPath : _masterPaths) {
+            const bool isForm = (_masterPaths.last() == masterPath);
+            auto masterContext = new QQmlContext(engine, engine);
+
+            //! Spin for child items of the master
+            QMap<QString, QObject*> childResults;
+            for (auto childPath : childrenPaths(masterPath)) {
+                int index = _masterPaths.indexOf(childPath);
+                if (index >= 0) {
+                    childResults[childPath] = masterResults[childPath];
+                } else {
+                    childResults[childPath] = _d->requestItem(error,
+                                                              childPath, engine, masterContext);
+                    if (childResults[childPath] == nullptr) {
+                        engine->deleteLater();
+                        return error;
+                    }
+                    if (_d->type(childResults[childPath]) == Window) {
+                        engine->deleteLater();
+                        error.type = ChildIsWindowError;
+                        return error;
+                    }
+                }
+                masterContext->setContextProperty(id(childPath),
+                                                  childResults[childPath]);
+                qApp->processEvents(QEventLoop::AllEvents, 20);
+            }
+
+            //! Make form invisible, if it's a window type
+            if (isForm && (mainSkin == Skin::PhonePortrait ||
+                           mainSkin == Skin::PhoneLandscape)) { // Check If it's a form (top level master) and skin is mobile
+                auto url = masterPath + separator() +
+                           DIR_THIS + separator() + "main.qml";
+                auto formData = rdfile(url);
+                ParserWorker parserWorker;
+                bool isWindow = parserWorker.typeName(formData).contains("Window");
+                if (isWindow) {//If form is a window type
+                    //BUG: Possible bug if property 'visible' is a binding
+                    qApp->processEvents(QEventLoop::AllEvents, 20);
+                    parserWorker.setVariantProperty(formData, url, "visible", false);
+                }
+                if (isWindow && !_d->isMain(masterPath)) {
+                    engine->deleteLater();
+                    error.type = MultipleWindowsForMobileError;
+                    return error;
+                }
+                masterResults[masterPath] = _d->requestItem(error,
+                                                            formData, masterPath, engine, masterContext);
+            } else {
+                masterResults[masterPath] = _d->requestItem(error,
+                                                            masterPath, engine, masterContext);
+            }
+
+            qApp->processEvents(QEventLoop::AllEvents, 20);
+            if (masterResults[masterPath] == nullptr) {
+                engine->deleteLater();
+                return error;
+            }
+
+            //! Catch this (current spin's) master item
+            if (isForm) { // If it's a form (top level master)
+                auto form = masterResults[masterPath];
+                if (_d->type(form) == NonGui) {
+                    engine->deleteLater();
+                    error.type = FormIsNonGui;
+                    return error;
+                }
+                if (_d->isMain(masterPath)) {
+                    if (!(mainWindow = qobject_cast<QQuickWindow*>(form))) {
+                        engine->deleteLater();
+                        error.type = MainFormIsntWindowError;
+                        return error;
+                    }
+                }
+                forms << form;
+                formContexes[masterPath] = masterContext;
+            } else { // If it's a "master child inside of the form"
+                auto masterItem = masterResults[masterPath];
+                if (_d->type(masterItem) == Window) {
+                    engine->deleteLater();
+                    error.type = ChildIsWindowError;
+                    return error;
+                }
+                if (_d->type(masterItem) == NonGui) {
+                    engine->deleteLater();
+                    error.type = MasterIsNonGui;
+                    return error;
+                }
+            }
+            masterContext->setContextProperty(id(masterPath),
+                                              masterResults[masterPath]);
+
+            //! Place child items into master item visually
+            // Only non-master nongui children were passed (because they don't have a visual parent)
+            // Others are handled in anyway, either here or above(invalid cases)
+            QMap<QString, QObject*> pmap;
+            pmap[masterPath] = masterResults[masterPath];
+            for (auto result : childResults.keys()) { //WARNING: Does it spin from parent to children?
+                auto pobject = pmap.value(dname(dname(result))); // Master item (a form(master) or a child master)
+                if (_d->type(childResults[result]) == NonGui) // Child item (master or non-master, but not form)
+                    continue;
+
+                // All childs are quick (not nongui/window)
+                // All masters are quick or window (not nongui)
+
+                if (_d->type(pobject) == Window) {
+                    static_cast<QQuickItem*>(childResults[result])->setParentItem(
+                                static_cast<QQuickWindow*>(pobject)->contentItem()); //FIXME: ApplicationWindow qml type?
+                } else {                                                  //header, footer, and contentItem?
+                    static_cast<QQuickItem*>(childResults[result])->setParentItem(
+                                static_cast<QQuickItem*>(pobject));
+                }
+
+                pmap[result] = childResults[result];
+                qApp->processEvents(QEventLoop::AllEvents, 20);
+            }
+        }
+    }
+
+    if (mainWindow == nullptr) {
+        engine->deleteLater();
+        error.type = NoMainForm;
+        return error;
+    }
+
+    for (auto formPath : formContexes.keys()) {
+        for (int i = 0; i < formContexes.keys().size(); i++) { //Don't change 'keys().size()'
+            formContexes[formPath]->setContextProperty(
+                        id(formContexes.keys().at(i)), forms.at(i));
+        }
+    }
+
+    qApp->processEvents(QEventLoop::AllEvents, 20);
+
+    QEventLoop loop;
+    if (mainSkin == Skin::PhonePortrait ||
+        mainSkin == Skin::PhoneLandscape) {
+        _d->executiveWidget.setSkin(mainSkin);
+        _d->executiveWidget.setWindow(mainWindow);
+        _d->executiveWidget.show();
+        connect(&_d->executiveWidget, SIGNAL(done()), &loop, SLOT(quit()));
+    } else {
+        connect(MainWindow::instance(), SIGNAL(quitting()), &loop, SLOT(quit()));
+        connect(mainWindow, SIGNAL(closing(QQuickCloseEvent*)), &loop, SLOT(quit()));
+    }
+    loop.exec();
+
+    engine->deleteLater();
+    return error;
+}
+
+void SaveManager::exposeProject()
+{
+    auto fpaths = _d->formPaths();
+
+    Control* lastControl;
+
+    for (auto path : fpaths) {
+
+        auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
+        if (_d->isMain(path))
+            form->setMain(true);
+        DesignManager::formScene()->addForm(form);
+        connect(form, &Form::initialized, [=] {
+            form->controlTransaction()->setTransactionsEnabled(true);
+        });
+
+        lastControl = form;
+
+        QMap<QString, Control*> pmap;
+        pmap[path] = form;
+        for (auto child : childrenPaths(path)) {
+            auto pcontrol = pmap.value(dname(dname(child)));
+            auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+            control->setParentItem(pcontrol);
+            control->refresh();
+            connect(control, &Control::initialized, [=] {
+                control->controlTransaction()->setTransactionsEnabled(true);
+            });
+
+            lastControl = control;
+            pmap[child] = control;
+        }
+    }
+
+    Delayer::delay(lastControl, &Control::init, true);
+
+    emit instance()->projectExposed();
+}
+
+Control* SaveManager::exposeControl(const QString& rootPath, QString suid)
+{
+    auto control = new Control(rootPath + separator() + DIR_THIS +
+                               separator() + "main.qml");
+
+    QMap<QString, Control*> pmap;
+    pmap[rootPath] = control;
+    for (auto child : childrenPaths(rootPath, suid)) {
+        auto pcontrol = pmap.value(dname(dname(child)));
+        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+        control->setParentItem(pcontrol);
+        control->refresh();
+        connect(control, &Control::initialized, [=] {
+            control->controlTransaction()->setTransactionsEnabled(true);
+        });
+
+        pmap[child] = control;
+    }
+
+    return control;
+}
+
+bool SaveManager::isOwctrl(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->isOwctrl(propertyData);
+}
+
+Skin SaveManager::skin(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return Skin(_d->property(propertyData, TAG_SKIN).toInt());
+}
+
+QString SaveManager::id(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_ID).toString();
+}
+
+QString SaveManager::uid(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_UID).toString();
+}
+
+QString SaveManager::suid(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_SUID).toString();
+}
+
+void SaveManager::refreshToolUid(const QString& toolRootPath)
+{
+    if (toolRootPath.isEmpty())
+        return;
+
+    QStringList paths, properties;
+
+    properties << fps(FILE_PROPERTIES, toolRootPath);
+    paths << properties;
+
+    for (auto pfile : properties) {
+        auto propertyData = rdfile(pfile);
+
+        if (!_d->isOwctrl(propertyData))
+            continue;
+
+        auto uid = _d->property(propertyData, TAG_UID).toString();
+        auto newUid = Control::generateUid();
+
+        for (auto file : paths)
+            _d->updateFile(file, uid, newUid);
     }
 }
 
-void SaveManager::removeSave(const QString& id)
+QString SaveManager::toolCategory(const QString& toolRootPath)
 {
-	if (!exists(id)) return;
-    rm(m_d->generateSaveDirectory(id));
+    if (toolRootPath.isEmpty())
+        return QString();
+
+    auto propertyPath = toolRootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_CATEGORY).toString();
 }
 
-bool SaveManager::buildNewDatabase(const QString& projDir)
+// You have to provide an valid suid, except if control is a form
+// If topPath is empty, then top level project directory searched
+// So, suid and topPath have to be in a valid logical relationship.
+bool SaveManager::exists(const Control* control, const QString& suid, const QString& topPath)
 {
-	auto saveBaseDir = projDir + separator() + SAVE_DIRECTORY;
-	if (!mkdir(saveBaseDir)) return false;
-	if (!mkfile(saveBaseDir + separator() + PARENTAL_RELATIONSHIP_FILE)) return false;
-	if (!mkfile(saveBaseDir + separator() + PAGE_ORDER_FILE)) return false;
-	m_d->initPageOrder(saveBaseDir + separator() + PAGE_ORDER_FILE);
-	m_d->initEmptyParentalFile(saveBaseDir + separator() + PARENTAL_RELATIONSHIP_FILE);
-	return true;
+    return control->form() ? _d->existsInFormScope(control) :
+                             _d->existsInParentScope(control, suid, topPath);
 }
 
-bool SaveManager::loadDatabase()
+bool SaveManager::addForm(Form* form)
 {
-	QJsonArray pageOrder = getPageOrders();
-	QJsonObject parentalRelationship = getParentalRelationships();
-	QJsonObject bindingSaves = getBindingSaves();
-    QJsonObject eventSaves = getEventSaves();
-	if (pageOrder.isEmpty()) return false;
-	if (parentalRelationship.size() != saves().size()) return false;
-	m_d->createPages(pageOrder);
-	if (!m_d->fillDashboard(parentalRelationship, pageOrder)) return false;
-    m_d->fillBindings(bindingSaves);
-    m_d->fillEvents(eventSaves);
+    if (form->url().isEmpty())
+        return false;
+
+    if (!isOwctrl(form->dir()))
+        return false;
+
+    _d->refactorId(form, QString());
+
+    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+
+    if (projectDir.isEmpty())
+        return false;
+
+    auto baseDir = projectDir + separator() + DIR_OWDB;
+    auto formDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
+
+    if (!mkdir(formDir))
+        return false;
+
+    if (!cp(form->dir(), formDir, true))
+        return false;
+
+    form->setUrl(formDir + separator() + DIR_THIS + separator() + "main.qml");
+
+    _d->flushId(form, form->id());
+    _d->recalculateUids(form);
+
+    emit _d->parent->databaseChanged();
+
     return true;
 }
 
-void SaveManager::setVariantProperty(const QString& id, const QString& property, const QVariant& value)
+void SaveManager::removeForm(const Form* form)
 {
-	if (saveDirectory(id).isEmpty()) return;
-	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-	QString mainQmlContent = rdfile(mainQmlFilename);
-	if (mainQmlContent.isEmpty()) return;
-	m_d->plainTextEdit->setPlainText(mainQmlContent);
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-    auto rootNode = rewriterView->rootModelNode();
-	QmlObjectNode(rootNode).setVariantProperty(QByteArray().insert(0, property), value);
-	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-    QmlEditor::clearCacheFor(saveDirectory(id), true);
-    delete rewriterView;
-    delete textModifier;
-    delete model;
+    if (form->id().isEmpty() || form->url().isEmpty())
+        return;
+
+    if (form->main() || !isOwctrl(form->dir()) || !exists(form, QString()))
+        return;
+
+    rm(form->dir());
+
+    emit _d->parent->databaseChanged();
 }
 
-void SaveManager::setBindingProperty(const QString& id, const QString& property, const QString& expression) //FIXME:
+bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
 {
-	if (saveDirectory(id).isEmpty()) return;
-	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-	QString mainQmlContent = rdfile(mainQmlFilename);
-	if (mainQmlContent.isEmpty()) return;
-	m_d->plainTextEdit->setPlainText(mainQmlContent);
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-    ModelNode rootNode = rewriterView->rootModelNode();
-	QmlObjectNode(rootNode).setBindingProperty(QByteArray().insert(0, property), expression);
-	wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-    delete rewriterView;
-    delete textModifier;
-    delete model;
+    if (control->url().isEmpty())
+        return false;
+
+    if (parentControl->dir().isEmpty())
+        return false;
+
+    if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
+        return false;
+
+    _d->refactorId(control, suid, topPath);
+    for (auto child : control->childControls())
+        _d->refactorId(child, suid, topPath);
+
+    auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
+    auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
+
+    if (!mkdir(controlDir))
+        return false;
+
+    if (!cp(control->dir(), controlDir, true))
+        return false;
+
+    for (auto child : control->childControls())
+        child->setUrl(child->url().replace(control->dir(), controlDir));
+
+    control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
+
+    _d->flushId(control, control->id());
+    for (auto child : control->childControls())
+        _d->flushId(child, child->id());
+
+    _d->flushSuid(control, suid);
+    _d->recalculateUids(control); //for all
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
+
+    return true;
 }
 
-void SaveManager::removeProperty(const QString& id, const QString& property) //FIXME: FOR BINDING PROPERTIES
-{
-	if (saveDirectory(id).isEmpty()) return;
-	auto mainQmlFilename = saveDirectory(id) + separator() + "main.qml";
-	QString mainQmlContent = rdfile(mainQmlFilename);
-	if (mainQmlContent.isEmpty()) return;
-	m_d->plainTextEdit->setPlainText(mainQmlContent);
-    auto model = Model::create("QtQuick.Item", 1, 0);
-    auto rewriterView = new RewriterView(RewriterView::Amend, model);
-    auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-    model->setTextModifier(textModifier);
-    model->setRewriterView(rewriterView);
-    model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-    ModelNode rootNode = rewriterView->rootModelNode();
-    rootNode.removeProperty(QByteArray().insert(0, property));
-    QmlObjectNode(rootNode).removeProperty(QByteArray().insert(0, property));
-    wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-    delete rewriterView;
-    delete textModifier;
-    delete model;
+// You can only move controls within current suid scope of related control
+bool SaveManager::moveControl(Control* control, const Control* parentControl)
+{ //FIXME: Some controls are disappearing after moving
+    if (_d->parentDir(control) == parentControl->dir())
+        return true;
+
+    if (control->id().isEmpty() || control->url().isEmpty())
+        return false;
+
+    if (parentControl->url().isEmpty())
+        return false;
+
+    if (!isOwctrl(control->dir()) || !isOwctrl(parentControl->dir()))
+        return false;
+
+    if (!parentControl->form() && suid(control->dir()) != suid(parentControl->dir()))
+        return false;
+
+    auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
+    auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
+
+    if (!mkdir(controlDir))
+        return false;
+
+    if (!cp(control->dir(), controlDir, true))
+        return false;
+
+    if (!rm(control->dir()))
+        return false;
+
+    control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
+
+    return true;
 }
 
-void SaveManager::addParentalRelationship(const QString& id, const QString& parent)
+void SaveManager::removeControl(const Control* control)
 {
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto parentalFile = projDir + separator() + SAVE_DIRECTORY + separator() + PARENTAL_RELATIONSHIP_FILE;
-	QJsonObject jObj = QJsonDocument::fromJson(rdfile(parentalFile)).object();
-	jObj[id] = parent;
-	wrfile(parentalFile, QJsonDocument(jObj).toJson());
+    if (control->id().isEmpty() || control->url().isEmpty())
+        return;
+
+    if (!isOwctrl(control->dir()))
+        return;
+
+    rm(control->dir());
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 }
 
-void SaveManager::removeParentalRelationship(const QString& id)
+void SaveManager::removeChildControlsOnly(const Control* control)
 {
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto parentalFile = projDir + separator() + SAVE_DIRECTORY + separator() + PARENTAL_RELATIONSHIP_FILE;
-	QJsonObject jObj = QJsonDocument::fromJson(rdfile(parentalFile)).object();
-	jObj.remove(id);
-	wrfile(parentalFile, QJsonDocument(jObj).toJson());
+    if (control->id().isEmpty() || control->url().isEmpty())
+        return;
+
+    if (!isOwctrl(control->dir()))
+        return;
+
+    rm(control->dir() + separator() + DIR_CHILDREN);
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 }
 
-QString SaveManager::parentalRelationship(const QString& id)
+// You can not set id property of a top control if it's not exist in the project database
+// If you want to set id property of a control that is not exist in the project database,
+// then you have to provide a valid topPath
+// If topPath is empty, then top level project directory searched
+// So, suid and topPath have to be in a valid logical relationship.
+// topPath is only necessary if property is an "id" set.
+void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath)
 {
-	auto jObj = getParentalRelationships();
-	return jObj[id].toString();
-}
+    if (control->dir().isEmpty() || !isOwctrl(control->dir()))
+        return;
 
-void SaveManager::addPageOrder(const QString& pageId)
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-	jArr.append(pageId);
-	wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
-}
+    if (property == TAG_ID) {
+        if (control->id() == value.toString())
+            return;
 
-void SaveManager::removePageOrder(const QString& pageId)
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-	for (int i = 0; i < jArr.size(); i++) {
-		if (jArr.at(i) == pageId) {
-			jArr.removeAt(i);
-			wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
-			break;
-		}
-	}
-}
+        auto _suid = suid(control->dir());
+        control->setId(value.toString());
+        _d->refactorId(control, _suid, topPath);
 
-void SaveManager::changePageOrder(const QString& fromPageId, const QString& toPageId)
-{
-	auto projDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-	if (projDir.isEmpty()) return;
-	auto pageOrderFile = projDir + separator() + SAVE_DIRECTORY + separator() + PAGE_ORDER_FILE;
-	QJsonArray jArr = QJsonDocument::fromJson(rdfile(pageOrderFile)).array();
-	for (int i = 0; i < jArr.size(); i++) {
-		if (jArr.at(i) == fromPageId) {
-			jArr[i] = toPageId;
-			wrfile(pageOrderFile, QJsonDocument(jArr).toJson());
-			break;
-		}
+        auto propertyPath = control->dir() + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        _d->setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
+        wrfile(propertyPath, propertyData);
+    } if (property == TAG_SKIN) {
+        if (control->dir().isEmpty() || !control->form())
+            return;
+
+        auto propertyPath = control->dir() + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        _d->setProperty(propertyData, TAG_SKIN, value.toInt());
+        wrfile(propertyPath, propertyData);
+    } else {
+        auto fileName = control->dir() + separator() + DIR_THIS +
+                        separator() + "main.qml";
+        ParserController::setVariantProperty(fileName, property, value);
     }
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 }
 
-void SaveManager::setId(const QString& id, const QString& newId)
+void SaveManager::removeProperty(const Control* control, const QString& property)
 {
-    m_d->id = id;
-    m_d->newId = newId;
-    m_d->applierTimer.start();
+    if (control->dir().isEmpty() || !isOwctrl(control->dir()) || property == TAG_ID)
+        return;
+
+    auto fileName = control->dir() + separator() + DIR_THIS +
+                    separator() + "main.qml";
+    ParserController::removeVariantProperty(fileName, property);
+
+    if (_d->isInOwdb(control->dir()))
+        emit _d->parent->databaseChanged();
 }
 
-void SaveManager::idApplier()
+QString SaveManager::pathOfId(const QString& suid, const QString& id, const QString& rootPath)
 {
-    m_d->applierTimer.stop();
-   if (saveDirectory(m_d->id).isEmpty()) return;
-   auto mainQmlFilename = saveDirectory(m_d->id) + separator() + "main.qml";
-   QString mainQmlContent = rdfile(mainQmlFilename);
-   if (mainQmlContent.isEmpty()) return;
-   m_d->plainTextEdit->setPlainText(mainQmlContent);
-   auto model = Model::create("QtQuick.Item", 1, 0);
-   auto rewriterView = new RewriterView(RewriterView::Amend, model);
-   auto textModifier = new NotIndentingTextEditModifier(m_d->plainTextEdit);
-   model->setTextModifier(textModifier);
-   model->setRewriterView(rewriterView);
-   model->setFileUrl(QUrl::fromLocalFile(mainQmlFilename));
-   ModelNode rootNode = rewriterView->rootModelNode();
-   QmlObjectNode(rootNode).setId(m_d->newId);
-   wrfile(mainQmlFilename, QByteArray().insert(0, m_d->plainTextEdit->toPlainText()));
-   delete rewriterView;
-   delete textModifier;
-   delete model;
+    return _d->findById(suid, id, rootPath);
 }
+
+bool SaveManager::parserWorking()
+{
+    return _d->parserController.running();
+}
+
+#include "savemanager.moc"

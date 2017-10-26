@@ -1,436 +1,1241 @@
 #include <propertieswidget.h>
-#include <propertyitem.h>
 #include <fit.h>
-#include <listwidget.h>
-#include <lineedit.h>
+#include <toolboxtree.h>
+#include <designmanager.h>
+#include <css.h>
+#include <savemanager.h>
+#include <delayer.h>
+#include <filemanager.h>
+#include <QtWidgets>
 
-#include <QStyleOption>
-#include <QPainter>
-#include <QQuickItem>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QQmlContext>
-#include <QIcon>
+//!
+//! *************************** [global] ***************************
+//!
 
 using namespace Fit;
 
-static const uchar rawData[] = { "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A\x00\x00\x00\x0D"
-								 "\x49\x48\x44\x52\x00\x00\x00\x80\x00\x00\x00\x80"
-								 "\x08\x06\x00\x00\x00\xC3\x3E\x61\xCB\x00\x00\x00"
-								 "\x04\x73\x42\x49\x54\x08\x08\x08\x08\x7C\x08\x64"
-								 "\x88\x00\x00\x00\x09\x70\x48\x59\x73\x00\x00\x0B"
-								 "\x13\x00\x00\x0B\x13\x01\x00\x9A\x9C\x18\x00\x00"
-								 "\x0A\x9E\x49\x44\x41\x54\x78\x9C\xED\x9D\x5F\x6C"
-								 "\x1C\xF5\x11\xC7\x67\xE6\xD6\x36\x26\x72\x50\x4D"
-								 "\x2C\x2B\x6A\x51\x03\x0D\xA9\x68\x9B\x98\x2A\x22"
-								 "\x51\xD3\x07\xC8\x03\xAE\x0B\x08\x9E\xE2\x0A\xA4"
-								 "\x22\xE5\x29\x95\xF1\xDE\x3A\x3A\x12\xA9\x90\x72"
-								 "\x49\xCA\x1F\x25\x96\x75\xF7\xF3\xD9\x81\xBC\xF4"
-								 "\xA1\x08\x21\x1C\xB5\x12\x0D\x90\x14\x08\xA4\x02"
-								 "\xA4\x26\xA9\x80\x04\x4A\x49\xA8\x2A\x10\xA5\x4A"
-								 "\x00\xB9\x81\x02\xF5\x71\xC7\x4C\x1F\xB2\x6E\x11"
-								 "\x8D\x77\xF7\xEE\x76\x7F\xBB\x17\xCD\xE7\x75\x67"
-								 "\x6F\xBF\x7B\xF7\xBD\xDF\xEE\xCE\x6F\x7E\xB3\x00"
-								 "\x8A\xA2\x28\x8A\xA2\x28\x8A\xA2\x28\x8A\xA2\x28"
-								 "\x8A\xA2\x28\x8A\xA2\x28\x8A\xA2\x28\x8A\xA2\x28"
-								 "\x8A\xA2\x28\x8A\xA2\x28\x8A\xA2\x28\x8A\xA2\xB4"
-								 "\x2B\x98\xB6\x80\x38\x28\x16\x8B\xD4\xD7\xD7\x77"
-								 "\x95\x88\xAC\x11\x91\x55\xCC\x7C\x25\x11\x7D\x13"
-								 "\x00\xFA\x98\xF9\x12\x22\xEA\x04\x00\x60\xE6\xCF"
-								 "\x01\xE0\x2C\x00\x7C\x80\x88\xEF\x00\xC0\x5B\x88"
-								 "\x78\x42\x44\x8E\xCE\xCE\xCE\xBE\xB9\x63\xC7\x0E"
-								 "\x4E\xF3\x3C\xD2\xA0\x6D\x0D\xB0\x6B\xD7\xAE\x9E"
-								 "\xEE\xEE\xEE\x9B\x44\xE4\x16\x44\xBC\x1E\x00\x7A"
-								 "\x5B\xFC\xC8\x59\x00\x78\x9A\x99\x1F\x77\x1C\xE7"
-								 "\x89\xD1\xD1\xD1\x4F\x62\x90\x99\x79\xDA\xCE\x00"
-								 "\xA5\x52\x69\x2D\x11\x8D\x20\xE2\x06\x00\xE8\x4E"
-								 "\xE2\x18\xCC\xFC\x19\x00\xCC\x10\xD1\x83\xF9\x7C"
-								 "\xFE\x68\x12\xC7\xC8\x0A\x6D\x61\x00\x11\xC1\xA9"
-								 "\xA9\xA9\x41\x11\xB9\x07\x00\xD6\xD9\x3C\x36\x33"
-								 "\xBF\x40\x44\x3B\x5D\xD7\x3D\x84\x88\x62\xF3\xD8"
-								 "\x36\xC8\xBC\x01\x26\x27\x27\x07\x00\xA0\x04\x00"
-								 "\xEB\xD3\xD4\xC1\xCC\xCF\x02\xC0\xE6\xB1\xB1\xB1"
-								 "\xD7\xD3\xD4\x11\x37\x99\x35\xC0\xC4\xC4\x44\xB7"
-								 "\xE3\x38\xDB\x11\xF1\x4E\x00\xA0\xB4\xF5\x00\x00"
-								 "\x30\xF3\x17\x44\xB4\xBB\xA7\xA7\x67\xE7\xC6\x8D"
-								 "\x1B\xE7\xD2\xD6\x13\x07\x99\x34\x40\xA5\x52\x59"
-								 "\xC9\xCC\x8F\x22\xE2\x77\xD3\xD6\x72\x3E\x98\xF9"
-								 "\x35\xC7\x71\x6E\x1D\x1D\x1D\xFD\x73\xDA\x5A\x5A"
-								 "\x25\x13\xFF\xAC\x2F\x53\xA9\x54\x6E\x13\x91\x23"
-								 "\x59\xFD\xF1\x01\x00\x88\x68\x65\xBD\x5E\x3F\x6A"
-								 "\x8C\x19\x4E\x5B\x4B\xAB\x64\x66\x04\x10\x11\x9C"
-								 "\x9C\x9C\xFC\x05\x22\xEE\x68\xE1\x63\x4E\x32\xF3"
-								 "\x61\x44\x3C\x8E\x88\x27\xEB\xF5\xFA\xDB\x1D\x1D"
-								 "\x1D\x1F\x7D\xF8\xE1\x87\xFF\x02\x00\x58\xB2\x64"
-								 "\x49\x4F\xAD\x56\xBB\x84\x88\x2E\x47\xC4\x15\x22"
-								 "\x32\x00\x00\xEB\x89\x68\x45\x0B\xC7\xBC\xDB\x75"
-								 "\xDD\x07\xDA\xF5\x06\x31\x13\x06\x10\x11\x34\xC6"
-								 "\x94\x89\x28\xDF\xC4\xEE\xAF\x00\xC0\xC3\x22\xB2"
-								 "\xCF\xF3\xBC\xBF\x37\x73\xFC\xE9\xE9\xE9\xCB\xEA"
-								 "\xF5\xFA\x06\x11\xB9\x9D\x88\x06\x1A\xDD\x5F\x44"
-								 "\x4A\xF9\x7C\xBE\xD0\x8E\x26\x48\xDD\x00\x2D\xFC"
-								 "\xF8\xFB\x45\xE4\x7E\xCF\xF3\xFE\x18\xA7\x1E\x63"
-								 "\xCC\x3A\x11\xB9\x8B\x88\x6E\x6C\x64\xBF\x76\x35"
-								 "\x41\xEA\x06\x30\xC6\xDC\xD3\xE0\xB0\x7F\x0C\x11"
-								 "\x47\x5C\xD7\xFD\x53\x62\xA2\x00\x60\x72\x72\x72"
-								 "\x0D\x00\xEC\x01\x80\xD5\x51\xF7\x11\x91\x6D\x9E"
-								 "\xE7\xDD\x97\x9C\xAA\xF8\x49\xD5\x00\xFE\x0D\xDF"
-								 "\x23\x11\xC3\xAB\x22\x52\x58\xBA\x74\xE9\x43\xC3"
-								 "\xC3\xC3\x5F\x24\x2A\xCC\x67\x66\x66\x26\x77\xFA"
-								 "\xF4\xE9\x3B\x00\x60\x37\x00\x74\x45\xD9\x07\x11"
-								 "\x87\x5D\xD7\xDD\x97\xAC\xB2\xF8\x48\xCD\x00\x95"
-								 "\x4A\x65\xA5\x88\x1C\x81\x08\xE9\x5C\x66\x3E\x45"
-								 "\x44\xC3\xF9\x7C\xFE\xB8\x05\x69\xFF\x47\xA9\x54"
-								 "\xBA\x9A\x88\xF6\x21\xE2\xF2\x08\xE1\x9F\x8A\xC8"
-								 "\x1A\xCF\xF3\xDE\x48\x5C\x58\x0C\xA4\x62\x00\x3F"
-								 "\xC9\x73\x2C\xE2\xA3\xDE\x8B\x8E\xE3\xDC\x3C\x32"
-								 "\x32\xF2\xCF\xC4\x85\x05\x30\x31\x31\xD1\xDB\xD1"
-								 "\xD1\xB1\x1F\x22\xA4\xA2\x99\xF9\x38\x22\xAE\xF5"
-								 "\x3C\xAF\x6A\x41\x5A\x4B\xA4\x92\x07\xF0\x33\x7C"
-								 "\x51\x7E\xFC\xA7\x6A\xB5\xDA\x60\xDA\x3F\x3E\x00"
-								 "\x40\xA1\x50\x98\xED\xEA\xEA\xBA\x5E\x44\x7E\x1F"
-								 "\x16\x4B\x44\x03\x22\xB2\xCD\x86\xAE\x56\xB1\x3E"
-								 "\x02\xF8\xB9\xFD\x97\x21\xDC\x7C\x2F\xD6\x6A\xB5"
-								 "\xC1\x42\xA1\xF0\x6F\x0B\xB2\x22\xB3\x77\xEF\xDE"
-								 "\x8B\xE7\xE6\xE6\x9E\x45\xC4\x1F\x84\x84\xD6\x45"
-								 "\x64\x20\xEB\x97\x02\xAB\x23\x80\x88\x20\x9C\x9B"
-								 "\xD8\x09\x3C\x2E\x33\x9F\x72\x1C\xE7\xE6\xAC\xFD"
-								 "\xF8\x00\x00\x9B\x36\x6D\xFA\xAC\x5E\xAF\xDF\x24"
-								 "\x22\x7F\x0D\x09\x75\x10\xB1\x64\x45\x54\x0B\x58"
-								 "\x35\xC0\xD4\xD4\xD4\x20\x84\xCC\xEA\x31\xF3\x1C"
-								 "\x00\x6C\xC8\xC2\xB0\xBF\x10\x85\x42\x61\x16\x00"
-								 "\x86\x01\xE0\xF3\x90\xD0\x41\x63\x4C\xAA\xB3\x98"
-								 "\x61\xD8\x1E\x01\xEE\x09\x8B\x41\xC4\x3B\xC7\xC6"
-								 "\xC6\x4E\xD8\xD0\xD3\x0A\x9E\xE7\xBD\x82\x88\x5B"
-								 "\xC3\xE2\x10\xB1\x68\x43\x4F\xB3\x58\x33\x40\xA9"
-								 "\x54\x5A\x0B\xE1\x77\xD0\xC7\x96\x2E\x5D\xFA\x90"
-								 "\x0D\x3D\x71\xD0\xDF\xDF\x3F\x05\xE7\x52\xD1\x41"
-								 "\x5C\x5B\x2E\x97\xAF\xB1\xA1\xA7\x19\xAC\x19\x80"
-								 "\x88\x46\xC2\x62\x10\x71\xC4\x56\x92\x27\x0E\x86"
-								 "\x87\x87\xBF\x10\x91\xD0\xF3\x22\xA2\x9F\xD9\xD0"
-								 "\xD3\x0C\x56\x9E\x02\xFC\x02\xCE\x33\x10\x9C\xF4"
-								 "\xD9\x9F\xCF\xE7\x6F\xB6\xA1\x27\x6E\xCA\xE5\xF2"
-								 "\x53\x44\xF4\xE3\x80\x90\x4F\xAB\xD5\x6A\xFF\x96"
-								 "\x2D\x5B\x3E\xB5\x26\x2A\x22\x56\x46\x80\xEE\xEE"
-								 "\xEE\x9B\x20\x24\xE3\x27\x22\xF7\xDB\xD0\x92\x04"
-								 "\x44\x14\x96\xFF\x5F\xD4\xD9\xD9\xD9\xD0\xE4\x92"
-								 "\x2D\xAC\x18\x40\x44\x6E\x09\x09\x79\x35\xEE\x59"
-								 "\x3D\x9B\xE4\xF3\xF9\x97\x98\xF9\xB5\xA0\x18\x44"
-								 "\xCC\xE4\xE8\x96\xB8\x01\x8A\xC5\x22\x89\xC8\x60"
-								 "\x48\xD8\xAF\x93\xD6\x91\x34\x44\xF4\x70\x48\xC8"
-								 "\xA0\x9F\x07\xC9\x14\x89\x1B\xA0\xAF\xAF\xEF\x2A"
-								 "\x22\xFA\x5A\x50\x8C\x88\xB4\xCD\xEC\xD9\x42\x10"
-								 "\xD1\x4C\x48\x48\x5F\xB9\x5C\x6E\xA5\xF2\x28\x11"
-								 "\x12\x37\x80\x88\xAC\x09\x09\x39\xD9\x6C\x25\x4F"
-								 "\x96\x18\x1D\x1D\x7D\x27\x2C\x3B\x98\xCB\xE5\xD6"
-								 "\xDA\xD2\x13\x15\x1B\x06\x58\x15\xB4\x9D\x99\x0F"
-								 "\x27\xAD\xC1\x22\xCF\x07\x6D\x0C\xFB\x2E\xD2\x20"
-								 "\x71\x03\x30\xF3\x95\x41\xDB\x11\x31\x95\x39\xFE"
-								 "\x24\x40\xC4\xC0\x0C\x66\xC4\x7A\x02\xAB\x24\x6E"
-								 "\x00\x7F\x95\xEE\x82\x20\xE2\xC9\xA4\x35\xD8\x22"
-								 "\xEC\x5C\x98\x79\x99\x25\x29\x91\xB1\xF1\x18\xD8"
-								 "\x17\xB4\xB1\x5E\xAF\xBF\x6D\x41\x83\x15\x98\xF9"
-								 "\x6F\x21\x21\x81\xDF\x45\x1A\xD8\xB8\x04\x5C\x12"
-								 "\xB4\xBD\xA3\xA3\xE3\xA3\xA4\x35\x58\xE4\xE3\xA0"
-								 "\x8D\x61\x4F\x43\x69\x60\xE3\x12\xD0\x19\xB4\x7D"
-								 "\x7E\xD1\xC6\x05\x42\xA0\x01\x20\x62\x61\xA9\x4D"
-								 "\x32\xB7\x34\x4C\xB1\x8B\x8D\x4B\x40\x60\xD1\xC4"
-								 "\x92\x25\x4B\x7A\x92\xD6\x60\x91\xC5\x21\xDB\x33"
-								 "\x57\x24\x6A\x63\x04\x38\x1B\xB4\xB1\x56\xAB\x05"
-								 "\xDE\x23\xB4\x19\x61\x06\x08\xFC\x2E\xD2\xC0\x86"
-								 "\x01\x3E\x08\x14\x40\x74\xB9\x05\x0D\x56\x20\xA2"
-								 "\x2B\x42\x42\xCE\x58\x11\xD2\x00\x89\x1B\xC0\xEF"
-								 "\xC6\x15\xB4\x3D\x73\xF9\xF1\x66\x11\x91\x6F\x87"
-								 "\x84\xBC\x6B\x45\x48\x03\xD8\x18\x01\xDE\x0A\xDA"
-								 "\xE8\x2F\xD1\xBE\x50\x08\x3C\x17\x11\x39\x65\x4B"
-								 "\x48\x54\x6C\x8C\x00\x61\x05\x9E\x99\xAE\x9A\x6D"
-								 "\x90\xC0\x73\x89\xF0\x5D\x58\xC7\xC6\x64\x50\x60"
-								 "\x9B\x35\x22\x5A\x31\x3D\x3D\x7D\x59\xD2\x3A\x92"
-								 "\xA6\x54\x2A\x2D\x03\x80\x6F\x85\x84\x65\xAE\xE5"
-								 "\x5C\xE2\x06\x98\x9D\x9D\x7D\x13\xCE\x35\x61\x5C"
-								 "\x90\x7A\xBD\xBE\x21\x69\x1D\x49\x93\xCB\xE5\x02"
-								 "\xDB\xC5\x30\xF3\xFB\xAE\xEB\x66\x6E\xDE\x23\x71"
-								 "\x03\xF8\xED\x57\x9F\x0E\x8A\x11\x91\xDB\x93\xD6"
-								 "\x91\x24\x22\x82\x61\xE7\x40\x44\xCF\x64\xB1\x79"
-								 "\x84\x95\x4C\x20\x33\x3F\x1E\x28\x82\x68\xC0\x18"
-								 "\x63\xB5\x01\x64\x9C\x18\x63\x7E\x18\xB6\xD8\x55"
-								 "\x44\x7E\x67\x4B\x4F\x23\x58\x31\x80\xE3\x38\x4F"
-								 "\xF8\xED\x57\x17\x44\x44\xEE\xB2\xA1\x25\x09\x10"
-								 "\x31\x70\x25\x30\x33\x7F\x72\xD1\x45\x17\x3D\x61"
-								 "\x4B\x4F\x23\x58\x31\x80\xDF\x78\x39\xB0\x66\x8E"
-								 "\x88\x6E\xF4\xDB\xB2\xB4\x15\xC6\x98\x75\x88\xF8"
-								 "\xA3\xA0\x18\x44\x7C\x6C\xD3\xA6\x4D\x81\x7F\x80"
-								 "\xB4\xB0\xB9\x32\xE8\xC1\x08\x61\x7B\x66\x66\x66"
-								 "\x72\x89\x8B\x89\x89\x62\xB1\xE8\x88\xC8\x9E\x08"
-								 "\xA1\xD3\x89\x8B\x69\x12\x6B\x06\xC8\xE7\xF3\x47"
-								 "\x99\xF9\x85\x90\xB0\xD5\x7E\x4F\x9E\xB6\xA0\xB7"
-								 "\xB7\x37\x1F\xD6\x56\x8E\x99\x9F\xF3\x3C\x2F\x6C"
-								 "\xFD\x60\x6A\x58\x9D\x0E\x26\xA2\x9D\x11\xC2\x76"
-								 "\x97\x4A\xA5\xAB\x13\x17\xD3\x22\xC6\x98\xD5\x88"
-								 "\xF8\x40\x58\x1C\x22\x46\x39\xE7\xD4\xB0\x6A\x00"
-								 "\xD7\x75\x0F\xF9\x5D\xB7\x83\xE8\x22\xA2\x7D\x13"
-								 "\x13\x13\xAD\xBE\x00\x22\x31\x2A\x95\xCA\xA5\x88"
-								 "\x38\x03\x00\x81\xC5\x2E\xCC\x7C\xC0\xF3\xBC\x3F"
-								 "\x58\x92\xD5\x14\x56\x0D\xE0\x3F\x07\x6F\x66\xE6"
-								 "\xC0\x15\xC0\x88\xB8\xBC\xA3\xA3\x63\xFF\xDE\xBD"
-								 "\x7B\x2F\xB6\x24\x2D\x32\xE3\xE3\xE3\x8B\x44\xE4"
-								 "\x49\x00\x08\x9C\xF9\x63\xE6\x9A\x88\x14\x2C\xC9"
-								 "\x6A\x1A\xEB\x15\x41\x63\x63\x63\xAF\x13\xD1\xEE"
-								 "\x08\xA1\xEB\xAA\xD5\xEA\x6F\xB2\x64\x82\xF1\xF1"
-								 "\xF1\x45\x5D\x5D\x5D\xBF\x05\x80\x28\x0B\x3C\x76"
-								 "\x6D\xDE\xBC\xF9\x2F\x49\x6B\x6A\x95\x54\x4A\xC2"
-								 "\x7A\x7A\x7A\x76\x86\x2D\xA6\xF4\x19\xAA\x56\xAB"
-								 "\xCF\x64\xE1\x72\x50\xA9\x54\x2E\xED\xEA\xEA\x3A"
-								 "\x04\x00\x61\xEB\x1C\x01\x00\xDE\x43\xC4\x7B\x93"
-								 "\xD6\x14\x07\xA9\x18\x60\xE3\xC6\x8D\x73\x8E\xE3"
-								 "\xDC\x1A\x96\x1C\xF2\x59\xE7\x38\xCE\x11\x63\xCC"
-								 "\xF7\x13\x17\xB6\x00\xC6\x98\xD5\xFE\xA4\x56\xD4"
-								 "\xA5\x5D\x5F\x07\x80\x9F\x27\x28\x29\x36\x52\x5D"
-								 "\xAD\x6A\x8C\x19\x46\xC4\xC7\x22\x86\x7F\x8E\x88"
-								 "\x5B\xFB\xFB\xFB\xA7\x6C\x75\x11\x29\x16\x8B\x4E"
-								 "\x6F\x6F\x6F\xDE\xBF\xDB\x0F\xBC\xE1\x3B\x1F\x22"
-								 "\xB2\xC3\xF3\xBC\xED\xF1\x2B\x8B\x8F\xD4\x97\x2B"
-								 "\x1B\x63\xEE\x6E\x64\xB8\x14\x91\x97\x01\xE0\x8E"
-								 "\xA4\xFB\x09\xF8\x19\xBE\x69\x00\x68\xE9\x91\x34"
-								 "\xEB\x26\x48\xDD\x00\xFE\x8B\x22\x26\x10\x71\x73"
-								 "\x23\xFB\x31\xF3\x01\x22\xBA\x2F\x9F\xCF\xBF\x14"
-								 "\xA7\x16\x7F\x62\x67\x5B\x58\x7A\xB7\xC1\xCF\xCD"
-								 "\xAC\x09\x52\x37\x00\x40\xF3\x26\x00\x38\xF7\xFE"
-								 "\x1E\x22\x7A\x98\x88\x66\x46\x47\x47\x03\xEB\x0F"
-								 "\x17\xA2\x54\x2A\x2D\xF3\xE7\xF3\x7F\x0A\x00\xDF"
-								 "\x6B\xE6\x33\xC2\xC8\xAA\x09\x32\x61\x00\x80\xFF"
-								 "\x9A\xE0\xAE\x56\xEE\x9E\xFD\xF5\xF9\xCF\x23\xE2"
-								 "\x09\x44\x3C\xE9\xAF\xD5\xFB\x18\xFE\xB7\x62\x67"
-								 "\x31\x00\x2C\x26\xA2\x2B\xFC\x02\xCE\x01\x38\x57"
-								 "\xC6\x15\x56\xC9\x13\x0B\x59\x34\x41\x66\x0C\x30"
-								 "\x8F\x7F\x63\xF8\x2B\x00\x58\x94\xB6\x96\x24\xC8"
-								 "\x9A\x09\x32\xB7\x34\xCC\xF3\xBC\x19\xBF\xAB\x48"
-								 "\xE6\x0A\x28\xE7\x61\xE6\x7F\x34\xBB\x2F\x22\x16"
-								 "\x8D\x31\xDB\x63\x94\xD3\x12\x99\x33\x00\x00\x80"
-								 "\xE7\x79\x6F\xF8\x26\xB8\x0F\x00\xEA\x69\xEB\x99"
-								 "\x87\x99\x6B\xCC\x7C\x2F\x22\x5E\x21\x22\x4D\xBF"
-								 "\xDD\x2C\x4B\x26\xC8\xDC\x25\xE0\xAB\x18\x63\xBE"
-								 "\xE3\x77\xDD\x8E\x92\x81\x4B\x0C\x66\x3E\x20\x22"
-								 "\x85\x2F\xA7\x77\x8D\x31\xDB\x5B\xE9\x05\x9C\x85"
-								 "\xCB\x41\xE6\x0D\x30\x8F\x31\x66\xBD\xFF\x65\x5F"
-								 "\x6B\xF3\xB8\xCC\xFC\x5C\x2E\x97\xFB\xA5\xEB\xBA"
-								 "\x87\x17\xD0\xD5\xD6\x26\x68\x1B\x03\xCC\x53\x2E"
-								 "\x97\xAF\xF1\x7B\xEF\xFE\x04\x12\xBA\x51\x64\xE6"
-								 "\x4F\x10\xF1\x31\x22\xDA\xE3\xBA\xEE\xCB\x61\xF1"
-								 "\xED\x6C\x82\xB6\x33\xC0\x3C\xE3\xE3\xE3\x8B\x3A"
-								 "\x3B\x3B\x6F\xF4\x3B\x70\x0E\x42\x8B\xED\x57\x98"
-								 "\xF9\x7D\xBF\x74\xFB\xF1\xCE\xCE\xCE\x27\x1B\xAD"
-								 "\xE1\x6B\x57\x13\xB4\xAD\x01\xBE\x8C\x88\x60\xB9"
-								 "\x5C\x5E\x91\xCB\xE5\xD6\x8A\xC8\x2A\x44\x5C\xEE"
-								 "\x37\x64\xEA\xF3\xDB\xB2\xCC\x77\xE6\xA8\xC2\xB9"
-								 "\x25\xDA\x67\x00\xE0\x5D\x11\x39\xE5\x2F\xD7\x3A"
-								 "\xEA\xBA\xEE\xC9\x56\xEB\xF6\xDB\xD1\x04\x17\x84"
-								 "\x01\xB2\x44\xBB\x99\xA0\x6D\x2A\x70\xDB\x85\x83"
-								 "\x07\x0F\x1E\x1E\x1A\x1A\x42\x44\xBC\xAE\x99\xFD"
-								 "\x11\xF1\xBA\xA1\xA1\x21\x3C\x78\xF0\xE0\xE1\x78"
-								 "\x95\x9D\x1F\x35\x40\x02\xB4\x93\x09\xD4\x00\x09"
-								 "\xD1\x2E\x26\x50\x03\x24\x48\x3B\x98\x40\x0D\x90"
-								 "\x30\x59\x37\x81\x1A\xC0\x02\x59\x36\x81\x1A\xC0"
-								 "\x12\x59\x35\x81\x1A\xC0\x22\x71\x98\xE0\x86\x1B"
-								 "\x6E\x38\x7B\xE0\xC0\x81\x23\x71\x69\xD2\x44\x50"
-								 "\x0A\xB4\x98\x2C\xAA\x8A\xC8\xF2\xB8\xDE\xB2\x92"
-								 "\xC9\x7A\x80\x0B\x1D\xCF\xF3\xB6\xB7\x50\x4F\xD0"
-								 "\x85\x88\xB7\xC5\xA5\x45\x0D\x90\x12\xAD\x98\x20"
-								 "\xCE\xDE\x8A\x6A\x80\x14\x69\x71\x24\x88\x05\x35"
-								 "\x40\xCA\x34\x63\x82\x38\xDF\xB3\xA4\x06\xC8\x00"
-								 "\x8D\x98\x80\x99\xE7\x6A\xB5\xDA\x23\x71\x1D\x5B"
-								 "\x0D\x90\x11\xA2\x9A\x00\x11\xB7\x16\x0A\x85\xF7"
-								 "\xE2\x3A\xAE\x3E\x06\x66\x8C\x4A\xA5\xE2\x89\xC8"
-								 "\x2E\xF8\xCA\xEB\x65\x98\x79\x0E\x11\xB7\x7A\x9E"
-								 "\x57\x89\xF3\x78\x6A\x80\x0C\x62\x8C\xF9\x86\xFF"
-								 "\xA8\xB7\x0A\x00\x40\x44\x5E\xAD\xD7\xEB\x8F\xC6"
-								 "\xF9\xCF\x57\x14\x45\x51\x14\x45\x51\x14\x45\x51"
-								 "\x14\x45\x51\x14\x45\x51\x14\x45\x51\x14\x45\x51"
-								 "\x14\x45\x51\x14\xE5\x42\xE4\x3F\x21\xE7\x39\xD1"
-								 "\x00\x29\x5C\x59\x00\x00\x00\x00\x49\x45\x4E\x44"
-								 "\xAE\x42\x60\x82"};
+enum NodeType {
+    FontFamily,
+    FontPtSize,
+    FontPxSize,
+    FontBold,
+    FontItalic,
+    FontUnderline,
+    FontOverline,
+    FontStrikeout,
+    Color,
+    Bool,
+    String,
+    Id,
+    Url,
+    Double,
+    Int,
+    GeometryX,
+    GeometryY,
+    GeometryWidth,
+    GeometryHeight,
+    GeometryFX,
+    GeometryFY,
+    GeometryFWidth,
+    GeometryFHeight
+};
+Q_DECLARE_METATYPE(NodeType)
 
-PropertiesWidget::PropertiesWidget(QWidget *parent)
-	: QWidget(parent)
-	, m_ListWidget(new ListWidget)
-	, m_Layout(new QVBoxLayout(this))
-    , m_Color(QColor("#52616D"))
-	, m_LastObject(nullptr)
-	, m_SearchEdit(nullptr)
-	, m_rootContext(nullptr)
+enum NodeRole {
+    Type = Qt::UserRole + 1,
+    Data
+};
+
+static void processFont(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-	setAutoFillBackground(true);
-	QPalette p(palette());
-	p.setColor(QPalette::Window, m_Color);
-	setPalette(p);
+    const auto value = map[propertyName].value<QFont>();
+    const auto px = value.pixelSize() > 0 ? true : false;
+    const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
+        .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
 
-	m_ListWidget->setStyleSheet(QString("QListView::item{background:none;border: 0px solid transparent;}"
-										"QListView { border:0px solid white;background:rgba(%1,%2,%3,%4);}")
-								.arg(m_Color.red()).arg(m_Color.green())
-								.arg(m_Color.blue()).arg(m_Color.alpha()));
-	m_ListWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_ListWidget->setHorizontalScrollMode(ListWidget::ScrollPerPixel);
-	m_ListWidget->setVerticalScrollMode(ListWidget::ScrollPerPixel);
-	m_ListWidget->setSelectionBehavior(ListWidget::SelectRows);
-	m_ListWidget->setFocusPolicy(Qt::NoFocus);
-	m_ListWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	m_Layout->setSpacing(fit(10));
-	m_Layout->setContentsMargins(fit(10), fit(5), fit(5), fit(10));
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, ft);
 
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "Family");
+    item1->setData(1, Qt::EditRole, value.family());
+    item1->setData(1, NodeRole::Type, NodeType::FontFamily);
+    item1->setData(1, NodeRole::Data, value.family());
+    iitem->addChild(item1);
 
-	QPixmap pm;
-	pm.loadFromData(rawData, sizeof(rawData));
-	pm = pm.scaled(fit(30), fit(30), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	m_SearchEdit = new LineEdit;
-	m_SearchEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	m_SearchEdit->setFixedHeight(fit(30));
-	m_SearchEdit->setIcon(QIcon(pm));
-	m_SearchEdit->setPlaceholderText("Search");
-	m_SearchEdit->show();
-	connect(m_SearchEdit->lineEdit(), (void(QLineEdit::*)(const QString&))(&QLineEdit::textEdited), [=] (const QString& str){
-		if (m_LastObject) {
-			refreshList(m_LastObject, str);
-		}
-	});
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "Point size");
+    item2->setData(1, Qt::EditRole, value.pointSize() < 0 ? 0 : value.pointSize());
+    item2->setData(1, NodeRole::Type, NodeType::FontPtSize);
+    item2->setData(1, NodeRole::Data, value.pointSize() < 0 ? 0 : value.pointSize());
+    iitem->addChild(item2);
 
-	m_Layout->addWidget(m_SearchEdit);
-	m_Layout->addWidget(m_ListWidget);
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "Pixel size");
+    item3->setData(1, Qt::EditRole, value.pixelSize() < 0 ? 0 : value.pixelSize());
+    item3->setData(1, NodeRole::Type, NodeType::FontPxSize);
+    item3->setData(1, NodeRole::Data, value.pixelSize() < 0 ? 0 : value.pixelSize());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "Bold");
+    item4->setData(1, NodeRole::Type, NodeType::FontBold);
+    item4->setData(1, NodeRole::Data, value.bold());
+    iitem->addChild(item4);
+
+    auto item5 = new QTreeWidgetItem;
+    item5->setFlags(item5->flags() | Qt::ItemIsEditable);
+    item5->setText(0, "Italic");
+    item5->setData(1, NodeRole::Type, NodeType::FontItalic);
+    item5->setData(1, NodeRole::Data, value.italic());
+    iitem->addChild(item5);
+
+    auto item6 = new QTreeWidgetItem;
+    item6->setFlags(item6->flags() | Qt::ItemIsEditable);
+    item6->setText(0, "Underline");
+    item6->setData(1, NodeRole::Type, NodeType::FontUnderline);
+    item6->setData(1, NodeRole::Data, value.underline());
+    iitem->addChild(item6);
+
+    auto item7 = new QTreeWidgetItem;
+    item7->setFlags(item7->flags() | Qt::ItemIsEditable);
+    item7->setText(0, "Overline");
+    item7->setData(1, NodeRole::Type, NodeType::FontOverline);
+    item7->setData(1, NodeRole::Data, value.overline());
+    iitem->addChild(item7);
+
+    auto item8 = new QTreeWidgetItem;
+    item8->setFlags(item8->flags() | Qt::ItemIsEditable);
+    item8->setText(0, "Strikeout");
+    item8->setData(1, NodeRole::Type, NodeType::FontStrikeout);
+    item8->setData(1, NodeRole::Data, value.strikeOut());
+    iitem->addChild(item8);
+
+    item->addChild(iitem);
 }
 
-const PropertiesWidget::Properties& PropertiesWidget::properties() const
+static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-	return m_Properties;
+    const auto value = QRect(map["x"].toInt(), map["y"].toInt(),
+        map["width"].toInt(), map["height"].toInt());
+    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+        arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, gt);
+
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "X");
+    item1->setData(1, Qt::EditRole, value.x());
+    item1->setData(1, NodeRole::Type, NodeType::GeometryX);
+    item1->setData(1, NodeRole::Data, value.x());
+    iitem->addChild(item1);
+
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "Y");
+    item2->setData(1, Qt::EditRole, value.y());
+    item2->setData(1, NodeRole::Type, NodeType::GeometryY);
+    item2->setData(1, NodeRole::Data, value.y());
+    iitem->addChild(item2);
+
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "Width");
+    item3->setData(1, Qt::EditRole, value.width());
+    item3->setData(1, NodeRole::Type, NodeType::GeometryWidth);
+    item3->setData(1, NodeRole::Data, value.width());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "Height");
+    item4->setData(1, Qt::EditRole, value.height());
+    item4->setData(1, NodeRole::Type, NodeType::GeometryHeight);
+    item4->setData(1, NodeRole::Data, value.height());
+    iitem->addChild(item4);
+
+    item->addChild(iitem);
 }
 
-const QColor& PropertiesWidget::color() const
+static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-	return m_Color;
+    const auto value = QRectF(map["x"].toReal(), map["y"].toReal(),
+        map["width"].toReal(), map["height"].toReal());
+    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+        arg((int)value.x()).arg((int)value.y()).
+        arg((int)value.width()).arg((int)value.height());
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, gt);
+
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "X");
+    item1->setData(1, Qt::EditRole, value.x());
+    item1->setData(1, NodeRole::Type, NodeType::GeometryFX);
+    item1->setData(1, NodeRole::Data, value.x());
+    iitem->addChild(item1);
+
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "Y");
+    item2->setData(1, Qt::EditRole, value.y());
+    item2->setData(1, NodeRole::Type, NodeType::GeometryFY);
+    item2->setData(1, NodeRole::Data, value.y());
+    iitem->addChild(item2);
+
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "Width");
+    item3->setData(1, Qt::EditRole, value.width());
+    item3->setData(1, NodeRole::Type, NodeType::GeometryFWidth);
+    item3->setData(1, NodeRole::Data, value.width());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "Height");
+    item4->setData(1, Qt::EditRole, value.height());
+    item4->setData(1, NodeRole::Type, NodeType::GeometryFHeight);
+    item4->setData(1, NodeRole::Data, value.height());
+    iitem->addChild(item4);
+
+    item->addChild(iitem);
 }
 
-void PropertiesWidget::setColor(const QColor& color)
+static void processColor(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-	m_Color = color;
-	QPalette p(palette());
-	p.setColor(QPalette::Window, m_Color);
-	setPalette(p);
+    const auto value = map[propertyName].value<QColor>();
+    const auto cc = value.name(QColor::HexArgb);
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, cc);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Color);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
 }
 
-QList<QQuickItem*>* PropertiesWidget::itemSource() const
+static void processBool(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-	return m_Items;
+    const auto value = map[propertyName].value<bool>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Bool);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
 }
 
-void PropertiesWidget::setItemSource(QList<QQuickItem*>* items)
+static void processString(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    m_Items = items;
+    const auto value = map[propertyName].value<QString>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::String);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
 }
 
-QList<QUrl>*PropertiesWidget::urlList() const
+static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    return m_UrlList;
+    auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
+    const auto value = map[propertyName].value<QUrl>();
+    auto dispText = value.toDisplayString();
+    if (value.isLocalFile()) {
+        dispText = value.toLocalFile().
+          remove(selectedControl->dir() + separator() + DIR_THIS + separator());
+    }
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, dispText);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Url);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
 }
 
-void PropertiesWidget::setUrlList(QList<QUrl>* urlList)
+static void processDouble(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    m_UrlList = urlList;
+    const auto value = map[propertyName].value<double>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Double);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
 }
 
-void PropertiesWidget::setRootContext(QQmlContext* const context)
+static void processInt(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-	m_rootContext = context;
+    const auto value = map[propertyName].value<int>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Int);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
 }
 
-void PropertiesWidget::refreshList(QObject* const selectedItem, const QString& filter)
+static void saveChanges(const QString& property, const QVariant& value)
 {
-	clearList();
+    auto scs = DesignManager::currentScene()->selectedControls();
 
-	if (filter.isEmpty() && m_LastObject != selectedItem) {
-		m_SearchEdit->lineEdit()->clear();
-	}
+    if (scs.isEmpty())
+        return;
 
-	/* Get selected item's properties */
-	auto meta = selectedItem->metaObject();
-	int count = meta->propertyCount();
-	for (int i = 0; i < count; i++) {
-		auto property = meta->property(i);
-		if (!QString(property.name()).startsWith("__") && QString(property.name()).contains(filter, Qt::CaseInsensitive)) {
-			m_Properties << Property(property, selectedItem);
-		}
-	}
+    QPointer<Control> sc = scs.at(0);
 
-	/* Update list widget */
-	refreshListWidget(selectedItem);
+    if (DesignManager::mode() == DesignManager::ControlGUI && property == TAG_ID)
+        SaveManager::setProperty(sc, property, value,
+            DesignManager::controlScene()->mainControl()->dir());
+    else
+        SaveManager::setProperty(sc, property, value);
 
-	setEnabled(true);
+    QMetaObject::Connection con;
+    con = QObject::connect(SaveManager::instance(),
+      &SaveManager::parserRunningChanged, [sc, con] {
+        if (sc.isNull()) {
+            QObject::disconnect(con);
+            return;
+        }
+        if (SaveManager::parserWorking() == false) {
+            sc->refresh();
+            QObject::disconnect(con);
+        }
+    });
+}
 
-	m_LastObject = selectedItem;
+static void saveChanges(const NodeType& type, const QVariant& value)
+{
+    QString property;
+    switch (type) {
+        case FontFamily:
+            property = "font.family";
+            break;
 
-	emit listRefreshed();
+        case FontPtSize:
+            property = "font.pointSize";
+            break;
+
+        case FontPxSize:
+            property = "font.pixelSize";
+            break;
+
+        case FontBold:
+            property = "font.bold";
+            break;
+
+        case FontItalic:
+            property = "font.italic";
+            break;
+
+        case FontUnderline:
+            property = "font.underline";
+            break;
+
+        case FontOverline:
+            property = "font.overline";
+            break;
+
+        case FontStrikeout:
+            property = "font.strikeout";
+            break;
+
+        case GeometryX:
+        case GeometryFX:
+            property = "x";
+            break;
+
+        case GeometryY:
+        case GeometryFY:
+            property = "y";
+            break;
+
+        case GeometryWidth:
+        case GeometryFWidth:
+            property = "width";
+            break;
+
+        case GeometryHeight:
+        case GeometryFHeight:
+            property = "height";
+            break;
+
+        default:
+            break;
+    }
+    saveChanges(property, value);
+}
+
+static void cleanProperties(PropertyMap& map)
+{
+    for (auto key : map.keys()) {
+        if (key.startsWith("__") ||
+            QString::fromUtf8(map.value(key).typeName()).isEmpty() ||
+            QString::fromUtf8(map.value(key).typeName()).
+            contains(QRegExp("Q([A-Za-z_][A-Za-z0-9_]*)\\*")))
+            map.remove(key);
+    }
+}
+
+//!
+//! ********************** [PropertiesDelegate] **********************
+//!
+
+class PropertiesDelegate : public QStyledItemDelegate
+{
+        Q_OBJECT
+
+    public:
+        explicit PropertiesDelegate(QTreeWidget* view, QObject* parent = 0);
+
+        QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option,
+                              const QModelIndex &index) const override;
+
+        void setEditorData(QWidget* ed, const QModelIndex &index) const override;
+
+        void setModelData(QWidget* ed, QAbstractItemModel* model,
+                          const QModelIndex &index) const override;
+
+        void updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem &option,
+                                  const QModelIndex &index) const override;
+
+        void paint(QPainter* painter, const QStyleOptionViewItem &opt,
+                   const QModelIndex &index) const override;
+
+        QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const override;
+
+    private:
+        QTreeWidget* m_view;
+};
+
+PropertiesDelegate::PropertiesDelegate(QTreeWidget* view, QObject* parent)
+    : QStyledItemDelegate(parent)
+    , m_view(view)
+{
+}
+
+QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
+    const QModelIndex &index) const
+{
+    QWidget* ed = 0;
+
+    if (index.column() == 0)
+        return ed;
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+    auto pIndex = m_view->model()->index(index.row(), 0, index.parent());
+    auto property = m_view->model()->data(pIndex, Qt::DisplayRole).toString();
+
+    switch (type) {
+        case FontFamily: {
+            auto editor = new QComboBox(parent);
+            editor->addItems(QFontDatabase().families());
+            connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
+        case FontPtSize:
+        case FontPxSize: {
+            auto editor = new QSpinBox(parent);
+            connect(editor, &QSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setMaximum(72);
+            editor->setMinimum(0);
+            ed = editor;
+            break;
+        }
+
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout:
+        case Bool: {
+            auto editor = new QCheckBox(parent);
+            connect(editor, &QCheckBox::toggled,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
+        case Color: {
+            auto editor = new QToolButton(parent);
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setText("Change Color");
+            ed = editor;
+
+            connect(editor, &QCheckBox::clicked, [this, property, index] ()
+            {
+                auto color = index.data(NodeRole::Data).value<QColor>();
+                color = QColorDialog::getColor(color, m_view, "Choose Color",
+                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+                if (color.isValid()) {
+                    m_view->model()->setData(index, color, NodeRole::Data);
+                    m_view->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
+                    saveChanges(property, color);
+                }
+            });
+            break;
+        }
+
+        case String: {
+            auto editor = new QLineEdit(parent);
+            connect(editor, &QLineEdit::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
+        case Id: {
+            auto editor = new QLineEdit(parent);
+            QRegExp rx("[a-z_][a-zA-Z0-9_]+");
+            QValidator* validator = new QRegExpValidator(rx, editor);
+            connect(editor, &QLineEdit::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setValidator(validator);
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
+        case Url: {
+            auto editor = new QLineEdit(parent);
+            connect(editor, &QLineEdit::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
+        case Double: {
+            auto editor = new QDoubleSpinBox(parent);
+            connect(editor, &QDoubleSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            if (property == "opacity") {
+                editor->setMaximum(1.0);
+                editor->setMinimum(0.0);
+                editor->setSingleStep(0.1);
+            } else {
+                editor->setMaximum(std::numeric_limits<double>::max());
+                editor->setMinimum(std::numeric_limits<double>::min());
+            }
+            ed = editor;
+            break;
+        }
+
+        case Int: {
+            auto editor = new QSpinBox(parent);
+            connect(editor, &QSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setMaximum(std::numeric_limits<int>::max());
+            editor->setMinimum(std::numeric_limits<int>::min());
+            ed = editor;
+            break;
+        }
+
+        case GeometryX:
+        case GeometryY:
+        case GeometryWidth:
+        case GeometryHeight: {
+            auto editor = new QSpinBox(parent);
+            connect(editor, &QSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setMaximum(std::numeric_limits<int>::max());
+            editor->setMinimum(std::numeric_limits<int>::min());
+            ed = editor;
+            break;
+        }
+
+        case GeometryFX:
+        case GeometryFY:
+        case GeometryFWidth:
+        case GeometryFHeight: {
+            auto editor = new QDoubleSpinBox(parent);
+            connect(editor, &QDoubleSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            editor->setMaximum(std::numeric_limits<double>::max());
+            editor->setMinimum(std::numeric_limits<double>::min());
+            ed = editor;
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return ed;
+}
+
+void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
+{
+    if (index.column() == 0)
+        return;
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+
+    switch (type) {
+        case FontFamily: {
+            auto val = index.model()->data(index, NodeRole::Data).value<QString>();
+            auto editor = static_cast<QComboBox*>(ed);
+            editor->setCurrentText(val);
+            break;
+        }
+
+        case FontPtSize:
+        case FontPxSize: {
+            auto val = index.model()->data(index, NodeRole::Data).value<int>();
+            auto editor = static_cast<QSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout:
+        case Bool: {
+            auto val = index.model()->data(index, NodeRole::Data).value<bool>();
+            auto editor = static_cast<QCheckBox*>(ed);
+            editor->setChecked(val);
+            break;
+        }
+
+        case Id:
+        case String: {
+            auto val = index.model()->data(index, NodeRole::Data).value<QString>();
+            auto editor = static_cast<QLineEdit*>(ed);
+            editor->setText(val);
+            break;
+        }
+
+        case Url: {
+            auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
+            auto val = index.model()->data(index, NodeRole::Data).value<QUrl>();
+            auto editor = static_cast<QLineEdit*>(ed);
+            auto dispText = val.toDisplayString();
+            if (val.isLocalFile()) {
+                dispText = val.toLocalFile().
+                  remove(selectedControl->dir() + separator() + DIR_THIS + separator());
+            }
+            editor->setText(dispText);
+            break;
+        }
+
+        case Double: {
+            auto val = index.model()->data(index, NodeRole::Data).value<double>();
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case Int: {
+            auto val = index.model()->data(index, NodeRole::Data).value<int>();
+            auto editor = static_cast<QSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case GeometryX:
+        case GeometryY:
+        case GeometryWidth:
+        case GeometryHeight: {
+            auto val = index.model()->data(index, NodeRole::Data).value<int>();
+            auto editor = static_cast<QSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        case GeometryFX:
+        case GeometryFY:
+        case GeometryFWidth:
+        case GeometryFHeight: {
+            auto val = index.model()->data(index, NodeRole::Data).value<double>();
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            editor->setValue(val);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
+    const QModelIndex &index) const
+{
+    if (index.column() == 0)
+        return;
+
+    QVariant val;
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+    auto pIndex = model->index(index.row(), 0, index.parent());
+    auto property = model->data(pIndex, Qt::DisplayRole).toString();
+
+    switch (type) {
+        case FontFamily: {
+            auto editor = static_cast<QComboBox*>(ed);
+            val = editor->currentText();
+            auto preVal = model->data(index, Qt::EditRole).toString();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
+            pVal.replace(preVal, val.toString());
+            model->setData(pIndex, pVal, Qt::DisplayRole);
+            saveChanges(type, val);
+            break;
+        }
+
+        case FontPtSize:
+        case FontPxSize: {
+            auto editor = static_cast<QSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            int pxSize, ptSize;
+            if (type == FontPtSize) {
+                auto bIndex = model->index(index.row() + 1, 1, index.parent());
+                pxSize = model->data(bIndex, NodeRole::Data).toInt();
+                ptSize = val.toInt();
+            } else {
+                auto bIndex = model->index(index.row() - 1, 1, index.parent());
+                ptSize = model->data(bIndex, NodeRole::Data).toInt();
+                pxSize = val.toInt();
+            }
+            bool px = pxSize > 0 ? true : false;
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
+            pVal.replace(QRegExp(",.*"), ", " + QString::number(px ? pxSize : ptSize) + (px ? "px]" : "pt]"));
+            model->setData(pIndex, pVal, Qt::DisplayRole);
+            saveChanges(type, val);
+            break;
+        }
+
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout: {
+            auto editor = static_cast<QCheckBox*>(ed);
+            val = editor->isChecked();
+            model->setData(index, val, NodeRole::Data);
+            saveChanges(type, val);
+            break;
+        }
+
+        case Bool: {
+            auto editor = static_cast<QCheckBox*>(ed);
+            val = editor->isChecked();
+            model->setData(index, val, NodeRole::Data);
+            saveChanges(property, val);
+            break;
+        }
+
+        case Id:
+        case String: {
+            auto editor = static_cast<QLineEdit*>(ed);
+            val = editor->text();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
+            break;
+        }
+
+        case Url: {
+            auto editor = static_cast<QLineEdit*>(ed);
+            val = QUrl(editor->text());
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
+            break;
+        }
+
+        case Double: {
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
+            break;
+        }
+
+        case Int: {
+            auto editor = static_cast<QSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val);
+            break;
+        }
+
+        case GeometryX:
+        case GeometryY:
+        case GeometryWidth:
+        case GeometryHeight: {
+            auto editor = static_cast<QSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toInt();
+            auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toInt();
+            auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toInt();
+            auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toInt();
+
+            const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+                arg(x).arg(y).arg(w).arg(h);
+
+            model->setData(pIndex, gt, Qt::DisplayRole);
+            saveChanges(type, val);
+            break;
+        }
+
+        case GeometryFX:
+        case GeometryFY:
+        case GeometryFWidth:
+        case GeometryFHeight: {
+            auto editor = static_cast<QDoubleSpinBox*>(ed);
+            val = editor->value();
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+
+            // Update parent node
+            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+            auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toReal();
+            auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toReal();
+            auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toReal();
+            auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toReal();
+
+            const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+                arg(x).arg(y).arg(w).arg(h);
+
+            model->setData(pIndex, gt, Qt::DisplayRole);
+            saveChanges(type, val);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
+    const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QStyledItemDelegate::updateEditorGeometry(ed, option, index);
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+
+    switch (type) {
+        default:
+            ed->setGeometry(ed->geometry().adjusted(0, 0, -1, -1));
+            break;
+    }
+}
+
+void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
+                          const QModelIndex &index) const
+{
+    QStyleOptionViewItem option = opt;
+    const QAbstractItemModel* model = index.model();
+    Q_ASSERT(model);
+
+    if (model->parent(index).isValid()) {
+        if (index.row() % 2) {
+            if (index.column() == 0) {
+                QRectF mrect(option.rect);
+                mrect.setX(0.5);
+                painter->fillRect(mrect, QColor("#EDF3FE"));
+            } else {
+                painter->fillRect(option.rect, QColor("#EDF3FE"));
+            }
+        }
+    } else {
+        painter->fillRect(option.rect, QColor("#C5C9CC"));
+        option.palette.setColor(QPalette::Highlight, QColor("#C5C9CC"));
+    }
+
+    if (index.column() == 0) {
+        QRectF branchRect = QRectF(0, option.rect.top(),
+                                   option.rect.x(), option.rect.height());
+
+        QBrush branchColor = option.palette.base();
+        if(option.state & QStyle::State_Selected) {
+            branchColor = option.palette.highlight();
+        } else {
+            if (!model->parent(index).isValid())
+                branchColor = QColor("#C5C9CC");
+            else if (index.row() % 2)
+                branchColor = QColor("#EDF3FE");
+        }
+        painter->fillRect(branchRect, branchColor);
+
+        if (model->rowCount(index)) {
+            static const int i = 9; // ### hardcoded in qcommonstyle.cpp
+            QRect r = option.rect;
+            QStyleOption branchOption;
+            branchOption.rect = QRect(r.left() - i,
+                                      r.top() + (r.height() - i)/2, i, i);
+            branchOption.state = QStyle::State_Children;
+
+            if (m_view->isExpanded(index))
+                branchOption.state |= QStyle::State_Open;
+
+            qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
+        }
+    }
+
+    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
+    if (!model->parent(index).isValid() && mask) {
+        option.font.setWeight(QFont::DemiBold);
+    }
+
+    QStyledItemDelegate::paint(painter, option, index);
+
+    auto type = index.data(NodeRole::Type).value<NodeType>();
+    QStyleOptionButton eoption;
+    eoption.initFrom(m_view);
+    eoption.rect = option.rect;
+
+    switch (type) {
+        case FontBold:
+        case FontItalic:
+        case FontUnderline:
+        case FontOverline:
+        case FontStrikeout:
+        case Bool: {
+            bool value = index.data(NodeRole::Data).value<bool>();
+            eoption.state |= value ? QStyle::State_On : QStyle::State_Off;
+            m_view->style()->drawControl(QStyle::CE_CheckBox, &eoption, painter, m_view);
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    const QColor color = static_cast<QRgb>(qApp->style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
+    const QPen oldPen = painter->pen();
+    painter->setPen(QPen(color));
+
+    if (index.column() == 0) {
+        painter->drawLine(QPointF(0.5, option.rect.y() + 0.5),
+                          QPointF(0.5, option.rect.bottom() + 0.5));
+        if (model->parent(index).isValid()) {
+            painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
+                              option.rect.right() + 0.5, option.rect.bottom() + 0.5);
+        }
+    } else {
+        painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
+                          option.rect.right() + 0.5, option.rect.bottom() + 0.5);
+    }
+
+    painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
+                      QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
+    painter->setPen(oldPen);
+}
+
+QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
+{
+    return QStyledItemDelegate::sizeHint(opt, index) + QSize(4, 4);
+}
+
+//!
+//! *********************** [PropertiesWidget] ***********************
+//!
+
+PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
+{
+    setAutoFillBackground(true);
+    QPalette p(palette());
+    p.setColor(QPalette::Window, QColor("#E0E4E7"));
+    setPalette(p);
+
+    QPalette p2(_treeWidget.palette());
+    p2.setColor(QPalette::Base, QColor("#F3F7FA"));
+    p2.setColor(QPalette::Highlight, QColor("#E0E4E7"));
+    p2.setColor(QPalette::Text, QColor("#202427"));
+    p2.setColor(QPalette::HighlightedText, QColor("#202427"));
+    _treeWidget.setPalette(p2);
+
+    QPalette p3(_lblMsg.palette());
+    p3.setColor(QPalette::WindowText, "#a0a4a7");
+    _lblMsg.setParent(&_treeWidget);
+    _lblMsg.setText("No items selected");
+    _lblMsg.setAlignment(Qt::AlignCenter);
+    _lblMsg.setPalette(p3);
+
+    _treeWidget.setHorizontalScrollMode(ToolboxTree::ScrollPerPixel);
+    _treeWidget.setVerticalScrollMode(ToolboxTree::ScrollPerPixel);
+    _treeWidget.setSelectionBehavior(ToolboxTree::SelectRows);
+    _treeWidget.setFocusPolicy(Qt::NoFocus);
+    _treeWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    _treeWidget.setEditTriggers(QAbstractItemView::AllEditTriggers);
+    _treeWidget.setDragEnabled(false);
+    _treeWidget.setDropIndicatorShown(false);
+    _treeWidget.setColumnCount(2);
+    _treeWidget.headerItem()->setText(0, "Property");
+    _treeWidget.headerItem()->setText(1, "Value");
+    _treeWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _treeWidget.horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    _treeWidget.setIndentation(fit(10));
+    _treeWidget.setItemDelegate(new PropertiesDelegate(&_treeWidget, &_treeWidget));
+    _treeWidget.header()->resizeSection(0, fit(170));
+
+    _layout.setSpacing(fit(2));
+    _layout.setContentsMargins(fit(3), fit(3), fit(3), fit(3));
+
+    _searchEdit.setPlaceholderText("Filter");
+    _searchEdit.setClearButtonEnabled(true);
+    connect(&_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
+
+    _layout.addWidget(&_searchEdit);
+    _layout.addWidget(&_treeWidget);
+
+    setLayout(&_layout);
+
+    /* Prepare Properties Widget */
+    connect(DesignManager::formScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
+    connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
+    connect(DesignManager::instance(), SIGNAL(modeChanged()), SLOT(handleSelectionChange()));
+    connect(ControlWatcher::instance(), SIGNAL(geometryChanged()), SLOT(handleSelectionChange()));
 }
 
 void PropertiesWidget::clearList()
 {
-	m_ListWidget->clear();
-	m_Properties.clear();
-	m_LastObject = nullptr;
+    for (int i = 0; i < _treeWidget.topLevelItemCount(); ++i)
+        qDeleteAll(_treeWidget.topLevelItem(i)->takeChildren());
+
+    _treeWidget.clear();
+    _lblMsg.setVisible(true);
 }
 
-void PropertiesWidget::refreshListWidget(QObject* const selectedItem)
+void PropertiesWidget::refreshList()
 {
-	QListWidgetItem* item = new QListWidgetItem;
-	PropertyItem* propertyItem = new PropertyItem(selectedItem, m_rootContext);
-	propertyItem->setItemSource(m_Items);
-    propertyItem->setUrlList(m_UrlList);
-	if (!propertyItem->isValid()) {
-		delete item;
-		propertyItem->deleteLater();
-		return;
-	}
-	connect(propertyItem, &PropertyItem::valueApplied, [&] {
-		emit idChanged(m_rootContext->nameForObject(selectedItem));
-	});
-	propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
-	propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
-	item->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
-	m_ListWidget->addItem(item);
-	m_ListWidget->setItemWidget(item, propertyItem);
+    clearList();
 
-	// ***
+    auto selectedControls = DesignManager::currentScene()->selectedControls();
 
-	for (auto property : m_Properties) {
-		QListWidgetItem* item = new QListWidgetItem;
-		PropertyItem* propertyItem = new PropertyItem(property, m_rootContext);
-		propertyItem->setItemSource(m_Items);
-        propertyItem->setUrlList(m_UrlList);
-		if (!propertyItem->isValid()) {
-			delete item;
-			propertyItem->deleteLater();
-			continue;
-		}
-		connect(propertyItem, &PropertyItem::valueApplied, [&] {
-			emit propertyChanged(property);
-		});
-		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
-		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
-		item->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
-		m_ListWidget->addItem(item);
-		m_ListWidget->setItemWidget(item, propertyItem);
-	}
+    if (selectedControls.size() != 1)
+        return;
+
+    auto propertyNodes = selectedControls[0]->properties();
+
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem;
+        item->setText(0, "Type");
+        {
+            QTreeWidgetItem* iitem = new QTreeWidgetItem;
+            iitem->setText(0, "Type");
+            iitem->setText(1, propertyNodes.first().cleanClassName);
+            item->addChild(iitem);
+
+            QTreeWidgetItem* jitem = new QTreeWidgetItem;
+            jitem->setText(0, "id");
+            jitem->setData(1, Qt::EditRole, selectedControls[0]->id());
+            jitem->setData(1, NodeRole::Data, selectedControls[0]->id());
+            jitem->setData(1, NodeRole::Type, NodeType::Id);
+            jitem->setFlags(jitem->flags() | Qt::ItemIsEditable);
+            item->addChild(jitem);
+        }
+        _treeWidget.addTopLevelItem(item);
+        _treeWidget.expandItem(item);
+    }
+
+    for (const auto& propertyNode : propertyNodes) {
+        auto metaObject = propertyNode.metaObject;
+        auto map = propertyNode.propertyMap;
+        cleanProperties(map);
+
+        if (map.isEmpty())
+            continue;
+
+        auto item = new QTreeWidgetItem;
+        item->setText(0, propertyNode.cleanClassName);
+
+        for (auto propertyName : map.keys()) {
+            switch (map[propertyName].type())
+            {
+                case QVariant::Font: {
+                    processFont(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::Color: {
+                    processColor(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::Bool: {
+                    processBool(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::String: {
+                    processString(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::Url: {
+                    processUrl(item, propertyName, map);
+                    break;
+                }
+
+                case QVariant::Double: {
+                    if (propertyName == "x" || propertyName == "y" ||
+                        propertyName == "width" || propertyName == "height") {
+                        if (propertyName == "x")
+                            processGeometryF(item, "geometry", map);
+                    } else {
+                        processDouble(item, propertyName, map);
+                    }
+                    break;
+                }
+
+                case QVariant::Int: {
+                    QMetaProperty mp;
+                    for (int i = 0; i < metaObject->propertyCount(); i++)
+                        if (metaObject->property(i).name() == propertyName)
+                            mp = metaObject->property(i);
+
+                    if ((mp.isValid() && (mp.isEnumType() || mp.isFlagType())) ||
+                        propertyName == "inputMethodHints" ||
+                        propertyName == "horizontalAlignment" ||
+                        propertyName == "verticalAlignment" ||
+                        propertyName == "horizontalScrollBarPolicy" ||
+                        propertyName == "verticalScrollBarPolicy" ||
+                        propertyName == "wrapMode" ||
+                        propertyName == "orientation" ||
+                        propertyName == "tickmarkAlignment" ||
+                        propertyName == "echoMode") {
+                        continue;
+                    }
+
+                    if (propertyName == "x" || propertyName == "y" ||
+                        propertyName == "width" || propertyName == "height") {
+                        if (propertyName == "x")
+                            processGeometry(item, "geometry", map);
+                    } else {
+                        processInt(item, propertyName, map);
+                    }
+                    break;
+                }
+
+                default: {
+                    continue;
+                    // QTreeWidgetItem* iitem = new QTreeWidgetItem;
+                    // iitem->setText(0, propertyName);
+                    // iitem->setText(1, map[propertyName].typeName());
+                    // item->addChild(iitem);
+                    // break;
+                }
+            }
+        }
+        _treeWidget.addTopLevelItem(item);
+        _treeWidget.expandItem(item);
+    }
+
+    filterList(_searchEdit.text());
+    _lblMsg.setHidden(_treeWidget.topLevelItemCount() > 0);
 }
 
-void PropertiesWidget::showEvent(QShowEvent* event)
+void PropertiesWidget::handleSelectionChange()
 {
-	fixItemsGeometry();
-	QWidget::showEvent(event);
+    auto selectedControls = DesignManager::currentScene()->selectedControls();
+
+    if (selectedControls.size() != 1) {
+        clearList();
+        return;
+    }
+
+    refreshList();
 }
 
-void PropertiesWidget::fixItemsGeometry()
+void PropertiesWidget::filterList(const QString& filter)
 {
-	for (int i=0; i<m_ListWidget->count(); i++) {
-		QWidget* propertyItem = m_ListWidget->itemWidget(m_ListWidget->item(i));
-		propertyItem->resize(m_ListWidget->width() - fit(4), propertyItem->height());
-		propertyItem->setFixedWidth(m_ListWidget->width() - fit(4));
-		m_ListWidget->item(i)->setSizeHint(QSize(m_ListWidget->width() - fit(4),propertyItem->sizeHint().height()));
-	}
+    for (int i = 0; i < _treeWidget.topLevelItemCount(); i++) {
+        auto tli = _treeWidget.topLevelItem(i);
+        auto tlv = false;
+
+        for (int j = 0; j < tli->childCount(); j++) {
+            auto tci = tli->child(j);
+            auto tcv = false;
+            auto vv = tci->text(0).contains(filter, Qt::CaseInsensitive);
+
+            for (int z = 0; z < tci->childCount(); z++) {
+                auto tdi = tci->child(z);
+                auto v = (filter.isEmpty() || vv) ? true :
+                    tdi->text(0).contains(filter, Qt::CaseInsensitive);
+
+                tdi->setHidden(!v);
+                if (v)
+                    tcv = v;
+            }
+
+            auto v = filter.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
+            tci->setHidden(!v);
+            if (v)
+                tlv = v;
+        }
+
+        auto v = filter.isEmpty() ? true : tlv;
+        tli->setHidden(!v);
+    }
 }
+
+QSize PropertiesWidget::sizeHint() const
+{
+    return QSize(fit(340), fit(2600)); //FIXME:
+}
+
+void PropertiesWidget::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    _lblMsg.setGeometry(rect());
+}
+
+#include "propertieswidget.moc"

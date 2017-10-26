@@ -1,28 +1,19 @@
 #include <buildsscreen.h>
 #include <fit.h>
 #include <projectmanager.h>
-#include <QQmlContext>
-#include <QQmlProperty>
-#include <QQuickItem>
 #include <usermanager.h>
-#include <QDateTime>
-#include <QTimer>
-#include <QMessageBox>
-#include <splashscreen.h>
-#include <scenemanager.h>
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <toolsmanager.h>
 #include <savemanager.h>
-#include <splashscreen.h>
-#include <scenemanager.h>
-#include <QtConcurrent>
-#include <QQmlEngine>
 #include <projectsscreen.h>
 #include <dirlocker.h>
-#include <QDebug>
 #include <zipper.h>
+#include <flatbutton.h>
+#include <global.h>
+#include <mainwindow.h>
+
 #include <QStandardPaths>
 #include <QUrl>
 #include <QNetworkAccessManager>
@@ -33,8 +24,18 @@
 #include <QString>
 #include <QApplication>
 #include <QPointer>
-#include <flatbutton.h>
+#include <QDebug>
+#include <QtMath>
+#include <QQmlEngine>
+#include <QDateTime>
+#include <QTimer>
+#include <QMessageBox>
+#include <QQmlContext>
+#include <QQmlProperty>
+#include <QQuickItem>
 
+#define cW (MainWindow::instance()->centralWidget())
+#define pW (MainWindow::instance()->progressWidget())
 #define URL QString("https://139.59.149.173/api/v1/build/")
 
 using namespace Fit;
@@ -58,7 +59,7 @@ class BuildsScreenPrivate {
         QString determineBuildExtension(const QString label);
 };
 
-BuildsScreenPrivate* BuildsScreen::m_d = nullptr;
+BuildsScreenPrivate* BuildsScreen::_d = nullptr;
 
 BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     : parent(w)
@@ -87,7 +88,7 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     exitButton.show();
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
-        SceneManager::show("studioScene", SceneManager::ToRight);
+        cW->showWidget(Screen::STUDIO);
     });
 
     buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "buildPage", parent->engine()).value<QObject*>();
@@ -146,18 +147,18 @@ QString BuildsScreenPrivate::determineBuildExtension(const QString label)
 
 BuildsScreen::~BuildsScreen()
 {
-    delete m_d;
+    delete _d;
 }
 
 BuildsScreen* BuildsScreen::instance()
 {
-    return m_d->parent;
+    return _d->parent;
 }
 
 BuildsScreen::BuildsScreen(QWidget *parent) : QQuickWidget(parent)
 {
-    if (m_d) return;
-    m_d = new BuildsScreenPrivate(this);
+    if (_d) return;
+    _d = new BuildsScreenPrivate(this);
 }
 
 void BuildsScreen::resizeEvent(QResizeEvent* event)
@@ -168,11 +169,11 @@ void BuildsScreen::resizeEvent(QResizeEvent* event)
 
 void BuildsScreen::handleBuildButtonClicked()
 {
-    auto buildLabel = QQmlProperty::read(m_d->buildPage, "currentBuildLabel").toString();
-    auto savesDir = SaveManager::savesDirectory();
-    if (savesDir.isEmpty()) return;
+    auto buildLabel = QQmlProperty::read(_d->buildPage, "currentBuildLabel").toString();
+//    auto savesDir = SaveManager::savesDirectory();
+//    if (savesDir.isEmpty()) return;
     auto projectFilename = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0] + separator() + "objectwheel_project.zip";
-    Zipper::compressDir(savesDir, projectFilename, "dashboard");
+//    Zipper::compressDir(savesDir, projectFilename, "dashboard");
     QByteArray data = rdfile(projectFilename);
     rm(projectFilename);
     QByteArray boundary = "-----------------------------7d935033608e2";
@@ -186,200 +187,200 @@ void BuildsScreen::handleBuildButtonClicked()
     request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
     request.setRawHeader("token", QByteArray().insert(0, QString("{\"token\" : \"%1\"}").arg(UserManager::currentSessionsToken())));
     request.setHeader(QNetworkRequest::ContentLengthHeader,body.size());
-    m_d->reply = m_d->manager->post(request, body);
+    _d->reply = _d->manager->post(request, body);
 
-    QQmlProperty::write(m_d->swipeView, "currentIndex", 1);
-    QQmlProperty::write(m_d->progressPage, "informativeText", "Establishing connection");
-    QQmlProperty::write(m_d->progressPage, "mbText", "-");
-    QQmlProperty::write(m_d->progressPage, "speedText", "-");
-    QQmlProperty::write(m_d->progressPage, "progressbarValue", 0.0);
-    QMetaObject::invokeMethod(m_d->progressPage, "startWaitEffect");
-    QMetaObject::invokeMethod(m_d->progressPage, "showBtnCancel");
-    m_d->exitButton.hide();
+    QQmlProperty::write(_d->swipeView, "currentIndex", 1);
+    QQmlProperty::write(_d->progressPage, "informativeText", "Establishing connection");
+    QQmlProperty::write(_d->progressPage, "mbText", "-");
+    QQmlProperty::write(_d->progressPage, "speedText", "-");
+    QQmlProperty::write(_d->progressPage, "progressbarValue", 0.0);
+    QMetaObject::invokeMethod(_d->progressPage, "startWaitEffect");
+    QMetaObject::invokeMethod(_d->progressPage, "showBtnCancel");
+    _d->exitButton.hide();
 
-    connect(m_d->reply, &QNetworkReply::finished, [=] {
-        if (!m_d->reply->isOpen() || !m_d->reply->isReadable() || m_d->reply->error() != QNetworkReply::NoError) {
-            m_d->elapsedTimer.invalidate();
-            m_d->times.clear();
-            m_d->bytes.clear();
-            if (m_d->reply) m_d->reply->deleteLater();
+    connect(_d->reply, &QNetworkReply::finished, [=] {
+        if (!_d->reply->isOpen() || !_d->reply->isReadable() || _d->reply->error() != QNetworkReply::NoError) {
+            _d->elapsedTimer.invalidate();
+            _d->times.clear();
+            _d->bytes.clear();
+            if (_d->reply) _d->reply->deleteLater();
             return;
         }
 
-        QQmlProperty::write(m_d->progressPage, "btnCancelEnabled", false);
-        auto response = m_d->reply->readAll();
+        QQmlProperty::write(_d->progressPage, "btnCancelEnabled", false);
+        auto response = _d->reply->readAll();
         QString name = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation)[0] + separator() + buildLabel;
 
         QString nname;
         int count = 0;
         do {
             if (count == 0) {
-                nname = name + m_d->determineBuildExtension(buildLabel);
+                nname = name + _d->determineBuildExtension(buildLabel);
             } else {
-                nname = name + "_" + QString::number(count) + m_d->determineBuildExtension(buildLabel);
+                nname = name + "_" + QString::number(count) + _d->determineBuildExtension(buildLabel);
             }
             count++;
         } while (exists(nname));
 
         wrfile(nname, response);
 
-        QQmlProperty::write(m_d->progressPage, "informativeText", "Done");
-        QMetaObject::invokeMethod(m_d->progressPage, "stopWaitEffect");
-        QMetaObject::invokeMethod(m_d->progressPage, "showBtnOk");
-        QQmlProperty::write(m_d->progressPage, "btnCancelEnabled", true);
+        QQmlProperty::write(_d->progressPage, "informativeText", "Done");
+        QMetaObject::invokeMethod(_d->progressPage, "stopWaitEffect");
+        QMetaObject::invokeMethod(_d->progressPage, "showBtnOk");
+        QQmlProperty::write(_d->progressPage, "btnCancelEnabled", true);
 
-        m_d->elapsedTimer.invalidate();
-        m_d->times.clear();
-        m_d->bytes.clear();
-        if (m_d->reply) m_d->reply->deleteLater();
+        _d->elapsedTimer.invalidate();
+        _d->times.clear();
+        _d->bytes.clear();
+        if (_d->reply) _d->reply->deleteLater();
     });
-    connect(m_d->reply, (void (QNetworkReply::*)(qint64, qint64))&QNetworkReply::downloadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
-        QQmlProperty::write(m_d->progressPage, "informativeText", "Downloading your build");
-        QString sentStr = m_d->bytesString(bytesSent, false);
+    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))&QNetworkReply::downloadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+        QQmlProperty::write(_d->progressPage, "informativeText", "Downloading your build");
+        QString sentStr = _d->bytesString(bytesSent, false);
         if (bytesTotal == -1) {
-            QQmlProperty::write(m_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
-            QQmlProperty::write(m_d->progressPage, "progressbarValue", 0.6);
-            QQmlProperty::write(m_d->progressPage, "progressbarValue2", 0.75);
+            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
+            QQmlProperty::write(_d->progressPage, "progressbarValue", 0.6);
+            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.75);
         } else if (bytesTotal == 0) {
             Q_UNUSED(bytesTotal);
         } else {
-            QString totalStr = m_d->bytesString(bytesTotal, true);
-            QQmlProperty::write(m_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
-            QQmlProperty::write(m_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
-            QQmlProperty::write(m_d->progressPage, "progressbarValue2", 0.3 + ((qreal)bytesSent/bytesTotal) * 0.7);
+            QString totalStr = _d->bytesString(bytesTotal, true);
+            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
+            QQmlProperty::write(_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
+            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.3 + ((qreal)bytesSent/bytesTotal) * 0.7);
         }
 
         if (bytesSent > 0 && bytesSent != bytesTotal)  {
-            if (m_d->elapsedTimer.isValid()) {
-                m_d->times.append(m_d->elapsedTimer.elapsed());
+            if (_d->elapsedTimer.isValid()) {
+                _d->times.append(_d->elapsedTimer.elapsed());
             }
-            m_d->bytes.append(bytesSent);
-            m_d->elapsedTimer.restart();
+            _d->bytes.append(bytesSent);
+            _d->elapsedTimer.restart();
 
-            if (m_d->bytes.size() > 5) {
-                m_d->bytes.removeFirst();
-                m_d->times.removeFirst();
+            if (_d->bytes.size() > 5) {
+                _d->bytes.removeFirst();
+                _d->times.removeFirst();
             }
 
             qreal collection = 0;
-            for (int i = 0; i < m_d->times.size(); i++) {
-                collection += (m_d->bytes[i + 1] - m_d->bytes[i])/((qreal)m_d->times[i]);
+            for (int i = 0; i < _d->times.size(); i++) {
+                collection += (_d->bytes[i + 1] - _d->bytes[i])/((qreal)_d->times[i]);
             }
             if (collection > 0) {
-                QQmlProperty::write(m_d->progressPage, "speedText", m_d->bytesString((collection / m_d->times.size()) * 1000, true) + "/sec");
+                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString((collection / _d->times.size()) * 1000, true) + "/sec");
             } else {
-                QQmlProperty::write(m_d->progressPage, "speedText", m_d->bytesString(bytesSent, true) + "/sec");
+                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString(bytesSent, true) + "/sec");
             }
         } else {
-            m_d->elapsedTimer.invalidate();
-            m_d->times.clear();
-            m_d->bytes.clear();
+            _d->elapsedTimer.invalidate();
+            _d->times.clear();
+            _d->bytes.clear();
         }
     });
-    connect(m_d->reply, (void (QNetworkReply::*)(qint64, qint64))&QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
-        QQmlProperty::write(m_d->progressPage, "informativeText", "Uploading your project");
-        QString sentStr = m_d->bytesString(bytesSent, false);
+    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))&QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+        QQmlProperty::write(_d->progressPage, "informativeText", "Uploading your project");
+        QString sentStr = _d->bytesString(bytesSent, false);
         if (bytesTotal == -1) {
-            QQmlProperty::write(m_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
-            QQmlProperty::write(m_d->progressPage, "progressbarValue", 0.6);
-            QQmlProperty::write(m_d->progressPage, "progressbarValue2", 0.3);
+            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
+            QQmlProperty::write(_d->progressPage, "progressbarValue", 0.6);
+            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.3);
         } else if (bytesTotal == 0) {
             Q_UNUSED(bytesTotal);
         } else {
-            QString totalStr = m_d->bytesString(bytesTotal, true);
-            QQmlProperty::write(m_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
-            QQmlProperty::write(m_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
-            QQmlProperty::write(m_d->progressPage, "progressbarValue2", (((qreal)bytesSent / bytesTotal) / 2) * 0.3);
+            QString totalStr = _d->bytesString(bytesTotal, true);
+            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
+            QQmlProperty::write(_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
+            QQmlProperty::write(_d->progressPage, "progressbarValue2", (((qreal)bytesSent / bytesTotal) / 2) * 0.3);
         }
 
         if (bytesSent > 0 && bytesSent != bytesTotal)  {
-            if (m_d->elapsedTimer.isValid()) {
-                m_d->times.append(m_d->elapsedTimer.elapsed());
+            if (_d->elapsedTimer.isValid()) {
+                _d->times.append(_d->elapsedTimer.elapsed());
             }
-            m_d->bytes.append(bytesSent);
-            m_d->elapsedTimer.restart();
+            _d->bytes.append(bytesSent);
+            _d->elapsedTimer.restart();
 
-            if (m_d->bytes.size() > 5) {
-                m_d->bytes.removeFirst();
-                m_d->times.removeFirst();
+            if (_d->bytes.size() > 5) {
+                _d->bytes.removeFirst();
+                _d->times.removeFirst();
             }
 
             qreal collection = 0;
-            for (int i = 0; i < m_d->times.size(); i++) {
-                collection += (m_d->bytes[i + 1] - m_d->bytes[i])/((qreal)m_d->times[i]);
+            for (int i = 0; i < _d->times.size(); i++) {
+                collection += (_d->bytes[i + 1] - _d->bytes[i])/((qreal)_d->times[i]);
             }
             if (collection > 0) {
-                QQmlProperty::write(m_d->progressPage, "speedText", m_d->bytesString((collection / m_d->times.size()) * 1000, true) + "/sec");
+                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString((collection / _d->times.size()) * 1000, true) + "/sec");
             } else {
-                QQmlProperty::write(m_d->progressPage, "speedText", m_d->bytesString(bytesSent, true) + "/sec");
+                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString(bytesSent, true) + "/sec");
             }
         } else {
-            m_d->elapsedTimer.invalidate();
-            m_d->times.clear();
-            m_d->bytes.clear();
+            _d->elapsedTimer.invalidate();
+            _d->times.clear();
+            _d->bytes.clear();
         }
         if (bytesSent == bytesTotal) {
-            QQmlProperty::write(m_d->progressPage, "informativeText", "Your build getting prepared");
-            m_d->elapsedTimer.invalidate();
-            m_d->times.clear();
-            m_d->bytes.clear();
+            QQmlProperty::write(_d->progressPage, "informativeText", "Your build getting prepared");
+            _d->elapsedTimer.invalidate();
+            _d->times.clear();
+            _d->bytes.clear();
         }
     });
-    connect(m_d->reply, (void (QNetworkReply::*)(QList<QSslError>))&QNetworkReply::sslErrors, [=] { m_d->reply->ignoreSslErrors(); });
-    connect(m_d->reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=](QNetworkReply::NetworkError e)
+    connect(_d->reply, (void (QNetworkReply::*)(QList<QSslError>))&QNetworkReply::sslErrors, [=] { _d->reply->ignoreSslErrors(); });
+    connect(_d->reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=](QNetworkReply::NetworkError e)
     {
         if (e != QNetworkReply::OperationCanceledError) {
-            QQmlProperty::write(m_d->swipeView, "currentIndex", 0);
+            QQmlProperty::write(_d->swipeView, "currentIndex", 0);
             QMetaEnum metaEnum = QMetaEnum::fromType<QNetworkReply::NetworkError>();
 
             if (e == QNetworkReply::AuthenticationRequiredError) {
-                QQmlProperty::write(m_d->toast, "text.text", "<p><b>Authentication Error</b></p>"
+                QQmlProperty::write(_d->toast, "text.text", "<p><b>Authentication Error</b></p>"
                                     "<p>Your email address or password is wrong. Please contact to support.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
-                QQmlProperty::write(m_d->toast, "base.height", qFloor(fit(95)));
-                QQmlProperty::write(m_d->toast, "duration", 10000);
+                QQmlProperty::write(_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(_d->toast, "base.height", qFloor(fit(95)));
+                QQmlProperty::write(_d->toast, "duration", 10000);
             } else if (e == QNetworkReply::ContentOperationNotPermittedError) {
-                QQmlProperty::write(m_d->toast, "text.text", "<p><b>Access Denied</b></p>"
+                QQmlProperty::write(_d->toast, "text.text", "<p><b>Access Denied</b></p>"
                                     "<p>Your account doesn't have any permission to use this feature, please upgrade your subscription plan.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
-                QQmlProperty::write(m_d->toast, "base.height", qFloor(fit(110)));
-                QQmlProperty::write(m_d->toast, "duration", 10000);
+                QQmlProperty::write(_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(_d->toast, "base.height", qFloor(fit(110)));
+                QQmlProperty::write(_d->toast, "duration", 10000);
             }  else if (e == QNetworkReply::ServiceUnavailableError ||
                         e == QNetworkReply::UnknownServerError ||
                         e == QNetworkReply::InternalServerError ) {
-                QQmlProperty::write(m_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
+                QQmlProperty::write(_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
                                     "<p>Server error has occurred, please try again later.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
-                QQmlProperty::write(m_d->toast, "base.height",qFloor(fit(95)));
-                QQmlProperty::write(m_d->toast, "duration", 10000);
+                QQmlProperty::write(_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(_d->toast, "base.height",qFloor(fit(95)));
+                QQmlProperty::write(_d->toast, "duration", 10000);
             } else {
-                QQmlProperty::write(m_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
+                QQmlProperty::write(_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
                                     "<p>Either check your internet connection or contact to support.</p>");
-                QQmlProperty::write(m_d->toast, "base.width", qFloor(fit(330)));
-                QQmlProperty::write(m_d->toast, "base.height", qFloor(fit(95)));
-                QQmlProperty::write(m_d->toast, "duration", 10000);
+                QQmlProperty::write(_d->toast, "base.width", qFloor(fit(330)));
+                QQmlProperty::write(_d->toast, "base.height", qFloor(fit(95)));
+                QQmlProperty::write(_d->toast, "duration", 10000);
             }
-            QMetaObject::invokeMethod(m_d->toast, "show");
-            m_d->exitButton.show();
+            QMetaObject::invokeMethod(_d->toast, "show");
+            _d->exitButton.show();
         }
     });
 }
 
 void BuildsScreen::handleBtnOkClicked()
 {
-    m_d->elapsedTimer.invalidate();
-    m_d->times.clear();
-    m_d->bytes.clear();
-    QQmlProperty::write(m_d->swipeView, "currentIndex", 0);
-    m_d->exitButton.show();
+    _d->elapsedTimer.invalidate();
+    _d->times.clear();
+    _d->bytes.clear();
+    QQmlProperty::write(_d->swipeView, "currentIndex", 0);
+    _d->exitButton.show();
 }
 
 void BuildsScreen::handleBtnCancelClicked()
 {
-    if (m_d->reply) m_d->reply->abort();
-    m_d->elapsedTimer.invalidate();
-    m_d->times.clear();
-    m_d->bytes.clear();
-    QQmlProperty::write(m_d->swipeView, "currentIndex", 0);
-    m_d->exitButton.show();
+    if (_d->reply) _d->reply->abort();
+    _d->elapsedTimer.invalidate();
+    _d->times.clear();
+    _d->bytes.clear();
+    QQmlProperty::write(_d->swipeView, "currentIndex", 0);
+    _d->exitButton.show();
 }

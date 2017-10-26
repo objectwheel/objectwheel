@@ -18,10 +18,11 @@ class FileManager : public QObject
 		bool rmsuffix(const QString& dir, const QString& suffix) const;
 		bool exists(const QString& name) const;
 		bool mv(const QString& from, const QString& to) const;
-		bool cp(const QString& from, const QString& toDir, const bool content = false) const;
+        bool cp(const QString& from, const QString& toDir, const bool content = false, const bool qrc = false) const;
 		QStringList ls(const QString& dir) const;
 		QStringList lsdir(const QString& dir) const;
 		QStringList lsfile(const QString& dir) const;
+        QStringList fps(const QString& file, const QString& dir) const;
 		QString fname(const QString& name) const;
 		QString dname(const QString& name) const;
 		qint64 fsize(const QString& name) const;
@@ -42,7 +43,7 @@ class FileManager : public QObject
 		#endif
 
 	private:
-		static bool copyDir(QString from, QString to);
+        static bool copyDir(QString from, QString to, bool qrc = false);
 
 };
 
@@ -53,10 +54,11 @@ static inline bool rn(const QString& from, const QString& to) { return FileManag
 static inline bool rmsuffix(const QString& dir, const QString& suffix) { return FileManager().rmsuffix(dir, suffix); }
 static inline bool exists(const QString& name) { return FileManager().exists(name); }
 static inline bool mv(const QString& from, const QString& to) { return FileManager().mv(from, to); }
-static inline bool cp(const QString& from, const QString& toDir, const bool content = false) { return FileManager().cp(from, toDir, content); }
+static inline bool cp(const QString& from, const QString& toDir, const bool content = false, const bool qrc = false) { return FileManager().cp(from, toDir, content, qrc); }
 static inline QStringList ls(const QString& dir) { return FileManager().ls(dir); }
 static inline QStringList lsdir(const QString& dir) { return FileManager().lsdir(dir); }
 static inline QStringList lsfile(const QString& dir) { return FileManager().lsfile(dir); }
+static inline QStringList fps(const QString& file, const QString& dir) { return FileManager().fps(file, dir); }
 static inline QString fname(const QString& name) { return FileManager().fname(name); }
 static inline QString dname(const QString& name) { return FileManager().dname(name); }
 static inline qint64 fsize(const QString& name) { return FileManager().fsize(name); }

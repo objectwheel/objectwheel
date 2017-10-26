@@ -64,26 +64,26 @@ class ProjectListModel : public QAbstractListModel
 		virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override
 		{
 			Q_UNUSED(parent);
-			return m_data.size();
+			return _data.size();
 		}
 
 		virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
 		{
 			QVariant rv;
 
-			if (index.row() >= m_data.size())
+			if (index.row() >= _data.size())
 				return rv;
 
 			switch (role)
 			{
 				case ProjectNameRole:
-					rv = m_data.at(index.row()).projectName;
+					rv = _data.at(index.row()).projectName;
 					break;
 				case LastEditedRole:
-					rv = m_data.at(index.row()).lastEdited;
+					rv = _data.at(index.row()).lastEdited;
 					break;
 				case ActiveRole:
-					rv = m_data.at(index.row()).active;
+					rv = _data.at(index.row()).active;
 					break;
 				default:
 					break;
@@ -105,7 +105,7 @@ class ProjectListModel : public QAbstractListModel
 			beginInsertRows(QModelIndex(), row, row + count - 1);
 
 			for (int r = 0; r < count; ++r)
-				m_data.insert(row, ProjectProperty());
+				_data.insert(row, ProjectProperty());
 
 			endInsertRows();
 
@@ -120,7 +120,7 @@ class ProjectListModel : public QAbstractListModel
 			beginRemoveRows(QModelIndex(), row, row + count - 1);
 
 			for (int r = 0; r < count; ++r)
-				m_data.removeAt(row);
+				_data.removeAt(row);
 
 			endRemoveRows();
 
@@ -129,18 +129,18 @@ class ProjectListModel : public QAbstractListModel
 
 		virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
 		{
-			if (index.row() >= 0 && index.row() < m_data.size()
+			if (index.row() >= 0 && index.row() < _data.size()
 				&& m_roleNames.keys().contains(role)) {
 				switch (role)
 				{
 					case ProjectNameRole:
-						m_data[index.row()].projectName = value.toString();
+						_data[index.row()].projectName = value.toString();
 						break;
 					case LastEditedRole:
-						m_data[index.row()].lastEdited = value.toString();
+						_data[index.row()].lastEdited = value.toString();
 						break;
 					case ActiveRole:
-						m_data[index.row()].active = value.toBool();
+						_data[index.row()].active = value.toBool();
 						break;
 					default:
 						break;
@@ -154,7 +154,7 @@ class ProjectListModel : public QAbstractListModel
 		virtual void clear()
 		{
 			emit beginResetModel();
-			m_data.clear();
+			_data.clear();
 			emit endResetModel();
 		}
 
@@ -169,10 +169,10 @@ class ProjectListModel : public QAbstractListModel
 		Q_INVOKABLE QJsonObject get(int row) const // For QML side usage
 		{
 			QJsonObject jobj;
-			if (row >= 0 && row < m_data.size()) {
-				jobj[m_roleNames[ProjectNameRole]] = m_data.at(row).projectName;
-				jobj[m_roleNames[LastEditedRole]] = m_data.at(row).lastEdited;
-				jobj[m_roleNames[ActiveRole]] = m_data.at(row).active;
+			if (row >= 0 && row < _data.size()) {
+				jobj[m_roleNames[ProjectNameRole]] = _data.at(row).projectName;
+				jobj[m_roleNames[LastEditedRole]] = _data.at(row).lastEdited;
+				jobj[m_roleNames[ActiveRole]] = _data.at(row).active;
 				return jobj;
 			} else {
 				return jobj;
@@ -202,7 +202,7 @@ class ProjectListModel : public QAbstractListModel
 
 	private:
 		QHash<int, QByteArray> m_roleNames;
-		QList<ProjectProperty> m_data;
+		QList<ProjectProperty> _data;
 };
 
 #endif // PROJECTSSCREEN_H

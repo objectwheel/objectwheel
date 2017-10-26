@@ -2,76 +2,97 @@
 #define SAVEMANAGER_H
 
 #include <QObject>
+#include <QQmlError>
+#include <global.h>
+
+#define SIGN_OWDB "T3dkYl92Mi4w"
+#define SIGN_OWCTRL "T3djdHJsX3YyLjA"
+#define DIR_THIS "t"
+#define DIR_CHILDREN "c"
+#define DIR_OWDB "owdb"
+#define DIR_MAINFORM "1"
+#define DIR_QRC_OWDB ":/resources/qmls/owdb"
+#define DIR_QRC_ITEM ":/resources/qmls/item"
+#define DIR_QRC_FORM ":/resources/qmls/form"
+#define FILE_PROPERTIES "_properties.json"
+#define TAG_ID "id"
+#define TAG_UID "_uid"
+#define TAG_SUID "_suid"
+#define TAG_SKIN "_skin"
+#define TAG_CATEGORY "_category"
+#define TAG_OWDB_SIGN "_owdbsign"
+#define TAG_OWCTRL_SIGN "_owctrlsign"
 
 class SaveManagerPrivate;
+class Control;
+class Form;
+class ControlScene;
+
+enum ExecErrorType {
+    NoError,
+    CommonError,
+    ChildIsWindowError,
+    MasterIsNonGui,
+    FormIsNonGui,
+    MainFormIsntWindowError,
+    MultipleWindowsForMobileError,
+    NoMainForm,
+    CodeError
+};
+
+struct ExecError {
+        ExecErrorType type = NoError;
+        QList<QQmlError> errors;
+};
 
 class SaveManager : public QObject
 {
-		Q_OBJECT
-		Q_DISABLE_COPY(SaveManager)
+        Q_OBJECT
+        Q_DISABLE_COPY(SaveManager)
 
-	public:
-		struct BindingInf {
-				QString sourceId;
-				QString sourceProperty;
-				QString targetId;
-				QString targetProperty;
-				QString bindingName;
-		};
+    public:
+        explicit SaveManager(QObject *parent = 0);
+        static SaveManager* instance();
 
-        struct EventInf {
-                QString targetId;
-                QString targetEventname;
-                QString eventCode;
-                QString eventName;
-        };
+        static ExecError execProject();
+        static void exposeProject();
+        static Control* exposeControl(const QString& rootPath, QString suid = QString());
+        static bool initProject(const QString& projectDirectory);
 
-		explicit SaveManager(QObject *parent = 0);
-        ~SaveManager();
-		static SaveManager* instance();
+        static QString basePath();
+        static QStringList formPaths();
+        static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
+        static QStringList masterPaths(const QString& topPath);
+        static bool isOwctrl(const QString& rootPath);
+        static Skin skin(const QString& rootPath);
+        static QString id(const QString& rootPath);
+        static QString uid(const QString& rootPath);
+        static QString suid(const QString& rootPath);
+        static void refreshToolUid(const QString& toolRootPath);
+        static QString toolCategory(const QString& toolRootPath);
 
-		static bool buildNewDatabase(const QString& projDir);
-		static bool loadDatabase();
+        static bool exists(const Control* control, const QString& suid, const QString& topPath = QString());
+        static bool addForm(Form* form);
+        static void removeForm(const Form* form);
+        static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
+        static bool moveControl(Control* control, const Control* parentControl);
+        static void removeControl(const Control* control);
+        static void removeChildControlsOnly(const Control* control);
 
-		static bool exists(const QString& id);
-		static QStringList saves();
-		static void addSave(const QString& id, const QString& url);
-		static void changeSave(const QString& fromId, QString toId);
-		static void removeSave(const QString& id);
-		static QString saveDirectory(const QString& id);
-        static QString savesDirectory();
+        static void setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath = QString());
+        static void removeProperty(const Control* control, const QString& property);
 
-		static QJsonObject getBindingSaves();
-		static void addBindingSave(const BindingInf& bindingInf);
-		static void changeBindingSave(const QString& bindingName, const BindingInf& toBindingInf);
-		static void removeBindingSave(const QString& bindingName);
+        static QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString());
 
-        static QJsonObject getEventSaves();
-        static void addEventSave(const EventInf& eventInf);
-        static void changeEventSave(const QString& eventName, const EventInf& toEventInf);
-        static void removeEventSave(const QString& eventName);
+        static bool parserWorking();
 
-		static QJsonObject getParentalRelationships();
-		static QJsonArray getPageOrders();
-
-		static void addParentalRelationship(const QString& id, const QString& parent);
-		static void removeParentalRelationship(const QString& id);
-		static QString parentalRelationship(const QString& id);
-
-		static void addPageOrder(const QString& pageId);
-		static void removePageOrder(const QString& pageId);
-		static void changePageOrder(const QString& fromPageId, const QString& toPageId);
-
-        static void setId(const QString& id, const QString& newId);
-		static void setVariantProperty(const QString& id, const QString& property, const QVariant& value);
-		static void setBindingProperty(const QString& id, const QString& property, const QString& expression);
-		static void removeProperty(const QString& id, const QString& property);
-
-    public slots:
-        void idApplier();
+    signals:
+        void parserRunningChanged(bool running);
+        void databaseChanged();
+        void projectExposed();
 
     private:
-		static SaveManagerPrivate* m_d;
+        static SaveManagerPrivate* _d;
 };
 
 #endif // SAVEMANAGER_H

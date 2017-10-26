@@ -22,7 +22,7 @@ class AudioPlayer : public QObject
 		QPointer<QAudioOutput> m_audioOutput;
 		QAudioFormat m_format;
 		float m_volume;
-		QByteArray m_data;
+		QByteArray _data;
 
 	public:
 		explicit AudioPlayer(QObject* parent = 0);

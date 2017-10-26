@@ -19,7 +19,7 @@ class About : public QWidget
         void resized() const;
 
 	private:
-		AboutPrivate* m_d;
+		AboutPrivate* _d;
 };
 
 #endif // ABOUT_H

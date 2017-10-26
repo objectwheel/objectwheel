@@ -14,7 +14,7 @@ class BuildsScreen : public QQuickWidget
         static BuildsScreen* instance();
 
     private:
-        static BuildsScreenPrivate* m_d;
+        static BuildsScreenPrivate* _d;
         void resizeEvent(QResizeEvent *event) override;
 
     signals:

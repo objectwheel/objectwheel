@@ -35,23 +35,23 @@ void DirLockerPrivate::clearTrashes(const QString& dir)
 	rm(dir + separator() + ZIPPED_FILENAME);
 }
 
-DirLockerPrivate* DirLocker::m_d = nullptr;
+DirLockerPrivate* DirLocker::_d = nullptr;
 
 DirLocker::DirLocker(QObject *parent)
 	: QObject(parent)
 {
-	if (m_d) return;
-	m_d = new DirLockerPrivate(this);
+	if (_d) return;
+	_d = new DirLockerPrivate(this);
 }
 
 DirLocker* DirLocker::instance()
 {
-	return m_d->parent;
+	return _d->parent;
 }
 
 DirLocker::~DirLocker()
 {
-    delete m_d;
+    delete _d;
 }
 
 bool DirLocker::locked(const QString& dir)
@@ -76,7 +76,7 @@ bool DirLocker::canUnlock(const QString& dir, const QByteArray& key)
 bool DirLocker::lock(const QString& dir, const QByteArray& key)
 {
 	if (locked(dir)) return false;
-	m_d->clearTrashes(dir);
+	_d->clearTrashes(dir);
 	QString zippedFileName = dir + separator() + ZIPPED_FILENAME;
 	Zipper::compressDir(dir, zippedFileName);
 	auto checkData = QByteArray(CHECK_SIGN);

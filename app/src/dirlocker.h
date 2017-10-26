@@ -21,7 +21,7 @@ class DirLocker : public QObject
         static QStringList dirlockersFilenames();
 
 	private:
-		static DirLockerPrivate* m_d;
+		static DirLockerPrivate* _d;
 };
 
 #endif // DIRLOCKER_H

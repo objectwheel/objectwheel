@@ -654,9 +654,10 @@ bool ModelManagerInterface::isIdle() const
 void ModelManagerInterface::emitDocumentChangedOnDisk(Document::Ptr doc)
 { emit documentChangedOnDisk(doc); }
 
-void ModelManagerInterface::updateQrcFile(const QString &path)
+void ModelManagerInterface::updateQrcFile(const QString &)
 {
 //    m_qrcCache.updatePath(path);
+    Q_UNUSED(0);
 }
 
 void ModelManagerInterface::updateDocument(Document::Ptr doc)
@@ -1197,8 +1198,8 @@ void ModelManagerInterface::updateImportPaths()
     maybeScan(allImportPaths);
 }
 
-void ModelManagerInterface::loadPluginTypes(const QString &libraryPath, const QString &importPath,
-                                   const QString &importUri, const QString &importVersion)
+void ModelManagerInterface::loadPluginTypes(const QString &, const QString &,
+                                   const QString &, const QString &)
 {
 //    m_pluginDumper->loadPluginTypes(libraryPath, importPath, importUri, importVersion);
 }

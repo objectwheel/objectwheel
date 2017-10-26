@@ -1,15 +1,20 @@
 #include <about.h>
+#include <fit.h>
+#include <flatbutton.h>
+#include <usermanager.h>
+#include <global.h>
+#include <mainwindow.h>
+
+#include <QApplication>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <fit.h>
-#include <QApplication>
-#include <flatbutton.h>
-#include <scenemanager.h>
-#include <usermanager.h>
 
+#define pS (QApplication::primaryScreen())
+#define cW (MainWindow::instance()->centralWidget())
+#define pW (MainWindow::instance()->progressWidget())
 #define TITLE_TEXT "<p><b>version</b> 1.592 <b>pbuild</b> 529e042<br>Wed May 10 03:32:18 2017 +0300<br></p>"
 #define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
@@ -40,8 +45,8 @@ AboutPrivate::AboutPrivate(QWidget* p)
 	iconLabel.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	iconLabel.setFixedSize(fit(150), fit(74.5));
     QPixmap pixmap(":/resources/images/logo.png");
-    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-	iconLabel.setPixmap(pixmap.scaled(fit(150)*qApp->devicePixelRatio(), fit(74.5)*qApp->devicePixelRatio(),
+    pixmap.setDevicePixelRatio(pS->devicePixelRatio());
+    iconLabel.setPixmap(pixmap.scaled(fit(150) * pS->devicePixelRatio(), fit(74.5) * pS->devicePixelRatio(),
 									  Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 
 	iconLayout.addStretch();
@@ -82,22 +87,22 @@ AboutPrivate::AboutPrivate(QWidget* p)
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
         if (UserManager::currentSessionsUser().isEmpty()) {
-            SceneManager::show("loginScene", SceneManager::ToRight);
+            cW->showWidget(Screen::LOGIN);
         } else {
-            SceneManager::show("studioScene", SceneManager::ToRight);
+            cW->showWidget(Screen::STUDIO);
         }
     });
 }
 
 About::About(QWidget *parent)
 	: QWidget(parent)
-	, m_d(new AboutPrivate(this))
+	, _d(new AboutPrivate(this))
 {
 }
 
 About::~About()
 {
-    delete m_d;
+    delete _d;
 }
 
 void About::resizeEvent(QResizeEvent* event)
