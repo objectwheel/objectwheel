@@ -161,6 +161,7 @@ void FormsWidgetPrivate::handleCurrentFormChange()
         if (form->id() == id)
             DesignManager::formScene()->setMainForm(form);
     DesignManager::updateSkin();
+    emit parent->currentFormChanged();
 }
 
 FormsWidgetPrivate* FormsWidget::_d = nullptr;

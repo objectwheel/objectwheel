@@ -223,8 +223,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(Control* control, const QStrin
         result.preview = QPixmap(dname(url) + separator() + "icon.png")
                          .scaled(NONGUI_CONTROL_SIZE * pS->devicePixelRatio(),
                                  NONGUI_CONTROL_SIZE * pS->devicePixelRatio());
-        emit previewReady(result);
-        return PreviewResult();
+        return result;
     }
 
     if (window == nullptr) {

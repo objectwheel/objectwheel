@@ -136,7 +136,7 @@ ToolBox::ToolBox(QWidget* parent) : QWidget(parent)
 
     QPalette p2(_toolboxTree.palette());
     p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Highlight, QColor("#E0E4E7"));
+    p2.setColor(QPalette::Highlight, QColor("#d0d4d7"));
     p2.setColor(QPalette::Text, QColor("#202427"));
     _toolboxTree.setPalette(p2);
 

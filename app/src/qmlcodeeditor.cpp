@@ -157,6 +157,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent)
     p.setColor(QPalette::Base, COLOR_EDITORBACKGROUND);
     setPalette(p);
 
+    setAcceptDrops(false);
     setWordWrapMode(QTextOption::NoWrap);
 
     lineNumberArea = new LineNumberArea(this);

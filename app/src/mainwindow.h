@@ -61,9 +61,9 @@ class MainWindow : public QMainWindow
         QDockWidget _inspectorDockwidget;
         DesignManager _designManager;
         ToolBox _toolbox;
-        InspectorWidget _inspectorWidget;
         PropertiesWidget _propertiesWidget;
         FormsWidget _formsWidget;
+        InspectorWidget _inspectorWidget;
         About _aboutWidget;
 };
 

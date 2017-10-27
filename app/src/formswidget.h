@@ -18,6 +18,9 @@ class FormsWidget : public QWidget
     protected:
         virtual QSize sizeHint() const override;
 
+    signals:
+        void currentFormChanged();
+
     private:
         static FormsWidgetPrivate* _d;
 };

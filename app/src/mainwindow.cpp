@@ -268,6 +268,7 @@ void MainWindow::showDockWidgets()
     _formsDockwidget.show();
     _propertiesDockwidget.show();
     _toolboxDockwidget.show();
+    _inspectorDockwidget.show();
 }
 
 void MainWindow::hideDockWidgets()
@@ -275,6 +276,7 @@ void MainWindow::hideDockWidgets()
     _formsDockwidget.hide();
     _propertiesDockwidget.hide();
     _toolboxDockwidget.hide();
+    _inspectorDockwidget.hide();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

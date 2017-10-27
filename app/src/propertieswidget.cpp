@@ -894,8 +894,8 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
             }
         }
     } else {
-        painter->fillRect(option.rect, QColor("#C5C9CC"));
-        option.palette.setColor(QPalette::Highlight, QColor("#C5C9CC"));
+        painter->fillRect(option.rect, QColor("#d5d9dC"));
+        option.palette.setColor(QPalette::Highlight, QColor("#d5d9dC"));
     }
 
     if (index.column() == 0) {
@@ -907,7 +907,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
             branchColor = option.palette.highlight();
         } else {
             if (!model->parent(index).isValid())
-                branchColor = QColor("#C5C9CC");
+                branchColor = QColor("#d5d9dC");
             else if (index.row() % 2)
                 branchColor = QColor("#EDF3FE");
         }
@@ -928,10 +928,10 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
         }
     }
 
-    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
-    if (!model->parent(index).isValid() && mask) {
-        option.font.setWeight(QFont::DemiBold);
-    }
+//    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
+//    if (!model->parent(index).isValid() && mask) {
+//        option.font.setWeight(QFont::DemiBold);
+//    }
 
     QStyledItemDelegate::paint(painter, option, index);
 

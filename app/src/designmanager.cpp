@@ -569,8 +569,8 @@ void DesignManagerPrivate::handleBuildButtonClicked()
 void DesignManagerPrivate::handleModeChange()
 {
     if (DesignManager::_mode == DesignManager::FormGUI) {
-        if (MainWindow::instance())
-            MainWindow::instance()->showDockWidgets();
+//        if (MainWindow::instance())
+//            MainWindow::instance()->showDockWidgets();
         wGuiModeButton.setChecked(true);
         wGuiModeButton.setDisabled(true);
         cGuiModeButton.setChecked(false);
@@ -613,8 +613,8 @@ void DesignManagerPrivate::handleModeChange()
         toolbar.show();
         parent->_currentScene = &formScene;
     } else if (DesignManager::_mode == DesignManager::ControlGUI) {
-        if (MainWindow::instance())
-            MainWindow::instance()->showDockWidgets();
+//        if (MainWindow::instance())
+//            MainWindow::instance()->showDockWidgets();
         cGuiModeButton.setChecked(true);
         cGuiModeButton.setDisabled(true);
         editorModeButton.setChecked(false);
@@ -649,8 +649,8 @@ void DesignManagerPrivate::handleModeChange()
         toolbar.show();
         parent->_currentScene = &controlScene;
     } else {
-        if (MainWindow::instance())
-            MainWindow::instance()->hideDockWidgets();
+//        if (MainWindow::instance())
+//            MainWindow::instance()->hideDockWidgets();
         editorModeButton.setChecked(true);
         editorModeButton.setDisabled(true);
         cGuiModeButton.setChecked(false);

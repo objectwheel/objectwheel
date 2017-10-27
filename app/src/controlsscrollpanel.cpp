@@ -9,6 +9,7 @@
 #include <QGraphicsSceneWheelEvent>
 
 //TODO: Horizontal mode
+//TODO: Delete me
 
 using namespace Fit;
 
