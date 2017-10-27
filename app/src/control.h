@@ -23,7 +23,7 @@ class ControlWatcher : public QObject {
         static ControlWatcher* instance();
 
     signals:
-        void geometryChanged();
+        void geometryChanged(Control*);
 
     private:
         static ControlWatcher* _instance;

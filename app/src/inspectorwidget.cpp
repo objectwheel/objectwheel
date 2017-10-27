@@ -107,8 +107,8 @@ InspectorWidget::InspectorWidget(QWidget* parent)
       SLOT(refreshList()));
     connect(DesignManager::instance(), SIGNAL(modeChanged()),
       SLOT(refreshList()));
-    connect(ControlWatcher::instance(), SIGNAL(geometryChanged()), //FIXME: change geometryChanged signal
-      SLOT(refreshList()), Qt::QueuedConnection);
+    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
+      SLOT(refreshList()));
     connect(FormsWidget::instance(), SIGNAL(currentFormChanged()),
       SLOT(refreshList()));
     QTimer::singleShot(1500, [this] {

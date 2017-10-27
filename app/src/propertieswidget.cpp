@@ -1038,11 +1038,14 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     setLayout(&_layout);
 
     /* Prepare Properties Widget */
-    connect(DesignManager::formScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
-    connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
-    connect(DesignManager::instance(), SIGNAL(modeChanged()), SLOT(handleSelectionChange()));
-    connect(ControlWatcher::instance(), SIGNAL(geometryChanged()),
-      SLOT(handleSelectionChange()), Qt::QueuedConnection);
+    connect(DesignManager::formScene(), SIGNAL(selectionChanged()),
+      SLOT(handleSelectionChange()));
+    connect(DesignManager::controlScene(), SIGNAL(selectionChanged()),
+      SLOT(handleSelectionChange()));
+    connect(DesignManager::instance(), SIGNAL(modeChanged()),
+      SLOT(handleSelectionChange()));
+    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
+      SLOT(handleSelectionChange()));
 }
 
 void PropertiesWidget::clearList()

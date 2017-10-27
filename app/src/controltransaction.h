@@ -19,7 +19,7 @@ class ControlTransaction : public QObject
         bool transactionsEnabled() const;
 
     public slots:
-        void flushGeometryChange();
+        void flushGeometryChange(Control* control);
         void flushParentChange();
         void flushZChange();
 

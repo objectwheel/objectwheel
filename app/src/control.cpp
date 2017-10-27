@@ -40,6 +40,7 @@
 #define RESIZER_OUTLINE_COLOR ("#202427")
 #define PREVIEW_REFRESH_INTERVAL 100
 #define RESIZE_TRANSACTION_INTERVAL 800
+#define GEOMETRY_SIGNAL_DELAY 800
 #define MAGNETIC_FIELD (fit(3))
 #define MARGIN_TOP (fit(14))
 #define pS (QApplication::primaryScreen())
@@ -253,11 +254,13 @@ class ControlPrivate : public QObject
         void refreshPreview();
         void updatePreview(Control* control, PreviewResult result);
         void handlePreviewErrors(Control* control, QList<QQmlError> errors, PreviewResult result);
+        void handleGeometrySignalChange();
 
     public:
         Control* parent;
         QPixmap itemPixmap;
         QTimer refreshTimer;
+        QTimer geometrySignalTimer;
         bool hoverOn;
 };
 
@@ -273,11 +276,17 @@ ControlPrivate::ControlPrivate(Control* parent)
     }
 
     refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
-    connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshPreview()));
-    connect(QmlPreviewer::instance(), SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)),
-            SLOT(handlePreviewErrors(Control*,QList<QQmlError>,PreviewResult)));
-    connect(QmlPreviewer::instance(), SIGNAL(previewReady(Control*,PreviewResult)),
-            SLOT(updatePreview(Control*,PreviewResult)));
+    connect(&refreshTimer, SIGNAL(timeout()),
+      SLOT(refreshPreview()));
+    geometrySignalTimer.setInterval(GEOMETRY_SIGNAL_DELAY);
+    connect(&geometrySignalTimer, SIGNAL(timeout()),
+      SLOT(handleGeometrySignalChange()));
+    connect(QmlPreviewer::instance(),
+      SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)),
+      SLOT(handlePreviewErrors(Control*,QList<QQmlError>,PreviewResult)));
+    connect(QmlPreviewer::instance(),
+      SIGNAL(previewReady(Control*,PreviewResult)),
+      SLOT(updatePreview(Control*,PreviewResult)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -426,6 +435,24 @@ void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> erro
     parent->hide();
 }
 
+void ControlPrivate::handleGeometrySignalChange()
+{
+    geometrySignalTimer.stop();
+    for (auto& pnode : parent->_properties) {
+        auto& map = pnode.propertyMap;
+        if (map.contains("x") && map.contains("y")) {
+            const bool isInt = (map["x"].type() == QVariant::Int);
+            map["x"] = isInt ? int(parent->x()) : parent->x();
+            map["y"] = isInt ? int(parent->y()) : parent->y();
+            map["width"] = isInt ? int(parent->size().width()) :
+              parent->size().width();
+            map["height"] = isInt ? int(parent->size().height()) :
+              parent->size().height();
+        }
+    }
+    emit controlWatcher.geometryChanged(parent);
+}
+
 //!
 //! ********************** [Control] **********************
 //!
@@ -454,19 +481,8 @@ Control::Control(const QString& url, const QString& uid, Control* parent)
             refresh();
     });
 
-    connect(this, &Control::geometryChanged, [=] {
-        for (auto& pnode : _properties) {
-            auto& map = pnode.propertyMap;
-            if (map.contains("x") && map.contains("y")) {
-                const bool isInt = (map["x"].type() == QVariant::Int);
-                map["x"] = isInt ? int(x()) : x();
-                map["y"] = isInt ? int(y()) : y();
-                map["width"] = isInt ? int(size().width()) : size().width();
-                map["height"] = isInt ? int(size().height()) : size().height();
-            }
-        }
-        emit controlWatcher.geometryChanged();
-    });
+    connect(this, SIGNAL(geometryChanged()),
+      &_d->geometrySignalTimer, SLOT(start()));
 }
 
 Control::~Control()
@@ -943,6 +959,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
+//FIXME: Control alignment has some bugs
 bool Control::stickSelectedControlToGuideLines() const
 {
     bool ret = false;

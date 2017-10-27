@@ -12,7 +12,8 @@ ControlTransaction::ControlTransaction(Control* watched, QObject *parent)
     , _zTransactionsEnabled(true)
     , _activated(false)
 {
-    connect(_watched, SIGNAL(geometryChanged()), SLOT(flushGeometryChange()));
+    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
+      SLOT(flushGeometryChange(Control*)));
     connect(_watched, SIGNAL(parentChanged()), SLOT(flushParentChange()));
     connect(_watched, SIGNAL(zChanged()), SLOT(flushZChange()));
 
@@ -49,9 +50,11 @@ void ControlTransaction::setTransactionsEnabled(bool value)
     _transactionsEnabled = value;
 }
 
-void ControlTransaction::flushGeometryChange()
+void ControlTransaction::flushGeometryChange(Control* control)
 {
-    if (_watched.isNull() || _watched->id().isEmpty() ||
+    if (_watched.isNull() ||
+        control != _watched.data() ||
+        _watched->id().isEmpty() ||
         !_geometryTransactionsEnabled ||
         !_transactionsEnabled)
         return;
@@ -76,7 +79,7 @@ void ControlTransaction::flushParentChange()
         return;
 
     SaveManager::moveControl(_watched, _watched->parentControl());
-    flushGeometryChange();
+    flushGeometryChange(_watched.data());
     _activated = true;
 }
 
