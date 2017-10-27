@@ -42,7 +42,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/centralwidget.h \
                              $$PWD/progresswidget.h \
                              $$PWD/global.h \
-    $$PWD/executivewidget.h
+    $$PWD/executivewidget.h \
+    $$PWD/inspectorwidget.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -86,7 +87,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/filterlineedit.cpp \
                              $$PWD/centralwidget.cpp \
                              $$PWD/progresswidget.cpp \
-    $$PWD/executivewidget.cpp
+    $$PWD/executivewidget.cpp \
+    $$PWD/inspectorwidget.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

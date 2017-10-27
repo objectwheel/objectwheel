@@ -269,5 +269,6 @@
         <file>resources/tools/RoundButton-2.zip</file>
         <file>resources/images/phnh.svg</file>
         <file>resources/images/phnv.svg</file>
+        <file>resources/images/frm.png</file>
     </qresource>
 </RCC>

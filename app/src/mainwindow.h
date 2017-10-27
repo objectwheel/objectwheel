@@ -18,6 +18,7 @@
 #include <designmanager.h>
 #include <toolbox.h>
 #include <progresswidget.h>
+#include <inspectorwidget.h>
 
 class MainWindow : public QMainWindow
 {
@@ -57,8 +58,10 @@ class MainWindow : public QMainWindow
         QDockWidget _toolboxDockwidget;
         QDockWidget _propertiesDockwidget;
         QDockWidget _formsDockwidget;
+        QDockWidget _inspectorDockwidget;
         DesignManager _designManager;
         ToolBox _toolbox;
+        InspectorWidget _inspectorWidget;
         PropertiesWidget _propertiesWidget;
         FormsWidget _formsWidget;
         About _aboutWidget;

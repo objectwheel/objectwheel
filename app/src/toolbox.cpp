@@ -290,11 +290,6 @@ ToolboxTree* ToolBox::toolboxTree()
     return &_toolboxTree;
 }
 
-QSize ToolBox::sizeHint() const
-{
-    return QSize(fit(200), fit(400));
-}
-
 void ToolBox::filterList(const QString& filter)
 {
     for (int i = 0; i < _toolboxTree.topLevelItemCount(); i++) {
@@ -592,6 +587,11 @@ void ToolBox::handleImports(const QStringList& fileNames)
         SaveManager::refreshToolUid(itemPath);
         ToolsManager::addTool(name);
     }
+}
+
+QSize ToolBox::sizeHint() const
+{
+    return QSize(fit(200), fit(3000));
 }
 
 #include "toolbox.moc"

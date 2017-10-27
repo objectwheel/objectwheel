@@ -1,6 +1,5 @@
 #include <propertieswidget.h>
 #include <fit.h>
-#include <toolboxtree.h>
 #include <designmanager.h>
 #include <css.h>
 #include <savemanager.h>
@@ -1009,9 +1008,9 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     _lblMsg.setAlignment(Qt::AlignCenter);
     _lblMsg.setPalette(p3);
 
-    _treeWidget.setHorizontalScrollMode(ToolboxTree::ScrollPerPixel);
-    _treeWidget.setVerticalScrollMode(ToolboxTree::ScrollPerPixel);
-    _treeWidget.setSelectionBehavior(ToolboxTree::SelectRows);
+    _treeWidget.setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    _treeWidget.setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    _treeWidget.setSelectionBehavior(QTreeWidget::SelectRows);
     _treeWidget.setFocusPolicy(Qt::NoFocus);
     _treeWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _treeWidget.setEditTriggers(QAbstractItemView::AllEditTriggers);
@@ -1042,7 +1041,8 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     connect(DesignManager::formScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     connect(DesignManager::controlScene(), SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     connect(DesignManager::instance(), SIGNAL(modeChanged()), SLOT(handleSelectionChange()));
-    connect(ControlWatcher::instance(), SIGNAL(geometryChanged()), SLOT(handleSelectionChange()));
+    connect(ControlWatcher::instance(), SIGNAL(geometryChanged()),
+      SLOT(handleSelectionChange()), Qt::QueuedConnection);
 }
 
 void PropertiesWidget::clearList()

@@ -66,11 +66,13 @@ void MainWindow::setupGui()
             _formsDockwidget.show();
             _propertiesDockwidget.show();
             _toolboxDockwidget.show();
+            _inspectorDockwidget.show();
         } else {
             _titleBar.hide();
             _formsDockwidget.hide();
             _propertiesDockwidget.hide();
             _toolboxDockwidget.hide();
+            _inspectorDockwidget.hide();
         }
     });
 
@@ -115,8 +117,8 @@ void MainWindow::setupGui()
     _propertiesDockwidget.setWidget(&_propertiesWidget);
     _propertiesDockwidget.setWindowTitle("Properties");
     _propertiesDockwidget.setVisible(false);
-    _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, &_propertiesDockwidget);
+    _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
+                                      QDockWidget::DockWidgetFloatable);
 
     /*** FORMS DOCK WIDGET ***/
     QLabel* label2 = new QLabel;
@@ -142,8 +144,8 @@ void MainWindow::setupGui()
     _formsDockwidget.setWidget(&_formsWidget);
     _formsDockwidget.setWindowTitle("Forms");
     _formsDockwidget.setVisible(false);
-    _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, &_formsDockwidget);
+    _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
+                                 QDockWidget::DockWidgetFloatable);
 
     /*** TOOLBOX DOCK WIDGET ***/
     QLabel* label3 = new QLabel;
@@ -169,8 +171,8 @@ void MainWindow::setupGui()
     _toolboxDockwidget.setWidget(&_toolbox);
     _toolboxDockwidget.setWindowTitle("Toolbox");
     _toolboxDockwidget.setVisible(false);
-    _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::LeftDockWidgetArea, &_toolboxDockwidget);
+    _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
+                                   QDockWidget::DockWidgetFloatable);
 
     connect(_toolbox.toolboxTree()->indicatorButton(), &FlatButton::clicked, [=] {
         auto previousControl = DesignManager::controlScene()->mainControl();
@@ -187,6 +189,38 @@ void MainWindow::setupGui()
         for (auto childControl : control->childControls())
             childControl->refresh();
     });
+
+    /*** INSPECTOR DOCK WIDGET ***/
+    QLabel* label4 = new QLabel;
+    label4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    label4->setText(" Control Inspector");
+
+    QToolButton* pinButton4 = new QToolButton;
+    pinButton4->setToolTip("Pin/Unpin pane.");
+    pinButton4->setCursor(Qt::PointingHandCursor);
+    pinButton4->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(pinButton4, &QToolButton::clicked, [=]{
+        _inspectorDockwidget.setFloating(!_inspectorDockwidget.isFloating());
+    });
+
+    QToolBar* toolbar4 = new QToolBar;
+    toolbar4->addWidget(label4);
+    toolbar4->addWidget(pinButton4);
+    toolbar4->setStyleSheet(CSS::DesignerPinbar);
+    toolbar4->setIconSize(QSize(fit(11), fit(11)));
+    toolbar4->setFixedHeight(fit(21));
+
+    _inspectorDockwidget.setTitleBarWidget(toolbar4);
+    _inspectorDockwidget.setWidget(&_inspectorWidget);
+    _inspectorDockwidget.setWindowTitle("Control Inspector");
+    _inspectorDockwidget.setVisible(false);
+    _inspectorDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
+                                     QDockWidget::DockWidgetFloatable);
+
+    addDockWidget(Qt::LeftDockWidgetArea, &_toolboxDockwidget);
+    addDockWidget(Qt::LeftDockWidgetArea, &_formsDockwidget);
+    addDockWidget(Qt::RightDockWidgetArea, &_inspectorDockwidget);
+    addDockWidget(Qt::RightDockWidgetArea, &_propertiesDockwidget);
 }
 
 void MainWindow::setupManagers()
