@@ -10,6 +10,7 @@
 #include <loadingindicator.h>
 #include <savemanager.h>
 #include <mainwindow.h>
+#include <outputbox.h>
 
 #include <QWidget>
 #include <QList>
@@ -22,6 +23,7 @@
 #include <QMenu>
 #include <QComboBox>
 #include <QMessageBox>
+#include <QSplitter>
 
 using namespace Fit;
 
@@ -75,11 +77,13 @@ class DesignManagerPrivate : public QObject
         QToolButton buildButton;
 
         QVBoxLayout vlayout;
+        QSplitter splitter;
         FormScene formScene;
         ControlScene controlScene;
         FormView formView;
         ControlView controlView;
         QmlEditorView qmlEditorView;
+        OutputBox outputBox;
         qreal lastScaleOfWv;
         qreal lastScaleOfCv;
         QToolBar toolbar;
@@ -107,6 +111,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     , parent(parent)
     , formView(&formScene)
     , controlView(&controlScene)
+    , outputBox(&splitter)
     , lastScaleOfWv(1.0)
     , lastScaleOfCv(1.0)
 {
@@ -119,10 +124,25 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 
     vlayout.setContentsMargins(0, 0, 0, 0);
     vlayout.setSpacing(0);
-    vlayout.addWidget(&toolbar);
-    vlayout.addWidget(&formView);
-    vlayout.addWidget(&controlView);
-    vlayout.addWidget(&qmlEditorView);
+    vlayout.addWidget(&splitter);
+
+    splitter.setStyleSheet("QSplitter{background: #e0e4e7;}");
+    splitter.setOrientation(Qt::Vertical);
+    splitter.addWidget(&toolbar);
+    splitter.addWidget(&formView);
+    splitter.addWidget(&controlView);
+    splitter.addWidget(&qmlEditorView);
+    splitter.addWidget(&outputBox);
+    splitter.setCollapsible(0, false);
+    splitter.setCollapsible(1, false);
+    splitter.setCollapsible(2, false);
+    splitter.setCollapsible(3, false);
+    splitter.setCollapsible(4, false);
+    splitter.handle(0)->setDisabled(true);
+    splitter.handle(1)->setDisabled(true);
+    splitter.handle(2)->setDisabled(true);
+    splitter.handle(3)->setDisabled(true);
+    splitter.setHandleWidth(0);
 
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);

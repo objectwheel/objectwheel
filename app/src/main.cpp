@@ -13,8 +13,8 @@
 #include <QTimer>
 
 #define PIXEL_SIZE 13
-#define REF_WIDTH 1600
-#define REF_HEIGHT 830
+#define REF_WIDTH 1366
+#define REF_HEIGHT 768
 #define REF_DPI 144
 
 int main(int argc, char *argv[])
@@ -56,8 +56,7 @@ int main(int argc, char *argv[])
     // Start MainWidget
     MainWindow w;
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-    w.resize({REF_WIDTH, REF_HEIGHT});
-    Fit::fit(&w, Fit::WidthHeight);
+    w.resize(qApp->primaryScreen()->availableSize());
     w.show();
 # else
     Fit::init(REF_WIDTH, REF_HEIGHT, REF_DPI);

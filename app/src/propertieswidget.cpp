@@ -1229,7 +1229,7 @@ void PropertiesWidget::filterList(const QString& filter)
         tli->setHidden(!v);
     }
 }
-
+//BUG: Occurs when properties widget lost focus
 QSize PropertiesWidget::sizeHint() const
 {
     return QSize(fit(340), fit(2600)); //FIXME:

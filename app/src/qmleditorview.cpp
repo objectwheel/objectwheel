@@ -166,6 +166,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     splitter->addWidget(explorerWrapper);
     splitter->setCollapsible(0, false);;
     splitter->setCollapsible(1, false);;
+    splitter->setHandleWidth(0);
 
     editorWrapperVBoxLayout->setContentsMargins(0, 0, 0, 0);
     editorWrapperVBoxLayout->setSpacing(0);

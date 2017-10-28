@@ -13,6 +13,12 @@ enum Screen {
     BUILDS
 };
 
+enum OutputPane {
+    ISSUES,
+    SEARCH,
+    APPOUTPUT
+};
+
 enum Skin {
     Invalid,
     PhonePortrait,
