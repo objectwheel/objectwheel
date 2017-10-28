@@ -558,7 +558,71 @@ void DesignManagerPrivate::handleWGuiModeButtonClicked()
 }
 void DesignManagerPrivate::handlePlayButtonClicked()
 {
-    SaveManager::execProject();
+    ExecError error = SaveManager::execProject();
+
+    QMessageBox box;
+    box.setText("<b>Some went wrong.</b>");
+    box.setStandardButtons(QMessageBox::Ok);
+    box.setDefaultButton(QMessageBox::Ok);
+    box.setIcon(QMessageBox::Warning);
+    switch (error.type) {
+        case CommonError:
+            box.setInformativeText("Database corrupted, change your application skin. "
+                                   "If it doesn't work, contact to support for further help.");
+            box.exec();
+            break;
+
+        case ChildIsWindowError:
+            box.setInformativeText("Child controls can not be a 'Window' (or derived) type."
+                                   " Only forms could be 'Window' type.");
+            box.exec();
+            break;
+
+        case MasterIsNonGui:
+            box.setInformativeText("Master controls can not be a non-ui control (such as Timer or QtObject).");
+            box.exec();
+            break;
+
+        case FormIsNonGui:
+            box.setInformativeText("Forms can not be a non-ui control (such as Timer or QtObject)."
+                                   "Check your forms and make sure they are some 'Window' or 'Item' derived type.");
+            box.exec();
+            break;
+
+        case MainFormIsntWindowError:
+            box.setInformativeText("Main form has to be a 'Window' derived type. "
+                                   "Please change its type to a 'Window' derived class.");
+            box.exec();
+            break;
+
+        case MultipleWindowsForMobileError:
+            box.setInformativeText("Mobile applications can not contain multiple windows. "
+                                   "Please either change the type of secondary windows' type to a non 'Window' derived class, "
+                                   "or change your application skin to something else (Desktop for instance) by changing the skin of main form.");
+            box.exec();
+            break;
+
+        case NoMainForm:
+            box.setInformativeText("There is no main application window. Probably database has corrupted, "
+                                   "please contact to support, or start a new project over.");
+            box.exec();
+            break;
+
+        case CodeError: {
+            box.setInformativeText(QString("Following control has some errors: <b>%1</b>").
+              arg(error.id));
+            QString detailedText;
+            for (auto err : error.errors)
+                detailedText += QString("Line %1, column %2: %3").
+                  arg(err.line()).arg(err.column()).arg(err.description());
+            box.setDetailedText(detailedText);
+            box.exec();
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 void DesignManagerPrivate::handleBuildButtonClicked()

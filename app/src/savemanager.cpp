@@ -486,6 +486,7 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err,
     auto item = comp.create(context);
     if (!comp.errors().isEmpty()) {
         err.type = CodeError;
+        err.id = parent->id(path);
         err.errors = comp.errors();
     } else {
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
@@ -502,6 +503,7 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, const QByteArray& data,
     auto item = comp.create(context);
     if (!comp.errors().isEmpty()) {
         err.type = CodeError;
+        err.id = parent->id(path);
         err.errors = comp.errors();
     } else {
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);

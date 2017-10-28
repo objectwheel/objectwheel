@@ -385,9 +385,11 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
 
         parent->setFlag(Control::ItemSendsGeometryChanges);
         parent->setAcceptDrops(true);
-        if (!parent->form())
+        if (!parent->form() && !parent->dragging())
             parent->setPos(result.pos);
-        parent->resize(result.size);
+
+        if (!Resizer::resizing())
+            parent->resize(result.size);
         refreshTimer.stop();
         parent->setClip(result.clip);
         parent->setZValue(result.zValue); //BUG: PropertiesWidget proper z val update

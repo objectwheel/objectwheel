@@ -43,6 +43,7 @@ enum ExecErrorType {
 struct ExecError {
         ExecErrorType type = NoError;
         QList<QQmlError> errors;
+        QString id;
 };
 
 class SaveManager : public QObject
