@@ -385,10 +385,10 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
 
         parent->setFlag(Control::ItemSendsGeometryChanges);
         parent->setAcceptDrops(true);
-        if (!parent->form()/* && !parent->dragging()*/)
+        if (!parent->form()/* && !parent->dragging()*/) //FIXME
             parent->setPos(result.pos);
 
-//        if (!Resizer::resizing())
+//        if (!Resizer::resizing()) //FIXME
             parent->resize(result.size);
         refreshTimer.stop();
         parent->setClip(result.clip);

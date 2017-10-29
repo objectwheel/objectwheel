@@ -111,7 +111,6 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     , parent(parent)
     , formView(&formScene)
     , controlView(&controlScene)
-    , outputBox(&splitter)
     , lastScaleOfWv(1.0)
     , lastScaleOfCv(1.0)
 {
@@ -143,6 +142,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     splitter.handle(2)->setDisabled(true);
     splitter.handle(3)->setDisabled(true);
     splitter.setHandleWidth(0);
+    outputBox.setSplitterHandle(splitter.handle(4));
 
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);

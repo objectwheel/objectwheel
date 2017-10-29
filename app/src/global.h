@@ -13,10 +13,10 @@ enum Screen {
     BUILDS
 };
 
-enum OutputPane {
+enum PaneType {
     ISSUES,
     SEARCH,
-    APPOUTPUT
+    CONSOLE
 };
 
 enum Skin {
