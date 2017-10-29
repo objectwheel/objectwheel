@@ -75,7 +75,7 @@ void LoginScreen::handleAutoLoginButtonClicked()
 
 void LoginScreen::handleAboutButtonClicked()
 {
-    cW->showWidget(Screen::ABOUT);
+    cW->showWidget(Screen::About);
 }
 
 void LoginScreen::handleLostPasswordButtonClicked()
@@ -100,7 +100,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
 //    if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
 //    ProjectsScreen::refreshProjectList();
 //    pW->hideProgress();
-//    cW->showWidget(Screen::PROJECTS);
+//    cW->showWidget(Screen::Projects);
 //    clearGUI();
 //    return;
 
@@ -114,7 +114,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                     if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                     ProjectsScreen::refreshProjectList();
                     pW->hideProgress();
-                    cW->showWidget(Screen::PROJECTS);
+                    cW->showWidget(Screen::Projects);
                     clearGUI();
                 } else {
                     QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x01");
@@ -145,7 +145,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                         if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                         ProjectsScreen::refreshProjectList();
                         pW->hideProgress();
-                        cW->showWidget(Screen::PROJECTS);
+                        cW->showWidget(Screen::Projects);
                         clearGUI();
                     } else {
                         QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
@@ -188,7 +188,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                 if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                 ProjectsScreen::refreshProjectList();
                 pW->hideProgress();
-                cW->showWidget(Screen::PROJECTS);
+                cW->showWidget(Screen::Projects);
                 clearGUI();
             } else if (jobj["result"].toString() == "EMAIL") {
                 QMetaObject::invokeMethod(loginScreen, "animateWrongEmail");

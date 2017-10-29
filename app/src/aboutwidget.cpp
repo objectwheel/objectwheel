@@ -1,4 +1,4 @@
-#include <about.h>
+#include <aboutwidget.h>
 #include <fit.h>
 #include <flatbutton.h>
 #include <usermanager.h>
@@ -20,9 +20,9 @@
 
 using namespace Fit;
 
-struct AboutPrivate
+struct AboutWidgetPrivate
 {
-		AboutPrivate(QWidget*);
+        AboutWidgetPrivate(QWidget*);
 		QWidget* parent;
 		QVBoxLayout mainLayout;
 		QHBoxLayout iconLayout;
@@ -32,7 +32,7 @@ struct AboutPrivate
         FlatButton exitButton;
 };
 
-AboutPrivate::AboutPrivate(QWidget* p)
+AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
 	: parent(p)
 {
 	QPalette palette(parent->palette());
@@ -75,7 +75,7 @@ AboutPrivate::AboutPrivate(QWidget* p)
 #else
     exitButton.setGeometry(parent->width() - fit(15), fit(5), fit(8), fit(8));
 #endif
-    QObject::connect((About*)parent,  &About::resized, [=]{
+    QObject::connect((AboutWidget*)parent,  &AboutWidget::resized, [=]{
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
         exitButton.setGeometry(parent->width() - fit(26), fit(8), fit(18), fit(18));
 #else
@@ -87,25 +87,25 @@ AboutPrivate::AboutPrivate(QWidget* p)
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
         if (UserManager::currentSessionsUser().isEmpty()) {
-            cW->showWidget(Screen::LOGIN);
+            cW->showWidget(Screen::Login);
         } else {
-            cW->showWidget(Screen::STUDIO);
+            cW->showWidget(Screen::Studio);
         }
     });
 }
 
-About::About(QWidget *parent)
+AboutWidget::AboutWidget(QWidget *parent)
 	: QWidget(parent)
-	, _d(new AboutPrivate(this))
+    , _d(new AboutWidgetPrivate(this))
 {
 }
 
-About::~About()
+AboutWidget::~AboutWidget()
 {
     delete _d;
 }
 
-void About::resizeEvent(QResizeEvent* event)
+void AboutWidget::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
     emit resized();

@@ -21,7 +21,7 @@ ProgressWidget::ProgressWidget(CentralWidget* parent)
     , _logoPixmap(QPixmap(PATH_LOGO).scaled(SIZE_LOGO * pS->devicePixelRatio(),
        Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
 {
-    _centralWidget->addWidget(Screen::PROGRESS, this);
+    _centralWidget->addWidget(Screen::Progress, this);
     setAutoFillBackground(true);
 
     QPalette p(palette());
@@ -59,7 +59,7 @@ void ProgressWidget::showProgress()
 {
     _waitEffectTimer.start();
     _lastUid = _centralWidget->visibleUid();
-    _centralWidget->showWidget(Screen::PROGRESS);
+    _centralWidget->showWidget(Screen::Progress);
 }
 
 void ProgressWidget::hideProgress()

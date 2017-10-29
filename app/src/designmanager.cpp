@@ -143,6 +143,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     splitter.handle(3)->setDisabled(true);
     splitter.setHandleWidth(0);
     outputBox.setSplitterHandle(splitter.handle(4));
+    connect(&splitter, SIGNAL(splitterMoved(int,int)),
+      &outputBox, SLOT(updateLastHeight()));
 
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);

@@ -5,18 +5,12 @@
 #define SIZE_FORM (fit(QSize(285, 535)))
 
 enum Screen {
-    PROGRESS,
-    STUDIO,
-    PROJECTS,
-    LOGIN,
-    ABOUT,
-    BUILDS
-};
-
-enum PaneType {
-    ISSUES,
-    SEARCH,
-    CONSOLE
+    Progress,
+    Studio,
+    Projects,
+    Login,
+    About,
+    Builds
 };
 
 enum Skin {

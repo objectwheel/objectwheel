@@ -52,16 +52,16 @@ void MainWindow::setupGui()
 
     _designManager.setSettleWidget(&_settleWidget);
 
-    _centralWidget.addWidget(Screen::STUDIO, &_settleWidget);
-    _centralWidget.addWidget(Screen::PROJECTS, &_projectsScreen);
-    _centralWidget.addWidget(Screen::LOGIN, &_loginScreen);
-    _centralWidget.addWidget(Screen::ABOUT, &_aboutWidget);
-    _centralWidget.addWidget(Screen::BUILDS, &_buildsScreen);
-    _centralWidget.showWidget(Screen::LOGIN);
+    _centralWidget.addWidget(Screen::Studio, &_settleWidget);
+    _centralWidget.addWidget(Screen::Projects, &_projectsScreen);
+    _centralWidget.addWidget(Screen::Login, &_loginScreen);
+    _centralWidget.addWidget(Screen::About, &_aboutWidget);
+    _centralWidget.addWidget(Screen::Builds, &_buildsScreen);
+    _centralWidget.showWidget(Screen::Login);
     _progressWidget.showProgress("Loading");
     connect(&_centralWidget, &CentralWidget::visibleWidgetChanged, [=]()
     {
-        if (_centralWidget.visibleUid() == Screen::STUDIO) {
+        if (_centralWidget.visibleUid() == Screen::Studio) {
             _titleBar.show();
             _formsDockwidget.show();
             _propertiesDockwidget.show();
@@ -242,7 +242,7 @@ void MainWindow::setupManagers()
     if (ret.result()) {
         ProjectsScreen::refreshProjectList();
         _progressWidget.hideProgress();
-        _centralWidget.showWidget(Screen::PROJECTS);
+        _centralWidget.showWidget(Screen::Projects);
     } else {
         _progressWidget.hideProgress();
     }

@@ -88,7 +88,7 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     exitButton.show();
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
-        cW->showWidget(Screen::STUDIO);
+        cW->showWidget(Screen::Studio);
     });
 
     buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "buildPage", parent->engine()).value<QObject*>();

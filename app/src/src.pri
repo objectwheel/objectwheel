@@ -5,7 +5,7 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/propertieswidget.h \
                              $$PWD/css.h \
                              $$PWD/scrollarea.h \
-                             $$PWD/about.h \
+                             $$PWD/aboutwidget.h \
                              $$PWD/usermanager.h \
                              $$PWD/savemanager.h \
                              $$PWD/projectmanager.h \
@@ -42,9 +42,9 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/centralwidget.h \
                              $$PWD/progresswidget.h \
                              $$PWD/global.h \
-    $$PWD/executivewidget.h \
-    $$PWD/inspectorwidget.h \
-    $$PWD/outputbox.h
+                             $$PWD/executivewidget.h \
+                             $$PWD/inspectorwidget.h \
+                             $$PWD/outputbox.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -52,7 +52,7 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/propertieswidget.cpp \
                              $$PWD/css.cpp \
                              $$PWD/scrollarea.cpp \
-                             $$PWD/about.cpp \
+                             $$PWD/aboutwidget.cpp \
                              $$PWD/usermanager.cpp \
                              $$PWD/savemanager.cpp \
                              $$PWD/projectmanager.cpp \
@@ -88,9 +88,9 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/filterlineedit.cpp \
                              $$PWD/centralwidget.cpp \
                              $$PWD/progresswidget.cpp \
-    $$PWD/executivewidget.cpp \
-    $$PWD/inspectorwidget.cpp \
-    $$PWD/outputbox.cpp
+                             $$PWD/executivewidget.cpp \
+                             $$PWD/inspectorwidget.cpp \
+                             $$PWD/outputbox.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

@@ -7,7 +7,7 @@
 #include <flatbutton.h>
 #include <toolboxtree.h>
 #include <propertieswidget.h>
-#include <about.h>
+#include <aboutwidget.h>
 #include <formswidget.h>
 #include <fit.h>
 #include <filemanager.h>
@@ -64,7 +64,7 @@ class MainWindow : public QMainWindow
         PropertiesWidget _propertiesWidget;
         FormsWidget _formsWidget;
         InspectorWidget _inspectorWidget;
-        About _aboutWidget;
+        AboutWidget _aboutWidget;
 };
 
 #endif // MAINWINDOW_H

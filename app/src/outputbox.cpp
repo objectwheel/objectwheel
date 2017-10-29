@@ -8,6 +8,10 @@
 #include <QButtonGroup>
 #include <QVBoxLayout>
 
+#define HEIGHT_MIN (fit(100))
+#define HEIGHT_MAX (fit(600))
+#define SIZE_INITIAL (QSize(fit(300), fit(140)))
+
 using namespace Fit;
 
 class OutputBoxPrivate : public QObject
@@ -24,7 +28,7 @@ class OutputBoxPrivate : public QObject
 
     public:
         OutputBox* parent;
-        QMap<PaneType, QWidget*> panes;
+        QMap<BoxType, QWidget*> boxes;
         QVBoxLayout* layout;
         QToolBar* toolbar;
         FlatButton* hideButton;
@@ -112,7 +116,6 @@ OutputBoxPrivate::OutputBoxPrivate(OutputBox* parent)
     rspacer->setFixedSize(fit(1), fit(1));
 
     toolbar->setStyleSheet(CSS::DesignerToolbarR);
-    toolbar->setFixedHeight(fit(36));
     toolbar->setIconSize(QSize(fit(14), fit(14)));
     toolbar->addWidget(lspacer);
     toolbar->addWidget(issuesButton);
@@ -121,25 +124,25 @@ OutputBoxPrivate::OutputBoxPrivate(OutputBox* parent)
     toolbar->addWidget(spacer);
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);
-    toolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    panes[ISSUES] = new QWidget;
-    panes[SEARCH] = new QWidget;
-    panes[CONSOLE] = new QWidget;
+    boxes[Issues] = new QWidget;
+    boxes[Search] = new QWidget;
+    boxes[Console] = new QWidget;
 
-    panes[ISSUES]->setSizePolicy(QSizePolicy::Expanding,
+    boxes[Issues]->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
-    panes[SEARCH]->setSizePolicy(QSizePolicy::Expanding,
+    boxes[Search]->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
-    panes[CONSOLE]->setSizePolicy(QSizePolicy::Expanding,
+    boxes[Console]->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-    layout->addWidget(panes[ISSUES]);
-    layout->addWidget(panes[SEARCH]);
-    layout->addWidget(panes[CONSOLE]);
+    layout->setSpacing(10);
+    layout->addWidget(boxes[Issues]);
+    layout->addWidget(boxes[Search]);
+    layout->addWidget(boxes[Console]);
     layout->addWidget(toolbar);
+    toolbar->setFixedHeight(fit(26));
 }
 
 void OutputBoxPrivate::handleHideButtonClicked()
@@ -147,79 +150,123 @@ void OutputBoxPrivate::handleHideButtonClicked()
     if (hideButton->toolTip().contains("Hide")) {
         hideButton->setToolTip("Show pane.");
         hideButton->setIcon(QIcon(":/resources/images/up-arrow.png"));
-        parent->hidePanes();
+        parent->collapse();
     } else {
         hideButton->setToolTip("Hide pane.");
         hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
-        parent->showPanes();
+        parent->expand();
     }
 }
 
 void OutputBoxPrivate::handleIssuesButtonClicked(bool val)
 {
-    if (val)
-        parent->showPane(ISSUES);
+    if (val) {
+        parent->_activeBoxType = Issues;
+        for (auto box : boxes)
+            box->hide();
+
+        if (!parent->_collapsed)
+            boxes.value(Issues)->show();
+    }
 }
 
 void OutputBoxPrivate::handleSearchButtonClicked(bool val)
 {
-    if (val)
-        parent->showPane(SEARCH);
+    if (val) {
+        parent->_activeBoxType = Search;
+        for (auto box : boxes)
+            box->hide();
+
+        if (!parent->_collapsed)
+            boxes.value(Search)->show();
+    }
 }
 
 void OutputBoxPrivate::handleConsoleButtonClicked(bool val)
 {
-    if (val)
-        parent->showPane(CONSOLE);
+    if (val) {
+        parent->_activeBoxType = Console;
+        for (auto box : boxes)
+            box->hide();
+
+        if (!parent->_collapsed)
+            boxes.value(Console)->show();
+    }
 }
 
 OutputBox::OutputBox(QWidget *parent)
     : QWidget(parent)
-    , _splitterHandle(nullptr)
     , _d(new OutputBoxPrivate(this))
-    , _lastHeight(140)
+    , _lastHeight(SIZE_INITIAL.height())
+    , _activeBoxType(Issues)
+    , _collapsed(false)
 {
-    resize(width(), _lastHeight);
+    setMinimumHeight(HEIGHT_MIN);
+    setMaximumHeight(HEIGHT_MAX);
+    setActiveBox(_activeBoxType);
 }
 
-void OutputBox::showPane(PaneType pane)
+void OutputBox::setActiveBox(BoxType type)
 {
-    _d->panes[ISSUES]->hide();
-    _d->panes[SEARCH]->hide();
-    _d->panes[CONSOLE]->hide();
+    _activeBoxType = type;
+    for (auto box : _d->boxes)
+        box->hide();
 
-    if (_d->panes.value(pane))
-        _d->panes.value(pane)->show();
+    if (!_collapsed)
+        _d->boxes.value(type)->show();
 
-    switch (pane) {
-        case ISSUES:
+    switch (type) {
+        case Issues:
             _d->issuesButton->setChecked(true);
             break;
-        case SEARCH:
+        case Search:
             _d->searchButton->setChecked(true);
             break;
-        case CONSOLE:
+        case Console:
             _d->consoleButton->setChecked(true);
             break;
     }
 }
 
-void OutputBox::hidePanes()
+void OutputBox::expand()
 {
-    _d->panes[ISSUES]->hide();
-    _d->panes[SEARCH]->hide();
-    _d->panes[CONSOLE]->hide();
-
-    setFixedHeight(fit(27));
-    _splitterHandle->setDisabled(true);
+    _collapsed = false;
+    _d->boxes.value(_activeBoxType)->show();
+    setFixedHeight(_lastHeight);
+    setMinimumHeight(HEIGHT_MIN);
+    setMaximumHeight(HEIGHT_MAX);
+    if (_splitterHandle)
+        _splitterHandle->setEnabled(true);
 }
 
-void OutputBox::showPanes()
+void OutputBox::collapse()
 {
-    setMaximumHeight(fit(600));
-    setMinimumHeight(fit(100));
-    resize(width(), _lastHeight);
-    _splitterHandle->setEnabled(true);
+    _collapsed = true;
+    for (auto box : _d->boxes)
+        box->hide();
+    setFixedHeight(_d->toolbar->height());
+    if (_splitterHandle)
+        _splitterHandle->setDisabled(true);
+}
+
+void OutputBox::updateLastHeight()
+{
+    _lastHeight = height();
+}
+
+QSize OutputBox::sizeHint() const
+{
+    return SIZE_INITIAL;
+}
+
+BoxType OutputBox::activeBoxType() const
+{
+    return _activeBoxType;
+}
+
+bool OutputBox::collapsed() const
+{
+    return _collapsed;
 }
 
 void OutputBox::setSplitterHandle(QSplitterHandle* splitterHandle)
