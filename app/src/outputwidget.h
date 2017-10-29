@@ -1,5 +1,5 @@
-#ifndef OUTPUTBOX_H
-#define OUTPUTBOX_H
+#ifndef OUTPUTWIDGET_H
+#define OUTPUTWIDGET_H
 
 #include <global.h>
 #include <QWidget>
@@ -8,7 +8,7 @@
 
 class QSplitter;
 class QSplitterHandle;
-class OutputBoxPrivate;
+class OutputWidgetPrivate;
 
 enum BoxType {
     Issues,
@@ -16,13 +16,13 @@ enum BoxType {
     Console
 };
 
-class OutputBox : public QWidget
+class OutputWidget : public QWidget
 {
         Q_OBJECT
-        friend class OutputBoxPrivate;
+        friend class OutputWidgetPrivate;
 
     public:
-        explicit OutputBox(QWidget *parent = nullptr);
+        explicit OutputWidget(QWidget *parent = nullptr);
         void setSplitter(QSplitter* splitter);
         void setSplitterHandle(QSplitterHandle* splitterHandle);
         void setActiveBox(BoxType type);
@@ -40,10 +40,10 @@ class OutputBox : public QWidget
     private:
         QPointer<QSplitter> _splitter;
         QPointer<QSplitterHandle> _splitterHandle;
-        OutputBoxPrivate* _d;
+        OutputWidgetPrivate* _d;
         int _lastHeight;
         BoxType _activeBoxType;
         bool _collapsed;
 };
 
-#endif // OUTPUTBOX_H
+#endif // OUTPUTWIDGET_H

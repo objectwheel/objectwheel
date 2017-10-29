@@ -17,7 +17,7 @@
 #include <controlview.h>
 #include <loadingindicator.h>
 #include <global.h>
-#include <outputbox.h>
+#include <outputwidget.h>
 
 #include <QtConcurrent>
 #include <QtNetwork>

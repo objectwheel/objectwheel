@@ -8,7 +8,7 @@
 class QWidget;
 class DesignManagerPrivate;
 class LoadingIndicator;
-class OutputBox;
+class OutputWidget;
 class QSplitter;
 class ControlView;
 class FormView;
@@ -41,7 +41,7 @@ class DesignManager : public QObject
         static LoadingIndicator* loadingIndicator();
         static void updateSkin();
         static QSplitter* splitter();
-        static OutputBox* outputBox();
+        static OutputWidget* outputWidget();
 
     signals:
         void modeChanged();

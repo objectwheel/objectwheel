@@ -44,7 +44,10 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/global.h \
                              $$PWD/executivewidget.h \
                              $$PWD/inspectorwidget.h \
-                             $$PWD/outputbox.h
+                             $$PWD/issuesbox.h \
+                             $$PWD/consolebox.h \
+                             $$PWD/searchbox.h \
+                             $$PWD/outputwidget.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -90,7 +93,10 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/progresswidget.cpp \
                              $$PWD/executivewidget.cpp \
                              $$PWD/inspectorwidget.cpp \
-                             $$PWD/outputbox.cpp
+                             $$PWD/issuesbox.cpp \
+                             $$PWD/consolebox.cpp \
+                             $$PWD/searchbox.cpp \
+                             $$PWD/outputwidget.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

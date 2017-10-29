@@ -9,7 +9,7 @@
 #include <css.h>
 #include <loadingindicator.h>
 #include <savemanager.h>
-#include <outputbox.h>
+#include <outputwidget.h>
 
 #include <QWidget>
 #include <QList>
@@ -82,7 +82,7 @@ class DesignManagerPrivate : public QObject
         FormView formView;
         ControlView controlView;
         QmlEditorView qmlEditorView;
-        OutputBox outputBox;
+        OutputWidget outputWidget;
         qreal lastScaleOfWv;
         qreal lastScaleOfCv;
         QToolBar toolbar;
@@ -130,7 +130,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     splitter.addWidget(&formView);
     splitter.addWidget(&controlView);
     splitter.addWidget(&qmlEditorView);
-    splitter.addWidget(&outputBox);
+    splitter.addWidget(&outputWidget);
     splitter.setCollapsible(0, false);
     splitter.setCollapsible(1, false);
     splitter.setCollapsible(2, false);
@@ -141,12 +141,13 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     splitter.handle(2)->setDisabled(true);
     splitter.handle(3)->setDisabled(true);
     splitter.setHandleWidth(0);
-    outputBox.setSplitter(&splitter);
-    outputBox.setSplitterHandle(splitter.handle(4));
+    outputWidget.setSplitter(&splitter);
+    outputWidget.setSplitterHandle(splitter.handle(4));
     connect(&splitter, SIGNAL(splitterMoved(int,int)),
-      &outputBox, SLOT(updateLastHeight()));
+      &outputWidget, SLOT(updateLastHeight()));
 
-    qmlEditorView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    qmlEditorView.setSizePolicy(QSizePolicy::Expanding,
+      QSizePolicy::Expanding);
 
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -155,7 +156,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     formView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     formView.setBackgroundBrush(QColor("#e0e4e7"));
     formView.setFrameShape(QFrame::NoFrame);
-    formView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    formView.setSizePolicy(QSizePolicy::Expanding,
+      QSizePolicy::Expanding);
 
     controlView.setRenderHint(QPainter::Antialiasing);
     controlView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -164,11 +166,13 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     controlView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     controlView.setBackgroundBrush(QColor("#e0e4e7"));
     controlView.setFrameShape(QFrame::NoFrame);
-    controlView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    controlView.setSizePolicy(QSizePolicy::Expanding,
+      QSizePolicy::Expanding);
 
     // Toolbar settings
     QWidget* spacer = new QWidget;
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    spacer->setSizePolicy(QSizePolicy::Expanding,
+      QSizePolicy::Preferred);
 
     zoomlLevelCombobox.addItem("10 %");
     zoomlLevelCombobox.addItem("25 %");
@@ -248,16 +252,26 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     layItGridButton.setIcon(QIcon(":/resources/images/grid.png"));
     breakLayoutButton.setIcon(QIcon(":/resources/images/break.png"));
 
-    connect(&snappingButton, SIGNAL(toggled(bool)), SLOT(handleSnappingClicked(bool)));
-    connect(&showOutlineButton, SIGNAL(toggled(bool)), SLOT(handleShowOutlineClicked(bool)));
-    connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(handleZoomLevelChange(QString)));
-    connect(&fitInSceneButton, SIGNAL(clicked(bool)), SLOT(handleFitInSceneClicked()));
-    connect(&refreshPreviewButton, SIGNAL(clicked(bool)), SLOT(handleRefreshPreviewClicked()));
-    connect(&clearFormButton, SIGNAL(clicked(bool)), SLOT(handleClearControls()));
-    connect(&phonePortraitButton, SIGNAL(clicked(bool)), SLOT(handlePhonePortraitButtonClicked()));
-    connect(&phoneLandscapeButton, SIGNAL(clicked(bool)), SLOT(handlePhoneLandscapeButtonClicked()));
-    connect(&desktopSkinButton, SIGNAL(clicked(bool)), SLOT(handleDesktopSkinButtonClicked()));
-    connect(&noSkinButton, SIGNAL(clicked(bool)), SLOT(handleNoSkinButtonClicked()));
+    connect(&snappingButton, SIGNAL(toggled(bool)),
+      SLOT(handleSnappingClicked(bool)));
+    connect(&showOutlineButton, SIGNAL(toggled(bool)),
+      SLOT(handleShowOutlineClicked(bool)));
+    connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)),
+      SLOT(handleZoomLevelChange(QString)));
+    connect(&fitInSceneButton, SIGNAL(clicked(bool)),
+      SLOT(handleFitInSceneClicked()));
+    connect(&refreshPreviewButton, SIGNAL(clicked(bool)),
+      SLOT(handleRefreshPreviewClicked()));
+    connect(&clearFormButton, SIGNAL(clicked(bool)),
+      SLOT(handleClearControls()));
+    connect(&phonePortraitButton, SIGNAL(clicked(bool)),
+      SLOT(handlePhonePortraitButtonClicked()));
+    connect(&phoneLandscapeButton, SIGNAL(clicked(bool)),
+      SLOT(handlePhoneLandscapeButtonClicked()));
+    connect(&desktopSkinButton, SIGNAL(clicked(bool)),
+      SLOT(handleDesktopSkinButtonClicked()));
+    connect(&noSkinButton, SIGNAL(clicked(bool)),
+      SLOT(handleNoSkinButtonClicked()));
 
     toolbar.setStyleSheet(CSS::DesignerToolbar);
     toolbar.setFixedHeight(fit(21));
@@ -287,7 +301,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
 
     // Toolbar_2 settings
     QWidget* spacer_2 = new QWidget;
-    spacer_2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    spacer_2->setSizePolicy(QSizePolicy::Preferred,
+      QSizePolicy::Expanding);
 
     editorModeButton.setCheckable(true);
     wGuiModeButton.setCheckable(true);
@@ -313,13 +328,19 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     playButton.setIcon(QIcon(":/resources/images/play.png"));
     buildButton.setIcon(QIcon(":/resources/images/build.png"));
 
-    connect(&editorModeButton, SIGNAL(clicked(bool)), SLOT(handleEditorModeButtonClicked()));
-    connect(&cGuiModeButton, SIGNAL(clicked(bool)), SLOT(handleCGuiModeButtonClicked()));
-    connect(&wGuiModeButton, SIGNAL(clicked(bool)), SLOT(handleWGuiModeButtonClicked()));
-    connect(&playButton, SIGNAL(clicked(bool)), SLOT(handlePlayButtonClicked()));
-    connect(&buildButton, SIGNAL(clicked(bool)), SLOT(handleBuildButtonClicked()));
+    connect(&editorModeButton, SIGNAL(clicked(bool)),
+      SLOT(handleEditorModeButtonClicked()));
+    connect(&cGuiModeButton, SIGNAL(clicked(bool)),
+      SLOT(handleCGuiModeButtonClicked()));
+    connect(&wGuiModeButton, SIGNAL(clicked(bool)),
+      SLOT(handleWGuiModeButtonClicked()));
+    connect(&playButton, SIGNAL(clicked(bool)),
+      SLOT(handlePlayButtonClicked()));
+    connect(&buildButton, SIGNAL(clicked(bool)),
+      SLOT(handleBuildButtonClicked()));
 
-    toolbar_2.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    toolbar_2.setSizePolicy(QSizePolicy::Preferred,
+      QSizePolicy::Expanding);
     toolbar_2.setOrientation(Qt::Vertical);
     toolbar_2.setStyleSheet(CSS::DesignerToolbarV);
     toolbar_2.setFixedWidth(fit(21));
@@ -896,9 +917,9 @@ QSplitter* DesignManager::splitter()
     return &_d->splitter;
 }
 
-OutputBox* DesignManager::outputBox()
+OutputWidget* DesignManager::outputWidget()
 {
-    return &_d->outputBox;
+    return &_d->outputWidget;
 }
 
 #include "designmanager.moc"

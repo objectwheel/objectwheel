@@ -1,4 +1,4 @@
-#include <outputbox.h>
+#include <outputwidget.h>
 #include <flatbutton.h>
 #include <css.h>
 #include <fit.h>
@@ -15,11 +15,11 @@
 
 using namespace Fit;
 
-class OutputBoxPrivate : public QObject
+class OutputWidgetPrivate : public QObject
 {
         Q_OBJECT
     public:
-        OutputBoxPrivate(OutputBox *parent);
+        OutputWidgetPrivate(OutputWidget *parent);
 
     public slots:
         void handleHideButtonClicked();
@@ -28,7 +28,7 @@ class OutputBoxPrivate : public QObject
         void handleConsoleButtonClicked(bool val);
 
     public:
-        OutputBox* parent;
+        OutputWidget* parent;
         QMap<BoxType, QWidget*> boxes;
         QVBoxLayout* layout;
         QToolBar* toolbar;
@@ -38,7 +38,7 @@ class OutputBoxPrivate : public QObject
         FlatButton* consoleButton;
 };
 
-OutputBoxPrivate::OutputBoxPrivate(OutputBox* parent)
+OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     : QObject(parent)
     , parent(parent)
     , layout(new QVBoxLayout(parent))
@@ -146,7 +146,7 @@ OutputBoxPrivate::OutputBoxPrivate(OutputBox* parent)
     toolbar->setFixedHeight(fit(26));
 }
 
-void OutputBoxPrivate::handleHideButtonClicked()
+void OutputWidgetPrivate::handleHideButtonClicked()
 {
     if (hideButton->toolTip().contains("Hide")) {
         hideButton->setToolTip("Show pane.");
@@ -159,7 +159,7 @@ void OutputBoxPrivate::handleHideButtonClicked()
     }
 }
 
-void OutputBoxPrivate::handleIssuesButtonClicked(bool val)
+void OutputWidgetPrivate::handleIssuesButtonClicked(bool val)
 {
     if (val) {
         parent->_activeBoxType = Issues;
@@ -171,7 +171,7 @@ void OutputBoxPrivate::handleIssuesButtonClicked(bool val)
     }
 }
 
-void OutputBoxPrivate::handleSearchButtonClicked(bool val)
+void OutputWidgetPrivate::handleSearchButtonClicked(bool val)
 {
     if (val) {
         parent->_activeBoxType = Search;
@@ -183,7 +183,7 @@ void OutputBoxPrivate::handleSearchButtonClicked(bool val)
     }
 }
 
-void OutputBoxPrivate::handleConsoleButtonClicked(bool val)
+void OutputWidgetPrivate::handleConsoleButtonClicked(bool val)
 {
     if (val) {
         parent->_activeBoxType = Console;
@@ -195,9 +195,9 @@ void OutputBoxPrivate::handleConsoleButtonClicked(bool val)
     }
 }
 
-OutputBox::OutputBox(QWidget *parent)
+OutputWidget::OutputWidget(QWidget *parent)
     : QWidget(parent)
-    , _d(new OutputBoxPrivate(this))
+    , _d(new OutputWidgetPrivate(this))
     , _lastHeight(SIZE_INITIAL.height())
     , _activeBoxType(Issues)
     , _collapsed(false)
@@ -207,7 +207,7 @@ OutputBox::OutputBox(QWidget *parent)
     setActiveBox(_activeBoxType);
 }
 
-void OutputBox::setActiveBox(BoxType type)
+void OutputWidget::setActiveBox(BoxType type)
 {
     _activeBoxType = type;
     for (auto box : _d->boxes)
@@ -229,7 +229,7 @@ void OutputBox::setActiveBox(BoxType type)
     }
 }
 
-void OutputBox::expand()
+void OutputWidget::expand()
 {
     _collapsed = false;
     _d->boxes.value(_activeBoxType)->show();
@@ -244,7 +244,7 @@ void OutputBox::expand()
     }
 }
 
-void OutputBox::collapse()
+void OutputWidget::collapse()
 {
     _collapsed = true;
     for (auto box : _d->boxes)
@@ -254,32 +254,32 @@ void OutputBox::collapse()
         _splitterHandle->setDisabled(true);
 }
 
-void OutputBox::updateLastHeight()
+void OutputWidget::updateLastHeight()
 {
     _lastHeight = height();
 }
 
-QSize OutputBox::sizeHint() const
+QSize OutputWidget::sizeHint() const
 {
     return SIZE_INITIAL;
 }
 
-BoxType OutputBox::activeBoxType() const
+BoxType OutputWidget::activeBoxType() const
 {
     return _activeBoxType;
 }
 
-bool OutputBox::collapsed() const
+bool OutputWidget::collapsed() const
 {
     return _collapsed;
 }
 
-void OutputBox::setSplitter(QSplitter* splitter)
+void OutputWidget::setSplitter(QSplitter* splitter)
 {
     _splitter = splitter;
 }
 
-void OutputBox::setSplitterHandle(QSplitterHandle* splitterHandle)
+void OutputWidget::setSplitterHandle(QSplitterHandle* splitterHandle)
 {
     _splitterHandle = splitterHandle;
 }
