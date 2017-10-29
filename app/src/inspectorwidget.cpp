@@ -168,7 +168,7 @@ void InspectorWidget::refreshList()
     item->setText(1, "Yes");
 
     if (mc->form()) {
-        item->setIcon(0, QIcon(":/resources/images/frm.png"));
+        item->setIcon(0, QIcon(":/resources/images/form.png"));
     } else {
         QIcon icon;
         icon.addFile(mc->dir() + separator() + DIR_THIS +

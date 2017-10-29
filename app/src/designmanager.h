@@ -3,12 +3,15 @@
 
 #include <formscene.h>
 #include <qmleditorview.h>
-
 #include <QObject>
 
 class QWidget;
 class DesignManagerPrivate;
 class LoadingIndicator;
+class OutputBox;
+class QSplitter;
+class ControlView;
+class FormView;
 
 class DesignManager : public QObject
 {
@@ -33,8 +36,12 @@ class DesignManager : public QObject
         static ControlScene* controlScene();
         static FormScene* formScene();
         static QmlEditorView* qmlEditorView();
+        static ControlView* controlView();
+        static FormView* formView();
         static LoadingIndicator* loadingIndicator();
         static void updateSkin();
+        static QSplitter* splitter();
+        static OutputBox* outputBox();
 
     signals:
         void modeChanged();

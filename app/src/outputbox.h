@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QPointer>
 
+class QSplitter;
 class QSplitterHandle;
 class OutputBoxPrivate;
 
@@ -22,6 +23,7 @@ class OutputBox : public QWidget
 
     public:
         explicit OutputBox(QWidget *parent = nullptr);
+        void setSplitter(QSplitter* splitter);
         void setSplitterHandle(QSplitterHandle* splitterHandle);
         void setActiveBox(BoxType type);
         BoxType activeBoxType() const;
@@ -36,6 +38,7 @@ class OutputBox : public QWidget
         virtual QSize sizeHint() const override;
 
     private:
+        QPointer<QSplitter> _splitter;
         QPointer<QSplitterHandle> _splitterHandle;
         OutputBoxPrivate* _d;
         int _lastHeight;

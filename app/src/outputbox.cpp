@@ -3,6 +3,7 @@
 #include <css.h>
 #include <fit.h>
 
+#include <QSplitter>
 #include <QSplitterHandle>
 #include <QToolBar>
 #include <QButtonGroup>
@@ -10,7 +11,7 @@
 
 #define HEIGHT_MIN (fit(100))
 #define HEIGHT_MAX (fit(600))
-#define SIZE_INITIAL (QSize(fit(300), fit(140)))
+#define SIZE_INITIAL (QSize(fit(300), fit(160)))
 
 using namespace Fit;
 
@@ -232,11 +233,15 @@ void OutputBox::expand()
 {
     _collapsed = false;
     _d->boxes.value(_activeBoxType)->show();
-    setFixedHeight(_lastHeight);
     setMinimumHeight(HEIGHT_MIN);
     setMaximumHeight(HEIGHT_MAX);
     if (_splitterHandle)
         _splitterHandle->setEnabled(true);
+    if (_splitter) {
+        auto sizes = _splitter->sizes();
+        sizes[_splitter->indexOf(this)] = _lastHeight;
+        _splitter->setSizes(sizes);
+    }
 }
 
 void OutputBox::collapse()
@@ -267,6 +272,11 @@ BoxType OutputBox::activeBoxType() const
 bool OutputBox::collapsed() const
 {
     return _collapsed;
+}
+
+void OutputBox::setSplitter(QSplitter* splitter)
+{
+    _splitter = splitter;
 }
 
 void OutputBox::setSplitterHandle(QSplitterHandle* splitterHandle)

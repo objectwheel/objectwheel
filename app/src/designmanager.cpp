@@ -9,7 +9,6 @@
 #include <css.h>
 #include <loadingindicator.h>
 #include <savemanager.h>
-#include <mainwindow.h>
 #include <outputbox.h>
 
 #include <QWidget>
@@ -142,9 +141,12 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     splitter.handle(2)->setDisabled(true);
     splitter.handle(3)->setDisabled(true);
     splitter.setHandleWidth(0);
+    outputBox.setSplitter(&splitter);
     outputBox.setSplitterHandle(splitter.handle(4));
     connect(&splitter, SIGNAL(splitterMoved(int,int)),
       &outputBox, SLOT(updateLastHeight()));
+
+    qmlEditorView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -153,6 +155,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     formView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     formView.setBackgroundBrush(QColor("#e0e4e7"));
     formView.setFrameShape(QFrame::NoFrame);
+    formView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     controlView.setRenderHint(QPainter::Antialiasing);
     controlView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
@@ -161,6 +164,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     controlView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     controlView.setBackgroundBrush(QColor("#e0e4e7"));
     controlView.setFrameShape(QFrame::NoFrame);
+    controlView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // Toolbar settings
     QWidget* spacer = new QWidget;
@@ -655,8 +659,6 @@ void DesignManagerPrivate::handleBuildButtonClicked()
 void DesignManagerPrivate::handleModeChange()
 {
     if (DesignManager::_mode == DesignManager::FormGUI) {
-//        if (MainWindow::instance())
-//            MainWindow::instance()->showDockWidgets();
         wGuiModeButton.setChecked(true);
         wGuiModeButton.setDisabled(true);
         cGuiModeButton.setChecked(false);
@@ -693,14 +695,20 @@ void DesignManagerPrivate::handleModeChange()
         layItGridButton.setEnabled(true);
         breakLayoutButton.setEnabled(true);
         zoomlLevelCombobox.setCurrentText(findText(lastScaleOfWv));
+        auto sizes = splitter.sizes();
+        QSize size;
+        if (controlView.isVisible())
+            size = controlView.size();
+        else
+            size = qmlEditorView.size();
+        sizes[splitter.indexOf(&formView)] = size.height();
         controlView.hide();
         qmlEditorView.hide();
         formView.show();
         toolbar.show();
+        splitter.setSizes(sizes);
         parent->_currentScene = &formScene;
     } else if (DesignManager::_mode == DesignManager::ControlGUI) {
-//        if (MainWindow::instance())
-//            MainWindow::instance()->showDockWidgets();
         cGuiModeButton.setChecked(true);
         cGuiModeButton.setDisabled(true);
         editorModeButton.setChecked(false);
@@ -729,14 +737,20 @@ void DesignManagerPrivate::handleModeChange()
         layItGridButton.setEnabled(true);
         breakLayoutButton.setEnabled(true);
         zoomlLevelCombobox.setCurrentText(findText(lastScaleOfCv));
+        auto sizes = splitter.sizes();
+        QSize size;
+        if (formView.isVisible())
+            size = formView.size();
+        else
+            size = qmlEditorView.size();
+        sizes[splitter.indexOf(&controlView)] = size.height();
         formView.hide();
         qmlEditorView.hide();
         controlView.show();
         toolbar.show();
+        splitter.setSizes(sizes);
         parent->_currentScene = &controlScene;
     } else {
-//        if (MainWindow::instance())
-//            MainWindow::instance()->hideDockWidgets();
         editorModeButton.setChecked(true);
         editorModeButton.setDisabled(true);
         cGuiModeButton.setChecked(false);
@@ -762,10 +776,18 @@ void DesignManagerPrivate::handleModeChange()
         layItHorzButton.setDisabled(true);
         layItGridButton.setDisabled(true);
         breakLayoutButton.setDisabled(true);
+        auto sizes = splitter.sizes();
+        QSize size;
+        if (formView.isVisible())
+            size = formView.size();
+        else
+            size = controlView.size();
+        sizes[splitter.indexOf(&qmlEditorView)] = size.height();
         toolbar.hide();
         formView.hide();
         controlView.hide();
         qmlEditorView.show();
+        splitter.setSizes(sizes);
     }
 }
 
@@ -825,6 +847,16 @@ QmlEditorView* DesignManager::qmlEditorView()
     return &_d->qmlEditorView;
 }
 
+ControlView* DesignManager::controlView()
+{
+    return &_d->controlView;
+}
+
+FormView* DesignManager::formView()
+{
+    return &_d->formView;
+}
+
 LoadingIndicator* DesignManager::loadingIndicator()
 {
     return &_d->loadingIndicator;
@@ -857,6 +889,16 @@ void DesignManager::updateSkin()
             _d->phoneLandscapeButton.setEnabled(false);
         }
     }
+}
+
+QSplitter* DesignManager::splitter()
+{
+    return &_d->splitter;
+}
+
+OutputBox* DesignManager::outputBox()
+{
+    return &_d->outputBox;
 }
 
 #include "designmanager.moc"

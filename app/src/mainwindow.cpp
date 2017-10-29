@@ -13,8 +13,12 @@
 #include <control.h>
 #include <formscene.h>
 #include <qmlpreviewer.h>
+#include <formview.h>
+#include <controlview.h>
 #include <loadingindicator.h>
 #include <global.h>
+#include <outputbox.h>
+
 #include <QtConcurrent>
 #include <QtNetwork>
 
@@ -174,7 +178,20 @@ void MainWindow::setupGui()
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                    QDockWidget::DockWidgetFloatable);
 
-    connect(_toolbox.toolboxTree()->indicatorButton(), &FlatButton::clicked, [=] {
+    connect(_toolbox.toolboxTree()->indicatorButton(), &FlatButton::clicked, [this] {
+        auto splitter = DesignManager::splitter();
+        auto controlView = DesignManager::controlView();
+        auto formView = DesignManager::formView();
+        auto qmlEditorView = DesignManager::qmlEditorView();
+        auto sizes = splitter->sizes();
+        QSize size;
+        if (formView->isVisible())
+            size = formView->size();
+        else if (qmlEditorView->isVisible())
+            size = qmlEditorView->size();
+        else
+            size = controlView->size();
+        sizes[splitter->indexOf(controlView)] = size.height();
         auto previousControl = DesignManager::controlScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
@@ -183,11 +200,12 @@ void MainWindow::setupGui()
         DesignManager::controlScene()->setMainControl(control);
         DesignManager::setMode(DesignManager::ControlGUI);
         control->refresh();
-        connect(control, &Control::initialized, [=] {
+        connect(control, &Control::initialized, [control] {
             control->controlTransaction()->setTransactionsEnabled(true);
         });
         for (auto childControl : control->childControls())
             childControl->refresh();
+        splitter->setSizes(sizes);
     });
 
     /*** INSPECTOR DOCK WIDGET ***/
