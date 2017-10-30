@@ -16,6 +16,11 @@
 #define DIR_QRC_FORM ":/resources/qmls/form"
 #define FILE_PROPERTIES "_properties.json"
 #define TAG_ID "id"
+#define TAG_X "x"
+#define TAG_Y "y"
+#define TAG_Z "z"
+#define TAG_WIDTH "width"
+#define TAG_HEIGHT "height"
 #define TAG_UID "_uid"
 #define TAG_SUID "_suid"
 #define TAG_SKIN "_skin"
@@ -67,6 +72,11 @@ class SaveManager : public QObject
         static bool isOwctrl(const QString& rootPath);
         static bool isMain(const QString& rootPath);
         static Skin skin(const QString& rootPath);
+        static qreal x(const QString& rootPath);
+        static qreal y(const QString& rootPath);
+        static qreal z(const QString& rootPath);
+        static qreal width(const QString& rootPath);
+        static qreal height(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);

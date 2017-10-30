@@ -901,6 +901,46 @@ Skin SaveManager::skin(const QString& rootPath)
     return Skin(_d->property(propertyData, TAG_SKIN).toInt());
 }
 
+qreal SaveManager::x(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_X).toDouble();
+}
+
+qreal SaveManager::y(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_Y).toDouble();
+}
+
+qreal SaveManager::z(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_Z).toDouble();
+}
+
+qreal SaveManager::width(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_WIDTH).toDouble();
+}
+
+qreal SaveManager::height(const QString& rootPath)
+{
+    auto propertyPath = rootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_HEIGHT).toDouble();
+}
+
 QString SaveManager::id(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
@@ -1134,7 +1174,6 @@ void SaveManager::setProperty(Control* control, const QString& property,
   const QVariant& value, const QString& topPath)
 {
     if (control->dir().isEmpty() ||
-        control->hasErrors() ||
         !isOwctrl(control->dir()))
         return;
 
@@ -1152,7 +1191,7 @@ void SaveManager::setProperty(Control* control, const QString& property,
         _d->setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
     } if (property == TAG_SKIN) {
-        if (control->dir().isEmpty() || !control->form())
+        if (!control->form())
             return;
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
@@ -1160,7 +1199,17 @@ void SaveManager::setProperty(Control* control, const QString& property,
         auto propertyData = rdfile(propertyPath);
         _d->setProperty(propertyData, TAG_SKIN, value.toInt());
         wrfile(propertyPath, propertyData);
+    } if (property == TAG_X || property == TAG_Y || property == TAG_Z ||
+       property == TAG_WIDTH || property == TAG_HEIGHT) {
+        auto propertyPath = control->dir() + separator() + DIR_THIS +
+                            separator() + FILE_PROPERTIES;
+        auto propertyData = rdfile(propertyPath);
+        _d->setProperty(propertyData, property, control->form()
+          ? value.toInt() : value.toReal());
+        wrfile(propertyPath, propertyData);
     } else {
+        if (control->hasErrors())
+            return;
         auto fileName = control->dir() + separator() + DIR_THIS +
                         separator() + "main.qml";
         ParserController::setVariantProperty(fileName, property, value);
@@ -1175,7 +1224,8 @@ void SaveManager::removeProperty(const Control* control, const QString& property
     if (control->dir().isEmpty() ||
         control->hasErrors() ||
         !isOwctrl(control->dir()) ||
-        property == TAG_ID)
+        property == TAG_ID ||
+        property == TAG_SKIN)
         return;
 
     auto fileName = control->dir() + separator() + DIR_THIS +

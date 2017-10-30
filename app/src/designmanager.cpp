@@ -147,7 +147,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     connect(&splitter, SIGNAL(splitterMoved(int,int)),
       &outputWidget, SLOT(updateLastHeight()));
     connect(ControlWatcher::instance(), &ControlWatcher::errorOccurred,
-      [this] { outputWidget.shine(Issues); });
+      [this] { outputWidget.shine(Issues); }); //FIXME: Don't shine unnecessarily
     qmlEditorView.setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
