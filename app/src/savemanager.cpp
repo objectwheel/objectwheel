@@ -1204,8 +1204,7 @@ void SaveManager::setProperty(Control* control, const QString& property,
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;
         auto propertyData = rdfile(propertyPath);
-        _d->setProperty(propertyData, property, control->form()
-          ? value.toInt() : value.toReal());
+        _d->setProperty(propertyData, property, value.toReal());
         wrfile(propertyPath, propertyData);
     } else {
         if (control->hasErrors())

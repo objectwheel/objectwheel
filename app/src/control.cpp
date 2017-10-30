@@ -391,14 +391,9 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
 
         parent->setFlag(Control::ItemSendsGeometryChanges);
         parent->setAcceptDrops(true);
-        if (!parent->form()/* && !parent->dragging()*/) //FIXME
-            parent->setPos(result.pos);
 
-//        if (!Resizer::resizing()) //FIXME
-            parent->resize(result.size);
         refreshTimer.stop();
-        parent->setClip(result.clip);
-        parent->setZValue(result.zValue); //BUG: PropertiesWidget proper z val update
+        parent->setClip(result.property("clip").toBool());
         parent->controlTransaction()->setTransactionsEnabled(te);
     }
 

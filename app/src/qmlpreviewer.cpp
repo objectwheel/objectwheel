@@ -39,7 +39,7 @@ class QmlPreviewerPrivate : public QObject
         QmlPreviewerPrivate(QmlPreviewer* parent);
         void scratchPixmapIfEmpty(QPixmap& pixmap) const;
         QQuickWindow* handleWindowsIfAny(QObject* object) const;
-        PropertyNodes extractProperties(const QObject* object) const;
+        PropertyNodes extractProperties(const QObject* object, const Control* control) const;
         QList<QString> extractEvents(const QObject* object) const;
 
     public slots:
@@ -103,7 +103,7 @@ QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object) const
     return ret;
 }
 
-PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object) const
+PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object, const Control* control) const
 {
     PropertyNodes propertyNodes;
     auto metaObject = object->metaObject();
@@ -123,9 +123,13 @@ PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object) cons
         for (int i = metaObject->propertyOffset();
              i < metaObject->propertyCount(); i++) {
             if (metaObject->property(i).isWritable()) {
-                auto name = metaObject->property(i).name();
+                QString name = metaObject->property(i).name();
                 auto val = metaObject->property(i).read(object);
-                propertyMap[name] = val;
+
+                if (name == TAG_X)
+                    propertyMap[name] = SaveManager::x(control->dir());
+                else
+                    propertyMap[name] = val;
             }
         }
 
@@ -215,7 +219,7 @@ PreviewResult QmlPreviewerPrivate::requestPreview(Control* control, const QStrin
     }
 
     result.skin = SaveManager::skin(dname(dname(url)));
-    result.properties = extractProperties(qmlObject);
+    result.properties = extractProperties(qmlObject, control);
     result.events = extractEvents(qmlObject);
     window = QSharedPointer<QQuickWindow>(handleWindowsIfAny(qmlObject));
     result.gui = (qmlObject->inherits("QQuickItem") || window);
@@ -232,21 +236,12 @@ PreviewResult QmlPreviewerPrivate::requestPreview(Control* control, const QStrin
         window = QSharedPointer<QQuickWindow>(new QQuickWindow);
         item->setParentItem(window->contentItem());
         item->setSize(QSizeF(fit(item->width()), fit(item->height())));
-
-        result.pos = item->position();
-        result.size = QSizeF(item->width(), item->height());
-        result.clip = item->clip();
-        result.zValue = item->z();
-
         item->setPosition({0,0});
         window->resize(qCeil(item->width()), qCeil(item->height()));
         window->setClearBeforeRendering(true);
         window->setColor(QColor(Qt::transparent));
     } else {
         window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
-        result.size = window->size();
-        result.zValue = 0;
-        result.clip = true;
     }
 
     window->setFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -339,13 +334,16 @@ void QmlPreviewerPrivate::taskHandler()
             if (dname(dname(result)) == path)
                 parentPixmap = &masterResults[path].preview;
 
-            QPainter p(parentPixmap);
-            p.drawPixmap(QRectF(results[result].pos, results[result].size),
-                         results[result].preview, QRectF(QPointF(0, 0),
-                         results[result].size * pS->devicePixelRatio()));
-            p.end();
+            auto& r = results[result];
+            const QPointF p = { r.property("x").toReal(), r.property("y").toReal() };
+            const QSizeF s = { r.property("width").toReal(), r.property("height").toReal() };
 
-            parentPixmap = &results[result].preview;
+            QPainter px(parentPixmap);
+            px.drawPixmap(QRectF(p, s), r.preview, QRectF(QPointF(0, 0),
+             s * pS->devicePixelRatio()));
+            px.end();
+
+            parentPixmap = &r.preview;
         }
     }
 

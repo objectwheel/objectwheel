@@ -26,15 +26,18 @@ typedef QList<PropertyNode> PropertyNodes;
 
 struct PreviewResult {
         QPixmap preview;
-        QPointF pos;
-        QSizeF size;
         QList<QString> events;
         PropertyNodes properties;
-        bool clip;
-        bool gui;
-        int zValue;
         Skin skin;
+        bool gui;
         bool isNull() { return preview.isNull(); }
+        QVariant property(const QString& name) const {
+            for (const auto& node : properties) {
+                if (node.propertyMap.contains(name))
+                    return node.propertyMap.value(name);
+            }
+            return QVariant();
+        }
 };
 
 class QmlPreviewer : public QObject
