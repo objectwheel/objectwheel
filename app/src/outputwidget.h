@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QMap>
 #include <QPointer>
+#include <QTimer>
 
 class QSplitter;
 class QSplitterHandle;
@@ -33,6 +34,7 @@ class OutputWidget : public QWidget
         void expand();
         void collapse();
         void updateLastHeight();
+        void shine(BoxType type);
 
     protected:
         virtual QSize sizeHint() const override;

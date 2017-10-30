@@ -2,6 +2,9 @@
 #include <flatbutton.h>
 #include <css.h>
 #include <fit.h>
+#include <issuesbox.h>
+#include <consolebox.h>
+#include <searchbox.h>
 
 #include <QSplitter>
 #include <QSplitterHandle>
@@ -12,6 +15,7 @@
 #define HEIGHT_MIN (fit(100))
 #define HEIGHT_MAX (fit(600))
 #define SIZE_INITIAL (QSize(fit(300), fit(160)))
+#define INTERVAL_SHINE (500)
 
 using namespace Fit;
 
@@ -116,7 +120,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     auto rspacer = new QWidget;
     rspacer->setFixedSize(fit(1), fit(1));
 
-    toolbar->setStyleSheet(CSS::DesignerToolbarR);
+    toolbar->setStyleSheet("background: #D5D9DC; border: none;");
     toolbar->setIconSize(QSize(fit(14), fit(14)));
     toolbar->addWidget(lspacer);
     toolbar->addWidget(issuesButton);
@@ -126,22 +130,22 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);
 
-    boxes[Issues] = new QWidget;
-    boxes[Search] = new QWidget;
-    boxes[Console] = new QWidget;
+    boxes[Issues] = new IssuesBox;
+    boxes[Search] = new SearchBox;
+    boxes[Console] = new ConsoleBox;
 
-    boxes[Issues]->setSizePolicy(QSizePolicy::Expanding,
+    boxes.value(Issues)->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
-    boxes[Search]->setSizePolicy(QSizePolicy::Expanding,
+    boxes.value(Search)->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
-    boxes[Console]->setSizePolicy(QSizePolicy::Expanding,
+    boxes.value(Console)->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(10);
-    layout->addWidget(boxes[Issues]);
-    layout->addWidget(boxes[Search]);
-    layout->addWidget(boxes[Console]);
+    layout->setSpacing(0);
+    layout->addWidget(boxes.value(Issues));
+    layout->addWidget(boxes.value(Search));
+    layout->addWidget(boxes.value(Console));
     layout->addWidget(toolbar);
     toolbar->setFixedHeight(fit(26));
 }
@@ -257,6 +261,51 @@ void OutputWidget::collapse()
 void OutputWidget::updateLastHeight()
 {
     _lastHeight = height();
+}
+
+void OutputWidget::shine(BoxType type)
+{
+    auto timer = new QTimer;
+    auto counter = new int(0);
+    timer->start(INTERVAL_SHINE);
+
+    connect(timer, &QTimer::timeout, [=] {
+        if ((*counter)++ < 8) {
+            switch (type) {
+                case Issues:
+                    if ((*counter) % 2) {
+                        _d->issuesButton->setColor("#822E33");
+                        _d->issuesButton->setCheckedColor("#622E33");
+                    } else {
+                        _d->issuesButton->setColor("#495866");
+                        _d->issuesButton->setCheckedColor("#363F47");
+                    }
+                    break;
+                case Search:
+                    if ((*counter) % 2) {
+                        _d->searchButton->setColor("#822E33");
+                        _d->searchButton->setCheckedColor("#622E33");
+                    } else {
+                        _d->searchButton->setColor("#495866");
+                        _d->searchButton->setCheckedColor("#363F47");
+                    }
+                    break;
+                case Console:
+                    if ((*counter) % 2) {
+                        _d->consoleButton->setColor("#822E33");
+                        _d->consoleButton->setCheckedColor("#622E33");
+                    } else {
+                        _d->consoleButton->setColor("#495866");
+                        _d->consoleButton->setCheckedColor("#363F47");
+                    }
+                    break;
+            }
+        } else {
+            timer->stop();
+            timer->deleteLater();
+            delete counter;
+        }
+    });
 }
 
 QSize OutputWidget::sizeHint() const
