@@ -25,7 +25,7 @@ class ParserController : public QObject
                 QVariant value;
                 TransactionType type;
 
-                bool operator== (const Transaction& x) {
+                bool operator== (const Transaction& x) const {
                     return (x.fileName == this->fileName &&
                             x.property == this->property &&
                             x.type == this->type);

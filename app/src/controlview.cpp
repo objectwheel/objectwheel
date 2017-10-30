@@ -202,7 +202,7 @@ void ControlViewPrivate::handlePasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = SaveManager::exposeControl(url.toLocalFile(), uid);
+        auto control = SaveManager::exposeControl(url.toLocalFile(), ControlGui, uid);
         SaveManager::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
         control->setParentItem(mainControl);
         control->refresh();

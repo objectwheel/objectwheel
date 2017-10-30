@@ -273,5 +273,6 @@
         <file>resources/images/issues.png</file>
         <file>resources/images/search.png</file>
         <file>resources/images/up-arrow.png</file>
+        <file>resources/images/error.png</file>
     </qresource>
 </RCC>

@@ -310,7 +310,7 @@ static void saveChanges(const QString& property, const QVariant& value)
 
     QPointer<Control> sc = scs.at(0);
 
-    if (DesignManager::mode() == DesignManager::ControlGUI && property == TAG_ID)
+    if (DesignManager::mode() == ControlGui && property == TAG_ID)
         SaveManager::setProperty(sc, property, value,
             DesignManager::controlScene()->mainControl()->dir());
     else
@@ -928,10 +928,10 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
         }
     }
 
-//    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
-//    if (!model->parent(index).isValid() && mask) {
-//        option.font.setWeight(QFont::DemiBold);
-//    }
+    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
+    if (!model->parent(index).isValid() && mask) {
+        option.font.setWeight(QFont::Medium);
+    }
 
     QStyledItemDelegate::paint(painter, option, index);
 

@@ -3,6 +3,7 @@
 
 #include <formscene.h>
 #include <qmleditorview.h>
+#include <global.h>
 #include <QObject>
 
 class QWidget;
@@ -20,18 +21,11 @@ class DesignManager : public QObject
         friend class DesignManagerPrivate;
 
     public:
-        enum Mode {
-            ControlGUI,
-            FormGUI,
-            CodeEdit
-        };
-
-    public:
         explicit DesignManager(QObject *parent = 0);
         static DesignManager* instance();
         static void setSettleWidget(QWidget* widget);
-        static const Mode& mode();
-        static void setMode(const Mode& mode);
+        static const DesignMode& mode();
+        static void setMode(const DesignMode& mode);
         static ControlScene* currentScene();
         static ControlScene* controlScene();
         static FormScene* formScene();
@@ -48,7 +42,7 @@ class DesignManager : public QObject
 
     private:
         static DesignManagerPrivate* _d;
-        static Mode _mode;
+        static DesignMode _mode;
         static ControlScene* _currentScene;
 };
 

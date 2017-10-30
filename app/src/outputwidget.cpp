@@ -2,9 +2,7 @@
 #include <flatbutton.h>
 #include <css.h>
 #include <fit.h>
-#include <issuesbox.h>
-#include <consolebox.h>
-#include <searchbox.h>
+#include <designmanager.h>
 
 #include <QSplitter>
 #include <QSplitterHandle>
@@ -16,6 +14,7 @@
 #define HEIGHT_MAX (fit(600))
 #define SIZE_INITIAL (QSize(fit(300), fit(160)))
 #define INTERVAL_SHINE (500)
+#define COUNT_BLINK (3)
 
 using namespace Fit;
 
@@ -64,8 +63,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     hideButton->setCursor(Qt::PointingHandCursor);
     hideButton->setToolTip("Hide bar.");
     hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
-    hideButton->setColor("#495866");
-    hideButton->setCheckedColor("#363F47");
+    hideButton->setColor("#697D8C");
+    hideButton->setCheckedColor("#4C5A66");
     connect(hideButton, SIGNAL(clicked(bool)),
       SLOT(handleHideButtonClicked()));
 
@@ -76,8 +75,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     issuesButton->setCursor(Qt::PointingHandCursor);
     issuesButton->setToolTip("Show recent issues.");
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
-    issuesButton->setColor("#495866");
-    issuesButton->setCheckedColor("#363F47");
+    issuesButton->setColor("#697D8C");
+    issuesButton->setCheckedColor("#4C5A66");
     issuesButton->setCheckedTextColor("#f0f4f7");
     issuesButton->setTextColor("#f0f4f7");
     issuesButton->setChecked(true);
@@ -91,8 +90,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     searchButton->setCursor(Qt::PointingHandCursor);
     searchButton->setToolTip("Search words within project.");
     searchButton->setIcon(QIcon(":/resources/images/search.png"));
-    searchButton->setColor("#495866");
-    searchButton->setCheckedColor("#363F47");
+    searchButton->setColor("#697D8C");
+    searchButton->setCheckedColor("#4C5A66");
     searchButton->setCheckedTextColor("#f0f4f7");
     searchButton->setTextColor("#f0f4f7");
     connect(searchButton, SIGNAL(toggled(bool)),
@@ -105,8 +104,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     consoleButton->setCursor(Qt::PointingHandCursor);
     consoleButton->setToolTip("Show application output.");
     consoleButton->setIcon(QIcon(":/resources/images/console.png"));
-    consoleButton->setColor("#495866");
-    consoleButton->setCheckedColor("#363F47");
+    consoleButton->setColor("#697D8C");
+    consoleButton->setCheckedColor("#4C5A66");
     consoleButton->setCheckedTextColor("#f0f4f7");
     consoleButton->setTextColor("#f0f4f7");
     connect(consoleButton, SIGNAL(toggled(bool)),
@@ -130,9 +129,9 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);
 
-    boxes[Issues] = new IssuesBox;
-    boxes[Search] = new SearchBox;
-    boxes[Console] = new ConsoleBox;
+    boxes[Issues] = new IssuesBox(parent);
+    boxes[Search] = new SearchBox(parent);
+    boxes[Console] = new ConsoleBox(parent);
 
     boxes.value(Issues)->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
@@ -140,6 +139,11 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
       QSizePolicy::Expanding);
     boxes.value(Console)->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
+
+    QTimer::singleShot(100, [this] {
+        connect(DesignManager::instance(), SIGNAL(modeChanged()),
+          boxes.value(Issues), SLOT(checkErrors()));
+    });
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
@@ -220,19 +224,11 @@ void OutputWidget::setActiveBox(BoxType type)
     if (!_collapsed)
         _d->boxes.value(type)->show();
 
-    switch (type) {
-        case Issues:
-            _d->issuesButton->setChecked(true);
-            break;
-        case Search:
-            _d->searchButton->setChecked(true);
-            break;
-        case Console:
-            _d->consoleButton->setChecked(true);
-            break;
-    }
+    button(type)->setChecked(true);
 }
 
+//FIXME: My size is getting corrupted if qmlcodeview opens by inspector pane a few times
+//WARNING: Does it get broken if I pin/unpin qmleditorview? or properties, forms panes etc?
 void OutputWidget::expand()
 {
     _collapsed = false;
@@ -265,42 +261,27 @@ void OutputWidget::updateLastHeight()
 
 void OutputWidget::shine(BoxType type)
 {
+    static QList<BoxType> shineList;
+    if (shineList.contains(type))
+        return;
+    shineList << type;
+
     auto timer = new QTimer;
     auto counter = new int(0);
     timer->start(INTERVAL_SHINE);
 
-    connect(timer, &QTimer::timeout, [=] {
-        if ((*counter)++ < 8) {
-            switch (type) {
-                case Issues:
-                    if ((*counter) % 2) {
-                        _d->issuesButton->setColor("#822E33");
-                        _d->issuesButton->setCheckedColor("#622E33");
-                    } else {
-                        _d->issuesButton->setColor("#495866");
-                        _d->issuesButton->setCheckedColor("#363F47");
-                    }
-                    break;
-                case Search:
-                    if ((*counter) % 2) {
-                        _d->searchButton->setColor("#822E33");
-                        _d->searchButton->setCheckedColor("#622E33");
-                    } else {
-                        _d->searchButton->setColor("#495866");
-                        _d->searchButton->setCheckedColor("#363F47");
-                    }
-                    break;
-                case Console:
-                    if ((*counter) % 2) {
-                        _d->consoleButton->setColor("#822E33");
-                        _d->consoleButton->setCheckedColor("#622E33");
-                    } else {
-                        _d->consoleButton->setColor("#495866");
-                        _d->consoleButton->setCheckedColor("#363F47");
-                    }
-                    break;
+    connect(timer, &QTimer::timeout, this, [=] {
+        if ((*counter)++ < (COUNT_BLINK * 2)) {
+            auto btn = button(type);
+            if ((*counter) % 2) {
+                btn->setColor("#C63333");
+                btn->setCheckedColor("#C63333");
+            } else {
+                btn->setColor("#697D8C");
+                btn->setCheckedColor("#4C5A66");
             }
         } else {
+            shineList.removeAll(type);
             timer->stop();
             timer->deleteLater();
             delete counter;
@@ -331,6 +312,23 @@ void OutputWidget::setSplitter(QSplitter* splitter)
 void OutputWidget::setSplitterHandle(QSplitterHandle* splitterHandle)
 {
     _splitterHandle = splitterHandle;
+}
+
+FlatButton* OutputWidget::button(BoxType type)
+{
+    switch (type) {
+        case Issues:
+            return _d->issuesButton;
+        case Search:
+            return _d->searchButton;
+        case Console:
+            return _d->consoleButton;
+    }
+}
+
+QWidget* OutputWidget::box(BoxType type)
+{
+    return _d->boxes[type];
 }
 
 #include "outputbox.moc"

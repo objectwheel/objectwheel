@@ -12,7 +12,7 @@
 #include <QLoggingCategory>
 #include <QTimer>
 
-#define PIXEL_SIZE 13
+#define PIXEL_SIZE 14
 #define REF_WIDTH 1366
 #define REF_HEIGHT 768
 #define REF_DPI 144
@@ -66,6 +66,9 @@ int main(int argc, char *argv[])
     // Add system wide fonts and set default font
     QFont font;
     font.setPixelSize(Fit::fit(PIXEL_SIZE));
+#if defined(Q_OS_MACOS)
+    font.setFamily(".SF NS Display");
+#endif
     QApplication::setFont(font);
     QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
 

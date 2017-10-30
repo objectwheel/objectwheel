@@ -57,7 +57,7 @@ class SaveManager : public QObject
 
         static ExecError execProject();
         static void exposeProject();
-        static Control* exposeControl(const QString& rootPath, QString suid = QString());
+        static Control* exposeControl(const QString& rootPath, const DesignMode& mode, QString suid = QString());
         static bool initProject(const QString& projectDirectory);
 
         static QString basePath();

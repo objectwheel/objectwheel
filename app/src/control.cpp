@@ -400,6 +400,7 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         ((Form*)parent)->setSkin(result.skin);
 
     parent->update();
+    parent->_errors.clear();
 
     if (parent->_initialized == false) {
         parent->_initialized = true;
@@ -415,13 +416,15 @@ void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> erro
     if (control != parent)
         return;
 
-    QMessageBox box;
-    box.setText("<b>Following control has some errors.</b>");
-    box.setInformativeText("<b>Control</b>: " +  parent->id() + ", <b>\n\rReason</b>: " + errors[0].description());
-    box.setStandardButtons(QMessageBox::Ok);
-    box.setDefaultButton(QMessageBox::Ok);
-    box.setIcon(QMessageBox::Information);
-    box.exec();
+    parent->_errors = errors;
+    // TODO: Remove me
+    //    QMessageBox box;
+    //    box.setText("<b>Following control has some errors.</b>");
+    //    box.setInformativeText("<b>Control</b>: " +  parent->id() + ", <b>\n\rReason</b>: " + errors[0].description());
+    //    box.setStandardButtons(QMessageBox::Ok);
+    //    box.setDefaultButton(QMessageBox::Ok);
+    //    box.setIcon(QMessageBox::Information);
+    //    box.exec();
 
     if (parent->_initialized == false) {
         auto scene = static_cast<ControlScene*>(parent->scene());
@@ -435,6 +438,8 @@ void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> erro
     }
 
     parent->hide();
+    emit parent->errorOccurred();
+    emit controlWatcher.errorOccurred(parent);
 }
 
 void ControlPrivate::handleGeometrySignalChange()
@@ -462,12 +467,13 @@ void ControlPrivate::handleGeometrySignalChange()
 bool Control::_showOutline = false;
 QList<Control*> Control::_controls;
 
-Control::Control(const QString& url, const QString& uid, Control* parent)
+Control::Control(const QString& url, const DesignMode& mode, const QString& uid, Control* parent)
     : QGraphicsWidget(parent)
     , _d(new ControlPrivate(this))
     , _controlTransaction(this)
     , _uid(uid.isEmpty() ? SaveManager::uid(dname(dname(url))) : uid)
     , _url(url)
+    , _mode(mode)
     , _dragging(false)
     , _dragIn(false)
     , _clip(true)
@@ -653,10 +659,11 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     _dragIn = false;
 
     auto pos = event->pos();
-    auto control = new Control(event->mimeData()->urls().at(0).toLocalFile());
+    auto control = new Control(event->mimeData()->urls().
+      at(0).toLocalFile(), DesignManager::mode());
     control->setParentItem(this);
-    SaveManager::addControl(control, this, DesignManager::currentScene()->mainControl()->uid(),
-                            DesignManager::currentScene()->mainControl()->dir());
+    SaveManager::addControl(control, this, DesignManager::currentScene()->
+      mainControl()->uid(), DesignManager::currentScene()->mainControl()->dir());
     control->refresh();
     connect(control, &Control::initialized, [=] {
         control->controlTransaction()->setTransactionsEnabled(true);
@@ -754,7 +761,7 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
     DesignManager::qmlEditorView()->addControl(this);
     if (DesignManager::qmlEditorView()->pinned())
-        DesignManager::setMode(DesignManager::CodeEdit);
+        DesignManager::setMode(CodeEdit);
     DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
     DesignManager::qmlEditorView()->openControl(this);
     DesignManager::qmlEditorView()->raiseContainer();
@@ -779,6 +786,21 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             break;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+const DesignMode& Control::mode() const
+{
+    return _mode;
+}
+
+const QList<QQmlError>& Control::errors() const
+{
+    return _errors;
+}
+
+bool Control::hasErrors() const
+{
+    return !_errors.isEmpty();
 }
 
 const QList<Control*>& Control::controls()
@@ -1444,7 +1466,7 @@ void FormPrivate::applySkinChange()
 //! ********************** [Form] **********************
 
 Form::Form(const QString& url, const QString& uid, Form* parent)
-    : Control(url, uid, parent)
+    : Control(url, FormGui, uid, parent)
     , _d(new FormPrivate(this))
     , _skin(Skin::Invalid)
 {

@@ -837,7 +837,7 @@ void SaveManager::exposeProject()
         pmap[path] = form;
         for (auto child : childrenPaths(path)) {
             auto pcontrol = pmap.value(dname(dname(child)));
-            auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+            auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml", FormGui);
             control->setParentItem(pcontrol);
             control->refresh();
             connect(control, &Control::initialized, [=] {
@@ -854,20 +854,23 @@ void SaveManager::exposeProject()
     emit instance()->projectExposed();
 }
 
-Control* SaveManager::exposeControl(const QString& rootPath, QString suid)
+Control* SaveManager::exposeControl(const QString& rootPath,
+  const DesignMode& mode, QString suid)
 {
-    auto control = new Control(rootPath + separator() + DIR_THIS +
-                               separator() + "main.qml");
+    auto control = new Control(rootPath + separator() +
+      DIR_THIS + separator() + "main.qml", mode);
 
     QMap<QString, Control*> pmap;
     pmap[rootPath] = control;
     for (auto child : childrenPaths(rootPath, suid)) {
         auto pcontrol = pmap.value(dname(dname(child)));
-        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+        auto control = new Control(child + separator() +
+          DIR_THIS + separator() + "main.qml", mode);
         control->setParentItem(pcontrol);
         control->refresh();
         connect(control, &Control::initialized, [=] {
-            control->controlTransaction()->setTransactionsEnabled(true);
+            control->controlTransaction()->
+              setTransactionsEnabled(true);
         });
 
         pmap[child] = control;

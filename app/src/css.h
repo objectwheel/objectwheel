@@ -14,7 +14,6 @@ class CSS
         static QString ScrollBar;
         static QString ScrollBarH;
         static QString DesignerToolbar;
-        static QString DesignerToolbarR;
         static QString DesignerToolbarV;
         static QString DesignerPinbar;
 };

@@ -2,6 +2,10 @@
 #define OUTPUTWIDGET_H
 
 #include <global.h>
+#include <issuesbox.h>
+#include <consolebox.h>
+#include <searchbox.h>
+
 #include <QWidget>
 #include <QMap>
 #include <QPointer>
@@ -10,6 +14,7 @@
 class QSplitter;
 class QSplitterHandle;
 class OutputWidgetPrivate;
+class FlatButton;
 
 enum BoxType {
     Issues,
@@ -29,6 +34,8 @@ class OutputWidget : public QWidget
         void setActiveBox(BoxType type);
         BoxType activeBoxType() const;
         bool collapsed() const;
+        FlatButton* button(BoxType type);
+        QWidget* box(BoxType type);
 
     public slots:
         void expand();

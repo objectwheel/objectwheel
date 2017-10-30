@@ -86,6 +86,9 @@ void MainWindow::setupGui()
     titleText->setText("Objectwheel Studio");
     titleText->setAlignment(Qt::AlignCenter);
     titleText->setStyleSheet("background: transparent; color:white;");
+    QFont f;
+    f.setWeight(QFont::Medium);
+    titleText->setFont(f);
 
     /* Add Title Bar */
     addToolBar(Qt::TopToolBarArea, &_titleBar);
@@ -101,6 +104,7 @@ void MainWindow::setupGui()
     QLabel* label = new QLabel;
     label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     label->setText(" Properties");
+    label->setFont(f);
 
     QToolButton* pinButton = new QToolButton;
     pinButton->setToolTip("Pin/Unpin pane.");
@@ -128,6 +132,7 @@ void MainWindow::setupGui()
     QLabel* label2 = new QLabel;
     label2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     label2->setText(" Forms");
+    label2->setFont(f);
 
     QToolButton* pinButton2 = new QToolButton;
     pinButton2->setToolTip("Pin/Unpin pane.");
@@ -155,6 +160,7 @@ void MainWindow::setupGui()
     QLabel* label3 = new QLabel;
     label3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     label3->setText(" Toolbox");
+    label3->setFont(f);
 
     QToolButton* pinButton3 = new QToolButton;
     pinButton3->setToolTip("Pin/Unpin pane.");
@@ -196,9 +202,9 @@ void MainWindow::setupGui()
         if (previousControl)
             previousControl->deleteLater();
         auto url = _toolbox.toolboxTree()->urls(_toolbox.toolboxTree()->currentItem())[0];
-        auto control = SaveManager::exposeControl(dname(dname(url.toLocalFile())));
+        auto control = SaveManager::exposeControl(dname(dname(url.toLocalFile())), ControlGui);
         DesignManager::controlScene()->setMainControl(control);
-        DesignManager::setMode(DesignManager::ControlGUI);
+        DesignManager::setMode(ControlGui);
         control->refresh();
         connect(control, &Control::initialized, [control] {
             control->controlTransaction()->setTransactionsEnabled(true);
@@ -212,6 +218,7 @@ void MainWindow::setupGui()
     QLabel* label4 = new QLabel;
     label4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     label4->setText(" Control Inspector");
+    label4->setFont(f);
 
     QToolButton* pinButton4 = new QToolButton;
     pinButton4->setToolTip("Pin/Unpin pane.");

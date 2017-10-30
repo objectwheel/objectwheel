@@ -4,6 +4,12 @@
 #define SIZE_SKIN (fit(QSize(320, 662)))
 #define SIZE_FORM (fit(QSize(285, 535)))
 
+enum DesignMode {
+    ControlGui,
+    FormGui,
+    CodeEdit
+};
+
 enum Screen {
     Progress,
     Studio,

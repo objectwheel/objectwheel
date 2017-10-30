@@ -214,7 +214,7 @@ void InspectorWidget::handleDoubleClick(QTreeWidgetItem* item, int)
 
     DesignManager::qmlEditorView()->addControl(c);
     if (DesignManager::qmlEditorView()->pinned())
-        DesignManager::setMode(DesignManager::CodeEdit);
+        DesignManager::setMode(CodeEdit);
     DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
     DesignManager::qmlEditorView()->openControl(c);
     DesignManager::qmlEditorView()->raiseContainer();

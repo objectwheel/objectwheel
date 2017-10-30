@@ -24,6 +24,7 @@ class ControlWatcher : public QObject {
 
     signals:
         void geometryChanged(Control*);
+        void errorOccurred(Control*);
 
     private:
         static ControlWatcher* _instance;
@@ -79,7 +80,8 @@ class Control : public QGraphicsWidget
         friend class DesignManagerPrivate;
 
     public:
-        explicit Control(const QString& url, const QString& uid = QString(), Control* parent = Q_NULLPTR);
+        explicit Control(const QString& url, const DesignMode& mode,
+          const QString& uid = QString(), Control* parent = Q_NULLPTR);
         ~Control();
         QString uid() const;
         QString id() const;
@@ -109,6 +111,9 @@ class Control : public QGraphicsWidget
         static QString generateUid();
         ControlTransaction* controlTransaction();
         static const QList<Control*>& controls();
+        const QList<QQmlError>& errors() const;
+        bool hasErrors() const;
+        const DesignMode& mode() const;
 
     public slots:
         void hideSelection();
@@ -148,6 +153,7 @@ class Control : public QGraphicsWidget
     signals:
         void previewChanged();
         void initialized();
+        void errorOccurred();
 
     protected:
         Resizer _resizers[8];
@@ -159,7 +165,9 @@ class Control : public QGraphicsWidget
         QString _id;
         QList<QString> _events;
         PropertyNodes _properties;
+        QList<QQmlError> _errors;
         QString _url;
+        DesignMode _mode;
         bool _dragging;
         bool _dragIn;
         bool _clip;
