@@ -23,6 +23,13 @@ void fillItem(QTreeWidgetItem* parentItem, const QList<Control*>& children)
     for (auto child : children) {
         QTreeWidgetItem* item = new QTreeWidgetItem;
         item->setText(0, child->id());
+        item->setData(0, Qt::UserRole, child->hasErrors());
+        item->setData(1, Qt::UserRole, child->hasErrors());
+
+        if (child->hasErrors()) {
+            item->setTextColor(0, "#D02929");
+            item->setTextColor(1, "#D02929");
+        }
 
         if (child->gui())
             item->setText(1, "Yes");
@@ -49,6 +56,41 @@ QList<QTreeWidgetItem*> tree(QTreeWidgetItem* item)
         items << tree(item->child(i));
     }
     return items;
+}
+//!
+//! *********************** [InspectorListDelegate] ***********************
+//!
+
+class InspectorListDelegate: public QStyledItemDelegate
+{
+        Q_OBJECT
+
+    public:
+        InspectorListDelegate(QWidget* parent);
+        void paint(QPainter* painter, const QStyleOptionViewItem &option,
+          const QModelIndex &index) const override;
+};
+
+InspectorListDelegate::InspectorListDelegate(QWidget* parent)
+    : QStyledItemDelegate(parent)
+{
+}
+
+void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
+    const QModelIndex &index) const
+{
+    const QAbstractItemModel* model = index.model();
+    Q_ASSERT(model);
+
+    auto o = option;
+    if (model->data(index, Qt::UserRole).toBool() &&
+      option.state & QStyle::State_Selected) {
+        QPalette p(o.palette);
+        p.setColor(QPalette::HighlightedText, "#D02929");
+        o.palette = p;
+    }
+
+    QStyledItemDelegate::paint(painter, o, index);
 }
 
 //!
@@ -89,6 +131,7 @@ InspectorWidget::InspectorWidget(QWidget* parent)
     _treeWidget.viewport()->installEventFilter(this);
     _treeWidget.header()->resizeSection(0, fit(250));
     _treeWidget.header()->resizeSection(1, fit(50));
+    _treeWidget.setItemDelegate(new InspectorListDelegate(&_treeWidget));
 
     connect(&_treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
       SLOT(handleClick(QTreeWidgetItem*,int)));
@@ -166,9 +209,19 @@ void InspectorWidget::refreshList()
     QTreeWidgetItem* item = new QTreeWidgetItem;
     item->setText(0, mc->id());
     item->setText(1, "Yes");
+    item->setData(0, Qt::UserRole, mc->hasErrors());
+    item->setData(1, Qt::UserRole, mc->hasErrors());
+
+    if (mc->hasErrors()) {
+        item->setTextColor(0, "#D02929");
+        item->setTextColor(1, "#D02929");
+    }
 
     if (mc->form()) {
-        item->setIcon(0, QIcon(":/resources/images/form.png"));
+        if (SaveManager::isMain(mc->dir()))
+            item->setIcon(0, QIcon(":/resources/images/mform.png"));
+        else
+            item->setIcon(0, QIcon(":/resources/images/form.png"));
     } else {
         QIcon icon;
         icon.addFile(mc->dir() + separator() + DIR_THIS +
@@ -239,7 +292,6 @@ void InspectorWidget::handleClick(QTreeWidgetItem* item, int)
     if (c == nullptr)
         return;
 
-
     _blockRefresh = true;
     DesignManager::currentScene()->clearSelection();
     c->setSelected(true);
@@ -250,3 +302,5 @@ QSize InspectorWidget::sizeHint() const
 {
     return QSize(fit(200), fit(400));
 }
+
+#include "inspectorwidget.moc"

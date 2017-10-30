@@ -65,6 +65,7 @@ class SaveManager : public QObject
         static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
         static QStringList masterPaths(const QString& topPath);
         static bool isOwctrl(const QString& rootPath);
+        static bool isMain(const QString& rootPath);
         static Skin skin(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);

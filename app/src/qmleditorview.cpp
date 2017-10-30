@@ -193,6 +193,8 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     saveButton->setDisabled(true);
 
     codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    codeEditor->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    codeEditor->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     codeEditor->setDocument(nullptr);
     codeEditor->hide();
 

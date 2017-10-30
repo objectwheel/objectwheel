@@ -274,5 +274,6 @@
         <file>resources/images/search.png</file>
         <file>resources/images/up-arrow.png</file>
         <file>resources/images/error.png</file>
+        <file>resources/images/mform.png</file>
     </qresource>
 </RCC>

@@ -50,7 +50,7 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, cons
     const auto value = map[propertyName].value<QFont>();
     const auto px = value.pixelSize() > 0 ? true : false;
     const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
-        .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
+                    .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -121,9 +121,9 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, cons
 static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = QRect(map["x"].toInt(), map["y"].toInt(),
-        map["width"].toInt(), map["height"].toInt());
+            map["width"].toInt(), map["height"].toInt());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-        arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
+                    arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -167,10 +167,10 @@ static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, 
 static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     const auto value = QRectF(map["x"].toReal(), map["y"].toReal(),
-        map["width"].toReal(), map["height"].toReal());
+            map["width"].toReal(), map["height"].toReal());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-        arg((int)value.x()).arg((int)value.y()).
-        arg((int)value.width()).arg((int)value.height());
+                    arg((int)value.x()).arg((int)value.y()).
+                    arg((int)value.width()).arg((int)value.height());
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -260,7 +260,7 @@ static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const
     auto dispText = value.toDisplayString();
     if (value.isLocalFile()) {
         dispText = value.toLocalFile().
-          remove(selectedControl->dir() + separator() + DIR_THIS + separator());
+                   remove(selectedControl->dir() + separator() + DIR_THIS + separator());
     }
 
     auto iitem = new QTreeWidgetItem;
@@ -312,13 +312,13 @@ static void saveChanges(const QString& property, const QVariant& value)
 
     if (DesignManager::mode() == ControlGui && property == TAG_ID)
         SaveManager::setProperty(sc, property, value,
-            DesignManager::controlScene()->mainControl()->dir());
+                                 DesignManager::controlScene()->mainControl()->dir());
     else
         SaveManager::setProperty(sc, property, value);
 
     QMetaObject::Connection con;
     con = QObject::connect(SaveManager::instance(),
-      &SaveManager::parserRunningChanged, [sc, con] {
+                           &SaveManager::parserRunningChanged, [sc, con] {
         if (sc.isNull()) {
             QObject::disconnect(con);
             return;
@@ -441,7 +441,7 @@ PropertiesDelegate::PropertiesDelegate(QTreeWidget* view, QObject* parent)
 }
 
 QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
-    const QModelIndex &index) const
+                                          const QModelIndex &index) const
 {
     QWidget* ed = 0;
 
@@ -457,7 +457,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
             auto editor = new QComboBox(parent);
             editor->addItems(QFontDatabase().families());
             connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -467,7 +467,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case FontPxSize: {
             auto editor = new QSpinBox(parent);
             connect(editor, &QSpinBox::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(72);
             editor->setMinimum(0);
@@ -483,7 +483,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case Bool: {
             auto editor = new QCheckBox(parent);
             connect(editor, &QCheckBox::toggled,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -499,7 +499,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
             {
                 auto color = index.data(NodeRole::Data).value<QColor>();
                 color = QColorDialog::getColor(color, m_view, "Choose Color",
-                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+                                               QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
                 if (color.isValid()) {
                     m_view->model()->setData(index, color, NodeRole::Data);
                     m_view->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
@@ -512,7 +512,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case String: {
             auto editor = new QLineEdit(parent);
             connect(editor, &QLineEdit::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -523,7 +523,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
             QRegExp rx("[a-z_][a-zA-Z0-9_]+");
             QValidator* validator = new QRegExpValidator(rx, editor);
             connect(editor, &QLineEdit::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setValidator(validator);
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
@@ -533,7 +533,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case Url: {
             auto editor = new QLineEdit(parent);
             connect(editor, &QLineEdit::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             ed = editor;
             break;
@@ -542,7 +542,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case Double: {
             auto editor = new QDoubleSpinBox(parent);
             connect(editor, &QDoubleSpinBox::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             if (property == "opacity") {
                 editor->setMaximum(1.0);
@@ -559,7 +559,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case Int: {
             auto editor = new QSpinBox(parent);
             connect(editor, &QSpinBox::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<int>::max());
             editor->setMinimum(std::numeric_limits<int>::min());
@@ -573,7 +573,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case GeometryHeight: {
             auto editor = new QSpinBox(parent);
             connect(editor, &QSpinBox::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<int>::max());
             editor->setMinimum(std::numeric_limits<int>::min());
@@ -587,7 +587,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case GeometryFHeight: {
             auto editor = new QDoubleSpinBox(parent);
             connect(editor, &QDoubleSpinBox::editingFinished,
-                [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
             editor->setMaximum(std::numeric_limits<double>::max());
             editor->setMinimum(std::numeric_limits<double>::min());
@@ -652,7 +652,7 @@ void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) co
             auto dispText = val.toDisplayString();
             if (val.isLocalFile()) {
                 dispText = val.toLocalFile().
-                  remove(selectedControl->dir() + separator() + DIR_THIS + separator());
+                           remove(selectedControl->dir() + separator() + DIR_THIS + separator());
             }
             editor->setText(dispText);
             break;
@@ -698,7 +698,7 @@ void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) co
 }
 
 void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
-    const QModelIndex &index) const
+                                      const QModelIndex &index) const
 {
     if (index.column() == 0)
         return;
@@ -826,7 +826,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toInt();
 
             const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-                arg(x).arg(y).arg(w).arg(h);
+                            arg(x).arg(y).arg(w).arg(h);
 
             model->setData(pIndex, gt, Qt::DisplayRole);
             saveChanges(type, val);
@@ -850,7 +850,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toReal();
 
             const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-                arg(x).arg(y).arg(w).arg(h);
+                            arg(x).arg(y).arg(w).arg(h);
 
             model->setData(pIndex, gt, Qt::DisplayRole);
             saveChanges(type, val);
@@ -863,7 +863,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
 }
 
 void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
-    const QStyleOptionViewItem &option, const QModelIndex &index) const
+                                              const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QStyledItemDelegate::updateEditorGeometry(ed, option, index);
 
@@ -877,7 +877,7 @@ void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
 }
 
 void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
-                          const QModelIndex &index) const
+                               const QModelIndex &index) const
 {
     QStyleOptionViewItem option = opt;
     const QAbstractItemModel* model = index.model();
@@ -976,6 +976,10 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
     painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
                       QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
     painter->setPen(oldPen);
+
+    if (!m_view->isEnabled()) {
+        painter->fillRect(option.rect, QColor("04000000"));
+    }
 }
 
 QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
@@ -1001,13 +1005,6 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     p2.setColor(QPalette::HighlightedText, QColor("#202427"));
     _treeWidget.setPalette(p2);
 
-    QPalette p3(_lblMsg.palette());
-    p3.setColor(QPalette::WindowText, "#a0a4a7");
-    _lblMsg.setParent(&_treeWidget);
-    _lblMsg.setText("No items selected");
-    _lblMsg.setAlignment(Qt::AlignCenter);
-    _lblMsg.setPalette(p3);
-
     _treeWidget.setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     _treeWidget.setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     _treeWidget.setSelectionBehavior(QTreeWidget::SelectRows);
@@ -1024,6 +1021,7 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
     _treeWidget.setIndentation(fit(10));
     _treeWidget.setItemDelegate(new PropertiesDelegate(&_treeWidget, &_treeWidget));
     _treeWidget.header()->resizeSection(0, fit(170));
+    _treeWidget.viewport()->installEventFilter(this);
 
     _layout.setSpacing(fit(2));
     _layout.setContentsMargins(fit(3), fit(3), fit(3), fit(3));
@@ -1039,13 +1037,13 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
 
     /* Prepare Properties Widget */
     connect(DesignManager::formScene(), SIGNAL(selectionChanged()),
-      SLOT(handleSelectionChange()));
+            SLOT(handleSelectionChange()));
     connect(DesignManager::controlScene(), SIGNAL(selectionChanged()),
-      SLOT(handleSelectionChange()));
+            SLOT(handleSelectionChange()));
     connect(DesignManager::instance(), SIGNAL(modeChanged()),
-      SLOT(handleSelectionChange()));
+            SLOT(handleSelectionChange()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
-      SLOT(handleSelectionChange()));
+            SLOT(handleSelectionChange()));
 }
 
 void PropertiesWidget::clearList()
@@ -1054,7 +1052,6 @@ void PropertiesWidget::clearList()
         qDeleteAll(_treeWidget.topLevelItem(i)->takeChildren());
 
     _treeWidget.clear();
-    _lblMsg.setVisible(true);
 }
 
 void PropertiesWidget::refreshList()
@@ -1066,7 +1063,11 @@ void PropertiesWidget::refreshList()
     if (selectedControls.size() != 1)
         return;
 
+    setDisabled(selectedControls[0]->hasErrors());
+
     auto propertyNodes = selectedControls[0]->properties();
+    if (propertyNodes.isEmpty())
+        return;
 
     {
         QTreeWidgetItem* item = new QTreeWidgetItem;
@@ -1183,7 +1184,6 @@ void PropertiesWidget::refreshList()
     }
 
     filterList(_searchEdit.text());
-    _lblMsg.setHidden(_treeWidget.topLevelItemCount() > 0);
 }
 
 void PropertiesWidget::handleSelectionChange()
@@ -1212,7 +1212,7 @@ void PropertiesWidget::filterList(const QString& filter)
             for (int z = 0; z < tci->childCount(); z++) {
                 auto tdi = tci->child(z);
                 auto v = (filter.isEmpty() || vv) ? true :
-                    tdi->text(0).contains(filter, Qt::CaseInsensitive);
+                                                    tdi->text(0).contains(filter, Qt::CaseInsensitive);
 
                 tdi->setHidden(!v);
                 if (v)
@@ -1229,16 +1229,41 @@ void PropertiesWidget::filterList(const QString& filter)
         tli->setHidden(!v);
     }
 }
+//TODO: Do not attempt to set a property on a hasErrors() control
+bool PropertiesWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == _treeWidget.viewport()) {
+        if (event->type() == QEvent::Paint) {
+            QPainter painter(_treeWidget.viewport());
+            if (_treeWidget.topLevelItemCount() == 0) {
+                bool drawn = false;
+                painter.setPen(QColor("#a0a4a7"));
+                const qreal ic = _treeWidget.viewport()->height() / fit(20);
+                for (int i = 0; i < ic; i++) {
+                    if (i % 2) {
+                        painter.fillRect(0, i * fit(20),
+                                         _treeWidget.viewport()->width(),
+                                         fit(20), QColor("#E5E9EC"));
+                    } else if (!drawn && (i == int(ic) / 2 ||
+                                          i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
+                        drawn = true;
+                        painter.drawText(0, i * fit(20),
+                                         _treeWidget.viewport()->width(),
+                                         fit(20), Qt::AlignCenter, "No items selected");
+                    }
+                }
+            }
+        }
+        return false;
+    } else {
+        return QWidget::eventFilter(watched, event);
+    }
+}
+
 //BUG: Occurs when properties widget lost focus
 QSize PropertiesWidget::sizeHint() const
 {
     return QSize(fit(340), fit(2600)); //FIXME:
-}
-
-void PropertiesWidget::resizeEvent(QResizeEvent* event)
-{
-    QWidget::resizeEvent(event);
-    _lblMsg.setGeometry(rect());
 }
 
 #include "propertieswidget.moc"

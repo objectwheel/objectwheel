@@ -635,6 +635,7 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 //WARNING: Check and make sure non-gui elements are added to master item of each control
 //FIXME: Change the name of default context property 'dpi' everywhere
 //FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
+//WARNING: Don't call me if project has errors
 ExecError SaveManager::execProject()
 {
     ExecError error;
@@ -887,6 +888,11 @@ bool SaveManager::isOwctrl(const QString& rootPath)
     return _d->isOwctrl(propertyData);
 }
 
+bool SaveManager::isMain(const QString& rootPath)
+{
+    return _d->isMain(rootPath);
+}
+
 Skin SaveManager::skin(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
@@ -1124,9 +1130,12 @@ void SaveManager::removeChildControlsOnly(const Control* control)
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
 // topPath is only necessary if property is an "id" set.
-void SaveManager::setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath)
+void SaveManager::setProperty(Control* control, const QString& property,
+  const QVariant& value, const QString& topPath)
 {
-    if (control->dir().isEmpty() || !isOwctrl(control->dir()))
+    if (control->dir().isEmpty() ||
+        control->hasErrors() ||
+        !isOwctrl(control->dir()))
         return;
 
     if (property == TAG_ID) {
@@ -1163,7 +1172,10 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
 
 void SaveManager::removeProperty(const Control* control, const QString& property)
 {
-    if (control->dir().isEmpty() || !isOwctrl(control->dir()) || property == TAG_ID)
+    if (control->dir().isEmpty() ||
+        control->hasErrors() ||
+        !isOwctrl(control->dir()) ||
+        property == TAG_ID)
         return;
 
     auto fileName = control->dir() + separator() + DIR_THIS +

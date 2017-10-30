@@ -46,7 +46,7 @@ class Resizer : public QGraphicsWidget
             BottomLeft
         };
 
-        explicit Resizer(Control* parent = Q_NULLPTR);
+        explicit Resizer(Control* parent = nullptr);
 
         Placement placement() const;
         void setPlacement(const Placement& placement);

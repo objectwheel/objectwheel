@@ -51,7 +51,8 @@ class IssuesBox : public QWidget
         void checkErrors();
 
     private slots:
-        void handleErrors(Control*);
+        void handleErrors(Control* control);
+        void handleDoubleClick(QListWidgetItem* item);
 
     private:
         QVBoxLayout _layout;

@@ -5,7 +5,7 @@
 
 ParserWorker* ParserController::_parserWorker = nullptr;
 QThread* ParserController::_workerThread = nullptr;
-QList<ParserController::Transaction> ParserController::_transactionList;
+QList<Transaction> ParserController::_transactionList;
 QTimer* ParserController::_transactionTimer = nullptr;
 bool ParserController::_running = false;
 
@@ -32,10 +32,10 @@ ParserController::~ParserController()
     _workerThread->wait();
 }
 
-void ParserController::setVariantProperty(const QString& fileName, const QString& property, const QVariant& value)
+void ParserController::setVariantProperty(const QString& url, const QString& property, const QVariant& value)
 {
     Transaction transaction;
-    transaction.fileName = fileName;
+    transaction.url = url;
     transaction.property = property;
     transaction.value = value;
     transaction.type = VariantProperty;
@@ -47,10 +47,10 @@ void ParserController::setVariantProperty(const QString& fileName, const QString
     _transactionTimer->start();
 }
 
-void ParserController::removeVariantProperty(const QString& fileName, const QString& property)
+void ParserController::removeVariantProperty(const QString& url, const QString& property)
 {
     Transaction transaction;
-    transaction.fileName = fileName;
+    transaction.url = url;
     transaction.property = property;
     transaction.type = RemoveVariantProperty;
 
@@ -64,6 +64,15 @@ void ParserController::removeVariantProperty(const QString& fileName, const QStr
 bool ParserController::running()
 {
     return _transactionList.size() > 0;
+}
+
+void ParserController::removeTransactionsFor(const QString& url)
+{
+    for (const auto tr : _transactionList) {
+        if (tr.url == url) {
+            _transactionList.removeOne(tr);
+        }
+    }
 }
 
 void ParserController::processWaitingTransactions()
@@ -80,14 +89,14 @@ void ParserController::processWaitingTransactions()
         case VariantProperty:
             QMetaObject::invokeMethod(_parserWorker, "setVariantProperty",
                                       Qt::QueuedConnection,
-                                      Q_ARG(QString, transaction.fileName),
+                                      Q_ARG(QString, transaction.url),
                                       Q_ARG(QString, transaction.property),
                                       Q_ARG(QVariant, transaction.value));
             break;
         case RemoveVariantProperty:
             QMetaObject::invokeMethod(_parserWorker, "removeVariantProperty",
                                       Qt::QueuedConnection,
-                                      Q_ARG(QString, transaction.fileName),
+                                      Q_ARG(QString, transaction.url),
                                       Q_ARG(QString, transaction.property));
             break;
         default:

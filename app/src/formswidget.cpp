@@ -70,6 +70,7 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     formsListWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     formsListWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     formsListWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    formsListWidget->setIconSize(QSize(fit(14),fit(14)));
 
     QTimer::singleShot(1000, [=] { //FIXME
         Delayer::delay([]()->bool {if (SaveManager::instance()) return false; else return true;});
@@ -146,7 +147,14 @@ void FormsWidgetPrivate::handleDatabaseChange()
         auto _id = SaveManager::id(path);
         if (id == _id)
             row = formsListWidget->count();
-        formsListWidget->addItem(_id);
+
+        auto item = new QListWidgetItem;
+        item->setText(_id);
+        if (SaveManager::isMain(path))
+            item->setIcon(QIcon(":/resources/images/mform.png"));
+        else
+            item->setIcon(QIcon(":/resources/images/form.png"));
+        formsListWidget->addItem(item);
     }
     formsListWidget->setCurrentRow(row);
 }

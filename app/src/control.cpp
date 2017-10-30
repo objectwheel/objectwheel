@@ -6,6 +6,7 @@
 #include <random>
 #include <filemanager.h>
 #include <qmleditorview.h>
+#include <parsercontroller.h>
 
 #include <QDebug>
 #include <QTimer>
@@ -106,6 +107,12 @@ void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
 void Resizer::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
+    auto* parent = static_cast<Control*>(parentItem());
+    if (parent->hasErrors()) {
+        event->ignore();
+        return;
+    }
+
     QGraphicsItem::mousePressEvent(event);
     event->accept();
     _resizing = true;
@@ -115,7 +122,7 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    if (_disabled)
+    if (_disabled || !_resizing)
         return;
 
     qreal diff_x, diff_y;
@@ -375,7 +382,6 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         for (auto& resizer : parent->_resizers)
             resizer.setDisabled(true);
     } else {
-
         bool te = parent->controlTransaction()->transactionsEnabled();
         parent->controlTransaction()->setTransactionsEnabled(false);
         if (parent->form())
@@ -417,6 +423,7 @@ void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> erro
         return;
 
     parent->_errors = errors;
+    ParserController::removeTransactionsFor(control->url());
     // TODO: Remove me
     //    QMessageBox box;
     //    box.setText("<b>Following control has some errors.</b>");
@@ -437,7 +444,7 @@ void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> erro
         emit parent->initialized();
     }
 
-    parent->hide();
+//    parent->hide();
     emit parent->errorOccurred();
     emit controlWatcher.errorOccurred(parent);
 }
@@ -699,7 +706,7 @@ void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mousePressEvent(event);
 
-    if (event->button() == Qt::MidButton)
+    if (event->button() == Qt::MidButton || !_errors.isEmpty())
         event->ignore();
     else
         event->accept();

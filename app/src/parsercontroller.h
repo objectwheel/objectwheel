@@ -8,36 +8,38 @@
 
 class ParserWorker;
 
+
+enum TransactionType {
+    VariantProperty,
+    RemoveVariantProperty
+};
+
+struct Transaction {
+        QString url;
+        QString property;
+        QVariant value;
+        TransactionType type;
+
+        bool operator== (const Transaction& x) const {
+            return (x.url == this->url &&
+                    x.property == this->property &&
+                    x.type == this->type);
+        }
+};
+
+
 class ParserController : public QObject
 {
         Q_OBJECT
         Q_DISABLE_COPY(ParserController)
 
     public:
-        enum TransactionType {
-            VariantProperty,
-            RemoveVariantProperty
-        };
-
-        struct Transaction {
-                QString fileName;
-                QString property;
-                QVariant value;
-                TransactionType type;
-
-                bool operator== (const Transaction& x) const {
-                    return (x.fileName == this->fileName &&
-                            x.property == this->property &&
-                            x.type == this->type);
-                }
-        };
-
-    public:
         explicit ParserController(QObject *parent = 0);
         ~ParserController();
-        static void setVariantProperty(const QString& fileName, const QString& property, const QVariant& value);
-        static void removeVariantProperty(const QString& fileName, const QString& property);
+        static void setVariantProperty(const QString& url, const QString& property, const QVariant& value);
+        static void removeVariantProperty(const QString& url, const QString& property);
         static bool running();
+        static void removeTransactionsFor(const QString& url);
 
     private slots:
         void processWaitingTransactions();

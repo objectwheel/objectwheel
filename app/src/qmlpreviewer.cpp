@@ -192,7 +192,8 @@ PreviewResult QmlPreviewerPrivate::requestPreview(Control* control, const QStrin
     qmlEngine->rootContext()->setContextProperty("dpi", Fit::ratio());
 
     auto qmlData = rdfile(url);
-    ParserWorker parserWorker; //FIXME
+    ParserWorker parserWorker; //FIXME: What if qml file contains errors?
+    //BUG: Possible bug if property 'visible' is a binding
     if (parserWorker.typeName(qmlData).contains("Window")) {
         parserWorker.setVariantProperty(qmlData, url, "visible", false);
         isWindow = true;

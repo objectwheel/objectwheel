@@ -3,6 +3,7 @@
 #include <css.h>
 #include <control.h>
 #include <outputwidget.h>
+#include <designmanager.h>
 
 #include <QLabel>
 #include <QStyledItemDelegate>
@@ -14,25 +15,25 @@
 using namespace Fit;
 
 //!
-//! *********************** [ListDelegate] ***********************
+//! *********************** [IssuesListDelegate] ***********************
 //!
 
-class ListDelegate: public QStyledItemDelegate
+class IssuesListDelegate: public QStyledItemDelegate
 {
         Q_OBJECT
 
     public:
-        ListDelegate(QWidget* parent);
+        IssuesListDelegate(QWidget* parent);
         void paint(QPainter* painter, const QStyleOptionViewItem &option,
           const QModelIndex &index) const override;
 };
 
-ListDelegate::ListDelegate(QWidget* parent)
+IssuesListDelegate::IssuesListDelegate(QWidget* parent)
     : QStyledItemDelegate(parent)
 {
 }
 
-void ListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
+void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
     const QModelIndex &index) const
 {
     const QAbstractItemModel* model = index.model();
@@ -91,12 +92,15 @@ IssuesBox::IssuesBox(OutputWidget* outputWidget)
     _listWidget.setFocusPolicy(Qt::NoFocus);
     _listWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget.setItemDelegate(new ListDelegate(&_listWidget));
+    _listWidget.setItemDelegate(new IssuesListDelegate(&_listWidget));
     connect(ControlWatcher::instance(), SIGNAL(errorOccurred(Control*)),
       SLOT(handleErrors(Control*)));
 
     _checkTimer.setInterval(INTERVAL_ERROR_CHECK);
     connect(&_checkTimer, SIGNAL(timeout()), SLOT(checkErrors()));
+
+    connect(&_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+      SLOT(handleDoubleClick(QListWidgetItem*)));
 }
 
 void IssuesBox::handleErrors(Control* control)
@@ -122,6 +126,22 @@ void IssuesBox::handleErrors(Control* control)
         }
     }
     _checkTimer.start();
+}
+
+void IssuesBox::handleDoubleClick(QListWidgetItem* item)
+{
+    const auto& error = item->data(Qt::UserRole).value<Error>();
+    const auto& c = _buggyControls.value(error);
+
+    if (!c)
+        return;
+
+    DesignManager::qmlEditorView()->addControl(c);
+    if (DesignManager::qmlEditorView()->pinned())
+        DesignManager::setMode(CodeEdit);
+    DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
+    DesignManager::qmlEditorView()->openControl(c);
+    DesignManager::qmlEditorView()->raiseContainer();
 }
 
 void IssuesBox::setCurrentMode(const DesignMode& currentMode)

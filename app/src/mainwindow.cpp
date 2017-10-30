@@ -23,7 +23,7 @@
 #include <QtNetwork>
 
 using namespace Fit;
-
+//TODO: Put current project name to somewhere
 MainWindow* MainWindow::_instance = nullptr;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
