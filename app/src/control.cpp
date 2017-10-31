@@ -107,12 +107,6 @@ void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
 void Resizer::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    auto* parent = static_cast<Control*>(parentItem());
-    if (parent->hasErrors()) {
-        event->ignore();
-        return;
-    }
-
     QGraphicsItem::mousePressEvent(event);
     event->accept();
     _resizing = true;
@@ -260,12 +254,11 @@ class ControlPrivate : public QObject
     public slots:
         void refreshPreview();
         void updatePreview(Control* control, PreviewResult result);
-        void handlePreviewErrors(Control* control, QList<QQmlError> errors, PreviewResult result);
         void handleGeometrySignalChange();
 
     public:
         Control* parent;
-        QPixmap itemPixmap;
+        QPixmap preview;
         QTimer refreshTimer;
         QTimer geometrySignalTimer;
         bool hoverOn;
@@ -288,9 +281,6 @@ ControlPrivate::ControlPrivate(Control* parent)
     geometrySignalTimer.setInterval(GEOMETRY_SIGNAL_DELAY);
     connect(&geometrySignalTimer, SIGNAL(timeout()),
       SLOT(handleGeometrySignalChange()));
-    connect(QmlPreviewer::instance(),
-      SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)),
-      SLOT(handlePreviewErrors(Control*,QList<QQmlError>,PreviewResult)));
     connect(QmlPreviewer::instance(),
       SIGNAL(previewReady(Control*,PreviewResult)),
       SLOT(updatePreview(Control*,PreviewResult)));
@@ -354,15 +344,12 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
     if (control != parent)
         return;
 
-    itemPixmap = result.preview;
+    parent->_errors = result.errors;
+    preview = result.preview;
 
-    if (parent->_initialized == false) {
-        auto scene = static_cast<ControlScene*>(parent->scene());
-        scene->clearSelection();
-        parent->setFlag(Control::ItemIsFocusable);
-        parent->setFlag(Control::ItemIsSelectable);
-        parent->setAcceptHoverEvents(true);
-        parent->_controlTransaction.flushParentChange();
+    if (result.hasError()) {
+        emit parent->errorOccurred();
+        emit controlWatcher.errorOccurred(parent);
     }
 
     parent->setGui(result.gui);
@@ -378,7 +365,7 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         parent->_controlTransaction.setParentTransactionsEnabled(false);
         parent->_controlTransaction.setZTransactionsEnabled(false);
         parent->resize(NONGUI_CONTROL_SIZE, NONGUI_CONTROL_SIZE);
-        DesignManager::currentScene()->nonGuiControlsPanel()->addControl(parent);
+        parent->setVisible(false);
         for (auto& resizer : parent->_resizers)
             resizer.setDisabled(true);
     } else {
@@ -397,68 +384,15 @@ void ControlPrivate::updatePreview(Control* control, PreviewResult result)
         parent->controlTransaction()->setTransactionsEnabled(te);
     }
 
-    if (parent->form())
-        ((Form*)parent)->setSkin(result.skin);
-
     parent->update();
     parent->_errors.clear();
 
-    if (parent->_initialized == false) {
-        parent->_initialized = true;
-        parent->setSelected(true);
-        emit parent->initialized();
-    }
-
     emit parent->previewChanged();
-}
-
-void ControlPrivate::handlePreviewErrors(Control* control, QList<QQmlError> errors, PreviewResult)
-{
-    if (control != parent)
-        return;
-
-    parent->_errors = errors;
-    ParserController::removeTransactionsFor(control->url());
-    // TODO: Remove me
-    //    QMessageBox box;
-    //    box.setText("<b>Following control has some errors.</b>");
-    //    box.setInformativeText("<b>Control</b>: " +  parent->id() + ", <b>\n\rReason</b>: " + errors[0].description());
-    //    box.setStandardButtons(QMessageBox::Ok);
-    //    box.setDefaultButton(QMessageBox::Ok);
-    //    box.setIcon(QMessageBox::Information);
-    //    box.exec();
-
-    if (parent->_initialized == false) {
-        auto scene = static_cast<ControlScene*>(parent->scene());
-        scene->clearSelection();
-        parent->setFlag(Control::ItemIsFocusable);
-        parent->setFlag(Control::ItemIsSelectable);
-        parent->setAcceptHoverEvents(true);
-        parent->_controlTransaction.flushParentChange();
-        parent->_initialized = true;
-        emit parent->initialized();
-    }
-
-//    parent->hide();
-    emit parent->errorOccurred();
-    emit controlWatcher.errorOccurred(parent);
 }
 
 void ControlPrivate::handleGeometrySignalChange()
 {
     geometrySignalTimer.stop();
-    for (auto& pnode : parent->_properties) {
-        auto& map = pnode.propertyMap;
-        if (map.contains("x") && map.contains("y")) {
-            const bool isInt = (map["x"].type() == QVariant::Int);
-            map["x"] = isInt ? int(parent->x()) : parent->x();
-            map["y"] = isInt ? int(parent->y()) : parent->y();
-            map["width"] = isInt ? int(parent->size().width()) :
-              parent->size().width();
-            map["height"] = isInt ? int(parent->size().height()) :
-              parent->size().height();
-        }
-    }
     emit controlWatcher.geometryChanged(parent);
 }
 
@@ -481,7 +415,6 @@ Control::Control(const QString& url, const DesignMode& mode, const QString& uid,
     , _clip(true)
     , _gui(true)
     , _hideSelection(false)
-    , _initialized(false)
 {
     setId(SaveManager::id(dname(dname(url))));
     _controls << this;
@@ -493,6 +426,13 @@ Control::Control(const QString& url, const DesignMode& mode, const QString& uid,
 
     connect(this, SIGNAL(geometryChanged()),
       &_d->geometrySignalTimer, SLOT(start()));
+    connect(this, &Control::zChanged, [this]{
+        emit controlWatcher.zValueChanged(this);
+    });
+
+    parent->setFlag(Control::ItemIsFocusable);
+    parent->setFlag(Control::ItemIsSelectable);
+    parent->setAcceptHoverEvents(true);
 }
 
 Control::~Control()
@@ -660,17 +600,18 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     _dragIn = false;
 
+    auto scene = static_cast<ControlScene*>(parent->scene());
+    scene->clearSelection();
     auto pos = event->pos();
     auto control = new Control(event->mimeData()->urls().
       at(0).toLocalFile(), DesignManager::mode());
     control->setParentItem(this);
-    SaveManager::addControl(control, this, DesignManager::currentScene()->
-      mainControl()->uid(), DesignManager::currentScene()->mainControl()->dir());
+    SaveManager::addControl(control, this,
+      scene->mainControl()->uid(), scene->mainControl()->dir());
     control->refresh();
-    connect(control, &Control::initialized, [=] {
-        control->controlTransaction()->setTransactionsEnabled(true);
-        control->setPos(pos);
-    });
+    control->controlTransaction()->setTransactionsEnabled(true);
+    control->setPos(pos);
+    control->setSelected(true);
 
     event->accept();
     update();
@@ -701,7 +642,7 @@ void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mousePressEvent(event);
 
-    if (event->button() == Qt::MidButton || !_errors.isEmpty())
+    if (event->button() == Qt::MidButton)
         event->ignore();
     else
         event->accept();
@@ -865,11 +806,6 @@ bool Control::clip() const
     return _clip;
 }
 
-bool Control::init() const
-{
-    return _initialized;
-}
-
 void Control::setClip(bool clip)
 {
     _clip = clip;
@@ -920,22 +856,17 @@ int Control::lowerZValue() const
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (_d->itemPixmap.isNull())
+    if (_d->preview.isNull())
         return;
 
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
 
     if (gui() && parentControl() && parentControl()->clip() && !_dragging)
-        painter->setClipRect(rect().intersected(parentControl()->mapToItem(this, parentControl()->rect().adjusted(1, 1, -1, -1))
-                                                .boundingRect()));
-    if (gui() == false) {
-        auto view = ((ControlScene*)scene())->nonGuiControlsPanel();
-        auto clipRect = rect().intersected(view->mapToItem(this, view->rect().adjusted(1, 1, -1, -1)).boundingRect());
-        painter->setClipRect(clipRect);
-    }
+        painter->setClipRect(rect().intersected(parentControl()->mapToItem
+          (this, parentControl()->rect().adjusted(1, 1, -1, -1)).boundingRect()));
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect(), _d->itemPixmap, QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
+    painter->drawPixmap(rect(), _d->preview, QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
 
     QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
                              innerRect.center().x(), innerRect.bottom());
@@ -946,10 +877,10 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         if (_showOutline) {
             painter->fillRect(innerRect, gradient);
         } else {
-            QPixmap highlight(_d->itemPixmap);
+            QPixmap highlight(_d->preview);
             QPainter p(&highlight);
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-            p.fillRect(_d->itemPixmap.rect(), gradient);
+            p.fillRect(_d->preview.rect(), gradient);
             p.end();
             painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
         }
@@ -1470,7 +1401,7 @@ void FormPrivate::applySkinChange()
 Form::Form(const QString& url, const QString& uid, Form* parent)
     : Control(url, FormGui, uid, parent)
     , _d(new FormPrivate(this))
-    , _skin(Skin::Invalid)
+    , _skin(SaveManager::skin(dir()))
 {
 }
 

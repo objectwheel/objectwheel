@@ -18,20 +18,23 @@ typedef QMap<QString, QVariant> PropertyMap;
 
 struct PropertyNode {
         QString cleanClassName;
-        const QMetaObject* metaObject;
+        const QMetaObject* metaObject = 0;
         PropertyMap propertyMap;
 };
 
 typedef QList<PropertyNode> PropertyNodes;
 
 struct PreviewResult {
+        bool gui;
         QPixmap preview;
+        Control* control;
         QList<QString> events;
         PropertyNodes properties;
-        Skin skin;
-        bool gui;
-        bool isNull() { return preview.isNull(); }
-        QVariant property(const QString& name) const {
+        QList<QQmlError> errors;
+        inline bool hasError() {
+            return !errors.isEmpty();
+        }
+        inline QVariant property(const QString& name) const {
             for (const auto& node : properties) {
                 if (node.propertyMap.contains(name))
                     return node.propertyMap.value(name);
@@ -52,8 +55,7 @@ class QmlPreviewer : public QObject
         static bool working();
 
     signals:
-        void previewReady(Control* control, const PreviewResult& result);
-        void errorsOccurred(Control* control, const QList<QQmlError>& errors, const PreviewResult& result);
+        void previewReady(const PreviewResult& result);
         void workingChanged(bool value);
 
     private:

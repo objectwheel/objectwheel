@@ -38,24 +38,11 @@ ControlScene::ControlScene(QObject *parent)
     , _mainControl(nullptr)
     , _d(new ControlScenePrivate(this))
     , _snapping(true)
-    , _nonGuiControlsPanel(new ControlsScrollPanel(this))
 {
     connect(this, &ControlScene::changed, [=] {
         if (_mainControl)
-            setSceneRect(mainControl()->frameGeometry().adjusted(-fit(8), -fit(8), fit(8), fit(8)));
-    });
-
-    _nonGuiControlsPanel->setShowIds(true);
-    _nonGuiControlsPanel->setMargins({fit(26), fit(3), fit(3), fit(3)});
-    _nonGuiControlsPanel->setSpacing(fit(10));
-    connect(this, &ControlScene::changed, [=] {
-        if (_mainControl) {
-            setSceneRect(mainControl()->frameGeometry().adjusted(-fit(8) - NGCS_PANEL_WIDTH, -fit(8),
-                                                                 NGCS_PANEL_WIDTH + fit(8), fit(8)));
-            _nonGuiControlsPanel->setGeometry(mainControl()->frameGeometry().width() / 2.0 + fit(4),
-                                              -mainControl()->frameGeometry().height() / 2.0,
-                                             NGCS_PANEL_WIDTH, mainControl()->frameGeometry().height());
-        }
+            setSceneRect(mainControl()->frameGeometry().
+              adjusted(-fit(8), -fit(8), fit(8), fit(8)));
     });
 }
 
@@ -70,12 +57,6 @@ void ControlScene::setMainControl(Control* mainControl)
         removeItem(_mainControl);
     _mainControl = mainControl;
     addItem(_mainControl);
-
-    _nonGuiControlsPanel->clear();
-    for (auto control : mainControl->childControls())
-        if (control->gui() == false)
-            nonGuiControlsPanel()->addControl(control);
-
     emit mainControlChanged(mainControl);
 }
 
@@ -220,11 +201,6 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
         painter->drawRect(rect);
         painter->drawText(rect, "No Items Selected", QTextOption(Qt::AlignCenter));
     }
-}
-
-ControlsScrollPanel* ControlScene::nonGuiControlsPanel()
-{
-    return _nonGuiControlsPanel;
 }
 
 QPointF ControlScene::lastMousePos()

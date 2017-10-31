@@ -2,7 +2,6 @@
 #define CONTROLSCENE_H
 
 #include <control.h>
-#include <controlsscrollpanel.h>
 #include <QGraphicsScene>
 #include <QPointer>
 
@@ -31,7 +30,6 @@ class ControlScene : public QGraphicsScene
         void setSnapping(bool snapping);
 
         QPointF lastMousePos();
-        ControlsScrollPanel* nonGuiControlsPanel();
 
     protected:
         void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -51,7 +49,6 @@ class ControlScene : public QGraphicsScene
         ControlScenePrivate* _d;
         bool _snapping;
         QPointF _lastMousePos;
-        ControlsScrollPanel* _nonGuiControlsPanel;
 };
 
 #endif // CONTROLSCENE_H

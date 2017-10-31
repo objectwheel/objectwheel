@@ -25,7 +25,6 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/parsercontroller.h \
                              $$PWD/controlscene.h \
                              $$PWD/controlview.h \
-                             $$PWD/controlsscrollpanel.h \
                              $$PWD/formview.h \
                              $$PWD/formswidget.h \
                              $$PWD/loadingindicator.h \
@@ -75,7 +74,6 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/parsercontroller.cpp \
                              $$PWD/controlscene.cpp \
                              $$PWD/controlview.cpp \
-                             $$PWD/controlsscrollpanel.cpp \
                              $$PWD/formview.cpp \
                              $$PWD/formswidget.cpp \
                              $$PWD/loadingindicator.cpp \

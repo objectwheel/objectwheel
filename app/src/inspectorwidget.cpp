@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QApplication>
 #include <QHeaderView>
+#include <QScrollBar>
 
 using namespace Fit;
 

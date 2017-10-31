@@ -208,37 +208,37 @@ void FormViewPrivate::handlePasteAction()
         control->setParentItem(mainControl);
         control->refresh();
         controls << control;
-        connect(control, &Control::initialized, [=] {
-            control->controlTransaction()->setTransactionsEnabled(true);
-            control->setPos(control->pos() + QPoint(fit(5), fit(5)));
-            if (url == mimeData->urls().last()) {
-                DesignManager::formScene()->clearSelection();
-                for (auto control : controls)
-                    control->setSelected(true);
 
-                if (!mimeData->data("objectwheel/cut").isEmpty()) {
-                    ControlScene* scene;
-                    if (mimeData->data("objectwheel/fscene").isEmpty())
-                        scene = DesignManager::formScene();
-                    else
-                        scene = DesignManager::controlScene();
+        control->controlTransaction()->setTransactionsEnabled(true);
+        control->setPos(control->pos() + QPoint(fit(5), fit(5)));
+        if (url == mimeData->urls().last()) {
+            DesignManager::formScene()->clearSelection();
+            for (auto control : controls)
+                control->setSelected(true);
 
-                    QDataStream dstream(mimeData->data("objectwheel/dstream"));
-                    int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
-                    QList<Control*> cutControls;
-                    for (int i = 0; i < size; i++) {
-                        quint64 buff;
-                        dstream >> buff;
-                        cutControls << (Control*)buff;
-                    }
+            if (!mimeData->data("objectwheel/cut").isEmpty()) {
+                ControlScene* scene;
+                if (mimeData->data("objectwheel/fscene").isEmpty())
+                    scene = DesignManager::formScene();
+                else
+                    scene = DesignManager::controlScene();
 
-                    for (auto control : cutControls) {
-                        scene->removeControl(control);
-                        SaveManager::removeControl(control);
-                    }
+                QDataStream dstream(mimeData->data("objectwheel/dstream"));
+                int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
+                QList<Control*> cutControls;
+                for (int i = 0; i < size; i++) {
+                    quint64 buff;
+                    dstream >> buff;
+                    cutControls << (Control*)buff;
+                }
+
+                for (auto control : cutControls) {
+                    scene->removeControl(control);
+                    SaveManager::removeControl(control);
                 }
             }
-        });
+        }
+
         for (auto childControl : control->childControls())
             childControl->refresh();
     }

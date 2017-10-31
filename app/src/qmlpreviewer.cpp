@@ -34,76 +34,90 @@ using namespace Fit;
 class QmlPreviewerPrivate : public QObject
 {
         Q_OBJECT
-
     public:
-        QmlPreviewerPrivate(QmlPreviewer* parent);
-        void scratchPixmapIfEmpty(QPixmap& pixmap) const;
-        QQuickWindow* handleWindowsIfAny(QObject* object) const;
-        PropertyNodes extractProperties(const QObject* object, const Control* control) const;
-        QList<QString> extractEvents(const QObject* object) const;
-
-    public slots:
-        PreviewResult requestPreview(Control* control, const QString& url) const;
-        void taskHandler();
-
-    signals:
-        void previewReady(const PreviewResult& result) const;
-        void errorsOccurred(Control*, const QList<QQmlError>& errors, const PreviewResult& result) const;
+        QmlPreviewerPrivate(QmlPreviewer*);
+        PreviewResult preview(Control*, const QString&) const;
 
     public:
         QmlPreviewer* parent;
-        QList<QPointer<Control>> taskList;
         QTimer taskTimer;
+        QList<QPointer<Control>> taskList;
+
+    private slots:
+        void processTasks();
+
+    private:
+        void dash(QPixmap&) const;
+        bool containsWindow(QObject*) const;
+        QPixmap prepreview(const Control*) const;
+        QList<QString> events(const QObject*) const;
+        PropertyNodes properties(const QObject*) const;
+
+    private:
+        QPixmap errorPixmap;
 };
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : QObject(parent)
     , parent(parent)
+    , errorPixmap(QPixmap(":/resources/images/error.png").
+      scaled(QSize(fit(14), fit(14)) * pS->devicePixelRatio(),
+      Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
 {
     taskTimer.setInterval(TASK_TIMEOUT);
-    connect(&taskTimer, SIGNAL(timeout()), SLOT(taskHandler()));
-    connect(this, SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)),
-        parent, SIGNAL(errorsOccurred(Control*,QList<QQmlError>,PreviewResult)));
+    connect(&taskTimer, SIGNAL(timeout()), SLOT(processTasks()));
 }
 
-void QmlPreviewerPrivate::scratchPixmapIfEmpty(QPixmap& pixmap) const
+void QmlPreviewerPrivate::dash(QPixmap& pixmap) const
 {
-    // Check 10 pixels atleast that has alpha > 250
+    // Check 15 pixels atleast that has alpha > 250
     int totalAlpha = 0;
-    QImage img = pixmap.toImage();
+    const auto& img = pixmap.toImage();
     for (int i = 0; i < img.width(); i++) {
         for (int j = 0; j < img.height(); j++) {
             totalAlpha += qAlpha(img.pixel(i, j));
-            if (totalAlpha > (250 * 10)) {
+            if (totalAlpha > (250 * 15)) {
                 return;
             }
         }
     }
 
     QBrush brush;
-    QPainter painter(&pixmap);
     brush.setColor(Qt::gray);
-    brush.setStyle(Qt::DiagCrossPattern);
-    painter.setPen(Qt::NoPen);
+    brush.setStyle(Qt::Dense5Pattern);
+    QPainter painter(&pixmap);
     painter.setBrush(brush);
+    painter.setPen(Qt::NoPen);
     painter.drawRect(pixmap.rect());
 }
 
-QQuickWindow* QmlPreviewerPrivate::handleWindowsIfAny(QObject* object) const
+bool QmlPreviewerPrivate::containsWindow(QObject* o) const
 {
-    QQuickWindow* ret = nullptr;
-
-    if (object->isWindowType())
-        ret = qobject_cast<QQuickWindow*>(object);
-
-    for (auto object : object->findChildren<QObject*>()) {
-        if (object->isWindowType())
-            object->deleteLater();
+    for (auto _o : o->findChildren<QObject*>()) {
+        if (_o->isWindowType())
+            return true;
     }
-    return ret;
+    return false;
 }
 
-PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object, const Control* control) const
+QPixmap QmlPreviewerPrivate::prepreview(const Control* control) const
+{
+    QPixmap p(qCeil(control->size().width()),
+      qCeil(control->size().height()));
+    QRectF r(0, 0, fit(14), fit(14));
+    r.moveCenter(p.rect().center());
+    QBrush brush;
+    brush.setColor(Qt::gray);
+    brush.setStyle(Qt::Dense6Pattern);
+    QPainter painter(&p);
+    painter.setBrush(brush);
+    painter.setPen(Qt::NoPen);
+    painter.drawRect(p.rect());
+    painter.drawPixmap(r, errorPixmap, errorPixmap.rect());
+    return p;
+}
+
+PropertyNodes QmlPreviewerPrivate::properties(const QObject* object) const
 {
     PropertyNodes propertyNodes;
     auto metaObject = object->metaObject();
@@ -125,11 +139,7 @@ PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object, cons
             if (metaObject->property(i).isWritable()) {
                 QString name = metaObject->property(i).name();
                 auto val = metaObject->property(i).read(object);
-
-                if (name == TAG_X)
-                    propertyMap[name] = SaveManager::x(control->dir());
-                else
-                    propertyMap[name] = val;
+                propertyMap[name] = val;
             }
         }
 
@@ -145,7 +155,7 @@ PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object, cons
         metaObject = metaObject->superClass();
     }
 
-    // ** Attached Properties **
+    /** Attached Properties **/
     //    #include <QtQml>
     //    #include <QtQml/private/qqmldata_p.h>
     //    QQmlData *data = QQmlData::get(object);
@@ -163,7 +173,7 @@ PropertyNodes QmlPreviewerPrivate::extractProperties(const QObject* object, cons
     return propertyNodes;
 }
 
-QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
+QList<QString> QmlPreviewerPrivate::events(const QObject* object) const
 {
     QList<QString> events;
     auto metaObject = object->metaObject();
@@ -175,91 +185,98 @@ QList<QString> QmlPreviewerPrivate::extractEvents(const QObject* object) const
     return events;
 }
 
-PreviewResult QmlPreviewerPrivate::requestPreview(Control* control, const QString& url) const
+PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url) const
 {
-    bool isWindow = false;
-    PreviewResult result;
-
-    if (url.isEmpty() || !SaveManager::isOwctrl(dname(dname(url)))) {
-        QQmlError error;
-        error.setDescription("Invalid url or control.");
-        emit errorsOccurred(control, QList<QQmlError>() << error, result);
+    if (!SaveManager::isOwctrl(dname(dname(url)))) {
+        qFatal("Fatal error: Control doesn't meet Owctrl™ requirements.");
         return PreviewResult();
     }
 
-    QObject* qmlObject;
-    QSharedPointer<QQmlEngine> qmlEngine(new QQmlEngine);
-    QSharedPointer<QQmlComponent> qmlComponent(new QQmlComponent(qmlEngine.data()));
-    QSharedPointer<QQuickWindow> window;
+    PreviewResult result;
+    QQmlEngine engine;
+    QQmlComponent component(&engine);
 
-    qmlEngine->setOutputWarningsToStandardError(false);
-    qmlEngine->rootContext()->setContextProperty("dpi", Fit::ratio());
+    engine.setOutputWarningsToStandardError(false);
+    engine.rootContext()->setContextProperty("dpi", Fit::ratio());
 
-    auto qmlData = rdfile(url);
-    ParserWorker parserWorker; //FIXME: What if qml file contains errors?
-    //BUG: Possible bug if property 'visible' is a binding
-    if (parserWorker.typeName(qmlData).contains("Window")) {
-        parserWorker.setVariantProperty(qmlData, url, "visible", false);
+    // FIXME: What if qml file contains errors?
+    // BUG: Possible bug if property 'visible' is a binding
+    bool isWindow = false;
+    auto qml = rdfile(url);
+    ParserWorker pw;
+    if (pw.typeName(qml).contains("Window")) {
+        pw.setVariantProperty(qml, url, "visible", false);
         isWindow = true;
     }
+
+    result.control = control;
+    result.preview = prepreview(control);
 
     if (isWindow && !control->form()) {
         QQmlError error;
         error.setDescription("Only forms can be 'Window' qml type.");
-        emit errorsOccurred(control, QList<QQmlError>() << error, result);
-        return PreviewResult();
+        result.errors = (QList<QQmlError>() << error);
+        return result;
     }
 
-    qmlComponent->setData(qmlData, QUrl::fromLocalFile(url));
-    qmlObject = qmlComponent->create();
+    component.setData(qml, QUrl::fromLocalFile(url));
+    auto object = component.create();
+    engine.setObjectOwnership(object, QQmlEngine::JavaScriptOwnership);
 
-    if (!qmlComponent->errors().isEmpty()) {
-        emit errorsOccurred(control, qmlComponent->errors(), result);
-        return PreviewResult();
+    if (component.isError()) {
+        result.errors = component.errors();
+        return result;
     }
 
-    result.skin = SaveManager::skin(dname(dname(url)));
-    result.properties = extractProperties(qmlObject, control);
-    result.events = extractEvents(qmlObject);
-    window = QSharedPointer<QQuickWindow>(handleWindowsIfAny(qmlObject));
-    result.gui = (qmlObject->inherits("QQuickItem") || window);
+    if (containsWindow(object)) {
+        QQmlError error;
+        error.setDescription("You can not define child objects as 'Window' qml type.");
+        result.errors = (QList<QQmlError>() << error);
+        return result;
+    }
+
+    QSharedPointer<QQuickWindow> window(qobject_cast<QQuickWindow*>(object));
+    result.properties = properties(object);
+    result.events = events(object);
+    result.gui = (object->inherits("QQuickItem") || window);
 
     if (result.gui == false) {
         result.preview = QPixmap(dname(url) + separator() + "icon.png")
                          .scaled(NONGUI_CONTROL_SIZE * pS->devicePixelRatio(),
                                  NONGUI_CONTROL_SIZE * pS->devicePixelRatio());
-        return result;
-    }
-
-    if (window == nullptr) {
-        auto item = static_cast<QQuickItem*>(qmlObject);
-        window = QSharedPointer<QQuickWindow>(new QQuickWindow);
-        item->setParentItem(window->contentItem());
-        item->setSize(QSizeF(fit(item->width()), fit(item->height())));
-        item->setPosition({0,0});
-        window->resize(qCeil(item->width()), qCeil(item->height()));
-        window->setClearBeforeRendering(true);
-        window->setColor(QColor(Qt::transparent));
     } else {
-        window->resize(QSize(qCeil(fit(window->width())), qCeil(fit(window->height()))));
+        const qreal w = control->size().width();
+        const qreal h = control->size().height();
+
+        if (window.isNull()) {
+            auto item = qobject_cast<QQuickItem*>(object); Q_ASSERT(item);
+            window = QSharedPointer<QQuickWindow>(new QQuickWindow);
+            item->setParentItem(window->contentItem());
+            item->setSize(QSizeF(fit(w), fit(h)));
+            item->setPosition({0,0});
+            window->resize(qCeil(item->width()), qCeil(item->height()));
+            window->setClearBeforeRendering(true);
+            window->setColor(Qt::transparent);
+        } else {
+            window->resize(QSize(qCeil(fit(w)), qCeil(fit(h))));
+        }
+
+        window->setFlags(Qt::Window | Qt::FramelessWindowHint);
+        window->setOpacity(0);
+        window->hide();
+        window->create();
+
+        Delayer::delay(1); //WARNING
+
+        QPixmap p = QPixmap::fromImage(window->grabWindow());
+        p.setDevicePixelRatio(pS->devicePixelRatio());
+        dash(p);
+        result.preview = p;
     }
-
-    window->setFlags(Qt::Window | Qt::FramelessWindowHint);
-    window->setOpacity(0);
-    window->hide();
-    window->create();
-
-    Delayer::delay(100);
-
-    QPixmap preview = QPixmap::fromImage(window->grabWindow());
-    preview.setDevicePixelRatio(pS->devicePixelRatio());
-    scratchPixmapIfEmpty(preview);
-    result.preview = preview;
-
     return result;
 }
 
-void QmlPreviewerPrivate::taskHandler()
+void QmlPreviewerPrivate::processTasks()
 {
     if (parent->_working)
         return;
@@ -273,7 +290,7 @@ void QmlPreviewerPrivate::taskHandler()
 
     auto control = taskList.takeFirst();
 
-    if (!control) {
+    if (control.isNull()) {
         parent->_working = false;
         emit parent->workingChanged(parent->_working);
         return;
@@ -282,16 +299,18 @@ void QmlPreviewerPrivate::taskHandler()
     auto dir = control->dir();
     auto masterPaths = SaveManager::masterPaths(dir);
 
+    // If it's a form, tool or non-master child control, then we just need a background
+    // preview pixmap. So, we don't need a nested-preview pixmap.
     if (SaveManager::suid(dir).isEmpty() || masterPaths.isEmpty()) {
-        auto res = requestPreview(control, dir + separator() + DIR_THIS +
-                                  separator() + "main.qml");
-        if (!res.isNull())
-            emit parent->previewReady(control, res);
+        auto res = preview(control, dir + separator() + DIR_THIS +
+                           separator() + "main.qml");
+        emit parent->previewReady(res);
         parent->_working = false;
         emit parent->workingChanged(parent->_working);
         return;
     }
 
+    // Only master-child items are handled here, others are handled above
     PreviewResult* finalResult = nullptr;
     QMap<QString, PreviewResult> masterResults;
 
@@ -303,8 +322,10 @@ void QmlPreviewerPrivate::taskHandler()
             if (index >= 0) {
                 results[childPath] = masterResults[childPath];
             } else {
-                results[childPath] = requestPreview(control, childPath + separator() + DIR_THIS + separator() + "main.qml");
-                if (results[childPath].isNull()) {
+                results[childPath] = preview(control, childPath +
+                  separator() + DIR_THIS + separator() + "main.qml");
+                if (results[childPath].hasError()) {
+                    emit parent->previewReady(results[childPath]);
                     parent->_working = false;
                     emit parent->workingChanged(parent->_working);
                     return;
@@ -313,16 +334,20 @@ void QmlPreviewerPrivate::taskHandler()
         }
 
         if (masterPaths.last() == path) {
-            masterResults[path] = requestPreview(control, path + separator() + DIR_THIS + separator() + "main.qml");
+            masterResults[path] = preview(control, path +
+              separator() + DIR_THIS + separator() + "main.qml");
             finalResult = &masterResults[path];
-            if (masterResults[path].isNull()) {
+            if (masterResults[path].hasError()) {
+                emit parent->previewReady(masterResults[path]);
                 parent->_working = false;
                 emit parent->workingChanged(parent->_working);
                 return;
             }
         } else {
-            masterResults[path] = requestPreview(control, path + separator() + DIR_THIS + separator() + "main.qml");
-            if (masterResults[path].isNull()) {
+            masterResults[path] = preview(control, path +
+              separator() + DIR_THIS + separator() + "main.qml");
+            if (masterResults[path].hasError()) {
+                emit parent->previewReady(masterResults[path]);
                 parent->_working = false;
                 emit parent->workingChanged(parent->_working);
                 return;
@@ -330,24 +355,24 @@ void QmlPreviewerPrivate::taskHandler()
         }
 
         QPixmap* parentPixmap;
-        for (auto result : results.keys()) { //FIXME
+        for (auto result : results.keys()) { //FIXME: Some child previews lost, wrong 'parentPixmap' logic, use maps here
             if (dname(dname(result)) == path)
                 parentPixmap = &masterResults[path].preview;
 
             auto& r = results[result];
-            const QPointF p = { r.property("x").toReal(), r.property("y").toReal() };
-            const QSizeF s = { r.property("width").toReal(), r.property("height").toReal() };
+            const QPointF p = r.control->pos();
+            const QSizeF s = r.control->size();
 
             QPainter px(parentPixmap);
             px.drawPixmap(QRectF(p, s), r.preview, QRectF(QPointF(0, 0),
-             s * pS->devicePixelRatio()));
+              s * pS->devicePixelRatio()));
             px.end();
 
             parentPixmap = &r.preview;
         }
     }
 
-    emit parent->previewReady(control, *finalResult);
+    emit parent->previewReady(*finalResult);
 
     parent->_working = false;
     emit parent->workingChanged(parent->_working);

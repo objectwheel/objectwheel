@@ -55,11 +55,6 @@ void FormScene::setMainForm(Form* mainForm)
 
     _mainControl = mainForm;
     _mainControl->setVisible(true);
-
-    nonGuiControlsPanel()->clear();
-    for (auto control : mainForm->childControls())
-        if (control->gui() == false)
-            nonGuiControlsPanel()->addControl(control);
 }
 
 void FormScene::setMainControl(Control* mainControl)

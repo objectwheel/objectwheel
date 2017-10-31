@@ -15,6 +15,7 @@
 #include <QPainter>
 #include <QPalette>
 #include <QListWidget>
+#include <QScrollBar>
 
 using namespace Fit;
 
@@ -127,11 +128,9 @@ void FormsWidgetPrivate::addButtonClicked()
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
     DesignManager::formScene()->addForm(form);
-    connect(form, &Form::initialized, [=] {
-        SaveManager::addForm(form);
-        form->controlTransaction()->setTransactionsEnabled(true);
-        rm(tempPath);
-    });
+    SaveManager::addForm(form);
+    form->controlTransaction()->setTransactionsEnabled(true);
+    rm(tempPath);
 }
 
 void FormsWidgetPrivate::handleDatabaseChange()

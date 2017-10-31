@@ -39,7 +39,6 @@ class ParserController : public QObject
         static void setVariantProperty(const QString& url, const QString& property, const QVariant& value);
         static void removeVariantProperty(const QString& url, const QString& property);
         static bool running();
-        static void removeTransactionsFor(const QString& url);
 
     private slots:
         void processWaitingTransactions();

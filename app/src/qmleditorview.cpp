@@ -22,6 +22,7 @@
 #include <QLineEdit>
 #include <QSplitter>
 #include <QMessageBox>
+#include <QScrollBar>
 
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")

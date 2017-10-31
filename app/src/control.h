@@ -24,6 +24,7 @@ class ControlWatcher : public QObject {
 
     signals:
         void geometryChanged(Control*);
+        void zValueChanged(Control*);
         void errorOccurred(Control*);
 
     private:
@@ -92,7 +93,6 @@ class Control : public QGraphicsWidget
         bool dragging() const;
         bool dragIn() const;
         bool clip() const;
-        bool init() const;
         const PropertyNodes& properties() const;
         const QList<QString>& events() const;
         QList<Control*> childControls(bool dive = true) const;
@@ -152,7 +152,6 @@ class Control : public QGraphicsWidget
 
     signals:
         void previewChanged();
-        void initialized();
         void errorOccurred();
 
     protected:
@@ -173,7 +172,6 @@ class Control : public QGraphicsWidget
         bool _clip;
         bool _gui;
         bool _hideSelection;
-        bool _initialized;
         static bool _showOutline;
         static QList<Control*> _controls;
 };

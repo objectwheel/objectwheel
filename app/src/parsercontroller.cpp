@@ -66,15 +66,6 @@ bool ParserController::running()
     return _transactionList.size() > 0;
 }
 
-void ParserController::removeTransactionsFor(const QString& url)
-{
-    for (const auto tr : _transactionList) {
-        if (tr.url == url) {
-            _transactionList.removeOne(tr);
-        }
-    }
-}
-
 void ParserController::processWaitingTransactions()
 {
     _transactionTimer->stop();

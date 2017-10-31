@@ -206,9 +206,7 @@ void MainWindow::setupGui()
         DesignManager::controlScene()->setMainControl(control);
         DesignManager::setMode(ControlGui);
         control->refresh();
-        connect(control, &Control::initialized, [control] {
-            control->controlTransaction()->setTransactionsEnabled(true);
-        });
+        control->controlTransaction()->setTransactionsEnabled(true);
         for (auto childControl : control->childControls())
             childControl->refresh();
         splitter->setSizes(sizes);

@@ -118,10 +118,9 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, cons
     item->addChild(iitem);
 }
 
-static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, Control* control)
 {
-    const auto value = QRect(map["x"].toInt(), map["y"].toInt(),
-            map["width"].toInt(), map["height"].toInt());
+    const auto value = QRect(control->pos().toPoint(), control->size().toSize());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
                     arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
 
@@ -164,10 +163,9 @@ static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, 
     item->addChild(iitem);
 }
 
-static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, Control* control)
 {
-    const auto value = QRectF(map["x"].toReal(), map["y"].toReal(),
-            map["width"].toReal(), map["height"].toReal());
+    const auto value = QRectF(control->pos(), control->size());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
                     arg((int)value.x()).arg((int)value.y()).
                     arg((int)value.width()).arg((int)value.height());
@@ -1044,6 +1042,8 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
             SLOT(handleSelectionChange()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
             SLOT(handleSelectionChange()));
+    connect(ControlWatcher::instance(), SIGNAL(zValueChanged(Control*)),
+            SLOT(handleSelectionChange()));
 }
 
 void PropertiesWidget::clearList()
@@ -1132,8 +1132,8 @@ void PropertiesWidget::refreshList()
                 case QVariant::Double: {
                     if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
-                        if (propertyName == "x")
-                            processGeometryF(item, "geometry", map);
+                        if (propertyName == "x") //To make it called only once
+                            processGeometryF(item, "geometry", selectedControls[0]);
                     } else {
                         processDouble(item, propertyName, map);
                     }
@@ -1162,7 +1162,7 @@ void PropertiesWidget::refreshList()
                     if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                         if (propertyName == "x")
-                            processGeometry(item, "geometry", map);
+                            processGeometry(item, "geometry", selectedControls[0]);
                     } else {
                         processInt(item, propertyName, map);
                     }
