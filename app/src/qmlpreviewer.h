@@ -25,9 +25,9 @@ struct PropertyNode {
 typedef QList<PropertyNode> PropertyNodes;
 
 struct PreviewResult {
-        bool gui;
+        bool gui = true;
         QPixmap preview;
-        Control* control;
+        Control* control = nullptr;
         QList<QString> events;
         PropertyNodes properties;
         QList<QQmlError> errors;

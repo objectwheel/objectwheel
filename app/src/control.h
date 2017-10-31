@@ -127,12 +127,8 @@ class Control : public QGraphicsWidget
         void updateUid();
 
     protected:
-        void setGui(bool value);
         void setDragging(bool dragging);
         void setDragIn(bool dragIn);
-        void setClip(bool clip);
-        void setProperties(const PropertyNodes& properties);
-        void setEvents(const QList<QString>& events);
 
         virtual QRectF frameGeometry() const;
         virtual void dropControl(Control* control);
@@ -155,6 +151,7 @@ class Control : public QGraphicsWidget
         void errorOccurred();
 
     protected:
+        bool _clip;
         Resizer _resizers[8];
         ControlPrivate* _d;
 
@@ -169,7 +166,6 @@ class Control : public QGraphicsWidget
         DesignMode _mode;
         bool _dragging;
         bool _dragIn;
-        bool _clip;
         bool _gui;
         bool _hideSelection;
         static bool _showOutline;

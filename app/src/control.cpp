@@ -252,14 +252,12 @@ class ControlPrivate : public QObject
         void fixResizerCoordinates();
 
     public slots:
-        void refreshPreview();
-        void updatePreview(Control* control, PreviewResult result);
+        void updatePreview(PreviewResult result);
         void handleGeometrySignalChange();
 
     public:
         Control* parent;
         QPixmap preview;
-        QTimer refreshTimer;
         QTimer geometrySignalTimer;
         bool hoverOn;
 };
@@ -275,15 +273,12 @@ ControlPrivate::ControlPrivate(Control* parent)
         resizer.setPlacement(Resizer::Placement(i++));
     }
 
-    refreshTimer.setInterval(PREVIEW_REFRESH_INTERVAL);
-    connect(&refreshTimer, SIGNAL(timeout()),
-      SLOT(refreshPreview()));
     geometrySignalTimer.setInterval(GEOMETRY_SIGNAL_DELAY);
     connect(&geometrySignalTimer, SIGNAL(timeout()),
       SLOT(handleGeometrySignalChange()));
     connect(QmlPreviewer::instance(),
-      SIGNAL(previewReady(Control*,PreviewResult)),
-      SLOT(updatePreview(Control*,PreviewResult)));
+      SIGNAL(previewReady(PreviewResult)),
+      SLOT(updatePreview(PreviewResult)));
 }
 
 void ControlPrivate::fixResizerCoordinates()
@@ -333,60 +328,39 @@ void ControlPrivate::fixResizerCoordinates()
     }
 }
 
-void ControlPrivate::refreshPreview()
+void ControlPrivate::updatePreview(PreviewResult result)
 {
-    refreshTimer.stop();
-    QmlPreviewer::requestPreview(parent);
-}
-
-void ControlPrivate::updatePreview(Control* control, PreviewResult result)
-{ //FIXME: Resize and move operations are getting broken because of ongoing preview updates
-    if (control != parent)
+    if (result.control != parent)
         return;
 
     parent->_errors = result.errors;
     preview = result.preview;
+    parent->_gui = result.gui;
+    parent->_properties = result.properties;
+    parent->_events = result.events;
 
+    ControlScene* scene;
+    if (result.control->mode() == ControlGui)
+        scene = DesignManager::controlScene();
+    else
+        scene = DesignManager::formScene();
+
+    if (!result.hasError()) {
+        if (result.gui) {
+            if (!parent->form())
+                parent->_clip = result.property("clip").toBool();
+        } else if (parent->parentItem() != scene->mainControl()) {
+            parent->setParentItem(scene->mainControl());
+            parent->_controlTransaction.flushParentChange();
+        }
+        parent->setVisible(result.gui);
+    }
+
+    parent->update();
     if (result.hasError()) {
         emit parent->errorOccurred();
         emit controlWatcher.errorOccurred(parent);
     }
-
-    parent->setGui(result.gui);
-    parent->setProperties(result.properties);
-    parent->setEvents(result.events);
-
-    if (result.gui == false) {
-        parent->setFlag(Control::ItemIsMovable, false);
-        parent->setFlag(Control::ItemSendsGeometryChanges, false);
-        parent->setParentItem(DesignManager::currentScene()->mainControl()); //BUG: occurs when database loading
-        parent->_controlTransaction.flushParentChange();
-        parent->_controlTransaction.setGeometryTransactionsEnabled(false);
-        parent->_controlTransaction.setParentTransactionsEnabled(false);
-        parent->_controlTransaction.setZTransactionsEnabled(false);
-        parent->resize(NONGUI_CONTROL_SIZE, NONGUI_CONTROL_SIZE);
-        parent->setVisible(false);
-        for (auto& resizer : parent->_resizers)
-            resizer.setDisabled(true);
-    } else {
-        bool te = parent->controlTransaction()->transactionsEnabled();
-        parent->controlTransaction()->setTransactionsEnabled(false);
-        if (parent->form())
-            parent->setFlag(Control::ItemIsMovable, false);
-        else
-            parent->setFlag(Control::ItemIsMovable);
-
-        parent->setFlag(Control::ItemSendsGeometryChanges);
-        parent->setAcceptDrops(true);
-
-        refreshTimer.stop();
-        parent->setClip(result.property("clip").toBool());
-        parent->controlTransaction()->setTransactionsEnabled(te);
-    }
-
-    parent->update();
-    parent->_errors.clear();
-
     emit parent->previewChanged();
 }
 
@@ -405,6 +379,7 @@ QList<Control*> Control::_controls;
 
 Control::Control(const QString& url, const DesignMode& mode, const QString& uid, Control* parent)
     : QGraphicsWidget(parent)
+    , _clip(true)
     , _d(new ControlPrivate(this))
     , _controlTransaction(this)
     , _uid(uid.isEmpty() ? SaveManager::uid(dname(dname(url))) : uid)
@@ -412,13 +387,23 @@ Control::Control(const QString& url, const DesignMode& mode, const QString& uid,
     , _mode(mode)
     , _dragging(false)
     , _dragIn(false)
-    , _clip(true)
     , _gui(true)
     , _hideSelection(false)
 {
-    setId(SaveManager::id(dname(dname(url))));
     _controls << this;
-    setGeometry(0, 0, 0, 0);
+
+    setFlag(Control::ItemIsFocusable);
+    setFlag(Control::ItemIsSelectable);
+    setFlag(Control::ItemSendsGeometryChanges);
+    setFlag(Control::ItemIsMovable);
+    setAcceptHoverEvents(true);
+    setAcceptDrops(true);
+
+    setZValue(SaveManager::z(dir()));
+    setId(SaveManager::id(dname(dname(url))));
+    setPos(SaveManager::x(dir()), SaveManager::y(dir()));
+    resize(SaveManager::width(dir()), SaveManager::height(dir()));
+
     connect(this, &Control::visibleChanged, [=] {
         if (size().width() < 2 || size().height() < 2)
             refresh();
@@ -430,9 +415,6 @@ Control::Control(const QString& url, const DesignMode& mode, const QString& uid,
         emit controlWatcher.zValueChanged(this);
     });
 
-    parent->setFlag(Control::ItemIsFocusable);
-    parent->setFlag(Control::ItemIsSelectable);
-    parent->setAcceptHoverEvents(true);
 }
 
 Control::~Control()
@@ -552,8 +534,7 @@ bool Control::form() const
 
 void Control::refresh()
 {
-    if (scene())
-        _d->refreshTimer.start();
+    QmlPreviewer::requestPreview(this);
 }
 
 void Control::updateUid()
@@ -600,16 +581,15 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     _dragIn = false;
 
-    auto scene = static_cast<ControlScene*>(parent->scene());
+    auto scene = static_cast<ControlScene*>(this->scene());
     scene->clearSelection();
     auto pos = event->pos();
     auto control = new Control(event->mimeData()->urls().
-      at(0).toLocalFile(), DesignManager::mode());
+      at(0).toLocalFile(), mode());
     control->setParentItem(this);
     SaveManager::addControl(control, this,
       scene->mainControl()->uid(), scene->mainControl()->dir());
     control->refresh();
-    control->controlTransaction()->setTransactionsEnabled(true);
     control->setPos(pos);
     control->setSelected(true);
 
@@ -776,19 +756,9 @@ bool Control::gui() const
     return _gui;
 }
 
-void Control::setGui(bool value)
-{
-    _gui = value;
-}
-
 const QList<QString>& Control::events() const
 {
     return _events;
-}
-
-void Control::setEvents(const QList<QString>& events)
-{
-    _events = events;
 }
 
 const PropertyNodes& Control::properties() const
@@ -796,19 +766,9 @@ const PropertyNodes& Control::properties() const
     return _properties;
 }
 
-void Control::setProperties(const PropertyNodes& properties)
-{
-    _properties = properties;
-}
-
 bool Control::clip() const
 {
     return _clip;
-}
-
-void Control::setClip(bool clip)
-{
-    _clip = clip;
 }
 
 bool Control::dragIn() const
@@ -1403,6 +1363,9 @@ Form::Form(const QString& url, const QString& uid, Form* parent)
     , _d(new FormPrivate(this))
     , _skin(SaveManager::skin(dir()))
 {
+    _clip = false;
+    setFlag(Control::ItemIsMovable, false);
+    _d->applySkinChange();
 }
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)

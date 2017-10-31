@@ -192,8 +192,8 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         return PreviewResult();
     }
 
-    PreviewResult result;
     QQmlEngine engine;
+    PreviewResult result;
     QQmlComponent component(&engine);
 
     engine.setOutputWarningsToStandardError(false);
@@ -396,7 +396,8 @@ QmlPreviewer* QmlPreviewer::instance()
 
 void QmlPreviewer::requestPreview(Control* control)
 {
-    _d->taskList.append(control);
+    if (!_d->taskList.contains(control))
+        _d->taskList.append(control);
     _d->taskTimer.start();
 }
 

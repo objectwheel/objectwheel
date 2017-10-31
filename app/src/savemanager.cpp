@@ -828,7 +828,6 @@ void SaveManager::exposeProject()
         if (_d->isMain(path))
             form->setMain(true);
         DesignManager::formScene()->addForm(form);
-        form->controlTransaction()->setTransactionsEnabled(true);
 
         lastControl = form;
 
@@ -836,10 +835,10 @@ void SaveManager::exposeProject()
         pmap[path] = form;
         for (auto child : childrenPaths(path)) {
             auto pcontrol = pmap.value(dname(dname(child)));
-            auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml", FormGui);
+            auto control = new Control(child + separator() +
+              DIR_THIS + separator() + "main.qml", FormGui);
             control->setParentItem(pcontrol);
             control->refresh();
-            control->controlTransaction()->setTransactionsEnabled(true);
 
             lastControl = control;
             pmap[child] = control;
@@ -867,8 +866,6 @@ Control* SaveManager::exposeControl(const QString& rootPath,
           DIR_THIS + separator() + "main.qml", mode);
         control->setParentItem(pcontrol);
         control->refresh();
-        control->controlTransaction()->setTransactionsEnabled(true);
-
         pmap[child] = control;
     }
 

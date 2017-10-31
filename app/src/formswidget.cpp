@@ -129,7 +129,6 @@ void FormsWidgetPrivate::addButtonClicked()
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
     DesignManager::formScene()->addForm(form);
     SaveManager::addForm(form);
-    form->controlTransaction()->setTransactionsEnabled(true);
     rm(tempPath);
 }
 
