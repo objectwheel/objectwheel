@@ -303,8 +303,7 @@ void FormViewPrivate::handleSendBackActAction()
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainForm()->lowerZValue() == MAX_Z_VALUE
-                           ? 0 : scene->mainForm()->lowerZValue() - 1);
+        control->setZValue(scene->mainForm()->lowerZValue() - 1);
 }
 
 void FormViewPrivate::handleBringFrontActAction()
@@ -313,8 +312,7 @@ void FormViewPrivate::handleBringFrontActAction()
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainForm()->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : scene->mainForm()->higherZValue() + 1);
+        control->setZValue(scene->mainForm()->higherZValue() + 1);
 }
 
 FormView::FormView(QGraphicsScene* scene, QWidget* parent)

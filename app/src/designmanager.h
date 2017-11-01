@@ -33,9 +33,11 @@ class DesignManager : public QObject
         static ControlView* controlView();
         static FormView* formView();
         static LoadingIndicator* loadingIndicator();
-        static void updateSkin();
         static QSplitter* splitter();
         static OutputWidget* outputWidget();
+
+    public slots:
+        void updateSkin();
 
     signals:
         void modeChanged();

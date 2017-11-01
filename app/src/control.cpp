@@ -4,6 +4,9 @@
 #include <filemanager.h>
 #include <controlwatcher.h>
 #include <suppressor.h>
+#include <savemanager.h>
+#include <controlscene.h>
+#include <formscene.h>
 
 #include <QtMath>
 #include <QtWidgets>
@@ -79,18 +82,10 @@ void ControlPrivate::updatePreview(PreviewResult result)
     parent->_properties = result.properties;
     parent->_events = result.events;
 
-    ControlScene* scene;
-    if (result.control->mode() == ControlGui)
-        scene = DesignManager::controlScene();
-    else
-        scene = DesignManager::formScene();
-
     if (!result.hasError()) {
         if (result.gui) {
             if (!parent->form())
                 parent->_clip = result.property("clip").toBool();
-        } else if (parent->parentItem() != scene->mainControl()) {
-            parent->setParentItem(scene->mainControl());
         }
         parent->setVisible(result.gui);
     }
@@ -116,7 +111,6 @@ Control::Control(const QString& url, const DesignMode& mode,
     : QGraphicsWidget(parent)
     , _clip(true)
     , _d(new ControlPrivate(this))
-    , _saveTransaction(this)
     , _uid(uid.isEmpty() ? SaveManager::uid(dname(dname(url))) : uid)
     , _url(url)
     , _mode(mode)
@@ -149,9 +143,12 @@ Control::Control(const QString& url, const DesignMode& mode,
     });
 
     connect(this, &Control::zChanged, [this]{
-        emit controlWatcher.zValueChanged(this);
+        emit cW->zValueChanged(this);
     });
 
+    connect(this, &Control::parentChanged, [this]{
+        emit cW->parentChanged(this);
+    });
 }
 
 Control::~Control()
@@ -299,26 +296,18 @@ void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     _dragIn = false;
-
-    auto scene = static_cast<ControlScene*>(this->scene());
-    scene->clearSelection();
-    auto pos = event->pos();
-    auto control = new Control(event->mimeData()->urls().
-      at(0).toLocalFile(), mode());
-    control->setParentItem(this);
-    SaveManager::addControl(control, this,
-      scene->mainControl()->uid(), scene->mainControl()->dir());
-    control->refresh();
-    control->setPos(pos);
-    control->setSelected(true);
-
     event->accept();
+    emit controlDropped(event->pos(),
+      event->mimeData()->urls().first().toLocalFile());
+    emit cW->controlDropped(this, event->pos(),
+      event->mimeData()->urls().first().toLocalFile());
     update();
 }
 
 void Control::dropControl(Control* control)
 {
-    control->setPos(mapFromItem(control->parentItem(), control->pos()));
+    control->setPos(mapFromItem(control->
+      parentItem(), control->pos()));
     control->setParentItem(this);
     update();
 }
@@ -401,18 +390,15 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
-    DesignManager::qmlEditorView()->addControl(this);
-    if (DesignManager::qmlEditorView()->pinned())
-        DesignManager::setMode(CodeEdit);
-    DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
-    DesignManager::qmlEditorView()->openControl(this);
-    DesignManager::qmlEditorView()->raiseContainer();
+    emit doubleClicked();
+    emit cW->doubleClicked(this);
 }
 
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
-    _d->fixResizerCoordinates();
+    for (auto& resizer : _resizers)
+        resizer.correct();
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -512,20 +498,20 @@ void Control::setDragging(bool dragging)
 
 int Control::higherZValue() const
 {
-    int z = -MAX_Z_VALUE;
+    int z = 0;
     for (const auto& control : childControls())
         if (control->zValue() > z)
             z = control->zValue();
-    return z == -MAX_Z_VALUE ? 0 : z;
+    return z;
 }
 
 int Control::lowerZValue() const
 {
-    int z = MAX_Z_VALUE;
+    int z = 0;
     for (const auto& control : childControls())
         if (control->zValue() < z)
             z = control->zValue();
-    return z == MAX_Z_VALUE ? 1 : z;
+    return z;
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
@@ -1067,7 +1053,6 @@ void FormPrivate::applySkinChange()
         resizer.setDisabled(!resizable);
 
     parent->update();
-    DesignManager::updateSkin();
 }
 
 //! ********************** [Form] **********************
@@ -1211,6 +1196,8 @@ void Form::setSkin(const Skin& skin)
         return;
     _skin = skin;
     _d->applySkinChange();
+    emit skinChanged();
+    emit cW->skinChanged(this);
 }
 
 const Skin& Form::skin()

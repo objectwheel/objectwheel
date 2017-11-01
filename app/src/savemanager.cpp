@@ -42,6 +42,9 @@
 /* - A form has to be master item                                 */
 /******************************************************************/
 
+//TODO: Non-gui controls could be anywhere as child in any control
+//Process this model change to code
+
 //!
 //! ******************* [SaveManagerPrivate] *******************
 //!
@@ -846,9 +849,9 @@ void SaveManager::exposeProject()
         }
     }
 
-    QEventLoop l;
-    connect(lastControl, SIGNAL(previewChanged()), &l, SLOT(quit()));
-    l.exec();
+//    QEventLoop l;
+//    connect(lastControl, SIGNAL(previewChanged()), &l, SLOT(quit()));
+//    l.exec(); //FIXME
 
     emit instance()->projectExposed();
 }
@@ -1183,7 +1186,7 @@ void SaveManager::setProperty(Control* control, const QString& property,
         auto propertyData = rdfile(propertyPath);
         _d->setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
-    } if (property == TAG_SKIN) {
+    } else if (property == TAG_SKIN) {
         if (!control->form())
             return;
 
@@ -1192,7 +1195,7 @@ void SaveManager::setProperty(Control* control, const QString& property,
         auto propertyData = rdfile(propertyPath);
         _d->setProperty(propertyData, TAG_SKIN, value.toInt());
         wrfile(propertyPath, propertyData);
-    } if (property == TAG_X || property == TAG_Y || property == TAG_Z ||
+    } else if (property == TAG_X || property == TAG_Y || property == TAG_Z ||
        property == TAG_WIDTH || property == TAG_HEIGHT) {
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;
@@ -1207,7 +1210,7 @@ void SaveManager::setProperty(Control* control, const QString& property,
         ParserController::setVariantProperty(fileName, property, value);
     }
 
-    if (_d->isInOwdb(control->dir()))
+    if (_d->isInOwdb(control->dir())) //FIXME
         emit _d->parent->databaseChanged();
 }
 

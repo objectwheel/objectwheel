@@ -111,8 +111,7 @@ void ControlScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     selectedControls.removeOne(mainControl());
 
     for (auto control : selectedControls)
-        control->setZValue(_mainControl->higherZValue() == -MAX_Z_VALUE
-                           ? 0 : _mainControl->higherZValue() + 1);
+        control->setZValue(control->zValue() + 1);
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
     if (selectedControls.contains((Control*)itemUnderMouse))
@@ -154,6 +153,13 @@ void ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void ControlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
+    auto selectedControls = this->selectedControls();
+    selectedControls.removeOne(mainControl());
+
+    if (selectedControls.size() > 0)
+        for (auto control : selectedControls)
+            control->setZValue(control->zValue() - 1);
+
     QGraphicsScene::mouseReleaseEvent(event);
     _d->itemPressed = false;
     _d->itemMoving = false;

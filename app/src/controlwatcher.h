@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+class Form;
 class Control;
 
 class ControlWatcher : public QObject
@@ -14,11 +15,14 @@ class ControlWatcher : public QObject
         static ControlWatcher* instance();
 
     signals:
+        void skinChanged(Form*);
         void zValueChanged(Control*);
         void geometryChanged(Control*);
         void previewChanged(Control*);
+        void parentChanged(Control*);
         void errorOccurred(Control*);
         void doubleClicked(Control*);
+        void controlDropped(Control*, const QPointF&, const QString&);
 
     private:
         ControlWatcher() {}

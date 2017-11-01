@@ -4,6 +4,7 @@
 #include <control.h>
 #include <outputwidget.h>
 #include <designmanager.h>
+#include <controlwatcher.h>
 
 #include <QLabel>
 #include <QStyledItemDelegate>

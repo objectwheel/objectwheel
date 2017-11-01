@@ -11,6 +11,7 @@
 #include <savemanager.h>
 #include <outputwidget.h>
 #include <controlwatcher.h>
+#include <savetransaction.h>
 
 #include <QWidget>
 #include <QList>
@@ -24,6 +25,8 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QSplitter>
+
+#define cW (ControlWatcher::instance())
 
 using namespace Fit;
 
@@ -62,6 +65,10 @@ class DesignManagerPrivate : public QObject
         void handleWGuiModeButtonClicked();
         void handlePlayButtonClicked();
         void handleBuildButtonClicked();
+
+    private slots:
+        void controlDoubleClicked(Control*);
+        void controlDropped(Control*, const QPointF&, const QString&);
 
     public:
         DesignManager* parent;
@@ -354,6 +361,14 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar_2.addWidget(spacer_2);
     toolbar_2.addWidget(&playButton);
     toolbar_2.addWidget(&buildButton);
+
+    SaveTransaction::instance();
+    connect(cW, SIGNAL(doubleClicked(Control*)),
+      SLOT(controlDoubleClicked(Control*)));
+    connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
+      SLOT(controlDropped(Control*,QPointF,QString)));
+    connect(cW, SIGNAL(skinChanged(Form*)), parent,
+      SLOT(updateSkin()));
 }
 
 DesignManagerPrivate::~DesignManagerPrivate()
@@ -680,6 +695,29 @@ void DesignManagerPrivate::handleBuildButtonClicked()
     //TODO
 }
 
+void DesignManagerPrivate::controlDoubleClicked(Control* control)
+{
+    qmlEditorView.addControl(control );
+    if (qmlEditorView.pinned())
+        DesignManager::setMode(CodeEdit);
+    qmlEditorView.setMode(QmlEditorView::CodeEditor);
+    qmlEditorView.openControl(control);
+    qmlEditorView.raiseContainer();
+}
+
+void DesignManagerPrivate::controlDropped(Control* control, const QPointF& pos, const QString& url)
+{
+    auto scene = (ControlScene*)control->scene();
+    scene->clearSelection();
+    auto newControl = new Control(url, control->mode());
+    newControl->setParentItem(control);
+    SaveManager::addControl(newControl, control,
+      scene->mainControl()->uid(), scene->mainControl()->dir());
+    newControl->refresh();
+    newControl->setPos(pos);
+    newControl->setSelected(true);
+}
+
 void DesignManagerPrivate::handleModeChange()
 {
     if (DesignManager::_mode == FormGui) {
@@ -890,7 +928,7 @@ LoadingIndicator* DesignManager::loadingIndicator()
 
 void DesignManager::updateSkin()
 {
-    auto form = DesignManager::formScene()->mainForm();
+    auto form = formScene()->mainForm();
     if (form) {
         _d->noSkinButton.setChecked(false);
         _d->phoneLandscapeButton.setChecked(false);

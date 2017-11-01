@@ -81,6 +81,8 @@ class Control : public QGraphicsWidget
     signals:
         void previewChanged();
         void errorOccurred();
+        void doubleClicked();
+        void controlDropped(const QPointF&, const QString&);
 
     protected:
         bool _clip;
@@ -116,6 +118,9 @@ class Form : public Control
         void setSkin(const Skin& skin);
         const Skin& skin();
         QRectF frameGeometry() const override;
+
+    signals:
+        void skinChanged();
 
     protected:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;

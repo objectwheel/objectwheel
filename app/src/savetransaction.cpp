@@ -8,9 +8,9 @@
 
 SaveTransaction::SaveTransaction()
 {
-    connect(cW, SIGNAL(zChanged()),
+    connect(cW, SIGNAL(zValueChanged(Control*)),
       this, SLOT(processZ(Control*)));
-    connect(cW, SIGNAL(parentChanged()),
+    connect(cW, SIGNAL(parentChanged(Control*)),
       this, SLOT(processParent(Control*)));
     connect(cW, SIGNAL(geometryChanged(Control*)),
       this, SLOT(processGeometry(Control*)));

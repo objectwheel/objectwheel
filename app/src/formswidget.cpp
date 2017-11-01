@@ -166,7 +166,7 @@ void FormsWidgetPrivate::handleCurrentFormChange()
     for (auto form : DesignManager::formScene()->forms())
         if (form->id() == id)
             DesignManager::formScene()->setMainForm(form);
-    DesignManager::updateSkin();
+    DesignManager::instance()->updateSkin();
     emit parent->currentFormChanged();
 }
 
