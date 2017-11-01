@@ -1,88 +1,24 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <QGraphicsWidget>
-#include <QUrl>
-#include <QList>
-#include <QPixmap>
-#include <QTimer>
-#include <controltransaction.h>
+#include <resizer.h>
 #include <qmlpreviewer.h>
-#include <global.h>
-
-#define MAX_Z_VALUE (9999999)
+#include <QGraphicsWidget>
+#include <QList>
 
 class Control;
 class ControlPrivate;
 class FormPrivate;
-
-class ControlWatcher : public QObject {
-        Q_OBJECT
-    public:
-        explicit ControlWatcher(QObject* parent = Q_NULLPTR);
-        static ControlWatcher* instance();
-
-    signals:
-        void geometryChanged(Control*);
-        void zValueChanged(Control*);
-        void errorOccurred(Control*);
-
-    private:
-        static ControlWatcher* _instance;
-};
-
-class Resizer : public QGraphicsWidget
-{
-        Q_OBJECT
-
-    public:
-        enum Placement {
-            Top,
-            Right,
-            Bottom,
-            Left,
-            TopLeft,
-            TopRight,
-            BottomRight,
-            BottomLeft
-        };
-
-        explicit Resizer(Control* parent = nullptr);
-
-        Placement placement() const;
-        void setPlacement(const Placement& placement);
-
-        bool disabled() const;
-        void setDisabled(bool disabled);
-
-        static bool resizing();
-
-    protected:
-        virtual QRectF boundingRect() const override;
-        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
-        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-
-    private:
-        Placement _placement;
-        bool _disabled;
-        static bool _resizing;
-};
+class ControlWatcher;
 
 class Control : public QGraphicsWidget
 {
         Q_OBJECT
         friend class ControlPrivate;
-        friend class ControlScene;
-        friend class ControlView;
-        friend class FormScene;
-        friend class DesignManager;
-        friend class DesignManagerPrivate;
 
     public:
         explicit Control(const QString& url, const DesignMode& mode,
-          const QString& uid = QString(), Control* parent = Q_NULLPTR);
+          const QString& uid = QString(), Control* parent = nullptr);
         ~Control();
         QString uid() const;
         QString id() const;
@@ -109,15 +45,15 @@ class Control : public QGraphicsWidget
         static void setShowOutline(const bool value);
         static void updateUids();
         static QString generateUid();
-        ControlTransaction* controlTransaction();
         static const QList<Control*>& controls();
         const QList<QQmlError>& errors() const;
         bool hasErrors() const;
         const DesignMode& mode() const;
+        virtual QRectF frameGeometry() const;
+        void setDragging(bool dragging);
+        void setDragIn(bool dragIn);
 
     public slots:
-        void hideSelection();
-        void showSelection();
         void hideResizers();
         void showResizers();
         virtual void refresh();
@@ -127,10 +63,6 @@ class Control : public QGraphicsWidget
         void updateUid();
 
     protected:
-        void setDragging(bool dragging);
-        void setDragIn(bool dragIn);
-
-        virtual QRectF frameGeometry() const;
         virtual void dropControl(Control* control);
         virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
         virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
@@ -156,7 +88,6 @@ class Control : public QGraphicsWidget
         ControlPrivate* _d;
 
     private:
-        ControlTransaction _controlTransaction;
         QString _uid;
         QString _id;
         QList<QString> _events;
@@ -168,6 +99,7 @@ class Control : public QGraphicsWidget
         bool _dragIn;
         bool _gui;
         bool _hideSelection;
+        ControlWatcher* _cW;
         static bool _showOutline;
         static QList<Control*> _controls;
 };
@@ -183,7 +115,6 @@ class Form : public Control
         void setMain(bool value);
         void setSkin(const Skin& skin);
         const Skin& skin();
-
         QRectF frameGeometry() const override;
 
     protected:

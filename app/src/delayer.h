@@ -6,11 +6,11 @@
 
 namespace Delayer
 {
-    void delay(const int msec);
-    void delay(const bool& condition, bool reverse = false, const int maxMs = 0, const int checkMs = 20);
-    void delay(bool (*const method)(), bool reverse = false, const int maxMs = 0, const int checkMs = 20);
+    void delay(int msec);
+    void delay(const bool& condition, bool reverse = false, int maxMs = 0, int checkMs = 20);
+    void delay(bool (*const method)(), bool reverse = false, int maxMs = 0, int checkMs = 20);
     template<typename T>
-    void delay(const void* object, bool (T::*const method)() const, bool reverse = false, const int maxMs = 0, const int checkMs = 20)
+    void delay(const void* object, bool (T::*const method)() const, bool reverse = false, int maxMs = 0, int checkMs = 20)
     {
         QEventLoop loop;
         QTimer timer, timer_2;
@@ -21,7 +21,7 @@ namespace Delayer
         loop.exec();
     }
     template<typename T>
-    void delay(const void* object, bool (T::*const method)(), bool reverse = false, const int maxMs = 0, const int checkMs = 20)
+    void delay(const void* object, bool (T::*const method)(), bool reverse = false, int maxMs = 0, int checkMs = 20)
     {
         QEventLoop loop;
         QTimer timer, timer_2;

@@ -26,6 +26,8 @@
 #include <QPair>
 #include <QScreen>
 
+//TODO: QQuickRenderControl???
+
 #define TASK_TIMEOUT 100
 #define pS (QApplication::primaryScreen())
 

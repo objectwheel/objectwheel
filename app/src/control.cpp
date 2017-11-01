@@ -1,50 +1,26 @@
 #include <control.h>
 #include <fit.h>
-#include <formscene.h>
-#include <savemanager.h>
-#include <designmanager.h>
 #include <random>
 #include <filemanager.h>
-#include <qmleditorview.h>
-#include <parsercontroller.h>
+#include <controlwatcher.h>
+#include <suppressor.h>
 
-#include <QDebug>
-#include <QTimer>
 #include <QtMath>
-#include <QPen>
-#include <QQuickWindow>
-#include <QWidget>
-#include <QPainter>
-#include <QBitmap>
-#include <QVector>
-#include <QMimeData>
-#include <QGraphicsScene>
-#include <QApplication>
-#include <QSharedPointer>
-#include <QGraphicsView>
-#include <QGraphicsSceneDragDropEvent>
-#include <QGraphicsSceneMouseEvent>
-#include <QMessageBox>
-#include <QMetaObject>
-#include <QDateTime>
-#include <QCryptographicHash>
 #include <QtWidgets>
 #include <QtSvg>
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
-#define RESIZER_SIZE (fit(6.0))
 #define HIGHLIGHT_COLOR (QColor("#174C4E4D"))
 #define SELECTION_COLOR ("#404447")
 #define OUTLINE_COLOR ("#808487")
 #define BACKGROUND_COLOR (QColor("#F0F4F7"))
-#define RESIZER_COLOR (Qt::white)
-#define RESIZER_OUTLINE_COLOR ("#202427")
 #define PREVIEW_REFRESH_INTERVAL 100
 #define RESIZE_TRANSACTION_INTERVAL 800
 #define GEOMETRY_SIGNAL_DELAY 800
 #define MAGNETIC_FIELD (fit(3))
 #define MARGIN_TOP (fit(14))
 #define pS (QApplication::primaryScreen())
+#define cW (ControlWatcher::instance())
 
 using namespace Fit;
 
@@ -55,189 +31,6 @@ using namespace Fit;
 static std::random_device rd;
 static std::mt19937 mt(rd());
 static std::uniform_int_distribution<qint32> rand_dist(-2147483648, 2147483647);
-static ControlWatcher controlWatcher;
-
-//!
-//! ********************** [ControlWatcher] **********************
-//!
-
-ControlWatcher* ControlWatcher::_instance = nullptr;
-
-ControlWatcher::ControlWatcher(QObject* parent)
-    : QObject(parent)
-{
-    if (!_instance)
-        _instance = this;
-}
-
-ControlWatcher* ControlWatcher::instance()
-{
-    return _instance;
-}
-
-//!
-//! ************************** [Resizer] **************************
-//!
-
-bool Resizer::_resizing = false;
-
-Resizer::Resizer(Control* parent)
-    : QGraphicsWidget(parent)
-    , _placement(Top)
-    , _disabled(false)
-{
-    setVisible(false);
-    setAcceptedMouseButtons(Qt::LeftButton);
-    setAcceptHoverEvents(true);
-}
-
-QRectF Resizer::boundingRect() const
-{
-    return QRectF(0, 0, RESIZER_SIZE, RESIZER_SIZE);
-}
-
-void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
-{
-    painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(RESIZER_OUTLINE_COLOR);
-    painter->setBrush(RESIZER_COLOR);
-    painter->drawRoundedRect(boundingRect().adjusted(0.5, 0.5, -0.5, -0.5),
-                             RESIZER_SIZE / 4.0, RESIZER_SIZE / 4.0);
-}
-
-void Resizer::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsItem::mousePressEvent(event);
-    event->accept();
-    _resizing = true;
-}
-
-void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsItem::mouseMoveEvent(event);
-
-    if (_disabled || !_resizing)
-        return;
-
-    qreal diff_x, diff_y;
-    auto* parent = static_cast<Control*>(parentItem());
-    auto startSize = parent->size();
-    switch (_placement) {
-        case Top:
-            diff_y = event->lastPos().y() - event->pos().y();
-            parent->setGeometry(parent->geometry().adjusted(0, -diff_y, 0, 0));
-            break;
-
-        case Right:
-            diff_x = event->pos().x() - event->lastPos().x();
-            parent->setGeometry(parent->geometry().adjusted(0, 0, diff_x, 0));
-            break;
-
-        case Bottom:
-            diff_y = event->pos().y() - event->lastPos().y();
-            parent->setGeometry(parent->geometry().adjusted(0, 0, 0, diff_y));
-            break;
-
-        case Left:
-            diff_x = event->lastPos().x() - event->pos().x();
-            parent->setGeometry(parent->geometry().adjusted(-diff_x, 0, 0, 0));
-            break;
-
-        case TopLeft:
-            diff_x = event->lastPos().x() - event->pos().x();
-            diff_y = event->lastPos().y() - event->pos().y();
-            parent->setGeometry(parent->geometry().adjusted(-diff_x, -diff_y, 0, 0));
-            break;
-
-        case TopRight:
-            diff_x = event->pos().x() - event->lastPos().x();
-            diff_y = event->lastPos().y() - event->pos().y();
-            parent->setGeometry(parent->geometry().adjusted(0, -diff_y, diff_x, 0));
-            break;
-
-        case BottomRight:
-            diff_x = event->pos().x() - event->lastPos().x();
-            diff_y = event->pos().y() - event->lastPos().y();
-            parent->setGeometry(parent->geometry().adjusted(0, 0, diff_x, diff_y));
-            break;
-
-        case BottomLeft:
-            diff_x = event->lastPos().x() - event->pos().x();
-            diff_y = event->pos().y() - event->lastPos().y();
-            parent->setGeometry(parent->geometry().adjusted(-diff_x, 0, 0, diff_y));
-            break;
-    }
-
-    if (parent->size().width() < RESIZER_SIZE ||
-        parent->size().height() < RESIZER_SIZE) {
-        parent->resize(startSize);
-    }
-}
-
-void Resizer::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsItem::mouseReleaseEvent(event);
-    _resizing = false;
-}
-
-bool Resizer::disabled() const
-{
-    return _disabled;
-}
-
-void Resizer::setDisabled(bool disabled)
-{
-    _disabled = disabled;
-}
-
-bool Resizer::resizing()
-{
-    return _resizing;
-}
-
-Resizer::Placement Resizer::placement() const
-{
-    return _placement;
-}
-
-void Resizer::setPlacement(const Resizer::Placement& placement)
-{
-    _placement = placement;
-
-    switch (_placement) {
-        case Resizer::Top:
-            setCursor(Qt::SizeVerCursor);
-            break;
-
-        case Resizer::Right:
-            setCursor(Qt::SizeHorCursor);
-            break;
-
-        case Resizer::Bottom:
-            setCursor(Qt::SizeVerCursor);
-            break;
-
-        case Resizer::Left:
-            setCursor(Qt::SizeHorCursor);
-            break;
-
-        case Resizer::TopLeft:
-            setCursor(Qt::SizeFDiagCursor);
-            break;
-
-        case Resizer::TopRight:
-            setCursor(Qt::SizeBDiagCursor);
-            break;
-
-        case Resizer::BottomRight:
-            setCursor(Qt::SizeFDiagCursor);
-            break;
-
-        case Resizer::BottomLeft:
-            setCursor(Qt::SizeBDiagCursor);
-            break;
-    }
-}
 
 //!
 //! ****************** [Control Private] ******************
@@ -249,16 +42,13 @@ class ControlPrivate : public QObject
 
     public:
         ControlPrivate(Control* parent);
-        void fixResizerCoordinates();
 
     public slots:
         void updatePreview(PreviewResult result);
-        void handleGeometrySignalChange();
 
     public:
         Control* parent;
         QPixmap preview;
-        QTimer geometrySignalTimer;
         bool hoverOn;
 };
 
@@ -273,59 +63,9 @@ ControlPrivate::ControlPrivate(Control* parent)
         resizer.setPlacement(Resizer::Placement(i++));
     }
 
-    geometrySignalTimer.setInterval(GEOMETRY_SIGNAL_DELAY);
-    connect(&geometrySignalTimer, SIGNAL(timeout()),
-      SLOT(handleGeometrySignalChange()));
     connect(QmlPreviewer::instance(),
       SIGNAL(previewReady(PreviewResult)),
       SLOT(updatePreview(PreviewResult)));
-}
-
-void ControlPrivate::fixResizerCoordinates()
-{
-    for (auto& resizer : parent->_resizers) {
-        switch (resizer.placement()) {
-            case Resizer::Top:
-                resizer.setPos(parent->size().width() / 2.0 - RESIZER_SIZE / 2.0,
-                               - RESIZER_SIZE / 2.0 + 0.5);
-                break;
-
-            case Resizer::Right:
-                resizer.setPos(parent->size().width() - RESIZER_SIZE / 2.0 - 0.5,
-                               parent->size().height() / 2.0 - RESIZER_SIZE / 2.0);
-                break;
-
-            case Resizer::Bottom:
-                resizer.setPos(parent->size().width() / 2.0 - RESIZER_SIZE / 2.0,
-                               parent->size().height() - RESIZER_SIZE / 2.0 - 0.5);
-                break;
-
-            case Resizer::Left:
-                resizer.setPos(- RESIZER_SIZE / 2.0 + 0.5,
-                               parent->size().height() / 2.0 - RESIZER_SIZE / 2.0);
-                break;
-
-            case Resizer::TopLeft:
-                resizer.setPos(- RESIZER_SIZE / 2.0 + 0.5, - RESIZER_SIZE / 2.0 + 0.5);
-                break;
-
-            case Resizer::TopRight:
-                resizer.setPos(parent->size().width() - RESIZER_SIZE / 2.0 - 0.5,
-                               - RESIZER_SIZE / 2.0 + 0.5);
-                break;
-
-            case Resizer::BottomRight:
-                resizer.setPos(parent->size().width() - RESIZER_SIZE / 2.0 - 0.5,
-                               parent->size().height() - RESIZER_SIZE / 2.0 - 0.5);
-                break;
-
-            case Resizer::BottomLeft:
-                resizer.setPos( - RESIZER_SIZE / 2.0 + 0.5,
-                                parent->size().height() - RESIZER_SIZE / 2.0 - 0.5);
-                break;
-        }
-        resizer.setZValue(MAX_Z_VALUE);
-    }
 }
 
 void ControlPrivate::updatePreview(PreviewResult result)
@@ -351,7 +91,6 @@ void ControlPrivate::updatePreview(PreviewResult result)
                 parent->_clip = result.property("clip").toBool();
         } else if (parent->parentItem() != scene->mainControl()) {
             parent->setParentItem(scene->mainControl());
-            parent->_controlTransaction.flushParentChange();
         }
         parent->setVisible(result.gui);
     }
@@ -359,15 +98,10 @@ void ControlPrivate::updatePreview(PreviewResult result)
     parent->update();
     if (result.hasError()) {
         emit parent->errorOccurred();
-        emit controlWatcher.errorOccurred(parent);
+        emit cW->errorOccurred(parent);
     }
     emit parent->previewChanged();
-}
-
-void ControlPrivate::handleGeometrySignalChange()
-{
-    geometrySignalTimer.stop();
-    emit controlWatcher.geometryChanged(parent);
+    emit cW->previewChanged(parent);
 }
 
 //!
@@ -377,18 +111,18 @@ void ControlPrivate::handleGeometrySignalChange()
 bool Control::_showOutline = false;
 QList<Control*> Control::_controls;
 
-Control::Control(const QString& url, const DesignMode& mode, const QString& uid, Control* parent)
+Control::Control(const QString& url, const DesignMode& mode,
+  const QString& uid, Control* parent)
     : QGraphicsWidget(parent)
     , _clip(true)
     , _d(new ControlPrivate(this))
-    , _controlTransaction(this)
+    , _saveTransaction(this)
     , _uid(uid.isEmpty() ? SaveManager::uid(dname(dname(url))) : uid)
     , _url(url)
     , _mode(mode)
     , _dragging(false)
     , _dragIn(false)
     , _gui(true)
-    , _hideSelection(false)
 {
     _controls << this;
 
@@ -409,8 +143,11 @@ Control::Control(const QString& url, const DesignMode& mode, const QString& uid,
             refresh();
     });
 
-    connect(this, SIGNAL(geometryChanged()),
-      &_d->geometrySignalTimer, SLOT(start()));
+    connect(this, &Control::geometryChanged, [=] {
+        Suppressor::suppress(GEOMETRY_SIGNAL_DELAY, "geometryChanged",
+          std::bind(&ControlWatcher::geometryChanged, cW, this));
+    });
+
     connect(this, &Control::zChanged, [this]{
         emit controlWatcher.zValueChanged(this);
     });
@@ -452,22 +189,6 @@ QString Control::generateUid()
     return QCryptographicHash::hash(uidData, QCryptographicHash::Sha256).toHex();
 }
 
-void Control::hideSelection()
-{
-    if (isSelected()) {
-        _hideSelection = true;
-        hideResizers();
-    }
-}
-
-void Control::showSelection()
-{
-    if (isSelected()) {
-        _hideSelection = false;
-        showResizers();
-    }
-}
-
 QList<Control*> Control::childControls(bool dive) const
 {
     QList<Control*> controls;
@@ -490,8 +211,6 @@ void Control::hideResizers()
 
 void Control::showResizers()
 {
-    if (_hideSelection)
-        return;
     for (auto& resizer : _resizers) {
         resizer.show();
     }
@@ -731,11 +450,6 @@ const QList<Control*>& Control::controls()
     return _controls;
 }
 
-ControlTransaction* Control::controlTransaction()
-{
-    return &_controlTransaction;
-}
-
 void Control::setUrl(const QString& url)
 {
     _url = url;
@@ -846,7 +560,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
     }
 
-    if ((isSelected() && !_hideSelection) || _showOutline) {
+    if (isSelected() || _showOutline) {
         QPen pen;
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);

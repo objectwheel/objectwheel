@@ -5,6 +5,7 @@
 #include <filemanager.h>
 #include <savemanager.h>
 #include <formswidget.h>
+#include <controlwatcher.h>
 
 #include <QStyledItemDelegate>
 #include <QTreeWidget>
@@ -12,6 +13,7 @@
 #include <QApplication>
 #include <QHeaderView>
 #include <QScrollBar>
+#include <QTimer>
 
 using namespace Fit;
 

@@ -20,7 +20,7 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/control.h \
                              $$PWD/formscene.h \
                              $$PWD/qmlpreviewer.h \
-                             $$PWD/controltransaction.h \
+                             $$PWD/savetransaction.h \
                              $$PWD/parserworker.h \
                              $$PWD/parsercontroller.h \
                              $$PWD/controlscene.h \
@@ -46,7 +46,10 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/issuesbox.h \
                              $$PWD/consolebox.h \
                              $$PWD/searchbox.h \
-                             $$PWD/outputwidget.h
+                             $$PWD/outputwidget.h \
+                             $$PWD/controlwatcher.h \
+    $$PWD/resizer.h \
+    $$PWD/suppressor.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -69,7 +72,7 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/control.cpp \
                              $$PWD/formscene.cpp \
                              $$PWD/qmlpreviewer.cpp \
-                             $$PWD/controltransaction.cpp \
+                             $$PWD/savetransaction.cpp \
                              $$PWD/parserworker.cpp \
                              $$PWD/parsercontroller.cpp \
                              $$PWD/controlscene.cpp \
@@ -94,7 +97,10 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/issuesbox.cpp \
                              $$PWD/consolebox.cpp \
                              $$PWD/searchbox.cpp \
-                             $$PWD/outputwidget.cpp
+                             $$PWD/outputwidget.cpp \
+                             $$PWD/controlwatcher.cpp \
+    $$PWD/resizer.cpp \
+    $$PWD/suppressor.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 

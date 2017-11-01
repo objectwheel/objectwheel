@@ -1,13 +1,13 @@
 #include <delayer.h>
 
-void Delayer::delay(const int msec)
+void Delayer::delay(int msec)
 {
     QEventLoop loop;
     QTimer::singleShot(msec, [&]{ loop.quit(); });
     loop.exec();
 }
 
-void Delayer::delay(const bool& condition, bool reverse, const int maxMs, const int checkMs)
+void Delayer::delay(const bool& condition, bool reverse, int maxMs, int checkMs)
 {
     QEventLoop loop;
     QTimer timer, timer_2;
@@ -18,7 +18,7 @@ void Delayer::delay(const bool& condition, bool reverse, const int maxMs, const 
     loop.exec();
 }
 
-void Delayer::delay(bool (* const method)(), bool reverse, const int maxMs, const int checkMs)
+void Delayer::delay(bool (* const method)(), bool reverse, int maxMs, int checkMs)
 {
     QEventLoop loop;
     QTimer timer, timer_2;

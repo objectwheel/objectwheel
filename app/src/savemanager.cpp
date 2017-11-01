@@ -9,6 +9,7 @@
 #include <delayer.h>
 #include <executivewidget.h>
 #include <parserworker.h>
+#include <controlwatcher.h>
 
 #include <QJsonArray>
 #include <QJsonDocument>

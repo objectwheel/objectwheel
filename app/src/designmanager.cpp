@@ -10,6 +10,7 @@
 #include <loadingindicator.h>
 #include <savemanager.h>
 #include <outputwidget.h>
+#include <controlwatcher.h>
 
 #include <QWidget>
 #include <QList>

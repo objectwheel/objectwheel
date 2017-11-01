@@ -5,6 +5,7 @@
 #include <savemanager.h>
 #include <delayer.h>
 #include <filemanager.h>
+#include <controlwatcher.h>
 #include <QtWidgets>
 
 //!
@@ -1265,5 +1266,7 @@ QSize PropertiesWidget::sizeHint() const
 {
     return QSize(fit(340), fit(2600)); //FIXME:
 }
+
+//TODO: Apply geometry, z, geometryf to control itself (so not only to db)
 
 #include "propertieswidget.moc"
