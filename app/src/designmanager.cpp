@@ -710,12 +710,12 @@ void DesignManagerPrivate::controlDropped(Control* control, const QPointF& pos, 
     auto scene = (ControlScene*)control->scene();
     scene->clearSelection();
     auto newControl = new Control(url, control->mode());
-    newControl->setParentItem(control);
     SaveManager::addControl(newControl, control,
       scene->mainControl()->uid(), scene->mainControl()->dir());
-    newControl->refresh();
+    newControl->setParentItem(control);
     newControl->setPos(pos);
     newControl->setSelected(true);
+    newControl->refresh();
 }
 
 void DesignManagerPrivate::handleModeChange()

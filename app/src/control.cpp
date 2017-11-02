@@ -54,10 +54,12 @@ class ControlPrivate : public QObject
         QPixmap preview;
         bool hoverOn;
 };
-
+//TODO: Search for ControlScene and FormScene and make their usage less
+//FIXME: Z Value doesn't save
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
+    , preview(":/resources/images/preloader.gif") //FIXME
     , hoverOn(false)
 {
     int i = 0;
@@ -105,7 +107,7 @@ void ControlPrivate::updatePreview(PreviewResult result)
 
 bool Control::_showOutline = false;
 QList<Control*> Control::_controls;
-
+//TODO: Why we need mode()?
 Control::Control(const QString& url, const DesignMode& mode,
   const QString& uid, Control* parent)
     : QGraphicsWidget(parent)
@@ -142,14 +144,8 @@ Control::Control(const QString& url, const DesignMode& mode,
           std::bind(&ControlWatcher::geometryChanged, cW, this));
     });
 
-    connect(cW, (void (ControlWatcher::*)(Control*))
-      &Control::geometryChanged, this, [=] (Control* control) {
-        if (control == this)
-            refresh();
-    });
-
     connect(this, &Control::zChanged, [this] {
-        refresh();
+        // refresh(); No need, cause it doesn't change preview
         emit cW->zValueChanged(this);
     });
 
@@ -406,6 +402,7 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
     QGraphicsWidget::resizeEvent(event);
     for (auto& resizer : _resizers)
         resizer.correct();
+    refresh();
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)

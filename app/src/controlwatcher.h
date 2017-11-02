@@ -17,7 +17,7 @@ class ControlWatcher : public QObject
     signals:
         void skinChanged(Form*);
         void zValueChanged(Control*);
-        void geometryChanged(Control*);
+        void geometryChanged(Control*); // Suppressed
         void previewChanged(Control*);
         void parentChanged(Control*);
         void errorOccurred(Control*);

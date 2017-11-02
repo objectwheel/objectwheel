@@ -29,6 +29,7 @@
 //TODO: QQuickRenderControl???
 
 #define TASK_TIMEOUT 100
+#define SIZE_ERROR_PIXMAP (fit(32))
 #define pS (QApplication::primaryScreen())
 
 using namespace Fit;
@@ -63,10 +64,12 @@ QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : QObject(parent)
     , parent(parent)
     , errorPixmap(QPixmap(":/resources/images/error.png").
-      scaled((QSizeF(fit(48), fit(48)) * pS->devicePixelRatio()).toSize(),
+      scaled((QSizeF(SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP) *
+      pS->devicePixelRatio()).toSize(),
       Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
     , refreshPixmap(QPixmap(":/resources/images/refresh.png").
-      scaled((QSizeF(fit(48), fit(48)) * pS->devicePixelRatio()).toSize(),
+      scaled((QSizeF(SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP) *
+      pS->devicePixelRatio()).toSize(),
       Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
 {
     taskTimer.setInterval(TASK_TIMEOUT);
@@ -88,7 +91,7 @@ void QmlPreviewerPrivate::dash(QPixmap& pixmap) const
     }
 
     auto r = QRectF(pixmap.rect()).adjusted(0.5, 0.5, -0.5, -0.5);
-    QRectF wr(0, 0, fit(48), fit(48));
+    QRectF wr(0, 0, SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP);
     wr.moveCenter(r.center());
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -117,10 +120,10 @@ QPixmap QmlPreviewerPrivate::prepreview(const Control* control) const
     QPixmap p(s);
     p.fill(Qt::transparent);
 
-    QRectF wr(0, 0, fit(48), fit(48));
+    QRectF wr(0, 0, SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP);
     wr.moveCenter(r.center());
     QPainter painter(&p);
-    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::Antialiasing); //FIXME: Bigger scratched preview appears
     QBrush brush;
     brush.setColor("#606467");
     brush.setStyle(Qt::DiagCrossPattern);
@@ -268,11 +271,11 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
             item->setParentItem(window->contentItem());
             item->setSize(QSizeF(fit(w), fit(h)));
             item->setPosition({0,0});
-            window->resize(qCeil(item->width()), qCeil(item->height()));
+            window->resize(qCeil(item->width()), qCeil(item->height())); //FIXME: Ceil??
             window->setClearBeforeRendering(true);
             window->setColor(Qt::transparent);
         } else {
-            window->resize(QSize(qCeil(fit(w)), qCeil(fit(h))));
+            window->resize(QSize(qCeil(fit(w)), qCeil(fit(h))));  //FIXME: Ceil??
         }
 
         window->setFlags(Qt::Window | Qt::FramelessWindowHint);

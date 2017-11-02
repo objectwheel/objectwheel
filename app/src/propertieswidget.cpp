@@ -366,24 +366,40 @@ static void saveChanges(const NodeType& type, const QVariant& value)
             break;
 
         case GeometryX:
-        case GeometryFX:
-            property = "x";
-            break;
+        case GeometryFX: {
+            auto sc = DesignManager::currentScene()->selectedControls();
+            if (sc.size() != 1)
+                return;
+            sc[0]->setX(value.toReal());
+            return;
+        }
 
         case GeometryY:
-        case GeometryFY:
-            property = "y";
-            break;
+        case GeometryFY: {
+            auto sc = DesignManager::currentScene()->selectedControls();
+            if (sc.size() != 1)
+                return;
+            sc[0]->setY(value.toReal());
+            return;
+        }
 
         case GeometryWidth:
-        case GeometryFWidth:
-            property = "width";
-            break;
+        case GeometryFWidth: {
+            auto sc = DesignManager::currentScene()->selectedControls();
+            if (sc.size() != 1)
+                return;
+            sc[0]->resize(value.toReal(), sc[0]->size().height());
+            return;
+        }
 
         case GeometryHeight:
-        case GeometryFHeight:
-            property = "height";
-            break;
+        case GeometryFHeight: {
+            auto sc = DesignManager::currentScene()->selectedControls();
+            if (sc.size() != 1)
+                return;
+            sc[0]->resize(sc[0]->size().width(), value.toReal());
+            return;
+        }
 
         default:
             break;
@@ -795,6 +811,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             val = editor->value();
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
+            if (property == "z") {
+                auto sc = DesignManager::currentScene()->selectedControls();
+                if (sc.size() == 1)
+                    sc[0]->setZValue(val.toReal());
+            }
             saveChanges(property, val);
             break;
         }
@@ -1136,6 +1157,8 @@ void PropertiesWidget::refreshList()
                         if (propertyName == "x") //To make it called only once
                             processGeometryF(item, "geometry", selectedControls[0]);
                     } else {
+                        if (propertyName == "z")
+                            map[propertyName] = selectedControls[0]->zValue();
                         processDouble(item, propertyName, map);
                     }
                     break;
@@ -1230,29 +1253,33 @@ void PropertiesWidget::filterList(const QString& filter)
         tli->setHidden(!v);
     }
 }
-//TODO: Do not attempt to set a property on a hasErrors() control
+
 bool PropertiesWidget::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == _treeWidget.viewport()) {
         if (event->type() == QEvent::Paint) {
-            QPainter painter(_treeWidget.viewport());
+            auto w = (QWidget*)watched;
+            QPainter painter(w);
+            painter.setRenderHint(QPainter::Antialiasing);
             if (_treeWidget.topLevelItemCount() == 0) {
+                auto sc = DesignManager::currentScene()->selectedControls();
                 bool drawn = false;
-                painter.setPen(QColor("#a0a4a7"));
-                const qreal ic = _treeWidget.viewport()->height() / fit(20);
+                const qreal ic = w->height() / fit(20);
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
-                        painter.fillRect(0, i * fit(20),
-                                         _treeWidget.viewport()->width(),
-                                         fit(20), QColor("#E5E9EC"));
+                        painter.fillRect(0, i * fit(20), w->width(),
+                          fit(20), QColor("#E5E9EC"));
                     } else if (!drawn && (i == int(ic) / 2 ||
-                                          i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
+                      i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
                         drawn = true;
-                        painter.drawText(0, i * fit(20),
-                                         _treeWidget.viewport()->width(),
-                                         fit(20), Qt::AlignCenter, "No items selected");
+                        painter.setPen(QColor(sc.size() == 1 ?
+                          "#d09497" : "#a0a4a7"));
+                        painter.drawText(0, i * fit(20), w->width(),
+                          fit(20), Qt::AlignCenter, sc.size() == 1 ?
+                            "Control has errors" : "No controls selected");
                     }
                 }
+
             }
         }
         return false;
@@ -1266,7 +1293,5 @@ QSize PropertiesWidget::sizeHint() const
 {
     return QSize(fit(340), fit(2600)); //FIXME:
 }
-
-//TODO: Apply geometry, z, geometryf to control itself (so not only to db)
 
 #include "propertieswidget.moc"

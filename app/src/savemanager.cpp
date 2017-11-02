@@ -776,10 +776,10 @@ ExecError SaveManager::execProject()
 
                 if (_d->type(pobject) == Window) {
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
-                                static_cast<QQuickWindow*>(pobject)->contentItem()); //FIXME: ApplicationWindow qml type?
+                      static_cast<QQuickWindow*>(pobject)->contentItem()); //FIXME: ApplicationWindow qml type?
                 } else {                                                  //header, footer, and contentItem?
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
-                                static_cast<QQuickItem*>(pobject));
+                      static_cast<QQuickItem*>(pobject));
                 }
 
                 pmap[result] = childResults[result];
@@ -1094,6 +1094,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     return true;
 }
 
+//FIXME: Called twice
 // You can only move controls within current suid scope of related control
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
 { //FIXME: Some controls are disappearing after moving
