@@ -12,7 +12,6 @@
 #include <QStandardPaths>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QPainter>
 #include <QPalette>
 #include <QListWidget>
 #include <QScrollBar>

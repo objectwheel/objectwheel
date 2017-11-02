@@ -650,6 +650,7 @@ void QmlEditorView::paintEvent(QPaintEvent*)
 {
     QPen pen;
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
     QRectF _rect(0, 0, fit(150), fit(60));
     _rect.moveCenter(rect().center());
     pen.setStyle(Qt::DotLine);

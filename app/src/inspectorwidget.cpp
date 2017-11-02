@@ -84,6 +84,7 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
 {
     const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     auto o = option;
     if (model->data(index, Qt::UserRole).toBool() &&

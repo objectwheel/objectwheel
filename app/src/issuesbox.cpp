@@ -39,6 +39,7 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
 {
     const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     QStyledItemDelegate::paint(painter, option, index);
 

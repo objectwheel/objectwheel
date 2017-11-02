@@ -902,6 +902,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
     QStyleOptionViewItem option = opt;
     const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     if (model->parent(index).isValid()) {
         if (index.row() % 2) {

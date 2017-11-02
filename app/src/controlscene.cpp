@@ -176,6 +176,7 @@ void ControlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     if ((_d->itemMoving || Resizer::resizing()) && _snapping && _mainControl != nullptr) {
         auto guideLines = _mainControl->guideLines();

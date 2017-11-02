@@ -254,6 +254,7 @@ void QmlCodeEditor::highlightCurrentLine()
 void QmlCodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
 {
     QPainter painter(lineNumberArea);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(event->rect(), COLOR_LINENUMBERAREA);
 
     QTextBlock block = firstVisibleBlock();

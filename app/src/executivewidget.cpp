@@ -111,6 +111,8 @@ void ExecutiveWidget::paintEvent(QPaintEvent* event)
     QRectF skinRect;
     QRectF innerRect = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5);
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+
     switch (_skin) {
         case Skin::PhonePortrait: {
             skinRect = QRectF({0, 0}, SIZE_SKIN);

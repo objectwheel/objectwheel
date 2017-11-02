@@ -16,7 +16,6 @@
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QPixmap>
-#include <QPainter>
 #include <QBrush>
 #include <QImage>
 #include <QtMath>
@@ -380,6 +379,7 @@ void QmlPreviewerPrivate::processTasks()
             const QSizeF s = r.control->size();
 
             QPainter px(parentPixmap);
+            px.setRenderHint(QPainter::Antialiasing);
             px.drawPixmap(QRectF(p, s), r.preview, QRectF(QPointF(0, 0),
               s * pS->devicePixelRatio()));
             px.end();

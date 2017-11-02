@@ -46,6 +46,7 @@ void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &optio
 {
     const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     if (!model->parent(index).isValid()) {
         // this is a top-level item.
