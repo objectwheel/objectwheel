@@ -48,7 +48,7 @@ enum NodeRole {
 
 static void processFont(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    const auto value = map[propertyName].value<QFont>();
+    const auto value = map.value(propertyName).value<QFont>();
     const auto px = value.pixelSize() > 0 ? true : false;
     const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
                     .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
@@ -212,7 +212,7 @@ static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName,
 
 static void processColor(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    const auto value = map[propertyName].value<QColor>();
+    const auto value = map.value(propertyName).value<QColor>();
     const auto cc = value.name(QColor::HexArgb);
 
     auto iitem = new QTreeWidgetItem;
@@ -227,7 +227,7 @@ static void processColor(QTreeWidgetItem* item, const QString& propertyName, con
 
 static void processBool(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    const auto value = map[propertyName].value<bool>();
+    const auto value = map.value(propertyName).value<bool>();
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -240,7 +240,7 @@ static void processBool(QTreeWidgetItem* item, const QString& propertyName, cons
 
 static void processString(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    const auto value = map[propertyName].value<QString>();
+    const auto value = map.value(propertyName).value<QString>();
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -255,7 +255,7 @@ static void processString(QTreeWidgetItem* item, const QString& propertyName, co
 static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
     auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
-    const auto value = map[propertyName].value<QUrl>();
+    const auto value = map.value(propertyName).value<QUrl>();
     auto dispText = value.toDisplayString();
     if (value.isLocalFile()) {
         dispText = value.toLocalFile().
@@ -274,7 +274,7 @@ static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const
 
 static void processDouble(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    const auto value = map[propertyName].value<double>();
+    const auto value = map.value(propertyName).value<double>();
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -288,7 +288,7 @@ static void processDouble(QTreeWidgetItem* item, const QString& propertyName, co
 
 static void processInt(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    const auto value = map[propertyName].value<int>();
+    const auto value = map.value(propertyName).value<int>();
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -317,7 +317,7 @@ static void saveChanges(const QString& property, const QVariant& value)
 
     QMetaObject::Connection con;
     con = QObject::connect(SaveManager::instance(),
-                           &SaveManager::parserRunningChanged, [sc, con] {
+      &SaveManager::parserRunningChanged, [sc, con] {
         if (sc.isNull()) {
             QObject::disconnect(con);
             return;
@@ -1103,7 +1103,7 @@ void PropertiesWidget::refreshList()
         item->setText(0, propertyNode.cleanClassName);
 
         for (auto propertyName : map.keys()) {
-            switch (map[propertyName].type())
+            switch (map.value(propertyName).type())
             {
                 case QVariant::Font: {
                     processFont(item, propertyName, map);
@@ -1143,9 +1143,9 @@ void PropertiesWidget::refreshList()
 
                 case QVariant::Int: {
                     QMetaProperty mp;
-                    for (int i = 0; i < metaObject->propertyCount(); i++)
-                        if (metaObject->property(i).name() == propertyName)
-                            mp = metaObject->property(i);
+                    for (int i = 0; i < metaObject.propertyCount(); i++)
+                        if (metaObject.property(i).name() == propertyName)
+                            mp = metaObject.property(i);
 
                     if ((mp.isValid() && (mp.isEnumType() || mp.isFlagType())) ||
                         propertyName == "inputMethodHints" ||
@@ -1174,7 +1174,7 @@ void PropertiesWidget::refreshList()
                     continue;
                     // QTreeWidgetItem* iitem = new QTreeWidgetItem;
                     // iitem->setText(0, propertyName);
-                    // iitem->setText(1, map[propertyName].typeName());
+                    // iitem->setText(1, map.value(propertyName).typeName());
                     // item->addChild(iitem);
                     // break;
                 }

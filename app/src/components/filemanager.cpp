@@ -219,11 +219,14 @@ QByteArray FileManager::dlfile(const QString& url)
     request.setRawHeader("User-Agent", "Objectwheel");
     reply = manager.get(request);
 
-    connect(reply, SIGNAL(sslErrors(QList<QSslError>)), reply, SLOT(ignoreSslErrors()));
-    connect(reply, (void(QNetworkReply::*)(QNetworkReply::NetworkError))(&QNetworkReply::error), [&loop] {
+    connect(reply, SIGNAL(sslErrors(QList<QSslError>)), reply,
+      SLOT(ignoreSslErrors()));
+    connect(reply, (void(QNetworkReply::*)(QNetworkReply::NetworkError))
+      &QNetworkReply::error, this, [&loop] {
         loop.quit();
     });
-    connect(reply, &QNetworkReply::finished, [reply, &data, &loop] {
+    connect(reply, &QNetworkReply::finished,
+      this, [reply, &data, &loop] {
         data = reply->readAll();
         loop.quit();
     });

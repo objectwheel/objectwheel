@@ -36,7 +36,7 @@ ProgressWidget::ProgressWidget(CentralWidget* parent)
     connect(&_movie, SIGNAL(frameChanged(int)), SLOT(update()));
 
     _waitEffectTimer.setInterval(INTERVAL_WAITEFFECT);
-    connect(&_waitEffectTimer, &QTimer::timeout, [=] {
+    connect(&_waitEffectTimer, &QTimer::timeout, this, [=] {
         if (_waitEffectString.size() < 1)
             _waitEffectString = ".";
         else if (_waitEffectString.size() < 2)

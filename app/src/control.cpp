@@ -142,11 +142,18 @@ Control::Control(const QString& url, const DesignMode& mode,
           std::bind(&ControlWatcher::geometryChanged, cW, this));
     });
 
-    connect(this, &Control::zChanged, [this]{
+    connect(cW, (void (ControlWatcher::*)(Control*))
+      &Control::geometryChanged, this, [=] (Control* control) {
+        if (control == this)
+            refresh();
+    });
+
+    connect(this, &Control::zChanged, [this] {
+        refresh();
         emit cW->zValueChanged(this);
     });
 
-    connect(this, &Control::parentChanged, [this]{
+    connect(this, &Control::parentChanged, [this] {
         emit cW->parentChanged(this);
     });
 }

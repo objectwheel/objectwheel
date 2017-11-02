@@ -353,7 +353,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     splitter->handle(1)->setDisabled(true);
     editorWrapper->setMinimumWidth(MINWIDTH_FILEEXPLORER);
     explorerWrapper->setFixedWidth(toolbar_2->width());
-    connect(splitter, &QSplitter::splitterMoved, [=] {
+    connect(splitter, &QSplitter::splitterMoved, this, [=] {
         lastWidthOfExplorerWrapper = explorerWrapper->width();
     });
 }

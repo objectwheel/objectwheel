@@ -18,7 +18,7 @@ typedef QMap<QString, QVariant> PropertyMap;
 
 struct PropertyNode {
         QString cleanClassName;
-        const QMetaObject* metaObject = 0;
+        QMetaObject metaObject;
         PropertyMap propertyMap;
 };
 

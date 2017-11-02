@@ -41,7 +41,7 @@ ToolboxTree::ToolboxTree(QWidget *parent)
                               rect.y() + rect.height()/2.0 - _indicatorButton.height()/2.0);
         _indicatorButton.setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
     });
-    connect(verticalScrollBar(), &QSlider::valueChanged , [=] {
+    connect(verticalScrollBar(), &QSlider::valueChanged , this, [=] {
         if (currentItem() == 0)
             return;
         if (model()->rowCount() < 1) {

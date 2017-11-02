@@ -135,7 +135,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             QNetworkRequest http(url);
             http.setRawHeader("content-type", "application/json");
             QNetworkReply* reply = manager->post(http, QByteArray().insert(0, body));
-            connect(reply, &QNetworkReply::finished, [=] {
+            connect(reply, &QNetworkReply::finished, this, [=] {
                 auto jobj = QJsonDocument::fromJson(reply->readAll()).object();
                 if (jobj["result"].toString() == "OK") {
                     pW->showProgress();
@@ -162,8 +162,10 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                 }
                 reply->deleteLater();
             });
-            connect(reply, (void (QNetworkReply::*)(QList<QSslError>))&QNetworkReply::sslErrors, [=] { reply->ignoreSslErrors(); });
-            connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=]
+            connect(reply, (void (QNetworkReply::*)(QList<QSslError>))
+              &QNetworkReply::sslErrors, this, [=] { reply->ignoreSslErrors(); });
+            connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))
+              &QNetworkReply::error, this, [=]
             {
                 QQmlProperty::write(toast, "text.text", "Your local data is unencrypted therefore we cannot verify your account locally. Please connect to the internet for login.");
                 QQmlProperty::write(toast, "base.width", qFloor(fit(330)));
@@ -179,7 +181,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
         QNetworkRequest http(url);
         http.setRawHeader("content-type", "application/json");
         QNetworkReply* reply = manager->post(http, QByteArray().insert(0, body));
-        connect(reply, &QNetworkReply::finished, [=] {
+        connect(reply, &QNetworkReply::finished, this, [=] {
             auto jobj = QJsonDocument::fromJson(reply->readAll()).object();
             if (jobj["result"].toString() == "OK") {
                 userManager->buildNewUser(email);
@@ -197,8 +199,10 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             }
             reply->deleteLater();
         });
-        connect(reply, (void (QNetworkReply::*)(QList<QSslError>))&QNetworkReply::sslErrors, [=] { reply->ignoreSslErrors(); });
-        connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=]
+        connect(reply, (void (QNetworkReply::*)(QList<QSslError>))
+          &QNetworkReply::sslErrors, this, [=] { reply->ignoreSslErrors(); });
+        connect(reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))
+          &QNetworkReply::error, this, [=]
         {
             QQmlProperty::write(toast, "text.text", "In order to activate your account, internet connection is required for the first time login.");
             QQmlProperty::write(toast, "base.width", qFloor(fit(330)));

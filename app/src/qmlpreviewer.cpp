@@ -56,14 +56,17 @@ class QmlPreviewerPrivate : public QObject
         PropertyNodes properties(const QObject*) const;
 
     private:
-        QPixmap errorPixmap;
+        QPixmap errorPixmap, refreshPixmap;
 };
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : QObject(parent)
     , parent(parent)
     , errorPixmap(QPixmap(":/resources/images/error.png").
-      scaled(QSize(fit(14), fit(14)) * pS->devicePixelRatio(),
+      scaled((QSizeF(fit(48), fit(48)) * pS->devicePixelRatio()).toSize(),
+      Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
+    , refreshPixmap(QPixmap(":/resources/images/refresh.png").
+      scaled((QSizeF(fit(48), fit(48)) * pS->devicePixelRatio()).toSize(),
       Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
 {
     taskTimer.setInterval(TASK_TIMEOUT);
@@ -84,13 +87,18 @@ void QmlPreviewerPrivate::dash(QPixmap& pixmap) const
         }
     }
 
-    QBrush brush;
-    brush.setColor(Qt::gray);
-    brush.setStyle(Qt::Dense5Pattern);
+    auto r = QRectF(pixmap.rect()).adjusted(0.5, 0.5, -0.5, -0.5);
+    QRectF wr(0, 0, fit(48), fit(48));
+    wr.moveCenter(r.center());
     QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QBrush brush;
+    brush.setColor("#606467");
+    brush.setStyle(Qt::DiagCrossPattern);
     painter.setBrush(brush);
-    painter.setPen(Qt::NoPen);
-    painter.drawRect(pixmap.rect());
+    painter.setPen(brush.color());
+    painter.drawRect(r);
+    painter.drawPixmap(wr, refreshPixmap, refreshPixmap.rect());
 }
 
 bool QmlPreviewerPrivate::containsWindow(QObject* o) const
@@ -104,18 +112,22 @@ bool QmlPreviewerPrivate::containsWindow(QObject* o) const
 
 QPixmap QmlPreviewerPrivate::prepreview(const Control* control) const
 {
-    QPixmap p(qCeil(control->size().width()),
-      qCeil(control->size().height()));
-    QRectF r(0, 0, fit(14), fit(14));
-    r.moveCenter(p.rect().center());
-    QBrush brush;
-    brush.setColor(Qt::gray);
-    brush.setStyle(Qt::Dense6Pattern);
+    auto s = (control->size() * pS->devicePixelRatio()).toSize();
+    auto r = QRectF(QPointF(), s).adjusted(0.5, 0.5, -0.5, -0.5);
+    QPixmap p(s);
+    p.fill(Qt::transparent);
+
+    QRectF wr(0, 0, fit(48), fit(48));
+    wr.moveCenter(r.center());
     QPainter painter(&p);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QBrush brush;
+    brush.setColor("#606467");
+    brush.setStyle(Qt::DiagCrossPattern);
     painter.setBrush(brush);
-    painter.setPen(Qt::NoPen);
-    painter.drawRect(p.rect());
-    painter.drawPixmap(r, errorPixmap, errorPixmap.rect());
+    painter.setPen(brush.color());
+    painter.drawRect(r);
+    painter.drawPixmap(wr, errorPixmap, errorPixmap.rect());
     return p;
 }
 
@@ -150,7 +162,7 @@ PropertyNodes QmlPreviewerPrivate::properties(const QObject* object) const
 
         propertyNode.cleanClassName = className;
         propertyNode.propertyMap = propertyMap;
-        propertyNode.metaObject = metaObject;
+        propertyNode.metaObject = object->staticMetaObject;
 
         propertyNodes << propertyNode;
 
@@ -268,10 +280,9 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         window->hide();
         window->create();
 
-        Delayer::delay(1); //WARNING
+        Delayer::delay(100); //WARNING
 
         QPixmap p = QPixmap::fromImage(window->grabWindow());
-        p.setDevicePixelRatio(pS->devicePixelRatio());
         dash(p);
         result.preview = p;
     }
@@ -357,7 +368,7 @@ void QmlPreviewerPrivate::processTasks()
         }
 
         QPixmap* parentPixmap;
-        for (auto result : results.keys()) { //FIXME: Some child previews lost, wrong 'parentPixmap' logic, use maps here
+        for (auto result : results.keys()) { //FIXME: Some child previews lost, wrong 'parentPixmap' logic, use QMap here to fix
             if (dname(dname(result)) == path)
                 parentPixmap = &masterResults[path].preview;
 

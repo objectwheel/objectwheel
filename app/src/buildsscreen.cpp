@@ -91,15 +91,23 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
         cW->showWidget(Screen::Studio);
     });
 
-    buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "buildPage", parent->engine()).value<QObject*>();
-    progressPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "progressPage", parent->engine()).value<QObject*>();
-    toast = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "toast",parent-> engine()).value<QObject*>();
-    swipeView = (QQuickItem*)QQmlProperty::read(parent->rootObject(), "swipeView", parent->engine()).value<QObject*>();
+    buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
+      "buildPage", parent->engine()).value<QObject*>();
+    progressPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
+      "progressPage", parent->engine()).value<QObject*>();
+    toast = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
+      "toast",parent-> engine()).value<QObject*>();
+    swipeView = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
+      "swipeView", parent->engine()).value<QObject*>();
 
-    QObject::connect(buildPage, SIGNAL(btnBuildClicked()), parent, SLOT(handleBuildButtonClicked()));
-    QObject::connect(progressPage, SIGNAL(btnOkClicked()), parent, SLOT(handleBtnOkClicked()));
-    QObject::connect(progressPage, SIGNAL(btnCancelClicked()), parent, SLOT(handleBtnCancelClicked()));
-    QObject::connect(qApp, SIGNAL(aboutToQuit()), parent, SLOT(handleBtnCancelClicked()));
+    QObject::connect(buildPage, SIGNAL(btnBuildClicked()),
+      parent, SLOT(handleBuildButtonClicked()));
+    QObject::connect(progressPage, SIGNAL(btnOkClicked()),
+      parent, SLOT(handleBtnOkClicked()));
+    QObject::connect(progressPage, SIGNAL(btnCancelClicked()),
+      parent, SLOT(handleBtnCancelClicked()));
+    QObject::connect(qApp, SIGNAL(aboutToQuit()), parent,
+      SLOT(handleBtnCancelClicked()));
 }
 
 QString BuildsScreenPrivate::bytesString(const qint64 size, bool withExt)
@@ -198,7 +206,7 @@ void BuildsScreen::handleBuildButtonClicked()
     QMetaObject::invokeMethod(_d->progressPage, "showBtnCancel");
     _d->exitButton.hide();
 
-    connect(_d->reply, &QNetworkReply::finished, [=] {
+    connect(_d->reply, &QNetworkReply::finished, this, [=] {
         if (!_d->reply->isOpen() || !_d->reply->isReadable() || _d->reply->error() != QNetworkReply::NoError) {
             _d->elapsedTimer.invalidate();
             _d->times.clear();
@@ -234,7 +242,8 @@ void BuildsScreen::handleBuildButtonClicked()
         _d->bytes.clear();
         if (_d->reply) _d->reply->deleteLater();
     });
-    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))&QNetworkReply::downloadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))
+      &QNetworkReply::downloadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal) {
         QQmlProperty::write(_d->progressPage, "informativeText", "Downloading your build");
         QString sentStr = _d->bytesString(bytesSent, false);
         if (bytesTotal == -1) {
@@ -277,7 +286,8 @@ void BuildsScreen::handleBuildButtonClicked()
             _d->bytes.clear();
         }
     });
-    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))&QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))
+      &QNetworkReply::uploadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal) {
         QQmlProperty::write(_d->progressPage, "informativeText", "Uploading your project");
         QString sentStr = _d->bytesString(bytesSent, false);
         if (bytesTotal == -1) {
@@ -326,8 +336,10 @@ void BuildsScreen::handleBuildButtonClicked()
             _d->bytes.clear();
         }
     });
-    connect(_d->reply, (void (QNetworkReply::*)(QList<QSslError>))&QNetworkReply::sslErrors, [=] { _d->reply->ignoreSslErrors(); });
-    connect(_d->reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))&QNetworkReply::error, [=](QNetworkReply::NetworkError e)
+    connect(_d->reply, (void (QNetworkReply::*)(QList<QSslError>))
+      &QNetworkReply::sslErrors, this, [=] { _d->reply->ignoreSslErrors(); });
+    connect(_d->reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))
+      &QNetworkReply::error, this, [=](QNetworkReply::NetworkError e)
     {
         if (e != QNetworkReply::OperationCanceledError) {
             QQmlProperty::write(_d->swipeView, "currentIndex", 0);
