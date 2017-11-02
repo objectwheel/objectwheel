@@ -520,9 +520,6 @@ int Control::lowerZValue() const
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (_d->preview.isNull())
-        return;
-
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
 
     if (gui() && parentControl() && parentControl()->clip() && !_dragging)

@@ -16,7 +16,7 @@
 #include <QTimer>
 
 using namespace Fit;
-
+//BUG: Somehow it doesn't reflect intial errors right after project loading
 //!
 //! *************************** [global] ****************************
 //!
