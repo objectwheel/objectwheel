@@ -11,8 +11,6 @@
 #include <QPainter>
 #include <QScrollBar>
 
-#define INTERVAL_ERROR_CHECK (1000)
-
 using namespace Fit;
 
 //!
@@ -98,16 +96,13 @@ IssuesBox::IssuesBox(OutputWidget* outputWidget)
     connect(ControlWatcher::instance(), SIGNAL(errorOccurred(Control*)),
       SLOT(handleErrors(Control*)));
 
-    _checkTimer.setInterval(INTERVAL_ERROR_CHECK);
-    connect(&_checkTimer, SIGNAL(timeout()), SLOT(checkErrors()));
-
     connect(&_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
       SLOT(handleDoubleClick(QListWidgetItem*)));
 }
 
 void IssuesBox::handleErrors(Control* control)
 {
-    checkErrors();
+    refresh();
     if (control->hasErrors()) {
         for (const auto& error : control->errors()) {
             Error err;
@@ -127,7 +122,6 @@ void IssuesBox::handleErrors(Control* control)
             _buggyControls[err] = control;
         }
     }
-    _checkTimer.start();
 }
 
 void IssuesBox::handleDoubleClick(QListWidgetItem* item)
@@ -152,7 +146,7 @@ void IssuesBox::setCurrentMode(const DesignMode& currentMode)
         _currentMode = currentMode;
 }
 
-void IssuesBox::checkErrors()
+void IssuesBox::refresh()
 {
     for (const auto& err : _buggyControls.keys()) {
         auto control = _buggyControls.value(err);
@@ -197,9 +191,6 @@ void IssuesBox::checkErrors()
 
     _outputWidget->button(Issues)->setText
       (QString("Issues [%1]").arg(visibleItemCount));
-
-    if (_buggyControls.isEmpty())
-        _checkTimer.stop();
 }
 
 bool operator<(const Error& e1, const Error& e2)

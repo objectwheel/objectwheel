@@ -311,9 +311,14 @@ void MainWindow::closeEvent(QCloseEvent* event)
     emit quitting();
 }
 
+InspectorWidget* MainWindow::inspectorWidget()
+{
+    return &_inspectorWidget;
+}
+
 void MainWindow::clearStudio()
 {
-
+    
 }
 
 CentralWidget* MainWindow::centralWidget()

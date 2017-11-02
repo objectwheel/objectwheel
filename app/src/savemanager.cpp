@@ -639,7 +639,7 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 //WARNING: Check and make sure non-gui elements are added to master item of each control
 //FIXME: Change the name of default context property 'dpi' everywhere
 //FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
-//WARNING: Don't call me if project has errors
+//WARNING: Update error messages
 ExecError SaveManager::execProject()
 {
     ExecError error;
@@ -835,6 +835,7 @@ void SaveManager::exposeProject()
 
         lastControl = form;
 
+        qApp->processEvents(QEventLoop::AllEvents, 20);
         QMap<QString, Control*> pmap;
         pmap[path] = form;
         for (auto child : childrenPaths(path)) {
@@ -846,12 +847,13 @@ void SaveManager::exposeProject()
 
             lastControl = control;
             pmap[child] = control;
+            qApp->processEvents(QEventLoop::AllEvents, 20);
         }
     }
 
-//    QEventLoop l;
-//    connect(lastControl, SIGNAL(previewChanged()), &l, SLOT(quit()));
-//    l.exec(); //FIXME
+    QEventLoop l;
+    connect(lastControl, SIGNAL(previewChanged()), &l, SLOT(quit()));
+    l.exec();
 
     emit instance()->projectExposed();
 }
@@ -1094,10 +1096,9 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     return true;
 }
 
-//FIXME: Called twice
 // You can only move controls within current suid scope of related control
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
-{ //FIXME: Some controls are disappearing after moving
+{
     if (_d->parentDir(control) == parentControl->dir())
         return true;
 

@@ -142,7 +142,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
 
     QTimer::singleShot(100, [this] {
         connect(DesignManager::instance(), SIGNAL(modeChanged()),
-          boxes.value(Issues), SLOT(checkErrors()));
+          boxes.value(Issues), SLOT(refresh()));
     });
 
     layout->setContentsMargins(0, 0, 0, 0);

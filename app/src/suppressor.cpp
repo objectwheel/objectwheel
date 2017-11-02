@@ -1,23 +1,25 @@
 #include <suppressor.h>
 #include <QTimer>
 #include <QMap>
+#include <QPair>
 
-using namespace std;
-
-void Suppressor::suppress(int msec, const QString& key, const function<void()>& function)
+void Suppressor::suppress(int msec, const QString& key, const std::function<void()>& function)
 {
-    static QMap<QString, QTimer*> map;
+    static QMap<QString, QPair<QTimer*, std::function<void()>>> map;
     if (map.contains(key)) {
-        map.value(key)->start();
+        map[key].second = function;
+        map.value(key).first->start();
         return;
     } else {
         auto timer = new QTimer;
         timer->setInterval(msec);
         QObject::connect(timer, &QTimer::timeout, [=] {
-            map.remove(key);
             timer->deleteLater();
-            function();
+            map.value(key).second();
+            map.remove(key);
         });
-        map[key] = timer;
+        map[key].first = timer;
+        map[key].second = function;
+        timer->start();
     }
 }

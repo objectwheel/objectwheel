@@ -1276,7 +1276,7 @@ bool PropertiesWidget::eventFilter(QObject* watched, QEvent* event)
                       i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
                         drawn = true;
                         painter.setPen(QColor(sc.size() == 1 ?
-                          "#d08487" : "#a0a4a7"));
+                          "#d98083" : "#a0a4a7"));
                         painter.drawText(0, i * fit(20), w->width(),
                           fit(20), Qt::AlignCenter, sc.size() == 1 ?
                             "Control has errors" : "No controls selected");

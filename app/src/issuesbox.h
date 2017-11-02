@@ -48,7 +48,7 @@ class IssuesBox : public QWidget
         void setCurrentMode(const DesignMode& currentMode);
 
     public slots:
-        void checkErrors();
+        void refresh();
 
     private slots:
         void handleErrors(Control* control);
@@ -59,7 +59,6 @@ class IssuesBox : public QWidget
         QToolBar _toolbar;
         QLabel _title;
         QListWidget _listWidget;
-        QTimer _checkTimer;
         QMap<Error, QPointer<Control>> _buggyControls;
         OutputWidget* _outputWidget;
         DesignMode _currentMode;

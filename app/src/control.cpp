@@ -54,12 +54,12 @@ class ControlPrivate : public QObject
         QPixmap preview;
         bool hoverOn;
 };
+
 //TODO: Search for ControlScene and FormScene and make their usage less
-//FIXME: Z Value doesn't save
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
-    , preview(":/resources/images/preloader.gif") //FIXME
+    , preview(":/resources/images/wait.png")
     , hoverOn(false)
 {
     int i = 0;
@@ -133,6 +133,7 @@ Control::Control(const QString& url, const DesignMode& mode,
     setId(SaveManager::id(dname(dname(url))));
     setPos(SaveManager::x(dir()), SaveManager::y(dir()));
     resize(SaveManager::width(dir()), SaveManager::height(dir()));
+    _d->preview = _d->preview.scaled((size() * pS->devicePixelRatio()).toSize());
 
     connect(this, &Control::visibleChanged, [=] {
         if (size().width() < 2 || size().height() < 2)
@@ -527,10 +528,11 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
           (this, parentControl()->rect().adjusted(1, 1, -1, -1)).boundingRect()));
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect(), _d->preview, QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
+    painter->drawPixmap(rect(), _d->preview,
+      QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
 
     QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
-                             innerRect.center().x(), innerRect.bottom());
+      innerRect.center().x(), innerRect.bottom());
     gradient.setColorAt(0, HIGHLIGHT_COLOR.lighter(110));
     gradient.setColorAt(1, HIGHLIGHT_COLOR.darker(110));
 
@@ -543,7 +545,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(_d->preview.rect(), gradient);
             p.end();
-            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
+            painter->drawPixmap(rect(), highlight, QRectF(
+              QPointF(0, 0), size() * pS->devicePixelRatio()));
         }
     }
 
@@ -566,14 +569,22 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         // Draw corner lines
         pen.setStyle(Qt::SolidLine);
         painter->setPen(pen);
-        painter->drawLine(innerRect.topLeft(), innerRect.topLeft() + QPointF(2, 0));
-        painter->drawLine(innerRect.topLeft(), innerRect.topLeft() + QPointF(0, 2));
-        painter->drawLine(innerRect.bottomLeft(), innerRect.bottomLeft() + QPointF(2, 0));
-        painter->drawLine(innerRect.bottomLeft(), innerRect.bottomLeft() + QPointF(0, -2));
-        painter->drawLine(innerRect.topRight(), innerRect.topRight() + QPointF(-2, 0));
-        painter->drawLine(innerRect.topRight(), innerRect.topRight() + QPointF(0, 2));
-        painter->drawLine(innerRect.bottomRight(), innerRect.bottomRight() + QPointF(-2, 0));
-        painter->drawLine(innerRect.bottomRight(), innerRect.bottomRight() + QPointF(0, -2));
+        painter->drawLine(innerRect.topLeft(),
+          innerRect.topLeft() + QPointF(2, 0));
+        painter->drawLine(innerRect.topLeft(),
+          innerRect.topLeft() + QPointF(0, 2));
+        painter->drawLine(innerRect.bottomLeft(),
+          innerRect.bottomLeft() + QPointF(2, 0));
+        painter->drawLine(innerRect.bottomLeft(),
+          innerRect.bottomLeft() + QPointF(0, -2));
+        painter->drawLine(innerRect.topRight(),
+          innerRect.topRight() + QPointF(-2, 0));
+        painter->drawLine(innerRect.topRight(),
+          innerRect.topRight() + QPointF(0, 2));
+        painter->drawLine(innerRect.bottomRight(),
+          innerRect.bottomRight() + QPointF(-2, 0));
+        painter->drawLine(innerRect.bottomRight(),
+          innerRect.bottomRight() + QPointF(0, -2));
     }
 }
 

@@ -13,12 +13,12 @@ class InspectorWidget : public QWidget
         explicit InspectorWidget(QWidget* parent = nullptr);
 
     public slots:
-        void clearList();
-        void refreshList();
+        void clear();
+        void refresh();
 
     private slots:
-        void handleDoubleClick(QTreeWidgetItem* item, int column);
-        void handleClick(QTreeWidgetItem* item, int column);
+        void handleDoubleClick(QTreeWidgetItem* item, int column); //Forward to designer manager
+        void handleClick(QTreeWidgetItem* item, int column); //Forward to designer manager
 
     protected:
         virtual QSize sizeHint() const override;

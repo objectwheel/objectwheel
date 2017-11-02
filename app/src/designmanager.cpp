@@ -12,6 +12,7 @@
 #include <outputwidget.h>
 #include <controlwatcher.h>
 #include <savetransaction.h>
+#include <mainwindow.h>
 
 #include <QWidget>
 #include <QList>
@@ -26,6 +27,7 @@
 #include <QMessageBox>
 #include <QSplitter>
 
+#define INTERVAL_ERROR_CHECK (1000)
 #define cW (ControlWatcher::instance())
 
 using namespace Fit;
@@ -67,6 +69,7 @@ class DesignManagerPrivate : public QObject
         void handleBuildButtonClicked();
 
     private slots:
+        void checkErrors();
         void controlDoubleClicked(Control*);
         void controlDropped(Control*, const QPointF&, const QString&);
 
@@ -111,6 +114,9 @@ class DesignManagerPrivate : public QObject
         QToolButton layItHorzButton;
         QToolButton layItGridButton;
         QToolButton breakLayoutButton;
+
+        QTimer _errorChecker;
+
 };
 
 DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
@@ -361,6 +367,10 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar_2.addWidget(spacer_2);
     toolbar_2.addWidget(&playButton);
     toolbar_2.addWidget(&buildButton);
+
+    _errorChecker.setInterval(INTERVAL_ERROR_CHECK);
+    connect(&_errorChecker, SIGNAL(timeout()), SLOT(checkErrors()));
+    _errorChecker.start();
 
     SaveTransaction::instance();
     connect(cW, SIGNAL(doubleClicked(Control*)),
@@ -693,6 +703,12 @@ void DesignManagerPrivate::handlePlayButtonClicked()
 void DesignManagerPrivate::handleBuildButtonClicked()
 {
     //TODO
+}
+
+void DesignManagerPrivate::checkErrors()
+{
+    static_cast<IssuesBox*>(outputWidget.box(Issues))->refresh();
+    MainWindow::instance()->inspectorWidget()->refresh();
 }
 
 void DesignManagerPrivate::controlDoubleClicked(Control* control)

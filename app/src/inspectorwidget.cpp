@@ -16,7 +16,7 @@
 #include <QTimer>
 
 using namespace Fit;
-//BUG: Somehow it doesn't reflect intial errors right after project loading
+
 //!
 //! *************************** [global] ****************************
 //!
@@ -149,18 +149,18 @@ InspectorWidget::InspectorWidget(QWidget* parent)
 
     /* Prepare Properties Widget */
     connect(DesignManager::formScene(), SIGNAL(selectionChanged()),
-      SLOT(refreshList()));
+      SLOT(refresh()));
     connect(DesignManager::controlScene(), SIGNAL(selectionChanged()),
-      SLOT(refreshList()));
+      SLOT(refresh()));
     connect(DesignManager::instance(), SIGNAL(modeChanged()),
-      SLOT(refreshList()));
+      SLOT(refresh()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
-      SLOT(refreshList()));
+      SLOT(refresh()));
     connect(FormsWidget::instance(), SIGNAL(currentFormChanged()),
-      SLOT(refreshList()));
+      SLOT(refresh()));
     QTimer::singleShot(1500, [this] {
         connect(SaveManager::instance(), SIGNAL(databaseChanged()),
-          SLOT(refreshList()));
+          SLOT(refresh()));
     });
 }
 
@@ -188,7 +188,7 @@ bool InspectorWidget::eventFilter(QObject* watched, QEvent* event)
     }
 }
 
-void InspectorWidget::clearList()
+void InspectorWidget::clear()
 {
     for (int i = 0; i < _treeWidget.topLevelItemCount(); ++i)
         qDeleteAll(_treeWidget.topLevelItem(i)->takeChildren());
@@ -196,12 +196,12 @@ void InspectorWidget::clearList()
     _treeWidget.clear();
 }
 
-void InspectorWidget::refreshList()
+void InspectorWidget::refresh()
 {
     if (_blockRefresh)
         return;
 
-    clearList();
+    clear();
 
     auto cs = DesignManager::currentScene();
     auto scs = cs->selectedControls();

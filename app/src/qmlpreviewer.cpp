@@ -315,7 +315,7 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         window->hide();
         window->create();
 
-//        Delayer::delay(1); //WARNING
+//        Delayer::delay(10); //WARNING
 
         QPixmap p = QPixmap::fromImage(window->grabWindow());
         dash(control, p);

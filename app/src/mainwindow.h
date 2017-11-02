@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow
         static MainWindow* instance();
         CentralWidget* centralWidget();
         ProgressWidget* progressWidget();
+        InspectorWidget* inspectorWidget();
 
         void setupGui();
         void setupManagers();
