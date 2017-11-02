@@ -944,11 +944,13 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
             if (m_view->isExpanded(index))
                 branchOption.state |= QStyle::State_Open;
 
-            qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
+            qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch,
+              &branchOption, painter, m_view);
         }
     }
 
-    const bool mask = qvariant_cast<bool>(index.model()->data(index, Qt::EditRole));
+    const bool mask = qvariant_cast<bool>
+      (index.model()->data(index, Qt::EditRole));
     if (!model->parent(index).isValid() && mask) {
         option.font.setWeight(QFont::Medium);
     }
@@ -956,10 +958,6 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
     QStyledItemDelegate::paint(painter, option, index);
 
     auto type = index.data(NodeRole::Type).value<NodeType>();
-    QStyleOptionButton eoption;
-    eoption.initFrom(m_view);
-    eoption.rect = option.rect;
-
     switch (type) {
         case FontBold:
         case FontItalic:
@@ -968,8 +966,12 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
         case FontStrikeout:
         case Bool: {
             bool value = index.data(NodeRole::Data).value<bool>();
-            eoption.state |= value ? QStyle::State_On : QStyle::State_Off;
-            m_view->style()->drawControl(QStyle::CE_CheckBox, &eoption, painter, m_view);
+            QStyleOptionButton opt;
+            opt.initFrom(m_view);
+            opt.rect = option.rect;
+            opt.state = QStyle::State_Active | QStyle::State_Enabled;
+            opt.state |= value ? QStyle::State_On : QStyle::State_Off;
+            m_view->style()->drawControl(QStyle::CE_CheckBox, &opt, painter, m_view);
             break;
         }
 
@@ -1273,7 +1275,7 @@ bool PropertiesWidget::eventFilter(QObject* watched, QEvent* event)
                       i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
                         drawn = true;
                         painter.setPen(QColor(sc.size() == 1 ?
-                          "#d09497" : "#a0a4a7"));
+                          "#d08487" : "#a0a4a7"));
                         painter.drawText(0, i * fit(20), w->width(),
                           fit(20), Qt::AlignCenter, sc.size() == 1 ?
                             "Control has errors" : "No controls selected");
@@ -1288,7 +1290,6 @@ bool PropertiesWidget::eventFilter(QObject* watched, QEvent* event)
     }
 }
 
-//BUG: Occurs when properties widget lost focus
 QSize PropertiesWidget::sizeHint() const
 {
     return QSize(fit(340), fit(2600)); //FIXME:
