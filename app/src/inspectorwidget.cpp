@@ -125,7 +125,7 @@ InspectorWidget::InspectorWidget(QWidget* parent)
     _treeWidget.setDragEnabled(false);
     _treeWidget.setDropIndicatorShown(false);
     _treeWidget.setColumnCount(2);
-    _treeWidget.setIndentation(fit(12));
+    _treeWidget.setIndentation(fit(14));
     _treeWidget.headerItem()->setText(0, "Controls");
     _treeWidget.headerItem()->setText(1, "Ui");
     _treeWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
@@ -201,12 +201,9 @@ void InspectorWidget::refresh()
     if (_blockRefresh)
         return;
 
-    QString idPrevInvItem;
-    if (_treeWidget.selectedItems().size() == 1) {
-        auto si = _treeWidget.selectedItems().at(0);
-        if (si->text(1) == "No")
-            idPrevInvItem = si->text(0);
-    }
+    int vsp = _treeWidget.verticalScrollBar()->sliderPosition();
+    int hsp = _treeWidget.horizontalScrollBar()->sliderPosition();
+
     clear();
 
     auto cs = DesignManager::currentScene();
@@ -244,6 +241,7 @@ void InspectorWidget::refresh()
     fillItem(item, mc->childControls(false));
     _treeWidget.addTopLevelItem(item);
     _treeWidget.expandAll();
+    _treeWidget.setItemsExpandable(false);
 
     auto items = tree(item);
     items << item;
@@ -255,13 +253,8 @@ void InspectorWidget::refresh()
         }
     }
 
-    if (!idPrevInvItem.isEmpty() && scs.isEmpty()) {
-        for (auto i : items) {
-            if (i->text(0) == idPrevInvItem) {
-                i->setSelected(true);
-            }
-        }
-    }
+    _treeWidget.verticalScrollBar()->setSliderPosition(vsp);
+    _treeWidget.horizontalScrollBar()->setSliderPosition(hsp);
 }
 
 void InspectorWidget::handleDoubleClick(QTreeWidgetItem* item, int)

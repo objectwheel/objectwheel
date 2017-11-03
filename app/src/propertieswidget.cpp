@@ -1081,6 +1081,9 @@ void PropertiesWidget::clearList()
 
 void PropertiesWidget::refreshList()
 {
+    int vsp = _treeWidget.verticalScrollBar()->sliderPosition();
+    int hsp = _treeWidget.horizontalScrollBar()->sliderPosition();
+
     clearList();
 
     auto selectedControls = DesignManager::currentScene()->selectedControls();
@@ -1211,6 +1214,9 @@ void PropertiesWidget::refreshList()
     }
 
     filterList(_searchEdit.text());
+
+    _treeWidget.verticalScrollBar()->setSliderPosition(vsp);
+    _treeWidget.horizontalScrollBar()->setSliderPosition(hsp);
 }
 
 void PropertiesWidget::handleSelectionChange()

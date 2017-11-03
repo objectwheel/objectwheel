@@ -1,8 +1,9 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define SIZE_SKIN (fit(QSize(320, 662)))
-#define SIZE_FORM (fit(QSize(285, 535)))
+#define SIZE_SKIN (QSize(fit(320), fit(662)))
+#define SIZE_FORM (QSize(fit(285), fit(535)))
+#define SIZE_NONGUI_CONTROL (QSizeF(fit(50), fit(50)))
 
 enum DesignMode {
     ControlGui,

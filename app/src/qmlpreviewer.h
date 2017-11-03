@@ -9,8 +9,6 @@
 #include <QMap>
 #include <global.h>
 
-#define NONGUI_CONTROL_SIZE (fit(40))
-
 class Control;
 class QmlPreviewerPrivate;
 
@@ -53,6 +51,7 @@ class QmlPreviewer : public QObject
         static QmlPreviewer* instance();
         static void requestPreview(Control* control);
         static bool working();
+        static QPixmap initialPreview(const QSizeF& size);
 
     signals:
         void previewReady(const PreviewResult& result);

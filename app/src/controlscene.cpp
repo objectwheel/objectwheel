@@ -110,7 +110,7 @@ void ControlScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(mainControl());
 
-    for (auto control : selectedControls)
+    for (auto control : selectedControls) //FIXME: Use higherZValue()
         control->setZValue(control->zValue() + 1);
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());

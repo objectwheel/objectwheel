@@ -276,5 +276,6 @@
         <file>resources/images/error.png</file>
         <file>resources/images/mform.png</file>
         <file>resources/images/wait.png</file>
+        <file>resources/images/nopreview.png</file>
     </qresource>
 </RCC>

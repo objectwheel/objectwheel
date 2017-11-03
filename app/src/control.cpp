@@ -59,7 +59,6 @@ class ControlPrivate : public QObject
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
-    , preview(":/resources/images/wait.png")
     , hoverOn(false)
 {
     int i = 0;
@@ -89,13 +88,10 @@ void ControlPrivate::updatePreview(PreviewResult result)
             if (!parent->form())
                 parent->_clip = result.property("clip").toBool();
         }
-        parent->setVisible(result.gui);
     }
 
     parent->update();
     if (result.hasError()) {
-        if (parent->size().isNull())
-            parent->setVisible(false);
         emit parent->errorOccurred();
         emit cW->errorOccurred(parent);
     }
@@ -135,8 +131,8 @@ Control::Control(const QString& url, const DesignMode& mode,
     setId(SaveManager::id(dname(dname(url))));
     setPos(SaveManager::x(dir()), SaveManager::y(dir()));
     resize(SaveManager::width(dir()), SaveManager::height(dir()));
-    _d->preview = _d->preview.scaled((size() * pS->devicePixelRatio()).toSize()); //FIXME
-    if (size().isNull()) resize(fit(50), fit(50));
+    if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
+    _d->preview = QmlPreviewer::initialPreview(size());
 
     connect(this, &Control::geometryChanged, [=] {
         Suppressor::suppress(GEOMETRY_SIGNAL_DELAY, "geometryChanged",
@@ -519,6 +515,9 @@ int Control::lowerZValue() const
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
+    if (_d->preview.isNull())
+        return;
+
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
 
     if (gui() && parentControl() && parentControl()->clip() && !_dragging)

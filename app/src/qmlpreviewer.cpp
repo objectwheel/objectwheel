@@ -28,7 +28,10 @@
 //TODO: QQuickRenderControl???
 
 #define TASK_TIMEOUT 100
-#define SIZE_ERROR_PIXMAP (fit(16))
+#define SIZE_ERROR_PIXMAP (QSizeF(fit(16), fit(16)))
+#define SIZE_NONGUI_PIXMAP (QSize(fit(16), fit(16)))
+#define SIZE_INITIAL_PIXMAP (QSizeF(fit(50), fit(50)))
+#define SIZE_NOPREVIEW_PIXMAP (QSizeF(fit(40), fit(40)))
 #define pS (QApplication::primaryScreen())
 
 using namespace Fit;
@@ -39,11 +42,13 @@ class QmlPreviewerPrivate : public QObject
     public:
         QmlPreviewerPrivate(QmlPreviewer*);
         PreviewResult preview(Control*, const QString&) const;
+        void draw(QPixmap&, const QPixmap&, const QSizeF&) const;
 
     public:
         QmlPreviewer* parent;
         QTimer taskTimer;
         QList<QPointer<Control>> taskList;
+        QPixmap initialPixmap;
 
     private slots:
         void processTasks();
@@ -56,19 +61,20 @@ class QmlPreviewerPrivate : public QObject
         PropertyNodes properties(const QObject*) const;
 
     private:
-        QPixmap errorPixmap, refreshPixmap;
+        QPixmap errorPixmap, nopreviewPixmap;
 };
 
 QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     : QObject(parent)
     , parent(parent)
-    , errorPixmap(QPixmap(":/resources/images/error.png").
-      scaled((QSizeF(SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP) *
-      pS->devicePixelRatio()).toSize(),
+    , initialPixmap(QPixmap(":/resources/images/wait.png").
+      scaled((SIZE_INITIAL_PIXMAP * pS->devicePixelRatio()).toSize(),
       Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
-    , refreshPixmap(QPixmap(":/resources/images/refresh.png").
-      scaled((QSizeF(SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP) *
-      pS->devicePixelRatio()).toSize(),
+    , errorPixmap(QPixmap(":/resources/images/error.png").
+      scaled((SIZE_ERROR_PIXMAP * pS->devicePixelRatio()).toSize(),
+      Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
+    , nopreviewPixmap(QPixmap(":/resources/images/nopreview.png").
+      scaled((SIZE_NOPREVIEW_PIXMAP * pS->devicePixelRatio()).toSize(),
       Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
 {
     taskTimer.setInterval(TASK_TIMEOUT);
@@ -89,34 +95,17 @@ void QmlPreviewerPrivate::dash(Control* control, QPixmap& pixmap) const
         }
     }
 
-    auto r = QRectF({QPointF(), control->size()}).adjusted(1, 1, -1, -1);
-    QRectF wr(0, 0, SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP);
-    wr.moveCenter(r.center());
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    QBrush brush;
-    brush.setColor("#808487");
-    brush.setStyle(Qt::Dense6Pattern);
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor(brush.color());
-    painter.setPen(pen);
-    painter.drawRect(r);
-    brush.setColor("#b0b4b7");
-    painter.setBrush(brush);
-    painter.drawRect(r);
-    painter.drawPixmap(wr, refreshPixmap, refreshPixmap.rect());
-    // Draw corner lines
-    pen.setStyle(Qt::SolidLine);
-    painter.setPen(pen);
-    painter.drawLine(r.topLeft(), r.topLeft() + QPointF(2, 0));
-    painter.drawLine(r.topLeft(), r.topLeft() + QPointF(0, 2));
-    painter.drawLine(r.bottomLeft(), r.bottomLeft() + QPointF(2, 0));
-    painter.drawLine(r.bottomLeft(), r.bottomLeft() + QPointF(0, -2));
-    painter.drawLine(r.topRight(), r.topRight() + QPointF(-2, 0));
-    painter.drawLine(r.topRight(), r.topRight() + QPointF(0, 2));
-    painter.drawLine(r.bottomRight(), r.bottomRight() + QPointF(-2, 0));
-    painter.drawLine(r.bottomRight(), r.bottomRight() + QPointF(0, -2));
+    draw(pixmap, nopreviewPixmap, control->size());
+}
+
+QPixmap QmlPreviewerPrivate::prepreview(const Control* control) const
+{
+    QPixmap pixmap(qCeil(control->size().width() * pS->devicePixelRatio()),
+      qCeil(control->size().height() * pS->devicePixelRatio()));
+    pixmap.setDevicePixelRatio(pS->devicePixelRatio());
+    pixmap.fill(Qt::transparent);
+    draw(pixmap, errorPixmap, control->size());
+    return pixmap;
 }
 
 bool QmlPreviewerPrivate::containsWindow(QObject* o) const
@@ -126,44 +115,6 @@ bool QmlPreviewerPrivate::containsWindow(QObject* o) const
             return true;
     }
     return false;
-}
-
-QPixmap QmlPreviewerPrivate::prepreview(const Control* control) const
-{
-    QPixmap pixmap(qCeil(control->size().width() * pS->devicePixelRatio()),
-      qCeil(control->size().height() * pS->devicePixelRatio()));
-    pixmap.setDevicePixelRatio(pS->devicePixelRatio());
-    pixmap.fill(Qt::transparent);
-
-    auto r = QRectF({QPointF(), control->size()}).adjusted(1, 1, -1, -1);
-    QRectF wr(0, 0, SIZE_ERROR_PIXMAP, SIZE_ERROR_PIXMAP);
-    wr.moveCenter(r.center());
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    QBrush brush;
-    brush.setColor("#808487");
-    brush.setStyle(Qt::Dense6Pattern);
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor(brush.color());
-    painter.setPen(pen);
-    painter.drawRect(r);
-    brush.setColor("#b0b4b7");
-    painter.setBrush(brush);
-    painter.drawRect(r);
-    painter.drawPixmap(wr, errorPixmap, errorPixmap.rect());
-    // Draw corner lines
-    pen.setStyle(Qt::SolidLine);
-    painter.setPen(pen);
-    painter.drawLine(r.topLeft(), r.topLeft() + QPointF(2, 0));
-    painter.drawLine(r.topLeft(), r.topLeft() + QPointF(0, 2));
-    painter.drawLine(r.bottomLeft(), r.bottomLeft() + QPointF(2, 0));
-    painter.drawLine(r.bottomLeft(), r.bottomLeft() + QPointF(0, -2));
-    painter.drawLine(r.topRight(), r.topRight() + QPointF(-2, 0));
-    painter.drawLine(r.topRight(), r.topRight() + QPointF(0, 2));
-    painter.drawLine(r.bottomRight(), r.bottomRight() + QPointF(-2, 0));
-    painter.drawLine(r.bottomRight(), r.bottomRight() + QPointF(0, -2));
-    return pixmap;
 }
 
 PropertyNodes QmlPreviewerPrivate::properties(const QObject* object) const
@@ -220,6 +171,38 @@ PropertyNodes QmlPreviewerPrivate::properties(const QObject* object) const
     //    }
 
     return propertyNodes;
+}
+
+void QmlPreviewerPrivate::draw(QPixmap& dest, const QPixmap& source, const QSizeF& size) const
+{
+    auto r = QRectF({QPointF(), size}).adjusted(1, 1, -1, -1);
+    QRectF wr(QPoint(), QSizeF(source.size()) / 2.0);
+    wr.moveCenter(r.center());
+    QPainter painter(&dest);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QBrush brush;
+    brush.setColor("#808487");
+    brush.setStyle(Qt::Dense6Pattern);
+    QPen pen;
+    pen.setStyle(Qt::DotLine);
+    pen.setColor(brush.color());
+    painter.setPen(pen);
+    painter.drawRect(r);
+    brush.setColor("#b0b4b7");
+    painter.setBrush(brush);
+    painter.drawRect(r);
+    painter.drawPixmap(wr, source, source.rect());
+    // Draw corner lines
+    pen.setStyle(Qt::SolidLine);
+    painter.setPen(pen);
+    painter.drawLine(r.topLeft(), r.topLeft() + QPointF(2, 0));
+    painter.drawLine(r.topLeft(), r.topLeft() + QPointF(0, 2));
+    painter.drawLine(r.bottomLeft(), r.bottomLeft() + QPointF(2, 0));
+    painter.drawLine(r.bottomLeft(), r.bottomLeft() + QPointF(0, -2));
+    painter.drawLine(r.topRight(), r.topRight() + QPointF(-2, 0));
+    painter.drawLine(r.topRight(), r.topRight() + QPointF(0, 2));
+    painter.drawLine(r.bottomRight(), r.bottomRight() + QPointF(-2, 0));
+    painter.drawLine(r.bottomRight(), r.bottomRight() + QPointF(0, -2));
 }
 
 QList<QString> QmlPreviewerPrivate::events(const QObject* object) const
@@ -292,9 +275,13 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
     result.gui = (object->inherits("QQuickItem") || window);
 
     if (result.gui == false) {
-        result.preview = QPixmap(dname(url) + separator() + "icon.png")
-                         .scaled(NONGUI_CONTROL_SIZE * pS->devicePixelRatio(),
-                                 NONGUI_CONTROL_SIZE * pS->devicePixelRatio());
+        QPixmap p(qCeil(control->size().width() * pS->devicePixelRatio()),
+                  qCeil(control->size().height() * pS->devicePixelRatio()));
+        p.setDevicePixelRatio(pS->devicePixelRatio());
+        p.fill(Qt::transparent);
+        draw(p, QPixmap(dname(url) + separator() + "icon.png")
+          .scaled(SIZE_NONGUI_PIXMAP * pS->devicePixelRatio()), control->size());
+        result.preview = p;
     } else {
         const qreal w = control->size().width();
         const qreal h = control->size().height();
@@ -325,7 +312,7 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
     }
     return result;
 }
-
+//FIXME: Fit library
 void QmlPreviewerPrivate::processTasks()
 {
     if (parent->_working)
@@ -455,6 +442,16 @@ void QmlPreviewer::requestPreview(Control* control)
 bool QmlPreviewer::working()
 {
     return _working;
+}
+
+QPixmap QmlPreviewer::initialPreview(const QSizeF& size)
+{
+    QPixmap pixmap(qCeil(size.width() * pS->devicePixelRatio()),
+      qCeil(size.height() * pS->devicePixelRatio()));
+    pixmap.setDevicePixelRatio(pS->devicePixelRatio());
+    pixmap.fill(Qt::transparent);
+    _d->draw(pixmap, _d->initialPixmap, size);
+    return pixmap;
 }
 
 #include "qmlpreviewer.moc"
