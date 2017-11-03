@@ -640,7 +640,7 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 //FIXME: Change the name of default context property 'dpi' everywhere
 //FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
 //WARNING: Update error messages
-ExecError SaveManager::execProject()
+ExecError SaveManager::execProject() //FIXME
 {
     ExecError error;
     Skin mainSkin = Skin::Invalid;

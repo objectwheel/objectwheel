@@ -952,6 +952,7 @@ void DesignManager::checkErrors()
 {
     static_cast<IssuesBox*>(_d->outputWidget.box(Issues))->refresh();
     MainWindow::instance()->inspectorWidget()->refresh();
+    _d->qmlEditorView.refreshErrors();
 }
 
 void DesignManager::controlClicked(Control* control)

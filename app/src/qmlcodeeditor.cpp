@@ -208,6 +208,18 @@ int QmlCodeEditor::lineNumberAreaWidth()
     return space + SPACE_LINENUMBERAREALEFT;
 }
 
+void QmlCodeEditor::addErrorLine(int line)
+{
+    _errorLines << line;
+    update();
+}
+
+void QmlCodeEditor::clearErrorLines()
+{
+    _errorLines.clear();
+    update();
+}
+
 void QmlCodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
@@ -283,6 +295,15 @@ void QmlCodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
 
             painter.setFont(font);
             painter.setPen(pen);
+            if (_errorLines.contains(number.toInt())) {
+                painter.fillRect(0, top, lineNumberArea->width() - SPACE_LINENUMBERAREARIGHT,
+                                 fontMetrics().height(), "#D02929");
+
+                font.setBold(true);
+                painter.setFont(font);
+                pen.setColor("white");
+                painter.setPen(pen);
+            }
             painter.drawText(0, top, lineNumberArea->width() - SPACE_LINENUMBERAREARIGHT,
                              fontMetrics().height(), Qt::AlignRight, number);
         }

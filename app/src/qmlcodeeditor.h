@@ -25,6 +25,9 @@ class QmlCodeEditor : public QPlainTextEdit
         void lineNumberAreaPaintEvent(QPaintEvent* event);
         int lineNumberAreaWidth();
 
+        void addErrorLine(int line);
+        void clearErrorLines();
+
     public slots:
         void updateCompletion();
 
@@ -50,6 +53,7 @@ class QmlCodeEditor : public QPlainTextEdit
         CompletionHelper _completionHelper;
         QThread _completionThread;
         QTimer _completionTimer;
+        QList<int> _errorLines;
 };
 
 

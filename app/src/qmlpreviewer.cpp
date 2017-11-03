@@ -234,6 +234,8 @@ QList<QString> QmlPreviewerPrivate::events(const QObject* object) const
     return events;
 }
 
+//Set invisible items visible on dashboard
+
 PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url) const
 {
     if (!SaveManager::isOwctrl(dname(dname(url)))) {

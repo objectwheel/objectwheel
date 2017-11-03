@@ -51,6 +51,7 @@ class QmlEditorView : public QWidget
 
     public slots:
         void raiseContainer();
+        void refreshErrors();
 
     protected:
         virtual void paintEvent(QPaintEvent *event) override;

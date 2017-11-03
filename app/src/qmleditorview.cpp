@@ -35,7 +35,6 @@
 
 using namespace Fit;
 
-//TODO: Error line warning system
 class QmlEditorViewPrivate : public QObject
 {
         Q_OBJECT
@@ -924,6 +923,15 @@ void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
 void QmlEditorView::raiseContainer()
 {
     _d->containerWidget->raise();
+}
+
+void QmlEditorView::refreshErrors()
+{
+    if (_d->currentControl) {
+        _d->codeEditor->clearErrorLines();
+        for (auto error : _d->currentControl->errors())
+            _d->codeEditor->addErrorLine(error.line());
+    }
 }
 
 #include "qmleditorview.moc"
