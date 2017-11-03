@@ -3,7 +3,6 @@
 #include <css.h>
 #include <control.h>
 #include <outputwidget.h>
-#include <designmanager.h>
 #include <controlwatcher.h>
 
 #include <QLabel>
@@ -103,6 +102,7 @@ IssuesBox::IssuesBox(OutputWidget* outputWidget)
 void IssuesBox::handleErrors(Control* control)
 {
     refresh();
+    QList<QQmlError> errs = control->errors();
     if (control->hasErrors()) {
         for (const auto& error : control->errors()) {
             Error err;
@@ -120,6 +120,7 @@ void IssuesBox::handleErrors(Control* control)
             _listWidget.addItem(item);
             item->setHidden(_currentMode != err.mode);
             _buggyControls[err] = control;
+            _outputWidget->shine(Issues);
         }
     }
 }
@@ -129,15 +130,9 @@ void IssuesBox::handleDoubleClick(QListWidgetItem* item)
     const auto& error = item->data(Qt::UserRole).value<Error>();
     const auto& c = _buggyControls.value(error);
 
-    if (!c)
+    if (c == nullptr)
         return;
-
-    DesignManager::qmlEditorView()->addControl(c);
-    if (DesignManager::qmlEditorView()->pinned())
-        DesignManager::setMode(CodeEdit);
-    DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
-    DesignManager::qmlEditorView()->openControl(c);
-    DesignManager::qmlEditorView()->raiseContainer();
+    emit entryDoubleClicked(c);
 }
 
 void IssuesBox::setCurrentMode(const DesignMode& currentMode)
@@ -195,7 +190,12 @@ void IssuesBox::refresh()
 
 bool operator<(const Error& e1, const Error& e2)
 {
-    return e1.uid < e2.uid;
+    return (e1.uid + e1.description +
+      QString::number(e1.column) +
+      QString::number(e1.line)) <
+     (e2.uid + e2.description +
+      QString::number(e2.column) +
+      QString::number(e2.line));
 }
 
 #include "issuesbox.moc"

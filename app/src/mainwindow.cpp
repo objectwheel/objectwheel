@@ -10,7 +10,6 @@
 #include <toolsmanager.h>
 #include <savemanager.h>
 #include <delayer.h>
-#include <control.h>
 #include <formscene.h>
 #include <qmlpreviewer.h>
 #include <formview.h>
@@ -232,6 +231,11 @@ void MainWindow::setupGui()
     toolbar4->setStyleSheet(CSS::DesignerPinbar);
     toolbar4->setIconSize(QSize(fit(11), fit(11)));
     toolbar4->setFixedHeight(fit(21));
+
+    connect(&_inspectorWidget, SIGNAL(controlClicked(Control*)),
+      &_designManager, SLOT(controlClicked(Control*)));
+    connect(&_inspectorWidget, SIGNAL(controlDoubleClicked(Control*)),
+      &_designManager, SLOT(controlDoubleClicked(Control*)));
 
     _inspectorDockwidget.setTitleBarWidget(toolbar4);
     _inspectorDockwidget.setWidget(&_inspectorWidget);

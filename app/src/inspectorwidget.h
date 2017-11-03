@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <filterlineedit.h>
+#include <control.h>
 
 class InspectorWidget : public QWidget
 {
@@ -19,6 +20,10 @@ class InspectorWidget : public QWidget
     private slots:
         void handleDoubleClick(QTreeWidgetItem* item, int column); //Forward to designer manager
         void handleClick(QTreeWidgetItem* item, int column); //Forward to designer manager
+
+    signals:
+        void controlClicked(Control*);
+        void controlDoubleClicked(Control*);
 
     protected:
         virtual QSize sizeHint() const override;

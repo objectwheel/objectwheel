@@ -201,6 +201,12 @@ void InspectorWidget::refresh()
     if (_blockRefresh)
         return;
 
+    QString idPrevInvItem;
+    if (_treeWidget.selectedItems().size() == 1) {
+        auto si = _treeWidget.selectedItems().at(0);
+        if (si->text(1) == "No")
+            idPrevInvItem = si->text(0);
+    }
     clear();
 
     auto cs = DesignManager::currentScene();
@@ -248,6 +254,14 @@ void InspectorWidget::refresh()
             }
         }
     }
+
+    if (!idPrevInvItem.isEmpty() && scs.isEmpty()) {
+        for (auto i : items) {
+            if (i->text(0) == idPrevInvItem) {
+                i->setSelected(true);
+            }
+        }
+    }
 }
 
 void InspectorWidget::handleDoubleClick(QTreeWidgetItem* item, int)
@@ -269,12 +283,7 @@ void InspectorWidget::handleDoubleClick(QTreeWidgetItem* item, int)
     if (c == nullptr)
         return;
 
-    DesignManager::qmlEditorView()->addControl(c);
-    if (DesignManager::qmlEditorView()->pinned())
-        DesignManager::setMode(CodeEdit);
-    DesignManager::qmlEditorView()->setMode(QmlEditorView::CodeEditor);
-    DesignManager::qmlEditorView()->openControl(c);
-    DesignManager::qmlEditorView()->raiseContainer();
+    emit controlDoubleClicked(c);
 }
 
 void InspectorWidget::handleClick(QTreeWidgetItem* item, int)
@@ -297,8 +306,7 @@ void InspectorWidget::handleClick(QTreeWidgetItem* item, int)
         return;
 
     _blockRefresh = true;
-    DesignManager::currentScene()->clearSelection();
-    c->setSelected(true);
+    emit controlClicked(c);
     _blockRefresh = false;
 }
 

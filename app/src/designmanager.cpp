@@ -68,11 +68,6 @@ class DesignManagerPrivate : public QObject
         void handlePlayButtonClicked();
         void handleBuildButtonClicked();
 
-    private slots:
-        void checkErrors();
-        void controlDoubleClicked(Control*);
-        void controlDropped(Control*, const QPointF&, const QString&);
-
     public:
         DesignManager* parent;
         QWidget dummyWidget;
@@ -160,8 +155,6 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     outputWidget.setSplitterHandle(splitter.handle(4));
     connect(&splitter, SIGNAL(splitterMoved(int,int)),
       &outputWidget, SLOT(updateLastHeight()));
-    connect(ControlWatcher::instance(), &ControlWatcher::errorOccurred,
-      this, [=] { outputWidget.shine(Issues); }); //FIXME: Don't shine unnecessarily
     qmlEditorView.setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
@@ -369,14 +362,17 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar_2.addWidget(&buildButton);
 
     _errorChecker.setInterval(INTERVAL_ERROR_CHECK);
-    connect(&_errorChecker, SIGNAL(timeout()), SLOT(checkErrors()));
+    connect(&_errorChecker, SIGNAL(timeout()),
+      parent, SLOT(checkErrors()));
     _errorChecker.start();
 
     SaveTransaction::instance();
+    connect((IssuesBox*)outputWidget.box(Issues), SIGNAL(entryDoubleClicked(Control*)),
+      parent, SLOT(controlDoubleClicked(Control*)));
     connect(cW, SIGNAL(doubleClicked(Control*)),
-      SLOT(controlDoubleClicked(Control*)));
+      parent, SLOT(controlDoubleClicked(Control*)));
     connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
-      SLOT(controlDropped(Control*,QPointF,QString)));
+      parent, SLOT(controlDropped(Control*,QPointF,QString)));
     connect(cW, SIGNAL(skinChanged(Form*)), parent,
       SLOT(updateSkin()));
 }
@@ -705,35 +701,6 @@ void DesignManagerPrivate::handleBuildButtonClicked()
     //TODO
 }
 
-void DesignManagerPrivate::checkErrors()
-{
-    static_cast<IssuesBox*>(outputWidget.box(Issues))->refresh();
-    MainWindow::instance()->inspectorWidget()->refresh();
-}
-
-void DesignManagerPrivate::controlDoubleClicked(Control* control)
-{
-    qmlEditorView.addControl(control );
-    if (qmlEditorView.pinned())
-        DesignManager::setMode(CodeEdit);
-    qmlEditorView.setMode(QmlEditorView::CodeEditor);
-    qmlEditorView.openControl(control);
-    qmlEditorView.raiseContainer();
-}
-
-void DesignManagerPrivate::controlDropped(Control* control, const QPointF& pos, const QString& url)
-{
-    auto scene = (ControlScene*)control->scene();
-    scene->clearSelection();
-    auto newControl = new Control(url, control->mode());
-    SaveManager::addControl(newControl, control,
-      scene->mainControl()->uid(), scene->mainControl()->dir());
-    newControl->setParentItem(control);
-    newControl->setPos(pos);
-    newControl->setSelected(true);
-    newControl->refresh();
-}
-
 void DesignManagerPrivate::handleModeChange()
 {
     if (DesignManager::_mode == FormGui) {
@@ -979,6 +946,53 @@ QSplitter* DesignManager::splitter()
 OutputWidget* DesignManager::outputWidget()
 {
     return &_d->outputWidget;
+}
+
+void DesignManager::checkErrors()
+{
+    static_cast<IssuesBox*>(_d->outputWidget.box(Issues))->refresh();
+    MainWindow::instance()->inspectorWidget()->refresh();
+}
+
+void DesignManager::controlClicked(Control* control)
+{
+    currentScene()->clearSelection();
+    control->setSelected(true);
+}
+
+void DesignManager::controlDoubleClicked(Control* control)
+{
+    auto sizes = _d->splitter.sizes();
+    QSize size;
+    if (_d->formView.isVisible())
+        size = _d->formView.size();
+    else if (_d->qmlEditorView.isVisible())
+        size = _d->qmlEditorView.size();
+    else
+        size = _d->controlView.size();
+    sizes[_d->splitter.indexOf(&_d->qmlEditorView)] = size.height();
+
+    _d->qmlEditorView.addControl(control);
+    if (_d->qmlEditorView.pinned())
+        DesignManager::setMode(CodeEdit);
+    _d->qmlEditorView.setMode(QmlEditorView::CodeEditor);
+    _d->qmlEditorView.openControl(control);
+    _d->qmlEditorView.raiseContainer();
+
+    _d->splitter.setSizes(sizes);
+}
+
+void DesignManager::controlDropped(Control* control, const QPointF& pos, const QString& url)
+{
+    auto scene = (ControlScene*)control->scene();
+    scene->clearSelection();
+    auto newControl = new Control(url, control->mode());
+    SaveManager::addControl(newControl, control,
+      scene->mainControl()->uid(), scene->mainControl()->dir());
+    newControl->setParentItem(control);
+    newControl->setPos(pos);
+    newControl->setSelected(true);
+    newControl->refresh();
 }
 
 #include "designmanager.moc"

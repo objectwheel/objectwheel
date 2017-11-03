@@ -54,6 +54,9 @@ class IssuesBox : public QWidget
         void handleErrors(Control* control);
         void handleDoubleClick(QListWidgetItem* item);
 
+    signals:
+        void entryDoubleClicked(Control*);
+
     private:
         QVBoxLayout _layout;
         QToolBar _toolbar;

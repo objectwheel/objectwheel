@@ -38,6 +38,10 @@ class DesignManager : public QObject
 
     public slots:
         void updateSkin();
+        void checkErrors();
+        void controlClicked(Control*);
+        void controlDoubleClicked(Control*);
+        void controlDropped(Control*, const QPointF&, const QString&);
 
     signals:
         void modeChanged();

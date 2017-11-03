@@ -78,8 +78,8 @@ void ControlPrivate::updatePreview(PreviewResult result)
     if (result.control != parent)
         return;
 
-    parent->_errors = result.errors;
     preview = result.preview;
+    parent->_errors = result.errors;
     parent->_gui = result.gui;
     parent->_properties = result.properties;
     parent->_events = result.events;
@@ -94,6 +94,8 @@ void ControlPrivate::updatePreview(PreviewResult result)
 
     parent->update();
     if (result.hasError()) {
+        if (parent->size().isNull())
+            parent->setVisible(false);
         emit parent->errorOccurred();
         emit cW->errorOccurred(parent);
     }
@@ -133,12 +135,8 @@ Control::Control(const QString& url, const DesignMode& mode,
     setId(SaveManager::id(dname(dname(url))));
     setPos(SaveManager::x(dir()), SaveManager::y(dir()));
     resize(SaveManager::width(dir()), SaveManager::height(dir()));
-    _d->preview = _d->preview.scaled((size() * pS->devicePixelRatio()).toSize());
-
-    connect(this, &Control::visibleChanged, [=] {
-        if (size().width() < 2 || size().height() < 2)
-            refresh();
-    });
+    _d->preview = _d->preview.scaled((size() * pS->devicePixelRatio()).toSize()); //FIXME
+    if (size().isNull()) resize(fit(50), fit(50));
 
     connect(this, &Control::geometryChanged, [=] {
         Suppressor::suppress(GEOMETRY_SIGNAL_DELAY, "geometryChanged",

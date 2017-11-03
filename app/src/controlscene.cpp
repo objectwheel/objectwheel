@@ -205,8 +205,7 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
         pen.setStyle(Qt::DotLine);
         pen.setColor(LINE_COLOR);
         painter->setPen(pen);
-        painter->drawRect(rect);
-        painter->drawText(rect, "No controls selected", QTextOption(Qt::AlignCenter));
+        painter->drawText(rect, "No tools selected", QTextOption(Qt::AlignCenter));
     }
 }
 

@@ -35,6 +35,7 @@
 
 using namespace Fit;
 
+//TODO: Error line warning system
 class QmlEditorViewPrivate : public QObject
 {
         Q_OBJECT
