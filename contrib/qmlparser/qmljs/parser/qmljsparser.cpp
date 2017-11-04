@@ -1431,7 +1431,7 @@ case 288: {
 } break;
 
 case 289: {
-  // ### TODO: AST for initializer
+  // ### todo: AST for initializer
   sym(1) = sym(2);
 } break;
 
@@ -1440,7 +1440,7 @@ case 290: {
 } break;
 
 case 292: {
-  // ### TODO: AST for initializer
+  // ### todo: AST for initializer
   sym(1) = sym(2);
 } break;
 

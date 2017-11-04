@@ -209,7 +209,7 @@ public:
     inline Node()
         : kind(Kind_Undefined) {}
 
-    // NOTE: node destructors are never called,
+    // note: node destructors are never called,
     //       instead we block free the memory
     //       (see the NodePool class)
     virtual ~Node() {}

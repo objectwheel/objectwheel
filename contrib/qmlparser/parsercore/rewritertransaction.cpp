@@ -112,7 +112,7 @@ void RewriterTransaction::commit()
 
 void RewriterTransaction::rollback()
 {
-    // TODO: should be implemented with a function in the rewriter
+    // todo: should be implemented with a function in the rewriter
     if (m_valid) {
         m_valid = false;
         view()->emitRewriterEndTransaction();

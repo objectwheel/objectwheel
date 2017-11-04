@@ -227,8 +227,6 @@ void OutputWidget::setActiveBox(BoxType type)
     button(type)->setChecked(true);
 }
 
-//FIXME: My size is getting corrupted if qmlcodeview opens by inspector pane a few times
-//WARNING: Does it get broken if I pin/unpin qmleditorview? or properties, forms panes etc?
 void OutputWidget::expand()
 {
     _collapsed = false;

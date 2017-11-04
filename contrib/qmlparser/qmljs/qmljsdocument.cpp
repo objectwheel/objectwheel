@@ -100,7 +100,7 @@ Document::Document(const QString &fileName, Dialect language)
         _componentName = fileInfo.baseName();
 
         if (! _componentName.isEmpty()) {
-            // ### TODO: check the component name.
+            // ### todo: check the component name.
 
             if (! _componentName.at(0).isUpper())
                 _componentName.clear();

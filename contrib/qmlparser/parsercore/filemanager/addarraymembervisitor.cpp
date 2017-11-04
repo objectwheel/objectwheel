@@ -77,7 +77,7 @@ bool AddArrayMemberVisitor::visit(QmlJS::AST::UiObjectDefinition *ast)
     return !didRewriting();
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 void AddArrayMemberVisitor::insertInto(QmlJS::AST::UiArrayBinding *arrayBinding)
 {
     QmlJS::AST::UiObjectMember *lastMember = 0;

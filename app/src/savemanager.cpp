@@ -42,9 +42,6 @@
 /* - A form has to be master item                                 */
 /******************************************************************/
 
-//TODO: Non-gui controls could be anywhere as child in any control
-//Process this model change to code
-
 //!
 //! ******************* [SaveManagerPrivate] *******************
 //!
@@ -494,6 +491,18 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err,
         err.errors = comp.errors();
     } else {
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
+        if (type(item) == Window) {
+            ((QQuickWindow*)item)->setX(parent->x(path));
+            ((QQuickWindow*)item)->setY(parent->y(path));
+            ((QQuickWindow*)item)->setWidth(parent->width(path));
+            ((QQuickWindow*)item)->setHeight(parent->height(path));
+        } else if (type(item) == Quick) {
+            ((QQuickItem*)item)->setX(parent->x(path));
+            ((QQuickItem*)item)->setY(parent->y(path));
+            ((QQuickItem*)item)->setWidth(parent->width(path));
+            ((QQuickItem*)item)->setHeight(parent->height(path));
+            ((QQuickItem*)item)->setZ(parent->z(path));
+        }
     }
     return item;
 }
@@ -511,6 +520,18 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, const QByteArray& data,
         err.errors = comp.errors();
     } else {
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
+        if (type(item) == Window) {
+            ((QQuickWindow*)item)->setX(parent->x(path));
+            ((QQuickWindow*)item)->setY(parent->y(path));
+            ((QQuickWindow*)item)->setWidth(parent->width(path));
+            ((QQuickWindow*)item)->setHeight(parent->height(path));
+        } else if (type(item) == Quick) {
+            ((QQuickItem*)item)->setX(parent->x(path));
+            ((QQuickItem*)item)->setY(parent->y(path));
+            ((QQuickItem*)item)->setWidth(parent->width(path));
+            ((QQuickItem*)item)->setHeight(parent->height(path));
+            ((QQuickItem*)item)->setZ(parent->z(path));
+        }
     }
     return item;
 }
@@ -636,11 +657,10 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 
 //WARNING: Problem with scope resolution,
 //         Component.onCompleted: Why items names are not reachable in this slot?
-//WARNING: Check and make sure non-gui elements are added to master item of each control
 //FIXME: Change the name of default context property 'dpi' everywhere
 //FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
 //WARNING: Update error messages
-ExecError SaveManager::execProject() //FIXME
+ExecError SaveManager::execProject()
 {
     ExecError error;
     Skin mainSkin = Skin::Invalid;
@@ -716,10 +736,10 @@ ExecError SaveManager::execProject() //FIXME
                     return error;
                 }
                 masterResults[masterPath] = _d->requestItem(error,
-                                                            formData, masterPath, engine, masterContext);
+                  formData, masterPath, engine, masterContext);
             } else {
                 masterResults[masterPath] = _d->requestItem(error,
-                                                            masterPath, engine, masterContext);
+                  masterPath, engine, masterContext);
             }
 
             qApp->processEvents(QEventLoop::AllEvents, 20);
@@ -766,7 +786,7 @@ ExecError SaveManager::execProject() //FIXME
             // Others are handled in anyway, either here or above(invalid cases)
             QMap<QString, QObject*> pmap;
             pmap[masterPath] = masterResults[masterPath];
-            for (auto result : childResults.keys()) { //WARNING: Does it spin from parent to children?
+            for (auto result : childResults.keys()) {
                 auto pobject = pmap.value(dname(dname(result))); // Master item (a form(master) or a child master)
                 if (_d->type(childResults[result]) == NonGui) // Child item (master or non-master, but not form)
                     continue;
@@ -776,8 +796,7 @@ ExecError SaveManager::execProject() //FIXME
 
                 if (_d->type(pobject) == Window) {
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
-                      static_cast<QQuickWindow*>(pobject)->contentItem()); //FIXME: ApplicationWindow qml type?
-                } else {                                                  //header, footer, and contentItem?
+                      static_cast<QQuickWindow*>(pobject)->contentItem()); //NOTE: What if ApplicationWindow's some properties are binding?
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
                       static_cast<QQuickItem*>(pobject));
                 }
@@ -797,7 +816,7 @@ ExecError SaveManager::execProject() //FIXME
     for (auto formPath : formContexes.keys()) {
         for (int i = 0; i < formContexes.keys().size(); i++) { //Don't change 'keys().size()'
             formContexes[formPath]->setContextProperty(
-                        id(formContexes.keys().at(i)), forms.at(i));
+              id(formContexes.keys().at(i)), forms.at(i));
         }
     }
 
@@ -809,10 +828,13 @@ ExecError SaveManager::execProject() //FIXME
         _d->executiveWidget.setSkin(mainSkin);
         _d->executiveWidget.setWindow(mainWindow);
         _d->executiveWidget.show();
-        connect(&_d->executiveWidget, SIGNAL(done()), &loop, SLOT(quit()));
+        connect(&_d->executiveWidget, SIGNAL(done()),
+          &loop, SLOT(quit()));
     } else {
-        connect(MainWindow::instance(), SIGNAL(quitting()), &loop, SLOT(quit()));
-        connect(mainWindow, SIGNAL(closing(QQuickCloseEvent*)), &loop, SLOT(quit()));
+        connect(MainWindow::instance(),
+          SIGNAL(quitting()), &loop, SLOT(quit()));
+        connect(mainWindow, SIGNAL(closing(QQuickCloseEvent*)),
+          &loop, SLOT(quit()));
     }
     loop.exec();
 
@@ -828,7 +850,8 @@ void SaveManager::exposeProject()
 
     for (auto path : fpaths) {
 
-        auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
+        auto form = new Form(path + separator() +
+          DIR_THIS + separator() + "main.qml");
         if (_d->isMain(path))
             form->setMain(true);
         DesignManager::formScene()->addForm(form);

@@ -53,7 +53,7 @@ bool AddPropertyVisitor::visit(QmlJS::AST::UiObjectDefinition *ast)
         return false;
 
     if (ast->firstSourceLocation().offset == m_parentLocation) {
-        // FIXME: change this to use the QmlJS::Rewriter class
+        // fixme: change this to use the QmlJS::Rewriter class
         addInMembers(ast->initializer);
         return false;
     }
@@ -67,7 +67,7 @@ bool AddPropertyVisitor::visit(QmlJS::AST::UiObjectBinding *ast)
         return false;
 
     if (ast->qualifiedTypeNameId->identifierToken.offset == m_parentLocation) {
-        // FIXME: change this to use the QmlJS::Rewriter class
+        // fixme: change this to use the QmlJS::Rewriter class
         addInMembers(ast->initializer);
         return false;
     }
@@ -75,7 +75,7 @@ bool AddPropertyVisitor::visit(QmlJS::AST::UiObjectBinding *ast)
     return !didRewriting();
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 void AddPropertyVisitor::addInMembers(QmlJS::AST::UiObjectInitializer *initializer)
 {
     QmlJS::AST::UiObjectMemberList *insertAfter = searchMemberToInsertAfter(initializer->members, m_name, m_propertyOrder);

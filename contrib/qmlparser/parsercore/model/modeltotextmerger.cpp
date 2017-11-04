@@ -123,7 +123,7 @@ void ModelToTextMerger::nodeTypeChanged(const ModelNode &node,const QString &/*t
     if (!node.isInHierarchy())
         return;
 
-    // TODO: handle the majorVersion and the minorVersion
+    // todo: handle the majorVersion and the minorVersion
 
     schedule(new ChangeTypeRewriteAction(node));
 }

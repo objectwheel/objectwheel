@@ -263,7 +263,7 @@ bool Bind::visit(UiObjectBinding *ast)
 //    const QString name = serialize(ast->qualifiedId);
     ObjectValue *value = bindObject(ast->qualifiedTypeNameId, ast->initializer);
     _qmlObjects.insert(ast, value);
-    // ### FIXME: we don't handle dot-properties correctly (i.e. font.size)
+    // ### fixme: we don't handle dot-properties correctly (i.e. font.size)
 //    _currentObjectValue->setProperty(name, value);
 
     return false;
@@ -292,7 +292,7 @@ bool Bind::visit(UiScriptBinding *ast)
 
 bool Bind::visit(UiArrayBinding *)
 {
-    // ### FIXME: do we need to store the members into the property? Or, maybe the property type is an JS Array?
+    // ### fixme: do we need to store the members into the property? Or, maybe the property type is an JS Array?
 
     return true;
 }
@@ -310,7 +310,7 @@ bool Bind::visit(VariableDeclaration *ast)
 
 bool Bind::visit(FunctionExpression *ast)
 {
-    // ### FIXME: the first declaration counts
+    // ### fixme: the first declaration counts
     //if (_currentObjectValue->property(ast->name->asString(), 0))
     //    return false;
 

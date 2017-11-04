@@ -148,7 +148,7 @@ void ControlViewPrivate::handleCutAction()
     selectedControls.removeOne(scene->mainControl());
     mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
     mimeData->setData("objectwheel/cut", "1");
-    mimeData->setData("objectwheel/fscene", "1"); //WARNING
+    mimeData->setData("objectwheel/fscene", "1");
 
     for (auto control : selectedControls)
         for (auto ctrl : selectedControls)

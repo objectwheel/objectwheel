@@ -1299,7 +1299,7 @@ QmlDesigner::PropertyName TextToModelMerger::syncScriptBinding(ModelNode &modelN
     const QVariant enumValue = context->convertToEnum(script->statement, prefix, script->qualifiedId, astValue);
     if (enumValue.isValid()) { // It is a qualified enum:
         AbstractProperty modelProperty = modelNode.property(astPropertyName.toUtf8());
-        syncVariantProperty(modelProperty, enumValue, TypeName(), differenceHandler); // TODO: parse type
+        syncVariantProperty(modelProperty, enumValue, TypeName(), differenceHandler); // todo: parse type
         return astPropertyName.toUtf8();
     } else { // Not an enum, so:
         if (isPropertyChangesType(modelNode.type())
@@ -1307,7 +1307,7 @@ QmlDesigner::PropertyName TextToModelMerger::syncScriptBinding(ModelNode &modelN
                 || context->lookupProperty(prefix, script->qualifiedId)
                 || isSupportedAttachedProperties(astPropertyName)) {
             AbstractProperty modelProperty = modelNode.property(astPropertyName.toUtf8());
-            syncExpressionProperty(modelProperty, astValue, TypeName(), differenceHandler); // TODO: parse type
+            syncExpressionProperty(modelProperty, astValue, TypeName(), differenceHandler); // todo: parse type
             return astPropertyName.toUtf8();
         } else {
 //            qWarning() << Q_FUNC_INFO << "Skipping invalid expression property" << astPropertyName

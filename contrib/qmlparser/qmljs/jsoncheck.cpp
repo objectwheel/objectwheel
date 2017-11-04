@@ -172,7 +172,7 @@ bool JsonCheck::visit(ArrayLiteral *ast)
                     Node::accept(element->expression, this);
                 }
             } else {
-                // TODO: Handle additionalItems.
+                // todo: Handle additionalItems.
             }
         }
         if (current < arraySize

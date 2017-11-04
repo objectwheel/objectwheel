@@ -123,6 +123,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                     QQmlProperty::write(toast, "duration", 5000);
                     QMetaObject::invokeMethod(toast, "show");
                     //FIXME: when sync part done.
+                    //FIXME: Show loading indicator when "login" clicked, do not freeze screen
                 }
             } else {
                 pW->hideProgress();

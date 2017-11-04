@@ -188,7 +188,7 @@ bool QMLRewriter::isMissingSemicolon(QmlJS::AST::Statement *stmt)
     }
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 bool QMLRewriter::includeSurroundingWhitespace(int &start, int &end) const
 {
     QTextDocument *doc = m_textModifier->textDocument();
@@ -229,7 +229,7 @@ bool QMLRewriter::includeSurroundingWhitespace(int &start, int &end) const
     return paragraphFound;
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 void QMLRewriter::includeLeadingEmptyLine(int &start) const
 {
     QTextDocument *doc = textModifier()->textDocument();
@@ -254,7 +254,7 @@ void QMLRewriter::includeLeadingEmptyLine(int &start) const
     start = prevBlock.position();
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 QmlJS::AST::UiObjectMemberList *QMLRewriter::searchMemberToInsertAfter(QmlJS::AST::UiObjectMemberList *members, const QmlDesigner::PropertyNameList &propertyOrder)
 {
     const int objectDefinitionInsertionPoint = propertyOrder.indexOf(PropertyName()); // XXX ????
@@ -287,7 +287,7 @@ QmlJS::AST::UiObjectMemberList *QMLRewriter::searchMemberToInsertAfter(QmlJS::AS
         return lastNonObjectDef;
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 QmlJS::AST::UiObjectMemberList *QMLRewriter::searchMemberToInsertAfter(QmlJS::AST::UiObjectMemberList *members,
                                                            const QmlDesigner::PropertyName &propertyName,
                                                            const QmlDesigner::PropertyNameList &propertyOrder)

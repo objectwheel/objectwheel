@@ -43,12 +43,12 @@ bool RemovePropertyVisitor::visit(QmlJS::AST::UiObjectBinding *ast)
     if (ast->firstSourceLocation().offset == parentLocation) {
         //this condition is wrong for the UiObjectBinding case, but we keep it
         //since we are paranoid until the release is done.
-        // FIXME: change this to use the QmlJS::Rewriter class
+        // fixme: change this to use the QmlJS::Rewriter class
         removeFrom(ast->initializer);
     }
 
     if (ast->qualifiedTypeNameId && ast->qualifiedTypeNameId->identifierToken.offset == parentLocation) {
-        // FIXME: change this to use the QmlJS::Rewriter class
+        // fixme: change this to use the QmlJS::Rewriter class
         removeFrom(ast->initializer);
     }
 
@@ -58,14 +58,14 @@ bool RemovePropertyVisitor::visit(QmlJS::AST::UiObjectBinding *ast)
 bool RemovePropertyVisitor::visit(QmlJS::AST::UiObjectDefinition *ast)
 {
     if (ast->firstSourceLocation().offset == parentLocation) {
-        // FIXME: change this to use the QmlJS::Rewriter class
+        // fixme: change this to use the QmlJS::Rewriter class
         removeFrom(ast->initializer);
     }
 
     return !didRewriting();
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 void RemovePropertyVisitor::removeFrom(QmlJS::AST::UiObjectInitializer *ast)
 {
     QString prefix;
@@ -89,7 +89,7 @@ void RemovePropertyVisitor::removeFrom(QmlJS::AST::UiObjectInitializer *ast)
     }
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 void RemovePropertyVisitor::removeGroupedProperty(QmlJS::AST::UiObjectDefinition *ast)
 {
     int dotIdx = propertyName.indexOf(QLatin1Char('.'));
@@ -116,7 +116,7 @@ void RemovePropertyVisitor::removeGroupedProperty(QmlJS::AST::UiObjectDefinition
         removeMember(wanted);
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 void RemovePropertyVisitor::removeMember(QmlJS::AST::UiObjectMember *member)
 {
     int start = member->firstSourceLocation().offset;
@@ -128,7 +128,7 @@ void RemovePropertyVisitor::removeMember(QmlJS::AST::UiObjectMember *member)
     setDidRewriting(true);
 }
 
-// FIXME: duplicate code in the QmlJS::Rewriter class, remove this
+// fixme: duplicate code in the QmlJS::Rewriter class, remove this
 bool RemovePropertyVisitor::memberNameMatchesPropertyName(const QString &propertyName, QmlJS::AST::UiObjectMember *ast)
 {
     if (QmlJS::AST::UiPublicMember *publicMember = QmlJS::AST::cast<QmlJS::AST::UiPublicMember*>(ast))

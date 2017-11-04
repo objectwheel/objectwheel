@@ -345,7 +345,7 @@ private:
 
     QStringList properties(JsonObjectValue *v) const;
     JsonObjectValue *propertySchema(const QString &property, JsonObjectValue *v) const;
-    // TODO: Similar functions for other attributes which require looking into base schemas.
+    // todo: Similar functions for other attributes which require looking into base schemas.
 
     static bool maybeSchemaName(const QString &s);
 

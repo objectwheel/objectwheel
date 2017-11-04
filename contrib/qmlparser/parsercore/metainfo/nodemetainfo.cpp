@@ -498,7 +498,7 @@ QVector<PropertyInfo> getObjectTypes(const ObjectValue *objectValue, const Conte
 
     if (!local) {
         const ObjectValue* prototype = objectValue->prototype(context);
-        // TODO: can we move this to getType methode and use that one here then
+        // todo: can we move this to getType methode and use that one here then
         if (prototype == objectValue)
             return propertyList;
 
@@ -1435,12 +1435,12 @@ QVariant NodeMetaInfo::propertyCastedValue(const PropertyName &propertyName, con
     } else if (typeId == QVariant::UserType && typeName == "var") {
         return variant;
     } else if (variant.type() == QVariant::List) {
-        // TODO: check the contents of the list
+        // todo: check the contents of the list
         return variant;
     } else if (typeName == "var" || typeName == "variant") {
         return variant;
     } else if (typeName == "alias") {
-        // TODO: The QML compiler resolves the alias type. We probably should do the same.
+        // todo: The QML compiler resolves the alias type. We probably should do the same.
         return variant;
     } else if (copyVariant.convert(typeId)) {
         return copyVariant;

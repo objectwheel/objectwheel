@@ -58,7 +58,7 @@ template <typename Result, typename... Args>
 struct functionTraits<Result(Args...)>
 {
     using ResultType = Result;
-    static const unsigned arity = sizeof...(Args); // TODO const -> constexpr with MSVC2015
+    static const unsigned arity = sizeof...(Args); // todo const -> constexpr with MSVC2015
 
     template <unsigned i>
     struct argument
@@ -103,7 +103,7 @@ struct functionTraits<Result(Type::* const)(Args...) const> : public functionTra
 {
 };
 
-// TODO: enable lvalue and rvalue ref member function later (MSVC 2015?)
+// todo: enable lvalue and rvalue ref member function later (MSVC 2015?)
 //// lvalue ref member function
 //template <typename Type, typename Result, typename... Args>
 //struct functionTraits<Result(Type::*)(Args...) &> : public functionTraits<Result(Type&,Args...)>
@@ -128,7 +128,7 @@ struct functionTraits
 {
     using callableTraits = functionTraits<decltype(&Callable::operator())>;
     using ResultType = typename callableTraits::ResultType;
-    static const unsigned arity = callableTraits::arity - 1; // ignore object pointer arg // TODO const -> constexpr with MSVC2015
+    static const unsigned arity = callableTraits::arity - 1; // ignore object pointer arg // todo const -> constexpr with MSVC2015
 
     template <unsigned i>
     struct argument

@@ -304,7 +304,7 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         window->hide();
         window->create();
 
-//        Delayer::delay(10); //WARNING
+        Delayer::delay(100); //FIXME
 
         QPixmap p = QPixmap::fromImage(window->grabWindow());
         dash(control, p);
