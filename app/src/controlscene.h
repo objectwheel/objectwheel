@@ -15,23 +15,25 @@ class ControlScene : public QGraphicsScene
     public:
         explicit ControlScene(QObject *parent = Q_NULLPTR);
 
-        Control* mainControl();
+        Control* mainControl() const;
         virtual void setMainControl(Control* mainControl);
 
         void removeControl(Control* control);
         void removeChildControlsOnly(Control* parent);
-        QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder);
-        QList<Control*> selectedControls();
+        QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder) const;
+        QList<Control*> selectedControls() const;
 
-        bool showOutlines();
+        bool showOutlines() const;
         void setShowOutlines(bool value);
 
-        bool snapping();
+        bool snapping() const;
         void setSnapping(bool snapping);
 
-        QPointF lastMousePos();
+        QPointF lastMousePos() const;
 
     protected:
+        bool stick() const;
+        QVector<QLineF> guideLines() const;
         void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
         void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
         void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;

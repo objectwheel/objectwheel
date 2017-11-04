@@ -35,8 +35,6 @@ class Control : public QGraphicsWidget
         Control* parentControl() const;
         int higherZValue() const;
         int lowerZValue() const;
-        bool stickSelectedControlToGuideLines() const;
-        QVector<QLineF> guideLines() const;
         bool gui() const;
         using QGraphicsWidget::contains;
         bool contains(const QString& id) const;

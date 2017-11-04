@@ -872,12 +872,12 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath,
     issuerItem->documents.value(relativePath).document->deleteLater();
     issuerItem->documents.remove(relativePath);
 
-    if (issuerItem->documents.size() > 0 &&
+    if (!issuerItem->documents.isEmpty() &&
         issuerItem->currentFileRelativePath == relativePath) {
         issuerItem->currentFileRelativePath = issuerItem->documents.keys().at(0);
     }
 
-    if (issuerItem->documents.size() <= 0) {
+    if (issuerItem->documents.isEmpty()) {
         if (_d->currentControl == issuerItem->control)
             _d->currentControl = nullptr;
         _editorItems.removeOne(*issuerItem);
@@ -886,7 +886,7 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath,
     if (!_d->currentControl)
         _d->fileExplorer->setRootPath(UNKNOWN_PATH);
 
-    if (_editorItems.size() > 0) {
+    if (!_editorItems.isEmpty()) {
         if(_d->currentControl)
             openControl(_d->currentControl);
         else

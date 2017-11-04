@@ -340,7 +340,7 @@ void ControlView::contextMenuEvent(QContextMenuEvent* event)
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
 
-    if (selectedControls.size() <= 0) {
+    if (selectedControls.isEmpty()) {
         _d->sendBackAct.setDisabled(true);
         _d->bringFrontAct.setDisabled(true);
         _d->cutAct.setDisabled(true);

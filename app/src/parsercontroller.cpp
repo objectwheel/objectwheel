@@ -63,7 +63,7 @@ void ParserController::removeVariantProperty(const QString& url, const QString& 
 
 bool ParserController::running()
 {
-    return _transactionList.size() > 0;
+    return !_transactionList.isEmpty();
 }
 
 void ParserController::processWaitingTransactions()
