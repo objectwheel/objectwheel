@@ -329,4 +329,4 @@ QWidget* OutputWidget::box(BoxType type)
     return _d->boxes[type];
 }
 
-#include "outputbox.moc"
+#include "outputwidget.moc"
