@@ -129,7 +129,7 @@ Control::Control(const QString& url, const DesignMode& mode,
     setZValue(SaveManager::z(dir()));
     setId(SaveManager::id(dname(dname(url))));
     setPos(SaveManager::x(dir()), SaveManager::y(dir()));
-    resize(SaveManager::width(dir()), SaveManager::height(dir()));
+    resize(fit(SaveManager::width(dir())), fit(SaveManager::height(dir())));
     if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
     _d->preview = QmlPreviewer::initialPreview(size());
 

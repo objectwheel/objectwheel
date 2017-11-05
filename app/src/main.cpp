@@ -17,10 +17,13 @@
 #define REF_HEIGHT 768
 #define REF_DPI 144
 
+//FIXME: Fit library
+
 int main(int argc, char *argv[])
 {
     // Init application
     QApplication a(argc, argv);
+    a.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     //    Multiple instances protection

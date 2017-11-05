@@ -25,6 +25,7 @@
 #include <QPair>
 #include <QScreen>
 #include <QQuickRenderControl>
+#include <QtOpenGL>
 
 #define TASK_TIMEOUT 100
 #define SIZE_ERROR_PIXMAP (QSizeF(fit(16), fit(16)))
@@ -33,25 +34,6 @@
 #define SIZE_NOPREVIEW_PIXMAP (QSizeF(fit(40), fit(40)))
 #define pS (QApplication::primaryScreen())
 
-#include <QOpenGLContext>
-#include <QOffscreenSurface>
-#include <QtGui/QOpenGLContext>
-#include <QtQuick/private/qquickwindow_p.h>
-#include <QOpenGLFunctions>
-
-extern QImage qt_gl_read_framebuffer(const QSize &size, bool alpha_format, bool include_alpha);
-QImage grapImage(QQuickRenderControl* rc, QQuickWindow* w)
-{
-    auto cd = QQuickWindowPrivate::get(w);
-    cd->polishItems();
-    cd->syncSceneGraph();
-    rc->render();
-    auto grabContent = qt_gl_read_framebuffer(w->size() *
-      w->effectiveDevicePixelRatio(), true, true);
-    grabContent.setDevicePixelRatio(w->effectiveDevicePixelRatio());
-    return grabContent;
-}
-
 using namespace Fit;
 
 class QmlPreviewerPrivate : public QObject
@@ -59,6 +41,7 @@ class QmlPreviewerPrivate : public QObject
         Q_OBJECT
     public:
         QmlPreviewerPrivate(QmlPreviewer*);
+        ~QmlPreviewerPrivate();
         PreviewResult preview(Control*, const QString&) const;
         void draw(QPixmap&, const QPixmap&, const QSizeF&) const;
 
@@ -97,6 +80,10 @@ QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
 {
     taskTimer.setInterval(TASK_TIMEOUT);
     connect(&taskTimer, SIGNAL(timeout()), SLOT(processTasks()));
+}
+
+QmlPreviewerPrivate::~QmlPreviewerPrivate()
+{
 }
 
 void QmlPreviewerPrivate::dash(Control* control, QPixmap& pixmap) const
@@ -245,10 +232,9 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
     QQmlEngine engine;
     PreviewResult result;
     QQmlComponent component(&engine);
-    QQuickRenderControl* renderer = new QQuickRenderControl;
 
     engine.setOutputWarningsToStandardError(false);
-    engine.rootContext()->setContextProperty("dpi", Fit::ratio());
+    engine.rootContext()->setContextProperty("dpi", Fit::ratio()); //FIXME
 
     // FIXME: What if qml file contains errors?
     // BUG: Possible bug if property 'visible' is a binding
@@ -286,107 +272,92 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         return result;
     }
 
-    QQuickWindow* window(qobject_cast<QQuickWindow*>(object));
+    auto w = qobject_cast<QQuickWindow*>(object);
     result.properties = properties(object);
     result.events = events(object);
-    result.gui = (object->inherits("QQuickItem") || window);
+    result.gui = (object->inherits("QQuickItem") || isWindow);
 
     if (result.gui == false) {
         QPixmap p(qCeil(control->size().width() * pS->devicePixelRatio()),
-                  qCeil(control->size().height() * pS->devicePixelRatio()));
+          qCeil(control->size().height() * pS->devicePixelRatio()));
         p.setDevicePixelRatio(pS->devicePixelRatio());
         p.fill(Qt::transparent);
         draw(p, QPixmap(dname(url) + separator() + "icon.png")
           .scaled(SIZE_NONGUI_PIXMAP * pS->devicePixelRatio()), control->size());
         result.preview = p;
     } else {
-        const qreal w = control->size().width();
-        const qreal h = control->size().height();
 
-        bool quick = false;
-        if (window == nullptr) {
-            quick = true;
-            auto item = qobject_cast<QQuickItem*>(object); Q_ASSERT(item);
-            window = new QQuickWindow(renderer);
-            item->setParentItem(window->contentItem());
-            item->setSize(QSizeF(fit(w), fit(h)));
-            item->setPosition({0, 0});
-            window->resize(qCeil(item->width()), qCeil(item->height()));
-            window->setClearBeforeRendering(true);
-            window->setColor(Qt::transparent);
-        } else {
-            window->resize(QSize(qCeil(fit(w)), qCeil(fit(h))));
-        }
-
+        auto renderer = new QQuickRenderControl;
+        auto window = new QQuickWindow(renderer);
+        window->setClearBeforeRendering(true);
         window->setFlags(Qt::Window | Qt::FramelessWindowHint);
         window->setOpacity(0);
         window->hide();
+        window->create();
 
-        if (quick) {
-            // Qt Quick may need a depth and stencil buffer. Always make sure these are available.
-            QSurfaceFormat format;
-            format.setDepthBufferSize(16);
-            format.setAlphaBufferSize(8);
-            format.setStencilBufferSize(8);
-
-            QOpenGLContext* context = new QOpenGLContext;
-            context->setFormat(format);
-            context->create();
-
-            auto offscreenSurface = new QOffscreenSurface;
-            offscreenSurface->setFormat(context->format());
-            offscreenSurface->create();
-
-            context->makeCurrent(offscreenSurface);
-            renderer->initialize(context);
-
-            auto dpr = pS->devicePixelRatio();
-            auto fbo = new QOpenGLFramebufferObject(window->size() * dpr,
-              QOpenGLFramebufferObject::CombinedDepthStencil);
-            window->setRenderTarget(fbo);
-
-
-            Delayer::delay(100);
-
-            if (!context->makeCurrent(offscreenSurface))
-                qFatal("err 1");
-
-            renderer->polishItems();
-            renderer->sync();
-            renderer->render();
-
-            window->resetOpenGLState();
-            QOpenGLFramebufferObject::bindDefault();
-            context->functions()->glFlush();
-
-            //                auto image = grapImage(renderer, window);
-            auto image = fbo->toImage();
-            QPixmap p = QPixmap::fromImage(image);
-            dash(control, p);
-            result.preview = p;
-
-            window->resetOpenGLState();
-            context->functions()->glFlush();
-            context->makeCurrent(offscreenSurface);
-
-            delete renderer;
-            delete window;
-            context->doneCurrent();
-            delete offscreenSurface;
-            delete context;
-
-
+        QQuickItem* item = nullptr;
+        if (w) {
+            item = w->contentItem();
+            window->setColor(w->color());
         } else {
-            window->create();
-            Delayer::delay(100); //FIXME
-            QPixmap p = QPixmap::fromImage(window->grabWindow());
-            dash(control, p);
-            result.preview = p;
+            item = qobject_cast<QQuickItem*>(object);
+            window->setColor(Qt::transparent);
         }
+        Q_ASSERT(item);
+
+        item->setParentItem(window->contentItem());
+        item->setPosition({0, 0});
+        item->setSize(control->size());
+        window->resize(qCeil(item->width()), qCeil(item->height()));
+
+        QSurfaceFormat format;
+        format.setDepthBufferSize(16);
+        format.setAlphaBufferSize(8);
+        format.setStencilBufferSize(8);
+
+        QOpenGLContext* context = new QOpenGLContext;
+        context->setFormat(format);
+        context->create();
+
+        auto offscreenSurface = new QOffscreenSurface;
+        offscreenSurface->setFormat(context->format());
+        offscreenSurface->create();
+
+        context->makeCurrent(offscreenSurface);
+        renderer->initialize(context);
+
+        auto dpr = pS->devicePixelRatio();
+        auto fbo = new QOpenGLFramebufferObject(window->size()*dpr);
+        window->setRenderTarget(fbo);
+
+        Delayer::delay(100);
+
+        if (!context->makeCurrent(offscreenSurface))
+            qFatal("err 1");
+
+        renderer->polishItems();
+        renderer->sync();
+        renderer->render();
+
+        window->resetOpenGLState();
+        QOpenGLFramebufferObject::bindDefault();
+        context->functions()->glFlush();
+
+        auto image = fbo->toImage(false);
+        QPixmap p = QPixmap::fromImage(image);
+        dash(control, p);
+        result.preview = p;
+
+        delete renderer;
+        delete window;
+        delete fbo;
+        context->doneCurrent();
+        delete offscreenSurface;
+        delete context;
     }
     return result;
 }
-//FIXME: Fit library
+
 void QmlPreviewerPrivate::processTasks()
 {
     if (parent->_working)

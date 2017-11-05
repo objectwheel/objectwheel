@@ -878,7 +878,7 @@ void SaveManager::exposeProject()
 
     QEventLoop l;
     connect(lastControl, SIGNAL(previewChanged()), &l, SLOT(quit()));
-    l.exec();
+//    l.exec();
 
     emit instance()->projectExposed();
 }
