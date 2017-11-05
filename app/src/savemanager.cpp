@@ -794,9 +794,11 @@ ExecError SaveManager::execProject()
                 // All childs are quick (not nongui/window)
                 // All masters are quick or window (not nongui)
 
+                //NOTE: What if ApplicationWindow's some properties are binding?
                 if (_d->type(pobject) == Window) {
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
-                      static_cast<QQuickWindow*>(pobject)->contentItem()); //NOTE: What if ApplicationWindow's some properties are binding?
+                      static_cast<QQuickWindow*>(pobject)->contentItem());
+                } else {
                     static_cast<QQuickItem*>(childResults[result])->setParentItem(
                       static_cast<QQuickItem*>(pobject));
                 }

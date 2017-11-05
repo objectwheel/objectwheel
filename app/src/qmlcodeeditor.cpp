@@ -45,7 +45,7 @@ bool blockVisible(const QString& block)
 
 int leftCount(QString block)
 {
-    if (block[0] == 8233) //WARNING: Weird bug fix
+    if (block[0] == 8233) //NOTE: Weird bug fix
         block.remove(0, 1);
 
     int leftCount = 0;

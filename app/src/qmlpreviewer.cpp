@@ -24,8 +24,7 @@
 #include <QTimer>
 #include <QPair>
 #include <QScreen>
-
-//TODO: QQuickRenderControl???
+#include <QQuickRenderControl>
 
 #define TASK_TIMEOUT 100
 #define SIZE_ERROR_PIXMAP (QSizeF(fit(16), fit(16)))
@@ -33,6 +32,25 @@
 #define SIZE_INITIAL_PIXMAP (QSizeF(fit(50), fit(50)))
 #define SIZE_NOPREVIEW_PIXMAP (QSizeF(fit(40), fit(40)))
 #define pS (QApplication::primaryScreen())
+
+#include <QOpenGLContext>
+#include <QOffscreenSurface>
+#include <QtGui/QOpenGLContext>
+#include <QtQuick/private/qquickwindow_p.h>
+#include <QOpenGLFunctions>
+
+extern QImage qt_gl_read_framebuffer(const QSize &size, bool alpha_format, bool include_alpha);
+QImage grapImage(QQuickRenderControl* rc, QQuickWindow* w)
+{
+    auto cd = QQuickWindowPrivate::get(w);
+    cd->polishItems();
+    cd->syncSceneGraph();
+    rc->render();
+    auto grabContent = qt_gl_read_framebuffer(w->size() *
+      w->effectiveDevicePixelRatio(), true, true);
+    grabContent.setDevicePixelRatio(w->effectiveDevicePixelRatio());
+    return grabContent;
+}
 
 using namespace Fit;
 
@@ -217,8 +235,6 @@ QList<QString> QmlPreviewerPrivate::events(const QObject* object) const
     return events;
 }
 
-//Set invisible items visible on dashboard
-
 PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url) const
 {
     if (!SaveManager::isOwctrl(dname(dname(url)))) {
@@ -229,6 +245,7 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
     QQmlEngine engine;
     PreviewResult result;
     QQmlComponent component(&engine);
+    QQuickRenderControl* renderer = new QQuickRenderControl;
 
     engine.setOutputWarningsToStandardError(false);
     engine.rootContext()->setContextProperty("dpi", Fit::ratio());
@@ -269,7 +286,7 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         return result;
     }
 
-    QSharedPointer<QQuickWindow> window(qobject_cast<QQuickWindow*>(object));
+    QQuickWindow* window(qobject_cast<QQuickWindow*>(object));
     result.properties = properties(object);
     result.events = events(object);
     result.gui = (object->inherits("QQuickItem") || window);
@@ -286,9 +303,11 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         const qreal w = control->size().width();
         const qreal h = control->size().height();
 
-        if (window.isNull()) {
+        bool quick = false;
+        if (window == nullptr) {
+            quick = true;
             auto item = qobject_cast<QQuickItem*>(object); Q_ASSERT(item);
-            window = QSharedPointer<QQuickWindow>(new QQuickWindow);
+            window = new QQuickWindow(renderer);
             item->setParentItem(window->contentItem());
             item->setSize(QSizeF(fit(w), fit(h)));
             item->setPosition({0, 0});
@@ -302,13 +321,68 @@ PreviewResult QmlPreviewerPrivate::preview(Control* control, const QString& url)
         window->setFlags(Qt::Window | Qt::FramelessWindowHint);
         window->setOpacity(0);
         window->hide();
-        window->create();
 
-        Delayer::delay(100); //FIXME
+        if (quick) {
+            // Qt Quick may need a depth and stencil buffer. Always make sure these are available.
+            QSurfaceFormat format;
+            format.setDepthBufferSize(16);
+            format.setAlphaBufferSize(8);
+            format.setStencilBufferSize(8);
 
-        QPixmap p = QPixmap::fromImage(window->grabWindow());
-        dash(control, p);
-        result.preview = p;
+            QOpenGLContext* context = new QOpenGLContext;
+            context->setFormat(format);
+            context->create();
+
+            auto offscreenSurface = new QOffscreenSurface;
+            offscreenSurface->setFormat(context->format());
+            offscreenSurface->create();
+
+            context->makeCurrent(offscreenSurface);
+            renderer->initialize(context);
+
+            auto dpr = pS->devicePixelRatio();
+            auto fbo = new QOpenGLFramebufferObject(window->size() * dpr,
+              QOpenGLFramebufferObject::CombinedDepthStencil);
+            window->setRenderTarget(fbo);
+
+
+            Delayer::delay(100);
+
+            if (!context->makeCurrent(offscreenSurface))
+                qFatal("err 1");
+
+            renderer->polishItems();
+            renderer->sync();
+            renderer->render();
+
+            window->resetOpenGLState();
+            QOpenGLFramebufferObject::bindDefault();
+            context->functions()->glFlush();
+
+            //                auto image = grapImage(renderer, window);
+            auto image = fbo->toImage();
+            QPixmap p = QPixmap::fromImage(image);
+            dash(control, p);
+            result.preview = p;
+
+            window->resetOpenGLState();
+            context->functions()->glFlush();
+            context->makeCurrent(offscreenSurface);
+
+            delete renderer;
+            delete window;
+            context->doneCurrent();
+            delete offscreenSurface;
+            delete context;
+
+
+        } else {
+            window->create();
+            Delayer::delay(100); //FIXME
+            QPixmap p = QPixmap::fromImage(window->grabWindow());
+            dash(control, p);
+            result.preview = p;
+        }
     }
     return result;
 }
