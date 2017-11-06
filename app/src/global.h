@@ -4,6 +4,7 @@
 #define SIZE_SKIN (QSize(fit(320), fit(662)))
 #define SIZE_FORM (QSize(fit(285), fit(535)))
 #define SIZE_NONGUI_CONTROL (QSizeF(fit(50), fit(50)))
+#define NAME_APP ("Objectwheel")
 
 enum DesignMode {
     ControlGui,

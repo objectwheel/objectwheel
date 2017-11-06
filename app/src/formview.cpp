@@ -17,7 +17,6 @@
 #include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonObject>
-#include <QtOpenGL>
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 
@@ -320,9 +319,6 @@ FormView::FormView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
     , _d(new FormViewPrivate(this))
 {
-    if (QGLFormat::hasOpenGL())
-        setViewport(new QOpenGLWidget);
-
 }
 
 void FormView::resizeEvent(QResizeEvent* event)

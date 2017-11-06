@@ -1,6 +1,7 @@
 #include <controlscene.h>
 #include <fit.h>
 #include <savemanager.h>
+#include <suppressor.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -94,15 +95,6 @@ void ControlScene::removeChildControlsOnly(Control* parent)
         removeItem(control);
 }
 
-QList<Control*> ControlScene::controls(Qt::SortOrder order) const
-{
-    QList<Control*> controls;
-    for (auto item : items(order))
-        if (dynamic_cast<Control*>(item))
-            controls << static_cast<Control*>(item);
-    return controls;
-}
-
 QList<Control*> ControlScene::selectedControls() const
 {
     QList<Control*> selectedControls;
@@ -122,8 +114,7 @@ void ControlScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(mainControl());
 
-    for (auto control : selectedControls) //FIXME: Use higherZValue()
-        control->setZValue(control->zValue() + 1);
+    //TODO: Raise selected controls
 
     auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
     if (selectedControls.contains((Control*)itemUnderMouse))
@@ -146,7 +137,6 @@ void ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(mainControl());
-    mainControl()->setSelected(false);
 
     if (_mainControl && !selectedControls.isEmpty() &&
         _d->itemPressed && !Resizer::resizing()) {
@@ -177,18 +167,13 @@ void ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     _lastMousePos = event->scenePos();
 
-    update();
+    Suppressor::suppress(100, "update", std::bind
+      (static_cast<void(ControlScene::*)(const QRectF&)>
+        (&ControlScene::update), this, QRect()));
 }
 
 void ControlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(mainControl());
-
-    if (!selectedControls.isEmpty())
-        for (auto control : selectedControls)
-            control->setZValue(control->zValue() - 1);
-
     QGraphicsScene::mouseReleaseEvent(event);
     _d->itemPressed = false;
     _d->itemMoving = false;
@@ -205,9 +190,10 @@ void ControlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
+    painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
 
-    if ((_d->itemMoving || Resizer::resizing()) && _snapping && _mainControl != nullptr) {
+    if ((_d->itemMoving || Resizer::resizing())/*&& _snapping */&& _mainControl != nullptr) {
         {
             auto selectedControls = this->selectedControls();
             selectedControls.removeOne(mainControl());
@@ -248,7 +234,6 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
         }
     }
 
-
     if (_mainControl == nullptr) {
         QPen pen;
         QRectF rect(0, 0, fit(150), fit(60));
@@ -258,6 +243,7 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
         painter->setPen(pen);
         painter->drawText(rect, "No tools selected", QTextOption(Qt::AlignCenter));
     }
+    painter->restore();
 }
 
 QPointF ControlScene::lastMousePos() const
@@ -283,8 +269,8 @@ bool ControlScene::showOutlines() const
 void ControlScene::setShowOutlines(bool value)
 {
     Control::setShowOutline(value);
-    for (auto control : controls())
-        control->update();
+    if (mainControl())
+        mainControl()->update();
 }
 
 bool ControlScene::stick() const

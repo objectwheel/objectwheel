@@ -23,7 +23,12 @@ int main(int argc, char *argv[])
 {
     // Init application
     QApplication a(argc, argv);
-    a.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
+
+    // Setup OpenGL format
+    QSurfaceFormat format;
+    format.setSamples(4);
+    format.setAlphaBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(format);
 
 # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     //    Multiple instances protection

@@ -24,7 +24,7 @@ typedef QList<PropertyNode> PropertyNodes;
 
 struct PreviewResult {
         bool gui = true;
-        QPixmap preview;
+        QImage preview;
         Control* control = nullptr;
         QList<QString> events;
         PropertyNodes properties;
@@ -51,10 +51,10 @@ class QmlPreviewer : public QObject
         static QmlPreviewer* instance();
         static void requestPreview(Control* control);
         static bool working();
-        static QPixmap initialPreview(const QSizeF& size);
+        static QImage initialPreview(const QSizeF& size);
 
     signals:
-        void previewReady(const PreviewResult& result);
+        void previewReady(const QSharedPointer<PreviewResult> result);
         void workingChanged(bool value);
 
     private:

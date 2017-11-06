@@ -714,7 +714,7 @@ ExecError SaveManager::execProject()
                 }
                 masterContext->setContextProperty(id(childPath),
                                                   childResults[childPath]);
-                qApp->processEvents(QEventLoop::AllEvents, 20);
+                qApp->processEvents(QEventLoop::AllEvents, 10);
             }
 
             //! Make form invisible, if it's a window type
@@ -727,7 +727,7 @@ ExecError SaveManager::execProject()
                 bool isWindow = parserWorker.typeName(formData).contains("Window");
                 if (isWindow) {//If form is a window type
                     //BUG: Possible bug if property 'visible' is a binding
-                    qApp->processEvents(QEventLoop::AllEvents, 20);
+                    qApp->processEvents(QEventLoop::AllEvents, 10);
                     parserWorker.setVariantProperty(formData, url, "visible", false);
                 }
                 if (isWindow && !_d->isMain(masterPath)) {
@@ -742,7 +742,7 @@ ExecError SaveManager::execProject()
                   masterPath, engine, masterContext);
             }
 
-            qApp->processEvents(QEventLoop::AllEvents, 20);
+            qApp->processEvents(QEventLoop::AllEvents, 10);
             if (masterResults[masterPath] == nullptr) {
                 engine->deleteLater();
                 return error;
@@ -804,7 +804,7 @@ ExecError SaveManager::execProject()
                 }
 
                 pmap[result] = childResults[result];
-                qApp->processEvents(QEventLoop::AllEvents, 20);
+                qApp->processEvents(QEventLoop::AllEvents, 10);
             }
         }
     }
@@ -822,7 +822,7 @@ ExecError SaveManager::execProject()
         }
     }
 
-    qApp->processEvents(QEventLoop::AllEvents, 20);
+    qApp->processEvents(QEventLoop::AllEvents, 10);
 
     QEventLoop loop;
     if (mainSkin == Skin::PhonePortrait ||
@@ -848,8 +848,6 @@ void SaveManager::exposeProject()
 {
     auto fpaths = _d->formPaths();
 
-    Control* lastControl;
-
     for (auto path : fpaths) {
 
         auto form = new Form(path + separator() +
@@ -858,9 +856,7 @@ void SaveManager::exposeProject()
             form->setMain(true);
         DesignManager::formScene()->addForm(form);
 
-        lastControl = form;
-
-        qApp->processEvents(QEventLoop::AllEvents, 20);
+        qApp->processEvents(QEventLoop::AllEvents, 10);
         QMap<QString, Control*> pmap;
         pmap[path] = form;
         for (auto child : childrenPaths(path)) {
@@ -870,15 +866,10 @@ void SaveManager::exposeProject()
             control->setParentItem(pcontrol);
             control->refresh();
 
-            lastControl = control;
             pmap[child] = control;
-            qApp->processEvents(QEventLoop::AllEvents, 20);
+            qApp->processEvents(QEventLoop::AllEvents, 10);
         }
     }
-
-    QEventLoop l;
-    connect(lastControl, SIGNAL(previewChanged()), &l, SLOT(quit()));
-//    l.exec();
 
     emit instance()->projectExposed();
 }

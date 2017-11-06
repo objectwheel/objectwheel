@@ -7,7 +7,7 @@
 #define SIZE (fit(6.0))
 #define COLOR (Qt::white)
 #define OUTLINE_COLOR ("#202427")
-#define MAX_Z_VALUE (9999)
+#define MAX_Z_VALUE (99999)
 
 using namespace Fit;
 

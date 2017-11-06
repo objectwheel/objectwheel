@@ -89,9 +89,9 @@
     	"toolUrl" : "qrc:/resources/tools/TextArea.zip"
     },
 
-    "WindRose" :
+    "Pinwheel" :
     {
-    	"toolUrl" : "qrc:/resources/tools/WindRose.zip"
+    	"toolUrl" : "qrc:/resources/tools/Pinwheel.zip"
     },
 
     "AnimatedImage" :

@@ -26,6 +26,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QSplitter>
+//#include <QOpenGLWidget>
 
 #define INTERVAL_ERROR_CHECK (1000)
 #define cW (ControlWatcher::instance())
@@ -158,6 +159,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     qmlEditorView.setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
+//    formView.setViewport(new QOpenGLWidget);
     formView.setRenderHint(QPainter::Antialiasing);
     formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
     formView.setDragMode(QGraphicsView::RubberBandDrag);
@@ -168,6 +170,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     formView.setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
+//    controlView.setViewport(new QOpenGLWidget);
     controlView.setRenderHint(QPainter::Antialiasing);
     controlView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
     controlView.setDragMode(QGraphicsView::RubberBandDrag);

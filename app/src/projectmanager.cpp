@@ -229,6 +229,9 @@ bool ProjectManager::startProject(const QString& projectname)
 
     ToolsManager::downloadTools();
 
+    MainWindow::instance()->setWindowTitle
+      (QString(NAME_APP) + " - [" + projectname + "]");
+
 	return true;
 }
 

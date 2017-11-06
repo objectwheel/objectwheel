@@ -22,7 +22,7 @@
 #include <QtNetwork>
 
 using namespace Fit;
-//TODO: Put current project name to somewhere
+
 MainWindow* MainWindow::_instance = nullptr;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -46,7 +46,7 @@ MainWindow* MainWindow::instance()
 
 void MainWindow::setupGui()
 {
-    setWindowTitle("Objectwheel");
+    setWindowTitle(NAME_APP);
     setAutoFillBackground(true);
 
     QPalette p(palette());

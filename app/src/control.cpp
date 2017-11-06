@@ -46,11 +46,11 @@ class ControlPrivate : public QObject
         ControlPrivate(Control* parent);
 
     public slots:
-        void updatePreview(PreviewResult result);
+        void updatePreview(const QSharedPointer<PreviewResult>& result);
 
     public:
         Control* parent;
-        QPixmap preview;
+        QImage preview;
         bool hoverOn;
 };
 
@@ -67,30 +67,30 @@ ControlPrivate::ControlPrivate(Control* parent)
     }
 
     connect(QmlPreviewer::instance(),
-      SIGNAL(previewReady(PreviewResult)),
-            SLOT(updatePreview(PreviewResult)));
+      SIGNAL(previewReady(const QSharedPointer<PreviewResult>&)),
+            SLOT(updatePreview(const QSharedPointer<PreviewResult>&)));
 }
 
-void ControlPrivate::updatePreview(PreviewResult result)
+void ControlPrivate::updatePreview(const QSharedPointer<PreviewResult>& result)
 {
-    if (result.control != parent)
+    if (result->control != parent)
         return;
 
-    preview = result.preview;
-    parent->_errors = result.errors;
-    parent->_gui = result.gui;
-    parent->_properties = result.properties;
-    parent->_events = result.events;
+    preview = result->preview;
+    parent->_errors = result->errors;
+    parent->_gui = result->gui;
+    parent->_properties = result->properties;
+    parent->_events = result->events;
 
-    if (!result.hasError()) {
-        if (result.gui) {
+    if (!result->hasError()) {
+        if (result->gui) {
             if (!parent->form())
-                parent->_clip = result.property("clip").toBool();
+                parent->_clip = result->property("clip").toBool();
         }
     }
 
     parent->update();
-    if (result.hasError()) {
+    if (result->hasError()) {
         emit parent->errorOccurred();
         emit cW->errorOccurred(parent);
     }
@@ -340,7 +340,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     Control* control = nullptr;
     auto items = scene()->items(event->scenePos());
     if (_dragging && items.size() > 1 && (control = dynamic_cast<Control*>(items[1])) &&
-        control != this) {
+        control != this && !control->dragIn()) {
         control->setDragIn(true);
 
         auto scene = static_cast<ControlScene*>(this->scene());
@@ -363,11 +363,16 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsWidget::mouseReleaseEvent(event);
 
     auto scene = static_cast<ControlScene*>(this->scene());
+    auto selectedControls = scene->selectedControls();
+    selectedControls.removeOne(scene->mainControl());
 
     for (auto control : scene->mainControl()->childControls()) {
-        if (control->dragIn() && dragging() &&
-            parentControl() != control) {
-            control->dropControl(this);
+        if (control->dragIn() && dragging() && parentControl() != control) {
+            for (auto sc : selectedControls) {
+                if (sc->dragging()) {
+                    control->dropControl(sc);
+                }
+            }
             scene->clearSelection();
             control->setSelected(true);
         }
@@ -524,7 +529,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
           (this, parentControl()->rect().adjusted(1, 1, -1, -1)).boundingRect()));
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect(), _d->preview,
+    painter->drawImage(rect(), _d->preview,
       QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
 
     QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
@@ -536,12 +541,12 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         if (_showOutline) {
             painter->fillRect(innerRect, gradient);
         } else {
-            QPixmap highlight(_d->preview);
+            QImage highlight(_d->preview);
             QPainter p(&highlight);
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(_d->preview.rect(), gradient);
             p.end();
-            painter->drawPixmap(rect(), highlight, QRectF(
+            painter->drawImage(rect(), highlight, QRectF(
               QPointF(0, 0), size() * pS->devicePixelRatio()));
         }
     }
@@ -705,14 +710,14 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
             if (mapToScene(QRectF(btnExtRect.topLeft(), btnMaxRect.bottomRight())).containsPoint
                 (scene->lastMousePos(), Qt::WindingFill)) {
-                auto ciks = QPixmap(":/resources/images/ciks.png");
+                auto ciks = QImage(":/resources/images/ciks.png");
                 painter->setPen(QColor("#4c0102"));
                 painter->drawLine(btnExtRect.topLeft() + QPoint(fit(3), fit(3)), btnExtRect.bottomRight() + QPoint(-fit(3), -fit(3)));
                 painter->drawLine(btnExtRect.topRight() + QPoint(-fit(3), fit(3)), btnExtRect.bottomLeft() + QPoint(fit(3), -fit(3)));
                 painter->setPen(QColor("#985712"));
                 painter->drawLine(QPointF(btnMinRect.left() + fit(2.5), btnMinRect.center().y()),
                                   QPointF(btnMinRect.right() - fit(2.5), btnMinRect.center().y()));
-                painter->drawPixmap(btnMaxRect.adjusted(fit(2.0), fit(2.0), -fit(2.0), -fit(2.0)), ciks, ciks.rect());
+                painter->drawImage(btnMaxRect.adjusted(fit(2.0), fit(2.0), -fit(2.0), -fit(2.0)), ciks, ciks.rect());
             }
             break;
         }

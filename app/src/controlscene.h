@@ -20,7 +20,6 @@ class ControlScene : public QGraphicsScene
 
         void removeControl(Control* control);
         void removeChildControlsOnly(Control* parent);
-        QList<Control*> controls(Qt::SortOrder order = Qt::DescendingOrder) const;
         QList<Control*> selectedControls() const;
 
         bool showOutlines() const;
@@ -32,12 +31,12 @@ class ControlScene : public QGraphicsScene
         QPointF lastMousePos() const;
 
     protected:
-        bool stick() const;
-        QVector<QLineF> guideLines() const;
-        void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-        void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-        void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-        void drawForeground(QPainter *painter, const QRectF &rect) override;
+        virtual bool stick() const;
+        virtual QVector<QLineF> guideLines() const;
+        virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+        virtual void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     signals:
         void aboutToRemove(Control* control);

@@ -96,7 +96,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
 //    email = "kozmon@hotmail.com", password="ntvmsnbc21";
 //    userManager->buildNewUser(email);
 //    auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
-//    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 20);
+//    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 10);
 //    if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
 //    ProjectsScreen::refreshProjectList();
 //    pW->hideProgress();

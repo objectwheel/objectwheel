@@ -92,7 +92,6 @@
         <file>resources/tools/FlatSwitch.zip</file>
         <file>resources/tools/VerticalSpacer.zip</file>
         <file>resources/tools/HorizontalSpacer.zip</file>
-        <file>resources/tools/WindRose.zip</file>
         <file>resources/tools/ScaledTextField.zip</file>
         <file>resources/tools/ScaledText.zip</file>
         <file>resources/qmls/empty-item.qml</file>
@@ -178,7 +177,6 @@
         <file>resources/images/build_inprogress@2x.png</file>
         <file>resources/images/bouncing_arrow.png</file>
         <file>resources/images/bouncing_arrow@2x.png</file>
-        <file>resources/tools/tools_copy.json</file>
         <file>resources/images/sign_warning@2x.png</file>
         <file>resources/images/delete-icon@2x.png</file>
         <file>resources/images/owicon.png</file>
@@ -277,5 +275,6 @@
         <file>resources/images/mform.png</file>
         <file>resources/images/wait.png</file>
         <file>resources/images/nopreview.png</file>
+        <file>resources/tools/Pinwheel.zip</file>
     </qresource>
 </RCC>

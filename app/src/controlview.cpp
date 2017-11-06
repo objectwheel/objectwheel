@@ -16,7 +16,6 @@
 #include <QMimeData>
 #include <QJsonObject>
 #include <QJsonDocument>
-#include <QtOpenGL>
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 
@@ -321,8 +320,6 @@ ControlView::ControlView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
     , _d(new ControlViewPrivate(this))
 {
-    if (QGLFormat::hasOpenGL())
-        setViewport(new QOpenGLWidget);
 }
 
 void ControlView::resizeEvent(QResizeEvent* event)
