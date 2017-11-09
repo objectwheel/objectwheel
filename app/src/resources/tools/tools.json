@@ -1,256 +1,53 @@
-{
-    "Dial" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Dial.zip"
-    },
-
-    "Slider" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Slider.zip"
-    },
-
-    "Text" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Text.zip"
-    },
-
-    "TextField" :
-    {
-        "toolUrl" : "qrc:/resources/tools/TextField.zip"
-    },
-
-    "RadioButton" :
-    {
-        "toolUrl" : "qrc:/resources/tools/RadioButton.zip"
-    },
-
-    "Button" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Button.zip"
-    },
-
-    "CheckBox" :
-    {
-        "toolUrl" : "qrc:/resources/tools/CheckBox.zip"
-    },
-
-    "Rectangle" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Rectangle.zip"
-    },
-
-    "BusyIndicator" :
-    {
-        "toolUrl" : "qrc:/resources/tools/BusyIndicator.zip"
-    },
-
-    "FlatSwitch" :
-    {
-        "toolUrl" : "qrc:/resources/tools/FlatSwitch.zip"
-    },
-    
-    "ToggleButton" :
-    {
-        "toolUrl" : "qrc:/resources/tools/ToggleButton.zip"
-    },
-
-    "Tumbler" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Tumbler.zip"
-    },
-
-    "DelayButton" :
-    {
-        "toolUrl" : "qrc:/resources/tools/DelayButton.zip"
-    },
-
-	"Gauge" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Gauge.zip"
-    },
-
-	"StatusIndicator" :
-    {
-        "toolUrl" : "qrc:/resources/tools/StatusIndicator.zip"
-    },
-
-	"Compass" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Compass.zip"
-    },
-
-    "ComboBox" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/ComboBox.zip"
-    },
-
-    "TextArea" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/TextArea.zip"
-    },
-
-    "Pinwheel" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/Pinwheel.zip"
-    },
-
-    "AnimatedImage" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/AnimatedImage.zip"
-    },
-
-    "ScaledText" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/ScaledText.zip"
-    },
-
-    "ScaledTextField" :
-    {
-    	"toolUrl" : "qrc:/resources/tools/ScaledTextField.zip"
-    },
-
-    "ProgressBar" :
-    {
-        "toolUrl" : "qrc:/resources/tools/ProgressBar.zip"
-    },
-
-    "Timer" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Timer.zip"
-    },
-
-    "Image" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Image.zip"
-    },
-
-    "GroupBox" :
-    {
-        "toolUrl" : "qrc:/resources/tools/GroupBox.zip"
-    },
-
-    "Calendar" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Calendar.zip"
-    },
-
-    "Label" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Label.zip"
-    },
-
-    "SpinBox" :
-    {
-        "toolUrl" : "qrc:/resources/tools/SpinBox.zip"
-    },
-
-    "TableView" :
-    {
-        "toolUrl" : "qrc:/resources/tools/TableView.zip"
-    },
-
-    "CircularGauge" :
-    {
-        "toolUrl" : "qrc:/resources/tools/CircularGauge.zip"
-    },
-
-    "Tumbler-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Tumbler-2.zip"
-    },
-
-    "RadioButton-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/RadioButton-2.zip"
-    },
-
-    "SpinBox-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/SpinBox-2.zip"
-    },
-
-    "TextArea-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/TextArea-2.zip"
-    },
-
-    "TextField-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/TextField-2.zip"
-    },
-
-    "Slider-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Slider-2.zip"
-    },
-
-    "ProgressBar-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/ProgressBar-2.zip"
-    },
-
-    "BusyIndicator-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/BusyIndicator-2.zip"
-    },
-
-    "Label-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Label-2.zip"
-    },
-
-    "CheckBox-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/CheckBox-2.zip"
-    },
-
-    "ComboBox-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/ComboBox-2.zip"
-    },
-
-    "Button-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Button-2.zip"
-    },
-
-    "Switch-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Switch-2.zip"
-    },
-
-    "Dial-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Dial-2.zip"
-    },
-
-    "GroupBox-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/GroupBox-2.zip"
-    },
-
-    "RoundButton-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/RoundButton-2.zip"
-    },
-
-    "PageIndicator-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/PageIndicator-2.zip"
-    },
-
-    "RangeSlider-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/RangeSlider-2.zip"
-    },
-
-    "Frame-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/Frame-2.zip"
-    },
-
-    "DelayButton-2" :
-    {
-        "toolUrl" : "qrc:/resources/tools/DelayButton-2.zip"
-    }
-}
+[
+    "qrc:/resources/tools/Dial.zip",
+    "qrc:/resources/tools/Slider.zip",
+    "qrc:/resources/tools/Text.zip",
+    "qrc:/resources/tools/TextField.zip",
+    "qrc:/resources/tools/RadioButton.zip",
+    "qrc:/resources/tools/Button.zip",
+    "qrc:/resources/tools/CheckBox.zip",
+    "qrc:/resources/tools/Rectangle.zip",
+    "qrc:/resources/tools/BusyIndicator.zip",
+    "qrc:/resources/tools/FlatSwitch.zip",
+    "qrc:/resources/tools/ToggleButton.zip",
+    "qrc:/resources/tools/Tumbler.zip",
+    "qrc:/resources/tools/DelayButton.zip",
+    "qrc:/resources/tools/Gauge.zip",
+    "qrc:/resources/tools/StatusIndicator.zip",
+    "qrc:/resources/tools/Compass.zip",
+    "qrc:/resources/tools/ComboBox.zip",
+    "qrc:/resources/tools/TextArea.zip",
+    "qrc:/resources/tools/Pinwheel.zip",
+    "qrc:/resources/tools/AnimatedImage.zip",
+    "qrc:/resources/tools/ScaledText.zip",
+    "qrc:/resources/tools/ScaledTextField.zip",
+    "qrc:/resources/tools/ProgressBar.zip",
+    "qrc:/resources/tools/Timer.zip",
+    "qrc:/resources/tools/Image.zip",
+    "qrc:/resources/tools/GroupBox.zip",
+    "qrc:/resources/tools/Calendar.zip",
+    "qrc:/resources/tools/Label.zip",
+    "qrc:/resources/tools/SpinBox.zip",
+    "qrc:/resources/tools/TableView.zip",
+    "qrc:/resources/tools/CircularGauge.zip",
+    "qrc:/resources/tools/Tumbler-2.zip",
+    "qrc:/resources/tools/RadioButton-2.zip",
+    "qrc:/resources/tools/SpinBox-2.zip",
+    "qrc:/resources/tools/TextArea-2.zip",
+    "qrc:/resources/tools/TextField-2.zip",
+    "qrc:/resources/tools/Slider-2.zip",
+    "qrc:/resources/tools/ProgressBar-2.zip",
+    "qrc:/resources/tools/BusyIndicator-2.zip",
+    "qrc:/resources/tools/Label-2.zip",
+    "qrc:/resources/tools/CheckBox-2.zip",
+    "qrc:/resources/tools/ComboBox-2.zip",
+    "qrc:/resources/tools/Button-2.zip",
+    "qrc:/resources/tools/Switch-2.zip",
+    "qrc:/resources/tools/Dial-2.zip",
+    "qrc:/resources/tools/GroupBox-2.zip",
+    "qrc:/resources/tools/RoundButton-2.zip",
+    "qrc:/resources/tools/PageIndicator-2.zip",
+    "qrc:/resources/tools/RangeSlider-2.zip",
+    "qrc:/resources/tools/Frame-2.zip",
+    "qrc:/resources/tools/DelayButton-2.zip"
+]

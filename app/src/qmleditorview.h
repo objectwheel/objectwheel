@@ -40,6 +40,7 @@ class QmlEditorView : public QWidget
         Mode mode() const;
         void setMode(const Mode& mode);
         bool pinned() const;
+        bool isOpen(Control* control) const;
         void addControl(Control* control);
         void addDocument(Control* control, const QString& documentPath);
         void setCurrentDocument(Control* control, const QString& documentPath);

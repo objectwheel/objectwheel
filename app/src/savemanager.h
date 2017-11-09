@@ -24,6 +24,7 @@
 #define TAG_UID "_uid"
 #define TAG_SUID "_suid"
 #define TAG_SKIN "_skin"
+#define TAG_NAME "_toolName"
 #define TAG_CATEGORY "_category"
 #define TAG_OWDB_SIGN "_owdbsign"
 #define TAG_OWCTRL_SIGN "_owctrlsign"
@@ -65,6 +66,7 @@ class SaveManager : public QObject
         static Control* exposeControl(const QString& rootPath, const DesignMode& mode, QString suid = QString());
         static bool initProject(const QString& projectDirectory);
 
+        static int biggestDir(const QString& basePath);
         static QString basePath();
         static QStringList formPaths();
         static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
@@ -81,6 +83,7 @@ class SaveManager : public QObject
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);
         static void refreshToolUid(const QString& toolRootPath);
+        static QString toolName(const QString& toolRootPath);
         static QString toolCategory(const QString& toolRootPath);
 
         static bool exists(const Control* control, const QString& suid, const QString& topPath = QString());

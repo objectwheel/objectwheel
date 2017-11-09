@@ -99,11 +99,6 @@ class SaveManagerPrivate : public QObject
         // It doesn't check whether rootPath belong to a form or not.
         bool isMain(const QString& rootPath);
 
-        // Returns biggest number from integer named dirs.
-        // If no integer named dir exists, 0 returned.
-        // If no dir exists or dirs are smaller than zero, 0 returned.
-        int biggestDir(const QString& basePath) const;
-
         // Recalculates all uids belongs to given control and its children (all).
         // Both database and in-memory data are updated.
         void recalculateUids(Control* control) const;
@@ -339,15 +334,6 @@ bool SaveManagerPrivate::isMain(const QString& rootPath)
     return (fname(rootPath) == DIR_MAINFORM);
 }
 
-int SaveManagerPrivate::biggestDir(const QString& basePath) const
-{
-    int num = 0;
-    for (auto dir : lsdir(basePath))
-        if (dir.toInt() > num)
-            num = dir.toInt();
-    return num;
-}
-
 void SaveManagerPrivate::recalculateUids(Control* control) const
 {
     if (control->dir().isEmpty())
@@ -580,6 +566,18 @@ bool SaveManager::initProject(const QString& projectDirectory)
     _d->setProperty(propertyData, TAG_UID, Control::generateUid());
 
     return wrfile(propertyPath, propertyData);
+}
+
+// Returns biggest number from integer named dirs.
+// If no integer named dir exists, 0 returned.
+// If no dir exists or dirs are smaller than zero, 0 returned.
+int SaveManager::biggestDir(const QString& basePath)
+{
+    int num = 0;
+    for (auto dir : lsdir(basePath))
+        if (dir.toInt() > num)
+            num = dir.toInt();
+    return num;
 }
 
 QString SaveManager::basePath()
@@ -1003,6 +1001,17 @@ void SaveManager::refreshToolUid(const QString& toolRootPath)
     }
 }
 
+QString SaveManager::toolName(const QString& toolRootPath)
+{
+    if (toolRootPath.isEmpty())
+        return QString();
+
+    auto propertyPath = toolRootPath + separator() + DIR_THIS +
+                        separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    return _d->property(propertyData, TAG_NAME).toString();
+}
+
 QString SaveManager::toolCategory(const QString& toolRootPath)
 {
     if (toolRootPath.isEmpty())
@@ -1039,7 +1048,7 @@ bool SaveManager::addForm(Form* form)
         return false;
 
     auto baseDir = projectDir + separator() + DIR_OWDB;
-    auto formDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
+    auto formDir = baseDir + separator() + QString::number(biggestDir(baseDir) + 1);
 
     if (!mkdir(formDir))
         return false;
@@ -1086,7 +1095,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
         _d->refactorId(child, suid, topPath);
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
-    auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
+    auto controlDir = baseDir + separator() + QString::number(biggestDir(baseDir) + 1);
 
     if (!mkdir(controlDir))
         return false;
@@ -1131,7 +1140,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
         return false;
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
-    auto controlDir = baseDir + separator() + QString::number(_d->biggestDir(baseDir) + 1);
+    auto controlDir = baseDir + separator() + QString::number(biggestDir(baseDir) + 1);
 
     if (!mkdir(controlDir))
         return false;

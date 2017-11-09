@@ -87,6 +87,7 @@ QVariant ParserWorker::variantProperty(const QByteArray& data, const QString& na
     return value;
 }
 
+//BUG: This function doesn't work for Timer control
 void ParserWorker::setVariantProperty(QByteArray& data, const QString& fileName, const QString& property, const QVariant& value) const
 {
     if (data.isEmpty()) {

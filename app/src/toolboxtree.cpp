@@ -1,5 +1,6 @@
 #include <toolboxtree.h>
 #include <fit.h>
+#include <css.h>
 
 #include <QMimeData>
 #include <QApplication>
@@ -10,10 +11,127 @@
 #include <QPropertyAnimation>
 #include <QScroller>
 #include <QWheelEvent>
+#include <QStyledItemDelegate>
+#include <QPainter>
+#include <QHeaderView>
 
 #define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 
 using namespace Fit;
+
+//!
+//! *********************** [ToolboxDelegate] ***********************
+//!
+
+class ToolboxDelegate: public QStyledItemDelegate
+{
+        Q_OBJECT
+
+    public:
+        ToolboxDelegate(QTreeView* view, QWidget* parent);
+
+        void paint(QPainter* painter, const QStyleOptionViewItem &option,
+                   const QModelIndex &index) const override;
+
+        QSize sizeHint(const QStyleOptionViewItem &opt,
+                       const QModelIndex &index) const override;
+
+    private:
+        QTreeView* m_view;
+};
+
+ToolboxDelegate::ToolboxDelegate(QTreeView* view, QWidget* parent)
+    : QStyledItemDelegate(parent)
+    , m_view(view)
+{
+}
+
+void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
+    const QModelIndex &index) const
+{
+    const QAbstractItemModel* model = index.model();
+    Q_ASSERT(model);
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    if (!model->parent(index).isValid()) {
+        // this is a top-level item.
+        QStyleOptionButton buttonOption;
+
+        buttonOption.state = option.state;
+#ifdef Q_OS_MACOS
+        buttonOption.state |= QStyle::State_Raised;
+#endif
+        buttonOption.state &= ~QStyle::State_HasFocus;
+
+        buttonOption.rect = option.rect;
+        buttonOption.palette = option.palette;
+        buttonOption.features = QStyleOptionButton::None;
+
+        painter->save();
+        QColor buttonColor(230, 230, 230);
+        QBrush buttonBrush = option.palette.button();
+        if (!buttonBrush.gradient() && buttonBrush.texture().isNull())
+            buttonColor = buttonBrush.color();
+        QColor outlineColor = buttonColor.darker(150);
+        QColor highlightColor = buttonColor.lighter(130);
+
+        // Only draw topline if the previous item is expanded
+        QModelIndex previousIndex = model->index(index.row() - 1, index.column());
+        bool drawTopline = (index.row() > 0 && m_view->isExpanded(previousIndex));
+        int highlightOffset = drawTopline ? 1 : 0;
+
+        QLinearGradient gradient(option.rect.topLeft(), option.rect.bottomLeft());
+        gradient.setColorAt(0, QColor("#EAEEF1"));
+        gradient.setColorAt(1, QColor("#D0D4D7"));
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(gradient);
+        painter->drawRect(option.rect);
+        QPen p(highlightColor);
+        p.setWidthF(0.5);
+        painter->setPen(p);
+        painter->drawLine(option.rect.topLeft() + QPoint(0, highlightOffset),
+                          option.rect.topRight() + QPoint(0, highlightOffset));
+        p.setColor(outlineColor);
+        painter->setPen(p);
+        if (drawTopline)
+            painter->drawLine(option.rect.topLeft(), option.rect.topRight());
+        painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
+        painter->restore();
+
+        QStyleOption branchOption;
+        static const int i = 9; // ### hardcoded in qcommonstyle.cpp
+        QRect r = option.rect;
+        branchOption.rect = QRect(r.left() + i/2, r.top() + (r.height() - i)/2, i, i);
+        branchOption.state = QStyle::State_Children;
+
+        if (m_view->isExpanded(index))
+            branchOption.state |= QStyle::State_Open;
+
+        qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
+
+        // draw text
+        QRect textrect = QRect(r.left() + i*2, r.top(), r.width() - ((5*i)/2), r.height());
+        QString text = elidedText(option.fontMetrics, textrect.width(), Qt::ElideMiddle,
+                                  model->data(index, Qt::DisplayRole).toString());
+        m_view->style()->drawItemText(painter, textrect, Qt::AlignCenter,
+                                      option.palette, m_view->isEnabled(), text);
+
+    } else {
+        QStyledItemDelegate::paint(painter, option, index);
+    }
+}
+
+QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
+{
+    QStyleOptionViewItem option = opt;
+    QSize sz = QStyledItemDelegate::sizeHint(opt, index) + QSize(2, 2);
+    return sz;
+}
+
+//!
+//! ********************** [ToolboxTree] **********************
+//!
 
 ToolboxTree::ToolboxTree(QWidget *parent)
     : QTreeWidget(parent)
@@ -28,7 +146,6 @@ ToolboxTree::ToolboxTree(QWidget *parent)
     QScroller::scroller(viewport())->setScrollerProperties(prop);
 
     _indicatorButton.setVisible(_indicatorButtonVisible);
-
     connect(this, &ToolboxTree::currentItemChanged, [=] {
         if (currentItem() == 0)
             return;
@@ -53,6 +170,32 @@ ToolboxTree::ToolboxTree(QWidget *parent)
                               rect.y() + rect.height()/2.0 - _indicatorButton.height()/2.0);
         _indicatorButton.setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
     });
+
+
+    QPalette p2(palette());
+    p2.setColor(QPalette::Base, QColor("#F3F7FA"));
+    p2.setColor(QPalette::Highlight, QColor("#d0d4d7"));
+    p2.setColor(QPalette::Text, QColor("#202427"));
+    setPalette(p2);
+
+    setIconSize(fit({24, 24}));
+    setFocusPolicy(Qt::NoFocus);
+    setIndentation(0);
+    setRootIsDecorated(false);
+    setSortingEnabled(true);
+    setColumnCount(1);
+    header()->hide();
+    header()->setSectionResizeMode(QHeaderView::Stretch);
+    setTextElideMode(Qt::ElideMiddle);
+    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+
+    setDragEnabled(true);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setDragDropMode(QAbstractItemView::DragOnly);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    setItemDelegate(new ToolboxDelegate(this, this));
 }
 
 void ToolboxTree::addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls)
@@ -165,3 +308,5 @@ void ToolboxTree::mouseMoveEvent(QMouseEvent *event)
 
     QTreeWidget::mouseMoveEvent(event);
 }
+
+#include "toolboxtree.moc"

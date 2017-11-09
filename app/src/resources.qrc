@@ -58,37 +58,7 @@
         <file>resources/images/reset.png</file>
         <file>resources/images/fexplorer.png</file>
         <file>resources/images/fexplorer@2x.png</file>
-        <file>resources/images/fileExplorer/text@2x.png</file>
-        <file>resources/images/fileExplorer/text.png</file>
-        <file>resources/images/fileExplorer/qml@2x.svg</file>
-        <file>resources/images/fileExplorer/qml.svg</file>
-        <file>resources/images/fileExplorer/ok@2x.png</file>
-        <file>resources/images/fileExplorer/ok.png</file>
-        <file>resources/images/fileExplorer/newFolder@2x.png</file>
-        <file>resources/images/fileExplorer/newFolder.png</file>
-        <file>resources/images/fileExplorer/newFile@2x.png</file>
-        <file>resources/images/fileExplorer/newFile.png</file>
-        <file>resources/images/fileExplorer/js@2x.svg</file>
-        <file>resources/images/fileExplorer/js.svg</file>
-        <file>resources/images/fileExplorer/image@2x.svg</file>
-        <file>resources/images/fileExplorer/image.svg</file>
-        <file>resources/images/fileExplorer/home@2x.png</file>
-        <file>resources/images/fileExplorer/home.png</file>
-        <file>resources/images/fileExplorer/edit@2x.png</file>
-        <file>resources/images/fileExplorer/edit.png</file>
-        <file>resources/images/fileExplorer/download@2x.png</file>
-        <file>resources/images/fileExplorer/download.png</file>
-        <file>resources/images/fileExplorer/dir@2x.png</file>
-        <file>resources/images/fileExplorer/dir.png</file>
-        <file>resources/images/fileExplorer/delete@2x.png</file>
-        <file>resources/images/fileExplorer/delete.png</file>
-        <file>resources/images/fileExplorer/bin@2x.svg</file>
-        <file>resources/images/fileExplorer/bin.svg</file>
-        <file>resources/images/fileExplorer/back@2x.png</file>
-        <file>resources/images/fileExplorer/back.png</file>
         <file>resources/images/sign_warning.png</file>
-        <file>resources/images/fileExplorer/drop@2x.png</file>
-        <file>resources/images/fileExplorer/drop.png</file>
         <file>resources/tools/FlatSwitch.zip</file>
         <file>resources/tools/VerticalSpacer.zip</file>
         <file>resources/tools/HorizontalSpacer.zip</file>
@@ -276,5 +246,6 @@
         <file>resources/images/wait.png</file>
         <file>resources/images/nopreview.png</file>
         <file>resources/tools/Pinwheel.zip</file>
+        <file>resources/images/settings.png</file>
     </qresource>
 </RCC>

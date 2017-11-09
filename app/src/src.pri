@@ -49,7 +49,8 @@ HEADERS                   += $$PWD/mainwindow.h \
                              $$PWD/outputwidget.h \
                              $$PWD/controlwatcher.h \
     $$PWD/resizer.h \
-    $$PWD/suppressor.h
+    $$PWD/suppressor.h \
+    $$PWD/toolboxsettings.h
 
 SOURCES                   += $$PWD/main.cpp\
                              $$PWD/mainwindow.cpp \
@@ -100,7 +101,8 @@ SOURCES                   += $$PWD/main.cpp\
                              $$PWD/outputwidget.cpp \
                              $$PWD/controlwatcher.cpp \
     $$PWD/resizer.cpp \
-    $$PWD/suppressor.cpp
+    $$PWD/suppressor.cpp \
+    $$PWD/toolboxsettings.cpp
 
 RESOURCES                 += $$PWD/resources.qrc
 
@@ -114,3 +116,6 @@ DISTFILES                 += android/AndroidManifest.xml \
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 include($$PWD/components/components.pri)
+
+FORMS += \
+    $$PWD/toolboxsettings.ui

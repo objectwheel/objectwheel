@@ -227,7 +227,7 @@ bool ProjectManager::startProject(const QString& projectname)
     DesignManager::controlScene()->clearSelection();
     DesignManager::formScene()->clearSelection();
 
-    ToolsManager::downloadTools();
+    ToolsManager::instance()->downloadTools();
 
     MainWindow::instance()->setWindowTitle
       (QString(NAME_APP) + " - [" + projectname + "]");

@@ -7,6 +7,7 @@
 #include <toolboxtree.h>
 #include <fit.h>
 #include <filterlineedit.h>
+#include <toolboxsettings.h>
 
 class ToolBox : public QWidget
 {
@@ -15,39 +16,22 @@ class ToolBox : public QWidget
         explicit ToolBox(QWidget *parent = nullptr);
         ToolboxTree* toolboxTree();
 
+    public slots:
+        void showSettings();
+
     protected:
         virtual QSize sizeHint() const override;
 
     private slots:
         void filterList(const QString& filter);
-        void showAdderArea();
-        void hideAdderArea();
-        void handleSelectionChange();
         void handleMousePress(QTreeWidgetItem* item);
-        void handleToolboxUrlboxChanges(const QString& text);
-        void handleToolboxNameboxChanges(QString name);
-        void toolboxEditButtonToggled(bool);
-        void toolboxRemoveButtonClicked();
-        void toolboxAddButtonClicked();
-        void toolboxImportButtonClicked();
-        void toolboxExportButtonClicked();
-        void handleImports(const QStringList& fileNames);
 
     private:
         QVBoxLayout _toolboxVLay;
         FilterLineEdit _searchEdit;
         ToolboxTree _toolboxTree;
-        QWidget _toolboxAdderAreaWidget;
-        QVBoxLayout _toolboxAdderAreaVLay;
-        QHBoxLayout _toolboxAdderAreaButtonSideHLay;
-        FlatButton _toolboxAddButton;
-        FlatButton _toolboxEditButton;
-        FlatButton _toolboxRemoveButton;
-        FlatButton _toolboxExportButton;
-        FlatButton _toolboxImportButton;
-        QVBoxLayout _toolboxAdderAreaEditingLayout;
-        QLineEdit _toolboxUrlBox;
-        QLineEdit _toolBoxNameBox;
+        ToolboxSettings _settingsDialog;
+
 };
 
 #endif // TOOLBOX_H

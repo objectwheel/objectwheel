@@ -1,21 +1,34 @@
 #ifndef TOOLSMANAGER_H
 #define TOOLSMANAGER_H
 
+#include <QObject>
 #include <QUrl>
 
 class QJsonObject;
-class QString;
 class ToolboxTree;
 
-namespace ToolsManager
+class ToolsManager : QObject
 {
-	void resetTools();
-    void setToolboxTree(ToolboxTree* toolboxTree);
-	void downloadTools(const QUrl& url = QUrl());
-	void addTool(const QString& name);
-	bool toolsExists(const QJsonObject& toolsObject);
-	QString toolsDir();
-    QStringList categories();
-}
+        Q_OBJECT
+        Q_DISABLE_COPY(ToolsManager)
+
+    public:
+        static ToolsManager* instance();
+        QString toolsDir() const;
+        QStringList categories() const;
+
+        void addTool(const QString& toolPath);
+        void removeTool(const QString& toolPath);
+        void addToolboxTree(ToolboxTree* toolboxTree);
+        void downloadTools(const QUrl& url = QUrl());
+
+    public slots:
+        void resetTools();
+        void createNewTool();
+
+    private:
+        ToolsManager() {}
+        QList<ToolboxTree*> _toolboxTreeList;
+};
 
 #endif // TOOLSMANAGER_H

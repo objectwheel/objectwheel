@@ -5,7 +5,6 @@
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <usermanager.h>
-#include <toolsmanager.h>
 #include <savemanager.h>
 #include <projectsscreen.h>
 #include <dirlocker.h>

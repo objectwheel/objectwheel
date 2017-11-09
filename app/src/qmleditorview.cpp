@@ -676,6 +676,14 @@ bool QmlEditorView::pinned() const
     return _d->pinButton->toolTip().contains("Unpin");
 }
 
+bool QmlEditorView::isOpen(Control* control) const
+{
+    for (auto item : _editorItems)
+        if (item.control == control)
+            return true;
+    return false;
+}
+
 void QmlEditorView::addControl(Control* control)
 {
     for (auto& item : _editorItems)

@@ -62,7 +62,7 @@ void MainWindow::setupGui()
     _centralWidget.addWidget(Screen::Builds, &_buildsScreen);
     _centralWidget.showWidget(Screen::Login);
     _progressWidget.showProgress("Loading");
-    connect(&_centralWidget, &CentralWidget::visibleWidgetChanged, this, [=]
+    connect(&_centralWidget, &CentralWidget::visibleWidgetChanged, this, [&]
     {
         if (_centralWidget.visibleUid() == Screen::Studio) {
             _titleBar.show();
@@ -109,7 +109,7 @@ void MainWindow::setupGui()
     pinButton->setToolTip("Pin/Unpin pane.");
     pinButton->setCursor(Qt::PointingHandCursor);
     pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton, &QToolButton::clicked, this, [=]{
+    connect(pinButton, &QToolButton::clicked, this, [&]{
         _propertiesDockwidget.setFloating(!_propertiesDockwidget.isFloating());
     });
 
@@ -137,7 +137,7 @@ void MainWindow::setupGui()
     pinButton2->setToolTip("Pin/Unpin pane.");
     pinButton2->setCursor(Qt::PointingHandCursor);
     pinButton2->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton2, &QToolButton::clicked, this, [=]{
+    connect(pinButton2, &QToolButton::clicked, this, [&]{
         _formsDockwidget.setFloating(!_formsDockwidget.isFloating());
     });
 
@@ -165,12 +165,21 @@ void MainWindow::setupGui()
     pinButton3->setToolTip("Pin/Unpin pane.");
     pinButton3->setCursor(Qt::PointingHandCursor);
     pinButton3->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton3, &QToolButton::clicked, this, [=]{
+    connect(pinButton3, &QToolButton::clicked, this, [&]{
         _toolboxDockwidget.setFloating(!_toolboxDockwidget.isFloating());
+    });
+
+    QToolButton* toolboxSettingsButton = new QToolButton;
+    toolboxSettingsButton->setToolTip("Toolbox settings.");
+    toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
+    toolboxSettingsButton->setIcon(QIcon(":/resources/images/settings.png"));
+    connect(toolboxSettingsButton, &QToolButton::clicked, this, [&] {
+        _toolbox.showSettings();
     });
 
     QToolBar* toolbar3 = new QToolBar;
     toolbar3->addWidget(label3);
+    toolbar3->addWidget(toolboxSettingsButton);
     toolbar3->addWidget(pinButton3);
     toolbar3->setStyleSheet(CSS::DesignerPinbar);
     toolbar3->setIconSize(QSize(fit(11), fit(11)));
@@ -184,7 +193,7 @@ void MainWindow::setupGui()
                                    QDockWidget::DockWidgetFloatable);
 
     connect(_toolbox.toolboxTree()->indicatorButton(),
-      &FlatButton::clicked, this, [=] {
+      &FlatButton::clicked, this, [&] {
         auto splitter = DesignManager::splitter();
         auto controlView = DesignManager::controlView();
         auto formView = DesignManager::formView();
@@ -221,7 +230,7 @@ void MainWindow::setupGui()
     pinButton4->setToolTip("Pin/Unpin pane.");
     pinButton4->setCursor(Qt::PointingHandCursor);
     pinButton4->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton4, &QToolButton::clicked, this, [=]{
+    connect(pinButton4, &QToolButton::clicked, this, [&]{
         _inspectorDockwidget.setFloating(!_inspectorDockwidget.isFloating());
     });
 
@@ -252,7 +261,7 @@ void MainWindow::setupGui()
 
 void MainWindow::setupManagers()
 {
-    ToolsManager::setToolboxTree(_toolbox.toolboxTree());
+    ToolsManager::instance()->addToolboxTree(_toolbox.toolboxTree());
     auto userManager = new UserManager(this);
     Q_UNUSED(userManager);
     auto* projectManager = new ProjectManager(this);
