@@ -260,10 +260,15 @@ QTreeWidgetItem* ToolboxTree::categoryItem(const QString& categoryName)
 
 QMimeData* ToolboxTree::mimeData(const QList<QTreeWidgetItem*> items) const
 {
-    QMimeData *data = QTreeWidget::mimeData(items);
-    data->setUrls(_urls[items[0]]);
-    data->setText(TOOLBOX_ITEM_KEY);
-    return data;
+    if (itemAt(_previousPoint) &&
+      itemAt(_previousPoint)->parent() != nullptr) {
+        QMimeData *data = QTreeWidget::mimeData(items);
+        data->setUrls(_urls[items[0]]);
+        data->setText(TOOLBOX_ITEM_KEY);
+        return data;
+    } else {
+        return nullptr;
+    }
 }
 
 void ToolboxTree::mousePressEvent(QMouseEvent* event)

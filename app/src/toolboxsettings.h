@@ -15,6 +15,14 @@ class ToolboxSettings : public QDialog
         explicit ToolboxSettings(QWidget *parent = 0);
         ~ToolboxSettings();
 
+    private slots:
+        QString handleImports(const QStringList& fileNames);
+        void on_btnAdd_clicked();
+        void on_btnRemove_clicked();
+        void on_btnImport_clicked();
+        void on_btnExport_clicked();
+        void on_btnFileDialog_clicked();
+
     private:
         Ui::ToolboxSettings* ui;
 };

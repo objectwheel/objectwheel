@@ -17,7 +17,7 @@ class ToolsManager : QObject
         QString toolsDir() const;
         QStringList categories() const;
 
-        void addTool(const QString& toolPath);
+        bool addTool(const QString& toolPath);
         void removeTool(const QString& toolPath);
         void addToolboxTree(ToolboxTree* toolboxTree);
         void downloadTools(const QUrl& url = QUrl());

@@ -3,8 +3,15 @@
 #include <css.h>
 #include <toolsmanager.h>
 #include <filemanager.h>
+#include <zipper.h>
+#include <savemanager.h>
+
 #include <QScrollBar>
 #include <QBuffer>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QTemporaryDir>
+#include <QMessageBox>
 
 ToolboxSettings::ToolboxSettings(QWidget *parent)
     : QDialog(parent)
@@ -20,12 +27,12 @@ ToolboxSettings::ToolboxSettings(QWidget *parent)
         const bool hasValidSelection = ui->treeWidget->currentItem() &&
           ui->treeWidget->currentItem()->parent();
         ui->btnRemove->setEnabled(hasValidSelection);
-        ui->btnImport->setEnabled(hasValidSelection);
         ui->btnExport->setEnabled(hasValidSelection);
         ui->btnSave->setEnabled(hasValidSelection);
         ui->txtCategory->setEnabled(hasValidSelection);
         ui->txtIcon->setEnabled(hasValidSelection);
         ui->txtName->setEnabled(hasValidSelection);
+        ui->btnFileDialog->setEnabled(hasValidSelection);
         if (hasValidSelection) {
             const auto dir = dname(ui->treeWidget->urls(ui->treeWidget->currentItem()).first().toLocalFile());
             QPixmap icon;
@@ -171,93 +178,28 @@ ToolboxSettings::~ToolboxSettings()
 }
 
 
-//void ToolboxSettings::showAdderArea()
-//{
-//    QPropertyAnimation* animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
-//    animation->setDuration(DURATION);
-//    animation->setStartValue(fit(17));
-//    animation->setEndValue(fit(88));
-//    animation->setEasingCurve(QEasingCurve::OutExpo);
-//    connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
-
-//    QPropertyAnimation* animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
-//    animation2->setDuration(DURATION);
-//    animation2->setStartValue(fit(17));
-//    animation2->setEndValue(fit(88));
-//    animation2->setEasingCurve(QEasingCurve::OutExpo);
-//    connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
-
-//    QParallelAnimationGroup* group = new QParallelAnimationGroup(this);
-//    group->addAnimation(animation);
-//    group->addAnimation(animation2);
-//    connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));
-//    group->start();
-
-//    _toolboxAdderAreaEditingLayout.setSpacing(fit(6));
-//    _toolboxAdderAreaEditingLayout.setContentsMargins(0,0,0,0);
-//    _toolBoxNameBox.setHidden(false);
-//    _toolboxUrlBox.setHidden(false);
-//    _toolboxAddButton.setDisabled(true);
-//    _toolboxRemoveButton.setDisabled(true);
-//    _toolboxImportButton.setDisabled(true);
-//    _toolboxExportButton.setDisabled(true);
-//}
-
-//void ToolboxSettings::hideAdderArea()
-//{
-//    QPropertyAnimation* animation = new QPropertyAnimation(&_toolboxAdderAreaWidget, "minimumHeight");
-//    animation->setDuration(DURATION);
-//    animation->setStartValue(fit(88));
-//    animation->setEndValue(fit(17));
-//    animation->setEasingCurve(QEasingCurve::OutExpo);
-//    connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
-
-//    QPropertyAnimation* animation2 = new QPropertyAnimation(&_toolboxAdderAreaWidget, "maximumHeight");
-//    animation2->setDuration(DURATION);
-//    animation2->setStartValue(fit(88));
-//    animation2->setEndValue(fit(17));
-//    animation2->setEasingCurve(QEasingCurve::OutExpo);
-//    connect(animation2, SIGNAL(finished()), animation2, SLOT(deleteLater()));
-
-//    QParallelAnimationGroup* group = new QParallelAnimationGroup(this);
-//    group->addAnimation(animation);
-//    group->addAnimation(animation2);
-//    connect(group, SIGNAL(finished()), group, SLOT(deleteLater()));
-//    group->start();
-
-//    _toolboxAdderAreaEditingLayout.setSpacing(0);
-//    _toolboxAdderAreaEditingLayout.setContentsMargins(0,0,0,0);
-//    _toolboxAddButton.setEnabled(true);
-//    _toolboxRemoveButton.setEnabled(true);
-//    _toolboxImportButton.setEnabled(true);
-//    _toolboxExportButton.setEnabled(true);
-//    _toolboxEditButton.setChecked(false);
-//    _toolBoxNameBox.setHidden(true);
-//    _toolboxUrlBox.setHidden(true);
-//}
-
 //void ToolboxSettings::handleToolboxUrlboxChanges(const QString& text)
 //{
 //    QPixmap pixmap;
 //    pixmap.loadFromData(dlfile(text));
 //    if (pixmap.isNull()) return;
-//    auto icon = dname(_toolboxTree.urls(_toolboxTree.currentItem())[0].toLocalFile()) + "/icon.png";
+//    auto icon = dname(ui->treeWidget->urls(ui->treeWidget->currentItem())[0].toLocalFile()) + "/icon.png";
 //    QByteArray bArray;
 //    QBuffer buffer(&bArray);
 //    buffer.open(QIODevice::WriteOnly);
 //    if (!pixmap.save(&buffer,"PNG")) return;
 //    buffer.close();
 //    if (!wrfile(icon, bArray)) return;
-//    _toolboxTree.currentItem()->setIcon(0, QIcon(icon));
+//    ui->treeWidget->currentItem()->setIcon(0, QIcon(icon));
 //}
 
 //void ToolboxSettings::handleToolboxNameboxChanges(QString /*name*/)
 //{
-//    //	if (name == _toolboxTree.currentItem()->text() || name == "") return;
+//    //	if (name == ui->treeWidget->currentItem()->text() || name == "") return;
 
 //    //	int count = 1;
-//    //	for (int i = 0; i < _toolboxTree.count(); i++) {
-//    //		if (_toolboxTree.item(i)->text() == name) {
+//    //	for (int i = 0; i < ui->treeWidget->count(); i++) {
+//    //		if (ui->treeWidget->item(i)->text() == name) {
 //    //			if (count > 1) {
 //    //				name.remove(name.size() - 1, 1);
 //    //			}
@@ -267,16 +209,16 @@ ToolboxSettings::~ToolboxSettings()
 //    //		}
 //    //	}
 
-//    //	auto from = ToolsManager::toolsDir() + "/" + _toolboxTree.currentItem()->text();
+//    //	auto from = ToolsManager::toolsDir() + "/" + ui->treeWidget->currentItem()->text();
 //    //	auto to = ToolsManager::toolsDir() + "/" + name;
 //    //	if (!rn(from, to)) qFatal("ToolboxSettings : Error occurred");
 
-//    //	_toolboxTree.currentItem()->setText(name);
+//    //	ui->treeWidget->currentItem()->setText(name);
 
 //    //	QList<QUrl> urls;
 //    //	urls << QUrl::fromLocalFile(to + "/main.qml");
-//    //	_toolboxTree.RemoveUrls(_toolboxTree.currentItem());
-//    //	_toolboxTree.addUrls(_toolboxTree.currentItem(),urls);
+//    //	ui->treeWidget->RemoveUrls(ui->treeWidget->currentItem());
+//    //	ui->treeWidget->addUrls(ui->treeWidget->currentItem(),urls);
 
 //    //	for (int i = 0; i < m_ItemUrls.size(); i++) {
 //    //		if (m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
@@ -287,18 +229,10 @@ ToolboxSettings::~ToolboxSettings()
 //    //	qmlEditor->updateCacheForRenamedEntry(from, to, true);
 //}
 
-//void ToolboxSettings::toolboxEditButtonToggled(bool checked)
-//{
-//    if (checked)
-//        showAdderArea();
-//    else
-//        hideAdderArea();
-//}
-
 //void ToolboxSettings::toolboxRemoveButtonClicked()
 //{
-//    //	if (_toolboxTree.currentRow() < 0) return;
-//    //	auto name = _toolboxTree.currentItem()->text();
+//    //	if (ui->treeWidget->currentRow() < 0) return;
+//    //	auto name = ui->treeWidget->currentItem()->text();
 //    //	QMessageBox msgBox;
 //    //	msgBox.setText(QString("<b>This will remove %1 from Tool Library and Dashboard.</b>").arg(name));
 //    //	msgBox.setInformativeText("Do you want to continue?");
@@ -310,8 +244,8 @@ ToolboxSettings::~ToolboxSettings()
 //    //		case QMessageBox::Yes: {
 //    //			qmlEditor->clearCacheFor(ToolsManager::toolsDir() + separator() + name, true);
 //    //			rm(ToolsManager::toolsDir() + separator() + name);
-//    //			_toolboxTree.RemoveUrls(_toolboxTree.currentItem());
-//    //			delete _toolboxTree.takeItem(_toolboxTree.currentRow());
+//    //			ui->treeWidget->RemoveUrls(ui->treeWidget->currentItem());
+//    //			delete ui->treeWidget->takeItem(ui->treeWidget->currentRow());
 
 //    //			for (int i = 0; i < m_ItemUrls.size(); i++) {
 //    //				if (m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
@@ -339,94 +273,87 @@ ToolboxSettings::~ToolboxSettings()
 //    //	}
 //}
 
-//void ToolboxSettings::toolboxAddButtonClicked()
-//{
-//    int count = 1;
-//    auto name = QString("Item%1").arg(count);
-//    while(_toolboxTree.contains(name)) {
-//        name.remove(name.size() - 1, 1);
-//        count++;
-//        name += QString::number(count);
-//    }
+QString ToolboxSettings::handleImports(const QStringList& fileNames)
+{
+    QString msg;
+    for (auto fileName : fileNames) {
+        QTemporaryDir dir;
+        if (dir.isValid()) {
+            if (Zipper::extractZip(rdfile(fileName), dir.path())) {
+                if (SaveManager::isOwctrl(dir.path())) {
+                    if (ToolsManager::instance()->addTool(dir.path())) {
+                        msg = "Tool import has successfully done.";
+                    } else {
+                        msg = "An unknown error occurred.";
+                    }
+                } else {
+                    msg = "Tool is not valid or doesn't meet Owctrl™ requirements.";
+                }
+            } else {
+                msg = "Extraction failed, zip file is not valid.";
+            }
+        } else {
+            msg = "Temporary directory creation failed.";
+        }
+    }
+    return msg;
+}
 
-//    auto itemPath = ToolsManager::toolsDir() + separator() + name;
-//    auto iconPath = itemPath + separator() + DIR_THIS + separator() + "icon.png";
-//    auto qmlPath = itemPath + separator() + DIR_THIS + separator() + "main.png";
+void ToolboxSettings::on_btnFileDialog_clicked()
+{
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Open Image"),
+      QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
+      tr("Image Files (*.png *.jpg *.bmp)"));
+    if (!fileName.isEmpty()) {
+        ui->txtIcon->setText(fileName);
+        emit ui->txtIcon->editingFinished();
+    }
+}
 
-//    if (!mkdir(itemPath) || !cp(DIR_QRC_ITEM, itemPath, true, true))
-//        return;
+void ToolboxSettings::on_btnAdd_clicked()
+{
+    ToolsManager::instance()->createNewTool();
+}
 
-//    SaveManager::refreshToolUid(itemPath);
+void ToolboxSettings::on_btnRemove_clicked()
+{
+    ToolsManager::instance()->removeTool(dname(dname(ui->treeWidget->urls
+      (ui->treeWidget->currentItem()).first().toLocalFile())));
+}
 
-//    QList<QUrl> urls;
-//    urls << QUrl::fromLocalFile(qmlPath);
+void ToolboxSettings::on_btnImport_clicked()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setNameFilter(tr("Zip files (*.zip)"));
+    dialog.setViewMode(QFileDialog::Detail);
+    if (dialog.exec()) {
+        auto msg = handleImports(dialog.selectedFiles());
+        QMessageBox::information(this, "Finished",
+          msg.contains("successfully") ? msg :
+            "One or more files contain errors: " + msg);
+    }
+}
 
-//    auto category = SaveManager::toolCategory(itemPath);
-//    auto topItem = _toolboxTree.categoryItem(category);
-//    if (!topItem) {
-//        topItem = new QTreeWidgetItem;
-//        topItem->setText(0, category);
-//        _toolboxTree.addTopLevelItem(topItem);
-//        topItem->setExpanded(true);
-//    }
-
-//    QTreeWidgetItem* item = new QTreeWidgetItem;
-//    item->setText(0, name);
-//    item->setIcon(0, QIcon(iconPath));
-//    topItem->addChild(item);
-//    _toolboxTree.addUrls(item, urls);
-//    _toolboxEditButton.setChecked(true);
-//}
-
-//void ToolboxSettings::toolboxExportButtonClicked()
-//{
-//    QFileDialog dialog(this);
-//    dialog.setFileMode(QFileDialog::Directory);
-//    dialog.setViewMode(QFileDialog::Detail);
-//    dialog.setOption(QFileDialog::ShowDirsOnly, true);
-//    if (dialog.exec()) {
-//        auto dir = dname(dname(_toolboxTree.urls(_toolboxTree.currentItem())[0].toLocalFile()));
-//        auto toolName = _toolboxTree.currentItem()->text(0);
-//        if (!rm(dialog.selectedFiles().at(0) + separator() + toolName + ".zip")) return;
-//        Zipper::compressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip");
-//        QMessageBox::information(this, "Done", "Tool export is done.");
-//    }
-//}
-
-//void ToolboxSettings::toolboxImportButtonClicked()
-//{
-//    QFileDialog dialog(this);
-//    dialog.setFileMode(QFileDialog::ExistingFiles);
-//    dialog.setNameFilter(tr("Zip files (*.zip)"));
-//    dialog.setViewMode(QFileDialog::Detail);
-//    if (dialog.exec()) {
-//        handleImports(dialog.selectedFiles());
-//        QMessageBox::information(this, "Done", "Tool import is done.");
-//    }
-//}
-
-//void ToolboxSettings::handleImports(const QStringList& fileNames)
-//{
-//    for (auto fileName : fileNames) {
-//        auto name = fname(fileName.remove(fileName.size() - 4, 4));
-//        int count = 1;
-//        while(toolboxTree()->contains(name)) {
-//            if (count > 1)
-//                name.remove(name.size() - 1, 1);
-//            count++;
-//            name += QString::number(count);
-//        }
-
-//        auto itemPath = ToolsManager::toolsDir() + separator() + name;
-//        if (!mkdir(itemPath) || !Zipper::extractZip(rdfile(fileName + ".zip"), itemPath))
-//            return;
-
-//        if (!SaveManager::isOwctrl(itemPath)) {
-//            rm(itemPath);
-//            return;
-//        }
-
-//        SaveManager::refreshToolUid(itemPath);
-//        ToolsManager::addTool(name);
-//    }
-//}
+void ToolboxSettings::on_btnExport_clicked()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    if (dialog.exec()) {
+        QString msg;
+        auto dir = dname(dname(ui->treeWidget->urls(ui->treeWidget->currentItem()).first().toLocalFile()));
+        auto toolName = ui->treeWidget->currentItem()->text(0);
+        if (rm(dialog.selectedFiles().first() + separator() + toolName + ".zip")) {
+            if (Zipper::compressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip")) {
+                msg = "Tool export has successfully done.";
+            } else {
+                msg = "An unknown error occurred while making zip file.";
+            }
+        } else {
+            msg = "An error occurred while removing existing zip file within selected directory.";
+        }
+        QMessageBox::information(this, "Finished", msg);
+    }
+}

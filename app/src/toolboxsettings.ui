@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>470</height>
+    <height>462</height>
    </rect>
   </property>
   <property name="palette">
@@ -113,7 +113,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Tools:</string>
+        <string>Tool Library:</string>
        </property>
       </widget>
      </item>
@@ -160,7 +160,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Settings:</string>
+        <string>Options:</string>
        </property>
       </widget>
      </item>
@@ -174,8 +174,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>569</width>
-          <height>403</height>
+          <width>554</width>
+          <height>390</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
@@ -196,12 +196,41 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QPushButton" name="btnAdd">
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="toolTip">
+               <string>Create new tool.</string>
+              </property>
               <property name="text">
-               <string>Add New Tool</string>
+               <string>Create New Tool</string>
               </property>
               <property name="icon">
                <iconset resource="resources.qrc">
                 <normaloff>:/resources/images/newfile.png</normaloff>:/resources/images/newfile.png</iconset>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnImport">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="toolTip">
+               <string>Import an existing tool.</string>
+              </property>
+              <property name="text">
+               <string>Import</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/resources/images/undo.png</normaloff>:/resources/images/undo.png</iconset>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
@@ -220,13 +249,19 @@
             </sizepolicy>
            </property>
            <property name="title">
-            <string>Remove/Import/Export</string>
+            <string>Remove/Export</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <widget class="QPushButton" name="btnRemove">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="toolTip">
+               <string>Remove selected tool from the library.</string>
               </property>
               <property name="text">
                <string>Remove Tool</string>
@@ -241,26 +276,15 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnImport">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Import</string>
-              </property>
-              <property name="icon">
-               <iconset resource="resources.qrc">
-                <normaloff>:/resources/images/undo.png</normaloff>:/resources/images/undo.png</iconset>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="btnExport">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="toolTip">
+               <string>Export selected tool.</string>
               </property>
               <property name="text">
                <string>Export</string>
@@ -295,84 +319,6 @@
             <property name="verticalSpacing">
              <number>5</number>
             </property>
-            <item row="0" column="0" rowspan="4">
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <property name="spacing">
-               <number>4</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="lblName">
-                <property name="text">
-                 <string>Name:</string>
-                </property>
-                <property name="buddy">
-                 <cstring>txtName</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="txtName">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="lblCategory">
-                <property name="text">
-                 <string>Category:</string>
-                </property>
-                <property name="buddy">
-                 <cstring>txtCategory</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="txtCategory">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="lblIcon">
-                <property name="text">
-                 <string>Icon:</string>
-                </property>
-                <property name="buddy">
-                 <cstring>txtIcon</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="txtIcon">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="placeholderText">
-                 <string>Local urls have to be relative to selected tool's directory</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="lblPreview">
-              <property name="text">
-               <string>Icon:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QPushButton" name="btnSave">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Save</string>
-              </property>
-             </widget>
-            </item>
             <item row="3" column="1">
              <widget class="QLabel" name="lblIconPreview">
               <property name="sizePolicy">
@@ -392,6 +338,9 @@
                 <width>64</width>
                 <height>64</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>Icon preview will be shown here.</string>
               </property>
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
@@ -432,6 +381,112 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="0" rowspan="4">
+             <layout class="QGridLayout" name="gridLayout_3">
+              <property name="spacing">
+               <number>5</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="lblName">
+                <property name="text">
+                 <string>Name:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>txtName</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLineEdit" name="txtIcon">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Tool icon. It can be either an local or remote url.</string>
+                </property>
+                <property name="placeholderText">
+                 <string>internet urls are accepted</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="lblCategory">
+                <property name="text">
+                 <string>Category:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>txtCategory</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="lblIcon">
+                <property name="text">
+                 <string>Icon:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>txtIcon</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QToolButton" name="btnFileDialog">
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="toolTip">
+                 <string>Show file dialog to select an image file for icon.</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" colspan="2">
+               <widget class="QLineEdit" name="txtCategory">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Tool category.</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="2">
+               <widget class="QLineEdit" name="txtName">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Tool name. It can contain UTF-8 characters.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="5" column="1">
+             <widget class="QPushButton" name="btnSave">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="toolTip">
+               <string>Save changes made on current tool.</string>
+              </property>
+              <property name="text">
+               <string>Save</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblPreview">
+              <property name="text">
+               <string>Icon:</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -455,11 +510,46 @@
     </layout>
    </item>
    <item row="1" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Ok</set>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>5</number>
      </property>
-    </widget>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnOk">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>Close the dialog.</string>
+       </property>
+       <property name="text">
+        <string>Ok</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -472,7 +562,6 @@
  </customwidgets>
  <tabstops>
   <tabstop>btnAdd</tabstop>
-  <tabstop>btnImport</tabstop>
   <tabstop>btnExport</tabstop>
   <tabstop>txtName</tabstop>
   <tabstop>txtCategory</tabstop>
@@ -486,18 +575,18 @@
  </resources>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
+   <sender>btnOk</sender>
+   <signal>clicked()</signal>
    <receiver>ToolboxSettings</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>745</x>
-     <y>409</y>
+     <x>760</x>
+     <y>426</y>
     </hint>
     <hint type="destinationlabel">
-     <x>794</x>
-     <y>374</y>
+     <x>599</x>
+     <y>443</y>
     </hint>
    </hints>
   </connection>

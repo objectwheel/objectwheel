@@ -24,6 +24,11 @@
 #define DEFAULT_TOOLS_DIRECTORY "tools"
 #define DEFAULT_TOOLS_URL "qrc:/resources/tools/tools.json"
 
+void fillTree(ToolboxTree* toolboxTree)
+{
+
+}
+
 bool isProjectFull()
 {
     if (ProjectManager::currentProject().isEmpty())
@@ -60,22 +65,25 @@ QStringList ToolsManager::categories() const
     return categories;
 }
 
-void ToolsManager::addTool(const QString& toolPath)
+bool ToolsManager::addTool(const QString& toolPath)
 {
     if (ProjectManager::currentProject().isEmpty() ||
       toolPath.isEmpty() || !SaveManager::isOwctrl(toolPath))
-        return;
+        return false;
 
+    const bool isNewTool = !toolPath.contains(toolsDir());
     QString newToolPath;
-    if (!toolPath.contains(toolsDir())) {
+    if (isNewTool) {
         newToolPath = toolsDir() + separator() +
           QString::number(SaveManager::biggestDir(toolsDir()) + 1);
 
         if (!mkdir(newToolPath))
-            return;
+            return false;
 
         if (!cp(toolPath, newToolPath, true))
-            return;
+            return false;
+
+        SaveManager::refreshToolUid(newToolPath);
     } else {
         newToolPath = toolPath;
     }
@@ -105,7 +113,13 @@ void ToolsManager::addTool(const QString& toolPath)
         item->setIcon(0, QIcon(dir + "icon.png"));
         topItem->addChild(item);
         tree->addUrls(item, urls);
+
+        if (isNewTool) {
+            item->setSelected(true);
+            tree->scrollToItem(item);
+        }
     }
+    return true;
 }
 
 void ToolsManager::removeTool(const QString& toolPath)
@@ -116,7 +130,7 @@ void ToolsManager::removeTool(const QString& toolPath)
 void ToolsManager::addToolboxTree(ToolboxTree* toolboxTree)
 {
     _toolboxTreeList << toolboxTree;
-    // TODO: fillTree(toolboxTree);
+    fillTree(toolboxTree);
 }
 
 void ToolsManager::downloadTools(const QUrl& url)
