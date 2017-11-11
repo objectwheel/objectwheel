@@ -17,11 +17,14 @@ class ToolboxSettings : public QDialog
 
     private slots:
         QString handleImports(const QStringList& fileNames);
-        void on_btnAdd_clicked();
+        void on_btnReset_clicked();
         void on_btnRemove_clicked();
+        void on_btnAdd_clicked();
         void on_btnImport_clicked();
         void on_btnExport_clicked();
         void on_btnFileDialog_clicked();
+
+        void on_btnSave_clicked();
 
     private:
         Ui::ToolboxSettings* ui;

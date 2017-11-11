@@ -12,9 +12,10 @@
 #define DIR_OWDB "owdb"
 #define DIR_MAINFORM "1"
 #define DIR_QRC_OWDB ":/resources/qmls/owdb"
-#define DIR_QRC_ITEM ":/resources/qmls/item"
 #define DIR_QRC_FORM ":/resources/qmls/form"
 #define FILE_PROPERTIES "_properties.json"
+#define FILE_ICON "icon.png" //TODO: Apply everywhere
+#define FILE_MAIN "main.qml" //TODO: Apply everywhere
 #define TAG_ID "id"
 #define TAG_X "x"
 #define TAG_Y "y"

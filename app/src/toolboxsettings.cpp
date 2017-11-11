@@ -69,16 +69,6 @@ ToolboxSettings::ToolboxSettings(QWidget *parent)
         fnDisableBtnSave();
         ui->lblLoading->setPixmap(QPixmap());
         ui->txtIcon->setEnabled(true);
-
-        //        const auto icndir = dirctrl + separator() + "/icon.png";
-        //        if (pixmap.isNull()) return;
-        //        QByteArray bArray;
-        //        QBuffer buffer(&bArray);
-        //        buffer.open(QIODevice::WriteOnly);
-        //        if (!pixmap.save(&buffer,"PNG")) return;
-        //        buffer.close();
-        //        if (!wrfile(icndir, bArray)) return;
-        //        ui->lblIcon->setText("icon.png");
     });
 
 
@@ -281,7 +271,7 @@ QString ToolboxSettings::handleImports(const QStringList& fileNames)
         if (dir.isValid()) {
             if (Zipper::extractZip(rdfile(fileName), dir.path())) {
                 if (SaveManager::isOwctrl(dir.path())) {
-                    if (ToolsManager::instance()->addTool(dir.path())) {
+                    if (ToolsManager::instance()->addTool(dir.path(), true)) {
                         msg = "Tool import has successfully done.";
                     } else {
                         msg = "An unknown error occurred.";
@@ -299,26 +289,25 @@ QString ToolboxSettings::handleImports(const QStringList& fileNames)
     return msg;
 }
 
-void ToolboxSettings::on_btnFileDialog_clicked()
+void ToolboxSettings::on_btnReset_clicked()
 {
-    auto fileName = QFileDialog::getOpenFileName(this, tr("Open Image"),
-      QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
-      tr("Image Files (*.png *.jpg *.bmp)"));
-    if (!fileName.isEmpty()) {
-        ui->txtIcon->setText(fileName);
-        emit ui->txtIcon->editingFinished();
-    }
+    if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Reset",
+     "This will reset tool library to factory defaults and remove"
+      " all custom tools. Are you sure?"))
+        ToolsManager::instance()->resetTools();
+}
+
+void ToolboxSettings::on_btnRemove_clicked()
+{
+    if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Removal",
+      "This will remove selected tool from tool library. Are you sure?"))
+        ToolsManager::instance()->removeTool(dname(dname(ui->treeWidget->urls
+          (ui->treeWidget->currentItem()).first().toLocalFile())));
 }
 
 void ToolboxSettings::on_btnAdd_clicked()
 {
     ToolsManager::instance()->createNewTool();
-}
-
-void ToolboxSettings::on_btnRemove_clicked()
-{
-    ToolsManager::instance()->removeTool(dname(dname(ui->treeWidget->urls
-      (ui->treeWidget->currentItem()).first().toLocalFile())));
 }
 
 void ToolboxSettings::on_btnImport_clicked()
@@ -356,4 +345,26 @@ void ToolboxSettings::on_btnExport_clicked()
         }
         QMessageBox::information(this, "Finished", msg);
     }
+}
+
+void ToolboxSettings::on_btnFileDialog_clicked()
+{
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Open Image"),
+      QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
+      tr("Image Files (*.png *.jpg *.bmp)"));
+    if (!fileName.isEmpty()) {
+        ui->txtIcon->setText(fileName);
+        emit ui->txtIcon->editingFinished();
+    }
+}
+
+void ToolboxSettings::on_btnSave_clicked()
+{
+    ChangeSet changeSet;
+    changeSet.category = ui->txtCategory->text();
+    changeSet.iconPath = ui->txtIcon->text();
+    changeSet.name = ui->txtName->text();
+    changeSet.toolPath = dname(dname(ui->treeWidget->urls
+      (ui->treeWidget->currentItem()).first().toLocalFile()));
+    ToolsManager::instance()->changeTool(changeSet);
 }

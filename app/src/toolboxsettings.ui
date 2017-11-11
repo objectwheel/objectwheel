@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>462</height>
+    <height>450</height>
    </rect>
   </property>
   <property name="palette">
@@ -175,7 +175,7 @@
           <x>0</x>
           <y>0</y>
           <width>554</width>
-          <height>390</height>
+          <height>505</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
@@ -238,6 +238,13 @@
              </widget>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
           </widget>
          </item>
          <item>
@@ -405,7 +412,7 @@
                  <string>Tool icon. It can be either an local or remote url.</string>
                 </property>
                 <property name="placeholderText">
-                 <string>internet urls are accepted</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -458,7 +465,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="toolTip">
-                 <string>Tool name. It can contain UTF-8 characters.</string>
+                 <string>Tool name.</string>
                 </property>
                </widget>
               </item>
@@ -478,12 +485,121 @@
               <property name="text">
                <string>Save</string>
               </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item row="2" column="1">
              <widget class="QLabel" name="lblPreview">
               <property name="text">
                <string>Icon:</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="resetGroupBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Reset</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QPushButton" name="btnReset">
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>185</red>
+                    <green>35</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>167</red>
+                    <green>17</green>
+                    <blue>4</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>185</red>
+                    <green>35</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>167</red>
+                    <green>17</green>
+                    <blue>4</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>127</red>
+                    <green>127</green>
+                    <blue>127</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>148</red>
+                    <green>148</green>
+                    <blue>148</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="toolTip">
+               <string>Reset tool library to factory defaults and remove all custom tools.</string>
+              </property>
+              <property name="text">
+               <string>Reset Tool Library</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/resources/images/error.png</normaloff>:/resources/images/error.png</iconset>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
               </property>
              </widget>
             </item>

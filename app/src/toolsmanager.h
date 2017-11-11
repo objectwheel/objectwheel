@@ -7,6 +7,13 @@
 class QJsonObject;
 class ToolboxTree;
 
+struct ChangeSet {
+    QString toolPath;
+    QString category;
+    QString iconPath;
+    QString name;
+};
+
 class ToolsManager : QObject
 {
         Q_OBJECT
@@ -17,7 +24,8 @@ class ToolsManager : QObject
         QString toolsDir() const;
         QStringList categories() const;
 
-        bool addTool(const QString& toolPath);
+        bool addTool(const QString& toolPath, const bool select, const bool qrc = false);
+        void changeTool(const ChangeSet& changeSet);
         void removeTool(const QString& toolPath);
         void addToolboxTree(ToolboxTree* toolboxTree);
         void downloadTools(const QUrl& url = QUrl());

@@ -205,9 +205,6 @@
         <file>resources/images/newfolder.png</file>
         <file>resources/images/up.png</file>
         <file>resources/images/rename.png</file>
-        <file>resources/qmls/item/t/_properties.json</file>
-        <file>resources/qmls/item/t/icon.png</file>
-        <file>resources/qmls/item/t/main.qml</file>
         <file>resources/tools/Timer.zip</file>
         <file>resources/tools/Image.zip</file>
         <file>resources/tools/Calendar.zip</file>
@@ -247,5 +244,8 @@
         <file>resources/images/nopreview.png</file>
         <file>resources/tools/Pinwheel.zip</file>
         <file>resources/images/settings.png</file>
+        <file>resources/qmls/control/t/_properties.json</file>
+        <file>resources/qmls/control/t/icon.png</file>
+        <file>resources/qmls/control/t/main.qml</file>
     </qresource>
 </RCC>
