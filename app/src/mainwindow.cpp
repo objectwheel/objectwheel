@@ -218,6 +218,7 @@ void MainWindow::setupGui()
         for (auto childControl : control->childControls())
             childControl->refresh();
         splitter->setSizes(sizes);
+        // FIXME: Close docs on qml editor whenever a Control GUI Editor subject changed
     });
 
     /*** INSPECTOR DOCK WIDGET ***/

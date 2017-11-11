@@ -684,6 +684,14 @@ bool QmlEditorView::isOpen(Control* control) const
     return false;
 }
 
+bool QmlEditorView::isOpen(const QString& controlPath) const
+{
+    for (auto item : _editorItems)
+        if (item.control->dir().contains(controlPath))
+            return true;
+    return false;
+}
+
 void QmlEditorView::addControl(Control* control)
 {
     for (auto& item : _editorItems)

@@ -27,12 +27,16 @@
 #define DEFAULT_TOOLS_URL "qrc:/resources/tools/tools.json"
 #define DIR_QRC_CONTROL ":/resources/qmls/control"
 
-void fillTree(ToolboxTree* toolboxTree)
+//!
+//! *************************** [global] ***************************
+//!
+
+static void fillTree(ToolboxTree* toolboxTree)
 {
 
 }
 
-void flushChangeSet(const ChangeSet& changeSet)
+static void flushChangeSet(const ChangeSet& changeSet)
 {
     auto dirCtrl = changeSet.toolPath +
       separator() + DIR_THIS;
@@ -62,7 +66,7 @@ void flushChangeSet(const ChangeSet& changeSet)
     if (!wrfile(dirIcon, bArray)) return;
 }
 
-bool isProjectFull()
+static bool isProjectFull()
 {
     if (ProjectManager::currentProject().isEmpty())
         return false;
@@ -72,6 +76,10 @@ bool isProjectFull()
     else
         return true;
 }
+
+//!
+//! *********************** [ToolsManager] ***********************
+//!
 
 ToolsManager* ToolsManager::instance()
 {
@@ -166,6 +174,7 @@ void ToolsManager::changeTool(const ChangeSet& changeSet)
                 auto ci = tli->child(j);
                 if (dname(dname(tree->urls(ci).first().
                   toLocalFile())) == changeSet.toolPath) {
+                    tree->removeUrls(ci);
                     delete tli->takeChild(j);
                     if (tli->childCount() <= 0)
                         delete tree->takeTopLevelItem(i);
@@ -180,7 +189,24 @@ void ToolsManager::changeTool(const ChangeSet& changeSet)
 
 void ToolsManager::removeTool(const QString& toolPath)
 {
-    //clear selection
+    for (auto tree : _toolboxTreeList) {
+        tree->clearSelection(); tree->setCurrentItem(nullptr);
+        for (int i = 0; i < tree->topLevelItemCount(); i++) {
+            auto tli = tree->topLevelItem(i);
+            for (int j = 0; j < tli->childCount(); j++) {
+                auto ci = tli->child(j);
+                if (dname(dname(tree->urls(ci).first().
+                  toLocalFile())) == toolPath) {
+                    tree->removeUrls(ci);
+                    delete tli->takeChild(j);
+                    if (tli->childCount() <= 0)
+                        delete tree->takeTopLevelItem(i);
+                    rm(toolPath);
+                    emit tree->itemSelectionChanged();
+                }
+            }
+        }
+    }
 }
 
 void ToolsManager::addToolboxTree(ToolboxTree* toolboxTree)
@@ -256,6 +282,13 @@ void ToolsManager::createNewTool()
 
 void ToolsManager::resetTools()
 {
+    for (auto tree : _toolboxTreeList) {
+        tree->clearSelection();
+        tree->setCurrentItem(nullptr);
+        tree->clear();
+        tree->clearUrls();
+        emit tree->itemSelectionChanged();
+    }
     rm(toolsDir());
     downloadTools();
 }

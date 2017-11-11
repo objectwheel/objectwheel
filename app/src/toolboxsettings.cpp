@@ -12,6 +12,41 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QMessageBox>
+#include <designmanager.h>
+
+//!
+//! *************************** [global] ***************************
+//!
+
+static QString handleImports(const QStringList& fileNames)
+{
+    QString msg;
+    for (auto fileName : fileNames) {
+        QTemporaryDir dir;
+        if (dir.isValid()) {
+            if (Zipper::extractZip(rdfile(fileName), dir.path())) {
+                if (SaveManager::isOwctrl(dir.path())) {
+                    if (ToolsManager::instance()->addTool(dir.path(), true)) {
+                        msg = "Tool import has successfully done.";
+                    } else {
+                        msg = "An unknown error occurred.";
+                    }
+                } else {
+                    msg = "Tool is not valid or doesn't meet Owctrl™ requirements.";
+                }
+            } else {
+                msg = "Extraction failed, zip file is not valid.";
+            }
+        } else {
+            msg = "Temporary directory creation failed.";
+        }
+    }
+    return msg;
+}
+
+//!
+//! ********************** [ToolboxSettings] **********************
+//!
 
 ToolboxSettings::ToolboxSettings(QWidget *parent)
     : QDialog(parent)
@@ -70,96 +105,6 @@ ToolboxSettings::ToolboxSettings(QWidget *parent)
         ui->lblLoading->setPixmap(QPixmap());
         ui->txtIcon->setEnabled(true);
     });
-
-
-//    _toolboxAddButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-//    _toolboxAddButton.setColor("#6BB64B");
-//    _toolboxAddButton.setFixedSize(fit(17),fit(17));
-//    _toolboxAddButton.setRadius(fit(8));
-//    _toolboxAddButton.setIconSize(QSize(fit(13),fit(13)));
-//    _toolboxAddButton.setIcon(QIcon(":/resources/images/plus.png"));
-//    connect(&_toolboxAddButton, SIGNAL(clicked(bool)), SLOT(toolboxAddButtonClicked()) );
-
-//    _toolboxRemoveButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-//    _toolboxRemoveButton.setColor("#C61717");
-//    _toolboxRemoveButton.setFixedSize(fit(17),fit(17));
-//    _toolboxRemoveButton.setRadius(fit(8));
-//    _toolboxRemoveButton.setIconSize(QSize(fit(13),fit(13)));
-//    _toolboxRemoveButton.setIcon(QIcon(":/resources/images/minus.png"));
-//    _toolboxRemoveButton.setDisabled(true);
-//    connect(&_toolboxRemoveButton, SIGNAL(clicked(bool)), SLOT(toolboxRemoveButtonClicked()) );
-
-//    _toolboxEditButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-//    _toolboxEditButton.setColor("#697D8C");
-//    _toolboxEditButton.setFixedSize(fit(17),fit(17));
-//    _toolboxEditButton.setRadius(fit(8));
-//    _toolboxEditButton.setCheckedColor(QColor("#6BB64B"));
-//    _toolboxEditButton.setCheckable(true);
-//    _toolboxEditButton.setIconSize(QSize(fit(13),fit(13)));
-//    _toolboxEditButton.setIcon(QIcon(":/resources/images/edit.png"));
-//    _toolboxEditButton.setDisabled(true);
-//    connect(&_toolboxEditButton, SIGNAL(toggled(bool)), SLOT(toolboxEditButtonToggled(bool)) );
-
-//    _toolboxImportButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-//    _toolboxImportButton.setColor("#3498DB");
-//    _toolboxImportButton.setFixedSize(fit(17),fit(17));
-//    _toolboxImportButton.setRadius(fit(8));
-//    _toolboxImportButton.setIconSize(QSize(fit(13),fit(13)));
-//    _toolboxImportButton.setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(-90))));
-//    connect(&_toolboxImportButton, SIGNAL(clicked(bool)), SLOT(toolboxImportButtonClicked()) );
-
-//    _toolboxExportButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-//    _toolboxExportButton.setColor("#E8BC43");
-//    _toolboxExportButton.setFixedSize(fit(17),fit(17));
-//    _toolboxExportButton.setRadius(fit(8));
-//    _toolboxExportButton.setIconSize(QSize(fit(13),fit(13)));
-//    _toolboxExportButton.setIcon(QIcon(QPixmap(":/resources/images/left-arrow.png").transformed(QTransform().rotate(90))));
-//    _toolboxExportButton.setDisabled(true);
-//    connect(&_toolboxExportButton, SIGNAL(clicked(bool)), SLOT(toolboxExportButtonClicked()) );
-
-//    _toolboxAdderAreaButtonSideHLay.setSpacing(0);
-//    _toolboxAdderAreaButtonSideHLay.setContentsMargins(0, 0, 0, 0);
-//    _toolboxAdderAreaButtonSideHLay.addWidget(&_toolboxAddButton);
-//    _toolboxAdderAreaButtonSideHLay.addStretch();
-//    _toolboxAdderAreaButtonSideHLay.addWidget(&_toolboxRemoveButton);
-//    _toolboxAdderAreaButtonSideHLay.addStretch();
-//    _toolboxAdderAreaButtonSideHLay.addWidget(&_toolboxEditButton);
-//    _toolboxAdderAreaButtonSideHLay.addStretch();
-//    _toolboxAdderAreaButtonSideHLay.addWidget(&_toolboxImportButton);
-//    _toolboxAdderAreaButtonSideHLay.addStretch();
-//    _toolboxAdderAreaButtonSideHLay.addWidget(&_toolboxExportButton);
-
-//    _toolboxUrlBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-//    _toolboxUrlBox.setFixedHeight(fit(30));
-//    _toolboxUrlBox.setPlaceholderText("Icon url");
-//    _toolboxUrlBox.setText(":/resources/images/item.png");
-//    _toolboxUrlBox.setDisabled(true);
-//    _toolboxUrlBox.setHidden(true);
-//    connect(&_toolboxUrlBox, SIGNAL(textChanged(QString)),
-//            SLOT(handleToolboxUrlboxChanges(QString)));
-
-//    _toolBoxNameBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-//    _toolBoxNameBox.setFixedHeight(fit(30));
-//    _toolBoxNameBox.setPlaceholderText("Tool name");
-//    _toolBoxNameBox.setDisabled(true);
-//    _toolBoxNameBox.setHidden(true);
-//    connect(&_toolBoxNameBox, SIGNAL(textChanged(QString)),
-//            SLOT(handleToolboxNameboxChanges(QString)));
-
-//    _toolboxAdderAreaEditingLayout.addWidget(&_toolBoxNameBox);
-//    _toolboxAdderAreaEditingLayout.addWidget(&_toolboxUrlBox);
-//    _toolboxAdderAreaEditingLayout.setSpacing(0);
-//    _toolboxAdderAreaEditingLayout.setContentsMargins(0, 0, 0, 0);
-
-//    _toolboxAdderAreaVLay.addLayout(&_toolboxAdderAreaButtonSideHLay);
-//    _toolboxAdderAreaVLay.addLayout(&_toolboxAdderAreaEditingLayout);
-//    _toolboxAdderAreaVLay.addStretch();
-//    _toolboxAdderAreaVLay.setSpacing(fit(2));
-//    _toolboxAdderAreaVLay.setContentsMargins(0, 0, 0, 0);
-//    _toolboxAdderAreaWidget.setLayout(&_toolboxAdderAreaVLay);
-//    _toolboxAdderAreaWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-//    _toolboxAdderAreaWidget.setFixedHeight(fit(17));
-
 }
 
 ToolboxSettings::~ToolboxSettings()
@@ -167,142 +112,55 @@ ToolboxSettings::~ToolboxSettings()
     delete ui;
 }
 
-
-//void ToolboxSettings::handleToolboxUrlboxChanges(const QString& text)
-//{
-//    QPixmap pixmap;
-//    pixmap.loadFromData(dlfile(text));
-//    if (pixmap.isNull()) return;
-//    auto icon = dname(ui->treeWidget->urls(ui->treeWidget->currentItem())[0].toLocalFile()) + "/icon.png";
-//    QByteArray bArray;
-//    QBuffer buffer(&bArray);
-//    buffer.open(QIODevice::WriteOnly);
-//    if (!pixmap.save(&buffer,"PNG")) return;
-//    buffer.close();
-//    if (!wrfile(icon, bArray)) return;
-//    ui->treeWidget->currentItem()->setIcon(0, QIcon(icon));
-//}
-
-//void ToolboxSettings::handleToolboxNameboxChanges(QString /*name*/)
-//{
-//    //	if (name == ui->treeWidget->currentItem()->text() || name == "") return;
-
-//    //	int count = 1;
-//    //	for (int i = 0; i < ui->treeWidget->count(); i++) {
-//    //		if (ui->treeWidget->item(i)->text() == name) {
-//    //			if (count > 1) {
-//    //				name.remove(name.size() - 1, 1);
-//    //			}
-//    //			i = -1;
-//    //			count++;
-//    //			name += QString::number(count);
-//    //		}
-//    //	}
-
-//    //	auto from = ToolsManager::toolsDir() + "/" + ui->treeWidget->currentItem()->text();
-//    //	auto to = ToolsManager::toolsDir() + "/" + name;
-//    //	if (!rn(from, to)) qFatal("ToolboxSettings : Error occurred");
-
-//    //	ui->treeWidget->currentItem()->setText(name);
-
-//    //	QList<QUrl> urls;
-//    //	urls << QUrl::fromLocalFile(to + "/main.qml");
-//    //	ui->treeWidget->RemoveUrls(ui->treeWidget->currentItem());
-//    //	ui->treeWidget->addUrls(ui->treeWidget->currentItem(),urls);
-
-//    //	for (int i = 0; i < m_ItemUrls.size(); i++) {
-//    //		if (m_ItemUrls[i].toLocalFile() == (from+"/main.qml")) {
-//    //			m_ItemUrls[i] = QUrl::fromLocalFile(to+"/main.qml");
-//    //		}
-//    //	}
-
-//    //	qmlEditor->updateCacheForRenamedEntry(from, to, true);
-//}
-
-//void ToolboxSettings::toolboxRemoveButtonClicked()
-//{
-//    //	if (ui->treeWidget->currentRow() < 0) return;
-//    //	auto name = ui->treeWidget->currentItem()->text();
-//    //	QMessageBox msgBox;
-//    //	msgBox.setText(QString("<b>This will remove %1 from Tool Library and Dashboard.</b>").arg(name));
-//    //	msgBox.setInformativeText("Do you want to continue?");
-//    //	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-//    //	msgBox.setDefaultButton(QMessageBox::No);
-//    //	msgBox.setIcon(QMessageBox::Warning);
-//    //	const int ret = msgBox.exec();
-//    //	switch (ret) {
-//    //		case QMessageBox::Yes: {
-//    //			qmlEditor->clearCacheFor(ToolsManager::toolsDir() + separator() + name, true);
-//    //			rm(ToolsManager::toolsDir() + separator() + name);
-//    //			ui->treeWidget->RemoveUrls(ui->treeWidget->currentItem());
-//    //			delete ui->treeWidget->takeItem(ui->treeWidget->currentRow());
-
-//    //			for (int i = 0; i < m_ItemUrls.size(); i++) {
-//    //				if (m_ItemUrls[i].toLocalFile() == (ToolsManager::toolsDir() + separator() + name + "/main.qml")) {
-//    //					auto items = GetAllChildren(m_Items[i]);
-//    //					for (auto item : items) {
-//    //						if (m_Items.contains(item)) {
-//    //							SaveManager::removeSave(designWidget.rootContext()->nameForObject(item));
-//    //							SaveManager::removeParentalRelationship(designWidget.rootContext()->nameForObject(item));
-//    //							designWidget.rootContext()->setContextProperty(
-//    //										designWidget.rootContext()->nameForObject(item), 0);
-//    //							int j = m_Items.indexOf(item);
-//    //							m_Items.removeOne(item);
-//    //							m_ItemUrls.removeAt(j);
-//    //							item->deleteLater();
-//    //						}
-//    //					}
-//    //				}
-//    //			}
-//    //			HideSelectionTools();
-//    //			break;
-//    //		} default: {
-//    //			// Do nothing
-//    //			break;
-//    //		}
-//    //	}
-//}
-
-QString ToolboxSettings::handleImports(const QStringList& fileNames)
-{
-    QString msg;
-    for (auto fileName : fileNames) {
-        QTemporaryDir dir;
-        if (dir.isValid()) {
-            if (Zipper::extractZip(rdfile(fileName), dir.path())) {
-                if (SaveManager::isOwctrl(dir.path())) {
-                    if (ToolsManager::instance()->addTool(dir.path(), true)) {
-                        msg = "Tool import has successfully done.";
-                    } else {
-                        msg = "An unknown error occurred.";
-                    }
-                } else {
-                    msg = "Tool is not valid or doesn't meet Owctrl™ requirements.";
-                }
-            } else {
-                msg = "Extraction failed, zip file is not valid.";
-            }
-        } else {
-            msg = "Temporary directory creation failed.";
-        }
-    }
-    return msg;
-}
-
 void ToolboxSettings::on_btnReset_clicked()
 {
     if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Reset",
      "This will reset tool library to factory defaults and remove"
-      " all custom tools. Are you sure?"))
-        ToolsManager::instance()->resetTools();
+      " all custom tools. Are you sure?")) {
+        bool obstacle = false;
+        for (int i = 0; i < ui->treeWidget->topLevelItemCount(); i++) {
+            auto tli = ui->treeWidget->topLevelItem(i);
+            for (int j = 0; j < tli->childCount(); j++) {
+                auto ci = tli->child(j);
+                auto currentDir = dname(dname(ui->treeWidget->
+                  urls(ci).first().toLocalFile()));//FIXME: Do same for Control GUI Editor /Tool Editor
+                // TODO: Check same for selected control's child controls
+                if (DesignManager::qmlEditorView()->isOpen(currentDir)) {
+                    obstacle = true;
+                    break;
+                }
+            }
+            if (obstacle)
+                break;
+        }
+
+        if (!obstacle) {
+            ToolsManager::instance()->resetTools();
+        } else { //FIXME: Do same for Control GUI Editor /Tool Editor
+            // TODO: Check same for selected control's child controls
+            QMessageBox::information(this, "Oops",
+              "Some tool documents are open within QML Editor or "
+              "Tool Editor, please close them first.");
+        }
+    }
 }
 
 void ToolboxSettings::on_btnRemove_clicked()
 {
     if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Removal",
-      "This will remove selected tool from tool library. Are you sure?"))
-        ToolsManager::instance()->removeTool(dname(dname(ui->treeWidget->urls
-          (ui->treeWidget->currentItem()).first().toLocalFile())));
+      "This will remove selected tool from tool library. Are you sure?")) {
+        auto currentDir = dname(dname(ui->treeWidget->urls
+          (ui->treeWidget->currentItem()).first().toLocalFile()));
+        if (!DesignManager::qmlEditorView()->isOpen(currentDir)) {
+            ToolsManager::instance()->removeTool(dname(dname(ui->treeWidget->urls
+              (ui->treeWidget->currentItem()).first().toLocalFile())));
+        } else { //FIXME: Do same for Control GUI Editor /Tool Editor
+            // TODO: Check same for selected control's child controls
+            QMessageBox::information(this, "Oops",
+              "Some documents belongs to this tool is open within QML "
+              "Editor or Tool Editor, please close them first.");
+        }
+    }
 }
 
 void ToolboxSettings::on_btnAdd_clicked()

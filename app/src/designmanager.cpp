@@ -34,6 +34,7 @@
 using namespace Fit;
 
 // TODO: Prevent NoSkin option for main form
+// FIXME: Bugs about Control GUI Editor
 
 class DesignManagerPrivate : public QObject
 {

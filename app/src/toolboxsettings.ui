@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>450</height>
+    <width>900</width>
+    <height>552</height>
    </rect>
   </property>
   <property name="palette">
@@ -174,14 +174,11 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>554</width>
-          <height>505</height>
+          <width>669</width>
+          <height>473</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
-         <property name="spacing">
-          <number>20</number>
-         </property>
          <item>
           <widget class="QGroupBox" name="newGroupBox">
            <property name="sizePolicy">
@@ -242,6 +239,9 @@
          </item>
          <item>
           <widget class="Line" name="line">
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -502,6 +502,9 @@
          </item>
          <item>
           <widget class="Line" name="line_2">
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
