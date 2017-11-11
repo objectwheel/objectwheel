@@ -133,10 +133,12 @@ class SaveManagerPrivate : public QObject
         QString parentDir(const Control* control) const;
 
         // Build qml object form url
-        QObject* requestItem(ExecError& err, const QString& path, QQmlEngine* engine, QQmlContext* context) const;
+        QObject* requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>&,
+          const QString& path, QQmlEngine* engine, QQmlContext* context) const;
 
         // Build qml object form data
-        QObject* requestItem(ExecError& err, const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const;
+        QObject* requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>&,
+          const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const;
 
         // Returns true if the given object is an instance of QQuickItem
         Type type(QObject* object) const;
@@ -465,17 +467,18 @@ QString SaveManagerPrivate::parentDir(const Control* control) const
     return dname(dname(control->dir()));
 }
 
-QObject* SaveManagerPrivate::requestItem(ExecError& err,
-                                         const QString& path, QQmlEngine* engine, QQmlContext* context) const
+QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>& comps,
+  const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
-    QQmlComponent comp(engine, QUrl(path + separator() +
-                                    DIR_THIS + separator() + "main.qml"));
-    auto item = comp.create(context);
-    if (!comp.errors().isEmpty()) {
+    QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine,
+      QUrl(path + separator() + DIR_THIS + separator() + "main.qml")));
+    auto item = comp->beginCreate(context);
+    if (comp->isError()) {
         err.type = CodeError;
         err.id = parent->id(path);
-        err.errors = comp.errors();
+        err.errors = comp->errors();
     } else {
+        comps << comp;
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
         if (type(item) == Window) {
             ((QQuickWindow*)item)->setX(parent->x(path));
@@ -493,18 +496,21 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err,
     return item;
 }
 
-QObject* SaveManagerPrivate::requestItem(ExecError& err, const QByteArray& data,
-                                         const QString& path, QQmlEngine* engine, QQmlContext* context) const
+QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>& comps,
+  const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
-    QQmlComponent comp(engine);
-    comp.setData(data, QUrl(path + separator() +
+    QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine));
+    comp->setData(data, QUrl(path + separator() +
                             DIR_THIS + separator() + "main.qml"));
-    auto item = comp.create(context);
-    if (!comp.errors().isEmpty()) {
+
+    auto item = comp->beginCreate(context);
+
+    if (comp->isError()) {
         err.type = CodeError;
         err.id = parent->id(path);
-        err.errors = comp.errors();
+        err.errors = comp->errors();
     } else {
+        comps << comp;
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
         if (type(item) == Window) {
             ((QQuickWindow*)item)->setX(parent->x(path));
@@ -653,10 +659,7 @@ QStringList SaveManager::masterPaths(const QString& topPath)
     return paths;
 }
 
-//WARNING: Problem with scope resolution,
-//         Component.onCompleted: Why items names are not reachable in this slot?
 //FIXME: Change the name of default context property 'dpi' everywhere
-//FIXME: Why we can't access any children of a form from another form like this: form1.btnOk.click()
 //WARNING: Update error messages
 ExecError SaveManager::execProject()
 {
@@ -674,6 +677,7 @@ ExecError SaveManager::execProject()
     }
 
     QList<QObject*> forms;
+    QList<QSharedPointer<QQmlComponent>> components;
     QQuickWindow* mainWindow = nullptr;
     QMap<QString, QQmlContext*> formContexes;
     auto engine = new QQmlEngine(_d->parent);
@@ -698,8 +702,8 @@ ExecError SaveManager::execProject()
                 if (index >= 0) {
                     childResults[childPath] = masterResults[childPath];
                 } else {
-                    childResults[childPath] = _d->requestItem(error,
-                                                              childPath, engine, masterContext);
+                    childResults[childPath] = _d->requestItem(error, components,
+                      childPath, engine, masterContext);
                     if (childResults[childPath] == nullptr) {
                         engine->deleteLater();
                         return error;
@@ -711,7 +715,7 @@ ExecError SaveManager::execProject()
                     }
                 }
                 masterContext->setContextProperty(id(childPath),
-                                                  childResults[childPath]);
+                  childResults[childPath]);
                 qApp->processEvents(QEventLoop::AllEvents, 10);
             }
 
@@ -733,10 +737,10 @@ ExecError SaveManager::execProject()
                     error.type = MultipleWindowsForMobileError;
                     return error;
                 }
-                masterResults[masterPath] = _d->requestItem(error,
+                masterResults[masterPath] = _d->requestItem(error, components,
                   formData, masterPath, engine, masterContext);
             } else {
-                masterResults[masterPath] = _d->requestItem(error,
+                masterResults[masterPath] = _d->requestItem(error, components,
                   masterPath, engine, masterContext);
             }
 
@@ -777,7 +781,7 @@ ExecError SaveManager::execProject()
                 }
             }
             masterContext->setContextProperty(id(masterPath),
-                                              masterResults[masterPath]);
+              masterResults[masterPath]);
 
             //! Place child items into master item visually
             // Only non-master nongui children were passed (because they don't have a visual parent)
@@ -821,6 +825,9 @@ ExecError SaveManager::execProject()
     }
 
     qApp->processEvents(QEventLoop::AllEvents, 10);
+
+    for (auto comp : components)
+        comp->completeCreate();
 
     QEventLoop loop;
     if (mainSkin == Skin::PhonePortrait ||

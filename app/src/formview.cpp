@@ -242,9 +242,9 @@ void FormViewPrivate::handlePasteAction()
             childControl->refresh();
     }
 }
-
+//TODO: Add Cmd + Del action to del action shortcuts only on mac
 void FormViewPrivate::handleDeleteAction()
-{
+{ //FIXME: Do not delete if docs are open within QML Editor
     auto scene = static_cast<FormScene*>(parent->scene());
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
