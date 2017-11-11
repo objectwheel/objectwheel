@@ -702,7 +702,8 @@ void DesignManagerPrivate::handlePlayButtonClicked()
 
 void DesignManagerPrivate::handleBuildButtonClicked()
 {
-    //TODO
+    MainWindow::instance()->buildsScreen()->resize(fit(900), fit(550));
+    MainWindow::instance()->buildsScreen()->show();
 }
 
 void DesignManagerPrivate::handleModeChange()

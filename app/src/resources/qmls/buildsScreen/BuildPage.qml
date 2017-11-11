@@ -31,8 +31,8 @@ Item {
         delegate: projectListDelegate
         model: arches.length
         highlight: highlight
-        highlightMoveDuration: 100
-        highlightResizeDuration: 100
+        highlightMoveDuration: 0
+        highlightResizeDuration: 0
         ScrollBar.vertical: ScrollBar { /*contentItem.opacity: 1; onActiveChanged: active = false;*/ }
         layer.enabled: true
         layer.effect: OpacityMask {

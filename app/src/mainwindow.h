@@ -30,10 +30,12 @@ class MainWindow : public QMainWindow
         CentralWidget* centralWidget();
         ProgressWidget* progressWidget();
         InspectorWidget* inspectorWidget();
+        BuildsScreen* buildsScreen();
 
         void setupGui();
         void setupManagers();
         void clearStudio();
+
 
     public slots:
         void handleIndicatorChanges();

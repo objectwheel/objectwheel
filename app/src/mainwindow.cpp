@@ -59,7 +59,6 @@ void MainWindow::setupGui()
     _centralWidget.addWidget(Screen::Projects, &_projectsScreen);
     _centralWidget.addWidget(Screen::Login, &_loginScreen);
     _centralWidget.addWidget(Screen::About, &_aboutWidget);
-    _centralWidget.addWidget(Screen::Builds, &_buildsScreen);
     _centralWidget.showWidget(Screen::Login);
     _progressWidget.showProgress("Loading");
     connect(&_centralWidget, &CentralWidget::visibleWidgetChanged, this, [&]
@@ -323,6 +322,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     QMainWindow::closeEvent(event);
     emit quitting();
+}
+
+BuildsScreen* MainWindow::buildsScreen()
+{
+    return &_buildsScreen;
 }
 
 InspectorWidget* MainWindow::inspectorWidget()

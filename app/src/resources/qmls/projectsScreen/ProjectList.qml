@@ -26,8 +26,8 @@ Item {
         height: parent.height
         delegate: projectListDelegate
         highlight: highlight
-        highlightMoveDuration: 100
-        highlightResizeDuration: 100
+        highlightMoveDuration: 0
+        highlightResizeDuration: 0
         ScrollBar.vertical: ScrollBar { }
         layer.enabled: true
         layer.effect: OpacityMask{

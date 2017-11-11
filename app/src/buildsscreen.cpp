@@ -33,8 +33,6 @@
 #include <QQmlProperty>
 #include <QQuickItem>
 
-#define cW (MainWindow::instance()->centralWidget())
-#define pW (MainWindow::instance()->progressWidget())
 #define URL QString("https://139.59.149.173/api/v1/build/")
 
 using namespace Fit;
@@ -67,6 +65,10 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     parent->rootContext()->setContextProperty("dpi", Fit::ratio());
     parent->setSource(QUrl("qrc:/resources/qmls/buildsScreen/main.qml"));
     parent->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    parent->setWindowTitle("Objectwheel Builds");
+    parent->setWindowModality(Qt::ApplicationModal);
+    parent->setWindowFlags(Qt::CustomizeWindowHint |
+      Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint);
 
     exitButton.setParent(parent);
     exitButton.setIconButton(true);
@@ -87,7 +89,7 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     exitButton.show();
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
-        cW->showWidget(Screen::Studio);
+        parent->hide();
     });
 
     buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
@@ -177,10 +179,10 @@ void BuildsScreen::resizeEvent(QResizeEvent* event)
 void BuildsScreen::handleBuildButtonClicked()
 {
     auto buildLabel = QQmlProperty::read(_d->buildPage, "currentBuildLabel").toString();
-//    auto savesDir = SaveManager::savesDirectory();
-//    if (savesDir.isEmpty()) return;
+    auto savesDir = SaveManager::basePath();
+    if (savesDir.isEmpty()) return;
     auto projectFilename = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0] + separator() + "objectwheel_project.zip";
-//    Zipper::compressDir(savesDir, projectFilename, "dashboard");
+    Zipper::compressDir(savesDir, projectFilename, "dashboard");
     QByteArray data = rdfile(projectFilename);
     rm(projectFilename);
     QByteArray boundary = "-----------------------------7d935033608e2";
