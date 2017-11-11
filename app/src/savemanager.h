@@ -24,7 +24,7 @@
 #define TAG_UID "_uid"
 #define TAG_SUID "_suid"
 #define TAG_SKIN "_skin"
-#define TAG_NAME "_toolName"
+#define TAG_NAME "_name"
 #define TAG_CATEGORY "_category"
 #define TAG_OWDB_SIGN "_owdbsign"
 #define TAG_OWCTRL_SIGN "_owctrlsign"

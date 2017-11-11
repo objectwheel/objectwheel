@@ -69,7 +69,7 @@ void ToolsManager::addTool(const QString& toolPath)
     QString newToolPath;
     if (!toolPath.contains(toolsDir())) {
         newToolPath = toolsDir() + separator() +
-          QString::number(SaveManager::biggestDir(toolsDir()));
+          QString::number(SaveManager::biggestDir(toolsDir()) + 1);
 
         if (!mkdir(newToolPath))
             return;
@@ -151,7 +151,7 @@ void ToolsManager::downloadTools(const QUrl& url)
 
         for (auto val : toolsArray)
         {
-            QString toolDir = QString::number(SaveManager::biggestDir(toolsDir()));
+            QString toolDir = QString::number(SaveManager::biggestDir(toolsDir()) + 1);
             QDir(toolsDir()).mkpath(toolDir);
             QUrl toolUrl = QUrl::fromUserInput(val.toString());
 

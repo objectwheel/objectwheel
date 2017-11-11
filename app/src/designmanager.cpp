@@ -329,7 +329,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     buildButton.setCursor(Qt::PointingHandCursor);
 
     editorModeButton.setToolTip("Switch to Qml Editor.");
-    cGuiModeButton.setToolTip("Switch to Control Editor.");
+    cGuiModeButton.setToolTip("Switch to Tool Editor.");
     wGuiModeButton.setToolTip("Switch to Form Editor.");
     playButton.setToolTip("Run project.");
     buildButton.setToolTip("Get builds.");

@@ -2,7 +2,9 @@
 #include <ui_toolboxsettings.h>
 #include <css.h>
 #include <toolsmanager.h>
+#include <filemanager.h>
 #include <QScrollBar>
+#include <QBuffer>
 
 ToolboxSettings::ToolboxSettings(QWidget *parent)
     : QDialog(parent)
@@ -15,9 +17,63 @@ ToolboxSettings::ToolboxSettings(QWidget *parent)
     ui->scrollArea->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
 
     connect(ui->treeWidget, &ToolboxTree::itemSelectionChanged, this, [=] {
-        ui->removeButton->setEnabled(ui->treeWidget->currentItem() &&
-          ui->treeWidget->currentItem()->parent());
+        const bool hasValidSelection = ui->treeWidget->currentItem() &&
+          ui->treeWidget->currentItem()->parent();
+        ui->btnRemove->setEnabled(hasValidSelection);
+        ui->btnImport->setEnabled(hasValidSelection);
+        ui->btnExport->setEnabled(hasValidSelection);
+        ui->btnSave->setEnabled(hasValidSelection);
+        ui->txtCategory->setEnabled(hasValidSelection);
+        ui->txtIcon->setEnabled(hasValidSelection);
+        ui->txtName->setEnabled(hasValidSelection);
+        if (hasValidSelection) {
+            const auto dir = dname(ui->treeWidget->urls(ui->treeWidget->currentItem()).first().toLocalFile());
+            QPixmap icon;
+            icon.loadFromData(dlfile(dir + separator() + "icon.png"));
+            ui->lblIconPreview->setPixmap(icon);
+            ui->txtIcon->setText("icon.png");
+            ui->txtCategory->setText(ui->treeWidget->currentItem()->parent()->text(0));
+            ui->txtName->setText(ui->treeWidget->currentItem()->text(0));
+        }
     });
+
+    auto fnDisableBtnSave = [=] {
+        const bool hasValidSelection = ui->treeWidget->currentItem() &&
+          ui->treeWidget->currentItem()->parent();
+        ui->btnSave->setDisabled(ui->txtCategory->text().isEmpty() ||
+                                 ui->txtIcon->text().isEmpty() ||
+                                 ui->txtName->text().isEmpty() ||
+                                 ui->lblIconPreview->pixmap()->isNull() ||
+                                 !hasValidSelection);
+    };
+
+    connect(ui->txtCategory, &QLineEdit::textChanged, this, fnDisableBtnSave);
+    connect(ui->txtIcon, &QLineEdit::textChanged, this, fnDisableBtnSave);
+    connect(ui->txtName, &QLineEdit::textChanged, this, fnDisableBtnSave);
+    connect(ui->txtIcon, &QLineEdit::editingFinished, this, [=] {
+        ui->txtIcon->setEnabled(false);
+        ui->lblLoading->setPixmap(QPixmap(":/resources/images/preloader.gif"));
+        const auto dirctrl = dname(ui->treeWidget->urls(ui->treeWidget->currentItem()).first().toLocalFile());
+        const auto remoteTry = dlfile(ui->txtIcon->text());
+        QPixmap pixmap;
+        pixmap.loadFromData(!remoteTry.isEmpty() ?
+          remoteTry : dlfile(dirctrl + separator() + ui->txtIcon->text()));
+        ui->lblIconPreview->setPixmap(pixmap);
+        fnDisableBtnSave();
+        ui->lblLoading->setPixmap(QPixmap());
+        ui->txtIcon->setEnabled(true);
+
+        //        const auto icndir = dirctrl + separator() + "/icon.png";
+        //        if (pixmap.isNull()) return;
+        //        QByteArray bArray;
+        //        QBuffer buffer(&bArray);
+        //        buffer.open(QIODevice::WriteOnly);
+        //        if (!pixmap.save(&buffer,"PNG")) return;
+        //        buffer.close();
+        //        if (!wrfile(icndir, bArray)) return;
+        //        ui->lblIcon->setText("icon.png");
+    });
+
 
 //    _toolboxAddButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 //    _toolboxAddButton.setColor("#6BB64B");
