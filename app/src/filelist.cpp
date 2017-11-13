@@ -164,7 +164,7 @@ void FileList::handleDrop(const QList<QUrl>& urls)
         Delayer::delay(&future, &QFuture<bool>::isRunning);
     }
     progress.setValue(urls.size());
-    Delayer::delay(500);
+    Delayer::delay(100);
 }
 
 void FileList::dragEnterEvent(QDragEnterEvent* event)
