@@ -112,6 +112,7 @@ void FileList::handleDrop(const QList<QUrl>& urls)
 
     QProgressDialog progress("Copying files...", "Abort Copy", 0, urls.size(), this);
     progress.setWindowModality(Qt::WindowModal);
+    qApp->processEvents();
 
     for (int i = 0; i < urls.size(); i++) {
         progress.setValue(i);
@@ -201,7 +202,7 @@ void FileList::dragLeaveEvent(QDragLeaveEvent* event)
 void FileList::resizeEvent(QResizeEvent* event)
 {
     QTreeView::resizeEvent(event);
-    dropLabel->setGeometry(rect());
+    dropLabel->setGeometry(viewport()->rect());
 
     QPixmap bn(dropLabel->size() * pS->devicePixelRatio());
     bn.setDevicePixelRatio(pS->devicePixelRatio());
