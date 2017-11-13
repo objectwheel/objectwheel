@@ -4,6 +4,8 @@
 #include <QTreeView>
 #include <QFileSystemModel>
 #include <QSortFilterProxyModel>
+#include <QList>
+#include <QUrl>
 
 class FileFilterProxyModel : public QSortFilterProxyModel
 {
@@ -25,16 +27,24 @@ class FileList : public QTreeView
         Q_OBJECT
     public:
         explicit FileList(QWidget *parent = 0);
+        ~FileList();
         QFileSystemModel* fileModel();
         FileFilterProxyModel* filterProxyModel();
         QString currentPath() const;
 
-
     public slots:
         void goPath(const QString& path);
 
+    private slots:
+        void handleDrop(const QList<QUrl>& urls);
+
     protected:
         virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+        virtual void dragEnterEvent(QDragEnterEvent *event) override;
+        virtual void dropEvent(QDropEvent *event) override;
+        virtual void dragMoveEvent(QDragMoveEvent *event) override;
+        virtual void dragLeaveEvent(QDragLeaveEvent *event) override;
+        virtual void resizeEvent(QResizeEvent *event) override;
 
     signals:
         void fileOpened(const QString& filePath);
@@ -42,7 +52,6 @@ class FileList : public QTreeView
     private:
         QFileSystemModel _fileModel;
         FileFilterProxyModel _filterProxyModel;
-
 };
 
 #endif // FILELIST_H

@@ -247,5 +247,6 @@
         <file>resources/qmls/control/t/_properties.json</file>
         <file>resources/qmls/control/t/icon.png</file>
         <file>resources/qmls/control/t/main.qml</file>
+        <file>resources/images/droparrow.png</file>
     </qresource>
 </RCC>

@@ -1,6 +1,7 @@
 #include <toolboxtree.h>
 #include <fit.h>
 #include <css.h>
+#include <global.h>
 
 #include <QMimeData>
 #include <QApplication>
@@ -14,8 +15,6 @@
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QHeaderView>
-
-#define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 
 using namespace Fit;
 
@@ -31,10 +30,10 @@ class ToolboxDelegate: public QStyledItemDelegate
         ToolboxDelegate(QTreeView* view, QWidget* parent);
 
         void paint(QPainter* painter, const QStyleOptionViewItem &option,
-                   const QModelIndex &index) const override;
+          const QModelIndex &index) const override;
 
         QSize sizeHint(const QStyleOptionViewItem &opt,
-                       const QModelIndex &index) const override;
+          const QModelIndex &index) const override;
 
     private:
         QTreeView* m_view;
@@ -264,7 +263,7 @@ QMimeData* ToolboxTree::mimeData(const QList<QTreeWidgetItem*> items) const
       itemAt(_previousPoint)->parent() != nullptr) {
         QMimeData *data = QTreeWidget::mimeData(items);
         data->setUrls(_urls[items[0]]);
-        data->setText(TOOLBOX_ITEM_KEY);
+        data->setText(TOOL_KEY);
         return data;
     } else {
         return nullptr;

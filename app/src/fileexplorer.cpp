@@ -356,5 +356,3 @@ QString FileExplorer::rootPath() const
 }
 
 #include "fileexplorer.moc"
-
-

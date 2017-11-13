@@ -12,7 +12,6 @@
 #include <QtWidgets>
 #include <QtSvg>
 
-#define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
 #define HIGHLIGHT_COLOR (QColor("#174C4E4D"))
 #define SELECTION_COLOR ("#404447")
 #define OUTLINE_COLOR ("#808487")
@@ -269,7 +268,7 @@ void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
     auto mimeData = event->mimeData();
     if (mimeData->hasUrls() && mimeData->hasText() &&
-        mimeData->text() == TOOLBOX_ITEM_KEY) {
+        mimeData->text() == TOOL_KEY) {
         _dragIn = true;
         event->accept();
     } else {

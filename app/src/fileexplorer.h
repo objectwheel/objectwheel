@@ -7,7 +7,6 @@ class FileExplorerPrivate;
 
 class FileExplorer : public QWidget
 {
-        // TODO: Drag & Drop files into explorer and copy them to current dir
         Q_OBJECT
     public:
         explicit FileExplorer(QWidget *parent = 0);

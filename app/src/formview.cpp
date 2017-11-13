@@ -18,8 +18,6 @@
 #include <QJsonValue>
 #include <QJsonObject>
 
-#define TOOLBOX_ITEM_KEY "QURBUEFaQVJMSVlJWiBIQUZJWg"
-
 using namespace Fit;
 
 class FormViewPrivate : public QObject
@@ -164,7 +162,7 @@ void FormViewPrivate::handleCutAction()
     mimeData->setData("objectwheel/dstreamsize", QString::number(selectedControls.size()).toUtf8());
     mimeData->setData("objectwheel/dstream", controls);
     mimeData->setUrls(urls);
-    mimeData->setText(TOOLBOX_ITEM_KEY);
+    mimeData->setText(TOOL_KEY);
     clipboard->setMimeData(mimeData);
 }
 
@@ -187,7 +185,7 @@ void FormViewPrivate::handleCopyAction()
         urls << QUrl::fromLocalFile(control->dir());
 
     mimeData->setUrls(urls);
-    mimeData->setText(TOOLBOX_ITEM_KEY);
+    mimeData->setText(TOOL_KEY);
     clipboard->setMimeData(mimeData);
 }
 
@@ -198,7 +196,7 @@ void FormViewPrivate::handlePasteAction()
     auto mainControl = DesignManager::formScene()->mainForm();
     QString uid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
-        mimeData->text() != TOOLBOX_ITEM_KEY || uid.isEmpty())
+        mimeData->text() != TOOL_KEY || uid.isEmpty())
         return;
 
     QList<Control*> controls;
