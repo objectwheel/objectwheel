@@ -111,8 +111,9 @@ void FileList::handleDrop(const QList<QUrl>& urls)
     auto showMsgBox = true;
 
     QProgressDialog progress("Copying files...", "Abort Copy", 0, urls.size(), this);
-    progress.setWindowModality(Qt::WindowModal);
-    qApp->processEvents();
+    progress.setWindowModality(Qt::NonModal);
+    progress.open();
+    Delayer::delay(100);
 
     for (int i = 0; i < urls.size(); i++) {
         progress.setValue(i);
@@ -142,6 +143,7 @@ void FileList::handleDrop(const QList<QUrl>& urls)
                 msgbox.addButton(QMessageBox::YesToAll);
                 msgbox.addButton(QMessageBox::Abort);
                 msgbox.setDefaultButton(QMessageBox::No);
+                msgbox.setWindowModality(Qt::ApplicationModal);
 
                 int ret = msgbox.exec();
                 if (ret == QMessageBox::Yes) {
@@ -162,6 +164,7 @@ void FileList::handleDrop(const QList<QUrl>& urls)
         Delayer::delay(&future, &QFuture<bool>::isRunning);
     }
     progress.setValue(urls.size());
+    Delayer::delay(500);
 }
 
 void FileList::dragEnterEvent(QDragEnterEvent* event)
