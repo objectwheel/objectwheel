@@ -202,7 +202,7 @@ void FileList::dragLeaveEvent(QDragLeaveEvent* event)
 void FileList::resizeEvent(QResizeEvent* event)
 {
     QTreeView::resizeEvent(event);
-    dropLabel->setGeometry(viewport()->rect());
+    dropLabel->setGeometry(viewport()->geometry());
 
     QPixmap bn(dropLabel->size() * pS->devicePixelRatio());
     bn.setDevicePixelRatio(pS->devicePixelRatio());
