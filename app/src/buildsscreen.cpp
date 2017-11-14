@@ -33,7 +33,7 @@
 #include <QQmlProperty>
 #include <QQuickItem>
 
-#define URL QString("https://139.59.149.173/api/v1/build/")
+#define URL QString("https://165.227.164.200/api/v1/build/")
 
 using namespace Fit;
 

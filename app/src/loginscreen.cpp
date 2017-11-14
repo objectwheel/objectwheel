@@ -131,7 +131,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
         } else {
             auto manager = new QNetworkAccessManager(this);
             auto body = QString("{\"token\" : \"%1\"}").arg(userManager->generateToken(email, password));
-            auto url = QUrl("https://139.59.149.173/api/v1/registration/check");
+            auto url = QUrl("https://165.227.164.200/api/v1/registration/check");
             QNetworkRequest http(url);
             http.setRawHeader("content-type", "application/json");
             QNetworkReply* reply = manager->post(http, QByteArray().insert(0, body));
@@ -177,7 +177,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
     } else {
         auto manager = new QNetworkAccessManager(this);
         auto body = QString("{\"token\" : \"%1\"}").arg(userManager->generateToken(email, password));
-        auto url = QUrl("https://139.59.149.173/api/v1/registration/check");
+        auto url = QUrl("https://165.227.164.200/api/v1/registration/check");
         QNetworkRequest http(url);
         http.setRawHeader("content-type", "application/json");
         QNetworkReply* reply = manager->post(http, QByteArray().insert(0, body));

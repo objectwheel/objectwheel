@@ -211,7 +211,7 @@ Item {
                         warningText.text = "Please make sure your password's length\nis in between 6 and 20."
                         warning.show()
                     } else { //FIXME: http -> https | change ip with domain name
-                        var url = "http://139.59.149.173/api/v1/registration/register";
+                        var url = "http://165.227.164.200/api/v1/registration/register";
                         var body = {
                             first: firstnameTextInput.text,
                             last: lastnameTextInput.text,
