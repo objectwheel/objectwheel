@@ -31,9 +31,9 @@
 //! *************************** [global] ***************************
 //!
 
-static void fillTree(ToolboxTree* toolboxTree)
+static void fillTree(ToolboxTree*)
 {
-
+    // TODO
 }
 
 static void flushChangeSet(const ChangeSet& changeSet)

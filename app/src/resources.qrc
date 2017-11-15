@@ -4,9 +4,6 @@
         <file>resources/tools/Dial.zip</file>
         <file>resources/tools/Button.zip</file>
         <file>resources/tools/CheckBox.zip</file>
-        <file>resources/tools/ColumnLayout.zip</file>
-        <file>resources/tools/GridLayout.zip</file>
-        <file>resources/tools/RowLayout.zip</file>
         <file>resources/tools/Rectangle.zip</file>
         <file>resources/tools/BusyIndicator.zip</file>
         <file>resources/tools/Text.zip</file>
@@ -26,13 +23,10 @@
         <file>resources/images/plus.png</file>
         <file>resources/images/minus.png</file>
         <file>resources/tools/Compass.zip</file>
-        <file>resources/tools/TextReader.zip</file>
         <file>resources/images/toolboxbuttonfilled.png</file>
         <file>resources/images/toolboxbutton.png</file>
         <file>resources/images/propertiesbutton.png</file>
         <file>resources/images/propertiesbuttonfilled.png</file>
-        <file>resources/tools/WebSurfer.zip</file>
-        <file>resources/tools/SpeakSurf.zip</file>
         <file>resources/images/down-arrow.png</file>
         <file>resources/images/plug-up.png</file>
         <file>resources/images/plug-down.png</file>
@@ -60,8 +54,6 @@
         <file>resources/images/fexplorer@2x.png</file>
         <file>resources/images/sign_warning.png</file>
         <file>resources/tools/FlatSwitch.zip</file>
-        <file>resources/tools/VerticalSpacer.zip</file>
-        <file>resources/tools/HorizontalSpacer.zip</file>
         <file>resources/tools/ScaledTextField.zip</file>
         <file>resources/tools/ScaledText.zip</file>
         <file>resources/qmls/empty-item.qml</file>

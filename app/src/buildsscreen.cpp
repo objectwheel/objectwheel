@@ -12,6 +12,7 @@
 #include <flatbutton.h>
 #include <global.h>
 #include <mainwindow.h>
+#include <global.h>
 
 #include <QStandardPaths>
 #include <QUrl>
@@ -33,7 +34,7 @@
 #include <QQmlProperty>
 #include <QQuickItem>
 
-#define URL QString("https://165.227.164.200/api/v1/build/")
+#define URL QString(SERVER + "/api/v1/build/")
 
 using namespace Fit;
 
