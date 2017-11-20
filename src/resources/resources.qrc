@@ -1,28 +1,10 @@
 <RCC>
     <qresource prefix="/resources">
-        <file>tools/tools.json</file>
-        <file>tools/Dial.zip</file>
-        <file>tools/Button.zip</file>
-        <file>tools/CheckBox.zip</file>
-        <file>tools/Rectangle.zip</file>
-        <file>tools/BusyIndicator.zip</file>
-        <file>tools/Text.zip</file>
-        <file>tools/Slider.zip</file>
-        <file>tools/TextField.zip</file>
-        <file>tools/ProgressBar.zip</file>
-        <file>tools/RadioButton.zip</file>
         <file>images/resize-icon.png</file>
         <file>images/delete-icon.png</file>
-        <file>tools/CircularGauge.zip</file>
         <file>qmls/module-resolver.qml</file>
-        <file>tools/DelayButton.zip</file>
-        <file>tools/Gauge.zip</file>
-        <file>tools/StatusIndicator.zip</file>
-        <file>tools/ToggleButton.zip</file>
-        <file>tools/Tumbler.zip</file>
         <file>images/plus.png</file>
         <file>images/minus.png</file>
-        <file>tools/Compass.zip</file>
         <file>images/toolboxbuttonfilled.png</file>
         <file>images/toolboxbutton.png</file>
         <file>images/propertiesbutton.png</file>
@@ -32,8 +14,6 @@
         <file>images/plug-down.png</file>
         <file>images/item.png</file>
         <file>images/edit.png</file>
-        <file>tools/ComboBox.zip</file>
-        <file>tools/TextArea.zip</file>
         <file>images/logo.png</file>
         <file>images/right-arrow@2x.png</file>
         <file>images/right-arrow.png</file>
@@ -53,9 +33,6 @@
         <file>images/fexplorer.png</file>
         <file>images/fexplorer@2x.png</file>
         <file>images/sign_warning.png</file>
-        <file>tools/FlatSwitch.zip</file>
-        <file>tools/ScaledTextField.zip</file>
-        <file>tools/ScaledText.zip</file>
         <file>qmls/empty-item.qml</file>
         <file>images/loading.png</file>
         <file>qmls/projectsScreen/main.qml</file>
@@ -171,7 +148,6 @@
         <file>qmls/owdb/_properties.json</file>
         <file>qmls/owdb/1/t/_properties.json</file>
         <file>qmls/owdb/1/t/main.qml</file>
-        <file>tools/AnimatedImage.zip</file>
         <file>qmls/form/t/_properties.json</file>
         <file>qmls/form/t/main.qml</file>
         <file>images/preloader.gif</file>
@@ -197,33 +173,6 @@
         <file>images/newfolder.png</file>
         <file>images/up.png</file>
         <file>images/rename.png</file>
-        <file>tools/Timer.zip</file>
-        <file>tools/Image.zip</file>
-        <file>tools/Calendar.zip</file>
-        <file>tools/GroupBox.zip</file>
-        <file>tools/Label.zip</file>
-        <file>tools/SpinBox.zip</file>
-        <file>tools/TableView.zip</file>
-        <file>tools/BusyIndicator-2.zip</file>
-        <file>tools/Button-2.zip</file>
-        <file>tools/CheckBox-2.zip</file>
-        <file>tools/ComboBox-2.zip</file>
-        <file>tools/Dial-2.zip</file>
-        <file>tools/GroupBox-2.zip</file>
-        <file>tools/Label-2.zip</file>
-        <file>tools/ProgressBar-2.zip</file>
-        <file>tools/RadioButton-2.zip</file>
-        <file>tools/Slider-2.zip</file>
-        <file>tools/SpinBox-2.zip</file>
-        <file>tools/Switch-2.zip</file>
-        <file>tools/TextArea-2.zip</file>
-        <file>tools/TextField-2.zip</file>
-        <file>tools/Tumbler-2.zip</file>
-        <file>tools/DelayButton-2.zip</file>
-        <file>tools/Frame-2.zip</file>
-        <file>tools/PageIndicator-2.zip</file>
-        <file>tools/RangeSlider-2.zip</file>
-        <file>tools/RoundButton-2.zip</file>
         <file>images/phnh.svg</file>
         <file>images/phnv.svg</file>
         <file>images/console.png</file>
@@ -234,7 +183,6 @@
         <file>images/mform.png</file>
         <file>images/wait.png</file>
         <file>images/nopreview.png</file>
-        <file>tools/Pinwheel.zip</file>
         <file>images/settings.png</file>
         <file>qmls/control/t/_properties.json</file>
         <file>qmls/control/t/icon.png</file>
