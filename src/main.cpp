@@ -13,8 +13,8 @@
 #include <QTimer>
 
 #define PIXEL_SIZE 14
-#define REF_WIDTH 1366
-#define REF_HEIGHT 768
+#define REF_WIDTH 1680
+#define REF_HEIGHT 1050
 #define REF_DPI 72.0
 
 int main(int argc, char *argv[])
