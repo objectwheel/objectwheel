@@ -2,7 +2,6 @@
     <qresource prefix="/resources">
         <file>images/resize-icon.png</file>
         <file>images/delete-icon.png</file>
-        <file>qmls/module-resolver.qml</file>
         <file>images/plus.png</file>
         <file>images/minus.png</file>
         <file>images/toolboxbuttonfilled.png</file>
@@ -21,25 +20,14 @@
         <file>images/left-arrow.png</file>
         <file>images/save-icon@2x.png</file>
         <file>images/save-icon.png</file>
-        <file>fonts/LiberationMono-Regular.ttf</file>
-        <file>qmls/FancyButton.qml</file>
-        <file>qmls/filemanager.js</file>
-        <file>qmls/delaycaller.js</file>
         <file>images/menu-icon.png</file>
         <file>images/back.png</file>
         <file>images/menu-icon@2x.png</file>
-        <file>qmls/fit.js</file>
         <file>images/reset.png</file>
         <file>images/fexplorer.png</file>
         <file>images/fexplorer@2x.png</file>
         <file>images/sign_warning.png</file>
-        <file>qmls/empty-item.qml</file>
         <file>images/loading.png</file>
-        <file>qmls/projectsScreen/main.qml</file>
-        <file>qmls/projectsScreen/ProjectButton.qml</file>
-        <file>qmls/projectsScreen/ProjectList.qml</file>
-        <file>qmls/projectsScreen/ProjectSettings.qml</file>
-        <file>qmls/projectsScreen/ProjectsPage.qml</file>
         <file>images/logo@2x.png</file>
         <file>images/loading@2x.png</file>
         <file>images/studioSceneIcon.png</file>
@@ -80,13 +68,6 @@
         <file>images/objectwheel@2x.png</file>
         <file>images/registration.png</file>
         <file>images/registration@2x.png</file>
-        <file>qmls/loginScreen/LoginButton.qml</file>
-        <file>qmls/loginScreen/LoginScreen.qml</file>
-        <file>qmls/loginScreen/main.qml</file>
-        <file>qmls/loginScreen/PopupScreen.qml</file>
-        <file>qmls/loginScreen/RegistrationComplete.qml</file>
-        <file>qmls/loginScreen/RegistrationScreen.qml</file>
-        <file>qmls/loginScreen/Toast.qml</file>
         <file>images/android.png</file>
         <file>images/android@2x.png</file>
         <file>images/builds.png</file>
@@ -105,9 +86,6 @@
         <file>images/selectmsg@2x.png</file>
         <file>images/windows.png</file>
         <file>images/windows@2x.png</file>
-        <file>qmls/buildsScreen/BuildPage.qml</file>
-        <file>qmls/buildsScreen/main.qml</file>
-        <file>qmls/buildsScreen/ProgressPage.qml</file>
         <file>images/back-line.png</file>
         <file>images/back-line@2x.png</file>
         <file>images/construction.gif</file>
@@ -145,11 +123,6 @@
         <file>images/form.png</file>
         <file>images/formsbutton.png</file>
         <file>images/formsbuttonfilled.png</file>
-        <file>qmls/owdb/_properties.json</file>
-        <file>qmls/owdb/1/t/_properties.json</file>
-        <file>qmls/owdb/1/t/main.qml</file>
-        <file>qmls/form/t/_properties.json</file>
-        <file>qmls/form/t/main.qml</file>
         <file>images/preloader.gif</file>
         <file>images/pin.png</file>
         <file>images/save.png</file>
@@ -184,9 +157,6 @@
         <file>images/wait.png</file>
         <file>images/nopreview.png</file>
         <file>images/settings.png</file>
-        <file>qmls/control/t/_properties.json</file>
-        <file>qmls/control/t/icon.png</file>
-        <file>qmls/control/t/main.qml</file>
         <file>images/droparrow.png</file>
     </qresource>
 </RCC>
