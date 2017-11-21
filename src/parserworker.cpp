@@ -54,7 +54,7 @@ QString ParserWorker::typeName(const QByteArray& data) const
         textModifier->deleteLater();
         rewriterView->deleteLater();
         model->deleteLater();
-    } catch (Exception& e) {
+    } catch (Exception&) {
         // NOTE
     }
     return type;
@@ -81,7 +81,7 @@ QVariant ParserWorker::variantProperty(const QByteArray& data, const QString& na
         textModifier->deleteLater();
         rewriterView->deleteLater();
         model->deleteLater();
-    } catch (Exception& e) {
+    } catch (Exception&) {
         // NOTE
     }
     return value;
@@ -115,7 +115,7 @@ void ParserWorker::setVariantProperty(QByteArray& data, const QString& fileName,
         textModifier->deleteLater();
         rewriterView->deleteLater();
         model->deleteLater();
-    } catch (Exception& e) {
+    } catch (Exception&) {
         // NOTE
     }
 
@@ -150,7 +150,7 @@ void ParserWorker::setVariantProperty(const QString& fileName, const QString& pr
         textModifier->deleteLater();
         rewriterView->deleteLater();
         model->deleteLater();
-    } catch (Exception& e) {
+    } catch (Exception&) {
         // NOTE
     }
 
@@ -185,7 +185,7 @@ void ParserWorker::removeVariantProperty(const QString& fileName, const QString&
         textModifier->deleteLater();
         rewriterView->deleteLater();
         model->deleteLater();
-    } catch (Exception& e) {
+    } catch (Exception&) {
         // NOTE
     }
 

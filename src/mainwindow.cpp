@@ -264,8 +264,8 @@ void MainWindow::setupManagers()
     ToolsManager::instance()->addToolboxTree(_toolbox.toolboxTree());
     auto userManager = new UserManager(this);
     Q_UNUSED(userManager);
-    auto* projectManager = new ProjectManager(this);
-    projectManager->setMainWindow(this);
+    new ProjectManager(this);
+    ProjectManager::setMainWindow(this);
     new SaveManager(this);
     new QmlPreviewer(this);
 

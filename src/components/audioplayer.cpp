@@ -19,7 +19,7 @@ int AudioPlayer::sampleRate() const
 	return m_format.sampleRate();
 }
 
-void AudioPlayer::setSampleRate(const int rate)
+void AudioPlayer::setSampleRate(int rate)
 {
 	m_format.setSampleRate(rate);
 }
@@ -29,7 +29,7 @@ int AudioPlayer::channelCount() const
 	return m_format.channelCount();
 }
 
-void AudioPlayer::setChannelCount(const int count)
+void AudioPlayer::setChannelCount(int count)
 {
 	m_format.setChannelCount(count);
 }
@@ -39,7 +39,7 @@ int AudioPlayer::sampleSize() const
 	return m_format.sampleSize();
 }
 
-void AudioPlayer::setSampleSize(const int size)
+void AudioPlayer::setSampleSize(int size)
 {
 	m_format.setSampleSize(size);
 }
@@ -49,7 +49,7 @@ int AudioPlayer::byteOrder() const
 	return int(m_format.byteOrder());
 }
 
-void AudioPlayer::setByteOrder(const int order)
+void AudioPlayer::setByteOrder(int order)
 {
 	m_format.setByteOrder(static_cast<QAudioFormat::Endian>(order));
 }
@@ -59,7 +59,7 @@ int AudioPlayer::sampleType() const
 	return int(m_format.sampleType());
 }
 
-void AudioPlayer::setSampleType(const int type)
+void AudioPlayer::setSampleType(int type)
 {
 	m_format.setSampleType(static_cast<QAudioFormat::SampleType>(type));
 }
@@ -74,12 +74,12 @@ void AudioPlayer::setCodec(const QString& codec)
 	m_format.setCodec(codec);
 }
 
-float AudioPlayer::volume() const
+qreal AudioPlayer::volume() const
 {
 	return m_volume;
 }
 
-void AudioPlayer::setVolume(const float volume)
+void AudioPlayer::setVolume(qreal volume)
 {
 	m_volume = volume;
 }

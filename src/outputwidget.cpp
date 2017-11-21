@@ -322,6 +322,7 @@ FlatButton* OutputWidget::button(BoxType type)
         case Console:
             return _d->consoleButton;
     }
+    return nullptr;
 }
 
 QWidget* OutputWidget::box(BoxType type)

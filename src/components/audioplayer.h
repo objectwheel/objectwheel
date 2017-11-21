@@ -13,7 +13,7 @@ class AudioPlayer : public QObject
 		Q_PROPERTY(int byteOrder READ byteOrder WRITE setByteOrder)
 		Q_PROPERTY(int sampleType READ sampleType WRITE setSampleType)
 		Q_PROPERTY(QString codec READ codec WRITE setCodec)
-		Q_PROPERTY(float volume READ volume WRITE setVolume)
+        Q_PROPERTY(qreal volume READ volume WRITE setVolume)
 		Q_PROPERTY(QByteArray data READ data WRITE setData)
 		Q_PROPERTY(bool error READ error)
 		Q_PROPERTY(int state READ state)
@@ -21,25 +21,25 @@ class AudioPlayer : public QObject
 	private:
 		QPointer<QAudioOutput> m_audioOutput;
 		QAudioFormat m_format;
-		float m_volume;
+        qreal m_volume;
 		QByteArray _data;
 
 	public:
 		explicit AudioPlayer(QObject* parent = 0);
 		int sampleRate() const;
-		void setSampleRate(const int rate);
+        void setSampleRate(int rate);
 		int channelCount() const;
-		void setChannelCount(const int count);
+        void setChannelCount(int count);
 		int sampleSize() const;
-		void setSampleSize(const int size);
+        void setSampleSize(int size);
 		int byteOrder() const;
-		void setByteOrder(const int order);
+        void setByteOrder(int order);
 		int sampleType() const;
-		void setSampleType(const int type);
+        void setSampleType(int type);
 		const QString codec() const;
 		void setCodec(const QString& codec);
-		float volume() const;
-		void setVolume(const float volume);
+        qreal volume() const;
+        void setVolume(qreal volume);
 		bool error() const;
 		int state() const;
 		void setData(const QByteArray& data);
