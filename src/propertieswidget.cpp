@@ -890,6 +890,7 @@ void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
     auto type = index.data(NodeRole::Type).value<NodeType>();
 
     switch (type) {
+        case 0:
         default:
             ed->setGeometry(ed->geometry().adjusted(0, 0, -1, -1));
             break;
@@ -935,7 +936,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
         painter->fillRect(branchRect, branchColor);
 
         if (model->rowCount(index)) {
-            static const int i = 9; // ### hardcoded in qcommonstyle.cpp
+            static const int i = fit::fx(9); // ### hardcoded in qcommonstyle.cpp
             QRect r = option.rect;
             QStyleOption branchOption;
             branchOption.rect = QRect(r.left() - i,
@@ -982,7 +983,9 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
 
     const QColor color = static_cast<QRgb>(qApp->style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
     const QPen oldPen = painter->pen();
-    painter->setPen(QPen(color));
+    QPen pen(color);
+    pen.setWidthF(fit::fx(1));
+    painter->setPen(pen);
 
     if (index.column() == 0) {
         painter->drawLine(QPointF(0.5, option.rect.y() + 0.5),

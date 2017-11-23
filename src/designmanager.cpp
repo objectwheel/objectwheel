@@ -31,8 +31,6 @@
 #define INTERVAL_ERROR_CHECK (1000)
 #define cW (ControlWatcher::instance())
 
-
-
 // TODO: Prevent NoSkin option for main form
 // FIXME: Bugs about Control GUI Editor
 
@@ -187,6 +185,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     spacer->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Preferred);
 
+    zoomlLevelCombobox.setFixedHeight(fit::fx(17));
     zoomlLevelCombobox.addItem("10 %");
     zoomlLevelCombobox.addItem("25 %");
     zoomlLevelCombobox.addItem("50 %");

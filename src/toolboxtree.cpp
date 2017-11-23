@@ -87,7 +87,7 @@ void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &optio
         painter->setBrush(gradient);
         painter->drawRect(option.rect);
         QPen p(highlightColor);
-        p.setWidthF(0.5);
+        p.setWidthF(fit::fx(0.5));
         painter->setPen(p);
         painter->drawLine(option.rect.topLeft() + QPoint(0, highlightOffset),
                           option.rect.topRight() + QPoint(0, highlightOffset));
@@ -99,7 +99,7 @@ void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &optio
         painter->restore();
 
         QStyleOption branchOption;
-        static const int i = 9; // ### hardcoded in qcommonstyle.cpp
+        static const int i = fit::fx(9); // ### hardcoded in qcommonstyle.cpp
         QRect r = option.rect;
         branchOption.rect = QRect(r.left() + i/2, r.top() + (r.height() - i)/2, i, i);
         branchOption.state = QStyle::State_Children;
@@ -177,6 +177,7 @@ ToolboxTree::ToolboxTree(QWidget *parent)
     p2.setColor(QPalette::Text, QColor("#202427"));
     setPalette(p2);
 
+    setStyleSheet(QString("QTreeWidget::item{padding:%1px 0;}").arg(fit::fx(1.5)));
     setIconSize(fit::fx(QSize{24, 24}));
     setFocusPolicy(Qt::NoFocus);
     setIndentation(0);

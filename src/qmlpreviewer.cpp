@@ -31,8 +31,6 @@
 #define SIZE_NOPREVIEW_PIXMAP (QSizeF(fit::fx(40), fit::fx(40)))
 #define pS (QApplication::primaryScreen())
 
-
-
 class QmlPreviewerPrivate : public QObject
 {
         Q_OBJECT
@@ -181,7 +179,7 @@ PropertyNodes QmlPreviewerPrivate::properties(const QObject* object) const
 void QmlPreviewerPrivate::draw(QImage& dest, const QImage& source, const QSizeF& size) const
 {
     auto r = QRectF({QPointF(), size}).adjusted(1, 1, -1, -1);
-    QRectF wr(QPoint(), QSizeF(source.size()) / 2.0);
+    QRectF wr(QPoint(), QSizeF(source.size()) / pS->devicePixelRatio());
     wr.moveCenter(r.center());
     QPainter painter(&dest);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -189,6 +187,7 @@ void QmlPreviewerPrivate::draw(QImage& dest, const QImage& source, const QSizeF&
     brush.setColor("#808487");
     brush.setStyle(Qt::Dense6Pattern);
     QPen pen;
+    pen.setWidthF(fit::fx(1));
     pen.setStyle(Qt::DotLine);
     pen.setColor(brush.color());
     painter.setPen(pen);

@@ -31,7 +31,7 @@
 
 static std::random_device rd;
 static std::mt19937 mt(rd());
-static std::uniform_int_distribution<qint32> rand_dist(-2147483648, 2147483647);
+static std::uniform_int_distribution<qint32> rand_dist(-2147483647 - 1, 2147483647); //Wow C++
 
 //!
 //! ****************** [Control Private] ******************
@@ -552,6 +552,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     if (isSelected() || _showOutline) {
         QPen pen;
+        pen.setWidthF(fit::fx(1));
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);
 
@@ -674,7 +675,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             QSvgRenderer svg(QString(":/resources/images/phnh.svg"));
             svg.render(painter, skinRect);
             break;
-        } case Desktop: {
+        } case Desktop: { //FIXME: Bad window frame, redesign it.
             auto skinRect = QRectF({0, 0}, size() + QSizeF(fit::fx(2), fit::fx(2.0 * MARGIN_TOP / 1.35)));
             skinRect.moveCenter(innerRect.center());
             skinRect.moveTop(skinRect.top() - MARGIN_TOP / 1.5);
@@ -731,6 +732,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
     if (!isSelected() && !showOutline()) {
         QPen pen;
+        pen.setWidthF(fit::fx(1));
         pen.setJoinStyle(Qt::MiterJoin);
         if (_skin == PhonePortrait || _skin == PhoneLandscape) {
             pen.setColor(Qt::black);

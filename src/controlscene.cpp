@@ -209,7 +209,7 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
 
             if (selectedControls.size() > 1) {
                 QPen pen("#404447");
-                pen.setWidthF(1.0);
+                pen.setWidthF(fit::fx(1));
                 pen.setStyle(Qt::DotLine);
                 painter->setPen(pen);
                 painter->setBrush(Qt::NoBrush);
@@ -220,7 +220,7 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
 
         const auto& guideLines = this->guideLines();
         QPen pen(GUIDELINE_COLOR);
-        pen.setWidthF(1.0);
+        pen.setWidthF(0);
         pen.setStyle(Qt::DashLine);
         painter->setPen(pen);
         painter->setBrush(pen.color());
@@ -236,6 +236,7 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
 
     if (_mainControl == nullptr) {
         QPen pen;
+        pen.setWidthF(fit::fx(1));
         QRectF rect(0, 0, fit::fx(150), fit::fx(60));
         rect.moveCenter(sceneRect().center());
         pen.setStyle(Qt::DotLine);

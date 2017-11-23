@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow
         ProjectsScreen _projectsScreen;
         LoginScreen _loginScreen;
         BuildsScreen _buildsScreen;
-        QWidget _settleWidget;
+        QFrame _settleWidget;
         QToolBar _titleBar;
         QDockWidget _toolboxDockwidget;
         QDockWidget _propertiesDockwidget;

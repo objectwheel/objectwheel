@@ -24,6 +24,8 @@
 #include <QQmlComponent>
 #include <QQuickView>
 
+#define pS (qApp->primaryScreen())
+
 /******************************************************************/
 /**          D A T A B A S E  I N F R A S T R U C T U R E        **/
 /******************************************************************/
@@ -147,7 +149,6 @@ class SaveManagerPrivate : public QObject
         SaveManager* parent = nullptr;
         ParserController parserController;
         ExecutiveWidget executiveWidget;
-
 };
 
 SaveManagerPrivate::SaveManagerPrivate(SaveManager* parent)
@@ -471,9 +472,9 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
   const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine,
-      QUrl(path + separator() + DIR_THIS + separator() + "main.qml")));
+      QUrl::fromLocalFile(path + separator() + DIR_THIS + separator() + "main.qml")));
     auto item = comp->beginCreate(context);
-    if (comp->isError()) {
+    if (comp->isError() || !item) {
         err.type = CodeError;
         err.id = parent->id(path);
         err.errors = comp->errors();
@@ -481,15 +482,19 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
         comps << comp;
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
         if (type(item) == Window) {
-            ((QQuickWindow*)item)->setX(parent->x(path));
-            ((QQuickWindow*)item)->setY(parent->y(path));
-            ((QQuickWindow*)item)->setWidth(parent->width(path));
-            ((QQuickWindow*)item)->setHeight(parent->height(path));
+            //            ((QQuickWindow*)item)->setX(parent->x(path)); //FIXME
+            //            ((QQuickWindow*)item)->setY(parent->y(path));
+            ((QQuickWindow*)item)->setWidth(fit::fx(parent->width(path)));
+            ((QQuickWindow*)item)->setHeight(fit::fx(parent->height(path)));
+            QRectF r(0,0, ((QQuickWindow*)item)->width(), ((QQuickWindow*)item)->height());
+            r.moveCenter(pS->geometry().center());
+            ((QQuickWindow*)item)->setX(r.topLeft().x());
+            ((QQuickWindow*)item)->setY(r.topLeft().y());
         } else if (type(item) == Quick) {
             ((QQuickItem*)item)->setX(parent->x(path));
             ((QQuickItem*)item)->setY(parent->y(path));
-            ((QQuickItem*)item)->setWidth(parent->width(path));
-            ((QQuickItem*)item)->setHeight(parent->height(path));
+            ((QQuickItem*)item)->setWidth(fit::fx(parent->width(path)));
+            ((QQuickItem*)item)->setHeight(fit::fx(parent->height(path)));
             ((QQuickItem*)item)->setZ(parent->z(path));
         }
     }
@@ -500,12 +505,12 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
   const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine));
-    comp->setData(data, QUrl(path + separator() +
-                            DIR_THIS + separator() + "main.qml"));
+    comp->setData(data, QUrl::fromLocalFile(path + separator() +
+      DIR_THIS + separator() + "main.qml"));
 
     auto item = comp->beginCreate(context);
 
-    if (comp->isError()) {
+    if (comp->isError() || !item) {
         err.type = CodeError;
         err.id = parent->id(path);
         err.errors = comp->errors();
@@ -513,15 +518,19 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
         comps << comp;
         engine->setObjectOwnership(item, QQmlEngine::JavaScriptOwnership);
         if (type(item) == Window) {
-            ((QQuickWindow*)item)->setX(parent->x(path));
-            ((QQuickWindow*)item)->setY(parent->y(path));
-            ((QQuickWindow*)item)->setWidth(parent->width(path));
-            ((QQuickWindow*)item)->setHeight(parent->height(path));
+//            ((QQuickWindow*)item)->setX(parent->x(path)); //FIXME
+//            ((QQuickWindow*)item)->setY(parent->y(path));
+            ((QQuickWindow*)item)->setWidth(fit::fx(parent->width(path)));
+            ((QQuickWindow*)item)->setHeight(fit::fx(parent->height(path)));
+            QRectF r(0,0, ((QQuickWindow*)item)->width(), ((QQuickWindow*)item)->height());
+            r.moveCenter(pS->geometry().center());
+            ((QQuickWindow*)item)->setX(r.topLeft().x());
+            ((QQuickWindow*)item)->setY(r.topLeft().y());
         } else if (type(item) == Quick) {
             ((QQuickItem*)item)->setX(parent->x(path));
             ((QQuickItem*)item)->setY(parent->y(path));
-            ((QQuickItem*)item)->setWidth(parent->width(path));
-            ((QQuickItem*)item)->setHeight(parent->height(path));
+            ((QQuickItem*)item)->setWidth(fit::fx(parent->width(path)));
+            ((QQuickItem*)item)->setHeight(fit::fx(parent->height(path)));
             ((QQuickItem*)item)->setZ(parent->z(path));
         }
     }
@@ -704,7 +713,7 @@ ExecError SaveManager::execProject()
                 } else {
                     childResults[childPath] = _d->requestItem(error, components,
                       childPath, engine, masterContext);
-                    if (childResults[childPath] == nullptr) {
+                    if (error.hasError()) {
                         engine->deleteLater();
                         return error;
                     }
@@ -744,11 +753,11 @@ ExecError SaveManager::execProject()
                   masterPath, engine, masterContext);
             }
 
-            qApp->processEvents(QEventLoop::AllEvents, 10);
-            if (masterResults[masterPath] == nullptr) {
+            if (error.hasError()) {
                 engine->deleteLater();
                 return error;
             }
+            qApp->processEvents(QEventLoop::AllEvents, 10);
 
             //! Catch this (current spin's) master item
             if (isForm) { // If it's a form (top level master)

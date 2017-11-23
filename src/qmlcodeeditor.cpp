@@ -280,6 +280,7 @@ void QmlCodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
             QFont font;
             QString number = QString::number(blockNumber + 1);
 
+            pen.setWidthF(fit::fx(1));
             if (textCursor().hasSelection() &&
                 top >= blockBoundingGeometry(document()->findBlock(textCursor().selectionStart())).translated(contentOffset()).top() &&
                 bottom <= blockBoundingGeometry(document()->findBlock(textCursor().selectionEnd())).translated(contentOffset()).bottom()) {

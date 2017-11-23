@@ -56,8 +56,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     buttonGroup->addButton(searchButton);
     buttonGroup->addButton(consoleButton);
 
-    hideButton->setFixedWidth(16);
-    hideButton->setFixedHeight(16);
+    hideButton->setFixedWidth(fit::fx(16));
+    hideButton->setFixedHeight(fit::fx(16));
     hideButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     hideButton->setRadius(fit::fx(6));
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -70,8 +70,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
 
     issuesButton->setCheckable(true);
     issuesButton->setText("Issues");
-    issuesButton->setFixedWidth(100);
-    issuesButton->setFixedHeight(20);
+    issuesButton->setFixedWidth(fit::fx(100));
+    issuesButton->setFixedHeight(fit::fx(20));
     issuesButton->setCursor(Qt::PointingHandCursor);
     issuesButton->setToolTip("Show recent issues.");
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
@@ -85,8 +85,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
 
     searchButton->setCheckable(true);
     searchButton->setText("Search");
-    searchButton->setFixedWidth(100);
-    searchButton->setFixedHeight(20);
+    searchButton->setFixedWidth(fit::fx(100));
+    searchButton->setFixedHeight(fit::fx(20));
     searchButton->setCursor(Qt::PointingHandCursor);
     searchButton->setToolTip("Search words within project.");
     searchButton->setIcon(QIcon(":/resources/images/search.png"));
@@ -99,8 +99,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
 
     consoleButton->setCheckable(true);
     consoleButton->setText("Console Output");
-    consoleButton->setFixedWidth(150);
-    consoleButton->setFixedHeight(20);
+    consoleButton->setFixedWidth(fit::fx(150));
+    consoleButton->setFixedHeight(fit::fx(20));
     consoleButton->setCursor(Qt::PointingHandCursor);
     consoleButton->setToolTip("Show application output.");
     consoleButton->setIcon(QIcon(":/resources/images/console.png"));
@@ -125,6 +125,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     toolbar->addWidget(issuesButton);
     toolbar->addWidget(searchButton);
     toolbar->addWidget(consoleButton);
+    toolbar->setStyleSheet(QString("spacing: %1").arg(fit::fx(5)));
     toolbar->addWidget(spacer);
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);

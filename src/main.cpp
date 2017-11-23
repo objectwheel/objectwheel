@@ -12,7 +12,7 @@
 #include <QLoggingCategory>
 #include <QTimer>
 
-#define PIXEL_SIZE 14
+#define PIXEL_SIZE 13
 #define REF_WIDTH 1680
 #define REF_HEIGHT 1050
 #define REF_DPI 72.0
@@ -22,14 +22,8 @@ int main(int argc, char *argv[])
     // Init application
     QApplication a(argc, argv);
 
-    // Setup OpenGL format
-    QSurfaceFormat format;
-    format.setSamples(4);
-    format.setAlphaBufferSize(8);
-    QSurfaceFormat::setDefaultFormat(format);
-
-# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-    //    Multiple instances protection
+    # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
+    // Multiple instances protection
     QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
     if(!sharedMemory.create(1)) {
         sharedMemory.attach();
@@ -40,15 +34,39 @@ int main(int argc, char *argv[])
             return 0;
         }
     }
-# endif
+    # endif
+
+    // Initialize Fit library
+    fit::update(REF_WIDTH, REF_HEIGHT, REF_DPI);
 
     // Init application settings
-//    QApplication::setStyle("fusion");
+    // QApplication::setStyle("fusion");
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
     qApp->setWindowIcon(QIcon(":/resources/images/owicon.png"));
     qsrand(QDateTime::currentMSecsSinceEpoch());
+
+    // Setup OpenGL format
+    QSurfaceFormat format;
+    format.setSamples(4);
+    format.setAlphaBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(format);
+
+    // Add system wide fonts and set default font
+    QFont font;
+    font.setPixelSize(fit::fx(PIXEL_SIZE));
+    #if defined(Q_OS_MACOS)
+    font.setFamily(".SF NS Display");
+    #elif defined(Q_OS_WIN)
+    font.setFamily("Segoe UI");
+    #endif
+    QApplication::setFont(font);
+    QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
+
+    /* Disable Qml Parser warnings */
+    QLoggingCategory::setFilterRules(QStringLiteral("qtc*.info=false\n"
+      "qtc*.debug=false\n qtc*.warning=false\n qtc*.critical=false"));
 
     // Init CSS
     CSS::init();
@@ -61,25 +79,11 @@ int main(int argc, char *argv[])
 
     // Start MainWidget
     MainWindow w;
-    fit::update(REF_WIDTH, REF_HEIGHT, REF_DPI);
-# if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
+    # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     w.showMaximized();
-# else
+    # else
     w.showFullScreen();
-# endif
-
-    // Add system wide fonts and set default font
-    QFont font;
-    font.setPixelSize(fit::fx(PIXEL_SIZE));
-#if defined(Q_OS_MACOS)
-    font.setFamily(".SF NS Display");
-#endif
-    QApplication::setFont(font);
-    QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
-
-    /* Disable Qml Parser warnings */
-    QLoggingCategory::setFilterRules(QStringLiteral("qtc*.info=false\n"
-      "qtc*.debug=false\n qtc*.warning=false\n qtc*.critical=false"));
+    # endif
 
     // Start main event loop
     return a.exec();

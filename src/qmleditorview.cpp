@@ -188,6 +188,10 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     itemsCombobox->setFixedWidth(fit::fx(200));
     documentsCombobox->setFixedWidth(fit::fx(200));
 
+    itemsCombobox->setFixedHeight(fit::fx(17));
+    documentsCombobox->setFixedHeight(fit::fx(17));
+    zoomlLevelCombobox->setFixedHeight(fit::fx(17));
+
     redoButton->setDisabled(true);
     copyButton->setDisabled(true);
     cutButton->setDisabled(true);
@@ -236,7 +240,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     //TODO: form or control removal will be handled
 
-    QTimer::singleShot(1000, [=] {
+    QTimer::singleShot(3000, [=] {
         connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
         connect(DesignManager::controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
         connect(DesignManager::formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
@@ -649,6 +653,7 @@ QmlEditorView::QmlEditorView(QWidget* parent)
 void QmlEditorView::paintEvent(QPaintEvent*)
 {
     QPen pen;
+    pen.setWidthF(fit::fx(1));
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     QRectF _rect(0, 0, fit::fx(150), fit::fx(60));

@@ -166,6 +166,46 @@
      </item>
      <item>
       <widget class="QScrollArea" name="scrollArea">
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="Base">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>224</red>
+             <green>228</green>
+             <blue>231</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="Base">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>224</red>
+             <green>228</green>
+             <blue>231</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="Base">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>224</red>
+             <green>228</green>
+             <blue>231</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="autoFillBackground">
+        <bool>true</bool>
+       </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
@@ -175,8 +215,72 @@
           <x>0</x>
           <y>0</y>
           <width>669</width>
-          <height>471</height>
+          <height>487</height>
          </rect>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>224</red>
+              <green>228</green>
+              <blue>231</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>224</red>
+              <green>228</green>
+              <blue>231</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>224</red>
+              <green>228</green>
+              <blue>231</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>224</red>
+              <green>228</green>
+              <blue>231</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>224</red>
+              <green>228</green>
+              <blue>231</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>224</red>
+              <green>228</green>
+              <blue>231</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
@@ -203,7 +307,7 @@
                <string>Create New Tool</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="resources/resources.qrc">
                 <normaloff>:/resources/images/newfile.png</normaloff>:/resources/images/newfile.png</iconset>
               </property>
               <property name="autoDefault">
@@ -226,7 +330,7 @@
                <string>Import</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="resources/resources.qrc">
                 <normaloff>:/resources/images/undo.png</normaloff>:/resources/images/undo.png</iconset>
               </property>
               <property name="autoDefault">
@@ -274,7 +378,7 @@
                <string>Remove Tool</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="resources/resources.qrc">
                 <normaloff>:/resources/images/delete.png</normaloff>:/resources/images/delete.png</iconset>
               </property>
               <property name="autoDefault">
@@ -297,7 +401,7 @@
                <string>Export</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="resources/resources.qrc">
                 <normaloff>:/resources/images/redo.png</normaloff>:/resources/images/redo.png</iconset>
               </property>
               <property name="autoDefault">
@@ -598,7 +702,7 @@
                <string>Reset Tool Library</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="resources/resources.qrc">
                 <normaloff>:/resources/images/error.png</normaloff>:/resources/images/error.png</iconset>
               </property>
               <property name="autoDefault">
@@ -690,7 +794,7 @@
   <tabstop>scrollArea</tabstop>
  </tabstops>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="resources/resources.qrc"/>
  </resources>
  <connections>
   <connection>

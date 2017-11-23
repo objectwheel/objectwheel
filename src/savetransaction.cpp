@@ -2,6 +2,7 @@
 #include <control.h>
 #include <controlwatcher.h>
 #include <savemanager.h>
+#include <fit.h>
 
 #define sM (SaveManager::instance())
 #define cW (ControlWatcher::instance())
@@ -29,9 +30,9 @@ void SaveTransaction::processGeometry(Control* control)
     sM->setProperty(control, "y",
       control->y());
     sM->setProperty(control, "width",
-      control->size().width());
+      control->size().width() / fit::ratio());
     sM->setProperty(control, "height",
-      control->size().height());
+      control->size().height() / fit::ratio());
 }
 
 void SaveTransaction::processParent(Control* control)

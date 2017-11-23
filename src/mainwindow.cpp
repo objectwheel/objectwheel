@@ -52,7 +52,10 @@ void MainWindow::setupGui()
     QPalette p(palette());
     p.setColor(QPalette::Window, QColor("#E0E4E7"));
     setPalette(p);
+    setStyleSheet("QMainWindow::separator{height: 0px;}");
 
+    _settleWidget.setFrameShape(QFrame::StyledPanel);
+    _settleWidget.setFrameShadow(QFrame::Plain);
     _designManager.setSettleWidget(&_settleWidget);
 
     _centralWidget.addWidget(Screen::Studio, &_settleWidget);
@@ -101,7 +104,7 @@ void MainWindow::setupGui()
     /*** PROPERTIES DOCK WIDGET ***/
     QLabel* label = new QLabel;
     label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label->setText(" Properties");
+    label->setText("   Properties");
     label->setFont(f);
 
     QToolButton* pinButton = new QToolButton;
@@ -117,19 +120,20 @@ void MainWindow::setupGui()
     toolbar->addWidget(pinButton);
     toolbar->setStyleSheet(CSS::DesignerPinbar);
     toolbar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar->setFixedHeight(fit::fx(21));
+    toolbar->setFixedHeight(fit::fx(22.8));
 
     _propertiesDockwidget.setTitleBarWidget(toolbar);
     _propertiesDockwidget.setWidget(&_propertiesWidget);
     _propertiesDockwidget.setWindowTitle("Properties");
     _propertiesDockwidget.setVisible(false);
+    _propertiesDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                       QDockWidget::DockWidgetFloatable);
 
     /*** FORMS DOCK WIDGET ***/
     QLabel* label2 = new QLabel;
     label2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label2->setText(" Forms");
+    label2->setText("   Forms");
     label2->setFont(f);
 
     QToolButton* pinButton2 = new QToolButton;
@@ -145,19 +149,20 @@ void MainWindow::setupGui()
     toolbar2->addWidget(pinButton2);
     toolbar2->setStyleSheet(CSS::DesignerPinbar);
     toolbar2->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar2->setFixedHeight(fit::fx(21));
+    toolbar2->setFixedHeight(fit::fx(22.8));
 
     _formsDockwidget.setTitleBarWidget(toolbar2);
     _formsDockwidget.setWidget(&_formsWidget);
     _formsDockwidget.setWindowTitle("Forms");
     _formsDockwidget.setVisible(false);
+    _formsDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                  QDockWidget::DockWidgetFloatable);
 
     /*** TOOLBOX DOCK WIDGET ***/
     QLabel* label3 = new QLabel;
     label3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label3->setText(" Toolbox");
+    label3->setText("   Toolbox");
     label3->setFont(f);
 
     QToolButton* pinButton3 = new QToolButton;
@@ -182,12 +187,13 @@ void MainWindow::setupGui()
     toolbar3->addWidget(pinButton3);
     toolbar3->setStyleSheet(CSS::DesignerPinbar);
     toolbar3->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar3->setFixedHeight(fit::fx(21));
+    toolbar3->setFixedHeight(fit::fx(22.8));
 
     _toolboxDockwidget.setTitleBarWidget(toolbar3);
     _toolboxDockwidget.setWidget(&_toolbox);
     _toolboxDockwidget.setWindowTitle("Toolbox");
     _toolboxDockwidget.setVisible(false);
+    _toolboxDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                    QDockWidget::DockWidgetFloatable);
 
@@ -223,7 +229,7 @@ void MainWindow::setupGui()
     /*** INSPECTOR DOCK WIDGET ***/
     QLabel* label4 = new QLabel;
     label4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label4->setText(" Control Inspector");
+    label4->setText("   Control Inspector");
     label4->setFont(f);
 
     QToolButton* pinButton4 = new QToolButton;
@@ -239,7 +245,7 @@ void MainWindow::setupGui()
     toolbar4->addWidget(pinButton4);
     toolbar4->setStyleSheet(CSS::DesignerPinbar);
     toolbar4->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar4->setFixedHeight(fit::fx(21));
+    toolbar4->setFixedHeight(fit::fx(22.8));
 
     connect(&_inspectorWidget, SIGNAL(controlClicked(Control*)),
       &_designManager, SLOT(controlClicked(Control*)));
@@ -250,6 +256,7 @@ void MainWindow::setupGui()
     _inspectorDockwidget.setWidget(&_inspectorWidget);
     _inspectorDockwidget.setWindowTitle("Control Inspector");
     _inspectorDockwidget.setVisible(false);
+    _inspectorDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _inspectorDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                      QDockWidget::DockWidgetFloatable);
 

@@ -51,6 +51,7 @@ struct ExecError {
         ExecErrorType type = NoError;
         QList<QQmlError> errors;
         QString id;
+        inline bool hasError() { return type != NoError; }
 };
 
 class SaveManager : public QObject

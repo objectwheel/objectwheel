@@ -5,7 +5,9 @@
 #include <savemanager.h>
 #include <designmanager.h>
 #include <filemanager.h>
+#include <css.h>
 
+#include <QScrollBar>
 #include <QTimer>
 #include <QContextMenuEvent>
 #include <QMenu>
@@ -317,6 +319,8 @@ FormView::FormView(QGraphicsScene* scene, QWidget* parent)
     : QGraphicsView(scene, parent)
     , _d(new FormViewPrivate(this))
 {
+    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
 }
 
 void FormView::resizeEvent(QResizeEvent* event)

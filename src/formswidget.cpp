@@ -57,7 +57,8 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
 
     QPalette p2(formsListWidget->palette());
     p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Highlight, QColor("#E0E4E7"));
+    p2.setColor(QPalette::Window, QColor("#F3F7FA"));
+    p2.setColor(QPalette::Highlight, QColor("#d0d4d7"));
     p2.setColor(QPalette::Text, QColor("#202427"));
     formsListWidget->setPalette(p2);
 
@@ -82,7 +83,7 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     addButton->setColor("#6BB64B");
     addButton->setFixedSize(fit::fx(17),fit::fx(17));
-    addButton->setRadius(fit::fx(8));
+    addButton->setRadius(fit::fx(7.5));
     addButton->setIconSize(QSize(fit::fx(11),fit::fx(11)));
     addButton->setIcon(QIcon(":/resources/images/plus.png"));
     connect(addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
@@ -90,7 +91,7 @@ FormsWidgetPrivate::FormsWidgetPrivate(FormsWidget* parent)
     removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     removeButton->setColor("#C61717");
     removeButton->setFixedSize(fit::fx(17),fit::fx(17));
-    removeButton->setRadius(fit::fx(8));
+    removeButton->setRadius(fit::fx(7.5));
     removeButton->setIconSize(QSize(fit::fx(11),fit::fx(11)));
     removeButton->setIcon(QIcon(":/resources/images/minus.png"));
     connect(removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));

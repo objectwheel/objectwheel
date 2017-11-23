@@ -22,8 +22,6 @@
 
 #define pS (qApp->primaryScreen())
 
-
-
 QLabel* dropLabel;
 QGraphicsBlurEffect* blurEffect;
 
