@@ -857,10 +857,10 @@ Item {
     Dgl.MessageDialog {
         id: deleteProjectMessageDialog
         title: "Delete Project"
-//        text: "This will delete entire project. Are you sure?"
-//         standardButtons: Dgl.StandardButton.Yes | Dgl.StandardButton.No
-//         icon: Dgl.StandardIcon.Warning
-//         onYes: btnDelProject.clicked()
+        text: "This will delete entire project. Are you sure?"
+         standardButtons: Dgl.StandardButton.Yes | Dgl.StandardButton.No
+         icon: Dgl.StandardIcon.Warning
+         onYes: btnDelProject.clicked()
         // BUG: on IOS
     }
     property alias warning: warning

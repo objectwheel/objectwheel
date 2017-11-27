@@ -186,7 +186,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
       QSizePolicy::Preferred);
 
     #if defined(Q_OS_WIN)
-    itemsCombobox->setFixedHeight(fit::fx(18));
+    zoomlLevelCombobox.setFixedHeight(fit::fx(18));
     #endif
     zoomlLevelCombobox.addItem("10 %");
     zoomlLevelCombobox.addItem("25 %");
