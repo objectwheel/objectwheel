@@ -473,7 +473,7 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
 {
     QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine,
       QUrl::fromLocalFile(path + separator() + DIR_THIS + separator() + "main.qml")));
-    auto item = comp->beginCreate(context);
+    auto item = comp->beginCreate(context); // BUG: QTBUG-47633
     if (comp->isError() || !item) {
         err.type = CodeError;
         err.id = parent->id(path);
@@ -508,7 +508,7 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
     comp->setData(data, QUrl::fromLocalFile(path + separator() +
       DIR_THIS + separator() + "main.qml"));
 
-    auto item = comp->beginCreate(context);
+    auto item = comp->beginCreate(context); // BUG: QTBUG-47633
 
     if (comp->isError() || !item) {
         err.type = CodeError;
@@ -852,6 +852,8 @@ ExecError SaveManager::execProject()
         connect(mainWindow, SIGNAL(closing(QQuickCloseEvent*)),
           &loop, SLOT(quit()));
     }
+    connect(engine, SIGNAL(quit()), &loop, SLOT(quit()));
+    connect(engine, SIGNAL(exit(int)), &loop, SLOT(quit()));
     loop.exec();
 
     engine->deleteLater();

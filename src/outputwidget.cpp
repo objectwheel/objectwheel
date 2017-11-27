@@ -70,6 +70,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
 
     issuesButton->setCheckable(true);
     issuesButton->setText("Issues");
+    issuesButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     issuesButton->setFixedWidth(fit::fx(100));
     issuesButton->setFixedHeight(fit::fx(20));
     issuesButton->setCursor(Qt::PointingHandCursor);
@@ -85,6 +86,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
 
     searchButton->setCheckable(true);
     searchButton->setText("Search");
+    searchButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     searchButton->setFixedWidth(fit::fx(100));
     searchButton->setFixedHeight(fit::fx(20));
     searchButton->setCursor(Qt::PointingHandCursor);
@@ -99,6 +101,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
 
     consoleButton->setCheckable(true);
     consoleButton->setText("Console Output");
+    consoleButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     consoleButton->setFixedWidth(fit::fx(150));
     consoleButton->setFixedHeight(fit::fx(20));
     consoleButton->setCursor(Qt::PointingHandCursor);

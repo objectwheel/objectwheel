@@ -1,9 +1,16 @@
 #include <aispeak.h>
+#include <limits.h>
+#include <random>
+
 #include <QByteArray>
 #include <QNetworkAccessManager>
 #include <QDebug>
 
 #define URL "https://api.api.ai/v1/tts?v=20150910&text="
+
+static std::random_device rd;
+static std::mt19937 mt(rd());
+static std::uniform_int_distribution<int> rand_dist(INT_MIN, INT_MIN);
 
 class AiSpeakPrivate
 {
@@ -77,10 +84,9 @@ void AiSpeak::handleError(QNetworkReply::NetworkError error)
 QString AiSpeak::generateRandomId()
 {
 	auto s4 = [] {
-		return QString::number(65536 + (qrand() % 65536), 16).remove(0, 1);
-	};
-	qsrand(QDateTime::currentMSecsSinceEpoch());
-	return (s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4());
+        return QString::number(65536 + (rand_dist(mt) % 65536), 16).remove(0, 1);
+    };
+    return (s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4());
 }
 
 #ifdef QT_QML_LIB

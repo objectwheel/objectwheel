@@ -1,21 +1,28 @@
 #include <usermanager.h>
-#include <QStandardPaths>
-#include <QCoreApplication>
-#include <filemanager.h>
-#include <QCryptographicHash>
-#include <QByteArray>
-#include <dirlocker.h>
-#include <projectmanager.h>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <aes.h>
 #include <global.h>
 #include <mainwindow.h>
+#include <filemanager.h>
+#include <dirlocker.h>
+#include <projectmanager.h>
+#include <limits>
+#include <random>
+
+#include <QStandardPaths>
+#include <QCoreApplication>
+#include <QCryptographicHash>
+#include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #define cW (MainWindow::instance()->centralWidget())
 #define pW (MainWindow::instance()->progressWidget())
 #define AUTOLOGIN_FILENAME "alg.inf"
 #define AUTOLOGIN_PROTECTOR "QWxsYWggaXMgZ3JlYXRlc3Qu"
+
+static std::random_device rd;
+static std::mt19937 mt(rd());
+static std::uniform_int_distribution<int> rand_dist(INT_MIN, INT_MIN);
 
 class UserManagerPrivate
 {
@@ -120,7 +127,7 @@ void UserManager::setAutoLogin(const QString& password)
 void UserManager::clearAutoLogin()
 {
     QByteArray shredder;
-    for (int i = 1048576; i--;) { shredder.append(qrand() % 250); }
+    for (int i = 1048576; i--;) { shredder.append(rand_dist(mt) % 250); }
     wrfile(_d->dataDirectory + separator() + AUTOLOGIN_FILENAME, shredder);
     rm(_d->dataDirectory + separator() + AUTOLOGIN_FILENAME);
     mkfile(_d->dataDirectory + separator() + AUTOLOGIN_FILENAME);

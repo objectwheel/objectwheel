@@ -29,7 +29,6 @@ class ToolboxTree : public QTreeWidget
     protected:
         QMimeData* mimeData(const QList<QTreeWidgetItem*> items) const override;
         void mousePressEvent(QMouseEvent* event) override;
-        void mouseMoveEvent(QMouseEvent* event) override;
 
     private:
         QMap<QTreeWidgetItem*, QList<QUrl>> _urls;
@@ -37,8 +36,7 @@ class ToolboxTree : public QTreeWidget
         bool _indicatorButtonVisible;
 
     private:
-        QPoint _previousPoint;
-        QList<qreal> _angleList;
+        QPoint _pressPoint;
 };
 
 #endif // TOOLBOXTREE_H

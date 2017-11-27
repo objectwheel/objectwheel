@@ -54,6 +54,7 @@ QToolBar { \
     spacing: %4px; \
 }"
 
+#if defined(Q_OS_WIN)
 #define CSS_DESIGNER_PINBAR "\
 QToolBar { \
     border-top: 1px solid  %1;\
@@ -62,9 +63,21 @@ QToolBar { \
     border-left: %6px solid #0D74C8;\
     margin-left: %5px; margin-right: %5px;\
     margin-top: %5px;\
-    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.8, stop:0 %2, stop:1 %3); \
+    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %2, stop:1 %3); \
     spacing: %4px; \
 }"
+#else
+#define CSS_DESIGNER_PINBAR "\
+QToolBar { \
+    border-top: 1px solid  %1;\
+    border-bottom: 1px solid %1;\
+    border-right: 1px solid %1;\
+    border-left: %6px solid #0D74C8;\
+    margin-left: %5px; margin-right: %5px;\
+    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %2, stop:1 %3); \
+    spacing: %4px; \
+}"
+#endif
 
 QString CSS::ScrollBar;
 QString CSS::ScrollBarH;

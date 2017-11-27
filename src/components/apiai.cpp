@@ -1,4 +1,7 @@
 #include <apiai.h>
+#include <limits>
+#include <random>
+
 #include <QWebSocket>
 #include <QByteArray>
 #include <QDataStream>
@@ -11,6 +14,10 @@
 	"16000,+format=(string)S16LE,+channels=(int)1&access_token=%1&sessionId=%2"
 
 #define CONFIG "{\"timezone\":\"America/New_York\", \"lang\":\"%1\", \"sessionId\":\"%2\"}"
+
+static std::random_device rd;
+static std::mt19937 mt(rd());
+static std::uniform_int_distribution<int> rand_dist(INT_MIN, INT_MIN);
 
 class ApiAiPrivate
 {
@@ -139,10 +146,9 @@ void ApiAi::handleStateChanges(QAbstractSocket::SocketState state)
 QString ApiAi::generateRandomId()
 {
 	auto s4 = [] {
-		return QString::number(65536 + (qrand() % 65536), 16).remove(0, 1);
+        return QString::number(65536 + (rand_dist(mt) % 65536), 16).remove(0, 1);
 	};
-	qsrand(QDateTime::currentMSecsSinceEpoch());
-	return (s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4());
+    return (s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4());
 }
 
 #ifdef QT_QML_LIB

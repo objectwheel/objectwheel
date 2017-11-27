@@ -12,8 +12,6 @@
 #define INTERVAL_WAITEFFECT 600
 #define pS (QApplication::primaryScreen())
 
-
-
 ProgressWidget::ProgressWidget(CentralWidget* parent)
     : QWidget(parent)
     , _centralWidget(parent)

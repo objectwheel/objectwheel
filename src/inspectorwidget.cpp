@@ -15,8 +15,6 @@
 #include <QScrollBar>
 #include <QTimer>
 
-
-
 //!
 //! *************************** [global] ****************************
 //!
@@ -158,7 +156,7 @@ InspectorWidget::InspectorWidget(QWidget* parent)
       SLOT(refresh()));
     connect(FormsWidget::instance(), SIGNAL(currentFormChanged()),
       SLOT(refresh()));
-    QTimer::singleShot(1500, [this] {
+    QTimer::singleShot(3000, [this] {
         connect(SaveManager::instance(), SIGNAL(databaseChanged()),
           SLOT(refresh()));
     });

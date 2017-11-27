@@ -260,8 +260,8 @@ QTreeWidgetItem* ToolboxTree::categoryItem(const QString& categoryName)
 
 QMimeData* ToolboxTree::mimeData(const QList<QTreeWidgetItem*> items) const
 {
-    if (itemAt(_previousPoint) &&
-      itemAt(_previousPoint)->parent() != nullptr) {
+    if (itemAt(_pressPoint) &&
+      itemAt(_pressPoint)->parent() != nullptr) {
         QMimeData *data = QTreeWidget::mimeData(items);
         data->setUrls(_urls[items[0]]);
         data->setText(TOOL_KEY);
@@ -273,45 +273,8 @@ QMimeData* ToolboxTree::mimeData(const QList<QTreeWidgetItem*> items) const
 
 void ToolboxTree::mousePressEvent(QMouseEvent* event)
 {
-    _angleList.clear();
-    _previousPoint = event->pos();
+    _pressPoint = event->pos();
     QTreeWidget::mousePressEvent(event);
-}
-
-void ToolboxTree::mouseMoveEvent(QMouseEvent *event)
-{
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_WINPHONE)
-    /* Make dragging if direction is right out of the list widget */
-    if (state() == DraggingState)
-    {
-        QPoint diff = event->pos() - _previousPoint;
-        if (QApplication::startDragDistance() > diff.manhattanLength())
-            return;
-        _previousPoint = event->pos();
-
-        qreal angle;
-        if (0 == diff.x())
-            angle = 90;
-        else
-            angle = qAbs(qRadiansToDegrees(qAtan(diff.y() / (qreal)diff.x())));
-
-        _angleList << angle;
-        if (10 < _angleList.size())
-            _angleList.removeFirst();
-        else
-            return;
-
-        qreal dangle = 0;
-        for ( auto a : _angleList)
-            dangle += a;
-        dangle /= _angleList.size();
-
-        if (35 < dangle)
-            return;
-    }
-#endif
-
-    QTreeWidget::mouseMoveEvent(event);
 }
 
 #include "toolboxtree.moc"

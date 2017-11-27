@@ -16,8 +16,6 @@
 #include <QListWidget>
 #include <QScrollBar>
 
-
-
 class FormsWidgetPrivate : public QObject
 {
         Q_OBJECT

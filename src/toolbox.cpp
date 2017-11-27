@@ -30,6 +30,7 @@ ToolBox::ToolBox(QWidget* parent)
 
     _searchEdit.setPlaceholderText("Filter");
     _searchEdit.setClearButtonEnabled(true);
+    _searchEdit.setFixedHeight(fit::fx(22));
     connect(&_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
 
     _toolboxVLay.addWidget(&_searchEdit);

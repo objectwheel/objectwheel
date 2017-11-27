@@ -188,9 +188,11 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     itemsCombobox->setFixedWidth(fit::fx(200));
     documentsCombobox->setFixedWidth(fit::fx(200));
 
-    itemsCombobox->setFixedHeight(fit::fx(17));
-    documentsCombobox->setFixedHeight(fit::fx(17));
-    zoomlLevelCombobox->setFixedHeight(fit::fx(17));
+    #if defined(Q_OS_WIN)
+    itemsCombobox->setFixedHeight(fit::fx(18));
+    documentsCombobox->setFixedHeight(fit::fx(18));
+    zoomlLevelCombobox->setFixedHeight(fit::fx(18));
+    #endif
 
     redoButton->setDisabled(true);
     copyButton->setDisabled(true);

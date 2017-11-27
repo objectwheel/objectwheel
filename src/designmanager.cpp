@@ -185,7 +185,9 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     spacer->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Preferred);
 
-    zoomlLevelCombobox.setFixedHeight(fit::fx(17));
+    #if defined(Q_OS_WIN)
+    itemsCombobox->setFixedHeight(fit::fx(18));
+    #endif
     zoomlLevelCombobox.addItem("10 %");
     zoomlLevelCombobox.addItem("25 %");
     zoomlLevelCombobox.addItem("50 %");

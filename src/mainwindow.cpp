@@ -99,7 +99,7 @@ void MainWindow::setupGui()
     _titleBar.setMovable(false);
     _titleBar.addWidget(titleText);
     _titleBar.setStyleSheet(QString("border: none; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
-                            .arg(QColor("#0D74C8").name()).arg(QColor("#0D74C8").darker(115).name()));
+      .arg(QColor("#0D74C8").name()).arg(QColor("#0D74C8").darker(115).name()));
 
     /*** PROPERTIES DOCK WIDGET ***/
     QLabel* label = new QLabel;

@@ -92,6 +92,27 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
     auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha3_512);
     keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
 
+    //TEMPORARY
+    pW->showProgress();
+    userManager->buildNewUser(QString("kozmon@hotmail.com"));
+    auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), QString("kozmon@hotmail.com"), QString("ntvmsnbc21"));
+    Delayer::delay(&ret, &QFuture<void>::isRunning);
+    if (ret.result()) {
+        if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
+        ProjectsScreen::refreshProjectList();
+        pW->hideProgress();
+        cW->showWidget(Screen::Projects);
+        clearGUI();
+    } else {
+        QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
+        QQmlProperty::write(toast, "base.width", qFloor(fit::fx(280)));
+        QQmlProperty::write(toast, "base.height", qFloor(fit::fx(65)));
+        QQmlProperty::write(toast, "duration", 5000);
+        QMetaObject::invokeMethod(toast, "show");
+        //FIXME: when sync part done.
+    }
+
+//    Temporary for IOS keybpard bug
 //    email = "kozmon@hotmail.com", password="ntvmsnbc21";
 //    userManager->buildNewUser(email);
 //    auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
