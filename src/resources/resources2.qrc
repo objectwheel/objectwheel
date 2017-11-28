@@ -79,8 +79,5 @@
         <file>qmls/control/t/_properties.json</file>
         <file>qmls/control/t/icon.png</file>
         <file>qmls/control/t/main.qml</file>
-        <file>qmls/buildsScreen/BuildPage.qml</file>
-        <file>qmls/buildsScreen/main.qml</file>
-        <file>qmls/buildsScreen/ProgressPage.qml</file>
     </qresource>
 </RCC>

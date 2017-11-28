@@ -4,13 +4,7 @@
         <file>images/delete-icon.png</file>
         <file>images/plus.png</file>
         <file>images/minus.png</file>
-        <file>images/toolboxbuttonfilled.png</file>
-        <file>images/toolboxbutton.png</file>
-        <file>images/propertiesbutton.png</file>
-        <file>images/propertiesbuttonfilled.png</file>
         <file>images/down-arrow.png</file>
-        <file>images/plug-up.png</file>
-        <file>images/plug-down.png</file>
         <file>images/item.png</file>
         <file>images/edit.png</file>
         <file>images/logo.png</file>
@@ -35,7 +29,6 @@
         <file>images/aboutSceneIcon.png</file>
         <file>images/aboutSceneIcon@2x.png</file>
         <file>images/projectsSceneIcon@2x.png</file>
-        <file>images/studioSceneIcon@2x.png</file>
         <file>images/cancel.png</file>
         <file>images/cancel@2x.png</file>
         <file>images/fileicon.png</file>
@@ -69,23 +62,14 @@
         <file>images/registration.png</file>
         <file>images/registration@2x.png</file>
         <file>images/android.png</file>
-        <file>images/android@2x.png</file>
-        <file>images/builds.png</file>
-        <file>images/builds@2x.png</file>
         <file>images/helmet.png</file>
-        <file>images/helmet@2x.png</file>
         <file>images/ios.png</file>
-        <file>images/ios@2x.png</file>
         <file>images/linux.png</file>
-        <file>images/linux@2x.png</file>
         <file>images/macos.png</file>
-        <file>images/macos@2x.png</file>
         <file>images/raspi.png</file>
-        <file>images/raspi@2x.png</file>
         <file>images/selectmsg.png</file>
         <file>images/selectmsg@2x.png</file>
         <file>images/windows.png</file>
-        <file>images/windows@2x.png</file>
         <file>images/back-line.png</file>
         <file>images/back-line@2x.png</file>
         <file>images/construction.gif</file>
@@ -94,7 +78,6 @@
         <file>images/build_inprogress@2x.png</file>
         <file>images/bouncing_arrow.png</file>
         <file>images/bouncing_arrow@2x.png</file>
-        <file>images/sign_warning@2x.png</file>
         <file>images/delete-icon@2x.png</file>
         <file>images/owicon.png</file>
         <file>images/owicon@2x.png</file>
@@ -121,8 +104,6 @@
         <file>images/text.png</file>
         <file>images/gui.png</file>
         <file>images/form.png</file>
-        <file>images/formsbutton.png</file>
-        <file>images/formsbuttonfilled.png</file>
         <file>images/preloader.gif</file>
         <file>images/pin.png</file>
         <file>images/save.png</file>

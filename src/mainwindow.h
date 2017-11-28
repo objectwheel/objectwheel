@@ -14,7 +14,7 @@
 #include <mainwindow.h>
 #include <projectsscreen.h>
 #include <loginscreen.h>
-#include <buildsscreen.h>
+#include <buildsdialog.h>
 #include <designmanager.h>
 #include <toolbox.h>
 #include <progresswidget.h>
@@ -30,7 +30,7 @@ class MainWindow : public QMainWindow
         View* centralWidget();
         ProgressWidget* progressWidget();
         InspectorWidget* inspectorWidget();
-        BuildsScreen* buildsScreen();
+        BuildsDialog* buildsDialog();
 
         void setupGui();
         void setupManagers();
@@ -55,7 +55,7 @@ class MainWindow : public QMainWindow
         ProgressWidget _progressWidget;
         ProjectsScreen _projectsScreen;
         LoginScreen _loginScreen;
-        BuildsScreen _buildsScreen;
+        BuildsDialog _buildsDialog;
         QFrame _settleWidget;
         QToolBar _titleBar;
         QDockWidget _toolboxDockwidget;

@@ -53,7 +53,9 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/controlwatcher.h \
            $$PWD/resizer.h \
            $$PWD/suppressor.h \
-           $$PWD/toolboxsettings.h
+           $$PWD/toolboxsettings.h \
+    $$PWD/buildsdialog.h \
+    $$PWD/platformswidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -105,7 +107,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlwatcher.cpp \
            $$PWD/resizer.cpp \
            $$PWD/suppressor.cpp \
-           $$PWD/toolboxsettings.cpp
+           $$PWD/toolboxsettings.cpp \
+    $$PWD/buildsdialog.cpp \
+    $$PWD/platformswidget.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

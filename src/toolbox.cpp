@@ -9,8 +9,6 @@
 
 #define DURATION 500
 
-
-
 ToolBox::ToolBox(QWidget* parent)
     : QWidget(parent)
     , _settingsDialog(this)

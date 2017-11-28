@@ -332,9 +332,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
     emit quitting();
 }
 
-BuildsScreen* MainWindow::buildsScreen()
+BuildsDialog* MainWindow::buildsDialog()
 {
-    return &_buildsScreen;
+    return &_buildsDialog;
 }
 
 InspectorWidget* MainWindow::inspectorWidget()

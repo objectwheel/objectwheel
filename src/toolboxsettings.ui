@@ -215,7 +215,7 @@
           <x>0</x>
           <y>0</y>
           <width>669</width>
-          <height>487</height>
+          <height>471</height>
          </rect>
         </property>
         <property name="palette">
@@ -513,7 +513,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="toolTip">
-                 <string>Tool icon. It can be either an local or remote url.</string>
+                 <string>Tool icon. It can be either a local or remote url.</string>
                 </property>
                 <property name="placeholderText">
                  <string/>
