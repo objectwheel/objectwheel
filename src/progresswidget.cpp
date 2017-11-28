@@ -12,14 +12,14 @@
 #define INTERVAL_WAITEFFECT 600
 #define pS (QApplication::primaryScreen())
 
-ProgressWidget::ProgressWidget(CentralWidget* parent)
+ProgressWidget::ProgressWidget(View* parent)
     : QWidget(parent)
     , _centralWidget(parent)
     , _lastUid(-1)
     , _logoPixmap(QPixmap(PATH_LOGO).scaled(SIZE_LOGO * pS->devicePixelRatio(),
        Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
 {
-    _centralWidget->addWidget(Screen::Progress, this);
+    _centralWidget->add(Screen::Progress, this);
     setAutoFillBackground(true);
 
     QPalette p(palette());
@@ -56,14 +56,14 @@ void ProgressWidget::showProgress(const QString& msg)
 void ProgressWidget::showProgress()
 {
     _waitEffectTimer.start();
-    _lastUid = _centralWidget->visibleUid();
-    _centralWidget->showWidget(Screen::Progress);
+    _lastUid = _centralWidget->current();
+    _centralWidget->show(Screen::Progress);
 }
 
 void ProgressWidget::hideProgress()
 {
     if (_lastUid >= 0)
-        _centralWidget->showWidget(_lastUid);
+        _centralWidget->show(_lastUid);
     hide();
     _waitEffectTimer.stop();
 }

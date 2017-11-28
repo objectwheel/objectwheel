@@ -70,26 +70,26 @@ AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
     exitButton.setParent(parent);
     exitButton.setIconButton(true);
     exitButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+    #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
     exitButton.setGeometry(parent->width() - fit::fx(26), fit::fx(8), fit::fx(18), fit::fx(18));
-#else
+    #else
     exitButton.setGeometry(parent->width() - fit::fx(15), fit::fx(5), fit::fx(8), fit::fx(8));
-#endif
+    #endif
     QObject::connect((AboutWidget*)parent,  &AboutWidget::resized, [=]{
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+    #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
         exitButton.setGeometry(parent->width() - fit::fx(26), fit::fx(8), fit::fx(18), fit::fx(18));
-#else
+    #else
         exitButton.setGeometry(parent->width() - fit::fx(15), fit::fx(5), fit::fx(8), fit::fx(8));
-#endif
+    #endif
     });
     fit::fx(&exitButton, fit::both);
     exitButton.show();
 
     QObject::connect(&exitButton, &FlatButton::clicked, [=]{
         if (UserManager::currentSessionsUser().isEmpty()) {
-            cW->showWidget(Screen::Login);
+            cW->show(Screen::Login);
         } else {
-            cW->showWidget(Screen::Studio);
+            cW->show(Screen::Studio);
         }
     });
 }

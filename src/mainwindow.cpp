@@ -48,6 +48,7 @@ void MainWindow::setupGui()
 {
     setWindowTitle(NAME_APP);
     setAutoFillBackground(true);
+    setCentralWidget(&_centralWidget);
 
     QPalette p(palette());
     p.setColor(QPalette::Window, QColor("#E0E4E7"));
@@ -58,15 +59,15 @@ void MainWindow::setupGui()
     _settleWidget.setFrameShadow(QFrame::Plain);
     _designManager.setSettleWidget(&_settleWidget);
 
-    _centralWidget.addWidget(Screen::Studio, &_settleWidget);
-    _centralWidget.addWidget(Screen::Projects, &_projectsScreen);
-    _centralWidget.addWidget(Screen::Login, &_loginScreen);
-    _centralWidget.addWidget(Screen::About, &_aboutWidget);
-    _centralWidget.showWidget(Screen::Login);
+    _centralWidget.add(Screen::Studio, &_settleWidget);
+    _centralWidget.add(Screen::Projects, &_projectsScreen);
+    _centralWidget.add(Screen::Login, &_loginScreen);
+    _centralWidget.add(Screen::About, &_aboutWidget);
+    _centralWidget.show(Screen::Login);
     _progressWidget.showProgress("Loading");
-    connect(&_centralWidget, &CentralWidget::visibleWidgetChanged, this, [&]
+    connect(&_centralWidget, &View::visibleChanged, this, [&]
     {
-        if (_centralWidget.visibleUid() == Screen::Studio) {
+        if (_centralWidget.current() == Screen::Studio) {
             _titleBar.show();
             _formsDockwidget.show();
             _propertiesDockwidget.show();
@@ -288,7 +289,7 @@ void MainWindow::setupManagers()
     if (ret.result()) {
         ProjectsScreen::refreshProjectList();
         _progressWidget.hideProgress();
-        _centralWidget.showWidget(Screen::Projects);
+        _centralWidget.show(Screen::Projects);
     } else {
         _progressWidget.hideProgress();
     }
@@ -346,7 +347,7 @@ void MainWindow::clearStudio()
     
 }
 
-CentralWidget* MainWindow::centralWidget()
+View* MainWindow::centralWidget()
 {
     return &_centralWidget;
 }

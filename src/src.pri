@@ -41,7 +41,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/toolbox.h \
            $$PWD/toolboxtree.h \
            $$PWD/filterlineedit.h \
-           $$PWD/centralwidget.h \
+           $$PWD/view.h \
            $$PWD/progresswidget.h \
            $$PWD/global.h \
            $$PWD/executivewidget.h \
@@ -94,7 +94,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/toolbox.cpp \
            $$PWD/toolboxtree.cpp \
            $$PWD/filterlineedit.cpp \
-           $$PWD/centralwidget.cpp \
+           $$PWD/view.cpp \
            $$PWD/progresswidget.cpp \
            $$PWD/executivewidget.cpp \
            $$PWD/inspectorwidget.cpp \

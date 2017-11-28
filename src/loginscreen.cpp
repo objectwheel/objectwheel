@@ -74,7 +74,7 @@ void LoginScreen::handleAutoLoginButtonClicked()
 
 void LoginScreen::handleAboutButtonClicked()
 {
-    cW->showWidget(Screen::About);
+    cW->show(Screen::About);
 }
 
 void LoginScreen::handleLostPasswordButtonClicked()
@@ -101,7 +101,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
         if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
         ProjectsScreen::refreshProjectList();
         pW->hideProgress();
-        cW->showWidget(Screen::Projects);
+        cW->show(Screen::Projects);
         clearGUI();
     } else {
         QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
@@ -120,7 +120,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
 //    if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
 //    ProjectsScreen::refreshProjectList();
 //    pW->hideProgress();
-//    cW->showWidget(Screen::Projects);
+//    cW->show(Screen::Projects);
 //    clearGUI();
 //    return;
 
@@ -134,7 +134,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                     if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                     ProjectsScreen::refreshProjectList();
                     pW->hideProgress();
-                    cW->showWidget(Screen::Projects);
+                    cW->show(Screen::Projects);
                     clearGUI();
                 } else {
                     QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x01");
@@ -166,7 +166,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                         if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                         ProjectsScreen::refreshProjectList();
                         pW->hideProgress();
-                        cW->showWidget(Screen::Projects);
+                        cW->show(Screen::Projects);
                         clearGUI();
                     } else {
                         QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
@@ -211,7 +211,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                 if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                 ProjectsScreen::refreshProjectList();
                 pW->hideProgress();
-                cW->showWidget(Screen::Projects);
+                cW->show(Screen::Projects);
                 clearGUI();
             } else if (jobj["result"].toString() == "EMAIL") {
                 QMetaObject::invokeMethod(loginScreen, "animateWrongEmail");

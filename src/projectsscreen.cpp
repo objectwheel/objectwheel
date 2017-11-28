@@ -250,7 +250,7 @@ void ProjectsScreen::handleLoadButtonClicked()
 								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
 	auto currentProject = ProjectManager::currentProject();
 	if (!currentProject.isEmpty() && currentProject == projectName) {
-        cW->showWidget(Screen::Studio);
+        cW->show(Screen::Studio);
 		return;
     }
 
@@ -268,7 +268,7 @@ void ProjectsScreen::handleLoadButtonClicked()
     }
 
     pW->hideProgress();
-    cW->showWidget(Screen::Studio);
+    cW->show(Screen::Studio);
 
     for (int i = model.rowCount(); i--;) {
         if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {

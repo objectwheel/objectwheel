@@ -4,14 +4,14 @@
 #include <QWidget>
 #include <QMovie>
 #include <QTimer>
-#include <centralwidget.h>
+#include <view.h>
 
 class ProgressWidget : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit ProgressWidget(CentralWidget* parent);
+        explicit ProgressWidget(View* parent);
         const QString& msg() const;
         void setMsg(const QString& msg);
 
@@ -24,7 +24,7 @@ class ProgressWidget : public QWidget
         virtual void paintEvent(QPaintEvent* event) override;
 
     private:
-        CentralWidget* _centralWidget;
+        View* _centralWidget;
         int _lastUid;
         QString _msg;
         QMovie _movie;
