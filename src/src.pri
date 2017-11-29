@@ -55,7 +55,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/suppressor.h \
            $$PWD/toolboxsettings.h \
     $$PWD/buildsdialog.h \
-    $$PWD/platformswidget.h
+    $$PWD/platformswidget.h \
+    $$PWD/androidwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -109,7 +110,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/suppressor.cpp \
            $$PWD/toolboxsettings.cpp \
     $$PWD/buildsdialog.cpp \
-    $$PWD/platformswidget.cpp
+    $$PWD/platformswidget.cpp \
+    $$PWD/androidwidget.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

@@ -31,7 +31,7 @@ enum Skin {
     NoSkin
 };
 
-enum Platforms {
+enum Targets {
     android_armeabi_v7a,
     android_x86,
     windows_x86,

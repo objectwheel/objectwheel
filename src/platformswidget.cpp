@@ -48,11 +48,11 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
    auto utext = item->text();
    auto ltext = item->data(Arch).toString();
    auto rutext = option.rect.adjusted(option.rect.height(),
-     fit::fx(5), 0, - option.rect.height() / 2.0);
+     fit::fx(7), 0, - option.rect.height() / 2.0);
    auto rltext = option.rect.adjusted(option.rect.height(),
-     option.rect.height() / 2.0, 0, - fit::fx(5));
-   auto ricon = option.rect.adjusted(fit::fx(5), fit::fx(5),
-     - option.rect.width() + option.rect.height() - fit::fx(5), - fit::fx(5));
+     option.rect.height() / 2.0, 0, - fit::fx(7));
+   auto ricon = option.rect.adjusted(fit::fx(7), fit::fx(7),
+     - option.rect.width() + option.rect.height() - fit::fx(7), - fit::fx(7));
    auto icon = item->icon().pixmap(ricon.size() * pS->devicePixelRatio());
     painter->setRenderHint(QPainter::Antialiasing);
 
@@ -116,7 +116,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     f.setPixelSize(fit::fx(17));
     _lblMsg.setFont(f);
     _lblMsg.setPalette(p2);
-    _lblMsg.setText("Select your platform");
+    _lblMsg.setText("Select your target platform");
 
     _btnNext.setColor("#F4BA48");
     _btnNext.setTextColor(Qt::white);
@@ -127,19 +127,20 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _btnNext.setText("Next");
     connect(&_btnNext, &FlatButton::clicked, [&]{
         if (_listWidget.currentItem())
-            emit platformSelected(Platforms
+            emit platformSelected(Targets
               (_listWidget.currentItem()->data(Key).toInt()));
     });
 
-    QPalette p3(_listWidget.viewport()->palette());
-    p3.setColor(_listWidget.viewport()->backgroundRole(), "#D0D4D7");
+    QPalette p3;
+    p3.setColor(QPalette::Base, "#D0D4D7");
     p3.setColor(QPalette::Highlight, "#C3C7CA");
-    _listWidget.viewport()->setPalette(p3);
     _listWidget.setPalette(p3);
-    _listWidget.setIconSize(fit::fx(QSize{42, 42}));
+    _listWidget.setStyleSheet(CSS::ScrollBar.
+      replace("background: transparent;", "background: #d0d4d7;"));
+    _listWidget.setIconSize(fit::fx(QSize{52, 52}));
+    _listWidget.setMinimumWidth(fit::fx(400));
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));
     _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _listWidget.setFocusPolicy(Qt::NoFocus);
     connect(&_listWidget, &QListWidget::itemSelectionChanged, [&] {
        _btnNext.setEnabled(_listWidget.currentItem());

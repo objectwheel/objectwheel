@@ -16,7 +16,7 @@ class PlatformsWidget : public QWidget
         explicit PlatformsWidget(QWidget *parent = nullptr);
 
     signals:
-        void platformSelected(Platforms);
+        void platformSelected(Targets);
 
     private:
         QVBoxLayout _layout;

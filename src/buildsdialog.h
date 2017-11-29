@@ -3,6 +3,7 @@
 
 #include <view.h>
 #include <platformswidget.h>
+#include <androidwidget.h>
 #include <QDialog>
 
 class BuildsDialog : public QDialog
@@ -14,9 +15,14 @@ class BuildsDialog : public QDialog
     protected:
         virtual void resizeEvent(QResizeEvent *event) override;
 
+    public slots:
+        void showPlatforms();
+        void handlePlatformSelection(Targets);
+
     private:
         View _view;
         PlatformsWidget _platformsWidget;
+        AndroidWidget _androidWidget;
 };
 
 #endif // BUILDSDIALOG_H
