@@ -2,14 +2,7 @@
 #define ANDROIDWIDGET_H
 
 #include <flatbutton.h>
-#include <QWidget>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <QComboBox>
-#include <QScrollArea>
+#include <QtWidgets>
 
 class AndroidWidget : public QWidget
 {
@@ -55,11 +48,25 @@ class AndroidWidget : public QWidget
         QComboBox _cmbTargetSdk;
 
         QGroupBox _permissionsBox;
-//        QGridLayout _appBoxLay;
-        QLabel _lblPermissions;
+        QGridLayout _permissionsBoxLay;
+        QListWidget _permissionList;
+        QPushButton _btnAddPermission;
+        QPushButton _btnDelPermission;
+        QComboBox _cmbPermissions;
 
-        QGroupBox _crtificateBox;
-//        QGridLayout _appBoxLay;
+        QGroupBox _signingBox;
+        QGridLayout _signingBoxLay;
+        QLabel _lblKsPath;
+        QLineEdit _txtKsPath;
+        QPushButton _btnNewKs;
+        QPushButton _btnExistingKs;
+        QLabel _lblKsPw;
+        QLineEdit _txtKsPw;
+        QLabel _lblKsAlias;
+        QLineEdit _txtKsAlias;
+        QToolButton _btnKsAlias;
+        QLabel _lblKeyPw;
+        QLineEdit _txtKeyPw;
 
 };
 

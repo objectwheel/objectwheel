@@ -1,13 +1,14 @@
 #include <androidwidget.h>
 #include <fit.h>
 #include <css.h>
-#include <QScrollBar>
 
 AndroidWidget::AndroidWidget(QWidget *parent)
     : QWidget(parent)
     , _layout(this)
     , _appBoxLay(&_appBox)
     , _packageBoxLay(&_packageBox)
+    , _permissionsBoxLay(&_permissionsBox)
+    , _signingBoxLay(&_signingBox)
 {
     QPalette p(palette());
     p.setColor(backgroundRole(), "#e0e4e7");
@@ -52,13 +53,15 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     QPalette p3;
     p3.setColor(QPalette::Base, "#e2e6e9");
     p3.setColor(QPalette::Window, "#d8dcdf");
-    _scrollArea.setPalette(p3);
-    _scrollArea.setAutoFillBackground(true);
-    _scrollArea.setWidgetResizable(true);
+
     auto scrollAreaWidgetContents = new QWidget();
     scrollAreaWidgetContents->setGeometry(QRect(0, 0, 669, 471));
     scrollAreaWidgetContents->setPalette(p3);
     scrollAreaWidgetContents->setLayout(&_scrollAreaLay);
+
+    _scrollArea.setPalette(p3);
+    _scrollArea.setAutoFillBackground(true);
+    _scrollArea.setWidgetResizable(true);
     _scrollArea.setWidget(scrollAreaWidgetContents);
     _scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _scrollArea.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
@@ -68,6 +71,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _scrollAreaLay.setContentsMargins(fit::fx(30), fit::fx(30), fit::fx(30), fit::fx(30));
     _scrollAreaLay.addWidget(&_appBox);
     _scrollAreaLay.addWidget(&_packageBox);
+    _scrollAreaLay.addWidget(&_permissionsBox);
+    _scrollAreaLay.addWidget(&_signingBox);
 
     _appBox.setTitle("Application Settings");
     _appBox.setFixedHeight(fit::fx(200));
@@ -81,11 +86,11 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _appBoxLay.addWidget(&_cmbOrientation, 3, 1);
     _appBoxLay.addWidget(&_lblIcon, 4, 0);
 
-    _lblAppName.setText("Application name: ");
-    _lblVersionCode.setText("Version code: ");
-    _lblVersionName.setText("Version name: ");
-    _lblOrientation.setText("Orientation: ");
-    _lblIcon.setText("Icon: ");
+    _lblAppName.setText("Application name:");
+    _lblVersionCode.setText("Version code:");
+    _lblVersionName.setText("Version name:");
+    _lblOrientation.setText("Orientation:");
+    _lblIcon.setText("Icon:");
 
     _packageBox.setTitle("Package Settings");
     _packageBox.setFixedHeight(fit::fx(200));
@@ -95,13 +100,57 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _packageBoxLay.addWidget(&_cmbMinSdk, 1, 1);
     _packageBoxLay.addWidget(&_lblTargetSdk, 2, 0);
     _packageBoxLay.addWidget(&_cmbTargetSdk, 2, 1);
-    _packageBoxLay.addWidget(&_lblPermissions, 3, 0);
 
-    _lblPackageName.setText("Package name: ");
-    _lblMinSdk.setText("Minimum required SDK: ");
-    _lblTargetSdk.setText("Target SDK: ");
-    _lblPermissions.setText("Permissions: ");
+    _lblPackageName.setText("Package name:");
+    _lblMinSdk.setText("Minimum required SDK:");
+    _lblTargetSdk.setText("Target SDK:");
 
+    _permissionsBox.setTitle("Permission Settings");
+    _permissionsBox.setFixedHeight(fit::fx(200));
+    _permissionsBoxLay.addWidget(&_permissionList, 0, 0);
+    _permissionsBoxLay.addWidget(&_btnDelPermission, 0, 1);
+    _permissionsBoxLay.addWidget(&_cmbPermissions, 1, 0);
+    _permissionsBoxLay.addWidget(&_btnAddPermission, 1, 1);
+    _permissionsBoxLay.setAlignment(&_btnDelPermission, Qt::AlignBottom);
+
+    QPalette p4(_btnDelPermission.palette());
+    p4.setColor(_btnDelPermission.foregroundRole(), "#991223");
+    _btnDelPermission.setPalette(p4);
+    _permissionList.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _permissionList.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _btnDelPermission.setText("Delete");
+    _btnDelPermission.setIcon(QIcon(":/resources/images/delete.png"));
+    _btnAddPermission.setText("Add");
+    _btnAddPermission.setIcon(QIcon(":/resources/images/newfile.png"));
+    _btnAddPermission.setCursor(Qt::PointingHandCursor);
+    _btnDelPermission.setCursor(Qt::PointingHandCursor);
+
+    _signingBox.setTitle("Signing Settings");
+    _signingBox.setFixedHeight(fit::fx(200));
+    _signingBoxLay.addWidget(&_lblKsPath, 0, 0);
+    _signingBoxLay.addWidget(&_txtKsPath, 0, 1, 1, 2);
+    _signingBoxLay.addWidget(&_btnNewKs, 1, 1);
+    _signingBoxLay.addWidget(&_btnExistingKs, 1, 2);
+    _signingBoxLay.addWidget(&_lblKsPw, 2, 0);
+    _signingBoxLay.addWidget(&_txtKsPw, 2, 1, 1, 2);
+    _signingBoxLay.addWidget(&_lblKsAlias, 3, 0);
+    _signingBoxLay.addWidget(&_txtKsAlias, 3, 1);
+    _signingBoxLay.addWidget(&_btnKsAlias, 3, 2);
+    _signingBoxLay.addWidget(&_lblKeyPw, 4, 0);
+    _signingBoxLay.addWidget(&_txtKeyPw, 4, 1, 1, 2);
+
+    _btnExistingKs.setCursor(Qt::PointingHandCursor);
+    _btnKsAlias.setCursor(Qt::PointingHandCursor);
+    _btnNewKs.setCursor(Qt::PointingHandCursor);
+    _lblKsPath.setText("Key store path:");
+    _btnNewKs.setText("Create new...");
+    _btnNewKs.setIcon(QIcon(":/resources/images/newfile.png"));
+    _btnExistingKs.setText("Choose existing...");
+    _btnExistingKs.setIcon(QIcon(":/resources/images/undo.png"));
+    _lblKsPw.setText("Key store password:");
+    _lblKsAlias.setText("Key alias:");
+    _btnKsAlias.setText("...");
+    _lblKeyPw.setText("Key password:");
 
     _btnBack.setColor("#38A3F6");
     _btnBack.setTextColor(Qt::white);
@@ -113,7 +162,6 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     connect(&_btnBack, &FlatButton::clicked, [&]{
         emit backClicked();
     });
-
 
     _btnBuild.setColor("#81B251");
     _btnBuild.setTextColor(Qt::white);
