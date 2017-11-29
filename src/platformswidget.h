@@ -1,6 +1,7 @@
 #ifndef PLATFORMSWIDGET_H
 #define PLATFORMSWIDGET_H
 
+#include <global.h>
 #include <flatbutton.h>
 #include <QWidget>
 #include <QVBoxLayout>
@@ -10,8 +11,12 @@
 class PlatformsWidget : public QWidget
 {
         Q_OBJECT
+
     public:
         explicit PlatformsWidget(QWidget *parent = nullptr);
+
+    signals:
+        void platformSelected(Platforms);
 
     private:
         QVBoxLayout _layout;

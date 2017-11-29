@@ -125,7 +125,11 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _btnNext.setIconSize(QSize(fit::fx(14),fit::fx(14)));
     _btnNext.setIcon(QIcon(":/resources/images/unload.png"));
     _btnNext.setText("Next");
-//    connect(_btnNext, SIGNAL(clicked(bool)), SLOT(_btnNextClicked()));
+    connect(&_btnNext, &FlatButton::clicked, [&]{
+        if (_listWidget.currentItem())
+            emit platformSelected(Platforms
+              (_listWidget.currentItem()->data(Key).toInt()));
+    });
 
     QPalette p3(_listWidget.viewport()->palette());
     p3.setColor(_listWidget.viewport()->backgroundRole(), "#D0D4D7");
@@ -136,69 +140,74 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));
     _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _listWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _listWidget.setFocusPolicy(Qt::NoFocus);
+    connect(&_listWidget, &QListWidget::itemSelectionChanged, [&] {
+       _btnNext.setEnabled(_listWidget.currentItem());
+    });
 
     auto android = new QListWidgetItem;
     android->setText("Android 4.2+");
     android->setData(Arch, "Architecture: armeabi-v7a");
-    android->setData(Key, "android-armeabi-v7a");
+    android->setData(Key, android_armeabi_v7a);
     android->setIcon(QIcon(":/resources/images/android.png"));
     _listWidget.addItem(android);
 
-    auto ios = new QListWidgetItem;
-    ios->setText("iOS 10+");
-    ios->setData(Arch, "Architectures: armv7s, arm64");
-    ios->setData(Key, "ios");
-    ios->setIcon(QIcon(":/resources/images/ios.png"));
-    _listWidget.addItem(ios);
+    auto ioss = new QListWidgetItem;
+    ioss->setText("iOS 10+");
+    ioss->setData(Arch, "Architectures: armv7s, arm64");
+    ioss->setData(Key, ios);
+    ioss->setIcon(QIcon(":/resources/images/ios.png"));
+    _listWidget.addItem(ioss);
 
     auto mac = new QListWidgetItem;
     mac->setText("macOS 10.10+");
     mac->setData(Arch, "Architecture: x64");
-    mac->setData(Key, "macos");
+    mac->setData(Key, macos);
     mac->setIcon(QIcon(":/resources/images/macos.png"));
     _listWidget.addItem(mac);
 
     auto win = new QListWidgetItem;
     win->setText("Windows 7+");
     win->setData(Arch, "Architecture: x86");
-    win->setData(Key, "windows-x86");
+    win->setData(Key, windows_x86);
     win->setIcon(QIcon(":/resources/images/windows.png"));
     _listWidget.addItem(win);
 
     auto linux = new QListWidgetItem;
     linux->setText("Linux");
     linux->setData(Arch, "Architecture: x86");
-    linux->setData(Key, "linux-x86");
+    linux->setData(Key, linux_x86);
     linux->setIcon(QIcon(":/resources/images/linux.png"));
     _listWidget.addItem(linux);
 
-    auto raspi = new QListWidgetItem;
-    raspi->setText("Raspberry Pi");
-    raspi->setData(Arch, "Version: Pi 2+");
-    raspi->setData(Key, "raspi");
-    raspi->setIcon(QIcon(":/resources/images/raspi.png"));
-    _listWidget.addItem(raspi);
+    auto rasp = new QListWidgetItem;
+    rasp->setText("Raspberry Pi");
+    rasp->setData(Arch, "Version: Pi 2+");
+    rasp->setData(Key, raspi);
+    rasp->setIcon(QIcon(":/resources/images/raspi.png"));
+    _listWidget.addItem(rasp);
 
     auto androidx = new QListWidgetItem;
     androidx->setText("Android 4.2+");
     androidx->setData(Arch, "Architecture: x86");
-    androidx->setData(Key, "android-x86");
+    androidx->setData(Key, android_x86);
     androidx->setIcon(QIcon(":/resources/images/android.png"));
     _listWidget.addItem(androidx);
 
     auto winx = new QListWidgetItem;
     winx->setText("Windows 7+");
     winx->setData(Arch, "Architecture: x64");
-    winx->setData(Key, "windows-x64");
+    winx->setData(Key, windows_x64);
     winx->setIcon(QIcon(":/resources/images/windows.png"));
     _listWidget.addItem(winx);
 
     auto linuxx = new QListWidgetItem;
     linuxx->setText("Linux");
     linuxx->setData(Arch, "Architecture: x64");
-    linuxx->setData(Key, "linux-x64");
+    linuxx->setData(Key, linux_x64);
     linuxx->setIcon(QIcon(":/resources/images/linux.png"));
     _listWidget.addItem(linuxx);
+    _listWidget.setCurrentRow(0);
 }
 
 #include "platformswidget.moc"
