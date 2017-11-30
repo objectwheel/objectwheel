@@ -2,6 +2,7 @@
 
 enum {
     Platforms,
+    Modules,
     Android,
 };
 
@@ -10,6 +11,7 @@ BuildsDialog::BuildsDialog(QWidget *parent)
     , _view(this)
 {
     _view.add(Platforms, &_platformsWidget);
+    _view.add(Modules, &_modulesWidget);
     _view.add(Android, &_androidWidget);
     _view.show(Platforms);
 
@@ -35,12 +37,12 @@ void BuildsDialog::handlePlatformSelection(Targets platform)
     switch (platform) {
         case android_armeabi_v7a:
             _androidWidget.setTarget("Android Armeabi v7a");
-            _view.show(Android);
+            _view.show(Modules);
             break;
 
         case android_x86:
             _androidWidget.setTarget("Android x86");
-            _view.show(Android);
+            _view.show(Modules);
             break;
         default:
             break;

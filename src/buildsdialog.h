@@ -4,6 +4,7 @@
 #include <view.h>
 #include <platformswidget.h>
 #include <androidwidget.h>
+#include <moduleselectionwidget.h>
 #include <QDialog>
 
 class BuildsDialog : public QDialog
@@ -22,6 +23,7 @@ class BuildsDialog : public QDialog
     private:
         View _view;
         PlatformsWidget _platformsWidget;
+        ModuleSelectionWidget _modulesWidget;
         AndroidWidget _androidWidget;
 };
 

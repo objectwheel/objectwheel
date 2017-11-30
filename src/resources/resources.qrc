@@ -138,5 +138,6 @@
         <file>images/settings.png</file>
         <file>images/droparrow.png</file>
         <file>images/android-default.png</file>
+        <file>images/qt.png</file>
     </qresource>
 </RCC>

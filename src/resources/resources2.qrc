@@ -80,5 +80,7 @@
         <file>qmls/control/t/icon.png</file>
         <file>qmls/control/t/main.qml</file>
         <file>other/android-permissions.txt</file>
+        <file>other/ow-modules.txt</file>
+        <file>other/qt-modules.txt</file>
     </qresource>
 </RCC>

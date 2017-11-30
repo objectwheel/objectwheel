@@ -224,6 +224,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbPermissions.setMaxVisibleItems(15);
     _cmbPermissions.setEditable(true);
 
+    _permissionList.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _permissionList.setFixedWidth(fit::fx(400));
     _permissionList.addItem("android.permission.WRITE_EXTERNAL_STORAGE");
     _permissionList.addItem("android.permission.READ_PHONE_STATE");
