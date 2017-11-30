@@ -37,6 +37,9 @@ class AndroidWidget : public QWidget
         QLabel _lblOrientation;
         QComboBox _cmbOrientation;
         QLabel _lblIcon;
+        QLineEdit _txtIconPath;
+        QToolButton _btnIcon;
+        QLabel _picIcon;
 
         QGroupBox _packageBox;
         QGridLayout _packageBoxLay;
@@ -58,15 +61,15 @@ class AndroidWidget : public QWidget
         QGridLayout _signingBoxLay;
         QLabel _lblKsPath;
         QLineEdit _txtKsPath;
+        QToolButton _btnExistingKs;
         QPushButton _btnNewKs;
-        QPushButton _btnExistingKs;
         QLabel _lblKsPw;
         QLineEdit _txtKsPw;
         QLabel _lblKsAlias;
         QLineEdit _txtKsAlias;
         QToolButton _btnKsAlias;
         QLabel _lblKeyPw;
-        QLineEdit _txtKeyPw;
+        QLineEdit _txtAliasPw;
 
 };
 

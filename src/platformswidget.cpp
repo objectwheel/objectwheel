@@ -123,7 +123,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _btnNext.setFixedSize(fit::fx(200),fit::fx(28));
     _btnNext.setRadius(fit::fx(7.5));
     _btnNext.setIconSize(QSize(fit::fx(14),fit::fx(14)));
-    _btnNext.setIcon(QIcon(":/resources/images/unload.png"));
+    _btnNext.setIcon(QIcon(":/resources/images/load.png"));
     _btnNext.setText("Next");
     connect(&_btnNext, &FlatButton::clicked, [&]{
         if (_listWidget.currentItem())

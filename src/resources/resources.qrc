@@ -81,8 +81,6 @@
         <file>images/delete-icon@2x.png</file>
         <file>images/owicon.png</file>
         <file>images/owicon@2x.png</file>
-        <file>images/phone.png</file>
-        <file>images/phonel.png</file>
         <file>images/break.png</file>
         <file>images/clean.png</file>
         <file>images/fit.png</file>
@@ -139,5 +137,6 @@
         <file>images/nopreview.png</file>
         <file>images/settings.png</file>
         <file>images/droparrow.png</file>
+        <file>images/android-default.png</file>
     </qresource>
 </RCC>

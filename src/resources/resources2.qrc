@@ -79,5 +79,6 @@
         <file>qmls/control/t/_properties.json</file>
         <file>qmls/control/t/icon.png</file>
         <file>qmls/control/t/main.qml</file>
+        <file>other/android-permissions.txt</file>
     </qresource>
 </RCC>
