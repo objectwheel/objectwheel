@@ -26,7 +26,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     FlatButton* btnBack = new FlatButton;
 
     layout->setContentsMargins(0, fit::fx(20), 0, fit::fx(20));
-    layout->setSpacing(fit::fx(10));
+    layout->setSpacing(fit::fx(20));
     layout->addLayout(logoLay);
     layout->addWidget(lblTitle);
     layout->addWidget(lblMsg);
@@ -70,9 +70,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     f.setPixelSize(fit::fx(17));
     lblMsg->setFont(f);
     lblMsg->setPalette(p2);
-    lblMsg->setText("Select necessary modules");
-
-
+    lblMsg->setText("Select modules you use in your application");
 
     owBox->setTitle("Qbjectwheel Modules");
     qtBox->setTitle("Qt Modules");
@@ -81,27 +79,33 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     owBoxLay->addWidget(owScArea);
     owBoxLay->setContentsMargins(0, 0, 0, 0);
     auto owScWidget = new QWidget;
+    owScWidget->setObjectName("owScWidget");
+    owScWidget->setStyleSheet("#owScWidget{background: transparent;}");
     auto owScLay = new QVBoxLayout(owScWidget);
+    owScLay->setContentsMargins(0, 0, 0, 0);
     owScArea->setWidget(owScWidget);
     owScArea->setWidgetResizable(true);
     owScArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     owScArea->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     owScArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    owScArea->setFixedWidth(fit::fx(600));
-    owScArea->setStyleSheet("background: transparent;");
+    owScArea->setFixedWidth(fit::fx(400));
+    owScArea->setStyleSheet("QScrollArea {background: transparent;}");
 
     auto qtBoxLay = new QVBoxLayout(qtBox);
     qtBoxLay->addWidget(qtScArea);
     qtBoxLay->setContentsMargins(0, 0, 0, 0);
     auto qtScWidget = new QWidget;
+    qtScWidget->setObjectName("qtScWidget");
+    qtScWidget->setStyleSheet("#qtScWidget{background: transparent;}");
     auto qtScLay = new QVBoxLayout(qtScWidget);
+    qtScLay->setContentsMargins(0, 0, 0, 0);
     qtScArea->setWidget(qtScWidget);
     qtScArea->setWidgetResizable(true);
     qtScArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     qtScArea->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     qtScArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    qtScArea->setFixedWidth(fit::fx(600));
-    qtScArea->setStyleSheet("background: transparent;");
+    qtScArea->setFixedWidth(fit::fx(400));
+    qtScArea->setStyleSheet("QScrollArea {background: transparent;}");
 
     QString line;
     QTextStream stream(rdfile(":/resources/other/ow-modules.txt"));
@@ -125,6 +129,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
 
     buttonsLay->addWidget(btnBack);
     buttonsLay->addWidget(btnNext);
+    buttonsLay->setSpacing(fit::fx(10));
 
     btnNext->setColor("#84BF52");
     btnNext->setTextColor(Qt::white);
@@ -134,12 +139,11 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     btnNext->setIcon(QIcon(":/resources/images/load.png"));
     btnNext->setText("Next");
     connect(btnNext, &FlatButton::clicked, [&]{
-//        if (listWidget->currentItem())
-//            emit platformSelected(Targets
-//              (listWidget->currentItem()->data(Key)->toInt()));
+        // TODO
+        emit done();
     });
 
-    btnBack->setColor("#2784D1");
+    btnBack->setColor("#38A3F6");
     btnBack->setTextColor(Qt::white);
     btnBack->setFixedSize(fit::fx(200),fit::fx(28));
     btnBack->setRadius(fit::fx(7.5));
@@ -147,8 +151,6 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     btnBack->setIcon(QIcon(":/resources/images/unload.png"));
     btnBack->setText("Back");
     connect(btnBack, &FlatButton::clicked, [&]{
-//        if (listWidget->currentItem())
-//            emit platformSelected(Targets
-//              (listWidget->currentItem()->data(Key)->toInt()));
+        emit backClicked();
     });
 }

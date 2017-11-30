@@ -11,6 +11,7 @@ class ModuleSelectionWidget : public QWidget
         explicit ModuleSelectionWidget(QWidget *parent = nullptr);
 
     signals:
+        void done();
         void backClicked();
 };
 

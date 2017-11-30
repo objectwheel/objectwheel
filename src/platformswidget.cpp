@@ -69,7 +69,6 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
     painter->drawText(rutext, utext, Qt::AlignVCenter | Qt::AlignLeft);
 
     f.setWeight(QFont::Light);
-    f.setPixelSize(f.pixelSize() - 1);
     painter->setFont(f);
     painter->drawText(rltext, ltext, Qt::AlignVCenter | Qt::AlignLeft);
 }
@@ -147,7 +146,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     });
 
     auto android = new QListWidgetItem;
-    android->setText("Android 4.2+");
+    android->setText("Android 4.0+");
     android->setData(Arch, "Architecture: armeabi-v7a");
     android->setData(Key, android_armeabi_v7a);
     android->setIcon(QIcon(":/resources/images/android.png"));
@@ -189,7 +188,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _listWidget.addItem(rasp);
 
     auto androidx = new QListWidgetItem;
-    androidx->setText("Android 4.2+");
+    androidx->setText("Android 4.0+");
     androidx->setData(Arch, "Architecture: x86");
     androidx->setData(Key, android_x86);
     androidx->setIcon(QIcon(":/resources/images/android.png"));

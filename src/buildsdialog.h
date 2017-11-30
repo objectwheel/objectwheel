@@ -17,11 +17,14 @@ class BuildsDialog : public QDialog
         virtual void resizeEvent(QResizeEvent *event) override;
 
     public slots:
+        void showModules();
         void showPlatforms();
+        void handleModuleSelection();
         void handlePlatformSelection(Targets);
 
     private:
         View _view;
+        Targets _target;
         PlatformsWidget _platformsWidget;
         ModuleSelectionWidget _modulesWidget;
         AndroidWidget _androidWidget;
