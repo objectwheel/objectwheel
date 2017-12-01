@@ -28,7 +28,6 @@
 #include "qmljsfindexportedcpptypes.h"
 #include "qmljsinterpreter.h"
 #include "qmljsmodelmanagerinterface.h"
-#include "qmljsplugindumper.h"
 #include "qmljstypedescriptionreader.h"
 #include "qmljsdialect.h"
 #include "qmljsviewercontext.h"

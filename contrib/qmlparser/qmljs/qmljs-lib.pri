@@ -23,7 +23,6 @@ HEADERS += \
     $$PWD/qmljspropertyreader.h \
     $$PWD/qmljsrewriter.h \
     $$PWD/qmljsicons.h \
-    $$PWD/qmljsplugindumper.h \
     $$PWD/qmljstypedescriptionreader.h \
     $$PWD/qmljsscopeastpath.h \
     $$PWD/qmljsvalueowner.h \
@@ -57,7 +56,6 @@ SOURCES += \
     $$PWD/qmljspropertyreader.cpp \
     $$PWD/qmljsrewriter.cpp \
     $$PWD/qmljsicons.cpp \
-    $$PWD/qmljsplugindumper.cpp \
     $$PWD/qmljstypedescriptionreader.cpp \
     $$PWD/qmljsscopeastpath.cpp \
     $$PWD/qmljsvalueowner.cpp \
