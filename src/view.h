@@ -11,13 +11,14 @@ class View : public QWidget
         typedef QMap<int, QWidget*> WidgetMap;
 
     public:
+        enum Direction { NoSwipe, LeftToRight, RightToLeft };
         explicit View(QWidget* parent = nullptr);
         QWidget* widget(int id) const;
         int id(QWidget* widget) const;
         int current() const;
 
     public slots:
-        void show(int id);
+        void show(int id, Direction = NoSwipe);
         void add(int id, QWidget* widget);
         int remove(int id);
 

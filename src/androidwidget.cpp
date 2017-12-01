@@ -21,30 +21,17 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     btnLay->addWidget(&_btnBack);
     btnLay->addWidget(&_btnBuild);
 
-    auto bar = new QWidget;
-    bar->setFixedSize(fit::fx(700), fit::fx(1));
-    bar->setStyleSheet("background: #c0c4c7;");
-    bar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    auto _scTopLay = new QGridLayout;
-    _scTopLay->setSpacing(0);
-    _scTopLay->setContentsMargins(0, 0, 0, 0);
-    _scTopLay->addWidget(bar, 0, 0, 1, 3);
-    _scTopLay->addWidget(&_scrollArea, 1, 1);
-    _scTopLay->setAlignment(bar, Qt::AlignCenter);
-    _scTopLay->setAlignment(&_scrollArea, Qt::AlignCenter);
-
     _layout.setContentsMargins(fit::fx(20), fit::fx(20), fit::fx(20), fit::fx(20));
     _layout.setSpacing(fit::fx(10));
     _layout.addWidget(&_lblLogo);
     _layout.addWidget(&_lblTitle);
     _layout.addWidget(&_lblMsg);
-    _layout.addLayout(_scTopLay);
+    _layout.addWidget(&_scrollArea);
     _layout.addLayout(btnLay);
     _layout.setAlignment(&_lblLogo, Qt::AlignHCenter);
     _layout.setAlignment(&_lblTitle, Qt::AlignHCenter);
     _layout.setAlignment(&_lblMsg, Qt::AlignHCenter);
-    _layout.setAlignment(_scTopLay, Qt::AlignHCenter);
+    _layout.setAlignment(&_scrollArea, Qt::AlignHCenter);
     _layout.setAlignment(btnLay, Qt::AlignHCenter);
 
     _lblLogo.setFixedSize(fit::fx(50), fit::fx(50));
@@ -70,8 +57,9 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
     scrollAreaWidgetContents->setStyleSheet("#scrollAreaWidgetContents{background: transparent;}");
 
-    _scrollArea.setObjectName("_scrollArea");
-    _scrollArea.setStyleSheet("#_scrollArea{background: transparent;}");
+    QPalette p3(_scrollArea.palette());
+    p3.setColor(_scrollArea.backgroundRole(), "#d0d4d7");
+    _scrollArea.setPalette(p3);
     _scrollArea.setAutoFillBackground(true);
     _scrollArea.setWidgetResizable(true);
     _scrollArea.setWidget(scrollAreaWidgetContents);
@@ -80,7 +68,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _scrollArea.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     _scrollArea.setFixedWidth(fit::fx(600));
     _scrollAreaLay.setSpacing(fit::fx(30));
-    _scrollAreaLay.setContentsMargins(fit::fx(20), 0, fit::fx(20), 0);
+    _scrollAreaLay.setContentsMargins(fit::fx(20), fit::fx(30), fit::fx(20), fit::fx(30));
     _scrollAreaLay.addWidget(&_appBox);
     _scrollAreaLay.addWidget(&_packageBox);
     _scrollAreaLay.addWidget(&_permissionsBox);
@@ -272,7 +260,6 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     p4.setColor(_btnDelPermission.foregroundRole(), "#991223");
     _btnDelPermission.setPalette(p4);
     _permissionList.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _permissionList.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _btnDelPermission.setText("Delete");
     _btnDelPermission.setIcon(QIcon(":/resources/images/delete.png"));
     _btnAddPermission.setText("Add");
