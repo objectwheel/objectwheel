@@ -6,8 +6,6 @@
 #include <QMouseEvent>
 #include <QQuickItem>
 
-
-
 ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     : QWidget(parent)
     , _layout(this)

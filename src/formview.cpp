@@ -20,8 +20,6 @@
 #include <QJsonValue>
 #include <QJsonObject>
 
-
-
 class FormViewPrivate : public QObject
 {
         Q_OBJECT

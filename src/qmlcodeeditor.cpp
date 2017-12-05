@@ -13,8 +13,6 @@
 #define INTERVAL_COMPLETIONTIMER (10000)
 #define TAB_SPACE ("    ")
 
-
-
 class LineNumberArea : public QWidget
 {
     public:

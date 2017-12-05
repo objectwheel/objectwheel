@@ -1,6 +1,7 @@
 #include <platformswidget.h>
 #include <fit.h>
 #include <css.h>
+#include <build.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -124,11 +125,8 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _btnNext.setIconSize(QSize(fit::fx(14),fit::fx(14)));
     _btnNext.setIcon(QIcon(":/resources/images/load.png"));
     _btnNext.setText("Next");
-    connect(&_btnNext, &FlatButton::clicked, [&]{
-        if (_listWidget.currentItem())
-            emit platformSelected(Targets
-              (_listWidget.currentItem()->data(Key).toInt()));
-    });
+    connect(&_btnNext, SIGNAL(clicked(bool)),
+      SLOT(handleBtnNextClicked()));
 
     QPalette p3;
     p3.setColor(QPalette::Base, "#D0D4D7");
@@ -208,6 +206,16 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     linuxx->setIcon(QIcon(":/resources/images/linux.png"));
     _listWidget.addItem(linuxx);
     _listWidget.setCurrentRow(0);
+}
+
+void PlatformsWidget::handleBtnNextClicked()
+{
+    if (_listWidget.currentItem()) {
+        Targets target = (Targets)_listWidget.
+          currentItem()->data(Key).toInt();
+        Build::set(TAG_TARGET, target);
+        emit platformSelected(target);
+    }
 }
 
 #include "platformswidget.moc"

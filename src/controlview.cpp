@@ -19,8 +19,6 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-
-
 class ControlViewPrivate : public QObject
 {
         Q_OBJECT

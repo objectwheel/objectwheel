@@ -21,8 +21,6 @@
 #include <QtConcurrent>
 #include <QtNetwork>
 
-
-
 MainWindow* MainWindow::_instance = nullptr;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

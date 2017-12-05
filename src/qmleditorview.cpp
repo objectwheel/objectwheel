@@ -33,8 +33,6 @@
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
 #define TAB_SPACE ("    ")
 
-
-
 class QmlEditorViewPrivate : public QObject
 {
         Q_OBJECT

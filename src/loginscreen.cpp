@@ -26,8 +26,6 @@
 #define cW (MainWindow::instance()->centralWidget())
 #define pW (MainWindow::instance()->progressWidget())
 
-
-
 static bool autologin = false;
 QQuickItem* loginScreen;
 QQuickItem* emailTextInput;

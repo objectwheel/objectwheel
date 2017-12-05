@@ -16,8 +16,6 @@
 #define INTERVAL_SHINE (500)
 #define COUNT_BLINK (3)
 
-
-
 class OutputWidgetPrivate : public QObject
 {
         Q_OBJECT

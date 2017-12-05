@@ -16,6 +16,9 @@ class AndroidWidget : public QWidget
     signals:
         void backClicked();
 
+    private slots:
+        void handleBtnBuildClicked();
+
     private:
         QVBoxLayout _layout;
         QLabel _lblLogo;
@@ -70,7 +73,6 @@ class AndroidWidget : public QWidget
         QToolButton _btnKsAlias;
         QLabel _lblKeyPw;
         QLineEdit _txtAliasPw;
-
 };
 
 #endif // ANDROIDWIDGET_H

@@ -9,8 +9,6 @@
 #define OUTLINE_COLOR ("#202427")
 #define MAX_Z_VALUE (99999)
 
-
-
 bool Resizer::_resizing = false;
 
 Resizer::Resizer(QGraphicsWidget* parent)

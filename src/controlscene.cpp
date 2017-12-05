@@ -12,8 +12,6 @@
 #define NGCS_PANEL_WIDTH (fit::fx(100))
 #define MAGNETIC_FIELD (fit::fx(3))
 
-
-
 class ControlScenePrivate : public QObject
 {
         Q_OBJECT

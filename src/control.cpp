@@ -23,8 +23,6 @@
 #define pS (QApplication::primaryScreen())
 #define cW (ControlWatcher::instance())
 
-
-
 //!
 //! ************************* [global] **************************
 //!

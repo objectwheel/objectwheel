@@ -10,6 +10,9 @@ class ModuleSelectionWidget : public QWidget
     public:
         explicit ModuleSelectionWidget(QWidget *parent = nullptr);
 
+    private slots:
+        void handleBtnNextClicked();
+
     signals:
         void done();
         void backClicked();

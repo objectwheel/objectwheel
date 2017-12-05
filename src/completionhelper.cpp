@@ -4,8 +4,6 @@
 
 #include <QAbstractItemView>
 
-
-
 static QStringList generateKeywords();
 static QStringList generateProperties(const QString& text);
 static QStringList generateFunctions(const QString& text);

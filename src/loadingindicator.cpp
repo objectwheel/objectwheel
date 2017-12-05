@@ -8,8 +8,6 @@
 
 #define pS (QApplication::primaryScreen())
 
-
-
 QMovie* _movie = nullptr;
 bool LoadingIndicator::_running = false;
 

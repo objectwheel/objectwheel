@@ -2,7 +2,9 @@
 #include <fit.h>
 #include <css.h>
 #include <filemanager.h>
+#include <build.h>
 
+QVBoxLayout* qtScLay,* owScLay;
 ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -81,7 +83,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     auto owScWidget = new QWidget;
     owScWidget->setObjectName("owScWidget");
     owScWidget->setStyleSheet("#owScWidget{background: transparent;}");
-    auto owScLay = new QVBoxLayout(owScWidget);
+    owScLay = new QVBoxLayout(owScWidget);
     owScLay->setContentsMargins(0, 0, 0, 0);
     owScArea->setWidget(owScWidget);
     owScArea->setWidgetResizable(true);
@@ -97,7 +99,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     auto qtScWidget = new QWidget;
     qtScWidget->setObjectName("qtScWidget");
     qtScWidget->setStyleSheet("#qtScWidget{background: transparent;}");
-    auto qtScLay = new QVBoxLayout(qtScWidget);
+    qtScLay = new QVBoxLayout(qtScWidget);
     qtScLay->setContentsMargins(0, 0, 0, 0);
     qtScArea->setWidget(qtScWidget);
     qtScArea->setWidgetResizable(true);
@@ -138,10 +140,8 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     btnNext->setIconSize(QSize(fit::fx(14),fit::fx(14)));
     btnNext->setIcon(QIcon(":/resources/images/load.png"));
     btnNext->setText("Next");
-    connect(btnNext, &FlatButton::clicked, [&]{
-        // TODO
-        emit done();
-    });
+    connect(btnNext, SIGNAL(clicked(bool)),
+      SLOT(handleBtnNextClicked()));
 
     btnBack->setColor("#38A3F6");
     btnBack->setTextColor(Qt::white);
@@ -150,7 +150,18 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     btnBack->setIconSize(QSize(fit::fx(14),fit::fx(14)));
     btnBack->setIcon(QIcon(":/resources/images/unload.png"));
     btnBack->setText("Back");
-    connect(btnBack, &FlatButton::clicked, [&]{
-        emit backClicked();
-    });
+    connect(btnBack, &FlatButton::clicked, [&]{ emit backClicked(); });
+}
+
+void ModuleSelectionWidget::handleBtnNextClicked()
+{
+    for (int i = 0; i < qtScLay->count(); i++) {
+        auto checkbox = (QCheckBox*) qtScLay->itemAt(i)->widget();
+        Build::setModule(checkbox->text(), checkbox->isChecked(), true);
+    }
+    for (int i = 0; i < owScLay->count(); i++) {
+        auto checkbox = (QCheckBox*) owScLay->itemAt(i)->widget();
+        Build::setModule(checkbox->text(), checkbox->isChecked(), false);
+    }
+    emit done();
 }

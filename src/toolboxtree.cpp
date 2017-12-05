@@ -16,8 +16,6 @@
 #include <QPainter>
 #include <QHeaderView>
 
-
-
 //!
 //! *********************** [ToolboxDelegate] ***********************
 //!

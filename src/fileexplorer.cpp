@@ -14,8 +14,6 @@
 
 #define COLOR_BACKGROUND (QColor("#F3F7FA"))
 
-
-
 class FileExplorerPrivate : public QObject
 {
         Q_OBJECT

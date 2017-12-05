@@ -10,8 +10,6 @@
 #include <QPainter>
 #include <QScrollBar>
 
-
-
 //!
 //! *********************** [IssuesListDelegate] ***********************
 //!

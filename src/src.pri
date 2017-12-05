@@ -57,7 +57,8 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/buildsdialog.h \
     $$PWD/platformswidget.h \
     $$PWD/androidwidget.h \
-    $$PWD/moduleselectionwidget.h
+    $$PWD/moduleselectionwidget.h \
+    $$PWD/build.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -113,7 +114,8 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/buildsdialog.cpp \
     $$PWD/platformswidget.cpp \
     $$PWD/androidwidget.cpp \
-    $$PWD/moduleselectionwidget.cpp
+    $$PWD/moduleselectionwidget.cpp \
+    $$PWD/build.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

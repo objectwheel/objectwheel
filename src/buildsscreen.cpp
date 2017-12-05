@@ -36,8 +36,6 @@
 
 #define URL QString(SERVER + "/api/v1/build/")
 
-
-
 class BuildsScreenPrivate {
 
     public:

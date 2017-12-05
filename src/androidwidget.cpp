@@ -3,6 +3,7 @@
 #include <css.h>
 #include <projectmanager.h>
 #include <filemanager.h>
+#include <build.h>
 
 AndroidWidget::AndroidWidget(QWidget *parent)
     : QWidget(parent)
@@ -21,7 +22,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     btnLay->addWidget(&_btnBack);
     btnLay->addWidget(&_btnBuild);
 
-    _layout.setContentsMargins(fit::fx(20), fit::fx(20), fit::fx(20), fit::fx(20));
+    _layout.setContentsMargins(fit::fx(20),
+      fit::fx(20), fit::fx(20), fit::fx(20));
     _layout.setSpacing(fit::fx(10));
     _layout.addWidget(&_lblLogo);
     _layout.addWidget(&_lblTitle);
@@ -55,7 +57,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     auto scrollAreaWidgetContents = new QWidget();
     scrollAreaWidgetContents->setLayout(&_scrollAreaLay);
     scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
-    scrollAreaWidgetContents->setStyleSheet("#scrollAreaWidgetContents{background: transparent;}");
+    scrollAreaWidgetContents->setStyleSheet
+      ("#scrollAreaWidgetContents{background: transparent;}");
 
     QPalette p3(_scrollArea.palette());
     p3.setColor(_scrollArea.backgroundRole(), "#d0d4d7");
@@ -68,7 +71,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _scrollArea.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     _scrollArea.setFixedWidth(fit::fx(600));
     _scrollAreaLay.setSpacing(fit::fx(30));
-    _scrollAreaLay.setContentsMargins(fit::fx(20), fit::fx(30), fit::fx(20), fit::fx(30));
+    _scrollAreaLay.setContentsMargins(fit::fx(20),
+      fit::fx(30), fit::fx(20), fit::fx(30));
     _scrollAreaLay.addWidget(&_appBox);
     _scrollAreaLay.addWidget(&_packageBox);
     _scrollAreaLay.addWidget(&_permissionsBox);
@@ -96,8 +100,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _lblIcon.setText("Icon:");
     _btnIcon.setText("...");
     _btnIcon.setToolTip("Select icon for your application. It must be at least 256 x 256.\n"
-                        "Known image formats such as PNG and JPG are allowed. Your icon may \n"
-                        "contain alpha channel. It's better preferring high resolution images.");
+    "Known image formats such as PNG and JPG are allowed. Your icon may \n"
+    "contain alpha channel. It's better preferring high resolution images.");
 
     _txtIconPath.setDisabled(true);
     _txtIconPath.setPlaceholderText("[Android Default]");
@@ -117,23 +121,23 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _txtVersionName.setText("1.0");
     _txtVersionName.setFixedWidth(fit::fx(120));
     _txtVersionName.setToolTip("The version number shown to users. This value can be set as a raw string. \n"
-                               "The string has no other purpose than to be displayed to users. \n"
-                               "The 'Version code' field holds the significant version number used internally.");
+    "The string has no other purpose than to be displayed to users. \n"
+    "The 'Version code' field holds the significant version number used internally.");
 
     _spnVersionCode.setValue(1);
     _spnVersionCode.setMaximum(99999);
     _spnVersionCode.setFixedWidth(fit::fx(70));
     _spnVersionCode.setToolTip("An internal version number. This number is used only to determine \n"
-                               "whether one version is more recent than another, with higher \n"
-                               "numbers indicating more recent versions. This is not the version \n"
-                               "number shown to users; that number is set by the 'Version name' field. \n"
-                               "\n"
-                               "The value must be set as an integer, such as '100'. You can define it \n"
-                               "however you want, as long as each successive version has a higher number. \n"
-                               "For example, it could be a build number. Or you could translate a version \n"
-                               "number in 'x.y' format to an integer by encoding the 'x' and 'y' \n"
-                               "separately in the lower and upper 16 bits. Or you could simply increase \n"
-                               "the number by one each time a new version is released.");
+    "whether one version is more recent than another, with higher \n"
+    "numbers indicating more recent versions. This is not the version \n"
+    "number shown to users; that number is set by the 'Version name' field. \n"
+    "\n"
+    "The value must be set as an integer, such as '100'. You can define it \n"
+    "however you want, as long as each successive version has a higher number. \n"
+    "For example, it could be a build number. Or you could translate a version \n"
+    "number in 'x.y' format to an integer by encoding the 'x' and 'y' \n"
+    "separately in the lower and upper 16 bits. Or you could simply increase \n"
+    "the number by one each time a new version is released.");
 
     _cmbOrientation.setFixedWidth(fit::fx(120));
     _cmbOrientation.setIconSize(fit::fx(QSize{14, 14}));
@@ -141,7 +145,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbOrientation.addItem(QIcon(":/resources/images/landscape.png"), "Landscape");
     _cmbOrientation.addItem(QIcon(":/resources/images/portrait.png"), "Portrait");
     _cmbOrientation.setToolTip("Application orientation. Use Landscape or Portrait to lock your \n"
-                               "application orientation; or use Free to leave it unspecified.");
+    "application orientation; or use Free to leave it unspecified.");
 
     _packageBox.setTitle("Package Settings");
     _packageBox.setFixedHeight(fit::fx(150));
@@ -159,22 +163,22 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _txtPackageName.setFixedWidth(fit::fx(200));
     _txtPackageName.setToolTip("The Android package name, also known as the Google Play ID, the unique \n"
-                               "identifier of an application. Please choose a valid package name for \n"
-                               "your application (for example, 'org.example.myapp'). \n"
-                               "\n"
-                               "Packages are usually defined using a hierarchical naming pattern, with \n"
-                               "levels in the hierarchy seperated by periods (.) (pronounced 'dot').\n"
-                               "\n"
-                               "In general, a package name begins with the top level domain name of \n"
-                               "the organization and then the organization's domain and then any \n"
-                               "subdomains listed in reverse order. The organization can then choose \n"
-                               "a spesific name for their package. Package names should be all \n"
-                               "lowercase characters whenever possible.\n"
-                               "\n"
-                               "Completed conventions for disambiguating package names and rules for \n"
-                               "naming packages when the Internet domain name cannot be directly \n"
-                               "used as a package name are described in section 7.7 of \n"
-                               "the Java Language Specification.");
+    "identifier of an application. Please choose a valid package name for \n"
+    "your application (for example, 'org.example.myapp'). \n"
+    "\n"
+    "Packages are usually defined using a hierarchical naming pattern, with \n"
+    "levels in the hierarchy seperated by periods (.) (pronounced 'dot').\n"
+    "\n"
+    "In general, a package name begins with the top level domain name of \n"
+    "the organization and then the organization's domain and then any \n"
+    "subdomains listed in reverse order. The organization can then choose \n"
+    "a spesific name for their package. Package names should be all \n"
+    "lowercase characters whenever possible.\n"
+    "\n"
+    "Completed conventions for disambiguating package names and rules for \n"
+    "naming packages when the Internet domain name cannot be directly \n"
+    "used as a package name are described in section 7.7 of \n"
+    "the Java Language Specification.");
 
     _cmbMinSdk.setFixedWidth(fit::fx(200));
     _cmbMinSdk.setToolTip("Sets the minimum required version on which this application can be run.");
@@ -192,7 +196,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _cmbTargetSdk.setFixedWidth(fit::fx(200));
     _cmbTargetSdk.setToolTip("Sets the target SDK. Set this to the highest tested version. This \n"
-                             "disables compatibility behavior of the system for your application.");
+    "disables compatibility behavior of the system for your application.");
     _cmbTargetSdk.addItem("API 14: Android 4.0, 4.0.1, 4.0.2");
     _cmbTargetSdk.addItem("API 15: Android 4.0.3, 4.0.4");
     _cmbTargetSdk.addItem("API 16: Android 4.1, 4.1.1");
@@ -332,14 +336,41 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnBuild.setIconSize(QSize(fit::fx(14),fit::fx(14)));
     _btnBuild.setIcon(QIcon(":/resources/images/load.png"));
     _btnBuild.setText("Build");
-    //    connect(&_btnBuild, &FlatButton::clicked, [&]{
-    //        if (_listWidget.currentItem())
-    //            emit platformSelected(Targets
-    //              (_listWidget.currentItem()->data(Key).toInt()));
-    //    });
+    connect(&_btnBuild, SIGNAL(clicked(bool)),
+      SLOT(handleBtnBuildClicked()));
 }
 
 void AndroidWidget::setTarget(const QString& target)
 {
     _lblTitle.setText("Target: " + target);
+}
+
+void AndroidWidget::handleBtnBuildClicked()
+{
+    Build::set(TAG_APPNAME, _txtAppName.text());
+    Build::set(TAG_VERSIONNAME, _txtVersionName.text());
+    Build::set(TAG_VERSIONCODE, _spnVersionCode.value());
+    if (_cmbOrientation.currentText() == "Free")
+        Build::set(TAG_ORIENTATION, "unspecified");
+    else {
+        Build::set(TAG_ORIENTATION,
+          _cmbOrientation.currentText().toLower());
+    }
+    Build::setIcon(_txtIconPath.text());
+    Build::set(TAG_PACKAGENAME, _txtPackageName.text());
+
+    Build::set(TAG_MINAPI, _cmbMinSdk.currentText().
+      split(':').first().remove("API ").toInt());
+    Build::set(TAG_TARGETAPI, _cmbTargetSdk.currentText().
+      split(':').first().remove("API ").toInt());
+
+    for (int i = 0; i < _permissionList.count(); i++) {
+        auto permission = _permissionList.item(i)->text();
+        Build::addPermission(permission);
+    }
+
+    Build::setKeystore(_txtKsPath.text());
+    Build::set(TAG_KSPW, _txtKsPw.text());
+    Build::set(TAG_ALIASNAME, _txtKsAlias.text());
+    Build::set(TAG_ALIASPW, _txtAliasPw.text());
 }

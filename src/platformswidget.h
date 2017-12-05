@@ -18,6 +18,9 @@ class PlatformsWidget : public QWidget
     signals:
         void platformSelected(Targets);
 
+    private slots:
+        void handleBtnNextClicked();
+
     private:
         QVBoxLayout _layout;
         QLabel _lblLogo;
