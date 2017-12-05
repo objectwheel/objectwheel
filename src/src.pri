@@ -1,7 +1,8 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-FORMS += $$PWD/toolboxsettings.ui
+FORMS += $$PWD/toolboxsettings.ui \
+         $$PWD/androidcreatekeystorecertificate.ui
 
 HEADERS += $$PWD/mainwindow.h \
            $$PWD/flatbutton.h \
@@ -54,11 +55,12 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/resizer.h \
            $$PWD/suppressor.h \
            $$PWD/toolboxsettings.h \
-    $$PWD/buildsdialog.h \
-    $$PWD/platformswidget.h \
-    $$PWD/androidwidget.h \
-    $$PWD/moduleselectionwidget.h \
-    $$PWD/build.h
+           $$PWD/buildsdialog.h \
+           $$PWD/platformswidget.h \
+           $$PWD/androidwidget.h \
+           $$PWD/moduleselectionwidget.h \
+           $$PWD/build.h \
+           $$PWD/androidcreatekeystorecertificate.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -111,11 +113,12 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/resizer.cpp \
            $$PWD/suppressor.cpp \
            $$PWD/toolboxsettings.cpp \
-    $$PWD/buildsdialog.cpp \
-    $$PWD/platformswidget.cpp \
-    $$PWD/androidwidget.cpp \
-    $$PWD/moduleselectionwidget.cpp \
-    $$PWD/build.cpp
+           $$PWD/buildsdialog.cpp \
+           $$PWD/platformswidget.cpp \
+           $$PWD/androidwidget.cpp \
+           $$PWD/moduleselectionwidget.cpp \
+           $$PWD/build.cpp \
+           $$PWD/androidcreatekeystorecertificate.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

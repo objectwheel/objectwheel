@@ -385,9 +385,9 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _txtAliasPw.setToolTip("Type the related alias's password.");
 
     connect(&_btnExistingKs, &QToolButton::clicked, [&] {
-        auto fileName = QFileDialog::getOpenFileName(this, tr("Choose Android key store"),
+        auto fileName = QFileDialog::getOpenFileName(this, tr("Select Keystore File"),
           QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
-          tr("Key store files (*.*)"));
+          tr("Key store files (*.keystore *.jks)"));
         if (!fileName.isEmpty())
             _txtKsPath.setText(fileName);
     });
