@@ -69,10 +69,11 @@ class AndroidWidget : public QWidget
         QLabel _lblKsPw;
         QLineEdit _txtKsPw;
         QLabel _lblKsAlias;
-        QLineEdit _txtKsAlias;
-        QToolButton _btnKsAlias;
+        QComboBox _cmbKsAlias;
         QLabel _lblKeyPw;
         QLineEdit _txtAliasPw;
+        QLabel _lblSign;
+        QCheckBox _chkSign;
 };
 
 #endif // ANDROIDWIDGET_H

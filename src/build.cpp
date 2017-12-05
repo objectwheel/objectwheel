@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QFile>
 
 #define DIR_NAME "build"
 #define FILE_NAME "build.json"
@@ -52,7 +53,7 @@ void Build::setIcon(const QString& iconPath)
     if (!dir().isEmpty()) {
         auto icnDir = dir() + separator() + ICON_NAME;
         if (rm(icnDir) && !iconPath.isEmpty())
-            cp(iconPath, icnDir);
+            QFile::copy(iconPath, icnDir);
     }
 }
 
@@ -61,7 +62,7 @@ void Build::setKeystore(const QString& keystorePath)
     if (!dir().isEmpty()) {
         auto ksDir = dir() + separator() + KEYSTORE_NAME;
         if (rm(ksDir) && !keystorePath.isEmpty())
-            cp(keystorePath, ksDir);
+            QFile::copy(keystorePath, ksDir);
     }
 }
 

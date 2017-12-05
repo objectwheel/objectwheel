@@ -18,6 +18,7 @@
 #define TAG_KSPW "kspw"
 #define TAG_ALIASNAME "aliasname"
 #define TAG_ALIASPW "aliaspw"
+#define TAG_SIGNON "signon"
 
 class Build
 {

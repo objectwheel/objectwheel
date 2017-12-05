@@ -165,3 +165,4 @@ void ModuleSelectionWidget::handleBtnNextClicked()
     }
     emit done();
 }
+//TODO: Add "reset form"

@@ -18,9 +18,9 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     setPalette(p);
     setAutoFillBackground(true);
 
-    auto btnLay = new QHBoxLayout;
-    btnLay->addWidget(&_btnBack);
-    btnLay->addWidget(&_btnBuild);
+    auto buttonsLay = new QHBoxLayout;
+    buttonsLay->addWidget(&_btnBack);
+    buttonsLay->addWidget(&_btnBuild);
 
     _layout.setContentsMargins(fit::fx(20),
       fit::fx(20), fit::fx(20), fit::fx(20));
@@ -29,12 +29,12 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _layout.addWidget(&_lblTitle);
     _layout.addWidget(&_lblMsg);
     _layout.addWidget(&_scrollArea);
-    _layout.addLayout(btnLay);
+    _layout.addLayout(buttonsLay);
     _layout.setAlignment(&_lblLogo, Qt::AlignHCenter);
     _layout.setAlignment(&_lblTitle, Qt::AlignHCenter);
     _layout.setAlignment(&_lblMsg, Qt::AlignHCenter);
     _layout.setAlignment(&_scrollArea, Qt::AlignHCenter);
-    _layout.setAlignment(btnLay, Qt::AlignHCenter);
+    _layout.setAlignment(buttonsLay, Qt::AlignHCenter);
 
     _lblLogo.setFixedSize(fit::fx(50), fit::fx(50));
     _lblLogo.setPixmap(QPixmap(":/resources/images/android.png"));
@@ -78,6 +78,14 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _scrollAreaLay.addWidget(&_permissionsBox);
     _scrollAreaLay.addWidget(&_signingBox);
 
+    auto btnResIcon = new QToolButton;
+    btnResIcon->setIcon(QIcon(":/resources/images/refresh.png"));
+    btnResIcon->setIconSize(QSize(fit::fx(14), fit::fx(14)));
+    btnResIcon->setToolTip("Reset icon to default.");
+    connect(btnResIcon, &QToolButton::clicked, [&]{
+        _txtIconPath.setText("");
+        _picIcon.setPixmap(QPixmap(":/resources/images/android-default.png"));
+    });
     _appBox.setTitle("Application Settings");
     _appBox.setFixedHeight(fit::fx(280));
     _appBoxLay.addWidget(&_lblAppName, 0, 0);
@@ -91,7 +99,39 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _appBoxLay.addWidget(&_lblIcon, 4, 0);
     _appBoxLay.addWidget(&_txtIconPath, 4, 1);
     _appBoxLay.addWidget(&_btnIcon, 4, 2);
-    _appBoxLay.addWidget(&_picIcon, 5, 1, 1, 2);
+    _appBoxLay.addWidget(btnResIcon, 4, 2);
+    _appBoxLay.addWidget(&_picIcon, 5, 1);
+    _appBoxLay.setColumnMinimumWidth(2, fit::fx(55));
+    _appBoxLay.setAlignment(btnResIcon, Qt::AlignRight);
+
+    connect(&_btnIcon, &QToolButton::clicked, [&] {
+        auto fileName = QFileDialog::getOpenFileName(this, tr("Open Image"),
+          QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
+          tr("Image Files (*.png *.jpg *.jpeg *.tiff *.bmp)"));
+
+        QPixmap icon(fileName);
+        if (icon.width() >= 256 && icon.height() >= 256) {
+            _picIcon.setPixmap(icon);
+            _txtIconPath.setText(fileName);
+        } else if (!fileName.isEmpty()){
+            QMessageBox::warning(this, "Invalid",
+            "Image file is not valid. It must be atleast 256 x 256.");
+        }
+    });
+
+    connect(&_txtIconPath, &QLineEdit::textChanged, [&] {
+        if (_txtIconPath.text().isEmpty()) {
+            _txtIconPath.setToolTip(
+            "Select icon for your application. It must be at least 256 x 256.\n"
+            "Known image formats such as PNG and JPG are allowed. Your icon may \n"
+            "contain alpha channel. It's better preferring high resolution images.");
+        } else {
+            _txtIconPath.setToolTip(_txtIconPath.text() + "\n" +
+            "Select icon for your application. It must be at least 256 x 256.\n"
+            "Known image formats such as PNG and JPG are allowed. Your icon may \n"
+            "contain alpha channel. It's better preferring high resolution images.");
+        }
+    });
 
     _lblAppName.setText("Application name:");
     _lblVersionCode.setText("Version code:");
@@ -99,16 +139,17 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _lblOrientation.setText("Orientation:");
     _lblIcon.setText("Icon:");
     _btnIcon.setText("...");
-    _btnIcon.setToolTip("Select icon for your application. It must be at least 256 x 256.\n"
+    _btnIcon.setToolTip(
+    "Select icon for your application. It must be at least 256 x 256.\n"
     "Known image formats such as PNG and JPG are allowed. Your icon may \n"
     "contain alpha channel. It's better preferring high resolution images.");
 
     _txtIconPath.setDisabled(true);
     _txtIconPath.setPlaceholderText("[Android Default]");
     _txtIconPath.setToolTip(_btnIcon.toolTip());
-    _txtIconPath.setFixedWidth(fit::fx(160));
+    _txtIconPath.setFixedWidth(fit::fx(130));
 
-    _picIcon.setToolTip(_btnIcon.toolTip());
+    _picIcon.setToolTip("Application icon.");
     _picIcon.setFixedSize(fit::fx(QSize{64, 64}));
     _picIcon.setScaledContents(true);
     _picIcon.setPixmap(QPixmap(":/resources/images/android-default.png"));
@@ -120,14 +161,16 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _txtVersionName.setText("1.0");
     _txtVersionName.setFixedWidth(fit::fx(120));
-    _txtVersionName.setToolTip("The version number shown to users. This value can be set as a raw string. \n"
+    _txtVersionName.setToolTip(
+    "The version number shown to users. This value can be set as a raw string. \n"
     "The string has no other purpose than to be displayed to users. \n"
     "The 'Version code' field holds the significant version number used internally.");
 
     _spnVersionCode.setValue(1);
     _spnVersionCode.setMaximum(99999);
     _spnVersionCode.setFixedWidth(fit::fx(70));
-    _spnVersionCode.setToolTip("An internal version number. This number is used only to determine \n"
+    _spnVersionCode.setToolTip(
+    "An internal version number. This number is used only to determine \n"
     "whether one version is more recent than another, with higher \n"
     "numbers indicating more recent versions. This is not the version \n"
     "number shown to users; that number is set by the 'Version name' field. \n"
@@ -144,7 +187,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbOrientation.addItem(QIcon(":/resources/images/free.png"), "Free");
     _cmbOrientation.addItem(QIcon(":/resources/images/landscape.png"), "Landscape");
     _cmbOrientation.addItem(QIcon(":/resources/images/portrait.png"), "Portrait");
-    _cmbOrientation.setToolTip("Application orientation. Use Landscape or Portrait to lock your \n"
+    _cmbOrientation.setToolTip(
+    "Application orientation. Use Landscape or Portrait to lock your \n"
     "application orientation; or use Free to leave it unspecified.");
 
     _packageBox.setTitle("Package Settings");
@@ -161,8 +205,12 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _lblTargetSdk.setText("Target SDK:");
     _txtPackageName.setText("com.example.myapp");
 
+    auto validator = new QRegExpValidator(
+    QRegExp("^([A-Za-z]{1}[A-Za-z\\d_]*\\.)*[A-Za-z][A-Za-z\\d_]*$"));
+    _txtPackageName.setValidator(validator);
     _txtPackageName.setFixedWidth(fit::fx(200));
-    _txtPackageName.setToolTip("The Android package name, also known as the Google Play ID, the unique \n"
+    _txtPackageName.setToolTip(
+    "The Android package name, also known as the Google Play ID, the unique \n"
     "identifier of an application. Please choose a valid package name for \n"
     "your application (for example, 'org.example.myapp'). \n"
     "\n"
@@ -195,7 +243,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbMinSdk.setCurrentText("API 17: Android 4.2, 4.2.2");
 
     _cmbTargetSdk.setFixedWidth(fit::fx(200));
-    _cmbTargetSdk.setToolTip("Sets the target SDK. Set this to the highest tested version. This \n"
+    _cmbTargetSdk.setToolTip(
+    "Sets the target SDK. Set this to the highest tested version. This \n"
     "disables compatibility behavior of the system for your application.");
     _cmbTargetSdk.addItem("API 14: Android 4.0, 4.0.1, 4.0.2");
     _cmbTargetSdk.addItem("API 15: Android 4.0.3, 4.0.4");
@@ -274,49 +323,81 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnAddPermission.setToolTip("Add permission to the list.");
     _permissionList.setToolTip("Permission list.");
     _cmbPermissions.setToolTip("Select permission to add.");
+    _cmbPermissions.setValidator(validator);
 
     _signingBox.setTitle("Signing Settings");
-    _signingBox.setFixedHeight(fit::fx(200));
-    _signingBoxLay.addWidget(&_lblKsPath, 0, 0);
-    _signingBoxLay.addWidget(&_txtKsPath, 0, 1);
-    _signingBoxLay.addWidget(&_btnExistingKs, 0, 2);
-    _signingBoxLay.addWidget(&_btnNewKs, 1, 1, 1, 2);
-    _signingBoxLay.addWidget(&_lblKsPw, 2, 0);
-    _signingBoxLay.addWidget(&_txtKsPw, 2, 1, 1, 2);
-    _signingBoxLay.addWidget(&_lblKsAlias, 3, 0);
-    _signingBoxLay.addWidget(&_txtKsAlias, 3, 1);
-    _signingBoxLay.addWidget(&_btnKsAlias, 3, 2);
-    _signingBoxLay.addWidget(&_lblKeyPw, 4, 0);
-    _signingBoxLay.addWidget(&_txtAliasPw, 4, 1, 1, 2);
-    _signingBoxLay.setAlignment(&_btnExistingKs, Qt::AlignRight);
+    _signingBox.setFixedHeight(fit::fx(225));
+    _signingBoxLay.addWidget(&_lblSign, 0, 0);
+    _signingBoxLay.addWidget(&_chkSign, 0, 1, 1, 2);
+    _signingBoxLay.addWidget(&_lblKsPath, 1, 0);
+    _signingBoxLay.addWidget(&_txtKsPath, 1, 1);
+    _signingBoxLay.addWidget(&_btnExistingKs, 1, 2);
+    _signingBoxLay.addWidget(&_btnNewKs, 2, 1, 1, 2);
+    _signingBoxLay.addWidget(&_lblKsPw, 3, 0);
+    _signingBoxLay.addWidget(&_txtKsPw, 3, 1, 1, 2);
+    _signingBoxLay.addWidget(&_lblKsAlias, 4, 0);
+    _signingBoxLay.addWidget(&_cmbKsAlias, 4, 1, 1, 2);
+    _signingBoxLay.addWidget(&_lblKeyPw, 5, 0);
+    _signingBoxLay.addWidget(&_txtAliasPw, 5, 1, 1, 2);
 
     _btnExistingKs.setCursor(Qt::PointingHandCursor);
-    _btnKsAlias.setCursor(Qt::PointingHandCursor);
     _btnNewKs.setCursor(Qt::PointingHandCursor);
+    _btnIcon.setCursor(Qt::PointingHandCursor);
+    btnResIcon->setCursor(Qt::PointingHandCursor);
+
     _lblKsPath.setText("Key store path:");
     _btnNewKs.setText("Create new...");
     _btnNewKs.setIcon(QIcon(":/resources/images/newfile.png"));
     _btnExistingKs.setText("...");
     _lblKsPw.setText("Key store password:");
     _lblKsAlias.setText("Alias:");
-    _btnKsAlias.setText("...");
     _lblKeyPw.setText("Alias password:");
-    _txtKsPath.setPlaceholderText("Select key store file");
+    _txtKsPath.setPlaceholderText("Select key store file...");
     _txtKsPath.setDisabled(true);
     _btnNewKs.setFixedWidth(fit::fx(200));
     _txtKsPath.setFixedWidth(fit::fx(160));
-    _txtKsAlias.setFixedWidth(fit::fx(160));
+    _cmbKsAlias.setFixedWidth(fit::fx(200));
     _txtAliasPw.setFixedWidth(fit::fx(200));
     _txtKsPw.setFixedWidth(fit::fx(200));
     _txtAliasPw.setEchoMode(QLineEdit::Password);
     _txtKsPw.setEchoMode(QLineEdit::Password);
 
+    _chkSign.setChecked(true);
+    _chkSign.setText("Yes");
+    connect(&_chkSign, &QCheckBox::stateChanged, [&]{
+        _chkSign.setText(_chkSign.isChecked() ? "Yes" : "No");
+        _lblKsPath.setEnabled(_chkSign.isChecked());
+        _btnExistingKs.setEnabled(_chkSign.isChecked());
+        _btnNewKs.setEnabled(_chkSign.isChecked());
+        _lblKsPw.setEnabled(_chkSign.isChecked());
+        _txtKsPw.setEnabled(_chkSign.isChecked());
+        _lblKsAlias.setEnabled(_chkSign.isChecked());
+        _cmbKsAlias.setEnabled(_chkSign.isChecked());
+        _lblKeyPw.setEnabled(_chkSign.isChecked());
+        _txtAliasPw.setEnabled(_chkSign.isChecked());
+    });
+    _lblSign.setText("Sign package:");
     _txtKsPath.setToolTip("Key store path.");
-    _btnExistingKs.setToolTip("Select key store file.");
+    _btnExistingKs.setToolTip("Select key store file...");
     _btnNewKs.setToolTip("Generate new key store and signing certificate.");
     _txtKsPw.setToolTip("Type key store password.");
-    _txtKsAlias.setToolTip("Type which alias you want to use.");
+    _cmbKsAlias.setToolTip("Choose which alias you want to use.");
     _txtAliasPw.setToolTip("Type the related alias's password.");
+
+    connect(&_btnExistingKs, &QToolButton::clicked, [&] {
+        auto fileName = QFileDialog::getOpenFileName(this, tr("Choose Android key store"),
+          QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
+          tr("Key store files (*.*)"));
+        if (!fileName.isEmpty())
+            _txtKsPath.setText(fileName);
+    });
+    connect(&_txtKsPath, &QLineEdit::textChanged, [&] {
+        if (_txtKsPath.text().isEmpty()) {
+            _txtKsPath.setToolTip("Key store path.");
+        } else {
+            _txtKsPath.setToolTip("Key store path:\n" + _txtKsPath.text());
+        }
+    });
 
     _btnBack.setColor("#38A3F6");
     _btnBack.setTextColor(Qt::white);
@@ -357,20 +438,31 @@ void AndroidWidget::handleBtnBuildClicked()
           _cmbOrientation.currentText().toLower());
     }
     Build::setIcon(_txtIconPath.text());
-    Build::set(TAG_PACKAGENAME, _txtPackageName.text());
 
+    Build::set(TAG_PACKAGENAME, _txtPackageName.text());
     Build::set(TAG_MINAPI, _cmbMinSdk.currentText().
       split(':').first().remove("API ").toInt());
     Build::set(TAG_TARGETAPI, _cmbTargetSdk.currentText().
       split(':').first().remove("API ").toInt());
 
+    Build::clearPermissions();
     for (int i = 0; i < _permissionList.count(); i++) {
         auto permission = _permissionList.item(i)->text();
         Build::addPermission(permission);
     }
 
-    Build::setKeystore(_txtKsPath.text());
-    Build::set(TAG_KSPW, _txtKsPw.text());
-    Build::set(TAG_ALIASNAME, _txtKsAlias.text());
-    Build::set(TAG_ALIASPW, _txtAliasPw.text());
+    Build::set(TAG_SIGNON, _chkSign.isChecked());
+    if (_chkSign.isChecked()) {
+        Build::setKeystore(_txtKsPath.text());
+        Build::set(TAG_KSPW, _txtKsPw.text());
+        Build::set(TAG_ALIASNAME, _cmbKsAlias.currentText());
+        Build::set(TAG_ALIASPW, _txtAliasPw.text());
+    }
 }
+
+//TODO: Add "reset form" and critisize side effects
+//TODO: Generate certificate
+//TODO: Test and check alias and keystore passwords
+//TODO: Show aliases
+//TODO: Critisize removing build.json when build is done,
+// or after closing builds screen

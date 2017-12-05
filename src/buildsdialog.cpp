@@ -33,12 +33,12 @@ void BuildsDialog::resizeEvent(QResizeEvent* event)
 
 void BuildsDialog::showModules()
 {
-    _view.show(Modules, View::LeftToRight);
+    _view.show(Modules);
 }
 
 void BuildsDialog::showPlatforms()
 {
-    _view.show(Platforms, View::LeftToRight);
+    _view.show(Platforms);
 }
 
 void BuildsDialog::handleModuleSelection()
@@ -46,12 +46,12 @@ void BuildsDialog::handleModuleSelection()
     switch (_target) {
         case android_armeabi_v7a:
             _androidWidget.setTarget("Android Armeabi v7a");
-            _view.show(Android, View::RightToLeft);
+            _view.show(Android);
             break;
 
         case android_x86:
             _androidWidget.setTarget("Android x86");
-            _view.show(Android, View::RightToLeft);
+            _view.show(Android);
             break;
         default:
             break;
@@ -61,5 +61,5 @@ void BuildsDialog::handleModuleSelection()
 void BuildsDialog::handlePlatformSelection(Targets platform)
 {
     _target = platform;
-    _view.show(Modules, View::RightToLeft);
+    _view.show(Modules);
 }
