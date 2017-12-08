@@ -3,7 +3,9 @@
 #include <css.h>
 #include <filemanager.h>
 #include <build.h>
+#include <QMap>
 
+QMap<QString, QStringList> deps;
 QVBoxLayout* qtScLay,* owScLay;
 ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     : QWidget(parent)
@@ -109,13 +111,47 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     qtScArea->setFixedWidth(fit::fx(400));
     qtScArea->setStyleSheet("QScrollArea {background: transparent;}");
 
-    QString line;
+    QString line, lastModule;
     QTextStream stream(rdfile(":/resources/other/ow-modules.txt"));
     while (stream.readLineInto(&line)) {
-        auto checkbox = new QCheckBox;
-        checkbox->setText(line);
-        checkbox->setChecked(true);
-        owScLay->addWidget(checkbox);
+        if (line.startsWith(" ")) {
+            line.remove(0, 1);
+            if (deps.contains(lastModule))
+                deps[lastModule] << line;
+            else
+                deps[lastModule] = (QStringList() << line);
+        } else {
+            lastModule = line;
+            auto checkbox = new QCheckBox;
+            checkbox->setText(line);
+            checkbox->setToolTip(checkbox->text());
+            owScLay->addWidget(checkbox);
+            connect(checkbox, &QCheckBox::clicked, [=] {
+                if (deps.contains(checkbox->text())) {
+                    for (int i = 0; i < qtScLay->count(); i++) {
+                         auto chk = (QCheckBox*) qtScLay->itemAt(i)->widget();
+                         if (deps.value(checkbox->text()).contains(chk->text())) {
+                             if (checkbox->isChecked()) {
+                                 chk->setChecked(true);
+                                 chk->setDisabled(true);
+                                 if (!chk->toolTip().contains("Needed by"))
+                                     chk->setToolTip(chk->toolTip() + ":");
+                                 chk->setToolTip(chk->toolTip() + "\n └ Needed by: " + checkbox->text());
+                             } else {
+                                 if (chk->toolTip().contains(checkbox->text())) {
+                                     chk->setToolTip(chk->toolTip().remove("\n └ Needed by: " + checkbox->text()));
+                                     if (!chk->toolTip().contains("Needed by")) {
+                                         chk->setChecked(false);
+                                         chk->setDisabled(false);
+                                         chk->setToolTip(chk->text());
+                                     }
+                                 }
+                             }
+                         }
+                    }
+                }
+            });
+        }
     }
 
     QTextStream stream2(rdfile(":/resources/other/qt-modules.txt"));
@@ -126,6 +162,10 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
         checkbox->setText(line);
         checkbox->setChecked(dcount-- > 0);
         checkbox->setDisabled(checkbox->isChecked());
+        if (checkbox->isChecked())
+            checkbox->setToolTip(checkbox->text() + ":\n └ Essential");
+        else
+            checkbox->setToolTip(checkbox->text());
         qtScLay->addWidget(checkbox);
     }
 

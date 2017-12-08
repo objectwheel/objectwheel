@@ -1,5 +1,8 @@
 Ai Speak
 Api Ai
+ Qt WebSockets
 Audio Player
+ Qt Multimedia
 Audio Recorder
+ Qt Multimedia
 File Manager
