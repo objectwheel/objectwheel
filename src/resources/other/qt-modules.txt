@@ -12,16 +12,12 @@ Qt Widgets
 Qt 3D
 Qt Android Extras
 Qt Bluetooth
-Qt Canvas 3D
 Qt Concurrent
 Qt D-Bus
 Qt Gamepad
-Qt Graphical Effects
-Qt Image Formats
 Qt Location
 Qt Mac Extras
 Qt NFC
-Qt Platform Headers
 Qt Positioning
 Qt Print Support
 Qt Purchasing
@@ -40,7 +36,6 @@ Qt XML
 Qt XML Patterns
 Qt Charts
 Qt Data Visualization
-Qt Virtual Keyboard
 Qt Network Authorization
 Qt Speech
 Qt Remote Objects

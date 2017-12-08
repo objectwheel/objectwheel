@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QLoggingCategory>
 #include <QTimer>
+#include <QQuickStyle>
 
 #define PIXEL_SIZE 13
 #define REF_WIDTH 1680
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
 {
     // Init application
     QApplication a(argc, argv);
+    QQuickStyle::setStyle("Material");
 
     # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     // Multiple instances protection
