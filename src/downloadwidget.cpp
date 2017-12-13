@@ -1,4 +1,4 @@
-#include <buildsscreen.h>
+#include <downloadwidget.h>
 #include <fit.h>
 #include <projectmanager.h>
 #include <usermanager.h>
@@ -10,40 +10,23 @@
 #include <dirlocker.h>
 #include <zipper.h>
 #include <flatbutton.h>
-#include <global.h>
 #include <mainwindow.h>
-#include <global.h>
+#include <build.h>
 
-#include <QStandardPaths>
-#include <QUrl>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QList>
-#include <QElapsedTimer>
-#include <QString>
-#include <QApplication>
-#include <QPointer>
-#include <QDebug>
-#include <QtMath>
-#include <QQmlEngine>
-#include <QDateTime>
-#include <QTimer>
-#include <QMessageBox>
-#include <QQmlContext>
-#include <QQmlProperty>
-#include <QQuickItem>
+#include <QtWidgets>
+#include <QtQuick>
+#include <QtQml>
 
 #define URL QString(SERVER + "/api/v1/build/")
 
-class BuildsScreenPrivate {
+class DownloadWidgetPrivate {
 
     public:
-        BuildsScreenPrivate(BuildsScreen* w);
+        DownloadWidgetPrivate(DownloadWidget* w);
         QList<qint64> bytes;
         QList<qint64> times;
         QElapsedTimer elapsedTimer;
-        BuildsScreen* parent;
+        DownloadWidget* parent;
         QQuickItem* buildPage;
         QQuickItem* progressPage;
         QQuickItem* toast;
@@ -55,9 +38,9 @@ class BuildsScreenPrivate {
         QString determineBuildExtension(const QString label);
 };
 
-BuildsScreenPrivate* BuildsScreen::_d = nullptr;
+DownloadWidgetPrivate* DownloadWidget::_d = nullptr;
 
-BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
+DownloadWidgetPrivate::DownloadWidgetPrivate(DownloadWidget* w)
     : parent(w)
     , manager(new QNetworkAccessManager(parent))
 {
@@ -77,7 +60,7 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
 #else
     exitButton.setGeometry(parent->width() - fit::fx(15), fit::fx(5), fit::fx(8), fit::fx(8));
 #endif
-    QObject::connect((BuildsScreen*)parent,  &BuildsScreen::resized, [=]{
+    QObject::connect((DownloadWidget*)parent,  &DownloadWidget::resized, [=]{
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
         exitButton.setGeometry(parent->width() - fit::fx(26), fit::fx(8), fit::fx(18), fit::fx(18));
 #else
@@ -100,8 +83,6 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
     swipeView = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
       "swipeView", parent->engine()).value<QObject*>();
 
-    QObject::connect(buildPage, SIGNAL(btnBuildClicked()),
-      parent, SLOT(handleBuildButtonClicked()));
     QObject::connect(progressPage, SIGNAL(btnOkClicked()),
       parent, SLOT(handleBtnOkClicked()));
     QObject::connect(progressPage, SIGNAL(btnCancelClicked()),
@@ -110,7 +91,7 @@ BuildsScreenPrivate::BuildsScreenPrivate(BuildsScreen* w)
       SLOT(handleBtnCancelClicked()));
 }
 
-QString BuildsScreenPrivate::bytesString(const qint64 size, bool withExt)
+QString DownloadWidgetPrivate::bytesString(const qint64 size, bool withExt)
 {
     QString ret;
     float kb = 1024.0f;
@@ -134,7 +115,7 @@ QString BuildsScreenPrivate::bytesString(const qint64 size, bool withExt)
     return ret;
 }
 
-QString BuildsScreenPrivate::determineBuildExtension(const QString label)
+QString DownloadWidgetPrivate::determineBuildExtension(const QString label)
 {
     if (label.contains("android")) {
         return QString(".apk");
@@ -153,37 +134,47 @@ QString BuildsScreenPrivate::determineBuildExtension(const QString label)
     }
 }
 
-BuildsScreen::~BuildsScreen()
+DownloadWidget::~DownloadWidget()
 {
     delete _d;
 }
 
-BuildsScreen* BuildsScreen::instance()
+DownloadWidget* DownloadWidget::instance()
 {
     return _d->parent;
 }
 
-BuildsScreen::BuildsScreen(QWidget *parent) : QQuickWidget(parent)
+DownloadWidget::DownloadWidget(QWidget *parent) : QQuickWidget(parent)
 {
     if (_d) return;
-    _d = new BuildsScreenPrivate(this);
+    _d = new DownloadWidgetPrivate(this);
 }
 
-void BuildsScreen::resizeEvent(QResizeEvent* event)
+void DownloadWidget::resizeEvent(QResizeEvent* event)
 {
     QQuickWidget::resizeEvent(event);
     emit resized();
 }
 
-void BuildsScreen::handleBuildButtonClicked()
+void DownloadWidget::download(Targets target)
 {
     auto buildLabel = QQmlProperty::read(_d->buildPage, "currentBuildLabel").toString();
-    auto savesDir = SaveManager::basePath();
-    if (savesDir.isEmpty()) return;
-    auto projectFilename = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0] + separator() + "objectwheel_project.zip";
-    Zipper::compressDir(savesDir, projectFilename, "dashboard");
-    QByteArray data = rdfile(projectFilename);
-    rm(projectFilename);
+    auto pdir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    if (pdir.isEmpty())
+        return;
+
+    QTemporaryDir tdir, tdir2;
+    if (!tdir.isValid() || !tdir2.isValid())
+        qFatal("Error");
+
+    if (!cp(pdir + separator() + DIR_OWDB, tdir.path()) ||
+        !cp(pdir + separator() + DIR_BUILD, tdir.path()))
+        qFatal("Error");
+
+
+    Zipper::compressDir(tdir.path(), tdir2.path() + separator() + "project.zip");
+    QByteArray data = rdfile(tdir2.path() + separator() + "project.zip");
+
     QByteArray boundary = "-----------------------------7d935033608e2";
     QByteArray body = "\r\n--" + boundary + "\r\n";
     body += "Content-Disposition: form-data; name=\"project\"; filename=\"project.zip\"\r\n";
@@ -191,10 +182,16 @@ void BuildsScreen::handleBuildButtonClicked()
     body += data;
     body += "\r\n--" + boundary + "--\r\n";
 
-    QNetworkRequest request(QUrl(URL + buildLabel));
+    QString url = URL;
+    if (target == android_armeabi_v7a ||
+        target == android_x86)
+        url += "android";
+
+    QNetworkRequest request(QUrl::fromUserInput(url));
     request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
-    request.setRawHeader("token", QByteArray().insert(0, QString("{\"token\" : \"%1\"}").arg(UserManager::currentSessionsToken())));
-    request.setHeader(QNetworkRequest::ContentLengthHeader,body.size());
+    request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserManager::currentSessionsToken())));
+    request.setRawHeader("x86", QByteArray().insert(0, QString("{\"value\" : %1}").arg(target == android_x86 ? "true" : "false")));
+    request.setHeader(QNetworkRequest::ContentLengthHeader, body.size());
     _d->reply = _d->manager->post(request, body);
 
     QQmlProperty::write(_d->swipeView, "currentIndex", 1);
@@ -378,7 +375,7 @@ void BuildsScreen::handleBuildButtonClicked()
     });
 }
 
-void BuildsScreen::handleBtnOkClicked()
+void DownloadWidget::handleBtnOkClicked()
 {
     _d->elapsedTimer.invalidate();
     _d->times.clear();
@@ -387,7 +384,7 @@ void BuildsScreen::handleBtnOkClicked()
     _d->exitButton.show();
 }
 
-void BuildsScreen::handleBtnCancelClicked()
+void DownloadWidget::handleBtnCancelClicked()
 {
     if (_d->reply) _d->reply->abort();
     _d->elapsedTimer.invalidate();

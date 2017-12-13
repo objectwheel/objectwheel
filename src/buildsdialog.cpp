@@ -4,6 +4,7 @@ enum {
     Platforms,
     Modules,
     Android,
+    Download
 };
 
 BuildsDialog::BuildsDialog(QWidget *parent)
@@ -13,6 +14,7 @@ BuildsDialog::BuildsDialog(QWidget *parent)
     _view.add(Platforms, &_platformsWidget);
     _view.add(Modules, &_modulesWidget);
     _view.add(Android, &_androidWidget);
+    _view.add(Download, &_downloadWidget);
     _view.show(Platforms);
 
     connect(&_modulesWidget, SIGNAL(backClicked()),
@@ -23,6 +25,8 @@ BuildsDialog::BuildsDialog(QWidget *parent)
       SLOT(showModules()));
     connect(&_platformsWidget, SIGNAL(platformSelected(Targets)),
       SLOT(handlePlatformSelection(Targets)));
+    connect(&_androidWidget, SIGNAL(downloadBuild()),
+      SLOT(handleDownload()));
 }
 
 void BuildsDialog::resizeEvent(QResizeEvent* event)
@@ -62,4 +66,10 @@ void BuildsDialog::handlePlatformSelection(Targets platform)
 {
     _target = platform;
     _view.show(Modules);
+}
+
+void BuildsDialog::handleDownload()
+{
+    _view.show(Download);
+    _downloadWidget.download(_target);
 }

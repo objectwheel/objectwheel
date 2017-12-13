@@ -6,7 +6,6 @@
 #include <QJsonArray>
 #include <QFile>
 
-#define DIR_NAME "build"
 #define FILE_NAME "build.json"
 #define ICON_NAME "icon.png"
 #define KEYSTORE_NAME "keystore.ks"
@@ -19,7 +18,7 @@ QString Build::dir()
     if (projectDir.isEmpty())
         return QString();
 
-    return projectDir + separator() + DIR_NAME;
+    return projectDir + separator() + DIR_BUILD;
 }
 
 void Build::set(const QString& setting, const QVariant& value)

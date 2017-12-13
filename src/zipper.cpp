@@ -19,6 +19,10 @@ bool Zipper::compressDir(const QString& dir, const QString& outFilename, const Q
 
     // Spin for dirs
     for (auto dr : lsdir(dir)) {
+        #if defined(Q_OS_DARWIN)
+        if (dr == "__MACOSX")
+            continue;
+        #endif
         if (!mz_zip_add_mem_to_archive_file_in_place(outFilename.toStdString().c_str(), base.isEmpty() ?
                                                          (dr + separator()).toStdString().c_str() :
                                                          (base + separator() + dr + separator()).toStdString().c_str(),

@@ -18,7 +18,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/toolsmanager.h \
            $$PWD/projectsscreen.h \
            $$PWD/loginscreen.h \
-           $$PWD/buildsscreen.h \
            $$PWD/delayer.h \
            $$PWD/designmanager.h \
            $$PWD/control.h \
@@ -60,7 +59,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/androidwidget.h \
            $$PWD/moduleselectionwidget.h \
            $$PWD/build.h \
-           $$PWD/androidcreatekeystorecertificate.h
+           $$PWD/androidcreatekeystorecertificate.h \
+    $$PWD/downloadwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -77,7 +77,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/toolsmanager.cpp \
            $$PWD/projectsscreen.cpp \
            $$PWD/loginscreen.cpp \
-           $$PWD/buildsscreen.cpp \
            $$PWD/delayer.cpp \
            $$PWD/designmanager.cpp \
            $$PWD/control.cpp \
@@ -118,7 +117,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/androidwidget.cpp \
            $$PWD/moduleselectionwidget.cpp \
            $$PWD/build.cpp \
-           $$PWD/androidcreatekeystorecertificate.cpp
+           $$PWD/androidcreatekeystorecertificate.cpp \
+    $$PWD/downloadwidget.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

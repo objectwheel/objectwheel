@@ -5,6 +5,7 @@
 #include <platformswidget.h>
 #include <androidwidget.h>
 #include <moduleselectionwidget.h>
+#include <downloadwidget.h>
 #include <QDialog>
 
 class BuildsDialog : public QDialog
@@ -21,6 +22,7 @@ class BuildsDialog : public QDialog
         void showPlatforms();
         void handleModuleSelection();
         void handlePlatformSelection(Targets);
+        void handleDownload();
 
     private:
         View _view;
@@ -28,6 +30,7 @@ class BuildsDialog : public QDialog
         PlatformsWidget _platformsWidget;
         ModuleSelectionWidget _modulesWidget;
         AndroidWidget _androidWidget;
+        DownloadWidget _downloadWidget;
 };
 
 #endif // BUILDSDIALOG_H

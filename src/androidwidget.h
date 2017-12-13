@@ -15,6 +15,7 @@ class AndroidWidget : public QWidget
 
     signals:
         void backClicked();
+        void downloadBuild();
 
     private slots:
         void handleBtnBuildClicked();

@@ -458,6 +458,8 @@ void AndroidWidget::handleBtnBuildClicked()
         Build::set(TAG_ALIASNAME, _cmbKsAlias.currentText());
         Build::set(TAG_ALIASPW, _txtAliasPw.text());
     }
+
+    emit downloadBuild();
 }
 
 //TODO: Add "reset form" and critisize side effects

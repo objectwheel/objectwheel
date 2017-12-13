@@ -19,6 +19,7 @@
 #define TAG_ALIASNAME "aliasname"
 #define TAG_ALIASPW "aliaspw"
 #define TAG_SIGNON "signon"
+#define DIR_BUILD "build"
 
 class Build
 {
