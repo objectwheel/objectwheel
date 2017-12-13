@@ -20,20 +20,15 @@
 #define URL QString(SERVER + "/api/v1/build/")
 
 class DownloadWidgetPrivate {
-
     public:
         DownloadWidgetPrivate(DownloadWidget* w);
         QList<qint64> bytes;
         QList<qint64> times;
         QElapsedTimer elapsedTimer;
         DownloadWidget* parent;
-        QQuickItem* buildPage;
         QQuickItem* progressPage;
-        QQuickItem* toast;
-        QQuickItem* swipeView;
         QNetworkAccessManager* manager;
         QPointer<QNetworkReply> reply;
-        FlatButton exitButton;
         QString bytesString(const qint64 size, bool withExt);
         QString determineBuildExtension(const QString label);
 };
@@ -52,36 +47,8 @@ DownloadWidgetPrivate::DownloadWidgetPrivate(DownloadWidget* w)
     parent->setWindowFlags(Qt::CustomizeWindowHint |
       Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint);
 
-    exitButton.setParent(parent);
-    exitButton.setIconButton(true);
-    exitButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-    exitButton.setGeometry(parent->width() - fit::fx(26), fit::fx(8), fit::fx(18), fit::fx(18));
-#else
-    exitButton.setGeometry(parent->width() - fit::fx(15), fit::fx(5), fit::fx(8), fit::fx(8));
-#endif
-    QObject::connect((DownloadWidget*)parent,  &DownloadWidget::resized, [=]{
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-        exitButton.setGeometry(parent->width() - fit::fx(26), fit::fx(8), fit::fx(18), fit::fx(18));
-#else
-        exitButton.setGeometry(parent->width() - fit::fx(15), fit::fx(5), fit::fx(8), fit::fx(8));
-#endif
-    });
-    fit::fx(&exitButton, fit::both);
-    exitButton.show();
-
-    QObject::connect(&exitButton, &FlatButton::clicked, [=]{
-        parent->hide();
-    });
-
-    buildPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
-      "buildPage", parent->engine()).value<QObject*>();
     progressPage = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
       "progressPage", parent->engine()).value<QObject*>();
-    toast = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
-      "toast",parent-> engine()).value<QObject*>();
-    swipeView = (QQuickItem*)QQmlProperty::read(parent->rootObject(),
-      "swipeView", parent->engine()).value<QObject*>();
 
     QObject::connect(progressPage, SIGNAL(btnOkClicked()),
       parent, SLOT(handleBtnOkClicked()));
@@ -156,9 +123,11 @@ void DownloadWidget::resizeEvent(QResizeEvent* event)
     emit resized();
 }
 
-void DownloadWidget::download(Targets target)
+void DownloadWidget::download(OTargets::Targets target)
 {
-    auto buildLabel = QQmlProperty::read(_d->buildPage, "currentBuildLabel").toString();
+    QMetaEnum metaEnum = QMetaEnum::fromType<OTargets::Targets>();
+    auto buildLabel = QString(metaEnum.valueToKey(target));
+
     auto pdir = ProjectManager::projectDirectory(ProjectManager::currentProject());
     if (pdir.isEmpty())
         return;
@@ -183,25 +152,23 @@ void DownloadWidget::download(Targets target)
     body += "\r\n--" + boundary + "--\r\n";
 
     QString url = URL;
-    if (target == android_armeabi_v7a ||
-        target == android_x86)
+    if (target == OTargets::android_armeabi_v7a ||
+        target == OTargets::android_x86)
         url += "android";
 
     QNetworkRequest request(QUrl::fromUserInput(url));
     request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
     request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserManager::currentSessionsToken())));
-    request.setRawHeader("x86", QByteArray().insert(0, QString("{\"value\" : %1}").arg(target == android_x86 ? "true" : "false")));
+    request.setRawHeader("x86", QByteArray().insert(0, QString("{\"value\" : %1}").arg(target == OTargets::android_x86 ? "true" : "false")));
     request.setHeader(QNetworkRequest::ContentLengthHeader, body.size());
     _d->reply = _d->manager->post(request, body);
 
-    QQmlProperty::write(_d->swipeView, "currentIndex", 1);
     QQmlProperty::write(_d->progressPage, "informativeText", "Establishing connection");
     QQmlProperty::write(_d->progressPage, "mbText", "-");
     QQmlProperty::write(_d->progressPage, "speedText", "-");
     QQmlProperty::write(_d->progressPage, "progressbarValue", 0.0);
     QMetaObject::invokeMethod(_d->progressPage, "startWaitEffect");
     QMetaObject::invokeMethod(_d->progressPage, "showBtnCancel");
-    _d->exitButton.hide();
 
     connect(_d->reply, &QNetworkReply::finished, this, [=] {
         if (!_d->reply->isOpen() || !_d->reply->isReadable() || _d->reply->error() != QNetworkReply::NoError) {
@@ -339,38 +306,23 @@ void DownloadWidget::download(Targets target)
       &QNetworkReply::error, this, [=](QNetworkReply::NetworkError e)
     {
         if (e != QNetworkReply::OperationCanceledError) {
-            QQmlProperty::write(_d->swipeView, "currentIndex", 0);
             QMetaEnum metaEnum = QMetaEnum::fromType<QNetworkReply::NetworkError>();
-
             if (e == QNetworkReply::AuthenticationRequiredError) {
-                QQmlProperty::write(_d->toast, "text.text", "<p><b>Authentication Error</b></p>"
-                                    "<p>Your email address or password is wrong. Please contact to support.</p>");
-                QQmlProperty::write(_d->toast, "base.width", qFloor(fit::fx(330)));
-                QQmlProperty::write(_d->toast, "base.height", qFloor(fit::fx(95)));
-                QQmlProperty::write(_d->toast, "duration", 10000);
+                QMessageBox::warning(this, "Authentication Error",
+                  "Your email address or password is wrong. Please contact to support.");
             } else if (e == QNetworkReply::ContentOperationNotPermittedError) {
-                QQmlProperty::write(_d->toast, "text.text", "<p><b>Access Denied</b></p>"
-                                    "<p>Your account doesn't have any permission to use this feature, please upgrade your subscription plan.</p>");
-                QQmlProperty::write(_d->toast, "base.width", qFloor(fit::fx(330)));
-                QQmlProperty::write(_d->toast, "base.height", qFloor(fit::fx(110)));
-                QQmlProperty::write(_d->toast, "duration", 10000);
+                QMessageBox::warning(this, "Access Denied",
+                  "Your account doesn't have any permission to use this feature, please upgrade your subscription plan.");
             }  else if (e == QNetworkReply::ServiceUnavailableError ||
                         e == QNetworkReply::UnknownServerError ||
                         e == QNetworkReply::InternalServerError ) {
-                QQmlProperty::write(_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
-                                    "<p>Server error has occurred, please try again later.</p>");
-                QQmlProperty::write(_d->toast, "base.width", qFloor(fit::fx(330)));
-                QQmlProperty::write(_d->toast, "base.height",qFloor(fit::fx(95)));
-                QQmlProperty::write(_d->toast, "duration", 10000);
+                QMessageBox::warning(this, QString(metaEnum.valueToKey(e)),
+                  "Server error has occurred, please try again later.");
             } else {
-                QQmlProperty::write(_d->toast, "text.text", "<p><b>" + QString(metaEnum.valueToKey(e)) + "</b></p>" +
-                                    "<p>Either check your internet connection or contact to support.</p>");
-                QQmlProperty::write(_d->toast, "base.width", qFloor(fit::fx(330)));
-                QQmlProperty::write(_d->toast, "base.height", qFloor(fit::fx(95)));
-                QQmlProperty::write(_d->toast, "duration", 10000);
+                QMessageBox::warning(this, QString(metaEnum.valueToKey(e)),
+                  "Either check your internet connection or contact to support.");
             }
-            QMetaObject::invokeMethod(_d->toast, "show");
-            _d->exitButton.show();
+            emit done();
         }
     });
 }
@@ -380,8 +332,7 @@ void DownloadWidget::handleBtnOkClicked()
     _d->elapsedTimer.invalidate();
     _d->times.clear();
     _d->bytes.clear();
-    QQmlProperty::write(_d->swipeView, "currentIndex", 0);
-    _d->exitButton.show();
+    emit done();
 }
 
 void DownloadWidget::handleBtnCancelClicked()
@@ -390,6 +341,5 @@ void DownloadWidget::handleBtnCancelClicked()
     _d->elapsedTimer.invalidate();
     _d->times.clear();
     _d->bytes.clear();
-    QQmlProperty::write(_d->swipeView, "currentIndex", 0);
-    _d->exitButton.show();
+    emit done();
 }

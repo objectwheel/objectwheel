@@ -19,10 +19,10 @@ class DownloadWidget : public QQuickWidget
         void resizeEvent(QResizeEvent *event) override;
 
     signals:
+        void done();
         void resized() const;
-
     public slots:
-        void download(Targets);
+        void download(OTargets::Targets);
         void handleBtnOkClicked();
         void handleBtnCancelClicked();
 };

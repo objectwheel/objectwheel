@@ -324,7 +324,10 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnDelPermission.setCursor(Qt::PointingHandCursor);
     _btnDelPermission.setToolTip("Delete selected permission from the list.");
     _btnAddPermission.setToolTip("Add permission to the list.");
-    _permissionList.setToolTip("Permission list.");
+    _permissionList.setToolTip("Permissions list. Some of the permissions are not shown here.\n"
+                               "Those permissions are needed by Qt Modules and they will be\n"
+                               "included automatically.\n");
+
     _cmbPermissions.setToolTip("Select permission to add.");
     _cmbPermissions.setValidator(validator);
 
@@ -365,8 +368,17 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _txtAliasPw.setEchoMode(QLineEdit::Password);
     _txtKsPw.setEchoMode(QLineEdit::Password);
 
-    _chkSign.setChecked(true);
-    _chkSign.setText("Yes");
+    _chkSign.setChecked(false);
+    _chkSign.setText(_chkSign.isChecked() ? "Yes" : "No");
+    _lblKsPath.setEnabled(_chkSign.isChecked());
+    _btnExistingKs.setEnabled(_chkSign.isChecked());
+    _btnNewKs.setEnabled(_chkSign.isChecked());
+    _lblKsPw.setEnabled(_chkSign.isChecked());
+    _txtKsPw.setEnabled(_chkSign.isChecked());
+    _lblKsAlias.setEnabled(_chkSign.isChecked());
+    _cmbKsAlias.setEnabled(_chkSign.isChecked());
+    _lblKeyPw.setEnabled(_chkSign.isChecked());
+    _txtAliasPw.setEnabled(_chkSign.isChecked());
     connect(&_chkSign, &QCheckBox::stateChanged, [&]{
         _chkSign.setText(_chkSign.isChecked() ? "Yes" : "No");
         _lblKsPath.setEnabled(_chkSign.isChecked());
@@ -379,12 +391,15 @@ AndroidWidget::AndroidWidget(QWidget *parent)
         _lblKeyPw.setEnabled(_chkSign.isChecked());
         _txtAliasPw.setEnabled(_chkSign.isChecked());
     });
+
     _lblSign.setText("Sign package:");
     _txtKsPath.setToolTip("Key store path.");
     _btnExistingKs.setToolTip("Select key store file...");
     _btnNewKs.setToolTip("Generate new key store and signing certificate.");
     _txtKsPw.setToolTip("Type key store password.");
-    _cmbKsAlias.setToolTip("Choose which alias you want to use.");
+    _cmbKsAlias.setToolTip("Choose which alias you want to use. First you have to\n"
+                           "enter key store password above, then possible aliases\n"
+                           "will be shown here.");
     _txtAliasPw.setToolTip("Type the related alias's password.");
 
     connect(&_btnExistingKs, &QToolButton::clicked, [&] {
@@ -421,7 +436,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnBuild.setIcon(QIcon(":/resources/images/load.png"));
     _btnBuild.setText("Build");
     connect(&_btnBuild, SIGNAL(clicked(bool)),
-            SLOT(handleBtnBuildClicked()));
+      SLOT(handleBtnBuildClicked()));
 }
 
 bool AndroidWidget::checkFields()
@@ -481,7 +496,7 @@ void AndroidWidget::handleBtnBuildClicked()
             Build::set(TAG_ORIENTATION, "unspecified");
         else {
             Build::set(TAG_ORIENTATION,
-                       _cmbOrientation.currentText().toLower());
+              _cmbOrientation.currentText().toLower());
         }
         Build::setIcon(_txtIconPath.text());
 

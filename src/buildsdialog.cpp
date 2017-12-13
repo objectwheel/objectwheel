@@ -23,10 +23,12 @@ BuildsDialog::BuildsDialog(QWidget *parent)
       SLOT(handleModuleSelection()));
     connect(&_androidWidget, SIGNAL(backClicked()),
       SLOT(showModules()));
-    connect(&_platformsWidget, SIGNAL(platformSelected(Targets)),
-      SLOT(handlePlatformSelection(Targets)));
+    connect(&_platformsWidget, SIGNAL(platformSelected(OTargets::Targets)),
+      SLOT(handlePlatformSelection(OTargets::Targets)));
     connect(&_androidWidget, SIGNAL(downloadBuild()),
       SLOT(handleDownload()));
+    connect(&_downloadWidget, SIGNAL(done()),
+      SLOT(handleModuleSelection()));
 }
 
 void BuildsDialog::resizeEvent(QResizeEvent* event)
@@ -48,12 +50,12 @@ void BuildsDialog::showPlatforms()
 void BuildsDialog::handleModuleSelection()
 {
     switch (_target) {
-        case android_armeabi_v7a:
+        case OTargets::android_armeabi_v7a:
             _androidWidget.setTarget("Android Armeabi v7a");
             _view.show(Android);
             break;
 
-        case android_x86:
+        case OTargets::android_x86:
             _androidWidget.setTarget("Android x86");
             _view.show(Android);
             break;
@@ -62,7 +64,7 @@ void BuildsDialog::handleModuleSelection()
     }
 }
 
-void BuildsDialog::handlePlatformSelection(Targets platform)
+void BuildsDialog::handlePlatformSelection(OTargets::Targets platform)
 {
     _target = platform;
     _view.show(Modules);

@@ -21,12 +21,12 @@ class BuildsDialog : public QDialog
         void showModules();
         void showPlatforms();
         void handleModuleSelection();
-        void handlePlatformSelection(Targets);
+        void handlePlatformSelection(OTargets::Targets);
         void handleDownload();
 
     private:
         View _view;
-        Targets _target;
+        OTargets::Targets _target;
         PlatformsWidget _platformsWidget;
         ModuleSelectionWidget _modulesWidget;
         AndroidWidget _androidWidget;

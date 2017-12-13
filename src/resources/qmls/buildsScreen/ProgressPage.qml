@@ -11,13 +11,8 @@ import "../delaycaller.js" as DelayCaller
 
 Item {
     id: root
-
     Image {
         id: image
-        opacity: animationOpacity
-        Behavior on opacity {
-            PropertyAnimation { duration: 400 }
-        }
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         fillMode: Image.PreserveAspectFit
@@ -26,10 +21,6 @@ Item {
     }
     AnimatedImage {
         id: animatedImage
-        opacity: animationOpacity
-        Behavior on opacity {
-            PropertyAnimation { duration: 400 }
-        }
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         fillMode: Image.PreserveAspectFit
@@ -341,20 +332,6 @@ Item {
             }
         }
     }
-    function showAnimations() {
-        DelayCaller.delayCall(300, function() {
-            animationOpacity = 1
-        })
-    }
-    function hideAnimations() {
-        animatedImage.visible = false
-        image.visible = false
-        animationOpacity = 0
-        DelayCaller.delayCall(300, function() {
-            animatedImage.visible = true
-            image.visible = true
-        })
-    }
     function startWaitEffect() {
         waitEffectTimer.start()
     }
@@ -389,7 +366,6 @@ Item {
     }
     signal btnCancelClicked()
     signal btnOkClicked()
-    property real animationOpacity: 0
     property string waitEffectString: ""
     property real progressbarValue: 0
     property real progressbarValue2: 0

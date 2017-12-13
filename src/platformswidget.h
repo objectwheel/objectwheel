@@ -16,7 +16,7 @@ class PlatformsWidget : public QWidget
         explicit PlatformsWidget(QWidget *parent = nullptr);
 
     signals:
-        void platformSelected(Targets);
+        void platformSelected(OTargets::Targets);
 
     private slots:
         void handleBtnNextClicked();

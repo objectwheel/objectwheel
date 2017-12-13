@@ -146,63 +146,63 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     auto android = new QListWidgetItem;
     android->setText("Android 4.0+");
     android->setData(Arch, "Architecture: armeabi-v7a");
-    android->setData(Key, android_armeabi_v7a);
+    android->setData(Key, OTargets::android_armeabi_v7a);
     android->setIcon(QIcon(":/resources/images/android.png"));
     _listWidget.addItem(android);
 
     auto ioss = new QListWidgetItem;
     ioss->setText("iOS 10+");
     ioss->setData(Arch, "Architectures: armv7s, arm64");
-    ioss->setData(Key, ios);
+    ioss->setData(Key, OTargets::ios);
     ioss->setIcon(QIcon(":/resources/images/ios.png"));
     _listWidget.addItem(ioss);
 
     auto mac = new QListWidgetItem;
     mac->setText("macOS 10.10+");
     mac->setData(Arch, "Architecture: x64");
-    mac->setData(Key, macos);
+    mac->setData(Key, OTargets::macos);
     mac->setIcon(QIcon(":/resources/images/macos.png"));
     _listWidget.addItem(mac);
 
     auto win = new QListWidgetItem;
     win->setText("Windows 7+");
     win->setData(Arch, "Architecture: x86");
-    win->setData(Key, windows_x86);
+    win->setData(Key, OTargets::windows_x86);
     win->setIcon(QIcon(":/resources/images/windows.png"));
     _listWidget.addItem(win);
 
     auto linux = new QListWidgetItem;
     linux->setText("Linux");
     linux->setData(Arch, "Architecture: x86");
-    linux->setData(Key, linux_x86);
+    linux->setData(Key, OTargets::linux_x86);
     linux->setIcon(QIcon(":/resources/images/linux.png"));
     _listWidget.addItem(linux);
 
     auto rasp = new QListWidgetItem;
     rasp->setText("Raspberry Pi");
     rasp->setData(Arch, "Version: Pi 2+");
-    rasp->setData(Key, raspi);
+    rasp->setData(Key, OTargets::raspi);
     rasp->setIcon(QIcon(":/resources/images/raspi.png"));
     _listWidget.addItem(rasp);
 
     auto androidx = new QListWidgetItem;
     androidx->setText("Android 4.0+");
     androidx->setData(Arch, "Architecture: x86");
-    androidx->setData(Key, android_x86);
+    androidx->setData(Key, OTargets::android_x86);
     androidx->setIcon(QIcon(":/resources/images/android.png"));
     _listWidget.addItem(androidx);
 
     auto winx = new QListWidgetItem;
     winx->setText("Windows 7+");
     winx->setData(Arch, "Architecture: x64");
-    winx->setData(Key, windows_x64);
+    winx->setData(Key, OTargets::windows_x64);
     winx->setIcon(QIcon(":/resources/images/windows.png"));
     _listWidget.addItem(winx);
 
     auto linuxx = new QListWidgetItem;
     linuxx->setText("Linux");
     linuxx->setData(Arch, "Architecture: x64");
-    linuxx->setData(Key, linux_x64);
+    linuxx->setData(Key, OTargets::linux_x64);
     linuxx->setIcon(QIcon(":/resources/images/linux.png"));
     _listWidget.addItem(linuxx);
     _listWidget.setCurrentRow(0);
@@ -211,7 +211,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
 void PlatformsWidget::handleBtnNextClicked()
 {
     if (_listWidget.currentItem()) {
-        Targets target = (Targets)_listWidget.
+        OTargets::Targets target = (OTargets::Targets)_listWidget.
           currentItem()->data(Key).toInt();
         Build::set(TAG_TARGET, target);
         emit platformSelected(target);
