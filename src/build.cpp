@@ -5,9 +5,9 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QImage>
 
 #define FILE_NAME "build.json"
-#define ICON_NAME "icon.png"
 #define KEYSTORE_NAME "keystore.ks"
 
 QString Build::dir()
@@ -50,9 +50,17 @@ void Build::setModule(const QString& module, bool value, bool qt)
 void Build::setIcon(const QString& iconPath)
 {
     if (!dir().isEmpty()) {
-        auto icnDir = dir() + separator() + ICON_NAME;
-        if (rm(icnDir) && !iconPath.isEmpty())
-            QFile::copy(iconPath, icnDir);
+        auto icnDir = dir() + separator();
+        if (rm(icnDir + "l.png") &&  rm(icnDir + "m.png") &&
+            rm(icnDir + "h.png") && !iconPath.isEmpty()) {
+            QImage i(iconPath);
+            i.scaled(QSize(128, 128), Qt::IgnoreAspectRatio,
+              Qt::SmoothTransformation).save(icnDir + "l.png");
+            i.scaled(QSize(192, 192), Qt::IgnoreAspectRatio,
+              Qt::SmoothTransformation).save(icnDir + "m.png");
+            i.scaled(QSize(256, 256), Qt::IgnoreAspectRatio,
+              Qt::SmoothTransformation).save(icnDir + "h.png");
+        }
     }
 }
 

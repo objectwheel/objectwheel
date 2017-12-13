@@ -9,6 +9,7 @@ class AndroidWidget : public QWidget
         Q_OBJECT
     public:
         explicit AndroidWidget(QWidget *parent = nullptr);
+        bool checkFields();
 
     public slots:
         void setTarget(const QString&target);

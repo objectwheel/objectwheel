@@ -14,8 +14,6 @@
 #include <QQuickStyle>
 
 #define PIXEL_SIZE 13
-#define REF_WIDTH 1680
-#define REF_HEIGHT 1050
 #define REF_DPI 72.0
 
 int main(int argc, char *argv[])
@@ -39,7 +37,7 @@ int main(int argc, char *argv[])
     # endif
 
     // Initialize Fit library
-    fit::update(REF_WIDTH, REF_HEIGHT, REF_DPI);
+    fit::update(REF_DPI);
 
     // Init application settings
     // QApplication::setStyle("fusion");

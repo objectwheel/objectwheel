@@ -110,26 +110,27 @@ AndroidWidget::AndroidWidget(QWidget *parent)
           tr("Image Files (*.png *.jpg *.jpeg *.tiff *.bmp)"));
 
         QPixmap icon(fileName);
-        if (icon.width() >= 256 && icon.height() >= 256) {
+        if (icon.width() == icon.height() &&
+            icon.width() >= 256 && icon.height() >= 256) {
             _picIcon.setPixmap(icon);
             _txtIconPath.setText(fileName);
         } else if (!fileName.isEmpty()){
             QMessageBox::warning(this, "Invalid",
-            "Image file is not valid. It must be atleast 256 x 256.");
+            "Image file is not valid. It must be atleast 256 x 256 and width must be equal to height.");
         }
     });
 
     connect(&_txtIconPath, &QLineEdit::textChanged, [&] {
         if (_txtIconPath.text().isEmpty()) {
             _txtIconPath.setToolTip(
-            "Select icon for your application. It must be at least 256 x 256.\n"
-            "Known image formats such as PNG and JPG are allowed. Your icon may \n"
-            "contain alpha channel. It's better preferring high resolution images.");
+            "Select icon for your application. It must be at least 256 x 256 and\n"
+            "width must be equal to height. Known image formats such as PNG and\n"
+            "JPG are allowed. Your icon may contain alpha channel.");
         } else {
             _txtIconPath.setToolTip(_txtIconPath.text() + "\n" +
-            "Select icon for your application. It must be at least 256 x 256.\n"
-            "Known image formats such as PNG and JPG are allowed. Your icon may \n"
-            "contain alpha channel. It's better preferring high resolution images.");
+            "Select icon for your application. It must be at least 256 x 256 and\n"
+            "width must be equal to height. Known image formats such as PNG and\n"
+            "JPG are allowed. Your icon may contain alpha channel.");
         }
     });
 
@@ -140,9 +141,9 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _lblIcon.setText("Icon:");
     _btnIcon.setText("...");
     _btnIcon.setToolTip(
-    "Select icon for your application. It must be at least 256 x 256.\n"
-    "Known image formats such as PNG and JPG are allowed. Your icon may \n"
-    "contain alpha channel. It's better preferring high resolution images.");
+    "Select icon for your application. It must be at least 256 x 256 and\n"
+    "width must be equal to height. Known image formats such as PNG and\n"
+    "JPG are allowed. Your icon may contain alpha channel.");
 
     _txtIconPath.setDisabled(true);
     _txtIconPath.setPlaceholderText("[Android Default]");
@@ -266,6 +267,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _permissionsBoxLay.addWidget(&_btnAddPermission, 1, 1);
     _permissionsBoxLay.setAlignment(&_btnDelPermission, Qt::AlignBottom);
 
+    _chkSign.setToolTip("You don't have to sign debugging apps, for debugging purpose\n"
+                        "for instance if you wont release it on Google Play Store.");
     QString line;
     QTextStream stream(rdfile(":/resources/other/android-permissions.txt"));
     while (stream.readLineInto(&line)) {
@@ -326,7 +329,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbPermissions.setValidator(validator);
 
     _signingBox.setTitle("Signing Settings");
-    _signingBox.setFixedHeight(fit::fx(225));
+    _signingBox.setFixedHeight(fit::fx(255));
     _signingBoxLay.addWidget(&_lblSign, 0, 0);
     _signingBoxLay.addWidget(&_chkSign, 0, 1, 1, 2);
     _signingBoxLay.addWidget(&_lblKsPath, 1, 0);
@@ -418,7 +421,49 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnBuild.setIcon(QIcon(":/resources/images/load.png"));
     _btnBuild.setText("Build");
     connect(&_btnBuild, SIGNAL(clicked(bool)),
-      SLOT(handleBtnBuildClicked()));
+            SLOT(handleBtnBuildClicked()));
+}
+
+bool AndroidWidget::checkFields()
+{
+    QString errorMessage;
+
+    if (_txtAppName.text().isEmpty())
+        errorMessage += "* Application name cannot be empty.\n";
+
+    if (_txtVersionName.text().isEmpty())
+        errorMessage += "* Version name cannot be empty.\n";
+
+    if (_txtPackageName.text().isEmpty())
+        errorMessage += "* Package name cannot be empty.\n";
+    else if (!_txtPackageName.text().contains(QRegExp
+      ("^([A-Za-z]{1}[A-Za-z\\d_]*\\.)*[A-Za-z][A-Za-z\\d_]*$")))
+        errorMessage += "* Package name is not valid. Example usage: com.example.myapp\n";
+
+    if (_cmbMinSdk.currentText().split(':').
+     first().remove("API ").toInt() > _cmbTargetSdk.
+      currentText().split(':').first().remove("API ").toInt())
+        errorMessage += "* Target SDK api level cannot be lower than Minimum required SDK api level.\n";
+
+    if (_chkSign.isChecked()) {
+        if (_txtKsPath.text().isEmpty())
+             errorMessage += "* You have to choose a valid key store file when signing is on.\n";
+        else if (_txtKsPw.text().isEmpty())
+            errorMessage += "* Key store password cannot be empty.\n";
+        else if (_txtKsPw.text().size() < 6)
+            errorMessage += "* Key store password is too short.\n";
+        else if (_cmbKsAlias.currentText().isEmpty())
+            errorMessage += "* Alias name cannot be empty, your key store file is not valid.\n";
+        else if (_txtAliasPw.text().isEmpty())
+            errorMessage += "* Alias password cannot be empty.\n";
+        else if (_txtAliasPw.text().size() < 6)
+            errorMessage += "* Alias password is too short.\n";
+    }
+
+    if (!errorMessage.isEmpty())
+        QMessageBox::warning(this, "Warning", errorMessage);
+
+    return errorMessage.isEmpty();
 }
 
 void AndroidWidget::setTarget(const QString& target)
@@ -428,38 +473,40 @@ void AndroidWidget::setTarget(const QString& target)
 
 void AndroidWidget::handleBtnBuildClicked()
 {
-    Build::set(TAG_APPNAME, _txtAppName.text());
-    Build::set(TAG_VERSIONNAME, _txtVersionName.text());
-    Build::set(TAG_VERSIONCODE, _spnVersionCode.value());
-    if (_cmbOrientation.currentText() == "Free")
-        Build::set(TAG_ORIENTATION, "unspecified");
-    else {
-        Build::set(TAG_ORIENTATION,
-          _cmbOrientation.currentText().toLower());
+    if (checkFields()) {
+        Build::set(TAG_APPNAME, _txtAppName.text());
+        Build::set(TAG_VERSIONNAME, _txtVersionName.text());
+        Build::set(TAG_VERSIONCODE, _spnVersionCode.value());
+        if (_cmbOrientation.currentText() == "Free")
+            Build::set(TAG_ORIENTATION, "unspecified");
+        else {
+            Build::set(TAG_ORIENTATION,
+                       _cmbOrientation.currentText().toLower());
+        }
+        Build::setIcon(_txtIconPath.text());
+
+        Build::set(TAG_PACKAGENAME, _txtPackageName.text());
+        Build::set(TAG_MINAPI, _cmbMinSdk.currentText().
+                   split(':').first().remove("API ").toInt());
+        Build::set(TAG_TARGETAPI, _cmbTargetSdk.currentText().
+                   split(':').first().remove("API ").toInt());
+
+        Build::clearPermissions();
+        for (int i = 0; i < _permissionList.count(); i++) {
+            auto permission = _permissionList.item(i)->text();
+            Build::addPermission(permission);
+        }
+
+        Build::set(TAG_SIGNON, _chkSign.isChecked());
+        if (_chkSign.isChecked()) {
+            Build::setKeystore(_txtKsPath.text());
+            Build::set(TAG_KSPW, _txtKsPw.text());
+            Build::set(TAG_ALIASNAME, _cmbKsAlias.currentText());
+            Build::set(TAG_ALIASPW, _txtAliasPw.text());
+        }
+
+        emit downloadBuild();
     }
-    Build::setIcon(_txtIconPath.text());
-
-    Build::set(TAG_PACKAGENAME, _txtPackageName.text());
-    Build::set(TAG_MINAPI, _cmbMinSdk.currentText().
-      split(':').first().remove("API ").toInt());
-    Build::set(TAG_TARGETAPI, _cmbTargetSdk.currentText().
-      split(':').first().remove("API ").toInt());
-
-    Build::clearPermissions();
-    for (int i = 0; i < _permissionList.count(); i++) {
-        auto permission = _permissionList.item(i)->text();
-        Build::addPermission(permission);
-    }
-
-    Build::set(TAG_SIGNON, _chkSign.isChecked());
-    if (_chkSign.isChecked()) {
-        Build::setKeystore(_txtKsPath.text());
-        Build::set(TAG_KSPW, _txtKsPw.text());
-        Build::set(TAG_ALIASNAME, _cmbKsAlias.currentText());
-        Build::set(TAG_ALIASPW, _txtAliasPw.text());
-    }
-
-    emit downloadBuild();
 }
 
 //TODO: Add "reset form" and critisize side effects
