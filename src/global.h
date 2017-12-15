@@ -8,7 +8,7 @@
 #define SIZE_NONGUI_CONTROL (QSizeF(fit::fx(50), fit::fx(50)))
 #define NAME_APP ("Objectwheel")
 #define TOOL_KEY ("QURBUEFaQVJMSVlJWiBIQUZJWg")
-#define SERVER (QString("https://omergoktas.com"))
+#define SERVER (QString("https://api.objectwheel.com"))
 
 enum DesignMode {
     ControlGui,

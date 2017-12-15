@@ -211,7 +211,7 @@ Item {
                         warningText.text = "Please make sure your password's length\nis in between 6 and 20."
                         warning.show()
                     } else { //FIXME: http -> https | change ip with domain name
-                        var url = "http://omergoktas.com/api/v1/registration/register";
+                        var url = "http://api.objectwheel.com/api/v1/registration/register";
                         var body = {
                             first: firstnameTextInput.text,
                             last: lastnameTextInput.text,
