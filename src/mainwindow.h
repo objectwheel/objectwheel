@@ -19,6 +19,7 @@
 #include <toolbox.h>
 #include <progresswidget.h>
 #include <inspectorwidget.h>
+#include <preferenceswidget.h>
 
 class MainWindow : public QMainWindow
 {
@@ -73,6 +74,7 @@ class MainWindow : public QMainWindow
     private:
         static MainWindow* _instance;
         View _centralWidget;
+        PreferencesWidget _preferencesWidget;
         ProgressWidget _progressWidget;
         ProjectsScreen _projectsScreen;
         LoginScreen _loginScreen;

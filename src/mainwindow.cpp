@@ -443,7 +443,7 @@ void MainWindow::setParagraphSpacing()
 
 void MainWindow::preferences()
 {
-
+    _preferencesWidget.show();
 }
 
 void MainWindow::about()
