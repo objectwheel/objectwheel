@@ -26,6 +26,7 @@ struct AboutWidgetPrivate
 		QLabel iconLabel;
 		QLabel titleLabel;
         QLabel legalLabel;
+        QPushButton okButton;
 };
 
 AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
@@ -34,9 +35,14 @@ AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
 	QPalette palette(parent->palette());
 	palette.setColor(QPalette::Window, "#e0e4e7");
 	parent->setPalette(palette);
-
 	parent->setAutoFillBackground(true);
 	parent->setLayout(&mainLayout);
+
+    okButton.setText("Ok");
+    okButton.setFixedWidth(fit::fx(100));
+    okButton.setDefault(true);
+    QObject::connect(&okButton, SIGNAL(clicked(bool)),
+      parent, SLOT(close()));
 
 	iconLabel.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     iconLabel.setFixedSize(fit::fx(150), fit::fx(74.5));
@@ -70,8 +76,11 @@ AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
 	mainLayout.addStretch();
 	mainLayout.addLayout(&iconLayout);
 	mainLayout.addWidget(&titleLabel);
+    mainLayout.addStretch();
+    mainLayout.addWidget(&okButton);
 	mainLayout.addStretch();
 	mainLayout.addWidget(&legalLabel);
+    mainLayout.setAlignment(&okButton, Qt::AlignCenter);
 
     parent->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint |
       Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);

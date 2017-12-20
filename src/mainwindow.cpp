@@ -22,7 +22,7 @@
 #include <QtNetwork>
 
 MainWindow* MainWindow::_instance = nullptr;
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , _centralWidget(this)
     , _progressWidget(&_centralWidget)
@@ -441,14 +441,14 @@ void MainWindow::setParagraphSpacing()
     //TODO
 }
 
+void MainWindow::preferences()
+{
+
+}
+
 void MainWindow::about()
 {
     _aboutWidget.show();
-}
-
-void MainWindow::aboutQt()
-{
-    //TODO
 }
 
 void MainWindow::createActions()
@@ -543,7 +543,10 @@ void MainWindow::createActions()
     aboutQtAct = new QAction(tr("About &Qt"), this);
     aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
     connect(aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
-    connect(aboutQtAct, &QAction::triggered, this, &MainWindow::aboutQt);
+
+    preferencesAct = new QAction(tr("&Preferences"), this);
+    preferencesAct->setStatusTip(tr("Show Objectwheel Preferences"));
+    connect(preferencesAct, &QAction::triggered, this, &MainWindow::preferences);
 
     leftAlignAct = new QAction(tr("&Left Align"), this);
     leftAlignAct->setCheckable(true);
@@ -599,6 +602,15 @@ void MainWindow::createMenus()
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
+
+    optionsMenu = menuBar()->addMenu(tr("&Options"));
+
+#if defined (Q_OS_DARWIN)
+    helpMenu->addSeparator();
+    helpMenu->addAction(preferencesAct);
+#else
+    optionsMenu->addAction(preferencesAct);
+#endif
 
     formatMenu = editMenu->addMenu(tr("&Format"));
     formatMenu->addAction(boldAct);

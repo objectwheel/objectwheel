@@ -25,7 +25,7 @@ class MainWindow : public QMainWindow
         Q_OBJECT
 
     public:
-        explicit MainWindow(QWidget *parent = 0);
+        explicit MainWindow(QWidget* parent = 0);
         static MainWindow* instance();
         View* centralWidget();
         ProgressWidget* progressWidget();
@@ -57,11 +57,11 @@ class MainWindow : public QMainWindow
         void center();
         void setLineSpacing();
         void setParagraphSpacing();
+        void preferences();
         void about();
-        void aboutQt();
 
     protected:
-        void closeEvent(QCloseEvent *event) override;
+        void closeEvent(QCloseEvent* event) override;
 
     signals:
         void quitting() const;
@@ -89,31 +89,33 @@ class MainWindow : public QMainWindow
         FormsWidget _formsWidget;
         InspectorWidget _inspectorWidget;
         AboutWidget _aboutWidget;
-        QMenu *fileMenu;
-        QMenu *editMenu;
-        QMenu *formatMenu;
-        QMenu *helpMenu;
-        QActionGroup *alignmentGroup;
-        QAction *newAct;
-        QAction *openAct;
-        QAction *saveAct;
-        QAction *printAct;
-        QAction *exitAct;
-        QAction *undoAct;
-        QAction *redoAct;
-        QAction *cutAct;
-        QAction *copyAct;
-        QAction *pasteAct;
-        QAction *boldAct;
-        QAction *italicAct;
-        QAction *leftAlignAct;
-        QAction *rightAlignAct;
-        QAction *justifyAct;
-        QAction *centerAct;
-        QAction *setLineSpacingAct;
-        QAction *setParagraphSpacingAct;
-        QAction *aboutAct;
-        QAction *aboutQtAct;
+        QMenu* fileMenu;
+        QMenu* editMenu;
+        QMenu* formatMenu;
+        QMenu* helpMenu;
+        QMenu* optionsMenu;
+        QActionGroup* alignmentGroup;
+        QAction* newAct;
+        QAction* openAct;
+        QAction* saveAct;
+        QAction* printAct;
+        QAction* exitAct;
+        QAction* undoAct;
+        QAction* redoAct;
+        QAction* cutAct;
+        QAction* copyAct;
+        QAction* pasteAct;
+        QAction* boldAct;
+        QAction* italicAct;
+        QAction* leftAlignAct;
+        QAction* rightAlignAct;
+        QAction* justifyAct;
+        QAction* centerAct;
+        QAction* setLineSpacingAct;
+        QAction* setParagraphSpacingAct;
+        QAction* preferencesAct;
+        QAction* aboutAct;
+        QAction* aboutQtAct;
 };
 
 #endif // MAINWINDOW_H
