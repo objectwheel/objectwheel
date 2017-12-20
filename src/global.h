@@ -6,9 +6,9 @@
 #define SIZE_SKIN (QSize(fit::fx(320), fit::fx(662)))
 #define SIZE_FORM (QSize(fit::fx(285), fit::fx(535)))
 #define SIZE_NONGUI_CONTROL (QSizeF(fit::fx(50), fit::fx(50)))
-#define NAME_APP ("Objectwheel")
 #define TOOL_KEY ("QURBUEFaQVJMSVlJWiBIQUZJWg")
-#define SERVER (QString("https://api.objectwheel.com"))
+#define TEXT_LEGAL (QString("<p><b>© 2015 - 2017 %1 All Rights Reserved.</b></p>").arg(APP_CORP))
+#define TEXT_VERSION (QString("<p><b>version</b> v%1 <b>hash</b> %2 <b>date</b><br> %3 <br></p>").arg(APP_VER).arg(APP_GITHASH).arg(APP_GITDATE))
 
 enum DesignMode {
     ControlGui,
@@ -21,7 +21,6 @@ enum Screen {
     Studio,
     Projects,
     Login,
-    About,
     Builds
 };
 

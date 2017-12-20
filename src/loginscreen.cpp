@@ -23,6 +23,7 @@
 #include <QQmlProperty>
 #include <QQuickItem>
 
+#define mW (MainWindow::instance())
 #define cW (MainWindow::instance()->centralWidget())
 #define pW (MainWindow::instance()->progressWidget())
 
@@ -72,7 +73,7 @@ void LoginScreen::handleAutoLoginButtonClicked()
 
 void LoginScreen::handleAboutButtonClicked()
 {
-    cW->show(Screen::About);
+    mW->about();
 }
 
 void LoginScreen::handleLostPasswordButtonClicked()
@@ -150,7 +151,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
         } else {
             auto manager = new QNetworkAccessManager(this);
             auto body = QString("{\"token\" : \"%1\"}").arg(userManager->generateToken(email, password));
-            auto url = QUrl(SERVER + "/api/v1/registration/check");
+            auto url = QUrl(QString(APP_SERVER) + "/api/v1/registration/check");
             QNetworkRequest http(url);
             http.setRawHeader("content-type", "application/json");
             QNetworkReply* reply = manager->post(http, QByteArray().insert(0, body));
@@ -196,7 +197,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
     } else {
         auto manager = new QNetworkAccessManager(this);
         auto body = QString("{\"token\" : \"%1\"}").arg(userManager->generateToken(email, password));
-        auto url = QUrl(SERVER + "/api/v1/registration/check");
+        auto url = QUrl(QString(APP_SERVER) + "/api/v1/registration/check");
         QNetworkRequest http(url);
         http.setRawHeader("content-type", "application/json");
         QNetworkReply* reply = manager->post(http, QByteArray().insert(0, body));

@@ -17,7 +17,7 @@
 #include <QtQuick>
 #include <QtQml>
 
-#define URL QString(SERVER + "/api/v1/build/")
+#define URL (QString(APP_SERVER) + "/api/v1/build/")
 
 class DownloadWidgetPrivate {
     public:

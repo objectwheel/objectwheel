@@ -15,8 +15,6 @@
 #define pS (QApplication::primaryScreen())
 #define cW (MainWindow::instance()->centralWidget())
 #define pW (MainWindow::instance()->progressWidget())
-#define TITLE_TEXT "<p><b>version</b> 1.592 <b>pbuild</b> 529e042<br>Wed May 10 03:32:18 2017 +0300<br></p>"
-#define LEGAL_TEXT "<p><b>© 2015 - 2017 Objectwheel, Inc. All Rights Reserved.</b></p>"
 
 struct AboutWidgetPrivate
 {
@@ -24,10 +22,10 @@ struct AboutWidgetPrivate
 		QWidget* parent;
 		QVBoxLayout mainLayout;
 		QHBoxLayout iconLayout;
+        QLabel topLabel;
 		QLabel iconLabel;
 		QLabel titleLabel;
         QLabel legalLabel;
-        FlatButton exitButton;
 };
 
 AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
@@ -44,52 +42,39 @@ AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
     iconLabel.setFixedSize(fit::fx(150), fit::fx(74.5));
     QPixmap pixmap(":/resources/images/logo.png");
     pixmap.setDevicePixelRatio(pS->devicePixelRatio());
-    iconLabel.setPixmap(pixmap.scaled(fit::fx(150) * pS->devicePixelRatio(), fit::fx(74.5) * pS->devicePixelRatio(),
-									  Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    iconLabel.setPixmap(pixmap.scaled(fit::fx(150) * pS->devicePixelRatio(),
+      fit::fx(74.5) * pS->devicePixelRatio(),
+      Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 
 	iconLayout.addStretch();
 	iconLayout.addWidget(&iconLabel);
 	iconLayout.addStretch();
 
+    QFont f;
+    f.setWeight(QFont::ExtraLight);
+    f.setPixelSize(fit::fx(24));
+    topLabel.setFont(f);
+    topLabel.setText("About Objectwheel");
+    topLabel.setStyleSheet("background:transparent; color:#2e3a41;");
+    topLabel.setAlignment(Qt::AlignCenter);
+
 	titleLabel.setStyleSheet("background:transparent;color:#2e3a41;");
-	titleLabel.setText(TITLE_TEXT);
+    titleLabel.setText(TEXT_VERSION);
 	titleLabel.setAlignment(Qt::AlignCenter);
 
 	legalLabel.setStyleSheet("background:transparent;color:#2e3a41;");
-	legalLabel.setText(LEGAL_TEXT);
+    legalLabel.setText(TEXT_LEGAL);
 	legalLabel.setAlignment(Qt::AlignCenter);
 
+    mainLayout.addWidget(&topLabel);
 	mainLayout.addStretch();
 	mainLayout.addLayout(&iconLayout);
 	mainLayout.addWidget(&titleLabel);
 	mainLayout.addStretch();
 	mainLayout.addWidget(&legalLabel);
 
-    exitButton.setParent(parent);
-    exitButton.setIconButton(true);
-    exitButton.setIcon(QIcon(":/resources/images/delete-icon.png"));
-    #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-    exitButton.setGeometry(parent->width() - fit::fx(26), fit::fx(8), fit::fx(18), fit::fx(18));
-    #else
-    exitButton.setGeometry(parent->width() - fit::fx(15), fit::fx(5), fit::fx(8), fit::fx(8));
-    #endif
-    QObject::connect((AboutWidget*)parent,  &AboutWidget::resized, [=]{
-    #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
-        exitButton.setGeometry(parent->width() - fit::fx(26), fit::fx(8), fit::fx(18), fit::fx(18));
-    #else
-        exitButton.setGeometry(parent->width() - fit::fx(15), fit::fx(5), fit::fx(8), fit::fx(8));
-    #endif
-    });
-    fit::fx(&exitButton, fit::both);
-    exitButton.show();
-
-    QObject::connect(&exitButton, &FlatButton::clicked, [=]{
-        if (UserManager::currentSessionsUser().isEmpty()) {
-            cW->show(Screen::Login);
-        } else {
-            cW->show(Screen::Studio);
-        }
-    });
+    parent->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint |
+      Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
 }
 
 AboutWidget::AboutWidget(QWidget *parent)
@@ -103,8 +88,8 @@ AboutWidget::~AboutWidget()
     delete _d;
 }
 
-void AboutWidget::resizeEvent(QResizeEvent* event)
+QSize AboutWidget::sizeHint() const
 {
-    QWidget::resizeEvent(event);
-    emit resized();
+    return fit::fx(QSizeF{700, 400}).toSize();
 }
+

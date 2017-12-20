@@ -13,10 +13,7 @@ class AboutWidget : public QWidget
         ~AboutWidget();
 
     protected:
-        void resizeEvent(QResizeEvent *event) override;
-
-    signals:
-        void resized() const;
+        QSize sizeHint() const override;
 
 	private:
 		AboutWidgetPrivate* _d;

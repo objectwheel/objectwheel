@@ -26,6 +26,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QSplitter>
+#include <QQuickStyle>
 //#include <QOpenGLWidget>
 
 #define INTERVAL_ERROR_CHECK (1000)
@@ -55,6 +56,7 @@ class DesignManagerPrivate : public QObject
         void handleSnappingClicked(bool value);
         void handleShowOutlineClicked(bool value);
         void handleFitInSceneClicked();
+        void handleThemeChange(const QString& text);
         void handleZoomLevelChange(const QString& text);
         void handlePhonePortraitButtonClicked();
         void handlePhoneLandscapeButtonClicked();
@@ -104,6 +106,7 @@ class DesignManagerPrivate : public QObject
         QToolButton showOutlineButton;
         QToolButton fitInSceneButton;
         QComboBox zoomlLevelCombobox;
+        QComboBox themeCombobox;
         LoadingIndicator loadingIndicator;
         QToolButton layItVertButton;
         QToolButton layItHorzButton;
@@ -203,6 +206,12 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     zoomlLevelCombobox.addItem("1000 %");
     zoomlLevelCombobox.setCurrentIndex(5);
 
+    #if defined(Q_OS_WIN)
+    themeCombobox.setFixedHeight(fit::fx(18));
+    #endif
+    for (auto theme : QQuickStyle::availableStyles())
+        themeCombobox.addItem(theme);
+
     showOutlineButton.setCheckable(true);
     showOutlineButton.setChecked(Control::showOutline());
     snappingButton.setCheckable(true);
@@ -227,6 +236,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     showOutlineButton.setCursor(Qt::PointingHandCursor);
     fitInSceneButton.setCursor(Qt::PointingHandCursor);
     zoomlLevelCombobox.setCursor(Qt::PointingHandCursor);
+    themeCombobox.setCursor(Qt::PointingHandCursor);
     layItVertButton.setCursor(Qt::PointingHandCursor);
     layItHorzButton.setCursor(Qt::PointingHandCursor);
     layItGridButton.setCursor(Qt::PointingHandCursor);
@@ -244,6 +254,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     showOutlineButton.setToolTip("Show outline frame for controls.");
     fitInSceneButton.setToolTip("Fit scene into the Dashboard.");
     zoomlLevelCombobox.setToolTip("Change zoom level.");
+    themeCombobox.setToolTip("Change Theme. Themes are only available for Quick Controls 2.0 and above.");
     loadingIndicator.setToolTip("Background operations indicator.");
     layItVertButton.setToolTip("Lay out selected controls vertically.");
     layItHorzButton.setToolTip("Lay out selected controls horizontally.");
@@ -272,6 +283,8 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
       SLOT(handleShowOutlineClicked(bool)));
     connect(&zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)),
       SLOT(handleZoomLevelChange(QString)));
+//    connect(&themeCombobox, SIGNAL(currentTextChanged(QString)),
+//      SLOT(handleThemeChange(QString)));
     connect(&fitInSceneButton, SIGNAL(clicked(bool)),
       SLOT(handleFitInSceneClicked()));
     connect(&refreshPreviewButton, SIGNAL(clicked(bool)),
@@ -304,6 +317,7 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
     toolbar.addWidget(&snappingButton);
     toolbar.addWidget(&showOutlineButton);
     toolbar.addWidget(&fitInSceneButton);
+    toolbar.addWidget(&themeCombobox);
     toolbar.addWidget(&zoomlLevelCombobox);
     toolbar.addSeparator();
     toolbar.addWidget(&loadingIndicator);
@@ -508,6 +522,20 @@ void DesignManagerPrivate::handleFitInSceneClicked()
     for (auto ratio : ratios)
         if (roundRatio(diff) == ratio)
             zoomlLevelCombobox.setCurrentText(findText(ratio));
+}
+
+void DesignManagerPrivate::handleThemeChange(const QString& text)
+{
+//    qmlClearTypeRegistrations();
+//    QQuickStyle::setStyle(text);
+//    qmlRegisterType();
+//    handleRefreshPreviewClicked();
+//    formScene.mainForm()->refresh();
+//    for (auto control : formScene.mainForm()->childControls())
+//        control->refresh();
+//    controlScene.mainControl()->refresh();
+//    for (auto control : controlScene.mainControl()->childControls())
+//        control->refresh();
 }
 
 void DesignManagerPrivate::handleZoomLevelChange(const QString& text)

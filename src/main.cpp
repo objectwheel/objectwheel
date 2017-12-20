@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <components.h>
 #include <mainwindow.h>
+#include <global.h>
 #include <QApplication>
 #include <QFontDatabase>
 #include <QtWebView>
@@ -20,7 +21,12 @@ int main(int argc, char *argv[])
 {
     // Init application
     QApplication a(argc, argv);
-    QQuickStyle::setStyle("Material");
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setApplicationDisplayName(APP_NAME);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
 
     # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     // Multiple instances protection
@@ -78,6 +84,8 @@ int main(int argc, char *argv[])
 
     // Start MainWidget
     MainWindow w;
+    w.setWindowTitle(APP_NAME);
+
     # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     w.showMaximized();
     # else
