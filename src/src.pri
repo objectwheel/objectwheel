@@ -61,7 +61,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/build.h \
            $$PWD/androidcreatekeystorecertificate.h \
            $$PWD/downloadwidget.h \
-    $$PWD/preferenceswidget.h
+           $$PWD/preferencesdialog.h \
+    $$PWD/windowmanager.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -120,7 +121,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/build.cpp \
            $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/downloadwidget.cpp \
-    $$PWD/preferenceswidget.cpp
+           $$PWD/preferencesdialog.cpp \
+    $$PWD/windowmanager.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

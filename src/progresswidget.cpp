@@ -1,40 +1,43 @@
 #include <progresswidget.h>
-#include <global.h>
 #include <fit.h>
+
+#include <QMovie>
+#include <QTimer>
 #include <QPainter>
 #include <QApplication>
 #include <QScreen>
 
-#define PATH_GIF (":/resources/images/preloader.gif")
+#define PATH_GIF  (":/resources/images/preloader.gif")
 #define PATH_LOGO (":/resources/images/logo.png")
-#define SIZE_GIF (QSize(fit::fx(24), fit::fx(24)))
+#define SIZE_GIF  (QSize(fit::fx(24), fit::fx(24)))
 #define SIZE_LOGO (QSize(fit::fx(160), fit::fx(80)))
+#define pS        (QApplication::primaryScreen())
 #define INTERVAL_WAITEFFECT 600
-#define pS (QApplication::primaryScreen())
 
-ProgressWidget::ProgressWidget(View* parent)
-    : QWidget(parent)
-    , _centralWidget(parent)
-    , _lastUid(-1)
-    , _logoPixmap(QPixmap(PATH_LOGO).scaled(SIZE_LOGO * pS->devicePixelRatio(),
-       Qt::IgnoreAspectRatio, Qt::SmoothTransformation))
+const QPixmap* logoPixmap = nullptr;
+
+ProgressWidget::ProgressWidget(QWidget* parent) : QWidget(parent)
 {
-    _centralWidget->add(Screen::Progress, this);
-    setAutoFillBackground(true);
-
     QPalette p(palette());
     p.setColor(QPalette::Window, "#e0e4e7");
     p.setColor(QPalette::Text, "#2e3a41");
+
     setPalette(p);
+    setAutoFillBackground(true);
 
-    _movie.setFileName(PATH_GIF);
-    _movie.setScaledSize(SIZE_GIF * pS->devicePixelRatio());
-    _movie.setSpeed(230);
-    _movie.start();
-    connect(&_movie, SIGNAL(frameChanged(int)), SLOT(update()));
+    logoPixmap =  new QPixmap(QPixmap(PATH_LOGO).scaled(
+      SIZE_LOGO * pS->devicePixelRatio()));
 
-    _waitEffectTimer.setInterval(INTERVAL_WAITEFFECT);
-    connect(&_waitEffectTimer, &QTimer::timeout, this, [=] {
+    _movie = new QMovie(this);
+    _movie->setFileName(PATH_GIF);
+    _movie->setScaledSize(SIZE_GIF * pS->devicePixelRatio());
+    _movie->setSpeed(230);
+    _movie->start();
+    connect(_movie, SIGNAL(frameChanged(int)), SLOT(update()));
+
+    _waitEffectTimer = new QTimer(this);
+    _waitEffectTimer->setInterval(INTERVAL_WAITEFFECT);
+    connect(_waitEffectTimer, &QTimer::timeout, this, [=] {
         if (_waitEffectString.size() < 1)
             _waitEffectString = ".";
         else if (_waitEffectString.size() < 2)
@@ -47,41 +50,41 @@ ProgressWidget::ProgressWidget(View* parent)
     });
 }
 
-void ProgressWidget::showProgress(const QString& msg)
+ProgressWidget::~ProgressWidget()
 {
-    _msg = msg;
-    showProgress();
+    delete logoPixmap;
 }
 
-void ProgressWidget::showProgress()
+void ProgressWidget::show(const QString& text)
 {
-    _waitEffectTimer.start();
-    _lastUid = _centralWidget->current();
-    _centralWidget->show(Screen::Progress);
+    _text = text;
+    show();
 }
 
-void ProgressWidget::hideProgress()
+void ProgressWidget::show()
 {
-    if (_lastUid >= 0)
-        _centralWidget->show(_lastUid);
-    hide();
-    _waitEffectTimer.stop();
+    _waitEffectTimer->start();
+    QWidget::show();
 }
 
-const QString& ProgressWidget::msg() const
+void ProgressWidget::hide()
 {
-    return _msg;
+    _waitEffectTimer->stop();
+    QWidget::hide();
 }
 
-void ProgressWidget::setMsg(const QString& msg)
+const QString& ProgressWidget::text() const
 {
-    _msg = msg;
+    return _text;
 }
 
-void ProgressWidget::paintEvent(QPaintEvent* event)
+void ProgressWidget::setText(const QString& text)
 {
-    QWidget::paintEvent(event);
+    _text = text;
+}
 
+void ProgressWidget::paintEvent(QPaintEvent*)
+{
     QPainter painter(this);
     painter.setRenderHints(QPainter::Antialiasing);
     painter.setPen(palette().text().color());
@@ -92,16 +95,16 @@ void ProgressWidget::paintEvent(QPaintEvent* event)
     int y = height() - height()/1.618;
     auto rect = QRectF(x - SIZE_LOGO.width()/2.0, y - SIZE_LOGO.height()/2.0,
       SIZE_LOGO.width(), SIZE_LOGO.height());
-    painter.drawPixmap(rect, _logoPixmap, QRectF(QPointF(),
+    painter.drawPixmap(rect, *logoPixmap, QRectF(QPointF(),
       rect.size() * pS->devicePixelRatio()));
 
     y += (spacing + SIZE_LOGO.height());
     rect = QRectF(x - SIZE_GIF.width()/2.0, y - SIZE_GIF.height()/2.0,
       SIZE_GIF.width(), SIZE_GIF.height());
-    painter.drawPixmap(rect, _movie.currentPixmap(), QRectF(QPointF(),
+    painter.drawPixmap(rect, _movie->currentPixmap(), QRectF(QPointF(),
       rect.size() * pS->devicePixelRatio()));
 
     y += (SIZE_GIF.height());
     painter.drawText(0, y - fit::fx(10), width(), fit::fx(20),
-                     Qt::AlignCenter, _msg + _waitEffectString);
+                     Qt::AlignCenter, _text + _waitEffectString);
 }

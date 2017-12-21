@@ -21,11 +21,11 @@
 #include <QtConcurrent>
 #include <QtNetwork>
 
+#define wM (WindowManager::instance())
+
 MainWindow* MainWindow::_instance = nullptr;
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , _centralWidget(this)
-    , _progressWidget(&_centralWidget)
 {
     if (_instance) {
         deleteLater();
@@ -45,7 +45,7 @@ MainWindow* MainWindow::instance()
 void MainWindow::setupGui()
 {
     setAutoFillBackground(true);
-    setCentralWidget(&_centralWidget);
+    setCentralWidget(&_settleWidget);
 
     QPalette p(palette());
     p.setColor(QPalette::Window, QColor("#E0E4E7"));
@@ -56,11 +56,11 @@ void MainWindow::setupGui()
     _settleWidget.setFrameShadow(QFrame::Plain);
     _designManager.setSettleWidget(&_settleWidget);
 
-    _centralWidget.add(Screen::Studio, &_settleWidget);
-    _centralWidget.add(Screen::Projects, &_projectsScreen);
-    _centralWidget.add(Screen::Login, &_loginScreen);
-    _centralWidget.show(Screen::Login);
-    _progressWidget.showProgress("Loading");
+    wM->add(WindowManager::Studio, this);
+    wM->add(WindowManager::Projects, &_projectsScreen);
+    wM->add(WindowManager::Login, &_loginScreen);
+    wM->show(WindowManager::Login);
+    wM->busy("Loading");
     connect(&_centralWidget, &View::visibleChanged, this, [&]
     {
         if (_centralWidget.current() == Screen::Studio) {
@@ -344,11 +344,6 @@ InspectorWidget* MainWindow::inspectorWidget()
 void MainWindow::clearStudio()
 {
     
-}
-
-View* MainWindow::centralWidget()
-{
-    return &_centralWidget;
 }
 
 ProgressWidget* MainWindow::progressWidget()

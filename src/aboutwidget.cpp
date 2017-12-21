@@ -13,7 +13,7 @@
 #include <QHBoxLayout>
 
 #define pS (QApplication::primaryScreen())
-#define cW (MainWindow::instance()->centralWidget())
+#define wM (WindowManager::instance())
 #define pW (MainWindow::instance()->progressWidget())
 
 struct AboutWidgetPrivate

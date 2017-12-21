@@ -17,14 +17,6 @@ enum DesignMode {
     CodeEdit
 };
 
-enum Screen {
-    Progress,
-    Studio,
-    Projects,
-    Login,
-    Builds
-};
-
 enum Skin {
     Invalid,
     PhonePortrait,

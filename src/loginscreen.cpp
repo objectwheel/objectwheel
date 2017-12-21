@@ -24,7 +24,7 @@
 #include <QQuickItem>
 
 #define mW (MainWindow::instance())
-#define cW (MainWindow::instance()->centralWidget())
+#define wM (WindowManager::instance())
 #define pW (MainWindow::instance()->progressWidget())
 
 static bool autologin = false;
@@ -92,15 +92,15 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
     keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
 
     //TEMPORARY
-    pW->showProgress();
+    pW->show();
     userManager->buildNewUser(QString("kozmon@hotmail.com"));
     auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), QString("kozmon@hotmail.com"), QString("ntvmsnbc21"));
     Delayer::delay(&ret, &QFuture<void>::isRunning);
     if (ret.result()) {
         if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
         ProjectsScreen::refreshProjectList();
-        pW->hideProgress();
-        cW->show(Screen::Projects);
+        pW->hide();
+        wM->show(WindowManager::Projects);
         clearGUI();
     } else {
         QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
@@ -118,22 +118,22 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
 //    while(ret.isRunning()) qApp->processEvents(QEventLoop::AllEvents, 10);
 //    if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
 //    ProjectsScreen::refreshProjectList();
-//    pW->hideProgress();
-//    cW->show(Screen::Projects);
+//    pW->hide();
+//    wM->show(Windows::Projects);
 //    clearGUI();
 //    return;
 
     if (userManager->exists(email)) {
         if (DirLocker::locked(userManager->userDirectory(email))) {
             if (DirLocker::canUnlock(userManager->userDirectory(email), keyHash)) {
-                pW->showProgress();
+                pW->show();
                 auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
                 Delayer::delay(&ret, &QFuture<bool>::isRunning);
                 if (ret.result()) {
                     if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                     ProjectsScreen::refreshProjectList();
-                    pW->hideProgress();
-                    cW->show(Screen::Projects);
+                    pW->hide();
+                    wM->show(WindowManager::Projects);
                     clearGUI();
                 } else {
                     QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x01");
@@ -145,7 +145,7 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                     //FIXME: Show loading indicator when "login" clicked, do not freeze screen
                 }
             } else {
-                pW->hideProgress();
+                pW->hide();
                 QMetaObject::invokeMethod(loginScreen, "animateWrongPass");
             }
         } else {
@@ -158,14 +158,14 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
             connect(reply, &QNetworkReply::finished, this, [=] {
                 auto jobj = QJsonDocument::fromJson(reply->readAll()).object();
                 if (jobj["result"].toString() == "OK") {
-                    pW->showProgress();
+                    pW->show();
                     auto ret = QtConcurrent::run((bool (*)(const QString&,const QString&))(&UserManager::startUserSession), email, password);
                     Delayer::delay(&ret, &QFuture<void>::isRunning);
                     if (ret.result()) {
                         if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                         ProjectsScreen::refreshProjectList();
-                        pW->hideProgress();
-                        cW->show(Screen::Projects);
+                        pW->hide();
+                        wM->show(WindowManager::Projects);
                         clearGUI();
                     } else {
                         QQmlProperty::write(toast, "text.text", "Unfortunately your database is corrupted. 0x02");
@@ -209,8 +209,8 @@ void LoginScreen::handleLoginButtonClicked(const QVariant& json)
                 Delayer::delay(&ret, &QFuture<void>::isRunning);
                 if (autologin) userManager->setAutoLogin(password); else userManager->clearAutoLogin();
                 ProjectsScreen::refreshProjectList();
-                pW->hideProgress();
-                cW->show(Screen::Projects);
+                pW->hide();
+                wM->show(WindowManager::Projects);
                 clearGUI();
             } else if (jobj["result"].toString() == "EMAIL") {
                 QMetaObject::invokeMethod(loginScreen, "animateWrongEmail");

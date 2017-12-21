@@ -1,7 +1,7 @@
 #ifndef PREFERENCESWIDGET_H
 #define PREFERENCESWIDGET_H
 
-#include <QWidget>
+#include <QDialog>
 
 class QLabel;
 class QGridLayout;
@@ -10,11 +10,11 @@ class QScrollArea;
 class FilterLineEdit;
 class QDialogButtonBox;
 
-class PreferencesWidget : public QWidget
+class PreferencesDialog : public QDialog
 {
         Q_OBJECT
     public:
-        explicit PreferencesWidget(QWidget *parent = nullptr);
+        explicit PreferencesDialog(QWidget *parent = nullptr);
 
     protected:
         QSize sizeHint() const override;

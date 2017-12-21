@@ -15,7 +15,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#define cW (MainWindow::instance()->centralWidget())
+#define wM (WindowManager::instance())
 #define pW (MainWindow::instance()->progressWidget())
 #define AUTOLOGIN_FILENAME "alg.inf"
 #define AUTOLOGIN_PROTECTOR "QWxsYWggaXMgZ3JlYXRlc3Qu"
@@ -190,8 +190,8 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
     _d->currentSessionsToken = _d->generateToken(username, password);
 
     if (_d->dirLocker.canUnlock(userDirectory(username), keyHash)) {
-        QMetaObject::invokeMethod(pW, "showProgress", Qt::QueuedConnection,
-                                  Q_ARG(QString, "Decryption in progress"));
+//        QMetaObject::invokeMethod(pW, "show", Qt::QueuedConnection,
+//                                  Q_ARG(QString, "Decryption in progress"));
 
         /* Clear all previous trash project folders if locked versions already exists */
         auto dirlockersFiles = _d->dirLocker.dirlockersFilenames();

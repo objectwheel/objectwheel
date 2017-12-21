@@ -2,35 +2,34 @@
 #define PROGRESSWIDGET_H
 
 #include <QWidget>
-#include <QMovie>
-#include <QTimer>
-#include <view.h>
+
+class QMovie;
+class QTimer;
 
 class ProgressWidget : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit ProgressWidget(View* parent);
-        const QString& msg() const;
-        void setMsg(const QString& msg);
+        explicit ProgressWidget(QWidget* parent = nullptr);
+        ~ProgressWidget();
+
+        const QString& text() const;
+        void setText(const QString& text);
 
     public slots:
-        void showProgress(const QString& msg);
-        void showProgress();
-        void hideProgress();
+        void hide();
+        void show();
+        void show(const QString& text);
 
     protected:
         virtual void paintEvent(QPaintEvent* event) override;
 
     private:
-        View* _centralWidget;
-        int _lastUid;
-        QString _msg;
-        QMovie _movie;
-        QTimer _waitEffectTimer;
+        QString _text;
+        QMovie* _movie;
+        QTimer* _waitEffectTimer;
         QString _waitEffectString;
-        const QPixmap _logoPixmap;
 };
 
 #endif // PROGRESSWIDGET_H

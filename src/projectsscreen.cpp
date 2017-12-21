@@ -14,7 +14,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-#define cW (MainWindow::instance()->centralWidget())
+#define wM (WindowManager::instance())
 #define pW (MainWindow::instance()->progressWidget())
 
 ProjectsScreen* instance = nullptr;
@@ -250,11 +250,11 @@ void ProjectsScreen::handleLoadButtonClicked()
 								 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
 	auto currentProject = ProjectManager::currentProject();
 	if (!currentProject.isEmpty() && currentProject == projectName) {
-        cW->show(Screen::Studio);
+        wM->show(WindowManager::Studio);
 		return;
     }
 
-    pW->showProgress("Loading project");
+    pW->show("Loading project");
     ProjectManager::stopProject();
 
     /* Start Project */
@@ -264,11 +264,11 @@ void ProjectsScreen::handleLoadButtonClicked()
                 model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
             }
         }
-        pW->hideProgress();
+        pW->hide();
     }
 
-    pW->hideProgress();
-    cW->show(Screen::Studio);
+    pW->hide();
+    wM->show(WindowManager::Studio);
 
     for (int i = model.rowCount(); i--;) {
         if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
