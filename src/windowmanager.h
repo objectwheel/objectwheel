@@ -5,25 +5,28 @@
 #include <QMap>
 
 class ProgressWidget;
+class MainWindow;
+class WelcomeWindow;
+class AboutWindow;
 
-class WindowManager
+class WindowManager : public QObject
 {
+        Q_OBJECT
         Q_DISABLE_COPY(WindowManager)
 
     public:
         enum Windows {
-            Login,
-            Projects,
-            Studio,
+            Welcome,
+            Main,
+            About
         };
 
     public:
         static WindowManager* instance();
-        void busy(const QString& text);
-        void busy(Windows key, const QString& text);
         void show(Windows key);
+
+    protected:
         void add(Windows key, QWidget* window);
-        Windows current() const;
 
     private:
         WindowManager();
@@ -32,7 +35,9 @@ class WindowManager
     private:
         QMap<Windows, QWidget*> _windows;
         ProgressWidget* _progressWidget;
-        Windows _current;
+        MainWindow* _mainWindow;
+        WelcomeWindow* _welcomeWindow;
+        AboutWindow* _aboutWindow;
 };
 
 #endif // WINDOWMANAGER_H

@@ -1,18 +1,17 @@
 #include <css.h>
 #include <fit.h>
 #include <components.h>
-#include <mainwindow.h>
-#include <global.h>
+#include <windowmanager.h>
+
 #include <QApplication>
 #include <QFontDatabase>
 #include <QtWebView>
 #include <QIcon>
-#include <QBuffer>
 #include <QSharedMemory>
 #include <QMessageBox>
 #include <QLoggingCategory>
-#include <QTimer>
 #include <QQuickStyle>
+#include <QSurfaceFormat>
 
 #define PIXEL_SIZE 13
 #define REF_DPI 72.0
@@ -21,12 +20,6 @@ int main(int argc, char *argv[])
 {
     // Init application
     QApplication a(argc, argv);
-    QApplication::setOrganizationName(APP_CORP);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
-    QApplication::setApplicationName(APP_NAME);
-    QApplication::setApplicationDisplayName(APP_NAME);
-    QApplication::setApplicationVersion(APP_VER);
-    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
 
     # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     // Multiple instances protection
@@ -35,12 +28,19 @@ int main(int argc, char *argv[])
         sharedMemory.attach();
         sharedMemory.detach();
         if(!sharedMemory.create(1)) {
-            QMessageBox::warning(NULL, "Quitting", "Another instance is already running.");
+            QMessageBox::warning(nullptr, "Quitting", "Another instance is already running.");
             a.exit();
             return 0;
         }
     }
     # endif
+
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setApplicationDisplayName(APP_NAME);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
 
     // Initialize Fit library
     fit::update(REF_DPI);
@@ -82,15 +82,8 @@ int main(int argc, char *argv[])
     // Initialize Web View
     QtWebView::initialize();
 
-    // Start MainWidget
-    MainWindow w;
-    w.setWindowTitle(APP_NAME);
-
-    # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
-    w.showMaximized();
-    # else
-    w.showFullScreen();
-    # endif
+    // Start Application
+    WindowManager::instance();
 
     // Start main event loop
     return a.exec();

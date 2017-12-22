@@ -6,7 +6,7 @@
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <savemanager.h>
-#include <projectsscreen.h>
+#include <projectswidget.h>
 #include <dirlocker.h>
 #include <zipper.h>
 #include <flatbutton.h>

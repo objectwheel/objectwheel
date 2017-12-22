@@ -3,20 +3,20 @@
 
 #include <QWidget>
 
-struct AboutWidgetPrivate;
+struct AboutWindowPrivate;
 
-class AboutWidget : public QWidget
+class AboutWindow : public QWidget
 {
 		Q_OBJECT
 	public:
-        explicit AboutWidget(QWidget *parent = 0);
-        ~AboutWidget();
+        explicit AboutWindow(QWidget *parent = 0);
+        ~AboutWindow();
 
     protected:
         QSize sizeHint() const override;
 
 	private:
-		AboutWidgetPrivate* _d;
+		AboutWindowPrivate* _d;
 };
 
 #endif // ABOUTWIDGET_H

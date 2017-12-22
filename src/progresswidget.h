@@ -19,11 +19,12 @@ class ProgressWidget : public QWidget
 
     public slots:
         void hide();
-        void show();
-        void show(const QString& text);
+        void show(QWidget* parent = nullptr);
+        void show(const QString& text, QWidget* parent = nullptr);
 
     protected:
-        virtual void paintEvent(QPaintEvent* event) override;
+        void paintEvent(QPaintEvent* event) override;
+        QSize sizeHint() const override;
 
     private:
         QString _text;

@@ -7,13 +7,12 @@
 #include <flatbutton.h>
 #include <toolboxtree.h>
 #include <propertieswidget.h>
-#include <aboutwidget.h>
+#include <aboutwindow.h>
 #include <formswidget.h>
 #include <fit.h>
 #include <filemanager.h>
 #include <mainwindow.h>
-#include <projectsscreen.h>
-#include <loginscreen.h>
+#include <projectswidget.h>
 #include <buildsdialog.h>
 #include <designmanager.h>
 #include <toolbox.h>
@@ -62,6 +61,7 @@ class MainWindow : public QMainWindow
 
     protected:
         void closeEvent(QCloseEvent* event) override;
+        QSize sizeHint() const override;
 
     signals:
         void quitting() const;
@@ -73,9 +73,6 @@ class MainWindow : public QMainWindow
     private:
         static MainWindow* _instance;
         PreferencesDialog _preferencesWidget;
-        ProgressWidget _progressWidget;
-        ProjectsScreen _projectsScreen;
-        LoginScreen _loginScreen;
         BuildsDialog _buildsDialog;
         QFrame _settleWidget;
         QToolBar _titleBar;
@@ -88,7 +85,6 @@ class MainWindow : public QMainWindow
         PropertiesWidget _propertiesWidget;
         FormsWidget _formsWidget;
         InspectorWidget _inspectorWidget;
-        AboutWidget _aboutWidget;
         QMenu* fileMenu;
         QMenu* editMenu;
         QMenu* formatMenu;

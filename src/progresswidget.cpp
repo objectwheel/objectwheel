@@ -55,16 +55,24 @@ ProgressWidget::~ProgressWidget()
     delete logoPixmap;
 }
 
-void ProgressWidget::show(const QString& text)
+void ProgressWidget::show(const QString& text, QWidget* parent)
 {
     _text = text;
-    show();
+    show(parent);
 }
 
-void ProgressWidget::show()
+void ProgressWidget::show(QWidget* parent)
 {
-    _waitEffectTimer->start();
+    if (parent)
+        setParent(parent);
+
+    if (parentWidget())
+        setGeometry(parentWidget()->rect());
+
     QWidget::show();
+    raise();
+
+    _waitEffectTimer->start();
 }
 
 void ProgressWidget::hide()
@@ -107,4 +115,9 @@ void ProgressWidget::paintEvent(QPaintEvent*)
     y += (SIZE_GIF.height());
     painter.drawText(0, y - fit::fx(10), width(), fit::fx(20),
                      Qt::AlignCenter, _text + _waitEffectString);
+}
+
+QSize ProgressWidget::sizeHint() const
+{
+    return fit::fx(QSizeF{700, 500}).toSize();
 }

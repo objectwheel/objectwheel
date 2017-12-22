@@ -1,9 +1,6 @@
-#include <aboutwidget.h>
+#include <aboutwindow.h>
 #include <fit.h>
-#include <flatbutton.h>
-#include <usermanager.h>
 #include <global.h>
-#include <mainwindow.h>
 
 #include <QApplication>
 #include <QPropertyAnimation>
@@ -11,14 +8,14 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QScreen>
+#include <QPushButton>
 
 #define pS (QApplication::primaryScreen())
-#define wM (WindowManager::instance())
-#define pW (MainWindow::instance()->progressWidget())
 
-struct AboutWidgetPrivate
+struct AboutWindowPrivate
 {
-        AboutWidgetPrivate(QWidget*);
+        AboutWindowPrivate(QWidget*);
 		QWidget* parent;
 		QVBoxLayout mainLayout;
 		QHBoxLayout iconLayout;
@@ -29,7 +26,7 @@ struct AboutWidgetPrivate
         QPushButton okButton;
 };
 
-AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
+AboutWindowPrivate::AboutWindowPrivate(QWidget* p)
 	: parent(p)
 {
 	QPalette palette(parent->palette());
@@ -86,18 +83,18 @@ AboutWidgetPrivate::AboutWidgetPrivate(QWidget* p)
       Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
 }
 
-AboutWidget::AboutWidget(QWidget *parent)
+AboutWindow::AboutWindow(QWidget *parent)
 	: QWidget(parent)
-    , _d(new AboutWidgetPrivate(this))
+    , _d(new AboutWindowPrivate(this))
 {
 }
 
-AboutWidget::~AboutWidget()
+AboutWindow::~AboutWindow()
 {
     delete _d;
 }
 
-QSize AboutWidget::sizeHint() const
+QSize AboutWindow::sizeHint() const
 {
     return fit::fx(QSizeF{700, 400}).toSize();
 }

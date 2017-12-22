@@ -9,15 +9,12 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/propertieswidget.h \
            $$PWD/css.h \
            $$PWD/scrollarea.h \
-           $$PWD/aboutwidget.h \
            $$PWD/usermanager.h \
            $$PWD/savemanager.h \
            $$PWD/projectmanager.h \
            $$PWD/dirlocker.h \
            $$PWD/zipper.h \
            $$PWD/toolsmanager.h \
-           $$PWD/projectsscreen.h \
-           $$PWD/loginscreen.h \
            $$PWD/delayer.h \
            $$PWD/designmanager.h \
            $$PWD/control.h \
@@ -62,7 +59,11 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/androidcreatekeystorecertificate.h \
            $$PWD/downloadwidget.h \
            $$PWD/preferencesdialog.h \
-    $$PWD/windowmanager.h
+    $$PWD/windowmanager.h \
+    $$PWD/welcomewindow.h \
+    $$PWD/projectswidget.h \
+    $$PWD/loginwidget.h \
+    $$PWD/aboutwindow.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -70,15 +71,12 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/propertieswidget.cpp \
            $$PWD/css.cpp \
            $$PWD/scrollarea.cpp \
-           $$PWD/aboutwidget.cpp \
            $$PWD/usermanager.cpp \
            $$PWD/savemanager.cpp \
            $$PWD/projectmanager.cpp \
            $$PWD/dirlocker.cpp \
            $$PWD/zipper.cpp \
            $$PWD/toolsmanager.cpp \
-           $$PWD/projectsscreen.cpp \
-           $$PWD/loginscreen.cpp \
            $$PWD/delayer.cpp \
            $$PWD/designmanager.cpp \
            $$PWD/control.cpp \
@@ -122,7 +120,11 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/downloadwidget.cpp \
            $$PWD/preferencesdialog.cpp \
-    $$PWD/windowmanager.cpp
+    $$PWD/windowmanager.cpp \
+    $$PWD/welcomewindow.cpp \
+    $$PWD/projectswidget.cpp \
+    $$PWD/loginwidget.cpp \
+    $$PWD/aboutwindow.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

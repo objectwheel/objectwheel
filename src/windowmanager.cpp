@@ -1,14 +1,36 @@
 #include <windowmanager.h>
 #include <progresswidget.h>
+#include <welcomewindow.h>
+#include <mainwindow.h>
+#include <aboutwindow.h>
 
 WindowManager::WindowManager()
 {
     _progressWidget = new ProgressWidget;
+    _mainWindow = new MainWindow;
+    _aboutWindow = new AboutWindow;
+    _welcomeWindow = new WelcomeWindow;
+
+
+    connect(_mainWindow, SIGNAL(comfy()), _progressWidget, SLOT(hide()));
+    connect(_aboutWindow, SIGNAL(comfy()), _progressWidget, SLOT(hide()));
+    connect(_welcomeWindow, SIGNAL(comfy()), _progressWidget, SLOT(hide()));
+
+//    connect(_mainWindow, SIGNAL(comfy()), _progressWidget, SLOT(hide()));
+//    connect(_aboutWindow, SIGNAL(comfy()), _progressWidget, SLOT(hide()));
+//    connect(_welcomeWindow, SIGNAL(busy(QString)), _progressWidget, SLOT(sho));
+
+
+    add(Main, _mainWindow);
+    add(About, _aboutWindow);
+    add(Welcome, _welcomeWindow);
+    show(Welcome);
 }
 
 WindowManager::~WindowManager()
 {
     _progressWidget->setParent(nullptr);
+
     delete _progressWidget;
 }
 
@@ -16,23 +38,6 @@ WindowManager* WindowManager::instance()
 {
     static WindowManager instance;
     return &instance;
-}
-
-void WindowManager::busy(const QString& text)
-{
-    _progressWidget->show();
-    _progressWidget->raise();
-    _progressWidget->setGeometry(
-      _progressWidget->parentWidget()->rect());
-}
-
-void WindowManager::busy(WindowManager::Windows key, const QString& text)
-{
-    QWidget* window;
-    if ((window = _windows.value(key))) {
-        _progressWidget->setParent(window);
-        busy();
-    }
 }
 
 void WindowManager::show(WindowManager::Windows key)
@@ -46,7 +51,6 @@ void WindowManager::show(WindowManager::Windows key)
                 w->hide();
         }
 
-        _current = key;
         _progressWidget->hide();
     }
 }
@@ -54,9 +58,4 @@ void WindowManager::show(WindowManager::Windows key)
 void WindowManager::add(WindowManager::Windows key, QWidget* window)
 {
     _windows[key] = window;
-}
-
-WindowManager::Windows WindowManager::current() const
-{
-    return _current;
 }

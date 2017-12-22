@@ -44,6 +44,7 @@ MainWindow* MainWindow::instance()
 
 void MainWindow::setupGui()
 {
+    setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
     setCentralWidget(&_settleWidget);
 
@@ -56,27 +57,11 @@ void MainWindow::setupGui()
     _settleWidget.setFrameShadow(QFrame::Plain);
     _designManager.setSettleWidget(&_settleWidget);
 
-    wM->add(WindowManager::Studio, this);
-    wM->add(WindowManager::Projects, &_projectsScreen);
-    wM->add(WindowManager::Login, &_loginScreen);
-    wM->show(WindowManager::Login);
-    wM->busy("Loading");
-    connect(&_centralWidget, &View::visibleChanged, this, [&]
-    {
-        if (_centralWidget.current() == Screen::Studio) {
-            _titleBar.show();
-            _formsDockwidget.show();
-            _propertiesDockwidget.show();
-            _toolboxDockwidget.show();
-            _inspectorDockwidget.show();
-        } else {
-            _titleBar.hide();
-            _formsDockwidget.hide();
-            _propertiesDockwidget.hide();
-            _toolboxDockwidget.hide();
-            _inspectorDockwidget.hide();
-        }
-    });
+//    wM->add(WindowManager::Studio, this);
+//    wM->add(WindowManager::Projects, &_projectsScreen);
+//    wM->add(WindowManager::Login, &_loginScreen);
+//    wM->show(WindowManager::Login);
+//    wM->progress()->show("Loading", wM->window(WindowManager::Login));
 
     // Toolbar settings
     QLabel* titleText = new QLabel;
@@ -90,7 +75,6 @@ void MainWindow::setupGui()
 
     /* Add Title Bar */
     addToolBar(Qt::TopToolBarArea, &_titleBar);
-    _titleBar.setVisible(false);
     _titleBar.setFixedHeight(fit::fx(34));
     _titleBar.setFloatable(false);
     _titleBar.setMovable(false);
@@ -122,7 +106,6 @@ void MainWindow::setupGui()
     _propertiesDockwidget.setTitleBarWidget(toolbar);
     _propertiesDockwidget.setWidget(&_propertiesWidget);
     _propertiesDockwidget.setWindowTitle("Properties");
-    _propertiesDockwidget.setVisible(false);
     _propertiesDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                       QDockWidget::DockWidgetFloatable);
@@ -151,7 +134,6 @@ void MainWindow::setupGui()
     _formsDockwidget.setTitleBarWidget(toolbar2);
     _formsDockwidget.setWidget(&_formsWidget);
     _formsDockwidget.setWindowTitle("Forms");
-    _formsDockwidget.setVisible(false);
     _formsDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                  QDockWidget::DockWidgetFloatable);
@@ -189,7 +171,6 @@ void MainWindow::setupGui()
     _toolboxDockwidget.setTitleBarWidget(toolbar3);
     _toolboxDockwidget.setWidget(&_toolbox);
     _toolboxDockwidget.setWindowTitle("Toolbox");
-    _toolboxDockwidget.setVisible(false);
     _toolboxDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                    QDockWidget::DockWidgetFloatable);
@@ -252,7 +233,6 @@ void MainWindow::setupGui()
     _inspectorDockwidget.setTitleBarWidget(toolbar4);
     _inspectorDockwidget.setWidget(&_inspectorWidget);
     _inspectorDockwidget.setWindowTitle("Control Inspector");
-    _inspectorDockwidget.setVisible(false);
     _inspectorDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _inspectorDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                      QDockWidget::DockWidgetFloatable);
@@ -286,11 +266,12 @@ void MainWindow::setupManagers()
     auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
     Delayer::delay(&ret, &QFuture<bool>::isRunning);
     if (ret.result()) {
-        ProjectsScreen::refreshProjectList();
-        _progressWidget.hideProgress();
-        _centralWidget.show(Screen::Projects);
+        ProjectsWidget::refreshProjectList();
+//        wM->progress()->hide();
+//        wM->show(WindowManager::Projects);
     } else {
-        _progressWidget.hideProgress();
+//        wM->progress()->hide();
+//        wM->show(WindowManager::Login);
     }
 }
 
@@ -331,6 +312,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
     emit quitting();
 }
 
+QSize MainWindow::sizeHint() const
+{
+    return fit::fx(QSizeF{1200, 700}).toSize();
+}
+
 BuildsDialog* MainWindow::buildsDialog()
 {
     return &_buildsDialog;
@@ -348,7 +334,7 @@ void MainWindow::clearStudio()
 
 ProgressWidget* MainWindow::progressWidget()
 {
-    return &_progressWidget;
+//    return &_progressWidget;
 }
 
 void MainWindow::newFile()
@@ -443,7 +429,7 @@ void MainWindow::preferences()
 
 void MainWindow::about()
 {
-    _aboutWidget.show();
+//    _aboutWidget.show();
 }
 
 void MainWindow::createActions()

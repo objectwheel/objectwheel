@@ -1,5 +1,5 @@
-#ifndef PROJECTSSCREEN_H
-#define PROJECTSSCREEN_H
+#ifndef PROJECTSWIDGET_H
+#define PROJECTSWIDGET_H
 
 #include <QQuickWidget>
 #include <QAbstractListModel>
@@ -8,12 +8,13 @@
 #include <QList>
 #include <QJsonObject>
 
-class ProjectsScreen : public QQuickWidget
+class ProjectsWidget : public QQuickWidget
 {
 		Q_OBJECT
 	public:
-		explicit ProjectsScreen(QWidget *parent = 0);
-        static ProjectsScreen* instance();
+		explicit ProjectsWidget(QWidget *parent = 0);
+        static ProjectsWidget* instance();
+        static void refreshProjectList(const QString& activeProject = QString());
 
 	public slots:
 		void handleNewButtonClicked();
@@ -24,7 +25,13 @@ class ProjectsScreen : public QQuickWidget
 		void handleBtnOkClicked();
         void handleBtnImportClicked();
         void handleBtnExportClicked();
-        static void refreshProjectList(const QString& activeProject = QString());
+
+    private slots:
+        void startProject();
+
+    signals:
+        void done();
+        void busy(const QString& text);
 };
 
 class ProjectListModel : public QAbstractListModel
@@ -205,4 +212,4 @@ class ProjectListModel : public QAbstractListModel
 		QList<ProjectProperty> _data;
 };
 
-#endif // PROJECTSSCREEN_H
+#endif // PROJECTSWIDGET_H
