@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <components.h>
 #include <windowmanager.h>
+#include <menumanager.h>
 
 #include <QApplication>
 #include <QFontDatabase>
@@ -80,7 +81,10 @@ int main(int argc, char *argv[])
     // Initialize Web View
     QtWebView::initialize();
 
-    // Start Application
+    // Initialize Menus
+    MenuManager::instance();
+
+    // Start Windows
     WindowManager::instance();
 
     // Start main event loop

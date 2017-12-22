@@ -7,7 +7,7 @@
 #include <toolboxtree.h>
 #include <fit.h>
 #include <filterlineedit.h>
-#include <toolboxsettings.h>
+#include <toolboxsettingswindow.h>
 
 class ToolBox : public QWidget
 {
@@ -15,9 +15,6 @@ class ToolBox : public QWidget
     public:
         explicit ToolBox(QWidget *parent = nullptr);
         ToolboxTree* toolboxTree();
-
-    public slots:
-        void showSettings();
 
     protected:
         virtual QSize sizeHint() const override;
@@ -30,8 +27,6 @@ class ToolBox : public QWidget
         QVBoxLayout _toolboxVLay;
         FilterLineEdit _searchEdit;
         ToolboxTree _toolboxTree;
-        ToolboxSettings _settingsDialog;
-
 };
 
 #endif // TOOLBOX_H

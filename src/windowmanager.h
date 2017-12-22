@@ -1,13 +1,17 @@
 #ifndef WINDOWMANAGER_H
 #define WINDOWMANAGER_H
 
-#include <QWidget>
+#include <QObject>
 #include <QMap>
 
+class QWidget;
 class ProgressWidget;
 class MainWindow;
 class WelcomeWindow;
 class AboutWindow;
+class BuildsWindow;
+class PreferencesWindow;
+class ToolboxSettingsWindow;
 
 class WindowManager : public QObject
 {
@@ -18,7 +22,10 @@ class WindowManager : public QObject
         enum Windows {
             Welcome,
             Main,
-            About
+            About,
+            Builds,
+            Preferences,
+            ToolboxSettings
         };
 
     public:
@@ -26,7 +33,7 @@ class WindowManager : public QObject
 
     public slots:
         void hide(Windows key);
-        void show(Windows key);
+        void show(Windows key); // TODO: Modality
 
     private slots:
         void done();
@@ -35,6 +42,8 @@ class WindowManager : public QObject
     private:
         WindowManager();
         ~WindowManager();
+
+    private:
         void add(Windows key, QWidget* window);
 
     private:
@@ -43,6 +52,9 @@ class WindowManager : public QObject
         MainWindow* _mainWindow;
         WelcomeWindow* _welcomeWindow;
         AboutWindow* _aboutWindow;
+        BuildsWindow* _buildsWindow;
+        PreferencesWindow* _preferencesWindow;
+        ToolboxSettingsWindow* _toolboxSettingsWindow;
 };
 
 #endif // WINDOWMANAGER_H

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ToolboxSettings</class>
- <widget class="QDialog" name="ToolboxSettings">
+ <class>ToolboxSettingsWindow</class>
+ <widget class="QWidget" name="ToolboxSettingsWindow">
+  <property name="modal" stdset="0">
+   <bool>false</bool>
+  </property>
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -79,9 +82,6 @@
   </property>
   <property name="windowTitle">
    <string>Toolbox Settings</string>
-  </property>
-  <property name="modal">
-   <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <property name="leftMargin">
@@ -796,22 +796,5 @@
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>btnOk</sender>
-   <signal>clicked()</signal>
-   <receiver>ToolboxSettings</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>760</x>
-     <y>426</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>599</x>
-     <y>443</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

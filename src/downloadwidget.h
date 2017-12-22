@@ -21,6 +21,7 @@ class DownloadWidget : public QQuickWidget
     signals:
         void done();
         void resized() const;
+
     public slots:
         void download(OTargets::Targets);
         void handleBtnOkClicked();

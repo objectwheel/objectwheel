@@ -12,10 +12,6 @@ class ProgressWidget : public QWidget
 
     public:
         explicit ProgressWidget(QWidget* parent = nullptr);
-        ~ProgressWidget();
-
-        const QString& text() const;
-        void setText(const QString& text);
 
     public slots:
         void hide();
@@ -24,7 +20,6 @@ class ProgressWidget : public QWidget
 
     protected:
         void paintEvent(QPaintEvent* event) override;
-        QSize sizeHint() const override;
 
     private:
         QString _text;

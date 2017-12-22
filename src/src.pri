@@ -1,8 +1,9 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-FORMS += $$PWD/toolboxsettings.ui \
-         $$PWD/androidcreatekeystorecertificate.ui
+FORMS += \
+         $$PWD/androidcreatekeystorecertificate.ui \
+    $$PWD/toolboxsettingswindow.ui
 
 HEADERS += $$PWD/mainwindow.h \
            $$PWD/flatbutton.h \
@@ -50,20 +51,21 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/controlwatcher.h \
            $$PWD/resizer.h \
            $$PWD/suppressor.h \
-           $$PWD/toolboxsettings.h \
-           $$PWD/buildsdialog.h \
            $$PWD/platformswidget.h \
            $$PWD/androidwidget.h \
            $$PWD/moduleselectionwidget.h \
            $$PWD/build.h \
            $$PWD/androidcreatekeystorecertificate.h \
            $$PWD/downloadwidget.h \
-           $$PWD/preferencesdialog.h \
-    $$PWD/windowmanager.h \
-    $$PWD/welcomewindow.h \
-    $$PWD/projectswidget.h \
-    $$PWD/loginwidget.h \
-    $$PWD/aboutwindow.h
+           $$PWD/windowmanager.h \
+           $$PWD/welcomewindow.h \
+           $$PWD/projectswidget.h \
+           $$PWD/loginwidget.h \
+           $$PWD/aboutwindow.h \
+           $$PWD/buildswindow.h \
+           $$PWD/preferenceswindow.h \
+    $$PWD/toolboxsettingswindow.h \
+    $$PWD/menumanager.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -111,20 +113,21 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlwatcher.cpp \
            $$PWD/resizer.cpp \
            $$PWD/suppressor.cpp \
-           $$PWD/toolboxsettings.cpp \
-           $$PWD/buildsdialog.cpp \
            $$PWD/platformswidget.cpp \
            $$PWD/androidwidget.cpp \
            $$PWD/moduleselectionwidget.cpp \
            $$PWD/build.cpp \
            $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/downloadwidget.cpp \
-           $$PWD/preferencesdialog.cpp \
-    $$PWD/windowmanager.cpp \
-    $$PWD/welcomewindow.cpp \
-    $$PWD/projectswidget.cpp \
-    $$PWD/loginwidget.cpp \
-    $$PWD/aboutwindow.cpp
+           $$PWD/windowmanager.cpp \
+           $$PWD/welcomewindow.cpp \
+           $$PWD/projectswidget.cpp \
+           $$PWD/loginwidget.cpp \
+           $$PWD/aboutwindow.cpp \
+           $$PWD/buildswindow.cpp \
+           $$PWD/preferenceswindow.cpp \
+    $$PWD/toolboxsettingswindow.cpp \
+    $$PWD/menumanager.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

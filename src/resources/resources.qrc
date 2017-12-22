@@ -139,5 +139,6 @@
         <file>images/droparrow.png</file>
         <file>images/android-default.png</file>
         <file>images/qt.png</file>
+        <file>images/loader.gif</file>
     </qresource>
 </RCC>

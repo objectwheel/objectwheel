@@ -24,11 +24,13 @@ AboutWindow::AboutWindow(QWidget *parent) : QWidget(parent)
     QPalette p(palette());
     p.setColor(backgroundRole(), "#e0e4e7");
     setAutoFillBackground(true);
+    setWindowTitle(APP_NAME);
     setPalette(p);
 
     okButton->setText("Ok");
     okButton->setFixedWidth(fit::fx(100));
     okButton->setDefault(true);
+    okButton->setCursor(Qt::PointingHandCursor);
     connect(okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
 
     QPixmap pixmap(":/resources/images/logo.png");

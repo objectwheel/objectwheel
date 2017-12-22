@@ -1,5 +1,5 @@
-#include <toolboxsettings.h>
-#include <ui_toolboxsettings.h>
+#include <toolboxsettingswindow.h>
+#include <ui_toolboxsettingswindow.h>
 #include <css.h>
 #include <toolsmanager.h>
 #include <filemanager.h>
@@ -45,12 +45,11 @@ static QString handleImports(const QStringList& fileNames)
 }
 
 //!
-//! ********************** [ToolboxSettings] **********************
+//! ********************** [ToolboxSettingsWindow] **********************
 //!
 
-ToolboxSettings::ToolboxSettings(QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::ToolboxSettings)
+ToolboxSettingsWindow::ToolboxSettingsWindow(QWidget *parent) : QWidget(parent)
+    , ui(new Ui::ToolboxSettingsWindow)
 {
     ui->setupUi(this);
     ToolsManager::instance()->addToolboxTree(ui->treeWidget);
@@ -89,6 +88,7 @@ ToolboxSettings::ToolboxSettings(QWidget *parent)
                                  !hasValidSelection);
     };
 
+    connect(ui->btnOk, SIGNAL(clicked(bool)), SIGNAL(done()));
     connect(ui->txtCategory, &QLineEdit::textChanged, this, fnDisableBtnSave);
     connect(ui->txtIcon, &QLineEdit::textChanged, this, fnDisableBtnSave);
     connect(ui->txtName, &QLineEdit::textChanged, this, fnDisableBtnSave);
@@ -107,12 +107,12 @@ ToolboxSettings::ToolboxSettings(QWidget *parent)
     });
 }
 
-ToolboxSettings::~ToolboxSettings()
+ToolboxSettingsWindow::~ToolboxSettingsWindow()
 {
     delete ui;
 }
 
-void ToolboxSettings::on_btnReset_clicked()
+void ToolboxSettingsWindow::on_btnReset_clicked()
 {
     if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Reset",
      "This will reset tool library to factory defaults and remove"
@@ -145,7 +145,7 @@ void ToolboxSettings::on_btnReset_clicked()
     }
 }
 
-void ToolboxSettings::on_btnRemove_clicked()
+void ToolboxSettingsWindow::on_btnRemove_clicked()
 {
     if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Removal",
       "This will remove selected tool from tool library. Are you sure?")) {
@@ -163,12 +163,12 @@ void ToolboxSettings::on_btnRemove_clicked()
     }
 }
 
-void ToolboxSettings::on_btnAdd_clicked()
+void ToolboxSettingsWindow::on_btnAdd_clicked()
 {
     ToolsManager::instance()->createNewTool();
 }
 
-void ToolboxSettings::on_btnImport_clicked()
+void ToolboxSettingsWindow::on_btnImport_clicked()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFiles);
@@ -182,7 +182,7 @@ void ToolboxSettings::on_btnImport_clicked()
     }
 }
 
-void ToolboxSettings::on_btnExport_clicked()
+void ToolboxSettingsWindow::on_btnExport_clicked()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::Directory);
@@ -205,7 +205,7 @@ void ToolboxSettings::on_btnExport_clicked()
     }
 }
 
-void ToolboxSettings::on_btnFileDialog_clicked()
+void ToolboxSettingsWindow::on_btnFileDialog_clicked()
 {
     auto fileName = QFileDialog::getOpenFileName(this, tr("Open Image"),
       QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
@@ -216,7 +216,7 @@ void ToolboxSettings::on_btnFileDialog_clicked()
     }
 }
 
-void ToolboxSettings::on_btnSave_clicked()
+void ToolboxSettingsWindow::on_btnSave_clicked()
 {
     ChangeSet changeSet;
     changeSet.category = ui->txtCategory->text();

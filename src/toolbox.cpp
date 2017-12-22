@@ -9,9 +9,7 @@
 
 #define DURATION 500
 
-ToolBox::ToolBox(QWidget* parent)
-    : QWidget(parent)
-    , _settingsDialog(this)
+ToolBox::ToolBox(QWidget* parent) : QWidget(parent)
 {
     setAutoFillBackground(true);
     QPalette p(palette());
@@ -79,11 +77,6 @@ void ToolBox::filterList(const QString& filter)
         auto v = filter.isEmpty() ? true : tlv;
         tli->setHidden(!v);
     }
-}
-
-void ToolBox::showSettings()
-{
-    _settingsDialog.exec();
 }
 
 QSize ToolBox::sizeHint() const
