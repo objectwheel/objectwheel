@@ -17,16 +17,18 @@ class WelcomeWindow : public QWidget
     public:
         explicit WelcomeWindow(QWidget* parent = nullptr);
 
+    public slots:
+        void showLogin();
+
     protected:
         void resizeEvent(QResizeEvent* event) override;
-        QSize sizeHint() const override;
 
     private slots:
         void showProjects();
 
     signals:
         void done();
-        void comfy();
+        void lazy();
         void busy(const QString& text);
 
     private:

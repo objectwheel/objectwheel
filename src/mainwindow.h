@@ -61,9 +61,11 @@ class MainWindow : public QMainWindow
 
     protected:
         void closeEvent(QCloseEvent* event) override;
-        QSize sizeHint() const override;
 
     signals:
+        void done();
+        void lazy();
+        void busy(const QString& text);
         void quitting() const;
 
     private:

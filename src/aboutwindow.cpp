@@ -3,8 +3,6 @@
 #include <global.h>
 
 #include <QApplication>
-#include <QPropertyAnimation>
-#include <QParallelAnimationGroup>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -13,89 +11,77 @@
 
 #define pS (QApplication::primaryScreen())
 
-struct AboutWindowPrivate
+AboutWindow::AboutWindow(QWidget *parent) : QWidget(parent)
 {
-        AboutWindowPrivate(QWidget*);
-		QWidget* parent;
-		QVBoxLayout mainLayout;
-		QHBoxLayout iconLayout;
-        QLabel topLabel;
-		QLabel iconLabel;
-		QLabel titleLabel;
-        QLabel legalLabel;
-        QPushButton okButton;
-};
+    mainLayout = new QVBoxLayout(this);
+    iconLayout = new QHBoxLayout;
+    topLabel = new QLabel;
+    iconLabel = new QLabel;
+    titleLabel = new QLabel;
+    legalLabel = new QLabel;
+    okButton = new QPushButton;
 
-AboutWindowPrivate::AboutWindowPrivate(QWidget* p)
-	: parent(p)
-{
-	QPalette palette(parent->palette());
-	palette.setColor(QPalette::Window, "#e0e4e7");
-	parent->setPalette(palette);
-	parent->setAutoFillBackground(true);
-	parent->setLayout(&mainLayout);
+    QPalette p(palette());
+    p.setColor(backgroundRole(), "#e0e4e7");
+    setAutoFillBackground(true);
+    setPalette(p);
 
-    okButton.setText("Ok");
-    okButton.setFixedWidth(fit::fx(100));
-    okButton.setDefault(true);
-    QObject::connect(&okButton, SIGNAL(clicked(bool)),
-      parent, SLOT(close()));
+    okButton->setText("Ok");
+    okButton->setFixedWidth(fit::fx(100));
+    okButton->setDefault(true);
+    connect(okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
 
-	iconLabel.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    iconLabel.setFixedSize(fit::fx(150), fit::fx(74.5));
     QPixmap pixmap(":/resources/images/logo.png");
     pixmap.setDevicePixelRatio(pS->devicePixelRatio());
-    iconLabel.setPixmap(pixmap.scaled(fit::fx(150) * pS->devicePixelRatio(),
-      fit::fx(74.5) * pS->devicePixelRatio(),
-      Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 
-	iconLayout.addStretch();
-	iconLayout.addWidget(&iconLabel);
-	iconLayout.addStretch();
+    iconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    iconLabel->setFixedSize(fit::fx(150), fit::fx(74.5));
+    iconLabel->setPixmap(
+        pixmap.scaled(
+            fit::fx(150) * pS->devicePixelRatio(),
+            fit::fx(74.5) * pS->devicePixelRatio(),
+            Qt::IgnoreAspectRatio,
+            Qt::SmoothTransformation
+        )
+    );
 
-    QFont f;
-    f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(fit::fx(24));
-    topLabel.setFont(f);
-    topLabel.setText("About Objectwheel");
-    topLabel.setStyleSheet("background:transparent; color:#2e3a41;");
-    topLabel.setAlignment(Qt::AlignCenter);
+    iconLayout->addStretch();
+    iconLayout->addWidget(iconLabel);
+    iconLayout->addStretch();
 
-	titleLabel.setStyleSheet("background:transparent;color:#2e3a41;");
-    titleLabel.setText(TEXT_VERSION);
-	titleLabel.setAlignment(Qt::AlignCenter);
+    QFont font;
+    font.setWeight(QFont::ExtraLight);
+    font.setPixelSize(fit::fx(24));
 
-	legalLabel.setStyleSheet("background:transparent;color:#2e3a41;");
-    legalLabel.setText(TEXT_LEGAL);
-	legalLabel.setAlignment(Qt::AlignCenter);
+    topLabel->setFont(font);
+    topLabel->setText("About Objectwheel");
+    topLabel->setStyleSheet("background:transparent; color:#2e3a41;");
+    topLabel->setAlignment(Qt::AlignCenter);
 
-    mainLayout.addWidget(&topLabel);
-	mainLayout.addStretch();
-	mainLayout.addLayout(&iconLayout);
-	mainLayout.addWidget(&titleLabel);
-    mainLayout.addStretch();
-    mainLayout.addWidget(&okButton);
-	mainLayout.addStretch();
-	mainLayout.addWidget(&legalLabel);
-    mainLayout.setAlignment(&okButton, Qt::AlignCenter);
+    titleLabel->setStyleSheet("background:transparent;color:#2e3a41;");
+    titleLabel->setText(TEXT_VERSION);
+    titleLabel->setAlignment(Qt::AlignCenter);
 
-    parent->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint |
-      Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
-}
+    legalLabel->setStyleSheet("background:transparent;color:#2e3a41;");
+    legalLabel->setText(TEXT_LEGAL);
+    legalLabel->setAlignment(Qt::AlignCenter);
 
-AboutWindow::AboutWindow(QWidget *parent)
-	: QWidget(parent)
-    , _d(new AboutWindowPrivate(this))
-{
-}
+    mainLayout->addWidget(topLabel);
+    mainLayout->addStretch();
+    mainLayout->addLayout(iconLayout);
+    mainLayout->addWidget(titleLabel);
+    mainLayout->addStretch();
+    mainLayout->addWidget(okButton);
+    mainLayout->addStretch();
+    mainLayout->addWidget(legalLabel);
+    mainLayout->setAlignment(okButton, Qt::AlignCenter);
 
-AboutWindow::~AboutWindow()
-{
-    delete _d;
-}
-
-QSize AboutWindow::sizeHint() const
-{
-    return fit::fx(QSizeF{700, 400}).toSize();
+    setWindowFlags(
+        Qt::Dialog |
+        Qt::WindowTitleHint |
+        Qt::WindowSystemMenuHint |
+        Qt::WindowCloseButtonHint |
+        Qt::CustomizeWindowHint
+    );
 }
 

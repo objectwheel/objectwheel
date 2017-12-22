@@ -22,8 +22,8 @@ LoginWidget::LoginWidget(QWidget *parent)
     auto autoLoginButton = QQmlProperty::read(rootObject(), "loginScreen.autologinSwitch", engine()).value<QQuickItem*>();
     auto loginButton = QQmlProperty::read(rootObject(), "loginScreen.loginButton", engine()).value<QQuickItem*>();
 
-    connect(loginButton, SIGNAL(loginButtonClicked(QVariant)), this, SLOT(handleLoginButtonClicked(QVariant)));
-    connect(autoLoginButton, SIGNAL(clicked()), this, SLOT(handleAutoLoginButtonClicked()));
+    connect(loginButton, SIGNAL(loginButtonClicked(QVariant)), this, SLOT(handleLoginButtonClick(QVariant)));
+    connect(autoLoginButton, SIGNAL(clicked()), this, SLOT(handleAutoLoginButtonClick()));
     connect(&watcher, SIGNAL(finished()), this, SLOT(handleSessionStart()));
 }
 

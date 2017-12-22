@@ -3,20 +3,29 @@
 
 #include <QWidget>
 
-struct AboutWindowPrivate;
+class QLabel;
+class QVBoxLayout;
+class QHBoxLayout;
+class QPushButton;
 
 class AboutWindow : public QWidget
 {
 		Q_OBJECT
+
 	public:
         explicit AboutWindow(QWidget *parent = 0);
-        ~AboutWindow();
 
-    protected:
-        QSize sizeHint() const override;
+    signals:
+        void done();
 
 	private:
-		AboutWindowPrivate* _d;
+        QVBoxLayout* mainLayout;
+        QHBoxLayout* iconLayout;
+        QLabel* topLabel;
+        QLabel* iconLabel;
+        QLabel* titleLabel;
+        QLabel* legalLabel;
+        QPushButton* okButton;
 };
 
 #endif // ABOUTWIDGET_H

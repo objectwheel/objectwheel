@@ -312,11 +312,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     emit quitting();
 }
 
-QSize MainWindow::sizeHint() const
-{
-    return fit::fx(QSizeF{1200, 700}).toSize();
-}
-
 BuildsDialog* MainWindow::buildsDialog()
 {
     return &_buildsDialog;

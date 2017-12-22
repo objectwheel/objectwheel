@@ -23,14 +23,19 @@ class WindowManager : public QObject
 
     public:
         static WindowManager* instance();
+
+    public slots:
+        void hide(Windows key);
         void show(Windows key);
 
-    protected:
-        void add(Windows key, QWidget* window);
+    private slots:
+        void done();
+        void busy(const QString& text);
 
     private:
         WindowManager();
         ~WindowManager();
+        void add(Windows key, QWidget* window);
 
     private:
         QMap<Windows, QWidget*> _windows;

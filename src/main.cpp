@@ -21,8 +21,20 @@ int main(int argc, char *argv[])
     // Init application
     QApplication a(argc, argv);
 
-    # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
+    // Init application settings
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setApplicationDisplayName(APP_NAME);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
+
+    qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
+    qputenv("QML_DISABLE_DISK_CACHE", "true");
+
     // Multiple instances protection
+    # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
     if(!sharedMemory.create(1)) {
         sharedMemory.attach();
@@ -35,22 +47,8 @@ int main(int argc, char *argv[])
     }
     # endif
 
-    QApplication::setOrganizationName(APP_CORP);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
-    QApplication::setApplicationName(APP_NAME);
-    QApplication::setApplicationDisplayName(APP_NAME);
-    QApplication::setApplicationVersion(APP_VER);
-    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
-
     // Initialize Fit library
     fit::update(REF_DPI);
-
-    // Init application settings
-    // QApplication::setStyle("fusion");
-    qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
-    qputenv("QML_DISABLE_DISK_CACHE", "true");
-    qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
-    qApp->setWindowIcon(QIcon(":/resources/images/owicon.png"));
 
     // Setup OpenGL format
     QSurfaceFormat format;
