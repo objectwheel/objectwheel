@@ -1,8 +1,8 @@
 #include <propertiespane.h>
 #include <fit.h>
-#include <designmanager.h>
+#include <designerwidget.h>
 #include <css.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <delayer.h>
 #include <filemanager.h>
 #include <controlwatcher.h>
@@ -253,7 +253,7 @@ static void processString(QTreeWidgetItem* item, const QString& propertyName, co
 
 static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
 {
-    auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
+    auto selectedControl = DesignerWidget::currentScene()->selectedControls().at(0);
     const auto value = map.value(propertyName).value<QUrl>();
     auto dispText = value.toDisplayString();
     if (value.isLocalFile()) {
@@ -301,27 +301,27 @@ static void processInt(QTreeWidgetItem* item, const QString& propertyName, const
 
 static void saveChanges(const QString& property, const QVariant& value)
 {
-    auto scs = DesignManager::currentScene()->selectedControls();
+    auto scs = DesignerWidget::currentScene()->selectedControls();
 
     if (scs.isEmpty())
         return;
 
     QPointer<Control> sc = scs.at(0);
 
-    if (DesignManager::mode() == ControlGui && property == TAG_ID)
-        SaveManager::setProperty(sc, property, value,
-                                 DesignManager::controlScene()->mainControl()->dir());
+    if (DesignerWidget::mode() == ControlGui && property == TAG_ID)
+        SaveBackend::setProperty(sc, property, value,
+                                 DesignerWidget::controlScene()->mainControl()->dir());
     else
-        SaveManager::setProperty(sc, property, value);
+        SaveBackend::setProperty(sc, property, value);
 
     QMetaObject::Connection con;
-    con = QObject::connect(SaveManager::instance(),
-      &SaveManager::parserRunningChanged, [sc, con] {
+    con = QObject::connect(SaveBackend::instance(),
+      &SaveBackend::parserRunningChanged, [sc, con] {
         if (sc.isNull()) {
             QObject::disconnect(con);
             return;
         }
-        if (SaveManager::parserWorking() == false) {
+        if (SaveBackend::parserWorking() == false) {
             sc->refresh();
             QObject::disconnect(con);
         }
@@ -366,7 +366,7 @@ static void saveChanges(const NodeType& type, const QVariant& value)
 
         case GeometryX:
         case GeometryFX: {
-            auto sc = DesignManager::currentScene()->selectedControls();
+            auto sc = DesignerWidget::currentScene()->selectedControls();
             if (sc.size() != 1)
                 return;
             sc[0]->setX(value.toReal());
@@ -375,7 +375,7 @@ static void saveChanges(const NodeType& type, const QVariant& value)
 
         case GeometryY:
         case GeometryFY: {
-            auto sc = DesignManager::currentScene()->selectedControls();
+            auto sc = DesignerWidget::currentScene()->selectedControls();
             if (sc.size() != 1)
                 return;
             sc[0]->setY(value.toReal());
@@ -384,7 +384,7 @@ static void saveChanges(const NodeType& type, const QVariant& value)
 
         case GeometryWidth:
         case GeometryFWidth: {
-            auto sc = DesignManager::currentScene()->selectedControls();
+            auto sc = DesignerWidget::currentScene()->selectedControls();
             if (sc.size() != 1)
                 return;
             sc[0]->resize(value.toReal(), sc[0]->size().height());
@@ -393,7 +393,7 @@ static void saveChanges(const NodeType& type, const QVariant& value)
 
         case GeometryHeight:
         case GeometryFHeight: {
-            auto sc = DesignManager::currentScene()->selectedControls();
+            auto sc = DesignerWidget::currentScene()->selectedControls();
             if (sc.size() != 1)
                 return;
             sc[0]->resize(sc[0]->size().width(), value.toReal());
@@ -660,7 +660,7 @@ void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) co
         }
 
         case Url: {
-            auto selectedControl = DesignManager::currentScene()->selectedControls().at(0);
+            auto selectedControl = DesignerWidget::currentScene()->selectedControls().at(0);
             auto val = index.model()->data(index, NodeRole::Data).value<QUrl>();
             auto editor = static_cast<QLineEdit*>(ed);
             auto dispText = val.toDisplayString();
@@ -811,7 +811,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
             if (property == "z") {
-                auto sc = DesignManager::currentScene()->selectedControls();
+                auto sc = DesignerWidget::currentScene()->selectedControls();
                 if (sc.size() == 1)
                     sc[0]->setZValue(val.toReal());
             }
@@ -1064,11 +1064,11 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(DesignManager::formScene(), SIGNAL(selectionChanged()),
+    connect(DesignerWidget::formScene(), SIGNAL(selectionChanged()),
             SLOT(handleSelectionChange()));
-    connect(DesignManager::controlScene(), SIGNAL(selectionChanged()),
+    connect(DesignerWidget::controlScene(), SIGNAL(selectionChanged()),
             SLOT(handleSelectionChange()));
-    connect(DesignManager::instance(), SIGNAL(modeChanged()),
+    connect(DesignerWidget::instance(), SIGNAL(modeChanged()),
             SLOT(handleSelectionChange()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
             SLOT(handleSelectionChange()));
@@ -1091,7 +1091,7 @@ void PropertiesPane::refreshList()
 
     clearList();
 
-    auto selectedControls = DesignManager::currentScene()->selectedControls();
+    auto selectedControls = DesignerWidget::currentScene()->selectedControls();
 
     if (selectedControls.size() != 1)
         return;
@@ -1226,7 +1226,7 @@ void PropertiesPane::refreshList()
 
 void PropertiesPane::handleSelectionChange()
 {
-    auto selectedControls = DesignManager::currentScene()->selectedControls();
+    auto selectedControls = DesignerWidget::currentScene()->selectedControls();
 
     if (selectedControls.size() != 1) {
         clearList();
@@ -1276,7 +1276,7 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
             QPainter painter(w);
             painter.setRenderHint(QPainter::Antialiasing);
             if (_treeWidget->topLevelItemCount() == 0) {
-                auto sc = DesignManager::currentScene()->selectedControls();
+                auto sc = DesignerWidget::currentScene()->selectedControls();
                 bool drawn = false;
                 const qreal ic = w->height() / fit::fx(20);
                 for (int i = 0; i < ic; i++) {

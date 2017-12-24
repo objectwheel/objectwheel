@@ -13,7 +13,7 @@
 #include <filemanager.h>
 #include <mainwindow.h>
 #include <projectswidget.h>
-#include <designmanager.h>
+#include <designerwidget.h>
 #include <toolboxpane.h>
 #include <progresswidget.h>
 #include <inspectorpane.h>
@@ -25,8 +25,6 @@ class MainWindow : public QMainWindow
 
     public:
         explicit MainWindow(QWidget* parent = 0);
-        InspectorPane* inspectorPage();
-        FormsPane* formsPane();
 
     private slots:
         void setupGui();
@@ -34,22 +32,17 @@ class MainWindow : public QMainWindow
         void handleIndicatorChanges();
         void cleanupObjectwheel();
 
-    protected:
-        void closeEvent(QCloseEvent* event) override;
-
     signals:
         void done();
-        void quitting() const;
 
     private:
-        static MainWindow* _instance;
-        QFrame _settleWidget;
-        QToolBar _titleBar;
-        QDockWidget _toolboxDockwidget;
-        QDockWidget _propertiesDockwidget;
-        QDockWidget _formsDockwidget;
-        QDockWidget _inspectorDockwidget;
-        DesignManager _designManager;
+        QFrame* _settleWidget;
+        QToolBar* _titleBar;
+        QDockWidget* _toolboxDockwidget;
+        QDockWidget* _propertiesDockwidget;
+        QDockWidget* _formsDockwidget;
+        QDockWidget* _inspectorDockwidget;
+        DesignerWidget* _designerWidget;
         ToolboxPane* _toolboxPane;
         PropertiesPane* _propertiesPane;
         FormsPane* _formsPane;

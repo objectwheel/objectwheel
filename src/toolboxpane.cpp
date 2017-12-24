@@ -1,8 +1,9 @@
 #include <toolboxpane.h>
 #include <toolsmanager.h>
 #include <filemanager.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <toolboxtree.h>
+#include <flatbutton.h>
 #include <filterlineedit.h>
 #include <zipper.h>
 #include <fit.h>

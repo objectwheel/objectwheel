@@ -2,7 +2,7 @@
 #include <flatbutton.h>
 #include <css.h>
 #include <fit.h>
-#include <designmanager.h>
+#include <designerwidget.h>
 
 #include <QSplitter>
 #include <QSplitterHandle>
@@ -143,7 +143,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
       QSizePolicy::Expanding);
 
     QTimer::singleShot(100, [this] {
-        connect(DesignManager::instance(), SIGNAL(modeChanged()),
+        connect(DesignerWidget::instance(), SIGNAL(modeChanged()),
           boxes.value(Issues), SLOT(refresh()));
     });
 

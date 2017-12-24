@@ -2,14 +2,14 @@
 #include <usermanager.h>
 #include <filemanager.h>
 #include <toolsmanager.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <QMessageBox>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
 #include <mainwindow.h>
 #include <zipper.h>
-#include <designmanager.h>
+#include <designerwidget.h>
 
 #define INF_FILENAME "inf.json"
 
@@ -104,7 +104,7 @@ bool ProjectManager::buildNewProject(const QString& projectname)
     return (!UserManager::currentSessionsUser().isEmpty() &&
             !exists(projectname) &&
             mkdir(_d->generateProjectDir(projectname)) &&
-            SaveManager::initProject(_d->generateProjectDir(projectname)));
+            SaveBackend::initProject(_d->generateProjectDir(projectname)));
 }
 
 bool ProjectManager::renameProject(const QString& from, const QString& to)
@@ -223,9 +223,9 @@ bool ProjectManager::startProject(const QString& projectname)
 
     _d->currentProject = projectname;
 
-    SaveManager::exposeProject();
-    DesignManager::controlScene()->clearSelection();
-    DesignManager::formScene()->clearSelection();
+    SaveBackend::exposeProject();
+    DesignerWidget::controlScene()->clearSelection();
+    DesignerWidget::formScene()->clearSelection();
 
     ToolsManager::instance()->downloadTools();
 

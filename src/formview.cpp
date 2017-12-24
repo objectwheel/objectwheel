@@ -2,8 +2,8 @@
 #include <formscene.h>
 #include <control.h>
 #include <fit.h>
-#include <savemanager.h>
-#include <designmanager.h>
+#include <savebackend.h>
+#include <designerwidget.h>
 #include <filemanager.h>
 #include <css.h>
 
@@ -142,7 +142,7 @@ void FormViewPrivate::handleCutAction()
     QDataStream dstream(&controls, QIODevice::WriteOnly);
     auto mimeData = new QMimeData;
     auto clipboard = QApplication::clipboard();
-    auto scene = DesignManager::formScene();
+    auto scene = DesignerWidget::formScene();
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
@@ -171,7 +171,7 @@ void FormViewPrivate::handleCopyAction()
     QList<QUrl> urls;
     auto mimeData = new QMimeData;
     auto clipboard = QApplication::clipboard();
-    auto scene = DesignManager::formScene();
+    auto scene = DesignerWidget::formScene();
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
@@ -193,7 +193,7 @@ void FormViewPrivate::handlePasteAction()
 {
     auto clipboard = QApplication::clipboard();
     auto mimeData = clipboard->mimeData();
-    auto mainControl = DesignManager::formScene()->mainForm();
+    auto mainControl = DesignerWidget::formScene()->mainForm();
     QString uid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
         mimeData->text() != TOOL_KEY || uid.isEmpty())
@@ -201,24 +201,24 @@ void FormViewPrivate::handlePasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = SaveManager::exposeControl(url.toLocalFile(), FormGui, uid);
-        SaveManager::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
+        auto control = SaveBackend::exposeControl(url.toLocalFile(), FormGui, uid);
+        SaveBackend::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
         control->setParentItem(mainControl);
         control->refresh();
         controls << control;
 
         control->setPos(control->pos() + QPoint(fit::fx(5), fit::fx(5)));
         if (url == mimeData->urls().last()) {
-            DesignManager::formScene()->clearSelection();
+            DesignerWidget::formScene()->clearSelection();
             for (auto control : controls)
                 control->setSelected(true);
 
             if (!mimeData->data("objectwheel/cut").isEmpty()) {
                 ControlScene* scene;
                 if (mimeData->data("objectwheel/fscene").isEmpty())
-                    scene = DesignManager::formScene();
+                    scene = DesignerWidget::formScene();
                 else
-                    scene = DesignManager::controlScene();
+                    scene = DesignerWidget::controlScene();
 
                 QDataStream dstream(mimeData->data("objectwheel/dstream"));
                 int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
@@ -231,7 +231,7 @@ void FormViewPrivate::handlePasteAction()
 
                 for (auto control : cutControls) {
                     scene->removeControl(control);
-                    SaveManager::removeControl(control);
+                    SaveBackend::removeControl(control);
                 }
             }
         }
@@ -248,7 +248,7 @@ void FormViewPrivate::handleDeleteAction()
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls) {
        scene->removeControl(control);
-       SaveManager::removeControl(control);
+       SaveBackend::removeControl(control);
     }
 }
 

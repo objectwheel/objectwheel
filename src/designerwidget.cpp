@@ -1,4 +1,4 @@
-#include <designmanager.h>
+#include <designerwidget.h>
 #include <formscene.h>
 #include <formview.h>
 #include <controlscene.h>
@@ -8,7 +8,7 @@
 #include <fit.h>
 #include <css.h>
 #include <loadingindicator.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <outputwidget.h>
 #include <controlwatcher.h>
 #include <savetransaction.h>
@@ -35,13 +35,13 @@
 // TODO: Prevent NoSkin option for main form
 // FIXME: Bugs about Control GUI Editor
 
-class DesignManagerPrivate : public QObject
+class DesignerWidgetPrivate : public QObject
 {
         Q_OBJECT
 
     public:
-        DesignManagerPrivate(DesignManager* parent);
-        ~DesignManagerPrivate();
+        DesignerWidgetPrivate(DesignerWidget* parent);
+        ~DesignerWidgetPrivate();
 
     private:
         qreal roundRatio(qreal ratio);
@@ -71,7 +71,7 @@ class DesignManagerPrivate : public QObject
         void handleBuildButtonClicked();
 
     public:
-        DesignManager* parent;
+        DesignerWidget* parent;
         QWidget dummyWidget;
         QWidget* settleWidget = nullptr;
         QHBoxLayout hlayout;
@@ -117,7 +117,7 @@ class DesignManagerPrivate : public QObject
 
 };
 
-DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
+DesignerWidgetPrivate::DesignerWidgetPrivate(DesignerWidget* parent)
     : QObject(parent)
     , parent(parent)
     , formView(&formScene)
@@ -396,12 +396,12 @@ DesignManagerPrivate::DesignManagerPrivate(DesignManager* parent)
       SLOT(updateSkin()));
 }
 
-DesignManagerPrivate::~DesignManagerPrivate()
+DesignerWidgetPrivate::~DesignerWidgetPrivate()
 {
     dummyWidget.setLayout(&hlayout);
 }
 
-qreal DesignManagerPrivate::roundRatio(qreal ratio)
+qreal DesignerWidgetPrivate::roundRatio(qreal ratio)
 {
     if (ratio < 0.1)
         return 0.1;
@@ -419,7 +419,7 @@ qreal DesignManagerPrivate::roundRatio(qreal ratio)
         return 1.0;
 }
 
-qreal DesignManagerPrivate::findRatio(const QString& text)
+qreal DesignerWidgetPrivate::findRatio(const QString& text)
 {
     if (text == "10 %")
         return 0.1;
@@ -451,7 +451,7 @@ qreal DesignManagerPrivate::findRatio(const QString& text)
         return 1.0;
 }
 
-QString DesignManagerPrivate::findText(qreal ratio)
+QString DesignerWidgetPrivate::findText(qreal ratio)
 {
     if (ratio == 0.1)
         return "10 %";
@@ -483,9 +483,9 @@ QString DesignManagerPrivate::findText(qreal ratio)
         return "100 %";
 }
 
-void DesignManagerPrivate::scaleScene(qreal ratio)
+void DesignerWidgetPrivate::scaleScene(qreal ratio)
 {
-    if (DesignManager::_mode == FormGui) {
+    if (DesignerWidget::_mode == FormGui) {
         formView.scale((1.0 / lastScaleOfWv) * ratio, (1.0 / lastScaleOfWv) * ratio);
         lastScaleOfWv = ratio;
     } else {
@@ -494,27 +494,27 @@ void DesignManagerPrivate::scaleScene(qreal ratio)
     }
 }
 
-void DesignManagerPrivate::handleSnappingClicked(bool value)
+void DesignerWidgetPrivate::handleSnappingClicked(bool value)
 {
-    if (DesignManager::_mode == FormGui)
+    if (DesignerWidget::_mode == FormGui)
         formScene.setSnapping(value);
-    else if (DesignManager::_mode == ControlGui)
+    else if (DesignerWidget::_mode == ControlGui)
         controlScene.setSnapping(value);
 }
 
-void DesignManagerPrivate::handleShowOutlineClicked(bool value)
+void DesignerWidgetPrivate::handleShowOutlineClicked(bool value)
 {
-    if (DesignManager::_mode == FormGui ||
-        DesignManager::_mode == ControlGui) {
+    if (DesignerWidget::_mode == FormGui ||
+        DesignerWidget::_mode == ControlGui) {
         formScene.setShowOutlines(value);
         controlScene.setShowOutlines(value);
     }
 }
 
-void DesignManagerPrivate::handleFitInSceneClicked()
+void DesignerWidgetPrivate::handleFitInSceneClicked()
 {
     auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
-    auto diff = DesignManager::_mode == FormGui ?
+    auto diff = DesignerWidget::_mode == FormGui ?
                     qMin(formView.width() / formScene.width(),
                          formView.height() / formScene.height()) :
                     qMin(controlView.width() / controlScene.width(),
@@ -524,7 +524,7 @@ void DesignManagerPrivate::handleFitInSceneClicked()
             zoomlLevelCombobox.setCurrentText(findText(ratio));
 }
 
-void DesignManagerPrivate::handleThemeChange(const QString& text)
+void DesignerWidgetPrivate::handleThemeChange(const QString& text)
 {
 //    qmlClearTypeRegistrations();
 //    QQuickStyle::setStyle(text);
@@ -538,17 +538,17 @@ void DesignManagerPrivate::handleThemeChange(const QString& text)
 //        control->refresh();
 }
 
-void DesignManagerPrivate::handleZoomLevelChange(const QString& text)
+void DesignerWidgetPrivate::handleZoomLevelChange(const QString& text)
 {
     qreal ratio = findRatio(text);
     scaleScene(ratio);
 }
 
-void DesignManagerPrivate::handlePhonePortraitButtonClicked()
+void DesignerWidgetPrivate::handlePhonePortraitButtonClicked()
 {
-    auto form = DesignManager::formScene()->mainForm();
+    auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::PhonePortrait);
-    SaveManager::setProperty(form, TAG_SKIN, Skin::PhonePortrait);
+    SaveBackend::setProperty(form, TAG_SKIN, Skin::PhonePortrait);
     phonePortraitButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -560,11 +560,11 @@ void DesignManagerPrivate::handlePhonePortraitButtonClicked()
         formScene.mainControl()->centralize();
 }
 
-void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
+void DesignerWidgetPrivate::handlePhoneLandscapeButtonClicked()
 {
-    auto form = DesignManager::formScene()->mainForm();
+    auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::PhoneLandscape);
-    SaveManager::setProperty(form, TAG_SKIN, Skin::PhoneLandscape);
+    SaveBackend::setProperty(form, TAG_SKIN, Skin::PhoneLandscape);
     phoneLandscapeButton.setDisabled(true);
     phonePortraitButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -576,11 +576,11 @@ void DesignManagerPrivate::handlePhoneLandscapeButtonClicked()
         formScene.mainControl()->centralize();
 }
 
-void DesignManagerPrivate::handleDesktopSkinButtonClicked()
+void DesignerWidgetPrivate::handleDesktopSkinButtonClicked()
 {
-    auto form = DesignManager::formScene()->mainForm();
+    auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::Desktop);
-    SaveManager::setProperty(form, TAG_SKIN, Skin::Desktop);
+    SaveBackend::setProperty(form, TAG_SKIN, Skin::Desktop);
     desktopSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     phonePortraitButton.setChecked(false);
@@ -592,11 +592,11 @@ void DesignManagerPrivate::handleDesktopSkinButtonClicked()
         formScene.mainControl()->centralize();
 }
 
-void DesignManagerPrivate::handleNoSkinButtonClicked()
+void DesignerWidgetPrivate::handleNoSkinButtonClicked()
 {
-    auto form = DesignManager::formScene()->mainForm();
+    auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::NoSkin);
-    SaveManager::setProperty(form, TAG_SKIN, Skin::NoSkin);
+    SaveBackend::setProperty(form, TAG_SKIN, Skin::NoSkin);
     noSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
@@ -608,9 +608,9 @@ void DesignManagerPrivate::handleNoSkinButtonClicked()
         formScene.mainControl()->centralize();
 }
 
-void DesignManagerPrivate::handleRefreshPreviewClicked()
+void DesignerWidgetPrivate::handleRefreshPreviewClicked()
 {
-    if (DesignManager::_mode == FormGui) {
+    if (DesignerWidget::_mode == FormGui) {
         formScene.mainForm()->refresh();
         for (auto control : formScene.mainForm()->childControls())
             control->refresh();
@@ -621,7 +621,7 @@ void DesignManagerPrivate::handleRefreshPreviewClicked()
     }
 }
 
-void DesignManagerPrivate::handleClearControls()
+void DesignerWidgetPrivate::handleClearControls()
 {
     auto scene = parent->currentScene();
     if (!scene || !scene->mainControl())
@@ -637,7 +637,7 @@ void DesignManagerPrivate::handleClearControls()
     switch (ret) {
         case QMessageBox::Yes: {
             scene->removeChildControlsOnly(scene->mainControl());
-            SaveManager::removeChildControlsOnly(scene->mainControl());
+            SaveBackend::removeChildControlsOnly(scene->mainControl());
             break;
         } default: {
             // Do nothing
@@ -646,23 +646,23 @@ void DesignManagerPrivate::handleClearControls()
     }
 }
 
-void DesignManagerPrivate::handleEditorModeButtonClicked()
+void DesignerWidgetPrivate::handleEditorModeButtonClicked()
 {
-    DesignManager::setMode(CodeEdit);
+    DesignerWidget::setMode(CodeEdit);
 }
 
-void DesignManagerPrivate::handleCGuiModeButtonClicked()
+void DesignerWidgetPrivate::handleCGuiModeButtonClicked()
 {
-    DesignManager::setMode(ControlGui);
+    DesignerWidget::setMode(ControlGui);
 }
 
-void DesignManagerPrivate::handleWGuiModeButtonClicked()
+void DesignerWidgetPrivate::handleWGuiModeButtonClicked()
 {
-    DesignManager::setMode(FormGui);
+    DesignerWidget::setMode(FormGui);
 }
-void DesignManagerPrivate::handlePlayButtonClicked()
+void DesignerWidgetPrivate::handlePlayButtonClicked()
 {
-    ExecError error = SaveManager::execProject();
+    ExecError error = SaveBackend::execProject();
 
     QMessageBox box;
     box.setText("<b>Some went wrong.</b>");
@@ -729,14 +729,14 @@ void DesignManagerPrivate::handlePlayButtonClicked()
     }
 }
 
-void DesignManagerPrivate::handleBuildButtonClicked()
+void DesignerWidgetPrivate::handleBuildButtonClicked()
 {
     WindowManager::instance()->show(WindowManager::Builds);
 }
 
-void DesignManagerPrivate::handleModeChange()
+void DesignerWidgetPrivate::handleModeChange()
 {
-    if (DesignManager::_mode == FormGui) {
+    if (DesignerWidget::_mode == FormGui) {
         wGuiModeButton.setChecked(true);
         wGuiModeButton.setDisabled(true);
         cGuiModeButton.setChecked(false);
@@ -744,7 +744,7 @@ void DesignManagerPrivate::handleModeChange()
         cGuiModeButton.setEnabled(true);
         editorModeButton.setEnabled(true);
 
-        auto form = DesignManager::formScene()->mainForm();
+        auto form = DesignerWidget::formScene()->mainForm();
         if (form) {
             if (form->skin() == Skin::Desktop) {
                 desktopSkinButton.setChecked(true);
@@ -786,7 +786,7 @@ void DesignManagerPrivate::handleModeChange()
         toolbar.show();
         splitter.setSizes(sizes);
         parent->_currentScene = &formScene;
-    } else if (DesignManager::_mode == ControlGui) {
+    } else if (DesignerWidget::_mode == ControlGui) {
         cGuiModeButton.setChecked(true);
         cGuiModeButton.setDisabled(true);
         editorModeButton.setChecked(false);
@@ -869,80 +869,80 @@ void DesignManagerPrivate::handleModeChange()
     }
 }
 
-DesignManagerPrivate* DesignManager::_d = nullptr;
-DesignMode DesignManager::_mode = FormGui;
-ControlScene* DesignManager::_currentScene = nullptr;
+DesignerWidgetPrivate* DesignerWidget::_d = nullptr;
+DesignMode DesignerWidget::_mode = FormGui;
+ControlScene* DesignerWidget::_currentScene = nullptr;
 
-DesignManager::DesignManager(QObject *parent)
+DesignerWidget::DesignerWidget(QObject *parent)
     : QObject(parent)
 {
     if (_d) return;
-    _d = new DesignManagerPrivate(this);
+    _d = new DesignerWidgetPrivate(this);
     connect(this, SIGNAL(modeChanged()), _d, SLOT(handleModeChange()));
     _d->handleModeChange();
     ((IssuesBox*)_d->outputWidget.box(Issues))->setCurrentMode(_mode);
 }
 
-DesignManager* DesignManager::instance()
+DesignerWidget* DesignerWidget::instance()
 {
     return _d->parent;
 }
 
-void DesignManager::setSettleWidget(QWidget* widget)
+void DesignerWidget::setSettleWidget(QWidget* widget)
 {
     _d->settleWidget = widget;
     if (_d->settleWidget)
         _d->settleWidget->setLayout(&_d->hlayout);
 }
 
-const DesignMode& DesignManager::mode()
+const DesignMode& DesignerWidget::mode()
 {
     return _mode;
 }
 
-void DesignManager::setMode(const DesignMode& mode)
+void DesignerWidget::setMode(const DesignMode& mode)
 {
     _mode = mode;
     ((IssuesBox*)_d->outputWidget.box(Issues))->setCurrentMode(_mode);
     emit _d->parent->modeChanged();
 }
 
-ControlScene* DesignManager::currentScene()
+ControlScene* DesignerWidget::currentScene()
 {
     return _currentScene;
 }
 
-ControlScene* DesignManager::controlScene()
+ControlScene* DesignerWidget::controlScene()
 {
     return &_d->controlScene;
 }
 
-FormScene* DesignManager::formScene()
+FormScene* DesignerWidget::formScene()
 {
     return &_d->formScene;
 }
 
-QmlEditorView* DesignManager::qmlEditorView()
+QmlEditorView* DesignerWidget::qmlEditorView()
 {
     return &_d->qmlEditorView;
 }
 
-ControlView* DesignManager::controlView()
+ControlView* DesignerWidget::controlView()
 {
     return &_d->controlView;
 }
 
-FormView* DesignManager::formView()
+FormView* DesignerWidget::formView()
 {
     return &_d->formView;
 }
 
-LoadingIndicator* DesignManager::loadingIndicator()
+LoadingIndicator* DesignerWidget::loadingIndicator()
 {
     return &_d->loadingIndicator;
 }
 
-void DesignManager::updateSkin()
+void DesignerWidget::updateSkin()
 {
     auto form = formScene()->mainForm();
     if (form) {
@@ -971,30 +971,30 @@ void DesignManager::updateSkin()
     }
 }
 
-QSplitter* DesignManager::splitter()
+QSplitter* DesignerWidget::splitter()
 {
     return &_d->splitter;
 }
 
-OutputWidget* DesignManager::outputWidget()
+OutputWidget* DesignerWidget::outputWidget()
 {
     return &_d->outputWidget;
 }
 
-void DesignManager::checkErrors()
+void DesignerWidget::checkErrors()
 {
     static_cast<IssuesBox*>(_d->outputWidget.box(Issues))->refresh();
 //    MainWindow::instance()->inspectorPage()->refresh(); //FIXME
     _d->qmlEditorView.refreshErrors();
 }
 
-void DesignManager::controlClicked(Control* control)
+void DesignerWidget::controlClicked(Control* control)
 {
     currentScene()->clearSelection();
     control->setSelected(true);
 }
 
-void DesignManager::controlDoubleClicked(Control* control)
+void DesignerWidget::controlDoubleClicked(Control* control)
 {
     auto sizes = _d->splitter.sizes();
     QSize size;
@@ -1008,7 +1008,7 @@ void DesignManager::controlDoubleClicked(Control* control)
 
     _d->qmlEditorView.addControl(control);
     if (_d->qmlEditorView.pinned())
-        DesignManager::setMode(CodeEdit);
+        DesignerWidget::setMode(CodeEdit);
     _d->qmlEditorView.setMode(QmlEditorView::CodeEditor);
     _d->qmlEditorView.openControl(control);
     _d->qmlEditorView.raiseContainer();
@@ -1016,12 +1016,12 @@ void DesignManager::controlDoubleClicked(Control* control)
     _d->splitter.setSizes(sizes);
 }
 
-void DesignManager::controlDropped(Control* control, const QPointF& pos, const QString& url)
+void DesignerWidget::controlDropped(Control* control, const QPointF& pos, const QString& url)
 {
     auto scene = (ControlScene*)control->scene();
     scene->clearSelection();
     auto newControl = new Control(url, control->mode());
-    SaveManager::addControl(newControl, control,
+    SaveBackend::addControl(newControl, control,
       scene->mainControl()->uid(), scene->mainControl()->dir());
     newControl->setParentItem(control);
     newControl->setPos(pos);

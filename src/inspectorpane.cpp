@@ -1,9 +1,9 @@
 #include <inspectorpane.h>
 #include <fit.h>
 #include <css.h>
-#include <designmanager.h>
+#include <designerwidget.h>
 #include <filemanager.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <formspane.h>
 #include <controlwatcher.h>
 
@@ -150,18 +150,18 @@ InspectorPane::InspectorPane(QWidget* parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(DesignManager::formScene(), SIGNAL(selectionChanged()),
+    connect(DesignerWidget::formScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(DesignManager::controlScene(), SIGNAL(selectionChanged()),
+    connect(DesignerWidget::controlScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(DesignManager::instance(), SIGNAL(modeChanged()),
+    connect(DesignerWidget::instance(), SIGNAL(modeChanged()),
       SLOT(refresh()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
       SLOT(refresh()));
 //    connect(FormsPane::instance(), SIGNAL(currentFormChanged()),
 //      SLOT(refresh())); //FIXME
     QTimer::singleShot(3000, [this] {
-        connect(SaveManager::instance(), SIGNAL(databaseChanged()),
+        connect(SaveBackend::instance(), SIGNAL(databaseChanged()),
           SLOT(refresh()));
     });
 }
@@ -208,7 +208,7 @@ void InspectorPane::refresh()
 
     clear();
 
-    auto cs = DesignManager::currentScene();
+    auto cs = DesignerWidget::currentScene();
     auto scs = cs->selectedControls();
     auto mc = cs->mainControl();
 
@@ -227,7 +227,7 @@ void InspectorPane::refresh()
     }
 
     if (mc->form()) {
-        if (SaveManager::isMain(mc->dir()))
+        if (SaveBackend::isMain(mc->dir()))
             item->setIcon(0, QIcon(":/resources/images/mform.png"));
         else
             item->setIcon(0, QIcon(":/resources/images/form.png"));
@@ -262,7 +262,7 @@ void InspectorPane::refresh()
 void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = DesignManager::currentScene()->mainControl();
+    const auto mc = DesignerWidget::currentScene()->mainControl();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();
@@ -284,7 +284,7 @@ void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
 void InspectorPane::handleClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = DesignManager::currentScene()->mainControl();
+    const auto mc = DesignerWidget::currentScene()->mainControl();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();

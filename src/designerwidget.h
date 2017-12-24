@@ -1,5 +1,5 @@
-#ifndef DESIGNMANAGER_H
-#define DESIGNMANAGER_H
+#ifndef DESIGNERWIDGET_H
+#define DESIGNERWIDGET_H
 
 #include <formscene.h>
 #include <qmleditorview.h>
@@ -7,22 +7,22 @@
 #include <QObject>
 
 class QWidget;
-class DesignManagerPrivate;
+class DesignerWidgetPrivate;
 class LoadingIndicator;
 class OutputWidget;
 class QSplitter;
 class ControlView;
 class FormView;
 
-class DesignManager : public QObject
+class DesignerWidget : public QObject
 {
         Q_OBJECT
-        Q_DISABLE_COPY(DesignManager)
-        friend class DesignManagerPrivate;
+        Q_DISABLE_COPY(DesignerWidget)
+        friend class DesignerWidgetPrivate;
 
     public:
-        explicit DesignManager(QObject *parent = 0);
-        static DesignManager* instance();
+        explicit DesignerWidget(QObject *parent = 0);
+        static DesignerWidget* instance();
         static void setSettleWidget(QWidget* widget);
         static const DesignMode& mode();
         static void setMode(const DesignMode& mode);
@@ -47,9 +47,9 @@ class DesignManager : public QObject
         void modeChanged();
 
     private:
-        static DesignManagerPrivate* _d;
+        static DesignerWidgetPrivate* _d;
         static DesignMode _mode;
         static ControlScene* _currentScene;
 };
 
-#endif // DESIGNMANAGER_H
+#endif // DESIGNERWIDGET_H

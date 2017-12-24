@@ -4,7 +4,7 @@
 #include <toolsmanager.h>
 #include <filemanager.h>
 #include <zipper.h>
-#include <savemanager.h>
+#include <savebackend.h>
 
 #include <QScrollBar>
 #include <QBuffer>
@@ -12,7 +12,7 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QMessageBox>
-#include <designmanager.h>
+#include <designerwidget.h>
 
 //!
 //! *************************** [global] ***************************
@@ -25,7 +25,7 @@ static QString handleImports(const QStringList& fileNames)
         QTemporaryDir dir;
         if (dir.isValid()) {
             if (Zipper::extractZip(rdfile(fileName), dir.path())) {
-                if (SaveManager::isOwctrl(dir.path())) {
+                if (SaveBackend::isOwctrl(dir.path())) {
                     if (ToolsManager::instance()->addTool(dir.path(), true)) {
                         msg = "Tool import has successfully done.";
                     } else {
@@ -125,7 +125,7 @@ void ToolboxSettingsWindow::on_btnReset_clicked()
                 auto currentDir = dname(dname(ui->treeWidget->
                   urls(ci).first().toLocalFile()));//FIXME: Do same for Control GUI Editor /Tool Editor
                 // TODO: Check same for selected control's child controls
-                if (DesignManager::qmlEditorView()->isOpen(currentDir)) {
+                if (DesignerWidget::qmlEditorView()->isOpen(currentDir)) {
                     obstacle = true;
                     break;
                 }
@@ -151,7 +151,7 @@ void ToolboxSettingsWindow::on_btnRemove_clicked()
       "This will remove selected tool from tool library. Are you sure?")) {
         auto currentDir = dname(dname(ui->treeWidget->urls
           (ui->treeWidget->currentItem()).first().toLocalFile()));
-        if (!DesignManager::qmlEditorView()->isOpen(currentDir)) {
+        if (!DesignerWidget::qmlEditorView()->isOpen(currentDir)) {
             ToolsManager::instance()->removeTool(dname(dname(ui->treeWidget->urls
               (ui->treeWidget->currentItem()).first().toLocalFile())));
         } else { //FIXME: Do same for Control GUI Editor /Tool Editor

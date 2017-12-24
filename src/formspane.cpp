@@ -1,9 +1,9 @@
 #include <formspane.h>
 #include <flatbutton.h>
 #include <toolboxtree.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <formscene.h>
-#include <designmanager.h>
+#include <designerwidget.h>
 #include <filemanager.h>
 #include <css.h>
 #include <fit.h>
@@ -48,9 +48,9 @@ FormsPane::FormsPane(QWidget *parent) : QWidget(parent)
     _listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QTimer::singleShot(1000, [=] { //FIXME
-        Delayer::delay([]()->bool {if (SaveManager::instance()) return false; else return true;});
-        connect(SaveManager::instance(), SIGNAL(projectExposed()), SLOT(handleDatabaseChange()));
-        connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
+        Delayer::delay([]()->bool {if (SaveBackend::instance()) return false; else return true;});
+        connect(SaveBackend::instance(), SIGNAL(projectExposed()), SLOT(handleDatabaseChange()));
+        connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
         connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
     });
 
@@ -83,11 +83,11 @@ FormsPane::FormsPane(QWidget *parent) : QWidget(parent)
 
 void FormsPane::removeButtonClicked()
 {
-    auto form = DesignManager::formScene()->mainForm();
+    auto form = DesignerWidget::formScene()->mainForm();
     if (!form || !form->form() || form->main())
         return;
-    SaveManager::removeForm((Form*)form);
-    DesignManager::formScene()->removeForm(form);
+    SaveBackend::removeForm((Form*)form);
+    DesignerWidget::formScene()->removeForm(form);
 }
 
 void FormsPane::addButtonClicked()
@@ -101,8 +101,8 @@ void FormsPane::addButtonClicked()
         return;
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
-    DesignManager::formScene()->addForm(form);
-    SaveManager::addForm(form);
+    DesignerWidget::formScene()->addForm(form);
+    SaveBackend::addForm(form);
     rm(tempPath);
 }
 
@@ -115,14 +115,14 @@ void FormsPane::handleDatabaseChange()
 
     _listWidget->clear();
 
-    for (auto path : SaveManager::formPaths()) {
-        auto _id = SaveManager::id(path);
+    for (auto path : SaveBackend::formPaths()) {
+        auto _id = SaveBackend::id(path);
         if (id == _id)
             row = _listWidget->count();
 
         auto item = new QListWidgetItem;
         item->setText(_id);
-        if (SaveManager::isMain(path))
+        if (SaveBackend::isMain(path))
             item->setIcon(QIcon(":/resources/images/mform.png"));
         else
             item->setIcon(QIcon(":/resources/images/form.png"));
@@ -137,10 +137,10 @@ void FormsPane::handleCurrentFormChange()
         return;
 
     auto id = _listWidget->currentItem()->text();
-    for (auto form : DesignManager::formScene()->forms())
+    for (auto form : DesignerWidget::formScene()->forms())
         if (form->id() == id)
-            DesignManager::formScene()->setMainForm(form);
-    DesignManager::instance()->updateSkin();
+            DesignerWidget::formScene()->setMainForm(form);
+    DesignerWidget::instance()->updateSkin();
     emit currentFormChanged();
 }
 

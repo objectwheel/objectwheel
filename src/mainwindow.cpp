@@ -8,7 +8,7 @@
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <toolsmanager.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <delayer.h>
 #include <formscene.h>
 #include <qmlpreviewer.h>
@@ -31,23 +31,29 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 void MainWindow::setupGui()
 {
+    _settleWidget = new QFrame;
+    _titleBar = new QToolBar;
+    _toolboxDockwidget = new QDockWidget;
+    _propertiesDockwidget = new QDockWidget;
+    _formsDockwidget = new QDockWidget;
+    _inspectorDockwidget = new QDockWidget;
+    _designerWidget = new DesignerWidget;
     _toolboxPane = new ToolboxPane;
     _propertiesPane = new PropertiesPane;
     _formsPane = new FormsPane;
     _inspectorPage = new InspectorPane;
 
-    setWindowTitle(APP_NAME);
-    setAutoFillBackground(true);
-    setCentralWidget(&_settleWidget);
-
     QPalette p(palette());
-    p.setColor(QPalette::Window, QColor("#E0E4E7"));
-    setPalette(p);
+    p.setColor(backgroundRole(), "#E0E4E7");
     setStyleSheet("QMainWindow::separator{height: 0px;}");
+    setCentralWidget(_settleWidget);
+    setAutoFillBackground(true);
+    setWindowTitle(APP_NAME);
+    setPalette(p);
 
-    _settleWidget.setFrameShape(QFrame::StyledPanel);
-    _settleWidget.setFrameShadow(QFrame::Plain);
-    _designManager.setSettleWidget(&_settleWidget);
+    _settleWidget->setFrameShape(QFrame::StyledPanel);
+    _settleWidget->setFrameShadow(QFrame::Plain);
+    _designerWidget->setSettleWidget(_settleWidget);
 
     // Toolbar settings
     QLabel* titleText = new QLabel;
@@ -60,12 +66,12 @@ void MainWindow::setupGui()
     titleText->setFont(f);
 
     /* Add Title Bar */
-    addToolBar(Qt::TopToolBarArea, &_titleBar);
-    _titleBar.setFixedHeight(fit::fx(34));
-    _titleBar.setFloatable(false);
-    _titleBar.setMovable(false);
-    _titleBar.addWidget(titleText);
-    _titleBar.setStyleSheet(QString("border: none; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
+    addToolBar(Qt::TopToolBarArea, _titleBar);
+    _titleBar->setFixedHeight(fit::fx(34));
+    _titleBar->setFloatable(false);
+    _titleBar->setMovable(false);
+    _titleBar->addWidget(titleText);
+    _titleBar->setStyleSheet(QString("border: none; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
       .arg(QColor("#0D74C8").name()).arg(QColor("#0D74C8").darker(115).name()));
 
     /*** PROPERTIES DOCK WIDGET ***/
@@ -78,8 +84,8 @@ void MainWindow::setupGui()
     pinButton->setToolTip("Pin/Unpin pane.");
     pinButton->setCursor(Qt::PointingHandCursor);
     pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton, &QToolButton::clicked, this, [&]{
-        _propertiesDockwidget.setFloating(!_propertiesDockwidget.isFloating());
+    connect(pinButton, &QToolButton::clicked, this, [=]{
+        _propertiesDockwidget->setFloating(!_propertiesDockwidget->isFloating());
     });
 
     QToolBar* toolbar = new QToolBar;
@@ -89,11 +95,11 @@ void MainWindow::setupGui()
     toolbar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
     toolbar->setFixedHeight(fit::fx(22.8));
 
-    _propertiesDockwidget.setTitleBarWidget(toolbar);
-    _propertiesDockwidget.setWidget(_propertiesPane);
-    _propertiesDockwidget.setWindowTitle("Properties");
-    _propertiesDockwidget.setAttribute(Qt::WA_TranslucentBackground);
-    _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
+    _propertiesDockwidget->setTitleBarWidget(toolbar);
+    _propertiesDockwidget->setWidget(_propertiesPane);
+    _propertiesDockwidget->setWindowTitle("Properties");
+    _propertiesDockwidget->setAttribute(Qt::WA_TranslucentBackground);
+    _propertiesDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                       QDockWidget::DockWidgetFloatable);
 
     /*** FORMS DOCK WIDGET ***/
@@ -106,8 +112,8 @@ void MainWindow::setupGui()
     pinButton2->setToolTip("Pin/Unpin pane.");
     pinButton2->setCursor(Qt::PointingHandCursor);
     pinButton2->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton2, &QToolButton::clicked, this, [&]{
-        _formsDockwidget.setFloating(!_formsDockwidget.isFloating());
+    connect(pinButton2, &QToolButton::clicked, this, [=]{
+        _formsDockwidget->setFloating(!_formsDockwidget->isFloating());
     });
 
     QToolBar* toolbar2 = new QToolBar;
@@ -117,11 +123,11 @@ void MainWindow::setupGui()
     toolbar2->setIconSize(QSize(fit::fx(11), fit::fx(11)));
     toolbar2->setFixedHeight(fit::fx(22.8));
 
-    _formsDockwidget.setTitleBarWidget(toolbar2);
-    _formsDockwidget.setWidget(_formsPane);
-    _formsDockwidget.setWindowTitle("Forms");
-    _formsDockwidget.setAttribute(Qt::WA_TranslucentBackground);
-    _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
+    _formsDockwidget->setTitleBarWidget(toolbar2);
+    _formsDockwidget->setWidget(_formsPane);
+    _formsDockwidget->setWindowTitle("Forms");
+    _formsDockwidget->setAttribute(Qt::WA_TranslucentBackground);
+    _formsDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                  QDockWidget::DockWidgetFloatable);
 
     /*** TOOLBOX DOCK WIDGET ***/
@@ -134,15 +140,15 @@ void MainWindow::setupGui()
     pinButton3->setToolTip("Pin/Unpin pane.");
     pinButton3->setCursor(Qt::PointingHandCursor);
     pinButton3->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton3, &QToolButton::clicked, this, [&]{
-        _toolboxDockwidget.setFloating(!_toolboxDockwidget.isFloating());
+    connect(pinButton3, &QToolButton::clicked, this, [=]{
+        _toolboxDockwidget->setFloating(!_toolboxDockwidget->isFloating());
     });
 
     QToolButton* toolboxSettingsButton = new QToolButton;
     toolboxSettingsButton->setToolTip("Toolbox settings.");
     toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
     toolboxSettingsButton->setIcon(QIcon(":/resources/images/settings.png"));
-    connect(toolboxSettingsButton, &QToolButton::clicked, this, [&] {
+    connect(toolboxSettingsButton, &QToolButton::clicked, this, [=] {
         WindowManager::instance()->show(WindowManager::ToolboxSettings);
     });
 
@@ -154,19 +160,21 @@ void MainWindow::setupGui()
     toolbar3->setIconSize(QSize(fit::fx(11), fit::fx(11)));
     toolbar3->setFixedHeight(fit::fx(22.8));
 
-    _toolboxDockwidget.setTitleBarWidget(toolbar3);
-    _toolboxDockwidget.setWidget(_toolboxPane);
-    _toolboxDockwidget.setWindowTitle("Toolbox");
-    _toolboxDockwidget.setAttribute(Qt::WA_TranslucentBackground);
-    _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
-                                   QDockWidget::DockWidgetFloatable);
+    _toolboxDockwidget->setTitleBarWidget(toolbar3);
+    _toolboxDockwidget->setWidget(_toolboxPane);
+    _toolboxDockwidget->setWindowTitle("Toolbox");
+    _toolboxDockwidget->setAttribute(Qt::WA_TranslucentBackground);
+    _toolboxDockwidget->setFeatures(
+        QDockWidget::DockWidgetMovable |
+        QDockWidget::DockWidgetFloatable
+    );
 
     connect(_toolboxPane->toolboxTree()->indicatorButton(),
-      &FlatButton::clicked, this, [&] {
-        auto splitter = DesignManager::splitter();
-        auto controlView = DesignManager::controlView();
-        auto formView = DesignManager::formView();
-        auto qmlEditorView = DesignManager::qmlEditorView();
+      &FlatButton::clicked, this, [=] {
+        auto splitter = DesignerWidget::splitter();
+        auto controlView = DesignerWidget::controlView();
+        auto formView = DesignerWidget::formView();
+        auto qmlEditorView = DesignerWidget::qmlEditorView();
         auto sizes = splitter->sizes();
         QSize size;
         if (formView->isVisible())
@@ -176,13 +184,13 @@ void MainWindow::setupGui()
         else
             size = controlView->size();
         sizes[splitter->indexOf(controlView)] = size.height();
-        auto previousControl = DesignManager::controlScene()->mainControl();
+        auto previousControl = DesignerWidget::controlScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
         auto url = _toolboxPane->toolboxTree()->urls(_toolboxPane->toolboxTree()->currentItem())[0];
-        auto control = SaveManager::exposeControl(dname(dname(url.toLocalFile())), ControlGui);
-        DesignManager::controlScene()->setMainControl(control);
-        DesignManager::setMode(ControlGui);
+        auto control = SaveBackend::exposeControl(dname(dname(url.toLocalFile())), ControlGui);
+        DesignerWidget::controlScene()->setMainControl(control);
+        DesignerWidget::setMode(ControlGui);
         control->refresh();
         for (auto childControl : control->childControls())
             childControl->refresh();
@@ -200,8 +208,8 @@ void MainWindow::setupGui()
     pinButton4->setToolTip("Pin/Unpin pane.");
     pinButton4->setCursor(Qt::PointingHandCursor);
     pinButton4->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton4, &QToolButton::clicked, this, [&]{
-        _inspectorDockwidget.setFloating(!_inspectorDockwidget.isFloating());
+    connect(pinButton4, &QToolButton::clicked, this, [=]{
+        _inspectorDockwidget->setFloating(!_inspectorDockwidget->isFloating());
     });
 
     QToolBar* toolbar4 = new QToolBar;
@@ -212,21 +220,21 @@ void MainWindow::setupGui()
     toolbar4->setFixedHeight(fit::fx(22.8));
 
     connect(_inspectorPage, SIGNAL(controlClicked(Control*)),
-      &_designManager, SLOT(controlClicked(Control*)));
+      _designerWidget, SLOT(controlClicked(Control*)));
     connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)),
-      &_designManager, SLOT(controlDoubleClicked(Control*)));
+      _designerWidget, SLOT(controlDoubleClicked(Control*)));
 
-    _inspectorDockwidget.setTitleBarWidget(toolbar4);
-    _inspectorDockwidget.setWidget(_inspectorPage);
-    _inspectorDockwidget.setWindowTitle("Control Inspector");
-    _inspectorDockwidget.setAttribute(Qt::WA_TranslucentBackground);
-    _inspectorDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
+    _inspectorDockwidget->setTitleBarWidget(toolbar4);
+    _inspectorDockwidget->setWidget(_inspectorPage);
+    _inspectorDockwidget->setWindowTitle("Control Inspector");
+    _inspectorDockwidget->setAttribute(Qt::WA_TranslucentBackground);
+    _inspectorDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                      QDockWidget::DockWidgetFloatable);
 
-    addDockWidget(Qt::LeftDockWidgetArea, &_toolboxDockwidget);
-    addDockWidget(Qt::LeftDockWidgetArea, &_formsDockwidget);
-    addDockWidget(Qt::RightDockWidgetArea, &_inspectorDockwidget);
-    addDockWidget(Qt::RightDockWidgetArea, &_propertiesDockwidget);
+    addDockWidget(Qt::LeftDockWidgetArea, _toolboxDockwidget);
+    addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
+    addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
+    addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
 }
 
 void MainWindow::setupManagers()
@@ -236,10 +244,10 @@ void MainWindow::setupManagers()
     Q_UNUSED(userManager);
     new ProjectManager(this);
     ProjectManager::setMainWindow(this);
-    new SaveManager(this);
+    new SaveBackend(this);
     new QmlPreviewer(this);
 
-    connect(SaveManager::instance(), SIGNAL(parserRunningChanged(bool)),
+    connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
       SLOT(handleIndicatorChanges()));
     connect(QmlPreviewer::instance(), SIGNAL(workingChanged(bool)),
       SLOT(handleIndicatorChanges()));
@@ -260,33 +268,17 @@ void MainWindow::setupManagers()
 
 void MainWindow::handleIndicatorChanges()
 {
-    DesignManager::loadingIndicator()->setRunning(SaveManager::parserWorking() || QmlPreviewer::working());
+    DesignerWidget::loadingIndicator()->setRunning(SaveBackend::parserWorking() || QmlPreviewer::working());
 }
 
 void MainWindow::cleanupObjectwheel()
 {
-    while(SaveManager::parserWorking())
+    while(SaveBackend::parserWorking())
         Delayer::delay(100);
 
     UserManager::stopUserSession();
 
     qApp->processEvents();
-}
-
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-    QMainWindow::closeEvent(event);
-    emit quitting();
-}
-
-InspectorPane* MainWindow::inspectorPage()
-{
-    return _inspectorPage;
-}
-
-FormsPane* MainWindow::formsPane()
-{
-    return _formsPane;
 }
 
 //void MainWindow::on_secureExitButton_clicked()

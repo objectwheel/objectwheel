@@ -4,7 +4,7 @@
 #include <filemanager.h>
 #include <controlwatcher.h>
 #include <suppressor.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <controlscene.h>
 #include <formscene.h>
 
@@ -107,7 +107,7 @@ Control::Control(const QString& url, const DesignMode& mode,
     : QGraphicsWidget(parent)
     , _clip(true)
     , _d(new ControlPrivate(this))
-    , _uid(uid.isEmpty() ? SaveManager::uid(dname(dname(url))) : uid)
+    , _uid(uid.isEmpty() ? SaveBackend::uid(dname(dname(url))) : uid)
     , _url(url)
     , _mode(mode)
     , _dragging(false)
@@ -123,10 +123,10 @@ Control::Control(const QString& url, const DesignMode& mode,
     setAcceptHoverEvents(true);
     setAcceptDrops(true);
 
-    setZValue(SaveManager::z(dir()));
-    setId(SaveManager::id(dname(dname(url))));
-    setPos(SaveManager::x(dir()), SaveManager::y(dir()));
-    resize(fit::fx(SaveManager::width(dir())), fit::fx(SaveManager::height(dir())));
+    setZValue(SaveBackend::z(dir()));
+    setId(SaveBackend::id(dname(dname(url))));
+    setPos(SaveBackend::x(dir()), SaveBackend::y(dir()));
+    resize(fit::fx(SaveBackend::width(dir())), fit::fx(SaveBackend::height(dir())));
     if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
     _d->preview = QmlPreviewer::initialPreview(size());
 
@@ -249,7 +249,7 @@ void Control::refresh()
 
 void Control::updateUid()
 {
-    _uid = SaveManager::uid(dir());
+    _uid = SaveBackend::uid(dir());
 }
 
 void Control::centralize()
@@ -647,7 +647,7 @@ void FormPrivate::applySkinChange()
 Form::Form(const QString& url, const QString& uid, Form* parent)
     : Control(url, FormGui, uid, parent)
     , _d(new FormPrivate(this))
-    , _skin(SaveManager::skin(dir()))
+    , _skin(SaveBackend::skin(dir()))
 {
     _clip = false;
     setFlag(Control::ItemIsMovable, false);

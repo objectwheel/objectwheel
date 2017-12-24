@@ -1,10 +1,10 @@
 #include <savetransaction.h>
 #include <control.h>
 #include <controlwatcher.h>
-#include <savemanager.h>
+#include <savebackend.h>
 #include <fit.h>
 
-#define sM (SaveManager::instance())
+#define sM (SaveBackend::instance())
 #define cW (ControlWatcher::instance())
 
 SaveTransaction::SaveTransaction()

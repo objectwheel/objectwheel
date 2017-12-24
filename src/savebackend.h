@@ -1,5 +1,5 @@
-#ifndef SAVEMANAGER_H
-#define SAVEMANAGER_H
+#ifndef SAVEBACKEND_H
+#define SAVEBACKEND_H
 
 #include <QObject>
 #include <QQmlError>
@@ -30,7 +30,7 @@
 #define TAG_OWDB_SIGN "_owdbsign"
 #define TAG_OWCTRL_SIGN "_owctrlsign"
 
-class SaveManagerPrivate;
+class SaveBackendPrivate;
 class Control;
 class Form;
 class ControlScene;
@@ -54,14 +54,14 @@ struct ExecError {
         inline bool hasError() { return type != NoError; }
 };
 
-class SaveManager : public QObject
+class SaveBackend : public QObject
 {
         Q_OBJECT
-        Q_DISABLE_COPY(SaveManager)
+        Q_DISABLE_COPY(SaveBackend)
 
     public:
-        explicit SaveManager(QObject *parent = 0);
-        static SaveManager* instance();
+        explicit SaveBackend(QObject *parent = 0);
+        static SaveBackend* instance();
 
         static ExecError execProject();
         static void exposeProject();
@@ -109,7 +109,7 @@ class SaveManager : public QObject
         void projectExposed();
 
     private:
-        static SaveManagerPrivate* _d;
+        static SaveBackendPrivate* _d;
 };
 
-#endif // SAVEMANAGER_H
+#endif // SAVEBACKEND_H

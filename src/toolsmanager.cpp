@@ -3,7 +3,7 @@
 #include <zipper.h>
 #include <projectmanager.h>
 #include <toolboxtree.h>
-#include <savemanager.h>
+#include <savebackend.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -99,7 +99,7 @@ QStringList ToolsManager::categories() const
     QStringList categories;
     for (auto dir : lsdir(toolsDir())) {
         auto toolPath = toolsDir() + separator() + dir;
-        auto category = SaveManager::toolCategory(toolPath);
+        auto category = SaveBackend::toolCategory(toolPath);
         if (!categories.contains(category))
             categories << category;
     }
@@ -109,14 +109,14 @@ QStringList ToolsManager::categories() const
 bool ToolsManager::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
     if (ProjectManager::currentProject().isEmpty() ||
-      toolPath.isEmpty() || !SaveManager::isOwctrl(toolPath))
+      toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
         return false;
 
     const bool isNewTool = !toolPath.contains(toolsDir());
     QString newToolPath;
     if (isNewTool) {
         newToolPath = toolsDir() + separator() +
-          QString::number(SaveManager::biggestDir(toolsDir()) + 1);
+          QString::number(SaveBackend::biggestDir(toolsDir()) + 1);
 
         if (!mkdir(newToolPath))
             return false;
@@ -124,15 +124,15 @@ bool ToolsManager::addTool(const QString& toolPath, const bool select, const boo
         if (!cp(toolPath, newToolPath, true, qrc))
             return false;
 
-        SaveManager::refreshToolUid(newToolPath);
+        SaveBackend::refreshToolUid(newToolPath);
     } else {
         newToolPath = toolPath;
     }
 
     QList<QUrl> urls;
     auto dir = newToolPath + separator() + DIR_THIS + separator();
-    auto category = SaveManager::toolCategory(newToolPath);
-    auto name = SaveManager::toolName(newToolPath);
+    auto category = SaveBackend::toolCategory(newToolPath);
+    auto name = SaveBackend::toolName(newToolPath);
 
     urls << QUrl::fromLocalFile(dir + "main.qml");
     if (category.isEmpty())
@@ -247,7 +247,7 @@ void ToolsManager::downloadTools(const QUrl& url)
 
         for (auto val : toolsArray)
         {
-            QString toolDir = QString::number(SaveManager::biggestDir(toolsDir()) + 1);
+            QString toolDir = QString::number(SaveBackend::biggestDir(toolsDir()) + 1);
             QDir(toolsDir()).mkpath(toolDir);
             QUrl toolUrl = QUrl::fromUserInput(val.toString());
 

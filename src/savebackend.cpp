@@ -1,4 +1,4 @@
-#include <savemanager.h>
+#include <savebackend.h>
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <parsercontroller.h>
@@ -45,7 +45,7 @@
 /******************************************************************/
 
 //!
-//! ******************* [SaveManagerPrivate] *******************
+//! ******************* [SaveBackendPrivate] *******************
 //!
 
 enum Type {
@@ -54,7 +54,7 @@ enum Type {
     NonGui
 };
 
-class SaveManagerPrivate : public QObject
+class SaveBackendPrivate : public QObject
 {
         Q_OBJECT
         // Forms: All forms (children not included).
@@ -63,7 +63,7 @@ class SaveManagerPrivate : public QObject
         // None of member functions checks whether given controls' ids or dirs are valid or not.
 
     public:
-        SaveManagerPrivate(SaveManager* parent);
+        SaveBackendPrivate(SaveBackend* parent);
         void setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const;
         QJsonValue property(const QByteArray& propertyData, const QString& property) const;
         void flushId(const Control* control, const QString& id) const;
@@ -146,18 +146,18 @@ class SaveManagerPrivate : public QObject
         Type type(QObject* object) const;
 
     public:
-        SaveManager* parent = nullptr;
+        SaveBackend* parent = nullptr;
         ParserController parserController;
         ExecutiveWidget executiveWidget;
 };
 
-SaveManagerPrivate::SaveManagerPrivate(SaveManager* parent)
+SaveBackendPrivate::SaveBackendPrivate(SaveBackend* parent)
     : QObject(parent)
     , parent(parent)
 {
 }
 
-void SaveManagerPrivate::setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const
+void SaveBackendPrivate::setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value) const
 {
     if (propertyData.isEmpty())
         return;
@@ -167,7 +167,7 @@ void SaveManagerPrivate::setProperty(QByteArray& propertyData, const QString& pr
     propertyData = QJsonDocument(jobj).toJson();
 }
 
-QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QString& property) const
+QJsonValue SaveBackendPrivate::property(const QByteArray& propertyData, const QString& property) const
 {
     if (propertyData.isEmpty())
         return QJsonValue();
@@ -176,7 +176,7 @@ QJsonValue SaveManagerPrivate::property(const QByteArray& propertyData, const QS
     return jobj[property];
 }
 
-void SaveManagerPrivate::flushId(const Control* control, const QString& id) const
+void SaveBackendPrivate::flushId(const Control* control, const QString& id) const
 {
     auto propertyPath = control->dir() + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -185,13 +185,13 @@ void SaveManagerPrivate::flushId(const Control* control, const QString& id) cons
     wrfile(propertyPath, propertyData);
 }
 
-void SaveManagerPrivate::flushSuid(const Control* control, const QString& suid) const
+void SaveBackendPrivate::flushSuid(const Control* control, const QString& suid) const
 {
     auto topPath = control->dir();
     auto fromUid = parent->suid(topPath);
     if (!fromUid.isEmpty()) {
         for (auto path : fps(FILE_PROPERTIES, topPath)) {
-            if (SaveManager::suid(dname(dname(path))) == fromUid) {
+            if (SaveBackend::suid(dname(dname(path))) == fromUid) {
                 auto propertyData = rdfile(path);
                 auto jobj = QJsonDocument::fromJson(propertyData).object();
                 jobj[TAG_SUID] = suid;
@@ -208,14 +208,14 @@ void SaveManagerPrivate::flushSuid(const Control* control, const QString& suid) 
     }
 }
 
-bool SaveManagerPrivate::isOwctrl(const QByteArray& propertyData) const
+bool SaveBackendPrivate::isOwctrl(const QByteArray& propertyData) const
 {
     auto sign = property(propertyData, TAG_OWCTRL_SIGN).toString();
     auto uid = property(propertyData, TAG_OWCTRL_SIGN).toString();
     return (sign == SIGN_OWCTRL && !uid.isEmpty());
 }
 
-bool SaveManagerPrivate::existsInForms(const Control* control) const
+bool SaveBackendPrivate::existsInForms(const Control* control) const
 {
     for (auto path : formPaths()) {
         auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
@@ -228,7 +228,7 @@ bool SaveManagerPrivate::existsInForms(const Control* control) const
     return false;
 }
 
-bool SaveManagerPrivate::existsInFormScope(const Control* control) const
+bool SaveBackendPrivate::existsInFormScope(const Control* control) const
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
@@ -242,7 +242,7 @@ bool SaveManagerPrivate::existsInFormScope(const Control* control) const
     return false;
 }
 
-bool SaveManagerPrivate::existsInParentScope(const Control* control, const QString& suid, const QString topPath) const
+bool SaveBackendPrivate::existsInParentScope(const Control* control, const QString& suid, const QString topPath) const
 {
     if (control->form())
         return existsInFormScope(control);
@@ -283,7 +283,7 @@ bool SaveManagerPrivate::existsInParentScope(const Control* control, const QStri
     }
 }
 
-QStringList SaveManagerPrivate::controlPaths(const QString& topPath) const
+QStringList SaveBackendPrivate::controlPaths(const QString& topPath) const
 {
     QStringList paths;
 
@@ -299,7 +299,7 @@ QStringList SaveManagerPrivate::controlPaths(const QString& topPath) const
     return paths;
 }
 
-QStringList SaveManagerPrivate::formPaths() const
+QStringList SaveBackendPrivate::formPaths() const
 {
     QStringList paths;
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
@@ -321,7 +321,7 @@ QStringList SaveManagerPrivate::formPaths() const
     return paths;
 }
 
-QStringList SaveManagerPrivate::formScopePaths() const
+QStringList SaveBackendPrivate::formScopePaths() const
 {
     const QStringList fpaths = formPaths();
     QStringList paths(fpaths);
@@ -332,12 +332,12 @@ QStringList SaveManagerPrivate::formScopePaths() const
     return paths;
 }
 
-bool SaveManagerPrivate::isMain(const QString& rootPath)
+bool SaveBackendPrivate::isMain(const QString& rootPath)
 {
     return (fname(rootPath) == DIR_MAINFORM);
 }
 
-void SaveManagerPrivate::recalculateUids(Control* control) const
+void SaveBackendPrivate::recalculateUids(Control* control) const
 {
     if (control->dir().isEmpty())
         return;
@@ -363,7 +363,7 @@ void SaveManagerPrivate::recalculateUids(Control* control) const
     Control::updateUids(); // FIXME: Change with childControls()->updateUid();
 }
 
-void SaveManagerPrivate::refactorId(Control* control, const QString& suid, const QString& topPath) const
+void SaveBackendPrivate::refactorId(Control* control, const QString& suid, const QString& topPath) const
 {
     if (control->id().isEmpty())
         control->setId("control");
@@ -374,21 +374,21 @@ void SaveManagerPrivate::refactorId(Control* control, const QString& suid, const
         control->setId(id + QString::number(i));
 }
 
-void SaveManagerPrivate::updateFile(const QString& filePath, const QString& from, const QString& to) const
+void SaveBackendPrivate::updateFile(const QString& filePath, const QString& from, const QString& to) const
 {
     auto data = rdfile(filePath);
     data.replace(from.toUtf8(), to.toUtf8());
     wrfile(filePath, data);
 }
 
-bool SaveManagerPrivate::isForm(const QString& rootPath) const
+bool SaveBackendPrivate::isForm(const QString& rootPath) const
 {
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
     auto baseDir = projectDir + separator() + DIR_OWDB;
     return (baseDir == dname(rootPath));
 }
 
-QString SaveManagerPrivate::findByUid(const QString& uid, const QString& rootPath) const
+QString SaveBackendPrivate::findByUid(const QString& uid, const QString& rootPath) const
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
@@ -417,7 +417,7 @@ QString SaveManagerPrivate::findByUid(const QString& uid, const QString& rootPat
     return QString();
 }
 
-QString SaveManagerPrivate::findById(const QString& suid, const QString& id, const QString& rootPath) const
+QString SaveBackendPrivate::findById(const QString& suid, const QString& id, const QString& rootPath) const
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
@@ -448,7 +448,7 @@ QString SaveManagerPrivate::findById(const QString& suid, const QString& id, con
     return QString();
 }
 
-bool SaveManagerPrivate::isInOwdb(const QString& path) const
+bool SaveBackendPrivate::isInOwdb(const QString& path) const
 {
     auto projectDirectory = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
@@ -458,7 +458,7 @@ bool SaveManagerPrivate::isInOwdb(const QString& path) const
     return path.contains(owdbPath, Qt::CaseInsensitive);
 }
 
-QString SaveManagerPrivate::parentDir(const Control* control) const
+QString SaveBackendPrivate::parentDir(const Control* control) const
 {
     if (control->form() ||
         control->dir().isEmpty() ||
@@ -468,7 +468,7 @@ QString SaveManagerPrivate::parentDir(const Control* control) const
     return dname(dname(control->dir()));
 }
 
-QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>& comps,
+QObject* SaveBackendPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>& comps,
   const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine,
@@ -501,7 +501,7 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
     return item;
 }
 
-QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>& comps,
+QObject* SaveBackendPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQmlComponent>>& comps,
   const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine));
@@ -537,7 +537,7 @@ QObject* SaveManagerPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
     return item;
 }
 
-Type SaveManagerPrivate::type(QObject* object) const
+Type SaveBackendPrivate::type(QObject* object) const
 {
     if (qobject_cast<QQuickItem*>(object) != nullptr)
         return Quick;
@@ -547,26 +547,26 @@ Type SaveManagerPrivate::type(QObject* object) const
 }
 
 //!
-//! ********************** [SaveManager] **********************
+//! ********************** [SaveBackend] **********************
 //!
 
-SaveManagerPrivate* SaveManager::_d = nullptr;
+SaveBackendPrivate* SaveBackend::_d = nullptr;
 
-SaveManager::SaveManager(QObject *parent)
+SaveBackend::SaveBackend(QObject *parent)
     : QObject(parent)
 {
     if (_d)
         return;
-    _d = new SaveManagerPrivate(this);
+    _d = new SaveBackendPrivate(this);
     connect(&_d->parserController, SIGNAL(runningChanged(bool)), SIGNAL(parserRunningChanged(bool)));
 }
 
-SaveManager* SaveManager::instance()
+SaveBackend* SaveBackend::instance()
 {
     return _d ? _d->parent : nullptr;
 }
 
-bool SaveManager::initProject(const QString& projectDirectory)
+bool SaveBackend::initProject(const QString& projectDirectory)
 {
     if (projectDirectory.isEmpty() ||
         !::exists(projectDirectory) ||
@@ -586,7 +586,7 @@ bool SaveManager::initProject(const QString& projectDirectory)
 // Returns biggest number from integer named dirs.
 // If no integer named dir exists, 0 returned.
 // If no dir exists or dirs are smaller than zero, 0 returned.
-int SaveManager::biggestDir(const QString& basePath)
+int SaveBackend::biggestDir(const QString& basePath)
 {
     int num = 0;
     for (auto dir : lsdir(basePath))
@@ -595,7 +595,7 @@ int SaveManager::biggestDir(const QString& basePath)
     return num;
 }
 
-QString SaveManager::basePath()
+QString SaveBackend::basePath()
 {
     auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
 
@@ -605,7 +605,7 @@ QString SaveManager::basePath()
     return (projectDir + separator() + DIR_OWDB);
 }
 
-QStringList SaveManager::formPaths()
+QStringList SaveBackend::formPaths()
 {
     return _d->formPaths();
 }
@@ -613,7 +613,7 @@ QStringList SaveManager::formPaths()
 // Returns all children paths (rootPath) within given root path.
 // Returns children only if they have match between their and given suid.
 // If given suid is empty then rootPath's uid is taken.
-QStringList SaveManager::childrenPaths(const QString& rootPath, QString suid)
+QStringList SaveBackend::childrenPaths(const QString& rootPath, QString suid)
 {
     QStringList paths;
 
@@ -641,7 +641,7 @@ QStringList SaveManager::childrenPaths(const QString& rootPath, QString suid)
     return paths;
 }
 
-QStringList SaveManager::masterPaths(const QString& topPath)
+QStringList SaveBackend::masterPaths(const QString& topPath)
 {
     QStringList paths;
     auto controlPaths = _d->controlPaths(topPath);
@@ -670,7 +670,7 @@ QStringList SaveManager::masterPaths(const QString& topPath)
 
 //FIXME: Change the name of default context property 'dpi' everywhere
 //WARNING: Update error messages
-ExecError SaveManager::execProject()
+ExecError SaveBackend::execProject()
 {
     ExecError error;
     Skin mainSkin = Skin::Invalid;
@@ -860,7 +860,7 @@ ExecError SaveManager::execProject()
     return error;
 }
 
-void SaveManager::exposeProject()
+void SaveBackend::exposeProject()
 {
     auto fpaths = _d->formPaths();
 
@@ -870,7 +870,7 @@ void SaveManager::exposeProject()
           DIR_THIS + separator() + "main.qml");
         if (_d->isMain(path))
             form->setMain(true);
-        DesignManager::formScene()->addForm(form);
+        DesignerWidget::formScene()->addForm(form);
 
         qApp->processEvents(QEventLoop::AllEvents, 10);
         QMap<QString, Control*> pmap;
@@ -890,7 +890,7 @@ void SaveManager::exposeProject()
     emit instance()->projectExposed();
 }
 
-Control* SaveManager::exposeControl(const QString& rootPath,
+Control* SaveBackend::exposeControl(const QString& rootPath,
   const DesignMode& mode, QString suid)
 {
     auto control = new Control(rootPath + separator() +
@@ -910,7 +910,7 @@ Control* SaveManager::exposeControl(const QString& rootPath,
     return control;
 }
 
-bool SaveManager::isOwctrl(const QString& rootPath)
+bool SaveBackend::isOwctrl(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -918,12 +918,12 @@ bool SaveManager::isOwctrl(const QString& rootPath)
     return _d->isOwctrl(propertyData);
 }
 
-bool SaveManager::isMain(const QString& rootPath)
+bool SaveBackend::isMain(const QString& rootPath)
 {
     return _d->isMain(rootPath);
 }
 
-Skin SaveManager::skin(const QString& rootPath)
+Skin SaveBackend::skin(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -931,7 +931,7 @@ Skin SaveManager::skin(const QString& rootPath)
     return Skin(_d->property(propertyData, TAG_SKIN).toInt());
 }
 
-qreal SaveManager::x(const QString& rootPath)
+qreal SaveBackend::x(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -939,7 +939,7 @@ qreal SaveManager::x(const QString& rootPath)
     return _d->property(propertyData, TAG_X).toDouble();
 }
 
-qreal SaveManager::y(const QString& rootPath)
+qreal SaveBackend::y(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -947,7 +947,7 @@ qreal SaveManager::y(const QString& rootPath)
     return _d->property(propertyData, TAG_Y).toDouble();
 }
 
-qreal SaveManager::z(const QString& rootPath)
+qreal SaveBackend::z(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -955,7 +955,7 @@ qreal SaveManager::z(const QString& rootPath)
     return _d->property(propertyData, TAG_Z).toDouble();
 }
 
-qreal SaveManager::width(const QString& rootPath)
+qreal SaveBackend::width(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -963,7 +963,7 @@ qreal SaveManager::width(const QString& rootPath)
     return _d->property(propertyData, TAG_WIDTH).toDouble();
 }
 
-qreal SaveManager::height(const QString& rootPath)
+qreal SaveBackend::height(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -971,7 +971,7 @@ qreal SaveManager::height(const QString& rootPath)
     return _d->property(propertyData, TAG_HEIGHT).toDouble();
 }
 
-QString SaveManager::id(const QString& rootPath)
+QString SaveBackend::id(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -979,7 +979,7 @@ QString SaveManager::id(const QString& rootPath)
     return _d->property(propertyData, TAG_ID).toString();
 }
 
-QString SaveManager::uid(const QString& rootPath)
+QString SaveBackend::uid(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -987,7 +987,7 @@ QString SaveManager::uid(const QString& rootPath)
     return _d->property(propertyData, TAG_UID).toString();
 }
 
-QString SaveManager::suid(const QString& rootPath)
+QString SaveBackend::suid(const QString& rootPath)
 {
     auto propertyPath = rootPath + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -995,7 +995,7 @@ QString SaveManager::suid(const QString& rootPath)
     return _d->property(propertyData, TAG_SUID).toString();
 }
 
-void SaveManager::refreshToolUid(const QString& toolRootPath)
+void SaveBackend::refreshToolUid(const QString& toolRootPath)
 {
     if (toolRootPath.isEmpty())
         return;
@@ -1019,7 +1019,7 @@ void SaveManager::refreshToolUid(const QString& toolRootPath)
     }
 }
 
-QString SaveManager::toolName(const QString& toolRootPath)
+QString SaveBackend::toolName(const QString& toolRootPath)
 {
     if (toolRootPath.isEmpty())
         return QString();
@@ -1030,7 +1030,7 @@ QString SaveManager::toolName(const QString& toolRootPath)
     return _d->property(propertyData, TAG_NAME).toString();
 }
 
-QString SaveManager::toolCategory(const QString& toolRootPath)
+QString SaveBackend::toolCategory(const QString& toolRootPath)
 {
     if (toolRootPath.isEmpty())
         return QString();
@@ -1044,13 +1044,13 @@ QString SaveManager::toolCategory(const QString& toolRootPath)
 // You have to provide an valid suid, except if control is a form
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
-bool SaveManager::exists(const Control* control, const QString& suid, const QString& topPath)
+bool SaveBackend::exists(const Control* control, const QString& suid, const QString& topPath)
 {
     return control->form() ? _d->existsInFormScope(control) :
                              _d->existsInParentScope(control, suid, topPath);
 }
 
-bool SaveManager::addForm(Form* form)
+bool SaveBackend::addForm(Form* form)
 {
     if (form->url().isEmpty())
         return false;
@@ -1084,7 +1084,7 @@ bool SaveManager::addForm(Form* form)
     return true;
 }
 
-void SaveManager::removeForm(const Form* form)
+void SaveBackend::removeForm(const Form* form)
 {
     if (form->id().isEmpty() || form->url().isEmpty())
         return;
@@ -1097,7 +1097,7 @@ void SaveManager::removeForm(const Form* form)
     emit _d->parent->databaseChanged();
 }
 
-bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
+bool SaveBackend::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
 {
     if (control->url().isEmpty())
         return false;
@@ -1140,7 +1140,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
 }
 
 // You can only move controls within current suid scope of related control
-bool SaveManager::moveControl(Control* control, const Control* parentControl)
+bool SaveBackend::moveControl(Control* control, const Control* parentControl)
 {
     if (_d->parentDir(control) == parentControl->dir())
         return true;
@@ -1177,7 +1177,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     return true;
 }
 
-void SaveManager::removeControl(const Control* control)
+void SaveBackend::removeControl(const Control* control)
 {
     if (control->id().isEmpty() || control->url().isEmpty())
         return;
@@ -1191,7 +1191,7 @@ void SaveManager::removeControl(const Control* control)
         emit _d->parent->databaseChanged();
 }
 
-void SaveManager::removeChildControlsOnly(const Control* control)
+void SaveBackend::removeChildControlsOnly(const Control* control)
 {
     if (control->id().isEmpty() || control->url().isEmpty())
         return;
@@ -1213,7 +1213,7 @@ void SaveManager::removeChildControlsOnly(const Control* control)
 // topPath is only necessary if property is an "id" set.
 // FIXME: Why do I have to do following : form1.z = 1; to be able to raise my form?...
 // ...And why I need to do otherforms.z = -1; to hide other forms
-void SaveManager::setProperty(Control* control, const QString& property,
+void SaveBackend::setProperty(Control* control, const QString& property,
   const QVariant& value, const QString& topPath)
 {
     if (control->dir().isEmpty() ||
@@ -1261,7 +1261,7 @@ void SaveManager::setProperty(Control* control, const QString& property,
         emit _d->parent->databaseChanged();
 }
 
-void SaveManager::removeProperty(const Control* control, const QString& property)
+void SaveBackend::removeProperty(const Control* control, const QString& property)
 {
     if (control->dir().isEmpty() ||
         control->hasErrors() ||
@@ -1278,14 +1278,14 @@ void SaveManager::removeProperty(const Control* control, const QString& property
         emit _d->parent->databaseChanged();
 }
 
-QString SaveManager::pathOfId(const QString& suid, const QString& id, const QString& rootPath)
+QString SaveBackend::pathOfId(const QString& suid, const QString& id, const QString& rootPath)
 {
     return _d->findById(suid, id, rootPath);
 }
 
-bool SaveManager::parserWorking()
+bool SaveBackend::parserWorking()
 {
     return _d->parserController.running();
 }
 
-#include "savemanager.moc"
+#include "savebackend.moc"

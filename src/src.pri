@@ -1,22 +1,19 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-FORMS += \
-         $$PWD/androidcreatekeystorecertificate.ui \
-    $$PWD/toolboxsettingswindow.ui
+FORMS += $$PWD/androidcreatekeystorecertificate.ui \
+         $$PWD/toolboxsettingswindow.ui
 
 HEADERS += $$PWD/mainwindow.h \
            $$PWD/flatbutton.h \
            $$PWD/css.h \
            $$PWD/scrollarea.h \
            $$PWD/usermanager.h \
-           $$PWD/savemanager.h \
            $$PWD/projectmanager.h \
            $$PWD/dirlocker.h \
            $$PWD/zipper.h \
            $$PWD/toolsmanager.h \
            $$PWD/delayer.h \
-           $$PWD/designmanager.h \
            $$PWD/control.h \
            $$PWD/formscene.h \
            $$PWD/qmlpreviewer.h \
@@ -60,12 +57,15 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/aboutwindow.h \
            $$PWD/buildswindow.h \
            $$PWD/preferenceswindow.h \
-    $$PWD/toolboxsettingswindow.h \
-    $$PWD/menumanager.h \
-    $$PWD/inspectorpane.h \
-    $$PWD/formspane.h \
-    $$PWD/propertiespane.h \
-    $$PWD/toolboxpane.h
+           $$PWD/toolboxsettingswindow.h \
+           $$PWD/menumanager.h \
+           $$PWD/inspectorpane.h \
+           $$PWD/formspane.h \
+           $$PWD/propertiespane.h \
+           $$PWD/toolboxpane.h \
+           $$PWD/backendmanager.h \
+           $$PWD/designerwidget.h \
+           $$PWD/savebackend.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -73,13 +73,11 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/css.cpp \
            $$PWD/scrollarea.cpp \
            $$PWD/usermanager.cpp \
-           $$PWD/savemanager.cpp \
            $$PWD/projectmanager.cpp \
            $$PWD/dirlocker.cpp \
            $$PWD/zipper.cpp \
            $$PWD/toolsmanager.cpp \
            $$PWD/delayer.cpp \
-           $$PWD/designmanager.cpp \
            $$PWD/control.cpp \
            $$PWD/formscene.cpp \
            $$PWD/qmlpreviewer.cpp \
@@ -122,12 +120,15 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/aboutwindow.cpp \
            $$PWD/buildswindow.cpp \
            $$PWD/preferenceswindow.cpp \
-    $$PWD/toolboxsettingswindow.cpp \
-    $$PWD/menumanager.cpp \
-    $$PWD/inspectorpane.cpp \
-    $$PWD/formspane.cpp \
-    $$PWD/propertiespane.cpp \
-    $$PWD/toolboxpane.cpp
+           $$PWD/toolboxsettingswindow.cpp \
+           $$PWD/menumanager.cpp \
+           $$PWD/inspectorpane.cpp \
+           $$PWD/formspane.cpp \
+           $$PWD/propertiespane.cpp \
+           $$PWD/toolboxpane.cpp \
+           $$PWD/backendmanager.cpp \
+           $$PWD/designerwidget.cpp \
+           $$PWD/savebackend.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

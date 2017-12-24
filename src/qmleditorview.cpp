@@ -2,8 +2,8 @@
 #include <formscene.h>
 #include <control.h>
 #include <fit.h>
-#include <savemanager.h>
-#include <designmanager.h>
+#include <savebackend.h>
+#include <designerwidget.h>
 #include <filemanager.h>
 #include <qmlcodeeditor.h>
 #include <css.h>
@@ -241,9 +241,9 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     //TODO: form or control removal will be handled
 
     QTimer::singleShot(3000, [=] {
-        connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
-        connect(DesignManager::controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
-        connect(DesignManager::formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+        connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
+        connect(DesignerWidget::controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+        connect(DesignerWidget::formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
     });
 
     zoomlLevelCombobox->addItem("35 %");
