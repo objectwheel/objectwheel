@@ -158,8 +158,8 @@ InspectorPane::InspectorPane(QWidget* parent)
       SLOT(refresh()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
       SLOT(refresh()));
-    connect(FormsPane::instance(), SIGNAL(currentFormChanged()),
-      SLOT(refresh()));
+//    connect(FormsPane::instance(), SIGNAL(currentFormChanged()),
+//      SLOT(refresh())); //FIXME
     QTimer::singleShot(3000, [this] {
         connect(SaveManager::instance(), SIGNAL(databaseChanged()),
           SLOT(refresh()));

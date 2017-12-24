@@ -151,5 +151,5 @@ void FormsPane::setCurrentForm(int index)
 
 QSize FormsPane::sizeHint() const
 {
-    return fit::fx(QSizF{200, 10}).toSize();
+    return fit::fx(QSizeF{200, 10}).toSize();
 }

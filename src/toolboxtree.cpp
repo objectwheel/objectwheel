@@ -1,17 +1,14 @@
 #include <toolboxtree.h>
 #include <fit.h>
 #include <css.h>
+#include <flatbutton.h>
 #include <global.h>
 
 #include <QMimeData>
 #include <QApplication>
-#include <QtMath>
 #include <QMouseEvent>
 #include <QScrollBar>
-#include <QTimer>
-#include <QPropertyAnimation>
 #include <QScroller>
-#include <QWheelEvent>
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QHeaderView>
@@ -132,9 +129,17 @@ QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelInd
 
 ToolboxTree::ToolboxTree(QWidget *parent)
     : QTreeWidget(parent)
-    , _indicatorButton(this)
     , _indicatorButtonVisible(false)
 {
+    _indicatorButton = new FlatButton(this);
+
+    QPalette p2(palette());
+    p2.setColor(QPalette::Base, "#F3F7FA");
+    p2.setColor(QPalette::Highlight, "#d0d4d7");
+    p2.setColor(QPalette::Text, "#202427");
+    setAutoFillBackground(true);
+    setPalette(p2);
+
     QScroller::grabGesture(viewport(), QScroller::TouchGesture);
     QScrollerProperties prop = QScroller::scroller(viewport())->scrollerProperties();
     prop.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
@@ -142,38 +147,32 @@ ToolboxTree::ToolboxTree(QWidget *parent)
     prop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.009);
     QScroller::scroller(viewport())->setScrollerProperties(prop);
 
-    _indicatorButton.setVisible(_indicatorButtonVisible);
+    _indicatorButton->setVisible(_indicatorButtonVisible);
     connect(this, &ToolboxTree::currentItemChanged, [=] {
         if (currentItem() == 0)
             return;
         if (model()->rowCount() < 1) {
-            _indicatorButton.hide();
+            _indicatorButton->hide();
             return;
         }
         auto rect = visualItemRect(currentItem());
-        _indicatorButton.move(rect.width() - _indicatorButton.width() - fit::fx(5),
-                              rect.y() + rect.height()/2.0 - _indicatorButton.height()/2.0);
-        _indicatorButton.setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
+        _indicatorButton->move(rect.width() - _indicatorButton->width() - fit::fx(5),
+          rect.y() + rect.height()/2.0 - _indicatorButton->height()/2.0);
+        _indicatorButton->setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
     });
+
     connect(verticalScrollBar(), &QSlider::valueChanged , this, [=] {
         if (currentItem() == 0)
             return;
         if (model()->rowCount() < 1) {
-            _indicatorButton.hide();
+            _indicatorButton->hide();
             return;
         }
         auto rect = visualItemRect(currentItem());
-        _indicatorButton.move(rect.width() - _indicatorButton.width() - fit::fx(5),
-                              rect.y() + rect.height()/2.0 - _indicatorButton.height()/2.0);
-        _indicatorButton.setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
+        _indicatorButton->move(rect.width() - _indicatorButton->width() - fit::fx(5),
+                              rect.y() + rect.height()/2.0 - _indicatorButton->height()/2.0);
+        _indicatorButton->setVisible(_indicatorButtonVisible && currentItem()->parent() != 0);
     });
-
-
-    QPalette p2(palette());
-    p2.setColor(QPalette::Base, "#F3F7FA");
-    p2.setColor(QPalette::Highlight, "#d0d4d7");
-    p2.setColor(QPalette::Text, "#202427");
-    setPalette(p2);
 
     setStyleSheet(QString("QTreeWidget::item{padding:%1px 0;}").arg(fit::fx(1.5)));
     setIconSize(fit::fx(QSize{24, 24}));
@@ -223,7 +222,7 @@ QList<QUrl> ToolboxTree::urls(QTreeWidgetItem* item) const
 
 FlatButton* ToolboxTree::indicatorButton()
 {
-    return &_indicatorButton;
+    return _indicatorButton;
 }
 
 void ToolboxTree::setIndicatorButtonVisible(bool value)

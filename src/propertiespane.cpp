@@ -1,4 +1,4 @@
-#include <propertieswidget.h>
+#include <propertiespane.h>
 #include <fit.h>
 #include <designmanager.h>
 #include <css.h>
@@ -6,6 +6,7 @@
 #include <delayer.h>
 #include <filemanager.h>
 #include <controlwatcher.h>
+#include <filterlineedit.h>
 #include <QtWidgets>
 
 //!
@@ -881,7 +882,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
 }
 
 void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
-                                              const QStyleOptionViewItem &option, const QModelIndex &index) const
+  const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QStyledItemDelegate::updateEditorGeometry(ed, option, index);
 
@@ -896,7 +897,7 @@ void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
 }
 
 void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
-                               const QModelIndex &index) const
+  const QModelIndex &index) const
 {
     QStyleOptionViewItem option = opt;
     const QAbstractItemModel* model = index.model();
@@ -1012,53 +1013,55 @@ QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModel
 }
 
 //!
-//! *********************** [PropertiesWidget] ***********************
+//! *********************** [PropertiesPane] ***********************
 //!
 
-PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
+PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
 {
-    setAutoFillBackground(true);
+    _layout = new QVBoxLayout(this);
+    _treeWidget = new QTreeWidget;
+    _searchEdit = new FilterLineEdit;
+
     QPalette p(palette());
-    p.setColor(QPalette::Window, QColor("#E0E4E7"));
+    p.setColor(backgroundRole(), "#E0E4E7");
+    setAutoFillBackground(true);
     setPalette(p);
 
-    QPalette p2(_treeWidget.palette());
-    p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Highlight, QColor("#E0E4E7"));
-    p2.setColor(QPalette::Text, QColor("#202427"));
-    p2.setColor(QPalette::HighlightedText, QColor("#202427"));
-    _treeWidget.setPalette(p2);
+    QPalette p2(_treeWidget->palette());
+    p2.setColor(QPalette::Base, "#F3F7FA");
+    p2.setColor(QPalette::Highlight, "#E0E4E7");
+    p2.setColor(QPalette::Text, "#202427");
+    p2.setColor(QPalette::HighlightedText, "#202427");
+    _treeWidget->setPalette(p2);
 
-    _treeWidget.setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
-    _treeWidget.setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    _treeWidget.setSelectionBehavior(QTreeWidget::SelectRows);
-    _treeWidget.setFocusPolicy(Qt::NoFocus);
-    _treeWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _treeWidget.setEditTriggers(QAbstractItemView::AllEditTriggers);
-    _treeWidget.setDragEnabled(false);
-    _treeWidget.setDropIndicatorShown(false);
-    _treeWidget.setColumnCount(2);
-    _treeWidget.headerItem()->setText(0, "Property");
-    _treeWidget.headerItem()->setText(1, "Value");
-    _treeWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    _treeWidget.horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
-    _treeWidget.setIndentation(fit::fx(10));
-    _treeWidget.setItemDelegate(new PropertiesDelegate(&_treeWidget, &_treeWidget));
-    _treeWidget.header()->resizeSection(0, fit::fx(170));
-    _treeWidget.viewport()->installEventFilter(this);
+    _treeWidget->setColumnCount(2);
+    _treeWidget->setDragEnabled(false);
+    _treeWidget->setFocusPolicy(Qt::NoFocus);
+    _treeWidget->setIndentation(fit::fx(10));
+    _treeWidget->setDropIndicatorShown(false);
+    _treeWidget->headerItem()->setText(1, "Value");
+    _treeWidget->headerItem()->setText(0, "Property");
+    _treeWidget->viewport()->installEventFilter(this);
+    _treeWidget->header()->resizeSection(0, fit::fx(170));
+    _treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
+    _treeWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _treeWidget->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    _treeWidget->setEditTriggers(QAbstractItemView::AllEditTriggers);
+    _treeWidget->setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    _treeWidget->setItemDelegate(new PropertiesDelegate(_treeWidget, _treeWidget));
 
-    _layout.setSpacing(fit::fx(2));
-    _layout.setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
+    _layout->setSpacing(fit::fx(2));
+    _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
 
-    _searchEdit.setPlaceholderText("Filter");
-    _searchEdit.setClearButtonEnabled(true);
-    _searchEdit.setFixedHeight(fit::fx(22));
-    connect(&_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
+    _searchEdit->setPlaceholderText("Filter");
+    _searchEdit->setClearButtonEnabled(true);
+    _searchEdit->setFixedHeight(fit::fx(22));
+    connect(_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
 
-    _layout.addWidget(&_searchEdit);
-    _layout.addWidget(&_treeWidget);
-
-    setLayout(&_layout);
+    _layout->addWidget(_searchEdit);
+    _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
     connect(DesignManager::formScene(), SIGNAL(selectionChanged()),
@@ -1073,18 +1076,18 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
             SLOT(handleSelectionChange()));
 }
 
-void PropertiesWidget::clearList()
+void PropertiesPane::clearList()
 {
-    for (int i = 0; i < _treeWidget.topLevelItemCount(); ++i)
-        qDeleteAll(_treeWidget.topLevelItem(i)->takeChildren());
+    for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i)
+        qDeleteAll(_treeWidget->topLevelItem(i)->takeChildren());
 
-    _treeWidget.clear();
+    _treeWidget->clear();
 }
 
-void PropertiesWidget::refreshList()
+void PropertiesPane::refreshList()
 {
-    int vsp = _treeWidget.verticalScrollBar()->sliderPosition();
-    int hsp = _treeWidget.horizontalScrollBar()->sliderPosition();
+    int vsp = _treeWidget->verticalScrollBar()->sliderPosition();
+    int hsp = _treeWidget->horizontalScrollBar()->sliderPosition();
 
     clearList();
 
@@ -1116,8 +1119,8 @@ void PropertiesWidget::refreshList()
             jitem->setFlags(jitem->flags() | Qt::ItemIsEditable);
             item->addChild(jitem);
         }
-        _treeWidget.addTopLevelItem(item);
-        _treeWidget.expandItem(item);
+        _treeWidget->addTopLevelItem(item);
+        _treeWidget->expandItem(item);
     }
 
     for (const auto& propertyNode : propertyNodes) {
@@ -1211,17 +1214,17 @@ void PropertiesWidget::refreshList()
                 }
             }
         }
-        _treeWidget.addTopLevelItem(item);
-        _treeWidget.expandItem(item);
+        _treeWidget->addTopLevelItem(item);
+        _treeWidget->expandItem(item);
     }
 
-    filterList(_searchEdit.text());
+    filterList(_searchEdit->text());
 
-    _treeWidget.verticalScrollBar()->setSliderPosition(vsp);
-    _treeWidget.horizontalScrollBar()->setSliderPosition(hsp);
+    _treeWidget->verticalScrollBar()->setSliderPosition(vsp);
+    _treeWidget->horizontalScrollBar()->setSliderPosition(hsp);
 }
 
-void PropertiesWidget::handleSelectionChange()
+void PropertiesPane::handleSelectionChange()
 {
     auto selectedControls = DesignManager::currentScene()->selectedControls();
 
@@ -1233,10 +1236,10 @@ void PropertiesWidget::handleSelectionChange()
     refreshList();
 }
 
-void PropertiesWidget::filterList(const QString& filter)
+void PropertiesPane::filterList(const QString& filter)
 {
-    for (int i = 0; i < _treeWidget.topLevelItemCount(); i++) {
-        auto tli = _treeWidget.topLevelItem(i);
+    for (int i = 0; i < _treeWidget->topLevelItemCount(); i++) {
+        auto tli = _treeWidget->topLevelItem(i);
         auto tlv = false;
 
         for (int j = 0; j < tli->childCount(); j++) {
@@ -1247,7 +1250,7 @@ void PropertiesWidget::filterList(const QString& filter)
             for (int z = 0; z < tci->childCount(); z++) {
                 auto tdi = tci->child(z);
                 auto v = (filter.isEmpty() || vv) ? true :
-                                                    tdi->text(0).contains(filter, Qt::CaseInsensitive);
+                  tdi->text(0).contains(filter, Qt::CaseInsensitive);
 
                 tdi->setHidden(!v);
                 if (v)
@@ -1265,14 +1268,14 @@ void PropertiesWidget::filterList(const QString& filter)
     }
 }
 
-bool PropertiesWidget::eventFilter(QObject* watched, QEvent* event)
+bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == _treeWidget.viewport()) {
+    if (watched == _treeWidget->viewport()) {
         if (event->type() == QEvent::Paint) {
             auto w = (QWidget*)watched;
             QPainter painter(w);
             painter.setRenderHint(QPainter::Antialiasing);
-            if (_treeWidget.topLevelItemCount() == 0) {
+            if (_treeWidget->topLevelItemCount() == 0) {
                 auto sc = DesignManager::currentScene()->selectedControls();
                 bool drawn = false;
                 const qreal ic = w->height() / fit::fx(20);
@@ -1299,9 +1302,9 @@ bool PropertiesWidget::eventFilter(QObject* watched, QEvent* event)
     }
 }
 
-QSize PropertiesWidget::sizeHint() const
+QSize PropertiesPane::sizeHint() const
 {
-    return QSize(fit::fx(340), fit::fx(2600)); //FIXME:
+    return fit::fx(QSizeF{340, 2600}).toSize(); //FIXME:
 }
 
 #include "propertieswidget.moc"

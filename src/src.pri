@@ -7,7 +7,6 @@ FORMS += \
 
 HEADERS += $$PWD/mainwindow.h \
            $$PWD/flatbutton.h \
-           $$PWD/propertieswidget.h \
            $$PWD/css.h \
            $$PWD/scrollarea.h \
            $$PWD/usermanager.h \
@@ -35,7 +34,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/fileexplorer.h \
            $$PWD/filelist.h \
            $$PWD/qmlformatter.h \
-           $$PWD/toolbox.h \
            $$PWD/toolboxtree.h \
            $$PWD/filterlineedit.h \
            $$PWD/view.h \
@@ -65,12 +63,13 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/toolboxsettingswindow.h \
     $$PWD/menumanager.h \
     $$PWD/inspectorpane.h \
-    $$PWD/formspane.h
+    $$PWD/formspane.h \
+    $$PWD/propertiespane.h \
+    $$PWD/toolboxpane.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
            $$PWD/flatbutton.cpp \
-           $$PWD/propertieswidget.cpp \
            $$PWD/css.cpp \
            $$PWD/scrollarea.cpp \
            $$PWD/usermanager.cpp \
@@ -98,7 +97,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/fileexplorer.cpp \
            $$PWD/filelist.cpp \
            $$PWD/qmlformatter.cpp \
-           $$PWD/toolbox.cpp \
            $$PWD/toolboxtree.cpp \
            $$PWD/filterlineedit.cpp \
            $$PWD/view.cpp \
@@ -127,7 +125,9 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/toolboxsettingswindow.cpp \
     $$PWD/menumanager.cpp \
     $$PWD/inspectorpane.cpp \
-    $$PWD/formspane.cpp
+    $$PWD/formspane.cpp \
+    $$PWD/propertiespane.cpp \
+    $$PWD/toolboxpane.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

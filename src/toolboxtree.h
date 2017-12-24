@@ -1,21 +1,20 @@
 #ifndef TOOLBOXTREE_H
 #define TOOLBOXTREE_H
 
-#include <QUrl>
 #include <QTreeWidget>
-#include <flatbutton.h>
+#include <QUrl>
+
+class FlatButton;
 
 class ToolboxTree : public QTreeWidget
 {
         Q_OBJECT
 
     public:
-        explicit ToolboxTree(QWidget *parent = 0);
+        explicit ToolboxTree(QWidget *parent = nullptr);
 
         void addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls);
         void removeUrls(QTreeWidgetItem* item);
-        void clearUrls();
-
         const QMap<QTreeWidgetItem*, QList<QUrl>>& allUrls() const;
         QList<QUrl> urls(QTreeWidgetItem* item) const;
 
@@ -26,17 +25,18 @@ class ToolboxTree : public QTreeWidget
         FlatButton* indicatorButton();
         void setIndicatorButtonVisible(bool value);
 
+    public slots:
+        void clearUrls();
+
     protected:
         QMimeData* mimeData(const QList<QTreeWidgetItem*> items) const override;
         void mousePressEvent(QMouseEvent* event) override;
 
     private:
-        QMap<QTreeWidgetItem*, QList<QUrl>> _urls;
-        FlatButton _indicatorButton;
-        bool _indicatorButtonVisible;
-
-    private:
         QPoint _pressPoint;
+        bool _indicatorButtonVisible;
+        FlatButton* _indicatorButton;
+        QMap<QTreeWidgetItem*, QList<QUrl>> _urls;
 };
 
 #endif // TOOLBOXTREE_H

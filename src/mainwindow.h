@@ -6,7 +6,7 @@
 #include <windowmanager.h>
 #include <flatbutton.h>
 #include <toolboxtree.h>
-#include <propertieswidget.h>
+#include <propertiespane.h>
 #include <aboutwindow.h>
 #include <formspane.h>
 #include <fit.h>
@@ -14,7 +14,7 @@
 #include <mainwindow.h>
 #include <projectswidget.h>
 #include <designmanager.h>
-#include <toolbox.h>
+#include <toolboxpane.h>
 #include <progresswidget.h>
 #include <inspectorpane.h>
 #include <preferenceswindow.h>
@@ -50,8 +50,8 @@ class MainWindow : public QMainWindow
         QDockWidget _formsDockwidget;
         QDockWidget _inspectorDockwidget;
         DesignManager _designManager;
-        ToolBox _toolbox;
-        PropertiesWidget _propertiesWidget;
+        ToolboxPane* _toolboxPane;
+        PropertiesPane* _propertiesPane;
         FormsPane* _formsPane;
         InspectorPane* _inspectorPage;
 };

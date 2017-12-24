@@ -31,6 +31,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 void MainWindow::setupGui()
 {
+    _toolboxPane = new ToolboxPane;
+    _propertiesPane = new PropertiesPane;
+    _formsPane = new FormsPane;
+    _inspectorPage = new InspectorPane;
+
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
     setCentralWidget(&_settleWidget);
@@ -85,7 +90,7 @@ void MainWindow::setupGui()
     toolbar->setFixedHeight(fit::fx(22.8));
 
     _propertiesDockwidget.setTitleBarWidget(toolbar);
-    _propertiesDockwidget.setWidget(&_propertiesWidget);
+    _propertiesDockwidget.setWidget(_propertiesPane);
     _propertiesDockwidget.setWindowTitle("Properties");
     _propertiesDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _propertiesDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
@@ -150,13 +155,13 @@ void MainWindow::setupGui()
     toolbar3->setFixedHeight(fit::fx(22.8));
 
     _toolboxDockwidget.setTitleBarWidget(toolbar3);
-    _toolboxDockwidget.setWidget(&_toolbox);
+    _toolboxDockwidget.setWidget(_toolboxPane);
     _toolboxDockwidget.setWindowTitle("Toolbox");
     _toolboxDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _toolboxDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
                                    QDockWidget::DockWidgetFloatable);
 
-    connect(_toolbox.toolboxTree()->indicatorButton(),
+    connect(_toolboxPane->toolboxTree()->indicatorButton(),
       &FlatButton::clicked, this, [&] {
         auto splitter = DesignManager::splitter();
         auto controlView = DesignManager::controlView();
@@ -174,7 +179,7 @@ void MainWindow::setupGui()
         auto previousControl = DesignManager::controlScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
-        auto url = _toolbox.toolboxTree()->urls(_toolbox.toolboxTree()->currentItem())[0];
+        auto url = _toolboxPane->toolboxTree()->urls(_toolboxPane->toolboxTree()->currentItem())[0];
         auto control = SaveManager::exposeControl(dname(dname(url.toLocalFile())), ControlGui);
         DesignManager::controlScene()->setMainControl(control);
         DesignManager::setMode(ControlGui);
@@ -226,7 +231,7 @@ void MainWindow::setupGui()
 
 void MainWindow::setupManagers()
 {
-    ToolsManager::instance()->addToolboxTree(_toolbox.toolboxTree());
+    ToolsManager::instance()->addToolboxTree(_toolboxPane->toolboxTree());
     auto userManager = new UserManager(this);
     Q_UNUSED(userManager);
     new ProjectManager(this);
