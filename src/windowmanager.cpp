@@ -32,10 +32,12 @@ WindowManager::WindowManager()
     connect(_welcomeWindow, SIGNAL(busy(QString)), SLOT(busy(QString)));
     connect(_mainWindow, SIGNAL(done()), SLOT(done()));
     connect(_aboutWindow, SIGNAL(done()), SLOT(done()));
-    connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
-    connect(_welcomeWindow, SIGNAL(done()), _mainWindow, SLOT(show()));
     connect(_preferencesWindow, SIGNAL(done()), SLOT(done()));
     connect(_toolboxSettingsWindow, SIGNAL(done()), SLOT(done()));
+    connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
+    connect(_welcomeWindow, &WelcomeWindow::done, this, [=] {
+        show(Main, Qt::WindowMaximized);
+    });
 
     add(Main, _mainWindow);
     add(About, _aboutWindow);
@@ -85,11 +87,18 @@ void WindowManager::hide(WindowManager::Windows key)
         window->hide();
 }
 
-void WindowManager::show(WindowManager::Windows key)
+void WindowManager::show(
+    WindowManager::Windows key,
+    Qt::WindowState state,
+    Qt::WindowModality modality
+    )
 {
     QWidget* window;
-    if ((window = _windows.value(key)))
+    if ((window = _windows.value(key))) {
+        window->setWindowState(state);
+        window->setWindowModality(modality);
         window->show();
+    }
 }
 
 void WindowManager::done()

@@ -33,7 +33,11 @@ class WindowManager : public QObject
 
     public slots:
         void hide(Windows key);
-        void show(Windows key); // TODO: Modality
+        void show(
+            Windows key,
+            Qt::WindowState state = Qt::WindowNoState,
+            Qt::WindowModality modality = Qt::NonModal
+        );
 
     private slots:
         void done();
