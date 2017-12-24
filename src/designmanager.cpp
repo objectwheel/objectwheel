@@ -984,7 +984,7 @@ OutputWidget* DesignManager::outputWidget()
 void DesignManager::checkErrors()
 {
     static_cast<IssuesBox*>(_d->outputWidget.box(Issues))->refresh();
-    MainWindow::instance()->inspectorWidget()->refresh();
+//    MainWindow::instance()->inspectorPage()->refresh(); //FIXME
     _d->qmlEditorView.refreshErrors();
 }
 

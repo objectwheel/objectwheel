@@ -27,7 +27,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/controlscene.h \
            $$PWD/controlview.h \
            $$PWD/formview.h \
-           $$PWD/formswidget.h \
            $$PWD/loadingindicator.h \
            $$PWD/qmleditorview.h \
            $$PWD/qmlcodeeditor.h \
@@ -43,7 +42,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/progresswidget.h \
            $$PWD/global.h \
            $$PWD/executivewidget.h \
-           $$PWD/inspectorwidget.h \
            $$PWD/issuesbox.h \
            $$PWD/consolebox.h \
            $$PWD/searchbox.h \
@@ -65,7 +63,9 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/buildswindow.h \
            $$PWD/preferenceswindow.h \
     $$PWD/toolboxsettingswindow.h \
-    $$PWD/menumanager.h
+    $$PWD/menumanager.h \
+    $$PWD/inspectorpane.h \
+    $$PWD/formspane.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -90,7 +90,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlscene.cpp \
            $$PWD/controlview.cpp \
            $$PWD/formview.cpp \
-           $$PWD/formswidget.cpp \
            $$PWD/loadingindicator.cpp \
            $$PWD/qmleditorview.cpp \
            $$PWD/qmlcodeeditor.cpp \
@@ -105,7 +104,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/view.cpp \
            $$PWD/progresswidget.cpp \
            $$PWD/executivewidget.cpp \
-           $$PWD/inspectorwidget.cpp \
            $$PWD/issuesbox.cpp \
            $$PWD/consolebox.cpp \
            $$PWD/searchbox.cpp \
@@ -127,7 +125,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/buildswindow.cpp \
            $$PWD/preferenceswindow.cpp \
     $$PWD/toolboxsettingswindow.cpp \
-    $$PWD/menumanager.cpp
+    $$PWD/menumanager.cpp \
+    $$PWD/inspectorpane.cpp \
+    $$PWD/formspane.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

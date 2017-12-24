@@ -2,7 +2,7 @@
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <parsercontroller.h>
-#include <formswidget.h>
+#include <formspane.h>
 #include <mainwindow.h>
 #include <control.h>
 #include <algorithm>
@@ -847,8 +847,8 @@ ExecError SaveManager::execProject()
         connect(&_d->executiveWidget, SIGNAL(done()),
           &loop, SLOT(quit()));
     } else {
-        connect(MainWindow::instance(),
-          SIGNAL(quitting()), &loop, SLOT(quit()));
+        connect(qApp, SIGNAL(aboutToQuit()),
+          &loop, SLOT(quit()));
         connect(mainWindow, SIGNAL(closing(QQuickCloseEvent*)),
           &loop, SLOT(quit()));
     }

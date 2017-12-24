@@ -8,7 +8,7 @@
 #include <toolboxtree.h>
 #include <propertieswidget.h>
 #include <aboutwindow.h>
-#include <formswidget.h>
+#include <formspane.h>
 #include <fit.h>
 #include <filemanager.h>
 #include <mainwindow.h>
@@ -16,7 +16,7 @@
 #include <designmanager.h>
 #include <toolbox.h>
 #include <progresswidget.h>
-#include <inspectorwidget.h>
+#include <inspectorpane.h>
 #include <preferenceswindow.h>
 
 class MainWindow : public QMainWindow
@@ -25,17 +25,14 @@ class MainWindow : public QMainWindow
 
     public:
         explicit MainWindow(QWidget* parent = 0);
-        static MainWindow* instance();
-        InspectorWidget* inspectorWidget();
+        InspectorPane* inspectorPage();
+        FormsPane* formsPane();
 
-    public slots:
+    private slots:
         void setupGui();
         void setupManagers();
-        void clearStudio();
         void handleIndicatorChanges();
         void cleanupObjectwheel();
-        void showDockWidgets();
-        void hideDockWidgets();
 
     protected:
         void closeEvent(QCloseEvent* event) override;
@@ -55,8 +52,8 @@ class MainWindow : public QMainWindow
         DesignManager _designManager;
         ToolBox _toolbox;
         PropertiesWidget _propertiesWidget;
-        FormsWidget _formsWidget;
-        InspectorWidget _inspectorWidget;
+        FormsPane* _formsPane;
+        InspectorPane* _inspectorPage;
 };
 
 #endif // MAINWINDOW_H

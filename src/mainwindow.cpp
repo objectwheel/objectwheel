@@ -23,23 +23,10 @@
 
 #define wM (WindowManager::instance())
 
-MainWindow* MainWindow::_instance = nullptr;
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
-    if (_instance) {
-        deleteLater();
-        return;
-    }
-
-    _instance = this;
     setupGui();
     QTimer::singleShot(300, [=] { setupManagers(); });
-}
-
-MainWindow* MainWindow::instance()
-{
-    return _instance;
 }
 
 void MainWindow::setupGui()
@@ -56,12 +43,6 @@ void MainWindow::setupGui()
     _settleWidget.setFrameShape(QFrame::StyledPanel);
     _settleWidget.setFrameShadow(QFrame::Plain);
     _designManager.setSettleWidget(&_settleWidget);
-
-//    wM->add(WindowManager::Studio, this);
-//    wM->add(WindowManager::Projects, &_projectsScreen);
-//    wM->add(WindowManager::Login, &_loginScreen);
-//    wM->show(WindowManager::Login);
-//    wM->progress()->show("Loading", wM->window(WindowManager::Login));
 
     // Toolbar settings
     QLabel* titleText = new QLabel;
@@ -132,7 +113,7 @@ void MainWindow::setupGui()
     toolbar2->setFixedHeight(fit::fx(22.8));
 
     _formsDockwidget.setTitleBarWidget(toolbar2);
-    _formsDockwidget.setWidget(&_formsWidget);
+    _formsDockwidget.setWidget(_formsPane);
     _formsDockwidget.setWindowTitle("Forms");
     _formsDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _formsDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
@@ -225,13 +206,13 @@ void MainWindow::setupGui()
     toolbar4->setIconSize(QSize(fit::fx(11), fit::fx(11)));
     toolbar4->setFixedHeight(fit::fx(22.8));
 
-    connect(&_inspectorWidget, SIGNAL(controlClicked(Control*)),
+    connect(_inspectorPage, SIGNAL(controlClicked(Control*)),
       &_designManager, SLOT(controlClicked(Control*)));
-    connect(&_inspectorWidget, SIGNAL(controlDoubleClicked(Control*)),
+    connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)),
       &_designManager, SLOT(controlDoubleClicked(Control*)));
 
     _inspectorDockwidget.setTitleBarWidget(toolbar4);
-    _inspectorDockwidget.setWidget(&_inspectorWidget);
+    _inspectorDockwidget.setWidget(_inspectorPage);
     _inspectorDockwidget.setWindowTitle("Control Inspector");
     _inspectorDockwidget.setAttribute(Qt::WA_TranslucentBackground);
     _inspectorDockwidget.setFeatures(QDockWidget::DockWidgetMovable |
@@ -287,36 +268,20 @@ void MainWindow::cleanupObjectwheel()
     qApp->processEvents();
 }
 
-void MainWindow::showDockWidgets()
-{
-    _formsDockwidget.show();
-    _propertiesDockwidget.show();
-    _toolboxDockwidget.show();
-    _inspectorDockwidget.show();
-}
-
-void MainWindow::hideDockWidgets()
-{
-    _formsDockwidget.hide();
-    _propertiesDockwidget.hide();
-    _toolboxDockwidget.hide();
-    _inspectorDockwidget.hide();
-}
-
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     QMainWindow::closeEvent(event);
     emit quitting();
 }
 
-InspectorWidget* MainWindow::inspectorWidget()
+InspectorPane* MainWindow::inspectorPage()
 {
-    return &_inspectorWidget;
+    return _inspectorPage;
 }
 
-void MainWindow::clearStudio()
+FormsPane* MainWindow::formsPane()
 {
-    
+    return _formsPane;
 }
 
 //void MainWindow::on_secureExitButton_clicked()

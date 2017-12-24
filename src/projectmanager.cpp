@@ -115,7 +115,7 @@ bool ProjectManager::renameProject(const QString& from, const QString& to)
 	if (fromDir.isEmpty() || toDir.isEmpty()) return false;
     if (_d->currentProject == from) {
         stopProject();
-        _d->mainWindow->clearStudio();
+//        _d->mainWindow->clearStudio(); //FIXME
         if (!rn(fromDir, toDir)) return false;
         if (!startProject(to)) return false;
 		return infUpdateLastModification();
@@ -219,7 +219,7 @@ bool ProjectManager::startProject(const QString& projectname)
         stopProject();
     }
 
-    _d->mainWindow->clearStudio();
+//    _d->mainWindow->clearStudio(); //FIXME
 
     _d->currentProject = projectname;
 
@@ -229,8 +229,8 @@ bool ProjectManager::startProject(const QString& projectname)
 
     ToolsManager::instance()->downloadTools();
 
-    MainWindow::instance()->setWindowTitle
-      (QString(APP_NAME) + " - [" + projectname + "]");
+//    MainWindow::instance()->setWindowTitle
+//      (QString(APP_NAME) + " - [" + projectname + "]"); //FIXME
 
 	return true;
 }
