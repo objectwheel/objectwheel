@@ -5,13 +5,13 @@
 #include <mainwindow.h>
 #include <css.h>
 #include <filemanager.h>
-#include <projectmanager.h>
-#include <usermanager.h>
-#include <toolsmanager.h>
+#include <projectbackend.h>
+#include <userbackend.h>
+#include <toolsbackend.h>
 #include <savebackend.h>
 #include <delayer.h>
 #include <formscene.h>
-#include <qmlpreviewer.h>
+#include <previewbackend.h>
 #include <formview.h>
 #include <controlview.h>
 #include <loadingindicator.h>
@@ -24,12 +24,6 @@
 #define wM (WindowManager::instance())
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
-{
-    setupGui();
-    QTimer::singleShot(300, [=] { setupManagers(); });
-}
-
-void MainWindow::setupGui()
 {
     _settleWidget = new QFrame;
     _titleBar = new QToolBar;
@@ -237,38 +231,9 @@ void MainWindow::setupGui()
     addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
 }
 
-void MainWindow::setupManagers()
-{
-    ToolsManager::instance()->addToolboxTree(_toolboxPane->toolboxTree());
-    auto userManager = new UserManager(this);
-    Q_UNUSED(userManager);
-    new ProjectManager(this);
-    ProjectManager::setMainWindow(this);
-    new SaveBackend(this);
-    new QmlPreviewer(this);
-
-    connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
-      SLOT(handleIndicatorChanges()));
-    connect(QmlPreviewer::instance(), SIGNAL(workingChanged(bool)),
-      SLOT(handleIndicatorChanges()));
-    connect(qApp, SIGNAL(aboutToQuit()),
-      SLOT(cleanupObjectwheel()));
-
-    auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
-    Delayer::delay(&ret, &QFuture<bool>::isRunning);
-    if (ret.result()) {
-        ProjectsWidget::refreshProjectList();
-//        wM->progress()->hide();
-//        wM->show(WindowManager::Projects);
-    } else {
-//        wM->progress()->hide();
-//        wM->show(WindowManager::Login);
-    }
-}
-
 void MainWindow::handleIndicatorChanges()
 {
-    DesignerWidget::loadingIndicator()->setRunning(SaveBackend::parserWorking() || QmlPreviewer::working());
+    DesignerWidget::loadingIndicator()->setRunning(SaveBackend::parserWorking() || PreviewBackend::working());
 }
 
 void MainWindow::cleanupObjectwheel()
@@ -276,10 +241,39 @@ void MainWindow::cleanupObjectwheel()
     while(SaveBackend::parserWorking())
         Delayer::delay(100);
 
-    UserManager::stopUserSession();
+    UserBackend::stopUserSession();
 
     qApp->processEvents();
 }
+
+//void MainWindow::setupManagers()
+//{
+//    ToolsManager::instance()->addToolboxTree(_toolboxPane->toolboxTree());
+//    auto userManager = new UserManager(this);
+//    Q_UNUSED(userManager);
+//    new ProjectManager(this);
+//    ProjectManager::setMainWindow(this);
+//    new SaveBackend(this);
+//    new QmlPreviewer(this);
+
+//    connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
+//      SLOT(handleIndicatorChanges()));
+//    connect(QmlPreviewer::instance(), SIGNAL(workingChanged(bool)),
+//      SLOT(handleIndicatorChanges()));
+//    connect(qApp, SIGNAL(aboutToQuit()),
+//      SLOT(cleanupObjectwheel()));
+
+//    auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
+//    Delayer::delay(&ret, &QFuture<bool>::isRunning);
+//    if (ret.result()) {
+//        ProjectsWidget::refreshProjectList();
+////        wM->progress()->hide();
+////        wM->show(WindowManager::Projects);
+//    } else {
+////        wM->progress()->hide();
+////        wM->show(WindowManager::Login);
+//    }
+//}
 
 //void MainWindow::on_secureExitButton_clicked()
 //{

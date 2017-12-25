@@ -1,7 +1,7 @@
 #include <toolboxsettingswindow.h>
 #include <ui_toolboxsettingswindow.h>
 #include <css.h>
-#include <toolsmanager.h>
+#include <toolsbackend.h>
 #include <filemanager.h>
 #include <zipper.h>
 #include <savebackend.h>
@@ -26,7 +26,7 @@ static QString handleImports(const QStringList& fileNames)
         if (dir.isValid()) {
             if (Zipper::extractZip(rdfile(fileName), dir.path())) {
                 if (SaveBackend::isOwctrl(dir.path())) {
-                    if (ToolsManager::instance()->addTool(dir.path(), true)) {
+                    if (ToolsBackend::instance()->addTool(dir.path(), true)) {
                         msg = "Tool import has successfully done.";
                     } else {
                         msg = "An unknown error occurred.";
@@ -52,7 +52,7 @@ ToolboxSettingsWindow::ToolboxSettingsWindow(QWidget *parent) : QWidget(parent)
     , ui(new Ui::ToolboxSettingsWindow)
 {
     ui->setupUi(this);
-    ToolsManager::instance()->addToolboxTree(ui->treeWidget);
+    ToolsBackend::instance()->addToolboxTree(ui->treeWidget);
 
     ui->scrollArea->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     ui->scrollArea->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
@@ -135,7 +135,7 @@ void ToolboxSettingsWindow::on_btnReset_clicked()
         }
 
         if (!obstacle) {
-            ToolsManager::instance()->resetTools();
+            ToolsBackend::instance()->resetTools();
         } else { //FIXME: Do same for Control GUI Editor /Tool Editor
             // TODO: Check same for selected control's child controls
             QMessageBox::information(this, "Oops",
@@ -152,7 +152,7 @@ void ToolboxSettingsWindow::on_btnRemove_clicked()
         auto currentDir = dname(dname(ui->treeWidget->urls
           (ui->treeWidget->currentItem()).first().toLocalFile()));
         if (!DesignerWidget::qmlEditorView()->isOpen(currentDir)) {
-            ToolsManager::instance()->removeTool(dname(dname(ui->treeWidget->urls
+            ToolsBackend::instance()->removeTool(dname(dname(ui->treeWidget->urls
               (ui->treeWidget->currentItem()).first().toLocalFile())));
         } else { //FIXME: Do same for Control GUI Editor /Tool Editor
             // TODO: Check same for selected control's child controls
@@ -165,7 +165,7 @@ void ToolboxSettingsWindow::on_btnRemove_clicked()
 
 void ToolboxSettingsWindow::on_btnAdd_clicked()
 {
-    ToolsManager::instance()->createNewTool();
+    ToolsBackend::instance()->createNewTool();
 }
 
 void ToolboxSettingsWindow::on_btnImport_clicked()
@@ -218,11 +218,11 @@ void ToolboxSettingsWindow::on_btnFileDialog_clicked()
 
 void ToolboxSettingsWindow::on_btnSave_clicked()
 {
-    ChangeSet changeSet;
+    ToolsBackend::ChangeSet changeSet;
     changeSet.category = ui->txtCategory->text();
     changeSet.iconPath = ui->txtIcon->text();
     changeSet.name = ui->txtName->text();
     changeSet.toolPath = dname(dname(ui->treeWidget->urls
       (ui->treeWidget->currentItem()).first().toLocalFile()));
-    ToolsManager::instance()->changeTool(changeSet);
+    ToolsBackend::instance()->changeTool(changeSet);
 }

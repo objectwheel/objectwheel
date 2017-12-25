@@ -1,5 +1,5 @@
-#ifndef QMLPREVIEWER_H
-#define QMLPREVIEWER_H
+#ifndef PREVIEWBACKEND_H
+#define PREVIEWBACKEND_H
 
 #include <QObject>
 #include <QPointer>
@@ -10,7 +10,7 @@
 #include <global.h>
 
 class Control;
-class QmlPreviewerPrivate;
+class PreviewBackendPrivate;
 
 typedef QMap<QString, QVariant> PropertyMap;
 
@@ -41,14 +41,14 @@ struct PreviewResult {
         }
 };
 
-class QmlPreviewer : public QObject
+class PreviewBackend : public QObject
 {
         Q_OBJECT
-        friend class QmlPreviewerPrivate;
+        friend class PreviewBackendPrivate;
 
     public:
-        explicit QmlPreviewer(QObject *parent = 0);
-        static QmlPreviewer* instance();
+        explicit PreviewBackend(QObject *parent = 0);
+        static PreviewBackend* instance();
         static void requestPreview(Control* control);
         static bool working();
         static QImage initialPreview(const QSizeF& size);
@@ -58,8 +58,8 @@ class QmlPreviewer : public QObject
         void workingChanged(bool value);
 
     private:
-        static QmlPreviewerPrivate* _d;
+        static PreviewBackendPrivate* _d;
         static bool _working;
 };
 
-#endif // QMLPREVIEWER_H
+#endif // PREVIEWBACKEND_H

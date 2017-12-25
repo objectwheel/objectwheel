@@ -63,7 +63,7 @@ ControlPrivate::ControlPrivate(Control* parent)
         resizer.setPlacement(Resizer::Placement(i++));
     }
 
-    connect(QmlPreviewer::instance(),
+    connect(PreviewBackend::instance(),
       SIGNAL(previewReady(const QSharedPointer<PreviewResult>&)),
             SLOT(updatePreview(const QSharedPointer<PreviewResult>&)));
 }
@@ -128,7 +128,7 @@ Control::Control(const QString& url, const DesignMode& mode,
     setPos(SaveBackend::x(dir()), SaveBackend::y(dir()));
     resize(fit::fx(SaveBackend::width(dir())), fit::fx(SaveBackend::height(dir())));
     if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
-    _d->preview = QmlPreviewer::initialPreview(size());
+    _d->preview = PreviewBackend::initialPreview(size());
 
     connect(this, &Control::geometryChanged, [=] {
         Suppressor::suppress(GEOMETRY_SIGNAL_DELAY, "geometryChanged",
@@ -244,7 +244,7 @@ bool Control::form() const
 
 void Control::refresh()
 {
-    QmlPreviewer::requestPreview(this);
+    PreviewBackend::requestPreview(this);
 }
 
 void Control::updateUid()

@@ -1,7 +1,7 @@
-#include <toolsmanager.h>
+#include <toolsbackend.h>
 #include <filemanager.h>
 #include <zipper.h>
-#include <projectmanager.h>
+#include <projectbackend.h>
 #include <toolboxtree.h>
 #include <savebackend.h>
 
@@ -36,7 +36,7 @@ static void fillTree(ToolboxTree*)
     // TODO
 }
 
-static void flushChangeSet(const ChangeSet& changeSet)
+static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)
 {
     auto dirCtrl = changeSet.toolPath +
       separator() + DIR_THIS;
@@ -68,33 +68,33 @@ static void flushChangeSet(const ChangeSet& changeSet)
 
 static bool isProjectFull()
 {
-    if (ProjectManager::currentProject().isEmpty())
+    if (ProjectBackend::currentProject().isEmpty())
         return false;
-    if (!QDir().exists(ProjectManager::projectDirectory
-      (ProjectManager::currentProject()) + separator() + DEFAULT_TOOLS_DIRECTORY))
+    if (!QDir().exists(ProjectBackend::projectDirectory
+      (ProjectBackend::currentProject()) + separator() + DEFAULT_TOOLS_DIRECTORY))
         return false;
     else
         return true;
 }
 
 //!
-//! *********************** [ToolsManager] ***********************
+//! *********************** [ToolsBackend] ***********************
 //!
 
-ToolsManager* ToolsManager::instance()
+ToolsBackend* ToolsBackend::instance()
 {
-    static ToolsManager instance;
+    static ToolsBackend instance;
     return &instance;
 }
 
-QString ToolsManager::toolsDir() const
+QString ToolsBackend::toolsDir() const
 {
-    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
-    if (projectDir.isEmpty()) qFatal("ToolsManager : Error occurred");
+    auto projectDir = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
+    if (projectDir.isEmpty()) qFatal("ToolsBackend : Error occurred");
     return projectDir + separator() + DEFAULT_TOOLS_DIRECTORY;
 }
 
-QStringList ToolsManager::categories() const
+QStringList ToolsBackend::categories() const
 {
     QStringList categories;
     for (auto dir : lsdir(toolsDir())) {
@@ -106,9 +106,9 @@ QStringList ToolsManager::categories() const
     return categories;
 }
 
-bool ToolsManager::addTool(const QString& toolPath, const bool select, const bool qrc)
+bool ToolsBackend::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
-    if (ProjectManager::currentProject().isEmpty() ||
+    if (ProjectBackend::currentProject().isEmpty() ||
       toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
         return false;
 
@@ -164,7 +164,7 @@ bool ToolsManager::addTool(const QString& toolPath, const bool select, const boo
     return true;
 }
 
-void ToolsManager::changeTool(const ChangeSet& changeSet)
+void ToolsBackend::changeTool(const ChangeSet& changeSet)
 {
     for (auto tree : _toolboxTreeList) {
         tree->clearSelection(); tree->setCurrentItem(nullptr);
@@ -187,7 +187,7 @@ void ToolsManager::changeTool(const ChangeSet& changeSet)
     addTool(changeSet.toolPath, true);
 }
 
-void ToolsManager::removeTool(const QString& toolPath)
+void ToolsBackend::removeTool(const QString& toolPath)
 {
     for (auto tree : _toolboxTreeList) {
         tree->clearSelection(); tree->setCurrentItem(nullptr);
@@ -209,15 +209,15 @@ void ToolsManager::removeTool(const QString& toolPath)
     }
 }
 
-void ToolsManager::addToolboxTree(ToolboxTree* toolboxTree)
+void ToolsBackend::addToolboxTree(ToolboxTree* toolboxTree)
 {
     _toolboxTreeList << toolboxTree;
     fillTree(toolboxTree);
 }
 
-void ToolsManager::downloadTools(const QUrl& url)
+void ToolsBackend::downloadTools(const QUrl& url)
 {
-    if (ProjectManager::currentProject().isEmpty()) return;
+    if (ProjectBackend::currentProject().isEmpty()) return;
     QNetworkAccessManager *manager = new QNetworkAccessManager;
     QNetworkRequest request;
     if (!url.isEmpty()) request.setUrl(url);
@@ -275,12 +275,12 @@ void ToolsManager::downloadTools(const QUrl& url)
     loop->exec();
 }
 
-void ToolsManager::createNewTool()
+void ToolsBackend::createNewTool()
 {
     addTool(DIR_QRC_CONTROL, true, true);
 }
 
-void ToolsManager::resetTools()
+void ToolsBackend::resetTools()
 {
     for (auto tree : _toolboxTreeList) {
         tree->clearSelection();

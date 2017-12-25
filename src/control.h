@@ -2,7 +2,7 @@
 #define CONTROL_H
 
 #include <resizer.h>
-#include <qmlpreviewer.h>
+#include <previewbackend.h>
 #include <QGraphicsWidget>
 #include <QList>
 

@@ -3,15 +3,30 @@
 
 #include <QObject>
 
+class UserBackend;
+class SaveBackend;
+class ToolsBackend;
+class ProjectBackend;
+class PreviewBackend;
+
 class BackendManager : public QObject
 {
         Q_OBJECT
+        Q_DISABLE_COPY(BackendManager)
+
     public:
-        explicit BackendManager(QObject *parent = nullptr);
+        static BackendManager* instance();
 
-    signals:
+    private:
+        BackendManager();
 
-    public slots:
+    private:
+        ToolsBackend* _toolsBackend;
+        UserBackend* _userBackend;
+        ProjectBackend* _projectBackend;
+        SaveBackend* _saveBackend;
+        PreviewBackend* _previewBackend;
+
 };
 
 #endif // BACKENDMANAGER_H

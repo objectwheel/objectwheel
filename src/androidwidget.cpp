@@ -1,7 +1,7 @@
 #include <androidwidget.h>
 #include <fit.h>
 #include <css.h>
-#include <projectmanager.h>
+#include <projectbackend.h>
 #include <filemanager.h>
 #include <build.h>
 

@@ -1,7 +1,7 @@
 #include <projectswidget.h>
-#include <projectmanager.h>
+#include <projectbackend.h>
 #include <filemanager.h>
-#include <usermanager.h>
+#include <userbackend.h>
 #include <fit.h>
 
 #include <QDateTime>
@@ -90,8 +90,8 @@ ProjectsWidget* ProjectsWidget::instance()
 
 void ProjectsWidget::handleNewButtonClicked()
 {
-	if (UserManager::userDirectory(UserManager::currentSessionsUser()).isEmpty()) return;
-	auto projects = ProjectManager::projects();
+	if (UserBackend::userDirectory(UserBackend::currentSessionsUser()).isEmpty()) return;
+	auto projects = ProjectBackend::projects();
 	int count = 1;
 	QString projectName = "New Project-1";
 	while (projects.contains(projectName)) {
@@ -111,7 +111,7 @@ void ProjectsWidget::handleNewButtonClicked()
 	sizeText->setProperty("text", "0 bytes");
 	mfDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
 	crDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
-	ownerText->setProperty("text", UserManager::currentSessionsUser());
+	ownerText->setProperty("text", UserBackend::currentSessionsUser());
 	projectVersionTextInput->setProperty("text", "v0.01");
 	orgIdentTextInput->setProperty("text", "com.example");
 	orgnameTextInput->setProperty("text", "Example Corp.");
@@ -123,21 +123,21 @@ void ProjectsWidget::handleNewButtonClicked()
 void ProjectsWidget::handleInfoButtonClicks(const QVariant& projectname)
 {
 	auto projectName = projectname.toString();
-	sizeText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_SIZE].toString());
-	mfDateText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_MFDATE].toString());
-	crDateText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_CRDATE].toString());
-	ownerText->setProperty("text", ProjectManager::projectInformation(projectName)[INF_OWNER].toString());
-	projectVersionTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_PROJECT_VERSION].toString());
-	orgIdentTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_ORGIDENT].toString());
-	orgnameTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_ORGNAME].toString());
-	descriptionTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_DESCRIPTION].toString());
-	projectnameTextInput->setProperty("text", ProjectManager::projectInformation(projectName)[INF_PROJECTNAME].toString());
+	sizeText->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_SIZE].toString());
+	mfDateText->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_MFDATE].toString());
+	crDateText->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_CRDATE].toString());
+	ownerText->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_OWNER].toString());
+	projectVersionTextInput->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_PROJECT_VERSION].toString());
+	orgIdentTextInput->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_ORGIDENT].toString());
+	orgnameTextInput->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_ORGNAME].toString());
+	descriptionTextInput->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_DESCRIPTION].toString());
+	projectnameTextInput->setProperty("text", ProjectBackend::projectInformation(projectName)[INF_PROJECTNAME].toString());
 	swipeView->setProperty("currentIndex", 1);
 }
 
 void ProjectsWidget::handleBtnCancelClicked()
 {
-	refreshProjectList(ProjectManager::currentProject());
+	refreshProjectList(ProjectBackend::currentProject());
 	swipeView->setProperty("currentIndex", 0);
 }
 
@@ -146,14 +146,14 @@ void ProjectsWidget::handleBtnDeleteClicked()
 	QString currentProject;
 	auto projectName = model.get(listView->property("currentIndex").toInt(),
                                  model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
-    if (!ProjectManager::exists(projectName)) goto finish;
-    currentProject = ProjectManager::currentProject();
+    if (!ProjectBackend::exists(projectName)) goto finish;
+    currentProject = ProjectBackend::currentProject();
     if (!currentProject.isEmpty() && currentProject == projectName) {
-		ProjectManager::stopProject();
+		ProjectBackend::stopProject();
 		currentProject = "";
     }
 
-	rm(ProjectManager::projectDirectory(projectName));
+	rm(ProjectBackend::projectDirectory(projectName));
 
 finish:
 	refreshProjectList(currentProject);
@@ -168,13 +168,13 @@ void ProjectsWidget::handleBtnImportClicked()
     dialog.setViewMode(QFileDialog::Detail);
     if (dialog.exec()) {
         for (auto fileName : dialog.selectedFiles()) {
-            if (!ProjectManager::importProject(fileName)) {
+            if (!ProjectBackend::importProject(fileName)) {
                 QMessageBox::warning(this, "Operation Stopped", "One or more projects exists. Please rename your existing projects to another name."
                                      "Or one or more import file corrupted.");
                 return;
             }
         }
-        refreshProjectList(ProjectManager::currentProject());
+        refreshProjectList(ProjectBackend::currentProject());
         swipeView->setProperty("currentIndex", 0);
         QMessageBox::information(this, "Finished", "Tool import has successfully finished.");
     }
@@ -192,7 +192,7 @@ void ProjectsWidget::handleBtnExportClicked()
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
     if (dialog.exec()) {
         if (!rm(dialog.selectedFiles().at(0) + separator() + projectName + ".zip")) return;
-        if (!ProjectManager::exportProject(projectName, dialog.selectedFiles().at(0) + separator() + projectName + ".zip")) return;
+        if (!ProjectBackend::exportProject(projectName, dialog.selectedFiles().at(0) + separator() + projectName + ".zip")) return;
         QMessageBox::information(this, "Finished", "Project export has successfully finished.");
     }
 }
@@ -202,7 +202,7 @@ void ProjectsWidget::startProject()
     auto project = model.get(listView->property("currentIndex").toInt(),
       model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
 
-    if (!ProjectManager::startProject(project)) { // Asynchronous Operation
+    if (!ProjectBackend::startProject(project)) { // Asynchronous Operation
         for (int i = model.rowCount(); i--;) {
             if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
                 model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
@@ -243,24 +243,24 @@ void ProjectsWidget::handleBtnOkClicked()
 		return;
 	}
 
-	if (!ProjectManager::exists(prevprojectname)) {
-		if (!ProjectManager::buildNewProject(projectnametext)) {
+	if (!ProjectBackend::exists(prevprojectname)) {
+		if (!ProjectBackend::buildNewProject(projectnametext)) {
             qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x01");
 		}
 	} else if (prevprojectname != projectnametext) {
-		if (ProjectManager::exists(projectnametext)) {
+		if (ProjectBackend::exists(projectnametext)) {
 			QMessageBox::warning(NULL, "Oops!", "There is another project with the same name, please change your project name.");
 			return;
 		}
-		if (!ProjectManager::renameProject(prevprojectname, projectnametext)) {
+		if (!ProjectBackend::renameProject(prevprojectname, projectnametext)) {
             qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x02");
 		}
 	}
 
-	if (!ProjectManager::fillProjectInformation(projectnametext, descriptiontext, orgnametext, orgidenttext, projectversiontext,
+	if (!ProjectBackend::fillProjectInformation(projectnametext, descriptiontext, orgnametext, orgidenttext, projectversiontext,
 												projectidenttext, ownertext, crdatetext, mfdatetext, sizetext))
         qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x03");
-	refreshProjectList(ProjectManager::currentProject());
+	refreshProjectList(ProjectBackend::currentProject());
 	swipeView->setProperty("currentIndex", 0);
 }
 
@@ -268,14 +268,14 @@ void ProjectsWidget::handleLoadButtonClicked()
 {
 	auto projectName = model.get(listView->property("currentIndex").toInt(),
       model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
-    auto currentProject = ProjectManager::currentProject();
+    auto currentProject = ProjectBackend::currentProject();
 
 	if (!currentProject.isEmpty() && currentProject == projectName) {
         emit done();
 		return;
     }
 
-    ProjectManager::stopProject();
+    ProjectBackend::stopProject();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
     emit busy(tr("Loading project"));
 }
@@ -283,8 +283,8 @@ void ProjectsWidget::handleLoadButtonClicked()
 void ProjectsWidget::refreshProjectList(const QString& activeProject)
 {
 	model.clear();
-	if (UserManager::userDirectory(UserManager::currentSessionsUser()).isEmpty()) return;
-	auto projects = ProjectManager::projects();
+	if (UserBackend::userDirectory(UserBackend::currentSessionsUser()).isEmpty()) return;
+	auto projects = ProjectBackend::projects();
 	if (projects.size() < 1) return;
 	for (auto project : projects) {
 		int lastIndex = model.rowCount();
@@ -292,7 +292,7 @@ void ProjectsWidget::refreshProjectList(const QString& activeProject)
 		model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole], project);
 		model.set(lastIndex, model.roleNames()[ProjectListModel::ActiveRole], project == activeProject);
 		model.set(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole],
-				"Last edited: " + ProjectManager::projectInformation(project)[INF_MFDATE].toString());
+				"Last edited: " + ProjectBackend::projectInformation(project)[INF_MFDATE].toString());
 	}
 	listView->setProperty("currentIndex", 0);
 }

@@ -1,7 +1,7 @@
-#include <projectmanager.h>
-#include <usermanager.h>
+#include <projectbackend.h>
+#include <userbackend.h>
 #include <filemanager.h>
-#include <toolsmanager.h>
+#include <toolsbackend.h>
 #include <savebackend.h>
 #include <QMessageBox>
 #include <QJsonDocument>
@@ -13,32 +13,26 @@
 
 #define INF_FILENAME "inf.json"
 
-class ProjectManagerPrivate
+// Returns biggest number from integer named dirs.
+// If no integer named dir exists, 0 returned.
+// If no dir exists or dirs are smaller than zero, 0 returned.
+int biggestDir(const QString& basePath)
 {
-	public:
-		ProjectManagerPrivate(ProjectManager* uparent);
-		QString generateProjectDir(const QString& projectname) const;
-		QString bytesString(const qint64 size);
-
-	public:
-		ProjectManager* parent = nullptr;
-		QString currentProject;
-        MainWindow* mainWindow;
-};
-
-ProjectManagerPrivate::ProjectManagerPrivate(ProjectManager* uparent)
-	: parent(uparent)
-{
+    int num = 0;
+    for (auto dir : lsdir(basePath))
+        if (dir.toInt() > num)
+            num = dir.toInt();
+    return num;
 }
 
-inline QString ProjectManagerPrivate::generateProjectDir(const QString& projectname) const
+static QString generateProjectDir(const QString& projectname)
 {
-	auto userDir = UserManager::userDirectory(UserManager::currentSessionsUser());
+	auto userDir = UserBackend::userDirectory(UserBackend::currentSessionsUser());
     if (userDir.isEmpty()) return userDir;
 	return userDir + separator() + QByteArray().insert(0, projectname).toHex();
 }
 
-QString ProjectManagerPrivate::bytesString(const qint64 size)
+static QString bytesString(const qint64 size)
 {
 	QString ret;
 	float kb = 1024.0f;
@@ -62,52 +56,39 @@ QString ProjectManagerPrivate::bytesString(const qint64 size)
 	return ret;
 }
 
-ProjectManagerPrivate* ProjectManager::_d = nullptr;
-
-ProjectManager::ProjectManager(QObject *parent)
-	: QObject(parent)
+ProjectBackend* ProjectBackend::instance()
 {
-	if (_d) return;
-    _d = new ProjectManagerPrivate(this);
+    static ProjectBackend instance;
+    return &instance;
 }
 
-ProjectManager::~ProjectManager()
-{
-    delete _d;
-}
-
-ProjectManager* ProjectManager::instance()
-{
-	return _d->parent;
-}
-
-void ProjectManager::setMainWindow(MainWindow* mainWindow)
+void ProjectBackend::setMainWindow(MainWindow* mainWindow)
 {
 	_d->mainWindow = mainWindow;
 }
 
-QString ProjectManager::projectDirectory(const QString& projectname)
+QString ProjectBackend::projectDirectory(const QString& projectname)
 {
     if (!exists(projectname)) return QString();
     return _d->generateProjectDir(projectname);
 }
 
-bool ProjectManager::exists(const QString& projectname)
+bool ProjectBackend::exists(const QString& projectname)
 {
 	auto projectDir = _d->generateProjectDir(projectname);
 	if (projectDir.isEmpty()) return false;
 	return ::exists(projectDir);
 }
 
-bool ProjectManager::buildNewProject(const QString& projectname)
+bool ProjectBackend::buildNewProject(const QString& projectname)
 {
-    return (!UserManager::currentSessionsUser().isEmpty() &&
+    return (!UserBackend::currentSessionsUser().isEmpty() &&
             !exists(projectname) &&
             mkdir(_d->generateProjectDir(projectname)) &&
             SaveBackend::initProject(_d->generateProjectDir(projectname)));
 }
 
-bool ProjectManager::renameProject(const QString& from, const QString& to)
+bool ProjectBackend::renameProject(const QString& from, const QString& to)
 {
 	if (!exists(from) || exists(to)) return false;
 	auto fromDir = _d->generateProjectDir(from);
@@ -124,34 +105,36 @@ bool ProjectManager::renameProject(const QString& from, const QString& to)
     }
 }
 
-bool ProjectManager::exportProject(const QString& projectname, const QString& filepath)
+bool ProjectBackend::exportProject(const QString& projectname, const QString& filepath)
 {
     if (!exists(projectname)) return false;
     auto projDir = _d->generateProjectDir(projectname);
     return Zipper::compressDir(projDir, filepath, fname(projDir));
 }
 
-bool ProjectManager::importProject(const QString &filepath)
+bool ProjectBackend::importProject(const QString &filepath)
 {
     auto zipData = rdfile(filepath);
     if (zipData.isEmpty()) return false;
-    auto userDir = UserManager::userDirectory(UserManager::currentSessionsUser());
+    auto userDir = UserBackend::userDirectory(UserBackend::currentSessionsUser());
     if (userDir.isEmpty()) return false;
     return Zipper::extractZip(zipData, userDir);
 }
 
-bool ProjectManager::fillProjectInformation(const QString& projectname,
-											const QString& description,
-											const QString& orgname,
-											const QString& orgIdent,
-											const QString& projectVersion,
-											const QString& projectIdent,
-											const QString& owner,
-											const QString& crDate,
-											const QString& mfDate,
-											const QString& size)
+bool ProjectBackend::fillProjectInformation(
+    const QString& projectname,
+    const QString& description,
+    const QString& orgname,
+    const QString& orgIdent,
+    const QString& projectVersion,
+    const QString& projectIdent,
+    const QString& owner,
+    const QString& crDate,
+    const QString& mfDate,
+    const QString& size
+    )
 {
-	auto projDir = projectDirectory(projectname);
+    auto projDir = projectDirectory(projectname);
 	if (projDir.isEmpty()) return false;
 	QJsonObject jObj;
 	jObj["projectName"] = projectname;
@@ -169,7 +152,7 @@ bool ProjectManager::fillProjectInformation(const QString& projectname,
 	else return true;
 }
 
-QJsonObject ProjectManager::projectInformation(const QString& projectname)
+QJsonObject ProjectBackend::projectInformation(const QString& projectname)
 {
 	auto projDir = projectDirectory(projectname);
 	if (projDir.isEmpty()) return QJsonObject();
@@ -177,7 +160,7 @@ QJsonObject ProjectManager::projectInformation(const QString& projectname)
 	return QJsonDocument::fromJson(rdfile(projDir + separator() + INF_FILENAME)).object();
 }
 
-bool ProjectManager::infUpdateSize()
+bool ProjectBackend::infUpdateSize()
 {
 	if (_d->currentProject.isEmpty()) return false;
 	auto jObj = projectInformation(_d->currentProject);
@@ -190,7 +173,7 @@ bool ProjectManager::infUpdateSize()
 	else return true;
 }
 
-bool ProjectManager::infUpdateLastModification()
+bool ProjectBackend::infUpdateLastModification()
 {
 	if (_d->currentProject.isEmpty()) return false;
 	auto jObj = projectInformation(_d->currentProject);
@@ -203,9 +186,9 @@ bool ProjectManager::infUpdateLastModification()
 	else return true;
 }
 
-bool ProjectManager::startProject(const QString& projectname)
+bool ProjectBackend::startProject(const QString& projectname)
 {
-	if (UserManager::currentSessionsUser().isEmpty()) return false;
+	if (UserBackend::currentSessionsUser().isEmpty()) return false;
 
 	if (_d->currentProject == projectname) {
 		return true;
@@ -227,7 +210,7 @@ bool ProjectManager::startProject(const QString& projectname)
     DesignerWidget::controlScene()->clearSelection();
     DesignerWidget::formScene()->clearSelection();
 
-    ToolsManager::instance()->downloadTools();
+    ToolsBackend::instance()->downloadTools();
 
 //    MainWindow::instance()->setWindowTitle
 //      (QString(APP_NAME) + " - [" + projectname + "]"); //FIXME
@@ -235,9 +218,9 @@ bool ProjectManager::startProject(const QString& projectname)
 	return true;
 }
 
-void ProjectManager::stopProject()
+void ProjectBackend::stopProject()
 {
-	if (UserManager::currentSessionsUser().isEmpty()) return;
+	if (UserBackend::currentSessionsUser().isEmpty()) return;
 
 	if (_d->currentProject.isEmpty()) {
 		return;
@@ -249,15 +232,15 @@ void ProjectManager::stopProject()
 	_d->currentProject = "";
 }
 
-QString ProjectManager::currentProject()
+QString ProjectBackend::currentProject()
 {
 	return _d->currentProject;
 }
 
-QStringList ProjectManager::projects()
+QStringList ProjectBackend::projects()
 {
 	QStringList projectList;
-	auto userDir = UserManager::userDirectory(UserManager::currentSessionsUser());
+	auto userDir = UserBackend::userDirectory(UserBackend::currentSessionsUser());
 	if (userDir.isEmpty()) return projectList;
 	for (auto projectname : lsdir(userDir)) {
 		projectList << QByteArray::fromHex(QByteArray().insert(0, projectname));

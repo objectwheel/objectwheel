@@ -1,6 +1,6 @@
 #include <savebackend.h>
 #include <filemanager.h>
-#include <projectmanager.h>
+#include <projectbackend.h>
 #include <parsercontroller.h>
 #include <formspane.h>
 #include <mainwindow.h>
@@ -302,7 +302,7 @@ QStringList SaveBackendPrivate::controlPaths(const QString& topPath) const
 QStringList SaveBackendPrivate::formPaths() const
 {
     QStringList paths;
-    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    auto projectDir = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
 
     if (projectDir.isEmpty())
         return paths;
@@ -383,7 +383,7 @@ void SaveBackendPrivate::updateFile(const QString& filePath, const QString& from
 
 bool SaveBackendPrivate::isForm(const QString& rootPath) const
 {
-    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    auto projectDir = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
     auto baseDir = projectDir + separator() + DIR_OWDB;
     return (baseDir == dname(rootPath));
 }
@@ -392,7 +392,7 @@ QString SaveBackendPrivate::findByUid(const QString& uid, const QString& rootPat
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
-        auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+        auto projectDir = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
 
         if (projectDir.isEmpty())
             return QString();
@@ -421,7 +421,7 @@ QString SaveBackendPrivate::findById(const QString& suid, const QString& id, con
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
-        auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+        auto projectDir = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
 
         if (projectDir.isEmpty())
             return QString();
@@ -450,7 +450,7 @@ QString SaveBackendPrivate::findById(const QString& suid, const QString& id, con
 
 bool SaveBackendPrivate::isInOwdb(const QString& path) const
 {
-    auto projectDirectory = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    auto projectDirectory = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
 
     Q_ASSERT(!projectDirectory.isEmpty());
 
@@ -597,7 +597,7 @@ int SaveBackend::biggestDir(const QString& basePath)
 
 QString SaveBackend::basePath()
 {
-    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    auto projectDir = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
 
     if (projectDir.isEmpty())
         return QString();
@@ -1060,7 +1060,7 @@ bool SaveBackend::addForm(Form* form)
 
     _d->refactorId(form, QString());
 
-    auto projectDir = ProjectManager::projectDirectory(ProjectManager::currentProject());
+    auto projectDir = ProjectBackend::projectDirectory(ProjectBackend::currentProject());
 
     if (projectDir.isEmpty())
         return false;

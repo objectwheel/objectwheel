@@ -8,15 +8,11 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/flatbutton.h \
            $$PWD/css.h \
            $$PWD/scrollarea.h \
-           $$PWD/usermanager.h \
-           $$PWD/projectmanager.h \
            $$PWD/dirlocker.h \
            $$PWD/zipper.h \
-           $$PWD/toolsmanager.h \
            $$PWD/delayer.h \
            $$PWD/control.h \
            $$PWD/formscene.h \
-           $$PWD/qmlpreviewer.h \
            $$PWD/savetransaction.h \
            $$PWD/parserworker.h \
            $$PWD/parsercontroller.h \
@@ -65,22 +61,22 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/toolboxpane.h \
            $$PWD/backendmanager.h \
            $$PWD/designerwidget.h \
-           $$PWD/savebackend.h
+           $$PWD/savebackend.h \
+    $$PWD/projectbackend.h \
+    $$PWD/toolsbackend.h \
+    $$PWD/userbackend.h \
+    $$PWD/previewbackend.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
            $$PWD/flatbutton.cpp \
            $$PWD/css.cpp \
            $$PWD/scrollarea.cpp \
-           $$PWD/usermanager.cpp \
-           $$PWD/projectmanager.cpp \
            $$PWD/dirlocker.cpp \
            $$PWD/zipper.cpp \
-           $$PWD/toolsmanager.cpp \
            $$PWD/delayer.cpp \
            $$PWD/control.cpp \
            $$PWD/formscene.cpp \
-           $$PWD/qmlpreviewer.cpp \
            $$PWD/savetransaction.cpp \
            $$PWD/parserworker.cpp \
            $$PWD/parsercontroller.cpp \
@@ -128,7 +124,11 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/toolboxpane.cpp \
            $$PWD/backendmanager.cpp \
            $$PWD/designerwidget.cpp \
-           $$PWD/savebackend.cpp
+           $$PWD/savebackend.cpp \
+    $$PWD/projectbackend.cpp \
+    $$PWD/toolsbackend.cpp \
+    $$PWD/userbackend.cpp \
+    $$PWD/previewbackend.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

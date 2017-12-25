@@ -1,5 +1,5 @@
 #include <toolboxpane.h>
-#include <toolsmanager.h>
+#include <toolsbackend.h>
 #include <filemanager.h>
 #include <savebackend.h>
 #include <toolboxtree.h>

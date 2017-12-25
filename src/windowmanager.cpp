@@ -21,6 +21,13 @@ WindowManager::WindowManager()
     _preferencesWindow = new PreferencesWindow;
     _toolboxSettingsWindow = new ToolboxSettingsWindow;
 
+    add(Main, _mainWindow);
+    add(About, _aboutWindow);
+    add(Welcome, _welcomeWindow);
+    add(Builds, _buildsWindow);
+    add(Preferences, _preferencesWindow);
+    add(ToolboxSettings, _toolboxSettingsWindow);
+
     _mainWindow->resize(fit::fx(QSizeF{1620, 900}).toSize());
     _aboutWindow->resize(fit::fx(QSizeF{700, 400}).toSize());
     _welcomeWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
@@ -39,18 +46,9 @@ WindowManager::WindowManager()
         show(Main, Qt::WindowMaximized);
     });
 
-    add(Main, _mainWindow);
-    add(About, _aboutWindow);
-    add(Welcome, _welcomeWindow);
-    add(Builds, _buildsWindow);
-    add(Preferences, _preferencesWindow);
-    add(ToolboxSettings, _toolboxSettingsWindow);
-    show(Welcome);
-
     for (auto w : _windows) {
-        static const auto ww = _welcomeWindow;
+        static const int d = 11;
         static const auto a = pS->availableGeometry();
-        static const auto d = (ww->frameSize() - ww->size()).height() / 2.0;
 
         w->setGeometry(
             QStyle::alignedRect(

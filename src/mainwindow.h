@@ -27,8 +27,6 @@ class MainWindow : public QMainWindow
         explicit MainWindow(QWidget* parent = 0);
 
     private slots:
-        void setupGui();
-        void setupManagers();
         void handleIndicatorChanges();
         void cleanupObjectwheel();
 

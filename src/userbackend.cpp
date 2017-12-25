@@ -1,10 +1,10 @@
-#include <usermanager.h>
+#include <userbackend.h>
 #include <aes.h>
 #include <global.h>
 #include <mainwindow.h>
 #include <filemanager.h>
 #include <dirlocker.h>
-#include <projectmanager.h>
+#include <projectbackend.h>
 #include <limits>
 #include <random>
 
@@ -24,16 +24,16 @@ static std::random_device rd;
 static std::mt19937 mt(rd());
 static std::uniform_int_distribution<int> rand_dist(INT_MIN, INT_MIN);
 
-class UserManagerPrivate
+class UserBackendPrivate
 {
 	public:
-		UserManagerPrivate(UserManager* uparent);
+        UserBackendPrivate(UserBackend* uparent);
 		QString defaultDataDirectory() const;
 		QString generateUserDirectory(const QString& username) const;
         QString generateToken(const QString& username, const QString& password) const;
 
 	public:
-		UserManager* parent = nullptr;
+        UserBackend* parent = nullptr;
 		QString dataDirectory;
         QString currentSessionsToken;
 		QString currentSessionsUser;
@@ -41,13 +41,13 @@ class UserManagerPrivate
 		DirLocker dirLocker;
 };
 
-UserManagerPrivate::UserManagerPrivate(UserManager* uparent)
+UserBackendPrivate::UserBackendPrivate(UserBackend* uparent)
 	: parent(uparent)
 {
 	dataDirectory = defaultDataDirectory();
 }
 
-inline QString UserManagerPrivate::defaultDataDirectory() const
+inline QString UserBackendPrivate::defaultDataDirectory() const
 {
 	QString baseDir;
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
@@ -58,43 +58,43 @@ inline QString UserManagerPrivate::defaultDataDirectory() const
 	return baseDir + separator() + "data";
 }
 
-QString UserManagerPrivate::generateUserDirectory(const QString& username) const
+QString UserBackendPrivate::generateUserDirectory(const QString& username) const
 {
     return dataDirectory + separator() + QCryptographicHash::hash(QByteArray().insert(0, username), QCryptographicHash::Md5).toHex();
 }
 
-QString UserManagerPrivate::generateToken(const QString& username, const QString& password) const
+QString UserBackendPrivate::generateToken(const QString& username, const QString& password) const
 {
     QString hash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha512).toHex();
     auto json = QByteArray().insert(0, QString("{ \"email\" : \"%1\", \"hash\" : \"%2\" }").arg(username).arg(hash));
     return json.toBase64();
 }
 
-UserManagerPrivate* UserManager::_d = nullptr;
+UserBackendPrivate* UserBackend::_d = nullptr;
 
-UserManager::UserManager(QObject *parent)
+UserBackend::UserBackend(QObject *parent)
 	: QObject(parent)
 {
 	if (_d) return;
-    _d = new UserManagerPrivate(this);
+    _d = new UserBackendPrivate(this);
 }
 
-UserManager::~UserManager()
+UserBackend::~UserBackend()
 {
     delete _d;
 }
 
-UserManager* UserManager::instance()
+UserBackend* UserBackend::instance()
 {
 	return _d->parent;
 }
 
-bool UserManager::exists(const QString& username)
+bool UserBackend::exists(const QString& username)
 {
 	return ::exists(_d->generateUserDirectory(username));
 }
 
-bool UserManager::buildNewUser(const QString& username)
+bool UserBackend::buildNewUser(const QString& username)
 {
 //	if (exists(username)) return false; //True code
 //	return mkdir(_d->generateUserDirectory(username));
@@ -103,18 +103,18 @@ bool UserManager::buildNewUser(const QString& username)
     return mkfile(_d->generateUserDirectory(username) + separator() + "bad.dat");
 }
 
-QString UserManager::dataDirictory()
+QString UserBackend::dataDirictory()
 {
 	return _d->dataDirectory;
 }
 
-QString UserManager::userDirectory(const QString& username)
+QString UserBackend::userDirectory(const QString& username)
 {
 	if (!exists(username)) return QString();
     return _d->generateUserDirectory(username);
 }
 
-void UserManager::setAutoLogin(const QString& password)
+void UserBackend::setAutoLogin(const QString& password)
 {
     if (_d->currentSessionsUser.isEmpty() || userDirectory(_d->currentSessionsUser).isEmpty()) return;
     QString json = "{ \"e\" : \"%1\", \"p\" : \"%2\" }";
@@ -124,7 +124,7 @@ void UserManager::setAutoLogin(const QString& password)
            Aes::encrypt(sstep, QByteArray().insert(0, json.arg(_d->currentSessionsUser, password))));
 }
 
-void UserManager::clearAutoLogin()
+void UserBackend::clearAutoLogin()
 {
     QByteArray shredder;
     for (int i = 1048576; i--;) { shredder.append(rand_dist(mt) % 250); }
@@ -133,13 +133,13 @@ void UserManager::clearAutoLogin()
     mkfile(_d->dataDirectory + separator() + AUTOLOGIN_FILENAME);
 }
 
-bool UserManager::hasAutoLogin()
+bool UserBackend::hasAutoLogin()
 {
     auto algdata = rdfile(_d->dataDirectory + separator() + AUTOLOGIN_FILENAME);
     return !algdata.isEmpty();
 }
 
-bool UserManager::tryAutoLogin()
+bool UserBackend::tryAutoLogin()
 {
     if (!hasAutoLogin()) return false;
     auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
@@ -149,27 +149,27 @@ bool UserManager::tryAutoLogin()
     return startUserSession(jobj["e"].toString(), jobj["p"].toString());
 }
 
-QString UserManager::currentSessionsUser()
+QString UserBackend::currentSessionsUser()
 {
 	return _d->currentSessionsUser;
 }
 
-QString UserManager::currentSessionsToken()
+QString UserBackend::currentSessionsToken()
 {
     return _d->currentSessionsToken;
 }
 
-QString UserManager::currentSessionsKey()
+QString UserBackend::currentSessionsKey()
 {
     return _d->currentSessionsKey;
 }
 
-QString UserManager::generateToken(const QString& username, const QString& password)
+QString UserBackend::generateToken(const QString& username, const QString& password)
 {
     return _d->generateToken(username, password);
 }
 
-bool UserManager::startUserSession(const QString& username, const QString& password)
+bool UserBackend::startUserSession(const QString& username, const QString& password)
 {
 	if (_d->currentSessionsUser == username) {
 		return true;
@@ -219,17 +219,17 @@ bool UserManager::startUserSession(const QString& username, const QString& passw
 	return true;
 }
 
-void UserManager::stopUserSession()
+void UserBackend::stopUserSession()
 {
 	if (_d->currentSessionsUser.isEmpty()) {
 		return;
 	}
 
-	ProjectManager::stopProject();
+	ProjectBackend::stopProject();
 
 	if (exists(_d->currentSessionsUser) && !_d->dirLocker.locked(userDirectory(_d->currentSessionsUser))) {
 		if (!_d->dirLocker.lock(userDirectory(_d->currentSessionsUser), _d->currentSessionsKey)) {
-			qFatal("ProjectManager : Error occurred");
+			qFatal("ProjectBackend : Error occurred");
 		}
 	}
 

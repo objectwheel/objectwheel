@@ -1,5 +1,5 @@
 #include <build.h>
-#include <projectmanager.h>
+#include <projectbackend.h>
 #include <filemanager.h>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -12,8 +12,8 @@
 
 QString Build::dir()
 {
-    auto projectDir = ProjectManager::
-    projectDirectory(ProjectManager::currentProject());
+    auto projectDir = ProjectBackend::
+    projectDirectory(ProjectBackend::currentProject());
 
     if (projectDir.isEmpty())
         return QString();

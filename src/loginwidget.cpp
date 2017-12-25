@@ -1,7 +1,7 @@
 #include <loginwidget.h>
 #include <fit.h>
 #include <delayer.h>
-#include <usermanager.h>
+#include <userbackend.h>
 
 #include <QtQml>
 #include <QQuickItem>
@@ -42,9 +42,9 @@ void LoginWidget::handleSessionStart()
 {
     if (watcher.result()) {
         if (autologin)
-            UserManager::setAutoLogin(password);
+            UserBackend::setAutoLogin(password);
         else
-            UserManager::clearAutoLogin();
+            UserBackend::clearAutoLogin();
     } else
         qFatal("Fatal : LoginWidget");
 
@@ -55,9 +55,9 @@ void LoginWidget::startSession()
 {
     typedef bool (*Fn)(const QString&,const QString&);
 
-    UserManager::buildNewUser(email);
+    UserBackend::buildNewUser(email);
     QFuture<bool> future = QtConcurrent::run(
-      (Fn) &UserManager::startUserSession, email, password);
+      (Fn) &UserBackend::startUserSession, email, password);
 
     watcher.setFuture(future);
 }

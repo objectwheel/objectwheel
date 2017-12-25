@@ -1,4 +1,4 @@
-#include <qmlpreviewer.h>
+#include <previewbackend.h>
 #include <fit.h>
 #include <formscene.h>
 #include <filemanager.h>
@@ -31,16 +31,16 @@
 #define SIZE_NOPREVIEW_PIXMAP (QSizeF(fit::fx(40), fit::fx(40)))
 #define pS (QApplication::primaryScreen())
 
-class QmlPreviewerPrivate : public QObject
+class PreviewBackendPrivate : public QObject
 {
         Q_OBJECT
     public:
-        QmlPreviewerPrivate(QmlPreviewer*);
+        PreviewBackendPrivate(PreviewBackend*);
         QSharedPointer<PreviewResult> preview(Control*, const QString&);
         void draw(QImage&, const QImage&, const QSizeF&) const;
 
     public:
-        QmlPreviewer* parent;
+        PreviewBackend* parent;
         QTimer taskTimer;
         QList<QPointer<Control>> taskList;
         QImage initialImage;
@@ -60,7 +60,7 @@ class QmlPreviewerPrivate : public QObject
         QQuickWindow renderWindow;
 };
 
-QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
+PreviewBackendPrivate::PreviewBackendPrivate(PreviewBackend* parent)
     : QObject(parent)
     , parent(parent)
     , initialImage(QImage(":/resources/images/wait.png").
@@ -84,7 +84,7 @@ QmlPreviewerPrivate::QmlPreviewerPrivate(QmlPreviewer* parent)
     renderWindow.create();
 }
 
-void QmlPreviewerPrivate::dash(Control* control, QImage& image) const
+void PreviewBackendPrivate::dash(Control* control, QImage& image) const
 {
     // Check 15 pixels atleast that has alpha > 250
     int totalAlpha = 0;
@@ -100,7 +100,7 @@ void QmlPreviewerPrivate::dash(Control* control, QImage& image) const
     draw(image, nopreviewImage, control->size());
 }
 
-QImage QmlPreviewerPrivate::prepreview(const Control* control) const
+QImage PreviewBackendPrivate::prepreview(const Control* control) const
 {
     QImage image(qCeil(control->size().width() * pS->devicePixelRatio()),
       qCeil(control->size().height() * pS->devicePixelRatio()),
@@ -111,7 +111,7 @@ QImage QmlPreviewerPrivate::prepreview(const Control* control) const
     return image;
 }
 
-bool QmlPreviewerPrivate::containsWindow(QObject* o) const
+bool PreviewBackendPrivate::containsWindow(QObject* o) const
 {
     for (auto _o : o->findChildren<QObject*>()) {
         if (_o->isWindowType())
@@ -120,7 +120,7 @@ bool QmlPreviewerPrivate::containsWindow(QObject* o) const
     return false;
 }
 
-PropertyNodes QmlPreviewerPrivate::properties(const QObject* object) const
+PropertyNodes PreviewBackendPrivate::properties(const QObject* object) const
 {
     PropertyNodes propertyNodes;
     auto metaObject = object->metaObject();
@@ -176,7 +176,7 @@ PropertyNodes QmlPreviewerPrivate::properties(const QObject* object) const
     return propertyNodes;
 }
 
-void QmlPreviewerPrivate::draw(QImage& dest, const QImage& source, const QSizeF& size) const
+void PreviewBackendPrivate::draw(QImage& dest, const QImage& source, const QSizeF& size) const
 {
     auto r = QRectF({QPointF(), size}).adjusted(1, 1, -1, -1);
     QRectF wr(QPoint(), QSizeF(source.size()) / pS->devicePixelRatio());
@@ -209,7 +209,7 @@ void QmlPreviewerPrivate::draw(QImage& dest, const QImage& source, const QSizeF&
     painter.drawLine(r.bottomRight(), r.bottomRight() + QPointF(0, -2));
 }
 
-QList<QString> QmlPreviewerPrivate::events(const QObject* object) const
+QList<QString> PreviewBackendPrivate::events(const QObject* object) const
 {
     QList<QString> events;
     auto metaObject = object->metaObject();
@@ -221,7 +221,7 @@ QList<QString> QmlPreviewerPrivate::events(const QObject* object) const
     return events;
 }
 
-QSharedPointer<PreviewResult> QmlPreviewerPrivate::preview(Control* control, const QString& url)
+QSharedPointer<PreviewResult> PreviewBackendPrivate::preview(Control* control, const QString& url)
 {
     QSharedPointer<PreviewResult> result(new PreviewResult);
 
@@ -309,7 +309,7 @@ QSharedPointer<PreviewResult> QmlPreviewerPrivate::preview(Control* control, con
     return result;
 }
 
-void QmlPreviewerPrivate::processTasks()
+void PreviewBackendPrivate::processTasks()
 {
     if (parent->_working)
         return;
@@ -411,23 +411,23 @@ void QmlPreviewerPrivate::processTasks()
     }
 }
 
-bool QmlPreviewer::_working = false;
-QmlPreviewerPrivate* QmlPreviewer::_d = nullptr;
+bool PreviewBackend::_working = false;
+PreviewBackendPrivate* PreviewBackend::_d = nullptr;
 
-QmlPreviewer::QmlPreviewer(QObject *parent) : QObject(parent)
+PreviewBackend::PreviewBackend(QObject *parent) : QObject(parent)
 {
     if (_d)
         return;
 
-    _d = new QmlPreviewerPrivate(this);
+    _d = new PreviewBackendPrivate(this);
 }
 
-QmlPreviewer* QmlPreviewer::instance()
+PreviewBackend* PreviewBackend::instance()
 {
     return _d ? _d->parent : nullptr;
 }
 
-void QmlPreviewer::requestPreview(Control* control)
+void PreviewBackend::requestPreview(Control* control)
 {
     if (_d->taskList.isEmpty())
         _d->taskTimer.start();
@@ -435,12 +435,12 @@ void QmlPreviewer::requestPreview(Control* control)
         _d->taskList.append(control);
 }
 
-bool QmlPreviewer::working()
+bool PreviewBackend::working()
 {
     return _working;
 }
 
-QImage QmlPreviewer::initialPreview(const QSizeF& size)
+QImage PreviewBackend::initialPreview(const QSizeF& size)
 {
     QImage image(qCeil(size.width() * pS->devicePixelRatio()),
       qCeil(size.height() * pS->devicePixelRatio()),
@@ -451,4 +451,4 @@ QImage QmlPreviewer::initialPreview(const QSizeF& size)
     return image;
 }
 
-#include "qmlpreviewer.moc"
+#include "previewbackend.moc"

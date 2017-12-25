@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     MenuManager::instance();
 
     // Start Windows
-    WindowManager::instance();
+    WindowManager::instance()->show(WindowManager::Welcome);
 
     // Start main event loop
     return a.exec();

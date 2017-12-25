@@ -1,19 +1,19 @@
-#ifndef USERMANAGER_H
-#define USERMANAGER_H
+#ifndef USERBACKEND_H
+#define USERBACKEND_H
 
 #include <QObject>
 
-class UserManagerPrivate;
+class UserBackendPrivate;
 
-class UserManager : public QObject
+class UserBackend : public QObject
 {
 		Q_OBJECT
-		Q_DISABLE_COPY(UserManager)
+		Q_DISABLE_COPY(UserBackend)
 
 	public:
-		explicit UserManager(QObject *parent = 0);
-        ~UserManager();
-		static UserManager* instance();
+		explicit UserBackend(QObject *parent = 0);
+        ~UserBackend();
+		static UserBackend* instance();
 		static QString dataDirictory();
 		static QString userDirectory(const QString& username);
         static void setAutoLogin(const QString& password);
@@ -33,7 +33,7 @@ class UserManager : public QObject
 		static void stopUserSession();
 
 	private:
-		static UserManagerPrivate* _d;
+		static UserBackendPrivate* _d;
 };
 
-#endif // USERMANAGER_H
+#endif // USERBACKEND_H
