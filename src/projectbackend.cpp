@@ -62,20 +62,15 @@ ProjectBackend* ProjectBackend::instance()
     return &instance;
 }
 
-void ProjectBackend::setMainWindow(MainWindow* mainWindow)
-{
-	_d->mainWindow = mainWindow;
-}
-
 QString ProjectBackend::projectDirectory(const QString& projectname)
 {
     if (!exists(projectname)) return QString();
-    return _d->generateProjectDir(projectname);
+    return generateProjectDir(projectname);
 }
 
 bool ProjectBackend::exists(const QString& projectname)
 {
-	auto projectDir = _d->generateProjectDir(projectname);
+    auto projectDir = generateProjectDir(projectname);
 	if (projectDir.isEmpty()) return false;
 	return ::exists(projectDir);
 }
@@ -84,19 +79,19 @@ bool ProjectBackend::buildNewProject(const QString& projectname)
 {
     return (!UserBackend::currentSessionsUser().isEmpty() &&
             !exists(projectname) &&
-            mkdir(_d->generateProjectDir(projectname)) &&
-            SaveBackend::initProject(_d->generateProjectDir(projectname)));
+            mkdir(generateProjectDir(projectname)) &&
+            SaveBackend::initProject(generateProjectDir(projectname)));
 }
 
 bool ProjectBackend::renameProject(const QString& from, const QString& to)
 {
 	if (!exists(from) || exists(to)) return false;
-	auto fromDir = _d->generateProjectDir(from);
-	auto toDir = _d->generateProjectDir(to);
+    auto fromDir = generateProjectDir(from);
+    auto toDir = generateProjectDir(to);
 	if (fromDir.isEmpty() || toDir.isEmpty()) return false;
-    if (_d->currentProject == from) {
+    if (_currentProject == from) {
         stopProject();
-//        _d->mainWindow->clearStudio(); //FIXME
+//        mainWindow->clearStudio(); //FIXME
         if (!rn(fromDir, toDir)) return false;
         if (!startProject(to)) return false;
 		return infUpdateLastModification();
@@ -108,7 +103,7 @@ bool ProjectBackend::renameProject(const QString& from, const QString& to)
 bool ProjectBackend::exportProject(const QString& projectname, const QString& filepath)
 {
     if (!exists(projectname)) return false;
-    auto projDir = _d->generateProjectDir(projectname);
+    auto projDir = generateProjectDir(projectname);
     return Zipper::compressDir(projDir, filepath, fname(projDir));
 }
 
@@ -162,12 +157,12 @@ QJsonObject ProjectBackend::projectInformation(const QString& projectname)
 
 bool ProjectBackend::infUpdateSize()
 {
-	if (_d->currentProject.isEmpty()) return false;
-	auto jObj = projectInformation(_d->currentProject);
+    if (_currentProject.isEmpty()) return false;
+    auto jObj = projectInformation(_currentProject);
 	if (jObj.isEmpty()) return false;
-	auto projDir = projectDirectory(_d->currentProject);
+    auto projDir = projectDirectory(_currentProject);
 	if (projDir.isEmpty()) return false;
-	jObj[INF_SIZE] = _d->bytesString(dsize(projDir));
+    jObj[INF_SIZE] = bytesString(dsize(projDir));
 	QJsonDocument jDoc(jObj);
 	if (wrfile(projDir + separator() + INF_FILENAME, jDoc.toJson()) < 0) return false;
 	else return true;
@@ -175,10 +170,10 @@ bool ProjectBackend::infUpdateSize()
 
 bool ProjectBackend::infUpdateLastModification()
 {
-	if (_d->currentProject.isEmpty()) return false;
-	auto jObj = projectInformation(_d->currentProject);
+    if (_currentProject.isEmpty()) return false;
+    auto jObj = projectInformation(_currentProject);
 	if (jObj.isEmpty()) return false;
-	auto projDir = projectDirectory(_d->currentProject);
+    auto projDir = projectDirectory(_currentProject);
 	if (projDir.isEmpty()) return false;
 	jObj[INF_MFDATE] = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
 	QJsonDocument jDoc(jObj);
@@ -190,7 +185,7 @@ bool ProjectBackend::startProject(const QString& projectname)
 {
 	if (UserBackend::currentSessionsUser().isEmpty()) return false;
 
-	if (_d->currentProject == projectname) {
+    if (_currentProject == projectname) {
 		return true;
 	}
 
@@ -198,13 +193,13 @@ bool ProjectBackend::startProject(const QString& projectname)
 		return false;
 	}
 
-    if (!_d->currentProject.isEmpty()) {
+    if (!_currentProject.isEmpty()) {
         stopProject();
     }
 
-//    _d->mainWindow->clearStudio(); //FIXME
+//    mainWindow->clearStudio(); //FIXME
 
-    _d->currentProject = projectname;
+    _currentProject = projectname;
 
     SaveBackend::exposeProject();
     DesignerWidget::controlScene()->clearSelection();
@@ -222,19 +217,19 @@ void ProjectBackend::stopProject()
 {
 	if (UserBackend::currentSessionsUser().isEmpty()) return;
 
-	if (_d->currentProject.isEmpty()) {
+    if (_currentProject.isEmpty()) {
 		return;
 	}
 
 	infUpdateSize();
 	infUpdateLastModification();
 
-	_d->currentProject = "";
+    _currentProject = "";
 }
 
 QString ProjectBackend::currentProject()
 {
-	return _d->currentProject;
+    return _currentProject;
 }
 
 QStringList ProjectBackend::projects()

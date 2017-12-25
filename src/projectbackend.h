@@ -3,16 +3,16 @@
 
 #include <QObject>
 
-#define INF_PROJECTNAME "projectName"
-#define INF_DESCRIPTION "description"
-#define INF_ORGNAME "orgName"
-#define INF_ORGIDENT "orgIdent"
+#define INF_PROJECTNAME     "projectName"
+#define INF_DESCRIPTION     "description"
+#define INF_ORGNAME         "orgName"
+#define INF_ORGIDENT        "orgIdent"
 #define INF_PROJECT_VERSION "projectVersion"
-#define INF_PROJECT_IDENT "projectIdent"
-#define INF_OWNER "owner"
-#define INF_CRDATE "crDate"
-#define INF_MFDATE "mfDate"
-#define INF_SIZE "size"
+#define INF_PROJECT_IDENT   "projectIdent"
+#define INF_OWNER           "owner"
+#define INF_CRDATE          "crDate"
+#define INF_MFDATE          "mfDate"
+#define INF_SIZE            "size"
 
 class ProjectBackend : public QObject
 {
@@ -21,7 +21,6 @@ class ProjectBackend : public QObject
 
 	public:
         static ProjectBackend* instance();
-
         QString projectDirectory(const QString& projectname);
         bool exists(const QString& projectname);
         bool buildNewProject(const QString& projectname);
@@ -52,6 +51,7 @@ class ProjectBackend : public QObject
         bool startProject(const QString& projectname);
 
 	private:
+        ProjectBackend() {}
         QString _currentProject;
 };
 

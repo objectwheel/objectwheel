@@ -225,7 +225,7 @@ void UserBackend::stopUserSession()
 		return;
 	}
 
-	ProjectBackend::stopProject();
+    ProjectBackend::instance()->stopProject();
 
 	if (exists(_d->currentSessionsUser) && !_d->dirLocker.locked(userDirectory(_d->currentSessionsUser))) {
 		if (!_d->dirLocker.lock(userDirectory(_d->currentSessionsUser), _d->currentSessionsKey)) {

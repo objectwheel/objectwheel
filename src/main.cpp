@@ -3,6 +3,7 @@
 #include <components.h>
 #include <windowmanager.h>
 #include <menumanager.h>
+#include <backendmanager.h>
 
 #include <QApplication>
 #include <QFontDatabase>
@@ -69,8 +70,14 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
 
     /* Disable Qml Parser warnings */
-    QLoggingCategory::setFilterRules(QStringLiteral("qtc*.info=false\n"
-      "qtc*.debug=false\n qtc*.warning=false\n qtc*.critical=false"));
+    QLoggingCategory::setFilterRules(
+        QStringLiteral(
+            "qtc*.info=false\n"
+            "qtc*.debug=false\n"
+            "qtc*.warning=false\n"
+            "qtc*.critical=false"
+        )
+    );
 
     // Init CSS
     CSS::init();
@@ -86,6 +93,8 @@ int main(int argc, char *argv[])
 
     // Start Windows
     WindowManager::instance()->show(WindowManager::Welcome);
+
+    BackendManager::instance();
 
     // Start main event loop
     return a.exec();
