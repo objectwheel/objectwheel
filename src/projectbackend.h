@@ -3,17 +3,6 @@
 
 #include <QObject>
 
-#define INF_PROJECTNAME     "projectName"
-#define INF_DESCRIPTION     "description"
-#define INF_ORGNAME         "orgName"
-#define INF_ORGIDENT        "orgIdent"
-#define INF_PROJECT_VERSION "projectVersion"
-#define INF_PROJECT_IDENT   "projectIdent"
-#define INF_OWNER           "owner"
-#define INF_CRDATE          "crDate"
-#define INF_MFDATE          "mfDate"
-#define INF_SIZE            "size"
-
 class ProjectBackend : public QObject
 {
 		Q_OBJECT
@@ -21,38 +10,48 @@ class ProjectBackend : public QObject
 
 	public:
         static ProjectBackend* instance();
-        QString projectDirectory(const QString& projectname);
-        bool exists(const QString& projectname);
-        bool buildNewProject(const QString& projectname);
-        bool renameProject(const QString& from, const QString& to);
-        bool exportProject(const QString& projectname, const QString& filepath);
-        bool importProject(const QString& filepath);
-        bool fillProjectInformation(
-            const QString& projectname,
+
+        bool importProject(const QString& filePath);
+        bool exportProject(const QString& hash, const QString& filePath);
+
+        bool newProject(
+            const QString& name,
             const QString& description,
-            const QString& orgname,
-            const QString& orgIdent,
-            const QString& projectVersion,
-            const QString& projectIdent,
             const QString& owner,
             const QString& crDate,
-            const QString& mfDate,
             const QString& size
         );
-        QJsonObject projectInformation(const QString& projectname);
-        bool infUpdateSize();
-        bool infUpdateLastModification();
 
-        QStringList projects();
-        QString currentProject();
+        void changeName(const QString& hash, const QString& name);
+        void changeDescription(const QString& hash, const QString& desc);
+
+        const QString& hash() const;
+        QStringList projects() const;
+        QString dir(const QString& = instance()->hash()) const;
+        QString name(const QString& = instance()->hash()) const;
+        QString description(const QString& = instance()->hash()) const;
+        QString owner(const QString& = instance()->hash()) const;
+        QString crDate(const QString& = instance()->hash()) const;
+        QString mfDate(const QString& = instance()->hash()) const;
+        QString size(const QString& = instance()->hash()) const;
 
     public slots:
-        void stopProject();
-        bool startProject(const QString& projectname);
+        void stop();
+        bool start(const QString& hash);
+
+    private slots:
+        void updateSize();
+        void updateLastModification();
+
+    signals:
+        void started();
+        void stopped();
 
 	private:
         ProjectBackend() {}
-        QString _currentProject;
+
+    private:
+        QString _currentHash;
 };
 
 #endif // PROJECTBACKEND_H

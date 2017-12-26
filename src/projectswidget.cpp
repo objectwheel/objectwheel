@@ -127,9 +127,6 @@ void ProjectsWidget::handleInfoButtonClicks(const QVariant& projectname)
     mfDateText->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_MFDATE].toString());
     crDateText->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_CRDATE].toString());
     ownerText->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_OWNER].toString());
-    projectVersionTextInput->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_PROJECT_VERSION].toString());
-    orgIdentTextInput->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_ORGIDENT].toString());
-    orgnameTextInput->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_ORGNAME].toString());
     descriptionTextInput->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_DESCRIPTION].toString());
     projectnameTextInput->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_PROJECTNAME].toString());
 	swipeView->setProperty("currentIndex", 1);
@@ -257,8 +254,14 @@ void ProjectsWidget::handleBtnOkClicked()
 		}
 	}
 
-    if (!ProjectBackend::instance()->fillProjectInformation(projectnametext, descriptiontext, orgnametext, orgidenttext, projectversiontext,
-												projectidenttext, ownertext, crdatetext, mfdatetext, sizetext))
+    if (!ProjectBackend::instance()->fillProjectInformation(
+            projectnametext,
+            descriptiontext,
+            ownertext,
+            crdatetext,
+            mfdatetext,
+            sizetext
+        ))
         qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x03");
     refreshProjectList(ProjectBackend::instance()->currentProject());
 	swipeView->setProperty("currentIndex", 0);

@@ -12,6 +12,17 @@ BackendManager::BackendManager()
 //    _projectBackend = new ProjectBackend;
     _saveBackend = new SaveBackend;
     _previewBackend = new PreviewBackend;
+
+
+    // when project started
+    //    mainWindow->clearStudio(); //FIXME
+    //    SaveBackend::exposeProject();
+    //    DesignerWidget::controlScene()->clearSelection();
+    //    DesignerWidget::formScene()->clearSelection();
+    //    ToolsBackend::instance()->downloadTools();
+    //    MainWindow::instance()->setWindowTitle
+    //      (QString(APP_NAME) + " - [" + projectname + "]"); //FIXME
+
 }
 
 BackendManager* BackendManager::instance()

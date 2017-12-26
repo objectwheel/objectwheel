@@ -128,9 +128,7 @@ void DownloadWidget::download(OTargets::Targets target)
     QMetaEnum metaEnum = QMetaEnum::fromType<OTargets::Targets>();
     auto buildLabel = QString(metaEnum.valueToKey(target));
 
-    auto pdir = ProjectBackend::instance()->projectDirectory(
-        ProjectBackend::instance()->currentProject()
-    );
+    auto pdir = ProjectBackend::instance()->dir();
     if (pdir.isEmpty())
         return;
 
