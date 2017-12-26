@@ -4,7 +4,6 @@
 #include <projectbackend.h>
 #include <savebackend.h>
 #include <previewbackend.h>
-
 #include <designerwidget.h>
 
 BackendManager::BackendManager()

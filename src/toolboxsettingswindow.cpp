@@ -165,7 +165,7 @@ void ToolboxSettingsWindow::on_btnRemove_clicked()
 
 void ToolboxSettingsWindow::on_btnAdd_clicked()
 {
-    ToolsBackend::instance()->createNewTool();
+    ToolsBackend::instance()->newTool();
 }
 
 void ToolboxSettingsWindow::on_btnImport_clicked()

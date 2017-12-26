@@ -1,9 +1,9 @@
 #include <toolsbackend.h>
+#include <projectbackend.h>
+#include <savebackend.h>
+#include <toolboxtree.h>
 #include <filemanager.h>
 #include <zipper.h>
-#include <projectbackend.h>
-#include <toolboxtree.h>
-#include <savebackend.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -12,7 +12,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QString>
 #include <QUrl>
 #include <QList>
 #include <QIcon>
@@ -21,20 +20,11 @@
 #include <QEventLoop>
 #include <QBuffer>
 
-#define DEFAULT_CATEGORY "Others"
-#define DEFAULT_NAME "Tool"
+#define DEFAULT_CATEGORY        "Others"
+#define DEFAULT_NAME            "Tool"
 #define DEFAULT_TOOLS_DIRECTORY "tools"
-#define DEFAULT_TOOLS_URL "qrc:/resources/tools/tools.json"
-#define DIR_QRC_CONTROL ":/resources/qmls/control"
-
-//!
-//! *************************** [global] ***************************
-//!
-
-static void fillTree(ToolboxTree*)
-{
-    // TODO
-}
+#define DEFAULT_TOOLS_URL       "qrc:/resources/tools/tools.json"
+#define DIR_QRC_CONTROL         ":/resources/qmls/control"
 
 static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)
 {
@@ -80,10 +70,6 @@ static bool isProjectFull()
         return true;
 }
 
-//!
-//! *********************** [ToolsBackend] ***********************
-//!
-
 ToolsBackend* ToolsBackend::instance()
 {
     static ToolsBackend instance;
@@ -93,13 +79,17 @@ ToolsBackend* ToolsBackend::instance()
 QString ToolsBackend::toolsDir() const
 {
     auto projectDir = ProjectBackend::instance()->dir();
-    if (projectDir.isEmpty()) qFatal("ToolsBackend : Error occurred");
+    if (projectDir.isEmpty()) return projectDir;
     return projectDir + separator() + DEFAULT_TOOLS_DIRECTORY;
 }
 
 QStringList ToolsBackend::categories() const
 {
     QStringList categories;
+
+    if (!isProjectFull())
+        return categories;
+
     for (auto dir : lsdir(toolsDir())) {
         auto toolPath = toolsDir() + separator() + dir;
         auto category = SaveBackend::toolCategory(toolPath);
@@ -109,10 +99,57 @@ QStringList ToolsBackend::categories() const
     return categories;
 }
 
+void ToolsBackend::fillTree(ToolboxTree* tree)
+{
+    if (!isProjectFull())
+        return;
+
+    tree->clear();
+    for (auto toolDir : lsdir(toolsDir()))
+        addToTree(toolsDir() + separator() + toolDir, tree);
+}
+
+bool ToolsBackend::addToTree(const QString& toolPath, ToolboxTree* tree)
+{
+    if (ProjectBackend::instance()->dir().isEmpty() ||
+        toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
+        return false;
+
+    QList<QUrl> urls;
+    auto dir = toolPath + separator() + DIR_THIS + separator();
+    auto category = SaveBackend::toolCategory(toolPath);
+    auto name = SaveBackend::toolName(toolPath);
+
+    urls << QUrl::fromLocalFile(dir + "main.qml");
+    if (category.isEmpty())
+        category = DEFAULT_CATEGORY;
+    if (name.isEmpty())
+        name = DEFAULT_NAME;
+
+    auto topItem = tree->categoryItem(category);
+    if (!topItem) {
+        topItem = new QTreeWidgetItem;
+        topItem->setText(0, category);
+        tree->addTopLevelItem(topItem);
+        topItem->setExpanded(true);
+    }
+
+    QTreeWidgetItem* item = new QTreeWidgetItem;
+    item->setText(0, name);
+    item->setIcon(0, QIcon(dir + "icon.png"));
+    topItem->addChild(item);
+    tree->addUrls(item, urls);
+
+    return true;
+}
+
 bool ToolsBackend::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
     if (ProjectBackend::instance()->dir().isEmpty() ||
-      toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
+        toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
+        return false;
+
+    if (!isProjectFull())
         return false;
 
     const bool isNewTool = !toolPath.contains(toolsDir());
@@ -164,6 +201,7 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
             tree->scrollToItem(item);
         }
     }
+
     return true;
 }
 
@@ -221,20 +259,23 @@ void ToolsBackend::addToolboxTree(ToolboxTree* toolboxTree)
 void ToolsBackend::downloadTools(const QUrl& url)
 {
     if (ProjectBackend::instance()->dir().isEmpty()) return;
-    QNetworkAccessManager *manager = new QNetworkAccessManager;
+
+    for (auto tree : _toolboxTreeList)
+        tree->clear();
+
+    QNetworkAccessManager* manager = new QNetworkAccessManager;
     QNetworkRequest request;
     if (!url.isEmpty()) request.setUrl(url);
     else request.setUrl(QUrl::fromUserInput(DEFAULT_TOOLS_URL));
-    request.setRawHeader("User-Agent", "objectwheel 1.0");
 
     QSharedPointer<QEventLoop> loop(new QEventLoop);
-    QNetworkReply *reply = manager->get(request);
+    QNetworkReply* reply = manager->get(request);
     QObject::connect(reply, static_cast<void (QNetworkReply::*)
       (QNetworkReply::NetworkError)>(&QNetworkReply::error),
-      [] { qFatal("downloadTools() : Network Error"); });
+      this, [] { qFatal("downloadTools() : Network Error"); });
     QObject::connect(reply, &QNetworkReply::sslErrors,
-      [] { qFatal("downloadTools() : Ssl Error"); });
-    QObject::connect(reply, &QNetworkReply::finished, [=]
+      this, [] { qFatal("downloadTools() : Ssl Error"); });
+    QObject::connect(reply, &QNetworkReply::finished, this, [=]
     {
         QJsonDocument toolsDoc = QJsonDocument::fromJson(reply->readAll());
         QJsonArray toolsArray = toolsDoc.array();
@@ -258,7 +299,7 @@ void ToolsBackend::downloadTools(const QUrl& url)
             request.setUrl(toolUrl);
             request.setRawHeader("User-Agent", "objectwheel 1.0");
 
-            QNetworkReply *toolReply = manager->get(request);
+            QNetworkReply* toolReply = manager->get(request);
             QObject::connect(toolReply, static_cast<void (QNetworkReply::*)
               (QNetworkReply::NetworkError)> (&QNetworkReply::error), []
               { qFatal("downloadTools() : Network Error"); });
@@ -276,15 +317,19 @@ void ToolsBackend::downloadTools(const QUrl& url)
         reply->deleteLater();
     });
     loop->exec();
+    manager->deleteLater();
 }
 
-void ToolsBackend::createNewTool()
+void ToolsBackend::newTool()
 {
     addTool(DIR_QRC_CONTROL, true, true);
 }
 
 void ToolsBackend::resetTools()
 {
+    if (!isProjectFull())
+        return;
+
     for (auto tree : _toolboxTreeList) {
         tree->clearSelection();
         tree->setCurrentItem(nullptr);

@@ -33,9 +33,13 @@ class ToolsBackend : QObject
         QString toolsDir() const;
         QStringList categories() const;
 
+    private:
+        void fillTree(ToolboxTree* tree);
+        bool addToTree(const QString& toolPath, ToolboxTree* tree);
+
     public slots:
+        void newTool();
         void resetTools();
-        void createNewTool();
         void downloadTools(const QUrl& url = QUrl());
 
     private:

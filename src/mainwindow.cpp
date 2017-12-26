@@ -161,6 +161,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         QDockWidget::DockWidgetFloatable
     );
 
+    ToolsBackend::instance()->addToolboxTree(_toolboxPane->toolboxTree());
+
     connect(_toolboxPane->toolboxTree()->indicatorButton(),
       &FlatButton::clicked, this, [=] {
         auto splitter = DesignerWidget::splitter();
@@ -246,7 +248,6 @@ void MainWindow::cleanupObjectwheel()
 
 //void MainWindow::setupManagers()
 //{
-//    ToolsManager::instance()->addToolboxTree(_toolboxPane->toolboxTree());
 //    auto userManager = new UserManager(this);
 //    Q_UNUSED(userManager);
 //    new ProjectManager(this);
