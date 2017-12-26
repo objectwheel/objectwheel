@@ -2,10 +2,10 @@
 #include <filemanager.h>
 #include <aes.h>
 #include <zipper.h>
+
 #include <QByteArray>
 #include <QFile>
 #include <QCryptographicHash>
-#include <QDebug>
 #include <QDir>
 
 #define CHECK_FILENAME "check.lock"
@@ -13,45 +13,11 @@
 #define ZIPPED_FILENAME "data.tmp"
 #define CHECK_SIGN "VEdFZ2FXeGhhR1VnYVd4c1lXeHNZV2dzSUUxMWFHRnRiV1ZrZFc0Z2NtVnpkV3gxYkd4aGFB"
 
-class DirLockerPrivate
-{
-	public:
-		DirLockerPrivate(DirLocker* uparent);
-		void clearTrashes(const QString& dir);
-
-	public:
-		DirLocker* parent = nullptr;
-};
-
-DirLockerPrivate::DirLockerPrivate(DirLocker* uparent)
-	: parent(uparent)
-{
-}
-
-void DirLockerPrivate::clearTrashes(const QString& dir)
+static void clearTrashes(const QString& dir)
 {
 	rm(dir + separator() + CHECK_FILENAME);
 	rm(dir + separator() + LOCKED_FILENAME);
 	rm(dir + separator() + ZIPPED_FILENAME);
-}
-
-DirLockerPrivate* DirLocker::_d = nullptr;
-
-DirLocker::DirLocker(QObject *parent)
-	: QObject(parent)
-{
-	if (_d) return;
-	_d = new DirLockerPrivate(this);
-}
-
-DirLocker* DirLocker::instance()
-{
-	return _d->parent;
-}
-
-DirLocker::~DirLocker()
-{
-    delete _d;
 }
 
 bool DirLocker::locked(const QString& dir)
@@ -76,7 +42,7 @@ bool DirLocker::canUnlock(const QString& dir, const QByteArray& key)
 bool DirLocker::lock(const QString& dir, const QByteArray& key)
 {
 	if (locked(dir)) return false;
-	_d->clearTrashes(dir);
+    clearTrashes(dir);
 	QString zippedFileName = dir + separator() + ZIPPED_FILENAME;
 	Zipper::compressDir(dir, zippedFileName);
 	auto checkData = QByteArray(CHECK_SIGN);
@@ -104,7 +70,7 @@ bool DirLocker::unlock(const QString& dir, const QByteArray& key)
     return true;
 }
 
-QStringList DirLocker::dirlockersFilenames()
+QStringList DirLocker::lockFiles()
 {
     QStringList names;
     names << CHECK_FILENAME;

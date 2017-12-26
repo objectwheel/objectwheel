@@ -3,13 +3,13 @@
 #include <projectbackend.h>
 #include <parsercontroller.h>
 #include <formspane.h>
-#include <mainwindow.h>
 #include <control.h>
 #include <algorithm>
-#include <delayer.h>
 #include <executivewidget.h>
 #include <parserworker.h>
 #include <controlwatcher.h>
+#include <fit.h>
+#include <designerwidget.h>
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -23,6 +23,7 @@
 #include <QQmlContext>
 #include <QQmlComponent>
 #include <QQuickView>
+#include <QScreen>
 
 #define pS (qApp->primaryScreen())
 

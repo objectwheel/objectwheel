@@ -21,6 +21,7 @@ class BackendManager : public QObject
         inline void init() const {}
 
     private slots:
+        void handleSessionStop() const;
         void handleProjectStart() const;
 
     private:

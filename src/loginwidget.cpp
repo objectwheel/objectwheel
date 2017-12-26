@@ -42,9 +42,9 @@ void LoginWidget::handleSessionStart()
 {
     if (watcher.result()) {
         if (autologin)
-            UserBackend::setAutoLogin(password);
+            UserBackend::instance()->setAutoLogin(password);
         else
-            UserBackend::clearAutoLogin();
+            UserBackend::instance()->clearAutoLogin();
     } else
         qFatal("Fatal : LoginWidget");
 
@@ -53,11 +53,15 @@ void LoginWidget::handleSessionStart()
 
 void LoginWidget::startSession()
 {
-    typedef bool (*Fn)(const QString&,const QString&);
+    typedef bool (UserBackend::* Fn) (const QString&, const QString&);
 
-    UserBackend::buildNewUser(email);
+    UserBackend::instance()->newUser(email);
     QFuture<bool> future = QtConcurrent::run(
-      (Fn) &UserBackend::startUserSession, email, password);
+        UserBackend::instance(),
+        (Fn) &UserBackend::start,
+        email,
+        password
+    );
 
     watcher.setFuture(future);
 }

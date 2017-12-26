@@ -1,9 +1,9 @@
 #include <projectbackend.h>
+#include <userbackend.h>
+#include <savebackend.h>
 #include <filemanager.h>
 #include <zipper.h>
 #include <random>
-#include <userbackend.h>
-#include <savebackend.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -130,9 +130,7 @@ static QString newHash()
 static QString dir(const QString& hash)
 {
     QString pdir;
-    const auto& udir = UserBackend::userDirectory(
-        UserBackend::currentSessionsUser()
-    );
+    const auto& udir = UserBackend::instance()->dir();
 
     if (udir.isEmpty() || hash.isEmpty())
         return pdir;
@@ -186,9 +184,7 @@ bool ProjectBackend::newProject(
     const QString& size
   ) const
 {
-    const auto& udir = UserBackend::userDirectory(
-        UserBackend::currentSessionsUser()
-    );
+    const auto& udir = UserBackend::instance()->dir();
 
     if (udir.isEmpty() ||
         name.isEmpty() ||
@@ -213,7 +209,7 @@ bool ProjectBackend::newProject(
 
     const auto& data = QJsonDocument(jobj).toJson();
 
-    return (
+    return(
         !mkdir(pdir) ||
         0 > wrfile(
             pdir + separator() +
@@ -256,9 +252,7 @@ bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
 bool ProjectBackend::importProject(const QString &filePath) const
 {
     const auto& data = rdfile(filePath);
-    const auto& udir = UserBackend::userDirectory(
-        UserBackend::currentSessionsUser()
-    );
+    const auto& udir = UserBackend::instance()->dir();
     const auto& pdir = udir + separator() +
       QString::number(biggestDir(udir) + 1);
 
@@ -316,9 +310,7 @@ const QString& ProjectBackend::hash() const
 QStringList ProjectBackend::projects() const
 {
     QStringList hashes;
-    const auto& udir = UserBackend::userDirectory(
-        UserBackend::currentSessionsUser()
-    );
+    const auto& udir = UserBackend::instance()->dir();
 
     if (udir.isEmpty())
         return hashes;

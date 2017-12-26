@@ -21,8 +21,6 @@
 #include <QtConcurrent>
 #include <QtNetwork>
 
-#define wM (WindowManager::instance())
-
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     _settleWidget = new QFrame;
@@ -241,7 +239,7 @@ void MainWindow::cleanupObjectwheel()
     while(SaveBackend::parserWorking())
         Delayer::delay(100);
 
-    UserBackend::stopUserSession();
+    UserBackend::instance()->stop();
 
     qApp->processEvents();
 }
@@ -280,7 +278,7 @@ void MainWindow::cleanupObjectwheel()
 //    SplashScreen::setText("Stopping user session");
 //    SplashScreen::show(true);
 //    UserManager::clearAutoLogin();
-//    auto ret = QtConcurrent::run(&UserManager::stopUserSession);
+//    auto ret = QtConcurrent::run(&UserManager::stop);
 //    Delayer::delay(&ret, &QFuture<void>::isRunning);
 //    SplashScreen::hide();
 //    SplashScreen::setText("Loading");

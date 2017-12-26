@@ -9,14 +9,24 @@
 
 BackendManager::BackendManager()
 {
+    new SaveBackend;
+    new PreviewBackend;
+
     connect(ProjectBackend::instance(), SIGNAL(started()),
       SLOT(handleProjectStart()));
+    connect(UserBackend::instance(), SIGNAL(aboutToStop()),
+      SLOT(handleSessionStop()));
 }
 
 BackendManager* BackendManager::instance()
 {
     static BackendManager instance;
     return &instance;
+}
+
+void BackendManager::handleSessionStop() const
+{
+    ProjectBackend::instance()->stop();
 }
 
 void BackendManager::handleProjectStart() const

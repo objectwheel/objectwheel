@@ -73,7 +73,7 @@ ProjectsWidget::ProjectsWidget(QWidget *parent) : QQuickWidget(parent)
 
 void ProjectsWidget::handleNewButtonClicked()
 {
-	if (UserBackend::userDirectory(UserBackend::currentSessionsUser()).isEmpty()) return;
+    if (UserBackend::instance()->dir().isEmpty()) return;
     auto projects = ProjectBackend::instance()->projects();
 	int count = 1;
 	QString projectName = "New Project-1";
@@ -94,7 +94,7 @@ void ProjectsWidget::handleNewButtonClicked()
 	sizeText->setProperty("text", "0 bytes");
 	mfDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
 	crDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
-	ownerText->setProperty("text", UserBackend::currentSessionsUser());
+    ownerText->setProperty("text", UserBackend::instance()->user());
     descriptionTextInput->setProperty("text", "Simple description here.");
 	projectnameTextInput->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole]));
     QTimer::singleShot(250, [=]{ swipeView->setProperty("currentIndex", 1); });
@@ -296,10 +296,7 @@ void ProjectsWidget::handleLoadButtonClicked()
 void ProjectsWidget::refreshProjectList()
 {
 	model.clear();
-    if (UserBackend::userDirectory(
-           UserBackend::currentSessionsUser()
-       ).isEmpty()
-    )
+    if (UserBackend::instance()->dir().isEmpty())
         return;
 
     auto projects = ProjectBackend::instance()->projects();
