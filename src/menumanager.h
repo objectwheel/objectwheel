@@ -16,6 +16,9 @@ class MenuManager : public QObject
     public:
         static MenuManager* instance();
 
+    public slots:
+        inline void init() const {}
+
     private:
         MenuManager();
         ~MenuManager();

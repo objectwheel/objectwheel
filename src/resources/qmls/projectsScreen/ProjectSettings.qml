@@ -208,10 +208,8 @@ Item {
         ScrollBar.vertical: ScrollBar { }
         contentWidth: width
         contentHeight: projectnameContainer.height + descriptionContainer.height +
-                       orgnameContainer.height + orgIdentContainer.height +
-                       projectIdentContainer.height + crDateContainer.height +
                        ownerContainer.height + sizeContainer.height +
-                       mfDateContainer.height + projectVersionContainer.height +
+                       mfDateContainer.height + crDateContainer.height +
                        delProjectContainer.height + imExProjectContainer.height
         Column {
             anchors.fill: parent
@@ -246,7 +244,6 @@ Item {
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
-                        onTextChanged: projectIdentContainer.update()
                     }
                 }
             }
@@ -282,142 +279,6 @@ Item {
                         horizontalAlignment: TextArea.AlignRight
                         font.pixelSize: Fit.fit(13)
                     }
-                }
-            }
-            Rectangle {
-                id: orgnameContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "#07000000"
-                border.color: "#14000000"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: orgnameTitle
-                        text: "Organization Name"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    TextArea {
-                        id: orgnameTextInput
-                        clip: true
-                        selectByKeyboard: true
-                        selectByMouse: true
-                        frameVisible: false
-                        backgroundVisible: false
-                        inputMethodHints: Qt.ImhNoPredictiveText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        verticalAlignment: TextArea.AlignVCenter
-                        horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                    }
-                }
-            }
-            Rectangle {
-                id: orgIdentContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "transparent"
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: orgIdentTitle
-                        text: "Organization Identifier"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    TextArea {
-                        id: orgIdentTextInput
-                        clip: true
-                        selectByKeyboard: true
-                        selectByMouse: true
-                        frameVisible: false
-                        backgroundVisible: false
-                        inputMethodHints: Qt.ImhNoPredictiveText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        verticalAlignment: TextArea.AlignVCenter
-                        horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                        onTextChanged: projectIdentContainer.update()
-                    }
-                }
-            }
-            Rectangle {
-                id: projectVersionContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "#07000000"
-                border.color: "#14000000"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: projectVersionTitle
-                        text: "Project Version"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    TextArea {
-                        id: projectVersionTextInput
-                        clip: true
-                        selectByKeyboard: true
-                        selectByMouse: true
-                        frameVisible: false
-                        backgroundVisible: false
-                        inputMethodHints: Qt.ImhNoPredictiveText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        verticalAlignment: TextArea.AlignVCenter
-                        horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                    }
-                }
-            }
-            Rectangle {
-                id: projectIdentContainer
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
-                height: Fit.fit(40)
-                color: "transparent"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors { leftMargin: Fit.fit(10); rightMargin: Fit.fit(10); }
-                    Text {
-                        id: projectIdentTitle
-                        text: "Project Identifier"
-                        font.pixelSize: Fit.fit(13)
-                        font.bold: true
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
-                    }
-                    Text {
-                        id: projectIdentText
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        font.underline: true
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        font.pixelSize: Fit.fit(13)
-                    }
-                }
-                function update() {
-                    var projectNameText = projectnameTextInput.text.replace(/\s+/g, "-")
-                    var orgIdentText = orgIdentTextInput.text.replace(/\s+/g, "-")
-                    projectIdentText.text = orgIdentText + "." + projectNameText
                 }
             }
             Rectangle {
@@ -866,10 +727,6 @@ Item {
     property alias warning: warning
     property alias projectnameTextInput: projectnameTextInput
     property alias descriptionTextInput: descriptionTextInput
-    property alias orgnameTextInput: orgnameTextInput
-    property alias orgIdentTextInput: orgIdentTextInput
-    property alias projectVersionTextInput: projectVersionTextInput
-    property alias projectIdentText: projectIdentText
     property alias ownerText: ownerText
     property alias crDateText: crDateText
     property alias mfDateText: mfDateText

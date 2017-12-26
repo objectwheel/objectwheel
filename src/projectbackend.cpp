@@ -1,15 +1,14 @@
 #include <projectbackend.h>
-#include <userbackend.h>
 #include <filemanager.h>
-#include <toolsbackend.h>
+#include <zipper.h>
+#include <random>
+#include <userbackend.h>
 #include <savebackend.h>
-#include <QMessageBox>
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
-#include <mainwindow.h>
-#include <zipper.h>
-#include <designerwidget.h>
+#include <QCryptographicHash>
 
 #define FILENAME    "project.json"
 #define PROJECTNAME "projectName"
@@ -22,14 +21,11 @@
 #define OWPRJ       "owprj"
 #define SIGN_OWPRJ  "T3dwcmpfdjIuMA"
 
-typedef Hasher Hasher;
+typedef QCryptographicHash Hasher;
 static std::random_device rd;
 static std::mt19937 mt(rd());
 static std::uniform_int_distribution<qint32> rand_dist(-2147483647 - 1, 2147483647); //Wow C++
 
-// Returns biggest number from integer named dirs.
-// If no integer named dir exists, 0 returned.
-// If no dir exists or dirs are smaller than zero, 0 returned.
 static int biggestDir(const QString& basePath)
 {
     int num = 0;
@@ -78,6 +74,8 @@ static void setProperty(
     ).object();
 
     jobj[property] = value.toJsonValue();
+    jobj[MFDATE] = QDateTime::currentDateTime().
+                   toString(Qt::ISODate).replace("T", " ");
 
     const auto& data = QJsonDocument(jobj).toJson();
 
@@ -136,7 +134,8 @@ static QString dir(const QString& hash)
         UserBackend::currentSessionsUser()
     );
 
-    Q_ASSERT(!udir.isEmpty() && !hash.isEmpty());
+    if (udir.isEmpty() || hash.isEmpty())
+        return pdir;
 
     for (const auto& dir : lsdir(udir)) {
         const auto& p = udir + separator() + dir;
@@ -185,16 +184,18 @@ bool ProjectBackend::newProject(
     const QString& owner,
     const QString& crDate,
     const QString& size
-    )
+  ) const
 {
     const auto& udir = UserBackend::userDirectory(
         UserBackend::currentSessionsUser()
     );
 
     if (udir.isEmpty() ||
-        name.isEmpty() || description.isEmpty() ||
-        owner.isEmpty() || crDate.isEmpty() ||
-        mfDate.isEmpty() || size.isEmpty())
+        name.isEmpty() ||
+        description.isEmpty() ||
+        owner.isEmpty() ||
+        crDate.isEmpty() ||
+        size.isEmpty())
         return false;
 
     const auto& pdir = udir + separator() +
@@ -222,27 +223,27 @@ bool ProjectBackend::newProject(
     );
 }
 
-void ProjectBackend::changeName(const QString& hash, const QString& name)
+void ProjectBackend::changeName(const QString& hash, const QString& name) const
 {
     const auto& dir = ::dir(hash);
 
     if (dir.isEmpty())
         return;
 
-    setProperty(dir, NAME, name);
+    ::setProperty(dir, PROJECTNAME, name);
 }
 
-void ProjectBackend::changeDescription(const QString& hash, const QString& desc)
+void ProjectBackend::changeDescription(const QString& hash, const QString& desc) const
 {
     const auto& dir = ::dir(hash);
 
     if (dir.isEmpty())
         return;
 
-    setProperty(dir, DESCRIPTION, desc);
+    ::setProperty(dir, DESCRIPTION, desc);
 }
 
-bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
+bool ProjectBackend::exportProject(const QString& hash, const QString& filePath) const
 {
     const auto& dir = ::dir(hash);
 
@@ -252,7 +253,7 @@ bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
     return Zipper::compressDir(dir, filePath);
 }
 
-bool ProjectBackend::importProject(const QString &filePath)
+bool ProjectBackend::importProject(const QString &filePath) const
 {
     const auto& data = rdfile(filePath);
     const auto& udir = UserBackend::userDirectory(
@@ -264,7 +265,12 @@ bool ProjectBackend::importProject(const QString &filePath)
     if (data.isEmpty() || udir.isEmpty())
         return false;
 
-    return mkdir(pdir) || Zipper::extractZip(data, pdir);
+    if (!mkdir(pdir) || !Zipper::extractZip(data, pdir))
+        return false;
+
+    ::setProperty(pdir, HASH, newHash());
+
+    return true;
 }
 
 QString ProjectBackend::dir(const QString& hash) const
@@ -274,32 +280,32 @@ QString ProjectBackend::dir(const QString& hash) const
 
 QString ProjectBackend::name(const QString& hash) const
 {
-    return property(hash, NAME).toString();
+    return ::property(hash, PROJECTNAME).toString();
 }
 
 QString ProjectBackend::description(const QString& hash) const
 {
-    return property(hash, DESCRIPTION).toString();
+    return ::property(hash, DESCRIPTION).toString();
 }
 
 QString ProjectBackend::owner(const QString& hash) const
 {
-    return property(hash, OWNER).toString();
+    return ::property(hash, OWNER).toString();
 }
 
 QString ProjectBackend::crDate(const QString& hash) const
 {
-    return property(hash, CRDATE).toString();
+    return ::property(hash, CRDATE).toString();
 }
 
 QString ProjectBackend::mfDate(const QString& hash) const
 {
-    return property(hash, MFDATE).toString();
+    return ::property(hash, MFDATE).toString();
 }
 
 QString ProjectBackend::size(const QString& hash) const
 {
-    return property(hash, SIZE).toString();
+    return ::property(hash, SIZE).toString();
 }
 
 const QString& ProjectBackend::hash() const
@@ -307,17 +313,36 @@ const QString& ProjectBackend::hash() const
     return _currentHash;
 }
 
-void ProjectBackend::updateSize()
+QStringList ProjectBackend::projects() const
+{
+    QStringList hashes;
+    const auto& udir = UserBackend::userDirectory(
+        UserBackend::currentSessionsUser()
+    );
+
+    if (udir.isEmpty())
+        return hashes;
+
+    for (const auto& dir : lsdir(udir)) {
+        const auto& p = udir + separator() + dir;
+        if (isOwprj(p))
+            hashes << ::hash(p);
+    }
+
+    return hashes;
+}
+
+void ProjectBackend::updateSize() const
 {
     const auto& dir = ::dir(hash());
 
     if (dir.isEmpty())
         return;
 
-    setProperty(dir, SIZE, byteString(dsize(dir)));
+    ::setProperty(dir, SIZE, byteString(dsize(dir)));
 }
 
-void ProjectBackend::updateLastModification()
+void ProjectBackend::updateLastModification() const
 {
     const auto& date =
     QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
@@ -327,7 +352,7 @@ void ProjectBackend::updateLastModification()
     if (dir.isEmpty())
         return;
 
-    setProperty(dir, MFDATE, date);
+    ::setProperty(dir, MFDATE, date);
 }
 
 bool ProjectBackend::start(const QString& hash)
@@ -335,7 +360,7 @@ bool ProjectBackend::start(const QString& hash)
     if (this->hash() == hash)
 		return true;
 
-    const auto& dir = ::dir(hash());
+    const auto& dir = ::dir(hash);
 
     if (dir.isEmpty())
         return false;
@@ -352,30 +377,8 @@ bool ProjectBackend::start(const QString& hash)
 
 void ProjectBackend::stop()
 {
-	if (UserBackend::currentSessionsUser().isEmpty()) return;
-
-    if (_currentProject.isEmpty()) {
-		return;
-	}
-
     updateSize();
     updateLastModification();
-
-    _currentProject = "";
-}
-
-QString ProjectBackend::currentProject()
-{
-    return _currentProject;
-}
-
-QStringList ProjectBackend::projects() const
-{
-	QStringList projectList;
-	auto userDir = UserBackend::userDirectory(UserBackend::currentSessionsUser());
-	if (userDir.isEmpty()) return projectList;
-	for (auto projectname : lsdir(userDir)) {
-		projectList << QByteArray::fromHex(QByteArray().insert(0, projectname));
-	}
-	return projectList;
+    _currentHash = "";
+    emit stopped();
 }

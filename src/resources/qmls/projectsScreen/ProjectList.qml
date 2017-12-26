@@ -148,13 +148,13 @@ Item {
                     onPressed: infColorOverlay.color = "#50000000"
                     onReleased: infColorOverlay.color = "#01000000"
                     onClicked: {
-                        infoClicked(projectName)
+                        infoClicked(projectHash)
                     }
                 }
             }
         }
     }
-    signal infoClicked(var projectName)
+    signal infoClicked(var projectHash)
     property string selectedProjectname
     property alias listView: listView
 }

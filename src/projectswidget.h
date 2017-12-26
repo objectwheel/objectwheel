@@ -11,15 +11,15 @@
 class ProjectsWidget : public QQuickWidget
 {
 		Q_OBJECT
+
 	public:
 		explicit ProjectsWidget(QWidget *parent = 0);
-        static ProjectsWidget* instance();
-        static void refreshProjectList(const QString& activeProject = QString());
 
 	public slots:
+        void refreshProjectList();
 		void handleNewButtonClicked();
 		void handleLoadButtonClicked();
-		void handleInfoButtonClicks(const QVariant& projectname);
+        void handleInfoButtonClicks(const QVariant& hash);
 		void handleBtnCancelClicked();
 		void handleBtnDeleteClicked();
 		void handleBtnOkClicked();
@@ -43,13 +43,15 @@ class ProjectListModel : public QAbstractListModel
 		enum Roles
 		{
 			ProjectNameRole = Qt::UserRole + 1,
-			LastEditedRole = Qt::UserRole + 2,
-			ActiveRole = Qt::UserRole + 3
+            ProjectHashRole,
+            LastEditedRole,
+            ActiveRole
 		};
 
 		struct ProjectProperty
 		{
 			QString projectName;
+            QString projectHash;
 			QString lastEdited;
 			bool active;
 		};
@@ -57,6 +59,7 @@ class ProjectListModel : public QAbstractListModel
 		explicit ProjectListModel(QObject* parent = 0) : QAbstractListModel(parent)
 		{
 			m_roleNames[ProjectNameRole] = "projectName";
+            m_roleNames[ProjectHashRole] = "projectHash";
 			m_roleNames[LastEditedRole] = "lastEdited";
 			m_roleNames[ActiveRole] = "active";
 		}
@@ -86,6 +89,9 @@ class ProjectListModel : public QAbstractListModel
 				case ProjectNameRole:
 					rv = _data.at(index.row()).projectName;
 					break;
+                case ProjectHashRole:
+                    rv = _data.at(index.row()).projectHash;
+                    break;
 				case LastEditedRole:
 					rv = _data.at(index.row()).lastEdited;
 					break;
@@ -143,6 +149,9 @@ class ProjectListModel : public QAbstractListModel
 					case ProjectNameRole:
 						_data[index.row()].projectName = value.toString();
 						break;
+                    case ProjectHashRole:
+                        _data[index.row()].projectHash = value.toString();
+                        break;
 					case LastEditedRole:
 						_data[index.row()].lastEdited = value.toString();
 						break;
@@ -178,6 +187,7 @@ class ProjectListModel : public QAbstractListModel
 			QJsonObject jobj;
 			if (row >= 0 && row < _data.size()) {
 				jobj[m_roleNames[ProjectNameRole]] = _data.at(row).projectName;
+                jobj[m_roleNames[ProjectHashRole]] = _data.at(row).projectHash;
 				jobj[m_roleNames[LastEditedRole]] = _data.at(row).lastEdited;
 				jobj[m_roleNames[ActiveRole]] = _data.at(row).active;
 				return jobj;

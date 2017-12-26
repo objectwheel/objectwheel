@@ -11,22 +11,16 @@ class ProjectBackend : public QObject
 	public:
         static ProjectBackend* instance();
 
-        bool importProject(const QString& filePath);
-        bool exportProject(const QString& hash, const QString& filePath);
-
         bool newProject(
             const QString& name,
             const QString& description,
             const QString& owner,
             const QString& crDate,
             const QString& size
-        );
+        ) const;
 
-        void changeName(const QString& hash, const QString& name);
-        void changeDescription(const QString& hash, const QString& desc);
-
-        const QString& hash() const;
         QStringList projects() const;
+        const QString& hash() const;
         QString dir(const QString& = instance()->hash()) const;
         QString name(const QString& = instance()->hash()) const;
         QString description(const QString& = instance()->hash()) const;
@@ -35,13 +29,16 @@ class ProjectBackend : public QObject
         QString mfDate(const QString& = instance()->hash()) const;
         QString size(const QString& = instance()->hash()) const;
 
+        void changeName(const QString& hash, const QString& name) const;
+        void changeDescription(const QString& hash, const QString& desc) const;
+        bool importProject(const QString& filePath) const;
+        bool exportProject(const QString& hash, const QString& filePath) const;
+
     public slots:
         void stop();
         bool start(const QString& hash);
-
-    private slots:
-        void updateSize();
-        void updateLastModification();
+        void updateSize() const;
+        void updateLastModification() const;
 
     signals:
         void started();

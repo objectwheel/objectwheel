@@ -17,16 +17,14 @@ class BackendManager : public QObject
     public:
         static BackendManager* instance();
 
+    public slots:
+        inline void init() const {}
+
+    private slots:
+        void handleProjectStart() const;
+
     private:
         BackendManager();
-
-    private:
-        ToolsBackend* _toolsBackend;
-        UserBackend* _userBackend;
-        ProjectBackend* _projectBackend;
-        SaveBackend* _saveBackend;
-        PreviewBackend* _previewBackend;
-
 };
 
 #endif // BACKENDMANAGER_H

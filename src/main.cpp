@@ -20,10 +20,10 @@
 
 int main(int argc, char *argv[])
 {
-    // Init application
+    // Initialize application
     QApplication a(argc, argv);
 
-    // Init application settings
+    // Application settings
     QApplication::setOrganizationName(APP_CORP);
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationName(APP_NAME);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     }
     # endif
 
-    // Initialize Fit library
+    // Initialize fit library
     fit::update(REF_DPI);
 
     // Setup OpenGL format
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     format.setAlphaBufferSize(8);
     QSurfaceFormat::setDefaultFormat(format);
 
-    // Add system wide fonts and set default font
+    // Font settings
     QFont font;
     font.setPixelSize(fit::fx(PIXEL_SIZE));
     #if defined(Q_OS_MACOS)
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     QApplication::setFont(font);
     QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
 
-    /* Disable Qml Parser warnings */
+    // Disable Qml parser warnings
     QLoggingCategory::setFilterRules(
         QStringLiteral(
             "qtc*.info=false\n"
@@ -79,22 +79,23 @@ int main(int argc, char *argv[])
         )
     );
 
-    // Init CSS
+    // Initialize css
     CSS::init();
 
-    // Init Components
+    // Initialize components
     Components::init();
 
-    // Initialize Web View
+    // Initialize web view
     QtWebView::initialize();
 
-    // Initialize Menus
-    MenuManager::instance();
+    // Initialize menus
+    MenuManager::instance()->init();
 
-    // Start Windows
+    // Create backend manager
+    BackendManager::instance()->init();
+
+    // Show welcome window
     WindowManager::instance()->show(WindowManager::Welcome);
-
-    BackendManager::instance();
 
     // Start main event loop
     return a.exec();

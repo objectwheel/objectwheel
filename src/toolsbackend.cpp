@@ -68,10 +68,13 @@ static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)
 
 static bool isProjectFull()
 {
-    if (ProjectBackend::instance()->currentProject().isEmpty())
+    if (ProjectBackend::instance()->dir().isEmpty())
         return false;
-    if (!QDir().exists(ProjectBackend::instance()->projectDirectory
-      (ProjectBackend::instance()->currentProject()) + separator() + DEFAULT_TOOLS_DIRECTORY))
+    if (!QDir().exists(
+        ProjectBackend::instance()->dir() +
+        separator() +
+        DEFAULT_TOOLS_DIRECTORY
+    ))
         return false;
     else
         return true;
@@ -89,7 +92,7 @@ ToolsBackend* ToolsBackend::instance()
 
 QString ToolsBackend::toolsDir() const
 {
-    auto projectDir = ProjectBackend::instance()->projectDirectory(ProjectBackend::instance()->currentProject());
+    auto projectDir = ProjectBackend::instance()->dir();
     if (projectDir.isEmpty()) qFatal("ToolsBackend : Error occurred");
     return projectDir + separator() + DEFAULT_TOOLS_DIRECTORY;
 }
@@ -108,7 +111,7 @@ QStringList ToolsBackend::categories() const
 
 bool ToolsBackend::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
-    if (ProjectBackend::instance()->currentProject().isEmpty() ||
+    if (ProjectBackend::instance()->dir().isEmpty() ||
       toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
         return false;
 
@@ -217,7 +220,7 @@ void ToolsBackend::addToolboxTree(ToolboxTree* toolboxTree)
 
 void ToolsBackend::downloadTools(const QUrl& url)
 {
-    if (ProjectBackend::instance()->currentProject().isEmpty()) return;
+    if (ProjectBackend::instance()->dir().isEmpty()) return;
     QNetworkAccessManager *manager = new QNetworkAccessManager;
     QNetworkRequest request;
     if (!url.isEmpty()) request.setUrl(url);

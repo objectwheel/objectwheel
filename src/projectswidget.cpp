@@ -1,7 +1,7 @@
 #include <projectswidget.h>
-#include <projectbackend.h>
 #include <filemanager.h>
 #include <userbackend.h>
+#include <projectbackend.h>
 #include <fit.h>
 
 #include <QDateTime>
@@ -12,7 +12,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-ProjectsWidget* instance = nullptr;
 QQuickItem* swipeView;
 QQuickItem* projectsPage;
 QQuickItem* projectSettings;
@@ -21,10 +20,6 @@ QQuickItem* projectButton;
 QQuickItem* warning;
 QQuickItem* projectnameTextInput;
 QQuickItem* descriptionTextInput;
-QQuickItem* orgnameTextInput;
-QQuickItem* orgIdentTextInput;
-QQuickItem* projectVersionTextInput;
-QQuickItem* projectIdentText;
 QQuickItem* ownerText;
 QQuickItem* crDateText;
 QQuickItem* mfDateText;
@@ -37,37 +32,30 @@ QQuickItem* btnCancel;
 QQuickItem* listView;
 ProjectListModel model;
 
-ProjectsWidget::ProjectsWidget(QWidget *parent)
-	: QQuickWidget(parent)
+ProjectsWidget::ProjectsWidget(QWidget *parent) : QQuickWidget(parent)
 {
-    if (::instance) return;
-    ::instance = this;
 	rootContext()->setContextProperty("dpi", fit::ratio());
 	setSource(QUrl("qrc:/resources/qmls/projectsScreen/main.qml"));
 	setResizeMode(SizeRootObjectToView);
 
-	swipeView = (QQuickItem*)QQmlProperty::read(rootObject(), "swipeView", engine()).value<QObject*>();
-	projectsPage = (QQuickItem*)QQmlProperty::read(rootObject(), "projectsPage", engine()).value<QObject*>();
-	projectSettings = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings", engine()).value<QObject*>();
-	projectList = (QQuickItem*)QQmlProperty::read(rootObject(), "projectsPage.projectList", engine()).value<QObject*>();
-	projectButton = (QQuickItem*)QQmlProperty::read(rootObject(), "projectsPage.projectButton", engine()).value<QObject*>();
-	warning = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.warning", engine()).value<QObject*>();
-	projectnameTextInput = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.projectnameTextInput", engine()).value<QObject*>();
-	descriptionTextInput = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.descriptionTextInput", engine()).value<QObject*>();
-	orgnameTextInput = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.orgnameTextInput", engine()).value<QObject*>();
-	orgIdentTextInput = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.orgIdentTextInput", engine()).value<QObject*>();
-	projectVersionTextInput = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.projectVersionTextInput", engine()).value<QObject*>();
-	projectIdentText = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.projectIdentText", engine()).value<QObject*>();
-	ownerText = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.ownerText", engine()).value<QObject*>();
-	crDateText = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.crDateText", engine()).value<QObject*>();
-	mfDateText = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.mfDateText", engine()).value<QObject*>();
-	sizeText = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.sizeText", engine()).value<QObject*>();
-	btnDelete = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.btnDelete", engine()).value<QObject*>();
-	btnImport = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.btnImport", engine()).value<QObject*>();
-	btnExport = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.btnExport", engine()).value<QObject*>();
-	btnOk = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.btnOk", engine()).value<QObject*>();
-	btnCancel = (QQuickItem*)QQmlProperty::read(rootObject(), "projectSettings.btnCancel", engine()).value<QObject*>();
-	listView = (QQuickItem*)QQmlProperty::read(projectList, "listView", engine()).value<QObject*>();
+    swipeView = QQmlProperty::read(rootObject(), "swipeView", engine()).value<QQuickItem*>();
+    projectsPage = QQmlProperty::read(rootObject(), "projectsPage", engine()).value<QQuickItem*>();
+    projectSettings = QQmlProperty::read(rootObject(), "projectSettings", engine()).value<QQuickItem*>();
+    projectList = QQmlProperty::read(rootObject(), "projectsPage.projectList", engine()).value<QQuickItem*>();
+    projectButton = QQmlProperty::read(rootObject(), "projectsPage.projectButton", engine()).value<QQuickItem*>();
+    warning = QQmlProperty::read(rootObject(), "projectSettings.warning", engine()).value<QQuickItem*>();
+    projectnameTextInput = QQmlProperty::read(rootObject(), "projectSettings.projectnameTextInput", engine()).value<QQuickItem*>();
+    descriptionTextInput = QQmlProperty::read(rootObject(), "projectSettings.descriptionTextInput", engine()).value<QQuickItem*>();
+    ownerText = QQmlProperty::read(rootObject(), "projectSettings.ownerText", engine()).value<QQuickItem*>();
+    crDateText = QQmlProperty::read(rootObject(), "projectSettings.crDateText", engine()).value<QQuickItem*>();
+    mfDateText = QQmlProperty::read(rootObject(), "projectSettings.mfDateText", engine()).value<QQuickItem*>();
+    sizeText = QQmlProperty::read(rootObject(), "projectSettings.sizeText", engine()).value<QQuickItem*>();
+    btnDelete = QQmlProperty::read(rootObject(), "projectSettings.btnDelete", engine()).value<QQuickItem*>();
+    btnImport = QQmlProperty::read(rootObject(), "projectSettings.btnImport", engine()).value<QQuickItem*>();
+    btnExport = QQmlProperty::read(rootObject(), "projectSettings.btnExport", engine()).value<QQuickItem*>();
+    btnOk = QQmlProperty::read(rootObject(), "projectSettings.btnOk", engine()).value<QQuickItem*>();
+    btnCancel = QQmlProperty::read(rootObject(), "projectSettings.btnCancel", engine()).value<QQuickItem*>();
+    listView = QQmlProperty::read(projectList, "listView", engine()).value<QQuickItem*>();
 
 	connect(projectButton, SIGNAL(newButtonClicked()), this, SLOT(handleNewButtonClicked()));
 	connect(projectButton, SIGNAL(loadButtonClicked()), this, SLOT(handleLoadButtonClicked()));
@@ -81,11 +69,6 @@ ProjectsWidget::ProjectsWidget(QWidget *parent)
 	QVariant v;
 	v.setValue<ProjectListModel*>(&model);
     listView->setProperty("model", v);
-}
-
-ProjectsWidget* ProjectsWidget::instance()
-{
-    return ::instance;
 }
 
 void ProjectsWidget::handleNewButtonClicked()
@@ -112,48 +95,49 @@ void ProjectsWidget::handleNewButtonClicked()
 	mfDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
 	crDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
 	ownerText->setProperty("text", UserBackend::currentSessionsUser());
-	projectVersionTextInput->setProperty("text", "v0.01");
-	orgIdentTextInput->setProperty("text", "com.example");
-	orgnameTextInput->setProperty("text", "Example Corp.");
-	descriptionTextInput->setProperty("text", "Simple description here.");
+    descriptionTextInput->setProperty("text", "Simple description here.");
 	projectnameTextInput->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole]));
-	QTimer::singleShot(400, [=]{ swipeView->setProperty("currentIndex", 1); });
+    QTimer::singleShot(250, [=]{ swipeView->setProperty("currentIndex", 1); });
 }
 
-void ProjectsWidget::handleInfoButtonClicks(const QVariant& projectname)
+void ProjectsWidget::handleInfoButtonClicks(const QVariant& hash)
 {
-	auto projectName = projectname.toString();
-    sizeText->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_SIZE].toString());
-    mfDateText->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_MFDATE].toString());
-    crDateText->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_CRDATE].toString());
-    ownerText->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_OWNER].toString());
-    descriptionTextInput->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_DESCRIPTION].toString());
-    projectnameTextInput->setProperty("text", ProjectBackend::instance()->projectInformation(projectName)[INF_PROJECTNAME].toString());
+    auto h = hash.toString();
+    ProjectBackend::instance()->updateSize();
+    sizeText->setProperty("text", ProjectBackend::instance()->size(h));
+    mfDateText->setProperty("text", ProjectBackend::instance()->mfDate(h));
+    crDateText->setProperty("text", ProjectBackend::instance()->crDate(h));
+    ownerText->setProperty("text", ProjectBackend::instance()->owner(h));
+    descriptionTextInput->setProperty("text", ProjectBackend::instance()->description(h));
+    projectnameTextInput->setProperty("text", ProjectBackend::instance()->name(h));
 	swipeView->setProperty("currentIndex", 1);
 }
 
 void ProjectsWidget::handleBtnCancelClicked()
 {
-    refreshProjectList(ProjectBackend::instance()->currentProject());
+    refreshProjectList();
 	swipeView->setProperty("currentIndex", 0);
 }
 
 void ProjectsWidget::handleBtnDeleteClicked()
 {
-	QString currentProject;
-	auto projectName = model.get(listView->property("currentIndex").toInt(),
-                                 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
-    if (!ProjectBackend::instance()->exists(projectName)) goto finish;
-    currentProject = ProjectBackend::instance()->currentProject();
-    if (!currentProject.isEmpty() && currentProject == projectName) {
-        ProjectBackend::instance()->stopProject();
-		currentProject = "";
+    QString chash;
+    auto hash = model.get(listView->property("currentIndex").toInt(),
+      model.roleNames()[ProjectListModel::ProjectHashRole]).toString();
+
+    if (ProjectBackend::instance()->dir(hash).isEmpty())
+        goto finish;
+
+    chash = ProjectBackend::instance()->hash();
+    if (!chash.isEmpty() && chash == hash) {
+        ProjectBackend::instance()->stop();
+        chash = "";
     }
 
-    rm(ProjectBackend::instance()->projectDirectory(projectName));
+    rm(ProjectBackend::instance()->dir(hash));
 
 finish:
-	refreshProjectList(currentProject);
+    refreshProjectList();
     swipeView->setProperty("currentIndex", 0);
 }
 
@@ -163,15 +147,19 @@ void ProjectsWidget::handleBtnImportClicked()
     dialog.setFileMode(QFileDialog::ExistingFiles);
     dialog.setNameFilter(tr("Zip files (*.zip)"));
     dialog.setViewMode(QFileDialog::Detail);
+
     if (dialog.exec()) {
         for (auto fileName : dialog.selectedFiles()) {
             if (!ProjectBackend::instance()->importProject(fileName)) {
-                QMessageBox::warning(this, "Operation Stopped", "One or more projects exists. Please rename your existing projects to another name."
-                                     "Or one or more import file corrupted.");
+                QMessageBox::warning(
+                    this,
+                    "Operation Stopped",
+                    "One or more import file is corrupted."
+                );
                 return;
             }
         }
-        refreshProjectList(ProjectBackend::instance()->currentProject());
+        refreshProjectList();
         swipeView->setProperty("currentIndex", 0);
         QMessageBox::information(this, "Finished", "Tool import has successfully finished.");
     }
@@ -179,27 +167,54 @@ void ProjectsWidget::handleBtnImportClicked()
 
 void ProjectsWidget::handleBtnExportClicked()
 {
-    auto projectName = model.get(listView->property("currentIndex").toInt(),
-                                 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
-    if (projectName.isEmpty()) return;
+    auto hash = model.get(
+        listView->property("currentIndex").toInt(),
+        model.roleNames()[ProjectListModel::ProjectHashRole]
+    ).toString();
+
+    auto pname = model.get(
+        listView->property("currentIndex").toInt(),
+        model.roleNames()[ProjectListModel::ProjectNameRole]
+    ).toString();
+
+    if (hash.isEmpty() || pname.isEmpty())
+        return;
 
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
+
     if (dialog.exec()) {
-        if (!rm(dialog.selectedFiles().at(0) + separator() + projectName + ".zip")) return;
-        if (!ProjectBackend::instance()->exportProject(projectName, dialog.selectedFiles().at(0) + separator() + projectName + ".zip")) return;
-        QMessageBox::information(this, "Finished", "Project export has successfully finished.");
+        if (!rm(
+            dialog.selectedFiles().at(0) +
+            separator() +
+            pname + ".zip"
+        )) return;
+
+        if (!ProjectBackend::instance()->exportProject(
+            hash,
+            dialog.selectedFiles().at(0) +
+            separator() +
+            pname + ".zip"
+        )) return;
+
+        QMessageBox::information(
+            this,
+            "Finished",
+            "Project export has successfully finished."
+        );
     }
 }
 
 void ProjectsWidget::startProject()
 {
-    auto project = model.get(listView->property("currentIndex").toInt(),
-      model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
+    auto hash = model.get(
+        listView->property("currentIndex").toInt(),
+        model.roleNames()[ProjectListModel::ProjectHashRole]
+    ).toString();
 
-    if (!ProjectBackend::instance()->startProject(project)) { // Asynchronous Operation
+    if (!ProjectBackend::instance()->start(hash)) { // Asynchronous Operation
         for (int i = model.rowCount(); i--;) {
             if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
                 model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
@@ -213,6 +228,7 @@ void ProjectsWidget::startProject()
             model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
         }
     }
+
     model.set(listView->property("currentIndex").toInt(),
         model.roleNames()[ProjectListModel::ActiveRole], true);
 
@@ -222,80 +238,86 @@ void ProjectsWidget::startProject()
 void ProjectsWidget::handleBtnOkClicked()
 {
 	auto projectnametext = projectnameTextInput->property("text").toString();
-	auto descriptiontext = descriptionTextInput->property("text").toString();
-	auto orgnametext = orgnameTextInput->property("text").toString();
-	auto orgidenttext = orgIdentTextInput->property("text").toString();
-	auto projectversiontext = projectVersionTextInput->property("text").toString();
-	auto projectidenttext = projectIdentText->property("text").toString();
+    auto descriptiontext = descriptionTextInput->property("text").toString();
 	auto sizetext = sizeText->property("text").toString();
-	auto mfdatetext = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
 	auto crdatetext = crDateText->property("text").toString();
 	auto ownertext = ownerText->property("text").toString();
-	auto prevprojectname = model.get(listView->property("currentIndex").toInt(),
-									 model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
+    auto prevhash = model.get(listView->property("currentIndex").toInt(),
+    model.roleNames()[ProjectListModel::ProjectHashRole]).toString();
 
-	if (projectnametext.isEmpty() || descriptiontext.isEmpty() ||
-		orgnametext.isEmpty() || orgidenttext.isEmpty() || projectversiontext.isEmpty()) {
+    if (projectnametext.isEmpty() || descriptiontext.isEmpty()) {
 		QMetaObject::invokeMethod(warning, "show");
 		return;
 	}
 
-    if (!ProjectBackend::instance()->exists(prevprojectname)) {
-        if (!ProjectBackend::instance()->buildNewProject(projectnametext)) {
-            qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x01");
-		}
-	} else if (prevprojectname != projectnametext) {
-        if (ProjectBackend::instance()->exists(projectnametext)) {
-			QMessageBox::warning(NULL, "Oops!", "There is another project with the same name, please change your project name.");
-			return;
-		}
-        if (!ProjectBackend::instance()->renameProject(prevprojectname, projectnametext)) {
-            qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x02");
-		}
-	}
-
-    if (!ProjectBackend::instance()->fillProjectInformation(
+    if (prevhash.isEmpty()) {
+        if (!ProjectBackend::instance()->newProject(
             projectnametext,
             descriptiontext,
             ownertext,
             crdatetext,
-            mfdatetext,
             sizetext
-        ))
-        qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x03");
-    refreshProjectList(ProjectBackend::instance()->currentProject());
+        )) qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x01");
+
+        ProjectBackend::instance()->updateSize();
+    } else {
+        ProjectBackend::
+        instance()->changeName(
+            prevhash,
+            projectnametext
+        );
+        ProjectBackend::
+        instance()->changeDescription(
+            prevhash,
+            descriptiontext
+        );
+    }
+
+    refreshProjectList();
 	swipeView->setProperty("currentIndex", 0);
 }
 
 void ProjectsWidget::handleLoadButtonClicked()
 {
-	auto projectName = model.get(listView->property("currentIndex").toInt(),
-      model.roleNames()[ProjectListModel::ProjectNameRole]).toString();
-    auto currentProject = ProjectBackend::instance()->currentProject();
+    auto hash = model.get(listView->property("currentIndex").toInt(),
+      model.roleNames()[ProjectListModel::ProjectHashRole]).toString();
+    auto chash = ProjectBackend::instance()->hash();
 
-	if (!currentProject.isEmpty() && currentProject == projectName) {
+    if (!chash.isEmpty() && chash == hash) {
         emit done();
 		return;
     }
 
-    ProjectBackend::instance()->stopProject();
+    ProjectBackend::instance()->stop();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
     emit busy(tr("Loading project"));
 }
 
-void ProjectsWidget::refreshProjectList(const QString& activeProject)
+void ProjectsWidget::refreshProjectList()
 {
 	model.clear();
-	if (UserBackend::userDirectory(UserBackend::currentSessionsUser()).isEmpty()) return;
+    if (UserBackend::userDirectory(
+           UserBackend::currentSessionsUser()
+       ).isEmpty()
+    )
+        return;
+
     auto projects = ProjectBackend::instance()->projects();
-	if (projects.size() < 1) return;
-	for (auto project : projects) {
+
+    if (projects.size() < 1)
+        return;
+
+    for (auto hash : projects) {
 		int lastIndex = model.rowCount();
 		model.insertRow(lastIndex);
-		model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole], project);
-		model.set(lastIndex, model.roleNames()[ProjectListModel::ActiveRole], project == activeProject);
+        model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole],
+            ProjectBackend::instance()->name(hash));
+        model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectHashRole], hash);
+        model.set(lastIndex, model.roleNames()[ProjectListModel::ActiveRole],
+            hash == ProjectBackend::instance()->hash());
 		model.set(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole],
-                "Last edited: " + ProjectBackend::instance()->projectInformation(project)[INF_MFDATE].toString());
+            "Last edited: " + ProjectBackend::instance()->mfDate(hash));
 	}
+
 	listView->setProperty("currentIndex", 0);
 }
