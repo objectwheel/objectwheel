@@ -21,6 +21,10 @@
 #include <QtConcurrent>
 #include <QtNetwork>
 
+#if defined(Q_OS_MAC)
+#include <mactoolbar.h>
+#endif
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     _settleWidget = new QFrame;
@@ -64,7 +68,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _titleBar->setMovable(false);
     _titleBar->addWidget(titleText);
     _titleBar->setStyleSheet(QString("border: none; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
-      .arg(QColor("#0D74C8").name()).arg(QColor("#0D74C8").darker(115).name()));
+      .arg(QColor("#2784E3").name()).arg(QColor("#1068C6").name()));
 
     /*** PROPERTIES DOCK WIDGET ***/
     QLabel* label = new QLabel;
@@ -229,6 +233,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
+
+   new MacToolbar(this);
 }
 
 void MainWindow::handleIndicatorChanges()
