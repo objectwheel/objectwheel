@@ -34,6 +34,7 @@ WindowManager::WindowManager()
     _buildsWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
     _preferencesWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
     _toolboxSettingsWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
+    _mainWindow->resize(fit::fx(QSizeF{1580, 900}).toSize());
 
     connect(_welcomeWindow, SIGNAL(lazy()), _progressWidget, SLOT(hide()));
     connect(_welcomeWindow, SIGNAL(busy(QString)), SLOT(busy(QString)));
@@ -42,20 +43,15 @@ WindowManager::WindowManager()
     connect(_preferencesWindow, SIGNAL(done()), SLOT(done()));
     connect(_toolboxSettingsWindow, SIGNAL(done()), SLOT(done()));
     connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
-    connect(_welcomeWindow, &WelcomeWindow::done, this, [=] {
-        show(Main, Qt::WindowMaximized);
-    });
+    connect(_welcomeWindow, &WelcomeWindow::done, this, [=] { show(Main); });
 
     for (auto w : _windows) {
-        static const int d = 11;
-        static const auto a = pS->availableGeometry();
-
         w->setGeometry(
             QStyle::alignedRect(
                 Qt::LeftToRight,
                 Qt::AlignCenter,
                 w->size(),
-                a.adjusted(0, d, 0, d)
+                pS->availableGeometry()
             )
         );
     }

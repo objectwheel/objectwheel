@@ -3,7 +3,12 @@
 
 #include <QObject>
 
-class QTimer;
+#if defined(__OBJC__)
+@class NSWindow;
+#else
+class NSWindow;
+#endif
+
 class QMainWindow;
 
 class MacToolbar : public QObject
@@ -12,13 +17,9 @@ class MacToolbar : public QObject
 
     public:
         explicit MacToolbar(QMainWindow* mainWindow);
-
-    private slots:
-        void hideTitlebar();
+        qreal toolbarHeight() const;
 
     private:
-        QMainWindow* _mainWindow;
-        QTimer* _timer;
         qreal _toolbarHeight;
 };
 

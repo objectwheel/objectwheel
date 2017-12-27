@@ -377,6 +377,8 @@ DesignerWidgetPrivate::DesignerWidgetPrivate(DesignerWidget* parent)
     toolbar_2.addWidget(&cGuiModeButton);
     toolbar_2.addWidget(&editorModeButton);
     toolbar_2.addWidget(spacer_2);
+
+
     toolbar_2.addWidget(&playButton);
     toolbar_2.addWidget(&buildButton);
 

@@ -63,12 +63,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /* Add Title Bar */
     addToolBar(Qt::TopToolBarArea, _titleBar);
-    _titleBar->setFixedHeight(fit::fx(34));
+    _titleBar->setFixedHeight(fit::fx(38));
     _titleBar->setFloatable(false);
     _titleBar->setMovable(false);
     _titleBar->addWidget(titleText);
-    _titleBar->setStyleSheet(QString("border: none; background:qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
-      .arg(QColor("#2784E3").name()).arg(QColor("#1068C6").name()));
+    _titleBar->setStyleSheet(QString(
+    "border: none; background:qlineargradient(spread:pad, "
+    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
+    .arg(QColor("#2784E3").name()).arg(QColor("#1068C6").name()));
+
+    #if defined(Q_OS_MAC)
+    auto macToolbar = new MacToolbar(this);
+    _titleBar->setFixedHeight(macToolbar->toolbarHeight());
+    #endif
 
     /*** PROPERTIES DOCK WIDGET ***/
     QLabel* label = new QLabel;
@@ -233,8 +240,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
-
-   new MacToolbar(this);
 }
 
 void MainWindow::handleIndicatorChanges()
