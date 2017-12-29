@@ -16,6 +16,7 @@
 #include <controlview.h>
 #include <global.h>
 #include <outputwidget.h>
+#include <qmleditorview.h>
 
 #include <QtConcurrent>
 #include <QtNetwork>
@@ -191,10 +192,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(_toolboxPane->toolboxTree()->indicatorButton(),
       &FlatButton::clicked, this, [=] {
-        auto splitter = DesignerWidget::splitter();
-        auto controlView = DesignerWidget::controlView();
-        auto formView = DesignerWidget::formView();
-        auto qmlEditorView = DesignerWidget::qmlEditorView();
+        auto splitter = designerWidget()->splitter();
+        auto controlView = designerWidget()->controlView();
+        auto formView = designerWidget()->formView();
+        auto qmlEditorView = designerWidget()->qmlEditorView();
         auto sizes = splitter->sizes();
         QSize size;
         if (formView->isVisible())
@@ -204,13 +205,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         else
             size = controlView->size();
         sizes[splitter->indexOf(controlView)] = size.height();
-        auto previousControl = DesignerWidget::controlScene()->mainControl();
+        auto previousControl = designerWidget()->controlScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
         auto url = _toolboxPane->toolboxTree()->urls(_toolboxPane->toolboxTree()->currentItem())[0];
         auto control = SaveBackend::exposeControl(dname(dname(url.toLocalFile())), ControlGui);
-        DesignerWidget::controlScene()->setMainControl(control);
-        DesignerWidget::setMode(ControlGui);
+        designerWidget()->controlScene()->setMainControl(control);
+        designerWidget()->setMode(ControlGui);
         control->refresh();
         for (auto childControl : control->childControls())
             childControl->refresh();
@@ -255,6 +256,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
+}
+
+DesignerWidget* MainWindow::designerWidget()
+{
+    return _designerWidget;
 }
 
 void MainWindow::cleanupObjectwheel()

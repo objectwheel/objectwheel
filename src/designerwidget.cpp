@@ -35,6 +35,56 @@
 // TODO: Prevent NoSkin option for main form
 // FIXME: Bugs about Control GUI Editor
 
+
+
+
+
+ControlScene* _currentScene;
+
+
+QToolButton* _buildButton;
+QVBoxLayout* _vlayout;
+QSplitter* _splitter;
+FormScene* _formScene;
+ControlScene* _controlScene;
+FormView* _formView;
+ControlView* _controlView;
+QmlEditorView* _qmlEditorView;
+OutputWidget* _outputWidget;
+QToolBar* _toolbar;
+QToolButton* _refreshPreviewButton;
+QToolButton* _clearFormButton;
+QToolButton* _undoButton;
+QToolButton* _redoButton;
+QToolButton* _phonePortraitButton;
+QToolButton* _phoneLandscapeButton;
+QToolButton* _desktopSkinButton;
+QToolButton* _noSkinButton;
+QToolButton* _snappingButton;
+QToolButton* _showOutlineButton;
+QToolButton* _fitInSceneButton;
+QComboBox* _zoomlLevelCombobox;
+QComboBox* _themeCombobox;
+LoadingIndicator* _loadingIndicator;
+QToolButton* _layItVertButton;
+QToolButton* _layItHorzButton;
+QToolButton* _layItGridButton;
+QToolButton* _breakLayoutButton;
+QTimer* _errorChecker;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static qreal roundRatio(qreal ratio)
 {
     if (ratio < 0.1)
@@ -117,23 +167,23 @@ static QString findText(qreal ratio)
         return "100 %";
 }
 
-static void scaleScene(qreal ratio)
+void DesignerWidget::scaleScene(qreal ratio)
 {
-    if (DesignerWidget::_mode == FormGui) {
-        formView.scale((1.0 / lastScaleOfWv) * ratio, (1.0 / lastScaleOfWv) * ratio);
-        lastScaleOfWv = ratio;
+    if (_mode == FormGui) {
+        _formView.scale((1.0 / _lastScaleOfWv) * ratio, (1.0 / _lastScaleOfWv) * ratio);
+        _lastScaleOfWv = ratio;
     } else {
-        controlView.scale((1.0 / lastScaleOfCv) * ratio, (1.0 / lastScaleOfCv) * ratio);
-        lastScaleOfCv = ratio;
+        controlView.scale((1.0 / _lastScaleOfCv) * ratio, (1.0 / _lastScaleOfCv) * ratio);
+        _lastScaleOfCv = ratio;
     }
 }
 
-void DesignerWidgetPrivate::handleIndicatorChanges()
+void DesignerWidget::handleIndicatorChanges()
 {
     loadingIndicator.setRunning(SaveBackend::parserWorking() || PreviewBackend::working());
 }
 
-void DesignerWidgetPrivate::handleSnappingClick(bool value)
+void DesignerWidget::handleSnappingClick(bool value)
 {
     if (DesignerWidget::_mode == FormGui)
         formScene.setSnapping(value);
@@ -141,7 +191,7 @@ void DesignerWidgetPrivate::handleSnappingClick(bool value)
         controlScene.setSnapping(value);
 }
 
-void DesignerWidgetPrivate::handleShowOutlineClick(bool value)
+void DesignerWidget::handleShowOutlineClick(bool value)
 {
     if (DesignerWidget::_mode == FormGui ||
         DesignerWidget::_mode == ControlGui) {
@@ -150,12 +200,12 @@ void DesignerWidgetPrivate::handleShowOutlineClick(bool value)
     }
 }
 
-void DesignerWidgetPrivate::handleFitInSceneClick()
+void DesignerWidget::handleFitInSceneClick()
 {
     auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
     auto diff = DesignerWidget::_mode == FormGui ?
-                    qMin(formView.width() / formScene.width(),
-                         formView.height() / formScene.height()) :
+                    qMin(_formView.width() / formScene.width(),
+                         _formView.height() / formScene.height()) :
                     qMin(controlView.width() / controlScene.width(),
                          controlView.height() / controlScene.height());;
     for (auto ratio : ratios)
@@ -163,7 +213,7 @@ void DesignerWidgetPrivate::handleFitInSceneClick()
             zoomlLevelCombobox.setCurrentText(findText(ratio));
 }
 
-void DesignerWidgetPrivate::handleThemeChange(const QString& text)
+void DesignerWidget::handleThemeChange(const QString& text)
 {
 //    qmlClearTypeRegistrations();
 //    QQuickStyle::setStyle(text);
@@ -177,18 +227,18 @@ void DesignerWidgetPrivate::handleThemeChange(const QString& text)
 //        control->refresh();
 }
 
-void DesignerWidgetPrivate::handleZoomLevelChange(const QString& text)
+void DesignerWidget::handleZoomLevelChange(const QString& text)
 {
     qreal ratio = findRatio(text);
     scaleScene(ratio);
 }
 
-void DesignerWidgetPrivate::handlePhonePortraitButtonClick()
+void DesignerWidget::handlePhonePortraitButtonClick()
 {
     auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::PhonePortrait);
     SaveBackend::setProperty(form, TAG_SKIN, Skin::PhonePortrait);
-    phonePortraitButton.setDisabled(true);
+    phonePortraitButton->setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
     noSkinButton.setChecked(false);
@@ -199,39 +249,39 @@ void DesignerWidgetPrivate::handlePhonePortraitButtonClick()
         formScene.mainControl()->centralize();
 }
 
-void DesignerWidgetPrivate::handlePhoneLandscapeButtonClick()
+void DesignerWidget::handlePhoneLandscapeButtonClick()
 {
     auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::PhoneLandscape);
     SaveBackend::setProperty(form, TAG_SKIN, Skin::PhoneLandscape);
     phoneLandscapeButton.setDisabled(true);
-    phonePortraitButton.setChecked(false);
+    phonePortraitButton->setChecked(false);
     desktopSkinButton.setChecked(false);
     noSkinButton.setChecked(false);
-    phonePortraitButton.setEnabled(true);
+    phonePortraitButton->setEnabled(true);
     desktopSkinButton.setEnabled(true);
     noSkinButton.setEnabled(true);
     if (formScene.mainControl())
         formScene.mainControl()->centralize();
 }
 
-void DesignerWidgetPrivate::handleDesktopSkinButtonClick()
+void DesignerWidget::handleDesktopSkinButtonClick()
 {
     auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::Desktop);
     SaveBackend::setProperty(form, TAG_SKIN, Skin::Desktop);
     desktopSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
-    phonePortraitButton.setChecked(false);
+    phonePortraitButton->setChecked(false);
     noSkinButton.setChecked(false);
-    phonePortraitButton.setEnabled(true);
+    phonePortraitButton->setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     noSkinButton.setEnabled(true);
     if (formScene.mainControl())
         formScene.mainControl()->centralize();
 }
 
-void DesignerWidgetPrivate::handleNoSkinButtonClick()
+void DesignerWidget::handleNoSkinButtonClick()
 {
     auto form = DesignerWidget::formScene()->mainForm();
     form->setSkin(Skin::NoSkin);
@@ -239,15 +289,15 @@ void DesignerWidgetPrivate::handleNoSkinButtonClick()
     noSkinButton.setDisabled(true);
     phoneLandscapeButton.setChecked(false);
     desktopSkinButton.setChecked(false);
-    phonePortraitButton.setChecked(false);
-    phonePortraitButton.setEnabled(true);
+    phonePortraitButton->setChecked(false);
+    phonePortraitButton->setEnabled(true);
     phoneLandscapeButton.setEnabled(true);
     desktopSkinButton.setEnabled(true);
     if (formScene.mainControl())
         formScene.mainControl()->centralize();
 }
 
-void DesignerWidgetPrivate::handleRefreshPreviewClick()
+void DesignerWidget::handleRefreshPreviewClick()
 {
     if (DesignerWidget::_mode == FormGui) {
         formScene.mainForm()->refresh();
@@ -260,7 +310,7 @@ void DesignerWidgetPrivate::handleRefreshPreviewClick()
     }
 }
 
-void DesignerWidgetPrivate::handleClearControls()
+void DesignerWidget::handleClearControls()
 {
     auto scene = parent->currentScene();
     if (!scene || !scene->mainControl())
@@ -285,21 +335,21 @@ void DesignerWidgetPrivate::handleClearControls()
     }
 }
 
-void DesignerWidgetPrivate::handleEditorModeButtonClick()
+void DesignerWidget::handleEditorModeButtonClick()
 {
     DesignerWidget::setMode(CodeEdit);
 }
 
-void DesignerWidgetPrivate::handleCGuiModeButtonClick()
+void DesignerWidget::handleCGuiModeButtonClick()
 {
     DesignerWidget::setMode(ControlGui);
 }
 
-void DesignerWidgetPrivate::handleWGuiModeButtonClick()
+void DesignerWidget::handleWGuiModeButtonClick()
 {
     DesignerWidget::setMode(FormGui);
 }
-void DesignerWidgetPrivate::handlePlayButtonClick()
+void DesignerWidget::handlePlayButtonClick()
 {
     ExecError error = SaveBackend::execProject();
 
@@ -368,20 +418,20 @@ void DesignerWidgetPrivate::handlePlayButtonClick()
     }
 }
 
-void DesignerWidgetPrivate::handleBuildButtonClick()
+void DesignerWidget::handleBuildButtonClick()
 {
     WindowManager::instance()->show(WindowManager::Builds);
 }
 
-void DesignerWidgetPrivate::handleModeChange()
+void DesignerWidget::handleModeChange()
 {
     if (DesignerWidget::_mode == FormGui) {
-        wGuiModeButton.setChecked(true);
-        wGuiModeButton.setDisabled(true);
-        cGuiModeButton.setChecked(false);
-        editorModeButton.setChecked(false);
-        cGuiModeButton.setEnabled(true);
-        editorModeButton.setEnabled(true);
+        _wGuiModeButton->setChecked(true);
+        _wGuiModeButton->setDisabled(true);
+        _cGuiModeButton->setChecked(false);
+        _editorModeButton->setChecked(false);
+        _cGuiModeButton->setEnabled(true);
+        _editorModeButton->setEnabled(true);
 
         auto form = DesignerWidget::formScene()->mainForm();
         if (form) {
@@ -392,7 +442,7 @@ void DesignerWidgetPrivate::handleModeChange()
                 noSkinButton.setChecked(true);
                 handleNoSkinButtonClick();
             } else if (form->skin() == Skin::PhonePortrait) {
-                phonePortraitButton.setChecked(true);
+                phonePortraitButton->setChecked(true);
                 handlePhonePortraitButtonClick();
             } else {
                 phoneLandscapeButton.setChecked(true);
@@ -411,33 +461,33 @@ void DesignerWidgetPrivate::handleModeChange()
         layItHorzButton.setEnabled(true);
         layItGridButton.setEnabled(true);
         breakLayoutButton.setEnabled(true);
-        zoomlLevelCombobox.setCurrentText(findText(lastScaleOfWv));
+        zoomlLevelCombobox.setCurrentText(findText(_lastScaleOfWv));
         auto sizes = splitter.sizes();
         QSize size;
         if (controlView.isVisible())
             size = controlView.size();
         else
             size = qmlEditorView.size();
-        sizes[splitter.indexOf(&formView)] = size.height();
+        sizes[splitter.indexOf(&_formView)] = size.height();
         controlView.hide();
         qmlEditorView.hide();
-        formView.show();
+        _formView.show();
         toolbar.show();
         splitter.setSizes(sizes);
         parent->_currentScene = &formScene;
     } else if (DesignerWidget::_mode == ControlGui) {
-        cGuiModeButton.setChecked(true);
-        cGuiModeButton.setDisabled(true);
-        editorModeButton.setChecked(false);
-        wGuiModeButton.setChecked(false);
-        editorModeButton.setEnabled(true);
-        wGuiModeButton.setEnabled(true);
+        _cGuiModeButton->setChecked(true);
+        _cGuiModeButton->setDisabled(true);
+        _editorModeButton->setChecked(false);
+        _wGuiModeButton->setChecked(false);
+        _editorModeButton->setEnabled(true);
+        _wGuiModeButton->setEnabled(true);
         noSkinButton.setChecked(true);
         phoneLandscapeButton.setChecked(false);
-        phonePortraitButton.setChecked(false);
+        phonePortraitButton->setChecked(false);
         desktopSkinButton.setChecked(false);
         noSkinButton.setDisabled(true);
-        phonePortraitButton.setDisabled(true);
+        phonePortraitButton->setDisabled(true);
         phoneLandscapeButton.setDisabled(true);
         desktopSkinButton.setDisabled(true);
         if (controlScene.mainControl())
@@ -453,33 +503,33 @@ void DesignerWidgetPrivate::handleModeChange()
         layItHorzButton.setEnabled(true);
         layItGridButton.setEnabled(true);
         breakLayoutButton.setEnabled(true);
-        zoomlLevelCombobox.setCurrentText(findText(lastScaleOfCv));
+        zoomlLevelCombobox.setCurrentText(findText(_lastScaleOfCv));
         auto sizes = splitter.sizes();
         QSize size;
-        if (formView.isVisible())
-            size = formView.size();
+        if (_formView.isVisible())
+            size = _formView.size();
         else
             size = qmlEditorView.size();
         sizes[splitter.indexOf(&controlView)] = size.height();
-        formView.hide();
+        _formView.hide();
         qmlEditorView.hide();
         controlView.show();
         toolbar.show();
         splitter.setSizes(sizes);
         parent->_currentScene = &controlScene;
     } else {
-        editorModeButton.setChecked(true);
-        editorModeButton.setDisabled(true);
-        cGuiModeButton.setChecked(false);
-        wGuiModeButton.setChecked(false);
-        cGuiModeButton.setEnabled(true);
-        wGuiModeButton.setEnabled(true);
+        _editorModeButton->setChecked(true);
+        _editorModeButton->setDisabled(true);
+        _cGuiModeButton->setChecked(false);
+        _wGuiModeButton->setChecked(false);
+        _cGuiModeButton->setEnabled(true);
+        _wGuiModeButton->setEnabled(true);
         noSkinButton.setChecked(false);
         phoneLandscapeButton.setChecked(false);
-        phonePortraitButton.setChecked(false);
+        phonePortraitButton->setChecked(false);
         desktopSkinButton.setChecked(false);
         noSkinButton.setDisabled(true);
-        phonePortraitButton.setDisabled(true);
+        phonePortraitButton->setDisabled(true);
         phoneLandscapeButton.setDisabled(true);
         desktopSkinButton.setDisabled(true);
         snappingButton.setChecked(false);
@@ -495,13 +545,13 @@ void DesignerWidgetPrivate::handleModeChange()
         breakLayoutButton.setDisabled(true);
         auto sizes = splitter.sizes();
         QSize size;
-        if (formView.isVisible())
-            size = formView.size();
+        if (_formView.isVisible())
+            size = _formView.size();
         else
             size = controlView.size();
         sizes[splitter.indexOf(&qmlEditorView)] = size.height();
         toolbar.hide();
-        formView.hide();
+        _formView.hide();
         controlView.hide();
         qmlEditorView.show();
         splitter.setSizes(sizes);
@@ -513,19 +563,19 @@ ControlScene* DesignerWidget::_currentScene = nullptr;
 
 DesignerWidget::DesignerWidget(QObject *parent)
     : QObject(parent)
-    , _formView(&formScene)
+    , __formView(&formScene)
     , _controlView(&controlScene)
-    , _lastScaleOfWv(1.0)
-    , _lastScaleOfCv(1.0)
+    , __lastScaleOfWv(1.0)
+    , __lastScaleOfCv(1.0)
 {
 
     setFrameShape(QFrame::StyledPanel);
     setFrameShadow(QFrame::Plain);
 
-    hlayout.setContentsMargins(0, 0, 0, 0);
-    hlayout.setSpacing(0);
-    hlayout.addWidget(&toolbar2);
-    hlayout.addLayout(&vlayout);
+    _hlayout->setContentsMargins(0, 0, 0, 0);
+    _hlayout->setSpacing(0);
+    _hlayout->addWidget(&_toolbar2);
+    _hlayout->addLayout(&vlayout);
 
     vlayout.setContentsMargins(0, 0, 0, 0);
     vlayout.setSpacing(0);
@@ -534,7 +584,7 @@ DesignerWidget::DesignerWidget(QObject *parent)
     splitter.setStyleSheet("QSplitter{background: #e0e4e7;}");
     splitter.setOrientation(Qt::Vertical);
     splitter.addWidget(&toolbar);
-    splitter.addWidget(&formView);
+    splitter.addWidget(&_formView);
     splitter.addWidget(&controlView);
     splitter.addWidget(&qmlEditorView);
     splitter.addWidget(&outputWidget);
@@ -556,15 +606,15 @@ DesignerWidget::DesignerWidget(QObject *parent)
     qmlEditorView.setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
-//    formView.setViewport(new QOpenGLWidget);
-    formView.setRenderHint(QPainter::Antialiasing);
-    formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
-    formView.setDragMode(QGraphicsView::RubberBandDrag);
-    formView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    formView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
-    formView.setBackgroundBrush(QColor("#e0e4e7"));
-    formView.setFrameShape(QFrame::NoFrame);
-    formView.setSizePolicy(QSizePolicy::Expanding,
+//    _formView.setViewport(new QOpenGLWidget);
+    _formView.setRenderHint(QPainter::Antialiasing);
+    _formView.setRubberBandSelectionMode(Qt::IntersectsItemShape);
+    _formView.setDragMode(QGraphicsView::RubberBandDrag);
+    _formView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    _formView.setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+    _formView.setBackgroundBrush(QColor("#e0e4e7"));
+    _formView.setFrameShape(QFrame::NoFrame);
+    _formView.setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
 //    controlView.setViewport(new QOpenGLWidget);
@@ -612,9 +662,9 @@ DesignerWidget::DesignerWidget(QObject *parent)
     snappingButton.setCheckable(true);
     snappingButton.setChecked(formScene.snapping());
 
-    phonePortraitButton.setCheckable(true);
-    phonePortraitButton.setChecked(true);
-    phonePortraitButton.setDisabled(true);
+    phonePortraitButton->setCheckable(true);
+    phonePortraitButton->setChecked(true);
+    phonePortraitButton->setDisabled(true);
     phoneLandscapeButton.setCheckable(true);
     desktopSkinButton.setCheckable(true);
     noSkinButton.setCheckable(true);
@@ -623,7 +673,7 @@ DesignerWidget::DesignerWidget(QObject *parent)
     clearFormButton.setCursor(Qt::PointingHandCursor);
     undoButton.setCursor(Qt::PointingHandCursor);
     redoButton.setCursor(Qt::PointingHandCursor);
-    phonePortraitButton.setCursor(Qt::PointingHandCursor);
+    phonePortraitButton->setCursor(Qt::PointingHandCursor);
     phoneLandscapeButton.setCursor(Qt::PointingHandCursor);
     desktopSkinButton.setCursor(Qt::PointingHandCursor);
     noSkinButton.setCursor(Qt::PointingHandCursor);
@@ -641,7 +691,7 @@ DesignerWidget::DesignerWidget(QObject *parent)
     clearFormButton.setToolTip("Clear controls on the Dashboard.");
     undoButton.setToolTip("Undo action.");
     redoButton.setToolTip("Redo action.");
-    phonePortraitButton.setToolTip("Skin: Phone portrait.");
+    phonePortraitButton->setToolTip("Skin: Phone portrait.");
     phoneLandscapeButton.setToolTip("Skin: Phone landscape.");
     desktopSkinButton.setToolTip("Skin: Desktop.");
     noSkinButton.setToolTip("No skin (free).");
@@ -660,7 +710,7 @@ DesignerWidget::DesignerWidget(QObject *parent)
     clearFormButton.setIcon(QIcon(":/resources/images/clean.png"));
     undoButton.setIcon(QIcon(":/resources/images/undo.png"));
     redoButton.setIcon(QIcon(":/resources/images/redo.png"));
-    phonePortraitButton.setIcon(QIcon(":/resources/images/portrait.png"));
+    phonePortraitButton->setIcon(QIcon(":/resources/images/portrait.png"));
     phoneLandscapeButton.setIcon(QIcon(":/resources/images/landscape.png"));
     desktopSkinButton.setIcon(QIcon(":/resources/images/desktop.png"));
     noSkinButton.setIcon(QIcon(":/resources/images/free.png"));
@@ -688,7 +738,7 @@ DesignerWidget::DesignerWidget(QObject *parent)
       SLOT(handleRefreshPreviewClick()));
     connect(&clearFormButton, SIGNAL(clicked(bool)),
       SLOT(handleClearControls()));
-    connect(&phonePortraitButton, SIGNAL(clicked(bool)),
+    connect(&_phonePortraitButton, SIGNAL(clicked(bool)),
       SLOT(handlePhonePortraitButtonClick()));
     connect(&phoneLandscapeButton, SIGNAL(clicked(bool)),
       SLOT(handlePhoneLandscapeButtonClick()));
@@ -706,7 +756,7 @@ DesignerWidget::DesignerWidget(QObject *parent)
     toolbar.addWidget(&refreshPreviewButton);
     toolbar.addWidget(&clearFormButton);
     toolbar.addSeparator();
-    toolbar.addWidget(&phonePortraitButton);
+    toolbar.addWidget(&_phonePortraitButton);
     toolbar.addWidget(&phoneLandscapeButton);
     toolbar.addWidget(&desktopSkinButton);
     toolbar.addWidget(&noSkinButton);
@@ -724,58 +774,58 @@ DesignerWidget::DesignerWidget(QObject *parent)
     toolbar.addWidget(&layItGridButton);
     toolbar.addWidget(&breakLayoutButton);
 
-    // toolbar2 settings
+    // _toolbar2 settings
     QWidget* spacer_2 = new QWidget;
     spacer_2->setSizePolicy(QSizePolicy::Preferred,
       QSizePolicy::Expanding);
 
-    editorModeButton.setCheckable(true);
-    wGuiModeButton.setCheckable(true);
-    cGuiModeButton.setCheckable(true);
-    wGuiModeButton.setChecked(true);
-    wGuiModeButton.setDisabled(true);
+    _editorModeButton->setCheckable(true);
+    _wGuiModeButton->setCheckable(true);
+    _cGuiModeButton->setCheckable(true);
+    _wGuiModeButton->setChecked(true);
+    _wGuiModeButton->setDisabled(true);
 
-    editorModeButton.setCursor(Qt::PointingHandCursor);
-    wGuiModeButton.setCursor(Qt::PointingHandCursor);
-    cGuiModeButton.setCursor(Qt::PointingHandCursor);
-    playButton.setCursor(Qt::PointingHandCursor);
+    _editorModeButton->setCursor(Qt::PointingHandCursor);
+    _wGuiModeButton->setCursor(Qt::PointingHandCursor);
+    _cGuiModeButton->setCursor(Qt::PointingHandCursor);
+    _playButton->setCursor(Qt::PointingHandCursor);
     buildButton.setCursor(Qt::PointingHandCursor);
 
-    editorModeButton.setToolTip("Switch to Qml Editor.");
-    cGuiModeButton.setToolTip("Switch to Tool Editor.");
-    wGuiModeButton.setToolTip("Switch to Form Editor.");
-    playButton.setToolTip("Run project.");
+    _editorModeButton->setToolTip("Switch to Qml Editor.");
+    _cGuiModeButton->setToolTip("Switch to Tool Editor.");
+    _wGuiModeButton->setToolTip("Switch to Form Editor.");
+    _playButton->setToolTip("Run project.");
     buildButton.setToolTip("Get builds.");
 
-    editorModeButton.setIcon(QIcon(":/resources/images/text.png"));
-    cGuiModeButton.setIcon(QIcon(":/resources/images/gui.png"));
-    wGuiModeButton.setIcon(QIcon(":/resources/images/form.png"));
-    playButton.setIcon(QIcon(":/resources/images/play.png"));
+    _editorModeButton->setIcon(QIcon(":/resources/images/text.png"));
+    _cGuiModeButton->setIcon(QIcon(":/resources/images/gui.png"));
+    _wGuiModeButton->setIcon(QIcon(":/resources/images/form.png"));
+    _playButton->setIcon(QIcon(":/resources/images/play.png"));
     buildButton.setIcon(QIcon(":/resources/images/build.png"));
 
-    connect(&editorModeButton, SIGNAL(clicked(bool)),
+    connect(&_editorModeButton, SIGNAL(clicked(bool)),
       SLOT(handleEditorModeButtonClick()));
-    connect(&cGuiModeButton, SIGNAL(clicked(bool)),
+    connect(&_cGuiModeButton, SIGNAL(clicked(bool)),
       SLOT(handleCGuiModeButtonClick()));
-    connect(&wGuiModeButton, SIGNAL(clicked(bool)),
+    connect(&_wGuiModeButton, SIGNAL(clicked(bool)),
       SLOT(handleWGuiModeButtonClick()));
-    connect(&playButton, SIGNAL(clicked(bool)),
+    connect(&_playButton, SIGNAL(clicked(bool)),
       SLOT(handlePlayButtonClick()));
     connect(&buildButton, SIGNAL(clicked(bool)),
       SLOT(handleBuildButtonClick()));
 
-    toolbar2.setSizePolicy(QSizePolicy::Preferred,
+    _toolbar2->setSizePolicy(QSizePolicy::Preferred,
       QSizePolicy::Expanding);
-    toolbar2.setOrientation(Qt::Vertical);
-    toolbar2.setStyleSheet(CSS::DesignerToolbarV);
-    toolbar2.setFixedWidth(fit::fx(21));
-    toolbar2.setIconSize(QSize(fit::fx(16), fit::fx(16)));
-    toolbar2.addWidget(&wGuiModeButton);
-    toolbar2.addWidget(&cGuiModeButton);
-    toolbar2.addWidget(&editorModeButton);
-    toolbar2.addWidget(spacer_2);
-    toolbar2.addWidget(&playButton);
-    toolbar2.addWidget(&buildButton);
+    _toolbar2->setOrientation(Qt::Vertical);
+    _toolbar2->setStyleSheet(CSS::DesignerToolbarV);
+    _toolbar2->setFixedWidth(fit::fx(21));
+    _toolbar2->setIconSize(QSize(fit::fx(16), fit::fx(16)));
+    _toolbar2->addWidget(&_wGuiModeButton);
+    _toolbar2->addWidget(&_cGuiModeButton);
+    _toolbar2->addWidget(&_editorModeButton);
+    _toolbar2->addWidget(spacer_2);
+    _toolbar2->addWidget(&_playButton);
+    _toolbar2->addWidget(&buildButton);
 
     _errorChecker.setInterval(INTERVAL_ERROR_CHECK);
     connect(&_errorChecker, SIGNAL(timeout()),
@@ -811,7 +861,7 @@ void DesignerWidget::setSettleWidget(QWidget* widget)
 {
     _settleWidget = widget;
     if (_settleWidget)
-        _settleWidget->setLayout(&_hlayout);
+        _settleWidget->setLayout(&__hlayout);
 }
 
 const DesignMode& DesignerWidget::mode() const
@@ -851,9 +901,9 @@ ControlView* DesignerWidget::controlView()
     return &_controlView;
 }
 
-FormView* DesignerWidget::formView()
+FormView* DesignerWidget::_formView()
 {
-    return &_formView;
+    return &__formView;
 }
 
 LoadingIndicator* DesignerWidget::loadingIndicator()
@@ -867,11 +917,11 @@ void DesignerWidget::updateSkin()
     if (form) {
         _noSkinButton.setChecked(false);
         _phoneLandscapeButton.setChecked(false);
-        _phonePortraitButton.setChecked(false);
+        _phonePortraitButton->setChecked(false);
         _desktopSkinButton.setChecked(false);
         _noSkinButton.setEnabled(true);
         _phoneLandscapeButton.setEnabled(true);
-        _phonePortraitButton.setEnabled(true);
+        _phonePortraitButton->setEnabled(true);
         _desktopSkinButton.setEnabled(true);
 
         if (form->skin() == Skin::Desktop) {
@@ -881,8 +931,8 @@ void DesignerWidget::updateSkin()
             _noSkinButton.setChecked(true);
             _noSkinButton.setEnabled(false);
         } else if (form->skin() == Skin::PhonePortrait) {
-            _phonePortraitButton.setChecked(true);
-            _phonePortraitButton.setEnabled(false);
+            _phonePortraitButton->setChecked(true);
+            _phonePortraitButton->setEnabled(false);
         } else {
             _phoneLandscapeButton.setChecked(true);
             _phoneLandscapeButton.setEnabled(false);
@@ -917,8 +967,8 @@ void DesignerWidget::handleControlDoubleClick(Control* control)
 {
     auto sizes = _splitter.sizes();
     QSize size;
-    if (_formView.isVisible())
-        size = _formView.size();
+    if (__formView.isVisible())
+        size = __formView.size();
     else if (_qmlEditorView.isVisible())
         size = _qmlEditorView.size();
     else

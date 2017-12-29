@@ -19,6 +19,7 @@ class OutputWidget;
 class QComboBox;
 class ControlScene;
 class ControlScene;
+class Control;
 
 class DesignerWidget : public QFrame
 {
@@ -65,11 +66,16 @@ class DesignerWidget : public QFrame
         void handlePlayButtonClick();
         void handleBuildButtonClick();
 
+    private:
+        void scaleScene(qreal ratio);
+
     signals:
         void modeChanged();
 
     private:
         DesignMode _mode;
+        qreal _lastScaleOfWv;
+        qreal _lastScaleOfCv;
         ControlScene* _currentScene;
         QHBoxLayout* _hlayout;
         QToolBar* _toolbar2;
@@ -86,8 +92,6 @@ class DesignerWidget : public QFrame
         ControlView* _controlView;
         QmlEditorView* _qmlEditorView;
         OutputWidget* _outputWidget;
-        qreal* _lastScaleOfWv;
-        qreal* _lastScaleOfCv;
         QToolBar* _toolbar;
         QToolButton* _refreshPreviewButton;
         QToolButton* _clearFormButton;

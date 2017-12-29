@@ -4,7 +4,7 @@
 #include <projectbackend.h>
 #include <savebackend.h>
 #include <previewbackend.h>
-#include <designerwidget.h>
+#include <frontend.h>
 
 BackendManager::BackendManager()
 {
@@ -32,8 +32,8 @@ void BackendManager::handleProjectStart() const
 {
     // mainWindow->clearStudio(); //FIXME
     SaveBackend::exposeProject();
-    DesignerWidget::controlScene()->clearSelection();
-    DesignerWidget::formScene()->clearSelection();
+//    dW->controlScene()->clearSelection();
+//    dW->formScene()->clearSelection();
     ToolsBackend::instance()->downloadTools();
     // MainWindow::instance()->setWindowTitle //FIXME
     // (QString(APP_NAME) + " - [" + projectname + "]");

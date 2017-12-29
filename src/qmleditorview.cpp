@@ -10,6 +10,7 @@
 #include <fileexplorer.h>
 #include <qmlhighlighter.h>
 #include <control.h>
+#include <frontend.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -242,8 +243,8 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     QTimer::singleShot(3000, [=] {
         connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
-        connect(DesignerWidget::controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
-        connect(DesignerWidget::formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+        connect(dW->controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+        connect(dW->formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
     });
 
     zoomlLevelCombobox->addItem("35 %");

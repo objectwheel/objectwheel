@@ -74,6 +74,11 @@ WindowManager* WindowManager::instance()
     return &instance;
 }
 
+QWidget* WindowManager::window(WindowManager::Windows screen)
+{
+    return _windows.value(screen);
+}
+
 void WindowManager::hide(WindowManager::Windows key)
 {
     QWidget* window;

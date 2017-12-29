@@ -65,7 +65,8 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/projectbackend.h \
     $$PWD/toolsbackend.h \
     $$PWD/userbackend.h \
-    $$PWD/previewbackend.h
+    $$PWD/previewbackend.h \
+    $$PWD/frontend.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \

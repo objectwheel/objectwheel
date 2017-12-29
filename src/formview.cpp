@@ -6,6 +6,7 @@
 #include <designerwidget.h>
 #include <filemanager.h>
 #include <css.h>
+#include <frontend.h>
 
 #include <QScrollBar>
 #include <QTimer>
@@ -142,7 +143,7 @@ void FormViewPrivate::handleCutAction()
     QDataStream dstream(&controls, QIODevice::WriteOnly);
     auto mimeData = new QMimeData;
     auto clipboard = QApplication::clipboard();
-    auto scene = DesignerWidget::formScene();
+    auto scene = dW->formScene();
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
@@ -171,7 +172,7 @@ void FormViewPrivate::handleCopyAction()
     QList<QUrl> urls;
     auto mimeData = new QMimeData;
     auto clipboard = QApplication::clipboard();
-    auto scene = DesignerWidget::formScene();
+    auto scene = dW->formScene();
     auto selectedControls = scene->selectedControls();
     selectedControls.removeOne(scene->mainControl());
     mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
@@ -193,7 +194,7 @@ void FormViewPrivate::handlePasteAction()
 {
     auto clipboard = QApplication::clipboard();
     auto mimeData = clipboard->mimeData();
-    auto mainControl = DesignerWidget::formScene()->mainForm();
+    auto mainControl = dW->formScene()->mainForm();
     QString uid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
         mimeData->text() != TOOL_KEY || uid.isEmpty())
@@ -209,16 +210,16 @@ void FormViewPrivate::handlePasteAction()
 
         control->setPos(control->pos() + QPoint(fit::fx(5), fit::fx(5)));
         if (url == mimeData->urls().last()) {
-            DesignerWidget::formScene()->clearSelection();
+            dW->formScene()->clearSelection();
             for (auto control : controls)
                 control->setSelected(true);
 
             if (!mimeData->data("objectwheel/cut").isEmpty()) {
                 ControlScene* scene;
                 if (mimeData->data("objectwheel/fscene").isEmpty())
-                    scene = DesignerWidget::formScene();
+                    scene = dW->formScene();
                 else
-                    scene = DesignerWidget::controlScene();
+                    scene = dW->controlScene();
 
                 QDataStream dstream(mimeData->data("objectwheel/dstream"));
                 int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();

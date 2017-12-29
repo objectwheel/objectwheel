@@ -10,6 +10,8 @@
 #include <controlwatcher.h>
 #include <fit.h>
 #include <designerwidget.h>
+#include <frontend.h>
+#include <formscene.h>
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -871,7 +873,7 @@ void SaveBackend::exposeProject()
           DIR_THIS + separator() + "main.qml");
         if (_d->isMain(path))
             form->setMain(true);
-        DesignerWidget::formScene()->addForm(form);
+        dW->formScene()->addForm(form);
 
         qApp->processEvents(QEventLoop::AllEvents, 10);
         QMap<QString, Control*> pmap;

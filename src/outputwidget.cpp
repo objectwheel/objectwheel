@@ -3,6 +3,7 @@
 #include <css.h>
 #include <fit.h>
 #include <designerwidget.h>
+#include <frontend.h>
 
 #include <QSplitter>
 #include <QSplitterHandle>
@@ -143,7 +144,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
       QSizePolicy::Expanding);
 
     QTimer::singleShot(100, [this] {
-        connect(DesignerWidget::instance(), SIGNAL(modeChanged()),
+        connect(dW, SIGNAL(modeChanged()),
           boxes.value(Issues), SLOT(refresh()));
     });
 

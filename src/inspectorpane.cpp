@@ -5,7 +5,10 @@
 #include <filemanager.h>
 #include <savebackend.h>
 #include <formspane.h>
+#include <control.h>
 #include <controlwatcher.h>
+#include <frontend.h>
+#include <controlscene.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -150,11 +153,11 @@ InspectorPane::InspectorPane(QWidget* parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(DesignerWidget::formScene(), SIGNAL(selectionChanged()),
+    connect(dW->formScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(DesignerWidget::controlScene(), SIGNAL(selectionChanged()),
+    connect(dW->controlScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(DesignerWidget::instance(), SIGNAL(modeChanged()),
+    connect(dW, SIGNAL(modeChanged()),
       SLOT(refresh()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
       SLOT(refresh()));
@@ -208,7 +211,7 @@ void InspectorPane::refresh()
 
     clear();
 
-    auto cs = DesignerWidget::currentScene();
+    auto cs = dW->currentScene();
     auto scs = cs->selectedControls();
     auto mc = cs->mainControl();
 
@@ -262,7 +265,7 @@ void InspectorPane::refresh()
 void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = DesignerWidget::currentScene()->mainControl();
+    const auto mc = dW->currentScene()->mainControl();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();
@@ -284,7 +287,7 @@ void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
 void InspectorPane::handleClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = DesignerWidget::currentScene()->mainControl();
+    const auto mc = dW->currentScene()->mainControl();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();

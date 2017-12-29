@@ -8,6 +8,7 @@
 #include <css.h>
 #include <fit.h>
 #include <delayer.h>
+#include <frontend.h>
 
 #include <QStandardPaths>
 #include <QVBoxLayout>
@@ -83,11 +84,11 @@ FormsPane::FormsPane(QWidget *parent) : QWidget(parent)
 
 void FormsPane::removeButtonClicked()
 {
-    auto form = DesignerWidget::formScene()->mainForm();
+    auto form = dW->formScene()->mainForm();
     if (!form || !form->form() || form->main())
         return;
     SaveBackend::removeForm((Form*)form);
-    DesignerWidget::formScene()->removeForm(form);
+    dW->formScene()->removeForm(form);
 }
 
 void FormsPane::addButtonClicked()
@@ -101,7 +102,7 @@ void FormsPane::addButtonClicked()
         return;
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
-    DesignerWidget::formScene()->addForm(form);
+    dW->formScene()->addForm(form);
     SaveBackend::addForm(form);
     rm(tempPath);
 }
@@ -137,10 +138,10 @@ void FormsPane::handleCurrentFormChange()
         return;
 
     auto id = _listWidget->currentItem()->text();
-    for (auto form : DesignerWidget::formScene()->forms())
+    for (auto form : dW->formScene()->forms())
         if (form->id() == id)
-            DesignerWidget::formScene()->setMainForm(form);
-    DesignerWidget::instance()->updateSkin();
+            dW->formScene()->setMainForm(form);
+    dW->updateSkin();
     emit currentFormChanged();
 }
 

@@ -5,6 +5,8 @@
 #include <filemanager.h>
 #include <zipper.h>
 #include <savebackend.h>
+#include <frontend.h>
+#include <qmleditorview.h>
 
 #include <QScrollBar>
 #include <QBuffer>
@@ -125,7 +127,7 @@ void ToolboxSettingsWindow::on_btnReset_clicked()
                 auto currentDir = dname(dname(ui->treeWidget->
                   urls(ci).first().toLocalFile()));//FIXME: Do same for Control GUI Editor /Tool Editor
                 // TODO: Check same for selected control's child controls
-                if (DesignerWidget::qmlEditorView()->isOpen(currentDir)) {
+                if (dW->qmlEditorView()->isOpen(currentDir)) {
                     obstacle = true;
                     break;
                 }
@@ -151,7 +153,7 @@ void ToolboxSettingsWindow::on_btnRemove_clicked()
       "This will remove selected tool from tool library. Are you sure?")) {
         auto currentDir = dname(dname(ui->treeWidget->urls
           (ui->treeWidget->currentItem()).first().toLocalFile()));
-        if (!DesignerWidget::qmlEditorView()->isOpen(currentDir)) {
+        if (!dW->qmlEditorView()->isOpen(currentDir)) {
             ToolsBackend::instance()->removeTool(dname(dname(ui->treeWidget->urls
               (ui->treeWidget->currentItem()).first().toLocalFile())));
         } else { //FIXME: Do same for Control GUI Editor /Tool Editor
