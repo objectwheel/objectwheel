@@ -46,10 +46,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setWindowTitle(APP_NAME);
     setPalette(p);
 
-    _settleWidget->setFrameShape(QFrame::StyledPanel);
-    _settleWidget->setFrameShadow(QFrame::Plain);
-    _designerWidget->setSettleWidget(_settleWidget);
-
     // Toolbar settings
     QLabel* titleText = new QLabel;
     titleText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
