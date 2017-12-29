@@ -5,7 +5,8 @@ INCLUDEPATH += $$PWD
 ICON = $$PWD/icon.icns
 QMAKE_MAC_SDK = macosx10.10
 QMAKE_INFO_PLIST = $$PWD/Info.plist
-LIBS += -framework Cocoa -framework QuartzCore
+QMAKE_OBJCXXFLAGS += -fobjc-arc
 
+LIBS += -framework AppKit
 HEADERS += $$PWD/mactoolbar.h
-SOURCES += $$PWD/mactoolbar.mm
+OBJECTIVE_SOURCES += $$PWD/mactoolbar.mm

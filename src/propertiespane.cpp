@@ -1307,4 +1307,4 @@ QSize PropertiesPane::sizeHint() const
     return fit::fx(QSizeF{340, 2600}).toSize(); //FIXME:
 }
 
-#include "propertieswidget.moc"
+#include "propertiespane.moc"

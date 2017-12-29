@@ -1,31 +1,23 @@
 #include <loadingindicator.h>
 #include <fit.h>
 
-#include <QMovie>
+#include <QTimer>
 #include <QPainter>
 #include <QApplication>
 #include <QScreen>
 
 #define pS (QApplication::primaryScreen())
 
-QMovie* _movie = nullptr;
-bool LoadingIndicator::_running = false;
-
 LoadingIndicator::LoadingIndicator(QWidget *parent)
     : QWidget(parent)
+    , _running(true)
 {
-    resize(sizeHint());
-    _movie = new QMovie(this);
-    _movie->setFileName(":/resources/images/preloader.gif");
-    _movie->setScaledSize(size() * pS->devicePixelRatio());
-    _movie->setSpeed(230);
-    _movie->start();
-    connect(_movie, SIGNAL(frameChanged(int)), SLOT(update()));
-}
+    _timer = new QTimer(this);
+    _timer->setInterval(15); // For 30 fps
+    _timer->start();
 
-QSize LoadingIndicator::sizeHint() const
-{
-    return QSize(fit::fx(20), fit::fx(20));
+    setFixedSize(fit::fx(QSizeF{20, 20}).toSize());
+    connect(_timer, SIGNAL(timeout()), SLOT(update()));
 }
 
 void LoadingIndicator::paintEvent(QPaintEvent* event)
@@ -35,14 +27,35 @@ void LoadingIndicator::paintEvent(QPaintEvent* event)
     if (!_running)
         return;
 
+    static QTransform transform;
+    transform.translate(width() / 2.0, height() / 2.0);
+    transform.rotate(48);
+    transform.translate(-width() / 2.0, -height() / 2.0);
+
     QPainter p(this);
+    p.setTransform(transform);
     p.setRenderHint(QPainter::Antialiasing);
-    p.drawPixmap(QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5),
-                 _movie->currentPixmap(),
-                 QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
+    p.drawImage(
+        rect().adjusted(1, 1, -1, -1),
+        _scaled,
+        QRectF(
+            QPointF(0, 0),
+            size() * pS->devicePixelRatio()
+        )
+    );
 }
 
-bool LoadingIndicator::running()
+void LoadingIndicator::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    _scaled = _image.scaled(
+        size() * pS->devicePixelRatio(),
+        Qt::IgnoreAspectRatio,
+        Qt::SmoothTransformation
+    );
+}
+
+bool LoadingIndicator::running() const
 {
     return _running;
 }
@@ -50,4 +63,30 @@ bool LoadingIndicator::running()
 void LoadingIndicator::setRunning(bool running)
 {
     _running = running;
+
+    if (running)
+        _timer->start();
+    else
+        _timer->stop();
+}
+
+void LoadingIndicator::setImage(const QImage& image)
+{
+    _image = image;
+    _image.setDevicePixelRatio(pS->devicePixelRatio());
+    _scaled = _image.scaled(
+        size() * pS->devicePixelRatio(),
+        Qt::IgnoreAspectRatio,
+        Qt::SmoothTransformation
+    );
+}
+
+void LoadingIndicator::start()
+{
+    setRunning(true);
+}
+
+void LoadingIndicator::stop()
+{
+    setRunning(false);
 }

@@ -14,7 +14,6 @@
 #include <previewbackend.h>
 #include <formview.h>
 #include <controlview.h>
-#include <loadingindicator.h>
 #include <global.h>
 #include <outputwidget.h>
 
@@ -68,13 +67,33 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _titleBar->setMovable(false);
     _titleBar->addWidget(titleText);
     _titleBar->setStyleSheet(QString(
-    "border: none; background:qlineargradient(spread:pad, "
-    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %1, stop:1 %2);")
-    .arg(QColor("#2784E3").name()).arg(QColor("#1068C6").name()));
+    "QToolBar{border: none; background:qlineargradient(spread:pad, "
+    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}")
+    .arg(int(fit::fx(16))));
 
     #if defined(Q_OS_MAC)
     auto macToolbar = new MacToolbar(this);
     _titleBar->setFixedHeight(macToolbar->toolbarHeight());
+
+    auto btn = new FlatButton;
+    btn->setIcon(QIcon("/users/omergoktas/desktop/test.png"));
+    btn->setFixedSize(fit::fx(QSizeF{38, 23}).toSize());
+    btn->setIconButton(true);
+    connect(btn, &QPushButton::clicked, [=]{
+    });
+
+    auto btn2 = new FlatButton;
+    btn2->setIcon(QIcon("/users/omergoktas/desktop/btnstop.png"));
+    btn2->setFixedSize(fit::fx(QSizeF{38, 23}).toSize());
+    btn2->setIconButton(true);
+    connect(btn2, &QPushButton::clicked, [=]{
+    });
+
+    auto spc = new QWidget;
+    spc->setFixedWidth(fit::fx(72));
+    _titleBar->insertWidget(_titleBar->actions().first(), btn2);
+    _titleBar->insertWidget(_titleBar->actions().first(), btn);
+    _titleBar->insertWidget(_titleBar->actions().first(), spc);
     #endif
 
     /*** PROPERTIES DOCK WIDGET ***/
@@ -242,11 +261,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
 }
 
-void MainWindow::handleIndicatorChanges()
-{
-    DesignerWidget::loadingIndicator()->setRunning(SaveBackend::parserWorking() || PreviewBackend::working());
-}
-
 void MainWindow::cleanupObjectwheel()
 {
     while(SaveBackend::parserWorking())
@@ -266,10 +280,6 @@ void MainWindow::cleanupObjectwheel()
 //    new SaveBackend(this);
 //    new QmlPreviewer(this);
 
-//    connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
-//      SLOT(handleIndicatorChanges()));
-//    connect(QmlPreviewer::instance(), SIGNAL(workingChanged(bool)),
-//      SLOT(handleIndicatorChanges()));
 //    connect(qApp, SIGNAL(aboutToQuit()),
 //      SLOT(cleanupObjectwheel()));
 

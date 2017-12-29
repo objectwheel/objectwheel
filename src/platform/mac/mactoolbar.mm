@@ -1,10 +1,7 @@
 #include <mactoolbar.h>
 #include <QMainWindow>
 #include <QtMacExtras>
-
-#import <Cocoa/Cocoa.h>
-#import <QuartzCore/QuartzCore.h>
-#import <QuartzCore/CoreAnimation.h>
+#import <AppKit/AppKit.h>
 
 MacToolbar::MacToolbar(QMainWindow* mainWindow) : QObject(mainWindow)
 {

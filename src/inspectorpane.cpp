@@ -310,4 +310,4 @@ QSize InspectorPane::sizeHint() const
     return fit::fx(QSizeF{200, 400}).toSize();
 }
 
-#include "inspectorwidget.moc"
+#include "inspectorpane.moc"

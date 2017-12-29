@@ -51,6 +51,7 @@ class DesignerWidgetPrivate : public QObject
 
     public slots:
         void handleModeChange();
+        void handleIndicatorChanges();
 
     private slots:
         void handleSnappingClicked(bool value);
@@ -276,6 +277,8 @@ DesignerWidgetPrivate::DesignerWidgetPrivate(DesignerWidget* parent)
     layItHorzButton.setIcon(QIcon(":/resources/images/hort.png"));
     layItGridButton.setIcon(QIcon(":/resources/images/grid.png"));
     breakLayoutButton.setIcon(QIcon(":/resources/images/break.png"));
+    loadingIndicator.setImage(QImage(":/resources/images/refresh.png"));
+    loadingIndicator.setRunning(false);
 
     connect(&snappingButton, SIGNAL(toggled(bool)),
       SLOT(handleSnappingClicked(bool)));
@@ -377,8 +380,6 @@ DesignerWidgetPrivate::DesignerWidgetPrivate(DesignerWidget* parent)
     toolbar_2.addWidget(&cGuiModeButton);
     toolbar_2.addWidget(&editorModeButton);
     toolbar_2.addWidget(spacer_2);
-
-
     toolbar_2.addWidget(&playButton);
     toolbar_2.addWidget(&buildButton);
 
@@ -396,6 +397,10 @@ DesignerWidgetPrivate::DesignerWidgetPrivate(DesignerWidget* parent)
       parent, SLOT(controlDropped(Control*,QPointF,QString)));
     connect(cW, SIGNAL(skinChanged(Form*)), parent,
       SLOT(updateSkin()));
+    connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
+      SLOT(handleIndicatorChanges()));
+    connect(PreviewBackend::instance(), SIGNAL(workingChanged(bool)),
+      SLOT(handleIndicatorChanges()));
 }
 
 DesignerWidgetPrivate::~DesignerWidgetPrivate()
@@ -494,6 +499,11 @@ void DesignerWidgetPrivate::scaleScene(qreal ratio)
         controlView.scale((1.0 / lastScaleOfCv) * ratio, (1.0 / lastScaleOfCv) * ratio);
         lastScaleOfCv = ratio;
     }
+}
+
+void DesignerWidgetPrivate::handleIndicatorChanges()
+{
+    loadingIndicator.setRunning(SaveBackend::parserWorking() || PreviewBackend::working());
 }
 
 void DesignerWidgetPrivate::handleSnappingClicked(bool value)
@@ -1031,4 +1041,4 @@ void DesignerWidget::controlDropped(Control* control, const QPointF& pos, const 
     newControl->refresh();
 }
 
-#include "designmanager.moc"
+#include "designerwidget.moc"

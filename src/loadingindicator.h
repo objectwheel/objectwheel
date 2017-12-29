@@ -1,24 +1,31 @@
 #ifndef LOADINGINDICATOR_H
 #define LOADINGINDICATOR_H
 
-#include <QLabel>
+#include <QWidget>
 
 class LoadingIndicator : public QWidget
 {
         Q_OBJECT
+
     public:
         explicit LoadingIndicator(QWidget *parent = 0);
-        static bool running();
+
+        bool running() const;
+        void setRunning(bool running);
+        void setImage(const QImage& image);
 
     public slots:
-        static void setRunning(bool running);
+        void start();
+        void stop();
 
     protected:
-        virtual QSize sizeHint() const override;
-        virtual void paintEvent(QPaintEvent *event) override;
+        void paintEvent(QPaintEvent* event) override;
+        void resizeEvent(QResizeEvent* event) override;
 
     private:
-        static bool _running;
+        bool _running;
+        QTimer* _timer;
+        QImage _image, _scaled;
 };
 
 #endif // LOADINGINDICATOR_H
