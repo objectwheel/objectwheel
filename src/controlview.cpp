@@ -1,5 +1,6 @@
 #include <controlview.h>
 #include <controlscene.h>
+#include <formscene.h>
 #include <control.h>
 #include <fit.h>
 #include <savebackend.h>
