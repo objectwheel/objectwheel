@@ -11,6 +11,7 @@
 #include <control.h>
 #include <frontend.h>
 #include <controlscene.h>
+#include <formscene.h>
 #include <QtWidgets>
 
 //!

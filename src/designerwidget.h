@@ -41,7 +41,7 @@ class DesignerWidget : public QFrame
 
     public slots:
         void updateSkin();
-        void handleControlClicked(Control*);
+        void handleControlClick(Control*);
         void handleControlDoubleClick(Control*);
         void handleControlDrop(Control*, const QPointF&, const QString&);
 
@@ -77,6 +77,8 @@ class DesignerWidget : public QFrame
         qreal _lastScaleOfWv;
         qreal _lastScaleOfCv;
         ControlScene* _currentScene;
+        QTimer* _errorChecker;
+
         QHBoxLayout* _hlayout;
         QToolBar* _toolbar2;
         QToolButton* _editorModeButton;
@@ -84,6 +86,7 @@ class DesignerWidget : public QFrame
         QToolButton* _cGuiModeButton;
         QToolButton* _playButton;
         QToolButton* _buildButton;
+
         QVBoxLayout* _vlayout;
         QSplitter* _splitter;
         FormScene* _formScene;
@@ -111,7 +114,6 @@ class DesignerWidget : public QFrame
         QToolButton* _layItHorzButton;
         QToolButton* _layItGridButton;
         QToolButton* _breakLayoutButton;
-        QTimer* _errorChecker;
 };
 
 #endif // DESIGNERWIDGET_H

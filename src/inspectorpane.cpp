@@ -9,6 +9,7 @@
 #include <controlwatcher.h>
 #include <frontend.h>
 #include <controlscene.h>
+#include <formscene.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>

@@ -509,13 +509,46 @@ void DesignerWidget::handleModeChange()
 }
 
 DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
-  , _currentScene(nullptr)
   , _mode(FormGui)
-  , _formView(_formScene)
-  , _controlView(_controlScene)
   , _lastScaleOfWv(1.0)
   , _lastScaleOfCv(1.0)
+  , _currentScene(nullptr)
 {
+    _hlayout = new QHBoxLayout(this);
+    _toolbar2 = new QToolBar;
+    _editorModeButton = new QToolButton;
+    _wGuiModeButton = new QToolButton;
+    _cGuiModeButton = new QToolButton;
+    _playButton = new QToolButton;
+    _buildButton = new QToolButton;
+    _vlayout = new QVBoxLayout;
+    _splitter = new QSplitter;
+    _formScene = new FormScene;
+    _controlScene = new ControlScene;
+    _formView = new FormView(_formScene);
+    _controlView = new ControlView(_controlScene);
+    _qmlEditorView = new QmlEditorView;
+    _outputWidget = new OutputWidget;
+    _toolbar = new QToolBar;
+    _refreshPreviewButton = new QToolButton;
+    _clearFormButton = new QToolButton;
+    _undoButton = new QToolButton;
+    _redoButton = new QToolButton;
+    _phonePortraitButton = new QToolButton;
+    _phoneLandscapeButton = new QToolButton;
+    _desktopSkinButton = new QToolButton;
+    _noSkinButton = new QToolButton;
+    _snappingButton = new QToolButton;
+    _showOutlineButton = new QToolButton;
+    _fitInSceneButton = new QToolButton;
+    _zoomlLevelCombobox = new QComboBox;
+    _themeCombobox = new QComboBox;
+    _loadingIndicator = new LoadingIndicator;
+    _layItVertButton = new QToolButton;
+    _layItHorzButton = new QToolButton;
+    _layItGridButton = new QToolButton;
+    _breakLayoutButton = new QToolButton;
+    _errorChecker = new QTimer(this);
 
     setFrameShape(QFrame::StyledPanel);
     setFrameShadow(QFrame::Plain);
@@ -549,7 +582,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
 
     _outputWidget->setSplitter(_splitter);
     _outputWidget->setSplitterHandle(_splitter->handle(4));
-    connect(_splitter, SIGNAL(_splitterMoved(int,int)),
+    connect(_splitter, SIGNAL(splitterMoved(int,int)),
             _outputWidget, SLOT(updateLastHeight()));
     _qmlEditorView->setSizePolicy(QSizePolicy::Expanding,
                                   QSizePolicy::Expanding);
@@ -782,11 +815,11 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
 
     SaveTransaction::instance();
     connect((IssuesBox*)_outputWidget->box(Issues), SIGNAL(entryDoubleClicked(Control*)),
-            this, SLOT(controlDoubleClick(Control*)));
+            this, SLOT(handleControlDoubleClick(Control*)));
     connect(cW, SIGNAL(doubleClicked(Control*)),
-            this, SLOT(controlDoubleClick(Control*)));
+            this, SLOT(handleControlDoubleClick(Control*)));
     connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
-            this, SLOT(controlDropped(Control*,QPointF,QString)));
+            this, SLOT(handleControlDrop(Control*,QPointF,QString)));
     connect(cW, SIGNAL(skinChanged(Form*)), this,
             SLOT(updateSkin()));
     connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
@@ -796,7 +829,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
 
 
     connect(this, SIGNAL(modeChanged()), this, SLOT(handleModeChange()));
-    _handleModeChange();
+    handleModeChange();
     ((IssuesBox*)_outputWidget->box(Issues))->setCurrentMode(_mode);
 }
 
@@ -817,7 +850,7 @@ ControlScene* DesignerWidget::currentScene()
     return _currentScene;
 }
 
-ControlScene* DesignerWidget::_controlScene()
+ControlScene* DesignerWidget::controlScene()
 {
     return _controlScene;
 }
@@ -933,5 +966,3 @@ void DesignerWidget::handleControlDrop(Control* control, const QPointF& pos, con
     newControl->setSelected(true);
     newControl->refresh();
 }
-
-#include "designerwidget.moc"
