@@ -299,79 +299,6 @@ void DesignerWidget::handleWGuiModeButtonClick()
 {
     setMode(FormGui);
 }
-void DesignerWidget::handlePlayButtonClick()
-{
-    ExecError error = SaveBackend::execProject();
-
-    QMessageBox box;
-    box.setText("<b>Some went wrong.</b>");
-    box.setStandardButtons(QMessageBox::Ok);
-    box.setDefaultButton(QMessageBox::Ok);
-    box.setIcon(QMessageBox::Warning);
-    switch (error.type) {
-        case CommonError:
-            box.setInformativeText("Database corrupted, change your application skin. "
-                                   "If it doesn't work, contact to support for further help.");
-            box.exec();
-            break;
-
-        case ChildIsWindowError:
-            box.setInformativeText("Child controls can not be a 'Window' (or derived) type."
-                                   " Only forms could be 'Window' type.");
-            box.exec();
-            break;
-
-        case MasterIsNonGui:
-            box.setInformativeText("Master controls can not be a non-ui control (such as Timer or QtObject).");
-            box.exec();
-            break;
-
-        case FormIsNonGui:
-            box.setInformativeText("Forms can not be a non-ui control (such as Timer or QtObject)."
-                                   "Check your forms and make sure they are some 'Window' or 'Item' derived type.");
-            box.exec();
-            break;
-
-        case MainFormIsntWindowError:
-            box.setInformativeText("Main form has to be a 'Window' derived type. "
-                                   "Please change its type to a 'Window' derived class.");
-            box.exec();
-            break;
-
-        case MultipleWindowsForMobileError:
-            box.setInformativeText("Mobile applications can not contain multiple windows. "
-                                   "Please either change the type of secondary windows' type to a non 'Window' derived class, "
-                                   "or change your application skin to something else (Desktop for instance) by changing the skin of main form.");
-            box.exec();
-            break;
-
-        case NoMainForm:
-            box.setInformativeText("There is no main application window. Probably database has corrupted, "
-                                   "please contact to support, or start a new project over.");
-            box.exec();
-            break;
-
-        case CodeError: {
-            box.setInformativeText(QString("Following control has some errors: <b>%1</b>").
-                                   arg(error.id));
-            QString detailedText;
-            for (auto err : error.errors)
-                detailedText += QString("Line %1, column %2: %3").
-                                arg(err.line()).arg(err.column()).arg(err.description());
-            box.setDetailedText(detailedText);
-            box.exec();
-            break;
-        }
-
-        default:
-            break;
-    }
-}
-
-void DesignerWidget::handleBuildButtonClick()
-{
-    WindowManager::instance()->show(WindowManager::Builds);
-}
 
 void DesignerWidget::handleModeChange()
 {
@@ -519,8 +446,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _editorModeButton = new QToolButton;
     _wGuiModeButton = new QToolButton;
     _cGuiModeButton = new QToolButton;
-    _playButton = new QToolButton;
-    _buildButton = new QToolButton;
     _vlayout = new QVBoxLayout;
     _splitter = new QSplitter;
     _formScene = new FormScene;
@@ -702,7 +627,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _layItHorzButton->setIcon(QIcon(":/resources/images/hort.png"));
     _layItGridButton->setIcon(QIcon(":/resources/images/grid.png"));
     _breakLayoutButton->setIcon(QIcon(":/resources/images/break.png"));
-    _loadingIndicator->setImage(QImage(":/resources/images/refresh.png"));
+    _loadingIndicator->setImage(QImage(":/resources/images/loading.png"));
     _loadingIndicator->setRunning(false);
 
     connect(_snappingButton, SIGNAL(toggled(bool)),
@@ -756,10 +681,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _toolbar->addWidget(_breakLayoutButton);
 
     // _toolbar2 settings
-    QWidget* spacer_2 = new QWidget;
-    spacer_2->setSizePolicy(QSizePolicy::Preferred,
-                            QSizePolicy::Expanding);
-
     _editorModeButton->setCheckable(true);
     _wGuiModeButton->setCheckable(true);
     _cGuiModeButton->setCheckable(true);
@@ -769,20 +690,14 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _editorModeButton->setCursor(Qt::PointingHandCursor);
     _wGuiModeButton->setCursor(Qt::PointingHandCursor);
     _cGuiModeButton->setCursor(Qt::PointingHandCursor);
-    _playButton->setCursor(Qt::PointingHandCursor);
-    _buildButton->setCursor(Qt::PointingHandCursor);
 
     _editorModeButton->setToolTip("Switch to Qml Editor.");
     _cGuiModeButton->setToolTip("Switch to Tool Editor.");
     _wGuiModeButton->setToolTip("Switch to Form Editor.");
-    _playButton->setToolTip("Run project.");
-    _buildButton->setToolTip("Get builds.");
 
     _editorModeButton->setIcon(QIcon(":/resources/images/text.png"));
     _cGuiModeButton->setIcon(QIcon(":/resources/images/gui.png"));
     _wGuiModeButton->setIcon(QIcon(":/resources/images/form.png"));
-    _playButton->setIcon(QIcon(":/resources/images/play.png"));
-    _buildButton->setIcon(QIcon(":/resources/images/build.png"));
 
     connect(_editorModeButton, SIGNAL(clicked(bool)),
             SLOT(handleEditorModeButtonClick()));
@@ -790,10 +705,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
             SLOT(handleCGuiModeButtonClick()));
     connect(_wGuiModeButton, SIGNAL(clicked(bool)),
             SLOT(handleWGuiModeButtonClick()));
-    connect(_playButton, SIGNAL(clicked(bool)),
-            SLOT(handlePlayButtonClick()));
-    connect(_buildButton, SIGNAL(clicked(bool)),
-            SLOT(handleBuildButtonClick()));
 
     _toolbar2->setSizePolicy(QSizePolicy::Preferred,
                              QSizePolicy::Expanding);
@@ -804,9 +715,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _toolbar2->addWidget(_wGuiModeButton);
     _toolbar2->addWidget(_cGuiModeButton);
     _toolbar2->addWidget(_editorModeButton);
-    _toolbar2->addWidget(spacer_2);
-    _toolbar2->addWidget(_playButton);
-    _toolbar2->addWidget(_buildButton);
 
     _errorChecker->setInterval(INTERVAL_ERROR_CHECK);
     connect(_errorChecker, SIGNAL(timeout()),

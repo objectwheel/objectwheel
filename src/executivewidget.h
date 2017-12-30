@@ -19,7 +19,7 @@ class ExecutiveWidget : public QWidget
         void setWindow(QQuickWindow* window);
 
     public slots:
-        void handleExitButtonClick();
+        void stop();
 
     protected:
         void paintEvent(QPaintEvent *event) override;

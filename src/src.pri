@@ -66,7 +66,8 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/toolsbackend.h \
     $$PWD/userbackend.h \
     $$PWD/previewbackend.h \
-    $$PWD/frontend.h
+    $$PWD/frontend.h \
+    $$PWD/loadingbar.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -129,7 +130,8 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/projectbackend.cpp \
     $$PWD/toolsbackend.cpp \
     $$PWD/userbackend.cpp \
-    $$PWD/previewbackend.cpp
+    $$PWD/previewbackend.cpp \
+    $$PWD/loadingbar.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

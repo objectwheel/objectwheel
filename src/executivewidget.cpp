@@ -30,8 +30,8 @@ ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     _exitButton.setRadius(fit::fx(9));
     _exitButton.setIconSize(QSize(fit::fx(17),fit::fx(17)));
     _exitButton.setIcon(QIcon(":/resources/images/down-arrow.png"));
-    connect(&_exitButton, SIGNAL(clicked(bool)), SLOT(handleExitButtonClick()));
-    connect(qApp, SIGNAL(aboutToQuit()), SLOT(handleExitButtonClick()));
+    connect(&_exitButton, SIGNAL(clicked(bool)), SLOT(stop()));
+    connect(qApp, SIGNAL(aboutToQuit()), SLOT(stop()));
 }
 
 Skin ExecutiveWidget::skin() const
@@ -74,7 +74,7 @@ void ExecutiveWidget::setWindow(QQuickWindow* window)
     }
 }
 
-void ExecutiveWidget::handleExitButtonClick()
+void ExecutiveWidget::stop()
 {
     hide();
     if (_contentItem)

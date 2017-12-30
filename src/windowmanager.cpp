@@ -6,7 +6,9 @@
 #include <buildswindow.h>
 #include <preferenceswindow.h>
 #include <toolboxsettingswindow.h>
+#include <fit.h>
 
+#include <QStyle>
 #include <QScreen>
 #include <QApplication>
 #define pS (QApplication::primaryScreen())

@@ -63,8 +63,6 @@ class DesignerWidget : public QFrame
         void handleEditorModeButtonClick();
         void handleCGuiModeButtonClick();
         void handleWGuiModeButtonClick();
-        void handlePlayButtonClick();
-        void handleBuildButtonClick();
 
     private:
         void scaleScene(qreal ratio);

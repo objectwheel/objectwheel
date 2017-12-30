@@ -34,9 +34,11 @@ class SaveBackendPrivate;
 class Control;
 class Form;
 class ControlScene;
+class ExecutiveWidget;
 
 enum ExecErrorType {
     NoError,
+    Stopped,
     CommonError,
     ChildIsWindowError,
     MasterIsNonGui,
@@ -63,7 +65,7 @@ class SaveBackend : public QObject
         explicit SaveBackend(QObject *parent = 0);
         static SaveBackend* instance();
 
-        static ExecError execProject();
+        static ExecError execProject(const bool* stopper, ExecutiveWidget* executiveWidget);
         static void exposeProject();
         static Control* exposeControl(const QString& rootPath, const DesignMode& mode, QString suid = QString());
         static bool initProject(const QString& projectDirectory);
@@ -104,6 +106,10 @@ class SaveBackend : public QObject
         static bool parserWorking();
 
     signals:
+        void busyLoader(int progress, const QString& text);
+        void doneLoader(const QString& text);
+        void busyExecuter(int progress, const QString& text);
+        void doneExecuter(const QString& text);
         void parserRunningChanged(bool running);
         void databaseChanged();
         void projectExposed();

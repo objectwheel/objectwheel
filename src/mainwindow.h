@@ -1,23 +1,18 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtWidgets>
+#include <QMainWindow>
 
-#include <windowmanager.h>
-#include <flatbutton.h>
-#include <toolboxtree.h>
-#include <propertiespane.h>
-#include <aboutwindow.h>
-#include <formspane.h>
-#include <fit.h>
-#include <filemanager.h>
-#include <mainwindow.h>
-#include <projectswidget.h>
-#include <designerwidget.h>
-#include <toolboxpane.h>
-#include <progresswidget.h>
-#include <inspectorpane.h>
-#include <preferenceswindow.h>
+class QToolBar;
+class FormsPane;
+class LoadingBar;
+class FlatButton;
+class QDockWidget;
+class ToolboxPane;
+class InspectorPane;
+class DesignerWidget;
+class PropertiesPane;
+class ExecutiveWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -29,6 +24,9 @@ class MainWindow : public QMainWindow
 
     private slots:
         void cleanupObjectwheel();
+        void handleRunButtonClick();
+        void handleStopButtonClick();
+        void handleBuildsButtonClick();
 
     signals:
         void done();
@@ -44,6 +42,12 @@ class MainWindow : public QMainWindow
         PropertiesPane* _propertiesPane;
         FormsPane* _formsPane;
         InspectorPane* _inspectorPage;
+        LoadingBar* _loadingBar;
+        FlatButton* _runButton;
+        FlatButton* _stopButton;
+        FlatButton* _buildsButton;
+        ExecutiveWidget* _executiveWidget;
+
 };
 
 #endif // MAINWINDOW_H

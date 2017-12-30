@@ -76,7 +76,7 @@ void ProjectsWidget::handleNewButtonClicked()
     if (UserBackend::instance()->dir().isEmpty()) return;
     auto projects = ProjectBackend::instance()->projects();
 	int count = 1;
-	QString projectName = "New Project-1";
+    QString projectName = "Project - 1";
 	while (projects.contains(projectName)) {
 		count++;
 		projectName.remove(projectName.size() - 1, 1);

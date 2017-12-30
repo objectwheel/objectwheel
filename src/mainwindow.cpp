@@ -17,13 +17,31 @@
 #include <global.h>
 #include <outputwidget.h>
 #include <qmleditorview.h>
+#include <loadingbar.h>
+#include <designerwidget.h>
+#include <toolboxpane.h>
+#include <propertiespane.h>
+#include <formspane.h>
+#include <inspectorpane.h>
+#include <windowmanager.h>
+#include <executivewidget.h>
 
+#include <QSplitter>
+#include <QMessageBox>
+#include <QToolButton>
+#include <QDockWidget>
 #include <QtConcurrent>
 #include <QtNetwork>
+#include <QApplication>
+#include <QScreen>
 
 #if defined(Q_OS_MAC)
 #include <mactoolbar.h>
 #endif
+
+#define pS (QApplication::primaryScreen())
+
+static bool stopper = false;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -37,6 +55,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _propertiesPane = new PropertiesPane(this);
     _formsPane = new FormsPane(this);
     _inspectorPage = new InspectorPane(this);
+    _loadingBar = new LoadingBar;
+    _runButton = new FlatButton;
+    _stopButton = new FlatButton;
+    _buildsButton = new FlatButton;
+    _executiveWidget = nullptr;
 
     QPalette p(palette());
     p.setColor(backgroundRole(), "#E0E4E7");
@@ -46,52 +69,91 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setWindowTitle(APP_NAME);
     setPalette(p);
 
-    // Toolbar settings
-    QLabel* titleText = new QLabel;
-    titleText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    titleText->setText("Objectwheel Studio");
-    titleText->setAlignment(Qt::AlignCenter);
-    titleText->setStyleSheet("background: transparent; color:white;");
-    QFont f;
-    f.setWeight(QFont::Medium);
-    titleText->setFont(f);
-
     /* Add Title Bar */
     addToolBar(Qt::TopToolBarArea, _titleBar);
     _titleBar->setFixedHeight(fit::fx(38));
     _titleBar->setFloatable(false);
     _titleBar->setMovable(false);
-    _titleBar->addWidget(titleText);
     _titleBar->setStyleSheet(QString(
-    "QToolBar{border: none; background:qlineargradient(spread:pad, "
-    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}")
-    .arg(int(fit::fx(16))));
+    "QToolBar{border: none; spacing:5px; background:qlineargradient(spread:pad, "
+    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}"));
 
+    int lspace = 0, btnwidth = 48 / pS->devicePixelRatio();
     #if defined(Q_OS_MAC)
     auto macToolbar = new MacToolbar(this);
     _titleBar->setFixedHeight(macToolbar->toolbarHeight());
-
-    auto btn = new FlatButton;
-    btn->setIcon(QIcon("/users/omergoktas/desktop/test.png"));
-    btn->setFixedSize(fit::fx(QSizeF{38, 23}).toSize());
-    btn->setIconButton(true);
-    connect(btn, &QPushButton::clicked, [=]{
-    });
-
-    auto btn2 = new FlatButton;
-    btn2->setIcon(QIcon("/users/omergoktas/desktop/btnstop.png"));
-    btn2->setFixedSize(fit::fx(QSizeF{38, 23}).toSize());
-    btn2->setIconButton(true);
-    connect(btn2, &QPushButton::clicked, [=]{
-    });
-
-    auto spc = new QWidget;
-    spc->setFixedWidth(fit::fx(72));
-    _titleBar->insertWidget(_titleBar->actions().first(), btn2);
-    _titleBar->insertWidget(_titleBar->actions().first(), btn);
-    _titleBar->insertWidget(_titleBar->actions().first(), spc);
+    lspace = fit::fx(72);
     #endif
 
+    _runButton->setCursor(Qt::PointingHandCursor);
+    _runButton->setToolTip("Run");
+    _runButton->setIcon(QIcon(":/resources/images/run.png"));
+    _runButton->setFixedSize(QSize(76, 48) / pS->devicePixelRatio());
+    _runButton->setIconButton(true);
+    connect(_runButton, SIGNAL(clicked(bool)),
+        SLOT(handleRunButtonClick()));
+
+    _stopButton->setToolTip("Stop");
+    _stopButton->setDisabled(true);
+    _stopButton->setCursor(Qt::PointingHandCursor);
+    _stopButton->setIcon(QIcon(":/resources/images/stop.png"));
+    _stopButton->setFixedSize(QSize(76, 48) / pS->devicePixelRatio());
+    _stopButton->setIconButton(true);
+    connect(_stopButton, SIGNAL(clicked(bool)),
+        SLOT(handleStopButtonClick()));
+
+    _buildsButton->setToolTip("Get Cloud Build");
+    _buildsButton->setCursor(Qt::PointingHandCursor);
+    _buildsButton->setIcon(QIcon(":/resources/images/build.png"));
+    _buildsButton->setFixedSize(QSize(76, 48) / pS->devicePixelRatio());
+    _buildsButton->setIconButton(true);
+    connect(_buildsButton, SIGNAL(clicked(bool)),
+       SLOT(handleBuildsButtonClick()));
+
+    _loadingBar->setFixedSize(QSize(962, 48) / pS->devicePixelRatio());
+
+    auto spc = new QWidget;
+    spc->setFixedWidth(lspace);
+    auto spc2 = new QWidget;
+    spc2->setFixedWidth(0);
+    auto spc3 = new QWidget;
+    spc3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto spc4 = new QWidget;
+    spc4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto spc5 = new QWidget;
+    spc5->setFixedWidth(0);
+    auto spc6 = new QWidget;
+    spc6->setFixedWidth(5 + btnwidth + lspace); // lspace + 2*btnwidth + 3*5 = 2*5 + btnwidth + x
+
+    _titleBar->insertWidget(_titleBar->actions().first(), spc5);
+    _titleBar->insertWidget(_titleBar->actions().first(), _buildsButton);
+    _titleBar->insertWidget(_titleBar->actions().first(), spc6);
+    _titleBar->insertWidget(_titleBar->actions().first(), spc4);
+    _titleBar->insertWidget(_titleBar->actions().first(), _loadingBar);
+    _titleBar->insertWidget(_titleBar->actions().first(), spc3);
+    _titleBar->insertWidget(_titleBar->actions().first(), _stopButton);
+    _titleBar->insertWidget(_titleBar->actions().first(), spc2);
+    _titleBar->insertWidget(_titleBar->actions().first(), _runButton);
+    _titleBar->insertWidget(_titleBar->actions().first(), spc);
+
+//    QTimer* cct = new QTimer;
+//    connect(cct, &QTimer::timeout, [=] {
+//        static int i = 0;
+//        if (i == 0) {
+//            _loadingBar->busy(30, "Loading..");
+//        } else if (i == 1) {
+//            _loadingBar->busy(60, "Loading..2323...");
+//        } else if (i == 2) {
+//            _loadingBar->busy(80, "Loading..23232323..");
+//        } if (i == 3) {
+//            _loadingBar->error("Kraal. Bitti.");
+//        }
+//        i++;
+//    });
+//    QTimer::singleShot(5000, [=]{cct->start(2000);});
+
+    QFont f;
+    f.setWeight(QFont::Medium);
     /*** PROPERTIES DOCK WIDGET ***/
     QLabel* label = new QLabel;
     label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -232,6 +294,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         _inspectorDockwidget->setFloating(!_inspectorDockwidget->isFloating());
     });
 
+    _loadingBar->setText(ProjectBackend::instance()->name() + ": <b>Ready</b>  |  Welcome to Objectwheel");
+    connect(ProjectBackend::instance(), &ProjectBackend::started, [=] {
+        _loadingBar->setText(ProjectBackend::instance()->name() + ": <b>Ready</b>  |  Welcome to Objectwheel");
+    });
+
+    connect(SaveBackend::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString)));
+    connect(SaveBackend::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString)));
+
     QToolBar* toolbar4 = new QToolBar;
     toolbar4->addWidget(label4);
     toolbar4->addWidget(pinButton4);
@@ -240,9 +310,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolbar4->setFixedHeight(fit::fx(22.8));
 
     connect(_inspectorPage, SIGNAL(controlClicked(Control*)),
-      _designerWidget, SLOT(controlClicked(Control*)));
+      _designerWidget, SLOT(handleControlClick(Control*)));
     connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)),
-      _designerWidget, SLOT(controlDoubleClicked(Control*)));
+      _designerWidget, SLOT(handleControlDoubleClick(Control*)));
 
     _inspectorDockwidget->setTitleBarWidget(toolbar4);
     _inspectorDockwidget->setWidget(_inspectorPage);
@@ -270,6 +340,112 @@ void MainWindow::cleanupObjectwheel()
     UserBackend::instance()->stop();
 
     qApp->processEvents();
+}
+
+void MainWindow::handleStopButtonClick()
+{
+    stopper = true;
+    if (_executiveWidget) {
+        _executiveWidget->stop();
+        _loadingBar->busy(0, ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
+    }
+}
+
+void MainWindow::handleRunButtonClick()
+{
+    if (_executiveWidget)
+        handleStopButtonClick();
+
+    _stopButton->setEnabled(true);
+    _stopButton->setEnabled(true);
+    stopper = false;
+    _executiveWidget = new ExecutiveWidget;
+    ExecError error = SaveBackend::execProject(&stopper, _executiveWidget);
+
+    QMessageBox box;
+    box.setText("<b>Some went wrong.</b>");
+    box.setStandardButtons(QMessageBox::Ok);
+    box.setDefaultButton(QMessageBox::Ok);
+    box.setIcon(QMessageBox::Warning);
+    switch (error.type) {
+        case CommonError:
+            box.setInformativeText("Database corrupted, change your application skin. "
+                                   "If it doesn't work, contact to support for further help.");
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+
+        case ChildIsWindowError:
+            box.setInformativeText("Child controls can not be a 'Window' (or derived) type."
+                                   " Only forms could be 'Window' type.");
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+
+        case MasterIsNonGui:
+            box.setInformativeText("Master controls can not be a non-ui control (such as Timer or QtObject).");
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+
+        case FormIsNonGui:
+            box.setInformativeText("Forms can not be a non-ui control (such as Timer or QtObject)."
+                                   "Check your forms and make sure they are some 'Window' or 'Item' derived type.");
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+
+        case MainFormIsntWindowError:
+            box.setInformativeText("Main form has to be a 'Window' derived type. "
+                                   "Please change its type to a 'Window' derived class.");
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+
+        case MultipleWindowsForMobileError:
+            box.setInformativeText("Mobile applications can not contain multiple windows. "
+                                   "Please either change the type of secondary windows' type to a non 'Window' derived class, "
+                                   "or change your application skin to something else (Desktop for instance) by changing the skin of main form.");
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+
+        case NoMainForm:
+            box.setInformativeText("There is no main application window. Probably database has corrupted, "
+                                   "please contact to support, or start a new project over.");
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+
+        case CodeError: {
+            box.setInformativeText(QString("Following control has some errors: <b>%1</b>").
+                                   arg(error.id));
+            QString detailedText;
+            for (auto err : error.errors)
+                detailedText += QString("Line %1, column %2: %3").
+                                arg(err.line()).arg(err.column()).arg(err.description());
+            box.setDetailedText(detailedText);
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+            box.exec();
+            break;
+        }
+
+        case Stopped: {
+            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
+        }
+
+        default:
+            break;
+    }
+
+    delete _executiveWidget;
+    _executiveWidget = nullptr;
+    _stopButton->setDisabled(true);
+}
+
+void MainWindow::handleBuildsButtonClick()
+{
+    WindowManager::instance()->show(WindowManager::Builds);
 }
 
 //void MainWindow::setupManagers()

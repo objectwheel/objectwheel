@@ -26,6 +26,7 @@
 #include <QQmlComponent>
 #include <QQuickView>
 #include <QScreen>
+#include <QTime>
 
 #define pS (qApp->primaryScreen())
 
@@ -151,7 +152,6 @@ class SaveBackendPrivate : public QObject
     public:
         SaveBackend* parent = nullptr;
         ParserController parserController;
-        ExecutiveWidget executiveWidget;
 };
 
 SaveBackendPrivate::SaveBackendPrivate(SaveBackend* parent)
@@ -673,7 +673,7 @@ QStringList SaveBackend::masterPaths(const QString& topPath)
 
 //FIXME: Change the name of default context property 'dpi' everywhere
 //WARNING: Update error messages
-ExecError SaveBackend::execProject()
+ExecError SaveBackend::execProject(const bool* stopper, ExecutiveWidget* executiveWidget)
 {
     ExecError error;
     Skin mainSkin = Skin::Invalid;
@@ -694,12 +694,16 @@ ExecError SaveBackend::execProject()
     QMap<QString, QQmlContext*> formContexes;
     auto engine = new QQmlEngine(_d->parent);
 
+    emit instance()->busyExecuter(5, ProjectBackend::instance()->name() + ": Building  |  Building in progress...");
+
     engine->rootContext()->setContextProperty("dpi", fit::ratio());
     engine->setOutputWarningsToStandardError(false);
 
     // Spin for forms (top level masters)
-    for (auto formPath : formPaths()) {
-        auto _masterPaths = masterPaths(formPath);
+    qreal j = 0;
+    const auto& fpaths = formPaths();
+    for (auto formPath : fpaths) {
+        const auto& _masterPaths = masterPaths(formPath);
 
         // Spin for masters inside the form (form itself included)
         QMap<QString, QObject*> masterResults;
@@ -708,8 +712,10 @@ ExecError SaveBackend::execProject()
             auto masterContext = new QQmlContext(engine, engine);
 
             //! Spin for child items of the master
+            qreal i = 1;
             QMap<QString, QObject*> childResults;
-            for (auto childPath : childrenPaths(masterPath)) {
+            const auto& pths = childrenPaths(masterPath);
+            for (auto childPath : pths) {
                 int index = _masterPaths.indexOf(childPath);
                 if (index >= 0) {
                     childResults[childPath] = masterResults[childPath];
@@ -728,7 +734,18 @@ ExecError SaveBackend::execProject()
                 }
                 masterContext->setContextProperty(id(childPath),
                   childResults[childPath]);
+
+                emit instance()->busyExecuter((100.0 * (j / fpaths.size()))   +   (((100.0 / fpaths.size())) / pths.size()) * i,
+                ProjectBackend::instance()->name() + ": Building " + id(formPath) + QString("  |  Building %1 of %2 controls...").arg(i).arg(pths.size()));
+
+                if (*stopper) {
+                    engine->deleteLater();
+                    error.type = Stopped;
+                    return error;
+                }
+
                 qApp->processEvents(QEventLoop::AllEvents, 10);
+                i++;
             }
 
             //! Make form invisible, if it's a window type
@@ -821,6 +838,7 @@ ExecError SaveBackend::execProject()
                 qApp->processEvents(QEventLoop::AllEvents, 10);
             }
         }
+        j++;
     }
 
     if (mainWindow == nullptr) {
@@ -836,18 +854,26 @@ ExecError SaveBackend::execProject()
         }
     }
 
+    emit instance()->doneExecuter(ProjectBackend::instance()->name() + ": <b>Succeeded</b>  |  Finished at " + QTime::currentTime().toString());
     qApp->processEvents(QEventLoop::AllEvents, 10);
+
+    if (*stopper) {
+        engine->deleteLater();
+        error.type = Stopped;
+        return error;
+    }
 
 //    for (auto comp : components) // BUG: QTBUG-47633
 //        comp->completeCreate();
 
+
     QEventLoop loop;
     if (mainSkin == Skin::PhonePortrait ||
         mainSkin == Skin::PhoneLandscape) {
-        _d->executiveWidget.setSkin(mainSkin);
-        _d->executiveWidget.setWindow(mainWindow);
-        _d->executiveWidget.show();
-        connect(&_d->executiveWidget, SIGNAL(done()),
+        executiveWidget->setSkin(mainSkin);
+        executiveWidget->setWindow(mainWindow);
+        executiveWidget->show();
+        connect(executiveWidget, SIGNAL(done()),
           &loop, SLOT(quit()));
     } else {
         connect(qApp, SIGNAL(aboutToQuit()),
@@ -878,7 +904,10 @@ void SaveBackend::exposeProject()
         qApp->processEvents(QEventLoop::AllEvents, 10);
         QMap<QString, Control*> pmap;
         pmap[path] = form;
-        for (auto child : childrenPaths(path)) {
+
+        int i = 1;
+        const auto& pths = childrenPaths(path);
+        for (auto child : pths) {
             auto pcontrol = pmap.value(dname(dname(child)));
             auto control = new Control(child + separator() +
               DIR_THIS + separator() + "main.qml", FormGui);
@@ -887,9 +916,11 @@ void SaveBackend::exposeProject()
 
             pmap[child] = control;
             qApp->processEvents(QEventLoop::AllEvents, 10);
+            i++;
         }
     }
 
+    emit instance()->doneLoader(ProjectBackend::instance()->name() + ": <b>Succeeded</b>  |  Finished at " + QTime::currentTime().toString());
     emit instance()->projectExposed();
 }
 

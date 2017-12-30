@@ -151,7 +151,10 @@ void FlatButton::paintEvent(QPaintEvent* e)
 			for (int j = 0; j < image.height(); j++) {
 				if (isDown() || isChecked()) {
 					image.setPixelColor(i, j, image.pixelColor(i, j).darker(150));
-				} else {
+                } else if (!isEnabled()) {
+                    auto g = qGray(image.pixelColor(i, j).rgb());
+                    image.setPixelColor(i, j, QColor(g, g, g, image.pixelColor(i, j).alpha()));
+                } else {
 					image.setPixel(i, j, image.pixel(i, j));
 				}
 			}
