@@ -12,6 +12,7 @@
 #include <frontend.h>
 #include <controlscene.h>
 #include <formscene.h>
+#include <mainwindow.h>
 #include <QtWidgets>
 
 //!
@@ -1021,7 +1022,7 @@ QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModel
 //! *********************** [PropertiesPane] ***********************
 //!
 
-PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
+PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _treeWidget = new QTreeWidget;
@@ -1069,11 +1070,11 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(dW->formScene(), SIGNAL(selectionChanged()),
+    connect(parent->designerWidget()->formScene(), SIGNAL(selectionChanged()),
             SLOT(handleSelectionChange()));
-    connect(dW->controlScene(), SIGNAL(selectionChanged()),
+    connect(parent->designerWidget()->controlScene(), SIGNAL(selectionChanged()),
             SLOT(handleSelectionChange()));
-    connect(dW, SIGNAL(modeChanged()),
+    connect(parent->designerWidget(), SIGNAL(modeChanged()),
             SLOT(handleSelectionChange()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
             SLOT(handleSelectionChange()));

@@ -7,13 +7,14 @@ class FlatButton;
 class QVBoxLayout;
 class QHBoxLayout;
 class QListWidget;
+class MainWindow;
 
 class FormsPane : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit FormsPane(QWidget* parent = nullptr);
+        explicit FormsPane(MainWindow* parent);
         void setCurrentForm(int index);
 
     protected:

@@ -10,6 +10,7 @@
 #include <frontend.h>
 #include <controlscene.h>
 #include <formscene.h>
+#include <mainwindow.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -105,7 +106,7 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
 //! *********************** [InspectorPane] ***********************
 //!
 
-InspectorPane::InspectorPane(QWidget* parent)
+InspectorPane::InspectorPane(MainWindow* parent)
     : QWidget(parent)
     , _blockRefresh(false)
 {
@@ -154,11 +155,11 @@ InspectorPane::InspectorPane(QWidget* parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(dW->formScene(), SIGNAL(selectionChanged()),
+    connect(parent->designerWidget()->formScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(dW->controlScene(), SIGNAL(selectionChanged()),
+    connect(parent->designerWidget()->controlScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(dW, SIGNAL(modeChanged()),
+    connect(parent->designerWidget(), SIGNAL(modeChanged()),
       SLOT(refresh()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
       SLOT(refresh()));

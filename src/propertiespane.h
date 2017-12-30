@@ -6,13 +6,14 @@
 class QVBoxLayout;
 class QTreeWidget;
 class FilterLineEdit;
+class MainWindow;
 
 class PropertiesPane : public QWidget
 {
 		Q_OBJECT
 
 	public:
-        explicit PropertiesPane(QWidget* parent = nullptr);
+        explicit PropertiesPane(MainWindow* parent);
 
 	public slots:
         void clearList();

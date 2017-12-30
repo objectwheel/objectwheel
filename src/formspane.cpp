@@ -9,6 +9,7 @@
 #include <fit.h>
 #include <delayer.h>
 #include <frontend.h>
+#include <mainwindow.h>
 
 #include <QStandardPaths>
 #include <QVBoxLayout>
@@ -17,7 +18,7 @@
 #include <QListWidget>
 #include <QScrollBar>
 
-FormsPane::FormsPane(QWidget *parent) : QWidget(parent)
+FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout;
     _listWidget = new QListWidget;

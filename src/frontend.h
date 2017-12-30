@@ -6,7 +6,7 @@
 #include <designerwidget.h>
 
 #define wM (WindowManager::instance())
-#define mW ((MainWindow*)wM->window(WindowManager::Main))
+#define mW ((MainWindow*)wM->get(WindowManager::Main))
 #define dW ((DesignerWidget*)mW->designerWidget())
 
 #endif // FRONTEND_H

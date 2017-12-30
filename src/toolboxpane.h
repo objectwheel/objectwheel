@@ -7,13 +7,14 @@ class QVBoxLayout;
 class ToolboxTree;
 class FilterLineEdit;
 class QTreeWidgetItem;
+class MainWindow;
 
 class ToolboxPane : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit ToolboxPane(QWidget* parent = nullptr);
+        explicit ToolboxPane(MainWindow* parent);
         ToolboxTree* toolboxTree();
 
     protected:

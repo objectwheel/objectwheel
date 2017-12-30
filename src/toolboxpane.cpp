@@ -7,6 +7,7 @@
 #include <filterlineedit.h>
 #include <zipper.h>
 #include <fit.h>
+#include <mainwindow.h>
 
 #include <QApplication>
 #include <QTreeWidget>
@@ -14,7 +15,7 @@
 
 #define DURATION 500
 
-ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
+ToolboxPane::ToolboxPane(MainWindow* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _searchEdit = new FilterLineEdit;

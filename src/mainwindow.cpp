@@ -27,22 +27,21 @@
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
-    _settleWidget = new QFrame;
     _titleBar = new QToolBar;
     _toolboxDockwidget = new QDockWidget;
     _propertiesDockwidget = new QDockWidget;
     _formsDockwidget = new QDockWidget;
     _inspectorDockwidget = new QDockWidget;
     _designerWidget = new DesignerWidget;
-    _toolboxPane = new ToolboxPane;
-    _propertiesPane = new PropertiesPane;
-    _formsPane = new FormsPane;
-    _inspectorPage = new InspectorPane;
+    _toolboxPane = new ToolboxPane(this);
+    _propertiesPane = new PropertiesPane(this);
+    _formsPane = new FormsPane(this);
+    _inspectorPage = new InspectorPane(this);
 
     QPalette p(palette());
     p.setColor(backgroundRole(), "#E0E4E7");
     setStyleSheet("QMainWindow::separator{height: 0px;}");
-    setCentralWidget(_settleWidget);
+    setCentralWidget(_designerWidget);
     setAutoFillBackground(true);
     setWindowTitle(APP_NAME);
     setPalette(p);

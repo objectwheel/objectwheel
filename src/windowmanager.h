@@ -30,7 +30,7 @@ class WindowManager : public QObject
 
     public:
         static WindowManager* instance();
-        QWidget* window(Windows screen);
+        QWidget* get(Windows key);
 
     public slots:
         void hide(Windows key);

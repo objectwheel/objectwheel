@@ -34,7 +34,6 @@ class MainWindow : public QMainWindow
         void done();
 
     private:
-        QFrame* _settleWidget;
         QToolBar* _titleBar;
         QDockWidget* _toolboxDockwidget;
         QDockWidget* _propertiesDockwidget;

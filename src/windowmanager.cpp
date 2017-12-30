@@ -11,61 +11,22 @@
 #include <QApplication>
 #define pS (QApplication::primaryScreen())
 
-WindowManager::WindowManager()
+WindowManager::WindowManager() : QObject()
+  , _progressWidget(new ProgressWidget)
+  , _mainWindow(nullptr)
+  , _welcomeWindow(nullptr)
+  , _aboutWindow(nullptr)
+  , _buildsWindow(nullptr)
+  , _preferencesWindow(nullptr)
+  , _toolboxSettingsWindow(nullptr)
 {
-    _progressWidget = new ProgressWidget;
-    _mainWindow = new MainWindow;
-    _aboutWindow = new AboutWindow;
-    _welcomeWindow = new WelcomeWindow;
-    _buildsWindow = new BuildsWindow;
-    _preferencesWindow = new PreferencesWindow;
-    _toolboxSettingsWindow = new ToolboxSettingsWindow;
-
-    add(Main, _mainWindow);
-    add(About, _aboutWindow);
-    add(Welcome, _welcomeWindow);
-    add(Builds, _buildsWindow);
-    add(Preferences, _preferencesWindow);
-    add(ToolboxSettings, _toolboxSettingsWindow);
-
-    _mainWindow->resize(fit::fx(QSizeF{1620, 900}).toSize());
-    _aboutWindow->resize(fit::fx(QSizeF{700, 400}).toSize());
-    _welcomeWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
-    _buildsWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
-    _preferencesWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
-    _toolboxSettingsWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
-    _mainWindow->resize(fit::fx(QSizeF{1580, 900}).toSize());
-
-    connect(_welcomeWindow, SIGNAL(lazy()), _progressWidget, SLOT(hide()));
-    connect(_welcomeWindow, SIGNAL(busy(QString)), SLOT(busy(QString)));
-    connect(_mainWindow, SIGNAL(done()), SLOT(done()));
-    connect(_aboutWindow, SIGNAL(done()), SLOT(done()));
-    connect(_preferencesWindow, SIGNAL(done()), SLOT(done()));
-    connect(_toolboxSettingsWindow, SIGNAL(done()), SLOT(done()));
-    connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
-    connect(_welcomeWindow, &WelcomeWindow::done, this, [=] { show(Main); });
-
-    for (auto w : _windows) {
-        w->setGeometry(
-            QStyle::alignedRect(
-                Qt::LeftToRight,
-                Qt::AlignCenter,
-                w->size(),
-                pS->availableGeometry()
-            )
-        );
-    }
 }
 
 WindowManager::~WindowManager()
 {
     delete _progressWidget;
-    delete _mainWindow;
-    delete _aboutWindow;
-    delete _welcomeWindow;
-    delete _buildsWindow;
-    delete _preferencesWindow;
-    delete _toolboxSettingsWindow;
+    for (auto w : _windows)
+        delete w;
 }
 
 WindowManager* WindowManager::instance()
@@ -74,15 +35,91 @@ WindowManager* WindowManager::instance()
     return &instance;
 }
 
-QWidget* WindowManager::window(WindowManager::Windows screen)
-{
-    return _windows.value(screen);
+QWidget* WindowManager::get(WindowManager::Windows key)
+{    
+    QWidget* window;
+    if ((window = _windows.value(key)))
+        return window;
+
+    switch (key) {
+        case Main: {
+            _mainWindow = new MainWindow;
+            _mainWindow->resize(fit::fx(QSizeF{1580, 900}).toSize());
+            connect(_mainWindow, SIGNAL(done()), SLOT(done()));
+            add(Main, _mainWindow);
+            window = _mainWindow;
+            break;
+        }
+
+        case About: {
+            _aboutWindow = new AboutWindow;
+            _aboutWindow->resize(fit::fx(QSizeF{700, 400}).toSize());
+            connect(_aboutWindow, SIGNAL(done()), SLOT(done()));
+            add(About, _aboutWindow);
+            window = _aboutWindow;
+            break;
+        }
+
+        case Welcome: {
+            _welcomeWindow = new WelcomeWindow;
+            _welcomeWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
+            connect(_welcomeWindow, SIGNAL(lazy()), _progressWidget, SLOT(hide()));
+            connect(_welcomeWindow, SIGNAL(busy(QString)), SLOT(busy(QString)));
+            connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
+            connect(_welcomeWindow, &WelcomeWindow::done, this, [=] { show(Main); });
+            add(Welcome, _welcomeWindow);
+            window = _welcomeWindow;
+            break;
+        }
+
+        case Builds: {
+            _buildsWindow = new BuildsWindow;
+            _buildsWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
+            add(Builds, _buildsWindow);
+            window = _buildsWindow;
+            break;
+        }
+
+        case Preferences: {
+            _preferencesWindow = new PreferencesWindow;
+            _preferencesWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
+            connect(_preferencesWindow, SIGNAL(done()), SLOT(done()));
+            add(Preferences, _preferencesWindow);
+            window = _preferencesWindow;
+            break;
+        }
+
+        case ToolboxSettings: {
+            _toolboxSettingsWindow = new ToolboxSettingsWindow;
+            _toolboxSettingsWindow->resize(fit::fx(QSizeF{900, 550}).toSize());
+            connect(_toolboxSettingsWindow, SIGNAL(done()), SLOT(done()));
+            add(ToolboxSettings, _toolboxSettingsWindow);
+            window = _toolboxSettingsWindow;
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    if (window) {
+        window->setGeometry(
+            QStyle::alignedRect(
+                Qt::LeftToRight,
+                Qt::AlignCenter,
+                window->size(),
+                pS->availableGeometry()
+            )
+        );
+    }
+
+    return window;
 }
 
 void WindowManager::hide(WindowManager::Windows key)
 {
     QWidget* window;
-    if ((window = _windows.value(key)))
+    if ((window = get(key)))
         window->hide();
 }
 
@@ -93,7 +130,7 @@ void WindowManager::show(
     )
 {
     QWidget* window;
-    if ((window = _windows.value(key))) {
+    if ((window = get(key))) {
         window->setWindowState(state);
         window->setWindowModality(modality);
         window->show();
