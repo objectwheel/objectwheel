@@ -12,28 +12,27 @@
 #include <QSharedMemory>
 #include <QMessageBox>
 #include <QLoggingCategory>
-#include <QQuickStyle>
 #include <QSurfaceFormat>
 
 #define PIXEL_SIZE 13
-#define REF_DPI 72.0
+#define REF_DPI 149.0
 
 int main(int argc, char *argv[])
 {
-    // Initialize application
-    QApplication a(argc, argv);
-
-    // Application settings
-    QApplication::setOrganizationName(APP_CORP);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
-    QApplication::setApplicationName(APP_NAME);
-    QApplication::setApplicationDisplayName(APP_NAME);
-    QApplication::setApplicationVersion(APP_VER);
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
-
+    // Boot settings
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+    // Initialize application
+    QApplication a(argc, argv);
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationDisplayName(APP_NAME);
+    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
 
     // Multiple instances protection
     # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)

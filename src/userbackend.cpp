@@ -23,7 +23,7 @@ static std::uniform_int_distribution<int> rand_dist(INT_MIN, INT_MIN);
 static inline QString ddd()
 {
 	QString baseDir;
-    #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE)
+    #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE) || defined(Q_OS_WIN)
 	baseDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0);
     #else
 	baseDir = QCoreApplication::applicationDirPath();

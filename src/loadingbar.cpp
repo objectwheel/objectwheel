@@ -1,4 +1,5 @@
 #include <loadingbar.h>
+#include <fit.h>
 #include <QPainter>
 #include <QTextDocument>
 #include <QTimer>
@@ -7,10 +8,10 @@
 
 #define INTERVALF     60
 #define INTERVAL      2000
-#define HEIGHT_LINE   (4.0 / pS->devicePixelRatio())
+#define HEIGHT_LINE   (fit::fx(2.0))
 #define pS            (QApplication::primaryScreen())
 #define PATH_BAR      (":/resources/images/loadingbar.png")
-#define SIZE          (QSize(962, 48) / pS->devicePixelRatio())
+#define SIZE          (fit::fx(QSizeF{481, 24}))
 #define COLOR_DONE    ("#52B548")
 #define COLOR_ERROR   ("#b34b4e")
 #define COLOR_DEFAULT ("#444444")
@@ -30,12 +31,21 @@ LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
     _timerFader = new QTimer(this);
     _timerFader->setInterval(INTERVALF);
     connect(_timerFader, SIGNAL(timeout()), SLOT(handleFader()));
-    setFixedSize(SIZE);
+
+    _image.setDevicePixelRatio(pS->devicePixelRatio());
+    _image = _image.scaled(
+        (SIZE * pS->devicePixelRatio()).toSize(),
+        Qt::IgnoreAspectRatio,
+        Qt::SmoothTransformation
+    );
+
+    setFixedSize(SIZE.toSize() + QSize(1, 1));
 }
 
 void LoadingBar::setText(const QString& text)
 {
     _text = text;
+    _text.prepend(tr("<font color=\"") + COLOR_TEXT + "\">");
 }
 
 void LoadingBar::busy(int progress, const QString& text)
@@ -98,8 +108,8 @@ void LoadingBar::handleFader()
 void LoadingBar::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawImage(rect(), _image, _image.rect());
+    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    painter.drawImage(QRectF{QPointF(), SIZE}, _image, _image.rect());
 
     QFont f;
     f.setWeight(QFont::Medium);
@@ -107,13 +117,13 @@ void LoadingBar::paintEvent(QPaintEvent*)
 
     QTextDocument doc;
     doc.setDefaultFont(f);
-    doc.setHtml(_text.prepend(tr("<font color=\"") + COLOR_TEXT + "\">"));
-    doc.drawContents(&painter, rect());
+    doc.setHtml(_text);
+    doc.drawContents(&painter, QRectF{QPointF(), SIZE});
 
     QPainterPath path;
-    path.addRoundedRect(0.5, 0.5, 480, 22.5, 3.5, 3.5);
+    path.addRoundedRect(fit::fx(0.5), fit::fx(0.5), fit::fx(480.0), fit::fx(22.5), fit::fx(3.5), fit::fx(3.5));
     painter.setClipPath(path);
-    painter.fillRect(QRectF{0.5, 21.0, _progress * 4.8, HEIGHT_LINE}, _color);
+    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(21.0), _progress * fit::fx(4.8), HEIGHT_LINE}, _color);
 }
 
 

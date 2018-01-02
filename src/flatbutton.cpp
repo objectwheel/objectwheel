@@ -145,8 +145,8 @@ void FlatButton::paintEvent(QPaintEvent* e)
 {
 	if (m_IconButton) {
 		QPainter painter(this);
-		painter.setRenderHint(QPainter::Antialiasing);
-		QImage image = icon().pixmap(width(),height()).toImage();
+        painter.setRenderHint(QPainter::HighQualityAntialiasing);
+        QImage image = icon().pixmap(width(),height()).toImage();
 		for (int i = 0; i < image.width(); i++) {
 			for (int j = 0; j < image.height(); j++) {
 				if (isDown() || isChecked()) {
@@ -158,8 +158,8 @@ void FlatButton::paintEvent(QPaintEvent* e)
 					image.setPixel(i, j, image.pixel(i, j));
 				}
 			}
-		}
-		painter.drawImage(rect(), image);
+        }
+        painter.drawImage(rect(), image);
     } else {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);

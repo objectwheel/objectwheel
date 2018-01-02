@@ -26,6 +26,7 @@ class ExecutiveWidget : public QWidget
         void mousePressEvent(QMouseEvent *event) override;
         void mouseMoveEvent(QMouseEvent *event) override;
         void mouseReleaseEvent(QMouseEvent *event) override;
+        void closeEvent(QCloseEvent *event) override;
 
     signals:
         void done() const;

@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _titleBar->setFloatable(false);
     _titleBar->setMovable(false);
     _titleBar->setStyleSheet(QString(
-    "QToolBar{border: none; spacing:5px; background:qlineargradient(spread:pad, "
+    "QToolBar{border: none; spacing: 20px; background:qlineargradient(spread:pad, "
     "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}"));
 
     int lspace = 0, btnwidth = 48 / pS->devicePixelRatio();
@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _runButton->setCursor(Qt::PointingHandCursor);
     _runButton->setToolTip("Run");
     _runButton->setIcon(QIcon(":/resources/images/run.png"));
-    _runButton->setFixedSize(QSize(76, 48) / pS->devicePixelRatio());
+    _runButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
     _runButton->setIconButton(true);
     connect(_runButton, SIGNAL(clicked(bool)),
         SLOT(handleRunButtonClick()));
@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _stopButton->setDisabled(true);
     _stopButton->setCursor(Qt::PointingHandCursor);
     _stopButton->setIcon(QIcon(":/resources/images/stop.png"));
-    _stopButton->setFixedSize(QSize(76, 48) / pS->devicePixelRatio());
+    _stopButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
     _stopButton->setIconButton(true);
     connect(_stopButton, SIGNAL(clicked(bool)),
         SLOT(handleStopButtonClick()));
@@ -105,12 +105,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _buildsButton->setToolTip("Get Cloud Build");
     _buildsButton->setCursor(Qt::PointingHandCursor);
     _buildsButton->setIcon(QIcon(":/resources/images/build.png"));
-    _buildsButton->setFixedSize(QSize(76, 48) / pS->devicePixelRatio());
+    _buildsButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
     _buildsButton->setIconButton(true);
     connect(_buildsButton, SIGNAL(clicked(bool)),
        SLOT(handleBuildsButtonClick()));
 
-    _loadingBar->setFixedSize(QSize(962, 48) / pS->devicePixelRatio());
+    _loadingBar->setFixedSize(fit::fx(QSizeF(481, 24)).toSize());
 
     auto spc = new QWidget;
     spc->setFixedWidth(lspace);
@@ -125,7 +125,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto spc6 = new QWidget;
     spc6->setFixedWidth(5 + btnwidth + lspace); // lspace + 2*btnwidth + 3*5 = 2*5 + btnwidth + x
 
-    _titleBar->insertWidget(_titleBar->actions().first(), spc5);
+    _titleBar->addWidget(spc5);
     _titleBar->insertWidget(_titleBar->actions().first(), _buildsButton);
     _titleBar->insertWidget(_titleBar->actions().first(), spc6);
     _titleBar->insertWidget(_titleBar->actions().first(), spc4);

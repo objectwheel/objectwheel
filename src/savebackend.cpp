@@ -866,10 +866,10 @@ ExecError SaveBackend::execProject(const bool* stopper, ExecutiveWidget* executi
 //    for (auto comp : components) // BUG: QTBUG-47633
 //        comp->completeCreate();
 
-
     QEventLoop loop;
     if (mainSkin == Skin::PhonePortrait ||
         mainSkin == Skin::PhoneLandscape) {
+        mainWindow->show();
         executiveWidget->setSkin(mainSkin);
         executiveWidget->setWindow(mainWindow);
         executiveWidget->show();

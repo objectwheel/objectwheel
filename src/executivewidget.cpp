@@ -13,7 +13,9 @@ ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     , _x(0), _y(0)
     , _pressed(false)
 {
+    #if !defined(Q_OS_WIN)
     setWindowFlags(Qt::FramelessWindowHint);
+    #endif
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_QuitOnClose, false);
 
@@ -102,6 +104,12 @@ void ExecutiveWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     _pressed = false;
     QWidget::mouseReleaseEvent(event);
+}
+
+void ExecutiveWidget::closeEvent(QCloseEvent* event)
+{
+    QWidget::closeEvent(event);
+    stop();
 }
 
 void ExecutiveWidget::paintEvent(QPaintEvent* event)
