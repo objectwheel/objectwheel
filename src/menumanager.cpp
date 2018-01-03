@@ -46,7 +46,7 @@ void MenuManager::createActions()
     connect(openAct, &QAction::triggered, this, &MenuManager::open);
 
     saveAct = new QAction(tr("&Save"), this);
-    saveAct->setShortcuts(QKeySequence::Save);
+//    saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save the document to disk"));
     connect(saveAct, &QAction::triggered, this, &MenuManager::save);
 

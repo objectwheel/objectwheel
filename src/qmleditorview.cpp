@@ -24,6 +24,8 @@
 #include <QSplitter>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QApplication>
+#include <QScreen>
 
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
@@ -33,6 +35,7 @@
 #define MINWIDTH_EDITOR (fit::fx(200))
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
 #define TAB_SPACE ("    ")
+#define pS (QApplication::primaryScreen())
 
 class QmlEditorViewPrivate : public QObject
 {
@@ -159,6 +162,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     containerWidget->addAction(&saveAction);
 
     saveAction.setText("Save document");
+    saveAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     saveAction.setShortcut(QKeySequence::Save);
 
     splitter->setStyleSheet("QSplitter{background: #e0e4e7;}");
@@ -204,9 +208,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     codeEditor->setDocument(nullptr);
     codeEditor->hide();
 
-    noDocumentIndicator->setStyleSheet("QLabel {"
-                                      "color: #606467;"
-                                      "}");
+    noDocumentIndicator->setStyleSheet("QLabel { color: #606467; }");
     noDocumentIndicator->setText("No documents open");
     noDocumentIndicator->setAlignment(Qt::AlignCenter);
     noDocumentIndicator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -414,8 +416,17 @@ void QmlEditorViewPrivate::handlePinButtonClicked()
         pinButton->setToolTip("Pin Editor.");
         pinButton->setIcon(QIcon(":/resources/images/pin.png"));
         containerWidget->setParent(nullptr);
-        containerWidget->show();
         containerWidget->setWindowIcon(QIcon(":/resources/images/owicon.png"));
+        containerWidget->show();
+
+        containerWidget->setGeometry(
+            QStyle::alignedRect(
+                Qt::LeftToRight,
+                Qt::AlignCenter,
+                containerWidget->size(),
+                pS->availableGeometry()
+            )
+        );
     } else {
         pinButton->setToolTip("Unpin Editor.");
         pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
