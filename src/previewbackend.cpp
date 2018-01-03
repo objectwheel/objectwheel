@@ -238,7 +238,7 @@ QSharedPointer<PreviewResult> PreviewBackendPrivate::preview(Control* control, c
 
     // FIXME: What if qml file contains errors?
     // BUG: Possible bug if property 'visible' is a binding
-    bool isWindow = false;
+    bool isWindow = control->form(); //FIXME: Parser doesn't work on Windows without running it from Qt Creator
     auto qml = rdfile(url);
     ParserWorker pw;
     if (pw.typeName(qml).contains("Window")) {

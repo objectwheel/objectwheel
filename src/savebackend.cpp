@@ -754,7 +754,7 @@ ExecError SaveBackend::execProject(const bool* stopper, ExecutiveWidget* executi
                 auto url = masterPath + separator() +
                            DIR_THIS + separator() + "main.qml";
                 auto formData = rdfile(url);
-                ParserWorker parserWorker;
+                ParserWorker parserWorker; //FIXME: Parser doesn't work on Windows without running it from Qt Creator
                 bool isWindow = parserWorker.typeName(formData).contains("Window");
                 if (isWindow) {//If form is a window type
                     //BUG: Possible bug if property 'visible' is a binding
