@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow
         void done();
 
     private:
-        QToolBar* _titleBar;
+        QToolBar* _toolBar;
         QDockWidget* _toolboxDockwidget;
         QDockWidget* _propertiesDockwidget;
         QDockWidget* _formsDockwidget;

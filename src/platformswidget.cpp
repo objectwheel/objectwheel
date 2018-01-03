@@ -69,7 +69,7 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
     painter->setFont(f);
     painter->drawText(rutext, utext, Qt::AlignVCenter | Qt::AlignLeft);
 
-    f.setWeight(QFont::Light);
+    f.setWeight(QFont::Normal);
     painter->setFont(f);
     painter->drawText(rltext, ltext, Qt::AlignVCenter | Qt::AlignLeft);
 }

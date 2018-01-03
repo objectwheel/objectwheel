@@ -60,8 +60,8 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     hideButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     hideButton->setRadius(fit::fx(6));
     hideButton->setCursor(Qt::PointingHandCursor);
-    hideButton->setToolTip("Hide bar.");
-    hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
+    hideButton->setToolTip("Show bar.");
+    hideButton->setIcon(QIcon(":/resources/images/up-arrow.png"));
     hideButton->setColor("#697D8C");
     hideButton->setCheckedColor("#4C5A66");
     connect(hideButton, SIGNAL(clicked(bool)),
@@ -121,13 +121,12 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     auto rspacer = new QWidget;
     rspacer->setFixedSize(fit::fx(1), fit::fx(1));
 
-    toolbar->setStyleSheet("background: #D5D9DC; border: none;");
     toolbar->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     toolbar->addWidget(lspacer);
     toolbar->addWidget(issuesButton);
     toolbar->addWidget(searchButton);
     toolbar->addWidget(consoleButton);
-    toolbar->setStyleSheet(QString("spacing: %1").arg(fit::fx(5)));
+    toolbar->setStyleSheet(QString("background: #D5D9DC; border-top: 1px solid #a5a9ac; spacing: %1").arg(fit::fx(5)));
     toolbar->addWidget(spacer);
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);
@@ -146,6 +145,7 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     QTimer::singleShot(100, [this] {
         connect(dW, SIGNAL(modeChanged()),
           boxes.value(Issues), SLOT(refresh()));
+        this->parent->collapse();
     });
 
     layout->setContentsMargins(0, 0, 0, 0);

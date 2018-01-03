@@ -15,8 +15,8 @@ ExecutiveWidget::ExecutiveWidget(QWidget *parent)
 {
     #if !defined(Q_OS_WIN)
     setWindowFlags(Qt::FramelessWindowHint);
-    #endif
     setAttribute(Qt::WA_TranslucentBackground);
+    #endif
     setAttribute(Qt::WA_QuitOnClose, false);
 
     _layout.setSpacing(0);

@@ -7,14 +7,13 @@
 #include <QApplication>
 
 #define INTERVALF     60
-#define INTERVAL      2000
-#define HEIGHT_LINE   (fit::fx(2.0))
+#define INTERVAL      1000
 #define pS            (QApplication::primaryScreen())
 #define PATH_BAR      (":/resources/images/loadingbar.png")
 #define SIZE          (fit::fx(QSizeF{481, 24}))
-#define COLOR_DONE    ("#52B548")
+#define COLOR_DONE    ("#30a8f7")
 #define COLOR_ERROR   ("#b34b4e")
-#define COLOR_DEFAULT ("#444444")
+#define COLOR_DEFAULT ("#505457")
 #define COLOR_TEXT    ("#2a2d33")
 
 static int counter = 25;
@@ -112,7 +111,11 @@ void LoadingBar::paintEvent(QPaintEvent*)
     painter.drawImage(QRectF{QPointF(), SIZE}, _image, _image.rect());
 
     QFont f;
+    #if defined(Q_OS_WIN)
+    f.setWeight(QFont::Normal);
+    #else
     f.setWeight(QFont::Medium);
+    #endif
     f.setPixelSize(f.pixelSize() - 1);
 
     QTextDocument doc;
@@ -121,9 +124,9 @@ void LoadingBar::paintEvent(QPaintEvent*)
     doc.drawContents(&painter, QRectF{QPointF(), SIZE});
 
     QPainterPath path;
-    path.addRoundedRect(fit::fx(0.5), fit::fx(0.5), fit::fx(480.0), fit::fx(22.5), fit::fx(3.5), fit::fx(3.5));
+    path.addRoundedRect(fit::fx(0.5), fit::fx(0.5), fit::fx(480.0), fit::fx(23.0), fit::fx(3.5), fit::fx(3.5));
     painter.setClipPath(path);
-    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(21.0), _progress * fit::fx(4.8), HEIGHT_LINE}, _color);
+    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(21.5), _progress * fit::fx(4.8), fit::fx(10)}, _color);
 }
 
 

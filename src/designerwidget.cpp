@@ -487,24 +487,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _vlayout->setSpacing(0);
     _vlayout->addWidget(_splitter);
 
-    _splitter->setStyleSheet("QSplitter{background: #e0e4e7;}");
-    _splitter->setOrientation(Qt::Vertical);
-    _splitter->addWidget(_toolbar);
-    _splitter->addWidget(_formView);
-    _splitter->addWidget(_controlView);
-    _splitter->addWidget(_qmlEditorView);
-    _splitter->addWidget(_outputWidget);
-    _splitter->setCollapsible(0, false);
-    _splitter->setCollapsible(1, false);
-    _splitter->setCollapsible(2, false);
-    _splitter->setCollapsible(3, false);
-    _splitter->setCollapsible(4, false);
-    _splitter->handle(0)->setDisabled(true);
-    _splitter->handle(1)->setDisabled(true);
-    _splitter->handle(2)->setDisabled(true);
-    _splitter->handle(3)->setDisabled(true);
-    _splitter->setHandleWidth(0);
-
     _outputWidget->setSplitter(_splitter);
     _outputWidget->setSplitterHandle(_splitter->handle(4));
     connect(_splitter, SIGNAL(splitterMoved(int,int)),
@@ -720,6 +702,24 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     connect(_errorChecker, SIGNAL(timeout()),
             this, SLOT(checkErrors()));
     _errorChecker->start();
+
+    _splitter->setStyleSheet("QSplitter{background: #e0e4e7;}");
+    _splitter->setOrientation(Qt::Vertical);
+    _splitter->addWidget(_toolbar);
+    _splitter->addWidget(_formView);
+    _splitter->addWidget(_controlView);
+    _splitter->addWidget(_qmlEditorView);
+    _splitter->addWidget(_outputWidget);
+    _splitter->setCollapsible(0, false);
+    _splitter->setCollapsible(1, false);
+    _splitter->setCollapsible(2, false);
+    _splitter->setCollapsible(3, false);
+    _splitter->setCollapsible(4, false);
+    _splitter->handle(0)->setDisabled(true);
+    _splitter->handle(1)->setDisabled(true);
+    _splitter->handle(2)->setDisabled(true);
+    _splitter->handle(3)->setDisabled(true);
+    _splitter->setHandleWidth(0);
 
     SaveTransaction::instance();
     connect((IssuesBox*)_outputWidget->box(Issues), SIGNAL(entryDoubleClicked(Control*)),

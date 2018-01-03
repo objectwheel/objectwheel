@@ -62,12 +62,12 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/backendmanager.h \
            $$PWD/designerwidget.h \
            $$PWD/savebackend.h \
-    $$PWD/projectbackend.h \
-    $$PWD/toolsbackend.h \
-    $$PWD/userbackend.h \
-    $$PWD/previewbackend.h \
-    $$PWD/frontend.h \
-    $$PWD/loadingbar.h
+           $$PWD/projectbackend.h \
+           $$PWD/toolsbackend.h \
+           $$PWD/userbackend.h \
+           $$PWD/previewbackend.h \
+           $$PWD/frontend.h \
+           $$PWD/loadingbar.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -127,11 +127,11 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/backendmanager.cpp \
            $$PWD/designerwidget.cpp \
            $$PWD/savebackend.cpp \
-    $$PWD/projectbackend.cpp \
-    $$PWD/toolsbackend.cpp \
-    $$PWD/userbackend.cpp \
-    $$PWD/previewbackend.cpp \
-    $$PWD/loadingbar.cpp
+           $$PWD/projectbackend.cpp \
+           $$PWD/toolsbackend.cpp \
+           $$PWD/userbackend.cpp \
+           $$PWD/previewbackend.cpp \
+           $$PWD/loadingbar.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

@@ -312,7 +312,7 @@ void InspectorPane::handleClick(QTreeWidgetItem* item, int)
 
 QSize InspectorPane::sizeHint() const
 {
-    return fit::fx(QSizeF{200, 400}).toSize();
+    return fit::fx(QSizeF{200, 200}).toSize();
 }
 
 #include "inspectorpane.moc"

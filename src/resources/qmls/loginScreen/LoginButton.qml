@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.7
 import QtGraphicalEffects 1.0
 import "../fit.js" as Fit
 
@@ -39,6 +39,7 @@ Item {
                     source: "qrc:///resources/images/new.png"
                     height: btnLeft.height - Fit.fit(14)
                     fillMode: Image.PreserveAspectFit
+                    antialiasing: true
                 }
             }
             function glow() {
@@ -66,6 +67,7 @@ Item {
                     source: "qrc:///resources/images/load.png"
                     height: btnRight.height - Fit.fit(14)
                     fillMode: Image.PreserveAspectFit
+                    antialiasing: true
                 }
                 Text {
                     id: txtLoad2

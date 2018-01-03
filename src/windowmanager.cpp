@@ -68,7 +68,14 @@ QWidget* WindowManager::get(WindowManager::Windows key)
             connect(_welcomeWindow, SIGNAL(lazy()), _progressWidget, SLOT(hide()));
             connect(_welcomeWindow, SIGNAL(busy(QString)), SLOT(busy(QString)));
             connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
-            connect(_welcomeWindow, &WelcomeWindow::done, this, [=] { show(Main); });
+            connect(_welcomeWindow, &WelcomeWindow::done, this, [=]
+            {
+                const auto& size = fit::fx(QSizeF{1580, 900}).toSize();
+                const auto& ssize = pS->size();
+                const bool full = (size.height() + 100 > ssize.height()) ||
+                                  (size.width() + 50 > ssize.width());
+                show(Main, full ? Qt::WindowMaximized : Qt::WindowNoState);
+            });
             add(Welcome, _welcomeWindow);
             window = _welcomeWindow;
             break;

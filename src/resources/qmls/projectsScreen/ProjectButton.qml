@@ -43,6 +43,7 @@ Item {
                     source: "qrc:///resources/images/new.png"
                     height: btnLeft.height - Fit.fit(14)
                     fillMode: Image.PreserveAspectFit
+                    antialiasing: true
                 }
             }
 
@@ -73,6 +74,7 @@ Item {
                     source: "qrc:///resources/images/load.png"
                     height: btnRight.height - Fit.fit(14)
                     fillMode: Image.PreserveAspectFit
+                    antialiasing: true
                 }
                 Text {
                     id: txtLoad2

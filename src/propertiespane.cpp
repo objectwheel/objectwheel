@@ -1310,7 +1310,7 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
 
 QSize PropertiesPane::sizeHint() const
 {
-    return fit::fx(QSizeF{340, 2600}).toSize(); //FIXME:
+    return fit::fx(QSizeF{340, 700}).toSize();
 }
 
 #include "propertiespane.moc"

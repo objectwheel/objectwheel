@@ -15,6 +15,7 @@
 #include <QSurfaceFormat>
 
 #define PIXEL_SIZE 13
+#define MIN_DPI 110.0
 #define REF_DPI 149.0
 
 int main(int argc, char *argv[])
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
     # endif
 
     // Initialize fit library
-    fit::update(REF_DPI);
+    fit::update(REF_DPI, MIN_DPI);
 
     // Setup OpenGL format
     QSurfaceFormat format;
@@ -87,14 +88,14 @@ int main(int argc, char *argv[])
     // Initialize web view
     QtWebView::initialize();
 
-    // Initialize menus
-    MenuManager::instance()->init();
-
     // Create backend manager
     BackendManager::instance()->init();
 
     // Show welcome window
     WindowManager::instance()->show(WindowManager::Welcome);
+
+    // Initialize menus
+    MenuManager::instance()->init();
 
     // Start main event loop
     return a.exec();

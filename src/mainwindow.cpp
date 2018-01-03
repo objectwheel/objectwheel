@@ -45,7 +45,7 @@ static bool stopper = false;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
-    _titleBar = new QToolBar;
+    _toolBar = new QToolBar;
     _toolboxDockwidget = new QDockWidget;
     _propertiesDockwidget = new QDockWidget;
     _formsDockwidget = new QDockWidget;
@@ -70,18 +70,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setPalette(p);
 
     /* Add Title Bar */
-    addToolBar(Qt::TopToolBarArea, _titleBar);
-    _titleBar->setFixedHeight(fit::fx(38));
-    _titleBar->setFloatable(false);
-    _titleBar->setMovable(false);
-    _titleBar->setStyleSheet(QString(
-    "QToolBar{border: none; spacing: 20px; background:qlineargradient(spread:pad, "
-    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}"));
+    _toolBar->setFixedHeight(fit::fx(38));
+    _toolBar->setFloatable(false);
+    _toolBar->setMovable(false);
+    _toolBar->setStyleSheet(QString(
+    "QToolBar { border: none; spacing: %1px; background:qlineargradient(spread:pad, "
+    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}").arg(fit::fx(3.5)));
+    addToolBar(Qt::TopToolBarArea, _toolBar);
 
-    int lspace = 0, btnwidth = 48 / pS->devicePixelRatio();
+    int lspace = 0, btnwidth = fit::fx(38);
     #if defined(Q_OS_MAC)
     auto macToolbar = new MacToolbar(this);
-    _titleBar->setFixedHeight(macToolbar->toolbarHeight());
+    _toolBar->setFixedHeight(macToolbar->toolbarHeight());
     lspace = fit::fx(72);
     #endif
 
@@ -123,34 +123,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto spc5 = new QWidget;
     spc5->setFixedWidth(0);
     auto spc6 = new QWidget;
-    spc6->setFixedWidth(5 + btnwidth + lspace); // lspace + 2*btnwidth + 3*5 = 2*5 + btnwidth + x
+    spc6->setFixedWidth(fit::fx(3.5) + btnwidth + lspace); // lspace + 2*btnwidth + 3*5 = 2*5 + btnwidth + x
 
-    _titleBar->addWidget(spc5);
-    _titleBar->insertWidget(_titleBar->actions().first(), _buildsButton);
-    _titleBar->insertWidget(_titleBar->actions().first(), spc6);
-    _titleBar->insertWidget(_titleBar->actions().first(), spc4);
-    _titleBar->insertWidget(_titleBar->actions().first(), _loadingBar);
-    _titleBar->insertWidget(_titleBar->actions().first(), spc3);
-    _titleBar->insertWidget(_titleBar->actions().first(), _stopButton);
-    _titleBar->insertWidget(_titleBar->actions().first(), spc2);
-    _titleBar->insertWidget(_titleBar->actions().first(), _runButton);
-    _titleBar->insertWidget(_titleBar->actions().first(), spc);
-
-//    QTimer* cct = new QTimer;
-//    connect(cct, &QTimer::timeout, [=] {
-//        static int i = 0;
-//        if (i == 0) {
-//            _loadingBar->busy(30, "Loading..");
-//        } else if (i == 1) {
-//            _loadingBar->busy(60, "Loading..2323...");
-//        } else if (i == 2) {
-//            _loadingBar->busy(80, "Loading..23232323..");
-//        } if (i == 3) {
-//            _loadingBar->error("Kraal. Bitti.");
-//        }
-//        i++;
-//    });
-//    QTimer::singleShot(5000, [=]{cct->start(2000);});
+    _toolBar->addWidget(spc5);
+    _toolBar->insertWidget(_toolBar->actions().first(), _buildsButton);
+    _toolBar->insertWidget(_toolBar->actions().first(), spc6);
+    _toolBar->insertWidget(_toolBar->actions().first(), spc4);
+    _toolBar->insertWidget(_toolBar->actions().first(), _loadingBar);
+    _toolBar->insertWidget(_toolBar->actions().first(), spc3);
+    _toolBar->insertWidget(_toolBar->actions().first(), _stopButton);
+    _toolBar->insertWidget(_toolBar->actions().first(), spc2);
+    _toolBar->insertWidget(_toolBar->actions().first(), _runButton);
+    _toolBar->insertWidget(_toolBar->actions().first(), spc);
 
     QFont f;
     f.setWeight(QFont::Medium);
