@@ -35,6 +35,8 @@ QQuickItem* btnCancel;
 QQuickItem* listView;
 ProjectListModel model;
 
+// TODO: Show a loading bar and inform user about loading progress of the project
+
 ProjectsWidget::ProjectsWidget(QWidget *parent) : QQuickWidget(parent)
 {
 	rootContext()->setContextProperty("dpi", fit::ratio());

@@ -13,7 +13,7 @@
 #define SIZE          (fit::fx(QSizeF{481, 24}))
 #define COLOR_DONE    ("#30a8f7")
 #define COLOR_ERROR   ("#b34b4e")
-#define COLOR_DEFAULT ("#505457")
+#define COLOR_DEFAULT ("#9C7650")
 #define COLOR_TEXT    ("#2a2d33")
 
 static int counter = 25;
