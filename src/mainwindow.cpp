@@ -375,7 +375,6 @@ void MainWindow::handleRunButtonClick()
         handleStopButtonClick();
 
     _stopButton->setEnabled(true);
-    _stopButton->setEnabled(true);
     stopper = false;
     _executiveWidget = new ExecutiveWidget;
     ExecError error = SaveBackend::execProject(&stopper, _executiveWidget);

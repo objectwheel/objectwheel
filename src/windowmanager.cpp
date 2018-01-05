@@ -7,6 +7,7 @@
 #include <preferenceswindow.h>
 #include <toolboxsettingswindow.h>
 #include <fit.h>
+#include <savebackend.h>
 
 #include <QStyle>
 #include <QScreen>
@@ -22,6 +23,10 @@ WindowManager::WindowManager() : QObject()
   , _preferencesWindow(nullptr)
   , _toolboxSettingsWindow(nullptr)
 {
+    connect(SaveBackend::instance(), SIGNAL(doneLoader(QString)),
+      progressWidget(), SLOT(done(QString)));
+    connect(SaveBackend::instance(), SIGNAL(busyLoader(int, QString)),
+      progressWidget(), SLOT(busy(int,QString)));
 }
 
 WindowManager::~WindowManager()
@@ -170,4 +175,9 @@ void WindowManager::busy(const QString& text)
 void WindowManager::add(WindowManager::Windows key, QWidget* window)
 {
     _windows[key] = window;
+}
+
+ProgressWidget* WindowManager::progressWidget() const
+{
+    return _progressWidget;
 }

@@ -31,6 +31,7 @@ class WindowManager : public QObject
     public:
         static WindowManager* instance();
         QWidget* get(Windows key);
+        ProgressWidget* progressWidget() const;
 
     public slots:
         void hide(Windows key);

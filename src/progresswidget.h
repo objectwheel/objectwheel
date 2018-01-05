@@ -5,6 +5,7 @@
 
 class QMovie;
 class QTimer;
+class QProgressBar;
 
 class ProgressWidget : public QWidget
 {
@@ -17,11 +18,14 @@ class ProgressWidget : public QWidget
         void hide();
         void show(QWidget* parent = nullptr);
         void show(const QString& text, QWidget* parent = nullptr);
+        void busy(int progress, const QString& text);
+        void done(const QString& text);
 
     protected:
         void paintEvent(QPaintEvent* event) override;
 
     private:
+        int _progress;
         QString _text;
         QMovie* _movie;
         QTimer* _waitEffectTimer;

@@ -18,7 +18,6 @@
 #include <QJsonObject>
 #include <QApplication>
 #include <QTimer>
-#include <QDebug>
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQmlProperty>
@@ -893,6 +892,7 @@ void SaveBackend::exposeProject()
 {
     auto fpaths = _d->formPaths();
 
+    qreal j = 0;
     for (auto path : fpaths) {
 
         auto form = new Form(path + separator() +
@@ -914,13 +914,17 @@ void SaveBackend::exposeProject()
             control->setParentItem(pcontrol);
             control->refresh();
 
+            emit instance()->busyLoader((100.0 * (j / fpaths.size()))   +   (((100.0 / fpaths.size())) / pths.size()) * i,
+            "Loading " + form->id() + QString("'s %1 of %2 controls").arg(i).arg(pths.size()));
+
             pmap[child] = control;
             qApp->processEvents(QEventLoop::AllEvents, 10);
             i++;
         }
+        j++;
     }
 
-    emit instance()->doneLoader(ProjectBackend::instance()->name() + ": <b>Succeeded</b>  |  Finished at " + QTime::currentTime().toString());
+    emit instance()->doneLoader("Done!");
     emit instance()->projectExposed();
 }
 
