@@ -9,9 +9,8 @@ class SearchBox : public QWidget
     public:
         explicit SearchBox(QWidget *parent = nullptr);
 
-    signals:
-
     public slots:
+        void clear();
 };
 
 #endif // SEARCHBOX_H

@@ -43,7 +43,7 @@ class Control : public QGraphicsWidget
         static void setShowOutline(const bool value);
         static void updateUids();
         static QString generateUid();
-        static const QList<Control*>& controls();
+        static QList<Control*>& controls();
         const QList<QQmlError>& errors() const;
         bool hasErrors() const;
         const DesignMode& mode() const;

@@ -44,6 +44,12 @@ Form* FormScene::mainForm()
     return (Form*)_mainControl.data();
 }
 
+void FormScene::clearScene()
+{
+    _forms.clear();
+    ControlScene::clearScene();
+}
+
 void FormScene::setMainForm(Form* mainForm)
 {
     if (_forms.contains(mainForm) == false ||

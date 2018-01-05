@@ -709,6 +709,33 @@ bool QmlEditorView::isOpen(const QString& controlPath) const
     return false;
 }
 
+bool QmlEditorView::hasUnsavedDocs() const
+{
+    for (auto& item : _editorItems)
+        if (hasChanges(item.control))
+            return true;
+
+    return false;
+}
+
+bool QmlEditorView::hasChanges(Control* control) const
+{
+    if (!isOpen(control))
+        return false;
+
+    for (auto& item : _editorItems) {
+        if (item.control == control) {
+            for (auto& doc : item.documents.keys()) {
+                if (item.documents.value(doc).document->isModified()) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 void QmlEditorView::addControl(Control* control)
 {
     for (auto& item : _editorItems)
@@ -951,6 +978,18 @@ void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
     }
 
     _d->updateOpenDocHistory();
+}
+
+void QmlEditorView::clear()
+{
+    for (auto& item : _editorItems)
+        closeControl(item.control, false);
+}
+
+void QmlEditorView::saveAll()
+{
+    for (auto& item : _editorItems)
+        saveControl(item.control);
 }
 
 void QmlEditorView::raiseContainer()

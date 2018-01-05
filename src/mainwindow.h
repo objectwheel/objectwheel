@@ -23,10 +23,11 @@ class MainWindow : public QMainWindow
         DesignerWidget* designerWidget();
 
     private slots:
-        void cleanupObjectwheel();
+        void clear();
         void handleRunButtonClick();
         void handleStopButtonClick();
         void handleBuildsButtonClick();
+        void handleProjectsButtonClick();
 
     signals:
         void done();
@@ -46,6 +47,7 @@ class MainWindow : public QMainWindow
         FlatButton* _runButton;
         FlatButton* _stopButton;
         FlatButton* _buildsButton;
+        FlatButton* _projectsButton;
         ExecutiveWidget* _executiveWidget;
 
 };

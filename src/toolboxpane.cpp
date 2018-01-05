@@ -52,6 +52,13 @@ ToolboxTree* ToolboxPane::toolboxTree()
     return _toolboxTree;
 }
 
+void ToolboxPane::clear()
+{
+    _toolboxTree->clear();
+    _toolboxTree->clearUrls();
+    _searchEdit->clear();
+}
+
 void ToolboxPane::handleMousePress(QTreeWidgetItem* item)
 {
     if (item == 0)

@@ -17,6 +17,9 @@ class FormScene : public ControlScene
         void setMainForm(Form* mainForm);
         Form* mainForm();
 
+    public slots:
+        void clearScene();
+
     signals:
         void mainControlChanged(Control* mainControl);
 

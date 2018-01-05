@@ -17,6 +17,9 @@ class FormsPane : public QWidget
         explicit FormsPane(MainWindow* parent);
         void setCurrentForm(int index);
 
+    public slots:
+        void clear();
+
     protected:
         QSize sizeHint() const override;
 

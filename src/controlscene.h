@@ -30,6 +30,9 @@ class ControlScene : public QGraphicsScene
 
         QPointF lastMousePos() const;
 
+    public slots:
+        void clearScene();
+
     protected:
         virtual bool stick() const;
         virtual QVector<QLineF> guideLines() const;

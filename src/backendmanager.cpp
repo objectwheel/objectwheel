@@ -5,12 +5,15 @@
 #include <savebackend.h>
 #include <previewbackend.h>
 #include <frontend.h>
+#include <windowmanager.h>
 
 BackendManager::BackendManager()
 {
     new SaveBackend;
     new PreviewBackend;
 
+    connect(ProjectBackend::instance(), SIGNAL(started()),
+      WindowManager::instance()->get(WindowManager::Main), SLOT(clear()));
     connect(ProjectBackend::instance(), SIGNAL(started()),
       SLOT(handleProjectStart()));
     connect(UserBackend::instance(), SIGNAL(aboutToStop()),
@@ -30,7 +33,6 @@ void BackendManager::handleSessionStop() const
 
 void BackendManager::handleProjectStart() const
 {
-    // mainWindow->clearStudio(); //FIXME
     SaveBackend::exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->formScene()->clearSelection();

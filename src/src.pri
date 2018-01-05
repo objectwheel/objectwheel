@@ -36,7 +36,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/issuesbox.h \
            $$PWD/consolebox.h \
            $$PWD/searchbox.h \
-           $$PWD/outputwidget.h \
            $$PWD/controlwatcher.h \
            $$PWD/resizer.h \
            $$PWD/suppressor.h \
@@ -67,7 +66,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/userbackend.h \
            $$PWD/previewbackend.h \
            $$PWD/frontend.h \
-           $$PWD/loadingbar.h
+           $$PWD/loadingbar.h \
+    $$PWD/outputpane.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -101,7 +101,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/issuesbox.cpp \
            $$PWD/consolebox.cpp \
            $$PWD/searchbox.cpp \
-           $$PWD/outputwidget.cpp \
            $$PWD/controlwatcher.cpp \
            $$PWD/resizer.cpp \
            $$PWD/suppressor.cpp \
@@ -131,7 +130,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/toolsbackend.cpp \
            $$PWD/userbackend.cpp \
            $$PWD/previewbackend.cpp \
-           $$PWD/loadingbar.cpp
+           $$PWD/loadingbar.cpp \
+    $$PWD/outputpane.cpp
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)

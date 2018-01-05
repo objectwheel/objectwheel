@@ -5,3 +5,8 @@ ConsoleBox::ConsoleBox(QWidget *parent)
 {
 
 }
+
+void ConsoleBox::clear()
+{
+    // TODO
+}

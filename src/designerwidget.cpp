@@ -9,10 +9,11 @@
 #include <css.h>
 #include <loadingindicator.h>
 #include <savebackend.h>
-#include <outputwidget.h>
+#include <outputpane.h>
 #include <controlwatcher.h>
 #include <savetransaction.h>
 #include <mainwindow.h>
+#include <issuesbox.h>
 
 #include <QWidget>
 #include <QList>
@@ -453,7 +454,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _formView = new FormView(_formScene);
     _controlView = new ControlView(_controlScene);
     _qmlEditorView = new QmlEditorView;
-    _outputWidget = new OutputWidget;
+    _outputPane = new OutputPane;
     _toolbar = new QToolBar;
     _refreshPreviewButton = new QToolButton;
     _clearFormButton = new QToolButton;
@@ -487,10 +488,10 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _vlayout->setSpacing(0);
     _vlayout->addWidget(_splitter);
 
-    _outputWidget->setSplitter(_splitter);
-    _outputWidget->setSplitterHandle(_splitter->handle(4));
+    _outputPane->setSplitter(_splitter);
+    _outputPane->setSplitterHandle(_splitter->handle(4));
     connect(_splitter, SIGNAL(splitterMoved(int,int)),
-            _outputWidget, SLOT(updateLastHeight()));
+            _outputPane, SLOT(updateLastHeight()));
     _qmlEditorView->setSizePolicy(QSizePolicy::Expanding,
                                   QSizePolicy::Expanding);
 
@@ -709,7 +710,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _splitter->addWidget(_formView);
     _splitter->addWidget(_controlView);
     _splitter->addWidget(_qmlEditorView);
-    _splitter->addWidget(_outputWidget);
+    _splitter->addWidget(_outputPane);
     _splitter->setCollapsible(0, false);
     _splitter->setCollapsible(1, false);
     _splitter->setCollapsible(2, false);
@@ -722,7 +723,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _splitter->setHandleWidth(0);
 
     SaveTransaction::instance();
-    connect((IssuesBox*)_outputWidget->box(Issues), SIGNAL(entryDoubleClicked(Control*)),
+    connect(_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
             this, SLOT(handleControlDoubleClick(Control*)));
     connect(cW, SIGNAL(doubleClicked(Control*)),
             this, SLOT(handleControlDoubleClick(Control*)));
@@ -738,7 +739,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
 
     connect(this, SIGNAL(modeChanged()), this, SLOT(handleModeChange()));
     handleModeChange();
-    ((IssuesBox*)_outputWidget->box(Issues))->setCurrentMode(_mode);
+    _outputPane->issuesBox()->setCurrentMode(_mode);
 }
 
 const DesignMode& DesignerWidget::mode() const
@@ -749,7 +750,7 @@ const DesignMode& DesignerWidget::mode() const
 void DesignerWidget::setMode(const DesignMode& mode)
 {
     _mode = mode;
-    ((IssuesBox*)_outputWidget->box(Issues))->setCurrentMode(_mode);
+    _outputPane->issuesBox()->setCurrentMode(_mode);
     emit modeChanged();
 }
 
@@ -822,14 +823,21 @@ QSplitter* DesignerWidget::splitter()
     return _splitter;
 }
 
-OutputWidget* DesignerWidget::outputWidget()
+OutputPane* DesignerWidget::outputPane()
 {
-    return _outputWidget;
+    return _outputPane;
+}
+
+void DesignerWidget::clear()
+{
+    _lastScaleOfWv = 1.0;
+    _lastScaleOfCv = 1.0;
+    setMode(FormGui);
 }
 
 void DesignerWidget::checkErrors()
 {
-    static_cast<IssuesBox*>(_outputWidget->box(Issues))->refresh();
+    _outputPane->issuesBox()->refresh();
     //    MainWindow::instance()->inspectorPage()->refresh(); //FIXME
     _qmlEditorView->refreshErrors();
 }

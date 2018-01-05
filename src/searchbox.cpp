@@ -5,3 +5,8 @@ SearchBox::SearchBox(QWidget *parent)
 {
 
 }
+
+void SearchBox::clear()
+{
+    // TODO
+}

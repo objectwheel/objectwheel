@@ -1,9 +1,12 @@
-#include <outputwidget.h>
+#include <outputpane.h>
 #include <flatbutton.h>
 #include <css.h>
 #include <fit.h>
 #include <designerwidget.h>
 #include <frontend.h>
+#include <issuesbox.h>
+#include <searchbox.h>
+#include <consolebox.h>
 
 #include <QSplitter>
 #include <QSplitterHandle>
@@ -17,11 +20,12 @@
 #define INTERVAL_SHINE (500)
 #define COUNT_BLINK (3)
 
-class OutputWidgetPrivate : public QObject
+class OutputPanePrivate : public QObject
 {
         Q_OBJECT
+
     public:
-        OutputWidgetPrivate(OutputWidget *parent);
+        OutputPanePrivate(OutputPane *parent);
 
     public slots:
         void handleHideButtonClicked();
@@ -30,8 +34,7 @@ class OutputWidgetPrivate : public QObject
         void handleConsoleButtonClicked(bool val);
 
     public:
-        OutputWidget* parent;
-        QMap<BoxType, QWidget*> boxes;
+        OutputPane* parent;
         QVBoxLayout* layout;
         QToolBar* toolbar;
         FlatButton* hideButton;
@@ -40,7 +43,7 @@ class OutputWidgetPrivate : public QObject
         FlatButton* consoleButton;
 };
 
-OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
+OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     : QObject(parent)
     , parent(parent)
     , layout(new QVBoxLayout(parent))
@@ -131,33 +134,33 @@ OutputWidgetPrivate::OutputWidgetPrivate(OutputWidget* parent)
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);
 
-    boxes[Issues] = new IssuesBox(parent);
-    boxes[Search] = new SearchBox(parent);
-    boxes[Console] = new ConsoleBox(parent);
+    parent->_issuesBox = new IssuesBox(parent);
+    parent->_searchBox = new SearchBox(parent);
+    parent->_consoleBox = new ConsoleBox(parent);
 
-    boxes.value(Issues)->setSizePolicy(QSizePolicy::Expanding,
+    parent->_issuesBox->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
-    boxes.value(Search)->setSizePolicy(QSizePolicy::Expanding,
+    parent->_searchBox->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
-    boxes.value(Console)->setSizePolicy(QSizePolicy::Expanding,
+    parent->_consoleBox->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
-    QTimer::singleShot(100, [this] {
+    QTimer::singleShot(100, [=] {
         connect(dW, SIGNAL(modeChanged()),
-          boxes.value(Issues), SLOT(refresh()));
+          parent->_issuesBox, SLOT(refresh()));
         this->parent->collapse();
     });
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
-    layout->addWidget(boxes.value(Issues));
-    layout->addWidget(boxes.value(Search));
-    layout->addWidget(boxes.value(Console));
+    layout->addWidget(parent->_issuesBox);
+    layout->addWidget(parent->_searchBox);
+    layout->addWidget(parent->_consoleBox);
     layout->addWidget(toolbar);
     toolbar->setFixedHeight(fit::fx(26));
 }
 
-void OutputWidgetPrivate::handleHideButtonClicked()
+void OutputPanePrivate::handleHideButtonClicked()
 {
     if (hideButton->toolTip().contains("Hide")) {
         hideButton->setToolTip("Show pane.");
@@ -170,70 +173,69 @@ void OutputWidgetPrivate::handleHideButtonClicked()
     }
 }
 
-void OutputWidgetPrivate::handleIssuesButtonClicked(bool val)
+void OutputPanePrivate::handleIssuesButtonClicked(bool val)
 {
     if (val) {
-        parent->_activeBoxType = Issues;
-        for (auto box : boxes)
-            box->hide();
+        parent->_activeBox = parent->_issuesBox;
+        parent->_issuesBox->hide();
+        parent->_searchBox->hide();
+        parent->_consoleBox->hide();
 
         if (!parent->_collapsed)
-            boxes.value(Issues)->show();
+            parent->_issuesBox->show();
     }
 }
 
-void OutputWidgetPrivate::handleSearchButtonClicked(bool val)
+void OutputPanePrivate::handleSearchButtonClicked(bool val)
 {
     if (val) {
-        parent->_activeBoxType = Search;
-        for (auto box : boxes)
-            box->hide();
+        parent->_activeBox = parent->_searchBox;
+        parent->_issuesBox->hide();
+        parent->_searchBox->hide();
+        parent->_consoleBox->hide();
 
         if (!parent->_collapsed)
-            boxes.value(Search)->show();
+            parent->_searchBox->show();
     }
 }
 
-void OutputWidgetPrivate::handleConsoleButtonClicked(bool val)
+void OutputPanePrivate::handleConsoleButtonClicked(bool val)
 {
     if (val) {
-        parent->_activeBoxType = Console;
-        for (auto box : boxes)
-            box->hide();
+        parent->_activeBox = parent->_consoleBox;
+        parent->_issuesBox->hide();
+        parent->_searchBox->hide();
+        parent->_consoleBox->hide();
 
         if (!parent->_collapsed)
-            boxes.value(Console)->show();
+            parent->_consoleBox->show();
     }
 }
 
-OutputWidget::OutputWidget(QWidget *parent)
+OutputPane::OutputPane(QWidget *parent)
     : QWidget(parent)
-    , _d(new OutputWidgetPrivate(this))
+    , _d(new OutputPanePrivate(this))
     , _lastHeight(SIZE_INITIAL.height())
-    , _activeBoxType(Issues)
     , _collapsed(false)
 {
     setMinimumHeight(HEIGHT_MIN);
     setMaximumHeight(HEIGHT_MAX);
-    setActiveBox(_activeBoxType);
-}
 
-void OutputWidget::setActiveBox(BoxType type)
-{
-    _activeBoxType = type;
-    for (auto box : _d->boxes)
-        box->hide();
+    _activeBox = _issuesBox;
+    _issuesBox->hide();
+    _searchBox->hide();
+    _consoleBox->hide();
 
     if (!_collapsed)
-        _d->boxes.value(type)->show();
+        _issuesBox->show();
 
-    button(type)->setChecked(true);
+    _d->issuesButton->setChecked(true);
 }
 
-void OutputWidget::expand()
+void OutputPane::expand()
 {
     _collapsed = false;
-    _d->boxes.value(_activeBoxType)->show();
+    _activeBox->show();
     setMinimumHeight(HEIGHT_MIN);
     setMaximumHeight(HEIGHT_MAX);
     if (_splitterHandle)
@@ -245,24 +247,25 @@ void OutputWidget::expand()
     }
 }
 
-void OutputWidget::collapse()
+void OutputPane::collapse()
 {
     _collapsed = true;
-    for (auto box : _d->boxes)
-        box->hide();
+    _issuesBox->hide();
+    _searchBox->hide();
+    _consoleBox->hide();
     setFixedHeight(_d->toolbar->height());
     if (_splitterHandle)
         _splitterHandle->setDisabled(true);
 }
 
-void OutputWidget::updateLastHeight()
+void OutputPane::updateLastHeight()
 {
     _lastHeight = height();
 }
 
-void OutputWidget::shine(BoxType type)
+void OutputPane::shine(OutputPane::Box type)
 {
-    static QList<BoxType> shineList;
+    static QList<Box> shineList;
     if (shineList.contains(type))
         return;
     shineList << type;
@@ -290,32 +293,37 @@ void OutputWidget::shine(BoxType type)
     });
 }
 
-QSize OutputWidget::sizeHint() const
+QSize OutputPane::sizeHint() const
 {
     return SIZE_INITIAL;
 }
 
-BoxType OutputWidget::activeBoxType() const
+SearchBox* OutputPane::searchBox()
 {
-    return _activeBoxType;
+    return _searchBox;
 }
 
-bool OutputWidget::collapsed() const
+ConsoleBox* OutputPane::consoleBox()
 {
-    return _collapsed;
+    return _consoleBox;
 }
 
-void OutputWidget::setSplitter(QSplitter* splitter)
+IssuesBox* OutputPane::issuesBox()
+{
+    return _issuesBox;
+}
+
+void OutputPane::setSplitter(QSplitter* splitter)
 {
     _splitter = splitter;
 }
 
-void OutputWidget::setSplitterHandle(QSplitterHandle* splitterHandle)
+void OutputPane::setSplitterHandle(QSplitterHandle* splitterHandle)
 {
     _splitterHandle = splitterHandle;
 }
 
-FlatButton* OutputWidget::button(BoxType type)
+FlatButton* OutputPane::button(OutputPane::Box type)
 {
     switch (type) {
         case Issues:
@@ -328,9 +336,15 @@ FlatButton* OutputWidget::button(BoxType type)
     return nullptr;
 }
 
-QWidget* OutputWidget::box(BoxType type)
+void OutputPane::clear()
 {
-    return _d->boxes[type];
+    _d->handleIssuesButtonClicked(true);
+    _d->issuesButton->setText("Issues");
+    _d->searchButton->setText("Search");
+    _d->consoleButton->setText("Console Output");
+    _issuesBox->clear();
+    _searchBox->clear();
+    _consoleBox->clear();
 }
 
-#include "outputwidget.moc"
+#include "outputpane.moc"

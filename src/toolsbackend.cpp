@@ -105,6 +105,7 @@ void ToolsBackend::fillTree(ToolboxTree* tree)
         return;
 
     tree->clear();
+    tree->clearUrls();
     for (auto toolDir : lsdir(toolsDir()))
         addToTree(toolsDir() + separator() + toolDir, tree);
 }
@@ -141,6 +142,20 @@ bool ToolsBackend::addToTree(const QString& toolPath, ToolboxTree* tree)
     tree->addUrls(item, urls);
 
     return true;
+}
+
+void ToolsBackend::clear()
+{
+    if (!isProjectFull())
+        return;
+
+    for (auto tree : _toolboxTreeList) {
+        tree->clearSelection();
+        tree->setCurrentItem(nullptr);
+        tree->clear();
+        tree->clearUrls();
+        emit tree->itemSelectionChanged();
+    }
 }
 
 bool ToolsBackend::addTool(const QString& toolPath, const bool select, const bool qrc)
@@ -260,8 +275,10 @@ void ToolsBackend::downloadTools(const QUrl& url)
 {
     if (ProjectBackend::instance()->dir().isEmpty()) return;
 
-    for (auto tree : _toolboxTreeList)
+    for (auto tree : _toolboxTreeList) {
         tree->clear();
+        tree->clearUrls();
+    }
 
     QNetworkAccessManager* manager = new QNetworkAccessManager;
     QNetworkRequest request;

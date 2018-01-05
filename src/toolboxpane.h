@@ -17,6 +17,9 @@ class ToolboxPane : public QWidget
         explicit ToolboxPane(MainWindow* parent);
         ToolboxTree* toolboxTree();
 
+    public slots:
+        void clear();
+
     protected:
         QSize sizeHint() const override;
 

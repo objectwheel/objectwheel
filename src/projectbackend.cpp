@@ -336,7 +336,7 @@ void ProjectBackend::updateSize() const
 
 void ProjectBackend::updateLastModification() const
 {
-    const auto& date =
+    auto date =
     QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
 
     const auto& dir = ::dir(hash());

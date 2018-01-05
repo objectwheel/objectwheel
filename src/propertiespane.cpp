@@ -414,13 +414,18 @@ static void saveChanges(const NodeType& type, const QVariant& value)
 
 static void cleanProperties(PropertyMap& map)
 {
+    QStringList keysToRemove;
+
     for (auto key : map.keys()) {
         if (key.startsWith("__") ||
             QString::fromUtf8(map.value(key).typeName()).isEmpty() ||
             QString::fromUtf8(map.value(key).typeName()).
             contains(QRegExp("Q([A-Za-z_][A-Za-z0-9_]*)\\*")))
-            map.remove(key);
+            keysToRemove << key;
     }
+
+    for (auto key : keysToRemove)
+        map.remove(key);
 }
 
 //!
@@ -1080,6 +1085,12 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
             SLOT(handleSelectionChange()));
     connect(ControlWatcher::instance(), SIGNAL(zValueChanged(Control*)),
             SLOT(handleSelectionChange()));
+}
+
+void PropertiesPane::clear()
+{
+    clearList();
+    _searchEdit->clear();
 }
 
 void PropertiesPane::clearList()

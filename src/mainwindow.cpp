@@ -15,7 +15,7 @@
 #include <formview.h>
 #include <controlview.h>
 #include <global.h>
-#include <outputwidget.h>
+#include <outputpane.h>
 #include <qmleditorview.h>
 #include <loadingbar.h>
 #include <designerwidget.h>
@@ -34,6 +34,8 @@
 #include <QtNetwork>
 #include <QApplication>
 #include <QScreen>
+#include <QToolBar>
+#include <QLabel>
 
 #if defined(Q_OS_MAC)
 #include <mactoolbar.h>
@@ -59,6 +61,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _runButton = new FlatButton;
     _stopButton = new FlatButton;
     _buildsButton = new FlatButton;
+    _projectsButton = new FlatButton;
     _executiveWidget = nullptr;
 
     QPalette p(palette());
@@ -78,7 +81,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}").arg(fit::fx(3.5)));
     addToolBar(Qt::TopToolBarArea, _toolBar);
 
-    int lspace = 0, btnwidth = fit::fx(38);
+    int lspace = 0;
     #if defined(Q_OS_MAC)
     auto macToolbar = new MacToolbar(this);
     _toolBar->setFixedHeight(macToolbar->toolbarHeight());
@@ -110,6 +113,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(_buildsButton, SIGNAL(clicked(bool)),
        SLOT(handleBuildsButtonClick()));
 
+    _projectsButton->setToolTip("Show Projects");
+    _projectsButton->setCursor(Qt::PointingHandCursor);
+    _projectsButton->setIcon(QIcon(":/resources/images/projects.png"));
+    _projectsButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
+    _projectsButton->setIconButton(true);
+    connect(_projectsButton, SIGNAL(clicked(bool)),
+       SLOT(handleProjectsButtonClick()));
+
     _loadingBar->setFixedSize(fit::fx(QSizeF(481, 24)).toSize());
 
     auto spc = new QWidget;
@@ -123,10 +134,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto spc5 = new QWidget;
     spc5->setFixedWidth(0);
     auto spc6 = new QWidget;
-    spc6->setFixedWidth(fit::fx(3.5) + btnwidth + lspace); // lspace + 2*btnwidth + 3*5 = 2*5 + btnwidth + x
+    spc6->setFixedWidth(lspace); // lspace + 2*btnwidth + 3*5 = 3*5 + 2*btnwidth + x
+    auto spc7 = new QWidget;
+    spc7->setFixedWidth(0);
 
     _toolBar->addWidget(spc5);
     _toolBar->insertWidget(_toolBar->actions().first(), _buildsButton);
+    _toolBar->insertWidget(_toolBar->actions().first(), spc7);
+    _toolBar->insertWidget(_toolBar->actions().first(), _projectsButton);
     _toolBar->insertWidget(_toolBar->actions().first(), spc6);
     _toolBar->insertWidget(_toolBar->actions().first(), spc4);
     _toolBar->insertWidget(_toolBar->actions().first(), _loadingBar);
@@ -316,14 +331,33 @@ DesignerWidget* MainWindow::designerWidget()
     return _designerWidget;
 }
 
-void MainWindow::cleanupObjectwheel()
+void MainWindow::clear()
 {
     while(SaveBackend::parserWorking())
         Delayer::delay(100);
 
-    UserBackend::instance()->stop();
+    handleStopButtonClick();
 
-    qApp->processEvents();
+    designerWidget()->qmlEditorView()->clear();
+
+    ToolsBackend::instance()->clear();
+
+    for (auto& control : Control::controls()) {
+        if (control->scene())
+            control->scene()->removeItem(control);
+        control->deleteLater();
+    }
+
+    Control::controls().clear();
+
+    designerWidget()->clear();
+    designerWidget()->controlScene()->clearScene();
+    designerWidget()->formScene()->clearScene();
+
+    _formsPane->clear();
+    _toolboxPane->clear();
+    _inspectorPage->clear();
+    _propertiesPane->clear();
 }
 
 void MainWindow::handleStopButtonClick()
@@ -430,6 +464,11 @@ void MainWindow::handleRunButtonClick()
 void MainWindow::handleBuildsButtonClick()
 {
     WindowManager::instance()->show(WindowManager::Builds);
+}
+
+void MainWindow::handleProjectsButtonClick()
+{
+    WindowManager::instance()->show(WindowManager::Welcome);
 }
 
 //void MainWindow::setupManagers()

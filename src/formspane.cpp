@@ -151,6 +151,11 @@ void FormsPane::setCurrentForm(int index)
     _listWidget->setCurrentRow(index);
 }
 
+void FormsPane::clear()
+{
+    _listWidget->clear();
+}
+
 QSize FormsPane::sizeHint() const
 {
     return fit::fx(QSizeF{200, 100}).toSize();

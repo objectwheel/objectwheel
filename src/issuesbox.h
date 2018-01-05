@@ -12,7 +12,7 @@
 #include <QLabel>
 
 class Control;
-class OutputWidget;
+class OutputPane;
 
 class Error {
     public:
@@ -44,10 +44,11 @@ class IssuesBox : public QWidget
 {
         Q_OBJECT
     public:
-        explicit IssuesBox(OutputWidget* outputWidget);
+        explicit IssuesBox(OutputPane* outputPane);
         void setCurrentMode(const DesignMode& currentMode);
 
     public slots:
+        void clear();
         void refresh();
 
     private slots:
@@ -63,7 +64,7 @@ class IssuesBox : public QWidget
         QLabel _title;
         QListWidget _listWidget;
         QMap<Error, QPointer<Control>> _buggyControls;
-        OutputWidget* _outputWidget;
+        OutputPane* _outputPane;
         DesignMode _currentMode;
 };
 

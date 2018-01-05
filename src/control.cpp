@@ -431,7 +431,7 @@ bool Control::hasErrors() const
     return !_errors.isEmpty();
 }
 
-const QList<Control*>& Control::controls()
+QList<Control*>& Control::controls()
 {
     return _controls;
 }

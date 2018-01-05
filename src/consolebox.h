@@ -9,9 +9,8 @@ class ConsoleBox : public QWidget
     public:
         explicit ConsoleBox(QWidget *parent = nullptr);
 
-    signals:
-
     public slots:
+        void clear();
 };
 
 #endif // CONSOLEBOX_H

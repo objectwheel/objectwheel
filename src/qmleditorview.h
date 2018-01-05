@@ -42,6 +42,8 @@ class QmlEditorView : public QWidget
         bool pinned() const;
         bool isOpen(Control* control) const;
         bool isOpen(const QString& controlPath) const;
+        bool hasUnsavedDocs() const;
+        bool hasChanges(Control* control) const;
         void addControl(Control* control);
         void addDocument(Control* control, const QString& documentPath);
         void setCurrentDocument(Control* control, const QString& documentPath);
@@ -52,6 +54,8 @@ class QmlEditorView : public QWidget
         void saveDocument(Control* control, const QString& documentPath);
 
     public slots:
+        void clear();
+        void saveAll();
         void raiseContainer();
         void refreshErrors();
 

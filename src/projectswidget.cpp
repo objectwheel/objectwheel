@@ -3,6 +3,9 @@
 #include <userbackend.h>
 #include <projectbackend.h>
 #include <fit.h>
+#include <windowmanager.h>
+#include <frontend.h>
+#include <qmleditorview.h>
 
 #include <QDateTime>
 #include <QQmlContext>
@@ -288,6 +291,28 @@ void ProjectsWidget::handleLoadButtonClicked()
 		return;
     }
 
+    if (dW->qmlEditorView()->hasUnsavedDocs()) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
+        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
+        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::SaveAll);
+        int ret = msgBox.exec();
+
+        switch (ret) {
+            case QMessageBox::Cancel:
+                return;
+
+            case QMessageBox::SaveAll:
+                dW->qmlEditorView()->saveAll();
+                break;
+
+            case QMessageBox::NoToAll:
+                break;
+        }
+    }
+
+    WindowManager::instance()->hide(WindowManager::Main);
     ProjectBackend::instance()->stop();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
     emit busy(tr("Loading project"));

@@ -15,7 +15,7 @@ class QHBoxLayout;
 class QVBoxLayout;
 class QToolBar;
 class QToolButton;
-class OutputWidget;
+class OutputPane;
 class QComboBox;
 class ControlScene;
 class ControlScene;
@@ -37,9 +37,10 @@ class DesignerWidget : public QFrame
         FormView* formView();
         LoadingIndicator* loadingIndicator();
         QSplitter* splitter();
-        OutputWidget* outputWidget();
+        OutputPane* outputPane();
 
     public slots:
+        void clear();
         void updateSkin();
         void handleControlClick(Control*);
         void handleControlDoubleClick(Control*);
@@ -92,7 +93,7 @@ class DesignerWidget : public QFrame
         FormView* _formView;
         ControlView* _controlView;
         QmlEditorView* _qmlEditorView;
-        OutputWidget* _outputWidget;
+        OutputPane* _outputPane;
         QToolBar* _toolbar;
         QToolButton* _refreshPreviewButton;
         QToolButton* _clearFormButton;

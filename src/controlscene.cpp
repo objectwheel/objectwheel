@@ -250,6 +250,13 @@ QPointF ControlScene::lastMousePos() const
     return _lastMousePos;
 }
 
+void ControlScene::clearScene()
+{
+    _mainControl.clear();
+    _d->itemPressed = false;
+    _d->itemMoving = false;
+}
+
 bool ControlScene::snapping() const
 {
     return _snapping;

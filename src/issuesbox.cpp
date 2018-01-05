@@ -2,7 +2,7 @@
 #include <fit.h>
 #include <css.h>
 #include <control.h>
-#include <outputwidget.h>
+#include <outputpane.h>
 #include <controlwatcher.h>
 
 #include <QLabel>
@@ -61,10 +61,10 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
 //! ************************* [IssuesBox] *************************
 //!
 
-IssuesBox::IssuesBox(OutputWidget* outputWidget)
-    : QWidget(outputWidget)
+IssuesBox::IssuesBox(OutputPane* outputPane)
+    : QWidget(outputPane)
     , _layout(this)
-    , _outputWidget(outputWidget)
+    , _outputPane(outputPane)
 {
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);
@@ -118,7 +118,7 @@ void IssuesBox::handleErrors(Control* control)
             _listWidget.addItem(item);
             item->setHidden(_currentMode != err.mode);
             _buggyControls[err] = control;
-            _outputWidget->shine(Issues);
+            _outputPane->shine(OutputPane::Issues);
         }
     }
 }
@@ -137,6 +137,12 @@ void IssuesBox::setCurrentMode(const DesignMode& currentMode)
 {
     if (currentMode == FormGui || currentMode == ControlGui)
         _currentMode = currentMode;
+}
+
+void IssuesBox::clear()
+{
+    _buggyControls.clear();
+    _listWidget.clear();
 }
 
 void IssuesBox::refresh()
@@ -182,7 +188,7 @@ void IssuesBox::refresh()
             visibleItemCount++;
     }
 
-    _outputWidget->button(Issues)->setText
+    _outputPane->button(OutputPane::Issues)->setText
       (QString("Issues [%1]").arg(visibleItemCount));
 }
 

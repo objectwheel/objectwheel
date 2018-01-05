@@ -139,5 +139,6 @@
         <file>images/stop.png</file>
         <file>images/loadingbar.png</file>
         <file>images/run.png</file>
+        <file>images/projects.png</file>
     </qresource>
 </RCC>

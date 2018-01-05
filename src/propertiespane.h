@@ -16,6 +16,7 @@ class PropertiesPane : public QWidget
         explicit PropertiesPane(MainWindow* parent);
 
 	public slots:
+        void clear();
         void clearList();
         void refreshList();
 
