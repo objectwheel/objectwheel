@@ -342,10 +342,11 @@ void MainWindow::clear()
 
     ToolsBackend::instance()->clear();
 
-    for (auto& control : Control::controls()) {
+    QList<Control*> controls = Control::controls();
+    for (auto& control : controls) {
         if (control->scene())
             control->scene()->removeItem(control);
-        control->deleteLater();
+        delete control;
     }
 
     Control::controls().clear();

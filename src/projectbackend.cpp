@@ -216,7 +216,21 @@ bool ProjectBackend::newProject(
             FILENAME, data
         ) ||
         SaveBackend::initProject(pdir)
-    );
+                );
+}
+
+QStringList ProjectBackend::projectNames() const
+{
+    QStringList names;
+    const auto& hashes = projects();
+
+    if (hashes.isEmpty())
+        return names;
+
+    for (const auto& hash : hashes)
+        names << ::property(hash, PROJECTNAME).toString();
+
+    return names;
 }
 
 void ProjectBackend::changeName(const QString& hash, const QString& name) const

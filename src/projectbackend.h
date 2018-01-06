@@ -19,6 +19,7 @@ class ProjectBackend : public QObject
             const QString& size
         ) const;
 
+        QStringList projectNames() const;
         QStringList projects() const;
         const QString& hash() const;
         QString dir(const QString& = instance()->hash()) const;

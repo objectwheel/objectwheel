@@ -79,7 +79,7 @@ ProjectsWidget::ProjectsWidget(QWidget *parent) : QQuickWidget(parent)
 void ProjectsWidget::handleNewButtonClicked()
 {
     if (UserBackend::instance()->dir().isEmpty()) return;
-    auto projects = ProjectBackend::instance()->projects();
+    auto projects = ProjectBackend::instance()->projectNames();
 	int count = 1;
     QString projectName = "Project - 1";
 	while (projects.contains(projectName)) {
