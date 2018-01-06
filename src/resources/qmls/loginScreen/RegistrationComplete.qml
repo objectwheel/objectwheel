@@ -16,14 +16,15 @@ Item {
         visible: false
     }
 
-    Image {
+    Text {
         id: owText
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: img.bottom
         anchors.topMargin: Fit.fit(20)
-        source: "qrc:///resources/images/objectwheel.png"
-        fillMode: Image.PreserveAspectFit
-        height: Fit.fit(28)
+        text: "Objectwheel"
+        color: "#2E3A41"
+        font.weight: Font.ExtraLight
+        font.pixelSize: Fit.fit(28)
     }
 
     Text {
@@ -42,7 +43,6 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: thanksText.bottom
         text: "Please check your mailbox to\nverify your account."
-        font.pixelSize: Fit.fit(13)
         color: "#304050"
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
@@ -73,7 +73,7 @@ Item {
                     Image {
                         id: btnOkayImg
                         source: "qrc:///resources/images/ok.png"
-                        height: btnOkay.height - Fit.fit(14)
+                        height: btnOkay.height - Fit.fit(12)
                         fillMode: Image.PreserveAspectFit
                     }
                     Text {
@@ -81,7 +81,6 @@ Item {
                         color: "white"
                         verticalAlignment: Text.AlignVCenter
                         height: btnOkayImg.height
-                        font.pixelSize: Fit.fit(13)
                     }
                 }
                 signal clicked()
@@ -107,19 +106,9 @@ Item {
         }
         OpacityMask {
             id: btnOkayOpMask
-            visible: false
             anchors.fill: btnOkayInCont
             source: btnOkayInCont
             maskSource: btnOkayMask
-        }
-        DropShadow {
-            anchors.fill: btnOkayOpMask
-            horizontalOffset: 0
-            verticalOffset: Fit.fit(1)
-            radius: 3
-            samples: 15
-            color: "#30000000"
-            source: btnOkayOpMask
         }
         MouseArea {
             anchors.fill: parent

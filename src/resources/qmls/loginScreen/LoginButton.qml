@@ -31,13 +31,12 @@ Item {
                     color: "white"
                     verticalAlignment: Text.AlignVCenter
                     height: imgLoad.height
-                    font.pixelSize: Fit.fit(13)
                 }
 
                 Image {
                     id: imgLoad
                     source: "qrc:///resources/images/new.png"
-                    height: btnLeft.height - Fit.fit(14)
+                    height: btnLeft.height - Fit.fit(12)
                     fillMode: Image.PreserveAspectFit
                     antialiasing: true
                 }
@@ -65,7 +64,7 @@ Item {
                 Image {
                     id: imgLoad2
                     source: "qrc:///resources/images/load.png"
-                    height: btnRight.height - Fit.fit(14)
+                    height: btnRight.height - Fit.fit(12)
                     fillMode: Image.PreserveAspectFit
                     antialiasing: true
                 }
@@ -73,7 +72,6 @@ Item {
                     id: txtLoad2
                     text: "Log In"
                     color: "white"
-                    font.pixelSize: Fit.fit(13)
                     verticalAlignment: Text.AlignVCenter
                     height: imgLoad.height
                 }
@@ -101,19 +99,9 @@ Item {
     }
     OpacityMask {
         id: opMask
-        visible: false
         anchors.fill: buttonsContainer
         source: buttonsContainer
         maskSource: mask
-    }
-    DropShadow {
-        anchors.fill: opMask
-        horizontalOffset: 0
-        verticalOffset: Fit.fit(1)
-        radius: 3
-        samples: 16
-        color: "#50000000"
-        source: opMask
     }
     MouseArea {
         anchors.fill: parent

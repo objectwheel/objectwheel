@@ -65,7 +65,7 @@ FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
     connect(_addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
 
     _removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _removeButton->setColor("#C61717");
+    _removeButton->setColor("#C2504B");
     _removeButton->setFixedSize(fit::fx(17),fit::fx(17));
     _removeButton->setRadius(fit::fx(7.5));
     _removeButton->setIconSize(QSize(fit::fx(11),fit::fx(11)));

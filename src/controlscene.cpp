@@ -252,6 +252,7 @@ QPointF ControlScene::lastMousePos() const
 
 void ControlScene::clearScene()
 {
+    clear();
     _mainControl.clear();
     _d->itemPressed = false;
     _d->itemMoving = false;

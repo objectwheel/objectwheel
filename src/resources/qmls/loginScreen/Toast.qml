@@ -41,7 +41,6 @@ Item {
             clip: true
             color: Qt.lighter("#2E3A41", 1.55)
             text: "       "
-            font.pixelSize: Fit.fit(13)
             wrapMode: Text.WordWrap
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter

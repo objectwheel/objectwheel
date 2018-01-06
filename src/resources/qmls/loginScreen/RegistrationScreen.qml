@@ -15,12 +15,13 @@ Item {
         color: "#25000000"
         anchors { top: parent.top; left: parent.left; right: parent.right;}
         height: Fit.fit(40)
-        Image {
+        Text {
             id: projectsettingsTextImage
-            source: "qrc:///resources/images/registration.png"
             anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter }
-            fillMode: Image.PreserveAspectFit
-            height: Fit.fit(16)
+            font.pixelSize: Fit.fit(16)
+            font.weight: Font.Normal
+            color: "#2E3A41"
+            text: "Registration"
         }
         Item {
             id: btnCancelOutCont
@@ -47,12 +48,11 @@ Item {
                             color: "white"
                             verticalAlignment: Text.AlignVCenter
                             height: btnCancelImg.height
-                            font.pixelSize: Fit.fit(13)
                         }
                         Image {
                             id: btnCancelImg
                             source: "qrc:///resources/images/cancel.png"
-                            height: btnCancel.height - Fit.fit(14)
+                            height: btnCancel.height - Fit.fit(12)
                             fillMode: Image.PreserveAspectFit
                         }
                     }
@@ -85,19 +85,9 @@ Item {
             }
             OpacityMask {
                 id: btnCancelOpMask
-                visible: false
                 anchors.fill: btnCancelInCont
                 source: btnCancelInCont
                 maskSource: btnCancelMask
-            }
-            DropShadow {
-                anchors.fill: btnCancelOpMask
-                horizontalOffset: 0
-                verticalOffset: Fit.fit(1)
-                radius: 3
-                samples: 15
-                color: "#30000000"
-                source: btnCancelOpMask
             }
             MouseArea {
                 anchors.fill: parent
@@ -131,7 +121,7 @@ Item {
                         Image {
                             id: btnOkImg
                             source: "qrc:///resources/images/ok.png"
-                            height: btnOk.height - Fit.fit(14)
+                            height: btnOk.height - Fit.fit(12)
                             fillMode: Image.PreserveAspectFit
                         }
                         Text {
@@ -139,7 +129,6 @@ Item {
                             color: "white"
                             verticalAlignment: Text.AlignVCenter
                             height: btnOkImg.height
-                            font.pixelSize: Fit.fit(13)
                         }
                     }
                     signal clicked();
@@ -171,19 +160,9 @@ Item {
             }
             OpacityMask {
                 id: btnOkOpMask
-                visible: false
                 anchors.fill: btnOkInCont
                 source: btnOkInCont
                 maskSource: btnOkMask
-            }
-            DropShadow {
-                anchors.fill: btnOkOpMask
-                horizontalOffset: 0
-                verticalOffset: Fit.fit(1)
-                radius: 3
-                samples: 15
-                color: "#30000000"
-                source: btnOkOpMask
             }
             MouseArea {
                 anchors.fill: parent
@@ -289,8 +268,7 @@ Item {
                         id: firstnameTitle
                         text: "First Name*"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -307,7 +285,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -325,8 +302,7 @@ Item {
                         id: lastnameTitle
                         text: "Last Name*"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -343,7 +319,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -361,8 +336,7 @@ Item {
                         id: emailTitle
                         text: "Email*"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -377,7 +351,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                         style: TextFieldStyle {
                             background: Rectangle {
                                 radius: 2
@@ -400,8 +373,7 @@ Item {
                         id: emailTitle2
                         text: "Confirm Email*"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -416,7 +388,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                         style: TextFieldStyle {
                             background: Rectangle {
                                 radius: 2
@@ -440,8 +411,7 @@ Item {
                         id: passwordTitle
                         text: "Password*"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -456,7 +426,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                         style: TextFieldStyle {
                             background: Rectangle {
                                 radius: 2
@@ -480,8 +449,7 @@ Item {
                         id: passwordTitle2
                         text: "Confirm Password*"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -496,7 +464,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                         style: TextFieldStyle {
                             background: Rectangle {
                                 radius: 2
@@ -520,8 +487,7 @@ Item {
                         id: countryTitle
                         text: "Country"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -538,7 +504,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -555,8 +520,7 @@ Item {
                         id: companyTitle
                         text: "Company"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -573,7 +537,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -591,8 +554,7 @@ Item {
                         id: titleTitle
                         text: "Title"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -609,7 +571,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -626,8 +587,7 @@ Item {
                         id: phoneTitle
                         text: "Phone"
                         color: "#2E3A41"
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                         verticalAlignment: Text.AlignVCenter
                         Layout.fillHeight: true
                     }
@@ -644,7 +604,6 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextArea.AlignVCenter
                         horizontalAlignment: TextArea.AlignRight
-                        font.pixelSize: Fit.fit(13)
                     }
                 }
             }
@@ -678,7 +637,6 @@ Item {
         }
         Text {
             id: warningText
-            font.pixelSize: Fit.fit(13)
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             y: parent.height/2.0 -contentHeight/2.0 + Fit.fit(4)

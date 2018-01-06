@@ -18,7 +18,6 @@ Rectangle {
         id: base
         y: -height-base.radius-Fit.fit(5)
         anchors.horizontalCenter: parent.horizontalCenter
-        visible: false
         Rectangle {
             id: line
             color: base.color
@@ -59,15 +58,6 @@ Rectangle {
             to: 0
             duration: 300
         }
-    }
-    DropShadow {
-        anchors.fill: base
-        horizontalOffset: 0
-        verticalOffset: Fit.fit(1)
-        radius: 4
-        samples: 18
-        color: "#10000000"
-        source: base
     }
     Item {
         id: container

@@ -342,15 +342,6 @@ void MainWindow::clear()
 
     ToolsBackend::instance()->clear();
 
-    QList<Control*> controls = Control::controls();
-    for (auto& control : controls) {
-        if (control->scene())
-            control->scene()->removeItem(control);
-        delete control;
-    }
-
-    Control::controls().clear();
-
     designerWidget()->clear();
     designerWidget()->controlScene()->clearScene();
     designerWidget()->formScene()->clearScene();

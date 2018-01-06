@@ -38,41 +38,25 @@
         <file>images/new@2x.png</file>
         <file>images/ok.png</file>
         <file>images/ok@2x.png</file>
-        <file>images/projectsettings.png</file>
-        <file>images/projectsettings@2x.png</file>
         <file>images/unload.png</file>
         <file>images/unload@2x.png</file>
-        <file>images/version.png</file>
-        <file>images/version@2x.png</file>
-        <file>images/welcome.png</file>
-        <file>images/welcome@2x.png</file>
         <file>images/complete.gif</file>
         <file>images/complete@2x.gif</file>
         <file>images/find.png</file>
         <file>images/find@2x.png</file>
         <file>images/key.png</file>
         <file>images/key@2x.png</file>
-        <file>images/login.png</file>
-        <file>images/login@2x.png</file>
-        <file>images/objectwheel.png</file>
-        <file>images/objectwheel@2x.png</file>
-        <file>images/registration.png</file>
-        <file>images/registration@2x.png</file>
         <file>images/android.png</file>
         <file>images/helmet.png</file>
         <file>images/ios.png</file>
         <file>images/linux.png</file>
         <file>images/macos.png</file>
         <file>images/raspi.png</file>
-        <file>images/selectmsg.png</file>
-        <file>images/selectmsg@2x.png</file>
         <file>images/windows.png</file>
         <file>images/back-line.png</file>
         <file>images/back-line@2x.png</file>
         <file>images/construction.gif</file>
         <file>images/construction@2x.gif</file>
-        <file>images/build_inprogress.png</file>
-        <file>images/build_inprogress@2x.png</file>
         <file>images/bouncing_arrow.png</file>
         <file>images/bouncing_arrow@2x.png</file>
         <file>images/delete-icon@2x.png</file>

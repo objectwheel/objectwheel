@@ -34,7 +34,7 @@ Rectangle {
         font.pixelSize: Fit.fit(18)
         text: "Build inprogress"
         color: "#e0e4e7"
-        font.weight: Font.ExtraLight
+        font.weight: Font.Light
     }
     ProgressPage {
         id: progressPage

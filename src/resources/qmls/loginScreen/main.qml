@@ -14,6 +14,7 @@ Rectangle {
         anchors.fill: parent
         interactive: false
         clip: true
+        currentIndex:  0
 
         Item {
             LoginScreen {
@@ -50,11 +51,10 @@ Rectangle {
     }
 
     Text {
-        text: "© 2015 - 2017 Objectwheel, Inc. All Rights Reserved."
+        text: "© 2015 - 2018 Objectwheel, Inc. All Rights Reserved."
         x: parent.width/2.0 - width/2.0
         anchors.bottom: parent.bottom
-        font.pixelSize: Fit.fit(13)
-        font.bold: true
+        font.weight: Font.Bold
         color: "#2E3A41"
         anchors.bottomMargin:  Fit.fit(2)
         opacity: swipeView.currentIndex == 0

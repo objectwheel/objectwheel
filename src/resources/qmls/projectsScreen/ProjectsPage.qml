@@ -13,24 +13,24 @@ Item {
         fillMode: Image.PreserveAspectFit
     }
 
-    Image {
+    Text {
         id: welcomeTextImage
-        source: "qrc:///resources/images/welcome.png"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: welcomeImage.bottom
         anchors.topMargin: Fit.fit(10)
-        fillMode: Image.PreserveAspectFit
-        height: Fit.fit(28)
+        text: "Welcome to Objectwheel"
+        color: "#1E2A31"
+        font.weight: Font.ExtraLight
+        font.pixelSize: Fit.fit(28)
     }
 
-    Image {
+    Text {
         id: versionTextImage
-        source: "qrc:///resources/images/version.png"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: welcomeTextImage.bottom
         anchors.topMargin: Fit.fit(15)
-        fillMode: Image.PreserveAspectFit
-        height: Fit.fit(12)
+        color: "#2E3A41"
+        text: "Version " + version
     }
 
     Text {
@@ -39,8 +39,7 @@ Item {
         anchors.top: versionTextImage.bottom
         anchors.topMargin: Fit.fit(15)
         text: "Your Projects"
-        color: "#505457"
-        font.pixelSize: Fit.fit(13)
+        color: "#2E3A41"
     }
 
     ProjectList {
@@ -65,4 +64,5 @@ Item {
     property alias projectList : projectList
     property alias projectButton : projectButton
     property string logoPath
+    property string version
 }

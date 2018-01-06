@@ -89,16 +89,6 @@ Item {
                         source: activeGradient
                         anchors.fill: activeGradient
                         maskSource: mask
-                        visible: false
-                    }
-                    DropShadow {
-                        anchors.fill: opMask
-                        horizontalOffset: 0
-                        verticalOffset: Fit.fit(1)
-                        radius: 3
-                        samples: 15
-                        color: "#25000000"
-                        source: opMask
                         visible: active
                     }
                 }
@@ -107,17 +97,15 @@ Item {
                     Text {
                         width: Fit.fit(320)
                         elide: Text.ElideRight
-                        color: "#2e2a21"
+                        color: "#1E2A31"
                         text: projectName
-                        font.bold: true
-                        font.pixelSize: Fit.fit(13)
+                        font.weight: Font.DemiBold
                     }
                     Text {
                         width: Fit.fit(320)
                         elide: Text.ElideRight
-                        color: Qt.lighter("#2e2a21", 1.2)
+                        color: "#2E3A41"
                         text: lastEdited
-                        font.pixelSize: Fit.fit(12)
                     }
                 }
             }

@@ -38,7 +38,6 @@ Item {
             id: informativeText
             text: root.informativeText + waitEffectString
             color: "#e0e4e7"
-            font.pixelSize: Fit.fit(13)
             anchors.horizontalCenter: parent.horizontalCenter
         }
         ProgressBar {
@@ -83,7 +82,6 @@ Item {
                 id: mbText
                 text: root.mbText
                 color: "#e0e4e7"
-                font.pixelSize: Fit.fit(12)
                 horizontalAlignment: Text.AlignLeft
             }
             Item { height: 1; Layout.fillWidth: true }
@@ -91,7 +89,6 @@ Item {
                 id: speedText
                 text: root.speedText
                 color: "#e0e4e7"
-                font.pixelSize: Fit.fit(12)
                 horizontalAlignment: Text.AlignRight
             }
         }
@@ -134,7 +131,6 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Total progress: %" + (progressBar2.value * 100).toFixed(1)
             color: "#e0e4e7"
-            font.pixelSize: Fit.fit(12)
         }
         Item {
             id: btnCancelOutCont
@@ -154,8 +150,8 @@ Item {
                     anchors.fill: parent
                     visible: false
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: Qt.darker("#BB2023", 1.1) }
-                        GradientStop { position: 1.0; color: Qt.darker("#BB2023", 1.3) }
+                        GradientStop { position: 0.0; color: Qt.darker("#C2504B", 1.1) }
+                        GradientStop { position: 1.0; color: Qt.darker("#C2504B", 1.3) }
                     }
                     Row {
                         anchors.centerIn: parent
@@ -165,12 +161,11 @@ Item {
                             color: "white"
                             verticalAlignment: Text.AlignVCenter
                             height: btnCancelImg.height
-                            font.pixelSize: Fit.fit(13)
                         }
                         Image {
                             id: btnCancelImg
                             source: "qrc:///resources/images/cancel.png"
-                            height: btnCancel.height - Fit.fit(14)
+                            height: btnCancel.height - Fit.fit(12)
                             fillMode: Image.PreserveAspectFit
                         }
                     }
@@ -196,19 +191,9 @@ Item {
             }
             OpacityMask {
                 id: btnCancelOpMask
-                visible: false
                 anchors.fill: btnCancelInCont
                 source: btnCancelInCont
                 maskSource: btnCancelMask
-            }
-            DropShadow {
-                anchors.fill: btnCancelOpMask
-                horizontalOffset: 0
-                verticalOffset: Fit.fit(1)
-                radius: 2
-                samples: 18
-                color: "#30000000"
-                source: btnCancelOpMask
             }
             MouseArea {
                 anchors.fill: parent
@@ -249,12 +234,11 @@ Item {
                             color: "white"
                             verticalAlignment: Text.AlignVCenter
                             height: btnOkImg.height
-                            font.pixelSize: Fit.fit(13)
                         }
                         Image {
                             id: btnOkImg
                             source: "qrc:///resources/images/cancel.png"
-                            height: btnOk.height - Fit.fit(14)
+                            height: btnOk.height - Fit.fit(12)
                             fillMode: Image.PreserveAspectFit
                         }
                     }
@@ -280,19 +264,9 @@ Item {
             }
             OpacityMask {
                 id: btnOkOpMask
-                visible: false
                 anchors.fill: btnOkInCont
                 source: btnOkInCont
                 maskSource: btnOkMask
-            }
-            DropShadow {
-                anchors.fill: btnOkOpMask
-                horizontalOffset: 0
-                verticalOffset: Fit.fit(1)
-                radius: 3
-                samples: 15
-                color: "#30000000"
-                source: btnOkOpMask
             }
             MouseArea {
                 anchors.fill: parent

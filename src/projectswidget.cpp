@@ -35,8 +35,6 @@ QQuickItem* btnCancel;
 QQuickItem* listView;
 ProjectListModel model;
 
-// TODO: Show a loading bar and inform user about loading progress of the project
-
 ProjectsWidget::ProjectsWidget(QWidget *parent) : QQuickWidget(parent)
 {
 	rootContext()->setContextProperty("dpi", fit::ratio());
@@ -61,6 +59,8 @@ ProjectsWidget::ProjectsWidget(QWidget *parent) : QQuickWidget(parent)
     btnOk = QQmlProperty::read(rootObject(), "projectSettings.btnOk", engine()).value<QQuickItem*>();
     btnCancel = QQmlProperty::read(rootObject(), "projectSettings.btnCancel", engine()).value<QQuickItem*>();
     listView = QQmlProperty::read(projectList, "listView", engine()).value<QQuickItem*>();
+
+    QQmlProperty::write(rootObject(), "owVersion", tr(APP_VER) + " (" APP_GITHASH ")");
 
 	connect(projectButton, SIGNAL(newButtonClicked()), this, SLOT(handleNewButtonClicked()));
 	connect(projectButton, SIGNAL(loadButtonClicked()), this, SLOT(handleLoadButtonClicked()));

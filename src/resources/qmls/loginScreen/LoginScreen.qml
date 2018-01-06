@@ -17,12 +17,13 @@ Column {
         height: Fit.fit(80)
         fillMode: Image.PreserveAspectFit
     }
-    Image {
+    Text {
         id: loginImage
         anchors.horizontalCenter: parent.horizontalCenter
-        source: "qrc:///resources/images/login.png"
-        height: Fit.fit(18)
-        fillMode: Image.PreserveAspectFit
+        text: "Login"
+        color: "#2E3A41"
+        font.weight: Font.Light
+        font.pixelSize: Fit.fit(18)
     }
     Item {
         id: inputContainer
@@ -35,16 +36,6 @@ Column {
             border.color: "#c2c6c9"
             radius: Fit.fit(8)
             border.width: Fit.fit(1)
-            visible: false
-        }
-        DropShadow {
-            anchors.fill: base
-            horizontalOffset: 0
-            verticalOffset: Fit.fit(1)
-            radius: 3
-            samples: 17
-            color: "#20000000"
-            source: base
         }
         ColumnLayout {
             anchors.fill: parent
@@ -53,7 +44,6 @@ Column {
                 Text {
                     id: emailLabel
                     text: "Email"
-                    font.pixelSize: Fit.fit(13)
                     verticalAlignment: Text.AlignVCenter
                     Layout.fillHeight: true
                     color: "#45000000"
@@ -84,7 +74,6 @@ Column {
                     Layout.fillWidth: true
                     verticalAlignment: TextArea.AlignVCenter
                     horizontalAlignment: TextArea.AlignRight
-                    font.pixelSize: Fit.fit(13)
                     Layout.rightMargin: Fit.fit(10)
                     Keys.onReturnPressed: {
                         var json = {
@@ -116,7 +105,6 @@ Column {
                 Text {
                     id: passwordLabel
                     text: "Password"
-                    font.pixelSize: Fit.fit(13)
                     verticalAlignment: Text.AlignVCenter
                     Layout.fillHeight: true
                     color: "#45000000"
@@ -147,7 +135,6 @@ Column {
                     Layout.fillWidth: true
                     verticalAlignment: TextArea.AlignVCenter
                     horizontalAlignment: TextArea.AlignRight
-                    font.pixelSize: Fit.fit(13)
                     Layout.rightMargin: Fit.fit(10)
                     Keys.onReturnPressed: {
                         var json = {
@@ -196,15 +183,6 @@ Column {
             radius: Fit.fit(20)
             color: "#d0d4d7"
             border.color: "#c2c6c9"
-        }
-        DropShadow {
-            anchors.fill: base2
-            horizontalOffset: 0
-            verticalOffset: Fit.fit(1)
-            radius: 3
-            samples: 17
-            color: "#20000000"
-            source: base2
         }
         RowLayout {
             spacing: Fit.fit(8)
@@ -259,7 +237,6 @@ Column {
             }
             Text {
                 text: "Automatic login"
-                font.pixelSize: Fit.fit(13)
                 verticalAlignment: Text.AlignVCenter
                 Layout.fillHeight: true
                 Layout.fillWidth: true
@@ -335,7 +312,6 @@ Column {
                 id: lostPassButton
                 text.text: "Lost your password?"
                 text.color: "#2E3A41"
-                text.font.pixelSize: Fit.fit(13)
                 width: parent.width
                 height: (parent.height - img.height - padder.height) / 2
                 anchors.top: img.bottom
@@ -362,7 +338,6 @@ Column {
                 id: aboutButton
                 text.text: "About Objectwheel"
                 text.color: "#2E3A41"
-                text.font.pixelSize: Fit.fit(13)
                 width: parent.width
                 height: (parent.height - img.height - padder.height) / 2
                 anchors.top: line.bottom

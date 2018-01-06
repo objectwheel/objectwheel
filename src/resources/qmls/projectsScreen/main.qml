@@ -15,6 +15,7 @@ Rectangle {
             id: projectsPage
             clip: true
             logoPath: "qrc:///resources/images/logo.png"
+            version: owVersion
         }
 
         ProjectSettings {
@@ -26,4 +27,5 @@ Rectangle {
     property alias swipeView: swipeView
     property alias projectSettings: projectSettings
     property alias projectsPage: projectsPage
+    property string owVersion
 }
