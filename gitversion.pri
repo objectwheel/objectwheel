@@ -24,7 +24,8 @@ COMMIT_VER = $$section(CONF_VERSION, ., 2, 2)
 SZVER = $$str_size($$COMMIT_VER)
 equals(SZVER, 0) {
     ZEROS = 00
-} equals(SZVER, 1)) {
+}
+equals(SZVER, 1) {
     ZEROS = 0
 }
 
