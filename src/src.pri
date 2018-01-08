@@ -140,7 +140,7 @@ SOURCES += $$PWD/main.cpp\
 CONFIG(release, debug | release):
 !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {
     VERSION_DATA = PREVIOUS_VERSION=$$GIT_VERSION
-    write_file($$VERSION_FILE, VERSION_DATA, append)
+    write_file($$VERSION_FILE, VERSION_DATA)
     touch($$PWD/global.h, $$VERSION_FILE)
     touch($$PWD/main.cpp, $$VERSION_FILE)
     touch($$PWD/projectswidget.cpp, $$VERSION_FILE)
