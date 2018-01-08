@@ -8,7 +8,7 @@
 #define SIZE_NONGUI_CONTROL (QSizeF(fit::fx(50), fit::fx(50)))
 #define TOOL_KEY ("QURBUEFaQVJMSVlJWiBIQUZJWg")
 #define TEXT_LEGAL (QString("<p><b>© 2015 - 2018 %1 All Rights Reserved.</b></p>").arg(APP_CORP))
-#define TEXT_VERSION (QString("<p><b>version</b> v%1 <b>hash</b> %2 <b>date</b><br> %3 <br></p>")\
+#define TEXT_VERSION (QString("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b><br> %3 <br></p>")\
     .arg(APP_VER).arg(APP_GITHASH).arg(APP_GITDATE))
 
 enum DesignMode {

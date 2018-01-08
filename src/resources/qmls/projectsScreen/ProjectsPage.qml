@@ -31,6 +31,8 @@ Item {
         anchors.topMargin: Fit.fit(15)
         color: "#2E3A41"
         text: "Version " + version
+        font.pixelSize: Fit.fit(15)
+        font.weight: Font.Light
     }
 
     Text {
