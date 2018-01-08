@@ -54,9 +54,7 @@
         <file>tools/Pinwheel.zip</file>
         <file>fonts/LiberationMono-Regular.ttf</file>
         <file>qmls/delaycaller.js</file>
-        <file>qmls/empty-item.qml</file>
         <file>qmls/FancyButton.qml</file>
-        <file>qmls/filemanager.js</file>
         <file>qmls/fit.js</file>
         <file>qmls/module-resolver.qml</file>
         <file>qmls/projectsScreen/main.qml</file>
@@ -73,7 +71,6 @@
         <file>qmls/loginScreen/PopupScreen.qml</file>
         <file>qmls/loginScreen/RegistrationComplete.qml</file>
         <file>qmls/loginScreen/RegistrationScreen.qml</file>
-        <file>qmls/loginScreen/Toast.qml</file>
         <file>qmls/form/t/_properties.json</file>
         <file>qmls/form/t/main.qml</file>
         <file>qmls/control/t/_properties.json</file>

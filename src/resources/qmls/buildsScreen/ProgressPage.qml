@@ -6,7 +6,6 @@ import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.1
 import Qt.labs.platform 1.0
 import "../fit.js" as Fit
-import "../filemanager.js" as FileManager
 import "../delaycaller.js" as DelayCaller
 
 Item {

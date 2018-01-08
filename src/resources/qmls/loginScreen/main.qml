@@ -62,10 +62,6 @@ Rectangle {
             PropertyAnimation {}
         }
     }
-    Toast {
-        id: toast
-        anchors.fill: parent
-    }
     PopupScreen {
         id: popup
         anchors.fill: parent
@@ -75,6 +71,5 @@ Rectangle {
         base.color: "#D0D4D7"
         base.border.color: "#a0a4a7"
     }
-    property alias toast: toast
     property alias loginScreen: loginScreen
 }
