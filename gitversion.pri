@@ -19,9 +19,22 @@ win32 { # On windows version can only be numerical so remove commit hash
     CONF_VERSION ~= s/\.\d+\.[a-f0-9]{6,}//
 }
 
-VERSION = $$section(CONF_VERSION, ., 0, 1)
-GIT_HASH = $$section(CONF_VERSION, ., 2, 4)
+ZEROS =
+COMMIT_VER = $$section(CONF_VERSION, ., 2, 2)
+SZVER = $$str_size($$COMMIT_VER)
+equals(SZVER, 0) {
+    ZEROS = 00
+} equals(SZVER, 1)) {
+    ZEROS = 0
+}
+
+VERSION = $$section(CONF_VERSION, ., 0, 1)$$ZEROS$$COMMIT_VER
+GIT_HASH = $$section(CONF_VERSION, ., 3, 4)
 GIT_DATE = $$system(git log -1 --format=%cd)
+
+equals(GIT_HASH, ) {
+    GIT_HASH += 00000
+}
 
 # By default Qt only uses major and minor version for Info.plist on Mac.
 # This will rewrite Info.plist with full version
