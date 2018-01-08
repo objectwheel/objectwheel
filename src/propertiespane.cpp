@@ -520,8 +520,13 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
             connect(editor, &QCheckBox::clicked, [this, property, index] ()
             {
                 auto color = index.data(NodeRole::Data).value<QColor>();
-                color = QColorDialog::getColor(color, m_view, "Choose Color",
-                                               QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+                color = QColorDialog::getColor(
+                    Qt::white,
+                    m_view,
+                    "Select Color",
+                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+                );
+
                 if (color.isValid()) {
                     m_view->model()->setData(index, color, NodeRole::Data);
                     m_view->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
