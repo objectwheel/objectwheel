@@ -143,6 +143,14 @@ InspectorPane::InspectorPane(MainWindow* parent)
     _treeWidget->viewport()->installEventFilter(this);
     _treeWidget->header()->resizeSection(0, fit::fx(250));
     _treeWidget->header()->resizeSection(1, fit::fx(50));
+    _treeWidget->header()->setStyleSheet("QHeaderView::section {"
+                                         "    background-color: qlineargradient("
+                                         "    x1:0, y1:0, x2:0, y2:1,"
+                                         "    stop:0 #F7FbFf,"
+                                         "    stop:1 #e7ebef);"
+                                         "    color: black;"
+                                         "    padding-left: 4px;"
+                                         "}");
     _treeWidget->setItemDelegate(new InspectorListDelegate(_treeWidget));
 
     connect(_treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),

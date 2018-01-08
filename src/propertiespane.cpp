@@ -417,10 +417,7 @@ static void cleanProperties(PropertyMap& map)
     QStringList keysToRemove;
 
     for (auto key : map.keys()) {
-        if (key.startsWith("__") ||
-            QString::fromUtf8(map.value(key).typeName()).isEmpty() ||
-            QString::fromUtf8(map.value(key).typeName()).
-            contains(QRegExp("Q([A-Za-z_][A-Za-z0-9_]*)\\*")))
+        if (key.startsWith("__") || QString(map.value(key).typeName()).isEmpty())
             keysToRemove << key;
     }
 
@@ -1048,6 +1045,14 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     _treeWidget->setColumnCount(2);
     _treeWidget->setDragEnabled(false);
     _treeWidget->setFocusPolicy(Qt::NoFocus);
+    _treeWidget->header()->setStyleSheet("QHeaderView::section {"
+                                         "    background-color: qlineargradient("
+                                         "    x1:0, y1:0, x2:0, y2:1,"
+                                         "    stop:0 #F7FbFf,"
+                                         "    stop:1 #e7ebef);"
+                                         "    color: black;"
+                                         "    padding-left: 4px;"
+                                         "}");
     _treeWidget->setIndentation(fit::fx(10));
     _treeWidget->setDropIndicatorShown(false);
     _treeWidget->headerItem()->setText(1, "Value");
@@ -1143,6 +1148,7 @@ void PropertiesPane::refreshList()
     for (const auto& propertyNode : propertyNodes) {
         auto metaObject = propertyNode.metaObject;
         auto map = propertyNode.propertyMap;
+
         cleanProperties(map);
 
         if (map.isEmpty())

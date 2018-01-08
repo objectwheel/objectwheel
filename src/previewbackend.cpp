@@ -137,13 +137,19 @@ PropertyNodes PreviewBackendPrivate::properties(const QObject* object) const
         PropertyNode propertyNode;
         PropertyMap propertyMap;
 
-        for (int i = metaObject->propertyOffset();
-             i < metaObject->propertyCount(); i++) {
-            if (metaObject->property(i).isWritable()) {
-                QString name = metaObject->property(i).name();
-                auto val = metaObject->property(i).read(object);
-                propertyMap[name] = val;
-            }
+        for (
+            int i = metaObject->propertyOffset();
+            i < metaObject->propertyCount();
+            i++
+        ) {
+            const auto& prop = metaObject->property(i);
+
+            if (
+                prop.isValid() &&
+                !tr(prop.typeName()).contains("*") &&
+                prop.isWritable() && prop.isReadable()
+            )
+                propertyMap[prop.name()] = prop.read(object);
         }
 
         className = className.split("_QMLTYPE").at(0);
