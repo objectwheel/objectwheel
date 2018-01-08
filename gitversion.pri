@@ -34,7 +34,7 @@ GIT_HASH = $$section(CONF_VERSION, ., 3, 4)
 GIT_DATE = $$system(git log -1 --format=%cd)
 
 equals(GIT_HASH, ) {
-    GIT_HASH += 00000
+    GIT_HASH = master
 }
 
 # By default Qt only uses major and minor version for Info.plist on Mac.
