@@ -1,6 +1,10 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
+include($$PWD/platform/platform.pri)
+include($$PWD/resources/resources.pri)
+include($$PWD/components/components.pri)
+
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
 
@@ -67,7 +71,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/previewbackend.h \
            $$PWD/frontend.h \
            $$PWD/loadingbar.h \
-    $$PWD/outputpane.h
+           $$PWD/outputpane.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -131,8 +135,13 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/userbackend.cpp \
            $$PWD/previewbackend.cpp \
            $$PWD/loadingbar.cpp \
-    $$PWD/outputpane.cpp
+           $$PWD/outputpane.cpp
 
-include($$PWD/platform/platform.pri)
-include($$PWD/resources/resources.pri)
-include($$PWD/components/components.pri)
+CONFIG(release, debug | release):
+!infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {
+    VERSION_DATA = PREVIOUS_VERSION=$$GIT_VERSION
+    write_file($$VERSION_FILE, VERSION_DATA, append)
+    touch($$PWD/global.h, $$VERSION_FILE)
+    touch($$PWD/main.cpp, $$VERSION_FILE)
+    touch($$PWD/projectswidget.cpp, $$VERSION_FILE)
+}

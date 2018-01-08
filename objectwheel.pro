@@ -2,8 +2,8 @@ TEMPLATE = app
 TARGET = Objectwheel
 QT += widgets network qml quick quickcontrols2 quickwidgets webview websockets multimedia sensors svg concurrent
 
-include($$PWD/src/src.pri)
 include($$PWD/gitversion.pri)
+include($$PWD/src/src.pri)
 include($$PWD/contrib/contrib.pri)
 
 DEFINES += QT_QML_DEBUG_NO_WARNING \

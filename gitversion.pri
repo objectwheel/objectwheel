@@ -1,3 +1,5 @@
+VERSION_FILE = $$PWD/VERSION
+
 # Need to discard STDERR so get path to NULL device
 win32 {
     NULL_DEVICE = NUL # Windows doesn't have /dev/null but has NUL

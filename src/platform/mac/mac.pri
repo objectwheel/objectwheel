@@ -9,4 +9,4 @@ QMAKE_OBJCXXFLAGS += -fobjc-arc
 
 LIBS += -framework AppKit
 HEADERS += $$PWD/mactoolbar.h
-OBJECTIVE_SOURCES += $$PWD/mactoolbar.mm
+SOURCES += $$PWD/mactoolbar.mm
