@@ -1301,7 +1301,7 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
             if (_treeWidget->topLevelItemCount() == 0) {
                 auto sc = dW->currentScene()->selectedControls();
                 bool drawn = false;
-                const qreal ic = w->height() / fit::fx(20);
+                const qreal ic = w->height() / fit::fx(20); // WARNING: Constant 20?
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
                         painter.fillRect(0, i * fit::fx(20), w->width(),

@@ -182,21 +182,48 @@ InspectorPane::InspectorPane(MainWindow* parent)
 bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == _treeWidget->viewport()) {
-        if (event->type() == QEvent::Paint &&
-          _treeWidget->topLevelItemCount() > 0) {
+        if (event->type() == QEvent::Paint) {
             QPainter painter(_treeWidget->viewport());
-            const auto tli = _treeWidget->topLevelItem(0);
-            const auto tlir = _treeWidget->visualItemRect(tli);
-            const qreal ic = (_treeWidget->viewport()->height() +
-              qAbs(tlir.y())) / (qreal)tlir.height();
-            for (int i = 0; i < ic; i++) {
-                if (i % 2) {
-                    painter.fillRect(0, tlir.y() + i * tlir.height(),
-                      _treeWidget->viewport()->width(),
-                        tlir.height(), QColor("#E5E9EC"));
+
+            if (_treeWidget->topLevelItemCount() > 0) {
+                const auto tli = _treeWidget->topLevelItem(0);
+                const auto& tlir = _treeWidget->visualItemRect(tli);
+                const qreal ic = (
+                    _treeWidget->viewport()->height() +
+                    qAbs(tlir.y())
+                ) / (qreal) tlir.height();
+
+                for (int i = 0; i < ic; i++) {
+                    if (i % 2) {
+                        painter.fillRect(
+                            0,
+                            tlir.y() + i * tlir.height(),
+                            _treeWidget->viewport()->width(),
+                            tlir.height(),
+                            QColor("#E5E9EC")
+                        );
+                    }
+                }
+            } else {
+                const qreal hg = fit::fx(20.0);
+                const qreal ic = _treeWidget->viewport()->height() / hg;
+
+                for (int i = 0; i < ic; i++) {
+                    if (i % 2) {
+                        painter.fillRect(
+                            0, i * hg,
+                            _treeWidget->viewport()->width(),
+                            hg, QColor("#E5E9EC")
+                        );
+                    } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
+                        painter.setPen(QColor("#a0a4a7"));
+                        painter.drawText(0, i * hg, _treeWidget->viewport()->width(),
+                          hg, Qt::AlignCenter, "No items to show");
+                    }
                 }
             }
         }
+
         return false;
     } else {
         return QWidget::eventFilter(watched, event);

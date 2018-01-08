@@ -4,7 +4,7 @@
 
 #define CSS_SCROLLBAR "\
 QScrollBar:vertical { \
-    background: transparent; \
+    background: #e0e4e7; \
     width: %2px; \
 } QScrollBar::handle:vertical { \
     background: #909497; \
