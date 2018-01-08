@@ -1,19 +1,21 @@
 #include <menumanager.h>
 #include <windowmanager.h>
 #include <QMenuBar>
-#include <QMainWindow>
 #include <QApplication>
+#include <frontend.h>
 
 MenuManager::MenuManager()
 {
     #if defined(Q_OS_MAC)
     _menuBar = new QMenuBar;
     #else
-    _menuBar = ((QMainWindow*)WindowManager::instance()->get(WindowManager::Main))->menuBar();
-    _menuBar->setStyleSheet("QMenuBar {"
-                            "    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
-                            "    stop:0 #ffffff, stop:1 #d6d9dc);"
-                            "}");
+    _menuBar = mW->menuBar();
+    _menuBar->setStyleSheet(
+        "QMenuBar {"
+        "    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+        "    stop:0 #ffffff, stop:1 #d6d9dc);"
+        "}"
+    );
     #endif
     createActions();
     createMenus();
