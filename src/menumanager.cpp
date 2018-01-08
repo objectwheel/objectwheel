@@ -14,9 +14,6 @@ MenuManager::MenuManager()
                             "    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
                             "    stop:0 #ffffff, stop:1 #d6d9dc);"
                             "}");
-    QFont f;
-    f.setPixelSize(f.pixelSize() - 1);
-    _menuBar->setFont(f);
     #endif
     createActions();
     createMenus();
