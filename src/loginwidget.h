@@ -10,6 +10,9 @@ class LoginWidget : public QWidget
     public:
         explicit LoginWidget(QWidget *parent = nullptr);
 
+    protected:
+        void paintEvent(QPaintEvent *event) override;
+
 };
 
 #endif // LOGINWIDGET_H
