@@ -1,26 +1,15 @@
 #ifndef LOGINWIDGET_H
 #define LOGINWIDGET_H
 
-#include <QQuickWidget>
+#include <QWidget>
 
-class LoginWidget : public QQuickWidget
+class LoginWidget : public QWidget
 {
-		Q_OBJECT
+        Q_OBJECT
 
-	public:
-        explicit LoginWidget(QWidget *parent = 0);
+    public:
+        explicit LoginWidget(QWidget *parent = nullptr);
 
-	public slots:
-        void handleAutoLoginButtonClick();
-        void handleLoginButtonClick(const QVariant& json);
-        void handleSessionStart();
-
-    private slots:
-        void startSession();
-
-    signals:
-        void done();
-        void busy(const QString& text);
 };
 
 #endif // LOGINWIDGET_H

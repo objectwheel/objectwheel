@@ -57,20 +57,9 @@
         <file>qmls/FancyButton.qml</file>
         <file>qmls/fit.js</file>
         <file>qmls/module-resolver.qml</file>
-        <file>qmls/projectsScreen/main.qml</file>
-        <file>qmls/projectsScreen/ProjectButton.qml</file>
-        <file>qmls/projectsScreen/ProjectList.qml</file>
-        <file>qmls/projectsScreen/ProjectSettings.qml</file>
-        <file>qmls/projectsScreen/ProjectsPage.qml</file>
         <file>qmls/owdb/_properties.json</file>
         <file>qmls/owdb/1/t/_properties.json</file>
         <file>qmls/owdb/1/t/main.qml</file>
-        <file>qmls/loginScreen/LoginButton.qml</file>
-        <file>qmls/loginScreen/LoginScreen.qml</file>
-        <file>qmls/loginScreen/main.qml</file>
-        <file>qmls/loginScreen/PopupScreen.qml</file>
-        <file>qmls/loginScreen/RegistrationComplete.qml</file>
-        <file>qmls/loginScreen/RegistrationScreen.qml</file>
         <file>qmls/form/t/_properties.json</file>
         <file>qmls/form/t/main.qml</file>
         <file>qmls/control/t/_properties.json</file>

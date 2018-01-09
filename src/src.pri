@@ -51,8 +51,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/downloadwidget.h \
            $$PWD/windowmanager.h \
            $$PWD/welcomewindow.h \
-           $$PWD/projectswidget.h \
-           $$PWD/loginwidget.h \
            $$PWD/aboutwindow.h \
            $$PWD/buildswindow.h \
            $$PWD/preferenceswindow.h \
@@ -71,7 +69,11 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/previewbackend.h \
            $$PWD/frontend.h \
            $$PWD/loadingbar.h \
-           $$PWD/outputpane.h
+           $$PWD/outputpane.h \
+    $$PWD/registrationwidget.h \
+    $$PWD/loginwidget.h \
+    $$PWD/projectswidget.h \
+    $$PWD/newprojectwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -116,8 +118,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/downloadwidget.cpp \
            $$PWD/windowmanager.cpp \
            $$PWD/welcomewindow.cpp \
-           $$PWD/projectswidget.cpp \
-           $$PWD/loginwidget.cpp \
            $$PWD/aboutwindow.cpp \
            $$PWD/buildswindow.cpp \
            $$PWD/preferenceswindow.cpp \
@@ -135,7 +135,11 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/userbackend.cpp \
            $$PWD/previewbackend.cpp \
            $$PWD/loadingbar.cpp \
-           $$PWD/outputpane.cpp
+           $$PWD/outputpane.cpp \
+    $$PWD/registrationwidget.cpp \
+    $$PWD/loginwidget.cpp \
+    $$PWD/projectswidget.cpp \
+    $$PWD/newprojectwidget.cpp
 
 CONFIG(release, debug | release):
 !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

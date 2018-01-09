@@ -6,13 +6,20 @@
 class View;
 class LoginWidget;
 class ProjectsWidget;
+class NewProjectWidget;
+class RegistrationWidget;
 
 class WelcomeWindow : public QWidget
 {
         Q_OBJECT
 
     public:
-        enum Screens { Login, Projects };
+        enum Screens {
+            Login,
+            Registration,
+            Projects,
+            NewProject
+        };
 
     public:
         explicit WelcomeWindow(QWidget* parent = nullptr);
@@ -35,6 +42,8 @@ class WelcomeWindow : public QWidget
         View* _view;
         LoginWidget* _loginWidget;
         ProjectsWidget* _projectsWidget;
+        NewProjectWidget* _newProjectWidget;
+        RegistrationWidget* _registrationWidget;
 };
 
 #endif // WELCOMEWINDOW_H
