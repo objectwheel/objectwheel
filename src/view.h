@@ -3,31 +3,31 @@
 
 #include <QMap>
 #include <QWidget>
-#include <QVBoxLayout>
+
+class QLayout;
 
 class View : public QWidget
 {
         Q_OBJECT
-        typedef QMap<int, QWidget*> WidgetMap;
 
     public:
-        enum Direction { NoSwipe, LeftToRight, RightToLeft };
+        enum SwipeDirection {
+            NoSwipe,
+            LeftToRight,
+            RightToLeft
+        };
+
+    public:
         explicit View(QWidget* parent = nullptr);
-        QWidget* widget(int id) const;
-        int id(QWidget* widget) const;
-        int current() const;
+        void add(int id, QWidget* widget);
 
     public slots:
-        void show(int id, Direction = NoSwipe);
-        void add(int id, QWidget* widget);
-        int remove(int id);
-
-    signals:
-        void visibleChanged();
+        void show(int id, SwipeDirection = NoSwipe);
 
     private:
-        QVBoxLayout _layout;
-        WidgetMap _widgets;
+        int _visibleId;
+        QLayout* _layout;
+        QMap<int, QWidget*> _widgets;
 };
 
 #endif // VIEW_H

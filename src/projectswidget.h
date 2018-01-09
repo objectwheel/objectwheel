@@ -64,7 +64,7 @@ class ProjectListModel : public QAbstractListModel
 			m_roleNames[ActiveRole] = "active";
 		}
 
-		~ProjectListModel() { }
+        ~ProjectListModel() { }
 
 		QHash<int, QByteArray> roleNames() const override
 		{

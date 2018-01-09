@@ -28,15 +28,15 @@ void WelcomeWindow::showLogin()
     _view->show(Login, View::LeftToRight);
 }
 
-void WelcomeWindow::resizeEvent(QResizeEvent* event)
-{
-    _view->setGeometry(rect());
-    QWidget::resizeEvent(event);
-}
-
 void WelcomeWindow::showProjects()
 {
     _projectsWidget->refreshProjectList();
     _view->show(Projects, View::RightToLeft);
     emit lazy();
+}
+
+void WelcomeWindow::resizeEvent(QResizeEvent* event)
+{
+    _view->setGeometry(rect());
+    QWidget::resizeEvent(event);
 }
