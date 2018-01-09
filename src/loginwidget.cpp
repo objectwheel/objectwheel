@@ -1,5 +1,6 @@
 #include <loginwidget.h>
 #include <fit.h>
+#include <switch.h>
 #include <QPainter>
 #include <QApplication>
 #include <QScreen>
@@ -22,6 +23,11 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
         )
     );
     logoPixmap = &px;
+
+
+    auto sw = new Switch(this);
+    sw->move(303, 313);
+    sw->show();
 }
 
 void LoginWidget::paintEvent(QPaintEvent*)

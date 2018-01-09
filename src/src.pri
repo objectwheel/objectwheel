@@ -70,10 +70,11 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/frontend.h \
            $$PWD/loadingbar.h \
            $$PWD/outputpane.h \
-    $$PWD/registrationwidget.h \
-    $$PWD/loginwidget.h \
-    $$PWD/projectswidget.h \
-    $$PWD/newprojectwidget.h
+           $$PWD/registrationwidget.h \
+           $$PWD/loginwidget.h \
+           $$PWD/projectswidget.h \
+           $$PWD/newprojectwidget.h \
+           $$PWD/switch.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -136,16 +137,18 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/previewbackend.cpp \
            $$PWD/loadingbar.cpp \
            $$PWD/outputpane.cpp \
-    $$PWD/registrationwidget.cpp \
-    $$PWD/loginwidget.cpp \
-    $$PWD/projectswidget.cpp \
-    $$PWD/newprojectwidget.cpp
+           $$PWD/registrationwidget.cpp \
+           $$PWD/loginwidget.cpp \
+           $$PWD/projectswidget.cpp \
+           $$PWD/newprojectwidget.cpp \
+           $$PWD/switch.cpp
 
-CONFIG(release, debug | release):
-!infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {
-    VERSION_DATA = PREVIOUS_VERSION=$$GIT_VERSION
-    write_file($$VERSION_FILE, VERSION_DATA)
-    touch($$PWD/global.h, $$VERSION_FILE)
-    touch($$PWD/main.cpp, $$VERSION_FILE)
-    touch($$PWD/projectswidget.cpp, $$VERSION_FILE)
+CONFIG(release, debug | release) {
+    !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {
+        VERSION_DATA = PREVIOUS_VERSION=$$GIT_VERSION
+        write_file($$VERSION_FILE, VERSION_DATA)
+        touch($$PWD/global.h, $$VERSION_FILE)
+        touch($$PWD/main.cpp, $$VERSION_FILE)
+        touch($$PWD/projectswidget.cpp, $$VERSION_FILE)
+    }
 }
