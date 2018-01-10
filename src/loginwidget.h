@@ -20,11 +20,12 @@ class LoginWidget : public QWidget
         QGridLayout* _layout;
         QLabel* _logoLabel;
         QLabel* _loginLabel;
+        BulkEdit* _bulkEdit;
         QWidget* _autologinWidget;
         QHBoxLayout* _autologinLayout;
         Switch* _autologinSwitch;
         QLabel* _autologinLabel;
-        BulkEdit* _bulkEdit;
+        QLabel* _legalLabel;
 };
 
 #endif // LOGINWIDGET_H

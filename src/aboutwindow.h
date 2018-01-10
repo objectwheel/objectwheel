@@ -1,11 +1,10 @@
-#ifndef ABOUTWIDGET_H
-#define ABOUTWIDGET_H
+#ifndef ABOUTWINDOW_H
+#define ABOUTWINDOW_H
 
 #include <QWidget>
 
 class QLabel;
 class QVBoxLayout;
-class QHBoxLayout;
 class QPushButton;
 
 class AboutWindow : public QWidget
@@ -13,19 +12,18 @@ class AboutWindow : public QWidget
 		Q_OBJECT
 
 	public:
-        explicit AboutWindow(QWidget *parent = 0);
+        explicit AboutWindow(QWidget* parent = nullptr);
 
     signals:
         void done();
 
 	private:
-        QVBoxLayout* mainLayout;
-        QHBoxLayout* iconLayout;
-        QLabel* topLabel;
-        QLabel* iconLabel;
-        QLabel* titleLabel;
-        QLabel* legalLabel;
-        QPushButton* okButton;
+        QVBoxLayout* _layout;
+        QLabel* _titleLabel;
+        QLabel* _logoLabel;
+        QLabel* _versionLabel;
+        QPushButton* _okButton;
+        QLabel* _legalLabel;
 };
 
-#endif // ABOUTWIDGET_H
+#endif // ABOUTWINDOW_H

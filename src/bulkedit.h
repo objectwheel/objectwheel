@@ -1,7 +1,7 @@
 #ifndef BULKEDIT_H
 #define BULKEDIT_H
 
-#include <QMap>
+#include <QList>
 #include <QWidget>
 
 class QLayout;
@@ -13,6 +13,7 @@ class BulkEdit : public QWidget
 
     private:
         struct LineElement {
+            int id;
             QString text;
             QLineEdit* edit;
         };
@@ -33,20 +34,22 @@ class BulkEdit : public QWidget
         };
 
     public:
-        explicit BulkEdit(QWidget *parent = nullptr);
+        explicit BulkEdit(QWidget* parent = nullptr);
         Settings& settings();
+        QLineEdit* get(int id);
         void add(int id, const QString& label);
 
     public slots:
         void triggerSettings();
 
     protected:
-        void paintEvent(QPaintEvent *event) override;
+        void paintEvent(QPaintEvent* event) override;
+        QSize sizeHint() const override;
 
     private:
         QLayout* _layout;
         Settings _settings;
-        QMap<int, LineElement> _elements;
+        QList<LineElement> _elements;
 };
 
 #endif // BULKEDIT_H

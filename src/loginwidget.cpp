@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <switch.h>
 #include <bulkedit.h>
+#include <global.h>
 
 #include <QPainter>
 #include <QApplication>
@@ -9,14 +10,15 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 
-#define SIZE_SPACING (fit::fx(12))
-#define SIZE_BLOCK   (fit::fx(342))
-#define PATH_LOGO    (":/resources/images/logo.png")
-#define SIZE_LOGO    (QSize(fit::fx(160), fit::fx(80)))
-#define HEIGHT       (fit::fx(35))
-#define WIDTH        (fit::fx(300))
-#define pS           (QApplication::primaryScreen())
+#define AUTOLOGIN_HEIGHT (fit::fx(35))
+#define AUTOLOGIN_WIDTH  (fit::fx(300))
+#define SIZE_LOGO        (QSize(fit::fx(160), fit::fx(80)))
+#define PATH_LOGO        (":/resources/images/logo.png")
+#define pS               (QApplication::primaryScreen())
+
+enum Fields { Email, Password };
 
 LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 {
@@ -28,45 +30,60 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _autologinLayout = new QHBoxLayout(_autologinWidget);
     _autologinSwitch = new Switch;
     _autologinLabel = new QLabel;
+    _legalLabel = new QLabel;
 
-    _layout->setSpacing(SIZE_SPACING);
-    _layout->setContentsMargins(0, 0, 0, 0);
+    _layout->setSpacing(fit::fx(12));
     _layout->setRowStretch(0, 1);
     _layout->setRowStretch(5, 1);
     _layout->setColumnStretch(0, 1);
     _layout->setColumnStretch(2, 1);
 
-    _logoLabel->setScaledContents(true);
+    _layout->addWidget(_logoLabel, 1, 1);
+    _layout->addWidget(_loginLabel, 2, 1);
+    _layout->addWidget(_bulkEdit, 3, 1);
+    _layout->addWidget(_autologinWidget, 4, 1);
+    _layout->addWidget(_legalLabel, 6, 1);
+    _layout->setAlignment(_logoLabel, Qt::AlignCenter);
+    _layout->setAlignment(_loginLabel, Qt::AlignCenter);
+    _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
+    _layout->setAlignment(_autologinWidget, Qt::AlignCenter);
+    _layout->setAlignment(_legalLabel, Qt::AlignCenter);
+
+    _autologinLayout->setSpacing(fit::fx(5));
+    _autologinLayout->setContentsMargins(fit::fx(2.5), 0, 0, 0);
+    _autologinLayout->addWidget(_autologinSwitch);
+    _autologinLayout->addWidget(_autologinLabel);
+    _autologinLayout->setAlignment(_autologinLabel, Qt::AlignVCenter);
+    _autologinLayout->setAlignment(_autologinSwitch, Qt::AlignVCenter);
+    _autologinLayout->addStretch();
+
+    QPixmap p(PATH_LOGO);
+    p.setDevicePixelRatio(pS->devicePixelRatio());
+
     _logoLabel->setFixedSize(SIZE_LOGO);
     _logoLabel->setPixmap(
-        QPixmap(PATH_LOGO).scaled(
+        p.scaled(
             SIZE_LOGO * pS->devicePixelRatio(),
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )
     );
 
-    _layout->addWidget(_logoLabel, 1, 1);
-    _layout->addWidget(_loginLabel, 2, 1);
-    _layout->addWidget(_bulkEdit, 3, 1);
-    _layout->addWidget(_autologinWidget, 4, 1);
-    _layout->setAlignment(_logoLabel, Qt::AlignCenter);
-    _layout->setAlignment(_loginLabel, Qt::AlignCenter);
-    _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
-    _layout->setAlignment(_autologinWidget, Qt::AlignCenter);
-
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(fit::fx(18));
+
     _loginLabel->setFont(f);
     _loginLabel->setText(tr("Login"));
     _loginLabel->setStyleSheet("color: #2E3A41");
 
-    _bulkEdit->add(0, tr("Email"));
-    _bulkEdit->add(1, tr("Password"));
-    _bulkEdit->setFixedWidth(WIDTH);
+    _bulkEdit->add(Email, tr("Email"));
+    _bulkEdit->add(Password, tr("Password"));
+    _bulkEdit->get(Password)->setEchoMode(QLineEdit::Password);
+    _autologinWidget->setFixedWidth(AUTOLOGIN_WIDTH);
 
     _autologinWidget->setObjectName("autologinWidget");
+    _autologinWidget->setFixedSize(AUTOLOGIN_WIDTH, AUTOLOGIN_HEIGHT);
     _autologinWidget->setStyleSheet(
         tr(
             "#autologinWidget {"
@@ -75,104 +92,12 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
             "    border: 1px solid #18000000;"
             "}"
         )
-        .arg(int(HEIGHT / 2.0))
+        .arg(int(AUTOLOGIN_HEIGHT / 2.0))
     );
-    _autologinWidget->setFixedSize(WIDTH, HEIGHT);
-    _autologinLabel->setStyleSheet("color: #2E3A41");
+
     _autologinLabel->setText(tr("Automatic login"));
+    _autologinLabel->setStyleSheet("color: #2E3A41");
 
-    _autologinLayout->setSpacing(SIZE_SPACING / 2.0);
-    _autologinLayout->setContentsMargins(fit::fx(2.5), 0, 0, 0);
-    _autologinLayout->addWidget(_autologinSwitch);
-    _autologinLayout->addWidget(_autologinLabel);
-    _autologinLayout->setAlignment(_autologinLabel, Qt::AlignVCenter);
-    _autologinLayout->setAlignment(_autologinSwitch, Qt::AlignVCenter);
-    _autologinLayout->addStretch();
+    _legalLabel->setText(TEXT_LEGAL);
+    _legalLabel->setStyleSheet("color:#2E3A41;");
 }
-
-//void LoginWidget::paintEvent(QPaintEvent*)
-//{
-//    QPainter painter(this);
-//    painter.setRenderHint(QPainter::Antialiasing);
-//    painter.setPen("#2E3A41");
-
-//    QFont f;
-//    int spacing = fit::fx(12);
-//    int x = width() / 2.0 - SIZE_LOGO.width()/2.0;
-//    int y = height() / 2.0 - SIZE_BLOCK/2.0;
-
-//    f.setWeight(QFont::Light);
-//    f.setPixelSize(fit::fx(18));
-//    painter.setFont(f);
-
-//    QRectF rect(
-//        x, y,
-//        SIZE_LOGO.width(),
-//        SIZE_LOGO.height()
-//    );
-
-//    painter.drawPixmap(
-//        rect, *logoPixmap,
-//        QRectF(
-//            QPointF(),
-//            rect.size() * pS->devicePixelRatio()
-//        )
-//    );
-
-//    x = width() / 2.0 - SIZE_BLOCK/2.0;
-//    y += (spacing + SIZE_LOGO.height());
-
-//    painter.drawText(
-//        QRectF(
-//            QPointF(x, y),
-//            QSizeF(SIZE_BLOCK, fit::fx(22))
-//        ),
-//        tr("Login"),
-//        QTextOption(Qt::AlignCenter)
-//    );
-
-//    x = width() / 2.0 - SIZE_INPUT.width()/2.0;
-//    y += (spacing + fit::fx(22));
-
-//    rect = QRectF(
-//        x, y,
-//        SIZE_INPUT.width(),
-//        SIZE_INPUT.height()
-//    );
-
-//    painter.setFont(QFont());
-//    painter.setPen("#18000000");
-//    painter.setBrush(QBrush("#12000000"));
-//    painter.drawRoundedRect(rect, fit::fx(8), fit::fx(8));
-//    painter.drawLine(x, rect.center().y(), x + SIZE_INPUT.width(), rect.center().y());
-
-//    painter.setPen("#40000000");
-//    painter.drawText(
-//        rect.adjusted(fit::fx(10), 0, 0, -SIZE_INPUT.height() / 2.0),
-//        tr("Email"),
-//        QTextOption(Qt::AlignVCenter)
-//    );
-//    painter.drawText(
-//        rect.adjusted(fit::fx(10), SIZE_INPUT.height() / 2.0, 0, 0),
-//        tr("Password"),
-//        QTextOption(Qt::AlignVCenter)
-//    );
-
-//    y += (spacing + SIZE_INPUT.height());
-
-//    rect = QRectF(
-//        x, y,
-//        SIZE_INPUT.width(),
-//        SIZE_INPUT.height() / 2.0
-//    );
-
-//    painter.setPen("#18000000");
-//    painter.drawRoundedRect(rect, rect.height() / 2.0, rect.height() / 2.0);
-
-//    painter.setPen("#2E3A41");
-//    painter.drawText(
-//        rect.adjusted(fit::fx(55), 0, 0, 0),
-//        tr("Automatic login"),
-//        QTextOption(Qt::AlignVCenter)
-//    );
-//}

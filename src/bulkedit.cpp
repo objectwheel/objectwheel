@@ -1,16 +1,18 @@
 #include <bulkedit.h>
 #include <fit.h>
 #include <focuslesslineedit.h>
-
 #include <QPainter>
 #include <QLineEdit>
 #include <QVBoxLayout>
 
 #define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
+#define SIZE (fit::fx(QSizeF(300, 0)).toSize())
 
-BulkEdit::BulkEdit(QWidget *parent) : QWidget(parent)
+BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
+
+    resize(SIZE);
 
     /* Set color settings */
     _settings.borderColor = "#18000000";
@@ -26,12 +28,12 @@ BulkEdit::BulkEdit(QWidget *parent) : QWidget(parent)
 
     _layout->setSpacing(0);
     _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
-    resize(fit::fx(QSizeF(300, 0)).toSize());
 }
 
 void BulkEdit::add(int id, const QString& label)
 {
     LineElement element;
+    element.id = id;
     element.text = label;
     element.edit = new QLineEdit;
     element.edit->setFrame(false);
@@ -45,9 +47,23 @@ void BulkEdit::add(int id, const QString& label)
     p.setColor(QPalette::Window, Qt::transparent);
     element.edit->setPalette(p);
 
-    _elements[id] = element;
+    _elements << element;
+
     _layout->addWidget(element.edit);
     setFixedHeight(_settings.cellHeight * _elements.size());
+}
+
+QLineEdit* BulkEdit::get(int id)
+{
+    for (const auto& e : _elements)
+        if (e.id == id)
+            return e.edit;
+    return nullptr;
+}
+
+BulkEdit::Settings& BulkEdit::settings()
+{
+    return _settings;
 }
 
 void BulkEdit::triggerSettings()
@@ -56,12 +72,17 @@ void BulkEdit::triggerSettings()
     _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
 }
 
+QSize BulkEdit::sizeHint() const
+{
+    return SIZE;
+}
+
 void BulkEdit::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    auto r = ADJUST(QRectF(rect()));
+    const auto& r = ADJUST(QRectF(rect()));
 
     /* Draw background */
     painter.setPen(_settings.borderColor);
@@ -81,7 +102,7 @@ void BulkEdit::paintEvent(QPaintEvent*)
     /* Draw labels */
     painter.setPen(_settings.labelColor);
     for (int i = 0; i < _elements.size(); i++) {
-        auto element = _elements.value(_elements.keys().at(i));
+        const auto& element = _elements.at(i);
         painter.drawText(
             QRectF(
                 r.left() + fit::fx(10),
@@ -93,10 +114,4 @@ void BulkEdit::paintEvent(QPaintEvent*)
             QTextOption(Qt::AlignVCenter | Qt::AlignLeft)
         );
     }
-
-}
-
-BulkEdit::Settings& BulkEdit::settings()
-{
-    return _settings;
 }

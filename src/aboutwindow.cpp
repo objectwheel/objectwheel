@@ -1,83 +1,31 @@
 #include <aboutwindow.h>
 #include <fit.h>
 #include <global.h>
-
 #include <QApplication>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QScreen>
 #include <QPushButton>
 
-#define pS (QApplication::primaryScreen())
+#define pS        (QApplication::primaryScreen())
+#define PATH_LOGO (":/resources/images/logo.png")
+#define SIZE_LOGO (QSize(fit::fx(160), fit::fx(80)))
 
-AboutWindow::AboutWindow(QWidget *parent) : QWidget(parent)
+AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
 {
-    mainLayout = new QVBoxLayout(this);
-    iconLayout = new QHBoxLayout;
-    topLabel = new QLabel;
-    iconLabel = new QLabel;
-    titleLabel = new QLabel;
-    legalLabel = new QLabel;
-    okButton = new QPushButton;
+    _layout = new QVBoxLayout(this);
+    _titleLabel = new QLabel;
+    _logoLabel = new QLabel;
+    _versionLabel = new QLabel;
+    _okButton = new QPushButton;
+    _legalLabel = new QLabel;
 
     QPalette p(palette());
     p.setColor(backgroundRole(), "#e0e4e7");
-    setAutoFillBackground(true);
-    setWindowTitle(APP_NAME);
+
     setPalette(p);
-
-    okButton->setText("Ok");
-    okButton->setFixedWidth(fit::fx(100));
-    okButton->setDefault(true);
-    okButton->setCursor(Qt::PointingHandCursor);
-    connect(okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
-
-    QPixmap pixmap(":/resources/images/logo.png");
-    pixmap.setDevicePixelRatio(pS->devicePixelRatio());
-
-    iconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    iconLabel->setFixedSize(fit::fx(150), fit::fx(74.5));
-    iconLabel->setPixmap(
-        pixmap.scaled(
-            fit::fx(150) * pS->devicePixelRatio(),
-            fit::fx(74.5) * pS->devicePixelRatio(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
-
-    iconLayout->addStretch();
-    iconLayout->addWidget(iconLabel);
-    iconLayout->addStretch();
-
-    QFont font;
-    font.setWeight(QFont::ExtraLight);
-    font.setPixelSize(fit::fx(24));
-
-    topLabel->setFont(font);
-    topLabel->setText("About Objectwheel");
-    topLabel->setStyleSheet("background:transparent; color:#2e3a41;");
-    topLabel->setAlignment(Qt::AlignCenter);
-
-    titleLabel->setStyleSheet("background:transparent;color:#2e3a41;");
-    titleLabel->setText(TEXT_VERSION);
-    titleLabel->setAlignment(Qt::AlignCenter);
-
-    legalLabel->setStyleSheet("background:transparent;color:#2e3a41;");
-    legalLabel->setText(TEXT_LEGAL);
-    legalLabel->setAlignment(Qt::AlignCenter);
-
-    mainLayout->addWidget(topLabel);
-    mainLayout->addStretch();
-    mainLayout->addLayout(iconLayout);
-    mainLayout->addWidget(titleLabel);
-    mainLayout->addStretch();
-    mainLayout->addWidget(okButton);
-    mainLayout->addStretch();
-    mainLayout->addWidget(legalLabel);
-    mainLayout->setAlignment(okButton, Qt::AlignCenter);
-
+    setWindowTitle(APP_NAME);
+    setAutoFillBackground(true);
     setWindowFlags(
         Qt::Dialog |
         Qt::WindowTitleHint |
@@ -85,5 +33,53 @@ AboutWindow::AboutWindow(QWidget *parent) : QWidget(parent)
         Qt::WindowCloseButtonHint |
         Qt::CustomizeWindowHint
     );
+
+    _layout->addWidget(_titleLabel);
+    _layout->addStretch();
+    _layout->addWidget(_logoLabel);
+    _layout->addWidget(_versionLabel);
+    _layout->addStretch();
+    _layout->addWidget(_okButton);
+    _layout->addStretch();
+    _layout->addWidget(_legalLabel);
+    _layout->setAlignment(_titleLabel, Qt::AlignCenter);
+    _layout->setAlignment(_logoLabel, Qt::AlignCenter);
+    _layout->setAlignment(_versionLabel, Qt::AlignCenter);
+    _layout->setAlignment(_okButton, Qt::AlignCenter);
+    _layout->setAlignment(_legalLabel, Qt::AlignCenter);
+    _layout->setSpacing(fit::fx(20));
+
+    QFont f;
+    f.setWeight(QFont::ExtraLight);
+    f.setPixelSize(fit::fx(24));
+
+    _titleLabel->setFont(f);
+    _titleLabel->setText("About Objectwheel");
+    _titleLabel->setStyleSheet("color:#2e3a41;");
+
+    QPixmap px(PATH_LOGO);
+    px.setDevicePixelRatio(pS->devicePixelRatio());
+
+    _logoLabel->setFixedSize(SIZE_LOGO);
+    _logoLabel->setPixmap(
+        px.scaled(
+            SIZE_LOGO * pS->devicePixelRatio(),
+            Qt::IgnoreAspectRatio,
+            Qt::SmoothTransformation
+        )
+    );
+
+    _versionLabel->setText(TEXT_VERSION);
+    _versionLabel->setStyleSheet("color:#2e3a41;");
+    _versionLabel->setAlignment(Qt::AlignCenter);
+
+    _okButton->setText("Ok");
+    _okButton->setDefault(true);
+    _okButton->setFixedWidth(fit::fx(100));
+    _okButton->setCursor(Qt::PointingHandCursor);
+    connect(_okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
+
+    _legalLabel->setText(TEXT_LEGAL);
+    _legalLabel->setStyleSheet("color:#2e3a41;");
 }
 
