@@ -1,5 +1,5 @@
 #include <preferenceswindow.h>
-#include <filterlineedit.h>
+#include <focuslesslineedit.h>
 #include <fit.h>
 #include <css.h>
 #include <QtWidgets>
@@ -42,7 +42,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     _lblTitle->setFont(f);
     _lblTitle->setText("Title");
 
-    _txtFilter = new FilterLineEdit;
+    _txtFilter = new FocuslessLineEdit;
     _txtFilter->setPlaceholderText("Filter");
     _txtFilter->setClearButtonEnabled(true);
     _txtFilter->setFixedWidth(fit::fx(150));

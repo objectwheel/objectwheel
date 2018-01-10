@@ -5,7 +5,7 @@
 
 class QVBoxLayout;
 class QTreeWidget;
-class FilterLineEdit;
+class FocuslessLineEdit;
 class MainWindow;
 
 class PropertiesPane : public QWidget
@@ -31,7 +31,7 @@ class PropertiesPane : public QWidget
     private:
         QVBoxLayout* _layout;
         QTreeWidget* _treeWidget;
-        FilterLineEdit* _searchEdit;
+        FocuslessLineEdit* _searchEdit;
 };
 
 #endif // PROPERTIESPANE_H

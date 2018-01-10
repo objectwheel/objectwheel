@@ -4,7 +4,7 @@
 #include <savebackend.h>
 #include <toolboxtree.h>
 #include <flatbutton.h>
-#include <filterlineedit.h>
+#include <focuslesslineedit.h>
 #include <zipper.h>
 #include <fit.h>
 #include <mainwindow.h>
@@ -18,7 +18,7 @@
 ToolboxPane::ToolboxPane(MainWindow* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
-    _searchEdit = new FilterLineEdit;
+    _searchEdit = new FocuslessLineEdit;
     _toolboxTree = new ToolboxTree;
 
     QPalette p(palette());

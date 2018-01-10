@@ -32,7 +32,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/filelist.h \
            $$PWD/qmlformatter.h \
            $$PWD/toolboxtree.h \
-           $$PWD/filterlineedit.h \
            $$PWD/view.h \
            $$PWD/progresswidget.h \
            $$PWD/global.h \
@@ -74,7 +73,9 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/loginwidget.h \
            $$PWD/projectswidget.h \
            $$PWD/newprojectwidget.h \
-           $$PWD/switch.h
+           $$PWD/switch.h \
+    $$PWD/bulkedit.h \
+    $$PWD/focuslesslineedit.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -101,7 +102,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/filelist.cpp \
            $$PWD/qmlformatter.cpp \
            $$PWD/toolboxtree.cpp \
-           $$PWD/filterlineedit.cpp \
            $$PWD/view.cpp \
            $$PWD/progresswidget.cpp \
            $$PWD/executivewidget.cpp \
@@ -141,7 +141,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/loginwidget.cpp \
            $$PWD/projectswidget.cpp \
            $$PWD/newprojectwidget.cpp \
-           $$PWD/switch.cpp
+           $$PWD/switch.cpp \
+    $$PWD/bulkedit.cpp \
+    $$PWD/focuslesslineedit.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

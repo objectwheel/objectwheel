@@ -13,7 +13,8 @@ class Switch : public QAbstractButton
         explicit Switch(QWidget *parent = nullptr);
 
     protected:
-        virtual void paintEvent(QPaintEvent* event) override;
+        QSize sizeHint() const override;
+        void paintEvent(QPaintEvent* event) override;
 
     private slots:
         void handleStateChange();

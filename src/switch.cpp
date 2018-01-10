@@ -4,6 +4,7 @@
 #include <QVariantAnimation>
 
 #define ADJUST(x) ((x).adjusted(3.0, 3.0, -3.0, -3.0))
+#define SIZE (fit::fx(QSizeF(48, 30)).toSize())
 
 Switch::Switch(QWidget *parent) : QAbstractButton(parent)
 {
@@ -15,7 +16,7 @@ Switch::Switch(QWidget *parent) : QAbstractButton(parent)
     setPalette(p);
     setCheckable(true);
     setCursor(Qt::PointingHandCursor);
-    resize(fit::fx(QSizeF(48, 30)).toSize());
+    resize(SIZE);
 
     _animation = new QVariantAnimation(this);
     _animation->setEasingCurve(QEasingCurve::OutBack);
@@ -35,6 +36,11 @@ void Switch::handleStateChange()
     _animation->setStartValue(_animation->currentValue().toReal());
     _animation->setEndValue(isChecked() ? r.width() - r.height() : 0);
     _animation->start();
+}
+
+QSize Switch::sizeHint() const
+{
+    return SIZE;
 }
 
 void Switch::paintEvent(QPaintEvent*)

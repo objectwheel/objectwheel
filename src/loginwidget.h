@@ -3,6 +3,12 @@
 
 #include <QWidget>
 
+class QLabel;
+class Switch;
+class BulkEdit;
+class QGridLayout;
+class QHBoxLayout;
+
 class LoginWidget : public QWidget
 {
         Q_OBJECT
@@ -10,9 +16,15 @@ class LoginWidget : public QWidget
     public:
         explicit LoginWidget(QWidget *parent = nullptr);
 
-    protected:
-        void paintEvent(QPaintEvent *event) override;
-
+    private:
+        QGridLayout* _layout;
+        QLabel* _logoLabel;
+        QLabel* _loginLabel;
+        QWidget* _autologinWidget;
+        QHBoxLayout* _autologinLayout;
+        Switch* _autologinSwitch;
+        QLabel* _autologinLabel;
+        BulkEdit* _bulkEdit;
 };
 
 #endif // LOGINWIDGET_H

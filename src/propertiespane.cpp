@@ -6,7 +6,7 @@
 #include <delayer.h>
 #include <filemanager.h>
 #include <controlwatcher.h>
-#include <filterlineedit.h>
+#include <focuslesslineedit.h>
 #include <previewbackend.h>
 #include <control.h>
 #include <frontend.h>
@@ -1033,7 +1033,7 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _treeWidget = new QTreeWidget;
-    _searchEdit = new FilterLineEdit;
+    _searchEdit = new FocuslessLineEdit;
 
     QPalette p(palette());
     p.setColor(backgroundRole(), "#E0E4E7");

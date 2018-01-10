@@ -7,7 +7,7 @@ class QLabel;
 class QGridLayout;
 class QListWidget;
 class QScrollArea;
-class FilterLineEdit;
+class FocuslessLineEdit;
 class QDialogButtonBox;
 
 class PreferencesWindow : public QWidget
@@ -26,7 +26,7 @@ class PreferencesWindow : public QWidget
         QGridLayout* _layout;
         QListWidget* _listWidget;
         QScrollArea* _scrollArea;
-        FilterLineEdit* _txtFilter;
+        FocuslessLineEdit* _txtFilter;
         QLabel* _lblTitle;
         QDialogButtonBox* _bboxButtons;
 };
