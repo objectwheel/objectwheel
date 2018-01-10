@@ -74,8 +74,9 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/projectswidget.h \
            $$PWD/newprojectwidget.h \
            $$PWD/switch.h \
-    $$PWD/bulkedit.h \
-    $$PWD/focuslesslineedit.h
+           $$PWD/bulkedit.h \
+           $$PWD/focuslesslineedit.h \
+           $$PWD/buttonslice.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -142,8 +143,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/projectswidget.cpp \
            $$PWD/newprojectwidget.cpp \
            $$PWD/switch.cpp \
-    $$PWD/bulkedit.cpp \
-    $$PWD/focuslesslineedit.cpp
+           $$PWD/bulkedit.cpp \
+           $$PWD/focuslesslineedit.cpp \
+           $$PWD/buttonslice.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

@@ -3,8 +3,11 @@
 #include <QPainter>
 #include <QVariantAnimation>
 
-#define ADJUST(x) ((x).adjusted(3.0, 3.0, -3.0, -3.0))
 #define SIZE (fit::fx(QSizeF(48, 30)).toSize())
+#define ADJUST(x) ((x).adjusted(\
+    fit::fx(2.5) + 0.5, fit::fx(2.5) + 0.5,\
+    - fit::fx(2.5) - 0.5, - fit::fx(2.5) - 0.5\
+))
 
 Switch::Switch(QWidget* parent) : QAbstractButton(parent)
 {
@@ -57,16 +60,16 @@ void Switch::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    auto r = ADJUST(QRectF(rect()));
-    auto x = _animation->currentValue().toReal();
-    auto hc = _settings.handleColor;
-    auto hbc = _settings.handleBorderColor;
-    auto ac = _settings.activeBackgroundColor;
-    auto abc = _settings.activeBorderColor;
-    auto ic = _settings.inactiveBackgroundColor;
-    auto ibc = _settings.inactiveBorderColor;
-    auto cc = isChecked() ? ac : ic;
-    auto cbc = isChecked() ? abc : ibc;
+    const auto& r = ADJUST(QRectF(rect()));
+    const auto& x = _animation->currentValue().toReal();
+    const auto& hc = _settings.handleColor;
+    const auto& hbc = _settings.handleBorderColor;
+    const auto& ac = _settings.activeBackgroundColor;
+    const auto& abc = _settings.activeBorderColor;
+    const auto& ic = _settings.inactiveBackgroundColor;
+    const auto& ibc = _settings.inactiveBorderColor;
+    const auto& cc = isChecked() ? ac : ic;
+    const auto& cbc = isChecked() ? abc : ibc;
 
     /* Draw background circle */
     painter.setBrush(cc);
@@ -75,34 +78,45 @@ void Switch::paintEvent(QPaintEvent*)
 
     /* Draw the gap that appears whenever state changes */
     if (isChecked()) {
+        const auto& r2 = r.adjusted(x, 0, 0, 0);
         painter.setBrush(ic);
         painter.setPen(ibc);
-        auto r2 = r.adjusted(x, 0, 0, 0);
         painter.drawRoundedRect(r2, r.height() / 2.0, r.height() / 2.0);
     } else {
+        const auto& r2 = r.adjusted(0, 0, - r.width() + x + r.height(), 0);
         painter.setBrush(ac);
         painter.setPen(abc);
-        auto r2 = r.adjusted(0, 0, - r.width() + x + r.height(), 0);
         painter.drawRoundedRect(r2, r.height() / 2.0, r.height() / 2.0);
     }
 
     /* Draw handle shadow */
-    auto sr = r.adjusted(x, fit::fx(2.5), - r.width() + x + r.height(), fit::fx(2.5));
+    const auto& sr = r.adjusted(
+        x,
+        fit::fx(2.5),
+        - r.width() + x + r.height(),
+        fit::fx(2.5)
+    );
+
     QLinearGradient sg(sr.topLeft(), sr.bottomLeft());
-    sg.setColorAt(0, "#08000000");
-    sg.setColorAt(1, "#25000000");
-    painter.setPen(Qt::NoPen);
+    sg.setColorAt(0, "#60000000");
+    sg.setColorAt(1, "#15000000");
+
     painter.setBrush(sg);
+    painter.setPen(Qt::NoPen);
     painter.drawRoundedRect(sr, r.height() / 2.0, r.height() / 2.0);
 
     /* Draw handle */
     QPen p;
-    auto hr = r.adjusted(x, 0, - r.width() + x + r.height(), 0);
+    p.setColor(hbc);
+    p.setWidthF(p.widthF() + 0.2);
+
+    const auto& hr = r.adjusted(x, 0,
+      - r.width() + x + r.height(), 0);
+
     QLinearGradient hg(hr.topLeft(), hr.bottomLeft());
     hg.setColorAt(0, hc.lighter(105));
     hg.setColorAt(1, hc.darker(105));
-    p.setColor(hbc);
-    p.setWidthF(p.widthF() + 0.2);
+
     painter.setPen(p);
     painter.setBrush(hg);
     painter.drawRoundedRect(hr, r.height() / 2.0, r.height() / 2.0);

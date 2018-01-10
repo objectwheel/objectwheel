@@ -6,6 +6,7 @@
 class QLabel;
 class Switch;
 class BulkEdit;
+class ButtonSlice;
 class QGridLayout;
 class QHBoxLayout;
 
@@ -25,6 +26,7 @@ class LoginWidget : public QWidget
         QHBoxLayout* _autologinLayout;
         Switch* _autologinSwitch;
         QLabel* _autologinLabel;
+        ButtonSlice* _buttons;
         QLabel* _legalLabel;
 };
 

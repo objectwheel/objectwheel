@@ -40,12 +40,7 @@ void BulkEdit::add(int id, const QString& label)
     element.edit->setAttribute(Qt::WA_MacShowFocusRect, false);
     element.edit->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     element.edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    QPalette p(element.edit->palette());
-    p.setColor(QPalette::Text, "#2E3A41");
-    p.setColor(QPalette::Base, Qt::transparent);
-    p.setColor(QPalette::Window, Qt::transparent);
-    element.edit->setPalette(p);
+    element.edit->setStyleSheet("color: #2e3a41; border: none; background: transparent;");
 
     _elements << element;
 

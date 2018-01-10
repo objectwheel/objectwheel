@@ -35,16 +35,16 @@ class BulkEdit : public QWidget
 
     public:
         explicit BulkEdit(QWidget* parent = nullptr);
-        Settings& settings();
-        QLineEdit* get(int id);
         void add(int id, const QString& label);
+        QLineEdit* get(int id);
+        Settings& settings();
 
     public slots:
         void triggerSettings();
 
     protected:
-        void paintEvent(QPaintEvent* event) override;
         QSize sizeHint() const override;
+        void paintEvent(QPaintEvent* event) override;
 
     private:
         QLayout* _layout;
