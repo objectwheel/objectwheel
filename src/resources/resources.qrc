@@ -8,44 +8,26 @@
         <file>images/item.png</file>
         <file>images/edit.png</file>
         <file>images/logo.png</file>
-        <file>images/right-arrow@2x.png</file>
         <file>images/right-arrow.png</file>
-        <file>images/left-arrow@2x.png</file>
         <file>images/left-arrow.png</file>
-        <file>images/save-icon@2x.png</file>
         <file>images/save-icon.png</file>
         <file>images/menu-icon.png</file>
         <file>images/back.png</file>
-        <file>images/menu-icon@2x.png</file>
         <file>images/reset.png</file>
         <file>images/fexplorer.png</file>
-        <file>images/fexplorer@2x.png</file>
         <file>images/sign_warning.png</file>
         <file>images/loading.png</file>
-        <file>images/logo@2x.png</file>
-        <file>images/loading@2x.png</file>
         <file>images/aboutSceneIcon.png</file>
-        <file>images/aboutSceneIcon@2x.png</file>
         <file>images/cancel.png</file>
-        <file>images/cancel@2x.png</file>
         <file>images/fileicon.png</file>
-        <file>images/fileicon@2x.png</file>
         <file>images/info.png</file>
-        <file>images/info@2x.png</file>
         <file>images/load.png</file>
-        <file>images/load@2x.png</file>
         <file>images/new.png</file>
-        <file>images/new@2x.png</file>
         <file>images/ok.png</file>
-        <file>images/ok@2x.png</file>
         <file>images/unload.png</file>
-        <file>images/unload@2x.png</file>
         <file>images/complete.gif</file>
-        <file>images/complete@2x.gif</file>
         <file>images/find.png</file>
-        <file>images/find@2x.png</file>
         <file>images/key.png</file>
-        <file>images/key@2x.png</file>
         <file>images/android.png</file>
         <file>images/helmet.png</file>
         <file>images/ios.png</file>
@@ -54,14 +36,9 @@
         <file>images/raspi.png</file>
         <file>images/windows.png</file>
         <file>images/back-line.png</file>
-        <file>images/back-line@2x.png</file>
         <file>images/construction.gif</file>
-        <file>images/construction@2x.gif</file>
         <file>images/bouncing_arrow.png</file>
-        <file>images/bouncing_arrow@2x.png</file>
-        <file>images/delete-icon@2x.png</file>
         <file>images/owicon.png</file>
-        <file>images/owicon@2x.png</file>
         <file>images/break.png</file>
         <file>images/clean.png</file>
         <file>images/fit.png</file>
@@ -82,7 +59,6 @@
         <file>images/text.png</file>
         <file>images/gui.png</file>
         <file>images/form.png</file>
-        <file>images/preloader.gif</file>
         <file>images/pin.png</file>
         <file>images/save.png</file>
         <file>images/unpin.png</file>

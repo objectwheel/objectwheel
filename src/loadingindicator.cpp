@@ -13,7 +13,7 @@ LoadingIndicator::LoadingIndicator(QWidget *parent)
     , _running(true)
 {
     _timer = new QTimer(this);
-    _timer->setInterval(15); // For 30 fps
+    _timer->setInterval(20); // For 30 fps
     _timer->start();
 
     setFixedSize(fit::fx(QSizeF{20, 20}).toSize());
@@ -29,7 +29,7 @@ void LoadingIndicator::paintEvent(QPaintEvent* event)
 
     static QTransform transform;
     transform.translate(width() / 2.0, height() / 2.0);
-    transform.rotate(48);
+    transform.rotate(10);
     transform.translate(-width() / 2.0, -height() / 2.0);
 
     QPainter p(this);

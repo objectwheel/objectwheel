@@ -6,9 +6,11 @@
 class QLabel;
 class Switch;
 class BulkEdit;
+class FlatButton;
 class ButtonSlice;
 class QGridLayout;
 class QHBoxLayout;
+class WaitingSpinnerWidget;
 
 class LoginWidget : public QWidget
 {
@@ -27,6 +29,8 @@ class LoginWidget : public QWidget
         Switch* _autologinSwitch;
         QLabel* _autologinLabel;
         ButtonSlice* _buttons;
+        FlatButton* _helpButton;
+        WaitingSpinnerWidget* _loadingIndicator;
         QLabel* _legalLabel;
 };
 

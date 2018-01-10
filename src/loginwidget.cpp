@@ -3,6 +3,9 @@
 #include <switch.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
+#include <flatbutton.h>
+#include <loadingindicator.h>
+#include <waitingspinnerwidget.h>
 #include <global.h>
 
 #include <QPainter>
@@ -20,6 +23,7 @@
 #define PATH_LOGO        (":/resources/images/logo.png")
 #define PATH_RICON       (":/resources/images/new.png")
 #define PATH_LICON       (":/resources/images/load.png")
+#define PATH_HICON       (":/resources/images/info.png")
 #define pS               (QApplication::primaryScreen())
 
 enum Fields { Email, Password };
@@ -36,11 +40,13 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _autologinSwitch = new Switch;
     _autologinLabel = new QLabel;
     _buttons = new ButtonSlice;
+    _helpButton = new FlatButton;
+    _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
     _legalLabel = new QLabel;
 
     _layout->setSpacing(fit::fx(12));
     _layout->setRowStretch(0, 1);
-    _layout->setRowStretch(6, 1);
+    _layout->setRowStretch(8, 1);
     _layout->setColumnStretch(0, 1);
     _layout->setColumnStretch(2, 1);
 
@@ -49,12 +55,16 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _layout->addWidget(_bulkEdit, 3, 1);
     _layout->addWidget(_autologinWidget, 4, 1);
     _layout->addWidget(_buttons, 5, 1);
-    _layout->addWidget(_legalLabel, 7, 1);
+    _layout->addWidget(_helpButton, 6, 1);
+    _layout->addWidget(_loadingIndicator, 7, 1);
+    _layout->addWidget(_legalLabel, 9, 1);
     _layout->setAlignment(_logoLabel, Qt::AlignCenter);
     _layout->setAlignment(_loginLabel, Qt::AlignCenter);
     _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
     _layout->setAlignment(_autologinWidget, Qt::AlignCenter);
     _layout->setAlignment(_buttons, Qt::AlignCenter);
+    _layout->setAlignment(_helpButton, Qt::AlignCenter);
+    _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
     _layout->setAlignment(_legalLabel, Qt::AlignCenter);
 
     _autologinLayout->setSpacing(fit::fx(5));
@@ -88,6 +98,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _bulkEdit->add(Email, tr("Email"));
     _bulkEdit->add(Password, tr("Password"));
     _bulkEdit->get(Password)->setEchoMode(QLineEdit::Password);
+    _bulkEdit->get(Email)->setText(tr("alpha@objectwheel.com"));
+    _bulkEdit->get(Password)->setText(tr("password"));
 
     _autologinWidget->setObjectName("autologinWidget");
     _autologinWidget->setFixedSize(AUTOLOGIN_WIDTH, AUTOLOGIN_HEIGHT);
@@ -105,6 +117,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _autologinLabel->setText(tr("Automatic login"));
     _autologinLabel->setStyleSheet("color: #2E3A41");
 
+    _autologinSwitch->setChecked(true);
+
     _buttons->add(Register, "#5BC5F8", "#2592F9");
     _buttons->add(Login, "#8BBB56", "#6EA045");
     _buttons->get(Register)->setText(tr("Sign Up"));
@@ -113,6 +127,21 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Login)->setIcon(QIcon(PATH_LICON));
     _buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Login)->setCursor(Qt::PointingHandCursor);
+
+    _helpButton->setIconButton(true);
+    _helpButton->setIcon(QIcon(PATH_HICON));
+    _helpButton->setFixedSize(fit::fx(18),fit::fx(18));
+
+    _loadingIndicator->setStyleSheet("background: transparent;");
+    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setRoundness(50);
+    _loadingIndicator->setMinimumTrailOpacity(5);
+    _loadingIndicator->setTrailFadePercentage(100);
+    _loadingIndicator->setRevolutionsPerSecond(2);
+    _loadingIndicator->setNumberOfLines(12);
+    _loadingIndicator->setLineLength(5);
+    _loadingIndicator->setInnerRadius(4);
+    _loadingIndicator->setLineWidth(2);
 
     _legalLabel->setText(TEXT_LEGAL);
     _legalLabel->setStyleSheet("color:#2E3A41;");
