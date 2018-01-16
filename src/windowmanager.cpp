@@ -33,7 +33,7 @@ WindowManager::~WindowManager()
 {
     delete _progressWidget;
     for (auto w : _windows)
-        delete w;
+        w->deleteLater(); //TODO: delete w;
 }
 
 WindowManager* WindowManager::instance()

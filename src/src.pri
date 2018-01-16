@@ -77,7 +77,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/bulkedit.h \
            $$PWD/focuslesslineedit.h \
            $$PWD/buttonslice.h \
-    $$PWD/waitingspinnerwidget.h
+           $$PWD/waitingspinnerwidget.h \
+           $$PWD/filemanager.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -147,7 +148,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/bulkedit.cpp \
            $$PWD/focuslesslineedit.cpp \
            $$PWD/buttonslice.cpp \
-    $$PWD/waitingspinnerwidget.cpp
+           $$PWD/waitingspinnerwidget.cpp \
+           $$PWD/filemanager.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {
