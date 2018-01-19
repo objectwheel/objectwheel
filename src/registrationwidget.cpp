@@ -7,6 +7,7 @@
 #include <global.h>
 #include <filemanager.h>
 #include <authenticator.h>
+#include <internetaccess.h>
 
 #include <QPainter>
 #include <QApplication>
@@ -30,7 +31,7 @@
 #define pS               (QApplication::primaryScreen())
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
-enum Buttons { Ok, Cancel };
+enum Buttons { SignUp, Cancel };
 
 static const QStringList& countries()
 {
@@ -188,25 +189,25 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
     _buttons->add(Cancel, "#cf5751", "#B34B46");
-    _buttons->add(Ok, "#6ab35f", "#599750");
-    _buttons->get(Ok)->setText(tr("Ok"));
+    _buttons->add(SignUp, "#6ab35f", "#599750");
+    _buttons->get(SignUp)->setText(tr("Sign Up"));
     _buttons->get(Cancel)->setText(tr("Cancel"));
-    _buttons->get(Ok)->setIcon(QIcon(PATH_OICON));
+    _buttons->get(SignUp)->setIcon(QIcon(PATH_OICON));
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
-    _buttons->get(Ok)->setCursor(Qt::PointingHandCursor);
+    _buttons->get(SignUp)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = TERMS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Ok), SIGNAL(clicked(bool)), SLOT(onOkClicked()));
-    connect(_buttons->get(Cancel), SIGNAL(clicked(bool)), SLOT(onCancelClicked()));
+    connect(_buttons->get(SignUp), SIGNAL(clicked(bool)), SLOT(onSignUpClicked()));
+    connect(_buttons->get(Cancel), SIGNAL(clicked(bool)), SIGNAL(cancel()));
 
     _termsSwitch->settings().activeBackgroundColor = "#62A558";
     _termsSwitch->settings().activeBorderColor = "#538C4A";
     _termsSwitch->setChecked(false);
-    _buttons->get(Ok)->setDisabled(true);
+    _buttons->get(SignUp)->setDisabled(true);
     connect(_termsSwitch, SIGNAL(toggled(bool)),
-      _buttons->get(Ok), SLOT(setEnabled(bool)));
+      _buttons->get(SignUp), SLOT(setEnabled(bool)));
 
     _loadingIndicator->setStyleSheet("Background: transparent;");
     _loadingIndicator->setColor("#2E3A41");
@@ -221,6 +222,16 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
 
     _legalLabel->setText(TEXT_LEGAL);
     _legalLabel->setStyleSheet("color:#2E3A41;");
+}
+
+bool RegistrationWidget::checkEmail(const QString& email) const
+{
+    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
+}
+
+bool RegistrationWidget::checkPassword(const QString& password) const
+{
+    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
 }
 
 void RegistrationWidget::clear()
@@ -244,9 +255,8 @@ void RegistrationWidget::lock()
     _bulkEdit->setDisabled(true);
     _termsLabel->setDisabled(true);
     _termsSwitch->setDisabled(true);
-    _buttons->get(Ok)->setDisabled(true);
+    _buttons->setDisabled(true);
     _loadingIndicator->start();
-
     _buttons->setFocus();
 }
 
@@ -259,14 +269,91 @@ void RegistrationWidget::unlock()
     _loadingIndicator->stop();
 
     if (_termsSwitch->isChecked())
-        _buttons->get(Ok)->setEnabled(true);
+        _buttons->get(SignUp)->setEnabled(true);
 
     _buttons->setFocus();
 }
 
-void RegistrationWidget::onOkClicked()
+void RegistrationWidget::onSignUpClicked()
 {
+    const auto& first = static_cast<QLineEdit*>(_bulkEdit->get(First))->text();
+    const auto& last = static_cast<QLineEdit*>(_bulkEdit->get(Last))->text();
+    const auto& email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+    const auto& cemail = static_cast<QLineEdit*>(_bulkEdit->get(ConfirmEmail))->text();
+    const auto& password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+    const auto& cpassword = static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->text();
+    const auto& company = static_cast<QLineEdit*>(_bulkEdit->get(Company))->text();
+    const auto& title = static_cast<QLineEdit*>(_bulkEdit->get(Title))->text();
+    const auto& phone = static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text();
+    const auto& country = static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText();
+
+    if (first.isEmpty() || first.size() > 256 ||
+        last.isEmpty() || last.size() > 256 ||
+        email.isEmpty() || email.size() > 256 ||
+        cemail.isEmpty() || cemail.size() > 256 ||
+        password.isEmpty() || password.size() > 256 ||
+        cpassword.isEmpty() || cpassword.size() > 256 ||
+        country.size() > 256 || company.size() > 256 ||
+        title.size() > 256 || phone.size() > 256
+    ) {
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Information"),
+            tr("Please make sure you have filled all the required fields "
+               "with correct information. Fields can not exceed 256 characters.")
+        );
+        return;
+    }
+
+    if (email != cemail) {
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Email Addresses"),
+            tr("Email addresses do not match.")
+        );
+        return;
+    }
+
+    if (password != cpassword) {
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Passwords"),
+            tr("Passwords do not match.")
+        );
+        return;
+    }
+
+    if (!checkEmail(email)) {
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Email Address"),
+            tr("Incorrect Email Address. Please check your email address.")
+        );
+        return;
+    }
+
+    if (!checkPassword(password)) {
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Password"),
+            tr("Incorrect Password. Your password must be in between "
+               "6 and 25 characters long. Also please check it if contains invalid characters.")
+        );
+        return;
+    }
+
     lock();
+
+    if (!InternetAccess::available()) {
+        QMessageBox::warning(
+            this,
+            tr("No Internet Access"),
+            tr("Unable to connect to server. Check your internet connection.")
+        );
+
+        unlock();
+        return;
+    }
 
     bool succeed =
     Authenticator::instance()->signup(
@@ -286,13 +373,12 @@ void RegistrationWidget::onOkClicked()
         QMessageBox::warning(
             this,
             tr("Incorrect Information"),
-            tr("Server rejected your request. Please review the information you entered.")
+            tr("Server rejected your request. Please review the information you entered. "
+               "And make sure you are not trying to sign up more than once.")
         );
 
     unlock();
-}
 
-void RegistrationWidget::onCancelClicked()
-{
-    unlock();
+    if (succeed)
+        emit done();
 }

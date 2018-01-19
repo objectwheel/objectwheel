@@ -22,10 +22,14 @@ class RegistrationWidget : public QWidget
         void clear();
         void lock();
         void unlock();
-        void onOkClicked();
-        void onCancelClicked();
+        void onSignUpClicked();
+
+    private:
+        bool checkEmail(const QString& email) const;
+        bool checkPassword(const QString& password) const;
 
     signals:
+        void done();
         void cancel();
 
     private:
@@ -40,7 +44,6 @@ class RegistrationWidget : public QWidget
         ButtonSlice* _buttons;
         WaitingSpinnerWidget* _loadingIndicator;
         QLabel* _legalLabel;
-
 };
 
 #endif // REGISTRATIONWIDGET_H
