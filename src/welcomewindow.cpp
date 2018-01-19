@@ -29,7 +29,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _view->add(Registration, _registrationWidget);
     _view->add(Projects, _projectsWidget);
     _view->add(NewProject, _newProjectWidget);
-    _view->show(Login);
+    _view->show(Registration);
 }
 
 void WelcomeWindow::showLogin()

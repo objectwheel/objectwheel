@@ -4,18 +4,15 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <flatbutton.h>
-#include <loadingindicator.h>
 #include <waitingspinnerwidget.h>
 #include <global.h>
 
-#include <QPainter>
 #include <QApplication>
 #include <QScreen>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
 
 #define AUTOLOGIN_HEIGHT (fit::fx(35))
 #define AUTOLOGIN_WIDTH  (fit::fx(300))
@@ -46,18 +43,20 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     _layout->setSpacing(fit::fx(12));
     _layout->setRowStretch(0, 1);
+    _layout->setRowStretch(1, 1);
     _layout->setRowStretch(8, 1);
+    _layout->setRowStretch(10, 1);
     _layout->setColumnStretch(0, 1);
     _layout->setColumnStretch(2, 1);
 
-    _layout->addWidget(_logoLabel, 1, 1);
-    _layout->addWidget(_loginLabel, 2, 1);
-    _layout->addWidget(_bulkEdit, 3, 1);
-    _layout->addWidget(_autologinWidget, 4, 1);
-    _layout->addWidget(_buttons, 5, 1);
-    _layout->addWidget(_helpButton, 6, 1);
-    _layout->addWidget(_loadingIndicator, 7, 1);
-    _layout->addWidget(_legalLabel, 9, 1);
+    _layout->addWidget(_logoLabel, 2, 1);
+    _layout->addWidget(_loginLabel, 3, 1);
+    _layout->addWidget(_bulkEdit, 4, 1);
+    _layout->addWidget(_autologinWidget, 5, 1);
+    _layout->addWidget(_buttons, 6, 1);
+    _layout->addWidget(_helpButton, 7, 1);
+    _layout->addWidget(_loadingIndicator, 9, 1);
+    _layout->addWidget(_legalLabel, 11, 1);
     _layout->setAlignment(_logoLabel, Qt::AlignCenter);
     _layout->setAlignment(_loginLabel, Qt::AlignCenter);
     _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
@@ -92,7 +91,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     f.setPixelSize(fit::fx(18));
 
     _loginLabel->setFont(f);
-    _loginLabel->setText(tr("Login"));
+    _loginLabel->setText(tr("Log In"));
     _loginLabel->setStyleSheet("color: #2E3A41");
 
     _bulkEdit->add(Email, tr("Email"));

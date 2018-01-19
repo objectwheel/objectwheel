@@ -100,5 +100,6 @@
         <file>images/loadingbar.png</file>
         <file>images/run.png</file>
         <file>images/projects.png</file>
+        <file>images/register.png</file>
     </qresource>
 </RCC>
