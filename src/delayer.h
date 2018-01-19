@@ -3,34 +3,13 @@
 
 #include <QTimer>
 #include <QEventLoop>
+#include <functional>
 
 namespace Delayer
 {
-    void delay(int msec);
+    void delay(int msec); /* Spin as long as the condition is true */
     void delay(const bool& condition, bool reverse = false, int maxMs = 0, int checkMs = 20);
-    void delay(bool (*const method)(), bool reverse = false, int maxMs = 0, int checkMs = 20);
-    template<typename T>
-    void delay(const void* object, bool (T::*const method)() const, bool reverse = false, int maxMs = 0, int checkMs = 20)
-    {
-        QEventLoop loop;
-        QTimer timer, timer_2;
-        QObject::connect(&timer, &QTimer::timeout, [&] { if (reverse ? ((((T*)object)->*method)()) : !((((T*)object)->*method)())) loop.quit(); });
-        QObject::connect(&timer_2, SIGNAL(timeout()), &loop, SLOT(quit()));
-        timer.start(checkMs);
-        if (maxMs > 0) timer_2.start(maxMs);
-        loop.exec();
-    }
-    template<typename T>
-    void delay(const void* object, bool (T::*const method)(), bool reverse = false, int maxMs = 0, int checkMs = 20)
-    {
-        QEventLoop loop;
-        QTimer timer, timer_2;
-        QObject::connect(&timer, &QTimer::timeout, [&] { if (reverse ? ((((T*)object)->*method)()) : !((((T*)object)->*method)())) loop.quit(); });
-        QObject::connect(&timer_2, SIGNAL(timeout()), &loop, SLOT(quit()));
-        timer.start(checkMs);
-        if (maxMs > 0) timer_2.start(maxMs);
-        loop.exec();
-    }
+    void delay(const std::function<bool()>& method, bool reverse = false, int maxMs = 0, int checkMs = 20);
 }
 
 #endif // DELAYER_H

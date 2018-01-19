@@ -6,9 +6,12 @@
 #include <previewbackend.h>
 #include <frontend.h>
 #include <windowmanager.h>
+#include <authenticator.h>
 
 BackendManager::BackendManager()
 {
+    Authenticator::instance()->init(QUrl(APP_SERVER));
+
     new SaveBackend;
     new PreviewBackend;
 

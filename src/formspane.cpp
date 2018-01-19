@@ -50,7 +50,7 @@ FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
     _listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QTimer::singleShot(1000, [=] { //FIXME
-        Delayer::delay([]()->bool {if (SaveBackend::instance()) return false; else return true;});
+        Delayer::delay([=]() -> bool { if (SaveBackend::instance()) return false; else return true;});
         connect(SaveBackend::instance(), SIGNAL(projectExposed()), SLOT(handleDatabaseChange()));
         connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
         connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));

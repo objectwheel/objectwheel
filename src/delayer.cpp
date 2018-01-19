@@ -18,12 +18,14 @@ void Delayer::delay(const bool& condition, bool reverse, int maxMs, int checkMs)
     loop.exec();
 }
 
-void Delayer::delay(bool (* const method)(), bool reverse, int maxMs, int checkMs)
+void Delayer::delay(const std::function<bool()>& method, bool reverse, int maxMs, int checkMs)
 {
     QEventLoop loop;
     QTimer timer, timer_2;
     QObject::connect(&timer, &QTimer::timeout, [&] {
-        if (reverse ? ((*method)()) : !((*method)())) loop.quit(); });
+        if (reverse ? method() : !method())
+            loop.quit();
+    });
     QObject::connect(&timer_2, SIGNAL(timeout()), &loop, SLOT(quit()));
     timer.start(checkMs);
     if (maxMs > 0) timer_2.start(maxMs);

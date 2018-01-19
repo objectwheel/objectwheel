@@ -6,6 +6,7 @@
 #include <waitingspinnerwidget.h>
 #include <global.h>
 #include <filemanager.h>
+#include <authenticator.h>
 
 #include <QPainter>
 #include <QApplication>
@@ -17,6 +18,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QTextStream>
+#include <QMessageBox>
 
 #define TERMS_HEIGHT     (fit::fx(35))
 #define TERMS_WIDTH      (fit::fx(350))
@@ -239,7 +241,6 @@ void RegistrationWidget::clear()
 
 void RegistrationWidget::lock()
 {
-    _iconLabel->setDisabled(true);
     _bulkEdit->setDisabled(true);
     _termsLabel->setDisabled(true);
     _termsSwitch->setDisabled(true);
@@ -251,7 +252,6 @@ void RegistrationWidget::lock()
 
 void RegistrationWidget::unlock()
 {
-    _iconLabel->setEnabled(true);
     _bulkEdit->setEnabled(true);
     _termsLabel->setEnabled(true);
     _termsSwitch->setEnabled(true);
@@ -268,7 +268,28 @@ void RegistrationWidget::onOkClicked()
 {
     lock();
 
-    //    unlock();
+    bool succeed =
+    Authenticator::instance()->signup(
+        static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
+        static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
+        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),
+        static_cast<QLineEdit*>(_bulkEdit->get(Password))->text(),
+        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText(),
+        static_cast<QLineEdit*>(_bulkEdit->get(Company))->text(),
+        static_cast<QLineEdit*>(_bulkEdit->get(Title))->text(),
+        static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text()
+    );
+
+    if (succeed)
+        clear();
+    else
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Information"),
+            tr("Server rejected your request. Please review the information you entered.")
+        );
+
+    unlock();
 }
 
 void RegistrationWidget::onCancelClicked()
