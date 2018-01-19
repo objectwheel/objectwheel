@@ -34,8 +34,8 @@ void ButtonSlice::add(int id, const QColor& topColor, const QColor& bottomColor)
     element.button->setAttribute(Qt::WA_MacShowFocusRect, false);
     element.button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     element.button->setStyleSheet(
-        "QPushButton:disabled {color:#cccccc;}"
-        "QPushButton {color: white; border: none; background: transparent;}"
+        "QPushButton:disabled { color:#80ffffff; }"
+        "QPushButton { color: white; border: none; background: transparent; }"
     );
     connect(element.button, SIGNAL(pressed()), SLOT(update()));
     connect(element.button, SIGNAL(released()), SLOT(update()));
@@ -62,6 +62,7 @@ ButtonSlice::Settings& ButtonSlice::settings()
 void ButtonSlice::triggerSettings()
 {
     setFixedWidth(_settings.cellWidth * _elements.size());
+    update();
 }
 
 QSize ButtonSlice::sizeHint() const
@@ -115,8 +116,10 @@ void ButtonSlice::paintEvent(QPaintEvent*)
             bg.setColorAt(0, e.button->isDown() ? e.topColor.darker(120) : e.topColor);
             bg.setColorAt(1, e.button->isDown() ? e.bottomColor.darker(120) : e.bottomColor);
         } else {
-            bg.setColorAt(0, e.topColor.darker(110));
-            bg.setColorAt(1, e.bottomColor.darker(110));
+            const auto& t = qGray(e.topColor.rgb());
+            const auto& b = qGray(e.bottomColor.rgb());
+            bg.setColorAt(0, QColor(t, t, t));
+            bg.setColorAt(1, QColor(b, b, b));
         }
 
         painter.setBrush(bg);

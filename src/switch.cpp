@@ -44,6 +44,7 @@ void Switch::triggerSettings()
 {
     _animation->setEasingCurve(_settings.animationType);
     _animation->setDuration(_settings.animationDuration);
+    update();
 }
 
 void Switch::handleStateChange()
@@ -62,12 +63,22 @@ void Switch::paintEvent(QPaintEvent*)
 
     const auto& r = ADJUST(QRectF(rect()));
     const auto& x = _animation->currentValue().toReal();
-    const auto& hc = _settings.handleColor;
-    const auto& hbc = _settings.handleBorderColor;
-    const auto& ac = _settings.activeBackgroundColor;
-    const auto& abc = _settings.activeBorderColor;
-    const auto& ic = _settings.inactiveBackgroundColor;
-    const auto& ibc = _settings.inactiveBorderColor;
+    auto hc = _settings.handleColor;
+    auto hbc = _settings.handleBorderColor;
+    auto ac = _settings.activeBackgroundColor;
+    auto abc = _settings.activeBorderColor;
+    auto ic = _settings.inactiveBackgroundColor;
+    auto ibc = _settings.inactiveBorderColor;
+
+    if (!isEnabled()) {
+        hc = QColor(qGray(hc.rgb()), qGray(hc.rgb()), qGray(hc.rgb()));
+        hbc = QColor(qGray(hbc.rgb()), qGray(hbc.rgb()), qGray(hbc.rgb()));
+        ac = QColor(qGray(ac.rgb()), qGray(ac.rgb()), qGray(ac.rgb()));
+        abc = QColor(qGray(abc.rgb()), qGray(abc.rgb()), qGray(abc.rgb()));
+        ic = QColor(qGray(ic.rgb()), qGray(ic.rgb()), qGray(ic.rgb()));
+        ibc = QColor(qGray(ibc.rgb()), qGray(ibc.rgb()), qGray(ibc.rgb()));
+    }
+
     const auto& cc = isChecked() ? ac : ic;
     const auto& cbc = isChecked() ? abc : ibc;
 

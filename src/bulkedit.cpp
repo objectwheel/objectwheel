@@ -18,7 +18,6 @@ BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
     _settings.borderColor = "#18000000";
     _settings.backgroundColor = "#12000000";
     _settings.labelColor = "#40000000";
-    _settings.textColor = "#2E3A41";
 
     /* Set size settings */
     _settings.cellHeight = fit::fx(35);
@@ -30,15 +29,13 @@ BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
     _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
 }
 
-void BulkEdit::add(int id, const QString& label)
+void BulkEdit::add(int id, const QString& label, QWidget* widget)
 {
     LineElement element;
     element.id = id;
     element.text = label;
-    element.edit = new QLineEdit;
-    element.edit->setFrame(false);
+    element.edit = widget;
     element.edit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    element.edit->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     element.edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     element.edit->setStyleSheet("color: #2e3a41; border: none; background: transparent;");
 
@@ -48,7 +45,7 @@ void BulkEdit::add(int id, const QString& label)
     setFixedHeight(_settings.cellHeight * _elements.size());
 }
 
-QLineEdit* BulkEdit::get(int id)
+QWidget* BulkEdit::get(int id)
 {
     for (const auto& e : _elements)
         if (e.id == id)
@@ -65,6 +62,7 @@ void BulkEdit::triggerSettings()
 {
     setFixedHeight(_settings.cellHeight * _elements.size());
     _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
+    update();
 }
 
 QSize BulkEdit::sizeHint() const
@@ -78,10 +76,13 @@ void BulkEdit::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     const auto& r = ADJUST(QRectF(rect()));
+    auto bc = _settings.backgroundColor;
+    auto bbc = _settings.borderColor;
+    auto lc = _settings.labelColor;
 
     /* Draw background */
-    painter.setPen(_settings.borderColor);
-    painter.setBrush(_settings.backgroundColor);
+    painter.setPen(bbc);
+    painter.setBrush(bc);
     painter.drawRoundedRect(r, _settings.borderRadius, _settings.borderRadius);
 
     /* Draw seperator lines */
@@ -95,7 +96,7 @@ void BulkEdit::paintEvent(QPaintEvent*)
     }
 
     /* Draw labels */
-    painter.setPen(_settings.labelColor);
+    painter.setPen(lc);
     for (int i = 0; i < _elements.size(); i++) {
         const auto& element = _elements.at(i);
         painter.drawText(

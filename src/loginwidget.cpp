@@ -96,9 +96,11 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     _bulkEdit->add(Email, tr("Email"));
     _bulkEdit->add(Password, tr("Password"));
-    _bulkEdit->get(Password)->setEchoMode(QLineEdit::Password);
-    _bulkEdit->get(Email)->setText(tr("alpha@objectwheel.com"));
-    _bulkEdit->get(Password)->setText(tr("password"));
+    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
+    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setText(tr("alpha@objectwheel.com"));
+    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setText(tr("password"));
+    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
     _autologinWidget->setObjectName("autologinWidget");
     _autologinWidget->setFixedSize(AUTOLOGIN_WIDTH, AUTOLOGIN_HEIGHT);

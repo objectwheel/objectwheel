@@ -2,10 +2,9 @@
 #define BULKEDIT_H
 
 #include <QList>
-#include <QWidget>
+#include <QLineEdit>
 
 class QLayout;
-class QLineEdit;
 
 class BulkEdit : public QWidget
 {
@@ -15,7 +14,7 @@ class BulkEdit : public QWidget
         struct LineElement {
             int id;
             QString text;
-            QLineEdit* edit;
+            QWidget* edit;
         };
 
     public:
@@ -24,7 +23,6 @@ class BulkEdit : public QWidget
             QColor borderColor;
             QColor backgroundColor;
             QColor labelColor;
-            QColor textColor;
 
             /* Sizes */
             qreal cellHeight;
@@ -35,8 +33,8 @@ class BulkEdit : public QWidget
 
     public:
         explicit BulkEdit(QWidget* parent = nullptr);
-        void add(int id, const QString& label);
-        QLineEdit* get(int id);
+        void add(int id, const QString& label, QWidget* widget = new QLineEdit);
+        QWidget* get(int id);
         Settings& settings();
 
     public slots:

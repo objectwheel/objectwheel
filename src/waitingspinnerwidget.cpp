@@ -73,7 +73,6 @@ void WaitingSpinnerWidget::initialize() {
     connect(_timer, SIGNAL(timeout()), this, SLOT(rotate()));
     updateSize();
     updateTimer();
-    hide();
 }
 
 void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
@@ -81,6 +80,9 @@ void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
     painter.fillRect(this->rect(), Qt::transparent);
     painter.setRenderHint(QPainter::Antialiasing, true);
+
+    if (!_isSpinning)
+        return;
 
     if (_currentCounter >= _numberOfLines) {
         _currentCounter = 0;
@@ -112,7 +114,6 @@ void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
 void WaitingSpinnerWidget::start() {
     updatePosition();
     _isSpinning = true;
-    show();
 
     if(parentWidget() && _disableParentWhenSpinning) {
         parentWidget()->setEnabled(false);
@@ -122,11 +123,12 @@ void WaitingSpinnerWidget::start() {
         _timer->start();
         _currentCounter = 0;
     }
+
+    update();
 }
 
 void WaitingSpinnerWidget::stop() {
     _isSpinning = false;
-    hide();
 
     if(parentWidget() && _disableParentWhenSpinning) {
         parentWidget()->setEnabled(true);
@@ -136,6 +138,8 @@ void WaitingSpinnerWidget::stop() {
         _timer->stop();
         _currentCounter = 0;
     }
+
+    update();
 }
 
 void WaitingSpinnerWidget::setNumberOfLines(int lines) {

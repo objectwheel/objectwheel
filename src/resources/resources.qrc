@@ -101,5 +101,7 @@
         <file>images/run.png</file>
         <file>images/projects.png</file>
         <file>images/register.png</file>
+        <file>images/downarrow.png</file>
+        <file>images/downarrow@2x.png</file>
     </qresource>
 </RCC>

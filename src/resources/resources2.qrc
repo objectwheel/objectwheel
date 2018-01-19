@@ -70,5 +70,6 @@
         <file>other/qt-modules.txt</file>
         <file>qmls/buildsScreen/main.qml</file>
         <file>qmls/buildsScreen/ProgressPage.qml</file>
+        <file>other/countries.txt</file>
     </qresource>
 </RCC>

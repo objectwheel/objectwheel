@@ -18,6 +18,16 @@ class RegistrationWidget : public QWidget
     public:
         explicit RegistrationWidget(QWidget *parent = nullptr);
 
+    private slots:
+        void clear();
+        void lock();
+        void unlock();
+        void onOkClicked();
+        void onCancelClicked();
+
+    signals:
+        void cancel();
+
     private:
         QVBoxLayout* _layout;
         QLabel* _iconLabel;
