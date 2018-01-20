@@ -380,5 +380,5 @@ void RegistrationWidget::onSignUpClicked()
     unlock();
 
     if (succeed)
-        emit done();
+        emit done(email);
 }

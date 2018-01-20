@@ -10,20 +10,20 @@ Countdown::Countdown(QWidget *parent) : QWidget(parent)
   , _second(0)
   , _timer(new QTimer(this))
 {
-    _settings.borderColor = "#253F51";
-    _settings.backgroundColor = "#2D4D62";
+    _settings.borderColor = "#C0C4C7";
+    _settings.backgroundColor = "#D0D4D7";
     _settings.leftDigitColor = "#7EBE5D";
     _settings.rightDigitColor = "#BE5760";
-    _settings.dotColor = "#aaffffff";
+    _settings.dotColor = "#50000000";
     _settings.textColor = Qt::white;
-    _settings.screwColor = Qt::white;
-    _settings.lineColor = "#e0e4e7";
+    _settings.screwColor = "#70000000";
+    _settings.lineColor = "#70000000";
 
     _settings.borderRadius = fit::fx(4);
     _settings.digitRadius = fit::fx(4);
     _settings.margins = fit::fx(8);
 
-    resize(SIZE);start(100);
+    resize(SIZE);
     connect(_timer, SIGNAL(timeout()), SLOT(decrease()));
 }
 

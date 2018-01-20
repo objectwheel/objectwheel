@@ -24,6 +24,8 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
     connect(_projectsWidget, SIGNAL(done()), SIGNAL(lazy()));
     connect(_projectsWidget, SIGNAL(done()), SIGNAL(done()));
+    connect(_registrationWidget, SIGNAL(done(QString)),
+      _verificationWidget, SLOT(setEmail(QString)));
 
     connect(_loginWidget, &LoginWidget::signup, [=] {
         _view->show(Registration, View::LeftToRight);
@@ -37,13 +39,21 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         _view->show(Verification, View::RightToLeft);
     });
 
+    connect(_verificationWidget, &VerificationWidget::cancel, [=] {
+        _view->show(Login, View::LeftToRight);
+    });
+
+    connect(_verificationWidget, &VerificationWidget::done, [=] {
+        _view->show(Login, View::LeftToRight);
+    });
+
     _view = new View(this);
     _view->add(Login, _loginWidget);
     _view->add(Registration, _registrationWidget);
     _view->add(Verification, _verificationWidget);
     _view->add(Projects, _projectsWidget);
     _view->add(NewProject, _newProjectWidget);
-    _view->show(Verification);
+    _view->show(Registration);
 }
 
 void WelcomeWindow::showLogin()

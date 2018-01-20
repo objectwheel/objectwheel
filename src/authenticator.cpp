@@ -114,3 +114,66 @@ bool Authenticator::signup(
     return incoming == TYPE_SUCCESS;
 }
 
+bool Authenticator::forget(const QString& email)
+{
+    if (!connect(TIMEOUT))
+        return false;
+
+    sendTextMessage(
+        TYPE_RESEND + ENDL +
+        email + ENDL
+    );
+
+    const auto& incoming = readSync(TIMEOUT);
+
+    close();
+
+    return incoming == TYPE_SUCCESS;
+}
+
+bool Authenticator::resend(const QString& email)
+{
+    if (!connect(TIMEOUT))
+        return false;
+
+    sendTextMessage(
+        TYPE_RESEND + ENDL +
+        email + ENDL
+    );
+
+    const auto& incoming = readSync(TIMEOUT);
+
+    close();
+
+    return incoming == TYPE_SUCCESS;
+
+}
+
+bool Authenticator::verify(const QString& email, const QString& code)
+{
+    if (!connect(TIMEOUT))
+        return false;
+
+    sendTextMessage(
+        TYPE_VERIFY + ENDL +
+        email + ENDL +
+        code + ENDL
+    );
+
+    const auto& incoming = readSync(TIMEOUT);
+
+    close();
+
+    return incoming == TYPE_SUCCESS;
+}
+
+bool Authenticator::login(const QString& email, const QString& password)
+{
+
+}
+
+bool Authenticator::reset(const QString& email, const QString& password, const QString& code)
+{
+
+}
+

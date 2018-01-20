@@ -29,8 +29,8 @@ class RegistrationWidget : public QWidget
         bool checkPassword(const QString& password) const;
 
     signals:
-        void done();
         void cancel();
+        void done(const QString& email);
 
     private:
         QVBoxLayout* _layout;

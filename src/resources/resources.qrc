@@ -103,5 +103,6 @@
         <file>images/register.png</file>
         <file>images/downarrow.png</file>
         <file>images/downarrow@2x.png</file>
+        <file>images/verification.png</file>
     </qresource>
 </RCC>
