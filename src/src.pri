@@ -79,8 +79,9 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/buttonslice.h \
            $$PWD/waitingspinnerwidget.h \
            $$PWD/filemanager.h \
-    $$PWD/authenticator.h \
-    $$PWD/internetaccess.h
+           $$PWD/authenticator.h \
+           $$PWD/internetaccess.h \
+           $$PWD/verificationwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -152,8 +153,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/buttonslice.cpp \
            $$PWD/waitingspinnerwidget.cpp \
            $$PWD/filemanager.cpp \
-    $$PWD/authenticator.cpp \
-    $$PWD/internetaccess.cpp
+           $$PWD/authenticator.cpp \
+           $$PWD/internetaccess.cpp \
+           $$PWD/verificationwidget.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

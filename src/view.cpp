@@ -3,7 +3,7 @@
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 
-#define SWIPE_DURATION 300
+#define SWIPE_DURATION 500
 
 void swipe(QWidget* w1, QWidget* w2, QLayout* layout, View::SwipeDirection direction)
 {
@@ -12,8 +12,8 @@ void swipe(QWidget* w1, QWidget* w2, QLayout* layout, View::SwipeDirection direc
     static auto ag = new QParallelAnimationGroup;
 
     if (ag->animationCount() == 0) {
-        a1->setEasingCurve(QEasingCurve::OutExpo);
-        a2->setEasingCurve(QEasingCurve::OutExpo);
+        a1->setEasingCurve(QEasingCurve::OutQuart);
+        a2->setEasingCurve(QEasingCurve::OutQuart);
         a1->setDuration(SWIPE_DURATION);
         a2->setDuration(SWIPE_DURATION);
         a1->setPropertyName("geometry");

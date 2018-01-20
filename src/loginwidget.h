@@ -19,6 +19,9 @@ class LoginWidget : public QWidget
     public:
         explicit LoginWidget(QWidget *parent = nullptr);
 
+    signals:
+        void signup();
+
     private:
         QGridLayout* _layout;
         QLabel* _logoLabel;

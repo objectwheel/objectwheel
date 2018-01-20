@@ -128,6 +128,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Login)->setIcon(QIcon(PATH_LICON));
     _buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Login)->setCursor(Qt::PointingHandCursor);
+    connect(_buttons->get(Register), SIGNAL(clicked(bool)), SIGNAL(signup()));
 
     _helpButton->setIconButton(true);
     _helpButton->setIcon(QIcon(PATH_HICON));

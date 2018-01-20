@@ -18,18 +18,25 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _projectsWidget = new ProjectsWidget;
     _newProjectWidget = new NewProjectWidget;
 
-    connect(_loginWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
     connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
     connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
     connect(_projectsWidget, SIGNAL(done()), SIGNAL(lazy()));
     connect(_projectsWidget, SIGNAL(done()), SIGNAL(done()));
+
+    connect(_loginWidget, &LoginWidget::signup, [=] {
+        _view->show(Registration, View::LeftToRight);
+    });
+
+    connect(_registrationWidget, &RegistrationWidget::cancel, [=] {
+        _view->show(Login, View::RightToLeft);
+    });
 
     _view = new View(this);
     _view->add(Login, _loginWidget);
     _view->add(Registration, _registrationWidget);
     _view->add(Projects, _projectsWidget);
     _view->add(NewProject, _newProjectWidget);
-    _view->show(Registration);
+    _view->show(Login);
 }
 
 void WelcomeWindow::showLogin()
