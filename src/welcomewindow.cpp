@@ -1,11 +1,16 @@
 #include <fit.h>
 #include <view.h>
+#include <global.h>
 #include <welcomewindow.h>
 #include <loginwidget.h>
 #include <projectswidget.h>
 #include <newprojectwidget.h>
 #include <registrationwidget.h>
 #include <verificationwidget.h>
+#include <registrationsucceedwidget.h>
+#include <QTimer>
+#include <QVBoxLayout>
+#include <QLabel>
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
@@ -14,11 +19,22 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     setPalette(p);
     setWindowTitle(APP_NAME);
 
+    _layout = new QVBoxLayout(this);
+    _view = new View;
+    _legalLabel = new QLabel;
     _loginWidget = new LoginWidget;
     _registrationWidget = new RegistrationWidget;
     _projectsWidget = new ProjectsWidget;
     _newProjectWidget = new NewProjectWidget;
     _verificationWidget = new VerificationWidget;
+    _registrationSucceedWidget = new RegistrationSucceedWidget;
+
+    _layout->setSpacing(fit::fx(12));
+    _layout->setContentsMargins(0, 0, 0, 0);
+    _layout->setSizeConstraint(QLayout::SetMaximumSize);
+
+    _layout->addWidget(_view);
+    _layout->addWidget(_legalLabel);
 
     connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
     connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
@@ -28,48 +44,53 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
       _verificationWidget, SLOT(setEmail(QString)));
 
     connect(_loginWidget, &LoginWidget::signup, [=] {
-        _view->show(Registration, View::LeftToRight);
+        _view->show(Registration);
     });
 
     connect(_registrationWidget, &RegistrationWidget::cancel, [=] {
-        _view->show(Login, View::RightToLeft);
+        _view->show(Login);
     });
 
     connect(_registrationWidget, &RegistrationWidget::done, [=] {
-        _view->show(Verification, View::RightToLeft);
+        _view->show(Verification);
     });
 
     connect(_verificationWidget, &VerificationWidget::cancel, [=] {
-        _view->show(Login, View::LeftToRight);
+        _view->show(Login);
     });
 
     connect(_verificationWidget, &VerificationWidget::done, [=] {
-        _view->show(Login, View::LeftToRight);
+        _view->show(RegistrationSucceed);
+        QTimer::singleShot(200, _registrationSucceedWidget,
+                           &RegistrationSucceedWidget::start);
     });
 
-    _view = new View(this);
+    connect(_registrationSucceedWidget, &RegistrationSucceedWidget::done, [=] {
+        _view->show(Login);
+    });
+
+    _view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _view->add(Login, _loginWidget);
     _view->add(Registration, _registrationWidget);
     _view->add(Verification, _verificationWidget);
     _view->add(Projects, _projectsWidget);
     _view->add(NewProject, _newProjectWidget);
-    _view->show(Registration);
+    _view->add(RegistrationSucceed, _registrationSucceedWidget);
+    _view->show(Login);
+
+    _legalLabel->setText(TEXT_LEGAL);
+    _legalLabel->setStyleSheet("color:#2E3A41;");
+    _legalLabel->setAlignment(Qt::AlignHCenter);
 }
 
 void WelcomeWindow::showLogin()
 {
-    _view->show(Login, View::LeftToRight);
+    _view->show(Login);
 }
 
 void WelcomeWindow::showProjects()
 {
 //    _projectsWidget->refreshProjectList(); //FIXME
-    _view->show(Projects, View::RightToLeft);
+    _view->show(Projects);
     emit lazy();
-}
-
-void WelcomeWindow::resizeEvent(QResizeEvent* event)
-{
-    _view->setGeometry(rect());
-    QWidget::resizeEvent(event);
 }

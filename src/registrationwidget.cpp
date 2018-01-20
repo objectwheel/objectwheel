@@ -4,7 +4,6 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <global.h>
 #include <filemanager.h>
 #include <authenticator.h>
 #include <internetaccess.h>
@@ -61,7 +60,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel = new QLabel;
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
-    _legalLabel = new QLabel;
 
     _layout->setSpacing(fit::fx(12));
     _layout->addStretch();
@@ -73,7 +71,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _layout->addStretch();
     _layout->addWidget(_loadingIndicator);
     _layout->addStretch();
-    _layout->addWidget(_legalLabel);
 
     _layout->setAlignment(_iconLabel, Qt::AlignCenter);
     _layout->setAlignment(_signupLabel, Qt::AlignCenter);
@@ -81,7 +78,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _layout->setAlignment(_termsWidget, Qt::AlignCenter);
     _layout->setAlignment(_buttons, Qt::AlignCenter);
     _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
-    _layout->setAlignment(_legalLabel, Qt::AlignCenter);
 
     _termsLayout->setSpacing(fit::fx(5));
     _termsLayout->setContentsMargins(fit::fx(2.5), 0, 0, 0);
@@ -219,9 +215,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setLineLength(5);
     _loadingIndicator->setInnerRadius(4);
     _loadingIndicator->setLineWidth(2);
-
-    _legalLabel->setText(TEXT_LEGAL);
-    _legalLabel->setStyleSheet("color:#2E3A41;");
 }
 
 bool RegistrationWidget::checkEmail(const QString& email) const

@@ -1,31 +1,22 @@
 #include <verificationwidget.h>
-#include <countdown.h>
-
 #include <fit.h>
-#include <switch.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <global.h>
-#include <filemanager.h>
 #include <authenticator.h>
 #include <internetaccess.h>
 #include <countdown.h>
 
-#include <QPainter>
 #include <QApplication>
 #include <QScreen>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QComboBox>
-#include <QTextStream>
 #include <QMessageBox>
+#include <QRegExpValidator>
 
 #define COUNTDOWN        300
-#define TERMS_HEIGHT     (fit::fx(35))
 #define BUTTONS_WIDTH    (fit::fx(300))
 #define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
 #define PATH_ICON        (":/resources/images/verification.png")
@@ -37,7 +28,7 @@
 enum Fields { Code };
 enum Buttons { Verify, Resend, Cancel };
 
-VerificationWidget::VerificationWidget(QWidget *parent) : QWidget(parent)
+VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _iconLabel = new QLabel;
@@ -48,7 +39,6 @@ VerificationWidget::VerificationWidget(QWidget *parent) : QWidget(parent)
     _emailLabel = new QLabel;
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
-    _legalLabel = new QLabel;
 
     _layout->setSpacing(fit::fx(12));
     _layout->addStretch();
@@ -64,7 +54,6 @@ VerificationWidget::VerificationWidget(QWidget *parent) : QWidget(parent)
     _layout->addStretch();
     _layout->addWidget(_loadingIndicator);
     _layout->addStretch();
-    _layout->addWidget(_legalLabel);
 
     _layout->setAlignment(_iconLabel, Qt::AlignCenter);
     _layout->setAlignment(_countdownLabel, Qt::AlignCenter);
@@ -74,7 +63,6 @@ VerificationWidget::VerificationWidget(QWidget *parent) : QWidget(parent)
     _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
     _layout->setAlignment(_buttons, Qt::AlignCenter);
     _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
-    _layout->setAlignment(_legalLabel, Qt::AlignCenter);
 
     QPixmap p(PATH_ICON);
     p.setDevicePixelRatio(pS->devicePixelRatio());
@@ -148,9 +136,6 @@ VerificationWidget::VerificationWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setLineLength(5);
     _loadingIndicator->setInnerRadius(4);
     _loadingIndicator->setLineWidth(2);
-
-    _legalLabel->setText(TEXT_LEGAL);
-    _legalLabel->setStyleSheet("color:#2E3A41;");
 }
 
 void VerificationWidget::setEmail(const QString& email)

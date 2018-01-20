@@ -4,11 +4,14 @@
 #include <QWidget>
 
 class View;
+class QLabel;
+class QVBoxLayout;
 class LoginWidget;
 class ProjectsWidget;
 class NewProjectWidget;
 class RegistrationWidget;
 class VerificationWidget;
+class RegistrationSucceedWidget;
 
 class WelcomeWindow : public QWidget
 {
@@ -20,7 +23,8 @@ class WelcomeWindow : public QWidget
             Registration,
             Verification,
             Projects,
-            NewProject
+            NewProject,
+            RegistrationSucceed
         };
 
     public:
@@ -28,9 +32,6 @@ class WelcomeWindow : public QWidget
 
     public slots:
         void showLogin();
-
-    protected:
-        void resizeEvent(QResizeEvent* event) override;
 
     private slots:
         void showProjects();
@@ -42,11 +43,14 @@ class WelcomeWindow : public QWidget
 
     private:
         View* _view;
+        QLabel* _legalLabel;
+        QVBoxLayout* _layout;
         LoginWidget* _loginWidget;
         ProjectsWidget* _projectsWidget;
         NewProjectWidget* _newProjectWidget;
         RegistrationWidget* _registrationWidget;
         VerificationWidget* _verificationWidget;
+        RegistrationSucceedWidget* _registrationSucceedWidget;
 };
 
 #endif // WELCOMEWINDOW_H

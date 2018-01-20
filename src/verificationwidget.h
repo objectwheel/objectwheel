@@ -13,8 +13,9 @@ class Countdown;
 class VerificationWidget : public QWidget
 {
         Q_OBJECT
+
     public:
-        explicit VerificationWidget(QWidget *parent = nullptr);
+        explicit VerificationWidget(QWidget* parent = nullptr);
 
     public slots:
         void setEmail(const QString& email);
@@ -39,10 +40,8 @@ class VerificationWidget : public QWidget
         QLabel* _verificationLabel;
         QLabel* _emailLabel;
         BulkEdit* _bulkEdit;
-        QWidget* _termsWidget;
         ButtonSlice* _buttons;
         WaitingSpinnerWidget* _loadingIndicator;
-        QLabel* _legalLabel;
 };
 
 #endif // VERIFICATIONWIDGET_H

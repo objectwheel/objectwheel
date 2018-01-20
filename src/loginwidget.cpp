@@ -5,7 +5,6 @@
 #include <buttonslice.h>
 #include <flatbutton.h>
 #include <waitingspinnerwidget.h>
-#include <global.h>
 
 #include <QApplication>
 #include <QScreen>
@@ -39,7 +38,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _helpButton = new FlatButton;
     _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
-    _legalLabel = new QLabel;
 
     _layout->setSpacing(fit::fx(12));
     _layout->setRowStretch(0, 1);
@@ -56,7 +54,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _layout->addWidget(_buttons, 6, 1);
     _layout->addWidget(_helpButton, 7, 1);
     _layout->addWidget(_loadingIndicator, 9, 1);
-    _layout->addWidget(_legalLabel, 11, 1);
     _layout->setAlignment(_logoLabel, Qt::AlignCenter);
     _layout->setAlignment(_loginLabel, Qt::AlignCenter);
     _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
@@ -64,7 +61,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _layout->setAlignment(_buttons, Qt::AlignCenter);
     _layout->setAlignment(_helpButton, Qt::AlignCenter);
     _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
-    _layout->setAlignment(_legalLabel, Qt::AlignCenter);
 
     _autologinLayout->setSpacing(fit::fx(5));
     _autologinLayout->setContentsMargins(fit::fx(2.5), 0, 0, 0);
@@ -144,7 +140,4 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setLineLength(5);
     _loadingIndicator->setInnerRadius(4);
     _loadingIndicator->setLineWidth(2);
-
-    _legalLabel->setText(TEXT_LEGAL);
-    _legalLabel->setStyleSheet("color:#2E3A41;");
 }

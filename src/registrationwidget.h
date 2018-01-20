@@ -43,7 +43,6 @@ class RegistrationWidget : public QWidget
         QLabel* _termsLabel;
         ButtonSlice* _buttons;
         WaitingSpinnerWidget* _loadingIndicator;
-        QLabel* _legalLabel;
 };
 
 #endif // REGISTRATIONWIDGET_H
