@@ -81,7 +81,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/filemanager.h \
            $$PWD/authenticator.h \
            $$PWD/internetaccess.h \
-           $$PWD/verificationwidget.h
+           $$PWD/verificationwidget.h \
+           $$PWD/countdown.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -155,7 +156,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/filemanager.cpp \
            $$PWD/authenticator.cpp \
            $$PWD/internetaccess.cpp \
-           $$PWD/verificationwidget.cpp
+           $$PWD/verificationwidget.cpp \
+           $$PWD/countdown.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

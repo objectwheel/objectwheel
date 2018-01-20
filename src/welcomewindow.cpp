@@ -1,10 +1,11 @@
+#include <fit.h>
+#include <view.h>
 #include <welcomewindow.h>
 #include <loginwidget.h>
 #include <projectswidget.h>
 #include <newprojectwidget.h>
 #include <registrationwidget.h>
-#include <view.h>
-#include <fit.h>
+#include <verificationwidget.h>
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
@@ -17,6 +18,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _registrationWidget = new RegistrationWidget;
     _projectsWidget = new ProjectsWidget;
     _newProjectWidget = new NewProjectWidget;
+    _verificationWidget = new VerificationWidget;
 
     connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
     connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
@@ -31,12 +33,17 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         _view->show(Login, View::RightToLeft);
     });
 
+    connect(_registrationWidget, &RegistrationWidget::done, [=] {
+        _view->show(Verification, View::RightToLeft);
+    });
+
     _view = new View(this);
     _view->add(Login, _loginWidget);
     _view->add(Registration, _registrationWidget);
+    _view->add(Verification, _verificationWidget);
     _view->add(Projects, _projectsWidget);
     _view->add(NewProject, _newProjectWidget);
-    _view->show(Login);
+    _view->show(Verification);
 }
 
 void WelcomeWindow::showLogin()
