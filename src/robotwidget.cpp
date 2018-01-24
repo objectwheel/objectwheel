@@ -17,7 +17,7 @@
 #define PATH_ICON        (":/resources/images/robot.png")
 #define PATH_NICON       (":/resources/images/ok.png")
 #define PATH_CICON       (":/resources/images/unload.png")
-#define PATH_RECAPTCHA   ("qrc://resources/other/recaptcha.html")
+#define PATH_RECAPTCHA   (tr(APP_HTTPSSERVER) + "/recaptcha.html")
 #define pS               (QApplication::primaryScreen())
 
 enum Buttons { Next, Cancel };
@@ -99,7 +99,12 @@ const QString& RobotWidget::response() const
 void RobotWidget::load()
 {
     if (_recaptchaView->page()->url().isEmpty())
-        _recaptchaView->load(QUrl("http://localhost"));
+        reload();
+}
+
+void RobotWidget::reload()
+{
+    _recaptchaView->load(QUrl(PATH_RECAPTCHA));
 }
 
 void RobotWidget::reset()

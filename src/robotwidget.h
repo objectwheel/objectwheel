@@ -19,6 +19,7 @@ class RobotWidget : public QWidget
 
     public slots:
         void load();
+        void reload();
         void reset();
         void captchaExpired();
         void updateResponse(const QString& response);

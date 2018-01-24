@@ -10,7 +10,7 @@
 
 BackendManager::BackendManager()
 {
-    Authenticator::instance()->init(QUrl(APP_SERVER));
+    Authenticator::instance()->init(QUrl(APP_WSSSERVER));
 
     new SaveBackend;
     new PreviewBackend;
