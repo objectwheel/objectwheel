@@ -18,6 +18,9 @@ class RegistrationWidget : public QWidget
     public:
         explicit RegistrationWidget(QWidget *parent = nullptr);
 
+    public slots:
+        void updateResponse(const QString& response);
+
     private slots:
         void clear();
         void lock();
@@ -33,6 +36,7 @@ class RegistrationWidget : public QWidget
         void done(const QString& email);
 
     private:
+        QString _response;
         QVBoxLayout* _layout;
         QLabel* _iconLabel;
         QLabel* _signupLabel;

@@ -34,6 +34,7 @@ class LoginWidget : public QWidget
         ButtonSlice* _buttons;
         FlatButton* _helpButton;
         WaitingSpinnerWidget* _loadingIndicator;
+        QLabel* _legalLabel;
 };
 
 #endif // LOGINWIDGET_H

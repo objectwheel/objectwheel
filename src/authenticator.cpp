@@ -2,7 +2,7 @@
 #include <delayer.h>
 #include <QWebSocket>
 
-#define TIMEOUT 5000
+#define TIMEOUT 10000
 #define ENDL tr("\r\n")
 #define TYPE_LOGIN   tr("0x0000")
 #define TYPE_SIGNUP  tr("0x0001")
@@ -82,6 +82,7 @@ void Authenticator::onTextMessageReceived(const QString& message)
 }
 
 bool Authenticator::signup(
+    const QString& recaptcha,
     const QString& first,
     const QString& last,
     const QString& email,
@@ -97,6 +98,7 @@ bool Authenticator::signup(
 
     sendTextMessage(
         TYPE_SIGNUP + ENDL +
+        recaptcha + ENDL +
         first + ENDL +
         last + ENDL +
         email + ENDL +

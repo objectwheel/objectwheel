@@ -1,8 +1,8 @@
 #include <fit.h>
 #include <view.h>
-#include <global.h>
 #include <welcomewindow.h>
 #include <loginwidget.h>
+#include <robotwidget.h>
 #include <projectswidget.h>
 #include <newprojectwidget.h>
 #include <registrationwidget.h>
@@ -21,20 +21,18 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
     _layout = new QVBoxLayout(this);
     _view = new View;
-    _legalLabel = new QLabel;
     _loginWidget = new LoginWidget;
+    _robotWidget = new RobotWidget;
     _registrationWidget = new RegistrationWidget;
     _projectsWidget = new ProjectsWidget;
     _newProjectWidget = new NewProjectWidget;
     _verificationWidget = new VerificationWidget;
     _registrationSucceedWidget = new RegistrationSucceedWidget;
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(0);
     _layout->setContentsMargins(0, 0, 0, 0);
     _layout->setSizeConstraint(QLayout::SetMaximumSize);
-
     _layout->addWidget(_view);
-    _layout->addWidget(_legalLabel);
 
     connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
     connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
@@ -44,6 +42,18 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
       _verificationWidget, SLOT(setEmail(QString)));
 
     connect(_loginWidget, &LoginWidget::signup, [=] {
+        _robotWidget->load();
+        _view->show(Robot);
+    });
+
+    connect(_robotWidget, SIGNAL(done(QString)),
+      _registrationWidget, SLOT(updateResponse(QString)));
+
+    connect(_robotWidget, &RobotWidget::cancel, [=] {
+        _view->show(Login);
+    });
+
+    connect(_robotWidget, &RobotWidget::done, [=] {
         _view->show(Registration);
     });
 
@@ -53,6 +63,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
     connect(_registrationWidget, &RegistrationWidget::done, [=] {
         _view->show(Verification);
+        _robotWidget->reset();
     });
 
     connect(_verificationWidget, &VerificationWidget::cancel, [=] {
@@ -71,16 +82,13 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
     _view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _view->add(Login, _loginWidget);
+    _view->add(Robot, _robotWidget);
     _view->add(Registration, _registrationWidget);
     _view->add(Verification, _verificationWidget);
     _view->add(Projects, _projectsWidget);
     _view->add(NewProject, _newProjectWidget);
     _view->add(RegistrationSucceed, _registrationSucceedWidget);
     _view->show(Login);
-
-    _legalLabel->setText(TEXT_LEGAL);
-    _legalLabel->setStyleSheet("color:#2E3A41;");
-    _legalLabel->setAlignment(Qt::AlignHCenter);
 }
 
 void WelcomeWindow::showLogin()

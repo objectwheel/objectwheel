@@ -22,6 +22,7 @@ ButtonSlice::ButtonSlice(QWidget* parent) : QWidget(parent)
 
     _layout->setSpacing(0);
     _layout->setContentsMargins(0, 0, 0, 0);
+    setFixedHeight(SIZE.height());
 }
 
 void ButtonSlice::add(int id, const QColor& topColor, const QColor& bottomColor)

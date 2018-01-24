@@ -14,6 +14,7 @@ class Authenticator : public QWebSocket
 
     public slots:
         bool signup(
+            const QString& recaptcha,
             const QString& first,
             const QString& last,
             const QString& email,

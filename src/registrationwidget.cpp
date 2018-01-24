@@ -8,7 +8,6 @@
 #include <authenticator.h>
 #include <internetaccess.h>
 
-#include <QPainter>
 #include <QApplication>
 #include <QScreen>
 #include <QVBoxLayout>
@@ -62,22 +61,16 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
 
     _layout->setSpacing(fit::fx(12));
-    _layout->addStretch();
-    _layout->addWidget(_iconLabel);
-    _layout->addWidget(_signupLabel);
-    _layout->addWidget(_bulkEdit);
-    _layout->addWidget(_termsWidget);
-    _layout->addWidget(_buttons);
-    _layout->addStretch();
-    _layout->addWidget(_loadingIndicator);
-    _layout->addStretch();
 
-    _layout->setAlignment(_iconLabel, Qt::AlignCenter);
-    _layout->setAlignment(_signupLabel, Qt::AlignCenter);
-    _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
-    _layout->setAlignment(_termsWidget, Qt::AlignCenter);
-    _layout->setAlignment(_buttons, Qt::AlignCenter);
-    _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
+    _layout->addStretch();
+    _layout->addWidget(_iconLabel,0 , Qt::AlignCenter);
+    _layout->addWidget(_signupLabel,0 , Qt::AlignCenter);
+    _layout->addWidget(_bulkEdit, 0, Qt::AlignCenter);
+    _layout->addWidget(_termsWidget, 0, Qt::AlignCenter);
+    _layout->addWidget(_buttons, 0, Qt::AlignCenter);
+    _layout->addStretch();
+    _layout->addWidget(_loadingIndicator, 0, Qt::AlignCenter);
+    _layout->addStretch();
 
     _termsLayout->setSpacing(fit::fx(5));
     _termsLayout->setContentsMargins(fit::fx(2.5), 0, 0, 0);
@@ -128,7 +121,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     static_cast<QLineEdit*>(_bulkEdit->get(Company))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(_bulkEdit->get(Title))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(_bulkEdit->get(Phone))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-
     static_cast<QLineEdit*>(_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
     static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->setEchoMode(QLineEdit::Password);
 
@@ -215,6 +207,11 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setLineLength(5);
     _loadingIndicator->setInnerRadius(4);
     _loadingIndicator->setLineWidth(2);
+}
+
+void RegistrationWidget::updateResponse(const QString& response)
+{
+    _response = response;
 }
 
 bool RegistrationWidget::checkEmail(const QString& email) const
@@ -350,6 +347,7 @@ void RegistrationWidget::onSignUpClicked()
 
     bool succeed =
     Authenticator::instance()->signup(
+        _response,
         static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),

@@ -97,7 +97,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     static_cast<QLineEdit*>(_bulkEdit->get(Code))
       ->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(_bulkEdit->get(Code))
-      ->setValidator(new QRegExpValidator(QRegExp("^\\d{1,8}$"), this));
+      ->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
 
     _buttons->add(Cancel, "#CC5D67", "#B2525A");
     _buttons->add(Resend, "#5BC5F8", "#2592F9");
@@ -222,7 +222,7 @@ void VerificationWidget::onVerifyClicked()
     auto email = _emailLabel->text().split("\n").at(2);
     auto code = static_cast<QLineEdit*>(_bulkEdit->get(Code))->text();
 
-    if (code.isEmpty() || code.size() != 8) {
+    if (code.isEmpty() || code.size() != 6) {
         QMessageBox::warning(
             this,
             tr("Oops"),
@@ -253,10 +253,9 @@ void VerificationWidget::onVerifyClicked()
         QMessageBox::warning(
             this,
             tr("Oops"),
-            tr("Server rejected your request. You might exceed "
+            tr("Server rejected your code. Or, you might exceed "
                "the verification trial limit. Try again later.")
         );
-        onCancelClicked();
     }
 
     unlock();

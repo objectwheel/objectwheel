@@ -69,7 +69,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case Welcome: {
             _welcomeWindow = new WelcomeWindow;
-            _welcomeWindow->resize(fit::fx(QSizeF{1200, 700}).toSize());
+            _welcomeWindow->resize(fit::fx(QSizeF{1280, 740}).toSize());
             connect(_welcomeWindow, SIGNAL(lazy()), _progressWidget, SLOT(hide()));
             connect(_welcomeWindow, SIGNAL(busy(QString)), SLOT(busy(QString)));
             connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
@@ -88,7 +88,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case Builds: {
             _buildsWindow = new BuildsWindow;
-            _buildsWindow->resize(fit::fx(QSizeF{1200, 700}).toSize());
+            _buildsWindow->resize(fit::fx(QSizeF{1280, 740}).toSize());
             add(Builds, _buildsWindow);
             window = _buildsWindow;
             break;
@@ -96,7 +96,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case Preferences: {
             _preferencesWindow = new PreferencesWindow;
-            _preferencesWindow->resize(fit::fx(QSizeF{1200, 700}).toSize());
+            _preferencesWindow->resize(fit::fx(QSizeF{1280, 740}).toSize());
             connect(_preferencesWindow, SIGNAL(done()), SLOT(done()));
             add(Preferences, _preferencesWindow);
             window = _preferencesWindow;
@@ -105,7 +105,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case ToolboxSettings: {
             _toolboxSettingsWindow = new ToolboxSettingsWindow;
-            _toolboxSettingsWindow->resize(fit::fx(QSizeF{1200, 700}).toSize());
+            _toolboxSettingsWindow->resize(fit::fx(QSizeF{1280, 740}).toSize());
             connect(_toolboxSettingsWindow, SIGNAL(done()), SLOT(done()));
             add(ToolboxSettings, _toolboxSettingsWindow);
             window = _toolboxSettingsWindow;

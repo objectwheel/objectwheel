@@ -4,9 +4,9 @@
 #include <QWidget>
 
 class View;
-class QLabel;
 class QVBoxLayout;
 class LoginWidget;
+class RobotWidget;
 class ProjectsWidget;
 class NewProjectWidget;
 class RegistrationWidget;
@@ -20,6 +20,7 @@ class WelcomeWindow : public QWidget
     public:
         enum Screens {
             Login,
+            Robot,
             Registration,
             Verification,
             Projects,
@@ -43,9 +44,9 @@ class WelcomeWindow : public QWidget
 
     private:
         View* _view;
-        QLabel* _legalLabel;
         QVBoxLayout* _layout;
         LoginWidget* _loginWidget;
+        RobotWidget* _robotWidget;
         ProjectsWidget* _projectsWidget;
         NewProjectWidget* _newProjectWidget;
         RegistrationWidget* _registrationWidget;
