@@ -27,12 +27,8 @@ class RegistrationWidget : public QWidget
         void unlock();
         void onSignUpClicked();
 
-    private:
-        bool checkEmail(const QString& email) const;
-        bool checkPassword(const QString& password) const;
-
     signals:
-        void cancel();
+        void back();
         void done(const QString& email);
 
     private:

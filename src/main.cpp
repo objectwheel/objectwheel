@@ -12,7 +12,6 @@
 #include <QSharedMemory>
 #include <QMessageBox>
 #include <QLoggingCategory>
-#include <QSurfaceFormat>
 
 #define PIXEL_SIZE 13
 #define MIN_DPI 110.0
@@ -52,12 +51,6 @@ int main(int argc, char *argv[])
 
     // Initialize fit library
     fit::update(REF_DPI, MIN_DPI);
-
-    // Setup OpenGL format
-    QSurfaceFormat format;
-    format.setSamples(4);
-    format.setAlphaBufferSize(8);
-    QSurfaceFormat::setDefaultFormat(format);
 
     // Font settings
     QFont font;

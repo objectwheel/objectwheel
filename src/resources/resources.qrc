@@ -105,5 +105,7 @@
         <file>images/downarrow@2x.png</file>
         <file>images/verification.png</file>
         <file>images/robot.png</file>
+        <file>images/forgot.png</file>
+        <file>images/lock.png</file>
     </qresource>
 </RCC>

@@ -13,6 +13,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 
 #define AUTOLOGIN_HEIGHT (fit::fx(35))
 #define AUTOLOGIN_WIDTH  (fit::fx(300))
@@ -130,9 +131,26 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Login)->setCursor(Qt::PointingHandCursor);
     connect(_buttons->get(Register), SIGNAL(clicked(bool)), SIGNAL(signup()));
 
+    _helpBox = new QMessageBox(this);
+    _helpBox->setIcon(QMessageBox::Question);
+    _helpBox->setWindowTitle("Help");
+    _helpBox->setText("Need help?");
+    _helpBox->addButton("Forgot my password", QMessageBox::ActionRole);
+    _helpBox->addButton("About Objectwheel", QMessageBox::ActionRole);
+    _helpBox->addButton(QMessageBox::Cancel);
+    _helpBox->setDefaultButton(QMessageBox::Cancel);
+    connect(_helpBox, (void(QMessageBox::*)(QAbstractButton*))
+      (&QMessageBox::buttonClicked), this, [=] (QAbstractButton* button) {
+        if (button->text().contains("Forgot"))
+            emit forget();
+        else if (button->text().contains("About"))
+            emit about();
+    });
+
     _helpButton->setIconButton(true);
     _helpButton->setIcon(QIcon(PATH_HICON));
-    _helpButton->setFixedSize(fit::fx(18),fit::fx(18));
+    _helpButton->setFixedSize(fit::fx(20),fit::fx(20));
+    connect(_helpButton, SIGNAL(clicked(bool)), _helpBox, SLOT(show()));
 
     _loadingIndicator->setStyleSheet("background: transparent;");
     _loadingIndicator->setColor("#2E3A41");

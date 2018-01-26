@@ -28,6 +28,8 @@
 enum Fields { Code };
 enum Buttons { Verify, Resend, Cancel };
 
+static bool resent = false;
+
 VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
@@ -140,6 +142,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 
 void VerificationWidget::setEmail(const QString& email)
 {
+    resent = false;
     unlock();
     _countdown->start(COUNTDOWN);
     _emailLabel->setText(tr("Please use the verification code\n"
@@ -154,9 +157,9 @@ void VerificationWidget::clear()
 void VerificationWidget::lock()
 {
     _bulkEdit->setDisabled(true);
-    _buttons->get(Verify)->setEnabled(true);
-    _buttons->get(Resend)->setEnabled(true);
-    _buttons->get(Cancel)->setEnabled(true);
+    _buttons->get(Verify)->setDisabled(true);
+    _buttons->get(Resend)->setDisabled(true);
+    _buttons->get(Cancel)->setDisabled(true);
     _loadingIndicator->start();
 }
 
@@ -164,7 +167,8 @@ void VerificationWidget::unlock()
 {
     _bulkEdit->setEnabled(true);
     _buttons->get(Verify)->setEnabled(true);
-    _buttons->get(Resend)->setEnabled(true);
+    if (!resent)
+        _buttons->get(Resend)->setEnabled(true);
     _buttons->get(Cancel)->setEnabled(true);
     _loadingIndicator->stop();
 }
@@ -213,8 +217,8 @@ void VerificationWidget::onResendClicked()
         );
     }
 
+    resent = true;
     unlock();
-    _buttons->get(Resend)->setEnabled(false);
 }
 
 void VerificationWidget::onVerifyClicked()

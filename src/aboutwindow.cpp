@@ -74,7 +74,6 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     _versionLabel->setAlignment(Qt::AlignCenter);
 
     _okButton->setText("Ok");
-    _okButton->setDefault(true);
     _okButton->setFixedWidth(fit::fx(100));
     _okButton->setCursor(Qt::PointingHandCursor);
     connect(_okButton, SIGNAL(clicked(bool)), SIGNAL(done()));

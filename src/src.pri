@@ -84,7 +84,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/verificationwidget.h \
            $$PWD/countdown.h \
     $$PWD/registrationsucceedwidget.h \
-    $$PWD/robotwidget.h
+    $$PWD/robotwidget.h \
+    $$PWD/forgetwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -161,7 +162,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/verificationwidget.cpp \
            $$PWD/countdown.cpp \
     $$PWD/registrationsucceedwidget.cpp \
-    $$PWD/robotwidget.cpp
+    $$PWD/robotwidget.cpp \
+    $$PWD/forgetwidget.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

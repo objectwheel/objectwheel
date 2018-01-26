@@ -25,11 +25,11 @@
 #define PATH_COUNTRIES   (":/resources/other/countries.txt")
 #define PATH_ICON        (":/resources/images/register.png")
 #define PATH_OICON       (":/resources/images/ok.png")
-#define PATH_CICON       (":/resources/images/unload.png")
+#define PATH_BICON       (":/resources/images/unload.png")
 #define pS               (QApplication::primaryScreen())
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
-enum Buttons { SignUp, Cancel };
+enum Buttons { SignUp, Back };
 
 static const QStringList& countries()
 {
@@ -45,6 +45,16 @@ static const QStringList& countries()
     }
 
     return countries;
+}
+
+static bool checkEmail(const QString& email)
+{
+    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
+}
+
+static bool checkPassword(const QString& password)
+{
+    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
 }
 
 RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
@@ -176,26 +186,19 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setOpenExternalLinks(true);
     _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
-    _buttons->add(Cancel, "#cf5751", "#B34B46");
-    _buttons->add(SignUp, "#6ab35f", "#599750");
+    _buttons->add(Back, "#5BC5F8", "#2592F9");
+    _buttons->add(SignUp, "#8BBB56", "#6EA045");
     _buttons->get(SignUp)->setText(tr("Sign Up"));
-    _buttons->get(Cancel)->setText(tr("Cancel"));
+    _buttons->get(Back)->setText(tr("Back"));
     _buttons->get(SignUp)->setIcon(QIcon(PATH_OICON));
-    _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
+    _buttons->get(Back)->setIcon(QIcon(PATH_BICON));
     _buttons->get(SignUp)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
+    _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = TERMS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
     connect(_buttons->get(SignUp), SIGNAL(clicked(bool)), SLOT(onSignUpClicked()));
-    connect(_buttons->get(Cancel), SIGNAL(clicked(bool)), SIGNAL(cancel()));
-
-    _termsSwitch->settings().activeBackgroundColor = "#62A558";
-    _termsSwitch->settings().activeBorderColor = "#538C4A";
-    _termsSwitch->setChecked(false);
-    _buttons->get(SignUp)->setDisabled(true);
-    connect(_termsSwitch, SIGNAL(toggled(bool)),
-      _buttons->get(SignUp), SLOT(setEnabled(bool)));
+    connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
 
     _loadingIndicator->setStyleSheet("Background: transparent;");
     _loadingIndicator->setColor("#2E3A41");
@@ -212,16 +215,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
 void RegistrationWidget::updateResponse(const QString& response)
 {
     _response = response;
-}
-
-bool RegistrationWidget::checkEmail(const QString& email) const
-{
-    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
-}
-
-bool RegistrationWidget::checkPassword(const QString& password) const
-{
-    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
 }
 
 void RegistrationWidget::clear()
@@ -276,6 +269,15 @@ void RegistrationWidget::onSignUpClicked()
     const auto& title = static_cast<QLineEdit*>(_bulkEdit->get(Title))->text();
     const auto& phone = static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text();
     const auto& country = static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText();
+
+    if (!_termsSwitch->isChecked()) {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Please accept the terms and conditions first.")
+        );
+        return;
+    }
 
     if (first.isEmpty() || first.size() > 256 ||
         last.isEmpty() || last.size() > 256 ||
@@ -352,7 +354,8 @@ void RegistrationWidget::onSignUpClicked()
         static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Password))->text(),
-        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText(),
+        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() != "Please select..." ?
+        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() : "",
         static_cast<QLineEdit*>(_bulkEdit->get(Company))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Title))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text()

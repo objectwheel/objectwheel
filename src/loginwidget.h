@@ -11,6 +11,7 @@ class ButtonSlice;
 class QGridLayout;
 class QHBoxLayout;
 class WaitingSpinnerWidget;
+class QMessageBox;
 
 class LoginWidget : public QWidget
 {
@@ -20,7 +21,9 @@ class LoginWidget : public QWidget
         explicit LoginWidget(QWidget *parent = nullptr);
 
     signals:
+        void about();
         void signup();
+        void forget();
 
     private:
         QGridLayout* _layout;
@@ -35,6 +38,7 @@ class LoginWidget : public QWidget
         FlatButton* _helpButton;
         WaitingSpinnerWidget* _loadingIndicator;
         QLabel* _legalLabel;
+        QMessageBox* _helpBox;
 };
 
 #endif // LOGINWIDGET_H

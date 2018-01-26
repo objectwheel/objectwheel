@@ -12,6 +12,7 @@ class NewProjectWidget;
 class RegistrationWidget;
 class VerificationWidget;
 class RegistrationSucceedWidget;
+class ForgetWidget;
 
 class WelcomeWindow : public QWidget
 {
@@ -21,6 +22,7 @@ class WelcomeWindow : public QWidget
         enum Screens {
             Login,
             Robot,
+            Forget,
             Registration,
             Verification,
             Projects,
@@ -52,6 +54,7 @@ class WelcomeWindow : public QWidget
         RegistrationWidget* _registrationWidget;
         VerificationWidget* _verificationWidget;
         RegistrationSucceedWidget* _registrationSucceedWidget;
+        ForgetWidget* _forgetWidget;
 };
 
 #endif // WELCOMEWINDOW_H

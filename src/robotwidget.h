@@ -31,7 +31,7 @@ class RobotWidget : public QWidget
         void onNextClicked();
 
     signals:
-        void cancel();
+        void back();
         void done(const QString& response);
 
     private:

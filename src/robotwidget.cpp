@@ -11,17 +11,18 @@
 #include <QWebEngineView>
 #include <QWebChannel>
 #include <QWebEngineSettings>
+#include <QMessageBox>
 
 #define BUTTONS_WIDTH    (fit::fx(350))
 #define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
 #define PATH_ICON        (":/resources/images/robot.png")
-#define PATH_NICON       (":/resources/images/ok.png")
+#define PATH_NICON       (":/resources/images/load.png")
 #define PATH_CICON       (":/resources/images/unload.png")
 #define PATH_RECAPTCHA   (tr(APP_HTTPSSERVER) + "/recaptcha.html")
 #define pS               (QApplication::primaryScreen())
 
-enum Buttons { Next, Cancel };
-#include <QWebEngineHistory>
+enum Buttons { Next, Back };
+
 RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
@@ -69,23 +70,22 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     f.setPixelSize(fit::fx(18));
 
     _robotLabel->setFont(f);
-    _robotLabel->setText(tr("I'm not robot"));
+    _robotLabel->setText(tr("I'm not Robot"));
     _robotLabel->setStyleSheet("color: #2E3A41");
 
-    _buttons->add(Cancel, "#cf5751", "#B34B46");
-    _buttons->add(Next, "#6ab35f", "#599750");
+    _buttons->add(Back, "#5BC5F8", "#2592F9");
+    _buttons->add(Next, "#8BBB56", "#6EA045");
     _buttons->get(Next)->setText(tr("Next"));
-    _buttons->get(Cancel)->setText(tr("Cancel"));
+    _buttons->get(Back)->setText(tr("Back"));
     _buttons->get(Next)->setIcon(QIcon(PATH_NICON));
-    _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
+    _buttons->get(Back)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
+    _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     _buttons->triggerSettings();
-    _buttons->get(Next)->setEnabled(false);
 
     connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
-    connect(_buttons->get(Cancel), SIGNAL(clicked(bool)), SIGNAL(cancel()));
+    connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
 
     _recaptchaWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     _buttons->raise();
@@ -110,22 +110,31 @@ void RobotWidget::reload()
 void RobotWidget::reset()
 {
     _recaptchaView->page()->runJavaScript("grecaptcha.reset();");
-    _buttons->get(Next)->setEnabled(false);
+    _response.clear();
     _buttons->raise();
 }
 
 void RobotWidget::captchaExpired()
 {
-    _buttons->get(Next)->setEnabled(false);
+    _response.clear();
     _buttons->raise();
 }
 
 void RobotWidget::updateResponse(const QString& response)
 {
-    if (!response.isEmpty()) {
-        _response = response;
-        _buttons->get(Next)->setEnabled(true);
-    }
+    _response = response;
+}
+
+void RobotWidget::onNextClicked()
+{
+    if (_response.isEmpty())
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Please pass the test first.")
+        );
+    else
+        emit done(_response);
 }
 
 void RobotWidget::resizeEvent(QResizeEvent* event)
@@ -133,9 +142,4 @@ void RobotWidget::resizeEvent(QResizeEvent* event)
     QWidget::resizeEvent(event);
     _recaptchaWidget->setGeometry(rect());
     _buttons->move(_space->geometry().bottomLeft());
-}
-
-void RobotWidget::onNextClicked()
-{
-    emit done(_response);
 }
