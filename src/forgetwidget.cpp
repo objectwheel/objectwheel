@@ -66,7 +66,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _forgotLabel->setText(tr("Forgot My Password"));
     _forgotLabel->setStyleSheet("color: #2E3A41");
 
-    _bulkEdit->add(Email, tr("Enter your email"));
+    _bulkEdit->add(Email, tr("Email Address"));
     _bulkEdit->setFixedWidth(BUTTONS_WIDTH);
 
     static_cast<QLineEdit*>(_bulkEdit->get(Email))

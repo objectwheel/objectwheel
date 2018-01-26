@@ -1,6 +1,7 @@
+#include <welcomewindow.h>
+#include <windowmanager.h>
 #include <fit.h>
 #include <view.h>
-#include <welcomewindow.h>
 #include <loginwidget.h>
 #include <robotwidget.h>
 #include <projectswidget.h>
@@ -9,7 +10,8 @@
 #include <verificationwidget.h>
 #include <registrationsucceedwidget.h>
 #include <forgetwidget.h>
-#include <windowmanager.h>
+#include <resetwidget.h>
+
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -31,6 +33,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _verificationWidget = new VerificationWidget;
     _registrationSucceedWidget = new RegistrationSucceedWidget;
     _forgetWidget = new ForgetWidget;
+    _resetWidget = new ResetWidget;
 
     _layout->setSpacing(0);
     _layout->setContentsMargins(0, 0, 0, 0);
@@ -46,7 +49,8 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _view->add(NewProject, _newProjectWidget);
     _view->add(RegistrationSucceed, _registrationSucceedWidget);
     _view->add(Forget, _forgetWidget);
-    _view->show(Registration);
+    _view->add(Reset, _resetWidget);
+    _view->show(Reset);
 
 //    connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
 //    connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
@@ -55,6 +59,21 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
     connect(_forgetWidget, &ForgetWidget::back, [=] {
         _view->show(Login);
+    });
+
+    connect(_forgetWidget, SIGNAL(done(QString)),
+      _resetWidget, SLOT(setEmail(QString)));
+
+    connect(_forgetWidget, &ForgetWidget::done, [=] {
+        _view->show(Reset);
+    });
+
+    connect(_resetWidget, &ResetWidget::cancel, [=] {
+        _view->show(Login);
+    });
+
+    connect(_resetWidget, &ResetWidget::done, [=] {
+        _view->show(Reset);
     });
 
     connect(_loginWidget, &LoginWidget::signup, [=] {
