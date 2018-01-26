@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <buttonslice.h>
 #include <internetaccess.h>
+#include <waitingspinnerwidget.h>
 
 #include <QApplication>
 #include <QScreen>
@@ -33,6 +34,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _iconLabel = new QLabel;
     _robotLabel = new QLabel;
     _space = new QWidget;
+    _loadingIndicator = new WaitingSpinnerWidget(this, false);
     _buttons = new ButtonSlice(_recaptchaView);
 
     _layout->setSpacing(0);
@@ -43,11 +45,17 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 
     _recaptchaLayout->setSpacing(fit::fx(12));
     _recaptchaLayout->addStretch();
-    _recaptchaLayout->addWidget(_iconLabel, 0 , Qt::AlignCenter);
-    _recaptchaLayout->addWidget(_robotLabel, 0 , Qt::AlignCenter);
+    _recaptchaLayout->addWidget(_iconLabel, 0, Qt::AlignCenter);
+    _recaptchaLayout->addWidget(_robotLabel, 0, Qt::AlignCenter);
+    _recaptchaLayout->addStretch();
+    _recaptchaLayout->addWidget(_loadingIndicator, 0, Qt::AlignCenter);
     _recaptchaLayout->addWidget(_space, 0 , Qt::AlignCenter);
     _recaptchaLayout->addStretch();
-    _recaptchaLayout->addStretch();
+
+    connect(_recaptchaView, SIGNAL(loadStarted()),
+      _loadingIndicator, SLOT(start()));
+    connect(_recaptchaView, SIGNAL(loadFinished(bool)),
+      _loadingIndicator, SLOT(stop()));
 
     _webChannel->registerObject("cpp", this);
     _recaptchaView->page()->setWebChannel(_webChannel);
@@ -84,8 +92,22 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
-    connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
+    connect(_buttons->get(Next), SIGNAL(clicked(bool)),
+      SLOT(onNextClicked()));
+    connect(_buttons->get(Back), SIGNAL(clicked(bool)),
+      SIGNAL(back()));
+
+    _loadingIndicator->setStyleSheet("Background: transparent;");
+    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setRoundness(50);
+    _loadingIndicator->setMinimumTrailOpacity(5);
+    _loadingIndicator->setTrailFadePercentage(100);
+    _loadingIndicator->setRevolutionsPerSecond(2);
+    _loadingIndicator->setNumberOfLines(12);
+    _loadingIndicator->setLineLength(5);
+    _loadingIndicator->setInnerRadius(4);
+    _loadingIndicator->setLineWidth(2);
+    _loadingIndicator->start();
 
     _recaptchaWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     _buttons->raise();

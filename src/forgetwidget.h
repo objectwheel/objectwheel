@@ -7,6 +7,7 @@ class QVBoxLayout;
 class QLabel;
 class ButtonSlice;
 class BulkEdit;
+class WaitingSpinnerWidget;
 
 class ForgetWidget : public QWidget
 {
@@ -14,6 +15,12 @@ class ForgetWidget : public QWidget
 
     public:
         explicit ForgetWidget(QWidget* parent = nullptr);
+
+    private slots:
+        void clear();
+        void lock();
+        void unlock();
+        void onNextClicked();
 
     signals:
         void back();
@@ -25,6 +32,7 @@ class ForgetWidget : public QWidget
         QLabel* _forgotLabel;
         ButtonSlice* _buttons;
         BulkEdit* _bulkEdit;
+        WaitingSpinnerWidget* _loadingIndicator;
 };
 
 #endif // FORGETWIDGET_H

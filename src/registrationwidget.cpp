@@ -68,7 +68,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsSwitch = new Switch;
     _termsLabel = new QLabel;
     _buttons = new ButtonSlice;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
+    _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
     _layout->setSpacing(fit::fx(12));
 

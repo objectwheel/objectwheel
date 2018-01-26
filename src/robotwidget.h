@@ -8,6 +8,7 @@ class ButtonSlice;
 class QVBoxLayout;
 class QWebChannel;
 class QWebEngineView;
+class WaitingSpinnerWidget;
 
 class RobotWidget : public QWidget
 {
@@ -45,6 +46,7 @@ class RobotWidget : public QWidget
         QLabel* _robotLabel;
         QWidget* _space;
         ButtonSlice* _buttons;
+        WaitingSpinnerWidget* _loadingIndicator;
 };
 
 #endif // ROBOTWIDGET_H

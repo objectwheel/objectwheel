@@ -24,10 +24,13 @@
 #define PATH_CICON       (":/resources/images/unload.png")
 #define pS               (QApplication::primaryScreen())
 
+static bool checkPassword(const QString& password)
+{
+    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
+}
+
 enum Fields { Password, ConfirmPassword, Code };
 enum Buttons { Apply, Cancel };
-
-static bool resent = false;
 
 ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
 {
@@ -39,7 +42,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _bulkEdit = new BulkEdit;
     _emailLabel = new QLabel;
     _buttons = new ButtonSlice;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
+    _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
     _layout->setSpacing(fit::fx(12));
     _layout->addStretch();
@@ -82,7 +85,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     f.setPixelSize(fit::fx(18));
 
     _resetLabel->setFont(f);
-    _resetLabel->setText(tr("Email Reset"));
+    _resetLabel->setText(tr("Verify Password Reset"));
     _resetLabel->setStyleSheet("color: #2E3A41");
 
     _countdownLabel->setAlignment(Qt::AlignHCenter);
@@ -104,7 +107,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     static_cast<QLineEdit*>(_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
     static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->setEchoMode(QLineEdit::Password);
 
-    _buttons->add(Cancel, "#5BC5F8", "#2592F9");
+    _buttons->add(Cancel, "#CC5D67", "#B2525A");
     _buttons->add(Apply, "#86CC63", "#75B257");
     _buttons->get(Cancel)->setText(tr("Cancel"));
     _buttons->get(Apply)->setText(tr("Apply"));
@@ -140,37 +143,35 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
 
 void ResetWidget::setEmail(const QString& email)
 {
-    resent = false;
-    unlock();
     _countdown->start(COUNTDOWN);
-    _emailLabel->setText(tr("Please use the reset code\n"
-        "we have sent to the following email address.\n") + email);
+    _emailLabel->setText(tr("Please use the reset code we have sent\n"
+      "to the following email address, to reset your password.\n") + email);
 }
 
 void ResetWidget::clear()
 {
+    _countdown->stop();
     static_cast<QLineEdit*>(_bulkEdit->get(Code))->clear();
+    static_cast<QLineEdit*>(_bulkEdit->get(Password))->clear();
+    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->clear();
 }
 
 void ResetWidget::lock()
 {
     _bulkEdit->setDisabled(true);
-    _buttons->get(Apply)->setDisabled(true);
-    _buttons->get(Cancel)->setDisabled(true);
+    _buttons->setDisabled(true);
     _loadingIndicator->start();
 }
 
 void ResetWidget::unlock()
 {
     _bulkEdit->setEnabled(true);
-    _buttons->get(Apply)->setEnabled(true);
-    _buttons->get(Cancel)->setEnabled(true);
+    _buttons->setEnabled(true);
     _loadingIndicator->stop();
 }
 
 void ResetWidget::onCancelClicked()
 {
-    _countdown->stop();
     clear();
     emit cancel();
 }
@@ -178,7 +179,28 @@ void ResetWidget::onCancelClicked()
 void ResetWidget::onApplyClicked()
 {
     auto email = _emailLabel->text().split("\n").at(2);
-    auto code = static_cast<QLineEdit*>(_bulkEdit->get(Code))->text();
+    const auto& code = static_cast<QLineEdit*>(_bulkEdit->get(Code))->text();
+    const auto& password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+    const auto& cpassword = static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->text();
+
+    if (password != cpassword) {
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Passwords"),
+            tr("Passwords do not match.")
+        );
+        return;
+    }
+
+    if (!checkPassword(password)) {
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Password"),
+            tr("Incorrect Password. Your password must be in between "
+               "6 and 25 characters long. Also please check it if contains invalid characters.")
+        );
+        return;
+    }
 
     if (code.isEmpty() || code.size() != 6) {
         QMessageBox::warning(
@@ -202,17 +224,16 @@ void ResetWidget::onApplyClicked()
         return;
     }
 
-    bool succeed = Authenticator::instance()->verify(email, code);
+    bool succeed = Authenticator::instance()->reset(email, password, code);
 
-    if (succeed) {
+    if (succeed)
         clear();
-        _countdown->stop();
-    } else {
+    else {
         QMessageBox::warning(
             this,
             tr("Oops"),
-            tr("Server rejected your code. Or, you might exceed "
-               "the reset trial limit. Try again later.")
+            tr("Server rejected your code. You might mistyped "
+               "the reset code. Try again.")
         );
     }
 

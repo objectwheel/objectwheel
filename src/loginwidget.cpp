@@ -39,7 +39,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _autologinLabel = new QLabel;
     _buttons = new ButtonSlice;
     _helpButton = new FlatButton;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
+    _loadingIndicator = new WaitingSpinnerWidget(this, false);
     _legalLabel = new QLabel;
 
     _layout->setSpacing(fit::fx(12));

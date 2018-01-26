@@ -3,6 +3,8 @@
 #include <buttonslice.h>
 #include <bulkedit.h>
 #include <internetaccess.h>
+#include <waitingspinnerwidget.h>
+#include <authenticator.h>
 
 #include <QApplication>
 #include <QScreen>
@@ -34,6 +36,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _forgotLabel = new QLabel;
     _bulkEdit = new BulkEdit;
     _buttons = new ButtonSlice;
+    _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
     _layout->setSpacing(fit::fx(12));
     _layout->addStretch();
@@ -44,6 +47,8 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _layout->addWidget(_bulkEdit, 0 , Qt::AlignCenter);
     _layout->addSpacing(fit::fx(10));
     _layout->addWidget(_buttons, 0 , Qt::AlignCenter);
+    _layout->addStretch();
+    _layout->addWidget(_loadingIndicator, 0 , Qt::AlignCenter);
     _layout->addStretch();
 
     QPixmap p(PATH_ICON);
@@ -63,7 +68,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     f.setPixelSize(fit::fx(18));
 
     _forgotLabel->setFont(f);
-    _forgotLabel->setText(tr("Forgot My Password"));
+    _forgotLabel->setText(tr("Password Reset"));
     _forgotLabel->setStyleSheet("color: #2E3A41");
 
     _bulkEdit->add(Email, tr("Email Address"));
@@ -83,17 +88,84 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Next), &QPushButton::clicked, [=] {
-        const auto& email = ((QLineEdit*)_bulkEdit->get(Email))->text();
-        if (checkEmail(email))
-            emit done(email);
-        else
-            QMessageBox::warning(
-                this,
-                tr("Oops"),
-                tr("Incorrect Email Address. Please check your email address.")
-            );
-    });
-
     connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
+    connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
+
+    _loadingIndicator->setStyleSheet("Background: transparent;");
+    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setRoundness(50);
+    _loadingIndicator->setMinimumTrailOpacity(5);
+    _loadingIndicator->setTrailFadePercentage(100);
+    _loadingIndicator->setRevolutionsPerSecond(2);
+    _loadingIndicator->setNumberOfLines(12);
+    _loadingIndicator->setLineLength(5);
+    _loadingIndicator->setInnerRadius(4);
+    _loadingIndicator->setLineWidth(2);
+}
+
+void ForgetWidget::clear()
+{
+    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setText("");
+}
+
+void ForgetWidget::lock()
+{
+    _bulkEdit->setDisabled(true);
+    _buttons->setDisabled(true);
+    _loadingIndicator->start();
+}
+
+void ForgetWidget::unlock()
+{
+    _bulkEdit->setEnabled(true);
+    _buttons->setEnabled(true);
+    _loadingIndicator->stop();
+}
+
+void ForgetWidget::onNextClicked()
+{
+    const auto& email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+
+    if (email.isEmpty() || email.size() > 256 ||
+        !checkEmail(email)
+        ) {
+        QMessageBox::warning(
+                    this,
+                    tr("Oops"),
+                    tr("Incorrect Email Address. Please check your email address.")
+                    );
+        return;
+    }
+
+    lock();
+
+    if (!InternetAccess::available()) {
+        QMessageBox::warning(
+                    this,
+                    tr("No Internet Access"),
+            tr("Unable to connect to server. Check your internet connection.")
+        );
+
+        unlock();
+        return;
+    }
+
+    bool succeed =
+    Authenticator::instance()->forget(
+        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text()
+    );
+
+    if (succeed)
+        clear();
+    else
+        QMessageBox::warning(
+            this,
+            tr("Incorrect Information"),
+            tr("Server rejected your request. Possibly incorrect email address.")
+        );
+
+    unlock();
+
+    if (succeed)
+        emit done(email);
 }

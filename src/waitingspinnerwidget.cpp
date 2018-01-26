@@ -1,6 +1,7 @@
 /* Original Work Copyright (c) 2012-2014 Alexander Turkin
    Modified 2014 by William Hallatt
    Modified 2015 by Jacob Dawid
+   Modified 2018 by Ömer Göktaş
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -31,22 +32,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QPainter>
 #include <QTimer>
 
-WaitingSpinnerWidget::WaitingSpinnerWidget(QWidget *parent,
-                                           bool centerOnParent,
-                                           bool disableParentWhenSpinning)
-    : QWidget(parent),
-      _centerOnParent(centerOnParent),
-      _disableParentWhenSpinning(disableParentWhenSpinning) {
+WaitingSpinnerWidget::WaitingSpinnerWidget(QWidget *parent, bool centerOnParent) : QWidget(parent)
+  ,_centerOnParent(centerOnParent)
+{
     initialize();
 }
 
-WaitingSpinnerWidget::WaitingSpinnerWidget(Qt::WindowModality modality,
-                                           QWidget *parent,
-                                           bool centerOnParent,
-                                           bool disableParentWhenSpinning)
-    : QWidget(parent, Qt::Dialog | Qt::FramelessWindowHint),
-      _centerOnParent(centerOnParent),
-      _disableParentWhenSpinning(disableParentWhenSpinning){
+WaitingSpinnerWidget::WaitingSpinnerWidget(
+    Qt::WindowModality modality,
+    QWidget *parent,
+    bool centerOnParent
+)
+    : QWidget(parent, Qt::Dialog | Qt::FramelessWindowHint)
+    , _centerOnParent(centerOnParent)
+{
     initialize();
 
     // We need to set the window modality AFTER we've hidden the
@@ -76,7 +75,6 @@ void WaitingSpinnerWidget::initialize() {
 }
 
 void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
-    updatePosition();
     QPainter painter(this);
     painter.fillRect(this->rect(), Qt::transparent);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -112,12 +110,7 @@ void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
 }
 
 void WaitingSpinnerWidget::start() {
-    updatePosition();
     _isSpinning = true;
-
-    if(parentWidget() && _disableParentWhenSpinning) {
-        parentWidget()->setEnabled(false);
-    }
 
     if (!_timer->isActive()) {
         _timer->start();
@@ -129,10 +122,6 @@ void WaitingSpinnerWidget::start() {
 
 void WaitingSpinnerWidget::stop() {
     _isSpinning = false;
-
-    if(parentWidget() && _disableParentWhenSpinning) {
-        parentWidget()->setEnabled(true);
-    }
 
     if (_timer->isActive()) {
         _timer->stop();
@@ -239,13 +228,6 @@ void WaitingSpinnerWidget::updateSize() {
 
 void WaitingSpinnerWidget::updateTimer() {
     _timer->setInterval(1000 / (_numberOfLines * _revolutionsPerSecond));
-}
-
-void WaitingSpinnerWidget::updatePosition() {
-    if (parentWidget() && _centerOnParent) {
-        move(parentWidget()->width() / 2 - width() / 2,
-             parentWidget()->height() / 2 - height() / 2);
-    }
 }
 
 int WaitingSpinnerWidget::lineCountDistanceFromPrimary(int current, int primary,

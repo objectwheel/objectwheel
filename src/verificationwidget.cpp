@@ -40,7 +40,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _bulkEdit = new BulkEdit;
     _emailLabel = new QLabel;
     _buttons = new ButtonSlice;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false, false);
+    _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
     _layout->setSpacing(fit::fx(12));
     _layout->addStretch();
@@ -151,6 +151,7 @@ void VerificationWidget::setEmail(const QString& email)
 
 void VerificationWidget::clear()
 {
+    _countdown->stop();
     static_cast<QLineEdit*>(_bulkEdit->get(Code))->clear();
 }
 
@@ -175,7 +176,6 @@ void VerificationWidget::unlock()
 
 void VerificationWidget::onCancelClicked()
 {
-    _countdown->stop();
     clear();
     emit cancel();
 }
@@ -250,10 +250,9 @@ void VerificationWidget::onVerifyClicked()
 
     bool succeed = Authenticator::instance()->verify(email, code);
 
-    if (succeed) {
+    if (succeed)
         clear();
-        _countdown->stop();
-    } else {
+    else {
         QMessageBox::warning(
             this,
             tr("Oops"),
