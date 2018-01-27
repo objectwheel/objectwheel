@@ -11,7 +11,7 @@ class ProjectsWidget;
 class NewProjectWidget;
 class RegistrationWidget;
 class VerificationWidget;
-class RegistrationSucceedWidget;
+class SucceedWidget;
 class ForgetWidget;
 class ResetWidget;
 
@@ -29,7 +29,7 @@ class WelcomeWindow : public QWidget
             Reset,
             Projects,
             NewProject,
-            RegistrationSucceed
+            Succeed
         };
 
     public:
@@ -55,7 +55,7 @@ class WelcomeWindow : public QWidget
         NewProjectWidget* _newProjectWidget;
         RegistrationWidget* _registrationWidget;
         VerificationWidget* _verificationWidget;
-        RegistrationSucceedWidget* _registrationSucceedWidget;
+        SucceedWidget* _succeedWidget;
         ForgetWidget* _forgetWidget;
         ResetWidget* _resetWidget;
 };

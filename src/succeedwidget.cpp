@@ -1,6 +1,7 @@
-#include <registrationsucceedwidget.h>
+#include <succeedwidget.h>
 #include <fit.h>
 #include <buttonslice.h>
+#include <QTimer>
 
 #include <QApplication>
 #include <QScreen>
@@ -8,6 +9,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QPainter>
 
 #define BUTTONS_WIDTH    (fit::fx(150))
 #define SIZE_GIF        (QSize(fit::fx(100), fit::fx(100)))
@@ -17,7 +19,7 @@
 
 enum Buttons { Ok };
 
-RegistrationSucceedWidget::RegistrationSucceedWidget(QWidget* parent) : QWidget(parent)
+SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _movie = new QMovie(this);
@@ -42,19 +44,17 @@ RegistrationSucceedWidget::RegistrationSucceedWidget(QWidget* parent) : QWidget(
     _movie->setFileName(PATH_GIF);
     _movie->setBackgroundColor(Qt::transparent);
     _movie->setScaledSize(SIZE_GIF * pS->devicePixelRatio());
-    _iconLabel->setMovie(_movie);
+    connect(_movie, SIGNAL(frameChanged(int)), SLOT(update()));
+
     _iconLabel->setFixedSize(SIZE_GIF);
-    _iconLabel->setScaledContents(true);
+    _iconLabel->setStyleSheet("background: transparent;");
 
     QFont f;
     f.setPixelSize(fit::fx(18));
 
     _titleLabel->setFont(f);
-    _titleLabel->setText(tr("Thank you for registering."));
     _titleLabel->setStyleSheet("color: #65A35C");
 
-    _descriptionLabel->setText(tr("Your registration is completed. Thank you for choosing us.\n"
-                                  "You can continue by logging into the application."));
     _descriptionLabel->setStyleSheet("color: #304050");
     _descriptionLabel->setAlignment(Qt::AlignHCenter);
 
@@ -67,7 +67,39 @@ RegistrationSucceedWidget::RegistrationSucceedWidget(QWidget* parent) : QWidget(
     connect(_buttons->get(Ok), SIGNAL(clicked(bool)), SIGNAL(done()));
 }
 
-void RegistrationSucceedWidget::start()
+void SucceedWidget::start()
 {
-    _movie->start();
+    _movie->jumpToFrame(0);
+    update();
+    QTimer::singleShot(200, _movie, &QMovie::start);
+}
+
+void SucceedWidget::update(const QString& title, const QString& description)
+{
+    _titleLabel->setText(title);
+    _descriptionLabel->setText(description);
+}
+
+void SucceedWidget::paintEvent(QPaintEvent* event)
+{
+    QWidget::paintEvent(event);
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    if (_movie->currentFrameNumber() > 48) {
+        auto r = _iconLabel->geometry().adjusted(
+            fit::fx(10),
+            fit::fx(10),
+            -fit::fx(10),
+            -fit::fx(10)
+        );
+        painter.setBrush(Qt::white);
+        painter.drawRoundedRect(r, r.width() / 2.0, r.width() / 2.0);
+    }
+
+    painter.drawPixmap(
+        _iconLabel->geometry(),
+        _movie->currentPixmap(),
+        QRectF(QPoint(), SIZE_GIF * pS->devicePixelRatio())
+    );
 }

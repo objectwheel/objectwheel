@@ -8,7 +8,7 @@
 #include <newprojectwidget.h>
 #include <registrationwidget.h>
 #include <verificationwidget.h>
-#include <registrationsucceedwidget.h>
+#include <succeedwidget.h>
 #include <forgetwidget.h>
 #include <resetwidget.h>
 
@@ -31,7 +31,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _projectsWidget = new ProjectsWidget;
     _newProjectWidget = new NewProjectWidget;
     _verificationWidget = new VerificationWidget;
-    _registrationSucceedWidget = new RegistrationSucceedWidget;
+    _succeedWidget = new SucceedWidget;
     _forgetWidget = new ForgetWidget;
     _resetWidget = new ResetWidget;
 
@@ -47,10 +47,10 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _view->add(Verification, _verificationWidget);
     _view->add(Projects, _projectsWidget);
     _view->add(NewProject, _newProjectWidget);
-    _view->add(RegistrationSucceed, _registrationSucceedWidget);
+    _view->add(Succeed, _succeedWidget);
     _view->add(Forget, _forgetWidget);
     _view->add(Reset, _resetWidget);
-    _view->show(Reset);
+    _view->show(Login);
 
 //    connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
 //    connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
@@ -73,7 +73,12 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 
     connect(_resetWidget, &ResetWidget::done, [=] {
-        _view->show(Reset);
+        _view->show(Succeed);
+        _succeedWidget->start();
+        _succeedWidget->update(
+          tr("Succeed."),
+          tr("Your password has been successfully changed.\n"
+          "You can continue by logging into the application with your new password."));
     });
 
     connect(_loginWidget, &LoginWidget::signup, [=] {
@@ -117,12 +122,15 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 
     connect(_verificationWidget, &VerificationWidget::done, [=] {
-        _view->show(RegistrationSucceed);
-        QTimer::singleShot(200, _registrationSucceedWidget,
-                           &RegistrationSucceedWidget::start);
+        _view->show(Succeed);
+        _succeedWidget->start();
+        _succeedWidget->update(
+          tr("Thank you for registering."),
+          tr("Your registration is completed. Thank you for choosing us.\n"
+          "You can continue by logging into the application."));
     });
 
-    connect(_registrationSucceedWidget, &RegistrationSucceedWidget::done, [=] {
+    connect(_succeedWidget, &SucceedWidget::done, [=] {
         _view->show(Login);
     });
 }

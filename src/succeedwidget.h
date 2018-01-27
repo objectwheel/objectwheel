@@ -1,5 +1,5 @@
-#ifndef REGISTRATIONSUCCEEDWIDGET_H
-#define REGISTRATIONSUCCEEDWIDGET_H
+#ifndef SUCCEEDWIDGET_H
+#define SUCCEEDWIDGET_H
 
 #include <QWidget>
 
@@ -8,15 +8,20 @@ class QLabel;
 class ButtonSlice;
 class QMovie;
 
-class RegistrationSucceedWidget : public QWidget
+class SucceedWidget : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit RegistrationSucceedWidget(QWidget* parent = nullptr);
+        explicit SucceedWidget(QWidget* parent = nullptr);
+        using QWidget::update;
 
     public slots:
         void start();
+        void update(const QString& title, const QString& description);
+
+    protected:
+        void paintEvent(QPaintEvent* event) override;
 
     signals:
         void done();
@@ -30,4 +35,4 @@ class RegistrationSucceedWidget : public QWidget
         ButtonSlice* _buttons;
 };
 
-#endif // REGISTRATIONSUCCEEDWIDGET_H
+#endif // SUCCEEDWIDGET_H
