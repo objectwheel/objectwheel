@@ -201,7 +201,7 @@ void VerificationWidget::onResendClicked()
 
     if (succeed) {
         clear();
-        _countdown->start(COUNTDOWN);
+        _countdown->start();
 
         QMessageBox::information(
             this,

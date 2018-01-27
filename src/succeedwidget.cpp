@@ -71,7 +71,7 @@ void SucceedWidget::start()
 {
     _movie->jumpToFrame(0);
     update();
-    QTimer::singleShot(200, _movie, &QMovie::start);
+    QTimer::singleShot(20, _movie, &QMovie::start);
 }
 
 void SucceedWidget::update(const QString& title, const QString& description)
