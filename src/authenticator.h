@@ -26,7 +26,7 @@ class Authenticator : public QWebSocket
         );
         bool forget(const QString& email);
         bool resend(const QString& email);
-        bool login(const QString& email, const QString& password);
+        QString login(const QString& email, const QString& password);
         bool verify(const QString& email, const QString& code);
         bool reset(const QString& email, const QString& password, const QString& code);
 

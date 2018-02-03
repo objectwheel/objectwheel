@@ -20,10 +20,17 @@ class LoginWidget : public QWidget
     public:
         explicit LoginWidget(QWidget *parent = nullptr);
 
+    private slots:
+        void lock();
+        void unlock();
+        void clear();
+        void onLoginButtonClicked();
+
     signals:
         void about();
         void signup();
         void forget();
+        void done(const QString& plan);
 
     private:
         QGridLayout* _layout;

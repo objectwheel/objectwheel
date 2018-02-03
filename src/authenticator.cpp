@@ -13,6 +13,8 @@
 #define TYPE_FAIL    tr("0x0006")
 #define TYPE_SUCCESS tr("0x0007")
 
+typedef QCryptographicHash Hasher;
+
 Authenticator::Authenticator()
 {
     connect(this, SIGNAL(disconnected()),
@@ -38,8 +40,11 @@ void Authenticator::init(const QUrl& host)
 
 bool Authenticator::connect(int timeout)
 {    
+    if (state() == QAbstractSocket::ConnectedState)
+        return true;
+
     open(_host);
-    ignoreSslErrors();
+    ignoreSslErrors(); // FIXME: Remove this
 
     Delayer::delay([=] () -> bool {
         return state() == QAbstractSocket::ConnectedState;
@@ -70,11 +75,11 @@ void Authenticator::onDisconnected()
     _message.clear();
 }
 
-void Authenticator::onError(QAbstractSocket::SocketError error)
+void Authenticator::onError(QAbstractSocket::SocketError)
 {
     _message.clear();
 }
-void Authenticator::onSslErrors(const QList<QSslError> &errors)
+void Authenticator::onSslErrors(const QList<QSslError>&)
 {
     _message.clear();
 }
@@ -105,7 +110,7 @@ bool Authenticator::signup(
         first + ENDL +
         last + ENDL +
         email + ENDL +
-        password + ENDL +
+        Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL +
         country + ENDL +
         company + ENDL +
         title + ENDL +
@@ -180,7 +185,7 @@ bool Authenticator::reset(const QString& email, const QString& password, const Q
     sendTextMessage(
         TYPE_RESET + ENDL +
         email + ENDL +
-        password + ENDL +
+        Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL +
         code + ENDL
     );
 
@@ -191,7 +196,27 @@ bool Authenticator::reset(const QString& email, const QString& password, const Q
     return incoming == TYPE_SUCCESS;
 }
 
-bool Authenticator::login(const QString& email, const QString& password)
+QString Authenticator::login(const QString& email, const QString& password)
 {
+    if (!connect(TIMEOUT))
+        return QString();
 
+    sendTextMessage(
+        TYPE_LOGIN + ENDL +
+        email + ENDL +
+        Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL
+    );
+
+    auto incoming = readSync(TIMEOUT);
+    QTextStream body(&incoming);
+
+    auto succeed = body.readLine() == TYPE_SUCCESS;
+    auto plan = body.readLine();
+
+    if (!succeed) {
+        plan = "";
+        close();
+    }
+
+    return plan;
 }

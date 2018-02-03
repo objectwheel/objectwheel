@@ -6,6 +6,8 @@
 #include <flatbutton.h>
 #include <waitingspinnerwidget.h>
 #include <global.h>
+#include <authenticator.h>
+#include <internetaccess.h>
 
 #include <QApplication>
 #include <QScreen>
@@ -26,6 +28,16 @@
 
 enum Fields { Email, Password };
 enum Buttons { Login, Register };
+
+static bool checkEmail(const QString& email)
+{
+    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
+}
+
+static bool checkPassword(const QString& password)
+{
+    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
+}
 
 LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 {
@@ -129,7 +141,10 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Login)->setIcon(QIcon(PATH_LICON));
     _buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Login)->setCursor(Qt::PointingHandCursor);
-    connect(_buttons->get(Register), SIGNAL(clicked(bool)), SIGNAL(signup()));
+    connect(_buttons->get(Register), SIGNAL(clicked(bool)),
+      this, SIGNAL(signup()));
+    connect(_buttons->get(Login), SIGNAL(clicked(bool)),
+      this, SLOT(onLoginButtonClicked()));
 
     _helpBox = new QMessageBox(this);
     _helpBox->setIcon(QMessageBox::Question);
@@ -166,4 +181,75 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _legalLabel->setText(TEXT_LEGAL);
     _legalLabel->setStyleSheet("color:#2E3A41;");
     _legalLabel->setAlignment(Qt::AlignHCenter);
+}
+
+void LoginWidget::lock()
+{
+    _bulkEdit->setDisabled(true);
+    _buttons->setDisabled(true);
+    _autologinSwitch->setDisabled(true);
+    _helpButton->setDisabled(true);
+    _loadingIndicator->start();
+}
+
+void LoginWidget::unlock()
+{
+    _bulkEdit->setEnabled(true);
+    _buttons->setEnabled(true);
+    _autologinSwitch->setEnabled(true);
+    _helpButton->setEnabled(true);
+    _loadingIndicator->stop();
+}
+
+void LoginWidget::clear()
+{
+    static_cast<QLineEdit*>(_bulkEdit->get(Email))->clear();
+    static_cast<QLineEdit*>(_bulkEdit->get(Password))->clear();
+}
+
+void LoginWidget::onLoginButtonClicked()
+{
+    auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+
+    if (email.isEmpty() || email.size() > 256 ||
+        password.isEmpty() || password.size() > 256 ||
+        !checkEmail(email) || !checkPassword(password)) {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Fields cannot be either empty or incorrect.")
+        );
+        return;
+    }
+
+    lock();
+
+    if (!InternetAccess::available()) {
+        QMessageBox::warning(
+            this,
+            tr("No Internet Access"),
+            tr("Unable to connect to server. Check your internet connection.")
+        );
+
+        unlock();
+        return;
+    }
+
+    const auto& plan = Authenticator::instance()->login(email, password);
+
+    if (!plan.isEmpty())
+        clear();
+    else {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Login is not successful, please check the information you provided.")
+        );
+    }
+
+    unlock();
+
+    if (!plan.isEmpty())
+        emit done(plan);
 }
