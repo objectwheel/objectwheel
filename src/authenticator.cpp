@@ -37,13 +37,16 @@ void Authenticator::init(const QUrl& host)
 }
 
 bool Authenticator::connect(int timeout)
-{
+{    
     open(_host);
     ignoreSslErrors();
 
     Delayer::delay([=] () -> bool {
         return state() == QAbstractSocket::ConnectedState;
     }, true, timeout);
+
+    if (state() != QAbstractSocket::ConnectedState)
+        close();
 
     return state() == QAbstractSocket::ConnectedState;
 }
