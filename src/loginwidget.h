@@ -30,7 +30,7 @@ class LoginWidget : public QWidget
         void about();
         void signup();
         void forget();
-        void done(const QString& plan);
+        void done(const QString& email, const QString& password, const QString& plan);
 
     private:
         QGridLayout* _layout;

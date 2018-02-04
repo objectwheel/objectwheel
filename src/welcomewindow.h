@@ -35,11 +35,8 @@ class WelcomeWindow : public QWidget
     public:
         explicit WelcomeWindow(QWidget* parent = nullptr);
 
-    public slots:
-        void showLogin();
-
     private slots:
-        void showProjects();
+        void handleLogin(const QString& email, const QString& password, const QString& plan);
 
     signals:
         void done();

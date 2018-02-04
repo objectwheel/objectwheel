@@ -107,5 +107,6 @@
         <file>images/robot.png</file>
         <file>images/forgot.png</file>
         <file>images/lock.png</file>
+        <file>images/toolbox.png</file>
     </qresource>
 </RCC>

@@ -251,5 +251,5 @@ void LoginWidget::onLoginButtonClicked()
     unlock();
 
     if (!plan.isEmpty())
-        emit done(plan);
+        emit done(email, password, plan);
 }

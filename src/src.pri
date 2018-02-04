@@ -86,7 +86,8 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/robotwidget.h \
     $$PWD/forgetwidget.h \
     $$PWD/resetwidget.h \
-    $$PWD/succeedwidget.h
+    $$PWD/succeedwidget.h \
+    $$PWD/projectlistmodel.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -165,7 +166,8 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/robotwidget.cpp \
     $$PWD/forgetwidget.cpp \
     $$PWD/resetwidget.cpp \
-    $$PWD/succeedwidget.cpp
+    $$PWD/succeedwidget.cpp \
+    $$PWD/projectlistmodel.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

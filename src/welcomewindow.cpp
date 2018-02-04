@@ -53,7 +53,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _view->show(Login);
 
 //    connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
-//    connect(_loginWidget, SIGNAL(done()), SLOT(showProjects()));
 //    connect(_projectsWidget, SIGNAL(done()), SIGNAL(lazy()));
 //    connect(_projectsWidget, SIGNAL(done()), SIGNAL(done()));
 
@@ -93,6 +92,9 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     connect(_loginWidget, &LoginWidget::about, [=] {
         WindowManager::instance()->show(WindowManager::About);
     });
+
+    connect(_loginWidget, SIGNAL(done(QString,QString,QString)),
+      SLOT(handleLogin(QString,QString,QString)));
 
     connect(_robotWidget, SIGNAL(done(QString)),
       _registrationWidget, SLOT(updateResponse(QString)));
@@ -135,14 +137,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 }
 
-void WelcomeWindow::showLogin()
+void WelcomeWindow::handleLogin(const QString& email, const QString& password, const QString& plan)
 {
-    _view->show(Login);
-}
-
-void WelcomeWindow::showProjects()
-{
-//    _projectsWidget->refreshProjectList(); //FIXME
     _view->show(Projects);
-    emit lazy();
 }
