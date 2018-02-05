@@ -108,5 +108,6 @@
         <file>images/lock.png</file>
         <file>images/toolbox.png</file>
         <file>images/fileicon.png</file>
+        <file>images/options.png</file>
     </qresource>
 </RCC>

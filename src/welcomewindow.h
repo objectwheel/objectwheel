@@ -28,7 +28,7 @@ class WelcomeWindow : public QWidget
             Forget,
             Reset,
             Projects,
-            NewProject,
+            ProjectDetails,
             Succeed
         };
 

@@ -86,7 +86,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/forgetwidget.h \
            $$PWD/resetwidget.h \
            $$PWD/succeedwidget.h \
-           $$PWD/projectlistmodel.h \
            $$PWD/projectdetailswidget.h
 
 SOURCES += $$PWD/main.cpp\
@@ -166,7 +165,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/forgetwidget.cpp \
            $$PWD/resetwidget.cpp \
            $$PWD/succeedwidget.cpp \
-           $$PWD/projectlistmodel.cpp \
            $$PWD/projectdetailswidget.cpp
 
 CONFIG(release, debug | release) {

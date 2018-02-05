@@ -46,7 +46,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _view->add(Registration, _registrationWidget);
     _view->add(Verification, _verificationWidget);
     _view->add(Projects, _projectsWidget);
-    _view->add(NewProject, _projectDetailsWidget);
+    _view->add(ProjectDetails, _projectDetailsWidget);
     _view->add(Succeed, _succeedWidget);
     _view->add(Forget, _forgetWidget);
     _view->add(Reset, _resetWidget);
@@ -104,6 +104,16 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
       SIGNAL(lazy()));
     connect(_projectsWidget, SIGNAL(done()),
       SIGNAL(done()));
+    connect(_projectsWidget, SIGNAL(newProject(QString)),
+      _projectDetailsWidget, SLOT(onNewProject(QString)));
+    connect(_projectsWidget, &ProjectsWidget::newProject, [=] {
+        _view->show(ProjectDetails);
+    });
+
+    connect(_projectDetailsWidget, &ProjectDetailsWidget::done, [=] {
+        _projectsWidget->refreshProjectList();
+        _view->show(Projects);
+    });
 
     connect(_robotWidget, SIGNAL(done(QString)),
       _registrationWidget, SLOT(updateResponse(QString)));
