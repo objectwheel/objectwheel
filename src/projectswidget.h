@@ -15,11 +15,22 @@ class ProjectsWidget : public QWidget
     public:
         explicit ProjectsWidget(QWidget* parent = nullptr);
 
-    public:
+    public slots:
         void refreshProjectList();
 
-    protected:
+    private slots:
+        void startProject();
+        void onNewButtonClick();
+        void onLoadButtonClick();
+        void onExportButtonClick();
+        void onImportButtonClick();
+        void onSettingsButtonClick();
+
+    private:
         bool eventFilter(QObject *watched, QEvent *event) override;
+
+    signals:
+        void done();
 
     private:
         QVBoxLayout* _layout;

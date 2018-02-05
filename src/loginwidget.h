@@ -2,6 +2,7 @@
 #define LOGINWIDGET_H
 
 #include <QWidget>
+#include <QFutureWatcher>
 
 class QLabel;
 class Switch;
@@ -24,15 +25,19 @@ class LoginWidget : public QWidget
         void lock();
         void unlock();
         void clear();
-        void onLoginButtonClicked();
+        void startSession();
+        void onSessionStart();
+        void onLoginButtonClick();
 
     signals:
+        void done();
         void about();
         void signup();
         void forget();
-        void done(const QString& email, const QString& password, const QString& plan);
+        void busy(const QString& text);
 
     private:
+        QFutureWatcher<bool> _encryptionWatcher;
         QGridLayout* _layout;
         QLabel* _logoLabel;
         QLabel* _loginLabel;

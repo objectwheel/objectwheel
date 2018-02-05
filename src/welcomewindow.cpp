@@ -93,8 +93,14 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         WindowManager::instance()->show(WindowManager::About);
     });
 
-    connect(_loginWidget, SIGNAL(done(QString,QString,QString)),
-      SLOT(handleLogin(QString,QString,QString)));
+    connect(_loginWidget, SIGNAL(busy(QString)),
+      SIGNAL(busy(QString)));
+
+    connect(_loginWidget, &LoginWidget::done, [=] {
+        _projectsWidget->refreshProjectList();
+        _view->show(Projects);
+        emit lazy();
+    });
 
     connect(_robotWidget, SIGNAL(done(QString)),
       _registrationWidget, SLOT(updateResponse(QString)));
@@ -137,7 +143,3 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 }
 
-void WelcomeWindow::handleLogin(const QString& email, const QString& password, const QString& plan)
-{
-    _view->show(Projects);
-}

@@ -8,6 +8,8 @@
 #include <global.h>
 #include <authenticator.h>
 #include <internetaccess.h>
+#include <userbackend.h>
+#include <QtConcurrent>
 
 #include <QApplication>
 #include <QScreen>
@@ -144,7 +146,9 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     connect(_buttons->get(Register), SIGNAL(clicked(bool)),
       this, SIGNAL(signup()));
     connect(_buttons->get(Login), SIGNAL(clicked(bool)),
-      this, SLOT(onLoginButtonClicked()));
+      this, SLOT(onLoginButtonClick()));
+    connect(&_encryptionWatcher, SIGNAL(finished()),
+      this, SLOT(onSessionStart()));
 
     _helpBox = new QMessageBox(this);
     _helpBox->setIcon(QMessageBox::Question);
@@ -207,7 +211,7 @@ void LoginWidget::clear()
     static_cast<QLineEdit*>(_bulkEdit->get(Password))->clear();
 }
 
-void LoginWidget::onLoginButtonClicked()
+void LoginWidget::onLoginButtonClick()
 {
     auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
     auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
@@ -237,8 +241,9 @@ void LoginWidget::onLoginButtonClicked()
     }
 
     const auto& plan = Authenticator::instance()->login(email, password);
+    bool succeed = !plan.isEmpty();
 
-    if (!plan.isEmpty())
+    if (succeed)
         clear();
     else {
         QMessageBox::warning(
@@ -250,6 +255,41 @@ void LoginWidget::onLoginButtonClicked()
 
     unlock();
 
-    if (!plan.isEmpty())
-        emit done(email, password, plan);
+    if (succeed) {
+        QTimer::singleShot(0, this, &LoginWidget::startSession);
+        emit busy(tr("Decryption in progress"));
+    }
+}
+
+void LoginWidget::startSession()
+{
+    typedef bool (UserBackend::* Fn) (const QString&, const QString&);
+    auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+
+    UserBackend::instance()->newUser(email);
+    QFuture<bool> future = QtConcurrent::run(
+        UserBackend::instance(),
+        (Fn) &UserBackend::start,
+        email,
+        password
+    );
+
+    _encryptionWatcher.setFuture(future);
+}
+
+
+void LoginWidget::onSessionStart()
+{
+    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+
+    if (_encryptionWatcher.result()) {
+        if (_autologinSwitch->isChecked())
+            UserBackend::instance()->setAutoLogin(password);
+        else
+            UserBackend::instance()->clearAutoLogin();
+    } else
+        qFatal("Fatal : LoginWidget");
+
+    emit done();
 }

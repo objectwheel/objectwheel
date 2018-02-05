@@ -12,6 +12,7 @@
 #include <QScrollBar>
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QDebug>
 #include <QApplication>
 #include <QScreen>
 
@@ -27,7 +28,7 @@
 #define pS               (QApplication::primaryScreen())
 
 enum Buttons { Load, New, Import };
-enum { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
+enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
 
 class ProjectsDelegate: public QStyledItemDelegate
 {
@@ -62,6 +63,8 @@ void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
      option.rect.height() / 2.0, 0, - fit::fx(7));
    auto ri = option.rect.adjusted(fit::fx(7), fit::fx(7),
      - option.rect.width() + option.rect.height() - fit::fx(7), - fit::fx(7));
+   auto ra = ri.adjusted(fit::fx(3), fit::fx(-0.5), 0, 0);
+   ra.setSize(fit::fx(QSizeF(10, 10)).toSize());
    auto icon = item->icon().pixmap(ri.size() * pS->devicePixelRatio());
 
    painter->setRenderHint(QPainter::Antialiasing);
@@ -74,6 +77,15 @@ void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         painter->fillRect(option.rect, option.palette.highlight());
 
     painter->drawPixmap(ri, icon, icon.rect());
+
+    if (item->data(Active).toBool()) {
+        QLinearGradient g(ri.topLeft(), ri.bottomLeft());
+        g.setColorAt(0, "#6BCB36");
+        g.setColorAt(0.5, "#4db025");
+        painter->setBrush(g);
+        painter->setPen("#6BCB36");
+        painter->drawRoundedRect(ra, ra.width(), ra.height());
+    }
 
     QFont f;
     f.setWeight(QFont::DemiBold);
@@ -207,6 +219,17 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 3.0;
     _buttons->triggerSettings();
 
+    connect(_buttons->get(New), SIGNAL(clicked(bool)),
+        this, SLOT(onNewButtonClick()));
+    connect(_buttons->get(Load), SIGNAL(clicked(bool)),
+        this, SLOT(onLoadButtonClick()));
+    connect(_buttons->get(Import), SIGNAL(clicked()),
+        this, SLOT(onImportButtonClick()));
+//    connect(_buttons2->get(Settings), SIGNAL(clicked(bool)),
+//        this, SLOT(onSettingsButtonClick()));
+//    connect(_buttons2->get(Export), SIGNAL(clicked(bool)),
+//        this, SLOT(onExportButtonClick()));
+
 }
 
 bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
@@ -222,8 +245,50 @@ bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
     return false;
 }
 
-//void ProjectsWidget::handleNewButtonClicked()
-//{
+void ProjectsWidget::refreshProjectList()
+{
+    _listWidget->clear();
+    if (UserBackend::instance()->dir().isEmpty())
+        return;
+
+    auto projects = ProjectBackend::instance()->projects();
+
+    if (projects.size() < 1)
+        return;
+
+    for (auto hash : projects) {
+        auto item = new QListWidgetItem;
+        item->setIcon(QIcon(PATH_FILEICON));
+        item->setData(Hash, hash);
+        item->setData(Name, ProjectBackend::instance()->name(hash));
+        item->setData(LastEdit, tr("Last edit: ") + ProjectBackend::instance()->mfDate(hash));
+        item->setData(Active, hash == ProjectBackend::instance()->hash());
+        _listWidget->addItem(item);
+    }
+
+//    listView->setProperty("currentIndex", 0);
+}
+
+void ProjectsWidget::startProject()
+{
+    auto hash = _listWidget->currentItem()->data(Hash).toString();
+
+    if (!ProjectBackend::instance()->start(hash)) { // Asynchronous Operation
+        qWarning() << "Project starting unsuccessful.";
+        refreshProjectList();
+        return;
+    }
+
+    for (int i = _listWidget->count(); i--;)
+        _listWidget->item(i)->setData(Active, false);
+
+    _listWidget->currentItem()->setData(Active, false);
+
+    emit done();
+}
+
+void ProjectsWidget::onNewButtonClick()
+{
 //    if (UserBackend::instance()->dir().isEmpty()) return;
 //    auto projects = ProjectBackend::instance()->projectNames();
 //    int count = 1;
@@ -249,75 +314,48 @@ bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
 //    descriptionTextInput->setProperty("text", "Simple description here.");
 //    projectnameTextInput->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole]));
 //    QTimer::singleShot(250, [=]{ swipeView->setProperty("currentIndex", 1); });
-//}
+}
 
-//void ProjectsWidget::handleInfoButtonClicks(const QVariant& hash)
-//{
-//    auto h = hash.toString();
-//    ProjectBackend::instance()->updateSize();
-//    sizeText->setProperty("text", ProjectBackend::instance()->size(h));
-//    mfDateText->setProperty("text", ProjectBackend::instance()->mfDate(h));
-//    crDateText->setProperty("text", ProjectBackend::instance()->crDate(h));
-//    ownerText->setProperty("text", ProjectBackend::instance()->owner(h));
-//    descriptionTextInput->setProperty("text", ProjectBackend::instance()->description(h));
-//    projectnameTextInput->setProperty("text", ProjectBackend::instance()->name(h));
-//    swipeView->setProperty("currentIndex", 1);
-//}
-
-//void ProjectsWidget::handleBtnCancelClicked()
-//{
-//    refreshProjectList();
-//    swipeView->setProperty("currentIndex", 0);
-//}
-
-//void ProjectsWidget::handleBtnDeleteClicked()
-//{
-//    QString chash;
+void ProjectsWidget::onLoadButtonClick()
+{
 //    auto hash = model.get(listView->property("currentIndex").toInt(),
 //      model.roleNames()[ProjectListModel::ProjectHashRole]).toString();
+//    auto chash = ProjectBackend::instance()->hash();
 
-//    if (ProjectBackend::instance()->dir(hash).isEmpty())
-//        goto finish;
-
-//    chash = ProjectBackend::instance()->hash();
 //    if (!chash.isEmpty() && chash == hash) {
-//        ProjectBackend::instance()->stop();
-//        chash = "";
+//        emit done();
+//        return;
 //    }
 
-//    rm(ProjectBackend::instance()->dir(hash));
+//    if (dW->qmlEditorView()->hasUnsavedDocs()) {
+//        QMessageBox msgBox;
+//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
+//        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
+//        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
+//        msgBox.setDefaultButton(QMessageBox::SaveAll);
+//        int ret = msgBox.exec();
 
-//finish:
-//    refreshProjectList();
-//    swipeView->setProperty("currentIndex", 0);
-//}
-
-//void ProjectsWidget::handleBtnImportClicked()
-//{
-//    QFileDialog dialog(this);
-//    dialog.setFileMode(QFileDialog::ExistingFiles);
-//    dialog.setNameFilter(tr("Zip files (*.zip)"));
-//    dialog.setViewMode(QFileDialog::Detail);
-
-//    if (dialog.exec()) {
-//        for (auto fileName : dialog.selectedFiles()) {
-//            if (!ProjectBackend::instance()->importProject(fileName)) {
-//                QMessageBox::warning(
-//                    this,
-//                    "Operation Stopped",
-//                    "One or more import file is corrupted."
-//                );
+//        switch (ret) {
+//            case QMessageBox::Cancel:
 //                return;
-//            }
-//        }
-//        refreshProjectList();
-//        swipeView->setProperty("currentIndex", 0);
-//        QMessageBox::information(this, "Finished", "Tool import has successfully finished.");
-//    }
-//}
 
-//void ProjectsWidget::handleBtnExportClicked()
-//{
+//            case QMessageBox::SaveAll:
+//                dW->qmlEditorView()->saveAll();
+//                break;
+
+//            case QMessageBox::NoToAll:
+//                break;
+//        }
+//    }
+
+//    WindowManager::instance()->hide(WindowManager::Main);
+//    ProjectBackend::instance()->stop();
+//    QTimer::singleShot(0, this, &ProjectsWidget::startProject);
+//    emit busy(tr("Loading project"));
+}
+
+void ProjectsWidget::onExportButtonClick()
+{
 //    auto hash = model.get(
 //        listView->property("currentIndex").toInt(),
 //        model.roleNames()[ProjectListModel::ProjectHashRole]
@@ -356,138 +394,43 @@ bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
 //            "Project export has successfully finished."
 //        );
 //    }
-//}
+}
 
-//void ProjectsWidget::startProject()
-//{
-//    auto hash = model.get(
-//        listView->property("currentIndex").toInt(),
-//        model.roleNames()[ProjectListModel::ProjectHashRole]
-//    ).toString();
+void ProjectsWidget::onImportButtonClick()
+{
+//    QFileDialog dialog(this);
+//    dialog.setFileMode(QFileDialog::ExistingFiles);
+//    dialog.setNameFilter(tr("Zip files (*.zip)"));
+//    dialog.setViewMode(QFileDialog::Detail);
 
-//    if (!ProjectBackend::instance()->start(hash)) { // Asynchronous Operation
-//        for (int i = model.rowCount(); i--;) {
-//            if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
-//                model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
+//    if (dialog.exec()) {
+//        for (auto fileName : dialog.selectedFiles()) {
+//            if (!ProjectBackend::instance()->importProject(fileName)) {
+//                QMessageBox::warning(
+//                    this,
+//                    "Operation Stopped",
+//                    "One or more import file is corrupted."
+//                );
+//                return;
 //            }
 //        }
-//        qFatal("Fatal : ProjectsWidget");
+//        refreshProjectList();
+//        swipeView->setProperty("currentIndex", 0);
+//        QMessageBox::information(this, "Finished", "Tool import has successfully finished.");
 //    }
+}
 
-//    for (int i = model.rowCount(); i--;) {
-//        if (model.get(i, model.roleNames()[ProjectListModel::ActiveRole]).toBool()) {
-//            model.set(i, model.roleNames()[ProjectListModel::ActiveRole], false);
-//        }
-//    }
-
-//    model.set(listView->property("currentIndex").toInt(),
-//        model.roleNames()[ProjectListModel::ActiveRole], true);
-
-//    emit done();
-//}
-
-//void ProjectsWidget::handleBtnOkClicked()
-//{
-//    auto projectnametext = projectnameTextInput->property("text").toString();
-//    auto descriptiontext = descriptionTextInput->property("text").toString();
-//    auto sizetext = sizeText->property("text").toString();
-//    auto crdatetext = crDateText->property("text").toString();
-//    auto ownertext = ownerText->property("text").toString();
-//    auto prevhash = model.get(listView->property("currentIndex").toInt(),
-//    model.roleNames()[ProjectListModel::ProjectHashRole]).toString();
-
-//    if (projectnametext.isEmpty() || descriptiontext.isEmpty()) {
-//        QMetaObject::invokeMethod(warning, "show");
-//        return;
-//    }
-
-//    if (prevhash.isEmpty()) {
-//        if (!ProjectBackend::instance()->newProject(
-//            projectnametext,
-//            descriptiontext,
-//            ownertext,
-//            crdatetext,
-//            sizetext
-//        )) qFatal("ProjectsWidget::handleBtnOkClicked() : Fatal Error. 0x01");
-
-//        ProjectBackend::instance()->updateSize();
-//    } else {
-//        ProjectBackend::
-//        instance()->changeName(
-//            prevhash,
-//            projectnametext
-//        );
-//        ProjectBackend::
-//        instance()->changeDescription(
-//            prevhash,
-//            descriptiontext
-//        );
-//    }
-
-//    refreshProjectList();
-//    swipeView->setProperty("currentIndex", 0);
-//}
-
-//void ProjectsWidget::handleLoadButtonClicked()
-//{
-//    auto hash = model.get(listView->property("currentIndex").toInt(),
-//      model.roleNames()[ProjectListModel::ProjectHashRole]).toString();
-//    auto chash = ProjectBackend::instance()->hash();
-
-//    if (!chash.isEmpty() && chash == hash) {
-//        emit done();
-//        return;
-//    }
-
-//    if (dW->qmlEditorView()->hasUnsavedDocs()) {
-//        QMessageBox msgBox;
-//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
-//        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
-//        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
-//        msgBox.setDefaultButton(QMessageBox::SaveAll);
-//        int ret = msgBox.exec();
-
-//        switch (ret) {
-//            case QMessageBox::Cancel:
-//                return;
-
-//            case QMessageBox::SaveAll:
-//                dW->qmlEditorView()->saveAll();
-//                break;
-
-//            case QMessageBox::NoToAll:
-//                break;
-//        }
-//    }
-
-//    WindowManager::instance()->hide(WindowManager::Main);
-//    ProjectBackend::instance()->stop();
-//    QTimer::singleShot(0, this, &ProjectsWidget::startProject);
-//    emit busy(tr("Loading project"));
-//}
-
-void ProjectsWidget::refreshProjectList()
+void ProjectsWidget::onSettingsButtonClick()
 {
-    _listWidget->clear();
-    if (UserBackend::instance()->dir().isEmpty())
-        return;
-
-    auto projects = ProjectBackend::instance()->projects();
-
-    if (projects.size() < 1)
-        return;
-
-    for (auto hash : projects) {
-        auto item = new QListWidgetItem;
-        item->setIcon(QIcon(PATH_FILEICON));
-        item->setData(Hash, hash);
-        item->setData(Name, ProjectBackend::instance()->name(hash));
-        item->setData(LastEdit, tr("Last edit: ") + ProjectBackend::instance()->mfDate(hash));
-        item->setData(Active, hash == ProjectBackend::instance()->hash());
-        _listWidget->addItem(item);
-    }
-
-//    listView->setProperty("currentIndex", 0);
+//    auto h = hash.toString();
+//    ProjectBackend::instance()->updateSize();
+//    sizeText->setProperty("text", ProjectBackend::instance()->size(h));
+//    mfDateText->setProperty("text", ProjectBackend::instance()->mfDate(h));
+//    crDateText->setProperty("text", ProjectBackend::instance()->crDate(h));
+//    ownerText->setProperty("text", ProjectBackend::instance()->owner(h));
+//    descriptionTextInput->setProperty("text", ProjectBackend::instance()->description(h));
+//    projectnameTextInput->setProperty("text", ProjectBackend::instance()->name(h));
+//    swipeView->setProperty("currentIndex", 1);
 }
 
 #include "projectswidget.moc"
