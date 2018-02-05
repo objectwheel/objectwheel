@@ -5,7 +5,7 @@
 #include <loginwidget.h>
 #include <robotwidget.h>
 #include <projectswidget.h>
-#include <newprojectwidget.h>
+#include <projectdetailswidget.h>
 #include <registrationwidget.h>
 #include <verificationwidget.h>
 #include <succeedwidget.h>
@@ -29,7 +29,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _robotWidget = new RobotWidget;
     _registrationWidget = new RegistrationWidget;
     _projectsWidget = new ProjectsWidget;
-    _newProjectWidget = new NewProjectWidget;
+    _projectDetailsWidget = new ProjectDetailsWidget;
     _verificationWidget = new VerificationWidget;
     _succeedWidget = new SucceedWidget;
     _forgetWidget = new ForgetWidget;
@@ -46,15 +46,11 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _view->add(Registration, _registrationWidget);
     _view->add(Verification, _verificationWidget);
     _view->add(Projects, _projectsWidget);
-    _view->add(NewProject, _newProjectWidget);
+    _view->add(NewProject, _projectDetailsWidget);
     _view->add(Succeed, _succeedWidget);
     _view->add(Forget, _forgetWidget);
     _view->add(Reset, _resetWidget);
     _view->show(Login);
-
-//    connect(_projectsWidget, SIGNAL(busy(QString)), SIGNAL(busy(QString)));
-//    connect(_projectsWidget, SIGNAL(done()), SIGNAL(lazy()));
-//    connect(_projectsWidget, SIGNAL(done()), SIGNAL(done()));
 
     connect(_forgetWidget, &ForgetWidget::back, [=] {
         _view->show(Login);
@@ -101,6 +97,13 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         _view->show(Projects);
         emit lazy();
     });
+
+    connect(_projectsWidget, SIGNAL(busy(QString)),
+      SIGNAL(busy(QString)));
+    connect(_projectsWidget, SIGNAL(done()),
+      SIGNAL(lazy()));
+    connect(_projectsWidget, SIGNAL(done()),
+      SIGNAL(done()));
 
     connect(_robotWidget, SIGNAL(done(QString)),
       _registrationWidget, SLOT(updateResponse(QString)));

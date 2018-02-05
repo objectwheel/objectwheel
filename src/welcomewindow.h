@@ -8,7 +8,7 @@ class QVBoxLayout;
 class LoginWidget;
 class RobotWidget;
 class ProjectsWidget;
-class NewProjectWidget;
+class ProjectDetailsWidget;
 class RegistrationWidget;
 class VerificationWidget;
 class SucceedWidget;
@@ -46,7 +46,7 @@ class WelcomeWindow : public QWidget
         LoginWidget* _loginWidget;
         RobotWidget* _robotWidget;
         ProjectsWidget* _projectsWidget;
-        NewProjectWidget* _newProjectWidget;
+        ProjectDetailsWidget* _projectDetailsWidget;
         RegistrationWidget* _registrationWidget;
         VerificationWidget* _verificationWidget;
         SucceedWidget* _succeedWidget;

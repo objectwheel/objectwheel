@@ -72,7 +72,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/registrationwidget.h \
            $$PWD/loginwidget.h \
            $$PWD/projectswidget.h \
-           $$PWD/newprojectwidget.h \
            $$PWD/switch.h \
            $$PWD/bulkedit.h \
            $$PWD/focuslesslineedit.h \
@@ -83,11 +82,12 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/internetaccess.h \
            $$PWD/verificationwidget.h \
            $$PWD/countdown.h \
-    $$PWD/robotwidget.h \
-    $$PWD/forgetwidget.h \
-    $$PWD/resetwidget.h \
-    $$PWD/succeedwidget.h \
-    $$PWD/projectlistmodel.h
+           $$PWD/robotwidget.h \
+           $$PWD/forgetwidget.h \
+           $$PWD/resetwidget.h \
+           $$PWD/succeedwidget.h \
+           $$PWD/projectlistmodel.h \
+           $$PWD/projectdetailswidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -152,7 +152,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/registrationwidget.cpp \
            $$PWD/loginwidget.cpp \
            $$PWD/projectswidget.cpp \
-           $$PWD/newprojectwidget.cpp \
            $$PWD/switch.cpp \
            $$PWD/bulkedit.cpp \
            $$PWD/focuslesslineedit.cpp \
@@ -163,11 +162,12 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/internetaccess.cpp \
            $$PWD/verificationwidget.cpp \
            $$PWD/countdown.cpp \
-    $$PWD/robotwidget.cpp \
-    $$PWD/forgetwidget.cpp \
-    $$PWD/resetwidget.cpp \
-    $$PWD/succeedwidget.cpp \
-    $$PWD/projectlistmodel.cpp
+           $$PWD/robotwidget.cpp \
+           $$PWD/forgetwidget.cpp \
+           $$PWD/resetwidget.cpp \
+           $$PWD/succeedwidget.cpp \
+           $$PWD/projectlistmodel.cpp \
+           $$PWD/projectdetailswidget.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

@@ -27,10 +27,13 @@ class ProjectsWidget : public QWidget
         void onSettingsButtonClick();
 
     private:
-        bool eventFilter(QObject *watched, QEvent *event) override;
+        bool eventFilter(QObject* watched, QEvent* event) override;
 
     signals:
         void done();
+        void lazy();
+        void busy(const QString& text);
+        void newProject(const QString& projectName);
 
     private:
         QVBoxLayout* _layout;

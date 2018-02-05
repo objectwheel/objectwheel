@@ -4,15 +4,20 @@
 #include <css.h>
 #include <userbackend.h>
 #include <projectbackend.h>
+#include <frontend.h>
+#include <qmleditorview.h>
+#include <QMessageBox>
 
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QTimer>
 #include <QListWidget>
 #include <QScrollBar>
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QDebug>
+#include <QDateTime>
 #include <QApplication>
 #include <QScreen>
 
@@ -25,7 +30,8 @@
 #define PATH_NICON       (":/resources/images/new.png")
 #define PATH_LICON       (":/resources/images/load.png")
 #define PATH_IICON       (":/resources/images/unload.png")
-#define pS               (QApplication::primaryScreen())
+#define pS               QApplication::primaryScreen()
+#define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
 enum Buttons { Load, New, Import };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
@@ -95,7 +101,7 @@ void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     f.setWeight(QFont::Normal);
     painter->setFont(f);
-    painter->drawText(rl, lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
+    painter->drawText(rl, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
 }
 
 ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
@@ -261,12 +267,13 @@ void ProjectsWidget::refreshProjectList()
         item->setIcon(QIcon(PATH_FILEICON));
         item->setData(Hash, hash);
         item->setData(Name, ProjectBackend::instance()->name(hash));
-        item->setData(LastEdit, tr("Last edit: ") + ProjectBackend::instance()->mfDate(hash));
+        item->setData(LastEdit, ProjectBackend::instance()->mfDate(hash));
         item->setData(Active, hash == ProjectBackend::instance()->hash());
         _listWidget->addItem(item);
     }
 
-//    listView->setProperty("currentIndex", 0);
+    if (!_listWidget->currentItem())
+        _listWidget->setCurrentRow(0);
 }
 
 void ProjectsWidget::startProject()
@@ -289,69 +296,62 @@ void ProjectsWidget::startProject()
 
 void ProjectsWidget::onNewButtonClick()
 {
-//    if (UserBackend::instance()->dir().isEmpty()) return;
-//    auto projects = ProjectBackend::instance()->projectNames();
-//    int count = 1;
-//    QString projectName = "Project - 1";
-//    while (projects.contains(projectName)) {
-//        count++;
-//        projectName.remove(projectName.size() - 1, 1);
-//        projectName += QString::number(count);
-//    }
+    if (UserBackend::instance()->dir().isEmpty()) return;
+    auto projects = ProjectBackend::instance()->projectNames();
+    int count = 1;
+    QString projectName = "Project - 1";
+    while (projects.contains(projectName)) {
+        count++;
+        projectName.remove(projectName.size() - 1, 1);
+        projectName += QString::number(count);
+    }
 
-//    int lastIndex = model.rowCount();
-//    model.insertRow(lastIndex);
-//    listView->setProperty("currentIndex", lastIndex);
-//    model.set(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole], projectName);
-//    model.set(lastIndex, model.roleNames()[ProjectListModel::ActiveRole], false);
-//    model.set(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole],
-//            QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " "));
+    auto item = new QListWidgetItem;
+    item->setIcon(QIcon(PATH_FILEICON));
+    item->setData(Name, projectName);
+    item->setData(LastEdit, TIME);
+    item->setData(Active, false);
+    _listWidget->addItem(item);
+    _listWidget->setCurrentItem(item);
 
-//    sizeText->setProperty("text", "0 bytes");
-//    mfDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
-//    crDateText->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::LastEditedRole]));
-//    ownerText->setProperty("text", UserBackend::instance()->user());
-//    descriptionTextInput->setProperty("text", "Simple description here.");
-//    projectnameTextInput->setProperty("text", model.get(lastIndex, model.roleNames()[ProjectListModel::ProjectNameRole]));
-//    QTimer::singleShot(250, [=]{ swipeView->setProperty("currentIndex", 1); });
+    emit newProject(projectName);
 }
 
 void ProjectsWidget::onLoadButtonClick()
 {
-//    auto hash = model.get(listView->property("currentIndex").toInt(),
-//      model.roleNames()[ProjectListModel::ProjectHashRole]).toString();
-//    auto chash = ProjectBackend::instance()->hash();
+    auto hash = _listWidget->currentItem()->data(Hash).toString();
+    auto chash = ProjectBackend::instance()->hash();
 
-//    if (!chash.isEmpty() && chash == hash) {
-//        emit done();
-//        return;
-//    }
+    if (!chash.isEmpty() && chash == hash) {
+        emit done();
+        return;
+    }
 
-//    if (dW->qmlEditorView()->hasUnsavedDocs()) {
-//        QMessageBox msgBox;
-//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
-//        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
-//        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
-//        msgBox.setDefaultButton(QMessageBox::SaveAll);
-//        int ret = msgBox.exec();
+    if (dW->qmlEditorView()->hasUnsavedDocs()) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
+        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
+        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::SaveAll);
+        int ret = msgBox.exec();
 
-//        switch (ret) {
-//            case QMessageBox::Cancel:
-//                return;
+        switch (ret) {
+            case QMessageBox::Cancel:
+                return;
 
-//            case QMessageBox::SaveAll:
-//                dW->qmlEditorView()->saveAll();
-//                break;
+            case QMessageBox::SaveAll:
+                dW->qmlEditorView()->saveAll();
+                break;
 
-//            case QMessageBox::NoToAll:
-//                break;
-//        }
-//    }
+            case QMessageBox::NoToAll:
+                break;
+        }
+    }
 
-//    WindowManager::instance()->hide(WindowManager::Main);
-//    ProjectBackend::instance()->stop();
-//    QTimer::singleShot(0, this, &ProjectsWidget::startProject);
-//    emit busy(tr("Loading project"));
+    WindowManager::instance()->hide(WindowManager::Main);
+    ProjectBackend::instance()->stop();
+    QTimer::singleShot(0, this, &ProjectsWidget::startProject);
+    emit busy(tr("Loading project"));
 }
 
 void ProjectsWidget::onExportButtonClick()
