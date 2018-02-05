@@ -19,7 +19,6 @@
         <file>images/loading.png</file>
         <file>images/aboutSceneIcon.png</file>
         <file>images/cancel.png</file>
-        <file>images/fileicon.png</file>
         <file>images/info.png</file>
         <file>images/load.png</file>
         <file>images/new.png</file>
@@ -108,5 +107,6 @@
         <file>images/forgot.png</file>
         <file>images/lock.png</file>
         <file>images/toolbox.png</file>
+        <file>images/fileicon.png</file>
     </qresource>
 </RCC>

@@ -10,8 +10,8 @@ Countdown::Countdown(QWidget *parent) : QWidget(parent)
   , _second(0)
   , _timer(new QTimer(this))
 {
-    _settings.borderColor = "#C0C4C7";
-    _settings.backgroundColor = "#D0D4D7";
+    _settings.borderColor = "#22000000";
+    _settings.backgroundColor = "#12000000";
     _settings.leftDigitColor = "#7EBE5D";
     _settings.rightDigitColor = "#BE5760";
     _settings.dotColor = "#50000000";
