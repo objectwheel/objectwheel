@@ -89,8 +89,8 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     static_cast<QLineEdit*>(_bulkEdit->get(ModificationDate))->setStyleSheet("color: #50000000; border: none; background: transparent;");
     static_cast<QLineEdit*>(_bulkEdit->get(Size))->setStyleSheet("color: #50000000; border: none; background: transparent;");
 
-    _buttons->add(Delete, "#CC5D67", "#B2525A");
     _buttons->add(Cancel, "#5BC5F8", "#2592F9");
+    _buttons->add(Delete, "#CC5D67", "#B2525A");
     _buttons->add(Save, "#86CC63", "#75B257");
     _buttons->get(Delete)->setText(tr("Delete Project"));
     _buttons->get(Cancel)->setText(tr("Cancel"));

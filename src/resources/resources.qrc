@@ -109,5 +109,6 @@
         <file>images/toolbox.png</file>
         <file>images/fileicon.png</file>
         <file>images/options.png</file>
+        <file>images/dots.png</file>
     </qresource>
 </RCC>

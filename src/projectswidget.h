@@ -44,6 +44,7 @@ class ProjectsWidget : public QWidget
         QLabel* _projectsLabel;
         QListWidget* _listWidget;
         ButtonSlice* _buttons;
+        ButtonSlice* _buttons2;
 };
 
 #endif // PROJECTSWIDGET_H

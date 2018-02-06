@@ -7,6 +7,7 @@
 #include <frontend.h>
 #include <qmleditorview.h>
 #include <delayer.h>
+#include <filemanager.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -21,6 +22,7 @@
 #include <QDateTime>
 #include <QApplication>
 #include <QScreen>
+#include <QFileDialog>
 
 #define SIZE_LIST        (QSize(fit::fx(400), fit::fx(350)))
 #define BUTTONS_WIDTH    (fit::fx(400))
@@ -29,12 +31,14 @@
 #define PATH_LOGO        (":/resources/images/toolbox.png")
 #define PATH_FILEICON    (":/resources/images/fileicon.png")
 #define PATH_NICON       (":/resources/images/new.png")
-#define PATH_LICON       (":/resources/images/load.png")
-#define PATH_IICON       (":/resources/images/unload.png")
+#define PATH_LICON       (":/resources/images/ok.png")
+#define PATH_IICON       (":/resources/images/load.png")
+#define PATH_EICON       (":/resources/images/unload.png")
+#define PATH_SICON       (":/resources/images/dots.png")
 #define pS               QApplication::primaryScreen()
 #define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
-enum Buttons { Load, New, Import };
+enum Buttons { Load, New, Import, Export, Settings };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
 
 class ProjectsDelegate: public QStyledItemDelegate
@@ -114,6 +118,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     _projectsLabel = new QLabel;
     _listWidget = new QListWidget;
     _buttons = new ButtonSlice;
+    _buttons2 = new ButtonSlice(_listWidget->viewport());
 
     _layout->addStretch();
     _layout->setSpacing(fit::fx(12));
@@ -208,35 +213,55 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         _listWidget->addItem(item);
     }
 
+    _buttons2->setFixedHeight(fit::fx(20));
+    _buttons2->add(Settings, "#55A6F6", "#448DDE");
+    _buttons2->get(Settings)->setIconSize(fit::fx(QSizeF(12, 12)).toSize());
+    _buttons2->get(Settings)->setIcon(QIcon(PATH_SICON));
+    _buttons2->get(Settings)->setCursor(Qt::PointingHandCursor);
+    _buttons2->settings().cellWidth = _buttons2->height();
+    _buttons2->settings().borderRadius = _buttons2->height() / 2.0;
+    _buttons2->triggerSettings();
+    connect(_listWidget, &QListWidget::currentItemChanged, [=] {
+        auto currentItem = _listWidget->currentItem();
+        if (currentItem) {
+            _buttons2->show();
+            auto rect = _listWidget->visualItemRect(currentItem);
+            _buttons2->move(rect.topRight().x() - _buttons2->width() - fit::fx(5),
+                            rect.topRight().y() + (rect.height() - _buttons2->height()) / 2.0);
+        } else {
+            _buttons2->hide();
+        }
+    });
+
     _buttons->add(New, "#B97CD3", "#985BB2");
     _buttons->add(Load, "#5BC5F8", "#2592F9");
     _buttons->add(Import, "#8BBB56", "#6EA045");
-
+    _buttons->add(Export, "#AA815A", "#8c6b4a");
     _buttons->get(New)->setText(tr("New"));
     _buttons->get(Load)->setText(tr("Load"));
     _buttons->get(Import)->setText(tr("Import"));
-
+    _buttons->get(Export)->setText(tr("Export"));
     _buttons->get(New)->setIcon(QIcon(PATH_NICON));
     _buttons->get(Load)->setIcon(QIcon(PATH_LICON));
     _buttons->get(Import)->setIcon(QIcon(PATH_IICON));
-
+    _buttons->get(Export)->setIcon(QIcon(PATH_EICON));
     _buttons->get(New)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Load)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Import)->setCursor(Qt::PointingHandCursor);
-    _buttons->settings().cellWidth = BUTTONS_WIDTH / 3.0;
+    _buttons->get(Export)->setCursor(Qt::PointingHandCursor);
+    _buttons->settings().cellWidth = BUTTONS_WIDTH / 4.0;
     _buttons->triggerSettings();
 
     connect(_buttons->get(New), SIGNAL(clicked(bool)),
-        this, SLOT(onNewButtonClick()));
+      this, SLOT(onNewButtonClick()));
     connect(_buttons->get(Load), SIGNAL(clicked(bool)),
-        this, SLOT(onLoadButtonClick()));
-    connect(_buttons->get(Import), SIGNAL(clicked()),
-        this, SLOT(onImportButtonClick()));
-//    connect(_buttons2->get(Settings), SIGNAL(clicked(bool)),
-//        this, SLOT(onSettingsButtonClick()));
-//    connect(_buttons2->get(Export), SIGNAL(clicked(bool)),
-//        this, SLOT(onExportButtonClick()));
-
+      this, SLOT(onLoadButtonClick()));
+    connect(_buttons->get(Import), SIGNAL(clicked(bool)),
+      this, SLOT(onImportButtonClick()));
+    connect(_buttons->get(Export), SIGNAL(clicked(bool)),
+      this, SLOT(onExportButtonClick()));
+    connect(_buttons2->get(Settings), SIGNAL(clicked(bool)),
+      this, SLOT(onSettingsButtonClick()));
 }
 
 bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
@@ -373,68 +398,73 @@ void ProjectsWidget::onLoadButtonClick()
 
 void ProjectsWidget::onExportButtonClick()
 {
-//    auto hash = model.get(
-//        listView->property("currentIndex").toInt(),
-//        model.roleNames()[ProjectListModel::ProjectHashRole]
-//    ).toString();
+    if (!_listWidget->currentItem()) {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Select the project first.")
+        );
+        return;
+    }
 
-//    auto pname = model.get(
-//        listView->property("currentIndex").toInt(),
-//        model.roleNames()[ProjectListModel::ProjectNameRole]
-//    ).toString();
+    auto hash = _listWidget->currentItem()->data(Hash).toString();
+    auto pname = _listWidget->currentItem()->data(Name).toString();
 
-//    if (hash.isEmpty() || pname.isEmpty())
-//        return;
+    if (hash.isEmpty() || pname.isEmpty())
+        return;
 
-//    QFileDialog dialog(this);
-//    dialog.setFileMode(QFileDialog::Directory);
-//    dialog.setViewMode(QFileDialog::Detail);
-//    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
 
-//    if (dialog.exec()) {
-//        if (!rm(
-//            dialog.selectedFiles().at(0) +
-//            separator() +
-//            pname + ".zip"
-//        )) return;
+    if (dialog.exec()) {
+        if (!rm(
+            dialog.selectedFiles().at(0) +
+            separator() +
+            pname + ".zip"
+        )) return;
 
-//        if (!ProjectBackend::instance()->exportProject(
-//            hash,
-//            dialog.selectedFiles().at(0) +
-//            separator() +
-//            pname + ".zip"
-//        )) return;
+        if (!ProjectBackend::instance()->exportProject(
+            hash,
+            dialog.selectedFiles().at(0) +
+            separator() +
+            pname + ".zip"
+        )) return;
 
-//        QMessageBox::information(
-//            this,
-//            "Finished",
-//            "Project export has successfully finished."
-//        );
-//    }
+        QMessageBox::information(
+            this,
+            "Finished",
+            "Project export has successfully finished."
+        );
+    }
 }
 
 void ProjectsWidget::onImportButtonClick()
 {
-//    QFileDialog dialog(this);
-//    dialog.setFileMode(QFileDialog::ExistingFiles);
-//    dialog.setNameFilter(tr("Zip files (*.zip)"));
-//    dialog.setViewMode(QFileDialog::Detail);
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setNameFilter(tr("Zip files (*.zip)"));
+    dialog.setViewMode(QFileDialog::Detail);
 
-//    if (dialog.exec()) {
-//        for (auto fileName : dialog.selectedFiles()) {
-//            if (!ProjectBackend::instance()->importProject(fileName)) {
-//                QMessageBox::warning(
-//                    this,
-//                    "Operation Stopped",
-//                    "One or more import file is corrupted."
-//                );
-//                return;
-//            }
-//        }
-//        refreshProjectList();
-//        swipeView->setProperty("currentIndex", 0);
-//        QMessageBox::information(this, "Finished", "Tool import has successfully finished.");
-//    }
+    if (dialog.exec()) {
+        for (auto fileName : dialog.selectedFiles()) {
+            if (!ProjectBackend::instance()->importProject(fileName)) {
+                QMessageBox::warning(
+                    this,
+                    "Operation Stopped",
+                    "One or more import file is corrupted."
+                );
+                return;
+            }
+        }
+        refreshProjectList();
+        QMessageBox::information(
+            this,
+            tr("Finished"),
+            tr("Tool import has successfully finished.")
+        );
+    }
 }
 
 void ProjectsWidget::onSettingsButtonClick()
