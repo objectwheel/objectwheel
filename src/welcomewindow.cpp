@@ -53,22 +53,22 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     _view->show(Login);
 
     connect(_forgetWidget, &ForgetWidget::back, [=] {
-        _view->show(Login);
+        _view->show(Login, View::LeftToRight);
     });
 
     connect(_forgetWidget, SIGNAL(done(QString)),
       _resetWidget, SLOT(setEmail(QString)));
 
     connect(_forgetWidget, &ForgetWidget::done, [=] {
-        _view->show(Reset);
+        _view->show(Reset, View::RightToLeft);
     });
 
     connect(_resetWidget, &ResetWidget::cancel, [=] {
-        _view->show(Login);
+        _view->show(Login, View::LeftToRight);
     });
 
     connect(_resetWidget, &ResetWidget::done, [=] {
-        _view->show(Succeed);
+        _view->show(Succeed, View::RightToLeft);
         _succeedWidget->start();
         _succeedWidget->update(
           tr("Succeed."),
@@ -78,11 +78,11 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
     connect(_loginWidget, &LoginWidget::signup, [=] {
         _robotWidget->load();
-        _view->show(Robot);
+        _view->show(Robot, View::RightToLeft);
     });
 
     connect(_loginWidget, &LoginWidget::forget, [=] {
-        _view->show(Forget);
+        _view->show(Forget, View::RightToLeft);
     });
 
     connect(_loginWidget, &LoginWidget::about, [=] {
@@ -94,7 +94,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
     connect(_loginWidget, &LoginWidget::done, [=] {
         _projectsWidget->refreshProjectList();
-        _view->show(Projects);
+        _view->show(Projects, View::RightToLeft);
         emit lazy();
     });
 
@@ -106,44 +106,49 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
       SIGNAL(done()));
     connect(_projectsWidget, SIGNAL(newProject(QString)),
       _projectDetailsWidget, SLOT(onNewProject(QString)));
+    connect(_projectsWidget, SIGNAL(editProject(QString)),
+      _projectDetailsWidget, SLOT(onEditProject(QString)));
     connect(_projectsWidget, &ProjectsWidget::newProject, [=] {
-        _view->show(ProjectDetails);
+        _view->show(ProjectDetails, View::RightToLeft);
+    });
+    connect(_projectsWidget, &ProjectsWidget::editProject, [=] {
+        _view->show(ProjectDetails, View::RightToLeft);
     });
 
     connect(_projectDetailsWidget, &ProjectDetailsWidget::done, [=] {
         _projectsWidget->refreshProjectList();
-        _view->show(Projects);
+        _view->show(Projects, View::LeftToRight);
     });
 
     connect(_robotWidget, SIGNAL(done(QString)),
       _registrationWidget, SLOT(updateResponse(QString)));
 
     connect(_robotWidget, &RobotWidget::back, [=] {
-        _view->show(Login);
+        _view->show(Login, View::LeftToRight);
     });
 
     connect(_robotWidget, &RobotWidget::done, [=] {
-        _view->show(Registration);
+        _view->show(Registration, View::RightToLeft);
     });
 
     connect(_registrationWidget, &RegistrationWidget::back, [=] {
-        _view->show(Login);
+        _view->show(Login, View::LeftToRight);
     });
 
     connect(_registrationWidget, SIGNAL(done(QString)),
       _verificationWidget, SLOT(setEmail(QString)));
 
     connect(_registrationWidget, &RegistrationWidget::done, [=] {
-        _view->show(Verification);
+        _view->show(Verification, View::RightToLeft);
         _robotWidget->reset();
     });
 
     connect(_verificationWidget, &VerificationWidget::cancel, [=] {
-        _view->show(Login);
+        _view->show(Login, View::LeftToRight);
     });
 
     connect(_verificationWidget, &VerificationWidget::done, [=] {
-        _view->show(Succeed);
+        _view->show(Succeed, View::RightToLeft);
         _succeedWidget->start();
         _succeedWidget->update(
           tr("Thank you for registering."),
@@ -152,7 +157,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 
     connect(_succeedWidget, &SucceedWidget::done, [=] {
-        _view->show(Login);
+        _view->show(Login, View::LeftToRight);
     });
 }
 

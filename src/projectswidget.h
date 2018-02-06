@@ -33,6 +33,7 @@ class ProjectsWidget : public QWidget
         void done();
         void lazy();
         void busy(const QString& text);
+        void editProject(const QString& hash);
         void newProject(const QString& projectName);
 
     private:

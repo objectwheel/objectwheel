@@ -243,9 +243,7 @@ void LoginWidget::onLoginButtonClick()
     const auto& plan = Authenticator::instance()->login(email, password);
     bool succeed = !plan.isEmpty();
 
-    if (succeed)
-        clear();
-    else {
+    if (!succeed) {
         QMessageBox::warning(
             this,
             tr("Oops"),
@@ -290,6 +288,8 @@ void LoginWidget::onSessionStart()
             UserBackend::instance()->clearAutoLogin();
     } else
         qFatal("Fatal : LoginWidget");
+
+    clear();
 
     emit done();
 }

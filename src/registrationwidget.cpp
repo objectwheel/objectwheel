@@ -24,12 +24,12 @@
 #define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
 #define PATH_COUNTRIES   (":/resources/other/countries.txt")
 #define PATH_ICON        (":/resources/images/register.png")
-#define PATH_OICON       (":/resources/images/ok.png")
+#define PATH_OICON       (":/resources/images/load.png")
 #define PATH_BICON       (":/resources/images/unload.png")
 #define pS               (QApplication::primaryScreen())
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
-enum Buttons { SignUp, Back };
+enum Buttons { Next, Back };
 
 static const QStringList& countries()
 {
@@ -187,17 +187,17 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
     _buttons->add(Back, "#5BC5F8", "#2592F9");
-    _buttons->add(SignUp, "#8BBB56", "#6EA045");
-    _buttons->get(SignUp)->setText(tr("Sign Up"));
+    _buttons->add(Next, "#8BBB56", "#6EA045");
+    _buttons->get(Next)->setText(tr("Next"));
     _buttons->get(Back)->setText(tr("Back"));
-    _buttons->get(SignUp)->setIcon(QIcon(PATH_OICON));
+    _buttons->get(Next)->setIcon(QIcon(PATH_OICON));
     _buttons->get(Back)->setIcon(QIcon(PATH_BICON));
-    _buttons->get(SignUp)->setCursor(Qt::PointingHandCursor);
+    _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = TERMS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(SignUp), SIGNAL(clicked(bool)), SLOT(onSignUpClicked()));
+    connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
     connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
 
     _loadingIndicator->setStyleSheet("Background: transparent;");
@@ -252,12 +252,12 @@ void RegistrationWidget::unlock()
     _loadingIndicator->stop();
 
     if (_termsSwitch->isChecked())
-        _buttons->get(SignUp)->setEnabled(true);
+        _buttons->get(Next)->setEnabled(true);
 
     _buttons->setFocus();
 }
 
-void RegistrationWidget::onSignUpClicked()
+void RegistrationWidget::onNextClicked()
 {
     const auto& first = static_cast<QLineEdit*>(_bulkEdit->get(First))->text();
     const auto& last = static_cast<QLineEdit*>(_bulkEdit->get(Last))->text();

@@ -3,6 +3,8 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <userbackend.h>
+#include <projectbackend.h>
+#include <filemanager.h>
 
 #include <QApplication>
 #include <QScreen>
@@ -82,10 +84,10 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     static_cast<QLineEdit*>(_bulkEdit->get(ModificationDate))->setReadOnly(true);
     static_cast<QLineEdit*>(_bulkEdit->get(Size))->setReadOnly(true);
 
-    static_cast<QLineEdit*>(_bulkEdit->get(Owner))->setStyleSheet("color: #3F4F59; border: none; background: transparent;");
-    static_cast<QLineEdit*>(_bulkEdit->get(CreationDate))->setStyleSheet("color: #3F4F59; border: none; background: transparent;");
-    static_cast<QLineEdit*>(_bulkEdit->get(ModificationDate))->setStyleSheet("color: #3F4F59; border: none; background: transparent;");
-    static_cast<QLineEdit*>(_bulkEdit->get(Size))->setStyleSheet("color: #3F4F59; border: none; background: transparent;");
+    static_cast<QLineEdit*>(_bulkEdit->get(Owner))->setStyleSheet("color: #50000000; border: none; background: transparent;");
+    static_cast<QLineEdit*>(_bulkEdit->get(CreationDate))->setStyleSheet("color: #50000000; border: none; background: transparent;");
+    static_cast<QLineEdit*>(_bulkEdit->get(ModificationDate))->setStyleSheet("color: #50000000; border: none; background: transparent;");
+    static_cast<QLineEdit*>(_bulkEdit->get(Size))->setStyleSheet("color: #50000000; border: none; background: transparent;");
 
     _buttons->add(Delete, "#CC5D67", "#B2525A");
     _buttons->add(Cancel, "#5BC5F8", "#2592F9");
@@ -107,23 +109,90 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     connect(_buttons->get(Cancel), SIGNAL(clicked(bool)), SIGNAL(done()));
 }
 
+void ProjectDetailsWidget::onEditProject(const QString& hash)
+{
+    _hash = hash;
+    ProjectBackend::instance()->updateSize();
+    static_cast<QLineEdit*>(_bulkEdit->get(Name))->setText(ProjectBackend::instance()->name(hash));
+    static_cast<QLineEdit*>(_bulkEdit->get(Description))->setText(ProjectBackend::instance()->description(hash));
+    static_cast<QLineEdit*>(_bulkEdit->get(Owner))->setText(ProjectBackend::instance()->owner(hash));
+    static_cast<QLineEdit*>(_bulkEdit->get(CreationDate))->setText(ProjectBackend::instance()->crDate(hash));
+    static_cast<QLineEdit*>(_bulkEdit->get(ModificationDate))->setText(ProjectBackend::instance()->mfDate(hash));
+    static_cast<QLineEdit*>(_bulkEdit->get(Size))->setText(ProjectBackend::instance()->size(hash));
+}
+
 void ProjectDetailsWidget::onNewProject(const QString& projectName)
 {
+    _hash.clear();
     static_cast<QLineEdit*>(_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(_bulkEdit->get(Description))->setText(tr("Simple project description."));
-    static_cast<QLineEdit*>(_bulkEdit->get(Owner))->setText(UserBackend::instance()->user() + " •");
-    static_cast<QLineEdit*>(_bulkEdit->get(CreationDate))->setText(TIME + " •");
-    static_cast<QLineEdit*>(_bulkEdit->get(ModificationDate))->setText(TIME + " •");
-    static_cast<QLineEdit*>(_bulkEdit->get(Size))->setText(tr("0 bytes") + " •");
-
+    static_cast<QLineEdit*>(_bulkEdit->get(Owner))->setText(UserBackend::instance()->user());
+    static_cast<QLineEdit*>(_bulkEdit->get(CreationDate))->setText(TIME);
+    static_cast<QLineEdit*>(_bulkEdit->get(ModificationDate))->setText(TIME);
+    static_cast<QLineEdit*>(_bulkEdit->get(Size))->setText(tr("0 bytes"));
 }
 
 void ProjectDetailsWidget::onSaveClick()
 {
+    auto projectnametext = static_cast<QLineEdit*>(_bulkEdit->get(Name))->text();
+    auto descriptiontext = static_cast<QLineEdit*>(_bulkEdit->get(Description))->text();
+    auto sizetext = static_cast<QLineEdit*>(_bulkEdit->get(Size))->text();
+    auto crdatetext = static_cast<QLineEdit*>(_bulkEdit->get(CreationDate))->text();
+    auto ownertext = static_cast<QLineEdit*>(_bulkEdit->get(Owner))->text();
 
+    if (projectnametext.isEmpty()) {
+        QMessageBox::warning(this, tr("Oops"), tr("Project name cannot be empty."));
+        return;
+    }
+
+    if (_hash.isEmpty()) {
+        if (!ProjectBackend::instance()->newProject(
+            projectnametext,
+            descriptiontext,
+            ownertext,
+            crdatetext,
+            sizetext
+        )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
+
+        ProjectBackend::instance()->updateSize();
+    } else {
+        ProjectBackend::
+        instance()->changeName(
+            _hash,
+            projectnametext
+        );
+        ProjectBackend::
+        instance()->changeDescription(
+            _hash,
+            descriptiontext
+        );
+    }
+
+    emit done();
 }
 
 void ProjectDetailsWidget::onDeleteClick()
 {
+    if (ProjectBackend::instance()->dir(_hash).isEmpty()) {
+        emit done();
+        return;
+    }
 
+    auto ret = QMessageBox::question(
+        this,
+        "Confirm Deletion",
+        tr("You are about to delete %1 completely. Are you sure?").
+        arg(ProjectBackend::instance()->name(_hash)),
+        QMessageBox::Yes, QMessageBox::No | QMessageBox::Default
+    );
+
+    if (ret == QMessageBox::Yes) {
+        const auto& chash = ProjectBackend::instance()->hash();
+        if (!chash.isEmpty() && chash == _hash)
+            ProjectBackend::instance()->stop();
+
+        rm(ProjectBackend::instance()->dir(_hash));
+
+        emit done();
+    }
 }

@@ -21,7 +21,7 @@
 #define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
 #define PATH_ICON        (":/resources/images/lock.png")
 #define PATH_VICON       (":/resources/images/ok.png")
-#define PATH_CICON       (":/resources/images/unload.png")
+#define PATH_CICON       (":/resources/images/cancel.png")
 #define pS               (QApplication::primaryScreen())
 
 static bool checkPassword(const QString& password)

@@ -6,8 +6,9 @@
 #include <projectbackend.h>
 #include <frontend.h>
 #include <qmleditorview.h>
-#include <QMessageBox>
+#include <delayer.h>
 
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -207,7 +208,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         _listWidget->addItem(item);
     }
 
-    _buttons->add(New, "#CC5D67", "#B2525A");
+    _buttons->add(New, "#B97CD3", "#985BB2");
     _buttons->add(Load, "#5BC5F8", "#2592F9");
     _buttons->add(Import, "#8BBB56", "#6EA045");
 
@@ -289,7 +290,7 @@ void ProjectsWidget::startProject()
     for (int i = _listWidget->count(); i--;)
         _listWidget->item(i)->setData(Active, false);
 
-    _listWidget->currentItem()->setData(Active, false);
+    _listWidget->currentItem()->setData(Active, true);
 
     emit done();
 }
@@ -300,6 +301,9 @@ void ProjectsWidget::onNewButtonClick()
     auto projects = ProjectBackend::instance()->projectNames();
     int count = 1;
     QString projectName = "Project - 1";
+
+    _buttons->setDisabled(true);
+
     while (projects.contains(projectName)) {
         count++;
         projectName.remove(projectName.size() - 1, 1);
@@ -314,11 +318,24 @@ void ProjectsWidget::onNewButtonClick()
     _listWidget->addItem(item);
     _listWidget->setCurrentItem(item);
 
+    Delayer::delay(250);
+
+    _buttons->setEnabled(true);
+
     emit newProject(projectName);
 }
 
 void ProjectsWidget::onLoadButtonClick()
 {
+    if (!_listWidget->currentItem()) {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Select the project first.")
+        );
+        return;
+    }
+
     auto hash = _listWidget->currentItem()->data(Hash).toString();
     auto chash = ProjectBackend::instance()->hash();
 
@@ -422,15 +439,7 @@ void ProjectsWidget::onImportButtonClick()
 
 void ProjectsWidget::onSettingsButtonClick()
 {
-//    auto h = hash.toString();
-//    ProjectBackend::instance()->updateSize();
-//    sizeText->setProperty("text", ProjectBackend::instance()->size(h));
-//    mfDateText->setProperty("text", ProjectBackend::instance()->mfDate(h));
-//    crDateText->setProperty("text", ProjectBackend::instance()->crDate(h));
-//    ownerText->setProperty("text", ProjectBackend::instance()->owner(h));
-//    descriptionTextInput->setProperty("text", ProjectBackend::instance()->description(h));
-//    projectnameTextInput->setProperty("text", ProjectBackend::instance()->name(h));
-//    swipeView->setProperty("currentIndex", 1);
+    emit editProject(_listWidget->currentItem()->data(Hash).toString());
 }
 
 #include "projectswidget.moc"

@@ -25,7 +25,7 @@ class RegistrationWidget : public QWidget
         void clear();
         void lock();
         void unlock();
-        void onSignUpClicked();
+        void onNextClicked();
 
     signals:
         void back();

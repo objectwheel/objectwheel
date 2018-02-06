@@ -16,6 +16,7 @@ class ProjectDetailsWidget : public QWidget
         explicit ProjectDetailsWidget(QWidget* parent = nullptr);
 
     public slots:
+        void onEditProject(const QString& hash);
         void onNewProject(const QString& projectName);
 
     private slots:
@@ -26,6 +27,7 @@ class ProjectDetailsWidget : public QWidget
         void done();
 
     private:
+        QString _hash;
         QVBoxLayout* _layout;
         QLabel* _iconLabel;
         QLabel* _settingsLabel;

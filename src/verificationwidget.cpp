@@ -22,7 +22,7 @@
 #define PATH_ICON        (":/resources/images/verification.png")
 #define PATH_VICON       (":/resources/images/ok.png")
 #define PATH_RICON       (":/resources/images/reset.png")
-#define PATH_CICON       (":/resources/images/unload.png")
+#define PATH_CICON       (":/resources/images/cancel.png")
 #define pS               (QApplication::primaryScreen())
 
 enum Fields { Code };
