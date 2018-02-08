@@ -271,9 +271,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
                         "for instance if you wont release it on Google Play Store.");
     QString line;
     QTextStream stream(rdfile(":/resources/other/android-permissions.txt"));
-    while (stream.readLineInto(&line)) {
+    while (stream.readLineInto(&line))
         _cmbPermissions.addItem(line);
-    }
     _cmbPermissions.setFixedWidth(fit::fx(400));
     _cmbPermissions.setMaxVisibleItems(15);
     _cmbPermissions.setEditable(true);

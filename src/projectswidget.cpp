@@ -218,6 +218,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     _buttons2->get(Settings)->setIconSize(fit::fx(QSizeF(12, 12)).toSize());
     _buttons2->get(Settings)->setIcon(QIcon(PATH_SICON));
     _buttons2->get(Settings)->setCursor(Qt::PointingHandCursor);
+    _buttons2->hide();
     _buttons2->settings().cellWidth = _buttons2->height();
     _buttons2->settings().borderRadius = _buttons2->height() / 2.0;
     _buttons2->triggerSettings();
@@ -469,7 +470,8 @@ void ProjectsWidget::onImportButtonClick()
 
 void ProjectsWidget::onSettingsButtonClick()
 {
-    emit editProject(_listWidget->currentItem()->data(Hash).toString());
+    if (_listWidget->currentItem())
+        emit editProject(_listWidget->currentItem()->data(Hash).toString());
 }
 
 #include "projectswidget.moc"

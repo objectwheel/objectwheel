@@ -112,8 +112,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _bulkEdit->add(Email, tr("Email"));
     _bulkEdit->add(Password, tr("Password"));
     static_cast<QLineEdit*>(_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
-    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setText(tr("alpha@objectwheel.com"));
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setText(tr("password"));
     static_cast<QLineEdit*>(_bulkEdit->get(Email))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(_bulkEdit->get(Password))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 

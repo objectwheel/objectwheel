@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         SLOT(handleRunButtonClick()));
 
     _stopButton->setToolTip("Stop");
-    _stopButton->setDisabled(true);
+    // _stopButton->setDisabled(true);
     _stopButton->setCursor(Qt::PointingHandCursor);
     _stopButton->setIcon(QIcon(":/resources/images/stop.png"));
     _stopButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
@@ -449,7 +449,7 @@ void MainWindow::handleRunButtonClick()
 
     delete _executiveWidget;
     _executiveWidget = nullptr;
-    _stopButton->setDisabled(true);
+    // _stopButton->setDisabled(true);
 }
 
 void MainWindow::handleBuildsButtonClick()
