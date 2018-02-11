@@ -83,9 +83,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     int lspace = 0;
     #if defined(Q_OS_MAC)
-    auto macToolbar = new MacToolbar(this);
-    _toolBar->setFixedHeight(macToolbar->toolbarHeight());
-    lspace = fit::fx(72);
+//    auto macToolbar = new MacToolbar(this);
+//    _toolBar->setFixedHeight(macToolbar->toolbarHeight());
+//    lspace = fit::fx(72);
     #endif
 
     _runButton->setCursor(Qt::PointingHandCursor);
