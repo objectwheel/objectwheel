@@ -62,6 +62,7 @@ FileList::FileList(QWidget *parent) : QTreeView(parent)
     dropLabel->raise();
 
     setAcceptDrops(true);
+    setFocusPolicy(Qt::NoFocus);
 }
 
 FileList::~FileList()
