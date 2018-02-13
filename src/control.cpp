@@ -130,17 +130,20 @@ Control::Control(const QString& url, const DesignMode& mode,
     if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
     _d->preview = PreviewBackend::initialPreview(size());
 
-    connect(this, &Control::geometryChanged, [=] {
-        Suppressor::suppress(GEOMETRY_SIGNAL_DELAY, "geometryChanged",
-          std::bind(&ControlWatcher::geometryChanged, cW, this));
+    connect(this, &Control::geometryChanged, this, [=] {
+        QPointer<Control> p(this);
+        Suppressor::suppress(GEOMETRY_SIGNAL_DELAY, "geometryChanged", [=] {
+            if (p)
+                emit cW->geometryChanged(this);
+        });
     });
 
-    connect(this, &Control::zChanged, [this] {
+    connect(this, &Control::zChanged, this, [this] {
         // refresh(); No need, cause it doesn't change preview
         emit cW->zValueChanged(this);
     });
 
-    connect(this, &Control::parentChanged, [this] {
+    connect(this, &Control::parentChanged, this, [this] {
         emit cW->parentChanged(this);
     });
 }

@@ -5,6 +5,7 @@
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <QPointer>
 #include <QDebug>
 
 #define GUIDELINE_COLOR ("#0D80E7")
@@ -165,9 +166,11 @@ void ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     _lastMousePos = event->scenePos();
 
-    Suppressor::suppress(100, "update", std::bind
-      (static_cast<void(ControlScene::*)(const QRectF&)>
-        (&ControlScene::update), this, QRect()));
+    QPointer<ControlScene> p(this);
+    Suppressor::suppress(100, "update", [=] {
+        if (p)
+            update();
+    });
 }
 
 void ControlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
