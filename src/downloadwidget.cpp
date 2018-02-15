@@ -17,7 +17,7 @@
 #include <QtQuick>
 #include <QtQml>
 
-#define URL (QString(APP_WSSSERVER) + "/api/v1/build/")
+#define URL (QString("https://api.objectwheel.com") + "/api/v1/build/")
 
 class DownloadWidgetPrivate {
     public:

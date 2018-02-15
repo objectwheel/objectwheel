@@ -474,7 +474,7 @@ QObject* SaveBackendPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
   const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine,
-      QUrl::fromLocalFile(path + separator() + DIR_THIS + separator() + "main.qml")));
+      QUrl::fromUserInput(path + separator() + DIR_THIS + separator() + "main.qml")));
     auto item = comp->create(context); // BUG: QTBUG-47633 beginCreate
     if (comp->isError() || !item) {
         err.type = CodeError;
@@ -507,7 +507,7 @@ QObject* SaveBackendPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
   const QByteArray& data, const QString& path, QQmlEngine* engine, QQmlContext* context) const
 {
     QSharedPointer<QQmlComponent> comp(new QQmlComponent(engine));
-    comp->setData(data, QUrl::fromLocalFile(path + separator() +
+    comp->setData(data, QUrl::fromUserInput(path + separator() +
       DIR_THIS + separator() + "main.qml"));
 
     auto item = comp->create(context); // BUG: QTBUG-47633 beginCreate
