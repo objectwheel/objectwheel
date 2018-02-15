@@ -13,7 +13,7 @@
 #include <QMessageBox>
 #include <QLoggingCategory>
 
-#define PIXEL_SIZE 13
+#define PIXEL_SIZE 14
 #define MIN_DPI 110.0
 #define REF_DPI 149.0
 
