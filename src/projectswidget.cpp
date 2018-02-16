@@ -153,7 +153,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     _welcomeLabel->setStyleSheet("color: #2E3A41");
 
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(15));
+    f.setPixelSize(fit::fx(18));
     _versionLabel->setFont(f);
     _versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
     _versionLabel->setStyleSheet("color: #2E3A41");

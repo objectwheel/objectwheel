@@ -13,7 +13,7 @@ class ExecutiveWidget : public QWidget
 {
         Q_OBJECT
     public:
-        explicit ExecutiveWidget(QWidget *parent = nullptr);
+        explicit ExecutiveWidget(QWidget* parent = nullptr);
         Skin skin() const;
         void setSkin(const Skin& skin);
         void setWindow(QQuickWindow* window);
@@ -22,11 +22,11 @@ class ExecutiveWidget : public QWidget
         void stop();
 
     protected:
-        void paintEvent(QPaintEvent *event) override;
-        void mousePressEvent(QMouseEvent *event) override;
-        void mouseMoveEvent(QMouseEvent *event) override;
-        void mouseReleaseEvent(QMouseEvent *event) override;
-        void closeEvent(QCloseEvent *event) override;
+        void paintEvent(QPaintEvent* event) override;
+        void mousePressEvent(QMouseEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* event) override;
+        void mouseReleaseEvent(QMouseEvent* event) override;
+        void closeEvent(QCloseEvent* event) override;
 
     signals:
         void done() const;
@@ -34,7 +34,6 @@ class ExecutiveWidget : public QWidget
     private:
         Skin _skin;
         QVBoxLayout _layout;
-        FlatButton _exitButton;
         int _x, _y;
         bool _pressed;
         QQuickWindow _window;

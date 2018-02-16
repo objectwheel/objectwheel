@@ -2,24 +2,22 @@
 #include <fit.h>
 #include <QPainter>
 #include <QSvgRenderer>
-#include <QQmlEngine>
-#include <QMouseEvent>
 #include <QQuickItem>
+#include <QMouseEvent>
 #include <QStyle>
 #include <QApplication>
 #include <QScreen>
 
-ExecutiveWidget::ExecutiveWidget(QWidget *parent)
-    : QWidget(parent)
-    , _layout(this)
-    , _exitButton(this)
-    , _x(0), _y(0)
-    , _pressed(false)
+ExecutiveWidget::ExecutiveWidget(QWidget* parent) : QWidget(parent)
+  , _layout(this)
+  , _x(0), _y(0)
+  , _pressed(false)
 {
     #if !defined(Q_OS_WIN)
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
     #endif
+    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint );
     setAttribute(Qt::WA_QuitOnClose, false);
 
     _layout.setSpacing(0);
@@ -28,14 +26,6 @@ ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     _containerWidget = createWindowContainer(&_window);
     _layout.addWidget(_containerWidget);
     _layout.setAlignment(_containerWidget, Qt::AlignCenter);
-
-    _exitButton.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _exitButton.setColor("#C61717");
-    _exitButton.setFixedSize(fit::fx(20),fit::fx(20));
-    _exitButton.setRadius(fit::fx(9));
-    _exitButton.setIconSize(QSize(fit::fx(17),fit::fx(17)));
-    _exitButton.setIcon(QIcon(":/resources/images/down-arrow.png"));
-    connect(&_exitButton, SIGNAL(clicked(bool)), SLOT(stop()));
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(stop()));
 }
 
@@ -50,13 +40,9 @@ void ExecutiveWidget::setSkin(const Skin& skin)
     if (_skin == PhonePortrait) {
         setFixedSize(SIZE_SKIN);
         _containerWidget->setFixedSize(SIZE_FORM);
-        _exitButton.setGeometry(SIZE_SKIN.width() - fit::fx(55),
-            fit::fx(26), fit::fx(20), fit::fx(20));
     } else {
         setFixedSize(SIZE_SKIN.transposed());
         _containerWidget->setFixedSize(SIZE_FORM.transposed());
-        _exitButton.setGeometry(SIZE_SKIN.transposed().width()
-            - fit::fx(44), fit::fx(27), fit::fx(20), fit::fx(20));
     }
 }
 
@@ -96,16 +82,14 @@ void ExecutiveWidget::stop()
     emit done();
 }
 
-void ExecutiveWidget::mousePressEvent(QMouseEvent *event)
+void ExecutiveWidget::mousePressEvent(QMouseEvent* event)
 {
-    if (!_exitButton.geometry().contains(event->pos())) {
-        _x = event->x(), _y = event->y();
-        _pressed = true;
-    }
+    _x = event->x(), _y = event->y();
+    _pressed = true;
     QWidget::mousePressEvent(event);
 }
 
-void ExecutiveWidget::mouseMoveEvent(QMouseEvent *event)
+void ExecutiveWidget::mouseMoveEvent(QMouseEvent* event)
 {
     if (_pressed)
         move(event->globalX() - _x , event->globalY() - _y);

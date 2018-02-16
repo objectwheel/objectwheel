@@ -92,7 +92,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _runButton->setToolTip("Run");
     _runButton->setIcon(QIcon(":/resources/images/run.png"));
     _runButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _runButton->setIconButton(true);
+    _runButton->settings().iconButton = true;
     connect(_runButton, SIGNAL(clicked(bool)),
         SLOT(handleRunButtonClick()));
 
@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _stopButton->setCursor(Qt::PointingHandCursor);
     _stopButton->setIcon(QIcon(":/resources/images/stop.png"));
     _stopButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _stopButton->setIconButton(true);
+    _stopButton->settings().iconButton = true;
     connect(_stopButton, SIGNAL(clicked(bool)),
         SLOT(handleStopButtonClick()));
 
@@ -109,7 +109,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _buildsButton->setCursor(Qt::PointingHandCursor);
     _buildsButton->setIcon(QIcon(":/resources/images/build.png"));
     _buildsButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _buildsButton->setIconButton(true);
+    _buildsButton->settings().iconButton = true;
     connect(_buildsButton, SIGNAL(clicked(bool)),
        SLOT(handleBuildsButtonClick()));
 
@@ -117,7 +117,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _projectsButton->setCursor(Qt::PointingHandCursor);
     _projectsButton->setIcon(QIcon(":/resources/images/projects.png"));
     _projectsButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _projectsButton->setIconButton(true);
+    _projectsButton->settings().iconButton = true;
     connect(_projectsButton, SIGNAL(clicked(bool)),
        SLOT(handleProjectsButtonClick()));
 
@@ -364,7 +364,7 @@ void MainWindow::handleStopButtonClick()
 void MainWindow::handleRunButtonClick()
 {
     if (_executiveWidget)
-        handleStopButtonClick();
+        return;
 
     _stopButton->setEnabled(true);
     stopper = false;

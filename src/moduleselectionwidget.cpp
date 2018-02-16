@@ -173,20 +173,22 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     buttonsLay->addWidget(btnNext);
     buttonsLay->setSpacing(fit::fx(10));
 
-    btnNext->setColor("#84BF52");
-    btnNext->setTextColor(Qt::white);
+    btnNext->settings().topColor = "#84BF52";
+    btnNext->settings().bottomColor = btnNext->settings().topColor.darker(120);
+    btnNext->settings().borderRadius = fit::fx(7.5);
+    btnNext->settings().textColor = Qt::white;
     btnNext->setFixedSize(fit::fx(200),fit::fx(28));
-    btnNext->setRadius(fit::fx(7.5));
     btnNext->setIconSize(QSize(fit::fx(14),fit::fx(14)));
     btnNext->setIcon(QIcon(":/resources/images/load.png"));
     btnNext->setText("Next");
     connect(btnNext, SIGNAL(clicked(bool)),
       SLOT(handleBtnNextClicked()));
 
-    btnBack->setColor("#38A3F6");
-    btnBack->setTextColor(Qt::white);
+    btnBack->settings().topColor = "#38A3F6";
+    btnBack->settings().bottomColor = btnBack->settings().topColor.darker(120);
+    btnBack->settings().borderRadius = fit::fx(7.5);
+    btnBack->settings().textColor = Qt::white;
     btnBack->setFixedSize(fit::fx(200),fit::fx(28));
-    btnBack->setRadius(fit::fx(7.5));
     btnBack->setIconSize(QSize(fit::fx(14),fit::fx(14)));
     btnBack->setIcon(QIcon(":/resources/images/unload.png"));
     btnBack->setText("Back");

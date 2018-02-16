@@ -57,19 +57,23 @@ FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
         connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
     });
 
+    _addButton->settings().topColor = "#62A558";
+    _addButton->settings().bottomColor = "#599750";
+    _addButton->settings().borderRadius = fit::fx(10);
+    _addButton->settings().textColor = Qt::white;
     _addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _addButton->setColor("#6BB64B");
-    _addButton->setFixedSize(fit::fx(17),fit::fx(17));
-    _addButton->setRadius(fit::fx(7.5));
-    _addButton->setIconSize(QSize(fit::fx(11),fit::fx(11)));
+    _addButton->setFixedSize(fit::fx(20), fit::fx(20));
+    _addButton->setIconSize(QSize(fit::fx(12),fit::fx(12)));
     _addButton->setIcon(QIcon(":/resources/images/plus.png"));
     connect(_addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
 
+    _removeButton->settings().topColor = "#C2504B";
+    _removeButton->settings().bottomColor = "#B34B46";
+    _removeButton->settings().borderRadius = fit::fx(12);
+    _removeButton->settings().textColor = Qt::white;
     _removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _removeButton->setColor("#C2504B");
-    _removeButton->setFixedSize(fit::fx(17),fit::fx(17));
-    _removeButton->setRadius(fit::fx(7.5));
-    _removeButton->setIconSize(QSize(fit::fx(11),fit::fx(11)));
+    _removeButton->setFixedSize(fit::fx(20),fit::fx(20));
+    _removeButton->setIconSize(QSize(fit::fx(12),fit::fx(12)));
     _removeButton->setIcon(QIcon(":/resources/images/minus.png"));
     connect(_removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
 

@@ -416,10 +416,11 @@ AndroidWidget::AndroidWidget(QWidget *parent)
         }
     });
 
-    _btnBack.setColor("#38A3F6");
-    _btnBack.setTextColor(Qt::white);
+    _btnBack.settings().topColor = "#38A3F6";
+    _btnBack.settings().bottomColor = _btnBack.settings().topColor.darker(120);
+    _btnBack.settings().borderRadius = fit::fx(7.5);
+    _btnBack.settings().textColor = Qt::white;
     _btnBack.setFixedSize(fit::fx(200),fit::fx(28));
-    _btnBack.setRadius(fit::fx(7.5));
     _btnBack.setIconSize(QSize(fit::fx(14),fit::fx(14)));
     _btnBack.setIcon(QIcon(":/resources/images/unload.png"));
     _btnBack.setText("Back");
@@ -427,10 +428,11 @@ AndroidWidget::AndroidWidget(QWidget *parent)
         emit backClicked();
     });
 
-    _btnBuild.setColor("#84BF52");
-    _btnBuild.setTextColor(Qt::white);
+    _btnBuild.settings().topColor = "#84BF52";
+    _btnBuild.settings().bottomColor = _btnBuild.settings().topColor.darker(120);
+    _btnBuild.settings().borderRadius = fit::fx(7.5);
+    _btnBuild.settings().textColor = Qt::white;
     _btnBuild.setFixedSize(fit::fx(200),fit::fx(28));
-    _btnBuild.setRadius(fit::fx(7.5));
     _btnBuild.setIconSize(QSize(fit::fx(14),fit::fx(14)));
     _btnBuild.setIcon(QIcon(":/resources/images/load.png"));
     _btnBuild.setText("Build");

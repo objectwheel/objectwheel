@@ -58,34 +58,37 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     buttonGroup->addButton(searchButton);
     buttonGroup->addButton(consoleButton);
 
-    hideButton->setFixedWidth(fit::fx(16));
-    hideButton->setFixedHeight(fit::fx(16));
+    hideButton->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
     hideButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    hideButton->setRadius(fit::fx(6));
     hideButton->setCursor(Qt::PointingHandCursor);
     hideButton->setToolTip("Show bar.");
     hideButton->setIcon(QIcon(":/resources/images/up-arrow.png"));
-    hideButton->setColor("#697D8C");
-    hideButton->setCheckedColor("#4C5A66");
+    hideButton->settings().topColor = "#0D74C8";
+    hideButton->settings().bottomColor = hideButton->settings().topColor.darker(120);
+    hideButton->settings().borderRadius = fit::fx(10);
     connect(hideButton, SIGNAL(clicked(bool)),
       SLOT(handleHideButtonClicked()));
 
     issuesButton->setCheckable(true);
     issuesButton->setText("Issues");
     issuesButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
+    issuesButton->settings().borderRadius = fit::fx(5);
     issuesButton->setFixedWidth(fit::fx(100));
     issuesButton->setFixedHeight(fit::fx(20));
     issuesButton->setCursor(Qt::PointingHandCursor);
     issuesButton->setToolTip("Show recent issues.");
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
-    issuesButton->setColor("#697D8C");
-    issuesButton->setCheckedColor("#4C5A66");
-    issuesButton->setCheckedTextColor("#f0f4f7");
-    issuesButton->setTextColor("#f0f4f7");
+    issuesButton->settings().topColor = "#697D8C";
+    issuesButton->settings().bottomColor = issuesButton->settings().topColor.darker(120);
+    issuesButton->settings().textColor = "#f0f4f7";
     issuesButton->setChecked(true);
     connect(issuesButton, SIGNAL(toggled(bool)),
       SLOT(handleIssuesButtonClicked(bool)));
 
+    searchButton->settings().topColor = "#697D8C";
+    searchButton->settings().bottomColor = searchButton->settings().topColor.darker(120);
+    searchButton->settings().borderRadius = fit::fx(5);
+    searchButton->settings().textColor = "#f0f4f7";
     searchButton->setCheckable(true);
     searchButton->setText("Search");
     searchButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
@@ -94,13 +97,13 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     searchButton->setCursor(Qt::PointingHandCursor);
     searchButton->setToolTip("Search words within project.");
     searchButton->setIcon(QIcon(":/resources/images/search.png"));
-    searchButton->setColor("#697D8C");
-    searchButton->setCheckedColor("#4C5A66");
-    searchButton->setCheckedTextColor("#f0f4f7");
-    searchButton->setTextColor("#f0f4f7");
     connect(searchButton, SIGNAL(toggled(bool)),
       SLOT(handleSearchButtonClicked(bool)));
 
+    consoleButton->settings().topColor = "#697D8C";
+    consoleButton->settings().bottomColor = consoleButton->settings().topColor.darker(120);
+    consoleButton->settings().borderRadius = fit::fx(5);
+    consoleButton->settings().textColor = "#f0f4f7";
     consoleButton->setCheckable(true);
     consoleButton->setText("Console Output");
     consoleButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
@@ -109,10 +112,6 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     consoleButton->setCursor(Qt::PointingHandCursor);
     consoleButton->setToolTip("Show application output.");
     consoleButton->setIcon(QIcon(":/resources/images/console.png"));
-    consoleButton->setColor("#697D8C");
-    consoleButton->setCheckedColor("#4C5A66");
-    consoleButton->setCheckedTextColor("#f0f4f7");
-    consoleButton->setTextColor("#f0f4f7");
     connect(consoleButton, SIGNAL(toggled(bool)),
       SLOT(handleConsoleButtonClicked(bool)));
 
@@ -278,11 +277,11 @@ void OutputPane::shine(OutputPane::Box type)
         if ((*counter)++ < (COUNT_BLINK * 2)) {
             auto btn = button(type);
             if ((*counter) % 2) {
-                btn->setColor("#C63333");
-                btn->setCheckedColor("#C63333");
+                btn->settings().topColor = "#C63333";
+                btn->settings().bottomColor = btn->settings().topColor.darker(120);
             } else {
-                btn->setColor("#697D8C");
-                btn->setCheckedColor("#4C5A66");
+                btn->settings().topColor = "#697D8C";
+                btn->settings().bottomColor = btn->settings().topColor.darker(120);
             }
         } else {
             shineList.removeAll(type);

@@ -115,13 +115,13 @@ void ButtonSlice::paintEvent(QPaintEvent*)
 
         QLinearGradient bg(br.topLeft(), br.bottomLeft());
         if (e.button->isEnabled()) {
-            bg.setColorAt(0, e.button->isDown() ? e.topColor.darker(120) : e.topColor);
-            bg.setColorAt(1, e.button->isDown() ? e.bottomColor.darker(120) : e.bottomColor);
+            bg.setColorAt(0, (e.button->isDown() || e.button->isChecked()) ? e.topColor.darker(120) : e.topColor);
+            bg.setColorAt(1, (e.button->isDown() || e.button->isChecked()) ? e.bottomColor.darker(120) : e.bottomColor);
         } else {
             const auto& t = qGray(e.topColor.rgb());
             const auto& b = qGray(e.bottomColor.rgb());
-            bg.setColorAt(0, QColor(t, t, t));
-            bg.setColorAt(1, QColor(b, b, b));
+            bg.setColorAt(0, QColor(t, t, t, e.topColor.alpha()));
+            bg.setColorAt(1, QColor(b, b, b, e.bottomColor.alpha()));
         }
 
         painter.setBrush(bg);

@@ -118,10 +118,11 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _lblMsg.setPalette(p2);
     _lblMsg.setText("Select your target platform");
 
-    _btnNext.setColor("#F4BA48");
-    _btnNext.setTextColor(Qt::white);
+    _btnNext.settings().topColor = "#F4BA48";
+    _btnNext.settings().bottomColor = _btnNext.settings().topColor.darker(120);
+    _btnNext.settings().borderRadius = fit::fx(7.5);
+    _btnNext.settings().textColor = Qt::white;
     _btnNext.setFixedSize(fit::fx(200),fit::fx(28));
-    _btnNext.setRadius(fit::fx(7.5));
     _btnNext.setIconSize(QSize(fit::fx(14),fit::fx(14)));
     _btnNext.setIcon(QIcon(":/resources/images/load.png"));
     _btnNext.setText("Next");

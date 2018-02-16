@@ -166,7 +166,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
             emit about();
     });
 
-    _helpButton->setIconButton(true);
+    _helpButton->settings().iconButton = true;
     _helpButton->setIcon(QIcon(PATH_HICON));
     _helpButton->setFixedSize(fit::fx(20),fit::fx(20));
     connect(_helpButton, SIGNAL(clicked(bool)), _helpBox, SLOT(show()));
