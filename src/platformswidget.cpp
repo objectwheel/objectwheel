@@ -171,12 +171,12 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     win->setIcon(QIcon(":/resources/images/windows.png"));
     _listWidget.addItem(win);
 
-    auto linux = new QListWidgetItem;
-    linux->setText("Linux");
-    linux->setData(Arch, "Architecture: x86");
-    linux->setData(Key, OTargets::linux_x86);
-    linux->setIcon(QIcon(":/resources/images/linux.png"));
-    _listWidget.addItem(linux);
+    auto linx = new QListWidgetItem;
+    linx->setText("Linux");
+    linx->setData(Arch, "Architecture: x86");
+    linx->setData(Key, OTargets::linux_x86);
+    linx->setIcon(QIcon(":/resources/images/linux.png"));
+    _listWidget.addItem(linx);
 
     auto rasp = new QListWidgetItem;
     rasp->setText("Raspberry Pi");

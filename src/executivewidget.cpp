@@ -59,7 +59,7 @@ void ExecutiveWidget::setSkin(const Skin& skin)
 
 void ExecutiveWidget::setWindow(QQuickWindow* window)
 {
-    window->hide();
+    window->close();
     _contentItem = window->contentItem();
     _contentItem->setParentItem(_window.contentItem());
     _layout.update();

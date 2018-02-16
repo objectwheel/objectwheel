@@ -632,6 +632,8 @@ void FormPrivate::applySkinChange()
             resizable = true;
             break;
         default:
+            resizable = false;
+            qFatal("Something went wrong.");
             break;
     }
 

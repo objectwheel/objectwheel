@@ -62,7 +62,7 @@ FileList::FileList(QWidget *parent) : QTreeView(parent)
     dropLabel->raise();
 
     setAcceptDrops(true);
-    setFocusPolicy(Qt::NoFocus);
+    setAttribute(Qt::WA_MacShowFocusRect, false);
 }
 
 FileList::~FileList()
@@ -160,7 +160,7 @@ void FileList::handleDrop(const QList<QUrl>& urls)
         }
         auto future = QtConcurrent::run((void (*)(const QString&,
           const QString&, bool, bool))&cp, path, currentPath(), false, false);
-        Delayer::delay(&future, &QFuture<bool>::isRunning);
+        Delayer::delay(std::bind(&QFuture<void>::isRunning, &future));
     }
     progress.setValue(urls.size());
     Delayer::delay(100);
