@@ -1050,14 +1050,6 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     _treeWidget->setColumnCount(2);
     _treeWidget->setDragEnabled(false);
     _treeWidget->setFocusPolicy(Qt::NoFocus);
-    _treeWidget->header()->setStyleSheet("QHeaderView::section {"
-                                         "    background-color: qlineargradient("
-                                         "    x1:0, y1:0, x2:0, y2:1,"
-                                         "    stop:0 #F7FbFf,"
-                                         "    stop:1 #e7ebef);"
-                                         "    color: black;"
-                                         "    padding-left: 4px;"
-                                         "}");
     _treeWidget->setIndentation(fit::fx(10));
     _treeWidget->setDropIndicatorShown(false);
     _treeWidget->headerItem()->setText(1, "Value");

@@ -15,7 +15,7 @@
 #include <QMessageBox>
 #include <QDateTime>
 
-#define BUTTONS_WIDTH    (fit::fx(350))
+#define BUTTONS_WIDTH    (fit::fx(450))
 #define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
 #define PATH_ICON        (":/resources/images/options.png")
 #define PATH_SICON       (":/resources/images/load.png")

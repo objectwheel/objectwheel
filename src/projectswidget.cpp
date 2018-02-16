@@ -24,8 +24,8 @@
 #include <QScreen>
 #include <QFileDialog>
 
-#define SIZE_LIST        (QSize(fit::fx(400), fit::fx(350)))
-#define BUTTONS_WIDTH    (fit::fx(400))
+#define SIZE_LIST        (QSize(fit::fx(450), fit::fx(350)))
+#define BUTTONS_WIDTH    (fit::fx(450))
 #define SIZE_LOGO        (QSize(fit::fx(80), fit::fx(80)))
 #define SIZE_FILEICON    (QSize(fit::fx(48), fit::fx(48)))
 #define PATH_LOGO        (":/resources/images/toolbox.png")

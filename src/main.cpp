@@ -4,6 +4,7 @@
 #include <windowmanager.h>
 #include <menumanager.h>
 #include <backendmanager.h>
+#include <filemanager.h>
 
 #include <QApplication>
 #include <QFontDatabase>
@@ -53,15 +54,19 @@ int main(int argc, char *argv[])
     fit::update(REF_DPI, MIN_DPI);
 
     // Font settings
+    for (const auto& font : lsfile(":/resources/fonts"))
+        QFontDatabase::addApplicationFont(":/resources/fonts/" + font);
+
     QFont font;
     font.setPixelSize(fit::fx(PIXEL_SIZE));
     #if defined(Q_OS_MACOS)
     font.setFamily(".SF NS Display");
     #elif defined(Q_OS_WIN)
     font.setFamily("Segoe UI");
+    #else
+    font.setFamily("Open Sans");
     #endif
     QApplication::setFont(font);
-    QFontDatabase::addApplicationFont(":/resources/fonts/LiberationMono-Regular.ttf");
 
     // Disable Qml parser warnings
     QLoggingCategory::setFilterRules(

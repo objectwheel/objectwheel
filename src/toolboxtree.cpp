@@ -137,6 +137,7 @@ ToolboxTree::ToolboxTree(QWidget *parent)
     p2.setColor(QPalette::Base, "#F3F7FA");
     p2.setColor(QPalette::Highlight, "#d0d4d7");
     p2.setColor(QPalette::Text, "#202427");
+    p2.setColor(QPalette::HighlightedText, "#202427");
     setAutoFillBackground(true);
     setPalette(p2);
 

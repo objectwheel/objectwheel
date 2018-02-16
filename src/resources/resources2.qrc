@@ -71,6 +71,15 @@
         <file>qmls/buildsScreen/main.qml</file>
         <file>qmls/buildsScreen/ProgressPage.qml</file>
         <file>other/countries.txt</file>
+        <file>fonts/OpenSans-SemiBoldItalic.ttf</file>
+        <file>fonts/OpenSans-SemiBold.ttf</file>
+        <file>fonts/OpenSans-Regular.ttf</file>
+        <file>fonts/OpenSans-LightItalic.ttf</file>
+        <file>fonts/OpenSans-Light.ttf</file>
+        <file>fonts/OpenSans-Italic.ttf</file>
+        <file>fonts/OpenSans-ExtraBoldItalic.ttf</file>
+        <file>fonts/OpenSans-ExtraBold.ttf</file>
+        <file>fonts/OpenSans-BoldItalic.ttf</file>
+        <file>fonts/OpenSans-Bold.ttf</file>
     </qresource>
-    <qresource prefix="/"/>
 </RCC>
