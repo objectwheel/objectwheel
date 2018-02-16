@@ -5,6 +5,9 @@
 #include <QQmlEngine>
 #include <QMouseEvent>
 #include <QQuickItem>
+#include <QStyle>
+#include <QApplication>
+#include <QScreen>
 
 ExecutiveWidget::ExecutiveWidget(QWidget *parent)
     : QWidget(parent)
@@ -74,6 +77,15 @@ void ExecutiveWidget::setWindow(QQuickWindow* window)
         }
         mO = mO->superClass();
     }
+
+    setGeometry(
+        QStyle::alignedRect(
+            Qt::LeftToRight,
+            Qt::AlignCenter,
+            size(),
+            qApp->primaryScreen()->availableGeometry()
+        )
+    );
 }
 
 void ExecutiveWidget::stop()

@@ -32,6 +32,7 @@ void ButtonSlice::add(int id, const QColor& topColor, const QColor& bottomColor)
     element.topColor = topColor;
     element.bottomColor = bottomColor;
     element.button = new QPushButton;
+    element.button->setFocusPolicy(Qt::NoFocus);
     element.button->setAttribute(Qt::WA_MacShowFocusRect, false);
     element.button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     element.button->setStyleSheet(
