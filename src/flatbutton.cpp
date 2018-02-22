@@ -136,8 +136,9 @@ void FlatButton::paintEvent(QPaintEvent* event)
                 painter.drawText(r, text(), QTextOption(Qt::AlignCenter));
             } else {
                 int tw = QFontMetrics(QFont()).width(text());
-                painter.drawText(QRectF(ir.right() + fit::fx(2), r.top(), tw, r.height()),
-                    text(), QTextOption(Qt::AlignVCenter | Qt::AlignLeft));
+                QTextOption op(Qt::AlignVCenter | Qt::AlignLeft);
+                op.setWrapMode(QTextOption::NoWrap);
+                painter.drawText(QRectF(ir.right() + fit::fx(2), r.top(), tw, r.height()), text(), op);
             }
         }
     }

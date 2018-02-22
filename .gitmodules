@@ -7,3 +7,7 @@
 [submodule "contrib/aes"]
 	path = contrib/aes
 	url = https://github.com/omergoktas/aes
+[submodule "contrib/objectwheel-interpreter"]
+	path = contrib/objectwheel-interpreter
+	url = https://github.com/abigdreamer/objectwheel-interpreter
+	branch = objectwheel

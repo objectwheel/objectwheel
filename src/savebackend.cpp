@@ -497,7 +497,7 @@ QObject* SaveBackendPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
             ((QQuickItem*)item)->setY(parent->y(path));
             ((QQuickItem*)item)->setWidth(fit::fx(parent->width(path)));
             ((QQuickItem*)item)->setHeight(fit::fx(parent->height(path)));
-            ((QQuickItem*)item)->setZ(parent->z(path));
+//            ((QQuickItem*)item)->setZ(parent->z(path));
         }
     }
     return item;
@@ -533,7 +533,7 @@ QObject* SaveBackendPrivate::requestItem(ExecError& err, QList<QSharedPointer<QQ
             ((QQuickItem*)item)->setY(parent->y(path));
             ((QQuickItem*)item)->setWidth(fit::fx(parent->width(path)));
             ((QQuickItem*)item)->setHeight(fit::fx(parent->height(path)));
-            ((QQuickItem*)item)->setZ(parent->z(path));
+//            ((QQuickItem*)item)->setZ(parent->z(path));
         }
     }
     return item;

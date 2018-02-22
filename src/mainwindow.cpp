@@ -363,8 +363,10 @@ void MainWindow::handleStopButtonClick()
 
 void MainWindow::handleRunButtonClick()
 {
-    if (_executiveWidget)
+    if (_executiveWidget) {
+        _executiveWidget->raise();
         return;
+    }
 
     _stopButton->setEnabled(true);
     stopper = false;

@@ -1,6 +1,5 @@
 #include <css.h>
 #include <fit.h>
-#include <components.h>
 #include <windowmanager.h>
 #include <menumanager.h>
 #include <backendmanager.h>
@@ -18,7 +17,7 @@
 #define MIN_DPI 110.0
 #define REF_DPI 149.0
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // Boot settings
     qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
@@ -37,7 +36,6 @@ int main(int argc, char *argv[])
     QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
 
     // Multiple instances protection
-    # if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID) && !defined(Q_OS_WINPHONE)
     QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
     if(!sharedMemory.create(1)) {
         sharedMemory.attach();
@@ -48,7 +46,6 @@ int main(int argc, char *argv[])
             return 0;
         }
     }
-    # endif
 
     // Initialize fit library
     fit::update(REF_DPI, MIN_DPI);
@@ -80,9 +77,6 @@ int main(int argc, char *argv[])
 
     // Initialize css
     CSS::init();
-
-    // Initialize components
-    Components::init();
 
     // Initialize web view
     QtWebView::initialize();

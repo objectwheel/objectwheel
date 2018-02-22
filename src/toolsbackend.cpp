@@ -18,7 +18,7 @@
 #include <QDir>
 #include <QTreeWidgetItem>
 #include <QEventLoop>
-#include <QBuffer>
+#include <QtCore/QBuffer>
 
 #define DEFAULT_CATEGORY        "Others"
 #define DEFAULT_NAME            "Tool"

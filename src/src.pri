@@ -3,7 +3,6 @@ DEPENDPATH += $$PWD
 
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)
-include($$PWD/components/components.pri)
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
