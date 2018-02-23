@@ -2,7 +2,6 @@
 #define SAVEBACKEND_H
 
 #include <QObject>
-#include <QQmlError>
 #include <global.h>
 
 #define SIGN_OWDB "T3dkYl92Mi4w"
@@ -34,27 +33,6 @@ class SaveBackendPrivate;
 class Control;
 class Form;
 class ControlScene;
-class ExecutiveWidget;
-
-enum ExecErrorType {
-    NoError,
-    Stopped,
-    CommonError,
-    ChildIsWindowError,
-    MasterIsNonGui,
-    FormIsNonGui,
-    MainFormIsntWindowError,
-    MultipleWindowsForMobileError,
-    NoMainForm,
-    CodeError
-};
-
-struct ExecError {
-        ExecErrorType type = NoError;
-        QList<QQmlError> errors;
-        QString id;
-        inline bool hasError() { return type != NoError; }
-};
 
 class SaveBackend : public QObject
 {
@@ -65,7 +43,6 @@ class SaveBackend : public QObject
         explicit SaveBackend(QObject *parent = 0);
         static SaveBackend* instance();
 
-        static ExecError execProject(const bool* stopper, ExecutiveWidget* executiveWidget);
         static void exposeProject();
         static Control* exposeControl(const QString& rootPath, const DesignMode& mode, QString suid = QString());
         static bool initProject(const QString& projectDirectory);

@@ -29,8 +29,12 @@ class FlatButton : public QPushButton
         void triggerSettings();
 
 	protected:
+        void mouseDoubleClickEvent(QMouseEvent *event) override;
         void paintEvent(QPaintEvent* event) override;
         QSize sizeHint() const override;
+
+    signals:
+        void doubleClick();
 
     private:
         Settings _settings;

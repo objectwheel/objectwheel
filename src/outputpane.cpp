@@ -17,7 +17,7 @@
 #define HEIGHT_MIN (fit::fx(100))
 #define HEIGHT_MAX (fit::fx(600))
 #define SIZE_INITIAL (QSize(fit::fx(300), fit::fx(160)))
-#define INTERVAL_SHINE (500)
+#define INTERVAL_SHINE (400)
 #define COUNT_BLINK (3)
 
 class OutputPanePrivate : public QObject
@@ -61,8 +61,8 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     hideButton->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
     hideButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     hideButton->setCursor(Qt::PointingHandCursor);
-    hideButton->setToolTip("Show bar.");
-    hideButton->setIcon(QIcon(":/resources/images/up-arrow.png"));
+    hideButton->setToolTip("Hide bar.");
+    hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
     hideButton->settings().topColor = "#0D74C8";
     hideButton->settings().bottomColor = hideButton->settings().topColor.darker(120);
     hideButton->settings().borderRadius = fit::fx(10);
@@ -74,7 +74,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     issuesButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     issuesButton->settings().borderRadius = fit::fx(5);
     issuesButton->setFixedWidth(fit::fx(100));
-    issuesButton->setFixedHeight(fit::fx(20));
+    issuesButton->setFixedHeight(fit::fx(22));
     issuesButton->setCursor(Qt::PointingHandCursor);
     issuesButton->setToolTip("Show recent issues.");
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
@@ -93,7 +93,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     searchButton->setText("Search");
     searchButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     searchButton->setFixedWidth(fit::fx(100));
-    searchButton->setFixedHeight(fit::fx(20));
+    searchButton->setFixedHeight(fit::fx(22));
     searchButton->setCursor(Qt::PointingHandCursor);
     searchButton->setToolTip("Search words within project.");
     searchButton->setIcon(QIcon(":/resources/images/search.png"));
@@ -108,7 +108,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     consoleButton->setText("Console Output");
     consoleButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
     consoleButton->setFixedWidth(fit::fx(150));
-    consoleButton->setFixedHeight(fit::fx(20));
+    consoleButton->setFixedHeight(fit::fx(22));
     consoleButton->setCursor(Qt::PointingHandCursor);
     consoleButton->setToolTip("Show application output.");
     consoleButton->setIcon(QIcon(":/resources/images/console.png"));
@@ -147,7 +147,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     QTimer::singleShot(100, [=] {
         connect(dW, SIGNAL(modeChanged()),
           parent->_issuesBox, SLOT(refresh()));
-        this->parent->collapse();
+        // this->parent->collapse();
     });
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -271,17 +271,20 @@ void OutputPane::shine(OutputPane::Box type)
 
     auto timer = new QTimer;
     auto counter = new int(0);
-    timer->start(INTERVAL_SHINE);
+    timer->start(0);
 
     connect(timer, &QTimer::timeout, this, [=] {
+        timer->setInterval(INTERVAL_SHINE);
         if ((*counter)++ < (COUNT_BLINK * 2)) {
             auto btn = button(type);
             if ((*counter) % 2) {
-                btn->settings().topColor = "#C63333";
-                btn->settings().bottomColor = btn->settings().topColor.darker(120);
+                btn->settings().topColor = "#C2504B";
+                btn->settings().bottomColor = "#B34B46";
+                btn->triggerSettings();
             } else {
                 btn->settings().topColor = "#697D8C";
                 btn->settings().bottomColor = btn->settings().topColor.darker(120);
+                btn->triggerSettings();
             }
         } else {
             shineList.removeAll(type);
@@ -300,6 +303,16 @@ QSize OutputPane::sizeHint() const
 SearchBox* OutputPane::searchBox()
 {
     return _searchBox;
+}
+
+OutputPane::Box OutputPane::activeBox() const
+{
+    if (_activeBox == _issuesBox)
+        return Issues;
+    if (_activeBox == _searchBox)
+        return Search;
+    else
+        return Console;
 }
 
 ConsoleBox* OutputPane::consoleBox()

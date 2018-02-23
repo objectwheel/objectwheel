@@ -33,6 +33,7 @@ class OutputPane : public QWidget
         IssuesBox* issuesBox();
         ConsoleBox* consoleBox();
         SearchBox* searchBox();
+        Box activeBox() const;
 
     public slots:
         void clear();
@@ -42,7 +43,7 @@ class OutputPane : public QWidget
         void shine(Box type);
 
     protected:
-        virtual QSize sizeHint() const override;
+        QSize sizeHint() const override;
 
     private:
         QPointer<QSplitter> _splitter;

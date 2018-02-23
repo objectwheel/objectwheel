@@ -36,6 +36,11 @@ void FlatButton::triggerSettings()
     update();
 }
 
+void FlatButton::mouseDoubleClickEvent(QMouseEvent*)
+{
+    emit doubleClick();
+}
+
 void FlatButton::paintEvent(QPaintEvent* event)
 {
     QWidget::paintEvent(event);

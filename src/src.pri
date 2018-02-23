@@ -34,7 +34,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/view.h \
            $$PWD/progresswidget.h \
            $$PWD/global.h \
-           $$PWD/executivewidget.h \
            $$PWD/issuesbox.h \
            $$PWD/consolebox.h \
            $$PWD/searchbox.h \
@@ -85,7 +84,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/forgetwidget.h \
            $$PWD/resetwidget.h \
            $$PWD/succeedwidget.h \
-           $$PWD/projectdetailswidget.h
+           $$PWD/projectdetailswidget.h \
+           $$PWD/interpreterbackend.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -114,7 +114,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/toolboxtree.cpp \
            $$PWD/view.cpp \
            $$PWD/progresswidget.cpp \
-           $$PWD/executivewidget.cpp \
            $$PWD/issuesbox.cpp \
            $$PWD/consolebox.cpp \
            $$PWD/searchbox.cpp \
@@ -164,7 +163,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/forgetwidget.cpp \
            $$PWD/resetwidget.cpp \
            $$PWD/succeedwidget.cpp \
-           $$PWD/projectdetailswidget.cpp
+           $$PWD/projectdetailswidget.cpp \
+           $$PWD/interpreterbackend.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

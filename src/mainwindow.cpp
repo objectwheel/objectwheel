@@ -24,7 +24,9 @@
 #include <formspane.h>
 #include <inspectorpane.h>
 #include <windowmanager.h>
-#include <executivewidget.h>
+#include <interpreterbackend.h>
+#include <flatbutton.h>
+#include <consolebox.h>
 
 #include <QSplitter>
 #include <QMessageBox>
@@ -32,7 +34,6 @@
 #include <QDockWidget>
 #include <QtConcurrent>
 #include <QtNetwork>
-#include <QApplication>
 #include <QScreen>
 #include <QToolBar>
 #include <QLabel>
@@ -40,10 +41,6 @@
 #if defined(Q_OS_MAC)
 #include <mactoolbar.h>
 #endif
-
-#define pS (QApplication::primaryScreen())
-
-static bool stopper = false;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -62,7 +59,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _stopButton = new FlatButton;
     _buildsButton = new FlatButton;
     _projectsButton = new FlatButton;
-    _executiveWidget = nullptr;
 
     QPalette p(palette());
     p.setColor(backgroundRole(), "#E0E4E7");
@@ -104,6 +100,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _stopButton->settings().iconButton = true;
     connect(_stopButton, SIGNAL(clicked(bool)),
         SLOT(handleStopButtonClick()));
+    connect(_stopButton, SIGNAL(doubleClick()),
+        SLOT(handleStopButtonDoubleClick()));
 
     _buildsButton->setToolTip("Get Cloud Build");
     _buildsButton->setCursor(Qt::PointingHandCursor);
@@ -320,6 +318,42 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _inspectorDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                      QDockWidget::DockWidgetFloatable);
 
+    connect(InterpreterBackend::instance(), &InterpreterBackend::started, [=]
+    {
+        auto pane = _designerWidget->outputPane();
+        auto console = pane->consoleBox();
+
+        console->printFormatted(
+            tr(" started successfully.\n"),
+            "#008000",
+            true
+        );
+    });
+
+    connect(InterpreterBackend::instance(),
+    QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
+    [=] (int exitCode, QProcess::ExitStatus exitStatus)
+    {
+        auto pane = _designerWidget->outputPane();
+        auto console = pane->consoleBox();
+
+        if (exitStatus == QProcess::CrashExit) {
+            console->printFormatted(
+                tr("The process was ended forcefully.") + "!\n",
+                "#AA0000",
+                true
+            );
+        }
+
+        console->printFormatted(
+            ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
+            "#0000AA",
+            true
+        );
+
+        _runButton->setEnabled(true);
+    });
+
     addDockWidget(Qt::LeftDockWidgetArea, _toolboxDockwidget);
     addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
@@ -354,104 +388,103 @@ void MainWindow::clear()
 
 void MainWindow::handleStopButtonClick()
 {
-    stopper = true;
-    if (_executiveWidget) {
-        _executiveWidget->stop();
-        _loadingBar->busy(0, ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
-    }
+    InterpreterBackend::instance()->terminate();
+    _loadingBar->busy(0, ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
+}
+
+void MainWindow::handleStopButtonDoubleClick()
+{
+    InterpreterBackend::instance()->kill();
+    _loadingBar->busy(0, ProjectBackend::instance()->name() + ": <b>Stopped forcefully</b>  |  Finished at " + QTime::currentTime().toString());
 }
 
 void MainWindow::handleRunButtonClick()
 {
-    if (_executiveWidget) {
-        _executiveWidget->raise();
-        return;
-    }
+    auto pane = _designerWidget->outputPane();
+    auto console = pane->consoleBox();
 
-    _stopButton->setEnabled(true);
-    stopper = false;
-    _executiveWidget = new ExecutiveWidget;
-    ExecError error = SaveBackend::execProject(&stopper, _executiveWidget);
+    console->fade();
+    console->printFormatted(
+        tr("\nStarting ") + ProjectBackend::instance()->name() + "...",
+        "#0000AA",
+        true
+    );
+    console->scrollToEnd();
 
-    QMessageBox box;
-    box.setText("<b>Some went wrong.</b>");
-    box.setStandardButtons(QMessageBox::Ok);
-    box.setDefaultButton(QMessageBox::Ok);
-    box.setIcon(QMessageBox::Warning);
-    switch (error.type) {
-        case CommonError:
-            box.setInformativeText("Database corrupted, change your application skin. "
-                                   "If it doesn't work, contact to support for further help.");
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
+    InterpreterBackend::instance()->run();
 
-        case ChildIsWindowError:
-            box.setInformativeText("Child controls can not be a 'Window' (or derived) type."
-                                   " Only forms could be 'Window' type.");
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
+    _runButton->setDisabled(true);
 
-        case MasterIsNonGui:
-            box.setInformativeText("Master controls can not be a non-ui control (such as Timer or QtObject).");
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
+//    switch (error.type) {
+//        case CommonError:
+//            box.setInformativeText("Database corrupted, change your application skin. "
+//                                   "If it doesn't work, contact to support for further help.");
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
 
-        case FormIsNonGui:
-            box.setInformativeText("Forms can not be a non-ui control (such as Timer or QtObject)."
-                                   "Check your forms and make sure they are some 'Window' or 'Item' derived type.");
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
+//        case ChildIsWindowError:
+//            box.setInformativeText("Child controls can not be a 'Window' (or derived) type."
+//                                   " Only forms could be 'Window' type.");
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
 
-        case MainFormIsntWindowError:
-            box.setInformativeText("Main form has to be a 'Window' derived type. "
-                                   "Please change its type to a 'Window' derived class.");
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
+//        case MasterIsNonGui:
+//            box.setInformativeText("Master controls can not be a non-ui control (such as Timer or QtObject).");
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
 
-        case MultipleWindowsForMobileError:
-            box.setInformativeText("Mobile applications can not contain multiple windows. "
-                                   "Please either change the type of secondary windows' type to a non 'Window' derived class, "
-                                   "or change your application skin to something else (Desktop for instance) by changing the skin of main form.");
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
+//        case FormIsNonGui:
+//            box.setInformativeText("Forms can not be a non-ui control (such as Timer or QtObject)."
+//                                   "Check your forms and make sure they are some 'Window' or 'Item' derived type.");
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
 
-        case NoMainForm:
-            box.setInformativeText("There is no main application window. Probably database has corrupted, "
-                                   "please contact to support, or start a new project over.");
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
+//        case MainFormIsntWindowError:
+//            box.setInformativeText("Main form has to be a 'Window' derived type. "
+//                                   "Please change its type to a 'Window' derived class.");
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
 
-        case CodeError: {
-            box.setInformativeText(QString("Following control has some errors: <b>%1</b>").
-                                   arg(error.id));
-            QString detailedText;
-            for (auto err : error.errors)
-                detailedText += QString("Line %1, column %2: %3").
-                                arg(err.line()).arg(err.column()).arg(err.description());
-            box.setDetailedText(detailedText);
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-            box.exec();
-            break;
-        }
+//        case MultipleWindowsForMobileError:
+//            box.setInformativeText("Mobile applications can not contain multiple windows. "
+//                                   "Please either change the type of secondary windows' type to a non 'Window' derived class, "
+//                                   "or change your application skin to something else (Desktop for instance) by changing the skin of main form.");
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
 
-        case Stopped: {
-            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
-        }
+//        case NoMainForm:
+//            box.setInformativeText("There is no main application window. Probably database has corrupted, "
+//                                   "please contact to support, or start a new project over.");
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
 
-        default:
-            break;
-    }
+//        case CodeError: {
+//            box.setInformativeText(QString("Following control has some errors: <b>%1</b>").
+//                                   arg(error.id));
+//            QString detailedText;
+//            for (auto err : error.errors)
+//                detailedText += QString("Line %1, column %2: %3").
+//                                arg(err.line()).arg(err.column()).arg(err.description());
+//            box.setDetailedText(detailedText);
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
+//            box.exec();
+//            break;
+//        }
 
-    delete _executiveWidget;
-    _executiveWidget = nullptr;
-    // _stopButton->setDisabled(true);
+//        case Stopped: {
+//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
+//        }
+
+//        default:
+//            break;
+//    }
 }
 
 void MainWindow::handleBuildsButtonClick()

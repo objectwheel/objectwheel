@@ -61,10 +61,9 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
 //! ************************* [IssuesBox] *************************
 //!
 
-IssuesBox::IssuesBox(OutputPane* outputPane)
-    : QWidget(outputPane)
-    , _layout(this)
-    , _outputPane(outputPane)
+IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
+  , _layout(this)
+  , _outputPane(outputPane)
 {
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);

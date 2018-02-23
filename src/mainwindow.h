@@ -12,7 +12,6 @@ class ToolboxPane;
 class InspectorPane;
 class DesignerWidget;
 class PropertiesPane;
-class ExecutiveWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -26,6 +25,7 @@ class MainWindow : public QMainWindow
         void clear();
         void handleRunButtonClick();
         void handleStopButtonClick();
+        void handleStopButtonDoubleClick();
         void handleBuildsButtonClick();
         void handleProjectsButtonClick();
 
@@ -48,7 +48,6 @@ class MainWindow : public QMainWindow
         FlatButton* _stopButton;
         FlatButton* _buildsButton;
         FlatButton* _projectsButton;
-        ExecutiveWidget* _executiveWidget;
 
 };
 
