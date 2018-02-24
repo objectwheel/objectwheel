@@ -1,3 +1,65 @@
+Kod ile tasarım yan yana olabilmeli
+Designer'ın yaptığı değişikliği koda geri yazdır
+Açık olan proje silinmeden önce uyar
+nesnelerin boyutu ve konumu çapraz platform olarak fit'lenmeli
+ow ile yapılmış uygulamalarda fit olayı nasıl olacak?
+objectwheel uygulamaları temalarını proje ayarlarından okusun ona göre yapılansın/stilize olsun/görünsün
+objectwheel tema işini de hallet
+
+Form'ların x y leri gui editörden değişmicek
+Ancak ve ancak, properties window'dan değişecek
+Formlar x y şeklinde hardcoded olmayan propertilere sahip olmayacak
+Formların yada uygulamanın skin meselesi çözülecek
+Tema ve font için ayrı bir proje propertisi eklenecek
+Proje propertileri proje ayarı sayfasından görntülenip değiştirilebilecek
+interpreter gerekirse skin'i kendi, proje yolundan projeyi okuyarak bulacak
+interpreter herangi bir güvenlik testi yapmaz, objectwheel tüm testleri yapıp interpreter'i çağırmalı
+interpreter yorumlama olayına ilişkin geri bildirim yollayacak (% loading-ilerleme gibi)
+Carlos'un youtube app'ı ow içinde üretilecek, daha fazla bug alanacak
+Parser properties pane tarafından yapılan değişiklikleri hizalayabilmeli
+Parser properties pane tarafından yapılan değişiklikleri QML Editör'e aksettirmeli
+Toplu nesneler seçiliyken bu nesnelerin yerinin hareket ettirilmesi sonucu konumları veritabanına yazdırılmıyor
+
+buglar gitmiş mi kontrol et, tüm şu videoları vs, bug platformunu
+consoldaki yeşil renge ayar çek
+executivewidget'in çıkış butonunu geri getir
+run tuşuna basınca executivewidgeti yükselt
+play butonu disable oluşu çok çirkin, bi ayar çek
+run olayından önce hata kontrolü adımları nasıldı bir göz at gerekirse bazı hatalar sebebiyle "run" olayını durdur ve bir mesaj ile uyarı göster
+The project was ended forcefully'nin sonundaki ünlemi sil
+ConsoleBox sıçık bir çekilde fışkırmış olarak açılıyor, usturuplu açılmasını sağla
+ConsoleBox'ın temizleme ve bilimum tool buttonlarını ve toolbarını ekle
+QmlPreviewer'ı nasıl ayrı bir process olarak yaparız bunu düşün
+objectwheel-interpret'den usturuplu bir geri bildirim kanalı oluştur
+objectwheel-interpret anti-crak işini hallet, aynısını cloud build için de düşün
+propertiespane de ki hücre yükseklikleri ve hücre içlerindeki bilimum işaret kutularu (checkbox) için cross-platform boyut ayarlaması hatasını gider
+QML Debugging olayına ilişkin yol planı hazırlanacak
+Cloud Builds objectwheel-server projesine entegre edilecek
+MacOS için cloud build olayı hazırlanacak
+
+ControlScene aşağıdaki hata izinde de belirtildiği üzere mouseMoveEvent sırasında bir controlün parentItem()'i çağrılınca patlamış, neden?
+0   org.qt-project.QtWidgets      	0x000000010fb94934 QGraphicsItem::parentItem() const + 4
+1   com.objectwheel.Objectwheel   	0x000000010d7c3459 Control::parentControl() const + 25 (control.cpp:215)
+2   com.objectwheel.Objectwheel   	0x000000010d7d4eb0 ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent*) + 672 (controlscene.cpp:149)
+
+
+Diğer TODO'lar
+2. Changing Resizing Numbers manually doesn’t resize
+3. Bring to Front Bring to Back doesn’t work. (it sort of works if you do it enough) but it doesn’t stick. 
+4. Project Name not on the Project
+5. Objects move by themselves when you resize them.
+6. Run command has objects in a different place.
+8. If you make a bigger app, and then get out, when you get back in its back to a Cell phone size and your objects have been moved automatically.
+9. Adding Custom Control doesn’t work smoothly. It sorta works but putting the name in is difficult. 
+10. Loading Custom Controls from Zip Fails. 
+11. Exciting Objectwheel From Designer by clicking in the top left corner doesn’t close the program. Should maybe bring up the projects? not sure. Navigation in and out of various screens is confusing. 
+12. I separated the forms panel and the properties panel and now I can’t get them On top of each other again. Not clear how to move the panels around and then get the back to their original states. 
+13. Delete object Crashes system. 
+14. I wish Copy and paste had a slight X Y adjustment so the objects are not on top of each other. You are not certain you copied the objects because you might thing nothing happened.
+15. Checkout objectwheel's (project) inline TODO, BUG and FIXMEs
+
+
+
 * Add readme
 * Add license
 * Fix properties list scrolling on mobile devices
@@ -59,3 +121,4 @@
 * Json communication between controls
 * Control movement history in json
 * Why Switch control crash if its id "switch"
+* A better CODE Editor needed

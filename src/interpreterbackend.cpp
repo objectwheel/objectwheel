@@ -23,7 +23,7 @@ InterpreterBackend* InterpreterBackend::instance()
 
 void InterpreterBackend::run()
 {
-    _process->setArguments(QStringList() << ProjectBackend::instance()->dir() << "PhonePortrait");
+    _process->setArguments(QStringList() << ProjectBackend::instance()->dir());
     _process->setProgram("./objectwheel-interpreter");
     _process->start();
 }
