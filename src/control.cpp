@@ -32,7 +32,7 @@
 namespace {
     /* Fills the restricted area by the size with pattern into
      * the transparent dest. Then draws source into the center of the dest. */
-    void draw(QImage& dest, const QImage& source, const QSizeF& size)
+    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     {
         qreal dpr = pS->devicePixelRatio();
 
@@ -465,7 +465,7 @@ QImage Control::initialPreview() const
     QImage wait(":/resources/images/wait.png");
     wait.setDevicePixelRatio(dpr);
 
-    draw(
+    drawCenter(
         preview,
         wait.scaled(
             min * dpr,
