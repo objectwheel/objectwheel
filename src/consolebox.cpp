@@ -24,8 +24,7 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     _textEdit->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
 
     QFont f;
-    f.setFamily("Liberation Mono");
-    f.setPixelSize(f.pixelSize() - 2);
+    f.setPixelSize(f.pixelSize() - 1);
     _textEdit->setFont(f);
 
     QPalette p1(_textEdit->palette());
@@ -42,15 +41,15 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
 
 void ConsoleBox::print(const QString& text)
 {
-    printFormatted(text, _textEdit->palette().text().color(), false);
+    printFormatted(text, _textEdit->palette().text().color(), QFont::Normal);
 }
 
 void ConsoleBox::printError(const QString& text)
 {
-    printFormatted(text, "#AA0000", false);
+    printFormatted(text, "#AA0000", QFont::Normal);
 }
 
-void ConsoleBox::printFormatted(const QString& text, const QColor& color, bool bold)
+void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont::Weight weight)
 {
     auto scrollBar = _textEdit->verticalScrollBar();
     bool atEnd = scrollBar->value() > scrollBar->maximum() * 0.8;
@@ -64,7 +63,7 @@ void ConsoleBox::printFormatted(const QString& text, const QColor& color, bool b
     cursor.setPosition(pos, QTextCursor::KeepAnchor);
 
     QTextCharFormat format;
-    format.setFontWeight(bold ? QFont::Bold : QFont::Normal);
+    format.setFontWeight(weight);
     format.setForeground(color);
 
     cursor.mergeCharFormat(format);

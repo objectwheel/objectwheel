@@ -326,7 +326,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         console->printFormatted(
             tr(" started successfully.\n"),
             "#008000",
-            true
+            QFont::DemiBold
         );
     });
 
@@ -339,16 +339,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
         if (exitStatus == QProcess::CrashExit) {
             console->printFormatted(
-                tr("The process was ended forcefully.") + "!\n",
+                tr("The process was ended forcefully.\n"),
                 "#AA0000",
-                true
+                QFont::DemiBold
             );
         }
 
         console->printFormatted(
-            ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
+            ProjectBackend::instance()->name() + tr(" exited with code %1.\n\n").arg(exitCode),
             "#0000AA",
-            true
+            QFont::DemiBold
         );
 
         _runButton->setEnabled(true);
@@ -405,9 +405,9 @@ void MainWindow::handleRunButtonClick()
 
     console->fade();
     console->printFormatted(
-        tr("\nStarting ") + ProjectBackend::instance()->name() + "...",
+        tr("Starting ") + ProjectBackend::instance()->name() + "...",
         "#0000AA",
-        true
+        QFont::DemiBold
     );
     console->scrollToEnd();
 

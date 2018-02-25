@@ -76,6 +76,9 @@ class Control : public QGraphicsWidget
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
         virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
+    private:
+        QImage initialPreview() const;
+
     signals:
         void previewChanged();
         void errorOccurred();

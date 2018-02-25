@@ -51,7 +51,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
     const auto& r = ADJUST(QRectF(rect()));
 
     if (_settings.iconButton) {
-        QImage image(qCeil(width() * pS->devicePixelRatio()), qCeil(height() * pS->devicePixelRatio()), QImage::Format_ARGB32);
+        QImage image(qCeil(width() * pS->devicePixelRatio()), qCeil(height() * pS->devicePixelRatio()), QImage::Format_ARGB32_Premultiplied);
         image.setDevicePixelRatio(pS->devicePixelRatio());
         image.fill(Qt::transparent);
         QPainter pn(&image);

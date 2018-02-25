@@ -41,7 +41,11 @@ int main(int argc, char* argv[])
         sharedMemory.attach();
         sharedMemory.detach();
         if(!sharedMemory.create(1)) {
-            QMessageBox::warning(nullptr, "Quitting", "Another instance is already running.");
+            QMessageBox::warning(
+                nullptr,
+                QObject::tr("Quitting"),
+                QObject::tr("Another instance is already running.")
+            );
             a.exit();
             return 0;
         }

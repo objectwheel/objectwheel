@@ -1,10 +1,10 @@
 TEMPLATE = app
 TARGET = Objectwheel
 
-QT += widgets quickwidgets webenginewidgets concurrent
-QT += network qml quick quickcontrols2 webview websockets webengine webchannel webenginecore
-QT += sensors svg scxml purchasing positioning nfc multimedia location gamepad datavisualization
-QT += charts 3dcore 3drender 3dinput 3dlogic 3dextras 3danimation 3dquick bluetooth
+QT += quickwidgets webenginewidgets concurrent
+QT += widgets network qml quick quickcontrols2 webview websockets gamepad webchannel
+QT += sensors svg scxml purchasing positioning nfc location bluetooth datavisualization webengine
+QT += charts 3dcore 3drender 3dinput 3dlogic 3dextras 3danimation 3dquick multimedia webenginecore
 
 include($$PWD/gitversion.pri)
 include($$PWD/src/src.pri)
@@ -24,11 +24,13 @@ DEFINES += QT_QML_DEBUG_NO_WARNING \
 macx {
     interpreter.files = $$OUT_PWD/contrib/objectwheel-interpreter/objectwheel-interpreter
     interpreter.path = Contents/MacOS
-    QMAKE_BUNDLE_DATA += interpreter
-}
-
-!macx {
+    previewer.files = $$OUT_PWD/contrib/objectwheel-previewer/objectwheel-previewer
+    previewer.path = Contents/MacOS
+    QMAKE_BUNDLE_DATA += interpreter previewer
+} else {
     interpreter.files = $$OUT_PWD/contrib/objectwheel-interpreter/objectwheel-interpreter
     interpreter.path = $$OUT_PWD/
-    INSTALLS += interpreter
+    previewer.files = $$OUT_PWD/contrib/objectwheel-previewer/objectwheel-previewer
+    previewer.path = $$OUT_PWD/
+    INSTALLS += interpreter previewer
 }

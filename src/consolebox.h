@@ -17,7 +17,7 @@ class ConsoleBox : public QWidget
     public:
         void print(const QString& text);
         void printError(const QString& text);
-        void printFormatted(const QString& text, const QColor& color, bool bold);
+        void printFormatted(const QString& text, const QColor& color, QFont::Weight weight);
 
     public slots:
         void fade();

@@ -11,3 +11,6 @@
 	path = contrib/objectwheel-interpreter
 	url = https://github.com/abigdreamer/objectwheel-interpreter
 	branch = objectwheel
+[submodule "contrib/objectwheel-previewer"]
+	path = contrib/objectwheel-previewer
+	url = https://github.com/omergoktas/objectwheel-previewer

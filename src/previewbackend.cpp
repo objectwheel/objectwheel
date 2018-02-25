@@ -104,7 +104,7 @@ QImage PreviewBackendPrivate::prepreview(const Control* control) const
 {
     QImage image(qCeil(control->size().width() * pS->devicePixelRatio()),
       qCeil(control->size().height() * pS->devicePixelRatio()),
-       QImage::Format_ARGB32);
+       QImage::Format_ARGB32_Premultiplied);
     image.setDevicePixelRatio(pS->devicePixelRatio());
     image.fill(Qt::transparent);
     draw(image, errorImage, control->size());
@@ -286,7 +286,7 @@ QSharedPointer<PreviewResult> PreviewBackendPrivate::preview(Control* control, c
     if (result->gui == false) {
         QImage p(qCeil(control->size().width() * pS->devicePixelRatio()),
           qCeil(control->size().height() * pS->devicePixelRatio()),
-            QImage::Format_ARGB32);
+            QImage::Format_ARGB32_Premultiplied);
         p.setDevicePixelRatio(pS->devicePixelRatio());
         p.fill(Qt::transparent);
         draw(p, QImage(dname(url) + separator() + "icon.png")
@@ -450,7 +450,7 @@ QImage PreviewBackend::initialPreview(const QSizeF& size)
 {
     QImage image(qCeil(size.width() * pS->devicePixelRatio()),
       qCeil(size.height() * pS->devicePixelRatio()),
-        QImage::Format_ARGB32);
+        QImage::Format_ARGB32_Premultiplied);
     image.setDevicePixelRatio(pS->devicePixelRatio());
     image.fill(Qt::transparent);
     _d->draw(image, _d->initialImage, size);

@@ -20,6 +20,8 @@
 #define RESIZE_TRANSACTION_INTERVAL 800
 #define GEOMETRY_SIGNAL_DELAY 800
 #define MARGIN_TOP (fit::fx(14))
+#define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
+
 #define pS (QApplication::primaryScreen())
 #define cW (ControlWatcher::instance())
 
@@ -27,9 +29,36 @@
 //! ************************* [global] **************************
 //!
 
-static std::random_device rd;
-static std::mt19937 mt(rd());
-static std::uniform_int_distribution<qint32> rand_dist(-2147483647 - 1, 2147483647); //Wow C++
+namespace {
+    /* Fills the restricted area by the size with pattern into
+     * the transparent dest. Then draws source into the center of the dest. */
+    void draw(QImage& dest, const QImage& source, const QSizeF& size)
+    {
+        qreal dpr = pS->devicePixelRatio();
+
+        QBrush brush;
+        brush.setColor("#b0b4b7");
+        brush.setStyle(Qt::Dense6Pattern);
+
+        QPainter painter(&dest);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setBrush(brush);
+        painter.setPen("#808487");
+
+        QRectF rect;
+        rect.setTopLeft({0.0, 0.0});
+        rect.setWidth(size.width());
+        rect.setHeight(size.height());
+
+        QRectF rect_2;
+        rect_2.setWidth(source.width() / dpr);
+        rect_2.setHeight(source.height() / dpr);
+        rect_2.moveCenter(rect.center());
+
+        painter.drawRect(ADJUST(rect));
+        painter.drawImage(rect_2, source);
+    }
+}
 
 //!
 //! ****************** [Control Private] ******************
@@ -128,7 +157,7 @@ Control::Control(const QString& url, const DesignMode& mode,
     setPos(SaveBackend::x(dir()), SaveBackend::y(dir()));
     resize(fit::fx(SaveBackend::width(dir())), fit::fx(SaveBackend::height(dir())));
     if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
-    _d->preview = PreviewBackend::initialPreview(size());
+    _d->preview = initialPreview();
 
     connect(this, &Control::geometryChanged, this, [=] {
         QPointer<Control> p(this);
@@ -172,9 +201,9 @@ void Control::updateUids()
 QString Control::generateUid()
 {
     QByteArray uidData;
-    auto randNum = rand_dist(mt);
-    auto randNum1 = rand_dist(mt);
-    auto randNum2 = rand_dist(mt);
+    auto randNum = QRandomGenerator::global()->generate();
+    auto randNum1 = QRandomGenerator::global()->generate();
+    auto randNum2 = QRandomGenerator::global()->generate();
     auto dateMs = QDateTime::currentMSecsSinceEpoch();
     uidData.insert(0, QString::number(dateMs));
     uidData.insert(0, QString::number(randNum));
@@ -417,6 +446,37 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             break;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+QImage Control::initialPreview() const
+{
+    qreal dpr = pS->devicePixelRatio();
+    qreal min = qMin(fit::fx(24), qMin(size().width(), size().height()));
+
+    QImage preview(
+        qCeil(size().width() * dpr),
+        qCeil(size().height() * dpr),
+        QImage::Format_ARGB32_Premultiplied
+    );
+
+    preview.setDevicePixelRatio(dpr);
+    preview.fill(Qt::transparent);
+
+    QImage wait(":/resources/images/wait.png");
+    wait.setDevicePixelRatio(dpr);
+
+    draw(
+        preview,
+        wait.scaled(
+            min * dpr,
+            min * dpr,
+            Qt::IgnoreAspectRatio,
+            Qt::SmoothTransformation
+        ),
+        size()
+    );
+
+    return preview;
 }
 
 const DesignMode& Control::mode() const
