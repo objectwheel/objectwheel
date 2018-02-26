@@ -4,7 +4,6 @@
 #include <savebackend.h>
 #include <fit.h>
 
-#define sM (SaveBackend::instance())
 #define cW (ControlWatcher::instance())
 
 SaveTransaction::SaveTransaction()
@@ -25,27 +24,21 @@ SaveTransaction* SaveTransaction::instance()
 
 void SaveTransaction::processGeometry(Control* control)
 {
-    sM->setProperty(control, "x",
-      control->x());
-    sM->setProperty(control, "y",
-      control->y());
-    sM->setProperty(control, "width",
-      control->size().width() / fit::ratio());
-    sM->setProperty(control, "height",
-      control->size().height() / fit::ratio());
+    SaveBackend::instance()->setProperty(control, "x", control->x());
+    SaveBackend::instance()->setProperty(control, "y", control->y());
+    SaveBackend::instance()->setProperty(control, "width", control->size().width() / fit::ratio());
+    SaveBackend::instance()->setProperty(control, "height", control->size().height() / fit::ratio());
 }
 
 void SaveTransaction::processParent(Control* control)
 {
     if (control->parentControl()) {
-        sM->moveControl(control,
-          control->parentControl());
+        SaveBackend::instance()->moveControl(control, control->parentControl());
         processGeometry(control);
     }
 }
 
 void SaveTransaction::processZ(Control* control)
 {
-    sM->setProperty(control, "z",
-      control->zValue());
+    SaveBackend::instance()->setProperty(control, "z", control->zValue());
 }

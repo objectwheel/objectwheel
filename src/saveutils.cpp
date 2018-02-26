@@ -71,8 +71,28 @@ void SaveUtils::flushSuid(const QString& topPath, const QString& suid)
 bool SaveUtils::isOwctrl(const QByteArray& propertyData)
 {
     const auto& sign = property(propertyData, TAG_OWCTRL_SIGN).toString();
-    const auto& uid = property(propertyData, TAG_OWCTRL_SIGN).toString();
+    const auto& uid = property(propertyData, TAG_UID).toString();
     return (sign == SIGN_OWCTRL && !uid.isEmpty());
+}
+
+bool SaveUtils::isOwctrl(const QString& rootPath)
+{
+    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+    const auto& propertyData = rdfile(propertyPath);
+    return isOwctrl(propertyData);
+}
+
+bool SaveUtils::isOwprj(const QByteArray& propertyData)
+{
+    const auto& sign = property(propertyData, PTAG_OWPRJ_SIGN).toString();
+    return sign == SIGN_OWPRJ;
+}
+
+bool SaveUtils::isOwprj(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return isOwprj(propertyData);
 }
 
 // Searches for all controls paths, starting from topPath.
@@ -187,25 +207,11 @@ QStringList SaveUtils::masterPaths(const QString& topPath)
     return paths;
 }
 
-bool SaveUtils::isOwctrl(const QString& rootPath)
-{
-    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
-    const auto& propertyData = rdfile(propertyPath);
-    return isOwctrl(propertyData);
-}
-
 // Returns true if given path belongs to main form
 // It doesn't check whether rootPath belong to a form or not.
 bool SaveUtils::isMain(const QString& rootPath)
 {
     return (fname(rootPath) == DIR_MAINFORM);
-}
-
-SaveUtils::Skin SaveUtils::skin(const QString& rootPath)
-{
-    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
-    const auto& propertyData = rdfile(propertyPath);
-    return Skin(property(propertyData, TAG_SKIN).toInt());
 }
 
 qreal SaveUtils::x(const QString& rootPath)
@@ -276,4 +282,78 @@ QString SaveUtils::toolCategory(const QString& toolRootPath)
     const auto& propertyPath = toolRootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
     const auto& propertyData = rdfile(propertyPath);
     return property(propertyData, TAG_CATEGORY).toString();
+}
+
+QString SaveUtils::hash(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_HASH).toString();
+}
+
+QString SaveUtils::projectName(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_PROJECTNAME).toString();
+}
+
+QString SaveUtils::description(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_DESCRIPTION).toString();
+}
+
+QString SaveUtils::owner(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_OWNER).toString();
+}
+
+QString SaveUtils::crDate(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_CRDATE).toString();
+}
+
+QString SaveUtils::mfDate(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_MFDATE).toString();
+}
+
+QString SaveUtils::size(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_SIZE).toString();
+}
+
+QString SaveUtils::theme(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_THEME).toString();
+}
+
+SaveUtils::Skin SaveUtils::skin(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return Skin(property(propertyData, PTAG_SKIN).toInt());
+}
+
+void SaveUtils::setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value)
+{
+    if (projectDir.isEmpty() || !isOwprj(projectDir))
+        return;
+
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    auto propertyData = rdfile(propertyPath);
+    setProperty(propertyData, property, value);
+    wrfile(propertyPath, propertyData);
 }

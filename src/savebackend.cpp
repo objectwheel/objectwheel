@@ -617,14 +617,14 @@ void SaveBackend::setProperty(
         auto propertyData = rdfile(propertyPath);
         SaveUtils::setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
-    } else if (property == TAG_SKIN) {
+    } else if (property == PTAG_SKIN) {
         if (!control->form())
             return;
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;
         auto propertyData = rdfile(propertyPath);
-        SaveUtils::setProperty(propertyData, TAG_SKIN, value.toInt());
+        SaveUtils::setProperty(propertyData, PTAG_SKIN, value.toInt());
         wrfile(propertyPath, propertyData);
     } else if (property == TAG_X || property == TAG_Y || property == TAG_Z ||
        property == TAG_WIDTH || property == TAG_HEIGHT) {
@@ -651,7 +651,7 @@ void SaveBackend::removeProperty(const Control* control, const QString& property
         control->hasErrors() ||
         !SaveUtils::isOwctrl(control->dir()) ||
         property == TAG_ID ||
-        property == TAG_SKIN)
+        property == PTAG_SKIN)
         return;
 
     auto fileName = control->dir() + separator() + DIR_THIS +

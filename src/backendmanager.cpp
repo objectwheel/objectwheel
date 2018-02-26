@@ -3,16 +3,14 @@
 #include <userbackend.h>
 #include <projectbackend.h>
 #include <savebackend.h>
-#include <previewbackend.h>
 #include <frontend.h>
 #include <windowmanager.h>
 #include <authenticator.h>
+#include <previewerbackend.h>
 
 BackendManager::BackendManager()
 {
     Authenticator::instance()->init(QUrl(APP_WSSSERVER));
-
-    new PreviewBackend;
 
     connect(ProjectBackend::instance(), SIGNAL(started()),
       WindowManager::instance()->get(WindowManager::Main), SLOT(clear()));
@@ -35,6 +33,8 @@ void BackendManager::handleSessionStop() const
 
 void BackendManager::handleProjectStart() const
 {
+    PreviewerBackend::instance()->start();
+
     SaveBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->formScene()->clearSelection();

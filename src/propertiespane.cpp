@@ -8,7 +8,7 @@
 #include <filemanager.h>
 #include <controlwatcher.h>
 #include <focuslesslineedit.h>
-#include <previewbackend.h>
+#include <previewresult.h>
 #include <control.h>
 #include <frontend.h>
 #include <controlscene.h>
@@ -52,7 +52,7 @@ enum NodeRole {
     Data
 };
 
-static void processFont(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processFont(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<QFont>();
     const auto px = value.pixelSize() > 0 ? true : false;
@@ -216,7 +216,7 @@ static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName,
     item->addChild(iitem);
 }
 
-static void processColor(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processColor(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<QColor>();
     const auto cc = value.name(QColor::HexArgb);
@@ -231,7 +231,7 @@ static void processColor(QTreeWidgetItem* item, const QString& propertyName, con
     item->addChild(iitem);
 }
 
-static void processBool(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processBool(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<bool>();
 
@@ -244,7 +244,7 @@ static void processBool(QTreeWidgetItem* item, const QString& propertyName, cons
     item->addChild(iitem);
 }
 
-static void processString(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processString(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<QString>();
 
@@ -258,7 +258,7 @@ static void processString(QTreeWidgetItem* item, const QString& propertyName, co
     item->addChild(iitem);
 }
 
-static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     auto selectedControl = dW->currentScene()->selectedControls().at(0);
     const auto value = map.value(propertyName).value<QUrl>();
@@ -278,7 +278,7 @@ static void processUrl(QTreeWidgetItem* item, const QString& propertyName, const
     item->addChild(iitem);
 }
 
-static void processDouble(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processDouble(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<double>();
 
@@ -292,7 +292,7 @@ static void processDouble(QTreeWidgetItem* item, const QString& propertyName, co
     item->addChild(iitem);
 }
 
-static void processInt(QTreeWidgetItem* item, const QString& propertyName, const PropertyMap& map)
+static void processInt(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<int>();
 
@@ -413,7 +413,7 @@ static void saveChanges(const NodeType& type, const QVariant& value)
     saveChanges(property, value);
 }
 
-static void cleanProperties(PropertyMap& map)
+static void cleanProperties(QMap<QString, QVariant>& map)
 {
     QStringList keysToRemove;
 
@@ -1144,8 +1144,7 @@ void PropertiesPane::refreshList()
     }
 
     for (const auto& propertyNode : propertyNodes) {
-        auto metaObject = propertyNode.metaObject;
-        auto map = propertyNode.propertyMap;
+        auto map = propertyNode.properties;
 
         cleanProperties(map);
 
@@ -1197,24 +1196,6 @@ void PropertiesPane::refreshList()
                 }
 
                 case QVariant::Int: {
-                    QMetaProperty mp;
-                    for (int i = 0; i < metaObject.propertyCount(); i++)
-                        if (metaObject.property(i).name() == propertyName)
-                            mp = metaObject.property(i);
-
-                    if ((mp.isValid() && (mp.isEnumType() || mp.isFlagType())) ||
-                        propertyName == "inputMethodHints" ||
-                        propertyName == "horizontalAlignment" ||
-                        propertyName == "verticalAlignment" ||
-                        propertyName == "horizontalScrollBarPolicy" ||
-                        propertyName == "verticalScrollBarPolicy" ||
-                        propertyName == "wrapMode" ||
-                        propertyName == "orientation" ||
-                        propertyName == "tickmarkAlignment" ||
-                        propertyName == "echoMode") {
-                        continue;
-                    }
-
                     if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                         if (propertyName == "x")

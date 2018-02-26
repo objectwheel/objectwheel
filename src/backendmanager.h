@@ -3,12 +3,6 @@
 
 #include <QObject>
 
-class UserBackend;
-class SaveBackend;
-class ToolsBackend;
-class ProjectBackend;
-class PreviewBackend;
-
 class BackendManager : public QObject
 {
         Q_OBJECT

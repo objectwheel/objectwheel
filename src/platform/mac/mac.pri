@@ -1,12 +1,11 @@
-QT += macextras
+#QT += macextras
 DEPENDPATH += $$PWD
 INCLUDEPATH += $$PWD
 
 ICON = $$PWD/icon.icns
-QMAKE_MAC_SDK = macosx10.10
 QMAKE_INFO_PLIST = $$PWD/Info.plist
-QMAKE_OBJCXXFLAGS += -fobjc-arc
+#QMAKE_OBJCXXFLAGS += -fobjc-arc
 
-LIBS += -framework AppKit
-HEADERS += $$PWD/mactoolbar.h
-SOURCES += $$PWD/mactoolbar.mm
+#LIBS += -framework AppKit
+#HEADERS += $$PWD/mactoolbar.h
+#SOURCES += $$PWD/mactoolbar.mm

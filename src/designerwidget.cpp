@@ -15,6 +15,8 @@
 #include <savetransaction.h>
 #include <mainwindow.h>
 #include <issuesbox.h>
+#include <projectbackend.h>
+#include <previewerbackend.h>
 
 #include <QWidget>
 #include <QList>
@@ -132,7 +134,7 @@ void DesignerWidget::scaleScene(qreal ratio)
 
 void DesignerWidget::handleIndicatorChanges()
 {
-    _loadingIndicator->setRunning(SaveBackend::instance()->parserWorking() || PreviewBackend::working());
+    _loadingIndicator->setRunning(SaveBackend::instance()->parserWorking() || PreviewerBackend::instance()->isWorking());
 }
 
 void DesignerWidget::handleSnappingClick(bool value)
@@ -167,16 +169,8 @@ void DesignerWidget::handleFitInSceneClick()
 
 void DesignerWidget::handleThemeChange(const QString& text)
 {
-    //    qmlClearTypeRegistrations();
-    //    QQuickStyle::setStyle(text);
-    //    qmlRegisterType();
-    //    handleRefreshPreviewClick();
-    //    _formScene->mainForm()->refresh();
-    //    for (auto control : _formScene->mainForm()->childControls())
-    //        control->refresh();
-    //    _controlScene->mainControl()->refresh();
-    //    for (auto control : _controlScene->mainControl()->childControls())
-    //        control->refresh();
+    SaveUtils::setProjectProperty(ProjectBackend::instance()->dir(), PTAG_THEME, text);
+    handleRefreshPreviewClick();
 }
 
 void DesignerWidget::handleZoomLevelChange(const QString& text)
@@ -189,7 +183,7 @@ void DesignerWidget::handlePhonePortraitButtonClick()
 {
     auto form = formScene()->mainForm();
     form->setSkin(SaveUtils::PhonePortrait);
-    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::PhonePortrait);
+    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhonePortrait);
     _phonePortraitButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -205,7 +199,7 @@ void DesignerWidget::handlePhoneLandscapeButtonClick()
 {
     auto form = formScene()->mainForm();
     form->setSkin(SaveUtils::PhoneLandscape);
-    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::PhoneLandscape);
+    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhoneLandscape);
     _phoneLandscapeButton->setDisabled(true);
     _phonePortraitButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -221,7 +215,7 @@ void DesignerWidget::handleDesktopSkinButtonClick()
 {
     auto form = formScene()->mainForm();
     form->setSkin(SaveUtils::Desktop);
-    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::Desktop);
+    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::Desktop);
     _desktopSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _phonePortraitButton->setChecked(false);
@@ -237,7 +231,7 @@ void DesignerWidget::handleNoSkinButtonClick()
 {
     auto form = formScene()->mainForm();
     form->setSkin(SaveUtils::NoSkin);
-    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::NoSkin);
+    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::NoSkin);
     _noSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -620,8 +614,8 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
             SLOT(handleShowOutlineClick(bool)));
     connect(_zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)),
             SLOT(handleZoomLevelChange(QString)));
-    //    connect(_themeCombobox, SIGNAL(currentTextChanged(QString)),
-    //      SLOT(handleThemeChange(QString)));
+    connect(_themeCombobox, SIGNAL(currentTextChanged(QString)),
+            SLOT(handleThemeChange(QString)));
     connect(_fitInSceneButton, SIGNAL(clicked(bool)),
             SLOT(handleFitInSceneClick()));
     connect(_refreshPreviewButton, SIGNAL(clicked(bool)),
@@ -734,9 +728,8 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
             SLOT(updateSkin()));
     connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
             SLOT(handleIndicatorChanges()));
-    connect(PreviewBackend::instance(), SIGNAL(workingChanged(bool)),
+    connect(PreviewerBackend::instance(), SIGNAL(stateChanged()),
             SLOT(handleIndicatorChanges()));
-
 
     connect(this, SIGNAL(modeChanged()), this, SLOT(handleModeChange()));
     handleModeChange();

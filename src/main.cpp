@@ -7,7 +7,6 @@
 
 #include <QApplication>
 #include <QFontDatabase>
-#include <QtWebView>
 #include <QIcon>
 #include <QSharedMemory>
 #include <QMessageBox>
@@ -20,11 +19,8 @@
 int main(int argc, char* argv[])
 {
     // Boot settings
-    qputenv("QT_QUICK_CONTROLS_STYLE", "Base");
-    qputenv("QML_DISABLE_DISK_CACHE", "true");
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
 
     // Initialize application
     QApplication a(argc, argv);
@@ -81,9 +77,6 @@ int main(int argc, char* argv[])
 
     // Initialize css
     CSS::init();
-
-    // Initialize web view
-    QtWebView::initialize();
 
     // Create backend manager
     BackendManager::instance()->init();

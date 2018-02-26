@@ -1,9 +1,10 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
+#include <global.h>
 #include <resizer.h>
-#include <previewbackend.h>
 #include <saveutils.h>
+#include <previewresult.h>
 #include <QGraphicsWidget>
 #include <QList>
 
@@ -18,8 +19,12 @@ class Control : public QGraphicsWidget
         friend class ControlPrivate;
 
     public:
-        explicit Control(const QString& url, const DesignMode& mode,
-          const QString& uid = QString(), Control* parent = nullptr);
+        explicit Control(
+            const QString& url,
+            const DesignMode& mode,
+            const QString& uid = QString(),
+            Control* parent = nullptr
+        );
         ~Control();
         QString uid() const;
         QString id() const;
@@ -30,7 +35,7 @@ class Control : public QGraphicsWidget
         bool dragging() const;
         bool dragIn() const;
         bool clip() const;
-        const PropertyNodes& properties() const;
+        const QList<PropertyNode>& properties() const;
         const QList<QString>& events() const;
         QList<Control*> childControls(bool dive = true) const;
         Control* parentControl() const;
@@ -95,7 +100,7 @@ class Control : public QGraphicsWidget
         QString _uid;
         QString _id;
         QList<QString> _events;
-        PropertyNodes _properties;
+        QList<PropertyNode> _properties;
         QList<QQmlError> _errors;
         QString _url;
         DesignMode _mode;

@@ -6,6 +6,7 @@
 #include <suppressor.h>
 #include <controlscene.h>
 #include <formscene.h>
+#include <previewerbackend.h>
 
 #include <QtMath>
 #include <QtWidgets>
@@ -71,7 +72,7 @@ class ControlPrivate : public QObject
         ControlPrivate(Control* parent);
 
     public slots:
-        void updatePreview(const QSharedPointer<PreviewResult>& result);
+        void updatePreview(const PreviewResult& result);
 
     public:
         Control* parent;
@@ -91,31 +92,30 @@ ControlPrivate::ControlPrivate(Control* parent)
         resizer.setPlacement(Resizer::Placement(i++));
     }
 
-    connect(PreviewBackend::instance(),
-      SIGNAL(previewReady(const QSharedPointer<PreviewResult>&)),
-            SLOT(updatePreview(const QSharedPointer<PreviewResult>&)));
+    connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
+      SLOT(updatePreview(const PreviewResult&)));
 }
 
-void ControlPrivate::updatePreview(const QSharedPointer<PreviewResult>& result)
+void ControlPrivate::updatePreview(const PreviewResult& result)
 {
-    if (result->control != parent)
+    if (result.uid != parent->uid())
         return;
 
-    preview = result->preview;
-    parent->_errors = result->errors;
-    parent->_gui = result->gui;
-    parent->_properties = result->properties;
-    parent->_events = result->events;
+    preview = result.preview;
+    parent->_errors = result.errors;
+    parent->_gui = result.gui;
+    parent->_properties = result.propertyNodes;
+    parent->_events = result.events;
 
-    if (!result->hasError()) {
-        if (result->gui) {
+    if (!result.hasError()) {
+        if (result.gui) {
             if (!parent->form())
-                parent->_clip = result->property("clip").toBool();
+                parent->_clip = result.property("clip").toBool();
         }
     }
 
     parent->update();
-    if (result->hasError()) {
+    if (result.hasError()) {
         emit parent->errorOccurred();
         emit cW->errorOccurred(parent);
     }
@@ -130,8 +130,12 @@ void ControlPrivate::updatePreview(const QSharedPointer<PreviewResult>& result)
 bool Control::_showOutline = false;
 QList<Control*> Control::_controls;
 //TODO: Why we need mode()?
-Control::Control(const QString& url, const DesignMode& mode,
-  const QString& uid, Control* parent)
+Control::Control(
+    const QString& url,
+    const DesignMode& mode,
+    const QString& uid,
+    Control* parent
+    )
     : QGraphicsWidget(parent)
     , _clip(true)
     , _d(new ControlPrivate(this))
@@ -275,7 +279,7 @@ bool Control::form() const
 
 void Control::refresh()
 {
-    PreviewBackend::requestPreview(this);
+    PreviewerBackend::instance()->requestPreview(rect(), dir());
 }
 
 void Control::updateUid()
@@ -523,7 +527,7 @@ const QList<QString>& Control::events() const
     return _events;
 }
 
-const PropertyNodes& Control::properties() const
+const QList<PropertyNode>& Control::properties() const
 {
     return _properties;
 }

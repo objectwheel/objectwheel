@@ -63,7 +63,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/projectbackend.h \
            $$PWD/toolsbackend.h \
            $$PWD/userbackend.h \
-           $$PWD/previewbackend.h \
            $$PWD/frontend.h \
            $$PWD/loadingbar.h \
            $$PWD/outputpane.h \
@@ -86,7 +85,10 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/succeedwidget.h \
            $$PWD/projectdetailswidget.h \
            $$PWD/interpreterbackend.h \
-           $$PWD/saveutils.h
+           $$PWD/saveutils.h \
+           $$PWD/previewresult.h \
+           $$PWD/previewerbackend.h \
+    $$PWD/previewercommands.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -144,7 +146,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/projectbackend.cpp \
            $$PWD/toolsbackend.cpp \
            $$PWD/userbackend.cpp \
-           $$PWD/previewbackend.cpp \
            $$PWD/loadingbar.cpp \
            $$PWD/outputpane.cpp \
            $$PWD/registrationwidget.cpp \
@@ -166,7 +167,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/succeedwidget.cpp \
            $$PWD/projectdetailswidget.cpp \
            $$PWD/interpreterbackend.cpp \
-           $$PWD/saveutils.cpp
+           $$PWD/saveutils.cpp \
+           $$PWD/previewresult.cpp \
+           $$PWD/previewerbackend.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

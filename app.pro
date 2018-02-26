@@ -1,10 +1,9 @@
 TEMPLATE = app
 TARGET = Objectwheel
 
-QT += quickwidgets webenginewidgets concurrent
-QT += widgets network qml quick quickcontrols2 webview websockets gamepad webchannel
-QT += sensors svg scxml purchasing positioning nfc location bluetooth datavisualization webengine
-QT += charts 3dcore 3drender 3dinput 3dlogic 3dextras 3danimation 3dquick multimedia webenginecore
+QT += quickwidgets qml quick
+QT += widgets network websockets svg concurrent quickcontrols2
+QT += webenginewidgets webchannel webengine webenginecore
 
 include($$PWD/gitversion.pri)
 include($$PWD/src/src.pri)
