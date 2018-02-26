@@ -85,7 +85,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/resetwidget.h \
            $$PWD/succeedwidget.h \
            $$PWD/projectdetailswidget.h \
-           $$PWD/interpreterbackend.h
+           $$PWD/interpreterbackend.h \
+           $$PWD/saveutils.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -164,7 +165,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/resetwidget.cpp \
            $$PWD/succeedwidget.cpp \
            $$PWD/projectdetailswidget.cpp \
-           $$PWD/interpreterbackend.cpp
+           $$PWD/interpreterbackend.cpp \
+           $$PWD/saveutils.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

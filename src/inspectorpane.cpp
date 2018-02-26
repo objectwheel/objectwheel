@@ -3,6 +3,7 @@
 #include <css.h>
 #include <designerwidget.h>
 #include <filemanager.h>
+#include <saveutils.h>
 #include <savebackend.h>
 #include <formspane.h>
 #include <control.h>
@@ -259,7 +260,7 @@ void InspectorPane::refresh()
     }
 
     if (mc->form()) {
-        if (SaveBackend::isMain(mc->dir()))
+        if (SaveUtils::isMain(mc->dir()))
             item->setIcon(0, QIcon(":/resources/images/mform.png"));
         else
             item->setIcon(0, QIcon(":/resources/images/form.png"));

@@ -5,6 +5,7 @@
 #include <filemanager.h>
 #include <projectbackend.h>
 #include <userbackend.h>
+#include <saveutils.h>
 #include <savebackend.h>
 #include <projectswidget.h>
 #include <dirlocker.h>

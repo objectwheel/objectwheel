@@ -215,8 +215,8 @@ bool ProjectBackend::newProject(
             pdir + separator() +
             FILENAME, data
         ) ||
-        SaveBackend::initProject(pdir)
-                );
+        SaveBackend::instance()->initProject(pdir)
+    );
 }
 
 QStringList ProjectBackend::projectNames() const

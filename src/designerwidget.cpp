@@ -8,6 +8,7 @@
 #include <fit.h>
 #include <css.h>
 #include <loadingindicator.h>
+#include <saveutils.h>
 #include <savebackend.h>
 #include <outputpane.h>
 #include <controlwatcher.h>
@@ -131,7 +132,7 @@ void DesignerWidget::scaleScene(qreal ratio)
 
 void DesignerWidget::handleIndicatorChanges()
 {
-    _loadingIndicator->setRunning(SaveBackend::parserWorking() || PreviewBackend::working());
+    _loadingIndicator->setRunning(SaveBackend::instance()->parserWorking() || PreviewBackend::working());
 }
 
 void DesignerWidget::handleSnappingClick(bool value)
@@ -187,8 +188,8 @@ void DesignerWidget::handleZoomLevelChange(const QString& text)
 void DesignerWidget::handlePhonePortraitButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(Skin::PhonePortrait);
-    SaveBackend::setProperty(form, TAG_SKIN, Skin::PhonePortrait);
+    form->setSkin(SaveUtils::PhonePortrait);
+    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::PhonePortrait);
     _phonePortraitButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -203,8 +204,8 @@ void DesignerWidget::handlePhonePortraitButtonClick()
 void DesignerWidget::handlePhoneLandscapeButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(Skin::PhoneLandscape);
-    SaveBackend::setProperty(form, TAG_SKIN, Skin::PhoneLandscape);
+    form->setSkin(SaveUtils::PhoneLandscape);
+    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::PhoneLandscape);
     _phoneLandscapeButton->setDisabled(true);
     _phonePortraitButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -219,8 +220,8 @@ void DesignerWidget::handlePhoneLandscapeButtonClick()
 void DesignerWidget::handleDesktopSkinButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(Skin::Desktop);
-    SaveBackend::setProperty(form, TAG_SKIN, Skin::Desktop);
+    form->setSkin(SaveUtils::Desktop);
+    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::Desktop);
     _desktopSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _phonePortraitButton->setChecked(false);
@@ -235,8 +236,8 @@ void DesignerWidget::handleDesktopSkinButtonClick()
 void DesignerWidget::handleNoSkinButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(Skin::NoSkin);
-    SaveBackend::setProperty(form, TAG_SKIN, Skin::NoSkin);
+    form->setSkin(SaveUtils::NoSkin);
+    SaveBackend::instance()->setProperty(form, TAG_SKIN, SaveUtils::NoSkin);
     _noSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -277,7 +278,7 @@ void DesignerWidget::handleClearControls()
     switch (ret) {
         case QMessageBox::Yes: {
             scene->removeChildControlsOnly(scene->mainControl());
-            SaveBackend::removeChildControlsOnly(scene->mainControl());
+            SaveBackend::instance()->removeChildControlsOnly(scene->mainControl());
             break;
         } default: {
             // Do nothing
@@ -313,13 +314,13 @@ void DesignerWidget::handleModeChange()
 
         auto form = formScene()->mainForm();
         if (form) {
-            if (form->skin() == Skin::Desktop) {
+            if (form->skin() == SaveUtils::Desktop) {
                 _desktopSkinButton->setChecked(true);
                 handleDesktopSkinButtonClick();
-            } else if (form->skin() == Skin::NoSkin) {
+            } else if (form->skin() == SaveUtils::NoSkin) {
                 _noSkinButton->setChecked(true);
                 handleNoSkinButtonClick();
-            } else if (form->skin() == Skin::PhonePortrait) {
+            } else if (form->skin() == SaveUtils::PhonePortrait) {
                 _phonePortraitButton->setChecked(true);
                 handlePhonePortraitButtonClick();
             } else {
@@ -802,13 +803,13 @@ void DesignerWidget::updateSkin()
         _phonePortraitButton->setEnabled(true);
         _desktopSkinButton->setEnabled(true);
 
-        if (form->skin() == Skin::Desktop) {
+        if (form->skin() == SaveUtils::Desktop) {
             _desktopSkinButton->setChecked(true);
             _desktopSkinButton->setEnabled(false);
-        } else if (form->skin() == Skin::NoSkin) {
+        } else if (form->skin() == SaveUtils::NoSkin) {
             _noSkinButton->setChecked(true);
             _noSkinButton->setEnabled(false);
-        } else if (form->skin() == Skin::PhonePortrait) {
+        } else if (form->skin() == SaveUtils::PhonePortrait) {
             _phonePortraitButton->setChecked(true);
             _phonePortraitButton->setEnabled(false);
         } else {
@@ -875,7 +876,7 @@ void DesignerWidget::handleControlDrop(Control* control, const QPointF& pos, con
     auto scene = (ControlScene*)control->scene();
     scene->clearSelection();
     auto newControl = new Control(url, control->mode());
-    SaveBackend::addControl(newControl, control,
+    SaveBackend::instance()->addControl(newControl, control,
                             scene->mainControl()->uid(), scene->mainControl()->dir());
     newControl->setParentItem(control);
     newControl->setPos(pos);

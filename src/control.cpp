@@ -4,7 +4,6 @@
 #include <filemanager.h>
 #include <controlwatcher.h>
 #include <suppressor.h>
-#include <savebackend.h>
 #include <controlscene.h>
 #include <formscene.h>
 
@@ -136,7 +135,7 @@ Control::Control(const QString& url, const DesignMode& mode,
     : QGraphicsWidget(parent)
     , _clip(true)
     , _d(new ControlPrivate(this))
-    , _uid(uid.isEmpty() ? SaveBackend::uid(dname(dname(url))) : uid)
+    , _uid(uid.isEmpty() ? SaveUtils::uid(dname(dname(url))) : uid)
     , _url(url)
     , _mode(mode)
     , _dragging(false)
@@ -152,10 +151,10 @@ Control::Control(const QString& url, const DesignMode& mode,
     setAcceptHoverEvents(true);
     setAcceptDrops(true);
 
-    setZValue(SaveBackend::z(dir()));
-    setId(SaveBackend::id(dname(dname(url))));
-    setPos(SaveBackend::x(dir()), SaveBackend::y(dir()));
-    resize(fit::fx(SaveBackend::width(dir())), fit::fx(SaveBackend::height(dir())));
+    setZValue(SaveUtils::z(dir()));
+    setId(SaveUtils::id(dname(dname(url))));
+    setPos(SaveUtils::x(dir()), SaveUtils::y(dir()));
+    resize(fit::fx(SaveUtils::width(dir())), fit::fx(SaveUtils::height(dir())));
     if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
     _d->preview = initialPreview();
 
@@ -281,7 +280,7 @@ void Control::refresh()
 
 void Control::updateUid()
 {
-    _uid = SaveBackend::uid(dir());
+    _uid = SaveUtils::uid(dir());
 }
 
 void Control::centralize()
@@ -677,18 +676,18 @@ void FormPrivate::applySkinChange()
     bool resizable;
 
     switch (parent->_skin) {
-        case Skin::PhonePortrait:
+        case SaveUtils::PhonePortrait:
             resizable = false;
             size = SIZE_FORM;
             break;
 
-        case Skin::PhoneLandscape:
+        case SaveUtils::PhoneLandscape:
             resizable = false;
             size = SIZE_FORM.transposed();
             break;
 
-        case Skin::Desktop:
-        case Skin::NoSkin :
+        case SaveUtils::Desktop:
+        case SaveUtils::NoSkin :
             resizable = true;
             break;
         default:
@@ -697,8 +696,8 @@ void FormPrivate::applySkinChange()
             break;
     }
 
-    if (parent->_skin == Skin::PhonePortrait ||
-        parent->_skin == Skin::PhoneLandscape)
+    if (parent->_skin == SaveUtils::PhonePortrait ||
+        parent->_skin == SaveUtils::PhoneLandscape)
         parent->resize(size);
 
     for (auto& resizer : parent->_resizers)
@@ -712,7 +711,7 @@ void FormPrivate::applySkinChange()
 Form::Form(const QString& url, const QString& uid, Form* parent)
     : Control(url, FormGui, uid, parent)
     , _d(new FormPrivate(this))
-    , _skin(SaveBackend::skin(dir()))
+    , _skin(SaveUtils::skin(dir()))
 {
     _clip = false;
     setFlag(Control::ItemIsMovable, false);
@@ -726,19 +725,19 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     painter->setRenderHint(QPainter::Antialiasing);
 
     switch (_skin) {
-        case PhonePortrait: {
+        case SaveUtils::PhonePortrait: {
             auto skinRect = QRectF({0, 0}, SIZE_SKIN);
             skinRect.moveCenter(innerRect.center());
             QSvgRenderer svg(QString(":/resources/images/phnv.svg"));
             svg.render(painter, skinRect);
             break;
-        } case PhoneLandscape: {
+        } case SaveUtils::PhoneLandscape: {
             auto skinRect = QRectF({0, 0}, SIZE_SKIN.transposed());
             skinRect.moveCenter(innerRect.center());
             QSvgRenderer svg(QString(":/resources/images/phnh.svg"));
             svg.render(painter, skinRect);
             break;
-        } case Desktop: { //FIXME: Bad window frame, redesign it.
+        } case SaveUtils::Desktop: { //FIXME: Bad window frame, redesign it.
             auto skinRect = QRectF({0, 0}, size() + QSizeF(fit::fx(2), fit::fx(2.0 * MARGIN_TOP / 1.35)));
             skinRect.moveCenter(innerRect.center());
             skinRect.moveTop(skinRect.top() - MARGIN_TOP / 1.5);
@@ -797,7 +796,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
         QPen pen;
         pen.setWidthF(fit::fx(1));
         pen.setJoinStyle(Qt::MiterJoin);
-        if (_skin == PhonePortrait || _skin == PhoneLandscape) {
+        if (_skin == SaveUtils::PhonePortrait || _skin == SaveUtils::PhoneLandscape) {
             pen.setColor(Qt::black);
         } else {
             pen.setStyle(Qt::DotLine);
@@ -823,9 +822,9 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 QRectF Form::frameGeometry() const
 {
     QRectF rect;
-    if (_skin == PhonePortrait || _skin == PhoneLandscape)
+    if (_skin == SaveUtils::PhonePortrait || _skin == SaveUtils::PhoneLandscape)
         rect = QRectF({QPointF(-SIZE_SKIN.width() / 2.0, -SIZE_SKIN.height() / 2.0), SIZE_SKIN});
-    else if (_skin == NoSkin)
+    else if (_skin == SaveUtils::NoSkin)
         rect = QRectF({QPointF(-size().width() / 2.0, -size().height() / 2.0), size()});
     else
         rect = QRectF(-size().width() / 2.0, -size().height() / 2.0 - MARGIN_TOP / 1.5,
@@ -843,7 +842,7 @@ void Form::setMain(bool value)
     _main = value;
 }
 
-void Form::setSkin(const Skin& skin)
+void Form::setSkin(const SaveUtils::Skin& skin)
 {
     if (skin == _skin)
         return;
@@ -853,7 +852,7 @@ void Form::setSkin(const Skin& skin)
     emit cW->skinChanged(this);
 }
 
-const Skin& Form::skin()
+const SaveUtils::Skin& Form::skin()
 {
     return _skin;
 }

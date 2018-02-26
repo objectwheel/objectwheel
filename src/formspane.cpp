@@ -1,7 +1,9 @@
 #include <formspane.h>
 #include <flatbutton.h>
 #include <toolboxtree.h>
+#include <saveutils.h>
 #include <savebackend.h>
+#include <projectbackend.h>
 #include <formscene.h>
 #include <designerwidget.h>
 #include <filemanager.h>
@@ -93,7 +95,7 @@ void FormsPane::removeButtonClicked()
     auto form = dW->formScene()->mainForm();
     if (!form || !form->form() || form->main())
         return;
-    SaveBackend::removeForm((Form*)form);
+    SaveBackend::instance()->removeForm((Form*)form);
     dW->formScene()->removeForm(form);
 }
 
@@ -109,7 +111,7 @@ void FormsPane::addButtonClicked()
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
     dW->formScene()->addForm(form);
-    SaveBackend::addForm(form);
+    SaveBackend::instance()->addForm(form);
     rm(tempPath);
 }
 
@@ -122,14 +124,14 @@ void FormsPane::handleDatabaseChange()
 
     _listWidget->clear();
 
-    for (auto path : SaveBackend::formPaths()) {
-        auto _id = SaveBackend::id(path);
+    for (auto path : SaveUtils::formPaths(ProjectBackend::instance()->dir())) {
+        auto _id = SaveUtils::id(path);
         if (id == _id)
             row = _listWidget->count();
 
         auto item = new QListWidgetItem;
         item->setText(_id);
-        if (SaveBackend::isMain(path))
+        if (SaveUtils::isMain(path))
             item->setIcon(QIcon(":/resources/images/mform.png"));
         else
             item->setIcon(QIcon(":/resources/images/form.png"));

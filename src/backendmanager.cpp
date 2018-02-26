@@ -12,7 +12,6 @@ BackendManager::BackendManager()
 {
     Authenticator::instance()->init(QUrl(APP_WSSSERVER));
 
-    new SaveBackend;
     new PreviewBackend;
 
     connect(ProjectBackend::instance(), SIGNAL(started()),
@@ -36,7 +35,7 @@ void BackendManager::handleSessionStop() const
 
 void BackendManager::handleProjectStart() const
 {
-    SaveBackend::exposeProject();
+    SaveBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->formScene()->clearSelection();
     ToolsBackend::instance()->downloadTools();

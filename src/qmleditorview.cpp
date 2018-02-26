@@ -2,6 +2,7 @@
 #include <formscene.h>
 #include <control.h>
 #include <fit.h>
+#include <saveutils.h>
 #include <savebackend.h>
 #include <designerwidget.h>
 #include <filemanager.h>

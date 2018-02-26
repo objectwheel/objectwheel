@@ -4,7 +4,7 @@
 #include <toolsbackend.h>
 #include <filemanager.h>
 #include <zipper.h>
-#include <savebackend.h>
+#include <saveutils.h>
 #include <frontend.h>
 #include <qmleditorview.h>
 
@@ -27,7 +27,7 @@ static QString handleImports(const QStringList& fileNames)
         QTemporaryDir dir;
         if (dir.isValid()) {
             if (Zipper::extractZip(rdfile(fileName), dir.path())) {
-                if (SaveBackend::isOwctrl(dir.path())) {
+                if (SaveUtils::isOwctrl(dir.path())) {
                     if (ToolsBackend::instance()->addTool(dir.path(), true)) {
                         msg = "Tool import has successfully done.";
                     } else {

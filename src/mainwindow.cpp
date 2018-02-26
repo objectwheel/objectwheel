@@ -267,7 +267,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         if (previousControl)
             previousControl->deleteLater();
         auto url = _toolboxPane->toolboxTree()->urls(_toolboxPane->toolboxTree()->currentItem())[0];
-        auto control = SaveBackend::exposeControl(dname(dname(url.toLocalFile())), ControlGui);
+        auto control = SaveBackend::instance()->exposeControl(dname(dname(url.toLocalFile())), ControlGui);
         designerWidget()->controlScene()->setMainControl(control);
         designerWidget()->setMode(ControlGui);
         control->refresh();
@@ -367,7 +367,7 @@ DesignerWidget* MainWindow::designerWidget()
 
 void MainWindow::clear()
 {
-    while(SaveBackend::parserWorking())
+    while(SaveBackend::instance()->parserWorking())
         Delayer::delay(100);
 
     handleStopButtonClick();

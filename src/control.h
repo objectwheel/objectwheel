@@ -3,6 +3,7 @@
 
 #include <resizer.h>
 #include <previewbackend.h>
+#include <saveutils.h>
 #include <QGraphicsWidget>
 #include <QList>
 
@@ -116,8 +117,8 @@ class Form : public Control
         explicit Form(const QString& url, const QString& uid = QString(), Form* parent = Q_NULLPTR);
         bool main() const;
         void setMain(bool value);
-        void setSkin(const Skin& skin);
-        const Skin& skin();
+        void setSkin(const SaveUtils::Skin& skin);
+        const SaveUtils::Skin& skin();
         QRectF frameGeometry() const override;
 
     signals:
@@ -132,7 +133,7 @@ class Form : public Control
         FormPrivate* _d;
         bool _main = false;
         QList<Control*> _controls;
-        Skin _skin;
+        SaveUtils::Skin _skin;
 };
 
 #endif // CONTROL_H

@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <designerwidget.h>
 #include <css.h>
+#include <saveutils.h>
 #include <savebackend.h>
 #include <delayer.h>
 #include <filemanager.h>
@@ -315,10 +316,10 @@ static void saveChanges(const QString& property, const QVariant& value)
     QPointer<Control> sc = scs.at(0);
 
     if (dW->mode() == ControlGui && property == TAG_ID)
-        SaveBackend::setProperty(sc, property, value,
+        SaveBackend::instance()->setProperty(sc, property, value,
                                  dW->controlScene()->mainControl()->dir());
     else
-        SaveBackend::setProperty(sc, property, value);
+        SaveBackend::instance()->setProperty(sc, property, value);
 
     QMetaObject::Connection con;
     con = QObject::connect(SaveBackend::instance(),
@@ -327,7 +328,7 @@ static void saveChanges(const QString& property, const QVariant& value)
             QObject::disconnect(con);
             return;
         }
-        if (SaveBackend::parserWorking() == false) {
+        if (SaveBackend::instance()->parserWorking() == false) {
             sc->refresh();
             QObject::disconnect(con);
         }

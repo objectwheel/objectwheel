@@ -2,7 +2,7 @@
 #include <fit.h>
 #include <formscene.h>
 #include <filemanager.h>
-#include <savebackend.h>
+#include <saveutils.h>
 #include <control.h>
 #include <delayer.h>
 #include <parserworker.h>
@@ -231,7 +231,7 @@ QSharedPointer<PreviewResult> PreviewBackendPrivate::preview(Control* control, c
 {
     QSharedPointer<PreviewResult> result(new PreviewResult);
 
-    if (!SaveBackend::isOwctrl(dname(dname(url)))) {
+    if (!SaveUtils::isOwctrl(dname(dname(url)))) {
         qFatal("Fatal error: Control doesn't meet Owctrl™ requirements.");
         return result;
     }
@@ -337,11 +337,11 @@ void PreviewBackendPrivate::processTasks()
     }
 
     auto dir = control->dir();
-    auto masterPaths = SaveBackend::masterPaths(dir);
+    auto masterPaths = SaveUtils::masterPaths(dir);
 
     // If it's a form, tool or non-master child control, then we just need a background
     // preview image. So, we don't need a nested-preview image.
-    if (SaveBackend::suid(dir).isEmpty() || masterPaths.isEmpty()) {
+    if (SaveUtils::suid(dir).isEmpty() || masterPaths.isEmpty()) {
         auto res = preview(control, dir + separator() + DIR_THIS +
           separator() + "main.qml");
         emit parent->previewReady(res);
@@ -354,7 +354,7 @@ void PreviewBackendPrivate::processTasks()
 
         for (auto path : masterPaths) {
             QMap<QString, QSharedPointer<PreviewResult>> results;
-            auto childrenPaths = SaveBackend::childrenPaths(path);
+            auto childrenPaths = SaveUtils::childrenPaths(path);
             for (auto childPath : childrenPaths) {
                 int index = masterPaths.indexOf(childPath);
                 if (index >= 0) {

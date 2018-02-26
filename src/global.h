@@ -17,14 +17,6 @@ enum DesignMode {
     CodeEdit
 };
 
-enum Skin {
-    Invalid,
-    PhonePortrait,
-    PhoneLandscape,
-    Desktop,
-    NoSkin
-};
-
 class OTargets : public QObject {
         Q_OBJECT
     public:

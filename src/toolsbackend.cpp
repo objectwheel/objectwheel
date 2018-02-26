@@ -1,5 +1,6 @@
 #include <toolsbackend.h>
 #include <projectbackend.h>
+#include <saveutils.h>
 #include <savebackend.h>
 #include <toolboxtree.h>
 #include <filemanager.h>
@@ -92,7 +93,7 @@ QStringList ToolsBackend::categories() const
 
     for (auto dir : lsdir(toolsDir())) {
         auto toolPath = toolsDir() + separator() + dir;
-        auto category = SaveBackend::toolCategory(toolPath);
+        auto category = SaveUtils::toolCategory(toolPath);
         if (!categories.contains(category))
             categories << category;
     }
@@ -113,13 +114,13 @@ void ToolsBackend::fillTree(ToolboxTree* tree)
 bool ToolsBackend::addToTree(const QString& toolPath, ToolboxTree* tree)
 {
     if (ProjectBackend::instance()->dir().isEmpty() ||
-        toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
+        toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
     QList<QUrl> urls;
     auto dir = toolPath + separator() + DIR_THIS + separator();
-    auto category = SaveBackend::toolCategory(toolPath);
-    auto name = SaveBackend::toolName(toolPath);
+    auto category = SaveUtils::toolCategory(toolPath);
+    auto name = SaveUtils::toolName(toolPath);
 
     urls << QUrl::fromLocalFile(dir + "main.qml");
     if (category.isEmpty())
@@ -161,7 +162,7 @@ void ToolsBackend::clear()
 bool ToolsBackend::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
     if (ProjectBackend::instance()->dir().isEmpty() ||
-        toolPath.isEmpty() || !SaveBackend::isOwctrl(toolPath))
+        toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
     if (!isProjectFull())
@@ -171,7 +172,7 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
     QString newToolPath;
     if (isNewTool) {
         newToolPath = toolsDir() + separator() +
-          QString::number(SaveBackend::biggestDir(toolsDir()) + 1);
+          QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
 
         if (!mkdir(newToolPath))
             return false;
@@ -179,15 +180,15 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
         if (!cp(toolPath, newToolPath, true, qrc))
             return false;
 
-        SaveBackend::refreshToolUid(newToolPath);
+        SaveBackend::instance()->refreshToolUid(newToolPath);
     } else {
         newToolPath = toolPath;
     }
 
     QList<QUrl> urls;
     auto dir = newToolPath + separator() + DIR_THIS + separator();
-    auto category = SaveBackend::toolCategory(newToolPath);
-    auto name = SaveBackend::toolName(newToolPath);
+    auto category = SaveUtils::toolCategory(newToolPath);
+    auto name = SaveUtils::toolName(newToolPath);
 
     urls << QUrl::fromLocalFile(dir + "main.qml");
     if (category.isEmpty())
@@ -308,7 +309,7 @@ void ToolsBackend::downloadTools(const QUrl& url)
 
         for (auto val : toolsArray)
         {
-            QString toolDir = QString::number(SaveBackend::biggestDir(toolsDir()) + 1);
+            QString toolDir = QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
             QDir(toolsDir()).mkpath(toolDir);
             QUrl toolUrl = QUrl::fromUserInput(val.toString());
 

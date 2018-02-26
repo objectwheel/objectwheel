@@ -202,8 +202,8 @@ void ControlViewPrivate::handlePasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = SaveBackend::exposeControl(url.toLocalFile(), ControlGui, uid);
-        SaveBackend::addControl(control, mainControl, mainControl->uid(), mainControl->dir());
+        auto control = SaveBackend::instance()->exposeControl(url.toLocalFile(), ControlGui, uid);
+        SaveBackend::instance()->addControl(control, mainControl, mainControl->uid(), mainControl->dir());
         control->setParentItem(mainControl);
         control->refresh();
         controls << control;
@@ -232,7 +232,7 @@ void ControlViewPrivate::handlePasteAction()
 
                 for (auto control : cutControls) {
                     scene->removeControl(control);
-                    SaveBackend::removeControl(control);
+                    SaveBackend::instance()->removeControl(control);
                 }
             }
         }
@@ -249,7 +249,7 @@ void ControlViewPrivate::handleDeleteAction()
     selectedControls.removeOne(scene->mainControl());
     for (auto control : selectedControls) {
         scene->removeControl(control);
-        SaveBackend::removeControl(control);
+        SaveBackend::instance()->removeControl(control);
     }
 }
 
