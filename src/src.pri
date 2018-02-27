@@ -88,7 +88,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/saveutils.h \
            $$PWD/previewresult.h \
            $$PWD/previewerbackend.h \
-    $$PWD/previewercommands.h
+           $$PWD/previewercommands.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \

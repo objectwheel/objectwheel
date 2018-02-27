@@ -7,6 +7,7 @@
 #include <controlscene.h>
 #include <formscene.h>
 #include <previewerbackend.h>
+#include <saveutils.h>
 
 #include <QtMath>
 #include <QtWidgets>
@@ -662,7 +663,6 @@ class FormPrivate : public QObject
 
     public:
         explicit FormPrivate(Form* parent);
-        void applySkinChange();
 
     public:
         Form* parent;
@@ -674,124 +674,21 @@ FormPrivate::FormPrivate(Form* parent)
 {
 }
 
-void FormPrivate::applySkinChange()
-{
-    QSize size;
-    bool resizable;
-
-    switch (parent->_skin) {
-        case SaveUtils::PhonePortrait:
-            resizable = false;
-            size = SIZE_FORM;
-            break;
-
-        case SaveUtils::PhoneLandscape:
-            resizable = false;
-            size = SIZE_FORM.transposed();
-            break;
-
-        case SaveUtils::Desktop:
-        case SaveUtils::NoSkin :
-            resizable = true;
-            break;
-        default:
-            resizable = false;
-            qFatal("Something went wrong.");
-            break;
-    }
-
-    if (parent->_skin == SaveUtils::PhonePortrait ||
-        parent->_skin == SaveUtils::PhoneLandscape)
-        parent->resize(size);
-
-    for (auto& resizer : parent->_resizers)
-        resizer.setDisabled(!resizable);
-
-    parent->update();
-}
-
 //! ********************** [Form] **********************
 
 Form::Form(const QString& url, const QString& uid, Form* parent)
     : Control(url, FormGui, uid, parent)
     , _d(new FormPrivate(this))
-    , _skin(SaveUtils::skin(dir()))
 {
     _clip = false;
     setFlag(Control::ItemIsMovable, false);
-    _d->applySkinChange();
 }
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
-    auto scene = static_cast<FormScene*>(this->scene());
-    painter->setRenderHint(QPainter::Antialiasing);
 
-    switch (_skin) {
-        case SaveUtils::PhonePortrait: {
-            auto skinRect = QRectF({0, 0}, SIZE_SKIN);
-            skinRect.moveCenter(innerRect.center());
-            QSvgRenderer svg(QString(":/resources/images/phnv.svg"));
-            svg.render(painter, skinRect);
-            break;
-        } case SaveUtils::PhoneLandscape: {
-            auto skinRect = QRectF({0, 0}, SIZE_SKIN.transposed());
-            skinRect.moveCenter(innerRect.center());
-            QSvgRenderer svg(QString(":/resources/images/phnh.svg"));
-            svg.render(painter, skinRect);
-            break;
-        } case SaveUtils::Desktop: { //FIXME: Bad window frame, redesign it.
-            auto skinRect = QRectF({0, 0}, size() + QSizeF(fit::fx(2), fit::fx(2.0 * MARGIN_TOP / 1.35)));
-            skinRect.moveCenter(innerRect.center());
-            skinRect.moveTop(skinRect.top() - MARGIN_TOP / 1.5);
-            QPainterPath path;
-            path.setFillRule(Qt::WindingFill);
-            path.addRect(skinRect.adjusted(0, fit::fx(10), 0, 0));
-            path.addRoundedRect(skinRect.adjusted(0, 0, 0, -skinRect.height() + fit::fx(15)), fit::fx(3), fit::fx(3));
-
-            QLinearGradient gradient(skinRect.center().x(), skinRect.y(),
-                                     skinRect.center().x(), skinRect.y() + fit::fx(2.2 * MARGIN_TOP / 1.35));
-            gradient.setColorAt(0, QColor("#E8ECEF"));
-            gradient.setColorAt(1, QColor("#D3D7DA"));
-            painter->setBrush(gradient);
-            painter->setPen(QColor("#D3D7DA").darker(106));
-            painter->drawPath(path.simplified());
-
-            auto btnExtRect = QRectF(skinRect.left() + fit::fx(8), skinRect.top() + fit::fx(4.5), fit::fx(11), fit::fx(11));
-            auto btnMinRect = QRectF(skinRect.left() + fit::fx(27), skinRect.top() + fit::fx(4.5), fit::fx(11), fit::fx(11));
-            auto btnMaxRect = QRectF(skinRect.left() + fit::fx(46), skinRect.top() + fit::fx(4.5), fit::fx(11), fit::fx(11));
-
-            painter->setPen(QColor("#de4643"));
-            painter->setBrush(QColor("#fc625d"));
-            painter->drawEllipse(btnExtRect);
-
-            painter->setPen(QColor("#dd9e33"));
-            painter->setBrush(QColor("#fdbc40"));
-            painter->drawEllipse(btnMinRect);
-
-            painter->setPen(QColor("#26a934"));
-            painter->setBrush(QColor("#34c84a"));
-            painter->drawEllipse(btnMaxRect);
-
-            if (mapToScene(QRectF(btnExtRect.topLeft(), btnMaxRect.bottomRight())).containsPoint
-                (scene->lastMousePos(), Qt::WindingFill)) {
-                auto ciks = QImage(":/resources/images/ciks.png");
-                painter->setPen(QColor("#4c0102"));
-                painter->drawLine(btnExtRect.topLeft() + QPoint(fit::fx(3), fit::fx(3)), btnExtRect.bottomRight() + QPoint(-fit::fx(3), -fit::fx(3)));
-                painter->drawLine(btnExtRect.topRight() + QPoint(-fit::fx(3), fit::fx(3)), btnExtRect.bottomLeft() + QPoint(fit::fx(3), -fit::fx(3)));
-                painter->setPen(QColor("#985712"));
-                painter->drawLine(QPointF(btnMinRect.left() + fit::fx(2.5), btnMinRect.center().y()),
-                                  QPointF(btnMinRect.right() - fit::fx(2.5), btnMinRect.center().y()));
-                painter->drawImage(btnMaxRect.adjusted(fit::fx(2.0), fit::fx(2.0), -fit::fx(2.0), -fit::fx(2.0)), ciks, ciks.rect());
-            }
-            break;
-        }
-        default:
-            break;
-    }
-
-    painter->setBrush(BACKGROUND_COLOR);
+    painter->setBrush(/*BACKGROUND_COLOR*/Qt::red);
     painter->drawRect(innerRect);
 
     Control::paint(painter, option, widget);
@@ -800,12 +697,9 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
         QPen pen;
         pen.setWidthF(fit::fx(1));
         pen.setJoinStyle(Qt::MiterJoin);
-        if (_skin == SaveUtils::PhonePortrait || _skin == SaveUtils::PhoneLandscape) {
-            pen.setColor(Qt::black);
-        } else {
-            pen.setStyle(Qt::DotLine);
-            pen.setColor(OUTLINE_COLOR);
-        }
+        pen.setStyle(Qt::DotLine);
+        pen.setColor(OUTLINE_COLOR);
+
         painter->setPen(pen);
         painter->setBrush(Qt::transparent);
         painter->drawRect(innerRect);
@@ -825,15 +719,7 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 QRectF Form::frameGeometry() const
 {
-    QRectF rect;
-    if (_skin == SaveUtils::PhonePortrait || _skin == SaveUtils::PhoneLandscape)
-        rect = QRectF({QPointF(-SIZE_SKIN.width() / 2.0, -SIZE_SKIN.height() / 2.0), SIZE_SKIN});
-    else if (_skin == SaveUtils::NoSkin)
-        rect = QRectF({QPointF(-size().width() / 2.0, -size().height() / 2.0), size()});
-    else
-        rect = QRectF(-size().width() / 2.0, -size().height() / 2.0 - MARGIN_TOP / 1.5,
-                      size().width(), size().height() + 2.0 * MARGIN_TOP / 1.5);
-    return rect;
+    return QRectF(QPointF(-size().width() / 2.0, -size().height() / 2.0), size());
 }
 
 bool Form::main() const
@@ -844,21 +730,6 @@ bool Form::main() const
 void Form::setMain(bool value)
 {
     _main = value;
-}
-
-void Form::setSkin(const SaveUtils::Skin& skin)
-{
-    if (skin == _skin)
-        return;
-    _skin = skin;
-    _d->applySkinChange();
-    emit skinChanged();
-    emit cW->skinChanged(this);
-}
-
-const SaveUtils::Skin& Form::skin()
-{
-    return _skin;
 }
 
 #include "control.moc"

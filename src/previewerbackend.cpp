@@ -6,12 +6,19 @@
 
 #include <QProcess>
 #include <QLocalSocket>
-#include <QDataStream>
+
+namespace {
+    quint32 blockSize = 0;
+}
 
 PreviewerBackend::PreviewerBackend()
 {
     _process = new QProcess(this);
     _socket = new QLocalSocket(this);
+    connect(_socket, SIGNAL(readyRead()), SLOT(onReadReady()));
+
+    stream.setDevice(_socket);
+    stream.setVersion(QDataStream::Qt_5_10);
 }
 
 PreviewerBackend* PreviewerBackend::instance()
@@ -45,15 +52,10 @@ void PreviewerBackend::restart()
 
 void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir)
 {
-    QByteArray data;
-    QDataStream out(&data, QIODevice::WriteOnly);
-
-    out << REQUEST_PREVIEW;
-    out << rect;
-    out << dir;
-
-    _socket->write(data);
-    _socket->flush();
+    stream << quint32(SIZE_MSGTYPE) + quint32(sizeof(QRectF)) + quint32(dir.size());
+    stream << REQUEST_PREVIEW;
+    stream << rect;
+    stream << dir;
 }
 
 void PreviewerBackend::connect()
@@ -66,7 +68,7 @@ void PreviewerBackend::connect()
 //    Delayer::delay([=] () -> bool {
 //        qDebug() << _socket->state();
 //        return _socket->state() == QLocalSocket::ConnectedState;
-//    }, true);
+//    }, true, 10000, 2000);
 
 //    if (_socket->state() != QLocalSocket::ConnectedState)
 //        _socket->close();
@@ -74,19 +76,38 @@ void PreviewerBackend::connect()
 
 void PreviewerBackend::onReadReady()
 {
-    if (_socket) {
-        const auto& data = _socket->readAll();
-        QDataStream in(data);
-        QString type;
-        in >> type;
+    if (blockSize == 0) {
+        // Relies on the fact that QDataStream serializes a quint32 into
+        // sizeof(quint32) bytes
+        if (_socket->bytesAvailable() < (int)sizeof(quint32))
+            return;
 
-        if (type == REQUEST_READY) {
-            PreviewResult result;
+        stream >> blockSize;
+    }
 
-            in >> result;
+    if (_socket->bytesAvailable() < blockSize)
+        return;
 
-            emit previewReady(result);
-        }
+    if (stream.atEnd()) {
+        blockSize = 0;
+        return;
+    }
+
+    QString type;
+    stream >> type;
+
+    processMessage(type);
+
+    blockSize = 0;
+}
+
+void PreviewerBackend::processMessage(const QString& type)
+{
+    if (type == REQUEST_READY) {
+        PreviewResult result;
+        stream >> result;
+
+        emit previewReady(result);
     }
 }
 

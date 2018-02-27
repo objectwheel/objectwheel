@@ -182,7 +182,7 @@ void DesignerWidget::handleZoomLevelChange(const QString& text)
 void DesignerWidget::handlePhonePortraitButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(SaveUtils::PhonePortrait);
+//    form->setSkin(SaveUtils::PhonePortrait);
     SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhonePortrait);
     _phonePortraitButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
@@ -198,7 +198,7 @@ void DesignerWidget::handlePhonePortraitButtonClick()
 void DesignerWidget::handlePhoneLandscapeButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(SaveUtils::PhoneLandscape);
+//    form->setSkin(SaveUtils::PhoneLandscape);
     SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhoneLandscape);
     _phoneLandscapeButton->setDisabled(true);
     _phonePortraitButton->setChecked(false);
@@ -214,7 +214,7 @@ void DesignerWidget::handlePhoneLandscapeButtonClick()
 void DesignerWidget::handleDesktopSkinButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(SaveUtils::Desktop);
+//    form->setSkin(SaveUtils::Desktop);
     SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::Desktop);
     _desktopSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
@@ -230,7 +230,7 @@ void DesignerWidget::handleDesktopSkinButtonClick()
 void DesignerWidget::handleNoSkinButtonClick()
 {
     auto form = formScene()->mainForm();
-    form->setSkin(SaveUtils::NoSkin);
+//    form->setSkin(SaveUtils::NoSkin);
     SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::NoSkin);
     _noSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
@@ -307,21 +307,21 @@ void DesignerWidget::handleModeChange()
         _editorModeButton->setEnabled(true);
 
         auto form = formScene()->mainForm();
-        if (form) {
-            if (form->skin() == SaveUtils::Desktop) {
-                _desktopSkinButton->setChecked(true);
-                handleDesktopSkinButtonClick();
-            } else if (form->skin() == SaveUtils::NoSkin) {
-                _noSkinButton->setChecked(true);
-                handleNoSkinButtonClick();
-            } else if (form->skin() == SaveUtils::PhonePortrait) {
-                _phonePortraitButton->setChecked(true);
-                handlePhonePortraitButtonClick();
-            } else {
-                _phoneLandscapeButton->setChecked(true);
-                handlePhoneLandscapeButtonClick();
-            }
-        }
+//        if (form) {
+//            if (form->skin() == SaveUtils::Desktop) {
+//                _desktopSkinButton->setChecked(true);
+//                handleDesktopSkinButtonClick();
+//            } else if (form->skin() == SaveUtils::NoSkin) {
+//                _noSkinButton->setChecked(true);
+//                handleNoSkinButtonClick();
+//            } else if (form->skin() == SaveUtils::PhonePortrait) {
+//                _phonePortraitButton->setChecked(true);
+//                handlePhonePortraitButtonClick();
+//            } else {
+//                _phoneLandscapeButton->setChecked(true);
+//                handlePhoneLandscapeButtonClick();
+//            }
+//        }
 
         _snappingButton->setChecked(_formScene->snapping());
         _snappingButton->setEnabled(true);
@@ -724,8 +724,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
             this, SLOT(handleControlDoubleClick(Control*)));
     connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
             this, SLOT(handleControlDrop(Control*,QPointF,QString)));
-    connect(cW, SIGNAL(skinChanged(Form*)), this,
-            SLOT(updateSkin()));
     connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
             SLOT(handleIndicatorChanges()));
     connect(PreviewerBackend::instance(), SIGNAL(stateChanged()),
@@ -796,19 +794,19 @@ void DesignerWidget::updateSkin()
         _phonePortraitButton->setEnabled(true);
         _desktopSkinButton->setEnabled(true);
 
-        if (form->skin() == SaveUtils::Desktop) {
-            _desktopSkinButton->setChecked(true);
-            _desktopSkinButton->setEnabled(false);
-        } else if (form->skin() == SaveUtils::NoSkin) {
-            _noSkinButton->setChecked(true);
-            _noSkinButton->setEnabled(false);
-        } else if (form->skin() == SaveUtils::PhonePortrait) {
-            _phonePortraitButton->setChecked(true);
-            _phonePortraitButton->setEnabled(false);
-        } else {
-            _phoneLandscapeButton->setChecked(true);
-            _phoneLandscapeButton->setEnabled(false);
-        }
+//        if (form->skin() == SaveUtils::Desktop) {
+//            _desktopSkinButton->setChecked(true);
+//            _desktopSkinButton->setEnabled(false);
+//        } else if (form->skin() == SaveUtils::NoSkin) {
+//            _noSkinButton->setChecked(true);
+//            _noSkinButton->setEnabled(false);
+//        } else if (form->skin() == SaveUtils::PhonePortrait) {
+//            _phonePortraitButton->setChecked(true);
+//            _phonePortraitButton->setEnabled(false);
+//        } else {
+//            _phoneLandscapeButton->setChecked(true);
+//            _phoneLandscapeButton->setEnabled(false);
+//        }
     }
 }
 

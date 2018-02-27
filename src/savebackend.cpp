@@ -45,7 +45,7 @@ bool SaveBackend::initProject(const QString& projectDirectory) const
     if (projectDirectory.isEmpty() ||
         !::exists(projectDirectory) ||
         ::exists(projectDirectory + separator() + DIR_OWDB) ||
-        !cp(DIR_QRC_OWDB, projectDirectory, false, true))
+        !cp(":/resources/qmls/owdb", projectDirectory, false, true))
         return false;
 
     auto propertyPath = projectDirectory + separator() + DIR_OWDB +

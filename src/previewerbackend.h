@@ -2,6 +2,7 @@
 #define PREVIEWERBACKEND_H
 
 #include <QObject>
+#include <QDataStream>
 
 class QProcess;
 class QLocalSocket;
@@ -15,6 +16,7 @@ class PreviewerBackend : public QObject
     public:
         static PreviewerBackend* instance();
         bool isWorking() const;
+        using QObject::connect;
 
     public slots:
         void start();
@@ -30,9 +32,13 @@ class PreviewerBackend : public QObject
         void previewReady(const PreviewResult& result);
 
     private:
+        void processMessage(const QString& type);
+
+    private:
         PreviewerBackend();
 
     private:
+        QDataStream stream;
         QProcess* _process;
         QLocalSocket* _socket;
         bool _isWorking;

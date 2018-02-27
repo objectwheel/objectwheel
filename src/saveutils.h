@@ -12,8 +12,6 @@
 #define DIR_CHILDREN     "c"
 #define DIR_OWDB         "owdb"
 #define DIR_MAINFORM     "1"
-#define DIR_QRC_OWDB     ":/resources/qmls/owdb"
-#define DIR_QRC_FORM     ":/resources/qmls/form"
 #define FILE_PROJECT     "project.json"
 #define FILE_PROPERTIES  "_properties.json"
 #define FILE_ICON        "icon.png" //TODO: Apply everywhere
@@ -64,6 +62,7 @@ class SaveUtils : public QObject
         static QStringList masterPaths(const QString& topPath);
         static bool isOwctrl(const QByteArray& propertyData);
         static bool isOwctrl(const QString& rootPath);
+        static bool isForm(const QString& rootPath);
         static bool isMain(const QString& rootPath);
         static qreal x(const QString& rootPath);
         static qreal y(const QString& rootPath);

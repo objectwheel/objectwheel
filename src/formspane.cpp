@@ -106,7 +106,7 @@ void FormsPane::addButtonClicked()
 
     rm(tempPath);
 
-    if (!mkdir(tempPath) || !cp(DIR_QRC_FORM, tempPath, true, true))
+    if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
         return;
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");

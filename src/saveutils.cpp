@@ -204,7 +204,15 @@ QStringList SaveUtils::masterPaths(const QString& topPath)
     [](const QString& a, const QString& b)
     { return a.size() > b.size(); });
 
+    if (paths.isEmpty() && isForm(topPath))
+        paths << topPath;
+
     return paths;
+}
+
+bool SaveUtils::isForm(const QString& rootPath)
+{
+    return DIR_OWDB == fname(dname(rootPath));
 }
 
 // Returns true if given path belongs to main form

@@ -15,7 +15,6 @@ class ControlWatcher : public QObject
         static ControlWatcher* instance();
 
     signals:
-        void skinChanged(Form*);
         void zValueChanged(Control*);
         void geometryChanged(Control*); // Suppressed
         void previewChanged(Control*);
