@@ -7,6 +7,8 @@
 #include <QQmlError>
 #include <QMetaObject>
 
+class QQmlComponent;
+
 struct PropertyNode
 {
     QString cleanClassName;
@@ -25,6 +27,7 @@ class PreviewResult
         QString uid;
         QImage preview;
         QObject* object;
+        QQmlComponent* component;
         QList<QString> events;
         QList<QQmlError> errors;
         QList<PropertyNode> propertyNodes;

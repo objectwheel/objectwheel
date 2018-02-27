@@ -2,12 +2,12 @@
 #define PREVIEWERBACKEND_H
 
 #include <QObject>
-#include <QDataStream>
 #include <QRectF>
 
 class QProcess;
 class QLocalSocket;
 class PreviewResult;
+class QDataStream;
 
 class PreviewerBackend : public QObject
 {

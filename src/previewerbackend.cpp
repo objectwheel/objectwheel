@@ -6,6 +6,7 @@
 
 #include <QProcess>
 #include <QLocalSocket>
+#include <QDataStream>
 
 namespace {
     quint32 blockSize = 0;
@@ -59,6 +60,9 @@ void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir)
 
         if (_taskList.size() == 1)
             next();
+    } else {
+        _taskList[_taskList.indexOf(task)].rect = task.rect;
+        _taskList[_taskList.indexOf(task)].repreview = task.repreview;
     }
 }
 
@@ -74,6 +78,9 @@ void PreviewerBackend::requestRepreview(const QRectF& rect, const QString& dir)
 
         if (_taskList.size() == 1)
             next();
+    } else {
+        _taskList[_taskList.indexOf(task)].rect = task.rect;
+        _taskList[_taskList.indexOf(task)].repreview = task.repreview;
     }
 }
 
@@ -84,18 +91,23 @@ void PreviewerBackend::next()
 
         qDebug() << task.dir;
 
-        QByteArray msg;
+        QByteArray data, msg;
+        QDataStream dataStream(&data, QIODevice::WriteOnly);
         QDataStream out(&msg, QIODevice::WriteOnly);
-        if (task.repreview) {
-            out << quint32(SIZE_MSGTYPE) + quint32(sizeof(QRectF)) + quint32(task.dir.size());
-            out << REQUEST_REPREVIEW;
-            out << task.rect;
-            out << task.dir;
+        if (task.repreview) {            
+            dataStream << REQUEST_REPREVIEW;
+            dataStream << task.rect;
+            dataStream << task.dir;
+
+            out << quint32(data.size());
+            out << data;
         } else {
-            out << quint32(SIZE_MSGTYPE) + quint32(sizeof(QRectF)) + quint32(task.dir.size());
-            out << REQUEST_PREVIEW;
-            out << task.rect;
-            out << task.dir;
+            dataStream << REQUEST_PREVIEW;
+            dataStream << task.rect;
+            dataStream << task.dir;
+
+            out << quint32(data.size());
+            out << data;
         }
 
         _socket->write(msg);
@@ -136,7 +148,10 @@ void PreviewerBackend::onReadReady()
         return;
     }
 
-    emit onBinaryMessageReceived(_socket->readAll());
+    QByteArray data;
+    in >> data;
+
+    emit onBinaryMessageReceived(data);
 
     _taskList.removeFirst();
     blockSize = 0;

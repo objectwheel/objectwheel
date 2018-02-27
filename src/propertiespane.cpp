@@ -1104,6 +1104,7 @@ void PropertiesPane::clearList()
     _treeWidget->clear();
 }
 
+// FIXME: x, y, width, height, z properties are not shown (because we removed them within previewer)
 void PropertiesPane::refreshList()
 {
     int vsp = _treeWidget->verticalScrollBar()->sliderPosition();
@@ -1270,6 +1271,7 @@ void PropertiesPane::filterList(const QString& filter)
     }
 }
 
+// TODO: Visibility control->properties()'den alınmayacak, ParserWorker ile alınacak
 bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == _treeWidget->viewport()) {
