@@ -358,7 +358,6 @@ void SaveBackend::exposeProject() const
             auto control = new Control(child + separator() +
               DIR_THIS + separator() + "main.qml", FormGui);
             control->setParentItem(pcontrol);
-            control->refresh();
 
             emit instance()->busyLoader((100.0 * (j / fpaths.size()))   +   (((100.0 / fpaths.size())) / pths.size()) * i,
             "Loading " + form->id() + QString("'s %1 of %2 controls").arg(i).arg(pths.size()));

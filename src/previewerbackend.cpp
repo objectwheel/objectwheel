@@ -16,9 +16,6 @@ PreviewerBackend::PreviewerBackend()
     _process = new QProcess(this);
     _socket = new QLocalSocket(this);
     connect(_socket, SIGNAL(readyRead()), SLOT(onReadReady()));
-
-    stream.setDevice(_socket);
-    stream.setVersion(QDataStream::Qt_5_10);
 }
 
 PreviewerBackend* PreviewerBackend::instance()
@@ -29,7 +26,7 @@ PreviewerBackend* PreviewerBackend::instance()
 
 bool PreviewerBackend::isWorking() const
 {
-    return _isWorking;
+    return !_taskList.isEmpty();
 }
 
 void PreviewerBackend::start()
@@ -52,10 +49,57 @@ void PreviewerBackend::restart()
 
 void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir)
 {
-    stream << quint32(SIZE_MSGTYPE) + quint32(sizeof(QRectF)) + quint32(dir.size());
-    stream << REQUEST_PREVIEW;
-    stream << rect;
-    stream << dir;
+    Task task;
+    task.dir = dir;
+    task.rect = rect;
+    task.repreview = false;
+
+    if (!_taskList.contains(task)) {
+        _taskList << task;
+
+        if (_taskList.size() == 1)
+            next();
+    }
+}
+
+void PreviewerBackend::requestRepreview(const QRectF& rect, const QString& dir)
+{
+    Task task;
+    task.dir = dir;
+    task.rect = rect;
+    task.repreview = true;
+
+    if (!_taskList.contains(task)) {
+        _taskList << task;
+
+        if (_taskList.size() == 1)
+            next();
+    }
+}
+
+void PreviewerBackend::next()
+{
+    if (!_taskList.isEmpty()) {
+        const auto& task = _taskList.first();
+
+        qDebug() << task.dir;
+
+        QByteArray msg;
+        QDataStream out(&msg, QIODevice::WriteOnly);
+        if (task.repreview) {
+            out << quint32(SIZE_MSGTYPE) + quint32(sizeof(QRectF)) + quint32(task.dir.size());
+            out << REQUEST_REPREVIEW;
+            out << task.rect;
+            out << task.dir;
+        } else {
+            out << quint32(SIZE_MSGTYPE) + quint32(sizeof(QRectF)) + quint32(task.dir.size());
+            out << REQUEST_PREVIEW;
+            out << task.rect;
+            out << task.dir;
+        }
+
+        _socket->write(msg);
+    }
 }
 
 void PreviewerBackend::connect()
@@ -66,7 +110,6 @@ void PreviewerBackend::connect()
     _socket->connectToServer(SERVER_NAME);
 
 //    Delayer::delay([=] () -> bool {
-//        qDebug() << _socket->state();
 //        return _socket->state() == QLocalSocket::ConnectedState;
 //    }, true, 10000, 2000);
 
@@ -76,36 +119,46 @@ void PreviewerBackend::connect()
 
 void PreviewerBackend::onReadReady()
 {
+    QDataStream in(_socket);
+
     if (blockSize == 0) {
-        // Relies on the fact that QDataStream serializes a quint32 into
-        // sizeof(quint32) bytes
         if (_socket->bytesAvailable() < (int)sizeof(quint32))
             return;
 
-        stream >> blockSize;
+        in >> blockSize;
     }
 
     if (_socket->bytesAvailable() < blockSize)
         return;
 
-    if (stream.atEnd()) {
+    if (in.atEnd()) {
         blockSize = 0;
         return;
     }
 
-    QString type;
-    stream >> type;
+    emit onBinaryMessageReceived(_socket->readAll());
 
-    processMessage(type);
-
+    _taskList.removeFirst();
     blockSize = 0;
+
+    next();
 }
 
-void PreviewerBackend::processMessage(const QString& type)
+void PreviewerBackend::onBinaryMessageReceived(const QByteArray& data)
+{
+    QDataStream in(data);
+
+    QString type;
+    in >> type;
+
+    processMessage(type, in);
+}
+
+void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
 {
     if (type == REQUEST_READY) {
         PreviewResult result;
-        stream >> result;
+        in >> result;
 
         emit previewReady(result);
     }
