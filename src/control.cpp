@@ -688,7 +688,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 {
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
 
-    painter->setBrush(/*BACKGROUND_COLOR*/Qt::red);
+    painter->setBrush(BACKGROUND_COLOR);
     painter->drawRect(innerRect);
 
     Control::paint(painter, option, widget);

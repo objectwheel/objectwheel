@@ -9,7 +9,7 @@ class FormScene;
 class QmlEditorView;
 class ControlView;
 class FormView;
-class LoadingIndicator;
+class WaitingSpinnerWidget;
 class QSplitter;
 class QHBoxLayout;
 class QVBoxLayout;
@@ -35,7 +35,6 @@ class DesignerWidget : public QFrame
         QmlEditorView* qmlEditorView();
         ControlView* controlView();
         FormView* formView();
-        LoadingIndicator* loadingIndicator();
         QSplitter* splitter();
         OutputPane* outputPane();
 
@@ -108,7 +107,7 @@ class DesignerWidget : public QFrame
         QToolButton* _fitInSceneButton;
         QComboBox* _zoomlLevelCombobox;
         QComboBox* _themeCombobox;
-        LoadingIndicator* _loadingIndicator;
+        WaitingSpinnerWidget* _loadingIndicator;
         QToolButton* _layItVertButton;
         QToolButton* _layItHorzButton;
         QToolButton* _layItGridButton;

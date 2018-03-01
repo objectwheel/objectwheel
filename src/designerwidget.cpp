@@ -7,7 +7,7 @@
 #include <control.h>
 #include <fit.h>
 #include <css.h>
-#include <loadingindicator.h>
+#include <waitingspinnerwidget.h>
 #include <saveutils.h>
 #include <savebackend.h>
 #include <outputpane.h>
@@ -134,7 +134,10 @@ void DesignerWidget::scaleScene(qreal ratio)
 
 void DesignerWidget::handleIndicatorChanges()
 {
-    _loadingIndicator->setRunning(SaveBackend::instance()->parserWorking() || PreviewerBackend::instance()->isWorking());
+    if (SaveBackend::instance()->parserWorking() || PreviewerBackend::instance()->isWorking())
+        _loadingIndicator->start();
+    else
+        _loadingIndicator->stop();
 }
 
 void DesignerWidget::handleSnappingClick(bool value)
@@ -170,6 +173,7 @@ void DesignerWidget::handleFitInSceneClick()
 void DesignerWidget::handleThemeChange(const QString& text)
 {
     SaveUtils::setProjectProperty(ProjectBackend::instance()->dir(), PTAG_THEME, text);
+    PreviewerBackend::instance()->restart();
     handleRefreshPreviewClick();
 }
 
@@ -464,7 +468,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _fitInSceneButton = new QToolButton;
     _zoomlLevelCombobox = new QComboBox;
     _themeCombobox = new QComboBox;
-    _loadingIndicator = new LoadingIndicator;
+    _loadingIndicator = new WaitingSpinnerWidget;
     _layItVertButton = new QToolButton;
     _layItHorzButton = new QToolButton;
     _layItGridButton = new QToolButton;
@@ -482,6 +486,17 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _vlayout->setContentsMargins(0, 0, 0, 0);
     _vlayout->setSpacing(0);
     _vlayout->addWidget(_splitter);
+
+    _loadingIndicator->setStyleSheet("Background: transparent;");
+    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setRoundness(50);
+    _loadingIndicator->setMinimumTrailOpacity(5);
+    _loadingIndicator->setTrailFadePercentage(100);
+    _loadingIndicator->setRevolutionsPerSecond(2);
+    _loadingIndicator->setNumberOfLines(12);
+    _loadingIndicator->setLineLength(5);
+    _loadingIndicator->setInnerRadius(4);
+    _loadingIndicator->setLineWidth(2);
 
     _outputPane->setSplitter(_splitter);
     _outputPane->setSplitterHandle(_splitter->handle(4));
@@ -605,8 +620,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _layItHorzButton->setIcon(QIcon(":/resources/images/hort.png"));
     _layItGridButton->setIcon(QIcon(":/resources/images/grid.png"));
     _breakLayoutButton->setIcon(QIcon(":/resources/images/break.png"));
-    _loadingIndicator->setImage(QImage(":/resources/images/loading.png"));
-    _loadingIndicator->setRunning(false);
 
     connect(_snappingButton, SIGNAL(toggled(bool)),
             SLOT(handleSnappingClick(bool)));
@@ -774,11 +787,6 @@ ControlView* DesignerWidget::controlView()
 FormView* DesignerWidget::formView()
 {
     return _formView;
-}
-
-LoadingIndicator* DesignerWidget::loadingIndicator()
-{
-    return _loadingIndicator;
 }
 
 void DesignerWidget::updateSkin()

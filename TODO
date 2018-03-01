@@ -4,7 +4,14 @@ Açık olan proje silinmeden önce uyar
 nesnelerin boyutu ve konumu çapraz platform olarak fit'lenmeli
 ow ile yapılmış uygulamalarda fit olayı nasıl olacak?
 objectwheel uygulamaları temalarını proje ayarlarından okusun ona göre yapılansın/stilize olsun/görünsün
-objectwheel tema işini de hallet
+objectwheel tema ve font işlerini de hallet
+tema değiştirince neden objeclerin görüntüleri bozuluyor
+neden objectwheel'in previewer'i bilgisayarı şişirip donduruyor
+View class'ının çalışmasını "görsel kırmalar"ı bitirecek şekilde düzelt
+control inspector'un horizontal scrollbarı ı neden her "refresp preview" operasyonu sonrası çıldırıyor uzuyor
+properties pane'de geometry'yi unutma
+genel inline todo temizliği
+objectwheel'i qlocalserver yap, previewer'ı client yap
 
 Form'ların x y leri gui editörden değişmicek
 Ancak ve ancak, properties window'dan değişecek

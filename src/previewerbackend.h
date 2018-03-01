@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QRectF>
+#include <QProcess>
 
-class QProcess;
 class QLocalSocket;
 class PreviewResult;
 class QDataStream;
@@ -17,9 +17,9 @@ class PreviewerBackend : public QObject
     private:
         struct Task
         {
-            bool repreview;
             QRectF rect;
             QString dir;
+            bool repreview;
 
             bool operator==(const Task& t1)
             {
@@ -29,27 +29,30 @@ class PreviewerBackend : public QObject
 
     public:
         static PreviewerBackend* instance();
+        bool isReady() const;
         bool isWorking() const;
-        using QObject::connect;
 
     public slots:
-        void next();
         void start();
         void restart();
-        void requestPreview(const QRectF& rect, const QString& dir);
-        void requestRepreview(const QRectF& rect, const QString& dir);
+        void requestPreview(const QRectF& rect, const QString& dir, bool repreview = false);
 
     private slots:
-        void connect();
-        void onReadReady();
-        void onBinaryMessageReceived(const QByteArray& data);
+        void onProcessStart();
+        void onProcessFinish(int, QProcess::ExitStatus);
+
+        void onSocketReadReady();
+        void onSocketBinaryMessageReceived(const QByteArray& data);
+
+    private:
+        void waitForReady();
+        void connectToServer();
+        void processNextTask();
+        void processMessage(const QString& type, QDataStream& in);
 
     signals:
         void stateChanged();
         void previewReady(const PreviewResult& result);
-
-    private:
-        void processMessage(const QString& type, QDataStream& in);
 
     private:
         PreviewerBackend();

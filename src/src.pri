@@ -22,7 +22,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/controlscene.h \
            $$PWD/controlview.h \
            $$PWD/formview.h \
-           $$PWD/loadingindicator.h \
            $$PWD/qmleditorview.h \
            $$PWD/qmlcodeeditor.h \
            $$PWD/qmlhighlighter.h \
@@ -106,7 +105,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlscene.cpp \
            $$PWD/controlview.cpp \
            $$PWD/formview.cpp \
-           $$PWD/loadingindicator.cpp \
            $$PWD/qmleditorview.cpp \
            $$PWD/qmlcodeeditor.cpp \
            $$PWD/qmlhighlighter.cpp \
