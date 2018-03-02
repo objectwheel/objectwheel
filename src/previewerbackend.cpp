@@ -25,6 +25,14 @@ PreviewerBackend::PreviewerBackend()
     connect(_process, SIGNAL(finished(int, QProcess::ExitStatus)),
       SLOT(onProcessFinish(int, QProcess::ExitStatus)));
     connect(_process, SIGNAL(started()), SLOT(onProcessStart()));
+
+//    connect(_process, &QProcess::readyReadStandardError, [=] {
+//        qDebug().noquote().nospace() << _process->readAllStandardError();
+//    });
+
+//    connect(_process, &QProcess::readyReadStandardOutput, [=] {
+//        qDebug().noquote().nospace() << _process->readAllStandardOutput();
+//    });
 }
 
 PreviewerBackend* PreviewerBackend::instance()
