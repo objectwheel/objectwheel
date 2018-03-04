@@ -220,16 +220,11 @@ void ControlScene::drawForeground(QPainter* painter, const QRectF& rect)
         }
 
         const auto& guideLines = this->guideLines();
-        QPen pen(GUIDELINE_COLOR);
-        pen.setWidthF(0);
-        pen.setStyle(Qt::DashLine);
-        painter->setPen(pen);
-        painter->setBrush(pen.color());
+        painter->setPen(GUIDELINE_COLOR);
         painter->drawLines(guideLines);
 
         for (QLineF line : guideLines) {
-            pen.setStyle(Qt::SolidLine);
-            painter->setPen(pen);
+            painter->setBrush(QColor(GUIDELINE_COLOR));
             painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
         }

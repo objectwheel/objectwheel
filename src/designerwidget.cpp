@@ -134,7 +134,7 @@ void DesignerWidget::scaleScene(qreal ratio)
 
 void DesignerWidget::handleIndicatorChanges()
 {
-    if (SaveBackend::instance()->parserWorking() || PreviewerBackend::instance()->isWorking())
+    if (SaveBackend::instance()->parserWorking() || PreviewerBackend::instance()->isBusy())
         _loadingIndicator->start();
     else
         _loadingIndicator->stop();
@@ -739,7 +739,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
             this, SLOT(handleControlDrop(Control*,QPointF,QString)));
     connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
             SLOT(handleIndicatorChanges()));
-    connect(PreviewerBackend::instance(), SIGNAL(stateChanged()),
+    connect(PreviewerBackend::instance(), SIGNAL(busyChanged()),
             SLOT(handleIndicatorChanges()));
 
     connect(this, SIGNAL(modeChanged()), this, SLOT(handleModeChange()));

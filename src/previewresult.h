@@ -23,7 +23,6 @@ class PreviewResult
 
     public:
         bool gui;
-        bool window;
         QString uid;
         QImage preview;
         QObject* object;

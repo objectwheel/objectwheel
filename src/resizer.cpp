@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include <QCursor>
+#include <control.h>
 
 #define SIZE (fit::fx(6.0))
 #define COLOR (Qt::white)
@@ -150,7 +151,7 @@ void Resizer::mousePressEvent(QGsme* event)
 void Resizer::mouseMoveEvent(QGsme* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
-    auto parent = (QGraphicsWidget*)parentItem();
+    auto parent = static_cast<Control*>(parentItem());
 
     if (!parent || _disabled || !_resizing)
         return;
@@ -160,24 +161,28 @@ void Resizer::mouseMoveEvent(QGsme* event)
     switch (_placement) {
         case Top:
             diff_y = event->lastPos().y() - event->pos().y();
+            if (parent->form()) diff_y *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(0, -diff_y, 0, 0));
             break;
 
         case Right:
             diff_x = event->pos().x() - event->lastPos().x();
+            if (parent->form()) diff_x *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(0, 0, diff_x, 0));
             break;
 
         case Bottom:
             diff_y = event->pos().y() - event->lastPos().y();
+            if (parent->form()) diff_y *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(0, 0, 0, diff_y));
             break;
 
         case Left:
             diff_x = event->lastPos().x() - event->pos().x();
+            if (parent->form()) diff_x *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(-diff_x, 0, 0, 0));
             break;
@@ -185,6 +190,8 @@ void Resizer::mouseMoveEvent(QGsme* event)
         case TopLeft:
             diff_x = event->lastPos().x() - event->pos().x();
             diff_y = event->lastPos().y() - event->pos().y();
+            if (parent->form()) diff_x *= 2.0;
+            if (parent->form()) diff_y *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(-diff_x, -diff_y, 0, 0));
             break;
@@ -192,6 +199,8 @@ void Resizer::mouseMoveEvent(QGsme* event)
         case TopRight:
             diff_x = event->pos().x() - event->lastPos().x();
             diff_y = event->lastPos().y() - event->pos().y();
+            if (parent->form()) diff_x *= 2.0;
+            if (parent->form()) diff_y *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(0, -diff_y, diff_x, 0));
             break;
@@ -199,6 +208,8 @@ void Resizer::mouseMoveEvent(QGsme* event)
         case BottomRight:
             diff_x = event->pos().x() - event->lastPos().x();
             diff_y = event->pos().y() - event->lastPos().y();
+            if (parent->form()) diff_x *= 2.0;
+            if (parent->form()) diff_y *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(0, 0, diff_x, diff_y));
             break;
@@ -206,6 +217,8 @@ void Resizer::mouseMoveEvent(QGsme* event)
         case BottomLeft:
             diff_x = event->lastPos().x() - event->pos().x();
             diff_y = event->pos().y() - event->lastPos().y();
+            if (parent->form()) diff_x *= 2.0;
+            if (parent->form()) diff_y *= 2.0;
             parent->setGeometry(parent->geometry().
               adjusted(-diff_x, 0, 0, diff_y));
             break;

@@ -1,3 +1,5 @@
-#define REQUEST_PREVIEW   tr("0x0001")
-#define REQUEST_READY     tr("0x0002")
-#define REQUEST_REPREVIEW tr("0x0003")
+#define REQUEST_PREVIEW   QString("0x0001")
+#define REQUEST_READY     QString("0x0002")
+#define REQUEST_REPREVIEW QString("0x0003")
+#define REQUEST_TERMINATE QString("0x0004")
+#define REQUEST_RESTART   QString("0x0005")

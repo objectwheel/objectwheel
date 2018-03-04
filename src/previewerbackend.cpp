@@ -4,35 +4,65 @@
 #include <previewercommands.h>
 #include <delayer.h>
 
+#include <QPointer>
 #include <QCryptographicHash>
+#include <QLocalServer>
 #include <QLocalSocket>
 #include <QDataStream>
-#include <QMessageBox>
-#include <QApplication>
 #include <QDateTime>
+#include <QProcess>
 
 namespace {
     quint32 blockSize = 0;
     QString serverName;
+    QPointer<QLocalSocket> socket;
+
+    typedef QCryptographicHash Hasher;
+
+    void send(QLocalSocket* socket, const QByteArray& data)
+    {
+        QByteArray msg;
+        QDataStream out(&msg, QIODevice::WriteOnly);
+        out << quint32(data.size());
+        out << data;
+        socket->write(msg);
+        socket->flush();
+    }
+
+    void terminate(QLocalSocket* socket)
+    {
+        QByteArray data;
+        QDataStream out(&data, QIODevice::WriteOnly);
+        out << REQUEST_TERMINATE;
+        send(socket, data);
+        socket->abort();
+        ::socket = nullptr;
+    }
+
+    void restart(QLocalSocket* socket, const QStringList& arguments)
+    {
+        QByteArray data;
+        QDataStream out(&data, QIODevice::WriteOnly);
+        out << REQUEST_RESTART;
+        out << arguments;
+        send(socket, data);
+        socket->abort();
+        ::socket = nullptr;
+    }
 }
 
 PreviewerBackend::PreviewerBackend()
 {
-    _process = new QProcess(this);
-    _socket = new QLocalSocket(this);
+    _server = new QLocalServer(this);
+    _server->setSocketOptions(QLocalServer::UserAccessOption);
+    connect(_server, SIGNAL(newConnection()), SLOT(onNewConnection()));
+    serverName = Hasher::hash(QString::number(QDateTime::currentSecsSinceEpoch()).toUtf8(), Hasher::Md5).toHex();
+}
 
-    connect(_socket, SIGNAL(readyRead()), SLOT(onSocketReadReady()));
-    connect(_process, SIGNAL(finished(int, QProcess::ExitStatus)),
-      SLOT(onProcessFinish(int, QProcess::ExitStatus)));
-    connect(_process, SIGNAL(started()), SLOT(onProcessStart()));
-
-//    connect(_process, &QProcess::readyReadStandardError, [=] {
-//        qDebug().noquote().nospace() << _process->readAllStandardError();
-//    });
-
-//    connect(_process, &QProcess::readyReadStandardOutput, [=] {
-//        qDebug().noquote().nospace() << _process->readAllStandardOutput();
-//    });
+PreviewerBackend::~PreviewerBackend()
+{
+    if (socket)
+        terminate(socket);
 }
 
 PreviewerBackend* PreviewerBackend::instance()
@@ -41,39 +71,33 @@ PreviewerBackend* PreviewerBackend::instance()
     return &instance;
 }
 
-bool PreviewerBackend::isReady() const
+bool PreviewerBackend::init()
 {
-    return _socket->state() == QLocalSocket::ConnectedState;
+    return
+    _server->listen(serverName) &&
+    QProcess::startDetached(
+        "./objectwheel-previewer",
+        QStringList() << serverName
+    );
 }
 
-bool PreviewerBackend::isWorking() const
+bool PreviewerBackend::isBusy() const
 {
     return !_taskList.isEmpty();
 }
 
-void PreviewerBackend::start()
-{
-    serverName = QCryptographicHash::hash(
-        QString::number(QDateTime::currentSecsSinceEpoch()).toUtf8(),
-        QCryptographicHash::Md5
-    ).toHex();
-
-    _process->setProgram("./objectwheel-previewer");
-    _process->setArguments(
-        QStringList() <<
-        ProjectBackend::instance()->dir() <<
-        serverName
-    );
-
-    _process->start();
-    waitForReady();
-}
-
 void PreviewerBackend::restart()
 {
-    _socket->abort();
-    _process->kill();
-    waitForReady();
+    if (socket) {
+        blockSize = 0;
+        _taskList.clear();
+        ::restart(
+            socket.data(),
+            QStringList() << ProjectBackend::instance()->dir() << serverName
+        );
+    } else {
+        qFatal("No connection with Objectwheel Previewing Service");
+    }
 }
 
 void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bool repreview)
@@ -88,52 +112,61 @@ void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bo
 
         if (_taskList.size() == 1) {
             processNextTask();
-            emit stateChanged();
+            emit busyChanged();
         }
     } else {
         _taskList[_taskList.indexOf(task)].rect = task.rect;
         _taskList[_taskList.indexOf(task)].repreview = task.repreview;
+        _taskList[_taskList.indexOf(task)].needsUpdate = true;
     }
 }
 
-void PreviewerBackend::onProcessStart()
+void PreviewerBackend::onNewConnection()
 {
-    connectToServer();
+    auto client = _server->nextPendingConnection();
+
+    if (socket.isNull()) {
+        socket = client;
+
+        connect(socket.data(), SIGNAL(disconnected()), socket.data(), SLOT(deleteLater()));
+        connect(socket.data(), SIGNAL(readyRead()), SLOT(onReadReady()));
+
+        processNextTask();
+    } else {
+        terminate(client);
+    }
 }
 
-void PreviewerBackend::onProcessFinish(int, QProcess::ExitStatus)
+void PreviewerBackend::onReadReady()
 {
-    QTimer::singleShot(0, this, &PreviewerBackend::start);
-}
+    if (socket) {
+        QDataStream in(socket);
 
-void PreviewerBackend::onSocketReadReady()
-{
-    QDataStream in(_socket);
+        if (blockSize == 0) {
+            if (socket->bytesAvailable() < (int)sizeof(quint32))
+                return;
 
-    if (blockSize == 0) {
-        if (_socket->bytesAvailable() < (int)sizeof(quint32))
+            in >> blockSize;
+        }
+
+        if (socket->bytesAvailable() < blockSize)
             return;
 
-        in >> blockSize;
-    }
+        if (in.atEnd()) {
+            blockSize = 0;
+            return;
+        }
 
-    if (_socket->bytesAvailable() < blockSize)
-        return;
+        QByteArray data;
+        in >> data;
 
-    if (in.atEnd()) {
+        emit onBinaryMessageReceived(data);
+
         blockSize = 0;
-        return;
     }
-
-    QByteArray data;
-    in >> data;
-
-    emit onSocketBinaryMessageReceived(data);
-
-    blockSize = 0;
 }
 
-void PreviewerBackend::onSocketBinaryMessageReceived(const QByteArray& data)
+void PreviewerBackend::onBinaryMessageReceived(const QByteArray& data)
 {
     QDataStream in(data);
     QString type;
@@ -141,87 +174,38 @@ void PreviewerBackend::onSocketBinaryMessageReceived(const QByteArray& data)
     processMessage(type, in);
 }
 
-void PreviewerBackend::waitForReady()
-{
-    Delayer::delay(
-        std::bind(
-            &PreviewerBackend::isReady,
-            PreviewerBackend::instance()
-        ),
-        true
-    );
-}
-
-void PreviewerBackend::connectToServer()
-{
-    if (_socket->state() == QLocalSocket::ConnectedState)
-        return;
-
-    _socket->connectToServer(serverName);
-
-    Delayer::delay(
-        [=] () -> bool {
-            bool connected = _socket->state() == QLocalSocket::ConnectedState;
-            if (!connected)
-                _socket->connectToServer(serverName);
-            return _socket->state() == QLocalSocket::ConnectedState;
-        },
-        true,
-        5000,
-        200
-    );
-
-    if (_socket->state() != QLocalSocket::ConnectedState) {
-        _socket->close();
-        qFatal("Unable to start Objectwheel Previewer Layer.");
-    }
-}
-
 void PreviewerBackend::processNextTask()
 {
-    if (!_taskList.isEmpty()) {
+    if (!_taskList.isEmpty() && socket) {
         const auto& task = _taskList.first();
 
-        QByteArray data, msg;
-        QDataStream dataStream(&data, QIODevice::WriteOnly);
-        QDataStream out(&msg, QIODevice::WriteOnly);
+        QByteArray data;
+        QDataStream out(&data, QIODevice::WriteOnly);
+        out << (task.repreview ? REQUEST_REPREVIEW : REQUEST_PREVIEW);
+        out << task.rect;
+        out << task.dir;
 
-        if (task.repreview) {            
-            dataStream << REQUEST_REPREVIEW;
-            dataStream << task.rect;
-            dataStream << task.dir;
-
-            out << quint32(data.size());
-            out << data;
-        } else {
-            dataStream << REQUEST_PREVIEW;
-            dataStream << task.rect;
-            dataStream << task.dir;
-
-            out << quint32(data.size());
-            out << data;
-        }
-
-        _socket->write(msg);
+        send(socket.data(), data);
     }
 }
 
 void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
 {
     if (type == REQUEST_READY) {
-        _taskList.removeFirst();
+        if (!_taskList.first().needsUpdate)
+            _taskList.removeFirst();
+        else
+            _taskList.first().needsUpdate = false;
 
         PreviewResult result;
         in >> result;
+
+        if (!isBusy())
+            emit busyChanged();
+
         emit previewReady(result);
-
-        if (!isWorking())
-            emit stateChanged();
-
-        QTimer::singleShot(0, this, &PreviewerBackend::processNextTask);
-
-        return;
+        return processNextTask();
     }
 
-    qWarning() << tr("Unknown message.");
+    qWarning() << tr("Unknown message arrived.");
 }

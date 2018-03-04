@@ -65,7 +65,6 @@ QDataStream& operator<<(QDataStream& out, const PropertyNode& node)
 QDataStream& operator>>(QDataStream& in, PreviewResult& result)
 {
     in >> result.gui;
-    in >> result.window;
     in >> result.uid;
     in >> result.preview;
     in >> result.events;
@@ -78,7 +77,6 @@ QDataStream& operator>>(QDataStream& in, PreviewResult& result)
 QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
 {
     out << result.gui;
-    out << result.window;
     out << result.uid;
     out << result.preview;
     out << result.events;

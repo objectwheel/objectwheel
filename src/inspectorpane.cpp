@@ -145,6 +145,7 @@ InspectorPane::InspectorPane(MainWindow* parent)
     _treeWidget->header()->resizeSection(0, fit::fx(250));
     _treeWidget->header()->resizeSection(1, fit::fx(50));
     _treeWidget->setItemDelegate(new InspectorListDelegate(_treeWidget));
+    _treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     connect(_treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
       SLOT(handleClick(QTreeWidgetItem*,int)));

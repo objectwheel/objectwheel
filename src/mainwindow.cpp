@@ -375,6 +375,9 @@ void MainWindow::clear()
 
     ToolsBackend::instance()->clear();
 
+    designerWidget()->controlScene()->clearSelection();
+    designerWidget()->formScene()->clearSelection();
+
     designerWidget()->clear();
     designerWidget()->controlScene()->clearScene();
     designerWidget()->formScene()->clearScene();

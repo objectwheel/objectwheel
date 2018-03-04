@@ -7,10 +7,19 @@
 #include <windowmanager.h>
 #include <authenticator.h>
 #include <previewerbackend.h>
+#include <QMessageBox>
 
 BackendManager::BackendManager()
 {
     Authenticator::instance()->init(QUrl(APP_WSSSERVER));
+
+    if (!PreviewerBackend::instance()->init()) {
+        QMessageBox::critical(
+            nullptr,
+            tr("Error"),
+            tr("Unable to start Objectwheel Previewing Service")
+        );
+    }
 
     connect(ProjectBackend::instance(), SIGNAL(started()),
       WindowManager::instance()->get(WindowManager::Main), SLOT(clear()));
@@ -33,7 +42,7 @@ void BackendManager::handleSessionStop() const
 
 void BackendManager::handleProjectStart() const
 {
-    PreviewerBackend::instance()->start();
+    PreviewerBackend::instance()->restart();
 
     SaveBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
