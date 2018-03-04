@@ -923,14 +923,16 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
             if (index.column() == 0) {
                 QRectF mrect(option.rect);
                 mrect.setX(0.5);
-                painter->fillRect(mrect, QColor("#EDF3FE"));
+                painter->fillRect(mrect, QColor("#faf1e8"));
             } else {
-                painter->fillRect(option.rect, QColor("#EDF3FE"));
+                painter->fillRect(option.rect, QColor("#faf1e8"));
             }
         }
     } else {
-        painter->fillRect(option.rect, QColor("#d5d9dC"));
-        option.palette.setColor(QPalette::Highlight, QColor("#d5d9dC"));
+        painter->fillRect(option.rect, QColor("#a69685"));
+        option.palette.setColor(QPalette::Text, Qt::white);
+        option.palette.setColor(QPalette::HighlightedText, Qt::white);
+        option.palette.setColor(QPalette::Highlight, QColor("#a69685"));
     }
 
     if (index.column() == 0) {
@@ -942,9 +944,9 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
             branchColor = option.palette.highlight();
         } else {
             if (!model->parent(index).isValid())
-                branchColor = QColor("#d5d9dC");
+                branchColor = QColor("#a69685");
             else if (index.row() % 2)
-                branchColor = QColor("#EDF3FE");
+                branchColor = QColor("#faf1e8");
         }
         painter->fillRect(branchRect, branchColor);
 
@@ -964,12 +966,6 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
         }
     }
 
-    const bool mask = qvariant_cast<bool>
-      (index.model()->data(index, Qt::EditRole));
-    if (!model->parent(index).isValid() && mask) {
-        option.font.setWeight(QFont::Medium);
-    }
-
     QStyledItemDelegate::paint(painter, option, index);
 
     auto type = index.data(NodeRole::Type).value<NodeType>();
@@ -986,7 +982,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
             opt.rect = option.rect;
             opt.state = QStyle::State_Active | QStyle::State_Enabled;
             opt.state |= value ? QStyle::State_On : QStyle::State_Off;
-            m_view->style()->drawControl(QStyle::CE_CheckBox, &opt, painter, m_view);
+            qApp->style()->drawControl(QStyle::CE_CheckBox, &opt, painter, m_view);
             break;
         }
 
@@ -994,26 +990,19 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
             break;
     }
 
-    const QColor color = static_cast<QRgb>(qApp->style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
     const QPen oldPen = painter->pen();
-    QPen pen(color);
-    pen.setWidthF(fit::fx(1));
-    painter->setPen(pen);
+    painter->setPen("#25000000");
 
     if (index.column() == 0) {
-        painter->drawLine(QPointF(0.5, option.rect.y() + 0.5),
-                          QPointF(0.5, option.rect.bottom() + 0.5));
         if (model->parent(index).isValid()) {
             painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
                               option.rect.right() + 0.5, option.rect.bottom() + 0.5);
         }
     } else {
-        painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
-                          option.rect.right() + 0.5, option.rect.bottom() + 0.5);
+        painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
+                          QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
     }
 
-    painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
-                      QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
     painter->setPen(oldPen);
 
     if (!m_view->isEnabled()) {
@@ -1042,10 +1031,10 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     setPalette(p);
 
     QPalette p2(_treeWidget->palette());
-    p2.setColor(QPalette::Base, "#F3F7FA");
-    p2.setColor(QPalette::Highlight, "#E0E4E7");
-    p2.setColor(QPalette::Text, "#202427");
-    p2.setColor(QPalette::HighlightedText, "#202427");
+    p2.setColor(QPalette::All, QPalette::Base, QColor("#fffaf5"));
+    p2.setColor(QPalette::All, QPalette::Highlight, QColor("#ebd5c0"));
+    p2.setColor(QPalette::All, QPalette::Text, QColor("#202427"));
+    p2.setColor(QPalette::All, QPalette::HighlightedText, QColor("#202427"));
     _treeWidget->setPalette(p2);
 
     _treeWidget->setColumnCount(2);
@@ -1065,6 +1054,16 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _treeWidget->setItemDelegate(new PropertiesDelegate(_treeWidget, _treeWidget));
+
+    _treeWidget->setObjectName("treeWidgetss");
+    _treeWidget->setStyleSheet("#treeWidgetss { border: 1px solid #8c6a48; }");
+
+    _treeWidget->header()->setObjectName("header");
+    _treeWidget->header()->setFixedHeight(fit::fx(23));
+    _treeWidget->header()->setStyleSheet(
+        "#header { color: white; border:none; font-weight: Medium; border-bottom: 1px solid #8c6a48;"
+        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #AB8157, stop:1 #9C7650); }"
+    );
 
     _layout->setSpacing(fit::fx(2));
     _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
@@ -1286,18 +1285,38 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
                         painter.fillRect(0, i * fit::fx(20), w->width(),
-                          fit::fx(20), QColor("#E5E9EC"));
+                          fit::fx(20), QColor("#faf1e8"));
                     } else if (!drawn && (i == int(ic) / 2 ||
                       i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
                         drawn = true;
                         painter.setPen(QColor(sc.size() == 1 ?
-                          "#d98083" : "#a0a4a7"));
+                          "#d98083" : "#b5aea7"));
                         painter.drawText(0, i * fit::fx(20), w->width(),
                           fit::fx(20), Qt::AlignCenter, sc.size() == 1 ?
                             "Control has errors" : "No controls selected");
                     }
                 }
 
+            } else {
+                const auto tli = _treeWidget->topLevelItem(_treeWidget->topLevelItemCount() - 1);
+                const auto lci = tli->child(tli->childCount() - 1);
+                const auto& lcir = _treeWidget->visualItemRect(lci);
+                const qreal ic = (
+                    _treeWidget->viewport()->height() +
+                    qAbs(lcir.y())
+                ) / (qreal) lcir.height();
+
+                for (int i = 0; i < ic; i++) {
+                    if (i % 2) {
+                        painter.fillRect(
+                            0,
+                            lcir.y() + i * lcir.height(),
+                            _treeWidget->viewport()->width(),
+                            lcir.height(),
+                            QColor("#faf1e8")
+                        );
+                    }
+                }
             }
         }
         return false;

@@ -15,11 +15,13 @@ objectwheel'i qlocalserver yap, previewer'ı client yap
 pane hidden ken buttonlar hep shine lar
 consol çıktısındaki boşluk olayını hallet
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
+control inspector her refres'de uzayıp gidiyor
 
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin
 code editör'den yapılan değişiklikler sonucu repreview çağrılsın (preview değil)
 
+internetaccess bokunu her yerden kaldır
 Form'ların x y leri gui editörden değişmicek
 Ancak ve ancak, properties window'dan değişecek
 Formlar x y şeklinde hardcoded olmayan propertilere sahip olmayacak

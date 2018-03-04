@@ -100,6 +100,21 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
         o.palette = p;
     }
 
+    const QPen oldPen = painter->pen();
+    painter->setPen("#10000000");
+
+    if (index.column() == 0) {
+        if (model->parent(index).isValid()) {
+            painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
+                              option.rect.right() + 0.5, option.rect.bottom() + 0.5);
+        }
+    } else {
+        painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
+                          QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
+    }
+
+    painter->setPen(oldPen);
+
     QStyledItemDelegate::paint(painter, o, index);
 }
 
@@ -115,15 +130,16 @@ InspectorPane::InspectorPane(MainWindow* parent)
     _treeWidget = new QTreeWidget;
 
     QPalette p(palette());
+    p.setColor(QPalette::Base, QColor("#E0E4E7"));
     p.setColor(QPalette::Window, QColor("#E0E4E7"));
     setPalette(p);
     setAutoFillBackground(true);
 
     QPalette p2(_treeWidget->palette());
-    p2.setColor(QPalette::Base, QColor("#F3F7FA"));
-    p2.setColor(QPalette::Highlight, QColor("#d0d4d7"));
-    p2.setColor(QPalette::Text, QColor("#202427"));
-    p2.setColor(QPalette::HighlightedText, QColor("#202427"));
+    p2.setColor(QPalette::All, QPalette::Base, QColor("#FAFFF9"));
+    p2.setColor(QPalette::All, QPalette::Highlight, QColor("#cee7cb"));
+    p2.setColor(QPalette::All, QPalette::Text, QColor("#202427"));
+    p2.setColor(QPalette::All, QPalette::HighlightedText, QColor("#202427"));
     _treeWidget->setPalette(p2);
 
     _treeWidget->setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -146,6 +162,13 @@ InspectorPane::InspectorPane(MainWindow* parent)
     _treeWidget->header()->resizeSection(1, fit::fx(50));
     _treeWidget->setItemDelegate(new InspectorListDelegate(_treeWidget));
     _treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    _treeWidget->header()->setFixedHeight(fit::fx(23));
+    _treeWidget->setStyleSheet("QTreeView { border: 1px solid #4A7C42; }");
+    _treeWidget->header()->setStyleSheet(
+        "color: white; font-weight: Medium; border:none; border-bottom: 1px solid #4A7C42;"
+        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #62A558, stop:1 #599750);"
+    );
 
     connect(_treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
       SLOT(handleClick(QTreeWidgetItem*,int)));
@@ -194,7 +217,7 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
                             tlir.y() + i * tlir.height(),
                             _treeWidget->viewport()->width(),
                             tlir.height(),
-                            QColor("#E5E9EC")
+                            QColor("#ecfbea")
                         );
                     }
                 }
@@ -207,10 +230,10 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
                         painter.fillRect(
                             0, i * hg,
                             _treeWidget->viewport()->width(),
-                            hg, QColor("#E5E9EC")
+                            hg, QColor("#ecfbea")
                         );
                     } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
-                        painter.setPen(QColor("#a0a4a7"));
+                        painter.setPen(QColor("#a6afa5"));
                         painter.drawText(0, i * hg, _treeWidget->viewport()->width(),
                           hg, Qt::AlignCenter, "No items to show");
                     }
@@ -341,7 +364,7 @@ void InspectorPane::handleClick(QTreeWidgetItem* item, int)
 
 QSize InspectorPane::sizeHint() const
 {
-    return fit::fx(QSizeF{200, 200}).toSize();
+    return fit::fx(QSizeF{200, 230}).toSize();
 }
 
 #include "inspectorpane.moc"

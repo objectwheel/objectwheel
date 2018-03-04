@@ -13,16 +13,53 @@
 #include <frontend.h>
 #include <mainwindow.h>
 
+#include <QLabel>
 #include <QStandardPaths>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPalette>
 #include <QListWidget>
 #include <QScrollBar>
+#include <QPainter>
+#include <QStyledItemDelegate>
+
+class FormListDelegate: public QStyledItemDelegate
+{
+        Q_OBJECT
+
+    public:
+        FormListDelegate(QWidget* parent);
+        void paint(QPainter* painter, const QStyleOptionViewItem &option,
+          const QModelIndex &index) const override;
+};
+
+FormListDelegate::FormListDelegate(QWidget* parent)
+    : QStyledItemDelegate(parent)
+{
+}
+
+void FormListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
+    const QModelIndex &index) const
+{
+    const QAbstractItemModel* model = index.model();
+    Q_ASSERT(model);
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    const QPen oldPen = painter->pen();
+    painter->setPen("#10000000");
+    painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
+                      QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
+    painter->setPen(oldPen);
+
+    QStyledItemDelegate::paint(painter, option, index);
+}
 
 FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
 {
-    _layout = new QVBoxLayout;
+    _layout = new QVBoxLayout(this);
+    _innerWidget = new QFrame;
+    _innerLayout = new QVBoxLayout(_innerWidget);
+    _header = new QLabel;
     _listWidget = new QListWidget;
     _buttonLayout = new QHBoxLayout;
     _addButton = new FlatButton;
@@ -34,13 +71,15 @@ FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
     setPalette(p);
 
     QPalette p2(_listWidget->palette());
-    p2.setColor(QPalette::Base, "#F3F7FA");
-    p2.setColor(QPalette::Window, "#F3F7FA");
-    p2.setColor(QPalette::Highlight, "#d0d4d7");
-    p2.setColor(QPalette::Text, "#202427");
-    p2.setColor(QPalette::HighlightedText, "#202427");
+    p2.setColor(QPalette::All, QPalette::Base, QColor("#f5faff"));
+    p2.setColor(QPalette::All, QPalette::Highlight, QColor("#c0d5eb"));
+    p2.setColor(QPalette::All, QPalette::Text, QColor("#202427"));
+    p2.setColor(QPalette::All, QPalette::HighlightedText, QColor("#202427"));
     _listWidget->setPalette(p2);
 
+    _listWidget->setItemDelegate(new FormListDelegate(_listWidget));
+    _listWidget->viewport()->installEventFilter(this);
+    _listWidget->setStyleSheet("QListView { border: none; }");
     _listWidget->setFocusPolicy(Qt::NoFocus);
     _listWidget->setIconSize(QSize(fit::fx(14),fit::fx(14)));
     _listWidget->setSelectionMode(QListWidget::SingleSelection);
@@ -58,6 +97,16 @@ FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
         connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
         connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
     });
+
+    _innerWidget->setObjectName("innerWidget");
+    _innerWidget->setStyleSheet("#innerWidget { border: 1px solid #1a69bd; }");
+
+    _header->setText("Forms");
+    _header->setFixedHeight(fit::fx(23));
+    _header->setStyleSheet(
+        "color: white; font-weight: Medium; border:none; border-bottom: 1px solid #1a69bd;"
+        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1069C7);"
+    );
 
     _addButton->settings().topColor = "#62A558";
     _addButton->settings().bottomColor = "#599750";
@@ -83,11 +132,65 @@ FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
     _buttonLayout->addStretch();
     _buttonLayout->addWidget(_removeButton);
 
-    _layout->addWidget(_listWidget);
+    _innerLayout->addWidget(_header);
+    _innerLayout->addWidget(_listWidget);
+    _innerLayout->setSpacing(0);
+    _innerLayout->setContentsMargins(0, 0, 0, 0);
+
+    _layout->addWidget(_innerWidget);
     _layout->addLayout(_buttonLayout);
     _layout->setSpacing(fit::fx(2));
     _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
-    setLayout(_layout);
+}
+
+bool FormsPane::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == _listWidget->viewport()) {
+        if (event->type() == QEvent::Paint) {
+            QPainter painter(_listWidget->viewport());
+            if (_listWidget->count() > 0) {
+                const auto tli = _listWidget->item(0);
+                const auto& tlir = _listWidget->visualItemRect(tli);
+                const qreal ic = (
+                    _listWidget->viewport()->height() +
+                    qAbs(tlir.y())
+                ) / (qreal) tlir.height();
+
+                for (int i = 0; i < ic; i++) {
+                    if (i % 2) {
+                        painter.fillRect(
+                            0,
+                            tlir.y() + i * tlir.height(),
+                            _listWidget->viewport()->width(),
+                            tlir.height(),
+                            QColor("#e8f1fa")
+                        );
+                    }
+                }
+            } else {
+                const qreal hg = fit::fx(20.0);
+                const qreal ic = _listWidget->viewport()->height() / hg;
+
+                for (int i = 0; i < ic; i++) {
+                    if (i % 2) {
+                        painter.fillRect(
+                            0, i * hg,
+                            _listWidget->viewport()->width(),
+                            hg, QColor("#e8f1fa")
+                        );
+                    } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
+                        painter.setPen(QColor("#a5aab0"));
+                        painter.drawText(0, i * hg, _listWidget->viewport()->width(),
+                          hg, Qt::AlignCenter, "No items to show");
+                    }
+                }
+            }
+        }
+
+        return false;
+    } else {
+        return QWidget::eventFilter(watched, event);
+    }
 }
 
 void FormsPane::removeButtonClicked()
@@ -165,5 +268,7 @@ void FormsPane::clear()
 
 QSize FormsPane::sizeHint() const
 {
-    return fit::fx(QSizeF{200, 100}).toSize();
+    return fit::fx(QSizeF{215, 160}).toSize();
 }
+
+#include "formspane.moc"

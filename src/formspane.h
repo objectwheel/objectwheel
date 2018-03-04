@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+class QLabel;
+class QFrame;
 class FlatButton;
 class QVBoxLayout;
 class QHBoxLayout;
@@ -29,12 +31,17 @@ class FormsPane : public QWidget
         void handleDatabaseChange();
         void handleCurrentFormChange();
 
+    protected:
+        bool eventFilter(QObject* watched, QEvent* event) override;
+
     signals:
         void currentFormChanged();
 
     private:
-        QVBoxLayout* _layout;
+        QVBoxLayout* _layout,* _innerLayout;
+        QFrame* _innerWidget;
         QHBoxLayout* _buttonLayout;
+        QLabel* _header;
         QListWidget* _listWidget;
         FlatButton* _addButton;
         FlatButton* _removeButton;

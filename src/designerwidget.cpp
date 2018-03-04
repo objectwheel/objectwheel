@@ -477,6 +477,9 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
 
     setFrameShape(QFrame::StyledPanel);
     setFrameShadow(QFrame::Plain);
+    #if !defined(Q_OS_WINDOWS)
+    setFrameShape(QFrame::NoFrame);
+    #endif
 
     _hlayout->setContentsMargins(0, 0, 0, 0);
     _hlayout->setSpacing(0);

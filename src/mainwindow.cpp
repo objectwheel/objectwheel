@@ -60,8 +60,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _projectsButton = new FlatButton;
 
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#E0E4E7");
-    setStyleSheet("QMainWindow::separator{height: 0px;}");
+    p.setColor(backgroundRole(), "#f0f4f7");
+    setStyleSheet("QMainWindow::separator{height: 1px;}");
     setCentralWidget(_designerWidget);
     setAutoFillBackground(true);
     setWindowTitle(APP_NAME);
@@ -174,7 +174,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _propertiesDockwidget->setTitleBarWidget(toolbar);
     _propertiesDockwidget->setWidget(_propertiesPane);
     _propertiesDockwidget->setWindowTitle("Properties");
-    _propertiesDockwidget->setAttribute(Qt::WA_TranslucentBackground);
     _propertiesDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                       QDockWidget::DockWidgetFloatable);
 
@@ -202,7 +201,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _formsDockwidget->setTitleBarWidget(toolbar2);
     _formsDockwidget->setWidget(_formsPane);
     _formsDockwidget->setWindowTitle("Forms");
-    _formsDockwidget->setAttribute(Qt::WA_TranslucentBackground);
     _formsDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                  QDockWidget::DockWidgetFloatable);
 
@@ -239,7 +237,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _toolboxDockwidget->setTitleBarWidget(toolbar3);
     _toolboxDockwidget->setWidget(_toolboxPane);
     _toolboxDockwidget->setWindowTitle("Toolbox");
-    _toolboxDockwidget->setAttribute(Qt::WA_TranslucentBackground);
     _toolboxDockwidget->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable
@@ -313,7 +310,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _inspectorDockwidget->setTitleBarWidget(toolbar4);
     _inspectorDockwidget->setWidget(_inspectorPage);
     _inspectorDockwidget->setWindowTitle("Control Inspector");
-    _inspectorDockwidget->setAttribute(Qt::WA_TranslucentBackground);
     _inspectorDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                      QDockWidget::DockWidgetFloatable);
 
@@ -353,6 +349,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         _runButton->setEnabled(true);
     });
 
+    setDockOptions(dockOptions() ^ QMainWindow::AnimatedDocks);
     addDockWidget(Qt::LeftDockWidgetArea, _toolboxDockwidget);
     addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
