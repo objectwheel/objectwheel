@@ -169,7 +169,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolbar->addWidget(pinButton);
     toolbar->setStyleSheet(CSS::DesignerPinbar);
     toolbar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar->setFixedHeight(fit::fx(22.8));
+    toolbar->setFixedHeight(fit::fx(24));
 
     _propertiesDockwidget->setTitleBarWidget(toolbar);
     _propertiesDockwidget->setWidget(_propertiesPane);
@@ -180,7 +180,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /*** FORMS DOCK WIDGET ***/
     QLabel* label2 = new QLabel;
     label2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label2->setText("   Forms");
+    label2->setText("   Form Navigator");
     label2->setFont(f);
 
     QToolButton* pinButton2 = new QToolButton;
@@ -196,7 +196,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolbar2->addWidget(pinButton2);
     toolbar2->setStyleSheet(CSS::DesignerPinbar);
     toolbar2->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar2->setFixedHeight(fit::fx(22.8));
+    toolbar2->setFixedHeight(fit::fx(24));
 
     _formsDockwidget->setTitleBarWidget(toolbar2);
     _formsDockwidget->setWidget(_formsPane);
@@ -232,7 +232,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolbar3->addWidget(pinButton3);
     toolbar3->setStyleSheet(CSS::DesignerPinbar);
     toolbar3->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar3->setFixedHeight(fit::fx(22.8));
+    toolbar3->setFixedHeight(fit::fx(24));
 
     _toolboxDockwidget->setTitleBarWidget(toolbar3);
     _toolboxDockwidget->setWidget(_toolboxPane);
@@ -300,7 +300,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolbar4->addWidget(pinButton4);
     toolbar4->setStyleSheet(CSS::DesignerPinbar);
     toolbar4->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar4->setFixedHeight(fit::fx(22.8));
+    toolbar4->setFixedHeight(fit::fx(24));
 
     connect(_inspectorPage, SIGNAL(controlClicked(Control*)),
       _designerWidget, SLOT(handleControlClick(Control*)));

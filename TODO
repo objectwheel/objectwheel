@@ -16,6 +16,7 @@ pane hidden ken buttonlar hep shine lar
 consol çıktısındaki boşluk olayını hallet
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
 control inspector her refres'de uzayıp gidiyor
+console çıktılarının renklerini düzelt
 
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin

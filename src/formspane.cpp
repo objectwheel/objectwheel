@@ -181,7 +181,7 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
                     } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
                         painter.setPen(QColor("#a5aab0"));
                         painter.drawText(0, i * hg, _listWidget->viewport()->width(),
-                          hg, Qt::AlignCenter, "No items to show");
+                          hg, Qt::AlignCenter, "No forms to show");
                     }
                 }
             }
