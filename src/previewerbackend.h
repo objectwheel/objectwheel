@@ -17,13 +17,13 @@ class PreviewerBackend : public QObject
         struct Task
         {
             QRectF rect;
-            QString dir;
+            QString uid, dir;
             bool repreview;
             bool needsUpdate = false;
 
             bool operator==(const Task& t1)
             {
-                return dir == t1.dir;
+                return uid == t1.uid;
             }
         };
 

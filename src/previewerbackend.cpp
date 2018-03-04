@@ -3,6 +3,7 @@
 #include <previewresult.h>
 #include <previewercommands.h>
 #include <delayer.h>
+#include <saveutils.h>
 
 #include <QPointer>
 #include <QCryptographicHash>
@@ -73,12 +74,12 @@ PreviewerBackend* PreviewerBackend::instance()
 
 bool PreviewerBackend::init()
 {
-    return
-    _server->listen(serverName) &&
-    QProcess::startDetached(
-        "./objectwheel-previewer",
-        QStringList() << serverName
-    );
+    QProcess process;
+    process.setProgram("./objectwheel-previewer");
+    process.setArguments(QStringList() << serverName);
+//    process.setStandardOutputFile(QProcess::nullDevice());
+//    process.setStandardErrorFile(QProcess::nullDevice());
+    return _server->listen(serverName) && process.startDetached();
 }
 
 bool PreviewerBackend::isBusy() const
@@ -106,6 +107,7 @@ void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bo
     task.dir = dir;
     task.rect = rect;
     task.repreview = repreview;
+    task.uid = SaveUtils::uid(dir);
 
     if (!_taskList.contains(task)) {
         _taskList << task;
