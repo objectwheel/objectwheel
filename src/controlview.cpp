@@ -205,7 +205,6 @@ void ControlViewPrivate::handlePasteAction()
         auto control = SaveBackend::instance()->exposeControl(url.toLocalFile(), ControlGui, uid);
         SaveBackend::instance()->addControl(control, mainControl, mainControl->uid(), mainControl->dir());
         control->setParentItem(mainControl);
-        control->refresh();
         controls << control;
 
         control->setPos(control->pos() + QPoint(fit::fx(5), fit::fx(5)));

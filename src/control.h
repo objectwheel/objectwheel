@@ -59,7 +59,7 @@ class Control : public QGraphicsWidget
     public slots:
         void hideResizers();
         void showResizers();
-        virtual void refresh();
+        virtual void refresh(bool repreview = false);
         virtual void centralize();
 
     protected slots:

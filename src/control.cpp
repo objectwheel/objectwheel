@@ -278,9 +278,9 @@ bool Control::form() const
     return (dynamic_cast<const Form*>(this) != nullptr);
 }
 
-void Control::refresh()
+void Control::refresh(bool repreview)
 {
-    PreviewerBackend::instance()->requestPreview(rect(), dir());
+    PreviewerBackend::instance()->requestPreview(rect(), dir(), repreview);
 }
 
 void Control::updateUid()

@@ -973,7 +973,7 @@ void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
             wrfile(documentPath, item.documents.value
                    (relativePath).document->toPlainText().toUtf8());
             item.documents.value(relativePath).document->setModified(false);
-            control->refresh();
+            control->refresh(true);
             break;
         }
     }

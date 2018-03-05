@@ -389,7 +389,6 @@ Control* SaveBackend::exposeControl(
         auto control = new Control(child + separator() +
           DIR_THIS + separator() + "main.qml", mode);
         control->setParentItem(pcontrol);
-        control->refresh();
         pmap[child] = control;
     }
 

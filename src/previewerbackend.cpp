@@ -89,9 +89,8 @@ bool PreviewerBackend::isBusy() const
 
 void PreviewerBackend::restart()
 {
-    if (socket) {
+    if (socket && _taskList.isEmpty()) {
         blockSize = 0;
-        _taskList.clear();
         ::restart(
             socket.data(),
             QStringList() << ProjectBackend::instance()->dir() << serverName
@@ -106,8 +105,8 @@ void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bo
     Task task;
     task.dir = dir;
     task.rect = rect;
-    task.repreview = repreview;
     task.uid = SaveUtils::uid(dir);
+    task.type = repreview ? Task::Repreview : Task::Preview;
 
     if (!_taskList.contains(task)) {
         _taskList << task;
@@ -117,9 +116,54 @@ void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bo
             emit busyChanged();
         }
     } else {
-        _taskList[_taskList.indexOf(task)].rect = task.rect;
-        _taskList[_taskList.indexOf(task)].repreview = task.repreview;
-        _taskList[_taskList.indexOf(task)].needsUpdate = true;
+        int index = _taskList.indexOf(task);
+
+        if (index == 0)
+            _taskList[index].needsUpdate = true;
+
+        _taskList[index].rect = task.rect;
+    }
+}
+
+void PreviewerBackend::removeCache(const QString& uid)
+{
+    Task task;
+    task.uid = uid;
+    task.type = Task::Remove;
+
+    if (!_taskList.contains(task)) {
+        _taskList << task;
+
+        if (_taskList.size() == 1) {
+            processNextTask();
+            emit busyChanged();
+        }
+    }
+}
+
+void PreviewerBackend::updateCache(const QString& uid, const QString& property, const QVariant& value)
+{
+    Task task;
+    task.uid = uid;
+    task.property = property;
+    task.propertyValue = value;
+    task.type = Task::Update;
+
+    if (!_taskList.contains(task)) {
+        _taskList << task;
+
+        if (_taskList.size() == 1) {
+            processNextTask();
+            emit busyChanged();
+        }
+    } else {
+        int index = _taskList.indexOf(task);
+
+        if (index == 0)
+            _taskList[index].needsUpdate = true;
+
+        _taskList[index].property = task.property;
+        _taskList[index].propertyValue = task.propertyValue;
     }
 }
 
@@ -183,9 +227,24 @@ void PreviewerBackend::processNextTask()
 
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
-        out << (task.repreview ? REQUEST_REPREVIEW : REQUEST_PREVIEW);
-        out << task.rect;
-        out << task.dir;
+
+        if (task.type == Task::Preview) {
+            out << REQUEST_PREVIEW;
+            out << task.rect;
+            out << task.dir;
+        } else if (task.type == Task::Repreview) {
+            out << REQUEST_REPREVIEW;
+            out << task.rect;
+            out << task.dir;
+        } else if (task.type == Task::Remove) {
+            out << REQUEST_REMOVE;
+            out << task.uid;
+        } else if (task.type == Task::Update) {
+            out << REQUEST_UPDATE;
+            out << task.uid;
+            out << task.property;
+            out << task.propertyValue;
+        }
 
         send(socket.data(), data);
     }
@@ -193,19 +252,23 @@ void PreviewerBackend::processNextTask()
 
 void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
 {
-    if (type == REQUEST_READY) {
+    if (type == REQUEST_DONE) {
+        Task::Type t = _taskList.first().type;
+
         if (!_taskList.first().needsUpdate)
             _taskList.removeFirst();
         else
             _taskList.first().needsUpdate = false;
 
-        PreviewResult result;
-        in >> result;
+        if (t == Task::Preview || t == Task::Repreview) {
+            PreviewResult result;
+            in >> result;
+            emit previewReady(result);
+        }
 
         if (!isBusy())
             emit busyChanged();
 
-        emit previewReady(result);
         return processNextTask();
     }
 

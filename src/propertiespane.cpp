@@ -14,6 +14,8 @@
 #include <controlscene.h>
 #include <formscene.h>
 #include <mainwindow.h>
+#include <previewerbackend.h>
+
 #include <QtWidgets>
 
 //!
@@ -316,19 +318,19 @@ static void saveChanges(const QString& property, const QVariant& value)
     QPointer<Control> sc = scs.at(0);
 
     if (dW->mode() == ControlGui && property == TAG_ID)
-        SaveBackend::instance()->setProperty(sc, property, value,
-                                 dW->controlScene()->mainControl()->dir());
+        SaveBackend::instance()->setProperty(sc, property, value, dW->controlScene()->mainControl()->dir());
     else
         SaveBackend::instance()->setProperty(sc, property, value);
 
     QMetaObject::Connection con;
     con = QObject::connect(SaveBackend::instance(),
-      &SaveBackend::parserRunningChanged, [sc, con] {
+      &SaveBackend::parserRunningChanged, [=] {
         if (sc.isNull()) {
             QObject::disconnect(con);
             return;
         }
         if (SaveBackend::instance()->parserWorking() == false) {
+            PreviewerBackend::instance()->updateCache(sc->uid(), property, value);
             sc->refresh();
             QObject::disconnect(con);
         }

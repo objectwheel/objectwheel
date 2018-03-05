@@ -266,7 +266,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         auto control = SaveBackend::instance()->exposeControl(dname(dname(url.toLocalFile())), ControlGui);
         designerWidget()->controlScene()->setMainControl(control);
         designerWidget()->setMode(ControlGui);
-        control->refresh();
+
         for (auto childControl : control->childControls())
             childControl->refresh();
         splitter->setSizes(sizes);

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QRectF>
+#include <QVariant>
 
 class QLocalServer;
 class PreviewResult;
@@ -16,15 +17,25 @@ class PreviewerBackend : public QObject
     private:
         struct Task
         {
+            enum Type
+            {
+                Preview,
+                Repreview,
+                Update,
+                Remove
+            };
+
+            inline bool operator==(const Task& t1)
+            {
+                return uid == t1.uid && type == t1.type && property == t1.property;
+            }
+
+            Type type;
             QRectF rect;
             QString uid, dir;
-            bool repreview;
+            QString property;
+            QVariant propertyValue;
             bool needsUpdate = false;
-
-            bool operator==(const Task& t1)
-            {
-                return uid == t1.uid;
-            }
         };
 
     public:
@@ -35,6 +46,8 @@ class PreviewerBackend : public QObject
     public slots:
         void restart();
         void requestPreview(const QRectF& rect, const QString& dir, bool repreview = false);
+        void removeCache(const QString& uid);
+        void updateCache(const QString& uid, const QString& property, const QVariant& value);
 
     private slots:
         void onNewConnection();
