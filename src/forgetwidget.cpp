@@ -2,7 +2,6 @@
 #include <fit.h>
 #include <buttonslice.h>
 #include <bulkedit.h>
-#include <internetaccess.h>
 #include <waitingspinnerwidget.h>
 #include <authenticator.h>
 
@@ -138,17 +137,6 @@ void ForgetWidget::onNextClicked()
     }
 
     lock();
-
-    if (!InternetAccess::available()) {
-        QMessageBox::warning(
-                    this,
-                    tr("No Internet Access"),
-            tr("Unable to connect to server. Check your internet connection.")
-        );
-
-        unlock();
-        return;
-    }
 
     bool succeed =
     Authenticator::instance()->forget(

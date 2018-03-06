@@ -1,7 +1,6 @@
 #include <robotwidget.h>
 #include <fit.h>
 #include <buttonslice.h>
-#include <internetaccess.h>
 #include <waitingspinnerwidget.h>
 
 #include <QApplication>

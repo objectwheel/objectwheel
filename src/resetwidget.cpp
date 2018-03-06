@@ -4,7 +4,6 @@
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
 #include <authenticator.h>
-#include <internetaccess.h>
 #include <countdown.h>
 
 #include <QApplication>
@@ -212,17 +211,6 @@ void ResetWidget::onApplyClicked()
     }
 
     lock();
-
-    if (!InternetAccess::available()) {
-        QMessageBox::warning(
-            this,
-            tr("No Internet Access"),
-            tr("Unable to connect to server. Check your internet connection.")
-        );
-
-        unlock();
-        return;
-    }
 
     bool succeed = Authenticator::instance()->reset(email, password, code);
 

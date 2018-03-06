@@ -7,7 +7,6 @@
 #include <waitingspinnerwidget.h>
 #include <global.h>
 #include <authenticator.h>
-#include <internetaccess.h>
 #include <userbackend.h>
 #include <QtConcurrent>
 
@@ -228,17 +227,6 @@ void LoginWidget::onLoginButtonClick()
     }
 
     lock();
-
-    if (!InternetAccess::available()) {
-        QMessageBox::warning(
-            this,
-            tr("No Internet Access"),
-            tr("Unable to connect to server. Check your internet connection.")
-        );
-
-        unlock();
-        return;
-    }
 
     const auto& plan = Authenticator::instance()->login(email, password);
     bool succeed = !plan.isEmpty();

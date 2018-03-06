@@ -17,6 +17,17 @@ consol çıktısındaki boşluk olayını hallet
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
 control inspector her refres'de uzayıp gidiyor
 console çıktılarının renklerini düzelt
+objectwheel:Authenticator class'ındaki çağrılara internet kesiklik kontrolü eklenecek
+auto completer alt satıra enter ile inince salakça bi şekilde } işareti koyuyor, geri alması zor, bunu düzelt
+şu loadingi adam akıllı renkler ile doğru düzgün yap (project loading)
+properties pane, eğer bir önceki property değeri aynı ise yeni gelen property yi parserworker ile yazdırma
+previewer "Componont not ready" hatasında kitleniyor, previewer'ın hata ayıklama olayını hallet
+anchors.left, right vs vs gibi sub "qtobject" bazlı propertyleri de destekle (propertyleri tararken qobject bazlı olanları tebit edip, onları propertylerinin int, bool vs bilindik bazlı olanlasrını da properties listesine ekle)
+transform/rotation property değişikliği control üzerine uygulanamıyor, bunu düzelt, ve başka böyle propertiler varmı bi kontrol et
+aynı şekilde url değişikliklerinin uygulanmasında da sıkıntı var (keşlenmiş objeye uygulamada)
+Item top level propertisinin collapse butonuna basınca program donuyor
+collapsed controller, control inspectorde, her refresh ile yeniden expand oluyor, bunu düzelt. Hatta, direk her pane'nin refresh metodunu düzenle, her refresh ile her şey tümünden silinip yeniden doldurulmasın
+control inspector'ün paint olayınıda properties pane gibi düzelt, güzelleştir
 
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin

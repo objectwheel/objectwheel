@@ -150,12 +150,11 @@ InspectorPane::InspectorPane(MainWindow* parent)
     _treeWidget->setDragEnabled(false);
     _treeWidget->setDropIndicatorShown(false);
     _treeWidget->setColumnCount(2);
-    _treeWidget->setIndentation(fit::fx(14));
+    _treeWidget->setIndentation(fit::fx(16));
     _treeWidget->headerItem()->setText(0, "Controls");
     _treeWidget->headerItem()->setText(1, "Ui");
     _treeWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
-    _treeWidget->setRootIsDecorated(true);
     _treeWidget->setSortingEnabled(true);
     _treeWidget->viewport()->installEventFilter(this);
     _treeWidget->header()->resizeSection(0, fit::fx(250));
@@ -299,8 +298,6 @@ void InspectorPane::refresh()
 
     fillItem(item, mc->childControls(false));
     _treeWidget->addTopLevelItem(item);
-    _treeWidget->expandAll();
-    _treeWidget->setItemsExpandable(false);
 
     auto items = tree(item);
     items << item;

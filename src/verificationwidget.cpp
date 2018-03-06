@@ -4,7 +4,6 @@
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
 #include <authenticator.h>
-#include <internetaccess.h>
 #include <countdown.h>
 
 #include <QApplication>
@@ -186,17 +185,6 @@ void VerificationWidget::onResendClicked()
 
     lock();
 
-    if (!InternetAccess::available()) {
-        QMessageBox::warning(
-            this,
-            tr("No Internet Access"),
-            tr("Unable to connect to server. Check your internet connection.")
-        );
-
-        unlock();
-        return;
-    }
-
     bool succeed = Authenticator::instance()->resend(email);
 
     if (succeed) {
@@ -236,17 +224,6 @@ void VerificationWidget::onVerifyClicked()
     }
 
     lock();
-
-    if (!InternetAccess::available()) {
-        QMessageBox::warning(
-            this,
-            tr("No Internet Access"),
-            tr("Unable to connect to server. Check your internet connection.")
-        );
-
-        unlock();
-        return;
-    }
 
     bool succeed = Authenticator::instance()->verify(email, code);
 

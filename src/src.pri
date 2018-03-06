@@ -75,7 +75,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/waitingspinnerwidget.h \
            $$PWD/filemanager.h \
            $$PWD/authenticator.h \
-           $$PWD/internetaccess.h \
            $$PWD/verificationwidget.h \
            $$PWD/countdown.h \
            $$PWD/robotwidget.h \
@@ -156,7 +155,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/waitingspinnerwidget.cpp \
            $$PWD/filemanager.cpp \
            $$PWD/authenticator.cpp \
-           $$PWD/internetaccess.cpp \
            $$PWD/verificationwidget.cpp \
            $$PWD/countdown.cpp \
            $$PWD/robotwidget.cpp \

@@ -319,22 +319,11 @@ static void saveChanges(const QString& property, const QVariant& value)
 
     if (dW->mode() == ControlGui && property == TAG_ID)
         SaveBackend::instance()->setProperty(sc, property, value, dW->controlScene()->mainControl()->dir());
-    else
+    else {
         SaveBackend::instance()->setProperty(sc, property, value);
-
-    QMetaObject::Connection con;
-    con = QObject::connect(SaveBackend::instance(),
-      &SaveBackend::parserRunningChanged, [=] {
-        if (sc.isNull()) {
-            QObject::disconnect(con);
-            return;
-        }
-        if (SaveBackend::instance()->parserWorking() == false) {
-            PreviewerBackend::instance()->updateCache(sc->uid(), property, value);
-            sc->refresh();
-            QObject::disconnect(con);
-        }
-    });
+        PreviewerBackend::instance()->updateCache(sc->uid(), property, value);
+        sc->refresh();
+    }
 }
 
 static void saveChanges(const NodeType& type, const QVariant& value)
@@ -438,35 +427,23 @@ class PropertiesDelegate : public QStyledItemDelegate
 
     public:
         explicit PropertiesDelegate(QTreeWidget* view, QObject* parent = 0);
-
-        QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option,
-                              const QModelIndex &index) const override;
-
+        QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
         void setEditorData(QWidget* ed, const QModelIndex &index) const override;
-
-        void setModelData(QWidget* ed, QAbstractItemModel* model,
-                          const QModelIndex &index) const override;
-
-        void updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem &option,
-                                  const QModelIndex &index) const override;
-
-        void paint(QPainter* painter, const QStyleOptionViewItem &opt,
-                   const QModelIndex &index) const override;
-
-        QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const override;
+        void setModelData(QWidget* ed, QAbstractItemModel* model, const QModelIndex &index) const override;
+        void updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+        QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override;
+        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
     private:
         QTreeWidget* m_view;
 };
 
-PropertiesDelegate::PropertiesDelegate(QTreeWidget* view, QObject* parent)
-    : QStyledItemDelegate(parent)
+PropertiesDelegate::PropertiesDelegate(QTreeWidget* view, QObject* parent) : QStyledItemDelegate(parent)
     , m_view(view)
 {
 }
 
-QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &,
-                                          const QModelIndex &index) const
+QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &, const QModelIndex &index) const
 {
     QWidget* ed = 0;
 
@@ -727,8 +704,7 @@ void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) co
     }
 }
 
-void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
-                                      const QModelIndex &index) const
+void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, const QModelIndex &index) const
 {
     if (index.column() == 0)
         return;
@@ -743,6 +719,10 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
             auto editor = static_cast<QComboBox*>(ed);
             val = editor->currentText();
             auto preVal = model->data(index, Qt::EditRole).toString();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
 
@@ -759,6 +739,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case FontPxSize: {
             auto editor = static_cast<QSpinBox*>(ed);
             val = editor->value();
+            auto preVal = model->data(index, Qt::EditRole).toString();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
 
@@ -789,6 +774,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case FontStrikeout: {
             auto editor = static_cast<QCheckBox*>(ed);
             val = editor->isChecked();
+            auto preVal = model->data(index, NodeRole::Data).toBool();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             saveChanges(type, val);
             break;
@@ -797,6 +787,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case Bool: {
             auto editor = static_cast<QCheckBox*>(ed);
             val = editor->isChecked();
+            auto preVal = model->data(index, NodeRole::Data).toBool();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             saveChanges(property, val);
             break;
@@ -806,6 +801,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case String: {
             auto editor = static_cast<QLineEdit*>(ed);
             val = editor->text();
+            auto preVal = model->data(index, Qt::EditRole).toString();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
             saveChanges(property, val);
@@ -815,6 +815,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case Url: {
             auto editor = static_cast<QLineEdit*>(ed);
             val = QUrl(editor->text());
+            auto preVal = model->data(index, Qt::EditRole).toUrl();
+
+            if (val == preVal)  //FIXME: Does it work as we really want?
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
             saveChanges(property, val);
@@ -824,6 +829,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case Double: {
             auto editor = static_cast<QDoubleSpinBox*>(ed);
             val = editor->value();
+            auto preVal = model->data(index, NodeRole::Data).toDouble();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
             if (property == "z") {
@@ -838,6 +848,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case Int: {
             auto editor = static_cast<QSpinBox*>(ed);
             val = editor->value();
+            auto preVal = model->data(index, NodeRole::Data).toInt();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
             saveChanges(property, val);
@@ -850,6 +865,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case GeometryHeight: {
             auto editor = static_cast<QSpinBox*>(ed);
             val = editor->value();
+            auto preVal = model->data(index, NodeRole::Data).toInt();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
 
@@ -874,6 +894,11 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
         case GeometryFHeight: {
             auto editor = static_cast<QDoubleSpinBox*>(ed);
             val = editor->value();
+            auto preVal = model->data(index, NodeRole::Data).toReal();
+
+            if (val == preVal)
+                return;
+
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
 
@@ -897,8 +922,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model,
     }
 }
 
-void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
-  const QStyleOptionViewItem &option, const QModelIndex &index) const
+void PropertiesDelegate::updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QStyledItemDelegate::updateEditorGeometry(ed, option, index);
 
@@ -912,109 +936,148 @@ void PropertiesDelegate::updateEditorGeometry(QWidget* ed,
     }
 }
 
-void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opt,
-  const QModelIndex &index) const
+QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
 {
-    QStyleOptionViewItem option = opt;
-    const QAbstractItemModel* model = index.model();
-    Q_ASSERT(model);
+    const auto& size = QStyledItemDelegate::sizeHint(opt, index);
+    return fit::fx(QSizeF(size.width(), 22)).toSize();
+}
+
+void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QRectF cellRect(option.rect);
+    auto model = index.model();
+    bool isClassRow = !model->parent(index).isValid() && index.row() > 1;
+    bool isSelected = option.state & QStyle::State_Selected;
+
+    // Draw background
+    if (isClassRow)
+        painter->setBrush(QColor("#8c7f70"));
+    else if (isSelected)
+        painter->setBrush(QColor("#ebd5c0"));
+    else if (index.row() % 2)
+        painter->setBrush(QColor("#faf1e8"));
+    else
+        painter->setBrush(QColor("#fffaf5"));
+
     painter->setRenderHint(QPainter::Antialiasing);
+    painter->setPen(Qt::NoPen);
+    painter->drawRect(cellRect);
 
-    if (model->parent(index).isValid()) {
-        if (index.row() % 2) {
-            if (index.column() == 0) {
-                QRectF mrect(option.rect);
-                mrect.setX(0.5);
-                painter->fillRect(mrect, QColor("#faf1e8"));
-            } else {
-                painter->fillRect(option.rect, QColor("#faf1e8"));
+    // Draw bottom & middle cell lines
+    painter->setPen("#D6CEC6");
+    painter->drawLine(cellRect.bottomLeft() + QPointF(0.5, -0.5), cellRect.bottomRight() + QPointF(-0.5, -0.5));
+
+    if (index.column() == 0)
+        if (!isClassRow)
+            painter->drawLine(cellRect.topRight() + QPointF(-0.5, 0.5), cellRect.bottomRight() + QPointF(-0.5, -0.5));
+
+
+    // Draw data
+    if (index.column() == 0) {
+        if (isClassRow)
+            painter->setPen(Qt::white);
+        else
+            painter->setPen("#202427");
+
+        painter->drawText(
+            cellRect.adjusted(fit::fx(5), 0, 0, 0),
+            index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
+        );
+    } else {
+        if (!isClassRow) {
+            painter->setPen("#202427");
+
+            painter->drawText(
+                cellRect.adjusted(fit::fx(5), 0, 0, 0),
+                index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
+            );
+        }
+
+        auto type = index.data(NodeRole::Type).value<NodeType>();
+        switch (type) {
+            case FontBold:
+            case FontItalic:
+            case FontUnderline:
+            case FontOverline:
+            case FontStrikeout:
+            case Bool: {
+                bool value = index.data(NodeRole::Data).value<bool>();
+                QStyleOptionButton opt;
+                opt.initFrom(m_view);
+                opt.rect = option.rect;
+                opt.state = QStyle::State_Active | QStyle::State_Enabled;
+                opt.state |= value ? QStyle::State_On : QStyle::State_Off;
+                qApp->style()->drawControl(QStyle::CE_CheckBox, &opt, painter, m_view);
+                break;
             }
+
+            default:
+                break;
         }
-    } else {
-        painter->fillRect(option.rect, QColor("#a69685"));
-        option.palette.setColor(QPalette::Text, Qt::white);
-        option.palette.setColor(QPalette::HighlightedText, Qt::white);
-        option.palette.setColor(QPalette::Highlight, QColor("#a69685"));
-    }
-
-    if (index.column() == 0) {
-        QRectF branchRect = QRectF(0, option.rect.top(),
-                                   option.rect.x(), option.rect.height());
-
-        QBrush branchColor = option.palette.base();
-        if(option.state & QStyle::State_Selected) {
-            branchColor = option.palette.highlight();
-        } else {
-            if (!model->parent(index).isValid())
-                branchColor = QColor("#a69685");
-            else if (index.row() % 2)
-                branchColor = QColor("#faf1e8");
-        }
-        painter->fillRect(branchRect, branchColor);
-
-        if (model->rowCount(index)) {
-            static const int i = fit::fx(9); // ### hardcoded in qcommonstyle.cpp
-            QRect r = option.rect;
-            QStyleOption branchOption;
-            branchOption.rect = QRect(r.left() - i,
-                                      r.top() + (r.height() - i)/2, i, i);
-            branchOption.state = QStyle::State_Children;
-
-            if (m_view->isExpanded(index))
-                branchOption.state |= QStyle::State_Open;
-
-            qApp->style()->drawPrimitive(QStyle::PE_IndicatorBranch,
-              &branchOption, painter, m_view);
-        }
-    }
-
-    QStyledItemDelegate::paint(painter, option, index);
-
-    auto type = index.data(NodeRole::Type).value<NodeType>();
-    switch (type) {
-        case FontBold:
-        case FontItalic:
-        case FontUnderline:
-        case FontOverline:
-        case FontStrikeout:
-        case Bool: {
-            bool value = index.data(NodeRole::Data).value<bool>();
-            QStyleOptionButton opt;
-            opt.initFrom(m_view);
-            opt.rect = option.rect;
-            opt.state = QStyle::State_Active | QStyle::State_Enabled;
-            opt.state |= value ? QStyle::State_On : QStyle::State_Off;
-            qApp->style()->drawControl(QStyle::CE_CheckBox, &opt, painter, m_view);
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    const QPen oldPen = painter->pen();
-    painter->setPen("#25000000");
-
-    if (index.column() == 0) {
-        if (model->parent(index).isValid()) {
-            painter->drawLine(option.rect.right() + 0.5, option.rect.y() + 0.5,
-                              option.rect.right() + 0.5, option.rect.bottom() + 0.5);
-        }
-    } else {
-        painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
-                          QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
-    }
-
-    painter->setPen(oldPen);
-
-    if (!m_view->isEnabled()) {
-        painter->fillRect(option.rect, QColor("04000000"));
     }
 }
 
-QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
+//!
+//! *************************** [PropertiesTree] ****************************
+//!
+
+class PropertiesTree : public QTreeWidget
 {
-    return QStyledItemDelegate::sizeHint(opt, index) + QSize(4, 4);
+        Q_OBJECT
+    protected:
+        void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
+};
+
+void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
+{
+    qreal width = fit::fx(10);
+    auto model = index.model();
+    bool hasChild = itemFromIndex(index)->childCount();
+    bool isClassRow = !model->parent(index).isValid() && index.row() > 1;
+    bool isSelected = itemFromIndex(index)->isSelected();
+
+    QRectF branchRect(rect);
+    QRectF handleRect(0, 0, width, width);
+
+    handleRect.moveCenter(branchRect.center());
+    handleRect.moveRight(branchRect.right() - 0.5);
+
+    // Draw background
+    if (isClassRow)
+        painter->setBrush(QColor("#8c7f70"));
+    else if (isSelected)
+        painter->setBrush(QColor("#ebd5c0"));
+    else if (index.row() % 2)
+        painter->setBrush(QColor("#faf1e8"));
+    else
+        painter->setBrush(QColor("#fffaf5"));
+
+    painter->setPen(Qt::NoPen);
+    painter->drawRect(branchRect);
+
+    // Draw bottom & middle cell lines
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setPen("#D6CEC6");
+    painter->drawLine(branchRect.bottomLeft() + QPointF(0.5, -0.5), branchRect.bottomRight() + QPointF(-0.5, -0.5));
+
+    // Draw handle
+    if (hasChild) {
+        painter->setPen(isClassRow ? QColor(Qt::white) : QColor("#202427"));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRoundedRect(handleRect, fit::fx(2), fit::fx(2));
+
+        painter->drawLine(
+            QPointF(handleRect.left() + fit::fx(2.5), handleRect.center().y()),
+            QPointF(handleRect.right() - fit::fx(2.5), handleRect.center().y())
+        );
+
+        if (!isExpanded(index)) {
+            painter->drawLine(
+                QPointF(handleRect.center().x(), handleRect.top() + fit::fx(2.5)),
+                QPointF(handleRect.center().x(), handleRect.bottom() - fit::fx(2.5))
+            );
+        }
+    }
 }
 
 //!
@@ -1024,7 +1087,7 @@ QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModel
 PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
-    _treeWidget = new QTreeWidget;
+    _treeWidget = new PropertiesTree;
     _searchEdit = new FocuslessLineEdit;
 
     QPalette p(palette());
@@ -1040,9 +1103,10 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     _treeWidget->setPalette(p2);
 
     _treeWidget->setColumnCount(2);
+    _treeWidget->setIndentation(fit::fx(16));
     _treeWidget->setDragEnabled(false);
     _treeWidget->setFocusPolicy(Qt::NoFocus);
-    _treeWidget->setIndentation(fit::fx(10));
+    _treeWidget->setUniformRowHeights(true);
     _treeWidget->setDropIndicatorShown(false);
     _treeWidget->headerItem()->setText(1, "Value");
     _treeWidget->headerItem()->setText(0, "Property");
@@ -1056,7 +1120,6 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _treeWidget->setItemDelegate(new PropertiesDelegate(_treeWidget, _treeWidget));
-
     _treeWidget->setObjectName("treeWidgetss");
     _treeWidget->setStyleSheet("#treeWidgetss { border: 1px solid #8c6a48; }");
 
@@ -1125,24 +1188,19 @@ void PropertiesPane::refreshList()
         return;
 
     {
-        QTreeWidgetItem* item = new QTreeWidgetItem;
-        item->setText(0, "Type");
-        {
-            QTreeWidgetItem* iitem = new QTreeWidgetItem;
-            iitem->setText(0, "Type");
-            iitem->setText(1, propertyNodes.first().cleanClassName);
-            item->addChild(iitem);
+        QTreeWidgetItem* iitem = new QTreeWidgetItem;
+        iitem->setText(0, "Type");
+        iitem->setText(1, propertyNodes.first().cleanClassName);
 
-            QTreeWidgetItem* jitem = new QTreeWidgetItem;
-            jitem->setText(0, "id");
-            jitem->setData(1, Qt::EditRole, selectedControls[0]->id());
-            jitem->setData(1, NodeRole::Data, selectedControls[0]->id());
-            jitem->setData(1, NodeRole::Type, NodeType::Id);
-            jitem->setFlags(jitem->flags() | Qt::ItemIsEditable);
-            item->addChild(jitem);
-        }
-        _treeWidget->addTopLevelItem(item);
-        _treeWidget->expandItem(item);
+        QTreeWidgetItem* jitem = new QTreeWidgetItem;
+        jitem->setText(0, "id");
+        jitem->setData(1, Qt::EditRole, selectedControls[0]->id());
+        jitem->setData(1, NodeRole::Data, selectedControls[0]->id());
+        jitem->setData(1, NodeRole::Type, NodeType::Id);
+        jitem->setFlags(jitem->flags() | Qt::ItemIsEditable);
+
+        _treeWidget->addTopLevelItem(iitem);
+        _treeWidget->addTopLevelItem(jitem);
     }
 
     for (const auto& propertyNode : propertyNodes) {

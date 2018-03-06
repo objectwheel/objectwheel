@@ -157,7 +157,7 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
                 ) / (qreal) tlir.height();
 
                 for (int i = 0; i < ic; i++) {
-                    if (i % 2) {
+                    if (i % 2 == 0) {
                         painter.fillRect(
                             0,
                             tlir.y() + i * tlir.height(),
@@ -172,7 +172,7 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
                 const qreal ic = _listWidget->viewport()->height() / hg;
 
                 for (int i = 0; i < ic; i++) {
-                    if (i % 2) {
+                    if (i % 2 == 0) {
                         painter.fillRect(
                             0, i * hg,
                             _listWidget->viewport()->width(),
