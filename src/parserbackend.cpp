@@ -148,7 +148,50 @@ namespace {
 
     void changeProperty(QString& source, const UiObjectMemberList* list, const QString& property, const QString& value)
     {
+        quint32 begin, end;
 
+        while(list) {
+            UiPublicMember* publicMember;
+            UiArrayBinding* arrayBinding;
+            UiObjectBinding* objectBinding;
+            UiScriptBinding* scriptBinding;
+
+            if ((scriptBinding = cast<UiScriptBinding*>(list->member))) {
+                if (scriptBinding->qualifiedId->name == property) {
+                    begin = scriptBinding->firstSourceLocation().begin();
+                    end = scriptBinding->lastSourceLocation().end();
+                    break;
+                }
+            } else if ((arrayBinding = cast<UiArrayBinding*>(list->member))) {
+                if (arrayBinding->qualifiedId->name == property) {
+                    begin = arrayBinding->firstSourceLocation().begin();
+                    end = arrayBinding->lastSourceLocation().end();
+                    break;
+                }
+            } else if ((objectBinding = cast<UiObjectBinding*>(list->member))) {
+                if (objectBinding->qualifiedId->name == property) {
+                    begin = objectBinding->firstSourceLocation().begin();
+                    end = objectBinding->lastSourceLocation().end();
+                    break;
+                }
+            } else if ((publicMember = cast<UiPublicMember*>(list->member))) {
+                if (publicMember->name == property) {
+                    begin = publicMember->firstSourceLocation().begin();
+                    end = publicMember->lastSourceLocation().end();
+                    break;
+                }
+            }
+
+            list = list->next;
+        }
+
+        QTextDocument document(source);
+        QTextCursor cursor(&document);
+
+        cursor.setPosition(begin);
+        cursor.setPosition(end, QTextCursor::KeepAnchor);
+        cursor.insertText(property + ": " + value);
+
+        source = document.toPlainText();
     }
-
 }

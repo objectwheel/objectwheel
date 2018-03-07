@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     MenuManager::instance()->init();
 
     ParserBackend::instance()->init("/users/omergoktas/desktop/main.qml");
-    ParserBackend::instance()->setProperty("oha", "amk");
+    ParserBackend::instance()->setProperty("akil", "\"addaaaaaaaaam\"");
 
     // Start main event loop
     return a.exec();
