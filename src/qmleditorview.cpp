@@ -12,6 +12,7 @@
 #include <qmlhighlighter.h>
 #include <control.h>
 #include <frontend.h>
+#include <parserutils.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -66,6 +67,7 @@ class QmlEditorViewPrivate : public QObject
         void handleItemsComboboxActivated(QString text);
         void handleDocumentsComboboxActivated(QString text);
         void handleControlRemoval(Control* control);
+        void propertyUpdate(Control* control, const QString& property, const QVariant& variant);
 
     public:
         QmlEditorView* parent;
@@ -246,6 +248,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
 
     QTimer::singleShot(3000, [=] {
         connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
+        connect(SaveBackend::instance(), SIGNAL(propertyChanged(Control*,QString,QVariant)), SLOT(propertyUpdate(Control*,QString,QVariant)));
         connect(dW->controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
         connect(dW->formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
     });
@@ -655,6 +658,17 @@ void QmlEditorViewPrivate::handleDocumentsComboboxActivated(QString text)
 void QmlEditorViewPrivate::handleControlRemoval(Control* control)
 {
     parent->closeControl(control, false);
+}
+
+void QmlEditorViewPrivate::propertyUpdate(Control* control, const QString& property, const QVariant& value)
+{
+    for (auto& item : parent->_editorItems) {
+        if (item.control == control &&
+            item.documents.keys().contains("main.qml")) {
+            ParserUtils::setProperty(item.documents.value("main.qml").document, control->url(), property, value);
+            break;
+        }
+    }
 }
 
 QmlEditorView::QmlEditorView(QWidget* parent)

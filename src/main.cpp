@@ -4,7 +4,7 @@
 #include <menumanager.h>
 #include <backendmanager.h>
 #include <filemanager.h>
-#include <parserbackend.h>
+#include <parserutils.h>
 
 #include <QApplication>
 #include <QFontDatabase>
@@ -67,14 +67,14 @@ int main(int argc, char* argv[])
     QApplication::setFont(font);
 
     // Disable Qml parser warnings
-    QLoggingCategory::setFilterRules(
-        QStringLiteral(
-            "qtc*.info=false\n"
-            "qtc*.debug=false\n"
-            "qtc*.warning=false\n"
-            "qtc*.critical=false"
-        )
-    );
+    //    QLoggingCategory::setFilterRules(
+    //        QStringLiteral(
+    //            "qtc*.info=false\n"
+    //            "qtc*.debug=false\n"
+    //            "qtc*.warning=false\n"
+    //            "qtc*.critical=false"
+    //        )
+    //    );
 
     // Initialize css
     CSS::init();
@@ -87,9 +87,6 @@ int main(int argc, char* argv[])
 
     // Initialize menus
     MenuManager::instance()->init();
-
-    ParserBackend::instance()->init("/users/omergoktas/desktop/main.qml");
-    ParserBackend::instance()->setProperty("akil", "\"addaaaaaaaaam\"");
 
     // Start main event loop
     return a.exec();

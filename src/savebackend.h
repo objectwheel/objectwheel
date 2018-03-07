@@ -51,6 +51,7 @@ class SaveBackend : public QObject
         QStringList formScopePaths() const;
 
     signals:
+        void propertyChanged(Control* control, const QString& property, const QVariant& value) const;
         void busyLoader(int progress, const QString& text) const;
         void doneLoader(const QString& text) const;
         void busyExecuter(int progress, const QString& text) const;

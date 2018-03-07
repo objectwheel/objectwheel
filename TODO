@@ -30,6 +30,9 @@ collapsed controller, control inspectorde, her refresh ile yeniden expand oluyor
 control inspector'ün paint olayınıda properties pane gibi düzelt, güzelleştir
 x, y, width, height, z propertylerinin properties window ile etkileşimini kontrol et
 properties pane enumları desteklesin
+property pane den font family değiştirilince previewer cache'de ki font family propertisi değişmedi
+font parserca düzgün kaydedilemedfi
+x, y, z, width, height, id propertylerini .qml dosyası içine kayıt etme olayını tekrar kontrol et
 
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin

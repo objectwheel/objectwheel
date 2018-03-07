@@ -85,7 +85,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/previewresult.h \
            $$PWD/previewerbackend.h \
            $$PWD/previewercommands.h \
-           $$PWD/parserbackend.h
+    $$PWD/parserutils.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -163,7 +163,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/saveutils.cpp \
            $$PWD/previewresult.cpp \
            $$PWD/previewerbackend.cpp \
-           $$PWD/parserbackend.cpp
+    $$PWD/parserutils.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

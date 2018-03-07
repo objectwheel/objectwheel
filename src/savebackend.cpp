@@ -5,6 +5,7 @@
 #include <control.h>
 #include <frontend.h>
 #include <formscene.h>
+#include <parserutils.h>
 
 #include <QApplication>
 #include <QJsonDocument>
@@ -630,7 +631,8 @@ void SaveBackend::setProperty(
             return;
         auto fileName = control->dir() + separator() + DIR_THIS +
                         separator() + "main.qml";
-//        ParserController::setVariantProperty(fileName, property, value);
+        ParserUtils::setProperty(fileName, property, value);
+        emit propertyChanged(control, property, value);
     }
 
     if (isInOwdb(control->dir())) //FIXME
@@ -646,8 +648,9 @@ void SaveBackend::removeProperty(const Control* control, const QString& property
         property == PTAG_SKIN)
         return;
 
-    auto fileName = control->dir() + separator() + DIR_THIS +
-                    separator() + "main.qml";
+//    auto fileName = control->dir() + separator() + DIR_THIS +
+//                    separator() + "main.qml";
+
 //    ParserController::removeVariantProperty(fileName, property);
 
     if (isInOwdb(control->dir()))
