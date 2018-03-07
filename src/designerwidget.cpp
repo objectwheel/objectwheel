@@ -134,7 +134,7 @@ void DesignerWidget::scaleScene(qreal ratio)
 
 void DesignerWidget::handleIndicatorChanges()
 {
-    if (SaveBackend::instance()->parserWorking() || PreviewerBackend::instance()->isBusy())
+    if (PreviewerBackend::instance()->isBusy())
         _loadingIndicator->start();
     else
         _loadingIndicator->stop();

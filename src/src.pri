@@ -17,8 +17,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/control.h \
            $$PWD/formscene.h \
            $$PWD/savetransaction.h \
-           $$PWD/parserworker.h \
-           $$PWD/parsercontroller.h \
            $$PWD/controlscene.h \
            $$PWD/controlview.h \
            $$PWD/formview.h \
@@ -86,7 +84,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/saveutils.h \
            $$PWD/previewresult.h \
            $$PWD/previewerbackend.h \
-           $$PWD/previewercommands.h
+           $$PWD/previewercommands.h \
+           $$PWD/parserbackend.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -99,8 +98,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/control.cpp \
            $$PWD/formscene.cpp \
            $$PWD/savetransaction.cpp \
-           $$PWD/parserworker.cpp \
-           $$PWD/parsercontroller.cpp \
            $$PWD/controlscene.cpp \
            $$PWD/controlview.cpp \
            $$PWD/formview.cpp \
@@ -165,7 +162,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/interpreterbackend.cpp \
            $$PWD/saveutils.cpp \
            $$PWD/previewresult.cpp \
-           $$PWD/previewerbackend.cpp
+           $$PWD/previewerbackend.cpp \
+           $$PWD/parserbackend.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

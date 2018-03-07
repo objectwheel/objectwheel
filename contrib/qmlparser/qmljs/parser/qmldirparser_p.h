@@ -111,19 +111,6 @@ public:
     QList<Plugin> plugins() const;
     bool designerSupported() const;
 
-#ifdef QT_CREATOR
-    struct TypeInfo
-    {
-        TypeInfo() {}
-        TypeInfo(const QString &fileName)
-            : fileName(fileName) {}
-
-        QString fileName;
-    };
-
-    QList<TypeInfo> typeInfos() const;
-#endif
-
 private:
     bool maybeAddComponent(const QString &typeName, const QString &fileName, const QString &version, QHash<QString,Component> &hash, int lineNumber = -1, bool multi = true);
     void reportError(quint16 line, quint16 column, const QString &message);
@@ -136,9 +123,6 @@ private:
     QList<Script> _scripts;
     QList<Plugin> _plugins;
     bool _designerSupported;
-#ifdef QT_CREATOR
-    QList<TypeInfo> _typeInfos;
-#endif
 };
 
 typedef QHash<QString,QmlDirParser::Component> QmlDirComponents;

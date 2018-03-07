@@ -4,6 +4,7 @@
 #include <menumanager.h>
 #include <backendmanager.h>
 #include <filemanager.h>
+#include <parserbackend.h>
 
 #include <QApplication>
 #include <QFontDatabase>
@@ -86,6 +87,9 @@ int main(int argc, char* argv[])
 
     // Initialize menus
     MenuManager::instance()->init();
+
+    ParserBackend::instance()->init("/users/omergoktas/desktop/main.qml");
+    ParserBackend::instance()->setProperty("oha", "amk");
 
     // Start main event loop
     return a.exec();

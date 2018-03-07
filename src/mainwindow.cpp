@@ -363,9 +363,6 @@ DesignerWidget* MainWindow::designerWidget()
 
 void MainWindow::clear()
 {
-    while(SaveBackend::instance()->parserWorking())
-        Delayer::delay(100);
-
     handleStopButtonClick();
 
     designerWidget()->qmlEditorView()->clear();

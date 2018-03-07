@@ -1,9 +1,3 @@
-shared {
-    DEFINES += QMLJS_LIBRARY
-} else {
-    DEFINES += QML_BUILD_STATIC_LIB
-}
-
 include(parser/parser.pri)
 
 HEADERS += \
@@ -72,9 +66,6 @@ SOURCES += \
     $$PWD/qmljsdescribevalue.cpp \
     $$PWD/qmljsdialect.cpp \
     $$PWD/qmljslink.cpp
-
-DISTFILES += \
-    $$PWD/parser/qmljs.g
 
 contains(QT, gui) {
     SOURCES += \

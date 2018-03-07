@@ -28,6 +28,8 @@ aynı şekilde url değişikliklerinin uygulanmasında da sıkıntı var (keşle
 Item top level propertisinin collapse butonuna basınca program donuyor
 collapsed controller, control inspectorde, her refresh ile yeniden expand oluyor, bunu düzelt. Hatta, direk her pane'nin refresh metodunu düzenle, her refresh ile her şey tümünden silinip yeniden doldurulmasın
 control inspector'ün paint olayınıda properties pane gibi düzelt, güzelleştir
+x, y, width, height, z propertylerinin properties window ile etkileşimini kontrol et
+properties pane enumları desteklesin
 
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin

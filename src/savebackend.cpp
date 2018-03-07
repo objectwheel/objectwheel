@@ -28,12 +28,6 @@
 /* - A form has to be master item                                 */
 /******************************************************************/
 
-SaveBackend::SaveBackend()
-{
-    connect(&_parserController, SIGNAL(runningChanged(bool)),
-      SIGNAL(parserRunningChanged(bool)));
-}
-
 SaveBackend* SaveBackend::instance()
 {
     static SaveBackend instance;
@@ -636,7 +630,7 @@ void SaveBackend::setProperty(
             return;
         auto fileName = control->dir() + separator() + DIR_THIS +
                         separator() + "main.qml";
-        ParserController::setVariantProperty(fileName, property, value);
+//        ParserController::setVariantProperty(fileName, property, value);
     }
 
     if (isInOwdb(control->dir())) //FIXME
@@ -654,7 +648,7 @@ void SaveBackend::removeProperty(const Control* control, const QString& property
 
     auto fileName = control->dir() + separator() + DIR_THIS +
                     separator() + "main.qml";
-    ParserController::removeVariantProperty(fileName, property);
+//    ParserController::removeVariantProperty(fileName, property);
 
     if (isInOwdb(control->dir()))
         emit databaseChanged();
@@ -663,9 +657,4 @@ void SaveBackend::removeProperty(const Control* control, const QString& property
 QString SaveBackend::pathOfId(const QString& suid, const QString& id, const QString& rootPath) const
 {
     return findById(suid, id, rootPath);
-}
-
-bool SaveBackend::parserWorking() const
-{
-    return _parserController.running();
 }

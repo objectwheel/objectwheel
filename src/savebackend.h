@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <global.h>
-#include <parsercontroller.h>
 
 class Form;
 class Control;
@@ -31,7 +30,6 @@ class SaveBackend : public QObject
         void refreshToolUid(const QString& toolRootPath) const;
         void refactorId(Control* control, const QString& suid, const QString& topPath = QString()) const;
 
-        bool parserWorking() const;
         bool addForm(Form* form) const;
         bool isInOwdb(const QString& path) const;
         bool isForm(const QString& rootPath) const;
@@ -62,10 +60,7 @@ class SaveBackend : public QObject
         void projectExposed() const;
 
     private:
-        SaveBackend();
-
-    private:
-        ParserController _parserController;
+        SaveBackend() {}
 };
 
 #endif // SAVEBACKEND_H

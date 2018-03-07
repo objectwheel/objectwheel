@@ -3,7 +3,6 @@
 #include <qmljs/qmljsdocument.h>
 #include <qmljs/qmljsbind.h>
 #include <qmljs/parser/qmljsast_p.h>
-#include <metainforeader.h>
 #include <qmljs/qmljspropertyreader.h>
 #include <QPlainTextEdit>
 
