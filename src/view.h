@@ -1,10 +1,11 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include <QMap>
+#include <QHash>
 #include <QWidget>
 
-class QLayout;
+class QPropertyAnimation;
+class QParallelAnimationGroup;
 
 class View : public QWidget
 {
@@ -24,10 +25,17 @@ class View : public QWidget
     public slots:
         void show(int id, SwipeDirection = NoSwipe);
 
+    protected:
+        virtual void resizeEvent(QResizeEvent *event) override;
+
     private:
-        int _visibleId;
-        QLayout* _layout;
-        QMap<int, QWidget*> _widgets;
+        void swipe(QWidget* w1, QWidget* w2, View::SwipeDirection direction);
+
+    private:
+        int m_visibleId;
+        QHash<int, QWidget*> m_widgets;
+        QParallelAnimationGroup* m_animationGroup;
+        QPropertyAnimation* m_animationBack,* m_animationForth;
 };
 
 #endif // VIEW_H

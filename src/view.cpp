@@ -1,77 +1,39 @@
 #include <view.h>
-#include <QVBoxLayout>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 
 #define SWIPE_DURATION 500
 
-void swipe(QWidget* w1, QWidget* w2, QLayout* layout, View::SwipeDirection direction)
-{
-    static auto a1 = new QPropertyAnimation;
-    static auto a2 = new QPropertyAnimation;
-    static auto ag = new QParallelAnimationGroup;
-
-    if (ag->animationCount() == 0) {
-        a1->setEasingCurve(QEasingCurve::OutQuart);
-        a2->setEasingCurve(QEasingCurve::OutQuart);
-        a1->setDuration(SWIPE_DURATION);
-        a2->setDuration(SWIPE_DURATION);
-        a1->setPropertyName("geometry");
-        a2->setPropertyName("geometry");
-        ag->addAnimation(a1);
-        ag->addAnimation(a2);
-    }
-
-    a1->setTargetObject(w1);
-    a2->setTargetObject(w2);
-    a1->setStartValue(w1->geometry());
-    a2->setEndValue(w1->geometry());
-
-    switch (direction) {
-        case View::LeftToRight:
-            a1->setEndValue(QRect(QPoint(w1->x() + w1->width(), w1->y()), w1->size()));
-            a2->setStartValue(QRect(QPoint(w1->x() - w1->width(), w1->y()), w1->size()));
-            break;
-
-        case View::RightToLeft:
-            a1->setEndValue(QRect(QPoint(w1->x() - w1->width(), w1->y()), w1->size()));
-            a2->setStartValue(QRect(QPoint(w1->x() + w1->width(), w1->y()), w1->size()));
-            break;
-
-        default:
-            Q_ASSERT(0);
-            break;
-    }
-
-    QObject::connect(ag, &QParallelAnimationGroup::finished, [=] {
-        w1->hide();
-        layout->update();
-        ag->disconnect();
-    });
-
-    ag->start();
-}
-
 View::View(QWidget* parent) : QWidget(parent)
-  , _visibleId(-1)
+  , m_visibleId(-1)
+  , m_animationGroup(new QParallelAnimationGroup(this))
+  , m_animationBack(new QPropertyAnimation(this))
+  , m_animationForth(new QPropertyAnimation(this))
 {
-    _layout = new QVBoxLayout(this);
-    _layout->setContentsMargins(0, 0, 0, 0);
-    _layout->setSpacing(0);
+    m_animationBack->setDuration(SWIPE_DURATION);
+    m_animationForth->setDuration(SWIPE_DURATION);
+    m_animationBack->setPropertyName("geometry");
+    m_animationForth->setPropertyName("geometry");
+    m_animationBack->setEasingCurve(QEasingCurve::OutQuart);
+    m_animationForth->setEasingCurve(QEasingCurve::OutQuart);
+    m_animationGroup->addAnimation(m_animationBack);
+    m_animationGroup->addAnimation(m_animationForth);
 }
 
 void View::add(int id, QWidget* widget)
 {
     Q_ASSERT(id >= 0);
-    _widgets[id] = widget;
-    _layout->addWidget(widget);
+
+    m_widgets[id] = widget;
+    widget->setParent(this);
     widget->hide();
 }
 
 void View::show(int id, SwipeDirection direction)
 {
-    QWidget* w1 = _widgets.value(_visibleId),* w2;
-    if ((w2 = _widgets.value(id)) == 0)
+    QWidget* w1 = m_widgets.value(m_visibleId),* w2;
+
+    if ((w2 = m_widgets.value(id)) == 0)
         return;
 
     w2->show();
@@ -81,9 +43,48 @@ void View::show(int id, SwipeDirection direction)
             w1->hide();
         else {
             w1->setGeometry(rect());
-            swipe(w1, w2, _layout, direction);
+            swipe(w1, w2, direction);
         }
     }
 
-    _visibleId = id;
+    m_visibleId = id;
+}
+
+void View::resizeEvent(QResizeEvent* event)
+{
+    if (m_widgets.contains(m_visibleId))
+        m_widgets.value(m_visibleId)->setGeometry(rect());
+
+    QWidget::resizeEvent(event);
+}
+
+void View::swipe(QWidget* w1, QWidget* w2, View::SwipeDirection direction)
+{
+    m_animationBack->setTargetObject(w1);
+    m_animationForth->setTargetObject(w2);
+    m_animationBack->setStartValue(w1->geometry());
+    m_animationForth->setEndValue(w1->geometry());
+
+    switch (direction) {
+        case View::LeftToRight:
+            m_animationBack->setEndValue(QRect(QPoint(w1->x() + w1->width(), w1->y()), w1->size()));
+            m_animationForth->setStartValue(QRect(QPoint(w1->x() - w1->width(), w1->y()), w1->size()));
+            break;
+
+        case View::RightToLeft:
+            m_animationBack->setEndValue(QRect(QPoint(w1->x() - w1->width(), w1->y()), w1->size()));
+            m_animationForth->setStartValue(QRect(QPoint(w1->x() + w1->width(), w1->y()), w1->size()));
+            break;
+
+        default:
+            Q_ASSERT(0);
+            break;
+    }
+
+    QObject::connect(m_animationGroup, &QParallelAnimationGroup::finished, [=] {
+        w1->hide();
+        m_animationGroup->disconnect();
+    });
+
+    m_animationGroup->start();
 }
