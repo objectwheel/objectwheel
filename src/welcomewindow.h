@@ -4,7 +4,6 @@
 #include <QWidget>
 
 class View;
-class QVBoxLayout;
 class LoginWidget;
 class RobotWidget;
 class ProjectsWidget;
@@ -37,12 +36,9 @@ class WelcomeWindow : public QWidget
 
     signals:
         void done();
-        void lazy();
-        void busy(const QString& text);
 
     private:
         View* _view;
-        QVBoxLayout* _layout;
         LoginWidget* _loginWidget;
         RobotWidget* _robotWidget;
         ProjectsWidget* _projectsWidget;

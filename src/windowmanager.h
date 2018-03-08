@@ -5,7 +5,6 @@
 #include <QMap>
 
 class QWidget;
-class ProgressWidget;
 class MainWindow;
 class WelcomeWindow;
 class AboutWindow;
@@ -31,7 +30,6 @@ class WindowManager : public QObject
     public:
         static WindowManager* instance();
         QWidget* get(Windows key);
-        ProgressWidget* progressWidget() const;
 
     public slots:
         void hide(Windows key);
@@ -43,7 +41,6 @@ class WindowManager : public QObject
 
     private slots:
         void done();
-        void busy(const QString& text);
 
     private:
         WindowManager();
@@ -54,7 +51,6 @@ class WindowManager : public QObject
 
     private:
         QMap<Windows, QWidget*> _windows;
-        ProgressWidget* _progressWidget;
         MainWindow* _mainWindow;
         WelcomeWindow* _welcomeWindow;
         AboutWindow* _aboutWindow;

@@ -25,9 +25,6 @@ class BuildsWindow : public QWidget
     public:
         explicit BuildsWindow(QWidget *parent = nullptr);
 
-    protected:
-        void resizeEvent(QResizeEvent *event) override;
-
     private slots:
         void showModules();
         void showPlatforms();

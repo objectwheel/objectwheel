@@ -87,6 +87,11 @@ bool PreviewerBackend::isBusy() const
     return !_taskList.isEmpty();
 }
 
+int PreviewerBackend::totalTask() const
+{
+    return _taskList.size();
+}
+
 void PreviewerBackend::restart()
 {
     if (socket && _taskList.isEmpty()) {
@@ -255,9 +260,10 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
     if (type == REQUEST_DONE) {
         Task::Type t = _taskList.first().type;
 
-        if (!_taskList.first().needsUpdate)
+        if (!_taskList.first().needsUpdate) {
             _taskList.removeFirst();
-        else
+            emit taskDone();
+        } else
             _taskList.first().needsUpdate = false;
 
         if (t == Task::Preview || t == Task::Repreview) {

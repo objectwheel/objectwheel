@@ -42,6 +42,7 @@ class PreviewerBackend : public QObject
         static PreviewerBackend* instance();
         bool init();
         bool isBusy() const;
+        int totalTask() const;
 
     public slots:
         void restart();
@@ -59,6 +60,7 @@ class PreviewerBackend : public QObject
         void processMessage(const QString& type, QDataStream& in);
 
     signals:
+        void taskDone();
         void busyChanged();
         void previewReady(const PreviewResult& result);
 

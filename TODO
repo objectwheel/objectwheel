@@ -31,6 +31,7 @@ properties pane enumları desteklesin
 property pane den font family değiştirilince previewer cache'de ki font family propertisi değişmedi
 font parserca düzgün kaydedilemedfi
 x, y, z, width, height, id propertylerini .qml dosyası içine kayıt etme olayını tekrar kontrol et
+proje surdurulurken secure exit yapsın
 
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin
@@ -50,6 +51,7 @@ Carlos'un youtube app'ı ow içinde üretilecek, daha fazla bug alanacak
 Parser properties pane tarafından yapılan değişiklikleri hizalayabilmeli
 Parser properties pane tarafından yapılan değişiklikleri QML Editör'e aksettirmeli
 Toplu nesneler seçiliyken bu nesnelerin yerinin hareket ettirilmesi sonucu konumları veritabanına yazdırılmıyor
+proje değiştirilirken console ve diğer boxlar temizlensin
 
 buglar gitmiş mi kontrol et, tüm şu videoları vs, bug platformunu
 consoldaki yeşil renge ayar çek

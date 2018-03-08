@@ -29,7 +29,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/qmlformatter.h \
            $$PWD/toolboxtree.h \
            $$PWD/view.h \
-           $$PWD/progresswidget.h \
            $$PWD/global.h \
            $$PWD/issuesbox.h \
            $$PWD/consolebox.h \
@@ -85,7 +84,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/previewresult.h \
            $$PWD/previewerbackend.h \
            $$PWD/previewercommands.h \
-    $$PWD/parserutils.h
+           $$PWD/parserutils.h \
+           $$PWD/progressbar.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -110,7 +110,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/qmlformatter.cpp \
            $$PWD/toolboxtree.cpp \
            $$PWD/view.cpp \
-           $$PWD/progresswidget.cpp \
            $$PWD/issuesbox.cpp \
            $$PWD/consolebox.cpp \
            $$PWD/searchbox.cpp \
@@ -163,7 +162,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/saveutils.cpp \
            $$PWD/previewresult.cpp \
            $$PWD/previewerbackend.cpp \
-    $$PWD/parserutils.cpp
+           $$PWD/parserutils.cpp \
+           $$PWD/progressbar.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

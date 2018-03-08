@@ -1,5 +1,4 @@
 #include <windowmanager.h>
-#include <progresswidget.h>
 #include <welcomewindow.h>
 #include <mainwindow.h>
 #include <aboutwindow.h>
@@ -14,24 +13,18 @@
 #include <QApplication>
 #define pS (QApplication::primaryScreen())
 
-WindowManager::WindowManager() : QObject()
-  , _progressWidget(new ProgressWidget)
-  , _mainWindow(nullptr)
-  , _welcomeWindow(nullptr)
-  , _aboutWindow(nullptr)
-  , _buildsWindow(nullptr)
-  , _preferencesWindow(nullptr)
-  , _toolboxSettingsWindow(nullptr)
+WindowManager::WindowManager()
+    : _mainWindow(nullptr)
+    , _welcomeWindow(nullptr)
+    , _aboutWindow(nullptr)
+    , _buildsWindow(nullptr)
+    , _preferencesWindow(nullptr)
+    , _toolboxSettingsWindow(nullptr)
 {
-    connect(SaveBackend::instance(), SIGNAL(doneLoader(QString)),
-      progressWidget(), SLOT(done(QString)));
-    connect(SaveBackend::instance(), SIGNAL(busyLoader(int, QString)),
-      progressWidget(), SLOT(busy(int,QString)));
 }
 
 WindowManager::~WindowManager()
 {
-    delete _progressWidget;
     for (auto w : _windows)
         w->deleteLater(); //TODO: delete w;
 }
@@ -70,8 +63,6 @@ QWidget* WindowManager::get(WindowManager::Windows key)
         case Welcome: {
             _welcomeWindow = new WelcomeWindow;
             _welcomeWindow->resize(fit::fx(QSizeF{1160, 670}).toSize());
-            connect(_welcomeWindow, SIGNAL(lazy()), _progressWidget, SLOT(hide()));
-            connect(_welcomeWindow, SIGNAL(busy(QString)), SLOT(busy(QString)));
             connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
             connect(_welcomeWindow, &WelcomeWindow::done, this, [=]
             {
@@ -141,7 +132,7 @@ void WindowManager::show(
     WindowManager::Windows key,
     Qt::WindowState state,
     Qt::WindowModality modality
-    )
+)
 {
     QWidget* window;
     if ((window = get(key))) {
@@ -161,23 +152,7 @@ void WindowManager::done()
     }
 }
 
-void WindowManager::busy(const QString& text)
-{
-    for (auto w : _windows) {
-        if (w == sender()) {
-            _progressWidget->show(text, w);
-            _progressWidget->setGeometry(w->rect());
-            break;
-        }
-    }
-}
-
 void WindowManager::add(WindowManager::Windows key, QWidget* window)
 {
     _windows[key] = window;
-}
-
-ProgressWidget* WindowManager::progressWidget() const
-{
-    return _progressWidget;
 }

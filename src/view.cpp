@@ -1,4 +1,5 @@
 #include <view.h>
+#include <QEvent>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 
@@ -18,6 +19,8 @@ View::View(QWidget* parent) : QWidget(parent)
     m_animationForth->setEasingCurve(QEasingCurve::OutQuart);
     m_animationGroup->addAnimation(m_animationBack);
     m_animationGroup->addAnimation(m_animationForth);
+
+    parent->installEventFilter(this);
 }
 
 void View::add(int id, QWidget* widget)
@@ -36,6 +39,7 @@ void View::show(int id, SwipeDirection direction)
     if ((w2 = m_widgets.value(id)) == 0)
         return;
 
+    w2->setGeometry(rect());
     w2->show();
 
     if (w1) {
@@ -56,6 +60,14 @@ void View::resizeEvent(QResizeEvent* event)
         m_widgets.value(m_visibleId)->setGeometry(rect());
 
     QWidget::resizeEvent(event);
+}
+
+bool View::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == parentWidget() && event->type() == QEvent::Resize)
+        setGeometry(parentWidget()->rect());
+
+    return QWidget::eventFilter(watched, event);
 }
 
 void View::swipe(QWidget* w1, QWidget* w2, View::SwipeDirection direction)

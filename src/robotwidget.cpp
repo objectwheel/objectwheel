@@ -41,6 +41,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _layout->addWidget(_recaptchaView);
 
     _space->setFixedSize(BUTTONS_WIDTH, fit::fx(200));
+    _space->installEventFilter(this);
 
     _recaptchaLayout->setSpacing(fit::fx(12));
     _recaptchaLayout->addStretch();
@@ -96,7 +97,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     connect(_buttons->get(Back), SIGNAL(clicked(bool)),
       SIGNAL(back()));
 
-    _loadingIndicator->setStyleSheet("Background: transparent;");
+    _loadingIndicator->setStyleSheet("background: transparent;");
     _loadingIndicator->setColor("#2E3A41");
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
@@ -160,7 +161,13 @@ void RobotWidget::onNextClicked()
 
 void RobotWidget::resizeEvent(QResizeEvent* event)
 {
-    QWidget::resizeEvent(event);
     _recaptchaWidget->setGeometry(rect());
-    _buttons->move(_space->geometry().bottomLeft());
+    QWidget::resizeEvent(event);
+}
+
+bool RobotWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == _space && event->type() == QEvent::Move)
+        _buttons->move(_space->geometry().bottomLeft());
+    return QWidget::eventFilter(watched, event);
 }

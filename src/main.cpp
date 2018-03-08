@@ -4,14 +4,12 @@
 #include <menumanager.h>
 #include <backendmanager.h>
 #include <filemanager.h>
-#include <parserutils.h>
 
 #include <QApplication>
 #include <QFontDatabase>
 #include <QIcon>
 #include <QSharedMemory>
 #include <QMessageBox>
-#include <QLoggingCategory>
 
 #define PIXEL_SIZE 14
 #define MIN_DPI 110.0
@@ -22,6 +20,7 @@ int main(int argc, char* argv[])
     // Boot settings
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL); // For reCaptcha
 
     // Initialize application
     QApplication a(argc, argv);
@@ -65,16 +64,6 @@ int main(int argc, char* argv[])
     font.setFamily("Open Sans");
     #endif
     QApplication::setFont(font);
-
-    // Disable Qml parser warnings
-    //    QLoggingCategory::setFilterRules(
-    //        QStringLiteral(
-    //            "qtc*.info=false\n"
-    //            "qtc*.debug=false\n"
-    //            "qtc*.warning=false\n"
-    //            "qtc*.critical=false"
-    //        )
-    //    );
 
     // Initialize css
     CSS::init();

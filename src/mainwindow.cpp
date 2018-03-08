@@ -292,8 +292,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         _loadingBar->setText(ProjectBackend::instance()->name() + ": <b>Ready</b>  |  Welcome to Objectwheel");
     });
 
-    connect(SaveBackend::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString)));
-    connect(SaveBackend::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString)));
+//    connect(SaveBackend::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString))); //TODO
+//    connect(SaveBackend::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString))); //TODO
 
     QToolBar* toolbar4 = new QToolBar;
     toolbar4->addWidget(label4);

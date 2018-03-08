@@ -35,12 +35,6 @@ BuildsWindow::BuildsWindow(QWidget *parent) : QWidget(parent)
     _view->show(Platforms);
 }
 
-void BuildsWindow::resizeEvent(QResizeEvent* event)
-{
-    _view->setGeometry(rect());
-    QWidget::resizeEvent(event);
-}
-
 void BuildsWindow::showModules()
 {
     _view->show(Modules);

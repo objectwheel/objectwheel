@@ -7,6 +7,7 @@ class QLabel;
 class ButtonSlice;
 class QVBoxLayout;
 class QListWidget;
+class ProgressBar;
 
 class ProjectsWidget : public QWidget
 {
@@ -25,26 +26,30 @@ class ProjectsWidget : public QWidget
         void onExportButtonClick();
         void onImportButtonClick();
         void onSettingsButtonClick();
+        void onProgressChange();
 
     private:
+        void lock();
+        void unlock();
+
+    protected:
         bool eventFilter(QObject* watched, QEvent* event) override;
 
     signals:
         void done();
-        void lazy();
-        void busy(const QString& text);
         void editProject(const QString& hash);
         void newProject(const QString& projectName);
 
     private:
-        QVBoxLayout* _layout;
-        QLabel* _iconLabel;
-        QLabel* _welcomeLabel;
-        QLabel* _versionLabel;
-        QLabel* _projectsLabel;
-        QListWidget* _listWidget;
-        ButtonSlice* _buttons;
-        ButtonSlice* _buttons2;
+        QVBoxLayout* m_layout;
+        QLabel* m_iconLabel;
+        QLabel* m_welcomeLabel;
+        QLabel* m_versionLabel;
+        QLabel* m_projectsLabel;
+        QListWidget* m_listWidget;
+        ButtonSlice* m_buttons;
+        ButtonSlice* m_buttons_2;
+        ProgressBar* m_progressBar;
 };
 
 #endif // PROJECTSWIDGET_H

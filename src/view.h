@@ -19,14 +19,15 @@ class View : public QWidget
         };
 
     public:
-        explicit View(QWidget* parent = nullptr);
+        explicit View(QWidget* parent);
         void add(int id, QWidget* widget);
 
     public slots:
         void show(int id, SwipeDirection = NoSwipe);
 
     protected:
-        virtual void resizeEvent(QResizeEvent *event) override;
+        void resizeEvent(QResizeEvent* event) override;
+        bool eventFilter(QObject* watched, QEvent* event) override;
 
     private:
         void swipe(QWidget* w1, QWidget* w2, View::SwipeDirection direction);

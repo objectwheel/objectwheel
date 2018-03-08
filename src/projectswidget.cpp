@@ -8,6 +8,9 @@
 #include <qmleditorview.h>
 #include <delayer.h>
 #include <filemanager.h>
+#include <previewerbackend.h>
+#include <savebackend.h>
+#include <progressbar.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -20,7 +23,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QDateTime>
-#include <QApplication>
+#include <QGuiApplication>
 #include <QScreen>
 #include <QFileDialog>
 
@@ -35,11 +38,14 @@
 #define PATH_IICON       (":/resources/images/load.png")
 #define PATH_EICON       (":/resources/images/unload.png")
 #define PATH_SICON       (":/resources/images/dots.png")
-#define pS               QApplication::primaryScreen()
+#define WIDTH_PROGRESS   80
+#define DPR              QGuiApplication::primaryScreen()->devicePixelRatio()
 #define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
 enum Buttons { Load, New, Import, Export, Settings };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
+
+namespace { int totalTask = 0; }
 
 class ProjectsDelegate: public QStyledItemDelegate
 {
@@ -52,17 +58,17 @@ class ProjectsDelegate: public QStyledItemDelegate
           const QModelIndex& index) const override;
 
     private:
-        QListWidget* _listWidget;
+        QListWidget* m_listWidget;
 };
 
 ProjectsDelegate::ProjectsDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-  , _listWidget(listWidget)
+  , m_listWidget(listWidget)
 {
 }
 
 void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-   auto item = _listWidget->item(index.row());
+   auto item = m_listWidget->item(index.row());
    Q_ASSERT(item);
 
    auto name = item->data(Name).toString();
@@ -76,12 +82,12 @@ void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
      - option.rect.width() + option.rect.height() - fit::fx(7), - fit::fx(7));
    auto ra = ri.adjusted(fit::fx(3), fit::fx(-0.5), 0, 0);
    ra.setSize(fit::fx(QSizeF(10, 10)).toSize());
-   auto icon = item->icon().pixmap(ri.size() * pS->devicePixelRatio());
+   auto icon = item->icon().pixmap(ri.size() * DPR);
 
    painter->setRenderHint(QPainter::Antialiasing);
 
    QPainterPath path;
-   path.addRoundedRect(_listWidget->rect(), fit::fx(8), fit::fx(8));
+   path.addRoundedRect(m_listWidget->rect(), fit::fx(8), fit::fx(8));
    painter->setClipPath(path);
 
     if (item->isSelected())
@@ -110,35 +116,37 @@ void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 }
 
 ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
+  , m_layout(new QVBoxLayout(this))
+  , m_iconLabel(new QLabel)
+  , m_welcomeLabel(new QLabel)
+  , m_versionLabel(new QLabel)
+  , m_projectsLabel(new QLabel)
+  , m_listWidget(new QListWidget)
+  , m_buttons(new ButtonSlice)
+  , m_buttons_2(new ButtonSlice(m_listWidget->viewport()))
+  , m_progressBar(new ProgressBar(m_listWidget->viewport()))
 {
-    _layout = new QVBoxLayout(this);
-    _iconLabel = new QLabel;
-    _welcomeLabel = new QLabel;
-    _versionLabel = new QLabel;
-    _projectsLabel = new QLabel;
-    _listWidget = new QListWidget;
-    _buttons = new ButtonSlice;
-    _buttons2 = new ButtonSlice(_listWidget->viewport());
+    m_layout->addStretch();
+    m_layout->setSpacing(fit::fx(12));
+    m_layout->setContentsMargins(0, 0, 0, 0);
+    m_layout->addWidget(m_iconLabel, 0, Qt::AlignCenter);
+    m_layout->addWidget(m_welcomeLabel, 0, Qt::AlignCenter);
+    m_layout->addWidget(m_versionLabel, 0, Qt::AlignCenter);
+    m_layout->addSpacing(fit::fx(10));
+    m_layout->addWidget(m_projectsLabel, 0, Qt::AlignCenter);
+    m_layout->addWidget(m_listWidget, 0, Qt::AlignCenter);
+    m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
+    m_layout->addStretch();
 
-    _layout->addStretch();
-    _layout->setSpacing(fit::fx(12));
-    _layout->setContentsMargins(0, 0, 0, 0);
-    _layout->addWidget(_iconLabel, 0, Qt::AlignCenter);
-    _layout->addWidget(_welcomeLabel, 0, Qt::AlignCenter);
-    _layout->addWidget(_versionLabel, 0, Qt::AlignCenter);
-    _layout->addSpacing(fit::fx(10));
-    _layout->addWidget(_projectsLabel, 0, Qt::AlignCenter);
-    _layout->addWidget(_listWidget, 0, Qt::AlignCenter);
-    _layout->addWidget(_buttons, 0, Qt::AlignCenter);
-    _layout->addStretch();
+    m_progressBar->hide();
 
     QPixmap p(PATH_LOGO);
-    p.setDevicePixelRatio(pS->devicePixelRatio());
+    p.setDevicePixelRatio(DPR);
 
-    _iconLabel->setFixedSize(SIZE_LOGO);
-    _iconLabel->setPixmap(
+    m_iconLabel->setFixedSize(SIZE_LOGO);
+    m_iconLabel->setPixmap(
         p.scaled(
-            SIZE_LOGO * pS->devicePixelRatio(),
+            SIZE_LOGO * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )
@@ -148,30 +156,30 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     f.setWeight(QFont::ExtraLight);
     f.setPixelSize(fit::fx(28));
 
-    _welcomeLabel->setFont(f);
-    _welcomeLabel->setText(tr("Welcome to Objectwheel"));
-    _welcomeLabel->setStyleSheet("color: #2E3A41");
+    m_welcomeLabel->setFont(f);
+    m_welcomeLabel->setText(tr("Welcome to Objectwheel"));
+    m_welcomeLabel->setStyleSheet("color: #2E3A41");
 
     f.setWeight(QFont::Light);
     f.setPixelSize(fit::fx(18));
-    _versionLabel->setFont(f);
-    _versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
-    _versionLabel->setStyleSheet("color: #2E3A41");
+    m_versionLabel->setFont(f);
+    m_versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
+    m_versionLabel->setStyleSheet("color: #2E3A41");
 
-    _projectsLabel->setText(tr("Your Projects"));
-    _projectsLabel->setStyleSheet("color: #2E3A41");
+    m_projectsLabel->setText(tr("Your Projects"));
+    m_projectsLabel->setStyleSheet("color: #2E3A41");
 
     QPalette p1;
     p1.setColor(QPalette::Highlight, "#12000000");
-    _listWidget->viewport()->installEventFilter(this);
-    _listWidget->setPalette(p1);
-    _listWidget->setIconSize(SIZE_FILEICON);
-    _listWidget->setMinimumWidth(fit::fx(400));
-    _listWidget->setItemDelegate(new ProjectsDelegate(_listWidget, _listWidget));
-    _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget->setFocusPolicy(Qt::NoFocus);
-    _listWidget->setFixedSize(SIZE_LIST);
-    _listWidget->verticalScrollBar()->setStyleSheet(
+    m_listWidget->viewport()->installEventFilter(this);
+    m_listWidget->setPalette(p1);
+    m_listWidget->setIconSize(SIZE_FILEICON);
+    m_listWidget->setMinimumWidth(fit::fx(400));
+    m_listWidget->setItemDelegate(new ProjectsDelegate(m_listWidget, m_listWidget));
+    m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_listWidget->setFocusPolicy(Qt::NoFocus);
+    m_listWidget->setFixedSize(SIZE_LIST);
+    m_listWidget->verticalScrollBar()->setStyleSheet(
         tr(
             "QScrollBar:vertical {"
             "    background: transparent;"
@@ -194,7 +202,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         arg(fit::fx(6)).
         arg(fit::fx(2.5))
     );
-    _listWidget->setStyleSheet(
+    m_listWidget->setStyleSheet(
         tr(
             "QListWidget {"
             "    background: #12000000;"
@@ -210,68 +218,78 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         item->setIcon(QIcon(PATH_FILEICON));
         item->setData(Name, "Project - 1");
         item->setData(LastEdit, "Last edit: 2018.06.16 14:43:11");
-        _listWidget->addItem(item);
+        m_listWidget->addItem(item);
     }
 
-    _buttons2->setFixedHeight(fit::fx(20));
-    _buttons2->add(Settings, "#55A6F6", "#448DDE");
-    _buttons2->get(Settings)->setIconSize(fit::fx(QSizeF(12, 12)).toSize());
-    _buttons2->get(Settings)->setIcon(QIcon(PATH_SICON));
-    _buttons2->get(Settings)->setCursor(Qt::PointingHandCursor);
-    _buttons2->hide();
-    _buttons2->settings().cellWidth = _buttons2->height();
-    _buttons2->settings().borderRadius = _buttons2->height() / 2.0;
-    _buttons2->triggerSettings();
-    connect(_listWidget, &QListWidget::currentItemChanged, [=] {
-        auto currentItem = _listWidget->currentItem();
+    m_progressBar->setFixedWidth(WIDTH_PROGRESS);
+
+    m_buttons_2->setFixedHeight(fit::fx(20));
+    m_buttons_2->add(Settings, "#55A6F6", "#448DDE");
+    m_buttons_2->get(Settings)->setIconSize(fit::fx(QSizeF(12, 12)).toSize());
+    m_buttons_2->get(Settings)->setIcon(QIcon(PATH_SICON));
+    m_buttons_2->get(Settings)->setCursor(Qt::PointingHandCursor);
+    m_buttons_2->hide();
+    m_buttons_2->settings().cellWidth = m_buttons_2->height();
+    m_buttons_2->settings().borderRadius = m_buttons_2->height() / 2.0;
+    m_buttons_2->triggerSettings();
+    connect(m_listWidget, &QListWidget::currentItemChanged, [=] {
+        auto currentItem = m_listWidget->currentItem();
         if (currentItem) {
-            _buttons2->show();
-            auto rect = _listWidget->visualItemRect(currentItem);
-            _buttons2->move(rect.topRight().x() - _buttons2->width() - fit::fx(5),
-                            rect.topRight().y() + (rect.height() - _buttons2->height()) / 2.0);
+            m_buttons_2->show();
+            auto rect = m_listWidget->visualItemRect(currentItem);
+            m_buttons_2->move(rect.topRight().x() - m_buttons_2->width() - fit::fx(5),
+                            rect.topRight().y() + (rect.height() - m_buttons_2->height()) / 2.0);
         } else {
-            _buttons2->hide();
+            m_buttons_2->hide();
         }
     });
 
-    _buttons->add(New, "#B97CD3", "#985BB2");
-    _buttons->add(Load, "#5BC5F8", "#2592F9");
-    _buttons->add(Import, "#8BBB56", "#6EA045");
-    _buttons->add(Export, "#AA815A", "#8c6b4a");
-    _buttons->get(New)->setText(tr("New"));
-    _buttons->get(Load)->setText(tr("Load"));
-    _buttons->get(Import)->setText(tr("Import"));
-    _buttons->get(Export)->setText(tr("Export"));
-    _buttons->get(New)->setIcon(QIcon(PATH_NICON));
-    _buttons->get(Load)->setIcon(QIcon(PATH_LICON));
-    _buttons->get(Import)->setIcon(QIcon(PATH_IICON));
-    _buttons->get(Export)->setIcon(QIcon(PATH_EICON));
-    _buttons->get(New)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Load)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Import)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Export)->setCursor(Qt::PointingHandCursor);
-    _buttons->settings().cellWidth = BUTTONS_WIDTH / 4.0;
-    _buttons->triggerSettings();
+    m_buttons->add(New, "#B97CD3", "#985BB2");
+    m_buttons->add(Load, "#5BC5F8", "#2592F9");
+    m_buttons->add(Import, "#8BBB56", "#6EA045");
+    m_buttons->add(Export, "#AA815A", "#8c6b4a");
+    m_buttons->get(New)->setText(tr("New"));
+    m_buttons->get(Load)->setText(tr("Load"));
+    m_buttons->get(Import)->setText(tr("Import"));
+    m_buttons->get(Export)->setText(tr("Export"));
+    m_buttons->get(New)->setIcon(QIcon(PATH_NICON));
+    m_buttons->get(Load)->setIcon(QIcon(PATH_LICON));
+    m_buttons->get(Import)->setIcon(QIcon(PATH_IICON));
+    m_buttons->get(Export)->setIcon(QIcon(PATH_EICON));
+    m_buttons->get(New)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(Load)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(Import)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(Export)->setCursor(Qt::PointingHandCursor);
+    m_buttons->settings().cellWidth = BUTTONS_WIDTH / 4.0;
+    m_buttons->triggerSettings();
 
-    connect(_buttons->get(New), SIGNAL(clicked(bool)),
+    connect(m_buttons->get(New), SIGNAL(clicked(bool)),
       this, SLOT(onNewButtonClick()));
-    connect(_buttons->get(Load), SIGNAL(clicked(bool)),
+    connect(m_buttons->get(Load), SIGNAL(clicked(bool)),
       this, SLOT(onLoadButtonClick()));
-    connect(_buttons->get(Import), SIGNAL(clicked(bool)),
+    connect(m_buttons->get(Import), SIGNAL(clicked(bool)),
       this, SLOT(onImportButtonClick()));
-    connect(_buttons->get(Export), SIGNAL(clicked(bool)),
+    connect(m_buttons->get(Export), SIGNAL(clicked(bool)),
       this, SLOT(onExportButtonClick()));
-    connect(_buttons2->get(Settings), SIGNAL(clicked(bool)),
+    connect(m_buttons_2->get(Settings), SIGNAL(clicked(bool)),
       this, SLOT(onSettingsButtonClick()));
+
+    connect(PreviewerBackend::instance(), SIGNAL(taskDone()),
+      SLOT(onProgressChange()));
+    connect(ProjectBackend::instance(), &ProjectBackend::started, [=]
+    {
+        totalTask = PreviewerBackend::instance()->totalTask();
+        onProgressChange();
+    });
 }
 
 bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == _listWidget->viewport() && event->type() == QEvent::Paint && _listWidget->count() == 0) {
-        QPainter p(_listWidget->viewport());
+    if (watched == m_listWidget->viewport() && event->type() == QEvent::Paint && m_listWidget->count() == 0) {
+        QPainter p(m_listWidget->viewport());
         p.setRenderHint(QPainter::Antialiasing);
         p.setPen("#30000000");
-        p.drawText(_listWidget->viewport()->rect(), tr("No projects"), QTextOption(Qt::AlignCenter));
+        p.drawText(m_listWidget->viewport()->rect(), tr("No projects"), QTextOption(Qt::AlignCenter));
         return true;
     }
 
@@ -280,7 +298,8 @@ bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
 
 void ProjectsWidget::refreshProjectList()
 {
-    _listWidget->clear();
+    const int currentRow = m_listWidget->currentRow();
+    m_listWidget->clear();
     if (UserBackend::instance()->dir().isEmpty())
         return;
 
@@ -296,28 +315,32 @@ void ProjectsWidget::refreshProjectList()
         item->setData(Name, ProjectBackend::instance()->name(hash));
         item->setData(LastEdit, ProjectBackend::instance()->mfDate(hash));
         item->setData(Active, hash == ProjectBackend::instance()->hash());
-        _listWidget->addItem(item);
+        m_listWidget->addItem(item);
     }
 
-    if (!_listWidget->currentItem())
-        _listWidget->setCurrentRow(0);
+    if (currentRow >= 0 && m_listWidget->count() > currentRow)
+        m_listWidget->setCurrentRow(currentRow);
+    else
+        m_listWidget->setCurrentRow(0);
 }
 
 void ProjectsWidget::startProject()
 {
-    auto hash = _listWidget->currentItem()->data(Hash).toString();
+    auto hash = m_listWidget->currentItem()->data(Hash).toString();
 
-    if (!ProjectBackend::instance()->start(hash)) { // Asynchronous Operation
+    if (!ProjectBackend::instance()->start(hash)) {
         qWarning() << "Project starting unsuccessful.";
         refreshProjectList();
         return;
     }
 
-    for (int i = _listWidget->count(); i--;)
-        _listWidget->item(i)->setData(Active, false);
+    for (int i = m_listWidget->count(); i--;)
+        m_listWidget->item(i)->setData(Active, false);
 
-    _listWidget->currentItem()->setData(Active, true);
+    m_listWidget->currentItem()->setData(Active, true);
 
+    Delayer::delay(std::bind(&PreviewerBackend::isBusy, PreviewerBackend::instance()));
+    unlock();
     emit done();
 }
 
@@ -328,7 +351,7 @@ void ProjectsWidget::onNewButtonClick()
     int count = 1;
     QString projectName = "Project - 1";
 
-    _buttons->setDisabled(true);
+    m_buttons->setDisabled(true);
 
     while (projects.contains(projectName)) {
         count++;
@@ -341,19 +364,19 @@ void ProjectsWidget::onNewButtonClick()
     item->setData(Name, projectName);
     item->setData(LastEdit, TIME);
     item->setData(Active, false);
-    _listWidget->addItem(item);
-    _listWidget->setCurrentItem(item);
+    m_listWidget->addItem(item);
+    m_listWidget->setCurrentItem(item);
 
     Delayer::delay(250);
 
-    _buttons->setEnabled(true);
+    m_buttons->setEnabled(true);
 
     emit newProject(projectName);
 }
 
 void ProjectsWidget::onLoadButtonClick()
 {
-    if (!_listWidget->currentItem()) {
+    if (!m_listWidget->currentItem()) {
         QMessageBox::warning(
             this,
             tr("Oops"),
@@ -362,7 +385,7 @@ void ProjectsWidget::onLoadButtonClick()
         return;
     }
 
-    auto hash = _listWidget->currentItem()->data(Hash).toString();
+    auto hash = m_listWidget->currentItem()->data(Hash).toString();
     auto chash = ProjectBackend::instance()->hash();
 
     if (!chash.isEmpty() && chash == hash) {
@@ -394,12 +417,13 @@ void ProjectsWidget::onLoadButtonClick()
     WindowManager::instance()->hide(WindowManager::Main);
     ProjectBackend::instance()->stop();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
-    emit busy(tr("Loading project"));
+
+    lock();
 }
 
 void ProjectsWidget::onExportButtonClick()
 {
-    if (!_listWidget->currentItem()) {
+    if (!m_listWidget->currentItem()) {
         QMessageBox::warning(
             this,
             tr("Oops"),
@@ -408,8 +432,8 @@ void ProjectsWidget::onExportButtonClick()
         return;
     }
 
-    auto hash = _listWidget->currentItem()->data(Hash).toString();
-    auto pname = _listWidget->currentItem()->data(Name).toString();
+    auto hash = m_listWidget->currentItem()->data(Hash).toString();
+    auto pname = m_listWidget->currentItem()->data(Name).toString();
 
     if (hash.isEmpty() || pname.isEmpty())
         return;
@@ -470,8 +494,40 @@ void ProjectsWidget::onImportButtonClick()
 
 void ProjectsWidget::onSettingsButtonClick()
 {
-    if (_listWidget->currentItem())
-        emit editProject(_listWidget->currentItem()->data(Hash).toString());
+    if (m_listWidget->currentItem())
+        emit editProject(m_listWidget->currentItem()->data(Hash).toString());
+}
+
+void ProjectsWidget::onProgressChange()
+{
+    int taskDone = totalTask - PreviewerBackend::instance()->totalTask();
+    m_progressBar->setValue(10 + 90.0 * taskDone / totalTask);
+}
+
+void ProjectsWidget::lock()
+{
+    m_buttons->setDisabled(true);
+    m_listWidget->setDisabled(true);
+    m_buttons_2->hide();
+    m_progressBar->show();
+    m_progressBar->raise();
+    m_progressBar->setValue(10);
+
+    m_progressBar->move(
+        m_buttons_2->pos() +
+        QPoint(
+            -WIDTH_PROGRESS + m_buttons_2->width(),
+            m_buttons_2->height() / 2.0 - m_progressBar->height() / 2.0
+        )
+    );
+}
+
+void ProjectsWidget::unlock()
+{
+    m_buttons->setEnabled(true);
+    m_listWidget->setEnabled(true);
+    m_buttons_2->show();
+    m_progressBar->hide();
 }
 
 #include "projectswidget.moc"

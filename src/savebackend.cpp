@@ -342,7 +342,6 @@ void SaveBackend::exposeProject() const
             form->setMain(true);
         dW->formScene()->addForm(form);
 
-        qApp->processEvents(QEventLoop::AllEvents, 10);
         QMap<QString, Control*> pmap;
         pmap[path] = form;
 
@@ -353,19 +352,11 @@ void SaveBackend::exposeProject() const
             auto control = new Control(child + separator() +
               DIR_THIS + separator() + "main.qml", FormGui);
             control->setParentItem(pcontrol);
-
-            emit instance()->busyLoader((100.0 * (j / fpaths.size()))   +   (((100.0 / fpaths.size())) / pths.size()) * i,
-            "Loading " + form->id() + QString("'s %1 of %2 controls").arg(i).arg(pths.size()));
-
             pmap[child] = control;
-            qApp->processEvents(QEventLoop::AllEvents, 10);
             i++;
         }
         j++;
     }
-
-    emit instance()->doneLoader("Done!");
-    emit instance()->projectExposed();
 }
 
 Control* SaveBackend::exposeControl(

@@ -740,8 +740,6 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
             this, SLOT(handleControlDoubleClick(Control*)));
     connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
             this, SLOT(handleControlDrop(Control*,QPointF,QString)));
-    connect(SaveBackend::instance(), SIGNAL(parserRunningChanged(bool)),
-            SLOT(handleIndicatorChanges()));
     connect(PreviewerBackend::instance(), SIGNAL(busyChanged()),
             SLOT(handleIndicatorChanges()));
 
