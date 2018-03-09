@@ -32,10 +32,13 @@ property pane den font family değiştirilince previewer cache'de ki font family
 font parserca düzgün kaydedilemedfi
 x, y, z, width, height, id propertylerini .qml dosyası içine kayıt etme olayını tekrar kontrol et
 proje surdurulurken secure exit yapsın
+property remove edilebilsin, ve değiştirilmiş propertyler bold renk ile belli edilsin propertiespane üzerinde
+propertileri extract ederken heb subproperty, hem normal propertyler için isUserType() dan yararlan, bak bakalım nasıl olcak
+mainform'un visibilitisi false olsada yine render yapılıypr, bunu engelle
 
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin
-code editör'den yapılan değişiklikler sonucu repreview çağrılsın (preview değil)
+temayı değiştirip previewer preview kalitesini test et
 
 internetaccess bokunu her yerden kaldır
 Form'ların x y leri gui editörden değişmicek
@@ -155,3 +158,18 @@ Diğer TODO'lar
 * Control movement history in json
 * Why Switch control crash if its id "switch"
 * A better CODE Editor needed
+
+
+
+               canlı uygulama          property güncelleme          parser set etme
+Font               ok                    nope                        ok
+Bool               ok                    ok                          ok
+Enumarator         nope                  nope                        ok
+int                ok                    ok                          ok
+double             ok                    ok                          ok
+id                 ok                    ok                          ok
+string             ok                    ok                          ok
+color              ok                    ok                          ok
+url                nope                  ok                          ok 
+
+bazı canlı uygulamalarda öyle sanıyorum ki property changed sinyalleri gönderilmediği için gui de değişiklik olmuyor, örneğin gauge min thickmarkCount propertisinde

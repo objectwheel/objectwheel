@@ -50,6 +50,7 @@ QDataStream& operator>>(QDataStream& in, PropertyNode& node)
 {
     in >> node.cleanClassName;
     in >> node.properties;
+    in >> node.enums;
 
     return in;
 }
@@ -58,6 +59,7 @@ QDataStream& operator<<(QDataStream& out, const PropertyNode& node)
 {
     out << node.cleanClassName;
     out << node.properties;
+    out << node.enums;
 
     return out;
 }
@@ -82,6 +84,26 @@ QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
     out << result.events;
     out << result.errors;
     out << result.propertyNodes;
+
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, Enum& e)
+{
+    in >> e.name;
+    in >> e.scope;
+    in >> e.value;
+    in >> e.keys;
+
+    return in;
+}
+
+QDataStream& operator<<(QDataStream& out, const Enum& e)
+{
+    out << e.name;
+    out << e.scope;
+    out << e.value;
+    out << e.keys;
 
     return out;
 }

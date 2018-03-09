@@ -24,10 +24,10 @@ SaveTransaction* SaveTransaction::instance()
 
 void SaveTransaction::processGeometry(Control* control)
 {
-    SaveBackend::instance()->setProperty(control, "x", control->x());
-    SaveBackend::instance()->setProperty(control, "y", control->y());
-    SaveBackend::instance()->setProperty(control, "width", control->size().width() / fit::ratio());
-    SaveBackend::instance()->setProperty(control, "height", control->size().height() / fit::ratio());
+    SaveBackend::instance()->setProperty(control, "x", QString::number(control->x()));
+    SaveBackend::instance()->setProperty(control, "y", QString::number(control->y()));
+    SaveBackend::instance()->setProperty(control, "width", QString::number(control->size().width() / fit::ratio()));
+    SaveBackend::instance()->setProperty(control, "height", QString::number(control->size().height() / fit::ratio()));
 }
 
 void SaveTransaction::processParent(Control* control)
@@ -40,5 +40,5 @@ void SaveTransaction::processParent(Control* control)
 
 void SaveTransaction::processZ(Control* control)
 {
-    SaveBackend::instance()->setProperty(control, "z", control->zValue());
+    SaveBackend::instance()->setProperty(control, "z", QString::number(control->zValue()));
 }

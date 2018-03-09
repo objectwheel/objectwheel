@@ -187,7 +187,7 @@ void DesignerWidget::handlePhonePortraitButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::PhonePortrait);
-    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhonePortrait);
+//    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhonePortrait);
     _phonePortraitButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -203,7 +203,7 @@ void DesignerWidget::handlePhoneLandscapeButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::PhoneLandscape);
-    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhoneLandscape);
+//    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::PhoneLandscape);
     _phoneLandscapeButton->setDisabled(true);
     _phonePortraitButton->setChecked(false);
     _desktopSkinButton->setChecked(false);
@@ -219,7 +219,7 @@ void DesignerWidget::handleDesktopSkinButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::Desktop);
-    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::Desktop);
+//    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::Desktop);
     _desktopSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _phonePortraitButton->setChecked(false);
@@ -235,7 +235,7 @@ void DesignerWidget::handleNoSkinButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::NoSkin);
-    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::NoSkin);
+//    SaveBackend::instance()->setProperty(form, PTAG_SKIN, SaveUtils::NoSkin);
     _noSkinButton->setDisabled(true);
     _phoneLandscapeButton->setChecked(false);
     _desktopSkinButton->setChecked(false);

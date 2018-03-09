@@ -12,7 +12,6 @@ using namespace QmlJS;
 using namespace AST;
 
 namespace {
-    QString variantToString(const QVariant& variant);
     QString fullPropertyName(const UiQualifiedId* qualifiedId);
     bool propertyExists(const UiObjectMemberList* list, const QString& property);
     void addProperty(QString& source, const UiObjectInitializer* initializer, const QString& property, const QString& value);
@@ -115,32 +114,7 @@ void ParserUtils::setProperty(QTextDocument* doc, const QString& fileName, const
         addProperty(doc, uiObjectInitializer, property, value);
 }
 
-void ParserUtils::setProperty(const QString& fileName, const QString& property, const QVariant& value)
-{
-    setProperty(fileName, property, variantToString(value));
-}
-
-void ParserUtils::setProperty(QTextDocument* document, const QString& fileName, const QString& property, const QVariant& value)
-{
-    setProperty(document, fileName, property, variantToString(value));
-}
-
 namespace {
-    QString variantToString(const QVariant& variant)
-    {
-        switch (variant.type()) {
-            case QVariant::String:
-            case QVariant::Color:
-            case QVariant::Url:
-                return "\"" + variant.toString() + "\"";
-                break;
-
-            default:
-                return variant.toString();
-                break;
-        };
-    }
-
     QString fullPropertyName(const UiQualifiedId* qualifiedId)
     {
         QString name;

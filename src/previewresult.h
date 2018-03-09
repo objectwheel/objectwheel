@@ -5,14 +5,24 @@
 #include <QImage>
 #include <QVariant>
 #include <QQmlError>
-#include <QMetaObject>
+#include <QMetaEnum>
 
 class QQmlComponent;
+
+struct Enum {
+    QString name;
+    QString scope;
+    QString value;
+    QStringList keys;
+    QMetaEnum metaEnum;
+};
+Q_DECLARE_METATYPE(Enum)
 
 struct PropertyNode
 {
     QString cleanClassName;
     QMap<QString, QVariant> properties;
+    QList<Enum> enums;
 };
 
 class PreviewResult
@@ -32,8 +42,10 @@ class PreviewResult
         QList<PropertyNode> propertyNodes;
 };
 
+QDataStream& operator<<(QDataStream& out, const Enum& e);
 QDataStream& operator<<(QDataStream& out, const PropertyNode& node);
 QDataStream& operator<<(QDataStream& out, const PreviewResult& result);
+QDataStream& operator>>(QDataStream& in, Enum& e);
 QDataStream& operator>>(QDataStream& in, PropertyNode& node);
 QDataStream& operator>>(QDataStream& in, PreviewResult& result);
 

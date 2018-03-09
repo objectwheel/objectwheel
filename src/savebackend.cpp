@@ -580,20 +580,20 @@ void SaveBackend::removeChildControlsOnly(const Control* control) const
 void SaveBackend::setProperty(
     Control* control,
     const QString& property,
-    const QVariant& value,
+    const QString& value,
     const QString& topPath
-    ) const
+) const
 {
     if (control->dir().isEmpty() ||
         !SaveUtils::isOwctrl(control->dir()))
         return;
 
     if (property == TAG_ID) {
-        if (control->id() == value.toString())
+        if (control->id() == value)
             return;
 
         auto _suid = SaveUtils::suid(control->dir());
-        control->setId(value.toString());
+        control->setId(value);
         refactorId(control, _suid, topPath);
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
@@ -601,21 +601,12 @@ void SaveBackend::setProperty(
         auto propertyData = rdfile(propertyPath);
         SaveUtils::setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
-    } else if (property == PTAG_SKIN) {
-        if (!control->form())
-            return;
-
-        auto propertyPath = control->dir() + separator() + DIR_THIS +
-                            separator() + FILE_PROPERTIES;
-        auto propertyData = rdfile(propertyPath);
-        SaveUtils::setProperty(propertyData, PTAG_SKIN, value.toInt());
-        wrfile(propertyPath, propertyData);
     } else if (property == TAG_X || property == TAG_Y || property == TAG_Z ||
        property == TAG_WIDTH || property == TAG_HEIGHT) {
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;
         auto propertyData = rdfile(propertyPath);
-        SaveUtils::setProperty(propertyData, property, value.toReal());
+        SaveUtils::setProperty(propertyData, property, value.toDouble());
         wrfile(propertyPath, propertyData);
     } else {
         if (control->hasErrors())
@@ -635,8 +626,7 @@ void SaveBackend::removeProperty(const Control* control, const QString& property
     if (control->dir().isEmpty() ||
         control->hasErrors() ||
         !SaveUtils::isOwctrl(control->dir()) ||
-        property == TAG_ID ||
-        property == PTAG_SKIN)
+        property == TAG_ID)
         return;
 
 //    auto fileName = control->dir() + separator() + DIR_THIS +

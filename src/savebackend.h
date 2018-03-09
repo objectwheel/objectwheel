@@ -41,7 +41,7 @@ class SaveBackend : public QObject
         void removeControl(const Control* control) const;
         void removeChildControlsOnly(const Control* control) const;
         void removeProperty(const Control* control, const QString& property) const;
-        void setProperty(Control* control, const QString& property, const QVariant& value, const QString& topPath = QString()) const;
+        void setProperty(Control* control, const QString& property, const QString& value, const QString& topPath = QString()) const;
 
         QString basePath() const;
         QString parentDir(const Control* control) const;
@@ -52,7 +52,7 @@ class SaveBackend : public QObject
 
     signals:
         void databaseChanged() const;
-        void propertyChanged(Control* control, const QString& property, const QVariant& value) const;
+        void propertyChanged(Control* control, const QString& property, const QString& value) const;
 
     private:
         SaveBackend() {}

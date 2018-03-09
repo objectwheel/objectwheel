@@ -23,6 +23,7 @@
 //!
 
 enum NodeType {
+    EnumType,
     FontFamily,
     FontPtSize,
     FontPxSize,
@@ -308,25 +309,25 @@ static void processInt(QTreeWidgetItem* item, const QString& propertyName, const
     item->addChild(iitem);
 }
 
-static void saveChanges(const QString& property, const QVariant& value)
+static void saveChanges(const QString& property, const QString& parserValue, const QVariant& value)
 {
     auto scs = dW->currentScene()->selectedControls();
 
     if (scs.isEmpty())
         return;
 
-    QPointer<Control> sc = scs.at(0);
+    auto sc = scs.at(0);
 
     if (dW->mode() == ControlGui && property == TAG_ID)
-        SaveBackend::instance()->setProperty(sc, property, value, dW->controlScene()->mainControl()->dir());
+        SaveBackend::instance()->setProperty(sc, property, parserValue, dW->controlScene()->mainControl()->dir());
     else {
-        SaveBackend::instance()->setProperty(sc, property, value);
+        SaveBackend::instance()->setProperty(sc, property, parserValue);
         PreviewerBackend::instance()->updateCache(sc->uid(), property, value);
         sc->refresh();
     }
 }
 
-static void saveChanges(const NodeType& type, const QVariant& value)
+static void saveChanges(const NodeType& type, const QString& parserValue, const QVariant& value)
 {
     QString property;
     switch (type) {
@@ -401,20 +402,7 @@ static void saveChanges(const NodeType& type, const QVariant& value)
         default:
             break;
     }
-    saveChanges(property, value);
-}
-
-static void cleanProperties(QMap<QString, QVariant>& map)
-{
-    QStringList keysToRemove;
-
-    for (auto key : map.keys()) {
-        if (key.startsWith("__") || QString(map.value(key).typeName()).isEmpty())
-            keysToRemove << key;
-    }
-
-    for (auto key : keysToRemove)
-        map.remove(key);
+    saveChanges(property, parserValue, value);
 }
 
 //!
@@ -455,6 +443,17 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
     auto property = m_view->model()->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
+        case EnumType: {
+            auto editor = new QComboBox(parent);
+            auto e = index.data(NodeRole::Data).value<Enum>();
+            editor->addItems(e.keys);
+            connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
         case FontFamily: {
             auto editor = new QComboBox(parent);
             editor->addItems(QFontDatabase().families());
@@ -510,7 +509,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
                 if (color.isValid()) {
                     m_view->model()->setData(index, color, NodeRole::Data);
                     m_view->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
-                    saveChanges(property, color);
+                    saveChanges(property, "\"" + color.name(QColor::HexArgb) + "\"", color);
                 }
             });
             break;
@@ -617,6 +616,13 @@ void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) co
     auto type = index.data(NodeRole::Type).value<NodeType>();
 
     switch (type) {
+        case EnumType: {
+            auto val = index.model()->data(index, NodeRole::Data).value<Enum>();
+            auto editor = static_cast<QComboBox*>(ed);
+            editor->setCurrentText(val.value);
+            break;
+        }
+
         case FontFamily: {
             auto val = index.model()->data(index, NodeRole::Data).value<QString>();
             auto editor = static_cast<QComboBox*>(ed);
@@ -715,6 +721,24 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
     auto property = model->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
+        case EnumType: {
+            auto editor = static_cast<QComboBox*>(ed);
+            val = editor->currentText();
+            auto preVal = model->data(index, Qt::EditRole).toString();
+
+            if (val == preVal)
+                return;
+
+            auto e = index.data(NodeRole::Data).value<Enum>();
+            e.value = val.toString();
+
+            model->setData(index, QVariant::fromValue(e), NodeRole::Data);
+            model->setData(index, e.value, Qt::EditRole);
+
+            saveChanges(property, e.scope + "." + e.value, e.keys.indexOf(e.value));
+            break;
+        }
+
         case FontFamily: {
             auto editor = static_cast<QComboBox*>(ed);
             val = editor->currentText();
@@ -731,7 +755,8 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
             auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
             pVal.replace(preVal, val.toString());
             model->setData(pIndex, pVal, Qt::DisplayRole);
-            saveChanges(type, val);
+
+            saveChanges(type, "\"" + val.toString() + "\"", val);
             break;
         }
 
@@ -763,7 +788,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
             auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
             pVal.replace(QRegExp(",.*"), ", " + QString::number(px ? pxSize : ptSize) + (px ? "px]" : "pt]"));
             model->setData(pIndex, pVal, Qt::DisplayRole);
-            saveChanges(type, val);
+            saveChanges(type, val.toString(), val);
             break;
         }
 
@@ -780,7 +805,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
                 return;
 
             model->setData(index, val, NodeRole::Data);
-            saveChanges(type, val);
+            saveChanges(type, val.toString(), val);
             break;
         }
 
@@ -793,11 +818,24 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
                 return;
 
             model->setData(index, val, NodeRole::Data);
-            saveChanges(property, val);
+            saveChanges(property, val.toString(), val);
             break;
         }
 
-        case Id:
+        case Id: {
+            auto editor = static_cast<QLineEdit*>(ed);
+            val = editor->text();
+            auto preVal = model->data(index, Qt::EditRole).toString();
+
+            if (val == preVal)
+                return;
+
+            model->setData(index, val, NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+            saveChanges(property, val.toString(), val);
+            break;
+        }
+
         case String: {
             auto editor = static_cast<QLineEdit*>(ed);
             val = editor->text();
@@ -808,7 +846,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
 
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
-            saveChanges(property, val);
+            saveChanges(property, "\"" +val.toString() + "\"", val);
             break;
         }
 
@@ -822,7 +860,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
 
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
-            saveChanges(property, val);
+            saveChanges(property, "\"" + val.toString() + "\"", val);
             break;
         }
 
@@ -841,7 +879,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
                 if (sc.size() == 1)
                     sc[0]->setZValue(val.toReal());
             }
-            saveChanges(property, val);
+            saveChanges(property, val.toString(), val);
             break;
         }
 
@@ -855,7 +893,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
 
             model->setData(index, val, NodeRole::Data);
             model->setData(index, val, Qt::EditRole);
-            saveChanges(property, val);
+            saveChanges(property, val.toString(), val);
             break;
         }
 
@@ -884,7 +922,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
                             arg(x).arg(y).arg(w).arg(h);
 
             model->setData(pIndex, gt, Qt::DisplayRole);
-            saveChanges(type, val);
+            saveChanges(type, val.toString(), val);
             break;
         }
 
@@ -913,7 +951,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
                             arg(x).arg(y).arg(w).arg(h);
 
             model->setData(pIndex, gt, Qt::DisplayRole);
-            saveChanges(type, val);
+            saveChanges(type, val.toString(), val);
             break;
         }
 
@@ -1205,16 +1243,15 @@ void PropertiesPane::refreshList()
 
     for (const auto& propertyNode : propertyNodes) {
         auto map = propertyNode.properties;
+        auto enums = propertyNode.enums;
 
-        cleanProperties(map);
-
-        if (map.isEmpty())
+        if (map.isEmpty() && enums.isEmpty())
             continue;
 
         auto item = new QTreeWidgetItem;
         item->setText(0, propertyNode.cleanClassName);
 
-        for (auto propertyName : map.keys()) {
+        for (const auto& propertyName : map.keys()) {
             switch (map.value(propertyName).type())
             {
                 case QVariant::Font: {
@@ -1276,6 +1313,17 @@ void PropertiesPane::refreshList()
                 }
             }
         }
+
+        for (auto e : enums) {
+             auto item1 = new QTreeWidgetItem;
+             item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+             item1->setText(0, e.name);
+             item1->setData(1, Qt::EditRole, e.value);
+             item1->setData(1, NodeRole::Type, NodeType::EnumType);
+             item1->setData(1, NodeRole::Data, QVariant::fromValue(e));
+             item->addChild(item1);
+        }
+
         _treeWidget->addTopLevelItem(item);
         _treeWidget->expandItem(item);
     }
