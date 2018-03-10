@@ -99,7 +99,6 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
 void IssuesBox::handleErrors(Control* control)
 {
     refresh();
-    QList<QQmlError> errs = control->errors();
     if (control->hasErrors()) {
         for (const auto& error : control->errors()) {
             Error err;

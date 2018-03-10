@@ -446,7 +446,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case EnumType: {
             auto editor = new QComboBox(parent);
             auto e = index.data(NodeRole::Data).value<Enum>();
-            editor->addItems(e.keys);
+            editor->addItems(e.keys.keys());
             connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
                     [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
@@ -735,7 +735,7 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
             model->setData(index, QVariant::fromValue(e), NodeRole::Data);
             model->setData(index, e.value, Qt::EditRole);
 
-            saveChanges(property, e.scope + "." + e.value, e.keys.indexOf(e.value));
+            saveChanges(property, e.scope + "." + e.value, e.keys.value(e.value));
             break;
         }
 

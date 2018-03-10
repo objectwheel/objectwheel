@@ -4,13 +4,12 @@ nesnelerin boyutu ve konumu çapraz platform olarak fit'lenmeli
 ow ile yapılmış uygulamalarda fit olayı nasıl olacak?
 objectwheel uygulamaları temalarını proje ayarlarından okusun ona göre yapılansın/stilize olsun/görünsün
 objectwheel tema ve font işlerini de hallet
-tema değiştirince neden objeclerin görüntüleri bozuluyor
-View class'ının çalışmasını "görsel kırmalar"ı bitirecek şekilde düzelt
+
 control inspector'un horizontal scrollbarı ı neden her "refresp preview" operasyonu sonrası çıldırıyor uzuyor
 properties pane'de geometry'yi unutma
 genel inline todo temizliği
-objectwheel'i qlocalserver yap, previewer'ı client yap
-pane hidden ken buttonlar hep shine lar
+previewer den "uyanığım" sinyali yolla, eğer uzun süre ow bu sinyali almazsa uyarı versin ve kullanıcıya "yeniden denensin mi" diye sorsun
+
 consol çıktısındaki boşluk olayını hallet
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
 control inspector her refres'de uzayıp gidiyor
@@ -24,7 +23,8 @@ anchors.left, right vs vs gibi sub "qtobject" bazlı propertyleri de destekle (p
 transform/rotation property değişikliği control üzerine uygulanamıyor, bunu düzelt, ve başka böyle propertiler varmı bi kontrol et
 aynı şekilde url değişikliklerinin uygulanmasında da sıkıntı var (keşlenmiş objeye uygulamada)
 Item top level propertisinin collapse butonuna basınca program donuyor
-collapsed controller, control inspectorde, her refresh ile yeniden expand oluyor, bunu düzelt. Hatta, direk her pane'nin refresh metodunu düzenle, her refresh ile her şey tümünden silinip yeniden doldurulmasın
+collapsed controller, control inspectorde, her refresh ile yeniden expand oluyor, bunu düzelt. Hatta, direk her pane'nin refresh metodunu düzenle, her refresh ile her şey tümünden silinip yeniden doldurulmasın, bunu properties pane'e de uygula
+properties pane her refresh ile bulunduğu konumu kaybediyor, focus kayboluyor vs
 control inspector'ün paint olayınıda properties pane gibi düzelt, güzelleştir
 x, y, width, height, z propertylerinin properties window ile etkileşimini kontrol et
 properties pane enumları desteklesin
@@ -35,10 +35,17 @@ proje surdurulurken secure exit yapsın
 property remove edilebilsin, ve değiştirilmiş propertyler bold renk ile belli edilsin propertiespane üzerinde
 propertileri extract ederken heb subproperty, hem normal propertyler için isUserType() dan yararlan, bak bakalım nasıl olcak
 mainform'un visibilitisi false olsada yine render yapılıypr, bunu engelle
-
+run butonun kararmasını değiştir, kararmasın, hatta disable olmasın, run olunca windowlar neden alta gidiyor?
+cmd + backspace'de controlleri silsin
+paste yapınca kopyalanan item refresh edilmiyor
+zoot-in/out yapınca kalite bozuluyor
+properties pane filter olayı sıçık, bir textfield üzerinde "echoMode" aratmaya çalışınca sıçtı dondu kaldı
+run yapınca kontrollerin boyutları değişiyor, her nasılsa, özellikle textfield text inputlar
 control/form silinince objectwheel-previewer cahche i silsin
 control'un propertisi property pane'den değiştirilince cache'in propertyleri de (cache'de tutulan result objecsinin propertyleri dahil) güncellensin
 temayı değiştirip previewer preview kalitesini test et
+otherfocusreason propertysi cache ye nedense uygulanamıyor
+ayno şekilde url'de cache ye nedense uygulanamıyor
 
 internetaccess bokunu her yerden kaldır
 Form'ların x y leri gui editörden değişmicek
@@ -159,17 +166,3 @@ Diğer TODO'lar
 * Why Switch control crash if its id "switch"
 * A better CODE Editor needed
 
-
-
-               canlı uygulama          property güncelleme          parser set etme
-Font               ok                    nope                        ok
-Bool               ok                    ok                          ok
-Enumarator         nope                  nope                        ok
-int                ok                    ok                          ok
-double             ok                    ok                          ok
-id                 ok                    ok                          ok
-string             ok                    ok                          ok
-color              ok                    ok                          ok
-url                nope                  ok                          ok 
-
-bazı canlı uygulamalarda öyle sanıyorum ki property changed sinyalleri gönderilmediği için gui de değişiklik olmuyor, örneğin gauge min thickmarkCount propertisinde

@@ -313,18 +313,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _inspectorDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
                                      QDockWidget::DockWidgetFloatable);
 
-    connect(InterpreterBackend::instance(), &InterpreterBackend::started, [=]
-    {
-        auto pane = _designerWidget->outputPane();
-        auto console = pane->consoleBox();
-
-        console->printFormatted(
-            tr(" started successfully.\n"),
-            "#008000",
-            QFont::DemiBold
-        );
-    });
-
     connect(InterpreterBackend::instance(),
     QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
     [=] (int exitCode, QProcess::ExitStatus exitStatus)
@@ -335,14 +323,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         if (exitStatus == QProcess::CrashExit) {
             console->printFormatted(
                 tr("The process was ended forcefully.\n"),
-                "#AA0000",
+                "#B34B46",
                 QFont::DemiBold
             );
         }
 
         console->printFormatted(
-            ProjectBackend::instance()->name() + tr(" exited with code %1.\n\n").arg(exitCode),
-            "#0000AA",
+            ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
+            "#1069C7",
             QFont::DemiBold
         );
 
@@ -400,9 +388,11 @@ void MainWindow::handleRunButtonClick()
     auto console = pane->consoleBox();
 
     console->fade();
+    if (!console->isClean())
+        console->print("\n");
     console->printFormatted(
-        tr("Starting ") + ProjectBackend::instance()->name() + "...",
-        "#0000AA",
+        tr("Starting ") + ProjectBackend::instance()->name() + "...\n",
+        "#1069C7",
         QFont::DemiBold
     );
     console->scrollToEnd();

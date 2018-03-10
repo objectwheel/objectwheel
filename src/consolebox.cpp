@@ -36,7 +36,12 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     connect(InterpreterBackend::instance(), SIGNAL(standardError(QString)),
       SLOT(onStandardError(QString)));
     connect(InterpreterBackend::instance(), SIGNAL(standardOutput(QString)),
-      SLOT(onStandardOutput(QString)));
+            SLOT(onStandardOutput(QString)));
+}
+
+bool ConsoleBox::isClean() const
+{
+    return _textEdit->toPlainText().isEmpty();
 }
 
 void ConsoleBox::print(const QString& text)
@@ -72,7 +77,7 @@ void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont:
     if (atEnd)
         scrollToEnd();
 
-    if (_outputPane->activeBox() != OutputPane::Console)
+    if (_outputPane->isCollapsed() || _outputPane->activeBox() != OutputPane::Console)
         _outputPane->shine(OutputPane::Console);
 }
 

@@ -13,7 +13,7 @@ struct Enum {
     QString name;
     QString scope;
     QString value;
-    QStringList keys;
+    QHash<QString, int> keys;
     QMetaEnum metaEnum;
 };
 Q_DECLARE_METATYPE(Enum)

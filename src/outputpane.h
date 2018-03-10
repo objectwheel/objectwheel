@@ -34,6 +34,7 @@ class OutputPane : public QWidget
         ConsoleBox* consoleBox();
         SearchBox* searchBox();
         Box activeBox() const;
+        bool isCollapsed() const;
 
     public slots:
         void clear();

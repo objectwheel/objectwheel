@@ -309,6 +309,7 @@ void InspectorPane::refresh()
         }
     }
 
+    _treeWidget->expandAll();
     _treeWidget->verticalScrollBar()->setSliderPosition(vsp);
     _treeWidget->horizontalScrollBar()->setSliderPosition(hsp);
 }

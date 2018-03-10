@@ -315,6 +315,11 @@ OutputPane::Box OutputPane::activeBox() const
         return Console;
 }
 
+bool OutputPane::isCollapsed() const
+{
+    return _collapsed;
+}
+
 ConsoleBox* OutputPane::consoleBox()
 {
     return _consoleBox;

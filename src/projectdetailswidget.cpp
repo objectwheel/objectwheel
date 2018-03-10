@@ -94,7 +94,7 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     _buttons->add(Save, "#86CC63", "#75B257");
     _buttons->get(Delete)->setText(tr("Delete Project"));
     _buttons->get(Cancel)->setText(tr("Cancel"));
-    _buttons->get(Save)->setText(tr("Save"));
+    _buttons->get(Save)->setText(tr("Save Changes"));
     _buttons->get(Delete)->setIcon(QIcon(PATH_DICON));
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Save)->setIcon(QIcon(PATH_SICON));

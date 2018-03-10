@@ -15,6 +15,7 @@ class ConsoleBox : public QWidget
         explicit ConsoleBox(OutputPane* outputPane);
 
     public:
+        bool isClean() const;
         void print(const QString& text);
         void printError(const QString& text);
         void printFormatted(const QString& text, const QColor& color, QFont::Weight weight);
