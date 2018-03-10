@@ -10,10 +10,8 @@ properties pane'de geometry'yi unutma
 genel inline todo temizliği
 previewer den "uyanığım" sinyali yolla, eğer uzun süre ow bu sinyali almazsa uyarı versin ve kullanıcıya "yeniden denensin mi" diye sorsun
 
-consol çıktısındaki boşluk olayını hallet
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
 control inspector her refres'de uzayıp gidiyor
-console çıktılarının renklerini düzelt
 objectwheel:Authenticator class'ındaki çağrılara internet kesiklik kontrolü eklenecek
 auto completer alt satıra enter ile inince salakça bi şekilde } işareti koyuyor, geri alması zor, bunu düzelt
 şu loadingi adam akıllı renkler ile doğru düzgün yap (project loading)

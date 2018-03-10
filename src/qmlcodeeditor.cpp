@@ -441,16 +441,25 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent* e)
         (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return)) {
 
         auto cursor = textCursor();
+        cursor.beginEditBlock();
         cursor.select(QTextCursor::BlockUnderCursor);
         auto firstLine = cursor.selectedText();
+        cursor.clearSelection();
 
-        textCursor().insertBlock();
-        alignBlock(textCursor(), true);
+        cursor.insertBlock();
+        alignBlock(cursor, true);
 
         if (leftBracket(firstLine)) {
-            QTextCursor(textCursor().block().next()).insertText("}\n");
-            alignBlock(QTextCursor(textCursor().block().next()));
+            cursor.movePosition(QTextCursor::NextBlock);
+            cursor.insertText("}\n");
+            cursor.movePosition(QTextCursor::PreviousBlock);
+            alignBlock(cursor);
         }
+        cursor.movePosition(QTextCursor::PreviousCharacter);
+        cursor.insertText("a");
+        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+        cursor.removeSelectedText();
+        cursor.endEditBlock();
 
         return;
     }
