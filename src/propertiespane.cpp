@@ -25,6 +25,7 @@
 enum NodeType {
     EnumType,
     FontFamily,
+    FontWeight,
     FontPtSize,
     FontPxSize,
     FontBold,
@@ -66,17 +67,25 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, cons
     iitem->setText(0, propertyName);
     iitem->setText(1, ft);
 
+    auto item0 = new QTreeWidgetItem;
+    item0->setFlags(item0->flags() | Qt::ItemIsEditable);
+    item0->setText(0, "family");
+    item0->setData(1, Qt::EditRole, value.family());
+    item0->setData(1, NodeRole::Type, NodeType::FontFamily);
+    item0->setData(1, NodeRole::Data, value.family());
+    iitem->addChild(item0);
+
     auto item1 = new QTreeWidgetItem;
     item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-    item1->setText(0, "Family");
-    item1->setData(1, Qt::EditRole, value.family());
-    item1->setData(1, NodeRole::Type, NodeType::FontFamily);
-    item1->setData(1, NodeRole::Data, value.family());
+    item1->setText(0, "weight");
+    item1->setData(1, Qt::EditRole, QMetaEnum::fromType<QFont::Weight>().valueToKey(value.weight()));
+    item1->setData(1, NodeRole::Type, NodeType::FontWeight);
+    item1->setData(1, NodeRole::Data, value.weight());
     iitem->addChild(item1);
 
     auto item2 = new QTreeWidgetItem;
     item2->setFlags(item2->flags() | Qt::ItemIsEditable);
-    item2->setText(0, "Point size");
+    item2->setText(0, "pointSize");
     item2->setData(1, Qt::EditRole, value.pointSize() < 0 ? 0 : value.pointSize());
     item2->setData(1, NodeRole::Type, NodeType::FontPtSize);
     item2->setData(1, NodeRole::Data, value.pointSize() < 0 ? 0 : value.pointSize());
@@ -84,7 +93,7 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, cons
 
     auto item3 = new QTreeWidgetItem;
     item3->setFlags(item3->flags() | Qt::ItemIsEditable);
-    item3->setText(0, "Pixel size");
+    item3->setText(0, "pixelSize");
     item3->setData(1, Qt::EditRole, value.pixelSize() < 0 ? 0 : value.pixelSize());
     item3->setData(1, NodeRole::Type, NodeType::FontPxSize);
     item3->setData(1, NodeRole::Data, value.pixelSize() < 0 ? 0 : value.pixelSize());
@@ -92,35 +101,35 @@ static void processFont(QTreeWidgetItem* item, const QString& propertyName, cons
 
     auto item4 = new QTreeWidgetItem;
     item4->setFlags(item4->flags() | Qt::ItemIsEditable);
-    item4->setText(0, "Bold");
+    item4->setText(0, "bold");
     item4->setData(1, NodeRole::Type, NodeType::FontBold);
     item4->setData(1, NodeRole::Data, value.bold());
     iitem->addChild(item4);
 
     auto item5 = new QTreeWidgetItem;
     item5->setFlags(item5->flags() | Qt::ItemIsEditable);
-    item5->setText(0, "Italic");
+    item5->setText(0, "italic");
     item5->setData(1, NodeRole::Type, NodeType::FontItalic);
     item5->setData(1, NodeRole::Data, value.italic());
     iitem->addChild(item5);
 
     auto item6 = new QTreeWidgetItem;
     item6->setFlags(item6->flags() | Qt::ItemIsEditable);
-    item6->setText(0, "Underline");
+    item6->setText(0, "underline");
     item6->setData(1, NodeRole::Type, NodeType::FontUnderline);
     item6->setData(1, NodeRole::Data, value.underline());
     iitem->addChild(item6);
 
     auto item7 = new QTreeWidgetItem;
     item7->setFlags(item7->flags() | Qt::ItemIsEditable);
-    item7->setText(0, "Overline");
+    item7->setText(0, "overline");
     item7->setData(1, NodeRole::Type, NodeType::FontOverline);
     item7->setData(1, NodeRole::Data, value.overline());
     iitem->addChild(item7);
 
     auto item8 = new QTreeWidgetItem;
     item8->setFlags(item8->flags() | Qt::ItemIsEditable);
-    item8->setText(0, "Strikeout");
+    item8->setText(0, "strikeout");
     item8->setData(1, NodeRole::Type, NodeType::FontStrikeout);
     item8->setData(1, NodeRole::Data, value.strikeOut());
     iitem->addChild(item8);
@@ -140,7 +149,7 @@ static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, 
 
     auto item1 = new QTreeWidgetItem;
     item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-    item1->setText(0, "X");
+    item1->setText(0, "x");
     item1->setData(1, Qt::EditRole, value.x());
     item1->setData(1, NodeRole::Type, NodeType::GeometryX);
     item1->setData(1, NodeRole::Data, value.x());
@@ -148,7 +157,7 @@ static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, 
 
     auto item2 = new QTreeWidgetItem;
     item2->setFlags(item2->flags() | Qt::ItemIsEditable);
-    item2->setText(0, "Y");
+    item2->setText(0, "y");
     item2->setData(1, Qt::EditRole, value.y());
     item2->setData(1, NodeRole::Type, NodeType::GeometryY);
     item2->setData(1, NodeRole::Data, value.y());
@@ -156,7 +165,7 @@ static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, 
 
     auto item3 = new QTreeWidgetItem;
     item3->setFlags(item3->flags() | Qt::ItemIsEditable);
-    item3->setText(0, "Width");
+    item3->setText(0, "width");
     item3->setData(1, Qt::EditRole, value.width());
     item3->setData(1, NodeRole::Type, NodeType::GeometryWidth);
     item3->setData(1, NodeRole::Data, value.width());
@@ -164,7 +173,7 @@ static void processGeometry(QTreeWidgetItem* item, const QString& propertyName, 
 
     auto item4 = new QTreeWidgetItem;
     item4->setFlags(item4->flags() | Qt::ItemIsEditable);
-    item4->setText(0, "Height");
+    item4->setText(0, "height");
     item4->setData(1, Qt::EditRole, value.height());
     item4->setData(1, NodeRole::Type, NodeType::GeometryHeight);
     item4->setData(1, NodeRole::Data, value.height());
@@ -186,7 +195,7 @@ static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName,
 
     auto item1 = new QTreeWidgetItem;
     item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-    item1->setText(0, "X");
+    item1->setText(0, "x");
     item1->setData(1, Qt::EditRole, value.x());
     item1->setData(1, NodeRole::Type, NodeType::GeometryFX);
     item1->setData(1, NodeRole::Data, value.x());
@@ -194,7 +203,7 @@ static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName,
 
     auto item2 = new QTreeWidgetItem;
     item2->setFlags(item2->flags() | Qt::ItemIsEditable);
-    item2->setText(0, "Y");
+    item2->setText(0, "y");
     item2->setData(1, Qt::EditRole, value.y());
     item2->setData(1, NodeRole::Type, NodeType::GeometryFY);
     item2->setData(1, NodeRole::Data, value.y());
@@ -202,7 +211,7 @@ static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName,
 
     auto item3 = new QTreeWidgetItem;
     item3->setFlags(item3->flags() | Qt::ItemIsEditable);
-    item3->setText(0, "Width");
+    item3->setText(0, "width");
     item3->setData(1, Qt::EditRole, value.width());
     item3->setData(1, NodeRole::Type, NodeType::GeometryFWidth);
     item3->setData(1, NodeRole::Data, value.width());
@@ -210,7 +219,7 @@ static void processGeometryF(QTreeWidgetItem* item, const QString& propertyName,
 
     auto item4 = new QTreeWidgetItem;
     item4->setFlags(item4->flags() | Qt::ItemIsEditable);
-    item4->setText(0, "Height");
+    item4->setText(0, "height");
     item4->setData(1, Qt::EditRole, value.height());
     item4->setData(1, NodeRole::Type, NodeType::GeometryFHeight);
     item4->setData(1, NodeRole::Data, value.height());
@@ -335,6 +344,10 @@ static void saveChanges(const NodeType& type, const QString& parserValue, const 
             property = "font.family";
             break;
 
+        case FontWeight:
+            property = "font.weight";
+            break;
+
         case FontPtSize:
             property = "font.pointSize";
             break;
@@ -457,6 +470,19 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         case FontFamily: {
             auto editor = new QComboBox(parent);
             editor->addItems(QFontDatabase().families());
+            connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
+                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
+            editor->setFocusPolicy(Qt::StrongFocus);
+            ed = editor;
+            break;
+        }
+
+        case FontWeight: {
+            auto editor = new QComboBox(parent);
+            auto fenum = QMetaEnum::fromType<QFont::Weight>();
+            for (int i = fenum.keyCount(); i--;)
+                if (QString(fenum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
+                    editor->addItem(fenum.key(i));
             connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
                     [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
             editor->setFocusPolicy(Qt::StrongFocus);
@@ -630,6 +656,13 @@ void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) co
             break;
         }
 
+        case FontWeight: {
+            auto val = index.model()->data(index, NodeRole::Data).value<QFont::Weight>();
+            auto editor = static_cast<QComboBox*>(ed);
+            editor->setCurrentText(QMetaEnum::fromType<QFont::Weight>().valueToKey(val));
+            break;
+        }
+
         case FontPtSize:
         case FontPxSize: {
             auto val = index.model()->data(index, NodeRole::Data).value<int>();
@@ -757,6 +790,23 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
             model->setData(pIndex, pVal, Qt::DisplayRole);
 
             saveChanges(type, "\"" + val.toString() + "\"", val);
+            break;
+        }
+
+        case FontWeight: {
+            auto editor = static_cast<QComboBox*>(ed);
+            val = editor->currentText();
+            auto preVal = model->data(index, Qt::EditRole).toString();
+
+            if (val == preVal)
+                return;
+
+            auto fenum = QMetaEnum::fromType<QFont::Weight>();
+
+            model->setData(index, fenum.keyToValue(val.toString().toUtf8().data()), NodeRole::Data);
+            model->setData(index, val, Qt::EditRole);
+
+            saveChanges(type, "Font." + val.toString(), val);
             break;
         }
 
