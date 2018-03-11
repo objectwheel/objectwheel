@@ -359,21 +359,15 @@ void SaveBackend::exposeProject() const
     }
 }
 
-Control* SaveBackend::exposeControl(
-    const QString& rootPath,
-    const DesignMode& mode,
-    QString suid
-    ) const
+Control* SaveBackend::exposeControl(const QString& rootPath, QString suid) const
 {
-    auto control = new Control(rootPath + separator() +
-      DIR_THIS + separator() + "main.qml", mode);
+    auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     QMap<QString, Control*> pmap;
     pmap[rootPath] = control;
     for (auto child : SaveUtils::childrenPaths(rootPath, suid)) {
         auto pcontrol = pmap.value(dname(dname(child)));
-        auto control = new Control(child + separator() +
-          DIR_THIS + separator() + "main.qml", mode);
+        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         control->setParentItem(pcontrol);
         pmap[child] = control;
     }

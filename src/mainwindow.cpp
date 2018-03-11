@@ -12,7 +12,6 @@
 #include <delayer.h>
 #include <formscene.h>
 #include <formview.h>
-#include <controlview.h>
 #include <global.h>
 #include <outputpane.h>
 #include <qmleditorview.h>

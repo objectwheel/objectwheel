@@ -17,8 +17,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/control.h \
            $$PWD/formscene.h \
            $$PWD/savetransaction.h \
-           $$PWD/controlscene.h \
-           $$PWD/controlview.h \
            $$PWD/formview.h \
            $$PWD/qmleditorview.h \
            $$PWD/qmlcodeeditor.h \
@@ -85,7 +83,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/previewercommands.h \
            $$PWD/parserutils.h \
            $$PWD/progressbar.h \
-    $$PWD/centralwidget.h
+    $$PWD/centralwidget.h \
+    $$PWD/designerwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -98,8 +97,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/control.cpp \
            $$PWD/formscene.cpp \
            $$PWD/savetransaction.cpp \
-           $$PWD/controlscene.cpp \
-           $$PWD/controlview.cpp \
            $$PWD/formview.cpp \
            $$PWD/qmleditorview.cpp \
            $$PWD/qmlcodeeditor.cpp \
@@ -163,7 +160,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/previewerbackend.cpp \
            $$PWD/parserutils.cpp \
            $$PWD/progressbar.cpp \
-    $$PWD/centralwidget.cpp
+    $$PWD/centralwidget.cpp \
+    $$PWD/designerwidget.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

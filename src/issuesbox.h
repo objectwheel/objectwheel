@@ -2,7 +2,6 @@
 #define ISSUESBOX_H
 
 #include <flatbutton.h>
-#include <global.h>
 #include <QWidget>
 #include <QListWidget>
 #include <QToolBar>
@@ -23,7 +22,6 @@ class Error {
         {
             uid = other.uid;
             id = other.id;
-            mode = other.mode;
             description = other.description;
             line = other.line;
             column = other.column;
@@ -34,11 +32,9 @@ class Error {
                     e.column == column &&
                     e.line == line);
         }
-        DesignMode mode;
         int line, column;
         QString id, uid, description;
 };
-bool operator< (const Error&, const Error&);
 Q_DECLARE_METATYPE(Error)
 
 class IssuesBox : public QWidget
@@ -46,7 +42,6 @@ class IssuesBox : public QWidget
         Q_OBJECT
     public:
         explicit IssuesBox(OutputPane* outputPane);
-        void setCurrentMode(const DesignMode& currentMode);
 
     public slots:
         void clear();
@@ -65,9 +60,8 @@ class IssuesBox : public QWidget
         QToolButton* m_clearButton;
         QLabel* m_title;
         QListWidget* m_listWidget;
-        QMap<Error, QPointer<Control>> m_buggyControls;
+        QHash<Error, QPointer<Control>> m_buggyControls;
         OutputPane* m_outputPane;
-        DesignMode m_currentMode;
 };
 
 #endif // ISSUESBOX_H

@@ -1,7 +1,6 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <global.h>
 #include <resizer.h>
 #include <previewresult.h>
 #include <QGraphicsWidget>
@@ -20,7 +19,6 @@ class Control : public QGraphicsWidget
     public:
         explicit Control(
             const QString& url,
-            const DesignMode& mode,
             const QString& uid = QString(),
             Control* parent = nullptr
         );
@@ -51,7 +49,6 @@ class Control : public QGraphicsWidget
         static QList<Control*>& controls();
         const QList<QQmlError>& errors() const;
         bool hasErrors() const;
-        const DesignMode& mode() const;
         virtual QRectF frameGeometry() const;
         void setDragging(bool dragging);
         void setDragIn(bool dragIn);
@@ -102,7 +99,6 @@ class Control : public QGraphicsWidget
         QList<PropertyNode> _properties;
         QList<QQmlError> _errors;
         QString _url;
-        DesignMode _mode;
         bool _dragging;
         bool _dragIn;
         bool _gui;

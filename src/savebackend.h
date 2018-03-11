@@ -2,7 +2,6 @@
 #define SAVEBACKEND_H
 
 #include <QObject>
-#include <global.h>
 
 class Form;
 class Control;
@@ -17,7 +16,7 @@ class SaveBackend : public QObject
 
         bool initProject(const QString& projectDirectory) const;
         void exposeProject() const;
-        Control* exposeControl(const QString& rootPath, const DesignMode& mode, QString suid = QString()) const;
+        Control* exposeControl(const QString& rootPath, QString suid = QString()) const;
 
         void flushId(const Control* control, const QString& id) const;
         void flushSuid(const Control* control, const QString& suid) const;

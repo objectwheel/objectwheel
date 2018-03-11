@@ -11,12 +11,6 @@
 #define TEXT_VERSION (QString("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b><br> %3 <br></p>")\
     .arg(APP_VER).arg(APP_GITHASH).arg(APP_GITDATE))
 
-enum DesignMode {
-    ControlGui,
-    FormGui,
-    CodeEdit
-};
-
 class OTargets : public QObject {
         Q_OBJECT
     public:

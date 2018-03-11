@@ -112,14 +112,12 @@ void IssuesBox::handleErrors(Control* control)
             err.description = error.description();
             err.line = error.line();
             err.column = error.column();
-            err.mode = control->mode();
             if (m_buggyControls.contains(err))
                 continue;
             auto item = new QListWidgetItem;
             item->setData(Qt::UserRole, QVariant::fromValue<Error>(err));
             item->setIcon(QIcon(":/resources/images/error.png"));
             m_listWidget->addItem(item);
-            item->setHidden(m_currentMode != err.mode);
             m_buggyControls[err] = control;
             m_outputPane->shine(OutputPane::Issues);
         }
@@ -134,12 +132,6 @@ void IssuesBox::handleDoubleClick(QListWidgetItem* item)
     if (c == nullptr)
         return;
     emit entryDoubleClicked(c);
-}
-
-void IssuesBox::setCurrentMode(const DesignMode& currentMode)
-{
-    if (currentMode == FormGui || currentMode == ControlGui)
-        m_currentMode = currentMode;
 }
 
 void IssuesBox::clear()
@@ -181,28 +173,8 @@ void IssuesBox::refresh()
         }
     }
 
-    int visibleItemCount = 0;
-    for (int i = 0; i < m_listWidget->count(); i++) {
-        auto item = m_listWidget->item(i);
-        auto err = item->data(Qt::UserRole).value<Error>();
-        bool hidden = err.mode != m_currentMode;
-        item->setHidden(hidden);
-        if (!hidden)
-            visibleItemCount++;
-    }
-
     m_outputPane->button(OutputPane::Issues)->setText
-      (QString("Issues [%1]").arg(visibleItemCount));
-}
-
-bool operator<(const Error& e1, const Error& e2)
-{
-    return (e1.uid + e1.description +
-      QString::number(e1.column) +
-      QString::number(e1.line)) <
-     (e2.uid + e2.description +
-      QString::number(e2.column) +
-      QString::number(e2.line));
+      (QString("Issues [%1]").arg(m_listWidget->count()));
 }
 
 #include "issuesbox.moc"

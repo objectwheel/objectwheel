@@ -11,7 +11,6 @@
 #include <previewresult.h>
 #include <control.h>
 #include <frontend.h>
-#include <controlscene.h>
 #include <formscene.h>
 #include <mainwindow.h>
 #include <previewerbackend.h>

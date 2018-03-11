@@ -4,7 +4,6 @@
 #include <filemanager.h>
 #include <controlwatcher.h>
 #include <suppressor.h>
-#include <controlscene.h>
 #include <formscene.h>
 #include <previewerbackend.h>
 #include <saveutils.h>
@@ -23,19 +22,15 @@
 #define MARGIN_TOP (fit::fx(14))
 #define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
 
-#define pS (QApplication::primaryScreen())
+#define DPR (QApplication::primaryScreen()->devicePixelRatio())
 #define cW (ControlWatcher::instance())
-
-//!
-//! ************************* [global] **************************
-//!
 
 namespace {
     /* Fills the restricted area by the size with pattern into
      * the transparent dest. Then draws source into the center of the dest. */
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     {
-        qreal dpr = pS->devicePixelRatio();
+        qreal dpr = DPR;
 
         QBrush brush;
         brush.setColor("#b0b4b7");
@@ -454,7 +449,7 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
 
 QImage Control::initialPreview() const
 {
-    qreal dpr = pS->devicePixelRatio();
+    qreal dpr = DPR;
     qreal min = qMin(fit::fx(24), qMin(size().width(), size().height()));
 
     QImage preview(
@@ -481,11 +476,6 @@ QImage Control::initialPreview() const
     );
 
     return preview;
-}
-
-const DesignMode& Control::mode() const
-{
-    return _mode;
 }
 
 const QList<QQmlError>& Control::errors() const
@@ -594,7 +584,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     painter->setRenderHint(QPainter::Antialiasing);
     painter->drawImage(rect(), _d->preview,
-      QRectF(QPointF(0, 0), size() * pS->devicePixelRatio()));
+      QRectF(QPointF(0, 0), size() * DPR));
 
     QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
       innerRect.center().x(), innerRect.bottom());
@@ -611,7 +601,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.fillRect(_d->preview.rect(), gradient);
             p.end();
             painter->drawImage(rect(), highlight, QRectF(
-              QPointF(0, 0), size() * pS->devicePixelRatio()));
+              QPointF(0, 0), size() * DPR));
         }
     }
 

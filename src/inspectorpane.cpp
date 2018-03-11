@@ -9,7 +9,6 @@
 #include <control.h>
 #include <controlwatcher.h>
 #include <frontend.h>
-#include <controlscene.h>
 #include <formscene.h>
 #include <mainwindow.h>
 

@@ -7,6 +7,7 @@
 #include <filemanager.h>
 #include <css.h>
 #include <frontend.h>
+#include <global.h>
 
 #include <QScrollBar>
 #include <QTimer>
