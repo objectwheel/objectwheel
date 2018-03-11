@@ -5,7 +5,7 @@
 #include <savebackend.h>
 #include <projectbackend.h>
 #include <formscene.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <filemanager.h>
 #include <css.h>
 #include <fit.h>

@@ -17,7 +17,7 @@
 #include <outputpane.h>
 #include <qmleditorview.h>
 #include <loadingbar.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
 #include <formspane.h>
@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     _propertiesDockwidget = new QDockWidget;
     _formsDockwidget = new QDockWidget;
     _inspectorDockwidget = new QDockWidget;
-    _designerWidget = new DesignerWidget;
+    _centralWidget = new CentralWidget;
     _toolboxPane = new ToolboxPane(this);
     _propertiesPane = new PropertiesPane(this);
     _formsPane = new FormsPane(this);
@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     QPalette p(palette());
     p.setColor(backgroundRole(), "#f0f4f7");
     setStyleSheet("QMainWindow::separator{height: 1px;}");
-    setCentralWidget(_designerWidget);
+    setCentralWidget(_centralWidget);
     setAutoFillBackground(true);
     setWindowTitle(APP_NAME);
     setPalette(p);
@@ -246,10 +246,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(_toolboxPane->toolboxTree()->indicatorButton(),
       &FlatButton::clicked, this, [=] {
-        auto splitter = designerWidget()->splitter();
-        auto controlView = designerWidget()->controlView();
-        auto formView = designerWidget()->formView();
-        auto qmlEditorView = designerWidget()->qmlEditorView();
+        auto splitter = centralWidget()->splitter();
+        auto controlView = centralWidget()->controlView();
+        auto formView = centralWidget()->formView();
+        auto qmlEditorView = centralWidget()->qmlEditorView();
         auto sizes = splitter->sizes();
         QSize size;
         if (formView->isVisible())
@@ -259,13 +259,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         else
             size = controlView->size();
         sizes[splitter->indexOf(controlView)] = size.height();
-        auto previousControl = designerWidget()->controlScene()->mainControl();
+        auto previousControl = centralWidget()->controlScene()->mainControl();
         if (previousControl)
             previousControl->deleteLater();
         auto url = _toolboxPane->toolboxTree()->urls(_toolboxPane->toolboxTree()->currentItem())[0];
         auto control = SaveBackend::instance()->exposeControl(dname(dname(url.toLocalFile())), ControlGui);
-        designerWidget()->controlScene()->setMainControl(control);
-        designerWidget()->setMode(ControlGui);
+        centralWidget()->controlScene()->setMainControl(control);
+        centralWidget()->setMode(ControlGui);
 
         for (auto childControl : control->childControls())
             childControl->refresh();
@@ -303,9 +303,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolbar4->setFixedHeight(fit::fx(24));
 
     connect(_inspectorPage, SIGNAL(controlClicked(Control*)),
-      _designerWidget, SLOT(handleControlClick(Control*)));
+      _centralWidget, SLOT(handleControlClick(Control*)));
     connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)),
-      _designerWidget, SLOT(handleControlDoubleClick(Control*)));
+      _centralWidget, SLOT(handleControlDoubleClick(Control*)));
 
     _inspectorDockwidget->setTitleBarWidget(toolbar4);
     _inspectorDockwidget->setWidget(_inspectorPage);
@@ -317,7 +317,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
     [=] (int exitCode, QProcess::ExitStatus exitStatus)
     {
-        auto pane = _designerWidget->outputPane();
+        auto pane = _centralWidget->outputPane();
         auto console = pane->consoleBox();
 
         if (exitStatus == QProcess::CrashExit) {
@@ -344,25 +344,25 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
 }
 
-DesignerWidget* MainWindow::designerWidget()
+CentralWidget* MainWindow::centralWidget()
 {
-    return _designerWidget;
+    return _centralWidget;
 }
 
 void MainWindow::clear()
 {
     handleStopButtonClick();
 
-    designerWidget()->qmlEditorView()->clear();
+    centralWidget()->qmlEditorView()->clear();
 
     ToolsBackend::instance()->clear();
 
-    designerWidget()->controlScene()->clearSelection();
-    designerWidget()->formScene()->clearSelection();
+    centralWidget()->controlScene()->clearSelection();
+    centralWidget()->formScene()->clearSelection();
 
-    designerWidget()->clear();
-    designerWidget()->controlScene()->clearScene();
-    designerWidget()->formScene()->clearScene();
+    centralWidget()->clear();
+    centralWidget()->controlScene()->clearScene();
+    centralWidget()->formScene()->clearScene();
 
     _formsPane->clear();
     _toolboxPane->clear();
@@ -384,7 +384,7 @@ void MainWindow::handleStopButtonDoubleClick()
 
 void MainWindow::handleRunButtonClick()
 {
-    auto pane = _designerWidget->outputPane();
+    auto pane = _centralWidget->outputPane();
     auto console = pane->consoleBox();
 
     console->fade();

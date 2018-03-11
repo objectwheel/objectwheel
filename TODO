@@ -40,7 +40,6 @@ temayı değiştirip previewer preview kalitesini test et
 otherfocusreason propertysi cache ye nedense uygulanamıyor
 ayno şekilde url'de cache ye nedense uygulanamıyor
 
-internetaccess bokunu her yerden kaldır
 Form'ların x y leri gui editörden değişmicek
 Ancak ve ancak, properties window'dan değişecek
 Formlar x y şeklinde hardcoded olmayan propertilere sahip olmayacak
@@ -55,6 +54,7 @@ Parser properties pane tarafından yapılan değişiklikleri hizalayabilmeli
 Parser properties pane tarafından yapılan değişiklikleri QML Editör'e aksettirmeli
 Toplu nesneler seçiliyken bu nesnelerin yerinin hareket ettirilmesi sonucu konumları veritabanına yazdırılmıyor
 proje değiştirilirken console ve diğer boxlar temizlensin
+component not ready ama hangisi?
 
 buglar gitmiş mi kontrol et, tüm şu videoları vs, bug platformunu
 consoldaki yeşil renge ayar çek
@@ -62,13 +62,10 @@ executivewidget'in çıkış butonunu geri getir
 run tuşuna basınca executivewidgeti yükselt
 play butonu disable oluşu çok çirkin, bi ayar çek
 run olayından önce hata kontrolü adımları nasıldı bir göz at gerekirse bazı hatalar sebebiyle "run" olayını durdur ve bir mesaj ile uyarı göster
-The project was ended forcefully'nin sonundaki ünlemi sil
 ConsoleBox sıçık bir çekilde fışkırmış olarak açılıyor, usturuplu açılmasını sağla
 ConsoleBox'ın temizleme ve bilimum tool buttonlarını ve toolbarını ekle
-QmlPreviewer'ı nasıl ayrı bir process olarak yaparız bunu düşün
 objectwheel-interpret'den usturuplu bir geri bildirim kanalı oluştur
 objectwheel-interpret anti-crak işini hallet, aynısını cloud build için de düşün
-propertiespane de ki hücre yükseklikleri ve hücre içlerindeki bilimum işaret kutularu (checkbox) için cross-platform boyut ayarlaması hatasını gider
 QML Debugging olayına ilişkin yol planı hazırlanacak
 Cloud Builds objectwheel-server projesine entegre edilecek
 MacOS için cloud build olayı hazırlanacak

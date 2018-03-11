@@ -10,7 +10,7 @@ class FlatButton;
 class QDockWidget;
 class ToolboxPane;
 class InspectorPane;
-class DesignerWidget;
+class CentralWidget;
 class PropertiesPane;
 
 class MainWindow : public QMainWindow
@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
 
     public:
         explicit MainWindow(QWidget* parent = 0);
-        DesignerWidget* designerWidget();
+        CentralWidget* centralWidget();
 
     private slots:
         void clear();
@@ -38,7 +38,7 @@ class MainWindow : public QMainWindow
         QDockWidget* _propertiesDockwidget;
         QDockWidget* _formsDockwidget;
         QDockWidget* _inspectorDockwidget;
-        DesignerWidget* _designerWidget;
+        CentralWidget* _centralWidget;
         ToolboxPane* _toolboxPane;
         PropertiesPane* _propertiesPane;
         FormsPane* _formsPane;

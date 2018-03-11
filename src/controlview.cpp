@@ -4,7 +4,7 @@
 #include <control.h>
 #include <fit.h>
 #include <savebackend.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <filemanager.h>
 #include <css.h>
 #include <frontend.h>

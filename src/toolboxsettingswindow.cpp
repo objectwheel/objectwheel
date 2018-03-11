@@ -14,7 +14,7 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QMessageBox>
-#include <designerwidget.h>
+#include <centralwidget.h>
 
 //!
 //! *************************** [global] ***************************

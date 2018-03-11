@@ -2,7 +2,7 @@
 #include <flatbutton.h>
 #include <css.h>
 #include <fit.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <frontend.h>
 #include <issuesbox.h>
 #include <searchbox.h>

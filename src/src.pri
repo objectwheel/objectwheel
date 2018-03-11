@@ -54,7 +54,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/propertiespane.h \
            $$PWD/toolboxpane.h \
            $$PWD/backendmanager.h \
-           $$PWD/designerwidget.h \
            $$PWD/savebackend.h \
            $$PWD/projectbackend.h \
            $$PWD/toolsbackend.h \
@@ -85,7 +84,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/previewerbackend.h \
            $$PWD/previewercommands.h \
            $$PWD/parserutils.h \
-           $$PWD/progressbar.h
+           $$PWD/progressbar.h \
+    $$PWD/centralwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -134,7 +134,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/propertiespane.cpp \
            $$PWD/toolboxpane.cpp \
            $$PWD/backendmanager.cpp \
-           $$PWD/designerwidget.cpp \
            $$PWD/savebackend.cpp \
            $$PWD/projectbackend.cpp \
            $$PWD/toolsbackend.cpp \
@@ -163,7 +162,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/previewresult.cpp \
            $$PWD/previewerbackend.cpp \
            $$PWD/parserutils.cpp \
-           $$PWD/progressbar.cpp
+           $$PWD/progressbar.cpp \
+    $$PWD/centralwidget.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

@@ -4,7 +4,7 @@
 #include <fit.h>
 #include <saveutils.h>
 #include <savebackend.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <filemanager.h>
 #include <qmlcodeeditor.h>
 #include <css.h>
@@ -168,7 +168,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     saveAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     saveAction.setShortcut(QKeySequence::Save);
 
-    splitter->setStyleSheet("QSplitter{background: #e0e4e7;}");
+    splitter->setStyleSheet("QSplitter{background: #edf2f5;}");
     splitter->addWidget(editorWrapper);
     splitter->addWidget(explorerWrapper);
     splitter->setCollapsible(0, false);;

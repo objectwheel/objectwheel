@@ -10,10 +10,6 @@
 #include <QPainter>
 #include <QScrollBar>
 
-//!
-//! *********************** [IssuesListDelegate] ***********************
-//!
-
 class IssuesListDelegate: public QStyledItemDelegate
 {
         Q_OBJECT
@@ -57,42 +53,51 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
       arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
 }
 
-//!
-//! ************************* [IssuesBox] *************************
-//!
-
 IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
-  , _layout(this)
-  , _outputPane(outputPane)
+  , m_layout(new QVBoxLayout(this))
+  , m_toolbar(new QToolBar)
+  , m_clearButton(new QToolButton)
+  , m_title(new QLabel)
+  , m_listWidget(new QListWidget)
+  , m_outputPane(outputPane)
 {
-    _layout.setContentsMargins(0, 0, 0, 0);
-    _layout.setSpacing(0);
-    _layout.addWidget(&_toolbar);
-    _layout.addWidget(&_listWidget);
+    m_layout->setContentsMargins(0, 0, 0, 0);
+    m_layout->setSpacing(0);
+    m_layout->addWidget(m_toolbar);
+    m_layout->addWidget(m_listWidget);
 
-    QPalette p1(_listWidget.palette());
+    QPalette p1(m_listWidget->palette());
     p1.setColor(QPalette::Base, QColor("#F3F7FA"));
     p1.setColor(QPalette::Highlight, QColor("#d0d4d7"));
     p1.setColor(QPalette::Text, QColor("#202427"));
-    _listWidget.setPalette(p1);
+    m_listWidget->setPalette(p1);
 
-    _title.setText(" Issues");
-    _toolbar.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    _toolbar.setFixedHeight(fit::fx(21));
-    _toolbar.setAutoFillBackground(true);
-    _toolbar.setStyleSheet(CSS::DesignerToolbar);
-    _toolbar.addWidget(&_title);
+    m_title->setText(" Issues");
+    m_toolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    m_toolbar->setFixedHeight(fit::fx(21));
+    m_toolbar->setAutoFillBackground(true);
+    m_toolbar->setStyleSheet(CSS::DesignerToolbar);
+    m_toolbar->addWidget(m_title);
+    m_toolbar->addSeparator();
+    m_toolbar->addWidget(m_clearButton);
 
-    _listWidget.setIconSize(fit::fx(QSize{16, 16}));
-    _listWidget.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _listWidget.setFocusPolicy(Qt::NoFocus);
-    _listWidget.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget.setItemDelegate(new IssuesListDelegate(&_listWidget));
+    m_clearButton->setIcon(QIcon(":/resources/images/clean.png"));
+    m_clearButton->setIconSize(fit::fx(QSizeF(10, 10)).toSize());
+    m_clearButton->setFixedSize(fit::fx(QSizeF(14, 14)).toSize());
+    m_clearButton->setToolTip(tr("Clean errors."));
+    m_clearButton->setCursor(Qt::PointingHandCursor);
+    connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(clear()));
+
+    m_listWidget->setIconSize(fit::fx(QSize{16, 16}));
+    m_listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_listWidget->setFocusPolicy(Qt::NoFocus);
+    m_listWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_listWidget->setItemDelegate(new IssuesListDelegate(m_listWidget));
     connect(ControlWatcher::instance(), SIGNAL(errorOccurred(Control*)),
       SLOT(handleErrors(Control*)));
 
-    connect(&_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+    connect(m_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
       SLOT(handleDoubleClick(QListWidgetItem*)));
 }
 
@@ -108,15 +113,15 @@ void IssuesBox::handleErrors(Control* control)
             err.line = error.line();
             err.column = error.column();
             err.mode = control->mode();
-            if (_buggyControls.contains(err))
+            if (m_buggyControls.contains(err))
                 continue;
             auto item = new QListWidgetItem;
             item->setData(Qt::UserRole, QVariant::fromValue<Error>(err));
             item->setIcon(QIcon(":/resources/images/error.png"));
-            _listWidget.addItem(item);
-            item->setHidden(_currentMode != err.mode);
-            _buggyControls[err] = control;
-            _outputPane->shine(OutputPane::Issues);
+            m_listWidget->addItem(item);
+            item->setHidden(m_currentMode != err.mode);
+            m_buggyControls[err] = control;
+            m_outputPane->shine(OutputPane::Issues);
         }
     }
 }
@@ -124,7 +129,7 @@ void IssuesBox::handleErrors(Control* control)
 void IssuesBox::handleDoubleClick(QListWidgetItem* item)
 {
     const auto& error = item->data(Qt::UserRole).value<Error>();
-    const auto& c = _buggyControls.value(error);
+    const auto& c = m_buggyControls.value(error);
 
     if (c == nullptr)
         return;
@@ -134,26 +139,26 @@ void IssuesBox::handleDoubleClick(QListWidgetItem* item)
 void IssuesBox::setCurrentMode(const DesignMode& currentMode)
 {
     if (currentMode == FormGui || currentMode == ControlGui)
-        _currentMode = currentMode;
+        m_currentMode = currentMode;
 }
 
 void IssuesBox::clear()
 {
-    _buggyControls.clear();
-    _listWidget.clear();
+    m_buggyControls.clear();
+    m_listWidget->clear();
 }
 
 void IssuesBox::refresh()
 {
-    for (const auto& err : _buggyControls.keys()) {
-        auto control = _buggyControls.value(err);
+    for (const auto& err : m_buggyControls.keys()) {
+        auto control = m_buggyControls.value(err);
         if (control.isNull() || !control->hasErrors()) {
-            for (int i = 0; i < _listWidget.count(); i++) {
-                auto item = _listWidget.item(i);
+            for (int i = 0; i < m_listWidget->count(); i++) {
+                auto item = m_listWidget->item(i);
                 if (item->data(Qt::UserRole).value<Error>() == err)
-                    delete _listWidget.takeItem(i);
+                    delete m_listWidget->takeItem(i);
             }
-            _buggyControls.remove(err);
+            m_buggyControls.remove(err);
         } else {
             QList<Error> es;
             for (const auto& error : control->errors()) {
@@ -166,27 +171,27 @@ void IssuesBox::refresh()
                 es << e;
             }
             if (!es.contains(err)) {
-                for (int i = 0; i < _listWidget.count(); i++) {
-                    auto item = _listWidget.item(i);
+                for (int i = 0; i < m_listWidget->count(); i++) {
+                    auto item = m_listWidget->item(i);
                     if (item->data(Qt::UserRole).value<Error>() == err)
-                        delete _listWidget.takeItem(i);
+                        delete m_listWidget->takeItem(i);
                 }
-                _buggyControls.remove(err);
+                m_buggyControls.remove(err);
             }
         }
     }
 
     int visibleItemCount = 0;
-    for (int i = 0; i < _listWidget.count(); i++) {
-        auto item = _listWidget.item(i);
+    for (int i = 0; i < m_listWidget->count(); i++) {
+        auto item = m_listWidget->item(i);
         auto err = item->data(Qt::UserRole).value<Error>();
-        bool hidden = err.mode != _currentMode;
+        bool hidden = err.mode != m_currentMode;
         item->setHidden(hidden);
         if (!hidden)
             visibleItemCount++;
     }
 
-    _outputPane->button(OutputPane::Issues)->setText
+    m_outputPane->button(OutputPane::Issues)->setText
       (QString("Issues [%1]").arg(visibleItemCount));
 }
 

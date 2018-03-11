@@ -1,5 +1,5 @@
-#ifndef DESIGNERWIDGET_H
-#define DESIGNERWIDGET_H
+#ifndef CENTRALWIDGET_H
+#define CENTRALWIDGET_H
 
 #include <global.h>
 #include <QFrame>
@@ -21,12 +21,12 @@ class ControlScene;
 class ControlScene;
 class Control;
 
-class DesignerWidget : public QFrame
+class CentralWidget : public QFrame
 {
         Q_OBJECT
 
     public:
-        explicit DesignerWidget(QWidget* parent = nullptr);
+        explicit CentralWidget(QWidget* parent = nullptr);
         const DesignMode& mode() const;
         void setMode(const DesignMode& mode);
         ControlScene* currentScene();
@@ -114,4 +114,4 @@ class DesignerWidget : public QFrame
         QToolButton* _breakLayoutButton;
 };
 
-#endif // DESIGNERWIDGET_H
+#endif // CENTRALWIDGET_H

@@ -40,18 +40,18 @@ QScrollBar:horizontal { \
 
 #define CSS_DESIGNER_TOOLBAR "\
 QToolBar { \
-    border-top: 1px solid %1;\
-    border-bottom: 1px solid %1;\
-    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 %2, stop:1 %3); \
-    spacing: %4px; \
+    border-top: 1px solid #D0D4D7;\
+    border-bottom: 1px solid #D0D4D7;\
+    background: #E0E4E7; \
+    spacing: %1px; \
 }"
 
 #define CSS_DESIGNER_TOOLBAR_V "\
 QToolBar { \
-    border-left: 1px solid %1;\
-    border-right: 1px solid %1;\
-    background: qlineargradient(spread:pad, x1:1, y1:0.5, x2:0, y2:0.5, stop:1 %2, stop:0 %3); \
-    spacing: %4px; \
+    border-left: 1px solid #D0D4D7;\
+    border-right: 1px solid #D0D4D7;\
+    background: #E0E4E7; \
+    spacing: %1px; \
 }"
 
 #define CSS_DESIGNER_PINBAR "\
@@ -80,12 +80,10 @@ void CSS::init()
     ScrollBarH = QString(CSS_SCROLLBAR_H).arg(fit::fx(15)).arg(fit::fx(6)).arg(fit::fx(2.5));
 
     /* DesignerToolbar */
-    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(QColor("#ABAFB2").lighter(110).
-      name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name()).arg(fit::fx(5));
+    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(fit::fx(5));
 
     /* DesignerToolbarV */
-    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(QColor("#ABAFB2").lighter(110).
-      name()).arg(QColor("#EAEEF1").name()).arg(QColor("#d0d4d7").name()).arg(fit::fx(5));
+    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(fit::fx(5));
 
     /* DesignerPinbar */
     DesignerPinbar = QString(CSS_DESIGNER_PINBAR).arg(QColor("#ABAFB2").lighter(110).

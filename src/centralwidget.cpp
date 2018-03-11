@@ -1,4 +1,4 @@
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <formscene.h>
 #include <formview.h>
 #include <controlscene.h>
@@ -31,7 +31,6 @@
 #include <QMessageBox>
 #include <QSplitter>
 #include <QQuickStyle>
-//#include <QOpenGLWidget>
 
 #define INTERVAL_ERROR_CHECK (1000)
 #define cW (ControlWatcher::instance())
@@ -121,7 +120,7 @@ static QString findText(qreal ratio)
         return "100 %";
 }
 
-void DesignerWidget::scaleScene(qreal ratio)
+void CentralWidget::scaleScene(qreal ratio)
 {
     if (_mode == FormGui) {
         _formView->scale((1.0 / _lastScaleOfWv) * ratio, (1.0 / _lastScaleOfWv) * ratio);
@@ -132,7 +131,7 @@ void DesignerWidget::scaleScene(qreal ratio)
     }
 }
 
-void DesignerWidget::handleIndicatorChanges()
+void CentralWidget::handleIndicatorChanges()
 {
     if (PreviewerBackend::instance()->isBusy())
         _loadingIndicator->start();
@@ -140,7 +139,7 @@ void DesignerWidget::handleIndicatorChanges()
         _loadingIndicator->stop();
 }
 
-void DesignerWidget::handleSnappingClick(bool value)
+void CentralWidget::handleSnappingClick(bool value)
 {
     if (_mode == FormGui)
         _formScene->setSnapping(value);
@@ -148,7 +147,7 @@ void DesignerWidget::handleSnappingClick(bool value)
         _controlScene->setSnapping(value);
 }
 
-void DesignerWidget::handleShowOutlineClick(bool value)
+void CentralWidget::handleShowOutlineClick(bool value)
 {
     if (_mode == FormGui ||
         _mode == ControlGui) {
@@ -157,7 +156,7 @@ void DesignerWidget::handleShowOutlineClick(bool value)
     }
 }
 
-void DesignerWidget::handleFitInSceneClick()
+void CentralWidget::handleFitInSceneClick()
 {
     auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
     auto diff = _mode == FormGui ?
@@ -170,20 +169,20 @@ void DesignerWidget::handleFitInSceneClick()
             _zoomlLevelCombobox->setCurrentText(findText(ratio));
 }
 
-void DesignerWidget::handleThemeChange(const QString& text)
+void CentralWidget::handleThemeChange(const QString& text)
 {
     SaveUtils::setProjectProperty(ProjectBackend::instance()->dir(), PTAG_THEME, text);
     PreviewerBackend::instance()->restart();
     handleRefreshPreviewClick();
 }
 
-void DesignerWidget::handleZoomLevelChange(const QString& text)
+void CentralWidget::handleZoomLevelChange(const QString& text)
 {
     qreal ratio = findRatio(text);
     scaleScene(ratio);
 }
 
-void DesignerWidget::handlePhonePortraitButtonClick()
+void CentralWidget::handlePhonePortraitButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::PhonePortrait);
@@ -199,7 +198,7 @@ void DesignerWidget::handlePhonePortraitButtonClick()
         _formScene->mainControl()->centralize();
 }
 
-void DesignerWidget::handlePhoneLandscapeButtonClick()
+void CentralWidget::handlePhoneLandscapeButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::PhoneLandscape);
@@ -215,7 +214,7 @@ void DesignerWidget::handlePhoneLandscapeButtonClick()
         _formScene->mainControl()->centralize();
 }
 
-void DesignerWidget::handleDesktopSkinButtonClick()
+void CentralWidget::handleDesktopSkinButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::Desktop);
@@ -231,7 +230,7 @@ void DesignerWidget::handleDesktopSkinButtonClick()
         _formScene->mainControl()->centralize();
 }
 
-void DesignerWidget::handleNoSkinButtonClick()
+void CentralWidget::handleNoSkinButtonClick()
 {
     auto form = formScene()->mainForm();
 //    form->setSkin(SaveUtils::NoSkin);
@@ -247,7 +246,7 @@ void DesignerWidget::handleNoSkinButtonClick()
         _formScene->mainControl()->centralize();
 }
 
-void DesignerWidget::handleRefreshPreviewClick()
+void CentralWidget::handleRefreshPreviewClick()
 {
     if (_mode == FormGui) {
         _formScene->mainForm()->refresh();
@@ -260,7 +259,7 @@ void DesignerWidget::handleRefreshPreviewClick()
     }
 }
 
-void DesignerWidget::handleClearControls()
+void CentralWidget::handleClearControls()
 {
     auto scene = currentScene();
     if (!scene || !scene->mainControl())
@@ -285,22 +284,22 @@ void DesignerWidget::handleClearControls()
     }
 }
 
-void DesignerWidget::handleEditorModeButtonClick()
+void CentralWidget::handleEditorModeButtonClick()
 {
     setMode(CodeEdit);
 }
 
-void DesignerWidget::handleCGuiModeButtonClick()
+void CentralWidget::handleCGuiModeButtonClick()
 {
     setMode(ControlGui);
 }
 
-void DesignerWidget::handleWGuiModeButtonClick()
+void CentralWidget::handleWGuiModeButtonClick()
 {
     setMode(FormGui);
 }
 
-void DesignerWidget::handleModeChange()
+void CentralWidget::handleModeChange()
 {
     if (_mode == FormGui) {
         _wGuiModeButton->setChecked(true);
@@ -435,7 +434,7 @@ void DesignerWidget::handleModeChange()
     }
 }
 
-DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
+CentralWidget::CentralWidget(QWidget *parent) : QFrame(parent)
   , _mode(FormGui)
   , _lastScaleOfWv(1.0)
   , _lastScaleOfCv(1.0)
@@ -514,7 +513,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _formView->setDragMode(QGraphicsView::RubberBandDrag);
     _formView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     _formView->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
-    _formView->setBackgroundBrush(QColor("#e0e4e7"));
+    _formView->setBackgroundBrush(QColor("#edf2f5"));
     _formView->setFrameShape(QFrame::NoFrame);
     _formView->setSizePolicy(QSizePolicy::Expanding,
                              QSizePolicy::Expanding);
@@ -525,7 +524,7 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _controlView->setDragMode(QGraphicsView::RubberBandDrag);
     _controlView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     _controlView->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
-    _controlView->setBackgroundBrush(QColor("#e0e4e7"));
+    _controlView->setBackgroundBrush(QColor("#edf2f5"));
     _controlView->setFrameShape(QFrame::NoFrame);
     _controlView->setSizePolicy(QSizePolicy::Expanding,
                                 QSizePolicy::Expanding);
@@ -685,13 +684,21 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _wGuiModeButton->setCursor(Qt::PointingHandCursor);
     _cGuiModeButton->setCursor(Qt::PointingHandCursor);
 
-    _editorModeButton->setToolTip("Switch to Qml Editor.");
-    _cGuiModeButton->setToolTip("Switch to Tool Editor.");
-    _wGuiModeButton->setToolTip("Switch to Form Editor.");
+    _editorModeButton->setToolTip("Open Code Editor.");
+    _wGuiModeButton->setToolTip("Open Designer.");
+    _cGuiModeButton->setToolTip("Open Control Editor.");
 
-    _editorModeButton->setIcon(QIcon(":/resources/images/text.png"));
-    _cGuiModeButton->setIcon(QIcon(":/resources/images/gui.png"));
-    _wGuiModeButton->setIcon(QIcon(":/resources/images/form.png"));
+    _editorModeButton->setText("Editor");
+    _wGuiModeButton->setText("Designer");
+    _cGuiModeButton->setText("Designer");
+
+    _editorModeButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    _wGuiModeButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    _cGuiModeButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+
+    _editorModeButton->setIcon(QIcon("/users/omergoktas/desktop/versions.png"));
+    _wGuiModeButton->setIcon(QIcon("/users/omergoktas/desktop/crane.png"));
+    _cGuiModeButton->setIcon(QIcon("/users/omergoktas/desktop/robot.png"));
 
     connect(_editorModeButton, SIGNAL(clicked(bool)),
             SLOT(handleEditorModeButtonClick()));
@@ -704,18 +711,23 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
                              QSizePolicy::Expanding);
     _toolbar2->setOrientation(Qt::Vertical);
     _toolbar2->setStyleSheet(CSS::DesignerToolbarV);
-    _toolbar2->setFixedWidth(fit::fx(21));
-    _toolbar2->setIconSize(QSize(fit::fx(16), fit::fx(16)));
+    _toolbar2->setFixedWidth(fit::fx(50));
+    _toolbar2->setIconSize(QSize(fit::fx(32), fit::fx(32)));
     _toolbar2->addWidget(_wGuiModeButton);
-    _toolbar2->addWidget(_cGuiModeButton);
     _toolbar2->addWidget(_editorModeButton);
+
+    QWidget* spacer_2 = new QWidget;
+    spacer_2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    _toolbar2->addWidget(spacer_2);
+
+    _toolbar2->addWidget(_cGuiModeButton);
 
     _errorChecker->setInterval(INTERVAL_ERROR_CHECK);
     connect(_errorChecker, SIGNAL(timeout()),
             this, SLOT(checkErrors()));
     _errorChecker->start();
 
-    _splitter->setStyleSheet("QSplitter{background: #e0e4e7;}");
+    _splitter->setStyleSheet("QSplitter{background: #edf2f5;}");
     _splitter->setOrientation(Qt::Vertical);
     _splitter->addWidget(_toolbar);
     _splitter->addWidget(_formView);
@@ -748,49 +760,49 @@ DesignerWidget::DesignerWidget(QWidget *parent) : QFrame(parent)
     _outputPane->issuesBox()->setCurrentMode(_mode);
 }
 
-const DesignMode& DesignerWidget::mode() const
+const DesignMode& CentralWidget::mode() const
 {
     return _mode;
 }
 
-void DesignerWidget::setMode(const DesignMode& mode)
+void CentralWidget::setMode(const DesignMode& mode)
 {
     _mode = mode;
     _outputPane->issuesBox()->setCurrentMode(_mode);
     emit modeChanged();
 }
 
-ControlScene* DesignerWidget::currentScene()
+ControlScene* CentralWidget::currentScene()
 {
     return _currentScene;
 }
 
-ControlScene* DesignerWidget::controlScene()
+ControlScene* CentralWidget::controlScene()
 {
     return _controlScene;
 }
 
-FormScene* DesignerWidget::formScene()
+FormScene* CentralWidget::formScene()
 {
     return _formScene;
 }
 
-QmlEditorView* DesignerWidget::qmlEditorView()
+QmlEditorView* CentralWidget::qmlEditorView()
 {
     return _qmlEditorView;
 }
 
-ControlView* DesignerWidget::controlView()
+ControlView* CentralWidget::controlView()
 {
     return _controlView;
 }
 
-FormView* DesignerWidget::formView()
+FormView* CentralWidget::formView()
 {
     return _formView;
 }
 
-void DesignerWidget::updateSkin()
+void CentralWidget::updateSkin()
 {
     auto form = formScene()->mainForm();
     if (form) {
@@ -819,37 +831,37 @@ void DesignerWidget::updateSkin()
     }
 }
 
-QSplitter* DesignerWidget::splitter()
+QSplitter* CentralWidget::splitter()
 {
     return _splitter;
 }
 
-OutputPane* DesignerWidget::outputPane()
+OutputPane* CentralWidget::outputPane()
 {
     return _outputPane;
 }
 
-void DesignerWidget::clear()
+void CentralWidget::clear()
 {
     _lastScaleOfWv = 1.0;
     _lastScaleOfCv = 1.0;
     setMode(FormGui);
 }
 
-void DesignerWidget::checkErrors()
+void CentralWidget::checkErrors()
 {
     _outputPane->issuesBox()->refresh();
     //    MainWindow::instance()->inspectorPage()->refresh(); //FIXME
     _qmlEditorView->refreshErrors();
 }
 
-void DesignerWidget::handleControlClick(Control* control)
+void CentralWidget::handleControlClick(Control* control)
 {
     currentScene()->clearSelection();
     control->setSelected(true);
 }
 
-void DesignerWidget::handleControlDoubleClick(Control* control)
+void CentralWidget::handleControlDoubleClick(Control* control)
 {
     auto sizes = _splitter->sizes();
     QSize size;
@@ -871,7 +883,7 @@ void DesignerWidget::handleControlDoubleClick(Control* control)
     _splitter->setSizes(sizes);
 }
 
-void DesignerWidget::handleControlDrop(Control* control, const QPointF& pos, const QString& url)
+void CentralWidget::handleControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     auto scene = (ControlScene*)control->scene();
     scene->clearSelection();

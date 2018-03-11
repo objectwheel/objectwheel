@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QPointer>
 #include <QLabel>
+#include <QToolButton>
 
 class Control;
 class OutputPane;
@@ -59,13 +60,14 @@ class IssuesBox : public QWidget
         void entryDoubleClicked(Control*);
 
     private:
-        QVBoxLayout _layout;
-        QToolBar _toolbar;
-        QLabel _title;
-        QListWidget _listWidget;
-        QMap<Error, QPointer<Control>> _buggyControls;
-        OutputPane* _outputPane;
-        DesignMode _currentMode;
+        QVBoxLayout* m_layout;
+        QToolBar* m_toolbar;
+        QToolButton* m_clearButton;
+        QLabel* m_title;
+        QListWidget* m_listWidget;
+        QMap<Error, QPointer<Control>> m_buggyControls;
+        OutputPane* m_outputPane;
+        DesignMode m_currentMode;
 };
 
 #endif // ISSUESBOX_H

@@ -1,7 +1,7 @@
 #include <inspectorpane.h>
 #include <fit.h>
 #include <css.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <filemanager.h>
 #include <saveutils.h>
 #include <savebackend.h>
@@ -179,11 +179,11 @@ InspectorPane::InspectorPane(MainWindow* parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(parent->designerWidget()->formScene(), SIGNAL(selectionChanged()),
+    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(parent->designerWidget()->controlScene(), SIGNAL(selectionChanged()),
+    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
       SLOT(refresh()));
-    connect(parent->designerWidget(), SIGNAL(modeChanged()),
+    connect(parent->centralWidget(), SIGNAL(modeChanged()),
       SLOT(refresh()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
       SLOT(refresh()));

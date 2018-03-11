@@ -1,6 +1,6 @@
 #include <propertiespane.h>
 #include <fit.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 #include <css.h>
 #include <saveutils.h>
 #include <savebackend.h>
@@ -1230,11 +1230,11 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(parent->designerWidget()->formScene(), SIGNAL(selectionChanged()),
+    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
             SLOT(handleSelectionChange()));
-    connect(parent->designerWidget()->controlScene(), SIGNAL(selectionChanged()),
+    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
             SLOT(handleSelectionChange()));
-    connect(parent->designerWidget(), SIGNAL(modeChanged()),
+    connect(parent->centralWidget(), SIGNAL(modeChanged()),
             SLOT(handleSelectionChange()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
             SLOT(handleSelectionChange()));

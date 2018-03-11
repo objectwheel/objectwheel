@@ -3,10 +3,10 @@
 
 #include <windowmanager.h>
 #include <mainwindow.h>
-#include <designerwidget.h>
+#include <centralwidget.h>
 
 #define wM (WindowManager::instance())
 #define mW ((MainWindow*)wM->get(WindowManager::Main))
-#define dW ((DesignerWidget*)mW->designerWidget())
+#define dW ((CentralWidget*)mW->centralWidget())
 
 #endif // FRONTEND_H
