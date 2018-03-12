@@ -56,7 +56,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/projectbackend.h \
            $$PWD/toolsbackend.h \
            $$PWD/userbackend.h \
-           $$PWD/frontend.h \
            $$PWD/loadingbar.h \
            $$PWD/outputpane.h \
            $$PWD/registrationwidget.h \

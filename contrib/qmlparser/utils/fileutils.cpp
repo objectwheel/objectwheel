@@ -44,7 +44,7 @@
 #include <shlobj.h>
 #endif
 
-#ifdef Q_OS_OSX
+#ifdef Q_OS_MACOS
 #include "fileutils_mac.h"
 #endif
 
@@ -310,7 +310,7 @@ QString FileUtils::normalizePathName(const QString &name)
     if (!SHGetPathFromIDList(file, buffer))
         return name;
     return QDir::fromNativeSeparators(QString::fromUtf16(reinterpret_cast<const ushort *>(buffer)));
-#elif defined(Q_OS_OSX)
+#elif defined(Q_OS_MACOS)
     return Internal::normalizePathName(name);
 #else // do not try to handle case-insensitive file systems on Linux
     return name;

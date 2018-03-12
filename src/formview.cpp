@@ -1,155 +1,151 @@
 #include <formview.h>
 #include <formscene.h>
-#include <control.h>
-#include <fit.h>
-#include <savebackend.h>
-#include <centralwidget.h>
-#include <filemanager.h>
-#include <css.h>
-#include <frontend.h>
-#include <global.h>
 
-#include <QScrollBar>
-#include <QTimer>
-#include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
-#include <QApplication>
-#include <QDebug>
-#include <QClipboard>
-#include <QMimeData>
-#include <QJsonDocument>
-#include <QJsonValue>
-#include <QJsonObject>
 
-class FormViewPrivate : public QObject
+FormView::FormView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
+  , m_menu(new QMenu(this))
+  , m_sendBackAct(new QAction(this))
+  , m_bringFrontAct(new QAction(this))
+  , m_undoAct(new QAction(this))
+  , m_redoAct(new QAction(this))
+  , m_cutAct(new QAction(this))
+  , m_copyAct(new QAction(this))
+  , m_pasteAct(new QAction(this))
+  , m_selectAllAct(new QAction(this))
+  , m_deleteAct(new QAction(this))
+  , m_moveUpAct(new QAction(this))
+  , m_moveDownAct(new QAction(this))
+  , m_moveRightAct(new QAction(this))
+  , m_moveLeftAct(new QAction(this))
 {
-        Q_OBJECT
+    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
 
-    public:
-        FormViewPrivate(FormView* parent);
+    m_sendBackAct->setText("Send to Back");
+    m_bringFrontAct->setText("Bring to Front");
+    m_undoAct->setText("Undo");
+    m_undoAct->setShortcut(QKeySequence::Undo);
+    m_redoAct->setText("Redo");
+    m_redoAct->setShortcut(QKeySequence::Redo);
+    m_cutAct->setText("Cut");
+    m_cutAct->setShortcut(QKeySequence::Cut);
+    m_copyAct->setText("Copy");
+    m_copyAct->setShortcut(QKeySequence::Copy);
+    m_pasteAct->setText("Paste");
+    m_pasteAct->setShortcut(QKeySequence::Paste);
+    m_deleteAct->setText("Delete");
+    m_deleteAct->setShortcut(QKeySequence::Delete);
+    #if defined(Q_OS_MACOS)
+    m_deleteAct->setShortcut(Qt::Key_Control | Qt::Key_Backspace); //TODO: Test this
+    #endif
+    m_selectAllAct->setText("Select All");
+    m_selectAllAct->setShortcut(QKeySequence::SelectAll);
+    m_moveUpAct->setShortcut(Qt::Key_Up);
+    m_moveDownAct->setShortcut(Qt::Key_Down);
+    m_moveRightAct->setShortcut(Qt::Key_Right);
+    m_moveLeftAct->setShortcut(Qt::Key_Left);
 
-    private slots:
-        void handleUndoAction();
-        void handleRedoAction();
-        void handleCutAction();
-        void handleCopyAction();
-        void handlePasteAction();
-        void handleDeleteAction();
-        void handleSelectAllAction();
-        void handleMoveUpAction();
-        void handleMoveDownAction();
-        void handleMoveRightAction();
-        void handleMoveLeftAction();
-        void handleSendBackActAction();
-        void handleBringFrontActAction();
+    m_menu->addAction(m_sendBackAct);
+    m_menu->addAction(m_bringFrontAct);
+    m_menu->addSeparator();
+    m_menu->addAction(m_undoAct);
+    m_menu->addAction(m_redoAct);
+    m_menu->addSeparator();
+    m_menu->addAction(m_cutAct);
+    m_menu->addAction(m_copyAct);
+    m_menu->addAction(m_pasteAct);
+    m_menu->addAction(m_deleteAct);
+    m_menu->addSeparator();
+    m_menu->addAction(m_selectAllAct);
 
-    public:
-        FormView* parent;
-        QMenu menu;
-        QAction sendBackAct;
-        QAction bringFrontAct;
-        QAction undoAct;
-        QAction redoAct;
-        QAction cutAct;
-        QAction copyAct;
-        QAction pasteAct;
-        QAction selectAllAct;
-        QAction deleteAct;
-        QAction moveUpAct;
-        QAction moveDownAct;
-        QAction moveRightAct;
-        QAction moveLeftAct;
-};
+    connect(m_undoAct, SIGNAL(triggered()), SLOT(onUndoAction()));
+    connect(m_redoAct, SIGNAL(triggered()), SLOT(onRedoAction()));
+    connect(m_cutAct, SIGNAL(triggered()), SLOT(onCutAction()));
+    connect(m_copyAct, SIGNAL(triggered()), SLOT(onCopyAction()));
+    connect(m_pasteAct, SIGNAL(triggered()), SLOT(onPasteAction()));
+    connect(m_deleteAct, SIGNAL(triggered()), SLOT(onDeleteAction()));
+    connect(m_selectAllAct, SIGNAL(triggered()), SLOT(onSelectAllAction()));
+    connect(m_moveUpAct, SIGNAL(triggered()), SLOT(onMoveUpAction()));
+    connect(m_moveDownAct, SIGNAL(triggered()), SLOT(onMoveDownAction()));
+    connect(m_moveRightAct, SIGNAL(triggered()), SLOT(onMoveRightAction()));
+    connect(m_moveLeftAct, SIGNAL(triggered()), SLOT(onMoveLeftAction()));
+    connect(m_sendBackAct, SIGNAL(triggered()), SLOT(onSendBackActAction()));
+    connect(m_bringFrontAct, SIGNAL(triggered()), SLOT(onBringFrontActAction()));
 
-FormViewPrivate::FormViewPrivate(FormView* parent)
-    : QObject(parent)
-    , parent(parent)
-{
-    sendBackAct.setText("Send to Back");
-    bringFrontAct.setText("Bring to Front");
-    undoAct.setText("Undo");
-    undoAct.setShortcut(QKeySequence::Undo);
-    redoAct.setText("Redo");
-    redoAct.setShortcut(QKeySequence::Redo);
-    cutAct.setText("Cut");
-    cutAct.setShortcut(QKeySequence::Cut);
-    copyAct.setText("Copy");
-    copyAct.setShortcut(QKeySequence::Copy);
-    pasteAct.setText("Paste");
-    pasteAct.setShortcut(QKeySequence::Paste);
-    deleteAct.setText("Delete");
-    deleteAct.setShortcut(QKeySequence::Delete);
-    selectAllAct.setText("Select All");
-    selectAllAct.setShortcut(QKeySequence::SelectAll);
-    moveUpAct.setShortcut(Qt::Key_Up);
-    moveDownAct.setShortcut(Qt::Key_Down);
-    moveRightAct.setShortcut(Qt::Key_Right);
-    moveLeftAct.setShortcut(Qt::Key_Left);
-
-    menu.addAction(&sendBackAct);
-    menu.addAction(&bringFrontAct);
-    menu.addSeparator();
-    menu.addAction(&undoAct);
-    menu.addAction(&redoAct);
-    menu.addSeparator();
-    menu.addAction(&cutAct);
-    menu.addAction(&copyAct);
-    menu.addAction(&pasteAct);
-    menu.addAction(&deleteAct);
-    menu.addSeparator();
-    menu.addAction(&selectAllAct);
-
-    parent->addAction(&undoAct);
-    parent->addAction(&redoAct);
-    parent->addAction(&cutAct);
-    parent->addAction(&copyAct);
-    parent->addAction(&pasteAct);
-    parent->addAction(&deleteAct);
-    parent->addAction(&selectAllAct);
-    parent->addAction(&moveUpAct);
-    parent->addAction(&moveDownAct);
-    parent->addAction(&moveRightAct);
-    parent->addAction(&moveLeftAct);
-
-    connect(&undoAct, SIGNAL(triggered()), SLOT(handleUndoAction()));
-    connect(&redoAct, SIGNAL(triggered()), SLOT(handleRedoAction()));
-    connect(&cutAct, SIGNAL(triggered()), SLOT(handleCutAction()));
-    connect(&copyAct, SIGNAL(triggered()), SLOT(handleCopyAction()));
-    connect(&pasteAct, SIGNAL(triggered()), SLOT(handlePasteAction()));
-    connect(&deleteAct, SIGNAL(triggered()), SLOT(handleDeleteAction()));
-    connect(&selectAllAct, SIGNAL(triggered()), SLOT(handleSelectAllAction()));
-    connect(&moveUpAct, SIGNAL(triggered()), SLOT(handleMoveUpAction()));
-    connect(&moveDownAct, SIGNAL(triggered()), SLOT(handleMoveDownAction()));
-    connect(&moveRightAct, SIGNAL(triggered()), SLOT(handleMoveRightAction()));
-    connect(&moveLeftAct, SIGNAL(triggered()), SLOT(handleMoveLeftAction()));
-    connect(&sendBackAct, SIGNAL(triggered()), SLOT(handleSendBackActAction()));
-    connect(&bringFrontAct, SIGNAL(triggered()), SLOT(handleBringFrontActAction()));
+    addAction(m_undoAct);
+    addAction(m_redoAct);
+    addAction(m_cutAct);
+    addAction(m_copyAct);
+    addAction(m_pasteAct);
+    addAction(m_deleteAct);
+    addAction(m_selectAllAct);
+    addAction(m_moveUpAct);
+    addAction(m_moveDownAct);
+    addAction(m_moveRightAct);
+    addAction(m_moveLeftAct);
 }
 
-void FormViewPrivate::handleUndoAction()
+void FormView::resizeEvent(QResizeEvent* event)
+{
+    QGraphicsView::resizeEvent(event);
+
+    auto mainForm = scene()->mainForm();
+    if (mainForm)
+        mainForm->centralize();
+}
+
+void FormView::contextMenuEvent(QContextMenuEvent* event)
+{
+    QGraphicsView::contextMenuEvent(event);
+
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
+
+    if (selectedControls.isEmpty()) {
+        m_sendBackAct->setDisabled(true);
+        m_bringFrontAct->setDisabled(true);
+        m_cutAct->setDisabled(true);
+        m_copyAct->setDisabled(true);
+        m_deleteAct->setDisabled(true);
+    } else {
+        m_sendBackAct->setDisabled(false);
+        m_bringFrontAct->setDisabled(false);
+        m_cutAct->setDisabled(false);
+        m_copyAct->setDisabled(false);
+        m_deleteAct->setDisabled(false);
+        for (auto sc : selectedControls) {
+            if (sc->gui() == false) {
+                m_sendBackAct->setDisabled(true);
+                m_bringFrontAct->setDisabled(true);
+            }
+        }
+    }
+    m_menu->exec(event->globalPos());
+}
+
+void FormView::onUndoAction()
 {
     //TODO
 }
 
-void FormViewPrivate::handleRedoAction()
+void FormView::onRedoAction()
 {
     //TODO
 }
 
-void FormViewPrivate::handleCutAction()
+void FormView::onCutAction()
 {
     QList<QUrl> urls;
     QByteArray controls;
     QDataStream dstream(&controls, QIODevice::WriteOnly);
     auto mimeData = new QMimeData;
     auto clipboard = QApplication::clipboard();
-    auto scene = dW->formScene();
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
-    mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
+    mimeData->setData("objectwheel/uid", scene()->mainForm()->uid().toUtf8());
     mimeData->setData("objectwheel/cut", "1");
-    mimeData->setData("objectwheel/fscene", "");
 
     for (auto control : selectedControls)
         for (auto ctrl : selectedControls)
@@ -168,15 +164,14 @@ void FormViewPrivate::handleCutAction()
     clipboard->setMimeData(mimeData);
 }
 
-void FormViewPrivate::handleCopyAction()
+void FormView::onCopyAction()
 {
     QList<QUrl> urls;
     auto mimeData = new QMimeData;
     auto clipboard = QApplication::clipboard();
-    auto scene = dW->formScene();
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
-    mimeData->setData("objectwheel/uid", scene->mainControl()->uid().toUtf8());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
+    mimeData->setData("objectwheel/uid", scene()->mainForm()->uid().toUtf8());
 
     for (auto control : selectedControls)
         for (auto ctrl : selectedControls)
@@ -191,11 +186,11 @@ void FormViewPrivate::handleCopyAction()
     clipboard->setMimeData(mimeData);
 }
 
-void FormViewPrivate::handlePasteAction()
+void FormView::onPasteAction()
 {
     auto clipboard = QApplication::clipboard();
     auto mimeData = clipboard->mimeData();
-    auto mainControl = dW->formScene()->mainForm();
+    auto mainForm = dW->formScene()->mainForm();
     QString uid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
         mimeData->text() != TOOL_KEY || uid.isEmpty())
@@ -203,9 +198,9 @@ void FormViewPrivate::handlePasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = SaveBackend::instance()->exposeControl(url.toLocalFile(), FormGui, uid);
-        SaveBackend::instance()->addControl(control, mainControl, mainControl->uid(), mainControl->dir());
-        control->setParentItem(mainControl);
+        auto control = SaveBackend::instance()->exposeControl(url.toLocalFile(), uid);
+        SaveBackend::instance()->addControl(control, mainForm, mainForm->uid(), mainForm->dir());
+        control->setParentItem(mainForm);
         controls << control;
 
         control->setPos(control->pos() + QPoint(fit::fx(5), fit::fx(5)));
@@ -215,12 +210,6 @@ void FormViewPrivate::handlePasteAction()
                 control->setSelected(true);
 
             if (!mimeData->data("objectwheel/cut").isEmpty()) {
-                ControlScene* scene;
-                if (mimeData->data("objectwheel/fscene").isEmpty())
-                    scene = dW->formScene();
-                else
-                    scene = dW->controlScene();
-
                 QDataStream dstream(mimeData->data("objectwheel/dstream"));
                 int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
                 QList<Control*> cutControls;
@@ -231,7 +220,7 @@ void FormViewPrivate::handlePasteAction()
                 }
 
                 for (auto control : cutControls) {
-                    scene->removeControl(control);
+                    scene()->removeControl(control);
                     SaveBackend::instance()->removeControl(control);
                 }
             }
@@ -241,125 +230,68 @@ void FormViewPrivate::handlePasteAction()
             childControl->refresh();
     }
 }
-//TODO: Add Cmd + Del action to del action shortcuts only on mac
-void FormViewPrivate::handleDeleteAction()
+
+void FormView::onDeleteAction()
 { //FIXME: Do not delete if docs are open within QML Editor
-    auto scene = static_cast<FormScene*>(parent->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls) {
-       scene->removeControl(control);
+       scene()->removeControl(control);
        SaveBackend::instance()->removeControl(control);
     }
 }
 
-void FormViewPrivate::handleSelectAllAction()
+void FormView::onSelectAllAction()
 {
-    auto mainForm = ((FormScene*)parent->scene())->mainForm();
+    auto mainForm = scene()->mainForm();
     for (auto control : mainForm->childControls())
         control->setSelected(true);
 }
 
-void FormViewPrivate::handleMoveUpAction()
+void FormView::onMoveUpAction()
 {
-    auto scene = static_cast<FormScene*>(parent->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
         control->moveBy(0, - fit::fx(1));
 }
 
-void FormViewPrivate::handleMoveDownAction()
+void FormView::onMoveDownAction()
 {
-    auto scene = static_cast<FormScene*>(parent->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
         control->moveBy(0, fit::fx(1));
 }
 
-void FormViewPrivate::handleMoveRightAction()
+void FormView::onMoveRightAction()
 {
-    auto scene = static_cast<FormScene*>(parent->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
         control->moveBy(fit::fx(1), 0);
 }
 
-void FormViewPrivate::handleMoveLeftAction()
+void FormView::onMoveLeftAction()
 {
-    auto scene = static_cast<FormScene*>(parent->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
         control->moveBy(- fit::fx(1), 0);
 }
 
-void FormViewPrivate::handleSendBackActAction()
+void FormView::onSendBackAction()
 {
-    auto scene = static_cast<FormScene*>(parent->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainForm()->lowerZValue() - 1);
+        control->setZValue(scene()->mainForm()->lowerZValue() - 1);
 }
 
-void FormViewPrivate::handleBringFrontActAction()
+void FormView::onBringFrontAction()
 {
-    auto scene = static_cast<FormScene*>(parent->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
-        control->setZValue(scene->mainForm()->higherZValue() + 1);
+        control->setZValue(scene()->mainForm()->higherZValue() + 1);
 }
-
-FormView::FormView(QGraphicsScene* scene, QWidget* parent)
-    : QGraphicsView(scene, parent)
-    , _d(new FormViewPrivate(this))
-{
-    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
-}
-
-void FormView::resizeEvent(QResizeEvent* event)
-{
-    QGraphicsView::resizeEvent(event);
-
-    auto _scene = static_cast<FormScene*>(scene());
-    auto mainForm = _scene->mainForm();
-    if (mainForm)
-        mainForm->centralize();
-}
-
-void FormView::contextMenuEvent(QContextMenuEvent* event)
-{
-    QGraphicsView::contextMenuEvent(event);
-
-    auto scene = static_cast<FormScene*>(this->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
-
-    if (selectedControls.isEmpty()) {
-        _d->sendBackAct.setDisabled(true);
-        _d->bringFrontAct.setDisabled(true);
-        _d->cutAct.setDisabled(true);
-        _d->copyAct.setDisabled(true);
-        _d->deleteAct.setDisabled(true);
-    } else {
-        _d->sendBackAct.setDisabled(false);
-        _d->bringFrontAct.setDisabled(false);
-        _d->cutAct.setDisabled(false);
-        _d->copyAct.setDisabled(false);
-        _d->deleteAct.setDisabled(false);
-        for (auto sc : selectedControls) {
-            if (sc->gui() == false) {
-                _d->sendBackAct.setDisabled(true);
-                _d->bringFrontAct.setDisabled(true);
-            }
-        }
-    }
-    _d->menu.exec(event->globalPos());
-}
-
-#include "formview.moc"

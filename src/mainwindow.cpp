@@ -36,7 +36,7 @@
 #include <QToolBar>
 #include <QLabel>
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
 #include <mactoolbar.h>
 #endif
 
@@ -76,7 +76,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addToolBar(Qt::TopToolBarArea, _toolBar);
 
     int lspace = 0;
-    #if defined(Q_OS_MAC)
+    #if defined(Q_OS_MACOS)
 //    auto macToolbar = new MacToolbar(this);
 //    _toolBar->setFixedHeight(macToolbar->toolbarHeight());
 //    lspace = fit::fx(72);

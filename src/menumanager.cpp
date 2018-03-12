@@ -6,7 +6,7 @@
 
 MenuManager::MenuManager()
 {
-    #if defined(Q_OS_MAC)
+    #if defined(Q_OS_MACOS)
     _menuBar = new QMenuBar;
     #else
     _menuBar = mW->menuBar();

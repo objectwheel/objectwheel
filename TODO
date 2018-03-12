@@ -75,6 +75,12 @@ ControlScene aşağıdaki hata izinde de belirtildiği üzere mouseMoveEvent sı
 1   com.objectwheel.Objectwheel   	0x000000010d7c3459 Control::parentControl() const + 25 (control.cpp:215)
 2   com.objectwheel.Objectwheel   	0x000000010d7d4eb0 ControlScene::mouseMoveEvent(QGraphicsSceneMouseEvent*) + 672 (controlscene.cpp:149)
 
+Bug 1: last item freezes the app, I mean collapsing the last item on properties pane
+Bug 2: control inspector's horizontal scrollbar extends comtnuously after refrehing controls
+Bug 3: property search freezes the app
+Bug 4: changing properties trigs refreshing all properties in the properties pane, and we loose the position what we are trying to change, I should not be expand the property each time I change one sub property, same for control inspector, it expands automatically everytime another control selects
+Bug 5: Sub properties should be listed like accordion, i.e border's sub properties (border.width, border.color etc) should be listed under "border" title, like geometry does
+
 
 Diğer TODO'lar
 2. Changing Resizing Numbers manually doesn’t resize
