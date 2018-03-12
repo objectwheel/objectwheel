@@ -1,14 +1,12 @@
 #include <loadingbar.h>
 #include <fit.h>
+#include <dpr.h>
 #include <QPainter>
 #include <QTextDocument>
 #include <QTimer>
-#include <QScreen>
-#include <QApplication>
 
 #define INTERVALF     60
 #define INTERVAL      1000
-#define pS            (QApplication::primaryScreen())
 #define PATH_BAR      (":/resources/images/loadingbar.png")
 #define SIZE          (fit::fx(QSizeF{481, 24}))
 #define COLOR_DONE    ("#30a8f7")
@@ -31,9 +29,9 @@ LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
     _timerFader->setInterval(INTERVALF);
     connect(_timerFader, SIGNAL(timeout()), SLOT(handleFader()));
 
-    _image.setDevicePixelRatio(pS->devicePixelRatio());
+    _image.setDevicePixelRatio(DPR);
     _image = _image.scaled(
-        (SIZE * pS->devicePixelRatio()).toSize(),
+        (SIZE * DPR).toSize(),
         Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation
     );

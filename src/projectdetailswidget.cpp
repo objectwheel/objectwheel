@@ -5,9 +5,8 @@
 #include <userbackend.h>
 #include <projectbackend.h>
 #include <filemanager.h>
+#include <dpr.h>
 
-#include <QApplication>
-#include <QScreen>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -21,7 +20,6 @@
 #define PATH_SICON       (":/resources/images/load.png")
 #define PATH_CICON       (":/resources/images/unload.png")
 #define PATH_DICON       (":/resources/images/cancel.png")
-#define pS               QApplication::primaryScreen()
 #define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
 enum Fields { Name, Description, Owner, CreationDate, ModificationDate, Size };
@@ -46,12 +44,12 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     _layout->addStretch();
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(pS->devicePixelRatio());
+    p.setDevicePixelRatio(DPR);
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * pS->devicePixelRatio(),
+            SIZE_ICON * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

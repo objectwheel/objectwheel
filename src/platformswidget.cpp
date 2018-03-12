@@ -2,14 +2,11 @@
 #include <fit.h>
 #include <css.h>
 #include <build.h>
+#include <dpr.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
-#include <QApplication>
-#include <QScreen>
 #include <QScrollBar>
-
-#define pS (QApplication::primaryScreen())
 
 enum {
     Arch = Qt::UserRole + 1,
@@ -54,7 +51,7 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
      option.rect.height() / 2.0, 0, - fit::fx(7));
    auto ricon = option.rect.adjusted(fit::fx(7), fit::fx(7),
      - option.rect.width() + option.rect.height() - fit::fx(7), - fit::fx(7));
-   auto icon = item->icon().pixmap(ricon.size() * pS->devicePixelRatio());
+   auto icon = item->icon().pixmap(ricon.size() * DPR);
     painter->setRenderHint(QPainter::Antialiasing);
 
     QFont f;

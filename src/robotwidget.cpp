@@ -2,9 +2,8 @@
 #include <fit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
+#include <dpr.h>
 
-#include <QApplication>
-#include <QScreen>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -19,7 +18,6 @@
 #define PATH_NICON       (":/resources/images/load.png")
 #define PATH_CICON       (":/resources/images/unload.png")
 #define PATH_RECAPTCHA   (tr(APP_HTTPSSERVER) + "/recaptcha.html")
-#define pS               (QApplication::primaryScreen())
 
 enum Buttons { Next, Back };
 
@@ -62,12 +60,12 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _recaptchaView->page()->setBackgroundColor(Qt::transparent);
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(pS->devicePixelRatio());
+    p.setDevicePixelRatio(DPR);
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * pS->devicePixelRatio(),
+            SIZE_ICON * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

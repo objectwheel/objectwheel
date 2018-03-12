@@ -1,10 +1,9 @@
 #include <succeedwidget.h>
 #include <fit.h>
 #include <buttonslice.h>
-#include <QTimer>
+#include <dpr.h>
 
-#include <QApplication>
-#include <QScreen>
+#include <QTimer>
 #include <QMovie>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -15,7 +14,6 @@
 #define SIZE_GIF        (QSize(fit::fx(100), fit::fx(100)))
 #define PATH_GIF         (":/resources/images/complete.gif")
 #define PATH_OICON       (":/resources/images/ok.png")
-#define pS               (QApplication::primaryScreen())
 
 enum Buttons { Ok };
 
@@ -43,7 +41,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
 
     _movie->setFileName(PATH_GIF);
     _movie->setBackgroundColor(Qt::transparent);
-    _movie->setScaledSize(SIZE_GIF * pS->devicePixelRatio());
+    _movie->setScaledSize(SIZE_GIF * DPR);
     connect(_movie, SIGNAL(frameChanged(int)), SLOT(update()));
 
     _iconLabel->setFixedSize(SIZE_GIF);
@@ -100,6 +98,6 @@ void SucceedWidget::paintEvent(QPaintEvent* event)
     painter.drawPixmap(
         _iconLabel->geometry(),
         _movie->currentPixmap(),
-        QRectF(QPoint(), SIZE_GIF * pS->devicePixelRatio())
+        QRectF(QPoint(), SIZE_GIF * DPR)
     );
 }

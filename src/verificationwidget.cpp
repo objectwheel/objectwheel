@@ -5,9 +5,8 @@
 #include <waitingspinnerwidget.h>
 #include <authenticator.h>
 #include <countdown.h>
+#include <dpr.h>
 
-#include <QApplication>
-#include <QScreen>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -22,7 +21,6 @@
 #define PATH_VICON       (":/resources/images/ok.png")
 #define PATH_RICON       (":/resources/images/reset.png")
 #define PATH_CICON       (":/resources/images/cancel.png")
-#define pS               (QApplication::primaryScreen())
 
 enum Fields { Code };
 enum Buttons { Verify, Resend, Cancel };
@@ -66,12 +64,12 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(pS->devicePixelRatio());
+    p.setDevicePixelRatio(DPR);
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * pS->devicePixelRatio(),
+            SIZE_ICON * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

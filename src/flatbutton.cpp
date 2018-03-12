@@ -1,11 +1,10 @@
 #include <flatbutton.h>
 #include <fit.h>
+#include <dpr.h>
+
 #include <QPainter>
-#include <QApplication>
-#include <QScreen>
 #include <QtMath>
 
-#define pS QApplication::primaryScreen()
 #define SIZE (fit::fx(QSizeF(22, 80)).toSize())
 #define ADJUST(x) ((x).adjusted(\
     fit::fx(1) + 0.5, fit::fx(1) + 0.5,\
@@ -51,8 +50,8 @@ void FlatButton::paintEvent(QPaintEvent* event)
     const auto& r = ADJUST(QRectF(rect()));
 
     if (_settings.iconButton) {
-        QImage image(qCeil(width() * pS->devicePixelRatio()), qCeil(height() * pS->devicePixelRatio()), QImage::Format_ARGB32_Premultiplied);
-        image.setDevicePixelRatio(pS->devicePixelRatio());
+        QImage image(qCeil(width() * DPR), qCeil(height() * DPR), QImage::Format_ARGB32_Premultiplied);
+        image.setDevicePixelRatio(DPR);
         image.fill(Qt::transparent);
         QPainter pn(&image);
         icon().paint(
@@ -75,7 +74,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
                 }
             }
         }
-        painter.drawImage(QRectF(QPointF(), image.size() / pS->devicePixelRatio()), image, image.rect());
+        painter.drawImage(QRectF(QPointF(), image.size() / DPR), image, image.rect());
     } else {
         /* Limit shadow region */
         const auto& sr = r.adjusted(

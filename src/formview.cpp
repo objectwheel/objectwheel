@@ -1,9 +1,17 @@
 #include <formview.h>
 #include <formscene.h>
+#include <css.h>
+#include <savebackend.h>
+#include <fit.h>
 
 #include <QMenu>
 #include <QAction>
 #include <QScrollBar>
+#include <QMimeData>
+#include <QGuiApplication>
+#include <QClipboard>
+
+extern const char* TOOL_KEY;
 
 FormView::FormView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
   , m_menu(new QMenu(this))
@@ -147,7 +155,7 @@ void FormView::onCutAction()
     QByteArray controls;
     QDataStream dstream(&controls, QIODevice::WriteOnly);
     auto mimeData = new QMimeData;
-    auto clipboard = QApplication::clipboard();
+    auto clipboard = QGuiApplication::clipboard();
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     mimeData->setData("objectwheel/uid", scene()->mainForm()->uid().toUtf8());
@@ -174,7 +182,7 @@ void FormView::onCopyAction()
 {
     QList<QUrl> urls;
     auto mimeData = new QMimeData;
-    auto clipboard = QApplication::clipboard();
+    auto clipboard = QGuiApplication::clipboard();
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     mimeData->setData("objectwheel/uid", scene()->mainForm()->uid().toUtf8());
@@ -194,9 +202,9 @@ void FormView::onCopyAction()
 
 void FormView::onPasteAction()
 {
-    auto clipboard = QApplication::clipboard();
+    auto clipboard = QGuiApplication::clipboard();
     auto mimeData = clipboard->mimeData();
-    auto mainForm = dW->formScene()->mainForm();
+    auto mainForm = scene()->mainForm();
     QString uid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
         mimeData->text() != TOOL_KEY || uid.isEmpty())
@@ -211,7 +219,7 @@ void FormView::onPasteAction()
 
         control->setPos(control->pos() + QPoint(fit::fx(5), fit::fx(5)));
         if (url == mimeData->urls().last()) {
-            dW->formScene()->clearSelection();
+            scene()->clearSelection();
             for (auto control : controls)
                 control->setSelected(true);
 

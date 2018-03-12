@@ -10,6 +10,7 @@ class Control;
 class ControlPrivate;
 class FormPrivate;
 class ControlWatcher;
+class FormScene;
 
 class Control : public QGraphicsWidget
 {
@@ -52,6 +53,7 @@ class Control : public QGraphicsWidget
         virtual QRectF frameGeometry() const;
         void setDragging(bool dragging);
         void setDragIn(bool dragIn);
+        FormScene* scene() const;
 
     public slots:
         void hideResizers();

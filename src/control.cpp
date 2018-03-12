@@ -1,5 +1,6 @@
 #include <control.h>
 #include <fit.h>
+#include <dpr.h>
 #include <random>
 #include <filemanager.h>
 #include <controlwatcher.h>
@@ -22,8 +23,7 @@
 #define MARGIN_TOP (fit::fx(14))
 #define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
 
-#define DPR (QApplication::primaryScreen()->devicePixelRatio())
-#define cW (ControlWatcher::instance())
+extern const char* TOOL_KEY;
 
 namespace {
     /* Fills the restricted area by the size with pattern into
@@ -125,19 +125,17 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
 
 bool Control::_showOutline = false;
 QList<Control*> Control::_controls;
-//TODO: Why we need mode()?
+
 Control::Control(
     const QString& url,
-    const DesignMode& mode,
     const QString& uid,
     Control* parent
-    )
+)
     : QGraphicsWidget(parent)
     , _clip(true)
     , _d(new ControlPrivate(this))
     , _uid(uid.isEmpty() ? SaveUtils::uid(dname(dname(url))) : uid)
     , _url(url)
-    , _mode(mode)
     , _dragging(false)
     , _dragIn(false)
     , _gui(true)
@@ -155,7 +153,7 @@ Control::Control(
     setId(SaveUtils::id(dname(dname(url))));
     setPos(SaveUtils::x(dir()), SaveUtils::y(dir()));
     resize(fit::fx(SaveUtils::width(dir())), fit::fx(SaveUtils::height(dir())));
-    if (size().isNull()) resize(SIZE_NONGUI_CONTROL);
+    if (size().isNull()) resize(fit::fx(QSizeF(50, 50)));
     _d->preview = initialPreview();
 
     connect(this, &Control::geometryChanged, this, [=] {
@@ -371,13 +369,12 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         control != this && !control->dragIn()) {
         control->setDragIn(true);
 
-        auto scene = static_cast<ControlScene*>(this->scene());
-        for (auto c : scene->mainControl()->childControls())
+        for (auto c : scene()->mainForm()->childControls())
             if (c != control)
                 c->setDragIn(false);
 
-        if (scene->mainControl() != control)
-            scene->mainControl()->setDragIn(false);
+        if (scene()->mainForm() != control)
+            scene()->mainForm()->setDragIn(false);
     }
 
     if (event->button() == Qt::MidButton)
@@ -390,30 +387,29 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseReleaseEvent(event);
 
-    auto scene = static_cast<ControlScene*>(this->scene());
-    auto selectedControls = scene->selectedControls();
-    selectedControls.removeOne(scene->mainControl());
+    auto selectedControls = scene()->selectedControls();
+    selectedControls.removeOne(scene()->mainForm());
 
-    for (auto control : scene->mainControl()->childControls()) {
+    for (auto control : scene()->mainForm()->childControls()) {
         if (control->dragIn() && dragging() && parentControl() != control) {
             for (auto sc : selectedControls) {
                 if (sc->dragging()) {
                     control->dropControl(sc);
                 }
             }
-            scene->clearSelection();
+            scene()->clearSelection();
             control->setSelected(true);
         }
         control->setDragIn(false);
     }
 
-    if (scene->mainControl()->dragIn() && dragging() &&
-        parentControl() != scene->mainControl()) {
-        scene->mainControl()->dropControl(this);
-        scene->clearSelection();
-        scene->mainControl()->setSelected(true);
+    if (scene()->mainForm()->dragIn() && dragging() &&
+        parentControl() != scene()->mainForm()) {
+        scene()->mainForm()->dropControl(this);
+        scene()->clearSelection();
+        scene()->mainForm()->setSelected(true);
     }
-    scene->mainControl()->setDragIn(false);
+    scene()->mainForm()->setDragIn(false);
 
     event->accept();
 }
@@ -536,6 +532,11 @@ bool Control::dragIn() const
 void Control::setDragIn(bool dragIn)
 {
     _dragIn = dragIn;
+}
+
+FormScene* Control::scene() const
+{
+    return static_cast<FormScene*>(QGraphicsWidget::scene());
 }
 
 bool Control::dragging() const
@@ -667,7 +668,7 @@ FormPrivate::FormPrivate(Form* parent)
 //! ********************** [Form] **********************
 
 Form::Form(const QString& url, const QString& uid, Form* parent)
-    : Control(url, FormGui, uid, parent)
+    : Control(url, uid, parent)
     , _d(new FormPrivate(this))
 {
     _clip = false;

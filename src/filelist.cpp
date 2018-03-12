@@ -1,9 +1,9 @@
 #include <filelist.h>
 #include <fit.h>
 #include <css.h>
-#include <global.h>
 #include <filemanager.h>
 #include <delayer.h>
+#include <dpr.h>
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -15,12 +15,10 @@
 #include <QGraphicsBlurEffect>
 #include <QScrollBar>
 #include <QPainter>
-#include <QApplication>
-#include <QScreen>
 #include <QtWidgets>
 #include <QtConcurrent>
 
-#define pS (qApp->primaryScreen())
+extern const char* TOOL_KEY;
 
 QLabel* dropLabel;
 QGraphicsBlurEffect* blurEffect;
@@ -206,13 +204,13 @@ void FileList::resizeEvent(QResizeEvent* event)
     QTreeView::resizeEvent(event);
     dropLabel->setGeometry(viewport()->geometry());
 
-    QPixmap bn(dropLabel->size() * pS->devicePixelRatio());
-    bn.setDevicePixelRatio(pS->devicePixelRatio());
+    QPixmap bn(dropLabel->size() * DPR);
+    bn.setDevicePixelRatio(DPR);
     bn.fill("#15000000");
     dbs->b = bn;
     dbs->r.moveCenter(dropLabel->rect().center());
     dbs->ra = dbs->r.adjusted(fit::fx(25), fit::fx(17), -fit::fx(25), -fit::fx(33));
-    dbs->a = dbs->ao.scaled((dbs->ra.size() * pS->devicePixelRatio()).toSize());
+    dbs->a = dbs->ao.scaled((dbs->ra.size() * DPR).toSize());
 
     QPen pen;
     pen.setStyle(Qt::DashLine);

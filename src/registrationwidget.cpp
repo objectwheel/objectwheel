@@ -6,9 +6,8 @@
 #include <waitingspinnerwidget.h>
 #include <filemanager.h>
 #include <authenticator.h>
+#include <dpr.h>
 
-#include <QApplication>
-#include <QScreen>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -25,7 +24,6 @@
 #define PATH_ICON        (":/resources/images/register.png")
 #define PATH_OICON       (":/resources/images/load.png")
 #define PATH_BICON       (":/resources/images/unload.png")
-#define pS               (QApplication::primaryScreen())
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
 enum Buttons { Next, Back };
@@ -90,12 +88,12 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLayout->addStretch();
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(pS->devicePixelRatio());
+    p.setDevicePixelRatio(DPR);
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * pS->devicePixelRatio(),
+            SIZE_ICON * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

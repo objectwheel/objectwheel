@@ -7,11 +7,9 @@
 #include <toolboxsettingswindow.h>
 #include <fit.h>
 #include <savebackend.h>
+#include <dpr.h>
 
 #include <QStyle>
-#include <QScreen>
-#include <QApplication>
-#define pS (QApplication::primaryScreen())
 
 WindowManager::WindowManager()
     : _mainWindow(nullptr)

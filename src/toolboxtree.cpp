@@ -17,6 +17,8 @@
 //! *********************** [ToolboxDelegate] ***********************
 //!
 
+const char* TOOL_KEY = "QURBUEFaQVJMSVlJWiBIQUZJWg";
+
 class ToolboxDelegate: public QStyledItemDelegate
 {
         Q_OBJECT

@@ -16,6 +16,7 @@ class FormScene : public QGraphicsScene
         const QList<Form*>& forms() const;
         void addForm(Form* form);
         void removeForm(Form* form);
+        void removeControl(Control* control);
         void removeChildControlsOnly(Control* parent);
         void setMainForm(Form* mainForm);
         Form* mainForm();

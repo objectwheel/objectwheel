@@ -11,8 +11,8 @@
 #include <fileexplorer.h>
 #include <qmlhighlighter.h>
 #include <control.h>
-#include <frontend.h>
 #include <parserutils.h>
+#include <dpr.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -26,8 +26,6 @@
 #include <QSplitter>
 #include <QMessageBox>
 #include <QScrollBar>
-#include <QApplication>
-#include <QScreen>
 
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
@@ -37,7 +35,6 @@
 #define MINWIDTH_EDITOR (fit::fx(200))
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
 #define TAB_SPACE ("    ")
-#define pS (QApplication::primaryScreen())
 
 class QmlEditorViewPrivate : public QObject
 {
@@ -245,13 +242,13 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     connect(&saveAction, SIGNAL(triggered()), SLOT(handleSaveButtonClicked()));
 
     //TODO: form or control removal will be handled
-
-    QTimer::singleShot(3000, [=] {
-        connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
-        connect(SaveBackend::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
-        connect(dW->controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
-        connect(dW->formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
-    });
+    // FIXME
+    //    QTimer::singleShot(3000, [=] {
+    //        connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
+    //        connect(SaveBackend::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
+    //        connect(dW->controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+    //        connect(dW->formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+    //    });
 
     zoomlLevelCombobox->addItem("35 %");
     zoomlLevelCombobox->addItem("50 %");
@@ -428,7 +425,7 @@ void QmlEditorViewPrivate::handlePinButtonClicked()
                 Qt::LeftToRight,
                 Qt::AlignCenter,
                 containerWidget->size(),
-                pS->availableGeometry()
+                QGuiApplication::primaryScreen()->availableGeometry()
             )
         );
     } else {

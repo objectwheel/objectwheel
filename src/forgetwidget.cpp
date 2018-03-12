@@ -4,9 +4,8 @@
 #include <bulkedit.h>
 #include <waitingspinnerwidget.h>
 #include <authenticator.h>
+#include <dpr.h>
 
-#include <QApplication>
-#include <QScreen>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -18,7 +17,6 @@
 #define PATH_ICON        (":/resources/images/forgot.png")
 #define PATH_NICON       (":/resources/images/load.png")
 #define PATH_CICON       (":/resources/images/unload.png")
-#define pS               (QApplication::primaryScreen())
 
 enum Fields { Email };
 enum Buttons { Next, Back };
@@ -51,12 +49,12 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _layout->addStretch();
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(pS->devicePixelRatio());
+    p.setDevicePixelRatio(DPR);
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * pS->devicePixelRatio(),
+            SIZE_ICON * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

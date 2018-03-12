@@ -27,4 +27,6 @@ class ControlWatcher : public QObject
         ControlWatcher() {}
 };
 
+#define cW ControlWatcher::instance()
+
 #endif // CONTROLWATCHER_H

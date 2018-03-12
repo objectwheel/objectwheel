@@ -8,10 +8,9 @@
 #include <global.h>
 #include <authenticator.h>
 #include <userbackend.h>
-#include <QtConcurrent>
+#include <dpr.h>
 
-#include <QApplication>
-#include <QScreen>
+#include <QtConcurrent>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -25,7 +24,6 @@
 #define PATH_RICON       (":/resources/images/new.png")
 #define PATH_LICON       (":/resources/images/load.png")
 #define PATH_HICON       (":/resources/images/info.png")
-#define pS               (QApplication::primaryScreen())
 
 enum Fields { Email, Password };
 enum Buttons { Login, Register };
@@ -89,12 +87,12 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _autologinLayout->addStretch();
 
     QPixmap p(PATH_LOGO);
-    p.setDevicePixelRatio(pS->devicePixelRatio());
+    p.setDevicePixelRatio(DPR);
 
     _logoLabel->setFixedSize(SIZE_LOGO);
     _logoLabel->setPixmap(
         p.scaled(
-            SIZE_LOGO * pS->devicePixelRatio(),
+            SIZE_LOGO * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

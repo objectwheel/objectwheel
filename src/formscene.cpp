@@ -78,6 +78,18 @@ void FormScene::removeForm(Form* form)
     emit controlRemoved(form);
 }
 
+void FormScene::removeControl(Control* control)
+{
+    if (control == mainForm())
+        return;
+    for (auto ctrl : control->childControls())
+        emit aboutToRemove(ctrl);
+    emit aboutToRemove(control);
+    removeItem(control);
+    control->deleteLater();
+    emit controlRemoved(control);
+}
+
 void FormScene::removeChildControlsOnly(Control* parent)
 {
     for (auto control : parent->childControls())
