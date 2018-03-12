@@ -1,5 +1,6 @@
 #include <mainwindow.h>
 #include <fit.h>
+#include <css.h>
 #include <runpane.h>
 #include <outputpane.h>
 #include <toolboxpane.h>
@@ -8,8 +9,20 @@
 #include <inspectorpane.h>
 #include <pageswitcherpane.h>
 #include <centralwidget.h>
+#include <windowmanager.h>
+#include <toolsbackend.h>
 
 #include <QToolBar>
+#include <QLabel>
+#include <QToolButton>
+#include <QDockWidget>
+
+namespace {
+    QDockWidget* propertiesDockWidget;
+    QDockWidget* formsDockWidget;
+    QDockWidget* toolboxDockWidget;
+    QDockWidget* inspectorDockWidget;
+}
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_outputPane(new OutputPane)
@@ -18,7 +31,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_toolboxPane(new ToolboxPane)
   , m_propertiesPane(new PropertiesPane)
   , m_formsPane(new FormsPane)
-  , m_inspectorPage(new InspectorPane)
+  , m_inspectorPane(new InspectorPane)
   , m_centralWidget(new CentralWidget)
 
 {
@@ -60,219 +73,173 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     dockTitleFont.setWeight(QFont::Medium);
 
     /* Add Properties Pane */
-    auto propertiesLabel = new QLabel;
-    propertiesLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    propertiesLabel->setText(tr("   Properties"));
-    propertiesLabel->setFont(dockTitleFont);
+    auto propertiesTitleLabel = new QLabel;
+    propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    propertiesTitleLabel->setText(tr("   Properties"));
+    propertiesTitleLabel->setFont(dockTitleFont);
 
-    QToolButton* pinButton = new QToolButton;
-    pinButton->setToolTip("Pin/Unpin pane.");
-    pinButton->setCursor(Qt::PointingHandCursor);
-    pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton, &QToolButton::clicked, this, [=]{
-        _propertiesDockwidget->setFloating(!_propertiesDockwidget->isFloating());
+    auto propertiesTitlePinButton = new QToolButton;
+    propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    propertiesTitlePinButton->setCursor(Qt::PointingHandCursor);
+    propertiesTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(propertiesTitlePinButton, &QToolButton::clicked, this, [] {
+        propertiesDockWidget->setFloating(!propertiesDockWidget->isFloating());
     });
 
-    QToolBar* toolbar = new QToolBar;
-    toolbar->addWidget(label);
-    toolbar->addWidget(pinButton);
-    toolbar->setStyleSheet(CSS::DesignerPinbar);
-    toolbar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar->setFixedHeight(fit::fx(24));
+    auto propertiesTitleBar = new QToolBar;
+    propertiesTitleBar->addWidget(propertiesTitleLabel);
+    propertiesTitleBar->addWidget(propertiesTitlePinButton);
+    propertiesTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    propertiesTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
+    propertiesTitleBar->setFixedHeight(fit::fx(24));
 
-    _propertiesDockwidget->setTitleBarWidget(toolbar);
-    _propertiesDockwidget->setWidget(_propertiesPane);
-    _propertiesDockwidget->setWindowTitle("Properties");
-    _propertiesDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
-                                      QDockWidget::DockWidgetFloatable);
+    propertiesDockWidget = new QDockWidget;
+    propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
+    propertiesDockWidget->setWidget(m_propertiesPane);
+    propertiesDockWidget->setWindowTitle(tr("Properties"));
+    propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
 
-    /*** FORMS DOCK WIDGET ***/
-    QLabel* label2 = new QLabel;
-    label2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label2->setText("   Form Navigator");
-    label2->setFont(f);
+    /* Add Forms Pane */
+    auto formsTitleLabel = new QLabel;
+    formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    formsTitleLabel->setText(tr("   Form Navigator"));
+    formsTitleLabel->setFont(dockTitleFont);
 
-    QToolButton* pinButton2 = new QToolButton;
-    pinButton2->setToolTip("Pin/Unpin pane.");
-    pinButton2->setCursor(Qt::PointingHandCursor);
-    pinButton2->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton2, &QToolButton::clicked, this, [=]{
-        _formsDockwidget->setFloating(!_formsDockwidget->isFloating());
+    auto formsTitlePinButton = new QToolButton;
+    formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    formsTitlePinButton->setCursor(Qt::PointingHandCursor);
+    formsTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(formsTitlePinButton, &QToolButton::clicked, this, [] {
+        formsDockWidget->setFloating(!formsDockWidget->isFloating());
     });
 
-    QToolBar* toolbar2 = new QToolBar;
-    toolbar2->addWidget(label2);
-    toolbar2->addWidget(pinButton2);
-    toolbar2->setStyleSheet(CSS::DesignerPinbar);
-    toolbar2->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar2->setFixedHeight(fit::fx(24));
+    auto formsTitleBar = new QToolBar;
+    formsTitleBar->addWidget(formsTitleLabel);
+    formsTitleBar->addWidget(formsTitlePinButton);
+    formsTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    formsTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
+    formsTitleBar->setFixedHeight(fit::fx(24));
 
-    _formsDockwidget->setTitleBarWidget(toolbar2);
-    _formsDockwidget->setWidget(_formsPane);
-    _formsDockwidget->setWindowTitle("Forms");
-    _formsDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
-                                 QDockWidget::DockWidgetFloatable);
+    formsDockWidget = new QDockWidget;
+    formsDockWidget->setTitleBarWidget(formsTitleBar);
+    formsDockWidget->setWidget(m_formsPane);
+    formsDockWidget->setWindowTitle(tr("Form Navigator"));
+    formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, formsDockWidget);
 
-    /*** TOOLBOX DOCK WIDGET ***/
-    QLabel* label3 = new QLabel;
-    label3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label3->setText("   Toolbox");
-    label3->setFont(f);
+    /* Add Toolbox Pane */
+    auto toolboxTitleLabel = new QLabel;
+    toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolboxTitleLabel->setText(tr("   Toolbox"));
+    toolboxTitleLabel->setFont(dockTitleFont);
 
-    QToolButton* pinButton3 = new QToolButton;
-    pinButton3->setToolTip("Pin/Unpin pane.");
-    pinButton3->setCursor(Qt::PointingHandCursor);
-    pinButton3->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton3, &QToolButton::clicked, this, [=]{
-        _toolboxDockwidget->setFloating(!_toolboxDockwidget->isFloating());
+    auto toolboxTitlePinButton = new QToolButton;
+    toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    toolboxTitlePinButton->setCursor(Qt::PointingHandCursor);
+    toolboxTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(toolboxTitlePinButton, &QToolButton::clicked, this, [] {
+        toolboxDockWidget->setFloating(!toolboxDockWidget->isFloating());
     });
 
-    QToolButton* toolboxSettingsButton = new QToolButton;
-    toolboxSettingsButton->setToolTip("Toolbox settings.");
+    auto toolboxSettingsButton = new QToolButton;
+    toolboxSettingsButton->setToolTip(tr("Toolbox settings."));
     toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
     toolboxSettingsButton->setIcon(QIcon(":/resources/images/settings.png"));
     connect(toolboxSettingsButton, &QToolButton::clicked, this, [=] {
         WindowManager::instance()->show(WindowManager::ToolboxSettings);
     });
 
-    QToolBar* toolbar3 = new QToolBar;
-    toolbar3->addWidget(label3);
-    toolbar3->addWidget(toolboxSettingsButton);
-    toolbar3->addWidget(pinButton3);
-    toolbar3->setStyleSheet(CSS::DesignerPinbar);
-    toolbar3->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar3->setFixedHeight(fit::fx(24));
+    auto toolboxTitleBar = new QToolBar;
+    toolboxTitleBar->addWidget(toolboxTitleLabel);
+    toolboxTitleBar->addWidget(toolboxSettingsButton);
+    toolboxTitleBar->addWidget(toolboxTitlePinButton);
+    toolboxTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    toolboxTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
+    toolboxTitleBar->setFixedHeight(fit::fx(24));
 
-    _toolboxDockwidget->setTitleBarWidget(toolbar3);
-    _toolboxDockwidget->setWidget(_toolboxPane);
-    _toolboxDockwidget->setWindowTitle("Toolbox");
-    _toolboxDockwidget->setFeatures(
-        QDockWidget::DockWidgetMovable |
-        QDockWidget::DockWidgetFloatable
-    );
+    toolboxDockWidget = new QDockWidget;
+    toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
+    toolboxDockWidget->setWidget(m_toolboxPane);
+    toolboxDockWidget->setWindowTitle(tr("Toolbox"));
+    toolboxDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, toolboxDockWidget);
+    ToolsBackend::instance()->addToolboxTree(m_toolboxPane->toolboxTree());
 
-    ToolsBackend::instance()->addToolboxTree(_toolboxPane->toolboxTree());
+    /* Add Inspector Pane */
+    auto inspectorTitleLabel = new QLabel;
+    inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    inspectorTitleLabel->setText(tr("   Control Inspector"));
+    inspectorTitleLabel->setFont(dockTitleFont);
 
-    /*** INSPECTOR DOCK WIDGET ***/
-    QLabel* label4 = new QLabel;
-    label4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label4->setText("   Control Inspector");
-    label4->setFont(f);
-
-    QToolButton* pinButton4 = new QToolButton;
-    pinButton4->setToolTip("Pin/Unpin pane.");
-    pinButton4->setCursor(Qt::PointingHandCursor);
-    pinButton4->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(pinButton4, &QToolButton::clicked, this, [=]{
-        _inspectorDockwidget->setFloating(!_inspectorDockwidget->isFloating());
+    auto inspectorTitlePinButton = new QToolButton;
+    inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    inspectorTitlePinButton->setCursor(Qt::PointingHandCursor);
+    inspectorTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(inspectorTitlePinButton, &QToolButton::clicked, this, [] {
+        inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
     });
 
-    QToolBar* toolbar4 = new QToolBar;
-    toolbar4->addWidget(label4);
-    toolbar4->addWidget(pinButton4);
-    toolbar4->setStyleSheet(CSS::DesignerPinbar);
-    toolbar4->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolbar4->setFixedHeight(fit::fx(24));
+    auto inspectorTitleBar = new QToolBar;
+    inspectorTitleBar->addWidget(inspectorTitleLabel);
+    inspectorTitleBar->addWidget(inspectorTitlePinButton);
+    inspectorTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    inspectorTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
+    inspectorTitleBar->setFixedHeight(fit::fx(24));
 
-    connect(_inspectorPage, SIGNAL(controlClicked(Control*)),
-      _centralWidget, SLOT(onControlClick(Control*)));
-    connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)),
-      _centralWidget, SLOT(onControlDoubleClick(Control*)));
+    inspectorDockWidget = new QDockWidget;
+    inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
+    inspectorDockWidget->setWidget(m_inspectorPane);
+    inspectorDockWidget->setWindowTitle(tr("Control Inspector"));
+    inspectorDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, inspectorDockWidget);
 
-    _inspectorDockwidget->setTitleBarWidget(toolbar4);
-    _inspectorDockwidget->setWidget(_inspectorPage);
-    _inspectorDockwidget->setWindowTitle("Control Inspector");
-    _inspectorDockwidget->setFeatures(QDockWidget::DockWidgetMovable |
-                                     QDockWidget::DockWidgetFloatable);
+    // FIXME
+    //    connect(_inspectorPage, SIGNAL(controlClicked(Control*)), _centralWidget, SLOT(onControlClick(Control*)));
+    //    connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)), _centralWidget, SLOT(onControlDoubleClick(Control*)));
 
-    connect(InterpreterBackend::instance(),
-    QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
-    [=] (int exitCode, QProcess::ExitStatus exitStatus)
-    {
-        auto pane = _centralWidget->outputPane();
-        auto console = pane->consoleBox();
+    //    connect(InterpreterBackend::instance(),
+    //    QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
+    //    [=] (int exitCode, QProcess::ExitStatus exitStatus)
+    //    {
+    //        auto pane = _centralWidget->outputPane();
+    //        auto console = pane->consoleBox();
 
-        if (exitStatus == QProcess::CrashExit) {
-            console->printFormatted(
-                tr("The process was ended forcefully.\n"),
-                "#B34B46",
-                QFont::DemiBold
-            );
-        }
+    //        if (exitStatus == QProcess::CrashExit) {
+    //            console->printFormatted(
+    //                tr("The process was ended forcefully.\n"),
+    //                "#B34B46",
+    //                QFont::DemiBold
+    //            );
+    //        }
 
-        console->printFormatted(
-            ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
-            "#1069C7",
-            QFont::DemiBold
-        );
+    //        console->printFormatted(
+    //            ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
+    //            "#1069C7",
+    //            QFont::DemiBold
+    //        );
 
-        _runButton->setEnabled(true);
-    });
-
-    addDockWidget(Qt::LeftDockWidgetArea, _toolboxDockwidget);
-    addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
-    addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
-    addDockWidget(Qt::RightDockWidgetArea, _propertiesDockwidget);
+    //        _runButton->setEnabled(true);
+    //    });
 }
 
-CentralWidget* MainWindow::centralWidget()
+void MainWindow::reset()
 {
-    return _centralWidget;
+    // FIXME
+    //    m_runPane->reset();
+    //    m_centralWidget->qmlEditorView()->clear();
+
+    //    ToolsBackend::instance()->clear();
+
+    //    m_centralWidget->controlScene()->clearSelection();
+    //    m_centralWidget->formScene()->clearSelection();
+
+    //    m_centralWidget->reset();
+    //    m_centralWidget->controlScene()->clearScene();
+    //    m_centralWidget->formScene()->clearScene();
+
+    //    m_formsPane->reset();
+    //    m_toolboxPane->reset();
+    //    m_inspectorPane->reset();
+    //    m_propertiesPane->reset();
 }
-
-void MainWindow::clear()
-{
-    runPange()->reset();
-    centralWidget()->qmlEditorView()->clear();
-
-    ToolsBackend::instance()->clear();
-
-    centralWidget()->controlScene()->clearSelection();
-    centralWidget()->formScene()->clearSelection();
-
-    centralWidget()->clear();
-    centralWidget()->controlScene()->clearScene();
-    centralWidget()->formScene()->clearScene();
-
-    _formsPane->clear();
-    _toolboxPane->clear();
-    _inspectorPage->clear();
-    _propertiesPane->clear();
-}
-
-
-//void MainWindow::setupManagers()
-//{
-//    auto userManager = new UserManager(this);
-//    Q_UNUSED(userManager);
-//    new ProjectManager(this);
-//    ProjectManager::setMainWindow(this);
-//    new SaveBackend(this);
-//    new QmlPreviewer(this);
-
-//    connect(qApp, SIGNAL(aboutToQuit()),
-//      SLOT(cleanupObjectwheel()));
-
-//    auto ret = QtConcurrent::run(&UserManager::tryAutoLogin);
-//    Delayer::delay(&ret, &QFuture<bool>::isRunning);
-//    if (ret.result()) {
-//        ProjectsWidget::refreshProjectList();
-////        wM->progress()->hide();
-////        wM->show(WindowManager::Projects);
-//    } else {
-////        wM->progress()->hide();
-////        wM->show(WindowManager::Login);
-//    }
-//}
-
-//void MainWindow::on_secureExitButton_clicked()
-//{
-//    SplashScreen::setText("Stopping user session");
-//    SplashScreen::show(true);
-//    UserManager::clearAutoLogin();
-//    auto ret = QtConcurrent::run(&UserManager::stop);
-//    Delayer::delay(&ret, &QFuture<void>::isRunning);
-//    SplashScreen::hide();
-//    SplashScreen::setText("Loading");
-//    SceneManager::show("loginScene", SceneManager::ToLeft);
-//}

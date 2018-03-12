@@ -20,7 +20,7 @@ class MainWindow : public QMainWindow
         explicit MainWindow(QWidget* parent = 0);
 
     public slots:
-        void clear();
+        void reset();
 
     signals:
         void done();
@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow
         ToolboxPane* m_toolboxPane;
         PropertiesPane* m_propertiesPane;
         FormsPane* m_formsPane;
-        InspectorPane* m_inspectorPage;
+        InspectorPane* m_inspectorPane;
         CentralWidget* m_centralWidget;
 };
 
