@@ -8,9 +8,7 @@
 #include <formspane.h>
 #include <control.h>
 #include <controlwatcher.h>
-#include <frontend.h>
 #include <formscene.h>
-#include <mainwindow.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -121,8 +119,7 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
 //! *********************** [InspectorPane] ***********************
 //!
 
-InspectorPane::InspectorPane(MainWindow* parent)
-    : QWidget(parent)
+InspectorPane::InspectorPane(QWidget* parent) : QWidget(parent)
     , _blockRefresh(false)
 {
     _layout = new QVBoxLayout(this);

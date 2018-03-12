@@ -22,9 +22,6 @@ class ToolboxTree : public QTreeWidget
         bool categoryContains(const QString& categoryName);
         QTreeWidgetItem* categoryItem(const QString& categoryName);
 
-        FlatButton* indicatorButton();
-        void setIndicatorButtonVisible(bool value);
-
     public slots:
         void clearUrls();
 
@@ -34,8 +31,6 @@ class ToolboxTree : public QTreeWidget
 
     private:
         QPoint _pressPoint;
-        bool _indicatorButtonVisible;
-        FlatButton* _indicatorButton;
         QMap<QTreeWidgetItem*, QList<QUrl>> _urls;
 };
 

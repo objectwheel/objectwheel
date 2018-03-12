@@ -12,8 +12,7 @@ class FormView : public QGraphicsView
         Q_OBJECT
     public:
         explicit FormView(FormScene* scene, QWidget* parent = 0);
-
-        FormScene* scene() const { return static_cast<FormScene*>(QGraphicsView::scene()); }
+        FormScene* scene() const;
 
     protected:
         void resizeEvent(QResizeEvent* event) override;

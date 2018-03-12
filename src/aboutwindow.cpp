@@ -1,25 +1,19 @@
 #include <aboutwindow.h>
 #include <fit.h>
-#include <global.h>
-#include <QApplication>
+#include <dpr.h>
+
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QScreen>
 #include <QPushButton>
 
-#define pS        (QApplication::primaryScreen())
-#define PATH_LOGO (":/resources/images/logo.png")
-#define SIZE_LOGO (QSize(fit::fx(160), fit::fx(80)))
-
 AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
+  , m_layout(new QVBoxLayout(this))
+  , m_titleLabel(new QLabel)
+  , m_logoLabel(new QLabel)
+  , m_versionLabel(new QLabel)
+  , m_okButton(new QPushButton)
+  , m_legalLabel(new QLabel)
 {
-    _layout = new QVBoxLayout(this);
-    _titleLabel = new QLabel;
-    _logoLabel = new QLabel;
-    _versionLabel = new QLabel;
-    _okButton = new QPushButton;
-    _legalLabel = new QLabel;
-
     QPalette p(palette());
     p.setColor(backgroundRole(), "#e0e4e7");
 
@@ -34,51 +28,56 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
         Qt::CustomizeWindowHint
     );
 
-    _layout->addWidget(_titleLabel);
-    _layout->addStretch();
-    _layout->addWidget(_logoLabel);
-    _layout->addWidget(_versionLabel);
-    _layout->addStretch();
-    _layout->addWidget(_okButton);
-    _layout->addStretch();
-    _layout->addWidget(_legalLabel);
-    _layout->setAlignment(_titleLabel, Qt::AlignCenter);
-    _layout->setAlignment(_logoLabel, Qt::AlignCenter);
-    _layout->setAlignment(_versionLabel, Qt::AlignCenter);
-    _layout->setAlignment(_okButton, Qt::AlignCenter);
-    _layout->setAlignment(_legalLabel, Qt::AlignCenter);
-    _layout->setSpacing(fit::fx(20));
+    m_layout->addWidget(m_titleLabel);
+    m_layout->addStretch();
+    m_layout->addWidget(m_logoLabel);
+    m_layout->addWidget(m_versionLabel);
+    m_layout->addStretch();
+    m_layout->addWidget(m_okButton);
+    m_layout->addStretch();
+    m_layout->addWidget(m_legalLabel);
+    m_layout->setAlignment(m_titleLabel, Qt::AlignCenter);
+    m_layout->setAlignment(m_logoLabel, Qt::AlignCenter);
+    m_layout->setAlignment(m_versionLabel, Qt::AlignCenter);
+    m_layout->setAlignment(m_okButton, Qt::AlignCenter);
+    m_layout->setAlignment(m_legalLabel, Qt::AlignCenter);
+    m_layout->setSpacing(fit::fx(20));
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
     f.setPixelSize(fit::fx(24));
 
-    _titleLabel->setFont(f);
-    _titleLabel->setText("About Objectwheel");
-    _titleLabel->setStyleSheet("color:#2e3a41;");
+    m_titleLabel->setFont(f);
+    m_titleLabel->setText("About Objectwheel");
+    m_titleLabel->setStyleSheet("color:#2e3a41;");
 
-    QPixmap px(PATH_LOGO);
-    px.setDevicePixelRatio(pS->devicePixelRatio());
+    QPixmap px(":/resources/images/logo.png");
+    px.setDevicePixelRatio(DPR);
 
-    _logoLabel->setFixedSize(SIZE_LOGO);
-    _logoLabel->setPixmap(
+    m_logoLabel->setFixedSize(fit::fx(QSizeF(160, 80)).toSize());
+    m_logoLabel->setPixmap(
         px.scaled(
-            SIZE_LOGO * pS->devicePixelRatio(),
+            fit::fx(QSizeF(160, 80)).toSize() * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )
     );
 
-    _versionLabel->setText(TEXT_VERSION);
-    _versionLabel->setStyleSheet("color:#2e3a41;");
-    _versionLabel->setAlignment(Qt::AlignCenter);
+    m_versionLabel->setText(
+        tr("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b><br> %3 <br></p>")
+        .arg(APP_VER)
+        .arg(APP_GITHASH)
+        .arg(APP_GITDATE)
+    );
+    m_versionLabel->setAlignment(Qt::AlignCenter);
+    m_versionLabel->setStyleSheet("color:#2e3a41;");
 
-    _okButton->setText("Ok");
-    _okButton->setFixedWidth(fit::fx(100));
-    _okButton->setCursor(Qt::PointingHandCursor);
-    connect(_okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
+    m_okButton->setText("Ok");
+    m_okButton->setFixedWidth(fit::fx(100));
+    m_okButton->setCursor(Qt::PointingHandCursor);
+    connect(m_okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
 
-    _legalLabel->setText(TEXT_LEGAL);
-    _legalLabel->setStyleSheet("color:#2e3a41;");
+    m_legalLabel->setText(tr("<p><b>© 2015 - 2018 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
+    m_legalLabel->setStyleSheet("color:#2e3a41;");
 }
 

@@ -13,9 +13,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
-#define DURATION 500
-
-ToolboxPane::ToolboxPane(MainWindow* parent) : QWidget(parent)
+ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _searchEdit = new FocuslessLineEdit;
@@ -26,13 +24,6 @@ ToolboxPane::ToolboxPane(MainWindow* parent) : QWidget(parent)
     setAutoFillBackground(true);
     setPalette(p);
 
-    _toolboxTree->setIndicatorButtonVisible(true);
-    _toolboxTree->indicatorButton()->settings().borderRadius = fit::fx(10);
-    _toolboxTree->indicatorButton()->settings().topColor = "#0D74C8";
-    _toolboxTree->indicatorButton()->settings().bottomColor = _toolboxTree->indicatorButton()->settings().topColor.darker(120);
-    _toolboxTree->indicatorButton()->setFixedSize(fit::fx(20), fit::fx(20));
-    _toolboxTree->indicatorButton()->setIconSize(QSize(fit::fx(12), fit::fx(12)));
-    _toolboxTree->indicatorButton()->setIcon(QIcon(":/resources/images/right-arrow.png"));
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
 
     _searchEdit->setFixedHeight(fit::fx(22));

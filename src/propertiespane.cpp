@@ -12,7 +12,6 @@
 #include <control.h>
 #include <frontend.h>
 #include <formscene.h>
-#include <mainwindow.h>
 #include <previewerbackend.h>
 
 #include <QtWidgets>
@@ -1171,7 +1170,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
 //! *********************** [PropertiesPane] ***********************
 //!
 
-PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
+PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _treeWidget = new PropertiesTree;
@@ -1229,16 +1228,17 @@ PropertiesPane::PropertiesPane(MainWindow* parent) : QWidget(parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
-            SLOT(handleSelectionChange()));
-    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
-            SLOT(handleSelectionChange()));
-    connect(parent->centralWidget(), SIGNAL(modeChanged()),
-            SLOT(handleSelectionChange()));
-    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
-            SLOT(handleSelectionChange()));
-    connect(ControlWatcher::instance(), SIGNAL(zValueChanged(Control*)),
-            SLOT(handleSelectionChange()));
+    //FIXME
+    //    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
+    //            SLOT(handleSelectionChange()));
+    //    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
+    //            SLOT(handleSelectionChange()));
+    //    connect(parent->centralWidget(), SIGNAL(modeChanged()),
+    //            SLOT(handleSelectionChange()));
+    //    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
+    //            SLOT(handleSelectionChange()));
+    //    connect(ControlWatcher::instance(), SIGNAL(zValueChanged(Control*)),
+    //            SLOT(handleSelectionChange()));
 }
 
 void PropertiesPane::clear()

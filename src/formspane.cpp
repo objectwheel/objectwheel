@@ -54,7 +54,7 @@ void FormListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
     QStyledItemDelegate::paint(painter, option, index);
 }
 
-FormsPane::FormsPane(MainWindow* parent) : QWidget(parent)
+FormsPane::FormsPane(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _innerWidget = new QFrame;

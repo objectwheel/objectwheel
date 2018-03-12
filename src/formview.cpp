@@ -3,6 +3,7 @@
 
 #include <QMenu>
 #include <QAction>
+#include <QScrollBar>
 
 FormView::FormView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
   , m_menu(new QMenu(this))
@@ -85,6 +86,11 @@ FormView::FormView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, par
     addAction(m_moveDownAct);
     addAction(m_moveRightAct);
     addAction(m_moveLeftAct);
+}
+
+FormScene* FormView::scene() const
+{
+    return static_cast<FormScene*>(QGraphicsView::scene());
 }
 
 void FormView::resizeEvent(QResizeEvent* event)

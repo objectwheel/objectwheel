@@ -16,7 +16,7 @@ class FormsPane : public QWidget
         Q_OBJECT
 
     public:
-        explicit FormsPane(MainWindow* parent);
+        explicit FormsPane(QWidget* parent = nullptr);
         void setCurrentForm(int index);
 
     public slots:

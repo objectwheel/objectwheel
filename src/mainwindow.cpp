@@ -1,159 +1,69 @@
-#include <fit.h>
-#include <zipper.h>
-#include <string.h>
-#include <toolboxtree.h>
 #include <mainwindow.h>
-#include <css.h>
-#include <filemanager.h>
-#include <projectbackend.h>
-#include <userbackend.h>
-#include <toolsbackend.h>
-#include <savebackend.h>
-#include <delayer.h>
-#include <formscene.h>
-#include <formview.h>
-#include <global.h>
+#include <fit.h>
+#include <runpane.h>
 #include <outputpane.h>
-#include <qmleditorview.h>
-#include <loadingbar.h>
-#include <centralwidget.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
 #include <formspane.h>
 #include <inspectorpane.h>
-#include <windowmanager.h>
-#include <interpreterbackend.h>
-#include <flatbutton.h>
-#include <consolebox.h>
+#include <pageswitcherpane.h>
+#include <centralwidget.h>
 
-#include <QSplitter>
-#include <QMessageBox>
-#include <QToolButton>
-#include <QDockWidget>
-#include <QtConcurrent>
-#include <QtNetwork>
-#include <QScreen>
 #include <QToolBar>
-#include <QLabel>
-
-#if defined(Q_OS_MACOS)
-#include <mactoolbar.h>
-#endif
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
-{
-    _toolBar = new QToolBar;
-    _toolboxDockwidget = new QDockWidget;
-    _propertiesDockwidget = new QDockWidget;
-    _formsDockwidget = new QDockWidget;
-    _inspectorDockwidget = new QDockWidget;
-    _centralWidget = new CentralWidget;
-    _toolboxPane = new ToolboxPane(this);
-    _propertiesPane = new PropertiesPane(this);
-    _formsPane = new FormsPane(this);
-    _inspectorPage = new InspectorPane(this);
-    _loadingBar = new LoadingBar;
-    _runButton = new FlatButton;
-    _stopButton = new FlatButton;
-    _buildsButton = new FlatButton;
-    _projectsButton = new FlatButton;
+  , m_outputPane(new OutputPane)
+  , m_runPane(new RunPane(m_outputPane->consoleBox()))
+  , m_pageSwitcherPane(new PageSwitcherPane)
+  , m_toolboxPane(new ToolboxPane)
+  , m_propertiesPane(new PropertiesPane)
+  , m_formsPane(new FormsPane)
+  , m_inspectorPage(new InspectorPane)
+  , m_centralWidget(new CentralWidget)
 
+{
     QPalette p(palette());
     p.setColor(backgroundRole(), "#f0f4f7");
-    setStyleSheet("QMainWindow::separator{height: 1px;}");
-    setCentralWidget(_centralWidget);
+    setStyleSheet("QMainWindow::separator{ height: 1px; }");
+    setCentralWidget(m_centralWidget);
     setAutoFillBackground(true);
     setWindowTitle(APP_NAME);
     setPalette(p);
 
-    /* Add Title Bar */
-    _toolBar->setFixedHeight(fit::fx(38));
-    _toolBar->setFloatable(false);
-    _toolBar->setMovable(false);
-    _toolBar->setStyleSheet(QString(
-    "QToolBar { border: none; spacing: %1px; background:qlineargradient(spread:pad, "
-    "x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1068C6);}").arg(fit::fx(3.5)));
-    addToolBar(Qt::TopToolBarArea, _toolBar);
+    /** Set Tool Bars **/
+    /* Add Output Pane */
+    auto outputBar = new QToolBar(this);
+    outputBar->setFixedHeight(fit::fx(25));
+    outputBar->setFloatable(false);
+    outputBar->setMovable(false);
+    outputBar->addWidget(m_outputPane);
+    addToolBar(Qt::BottomToolBarArea, outputBar);
 
-    int lspace = 0;
-    #if defined(Q_OS_MACOS)
-//    auto macToolbar = new MacToolbar(this);
-//    _toolBar->setFixedHeight(macToolbar->toolbarHeight());
-//    lspace = fit::fx(72);
-    #endif
+    /* Add Run Pane */
+    auto runBar = new QToolBar(this);
+    runBar->setFixedHeight(fit::fx(38));
+    runBar->setFloatable(false);
+    runBar->setMovable(false);
+    runBar->addWidget(m_runPane);
+    addToolBar(Qt::TopToolBarArea, runBar);
 
-    _runButton->setCursor(Qt::PointingHandCursor);
-    _runButton->setToolTip("Run");
-    _runButton->setIcon(QIcon(":/resources/images/run.png"));
-    _runButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _runButton->settings().iconButton = true;
-    connect(_runButton, SIGNAL(clicked(bool)),
-        SLOT(handleRunButtonClick()));
+    /* Add Page Switcher Pane */
+    auto pageSwitcherBar = new QToolBar(this);
+    pageSwitcherBar->setFixedWidth(fit::fx(50));
+    pageSwitcherBar->setFloatable(false);
+    pageSwitcherBar->setMovable(false);
+    pageSwitcherBar->addWidget(m_pageSwitcherPane);
+    addToolBar(Qt::LeftToolBarArea, pageSwitcherBar);
 
-    _stopButton->setToolTip("Stop");
-    // _stopButton->setDisabled(true);
-    _stopButton->setCursor(Qt::PointingHandCursor);
-    _stopButton->setIcon(QIcon(":/resources/images/stop.png"));
-    _stopButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _stopButton->settings().iconButton = true;
-    connect(_stopButton, SIGNAL(clicked(bool)),
-        SLOT(handleStopButtonClick()));
-    connect(_stopButton, SIGNAL(doubleClick()),
-        SLOT(handleStopButtonDoubleClick()));
+    /** Set Dock Widgets **/
+    QFont dockTitleFont;
+    dockTitleFont.setWeight(QFont::Medium);
 
-    _buildsButton->setToolTip("Get Cloud Build");
-    _buildsButton->setCursor(Qt::PointingHandCursor);
-    _buildsButton->setIcon(QIcon(":/resources/images/build.png"));
-    _buildsButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _buildsButton->settings().iconButton = true;
-    connect(_buildsButton, SIGNAL(clicked(bool)),
-       SLOT(handleBuildsButtonClick()));
-
-    _projectsButton->setToolTip("Show Projects");
-    _projectsButton->setCursor(Qt::PointingHandCursor);
-    _projectsButton->setIcon(QIcon(":/resources/images/projects.png"));
-    _projectsButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    _projectsButton->settings().iconButton = true;
-    connect(_projectsButton, SIGNAL(clicked(bool)),
-       SLOT(handleProjectsButtonClick()));
-
-    _loadingBar->setFixedSize(fit::fx(QSizeF(481, 24)).toSize());
-
-    auto spc = new QWidget;
-    spc->setFixedWidth(lspace);
-    auto spc2 = new QWidget;
-    spc2->setFixedWidth(0);
-    auto spc3 = new QWidget;
-    spc3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto spc4 = new QWidget;
-    spc4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto spc5 = new QWidget;
-    spc5->setFixedWidth(0);
-    auto spc6 = new QWidget;
-    spc6->setFixedWidth(lspace); // lspace + 2*btnwidth + 3*5 = 3*5 + 2*btnwidth + x
-    auto spc7 = new QWidget;
-    spc7->setFixedWidth(0);
-
-    _toolBar->addWidget(spc5);
-    _toolBar->insertWidget(_toolBar->actions().first(), _buildsButton);
-    _toolBar->insertWidget(_toolBar->actions().first(), spc7);
-    _toolBar->insertWidget(_toolBar->actions().first(), _projectsButton);
-    _toolBar->insertWidget(_toolBar->actions().first(), spc6);
-    _toolBar->insertWidget(_toolBar->actions().first(), spc4);
-    _toolBar->insertWidget(_toolBar->actions().first(), _loadingBar);
-    _toolBar->insertWidget(_toolBar->actions().first(), spc3);
-    _toolBar->insertWidget(_toolBar->actions().first(), _stopButton);
-    _toolBar->insertWidget(_toolBar->actions().first(), spc2);
-    _toolBar->insertWidget(_toolBar->actions().first(), _runButton);
-    _toolBar->insertWidget(_toolBar->actions().first(), spc);
-
-    QFont f;
-    f.setWeight(QFont::Medium);
-    /*** PROPERTIES DOCK WIDGET ***/
-    QLabel* label = new QLabel;
-    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    label->setText("   Properties");
-    label->setFont(f);
+    /* Add Properties Pane */
+    auto propertiesLabel = new QLabel;
+    propertiesLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    propertiesLabel->setText(tr("   Properties"));
+    propertiesLabel->setFont(dockTitleFont);
 
     QToolButton* pinButton = new QToolButton;
     pinButton->setToolTip("Pin/Unpin pane.");
@@ -243,35 +153,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     ToolsBackend::instance()->addToolboxTree(_toolboxPane->toolboxTree());
 
-    connect(_toolboxPane->toolboxTree()->indicatorButton(),
-      &FlatButton::clicked, this, [=] {
-        auto splitter = centralWidget()->splitter();
-        auto controlView = centralWidget()->controlView();
-        auto formView = centralWidget()->formView();
-        auto qmlEditorView = centralWidget()->qmlEditorView();
-        auto sizes = splitter->sizes();
-        QSize size;
-        if (formView->isVisible())
-            size = formView->size();
-        else if (qmlEditorView->isVisible())
-            size = qmlEditorView->size();
-        else
-            size = controlView->size();
-        sizes[splitter->indexOf(controlView)] = size.height();
-        auto previousControl = centralWidget()->controlScene()->mainControl();
-        if (previousControl)
-            previousControl->deleteLater();
-        auto url = _toolboxPane->toolboxTree()->urls(_toolboxPane->toolboxTree()->currentItem())[0];
-        auto control = SaveBackend::instance()->exposeControl(dname(dname(url.toLocalFile())), ControlGui);
-        centralWidget()->controlScene()->setMainControl(control);
-        centralWidget()->setMode(ControlGui);
-
-        for (auto childControl : control->childControls())
-            childControl->refresh();
-        splitter->setSizes(sizes);
-        // FIXME: Close docs on qml editor whenever a Control GUI Editor subject changed
-    });
-
     /*** INSPECTOR DOCK WIDGET ***/
     QLabel* label4 = new QLabel;
     label4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -286,14 +167,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         _inspectorDockwidget->setFloating(!_inspectorDockwidget->isFloating());
     });
 
-    _loadingBar->setText(ProjectBackend::instance()->name() + ": <b>Ready</b>  |  Welcome to Objectwheel");
-    connect(ProjectBackend::instance(), &ProjectBackend::started, [=] {
-        _loadingBar->setText(ProjectBackend::instance()->name() + ": <b>Ready</b>  |  Welcome to Objectwheel");
-    });
-
-//    connect(SaveBackend::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString))); //TODO
-//    connect(SaveBackend::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString))); //TODO
-
     QToolBar* toolbar4 = new QToolBar;
     toolbar4->addWidget(label4);
     toolbar4->addWidget(pinButton4);
@@ -302,9 +175,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolbar4->setFixedHeight(fit::fx(24));
 
     connect(_inspectorPage, SIGNAL(controlClicked(Control*)),
-      _centralWidget, SLOT(handleControlClick(Control*)));
+      _centralWidget, SLOT(onControlClick(Control*)));
     connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)),
-      _centralWidget, SLOT(handleControlDoubleClick(Control*)));
+      _centralWidget, SLOT(onControlDoubleClick(Control*)));
 
     _inspectorDockwidget->setTitleBarWidget(toolbar4);
     _inspectorDockwidget->setWidget(_inspectorPage);
@@ -336,7 +209,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         _runButton->setEnabled(true);
     });
 
-    setDockOptions(dockOptions() ^ QMainWindow::AnimatedDocks);
     addDockWidget(Qt::LeftDockWidgetArea, _toolboxDockwidget);
     addDockWidget(Qt::LeftDockWidgetArea, _formsDockwidget);
     addDockWidget(Qt::RightDockWidgetArea, _inspectorDockwidget);
@@ -350,8 +222,7 @@ CentralWidget* MainWindow::centralWidget()
 
 void MainWindow::clear()
 {
-    handleStopButtonClick();
-
+    runPange()->reset();
     centralWidget()->qmlEditorView()->clear();
 
     ToolsBackend::instance()->clear();
@@ -369,118 +240,6 @@ void MainWindow::clear()
     _propertiesPane->clear();
 }
 
-void MainWindow::handleStopButtonClick()
-{
-    InterpreterBackend::instance()->terminate();
-    _loadingBar->busy(0, ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
-}
-
-void MainWindow::handleStopButtonDoubleClick()
-{
-    InterpreterBackend::instance()->kill();
-    _loadingBar->busy(0, ProjectBackend::instance()->name() + ": <b>Stopped forcefully</b>  |  Finished at " + QTime::currentTime().toString());
-}
-
-void MainWindow::handleRunButtonClick()
-{
-    auto pane = _centralWidget->outputPane();
-    auto console = pane->consoleBox();
-
-    console->fade();
-    if (!console->isClean())
-        console->print("\n");
-    console->printFormatted(
-        tr("Starting ") + ProjectBackend::instance()->name() + "...\n",
-        "#1069C7",
-        QFont::DemiBold
-    );
-    console->scrollToEnd();
-
-    InterpreterBackend::instance()->run();
-
-    _runButton->setDisabled(true);
-
-//    switch (error.type) {
-//        case CommonError:
-//            box.setInformativeText("Database corrupted, change your application skin. "
-//                                   "If it doesn't work, contact to support for further help.");
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-
-//        case ChildIsWindowError:
-//            box.setInformativeText("Child controls can not be a 'Window' (or derived) type."
-//                                   " Only forms could be 'Window' type.");
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-
-//        case MasterIsNonGui:
-//            box.setInformativeText("Master controls can not be a non-ui control (such as Timer or QtObject).");
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-
-//        case FormIsNonGui:
-//            box.setInformativeText("Forms can not be a non-ui control (such as Timer or QtObject)."
-//                                   "Check your forms and make sure they are some 'Window' or 'Item' derived type.");
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-
-//        case MainFormIsntWindowError:
-//            box.setInformativeText("Main form has to be a 'Window' derived type. "
-//                                   "Please change its type to a 'Window' derived class.");
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-
-//        case MultipleWindowsForMobileError:
-//            box.setInformativeText("Mobile applications can not contain multiple windows. "
-//                                   "Please either change the type of secondary windows' type to a non 'Window' derived class, "
-//                                   "or change your application skin to something else (Desktop for instance) by changing the skin of main form.");
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-
-//        case NoMainForm:
-//            box.setInformativeText("There is no main application window. Probably database has corrupted, "
-//                                   "please contact to support, or start a new project over.");
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-
-//        case CodeError: {
-//            box.setInformativeText(QString("Following control has some errors: <b>%1</b>").
-//                                   arg(error.id));
-//            QString detailedText;
-//            for (auto err : error.errors)
-//                detailedText += QString("Line %1, column %2: %3").
-//                                arg(err.line()).arg(err.column()).arg(err.description());
-//            box.setDetailedText(detailedText);
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Error</b>  |  Stopped at " + QTime::currentTime().toString());
-//            box.exec();
-//            break;
-//        }
-
-//        case Stopped: {
-//            _loadingBar->error(ProjectBackend::instance()->name() + ": <b>Stopped</b>  |  Finished at " + QTime::currentTime().toString());
-//        }
-
-//        default:
-//            break;
-//    }
-}
-
-void MainWindow::handleBuildsButtonClick()
-{
-    WindowManager::instance()->show(WindowManager::Builds);
-}
-
-void MainWindow::handleProjectsButtonClick()
-{
-    WindowManager::instance()->show(WindowManager::Welcome);
-}
 
 //void MainWindow::setupManagers()
 //{

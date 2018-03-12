@@ -14,7 +14,7 @@ class ToolboxPane : public QWidget
         Q_OBJECT
 
     public:
-        explicit ToolboxPane(MainWindow* parent);
+        explicit ToolboxPane(QWidget* parent = nullptr);
         ToolboxTree* toolboxTree();
 
     public slots:

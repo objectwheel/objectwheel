@@ -83,7 +83,10 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/parserutils.h \
            $$PWD/progressbar.h \
     $$PWD/centralwidget.h \
-    $$PWD/designerwidget.h
+    $$PWD/designerwidget.h \
+    $$PWD/dpr.h \
+    $$PWD/runpane.h \
+    $$PWD/pageswitcherpane.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -160,7 +163,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/parserutils.cpp \
            $$PWD/progressbar.cpp \
     $$PWD/centralwidget.cpp \
-    $$PWD/designerwidget.cpp
+    $$PWD/designerwidget.cpp \
+    $$PWD/runpane.cpp \
+    $$PWD/pageswitcherpane.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

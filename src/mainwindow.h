@@ -3,15 +3,14 @@
 
 #include <QMainWindow>
 
-class QToolBar;
+class RunPane;
 class FormsPane;
-class LoadingBar;
-class FlatButton;
-class QDockWidget;
+class OutputPane;
 class ToolboxPane;
 class InspectorPane;
 class CentralWidget;
 class PropertiesPane;
+class PageSwitcherPane;
 
 class MainWindow : public QMainWindow
 {
@@ -19,36 +18,22 @@ class MainWindow : public QMainWindow
 
     public:
         explicit MainWindow(QWidget* parent = 0);
-        CentralWidget* centralWidget();
 
-    private slots:
+    public slots:
         void clear();
-        void handleRunButtonClick();
-        void handleStopButtonClick();
-        void handleStopButtonDoubleClick();
-        void handleBuildsButtonClick();
-        void handleProjectsButtonClick();
 
     signals:
         void done();
 
     private:
-        QToolBar* _toolBar;
-        QDockWidget* _toolboxDockwidget;
-        QDockWidget* _propertiesDockwidget;
-        QDockWidget* _formsDockwidget;
-        QDockWidget* _inspectorDockwidget;
-        CentralWidget* _centralWidget;
-        ToolboxPane* _toolboxPane;
-        PropertiesPane* _propertiesPane;
-        FormsPane* _formsPane;
-        InspectorPane* _inspectorPage;
-        LoadingBar* _loadingBar;
-        FlatButton* _runButton;
-        FlatButton* _stopButton;
-        FlatButton* _buildsButton;
-        FlatButton* _projectsButton;
-
+        OutputPane* m_outputPane;
+        RunPane* m_runPane;
+        PageSwitcherPane* m_pageSwitcherPane;
+        ToolboxPane* m_toolboxPane;
+        PropertiesPane* m_propertiesPane;
+        FormsPane* m_formsPane;
+        InspectorPane* m_inspectorPage;
+        CentralWidget* m_centralWidget;
 };
 
 #endif // MAINWINDOW_H

@@ -18,12 +18,12 @@ class AboutWindow : public QWidget
         void done();
 
 	private:
-        QVBoxLayout* _layout;
-        QLabel* _titleLabel;
-        QLabel* _logoLabel;
-        QLabel* _versionLabel;
-        QPushButton* _okButton;
-        QLabel* _legalLabel;
+        QVBoxLayout* m_layout;
+        QLabel* m_titleLabel;
+        QLabel* m_logoLabel;
+        QLabel* m_versionLabel;
+        QPushButton* m_okButton;
+        QLabel* m_legalLabel;
 };
 
 #endif // ABOUTWINDOW_H

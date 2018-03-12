@@ -6,14 +6,13 @@
 class QVBoxLayout;
 class QTreeWidget;
 class FocuslessLineEdit;
-class MainWindow;
 
 class PropertiesPane : public QWidget
 {
 		Q_OBJECT
 
 	public:
-        explicit PropertiesPane(MainWindow* parent);
+        explicit PropertiesPane(QWidget* parent = nullptr);
 
 	public slots:
         void clear();

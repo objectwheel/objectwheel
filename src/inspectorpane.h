@@ -7,14 +7,13 @@ class Control;
 class QVBoxLayout;
 class QTreeWidget;
 class QTreeWidgetItem;
-class MainWindow;
 
 class InspectorPane : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit InspectorPane(MainWindow* parent);
+        explicit InspectorPane(QWidget* parent = nullptr);
 
     public slots:
         void clear();
