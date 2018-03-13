@@ -8,7 +8,6 @@ class QWidget;
 class MainWindow;
 class WelcomeWindow;
 class AboutWindow;
-class BuildsWindow;
 class PreferencesWindow;
 class ToolboxSettingsWindow;
 
@@ -54,7 +53,6 @@ class WindowManager : public QObject
         MainWindow* _mainWindow;
         WelcomeWindow* _welcomeWindow;
         AboutWindow* _aboutWindow;
-        BuildsWindow* _buildsWindow;
         PreferencesWindow* _preferencesWindow;
         ToolboxSettingsWindow* _toolboxSettingsWindow;
 };

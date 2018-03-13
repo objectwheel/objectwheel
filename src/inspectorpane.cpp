@@ -119,9 +119,9 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
 //! *********************** [InspectorPane] ***********************
 //!
 
-InspectorPane::InspectorPane(FormScene* scene, QWidget* parent) : QWidget(parent)
+InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QWidget(parent)
   , _blockRefresh(false)
-  , m_scene(scene)
+  , m_designerScene(designerScene)
 {
     _layout = new QVBoxLayout(this);
     _treeWidget = new QTreeWidget;
@@ -244,7 +244,7 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
     }
 }
 
-void InspectorPane::reset()
+void InspectorPane::clear()
 {
     for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i)
         qDeleteAll(_treeWidget->topLevelItem(i)->takeChildren());
@@ -262,9 +262,8 @@ void InspectorPane::refresh()
 
     clear();
 
-    auto cs = dW->currentScene();
-    auto scs = cs->selectedControls();
-    auto mc = cs->mainControl();
+    auto scs = m_designerScene->selectedControls();
+    auto mc = m_designerScene->mainForm();
 
     if (!mc)
         return;
@@ -315,7 +314,7 @@ void InspectorPane::refresh()
 void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = dW->currentScene()->mainControl();
+    const auto mc = m_designerScene->mainForm();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();
@@ -337,7 +336,7 @@ void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
 void InspectorPane::handleClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = dW->currentScene()->mainControl();
+    const auto mc = m_designerScene->mainForm();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();

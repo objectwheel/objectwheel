@@ -13,7 +13,7 @@
 
 extern const char* TOOL_KEY;
 
-DesignerView::DesignerView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
+DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
   , m_menu(new QMenu(this))
   , m_sendBackAct(new QAction(this))
   , m_bringFrontAct(new QAction(this))
@@ -96,9 +96,9 @@ DesignerView::DesignerView(FormScene* scene, QWidget* parent) : QGraphicsView(sc
     addAction(m_moveLeftAct);
 }
 
-FormScene* DesignerView::scene() const
+DesignerScene* DesignerView::scene() const
 {
-    return static_cast<FormScene*>(QGraphicsView::scene());
+    return static_cast<DesignerScene*>(QGraphicsView::scene());
 }
 
 void DesignerView::resizeEvent(QResizeEvent* event)

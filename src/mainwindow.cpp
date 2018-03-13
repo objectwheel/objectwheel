@@ -11,6 +11,7 @@
 #include <centralwidget.h>
 #include <windowmanager.h>
 #include <toolsbackend.h>
+#include <designerwidget.h>
 
 #include <QToolBar>
 #include <QLabel>
@@ -24,15 +25,23 @@ namespace {
     QDockWidget* inspectorDockWidget;
 }
 
+RunPane* m_runPane;
+FormsPane* m_formsPane;
+OutputPane* m_outputPane;
+ToolboxPane* m_toolboxPane;
+InspectorPane* m_inspectorPane;
+PropertiesPane* m_propertiesPane;
+PageSwitcherPane* m_pageSwitcherPane;
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
-  , m_outputPane(new OutputPane)
-  , m_runPane(new RunPane(m_outputPane->consoleBox()))
-  , m_pageSwitcherPane(new PageSwitcherPane)
-  , m_toolboxPane(new ToolboxPane)
-  , m_propertiesPane(new PropertiesPane)
-  , m_formsPane(new FormsPane)
-  , m_inspectorPane(new InspectorPane)
   , m_centralWidget(new CentralWidget)
+  , m_runPane(new RunPane(m_outputPane->consoleBox()))
+  , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
+  , m_outputPane(new OutputPane)
+  , m_toolboxPane(new ToolboxPane)
+  , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
+  , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))
+  , m_pageSwitcherPane(new PageSwitcherPane)
 
 {
     QPalette p(palette());

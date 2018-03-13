@@ -5,12 +5,10 @@
 #include <savebackend.h>
 #include <projectbackend.h>
 #include <designerscene.h>
-#include <centralwidget.h>
 #include <filemanager.h>
 #include <css.h>
 #include <fit.h>
 #include <delayer.h>
-#include <mainwindow.h>
 
 #include <QLabel>
 #include <QStandardPaths>
@@ -53,7 +51,8 @@ void FormListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
     QStyledItemDelegate::paint(painter, option, index);
 }
 
-FormsPane::FormsPane(QWidget* parent) : QWidget(parent)
+FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(parent)
+  , m_designerScene(designerScene)
 {
     _layout = new QVBoxLayout(this);
     _innerWidget = new QFrame;
@@ -194,11 +193,11 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
 
 void FormsPane::removeButtonClicked()
 {
-    auto form = dW->designerScene()->mainForm();
+    auto form = m_designerScene->mainForm();
     if (!form || !form->form() || form->main())
         return;
     SaveBackend::instance()->removeForm((Form*)form);
-    dW->designerScene()->removeForm(form);
+    m_designerScene->removeForm(form);
 }
 
 void FormsPane::addButtonClicked()
@@ -212,7 +211,7 @@ void FormsPane::addButtonClicked()
         return;
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
-    dW->designerScene()->addForm(form);
+    m_designerScene->addForm(form);
     SaveBackend::instance()->addForm(form);
     rm(tempPath);
 }
@@ -248,10 +247,9 @@ void FormsPane::handleCurrentFormChange()
         return;
 
     auto id = _listWidget->currentItem()->text();
-    for (auto form : dW->designerScene()->forms())
+    for (auto form : m_designerScene->forms())
         if (form->id() == id)
-            dW->designerScene()->setMainForm(form);
-    dW->updateSkin();
+            m_designerScene->setMainForm(form);
     emit currentFormChanged();
 }
 

@@ -1,11 +1,11 @@
-#ifndef QMLEDITORVIEW_H
-#define QMLEDITORVIEW_H
+#ifndef QMLCODEEDITORWIDGET_H
+#define QMLCODEEDITORWIDGET_H
 
 #include <QWidget>
 #include <QTextDocument>
 #include <QTextCursor>
 
-class QmlEditorViewPrivate;
+class QmlCodeEditorWidgetPrivate;
 class Control;
 
 struct DocumentData {
@@ -23,10 +23,10 @@ struct EditorItem {
         }
 };
 
-class QmlEditorView : public QWidget
+class QmlCodeEditorWidget : public QWidget
 {
         Q_OBJECT
-        friend class QmlEditorViewPrivate;
+        friend class QmlCodeEditorWidgetPrivate;
 
     public:
         enum Mode {
@@ -36,7 +36,7 @@ class QmlEditorView : public QWidget
         };
 
     public:
-        explicit QmlEditorView(QWidget *parent = 0);
+        explicit QmlCodeEditorWidget(QWidget *parent = 0);
         Mode mode() const;
         void setMode(const Mode& mode);
         bool pinned() const;
@@ -66,9 +66,9 @@ class QmlEditorView : public QWidget
         void modeChanged();
 
     private:
-        QmlEditorViewPrivate* _d;
+        QmlCodeEditorWidgetPrivate* _d;
         Mode _mode;
         QList<EditorItem> _editorItems;
 };
 
-#endif // QMLEDITORVIEW_H
+#endif // QMLCODEEDITORWIDGET_H

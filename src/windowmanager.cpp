@@ -2,7 +2,6 @@
 #include <welcomewindow.h>
 #include <mainwindow.h>
 #include <aboutwindow.h>
-#include <buildswindow.h>
 #include <preferenceswindow.h>
 #include <toolboxsettingswindow.h>
 #include <fit.h>
@@ -11,13 +10,11 @@
 
 #include <QStyle>
 
-WindowManager::WindowManager()
-    : _mainWindow(nullptr)
-    , _welcomeWindow(nullptr)
-    , _aboutWindow(nullptr)
-    , _buildsWindow(nullptr)
-    , _preferencesWindow(nullptr)
-    , _toolboxSettingsWindow(nullptr)
+WindowManager::WindowManager() : _mainWindow(nullptr)
+  , _welcomeWindow(nullptr)
+  , _aboutWindow(nullptr)
+  , _preferencesWindow(nullptr)
+  , _toolboxSettingsWindow(nullptr)
 {
 }
 
@@ -72,14 +69,6 @@ QWidget* WindowManager::get(WindowManager::Windows key)
             });
             add(Welcome, _welcomeWindow);
             window = _welcomeWindow;
-            break;
-        }
-
-        case Builds: {
-            _buildsWindow = new BuildsWindow;
-            _buildsWindow->resize(fit::fx(QSizeF{1160, 670}).toSize());
-            add(Builds, _buildsWindow);
-            window = _buildsWindow;
             break;
         }
 

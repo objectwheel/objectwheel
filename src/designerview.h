@@ -3,7 +3,7 @@
 
 #include <QGraphicsView>
 
-class FormScene;
+class DesignerScene;
 class QMenu;
 class QAction;
 
@@ -11,8 +11,8 @@ class DesignerView : public QGraphicsView
 {
         Q_OBJECT
     public:
-        explicit DesignerView(FormScene* scene, QWidget* parent = 0);
-        FormScene* scene() const;
+        explicit DesignerView(DesignerScene* scene, QWidget* parent = 0);
+        DesignerScene* scene() const;
 
     protected:
         void resizeEvent(QResizeEvent* event) override;

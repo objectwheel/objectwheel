@@ -10,7 +10,7 @@ class DownloadWidget;
 class PlatformsWidget;
 class ModuleSelectionWidget;
 
-class BuildsWindow : public QWidget
+class BuildsWidget : public QWidget
 {
         Q_OBJECT
 
@@ -23,7 +23,7 @@ class BuildsWindow : public QWidget
         };
 
     public:
-        explicit BuildsWindow(QWidget *parent = nullptr);
+        explicit BuildsWidget(QWidget *parent = nullptr);
 
     private slots:
         void showModules();

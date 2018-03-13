@@ -1,9 +1,9 @@
 #include <designerwidget.h>
-#include <designerscene.h>
-#include <designerview.h>
 #include <fit.h>
-#include <qmleditorview.h>
 #include <css.h>
+#include <designerview.h>
+#include <designerscene.h>
+#include <qmlcodeeditorwidget.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -17,9 +17,9 @@ namespace {
     qreal findRatio(const QString& text);
 }
 
-DesignerWidget::DesignerWidget(QmlEditorView* qmlEditorView, QWidget *parent) : QWidget(parent)
+DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent) : QWidget(parent)
   , m_lastScale(1.0)
-  , m_qmlEditorView(qmlEditorView)
+  , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
   , m_layout(new QVBoxLayout(this))
   , m_designerScene(new DesignerScene(this))
   , m_designerView(new DesignerView(m_designerScene))
@@ -132,6 +132,11 @@ void DesignerWidget::scaleScene(qreal ratio)
     m_lastScale = ratio;
 }
 
+DesignerScene* DesignerWidget::designerScene() const
+{
+    return m_designerScene;
+}
+
 void DesignerWidget::onSnappingButtonClick(bool value)
 {
     m_designerScene->setSnapping(value);
@@ -201,13 +206,13 @@ void DesignerWidget::onControlClick(Control* control)
 
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
-    m_qmlEditorView->addControl(control);
+    m_qmlCodeEditorWidget->addControl(control);
     // FIXME
-    // if (m_qmlEditorView->pinned())
+    // if (m_qmlCodeEditorWidget->pinned())
     //    setMode(CodeEdit);
-    m_qmlEditorView->setMode(QmlEditorView::CodeEditor);
-    m_qmlEditorView->openControl(control);
-    m_qmlEditorView->raiseContainer();
+    m_qmlCodeEditorWidget->setMode(QmlEditorView::CodeEditor);
+    m_qmlCodeEditorWidget->openControl(control);
+    m_qmlCodeEditorWidget->raiseContainer();
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)

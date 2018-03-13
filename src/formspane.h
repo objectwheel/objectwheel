@@ -10,13 +10,14 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QListWidget;
 class MainWindow;
+class DesignerScene;
 
 class FormsPane : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit FormsPane(QWidget* parent = nullptr);
+        explicit FormsPane(DesignerScene* designerScene, QWidget* parent = nullptr);
         void setCurrentForm(int index);
 
     public slots:
@@ -38,6 +39,7 @@ class FormsPane : public QWidget
         void currentFormChanged();
 
     private:
+        DesignerScene* m_designerScene;
         QVBoxLayout* _layout,* _innerLayout;
         QFrame* _innerWidget;
         QHBoxLayout* _buttonLayout;

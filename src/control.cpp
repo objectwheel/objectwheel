@@ -76,7 +76,7 @@ class ControlPrivate : public QObject
         bool hoverOn;
 };
 
-//TODO: Search for ControlScene and FormScene and make their usage less
+//TODO: Search for ControlScene and DesignerScene and make their usage less
 ControlPrivate::ControlPrivate(Control* parent)
     : QObject(parent)
     , parent(parent)
@@ -534,9 +534,9 @@ void Control::setDragIn(bool dragIn)
     _dragIn = dragIn;
 }
 
-FormScene* Control::scene() const
+DesignerScene* Control::scene() const
 {
-    return static_cast<FormScene*>(QGraphicsWidget::scene());
+    return static_cast<DesignerScene*>(QGraphicsWidget::scene());
 }
 
 bool Control::dragging() const

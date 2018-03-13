@@ -16,7 +16,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/delayer.h \
            $$PWD/control.h \
            $$PWD/savetransaction.h \
-           $$PWD/qmleditorview.h \
            $$PWD/qmlcodeeditor.h \
            $$PWD/qmlhighlighter.h \
            $$PWD/completionhelper.h \
@@ -41,7 +40,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/windowmanager.h \
            $$PWD/welcomewindow.h \
            $$PWD/aboutwindow.h \
-           $$PWD/buildswindow.h \
            $$PWD/preferenceswindow.h \
            $$PWD/toolboxsettingswindow.h \
            $$PWD/menumanager.h \
@@ -86,7 +84,12 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/runpane.h \
     $$PWD/pageswitcherpane.h \
     $$PWD/designerscene.h \
-    $$PWD/designerview.h
+    $$PWD/designerview.h \
+    $$PWD/qmlcodeeditorwidget.h \
+    $$PWD/projectsettingswidget.h \
+    $$PWD/documentationswidget.h \
+    $$PWD/buildswidget.h \
+    $$PWD/outputwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -98,7 +101,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/delayer.cpp \
            $$PWD/control.cpp \
            $$PWD/savetransaction.cpp \
-           $$PWD/qmleditorview.cpp \
            $$PWD/qmlcodeeditor.cpp \
            $$PWD/qmlhighlighter.cpp \
            $$PWD/completionhelper.cpp \
@@ -122,7 +124,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/windowmanager.cpp \
            $$PWD/welcomewindow.cpp \
            $$PWD/aboutwindow.cpp \
-           $$PWD/buildswindow.cpp \
            $$PWD/preferenceswindow.cpp \
            $$PWD/toolboxsettingswindow.cpp \
            $$PWD/menumanager.cpp \
@@ -165,7 +166,12 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/runpane.cpp \
     $$PWD/pageswitcherpane.cpp \
     $$PWD/designerscene.cpp \
-    $$PWD/designerview.cpp
+    $$PWD/designerview.cpp \
+    $$PWD/qmlcodeeditorwidget.cpp \
+    $$PWD/projectsettingswidget.cpp \
+    $$PWD/documentationswidget.cpp \
+    $$PWD/buildswidget.cpp \
+    $$PWD/outputwidget.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

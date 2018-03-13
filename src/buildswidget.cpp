@@ -1,4 +1,4 @@
-#include <buildswindow.h>
+#include <buildswidget.h>
 #include <view.h>
 #include <platformswidget.h>
 #include <androidwidget.h>

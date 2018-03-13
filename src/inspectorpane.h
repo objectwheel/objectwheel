@@ -7,17 +7,17 @@ class Control;
 class QVBoxLayout;
 class QTreeWidget;
 class QTreeWidgetItem;
-class FormScene;
+class DesignerScene;
 
 class InspectorPane : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit InspectorPane(FormScene* scene, QWidget* parent = nullptr);
+        explicit InspectorPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 
     public slots:
-        void reset();
+        void clear();
         void refresh();
 
     protected:
@@ -34,7 +34,7 @@ class InspectorPane : public QWidget
 
     private:
         bool _blockRefresh;
-        FormScene* m_scene;
+        DesignerScene* m_designerScene;
         QVBoxLayout* _layout;
         QTreeWidget* _treeWidget;
 };

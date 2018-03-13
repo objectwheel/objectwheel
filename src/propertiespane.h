@@ -6,13 +6,14 @@
 class QVBoxLayout;
 class QTreeWidget;
 class FocuslessLineEdit;
+class DesignerScene;
 
 class PropertiesPane : public QWidget
 {
 		Q_OBJECT
 
 	public:
-        explicit PropertiesPane(QWidget* parent = nullptr);
+        explicit PropertiesPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 
 	public slots:
         void clear();
@@ -28,6 +29,7 @@ class PropertiesPane : public QWidget
         void filterList(const QString& filter);
 
     private:
+        DesignerScene* m_designerScene;
         QVBoxLayout* _layout;
         QTreeWidget* _treeWidget;
         FocuslessLineEdit* _searchEdit;

@@ -3,12 +3,21 @@
 
 #include <QWidget>
 
+class QmlCodeEditorWidget;
+class DesignerScene;
+class DesignerView;
+class QVBoxLayout;
+class QToolBar;
+class QToolButton;
+class QComboBox;
+
 class DesignerWidget : public QWidget
 {
         Q_OBJECT
 
     public:
-        explicit DesignerWidget(QmlEditorView* qmlEditorView, QWidget* parent = nullptr);
+        explicit DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget* parent = nullptr);
+        DesignerScene* designerScene() const;
 
     public slots:
         void reset();
@@ -31,7 +40,7 @@ class DesignerWidget : public QWidget
 
     private:
         qreal m_lastScale;
-        QmlEditorView* m_qmlEditorView;
+        QmlCodeEditorWidget* m_qmlCodeEditorWidget;
         QVBoxLayout* m_layout;
         DesignerScene* m_designerScene;
         DesignerView* m_designerView;

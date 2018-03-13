@@ -1,4 +1,4 @@
-#include <qmleditorview.h>
+#include <qmlcodeeditorwidget.h>
 #include <designerscene.h>
 #include <control.h>
 #include <fit.h>
@@ -36,12 +36,12 @@
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
 #define TAB_SPACE ("    ")
 
-class QmlEditorViewPrivate : public QObject
+class QmlCodeEditorWidgetPrivate : public QObject
 {
         Q_OBJECT
 
     public:
-        QmlEditorViewPrivate(QmlEditorView* parent);
+        QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* parent);
 
     private:
         qreal findPixelSize(const QString& text);
@@ -67,7 +67,7 @@ class QmlEditorViewPrivate : public QObject
         void propertyUpdate(Control* control, const QString& property, const QString& value);
 
     public:
-        QmlEditorView* parent;
+        QmlCodeEditorWidget* parent;
         QVBoxLayout* vBoxLayout;
         QWidget* containerWidget;
         QVBoxLayout* containerVBoxLayout;
@@ -111,7 +111,7 @@ class QmlEditorViewPrivate : public QObject
         FileExplorer* fileExplorer;
 };
 
-QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
+QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* parent)
     : QObject(parent)
     , parent(parent)
     , vBoxLayout(new QVBoxLayout(parent))
@@ -366,7 +366,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     });
 }
 
-qreal QmlEditorViewPrivate::findPixelSize(const QString& text)
+qreal QmlCodeEditorWidgetPrivate::findPixelSize(const QString& text)
 {
     qreal base = QFont().pixelSize();
 
@@ -404,14 +404,14 @@ qreal QmlEditorViewPrivate::findPixelSize(const QString& text)
         return base;
 }
 
-void QmlEditorViewPrivate::handleCursorPositionChanged()
+void QmlCodeEditorWidgetPrivate::handleCursorPositionChanged()
 {
     auto textCursor = codeEditor->textCursor();
     QString lineColText("# Line: %1, Col: %2");
     lineColLabel->setText(lineColText.arg(textCursor.blockNumber() + 1).arg(textCursor.columnNumber()));
 }
 
-void QmlEditorViewPrivate::handlePinButtonClicked()
+void QmlCodeEditorWidgetPrivate::handlePinButtonClicked()
 {
     if (pinButton->toolTip().contains("Unpin")) {
         pinButton->setToolTip("Pin Editor.");
@@ -435,7 +435,7 @@ void QmlEditorViewPrivate::handlePinButtonClicked()
     }
 }
 
-void QmlEditorViewPrivate::handleCloseButtonClicked()
+void QmlCodeEditorWidgetPrivate::handleCloseButtonClicked()
 {
     for (auto& item : parent->_editorItems) {
         if (item.control == currentControl) {
@@ -446,7 +446,7 @@ void QmlEditorViewPrivate::handleCloseButtonClicked()
     }
 }
 
-void QmlEditorViewPrivate::handleSaveButtonClicked()
+void QmlCodeEditorWidgetPrivate::handleSaveButtonClicked()
 {
     for (auto& item : parent->_editorItems) {
         if (item.control == currentControl) {
@@ -457,13 +457,13 @@ void QmlEditorViewPrivate::handleSaveButtonClicked()
     }
 }
 
-void QmlEditorViewPrivate::handleZoomLevelChange(const QString& text)
+void QmlCodeEditorWidgetPrivate::handleZoomLevelChange(const QString& text)
 {
     defaultFont.setPixelSize(findPixelSize(text));
     codeEditor->document()->setDefaultFont(defaultFont);
 }
 
-void QmlEditorViewPrivate::handleHideShowButtonClicked()
+void QmlCodeEditorWidgetPrivate::handleHideShowButtonClicked()
 {
     if (hideShowButton->toolTip().contains("Hide")) {
         hideShowButton->setIcon(QIcon(":/resources/images/show.png"));
@@ -489,9 +489,9 @@ void QmlEditorViewPrivate::handleHideShowButtonClicked()
     }
 }
 
-void QmlEditorViewPrivate::handleModeChange()
+void QmlCodeEditorWidgetPrivate::handleModeChange()
 {
-    if (parent->_mode == QmlEditorView::CodeEditor) {
+    if (parent->_mode == QmlCodeEditorWidget::CodeEditor) {
         codeEditorButton->setChecked(true);
         codeEditorButton->setDisabled(true);
         imageEditorButton->setChecked(false);
@@ -502,7 +502,7 @@ void QmlEditorViewPrivate::handleModeChange()
         imageEditor->hide();
         hexEditor->hide();
         codeEditor->show();
-    } else if (parent->_mode == QmlEditorView::ImageEditor) {
+    } else if (parent->_mode == QmlCodeEditorWidget::ImageEditor) {
         imageEditorButton->setChecked(true);
         imageEditorButton->setDisabled(true);
         codeEditorButton->setChecked(false);
@@ -527,18 +527,18 @@ void QmlEditorViewPrivate::handleModeChange()
     }
 }
 
-void QmlEditorViewPrivate::handleFileExplorerFileOpen(const QString& filePath)
+void QmlCodeEditorWidgetPrivate::handleFileExplorerFileOpen(const QString& filePath)
 {
     parent->addDocument(currentControl, filePath);
     parent->setCurrentDocument(currentControl, filePath);
 }
 
-void QmlEditorViewPrivate::handleFileExplorerFileDeleted(const QString& filePath)
+void QmlCodeEditorWidgetPrivate::handleFileExplorerFileDeleted(const QString& filePath)
 {
     parent->closeDocument(currentControl, filePath, false);
 }
 
-void QmlEditorViewPrivate::handleFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo)
+void QmlCodeEditorWidgetPrivate::handleFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo)
 {
     auto relativePath = filePathFrom;
     relativePath.remove(currentControl->dir() + separator() + DIR_THIS + separator());
@@ -560,23 +560,23 @@ void QmlEditorViewPrivate::handleFileExplorerFileRenamed(const QString& filePath
     updateOpenDocHistory();
 }
 
-void QmlEditorViewPrivate::handleCodeEditorButtonClicked()
+void QmlCodeEditorWidgetPrivate::handleCodeEditorButtonClicked()
 {
-    parent->setMode(QmlEditorView::CodeEditor);
+    parent->setMode(QmlCodeEditorWidget::CodeEditor);
 }
 
-void QmlEditorViewPrivate::handleImageEditorButtonClicked()
+void QmlCodeEditorWidgetPrivate::handleImageEditorButtonClicked()
 {
-    parent->setMode(QmlEditorView::ImageEditor);
+    parent->setMode(QmlCodeEditorWidget::ImageEditor);
 }
 
-void QmlEditorViewPrivate::handleHexEditorButtonClicked()
+void QmlCodeEditorWidgetPrivate::handleHexEditorButtonClicked()
 {
-    parent->setMode(QmlEditorView::HexEditor);
+    parent->setMode(QmlCodeEditorWidget::HexEditor);
 }
 
 // TODO: Update when toolbox controls are changed
-void QmlEditorViewPrivate::updateOpenDocHistory()
+void QmlCodeEditorWidgetPrivate::updateOpenDocHistory()
 {
     itemsCombobox->clear();
     documentsCombobox->clear();
@@ -610,7 +610,7 @@ void QmlEditorViewPrivate::updateOpenDocHistory()
     }
 }
 
-void QmlEditorViewPrivate::handleItemsComboboxActivated(QString text)
+void QmlCodeEditorWidgetPrivate::handleItemsComboboxActivated(QString text)
 {
     if (text.isEmpty())
         return;
@@ -633,7 +633,7 @@ void QmlEditorViewPrivate::handleItemsComboboxActivated(QString text)
     }
 }
 
-void QmlEditorViewPrivate::handleDocumentsComboboxActivated(QString text)
+void QmlCodeEditorWidgetPrivate::handleDocumentsComboboxActivated(QString text)
 {
     if (text.isEmpty())
         return;
@@ -652,12 +652,12 @@ void QmlEditorViewPrivate::handleDocumentsComboboxActivated(QString text)
     }
 }
 
-void QmlEditorViewPrivate::handleControlRemoval(Control* control)
+void QmlCodeEditorWidgetPrivate::handleControlRemoval(Control* control)
 {
     parent->closeControl(control, false);
 }
 
-void QmlEditorViewPrivate::propertyUpdate(Control* control, const QString& property, const QString& value)
+void QmlCodeEditorWidgetPrivate::propertyUpdate(Control* control, const QString& property, const QString& value)
 {
     for (auto& item : parent->_editorItems) {
         if (item.control == control &&
@@ -668,13 +668,13 @@ void QmlEditorViewPrivate::propertyUpdate(Control* control, const QString& prope
     }
 }
 
-QmlEditorView::QmlEditorView(QWidget* parent)
+QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent)
     : QWidget(parent)
-    , _d(new QmlEditorViewPrivate(this))
+    , _d(new QmlCodeEditorWidgetPrivate(this))
 {
 }
 
-void QmlEditorView::paintEvent(QPaintEvent*)
+void QmlCodeEditorWidget::paintEvent(QPaintEvent*)
 {
     QPen pen;
     pen.setWidthF(fit::fx(1));
@@ -689,23 +689,23 @@ void QmlEditorView::paintEvent(QPaintEvent*)
     painter.drawText(_rect, "Editor unpinned, pin it again.", QTextOption(Qt::AlignCenter));
 }
 
-QmlEditorView::Mode QmlEditorView::mode() const
+QmlCodeEditorWidget::Mode QmlCodeEditorWidget::mode() const
 {
     return _mode;
 }
 
-void QmlEditorView::setMode(const Mode& mode)
+void QmlCodeEditorWidget::setMode(const Mode& mode)
 {
     _mode = mode;
     emit _d->parent->modeChanged();
 }
 
-bool QmlEditorView::pinned() const
+bool QmlCodeEditorWidget::pinned() const
 {
     return _d->pinButton->toolTip().contains("Unpin");
 }
 
-bool QmlEditorView::isOpen(Control* control) const
+bool QmlCodeEditorWidget::isOpen(Control* control) const
 {
     for (auto item : _editorItems)
         if (item.control == control)
@@ -713,7 +713,7 @@ bool QmlEditorView::isOpen(Control* control) const
     return false;
 }
 
-bool QmlEditorView::isOpen(const QString& controlPath) const
+bool QmlCodeEditorWidget::isOpen(const QString& controlPath) const
 {
     for (auto item : _editorItems)
         if (item.control->dir().contains(controlPath))
@@ -721,7 +721,7 @@ bool QmlEditorView::isOpen(const QString& controlPath) const
     return false;
 }
 
-bool QmlEditorView::hasUnsavedDocs() const
+bool QmlCodeEditorWidget::hasUnsavedDocs() const
 {
     for (auto& item : _editorItems)
         if (hasChanges(item.control))
@@ -730,7 +730,7 @@ bool QmlEditorView::hasUnsavedDocs() const
     return false;
 }
 
-bool QmlEditorView::hasChanges(Control* control) const
+bool QmlCodeEditorWidget::hasChanges(Control* control) const
 {
     if (!isOpen(control))
         return false;
@@ -748,7 +748,7 @@ bool QmlEditorView::hasChanges(Control* control) const
     return false;
 }
 
-void QmlEditorView::addControl(Control* control)
+void QmlCodeEditorWidget::addControl(Control* control)
 {
     for (auto& item : _editorItems)
         if (item.control == control)
@@ -770,7 +770,7 @@ void QmlEditorView::addControl(Control* control)
     _d->documentsCombobox->addItem(relativePath);
 }
 
-void QmlEditorView::addDocument(Control* control, const QString& documentPath)
+void QmlCodeEditorWidget::addDocument(Control* control, const QString& documentPath)
 {
     for (auto& item : _editorItems) {
         if (item.control == control) {
@@ -789,7 +789,7 @@ void QmlEditorView::addDocument(Control* control, const QString& documentPath)
     }
 }
 
-void QmlEditorView::setCurrentDocument(Control* control, const QString& documentPath)
+void QmlCodeEditorWidget::setCurrentDocument(Control* control, const QString& documentPath)
 {
     for (auto& item : _editorItems) {
         if (item.control == control) {
@@ -805,7 +805,7 @@ void QmlEditorView::setCurrentDocument(Control* control, const QString& document
     }
 }
 
-void QmlEditorView::openControl(Control* control)
+void QmlCodeEditorWidget::openControl(Control* control)
 {
     for (auto& item : _editorItems) {
         if (item.control == control) {
@@ -860,7 +860,7 @@ void QmlEditorView::openControl(Control* control)
     }
 }
 
-void QmlEditorView::closeControl(Control* control, const bool ask)
+void QmlCodeEditorWidget::closeControl(Control* control, const bool ask)
 {
     for (auto& item : _editorItems) {
         if (item.control == control)  {
@@ -893,7 +893,7 @@ void QmlEditorView::closeControl(Control* control, const bool ask)
     }
 }
 
-void QmlEditorView::closeDocument(Control* control, const QString& documentPath, const bool ask)
+void QmlCodeEditorWidget::closeDocument(Control* control, const QString& documentPath, const bool ask)
 {
     auto relativePath = documentPath;
     relativePath.remove(control->dir() + separator() + DIR_THIS + separator());
@@ -968,12 +968,12 @@ void QmlEditorView::closeDocument(Control* control, const QString& documentPath,
     _d->updateOpenDocHistory();
 }
 
-void QmlEditorView::saveControl(Control*)
+void QmlCodeEditorWidget::saveControl(Control*)
 {
     //TODO
 }
 
-void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
+void QmlCodeEditorWidget::saveDocument(Control* control, const QString& documentPath)
 {
     auto relativePath = documentPath;
     relativePath.remove(control->dir() + separator() + DIR_THIS + separator());
@@ -992,24 +992,24 @@ void QmlEditorView::saveDocument(Control* control, const QString& documentPath)
     _d->updateOpenDocHistory();
 }
 
-void QmlEditorView::clear()
+void QmlCodeEditorWidget::clear()
 {
     for (auto& item : _editorItems)
         closeControl(item.control, false);
 }
 
-void QmlEditorView::saveAll()
+void QmlCodeEditorWidget::saveAll()
 {
     for (auto& item : _editorItems)
         saveControl(item.control);
 }
 
-void QmlEditorView::raiseContainer()
+void QmlCodeEditorWidget::raiseContainer()
 {
     _d->containerWidget->raise();
 }
 
-void QmlEditorView::refreshErrors()
+void QmlCodeEditorWidget::refreshErrors()
 {
     if (_d->currentControl) {
         _d->codeEditor->clearErrorLines();
