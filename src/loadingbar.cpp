@@ -30,13 +30,8 @@ LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
     connect(_timerFader, SIGNAL(timeout()), SLOT(handleFader()));
 
     _image.setDevicePixelRatio(DPR);
-    _image = _image.scaled(
-        (SIZE * DPR).toSize(),
-        Qt::IgnoreAspectRatio,
-        Qt::SmoothTransformation
-    );
 
-    setFixedSize(SIZE.toSize() + QSize(1, 1));
+    setFixedSize(SIZE.toSize() + QSize(0, 1));
 }
 
 void LoadingBar::setText(const QString& text)
@@ -102,11 +97,15 @@ void LoadingBar::handleFader()
     update();
 }
 
+// WARNING: Check this out on multi platforms
 void LoadingBar::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
-    painter.drawImage(QRectF{QPointF(), SIZE}, _image, _image.rect());
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    return painter.fillRect(rect(), Qt::black);
+
+    painter.drawImage(QRectF{QPointF(0, 1), SIZE}, _image, _image.rect());
 
     QFont f;
     #if defined(Q_OS_WIN)
@@ -119,12 +118,12 @@ void LoadingBar::paintEvent(QPaintEvent*)
     QTextDocument doc;
     doc.setDefaultFont(f);
     doc.setHtml(_text);
-    doc.drawContents(&painter, QRectF{QPointF(), SIZE});
+    doc.drawContents(&painter, QRectF{QPointF(0, 1), SIZE});
 
     QPainterPath path;
-    path.addRoundedRect(fit::fx(0.5), fit::fx(0.5), fit::fx(480.0), fit::fx(23.0), fit::fx(3.5), fit::fx(3.5));
+    path.addRoundedRect(fit::fx(0.5), fit::fx(1.5), fit::fx(480.0), fit::fx(23.0), fit::fx(3.5), fit::fx(3.5));
     painter.setClipPath(path);
-    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(21.5), _progress * fit::fx(4.8), fit::fx(10)}, _color);
+    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(22.5), _progress * fit::fx(4.8), fit::fx(10)}, _color);
 }
 
 

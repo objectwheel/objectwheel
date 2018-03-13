@@ -21,6 +21,7 @@ class FormsPane : public QWidget
         void setCurrentForm(int index);
 
     public slots:
+        void reset();
         void clear();
 
     protected:

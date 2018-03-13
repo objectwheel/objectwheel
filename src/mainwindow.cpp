@@ -53,14 +53,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setPalette(p);
 
     /** Set Tool Bars **/
-    /* Add Output Pane */
-    auto outputBar = new QToolBar(this);
-    outputBar->setFixedHeight(fit::fx(25));
-    outputBar->setFloatable(false);
-    outputBar->setMovable(false);
-    outputBar->addWidget(m_outputPane);
-    addToolBar(Qt::BottomToolBarArea, outputBar);
-
     /* Add Run Pane */
     auto runBar = new QToolBar(this);
     runBar->setFixedHeight(fit::fx(38));
@@ -77,9 +69,45 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     pageSwitcherBar->addWidget(m_pageSwitcherPane);
     addToolBar(Qt::LeftToolBarArea, pageSwitcherBar);
 
+    /* Add Output Pane */
+    auto outputBar = new QToolBar(this);
+    outputBar->setFixedHeight(fit::fx(25));
+    outputBar->setFloatable(false);
+    outputBar->setMovable(false);
+    outputBar->addWidget(m_outputPane);
+    addToolBar(Qt::BottomToolBarArea, outputBar);
+
     /** Set Dock Widgets **/
     QFont dockTitleFont;
     dockTitleFont.setWeight(QFont::Medium);
+
+    /* Add Inspector Pane */
+    auto inspectorTitleLabel = new QLabel;
+    inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    inspectorTitleLabel->setText(tr("   Control Inspector"));
+    inspectorTitleLabel->setFont(dockTitleFont);
+
+    auto inspectorTitlePinButton = new QToolButton;
+    inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    inspectorTitlePinButton->setCursor(Qt::PointingHandCursor);
+    inspectorTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(inspectorTitlePinButton, &QToolButton::clicked, this, [] {
+        inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
+    });
+
+    auto inspectorTitleBar = new QToolBar;
+    inspectorTitleBar->addWidget(inspectorTitleLabel);
+    inspectorTitleBar->addWidget(inspectorTitlePinButton);
+    inspectorTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    inspectorTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
+    inspectorTitleBar->setFixedHeight(fit::fx(24));
+
+    inspectorDockWidget = new QDockWidget;
+    inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
+    inspectorDockWidget->setWidget(m_inspectorPane);
+    inspectorDockWidget->setWindowTitle(tr("Control Inspector"));
+    inspectorDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, inspectorDockWidget);
 
     /* Add Properties Pane */
     auto propertiesTitleLabel = new QLabel;
@@ -108,34 +136,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesDockWidget->setWindowTitle(tr("Properties"));
     propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
-
-    /* Add Forms Pane */
-    auto formsTitleLabel = new QLabel;
-    formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    formsTitleLabel->setText(tr("   Form Navigator"));
-    formsTitleLabel->setFont(dockTitleFont);
-
-    auto formsTitlePinButton = new QToolButton;
-    formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    formsTitlePinButton->setCursor(Qt::PointingHandCursor);
-    formsTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(formsTitlePinButton, &QToolButton::clicked, this, [] {
-        formsDockWidget->setFloating(!formsDockWidget->isFloating());
-    });
-
-    auto formsTitleBar = new QToolBar;
-    formsTitleBar->addWidget(formsTitleLabel);
-    formsTitleBar->addWidget(formsTitlePinButton);
-    formsTitleBar->setStyleSheet(CSS::DesignerPinbar);
-    formsTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    formsTitleBar->setFixedHeight(fit::fx(24));
-
-    formsDockWidget = new QDockWidget;
-    formsDockWidget->setTitleBarWidget(formsTitleBar);
-    formsDockWidget->setWidget(m_formsPane);
-    formsDockWidget->setWindowTitle(tr("Form Navigator"));
-    formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, formsDockWidget);
 
     /* Add Toolbox Pane */
     auto toolboxTitleLabel = new QLabel;
@@ -172,36 +172,36 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxDockWidget->setWidget(m_toolboxPane);
     toolboxDockWidget->setWindowTitle(tr("Toolbox"));
     toolboxDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, toolboxDockWidget);
+    addDockWidget(Qt::LeftDockWidgetArea, toolboxDockWidget);
     ToolsBackend::instance()->addToolboxTree(m_toolboxPane->toolboxTree());
 
-    /* Add Inspector Pane */
-    auto inspectorTitleLabel = new QLabel;
-    inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    inspectorTitleLabel->setText(tr("   Control Inspector"));
-    inspectorTitleLabel->setFont(dockTitleFont);
+    /* Add Forms Pane */
+    auto formsTitleLabel = new QLabel;
+    formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    formsTitleLabel->setText(tr("   Form Navigator"));
+    formsTitleLabel->setFont(dockTitleFont);
 
-    auto inspectorTitlePinButton = new QToolButton;
-    inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    inspectorTitlePinButton->setCursor(Qt::PointingHandCursor);
-    inspectorTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
-    connect(inspectorTitlePinButton, &QToolButton::clicked, this, [] {
-        inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
+    auto formsTitlePinButton = new QToolButton;
+    formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    formsTitlePinButton->setCursor(Qt::PointingHandCursor);
+    formsTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    connect(formsTitlePinButton, &QToolButton::clicked, this, [] {
+        formsDockWidget->setFloating(!formsDockWidget->isFloating());
     });
 
-    auto inspectorTitleBar = new QToolBar;
-    inspectorTitleBar->addWidget(inspectorTitleLabel);
-    inspectorTitleBar->addWidget(inspectorTitlePinButton);
-    inspectorTitleBar->setStyleSheet(CSS::DesignerPinbar);
-    inspectorTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    inspectorTitleBar->setFixedHeight(fit::fx(24));
+    auto formsTitleBar = new QToolBar;
+    formsTitleBar->addWidget(formsTitleLabel);
+    formsTitleBar->addWidget(formsTitlePinButton);
+    formsTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    formsTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
+    formsTitleBar->setFixedHeight(fit::fx(24));
 
-    inspectorDockWidget = new QDockWidget;
-    inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
-    inspectorDockWidget->setWidget(m_inspectorPane);
-    inspectorDockWidget->setWindowTitle(tr("Control Inspector"));
-    inspectorDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, inspectorDockWidget);
+    formsDockWidget = new QDockWidget;
+    formsDockWidget->setTitleBarWidget(formsTitleBar);
+    formsDockWidget->setWidget(m_formsPane);
+    formsDockWidget->setWindowTitle(tr("Form Navigator"));
+    formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
 
     // FIXME
     //    connect(_inspectorPage, SIGNAL(controlClicked(Control*)), _centralWidget, SLOT(onControlClick(Control*)));
@@ -234,21 +234,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 void MainWindow::reset()
 {
-    // FIXME
-    //    m_runPane->reset();
-    //    m_centralWidget->qmlEditorView()->clear();
-
-    //    ToolsBackend::instance()->clear();
-
-    //    m_centralWidget->controlScene()->clearSelection();
-    //    m_centralWidget->designerScene()->clearSelection();
-
-    //    m_centralWidget->reset();
-    //    m_centralWidget->controlScene()->clearScene();
-    //    m_centralWidget->designerScene()->clearScene();
-
-    //    m_formsPane->reset();
-    //    m_toolboxPane->reset();
-    //    m_inspectorPane->reset();
-    //    m_propertiesPane->reset();
+    ToolsBackend::instance()->clear();
+    m_runPane->reset();
+    m_centralWidget->reset();
+    m_formsPane->reset();
+    m_toolboxPane->reset();
+    m_inspectorPane->reset();
+    m_propertiesPane->reset();
 }

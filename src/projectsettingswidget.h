@@ -9,9 +9,8 @@ class ProjectSettingsWidget : public QWidget
     public:
         explicit ProjectSettingsWidget(QWidget *parent = nullptr);
 
-    signals:
-
     public slots:
+        void reset();
 };
 
 #endif // PROJECTSETTINGSWIDGET_H

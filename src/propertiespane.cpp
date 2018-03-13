@@ -1242,6 +1242,11 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     //            SLOT(handleSelectionChange()));
 }
 
+void PropertiesPane::reset()
+{
+    //TODO
+}
+
 void PropertiesPane::clear()
 {
     clearList();

@@ -47,6 +47,9 @@ void FlatButton::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
+    return painter.fillRect(rect(), Qt::black);
+
+
     const auto& r = ADJUST(QRectF(rect()));
 
     if (_settings.iconButton) {

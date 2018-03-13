@@ -9,9 +9,8 @@ class OutputWidget : public QWidget
     public:
         explicit OutputWidget(QWidget *parent = nullptr);
 
-    signals:
-
     public slots:
+        void reset();
 };
 
 #endif // OUTPUTWIDGET_H

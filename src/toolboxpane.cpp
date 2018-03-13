@@ -44,6 +44,11 @@ ToolboxTree* ToolboxPane::toolboxTree()
     return _toolboxTree;
 }
 
+void ToolboxPane::reset()
+{
+    //TODO
+}
+
 void ToolboxPane::clear()
 {
     _toolboxTree->clear();

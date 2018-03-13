@@ -54,13 +54,14 @@ class QmlCodeEditorWidget : public QWidget
         void saveDocument(Control* control, const QString& documentPath);
 
     public slots:
+        void reset();
         void clear();
         void saveAll();
         void raiseContainer();
         void refreshErrors();
 
     protected:
-        virtual void paintEvent(QPaintEvent *event) override;
+        void paintEvent(QPaintEvent *event) override;
 
     signals:
         void modeChanged();

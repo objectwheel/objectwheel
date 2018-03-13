@@ -992,6 +992,11 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
     _d->updateOpenDocHistory();
 }
 
+void QmlCodeEditorWidget::reset()
+{
+    //TODO
+}
+
 void QmlCodeEditorWidget::clear()
 {
     for (auto& item : _editorItems)

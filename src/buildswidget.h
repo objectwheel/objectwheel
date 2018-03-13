@@ -25,6 +25,9 @@ class BuildsWidget : public QWidget
     public:
         explicit BuildsWidget(QWidget *parent = nullptr);
 
+    public slots:
+        void reset();
+
     private slots:
         void showModules();
         void showPlatforms();

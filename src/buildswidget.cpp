@@ -29,6 +29,11 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
     _view->show(Platforms);
 }
 
+void BuildsWidget::reset()
+{
+    //TODO
+}
+
 void BuildsWidget::showModules()
 {
     _view->show(Modules);

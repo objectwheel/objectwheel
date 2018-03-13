@@ -4,3 +4,8 @@ OutputWidget::OutputWidget(QWidget *parent) : QWidget(parent)
 {
 
 }
+
+void OutputWidget::reset()
+{
+    //TODO
+}

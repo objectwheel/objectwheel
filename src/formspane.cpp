@@ -258,6 +258,11 @@ void FormsPane::setCurrentForm(int index)
     _listWidget->setCurrentRow(index);
 }
 
+void FormsPane::reset()
+{
+    //TODO
+}
+
 void FormsPane::clear()
 {
     _listWidget->clear();

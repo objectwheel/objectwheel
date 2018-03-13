@@ -21,6 +21,9 @@ class CentralWidget : public QWidget
         QmlCodeEditorWidget* qmlCodeEditorWidget() const;
         DesignerWidget* designerWidget() const;
 
+    public slots:
+        void reset();
+
     private:
         QVBoxLayout* m_layout;
         QSplitter* m_splitterOut,* m_splitterIn;

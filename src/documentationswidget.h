@@ -9,9 +9,8 @@ class DocumentationsWidget : public QWidget
     public:
         explicit DocumentationsWidget(QWidget *parent = nullptr);
 
-    signals:
-
     public slots:
+        void reset();
 };
 
 #endif // DOCUMENTATIONSWIDGET_H

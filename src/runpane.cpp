@@ -20,8 +20,9 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
   , m_buildsButton(new FlatButton)
   , m_projectsButton(new FlatButton)
 {
-    m_layout->setSpacing(fit::fx(10));
-    m_layout->setContentsMargins(fit::fx(5), fit::fx(5), fit::fx(5), fit::fx(5));
+    m_layout->setSpacing(fit::fx(20));
+    m_layout->setContentsMargins(fit::fx(10), 0, fit::fx(10), 0);
+
     m_layout->addWidget(m_runButton);
     m_layout->addWidget(m_stopButton);
     m_layout->addStretch();

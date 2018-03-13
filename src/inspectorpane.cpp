@@ -193,6 +193,11 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
     });
 }
 
+void InspectorPane::reset()
+{
+    //TODO
+}
+
 bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == _treeWidget->viewport()) {

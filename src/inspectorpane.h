@@ -17,6 +17,7 @@ class InspectorPane : public QWidget
         explicit InspectorPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 
     public slots:
+        void reset();
         void clear();
         void refresh();
 

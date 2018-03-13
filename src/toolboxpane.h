@@ -18,6 +18,7 @@ class ToolboxPane : public QWidget
         ToolboxTree* toolboxTree();
 
     public slots:
+        void reset();
         void clear();
 
     protected:
