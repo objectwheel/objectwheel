@@ -8,16 +8,13 @@ class DesignerWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit DesignerWidget(QWidget* parent = nullptr);
+        explicit DesignerWidget(QmlEditorView* qmlEditorView, QWidget* parent = nullptr);
 
     public slots:
         void reset();
         void onControlClick(Control*);
         void onControlDoubleClick(Control*);
         void onControlDrop(Control*, const QPointF&, const QString&);
-
-    protected:
-        void paintEvent(QPaintEvent *event) override;
 
     private slots:
         void onFitButtonClick();
@@ -29,12 +26,12 @@ class DesignerWidget : public QWidget
         void onSnappingButtonClick(bool value);
         void onZoomLevelChange(const QString& text);
 
-
     private:
         void scaleScene(qreal ratio);
 
     private:
         qreal m_lastScale;
+        QmlEditorView* m_qmlEditorView;
         QVBoxLayout* m_layout;
         DesignerScene* m_designerScene;
         DesignerView* m_designerView;

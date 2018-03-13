@@ -4,16 +4,11 @@
 #include <savebackend.h>
 #include <fit.h>
 
-#define cW (ControlWatcher::instance())
-
 SaveTransaction::SaveTransaction()
 {
-    connect(cW, SIGNAL(zValueChanged(Control*)),
-      this, SLOT(processZ(Control*)));
-    connect(cW, SIGNAL(parentChanged(Control*)),
-      this, SLOT(processParent(Control*)));
-    connect(cW, SIGNAL(geometryChanged(Control*)),
-      this, SLOT(processGeometry(Control*)));
+    connect(cW, SIGNAL(zValueChanged(Control*)), this, SLOT(processZ(Control*)));
+    connect(cW, SIGNAL(parentChanged(Control*)), this, SLOT(processParent(Control*)));
+    connect(cW, SIGNAL(geometryChanged(Control*)), this, SLOT(processGeometry(Control*)));
 }
 
 SaveTransaction* SaveTransaction::instance()
