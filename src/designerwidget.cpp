@@ -3,6 +3,7 @@
 #include <designerview.h>
 #include <fit.h>
 #include <qmleditorview.h>
+#include <css.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -69,130 +70,60 @@ DesignerWidget::DesignerWidget(QmlEditorView* qmlEditorView, QWidget *parent) : 
     m_snappingButton->setCheckable(true);
     m_snappingButton->setChecked(m_designerScene->snapping());
 
-    m_phonePortraitButton->setCheckable(true);
-    m_phonePortraitButton->setChecked(true);
-    m_phonePortraitButton->setDisabled(true);
-    m_phoneLandscapeButton->setCheckable(true);
-    m_desktopSkinButton->setCheckable(true);
-    m_noSkinButton->setCheckable(true);
-
-    m_refreshPreviewButton->setCursor(Qt::PointingHandCursor);
-    m_clearFormButton->setCursor(Qt::PointingHandCursor);
+    m_refreshButton->setCursor(Qt::PointingHandCursor);
+    m_clearButton->setCursor(Qt::PointingHandCursor);
     m_undoButton->setCursor(Qt::PointingHandCursor);
     m_redoButton->setCursor(Qt::PointingHandCursor);
-    m_phonePortraitButton->setCursor(Qt::PointingHandCursor);
-    m_phoneLandscapeButton->setCursor(Qt::PointingHandCursor);
-    m_desktopSkinButton->setCursor(Qt::PointingHandCursor);
-    m_noSkinButton->setCursor(Qt::PointingHandCursor);
     m_snappingButton->setCursor(Qt::PointingHandCursor);
-    m_showOutlineButton->setCursor(Qt::PointingHandCursor);
-    m_fitInSceneButton->setCursor(Qt::PointingHandCursor);
+    m_outlineButton->setCursor(Qt::PointingHandCursor);
+    m_fitButton->setCursor(Qt::PointingHandCursor);
     m_zoomlLevelCombobox->setCursor(Qt::PointingHandCursor);
-    m_themeCombobox->setCursor(Qt::PointingHandCursor);
-    m_layItVertButton->setCursor(Qt::PointingHandCursor);
-    m_layItHorzButton->setCursor(Qt::PointingHandCursor);
-    m_layItGridButton->setCursor(Qt::PointingHandCursor);
-    m_breakLayoutButton->setCursor(Qt::PointingHandCursor);
 
-    m_refreshPreviewButton->setToolTip("Refresh control previews on the Dashboard.");
-    m_clearFormButton->setToolTip("Clear controls on the Dashboard.");
+    m_refreshButton->setToolTip("Refresh control previews on the Dashboard.");
+    m_clearButton->setToolTip("Clear controls on the Dashboard.");
     m_undoButton->setToolTip("Undo action.");
     m_redoButton->setToolTip("Redo action.");
-    m_phonePortraitButton->setToolTip("Skin: Phone portrait.");
-    m_phoneLandscapeButton->setToolTip("Skin: Phone landscape.");
-    m_desktopSkinButton->setToolTip("Skin: Desktop.");
-    m_noSkinButton->setToolTip("No skin (free).");
     m_snappingButton->setToolTip("Enable snapping to help aligning of controls to each others.");
-    m_showOutlineButton->setToolTip("Show outline frame for controls.");
-    m_fitInSceneButton->setToolTip("Fit scene into the Dashboard.");
+    m_outlineButton->setToolTip("Show outline frame for controls.");
+    m_fitButton->setToolTip("Fit scene into the Dashboard.");
     m_zoomlLevelCombobox->setToolTip("Change zoom level.");
-    m_themeCombobox->setToolTip("Change Theme. Themes are only available for Quick Controls 2.0 and above.");
-    m_loadingIndicator->setToolTip("Background operations indicator.");
-    m_layItVertButton->setToolTip("Lay out selected controls vertically.");
-    m_layItHorzButton->setToolTip("Lay out selected controls horizontally.");
-    m_layItGridButton->setToolTip("Lay out selected controls as grid.");
-    m_breakLayoutButton->setToolTip("Break layouts for selected controls.");
 
-    m_refreshPreviewButton->setIcon(QIcon(":/resources/images/refresh.png"));
-    m_clearFormButton->setIcon(QIcon(":/resources/images/clean.png"));
+    m_refreshButton->setIcon(QIcon(":/resources/images/refresh.png"));
+    m_clearButton->setIcon(QIcon(":/resources/images/clean.png"));
     m_undoButton->setIcon(QIcon(":/resources/images/undo.png"));
     m_redoButton->setIcon(QIcon(":/resources/images/redo.png"));
-    m_phonePortraitButton->setIcon(QIcon(":/resources/images/portrait.png"));
-    m_phoneLandscapeButton->setIcon(QIcon(":/resources/images/landscape.png"));
-    m_desktopSkinButton->setIcon(QIcon(":/resources/images/desktop.png"));
-    m_noSkinButton->setIcon(QIcon(":/resources/images/free.png"));
     m_snappingButton->setIcon(QIcon(":/resources/images/snap.png"));
-    m_showOutlineButton->setIcon(QIcon(":/resources/images/outline.png"));
-    m_fitInSceneButton->setIcon(QIcon(":/resources/images/fit.png"));
-    m_layItVertButton->setIcon(QIcon(":/resources/images/vert.png"));
-    m_layItHorzButton->setIcon(QIcon(":/resources/images/hort.png"));
-    m_layItGridButton->setIcon(QIcon(":/resources/images/grid.png"));
-    m_breakLayoutButton->setIcon(QIcon(":/resources/images/break.png"));
+    m_outlineButton->setIcon(QIcon(":/resources/images/outline.png"));
+    m_fitButton->setIcon(QIcon(":/resources/images/fit.png"));
 
-    connect(_snappingButton, SIGNAL(toggled(bool)),
-            SLOT(onSnappingClick(bool)));
-    connect(_showOutlineButton, SIGNAL(toggled(bool)),
-            SLOT(onShowOutlineClick(bool)));
-    connect(_zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)),
-            SLOT(onZoomLevelChange(QString)));
-    connect(_themeCombobox, SIGNAL(currentTextChanged(QString)),
-            SLOT(onThemeChange(QString)));
-    connect(_fitInSceneButton, SIGNAL(clicked(bool)),
-            SLOT(onFitInSceneClick()));
-    connect(_refreshPreviewButton, SIGNAL(clicked(bool)),
-            SLOT(onRefreshPreviewClick()));
-    connect(_clearFormButton, SIGNAL(clicked(bool)),
-            SLOT(onClearControls()));
-    connect(_phonePortraitButton, SIGNAL(clicked(bool)),
-            SLOT(onPhonePortraitButtonClick()));
-    connect(_phoneLandscapeButton, SIGNAL(clicked(bool)),
-            SLOT(onPhoneLandscapeButtonClick()));
-    connect(_desktopSkinButton, SIGNAL(clicked(bool)),
-            SLOT(onDesktopSkinButtonClick()));
-    connect(_noSkinButton, SIGNAL(clicked(bool)),
-            SLOT(onNoSkinButtonClick()));
+    connect(m_snappingButton, SIGNAL(toggled(bool)), SLOT(onSnappingClick(bool)));
+    connect(m_outlineButton, SIGNAL(toggled(bool)), SLOT(onOutlineButtonClick(bool)));
+    connect(m_zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(onZoomLevelChange(QString)));
+    connect(m_fitButton, SIGNAL(clicked(bool)), SLOT(onFitButtonClick()));
+    connect(m_refreshButton, SIGNAL(clicked(bool)), SLOT(onRefreshButtonClick()));
+    connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(onClearButtonClick()));
 
     m_toolbar->setStyleSheet(CSS::DesignerToolbar);
     m_toolbar->setFixedHeight(fit::fx(21));
     m_toolbar->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    m_toolbar->addWidget(_undoButton);
-    m_toolbar->addWidget(_redoButton);
+    m_toolbar->addWidget(m_undoButton);
+    m_toolbar->addWidget(m_redoButton);
     m_toolbar->addSeparator();
-    m_toolbar->addWidget(_refreshPreviewButton);
-    m_toolbar->addWidget(_clearFormButton);
+    m_toolbar->addWidget(m_refreshButton);
+    m_toolbar->addWidget(m_clearButton);
     m_toolbar->addSeparator();
-    m_toolbar->addWidget(_phonePortraitButton);
-    m_toolbar->addWidget(_phoneLandscapeButton);
-    m_toolbar->addWidget(_desktopSkinButton);
-    m_toolbar->addWidget(_noSkinButton);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(_snappingButton);
-    m_toolbar->addWidget(_showOutlineButton);
-    m_toolbar->addWidget(_fitInSceneButton);
-    m_toolbar->addWidget(_themeCombobox);
-    m_toolbar->addWidget(_zoomlLevelCombobox);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(_loadingIndicator);
-    m_toolbar->addWidget(spacer);
-    m_toolbar->addWidget(_layItVertButton);
-    m_toolbar->addWidget(_layItHorzButton);
-    m_toolbar->addWidget(_layItGridButton);
-    m_toolbar->addWidget(_breakLayoutButton);
-
+    m_toolbar->addWidget(m_snappingButton);
+    m_toolbar->addWidget(m_outlineButton);
+    m_toolbar->addWidget(m_fitButton);
+    m_toolbar->addWidget(m_zoomlLevelCombobox);
 
     SaveTransaction::instance();
-    connect(_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
+    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
             this, SLOT(onControlDoubleClick(Control*)));
     connect(cW, SIGNAL(doubleClicked(Control*)),
             this, SLOT(onControlDoubleClick(Control*)));
     connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
             this, SLOT(onControlDrop(Control*,QPointF,QString)));
-    connect(PreviewerBackend::instance(), SIGNAL(busyChanged()),
-            SLOT(onIndicatorChanges()));
-
-    connect(this, SIGNAL(modeChanged()), this, SLOT(onModeChange()));
-    onModeChange();
-    _outputPane->issuesBox()->setCurrentMode(_mode);
 }
 
 void DesignerWidget::scaleScene(qreal ratio)
@@ -270,14 +201,13 @@ void DesignerWidget::onControlClick(Control* control)
 
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
-    _qmlEditorView->addControl(control);
-    if (_qmlEditorView->pinned())
-        setMode(CodeEdit);
-    _qmlEditorView->setMode(QmlEditorView::CodeEditor);
-    _qmlEditorView->openControl(control);
-    _qmlEditorView->raiseContainer();
-
-    _splitter->setSizes(sizes);
+    m_qmlEditorView->addControl(control);
+    // FIXME
+    // if (m_qmlEditorView->pinned())
+    //    setMode(CodeEdit);
+    m_qmlEditorView->setMode(QmlEditorView::CodeEditor);
+    m_qmlEditorView->openControl(control);
+    m_qmlEditorView->raiseContainer();
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
