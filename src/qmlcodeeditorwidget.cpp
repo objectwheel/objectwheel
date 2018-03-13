@@ -1018,4 +1018,4 @@ void QmlCodeEditorWidget::refreshErrors()
     }
 }
 
-#include "qmleditorview.moc"
+#include "qmlcodeeditorwidget.moc"

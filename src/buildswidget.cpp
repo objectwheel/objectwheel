@@ -5,7 +5,7 @@
 #include <moduleselectionwidget.h>
 #include <downloadwidget.h>
 
-BuildsWindow::BuildsWindow(QWidget *parent) : QWidget(parent)
+BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
 {
     setWindowTitle(APP_NAME);
 
@@ -14,18 +14,12 @@ BuildsWindow::BuildsWindow(QWidget *parent) : QWidget(parent)
     _platformsWidget = new PlatformsWidget;
     _downloadWidget = new DownloadWidget;
 
-    connect(_modulesWidget, SIGNAL(backClicked()),
-      SLOT(showPlatforms()));
-    connect(_modulesWidget, SIGNAL(done()),
-      SLOT(handleModuleSelection()));
-    connect(_androidWidget, SIGNAL(backClicked()),
-      SLOT(showModules()));
-    connect(_platformsWidget, SIGNAL(platformSelected(OTargets::Targets)),
-      SLOT(handlePlatformSelection(OTargets::Targets)));
-    connect(_androidWidget, SIGNAL(downloadBuild()),
-      SLOT(handleDownload()));
-    connect(_downloadWidget, SIGNAL(done()),
-      SLOT(handleModuleSelection()));
+    connect(_modulesWidget, SIGNAL(backClicked()), SLOT(showPlatforms()));
+    connect(_modulesWidget, SIGNAL(done()), SLOT(handleModuleSelection()));
+    connect(_androidWidget, SIGNAL(backClicked()), SLOT(showModules()));
+    connect(_platformsWidget, SIGNAL(platformSelected(OTargets::Targets)), SLOT(handlePlatformSelection(OTargets::Targets)));
+    connect(_androidWidget, SIGNAL(downloadBuild()), SLOT(handleDownload()));
+    connect(_downloadWidget, SIGNAL(done()), SLOT(handleModuleSelection()));
 
     _view = new View(this);
     _view->add(Platforms, _platformsWidget);
@@ -35,17 +29,17 @@ BuildsWindow::BuildsWindow(QWidget *parent) : QWidget(parent)
     _view->show(Platforms);
 }
 
-void BuildsWindow::showModules()
+void BuildsWidget::showModules()
 {
     _view->show(Modules);
 }
 
-void BuildsWindow::showPlatforms()
+void BuildsWidget::showPlatforms()
 {
     _view->show(Platforms);
 }
 
-void BuildsWindow::handleModuleSelection()
+void BuildsWidget::handleModuleSelection()
 {
     switch (_target) {
         case OTargets::android_armeabi_v7a:
@@ -62,13 +56,13 @@ void BuildsWindow::handleModuleSelection()
     }
 }
 
-void BuildsWindow::handlePlatformSelection(OTargets::Targets platform)
+void BuildsWidget::handlePlatformSelection(OTargets::Targets platform)
 {
     _target = platform;
     _view->show(Modules);
 }
 
-void BuildsWindow::handleDownload()
+void BuildsWidget::handleDownload()
 {
     _view->show(Download);
     _downloadWidget->download(_target);

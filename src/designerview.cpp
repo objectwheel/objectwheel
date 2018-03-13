@@ -80,8 +80,8 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
     connect(m_moveDownAct, SIGNAL(triggered()), SLOT(onMoveDownAction()));
     connect(m_moveRightAct, SIGNAL(triggered()), SLOT(onMoveRightAction()));
     connect(m_moveLeftAct, SIGNAL(triggered()), SLOT(onMoveLeftAction()));
-    connect(m_sendBackAct, SIGNAL(triggered()), SLOT(onSendBackActAction()));
-    connect(m_bringFrontAct, SIGNAL(triggered()), SLOT(onBringFrontActAction()));
+    connect(m_sendBackAct, SIGNAL(triggered()), SLOT(onSendBackAction()));
+    connect(m_bringFrontAct, SIGNAL(triggered()), SLOT(onBringFrontAction()));
 
     addAction(m_undoAct);
     addAction(m_redoAct);

@@ -177,4 +177,14 @@ void IssuesBox::refresh()
       (QString("Issues [%1]").arg(m_listWidget->count()));
 }
 
+bool operator<(const Error& e1, const Error& e2)
+{
+    return (e1.uid + e1.description +
+      QString::number(e1.column) +
+      QString::number(e1.line)) <
+     (e2.uid + e2.description +
+      QString::number(e2.column) +
+      QString::number(e2.line));
+}
+
 #include "issuesbox.moc"

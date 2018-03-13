@@ -10,6 +10,7 @@
 #include <previewerbackend.h>
 #include <savebackend.h>
 #include <progressbar.h>
+#include <windowmanager.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -392,26 +393,27 @@ void ProjectsWidget::onLoadButtonClick()
         return;
     }
 
-    if (dW->qmlEditorView()->hasUnsavedDocs()) {
-        QMessageBox msgBox;
-        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
-        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
-        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::SaveAll);
-        int ret = msgBox.exec();
+// FIXME
+//    if (dW->qmlEditorView()->hasUnsavedDocs()) {
+//        QMessageBox msgBox;
+//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
+//        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
+//        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
+//        msgBox.setDefaultButton(QMessageBox::SaveAll);
+//        int ret = msgBox.exec();
 
-        switch (ret) {
-            case QMessageBox::Cancel:
-                return;
+//        switch (ret) {
+//            case QMessageBox::Cancel:
+//                return;
 
-            case QMessageBox::SaveAll:
-                dW->qmlEditorView()->saveAll();
-                break;
+//            case QMessageBox::SaveAll:
+//                dW->qmlEditorView()->saveAll();
+//                break;
 
-            case QMessageBox::NoToAll:
-                break;
-        }
-    }
+//            case QMessageBox::NoToAll:
+//                break;
+//        }
+//    }
 
     WindowManager::instance()->hide(WindowManager::Main);
     ProjectBackend::instance()->stop();

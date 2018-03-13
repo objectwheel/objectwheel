@@ -4,12 +4,14 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>
+#include <savebackend.h>
 
 #include <QToolBar>
 #include <QToolButton>
 #include <QComboBox>
 #include <QPainter>
 #include <QVBoxLayout>
+#include <QMessageBox>
 
 namespace {
     QString findText(qreal ratio);
@@ -96,7 +98,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_outlineButton->setIcon(QIcon(":/resources/images/outline.png"));
     m_fitButton->setIcon(QIcon(":/resources/images/fit.png"));
 
-    connect(m_snappingButton, SIGNAL(toggled(bool)), SLOT(onSnappingClick(bool)));
+    connect(m_snappingButton, SIGNAL(toggled(bool)), SLOT(onSnappingButtonClick(bool)));
     connect(m_outlineButton, SIGNAL(toggled(bool)), SLOT(onOutlineButtonClick(bool)));
     connect(m_zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(onZoomLevelChange(QString)));
     connect(m_fitButton, SIGNAL(clicked(bool)), SLOT(onFitButtonClick()));
@@ -117,13 +119,14 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
 
-    SaveTransaction::instance();
-    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
-            this, SLOT(onControlDoubleClick(Control*)));
-    connect(cW, SIGNAL(doubleClicked(Control*)),
-            this, SLOT(onControlDoubleClick(Control*)));
-    connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
-            this, SLOT(onControlDrop(Control*,QPointF,QString)));
+// FIXME
+//    SaveTransaction::instance();
+//    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
+//            this, SLOT(onControlDoubleClick(Control*)));
+//    connect(cW, SIGNAL(doubleClicked(Control*)),
+//            this, SLOT(onControlDoubleClick(Control*)));
+//    connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
+//            this, SLOT(onControlDrop(Control*,QPointF,QString)));
 }
 
 void DesignerWidget::scaleScene(qreal ratio)
@@ -156,6 +159,16 @@ void DesignerWidget::onFitButtonClick()
             m_zoomlLevelCombobox->setCurrentText(findText(ratio));
 }
 
+void DesignerWidget::onUndoButtonClick()
+{
+
+}
+
+void DesignerWidget::onRedoButtonClick()
+{
+
+}
+
 void DesignerWidget::onZoomLevelChange(const QString& text)
 {
     qreal ratio = findRatio(text);
@@ -183,8 +196,8 @@ void DesignerWidget::onClearButtonClick()
     const int ret = msgBox.exec();
     switch (ret) {
         case QMessageBox::Yes: {
-            scene->removeChildControlsOnly(scene->mainControl());
-            SaveBackend::instance()->removeChildControlsOnly(scene->mainControl());
+            m_designerScene->removeChildControlsOnly(m_designerScene->mainForm());
+            SaveBackend::instance()->removeChildControlsOnly(m_designerScene->mainForm());
             break;
         } default: {
             // Do nothing
@@ -210,18 +223,16 @@ void DesignerWidget::onControlDoubleClick(Control* control)
     // FIXME
     // if (m_qmlCodeEditorWidget->pinned())
     //    setMode(CodeEdit);
-    m_qmlCodeEditorWidget->setMode(QmlEditorView::CodeEditor);
+    m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);
     m_qmlCodeEditorWidget->openControl(control);
     m_qmlCodeEditorWidget->raiseContainer();
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
-    auto scene = (ControlScene*)control->scene();
-    scene->clearSelection();
-    auto newControl = new Control(url, control->mode());
-    SaveBackend::instance()->addControl(newControl, control,
-                            scene->mainControl()->uid(), scene->mainControl()->dir());
+    m_designerScene->clearSelection();
+    auto newControl = new Control(url);
+    SaveBackend::instance()->addControl(newControl, control, m_designerScene->mainForm()->uid(), m_designerScene->mainForm()->dir());
     newControl->setParentItem(control);
     newControl->setPos(pos);
     newControl->setSelected(true);

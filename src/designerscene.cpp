@@ -55,7 +55,7 @@ void DesignerScene::addForm(Form* form)
     m_forms.append(form);
 
     if (!m_mainForm)
-        setMainControl(form);
+        setMainForm(form);
 }
 
 void DesignerScene::removeForm(Form* form)
@@ -72,7 +72,7 @@ void DesignerScene::removeForm(Form* form)
     m_forms.removeOne(form);
 
     if (m_mainForm == form)
-        setMainControl(m_forms[0]);
+        setMainForm(m_forms[0]);
 
     form->deleteLater();
     emit controlRemoved(form);

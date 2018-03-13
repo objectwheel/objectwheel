@@ -35,9 +35,9 @@ PageSwitcherPane* m_pageSwitcherPane;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
+  , m_outputPane(new OutputPane)
   , m_runPane(new RunPane(m_outputPane->consoleBox()))
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
-  , m_outputPane(new OutputPane)
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
   , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))

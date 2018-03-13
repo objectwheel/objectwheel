@@ -179,7 +179,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setInnerRadius(4);
     _loadingIndicator->setLineWidth(2);
 
-    _legalLabel->setText(TEXT_LEGAL);
+    _legalLabel->setText(QString("<p><b>© 2015 - 2018 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
     _legalLabel->setStyleSheet("color:#2E3A41;");
     _legalLabel->setAlignment(Qt::AlignHCenter);
 }

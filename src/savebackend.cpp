@@ -329,33 +329,33 @@ QString SaveBackend::basePath() const
 }
 
 void SaveBackend::exposeProject() const
-{
-    auto fpaths = SaveUtils::formPaths(ProjectBackend::instance()->dir());
+{ //FIXME
+//    auto fpaths = SaveUtils::formPaths(ProjectBackend::instance()->dir());
 
-    qreal j = 0;
-    for (auto path : fpaths) {
+//    qreal j = 0;
+//    for (auto path : fpaths) {
 
-        auto form = new Form(path + separator() +
-          DIR_THIS + separator() + "main.qml");
-        if (SaveUtils::isMain(path))
-            form->setMain(true);
-        dW->designerScene()->addForm(form);
+//        auto form = new Form(path + separator() +
+//          DIR_THIS + separator() + "main.qml");
+//        if (SaveUtils::isMain(path))
+//            form->setMain(true);
+//        dW->designerScene()->addForm(form);
 
-        QMap<QString, Control*> pmap;
-        pmap[path] = form;
+//        QMap<QString, Control*> pmap;
+//        pmap[path] = form;
 
-        int i = 1;
-        const auto& pths = SaveUtils::childrenPaths(path);
-        for (auto child : pths) {
-            auto pcontrol = pmap.value(dname(dname(child)));
-            auto control = new Control(child + separator() +
-              DIR_THIS + separator() + "main.qml", FormGui);
-            control->setParentItem(pcontrol);
-            pmap[child] = control;
-            i++;
-        }
-        j++;
-    }
+//        int i = 1;
+//        const auto& pths = SaveUtils::childrenPaths(path);
+//        for (auto child : pths) {
+//            auto pcontrol = pmap.value(dname(dname(child)));
+//            auto control = new Control(child + separator() +
+//              DIR_THIS + separator() + "main.qml", FormGui);
+//            control->setParentItem(pcontrol);
+//            pmap[child] = control;
+//            i++;
+//        }
+//        j++;
+//    }
 }
 
 Control* SaveBackend::exposeControl(const QString& rootPath, QString suid) const

@@ -20,12 +20,9 @@ BackendManager::BackendManager()
         );
     }
 
-    connect(ProjectBackend::instance(), SIGNAL(started()),
-      WindowManager::instance()->get(WindowManager::Main), SLOT(clear()));
-    connect(ProjectBackend::instance(), SIGNAL(started()),
-      SLOT(handleProjectStart()));
-    connect(UserBackend::instance(), SIGNAL(aboutToStop()),
-      SLOT(handleSessionStop()));
+    connect(ProjectBackend::instance(), SIGNAL(started()), WindowManager::instance()->get(WindowManager::Main), SLOT(reset()));
+    connect(ProjectBackend::instance(), SIGNAL(started()), SLOT(handleProjectStart()));
+    connect(UserBackend::instance(), SIGNAL(aboutToStop()), SLOT(handleSessionStop()));
 }
 
 BackendManager* BackendManager::instance()

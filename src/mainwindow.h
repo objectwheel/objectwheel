@@ -27,9 +27,9 @@ class MainWindow : public QMainWindow
 
     private:
         CentralWidget* m_centralWidget;
+        OutputPane* m_outputPane;
         RunPane* m_runPane;
         FormsPane* m_formsPane;
-        OutputPane* m_outputPane;
         ToolboxPane* m_toolboxPane;
         InspectorPane* m_inspectorPane;
         PropertiesPane* m_propertiesPane;

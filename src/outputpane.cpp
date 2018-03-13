@@ -143,12 +143,6 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     parent->_consoleBox->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
 
-    QTimer::singleShot(100, [=] {
-        connect(dW, SIGNAL(modeChanged()),
-          parent->_issuesBox, SLOT(refresh()));
-        // this->parent->collapse();
-    });
-
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(parent->_issuesBox);

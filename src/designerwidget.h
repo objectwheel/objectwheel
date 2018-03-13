@@ -10,6 +10,7 @@ class QVBoxLayout;
 class QToolBar;
 class QToolButton;
 class QComboBox;
+class Control;
 
 class DesignerWidget : public QWidget
 {
@@ -21,9 +22,6 @@ class DesignerWidget : public QWidget
 
     public slots:
         void reset();
-        void onControlClick(Control*);
-        void onControlDoubleClick(Control*);
-        void onControlDrop(Control*, const QPointF&, const QString&);
 
     private slots:
         void onFitButtonClick();
@@ -34,6 +32,10 @@ class DesignerWidget : public QWidget
         void onOutlineButtonClick(bool value);
         void onSnappingButtonClick(bool value);
         void onZoomLevelChange(const QString& text);
+
+        void onControlClick(Control*);
+        void onControlDoubleClick(Control*);
+        void onControlDrop(Control*, const QPointF&, const QString&);
 
     private:
         void scaleScene(qreal ratio);
