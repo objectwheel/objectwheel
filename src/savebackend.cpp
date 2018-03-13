@@ -3,7 +3,6 @@
 #include <filemanager.h>
 #include <projectbackend.h>
 #include <control.h>
-#include <frontend.h>
 #include <formscene.h>
 #include <parserutils.h>
 

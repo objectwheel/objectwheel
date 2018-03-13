@@ -2,7 +2,6 @@
 #include <windowmanager.h>
 #include <QMenuBar>
 #include <QApplication>
-#include <frontend.h>
 
 MenuManager::MenuManager()
 {

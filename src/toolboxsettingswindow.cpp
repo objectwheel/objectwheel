@@ -5,7 +5,6 @@
 #include <filemanager.h>
 #include <zipper.h>
 #include <saveutils.h>
-#include <frontend.h>
 #include <qmleditorview.h>
 
 #include <QScrollBar>
@@ -127,10 +126,10 @@ void ToolboxSettingsWindow::on_btnReset_clicked()
                 auto currentDir = dname(dname(ui->treeWidget->
                   urls(ci).first().toLocalFile()));//FIXME: Do same for Control GUI Editor /Tool Editor
                 // TODO: Check same for selected control's child controls
-                if (dW->qmlEditorView()->isOpen(currentDir)) {
-                    obstacle = true;
-                    break;
-                }
+//                if (dW->qmlEditorView()->isOpen(currentDir)) { //FIXME
+//                    obstacle = true;
+//                    break;
+//                }
             }
             if (obstacle)
                 break;
@@ -149,20 +148,21 @@ void ToolboxSettingsWindow::on_btnReset_clicked()
 
 void ToolboxSettingsWindow::on_btnRemove_clicked()
 {
-    if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Removal",
-      "This will remove selected tool from tool library. Are you sure?")) {
-        auto currentDir = dname(dname(ui->treeWidget->urls
-          (ui->treeWidget->currentItem()).first().toLocalFile()));
-        if (!dW->qmlEditorView()->isOpen(currentDir)) {
-            ToolsBackend::instance()->removeTool(dname(dname(ui->treeWidget->urls
-              (ui->treeWidget->currentItem()).first().toLocalFile())));
-        } else { //FIXME: Do same for Control GUI Editor /Tool Editor
-            // TODO: Check same for selected control's child controls
-            QMessageBox::information(this, "Oops",
-              "Some documents belongs to this tool is open within QML "
-              "Editor or Tool Editor, please close them first.");
-        }
-    }
+    // FIXME
+//    if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Removal",
+//      "This will remove selected tool from tool library. Are you sure?")) {
+//        auto currentDir = dname(dname(ui->treeWidget->urls
+//          (ui->treeWidget->currentItem()).first().toLocalFile()));
+//        if (!dW->qmlEditorView()->isOpen(currentDir)) {
+//            ToolsBackend::instance()->removeTool(dname(dname(ui->treeWidget->urls
+//              (ui->treeWidget->currentItem()).first().toLocalFile())));
+//        } else { //FIXME: Do same for Control GUI Editor /Tool Editor
+//            // TODO: Check same for selected control's child controls
+//            QMessageBox::information(this, "Oops",
+//              "Some documents belongs to this tool is open within QML "
+//              "Editor or Tool Editor, please close them first.");
+//        }
+//    }
 }
 
 void ToolboxSettingsWindow::on_btnAdd_clicked()

@@ -10,7 +10,6 @@
 #include <focuslesslineedit.h>
 #include <previewresult.h>
 #include <control.h>
-#include <frontend.h>
 #include <formscene.h>
 #include <previewerbackend.h>
 

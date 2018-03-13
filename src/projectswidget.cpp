@@ -4,7 +4,6 @@
 #include <css.h>
 #include <userbackend.h>
 #include <projectbackend.h>
-#include <frontend.h>
 #include <qmleditorview.h>
 #include <delayer.h>
 #include <filemanager.h>

@@ -119,8 +119,9 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
 //! *********************** [InspectorPane] ***********************
 //!
 
-InspectorPane::InspectorPane(QWidget* parent) : QWidget(parent)
-    , _blockRefresh(false)
+InspectorPane::InspectorPane(FormScene* scene, QWidget* parent) : QWidget(parent)
+  , _blockRefresh(false)
+  , m_scene(scene)
 {
     _layout = new QVBoxLayout(this);
     _treeWidget = new QTreeWidget;
@@ -175,16 +176,17 @@ InspectorPane::InspectorPane(QWidget* parent) : QWidget(parent)
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
-      SLOT(refresh()));
-    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
-      SLOT(refresh()));
-    connect(parent->centralWidget(), SIGNAL(modeChanged()),
-      SLOT(refresh()));
-    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
-      SLOT(refresh()));
-//    connect(FormsPane::instance(), SIGNAL(currentFormChanged()),
-//      SLOT(refresh())); //FIXME
+    // FIXME
+    //    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
+    //      SLOT(refresh()));
+    //    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
+    //      SLOT(refresh()));
+    //    connect(parent->centralWidget(), SIGNAL(modeChanged()),
+    //      SLOT(refresh()));
+    //    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
+    //      SLOT(refresh()));
+    //    connect(FormsPane::instance(), SIGNAL(currentFormChanged()),
+    //      SLOT(refresh()));
     QTimer::singleShot(3000, [this] {
         connect(SaveBackend::instance(), SIGNAL(databaseChanged()),
           SLOT(refresh()));
@@ -242,7 +244,7 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
     }
 }
 
-void InspectorPane::clear()
+void InspectorPane::reset()
 {
     for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i)
         qDeleteAll(_treeWidget->topLevelItem(i)->takeChildren());

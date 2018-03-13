@@ -3,7 +3,6 @@
 #include <userbackend.h>
 #include <projectbackend.h>
 #include <savebackend.h>
-#include <frontend.h>
 #include <windowmanager.h>
 #include <authenticator.h>
 #include <previewerbackend.h>

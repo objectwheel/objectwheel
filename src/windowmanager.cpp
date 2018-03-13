@@ -65,7 +65,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
             connect(_welcomeWindow, &WelcomeWindow::done, this, [=]
             {
                 const auto& size = fit::fx(QSizeF{1580, 900}).toSize();
-                const auto& ssize = pS->size();
+                const auto& ssize = QGuiApplication::primaryScreen()->size();
                 const bool full = (size.height() + 100 > ssize.height()) ||
                                   (size.width() + 50 > ssize.width());
                 show(Main, full ? Qt::WindowMaximized : Qt::WindowNoState);
@@ -111,7 +111,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
                 Qt::LeftToRight,
                 Qt::AlignCenter,
                 window->size(),
-                pS->availableGeometry()
+                QGuiApplication::primaryScreen()->availableGeometry()
             )
         );
     }

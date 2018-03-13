@@ -10,7 +10,6 @@
 #include <css.h>
 #include <fit.h>
 #include <delayer.h>
-#include <frontend.h>
 #include <mainwindow.h>
 
 #include <QLabel>

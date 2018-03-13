@@ -3,7 +3,6 @@
 #include <css.h>
 #include <fit.h>
 #include <centralwidget.h>
-#include <frontend.h>
 #include <issuesbox.h>
 #include <searchbox.h>
 #include <consolebox.h>

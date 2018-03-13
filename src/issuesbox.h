@@ -35,6 +35,7 @@ class Error {
         int line, column;
         QString id, uid, description;
 };
+bool operator< (const Error&, const Error&);
 Q_DECLARE_METATYPE(Error)
 
 class IssuesBox : public QWidget
@@ -60,7 +61,7 @@ class IssuesBox : public QWidget
         QToolButton* m_clearButton;
         QLabel* m_title;
         QListWidget* m_listWidget;
-        QHash<Error, QPointer<Control>> m_buggyControls;
+        QMap<Error, QPointer<Control>> m_buggyControls;
         OutputPane* m_outputPane;
 };
 
