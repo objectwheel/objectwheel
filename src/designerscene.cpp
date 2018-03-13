@@ -1,4 +1,4 @@
-#include <formscene.h>
+#include <designerscene.h>
 #include <fit.h>
 #include <savebackend.h>
 #include <suppressor.h>
@@ -28,11 +28,11 @@ namespace {
     bool itemMoving = false;
 }
 
-FormScene::FormScene(QObject *parent) : QGraphicsScene(parent)
+DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
   , m_snapping(true)
   , m_mainForm(nullptr)
 {
-    connect(this, &FormScene::changed, [=] {
+    connect(this, &DesignerScene::changed, [=] {
         if (m_mainForm) {
             setSceneRect(m_mainForm->frameGeometry().adjusted(
                -fit::fx(8),
@@ -44,7 +44,7 @@ FormScene::FormScene(QObject *parent) : QGraphicsScene(parent)
     });
 }
 
-void FormScene::addForm(Form* form)
+void DesignerScene::addForm(Form* form)
 {
     if (m_forms.contains(form))
         return;
@@ -58,7 +58,7 @@ void FormScene::addForm(Form* form)
         setMainControl(form);
 }
 
-void FormScene::removeForm(Form* form)
+void DesignerScene::removeForm(Form* form)
 {
     if (m_forms.contains(form) == false ||
         form->main())
@@ -78,7 +78,7 @@ void FormScene::removeForm(Form* form)
     emit controlRemoved(form);
 }
 
-void FormScene::removeControl(Control* control)
+void DesignerScene::removeControl(Control* control)
 {
     if (control == mainForm())
         return;
@@ -90,7 +90,7 @@ void FormScene::removeControl(Control* control)
     emit controlRemoved(control);
 }
 
-void FormScene::removeChildControlsOnly(Control* parent)
+void DesignerScene::removeChildControlsOnly(Control* parent)
 {
     for (auto control : parent->childControls())
         emit aboutToRemove(control);
@@ -102,34 +102,34 @@ void FormScene::removeChildControlsOnly(Control* parent)
         removeItem(control);
 }
 
-Form* FormScene::mainForm()
+Form* DesignerScene::mainForm()
 {
     return m_mainForm.data();
 }
 
-bool FormScene::snapping() const
+bool DesignerScene::snapping() const
 {
     return m_snapping;
 }
 
-void FormScene::setSnapping(bool snapping)
+void DesignerScene::setSnapping(bool snapping)
 {
     m_snapping = snapping;
 }
 
-bool FormScene::showOutlines() const
+bool DesignerScene::showOutlines() const
 {
     return Control::showOutline();;
 }
 
-void FormScene::setShowOutlines(bool value)
+void DesignerScene::setShowOutlines(bool value)
 {
     Control::setShowOutline(value);
     if (m_mainForm)
         m_mainForm->update();
 }
 
-QList<Control*> FormScene::selectedControls() const
+QList<Control*> DesignerScene::selectedControls() const
 {
     QList<Control*> selectedControls;
     for (auto item : selectedItems())
@@ -138,7 +138,7 @@ QList<Control*> FormScene::selectedControls() const
     return selectedControls;
 }
 
-void FormScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mousePressEvent(event);
 
@@ -162,7 +162,7 @@ void FormScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     update();
 }
 
-void FormScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
@@ -201,14 +201,14 @@ void FormScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     m_lastMousePos = event->scenePos();
 
-    QPointer<FormScene> p(this);
+    QPointer<DesignerScene> p(this);
     Suppressor::suppress(100, "update", [=] {
         if (p)
             update();
     });
 }
 
-void FormScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseReleaseEvent(event);
     itemPressed = false;
@@ -223,7 +223,7 @@ void FormScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     update();
 }
 
-void FormScene::drawForeground(QPainter* painter, const QRectF& rect)
+void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
     painter->save();
@@ -278,12 +278,12 @@ void FormScene::drawForeground(QPainter* painter, const QRectF& rect)
     painter->restore();
 }
 
-QPointF FormScene::lastMousePos() const
+QPointF DesignerScene::lastMousePos() const
 {
     return m_lastMousePos;
 }
 
-bool FormScene::stick() const
+bool DesignerScene::stick() const
 {
     bool ret = false;
     auto selectedControls = this->selectedControls();
@@ -622,7 +622,7 @@ bool FormScene::stick() const
     return ret;
 }
 
-QVector<QLineF> FormScene::guideLines() const
+QVector<QLineF> DesignerScene::guideLines() const
 {
     QVector<QLineF> lines;
     auto selectedControls = this->selectedControls();
@@ -760,7 +760,7 @@ QVector<QLineF> FormScene::guideLines() const
     return lines;
 }
 
-void FormScene::clearScene()
+void DesignerScene::clearScene()
 {
     clear();
     m_forms.clear();
@@ -769,7 +769,7 @@ void FormScene::clearScene()
     itemMoving = false;
 }
 
-void FormScene::setMainForm(Form* mainForm)
+void DesignerScene::setMainForm(Form* mainForm)
 {
     if (!m_forms.contains(mainForm) || m_mainForm == mainForm)
         return;
@@ -782,7 +782,7 @@ void FormScene::setMainForm(Form* mainForm)
     emit mainFormChanged(m_mainForm);
 }
 
-const QList<Form*>& FormScene::forms() const
+const QList<Form*>& DesignerScene::forms() const
 {
     return m_forms;
 }

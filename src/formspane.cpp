@@ -4,7 +4,7 @@
 #include <saveutils.h>
 #include <savebackend.h>
 #include <projectbackend.h>
-#include <formscene.h>
+#include <designerscene.h>
 #include <centralwidget.h>
 #include <filemanager.h>
 #include <css.h>
@@ -194,11 +194,11 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
 
 void FormsPane::removeButtonClicked()
 {
-    auto form = dW->formScene()->mainForm();
+    auto form = dW->designerScene()->mainForm();
     if (!form || !form->form() || form->main())
         return;
     SaveBackend::instance()->removeForm((Form*)form);
-    dW->formScene()->removeForm(form);
+    dW->designerScene()->removeForm(form);
 }
 
 void FormsPane::addButtonClicked()
@@ -212,7 +212,7 @@ void FormsPane::addButtonClicked()
         return;
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
-    dW->formScene()->addForm(form);
+    dW->designerScene()->addForm(form);
     SaveBackend::instance()->addForm(form);
     rm(tempPath);
 }
@@ -248,9 +248,9 @@ void FormsPane::handleCurrentFormChange()
         return;
 
     auto id = _listWidget->currentItem()->text();
-    for (auto form : dW->formScene()->forms())
+    for (auto form : dW->designerScene()->forms())
         if (form->id() == id)
-            dW->formScene()->setMainForm(form);
+            dW->designerScene()->setMainForm(form);
     dW->updateSkin();
     emit currentFormChanged();
 }

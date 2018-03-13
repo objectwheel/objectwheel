@@ -45,7 +45,7 @@ void BackendManager::handleProjectStart() const
 
     SaveBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
-//    dW->formScene()->clearSelection();
+//    dW->designerScene()->clearSelection();
     ToolsBackend::instance()->downloadTools();
     // MainWindow::instance()->setWindowTitle //FIXME
     // (QString(APP_NAME) + " - [" + projectname + "]");

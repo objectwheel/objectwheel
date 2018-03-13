@@ -11,6 +11,7 @@ class InspectorPane;
 class CentralWidget;
 class PropertiesPane;
 class PageSwitcherPane;
+class DesignerWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -34,6 +35,7 @@ class MainWindow : public QMainWindow
         FormsPane* m_formsPane;
         InspectorPane* m_inspectorPane;
         CentralWidget* m_centralWidget;
+        DesignerWidget* m_designerWidget;
 };
 
 #endif // MAINWINDOW_H

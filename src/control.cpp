@@ -5,7 +5,7 @@
 #include <filemanager.h>
 #include <controlwatcher.h>
 #include <suppressor.h>
-#include <formscene.h>
+#include <designerscene.h>
 #include <previewerbackend.h>
 #include <saveutils.h>
 

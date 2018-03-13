@@ -1,5 +1,5 @@
-#include <formview.h>
-#include <formscene.h>
+#include <designerview.h>
+#include <designerscene.h>
 #include <css.h>
 #include <savebackend.h>
 #include <fit.h>
@@ -13,7 +13,7 @@
 
 extern const char* TOOL_KEY;
 
-FormView::FormView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
+DesignerView::DesignerView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
   , m_menu(new QMenu(this))
   , m_sendBackAct(new QAction(this))
   , m_bringFrontAct(new QAction(this))
@@ -96,12 +96,12 @@ FormView::FormView(FormScene* scene, QWidget* parent) : QGraphicsView(scene, par
     addAction(m_moveLeftAct);
 }
 
-FormScene* FormView::scene() const
+FormScene* DesignerView::scene() const
 {
     return static_cast<FormScene*>(QGraphicsView::scene());
 }
 
-void FormView::resizeEvent(QResizeEvent* event)
+void DesignerView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
 
@@ -110,7 +110,7 @@ void FormView::resizeEvent(QResizeEvent* event)
         mainForm->centralize();
 }
 
-void FormView::contextMenuEvent(QContextMenuEvent* event)
+void DesignerView::contextMenuEvent(QContextMenuEvent* event)
 {
     QGraphicsView::contextMenuEvent(event);
 
@@ -139,17 +139,17 @@ void FormView::contextMenuEvent(QContextMenuEvent* event)
     m_menu->exec(event->globalPos());
 }
 
-void FormView::onUndoAction()
+void DesignerView::onUndoAction()
 {
     //TODO
 }
 
-void FormView::onRedoAction()
+void DesignerView::onRedoAction()
 {
     //TODO
 }
 
-void FormView::onCutAction()
+void DesignerView::onCutAction()
 {
     QList<QUrl> urls;
     QByteArray controls;
@@ -178,7 +178,7 @@ void FormView::onCutAction()
     clipboard->setMimeData(mimeData);
 }
 
-void FormView::onCopyAction()
+void DesignerView::onCopyAction()
 {
     QList<QUrl> urls;
     auto mimeData = new QMimeData;
@@ -200,7 +200,7 @@ void FormView::onCopyAction()
     clipboard->setMimeData(mimeData);
 }
 
-void FormView::onPasteAction()
+void DesignerView::onPasteAction()
 {
     auto clipboard = QGuiApplication::clipboard();
     auto mimeData = clipboard->mimeData();
@@ -245,7 +245,7 @@ void FormView::onPasteAction()
     }
 }
 
-void FormView::onDeleteAction()
+void DesignerView::onDeleteAction()
 { //FIXME: Do not delete if docs are open within QML Editor
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
@@ -255,14 +255,14 @@ void FormView::onDeleteAction()
     }
 }
 
-void FormView::onSelectAllAction()
+void DesignerView::onSelectAllAction()
 {
     auto mainForm = scene()->mainForm();
     for (auto control : mainForm->childControls())
         control->setSelected(true);
 }
 
-void FormView::onMoveUpAction()
+void DesignerView::onMoveUpAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
@@ -270,7 +270,7 @@ void FormView::onMoveUpAction()
         control->moveBy(0, - fit::fx(1));
 }
 
-void FormView::onMoveDownAction()
+void DesignerView::onMoveDownAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
@@ -278,7 +278,7 @@ void FormView::onMoveDownAction()
         control->moveBy(0, fit::fx(1));
 }
 
-void FormView::onMoveRightAction()
+void DesignerView::onMoveRightAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
@@ -286,7 +286,7 @@ void FormView::onMoveRightAction()
         control->moveBy(fit::fx(1), 0);
 }
 
-void FormView::onMoveLeftAction()
+void DesignerView::onMoveLeftAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
@@ -294,7 +294,7 @@ void FormView::onMoveLeftAction()
         control->moveBy(- fit::fx(1), 0);
 }
 
-void FormView::onSendBackAction()
+void DesignerView::onSendBackAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
@@ -302,7 +302,7 @@ void FormView::onSendBackAction()
         control->setZValue(scene()->mainForm()->lowerZValue() - 1);
 }
 
-void FormView::onBringFrontAction()
+void DesignerView::onBringFrontAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());

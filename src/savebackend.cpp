@@ -3,7 +3,7 @@
 #include <filemanager.h>
 #include <projectbackend.h>
 #include <control.h>
-#include <formscene.h>
+#include <designerscene.h>
 #include <parserutils.h>
 
 #include <QApplication>
@@ -339,7 +339,7 @@ void SaveBackend::exposeProject() const
           DIR_THIS + separator() + "main.qml");
         if (SaveUtils::isMain(path))
             form->setMain(true);
-        dW->formScene()->addForm(form);
+        dW->designerScene()->addForm(form);
 
         QMap<QString, Control*> pmap;
         pmap[path] = form;

@@ -5,14 +5,12 @@
 #include <QGraphicsScene>
 #include <QPointer>
 
-class FormScene : public QGraphicsScene
+class DesignerScene : public QGraphicsScene
 {
         Q_OBJECT
 
     public:
-        explicit FormScene(QObject *parent = Q_NULLPTR);
-        void setMainControl(Control* mainControl);
-
+        explicit DesignerScene(QObject *parent = Q_NULLPTR);
         const QList<Form*>& forms() const;
         void addForm(Form* form);
         void removeForm(Form* form);

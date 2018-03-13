@@ -1,5 +1,5 @@
 #include <qmleditorview.h>
-#include <formscene.h>
+#include <designerscene.h>
 #include <control.h>
 #include <fit.h>
 #include <saveutils.h>
@@ -247,7 +247,7 @@ QmlEditorViewPrivate::QmlEditorViewPrivate(QmlEditorView* parent)
     //        connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
     //        connect(SaveBackend::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
     //        connect(dW->controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
-    //        connect(dW->formScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
+    //        connect(dW->designerScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
     //    });
 
     zoomlLevelCombobox->addItem("35 %");

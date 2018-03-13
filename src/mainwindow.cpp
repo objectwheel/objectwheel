@@ -232,11 +232,11 @@ void MainWindow::reset()
     //    ToolsBackend::instance()->clear();
 
     //    m_centralWidget->controlScene()->clearSelection();
-    //    m_centralWidget->formScene()->clearSelection();
+    //    m_centralWidget->designerScene()->clearSelection();
 
     //    m_centralWidget->reset();
     //    m_centralWidget->controlScene()->clearScene();
-    //    m_centralWidget->formScene()->clearScene();
+    //    m_centralWidget->designerScene()->clearScene();
 
     //    m_formsPane->reset();
     //    m_toolboxPane->reset();

@@ -15,9 +15,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/zipper.h \
            $$PWD/delayer.h \
            $$PWD/control.h \
-           $$PWD/formscene.h \
            $$PWD/savetransaction.h \
-           $$PWD/formview.h \
            $$PWD/qmleditorview.h \
            $$PWD/qmlcodeeditor.h \
            $$PWD/qmlhighlighter.h \
@@ -86,7 +84,9 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/designerwidget.h \
     $$PWD/dpr.h \
     $$PWD/runpane.h \
-    $$PWD/pageswitcherpane.h
+    $$PWD/pageswitcherpane.h \
+    $$PWD/designerscene.h \
+    $$PWD/designerview.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -97,9 +97,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/zipper.cpp \
            $$PWD/delayer.cpp \
            $$PWD/control.cpp \
-           $$PWD/formscene.cpp \
            $$PWD/savetransaction.cpp \
-           $$PWD/formview.cpp \
            $$PWD/qmleditorview.cpp \
            $$PWD/qmlcodeeditor.cpp \
            $$PWD/qmlhighlighter.cpp \
@@ -165,7 +163,9 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/centralwidget.cpp \
     $$PWD/designerwidget.cpp \
     $$PWD/runpane.cpp \
-    $$PWD/pageswitcherpane.cpp
+    $$PWD/pageswitcherpane.cpp \
+    $$PWD/designerscene.cpp \
+    $$PWD/designerview.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

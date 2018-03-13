@@ -8,7 +8,7 @@
 #include <formspane.h>
 #include <control.h>
 #include <controlwatcher.h>
-#include <formscene.h>
+#include <designerscene.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -177,7 +177,7 @@ InspectorPane::InspectorPane(FormScene* scene, QWidget* parent) : QWidget(parent
 
     /* Prepare Properties Widget */
     // FIXME
-    //    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
+    //    connect(parent->centralWidget()->designerScene(), SIGNAL(selectionChanged()),
     //      SLOT(refresh()));
     //    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
     //      SLOT(refresh()));

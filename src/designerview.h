@@ -7,11 +7,11 @@ class FormScene;
 class QMenu;
 class QAction;
 
-class FormView : public QGraphicsView
+class DesignerView : public QGraphicsView
 {
         Q_OBJECT
     public:
-        explicit FormView(FormScene* scene, QWidget* parent = 0);
+        explicit DesignerView(FormScene* scene, QWidget* parent = 0);
         FormScene* scene() const;
 
     protected:

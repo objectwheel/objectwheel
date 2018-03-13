@@ -10,7 +10,7 @@
 #include <focuslesslineedit.h>
 #include <previewresult.h>
 #include <control.h>
-#include <formscene.h>
+#include <designerscene.h>
 #include <previewerbackend.h>
 
 #include <QtWidgets>
@@ -1228,7 +1228,7 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
 
     /* Prepare Properties Widget */
     //FIXME
-    //    connect(parent->centralWidget()->formScene(), SIGNAL(selectionChanged()),
+    //    connect(parent->centralWidget()->designerScene(), SIGNAL(selectionChanged()),
     //            SLOT(handleSelectionChange()));
     //    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
     //            SLOT(handleSelectionChange()));
