@@ -37,6 +37,7 @@ class OutputPane : public QWidget
         bool isCollapsed() const;
 
     public slots:
+        void reset();
         void clear();
         void expand();
         void collapse();

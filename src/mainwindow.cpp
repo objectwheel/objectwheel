@@ -17,6 +17,7 @@
 #include <QLabel>
 #include <QToolButton>
 #include <QDockWidget>
+#include <QLayout>
 
 namespace {
     QDockWidget* propertiesDockWidget;
@@ -24,14 +25,6 @@ namespace {
     QDockWidget* toolboxDockWidget;
     QDockWidget* inspectorDockWidget;
 }
-
-RunPane* m_runPane;
-FormsPane* m_formsPane;
-OutputPane* m_outputPane;
-ToolboxPane* m_toolboxPane;
-InspectorPane* m_inspectorPane;
-PropertiesPane* m_propertiesPane;
-PageSwitcherPane* m_pageSwitcherPane;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
@@ -54,28 +47,31 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Set Tool Bars **/
     /* Add Run Pane */
-    auto runBar = new QToolBar(this);
+    auto runBar = new QToolBar;
+    runBar->setOrientation(Qt::Horizontal);
     runBar->setFixedHeight(fit::fx(38));
     runBar->setFloatable(false);
     runBar->setMovable(false);
+    runBar->setStyleSheet("border: none");
+    runBar->setContentsMargins(0, 0, 0, 0);
+    runBar->layout()->setContentsMargins(0, 0, 0, 0);
     runBar->addWidget(m_runPane);
+    m_runPane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     addToolBar(Qt::TopToolBarArea, runBar);
 
     /* Add Page Switcher Pane */
-    auto pageSwitcherBar = new QToolBar(this);
+    auto pageSwitcherBar = new QToolBar;
+    pageSwitcherBar->setOrientation(Qt::Vertical);
     pageSwitcherBar->setFixedWidth(fit::fx(50));
+    pageSwitcherBar->setWindowFlags(pageSwitcherBar->windowFlags() | Qt::WindowStaysOnTopHint);
     pageSwitcherBar->setFloatable(false);
     pageSwitcherBar->setMovable(false);
+    pageSwitcherBar->setStyleSheet("border: none");
+    pageSwitcherBar->setContentsMargins(0, 0, 0, 0);
+    pageSwitcherBar->layout()->setContentsMargins(0, 0, 0, 0);
     pageSwitcherBar->addWidget(m_pageSwitcherPane);
-    addToolBar(Qt::LeftToolBarArea, pageSwitcherBar);
-
-    /* Add Output Pane */
-    auto outputBar = new QToolBar(this);
-    outputBar->setFixedHeight(fit::fx(25));
-    outputBar->setFloatable(false);
-    outputBar->setMovable(false);
-    outputBar->addWidget(m_outputPane);
-    addToolBar(Qt::BottomToolBarArea, outputBar);
+    m_pageSwitcherPane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addToolBar(Qt::LeftToolBarArea , pageSwitcherBar);
 
     /** Set Dock Widgets **/
     QFont dockTitleFont;
@@ -85,6 +81,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto inspectorTitleLabel = new QLabel;
     inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     inspectorTitleLabel->setText(tr("   Control Inspector"));
+    inspectorTitleLabel->setStyleSheet("color: #2E3A41");
     inspectorTitleLabel->setFont(dockTitleFont);
 
     auto inspectorTitlePinButton = new QToolButton;
@@ -103,6 +100,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     inspectorTitleBar->setFixedHeight(fit::fx(24));
 
     inspectorDockWidget = new QDockWidget;
+    inspectorDockWidget->setStyleSheet("QDockWidget { border: none }");
     inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
     inspectorDockWidget->setWidget(m_inspectorPane);
     inspectorDockWidget->setWindowTitle(tr("Control Inspector"));
@@ -113,6 +111,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto propertiesTitleLabel = new QLabel;
     propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     propertiesTitleLabel->setText(tr("   Properties"));
+    propertiesTitleLabel->setStyleSheet("color: #2E3A41");
     propertiesTitleLabel->setFont(dockTitleFont);
 
     auto propertiesTitlePinButton = new QToolButton;
@@ -131,6 +130,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesTitleBar->setFixedHeight(fit::fx(24));
 
     propertiesDockWidget = new QDockWidget;
+    propertiesDockWidget->setStyleSheet("QDockWidget { border: none }");
     propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
     propertiesDockWidget->setWidget(m_propertiesPane);
     propertiesDockWidget->setWindowTitle(tr("Properties"));
@@ -141,6 +141,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto toolboxTitleLabel = new QLabel;
     toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolboxTitleLabel->setText(tr("   Toolbox"));
+    toolboxTitleLabel->setStyleSheet("color: #2E3A41");
     toolboxTitleLabel->setFont(dockTitleFont);
 
     auto toolboxTitlePinButton = new QToolButton;
@@ -168,6 +169,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxTitleBar->setFixedHeight(fit::fx(24));
 
     toolboxDockWidget = new QDockWidget;
+    toolboxDockWidget->setStyleSheet("QDockWidget { border: none }");
     toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
     toolboxDockWidget->setWidget(m_toolboxPane);
     toolboxDockWidget->setWindowTitle(tr("Toolbox"));
@@ -179,6 +181,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto formsTitleLabel = new QLabel;
     formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     formsTitleLabel->setText(tr("   Form Navigator"));
+    formsTitleLabel->setStyleSheet("color: #2E3A41");
     formsTitleLabel->setFont(dockTitleFont);
 
     auto formsTitlePinButton = new QToolButton;
@@ -197,6 +200,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsTitleBar->setFixedHeight(fit::fx(24));
 
     formsDockWidget = new QDockWidget;
+    formsDockWidget->setStyleSheet("QDockWidget { border: none }");
     formsDockWidget->setTitleBarWidget(formsTitleBar);
     formsDockWidget->setWidget(m_formsPane);
     formsDockWidget->setWindowTitle(tr("Form Navigator"));

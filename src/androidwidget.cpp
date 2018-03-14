@@ -13,11 +13,6 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     , _permissionsBoxLay(&_permissionsBox)
     , _signingBoxLay(&_signingBox)
 {
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#e0e4e7");
-    setPalette(p);
-    setAutoFillBackground(true);
-
     auto buttonsLay = new QHBoxLayout;
     buttonsLay->addWidget(&_btnBack);
     buttonsLay->addWidget(&_btnBuild);

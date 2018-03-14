@@ -10,11 +10,6 @@ QVBoxLayout* qtScLay,* owScLay;
 ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     : QWidget(parent)
 {
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#e0e4e7");
-    setPalette(p);
-    setAutoFillBackground(true);
-
     QVBoxLayout* layout = new QVBoxLayout(this);
     QHBoxLayout* logoLay = new QHBoxLayout;
     QLabel* lblLogoOw = new QLabel;

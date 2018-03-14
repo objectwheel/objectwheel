@@ -63,7 +63,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     hideButton->setToolTip("Hide bar.");
     hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
     hideButton->settings().topColor = "#0D74C8";
-    hideButton->settings().bottomColor = hideButton->settings().topColor.darker(120);
+    hideButton->settings().bottomColor = "#0b6ab8";
     hideButton->settings().borderRadius = fit::fx(10);
     connect(hideButton, SIGNAL(clicked(bool)),
       SLOT(handleHideButtonClicked()));
@@ -77,15 +77,15 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     issuesButton->setCursor(Qt::PointingHandCursor);
     issuesButton->setToolTip("Show recent issues.");
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
-    issuesButton->settings().topColor = "#697D8C";
-    issuesButton->settings().bottomColor = issuesButton->settings().topColor.darker(120);
+    issuesButton->settings().topColor = "#5d6975";
+    issuesButton->settings().bottomColor = "#515b66";
     issuesButton->settings().textColor = "#f0f4f7";
     issuesButton->setChecked(true);
     connect(issuesButton, SIGNAL(toggled(bool)),
       SLOT(handleIssuesButtonClicked(bool)));
 
-    searchButton->settings().topColor = "#697D8C";
-    searchButton->settings().bottomColor = searchButton->settings().topColor.darker(120);
+    searchButton->settings().topColor = "#5d6975";
+    searchButton->settings().bottomColor = "#515b66";
     searchButton->settings().borderRadius = fit::fx(5);
     searchButton->settings().textColor = "#f0f4f7";
     searchButton->setCheckable(true);
@@ -99,8 +99,8 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     connect(searchButton, SIGNAL(toggled(bool)),
       SLOT(handleSearchButtonClicked(bool)));
 
-    consoleButton->settings().topColor = "#697D8C";
-    consoleButton->settings().bottomColor = consoleButton->settings().topColor.darker(120);
+    consoleButton->settings().topColor = "#5d6975";
+    consoleButton->settings().bottomColor = "#515b66";
     consoleButton->settings().borderRadius = fit::fx(5);
     consoleButton->settings().textColor = "#f0f4f7";
     consoleButton->setCheckable(true);
@@ -275,8 +275,8 @@ void OutputPane::shine(OutputPane::Box type)
                 btn->settings().bottomColor = "#B34B46";
                 btn->triggerSettings();
             } else {
-                btn->settings().topColor = "#697D8C";
-                btn->settings().bottomColor = btn->settings().topColor.darker(120);
+                btn->settings().topColor = "#5d6975";
+                btn->settings().bottomColor = "#515b66";
                 btn->triggerSettings();
             }
         } else {
@@ -311,6 +311,11 @@ OutputPane::Box OutputPane::activeBox() const
 bool OutputPane::isCollapsed() const
 {
     return _collapsed;
+}
+
+void OutputPane::reset()
+{
+    //TODO
 }
 
 ConsoleBox* OutputPane::consoleBox()

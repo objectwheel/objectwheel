@@ -226,7 +226,7 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
-    painter->save();
+
     painter->setRenderHint(QPainter::Antialiasing);
 
     if ((itemMoving || Resizer::resizing())/*&& m_snapping */&& m_mainForm != nullptr) {
@@ -275,7 +275,6 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
         painter->setPen(pen);
         painter->drawText(rect, "No tools selected", QTextOption(Qt::AlignCenter));
     }
-    painter->restore();
 }
 
 QPointF DesignerScene::lastMousePos() const

@@ -45,7 +45,6 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_designerView->setDragMode(QGraphicsView::RubberBandDrag);
     m_designerView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     m_designerView->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
-    m_designerView->setBackgroundBrush(QColor("#edf2f5"));
     m_designerView->setFrameShape(QFrame::NoFrame);
     m_designerView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -209,6 +208,11 @@ void DesignerWidget::onClearButtonClick()
 void DesignerWidget::reset()
 {
     m_lastScale = 1.0;
+}
+
+QSize DesignerWidget::sizeHint() const
+{
+    return fit::fx(QSizeF(680, 680)).toSize();
 }
 
 void DesignerWidget::onControlClick(Control* control)

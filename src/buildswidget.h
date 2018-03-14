@@ -28,6 +28,9 @@ class BuildsWidget : public QWidget
     public slots:
         void reset();
 
+    protected:
+        QSize sizeHint() const override;
+
     private slots:
         void showModules();
         void showPlatforms();

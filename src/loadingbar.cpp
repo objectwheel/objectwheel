@@ -123,7 +123,7 @@ namespace {
         doc.setIndentWidth(0);
 
         QTextBlockFormat bf;
-        bf.setLineHeight(22, QTextBlockFormat::FixedHeight);
+        bf.setLineHeight(rect.height() - fit::fx(1.5 * DPR), QTextBlockFormat::FixedHeight);
         bf.setAlignment(Qt::AlignCenter);
 
         QTextCharFormat cf;

@@ -4,6 +4,7 @@
 #include <androidwidget.h>
 #include <moduleselectionwidget.h>
 #include <downloadwidget.h>
+#include <fit.h>
 
 BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -32,6 +33,11 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
 void BuildsWidget::reset()
 {
     //TODO
+}
+
+QSize BuildsWidget::sizeHint() const
+{
+    return fit::fx(QSizeF(680, 680)).toSize();
 }
 
 void BuildsWidget::showModules()

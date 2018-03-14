@@ -88,8 +88,7 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/qmlcodeeditorwidget.h \
     $$PWD/projectsettingswidget.h \
     $$PWD/documentationswidget.h \
-    $$PWD/buildswidget.h \
-    $$PWD/outputwidget.h
+    $$PWD/buildswidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -170,8 +169,7 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/qmlcodeeditorwidget.cpp \
     $$PWD/projectsettingswidget.cpp \
     $$PWD/documentationswidget.cpp \
-    $$PWD/buildswidget.cpp \
-    $$PWD/outputwidget.cpp
+    $$PWD/buildswidget.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

@@ -165,7 +165,6 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     saveAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     saveAction.setShortcut(QKeySequence::Save);
 
-    splitter->setStyleSheet("QSplitter{background: #edf2f5;}");
     splitter->addWidget(editorWrapper);
     splitter->addWidget(explorerWrapper);
     splitter->setCollapsible(0, false);;
@@ -674,21 +673,6 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent)
 {
 }
 
-void QmlCodeEditorWidget::paintEvent(QPaintEvent*)
-{
-    QPen pen;
-    pen.setWidthF(fit::fx(1));
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-    QRectF _rect(0, 0, fit::fx(150), fit::fx(60));
-    _rect.moveCenter(rect().center());
-    pen.setStyle(Qt::DotLine);
-    pen.setColor(LINE_COLOR);
-    painter.setPen(pen);
-    painter.drawRect(_rect);
-    painter.drawText(_rect, "Editor unpinned, pin it again.", QTextOption(Qt::AlignCenter));
-}
-
 QmlCodeEditorWidget::Mode QmlCodeEditorWidget::mode() const
 {
     return _mode;
@@ -1021,6 +1005,11 @@ void QmlCodeEditorWidget::refreshErrors()
         for (auto error : _d->currentControl->errors())
             _d->codeEditor->addErrorLine(error.line());
     }
+}
+
+QSize QmlCodeEditorWidget::sizeHint() const
+{
+    return fit::fx(QSizeF(680, 680)).toSize();
 }
 
 #include "qmlcodeeditorwidget.moc"

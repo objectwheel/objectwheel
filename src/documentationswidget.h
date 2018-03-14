@@ -9,6 +9,9 @@ class DocumentationsWidget : public QWidget
     public:
         explicit DocumentationsWidget(QWidget *parent = nullptr);
 
+    protected:
+        QSize sizeHint() const override;
+
     public slots:
         void reset();
 };

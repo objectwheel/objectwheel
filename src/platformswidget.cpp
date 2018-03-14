@@ -79,11 +79,6 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     : QWidget(parent)
     , _layout(this)
 {
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#e0e4e7");
-    setPalette(p);
-    setAutoFillBackground(true);
-
     _layout.setContentsMargins(0, fit::fx(20), 0, fit::fx(20));
     _layout.setSpacing(fit::fx(10));
     _layout.addWidget(&_lblLogo);

@@ -23,6 +23,9 @@ class DesignerWidget : public QWidget
     public slots:
         void reset();
 
+    protected:
+        QSize sizeHint() const override;
+
     private slots:
         void onFitButtonClick();
         void onUndoButtonClick();

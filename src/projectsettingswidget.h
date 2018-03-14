@@ -9,6 +9,9 @@ class ProjectSettingsWidget : public QWidget
     public:
         explicit ProjectSettingsWidget(QWidget *parent = nullptr);
 
+    protected:
+        QSize sizeHint() const override;
+
     public slots:
         void reset();
 };

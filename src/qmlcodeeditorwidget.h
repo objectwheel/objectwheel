@@ -61,7 +61,7 @@ class QmlCodeEditorWidget : public QWidget
         void refreshErrors();
 
     protected:
-        void paintEvent(QPaintEvent *event) override;
+        QSize sizeHint() const override;
 
     signals:
         void modeChanged();

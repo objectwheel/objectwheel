@@ -9,6 +9,9 @@ class PageSwitcherPane : public QWidget
 
     public:
         explicit PageSwitcherPane(QWidget *parent = nullptr);
+
+    protected:
+        void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // PAGESWITCHERPANE_H

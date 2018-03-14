@@ -29,6 +29,7 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
   , m_moveRightAct(new QAction(this))
   , m_moveLeftAct(new QAction(this))
 {
+    setStyleSheet("background: transparent");
     verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
 

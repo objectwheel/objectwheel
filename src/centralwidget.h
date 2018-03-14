@@ -5,7 +5,7 @@
 
 class QSplitter;
 class QVBoxLayout;
-class OutputWidget;
+class OutputPane;
 class DesignerWidget;
 class QmlCodeEditorWidget;
 class ProjectSettingsWidget;
@@ -27,7 +27,7 @@ class CentralWidget : public QWidget
     private:
         QVBoxLayout* m_layout;
         QSplitter* m_splitterOut,* m_splitterIn;
-        OutputWidget* m_outputWidget;
+        OutputPane* m_outputPane;
         QmlCodeEditorWidget* m_qmlCodeEditorWidget;
         DesignerWidget* m_designerWidget;
         ProjectSettingsWidget* m_projectSettingsWidget;

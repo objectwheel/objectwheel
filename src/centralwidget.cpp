@@ -1,5 +1,5 @@
 #include <centralwidget.h>
-#include <outputwidget.h>
+#include <outputpane.h>
 #include <qmlcodeeditorwidget.h>
 #include <designerwidget.h>
 #include <projectsettingswidget.h>
@@ -13,7 +13,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_splitterOut(new QSplitter)
   , m_splitterIn(new QSplitter)
-  , m_outputWidget(new OutputWidget)
+  , m_outputPane(new OutputPane)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
   , m_projectSettingsWidget(new ProjectSettingsWidget)
@@ -24,9 +24,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_splitterOut);
 
+    m_splitterOut->setStyleSheet("QSplitter, QSplitter::handle { border: none }");
+    m_splitterOut->setHandleWidth(0);
     m_splitterOut->addWidget(m_splitterIn);
-    m_splitterOut->addWidget(m_outputWidget);
+    m_splitterOut->addWidget(m_outputPane);
 
+    m_splitterIn->setStyleSheet("QSplitter, QSplitter::handle { border: none }");
+    m_splitterIn->setHandleWidth(0);
     m_splitterIn->addWidget(m_qmlCodeEditorWidget);
     m_splitterIn->addWidget(m_designerWidget);
     m_splitterIn->addWidget(m_projectSettingsWidget);
@@ -49,7 +53,7 @@ void CentralWidget::reset()
     m_buildsWidget->hide();
     m_documentationsWidget->hide();
 
-    m_outputWidget->reset();
+    m_outputPane->reset();
     m_qmlCodeEditorWidget->reset();
     m_designerWidget->reset();
     m_projectSettingsWidget->reset();

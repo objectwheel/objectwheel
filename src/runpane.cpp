@@ -20,8 +20,8 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
   , m_buildsButton(new FlatButton)
   , m_projectsButton(new FlatButton)
 {
-    m_layout->setSpacing(fit::fx(20));
-    m_layout->setContentsMargins(fit::fx(10), 0, fit::fx(10), 0);
+    m_layout->setSpacing(fit::fx(8));
+    m_layout->setContentsMargins(fit::fx(8), 0, fit::fx(8), 0);
 
     m_layout->addWidget(m_runButton);
     m_layout->addWidget(m_stopButton);
@@ -87,6 +87,9 @@ void RunPane::paintEvent(QPaintEvent*)
     gradient.setColorAt(1, "#1068C6");
 
     painter.fillRect(rect(), gradient);
+
+    painter.setPen("#0c4e94");
+    painter.drawLine(QRectF(rect()).bottomLeft() + QPointF(0.5, -0.5), QRectF(rect()).bottomRight() + QPointF(-0.5, -0.5));
 }
 
 void RunPane::onStopButtonClick()
