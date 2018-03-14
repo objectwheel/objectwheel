@@ -20,6 +20,7 @@ class CentralWidget : public QWidget
         explicit CentralWidget(QWidget* parent = nullptr);
         QmlCodeEditorWidget* qmlCodeEditorWidget() const;
         DesignerWidget* designerWidget() const;
+        OutputPane* outputPane() const;
 
     public slots:
         void reset();

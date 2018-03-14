@@ -19,6 +19,8 @@ class FlatButton : public QPushButton
             qreal borderRadius;
             /* Others */
             bool iconButton;
+            bool showShadow;
+            bool textUnderIcon;
         };
 
 	public:

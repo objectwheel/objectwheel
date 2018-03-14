@@ -43,6 +43,11 @@ DesignerWidget* CentralWidget::designerWidget() const
     return m_designerWidget;
 }
 
+OutputPane* CentralWidget::outputPane() const
+{
+    return m_outputPane;
+}
+
 void CentralWidget::reset()
 {
     m_splitterIn->setOrientation(Qt::Horizontal);

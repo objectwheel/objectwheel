@@ -28,8 +28,7 @@ namespace {
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
-  , m_outputPane(new OutputPane)
-  , m_runPane(new RunPane(m_outputPane->consoleBox()))
+  , m_runPane(new RunPane(m_centralWidget->outputPane()->consoleBox()))
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
@@ -39,11 +38,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     QPalette p(palette());
     p.setColor(backgroundRole(), "#f0f4f7");
-    setStyleSheet("QMainWindow::separator{ height: 1px; }");
-    setCentralWidget(m_centralWidget);
-    setAutoFillBackground(true);
-    setWindowTitle(APP_NAME);
     setPalette(p);
+
+    setWindowTitle(APP_NAME);
+    setAutoFillBackground(true);
+    setCentralWidget(m_centralWidget);
+    setContextMenuPolicy(Qt::NoContextMenu);
+    setStyleSheet("QMainWindow::separator{ height: 1px; }");
 
     /** Set Tool Bars **/
     /* Add Run Pane */
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     runBar->setFixedHeight(fit::fx(38));
     runBar->setFloatable(false);
     runBar->setMovable(false);
+    runBar->setWindowTitle(tr("Run Bar"));
     runBar->setStyleSheet("border: none");
     runBar->setContentsMargins(0, 0, 0, 0);
     runBar->layout()->setContentsMargins(0, 0, 0, 0);
@@ -62,10 +64,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
     pageSwitcherBar->setOrientation(Qt::Vertical);
-    pageSwitcherBar->setFixedWidth(fit::fx(50));
+    pageSwitcherBar->setFixedWidth(fit::fx(70));
     pageSwitcherBar->setWindowFlags(pageSwitcherBar->windowFlags() | Qt::WindowStaysOnTopHint);
     pageSwitcherBar->setFloatable(false);
     pageSwitcherBar->setMovable(false);
+    pageSwitcherBar->setWindowTitle(tr("Page Bar"));
     pageSwitcherBar->setStyleSheet("border: none");
     pageSwitcherBar->setContentsMargins(0, 0, 0, 0);
     pageSwitcherBar->layout()->setContentsMargins(0, 0, 0, 0);
@@ -245,4 +248,5 @@ void MainWindow::reset()
     m_toolboxPane->reset();
     m_inspectorPane->reset();
     m_propertiesPane->reset();
+    m_pageSwitcherPane->reset();
 }
