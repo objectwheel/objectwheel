@@ -1,129 +1,140 @@
 #include <loadingbar.h>
 #include <fit.h>
 #include <dpr.h>
-#include <QPainter>
-#include <QTextDocument>
+
 #include <QTimer>
+#include <QPainter>
+#include <QTextCursor>
+#include <QTextDocument>
+#include <QTextCharFormat>
+#include <QTextBlockFormat>
 
-#define INTERVALF     60
-#define INTERVAL      1000
-#define PATH_BAR      (":/resources/images/loadingbar.png")
-#define SIZE          (fit::fx(QSizeF{481, 24}))
-#define COLOR_DONE    ("#30a8f7")
-#define COLOR_ERROR   ("#b34b4e")
-#define COLOR_DEFAULT ("#3B444C")
-#define COLOR_TEXT    ("#2a2d33")
-
-static int counter = 25;
+namespace {
+    int counter;
+    QImage image;
+    QColor loadingColor;
+    void drawText(QPainter *painter, const QString &text, const QRectF& rect);
+}
 
 LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
-  , _progress(0)
-  , _image(PATH_BAR)
-  , _color(COLOR_DEFAULT)
+  , m_progress(0)
+  , m_timerEnding(new QTimer(this))
+  , m_timerFader(new QTimer(this))
 {
-    _timer = new QTimer(this);
-    _timer->setInterval(INTERVAL);
-    connect(_timer, SIGNAL(timeout()), SLOT(handleEnding()));
+    setFixedSize(fit::fx(QSizeF(481, 24)).toSize());
 
-    _timerFader = new QTimer(this);
-    _timerFader->setInterval(INTERVALF);
-    connect(_timerFader, SIGNAL(timeout()), SLOT(handleFader()));
+    image = QImage(":/resources/images/loadingbar.png");
+    image.setDevicePixelRatio(DPR);
 
-    _image.setDevicePixelRatio(DPR);
+    m_timerFader->setInterval(60);
+    m_timerEnding->setInterval(1000);
 
-    setFixedSize(SIZE.toSize() + QSize(0, 1));
+    connect(m_timerEnding, SIGNAL(timeout()), SLOT(onEndingTimeout()));
+    connect(m_timerFader, SIGNAL(timeout()), SLOT(onFaderTimeout()));
 }
 
 void LoadingBar::setText(const QString& text)
 {
-    _text = text;
-    _text.prepend(tr("<font color=\"") + COLOR_TEXT + "\">");
+    m_text = text;
 }
 
 void LoadingBar::busy(int progress, const QString& text)
 {
     counter = 25;
-    _timer->stop();
-    _timerFader->stop();
-    _color = COLOR_DEFAULT;
-    _text = text;
-    _progress = progress;
+    loadingColor = "#606467";
+
+    m_text = text;
+    m_progress = progress;
+    m_timerEnding->stop();
+    m_timerFader->stop();
+
     update();
 }
 
 void LoadingBar::done(const QString& text)
 {
     counter = 25;
-    _timer->stop();
-    _timerFader->stop();
-    _color = COLOR_DONE;
-    _timer->start();
-    _text = text;
-    _progress = 100;
+    loadingColor = "#30a8f7";
+
+    m_text = text;
+    m_progress = 100;
+    m_timerFader->stop();
+    m_timerEnding->start();
+
     update();
 }
 
 void LoadingBar::error(const QString& text)
 {
     counter = 25;
-    _timer->stop();
-    _timerFader->stop();
-    _color = COLOR_ERROR;
-    _timer->start();
-    _text = text;
-    _progress = 100;
+    loadingColor = "#C2504B";
+
+    m_text = text;
+    m_progress = 100;
+    m_timerFader->stop();
+    m_timerEnding->start();
+
     update();
 }
 
-void LoadingBar::handleEnding()
+void LoadingBar::onEndingTimeout()
 {
-    _timer->stop();
-    _timerFader->start();
+    m_timerEnding->stop();
+    m_timerFader->start();
 }
 
-void LoadingBar::handleFader()
+void LoadingBar::onFaderTimeout()
 {
-    _color.setAlpha(counter * 10);
+    loadingColor.setAlpha(counter * 10);
 
-    if (counter > 0) {
+    if (counter > 0)
         counter--;
-    } else {
+    else {
         counter = 25;
-        _progress = 0;
-        _color = COLOR_DEFAULT;
-        _timerFader->stop();
+        loadingColor = "#606467";
+
+        m_progress = 0;
+        m_timerFader->stop();
     }
 
     update();
 }
 
-// WARNING: Check this out on multi platforms
 void LoadingBar::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
+    painter.drawImage(rect(), image, image.rect());
 
-    return painter.fillRect(rect(), Qt::black);
-
-    painter.drawImage(QRectF{QPointF(0, 1), SIZE}, _image, _image.rect());
-
-    QFont f;
-    #if defined(Q_OS_WIN)
-    f.setWeight(QFont::Normal);
-    #else
-    f.setWeight(QFont::Medium);
-    #endif
-    f.setPixelSize(f.pixelSize() - 1);
-
-    QTextDocument doc;
-    doc.setDefaultFont(f);
-    doc.setHtml(_text);
-    doc.drawContents(&painter, QRectF{QPointF(0, 1), SIZE});
+    drawText(&painter, m_text, rect());
 
     QPainterPath path;
-    path.addRoundedRect(fit::fx(0.5), fit::fx(1.5), fit::fx(480.0), fit::fx(23.0), fit::fx(3.5), fit::fx(3.5));
+    path.addRoundedRect(fit::fx(0.5), fit::fx(0.5), fit::fx(480.0), fit::fx(23.0), fit::fx(3.5), fit::fx(3.5));
     painter.setClipPath(path);
-    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(22.5), _progress * fit::fx(4.8), fit::fx(10)}, _color);
+    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(21.5), m_progress * fit::fx(4.8), fit::fx(10)}, loadingColor);
 }
 
+namespace {
+    void drawText(QPainter *painter, const QString &text, const QRectF& rect)
+    {
+        QTextDocument doc;
+        doc.setTextWidth(rect.width());
+        doc.setDocumentMargin(0);
+        doc.setIndentWidth(0);
 
+        QTextBlockFormat bf;
+        bf.setLineHeight(22, QTextBlockFormat::FixedHeight);
+        bf.setAlignment(Qt::AlignCenter);
+
+        QTextCharFormat cf;
+        cf.setForeground(QColor("#2E3A41"));
+
+        QTextCursor cursor(&doc);
+        cursor.insertHtml(text);
+        cursor.select(QTextCursor::Document);
+        cursor.mergeBlockFormat(bf);
+        cursor.mergeCharFormat(cf);
+
+        doc.drawContents(painter, rect);
+    }
+}

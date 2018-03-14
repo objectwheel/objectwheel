@@ -20,15 +20,13 @@ class LoadingBar : public QWidget
         void paintEvent(QPaintEvent *event) override;
 
     private slots:
-        void handleEnding();
-        void handleFader();
+        void onEndingTimeout();
+        void onFaderTimeout();
 
     private:
-        int _progress;
-        QImage _image;
-        QString _text;
-        QColor _color;
-        QTimer* _timer,* _timerFader;
+        int m_progress;
+        QString m_text;
+        QTimer* m_timerEnding,* m_timerFader;
 };
 
 #endif // LOADINGBAR_H
