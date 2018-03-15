@@ -86,9 +86,11 @@ HEADERS += $$PWD/mainwindow.h \
     $$PWD/designerscene.h \
     $$PWD/designerview.h \
     $$PWD/qmlcodeeditorwidget.h \
-    $$PWD/projectsettingswidget.h \
-    $$PWD/documentationswidget.h \
-    $$PWD/buildswidget.h
+    $$PWD/buildswidget.h \
+    $$PWD/pages.h \
+    $$PWD/documentswidget.h \
+    $$PWD/projectoptionswidget.h \
+    $$PWD/exposerbackend.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -167,9 +169,10 @@ SOURCES += $$PWD/main.cpp\
     $$PWD/designerscene.cpp \
     $$PWD/designerview.cpp \
     $$PWD/qmlcodeeditorwidget.cpp \
-    $$PWD/projectsettingswidget.cpp \
-    $$PWD/documentationswidget.cpp \
-    $$PWD/buildswidget.cpp
+    $$PWD/buildswidget.cpp \
+    $$PWD/documentswidget.cpp \
+    $$PWD/projectoptionswidget.cpp \
+    $$PWD/exposerbackend.cpp
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

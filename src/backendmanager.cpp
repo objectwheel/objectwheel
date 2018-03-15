@@ -2,7 +2,7 @@
 #include <toolsbackend.h>
 #include <userbackend.h>
 #include <projectbackend.h>
-#include <savebackend.h>
+#include <exposerbackend.h>
 #include <windowmanager.h>
 #include <authenticator.h>
 #include <previewerbackend.h>
@@ -40,7 +40,7 @@ void BackendManager::handleProjectStart() const
 {
     PreviewerBackend::instance()->restart();
 
-    SaveBackend::instance()->exposeProject();
+    ExposerBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->designerScene()->clearSelection();
     ToolsBackend::instance()->downloadTools();

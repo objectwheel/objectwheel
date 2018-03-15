@@ -2,8 +2,8 @@
 #include <outputpane.h>
 #include <qmlcodeeditorwidget.h>
 #include <designerwidget.h>
-#include <projectsettingswidget.h>
-#include <documentationswidget.h>
+#include <projectoptionswidget.h>
+#include <documentswidget.h>
 #include <buildswidget.h>
 
 #include <QSplitter>
@@ -16,9 +16,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_outputPane(new OutputPane)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
-  , m_projectSettingsWidget(new ProjectSettingsWidget)
+  , m_projectOptionsWidget(new ProjectOptionsWidget)
   , m_buildsWidget(new BuildsWidget)
-  , m_documentationsWidget(new DocumentationsWidget)
+  , m_documentsWidget(new DocumentsWidget)
 {
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -26,16 +26,18 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
 
     m_splitterOut->setStyleSheet("QSplitter, QSplitter::handle { border: none }");
     m_splitterOut->setHandleWidth(0);
+    m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
     m_splitterOut->addWidget(m_outputPane);
 
     m_splitterIn->setStyleSheet("QSplitter, QSplitter::handle { border: none }");
     m_splitterIn->setHandleWidth(0);
-    m_splitterIn->addWidget(m_qmlCodeEditorWidget);
+    m_splitterIn->setOrientation(Qt::Horizontal);
     m_splitterIn->addWidget(m_designerWidget);
-    m_splitterIn->addWidget(m_projectSettingsWidget);
+    m_splitterIn->addWidget(m_qmlCodeEditorWidget);
+    m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
-    m_splitterIn->addWidget(m_documentationsWidget);
+    m_splitterIn->addWidget(m_documentsWidget);
 }
 
 DesignerWidget* CentralWidget::designerWidget() const
@@ -50,24 +52,63 @@ OutputPane* CentralWidget::outputPane() const
 
 void CentralWidget::reset()
 {
-    m_splitterIn->setOrientation(Qt::Horizontal);
-    m_splitterOut->setOrientation(Qt::Vertical);
-
-    m_qmlCodeEditorWidget->hide();
-    m_projectSettingsWidget->hide();
-    m_buildsWidget->hide();
-    m_documentationsWidget->hide();
+    setCurrentPage(Page_Designer);
 
     m_outputPane->reset();
     m_qmlCodeEditorWidget->reset();
     m_designerWidget->reset();
-    m_projectSettingsWidget->reset();
+    m_projectOptionsWidget->reset();
     m_buildsWidget->reset();
-    m_documentationsWidget->reset();
+    m_documentsWidget->reset();
 
 //    m_centralWidget->qmlCodeEditorWidget()->clear();
 //    m_centralWidget->designerWidget()->designerScene()->clearSelection();
-//    m_centralWidget->designerWidget()->designerScene()->clearScene();
+    //    m_centralWidget->designerWidget()->designerScene()->clearScene();
+}
+
+void CentralWidget::setCurrentPage(const Pages& page)
+{
+    hideWidgets();
+
+    switch (page) {
+        case Page_Builds:
+            return m_buildsWidget->show();
+            break;
+
+        case Page_Designer:
+            m_outputPane->show();
+            return m_designerWidget->show();
+            break;
+
+        case Page_SplitView:
+            m_outputPane->show();
+            m_designerWidget->show();
+            return m_qmlCodeEditorWidget->show();
+            break;
+
+        case Page_Documents:
+            return m_documentsWidget->show();
+            break;
+
+        case Page_QmlCodeEditor:
+            m_outputPane->show();
+            return m_qmlCodeEditorWidget->show();
+            break;
+
+        case Page_ProjectOptions:
+            return m_projectOptionsWidget->show();
+            break;
+    }
+}
+
+void CentralWidget::hideWidgets()
+{
+    m_outputPane->hide();
+    m_designerWidget->hide();
+    m_qmlCodeEditorWidget->hide();
+    m_projectOptionsWidget->hide();
+    m_buildsWidget->hide();
+    m_documentsWidget->hide();
 }
 
 QmlCodeEditorWidget* CentralWidget::qmlCodeEditorWidget() const

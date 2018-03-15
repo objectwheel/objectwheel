@@ -348,6 +348,11 @@ void FileExplorer::setRootPath(const QString& rootPath)
     _d->handleFileListSelectionChanged();
 }
 
+QSize FileExplorer::sizeHint() const
+{
+    return fit::fx(QSizeF(200, 680)).toSize();
+}
+
 QString FileExplorer::rootPath() const
 {
     return _d->fileList->fileModel()->rootPath();

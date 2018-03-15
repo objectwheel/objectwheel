@@ -23,12 +23,8 @@ class MainWindow : public QMainWindow
         void reset();
 
     private slots:
-        void onBuildsActivated();
-        void onDesignerActivated();
-        void onSplitViewActivated();
-        void onDocumentsActivated();
-        void onQmlCodeEditorActivated();
-        void onProjectOptionsActivated();
+        void hideDocks();
+        void showDocks();
 
     signals:
         void done();

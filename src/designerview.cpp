@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <css.h>
 #include <savebackend.h>
+#include <exposerbackend.h>
 #include <fit.h>
 
 #include <QMenu>
@@ -29,7 +30,7 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
   , m_moveRightAct(new QAction(this))
   , m_moveLeftAct(new QAction(this))
 {
-    setStyleSheet("background: transparent");
+    setStyleSheet("DesignerView { background: transparent }");
     verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
 
@@ -213,7 +214,7 @@ void DesignerView::onPasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = SaveBackend::instance()->exposeControl(url.toLocalFile(), uid);
+        auto control = ExposerBackend::instance()->exposeControl(url.toLocalFile(), uid);
         SaveBackend::instance()->addControl(control, mainForm, mainForm->uid(), mainForm->dir());
         control->setParentItem(mainForm);
         controls << control;

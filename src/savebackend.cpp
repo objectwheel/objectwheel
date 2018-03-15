@@ -3,7 +3,6 @@
 #include <filemanager.h>
 #include <projectbackend.h>
 #include <control.h>
-#include <designerscene.h>
 #include <parserutils.h>
 
 #include <QApplication>
@@ -326,52 +325,6 @@ QString SaveBackend::basePath() const
         return QString();
 
     return (projectDir + separator() + DIR_OWDB);
-}
-
-void SaveBackend::exposeProject() const
-{ //FIXME
-//    auto fpaths = SaveUtils::formPaths(ProjectBackend::instance()->dir());
-
-//    qreal j = 0;
-//    for (auto path : fpaths) {
-
-//        auto form = new Form(path + separator() +
-//          DIR_THIS + separator() + "main.qml");
-//        if (SaveUtils::isMain(path))
-//            form->setMain(true);
-//        dW->designerScene()->addForm(form);
-
-//        QMap<QString, Control*> pmap;
-//        pmap[path] = form;
-
-//        int i = 1;
-//        const auto& pths = SaveUtils::childrenPaths(path);
-//        for (auto child : pths) {
-//            auto pcontrol = pmap.value(dname(dname(child)));
-//            auto control = new Control(child + separator() +
-//              DIR_THIS + separator() + "main.qml", FormGui);
-//            control->setParentItem(pcontrol);
-//            pmap[child] = control;
-//            i++;
-//        }
-//        j++;
-//    }
-}
-
-Control* SaveBackend::exposeControl(const QString& rootPath, QString suid) const
-{
-    auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
-
-    QMap<QString, Control*> pmap;
-    pmap[rootPath] = control;
-    for (auto child : SaveUtils::childrenPaths(rootPath, suid)) {
-        auto pcontrol = pmap.value(dname(dname(child)));
-        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        control->setParentItem(pcontrol);
-        pmap[child] = control;
-    }
-
-    return control;
 }
 
 void SaveBackend::refreshToolUid(const QString& toolRootPath) const

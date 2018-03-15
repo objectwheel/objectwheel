@@ -30,7 +30,7 @@
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
 #define CHAR_CHANGEINDICATOR ("*")
-#define INITIALWIDTH_FILEEXPLORER (fit::fx(450))
+#define INITIALWIDTH_FILEEXPLORER (fit::fx(380))
 #define MINWIDTH_FILEEXPLORER (fit::fx(200))
 #define MINWIDTH_EDITOR (fit::fx(200))
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
@@ -678,6 +678,11 @@ QmlCodeEditorWidget::Mode QmlCodeEditorWidget::mode() const
     return _mode;
 }
 
+int QmlCodeEditorWidget::openControlCount() const
+{
+    return _editorItems.size();
+}
+
 void QmlCodeEditorWidget::setMode(const Mode& mode)
 {
     _mode = mode;
@@ -842,6 +847,8 @@ void QmlCodeEditorWidget::openControl(Control* control)
             break;
         }
     }
+
+    emit openControlCountChanged();
 }
 
 void QmlCodeEditorWidget::closeControl(Control* control, const bool ask)
@@ -950,6 +957,7 @@ void QmlCodeEditorWidget::closeDocument(Control* control, const QString& documen
     }
 
     _d->updateOpenDocHistory();
+    emit openControlCountChanged();
 }
 
 void QmlCodeEditorWidget::saveControl(Control*)

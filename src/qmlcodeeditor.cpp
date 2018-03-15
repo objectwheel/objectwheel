@@ -388,6 +388,11 @@ void QmlCodeEditor::focusInEvent(QFocusEvent* e)
     QPlainTextEdit::focusInEvent(e);
 }
 
+QSize QmlCodeEditor::sizeHint() const
+{
+    return fit::fx(QSizeF(480, 680)).toSize();
+}
+
 void QmlCodeEditor::keyPressEvent(QKeyEvent* e)
 {
     if (_completer.popup()->isVisible()) {

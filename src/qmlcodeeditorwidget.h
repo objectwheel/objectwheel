@@ -38,6 +38,8 @@ class QmlCodeEditorWidget : public QWidget
     public:
         explicit QmlCodeEditorWidget(QWidget *parent = 0);
         Mode mode() const;
+        int openControlCount() const;
+
         void setMode(const Mode& mode);
         bool pinned() const;
         bool isOpen(Control* control) const;
@@ -65,6 +67,7 @@ class QmlCodeEditorWidget : public QWidget
 
     signals:
         void modeChanged();
+        void openControlCountChanged();
 
     private:
         QmlCodeEditorWidgetPrivate* _d;

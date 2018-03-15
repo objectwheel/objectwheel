@@ -119,58 +119,145 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->settings().bottomColor = "#475059";
     m_buildsButton->settings().bottomColor = "#475059";
 
-    connect(m_designerButton, &FlatButton::pressed, [=] { m_designerButton->setChecked(true); });
-    connect(m_qmlCodeEditorButton, &FlatButton::pressed, [=] { m_qmlCodeEditorButton->setChecked(true); });
-    connect(m_projectOptionsButton, &FlatButton::pressed, [=] { m_projectOptionsButton->setChecked(true); });
-    connect(m_documentsButton, &FlatButton::pressed, [=] { m_documentsButton->setChecked(true); });
-    connect(m_splitViewButton, &FlatButton::pressed, [=] { m_splitViewButton->setChecked(true); });
-    connect(m_buildsButton, &FlatButton::pressed, [=] { m_buildsButton->setChecked(true); });
-
-    connect(m_designerButton, SIGNAL(pressed()), SIGNAL(designerActivated()));
-    connect(m_qmlCodeEditorButton, SIGNAL(pressed()), SIGNAL(qmlCodeEditorActivated()));
-    connect(m_projectOptionsButton, SIGNAL(pressed()), SIGNAL(projectOptionsActivated()));
-    connect(m_documentsButton, SIGNAL(pressed()), SIGNAL(documentsActivated()));
-    connect(m_splitViewButton, SIGNAL(pressed()), SIGNAL(splitViewActivated()));
-    connect(m_buildsButton, SIGNAL(pressed()), SIGNAL(buildsActivated()));
+    connect(m_designerButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Designer); });
+    connect(m_qmlCodeEditorButton, &FlatButton::pressed, [=] { setCurrentPage(Page_QmlCodeEditor); });
+    connect(m_projectOptionsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_ProjectOptions); });
+    connect(m_documentsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Documents); });
+    connect(m_splitViewButton, &FlatButton::pressed, [=] { setCurrentPage(Page_SplitView); });
+    connect(m_buildsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Builds); });
 }
 
-void PageSwitcherPane::setPage(const PageSwitcherPane::Pages& page)
+Pages PageSwitcherPane::currentPage() const
+{
+    if (m_buildsButton->isChecked())
+        return Page_Builds;
+    if (m_designerButton->isChecked())
+        return Page_Designer;
+    if (m_splitViewButton->isChecked())
+        return Page_SplitView;
+    if (m_documentsButton->isChecked())
+        return Page_Documents;
+    if (m_qmlCodeEditorButton->isChecked())
+        return Page_QmlCodeEditor;
+    else
+        return Page_ProjectOptions;
+}
+
+bool PageSwitcherPane::isPageEnabled(const Pages& page) const
 {
     switch (page) {
-        case Builds:
-            return m_buildsButton->click();
-        case Designer:
-            return m_designerButton->click();
-        case SplitView:
-            return m_splitViewButton->click();
-        case Documents:
-            return m_documentsButton->click();
-        case QmlCodeEditor:
-            return m_qmlCodeEditorButton->click();
-        case ProjectOptions:
-            return m_projectOptionsButton->click();
+        case Page_Builds:
+            return m_buildsButton->isEnabled();
+
+        case Page_Designer:
+            return m_designerButton->isEnabled();
+
+        case Page_SplitView:
+            return m_splitViewButton->isEnabled();
+
+        case Page_Documents:
+            return m_documentsButton->isEnabled();
+
+        case Page_QmlCodeEditor:
+            return m_qmlCodeEditorButton->isEnabled();
+
+        case Page_ProjectOptions:
+            return m_projectOptionsButton->isEnabled();
     }
 }
 
-PageSwitcherPane::Pages PageSwitcherPane::page() const
+void PageSwitcherPane::setCurrentPage(const Pages& page)
 {
-    if (m_buildsButton->isVisible())
-        return Builds;
-    if (m_designerButton->isVisible())
-        return Designer;
-    if (m_splitViewButton->isVisible())
-        return SplitView;
-    if (m_documentsButton->isVisible())
-        return Documents;
-    if (m_qmlCodeEditorButton->isVisible())
-        return QmlCodeEditor;
-    else
-        return ProjectOptions;
+    switch (page) {
+        case Page_Builds:
+            m_buildsButton->setChecked(true);
+            emit buildsActivated();
+            emit currentPageChanged(Page_Builds);
+            break;
+
+        case Page_Designer:
+            m_designerButton->setChecked(true);
+            emit designerActivated();
+            emit currentPageChanged(Page_Designer);
+            break;
+
+        case Page_SplitView:
+            m_splitViewButton->setChecked(true);
+            emit splitViewActivated();
+            emit currentPageChanged(Page_SplitView);
+            break;
+
+        case Page_Documents:
+            m_documentsButton->setChecked(true);
+            emit documentsActivated();
+            emit currentPageChanged(Page_Documents);
+            break;
+
+        case Page_QmlCodeEditor:
+            m_qmlCodeEditorButton->setChecked(true);
+            emit qmlCodeEditorActivated();
+            emit currentPageChanged(Page_QmlCodeEditor);
+            break;
+
+        case Page_ProjectOptions:
+            m_projectOptionsButton->setChecked(true);
+            emit projectOptionsActivated();
+            emit currentPageChanged(Page_ProjectOptions);
+            break;
+    }
+}
+
+void PageSwitcherPane::setPageEnabled(const Pages& page)
+{
+    switch (page) {
+        case Page_Builds:
+            return m_buildsButton->setEnabled(true);
+
+        case Page_Designer:
+            return m_designerButton->setEnabled(true);
+
+        case Page_SplitView:
+            return m_splitViewButton->setEnabled(true);
+
+        case Page_Documents:
+            return m_documentsButton->setEnabled(true);
+
+        case Page_QmlCodeEditor:
+            return m_qmlCodeEditorButton->setEnabled(true);
+
+        case Page_ProjectOptions:
+            return m_projectOptionsButton->setEnabled(true);
+    }
+}
+
+void PageSwitcherPane::setPageDisabled(const Pages& page)
+{
+    switch (page) {
+        case Page_Builds:
+            return m_buildsButton->setDisabled(true);
+
+        case Page_Designer:
+            return m_designerButton->setDisabled(true);
+
+        case Page_SplitView:
+            return m_splitViewButton->setDisabled(true);
+
+        case Page_Documents:
+            return m_documentsButton->setDisabled(true);
+
+        case Page_QmlCodeEditor:
+            return m_qmlCodeEditorButton->setDisabled(true);
+
+        case Page_ProjectOptions:
+            return m_projectOptionsButton->setDisabled(true);
+    }
 }
 
 void PageSwitcherPane::reset()
 {
-    m_designerButton->click();
+    setCurrentPage(Page_Designer);
+    setPageDisabled(Page_QmlCodeEditor);
+    setPageDisabled(Page_SplitView);
 }
 
 void PageSwitcherPane::paintEvent(QPaintEvent*)

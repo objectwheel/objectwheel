@@ -2,6 +2,7 @@
 #define PAGESWITCHERPANE_H
 
 #include <QWidget>
+#include <pages.h>
 
 class FlatButton;
 class QVBoxLayout;
@@ -11,22 +12,15 @@ class PageSwitcherPane : public QWidget
         Q_OBJECT
 
     public:
-        enum Pages {
-            Builds,
-            Designer,
-            SplitView,
-            Documents,
-            QmlCodeEditor,
-            ProjectOptions
-        };
-
-    public:
         explicit PageSwitcherPane(QWidget *parent = nullptr);
-        void setPage(const Pages& page);
-        Pages page() const;
+        Pages currentPage() const;
+        bool isPageEnabled(const Pages& page) const;
 
     public slots:
         void reset();
+        void setCurrentPage(const Pages& page);
+        void setPageEnabled(const Pages& page);
+        void setPageDisabled(const Pages& page);
 
     protected:
         void paintEvent(QPaintEvent *event) override;
@@ -38,6 +32,7 @@ class PageSwitcherPane : public QWidget
         void documentsActivated();
         void qmlCodeEditorActivated();
         void projectOptionsActivated();
+        void currentPageChanged(const Pages& page);
 
     private:
         QVBoxLayout* m_layout;

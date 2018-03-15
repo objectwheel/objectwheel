@@ -35,6 +35,7 @@ class QmlCodeEditor : public QPlainTextEdit
         void resizeEvent(QResizeEvent* event) override;
         void keyPressEvent(QKeyEvent* e) override;
         void focusInEvent(QFocusEvent* e) override;
+        QSize sizeHint() const override;
 
     private slots:
         void updateLineNumberAreaWidth(int newBlockCount);

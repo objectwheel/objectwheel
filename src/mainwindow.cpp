@@ -12,6 +12,8 @@
 #include <windowmanager.h>
 #include <toolsbackend.h>
 #include <designerwidget.h>
+#include <qmlcodeeditorwidget.h>
+#include <exposerbackend.h>
 
 #include <QToolBar>
 #include <QLabel>
@@ -45,6 +47,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
     setStyleSheet("QMainWindow::separator{ height: 1px; }");
+
+    ExposerBackend::instance()->init(m_centralWidget->designerWidget()->designerScene());
 
     /** Set Tool Bars **/
     /* Add Run Pane */
@@ -210,12 +214,23 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
 
-    connect(m_pageSwitcherPane, SIGNAL(buildsActivated()), SLOT(onBuildsActivated()));
-    connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(onDesignerActivated()));
-    connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(onSplitViewActivated()));
-    connect(m_pageSwitcherPane, SIGNAL(documentsActivated()), SLOT(onDocumentsActivated()));
-    connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(onQmlCodeEditorActivated()));
-    connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(onProjectOptionsActivated()));
+    connect(m_pageSwitcherPane, SIGNAL(buildsActivated()), SLOT(hideDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(showDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(showDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(documentsActivated()), SLOT(hideDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(hideDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(hideDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)), m_centralWidget, SLOT(setCurrentPage(Pages)));
+
+    connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openControlCountChanged, [=] {
+        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0 && !m_pageSwitcherPane->isPageEnabled(Page_QmlCodeEditor)) {
+            m_pageSwitcherPane->setPageEnabled(Page_QmlCodeEditor);
+            m_pageSwitcherPane->setPageEnabled(Page_SplitView);
+        } else if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0) {
+            m_pageSwitcherPane->setPageDisabled(Page_QmlCodeEditor);
+            m_pageSwitcherPane->setPageDisabled(Page_SplitView);
+        }
+    });
 
     // FIXME
     //    connect(_inspectorPage, SIGNAL(controlClicked(Control*)), _centralWidget, SLOT(onControlClick(Control*)));
@@ -258,7 +273,7 @@ void MainWindow::reset()
     m_pageSwitcherPane->reset();
 }
 
-void MainWindow::onBuildsActivated()
+void MainWindow::hideDocks()
 {
     propertiesDockWidget->hide();
     formsDockWidget->hide();
@@ -266,42 +281,10 @@ void MainWindow::onBuildsActivated()
     toolboxDockWidget->hide();
 }
 
-void MainWindow::onDesignerActivated()
+void MainWindow::showDocks()
 {
     propertiesDockWidget->show();
     formsDockWidget->show();
     inspectorDockWidget->show();
     toolboxDockWidget->show();
-}
-
-void MainWindow::onSplitViewActivated()
-{
-    propertiesDockWidget->show();
-    formsDockWidget->show();
-    inspectorDockWidget->show();
-    toolboxDockWidget->show();
-}
-
-void MainWindow::onDocumentsActivated()
-{
-    propertiesDockWidget->hide();
-    formsDockWidget->hide();
-    inspectorDockWidget->hide();
-    toolboxDockWidget->hide();
-}
-
-void MainWindow::onQmlCodeEditorActivated()
-{
-    propertiesDockWidget->hide();
-    formsDockWidget->hide();
-    inspectorDockWidget->hide();
-    toolboxDockWidget->hide();
-}
-
-void MainWindow::onProjectOptionsActivated()
-{
-    propertiesDockWidget->hide();
-    formsDockWidget->hide();
-    inspectorDockWidget->hide();
-    toolboxDockWidget->hide();
 }

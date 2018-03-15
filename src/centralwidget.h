@@ -2,14 +2,15 @@
 #define CENTRALWIDGET_H
 
 #include <QWidget>
+#include <pages.h>
 
 class QSplitter;
 class QVBoxLayout;
 class OutputPane;
 class DesignerWidget;
 class QmlCodeEditorWidget;
-class ProjectSettingsWidget;
-class DocumentationsWidget;
+class ProjectOptionsWidget;
+class DocumentsWidget;
 class BuildsWidget;
 
 class CentralWidget : public QWidget
@@ -24,6 +25,10 @@ class CentralWidget : public QWidget
 
     public slots:
         void reset();
+        void setCurrentPage(const Pages& page);
+
+    private slots:
+        void hideWidgets();
 
     private:
         QVBoxLayout* m_layout;
@@ -31,9 +36,9 @@ class CentralWidget : public QWidget
         OutputPane* m_outputPane;
         QmlCodeEditorWidget* m_qmlCodeEditorWidget;
         DesignerWidget* m_designerWidget;
-        ProjectSettingsWidget* m_projectSettingsWidget;
+        ProjectOptionsWidget* m_projectOptionsWidget;
         BuildsWidget* m_buildsWidget;
-        DocumentationsWidget* m_documentationsWidget;
+        DocumentsWidget* m_documentsWidget;
 };
 
 #endif // CENTRALWIDGET_H
