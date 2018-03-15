@@ -22,9 +22,11 @@ FlatButton::FlatButton(QWidget* parent) : QPushButton(parent)
     _settings.topColor = "#f0f0f0";
     _settings.bottomColor = "#e0e4e7";
     _settings.textColor = "#2E3A41";
+    _settings.borderRadius = 0;
     _settings.iconButton = false;
     _settings.showShadow = true;
     _settings.textUnderIcon = false;
+    _settings.verticalGradient = true;
 }
 
 FlatButton::Settings& FlatButton::settings()
@@ -69,7 +71,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
             for (int j = 0; j < image.height(); j++) {
                 if (isEnabled()) {
                     const auto& c = image.pixelColor(i, j);
-                    image.setPixelColor(i, j, (isDown() || isChecked()) ? c.darker(120) : c);
+                    image.setPixelColor(i, j, (isDown() || isChecked()) ? c.darker(125) : c);
                 } else {
                     const auto& g = qGray(image.pixelColor(i, j).rgb());
                     image.setPixelColor(i, j, QColor(g, g, g, image.pixelColor(i, j).alpha()));
@@ -90,9 +92,17 @@ void FlatButton::paintEvent(QPaintEvent* event)
             painter.setClipPath(ph);
 
             /* Draw shadow */
-            QLinearGradient sg(sr.topLeft(), sr.bottomLeft());
-            sg.setColorAt(0, "#60000000");
+            QLinearGradient sg;
+            sg.setColorAt(0, "#70000000");
             sg.setColorAt(1, "#20000000");
+
+            if (_settings.verticalGradient) {
+                sg.setStart(sr.topLeft());
+                sg.setFinalStop(sr.bottomLeft());
+            } else {
+                sg.setStart(sr.topRight());
+                sg.setFinalStop(sr.topLeft());
+            }
 
             painter.setBrush(sg);
             painter.setPen(Qt::NoPen);
@@ -105,10 +115,18 @@ void FlatButton::paintEvent(QPaintEvent* event)
         painter.setClipPath(ph2);
 
         /* Draw background */
-        QLinearGradient bg(r.topLeft(), r.bottomLeft());
+        QLinearGradient bg;
+        if (_settings.verticalGradient) {
+            bg.setStart(r.topLeft());
+            bg.setFinalStop(r.bottomLeft());
+        } else {
+            bg.setStart(r.topRight());
+            bg.setFinalStop(r.topLeft());
+        }
+
         if (isEnabled()) {
-            bg.setColorAt(0, (isDown() || isChecked()) ? _settings.topColor.darker(120) : _settings.topColor);
-            bg.setColorAt(1, (isDown() || isChecked()) ? _settings.bottomColor.darker(120) : _settings.bottomColor);
+            bg.setColorAt(0, (isDown() || isChecked()) ? _settings.topColor.darker(125) : _settings.topColor);
+            bg.setColorAt(1, (isDown() || isChecked()) ? _settings.bottomColor.darker(125) : _settings.bottomColor);
         } else {
             const auto& t = qGray(_settings.topColor.rgb());
             const auto& b = qGray(_settings.bottomColor.rgb());

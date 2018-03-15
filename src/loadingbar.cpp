@@ -127,7 +127,7 @@ namespace {
         bf.setAlignment(Qt::AlignCenter);
 
         QTextCharFormat cf;
-        cf.setForeground(QColor("#2E3A41"));
+        cf.setForeground(QColor("#252F35"));
 
         QTextCursor cursor(&doc);
         cursor.insertHtml(text);

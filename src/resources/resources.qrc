@@ -109,5 +109,10 @@
         <file>images/fileicon.png</file>
         <file>images/options.png</file>
         <file>images/dots.png</file>
+        <file>images/designer.png</file>
+        <file>images/editor.png</file>
+        <file>images/help.png</file>
+        <file>images/projectoptions.png</file>
+        <file>images/split.png</file>
     </qresource>
 </RCC>

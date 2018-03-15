@@ -17,7 +17,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
   , m_loadingBar(new LoadingBar)
   , m_runButton(new FlatButton)
   , m_stopButton(new FlatButton)
-  , m_buildsButton(new FlatButton)
   , m_projectsButton(new FlatButton)
 {
     m_layout->setSpacing(fit::fx(8));
@@ -29,7 +28,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_loadingBar);
     m_layout->addStretch();
     m_layout->addWidget(m_projectsButton);
-    m_layout->addWidget(m_buildsButton);
 
     m_loadingBar->setFixedSize(fit::fx(QSizeF(481, 24)).toSize());
 
@@ -48,13 +46,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     m_stopButton->settings().iconButton = true;
     connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
     connect(m_stopButton, SIGNAL(doubleClick()), SLOT(onStopButtonDoubleClick()));
-
-    m_buildsButton->setToolTip(tr("Get Cloud Build"));
-    m_buildsButton->setCursor(Qt::PointingHandCursor);
-    m_buildsButton->setIcon(QIcon(":/resources/images/build.png"));
-    m_buildsButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
-    m_buildsButton->settings().iconButton = true;
-    connect(m_buildsButton, SIGNAL(clicked(bool)), SLOT(onBuildsButtonClick()));
 
     m_projectsButton->setToolTip(tr("Show Projects"));
     m_projectsButton->setCursor(Qt::PointingHandCursor);
@@ -75,21 +66,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 void RunPane::reset()
 {
     onStopButtonClick();
-}
-
-void RunPane::paintEvent(QPaintEvent*)
-{
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    QLinearGradient gradient(rect().topLeft(), rect().bottomLeft());
-    gradient.setColorAt(0, "#2784E3");
-    gradient.setColorAt(1, "#1068C6");
-
-    painter.fillRect(rect(), gradient);
-
-    painter.setPen("#0c4e94");
-    painter.drawLine(QRectF(rect()).bottomLeft() + QPointF(0.5, -0.5), QRectF(rect()).bottomRight() + QPointF(-0.5, -0.5));
 }
 
 void RunPane::onStopButtonClick()
@@ -135,12 +111,22 @@ void RunPane::onRunButtonClick()
     m_runButton->setDisabled(true);
 }
 
-void RunPane::onBuildsButtonClick()
-{
-    WindowManager::instance()->show(WindowManager::Builds);
-}
-
 void RunPane::onProjectsButtonClick()
 {
     WindowManager::instance()->show(WindowManager::Welcome);
+}
+
+void RunPane::paintEvent(QPaintEvent*)
+{
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QLinearGradient gradient(rect().topLeft(), rect().bottomLeft());
+    gradient.setColorAt(0, "#2784E3");
+    gradient.setColorAt(1, "#1068C6");
+
+    painter.fillRect(rect(), gradient);
+
+    painter.setPen("#0e5bad");
+    painter.drawLine(QRectF(rect()).bottomLeft() + QPointF(0.5, -0.5), QRectF(rect()).bottomRight() + QPointF(-0.5, -0.5));
 }

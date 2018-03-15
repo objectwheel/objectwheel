@@ -21,6 +21,7 @@ class FlatButton : public QPushButton
             bool iconButton;
             bool showShadow;
             bool textUnderIcon;
+            bool verticalGradient;
         };
 
 	public:

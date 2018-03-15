@@ -132,7 +132,7 @@ QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelInd
 ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
 {
     QPalette p2(palette());
-    p2.setColor(QPalette::Base, "#F3F7FA");
+    p2.setColor(QPalette::Base, "#f5f9fc");
     p2.setColor(QPalette::Highlight, "#d0d4d7");
     p2.setColor(QPalette::Text, "#202427");
     p2.setColor(QPalette::HighlightedText, "#202427");

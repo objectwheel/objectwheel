@@ -79,7 +79,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
     issuesButton->settings().topColor = "#5d6975";
     issuesButton->settings().bottomColor = "#515b66";
-    issuesButton->settings().textColor = "#f0f4f7";
+    issuesButton->settings().textColor = "#F5F9FC";
     issuesButton->setChecked(true);
     connect(issuesButton, SIGNAL(toggled(bool)),
       SLOT(handleIssuesButtonClicked(bool)));
@@ -87,7 +87,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     searchButton->settings().topColor = "#5d6975";
     searchButton->settings().bottomColor = "#515b66";
     searchButton->settings().borderRadius = fit::fx(5);
-    searchButton->settings().textColor = "#f0f4f7";
+    searchButton->settings().textColor = "#F5F9FC";
     searchButton->setCheckable(true);
     searchButton->setText("Search");
     searchButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
@@ -102,7 +102,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     consoleButton->settings().topColor = "#5d6975";
     consoleButton->settings().bottomColor = "#515b66";
     consoleButton->settings().borderRadius = fit::fx(5);
-    consoleButton->settings().textColor = "#f0f4f7";
+    consoleButton->settings().textColor = "#F5F9FC";
     consoleButton->setCheckable(true);
     consoleButton->setText("Console Output");
     consoleButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));

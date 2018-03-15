@@ -4,6 +4,6 @@ Rectangle {
    width: 54
    height: 54
    radius: 2 * dpi
-   color: "#F3F7FA"
+   color: "#F5F9FC"
    border.color: "#C3C7CA"
 }

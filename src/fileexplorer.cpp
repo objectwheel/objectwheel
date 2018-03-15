@@ -12,7 +12,7 @@
 #include <QInputDialog>
 #include <QtNetwork>
 
-#define COLOR_BACKGROUND (QColor("#F3F7FA"))
+#define COLOR_BACKGROUND (QColor("#F5F9FC"))
 
 class FileExplorerPrivate : public QObject
 {

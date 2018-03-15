@@ -21,7 +21,6 @@ class WindowManager : public QObject
             Welcome,
             Main,
             About,
-            Builds,
             Preferences,
             ToolboxSettings
         };

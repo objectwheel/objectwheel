@@ -30,7 +30,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     _listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     QPalette p2(palette());
-    p2.setColor(QPalette::Base, "#F3F7FA");
+    p2.setColor(QPalette::Base, "#F5F9FC");
     p2.setColor(QPalette::Highlight, "#d0d4d7");
     p2.setColor(QPalette::Text, "#202427");
     _listWidget->setPalette(p2);

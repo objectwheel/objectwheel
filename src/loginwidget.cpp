@@ -212,37 +212,37 @@ void LoginWidget::onLoginButtonClick()
 {
     auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
     auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+// FIXME
+//    if (email.isEmpty() || email.size() > 256 ||
+//        password.isEmpty() || password.size() > 256 ||
+//        !checkEmail(email) || !checkPassword(password)) {
+//        QMessageBox::warning(
+//            this,
+//            tr("Oops"),
+//            tr("Fields cannot be either empty or incorrect.")
+//        );
+//        return;
+//    }
 
-    if (email.isEmpty() || email.size() > 256 ||
-        password.isEmpty() || password.size() > 256 ||
-        !checkEmail(email) || !checkPassword(password)) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Fields cannot be either empty or incorrect.")
-        );
-        return;
-    }
+//    lock();
 
-    lock();
+//    const auto& plan = Authenticator::instance()->login(email, password);
+//    bool succeed = !plan.isEmpty();
 
-    const auto& plan = Authenticator::instance()->login(email, password);
-    bool succeed = !plan.isEmpty();
+//    if (!succeed) {
+//        QMessageBox::warning(
+//            this,
+//            tr("Oops"),
+//            tr("Login is not successful, please check the information you provided.")
+//        );
+//    }
 
-    if (!succeed) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Login is not successful, please check the information you provided.")
-        );
-    }
+//    unlock();
 
-    unlock();
-
-    if (succeed) {
+//    if (succeed) {
         QTimer::singleShot(0, this, &LoginWidget::startSession);
         emit busy(tr("Decryption in progress"));
-    }
+//    }
 }
 
 void LoginWidget::startSession()

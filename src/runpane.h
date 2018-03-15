@@ -25,7 +25,6 @@ class RunPane : public QWidget
         void onRunButtonClick();
         void onStopButtonClick();
         void onStopButtonDoubleClick();
-        void onBuildsButtonClick();
         void onProjectsButtonClick();
 
     private:
@@ -34,9 +33,7 @@ class RunPane : public QWidget
         LoadingBar* m_loadingBar;
         FlatButton* m_runButton;
         FlatButton* m_stopButton;
-        FlatButton* m_buildsButton;
         FlatButton* m_projectsButton;
-
 };
 
 #endif // RUNPANE_H

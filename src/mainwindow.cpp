@@ -210,6 +210,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
 
+    connect(m_pageSwitcherPane, SIGNAL(buildsActivated()), SLOT(onBuildsActivated()));
+    connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(onDesignerActivated()));
+    connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(onSplitViewActivated()));
+    connect(m_pageSwitcherPane, SIGNAL(documentsActivated()), SLOT(onDocumentsActivated()));
+    connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(onQmlCodeEditorActivated()));
+    connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(onProjectOptionsActivated()));
+
     // FIXME
     //    connect(_inspectorPage, SIGNAL(controlClicked(Control*)), _centralWidget, SLOT(onControlClick(Control*)));
     //    connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)), _centralWidget, SLOT(onControlDoubleClick(Control*)));
@@ -249,4 +256,52 @@ void MainWindow::reset()
     m_inspectorPane->reset();
     m_propertiesPane->reset();
     m_pageSwitcherPane->reset();
+}
+
+void MainWindow::onBuildsActivated()
+{
+    propertiesDockWidget->hide();
+    formsDockWidget->hide();
+    inspectorDockWidget->hide();
+    toolboxDockWidget->hide();
+}
+
+void MainWindow::onDesignerActivated()
+{
+    propertiesDockWidget->show();
+    formsDockWidget->show();
+    inspectorDockWidget->show();
+    toolboxDockWidget->show();
+}
+
+void MainWindow::onSplitViewActivated()
+{
+    propertiesDockWidget->show();
+    formsDockWidget->show();
+    inspectorDockWidget->show();
+    toolboxDockWidget->show();
+}
+
+void MainWindow::onDocumentsActivated()
+{
+    propertiesDockWidget->hide();
+    formsDockWidget->hide();
+    inspectorDockWidget->hide();
+    toolboxDockWidget->hide();
+}
+
+void MainWindow::onQmlCodeEditorActivated()
+{
+    propertiesDockWidget->hide();
+    formsDockWidget->hide();
+    inspectorDockWidget->hide();
+    toolboxDockWidget->hide();
+}
+
+void MainWindow::onProjectOptionsActivated()
+{
+    propertiesDockWidget->hide();
+    formsDockWidget->hide();
+    inspectorDockWidget->hide();
+    toolboxDockWidget->hide();
 }
