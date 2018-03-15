@@ -6,10 +6,12 @@
 #include <windowmanager.h>
 #include <authenticator.h>
 #include <previewerbackend.h>
+#include <savetransaction.h>
 #include <QMessageBox>
 
 BackendManager::BackendManager()
 {
+    SaveTransaction::instance();
     Authenticator::instance()->init(QUrl(APP_WSSSERVER));
 
     if (!PreviewerBackend::instance()->init()) {
@@ -39,7 +41,6 @@ void BackendManager::handleSessionStop() const
 void BackendManager::handleProjectStart() const
 {
     PreviewerBackend::instance()->restart();
-
     ExposerBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->designerScene()->clearSelection();

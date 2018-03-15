@@ -5,6 +5,7 @@
 #include <projectoptionswidget.h>
 #include <documentswidget.h>
 #include <buildswidget.h>
+#include <issuesbox.h>
 
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -38,6 +39,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_documentsWidget);
+
+    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)), m_designerWidget, SLOT(onControlDoubleClick(Control*)));
 }
 
 DesignerWidget* CentralWidget::designerWidget() const

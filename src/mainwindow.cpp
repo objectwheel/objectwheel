@@ -226,15 +226,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0 && !m_pageSwitcherPane->isPageEnabled(Page_QmlCodeEditor)) {
             m_pageSwitcherPane->setPageEnabled(Page_QmlCodeEditor);
             m_pageSwitcherPane->setPageEnabled(Page_SplitView);
-        } else if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0) {
+        }else if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0) {
             m_pageSwitcherPane->setPageDisabled(Page_QmlCodeEditor);
             m_pageSwitcherPane->setPageDisabled(Page_SplitView);
+            m_pageSwitcherPane->setCurrentPage(Page_Designer);
         }
+
+        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0
+            && m_pageSwitcherPane->currentPage() != Page_SplitView)
+            m_pageSwitcherPane->setCurrentPage(Page_QmlCodeEditor);
     });
 
-    // FIXME
-    //    connect(_inspectorPage, SIGNAL(controlClicked(Control*)), _centralWidget, SLOT(onControlClick(Control*)));
-    //    connect(_inspectorPage, SIGNAL(controlDoubleClicked(Control*)), _centralWidget, SLOT(onControlDoubleClick(Control*)));
+    connect(m_inspectorPane, SIGNAL(controlClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlClick(Control*)));
+    connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
 
     //    connect(InterpreterBackend::instance(),
     //    QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),

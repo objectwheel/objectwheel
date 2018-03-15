@@ -5,6 +5,7 @@
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>
 #include <savebackend.h>
+#include <controlwatcher.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -118,14 +119,8 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
 
-// FIXME
-//    SaveTransaction::instance();
-//    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
-//            this, SLOT(onControlDoubleClick(Control*)));
-//    connect(cW, SIGNAL(doubleClicked(Control*)),
-//            this, SLOT(onControlDoubleClick(Control*)));
-//    connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)),
-//            this, SLOT(onControlDrop(Control*,QPointF,QString)));
+    connect(cW, SIGNAL(doubleClicked(Control*)), SLOT(onControlDoubleClick(Control*)));
+    connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)), SLOT(onControlDrop(Control*,QPointF,QString)));
 }
 
 void DesignerWidget::scaleScene(qreal ratio)

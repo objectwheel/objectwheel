@@ -10,6 +10,10 @@
     - fit::fx(1) - 0.5, - fit::fx(1) - 0.5\
 ))
 
+namespace {
+    QColor blendColors(const QColor& color1, const QColor& color2, qreal ratio = 0.5);
+}
+
 ButtonSlice::ButtonSlice(QWidget* parent) : QWidget(parent)
 {
     _layout = new QHBoxLayout(this);
@@ -118,10 +122,10 @@ void ButtonSlice::paintEvent(QPaintEvent*)
             bg.setColorAt(0, (e.button->isDown() || e.button->isChecked()) ? e.topColor.darker(120) : e.topColor);
             bg.setColorAt(1, (e.button->isDown() || e.button->isChecked()) ? e.bottomColor.darker(120) : e.bottomColor);
         } else {
-            const auto& t = qGray(e.topColor.rgb());
-            const auto& b = qGray(e.bottomColor.rgb());
-            bg.setColorAt(0, QColor(t, t, t, e.topColor.alpha()));
-            bg.setColorAt(1, QColor(b, b, b, e.bottomColor.alpha()));
+            const auto& t = qGray(e.topColor.darker(110).rgb());
+            const auto& b = qGray(e.bottomColor.darker(110).rgb());
+            bg.setColorAt(0, blendColors(QColor(t, t, t, e.topColor.alpha()), e.topColor, 0.4));
+            bg.setColorAt(1, blendColors(QColor(b, b, b, e.bottomColor.alpha()), e.bottomColor, 0.4));
         }
 
         painter.setBrush(bg);
@@ -137,5 +141,19 @@ void ButtonSlice::paintEvent(QPaintEvent*)
             r.left() + _settings.cellWidth * (i + 1),
             r.bottom()
         );
+    }
+}
+
+namespace {
+    /* The parameter ratio specifies the weight of the colors when blending. A ratio
+     * of 0.8 will result in a blend of 20% color1 and 80% color2.
+     * A ratio of 0.5 will therefore be a 50-50 blend of the two colors. */
+    QColor blendColors(const QColor& color1, const QColor& color2, qreal ratio)
+    {
+        int r = color1.red()*(1-ratio) + color2.red()*ratio;
+        int g = color1.green()*(1-ratio) + color2.green()*ratio;
+        int b = color1.blue()*(1-ratio) + color2.blue()*ratio;
+        int a = color1.alpha()*(1-ratio) + color2.alpha()*ratio;
+        return QColor(r, g, b, a);
     }
 }
