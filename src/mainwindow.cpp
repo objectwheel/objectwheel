@@ -14,7 +14,11 @@
 #include <designerwidget.h>
 #include <qmlcodeeditorwidget.h>
 #include <exposerbackend.h>
+#include <interpreterbackend.h>
+#include <projectbackend.h>
+#include <consolebox.h>
 
+#include <QProcess>
 #include <QToolBar>
 #include <QLabel>
 #include <QToolButton>
@@ -239,30 +243,29 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(m_inspectorPane, SIGNAL(controlClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlClick(Control*)));
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
+    connect(m_formsPane, SIGNAL(currentFormChanged()), m_inspectorPane, SLOT(refresh()));
 
-    //    connect(InterpreterBackend::instance(),
-    //    QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
-    //    [=] (int exitCode, QProcess::ExitStatus exitStatus)
-    //    {
-    //        auto pane = _centralWidget->outputPane();
-    //        auto console = pane->consoleBox();
+    connect(InterpreterBackend::instance(),
+    QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
+    [=] (int exitCode, QProcess::ExitStatus exitStatus)
+    {
+        auto pane = m_centralWidget->outputPane();
+        auto console = pane->consoleBox();
 
-    //        if (exitStatus == QProcess::CrashExit) {
-    //            console->printFormatted(
-    //                tr("The process was ended forcefully.\n"),
-    //                "#B34B46",
-    //                QFont::DemiBold
-    //            );
-    //        }
+        if (exitStatus == QProcess::CrashExit) {
+            console->printFormatted(
+                tr("The process was ended forcefully.\n"),
+                "#B34B46",
+                QFont::DemiBold
+            );
+        }
 
-    //        console->printFormatted(
-    //            ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
-    //            "#1069C7",
-    //            QFont::DemiBold
-    //        );
-
-    //        _runButton->setEnabled(true);
-    //    });
+        console->printFormatted(
+            ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
+            "#1069C7",
+            QFont::DemiBold
+        );
+    });
 }
 
 void MainWindow::reset()

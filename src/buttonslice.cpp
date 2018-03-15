@@ -124,8 +124,8 @@ void ButtonSlice::paintEvent(QPaintEvent*)
         } else {
             const auto& t = qGray(e.topColor.darker(110).rgb());
             const auto& b = qGray(e.bottomColor.darker(110).rgb());
-            bg.setColorAt(0, blendColors(QColor(t, t, t, e.topColor.alpha()), e.topColor, 0.4));
-            bg.setColorAt(1, blendColors(QColor(b, b, b, e.bottomColor.alpha()), e.bottomColor, 0.4));
+            bg.setColorAt(0, blendColors(QColor(t, t, t, e.topColor.alpha()), e.topColor));
+            bg.setColorAt(1, blendColors(QColor(b, b, b, e.bottomColor.alpha()), e.bottomColor));
         }
 
         painter.setBrush(bg);

@@ -39,7 +39,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     connect(m_runButton, SIGNAL(clicked(bool)), SLOT(onRunButtonClick()));
 
     m_stopButton->setToolTip(tr("Stop"));
-    // m_stopButton->setDisabled(true);
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setIcon(QIcon(":/resources/images/stop.png"));
     m_stopButton->setFixedSize(fit::fx(QSizeF(38, 24)).toSize());
@@ -59,6 +58,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
         m_loadingBar->setText(ProjectBackend::instance()->name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
     });
 
+    // FIXME
 //    connect(SaveBackend::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString))); //TODO
 //    connect(SaveBackend::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString))); //TODO
 }
@@ -107,8 +107,6 @@ void RunPane::onRunButtonClick()
     m_consoleBox->scrollToEnd();
 
     InterpreterBackend::instance()->run();
-
-    m_runButton->setDisabled(true);
 }
 
 void RunPane::onProjectsButtonClick()

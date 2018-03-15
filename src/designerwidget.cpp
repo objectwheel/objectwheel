@@ -219,12 +219,8 @@ void DesignerWidget::onControlClick(Control* control)
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
     m_qmlCodeEditorWidget->addControl(control);
-    // FIXME
-    // if (m_qmlCodeEditorWidget->pinned())
-    //    setMode(CodeEdit);
     m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);
     m_qmlCodeEditorWidget->openControl(control);
-    m_qmlCodeEditorWidget->raiseContainer();
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)

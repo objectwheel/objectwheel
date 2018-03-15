@@ -176,21 +176,9 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
-    // FIXME
-    //    connect(parent->centralWidget()->designerScene(), SIGNAL(selectionChanged()),
-    //      SLOT(refresh()));
-    //    connect(parent->centralWidget()->controlScene(), SIGNAL(selectionChanged()),
-    //      SLOT(refresh()));
-    //    connect(parent->centralWidget(), SIGNAL(modeChanged()),
-    //      SLOT(refresh()));
-    //    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)),
-    //      SLOT(refresh()));
-    //    connect(FormsPane::instance(), SIGNAL(currentFormChanged()),
-    //      SLOT(refresh()));
-    QTimer::singleShot(3000, [this] {
-        connect(SaveBackend::instance(), SIGNAL(databaseChanged()),
-          SLOT(refresh()));
-    });
+    connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(refresh()));
+    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
+    connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
 }
 
 void InspectorPane::reset()

@@ -75,7 +75,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
                     image.setPixelColor(i, j, (isDown() || isChecked()) ? c.darker(125) : c);
                 } else {
                     const auto& g = qGray(image.pixelColor(i, j).darker(110).rgb());
-                    image.setPixelColor(i, j, blendColors(QColor(g, g, g, image.pixelColor(i, j).alpha()), image.pixelColor(i, j), 0.4));
+                    image.setPixelColor(i, j, blendColors(QColor(g, g, g, image.pixelColor(i, j).alpha()), image.pixelColor(i, j)));
                 }
             }
         }
@@ -131,8 +131,8 @@ void FlatButton::paintEvent(QPaintEvent* event)
         } else {
             const auto& t = qGray(_settings.topColor.darker(110).rgb());
             const auto& b = qGray(_settings.bottomColor.darker(110).rgb());
-            bg.setColorAt(0, blendColors(QColor(t, t, t, _settings.topColor.alpha()), _settings.topColor, 0.4));
-            bg.setColorAt(1, blendColors(QColor(b, b, b, _settings.bottomColor.alpha()), _settings.bottomColor, 0.4));
+            bg.setColorAt(0, blendColors(QColor(t, t, t, _settings.topColor.alpha()), _settings.topColor));
+            bg.setColorAt(1, blendColors(QColor(b, b, b, _settings.bottomColor.alpha()), _settings.bottomColor));
         }
 
         painter.setPen(Qt::NoPen);

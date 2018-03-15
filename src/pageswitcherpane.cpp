@@ -49,12 +49,12 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->setAutoExclusive(true);
     m_buildsButton->setAutoExclusive(true);
 
-    m_designerButton->setFixedHeight(fit::fx(60));
-    m_qmlCodeEditorButton->setFixedHeight(fit::fx(60));
-    m_projectOptionsButton->setFixedHeight(fit::fx(60));
-    m_documentsButton->setFixedHeight(fit::fx(60));
-    m_splitViewButton->setFixedHeight(fit::fx(60));
-    m_buildsButton->setFixedHeight(fit::fx(60));
+    m_designerButton->setFixedHeight(fit::fx(55));
+    m_qmlCodeEditorButton->setFixedHeight(fit::fx(55));
+    m_projectOptionsButton->setFixedHeight(fit::fx(55));
+    m_documentsButton->setFixedHeight(fit::fx(55));
+    m_splitViewButton->setFixedHeight(fit::fx(55));
+    m_buildsButton->setFixedHeight(fit::fx(55));
 
     m_designerButton->setCheckable(true);
     m_qmlCodeEditorButton->setCheckable(true);

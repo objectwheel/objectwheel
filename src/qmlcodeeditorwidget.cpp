@@ -30,7 +30,7 @@
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
 #define CHAR_CHANGEINDICATOR ("*")
-#define INITIALWIDTH_FILEEXPLORER (fit::fx(380))
+#define INITIALWIDTH_FILEEXPLORER (fit::fx(450))
 #define MINWIDTH_FILEEXPLORER (fit::fx(200))
 #define MINWIDTH_EDITOR (fit::fx(200))
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
@@ -239,15 +239,8 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     connect(itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
     connect(documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
     connect(&saveAction, SIGNAL(triggered()), SLOT(handleSaveButtonClicked()));
-
-    //TODO: form or control removal will be handled
-    // FIXME
-    //    QTimer::singleShot(3000, [=] {
-    //        connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
-    //        connect(SaveBackend::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
-    //        connect(dW->controlScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
-    //        connect(dW->designerScene(), SIGNAL(aboutToRemove(Control*)), SLOT(handleControlRemoval(Control*)));
-    //    });
+    connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
+    connect(SaveBackend::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
 
     zoomlLevelCombobox->addItem("35 %");
     zoomlLevelCombobox->addItem("50 %");

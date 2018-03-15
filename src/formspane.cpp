@@ -89,12 +89,9 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     _listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    QTimer::singleShot(1000, [=] { //FIXME
-        Delayer::delay([=]() -> bool { if (SaveBackend::instance()) return false; else return true;});
-        connect(ProjectBackend::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
-        connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
-        connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
-    });
+    connect(ProjectBackend::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
+    connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
+    connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
 
     _innerWidget->setObjectName("innerWidget");
     _innerWidget->setStyleSheet("#innerWidget { border: 1px solid #1a69bd; }");

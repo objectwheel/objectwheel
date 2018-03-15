@@ -124,7 +124,7 @@ void ToolboxSettingsWindow::on_btnReset_clicked()
             for (int j = 0; j < tli->childCount(); j++) {
                 auto ci = tli->child(j);
                 auto currentDir = dname(dname(ui->treeWidget->
-                  urls(ci).first().toLocalFile()));//FIXME: Do same for Control GUI Editor /Tool Editor
+                  urls(ci).first().toLocalFile()));
                 // TODO: Check same for selected control's child controls
 //                if (dW->qmlEditorView()->isOpen(currentDir)) { //FIXME
 //                    obstacle = true;
@@ -156,7 +156,7 @@ void ToolboxSettingsWindow::on_btnRemove_clicked()
 //        if (!dW->qmlEditorView()->isOpen(currentDir)) {
 //            ToolsBackend::instance()->removeTool(dname(dname(ui->treeWidget->urls
 //              (ui->treeWidget->currentItem()).first().toLocalFile())));
-//        } else { //FIXME: Do same for Control GUI Editor /Tool Editor
+//        } else {
 //            // TODO: Check same for selected control's child controls
 //            QMessageBox::information(this, "Oops",
 //              "Some documents belongs to this tool is open within QML "

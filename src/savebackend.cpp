@@ -521,8 +521,6 @@ void SaveBackend::removeChildControlsOnly(const Control* control) const
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
 // topPath is only necessary if property is an "id" set.
-// FIXME: Why do I have to do following : form1.z = 1; to be able to raise my form?...
-// ...And why I need to do otherforms.z = -1; to hide other forms
 void SaveBackend::setProperty(
     Control* control,
     const QString& property,

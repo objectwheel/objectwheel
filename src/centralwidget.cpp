@@ -6,6 +6,7 @@
 #include <documentswidget.h>
 #include <buildswidget.h>
 #include <issuesbox.h>
+#include <designerscene.h>
 
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -41,6 +42,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_documentsWidget);
 
     connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)), m_designerWidget, SLOT(onControlDoubleClick(Control*)));
+    connect(m_designerWidget->designerScene(), SIGNAL(aboutToRemove(Control*)), m_qmlCodeEditorWidget, SLOT(handleControlRemoval(Control*)));
 }
 
 DesignerWidget* CentralWidget::designerWidget() const
