@@ -89,20 +89,19 @@ QString HelpViewer::mimeFromUrl(const QUrl &url)
 
 void HelpViewer::home()
 {
-    static const QString url = QString::fromLatin1("qthelp://org.qt-project.qtcreator."
-        "%1%2%3/doc/index.html").arg(5).arg(10)
-        .arg(1);
+    static const QString url = QString::fromLatin1("qthelp://org.qt-project.qtdoc."
+        "%1%2%3/qtdoc/index.html").arg(QT_VERSION_MAJOR).arg(QT_VERSION_MINOR)
+        .arg(QT_VERSION_PATCH);
     setSource(url);
 }
 
 void HelpViewer::slotLoadStarted()
 {
-    qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+    // BUG: QWebEngineView bug: qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 }
-
 void HelpViewer::slotLoadFinished()
 {
-    qApp->restoreOverrideCursor();
+    // BUG: QWebEngineView bug: qApp->restoreOverrideCursor();
     emit sourceChanged(source());
     emit loadFinished();
 }

@@ -24,6 +24,7 @@ FlatButton::FlatButton(QWidget* parent) : QPushButton(parent)
     _settings.bottomColor = "#e0e4e7";
     _settings.textColor = "#2E3A41";
     _settings.borderRadius = 0;
+    _settings.textMargin = fit::fx(2);
     _settings.iconButton = false;
     _settings.showShadow = true;
     _settings.textUnderIcon = false;
@@ -144,10 +145,10 @@ void FlatButton::paintEvent(QPaintEvent* event)
             if (!text().isEmpty()) {
                 if (_settings.textUnderIcon) {
                     int th = QFontMetrics(QFont()).height();
-                    ir.moveTo(ir.x(), (r.height() - ir.height() - th - fit::fx(2)) / 2.0);
+                    ir.moveTo(ir.x(), (r.height() - ir.height() - th - _settings.textMargin) / 2.0);
                 } else {
                     int tw = QFontMetrics(QFont()).width(text());
-                    ir.moveTo((r.width() - ir.width() - tw - fit::fx(2)) / 2.0, ir.y());
+                    ir.moveTo((r.width() - ir.width() - tw - _settings.textMargin) / 2.0, ir.y());
                 }
             }
             icon().paint(
@@ -169,12 +170,12 @@ void FlatButton::paintEvent(QPaintEvent* event)
                     int th = QFontMetrics(QFont()).height();
                     QTextOption op(Qt::AlignTop | Qt::AlignHCenter);
                     op.setWrapMode(QTextOption::NoWrap);
-                    painter.drawText(QRectF(r.left(), ir.bottom() + fit::fx(2), r.width(), th), text(), op);
+                    painter.drawText(QRectF(r.left(), ir.bottom() + _settings.textMargin, r.width(), th), text(), op);
                 } else {
                     int tw = QFontMetrics(QFont()).width(text());
                     QTextOption op(Qt::AlignVCenter | Qt::AlignLeft);
                     op.setWrapMode(QTextOption::NoWrap);
-                    painter.drawText(QRectF(ir.right() + fit::fx(2), r.top(), tw, r.height()), text(), op);
+                    painter.drawText(QRectF(ir.right() + _settings.textMargin, r.top(), tw, r.height()), text(), op);
                 }
             }
         }

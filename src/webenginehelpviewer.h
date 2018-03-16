@@ -58,6 +58,7 @@ class WebEngineHelpViewer : public HelpViewer
 
         WebEngineHelpPage *page() const;
 
+    public slots:
         void scaleUp() override;
         void scaleDown() override;
         void resetScale() override;

@@ -109,6 +109,13 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->settings().verticalGradient = false;
     m_buildsButton->settings().verticalGradient = false;
 
+    m_designerButton->settings().textMargin = 0;
+    m_qmlCodeEditorButton->settings().textMargin = 0;
+    m_projectOptionsButton->settings().textMargin = 0;
+    m_helpButton->settings().textMargin = 0;
+    m_splitViewButton->settings().textMargin = 0;
+    m_buildsButton->settings().textMargin = 0;
+
     m_buildsButton->settings().textColor = "#F5F9FC";
     m_splitViewButton->settings().textColor = "#F5F9FC";
     m_helpButton->settings().textColor = "#F5F9FC";

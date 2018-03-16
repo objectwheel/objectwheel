@@ -2,11 +2,17 @@
 #define HELPWIDGET_H
 
 #include <QWidget>
+#include <QFutureWatcher>
 
-class QGridLayout;
+class QSplitter;
 class QComboBox;
 class QHelpEngine;
+class QVBoxLayout;
+class FocuslessLineEdit;
 class WebEngineHelpViewer;
+class QToolBar;
+class QToolButton;
+class QLabel;
 
 class HelpWidget : public QWidget
 {
@@ -14,19 +20,39 @@ class HelpWidget : public QWidget
 
     public:
         explicit HelpWidget(QWidget *parent = nullptr);
-        void showHelpForKeyword(const QString& id);
-
-    protected:
-        QSize sizeHint() const override;
 
     public slots:
         void reset();
 
+    protected:
+        QSize sizeHint() const override;
+        bool eventFilter(QObject *watched, QEvent *event) override;
+
+    private slots:
+        void onHomeButtonClick();
+        void onTypeChange();
+        void onTitleChange();
+        void onIndexFilterTextChange(const QString& filterText);
+        void onUrlChange(const QUrl& url);
+        void onUrlChange(const QUrl& link, const QString&);
+        void onUrlChange(const QMap<QString, QUrl> &links, const QString &keyword);
+
     private:
         QHelpEngine* m_helpEngine;
-        QGridLayout* m_layout;
-        QComboBox* m_indexTypeCombo;
+        QVBoxLayout* m_layout;
+        QToolBar* m_toolbar;
+        QComboBox* m_typeCombo;
+        QToolButton* m_homeButton;
+        QToolButton* m_backButton;
+        QToolButton* m_forthButton;
+        QLabel* m_titleLabel;
+        QSplitter* m_splitter;
         WebEngineHelpViewer* m_helpViewer;
+        QWidget* m_contentsWidget;
+        QVBoxLayout* m_contentsLayout;
+        QWidget* m_indexWidget;
+        QVBoxLayout* m_indexLayout;
+        FocuslessLineEdit* m_indexFilterEdit;
 };
 
 #endif // HELPWIDGET_H

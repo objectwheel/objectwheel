@@ -16,6 +16,7 @@ class FlatButton : public QPushButton
             QColor bottomColor;
             QColor textColor;
             /* Sizes */
+            qreal textMargin;
             qreal borderRadius;
             /* Others */
             bool iconButton;
