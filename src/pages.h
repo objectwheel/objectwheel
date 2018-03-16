@@ -5,7 +5,7 @@ enum Pages {
     Page_Builds,
     Page_Designer,
     Page_SplitView,
-    Page_Documents,
+    Page_Help,
     Page_QmlCodeEditor,
     Page_ProjectOptions
 };

@@ -10,7 +10,7 @@ class OutputPane;
 class DesignerWidget;
 class QmlCodeEditorWidget;
 class ProjectOptionsWidget;
-class DocumentsWidget;
+class HelpWidget;
 class BuildsWidget;
 
 class CentralWidget : public QWidget
@@ -38,7 +38,7 @@ class CentralWidget : public QWidget
         DesignerWidget* m_designerWidget;
         ProjectOptionsWidget* m_projectOptionsWidget;
         BuildsWidget* m_buildsWidget;
-        DocumentsWidget* m_documentsWidget;
+        HelpWidget* m_helpWidget;
 };
 
 #endif // CENTRALWIDGET_H

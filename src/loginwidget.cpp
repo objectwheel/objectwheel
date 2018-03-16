@@ -210,9 +210,9 @@ void LoginWidget::clear()
 
 void LoginWidget::onLoginButtonClick()
 {
-    auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
-    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
-// FIXME
+//    auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+//    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+
 //    if (email.isEmpty() || email.size() > 256 ||
 //        password.isEmpty() || password.size() > 256 ||
 //        !checkEmail(email) || !checkPassword(password)) {
@@ -241,7 +241,7 @@ void LoginWidget::onLoginButtonClick()
 
 //    if (succeed) {
         QTimer::singleShot(0, this, &LoginWidget::startSession);
-        emit busy(tr("Decryption in progress"));
+//        emit busy(tr("Decryption in progress"));
 //    }
 }
 

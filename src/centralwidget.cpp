@@ -3,7 +3,7 @@
 #include <qmlcodeeditorwidget.h>
 #include <designerwidget.h>
 #include <projectoptionswidget.h>
-#include <documentswidget.h>
+#include <helpwidget.h>
 #include <buildswidget.h>
 #include <issuesbox.h>
 #include <designerscene.h>
@@ -20,7 +20,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
   , m_buildsWidget(new BuildsWidget)
-  , m_documentsWidget(new DocumentsWidget)
+  , m_helpWidget(new HelpWidget)
 {
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -39,7 +39,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_qmlCodeEditorWidget);
     m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
-    m_splitterIn->addWidget(m_documentsWidget);
+    m_splitterIn->addWidget(m_helpWidget);
 
     connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)), m_designerWidget, SLOT(onControlDoubleClick(Control*)));
     connect(m_designerWidget->designerScene(), SIGNAL(aboutToRemove(Control*)), m_qmlCodeEditorWidget, SLOT(handleControlRemoval(Control*)));
@@ -64,7 +64,7 @@ void CentralWidget::reset()
     m_designerWidget->reset();
     m_projectOptionsWidget->reset();
     m_buildsWidget->reset();
-    m_documentsWidget->reset();
+    m_helpWidget->reset();
 
 //    m_centralWidget->qmlCodeEditorWidget()->clear();
 //    m_centralWidget->designerWidget()->designerScene()->clearSelection();
@@ -91,8 +91,8 @@ void CentralWidget::setCurrentPage(const Pages& page)
             return m_qmlCodeEditorWidget->show();
             break;
 
-        case Page_Documents:
-            return m_documentsWidget->show();
+        case Page_Help:
+            return m_helpWidget->show();
             break;
 
         case Page_QmlCodeEditor:
@@ -113,7 +113,7 @@ void CentralWidget::hideWidgets()
     m_qmlCodeEditorWidget->hide();
     m_projectOptionsWidget->hide();
     m_buildsWidget->hide();
-    m_documentsWidget->hide();
+    m_helpWidget->hide();
 }
 
 QmlCodeEditorWidget* CentralWidget::qmlCodeEditorWidget() const

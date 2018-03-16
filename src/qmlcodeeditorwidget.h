@@ -61,6 +61,7 @@ class QmlCodeEditorWidget : public QWidget
         void saveAll();
         void raiseContainer();
         void refreshErrors();
+        void handleControlRemoval(Control* control);
 
     protected:
         QSize sizeHint() const override;

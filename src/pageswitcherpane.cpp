@@ -31,7 +31,7 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_designerButton->setText(tr("Designer"));
     m_qmlCodeEditorButton->setText(tr("Editor"));
     m_projectOptionsButton->setText(tr("Options"));
-    m_documentsButton->setText(tr("Documents"));
+    m_documentsButton->setText(tr("Help"));
     m_splitViewButton->setText(tr("Split View"));
     m_buildsButton->setText(tr("Builds"));
 
@@ -122,7 +122,7 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     connect(m_designerButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Designer); });
     connect(m_qmlCodeEditorButton, &FlatButton::pressed, [=] { setCurrentPage(Page_QmlCodeEditor); });
     connect(m_projectOptionsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_ProjectOptions); });
-    connect(m_documentsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Documents); });
+    connect(m_documentsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Help); });
     connect(m_splitViewButton, &FlatButton::pressed, [=] { setCurrentPage(Page_SplitView); });
     connect(m_buildsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Builds); });
 }
@@ -136,7 +136,7 @@ Pages PageSwitcherPane::currentPage() const
     if (m_splitViewButton->isChecked())
         return Page_SplitView;
     if (m_documentsButton->isChecked())
-        return Page_Documents;
+        return Page_Help;
     if (m_qmlCodeEditorButton->isChecked())
         return Page_QmlCodeEditor;
     else
@@ -155,7 +155,7 @@ bool PageSwitcherPane::isPageEnabled(const Pages& page) const
         case Page_SplitView:
             return m_splitViewButton->isEnabled();
 
-        case Page_Documents:
+        case Page_Help:
             return m_documentsButton->isEnabled();
 
         case Page_QmlCodeEditor:
@@ -187,10 +187,10 @@ void PageSwitcherPane::setCurrentPage(const Pages& page)
             emit currentPageChanged(Page_SplitView);
             break;
 
-        case Page_Documents:
+        case Page_Help:
             m_documentsButton->setChecked(true);
             emit documentsActivated();
-            emit currentPageChanged(Page_Documents);
+            emit currentPageChanged(Page_Help);
             break;
 
         case Page_QmlCodeEditor:
@@ -219,7 +219,7 @@ void PageSwitcherPane::setPageEnabled(const Pages& page)
         case Page_SplitView:
             return m_splitViewButton->setEnabled(true);
 
-        case Page_Documents:
+        case Page_Help:
             return m_documentsButton->setEnabled(true);
 
         case Page_QmlCodeEditor:
@@ -242,7 +242,7 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
         case Page_SplitView:
             return m_splitViewButton->setDisabled(true);
 
-        case Page_Documents:
+        case Page_Help:
             return m_documentsButton->setDisabled(true);
 
         case Page_QmlCodeEditor:

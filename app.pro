@@ -1,7 +1,7 @@
 TEMPLATE = app
 TARGET = Objectwheel
 
-QT += quickwidgets qml quick
+QT += quickwidgets qml quick help
 QT += widgets network websockets svg concurrent quickcontrols2
 QT += webenginewidgets webchannel webengine webenginecore
 

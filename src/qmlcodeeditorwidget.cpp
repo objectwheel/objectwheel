@@ -1008,6 +1008,11 @@ void QmlCodeEditorWidget::refreshErrors()
     }
 }
 
+void QmlCodeEditorWidget::handleControlRemoval(Control* control)
+{
+    closeControl(control, false);
+}
+
 QSize QmlCodeEditorWidget::sizeHint() const
 {
     return fit::fx(QSizeF(680, 680)).toSize();

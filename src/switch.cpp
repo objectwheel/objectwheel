@@ -9,6 +9,10 @@
     - fit::fx(2.5) - 0.5, - fit::fx(2.5) - 0.5\
 ))
 
+namespace {
+    QColor disabledColor(const QColor& color);
+}
+
 Switch::Switch(QWidget* parent) : QAbstractButton(parent)
 {
     _settings.activeBackgroundColor = "#8BBB56";
@@ -71,12 +75,12 @@ void Switch::paintEvent(QPaintEvent*)
     auto ibc = _settings.inactiveBorderColor;
 
     if (!isEnabled()) {
-        hc = QColor(qGray(hc.rgb()), qGray(hc.rgb()), qGray(hc.rgb()));
-        hbc = QColor(qGray(hbc.rgb()), qGray(hbc.rgb()), qGray(hbc.rgb()));
-        ac = QColor(qGray(ac.rgb()), qGray(ac.rgb()), qGray(ac.rgb()));
-        abc = QColor(qGray(abc.rgb()), qGray(abc.rgb()), qGray(abc.rgb()));
-        ic = QColor(qGray(ic.rgb()), qGray(ic.rgb()), qGray(ic.rgb()));
-        ibc = QColor(qGray(ibc.rgb()), qGray(ibc.rgb()), qGray(ibc.rgb()));
+        hc = disabledColor(hc);
+        hbc = disabledColor(hbc);
+        ac = disabledColor(ac);
+        abc = disabledColor(abc);
+        ic = disabledColor(ic);
+        ibc = disabledColor(ibc);
     }
 
     const auto& cc = isChecked() ? ac : ic;
@@ -136,4 +140,13 @@ void Switch::paintEvent(QPaintEvent*)
 QSize Switch::sizeHint() const
 {
     return SIZE;
+}
+
+namespace {
+    QColor disabledColor(const QColor& color)
+    {
+        QColor d(color);
+        d.setHslF(d.hslHueF(), 0, d.lightnessF(), d.alphaF());
+        return d;
+    }
 }

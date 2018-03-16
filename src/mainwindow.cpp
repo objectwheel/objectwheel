@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
     pageSwitcherBar->setOrientation(Qt::Vertical);
-    pageSwitcherBar->setFixedWidth(fit::fx(70));
+    pageSwitcherBar->setFixedWidth(fit::fx(65));
     pageSwitcherBar->setWindowFlags(pageSwitcherBar->windowFlags() | Qt::WindowStaysOnTopHint);
     pageSwitcherBar->setFloatable(false);
     pageSwitcherBar->setMovable(false);

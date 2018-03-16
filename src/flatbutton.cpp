@@ -9,7 +9,7 @@
 
 namespace {
     QRectF adjust(const QRectF& rect, bool crop = false);
-    QColor blendColors(const QColor& color1, const QColor& color2, qreal ratio = 0.5);
+    QColor disabledColor(const QColor& color);
 }
 
 FlatButton::FlatButton(QWidget* parent) : QPushButton(parent)
@@ -74,8 +74,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
                     const auto& c = image.pixelColor(i, j);
                     image.setPixelColor(i, j, (isDown() || isChecked()) ? c.darker(125) : c);
                 } else {
-                    const auto& g = qGray(image.pixelColor(i, j).darker(110).rgb());
-                    image.setPixelColor(i, j, blendColors(QColor(g, g, g, image.pixelColor(i, j).alpha()), image.pixelColor(i, j)));
+                    image.setPixelColor(i, j, disabledColor(image.pixelColor(i, j)));
                 }
             }
         }
@@ -129,10 +128,8 @@ void FlatButton::paintEvent(QPaintEvent* event)
             bg.setColorAt(0, (isDown() || isChecked()) ? _settings.topColor.darker(125) : _settings.topColor);
             bg.setColorAt(1, (isDown() || isChecked()) ? _settings.bottomColor.darker(125) : _settings.bottomColor);
         } else {
-            const auto& t = qGray(_settings.topColor.darker(110).rgb());
-            const auto& b = qGray(_settings.bottomColor.darker(110).rgb());
-            bg.setColorAt(0, blendColors(QColor(t, t, t, _settings.topColor.alpha()), _settings.topColor));
-            bg.setColorAt(1, blendColors(QColor(b, b, b, _settings.bottomColor.alpha()), _settings.bottomColor));
+            bg.setColorAt(0, disabledColor(_settings.topColor));
+            bg.setColorAt(1, disabledColor(_settings.bottomColor));
         }
 
         painter.setPen(Qt::NoPen);
@@ -201,15 +198,10 @@ namespace {
             return rect;
     }
 
-    /* The parameter ratio specifies the weight of the colors when blending. A ratio
-     * of 0.8 will result in a blend of 20% color1 and 80% color2.
-     * A ratio of 0.5 will therefore be a 50-50 blend of the two colors. */
-    QColor blendColors(const QColor& color1, const QColor& color2, qreal ratio)
+    QColor disabledColor(const QColor& color)
     {
-        int r = color1.red()*(1-ratio) + color2.red()*ratio;
-        int g = color1.green()*(1-ratio) + color2.green()*ratio;
-        int b = color1.blue()*(1-ratio) + color2.blue()*ratio;
-        int a = color1.alpha()*(1-ratio) + color2.alpha()*ratio;
-        return QColor(r, g, b, a);
+        QColor d(color);
+        d.setHslF(d.hslHueF(), 0, d.lightnessF(), d.alphaF());
+        return d;
     }
 }
