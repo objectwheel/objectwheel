@@ -25,9 +25,9 @@ macx {
     interpreter.path = Contents/MacOS
     previewer.files = $$OUT_PWD/contrib/objectwheel-previewer/objectwheel-previewer
     previewer.path = Contents/MacOS
-    docs.files = $$PWD/src/resources/docs/*
-    docs.path = Contents/MacOS/docs
-    QMAKE_BUNDLE_DATA += interpreter previewer
+    docs.files = $$PWD/src/resources/docs
+    docs.path = Contents/MacOS
+    QMAKE_BUNDLE_DATA += interpreter previewer docs
 } else {
     interpreter.files = $$OUT_PWD/contrib/objectwheel-interpreter/objectwheel-interpreter
     interpreter.path = $$OUT_PWD/

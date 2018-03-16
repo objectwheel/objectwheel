@@ -16,7 +16,7 @@ namespace {
 }
 
 HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
-  , m_helpEngine(new QHelpEngine("/Users/omergoktas/Desktop/docs/docs.qhc", this))
+  , m_helpEngine(new QHelpEngine("./docs/docs.qhc", this))
   , m_layout(new QVBoxLayout(this))
   , m_toolbar(new QToolBar)
   , m_typeCombo(new QComboBox)
