@@ -17,7 +17,7 @@ class AboutWindow : public QWidget
     signals:
         void done();
 
-	private:
+    private:
         QVBoxLayout* m_layout;
         QLabel* m_titleLabel;
         QLabel* m_logoLabel;

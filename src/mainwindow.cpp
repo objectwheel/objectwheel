@@ -221,20 +221,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_pageSwitcherPane, SIGNAL(buildsActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(showDocks()));
     connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(showDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(documentsActivated()), SLOT(hideDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(helpActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)), m_centralWidget, SLOT(setCurrentPage(Pages)));
 
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openControlCountChanged, [=] {
-        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0 && !m_pageSwitcherPane->isPageEnabled(Page_QmlCodeEditor)) {
-            m_pageSwitcherPane->setPageEnabled(Page_QmlCodeEditor);
-            m_pageSwitcherPane->setPageEnabled(Page_SplitView);
-        }else if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0) {
-            m_pageSwitcherPane->setPageDisabled(Page_QmlCodeEditor);
-            m_pageSwitcherPane->setPageDisabled(Page_SplitView);
+        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0
+            && m_pageSwitcherPane->currentPage() != Page_SplitView)
             m_pageSwitcherPane->setCurrentPage(Page_Designer);
-        }
 
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0
             && m_pageSwitcherPane->currentPage() != Page_SplitView)

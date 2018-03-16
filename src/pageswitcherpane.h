@@ -29,7 +29,7 @@ class PageSwitcherPane : public QWidget
         void buildsActivated();
         void designerActivated();
         void splitViewActivated();
-        void documentsActivated();
+        void helpActivated();
         void qmlCodeEditorActivated();
         void projectOptionsActivated();
         void currentPageChanged(const Pages& page);
@@ -40,7 +40,7 @@ class PageSwitcherPane : public QWidget
         FlatButton* m_designerButton;
         FlatButton* m_projectOptionsButton;
         FlatButton* m_buildsButton;
-        FlatButton* m_documentsButton;
+        FlatButton* m_helpButton;
         FlatButton* m_splitViewButton;
 
 };

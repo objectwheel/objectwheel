@@ -1018,4 +1018,14 @@ QSize QmlCodeEditorWidget::sizeHint() const
     return fit::fx(QSizeF(680, 680)).toSize();
 }
 
+void QmlCodeEditorWidget::paintEvent(QPaintEvent*)
+{
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    painter.setPen("#cbced1");
+    painter.drawLine(QRectF(rect()).topLeft() + QPointF(0.5, 0.5),
+                     QRectF(rect()).bottomLeft() + QPointF(0.5, -0.5));
+}
+
 #include "qmlcodeeditorwidget.moc"
