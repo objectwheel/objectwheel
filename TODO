@@ -10,6 +10,11 @@ properties pane'de geometry'yi unutma
 genel inline todo temizliği
 previewer den "uyanığım" sinyali yolla, eğer uzun süre ow bu sinyali almazsa uyarı versin ve kullanıcıya "yeniden denensin mi" diye sorsun
 
+bir property yi değiştirince ona binli olan öteki control niye etkilenmiyor? previewer bir objecyi preview edince diğer etkilenen dirty node ları tespit edip geri "bunları da previwerlesen iyi olur kardo" sinyali göndersin
+anchor olayı yarım kaldı
+tüm objeler  previwer da arka planda parent-child ilişkisine sahip olsun, her reparent'de ow previewer'a kendisi de reparent yapsın diye snyal gönderecek
+previewer ilk açılırken proje dir'ini alıp tüm controlleri "disableCompopenentComplete" durumundayken oluşturup gerekli yerlere reparent edecek, bu iş bitince ow'ye hazırım sinyali atcak, ayrıca her saniye ayığım sinyali atmalımı?
+
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
 control inspector her refres'de uzayıp gidiyor
 objectwheel:Authenticator class'ındaki çağrılara internet kesiklik kontrolü eklenecek

@@ -105,6 +105,28 @@ void PreviewerBackend::restart()
     }
 }
 
+void PreviewerBackend::requestAnchors(const QString& dir)
+{
+    Task task;
+    task.dir = dir;
+    task.uid = SaveUtils::uid(dir);
+    task.type = Task::Anchors;
+
+    if (!_taskList.contains(task)) {
+        _taskList << task;
+
+        if (_taskList.size() == 1) {
+            processNextTask();
+            emit busyChanged();
+        }
+    } else {
+        int index = _taskList.indexOf(task);
+
+        if (index == 0)
+            _taskList[index].needsUpdate = true;
+    }
+}
+
 void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bool repreview)
 {
     Task task;
@@ -241,6 +263,9 @@ void PreviewerBackend::processNextTask()
             out << REQUEST_REPREVIEW;
             out << task.rect;
             out << task.dir;
+        } else if (task.type == Task::Anchors) {
+            out << REQUEST_ANCHORS;
+            out << task.dir;
         } else if (task.type == Task::Remove) {
             out << REQUEST_REMOVE;
             out << task.uid;
@@ -270,6 +295,10 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
             PreviewResult result;
             in >> result;
             emit previewReady(result);
+        } else if (t == Task::Anchors) {
+            Anchors anchors;
+            in >> anchors;
+            emit anchorsReady(anchors);
         }
 
         if (!isBusy())

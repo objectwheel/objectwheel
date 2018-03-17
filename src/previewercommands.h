@@ -5,3 +5,4 @@
 #define REQUEST_RESTART   QString("0x0005")
 #define REQUEST_REMOVE    QString("0x0006")
 #define REQUEST_UPDATE    QString("0x0007")
+#define REQUEST_ANCHORS   QString("0x0008")

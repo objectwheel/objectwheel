@@ -69,6 +69,7 @@ class ControlPrivate : public QObject
 
     public slots:
         void updatePreview(const PreviewResult& result);
+        void updateAnchors(const Anchors& anchors);
 
     public:
         Control* parent;
@@ -90,6 +91,8 @@ ControlPrivate::ControlPrivate(Control* parent)
 
     connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
       SLOT(updatePreview(const PreviewResult&)));
+    connect(PreviewerBackend::instance(), SIGNAL(anchorsReady(const Anchors&)),
+      SLOT(updateAnchors(const Anchors&)));
 }
 
 void ControlPrivate::updatePreview(const PreviewResult& result)
@@ -117,6 +120,20 @@ void ControlPrivate::updatePreview(const PreviewResult& result)
     }
     emit parent->previewChanged();
     emit cW->previewChanged(parent);
+}
+
+void ControlPrivate::updateAnchors(const Anchors& anchors)
+{
+    if (anchors.uid != parent->uid())
+        return;
+
+    qDebug() << anchors.bottom.id;
+    qDebug() << anchors.top.id;
+    qDebug() << anchors.left.id;
+    qDebug() << anchors.right.id;
+    qDebug() << anchors.verticalCenter.id;
+    qDebug() << anchors.horizontalCenter.id;
+    qDebug() << "-----------------------";
 }
 
 //!
@@ -274,6 +291,7 @@ bool Control::form() const
 void Control::refresh(bool repreview)
 {
     PreviewerBackend::instance()->requestPreview(rect(), dir(), repreview);
+    QTimer::singleShot(0, std::bind(&PreviewerBackend::requestAnchors, PreviewerBackend::instance(), dir()));
 }
 
 void Control::updateUid()
