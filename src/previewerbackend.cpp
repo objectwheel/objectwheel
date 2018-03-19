@@ -105,6 +105,23 @@ void PreviewerBackend::restart()
     }
 }
 
+void PreviewerBackend::requestInit(const QString& projectDir)
+{
+    Task task;
+    task.dir = projectDir;
+    task.uid = "initialization";
+    task.type = Task::Init;
+
+    if (!_taskList.contains(task)) {
+        _taskList << task;
+
+        if (_taskList.size() == 1) {
+            processNextTask();
+            emit busyChanged();
+        }
+    }
+}
+
 void PreviewerBackend::requestAnchors(const QString& dir)
 {
     Task task;
@@ -127,11 +144,10 @@ void PreviewerBackend::requestAnchors(const QString& dir)
     }
 }
 
-void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bool repreview)
+void PreviewerBackend::requestPreview(const QString& dir, bool repreview)
 {
     Task task;
     task.dir = dir;
-    task.rect = rect;
     task.uid = SaveUtils::uid(dir);
     task.type = repreview ? Task::Repreview : Task::Preview;
 
@@ -147,8 +163,6 @@ void PreviewerBackend::requestPreview(const QRectF& rect, const QString& dir, bo
 
         if (index == 0)
             _taskList[index].needsUpdate = true;
-
-        _taskList[index].rect = task.rect;
     }
 }
 
@@ -255,13 +269,14 @@ void PreviewerBackend::processNextTask()
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
 
-        if (task.type == Task::Preview) {
+        if (task.type == Task::Init) {
+            out << REQUEST_INIT;
+            out << task.dir;
+        } else if (task.type == Task::Preview) {
             out << REQUEST_PREVIEW;
-            out << task.rect;
             out << task.dir;
         } else if (task.type == Task::Repreview) {
             out << REQUEST_REPREVIEW;
-            out << task.rect;
             out << task.dir;
         } else if (task.type == Task::Anchors) {
             out << REQUEST_ANCHORS;

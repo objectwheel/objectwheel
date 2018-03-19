@@ -5,18 +5,24 @@
 #include <QImage>
 #include <QVariant>
 #include <QQmlError>
-#include <QMetaEnum>
 
 class QQmlComponent;
+class QQuickWindow;
 
-struct AnchorLine
-{
+struct Enum {
+    QString name;
+    QString scope;
+    QString value;
+    QHash<QString, int> keys;
+};
+Q_DECLARE_METATYPE(Enum)
+
+struct AnchorLine {
     QString id;
     QString anchor;
 };
 
-struct Anchors
-{
+struct Anchors {
     QString uid;
     AnchorLine top;
     AnchorLine left;
@@ -24,6 +30,8 @@ struct Anchors
     AnchorLine bottom;
     AnchorLine verticalCenter;
     AnchorLine horizontalCenter;
+    AnchorLine fill;
+    AnchorLine centerIn;
     qreal margins                = 0.0;
     qreal topMargin              = 0.0;
     qreal leftMargin             = 0.0;
@@ -33,38 +41,30 @@ struct Anchors
     qreal horizontalCenterOffset = 0.0;
 };
 
-struct Enum
-{
-    QString name;
-    QString scope;
-    QString value;
-    QHash<QString, int> keys;
-    QMetaEnum metaEnum;
-};
-Q_DECLARE_METATYPE(Enum)
-
-struct PropertyNode
-{
+struct PropertyNode {
     QString cleanClassName;
     QMap<QString, QVariant> properties;
     QList<Enum> enums;
 };
 
-class PreviewResult
-{
-    public:
-        bool hasError() const;
-        QVariant property(const QString& name) const;
+struct PreviewResult {
+    bool hasError() const;
+    QVariant property(const QString& name) const;
 
-    public:
-        bool gui;
-        QString id, uid;
-        QImage preview;
-        QObject* object;
-        QQmlComponent* component;
-        QList<QString> events;
-        QList<QQmlError> errors;
-        QList<PropertyNode> propertyNodes;
+    /* Transferred */
+    bool gui;
+    QString uid;
+    QImage preview;
+    QList<QString> events;
+    QList<QQmlError> errors;
+    QList<PropertyNode> propertyNodes;
+    QList<QString> dirtyUids;
+
+    /* Locally needed */
+    QString id;
+    QSizeF size;
+    QString url;
+    QObject* object;
 };
 
 QDataStream& operator>>(QDataStream& in, Enum& e);

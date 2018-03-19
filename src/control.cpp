@@ -167,7 +167,7 @@ Control::Control(
     setAcceptDrops(true);
 
     setZValue(SaveUtils::z(dir()));
-    setId(SaveUtils::id(dname(dname(url))));
+    setId(SaveUtils::id(dir()));
     setPos(SaveUtils::x(dir()), SaveUtils::y(dir()));
     resize(fit::fx(SaveUtils::width(dir())), fit::fx(SaveUtils::height(dir())));
     if (size().isNull()) resize(fit::fx(QSizeF(50, 50)));
@@ -290,8 +290,8 @@ bool Control::form() const
 
 void Control::refresh(bool repreview)
 {
-    PreviewerBackend::instance()->requestPreview(rect(), dir(), repreview);
-    QTimer::singleShot(0, std::bind(&PreviewerBackend::requestAnchors, PreviewerBackend::instance(), dir()));
+    PreviewerBackend::instance()->requestPreview(dir(), repreview);
+//    QTimer::singleShot(0, std::bind(&PreviewerBackend::requestAnchors, PreviewerBackend::instance(), dir()));
 }
 
 void Control::updateUid()

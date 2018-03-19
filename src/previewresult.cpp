@@ -67,12 +67,12 @@ QDataStream& operator<<(QDataStream& out, const PropertyNode& node)
 QDataStream& operator>>(QDataStream& in, PreviewResult& result)
 {
     in >> result.gui;
-    in >> result.id;
     in >> result.uid;
     in >> result.preview;
     in >> result.events;
     in >> result.errors;
     in >> result.propertyNodes;
+    in >> result.dirtyUids;
 
     return in;
 }
@@ -80,12 +80,12 @@ QDataStream& operator>>(QDataStream& in, PreviewResult& result)
 QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
 {
     out << result.gui;
-    out << result.id;
     out << result.uid;
     out << result.preview;
     out << result.events;
     out << result.errors;
     out << result.propertyNodes;
+    out << result.dirtyUids;
 
     return out;
 }

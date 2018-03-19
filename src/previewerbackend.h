@@ -7,7 +7,7 @@
 
 struct Anchors;
 class QLocalServer;
-class PreviewResult;
+struct PreviewResult;
 class QDataStream;
 
 class PreviewerBackend : public QObject
@@ -20,6 +20,7 @@ class PreviewerBackend : public QObject
         {
             enum Type
             {
+                Init,
                 Preview,
                 Repreview,
                 Update,
@@ -33,7 +34,6 @@ class PreviewerBackend : public QObject
             }
 
             Type type;
-            QRectF rect;
             QString uid, dir;
             QString property;
             QVariant propertyValue;
@@ -48,8 +48,9 @@ class PreviewerBackend : public QObject
 
     public slots:
         void restart();
+        void requestInit(const QString& projectDir);
         void requestAnchors(const QString& dir);
-        void requestPreview(const QRectF& rect, const QString& dir, bool repreview = false);
+        void requestPreview(const QString& dir, bool repreview = false);
         void removeCache(const QString& uid);
         void updateCache(const QString& uid, const QString& property, const QVariant& value);
 

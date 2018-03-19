@@ -10,10 +10,30 @@ properties pane'de geometry'yi unutma
 genel inline todo temizliği
 previewer den "uyanığım" sinyali yolla, eğer uzun süre ow bu sinyali almazsa uyarı versin ve kullanıcıya "yeniden denensin mi" diye sorsun
 
-bir property yi değiştirince ona binli olan öteki control niye etkilenmiyor? previewer bir objecyi preview edince diğer etkilenen dirty node ları tespit edip geri "bunları da previwerlesen iyi olur kardo" sinyali göndersin
+bir property yi değiştirince ona bindli olan öteki control niye etkilenmiyor? previewer bir objecyi preview edince diğer etkilenen dirty node ları tespit edip geri "bunları da previwerlesen iyi olur kardo" sinyali göndersin
 anchor olayı yarım kaldı
 tüm objeler  previwer da arka planda parent-child ilişkisine sahip olsun, her reparent'de ow previewer'a kendisi de reparent yapsın diye snyal gönderecek
 previewer ilk açılırken proje dir'ini alıp tüm controlleri "disableCompopenentComplete" durumundayken oluşturup gerekli yerlere reparent edecek, bu iş bitince ow'ye hazırım sinyali atcak, ayrıca her saniye ayığım sinyali atmalımı?
+bir obje repreview edilecekken, veya her ne şekilde olursa olsun, eğer silinecekse silinmeden önce yenisi oluşturulup setContextProperty ile id si ayarlansın, ondan sonra eskisi silinsin (hatta initialPreview'de ilk defa set edilen tüm propertyler yeni objeye set edilsin)
+bu arada setContextProperty'nin yan etki durumu (bazen set etmeme durumu) bi incelensin, ona göre bazen null set etme vs olayları araştırılsın düzeltilsin
+cachedPreview olayında niye result baştan aşağı kopyalanıyor? neden sadece güncellenmiyor?
+bir item reparent edilirse alt itemler reparent veya bir yan etki?
+bir item silinirse alt itemler silinir, ya yan etkiler?
+bir item repreview edilirse alt itemler, ve onlara olan yan etkiler?
+bir itemin propertysi değişirse ya child itemler? öteki itemlere yan etkiler? tüm itemler her en ufak değişiklikte "isDirty" diye çek edilmeli
+request manager ve previewmanager'in tüm fonksiyonları için yukarıdaki 4 soruyu sor
+id, width, height, x, y, z gibi property changeleri için de previwer uyarılsın (refresh epressions) hehangi "dirty" obje durumuna karşı previwer bize geri bildirim atsın
+result.id kullanılmıyorsa sil gitsin
+id change, property change durumları (ve olası diğer durumların kontrolü için) qml2puppet dispatch fonksiyonu kontrol edilsin, bir şey atlıyomuyuz bakalım görelim
+repreview sırasında error varmı kontrolü de yapılacak, aynı init'deki gibi, ve init'deki diğer prosedürler takip edilecek
+erroru olan tüm nesneler için dummy objec oluşturulur ve gui objecsi gibi davranılır, bu yüzden;
+1. diğer tüm apiler, previwe, prepreview, anchors vs vs alayı var olan resultları (m_results daki) hatalara karşı çek edip ona ilgili dummy objeyi yada gerçek objeyi bilip muamele edecek
+error'lu objeye property set edilemesin, yada resize yada reparent yapılamasın, GUI editörden
+init'deki prosedürler diğer fonklar içinde uygulansın, çek et alayını bak bakem hangileri bu uygulamaya uygun
+errorlu ve non-gui objeclerin silinme bildirimlerinin geri previewer!a bildirildiğinden emin ol
+contentItem render edilirken öteki objelerde istemsizce poz verirmi formun previwewinde?
+window neden render olmayi
+qml editör açılında "no items" widgeti altta sıkışık olarak kalıyor, gizlenmiyor
 
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
 control inspector her refres'de uzayıp gidiyor
@@ -102,68 +122,4 @@ Diğer TODO'lar
 14. I wish Copy and paste had a slight X Y adjustment so the objects are not on top of each other. You are not certain you copied the objects because you might thing nothing happened.
 15. Checkout objectwheel's (project) inline TODO, BUG and FIXMEs
 
-
-
-* Add readme
-* Add license
-* Fix properties list scrolling on mobile devices
-* Fix toolbox list scrolling on mobile devices
-* Adapt font property comboboxes on mobile devices
-* Restylize font property comboboxes
-* Split up the api.ai Console And Weview into (2) controls [Webview/Console]
-* The console should show only last query's resutls
-* Fix tumbler control's geometry
-* Test compass control on IOS
-* Research for other QtSensor based new controls
-* Add text-to-speech support for WikipediaSurfer control
-* While reading (text to speech) -- Create buttons for Faster, Slower, Pause, Resume -- Buttons only -- some sort of button control panel. 
-* Research for a flexible way to control api.ai based controls easily [Pattern based surfing]
-* Research for more voice drived record button for WikipediaSurfer
-* Don't forget about producing somethings related with Particle Photon
-* Accordion like properties window [ordering Alphabetically, Genetic etc.]
-* Accordion like toolbox window [ordering Alphabetically, Genetic etc.]
-* Make a IOS like Toolbar for inside of containers of covered menus
-* Fix issues about attached properties on properties window
-* Change scrollbar color in right of the properties window (grey or something lighter)
-* Make a new multilined text area control
-* Make an "are you sure" window right before you clear all controls on design area
-* Make layouts works again with a well thought-out usage system
-* Search bar for toolbox window
-* Research on how controls talk to each other
-* Fix "record button stopped working" bugs on android
-* A new control for Google analystics
-* Break out the Intent and Action -- These two things matter a lot -- they should be easily found in a separate place. 
-* Create a chat window (new control), chatting with who?
-* Make the record Button a control. Allow me to move it around and make it bigger. When the System is listening -- change words somewhere to Listening and count down 10, 9, 8, 7, etc. 
-* Add Chatbot Control to simply have a conversation with api.ai
-* Work with Keen.io to send What was said -- and by Who -- to the cloud. Be thinking about Logging in (Via Facebook or ?) 
-* we need a login component -- oath or Facebook.
-* general application console owned by all controls
-* general purpose webview control
-* a "words - actions" relations list control for wikipedia reader
-* try to figure out how to get "words"/"actions" list from api.ai
-* pre recorded sound to say, "no internet"
-* combobox control
-* Listview populated with api.ai values (new control)
-* navigator window, that shows items and item groups
-* User/Login system
-* AppStore/Package system
-* Friend system
-* Live project edit online shared with friends
-* Project saving/Database management system
-* Welcome dashboard
-* Project's folders/files navigator, file explorer popped-up from top of main screen
-* Password protected acccordion like toolbox titles, and tools(controls)
-* Background of design-area(dashboard) need properties those showed on properties window
-* Disable edit mode when click toolbox menu
-* Fix ugly image scaling on IOS
-* Fix control's black dragging icon issue on IOS
-* Fix spinbox keyboard pop-up on IOS
-* Fix design-area stretching problem on initialization of IOS app
-* Fix crazy compass on IOS
-* Add an about window with build numbers
-* Json communication between controls
-* Control movement history in json
-* Why Switch control crash if its id "switch"
-* A better CODE Editor needed
 

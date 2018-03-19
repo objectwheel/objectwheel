@@ -41,6 +41,7 @@ void BackendManager::handleSessionStop() const
 void BackendManager::handleProjectStart() const
 {
     PreviewerBackend::instance()->restart();
+    PreviewerBackend::instance()->requestInit(ProjectBackend::instance()->dir());
     ExposerBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->designerScene()->clearSelection();
