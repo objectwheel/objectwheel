@@ -2,6 +2,7 @@
 #include <control.h>
 #include <controlwatcher.h>
 #include <savebackend.h>
+#include <previewerbackend.h>
 #include <fit.h>
 
 SaveTransaction::SaveTransaction()
@@ -23,6 +24,11 @@ void SaveTransaction::processGeometry(Control* control)
     SaveBackend::instance()->setProperty(control, "y", QString::number(control->y()));
     SaveBackend::instance()->setProperty(control, "width", QString::number(control->size().width() / fit::ratio()));
     SaveBackend::instance()->setProperty(control, "height", QString::number(control->size().height() / fit::ratio()));
+    PreviewerBackend::instance()->updateCache(control->uid(), "x", control->x());
+    PreviewerBackend::instance()->updateCache(control->uid(), "y", control->y());
+    PreviewerBackend::instance()->updateCache(control->uid(), "width", control->size().width());
+    PreviewerBackend::instance()->updateCache(control->uid(), "height", control->size().height());
+    control->refresh();
 }
 
 void SaveTransaction::processParent(Control* control)
@@ -36,4 +42,6 @@ void SaveTransaction::processParent(Control* control)
 void SaveTransaction::processZ(Control* control)
 {
     SaveBackend::instance()->setProperty(control, "z", QString::number(control->zValue()));
+    PreviewerBackend::instance()->updateCache(control->uid(), "z", control->zValue());
+    control->refresh();
 }

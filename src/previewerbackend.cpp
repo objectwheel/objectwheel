@@ -4,6 +4,7 @@
 #include <previewercommands.h>
 #include <delayer.h>
 #include <saveutils.h>
+#include <control.h>
 
 #include <QPointer>
 #include <QCryptographicHash>
@@ -54,10 +55,14 @@ namespace {
 
 PreviewerBackend::PreviewerBackend()
 {
+    _dirtHandlingEnabled = false;
     _server = new QLocalServer(this);
     _server->setSocketOptions(QLocalServer::UserAccessOption);
     connect(_server, SIGNAL(newConnection()), SLOT(onNewConnection()));
     serverName = Hasher::hash(QString::number(QDateTime::currentSecsSinceEpoch()).toUtf8(), Hasher::Md5).toHex();
+    _dirtHandlingDisablerTimer = new QTimer(this);
+    _dirtHandlingDisablerTimer->setInterval(500);
+    connect(_dirtHandlingDisablerTimer, SIGNAL(timeout()), SLOT(disableDirtHandling()));
 }
 
 PreviewerBackend::~PreviewerBackend()
@@ -105,6 +110,17 @@ void PreviewerBackend::restart()
     }
 }
 
+void PreviewerBackend::disableDirtHandling()
+{
+    _dirtHandlingEnabled = false;
+}
+
+void PreviewerBackend::enableDirtHandling()
+{
+    _dirtHandlingEnabled = true;
+    _dirtHandlingDisablerTimer->start();
+}
+
 void PreviewerBackend::requestInit(const QString& projectDir)
 {
     Task task;
@@ -144,12 +160,13 @@ void PreviewerBackend::requestAnchors(const QString& dir)
     }
 }
 
-void PreviewerBackend::requestPreview(const QString& dir, bool repreview)
+void PreviewerBackend::requestPreview(const QSizeF& size, const QString& dir, bool repreview)
 {
     Task task;
     task.dir = dir;
     task.uid = SaveUtils::uid(dir);
     task.type = repreview ? Task::Repreview : Task::Preview;
+    task.size = size;
 
     if (!_taskList.contains(task)) {
         _taskList << task;
@@ -160,6 +177,8 @@ void PreviewerBackend::requestPreview(const QString& dir, bool repreview)
         }
     } else {
         int index = _taskList.indexOf(task);
+
+        _taskList[index].size = size;
 
         if (index == 0)
             _taskList[index].needsUpdate = true;
@@ -200,11 +219,11 @@ void PreviewerBackend::updateCache(const QString& uid, const QString& property, 
     } else {
         int index = _taskList.indexOf(task);
 
+        _taskList[index].property = property;
+        _taskList[index].propertyValue = value;
+
         if (index == 0)
             _taskList[index].needsUpdate = true;
-
-        _taskList[index].property = task.property;
-        _taskList[index].propertyValue = task.propertyValue;
     }
 }
 
@@ -274,10 +293,13 @@ void PreviewerBackend::processNextTask()
             out << task.dir;
         } else if (task.type == Task::Preview) {
             out << REQUEST_PREVIEW;
+            out << task.size;
             out << task.dir;
         } else if (task.type == Task::Repreview) {
             out << REQUEST_REPREVIEW;
+            out << task.size;
             out << task.dir;
+            enableDirtHandling();
         } else if (task.type == Task::Anchors) {
             out << REQUEST_ANCHORS;
             out << task.dir;
@@ -289,6 +311,7 @@ void PreviewerBackend::processNextTask()
             out << task.uid;
             out << task.property;
             out << task.propertyValue;
+            enableDirtHandling();
         }
 
         send(socket.data(), data);
@@ -309,6 +332,30 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
         if (t == Task::Preview || t == Task::Repreview) {
             PreviewResult result;
             in >> result;
+
+            if (_dirtHandlingEnabled) {
+                for (auto control : Control::controls()) {
+                    if (result.dirtyUids.contains(control->uid())) {
+                        Task task;
+                        task.dir = control->dir();
+                        task.uid = control->uid();
+                        task.size = control->size();
+                        task.type = Task::Preview;
+
+                        if (!_taskList.contains(task)) {
+                            _taskList << task;
+                        } else {
+                            int index = _taskList.indexOf(task);
+
+                            if (index == 0)
+                                _taskList[index].needsUpdate = true;
+                        }
+                    }
+                }
+            }
+
+            qDebug() << result.uid;
+
             emit previewReady(result);
         } else if (t == Task::Anchors) {
             Anchors anchors;

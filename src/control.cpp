@@ -290,7 +290,7 @@ bool Control::form() const
 
 void Control::refresh(bool repreview)
 {
-    PreviewerBackend::instance()->requestPreview(dir(), repreview);
+    PreviewerBackend::instance()->requestPreview(size(), dir(), repreview);
 //    QTimer::singleShot(0, std::bind(&PreviewerBackend::requestAnchors, PreviewerBackend::instance(), dir()));
 }
 
@@ -347,8 +347,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dropControl(Control* control)
 {
-    control->setPos(mapFromItem(control->
-      parentItem(), control->pos()));
+    control->setPos(mapFromItem(control->parentItem(), control->pos()));
     control->setParentItem(this);
     update();
 }

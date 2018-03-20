@@ -9,6 +9,7 @@ struct Anchors;
 class QLocalServer;
 struct PreviewResult;
 class QDataStream;
+class QTimer;
 
 class PreviewerBackend : public QObject
 {
@@ -34,6 +35,7 @@ class PreviewerBackend : public QObject
             }
 
             Type type;
+            QSizeF size;
             QString uid, dir;
             QString property;
             QVariant propertyValue;
@@ -50,11 +52,13 @@ class PreviewerBackend : public QObject
         void restart();
         void requestInit(const QString& projectDir);
         void requestAnchors(const QString& dir);
-        void requestPreview(const QString& dir, bool repreview = false);
+        void requestPreview(const QSizeF& size, const QString& dir, bool repreview = false);
         void removeCache(const QString& uid);
         void updateCache(const QString& uid, const QString& property, const QVariant& value);
 
     private slots:
+        void disableDirtHandling();
+        void enableDirtHandling();
         void onNewConnection();
         void onReadReady();
         void onBinaryMessageReceived(const QByteArray& data);
@@ -75,7 +79,9 @@ class PreviewerBackend : public QObject
 
     private:
         QLocalServer* _server;
+        QTimer* _dirtHandlingDisablerTimer;
         QList<Task> _taskList;
+        bool _dirtHandlingEnabled;
 };
 
 #endif // PREVIEWERBACKEND_H

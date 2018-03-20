@@ -8,5 +8,5 @@
 #define REQUEST_UPDATE    QString("0x0007")
 #define REQUEST_ANCHORS   QString("0x0008")
 #define REQUEST_REPARENT  QString("0x0009")
-#define REQUEST_DIRTY     QString("0x0010")
-#define REQUEST_AWAKE     QString("0x0011")
+#define REQUEST_AWAKE     QString("0x0010")
+#define REQUEST_PROGRESS  QString("0x0011")
