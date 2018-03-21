@@ -1,10 +1,10 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <resizer.h>
 #include <previewresult.h>
 #include <QGraphicsWidget>
 
+class Resizer;
 class ControlWatcher;
 class DesignerScene;
 
@@ -86,7 +86,7 @@ class Control : public QGraphicsWidget
 
     protected:
         bool m_clip;
-        Resizer m_resizers[8];
+        QList<Resizer*> m_resizers;
 
     private:
         QImage m_preview;

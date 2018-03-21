@@ -8,6 +8,7 @@
 #include <designerscene.h>
 #include <previewerbackend.h>
 #include <saveutils.h>
+#include <resizer.h>
 
 #include <QtMath>
 #include <QtWidgets>
@@ -26,52 +27,22 @@
 extern const char* TOOL_KEY;
 
 namespace {
-    /* Fills the restricted area by the size with pattern into
-     * the transparent dest. Then draws source into the center of the dest. */
-    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
-    {
-        qreal dpr = DPR;
-
-        QBrush brush;
-        brush.setColor("#b0b4b7");
-        brush.setStyle(Qt::Dense6Pattern);
-
-        QPainter painter(&dest);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setBrush(brush);
-        painter.setPen("#808487");
-
-        QRectF rect;
-        rect.setTopLeft({0.0, 0.0});
-        rect.setWidth(size.width());
-        rect.setHeight(size.height());
-
-        QRectF rect_2;
-        rect_2.setWidth(source.width() / dpr);
-        rect_2.setHeight(source.height() / dpr);
-        rect_2.moveCenter(rect.center());
-
-        painter.drawRect(ADJUST(rect));
-        painter.drawImage(rect_2, source);
-    }
+    QList<Resizer*> initializeResizers(Control* control);
+    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
 }
 
 bool Control::m_showOutline = false;
 QList<Control*> Control::m_controls;
 
-Control::Control(
-    const QString& url,
-    const QString& uid,
-    Control* parent
-)
-    : QGraphicsWidget(parent)
-    , m_clip(true)
-    , m_uid(uid.isEmpty() ? SaveUtils::uid(dname(dname(url))) : uid)
-    , m_url(url)
-    , m_hoverOn(false)
-    , m_dragging(false)
-    , m_dragIn(false)
-    , m_gui(true)
+Control::Control(const QString& url, const QString& uid, Control* parent) : QGraphicsWidget(parent)
+  , m_clip(true)
+  , m_resizers(initializeResizers(this))
+  , m_uid(uid.isEmpty() ? SaveUtils::uid(dname(dname(url))) : uid)
+  , m_url(url)
+  , m_hoverOn(false)
+  , m_dragging(false)
+  , m_dragIn(false)
+  , m_gui(true)
 {
     m_controls << this;
 
@@ -85,12 +56,6 @@ Control::Control(
     setId(SaveUtils::id(dir()));
     resize(fit::fx(QSizeF(50, 50)));
     m_preview = initialPreview();
-
-    int i = 0;
-    for (auto& resizer : m_resizers) {
-        resizer.setParentItem(parent);
-        resizer.setPlacement(Resizer::Placement(i++));
-    }
 
     connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
       SLOT(updatePreview(const PreviewResult&)));
@@ -166,15 +131,15 @@ QList<Control*> Control::childControls(bool dive) const
 
 void Control::hideResizers()
 {
-    for (auto& resizer : m_resizers) {
-        resizer.hide();
+    for (auto resizer : m_resizers) {
+        resizer->hide();
     }
 }
 
 void Control::showResizers()
 {
-    for (auto& resizer : m_resizers) {
-        resizer.show();
+    for (auto resizer : m_resizers) {
+        resizer->show();
     }
 }
 
@@ -406,8 +371,8 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
-    for (auto& resizer : m_resizers)
-        resizer.correct();
+    for (auto resizer : m_resizers)
+        resizer->correct();
     refresh();
 }
 
@@ -680,4 +645,45 @@ bool Form::main() const
 void Form::setMain(bool value)
 {
     m_main = value;
+}
+
+namespace {
+    /* Fills the restricted area by the size with pattern into
+     * the transparent dest. Then draws source into the center of the dest. */
+    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
+    {
+        qreal dpr = DPR;
+
+        QBrush brush;
+        brush.setColor("#b0b4b7");
+        brush.setStyle(Qt::Dense6Pattern);
+
+        QPainter painter(&dest);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setBrush(brush);
+        painter.setPen("#808487");
+
+        QRectF rect;
+        rect.setTopLeft({0.0, 0.0});
+        rect.setWidth(size.width());
+        rect.setHeight(size.height());
+
+        QRectF rect_2;
+        rect_2.setWidth(source.width() / dpr);
+        rect_2.setHeight(source.height() / dpr);
+        rect_2.moveCenter(rect.center());
+
+        painter.drawRect(ADJUST(rect));
+        painter.drawImage(rect_2, source);
+    }
+
+    QList<Resizer*> initializeResizers(Control* control)
+    {
+        QList<Resizer*> resizers;
+        int i = 0;
+        for (; i < 8; )
+            resizers << new Resizer(control, Resizer::Placement(i++));
+
+        return resizers;
+    }
 }

@@ -23,9 +23,7 @@ class Resizer : public QGraphicsWidget
         };
 
     public:
-        explicit Resizer(QGraphicsWidget* parent = nullptr);
-        Placement placement() const;
-        void setPlacement(Placement placement);
+        explicit Resizer(QGraphicsWidget* parent, Placement placement);
         bool disabled() const;
         void setDisabled(bool disabled);
         static bool resizing();
@@ -38,13 +36,12 @@ class Resizer : public QGraphicsWidget
         virtual void mousePressEvent(QGsme* event) override;
         virtual void mouseMoveEvent(QGsme* event) override;
         virtual void mouseReleaseEvent(QGsme* event) override;
-        virtual void paint(QPainter* painter, const QSogi* option,
-          QWidget* widget = nullptr) override;
+        virtual void paint(QPainter* painter, const QSogi* option, QWidget* widget = nullptr) override;
 
     private:
-        Placement _placement;
-        bool _disabled;
-        static bool _resizing;
+        Placement m_placement;
+        bool m_disabled;
+        static bool m_resizing;
 };
 
 #endif // RESIZER_H

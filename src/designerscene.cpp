@@ -2,6 +2,7 @@
 #include <fit.h>
 #include <savebackend.h>
 #include <suppressor.h>
+#include <resizer.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
