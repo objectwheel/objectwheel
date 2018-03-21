@@ -118,7 +118,7 @@ QmlHighlighter::QmlHighlighter(QTextDocument* parent)
     highlightingRules.append(rule);
 
     propertyFormat.setForeground(COLOR_PROPERTIES);
-    rule.pattern = QRegExp("^(!?(\\s+)?)[a-z][\\w\\.]+([ \\t ]+)?(?=:)");
+    rule.pattern = QRegExp("^(!?(\\s+)?)[a-z]([\\w\\.]+)?([ \\t ]+)?(?=:)");
     rule.format = propertyFormat;
     highlightingRules.append(rule);
 

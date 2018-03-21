@@ -629,7 +629,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 {
     QRectF cellRect(option.rect);
     auto model = index.model();
-    bool isClassRow = !model->parent(index).isValid() && index.row() > 1;
+    bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
     bool isSelected = option.state & QStyle::State_Selected;
 
     // Draw background
@@ -712,7 +712,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     qreal width = fit::fx(10);
     auto model = index.model();
     bool hasChild = itemFromIndex(index)->childCount();
-    bool isClassRow = !model->parent(index).isValid() && index.row() > 1;
+    bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
     bool isSelected = itemFromIndex(index)->isSelected();
 
     QRectF branchRect(rect);
@@ -862,19 +862,24 @@ void PropertiesPane::refreshList()
         return;
 
     {
-        QTreeWidgetItem* iitem = new QTreeWidgetItem;
-        iitem->setText(0, "Type");
-        iitem->setText(1, propertyNodes.first().cleanClassName);
+        QTreeWidgetItem* item_1 = new QTreeWidgetItem;
+        item_1->setText(0, "Type");
+        item_1->setText(1, propertyNodes.first().cleanClassName);
 
-        QTreeWidgetItem* jitem = new QTreeWidgetItem;
-        jitem->setText(0, "id");
-        jitem->setData(1, Qt::EditRole, selectedControls[0]->id());
-        jitem->setData(1, NodeRole::Data, selectedControls[0]->id());
-        jitem->setData(1, NodeRole::Type, PropertiesPane::NodeType::Id);
-        jitem->setFlags(jitem->flags() | Qt::ItemIsEditable);
+        QTreeWidgetItem* item_2 = new QTreeWidgetItem;
+        item_2->setText(0, "Uid");
+        item_2->setText(1, selectedControls[0]->uid());
 
-        _treeWidget->addTopLevelItem(iitem);
-        _treeWidget->addTopLevelItem(jitem);
+        QTreeWidgetItem* item_3 = new QTreeWidgetItem;
+        item_3->setText(0, "id");
+        item_3->setData(1, Qt::EditRole, selectedControls[0]->id());
+        item_3->setData(1, NodeRole::Data, selectedControls[0]->id());
+        item_3->setData(1, NodeRole::Type, PropertiesPane::NodeType::Id);
+        item_3->setFlags(item_3->flags() | Qt::ItemIsEditable);
+
+        _treeWidget->addTopLevelItem(item_1);
+        _treeWidget->addTopLevelItem(item_2);
+        _treeWidget->addTopLevelItem(item_3);
     }
 
     for (const auto& propertyNode : propertyNodes) {

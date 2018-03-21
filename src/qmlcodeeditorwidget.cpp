@@ -833,10 +833,7 @@ void QmlCodeEditorWidget::openControl(Control* control)
             if (!item.documents.value(item.currentFileRelativePath).cursor.isNull())
                 _d->codeEditor->setTextCursor(item.documents.value(item.currentFileRelativePath).cursor);
 
-            if (_d->noDocumentIndicator->isVisible()) {
-                _d->codeEditor->show();
-                _d->noDocumentIndicator->hide();
-            }
+            _d->noDocumentIndicator->hide();
             break;
         }
     }
