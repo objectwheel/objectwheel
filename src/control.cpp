@@ -13,15 +13,15 @@
 #include <QtWidgets>
 #include <QtSvg>
 
-#define HIGHLIGHT_COLOR (QColor("#174C4E4D"))
-#define SELECTION_COLOR ("#404447")
-#define OUTLINE_COLOR ("#808487")
-#define BACKGROUND_COLOR (QColor("#F0F4F7"))
-#define PREVIEW_REFRESH_INTERVAL 100
+#define HIGHLIGHT_COLOR     "#174C4E4D"
+#define SELECTION_COLOR       "#404447"
+#define OUTLINE_COLOR         "#808487"
+#define BACKGROUND_COLOR      "#F0F4F7"
+#define PREVIEW_REFRESH_INTERVAL    100
 #define RESIZE_TRANSACTION_INTERVAL 800
-#define GEOMETRY_SIGNAL_DELAY 800
-#define MARGIN_TOP (fit::fx(14))
-#define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
+#define GEOMETRY_SIGNAL_DELAY       800
+#define MARGIN_TOP fit::fx(14)
+#define ADJUST(x)  (x).adjusted(0.5, 0.5, -0.5, -0.5)
 
 extern const char* TOOL_KEY;
 
@@ -56,92 +56,8 @@ namespace {
     }
 }
 
-//!
-//! ****************** [Control Private] ******************
-//!
-
-class ControlPrivate : public QObject
-{
-        Q_OBJECT
-
-    public:
-        ControlPrivate(Control* parent);
-
-    public slots:
-        void updatePreview(const PreviewResult& result);
-        void updateAnchors(const Anchors& anchors);
-
-    public:
-        Control* parent;
-        QImage preview;
-        bool hoverOn;
-};
-
-//TODO: Search for ControlScene and DesignerScene and make their usage less
-ControlPrivate::ControlPrivate(Control* parent)
-    : QObject(parent)
-    , parent(parent)
-    , hoverOn(false)
-{
-    int i = 0;
-    for (auto& resizer : parent->_resizers) {
-        resizer.setParentItem(parent);
-        resizer.setPlacement(Resizer::Placement(i++));
-    }
-
-    connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
-      SLOT(updatePreview(const PreviewResult&)));
-    connect(PreviewerBackend::instance(), SIGNAL(anchorsReady(const Anchors&)),
-      SLOT(updateAnchors(const Anchors&)));
-}
-
-void ControlPrivate::updatePreview(const PreviewResult& result)
-{
-    if (result.uid != parent->uid())
-        return;
-
-    preview = result.preview;
-    parent->_errors = result.errors;
-    parent->_gui = result.gui;
-    parent->_properties = result.propertyNodes;
-    parent->_events = result.events;
-
-    if (!result.hasError()) {
-        if (result.gui) {
-            if (!parent->form())
-                parent->_clip = result.property("clip").toBool();
-        }
-    }
-
-    parent->update();
-    if (result.hasError()) {
-        emit parent->errorOccurred();
-        emit cW->errorOccurred(parent);
-    }
-    emit parent->previewChanged();
-    emit cW->previewChanged(parent);
-}
-
-void ControlPrivate::updateAnchors(const Anchors& anchors)
-{
-    if (anchors.uid != parent->uid())
-        return;
-
-    qDebug() << anchors.bottom.id;
-    qDebug() << anchors.top.id;
-    qDebug() << anchors.left.id;
-    qDebug() << anchors.right.id;
-    qDebug() << anchors.verticalCenter.id;
-    qDebug() << anchors.horizontalCenter.id;
-    qDebug() << "-----------------------";
-}
-
-//!
-//! ********************** [Control] **********************
-//!
-
-bool Control::_showOutline = false;
-QList<Control*> Control::_controls;
+bool Control::m_showOutline = false;
+QList<Control*> Control::m_controls;
 
 Control::Control(
     const QString& url,
@@ -149,15 +65,15 @@ Control::Control(
     Control* parent
 )
     : QGraphicsWidget(parent)
-    , _clip(true)
-    , _d(new ControlPrivate(this))
-    , _uid(uid.isEmpty() ? SaveUtils::uid(dname(dname(url))) : uid)
-    , _url(url)
-    , _dragging(false)
-    , _dragIn(false)
-    , _gui(true)
+    , m_clip(true)
+    , m_uid(uid.isEmpty() ? SaveUtils::uid(dname(dname(url))) : uid)
+    , m_url(url)
+    , m_hoverOn(false)
+    , m_dragging(false)
+    , m_dragIn(false)
+    , m_gui(true)
 {
-    _controls << this;
+    m_controls << this;
 
     setFlag(Control::ItemIsFocusable);
     setFlag(Control::ItemIsSelectable);
@@ -166,12 +82,20 @@ Control::Control(
     setAcceptHoverEvents(true);
     setAcceptDrops(true);
 
-    setZValue(SaveUtils::z(dir()));
     setId(SaveUtils::id(dir()));
-    setPos(SaveUtils::x(dir()), SaveUtils::y(dir()));
-    resize(fit::fx(SaveUtils::width(dir())), fit::fx(SaveUtils::height(dir())));
-    if (size().isNull()) resize(fit::fx(QSizeF(50, 50)));
-    _d->preview = initialPreview();
+    resize(fit::fx(QSizeF(50, 50)));
+    m_preview = initialPreview();
+
+    int i = 0;
+    for (auto& resizer : m_resizers) {
+        resizer.setParentItem(parent);
+        resizer.setPlacement(Resizer::Placement(i++));
+    }
+
+    connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
+      SLOT(updatePreview(const PreviewResult&)));
+    connect(PreviewerBackend::instance(), SIGNAL(anchorsReady(const Anchors&)),
+      SLOT(updateAnchors(const Anchors&)));
 
     connect(this, &Control::geometryChanged, this, [=] {
         QPointer<Control> p(this);
@@ -193,22 +117,22 @@ Control::Control(
 
 Control::~Control()
 {
-    _controls.removeOne(this);
+    m_controls.removeOne(this);
 }
 
 bool Control::showOutline()
 {
-    return _showOutline;
+    return m_showOutline;
 }
 
 void Control::setShowOutline(const bool value)
 {
-    _showOutline = value;
+    m_showOutline = value;
 }
 
 void Control::updateUids()
 {
-    for (auto control : _controls)
+    for (auto control : m_controls)
         control->updateUid();
 }
 
@@ -241,14 +165,14 @@ QList<Control*> Control::childControls(bool dive) const
 
 void Control::hideResizers()
 {
-    for (auto& resizer : _resizers) {
+    for (auto& resizer : m_resizers) {
         resizer.hide();
     }
 }
 
 void Control::showResizers()
 {
-    for (auto& resizer : _resizers) {
+    for (auto& resizer : m_resizers) {
         resizer.show();
     }
 }
@@ -260,18 +184,18 @@ Control* Control::parentControl() const
 
 QString Control::id() const
 {
-    return _id;
+    return m_id;
 }
 
 void Control::setId(const QString& id)
 {
-    _id = id;
+    m_id = id;
     setToolTip(id);
 }
 
 QString Control::url() const
 {
-    return _url;
+    return m_url;
 }
 
 bool Control::contains(const QString& id) const
@@ -288,6 +212,47 @@ bool Control::form() const
     return (dynamic_cast<const Form*>(this) != nullptr);
 }
 
+void Control::updatePreview(const PreviewResult& result)
+{
+    if (result.uid != uid())
+        return;
+
+    m_preview = result.preview;
+    m_errors = result.errors;
+    m_gui = result.gui;
+    m_properties = result.propertyNodes;
+    m_events = result.events;
+
+    if (!result.hasError()) {
+        if (result.gui) {
+            if (!form())
+                m_clip = result.property("clip").toBool();
+        }
+    }
+
+    update();
+    if (result.hasError()) {
+        emit errorOccurred();
+        emit cW->errorOccurred(this);
+    }
+    emit previewChanged();
+    emit cW->previewChanged(this);
+}
+
+void Control::updateAnchors(const Anchors& anchors)
+{
+    if (anchors.uid != uid())
+        return;
+
+    qDebug() << anchors.bottom.id;
+    qDebug() << anchors.top.id;
+    qDebug() << anchors.left.id;
+    qDebug() << anchors.right.id;
+    qDebug() << anchors.verticalCenter.id;
+    qDebug() << anchors.horizontalCenter.id;
+    qDebug() << "-----------------------";
+}
+
 void Control::refresh(bool repreview)
 {
     PreviewerBackend::instance()->requestPreview(size(), dir(), repreview);
@@ -296,7 +261,7 @@ void Control::refresh(bool repreview)
 
 void Control::updateUid()
 {
-    _uid = SaveUtils::uid(dir());
+    m_uid = SaveUtils::uid(dir());
 }
 
 void Control::centralize()
@@ -314,7 +279,7 @@ void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
     auto mimeData = event->mimeData();
     if (mimeData->hasUrls() && mimeData->hasText() &&
         mimeData->text() == TOOL_KEY) {
-        _dragIn = true;
+        m_dragIn = true;
         event->accept();
     } else {
         event->ignore();
@@ -324,7 +289,7 @@ void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
 {
-    _dragIn = false;
+    m_dragIn = false;
     event->accept();
     update();
 }
@@ -336,7 +301,7 @@ void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
-    _dragIn = false;
+    m_dragIn = false;
     event->accept();
     emit controlDropped(event->pos(),
       event->mimeData()->urls().first().toLocalFile());
@@ -355,14 +320,14 @@ void Control::dropControl(Control* control)
 void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     QGraphicsWidget::hoverEnterEvent(event);
-    _d->hoverOn = true;
+    m_hoverOn = true;
     update();
 }
 
 void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     QGraphicsWidget::hoverLeaveEvent(event);
-    _d->hoverOn = false;
+    m_hoverOn = false;
     update();
 }
 
@@ -382,7 +347,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     Control* control = nullptr;
     auto items = scene()->items(event->scenePos());
-    if (_dragging && items.size() > 1 && (control = dynamic_cast<Control*>(items[1])) &&
+    if (m_dragging && items.size() > 1 && (control = dynamic_cast<Control*>(items[1])) &&
         control != this && !control->dragIn()) {
         control->setDragIn(true);
 
@@ -440,7 +405,7 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
-    for (auto& resizer : _resizers)
+    for (auto& resizer : m_resizers)
         resizer.correct();
     refresh();
 }
@@ -493,62 +458,62 @@ QImage Control::initialPreview() const
 
 const QList<QQmlError>& Control::errors() const
 {
-    return _errors;
+    return m_errors;
 }
 
 bool Control::hasErrors() const
 {
-    return !_errors.isEmpty();
+    return !m_errors.isEmpty();
 }
 
 QList<Control*>& Control::controls()
 {
-    return _controls;
+    return m_controls;
 }
 
 void Control::setUrl(const QString& url)
 {
-    _url = url;
+    m_url = url;
 }
 
 QString Control::dir() const // Returns root path
 {
-    return dname(dname(_url));
+    return dname(dname(m_url));
 }
 
 QString Control::uid() const
 {
-    return _uid;
+    return m_uid;
 }
 
 bool Control::gui() const
 {
-    return _gui;
+    return m_gui;
 }
 
 const QList<QString>& Control::events() const
 {
-    return _events;
+    return m_events;
 }
 
 const QList<PropertyNode>& Control::properties() const
 {
-    return _properties;
+    return m_properties;
 }
 
 bool Control::clip() const
 {
-    return _clip;
+    return m_clip;
 }
 
 bool Control::dragIn() const
 {
-    return _dragIn;
+    return m_dragIn;
 }
 
 void Control::setDragIn(bool dragIn)
 {
-    _dragIn = dragIn;
+    m_dragIn = dragIn;
 }
 
 DesignerScene* Control::scene() const
@@ -558,12 +523,12 @@ DesignerScene* Control::scene() const
 
 bool Control::dragging() const
 {
-    return _dragging;
+    return m_dragging;
 }
 
 void Control::setDragging(bool dragging)
 {
-    _dragging = dragging;
+    m_dragging = dragging;
 
     if (dragging)
         setCursor(Qt::SizeAllCursor);
@@ -591,39 +556,39 @@ int Control::lowerZValue() const
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (_d->preview.isNull())
+    if (m_preview.isNull())
         return;
 
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
 
-    if (gui() && parentControl() && parentControl()->clip() && !_dragging)
+    if (gui() && parentControl() && parentControl()->clip() && !m_dragging)
         painter->setClipRect(rect().intersected(parentControl()->mapToItem
           (this, parentControl()->rect().adjusted(1, 1, -1, -1)).boundingRect()));
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawImage(rect(), _d->preview,
+    painter->drawImage(rect(), m_preview,
       QRectF(QPointF(0, 0), size() * DPR));
 
     QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
       innerRect.center().x(), innerRect.bottom());
-    gradient.setColorAt(0, HIGHLIGHT_COLOR.lighter(110));
-    gradient.setColorAt(1, HIGHLIGHT_COLOR.darker(110));
+    gradient.setColorAt(0, QColor(HIGHLIGHT_COLOR).lighter(110));
+    gradient.setColorAt(1, QColor(HIGHLIGHT_COLOR).darker(110));
 
-    if (_dragIn) {
-        if (_showOutline) {
+    if (m_dragIn) {
+        if (m_showOutline) {
             painter->fillRect(innerRect, gradient);
         } else {
-            QImage highlight(_d->preview);
+            QImage highlight(m_preview);
             QPainter p(&highlight);
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-            p.fillRect(_d->preview.rect(), gradient);
+            p.fillRect(m_preview.rect(), gradient);
             p.end();
             painter->drawImage(rect(), highlight, QRectF(
               QPointF(0, 0), size() * DPR));
         }
     }
 
-    if (isSelected() || _showOutline) {
+    if (isSelected() || m_showOutline) {
         QPen pen;
         pen.setWidthF(fit::fx(1));
         pen.setStyle(Qt::DotLine);
@@ -631,8 +596,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
         if (isSelected()) {
             pen.setColor(SELECTION_COLOR);
-        } else if (_showOutline) {
-            if (_d->hoverOn)
+        } else if (m_showOutline) {
+            if (m_hoverOn)
                 pen.setStyle(Qt::SolidLine);
             pen.setColor(OUTLINE_COLOR);
         }
@@ -662,33 +627,9 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
-//! ****************** [Form Private] ******************
-
-
-class FormPrivate : public QObject
+Form::Form(const QString& url, const QString& uid, Form* parent) : Control(url, uid, parent)
 {
-        Q_OBJECT
-
-    public:
-        explicit FormPrivate(Form* parent);
-
-    public:
-        Form* parent;
-};
-
-FormPrivate::FormPrivate(Form* parent)
-    : QObject(parent)
-    , parent(parent)
-{
-}
-
-//! ********************** [Form] **********************
-
-Form::Form(const QString& url, const QString& uid, Form* parent)
-    : Control(url, uid, parent)
-    , _d(new FormPrivate(this))
-{
-    _clip = false;
+    m_clip = false;
     setFlag(Control::ItemIsMovable, false);
 }
 
@@ -696,7 +637,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 {
     auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
 
-    painter->setBrush(BACKGROUND_COLOR);
+    painter->setBrush(QColor(BACKGROUND_COLOR));
     painter->drawRect(innerRect);
 
     Control::paint(painter, option, widget);
@@ -732,12 +673,10 @@ QRectF Form::frameGeometry() const
 
 bool Form::main() const
 {
-    return _main;
+    return m_main;
 }
 
 void Form::setMain(bool value)
 {
-    _main = value;
+    m_main = value;
 }
-
-#include "control.moc"

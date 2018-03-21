@@ -4,25 +4,16 @@
 #include <resizer.h>
 #include <previewresult.h>
 #include <QGraphicsWidget>
-#include <QList>
 
-class Control;
-class ControlPrivate;
-class FormPrivate;
 class ControlWatcher;
 class DesignerScene;
 
 class Control : public QGraphicsWidget
 {
         Q_OBJECT
-        friend class ControlPrivate;
 
     public:
-        explicit Control(
-            const QString& url,
-            const QString& uid = QString(),
-            Control* parent = nullptr
-        );
+        explicit Control(const QString& url, const QString& uid = QString(), Control* parent = nullptr);
         ~Control();
         QString uid() const;
         QString id() const;
@@ -80,6 +71,10 @@ class Control : public QGraphicsWidget
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
         virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
+    private slots:
+        void updateAnchors(const Anchors& anchors);
+        void updatePreview(const PreviewResult& result);
+
     private:
         QImage initialPreview() const;
 
@@ -90,46 +85,45 @@ class Control : public QGraphicsWidget
         void controlDropped(const QPointF&, const QString&);
 
     protected:
-        bool _clip;
-        Resizer _resizers[8];
-        ControlPrivate* _d;
+        bool m_clip;
+        Resizer m_resizers[8];
 
     private:
-        QString _uid;
-        QString _id;
-        QList<QString> _events;
-        QList<PropertyNode> _properties;
-        QList<QQmlError> _errors;
-        QString _url;
-        bool _dragging;
-        bool _dragIn;
-        bool _gui;
-        bool _hideSelection;
-        ControlWatcher* _cW;
-        static bool _showOutline;
-        static QList<Control*> _controls;
+        QImage m_preview;
+        QString m_uid;
+        QString m_id;
+        QList<QString> m_events;
+        QList<PropertyNode> m_properties;
+        QList<QQmlError> m_errors;
+        QString m_url;
+        bool m_hoverOn;
+        bool m_dragging;
+        bool m_dragIn;
+        bool m_gui;
+        bool m_hideSelection;
+        ControlWatcher* m_cW;
+        static bool m_showOutline;
+        static QList<Control*> m_controls;
 };
 
 class Form : public Control
 {
         Q_OBJECT
-        friend class FormPrivate;
 
     public:
-        explicit Form(const QString& url, const QString& uid = QString(), Form* parent = Q_NULLPTR);
-        bool main() const;
-        void setMain(bool value);
+        explicit Form(const QString& url, const QString& uid = QString(), Form* parent = nullptr);
         QRectF frameGeometry() const override;
+        void setMain(bool value);
+        bool main() const;
 
     protected:
-        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
         void resizeEvent(QGraphicsSceneResizeEvent *event) override;
         void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
     private:
-        FormPrivate* _d;
-        bool _main = false;
-        QList<Control*> _controls;
+        bool m_main = false;
+        QList<Control*> m_controls;
 };
 
 #endif // CONTROL_H

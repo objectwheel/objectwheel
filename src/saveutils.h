@@ -64,11 +64,6 @@ class SaveUtils : public QObject
         static bool isOwctrl(const QString& rootPath);
         static bool isForm(const QString& rootPath);
         static bool isMain(const QString& rootPath);
-        static qreal x(const QString& rootPath);
-        static qreal y(const QString& rootPath);
-        static qreal z(const QString& rootPath);
-        static qreal width(const QString& rootPath);
-        static qreal height(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);
@@ -91,7 +86,6 @@ class SaveUtils : public QObject
         static QString mfDate(const QString& projectDir);
         static QString size(const QString& projectDir);
         static QString theme(const QString& projectDir);
-        static Skin skin(const QString& projectDir);
         static void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value);
 
     private:

@@ -545,13 +545,6 @@ void SaveBackend::setProperty(
         auto propertyData = rdfile(propertyPath);
         SaveUtils::setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
-    } else if (property == TAG_X || property == TAG_Y || property == TAG_Z ||
-       property == TAG_WIDTH || property == TAG_HEIGHT) {
-        auto propertyPath = control->dir() + separator() + DIR_THIS +
-                            separator() + FILE_PROPERTIES;
-        auto propertyData = rdfile(propertyPath);
-        SaveUtils::setProperty(propertyData, property, value.toDouble());
-        wrfile(propertyPath, propertyData);
     } else {
         if (control->hasErrors())
             return;

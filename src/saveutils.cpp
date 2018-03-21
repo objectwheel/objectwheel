@@ -222,41 +222,6 @@ bool SaveUtils::isMain(const QString& rootPath)
     return (fname(rootPath) == DIR_MAINFORM);
 }
 
-qreal SaveUtils::x(const QString& rootPath)
-{
-    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
-    const auto& propertyData = rdfile(propertyPath);
-    return property(propertyData, TAG_X).toDouble();
-}
-
-qreal SaveUtils::y(const QString& rootPath)
-{
-    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
-    const auto& propertyData = rdfile(propertyPath);
-    return property(propertyData, TAG_Y).toDouble();
-}
-
-qreal SaveUtils::z(const QString& rootPath)
-{
-    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
-    const auto& propertyData = rdfile(propertyPath);
-    return property(propertyData, TAG_Z).toDouble();
-}
-
-qreal SaveUtils::width(const QString& rootPath)
-{
-    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
-    const auto& propertyData = rdfile(propertyPath);
-    return property(propertyData, TAG_WIDTH).toDouble();
-}
-
-qreal SaveUtils::height(const QString& rootPath)
-{
-    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
-    const auto& propertyData = rdfile(propertyPath);
-    return property(propertyData, TAG_HEIGHT).toDouble();
-}
-
 QString SaveUtils::id(const QString& rootPath)
 {
     const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
@@ -346,13 +311,6 @@ QString SaveUtils::theme(const QString& projectDir)
     const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
     const auto& propertyData = rdfile(propertyPath);
     return property(propertyData, PTAG_THEME).toString();
-}
-
-SaveUtils::Skin SaveUtils::skin(const QString& projectDir)
-{
-    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
-    const auto& propertyData = rdfile(propertyPath);
-    return Skin(property(propertyData, PTAG_SKIN).toInt());
 }
 
 void SaveUtils::setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value)
