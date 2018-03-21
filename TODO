@@ -36,6 +36,7 @@ window neden render olmayi
 qml editör açılında "no items" widgeti altta sıkışık olarak kalıyor, gizlenmiyor
 saveChanges geometriyi anında kayıt etmiyor mu?
 controller reparent edildiğinde url ve dir'in güncellendiğine emin ol
+properties pane'de (belki controlspane de olabilir) uid leri de göster
 x, y, width, height, z değerlerini (belki hatta id'yi de) qml içine al, preview ile ortaya çıkan dirty property değişiklerini geri ow ye yolla o da kendini güncellesin
 
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle

@@ -147,7 +147,8 @@ QString Control::generateUid()
     uidData.insert(0, QString::number(randNum));
     uidData.insert(0, QString::number(randNum1));
     uidData.insert(0, QString::number(randNum2));
-    return QCryptographicHash::hash(uidData, QCryptographicHash::Sha256).toHex();
+    const QString& hex = QCryptographicHash::hash(uidData, QCryptographicHash::Sha256).toHex();
+    return hex.left(6) + hex.right(6);
 }
 
 QList<Control*> Control::childControls(bool dive) const
