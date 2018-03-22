@@ -9,6 +9,7 @@
 #include <previewerbackend.h>
 #include <saveutils.h>
 #include <resizer.h>
+#include <parserutils.h>
 
 #include <QtMath>
 #include <QtWidgets>
@@ -27,6 +28,7 @@
 extern const char* TOOL_KEY;
 
 namespace {
+    void setInitialProperties(Control* control);
     QList<Resizer*> initializeResizers(Control* control);
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
 }
@@ -42,19 +44,18 @@ Control::Control(const QString& url, const QString& uid, Control* parent) : QGra
   , m_hoverOn(false)
   , m_dragging(false)
   , m_dragIn(false)
-  , m_gui(true)
+  , m_gui(false)
 {
     m_controls << this;
 
     setFlag(Control::ItemIsFocusable);
     setFlag(Control::ItemIsSelectable);
     setFlag(Control::ItemSendsGeometryChanges);
-    setFlag(Control::ItemIsMovable);
     setAcceptHoverEvents(true);
     setAcceptDrops(true);
 
     setId(SaveUtils::id(dir()));
-    resize(fit::fx(QSizeF(50, 50)));
+    setInitialProperties(this);
     m_preview = initialPreview();
 
     connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
@@ -196,6 +197,9 @@ void Control::updatePreview(const PreviewResult& result)
         }
     }
 
+    if (!form())
+        setFlag(Control::ItemIsMovable, !hasErrors());
+
     update();
     if (result.hasError()) {
         emit errorOccurred();
@@ -207,7 +211,7 @@ void Control::updatePreview(const PreviewResult& result)
 
 void Control::updateAnchors(const Anchors& anchors)
 {
-    if (anchors.uid != uid())
+    if (anchors.uid != uid() || hasErrors())
         return;
 
     qDebug() << anchors.bottom.id;
@@ -648,8 +652,26 @@ void Form::setMain(bool value)
 }
 
 namespace {
-    /* Fills the restricted area by the size with pattern into
-     * the transparent dest. Then draws source into the center of the dest. */
+    void setInitialProperties(Control *control)
+    {
+        qreal x = ParserUtils::property(control->url(), "x").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal y = ParserUtils::property(control->url(), "y").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal z = ParserUtils::property(control->url(), "z").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal width = ParserUtils::property(control->url(), "width").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal height = ParserUtils::property(control->url(), "height").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+
+        control->setZValue(z);
+        control->setPos(x, y);
+        control->resize(width, height);
+
+        if (control->size().isNull())
+            control->resize(fit::fx(QSizeF(50, 50)));
+    }
+
+    /*
+     * Fills the restricted area by the size with pattern into
+     * the transparent dest. Then draws source into the center of the dest.
+    */
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     {
         qreal dpr = DPR;

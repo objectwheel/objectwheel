@@ -1339,8 +1339,13 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            sc[0]->setX(value.toReal());
-            return;
+            if (sc[0]->form()) {
+                property = "x";
+                break;
+            } else {
+                sc[0]->setX(value.toReal());
+                return;
+            }
         }
 
         case PropertiesPane::GeometryY:
@@ -1348,7 +1353,13 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            sc[0]->setY(value.toReal());
+            if (sc[0]->form()) {
+                property = "y";
+                break;
+            } else {
+                sc[0]->setY(value.toReal());
+                return;
+            }
             return;
         }
 
@@ -1357,7 +1368,13 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            sc[0]->resize(value.toReal(), sc[0]->size().height());
+            if (sc[0]->form()) {
+                property = "width";
+                break;
+            } else {
+                sc[0]->resize(value.toReal(), sc[0]->size().height());
+                return;
+            }
             return;
         }
 
@@ -1366,7 +1383,13 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            sc[0]->resize(sc[0]->size().width(), value.toReal());
+            if (sc[0]->form()) {
+                property = "height";
+                break;
+            } else {
+                sc[0]->resize(sc[0]->size().width(), value.toReal());
+                return;
+            }
             return;
         }
 

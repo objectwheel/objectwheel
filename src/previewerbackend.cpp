@@ -354,8 +354,6 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
                 }
             }
 
-            qDebug() << result.uid;
-
             emit previewReady(result);
         } else if (t == Task::Anchors) {
             Anchors anchors;

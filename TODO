@@ -40,6 +40,7 @@ properties pane'de (belki controlspane de olabilir) uid leri de göster
 x, y, width, height, z değerlerini (belki hatta id'yi de) qml içine al, preview ile ortaya çıkan dirty property değişiklerini geri ow ye yolla o da kendini güncellesin
 form için x ve y set edilmesin, editör üzerinden (resizing sırasında vs), ama properties set edebilir
 
+project details kısmında son değiştirilme tarihini herkes kendi local saat formunda görsün
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle
 control inspector her refres'de uzayıp gidiyor
 objectwheel:Authenticator class'ındaki çağrılara internet kesiklik kontrolü eklenecek

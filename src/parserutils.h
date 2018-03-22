@@ -10,6 +10,7 @@ class ParserUtils
         Q_DISABLE_COPY(ParserUtils)
 
     public:
+        static QString property(const QString& fileName, const QString& property);
         static void setProperty(const QString& fileName, const QString& property, const QString& value);
         static void setProperty(QTextDocument* document, const QString& fileName, const QString& property, const QString& value);
 

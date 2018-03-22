@@ -177,8 +177,10 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         itemPressed && !Resizer::resizing()) {
         itemMoving = true;
         if (m_snapping) {
-            auto controlUnderMouse = (Control*)(itemAt
-                                                (event->scenePos(), QTransform()));
+            auto controlUnderMouse = (Control*)(itemAt(event->scenePos(), QTransform()));
+
+            if (!controlUnderMouse)
+                return;
 
             for(int i = 0; i < selectedControls.size(); i++) {
                 auto control = selectedControls[i];
@@ -289,9 +291,10 @@ bool DesignerScene::stick() const
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(m_mainForm);
 
+
     for(int i = 0; i < selectedControls.size(); i++) {
         auto control = selectedControls[i];
-        if (!control->gui() || selectedControls.
+        if (!control->gui() || control->hasErrors() || selectedControls.
             contains(control->parentControl())) {
             selectedControls.removeOne(control);
             i--;

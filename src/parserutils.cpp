@@ -13,11 +13,60 @@ using namespace AST;
 
 namespace {
     QString fullPropertyName(const UiQualifiedId* qualifiedId);
+    QString fullPropertyValue(const QString& source, const QString& property, const UiObjectMemberList* list);
     bool propertyExists(const UiObjectMemberList* list, const QString& property);
     void addProperty(QString& source, const UiObjectInitializer* initializer, const QString& property, const QString& value);
     void changeProperty(QString& source, const UiObjectMemberList* list, const QString& property, const QString& value);
     void addProperty(QTextDocument* doc, const UiObjectInitializer* initializer, const QString& property, const QString& value);
     void changeProperty(QTextDocument* doc, const UiObjectMemberList* list, const QString& property, const QString& value);
+}
+
+QString ParserUtils::property(const QString& fileName, const QString& property)
+{
+    QString source = rdfile(fileName);
+
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(fileName, dialect);
+    document->setSource(source);
+
+    if (!document->parse()) {
+        qWarning() << "Property couldn't set. Unable to parse qml file.";
+        return QString();
+    }
+
+    auto uiProgram = document->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't set. Corrupted ui program.";
+        return QString();
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't set. Empty source file.";
+        return QString();
+    }
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't set. Bad file format 0x1.";
+        return QString();
+    }
+
+    auto uiObjectInitializer = uiObjectDefinition->initializer;
+
+    if (!uiObjectInitializer) {
+        qWarning() << "Property couldn't set. Bad file format 0x2.";
+        return QString();
+    }
+
+    if (!propertyExists(uiObjectInitializer->members, property)) {
+        return QString();
+    }
+
+    return fullPropertyValue(source, property, uiObjectInitializer->members);
 }
 
 void ParserUtils::setProperty(const QString& fileName, const QString& property, const QString& value)
@@ -115,6 +164,57 @@ void ParserUtils::setProperty(QTextDocument* doc, const QString& fileName, const
 }
 
 namespace {
+    QString fullPropertyValue(const QString& source, const QString& property, const UiObjectMemberList* list)
+    {
+        quint32 begin = 0, end = 0;
+
+        while(list) {
+            UiPublicMember* publicMember;
+            UiArrayBinding* arrayBinding;
+            UiObjectBinding* objectBinding;
+            UiScriptBinding* scriptBinding;
+
+            if ((scriptBinding = cast<UiScriptBinding*>(list->member))) {
+                if (fullPropertyName(scriptBinding->qualifiedId) == property) {
+                    begin = scriptBinding->colonToken.end();
+                    end = scriptBinding->lastSourceLocation().end();
+                    break;
+                }
+            } else if ((arrayBinding = cast<UiArrayBinding*>(list->member))) {
+                if (fullPropertyName(arrayBinding->qualifiedId) == property) {
+                    begin = arrayBinding->colonToken.end();
+                    end = arrayBinding->lastSourceLocation().end();
+                    break;
+                }
+            } else if ((objectBinding = cast<UiObjectBinding*>(list->member))) {
+                if (fullPropertyName(objectBinding->qualifiedId) == property) {
+                    begin = objectBinding->colonToken.end();
+                    end = objectBinding->lastSourceLocation().end();
+                    break;
+                }
+            } else if ((publicMember = cast<UiPublicMember*>(list->member))) {
+                if (publicMember->name == property) {
+                    begin = publicMember->colonToken.end();
+                    end = publicMember->lastSourceLocation().end();
+                    break;
+                }
+            }
+
+            list = list->next;
+        }
+
+        if (begin > 0 && end > 0) {
+            QTextDocument document(source);
+            QTextCursor cursor(&document);
+
+            cursor.setPosition(begin);
+            cursor.setPosition(end, QTextCursor::KeepAnchor);
+            return cursor.selectedText();
+        }
+
+        return QString();
+    }
+
     QString fullPropertyName(const UiQualifiedId* qualifiedId)
     {
         QString name;
