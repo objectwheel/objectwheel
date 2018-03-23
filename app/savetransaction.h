@@ -12,6 +12,8 @@ class SaveTransaction : public QObject
 
     public:
         static SaveTransaction* instance();
+        void disable();
+        void enable();
 
     public slots:
         void processZ(Control*);

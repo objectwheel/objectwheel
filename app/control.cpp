@@ -31,6 +31,10 @@ namespace {
     void setInitialProperties(Control* control);
     QList<Resizer*> initializeResizers(Control* control);
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
+    QRectF getRect(const PreviewResult& result);
+    qreal getZ(const PreviewResult& result);
+    void setRect(QList<PropertyNode>& nodes, const QRectF& rect);
+    void setZ(QList<PropertyNode>& nodes, qreal z);
 }
 
 bool Control::m_showOutline = false;
@@ -194,6 +198,18 @@ void Control::updatePreview(const PreviewResult& result)
         if (result.gui) {
             if (!form())
                 m_clip = result.property("clip").toBool();
+
+            if (result.repreviewed) {
+                const auto& rect = getRect(result);
+                qreal z = getZ(result);
+                blockSignals(true);
+                setRect(m_properties, rect);
+                setZ(m_properties, z);
+                resize(rect.size());
+                setPos(rect.topLeft());
+                setZValue(z);
+                blockSignals(false);
+            }
         }
     }
 
@@ -707,5 +723,66 @@ namespace {
             resizers << new Resizer(control, Resizer::Placement(i++));
 
         return resizers;
+    }
+
+    QRectF getRect(const PreviewResult& result)
+    {
+        QRectF rect;
+        const QList<PropertyNode> nodes = result.propertyNodes;
+
+        for (const auto& node : nodes) {
+            for (const auto& property : node.properties.keys()) {
+                if (property == "x")
+                    rect.moveLeft(node.properties.value(property).toReal());
+                else if (property == "y")
+                    rect.moveTop(node.properties.value(property).toReal());
+                else if (property == "width")
+                    rect.setWidth(node.properties.value(property).toReal());
+                else if (property == "height")
+                    rect.setHeight(node.properties.value(property).toReal());
+            }
+        }
+
+        return rect;
+    }
+
+    qreal getZ(const PreviewResult& result)
+    {
+        const QList<PropertyNode> nodes = result.propertyNodes;
+
+        for (const auto& node : nodes) {
+            for (const auto& property : node.properties.keys()) {
+                if (property == "z")
+                    return node.properties.value(property).toReal();
+            }
+        }
+
+        return 0.0;
+    }
+
+    void setRect(QList<PropertyNode>& nodes, const QRectF& rect)
+    {
+        for (auto& node : nodes) {
+            for (auto& property : node.properties.keys()) {
+                if (property == "x")
+                    node.properties[property] = rect.x();
+                else if (property == "y")
+                    node.properties[property] = rect.y();
+                else if (property == "width")
+                    node.properties[property] = rect.width();
+                else if (property == "height")
+                    node.properties[property] = rect.height();
+            }
+        }
+    }
+
+    void setZ(QList<PropertyNode>& nodes, qreal z)
+    {
+        for (auto& node : nodes) {
+            for (auto& property : node.properties.keys()) {
+                if (property == "z")
+                    node.properties[property] = z;
+            }
+        }
     }
 }
