@@ -73,6 +73,7 @@ QDataStream& operator>>(QDataStream& in, PreviewResult& result)
     in >> result.errors;
     in >> result.propertyNodes;
     in >> result.dirtyUids;
+    in >> result.repreviewed;
 
     return in;
 }
@@ -86,6 +87,7 @@ QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
     out << result.errors;
     out << result.propertyNodes;
     out << result.dirtyUids;
+    out << result.repreviewed;
 
     return out;
 }

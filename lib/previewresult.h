@@ -55,14 +55,13 @@ struct PreviewResult {
     bool gui;
     QString uid;
     QImage preview;
+    bool repreviewed;
     QList<QString> events;
     QList<QQmlError> errors;
     QList<PropertyNode> propertyNodes;
     QList<QString> dirtyUids;
 
     /* Locally needed */
-    QString id;
-//    QSizeF size;
     QString url;
     QObject* object;
 };

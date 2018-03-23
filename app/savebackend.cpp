@@ -529,7 +529,8 @@ void SaveBackend::setProperty(
 ) const
 {
     if (control->dir().isEmpty() ||
-        !SaveUtils::isOwctrl(control->dir()))
+        !SaveUtils::isOwctrl(control->dir()) ||
+        control->hasErrors())
         return;
 
     if (property == TAG_ID) {
@@ -545,14 +546,12 @@ void SaveBackend::setProperty(
         auto propertyData = rdfile(propertyPath);
         SaveUtils::setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
-    } else {
-        if (control->hasErrors())
-            return;
-        auto fileName = control->dir() + separator() + DIR_THIS +
-                        separator() + "main.qml";
-        ParserUtils::setProperty(fileName, property, value);
-        emit propertyChanged(control, property, value);
     }
+
+    auto fileName = control->dir() + separator() + DIR_THIS +
+                    separator() + "main.qml";
+    ParserUtils::setProperty(fileName, property, value);
+    emit propertyChanged(control, property, value);
 
     if (isInOwdb(control->dir())) //FIXME
         emit databaseChanged();

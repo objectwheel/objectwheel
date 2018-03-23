@@ -33,7 +33,6 @@ init'deki prosedürler diğer fonklar içinde uygulansın, çek et alayını bak
 errorlu ve non-gui objeclerin silinme bildirimlerinin geri previewer!a bildirildiğinden emin ol
 contentItem render edilirken öteki objelerde istemsizce poz verirmi formun previwewinde?
 window neden render olmayi
-qml editör açılında "no items" widgeti altta sıkışık olarak kalıyor, gizlenmiyor
 saveChanges geometriyi anında kayıt etmiyor mu?
 controller reparent edildiğinde url ve dir'in güncellendiğine emin ol
 properties pane'de (belki controlspane de olabilir) uid leri de göster

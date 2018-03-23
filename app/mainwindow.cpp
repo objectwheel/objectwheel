@@ -239,6 +239,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_inspectorPane, SIGNAL(controlClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlClick(Control*)));
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
     connect(m_formsPane, SIGNAL(currentFormChanged()), m_inspectorPane, SLOT(refresh()));
+    connect(m_centralWidget->qmlCodeEditorWidget(), SIGNAL(documentSaved()), m_propertiesPane, SLOT(refreshList()));
 
     connect(InterpreterBackend::instance(),
     QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),

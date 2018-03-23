@@ -12,6 +12,7 @@ using namespace QmlJS;
 using namespace AST;
 
 namespace {
+    QString cleanPropertyValue(const QString& value);
     QString fullPropertyName(const UiQualifiedId* qualifiedId);
     QString fullPropertyValue(const QString& source, const QString& property, const UiObjectMemberList* list);
     bool propertyExists(const UiObjectMemberList* list, const QString& property);
@@ -62,11 +63,10 @@ QString ParserUtils::property(const QString& fileName, const QString& property)
         return QString();
     }
 
-    if (!propertyExists(uiObjectInitializer->members, property)) {
+    if (!propertyExists(uiObjectInitializer->members, property))
         return QString();
-    }
 
-    return fullPropertyValue(source, property, uiObjectInitializer->members);
+    return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
 void ParserUtils::setProperty(const QString& fileName, const QString& property, const QString& value)
@@ -164,6 +164,16 @@ void ParserUtils::setProperty(QTextDocument* doc, const QString& fileName, const
 }
 
 namespace {
+    QString cleanPropertyValue(const QString& value)
+    {
+        QString val(value);
+        while (val.left(1).contains(QRegularExpression("[\\r\\n\\t\\f\\v ]")))
+            val.remove(0, 1);
+        while (val.right(1).contains(QRegularExpression("[\\r\\n\\t\\f\\v ]")))
+            val.remove(val.size() - 1, 1);
+        return val;
+    }
+
     QString fullPropertyValue(const QString& source, const QString& property, const UiObjectMemberList* list)
     {
         quint32 begin = 0, end = 0;

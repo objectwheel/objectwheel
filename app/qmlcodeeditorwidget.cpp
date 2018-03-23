@@ -966,12 +966,18 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
             wrfile(documentPath, item.documents.value
                    (relativePath).document->toPlainText().toUtf8());
             item.documents.value(relativePath).document->setModified(false);
+
+            const auto& id = ParserUtils::property(documentPath, "id");
+            if (control->id() != id && !id.isEmpty())
+                SaveBackend::instance()->setProperty(control, "id", id);
+
             control->refresh(true);
             break;
         }
     }
 
     _d->updateOpenDocHistory();
+    emit documentSaved();
 }
 
 void QmlCodeEditorWidget::reset()

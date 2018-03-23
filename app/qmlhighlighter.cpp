@@ -102,62 +102,62 @@ QmlHighlighter::QmlHighlighter(QTextDocument* parent)
                     << "\\bnew\\b" << "\\bthis\\b" << "\\btrue\\b" ;
 
     foreach (const QString &pattern, keywordPatterns) {
-        rule.pattern = QRegExp(pattern);
+        rule.pattern = QRegularExpression(pattern);
         rule.format = keywordFormat;
         highlightingRules.append(rule);
     }
 
     numericFormat.setForeground(COLOR_NUMERICS);
-    rule.pattern = QRegExp("[0-9]+\\.?[0-9]*");
+    rule.pattern = QRegularExpression("(?<=[^\\w])[0-9]+\\.?[0-9]*");
     rule.format = numericFormat;
     highlightingRules.append(rule);
 
     typeFormat.setForeground(COLOR_QMLTYPE);
-    rule.pattern = QRegExp("\\b[A-Z][A-Za-z]+\\b");
+    rule.pattern = QRegularExpression("\\b[A-Z][A-Za-z]+\\b");
     rule.format = typeFormat;
     highlightingRules.append(rule);
 
     propertyFormat.setForeground(COLOR_PROPERTIES);
-    rule.pattern = QRegExp("^(!?(\\s+)?)[a-z]([\\w\\.]+)?([ \\t ]+)?(?=:)");
+    rule.pattern = QRegularExpression("^(!?(\\s+)?)[a-z]([\\w\\.]+)?([ \\t ]+)?(?=:)");
     rule.format = propertyFormat;
     highlightingRules.append(rule);
 
     classFormat.setForeground(COLOR_QTCLASS);
-    rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
+    rule.pattern = QRegularExpression("\\bQ[A-Za-z]+\\b");
     rule.format = classFormat;
     highlightingRules.append(rule);
 
     singleLineCommentFormat.setForeground(COLOR_COMMMENTS);
-    rule.pattern = QRegExp("//[^\n]*");
+    rule.pattern = QRegularExpression("//[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
     multiLineCommentFormat.setForeground(COLOR_COMMMENTS);
 
     quotationFormat.setForeground(COLOR_STRING);
-    rule.pattern = QRegExp("\".*\"");
+    rule.pattern = QRegularExpression("\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
     functionFormat.setFontItalic(true);
     functionFormat.setForeground(COLOR_FUNCTION);
-    rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\()");
+    rule.pattern = QRegularExpression("\\b[A-Za-z0-9_]+(?=\\()");
     rule.format = functionFormat;
     highlightingRules.append(rule);
 
-    commentStartExpression = QRegExp("/\\*");
-    commentEndExpression = QRegExp("\\*/");
+    commentStartExpression = QRegularExpression("/\\*");
+    commentEndExpression = QRegularExpression("\\*/");
 }
 
 void QmlHighlighter::highlightBlock(const QString &text)
 {
     for (const auto& rule : highlightingRules) {
-        QRegExp expression(rule.pattern);
-        int index = expression.indexIn(text);
+        QRegularExpression expression(rule.pattern);
+        int index = expression.match(text).capturedStart();
         while (index >= 0) {
-            int length = expression.matchedLength();
+            int length = expression.match(text).capturedLength();
             setFormat(index, length, rule.format);
-            index = expression.indexIn(text, index + length);
+            index = expression.match(text).capturedStart(index + length);
         }
     }
 
@@ -165,19 +165,19 @@ void QmlHighlighter::highlightBlock(const QString &text)
 
     int startIndex = 0;
     if (previousBlockState() != 1)
-        startIndex = commentStartExpression.indexIn(text);
+        startIndex = commentStartExpression.match(text).capturedStart();
 
     while (startIndex >= 0) {
-        int endIndex = commentEndExpression.indexIn(text, startIndex);
+        int endIndex = commentEndExpression.match(text).capturedStart(startIndex);
         int commentLength;
         if (endIndex == -1) {
             setCurrentBlockState(1);
             commentLength = text.length() - startIndex;
         } else {
             commentLength = endIndex - startIndex
-                            + commentEndExpression.matchedLength();
+                            + commentEndExpression.match(text).capturedLength();
         }
         setFormat(startIndex, commentLength, multiLineCommentFormat);
-        startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
+        startIndex = commentStartExpression.match(text).capturedStart(startIndex + commentLength);
     }
 }

@@ -69,6 +69,7 @@ class QmlCodeEditorWidget : public QWidget
 
     signals:
         void modeChanged();
+        void documentSaved();
         void openControlCountChanged();
 
     private:
