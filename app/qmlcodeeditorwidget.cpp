@@ -213,6 +213,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     noDocumentIndicator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     noDocumentIndicator->show();
 
+    defaultFont.setPixelSize(defaultFont.pixelSize() - fit::fx(0.5));
     defaultFont.setFamily("Liberation Mono");
     defaultFont.setStyleHint(QFont::Monospace);
 
@@ -360,7 +361,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
 
 qreal QmlCodeEditorWidgetPrivate::findPixelSize(const QString& text)
 {
-    qreal base = QFont().pixelSize();
+    qreal base = QFont().pixelSize() - fit::fx(0.5);
 
     if (text == "35 %")
         return (base * 0.35);
@@ -834,6 +835,8 @@ void QmlCodeEditorWidget::openControl(Control* control)
                 _d->codeEditor->setTextCursor(item.documents.value(item.currentFileRelativePath).cursor);
 
             _d->noDocumentIndicator->hide();
+            _d->codeEditor->show();
+
             break;
         }
     }

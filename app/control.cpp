@@ -206,7 +206,8 @@ void Control::updatePreview(const PreviewResult& result)
                 setRect(m_properties, rect);
                 setZ(m_properties, z);
                 resize(rect.size());
-                setPos(rect.topLeft());
+                if (!form())
+                    setPos(rect.topLeft());
                 setZValue(z);
                 blockSignals(false);
             }

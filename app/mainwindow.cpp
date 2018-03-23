@@ -234,8 +234,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_pageSwitcherPane->setCurrentPage(Page_Designer);
 
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0
-            && m_pageSwitcherPane->currentPage() != Page_SplitView)
-            m_pageSwitcherPane->setCurrentPage(Page_QmlCodeEditor);
+            && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor)
+            m_pageSwitcherPane->setCurrentPage(Page_SplitView);
     });
 
     connect(m_inspectorPane, SIGNAL(controlClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlClick(Control*)));

@@ -41,6 +41,8 @@ form için x ve y set edilmesin, editör üzerinden (resizing sırasında vs), a
 error, prereview, loading vs vs resimlerinin her boyuta controller üzerinde doğru boyutlarda oluğ olmadığını kontrol et
 nongui itemleri için altta bi kısım panel yap, onlar orda dursun sıralı
 nongui ve errorlu itemler içine reparent yapılamasın, ve onlar başkalarının içine reparent yapılamasın
+shoot metodunun iç yapısını da init ve initialShoot gibi yap, preview alan fonksiyonlar ile extract ve doComplete fonksiyonları ayrık olsun
+window'un visibility propertisi Hidden olarak gözüküyor, yanlış, bunu düzelt
 
 project details kısmında son değiştirilme tarihini herkes kendi local saat formunda görsün
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle

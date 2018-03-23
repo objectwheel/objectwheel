@@ -201,7 +201,8 @@ macx {
     previewer.files = $$OUT_PWD/../objectwheel-previewer/objectwheel-previewer
     previewer.path = Contents/MacOS
     lib.files = $$OUT_PWD/../lib/libobjectwheel.dylib
-    lib.path = Contents/MacOS
+    lib.path = Contents/Frameworks
+    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change libobjectwheel.dylib @loader_path/../Frameworks/libobjectwheel.dylib)
     docs.files = $$PWD/resources/docs
     docs.path = Contents/MacOS
     QMAKE_BUNDLE_DATA += interpreter previewer lib docs
@@ -219,5 +220,5 @@ macx {
     lib.path = $$OUT_PWD/
     docs.files = $$PWD/resources/docs/*
     docs.path = $$OUT_PWD/docs
-    INSTALLS += interpreter previewer lib docs
+    QMAKE_EXTRA_TARGETS += interpreter previewer lib docs
 }
