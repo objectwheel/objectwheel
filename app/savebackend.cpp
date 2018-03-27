@@ -4,6 +4,7 @@
 #include <projectbackend.h>
 #include <control.h>
 #include <parserutils.h>
+#include <hashfactory.h>
 
 #include <QApplication>
 #include <QJsonDocument>
@@ -45,7 +46,7 @@ bool SaveBackend::initProject(const QString& projectDirectory) const
                         separator() + DIR_MAINFORM + separator() +
                         DIR_THIS + separator() + FILE_PROPERTIES;
     auto propertyData = rdfile(propertyPath);
-    SaveUtils::setProperty(propertyData, TAG_UID, Control::generateUid());
+    SaveUtils::setProperty(propertyData, TAG_UID, HashFactory::generate());
 
     return wrfile(propertyPath, propertyData);
 }
@@ -196,7 +197,7 @@ void SaveBackend::recalculateUids(Control* control) const
             continue;
 
         auto uid = SaveUtils::property(propertyData, TAG_UID).toString();
-        auto newUid = Control::generateUid();
+        auto newUid = HashFactory::generate();
 
         for (auto file : paths)
             SaveUtils::updateFile(file, uid, newUid);
@@ -344,7 +345,7 @@ void SaveBackend::refreshToolUid(const QString& toolRootPath) const
             continue;
 
         auto uid = SaveUtils::property(propertyData, TAG_UID).toString();
-        auto newUid = Control::generateUid();
+        auto newUid = HashFactory::generate();
 
         for (auto file : paths)
             SaveUtils::updateFile(file, uid, newUid);

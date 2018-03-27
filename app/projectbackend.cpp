@@ -3,12 +3,11 @@
 #include <savebackend.h>
 #include <filemanager.h>
 #include <zipper.h>
-#include <random>
+#include <hashfactory.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
-#include <QCryptographicHash>
 
 #define FILENAME    "project.json"
 #define PROJECTNAME "projectName"
@@ -20,11 +19,6 @@
 #define HASH        "hash"
 #define OWPRJ       "owprj"
 #define SIGN_OWPRJ  "T3dwcmpfdjIuMA"
-
-typedef QCryptographicHash Hasher;
-static std::random_device rd;
-static std::mt19937 mt(rd());
-static std::uniform_int_distribution<qint32> rand_dist(-2147483647 - 1, 2147483647); //Wow C++
 
 static int biggestDir(const QString& basePath)
 {
@@ -113,20 +107,6 @@ static QString hash(const QString& rootPath)
     return jobj.value(HASH).toString();
 }
 
-static QString newHash()
-{
-    QByteArray data;
-    auto randNum = rand_dist(mt);
-    auto randNum1 = rand_dist(mt);
-    auto randNum2 = rand_dist(mt);
-    auto dateMs = QDateTime::currentMSecsSinceEpoch();
-    data.insert(0, QString::number(dateMs));
-    data.insert(0, QString::number(randNum));
-    data.insert(0, QString::number(randNum1));
-    data.insert(0, QString::number(randNum2));
-    return Hasher::hash(data, Hasher::Md5).toHex();
-}
-
 static QString dir(const QString& hash)
 {
     QString pdir;
@@ -205,7 +185,7 @@ bool ProjectBackend::newProject(
     jobj[MFDATE]      = crDate;
     jobj[SIZE]        = size;
     jobj[OWPRJ]       = SIGN_OWPRJ;
-    jobj[HASH]        = newHash();
+    jobj[HASH]        = HashFactory::generate();
 
     const auto& data = QJsonDocument(jobj).toJson();
 
@@ -276,7 +256,7 @@ bool ProjectBackend::importProject(const QString &filePath) const
     if (!mkdir(pdir) || !Zipper::extractZip(data, pdir))
         return false;
 
-    ::setProperty(pdir, HASH, newHash());
+    ::setProperty(pdir, HASH, HashFactory::generate());
 
     return true;
 }

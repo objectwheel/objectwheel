@@ -120,12 +120,12 @@ void DesignerScene::setSnapping(bool snapping)
 
 bool DesignerScene::showOutlines() const
 {
-    return Control::showOutline();;
+    return m_showOutlines;
 }
 
 void DesignerScene::setShowOutlines(bool value)
 {
-    Control::setShowOutline(value);
+    m_showOutlines = value;
     if (m_mainForm)
         m_mainForm->update();
 }

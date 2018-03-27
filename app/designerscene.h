@@ -44,6 +44,7 @@ class DesignerScene : public QGraphicsScene
 
     private:
         bool m_snapping;
+        bool m_showOutlines;
         QPointF m_lastMousePos;
         QList<Form*> m_forms;
         QPointer<Form> m_mainForm;

@@ -35,15 +35,15 @@ namespace {
     qreal getZ(const PreviewResult& result);
     void setRect(QList<PropertyNode>& nodes, const QRectF& rect);
     void setZ(QList<PropertyNode>& nodes, qreal z);
+    QImage initialPreview(const QSizeF& size);
 }
 
-bool Control::m_showOutline = false;
 QList<Control*> Control::m_controls;
 
-Control::Control(const QString& url, const QString& uid, Control* parent) : QGraphicsWidget(parent)
+Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_clip(true)
   , m_resizers(initializeResizers(this))
-  , m_uid(uid.isEmpty() ? SaveUtils::uid(dname(dname(url))) : uid)
+  , m_uid(SaveUtils::uid(dname(dname(url))))
   , m_url(url)
   , m_hoverOn(false)
   , m_dragging(false)
@@ -60,7 +60,7 @@ Control::Control(const QString& url, const QString& uid, Control* parent) : QGra
 
     setId(SaveUtils::id(dir()));
     setInitialProperties(this);
-    m_preview = initialPreview();
+    m_preview = initialPreview(size());
 
     connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
       SLOT(updatePreview(const PreviewResult&)));
@@ -90,35 +90,15 @@ Control::~Control()
     m_controls.removeOne(this);
 }
 
-bool Control::showOutline()
+void Control::updateUid()
 {
-    return m_showOutline;
-}
-
-void Control::setShowOutline(const bool value)
-{
-    m_showOutline = value;
+    m_uid = SaveUtils::uid(dir());
 }
 
 void Control::updateUids()
 {
     for (auto control : m_controls)
         control->updateUid();
-}
-
-QString Control::generateUid()
-{
-    QByteArray uidData;
-    auto randNum = QRandomGenerator::global()->generate();
-    auto randNum1 = QRandomGenerator::global()->generate();
-    auto randNum2 = QRandomGenerator::global()->generate();
-    auto dateMs = QDateTime::currentMSecsSinceEpoch();
-    uidData.insert(0, QString::number(dateMs));
-    uidData.insert(0, QString::number(randNum));
-    uidData.insert(0, QString::number(randNum1));
-    uidData.insert(0, QString::number(randNum2));
-    const QString& hex = QCryptographicHash::hash(uidData, QCryptographicHash::Sha256).toHex();
-    return hex.left(6) + hex.right(6);
 }
 
 QList<Control*> Control::childControls(bool dive) const
@@ -244,11 +224,6 @@ void Control::refresh(bool repreview)
 {
     PreviewerBackend::instance()->requestPreview(size(), dir(), repreview);
 //    QTimer::singleShot(0, std::bind(&PreviewerBackend::requestAnchors, PreviewerBackend::instance(), dir()));
-}
-
-void Control::updateUid()
-{
-    m_uid = SaveUtils::uid(dir());
 }
 
 void Control::centralize()
@@ -394,7 +369,8 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
     QGraphicsWidget::resizeEvent(event);
     for (auto resizer : m_resizers)
         resizer->correct();
-    refresh();
+    if (scene())
+        refresh();
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -410,37 +386,6 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             break;
     }
     return QGraphicsWidget::itemChange(change, value);
-}
-
-QImage Control::initialPreview() const
-{
-    qreal dpr = DPR;
-    qreal min = qMin(fit::fx(24), qMin(size().width(), size().height()));
-
-    QImage preview(
-        qCeil(size().width() * dpr),
-        qCeil(size().height() * dpr),
-        QImage::Format_ARGB32_Premultiplied
-    );
-
-    preview.setDevicePixelRatio(dpr);
-    preview.fill(Qt::transparent);
-
-    QImage wait(":/resources/images/wait.png");
-    wait.setDevicePixelRatio(dpr);
-
-    drawCenter(
-        preview,
-        wait.scaled(
-            min * dpr,
-            min * dpr,
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        ),
-        size()
-    );
-
-    return preview;
 }
 
 const QList<QQmlError>& Control::errors() const
@@ -562,7 +507,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     gradient.setColorAt(1, QColor(HIGHLIGHT_COLOR).darker(110));
 
     if (m_dragIn) {
-        if (m_showOutline) {
+        if (scene()->showOutlines()) {
             painter->fillRect(innerRect, gradient);
         } else {
             QImage highlight(m_preview);
@@ -575,7 +520,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
     }
 
-    if (isSelected() || m_showOutline) {
+    if (isSelected() || scene()->showOutlines()) {
         QPen pen;
         pen.setWidthF(fit::fx(1));
         pen.setStyle(Qt::DotLine);
@@ -583,7 +528,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
         if (isSelected()) {
             pen.setColor(SELECTION_COLOR);
-        } else if (m_showOutline) {
+        } else if (scene()->showOutlines()) {
             if (m_hoverOn)
                 pen.setStyle(Qt::SolidLine);
             pen.setColor(OUTLINE_COLOR);
@@ -614,9 +559,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
-Form::Form(const QString& url, const QString& uid, Form* parent) : Control(url, uid, parent)
+Form::Form(const QString& url, Form* parent) : Control(url, parent)
 {
-    m_clip = false;
     setFlag(Control::ItemIsMovable, false);
 }
 
@@ -629,7 +573,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
     Control::paint(painter, option, widget);
 
-    if (!isSelected() && !showOutline()) {
+    if (!isSelected() && !scene()->showOutlines()) {
         QPen pen;
         pen.setWidthF(fit::fx(1));
         pen.setJoinStyle(Qt::MiterJoin);
@@ -669,6 +613,36 @@ void Form::setMain(bool value)
 }
 
 namespace {
+    QImage initialPreview(const QSizeF& size)
+    {
+        qreal min = qMin(fit::fx(24), qMin(size.width(), size.height()));
+
+        QImage preview(
+            qCeil(size.width() * DPR),
+            qCeil(size.height() * DPR),
+            QImage::Format_ARGB32_Premultiplied
+        );
+
+        preview.setDevicePixelRatio(DPR);
+        preview.fill(Qt::transparent);
+
+        QImage wait(":/resources/images/wait.png");
+        wait.setDevicePixelRatio(DPR);
+
+        drawCenter(
+            preview,
+            wait.scaled(
+                min * DPR,
+                min * DPR,
+                Qt::IgnoreAspectRatio,
+                Qt::SmoothTransformation
+            ),
+            size
+        );
+
+        return preview;
+    }
+
     void setInitialProperties(Control *control)
     {
         qreal x = ParserUtils::property(control->url(), "x").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();

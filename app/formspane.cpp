@@ -208,8 +208,8 @@ void FormsPane::addButtonClicked()
         return;
 
     auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
-    m_designerScene->addForm(form);
     SaveBackend::instance()->addForm(form);
+    m_designerScene->addForm(form);
     rm(tempPath);
 }
 

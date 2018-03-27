@@ -68,7 +68,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_zoomlLevelCombobox->setCurrentIndex(5);
 
     m_outlineButton->setCheckable(true);
-    m_outlineButton->setChecked(Control::showOutline());
+    m_outlineButton->setChecked(m_designerScene->showOutlines());
     m_snappingButton->setCheckable(true);
     m_snappingButton->setChecked(m_designerScene->snapping());
 

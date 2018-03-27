@@ -93,7 +93,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/exposerbackend.h \
            $$PWD/helpwidget.h \
            $$PWD/webenginehelpviewer.h \
-           $$PWD/helpviewer.h
+           $$PWD/helpviewer.h \
+    hashfactory.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -170,7 +171,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/exposerbackend.cpp \
            $$PWD/helpwidget.cpp \
            $$PWD/webenginehelpviewer.cpp \
-           $$PWD/helpviewer.cpp
+           $$PWD/helpviewer.cpp \
+    hashfactory.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
