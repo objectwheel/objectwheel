@@ -1,9 +1,9 @@
 #ifndef FORMSCENE_H
 #define FORMSCENE_H
 
-#include <control.h>
-#include <QGraphicsScene>
+#include <form.h>
 #include <QPointer>
+#include <QGraphicsScene>
 
 class DesignerScene : public QGraphicsScene
 {

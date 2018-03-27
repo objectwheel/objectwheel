@@ -2,7 +2,7 @@
 #include <saveutils.h>
 #include <filemanager.h>
 #include <projectbackend.h>
-#include <control.h>
+#include <form.h>
 #include <parserutils.h>
 #include <hashfactory.h>
 

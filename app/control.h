@@ -33,15 +33,13 @@ class Control : public QGraphicsWidget
         QString url() const;
         QString dir() const;
 
-        const QList<PropertyNode>& properties() const;
-        const QList<QQmlError>& errors() const;
-        const QList<QString>& events() const;
-        QList<Control*> childControls(bool dive = true) const;
-
-        virtual QRectF frameGeometry() const;
-
         DesignerScene* scene() const;
         Control* parentControl() const;
+
+        const QList<QString>& events() const;
+        const QList<QQmlError>& errors() const;
+        const QList<PropertyNode>& properties() const;
+        QList<Control*> childControls(bool dive = true) const;
 
     public:
         static QList<Control*>& controls();
@@ -76,8 +74,8 @@ class Control : public QGraphicsWidget
         QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
     protected:
-        virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
         virtual void resizeEvent(QGraphicsSceneResizeEvent* event) override;
+        virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
         virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR) override;
 
     private slots:
@@ -109,25 +107,6 @@ class Control : public QGraphicsWidget
 
     private:
         static QList<Control*> m_controls;
-};
-
-class Form : public Control
-{
-        Q_OBJECT
-
-    public:
-        explicit Form(const QString& url, Form* parent = nullptr);
-        QRectF frameGeometry() const override;
-        void setMain(bool value);
-        bool main() const;
-
-    protected:
-        void resizeEvent(QGraphicsSceneResizeEvent* event) override;
-        void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
-
-    private:
-        bool m_main = false;
 };
 
 #endif // CONTROL_H

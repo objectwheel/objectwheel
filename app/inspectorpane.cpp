@@ -6,9 +6,9 @@
 #include <saveutils.h>
 #include <savebackend.h>
 #include <formspane.h>
-#include <control.h>
 #include <controlwatcher.h>
 #include <designerscene.h>
+#include <form.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>

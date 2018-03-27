@@ -1,29 +1,22 @@
-#include <control.h>
+#include <form.h>
 #include <fit.h>
 #include <dpr.h>
-#include <random>
-#include <filemanager.h>
-#include <controlwatcher.h>
-#include <suppressor.h>
-#include <designerscene.h>
-#include <previewerbackend.h>
-#include <saveutils.h>
 #include <resizer.h>
+#include <saveutils.h>
+#include <suppressor.h>
+#include <filemanager.h>
 #include <parserutils.h>
+#include <designerscene.h>
+#include <controlwatcher.h>
+#include <previewerbackend.h>
 
 #include <QtMath>
-#include <QtWidgets>
-#include <QtSvg>
-
-#define HIGHLIGHT_COLOR     "#174C4E4D"
-#define SELECTION_COLOR       "#404447"
-#define OUTLINE_COLOR         "#808487"
-#define BACKGROUND_COLOR      "#F0F4F7"
-#define PREVIEW_REFRESH_INTERVAL    100
-#define RESIZE_TRANSACTION_INTERVAL 800
-#define GEOMETRY_SIGNAL_DELAY       800
-#define MARGIN_TOP fit::fx(14)
-#define ADJUST(x)  (x).adjusted(0.5, 0.5, -0.5, -0.5)
+#include <QDebug>
+#include <QCursor>
+#include <QPainter>
+#include <QMimeData>
+#include <QRegularExpression>
+#include <QGraphicsSceneDragDropEvent>
 
 extern const char* TOOL_KEY;
 
@@ -35,54 +28,43 @@ namespace {
     qreal getZ(const PreviewResult& result);
     void setRect(QList<PropertyNode>& nodes, const QRectF& rect);
     void setZ(QList<PropertyNode>& nodes, qreal z);
-    QImage initialPreview(const QSizeF& size);
+    QImage initialPreview();
 }
 
 QList<Control*> Control::m_controls;
 
 Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
+  , m_gui(false)
   , m_clip(true)
-  , m_resizers(initializeResizers(this))
-  , m_uid(SaveUtils::uid(dname(dname(url))))
-  , m_url(url)
+  , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
-  , m_dragIn(false)
-  , m_gui(false)
+  , m_uid(SaveUtils::uid(dname(dname(url))))
+  , m_url(url)
+  , m_preview(initialPreview())
+  , m_resizers(initializeResizers(this))
 {
     m_controls << this;
 
+    setAcceptDrops(true);
+    setAcceptHoverEvents(true);
+    setInitialProperties(this);
     setFlag(Control::ItemIsFocusable);
     setFlag(Control::ItemIsSelectable);
     setFlag(Control::ItemSendsGeometryChanges);
-    setAcceptHoverEvents(true);
-    setAcceptDrops(true);
-
-    setId(SaveUtils::id(dir()));
-    setInitialProperties(this);
-    m_preview = initialPreview(size());
-
-    connect(PreviewerBackend::instance(), SIGNAL(previewReady(const PreviewResult&)),
-      SLOT(updatePreview(const PreviewResult&)));
-    connect(PreviewerBackend::instance(), SIGNAL(anchorsReady(const Anchors&)),
-      SLOT(updateAnchors(const Anchors&)));
 
     connect(this, &Control::geometryChanged, this, [=] {
         QPointer<Control> p(this);
-        Suppressor::suppress(GEOMETRY_SIGNAL_DELAY, "geometryChanged", [=] {
+        Suppressor::suppress(800, "geometryChanged", [=] {
             if (p)
                 emit cW->geometryChanged(this);
         });
     });
 
-    connect(this, &Control::zChanged, this, [this] {
-        // refresh(); No need, cause it doesn't change preview
-        emit cW->zValueChanged(this);
-    });
-
-    connect(this, &Control::parentChanged, this, [this] {
-        emit cW->parentChanged(this);
-    });
+    connect(this, &Control::zChanged, this, [=] { emit cW->zValueChanged(this); });
+    connect(this, &Control::parentChanged, this, [=] { emit cW->parentChanged(this); });
+    connect(PreviewerBackend::instance(), &PreviewerBackend::anchorsReady, this, &Control::updateAnchors);
+    connect(PreviewerBackend::instance(), &PreviewerBackend::previewReady, this, &Control::updatePreview);
 }
 
 Control::~Control()
@@ -229,11 +211,6 @@ void Control::refresh(bool repreview)
 void Control::centralize()
 {
     setPos(-size().width() / 2.0, -size().height() / 2.0);
-}
-
-QRectF Control::frameGeometry() const
-{
-    return QRectF({QPointF(-size().width() / 2.0, -size().height() / 2.0), size()});
 }
 
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
@@ -503,8 +480,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
       innerRect.center().x(), innerRect.bottom());
-    gradient.setColorAt(0, QColor(HIGHLIGHT_COLOR).lighter(110));
-    gradient.setColorAt(1, QColor(HIGHLIGHT_COLOR).darker(110));
+    gradient.setColorAt(0, QColor("#174C4E4D").lighter(110));
+    gradient.setColorAt(1, QColor("#174C4E4D").darker(110));
 
     if (m_dragIn) {
         if (scene()->showOutlines()) {
@@ -527,11 +504,11 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         painter->setBrush(Qt::transparent);
 
         if (isSelected()) {
-            pen.setColor(SELECTION_COLOR);
+            pen.setColor("#404447");
         } else if (scene()->showOutlines()) {
             if (m_hoverOn)
                 pen.setStyle(Qt::SolidLine);
-            pen.setColor(OUTLINE_COLOR);
+            pen.setColor("#808487");
         }
 
         painter->setPen(pen);
@@ -559,67 +536,12 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
-Form::Form(const QString& url, Form* parent) : Control(url, parent)
-{
-    setFlag(Control::ItemIsMovable, false);
-}
-
-void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
-{
-    auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
-
-    painter->setBrush(QColor(BACKGROUND_COLOR));
-    painter->drawRect(innerRect);
-
-    Control::paint(painter, option, widget);
-
-    if (!isSelected() && !scene()->showOutlines()) {
-        QPen pen;
-        pen.setWidthF(fit::fx(1));
-        pen.setJoinStyle(Qt::MiterJoin);
-        pen.setStyle(Qt::DotLine);
-        pen.setColor(OUTLINE_COLOR);
-
-        painter->setPen(pen);
-        painter->setBrush(Qt::transparent);
-        painter->drawRect(innerRect);
-    }
-}
-
-void Form::resizeEvent(QGraphicsSceneResizeEvent* event)
-{
-    Control::resizeEvent(event);
-    centralize();
-}
-
-void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    event->ignore();
-}
-
-QRectF Form::frameGeometry() const
-{
-    return QRectF(QPointF(-size().width() / 2.0, -size().height() / 2.0), size());
-}
-
-bool Form::main() const
-{
-    return m_main;
-}
-
-void Form::setMain(bool value)
-{
-    m_main = value;
-}
-
 namespace {
-    QImage initialPreview(const QSizeF& size)
+    QImage initialPreview()
     {
-        qreal min = qMin(fit::fx(24), qMin(size.width(), size.height()));
-
         QImage preview(
-            qCeil(size.width() * DPR),
-            qCeil(size.height() * DPR),
+            qCeil(fit::fx(50) * DPR),
+            qCeil(fit::fx(50) * DPR),
             QImage::Format_ARGB32_Premultiplied
         );
 
@@ -632,12 +554,12 @@ namespace {
         drawCenter(
             preview,
             wait.scaled(
-                min * DPR,
-                min * DPR,
+                fit::fx(24) * DPR,
+                fit::fx(24) * DPR,
                 Qt::IgnoreAspectRatio,
                 Qt::SmoothTransformation
             ),
-            size
+            fit::fx(QSizeF(50, 50))
         );
 
         return preview;
@@ -654,6 +576,7 @@ namespace {
         control->setZValue(z);
         control->setPos(x, y);
         control->resize(width, height);
+        control->setId(SaveUtils::id(control->dir()));
 
         if (control->size().isNull())
             control->resize(fit::fx(QSizeF(50, 50)));
@@ -665,8 +588,6 @@ namespace {
     */
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     {
-        qreal dpr = DPR;
-
         QBrush brush;
         brush.setColor("#b0b4b7");
         brush.setStyle(Qt::Dense6Pattern);
@@ -682,11 +603,11 @@ namespace {
         rect.setHeight(size.height());
 
         QRectF rect_2;
-        rect_2.setWidth(source.width() / dpr);
-        rect_2.setHeight(source.height() / dpr);
+        rect_2.setWidth(source.width() / DPR);
+        rect_2.setHeight(source.height() / DPR);
         rect_2.moveCenter(rect.center());
 
-        painter.drawRect(ADJUST(rect));
+        painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
         painter.drawImage(rect_2, source);
     }
 
@@ -694,7 +615,7 @@ namespace {
     {
         QList<Resizer*> resizers;
         int i = 0;
-        for (; i < 8; )
+        for (;i < 8;)
             resizers << new Resizer(control, Resizer::Placement(i++));
 
         return resizers;
