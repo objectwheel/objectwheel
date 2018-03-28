@@ -12,11 +12,9 @@ class Control : public QGraphicsWidget
 {
         Q_OBJECT
         using QGraphicsWidget::contains;
+        friend class ExposerBackend;
 
     public:
-        explicit Control(const QString& url, Control* parent = nullptr);
-        ~Control();
-
         bool gui() const;
         bool form() const;
         bool clip() const;
@@ -77,6 +75,10 @@ class Control : public QGraphicsWidget
         virtual void resizeEvent(QGraphicsSceneResizeEvent* event) override;
         virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
         virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR) override;
+
+    protected:
+        explicit Control(const QString& url, Control* parent = nullptr);
+        ~Control();
 
     private slots:
         void updateAnchors(const Anchors& anchors);

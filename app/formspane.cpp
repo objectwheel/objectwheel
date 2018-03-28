@@ -9,6 +9,7 @@
 #include <css.h>
 #include <fit.h>
 #include <delayer.h>
+#include <exposerbackend.h>
 
 #include <QLabel>
 #include <QStandardPaths>
@@ -207,9 +208,8 @@ void FormsPane::addButtonClicked()
     if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
         return;
 
-    auto form = new Form(tempPath + separator() + DIR_THIS + separator() + "main.qml");
-    SaveBackend::instance()->addForm(form);
-    m_designerScene->addForm(form);
+    ExposerBackend::instance()->exposeForm(tempPath);
+
     rm(tempPath);
 }
 

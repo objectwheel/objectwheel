@@ -6,6 +6,8 @@
 #include <qmlcodeeditorwidget.h>
 #include <savebackend.h>
 #include <controlwatcher.h>
+#include <exposerbackend.h>
+#include <filemanager.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -226,12 +228,9 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
-    auto newControl = new Control(url);
-    SaveBackend::instance()->addControl(newControl, control, m_designerScene->mainForm()->uid(), m_designerScene->mainForm()->dir());
-    newControl->setParentItem(control);
+    auto newControl = ExposerBackend::instance()->exposeControl(dname(dname(url)), "NULL", control, m_designerScene->mainForm()->dir(), m_designerScene->mainForm()->uid());
     newControl->setPos(pos);
     newControl->setSelected(true);
-    newControl->refresh();
 }
 
 namespace {

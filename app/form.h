@@ -6,9 +6,9 @@
 class Form : public Control
 {
         Q_OBJECT
+        friend class ExposerBackend;
 
     public:
-        explicit Form(const QString& url, Form* parent = nullptr);
         bool main() const;
         QRectF frameGeometry() const;
 
@@ -19,6 +19,9 @@ class Form : public Control
         void resizeEvent(QGraphicsSceneResizeEvent* event) override;
         void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
         void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
+
+    private:
+        explicit Form(const QString& url, Form* parent = nullptr);
 
     private:
         bool m_main;

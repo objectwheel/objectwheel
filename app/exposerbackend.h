@@ -3,6 +3,7 @@
 
 #include <QString>
 
+class Form;
 class Control;
 class DesignerScene;
 
@@ -14,7 +15,8 @@ class ExposerBackend
         static ExposerBackend* instance();
         void init(DesignerScene* designerScene);
         void exposeProject() const;
-        Control* exposeControl(const QString& rootPath, QString suid = QString()) const;
+        Form* exposeForm(const QString& rootPath) const;
+        Control* exposeControl(const QString& rootPath, QString sourceSuid, Control* parentControl, QString destinationPath, QString destinationSuid) const;
 
     private:
         ExposerBackend();

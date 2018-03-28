@@ -207,16 +207,14 @@ void DesignerView::onPasteAction()
     auto clipboard = QGuiApplication::clipboard();
     auto mimeData = clipboard->mimeData();
     auto mainForm = scene()->mainForm();
-    QString uid = mimeData->data("objectwheel/uid");
+    QString sourceSuid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
-        mimeData->text() != TOOL_KEY || uid.isEmpty())
+        mimeData->text() != TOOL_KEY || sourceSuid.isEmpty())
         return;
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = ExposerBackend::instance()->exposeControl(url.toLocalFile(), uid);
-        SaveBackend::instance()->addControl(control, mainForm, mainForm->uid(), mainForm->dir());
-        control->setParentItem(mainForm);
+        auto control = ExposerBackend::instance()->exposeControl(url.toLocalFile(), sourceSuid, mainForm, mainForm->dir(), mainForm->uid());
         controls << control;
 
         control->setPos(control->pos() + QPoint(fit::fx(5), fit::fx(5)));
