@@ -41,6 +41,22 @@ QJsonValue SaveUtils::property(const QByteArray& propertyData, const QString& pr
     return jobj.value(property);
 }
 
+void SaveUtils::setX(const QString& rootPath, qreal x)
+{
+    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    setProperty(propertyData, TAG_X, x);
+    wrfile(propertyPath, propertyData);
+}
+
+void SaveUtils::setY(const QString& rootPath, qreal y)
+{
+    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+    auto propertyData = rdfile(propertyPath);
+    setProperty(propertyData, TAG_Y, y);
+    wrfile(propertyPath, propertyData);
+}
+
 void SaveUtils::flushId(const QString& topPath, const QString& id)
 {
     const auto& propertyPath = topPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
@@ -220,6 +236,20 @@ bool SaveUtils::isForm(const QString& rootPath)
 bool SaveUtils::isMain(const QString& rootPath)
 {
     return (fname(rootPath) == DIR_MAINFORM);
+}
+
+qreal SaveUtils::x(const QString& rootPath)
+{
+    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, TAG_X).toDouble();
+}
+
+qreal SaveUtils::y(const QString& rootPath)
+{
+    const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, TAG_Y).toDouble();
 }
 
 QString SaveUtils::id(const QString& rootPath)

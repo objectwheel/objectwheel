@@ -26,8 +26,6 @@ namespace {
     QRectF getRect(const PreviewResult& result);
     QList<Resizer*> initializeResizers(Control* control);
     void setInitialProperties(Control* control);
-    void setZ(QList<PropertyNode>& nodes, qreal z);
-    void setRect(QList<PropertyNode>& nodes, const QRectF& rect);
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
 }
 
@@ -39,8 +37,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
-  , m_uid(SaveUtils::uid(dname(dname(url))))
   , m_url(url)
+  , m_uid(SaveUtils::uid(dir()))
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -49,9 +47,10 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setAcceptHoverEvents(true);
     setInitialProperties(this);
 
-    setFlag(Control::ItemIsFocusable);
-    setFlag(Control::ItemIsSelectable);
-    setFlag(Control::ItemSendsGeometryChanges);
+    setFlag(ItemIsMovable);
+    setFlag(ItemIsFocusable);
+    setFlag(ItemIsSelectable);
+    setFlag(ItemSendsGeometryChanges);
 
     m_preview = initialPreview(size());
 
@@ -131,6 +130,11 @@ int Control::lowerZValue() const
     return z;
 }
 
+QString Control::url() const
+{
+    return m_url;
+}
+
 QString Control::id() const
 {
     return m_id;
@@ -139,11 +143,6 @@ QString Control::id() const
 QString Control::uid() const
 {
     return m_uid;
-}
-
-QString Control::url() const
-{
-    return m_url;
 }
 
 QString Control::dir() const
@@ -258,6 +257,9 @@ void Control::updateUids()
 
 void Control::dropControl(Control* control)
 {
+    if (!control->gui())
+        return;
+
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
     control->setParentItem(this);
     update();
@@ -273,7 +275,6 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
       event->mimeData()->urls().first().toLocalFile());
     update();
 }
-
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -516,19 +517,23 @@ void Control::updatePreview(const PreviewResult& result)
                 const auto& rect = getRect(result);
                 qreal z = getZ(result);
                 blockSignals(true);
-                setRect(m_properties, rect);
-                setZ(m_properties, z);
                 resize(rect.size());
                 if (!form())
                     setPos(rect.topLeft());
                 setZValue(z);
                 blockSignals(false);
             }
+        } else {
+            blockSignals(true);
+            resize(fit::fx(QSizeF(50, 50)));
+            blockSignals(false);
+            setPos(pos());
+            setZValue(0);
         }
-    }
 
-    if (!form())
-        setFlag(Control::ItemIsMovable, !hasErrors());
+        for (auto resizer : m_resizers)
+            resizer->setDisabled(gui());
+    }
 
     update();
 
@@ -560,12 +565,9 @@ namespace {
     {
         auto min = qMin(fit::fx(24), qMin(size.width(), size.height()));
 
-        if (size.isNull())
-            min = fit::fx(24);
-
         QImage preview(
-            qCeil(size.isNull() ? fit::fx(50) * DPR : size.width() * DPR),
-            qCeil(size.isNull() ? fit::fx(50) * DPR : size.height() * DPR),
+            qCeil(size.width() * DPR),
+            qCeil(size.height() * DPR),
             QImage::Format_ARGB32_Premultiplied
         );
 
@@ -583,7 +585,7 @@ namespace {
                 Qt::IgnoreAspectRatio,
                 Qt::SmoothTransformation
             ),
-            size.isNull() ? fit::fx(QSizeF(50, 50)) : size
+            size
         );
 
         return preview;
@@ -622,45 +624,35 @@ namespace {
 
     void setInitialProperties(Control *control)
     {
-        qreal x = ParserUtils::property(control->url(), "x").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal y = ParserUtils::property(control->url(), "y").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal z = ParserUtils::property(control->url(), "z").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal width = ParserUtils::property(control->url(), "width").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal height = ParserUtils::property(control->url(), "height").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal x = 0;
+        qreal y = 0;
+        qreal z = 0;
+        qreal width = fit::fx(50);
+        qreal height = fit::fx(50);
 
-        control->setZValue(z);
-        control->setPos(x, y);
-        control->resize(width, height);
+        if (ParserUtils::exists(control->url(), "x"))
+            x = ParserUtils::property(control->url(), "x").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        else
+            x = SaveUtils::x(control->dir());
+
+        if (ParserUtils::exists(control->url(), "y"))
+            y = ParserUtils::property(control->url(), "y").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        else
+            y = SaveUtils::x(control->dir());
+
+        if (ParserUtils::exists(control->url(), "width"))
+            width = ParserUtils::property(control->url(), "width").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+
+        if (ParserUtils::exists(control->url(), "height"))
+            height = ParserUtils::property(control->url(), "height").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+
+        if (ParserUtils::exists(control->url(), "z"))
+            ParserUtils::property(control->url(), "z").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+
         control->setId(SaveUtils::id(control->dir()));
-
-        if (control->size().isNull())
-            control->resize(fit::fx(QSizeF(50, 50)));
-    }
-
-    void setZ(QList<PropertyNode>& nodes, qreal z)
-    {
-        for (auto& node : nodes) {
-            for (auto& property : node.properties.keys()) {
-                if (property == "z")
-                    node.properties[property] = z;
-            }
-        }
-    }
-
-    void setRect(QList<PropertyNode>& nodes, const QRectF& rect)
-    {
-        for (auto& node : nodes) {
-            for (auto& property : node.properties.keys()) {
-                if (property == "x")
-                    node.properties[property] = rect.x();
-                else if (property == "y")
-                    node.properties[property] = rect.y();
-                else if (property == "width")
-                    node.properties[property] = rect.width();
-                else if (property == "height")
-                    node.properties[property] = rect.height();
-            }
-        }
+        control->setPos(x, y);
+        control->setZValue(z);
+        control->resize(width, height);
     }
 
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)

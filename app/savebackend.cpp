@@ -522,12 +522,7 @@ void SaveBackend::removeChildControlsOnly(const Control* control) const
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
 // topPath is only necessary if property is an "id" set.
-void SaveBackend::setProperty(
-    Control* control,
-    const QString& property,
-    const QString& value,
-    const QString& topPath
-) const
+void SaveBackend::setProperty(Control* control, const QString& property, const QString& value, const QString& topPath) const
 {
     if (control->dir().isEmpty() ||
         !SaveUtils::isOwctrl(control->dir()) ||

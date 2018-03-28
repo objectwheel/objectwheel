@@ -98,9 +98,9 @@ class Control : public QGraphicsWidget
         bool m_hoverOn;
         bool m_dragging;
 
+        QString m_url;
         QString m_uid;
         QString m_id;
-        QString m_url;
         QImage m_preview;
 
         QList<QString> m_events;

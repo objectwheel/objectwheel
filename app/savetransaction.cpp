@@ -2,6 +2,7 @@
 #include <control.h>
 #include <controlwatcher.h>
 #include <savebackend.h>
+#include <saveutils.h>
 #include <previewerbackend.h>
 #include <fit.h>
 
@@ -20,8 +21,14 @@ SaveTransaction* SaveTransaction::instance()
 
 void SaveTransaction::processGeometry(Control* control)
 {
-    if (control->hasErrors() || !control->gui())
+    if (control->hasErrors())
         return;
+
+    if (!control->gui() && !control->form()) {
+        SaveUtils::setX(control->dir(), control->x());
+        SaveUtils::setY(control->dir(), control->y());
+        return;
+    }
 
     if (!control->form()) {
         SaveBackend::instance()->setProperty(control, "x", QString::number(control->x()));

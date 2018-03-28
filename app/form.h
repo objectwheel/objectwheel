@@ -6,6 +6,7 @@
 class Form : public Control
 {
         Q_OBJECT
+
         friend class ExposerBackend;
 
     public:

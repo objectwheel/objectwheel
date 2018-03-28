@@ -16,6 +16,8 @@
 #define FILE_PROPERTIES  "properties.json"
 #define FILE_ICON        "icon.png" //TODO: Apply everywhere
 #define FILE_MAIN        "main.qml" //TODO: Apply everywhere
+#define TAG_X            "x"
+#define TAG_Y            "y"
 #define TAG_ID           "id"
 #define TAG_UID          "uid"
 #define TAG_SUID         "suid"
@@ -48,12 +50,16 @@ class SaveUtils : public QObject
         static bool isOwctrl(const QString& rootPath);
         static bool isForm(const QString& rootPath);
         static bool isMain(const QString& rootPath);
+        static qreal x(const QString& rootPath);
+        static qreal y(const QString& rootPath);
         static QString id(const QString& rootPath);
         static QString uid(const QString& rootPath);
         static QString suid(const QString& rootPath);
         static QString toolName(const QString& toolRootPath);
         static QString toolCategory(const QString& toolRootPath);
         static QJsonValue property(const QByteArray& propertyData, const QString& property);
+        static void setX(const QString& rootPath, qreal x);
+        static void setY(const QString& rootPath, qreal y);
         static void setProperty(QByteArray& propertyData, const QString& property, const QJsonValue& value);
         static void refreshToolUid(const QString& toolRootPath);
         static void flushId(const QString& topPath, const QString& id);

@@ -1367,7 +1367,8 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            sc[0]->resize(value.toReal(), sc[0]->size().height());
+            if (sc[0]->gui())
+                sc[0]->resize(value.toReal(), sc[0]->size().height());
             return;
         }
 
@@ -1376,7 +1377,8 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            sc[0]->resize(sc[0]->size().width(), value.toReal());
+            if (sc[0]->gui())
+                sc[0]->resize(sc[0]->size().width(), value.toReal());
             return;
         }
 

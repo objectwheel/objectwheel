@@ -15,7 +15,7 @@ bool Resizer::m_resizing = false;
 
 Resizer::Resizer(QGraphicsWidget* parent, Placement placement) : QGraphicsWidget(parent)
     , m_placement(placement)
-    , m_disabled(false)
+    , m_disabled(true)
 {
     setVisible(false);
     setAcceptedMouseButtons(Qt::LeftButton);

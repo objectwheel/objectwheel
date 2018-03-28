@@ -22,6 +22,50 @@ namespace {
     void changeProperty(QTextDocument* doc, const UiObjectMemberList* list, const QString& property, const QString& value);
 }
 
+bool ParserUtils::exists(const QString& fileName, const QString& property)
+{
+    QString source = rdfile(fileName);
+
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(fileName, dialect);
+    document->setSource(source);
+
+    if (!document->parse()) {
+        qWarning() << "Property couldn't set. Unable to parse qml file.";
+        return false;
+    }
+
+    auto uiProgram = document->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't set. Corrupted ui program.";
+        return false;
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't set. Empty source file.";
+        return false;
+    }
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't set. Bad file format 0x1.";
+        return false;
+    }
+
+    auto uiObjectInitializer = uiObjectDefinition->initializer;
+
+    if (!uiObjectInitializer) {
+        qWarning() << "Property couldn't set. Bad file format 0x2.";
+        return false;
+    }
+
+    return propertyExists(uiObjectInitializer->members, property);
+}
+
 QString ParserUtils::property(const QString& fileName, const QString& property)
 {
     QString source = rdfile(fileName);
