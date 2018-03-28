@@ -21,14 +21,14 @@
 extern const char* TOOL_KEY;
 
 namespace {
-    void setInitialProperties(Control* control);
-    QList<Resizer*> initializeResizers(Control* control);
-    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
-    QRectF getRect(const PreviewResult& result);
     qreal getZ(const PreviewResult& result);
-    void setRect(QList<PropertyNode>& nodes, const QRectF& rect);
+    QImage initialPreview(const QSizeF& size);
+    QRectF getRect(const PreviewResult& result);
+    QList<Resizer*> initializeResizers(Control* control);
+    void setInitialProperties(Control* control);
     void setZ(QList<PropertyNode>& nodes, qreal z);
-    QImage initialPreview();
+    void setRect(QList<PropertyNode>& nodes, const QRectF& rect);
+    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
 }
 
 QList<Control*> Control::m_controls;
@@ -41,7 +41,6 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_dragging(false)
   , m_uid(SaveUtils::uid(dname(dname(url))))
   , m_url(url)
-  , m_preview(initialPreview())
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -49,9 +48,12 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
     setInitialProperties(this);
+
     setFlag(Control::ItemIsFocusable);
     setFlag(Control::ItemIsSelectable);
     setFlag(Control::ItemSendsGeometryChanges);
+
+    m_preview = initialPreview(size());
 
     connect(this, &Control::geometryChanged, this, [=] {
         QPointer<Control> p(this);
@@ -72,15 +74,106 @@ Control::~Control()
     m_controls.removeOne(this);
 }
 
-void Control::updateUid()
+bool Control::gui() const
 {
-    m_uid = SaveUtils::uid(dir());
+    return m_gui;
 }
 
-void Control::updateUids()
+bool Control::form() const
 {
-    for (auto control : m_controls)
-        control->updateUid();
+    return (dynamic_cast<const Form*>(this) != nullptr);
+}
+
+bool Control::clip() const
+{
+    return m_clip;
+}
+
+bool Control::dragIn() const
+{
+    return m_dragIn;
+}
+
+bool Control::dragging() const
+{
+    return m_dragging;
+}
+
+bool Control::hasErrors() const
+{
+    return !m_errors.isEmpty();
+}
+
+bool Control::contains(const QString& id) const
+{
+    for (auto control : childControls()) {
+        if (control->id() == id)
+            return true;
+    }
+    return false;
+}
+
+int Control::higherZValue() const
+{
+    int z = 0;
+    for (const auto& control : childControls())
+        if (control->zValue() > z)
+            z = control->zValue();
+    return z;
+}
+
+int Control::lowerZValue() const
+{
+    int z = 0;
+    for (const auto& control : childControls())
+        if (control->zValue() < z)
+            z = control->zValue();
+    return z;
+}
+
+QString Control::id() const
+{
+    return m_id;
+}
+
+QString Control::uid() const
+{
+    return m_uid;
+}
+
+QString Control::url() const
+{
+    return m_url;
+}
+
+QString Control::dir() const
+{
+    return dname(dname(m_url));
+}
+
+DesignerScene* Control::scene() const
+{
+    return static_cast<DesignerScene*>(QGraphicsWidget::scene());
+}
+
+Control* Control::parentControl() const
+{
+    return dynamic_cast<Control*>(parentItem());
+}
+
+const QList<QString>& Control::events() const
+{
+    return m_events;
+}
+
+const QList<QQmlError>& Control::errors() const
+{
+    return m_errors;
+}
+
+const QList<PropertyNode>& Control::properties() const
+{
+    return m_properties;
 }
 
 QList<Control*> Control::childControls(bool dive) const
@@ -94,6 +187,47 @@ QList<Control*> Control::childControls(bool dive) const
         }
     }
     return controls;
+}
+
+QList<Control*>& Control::controls()
+{
+    return m_controls;
+}
+
+void Control::setId(const QString& id)
+{
+    m_id = id;
+    setToolTip(id);
+}
+
+void Control::setUrl(const QString& url)
+{
+    m_url = url;
+}
+
+void Control::setDragIn(bool dragIn)
+{
+    m_dragIn = dragIn;
+}
+
+void Control::setDragging(bool dragging)
+{
+    m_dragging = dragging;
+
+    if (dragging)
+        setCursor(Qt::SizeAllCursor);
+    else
+        setCursor(Qt::ArrowCursor);
+}
+
+void Control::updateUid()
+{
+    m_uid = SaveUtils::uid(dir());
+}
+
+void Control::centralize()
+{
+    setPos(-size().width() / 2.0, -size().height() / 2.0);
 }
 
 void Control::hideResizers()
@@ -110,132 +244,23 @@ void Control::showResizers()
     }
 }
 
-Control* Control::parentControl() const
-{
-    return dynamic_cast<Control*>(parentItem());
-}
-
-QString Control::id() const
-{
-    return m_id;
-}
-
-void Control::setId(const QString& id)
-{
-    m_id = id;
-    setToolTip(id);
-}
-
-QString Control::url() const
-{
-    return m_url;
-}
-
-bool Control::contains(const QString& id) const
-{
-    for (auto control : childControls()) {
-        if (control->id() == id)
-            return true;
-    }
-    return false;
-}
-
-bool Control::form() const
-{
-    return (dynamic_cast<const Form*>(this) != nullptr);
-}
-
-void Control::updatePreview(const PreviewResult& result)
-{
-    if (result.uid != uid())
-        return;
-
-    m_preview = result.preview;
-    m_errors = result.errors;
-    m_gui = result.gui;
-    m_properties = result.propertyNodes;
-    m_events = result.events;
-
-    if (!result.hasError()) {
-        if (result.gui) {
-            if (!form())
-                m_clip = result.property("clip").toBool();
-
-            if (result.repreviewed) {
-                const auto& rect = getRect(result);
-                qreal z = getZ(result);
-                blockSignals(true);
-                setRect(m_properties, rect);
-                setZ(m_properties, z);
-                resize(rect.size());
-                if (!form())
-                    setPos(rect.topLeft());
-                setZValue(z);
-                blockSignals(false);
-            }
-        }
-    }
-
-    if (!form())
-        setFlag(Control::ItemIsMovable, !hasErrors());
-
-    update();
-    if (result.hasError()) {
-        emit errorOccurred();
-        emit cW->errorOccurred(this);
-    }
-    emit previewChanged();
-    emit cW->previewChanged(this);
-}
-
-void Control::updateAnchors(const Anchors& anchors)
-{
-    if (anchors.uid != uid() || hasErrors())
-        return;
-
-    qDebug() << anchors.bottom.id;
-    qDebug() << anchors.top.id;
-    qDebug() << anchors.left.id;
-    qDebug() << anchors.right.id;
-    qDebug() << anchors.verticalCenter.id;
-    qDebug() << anchors.horizontalCenter.id;
-    qDebug() << "-----------------------";
-}
-
 void Control::refresh(bool repreview)
 {
     PreviewerBackend::instance()->requestPreview(size(), dir(), repreview);
 //    QTimer::singleShot(0, std::bind(&PreviewerBackend::requestAnchors, PreviewerBackend::instance(), dir()));
 }
 
-void Control::centralize()
+void Control::updateUids()
 {
-    setPos(-size().width() / 2.0, -size().height() / 2.0);
+    for (auto control : m_controls)
+        control->updateUid();
 }
 
-void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
+void Control::dropControl(Control* control)
 {
-    auto mimeData = event->mimeData();
-    if (mimeData->hasUrls() && mimeData->hasText() &&
-        mimeData->text() == TOOL_KEY) {
-        m_dragIn = true;
-        event->accept();
-    } else {
-        event->ignore();
-    }
+    control->setPos(mapFromItem(control->parentItem(), control->pos()));
+    control->setParentItem(this);
     update();
-}
-
-void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
-{
-    m_dragIn = false;
-    event->accept();
-    update();
-}
-
-void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
-{
-    event->accept();
 }
 
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
@@ -249,36 +274,6 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     update();
 }
 
-void Control::dropControl(Control* control)
-{
-    control->setPos(mapFromItem(control->parentItem(), control->pos()));
-    control->setParentItem(this);
-    update();
-}
-
-void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
-    QGraphicsWidget::hoverEnterEvent(event);
-    m_hoverOn = true;
-    update();
-}
-
-void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
-    QGraphicsWidget::hoverLeaveEvent(event);
-    m_hoverOn = false;
-    update();
-}
-
-void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsWidget::mousePressEvent(event);
-
-    if (event->button() == Qt::MidButton)
-        event->ignore();
-    else
-        event->accept();
-}
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -302,6 +297,45 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         event->ignore();
     else
         event->accept();
+}
+
+void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsWidget::hoverEnterEvent(event);
+    m_hoverOn = true;
+    update();
+}
+
+void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsWidget::hoverLeaveEvent(event);
+    m_hoverOn = false;
+    update();
+}
+
+void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
+{
+    event->accept();
+}
+
+void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
+{
+    auto mimeData = event->mimeData();
+    if (mimeData->hasUrls() && mimeData->hasText() &&
+        mimeData->text() == TOOL_KEY) {
+        m_dragIn = true;
+        event->accept();
+    } else {
+        event->ignore();
+    }
+    update();
+}
+
+void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
+{
+    m_dragIn = false;
+    event->accept();
+    update();
 }
 
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
@@ -341,15 +375,6 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
     emit cW->doubleClicked(this);
 }
 
-void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
-{
-    QGraphicsWidget::resizeEvent(event);
-    for (auto resizer : m_resizers)
-        resizer->correct();
-    if (scene())
-        refresh();
-}
-
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     switch (change) {
@@ -365,102 +390,23 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
     return QGraphicsWidget::itemChange(change, value);
 }
 
-const QList<QQmlError>& Control::errors() const
+void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
-    return m_errors;
+    QGraphicsWidget::resizeEvent(event);
+    for (auto resizer : m_resizers)
+        resizer->correct();
+    if (scene())
+        refresh();
 }
 
-bool Control::hasErrors() const
+void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    return !m_errors.isEmpty();
-}
+    QGraphicsWidget::mousePressEvent(event);
 
-QList<Control*>& Control::controls()
-{
-    return m_controls;
-}
-
-void Control::setUrl(const QString& url)
-{
-    m_url = url;
-}
-
-QString Control::dir() const // Returns root path
-{
-    return dname(dname(m_url));
-}
-
-QString Control::uid() const
-{
-    return m_uid;
-}
-
-bool Control::gui() const
-{
-    return m_gui;
-}
-
-const QList<QString>& Control::events() const
-{
-    return m_events;
-}
-
-const QList<PropertyNode>& Control::properties() const
-{
-    return m_properties;
-}
-
-bool Control::clip() const
-{
-    return m_clip;
-}
-
-bool Control::dragIn() const
-{
-    return m_dragIn;
-}
-
-void Control::setDragIn(bool dragIn)
-{
-    m_dragIn = dragIn;
-}
-
-DesignerScene* Control::scene() const
-{
-    return static_cast<DesignerScene*>(QGraphicsWidget::scene());
-}
-
-bool Control::dragging() const
-{
-    return m_dragging;
-}
-
-void Control::setDragging(bool dragging)
-{
-    m_dragging = dragging;
-
-    if (dragging)
-        setCursor(Qt::SizeAllCursor);
+    if (event->button() == Qt::MidButton)
+        event->ignore();
     else
-        setCursor(Qt::ArrowCursor);
-}
-
-int Control::higherZValue() const
-{
-    int z = 0;
-    for (const auto& control : childControls())
-        if (control->zValue() > z)
-            z = control->zValue();
-    return z;
-}
-
-int Control::lowerZValue() const
-{
-    int z = 0;
-    for (const auto& control : childControls())
-        if (control->zValue() < z)
-            z = control->zValue();
-    return z;
+        event->accept();
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
@@ -536,12 +482,90 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
+void Control::updateAnchors(const Anchors& anchors)
+{
+    if (anchors.uid != uid() || hasErrors())
+        return;
+
+    qDebug() << anchors.bottom.id;
+    qDebug() << anchors.top.id;
+    qDebug() << anchors.left.id;
+    qDebug() << anchors.right.id;
+    qDebug() << anchors.verticalCenter.id;
+    qDebug() << anchors.horizontalCenter.id;
+    qDebug() << "-----------------------";
+}
+
+void Control::updatePreview(const PreviewResult& result)
+{
+    if (result.uid != uid())
+        return;
+
+    m_preview = result.preview;
+    m_errors = result.errors;
+    m_gui = result.gui;
+    m_properties = result.propertyNodes;
+    m_events = result.events;
+
+    if (!result.hasError()) {
+        if (result.gui) {
+            if (!form())
+                m_clip = result.property("clip").toBool();
+
+            if (result.repreviewed) {
+                const auto& rect = getRect(result);
+                qreal z = getZ(result);
+                blockSignals(true);
+                setRect(m_properties, rect);
+                setZ(m_properties, z);
+                resize(rect.size());
+                if (!form())
+                    setPos(rect.topLeft());
+                setZValue(z);
+                blockSignals(false);
+            }
+        }
+    }
+
+    if (!form())
+        setFlag(Control::ItemIsMovable, !hasErrors());
+
+    update();
+
+    if (result.hasError()) {
+        emit errorOccurred();
+        emit cW->errorOccurred(this);
+    }
+
+    emit previewChanged();
+    emit cW->previewChanged(this);
+}
+
 namespace {
-    QImage initialPreview()
+    qreal getZ(const PreviewResult& result)
     {
+        const QList<PropertyNode> nodes = result.propertyNodes;
+
+        for (const auto& node : nodes) {
+            for (const auto& property : node.properties.keys()) {
+                if (property == "z")
+                    return node.properties.value(property).toReal();
+            }
+        }
+
+        return 0.0;
+    }
+
+    QImage initialPreview(const QSizeF& size)
+    {
+        auto min = qMin(fit::fx(24), qMin(size.width(), size.height()));
+
+        if (size.isNull())
+            min = fit::fx(24);
+
         QImage preview(
-            qCeil(fit::fx(50) * DPR),
-            qCeil(fit::fx(50) * DPR),
+            qCeil(size.isNull() ? fit::fx(50) * DPR : size.width() * DPR),
+            qCeil(size.isNull() ? fit::fx(50) * DPR : size.height() * DPR),
             QImage::Format_ARGB32_Premultiplied
         );
 
@@ -554,71 +578,15 @@ namespace {
         drawCenter(
             preview,
             wait.scaled(
-                fit::fx(24) * DPR,
-                fit::fx(24) * DPR,
+                min * DPR,
+                min * DPR,
                 Qt::IgnoreAspectRatio,
                 Qt::SmoothTransformation
             ),
-            fit::fx(QSizeF(50, 50))
+            size.isNull() ? fit::fx(QSizeF(50, 50)) : size
         );
 
         return preview;
-    }
-
-    void setInitialProperties(Control *control)
-    {
-        qreal x = ParserUtils::property(control->url(), "x").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal y = ParserUtils::property(control->url(), "y").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal z = ParserUtils::property(control->url(), "z").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal width = ParserUtils::property(control->url(), "width").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-        qreal height = ParserUtils::property(control->url(), "height").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
-
-        control->setZValue(z);
-        control->setPos(x, y);
-        control->resize(width, height);
-        control->setId(SaveUtils::id(control->dir()));
-
-        if (control->size().isNull())
-            control->resize(fit::fx(QSizeF(50, 50)));
-    }
-
-    /*
-     * Fills the restricted area by the size with pattern into
-     * the transparent dest. Then draws source into the center of the dest.
-    */
-    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
-    {
-        QBrush brush;
-        brush.setColor("#b0b4b7");
-        brush.setStyle(Qt::Dense6Pattern);
-
-        QPainter painter(&dest);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setBrush(brush);
-        painter.setPen("#808487");
-
-        QRectF rect;
-        rect.setTopLeft({0.0, 0.0});
-        rect.setWidth(size.width());
-        rect.setHeight(size.height());
-
-        QRectF rect_2;
-        rect_2.setWidth(source.width() / DPR);
-        rect_2.setHeight(source.height() / DPR);
-        rect_2.moveCenter(rect.center());
-
-        painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
-        painter.drawImage(rect_2, source);
-    }
-
-    QList<Resizer*> initializeResizers(Control* control)
-    {
-        QList<Resizer*> resizers;
-        int i = 0;
-        for (;i < 8;)
-            resizers << new Resizer(control, Resizer::Placement(i++));
-
-        return resizers;
     }
 
     QRectF getRect(const PreviewResult& result)
@@ -642,18 +610,41 @@ namespace {
         return rect;
     }
 
-    qreal getZ(const PreviewResult& result)
+    QList<Resizer*> initializeResizers(Control* control)
     {
-        const QList<PropertyNode> nodes = result.propertyNodes;
+        QList<Resizer*> resizers;
+        int i = 0;
+        for (;i < 8;)
+            resizers << new Resizer(control, Resizer::Placement(i++));
 
-        for (const auto& node : nodes) {
-            for (const auto& property : node.properties.keys()) {
+        return resizers;
+    }
+
+    void setInitialProperties(Control *control)
+    {
+        qreal x = ParserUtils::property(control->url(), "x").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal y = ParserUtils::property(control->url(), "y").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal z = ParserUtils::property(control->url(), "z").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal width = ParserUtils::property(control->url(), "width").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+        qreal height = ParserUtils::property(control->url(), "height").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+
+        control->setZValue(z);
+        control->setPos(x, y);
+        control->resize(width, height);
+        control->setId(SaveUtils::id(control->dir()));
+
+        if (control->size().isNull())
+            control->resize(fit::fx(QSizeF(50, 50)));
+    }
+
+    void setZ(QList<PropertyNode>& nodes, qreal z)
+    {
+        for (auto& node : nodes) {
+            for (auto& property : node.properties.keys()) {
                 if (property == "z")
-                    return node.properties.value(property).toReal();
+                    node.properties[property] = z;
             }
         }
-
-        return 0.0;
     }
 
     void setRect(QList<PropertyNode>& nodes, const QRectF& rect)
@@ -672,13 +663,28 @@ namespace {
         }
     }
 
-    void setZ(QList<PropertyNode>& nodes, qreal z)
+    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     {
-        for (auto& node : nodes) {
-            for (auto& property : node.properties.keys()) {
-                if (property == "z")
-                    node.properties[property] = z;
-            }
-        }
+        QBrush brush;
+        brush.setColor("#b0b4b7");
+        brush.setStyle(Qt::Dense6Pattern);
+
+        QPainter painter(&dest);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setBrush(brush);
+        painter.setPen("#808487");
+
+        QRectF rect;
+        rect.setTopLeft({0.0, 0.0});
+        rect.setWidth(size.width());
+        rect.setHeight(size.height());
+
+        QRectF rect_2;
+        rect_2.setWidth(source.width() / DPR);
+        rect_2.setHeight(source.height() / DPR);
+        rect_2.moveCenter(rect.center());
+
+        painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
+        painter.drawImage(rect_2, source);
     }
 }

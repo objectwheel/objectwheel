@@ -11,8 +11,9 @@ class ControlWatcher;
 class Control : public QGraphicsWidget
 {
         Q_OBJECT
-        using QGraphicsWidget::contains;
+
         friend class ExposerBackend;
+        using QGraphicsWidget::contains;
 
     public:
         bool gui() const;
@@ -26,8 +27,8 @@ class Control : public QGraphicsWidget
         int higherZValue() const;
         int lowerZValue() const;
 
-        QString uid() const;
         QString id() const;
+        QString uid() const;
         QString url() const;
         QString dir() const;
 
