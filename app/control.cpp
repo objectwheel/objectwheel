@@ -64,7 +64,6 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
 
     connect(this, &Control::zChanged, this, [=] { emit cW->zValueChanged(this); });
     connect(this, &Control::parentChanged, this, [=] { emit cW->parentChanged(this); });
-    connect(PreviewerBackend::instance(), &PreviewerBackend::anchorsReady, this, &Control::updateAnchors);
     connect(PreviewerBackend::instance(), &PreviewerBackend::previewReady, this, &Control::updatePreview);
 }
 
@@ -246,7 +245,6 @@ void Control::showResizers()
 void Control::refresh(bool repreview)
 {
     PreviewerBackend::instance()->requestPreview(size(), dir(), repreview);
-//    QTimer::singleShot(0, std::bind(&PreviewerBackend::requestAnchors, PreviewerBackend::instance(), dir()));
 }
 
 void Control::updateUids()
@@ -471,20 +469,6 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         painter->setPen(pen);
         painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
     }
-}
-
-void Control::updateAnchors(const Anchors& anchors)
-{
-    if (anchors.uid != uid() || hasErrors())
-        return;
-
-    qDebug() << anchors.bottom.id;
-    qDebug() << anchors.top.id;
-    qDebug() << anchors.left.id;
-    qDebug() << anchors.right.id;
-    qDebug() << anchors.verticalCenter.id;
-    qDebug() << anchors.horizontalCenter.id;
-    qDebug() << "-----------------------";
 }
 
 void Control::updatePreview(const PreviewResult& result)

@@ -5,7 +5,6 @@
 #include <QRectF>
 #include <QVariant>
 
-struct Anchors;
 class QLocalServer;
 struct PreviewResult;
 class QDataStream;
@@ -25,8 +24,7 @@ class PreviewerBackend : public QObject
                 Preview,
                 Repreview,
                 Update,
-                Remove,
-                Anchors
+                Remove
             };
 
             inline bool operator==(const Task& t1)
@@ -51,7 +49,6 @@ class PreviewerBackend : public QObject
     public slots:
         void restart();
         void requestInit(const QString& projectDir);
-        void requestAnchors(const QString& dir);
         void requestPreview(const QSizeF& size, const QString& dir, bool repreview = false);
         void removeCache(const QString& uid);
         void updateCache(const QString& uid, const QString& property, const QVariant& value);
@@ -70,7 +67,6 @@ class PreviewerBackend : public QObject
     signals:
         void taskDone();
         void busyChanged();
-        void anchorsReady(const Anchors& anchors);
         void previewReady(const PreviewResult& result);
 
     private:

@@ -82,7 +82,6 @@ class Control : public QGraphicsWidget
         ~Control();
 
     private slots:
-        void updateAnchors(const Anchors& anchors);
         void updatePreview(const PreviewResult& result);
 
     signals:
