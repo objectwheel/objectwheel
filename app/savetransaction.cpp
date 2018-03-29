@@ -21,10 +21,7 @@ SaveTransaction* SaveTransaction::instance()
 
 void SaveTransaction::processGeometry(Control* control)
 {
-    if (control->hasErrors())
-        return;
-
-    if (!control->gui() && !control->form()) {
+    if ((!control->gui() || control->hasErrors()) && !control->form()) {
         SaveUtils::setX(control->dir(), control->x());
         SaveUtils::setY(control->dir(), control->y());
         return;
@@ -51,13 +48,12 @@ void SaveTransaction::processGeometry(Control* control)
 
 void SaveTransaction::processParent(Control* control)
 {
-    if (control->hasErrors() || !control->gui())
+    if (!control->parentControl() || (!control->parentControl()->gui() && control->gui()))
         return;
 
-    if (control->parentControl()) {
-        SaveBackend::instance()->moveControl(control, control->parentControl());
-        processGeometry(control);
-    }
+    SaveBackend::instance()->moveControl(control, control->parentControl());
+    // TODO: PreviewerBackend::instance()->updateReparent(), Errorlular hariç, Nongui ler dahil
+    processGeometry(control);
 }
 
 void SaveTransaction::processZ(Control* control)

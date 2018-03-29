@@ -36,7 +36,7 @@ void fillItem(QTreeWidgetItem* parentItem, const QList<Control*>& children)
             item->setTextColor(1, "#D02929");
         }
 
-        if (child->gui())
+        if (child->gui() && !child->hasErrors())
             item->setText(1, "Yes");
         else
             item->setText(1, "No");

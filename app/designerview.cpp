@@ -132,7 +132,7 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
         m_copyAct->setDisabled(false);
         m_deleteAct->setDisabled(false);
         for (auto sc : selectedControls) {
-            if (sc->gui() == false) {
+            if (sc->gui() == false || sc->hasErrors()) {
                 m_sendBackAct->setDisabled(true);
                 m_bringFrontAct->setDisabled(true);
             }

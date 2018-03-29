@@ -184,10 +184,9 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
             for(int i = 0; i < selectedControls.size(); i++) {
                 auto control = selectedControls[i];
-                if (!control->gui() || controlUnderMouse->parentControl()
-                    != control->parentControl() ||
-                    selectedControls.
-                    contains(control->parentControl())) {
+                if (controlUnderMouse->parentControl() != control->parentControl() ||
+                    selectedControls. contains(control->parentControl()))
+                {
                     selectedControls.removeOne(control);
                     control->setSelected(false);
                     i--;
@@ -239,8 +238,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
             for(int i = 0; i < selectedControls.size(); i++) {
                 auto control = selectedControls[i];
-                if (!control->gui() || selectedControls.
-                    contains(control->parentControl())) {
+                if (selectedControls.contains(control->parentControl())) {
                     selectedControls.removeOne(control);
                     i--;
                 }
@@ -291,11 +289,9 @@ bool DesignerScene::stick() const
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(m_mainForm);
 
-
     for(int i = 0; i < selectedControls.size(); i++) {
         auto control = selectedControls[i];
-        if (!control->gui() || control->hasErrors() || selectedControls.
-            contains(control->parentControl())) {
+        if (selectedControls.contains(control->parentControl())) {
             selectedControls.removeOne(control);
             i--;
         }
@@ -418,7 +414,7 @@ bool DesignerScene::stick() const
     }
 
     for (auto childControl : parent->childControls(false)) {
-        if (selectedControls.contains(childControl) || !childControl->gui())
+        if (selectedControls.contains(childControl))
             continue;
 
         auto cgeometry = childControl->geometry();
@@ -633,7 +629,7 @@ QVector<QLineF> DesignerScene::guideLines() const
 
     for(int i = 0; i < selectedControls.size(); i++) {
         auto control = selectedControls[i];
-        if (!control->gui() || selectedControls.
+        if (selectedControls.
             contains(control->parentControl())) {
             selectedControls.removeOne(control);
             i--;
@@ -697,7 +693,7 @@ QVector<QLineF> DesignerScene::guideLines() const
                         parent->mapToScene(QPointF(parent->size().width(), parent->size().height())));
 
     for (auto childControl : parent->childControls(false)) {
-        if (selectedControls.contains(childControl) || !childControl->gui())
+        if (selectedControls.contains(childControl))
             continue;
 
         auto cgeometry = childControl->geometry();

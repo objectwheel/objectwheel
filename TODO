@@ -43,6 +43,48 @@ nongui itemleri için altta bi kısım panel yap, onlar orda dursun sıralı
 nongui ve errorlu itemler içine reparent yapılamasın, ve onlar başkalarının içine reparent yapılamasın
 shoot metodunun iç yapısını da init ve initialShoot gibi yap, preview alan fonksiyonlar ile extract ve doComplete fonksiyonları ayrık olsun
 window'un visibility propertisi Hidden olarak gözüküyor, yanlış, bunu düzelt
+control haraket ettirilirken, veya resize edilirken pane ler refresh oluyor mu? ne tür connection lar çağrılıyor, neden kasma var?
+form clip on/off için yukarıya toolbar'a bir switch koy
+
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+|    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+| Gui kontroller      | ok              | ok                     | ok          | ok                        | ok            | ok                                 |
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+| NonGui kontroller   | ok              | ok                     | ok          | ok                        | ok            | ok                                 |
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+| Errorlu kontroller  | ok              | ok                     | ok          | ok                        | ok            | ok                                 |
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+- Parent change için de aynı kontroller yapılacak
+
+interpreter'de: non-gui elemanları babalarının üstüne setParent et (eğer baba window ise contentItem içine et) ve form contexti içine tanımlı et
+previewer'de: non-gui elemanları babalarının üstüne setParent et (eğer baba window ise contentItem içine et), ve form contexti içine tanımlı et, reparentUpdate sinyalini nonguiler için de çalıştır
+previewer'de: errorlu elemanları setContextProperty ile tanımsız et (null la)
+
+-nongui içine yalnızca nongui elemanlar koyulabilir
+-nongui içindeki bir eleman gui'ye çevrilecekse editör kaydetmeden önce uyarı vermeli
+- Gui olan ve üzerinde başka kontroller bulunan eleman non-gui ye dönüştürülürse içindeki kontroller ne olacak? O yüzden bu durumu daha editör kayıt etmeden uyar ve içindeki elemanlar çıkarılmadan da kayıt etme
+- Kodları kaydetmeden önce Form'lar nongui olamaz diye uyar (diğer benzeri uyarıları da yap ve kayıt etmeyi engelle)
+
+-errorluyu öbür errorlu içine koy (setParentItem), context'de nulla : ok
+-nonguiyi errorlu içine koy (setParent), o kadar: ok
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+    reparent                  | Editör'de ki etki | Previewer'de ki etki | Interpreter'deki etki |
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+Errorlu - Onun içine bişeyler : e:ok, n:ok, g:ok  | e:ok, n:ok, g:ok     | e:ok, n:ok, g:ok      |
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+Errorlu - Onu başkası içine   : e:ok, n:no, g:ok  | e:ok, n:no, g:ok     | e:ok, n:ok, g:ok      |
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+Nongui - Onun içine bişeyler  : e:no, n:ok, g:no  | e:no, n:ok, g:no     | e:no, n:ok, g:no      |
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+Nongui - Onu başkası içine    : e:ok, n:ok, g:ok  | e:ok, n:ok, g:ok     | e:ok, n:ok, g:ok      |
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+gui - Onun içine bişeyler     : e:ok, n:ok, g:ok  | e:ok, n:ok, g:ok     | e:ok, n:ok, g:ok      |
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+gui - Onu başkası içine       : e:ok, n:no, g:ok  | e:ok, n:no, g:ok     | e:ok, n:no, g:ok      |
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
 project details kısmında son değiştirilme tarihini herkes kendi local saat formunda görsün
 konsola top bar ekle ve "scroll bar çıktıyı takip eder" checkboxı ekle

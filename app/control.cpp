@@ -257,7 +257,7 @@ void Control::updateUids()
 
 void Control::dropControl(Control* control)
 {
-    if (!control->gui())
+    if (!gui() && control->gui())
         return;
 
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
@@ -415,24 +415,33 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     if (m_preview.isNull())
         return;
 
-    auto innerRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
-
-    if (gui() && parentControl() && parentControl()->clip() && !m_dragging)
-        painter->setClipRect(rect().intersected(parentControl()->mapToItem
-          (this, parentControl()->rect().adjusted(1, 1, -1, -1)).boundingRect()));
+    if (parentControl() && parentControl()->clip() && !m_dragging) {
+        painter->setClipRect(
+           rect().intersected(
+               parentControl()->mapToItem(
+                   this,
+                   parentControl()->rect().adjusted(
+                       1,
+                       1,
+                      -1,
+                      -1
+                   )
+               ).boundingRect()
+           )
+        );
+    }
 
     painter->setRenderHint(QPainter::Antialiasing);
     painter->drawImage(rect(), m_preview,
       QRectF(QPointF(0, 0), size() * DPR));
 
-    QLinearGradient gradient(innerRect.center().x(), innerRect.y(),
-      innerRect.center().x(), innerRect.bottom());
+    QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4E4D").lighter(110));
     gradient.setColorAt(1, QColor("#174C4E4D").darker(110));
 
     if (m_dragIn) {
         if (scene()->showOutlines()) {
-            painter->fillRect(innerRect, gradient);
+            painter->fillRect(rect(), gradient);
         } else {
             QImage highlight(m_preview);
             QPainter p(&highlight);
@@ -449,6 +458,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         pen.setWidthF(fit::fx(1));
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);
+        painter->setClipping(false);
 
         if (isSelected()) {
             pen.setColor("#404447");
@@ -459,27 +469,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
 
         painter->setPen(pen);
-        painter->drawRect(innerRect);
-
-        // Draw corner lines
-        pen.setStyle(Qt::SolidLine);
-        painter->setPen(pen);
-        painter->drawLine(innerRect.topLeft(),
-          innerRect.topLeft() + QPointF(2, 0));
-        painter->drawLine(innerRect.topLeft(),
-          innerRect.topLeft() + QPointF(0, 2));
-        painter->drawLine(innerRect.bottomLeft(),
-          innerRect.bottomLeft() + QPointF(2, 0));
-        painter->drawLine(innerRect.bottomLeft(),
-          innerRect.bottomLeft() + QPointF(0, -2));
-        painter->drawLine(innerRect.topRight(),
-          innerRect.topRight() + QPointF(-2, 0));
-        painter->drawLine(innerRect.topRight(),
-          innerRect.topRight() + QPointF(0, 2));
-        painter->drawLine(innerRect.bottomRight(),
-          innerRect.bottomRight() + QPointF(-2, 0));
-        painter->drawLine(innerRect.bottomRight(),
-          innerRect.bottomRight() + QPointF(0, -2));
+        painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
     }
 }
 
@@ -508,7 +498,13 @@ void Control::updatePreview(const PreviewResult& result)
     m_properties = result.propertyNodes;
     m_events = result.events;
 
-    if (!result.hasError()) {
+    if (result.hasError()) {
+        blockSignals(true);
+        resize(fit::fx(QSizeF(50, 50)));
+        blockSignals(false);
+        setPos(pos());
+        setZValue(0);
+    } else {
         if (result.gui) {
             if (!form())
                 m_clip = result.property("clip").toBool();
@@ -530,10 +526,10 @@ void Control::updatePreview(const PreviewResult& result)
             setPos(pos());
             setZValue(0);
         }
-
-        for (auto resizer : m_resizers)
-            resizer->setDisabled(gui());
     }
+
+    for (auto resizer : m_resizers)
+        resizer->setDisabled(hasErrors() || !gui());
 
     update();
 
@@ -638,7 +634,7 @@ namespace {
         if (ParserUtils::exists(control->url(), "y"))
             y = ParserUtils::property(control->url(), "y").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
         else
-            y = SaveUtils::x(control->dir());
+            y = SaveUtils::y(control->dir());
 
         if (ParserUtils::exists(control->url(), "width"))
             width = ParserUtils::property(control->url(), "width").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();

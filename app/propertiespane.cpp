@@ -867,7 +867,7 @@ void PropertiesPane::refreshList()
         item_1->setText(1, propertyNodes.first().cleanClassName);
 
         QTreeWidgetItem* item_2 = new QTreeWidgetItem;
-        item_2->setText(0, "Uid");
+        item_2->setText(0, "uid");
         item_2->setText(1, selectedControls[0]->uid());
 
         QTreeWidgetItem* item_3 = new QTreeWidgetItem;
