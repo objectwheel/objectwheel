@@ -81,7 +81,7 @@ bool PreviewerBackend::init()
     process.setArguments(QStringList() << serverName);
 //    process.setStandardOutputFile(QProcess::nullDevice());
 //    process.setStandardErrorFile(QProcess::nullDevice());
-    return _server->listen(serverName) && process.startDetached();
+    return _server->listen("serverName")/* && process.startDetached()*/;
 }
 
 bool PreviewerBackend::isBusy() const
@@ -94,14 +94,19 @@ int PreviewerBackend::totalTask() const
     return _taskList.size();
 }
 
+void PreviewerBackend::setDisabled(bool value)
+{
+    _disabled = value;
+}
+
 void PreviewerBackend::restart()
 {
     if (socket && _taskList.isEmpty()) {
         blockSize = 0;
-        ::restart(
-            socket.data(),
-            QStringList() << ProjectBackend::instance()->dir() << serverName
-        );
+//        ::restart(
+//            socket.data(),
+//            QStringList() << ProjectBackend::instance()->dir() << serverName
+//        );
     } else {
         qFatal("No connection with Objectwheel Previewing Service");
     }
@@ -120,6 +125,9 @@ void PreviewerBackend::enableDirtHandling()
 
 void PreviewerBackend::requestInit(const QString& projectDir)
 {
+    if (_disabled)
+        return;
+
     Task task;
     task.dir = projectDir;
     task.uid = "initialization";
@@ -137,6 +145,9 @@ void PreviewerBackend::requestInit(const QString& projectDir)
 
 void PreviewerBackend::requestPreview(const QSizeF& size, const QString& dir, bool repreview)
 {
+    if (_disabled)
+        return;
+
     Task task;
     task.dir = dir;
     task.uid = SaveUtils::uid(dir);
@@ -162,6 +173,9 @@ void PreviewerBackend::requestPreview(const QSizeF& size, const QString& dir, bo
 
 void PreviewerBackend::removeCache(const QString& uid)
 {
+    if (_disabled)
+        return;
+
     Task task;
     task.uid = uid;
     task.type = Task::Remove;
@@ -178,6 +192,9 @@ void PreviewerBackend::removeCache(const QString& uid)
 
 void PreviewerBackend::updateCache(const QString& uid, const QString& property, const QVariant& value)
 {
+    if (_disabled)
+        return;
+
     Task task;
     task.uid = uid;
     task.property = property;

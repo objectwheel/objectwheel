@@ -45,6 +45,7 @@ class PreviewerBackend : public QObject
         bool init();
         bool isBusy() const;
         int totalTask() const;
+        void setDisabled(bool value);
 
     public slots:
         void restart();
@@ -74,6 +75,7 @@ class PreviewerBackend : public QObject
         ~PreviewerBackend();
 
     private:
+        bool _disabled;
         QLocalServer* _server;
         QTimer* _dirtHandlingDisablerTimer;
         QList<Task> _taskList;

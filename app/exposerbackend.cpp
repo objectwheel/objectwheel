@@ -5,6 +5,7 @@
 #include <projectbackend.h>
 #include <filemanager.h>
 #include <savebackend.h>
+#include <previewerbackend.h>
 
 ExposerBackend::ExposerBackend() : m_designerScene(nullptr)
 {
@@ -47,41 +48,60 @@ void ExposerBackend::exposeProject() const
 
 Form* ExposerBackend::exposeForm(const QString& rootPath) const
 {
+    PreviewerBackend::instance()->setDisabled(true);
+
     auto form = new Form(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     if (SaveUtils::isMain(rootPath))
         form->setMain(true);
 
-    QMap<QString, Control*> pmap;
-    pmap[rootPath] = form;
-    for (const auto& child : SaveUtils::childrenPaths(rootPath)) {
-        auto pcontrol = pmap.value(dname(dname(child)));
-        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        control->setParentItem(pcontrol);
-        pmap[child] = control;
-    }
-
     SaveBackend::instance()->addForm(form);
     m_designerScene->addForm(form);
+
+    PreviewerBackend::instance()->setDisabled(false);
+    form->refresh();
+
+    QMap<QString, Control*> pmap;
+    pmap[form->dir()] = form;
+    for (const auto& child : SaveUtils::childrenPaths(form->dir())) {
+        auto pcontrol = pmap.value(dname(dname(child)));
+
+        PreviewerBackend::instance()->setDisabled(true);
+        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+        control->setParentItem(pcontrol);
+        PreviewerBackend::instance()->setDisabled(false);
+        control->refresh();
+
+        pmap[child] = control;
+    }
 
     return form;
 }
 
 Control* ExposerBackend::exposeControl(const QString& rootPath, QString sourceSuid, Control* parentControl, QString destinationPath, QString destinationSuid) const
 {
+    PreviewerBackend::instance()->setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
-
-    QMap<QString, Control*> pmap;
-    pmap[rootPath] = control;
-    for (const auto& child : SaveUtils::childrenPaths(rootPath, sourceSuid)) {
-        auto pcontrol = pmap.value(dname(dname(child)));
-        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        control->setParentItem(pcontrol);
-        pmap[child] = control;
-    }
 
     SaveBackend::instance()->addControl(control, parentControl, destinationSuid, destinationPath);
     control->setParentItem(parentControl);
+
+    PreviewerBackend::instance()->setDisabled(false);
+    control->refresh();
+
+    QMap<QString, Control*> pmap;
+    pmap[control->dir()] = control;
+    for (const auto& child : SaveUtils::childrenPaths(control->dir(), sourceSuid)) {
+        auto pcontrol = pmap.value(dname(dname(child)));
+
+        PreviewerBackend::instance()->setDisabled(true);
+        auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+        ccontrol->setParentItem(pcontrol);
+        PreviewerBackend::instance()->setDisabled(false);
+        ccontrol->refresh();
+
+        pmap[child] = ccontrol;
+    }
 
     return control;
 }
