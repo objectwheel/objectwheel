@@ -33,7 +33,7 @@ QList<Control*> Control::m_controls;
 
 Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_gui(false)
-  , m_clip(true)
+  , m_clip(false)
   , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
@@ -190,6 +190,11 @@ QList<Control*> Control::childControls(bool dive) const
 QList<Control*>& Control::controls()
 {
     return m_controls;
+}
+
+void Control::setClip(bool clip)
+{
+    m_clip = clip;
 }
 
 void Control::setId(const QString& id)
@@ -394,8 +399,8 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
     QGraphicsWidget::resizeEvent(event);
     for (auto resizer : m_resizers)
         resizer->correct();
-    if (scene())
-        refresh();
+
+    refresh();
 }
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)

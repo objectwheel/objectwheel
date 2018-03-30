@@ -39,7 +39,7 @@ struct PreviewResult {
 
     /* Locally needed */
     QString url;
-    QObject* object;
+    QObject* object = nullptr;
 };
 
 QDataStream& operator>>(QDataStream& in, Enum& e);

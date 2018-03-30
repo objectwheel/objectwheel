@@ -44,6 +44,7 @@ class Control : public QGraphicsWidget
         static QList<Control*>& controls();
 
     public:
+        void setClip(bool clip);
         void setId(const QString& id);
         void setUrl(const QString& url);
         void setDragIn(bool dragIn);

@@ -5,21 +5,18 @@
 #include <delayer.h>
 #include <saveutils.h>
 #include <control.h>
+#include <hashfactory.h>
 
 #include <QPointer>
-#include <QCryptographicHash>
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QDataStream>
-#include <QDateTime>
 #include <QProcess>
 
 namespace {
     quint32 blockSize = 0;
     QString serverName;
     QPointer<QLocalSocket> socket;
-
-    typedef QCryptographicHash Hasher;
 
     void send(QLocalSocket* socket, const QByteArray& data)
     {
@@ -59,7 +56,7 @@ PreviewerBackend::PreviewerBackend()
     _server = new QLocalServer(this);
     _server->setSocketOptions(QLocalServer::UserAccessOption);
     connect(_server, SIGNAL(newConnection()), SLOT(onNewConnection()));
-    serverName = Hasher::hash(QString::number(QDateTime::currentSecsSinceEpoch()).toUtf8(), Hasher::Md5).toHex();
+    serverName = HashFactory::generate();
     _dirtHandlingDisablerTimer = new QTimer(this);
     _dirtHandlingDisablerTimer->setInterval(500);
     connect(_dirtHandlingDisablerTimer, SIGNAL(timeout()), SLOT(disableDirtHandling()));
