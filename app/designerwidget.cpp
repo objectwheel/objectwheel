@@ -228,8 +228,7 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
-    auto newControl = ExposerBackend::instance()->exposeControl(dname(dname(url)), "NULL", control, m_designerScene->mainForm()->dir(), m_designerScene->mainForm()->uid());
-    newControl->setPos(pos);
+    auto newControl = ExposerBackend::instance()->exposeControl(dname(dname(url)), pos, "NULL", control, m_designerScene->mainForm()->dir(), m_designerScene->mainForm()->uid());
     newControl->setSelected(true);
 }
 

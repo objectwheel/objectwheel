@@ -616,28 +616,30 @@ namespace {
         qreal height = fit::fx(50);
 
         if (ParserUtils::exists(control->url(), "x"))
-            x = ParserUtils::property(control->url(), "x").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+            x = ParserUtils::property(control->url(), "x").toDouble();
         else
             x = SaveUtils::x(control->dir());
 
         if (ParserUtils::exists(control->url(), "y"))
-            y = ParserUtils::property(control->url(), "y").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+            y = ParserUtils::property(control->url(), "y").toDouble();
         else
             y = SaveUtils::y(control->dir());
 
         if (ParserUtils::exists(control->url(), "width"))
-            width = ParserUtils::property(control->url(), "width").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+            width = ParserUtils::property(control->url(), "width").toDouble();
 
         if (ParserUtils::exists(control->url(), "height"))
-            height = ParserUtils::property(control->url(), "height").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+            height = ParserUtils::property(control->url(), "height").toDouble();
 
         if (ParserUtils::exists(control->url(), "z"))
-            ParserUtils::property(control->url(), "z").remove(QRegularExpression("[\\r\\n\\t\\f\\v ]")).toDouble();
+            z = ParserUtils::property(control->url(), "z").toDouble();
 
+        control->blockSignals(true);
         control->setId(SaveUtils::id(control->dir()));
         control->setPos(x, y);
         control->setZValue(z);
         control->resize(width, height);
+        control->blockSignals(false);
     }
 
     void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)

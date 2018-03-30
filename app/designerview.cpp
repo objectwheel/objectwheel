@@ -4,6 +4,7 @@
 #include <savebackend.h>
 #include <exposerbackend.h>
 #include <fit.h>
+#include <saveutils.h>
 
 #include <QMenu>
 #include <QAction>
@@ -214,10 +215,17 @@ void DesignerView::onPasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = ExposerBackend::instance()->exposeControl(url.toLocalFile(), sourceSuid, mainForm, mainForm->dir(), mainForm->uid());
+        auto control = ExposerBackend::instance()->exposeControl(
+            url.toLocalFile(),
+            QPointF(SaveUtils::x(url.toLocalFile()) + fit::fx(5), SaveUtils::y(url.toLocalFile()) + fit::fx(5)),
+            sourceSuid,
+            mainForm,
+            mainForm->dir(),
+            mainForm->uid()
+        );
+
         controls << control;
 
-        control->setPos(control->pos() + QPoint(fit::fx(5), fit::fx(5)));
         if (url == mimeData->urls().last()) {
             scene()->clearSelection();
             for (auto control : controls)

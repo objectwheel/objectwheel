@@ -78,13 +78,17 @@ Form* ExposerBackend::exposeForm(const QString& rootPath) const
     return form;
 }
 
-Control* ExposerBackend::exposeControl(const QString& rootPath, QString sourceSuid, Control* parentControl, QString destinationPath, QString destinationSuid) const
+Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid, Control* parentControl, QString destinationPath, QString destinationSuid) const
 {
     PreviewerBackend::instance()->setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     SaveBackend::instance()->addControl(control, parentControl, destinationSuid, destinationPath);
     control->setParentItem(parentControl);
+    control->setPos(pos);
+
+    SaveUtils::setX(control->dir(), control->x());
+    SaveUtils::setY(control->dir(), control->y());
 
     PreviewerBackend::instance()->setDisabled(false);
     control->refresh();
@@ -97,6 +101,11 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, QString sourceSu
         PreviewerBackend::instance()->setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         ccontrol->setParentItem(pcontrol);
+        control->setPos(pos);
+
+        SaveUtils::setX(control->dir(), control->x());
+        SaveUtils::setY(control->dir(), control->y());
+
         PreviewerBackend::instance()->setDisabled(false);
         ccontrol->refresh();
 

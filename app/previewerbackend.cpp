@@ -76,12 +76,17 @@ PreviewerBackend* PreviewerBackend::instance()
 
 bool PreviewerBackend::init()
 {
-    QProcess process;
-    process.setProgram("./objectwheel-previewer");
-    process.setArguments(QStringList() << serverName);
-//    process.setStandardOutputFile(QProcess::nullDevice());
-//    process.setStandardErrorFile(QProcess::nullDevice());
-    return _server->listen("serverName")/* && process.startDetached()*/;
+    #if defined(PREVIEWER_DEBUG)
+      QLocalServer::removeServer("serverName");
+      return _server->listen("serverName");
+    #else
+      QProcess process;
+      process.setProgram("./objectwheel-previewer");
+      process.setArguments(QStringList() << serverName);
+      // process.setStandardOutputFile(QProcess::nullDevice());
+      // process.setStandardErrorFile(QProcess::nullDevice());
+      return _server->listen(serverName) && process.startDetached();
+    #endif
 }
 
 bool PreviewerBackend::isBusy() const
@@ -102,11 +107,13 @@ void PreviewerBackend::setDisabled(bool value)
 void PreviewerBackend::restart()
 {
     if (socket && _taskList.isEmpty()) {
-        blockSize = 0;
-//        ::restart(
-//            socket.data(),
-//            QStringList() << ProjectBackend::instance()->dir() << serverName
-//        );
+        blockSize = 0;        
+        #if !defined(PREVIEWER_DEBUG)
+          ::restart(
+              socket.data(),
+              QStringList() << ProjectBackend::instance()->dir() << serverName
+          );
+        #endif
     } else {
         qFatal("No connection with Objectwheel Previewing Service");
     }
