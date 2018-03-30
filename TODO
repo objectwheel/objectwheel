@@ -10,6 +10,7 @@ properties pane'de geometry'yi unutma
 genel inline todo temizliği
 previewer den "uyanığım" sinyali yolla, eğer uzun süre ow bu sinyali almazsa uyarı versin ve kullanıcıya "yeniden denensin mi" diye sorsun
 
+boş id'lerin qml kodundan yada propertiespane den set edilmesine mani ol
 bir property yi değiştirince ona bindli olan öteki control niye etkilenmiyor? previewer bir objecyi preview edince diğer etkilenen dirty node ları tespit edip geri "bunları da previwerlesen iyi olur kardo" sinyali göndersin
 anchor olayı yarım kaldı
 tüm objeler  previwer da arka planda parent-child ilişkisine sahip olsun, her reparent'de ow previewer'a kendisi de reparent yapsın diye snyal gönderecek
@@ -45,6 +46,11 @@ shoot metodunun iç yapısını da init ve initialShoot gibi yap, preview alan f
 window'un visibility propertisi Hidden olarak gözüküyor, yanlış, bunu düzelt
 control haraket ettirilirken, veya resize edilirken pane ler refresh oluyor mu? ne tür connection lar çağrılıyor, neden kasma var?
 form clip on/off için yukarıya toolbar'a bir switch koy
+eğer geçerli bir anchors propertisi var ise, bizim desgner'daki gui editör den konum değiştirilemeyecek
+eğer iki tane delayButton varsa, delayButton ve delayButton1 yani, delayButton qml code değiştirince id si sürekli 1 2 diye ek alıp duruyor, değişiyor
+niye anchorlu item yeniden proje yüklenirken sikko şekilde bozuk konumda yükleniyor
+niye anchorlu item, aznhor uygulayınca (üst, sol aşağı) enine genişliyor? designer'da genişlemiyor run yapınca yada bir dahayi yüklemede genişliyor
+anchorlu item copy paste yapınmca niye uygulama çöküyor
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |

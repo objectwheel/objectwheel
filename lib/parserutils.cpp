@@ -15,11 +15,56 @@ namespace {
     QString cleanPropertyValue(const QString& value);
     QString fullPropertyName(const UiQualifiedId* qualifiedId);
     QString fullPropertyValue(const QString& source, const QString& property, const UiObjectMemberList* list);
+    bool propertyContains(const UiObjectMemberList* list, const QString& property);
     bool propertyExists(const UiObjectMemberList* list, const QString& property);
     void addProperty(QString& source, const UiObjectInitializer* initializer, const QString& property, const QString& value);
     void changeProperty(QString& source, const UiObjectMemberList* list, const QString& property, const QString& value);
     void addProperty(QTextDocument* doc, const UiObjectInitializer* initializer, const QString& property, const QString& value);
     void changeProperty(QTextDocument* doc, const UiObjectMemberList* list, const QString& property, const QString& value);
+}
+
+bool ParserUtils::contains(const QString& fileName, const QString& property)
+{
+    QString source = rdfile(fileName);
+
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(fileName, dialect);
+    document->setSource(source);
+
+    if (!document->parse()) {
+        qWarning() << "Property couldn't set. Unable to parse qml file.";
+        return false;
+    }
+
+    auto uiProgram = document->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't set. Corrupted ui program.";
+        return false;
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't set. Empty source file.";
+        return false;
+    }
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't set. Bad file format 0x1.";
+        return false;
+    }
+
+    auto uiObjectInitializer = uiObjectDefinition->initializer;
+
+    if (!uiObjectInitializer) {
+        qWarning() << "Property couldn't set. Bad file format 0x2.";
+        return false;
+    }
+
+    return propertyContains(uiObjectInitializer->members, property);
 }
 
 bool ParserUtils::exists(const QString& fileName, const QString& property)
@@ -283,6 +328,34 @@ namespace {
         }
 
         return name;
+    }
+
+    bool propertyContains(const UiObjectMemberList* list, const QString& property)
+    {
+        while(list) {
+            UiPublicMember* publicMember;
+            UiArrayBinding* arrayBinding;
+            UiObjectBinding* objectBinding;
+            UiScriptBinding* scriptBinding;
+
+            if ((scriptBinding = cast<UiScriptBinding*>(list->member))) {
+                if (fullPropertyName(scriptBinding->qualifiedId).contains(property))
+                    return true;
+            } else if ((arrayBinding = cast<UiArrayBinding*>(list->member))) {
+                if (fullPropertyName(arrayBinding->qualifiedId).contains(property))
+                    return true;
+            } else if ((objectBinding = cast<UiObjectBinding*>(list->member))) {
+                if (fullPropertyName(objectBinding->qualifiedId).contains(property))
+                    return true;
+            } else if ((publicMember = cast<UiPublicMember*>(list->member))) {
+                if (publicMember->name.contains(property))
+                    return true;
+            }
+
+            list = list->next;
+        }
+
+        return false;
     }
 
     bool propertyExists(const UiObjectMemberList* list, const QString& property)

@@ -87,8 +87,8 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& p
     control->setParentItem(parentControl);
     control->setPos(pos);
 
-    SaveUtils::setX(control->dir(), control->x());
-    SaveUtils::setY(control->dir(), control->y());
+    SaveUtils::setX(control->dir(), pos.x());
+    SaveUtils::setY(control->dir(), pos.y());
 
     PreviewerBackend::instance()->setDisabled(false);
     control->refresh();
