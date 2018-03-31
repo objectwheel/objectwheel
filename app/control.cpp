@@ -37,6 +37,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
+  , m_refreshingDisabled(false)
   , m_url(url)
   , m_uid(SaveUtils::uid(dir()))
   , m_resizers(initializeResizers(this))
@@ -45,7 +46,9 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
 
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
+    setRefreshingDisabled(true);
     setInitialProperties(this);
+    setRefreshingDisabled(false);
 
     setFlag(ItemIsMovable);
     setFlag(ItemIsFocusable);
@@ -223,6 +226,11 @@ void Control::setDragging(bool dragging)
         setCursor(Qt::ArrowCursor);
 }
 
+void Control::setRefreshingDisabled(bool disabled)
+{
+    m_refreshingDisabled = disabled;
+}
+
 void Control::updateUid()
 {
     m_uid = SaveUtils::uid(dir());
@@ -230,7 +238,11 @@ void Control::updateUid()
 
 void Control::centralize()
 {
+    setRefreshingDisabled(true);
+    blockSignals(true);
     setPos(-size().width() / 2.0, -size().height() / 2.0);
+    blockSignals(true);
+    setRefreshingDisabled(false);
 }
 
 void Control::hideResizers()
@@ -397,10 +409,12 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
+
     for (auto resizer : m_resizers)
         resizer->correct();
 
-    refresh();
+    if (!m_refreshingDisabled)
+        refresh();
 }
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
@@ -488,9 +502,11 @@ void Control::updatePreview(const PreviewResult& result)
     m_events = result.events;
 
     if (result.hasError()) {
+        setRefreshingDisabled(true);
         blockSignals(true);
         resize(fit::fx(QSizeF(50, 50)));
         blockSignals(false);
+        setRefreshingDisabled(false);
         setPos(pos());
         setZValue(0);
     } else {
@@ -498,20 +514,24 @@ void Control::updatePreview(const PreviewResult& result)
             if (!form())
                 m_clip = result.property("clip").toBool();
 
-            if (result.repreviewed) {
+            if (!m_dragging && !Resizer::resizing() && !PreviewerBackend::instance()->contains(uid())) {
                 const auto& rect = getRect(result);
                 qreal z = getZ(result);
+                setRefreshingDisabled(true);
                 blockSignals(true);
                 resize(rect.size());
                 if (!form())
                     setPos(rect.topLeft());
                 setZValue(z);
                 blockSignals(false);
+                setRefreshingDisabled(false);
             }
         } else {
+            setRefreshingDisabled(true);
             blockSignals(true);
             resize(fit::fx(QSizeF(50, 50)));
             blockSignals(false);
+            setRefreshingDisabled(false);
             setPos(pos());
             setZValue(0);
         }
@@ -635,7 +655,7 @@ namespace {
             z = ParserUtils::property(control->url(), "z").toDouble();
 
         control->blockSignals(true);
-        control->setId(SaveUtils::id(control->dir()));
+        control->setId(SaveUtils::id(control->dir()));        
         control->setPos(x, y);
         control->setZValue(z);
         control->resize(width, height);

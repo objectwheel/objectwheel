@@ -15,7 +15,7 @@ class SaveBackend : public QObject
         static SaveBackend* instance();
 
         bool initProject(const QString& projectDirectory) const;
-        void flushId(const Control* control, const QString& id) const;
+        void flushId(const Control* control) const;
         void flushSuid(const Control* control, const QString& suid) const;
 
         bool existsInForms(const Control* control) const;
@@ -25,6 +25,7 @@ class SaveBackend : public QObject
         void recalculateUids(Control* control) const;
         void refreshToolUid(const QString& toolRootPath) const;
         void refactorId(Control* control, const QString& suid, const QString& topPath = QString()) const;
+        void fixIdConflicts() const;
 
         bool addForm(Form* form) const;
         bool isInOwdb(const QString& path) const;
@@ -37,7 +38,7 @@ class SaveBackend : public QObject
         void removeControl(const Control* control) const;
         void removeChildControlsOnly(const Control* control) const;
         void removeProperty(const Control* control, const QString& property) const;
-        void setProperty(Control* control, const QString& property, const QString& value, const QString& topPath = QString()) const;
+        void setProperty(Control* control, const QString& property, QString value, const QString& topPath = QString()) const;
 
         QString basePath() const;
         QString parentDir(const Control* control) const;

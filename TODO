@@ -4,6 +4,7 @@ nesnelerin boyutu ve konumu çapraz platform olarak fit'lenmeli
 ow ile yapılmış uygulamalarda fit olayı nasıl olacak?
 objectwheel uygulamaları temalarını proje ayarlarından okusun ona göre yapılansın/stilize olsun/görünsün
 objectwheel tema ve font işlerini de hallet
+control id'leri ow hariç başka bir editör ile qml dosyası içinden değiştirilirse, o zaman properties.json ile çatışma oluşur. bunu düzelt.
 
 control inspector'un horizontal scrollbarı ı neden her "refresp preview" operasyonu sonrası çıldırıyor uzuyor
 properties pane'de geometry'yi unutma
@@ -29,6 +30,7 @@ id change, property change durumları (ve olası diğer durumların kontrolü i�
 repreview sırasında error varmı kontrolü de yapılacak, aynı init'deki gibi, ve init'deki diğer prosedürler takip edilecek
 erroru olan tüm nesneler için dummy objec oluşturulur ve gui objecsi gibi davranılır, bu yüzden;
 1. diğer tüm apiler, previwe, prepreview, anchors vs vs alayı var olan resultları (m_results daki) hatalara karşı çek edip ona ilgili dummy objeyi yada gerçek objeyi bilip muamele edecek
+removeCache çocuk nesneleri de silsin
 error'lu objeye property set edilemesin, yada resize yada reparent yapılamasın, GUI editörden
 init'deki prosedürler diğer fonklar içinde uygulansın, çek et alayını bak bakem hangileri bu uygulamaya uygun
 errorlu ve non-gui objeclerin silinme bildirimlerinin geri previewer!a bildirildiğinden emin ol

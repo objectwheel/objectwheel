@@ -26,6 +26,12 @@
 /*   (except main form) has to be item (not window or non-gui)    */
 /* - Children could be non-gui or quick item type (not window)    */
 /* - A form has to be master item                                 */
+/*                                                                */
+/* - Forms: All forms (children not included).                    */
+/* - Form Scope: All forms + Primary children of them.            */
+/* - Parent Scope: Parent + Primary children of Parent.           */
+/* - None of member functions checks whether given controls' ids  */
+/*   or dirs are valid or not.                                    */
 /******************************************************************/
 
 SaveBackend* SaveBackend::instance()
@@ -51,18 +57,17 @@ bool SaveBackend::initProject(const QString& projectDirectory) const
     return wrfile(propertyPath, propertyData);
 }
 
-// Forms: All forms (children not included).
-// Form Scope: All forms + Primary children of them.
-// Parent Scope: Parent + Primary children of Parent.
-// None of member functions checks whether given controls' ids or dirs are valid or not.
-
-void SaveBackend::flushId(const Control* control, const QString& id) const
+void SaveBackend::flushId(const Control* control) const
 {
     auto propertyPath = control->dir() + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
     auto propertyData = rdfile(propertyPath);
-    SaveUtils::setProperty(propertyData, TAG_ID, id);
+    SaveUtils::setProperty(propertyData, TAG_ID, control->id());
     wrfile(propertyPath, propertyData);
+
+    auto qmlPath = control->dir() + separator() + DIR_THIS +
+                   separator() + "main.qml";
+    ParserUtils::setProperty(qmlPath, "id", control->id());
 }
 
 void SaveBackend::flushSuid(const Control* control, const QString& suid) const
@@ -387,7 +392,7 @@ bool SaveBackend::addForm(Form* form) const
 
     form->setUrl(formDir + separator() + DIR_THIS + separator() + "main.qml");
 
-    flushId(form, form->id());
+    flushId(form);
     recalculateUids(form);
 
     emit databaseChanged();
@@ -437,9 +442,9 @@ bool SaveBackend::addControl(Control* control, const Control* parentControl, con
 
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
-    flushId(control, control->id());
+    flushId(control);
     for (auto child : control->childControls())
-        flushId(child, child->id());
+        flushId(child);
 
     flushSuid(control, suid);
     recalculateUids(control); //for all
@@ -522,7 +527,7 @@ void SaveBackend::removeChildControlsOnly(const Control* control) const
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
 // topPath is only necessary if property is an "id" set.
-void SaveBackend::setProperty(Control* control, const QString& property, const QString& value, const QString& topPath) const
+void SaveBackend::setProperty(Control* control, const QString& property, QString value, const QString& topPath) const
 {
     if (control->dir().isEmpty() ||
         !SaveUtils::isOwctrl(control->dir()) ||
@@ -542,6 +547,8 @@ void SaveBackend::setProperty(Control* control, const QString& property, const Q
         auto propertyData = rdfile(propertyPath);
         SaveUtils::setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
+
+        value = control->id();
     }
 
     auto fileName = control->dir() + separator() + DIR_THIS +

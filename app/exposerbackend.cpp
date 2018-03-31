@@ -33,6 +33,7 @@ void ExposerBackend::exposeProject() const
             form->setMain(true);
 
         m_designerScene->addForm(form);
+        form->refresh();
 
         QMap<QString, Control*> pmap;
         pmap[path] = form;
@@ -41,6 +42,7 @@ void ExposerBackend::exposeProject() const
             auto pcontrol = pmap.value(dname(dname(child)));
             auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
             control->setParentItem(pcontrol);
+            control->refresh();
             pmap[child] = control;
         }
     }

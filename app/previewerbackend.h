@@ -44,6 +44,7 @@ class PreviewerBackend : public QObject
         static PreviewerBackend* instance();
         bool init();
         bool isBusy() const;
+        bool contains(const QString& uid) const;
         int totalTask() const;
         void setDisabled(bool value);
 
@@ -75,11 +76,11 @@ class PreviewerBackend : public QObject
         ~PreviewerBackend();
 
     private:
-        bool _disabled;
-        QLocalServer* _server;
-        QTimer* _dirtHandlingDisablerTimer;
-        QList<Task> _taskList;
-        bool _dirtHandlingEnabled;
+        bool m_disabled;
+        QLocalServer* m_server;
+        QTimer* m_dirtHandlingDisablerTimer;
+        QList<Task> m_taskList;
+        bool m_dirtHandlingEnabled;
 };
 
 #endif // PREVIEWERBACKEND_H
