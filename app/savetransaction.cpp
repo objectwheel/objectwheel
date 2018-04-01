@@ -52,7 +52,7 @@ void SaveTransaction::processParent(Control* control)
         return;
 
     SaveBackend::instance()->moveControl(control, control->parentControl());
-    // TODO: PreviewerBackend::instance()->updateReparent(), Errorlular hariç, Nongui ler dahil
+    PreviewerBackend::instance()->updateParent(control->uid(), control->parentControl()->uid(), control->url());
     processGeometry(control);
 }
 

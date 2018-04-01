@@ -5,6 +5,7 @@
 #include <exposerbackend.h>
 #include <fit.h>
 #include <saveutils.h>
+#include <previewerbackend.h>
 
 #include <QMenu>
 #include <QAction>
@@ -242,6 +243,10 @@ void DesignerView::onPasteAction()
                 }
 
                 for (auto control : cutControls) {
+                    PreviewerBackend::instance()->removeCache(control->uid());
+                    control->parentControl()->refresh();
+                    control->setRefreshingDisabled(true);
+                    control->blockSignals(true);
                     scene()->removeControl(control);
                     SaveBackend::instance()->removeControl(control);
                 }
@@ -258,8 +263,12 @@ void DesignerView::onDeleteAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls) {
-       scene()->removeControl(control);
-       SaveBackend::instance()->removeControl(control);
+        PreviewerBackend::instance()->removeCache(control->uid());
+        control->parentControl()->refresh();
+        control->setRefreshingDisabled(true);
+        control->blockSignals(true);
+        scene()->removeControl(control);
+        SaveBackend::instance()->removeControl(control);
     }
 }
 

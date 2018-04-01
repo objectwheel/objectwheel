@@ -241,7 +241,7 @@ void Control::centralize()
     setRefreshingDisabled(true);
     blockSignals(true);
     setPos(-size().width() / 2.0, -size().height() / 2.0);
-    blockSignals(true);
+    blockSignals(false);
     setRefreshingDisabled(false);
 }
 

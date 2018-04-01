@@ -24,7 +24,8 @@ class PreviewerBackend : public QObject
                 Preview,
                 Repreview,
                 Update,
-                Remove
+                Remove,
+                Reparent
             };
 
             inline bool operator==(const Task& t1)
@@ -34,7 +35,10 @@ class PreviewerBackend : public QObject
 
             Type type;
             QSizeF size;
-            QString uid, dir;
+            QString dir;
+            QString uid;
+            QString newUrl;
+            QString parentUid;
             QString property;
             QVariant propertyValue;
             bool needsUpdate = false;
@@ -53,6 +57,7 @@ class PreviewerBackend : public QObject
         void requestInit(const QString& projectDir);
         void requestPreview(const QSizeF& size, const QString& dir, bool repreview = false);
         void removeCache(const QString& uid);
+        void updateParent(const QString& uid, const QString& parentUid, const QString& newUrl);
         void updateCache(const QString& uid, const QString& property, const QVariant& value);
 
     private slots:

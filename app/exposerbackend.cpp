@@ -41,7 +41,9 @@ void ExposerBackend::exposeProject() const
         for (const auto& child : SaveUtils::childrenPaths(path)) {
             auto pcontrol = pmap.value(dname(dname(child)));
             auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+            control->blockSignals(true);
             control->setParentItem(pcontrol);
+            control->blockSignals(false);
             control->refresh();
             pmap[child] = control;
         }

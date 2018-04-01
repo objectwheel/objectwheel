@@ -28,6 +28,9 @@ class ToolboxPane : public QWidget
         void filterList(const QString& filter);
         void handleMousePress(QTreeWidgetItem* item);
 
+    signals:
+        void itemDoubleClicked(const QString& url);
+
     private:
         QVBoxLayout* _layout;
         ToolboxTree* _toolboxTree;

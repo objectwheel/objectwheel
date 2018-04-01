@@ -26,6 +26,9 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
 
+    connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=]
+    { emit itemDoubleClicked(_toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile()); });
+
     _searchEdit->setFixedHeight(fit::fx(22));
     _searchEdit->setClearButtonEnabled(true);
     _searchEdit->setPlaceholderText("Filter");
