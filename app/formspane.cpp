@@ -209,7 +209,8 @@ void FormsPane::addButtonClicked()
     if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
         return;
 
-    ExposerBackend::instance()->exposeForm(tempPath);
+    auto form = ExposerBackend::instance()->exposeForm(tempPath);
+    form->centralize();
 
     rm(tempPath);
 }

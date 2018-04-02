@@ -55,6 +55,8 @@ niye anchorlu item, aznhor uygulayınca (üst, sol aşağı) enine genişliyor? 
 anchorlu item copy paste yapınmca niye uygulama çöküyor
 Form'un default x, y'sinin eksili değerler olması saçmalığını düzelt (propertiespane'de)
 Switch tool'unu düzelt, bozulmuş
+mainForm kodu değişince previewer patlıyor
+anchorlu bir itemde örneğin height width'e bind edilince nedense işey yaramıyor
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |
