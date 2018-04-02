@@ -33,6 +33,7 @@ void ExposerBackend::exposeProject() const
             form->setMain(true);
 
         m_designerScene->addForm(form);
+        form->centralize();
         form->refresh();
 
         QMap<QString, Control*> pmap;

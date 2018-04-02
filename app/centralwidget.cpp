@@ -65,10 +65,6 @@ void CentralWidget::reset()
     m_projectOptionsWidget->reset();
     m_buildsWidget->reset();
     m_helpWidget->reset();
-
-//    m_centralWidget->qmlCodeEditorWidget()->clear();
-//    m_centralWidget->designerWidget()->designerScene()->clearSelection();
-    //    m_centralWidget->designerWidget()->designerScene()->clearScene();
 }
 
 void CentralWidget::setCurrentPage(const Pages& page)

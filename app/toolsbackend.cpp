@@ -145,7 +145,7 @@ bool ToolsBackend::addToTree(const QString& toolPath, ToolboxTree* tree)
     return true;
 }
 
-void ToolsBackend::clear()
+void ToolsBackend::reset()
 {
     if (!isProjectFull())
         return;

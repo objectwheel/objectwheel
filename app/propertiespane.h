@@ -55,8 +55,6 @@ class PropertiesPane : public QWidget
 
 	public slots:
         void reset();
-        void clear();
-        void clearList();
         void refreshList();
 
     protected:
@@ -64,6 +62,7 @@ class PropertiesPane : public QWidget
         bool eventFilter(QObject *watched, QEvent *event) override;
 
     private slots:
+        void clearList();
         void handleSelectionChange();
         void filterList(const QString& filter);
 

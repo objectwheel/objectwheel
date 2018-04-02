@@ -825,11 +825,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
 
 void PropertiesPane::reset()
 {
-    //TODO
-}
-
-void PropertiesPane::clear()
-{
     clearList();
     _searchEdit->clear();
 }

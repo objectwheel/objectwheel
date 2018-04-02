@@ -14,6 +14,9 @@ class FileExplorer : public QWidget
         void setRootPath(const QString& rootPath);
         QString rootPath() const;
 
+    public slots:
+        void reset();
+
     signals:
         void fileOpened(const QString& filePath);
         void fileDeleted(const QString& filePath);

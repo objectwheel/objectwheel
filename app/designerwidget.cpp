@@ -157,12 +157,12 @@ void DesignerWidget::onFitButtonClick()
 
 void DesignerWidget::onUndoButtonClick()
 {
-
+    // TODO:
 }
 
 void DesignerWidget::onRedoButtonClick()
 {
-
+    // TODO:
 }
 
 void DesignerWidget::onZoomLevelChange(const QString& text)
@@ -204,7 +204,11 @@ void DesignerWidget::onClearButtonClick()
 
 void DesignerWidget::reset()
 {
-    m_lastScale = 1.0;
+    m_designerScene->reset();
+    m_designerView->reset();
+    m_outlineButton->setChecked(m_designerScene->showOutlines());
+    m_snappingButton->setChecked(m_designerScene->snapping());
+    onZoomLevelChange("100 %");
 }
 
 QSize DesignerWidget::sizeHint() const

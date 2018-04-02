@@ -218,6 +218,11 @@ void QmlCodeEditor::clearErrorLines()
     update();
 }
 
+void QmlCodeEditor::reset()
+{
+    // TODO:
+}
+
 void QmlCodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);

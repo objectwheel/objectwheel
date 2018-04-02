@@ -92,6 +92,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
 
     connect(ProjectBackend::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
     connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
+    connect(m_designerScene, SIGNAL(mainFormChanged(Control*)), SLOT(handleDatabaseChange()));
     connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
 
     _innerWidget->setObjectName("innerWidget");
@@ -256,11 +257,6 @@ void FormsPane::setCurrentForm(int index)
 }
 
 void FormsPane::reset()
-{
-    //TODO
-}
-
-void FormsPane::clear()
 {
     _listWidget->clear();
 }

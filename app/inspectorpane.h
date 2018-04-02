@@ -18,7 +18,6 @@ class InspectorPane : public QWidget
 
     public slots:
         void reset();
-        void clear();
         void refresh();
 
     protected:
@@ -26,6 +25,7 @@ class InspectorPane : public QWidget
         bool eventFilter(QObject* watched, QEvent* event) override;
 
     private slots:
+        void clear();
         void handleClick(QTreeWidgetItem* item, int column);
         void handleDoubleClick(QTreeWidgetItem* item, int column);
 

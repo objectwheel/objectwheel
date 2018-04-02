@@ -51,7 +51,7 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
     m_deleteAct->setText("Delete");
     m_deleteAct->setShortcut(QKeySequence::Delete);
     #if defined(Q_OS_MACOS)
-    m_deleteAct->setShortcut(Qt::Key_Control | Qt::Key_Backspace); //TODO: Test this
+    m_deleteAct->setShortcuts(QList<QKeySequence>() << (Qt::CTRL + Qt::Key_Backspace) << QKeySequence::Delete);
     #endif
     m_selectAllAct->setText("Select All");
     m_selectAllAct->setShortcut(QKeySequence::SelectAll);
@@ -141,6 +141,11 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
         }
     }
     m_menu->exec(event->globalPos());
+}
+
+void DesignerView::reset()
+{
+    update();
 }
 
 void DesignerView::onUndoAction()

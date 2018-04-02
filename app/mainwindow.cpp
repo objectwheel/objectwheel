@@ -269,7 +269,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 void MainWindow::reset()
 {
-    ToolsBackend::instance()->clear();
     m_runPane->reset();
     m_centralWidget->reset();
     m_formsPane->reset();

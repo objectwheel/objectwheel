@@ -6,7 +6,7 @@ SearchBox::SearchBox(QWidget *parent)
 
 }
 
-void SearchBox::clear()
+void SearchBox::reset()
 {
     // TODO
 }

@@ -29,7 +29,7 @@ class DesignerScene : public QGraphicsScene
         QVector<QLineF> guideLines() const;
 
     public slots:
-        void clearScene();
+        void reset();
 
     private:
         void mousePressEvent(QGraphicsSceneMouseEvent* event);

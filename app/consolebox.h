@@ -22,7 +22,7 @@ class ConsoleBox : public QWidget
 
     public slots:
         void fade();
-        void clear();
+        void reset();
         void scrollToEnd();
 
     private slots:

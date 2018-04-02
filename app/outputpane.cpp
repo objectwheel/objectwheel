@@ -313,11 +313,6 @@ bool OutputPane::isCollapsed() const
     return _collapsed;
 }
 
-void OutputPane::reset()
-{
-    //TODO
-}
-
 ConsoleBox* OutputPane::consoleBox()
 {
     return _consoleBox;
@@ -351,15 +346,20 @@ FlatButton* OutputPane::button(OutputPane::Box type)
     return nullptr;
 }
 
-void OutputPane::clear()
+void OutputPane::reset()
 {
+    _lastHeight = SIZE_INITIAL.height();
+    _collapsed = false;
+
+    _issuesBox->reset();
+    _searchBox->reset();
+    _consoleBox->reset();
+
     _d->handleIssuesButtonClicked(true);
+
     _d->issuesButton->setText("Issues");
     _d->searchButton->setText("Search");
     _d->consoleButton->setText("Console Output");
-    _issuesBox->clear();
-    _searchBox->clear();
-    _consoleBox->clear();
 }
 
 #include "outputpane.moc"

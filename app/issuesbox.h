@@ -45,10 +45,11 @@ class IssuesBox : public QWidget
         explicit IssuesBox(OutputPane* outputPane);
 
     public slots:
-        void clear();
+        void reset();
         void refresh();
 
     private slots:
+        void clear();
         void handleErrors(Control* control);
         void handleDoubleClick(QListWidgetItem* item);
 

@@ -29,6 +29,7 @@ class QmlCodeEditor : public QPlainTextEdit
         void clearErrorLines();
 
     public slots:
+        void reset();
         void updateCompletion();
 
     protected:

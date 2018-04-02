@@ -54,6 +54,7 @@ niye anchorlu item yeniden proje yüklenirken sikko şekilde bozuk konumda yükl
 niye anchorlu item, aznhor uygulayınca (üst, sol aşağı) enine genişliyor? designer'da genişlemiyor run yapınca yada bir dahayi yüklemede genişliyor
 anchorlu item copy paste yapınmca niye uygulama çöküyor
 Form'un default x, y'sinin eksili değerler olması saçmalığını düzelt (propertiespane'de)
+Switch tool'unu düzelt, bozulmuş
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |

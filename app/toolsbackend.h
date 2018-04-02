@@ -38,7 +38,7 @@ class ToolsBackend : QObject
         bool addToTree(const QString& toolPath, ToolboxTree* tree);
 
     public slots:
-        void clear();
+        void reset();
         void newTool();
         void resetTools();
         void downloadTools(const QUrl& url = QUrl());

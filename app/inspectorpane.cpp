@@ -9,6 +9,7 @@
 #include <controlwatcher.h>
 #include <designerscene.h>
 #include <form.h>
+#include <projectbackend.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -177,13 +178,15 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(refresh()));
+    connect(m_designerScene, SIGNAL(mainFormChanged(Control*)), SLOT(refresh()));
     connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
     connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
 }
 
 void InspectorPane::reset()
 {
-    //TODO
+    clear();
+    _blockRefresh = false;
 }
 
 bool InspectorPane::eventFilter(QObject* watched, QEvent* event)

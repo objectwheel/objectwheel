@@ -49,13 +49,7 @@ ToolboxTree* ToolboxPane::toolboxTree()
 
 void ToolboxPane::reset()
 {
-    //TODO
-}
-
-void ToolboxPane::clear()
-{
-    _toolboxTree->clear();
-    _toolboxTree->clearUrls();
+    ToolsBackend::instance()->reset();
     _searchEdit->clear();
 }
 

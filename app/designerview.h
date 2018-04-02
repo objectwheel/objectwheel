@@ -14,6 +14,9 @@ class DesignerView : public QGraphicsView
         explicit DesignerView(DesignerScene* scene, QWidget* parent = 0);
         DesignerScene* scene() const;
 
+    public slots:
+        void reset();
+
     protected:
         void resizeEvent(QResizeEvent* event) override;
         void contextMenuEvent(QContextMenuEvent *event) override;

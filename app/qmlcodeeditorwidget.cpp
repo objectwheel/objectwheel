@@ -985,13 +985,30 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
 
 void QmlCodeEditorWidget::reset()
 {
-    //TODO
-}
-
-void QmlCodeEditorWidget::clear()
-{
     for (auto& item : _editorItems)
         closeControl(item.control, false);
+
+    _d->currentControl = nullptr;
+
+    if (!pinned())
+        _d->handlePinButtonClicked();
+
+    _d->redoButton->setDisabled(true);
+    _d->copyButton->setDisabled(true);
+    _d->cutButton->setDisabled(true);
+    _d->saveButton->setDisabled(true);
+
+    _d->lastWidthOfExplorerWrapper = INITIALWIDTH_FILEEXPLORER;
+    _d->codeEditor->reset();
+    _d->fileExplorer->reset();
+    // TODO: _d->imageEditor->reset();
+    // TODO: _d->hexEditor->reset();
+
+    if (_d->hideShowButton->toolTip().contains("Hide"))
+        _d->handleHideShowButtonClicked();
+
+    _d->handleZoomLevelChange("100 %");
+    setMode(CodeEditor);
 }
 
 void QmlCodeEditorWidget::saveAll()

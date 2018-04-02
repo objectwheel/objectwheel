@@ -102,7 +102,7 @@ void ConsoleBox::fade()
     cursor.clearSelection();
 }
 
-void ConsoleBox::clear()
+void ConsoleBox::reset()
 {
     _textEdit->clear();
 }

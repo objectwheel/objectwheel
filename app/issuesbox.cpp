@@ -134,10 +134,9 @@ void IssuesBox::handleDoubleClick(QListWidgetItem* item)
     emit entryDoubleClicked(c);
 }
 
-void IssuesBox::clear()
+void IssuesBox::reset()
 {
-    m_buggyControls.clear();
-    m_listWidget->clear();
+    clear();
 }
 
 void IssuesBox::refresh()
@@ -174,7 +173,13 @@ void IssuesBox::refresh()
     }
 
     m_outputPane->button(OutputPane::Issues)->setText
-      (QString("Issues [%1]").arg(m_listWidget->count()));
+            (QString("Issues [%1]").arg(m_listWidget->count()));
+}
+
+void IssuesBox::clear()
+{
+    m_buggyControls.clear();
+    m_listWidget->clear();
 }
 
 bool operator<(const Error& e1, const Error& e2)

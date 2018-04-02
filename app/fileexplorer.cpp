@@ -358,4 +358,9 @@ QString FileExplorer::rootPath() const
     return _d->fileList->fileModel()->rootPath();
 }
 
+void FileExplorer::reset()
+{
+    // TODO:
+}
+
 #include "fileexplorer.moc"

@@ -38,7 +38,6 @@ class OutputPane : public QWidget
 
     public slots:
         void reset();
-        void clear();
         void expand();
         void collapse();
         void updateLastHeight();

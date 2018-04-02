@@ -380,7 +380,7 @@ void ProjectsWidget::onLoadButtonClick()
         QMessageBox::warning(
             this,
             tr("Oops"),
-            tr("Select the project first.")
+            tr("Select a project first.")
         );
         return;
     }

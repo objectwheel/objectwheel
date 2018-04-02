@@ -57,7 +57,6 @@ class QmlCodeEditorWidget : public QWidget
 
     public slots:
         void reset();
-        void clear();
         void saveAll();
         void raiseContainer();
         void refreshErrors();

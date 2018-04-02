@@ -19,7 +19,6 @@ class ToolboxPane : public QWidget
 
     public slots:
         void reset();
-        void clear();
 
     protected:
         QSize sizeHint() const override;

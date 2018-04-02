@@ -31,6 +31,7 @@ namespace {
 
 DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
   , m_snapping(true)
+  , m_showOutlines(false)
   , m_mainForm(nullptr)
 {
     connect(this, &DesignerScene::changed, [=] {
@@ -759,11 +760,18 @@ QVector<QLineF> DesignerScene::guideLines() const
     return lines;
 }
 
-void DesignerScene::clearScene()
+void DesignerScene::reset()
 {
+    clearSelection();
     clear();
+
     m_forms.clear();
     m_mainForm.clear();
+
+    m_snapping = true;
+    m_showOutlines = false;
+    m_lastMousePos = QPointF();
+
     itemPressed = false;
     itemMoving = false;
 }
