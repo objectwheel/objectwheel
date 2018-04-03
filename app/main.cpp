@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[])
 {
-    // Boot settings
+    // Boot Settings
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL); // For reCaptcha
