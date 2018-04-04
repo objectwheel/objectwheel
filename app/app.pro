@@ -96,7 +96,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/webenginehelpviewer.h \
            $$PWD/helpviewer.h \
            $$PWD/hashfactory.h \
-           $$PWD/form.h
+           $$PWD/form.h \
+           $$PWD/themechooserwidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -175,7 +176,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/webenginehelpviewer.cpp \
            $$PWD/helpviewer.cpp \
            $$PWD/hashfactory.cpp \
-           $$PWD/form.cpp
+           $$PWD/form.cpp \
+           $$PWD/themechooserwidget.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
@@ -205,17 +207,21 @@ macx {
     interpreter.path = Contents/MacOS
     previewer.files = $$OUT_PWD/../objectwheel-previewer/objectwheel-previewer
     previewer.path = Contents/MacOS
+    themer.files = $$OUT_PWD/../objectwheel-themer/objectwheel-themer
+    themer.path = Contents/MacOS
     lib.files = $$OUT_PWD/../lib/libobjectwheel.dylib
     lib.path = Contents/Frameworks
     QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change libobjectwheel.dylib @loader_path/../Frameworks/libobjectwheel.dylib)
     docs.files = $$PWD/resources/docs
     docs.path = Contents/MacOS
-    QMAKE_BUNDLE_DATA += interpreter previewer lib docs
+    QMAKE_BUNDLE_DATA += interpreter previewer themer lib docs
 } else {
     interpreter.files = $$OUT_PWD/../objectwheel-interpreter/objectwheel-interpreter
     interpreter.path = $$OUT_PWD/
     previewer.files = $$OUT_PWD/../objectwheel-previewer/objectwheel-previewer
     previewer.path = $$OUT_PWD/
+    themer.files = $$OUT_PWD/../objectwheel-themer/objectwheel-themer
+    themer.path = $$OUT_PWD/
     windows {
         lib.files = $$OUT_PWD/../lib/libobjectwheel.dll
     }
@@ -225,5 +231,5 @@ macx {
     lib.path = $$OUT_PWD/
     docs.files = $$PWD/resources/docs/*
     docs.path = $$OUT_PWD/docs
-    QMAKE_EXTRA_TARGETS += interpreter previewer lib docs
+    QMAKE_EXTRA_TARGETS += interpreter previewer themer lib docs
 }

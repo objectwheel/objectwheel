@@ -114,5 +114,7 @@
         <file>images/help.png</file>
         <file>images/projectoptions.png</file>
         <file>images/split.png</file>
+        <file>images/universal.png</file>
+        <file>images/material.png</file>
     </qresource>
 </RCC>
