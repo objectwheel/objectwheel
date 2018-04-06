@@ -6,12 +6,12 @@
 #include <QtWidgets>
 
 namespace {
+    QPalette clearPalette;
     extern const QStringList STYLES;
     extern const QStringList STYLES_V2;
     extern const QStringList MATERIAL_THEMES;
     extern const QStringList UNIVERSAL_THEMES;
-    extern const QStringList MATERIAL_COLORS_LIGHT;
-    extern const QStringList MATERIAL_COLORS_DARK;
+    extern const QStringList MATERIAL_COLORS;
     extern const QStringList UNIVERSAL_COLORS;
 }
 
@@ -83,35 +83,36 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         m_backgroundDetailLabel->setStyleSheet("color: #2E3A41");
 
         m_accentColorsCombo->setFixedWidth(fit::fx(200));
-
         m_primaryColorsCombo->setFixedWidth(fit::fx(200));
-
         m_foregroundColorsCombo->setFixedWidth(fit::fx(200));
-
         m_backgroundColorsCombo->setFixedWidth(fit::fx(200));
 
         m_accentColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
         m_accentColorLabel->setFrameShape(QLabel::StyledPanel);
         m_accentColorLabel->setFrameShadow(QLabel::Plain);
+        m_accentColorLabel->setAutoFillBackground(true);
 
         m_primaryColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
         m_primaryColorLabel->setFrameShape(QLabel::StyledPanel);
         m_primaryColorLabel->setFrameShadow(QLabel::Plain);
+        m_primaryColorLabel->setAutoFillBackground(true);
 
         m_foregroundColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
         m_foregroundColorLabel->setFrameShape(QLabel::StyledPanel);
         m_foregroundColorLabel->setFrameShadow(QLabel::Plain);
+        m_foregroundColorLabel->setAutoFillBackground(true);
 
         m_backgroundColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
         m_backgroundColorLabel->setFrameShape(QLabel::StyledPanel);
         m_backgroundColorLabel->setFrameShadow(QLabel::Plain);
+        m_backgroundColorLabel->setAutoFillBackground(true);
+
+        clearPalette = m_backgroundColorLabel->palette();
+        clearPalette.setColor(m_backgroundColorLabel->backgroundRole(), Qt::transparent);
 
         m_accentColorButton->setText("...");
-
         m_primaryColorButton->setText("...");
-
         m_foregroundColorButton->setText("...");
-
         m_backgroundColorButton->setText("...");
 
         m_customizationLabel->setText(tr("Customization:"));
@@ -213,12 +214,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
             QRegularExpression exp("#.*(?=\\))");
             auto colorName = exp.match(text).captured(0);
 
-            if (colorName.isEmpty()) {
-                m_accentColorLabel->setStyleSheet("background: transparent");
-                return;
+            if (colorName.isEmpty())
+                m_accentColorLabel->setPalette(clearPalette);
+            else {
+                auto p = clearPalette;
+                p.setColor(m_accentColorLabel->backgroundRole(), colorName);
+                m_accentColorLabel->setPalette(p);
             }
-
-            m_accentColorLabel->setStyleSheet(QString("background: %1").arg(colorName));
         });
 
         connect(m_primaryColorsCombo, &QComboBox::currentTextChanged, [=] {
@@ -227,12 +229,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
             QRegularExpression exp("#.*(?=\\))");
             auto colorName = exp.match(text).captured(0);
 
-            if (colorName.isEmpty()) {
-                m_primaryColorLabel->setStyleSheet("background: transparent");
-                return;
+            if (colorName.isEmpty())
+                m_primaryColorLabel->setPalette(clearPalette);
+            else {
+                auto p = clearPalette;
+                p.setColor(m_primaryColorLabel->backgroundRole(), colorName);
+                m_primaryColorLabel->setPalette(p);
             }
-
-            m_primaryColorLabel->setStyleSheet(QString("background: %1").arg(colorName));
         });
 
         connect(m_foregroundColorsCombo, &QComboBox::currentTextChanged, [=] {
@@ -241,12 +244,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
             QRegularExpression exp("#.*(?=\\))");
             auto colorName = exp.match(text).captured(0);
 
-            if (colorName.isEmpty()) {
-                m_foregroundColorLabel->setStyleSheet("background: transparent");
-                return;
+            if (colorName.isEmpty())
+                m_foregroundColorLabel->setPalette(clearPalette);
+            else {
+                auto p = clearPalette;
+                p.setColor(m_foregroundColorLabel->backgroundRole(), colorName);
+                m_foregroundColorLabel->setPalette(p);
             }
-
-            m_foregroundColorLabel->setStyleSheet(QString("background: %1").arg(colorName));
         });
 
         connect(m_backgroundColorsCombo, &QComboBox::currentTextChanged, [=] {
@@ -255,12 +259,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
             QRegularExpression exp("#.*(?=\\))");
             auto colorName = exp.match(text).captured(0);
 
-            if (colorName.isEmpty()) {
-                m_backgroundColorLabel->setStyleSheet("background: transparent");
-                return;
+            if (colorName.isEmpty())
+                m_backgroundColorLabel->setPalette(clearPalette);
+            else {
+                auto p = clearPalette;
+                p.setColor(m_backgroundColorLabel->backgroundRole(), colorName);
+                m_backgroundColorLabel->setPalette(p);
             }
-
-            m_backgroundColorLabel->setStyleSheet(QString("background: %1").arg(colorName));
         });
     }
 
@@ -300,8 +305,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
             }
 
             if (m_stylesCombo->currentText() == "Material") {
-                for (int i = 0; i < MATERIAL_COLORS_LIGHT.size(); i++) {
-                    const auto& text = m_themesCombo->currentText() == "Light" ? MATERIAL_COLORS_LIGHT[i] : MATERIAL_COLORS_DARK[i];
+                m_accentColorsCombo->addItem(tr("Theme default"));
+                m_primaryColorsCombo->addItem(tr("Theme default"));
+                m_foregroundColorsCombo->addItem(tr("Theme default"));
+                m_backgroundColorsCombo->addItem(tr("Theme default"));
+
+                for (int i = 0; i < MATERIAL_COLORS.size(); i++) {
+                    const auto& text = MATERIAL_COLORS[i];
                     QRegularExpression exp("#.*(?=\\))");
                     QColor color(exp.match(text).captured(0));
                     m_accentColorsCombo->addItem(text);
@@ -314,20 +324,20 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
                     m_foregroundColorsCombo->setItemData(m_foregroundColorsCombo->count() - 1, color, Qt::DecorationRole);
                     m_backgroundColorsCombo->setItemData(m_backgroundColorsCombo->count() - 1, color, Qt::DecorationRole);
                 }
-
-                m_accentColorsCombo->setCurrentIndex(1);
-                m_primaryColorsCombo->setCurrentIndex(4);
-                m_foregroundColorsCombo->setCurrentIndex(19);
-                m_backgroundColorsCombo->setCurrentIndex(20);
             } else if (m_stylesCombo->currentText() == "Universal") {
                 m_primaryColorsCombo->addItem(tr("Unavailable"));
                 m_primaryColorsCombo->setDisabled(true);
                 m_primaryColorButton->setDisabled(true);
 
+                m_accentColorsCombo->addItem(tr("Theme default"));
+                m_foregroundColorsCombo->addItem(tr("Theme default"));
+                m_backgroundColorsCombo->addItem(tr("Theme default"));
+
                 for (int i = 0; i < UNIVERSAL_COLORS.size(); i++) {
                     const auto& text = UNIVERSAL_COLORS[i];
                     QRegularExpression exp("#.*(?=\\))");
                     QColor color(exp.match(text).captured(0));
+
                     m_accentColorsCombo->addItem(text);
                     m_foregroundColorsCombo->addItem(text);
                     m_backgroundColorsCombo->addItem(text);
@@ -335,16 +345,6 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
                     m_accentColorsCombo->setItemData(m_accentColorsCombo->count() - 1, color, Qt::DecorationRole);
                     m_foregroundColorsCombo->setItemData(m_foregroundColorsCombo->count() - 1, color, Qt::DecorationRole);
                     m_backgroundColorsCombo->setItemData(m_backgroundColorsCombo->count() - 1, color, Qt::DecorationRole);
-                }
-
-                m_accentColorsCombo->setCurrentIndex(5);
-
-                if (m_themesCombo->currentText() == "Light") {
-                    m_foregroundColorsCombo->setCurrentIndex(20);
-                    m_backgroundColorsCombo->setCurrentIndex(21);
-                } else {
-                    m_backgroundColorsCombo->setCurrentIndex(20);
-                    m_foregroundColorsCombo->setCurrentIndex(21);
                 }
             }
         });
@@ -376,12 +376,54 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         }
     });
 
+    connect(m_seeRunningButton, SIGNAL(clicked(bool)), SLOT(run()));
     resize(1299, 1299);
 }
 
 void ThemeChooserWidget::reset()
 {
 
+}
+
+void ThemeChooserWidget::run()
+{
+    QString json;
+    if (m_version == V2) {
+        QJsonObject object;
+        QRegularExpression exp("#.*(?=\\))");
+
+        auto text = m_stylesCombo->currentText();
+        object.insert("style", text);
+
+        text = m_themesCombo->currentText();
+        if (!text.contains("default"))
+            object.insert("theme", text);
+
+        text = m_accentColorsCombo->currentText();
+        if (!text.contains("default"))
+            object.insert("accent", exp.match(text).captured(0));
+
+        text = m_primaryColorsCombo->currentText();
+        if (!text.contains("default"))
+            object.insert("primary", exp.match(text).captured(0));
+
+        text = m_backgroundColorsCombo->currentText();
+        if (!text.contains("default"))
+            object.insert("background", exp.match(text).captured(0));
+
+        text = m_foregroundColorsCombo->currentText();
+        if (!text.contains("default"))
+            object.insert("foreground", exp.match(text).captured(0));
+
+        json = QJsonDocument(object).toJson();
+    }
+
+    QProcess::startDetached(
+         "./objectwheel-themer",
+         QStringList() << "show"
+                       << (m_version == V1 ? "v1" : "v2")
+                       << (m_version == V1 ? m_stylesCombo->currentText() : json)
+    );
 }
 
 void ThemeChooserWidget::refresh()
@@ -399,25 +441,30 @@ void ThemeChooserWidget::refresh()
         object.insert("style", text);
 
         text = m_themesCombo->currentText();
-        object.insert("theme", text);
+        if (!text.contains("default"))
+            object.insert("theme", text);
 
         text = m_accentColorsCombo->currentText();
-        object.insert("accent", exp.match(text).captured(0));
+        if (!text.contains("default"))
+            object.insert("accent", exp.match(text).captured(0));
 
         text = m_primaryColorsCombo->currentText();
-        object.insert("primary", exp.match(text).captured(0));
+        if (!text.contains("default"))
+            object.insert("primary", exp.match(text).captured(0));
 
         text = m_backgroundColorsCombo->currentText();
-        object.insert("background", exp.match(text).captured(0));
+        if (!text.contains("default"))
+            object.insert("background", exp.match(text).captured(0));
 
         text = m_foregroundColorsCombo->currentText();
-        object.insert("foreground", exp.match(text).captured(0));
+        if (!text.contains("default"))
+            object.insert("foreground", exp.match(text).captured(0));
 
         json = QJsonDocument(object).toJson();
     }
 
     QProcess process;
-    process.startDetached(
+    process.start(
          "./objectwheel-themer",
          QStringList() << "capture"
                        << (m_version == V1 ? "v1" : "v2")
@@ -426,8 +473,7 @@ void ThemeChooserWidget::refresh()
     );
 
     process.waitForStarted();
-
-    Delayer::delay(2000);
+    process.waitForFinished();
 
     QPixmap preview(tmpFile.fileName());
     preview.setDevicePixelRatio(DPR);
@@ -436,9 +482,9 @@ void ThemeChooserWidget::refresh()
 
 namespace {
     const QStringList STYLES = {
+        QObject::tr("Desktop"),
         QObject::tr("Base"),
-        QObject::tr("Flat"),
-        QObject::tr("Desktop")
+        QObject::tr("Flat")
     };
 
     const QStringList STYLES_V2 = {
@@ -450,40 +496,18 @@ namespace {
     };
 
     const QStringList MATERIAL_THEMES = {
+        QObject::tr("System default"),
         QObject::tr("Light"),
         QObject::tr("Dark")
     };
 
     const QStringList UNIVERSAL_THEMES = {
+        QObject::tr("System default"),
         QObject::tr("Light"),
         QObject::tr("Dark")
     };
 
-    const QStringList MATERIAL_COLORS_LIGHT = {
-        QObject::tr("Red (#F44336)"),
-        QObject::tr("Pink (#E91E63)"),
-        QObject::tr("Purple (#9C27B0)"),
-        QObject::tr("DeepPurple (#673AB7)"),
-        QObject::tr("Indigo (#3F51B5)"),
-        QObject::tr("Blue (#2196F3)"),
-        QObject::tr("LightBlue (#03A9F4)"),
-        QObject::tr("Cyan (#00BCD4)"),
-        QObject::tr("Teal (#009688)"),
-        QObject::tr("Green (#4CAF50)"),
-        QObject::tr("LightGreen (#8BC34A)"),
-        QObject::tr("Lime (#CDDC39)"),
-        QObject::tr("Yellow (#FFEB3B)"),
-        QObject::tr("Amber (#FFC107)"),
-        QObject::tr("Orange (#FF9800)"),
-        QObject::tr("DeepOrange (#FF5722)"),
-        QObject::tr("Brown (#795548)"),
-        QObject::tr("Grey (#9E9E9E)"),
-        QObject::tr("BlueGrey (#607D8B)"),
-        QObject::tr("Dark (#dd000000)"),
-        QObject::tr("Light (#fafafa)")
-    };
-
-    const QStringList MATERIAL_COLORS_DARK = {
+    const QStringList MATERIAL_COLORS = {
         QObject::tr("Red (#EF9A9A)"),
         QObject::tr("Pink (#F48FB1)"),
         QObject::tr("Purple (#CE93D8)"),
@@ -504,7 +528,28 @@ namespace {
         QObject::tr("Grey (#EEEEEE)"),
         QObject::tr("BlueGrey (#B0BEC5)"),
         QObject::tr("Light (#ffffff)"),
-        QObject::tr("Dark (#303030)")
+        QObject::tr("Dark (#303030)"),
+        QObject::tr("Red 2 (#F44336)"),
+        QObject::tr("Pink 2 (#E91E63)"),
+        QObject::tr("Purple 2 (#9C27B0)"),
+        QObject::tr("DeepPurple 2 (#673AB7)"),
+        QObject::tr("Indigo 2 (#3F51B5)"),
+        QObject::tr("Blue 2 (#2196F3)"),
+        QObject::tr("LightBlue 2 (#03A9F4)"),
+        QObject::tr("Cyan 2 (#00BCD4)"),
+        QObject::tr("Teal 2 (#009688)"),
+        QObject::tr("Green 2 (#4CAF50)"),
+        QObject::tr("LightGreen 2 (#8BC34A)"),
+        QObject::tr("Lime 2 (#CDDC39)"),
+        QObject::tr("Yellow 2 (#FFEB3B)"),
+        QObject::tr("Amber 2 (#FFC107)"),
+        QObject::tr("Orange 2 (#FF9800)"),
+        QObject::tr("DeepOrange 2 (#FF5722)"),
+        QObject::tr("Brown 2 (#795548)"),
+        QObject::tr("Grey 2 (#9E9E9E)"),
+        QObject::tr("BlueGrey 2 (#607D8B)"),
+        QObject::tr("Dark 2 (#dd000000)"),
+        QObject::tr("Light 2 (#fafafa)")
     };
 
     const QStringList UNIVERSAL_COLORS = {

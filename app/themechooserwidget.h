@@ -23,6 +23,7 @@ class ThemeChooserWidget : public QWidget
         void reset();
 
     private slots:
+        void run();
         void refresh();
 
     private:
