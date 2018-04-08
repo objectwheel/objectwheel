@@ -10,3 +10,9 @@
 [submodule "objectwheel-themer"]
 	path = objectwheel-themer
 	url = https://github.com/abigdreamer/objectwheel-themer
+[submodule "utils/fit"]
+	path = utils/fit
+	url = https://github.com/omergoktas/fit
+[submodule "utils/miniz"]
+	path = utils/miniz
+	url = https://github.com/omergoktas/miniz
