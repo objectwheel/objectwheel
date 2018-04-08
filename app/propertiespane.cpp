@@ -634,7 +634,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 
     // Draw background
     if (isClassRow)
-        painter->setBrush(QColor("#8c7f70"));
+        painter->setBrush(QColor("#9D7650"));
     else if (isSelected)
         painter->setBrush(QColor("#ebd5c0"));
     else if (index.row() % 2)
@@ -723,7 +723,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
 
     // Draw background
     if (isClassRow)
-        painter->setBrush(QColor("#8c7f70"));
+        painter->setBrush(QColor("#9D7650"));
     else if (isSelected)
         painter->setBrush(QColor("#ebd5c0"));
     else if (index.row() % 2)

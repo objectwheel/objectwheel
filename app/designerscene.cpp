@@ -9,7 +9,7 @@
 #include <QPointer>
 #include <QDebug>
 
-#define GUIDELINE_COLOR ("#0D80E7")
+#define GUIDELINE_COLOR ("#4BA2FF")
 #define LINE_COLOR ("#606467")
 #define NGCS_PANEL_WIDTH (fit::fx(100))
 #define MAGNETIC_FIELD (fit::fx(3))
@@ -246,7 +246,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
             }
 
             if (selectedControls.size() > 1) {
-                QPen pen("#404447");
+                QPen pen("#777777");
                 pen.setWidthF(fit::fx(1));
                 pen.setStyle(Qt::DotLine);
                 painter->setPen(pen);
