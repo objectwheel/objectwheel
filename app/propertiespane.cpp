@@ -743,7 +743,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     if (hasChild) {
         painter->setPen(isClassRow ? Qt::white : Qt::black);
         painter->setBrush(Qt::NoBrush);
-        painter->drawRoundedRect(handleRect, fit::fx(2), fit::fx(2));
+        painter->drawRoundedRect(handleRect, fit::fx(1), fit::fx(1));
 
         painter->drawLine(
             QPointF(handleRect.left() + fit::fx(2.5), handleRect.center().y()),

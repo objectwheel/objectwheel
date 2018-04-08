@@ -100,7 +100,7 @@ void RunPane::onRunButtonClick()
     m_consoleBox->printFormatted(
         tr("Starting ") +
         ProjectBackend::instance()->name() + "...\n",
-        "#1069C7",
+        "#025dbf",
         QFont::DemiBold
     );
 

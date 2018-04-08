@@ -261,7 +261,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
         console->printFormatted(
             ProjectBackend::instance()->name() + tr(" exited with code %1.\n").arg(exitCode),
-            "#1069C7",
+            "#025dbf",
             QFont::DemiBold
         );
     });
