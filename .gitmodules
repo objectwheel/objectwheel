@@ -4,12 +4,6 @@
 [submodule "objectwheel-interpreter"]
 	path = objectwheel-interpreter
 	url = https://github.com/abigdreamer/objectwheel-interpreter
-[submodule "lib/fit"]
-	path = lib/fit
-	url = https://github.com/omergoktas/fit
-[submodule "lib/miniz"]
-	path = lib/miniz
-	url = https://github.com/omergoktas/miniz
 [submodule "app/aes"]
 	path = app/aes
 	url = https://github.com/omergoktas/aes

@@ -510,9 +510,6 @@ void ProjectsWidget::lock()
     m_buttons->setDisabled(true);
     m_listWidget->setDisabled(true);
     m_buttons_2->hide();
-    m_progressBar->show();
-    m_progressBar->raise();
-    m_progressBar->setValue(10);
 
     m_progressBar->move(
         m_buttons_2->pos() +
@@ -521,6 +518,10 @@ void ProjectsWidget::lock()
             m_buttons_2->height() / 2.0 - m_progressBar->height() / 2.0
         )
     );
+
+    m_progressBar->show();
+    m_progressBar->raise();
+    m_progressBar->setValue(10);
 }
 
 void ProjectsWidget::unlock()

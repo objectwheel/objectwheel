@@ -98,10 +98,13 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _innerWidget->setObjectName("innerWidget");
     _innerWidget->setStyleSheet("#innerWidget { border: 1px solid #1a69bd; }");
 
+    QFont f; f.setWeight(QFont::Medium);
+    _header->setFont(f);
+
     _header->setText("Forms");
     _header->setFixedHeight(fit::fx(23));
     _header->setStyleSheet(
-        "color: white; font-weight: Medium; border:none; border-bottom: 1px solid #1a69bd;"
+        "color: white; padding-left: 5px; border:none; border-bottom: 1px solid #1a69bd;"
         "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1069C7);"
     );
 

@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
         QFontDatabase::addApplicationFont(":/resources/fonts/" + font);
 
     QFont font;
+    font.setStyleStrategy(QFont::PreferAntialias);
     font.setPixelSize(fit::fx(PIXEL_SIZE));
     #if defined(Q_OS_MACOS)
     font.setFamily(".SF NS Display");

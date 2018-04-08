@@ -160,11 +160,13 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
 //    _treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     _treeWidget->header()->setFixedHeight(fit::fx(23));
-    _treeWidget->setStyleSheet("QTreeView { border: 1px solid #4A7C42; }");
-    _treeWidget->header()->setStyleSheet(
-        "color: white; font-weight: Medium; border:none; border-bottom: 1px solid #4A7C42;"
-        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #62A558, stop:1 #599750);"
-    );
+    _treeWidget->setStyleSheet("QTreeView { border: 1px solid #4A7C42; }"
+                               "QHeaderView::section {"
+                               "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #4A7C42;"
+                               "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #62A558, stop:1 #599750);}");
+
+    QFont f; f.setWeight(QFont::Medium);
+    _treeWidget->header()->setFont(f);
 
     connect(_treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
       SLOT(handleClick(QTreeWidgetItem*,int)));

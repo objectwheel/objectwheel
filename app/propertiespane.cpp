@@ -796,15 +796,14 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _treeWidget->setItemDelegate(new PropertiesDelegate(_treeWidget, this, _treeWidget));
-    _treeWidget->setObjectName("treeWidgetss");
-    _treeWidget->setStyleSheet("#treeWidgetss { border: 1px solid #8c6a48; }");
-
-    _treeWidget->header()->setObjectName("header");
     _treeWidget->header()->setFixedHeight(fit::fx(23));
-    _treeWidget->header()->setStyleSheet(
-        "#header { color: white; border:none; font-weight: Medium; border-bottom: 1px solid #8c6a48;"
-        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #AB8157, stop:1 #9C7650); }"
-    );
+    _treeWidget->setStyleSheet("QTreeWidget { border: 1px solid #8c6a48; }"
+                               "QHeaderView::section {"
+                               "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #8c6a48;"
+                               "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #AB8157, stop:1 #9C7650);}");
+
+    QFont f; f.setWeight(QFont::Medium);
+    _treeWidget->header()->setFont(f);
 
     _layout->setSpacing(fit::fx(2));
     _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
