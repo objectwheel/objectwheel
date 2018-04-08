@@ -104,7 +104,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     _loginLabel->setFont(f);
     _loginLabel->setText(tr("Log In"));
-    _loginLabel->setStyleSheet("color: #2E3A41");
+    _loginLabel->setStyleSheet("color: black");
 
     _bulkEdit->add(Email, tr("Email"));
     _bulkEdit->add(Password, tr("Password"));
@@ -128,7 +128,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     );
 
     _autologinLabel->setText(tr("Automatic login"));
-    _autologinLabel->setStyleSheet("color: #2E3A41");
+    _autologinLabel->setStyleSheet("color: black");
 
     _autologinSwitch->setChecked(true);
 
@@ -169,7 +169,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     connect(_helpButton, SIGNAL(clicked(bool)), _helpBox, SLOT(show()));
 
     _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setColor(Qt::black);
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);
@@ -180,7 +180,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setLineWidth(2);
 
     _legalLabel->setText(QString("<p><b>© 2015 - 2018 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
-    _legalLabel->setStyleSheet("color:#2E3A41;");
+    _legalLabel->setStyleSheet("color: black;");
     _legalLabel->setAlignment(Qt::AlignHCenter);
 }
 

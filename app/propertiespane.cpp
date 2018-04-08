@@ -640,7 +640,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
     else if (index.row() % 2)
         painter->setBrush(QColor("#faf1e8"));
     else
-        painter->setBrush(QColor("#fffaf5"));
+        painter->setBrush(QColor("#fffefc"));
 
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(Qt::NoPen);
@@ -660,7 +660,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
         if (isClassRow)
             painter->setPen(Qt::white);
         else
-            painter->setPen("#202427");
+            painter->setPen(Qt::black);
 
         painter->drawText(
             cellRect.adjusted(fit::fx(5), 0, 0, 0),
@@ -668,7 +668,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
         );
     } else {
         if (!isClassRow) {
-            painter->setPen("#202427");
+            painter->setPen(Qt::black);
 
             painter->drawText(
                 cellRect.adjusted(fit::fx(5), 0, 0, 0),
@@ -729,7 +729,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     else if (index.row() % 2)
         painter->setBrush(QColor("#faf1e8"));
     else
-        painter->setBrush(QColor("#fffaf5"));
+        painter->setBrush(QColor("#fffefc"));
 
     painter->setPen(Qt::NoPen);
     painter->drawRect(branchRect);
@@ -741,7 +741,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
 
     // Draw handle
     if (hasChild) {
-        painter->setPen(isClassRow ? QColor(Qt::white) : QColor("#202427"));
+        painter->setPen(isClassRow ? Qt::white : Qt::black);
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, fit::fx(2), fit::fx(2));
 
@@ -767,15 +767,15 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     _searchEdit = new FocuslessLineEdit;
 
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#E0E4E7");
+    p.setColor(backgroundRole(), "#ececec");
     setAutoFillBackground(true);
     setPalette(p);
 
     QPalette p2(_treeWidget->palette());
-    p2.setColor(QPalette::All, QPalette::Base, QColor("#fffaf5"));
+    p2.setColor(QPalette::All, QPalette::Base, QColor("#fffefc"));
     p2.setColor(QPalette::All, QPalette::Highlight, QColor("#ebd5c0"));
-    p2.setColor(QPalette::All, QPalette::Text, QColor("#202427"));
-    p2.setColor(QPalette::All, QPalette::HighlightedText, QColor("#202427"));
+    p2.setColor(QPalette::All, QPalette::Text, Qt::black);
+    p2.setColor(QPalette::All, QPalette::HighlightedText, Qt::black);
     _treeWidget->setPalette(p2);
 
     _treeWidget->setColumnCount(2);

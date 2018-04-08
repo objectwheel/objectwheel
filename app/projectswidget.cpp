@@ -158,16 +158,16 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     m_welcomeLabel->setFont(f);
     m_welcomeLabel->setText(tr("Welcome to Objectwheel"));
-    m_welcomeLabel->setStyleSheet("color: #2E3A41");
+    m_welcomeLabel->setStyleSheet("color: black");
 
     f.setWeight(QFont::Light);
     f.setPixelSize(fit::fx(18));
     m_versionLabel->setFont(f);
     m_versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
-    m_versionLabel->setStyleSheet("color: #2E3A41");
+    m_versionLabel->setStyleSheet("color: black");
 
     m_projectsLabel->setText(tr("Your Projects"));
-    m_projectsLabel->setStyleSheet("color: #2E3A41");
+    m_projectsLabel->setStyleSheet("color: black");
 
     QPalette p1;
     p1.setColor(QPalette::Highlight, "#12000000");

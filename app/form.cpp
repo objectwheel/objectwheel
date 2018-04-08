@@ -40,20 +40,11 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(QColor("#F0F4F7"));
-    painter->drawRect(rect());
+    painter->fillRect(rect(), Qt::white);
 
     Control::paint(painter, option, widget);
 
-    if (!isSelected() && !scene()->showOutlines()) {
-        QPen pen;
-        pen.setWidthF(fit::fx(1));
-        pen.setStyle(Qt::DotLine);
-        pen.setColor("#808487");
-
-        painter->setPen(pen);
-        painter->setBrush(Qt::transparent);
-        painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
-    }
+    painter->setPen(isSelected() ? "#4BA2FF" : "#b4b4b4");
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
 }

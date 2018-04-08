@@ -4,10 +4,10 @@
 
 #define CSS_SCROLLBAR "\
 QScrollBar:vertical { \
-    background: #e0e4e7; \
+    background: #ececec; \
     width: %2px; \
 } QScrollBar::handle:vertical { \
-    background: #909497; \
+    background: #909090; \
     min-height: %1px; \
     border-radius: %3px; \
 } QScrollBar::add-line:vertical { \
@@ -25,7 +25,7 @@ QScrollBar:horizontal { \
     background: transparent; \
     height: %2px; \
 } QScrollBar::handle:horizontal { \
-    background: #909497; \
+    background: #909090; \
     min-width: %1px; \
     border-radius: %3px; \
 } QScrollBar::add-line:horizontal { \
@@ -40,17 +40,17 @@ QScrollBar:horizontal { \
 
 #define CSS_DESIGNER_TOOLBAR "\
 QToolBar { \
-    border-top: 1px solid #D0D4D7;\
-    border-bottom: 1px solid #D0D4D7;\
-    background: #E0E4E7; \
+    border-top: 1px solid #D0D0D0;\
+    border-bottom: 1px solid #D0D0D0;\
+    background: #e4e4e4; \
     spacing: %1px; \
 }"
 
 #define CSS_DESIGNER_TOOLBAR_V "\
 QToolBar { \
-    border-left: 1px solid #D0D4D7;\
-    border-right: 1px solid #D0D4D7;\
-    background: #E0E4E7; \
+    border-left: 1px solid #D0D0D0;\
+    border-right: 1px solid #D0D0D0;\
+    background: #e4e4e4; \
     spacing: %1px; \
 }"
 
@@ -86,8 +86,8 @@ void CSS::init()
     DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(fit::fx(5));
 
     /* DesignerPinbar */
-    DesignerPinbar = QString(CSS_DESIGNER_PINBAR).arg(QColor("#ABAFB2").lighter(110).
-      name()).arg(QColor("#F7FBFF").name()).arg(QColor("#DCDFE2").name())
+    DesignerPinbar = QString(CSS_DESIGNER_PINBAR).arg(QColor("#b3b3b3").lighter(110).
+      name()).arg(QColor("#ffffff").name()).arg(QColor("#e3e3e3").name())
             .arg(fit::fx(5)).arg(fit::fx(1.8)).arg(fit::fx(3.5));
 
 }

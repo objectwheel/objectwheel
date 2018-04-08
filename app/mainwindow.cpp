@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 {
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#f0f4f7");
+    p.setColor(backgroundRole(), "#f6f6f6");
     setPalette(p);
 
     setWindowTitle(APP_NAME);
@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
     pageSwitcherBar->setOrientation(Qt::Vertical);
-    pageSwitcherBar->setFixedWidth(fit::fx(65));
+    pageSwitcherBar->setFixedWidth(fit::fx(70));
     pageSwitcherBar->setWindowFlags(pageSwitcherBar->windowFlags() | Qt::WindowStaysOnTopHint);
     pageSwitcherBar->setFloatable(false);
     pageSwitcherBar->setMovable(false);
@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto inspectorTitleLabel = new QLabel;
     inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     inspectorTitleLabel->setText(tr("   Control Inspector"));
-    inspectorTitleLabel->setStyleSheet("color: #2E3A41");
+    inspectorTitleLabel->setStyleSheet("color: black");
     inspectorTitleLabel->setFont(dockTitleFont);
 
     auto inspectorTitlePinButton = new QToolButton;
@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto propertiesTitleLabel = new QLabel;
     propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     propertiesTitleLabel->setText(tr("   Properties"));
-    propertiesTitleLabel->setStyleSheet("color: #2E3A41");
+    propertiesTitleLabel->setStyleSheet("color: black");
     propertiesTitleLabel->setFont(dockTitleFont);
 
     auto propertiesTitlePinButton = new QToolButton;
@@ -154,7 +154,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto toolboxTitleLabel = new QLabel;
     toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolboxTitleLabel->setText(tr("   Toolbox"));
-    toolboxTitleLabel->setStyleSheet("color: #2E3A41");
+    toolboxTitleLabel->setStyleSheet("color: black");
     toolboxTitleLabel->setFont(dockTitleFont);
 
     auto toolboxTitlePinButton = new QToolButton;
@@ -194,7 +194,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto formsTitleLabel = new QLabel;
     formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     formsTitleLabel->setText(tr("   Form Navigator"));
-    formsTitleLabel->setStyleSheet("color: #2E3A41");
+    formsTitleLabel->setStyleSheet("color: black");
     formsTitleLabel->setFont(dockTitleFont);
 
     auto formsTitlePinButton = new QToolButton;

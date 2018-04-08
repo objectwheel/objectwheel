@@ -49,7 +49,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     sectionsFont.setWeight(QFont::DemiBold);
 
     m_stylesLabel->setText(tr("Style:"));
-    m_stylesLabel->setStyleSheet("color: #2E3A41");
+    m_stylesLabel->setStyleSheet("color: black");
     m_stylesLabel->setFont(sectionsFont);
 
     m_stylesCombo->addItems(m_version == V1 ? STYLES : STYLES_V2);
@@ -60,27 +60,27 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
     if (m_version == V2) {
         m_themesLabel->setText(tr("Theme:"));
-        m_themesLabel->setStyleSheet("color: #2E3A41");
+        m_themesLabel->setStyleSheet("color: black");
         m_themesLabel->setFont(sectionsFont);
 
         m_themesCombo->setCurrentText("None");
         m_themesCombo->setFixedWidth(fit::fx(150));
 
         m_detailsLabel->setText(tr("Details:"));
-        m_detailsLabel->setStyleSheet("color: #2E3A41");
+        m_detailsLabel->setStyleSheet("color: black");
         m_detailsLabel->setFont(sectionsFont);
 
         m_accentDetailLabel->setText(tr("Accent color:"));
-        m_accentDetailLabel->setStyleSheet("color: #2E3A41");
+        m_accentDetailLabel->setStyleSheet("color: black");
 
         m_primaryDetailLabel->setText(tr("Primary color:"));
-        m_primaryDetailLabel->setStyleSheet("color: #2E3A41");
+        m_primaryDetailLabel->setStyleSheet("color: black");
 
         m_foregroundDetailLabel->setText(tr("Foreground color:"));
-        m_foregroundDetailLabel->setStyleSheet("color: #2E3A41");
+        m_foregroundDetailLabel->setStyleSheet("color: black");
 
         m_backgroundDetailLabel->setText(tr("Background color:"));
-        m_backgroundDetailLabel->setStyleSheet("color: #2E3A41");
+        m_backgroundDetailLabel->setStyleSheet("color: black");
 
         m_accentColorsCombo->setFixedWidth(fit::fx(200));
         m_primaryColorsCombo->setFixedWidth(fit::fx(200));
@@ -116,7 +116,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         m_backgroundColorButton->setText("...");
 
         m_customizationLabel->setText(tr("Customization:"));
-        m_customizationLabel->setStyleSheet("color: #2E3A41");
+        m_customizationLabel->setStyleSheet("color: black");
         m_customizationLabel->setFont(sectionsFont);
 
         m_customizationPicture->setScaledContents(false);
@@ -124,7 +124,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     }
 
     m_previewLabel->setText(tr("Preview:"));
-    m_previewLabel->setStyleSheet("color: #2E3A41");
+    m_previewLabel->setStyleSheet("color: black");
     m_previewLabel->setFont(sectionsFont);
 
     m_previewPicture->setScaledContents(true);

@@ -21,8 +21,8 @@ FlatButton::FlatButton(QWidget* parent) : QPushButton(parent)
 
     /* Set size settings */
     _settings.topColor = "#f0f0f0";
-    _settings.bottomColor = "#e0e4e7";
-    _settings.textColor = "#2E3A41";
+    _settings.bottomColor = "#ececec";
+    _settings.textColor = Qt::black;
     _settings.borderRadius = 0;
     _settings.textMargin = fit::fx(2);
     _settings.iconButton = false;
@@ -202,7 +202,7 @@ namespace {
     QColor disabledColor(const QColor& color)
     {
         QColor d(color);
-        d.setHslF(d.hslHueF(), 0, d.lightnessF(), d.alphaF());
+        d.setHslF(d.hslHueF(), d.hslSaturationF() * 0.2, d.lightnessF(), d.alphaF());
         return d;
     }
 }

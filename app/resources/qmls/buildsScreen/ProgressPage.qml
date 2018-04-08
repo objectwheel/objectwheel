@@ -36,7 +36,7 @@ Item {
         Text {
             id: informativeText
             text: root.informativeText + waitEffectString
-            color: "#e0e4e7"
+            color: "#ececec"
             anchors.horizontalCenter: parent.horizontalCenter
         }
         ProgressBar {
@@ -80,14 +80,14 @@ Item {
             Text {
                 id: mbText
                 text: root.mbText
-                color: "#e0e4e7"
+                color: "#ececec"
                 horizontalAlignment: Text.AlignLeft
             }
             Item { height: 1; Layout.fillWidth: true }
             Text {
                 id: speedText
                 text: root.speedText
-                color: "#e0e4e7"
+                color: "#ececec"
                 horizontalAlignment: Text.AlignRight
             }
         }
@@ -129,7 +129,7 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Total progress: %" + (progressBar2.value * 100).toFixed(1)
-            color: "#e0e4e7"
+            color: "#ececec"
         }
         Item {
             id: btnCancelOutCont

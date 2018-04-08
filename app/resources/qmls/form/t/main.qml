@@ -2,8 +2,7 @@ import QtQuick 2.7
 
 Rectangle {
     id: form
-    width: 285
-    height: 535
+    width: 342
+    height: 608
     visible: true
-    color: "#f0f4f7"
 }

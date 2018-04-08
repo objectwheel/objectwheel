@@ -4,10 +4,10 @@
 
 #include <QtWidgets>
 
-#define COLOR_LINENUMBERAREA (QColor("#E3E7EA"))
-#define COLOR_CURRENTHIGHLIGHT (QColor("#D7E5F2"))
-#define COLOR_LINENUMBERTEXT (QColor("#929699"))
-#define COLOR_EDITORBACKGROUND (QColor("#F5F9FC"))
+#define COLOR_LINENUMBERAREA (QColor("#ececec"))
+#define COLOR_CURRENTHIGHLIGHT (QColor("#f0f0f0"))
+#define COLOR_LINENUMBERTEXT (QColor("#bfbfbf"))
+#define COLOR_EDITORBACKGROUND Qt::white
 #define SPACE_LINENUMBERAREALEFT fit::fx(20)
 #define SPACE_LINENUMBERAREARIGHT fit::fx(5)
 #define INTERVAL_COMPLETIONTIMER (10000)

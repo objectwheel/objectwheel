@@ -15,7 +15,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
   , m_legalLabel(new QLabel)
 {
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#e0e4e7");
+    p.setColor(backgroundRole(), "#ececec");
 
     setPalette(p);
     setWindowTitle(APP_NAME);
@@ -49,7 +49,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
 
     m_titleLabel->setFont(f);
     m_titleLabel->setText("About Objectwheel");
-    m_titleLabel->setStyleSheet("color:#2e3a41;");
+    m_titleLabel->setStyleSheet("color: black;");
 
     QPixmap px(":/resources/images/logo.png");
     px.setDevicePixelRatio(DPR);
@@ -70,7 +70,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
         .arg(APP_GITDATE)
     );
     m_versionLabel->setAlignment(Qt::AlignCenter);
-    m_versionLabel->setStyleSheet("color:#2e3a41;");
+    m_versionLabel->setStyleSheet("color: black;");
 
     m_okButton->setText("Ok");
     m_okButton->setFixedWidth(fit::fx(100));
@@ -78,6 +78,6 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     connect(m_okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
 
     m_legalLabel->setText(tr("<p><b>© 2015 - 2018 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
-    m_legalLabel->setStyleSheet("color:#2e3a41;");
+    m_legalLabel->setStyleSheet("color: black;");
 }
 

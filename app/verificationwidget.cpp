@@ -81,7 +81,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 
     _verificationLabel->setFont(f);
     _verificationLabel->setText(tr("Email Verification"));
-    _verificationLabel->setStyleSheet("color: #2E3A41");
+    _verificationLabel->setStyleSheet("color: black");
 
     _countdownLabel->setAlignment(Qt::AlignHCenter);
     _countdownLabel->setText(tr("You have left:"));
@@ -126,7 +126,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     });
 
     _loadingIndicator->setStyleSheet("Background: transparent;");
-    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setColor(Qt::black);
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);

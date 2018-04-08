@@ -128,16 +128,16 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
     _treeWidget = new QTreeWidget;
 
     QPalette p(palette());
-    p.setColor(QPalette::Base, QColor("#E0E4E7"));
-    p.setColor(QPalette::Window, QColor("#E0E4E7"));
+    p.setColor(QPalette::Base, QColor("#ececec"));
+    p.setColor(QPalette::Window, QColor("#ececec"));
     setPalette(p);
     setAutoFillBackground(true);
 
     QPalette p2(_treeWidget->palette());
-    p2.setColor(QPalette::All, QPalette::Base, QColor("#FAFFF9"));
+    p2.setColor(QPalette::All, QPalette::Base, QColor("#fefffc"));
     p2.setColor(QPalette::All, QPalette::Highlight, QColor("#cee7cb"));
-    p2.setColor(QPalette::All, QPalette::Text, QColor("#202427"));
-    p2.setColor(QPalette::All, QPalette::HighlightedText, QColor("#202427"));
+    p2.setColor(QPalette::All, QPalette::Text, Qt::black);
+    p2.setColor(QPalette::All, QPalette::HighlightedText, Qt::black);
     _treeWidget->setPalette(p2);
 
     _treeWidget->setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -153,7 +153,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
     _treeWidget->headerItem()->setText(1, "Ui");
     _treeWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
-    _treeWidget->setSortingEnabled(true);
     _treeWidget->viewport()->installEventFilter(this);
     _treeWidget->header()->resizeSection(0, fit::fx(250));
     _treeWidget->header()->resizeSection(1, fit::fx(50));

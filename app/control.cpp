@@ -453,8 +453,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
       QRectF(QPointF(0, 0), size() * DPR));
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
-    gradient.setColorAt(0, QColor("#174C4E4D").lighter(110));
-    gradient.setColorAt(1, QColor("#174C4E4D").darker(110));
+    gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
+    gradient.setColorAt(1, QColor("#174C4C4C").darker(110));
 
     if (m_dragIn) {
         if (scene()->showOutlines()) {
@@ -472,17 +472,19 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     if (isSelected() || scene()->showOutlines()) {
         QPen pen;
-        pen.setWidthF(fit::fx(1));
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);
         painter->setClipping(false);
 
         if (isSelected()) {
-            pen.setColor("#404447");
+            pen.setColor(Qt::black);
         } else if (scene()->showOutlines()) {
-            if (m_hoverOn)
+            if (m_hoverOn) {
                 pen.setStyle(Qt::SolidLine);
-            pen.setColor("#808487");
+                pen.setColor("#4BA2FF");
+            } else {
+                pen.setColor("#777777");
+            }
         }
 
         painter->setPen(pen);

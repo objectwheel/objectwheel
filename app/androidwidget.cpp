@@ -56,7 +56,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
       ("#scrollAreaWidgetContents{background: transparent;}");
 
     QPalette p3(_scrollArea.palette());
-    p3.setColor(_scrollArea.backgroundRole(), "#d0d4d7");
+    p3.setColor(_scrollArea.backgroundRole(), "#d4d4d4");
     _scrollArea.setPalette(p3);
     _scrollArea.setAutoFillBackground(true);
     _scrollArea.setWidgetResizable(true);

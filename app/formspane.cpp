@@ -65,15 +65,15 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _removeButton = new FlatButton;
 
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#E0E4E7");
+    p.setColor(backgroundRole(), "#e4e4e4");
     setAutoFillBackground(true);
     setPalette(p);
 
     QPalette p2(_listWidget->palette());
-    p2.setColor(QPalette::All, QPalette::Base, QColor("#f5faff"));
+    p2.setColor(QPalette::All, QPalette::Base, QColor("#fcfeff"));
     p2.setColor(QPalette::All, QPalette::Highlight, QColor("#c0d5eb"));
-    p2.setColor(QPalette::All, QPalette::Text, QColor("#202427"));
-    p2.setColor(QPalette::All, QPalette::HighlightedText, QColor("#202427"));
+    p2.setColor(QPalette::All, QPalette::Text, Qt::black);
+    p2.setColor(QPalette::All, QPalette::HighlightedText, Qt::black);
     _listWidget->setPalette(p2);
 
     _listWidget->setItemDelegate(new FormListDelegate(_listWidget));

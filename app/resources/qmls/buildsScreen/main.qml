@@ -23,7 +23,7 @@ Rectangle {
         anchors.topMargin: Fit.fit(5)
         font.pixelSize: Fit.fit(28)
         text: "Objectwheel Builds"
-        color: "#e0e4e7"
+        color: "#ececec"
         font.weight: Font.ExtraLight
     }
     Text {
@@ -33,7 +33,7 @@ Rectangle {
         anchors.topMargin: Fit.fit(15)
         font.pixelSize: Fit.fit(18)
         text: "Build inprogress"
-        color: "#e0e4e7"
+        color: "#ececec"
         font.weight: Font.Light
     }
     ProgressPage {

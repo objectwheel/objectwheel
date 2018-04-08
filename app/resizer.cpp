@@ -9,7 +9,7 @@
 #define MAX_Z_VALUE   99999
 #define COLOR         Qt::white
 #define SIZE          fit::fx(6.0)
-#define OUTLINE_COLOR "#202427"
+#define OUTLINE_COLOR Qt::black
 
 bool Resizer::m_resizing = false;
 

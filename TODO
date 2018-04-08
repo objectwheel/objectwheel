@@ -12,6 +12,8 @@ ow ile yapılmış uygulamalarda fit olayı nasıl olacak?
 objectwheel uygulamaları temalarını proje ayarlarından okusun ona göre yapılansın/stilize olsun/görünsün
 objectwheel tema ve font işlerini de hallet
 control id'leri ow hariç başka bir editör ile qml dosyası içinden değiştirilirse, o zaman properties.json ile çatışma oluşur. bunu düzelt.
+properties pane de objelerin focus alması kolaylaşsın
+qml editör'ün file explorer'ini sol tarafa al
 
 control inspector'un horizontal scrollbarı ı neden her "refresp preview" operasyonu sonrası çıldırıyor uzuyor
 properties pane'de geometry'yi unutma

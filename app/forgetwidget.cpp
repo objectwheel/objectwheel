@@ -66,7 +66,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
 
     _forgotLabel->setFont(f);
     _forgotLabel->setText(tr("Password Reset"));
-    _forgotLabel->setStyleSheet("color: #2E3A41");
+    _forgotLabel->setStyleSheet("color: black");
 
     _bulkEdit->add(Email, tr("Email Address"));
     _bulkEdit->setFixedWidth(BUTTONS_WIDTH);
@@ -89,7 +89,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
 
     _loadingIndicator->setStyleSheet("Background: transparent;");
-    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setColor(Qt::black);
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);

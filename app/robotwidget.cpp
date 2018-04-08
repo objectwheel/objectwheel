@@ -77,7 +77,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 
     _robotLabel->setFont(f);
     _robotLabel->setText(tr("I'm not Robot"));
-    _robotLabel->setStyleSheet("color: #2E3A41");
+    _robotLabel->setStyleSheet("color: black");
 
     _buttons->add(Back, "#5BC5F8", "#2592F9");
     _buttons->add(Next, "#8BBB56", "#6EA045");
@@ -96,7 +96,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
       SIGNAL(back()));
 
     _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setColor(Qt::black);
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);

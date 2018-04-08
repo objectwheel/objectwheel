@@ -28,9 +28,9 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     _textEdit->setFont(f);
 
     QPalette p1(_textEdit->palette());
-    p1.setColor(QPalette::Base, QColor("#F5F9FC"));
-    p1.setColor(QPalette::Highlight, QColor("#d0d4d7"));
-    p1.setColor(QPalette::Text, QColor("#202427"));
+    p1.setColor(QPalette::Base, Qt::white);
+    p1.setColor(QPalette::Highlight, QColor("#d4d4d4"));
+    p1.setColor(QPalette::Text, Qt::black);
     _textEdit->setPalette(p1);
 
     connect(InterpreterBackend::instance(), SIGNAL(standardError(QString)),

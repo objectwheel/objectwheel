@@ -83,7 +83,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
 
     _resetLabel->setFont(f);
     _resetLabel->setText(tr("Verify Password Reset"));
-    _resetLabel->setStyleSheet("color: #2E3A41");
+    _resetLabel->setStyleSheet("color: black");
 
     _countdownLabel->setAlignment(Qt::AlignHCenter);
     _countdownLabel->setText(tr("You have left:"));

@@ -105,7 +105,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
 
     _signupLabel->setFont(f);
     _signupLabel->setText(tr("Sign Up"));
-    _signupLabel->setStyleSheet("color: #2E3A41");
+    _signupLabel->setStyleSheet("color: black");
 
     _bulkEdit->add(First, tr("First Name *"));
     _bulkEdit->add(Last, tr("Last Name *"));
@@ -145,7 +145,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     "QComboBox {\
         border: none;\
         Background: transparent;\
-        color: #2e3a41;\
+        color: black;\
     }\
     QComboBox::drop-down {\
         subcontrol-origin: padding;\
@@ -156,7 +156,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
         image: url(:/resources/images/downarrow.png);\
     }\
     QComboBox QAbstractItemView {\
-        Background: #f0f4f7;\
+        background: #f0f4f7;\
     }");
 
     _termsWidget->setObjectName("termsWidget");
@@ -176,10 +176,10 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setTextFormat(Qt::RichText);
     _termsLabel->setText(tr(
         "I accept <a href=\"http://objectwheel.com/\" "
-        "style=\"color: #2E3A41;\">the terms and conditions</a>"
+        "style=\"color: black;\">the terms and conditions</a>"
     ));
 
-    _termsLabel->setStyleSheet("color: #2E3A41");
+    _termsLabel->setStyleSheet("color: black");
     _termsLabel->setOpenExternalLinks(true);
     _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
@@ -198,7 +198,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
 
     _loadingIndicator->setStyleSheet("Background: transparent;");
-    _loadingIndicator->setColor("#2E3A41");
+    _loadingIndicator->setColor(Qt::black);
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);

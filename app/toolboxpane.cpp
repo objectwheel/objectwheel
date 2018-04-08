@@ -20,14 +20,14 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
     _toolboxTree = new ToolboxTree;
 
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#E0E4E7");
+    p.setColor(backgroundRole(), "#ececec");
     setAutoFillBackground(true);
     setPalette(p);
 
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
 
     connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=]
-    { emit itemDoubleClicked(_toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile()); });
+    { if (_toolboxTree->currentItem() && _toolboxTree->currentItem()->parent()) emit itemDoubleClicked(_toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile()); });
 
     _searchEdit->setFixedHeight(fit::fx(22));
     _searchEdit->setClearButtonEnabled(true);

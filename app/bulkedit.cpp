@@ -37,7 +37,7 @@ void BulkEdit::add(int id, const QString& label, QWidget* widget)
     element.edit = widget;
     element.edit->setAttribute(Qt::WA_MacShowFocusRect, false);
     element.edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    element.edit->setStyleSheet("color: #2e3a41; border: none; background: transparent;");
+    element.edit->setStyleSheet("color: black; border: none; background: transparent;");
 
     _elements << element;
 

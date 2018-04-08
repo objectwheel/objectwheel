@@ -122,11 +122,11 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
       SLOT(handleBtnNextClicked()));
 
     QPalette p3;
-    p3.setColor(QPalette::Base, "#D0D4D7");
+    p3.setColor(QPalette::Base, "#d4d4d4");
     p3.setColor(QPalette::Highlight, "#C3C7CA");
     _listWidget.setPalette(p3);
     _listWidget.setStyleSheet(CSS::ScrollBar.
-      replace("background: transparent;", "background: #d0d4d7;"));
+      replace("background: transparent;", "background: #d4d4d4;"));
     _listWidget.setIconSize(fit::fx(QSize{52, 52}));
     _listWidget.setMinimumWidth(fit::fx(400));
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));

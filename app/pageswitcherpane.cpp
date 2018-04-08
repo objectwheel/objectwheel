@@ -24,13 +24,13 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_qmlCodeEditorButton);
     m_layout->addWidget(m_splitViewButton);
     m_layout->addWidget(m_projectOptionsButton);
+    m_layout->addWidget(m_buildsButton);
     m_layout->addWidget(m_helpButton);
     m_layout->addStretch();
-    m_layout->addWidget(m_buildsButton);
 
     QFont labelFont;
     labelFont.setWeight(QFont::DemiBold);
-    labelFont.setPixelSize(labelFont.pixelSize() - fit::fx(1.5));
+    labelFont.setPixelSize(labelFont.pixelSize() - fit::fx(2.5));
 
     m_designerButton->setText(tr("Designer"));
     m_qmlCodeEditorButton->setText(tr("Editor"));
@@ -60,12 +60,12 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->setAutoExclusive(true);
     m_buildsButton->setAutoExclusive(true);
 
-    m_designerButton->setFixedHeight(fit::fx(55));
-    m_qmlCodeEditorButton->setFixedHeight(fit::fx(55));
-    m_projectOptionsButton->setFixedHeight(fit::fx(55));
-    m_helpButton->setFixedHeight(fit::fx(55));
-    m_splitViewButton->setFixedHeight(fit::fx(55));
-    m_buildsButton->setFixedHeight(fit::fx(55));
+    m_designerButton->setFixedHeight(fit::fx(52));
+    m_qmlCodeEditorButton->setFixedHeight(fit::fx(52));
+    m_projectOptionsButton->setFixedHeight(fit::fx(52));
+    m_helpButton->setFixedHeight(fit::fx(52));
+    m_splitViewButton->setFixedHeight(fit::fx(52));
+    m_buildsButton->setFixedHeight(fit::fx(52));
 
     m_designerButton->setCheckable(true);
     m_qmlCodeEditorButton->setCheckable(true);
@@ -74,12 +74,12 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->setCheckable(true);
     m_buildsButton->setCheckable(true);
 
-    m_designerButton->setIconSize(fit::fx(QSizeF(30, 30)).toSize());
-    m_qmlCodeEditorButton->setIconSize(fit::fx(QSizeF(30, 30)).toSize());
-    m_projectOptionsButton->setIconSize(fit::fx(QSizeF(30, 30)).toSize());
-    m_helpButton->setIconSize(fit::fx(QSizeF(30, 30)).toSize());
-    m_splitViewButton->setIconSize(fit::fx(QSizeF(30, 30)).toSize());
-    m_buildsButton->setIconSize(fit::fx(QSizeF(30, 30)).toSize());
+    m_designerButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
+    m_qmlCodeEditorButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
+    m_projectOptionsButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
+    m_helpButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
+    m_splitViewButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
+    m_buildsButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
 
     m_designerButton->setIcon(QIcon(":/resources/images/designer.png"));
     m_qmlCodeEditorButton->setIcon(QIcon(":/resources/images/editor.png"));
@@ -116,26 +116,26 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->settings().textMargin = 0;
     m_buildsButton->settings().textMargin = 0;
 
-    m_buildsButton->settings().textColor = "#F5F9FC";
-    m_splitViewButton->settings().textColor = "#F5F9FC";
-    m_helpButton->settings().textColor = "#F5F9FC";
-    m_projectOptionsButton->settings().textColor = "#F5F9FC";
-    m_qmlCodeEditorButton->settings().textColor = "#F5F9FC";
-    m_designerButton->settings().textColor = "#F5F9FC";
+    m_buildsButton->settings().textColor = Qt::white;
+    m_splitViewButton->settings().textColor = Qt::white;
+    m_helpButton->settings().textColor = Qt::white;
+    m_projectOptionsButton->settings().textColor = Qt::white;
+    m_qmlCodeEditorButton->settings().textColor = Qt::white;
+    m_designerButton->settings().textColor = Qt::white;
 
-    m_designerButton->settings().topColor = "#6f7e8c";
-    m_qmlCodeEditorButton->settings().topColor = "#6f7e8c";
-    m_projectOptionsButton->settings().topColor = "#6f7e8c";
-    m_helpButton->settings().topColor = "#6f7e8c";
-    m_splitViewButton->settings().topColor = "#6f7e8c";
-    m_buildsButton->settings().topColor = "#6f7e8c";
+    m_designerButton->settings().topColor = "#3B444C";
+    m_qmlCodeEditorButton->settings().topColor = "#3B444C";
+    m_projectOptionsButton->settings().topColor = "#3B444C";
+    m_helpButton->settings().topColor = "#3B444C";
+    m_splitViewButton->settings().topColor = "#3B444C";
+    m_buildsButton->settings().topColor = "#3B444C";
 
-    m_designerButton->settings().bottomColor = "#475059";
-    m_qmlCodeEditorButton->settings().bottomColor = "#475059";
-    m_projectOptionsButton->settings().bottomColor = "#475059";
-    m_helpButton->settings().bottomColor = "#475059";
-    m_splitViewButton->settings().bottomColor = "#475059";
-    m_buildsButton->settings().bottomColor = "#475059";
+    m_designerButton->settings().bottomColor = "#3B444C";
+    m_qmlCodeEditorButton->settings().bottomColor = "#3B444C";
+    m_projectOptionsButton->settings().bottomColor = "#3B444C";
+    m_helpButton->settings().bottomColor = "#3B444C";
+    m_splitViewButton->settings().bottomColor = "#3B444C";
+    m_buildsButton->settings().bottomColor = "#3B444C";
 
     connect(m_designerButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Designer); });
     connect(m_qmlCodeEditorButton, &FlatButton::pressed, [=] { setCurrentPage(Page_QmlCodeEditor); });
@@ -282,10 +282,10 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     QLinearGradient gradient(rect().topRight(), rect().topLeft());
-    gradient.setColorAt(0, "#6f7e8c");
-    gradient.setColorAt(1, "#475059");
+    gradient.setColorAt(0, "#3B444C");
+    gradient.setColorAt(1, "#3B444C");
 
     painter.fillRect(rect(), gradient);
-    painter.setPen("#475059");
+    painter.setPen("#2f353c");
     painter.drawLine(QRectF(rect()).topRight() + QPointF(-0.5, 0.5), QRectF(rect()).bottomRight() + QPointF(-0.5, -0.5));
 }

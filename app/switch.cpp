@@ -17,9 +17,9 @@ Switch::Switch(QWidget* parent) : QAbstractButton(parent)
 {
     _settings.activeBackgroundColor = "#8BBB56";
     _settings.activeBorderColor = _settings.activeBackgroundColor.darker(120);
-    _settings.inactiveBackgroundColor = "#C5C9CC";
+    _settings.inactiveBackgroundColor = "#cccccc";
     _settings.inactiveBorderColor = _settings.inactiveBackgroundColor.darker(120);
-    _settings.handleColor = "#D0D4D7";
+    _settings.handleColor = "#d4d4d4";
     _settings.handleBorderColor = _settings.handleColor.darker(125);
     _settings.animationType = QEasingCurve::OutBack;
     _settings.animationDuration = 300;

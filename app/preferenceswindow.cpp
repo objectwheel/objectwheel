@@ -9,7 +9,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     setWindowTitle(tr("Preferences"));
 
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#e0e4e7");
+    p.setColor(backgroundRole(), "#ececec");
     setPalette(p);
 
     _scrollArea = new QScrollArea;
@@ -30,9 +30,9 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     _listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     QPalette p2(palette());
-    p2.setColor(QPalette::Base, "#F5F9FC");
-    p2.setColor(QPalette::Highlight, "#d0d4d7");
-    p2.setColor(QPalette::Text, "#202427");
+    p2.setColor(QPalette::Base, Qt::white);
+    p2.setColor(QPalette::Highlight, "#d4d4d4");
+    p2.setColor(QPalette::Text, Qt::black);
     _listWidget->setPalette(p2);
 
     QFont f;

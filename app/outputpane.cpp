@@ -79,7 +79,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
     issuesButton->settings().topColor = "#5d6975";
     issuesButton->settings().bottomColor = "#515b66";
-    issuesButton->settings().textColor = "#F5F9FC";
+    issuesButton->settings().textColor = Qt::white;
     issuesButton->setChecked(true);
     connect(issuesButton, SIGNAL(toggled(bool)),
       SLOT(handleIssuesButtonClicked(bool)));
@@ -87,7 +87,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     searchButton->settings().topColor = "#5d6975";
     searchButton->settings().bottomColor = "#515b66";
     searchButton->settings().borderRadius = fit::fx(5);
-    searchButton->settings().textColor = "#F5F9FC";
+    searchButton->settings().textColor = Qt::white;
     searchButton->setCheckable(true);
     searchButton->setText("Search");
     searchButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
@@ -102,7 +102,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     consoleButton->settings().topColor = "#5d6975";
     consoleButton->settings().bottomColor = "#515b66";
     consoleButton->settings().borderRadius = fit::fx(5);
-    consoleButton->settings().textColor = "#F5F9FC";
+    consoleButton->settings().textColor = Qt::white;
     consoleButton->setCheckable(true);
     consoleButton->setText("Console Output");
     consoleButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
@@ -127,7 +127,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     toolbar->addWidget(issuesButton);
     toolbar->addWidget(searchButton);
     toolbar->addWidget(consoleButton);
-    toolbar->setStyleSheet(QString("background: #D5D9DC; border-top: 1px solid #a5a9ac; spacing: %1").arg(fit::fx(5)));
+    toolbar->setStyleSheet(QString("background: #d4d4d4; border-top: 1px solid #a5a9ac; spacing: %1").arg(fit::fx(5)));
     toolbar->addWidget(spacer);
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);

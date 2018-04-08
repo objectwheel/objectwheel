@@ -35,8 +35,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->setStyleSheet("QSplitter, QSplitter::handle { border: none }");
     m_splitterIn->setHandleWidth(0);
     m_splitterIn->setOrientation(Qt::Horizontal);
-    m_splitterIn->addWidget(m_designerWidget);
     m_splitterIn->addWidget(m_qmlCodeEditorWidget);
+    m_splitterIn->addWidget(m_designerWidget);
     m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);

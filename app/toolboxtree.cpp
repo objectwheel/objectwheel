@@ -51,53 +51,30 @@ void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &optio
 
     if (!model->parent(index).isValid()) {
         // this is a top-level item.
-        QStyleOptionButton buttonOption;
-
-        buttonOption.state = option.state;
-        #ifdef Q_OS_MACOS
-        buttonOption.state |= QStyle::State_Raised;
-        #endif
-        buttonOption.state &= ~QStyle::State_HasFocus;
-
-        buttonOption.rect = option.rect;
-        buttonOption.palette = option.palette;
-        buttonOption.features = QStyleOptionButton::None;
-
         painter->save();
-        QColor buttonColor(230, 230, 230);
-        QBrush buttonBrush = option.palette.button();
-        if (!buttonBrush.gradient() && buttonBrush.texture().isNull())
-            buttonColor = buttonBrush.color();
-        QColor outlineColor = buttonColor.darker(150);
-        QColor highlightColor = buttonColor.lighter(130);
 
         // Only draw topline if the previous item is expanded
         QModelIndex previousIndex = model->index(index.row() - 1, index.column());
         bool drawTopline = (index.row() > 0 && m_view->isExpanded(previousIndex));
-        int highlightOffset = drawTopline ? 1 : 0;
 
-        QLinearGradient gradient(option.rect.topLeft(), option.rect.bottomLeft());
-        gradient.setColorAt(0, QColor("#EAEEF1"));
-        gradient.setColorAt(1, QColor("#D0D4D7"));
+        auto frame = option.rect;
 
+        QLinearGradient gradient(frame.topLeft(), frame.bottomLeft());
+        gradient.setColorAt(0, QColor("#fafafa"));
+        gradient.setColorAt(1, QColor("#e3e3e3"));
         painter->setPen(Qt::NoPen);
         painter->setBrush(gradient);
-        painter->drawRect(option.rect);
-        QPen p(highlightColor);
-        p.setWidthF(fit::fx(0.5));
-        painter->setPen(p);
-        painter->drawLine(option.rect.topLeft() + QPoint(0, highlightOffset),
-                          option.rect.topRight() + QPoint(0, highlightOffset));
-        p.setColor(outlineColor);
-        painter->setPen(p);
+        painter->drawRect(frame);
+
+        painter->setPen("#d0d0d0");
         if (drawTopline)
-            painter->drawLine(option.rect.topLeft(), option.rect.topRight());
-        painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
+            painter->drawLine(frame.topLeft(), frame.topRight());
+        painter->drawLine(frame.bottomLeft(), frame.bottomRight());
         painter->restore();
 
         QStyleOption branchOption;
         static const int i = fit::fx(9); // ### hardcoded in qcommonstyle.cpp
-        QRect r = option.rect;
+        QRect r = frame;
         branchOption.rect = QRect(r.left() + i/2, r.top() + (r.height() - i)/2, i, i);
         branchOption.state = QStyle::State_Children;
 
@@ -132,26 +109,17 @@ QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelInd
 ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
 {
     QPalette p2(palette());
-    p2.setColor(QPalette::Base, "#f5f9fc");
-    p2.setColor(QPalette::Highlight, "#d0d4d7");
-    p2.setColor(QPalette::Text, "#202427");
-    p2.setColor(QPalette::HighlightedText, "#202427");
+    p2.setColor(QPalette::Base, Qt::white);
+    p2.setColor(QPalette::Highlight, "#d0d0d0");
+    p2.setColor(QPalette::Text, Qt::black);
+    p2.setColor(QPalette::HighlightedText, Qt::black);
     setAutoFillBackground(true);
     setPalette(p2);
 
-    QScroller::grabGesture(viewport(), QScroller::TouchGesture);
-    QScrollerProperties prop = QScroller::scroller(viewport())->scrollerProperties();
-    prop.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
-    prop.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, QScrollerProperties::OvershootAlwaysOff);
-    prop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.009);
-    QScroller::scroller(viewport())->setScrollerProperties(prop);
-
-    setStyleSheet(QString("QTreeWidget::item{padding:%1px 0;}").arg(fit::fx(1.5)));
-    setIconSize(fit::fx(QSize{24, 24}));
+    setIconSize(fit::fx(QSize{22, 22}));
     setFocusPolicy(Qt::NoFocus);
     setIndentation(0);
     setRootIsDecorated(false);
-    setSortingEnabled(true);
     setColumnCount(1);
     header()->hide();
     header()->setSectionResizeMode(QHeaderView::Stretch);
