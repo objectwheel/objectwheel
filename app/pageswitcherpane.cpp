@@ -181,6 +181,10 @@ bool PageSwitcherPane::isPageEnabled(const Pages& page) const
 
         case Page_ProjectOptions:
             return m_projectOptionsButton->isEnabled();
+
+        default:
+            Q_ASSERT(false);
+            return false;
     }
 }
 
