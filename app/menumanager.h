@@ -21,7 +21,6 @@ class MenuManager : public QObject
 
     private:
         MenuManager();
-        ~MenuManager();
 
     private:
         void createMenus();

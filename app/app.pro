@@ -182,12 +182,15 @@ SOURCES += $$PWD/main.cpp\
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
 
-### Library Settings
+### Utils Settings
 INCLUDEPATH += $$PWD/../shared
-INCLUDEPATH += $$PWD/../lib
-INCLUDEPATH += $$PWD/../lib/fit
-INCLUDEPATH += $$PWD/../lib/miniz
-LIBS        += -L$$OUT_PWD/../lib -lobjectwheel
+INCLUDEPATH += $$PWD/../utils
+INCLUDEPATH += $$PWD/../utils/fit
+INCLUDEPATH += $$PWD/../utils/miniz
+INCLUDEPATH += $$PWD/../utils/components
+LIBS        += -L$$OUT_PWD/../utils -lutils
+windows:CONFIG(release, debug | release):LIBS += -L$$OUT_PWD/../utils/release
+windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug
 
 ### Defines
 DEFINES += QT_QML_DEBUG_NO_WARNING \
@@ -209,27 +212,36 @@ macx {
     previewer.path = Contents/MacOS
     themer.files = $$OUT_PWD/../objectwheel-themer/objectwheel-themer
     themer.path = Contents/MacOS
-    lib.files = $$OUT_PWD/../lib/libobjectwheel.dylib
-    lib.path = Contents/Frameworks
-    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change libobjectwheel.dylib @loader_path/../Frameworks/libobjectwheel.dylib)
+    utils.files = $$OUT_PWD/../utils/libutils.dylib
+    utils.path = Contents/Frameworks
+    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
     docs.files = $$PWD/resources/docs
     docs.path = Contents/MacOS
-    QMAKE_BUNDLE_DATA += interpreter previewer themer lib docs
-} else {
+    QMAKE_BUNDLE_DATA += interpreter previewer themer utils docs
+} else:unix {
     interpreter.files = $$OUT_PWD/../objectwheel-interpreter/objectwheel-interpreter
     interpreter.path = $$OUT_PWD/
     previewer.files = $$OUT_PWD/../objectwheel-previewer/objectwheel-previewer
     previewer.path = $$OUT_PWD/
     themer.files = $$OUT_PWD/../objectwheel-themer/objectwheel-themer
     themer.path = $$OUT_PWD/
-    windows {
-        lib.files = $$OUT_PWD/../lib/libobjectwheel.dll
-    }
-    linux {
-        lib.files = $$OUT_PWD/../lib/libobjectwheel.so
-    }
-    lib.path = $$OUT_PWD/
+    utils.files = $$OUT_PWD/../utils/libutils.so
+    utils.path = $$OUT_PWD/
     docs.files = $$PWD/resources/docs/*
     docs.path = $$OUT_PWD/docs
-    QMAKE_EXTRA_TARGETS += interpreter previewer themer lib docs
+    INSTALLS += interpreter previewer themer utils docs
+} else:windows {
+    CONFIG(debug, debug | release):COMPILING_MODE = debug
+    CONFIG(release, debug | release):COMPILING_MODE = release
+    interpreter.files = $$OUT_PWD/../objectwheel-interpreter/$$COMPILING_MODE/objectwheel-interpreter.exe
+    interpreter.path = $$OUT_PWD/$$COMPILING_MODE
+    previewer.files = $$OUT_PWD/../objectwheel-previewer/$$COMPILING_MODE/objectwheel-previewer.exe
+    previewer.path = $$OUT_PWD/$$COMPILING_MODE
+    themer.files = $$OUT_PWD/../objectwheel-themer/$$COMPILING_MODE/objectwheel-themer.exe
+    themer.path = $$OUT_PWD/$$COMPILING_MODE
+    utils.files = $$OUT_PWD/../utils/$$COMPILING_MODE/utils.dll
+    utils.path = $$OUT_PWD/$$COMPILING_MODE
+    docs.files = $$PWD/resources/docs/*
+    docs.path = $$OUT_PWD/$$COMPILING_MODE/docs
+    INSTALLS += interpreter previewer themer utils docs
 }

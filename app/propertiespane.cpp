@@ -709,7 +709,7 @@ class PropertiesTree : public QTreeWidget
 
 void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
-    qreal width = fit::fx(10);
+    qreal width = fit::fx(9);
     auto model = index.model();
     bool hasChild = itemFromIndex(index)->childCount();
     bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
@@ -743,7 +743,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     if (hasChild) {
         painter->setPen(isClassRow ? Qt::white : Qt::black);
         painter->setBrush(Qt::NoBrush);
-        painter->drawRoundedRect(handleRect, fit::fx(1), fit::fx(1));
+        painter->drawRect(handleRect);
 
         painter->drawLine(
             QPointF(handleRect.left() + fit::fx(2.5), handleRect.center().y()),

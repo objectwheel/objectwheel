@@ -1,5 +1,6 @@
 #include <interpreterbackend.h>
 #include <projectbackend.h>
+#include <QApplication>
 
 InterpreterBackend::InterpreterBackend()
 {
@@ -24,7 +25,7 @@ InterpreterBackend* InterpreterBackend::instance()
 void InterpreterBackend::run()
 {
     _process->setArguments(QStringList() << ProjectBackend::instance()->dir());
-    _process->setProgram("./objectwheel-interpreter");
+    _process->setProgram(qApp->applicationDirPath() + "/objectwheel-interpreter");
     _process->start();
 }
 

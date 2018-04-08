@@ -419,7 +419,7 @@ void ThemeChooserWidget::run()
     }
 
     QProcess::startDetached(
-         "./objectwheel-themer",
+         qApp->applicationDirPath() + "/objectwheel-themer",
          QStringList() << "show"
                        << (m_version == V1 ? "v1" : "v2")
                        << (m_version == V1 ? m_stylesCombo->currentText() : json)
@@ -465,7 +465,7 @@ void ThemeChooserWidget::refresh()
 
     QProcess process;
     process.start(
-         "./objectwheel-themer",
+         qApp->applicationDirPath() + "/objectwheel-themer",
          QStringList() << "capture"
                        << (m_version == V1 ? "v1" : "v2")
                        << (m_version == V1 ? m_stylesCombo->currentText() : json)

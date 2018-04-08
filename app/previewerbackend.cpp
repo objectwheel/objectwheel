@@ -12,6 +12,7 @@
 #include <QLocalSocket>
 #include <QDataStream>
 #include <QProcess>
+#include <QApplication>
 
 namespace {
     quint32 blockSize = 0;
@@ -81,7 +82,7 @@ bool PreviewerBackend::init()
       return m_server->listen("serverName");
     #else
       QProcess process;
-      process.setProgram("./objectwheel-previewer");
+      process.setProgram(qApp->applicationDirPath() + "/objectwheel-previewer");
       process.setArguments(QStringList() << serverName);
       // process.setStandardOutputFile(QProcess::nullDevice());
       // process.setStandardErrorFile(QProcess::nullDevice());
