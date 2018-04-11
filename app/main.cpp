@@ -12,14 +12,12 @@
 #include <QMessageBox>
 
 #define PIXEL_SIZE 14
-#define MIN_DPI 110.0
 #define REF_DPI 149.0
 
 int main(int argc, char* argv[])
 {
     // Boot Settings
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL); // For reCaptcha
 
     // Initialize application
@@ -48,21 +46,21 @@ int main(int argc, char* argv[])
     }
 
     // Initialize fit library
-    fit::update(REF_DPI, MIN_DPI);
+    fit::update(REF_DPI, false);
 
     // Font settings
     for (const auto& font : lsfile(":/resources/fonts"))
         QFontDatabase::addApplicationFont(":/resources/fonts/" + font);
 
     QFont font;
-    font.setStyleStrategy(QFont::PreferAntialias);
     font.setPixelSize(fit::fx(PIXEL_SIZE));
+    font.setStyleStrategy(QFont::PreferAntialias);
     #if defined(Q_OS_MACOS)
-    font.setFamily(".SF NS Display");
+      font.setFamily(".SF NS Display");
     #elif defined(Q_OS_WIN)
-    font.setFamily("Segoe UI");
+      font.setFamily("Segoe UI");
     #else
-    font.setFamily("Open Sans");
+      font.setFamily("Open Sans");
     #endif
     QApplication::setFont(font);
 

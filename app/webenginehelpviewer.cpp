@@ -87,10 +87,6 @@ WebEngineHelpViewer::WebEngineHelpViewer(QHelpEngine* helpEngine, QWidget *paren
         emit forwardAvailable(isForwardAvailable());
     });
 
-//    QAction* action = m_widget->pageAction(QWebEnginePage::OpenLinkInNewTab);
-//    action->setText(QCoreApplication::translate("HelpViewer",
-//                                                Constants::TR_OPEN_LINK_AS_NEW_PAGE));
-
     QWebEnginePage *viewPage = m_widget->page();
     QWebEngineProfile *viewProfile = viewPage->profile();
 

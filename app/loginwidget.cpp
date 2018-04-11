@@ -138,6 +138,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Login)->setText(tr("Log In"));
     _buttons->get(Register)->setIcon(QIcon(PATH_RICON));
     _buttons->get(Login)->setIcon(QIcon(PATH_LICON));
+    _buttons->get(Register)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Login)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
     _buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Login)->setCursor(Qt::PointingHandCursor);
     connect(_buttons->get(Register), SIGNAL(clicked(bool)),

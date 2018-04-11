@@ -1,5 +1,6 @@
 #include <interpreterbackend.h>
 #include <projectbackend.h>
+#include <fit.h>
 #include <QApplication>
 
 InterpreterBackend::InterpreterBackend()

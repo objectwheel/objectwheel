@@ -233,15 +233,23 @@ macx {
 } else:windows {
     CONFIG(debug, debug | release):COMPILING_MODE = debug
     CONFIG(release, debug | release):COMPILING_MODE = release
-    interpreter.files = $$OUT_PWD/../objectwheel-interpreter/$$COMPILING_MODE/objectwheel-interpreter.exe
-    interpreter.path = $$OUT_PWD/$$COMPILING_MODE
-    previewer.files = $$OUT_PWD/../objectwheel-previewer/$$COMPILING_MODE/objectwheel-previewer.exe
-    previewer.path = $$OUT_PWD/$$COMPILING_MODE
-    themer.files = $$OUT_PWD/../objectwheel-themer/$$COMPILING_MODE/objectwheel-themer.exe
-    themer.path = $$OUT_PWD/$$COMPILING_MODE
-    utils.files = $$OUT_PWD/../utils/$$COMPILING_MODE/utils.dll
-    utils.path = $$OUT_PWD/$$COMPILING_MODE
-    docs.files = $$PWD/resources/docs/*
-    docs.path = $$OUT_PWD/$$COMPILING_MODE/docs
-    INSTALLS += interpreter previewer themer utils docs
+
+    FILES_TO_COPY = $$OUT_PWD/../objectwheel-interpreter/$$COMPILING_MODE/objectwheel-interpreter.exe
+    FILES_TO_COPY += $$OUT_PWD/../objectwheel-previewer/$$COMPILING_MODE/objectwheel-previewer.exe
+    FILES_TO_COPY += $$OUT_PWD/../objectwheel-themer/$$COMPILING_MODE/objectwheel-themer.exe
+    FILES_TO_COPY += $$OUT_PWD/../utils/$$COMPILING_MODE/utils.dll
+    DESTINATION_DIR = $$shell_quote($$shell_path($$OUT_PWD/$$COMPILING_MODE))
+
+    for (FILE, FILES_TO_COPY) {
+        FILE_PATH = $$shell_quote($$shell_path($$FILE))
+        QMAKE_POST_LINK += $$QMAKE_COPY $$FILE_PATH $$DESTINATION_DIR $$escape_expand(\\n)
+    }
+
+    DIRS_TO_COPY = $$PWD/resources/docs
+    DESTINATION_DIR = $$shell_quote($$shell_path($$OUT_PWD/$$COMPILING_MODE/docs))
+
+    for (DIR, DIRS_TO_COPY) {
+        DIR_PATH = $$shell_quote($$shell_path($$DIR))
+        QMAKE_POST_LINK += $$QMAKE_COPY_DIR $$DIR_PATH $$DESTINATION_DIR $$escape_expand(\\n)
+    }
 }

@@ -85,6 +85,8 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Back)->setText(tr("Back"));
     _buttons->get(Next)->setIcon(QIcon(PATH_NICON));
     _buttons->get(Back)->setIcon(QIcon(PATH_CICON));
+    _buttons->get(Next)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Back)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
     _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;

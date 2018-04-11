@@ -107,9 +107,12 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Resend)->setIcon(QIcon(PATH_RICON));
     _buttons->get(Verify)->setIcon(QIcon(PATH_VICON));
-    _buttons->get(Verify)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Resend)->setCursor(Qt::PointingHandCursor);
+    _buttons->get(Cancel)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Resend)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Verify)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
     _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
+    _buttons->get(Resend)->setCursor(Qt::PointingHandCursor);
+    _buttons->get(Verify)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 3.0;
     _buttons->triggerSettings();
 

@@ -6,6 +6,7 @@
 #include <saveutils.h>
 #include <control.h>
 #include <hashfactory.h>
+#include <fit.h>
 
 #include <QPointer>
 #include <QLocalServer>
@@ -120,7 +121,9 @@ void PreviewerBackend::restart()
         #if !defined(PREVIEWER_DEBUG)
           ::restart(
               socket.data(),
-              QStringList() << ProjectBackend::instance()->dir() << serverName
+              QStringList()
+                  << ProjectBackend::instance()->dir()
+                  << serverName
           );
         #endif
     } else {

@@ -96,6 +96,9 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Delete)->setIcon(QIcon(PATH_DICON));
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Save)->setIcon(QIcon(PATH_SICON));
+    _buttons->get(Delete)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Cancel)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Delete)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
     _buttons->get(Delete)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Save)->setCursor(Qt::PointingHandCursor);

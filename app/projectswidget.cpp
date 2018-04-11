@@ -38,7 +38,7 @@
 #define PATH_IICON       (":/resources/images/load.png")
 #define PATH_EICON       (":/resources/images/unload.png")
 #define PATH_SICON       (":/resources/images/dots.png")
-#define WIDTH_PROGRESS   80
+#define WIDTH_PROGRESS   fit::fx(80)
 #define DPR              QGuiApplication::primaryScreen()->devicePixelRatio()
 #define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
@@ -256,6 +256,10 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->get(Load)->setIcon(QIcon(PATH_LICON));
     m_buttons->get(Import)->setIcon(QIcon(PATH_IICON));
     m_buttons->get(Export)->setIcon(QIcon(PATH_EICON));
+    m_buttons->get(New)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    m_buttons->get(Load)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    m_buttons->get(Import)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    m_buttons->get(Export)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
     m_buttons->get(New)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Load)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Import)->setCursor(Qt::PointingHandCursor);

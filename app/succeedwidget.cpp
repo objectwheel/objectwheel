@@ -59,6 +59,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _buttons->add(Ok, "#86CC63", "#75B257");
     _buttons->get(Ok)->setText(tr("Ok"));
     _buttons->get(Ok)->setIcon(QIcon(PATH_OICON));
+    _buttons->get(Ok)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
     _buttons->get(Ok)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH;
     _buttons->triggerSettings();

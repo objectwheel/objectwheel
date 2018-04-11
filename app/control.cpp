@@ -247,16 +247,14 @@ void Control::centralize()
 
 void Control::hideResizers()
 {
-    for (auto resizer : m_resizers) {
+    for (auto resizer : m_resizers)
         resizer->hide();
-    }
 }
 
 void Control::showResizers()
 {
-    for (auto resizer : m_resizers) {
+    for (auto resizer : m_resizers)
         resizer->show();
-    }
 }
 
 void Control::refresh(bool repreview)
@@ -449,8 +447,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawImage(rect(), m_preview,
-      QRectF(QPointF(0, 0), size() * DPR));
+    painter->drawImage(rect(), m_preview, QRectF(QPointF(0, 0), size() * DPR));
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
@@ -465,8 +462,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(m_preview.rect(), gradient);
             p.end();
-            painter->drawImage(rect(), highlight, QRectF(
-              QPointF(0, 0), size() * DPR));
+            painter->drawImage(rect(), highlight, QRectF(QPointF(0, 0), size() * DPR));
         }
     }
 
@@ -521,9 +517,9 @@ void Control::updatePreview(const PreviewResult& result)
                 qreal z = getZ(result);
                 setRefreshingDisabled(true);
                 blockSignals(true);
-                resize(rect.size());
+                resize(fit::fx(rect.size()));
                 if (!form())
-                    setPos(rect.topLeft());
+                    setPos(fit::fx(rect.topLeft().x()), fit::fx(rect.topLeft().y()));
                 setZValue(z);
                 blockSignals(false);
                 setRefreshingDisabled(false);
@@ -658,9 +654,9 @@ namespace {
 
         control->blockSignals(true);
         control->setId(SaveUtils::id(control->dir()));        
-        control->setPos(x, y);
+        control->setPos(fit::fx(x), fit::fx(y));
         control->setZValue(z);
-        control->resize(width, height);
+        control->resize(fit::fx(width), fit::fx(height));
         control->blockSignals(false);
     }
 

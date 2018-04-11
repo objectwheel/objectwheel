@@ -22,18 +22,18 @@ SaveTransaction* SaveTransaction::instance()
 void SaveTransaction::processGeometry(Control* control)
 {
     if ((!control->gui() || control->hasErrors()) && !control->form()) {
-        SaveUtils::setX(control->dir(), control->x());
-        SaveUtils::setY(control->dir(), control->y());
+        SaveUtils::setX(control->dir(), fit::dx(control->x()));
+        SaveUtils::setY(control->dir(), fit::dx(control->y()));
         return;
     }
 
     if (!control->form()) {
-        SaveBackend::instance()->setProperty(control, "x", QString::number(control->x()));
-        SaveBackend::instance()->setProperty(control, "y", QString::number(control->y()));
+        SaveBackend::instance()->setProperty(control, "x", QString::number(fit::dx(control->x())));
+        SaveBackend::instance()->setProperty(control, "y", QString::number(fit::dx(control->y())));
     }
 
-    SaveBackend::instance()->setProperty(control, "width", QString::number(control->size().width() / fit::ratio()));
-    SaveBackend::instance()->setProperty(control, "height", QString::number(control->size().height() / fit::ratio()));
+    SaveBackend::instance()->setProperty(control, "width", QString::number(fit::dx(control->size().width())));
+    SaveBackend::instance()->setProperty(control, "height", QString::number(fit::dx(control->size().height())));
 
     if (!control->form()) {
         PreviewerBackend::instance()->updateCache(control->uid(), "x", control->x());

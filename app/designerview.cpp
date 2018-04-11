@@ -223,7 +223,7 @@ void DesignerView::onPasteAction()
     for (auto url : mimeData->urls()) {
         auto control = ExposerBackend::instance()->exposeControl(
             url.toLocalFile(),
-            QPointF(SaveUtils::x(url.toLocalFile()) + fit::fx(5), SaveUtils::y(url.toLocalFile()) + fit::fx(5)),
+            QPointF(fit::fx(SaveUtils::x(url.toLocalFile())) + fit::fx(5), fit::fx(SaveUtils::y(url.toLocalFile())) + fit::fx(5)),
             sourceSuid,
             mainForm,
             mainForm->dir(),
