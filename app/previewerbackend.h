@@ -34,7 +34,6 @@ class PreviewerBackend : public QObject
             }
 
             Type type;
-            QSizeF size;
             QString dir;
             QString uid;
             QString newUrl;
@@ -55,7 +54,7 @@ class PreviewerBackend : public QObject
     public slots:
         void restart();
         void requestInit(const QString& projectDir);
-        void requestPreview(const QSizeF& size, const QString& dir, bool repreview = false);
+        void requestPreview(const QString& dir, bool repreview = false);
         void removeCache(const QString& uid);
         void updateParent(const QString& uid, const QString& parentUid, const QString& newUrl);
         void updateCache(const QString& uid, const QString& property, const QVariant& value);
@@ -66,6 +65,7 @@ class PreviewerBackend : public QObject
         void onNewConnection();
         void onReadReady();
         void onBinaryMessageReceived(const QByteArray& data);
+        void fixTasksAgainstReparent(const QString& uid, const QString& newUrl);
 
     private:
         void processNextTask();

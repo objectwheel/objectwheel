@@ -36,14 +36,9 @@ void SaveTransaction::processGeometry(Control* control)
     SaveBackend::instance()->setProperty(control, "height", QString::number(fit::dx(control->size().height())));
 
     if (!control->form()) {
-        PreviewerBackend::instance()->updateCache(control->uid(), "x", control->x());
-        PreviewerBackend::instance()->updateCache(control->uid(), "y", control->y());
+        PreviewerBackend::instance()->updateCache(control->uid(), "x", fit::dx(control->x()));
+        PreviewerBackend::instance()->updateCache(control->uid(), "y", fit::dx(control->y()));
     }
-
-    PreviewerBackend::instance()->updateCache(control->uid(), "width", control->size().width());
-    PreviewerBackend::instance()->updateCache(control->uid(), "height", control->size().height());
-
-    control->refresh();
 }
 
 void SaveTransaction::processParent(Control* control)
@@ -52,7 +47,6 @@ void SaveTransaction::processParent(Control* control)
         return;
 
     SaveBackend::instance()->moveControl(control, control->parentControl());
-    PreviewerBackend::instance()->updateParent(control->uid(), control->parentControl()->uid(), control->url());
     processGeometry(control);
 }
 
@@ -62,6 +56,4 @@ void SaveTransaction::processZ(Control* control)
         return;
 
     SaveBackend::instance()->setProperty(control, "z", QString::number(control->zValue()));
-    PreviewerBackend::instance()->updateCache(control->uid(), "z", control->zValue());
-    control->refresh();
 }

@@ -65,14 +65,45 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
         });
     });
 
+    connect(this, &Control::zChanged, this, &Control::onZValueChange);
     connect(this, &Control::zChanged, this, [=] { emit cW->zValueChanged(this); });
+    connect(this, &Control::parentChanged, this, &Control::onParentChange);
     connect(this, &Control::parentChanged, this, [=] { emit cW->parentChanged(this); });
+
     connect(PreviewerBackend::instance(), &PreviewerBackend::previewReady, this, &Control::updatePreview);
 }
 
 Control::~Control()
 {
     m_controls.removeOne(this);
+}
+
+void Control::onSizeChange()
+{
+    if (hasErrors() || !gui())
+        return;
+
+    PreviewerBackend::instance()->updateCache(uid(), "width", fit::dx(size().width()));
+    PreviewerBackend::instance()->updateCache(uid(), "height", fit::dx(size().height()));
+}
+
+void Control::onParentChange()
+{
+    if (!parentControl() || (!parentControl()->gui() && gui()))
+        return;
+
+    PreviewerBackend::instance()->updateParent(uid(), parentControl()->uid(), url());
+
+    onSizeChange();
+}
+
+void Control::onZValueChange()
+{
+    if (hasErrors() || !gui())
+        return;
+
+    // FIXME: Do we really need this?
+    PreviewerBackend::instance()->updateCache(uid(), "z", zValue());
 }
 
 bool Control::gui() const
@@ -259,7 +290,8 @@ void Control::showResizers()
 
 void Control::refresh(bool repreview)
 {
-    PreviewerBackend::instance()->requestPreview(size(), dir(), repreview);
+    if (!m_refreshingDisabled)
+        PreviewerBackend::instance()->requestPreview(dir(), repreview);
 }
 
 void Control::updateUids()
@@ -411,8 +443,7 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
     for (auto resizer : m_resizers)
         resizer->correct();
 
-    if (!m_refreshingDisabled)
-        refresh();
+    onSizeChange();
 }
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)

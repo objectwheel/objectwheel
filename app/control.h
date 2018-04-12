@@ -84,6 +84,9 @@ class Control : public QGraphicsWidget
         ~Control();
 
     private slots:
+        void onSizeChange();
+        void onParentChange();
+        void onZValueChange();
         void updatePreview(const PreviewResult& result);
 
     signals:

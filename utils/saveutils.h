@@ -76,7 +76,7 @@ class UTILS_EXPORT SaveUtils : public QObject
         static QString crDate(const QString& projectDir);
         static QString mfDate(const QString& projectDir);
         static QString size(const QString& projectDir);
-        static QString theme(const QString& projectDir);
+        static QJsonValue theme(const QString& projectDir);
         static void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value);
 
     private:

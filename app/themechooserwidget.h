@@ -25,6 +25,7 @@ class ThemeChooserWidget : public QWidget
     private slots:
         void run();
         void refresh();
+        void saveTheme();
 
     private:
         Version m_version;

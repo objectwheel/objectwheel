@@ -2,6 +2,10 @@
 #include <dpr.h>
 #include <fit.h>
 #include <delayer.h>
+#include <saveutils.h>
+#include <projectbackend.h>
+#include <filemanager.h>
+
 #include <QtQuickControls2>
 #include <QtWidgets>
 
@@ -198,6 +202,12 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_customizationPicture->setFixedSize(420 / DPR, 420 / DPR);
 
     if (m_version == V2) {
+        connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
+        connect(m_primaryColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
+        connect(m_foregroundColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
+        connect(m_backgroundColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
+        connect(m_themesCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
+
         connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
         connect(m_primaryColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
         connect(m_foregroundColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
@@ -205,6 +215,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         connect(m_themesCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
     }
 
+    connect(m_stylesCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
     connect(m_stylesCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
 
     if (m_version == V2) {
@@ -382,47 +393,58 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
 void ThemeChooserWidget::reset()
 {
+    const auto& object = SaveUtils::theme(ProjectBackend::instance()->dir()).toObject();
+    const auto& version = object.value("version").toString();
+    const auto& style = object.value("style").toString();
 
+    if (version == "v1") {
+        qputenv("QT_QUICK_CONTROLS_1_STYLE", style.toUtf8().constData());
+    } else {
+        const auto& theme = object.value("theme").toString();
+        const auto& accent = object.value("accent").toString();
+        const auto& primary = object.value("primary").toString();
+        const auto& foreground = object.value("foreground").toString();
+        const auto& background = object.value("background").toString();
+
+        qputenv("QT_QUICK_CONTROLS_STYLE", style.toUtf8().constData());
+
+        if (style == QString("Material")) {
+            if (!theme.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_MATERIAL_THEME", theme.toUtf8().constData());
+
+            if (!accent.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_MATERIAL_ACCENT", accent.toUtf8().constData());
+
+            if (!primary.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_MATERIAL_PRIMARY", primary.toUtf8().constData());
+
+            if (!foreground.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_MATERIAL_FOREGROUND", foreground.toUtf8().constData());
+
+            if (!background.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_MATERIAL_BACKGROUND", background.toUtf8().constData());
+        } else if (style == QString("Universal")) {
+            if (!theme.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_THEME", theme.toUtf8().constData());
+
+            if (!accent.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_ACCENT", accent.toUtf8().constData());
+
+            if (!foreground.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_FOREGROUND", foreground.toUtf8().constData());
+
+            if (!background.isEmpty())
+                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_BACKGROUND", background.toUtf8().constData());
+        }
+    }
 }
 
 void ThemeChooserWidget::run()
 {
-    QString json;
-    if (m_version == V2) {
-        QJsonObject object;
-        QRegularExpression exp("#.*(?=\\))");
-
-        auto text = m_stylesCombo->currentText();
-        object.insert("style", text);
-
-        text = m_themesCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("theme", text);
-
-        text = m_accentColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("accent", exp.match(text).captured(0));
-
-        text = m_primaryColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("primary", exp.match(text).captured(0));
-
-        text = m_backgroundColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("background", exp.match(text).captured(0));
-
-        text = m_foregroundColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("foreground", exp.match(text).captured(0));
-
-        json = QJsonDocument(object).toJson();
-    }
-
     QProcess::startDetached(
          qApp->applicationDirPath() + "/objectwheel-themer",
          QStringList() << "show"
-                       << (m_version == V1 ? "v1" : "v2")
-                       << (m_version == V1 ? m_stylesCombo->currentText() : json)
+                       << ProjectBackend::instance()->dir()
     );
 }
 
@@ -432,14 +454,34 @@ void ThemeChooserWidget::refresh()
     tmpFile.open();
     tmpFile.close();
 
-    QString json;
+    QProcess process;
+    process.startDetached(
+         qApp->applicationDirPath() + "/objectwheel-themer",
+         QStringList() << "capture"
+                       << ProjectBackend::instance()->dir()
+                       << tmpFile.fileName()
+    );
+
+    process.waitForStarted();
+    process.waitForFinished();
+
+    QPixmap preview(tmpFile.fileName());
+    preview.setDevicePixelRatio(DPR);
+    m_previewPicture->setPixmap(preview);
+}
+
+void ThemeChooserWidget::saveTheme()
+{
+    QJsonObject object;
+    QRegularExpression exp("#.*(?=\\))");
+
+    QString text = m_version == V2 ? "v2" : "v1";
+    object.insert("version", text);
+
+    text = m_stylesCombo->currentText();
+    object.insert("style", text);
+
     if (m_version == V2) {
-        QJsonObject object;
-        QRegularExpression exp("#.*(?=\\))");
-
-        auto text = m_stylesCombo->currentText();
-        object.insert("style", text);
-
         text = m_themesCombo->currentText();
         if (!text.contains("default"))
             object.insert("theme", text);
@@ -459,25 +501,9 @@ void ThemeChooserWidget::refresh()
         text = m_foregroundColorsCombo->currentText();
         if (!text.contains("default"))
             object.insert("foreground", exp.match(text).captured(0));
-
-        json = QJsonDocument(object).toJson();
     }
 
-    QProcess process;
-    process.start(
-         qApp->applicationDirPath() + "/objectwheel-themer",
-         QStringList() << "capture"
-                       << (m_version == V1 ? "v1" : "v2")
-                       << (m_version == V1 ? m_stylesCombo->currentText() : json)
-                       << tmpFile.fileName()
-    );
-
-    process.waitForStarted();
-    process.waitForFinished();
-
-    QPixmap preview(tmpFile.fileName());
-    preview.setDevicePixelRatio(DPR);
-    m_previewPicture->setPixmap(preview);
+    SaveUtils::setProjectProperty(ProjectBackend::instance()->dir(), PTAG_THEME, object);
 }
 
 namespace {

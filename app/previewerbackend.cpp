@@ -7,6 +7,7 @@
 #include <control.h>
 #include <hashfactory.h>
 #include <fit.h>
+#include <filemanager.h>
 
 #include <QPointer>
 #include <QLocalServer>
@@ -162,7 +163,7 @@ void PreviewerBackend::requestInit(const QString& projectDir)
     }
 }
 
-void PreviewerBackend::requestPreview(const QSizeF& size, const QString& dir, bool repreview)
+void PreviewerBackend::requestPreview(const QString& dir, bool repreview)
 {
     if (m_disabled)
         return;
@@ -171,7 +172,6 @@ void PreviewerBackend::requestPreview(const QSizeF& size, const QString& dir, bo
     task.dir = dir;
     task.uid = SaveUtils::uid(dir);
     task.type = repreview ? Task::Repreview : Task::Preview;
-    task.size = size;
 
     if (!m_taskList.contains(task)) {
         m_taskList << task;
@@ -180,13 +180,6 @@ void PreviewerBackend::requestPreview(const QSizeF& size, const QString& dir, bo
             processNextTask();
             QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);
         }
-    } else {
-        int index = m_taskList.indexOf(task);
-
-        m_taskList[index].size = size;
-
-        if (index == 0)
-            m_taskList[index].needsUpdate = true;
     }
 }
 
@@ -213,6 +206,8 @@ void PreviewerBackend::updateParent(const QString& uid, const QString& parentUid
 {
     if (m_disabled)
         return;
+
+    fixTasksAgainstReparent(uid, newUrl);
 
     Task task;
     task.uid = uid;
@@ -264,6 +259,15 @@ void PreviewerBackend::updateCache(const QString& uid, const QString& property, 
 
         if (index == 0)
             m_taskList[index].needsUpdate = true;
+    }
+}
+
+void PreviewerBackend::fixTasksAgainstReparent(const QString& uid, const QString& newUrl)
+{
+    for (auto& task : m_taskList) {
+        if (task.uid == uid) {
+            task.dir = dname(dname(newUrl));
+        }
     }
 }
 
@@ -328,12 +332,13 @@ void PreviewerBackend::processNextTask()
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
 
+        qDebug() << task.type << task.uid << m_taskList.size();
+
         if (task.type == Task::Init) {
             out << REQUEST_INIT;
             out << task.dir;
         } else if (task.type == Task::Preview) {
             out << REQUEST_PREVIEW;
-            out << task.size;
             out << task.dir;
         } else if (task.type == Task::Repreview) {
             out << REQUEST_REPREVIEW;
@@ -344,10 +349,12 @@ void PreviewerBackend::processNextTask()
             out << task.uid;
             out << task.parentUid;
             out << task.newUrl;
-            enableDirtHandling();
+            // We don't need cause we get an position property update with reparent in anyways
+            // enableDirtHandling();
         } else if (task.type == Task::Remove) {
             out << REQUEST_REMOVE;
             out << task.uid;
+            enableDirtHandling();
         } else if (task.type == Task::Update) {
             out << REQUEST_UPDATE;
             out << task.uid;
@@ -364,6 +371,7 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
 {
     if (type == REQUEST_DONE) {
         Task::Type t = m_taskList.first().type;
+        QString previousUid = m_taskList.first().uid;
 
         if (!m_taskList.first().needsUpdate) {
             m_taskList.removeFirst();
@@ -371,33 +379,29 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
         } else
             m_taskList.first().needsUpdate = false;
 
-        if (t == Task::Preview || t == Task::Repreview) {
-            PreviewResult result;
+        PreviewResult result;
+
+        if (t == Task::Remove || t == Task::Preview || t == Task::Repreview || t == Task::Update)
             in >> result;
 
+        if (t == Task::Remove || t == Task::Repreview || t == Task::Update) {
             if (m_dirtHandlingEnabled) {
                 for (auto control : Control::controls()) {
                     if (result.dirtyUids.contains(control->uid())) {
                         Task task;
                         task.dir = control->dir();
                         task.uid = control->uid();
-                        task.size = control->size();
                         task.type = Task::Preview;
 
-                        if (!m_taskList.contains(task)) {
+                        if (!m_taskList.contains(task))
                             m_taskList << task;
-                        } else {
-                            int index = m_taskList.indexOf(task);
-
-                            if (index == 0)
-                                m_taskList[index].needsUpdate = true;
-                        }
                     }
                 }
             }
-
-            QTimer::singleShot(0, std::bind(&PreviewerBackend::previewReady, this, result));
         }
+
+        if (t == Task::Preview || t == Task::Repreview)
+            QTimer::singleShot(0, std::bind(&PreviewerBackend::previewReady, this, result));
 
         if (!isBusy())
             QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);

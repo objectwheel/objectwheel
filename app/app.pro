@@ -1,7 +1,7 @@
 ### App Settings
 TEMPLATE = app
 TARGET   = Objectwheel
-#DEFINES += PREVIEWER_DEBUG
+DEFINES += PREVIEWER_DEBUG
 
 QT += quickwidgets qml quick help
 QT += widgets network websockets svg concurrent quickcontrols2

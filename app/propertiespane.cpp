@@ -1285,7 +1285,6 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 
     SaveBackend::instance()->setProperty(sc, property, parserValue);
     PreviewerBackend::instance()->updateCache(sc->uid(), property, value);
-    sc->refresh();
 }
 
 void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QString& parserValue, const QVariant& value)
