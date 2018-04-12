@@ -371,7 +371,6 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
 {
     if (type == REQUEST_DONE) {
         Task::Type t = m_taskList.first().type;
-        QString previousUid = m_taskList.first().uid;
 
         if (!m_taskList.first().needsUpdate) {
             m_taskList.removeFirst();

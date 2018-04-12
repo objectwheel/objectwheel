@@ -70,10 +70,6 @@ ApplicationWindow footer, header li bir şey nasıl preview edilir, previewe sis
 ApplicationWindow contentItem'i üzerine reparent bozuk mu bi test et
 ApplicationWindow ile material tema vs test et Dark/Light modlarını
 themer, interpreter, previewer için tema ve font kayıt olaylarını hallet, temaları test et, Options pageini doldur güzelleştir
-Mainwindow niye Niye siko sikko küçüle küçüle küçülüyor
-Dirty olarak işaretlenen kontrollerde filtreuygula, iki kere aynı obje dirty olmasın, ama o sırada dörtlü bindingin çalıştığından da emin ol
-Sürekli refresh flood oluyormu, olmuyormu test et
-Dirty itemler manyaklaştı, bunu düzelt
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |

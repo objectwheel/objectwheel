@@ -80,7 +80,7 @@ Control::~Control()
 
 void Control::onSizeChange()
 {
-    if (hasErrors() || !gui())
+    if (hasErrors() || !gui() || m_refreshingDisabled)
         return;
 
     PreviewerBackend::instance()->updateCache(uid(), "width", fit::dx(size().width()));
@@ -89,7 +89,7 @@ void Control::onSizeChange()
 
 void Control::onParentChange()
 {
-    if (!parentControl() || (!parentControl()->gui() && gui()))
+    if (!parentControl() || (!parentControl()->gui() && gui()) || m_refreshingDisabled)
         return;
 
     PreviewerBackend::instance()->updateParent(uid(), parentControl()->uid(), url());
@@ -99,7 +99,7 @@ void Control::onParentChange()
 
 void Control::onZValueChange()
 {
-    if (hasErrors() || !gui())
+    if (hasErrors() || !gui() || m_refreshingDisabled)
         return;
 
     // FIXME: Do we really need this?
