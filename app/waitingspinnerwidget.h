@@ -26,23 +26,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QTimer>
 #include <QColor>
 
-class WaitingSpinnerWidget : public QWidget
-{
+class WaitingSpinnerWidget : public QWidget {
     Q_OBJECT
-
 public:
     /*! Constructor for "standard" widget behaviour - use this
-    * constructor if you wish to, e.g. embed your widget in another. */
-    WaitingSpinnerWidget(QWidget *parent = 0, bool centerOnParent = true);
+   * constructor if you wish to, e.g. embed your widget in another. */
+    WaitingSpinnerWidget(QWidget *parent = 0,
+                         bool centerOnParent = true,
+                         bool disableParentWhenSpinning = true);
 
     /*! Constructor - use this constructor to automatically create a modal
-    * ("blocking") spinner on top of the calling widget/window.  If a valid
-    * parent widget is provided, "centreOnParent" will ensure that
-    * QtWaitingSpinner automatically centres itself on it, if not,
-    * "centreOnParent" is ignored. */
+   * ("blocking") spinner on top of the calling widget/window.  If a valid
+   * parent widget is provided, "centreOnParent" will ensure that
+   * QtWaitingSpinner automatically centres itself on it, if not,
+   * "centreOnParent" is ignored. */
     WaitingSpinnerWidget(Qt::WindowModality modality,
                          QWidget *parent = 0,
-                         bool centerOnParent = true);
+                         bool centerOnParent = true,
+                         bool disableParentWhenSpinning = true);
 
 public slots:
     void start();
@@ -107,6 +108,7 @@ private:
 
     QTimer *_timer;
     bool    _centerOnParent;
+    bool    _disableParentWhenSpinning;
     int     _currentCounter;
     bool    _isSpinning;
 };

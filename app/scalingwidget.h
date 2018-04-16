@@ -21,7 +21,6 @@ private slots:
 
 private:
     QVBoxLayout* m_layout;
-    QRadioButton* m_smartScalingButton;
     QRadioButton* m_highDpiScalingButton;
     QRadioButton* m_noScalingButton;
 };

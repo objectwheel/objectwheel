@@ -8,6 +8,7 @@ class QComboBox;
 class QToolButton;
 class QGridLayout;
 class QPushButton;
+class WaitingSpinnerWidget;
 
 class ThemeChooserWidget : public QWidget
 {
@@ -24,14 +25,21 @@ public slots:
 
 private slots:
     void run();
+    void save();
+    void enable();
     void refresh();
-    void saveTheme();
+
+private:
+    QJsonObject toJson() const;
+    QString toItem(QComboBox* comboBox, const QString& colorName) const;
 
 private:
     Version m_version;
     QLabel* m_stylesLabel;
     QComboBox* m_stylesCombo;
     QPushButton* m_seeRunningButton;
+    QPushButton* m_saveButton;
+    QPushButton* m_resetButton;
     QLabel* m_themesLabel;
     QComboBox* m_themesCombo;
     QLabel* m_detailsLabel;
@@ -56,7 +64,7 @@ private:
     QLabel* m_previewLabel;
     QLabel* m_previewPicture;
     QGridLayout* m_gridLayout;
-
+    WaitingSpinnerWidget* m_loadingIndicator;
 };
 
 #endif // THEMECHOOSERWIDGET_H

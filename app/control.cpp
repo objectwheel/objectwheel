@@ -465,12 +465,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
            rect().intersected(
                parentControl()->mapToItem(
                    this,
-                   parentControl()->rect().adjusted(
-                       1,
-                       1,
-                      -1,
-                      -1
-                   )
+                   parentControl()->rect().adjusted(1, 1, -1, -1)
                ).boundingRect()
            )
         );
@@ -481,7 +476,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
-    gradient.setColorAt(1, QColor("#174C4C4C").darker(110));
+    gradient.setColorAt(1, QColor("#174C4C4C").darker(120));
 
     if (m_dragIn) {
         if (scene()->showOutlines()) {
@@ -496,7 +491,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
     }
 
-    if (isSelected() || scene()->showOutlines()) {
+    if (!form() && (isSelected() || scene()->showOutlines())) {
         QPen pen;
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);

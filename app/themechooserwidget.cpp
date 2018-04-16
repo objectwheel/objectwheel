@@ -4,18 +4,19 @@
 #include <saveutils.h>
 #include <projectbackend.h>
 #include <filemanager.h>
+#include <waitingspinnerwidget.h>
 
-#include <QtQuickControls2>
+#include <QJsonValue>
 #include <QtWidgets>
 
 namespace {
-    QPalette clearPalette;
-    extern const QStringList STYLES;
-    extern const QStringList STYLES_V2;
-    extern const QStringList MATERIAL_THEMES;
-    extern const QStringList UNIVERSAL_THEMES;
-    extern const QStringList MATERIAL_COLORS;
-    extern const QStringList UNIVERSAL_COLORS;
+QPalette clearPalette;
+extern const QStringList STYLES;
+extern const QStringList STYLES_V2;
+extern const QStringList MATERIAL_THEMES;
+extern const QStringList UNIVERSAL_THEMES;
+extern const QStringList MATERIAL_COLORS;
+extern const QStringList UNIVERSAL_COLORS;
 }
 
 ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) : QWidget(parent)
@@ -23,6 +24,8 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
   , m_stylesLabel(new QLabel)
   , m_stylesCombo(new QComboBox)
   , m_seeRunningButton(new QPushButton)
+  , m_saveButton(new QPushButton)
+  , m_resetButton(new QPushButton)
   , m_themesLabel(new QLabel)
   , m_themesCombo(new QComboBox)
   , m_detailsLabel(new QLabel)
@@ -47,9 +50,21 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
   , m_previewLabel(new QLabel)
   , m_previewPicture(new QLabel)
   , m_gridLayout(new QGridLayout(this))
+  , m_loadingIndicator(new WaitingSpinnerWidget(m_previewPicture))
 {
     QFont sectionsFont;
     sectionsFont.setWeight(QFont::DemiBold);
+
+    m_loadingIndicator->setStyleSheet("background: transparent;");
+    m_loadingIndicator->setColor("#333333");
+    m_loadingIndicator->setRoundness(50);
+    m_loadingIndicator->setMinimumTrailOpacity(5);
+    m_loadingIndicator->setTrailFadePercentage(100);
+    m_loadingIndicator->setRevolutionsPerSecond(2);
+    m_loadingIndicator->setNumberOfLines(13);
+    m_loadingIndicator->setLineLength(10);
+    m_loadingIndicator->setInnerRadius(5);
+    m_loadingIndicator->setLineWidth(3);
 
     m_stylesLabel->setText(tr("Style:"));
     m_stylesLabel->setStyleSheet("color: black");
@@ -58,8 +73,19 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_stylesCombo->addItems(m_version == V1 ? STYLES : STYLES_V2);
     m_stylesCombo->setFixedWidth(150);
 
-    m_seeRunningButton->setText(tr("See Running"));
-    m_seeRunningButton->setDefault(true);
+    m_saveButton->setDefault(true);
+
+    m_seeRunningButton->setFixedWidth(150);
+    m_saveButton->setFixedWidth(150);
+    m_resetButton->setFixedWidth(150);
+
+    m_seeRunningButton->setCursor(Qt::PointingHandCursor);
+    m_saveButton->setCursor(Qt::PointingHandCursor);
+    m_resetButton->setCursor(Qt::PointingHandCursor);
+
+    m_seeRunningButton->setText(tr("See It Running"));
+    m_saveButton->setText(tr("Save Changes"));
+    m_resetButton->setText(tr("Discard Changes"));
 
     if (m_version == V2) {
         m_themesLabel->setText(tr("Theme:"));
@@ -140,8 +166,11 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_gridLayout->addWidget(m_stylesCombo, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
 
     m_gridLayout->addWidget(m_seeRunningButton, 2, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
+    m_gridLayout->addWidget(m_resetButton, 3, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
+    m_gridLayout->addWidget(m_saveButton, 4, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
 
     if (m_version == V2) {
+        m_gridLayout->addWidget(m_stylesCombo, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
         m_gridLayout->addWidget(m_themesLabel, 0, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
         m_gridLayout->addWidget(m_themesCombo, 1, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
 
@@ -168,14 +197,18 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         m_gridLayout->addWidget(m_foregroundColorButton, 2, 5, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
         m_gridLayout->addWidget(m_backgroundColorButton, 3, 5, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
         m_gridLayout->addWidget(m_primaryColorButton, 4, 5, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+
+        m_gridLayout->setColumnStretch(6, 1);
+        m_gridLayout->addWidget(m_previewLabel, 0, 7, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+        m_gridLayout->addWidget(m_previewPicture, 1, 7, 8, 1, Qt::AlignLeft | Qt::AlignTop);
+
+    } else {
+        m_gridLayout->setColumnStretch(1, 1);
+        m_gridLayout->addWidget(m_previewLabel, 0, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+        m_gridLayout->addWidget(m_previewPicture, 1, 2, 8, 1, Qt::AlignLeft | Qt::AlignTop);
     }
 
-    m_gridLayout->addWidget(m_previewLabel, 0, 6, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridLayout->addWidget(m_previewPicture, 1, 6, 8, 1, Qt::AlignLeft | Qt::AlignTop);
-
     m_gridLayout->setRowStretch(8, 1);
-    m_gridLayout->setColumnStretch(7, 1);
-
 
     if (m_version == V2) {
         m_themesCombo->addItem(tr("Unavailable"));
@@ -201,21 +234,101 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_customizationPicture->setFixedSize(420 / DPR, 420 / DPR);
 
     if (m_version == V2) {
-        connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
-        connect(m_primaryColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
-        connect(m_foregroundColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
-        connect(m_backgroundColorsCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
-        connect(m_themesCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
-
         connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
         connect(m_primaryColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
         connect(m_foregroundColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
         connect(m_backgroundColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
         connect(m_themesCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
+
+        connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
+        connect(m_primaryColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
+        connect(m_foregroundColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
+        connect(m_backgroundColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
+        connect(m_themesCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
     }
 
-    connect(m_stylesCombo, SIGNAL(activated(int)), SLOT(saveTheme()), Qt::QueuedConnection);
     connect(m_stylesCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
+    connect(m_stylesCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
+
+    connect(m_accentColorButton, &QToolButton::clicked, [=] {
+        QColor
+        color = QColorDialog::getColor(
+            Qt::white,
+            this,
+            "Select Color",
+            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+        );
+
+        if (color.isValid()) {
+            m_accentColorsCombo->setItemText(m_accentColorsCombo->count() - 1,
+                QString("Custom (%1)").arg(color.name()));
+            m_accentColorsCombo->setItemData(m_accentColorsCombo->count() - 1,
+                color, Qt::DecorationRole);
+            m_accentColorsCombo->setCurrentIndex(m_accentColorsCombo->count() - 1);
+            enable();
+            refresh();
+        }
+    });
+
+    connect(m_foregroundColorButton, &QToolButton::clicked, [=] {
+        QColor
+        color = QColorDialog::getColor(
+            Qt::white,
+            this,
+            "Select Color",
+            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+        );
+
+        if (color.isValid()) {
+            m_foregroundColorsCombo->setItemText(m_foregroundColorsCombo->count() - 1,
+                QString("Custom (%1)").arg(color.name()));
+            m_foregroundColorsCombo->setItemData(m_foregroundColorsCombo->count() - 1,
+                color, Qt::DecorationRole);
+            m_foregroundColorsCombo->setCurrentIndex(m_foregroundColorsCombo->count() - 1);
+            enable();
+            refresh();
+        }
+    });
+
+    connect(m_backgroundColorButton, &QToolButton::clicked, [=] {
+        QColor
+        color = QColorDialog::getColor(
+            Qt::white,
+            this,
+            "Select Color",
+            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+        );
+
+        if (color.isValid()) {
+            m_backgroundColorsCombo->setItemText(m_backgroundColorsCombo->count() - 1,
+                QString("Custom (%1)").arg(color.name()));
+            m_backgroundColorsCombo->setItemData(m_backgroundColorsCombo->count() - 1,
+                color, Qt::DecorationRole);
+            m_backgroundColorsCombo->setCurrentIndex(m_backgroundColorsCombo->count() - 1);
+            enable();
+            refresh();
+        }
+    });
+
+    connect(m_primaryColorButton, &QToolButton::clicked, [=] {
+        QColor
+        color = QColorDialog::getColor(
+            Qt::white,
+            this,
+            "Select Color",
+            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+        );
+
+        if (color.isValid()) {
+            m_primaryColorsCombo->setItemText(m_primaryColorsCombo->count() - 1,
+                QString("Custom (%1)").arg(color.name()));
+            m_primaryColorsCombo->setItemData(m_primaryColorsCombo->count() - 1,
+                color, Qt::DecorationRole);
+            m_primaryColorsCombo->setCurrentIndex(m_primaryColorsCombo->count() - 1);
+            enable();
+            refresh();
+        }
+    });
 
     if (m_version == V2) {
         connect(m_accentColorsCombo, &QComboBox::currentTextChanged, [=] {
@@ -279,7 +392,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         });
     }
 
-    if (m_version ==  V2) {
+    if (m_version == V2) {
         connect(m_themesCombo, &QComboBox::currentTextChanged, [=] {
             m_accentColorsCombo->clear();
             m_primaryColorsCombo->clear();
@@ -358,7 +471,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
                 }
             }
         });
-}
+    }
     connect(m_stylesCombo, &QComboBox::currentTextChanged, [=] {
         m_themesCombo->clear();
 
@@ -386,219 +499,295 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         }
     });
 
+    connect(m_resetButton, SIGNAL(clicked(bool)), SLOT(reset()));
+    connect(m_saveButton, SIGNAL(clicked(bool)), SLOT(save()));
     connect(m_seeRunningButton, SIGNAL(clicked(bool)), SLOT(run()));
     resize(1299, 1299);
 }
 
 void ThemeChooserWidget::reset()
 {
-    const auto& object = SaveUtils::theme(ProjectBackend::instance()->dir()).toObject();
-    const auto& version = object.value("version").toString();
-    const auto& style = object.value("style").toString();
+    m_stylesCombo->setCurrentIndex(0);
+    m_themesCombo->setCurrentIndex(0);
+    m_accentColorsCombo->setCurrentIndex(0);
+    m_primaryColorsCombo->setCurrentIndex(0);
+    m_foregroundColorsCombo->setCurrentIndex(0);
+    m_backgroundColorsCombo->setCurrentIndex(0);
 
-    if (version == "v1") {
-        qputenv("QT_QUICK_CONTROLS_1_STYLE", style.toUtf8().constData());
+    m_saveButton->setDisabled(true);
+    m_resetButton->setDisabled(true);
+
+    const auto& object = SaveUtils::theme(ProjectBackend::instance()->dir()).toObject();
+
+    if (m_version == V1) {
+        const auto& style = object.value("stylev1").toString();
+        m_stylesCombo->setCurrentText(style);
     } else {
+        const auto& style = object.value("stylev2").toString();
         const auto& theme = object.value("theme").toString();
         const auto& accent = object.value("accent").toString();
         const auto& primary = object.value("primary").toString();
         const auto& foreground = object.value("foreground").toString();
         const auto& background = object.value("background").toString();
 
-        qputenv("QT_QUICK_CONTROLS_STYLE", style.toUtf8().constData());
+        m_stylesCombo->setCurrentText(style);
 
-        if (style == QString("Material")) {
-            if (!theme.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_MATERIAL_THEME", theme.toUtf8().constData());
+        if (!theme.isEmpty())
+            m_themesCombo->setCurrentText(toItem(m_themesCombo, theme));
 
-            if (!accent.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_MATERIAL_ACCENT", accent.toUtf8().constData());
+        if (!accent.isEmpty())
+            m_accentColorsCombo->setCurrentText(toItem(m_accentColorsCombo, accent));
 
-            if (!primary.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_MATERIAL_PRIMARY", primary.toUtf8().constData());
+        if (!primary.isEmpty())
+            m_primaryColorsCombo->setCurrentText(toItem(m_primaryColorsCombo, primary));
 
-            if (!foreground.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_MATERIAL_FOREGROUND", foreground.toUtf8().constData());
+        if (!foreground.isEmpty())
+            m_foregroundColorsCombo->setCurrentText(toItem(m_foregroundColorsCombo, foreground));
 
-            if (!background.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_MATERIAL_BACKGROUND", background.toUtf8().constData());
-        } else if (style == QString("Universal")) {
-            if (!theme.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_THEME", theme.toUtf8().constData());
-
-            if (!accent.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_ACCENT", accent.toUtf8().constData());
-
-            if (!foreground.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_FOREGROUND", foreground.toUtf8().constData());
-
-            if (!background.isEmpty())
-                qputenv("QT_QUICK_CONTROLS_UNIVERSAL_BACKGROUND", background.toUtf8().constData());
-        }
+        if (!background.isEmpty())
+            m_backgroundColorsCombo->setCurrentText(toItem(m_backgroundColorsCombo, background));
     }
+
+    refresh();
 }
 
 void ThemeChooserWidget::run()
 {
-    QProcess::startDetached(
-         qApp->applicationDirPath() + "/objectwheel-themer",
-         QStringList() << "show"
-                       << ProjectBackend::instance()->dir()
-    );
-}
+    setDisabled(true);
+    m_loadingIndicator->start();
 
-void ThemeChooserWidget::refresh()
-{
-    QTemporaryFile tmpFile;
-    tmpFile.open();
-    tmpFile.close();
+    QTemporaryDir tmpDir;
+    QJsonObject jo;
+    jo.insert(PTAG_THEME, toJson());
 
-    QProcess process;
-    process.startDetached(
-         qApp->applicationDirPath() + "/objectwheel-themer",
-         QStringList() << "capture"
-                       << ProjectBackend::instance()->dir()
-                       << tmpFile.fileName()
-    );
+    wrfile(tmpDir.filePath(FILE_PROJECT), QJsonDocument(jo).toJson());
 
-    process.waitForStarted();
-    process.waitForFinished();
+    static QProcess* process = 0;
 
-    QPixmap preview(tmpFile.fileName());
-    preview.setDevicePixelRatio(DPR);
-    m_previewPicture->setPixmap(preview);
-}
-
-void ThemeChooserWidget::saveTheme()
-{
-    QJsonObject object;
-    QRegularExpression exp("#.*(?=\\))");
-
-    QString text = m_version == V2 ? "v2" : "v1";
-    object.insert("version", text);
-
-    text = m_stylesCombo->currentText();
-    object.insert("style", text);
-
-    if (m_version == V2) {
-        text = m_themesCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("theme", text);
-
-        text = m_accentColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("accent", exp.match(text).captured(0));
-
-        text = m_primaryColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("primary", exp.match(text).captured(0));
-
-        text = m_backgroundColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("background", exp.match(text).captured(0));
-
-        text = m_foregroundColorsCombo->currentText();
-        if (!text.contains("default"))
-            object.insert("foreground", exp.match(text).captured(0));
+    if (process && process->state() == QProcess::Running) {
+        process->terminate();
+        process->deleteLater();
     }
+
+    process = new QProcess(this);
+    process->start(
+        qApp->applicationDirPath() + "/objectwheel-themer",
+        QStringList() << "show" << tmpDir.path()
+    );
+
+    QEventLoop loop;
+    connect(process, SIGNAL(started()), &loop, SLOT(quit()));
+    QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    Delayer::delay(400);
+
+    setDisabled(false);
+    m_loadingIndicator->stop();
+}
+
+void ThemeChooserWidget::save()
+{
+    m_saveButton->setDisabled(true);
+    m_resetButton->setDisabled(true);
+
+    auto object = SaveUtils::theme(ProjectBackend::instance()->dir()).toObject();
+    auto newObject = toJson();
+
+    for (const auto& key : newObject.keys())
+        object[key] = newObject[key];
 
     SaveUtils::setProjectProperty(ProjectBackend::instance()->dir(), PTAG_THEME, object);
 }
 
-namespace {
-    const QStringList STYLES = {
-        QObject::tr("Desktop"),
-        QObject::tr("Base"),
-        QObject::tr("Flat")
-    };
-
-    const QStringList STYLES_V2 = {
-        QObject::tr("Default"),
-        QObject::tr("Fusion"),
-        QObject::tr("Imagine"),
-        QObject::tr("Material"),
-        QObject::tr("Universal")
-    };
-
-    const QStringList MATERIAL_THEMES = {
-        QObject::tr("System default"),
-        QObject::tr("Light"),
-        QObject::tr("Dark")
-    };
-
-    const QStringList UNIVERSAL_THEMES = {
-        QObject::tr("System default"),
-        QObject::tr("Light"),
-        QObject::tr("Dark")
-    };
-
-    const QStringList MATERIAL_COLORS = {
-        QObject::tr("Red (#EF9A9A)"),
-        QObject::tr("Pink (#F48FB1)"),
-        QObject::tr("Purple (#CE93D8)"),
-        QObject::tr("DeepPurple (#B39DDB)"),
-        QObject::tr("Indigo (#9FA8DA)"),
-        QObject::tr("Blue (#90CAF9)"),
-        QObject::tr("LightBlue (#81D4FA)"),
-        QObject::tr("Cyan (#80DEEA)"),
-        QObject::tr("Teal (#80CBC4)"),
-        QObject::tr("Green (#A5D6A7)"),
-        QObject::tr("LightGreen (#C5E1A5)"),
-        QObject::tr("Lime (#E6EE9C)"),
-        QObject::tr("Yellow (#FFF59D)"),
-        QObject::tr("Amber (#FFE082)"),
-        QObject::tr("Orange (#FFCC80)"),
-        QObject::tr("DeepOrange (#FFAB91)"),
-        QObject::tr("Brown (#BCAAA4)"),
-        QObject::tr("Grey (#EEEEEE)"),
-        QObject::tr("BlueGrey (#B0BEC5)"),
-        QObject::tr("Light (#ffffff)"),
-        QObject::tr("Dark (#303030)"),
-        QObject::tr("Red 2 (#F44336)"),
-        QObject::tr("Pink 2 (#E91E63)"),
-        QObject::tr("Purple 2 (#9C27B0)"),
-        QObject::tr("DeepPurple 2 (#673AB7)"),
-        QObject::tr("Indigo 2 (#3F51B5)"),
-        QObject::tr("Blue 2 (#2196F3)"),
-        QObject::tr("LightBlue 2 (#03A9F4)"),
-        QObject::tr("Cyan 2 (#00BCD4)"),
-        QObject::tr("Teal 2 (#009688)"),
-        QObject::tr("Green 2 (#4CAF50)"),
-        QObject::tr("LightGreen 2 (#8BC34A)"),
-        QObject::tr("Lime 2 (#CDDC39)"),
-        QObject::tr("Yellow 2 (#FFEB3B)"),
-        QObject::tr("Amber 2 (#FFC107)"),
-        QObject::tr("Orange 2 (#FF9800)"),
-        QObject::tr("DeepOrange 2 (#FF5722)"),
-        QObject::tr("Brown 2 (#795548)"),
-        QObject::tr("Grey 2 (#9E9E9E)"),
-        QObject::tr("BlueGrey 2 (#607D8B)"),
-        QObject::tr("Dark 2 (#dd000000)"),
-        QObject::tr("Light 2 (#fafafa)")
-    };
-
-    const QStringList UNIVERSAL_COLORS = {
-        QObject::tr("Lime (#A4C400)"),
-        QObject::tr("Green (#60A917)"),
-        QObject::tr("Emerald (#008A00)"),
-        QObject::tr("Teal (#00ABA9)"),
-        QObject::tr("Cyan (#1BA1E2)"),
-        QObject::tr("Cobalt (#3E65FF)"),
-        QObject::tr("Indigo (#6A00FF)"),
-        QObject::tr("Violet (#AA00FF)"),
-        QObject::tr("Pink (#F472D0)"),
-        QObject::tr("Magenta (#D80073)"),
-        QObject::tr("Crimson (#A20025)"),
-        QObject::tr("Red (#E51400)"),
-        QObject::tr("Orange (#FA6800)"),
-        QObject::tr("Amber (#F0A30A)"),
-        QObject::tr("Yellow (#E3C800)"),
-        QObject::tr("Brown (#825A2C)"),
-        QObject::tr("Olive (#6D8764)"),
-        QObject::tr("Steel (#647687)"),
-        QObject::tr("Mauve (#76608A)"),
-        QObject::tr("Taupe (#87794E)"),
-        QObject::tr("Dark (#000000)"),
-        QObject::tr("White (#FFFFFF)")
-    };
+void ThemeChooserWidget::enable()
+{
+    m_saveButton->setEnabled(true);
+    m_resetButton->setEnabled(true);
 }
+
+void ThemeChooserWidget::refresh()
+{
+    setDisabled(true);
+    m_loadingIndicator->start();
+
+    QTemporaryFile tmpFile;
+    tmpFile.open();
+    tmpFile.close();
+
+    QTemporaryDir tmpDir;
+    QJsonObject jo;
+    jo.insert(PTAG_THEME, toJson());
+
+    wrfile(tmpDir.filePath(FILE_PROJECT), QJsonDocument(jo).toJson());
+
+    QProcess process;
+    process.start(
+        qApp->applicationDirPath() + "/objectwheel-themer",
+        QStringList() << "capture"
+            << tmpDir.path()
+            << tmpFile.fileName()
+    );
+
+    QEventLoop loop;
+    connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
+    QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    QPixmap preview(tmpFile.fileName());
+    preview.setDevicePixelRatio(DPR);
+    m_previewPicture->setPixmap(preview);
+
+    setDisabled(false);
+    m_loadingIndicator->stop();
+}
+
+QJsonObject ThemeChooserWidget::toJson() const
+{
+    QJsonObject object;
+    QRegularExpression exp("#.*(?=\\))");
+
+    auto text = m_stylesCombo->currentText();
+    object.insert(m_version == V1 ? "stylev1" : "stylev2", text);
+
+    if (m_version == V2) {
+        text = m_themesCombo->currentText();
+        if (!text.contains("default") && !text.contains("Unavailable"))
+            object.insert("theme", text);
+
+        text = m_accentColorsCombo->currentText();
+        if (!text.contains("default") && !text.contains("Unavailable"))
+            object.insert("accent", exp.match(text).captured(0));
+
+        text = m_primaryColorsCombo->currentText();
+        if (!text.contains("default") && !text.contains("Unavailable"))
+            object.insert("primary", exp.match(text).captured(0));
+
+        text = m_backgroundColorsCombo->currentText();
+        if (!text.contains("default") && !text.contains("Unavailable"))
+            object.insert("background", exp.match(text).captured(0));
+
+        text = m_foregroundColorsCombo->currentText();
+        if (!text.contains("default") && !text.contains("Unavailable"))
+            object.insert("foreground", exp.match(text).captured(0));
+    }
+
+    return object;
+}
+
+QString ThemeChooserWidget::toItem(QComboBox* comboBox, const QString& colorName) const
+{
+    if (colorName.isEmpty())
+        return QString();
+
+    for (int i = 0; i < comboBox->count(); i++)
+        if (comboBox->itemText(i).contains(colorName))
+            return comboBox->itemText(i);
+
+    comboBox->setItemText(comboBox->count() - 1,
+        QString("Custom (%1)").arg(colorName));
+    comboBox->setItemData(comboBox->count() - 1,
+        QColor(colorName), Qt::DecorationRole);
+
+    return QString("Custom (%1)").arg(colorName);
+}
+
+namespace {
+const QStringList STYLES = {
+    QObject::tr("Desktop"),
+    QObject::tr("Base"),
+    QObject::tr("Flat")
+};
+
+const QStringList STYLES_V2 = {
+    QObject::tr("Default"),
+    QObject::tr("Fusion"),
+    QObject::tr("Imagine"),
+    QObject::tr("Material"),
+    QObject::tr("Universal")
+};
+
+const QStringList MATERIAL_THEMES = {
+    QObject::tr("System default"),
+    QObject::tr("Light"),
+    QObject::tr("Dark")
+};
+
+const QStringList UNIVERSAL_THEMES = {
+    QObject::tr("System default"),
+    QObject::tr("Light"),
+    QObject::tr("Dark")
+};
+
+const QStringList MATERIAL_COLORS = {
+    QObject::tr("Red (#EF9A9A)"),
+    QObject::tr("Pink (#F48FB1)"),
+    QObject::tr("Purple (#CE93D8)"),
+    QObject::tr("DeepPurple (#B39DDB)"),
+    QObject::tr("Indigo (#9FA8DA)"),
+    QObject::tr("Blue (#90CAF9)"),
+    QObject::tr("LightBlue (#81D4FA)"),
+    QObject::tr("Cyan (#80DEEA)"),
+    QObject::tr("Teal (#80CBC4)"),
+    QObject::tr("Green (#A5D6A7)"),
+    QObject::tr("LightGreen (#C5E1A5)"),
+    QObject::tr("Lime (#E6EE9C)"),
+    QObject::tr("Yellow (#FFF59D)"),
+    QObject::tr("Amber (#FFE082)"),
+    QObject::tr("Orange (#FFCC80)"),
+    QObject::tr("DeepOrange (#FFAB91)"),
+    QObject::tr("Brown (#BCAAA4)"),
+    QObject::tr("Grey (#EEEEEE)"),
+    QObject::tr("BlueGrey (#B0BEC5)"),
+    QObject::tr("Light (#ffffff)"),
+    QObject::tr("Dark (#303030)"),
+    QObject::tr("Red 2 (#F44336)"),
+    QObject::tr("Pink 2 (#E91E63)"),
+    QObject::tr("Purple 2 (#9C27B0)"),
+    QObject::tr("DeepPurple 2 (#673AB7)"),
+    QObject::tr("Indigo 2 (#3F51B5)"),
+    QObject::tr("Blue 2 (#2196F3)"),
+    QObject::tr("LightBlue 2 (#03A9F4)"),
+    QObject::tr("Cyan 2 (#00BCD4)"),
+    QObject::tr("Teal 2 (#009688)"),
+    QObject::tr("Green 2 (#4CAF50)"),
+    QObject::tr("LightGreen 2 (#8BC34A)"),
+    QObject::tr("Lime 2 (#CDDC39)"),
+    QObject::tr("Yellow 2 (#FFEB3B)"),
+    QObject::tr("Amber 2 (#FFC107)"),
+    QObject::tr("Orange 2 (#FF9800)"),
+    QObject::tr("DeepOrange 2 (#FF5722)"),
+    QObject::tr("Brown 2 (#795548)"),
+    QObject::tr("Grey 2 (#9E9E9E)"),
+    QObject::tr("BlueGrey 2 (#607D8B)"),
+    QObject::tr("Dark 2 (#dd000000)"),
+    QObject::tr("Light 2 (#fafafa)"),
+    QObject::tr("Custom (#545454)")
+};
+
+const QStringList UNIVERSAL_COLORS = {
+    QObject::tr("Lime (#A4C400)"),
+    QObject::tr("Green (#60A917)"),
+    QObject::tr("Emerald (#008A00)"),
+    QObject::tr("Teal (#00ABA9)"),
+    QObject::tr("Cyan (#1BA1E2)"),
+    QObject::tr("Cobalt (#3E65FF)"),
+    QObject::tr("Indigo (#6A00FF)"),
+    QObject::tr("Violet (#AA00FF)"),
+    QObject::tr("Pink (#F472D0)"),
+    QObject::tr("Magenta (#D80073)"),
+    QObject::tr("Crimson (#A20025)"),
+    QObject::tr("Red (#E51400)"),
+    QObject::tr("Orange (#FA6800)"),
+    QObject::tr("Amber (#F0A30A)"),
+    QObject::tr("Yellow (#E3C800)"),
+    QObject::tr("Brown (#825A2C)"),
+    QObject::tr("Olive (#6D8764)"),
+    QObject::tr("Steel (#647687)"),
+    QObject::tr("Mauve (#76608A)"),
+    QObject::tr("Taupe (#87794E)"),
+    QObject::tr("Dark (#000000)"),
+    QObject::tr("White (#FFFFFF)"),
+    QObject::tr("Custom (#545454)")
+};
+} // Anonymous Namespace

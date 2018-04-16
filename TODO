@@ -70,6 +70,10 @@ ApplicationWindow footer, header li bir şey nasıl preview edilir, previewe sis
 ApplicationWindow contentItem'i üzerine reparent bozuk mu bi test et
 ApplicationWindow ile material tema vs test et Dark/Light modlarını
 themer, interpreter, previewer için tema ve font kayıt olaylarını hallet, temaları test et, Options pageini doldur güzelleştir
+ctrl + r ile çalıştır yapsın
+her çalıştırmada önceki app'ı kapatsın
+her çalıştır'da unsaved doclar için sorsun, eğer kullanıcı sorma derse direk kaydetsin
+project şablonları ekle
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |
