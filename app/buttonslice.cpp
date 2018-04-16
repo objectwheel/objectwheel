@@ -1,13 +1,12 @@
 #include <buttonslice.h>
-#include <fit.h>
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QPainter>
 
-#define SIZE (fit::fx(QSizeF(0, 30)).toSize())
+#define SIZE (QSize(0, 30))
 #define ADJUST(x) ((x).adjusted(\
-    fit::fx(1) + 0.5, fit::fx(1) + 0.5,\
-    - fit::fx(1) - 0.5, - fit::fx(1) - 0.5\
+    1 + 0.5, 1 + 0.5,\
+    - 1 - 0.5, - 1 - 0.5\
 ))
 
 namespace {
@@ -21,8 +20,8 @@ ButtonSlice::ButtonSlice(QWidget* parent) : QWidget(parent)
     resize(SIZE);
 
     /* Set size settings */
-    _settings.cellWidth = fit::fx(150);
-    _settings.borderRadius = fit::fx(8);
+    _settings.cellWidth = 150;
+    _settings.borderRadius = 8;
 
     _layout->setSpacing(0);
     _layout->setContentsMargins(0, 0, 0, 0);
@@ -85,8 +84,8 @@ void ButtonSlice::paintEvent(QPaintEvent*)
 
     /* Limit shadow region */
     const auto& sr = r.adjusted(
-        0, fit::fx(1),
-        0, fit::fx(1)
+        0, 1,
+        0, 1
     );
 
     QPainterPath ph;

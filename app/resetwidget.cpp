@@ -1,5 +1,4 @@
 #include <resetwidget.h>
-#include <fit.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
@@ -15,8 +14,8 @@
 #include <QRegExpValidator>
 
 #define COUNTDOWN        300
-#define BUTTONS_WIDTH    (fit::fx(300))
-#define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
+#define BUTTONS_WIDTH    (300)
+#define SIZE_ICON        (QSize(80, 80))
 #define PATH_ICON        (":/resources/images/lock.png")
 #define PATH_VICON       (":/resources/images/ok.png")
 #define PATH_CICON       (":/resources/images/cancel.png")
@@ -41,14 +40,14 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(12);
     _layout->addStretch();
     _layout->addWidget(_iconLabel);
     _layout->addWidget(_resetLabel);
-    _layout->addSpacing(fit::fx(40));
+    _layout->addSpacing(40);
     _layout->addWidget(_countdownLabel);
     _layout->addWidget(_countdown);
-    _layout->addSpacing(fit::fx(40));
+    _layout->addSpacing(40);
     _layout->addWidget(_emailLabel);
     _layout->addWidget(_bulkEdit);
     _layout->addWidget(_buttons);
@@ -79,7 +78,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _resetLabel->setFont(f);
     _resetLabel->setText(tr("Verify Password Reset"));
@@ -110,8 +109,8 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Apply)->setText(tr("Apply"));
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Apply)->setIcon(QIcon(PATH_VICON));
-    _buttons->get(Cancel)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Apply)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Cancel)->setIconSize(QSize(16, 16));
+    _buttons->get(Apply)->setIconSize(QSize(16, 16));
     _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Apply)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;

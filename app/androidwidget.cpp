@@ -1,5 +1,4 @@
 #include <androidwidget.h>
-#include <fit.h>
 #include <css.h>
 #include <projectbackend.h>
 #include <filemanager.h>
@@ -17,9 +16,9 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     buttonsLay->addWidget(&_btnBack);
     buttonsLay->addWidget(&_btnBuild);
 
-    _layout.setContentsMargins(fit::fx(20),
-      fit::fx(20), fit::fx(20), fit::fx(20));
-    _layout.setSpacing(fit::fx(10));
+    _layout.setContentsMargins(20,
+      20, 20, 20);
+    _layout.setSpacing(10);
     _layout.addWidget(&_lblLogo);
     _layout.addWidget(&_lblTitle);
     _layout.addWidget(&_lblMsg);
@@ -31,12 +30,12 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _layout.setAlignment(&_scrollArea, Qt::AlignHCenter);
     _layout.setAlignment(buttonsLay, Qt::AlignHCenter);
 
-    _lblLogo.setFixedSize(fit::fx(50), fit::fx(50));
+    _lblLogo.setFixedSize(50, 50);
     _lblLogo.setPixmap(QPixmap(":/resources/images/android.png"));
     _lblLogo.setScaledContents(true);
 
     QFont f;
-    f.setPixelSize(fit::fx(28));
+    f.setPixelSize(28);
     f.setWeight(QFont::ExtraLight);
     QPalette p2(_lblTitle.palette());
     p2.setColor(_lblTitle.foregroundRole(), "#21303c");
@@ -44,7 +43,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _lblTitle.setPalette(p2);
     _lblTitle.setText("Target: Android");
 
-    f.setPixelSize(fit::fx(17));
+    f.setPixelSize(17);
     _lblMsg.setFont(f);
     _lblMsg.setPalette(p2);
     _lblMsg.setText("Settings");
@@ -64,10 +63,10 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _scrollArea.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _scrollArea.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    _scrollArea.setFixedWidth(fit::fx(600));
-    _scrollAreaLay.setSpacing(fit::fx(30));
-    _scrollAreaLay.setContentsMargins(fit::fx(20),
-      fit::fx(30), fit::fx(20), fit::fx(30));
+    _scrollArea.setFixedWidth(600);
+    _scrollAreaLay.setSpacing(30);
+    _scrollAreaLay.setContentsMargins(20,
+      30, 20, 30);
     _scrollAreaLay.addWidget(&_appBox);
     _scrollAreaLay.addWidget(&_packageBox);
     _scrollAreaLay.addWidget(&_permissionsBox);
@@ -75,14 +74,14 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     auto btnResIcon = new QToolButton;
     btnResIcon->setIcon(QIcon(":/resources/images/refresh.png"));
-    btnResIcon->setIconSize(QSize(fit::fx(14), fit::fx(14)));
+    btnResIcon->setIconSize(QSize(14, 14));
     btnResIcon->setToolTip("Reset icon to default.");
     connect(btnResIcon, &QToolButton::clicked, [&]{
         _txtIconPath.setText("");
         _picIcon.setPixmap(QPixmap(":/resources/images/android-default.png"));
     });
     _appBox.setTitle("Application Settings");
-    _appBox.setFixedHeight(fit::fx(280));
+    _appBox.setFixedHeight(280);
     _appBoxLay.addWidget(&_lblAppName, 0, 0);
     _appBoxLay.addWidget(&_txtAppName, 0, 1, 1, 2);
     _appBoxLay.addWidget(&_lblVersionName, 1, 0);
@@ -96,7 +95,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _appBoxLay.addWidget(&_btnIcon, 4, 2);
     _appBoxLay.addWidget(btnResIcon, 4, 2);
     _appBoxLay.addWidget(&_picIcon, 5, 1);
-    _appBoxLay.setColumnMinimumWidth(2, fit::fx(55));
+    _appBoxLay.setColumnMinimumWidth(2, 55);
     _appBoxLay.setAlignment(btnResIcon, Qt::AlignRight);
 
     connect(&_btnIcon, &QToolButton::clicked, [&] {
@@ -143,20 +142,20 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _txtIconPath.setDisabled(true);
     _txtIconPath.setPlaceholderText("[Android Default]");
     _txtIconPath.setToolTip(_btnIcon.toolTip());
-    _txtIconPath.setFixedWidth(fit::fx(130));
+    _txtIconPath.setFixedWidth(130);
 
     _picIcon.setToolTip("Application icon.");
-    _picIcon.setFixedSize(fit::fx(QSize{64, 64}));
+    _picIcon.setFixedSize({64, 64});
     _picIcon.setScaledContents(true);
     _picIcon.setPixmap(QPixmap(":/resources/images/android-default.png"));
     _picIcon.setFrameShape(QFrame::StyledPanel);
 
     _txtAppName.setText("My App");
-    _txtAppName.setFixedWidth(fit::fx(200));
+    _txtAppName.setFixedWidth(200);
     _txtAppName.setToolTip("Your application name.");
 
     _txtVersionName.setText("1.0");
-    _txtVersionName.setFixedWidth(fit::fx(120));
+    _txtVersionName.setFixedWidth(120);
     _txtVersionName.setToolTip(
     "The version number shown to users. This value can be set as a raw string. \n"
     "The string has no other purpose than to be displayed to users. \n"
@@ -164,7 +163,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _spnVersionCode.setValue(1);
     _spnVersionCode.setMaximum(99999);
-    _spnVersionCode.setFixedWidth(fit::fx(70));
+    _spnVersionCode.setFixedWidth(70);
     _spnVersionCode.setToolTip(
     "An internal version number. This number is used only to determine \n"
     "whether one version is more recent than another, with higher \n"
@@ -178,8 +177,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     "separately in the lower and upper 16 bits. Or you could simply increase \n"
     "the number by one each time a new version is released.");
 
-    _cmbOrientation.setFixedWidth(fit::fx(120));
-    _cmbOrientation.setIconSize(fit::fx(QSize{14, 14}));
+    _cmbOrientation.setFixedWidth(120);
+    _cmbOrientation.setIconSize({14, 14});
     _cmbOrientation.addItem(QIcon(":/resources/images/free.png"), "Free");
     _cmbOrientation.addItem(QIcon(":/resources/images/landscape.png"), "Landscape");
     _cmbOrientation.addItem(QIcon(":/resources/images/portrait.png"), "Portrait");
@@ -188,7 +187,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     "application orientation; or use Free to leave it unspecified.");
 
     _packageBox.setTitle("Package Settings");
-    _packageBox.setFixedHeight(fit::fx(150));
+    _packageBox.setFixedHeight(150);
     _packageBoxLay.addWidget(&_lblPackageName, 0, 0);
     _packageBoxLay.addWidget(&_txtPackageName, 0, 1);
     _packageBoxLay.addWidget(&_lblMinSdk, 1, 0);
@@ -204,7 +203,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     auto validator = new QRegExpValidator(
     QRegExp("^([A-Za-z]{1}[A-Za-z\\d_]*\\.)*[A-Za-z][A-Za-z\\d_]*$"));
     _txtPackageName.setValidator(validator);
-    _txtPackageName.setFixedWidth(fit::fx(200));
+    _txtPackageName.setFixedWidth(200);
     _txtPackageName.setToolTip(
     "The Android package name, also known as the Google Play ID, the unique \n"
     "identifier of an application. Please choose a valid package name for \n"
@@ -224,7 +223,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     "used as a package name are described in section 7.7 of \n"
     "the Java Language Specification.");
 
-    _cmbMinSdk.setFixedWidth(fit::fx(200));
+    _cmbMinSdk.setFixedWidth(200);
     _cmbMinSdk.setToolTip("Sets the minimum required version on which this application can be run.");
     _cmbMinSdk.addItem("API 14: Android 4.0, 4.0.1, 4.0.2");
     _cmbMinSdk.addItem("API 15: Android 4.0.3, 4.0.4");
@@ -238,7 +237,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbMinSdk.addItem("API 23: Android 6.0");
     _cmbMinSdk.setCurrentText("API 17: Android 4.2, 4.2.2");
 
-    _cmbTargetSdk.setFixedWidth(fit::fx(200));
+    _cmbTargetSdk.setFixedWidth(200);
     _cmbTargetSdk.setToolTip(
     "Sets the target SDK. Set this to the highest tested version. This \n"
     "disables compatibility behavior of the system for your application.");
@@ -255,7 +254,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbTargetSdk.setCurrentText("API 21: Android 5.0");
 
     _permissionsBox.setTitle("Permission Settings");
-    _permissionsBox.setFixedHeight(fit::fx(200));
+    _permissionsBox.setFixedHeight(200);
     _permissionsBoxLay.addWidget(&_permissionList, 0, 0);
     _permissionsBoxLay.addWidget(&_btnDelPermission, 0, 1);
     _permissionsBoxLay.addWidget(&_cmbPermissions, 1, 0);
@@ -268,12 +267,12 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     QTextStream stream(rdfile(":/resources/other/android-permissions.txt"));
     while (stream.readLineInto(&line))
         _cmbPermissions.addItem(line);
-    _cmbPermissions.setFixedWidth(fit::fx(400));
+    _cmbPermissions.setFixedWidth(400);
     _cmbPermissions.setMaxVisibleItems(15);
     _cmbPermissions.setEditable(true);
 
     _permissionList.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    _permissionList.setFixedWidth(fit::fx(400));
+    _permissionList.setFixedWidth(400);
     _permissionList.addItem("android.permission.WRITE_EXTERNAL_STORAGE");
     _permissionList.addItem("android.permission.READ_PHONE_STATE");
     _btnDelPermission.setDisabled(true);
@@ -326,7 +325,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbPermissions.setValidator(validator);
 
     _signingBox.setTitle("Signing Settings");
-    _signingBox.setFixedHeight(fit::fx(255));
+    _signingBox.setFixedHeight(255);
     _signingBoxLay.addWidget(&_lblSign, 0, 0);
     _signingBoxLay.addWidget(&_chkSign, 0, 1, 1, 2);
     _signingBoxLay.addWidget(&_lblKsPath, 1, 0);
@@ -354,11 +353,11 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _lblKeyPw.setText("Alias password:");
     _txtKsPath.setPlaceholderText("Select key store file...");
     _txtKsPath.setDisabled(true);
-    _btnNewKs.setFixedWidth(fit::fx(200));
-    _txtKsPath.setFixedWidth(fit::fx(160));
-    _cmbKsAlias.setFixedWidth(fit::fx(200));
-    _txtAliasPw.setFixedWidth(fit::fx(200));
-    _txtKsPw.setFixedWidth(fit::fx(200));
+    _btnNewKs.setFixedWidth(200);
+    _txtKsPath.setFixedWidth(160);
+    _cmbKsAlias.setFixedWidth(200);
+    _txtAliasPw.setFixedWidth(200);
+    _txtKsPw.setFixedWidth(200);
     _txtAliasPw.setEchoMode(QLineEdit::Password);
     _txtKsPw.setEchoMode(QLineEdit::Password);
 
@@ -413,10 +412,10 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _btnBack.settings().topColor = "#38A3F6";
     _btnBack.settings().bottomColor = _btnBack.settings().topColor.darker(120);
-    _btnBack.settings().borderRadius = fit::fx(7.5);
+    _btnBack.settings().borderRadius = 7.5;
     _btnBack.settings().textColor = Qt::white;
-    _btnBack.setFixedSize(fit::fx(200),fit::fx(28));
-    _btnBack.setIconSize(QSize(fit::fx(14),fit::fx(14)));
+    _btnBack.setFixedSize(200,28);
+    _btnBack.setIconSize(QSize(14,14));
     _btnBack.setIcon(QIcon(":/resources/images/unload.png"));
     _btnBack.setText("Back");
     connect(&_btnBack, &FlatButton::clicked, [&]{
@@ -425,10 +424,10 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _btnBuild.settings().topColor = "#84BF52";
     _btnBuild.settings().bottomColor = _btnBuild.settings().topColor.darker(120);
-    _btnBuild.settings().borderRadius = fit::fx(7.5);
+    _btnBuild.settings().borderRadius = 7.5;
     _btnBuild.settings().textColor = Qt::white;
-    _btnBuild.setFixedSize(fit::fx(200),fit::fx(28));
-    _btnBuild.setIconSize(QSize(fit::fx(14),fit::fx(14)));
+    _btnBuild.setFixedSize(200,28);
+    _btnBuild.setIconSize(QSize(14,14));
     _btnBuild.setIcon(QIcon(":/resources/images/load.png"));
     _btnBuild.setText("Build");
     connect(&_btnBuild, SIGNAL(clicked(bool)),

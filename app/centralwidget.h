@@ -15,30 +15,30 @@ class BuildsWidget;
 
 class CentralWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit CentralWidget(QWidget* parent = nullptr);
-        QmlCodeEditorWidget* qmlCodeEditorWidget() const;
-        DesignerWidget* designerWidget() const;
-        OutputPane* outputPane() const;
+public:
+    explicit CentralWidget(QWidget* parent = nullptr);
+    QmlCodeEditorWidget* qmlCodeEditorWidget() const;
+    DesignerWidget* designerWidget() const;
+    OutputPane* outputPane() const;
 
-    public slots:
-        void reset();
-        void setCurrentPage(const Pages& page);
+public slots:
+    void reset();
+    void setCurrentPage(const Pages& page);
 
-    private slots:
-        void hideWidgets();
+private slots:
+    void hideWidgets();
 
-    private:
-        QVBoxLayout* m_layout;
-        QSplitter* m_splitterOut,* m_splitterIn;
-        OutputPane* m_outputPane;
-        QmlCodeEditorWidget* m_qmlCodeEditorWidget;
-        DesignerWidget* m_designerWidget;
-        ProjectOptionsWidget* m_projectOptionsWidget;
-        BuildsWidget* m_buildsWidget;
-        HelpWidget* m_helpWidget;
+private:
+    QVBoxLayout* m_layout;
+    QSplitter* m_splitterOut,* m_splitterIn;
+    OutputPane* m_outputPane;
+    QmlCodeEditorWidget* m_qmlCodeEditorWidget;
+    DesignerWidget* m_designerWidget;
+    ProjectOptionsWidget* m_projectOptionsWidget;
+    BuildsWidget* m_buildsWidget;
+    HelpWidget* m_helpWidget;
 };
 
 #endif // CENTRALWIDGET_H

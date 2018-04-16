@@ -1,5 +1,4 @@
 #include <mainwindow.h>
-#include <fit.h>
 #include <css.h>
 #include <runpane.h>
 #include <outputpane.h>
@@ -60,7 +59,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Run Pane */
     auto runBar = new QToolBar;
     runBar->setOrientation(Qt::Horizontal);
-    runBar->setFixedHeight(fit::fx(38));
+    runBar->setFixedHeight(38);
     runBar->setFloatable(false);
     runBar->setMovable(false);
     runBar->setWindowTitle(tr("Run Bar"));
@@ -76,7 +75,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
     pageSwitcherBar->setOrientation(Qt::Vertical);
-    pageSwitcherBar->setFixedWidth(fit::fx(70));
+    pageSwitcherBar->setFixedWidth(70);
     pageSwitcherBar->setWindowFlags(pageSwitcherBar->windowFlags() | Qt::WindowStaysOnTopHint);
     pageSwitcherBar->setFloatable(false);
     pageSwitcherBar->setMovable(false);
@@ -112,8 +111,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     inspectorTitleBar->addWidget(inspectorTitleLabel);
     inspectorTitleBar->addWidget(inspectorTitlePinButton);
     inspectorTitleBar->setStyleSheet(CSS::DesignerPinbar);
-    inspectorTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    inspectorTitleBar->setFixedHeight(fit::fx(24));
+    inspectorTitleBar->setIconSize(QSize(11, 11));
+    inspectorTitleBar->setFixedHeight(24);
 
     inspectorDockWidget = new QDockWidget;
     inspectorDockWidget->setStyleSheet("QDockWidget { border: none }");
@@ -142,8 +141,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesTitleBar->addWidget(propertiesTitleLabel);
     propertiesTitleBar->addWidget(propertiesTitlePinButton);
     propertiesTitleBar->setStyleSheet(CSS::DesignerPinbar);
-    propertiesTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    propertiesTitleBar->setFixedHeight(fit::fx(24));
+    propertiesTitleBar->setIconSize(QSize(11, 11));
+    propertiesTitleBar->setFixedHeight(24);
 
     propertiesDockWidget = new QDockWidget;
     propertiesDockWidget->setStyleSheet("QDockWidget { border: none }");
@@ -181,8 +180,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxTitleBar->addWidget(toolboxSettingsButton);
     toolboxTitleBar->addWidget(toolboxTitlePinButton);
     toolboxTitleBar->setStyleSheet(CSS::DesignerPinbar);
-    toolboxTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    toolboxTitleBar->setFixedHeight(fit::fx(24));
+    toolboxTitleBar->setIconSize(QSize(11, 11));
+    toolboxTitleBar->setFixedHeight(24);
 
     toolboxDockWidget = new QDockWidget;
     toolboxDockWidget->setStyleSheet("QDockWidget { border: none }");
@@ -212,8 +211,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsTitleBar->addWidget(formsTitleLabel);
     formsTitleBar->addWidget(formsTitlePinButton);
     formsTitleBar->setStyleSheet(CSS::DesignerPinbar);
-    formsTitleBar->setIconSize(QSize(fit::fx(11), fit::fx(11)));
-    formsTitleBar->setFixedHeight(fit::fx(24));
+    formsTitleBar->setIconSize(QSize(11, 11));
+    formsTitleBar->setFixedHeight(24);
 
     formsDockWidget = new QDockWidget;
     formsDockWidget->setStyleSheet("QDockWidget { border: none }");

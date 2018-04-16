@@ -10,30 +10,30 @@ class ConsoleBox;
 
 class RunPane : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit RunPane(ConsoleBox* consoleBox, QWidget *parent = nullptr);
+public:
+    explicit RunPane(ConsoleBox* consoleBox, QWidget *parent = nullptr);
 
-    public slots:
-        void reset();
+public slots:
+    void reset();
 
-    protected:
-        void paintEvent(QPaintEvent *event) override;
+protected:
+    void paintEvent(QPaintEvent *event) override;
 
-    private slots:
-        void onRunButtonClick();
-        void onStopButtonClick();
-        void onStopButtonDoubleClick();
-        void onProjectsButtonClick();
+private slots:
+    void onRunButtonClick();
+    void onStopButtonClick();
+    void onStopButtonDoubleClick();
+    void onProjectsButtonClick();
 
-    private:
-        ConsoleBox* m_consoleBox;
-        QHBoxLayout* m_layout;
-        LoadingBar* m_loadingBar;
-        FlatButton* m_runButton;
-        FlatButton* m_stopButton;
-        FlatButton* m_projectsButton;
+private:
+    ConsoleBox* m_consoleBox;
+    QHBoxLayout* m_layout;
+    LoadingBar* m_loadingBar;
+    FlatButton* m_runButton;
+    FlatButton* m_stopButton;
+    FlatButton* m_projectsButton;
 };
 
 #endif // RUNPANE_H

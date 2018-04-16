@@ -1,5 +1,4 @@
 #include <loginwidget.h>
-#include <fit.h>
 #include <switch.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
@@ -17,9 +16,9 @@
 #include <QLineEdit>
 #include <QMessageBox>
 
-#define AUTOLOGIN_HEIGHT (fit::fx(35))
-#define AUTOLOGIN_WIDTH  (fit::fx(300))
-#define SIZE_LOGO        (QSize(fit::fx(160), fit::fx(80)))
+#define AUTOLOGIN_HEIGHT (35)
+#define AUTOLOGIN_WIDTH  (300)
+#define SIZE_LOGO        (QSize(160, 80))
 #define PATH_LOGO        (":/resources/images/logo.png")
 #define PATH_RICON       (":/resources/images/new.png")
 #define PATH_LICON       (":/resources/images/load.png")
@@ -53,7 +52,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
     _legalLabel = new QLabel;
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(12);
     _layout->setRowStretch(0, 1);
     _layout->setRowStretch(1, 1);
     _layout->setRowStretch(8, 1);
@@ -78,8 +77,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
     _layout->setAlignment(_legalLabel, Qt::AlignCenter);
 
-    _autologinLayout->setSpacing(fit::fx(5));
-    _autologinLayout->setContentsMargins(fit::fx(2.5), 0, 0, 0);
+    _autologinLayout->setSpacing(5);
+    _autologinLayout->setContentsMargins(2.5, 0, 0, 0);
     _autologinLayout->addWidget(_autologinSwitch);
     _autologinLayout->addWidget(_autologinLabel);
     _autologinLayout->setAlignment(_autologinLabel, Qt::AlignVCenter);
@@ -100,7 +99,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _loginLabel->setFont(f);
     _loginLabel->setText(tr("Log In"));
@@ -138,8 +137,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Login)->setText(tr("Log In"));
     _buttons->get(Register)->setIcon(QIcon(PATH_RICON));
     _buttons->get(Login)->setIcon(QIcon(PATH_LICON));
-    _buttons->get(Register)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Login)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Register)->setIconSize(QSize(16, 16));
+    _buttons->get(Login)->setIconSize(QSize(16, 16));
     _buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Login)->setCursor(Qt::PointingHandCursor);
     connect(_buttons->get(Register), SIGNAL(clicked(bool)),
@@ -167,7 +166,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     _helpButton->settings().iconButton = true;
     _helpButton->setIcon(QIcon(PATH_HICON));
-    _helpButton->setFixedSize(fit::fx(20),fit::fx(20));
+    _helpButton->setFixedSize(20,20);
     connect(_helpButton, SIGNAL(clicked(bool)), _helpBox, SLOT(show()));
 
     _loadingIndicator->setStyleSheet("background: transparent;");

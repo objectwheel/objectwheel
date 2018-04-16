@@ -1,5 +1,4 @@
 #include <inspectorpane.h>
-#include <fit.h>
 #include <css.h>
 #include <centralwidget.h>
 #include <filemanager.h>
@@ -148,18 +147,18 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
     _treeWidget->setDragEnabled(false);
     _treeWidget->setDropIndicatorShown(false);
     _treeWidget->setColumnCount(2);
-    _treeWidget->setIndentation(fit::fx(16));
+    _treeWidget->setIndentation(16);
     _treeWidget->headerItem()->setText(0, "Controls");
     _treeWidget->headerItem()->setText(1, "Ui");
     _treeWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     _treeWidget->viewport()->installEventFilter(this);
-    _treeWidget->header()->resizeSection(0, fit::fx(250));
-    _treeWidget->header()->resizeSection(1, fit::fx(50));
+    _treeWidget->header()->resizeSection(0, 250);
+    _treeWidget->header()->resizeSection(1, 50);
     _treeWidget->setItemDelegate(new InspectorListDelegate(_treeWidget));
 //    _treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    _treeWidget->header()->setFixedHeight(fit::fx(23));
+    _treeWidget->header()->setFixedHeight(23);
     _treeWidget->setStyleSheet("QTreeView { border: 1px solid #4A7C42; }"
                                "QHeaderView::section {"
                                "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #4A7C42;"
@@ -173,8 +172,8 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
     connect(_treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
       SLOT(handleDoubleClick(QTreeWidgetItem*,int)));
 
-    _layout->setSpacing(fit::fx(2));
-    _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
+    _layout->setSpacing(2);
+    _layout->setContentsMargins(3, 3, 3, 3);
     _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
@@ -216,7 +215,7 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
                     }
                 }
             } else {
-                const qreal hg = fit::fx(20.0);
+                const qreal hg = 20.0;
                 const qreal ic = _treeWidget->viewport()->height() / hg;
 
                 for (int i = 0; i < ic; i++) {
@@ -356,7 +355,7 @@ void InspectorPane::handleClick(QTreeWidgetItem* item, int)
 
 QSize InspectorPane::sizeHint() const
 {
-    return fit::fx(QSizeF{200, 230}).toSize();
+    return QSize{200, 230};
 }
 
 #include "inspectorpane.moc"

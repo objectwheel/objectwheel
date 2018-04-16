@@ -1,5 +1,4 @@
 #include <projectdetailswidget.h>
-#include <fit.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <userbackend.h>
@@ -14,8 +13,8 @@
 #include <QMessageBox>
 #include <QDateTime>
 
-#define BUTTONS_WIDTH    (fit::fx(450))
-#define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
+#define BUTTONS_WIDTH    (450)
+#define SIZE_ICON        (QSize(80, 80))
 #define PATH_ICON        (":/resources/images/options.png")
 #define PATH_SICON       (":/resources/images/load.png")
 #define PATH_CICON       (":/resources/images/unload.png")
@@ -33,12 +32,12 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     _bulkEdit = new BulkEdit;
     _buttons = new ButtonSlice;
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(12);
     _layout->addStretch();
     _layout->addWidget(_iconLabel,0 , Qt::AlignCenter);
-    _layout->addSpacing(fit::fx(15));
+    _layout->addSpacing(15);
     _layout->addWidget(_settingsLabel,0 , Qt::AlignCenter);
-    _layout->addSpacing(fit::fx(5));
+    _layout->addSpacing(5);
     _layout->addWidget(_bulkEdit, 0, Qt::AlignCenter);
     _layout->addWidget(_buttons, 0, Qt::AlignCenter);
     _layout->addStretch();
@@ -57,7 +56,7 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _settingsLabel->setFont(f);
     _settingsLabel->setText(tr("Project Settings"));
@@ -96,9 +95,9 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Delete)->setIcon(QIcon(PATH_DICON));
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Save)->setIcon(QIcon(PATH_SICON));
-    _buttons->get(Delete)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Cancel)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Delete)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Delete)->setIconSize(QSize(16, 16));
+    _buttons->get(Cancel)->setIconSize(QSize(16, 16));
+    _buttons->get(Save)->setIconSize(QSize(16, 16));
     _buttons->get(Delete)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Save)->setCursor(Qt::PointingHandCursor);

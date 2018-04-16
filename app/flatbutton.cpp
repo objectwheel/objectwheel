@@ -1,11 +1,10 @@
 #include <flatbutton.h>
-#include <fit.h>
 #include <dpr.h>
 
 #include <QPainter>
 #include <QtMath>
 
-#define SIZE (fit::fx(QSizeF(22, 80)).toSize())
+#define SIZE (QSize(22, 80))
 
 namespace {
     QRectF adjust(const QRectF& rect, bool crop = false);
@@ -24,7 +23,7 @@ FlatButton::FlatButton(QWidget* parent) : QPushButton(parent)
     _settings.bottomColor = "#ececec";
     _settings.textColor = Qt::black;
     _settings.borderRadius = 0;
-    _settings.textMargin = fit::fx(2);
+    _settings.textMargin = 2;
     _settings.iconButton = false;
     _settings.showShadow = true;
     _settings.textUnderIcon = false;
@@ -84,8 +83,8 @@ void FlatButton::paintEvent(QPaintEvent* event)
         if (_settings.showShadow) {
             /* Limit shadow region */
             const auto& sr = r.adjusted(
-                0, fit::fx(1),
-                0, fit::fx(1)
+                0, 1,
+                0, 1
             );
 
             QPainterPath ph;
@@ -191,10 +190,7 @@ namespace {
     QRectF adjust(const QRectF& rect, bool crop)
     {
         if (crop)
-            return rect.adjusted(
-                fit::fx(1), fit::fx(1),
-               -fit::fx(1), -fit::fx(1)
-            );
+            return rect.adjusted(1, 1, -1, -1);
         else
             return rect;
     }

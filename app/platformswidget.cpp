@@ -1,5 +1,4 @@
 #include <platformswidget.h>
-#include <fit.h>
 #include <css.h>
 #include <build.h>
 #include <dpr.h>
@@ -46,11 +45,11 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
    auto utext = item->text();
    auto ltext = item->data(Arch).toString();
    auto rutext = option.rect.adjusted(option.rect.height(),
-     fit::fx(7), 0, - option.rect.height() / 2.0);
+     7, 0, - option.rect.height() / 2.0);
    auto rltext = option.rect.adjusted(option.rect.height(),
-     option.rect.height() / 2.0, 0, - fit::fx(7));
-   auto ricon = option.rect.adjusted(fit::fx(7), fit::fx(7),
-     - option.rect.width() + option.rect.height() - fit::fx(7), - fit::fx(7));
+     option.rect.height() / 2.0, 0, - 7);
+   auto ricon = option.rect.adjusted(7, 7,
+     - option.rect.width() + option.rect.height() - 7, - 7);
    auto icon = item->icon().pixmap(ricon.size() * DPR);
     painter->setRenderHint(QPainter::Antialiasing);
 
@@ -79,8 +78,8 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     : QWidget(parent)
     , _layout(this)
 {
-    _layout.setContentsMargins(0, fit::fx(20), 0, fit::fx(20));
-    _layout.setSpacing(fit::fx(10));
+    _layout.setContentsMargins(0, 20, 0, 20);
+    _layout.setSpacing(10);
     _layout.addWidget(&_lblLogo);
     _layout.addWidget(&_lblTitle);
     _layout.addWidget(&_lblMsg);
@@ -92,12 +91,12 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _layout.setAlignment(&_listWidget, Qt::AlignHCenter);
     _layout.setAlignment(&_btnNext, Qt::AlignHCenter);
 
-    _lblLogo.setFixedSize(fit::fx(50), fit::fx(50));
+    _lblLogo.setFixedSize(50, 50);
     _lblLogo.setPixmap(QPixmap(":/resources/images/helmet.png"));
     _lblLogo.setScaledContents(true);
 
     QFont f;
-    f.setPixelSize(fit::fx(28));
+    f.setPixelSize(28);
     f.setWeight(QFont::ExtraLight);
     QPalette p2(_lblTitle.palette());
     p2.setColor(_lblTitle.foregroundRole(), "#21303c");
@@ -105,17 +104,17 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _lblTitle.setPalette(p2);
     _lblTitle.setText("Objectwheel Builds");
 
-    f.setPixelSize(fit::fx(17));
+    f.setPixelSize(17);
     _lblMsg.setFont(f);
     _lblMsg.setPalette(p2);
     _lblMsg.setText("Select your target platform");
 
     _btnNext.settings().topColor = "#F4BA48";
     _btnNext.settings().bottomColor = _btnNext.settings().topColor.darker(120);
-    _btnNext.settings().borderRadius = fit::fx(7.5);
+    _btnNext.settings().borderRadius = 7.5;
     _btnNext.settings().textColor = Qt::white;
-    _btnNext.setFixedSize(fit::fx(200),fit::fx(28));
-    _btnNext.setIconSize(QSize(fit::fx(14),fit::fx(14)));
+    _btnNext.setFixedSize(200,28);
+    _btnNext.setIconSize(QSize(14,14));
     _btnNext.setIcon(QIcon(":/resources/images/load.png"));
     _btnNext.setText("Next");
     connect(&_btnNext, SIGNAL(clicked(bool)),
@@ -127,8 +126,8 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _listWidget.setPalette(p3);
     _listWidget.setStyleSheet(CSS::ScrollBar.
       replace("background: transparent;", "background: #d4d4d4;"));
-    _listWidget.setIconSize(fit::fx(QSize{52, 52}));
-    _listWidget.setMinimumWidth(fit::fx(400));
+    _listWidget.setIconSize({52, 52});
+    _listWidget.setMinimumWidth(400);
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));
     _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _listWidget.setFocusPolicy(Qt::NoFocus);

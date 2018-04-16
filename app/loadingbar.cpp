@@ -1,5 +1,4 @@
 #include <loadingbar.h>
-#include <fit.h>
 #include <dpr.h>
 
 #include <QTimer>
@@ -21,7 +20,7 @@ LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
   , m_timerEnding(new QTimer(this))
   , m_timerFader(new QTimer(this))
 {
-    setFixedSize(fit::fx(QSizeF(481, 24)).toSize());
+    setFixedSize(QSize(481, 24));
 
     image = QImage(":/resources/images/loadingbar.png");
     image.setDevicePixelRatio(DPR);
@@ -109,9 +108,9 @@ void LoadingBar::paintEvent(QPaintEvent*)
     drawText(&painter, m_text, rect());
 
     QPainterPath path;
-    path.addRoundedRect(fit::fx(0.5), fit::fx(0.5), fit::fx(480.0), fit::fx(23.0), fit::fx(3.5), fit::fx(3.5));
+    path.addRoundedRect(0.5, 0.5, 480.0, 23.0, 3.5, 3.5);
     painter.setClipPath(path);
-    painter.fillRect(QRectF{fit::fx(0.5), fit::fx(21.5), m_progress * fit::fx(4.8), fit::fx(10)}, loadingColor);
+    painter.fillRect(QRectF{0.5, 21.5, m_progress * 4.8, 10}, loadingColor);
 }
 
 namespace {
@@ -123,7 +122,7 @@ namespace {
         doc.setIndentWidth(0);
 
         QTextBlockFormat bf;
-        bf.setLineHeight(rect.height() - fit::fx(1.5 * DPR), QTextBlockFormat::FixedHeight);
+        bf.setLineHeight(rect.height() - 1.5 * DPR, QTextBlockFormat::FixedHeight);
         bf.setAlignment(Qt::AlignCenter);
 
         QTextCharFormat cf;

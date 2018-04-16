@@ -23,20 +23,20 @@
 
 class Build
 {
-        Q_DISABLE_COPY(Build)
+    Q_DISABLE_COPY(Build)
 
-    public:
-        static QString dir();
-        static void set(const QString& setting, const QVariant& value);
-        static void setModule(const QString& module, bool value, bool qt);
-        static void setIcon(const QString& iconPath);
-        static void setKeystore(const QString& keystorePath);
+public:
+    static QString dir();
+    static void set(const QString& setting, const QVariant& value);
+    static void setModule(const QString& module, bool value, bool qt);
+    static void setIcon(const QString& iconPath);
+    static void setKeystore(const QString& keystorePath);
 
-        static void clearPermissions();
-        static void addPermission(const QString& permission);
+    static void clearPermissions();
+    static void addPermission(const QString& permission);
 
-    private:
-        Build() {}
+private:
+    Build() {}
 };
 
 #endif // BUILD_H

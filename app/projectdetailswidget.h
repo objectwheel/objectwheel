@@ -10,29 +10,29 @@ class QVBoxLayout;
 
 class ProjectDetailsWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit ProjectDetailsWidget(QWidget* parent = nullptr);
+public:
+    explicit ProjectDetailsWidget(QWidget* parent = nullptr);
 
-    public slots:
-        void onEditProject(const QString& hash);
-        void onNewProject(const QString& projectName);
+public slots:
+    void onEditProject(const QString& hash);
+    void onNewProject(const QString& projectName);
 
-    private slots:
-        void onSaveClick();
-        void onDeleteClick();
+private slots:
+    void onSaveClick();
+    void onDeleteClick();
 
-    signals:
-        void done();
+signals:
+    void done();
 
-    private:
-        QString _hash;
-        QVBoxLayout* _layout;
-        QLabel* _iconLabel;
-        QLabel* _settingsLabel;
-        BulkEdit* _bulkEdit;
-        ButtonSlice* _buttons;
+private:
+    QString _hash;
+    QVBoxLayout* _layout;
+    QLabel* _iconLabel;
+    QLabel* _settingsLabel;
+    BulkEdit* _bulkEdit;
+    ButtonSlice* _buttons;
 };
 
 #endif // PROJECTDETAILSWIDGET_H

@@ -1,24 +1,21 @@
 #include <css.h>
-#include <fit.h>
-#include <windowmanager.h>
-#include <menumanager.h>
-#include <backendmanager.h>
 #include <filemanager.h>
+#include <menumanager.h>
+#include <windowmanager.h>
+#include <backendmanager.h>
 
+#include <QIcon>
+#include <QMessageBox>
 #include <QApplication>
 #include <QFontDatabase>
-#include <QIcon>
 #include <QSharedMemory>
-#include <QMessageBox>
-
-#define PIXEL_SIZE 14
-#define REF_DPI 149.0
 
 int main(int argc, char* argv[])
 {
     // Boot Settings
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL); // For reCaptcha
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     // Initialize application
     QApplication a(argc, argv);
@@ -45,23 +42,20 @@ int main(int argc, char* argv[])
         }
     }
 
-    // Initialize fit library
-    fit::update(REF_DPI, false);
-
     // Font settings
     for (const auto& font : lsfile(":/resources/fonts"))
         QFontDatabase::addApplicationFont(":/resources/fonts/" + font);
 
-    QFont font;
-    font.setPixelSize(fit::fx(PIXEL_SIZE));
+#if defined(Q_OS_MACOS)
+    QFont font(".SF NS Display");
+#elif defined(Q_OS_WIN)
+    QFont font("Segoe UI");
+#else
+    QFont font("Open Sans");
+#endif
+
+    font.setPixelSize(14);
     font.setStyleStrategy(QFont::PreferAntialias);
-    #if defined(Q_OS_MACOS)
-      font.setFamily(".SF NS Display");
-    #elif defined(Q_OS_WIN)
-      font.setFamily("Segoe UI");
-    #else
-      font.setFamily("Open Sans");
-    #endif
     QApplication::setFont(font);
 
     // Initialize css

@@ -12,80 +12,80 @@ class QTimer;
 
 class PreviewerBackend : public QObject
 {
-        Q_OBJECT
-        Q_DISABLE_COPY(PreviewerBackend)
+    Q_OBJECT
+    Q_DISABLE_COPY(PreviewerBackend)
 
-    private:
-        struct Task
+private:
+    struct Task
+    {
+        enum Type
         {
-            enum Type
-            {
-                Init,
-                Preview,
-                Repreview,
-                Update,
-                Remove,
-                Reparent
-            };
-
-            inline bool operator==(const Task& t1)
-            {
-                return uid == t1.uid && type == t1.type && property == t1.property;
-            }
-
-            Type type;
-            QString dir;
-            QString uid;
-            QString newUrl;
-            QString parentUid;
-            QString property;
-            QVariant propertyValue;
-            bool needsUpdate = false;
+            Init,
+            Preview,
+            Repreview,
+            Update,
+            Remove,
+            Reparent
         };
 
-    public:
-        static PreviewerBackend* instance();
-        bool init();
-        bool isBusy() const;
-        bool contains(const QString& uid) const;
-        int totalTask() const;
-        void setDisabled(bool value);
+        inline bool operator==(const Task& t1)
+        {
+            return uid == t1.uid && type == t1.type && property == t1.property;
+        }
 
-    public slots:
-        void restart();
-        void requestInit(const QString& projectDir);
-        void requestPreview(const QString& dir, bool repreview = false);
-        void removeCache(const QString& uid);
-        void updateParent(const QString& uid, const QString& parentUid, const QString& newUrl);
-        void updateCache(const QString& uid, const QString& property, const QVariant& value);
+        Type type;
+        QString dir;
+        QString uid;
+        QString newUrl;
+        QString parentUid;
+        QString property;
+        QVariant propertyValue;
+        bool needsUpdate = false;
+    };
 
-    private slots:
-        void disableDirtHandling();
-        void enableDirtHandling();
-        void onNewConnection();
-        void onReadReady();
-        void onBinaryMessageReceived(const QByteArray& data);
-        void fixTasksAgainstReparent(const QString& uid, const QString& newUrl);
+public:
+    static PreviewerBackend* instance();
+    bool init();
+    bool isBusy() const;
+    bool contains(const QString& uid) const;
+    int totalTask() const;
+    void setDisabled(bool value);
 
-    private:
-        void processNextTask();
-        void processMessage(const QString& type, QDataStream& in);
+public slots:
+    void restart();
+    void requestInit(const QString& projectDir);
+    void requestPreview(const QString& dir, bool repreview = false);
+    void removeCache(const QString& uid);
+    void updateParent(const QString& uid, const QString& parentUid, const QString& newUrl);
+    void updateCache(const QString& uid, const QString& property, const QVariant& value);
 
-    signals:
-        void taskDone();
-        void busyChanged();
-        void previewReady(const PreviewResult& result);
+private slots:
+    void disableDirtHandling();
+    void enableDirtHandling();
+    void onNewConnection();
+    void onReadReady();
+    void onBinaryMessageReceived(const QByteArray& data);
+    void fixTasksAgainstReparent(const QString& uid, const QString& newUrl);
 
-    private:
-        PreviewerBackend();
-        ~PreviewerBackend();
+private:
+    void processNextTask();
+    void processMessage(const QString& type, QDataStream& in);
 
-    private:
-        bool m_disabled;
-        QLocalServer* m_server;
-        QTimer* m_dirtHandlingDisablerTimer;
-        QList<Task> m_taskList;
-        bool m_dirtHandlingEnabled;
+signals:
+    void taskDone();
+    void busyChanged();
+    void previewReady(const PreviewResult& result);
+
+private:
+    PreviewerBackend();
+    ~PreviewerBackend();
+
+private:
+    bool m_disabled;
+    QLocalServer* m_server;
+    QTimer* m_dirtHandlingDisablerTimer;
+    QList<Task> m_taskList;
+    bool m_dirtHandlingEnabled;
 };
 
 #endif // PREVIEWERBACKEND_H

@@ -5,15 +5,15 @@
 
 class Authenticator : public QWebSocket
 {
-        Q_OBJECT
-        Q_DISABLE_COPY(Authenticator)
+    Q_OBJECT
+    Q_DISABLE_COPY(Authenticator)
 
-    public:
-        static Authenticator* instance();
-        void init(const QUrl& host);
+public:
+    static Authenticator* instance();
+    void init(const QUrl& host);
 
-    public slots:
-        bool signup(
+public slots:
+    bool signup(
             const QString& recaptcha,
             const QString& first,
             const QString& last,
@@ -23,31 +23,31 @@ class Authenticator : public QWebSocket
             const QString& company, // optional
             const QString& title,   // optional
             const QString& phone    // optional
-        );
-        bool forget(const QString& email);
-        bool resend(const QString& email);
-        QString login(const QString& email, const QString& password);
-        bool verify(const QString& email, const QString& code);
-        bool reset(const QString& email, const QString& password, const QString& code);
+            );
+    bool forget(const QString& email);
+    bool resend(const QString& email);
+    QString login(const QString& email, const QString& password);
+    bool verify(const QString& email, const QString& code);
+    bool reset(const QString& email, const QString& password, const QString& code);
 
-    private slots:
-        void onDisconnected();
-        void onError(QAbstractSocket::SocketError error);
-        void onSslErrors(const QList<QSslError> &errors);
-        void onTextMessageReceived(const QString& message);
+private slots:
+    void onDisconnected();
+    void onError(QAbstractSocket::SocketError error);
+    void onSslErrors(const QList<QSslError> &errors);
+    void onTextMessageReceived(const QString& message);
 
-    private:
-        using QObject::connect;
-        bool connect(int timeout);
-        QString readSync(int timeout);
+private:
+    using QObject::connect;
+    bool connect(int timeout);
+    QString readSync(int timeout);
 
-    private:
-        Authenticator();
+private:
+    Authenticator();
 
-    private:
-        QUrl _host;
-        QString _message
-;
+private:
+    QUrl _host;
+    QString _message
+    ;
 };
 
 #endif // AUTHENTICATOR_H

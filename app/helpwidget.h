@@ -16,43 +16,43 @@ class QLabel;
 
 class HelpWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit HelpWidget(QWidget *parent = nullptr);
+public:
+    explicit HelpWidget(QWidget *parent = nullptr);
 
-    public slots:
-        void reset();
+public slots:
+    void reset();
 
-    protected:
-        QSize sizeHint() const override;
-        bool eventFilter(QObject *watched, QEvent *event) override;
+protected:
+    QSize sizeHint() const override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
-    private slots:
-        void onHomeButtonClick();
-        void onTypeChange();
-        void onTitleChange();
-        void onIndexFilterTextChange(const QString& filterText);
-        void onUrlChange(const QUrl& url);
-        void onUrlChange(const QUrl& link, const QString&);
-        void onUrlChange(const QMap<QString, QUrl> &links, const QString &keyword);
+private slots:
+    void onHomeButtonClick();
+    void onTypeChange();
+    void onTitleChange();
+    void onIndexFilterTextChange(const QString& filterText);
+    void onUrlChange(const QUrl& url);
+    void onUrlChange(const QUrl& link, const QString&);
+    void onUrlChange(const QMap<QString, QUrl> &links, const QString &keyword);
 
-    private:
-        QHelpEngine* m_helpEngine;
-        QVBoxLayout* m_layout;
-        QToolBar* m_toolbar;
-        QComboBox* m_typeCombo;
-        QToolButton* m_homeButton;
-        QToolButton* m_backButton;
-        QToolButton* m_forthButton;
-        QLabel* m_titleLabel;
-        QSplitter* m_splitter;
-        WebEngineHelpViewer* m_helpViewer;
-        QWidget* m_contentsWidget;
-        QVBoxLayout* m_contentsLayout;
-        QWidget* m_indexWidget;
-        QVBoxLayout* m_indexLayout;
-        FocuslessLineEdit* m_indexFilterEdit;
+private:
+    QHelpEngine* m_helpEngine;
+    QVBoxLayout* m_layout;
+    QToolBar* m_toolbar;
+    QComboBox* m_typeCombo;
+    QToolButton* m_homeButton;
+    QToolButton* m_backButton;
+    QToolButton* m_forthButton;
+    QLabel* m_titleLabel;
+    QSplitter* m_splitter;
+    WebEngineHelpViewer* m_helpViewer;
+    QWidget* m_contentsWidget;
+    QVBoxLayout* m_contentsLayout;
+    QWidget* m_indexWidget;
+    QVBoxLayout* m_indexLayout;
+    FocuslessLineEdit* m_indexFilterEdit;
 };
 
 #endif // HELPWIDGET_H

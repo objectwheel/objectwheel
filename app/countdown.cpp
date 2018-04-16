@@ -1,10 +1,9 @@
 #include <countdown.h>
-#include <fit.h>
 #include <QTimer>
 #include <QPainter>
 
 #define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
-#define SIZE (fit::fx(QSizeF(270, 86)).toSize())
+#define SIZE (QSize(270, 86))
 
 Countdown::Countdown(QWidget *parent) : QWidget(parent)
   , _second(0)
@@ -19,9 +18,9 @@ Countdown::Countdown(QWidget *parent) : QWidget(parent)
     _settings.screwColor = "#70000000";
     _settings.lineColor = "#70000000";
 
-    _settings.borderRadius = fit::fx(4);
-    _settings.digitRadius = fit::fx(4);
-    _settings.margins = fit::fx(8);
+    _settings.borderRadius = 4;
+    _settings.digitRadius = 4;
+    _settings.margins = 8;
 
     resize(SIZE);
     connect(_timer, SIGNAL(timeout()), SLOT(decrease()));
@@ -191,8 +190,8 @@ void Countdown::paintEvent(QPaintEvent*)
     if (_second % 2) {
         painter.setPen(Qt::NoPen);
         painter.setBrush(dc);
-        painter.drawRoundedRect(dr1, fit::fx(1.0), fit::fx(1.0));
-        painter.drawRoundedRect(dr2, fit::fx(1.0), fit::fx(1.0));
+        painter.drawRoundedRect(dr1, 1.0, 1.0);
+        painter.drawRoundedRect(dr2, 1.0, 1.0);
     }
 
     QString ld, rd;
@@ -209,7 +208,7 @@ void Countdown::paintEvent(QPaintEvent*)
         rd = "0" + rd;
 
     QFont f;
-    f.setPixelSize(dh - fit::fx(4));
+    f.setPixelSize(dh - 4);
     f.setBold(true);
     painter.setFont(f);
 

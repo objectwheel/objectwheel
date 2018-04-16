@@ -1,6 +1,5 @@
 #include <pageswitcherpane.h>
 #include <flatbutton.h>
-#include <fit.h>
 
 #include <QPainter>
 #include <QVBoxLayout>
@@ -30,7 +29,7 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
 
     QFont labelFont;
     labelFont.setWeight(QFont::DemiBold);
-    labelFont.setPixelSize(labelFont.pixelSize() - fit::fx(2.5));
+    labelFont.setPixelSize(labelFont.pixelSize() - 2.0);
 
     m_designerButton->setText(tr("Designer"));
     m_qmlCodeEditorButton->setText(tr("Editor"));
@@ -60,12 +59,12 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->setAutoExclusive(true);
     m_buildsButton->setAutoExclusive(true);
 
-    m_designerButton->setFixedHeight(fit::fx(52));
-    m_qmlCodeEditorButton->setFixedHeight(fit::fx(52));
-    m_projectOptionsButton->setFixedHeight(fit::fx(52));
-    m_helpButton->setFixedHeight(fit::fx(52));
-    m_splitViewButton->setFixedHeight(fit::fx(52));
-    m_buildsButton->setFixedHeight(fit::fx(52));
+    m_designerButton->setFixedHeight(60);
+    m_qmlCodeEditorButton->setFixedHeight(60);
+    m_projectOptionsButton->setFixedHeight(60);
+    m_helpButton->setFixedHeight(60);
+    m_splitViewButton->setFixedHeight(60);
+    m_buildsButton->setFixedHeight(60);
 
     m_designerButton->setCheckable(true);
     m_qmlCodeEditorButton->setCheckable(true);
@@ -74,12 +73,12 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->setCheckable(true);
     m_buildsButton->setCheckable(true);
 
-    m_designerButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
-    m_qmlCodeEditorButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
-    m_projectOptionsButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
-    m_helpButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
-    m_splitViewButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
-    m_buildsButton->setIconSize(fit::fx(QSizeF(23, 23)).toSize());
+    m_designerButton->setIconSize(QSize(23, 23));
+    m_qmlCodeEditorButton->setIconSize(QSize(23, 23));
+    m_projectOptionsButton->setIconSize(QSize(23, 23));
+    m_helpButton->setIconSize(QSize(23, 23));
+    m_splitViewButton->setIconSize(QSize(23, 23));
+    m_buildsButton->setIconSize(QSize(23, 23));
 
     m_designerButton->setIcon(QIcon(":/resources/images/designer.png"));
     m_qmlCodeEditorButton->setIcon(QIcon(":/resources/images/editor.png"));

@@ -10,20 +10,27 @@ class DesignerScene;
 
 class ExposerBackend
 {
-        Q_DISABLE_COPY(ExposerBackend)
+    Q_DISABLE_COPY(ExposerBackend)
 
-    public:
-        static ExposerBackend* instance();
-        void init(DesignerScene* designerScene);
-        void exposeProject() const;
-        Form* exposeForm(const QString& rootPath) const;
-        Control* exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid, Control* parentControl, QString destinationPath, QString destinationSuid) const;
+public:
+    static ExposerBackend* instance();
+    void init(DesignerScene* designerScene);
+    void exposeProject() const;
+    Form* exposeForm(const QString& rootPath) const;
+    Control* exposeControl(
+        const QString& rootPath,
+        const QPointF& pos,
+        QString sourceSuid,
+        Control* parentControl,
+        QString destinationPath,
+        QString destinationSuid
+    ) const;
 
-    private:
-        ExposerBackend();
+private:
+    ExposerBackend();
 
-    private:
-        DesignerScene* m_designerScene;
+private:
+    DesignerScene* m_designerScene;
 };
 
 #endif // EXPOSERBACKEND_H

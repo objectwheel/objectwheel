@@ -3,7 +3,6 @@
 #include <css.h>
 #include <savebackend.h>
 #include <exposerbackend.h>
-#include <fit.h>
 #include <saveutils.h>
 #include <previewerbackend.h>
 
@@ -223,7 +222,7 @@ void DesignerView::onPasteAction()
     for (auto url : mimeData->urls()) {
         auto control = ExposerBackend::instance()->exposeControl(
             url.toLocalFile(),
-            QPointF(fit::fx(SaveUtils::x(url.toLocalFile())) + fit::fx(5), fit::fx(SaveUtils::y(url.toLocalFile())) + fit::fx(5)),
+            QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
             sourceSuid,
             mainForm,
             mainForm->dir(),
@@ -289,7 +288,7 @@ void DesignerView::onMoveUpAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
-        control->moveBy(0, - fit::fx(1));
+        control->moveBy(0, - 1);
 }
 
 void DesignerView::onMoveDownAction()
@@ -297,7 +296,7 @@ void DesignerView::onMoveDownAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
-        control->moveBy(0, fit::fx(1));
+        control->moveBy(0, 1);
 }
 
 void DesignerView::onMoveRightAction()
@@ -305,7 +304,7 @@ void DesignerView::onMoveRightAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
-        control->moveBy(fit::fx(1), 0);
+        control->moveBy(1, 0);
 }
 
 void DesignerView::onMoveLeftAction()
@@ -313,7 +312,7 @@ void DesignerView::onMoveLeftAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls)
-        control->moveBy(- fit::fx(1), 0);
+        control->moveBy(- 1, 0);
 }
 
 void DesignerView::onSendBackAction()

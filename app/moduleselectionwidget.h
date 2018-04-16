@@ -6,16 +6,16 @@
 
 class ModuleSelectionWidget : public QWidget
 {
-        Q_OBJECT
-    public:
-        explicit ModuleSelectionWidget(QWidget *parent = nullptr);
+    Q_OBJECT
+public:
+    explicit ModuleSelectionWidget(QWidget *parent = nullptr);
 
-    private slots:
-        void handleBtnNextClicked();
+private slots:
+    void handleBtnNextClicked();
 
-    signals:
-        void done();
-        void backClicked();
+signals:
+    void done();
+    void backClicked();
 };
 
 #endif // MODULESELECTIONWIDGET_H

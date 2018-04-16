@@ -1,8 +1,7 @@
 #include <progressbar.h>
-#include <fit.h>
 #include <QPainter>
 
-#define SIZE fit::fx(QSizeF(0, 6)).toSize()
+#define SIZE QSize(0, 6)
 #define ADJUST(x) QRectF((x)).adjusted(0.5, 0, -0.5, 0)
 
 ProgressBar::ProgressBar(QWidget *parent) : QProgressBar(parent)

@@ -7,26 +7,29 @@ class QScrollArea;
 class QVBoxLayout;
 class QGridLayout;
 class ThemeChooserWidget;
+class ScalingWidget;
 
 class ProjectOptionsWidget : public QWidget
 {
-        Q_OBJECT
-    public:
-        explicit ProjectOptionsWidget(QWidget *parent = nullptr);
+    Q_OBJECT
 
-    protected:
-        QSize sizeHint() const override;
+public:
+    explicit ProjectOptionsWidget(QWidget *parent = nullptr);
 
-    public slots:
-        void reset();
+protected:
+    QSize sizeHint() const override;
 
-    private:
-        QVBoxLayout* m_layout;
-        QScrollArea* m_scrollArea;
-        QWidget* m_containerWidget;
-        QGridLayout* m_gridLayout;
-        ThemeChooserWidget* m_themeChooserWidget;
-        ThemeChooserWidget* m_themeChooserWidget_2;
+public slots:
+    void reset();
+
+private:
+    QVBoxLayout* m_layout;
+    QScrollArea* m_scrollArea;
+    QWidget* m_containerWidget;
+    QGridLayout* m_gridLayout;
+    ThemeChooserWidget* m_themeChooserWidget;
+    ThemeChooserWidget* m_themeChooserWidget_2;
+    ScalingWidget* m_scalingWidget;
 
 };
 

@@ -6,7 +6,6 @@
 #include <saveutils.h>
 #include <control.h>
 #include <hashfactory.h>
-#include <fit.h>
 #include <filemanager.h>
 
 #include <QPointer>
@@ -331,8 +330,6 @@ void PreviewerBackend::processNextTask()
 
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
-
-        qDebug() << task.type << task.uid << m_taskList.size();
 
         if (task.type == Task::Init) {
             out << REQUEST_INIT;

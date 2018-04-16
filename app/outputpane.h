@@ -14,48 +14,48 @@ class OutputPanePrivate;
 
 class OutputPane : public QWidget
 {
-        Q_OBJECT
-        friend class OutputPanePrivate;
+    Q_OBJECT
+    friend class OutputPanePrivate;
 
-    public:
-        enum Box {
-            Issues,
-            Search,
-            Console
-        };
+public:
+    enum Box {
+        Issues,
+        Search,
+        Console
+    };
 
-    public:
-        explicit OutputPane(QWidget *parent = nullptr);
-        void setSplitter(QSplitter* splitter);
-        void setSplitterHandle(QSplitterHandle* splitterHandle);
+public:
+    explicit OutputPane(QWidget *parent = nullptr);
+    void setSplitter(QSplitter* splitter);
+    void setSplitterHandle(QSplitterHandle* splitterHandle);
 
-        FlatButton* button(Box type);
-        IssuesBox* issuesBox();
-        ConsoleBox* consoleBox();
-        SearchBox* searchBox();
-        Box activeBox() const;
-        bool isCollapsed() const;
+    FlatButton* button(Box type);
+    IssuesBox* issuesBox();
+    ConsoleBox* consoleBox();
+    SearchBox* searchBox();
+    Box activeBox() const;
+    bool isCollapsed() const;
 
-    public slots:
-        void reset();
-        void expand();
-        void collapse();
-        void updateLastHeight();
-        void shine(Box type);
+public slots:
+    void reset();
+    void expand();
+    void collapse();
+    void updateLastHeight();
+    void shine(Box type);
 
-    protected:
-        QSize sizeHint() const override;
+protected:
+    QSize sizeHint() const override;
 
-    private:
-        QPointer<QSplitter> _splitter;
-        QPointer<QSplitterHandle> _splitterHandle;
-        OutputPanePrivate* _d;
-        IssuesBox* _issuesBox;
-        ConsoleBox* _consoleBox;
-        SearchBox* _searchBox;
-        int _lastHeight;
-        QWidget* _activeBox;
-        bool _collapsed;
+private:
+    QPointer<QSplitter> _splitter;
+    QPointer<QSplitterHandle> _splitterHandle;
+    OutputPanePrivate* _d;
+    IssuesBox* _issuesBox;
+    ConsoleBox* _consoleBox;
+    SearchBox* _searchBox;
+    int _lastHeight;
+    QWidget* _activeBox;
+    bool _collapsed;
 };
 
 #endif // OUTPUTPANE_H

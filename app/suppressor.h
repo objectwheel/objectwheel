@@ -7,7 +7,7 @@ class QString;
 
 namespace Suppressor
 {
-    void suppress(int msec, const QString& key, const std::function<void()>& function);
+void suppress(int msec, const QString& key, const std::function<void()>& function);
 }
 
 #endif // SUPPRESSOR_H

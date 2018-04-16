@@ -1,5 +1,4 @@
 #include <designerscene.h>
-#include <fit.h>
 #include <savebackend.h>
 #include <suppressor.h>
 #include <resizer.h>
@@ -11,8 +10,8 @@
 
 #define GUIDELINE_COLOR ("#4BA2FF")
 #define LINE_COLOR ("#606467")
-#define NGCS_PANEL_WIDTH (fit::fx(100))
-#define MAGNETIC_FIELD (fit::fx(3))
+#define NGCS_PANEL_WIDTH (100)
+#define MAGNETIC_FIELD (3)
 
 namespace {
     QRectF united(const QList<Control*>& controls)
@@ -37,10 +36,10 @@ DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
     connect(this, &DesignerScene::changed, [=] {
         if (m_mainForm) {
             setSceneRect(m_mainForm->frameGeometry().adjusted(
-               -fit::fx(8),
-               -fit::fx(8),
-                fit::fx(8),
-                fit::fx(8)
+               -8,
+               -8,
+                8,
+                8
             ));
         }
     });
@@ -247,7 +246,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
             if (selectedControls.size() > 1) {
                 QPen pen("#777777");
-                pen.setWidthF(fit::fx(1));
+                pen.setWidthF(1);
                 pen.setStyle(Qt::DotLine);
                 painter->setPen(pen);
                 painter->setBrush(Qt::NoBrush);
@@ -269,8 +268,8 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
     if (m_mainForm == nullptr) {
         QPen pen;
-        pen.setWidthF(fit::fx(1));
-        QRectF rect(0, 0, fit::fx(150), fit::fx(60));
+        pen.setWidthF(1);
+        QRectF rect(0, 0, 150, 60);
         rect.moveCenter(sceneRect().center());
         pen.setStyle(Qt::DotLine);
         pen.setColor(LINE_COLOR);

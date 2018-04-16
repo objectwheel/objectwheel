@@ -5,13 +5,13 @@
 
 class HashFactory
 {
-        Q_DISABLE_COPY(HashFactory)
+    Q_DISABLE_COPY(HashFactory)
 
-    public:
-        static QString generate();
+public:
+    static QString generate();
 
-    private:
-        HashFactory() {}
+private:
+    HashFactory() {}
 };
 
 #endif // HASHFACTORY_H

@@ -9,30 +9,30 @@ class OutputPane;
 
 class ConsoleBox : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit ConsoleBox(OutputPane* outputPane);
+public:
+    explicit ConsoleBox(OutputPane* outputPane);
 
-    public:
-        bool isClean() const;
-        void print(const QString& text);
-        void printError(const QString& text);
-        void printFormatted(const QString& text, const QColor& color, QFont::Weight weight);
+public:
+    bool isClean() const;
+    void print(const QString& text);
+    void printError(const QString& text);
+    void printFormatted(const QString& text, const QColor& color, QFont::Weight weight);
 
-    public slots:
-        void fade();
-        void reset();
-        void scrollToEnd();
+public slots:
+    void fade();
+    void reset();
+    void scrollToEnd();
 
-    private slots:
-        void onStandardError(const QString& output);
-        void onStandardOutput(const QString& output);
+private slots:
+    void onStandardError(const QString& output);
+    void onStandardOutput(const QString& output);
 
-    private:
-        QVBoxLayout* _layout;
-        QTextEdit* _textEdit;
-        OutputPane* _outputPane;
+private:
+    QVBoxLayout* _layout;
+    QTextEdit* _textEdit;
+    OutputPane* _outputPane;
 };
 
 #endif // CONSOLEBOX_H

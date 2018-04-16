@@ -5,27 +5,27 @@
 
 class ProgressBar : public QProgressBar
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        struct Settings {
-                /* Color settings */
-                QColor backgroundColor;
-                QColor borderColor;
-                QColor chunkColor;
-                /* Size settings */
-                qreal borderRadius;
-        };
+public:
+    struct Settings {
+        /* Color settings */
+        QColor backgroundColor;
+        QColor borderColor;
+        QColor chunkColor;
+        /* Size settings */
+        qreal borderRadius;
+    };
 
-    public:
-        explicit ProgressBar(QWidget* parent = nullptr);
-        void triggerSettings();
+public:
+    explicit ProgressBar(QWidget* parent = nullptr);
+    void triggerSettings();
 
-    protected:
-        void paintEvent(QPaintEvent*) override;
+protected:
+    void paintEvent(QPaintEvent*) override;
 
-    private:
-        Settings m_settings;
+private:
+    Settings m_settings;
 };
 
 #endif // PROGRESSBAR_H

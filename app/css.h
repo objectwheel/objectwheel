@@ -5,17 +5,17 @@
 
 class CSS
 {
-	private:
-		CSS() { }
+private:
+    CSS() { }
 
-	public:
-		static void init();
+public:
+    static void init();
 
-        static QString ScrollBar;
-        static QString ScrollBarH;
-        static QString DesignerToolbar;
-        static QString DesignerToolbarV;
-        static QString DesignerPinbar;
+    static QString ScrollBar;
+    static QString ScrollBarH;
+    static QString DesignerToolbar;
+    static QString DesignerToolbarV;
+    static QString DesignerPinbar;
 };
 
 #endif // CSS_H

@@ -8,24 +8,24 @@ class DownloadWidgetPrivate;
 
 class DownloadWidget : public QQuickWidget
 {
-		Q_OBJECT
-	public:
-        explicit DownloadWidget(QWidget *parent = 0);
-        ~DownloadWidget();
-        static DownloadWidget* instance();
+    Q_OBJECT
+public:
+    explicit DownloadWidget(QWidget *parent = 0);
+    ~DownloadWidget();
+    static DownloadWidget* instance();
 
-    private:
-        static DownloadWidgetPrivate* _d;
-        void resizeEvent(QResizeEvent *event) override;
+private:
+    static DownloadWidgetPrivate* _d;
+    void resizeEvent(QResizeEvent *event) override;
 
-    signals:
-        void done();
-        void resized() const;
+signals:
+    void done();
+    void resized() const;
 
-    public slots:
-        void download(OTargets::Targets);
-        void handleBtnOkClicked();
-        void handleBtnCancelClicked();
+public slots:
+    void download(OTargets::Targets);
+    void handleBtnOkClicked();
+    void handleBtnCancelClicked();
 };
 
 #endif // DOWNLOADWIDGET_H

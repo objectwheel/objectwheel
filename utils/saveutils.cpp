@@ -334,6 +334,13 @@ QString SaveUtils::size(const QString& projectDir)
     return property(propertyData, PTAG_SIZE).toString();
 }
 
+QString SaveUtils::scaling(const QString& projectDir)
+{
+    const auto& propertyPath = projectDir + separator() + FILE_PROJECT;
+    const auto& propertyData = rdfile(propertyPath);
+    return property(propertyData, PTAG_SCALING).toString();
+}
+
 QJsonValue SaveUtils::theme(const QString& projectDir)
 {
     const auto& propertyPath = projectDir + separator() + FILE_PROJECT;

@@ -14,29 +14,29 @@ class PageSwitcherPane;
 
 class MainWindow : public QMainWindow
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit MainWindow(QWidget* parent = nullptr);
+public:
+    explicit MainWindow(QWidget* parent = nullptr);
 
-    public slots:
-        void reset();
+public slots:
+    void reset();
 
-    private slots:
-        void hideDocks();
-        void showDocks();
+private slots:
+    void hideDocks();
+    void showDocks();
 
-    signals:
-        void done();
+signals:
+    void done();
 
-    private:
-        CentralWidget* m_centralWidget;
-        RunPane* m_runPane;
-        FormsPane* m_formsPane;
-        ToolboxPane* m_toolboxPane;
-        InspectorPane* m_inspectorPane;
-        PropertiesPane* m_propertiesPane;
-        PageSwitcherPane* m_pageSwitcherPane;
+private:
+    CentralWidget* m_centralWidget;
+    RunPane* m_runPane;
+    FormsPane* m_formsPane;
+    ToolboxPane* m_toolboxPane;
+    InspectorPane* m_inspectorPane;
+    PropertiesPane* m_propertiesPane;
+    PageSwitcherPane* m_pageSwitcherPane;
 };
 
 #endif // MAINWINDOW_H

@@ -1,5 +1,4 @@
 #include <robotwidget.h>
-#include <fit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
 #include <dpr.h>
@@ -12,8 +11,8 @@
 #include <QWebEngineSettings>
 #include <QMessageBox>
 
-#define BUTTONS_WIDTH    (fit::fx(350))
-#define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
+#define BUTTONS_WIDTH    (350)
+#define SIZE_ICON        (QSize(80, 80))
 #define PATH_ICON        (":/resources/images/robot.png")
 #define PATH_NICON       (":/resources/images/load.png")
 #define PATH_CICON       (":/resources/images/unload.png")
@@ -38,10 +37,10 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _layout->setContentsMargins(0, 0, 0, 0);
     _layout->addWidget(_recaptchaView);
 
-    _space->setFixedSize(BUTTONS_WIDTH, fit::fx(200));
+    _space->setFixedSize(BUTTONS_WIDTH, 200);
     _space->installEventFilter(this);
 
-    _recaptchaLayout->setSpacing(fit::fx(12));
+    _recaptchaLayout->setSpacing(12);
     _recaptchaLayout->addStretch();
     _recaptchaLayout->addWidget(_iconLabel, 0, Qt::AlignCenter);
     _recaptchaLayout->addWidget(_robotLabel, 0, Qt::AlignCenter);
@@ -73,7 +72,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _robotLabel->setFont(f);
     _robotLabel->setText(tr("I'm not Robot"));
@@ -85,8 +84,8 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Back)->setText(tr("Back"));
     _buttons->get(Next)->setIcon(QIcon(PATH_NICON));
     _buttons->get(Back)->setIcon(QIcon(PATH_CICON));
-    _buttons->get(Next)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Back)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Next)->setIconSize(QSize(16, 16));
+    _buttons->get(Back)->setIconSize(QSize(16, 16));
     _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;

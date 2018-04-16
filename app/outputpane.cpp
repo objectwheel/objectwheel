@@ -1,7 +1,6 @@
 #include <outputpane.h>
 #include <flatbutton.h>
 #include <css.h>
-#include <fit.h>
 #include <centralwidget.h>
 #include <issuesbox.h>
 #include <searchbox.h>
@@ -13,9 +12,9 @@
 #include <QButtonGroup>
 #include <QVBoxLayout>
 
-#define HEIGHT_MIN (fit::fx(100))
-#define HEIGHT_MAX (fit::fx(600))
-#define SIZE_INITIAL (QSize(fit::fx(300), fit::fx(160)))
+#define HEIGHT_MIN (100)
+#define HEIGHT_MAX (600)
+#define SIZE_INITIAL (QSize(300, 160))
 #define INTERVAL_SHINE (400)
 #define COUNT_BLINK (3)
 
@@ -57,23 +56,23 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     buttonGroup->addButton(searchButton);
     buttonGroup->addButton(consoleButton);
 
-    hideButton->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
-    hideButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
+    hideButton->setFixedSize(QSize(20, 20));
+    hideButton->setIconSize(QSize(14, 14));
     hideButton->setCursor(Qt::PointingHandCursor);
     hideButton->setToolTip("Hide bar.");
     hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
     hideButton->settings().topColor = "#0D74C8";
     hideButton->settings().bottomColor = "#0b6ab8";
-    hideButton->settings().borderRadius = fit::fx(10);
+    hideButton->settings().borderRadius = 10;
     connect(hideButton, SIGNAL(clicked(bool)),
       SLOT(handleHideButtonClicked()));
 
     issuesButton->setCheckable(true);
     issuesButton->setText("Issues");
-    issuesButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    issuesButton->settings().borderRadius = fit::fx(5);
-    issuesButton->setFixedWidth(fit::fx(100));
-    issuesButton->setFixedHeight(fit::fx(22));
+    issuesButton->setIconSize(QSize(14, 14));
+    issuesButton->settings().borderRadius = 5;
+    issuesButton->setFixedWidth(100);
+    issuesButton->setFixedHeight(22);
     issuesButton->setCursor(Qt::PointingHandCursor);
     issuesButton->setToolTip("Show recent issues.");
     issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
@@ -86,13 +85,13 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
 
     searchButton->settings().topColor = "#5d6975";
     searchButton->settings().bottomColor = "#515b66";
-    searchButton->settings().borderRadius = fit::fx(5);
+    searchButton->settings().borderRadius = 5;
     searchButton->settings().textColor = Qt::white;
     searchButton->setCheckable(true);
     searchButton->setText("Search");
-    searchButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    searchButton->setFixedWidth(fit::fx(100));
-    searchButton->setFixedHeight(fit::fx(22));
+    searchButton->setIconSize(QSize(14, 14));
+    searchButton->setFixedWidth(100);
+    searchButton->setFixedHeight(22);
     searchButton->setCursor(Qt::PointingHandCursor);
     searchButton->setToolTip("Search words within project.");
     searchButton->setIcon(QIcon(":/resources/images/search.png"));
@@ -101,13 +100,13 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
 
     consoleButton->settings().topColor = "#5d6975";
     consoleButton->settings().bottomColor = "#515b66";
-    consoleButton->settings().borderRadius = fit::fx(5);
+    consoleButton->settings().borderRadius = 5;
     consoleButton->settings().textColor = Qt::white;
     consoleButton->setCheckable(true);
     consoleButton->setText("Console Output");
-    consoleButton->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    consoleButton->setFixedWidth(fit::fx(150));
-    consoleButton->setFixedHeight(fit::fx(22));
+    consoleButton->setIconSize(QSize(14, 14));
+    consoleButton->setFixedWidth(150);
+    consoleButton->setFixedHeight(22);
     consoleButton->setCursor(Qt::PointingHandCursor);
     consoleButton->setToolTip("Show application output.");
     consoleButton->setIcon(QIcon(":/resources/images/console.png"));
@@ -115,19 +114,19 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
       SLOT(handleConsoleButtonClicked(bool)));
 
     auto lspacer = new QWidget;
-    lspacer->setFixedSize(fit::fx(1), fit::fx(1));
+    lspacer->setFixedSize(1, 1);
     auto spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding,
       QSizePolicy::Expanding);
     auto rspacer = new QWidget;
-    rspacer->setFixedSize(fit::fx(1), fit::fx(1));
+    rspacer->setFixedSize(1, 1);
 
-    toolbar->setIconSize(QSize(fit::fx(14), fit::fx(14)));
+    toolbar->setIconSize(QSize(14, 14));
     toolbar->addWidget(lspacer);
     toolbar->addWidget(issuesButton);
     toolbar->addWidget(searchButton);
     toolbar->addWidget(consoleButton);
-    toolbar->setStyleSheet(QString("background: #d4d4d4; border-top: 1px solid #a5a9ac; spacing: %1").arg(fit::fx(5)));
+    toolbar->setStyleSheet(QString("background: #d4d4d4; border-top: 1px solid #a5a9ac; spacing: %1").arg(5));
     toolbar->addWidget(spacer);
     toolbar->addWidget(hideButton);
     toolbar->addWidget(rspacer);
@@ -149,7 +148,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     layout->addWidget(parent->_searchBox);
     layout->addWidget(parent->_consoleBox);
     layout->addWidget(toolbar);
-    toolbar->setFixedHeight(fit::fx(26));
+    toolbar->setFixedHeight(26);
 }
 
 void OutputPanePrivate::handleHideButtonClicked()

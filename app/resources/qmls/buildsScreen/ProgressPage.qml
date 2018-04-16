@@ -5,7 +5,6 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.1
 import Qt.labs.platform 1.0
-import "../fit.js" as Fit
 import "../delaycaller.js" as DelayCaller
 
 Item {
@@ -15,7 +14,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         fillMode: Image.PreserveAspectFit
-        height: Fit.fit(57)
+        height: 57
         source: "qrc:///resources/images/back-line.png"
     }
     AnimatedImage {
@@ -23,16 +22,16 @@ Item {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         fillMode: Image.PreserveAspectFit
-        width: Fit.fit(200)
+        width: 200
         source: "qrc:///resources/images/construction.gif"
     }
     Column {
-        anchors.verticalCenterOffset: Fit.fit(-95)
+        anchors.verticalCenterOffset: -95
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: Fit.fit(10)
+        spacing: 10
         clip: true
-        Item { height: Fit.fit(55); width: 1; }
+        Item { height: 55; width: 1; }
         Text {
             id: informativeText
             text: root.informativeText + waitEffectString
@@ -41,30 +40,30 @@ Item {
         }
         ProgressBar {
             id: progressBar
-            width: Fit.fit(250)
-            height: Fit.fit(5)
+            width: 250
+            height: 5
             value: progressbarValue
             style: ProgressBarStyle {
                 background: Rectangle {
-                    radius: Fit.fit(2)
+                    radius: 2
                     border.color: Qt.darker("#135D52", 1.5)
                     color: "#30000000"
                 }
                 progress: Rectangle {
                     border.color: Qt.darker("#135D52", 1.5)
-                    radius: Fit.fit(2)
+                    radius: 2
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#F4BA48" }
                         GradientStop { position: 1.0; color: Qt.darker("#F4BA48", 1.3) }
                     }
                     Rectangle {
                         height: parent.height
-                        width: Fit.fit(10)
+                        width: 10
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
-                        anchors.topMargin: Fit.fit(1)
-                        anchors.bottomMargin: Fit.fit(1)
+                        anchors.topMargin: 1
+                        anchors.bottomMargin: 1
                         visible: control.value < 0.98
                         gradient: Gradient {
                             GradientStop { position: 0.0; color: "#F4BA48" }
@@ -93,30 +92,30 @@ Item {
         }
         ProgressBar {
             id: progressBar2
-            width: Fit.fit(250)
-            height: Fit.fit(5)
+            width: 250
+            height: 5
             value: progressbarValue2
             style: ProgressBarStyle {
                 background: Rectangle {
-                    radius: Fit.fit(2)
+                    radius: 2
                     border.color: Qt.darker("#135D52", 1.5)
                     color: "#30000000"
                 }
                 progress: Rectangle {
                     border.color: Qt.darker("#135D52", 1.5)
-                    radius: Fit.fit(2)
+                    radius: 2
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#F4BA48" }
                         GradientStop { position: 1.0; color: Qt.darker("#F4BA48", 1.3) }
                     }
                     Rectangle {
                         height: parent.height
-                        width: Fit.fit(10)
+                        width: 10
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
-                        anchors.topMargin: Fit.fit(1)
-                        anchors.bottomMargin: Fit.fit(1)
+                        anchors.topMargin: 1
+                        anchors.bottomMargin: 1
                         visible: control.value < 0.98
                         gradient: Gradient {
                             GradientStop { position: 0.0; color: "#F4BA48" }
@@ -133,8 +132,8 @@ Item {
         }
         Item {
             id: btnCancelOutCont
-            width: Fit.fit(150)
-            height: Fit.fit(28)
+            width: 150
+            height: 28
             anchors.horizontalCenter: parent.horizontalCenter
             enabled: btnCancelEnabled
             Behavior on opacity {
@@ -154,7 +153,7 @@ Item {
                     }
                     Row {
                         anchors.centerIn: parent
-                        spacing: Fit.fit(6)
+                        spacing: 6
                         Text {
                             text: "Cancel"
                             color: "white"
@@ -164,7 +163,7 @@ Item {
                         Image {
                             id: btnCancelImg
                             source: "qrc:///resources/images/cancel.png"
-                            height: btnCancel.height - Fit.fit(12)
+                            height: btnCancel.height - 12
                             fillMode: Image.PreserveAspectFit
                         }
                     }
@@ -185,7 +184,7 @@ Item {
             Rectangle {
                 id: btnCancelMask;
                 anchors.fill: parent;
-                radius: Fit.fit(6);
+                radius: 6;
                 visible: false;
             }
             OpacityMask {
@@ -205,8 +204,8 @@ Item {
         }
         Item {
             id: btnOkOutCont
-            width: Fit.fit(150)
-            height: Fit.fit(28)
+            width: 150
+            height: 28
             opacity: 0
             visible: false
             anchors.horizontalCenter: parent.horizontalCenter
@@ -227,7 +226,7 @@ Item {
                     }
                     Row {
                         anchors.centerIn: parent
-                        spacing: Fit.fit(6)
+                        spacing: 6
                         Text {
                             text: "Ok"
                             color: "white"
@@ -237,7 +236,7 @@ Item {
                         Image {
                             id: btnOkImg
                             source: "qrc:///resources/images/cancel.png"
-                            height: btnOk.height - Fit.fit(12)
+                            height: btnOk.height - 12
                             fillMode: Image.PreserveAspectFit
                         }
                     }
@@ -258,7 +257,7 @@ Item {
             Rectangle {
                 id: btnOkMask;
                 anchors.fill: parent;
-                radius: Fit.fit(6);
+                radius: 6
                 visible: false;
             }
             OpacityMask {
@@ -276,12 +275,12 @@ Item {
                 onClicked: btnOkClicked()
             }
         }
-        Item { height: Fit.fit(2); width: 1; }
+        Item { height: 2; width: 1; }
     }
     Image {
         id: downloadComplete
-        y: - height - Fit.fit(20)
-        width: Fit.fit(200)
+        y: - height - 20
+        width: 200
         fillMode: Image.PreserveAspectFit
         source: "qrc:///resources/images/bouncing_arrow.png"
         anchors.right:  parent.right
@@ -320,7 +319,7 @@ Item {
         })
         btnCancelOutCont.opacity = 0
 
-        downloadComplete.y = Qt.binding(function() { return (root.height - downloadComplete.height - Fit.fit(20))})
+        downloadComplete.y = Qt.binding(function() { return (root.height - downloadComplete.height - 20)})
     }
     function showBtnCancel() {
         DelayCaller.delayCall(250, function() {
@@ -335,7 +334,7 @@ Item {
         DelayCaller.delayCall(300, function() {
             downloadComplete.visible = true
         })
-        downloadComplete.y = Qt.binding(function() { return (-downloadComplete.height - Fit.fit(20))})
+        downloadComplete.y = Qt.binding(function() { return (-downloadComplete.height - 20)})
     }
     signal btnCancelClicked()
     signal btnOkClicked()

@@ -1,5 +1,4 @@
 #include <qmlcodeeditor.h>
-#include <fit.h>
 #include <qmlformatter.h>
 
 #include <QtWidgets>
@@ -8,8 +7,8 @@
 #define COLOR_CURRENTHIGHLIGHT (QColor("#f0f0f0"))
 #define COLOR_LINENUMBERTEXT (QColor("#bfbfbf"))
 #define COLOR_EDITORBACKGROUND Qt::white
-#define SPACE_LINENUMBERAREALEFT fit::fx(20)
-#define SPACE_LINENUMBERAREARIGHT fit::fx(5)
+#define SPACE_LINENUMBERAREALEFT 20
+#define SPACE_LINENUMBERAREARIGHT 5
 #define INTERVAL_COMPLETIONTIMER (10000)
 #define TAB_SPACE ("    ")
 
@@ -172,7 +171,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent)
     _completer.setModelSorting(QCompleter::UnsortedModel);
     _completer.setCaseSensitivity(Qt::CaseInsensitive);
     _completer.setWrapAround(false);
-    _completer.popup()->setIconSize(QSize(fit::fx(16), fit::fx(16)));
+    _completer.popup()->setIconSize(QSize(16, 16));
     _completer.setWidget(this);
     connect(&_completer, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
 
@@ -283,7 +282,7 @@ void QmlCodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
             QFont font;
             QString number = QString::number(blockNumber + 1);
 
-            pen.setWidthF(fit::fx(1));
+            pen.setWidthF(1);
             if (textCursor().hasSelection() &&
                 top >= blockBoundingGeometry(document()->findBlock(textCursor().selectionStart())).translated(contentOffset()).top() &&
                 bottom <= blockBoundingGeometry(document()->findBlock(textCursor().selectionEnd())).translated(contentOffset()).bottom()) {
@@ -395,7 +394,7 @@ void QmlCodeEditor::focusInEvent(QFocusEvent* e)
 
 QSize QmlCodeEditor::sizeHint() const
 {
-    return fit::fx(QSizeF(480, 680)).toSize();
+    return QSize(480, 680);
 }
 
 void QmlCodeEditor::keyPressEvent(QKeyEvent* e)

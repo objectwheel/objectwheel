@@ -1,5 +1,4 @@
 #include <verificationwidget.h>
-#include <fit.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
@@ -15,8 +14,8 @@
 #include <QRegExpValidator>
 
 #define COUNTDOWN        300
-#define BUTTONS_WIDTH    (fit::fx(300))
-#define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
+#define BUTTONS_WIDTH    (300)
+#define SIZE_ICON        (QSize(80, 80))
 #define PATH_ICON        (":/resources/images/verification.png")
 #define PATH_VICON       (":/resources/images/ok.png")
 #define PATH_RICON       (":/resources/images/reset.png")
@@ -39,14 +38,14 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(12);
     _layout->addStretch();
     _layout->addWidget(_iconLabel);
     _layout->addWidget(_verificationLabel);
-    _layout->addSpacing(fit::fx(40));
+    _layout->addSpacing(40);
     _layout->addWidget(_countdownLabel);
     _layout->addWidget(_countdown);
-    _layout->addSpacing(fit::fx(40));
+    _layout->addSpacing(40);
     _layout->addWidget(_emailLabel);
     _layout->addWidget(_bulkEdit);
     _layout->addWidget(_buttons);
@@ -77,7 +76,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _verificationLabel->setFont(f);
     _verificationLabel->setText(tr("Email Verification"));
@@ -107,9 +106,9 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Resend)->setIcon(QIcon(PATH_RICON));
     _buttons->get(Verify)->setIcon(QIcon(PATH_VICON));
-    _buttons->get(Cancel)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Resend)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Verify)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Cancel)->setIconSize(QSize(16, 16));
+    _buttons->get(Resend)->setIconSize(QSize(16, 16));
+    _buttons->get(Verify)->setIconSize(QSize(16, 16));
     _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Resend)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Verify)->setCursor(Qt::PointingHandCursor);

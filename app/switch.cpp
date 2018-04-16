@@ -1,12 +1,11 @@
 #include <switch.h>
-#include <fit.h>
 #include <QPainter>
 #include <QVariantAnimation>
 
-#define SIZE (fit::fx(QSizeF(48, 30)).toSize())
+#define SIZE (QSize(48, 30))
 #define ADJUST(x) ((x).adjusted(\
-    fit::fx(2.5) + 0.5, fit::fx(2.5) + 0.5,\
-    - fit::fx(2.5) - 0.5, - fit::fx(2.5) - 0.5\
+    2.5 + 0.5, 2.5 + 0.5,\
+    - 2.5 - 0.5, - 2.5 - 0.5\
 ))
 
 namespace {
@@ -107,9 +106,9 @@ void Switch::paintEvent(QPaintEvent*)
     /* Draw handle shadow */
     const auto& sr = r.adjusted(
         x,
-        fit::fx(2.5),
+        2.5,
         - r.width() + x + r.height(),
-        fit::fx(2.5)
+        2.5
     );
 
     QLinearGradient sg(sr.topLeft(), sr.bottomLeft());

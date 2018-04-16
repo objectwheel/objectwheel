@@ -12,39 +12,39 @@ class ModuleSelectionWidget;
 
 class BuildsWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        enum Screens {
-            Platforms,
-            Modules,
-            Android,
-            Download
-        };
+public:
+    enum Screens {
+        Platforms,
+        Modules,
+        Android,
+        Download
+    };
 
-    public:
-        explicit BuildsWidget(QWidget *parent = nullptr);
+public:
+    explicit BuildsWidget(QWidget *parent = nullptr);
 
-    public slots:
-        void reset();
+public slots:
+    void reset();
 
-    protected:
-        QSize sizeHint() const override;
+protected:
+    QSize sizeHint() const override;
 
-    private slots:
-        void showModules();
-        void showPlatforms();
-        void handleDownload();
-        void handleModuleSelection();
-        void handlePlatformSelection(OTargets::Targets);
+private slots:
+    void showModules();
+    void showPlatforms();
+    void handleDownload();
+    void handleModuleSelection();
+    void handlePlatformSelection(OTargets::Targets);
 
-    private:
-        View* _view;
-        OTargets::Targets _target;
-        PlatformsWidget* _platformsWidget;
-        ModuleSelectionWidget* _modulesWidget;
-        AndroidWidget* _androidWidget;
-        DownloadWidget* _downloadWidget;
+private:
+    View* _view;
+    OTargets::Targets _target;
+    PlatformsWidget* _platformsWidget;
+    ModuleSelectionWidget* _modulesWidget;
+    AndroidWidget* _androidWidget;
+    DownloadWidget* _downloadWidget;
 };
 
 #endif // BUILDSWINDOW_H

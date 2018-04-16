@@ -1,5 +1,4 @@
 #include <downloadwidget.h>
-#include <fit.h>
 #include <projectbackend.h>
 #include <userbackend.h>
 #include <filemanager.h>
@@ -40,7 +39,6 @@ DownloadWidgetPrivate::DownloadWidgetPrivate(DownloadWidget* w)
     : parent(w)
     , manager(new QNetworkAccessManager(parent))
 {
-    parent->rootContext()->setContextProperty("dpi", fit::ratio());
     parent->setSource(QUrl("qrc:/resources/qmls/buildsScreen/main.qml"));
     parent->setResizeMode(QQuickWidget::SizeRootObjectToView);
     parent->setWindowTitle("Objectwheel Builds");

@@ -1,5 +1,4 @@
 #include <filelist.h>
-#include <fit.h>
 #include <css.h>
 #include <filemanager.h>
 #include <delayer.h>
@@ -46,12 +45,12 @@ FileList::FileList(QWidget *parent) : QTreeView(parent)
     blurEffect = new QGraphicsBlurEffect(this);
     blurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
     blurEffect->setEnabled(false);
-    blurEffect->setBlurRadius(fit::fx(70));
+    blurEffect->setBlurRadius(70);
     viewport()->setGraphicsEffect(blurEffect);
 
     dbs = new DropSettings;
     dbs->ao.load(":/resources/images/droparrow.png");
-    dbs->r.setSize({fit::fx(100), fit::fx(100)});
+    dbs->r.setSize({100, 100});
 
     dropLabel = new QLabel(this);
     dropLabel->setHidden(true);
@@ -209,26 +208,26 @@ void FileList::resizeEvent(QResizeEvent* event)
     bn.fill("#15000000");
     dbs->b = bn;
     dbs->r.moveCenter(dropLabel->rect().center());
-    dbs->ra = dbs->r.adjusted(fit::fx(25), fit::fx(17), -fit::fx(25), -fit::fx(33));
+    dbs->ra = dbs->r.adjusted(25, 17, -25, -33);
     dbs->a = dbs->ao.scaled((dbs->ra.size() * DPR).toSize());
 
     QPen pen;
     pen.setStyle(Qt::DashLine);
-    pen.setWidthF(fit::fx(3));
+    pen.setWidthF(3);
     pen.setColor("#b4b8bb");
 
     QPainter painter(&dbs->b);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(pen);
 
-    painter.drawRoundedRect(dbs->r, fit::fx(12), fit::fx(12));
+    painter.drawRoundedRect(dbs->r, 12, 12);
     painter.drawPixmap(dbs->ra, dbs->a, dbs->a.rect());
 
-    pen.setWidthF(fit::fx(1));
+    pen.setWidthF(1);
     pen.setColor("#b0b4b7");
     painter.setPen(pen);
 
-    painter.drawText(dbs->r.adjusted(0, fit::fx(10), 0, -fit::fx(10)), "Drop Here",
+    painter.drawText(dbs->r.adjusted(0, 10, 0, -10), "Drop Here",
       QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
     painter.end();
     dropLabel->setPixmap(dbs->b);

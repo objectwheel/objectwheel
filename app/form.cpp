@@ -1,5 +1,4 @@
 #include <form.h>
-#include <fit.h>
 #include <designerscene.h>
 
 #include <QGraphicsSceneMouseEvent>

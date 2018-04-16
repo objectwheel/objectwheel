@@ -7,7 +7,6 @@
 #include <designerscene.h>
 #include <filemanager.h>
 #include <css.h>
-#include <fit.h>
 #include <delayer.h>
 #include <exposerbackend.h>
 
@@ -80,7 +79,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _listWidget->viewport()->installEventFilter(this);
     _listWidget->setStyleSheet("QListView { border: none; }");
     _listWidget->setFocusPolicy(Qt::NoFocus);
-    _listWidget->setIconSize(QSize(fit::fx(14),fit::fx(14)));
+    _listWidget->setIconSize(QSize(14,14));
     _listWidget->setSelectionMode(QListWidget::SingleSelection);
     _listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
     _listWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
@@ -102,7 +101,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _header->setFont(f);
 
     _header->setText("Forms");
-    _header->setFixedHeight(fit::fx(23));
+    _header->setFixedHeight(23);
     _header->setStyleSheet(
         "color: white; padding-left: 5px; border:none; border-bottom: 1px solid #1a69bd;"
         "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1069C7);"
@@ -110,21 +109,21 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
 
     _addButton->settings().topColor = "#62A558";
     _addButton->settings().bottomColor = "#599750";
-    _addButton->settings().borderRadius = fit::fx(10);
+    _addButton->settings().borderRadius = 10;
     _addButton->settings().textColor = Qt::white;
     _addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _addButton->setFixedSize(fit::fx(20), fit::fx(20));
-    _addButton->setIconSize(QSize(fit::fx(12),fit::fx(12)));
+    _addButton->setFixedSize(20, 20);
+    _addButton->setIconSize(QSize(12,12));
     _addButton->setIcon(QIcon(":/resources/images/plus.png"));
     connect(_addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
 
     _removeButton->settings().topColor = "#C2504B";
     _removeButton->settings().bottomColor = "#B34B46";
-    _removeButton->settings().borderRadius = fit::fx(12);
+    _removeButton->settings().borderRadius = 12;
     _removeButton->settings().textColor = Qt::white;
     _removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _removeButton->setFixedSize(fit::fx(20),fit::fx(20));
-    _removeButton->setIconSize(QSize(fit::fx(12),fit::fx(12)));
+    _removeButton->setFixedSize(20,20);
+    _removeButton->setIconSize(QSize(12,12));
     _removeButton->setIcon(QIcon(":/resources/images/minus.png"));
     connect(_removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
 
@@ -139,8 +138,8 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
 
     _layout->addWidget(_innerWidget);
     _layout->addLayout(_buttonLayout);
-    _layout->setSpacing(fit::fx(2));
-    _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
+    _layout->setSpacing(2);
+    _layout->setContentsMargins(3, 3, 3, 3);
 }
 
 bool FormsPane::eventFilter(QObject* watched, QEvent* event)
@@ -168,7 +167,7 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
                     }
                 }
             } else {
-                const qreal hg = fit::fx(20.0);
+                const qreal hg = 20.0;
                 const qreal ic = _listWidget->viewport()->height() / hg;
 
                 for (int i = 0; i < ic; i++) {
@@ -267,7 +266,7 @@ void FormsPane::reset()
 
 QSize FormsPane::sizeHint() const
 {
-    return fit::fx(QSizeF{215, 160}).toSize();
+    return QSize{215, 160};
 }
 
 #include "formspane.moc"

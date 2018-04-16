@@ -1,5 +1,4 @@
 #include <fileexplorer.h>
-#include <fit.h>
 #include <css.h>
 #include <filelist.h>
 #include <filemanager.h>
@@ -107,8 +106,8 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     connect(downloadFileButton, SIGNAL(clicked(bool)), SLOT(handleDownloadButtonClicked()));
 
     toolbar->setStyleSheet(CSS::DesignerToolbar);
-    toolbar->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    toolbar->setFixedHeight(fit::fx(21));
+    toolbar->setIconSize(QSize(14, 14));
+    toolbar->setFixedHeight(21);
     toolbar->addWidget(upButton);
     toolbar->addWidget(homeButton);
     toolbar->addSeparator();
@@ -350,7 +349,7 @@ void FileExplorer::setRootPath(const QString& rootPath)
 
 QSize FileExplorer::sizeHint() const
 {
-    return fit::fx(QSizeF(200, 680)).toSize();
+    return QSize(200, 680);
 }
 
 QString FileExplorer::rootPath() const

@@ -14,39 +14,39 @@ class DesignerScene;
 
 class FormsPane : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit FormsPane(DesignerScene* designerScene, QWidget* parent = nullptr);
-        void setCurrentForm(int index);
+public:
+    explicit FormsPane(DesignerScene* designerScene, QWidget* parent = nullptr);
+    void setCurrentForm(int index);
 
-    public slots:
-        void reset();
+public slots:
+    void reset();
 
-    protected:
-        QSize sizeHint() const override;
+protected:
+    QSize sizeHint() const override;
 
-    private slots:
-        void addButtonClicked();
-        void removeButtonClicked();
-        void handleDatabaseChange();
-        void handleCurrentFormChange();
+private slots:
+    void addButtonClicked();
+    void removeButtonClicked();
+    void handleDatabaseChange();
+    void handleCurrentFormChange();
 
-    protected:
-        bool eventFilter(QObject* watched, QEvent* event) override;
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
-    signals:
-        void currentFormChanged();
+signals:
+    void currentFormChanged();
 
-    private:
-        DesignerScene* m_designerScene;
-        QVBoxLayout* _layout,* _innerLayout;
-        QFrame* _innerWidget;
-        QHBoxLayout* _buttonLayout;
-        QLabel* _header;
-        QListWidget* _listWidget;
-        FlatButton* _addButton;
-        FlatButton* _removeButton;
+private:
+    DesignerScene* m_designerScene;
+    QVBoxLayout* _layout,* _innerLayout;
+    QFrame* _innerWidget;
+    QHBoxLayout* _buttonLayout;
+    QLabel* _header;
+    QListWidget* _listWidget;
+    FlatButton* _addButton;
+    FlatButton* _removeButton;
 };
 
 #endif // FORMSPANE_H

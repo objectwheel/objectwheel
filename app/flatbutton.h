@@ -7,41 +7,41 @@ class QGraphicsDropShadowEffect;
 
 class FlatButton : public QPushButton
 {
-		Q_OBJECT
+    Q_OBJECT
 
-    public:
-        struct Settings {
-            /* Colors */
-            QColor topColor;
-            QColor bottomColor;
-            QColor textColor;
-            /* Sizes */
-            qreal textMargin;
-            qreal borderRadius;
-            /* Others */
-            bool iconButton;
-            bool showShadow;
-            bool textUnderIcon;
-            bool verticalGradient;
-        };
+public:
+    struct Settings {
+        /* Colors */
+        QColor topColor;
+        QColor bottomColor;
+        QColor textColor;
+        /* Sizes */
+        qreal textMargin;
+        qreal borderRadius;
+        /* Others */
+        bool iconButton;
+        bool showShadow;
+        bool textUnderIcon;
+        bool verticalGradient;
+    };
 
-	public:
-		explicit FlatButton(QWidget *parent = 0);
-        Settings& settings();
+public:
+    explicit FlatButton(QWidget *parent = 0);
+    Settings& settings();
 
-    public slots:
-        void triggerSettings();
+public slots:
+    void triggerSettings();
 
-	protected:
-        void mouseDoubleClickEvent(QMouseEvent *event) override;
-        void paintEvent(QPaintEvent* event) override;
-        QSize sizeHint() const override;
+protected:
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
+    QSize sizeHint() const override;
 
-    signals:
-        void doubleClick();
+signals:
+    void doubleClick();
 
-    private:
-        Settings _settings;
+private:
+    Settings _settings;
 };
 
 #endif // FLATBUTTON_H

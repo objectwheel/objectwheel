@@ -1,6 +1,5 @@
 #include <themechooserwidget.h>
 #include <dpr.h>
-#include <fit.h>
 #include <delayer.h>
 #include <saveutils.h>
 #include <projectbackend.h>
@@ -57,7 +56,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_stylesLabel->setFont(sectionsFont);
 
     m_stylesCombo->addItems(m_version == V1 ? STYLES : STYLES_V2);
-    m_stylesCombo->setFixedWidth(fit::fx(150));
+    m_stylesCombo->setFixedWidth(150);
 
     m_seeRunningButton->setText(tr("See Running"));
     m_seeRunningButton->setDefault(true);
@@ -68,7 +67,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         m_themesLabel->setFont(sectionsFont);
 
         m_themesCombo->setCurrentText("None");
-        m_themesCombo->setFixedWidth(fit::fx(150));
+        m_themesCombo->setFixedWidth(150);
 
         m_detailsLabel->setText(tr("Details:"));
         m_detailsLabel->setStyleSheet("color: black");
@@ -86,27 +85,27 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         m_backgroundDetailLabel->setText(tr("Background color:"));
         m_backgroundDetailLabel->setStyleSheet("color: black");
 
-        m_accentColorsCombo->setFixedWidth(fit::fx(200));
-        m_primaryColorsCombo->setFixedWidth(fit::fx(200));
-        m_foregroundColorsCombo->setFixedWidth(fit::fx(200));
-        m_backgroundColorsCombo->setFixedWidth(fit::fx(200));
+        m_accentColorsCombo->setFixedWidth(200);
+        m_primaryColorsCombo->setFixedWidth(200);
+        m_foregroundColorsCombo->setFixedWidth(200);
+        m_backgroundColorsCombo->setFixedWidth(200);
 
-        m_accentColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
+        m_accentColorLabel->setFixedSize(QSize(20, 20));
         m_accentColorLabel->setFrameShape(QLabel::StyledPanel);
         m_accentColorLabel->setFrameShadow(QLabel::Plain);
         m_accentColorLabel->setAutoFillBackground(true);
 
-        m_primaryColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
+        m_primaryColorLabel->setFixedSize(QSize(20, 20));
         m_primaryColorLabel->setFrameShape(QLabel::StyledPanel);
         m_primaryColorLabel->setFrameShadow(QLabel::Plain);
         m_primaryColorLabel->setAutoFillBackground(true);
 
-        m_foregroundColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
+        m_foregroundColorLabel->setFixedSize(QSize(20, 20));
         m_foregroundColorLabel->setFrameShape(QLabel::StyledPanel);
         m_foregroundColorLabel->setFrameShadow(QLabel::Plain);
         m_foregroundColorLabel->setAutoFillBackground(true);
 
-        m_backgroundColorLabel->setFixedSize(fit::fx(QSizeF(20, 20)).toSize());
+        m_backgroundColorLabel->setFixedSize(QSize(20, 20));
         m_backgroundColorLabel->setFrameShape(QLabel::StyledPanel);
         m_backgroundColorLabel->setFrameShadow(QLabel::Plain);
         m_backgroundColorLabel->setAutoFillBackground(true);

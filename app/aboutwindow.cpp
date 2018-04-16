@@ -1,5 +1,4 @@
 #include <aboutwindow.h>
-#include <fit.h>
 #include <dpr.h>
 
 #include <QLabel>
@@ -41,11 +40,11 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_layout->setAlignment(m_versionLabel, Qt::AlignCenter);
     m_layout->setAlignment(m_okButton, Qt::AlignCenter);
     m_layout->setAlignment(m_legalLabel, Qt::AlignCenter);
-    m_layout->setSpacing(fit::fx(20));
+    m_layout->setSpacing(20);
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(fit::fx(24));
+    f.setPixelSize(24);
 
     m_titleLabel->setFont(f);
     m_titleLabel->setText("About Objectwheel");
@@ -54,10 +53,10 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     QPixmap px(":/resources/images/logo.png");
     px.setDevicePixelRatio(DPR);
 
-    m_logoLabel->setFixedSize(fit::fx(QSizeF(160, 80)).toSize());
+    m_logoLabel->setFixedSize(QSize(160, 80));
     m_logoLabel->setPixmap(
         px.scaled(
-            fit::fx(QSizeF(160, 80)).toSize() * DPR,
+            QSize(160, 80) * DPR,
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )
@@ -73,7 +72,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_versionLabel->setStyleSheet("color: black;");
 
     m_okButton->setText("Ok");
-    m_okButton->setFixedWidth(fit::fx(100));
+    m_okButton->setFixedWidth(100);
     m_okButton->setCursor(Qt::PointingHandCursor);
     connect(m_okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
 

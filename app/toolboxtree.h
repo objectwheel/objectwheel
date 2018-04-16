@@ -8,30 +8,30 @@ class FlatButton;
 
 class ToolboxTree : public QTreeWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit ToolboxTree(QWidget *parent = nullptr);
+public:
+    explicit ToolboxTree(QWidget *parent = nullptr);
 
-        void addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls);
-        void removeUrls(QTreeWidgetItem* item);
-        const QMap<QTreeWidgetItem*, QList<QUrl>>& allUrls() const;
-        QList<QUrl> urls(QTreeWidgetItem* item) const;
+    void addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls);
+    void removeUrls(QTreeWidgetItem* item);
+    const QMap<QTreeWidgetItem*, QList<QUrl>>& allUrls() const;
+    QList<QUrl> urls(QTreeWidgetItem* item) const;
 
-        bool contains(const QString& itemName);
-        bool categoryContains(const QString& categoryName);
-        QTreeWidgetItem* categoryItem(const QString& categoryName);
+    bool contains(const QString& itemName);
+    bool categoryContains(const QString& categoryName);
+    QTreeWidgetItem* categoryItem(const QString& categoryName);
 
-    public slots:
-        void clearUrls();
+public slots:
+    void clearUrls();
 
-    protected:
-        QMimeData* mimeData(const QList<QTreeWidgetItem*> items) const override;
-        void mousePressEvent(QMouseEvent* event) override;
+protected:
+    QMimeData* mimeData(const QList<QTreeWidgetItem*> items) const override;
+    void mousePressEvent(QMouseEvent* event) override;
 
-    private:
-        QPoint _pressPoint;
-        QMap<QTreeWidgetItem*, QList<QUrl>> _urls;
+private:
+    QPoint _pressPoint;
+    QMap<QTreeWidgetItem*, QList<QUrl>> _urls;
 };
 
 #endif // TOOLBOXTREE_H

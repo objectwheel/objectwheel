@@ -1,12 +1,11 @@
 #include <bulkedit.h>
-#include <fit.h>
 #include <focuslesslineedit.h>
 #include <QPainter>
 #include <QLineEdit>
 #include <QVBoxLayout>
 
 #define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
-#define SIZE (fit::fx(QSizeF(300, 0)).toSize())
+#define SIZE (QSize(300, 0))
 
 BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
 {
@@ -20,10 +19,10 @@ BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
     _settings.labelColor = "#40000000";
 
     /* Set size settings */
-    _settings.cellHeight = fit::fx(35);
-    _settings.borderRadius = fit::fx(8);
-    _settings.leftMargin = fit::fx(10);
-    _settings.rightMargin = fit::fx(10);
+    _settings.cellHeight = 35;
+    _settings.borderRadius = 8;
+    _settings.leftMargin = 10;
+    _settings.rightMargin = 10;
 
     _layout->setSpacing(0);
     _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
@@ -101,9 +100,9 @@ void BulkEdit::paintEvent(QPaintEvent*)
         const auto& element = _elements.at(i);
         painter.drawText(
             QRectF(
-                r.left() + fit::fx(10),
+                r.left() + 10,
                 r.top() + _settings.cellHeight * i,
-                r.width() - fit::fx(20),
+                r.width() - 20,
                 _settings.cellHeight
             ),
             element.text,

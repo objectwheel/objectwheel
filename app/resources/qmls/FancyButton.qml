@@ -1,7 +1,6 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.1
-import "fit.js" as Fit
 
 Item {
     id: root
@@ -21,7 +20,7 @@ Item {
     Image {
         id: iconImage
         anchors.fill: parent
-        anchors.margins: Fit.fit(4)
+        anchors.margins: 4
         sourceSize: Qt.size(width, height)
         visible: !iconButton ? false : !pressingEffect.visible
     }

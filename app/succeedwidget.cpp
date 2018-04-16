@@ -1,5 +1,4 @@
 #include <succeedwidget.h>
-#include <fit.h>
 #include <buttonslice.h>
 #include <dpr.h>
 
@@ -10,8 +9,8 @@
 #include <QPushButton>
 #include <QPainter>
 
-#define BUTTONS_WIDTH    (fit::fx(150))
-#define SIZE_GIF        (QSize(fit::fx(100), fit::fx(100)))
+#define BUTTONS_WIDTH    (150)
+#define SIZE_GIF        (QSize(100, 100))
 #define PATH_GIF         (":/resources/images/complete.gif")
 #define PATH_OICON       (":/resources/images/ok.png")
 
@@ -26,7 +25,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _descriptionLabel = new QLabel;
     _buttons = new ButtonSlice;
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(12);
     _layout->addStretch();
     _layout->addWidget(_iconLabel);
     _layout->addWidget(_titleLabel);
@@ -48,7 +47,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _iconLabel->setStyleSheet("background: transparent;");
 
     QFont f;
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _titleLabel->setFont(f);
     _titleLabel->setStyleSheet("color: #65A35C");
@@ -59,7 +58,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _buttons->add(Ok, "#86CC63", "#75B257");
     _buttons->get(Ok)->setText(tr("Ok"));
     _buttons->get(Ok)->setIcon(QIcon(PATH_OICON));
-    _buttons->get(Ok)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Ok)->setIconSize(QSize(16, 16));
     _buttons->get(Ok)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH;
     _buttons->triggerSettings();
@@ -87,10 +86,10 @@ void SucceedWidget::paintEvent(QPaintEvent* event)
 
     if (_movie->currentFrameNumber() > 48) {
         auto r = _iconLabel->geometry().adjusted(
-            fit::fx(10),
-            fit::fx(10),
-            -fit::fx(10),
-            -fit::fx(10)
+            10,
+            10,
+            -10,
+            -10
         );
         painter.setBrush(Qt::white);
         painter.drawRoundedRect(r, r.width() / 2.0, r.width() / 2.0);

@@ -1,5 +1,4 @@
 #include <forgetwidget.h>
-#include <fit.h>
 #include <buttonslice.h>
 #include <bulkedit.h>
 #include <waitingspinnerwidget.h>
@@ -12,8 +11,8 @@
 #include <QLineEdit>
 #include <QMessageBox>
 
-#define BUTTONS_WIDTH    (fit::fx(350))
-#define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
+#define BUTTONS_WIDTH    (350)
+#define SIZE_ICON        (QSize(80, 80))
 #define PATH_ICON        (":/resources/images/forgot.png")
 #define PATH_NICON       (":/resources/images/load.png")
 #define PATH_CICON       (":/resources/images/unload.png")
@@ -35,14 +34,14 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(12);
     _layout->addStretch();
     _layout->addWidget(_iconLabel, 0 , Qt::AlignCenter);
-    _layout->addSpacing(fit::fx(10));
+    _layout->addSpacing(10);
     _layout->addWidget(_forgotLabel, 0 , Qt::AlignCenter);
-    _layout->addSpacing(fit::fx(50));
+    _layout->addSpacing(50);
     _layout->addWidget(_bulkEdit, 0 , Qt::AlignCenter);
-    _layout->addSpacing(fit::fx(10));
+    _layout->addSpacing(10);
     _layout->addWidget(_buttons, 0 , Qt::AlignCenter);
     _layout->addStretch();
     _layout->addWidget(_loadingIndicator, 0 , Qt::AlignCenter);
@@ -62,7 +61,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _forgotLabel->setFont(f);
     _forgotLabel->setText(tr("Password Reset"));
@@ -80,8 +79,8 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Back)->setText(tr("Back"));
     _buttons->get(Next)->setIcon(QIcon(PATH_NICON));
     _buttons->get(Back)->setIcon(QIcon(PATH_CICON));
-    _buttons->get(Next)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Back)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Next)->setIconSize(QSize(16, 16));
+    _buttons->get(Back)->setIconSize(QSize(16, 16));
     _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;

@@ -1,6 +1,5 @@
 #include <welcomewindow.h>
 #include <windowmanager.h>
-#include <fit.h>
 #include <view.h>
 #include <loginwidget.h>
 #include <robotwidget.h>

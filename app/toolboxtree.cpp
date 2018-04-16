@@ -1,5 +1,4 @@
 #include <toolboxtree.h>
-#include <fit.h>
 #include <css.h>
 #include <flatbutton.h>
 #include <global.h>
@@ -73,7 +72,7 @@ void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &optio
         painter->restore();
 
         QStyleOption branchOption;
-        static const int i = fit::fx(9); // ### hardcoded in qcommonstyle.cpp
+        static const int i = 9; // ### hardcoded in qcommonstyle.cpp
         QRect r = frame;
         branchOption.rect = QRect(r.left() + i/2, r.top() + (r.height() - i)/2, i, i);
         branchOption.state = QStyle::State_Children;
@@ -116,7 +115,7 @@ ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
     setAutoFillBackground(true);
     setPalette(p2);
 
-    setIconSize(fit::fx(QSize{22, 22}));
+    setIconSize({22, 22});
     setFocusPolicy(Qt::NoFocus);
     setIndentation(0);
     setRootIsDecorated(false);

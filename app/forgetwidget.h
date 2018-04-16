@@ -11,28 +11,28 @@ class WaitingSpinnerWidget;
 
 class ForgetWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit ForgetWidget(QWidget* parent = nullptr);
+public:
+    explicit ForgetWidget(QWidget* parent = nullptr);
 
-    private slots:
-        void clear();
-        void lock();
-        void unlock();
-        void onNextClicked();
+private slots:
+    void clear();
+    void lock();
+    void unlock();
+    void onNextClicked();
 
-    signals:
-        void back();
-        void done(const QString& email);
+signals:
+    void back();
+    void done(const QString& email);
 
-    private:
-        QVBoxLayout* _layout;
-        QLabel* _iconLabel;
-        QLabel* _forgotLabel;
-        ButtonSlice* _buttons;
-        BulkEdit* _bulkEdit;
-        WaitingSpinnerWidget* _loadingIndicator;
+private:
+    QVBoxLayout* _layout;
+    QLabel* _iconLabel;
+    QLabel* _forgotLabel;
+    ButtonSlice* _buttons;
+    BulkEdit* _bulkEdit;
+    WaitingSpinnerWidget* _loadingIndicator;
 };
 
 #endif // FORGETWIDGET_H

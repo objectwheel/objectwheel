@@ -1,7 +1,6 @@
 #include <qmlcodeeditorwidget.h>
 #include <designerscene.h>
 #include <control.h>
-#include <fit.h>
 #include <saveutils.h>
 #include <savebackend.h>
 #include <centralwidget.h>
@@ -30,9 +29,9 @@
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
 #define CHAR_CHANGEINDICATOR ("*")
-#define INITIALWIDTH_FILEEXPLORER (fit::fx(450))
-#define MINWIDTH_FILEEXPLORER (fit::fx(200))
-#define MINWIDTH_EDITOR (fit::fx(200))
+#define INITIALWIDTH_FILEEXPLORER (450)
+#define MINWIDTH_FILEEXPLORER (200)
+#define MINWIDTH_EDITOR (200)
 #define UNKNOWN_PATH ("67asdta8d9yaghqbj4")
 #define TAB_SPACE ("    ")
 
@@ -187,13 +186,13 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     fileExplorer->setRootPath(UNKNOWN_PATH);
 
-    itemsCombobox->setFixedWidth(fit::fx(200));
-    documentsCombobox->setFixedWidth(fit::fx(200));
+    itemsCombobox->setFixedWidth(200);
+    documentsCombobox->setFixedWidth(200);
 
     #if defined(Q_OS_WIN)
-    itemsCombobox->setFixedHeight(fit::fx(18));
-    documentsCombobox->setFixedHeight(fit::fx(18));
-    zoomlLevelCombobox->setFixedHeight(fit::fx(18));
+    itemsCombobox->setFixedHeight(18);
+    documentsCombobox->setFixedHeight(18);
+    zoomlLevelCombobox->setFixedHeight(18);
     #endif
 
     redoButton->setDisabled(true);
@@ -213,7 +212,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     noDocumentIndicator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     noDocumentIndicator->show();
 
-    defaultFont.setPixelSize(defaultFont.pixelSize() - fit::fx(0.5));
+    defaultFont.setPixelSize(defaultFont.pixelSize() - 0.5);
     defaultFont.setFamily("Liberation Mono");
     defaultFont.setStyleHint(QFont::Monospace);
 
@@ -298,8 +297,8 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     toolbar->setStyleSheet(CSS::DesignerToolbar);
-    toolbar->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    toolbar->setFixedHeight(fit::fx(21));
+    toolbar->setIconSize(QSize(14, 14));
+    toolbar->setFixedHeight(21);
     toolbar->addWidget(pinButton);
     toolbar->addSeparator();
     toolbar->addWidget(undoButton);
@@ -343,8 +342,8 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     toolbar_2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     toolbar_2->setOrientation(Qt::Vertical);
     toolbar_2->setStyleSheet(CSS::DesignerToolbarV);
-    toolbar_2->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    toolbar_2->setFixedWidth(fit::fx(21));
+    toolbar_2->setIconSize(QSize(14, 14));
+    toolbar_2->setFixedWidth(21);
     toolbar_2->addWidget(hideShowButton);
     toolbar_2->addSeparator();
     toolbar_2->addWidget(codeEditorButton);
@@ -361,7 +360,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
 
 qreal QmlCodeEditorWidgetPrivate::findPixelSize(const QString& text)
 {
-    qreal base = QFont().pixelSize() - fit::fx(0.5);
+    qreal base = QFont().pixelSize() - 0.5;
 
     if (text == "35 %")
         return (base * 0.35);
@@ -1038,7 +1037,7 @@ void QmlCodeEditorWidget::handleControlRemoval(Control* control)
 
 QSize QmlCodeEditorWidget::sizeHint() const
 {
-    return fit::fx(QSizeF(680, 680)).toSize();
+    return QSize(680, 680);
 }
 
 void QmlCodeEditorWidget::paintEvent(QPaintEvent*)

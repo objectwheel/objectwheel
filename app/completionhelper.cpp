@@ -1,6 +1,5 @@
 #include <completionhelper.h>
 #include <qmlcodeeditor.h>
-#include <fit.h>
 
 #include <QAbstractItemView>
 

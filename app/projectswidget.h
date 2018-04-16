@@ -11,45 +11,45 @@ class ProgressBar;
 
 class ProjectsWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit ProjectsWidget(QWidget* parent = nullptr);
+public:
+    explicit ProjectsWidget(QWidget* parent = nullptr);
 
-    public slots:
-        void refreshProjectList();
+public slots:
+    void refreshProjectList();
 
-    private slots:
-        void startProject();
-        void onNewButtonClick();
-        void onLoadButtonClick();
-        void onExportButtonClick();
-        void onImportButtonClick();
-        void onSettingsButtonClick();
-        void onProgressChange();
+private slots:
+    void startProject();
+    void onNewButtonClick();
+    void onLoadButtonClick();
+    void onExportButtonClick();
+    void onImportButtonClick();
+    void onSettingsButtonClick();
+    void onProgressChange();
 
-    private:
-        void lock();
-        void unlock();
+private:
+    void lock();
+    void unlock();
 
-    protected:
-        bool eventFilter(QObject* watched, QEvent* event) override;
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
-    signals:
-        void done();
-        void editProject(const QString& hash);
-        void newProject(const QString& projectName);
+signals:
+    void done();
+    void editProject(const QString& hash);
+    void newProject(const QString& projectName);
 
-    private:
-        QVBoxLayout* m_layout;
-        QLabel* m_iconLabel;
-        QLabel* m_welcomeLabel;
-        QLabel* m_versionLabel;
-        QLabel* m_projectsLabel;
-        QListWidget* m_listWidget;
-        ButtonSlice* m_buttons;
-        ButtonSlice* m_buttons_2;
-        ProgressBar* m_progressBar;
+private:
+    QVBoxLayout* m_layout;
+    QLabel* m_iconLabel;
+    QLabel* m_welcomeLabel;
+    QLabel* m_versionLabel;
+    QLabel* m_projectsLabel;
+    QListWidget* m_listWidget;
+    ButtonSlice* m_buttons;
+    ButtonSlice* m_buttons_2;
+    ProgressBar* m_progressBar;
 };
 
 #endif // PROJECTSWIDGET_H

@@ -8,40 +8,40 @@ class QVariantAnimation;
 
 class Switch : public QAbstractButton
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        struct Settings {
-            /* Colors */
-            QColor activeBorderColor;
-            QColor activeBackgroundColor;
-            QColor inactiveBorderColor;
-            QColor inactiveBackgroundColor;
-            QColor handleBorderColor;
-            QColor handleColor;
+public:
+    struct Settings {
+        /* Colors */
+        QColor activeBorderColor;
+        QColor activeBackgroundColor;
+        QColor inactiveBorderColor;
+        QColor inactiveBackgroundColor;
+        QColor handleBorderColor;
+        QColor handleColor;
 
-            /* Animation settings */
-            int animationDuration;
-            QEasingCurve::Type animationType;
-        };
+        /* Animation settings */
+        int animationDuration;
+        QEasingCurve::Type animationType;
+    };
 
-    public:
-        explicit Switch(QWidget* parent = nullptr);
-        Settings& settings();
+public:
+    explicit Switch(QWidget* parent = nullptr);
+    Settings& settings();
 
-    public slots:
-        void triggerSettings();
+public slots:
+    void triggerSettings();
 
-    protected:
-        QSize sizeHint() const override;
-        void paintEvent(QPaintEvent* event) override;
+protected:
+    QSize sizeHint() const override;
+    void paintEvent(QPaintEvent* event) override;
 
-    private slots:
-        void handleStateChange();
+private slots:
+    void handleStateChange();
 
-    private:
-        Settings _settings;
-        QVariantAnimation* _animation;
+private:
+    Settings _settings;
+    QVariantAnimation* _animation;
 };
 
 #endif // SWITCH_H

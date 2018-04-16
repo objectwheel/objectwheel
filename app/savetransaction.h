@@ -7,21 +7,21 @@ class Control;
 
 class SaveTransaction : public QObject
 {
-        Q_OBJECT
-        Q_DISABLE_COPY(SaveTransaction)
+    Q_OBJECT
+    Q_DISABLE_COPY(SaveTransaction)
 
-    public:
-        static SaveTransaction* instance();
-        void disable();
-        void enable();
+public:
+    static SaveTransaction* instance();
+    void disable();
+    void enable();
 
-    public slots:
-        void processZ(Control*);
-        void processParent(Control*);
-        void processGeometry(Control*);
+public slots:
+    void processZ(Control*);
+    void processParent(Control*);
+    void processGeometry(Control*);
 
-    private:
-        SaveTransaction();
+private:
+    SaveTransaction();
 };
 
 #endif // SAVETRANSACTION_H

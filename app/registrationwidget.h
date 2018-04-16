@@ -13,36 +13,36 @@ class WaitingSpinnerWidget;
 
 class RegistrationWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit RegistrationWidget(QWidget *parent = nullptr);
+public:
+    explicit RegistrationWidget(QWidget *parent = nullptr);
 
-    public slots:
-        void updateResponse(const QString& response);
+public slots:
+    void updateResponse(const QString& response);
 
-    private slots:
-        void clear();
-        void lock();
-        void unlock();
-        void onNextClicked();
+private slots:
+    void clear();
+    void lock();
+    void unlock();
+    void onNextClicked();
 
-    signals:
-        void back();
-        void done(const QString& email);
+signals:
+    void back();
+    void done(const QString& email);
 
-    private:
-        QString _response;
-        QVBoxLayout* _layout;
-        QLabel* _iconLabel;
-        QLabel* _signupLabel;
-        BulkEdit* _bulkEdit;
-        QWidget* _termsWidget;
-        QHBoxLayout* _termsLayout;
-        Switch* _termsSwitch;
-        QLabel* _termsLabel;
-        ButtonSlice* _buttons;
-        WaitingSpinnerWidget* _loadingIndicator;
+private:
+    QString _response;
+    QVBoxLayout* _layout;
+    QLabel* _iconLabel;
+    QLabel* _signupLabel;
+    BulkEdit* _bulkEdit;
+    QWidget* _termsWidget;
+    QHBoxLayout* _termsLayout;
+    Switch* _termsSwitch;
+    QLabel* _termsLabel;
+    ButtonSlice* _buttons;
+    WaitingSpinnerWidget* _loadingIndicator;
 };
 
 #endif // REGISTRATIONWIDGET_H

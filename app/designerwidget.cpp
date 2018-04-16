@@ -1,5 +1,4 @@
 #include <designerwidget.h>
-#include <fit.h>
 #include <css.h>
 #include <designerview.h>
 #include <designerscene.h>
@@ -52,7 +51,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_designerView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     #if defined(Q_OS_WIN)
-    m_zoomlLevelCombobox->setFixedHeight(fit::fx(18));
+    m_zoomlLevelCombobox->setFixedHeight(18);
     #endif
     m_zoomlLevelCombobox->addItem("10 %");
     m_zoomlLevelCombobox->addItem("25 %");
@@ -108,8 +107,8 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(onClearButtonClick()));
 
     m_toolbar->setStyleSheet(CSS::DesignerToolbar);
-    m_toolbar->setFixedHeight(fit::fx(21));
-    m_toolbar->setIconSize(QSize(fit::fx(14), fit::fx(14)));
+    m_toolbar->setFixedHeight(21);
+    m_toolbar->setIconSize(QSize(14, 14));
     m_toolbar->addWidget(m_undoButton);
     m_toolbar->addWidget(m_redoButton);
     m_toolbar->addSeparator();
@@ -213,7 +212,7 @@ void DesignerWidget::reset()
 
 QSize DesignerWidget::sizeHint() const
 {
-    return fit::fx(QSizeF(680, 680)).toSize();
+    return QSize(680, 680);
 }
 
 void DesignerWidget::onControlClick(Control* control)

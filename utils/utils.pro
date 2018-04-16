@@ -24,7 +24,6 @@ SOURCES += $$PWD/zipper.cpp \
            $$PWD/previewresult.cpp
 
 ###Includes
-include($$PWD/fit/fit.pri)
 include($$PWD/miniz/miniz.pri)
 include($$PWD/qmlparser/qmlparser.pri)
 include($$PWD/components/components.pri)

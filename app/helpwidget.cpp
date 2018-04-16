@@ -1,5 +1,4 @@
 #include <helpwidget.h>
-#include <fit.h>
 #include <webenginehelpviewer.h>
 #include <focuslesslineedit.h>
 #include <css.h>
@@ -43,8 +42,8 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_splitter);
 
     m_toolbar->setStyleSheet(CSS::DesignerToolbar);
-    m_toolbar->setIconSize(QSize(fit::fx(14), fit::fx(14)));
-    m_toolbar->setFixedHeight(fit::fx(21));
+    m_toolbar->setIconSize(QSize(14, 14));
+    m_toolbar->setFixedHeight(21);
     m_toolbar->addWidget(m_typeCombo);
     m_toolbar->addSeparator();
     m_toolbar->addWidget(m_homeButton);
@@ -58,7 +57,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_titleLabel->setFont(f);
     m_titleLabel->setTextFormat(Qt::RichText);
 
-    m_typeCombo->setFixedWidth(fit::fx(280));
+    m_typeCombo->setFixedWidth(280);
     m_typeCombo->addItem("Index");
     m_typeCombo->addItem("Contents");
 
@@ -78,18 +77,18 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_splitter->setOrientation(Qt::Horizontal);
     m_splitter->addWidget(m_indexWidget);
     m_splitter->addWidget(m_helpViewer);
-    m_splitter->setSizes(QList<int>() << fit::fx(140) << fit::fx(600));
+    m_splitter->setSizes(QList<int>() << 140 << 600);
 
     contentWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
     indexWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    m_contentsLayout->setSpacing(fit::fx(5));
-    m_contentsLayout->setContentsMargins(fit::fx(5), fit::fx(5), fit::fx(5), fit::fx(5));
+    m_contentsLayout->setSpacing(5);
+    m_contentsLayout->setContentsMargins(5, 5, 5, 5);
     m_contentsLayout->addWidget(contentWidget);
     m_indexFilterEdit->setClearButtonEnabled(true);
 
-    m_indexLayout->setSpacing(fit::fx(5));
-    m_indexLayout->setContentsMargins(fit::fx(5), fit::fx(5), fit::fx(5), fit::fx(5));
+    m_indexLayout->setSpacing(5);
+    m_indexLayout->setContentsMargins(5, 5, 5, 5);
     m_indexLayout->addWidget(m_indexFilterEdit);
     m_indexLayout->addWidget(indexWidget);
 
@@ -112,7 +111,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
 QSize HelpWidget::sizeHint() const
 {
-    return fit::fx(QSizeF(680, 680)).toSize();
+    return QSize(680, 680);
 }
 
 bool HelpWidget::eventFilter(QObject* watched, QEvent* event)

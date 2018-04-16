@@ -1,5 +1,4 @@
 #include <registrationwidget.h>
-#include <fit.h>
 #include <switch.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
@@ -17,9 +16,9 @@
 #include <QTextStream>
 #include <QMessageBox>
 
-#define TERMS_HEIGHT     (fit::fx(35))
-#define TERMS_WIDTH      (fit::fx(350))
-#define SIZE_ICON        (QSize(fit::fx(80), fit::fx(80)))
+#define TERMS_HEIGHT     (35)
+#define TERMS_WIDTH      (350)
+#define SIZE_ICON        (QSize(80, 80))
 #define PATH_COUNTRIES   (":/resources/other/countries.txt")
 #define PATH_ICON        (":/resources/images/register.png")
 #define PATH_OICON       (":/resources/images/load.png")
@@ -67,7 +66,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
-    _layout->setSpacing(fit::fx(12));
+    _layout->setSpacing(12);
 
     _layout->addStretch();
     _layout->addWidget(_iconLabel,0 , Qt::AlignCenter);
@@ -79,8 +78,8 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _layout->addWidget(_loadingIndicator, 0, Qt::AlignCenter);
     _layout->addStretch();
 
-    _termsLayout->setSpacing(fit::fx(5));
-    _termsLayout->setContentsMargins(fit::fx(2.5), 0, 0, 0);
+    _termsLayout->setSpacing(5);
+    _termsLayout->setContentsMargins(2.5, 0, 0, 0);
     _termsLayout->addWidget(_termsSwitch);
     _termsLayout->addWidget(_termsLabel);
     _termsLayout->setAlignment(_termsLabel, Qt::AlignVCenter);
@@ -101,7 +100,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
 
     _signupLabel->setFont(f);
     _signupLabel->setText(tr("Sign Up"));
@@ -189,8 +188,8 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Back)->setText(tr("Back"));
     _buttons->get(Next)->setIcon(QIcon(PATH_OICON));
     _buttons->get(Back)->setIcon(QIcon(PATH_BICON));
-    _buttons->get(Next)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    _buttons->get(Back)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    _buttons->get(Next)->setIconSize(QSize(16, 16));
+    _buttons->get(Back)->setIconSize(QSize(16, 16));
     _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = TERMS_WIDTH / 2.0;

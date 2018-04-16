@@ -1,5 +1,4 @@
 #include <form.h>
-#include <fit.h>
 #include <dpr.h>
 #include <resizer.h>
 #include <saveutils.h>
@@ -83,8 +82,8 @@ void Control::onSizeChange()
     if (hasErrors() || !gui() || m_refreshingDisabled)
         return;
 
-    PreviewerBackend::instance()->updateCache(uid(), "width", fit::dx(size().width()));
-    PreviewerBackend::instance()->updateCache(uid(), "height", fit::dx(size().height()));
+    PreviewerBackend::instance()->updateCache(uid(), "width", size().width());
+    PreviewerBackend::instance()->updateCache(uid(), "height", size().height());
 }
 
 void Control::onParentChange()
@@ -533,7 +532,7 @@ void Control::updatePreview(const PreviewResult& result)
     if (result.hasError()) {
         setRefreshingDisabled(true);
         blockSignals(true);
-        resize(fit::fx(QSizeF(50, 50)));
+        resize(QSizeF(50, 50));
         blockSignals(false);
         setRefreshingDisabled(false);
         setPos(pos());
@@ -548,9 +547,9 @@ void Control::updatePreview(const PreviewResult& result)
                 qreal z = getZ(result);
                 setRefreshingDisabled(true);
                 blockSignals(true);
-                resize(fit::fx(rect.size()));
+                resize(rect.size());
                 if (!form())
-                    setPos(fit::fx(rect.topLeft().x()), fit::fx(rect.topLeft().y()));
+                    setPos(rect.topLeft());
                 setZValue(z);
                 blockSignals(false);
                 setRefreshingDisabled(false);
@@ -558,7 +557,7 @@ void Control::updatePreview(const PreviewResult& result)
         } else {
             setRefreshingDisabled(true);
             blockSignals(true);
-            resize(fit::fx(QSizeF(50, 50)));
+            resize(QSizeF(50, 50));
             blockSignals(false);
             setRefreshingDisabled(false);
             setPos(pos());
@@ -597,7 +596,7 @@ namespace {
 
     QImage initialPreview(const QSizeF& size)
     {
-        auto min = qMin(fit::fx(24), qMin(size.width(), size.height()));
+        auto min = qMin(24.0, qMin(size.width(), size.height()));
 
         QImage preview(
             qCeil(size.width() * DPR),
@@ -661,8 +660,8 @@ namespace {
         qreal x = 0;
         qreal y = 0;
         qreal z = 0;
-        qreal width = fit::fx(50);
-        qreal height = fit::fx(50);
+        qreal width = 50;
+        qreal height = 50;
 
         if (ParserUtils::exists(control->url(), "x"))
             x = ParserUtils::property(control->url(), "x").toDouble();
@@ -685,9 +684,9 @@ namespace {
 
         control->blockSignals(true);
         control->setId(SaveUtils::id(control->dir()));        
-        control->setPos(fit::fx(x), fit::fx(y));
+        control->setPos(x, y);
         control->setZValue(z);
-        control->resize(fit::fx(width), fit::fx(height));
+        control->resize(width, height);
         control->blockSignals(false);
     }
 

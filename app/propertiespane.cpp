@@ -1,5 +1,4 @@
 #include <propertiespane.h>
-#include <fit.h>
 #include <centralwidget.h>
 #include <css.h>
 #include <saveutils.h>
@@ -622,7 +621,7 @@ void PropertiesDelegate::updateEditorGeometry(QWidget* ed, const QStyleOptionVie
 QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
 {
     const auto& size = QStyledItemDelegate::sizeHint(opt, index);
-    return fit::fx(QSizeF(size.width(), 22)).toSize();
+    return QSize(size.width(), 22);
 }
 
 void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -663,7 +662,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
             painter->setPen(Qt::black);
 
         painter->drawText(
-            cellRect.adjusted(fit::fx(5), 0, 0, 0),
+            cellRect.adjusted(5, 0, 0, 0),
             index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
         );
     } else {
@@ -671,7 +670,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
             painter->setPen(Qt::black);
 
             painter->drawText(
-                cellRect.adjusted(fit::fx(5), 0, 0, 0),
+                cellRect.adjusted(5, 0, 0, 0),
                 index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
             );
         }
@@ -709,7 +708,7 @@ class PropertiesTree : public QTreeWidget
 
 void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
-    qreal width = fit::fx(9);
+    qreal width = 9;
     auto model = index.model();
     bool hasChild = itemFromIndex(index)->childCount();
     bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
@@ -746,14 +745,14 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
         painter->drawRect(handleRect);
 
         painter->drawLine(
-            QPointF(handleRect.left() + fit::fx(2.5), handleRect.center().y()),
-            QPointF(handleRect.right() - fit::fx(2.5), handleRect.center().y())
+            QPointF(handleRect.left() + 2.5, handleRect.center().y()),
+            QPointF(handleRect.right() - 2.5, handleRect.center().y())
         );
 
         if (!isExpanded(index)) {
             painter->drawLine(
-                QPointF(handleRect.center().x(), handleRect.top() + fit::fx(2.5)),
-                QPointF(handleRect.center().x(), handleRect.bottom() - fit::fx(2.5))
+                QPointF(handleRect.center().x(), handleRect.top() + 2.5),
+                QPointF(handleRect.center().x(), handleRect.bottom() - 2.5)
             );
         }
     }
@@ -779,7 +778,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     _treeWidget->setPalette(p2);
 
     _treeWidget->setColumnCount(2);
-    _treeWidget->setIndentation(fit::fx(16));
+    _treeWidget->setIndentation(16);
     _treeWidget->setDragEnabled(false);
     _treeWidget->setFocusPolicy(Qt::NoFocus);
     _treeWidget->setUniformRowHeights(true);
@@ -787,7 +786,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     _treeWidget->headerItem()->setText(1, "Value");
     _treeWidget->headerItem()->setText(0, "Property");
     _treeWidget->viewport()->installEventFilter(this);
-    _treeWidget->header()->resizeSection(0, fit::fx(170));
+    _treeWidget->header()->resizeSection(0, 170);
     _treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
     _treeWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     _treeWidget->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -796,7 +795,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _treeWidget->setItemDelegate(new PropertiesDelegate(_treeWidget, this, _treeWidget));
-    _treeWidget->header()->setFixedHeight(fit::fx(23));
+    _treeWidget->header()->setFixedHeight(23);
     _treeWidget->setStyleSheet("QTreeWidget { border: 1px solid #8c6a48; }"
                                "QHeaderView::section {"
                                "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #8c6a48;"
@@ -805,12 +804,12 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     QFont f; f.setWeight(QFont::Medium);
     _treeWidget->header()->setFont(f);
 
-    _layout->setSpacing(fit::fx(2));
-    _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
+    _layout->setSpacing(2);
+    _layout->setContentsMargins(3, 3, 3, 3);
 
     _searchEdit->setPlaceholderText("Filter");
     _searchEdit->setClearButtonEnabled(true);
-    _searchEdit->setFixedHeight(fit::fx(22));
+    _searchEdit->setFixedHeight(22);
     connect(_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
 
     _layout->addWidget(_searchEdit);
@@ -1392,18 +1391,18 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
             if (_treeWidget->topLevelItemCount() == 0) {
                 auto sc = m_designerScene->selectedControls();
                 bool drawn = false;
-                const qreal ic = w->height() / fit::fx(20); // WARNING: Constant 20?
+                const qreal ic = w->height() / 20; // WARNING: Constant 20?
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
-                        painter.fillRect(0, i * fit::fx(20), w->width(),
-                                         fit::fx(20), QColor("#faf1e8"));
+                        painter.fillRect(0, i * 20, w->width(),
+                                         20, QColor("#faf1e8"));
                     } else if (!drawn && (i == int(ic) / 2 ||
                                           i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
                         drawn = true;
                         painter.setPen(QColor(sc.size() == 1 ?
                                                   "#d98083" : "#b5aea7"));
-                        painter.drawText(0, i * fit::fx(20), w->width(),
-                                         fit::fx(20), Qt::AlignCenter, sc.size() == 1 ?
+                        painter.drawText(0, i * 20, w->width(),
+                                         20, Qt::AlignCenter, sc.size() == 1 ?
                                              "Control has errors" : "No controls selected");
                     }
                 }
@@ -1438,7 +1437,7 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
 
 QSize PropertiesPane::sizeHint() const
 {
-    return fit::fx(QSizeF{340, 700}).toSize();
+    return QSize{340, 700};
 }
 
 #include "propertiespane.moc"

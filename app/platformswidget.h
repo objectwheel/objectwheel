@@ -10,24 +10,24 @@
 
 class PlatformsWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit PlatformsWidget(QWidget *parent = nullptr);
+public:
+    explicit PlatformsWidget(QWidget *parent = nullptr);
 
-    signals:
-        void platformSelected(OTargets::Targets);
+signals:
+    void platformSelected(OTargets::Targets);
 
-    private slots:
-        void handleBtnNextClicked();
+private slots:
+    void handleBtnNextClicked();
 
-    private:
-        QVBoxLayout _layout;
-        QLabel _lblLogo;
-        QLabel _lblTitle;
-        QLabel _lblMsg;
-        QListWidget _listWidget;
-        FlatButton _btnNext;
+private:
+    QVBoxLayout _layout;
+    QLabel _lblLogo;
+    QLabel _lblTitle;
+    QLabel _lblMsg;
+    QListWidget _listWidget;
+    FlatButton _btnNext;
 };
 
 #endif // PLATFORMSWIDGET_H

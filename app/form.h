@@ -5,27 +5,27 @@
 
 class Form : public Control
 {
-        Q_OBJECT
+    Q_OBJECT
 
-        friend class ExposerBackend;
+    friend class ExposerBackend;
 
-    public:
-        bool main() const;
-        QRectF frameGeometry() const;
+public:
+    bool main() const;
+    QRectF frameGeometry() const;
 
-    public:
-        void setMain(bool value);
+public:
+    void setMain(bool value);
 
-    private:
-        void resizeEvent(QGraphicsSceneResizeEvent* event) override;
-        void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
+private:
+    void resizeEvent(QGraphicsSceneResizeEvent* event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
-    private:
-        explicit Form(const QString& url, Form* parent = nullptr);
+private:
+    explicit Form(const QString& url, Form* parent = nullptr);
 
-    private:
-        bool m_main;
+private:
+    bool m_main;
 };
 
 

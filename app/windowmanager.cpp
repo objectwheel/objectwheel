@@ -4,7 +4,6 @@
 #include <aboutwindow.h>
 #include <preferenceswindow.h>
 #include <toolboxsettingswindow.h>
-#include <fit.h>
 #include <savebackend.h>
 #include <dpr.h>
 
@@ -39,7 +38,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
     switch (key) {
         case Main: {
             _mainWindow = new MainWindow;
-            _mainWindow->resize(fit::fx(QSizeF{1580, 900}).toSize());
+            _mainWindow->resize({1580, 900});
             connect(_mainWindow, SIGNAL(done()), SLOT(done()));
             add(Main, _mainWindow);
             window = _mainWindow;
@@ -48,7 +47,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case About: {
             _aboutWindow = new AboutWindow;
-            _aboutWindow->resize(fit::fx(QSizeF{700, 400}).toSize());
+            _aboutWindow->resize({700, 400});
             connect(_aboutWindow, SIGNAL(done()), SLOT(done()));
             add(About, _aboutWindow);
             window = _aboutWindow;
@@ -57,11 +56,11 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case Welcome: {
             _welcomeWindow = new WelcomeWindow;
-            _welcomeWindow->resize(fit::fx(QSizeF{1160, 670}).toSize());
+            _welcomeWindow->resize({1160, 670});
             connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
             connect(_welcomeWindow, &WelcomeWindow::done, this, [=]
             {
-                const auto& size = fit::fx(QSizeF{1580, 900}).toSize();
+                const auto& size = QSize{1580, 900};
                 const auto& ssize = QGuiApplication::primaryScreen()->size();
                 const bool full = (size.height() + 100 > ssize.height()) ||
                                   (size.width() + 50 > ssize.width());
@@ -74,7 +73,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case Preferences: {
             _preferencesWindow = new PreferencesWindow;
-            _preferencesWindow->resize(fit::fx(QSizeF{1160, 670}).toSize());
+            _preferencesWindow->resize({1160, 670});
             connect(_preferencesWindow, SIGNAL(done()), SLOT(done()));
             add(Preferences, _preferencesWindow);
             window = _preferencesWindow;
@@ -83,7 +82,7 @@ QWidget* WindowManager::get(WindowManager::Windows key)
 
         case ToolboxSettings: {
             _toolboxSettingsWindow = new ToolboxSettingsWindow;
-            _toolboxSettingsWindow->resize(fit::fx(QSizeF{1160, 670}).toSize());
+            _toolboxSettingsWindow->resize({1160, 670});
             connect(_toolboxSettingsWindow, SIGNAL(done()), SLOT(done()));
             add(ToolboxSettings, _toolboxSettingsWindow);
             window = _toolboxSettingsWindow;

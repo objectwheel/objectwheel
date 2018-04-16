@@ -1,5 +1,4 @@
 #include <css.h>
-#include <fit.h>
 #include <QColor>
 
 #define CSS_SCROLLBAR "\
@@ -74,20 +73,20 @@ QString CSS::DesignerPinbar;
 void CSS::init()
 {
     /* ScrollBar */
-    ScrollBar = QString(CSS_SCROLLBAR).arg(fit::fx(15)).arg(fit::fx(6)).arg(fit::fx(2.5));
+    ScrollBar = QString(CSS_SCROLLBAR).arg(15).arg(6).arg(2.5);
 
     /* ScrollBarH */
-    ScrollBarH = QString(CSS_SCROLLBAR_H).arg(fit::fx(15)).arg(fit::fx(6)).arg(fit::fx(2.5));
+    ScrollBarH = QString(CSS_SCROLLBAR_H).arg(15).arg(6).arg(2.5);
 
     /* DesignerToolbar */
-    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(fit::fx(5));
+    DesignerToolbar = QString(CSS_DESIGNER_TOOLBAR).arg(5);
 
     /* DesignerToolbarV */
-    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(fit::fx(5));
+    DesignerToolbarV = QString(CSS_DESIGNER_TOOLBAR_V).arg(5);
 
     /* DesignerPinbar */
     DesignerPinbar = QString(CSS_DESIGNER_PINBAR).arg(QColor("#b3b3b3").lighter(110).
       name()).arg(QColor("#ffffff").name()).arg(QColor("#e3e3e3").name())
-            .arg(fit::fx(5)).arg(fit::fx(1.8)).arg(fit::fx(3.5));
+            .arg(5).arg(1.8).arg(3.5);
 
 }

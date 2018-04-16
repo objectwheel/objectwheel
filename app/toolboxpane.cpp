@@ -6,7 +6,6 @@
 #include <flatbutton.h>
 #include <focuslesslineedit.h>
 #include <zipper.h>
-#include <fit.h>
 #include <mainwindow.h>
 
 #include <QApplication>
@@ -29,15 +28,15 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
     connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=]
     { if (_toolboxTree->currentItem() && _toolboxTree->currentItem()->parent()) emit itemDoubleClicked(_toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile()); });
 
-    _searchEdit->setFixedHeight(fit::fx(22));
+    _searchEdit->setFixedHeight(22);
     _searchEdit->setClearButtonEnabled(true);
     _searchEdit->setPlaceholderText("Filter");
     connect(_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
 
     _layout->addWidget(_searchEdit);
     _layout->addWidget(_toolboxTree);
-    _layout->setSpacing(fit::fx(2));
-    _layout->setContentsMargins(fit::fx(3), fit::fx(3), fit::fx(3), fit::fx(3));
+    _layout->setSpacing(2);
+    _layout->setContentsMargins(3, 3, 3, 3);
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
@@ -91,5 +90,5 @@ void ToolboxPane::filterList(const QString& filter)
 
 QSize ToolboxPane::sizeHint() const
 {
-    return fit::fx(QSizeF{215, 600}).toSize();
+    return QSize{215, 600};
 }

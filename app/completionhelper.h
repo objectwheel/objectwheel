@@ -8,24 +8,24 @@
 class QmlCodeEditor;
 
 struct ExtractionResult {
-        QStringList keywords;
-        QStringList properties;
-        QStringList functions;
-        QStringList types;
+    QStringList keywords;
+    QStringList properties;
+    QStringList functions;
+    QStringList types;
 };
 
 class CompletionHelper : public QObject
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit CompletionHelper(QObject* parent = nullptr);
+public:
+    explicit CompletionHelper(QObject* parent = nullptr);
 
-    public slots:
-        void extractCompletions(const QString& text);
+public slots:
+    void extractCompletions(const QString& text);
 
-    signals:
-        void extractionReady(const ExtractionResult& result);
+signals:
+    void extractionReady(const ExtractionResult& result);
 };
 
 #endif // COMPLETIONHELPER_H

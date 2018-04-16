@@ -59,34 +59,34 @@ class QTextDocument;
 
 class QmlHighlighter : public QSyntaxHighlighter
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        QmlHighlighter(QTextDocument *parent = 0);
+public:
+    QmlHighlighter(QTextDocument *parent = 0);
 
-    protected:
-        void highlightBlock(const QString &text) override;
+protected:
+    void highlightBlock(const QString &text) override;
 
-    private:
-        struct HighlightingRule
-        {
-                QRegularExpression pattern;
-                QTextCharFormat format;
-        };
-        QVector<HighlightingRule> highlightingRules;
+private:
+    struct HighlightingRule
+    {
+        QRegularExpression pattern;
+        QTextCharFormat format;
+    };
+    QVector<HighlightingRule> highlightingRules;
 
-        QRegularExpression commentStartExpression;
-        QRegularExpression commentEndExpression;
+    QRegularExpression commentStartExpression;
+    QRegularExpression commentEndExpression;
 
-        QTextCharFormat keywordFormat;
-        QTextCharFormat numericFormat;
-        QTextCharFormat typeFormat;
-        QTextCharFormat propertyFormat;
-        QTextCharFormat classFormat;
-        QTextCharFormat singleLineCommentFormat;
-        QTextCharFormat multiLineCommentFormat;
-        QTextCharFormat quotationFormat;
-        QTextCharFormat functionFormat;
+    QTextCharFormat keywordFormat;
+    QTextCharFormat numericFormat;
+    QTextCharFormat typeFormat;
+    QTextCharFormat propertyFormat;
+    QTextCharFormat classFormat;
+    QTextCharFormat singleLineCommentFormat;
+    QTextCharFormat multiLineCommentFormat;
+    QTextCharFormat quotationFormat;
+    QTextCharFormat functionFormat;
 };
 
 #endif // QMLHIGHLIGHTER_H

@@ -34,6 +34,7 @@
 #define PTAG_SIZE        "size"
 #define PTAG_HASH        "hash"
 #define PTAG_THEME       "theme"
+#define PTAG_SCALING     "scaling"
 #define PTAG_OWPRJ_SIGN  "owprj"
 
 class UTILS_EXPORT SaveUtils : public QObject
@@ -76,6 +77,7 @@ class UTILS_EXPORT SaveUtils : public QObject
         static QString crDate(const QString& projectDir);
         static QString mfDate(const QString& projectDir);
         static QString size(const QString& projectDir);
+        static QString scaling(const QString& projectDir);
         static QJsonValue theme(const QString& projectDir);
         static void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value);
 

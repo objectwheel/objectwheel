@@ -1,5 +1,4 @@
 #include <moduleselectionwidget.h>
-#include <fit.h>
 #include <css.h>
 #include <filemanager.h>
 #include <build.h>
@@ -24,8 +23,8 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     FlatButton* btnNext = new FlatButton;
     FlatButton* btnBack = new FlatButton;
 
-    layout->setContentsMargins(0, fit::fx(20), 0, fit::fx(20));
-    layout->setSpacing(fit::fx(20));
+    layout->setContentsMargins(0, 20, 0, 20);
+    layout->setSpacing(20);
     layout->addLayout(logoLay);
     layout->addWidget(lblTitle);
     layout->addWidget(lblMsg);
@@ -42,23 +41,23 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     auto bar = new QWidget;
     bar->setStyleSheet("background: #c0c4c7;");
     bar->setFixedWidth(1);
-    bar->setFixedHeight(fit::fx(50));
+    bar->setFixedHeight(50);
 
     logoLay->addWidget(lblLogoOw);
     logoLay->addWidget(bar);
     logoLay->addWidget(lblLogoQt);
-    logoLay->setSpacing(fit::fx(20));
+    logoLay->setSpacing(20);
 
-    lblLogoQt->setFixedSize(fit::fx(50), fit::fx(50));
+    lblLogoQt->setFixedSize(50, 50);
     lblLogoQt->setPixmap(QPixmap(":/resources/images/qt.png"));
     lblLogoQt->setScaledContents(true);
 
-    lblLogoOw->setFixedSize(fit::fx(50), fit::fx(50));
+    lblLogoOw->setFixedSize(50, 50);
     lblLogoOw->setPixmap(QPixmap(":/resources/images/owicon.png"));
     lblLogoOw->setScaledContents(true);
 
     QFont f;
-    f.setPixelSize(fit::fx(28));
+    f.setPixelSize(28);
     f.setWeight(QFont::ExtraLight);
     QPalette p2(lblTitle->palette());
     p2.setColor(lblTitle->foregroundRole(), "#21303c");
@@ -66,7 +65,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     lblTitle->setPalette(p2);
     lblTitle->setText("Module Settings");
 
-    f.setPixelSize(fit::fx(17));
+    f.setPixelSize(17);
     lblMsg->setFont(f);
     lblMsg->setPalette(p2);
     lblMsg->setText("Select modules you use in your application");
@@ -87,7 +86,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     owScArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     owScArea->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     owScArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    owScArea->setFixedWidth(fit::fx(400));
+    owScArea->setFixedWidth(400);
     owScArea->setStyleSheet("QScrollArea {background: transparent;}");
 
     auto qtBoxLay = new QVBoxLayout(qtBox);
@@ -103,7 +102,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     qtScArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     qtScArea->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     qtScArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    qtScArea->setFixedWidth(fit::fx(400));
+    qtScArea->setFixedWidth(400);
     qtScArea->setStyleSheet("QScrollArea {background: transparent;}");
 
     QString line, lastModule;
@@ -166,14 +165,14 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
 
     buttonsLay->addWidget(btnBack);
     buttonsLay->addWidget(btnNext);
-    buttonsLay->setSpacing(fit::fx(10));
+    buttonsLay->setSpacing(10);
 
     btnNext->settings().topColor = "#84BF52";
     btnNext->settings().bottomColor = btnNext->settings().topColor.darker(120);
-    btnNext->settings().borderRadius = fit::fx(7.5);
+    btnNext->settings().borderRadius = 7.5;
     btnNext->settings().textColor = Qt::white;
-    btnNext->setFixedSize(fit::fx(200),fit::fx(28));
-    btnNext->setIconSize(QSize(fit::fx(14),fit::fx(14)));
+    btnNext->setFixedSize(200,28);
+    btnNext->setIconSize(QSize(14,14));
     btnNext->setIcon(QIcon(":/resources/images/load.png"));
     btnNext->setText("Next");
     connect(btnNext, SIGNAL(clicked(bool)),
@@ -181,10 +180,10 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
 
     btnBack->settings().topColor = "#38A3F6";
     btnBack->settings().bottomColor = btnBack->settings().topColor.darker(120);
-    btnBack->settings().borderRadius = fit::fx(7.5);
+    btnBack->settings().borderRadius = 7.5;
     btnBack->settings().textColor = Qt::white;
-    btnBack->setFixedSize(fit::fx(200),fit::fx(28));
-    btnBack->setIconSize(QSize(fit::fx(14),fit::fx(14)));
+    btnBack->setFixedSize(200,28);
+    btnBack->setIconSize(QSize(14,14));
     btnBack->setIcon(QIcon(":/resources/images/unload.png"));
     btnBack->setText("Back");
     connect(btnBack, &FlatButton::clicked, [&]{ emit backClicked(); });

@@ -5,12 +5,12 @@
 
 class ScrollArea : public QScrollArea
 {
-		Q_OBJECT
-	public:
-		explicit ScrollArea(QWidget* parent = 0);
+    Q_OBJECT
+public:
+    explicit ScrollArea(QWidget* parent = 0);
 
-	protected:
-		virtual void wheelEvent(QWheelEvent*) {}
+protected:
+    virtual void wheelEvent(QWheelEvent*) {}
 
 };
 

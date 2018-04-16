@@ -5,21 +5,21 @@
 
 class BackendManager : public QObject
 {
-        Q_OBJECT
-        Q_DISABLE_COPY(BackendManager)
+    Q_OBJECT
+    Q_DISABLE_COPY(BackendManager)
 
-    public:
-        static BackendManager* instance();
+public:
+    static BackendManager* instance();
 
-    public slots:
-        inline void init() const {}
+public slots:
+    inline void init() const {}
 
-    private slots:
-        void handleSessionStop() const;
-        void handleProjectStart() const;
+private slots:
+    void handleSessionStop() const;
+    void handleProjectStart() const;
 
-    private:
-        BackendManager();
+private:
+    BackendManager();
 };
 
 #endif // BACKENDMANAGER_H

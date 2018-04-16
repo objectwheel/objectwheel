@@ -1,6 +1,5 @@
 #include <projectswidget.h>
 #include <buttonslice.h>
-#include <fit.h>
 #include <css.h>
 #include <userbackend.h>
 #include <projectbackend.h>
@@ -27,10 +26,10 @@
 #include <QScreen>
 #include <QFileDialog>
 
-#define SIZE_LIST        (QSize(fit::fx(450), fit::fx(350)))
-#define BUTTONS_WIDTH    (fit::fx(450))
-#define SIZE_LOGO        (QSize(fit::fx(80), fit::fx(80)))
-#define SIZE_FILEICON    (QSize(fit::fx(48), fit::fx(48)))
+#define SIZE_LIST        (QSize(450, 350))
+#define BUTTONS_WIDTH    (450)
+#define SIZE_LOGO        (QSize(80, 80))
+#define SIZE_FILEICON    (QSize(48, 48))
 #define PATH_LOGO        (":/resources/images/toolbox.png")
 #define PATH_FILEICON    (":/resources/images/fileicon.png")
 #define PATH_NICON       (":/resources/images/new.png")
@@ -38,7 +37,7 @@
 #define PATH_IICON       (":/resources/images/load.png")
 #define PATH_EICON       (":/resources/images/unload.png")
 #define PATH_SICON       (":/resources/images/dots.png")
-#define WIDTH_PROGRESS   fit::fx(80)
+#define WIDTH_PROGRESS   80
 #define DPR              QGuiApplication::primaryScreen()->devicePixelRatio()
 #define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
@@ -75,19 +74,19 @@ void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
    auto lastEdit = item->data(LastEdit).toString();
 
    auto rn = option.rect.adjusted(option.rect.height(),
-     fit::fx(7), 0, - option.rect.height() / 2.0);
+     7, 0, - option.rect.height() / 2.0);
    auto rl = option.rect.adjusted(option.rect.height(),
-     option.rect.height() / 2.0, 0, - fit::fx(7));
-   auto ri = option.rect.adjusted(fit::fx(7), fit::fx(7),
-     - option.rect.width() + option.rect.height() - fit::fx(7), - fit::fx(7));
-   auto ra = ri.adjusted(fit::fx(3), fit::fx(-0.5), 0, 0);
-   ra.setSize(fit::fx(QSizeF(10, 10)).toSize());
+     option.rect.height() / 2.0, 0, - 7);
+   auto ri = option.rect.adjusted(7, 7,
+     - option.rect.width() + option.rect.height() - 7, - 7);
+   auto ra = ri.adjusted(3, -0.5, 0, 0);
+   ra.setSize(QSize(10, 10));
    auto icon = item->icon().pixmap(ri.size() * DPR);
 
    painter->setRenderHint(QPainter::Antialiasing);
 
    QPainterPath path;
-   path.addRoundedRect(m_listWidget->rect(), fit::fx(8), fit::fx(8));
+   path.addRoundedRect(m_listWidget->rect(), 8, 8);
    painter->setClipPath(path);
 
     if (item->isSelected())
@@ -127,12 +126,12 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
   , m_progressBar(new ProgressBar(m_listWidget->viewport()))
 {
     m_layout->addStretch();
-    m_layout->setSpacing(fit::fx(12));
+    m_layout->setSpacing(12);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_iconLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_welcomeLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_versionLabel, 0, Qt::AlignCenter);
-    m_layout->addSpacing(fit::fx(10));
+    m_layout->addSpacing(10);
     m_layout->addWidget(m_projectsLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_listWidget, 0, Qt::AlignCenter);
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
@@ -154,14 +153,14 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(fit::fx(28));
+    f.setPixelSize(28);
 
     m_welcomeLabel->setFont(f);
     m_welcomeLabel->setText(tr("Welcome to Objectwheel"));
     m_welcomeLabel->setStyleSheet("color: black");
 
     f.setWeight(QFont::Light);
-    f.setPixelSize(fit::fx(18));
+    f.setPixelSize(18);
     m_versionLabel->setFont(f);
     m_versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
     m_versionLabel->setStyleSheet("color: black");
@@ -174,7 +173,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_listWidget->viewport()->installEventFilter(this);
     m_listWidget->setPalette(p1);
     m_listWidget->setIconSize(SIZE_FILEICON);
-    m_listWidget->setMinimumWidth(fit::fx(400));
+    m_listWidget->setMinimumWidth(400);
     m_listWidget->setItemDelegate(new ProjectsDelegate(m_listWidget, m_listWidget));
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
@@ -198,9 +197,9 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
             "    background: none;"
             "}"
         ).
-        arg(fit::fx(15)).
-        arg(fit::fx(6)).
-        arg(fit::fx(2.5))
+        arg(15).
+        arg(6).
+        arg(2.5)
     );
     m_listWidget->setStyleSheet(
         tr(
@@ -210,7 +209,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
             "    border-radius: %1px;"
             "}"
         )
-        .arg(fit::fx(8))
+        .arg(8)
     );
 
     for (int i = 0; i < 10; i++) {
@@ -223,9 +222,9 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     m_progressBar->setFixedWidth(WIDTH_PROGRESS);
 
-    m_buttons_2->setFixedHeight(fit::fx(20));
+    m_buttons_2->setFixedHeight(20);
     m_buttons_2->add(Settings, "#55A6F6", "#448DDE");
-    m_buttons_2->get(Settings)->setIconSize(fit::fx(QSizeF(12, 12)).toSize());
+    m_buttons_2->get(Settings)->setIconSize(QSize(12, 12));
     m_buttons_2->get(Settings)->setIcon(QIcon(PATH_SICON));
     m_buttons_2->get(Settings)->setCursor(Qt::PointingHandCursor);
     m_buttons_2->hide();
@@ -237,7 +236,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         if (currentItem) {
             m_buttons_2->show();
             auto rect = m_listWidget->visualItemRect(currentItem);
-            m_buttons_2->move(rect.topRight().x() - m_buttons_2->width() - fit::fx(5),
+            m_buttons_2->move(rect.topRight().x() - m_buttons_2->width() - 5,
                             rect.topRight().y() + (rect.height() - m_buttons_2->height()) / 2.0);
         } else {
             m_buttons_2->hide();
@@ -256,10 +255,10 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->get(Load)->setIcon(QIcon(PATH_LICON));
     m_buttons->get(Import)->setIcon(QIcon(PATH_IICON));
     m_buttons->get(Export)->setIcon(QIcon(PATH_EICON));
-    m_buttons->get(New)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    m_buttons->get(Load)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    m_buttons->get(Import)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
-    m_buttons->get(Export)->setIconSize(fit::fx(QSizeF(16, 16)).toSize());
+    m_buttons->get(New)->setIconSize(QSize(16, 16));
+    m_buttons->get(Load)->setIconSize(QSize(16, 16));
+    m_buttons->get(Import)->setIconSize(QSize(16, 16));
+    m_buttons->get(Export)->setIconSize(QSize(16, 16));
     m_buttons->get(New)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Load)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Import)->setCursor(Qt::PointingHandCursor);

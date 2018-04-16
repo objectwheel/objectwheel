@@ -10,29 +10,29 @@ class QMovie;
 
 class SucceedWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit SucceedWidget(QWidget* parent = nullptr);
-        using QWidget::update;
+public:
+    explicit SucceedWidget(QWidget* parent = nullptr);
+    using QWidget::update;
 
-    public slots:
-        void start();
-        void update(const QString& title, const QString& description);
+public slots:
+    void start();
+    void update(const QString& title, const QString& description);
 
-    protected:
-        void paintEvent(QPaintEvent* event) override;
+protected:
+    void paintEvent(QPaintEvent* event) override;
 
-    signals:
-        void done();
+signals:
+    void done();
 
-    private:
-        QVBoxLayout* _layout;
-        QMovie* _movie;
-        QLabel* _iconLabel;
-        QLabel* _titleLabel;
-        QLabel* _descriptionLabel;
-        ButtonSlice* _buttons;
+private:
+    QVBoxLayout* _layout;
+    QMovie* _movie;
+    QLabel* _iconLabel;
+    QLabel* _titleLabel;
+    QLabel* _descriptionLabel;
+    ButtonSlice* _buttons;
 };
 
 #endif // SUCCEEDWIDGET_H

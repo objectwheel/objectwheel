@@ -12,36 +12,36 @@ class Countdown;
 
 class VerificationWidget : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit VerificationWidget(QWidget* parent = nullptr);
+public:
+    explicit VerificationWidget(QWidget* parent = nullptr);
 
-    public slots:
-        void setEmail(const QString& email);
+public slots:
+    void setEmail(const QString& email);
 
-    private slots:
-        void clear();
-        void lock();
-        void unlock();
-        void onCancelClicked();
-        void onResendClicked();
-        void onVerifyClicked();
+private slots:
+    void clear();
+    void lock();
+    void unlock();
+    void onCancelClicked();
+    void onResendClicked();
+    void onVerifyClicked();
 
-    signals:
-        void done();
-        void cancel();
+signals:
+    void done();
+    void cancel();
 
-    private:
-        QVBoxLayout* _layout;
-        QLabel* _iconLabel;
-        QLabel* _countdownLabel;
-        Countdown* _countdown;
-        QLabel* _verificationLabel;
-        QLabel* _emailLabel;
-        BulkEdit* _bulkEdit;
-        ButtonSlice* _buttons;
-        WaitingSpinnerWidget* _loadingIndicator;
+private:
+    QVBoxLayout* _layout;
+    QLabel* _iconLabel;
+    QLabel* _countdownLabel;
+    Countdown* _countdown;
+    QLabel* _verificationLabel;
+    QLabel* _emailLabel;
+    BulkEdit* _bulkEdit;
+    ButtonSlice* _buttons;
+    WaitingSpinnerWidget* _loadingIndicator;
 };
 
 #endif // VERIFICATIONWIDGET_H

@@ -9,34 +9,34 @@ class QParallelAnimationGroup;
 
 class View : public QWidget
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        enum SwipeDirection {
-            NoSwipe,
-            LeftToRight,
-            RightToLeft
-        };
+public:
+    enum SwipeDirection {
+        NoSwipe,
+        LeftToRight,
+        RightToLeft
+    };
 
-    public:
-        explicit View(QWidget* parent);
-        void add(int id, QWidget* widget);
+public:
+    explicit View(QWidget* parent);
+    void add(int id, QWidget* widget);
 
-    public slots:
-        void show(int id, SwipeDirection = NoSwipe);
+public slots:
+    void show(int id, SwipeDirection = NoSwipe);
 
-    protected:
-        void resizeEvent(QResizeEvent* event) override;
-        bool eventFilter(QObject* watched, QEvent* event) override;
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
-    private:
-        void swipe(QWidget* w1, QWidget* w2, View::SwipeDirection direction);
+private:
+    void swipe(QWidget* w1, QWidget* w2, View::SwipeDirection direction);
 
-    private:
-        int m_visibleId;
-        QHash<int, QWidget*> m_widgets;
-        QParallelAnimationGroup* m_animationGroup;
-        QPropertyAnimation* m_animationBack,* m_animationForth;
+private:
+    int m_visibleId;
+    QHash<int, QWidget*> m_widgets;
+    QParallelAnimationGroup* m_animationGroup;
+    QPropertyAnimation* m_animationBack,* m_animationForth;
 };
 
 #endif // VIEW_H

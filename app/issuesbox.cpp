@@ -1,5 +1,4 @@
 #include <issuesbox.h>
-#include <fit.h>
 #include <css.h>
 #include <control.h>
 #include <outputpane.h>
@@ -42,12 +41,12 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
     painter->setPen(option.palette.Text);
     f.setWeight(QFont::Medium);
     painter->setFont(f);
-    painter->drawText(r.adjusted(fit::fx(26), 0, 0, 0),
+    painter->drawText(r.adjusted(26, 0, 0, 0),
       error.id + ":", Qt::AlignVCenter | Qt::AlignLeft);
     QFontMetrics fm(f);
     f.setWeight(QFont::Normal);
     painter->setFont(f);
-    painter->drawText(r.adjusted(fit::fx(26) + fm.width(error.id) + fit::fx(8),0,0,0),
+    painter->drawText(r.adjusted(26.0 + fm.width(error.id) + 8, 0, 0, 0),
       error.description, Qt::AlignVCenter | Qt::AlignLeft);
     painter->drawText(r, QString("Line: %1, Col: %2 ").
       arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
@@ -74,7 +73,7 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
 
     m_title->setText(" Issues");
     m_toolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    m_toolbar->setFixedHeight(fit::fx(21));
+    m_toolbar->setFixedHeight(21);
     m_toolbar->setAutoFillBackground(true);
     m_toolbar->setStyleSheet(CSS::DesignerToolbar);
     m_toolbar->addWidget(m_title);
@@ -82,13 +81,13 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     m_toolbar->addWidget(m_clearButton);
 
     m_clearButton->setIcon(QIcon(":/resources/images/clean.png"));
-    m_clearButton->setIconSize(fit::fx(QSizeF(10, 10)).toSize());
-    m_clearButton->setFixedSize(fit::fx(QSizeF(14, 14)).toSize());
+    m_clearButton->setIconSize(QSize(10, 10));
+    m_clearButton->setFixedSize(QSize(14, 14));
     m_clearButton->setToolTip(tr("Clean errors."));
     m_clearButton->setCursor(Qt::PointingHandCursor);
     connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(clear()));
 
-    m_listWidget->setIconSize(fit::fx(QSize{16, 16}));
+    m_listWidget->setIconSize({16, 16});
     m_listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
