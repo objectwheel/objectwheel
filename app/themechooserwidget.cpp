@@ -598,6 +598,8 @@ void ThemeChooserWidget::save()
         object[key] = newObject[key];
 
     SaveUtils::setProjectProperty(ProjectBackend::instance()->dir(), PTAG_THEME, object);
+
+    emit saved();
 }
 
 void ThemeChooserWidget::enable()
@@ -654,22 +656,32 @@ QJsonObject ThemeChooserWidget::toJson() const
         text = m_themesCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("theme", text);
+        else
+            object.insert("theme", "");
 
         text = m_accentColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("accent", exp.match(text).captured(0));
+        else
+            object.insert("accent", "");
 
         text = m_primaryColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("primary", exp.match(text).captured(0));
+        else
+            object.insert("primary", "");
 
         text = m_backgroundColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("background", exp.match(text).captured(0));
+        else
+            object.insert("background", "");
 
         text = m_foregroundColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("foreground", exp.match(text).captured(0));
+        else
+            object.insert("foreground", "");
     }
 
     return object;

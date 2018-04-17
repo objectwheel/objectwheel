@@ -22,6 +22,7 @@ public:
 
 public slots:
     void reset();
+    void refresh() { onRefreshButtonClick(); }
 
 protected:
     QSize sizeHint() const override;

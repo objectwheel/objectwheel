@@ -127,7 +127,15 @@ void PreviewerBackend::restart()
           );
         #endif
     } else {
-        qFatal("No connection with Objectwheel Previewing Service");
+        static bool retryAvailable = true;
+        if (retryAvailable) {
+            QTimer::singleShot(3000, this, [=]{
+                restart();
+                retryAvailable = true;
+            });
+            retryAvailable = false;
+        }
+        qWarning() << "No connection with Objectwheel Previewing Service";
     }
 }
 

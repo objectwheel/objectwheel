@@ -74,6 +74,8 @@ ctrl + r ile çalıştır yapsın
 her çalıştırmada önceki app'ı kapatsın
 her çalıştır'da unsaved doclar için sorsun, eğer kullanıcı sorma derse direk kaydetsin
 project şablonları ekle
+konsol çıktısındaki hata mesajlarının yollarını düzelt ve tıklanınca döküman açılsın
+control inspector pane tüm kontroller yüklenince refreshlensin, sadece ilkinde refreshleniyor, hatalı
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |

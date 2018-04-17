@@ -22,6 +22,9 @@ protected:
 public slots:
     void reset();
 
+signals:
+    void themeChanged();
+
 private:
     QVBoxLayout* m_layout;
     QScrollArea* m_scrollArea;

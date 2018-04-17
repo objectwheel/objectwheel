@@ -29,6 +29,9 @@ private slots:
     void enable();
     void refresh();
 
+signals:
+    void saved();
+
 private:
     QJsonObject toJson() const;
     QString toItem(QComboBox* comboBox, const QString& colorName) const;
