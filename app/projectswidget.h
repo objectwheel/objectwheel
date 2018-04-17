@@ -52,4 +52,4 @@ private:
     ProgressBar* m_progressBar;
 };
 
-#endif // PROJECTSWIDGET_H
+#endif //  PROJECTSWIDGET_H

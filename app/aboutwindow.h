@@ -26,4 +26,4 @@ private:
     QLabel* m_legalLabel;
 };
 
-#endif // ABOUTWINDOW_H
+#endif //  ABOUTWINDOW_H

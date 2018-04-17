@@ -73,15 +73,15 @@ void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
    auto name = item->data(Name).toString();
    auto lastEdit = item->data(LastEdit).toString();
 
-   auto rn = option.rect.adjusted(option.rect.height(),
+   auto rn = QRectF(option.rect).adjusted(option.rect.height(),
      7, 0, - option.rect.height() / 2.0);
-   auto rl = option.rect.adjusted(option.rect.height(),
+   auto rl = QRectF(option.rect).adjusted(option.rect.height(),
      option.rect.height() / 2.0, 0, - 7);
-   auto ri = option.rect.adjusted(7, 7,
+   auto ri = QRectF(option.rect).adjusted(7, 7,
      - option.rect.width() + option.rect.height() - 7, - 7);
    auto ra = ri.adjusted(3, -0.5, 0, 0);
    ra.setSize(QSize(10, 10));
-   auto icon = item->icon().pixmap(ri.size() * DPR);
+   auto icon = item->icon().pixmap((ri.size() * DPR).toSize());
 
    painter->setRenderHint(QPainter::Antialiasing);
 
