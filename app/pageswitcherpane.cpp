@@ -80,12 +80,12 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
     m_splitViewButton->setIconSize(QSize(23, 23));
     m_buildsButton->setIconSize(QSize(23, 23));
 
-    m_designerButton->setIcon(QIcon(":/resources/images/designer.png"));
-    m_qmlCodeEditorButton->setIcon(QIcon(":/resources/images/editor.png"));
-    m_projectOptionsButton->setIcon(QIcon(":/resources/images/projectoptions.png"));
-    m_helpButton->setIcon(QIcon(":/resources/images/help.png"));
-    m_splitViewButton->setIcon(QIcon(":/resources/images/split.png"));
-    m_buildsButton->setIcon(QIcon(":/resources/images/helmet.png"));
+    m_designerButton->setIcon(QIcon(":/images/designer.png"));
+    m_qmlCodeEditorButton->setIcon(QIcon(":/images/editor.png"));
+    m_projectOptionsButton->setIcon(QIcon(":/images/projectoptions.png"));
+    m_helpButton->setIcon(QIcon(":/images/help.png"));
+    m_splitViewButton->setIcon(QIcon(":/images/split.png"));
+    m_buildsButton->setIcon(QIcon(":/images/helmet.png"));
 
     m_designerButton->settings().showShadow = false;
     m_qmlCodeEditorButton->settings().showShadow = false;

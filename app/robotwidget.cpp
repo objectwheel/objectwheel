@@ -13,9 +13,9 @@
 
 #define BUTTONS_WIDTH    (350)
 #define SIZE_ICON        (QSize(80, 80))
-#define PATH_ICON        (":/resources/images/robot.png")
-#define PATH_NICON       (":/resources/images/load.png")
-#define PATH_CICON       (":/resources/images/unload.png")
+#define PATH_ICON        (":/images/robot.png")
+#define PATH_NICON       (":/images/load.png")
+#define PATH_CICON       (":/images/unload.png")
 #define PATH_RECAPTCHA   (tr(APP_HTTPSSERVER) + "/recaptcha.html")
 
 enum Buttons { Next, Back };

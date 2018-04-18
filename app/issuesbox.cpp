@@ -80,7 +80,7 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     m_toolbar->addSeparator();
     m_toolbar->addWidget(m_clearButton);
 
-    m_clearButton->setIcon(QIcon(":/resources/images/clean.png"));
+    m_clearButton->setIcon(QIcon(":/images/clean.png"));
     m_clearButton->setIconSize(QSize(10, 10));
     m_clearButton->setFixedSize(QSize(14, 14));
     m_clearButton->setToolTip(tr("Clean errors."));
@@ -115,7 +115,7 @@ void IssuesBox::handleErrors(Control* control)
                 continue;
             auto item = new QListWidgetItem;
             item->setData(Qt::UserRole, QVariant::fromValue<Error>(err));
-            item->setIcon(QIcon(":/resources/images/error.png"));
+            item->setIcon(QIcon(":/images/error.png"));
             m_listWidget->addItem(item);
             m_buggyControls[err] = control;
             m_outputPane->shine(OutputPane::Issues);

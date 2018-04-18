@@ -50,7 +50,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_titleLabel->setText("About Objectwheel");
     m_titleLabel->setStyleSheet("color: black;");
 
-    QPixmap px(":/resources/images/logo.png");
+    QPixmap px(":/images/logo.png");
     px.setDevicePixelRatio(DPR);
 
     m_logoLabel->setFixedSize(QSize(160, 80));

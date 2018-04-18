@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>qmls/delaycaller.js</file>
+        <file>qmls/FancyButton.qml</file>
+        <file>qmls/owdb/1/t/main.qml</file>
+        <file>qmls/form/t/main.qml</file>
+        <file>qmls/control/t/icon.png</file>
+        <file>qmls/control/t/main.qml</file>
+        <file>other/android-permissions.txt</file>
+        <file>other/ow-modules.txt</file>
+        <file>other/qt-modules.txt</file>
+        <file>qmls/buildsScreen/main.qml</file>
+        <file>qmls/buildsScreen/ProgressPage.qml</file>
+        <file>other/countries.txt</file>
+        <file>qmls/owdb/properties.json</file>
+        <file>qmls/owdb/1/t/properties.json</file>
+        <file>qmls/form/t/properties.json</file>
+        <file>qmls/control/t/properties.json</file>
+    </qresource>
+</RCC>

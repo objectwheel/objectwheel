@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/resources">
+    <qresource prefix="/">
         <file>images/resize-icon.png</file>
         <file>images/delete-icon.png</file>
         <file>images/plus.png</file>
@@ -116,5 +116,16 @@
         <file>images/split.png</file>
         <file>images/universal.png</file>
         <file>images/material.png</file>
+        <file>images/templates.png</file>
+        <file>images/template0.png</file>
+        <file>images/template1.png</file>
+        <file>images/template2.png</file>
+        <file>images/template3.png</file>
+        <file>images/template4.png</file>
+        <file>images/template5.png</file>
+        <file>images/template6.png</file>
+        <file>images/template7.png</file>
+        <file>images/template8.png</file>
+        <file>images/template9.png</file>
     </qresource>
 </RCC>

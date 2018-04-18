@@ -308,7 +308,7 @@
               </property>
               <property name="icon">
                <iconset resource="resources/resources.qrc">
-                <normaloff>:/resources/images/newfile.png</normaloff>:/resources/images/newfile.png</iconset>
+                <normaloff>:/images/newfile.png</normaloff>:/images/newfile.png</iconset>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
@@ -331,7 +331,7 @@
               </property>
               <property name="icon">
                <iconset resource="resources/resources.qrc">
-                <normaloff>:/resources/images/undo.png</normaloff>:/resources/images/undo.png</iconset>
+                <normaloff>:/images/undo.png</normaloff>:/images/undo.png</iconset>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
@@ -379,7 +379,7 @@
               </property>
               <property name="icon">
                <iconset resource="resources/resources.qrc">
-                <normaloff>:/resources/images/delete.png</normaloff>:/resources/images/delete.png</iconset>
+                <normaloff>:/images/delete.png</normaloff>:/images/delete.png</iconset>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
@@ -402,7 +402,7 @@
               </property>
               <property name="icon">
                <iconset resource="resources/resources.qrc">
-                <normaloff>:/resources/images/redo.png</normaloff>:/resources/images/redo.png</iconset>
+                <normaloff>:/images/redo.png</normaloff>:/images/redo.png</iconset>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
@@ -703,7 +703,7 @@
               </property>
               <property name="icon">
                <iconset resource="resources/resources.qrc">
-                <normaloff>:/resources/images/error.png</normaloff>:/resources/images/error.png</iconset>
+                <normaloff>:/images/error.png</normaloff>:/images/error.png</iconset>
               </property>
               <property name="autoDefault">
                <bool>false</bool>

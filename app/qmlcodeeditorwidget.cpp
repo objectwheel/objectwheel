@@ -284,14 +284,14 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     copyButton->setToolTip("Copy selection.");
     pasteButton->setToolTip("Paste from clipboard.");
 
-    pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
-    undoButton->setIcon(QIcon(":/resources/images/undo.png"));
-    redoButton->setIcon(QIcon(":/resources/images/redo.png"));
-    closeButton->setIcon(QIcon(":/resources/images/delete-icon.png"));
-    saveButton->setIcon(QIcon(":/resources/images/save.png"));
-    cutButton->setIcon(QIcon(":/resources/images/cut.png"));
-    copyButton->setIcon(QIcon(":/resources/images/copy.png"));
-    pasteButton->setIcon(QIcon(":/resources/images/paste.png"));
+    pinButton->setIcon(QIcon(":/images/unpin.png"));
+    undoButton->setIcon(QIcon(":/images/undo.png"));
+    redoButton->setIcon(QIcon(":/images/redo.png"));
+    closeButton->setIcon(QIcon(":/images/delete-icon.png"));
+    saveButton->setIcon(QIcon(":/images/save.png"));
+    cutButton->setIcon(QIcon(":/images/cut.png"));
+    copyButton->setIcon(QIcon(":/images/copy.png"));
+    pasteButton->setIcon(QIcon(":/images/paste.png"));
 
     QWidget* spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -334,10 +334,10 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     imageEditorButton->setToolTip("Open Image Editor.");
     hexEditorButton->setToolTip("Open Hex Editor.");
 
-    hideShowButton->setIcon(QIcon(":/resources/images/show.png"));
-    codeEditorButton->setIcon(QIcon(":/resources/images/code.png"));
-    imageEditorButton->setIcon(QIcon(":/resources/images/image.png"));
-    hexEditorButton->setIcon(QIcon(":/resources/images/hex.png"));
+    hideShowButton->setIcon(QIcon(":/images/show.png"));
+    codeEditorButton->setIcon(QIcon(":/images/code.png"));
+    imageEditorButton->setIcon(QIcon(":/images/image.png"));
+    hexEditorButton->setIcon(QIcon(":/images/hex.png"));
 
     toolbar_2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     toolbar_2->setOrientation(Qt::Vertical);
@@ -407,9 +407,9 @@ void QmlCodeEditorWidgetPrivate::handlePinButtonClicked()
 {
     if (pinButton->toolTip().contains("Unpin")) {
         pinButton->setToolTip("Pin Editor.");
-        pinButton->setIcon(QIcon(":/resources/images/pin.png"));
+        pinButton->setIcon(QIcon(":/images/pin.png"));
         containerWidget->setParent(nullptr);
-        containerWidget->setWindowIcon(QIcon(":/resources/images/owicon.png"));
+        containerWidget->setWindowIcon(QIcon(":/images/owicon.png"));
         containerWidget->show();
 
         containerWidget->setGeometry(
@@ -422,7 +422,7 @@ void QmlCodeEditorWidgetPrivate::handlePinButtonClicked()
         );
     } else {
         pinButton->setToolTip("Unpin Editor.");
-        pinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+        pinButton->setIcon(QIcon(":/images/unpin.png"));
         vBoxLayout->addWidget(containerWidget);
     }
 }
@@ -458,7 +458,7 @@ void QmlCodeEditorWidgetPrivate::handleZoomLevelChange(const QString& text)
 void QmlCodeEditorWidgetPrivate::handleHideShowButtonClicked()
 {
     if (hideShowButton->toolTip().contains("Hide")) {
-        hideShowButton->setIcon(QIcon(":/resources/images/show.png"));
+        hideShowButton->setIcon(QIcon(":/images/show.png"));
         hideShowButton->setToolTip("Show File Explorer.");
         splitter->handle(1)->setDisabled(true);
         fileExplorer->hide();
@@ -468,7 +468,7 @@ void QmlCodeEditorWidgetPrivate::handleHideShowButtonClicked()
         sizes << toolbar_2->width();
         splitter->setSizes(sizes);
     } else {
-        hideShowButton->setIcon(QIcon(":/resources/images/hide.png"));
+        hideShowButton->setIcon(QIcon(":/images/hide.png"));
         hideShowButton->setToolTip("Hide File Explorer.");
         splitter->handle(1)->setEnabled(true);
         fileExplorer->show();

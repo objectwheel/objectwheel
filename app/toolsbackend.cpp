@@ -24,7 +24,7 @@
 #define DEFAULT_CATEGORY        "Others"
 #define DEFAULT_NAME            "Tool"
 #define DEFAULT_TOOLS_DIRECTORY "tools"
-#define DEFAULT_TOOLS_URL       "qrc:/resources/tools/tools.json"
+#define DEFAULT_TOOLS_URL       "qrc:/tools/tools.json"
 #define DIR_QRC_CONTROL         ":/resources/qmls/control"
 
 static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)

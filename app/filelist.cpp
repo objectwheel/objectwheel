@@ -49,7 +49,7 @@ FileList::FileList(QWidget *parent) : QTreeView(parent)
     viewport()->setGraphicsEffect(blurEffect);
 
     dbs = new DropSettings;
-    dbs->ao.load(":/resources/images/droparrow.png");
+    dbs->ao.load(":/images/droparrow.png");
     dbs->r.setSize({100, 100});
 
     dropLabel = new QLabel(this);

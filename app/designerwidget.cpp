@@ -91,13 +91,13 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_fitButton->setToolTip("Fit scene into the Dashboard.");
     m_zoomlLevelCombobox->setToolTip("Change zoom level.");
 
-    m_refreshButton->setIcon(QIcon(":/resources/images/refresh.png"));
-    m_clearButton->setIcon(QIcon(":/resources/images/clean.png"));
-    m_undoButton->setIcon(QIcon(":/resources/images/undo.png"));
-    m_redoButton->setIcon(QIcon(":/resources/images/redo.png"));
-    m_snappingButton->setIcon(QIcon(":/resources/images/snap.png"));
-    m_outlineButton->setIcon(QIcon(":/resources/images/outline.png"));
-    m_fitButton->setIcon(QIcon(":/resources/images/fit.png"));
+    m_refreshButton->setIcon(QIcon(":/images/refresh.png"));
+    m_clearButton->setIcon(QIcon(":/images/clean.png"));
+    m_undoButton->setIcon(QIcon(":/images/undo.png"));
+    m_redoButton->setIcon(QIcon(":/images/redo.png"));
+    m_snappingButton->setIcon(QIcon(":/images/snap.png"));
+    m_outlineButton->setIcon(QIcon(":/images/outline.png"));
+    m_fitButton->setIcon(QIcon(":/images/fit.png"));
 
     connect(m_snappingButton, SIGNAL(toggled(bool)), SLOT(onSnappingButtonClick(bool)));
     connect(m_outlineButton, SIGNAL(toggled(bool)), SLOT(onOutlineButtonClick(bool)));

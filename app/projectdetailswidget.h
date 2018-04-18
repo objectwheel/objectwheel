@@ -17,22 +17,24 @@ public:
 
 public slots:
     void onEditProject(const QString& hash);
-    void onNewProject(const QString& projectName);
+    void onNewProject(const QString& projectName, int templateNumber);
 
 private slots:
     void onSaveClick();
     void onDeleteClick();
 
 signals:
+    void back();
     void done();
 
 private:
-    QString _hash;
-    QVBoxLayout* _layout;
-    QLabel* _iconLabel;
-    QLabel* _settingsLabel;
-    BulkEdit* _bulkEdit;
-    ButtonSlice* _buttons;
+    QString m_hash;
+    QVBoxLayout* m_layout;
+    QLabel* m_iconLabel;
+    QLabel* m_settingsLabel;
+    BulkEdit* m_bulkEdit;
+    ButtonSlice* m_buttons;
+    bool m_toTemplates;
 };
 
 #endif // PROJECTDETAILSWIDGET_H

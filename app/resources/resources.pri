@@ -1,2 +1,4 @@
-RESOURCES += $$PWD/resources.qrc \
-             $$PWD/resources2.qrc
+RESOURCES += $$PWD/images.qrc \
+             $$PWD/other.qrc \
+             $$PWD/tools.qrc \
+             $$PWD/templates.qrc

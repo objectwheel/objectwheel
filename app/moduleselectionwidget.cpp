@@ -49,11 +49,11 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     logoLay->setSpacing(20);
 
     lblLogoQt->setFixedSize(50, 50);
-    lblLogoQt->setPixmap(QPixmap(":/resources/images/qt.png"));
+    lblLogoQt->setPixmap(QPixmap(":/images/qt.png"));
     lblLogoQt->setScaledContents(true);
 
     lblLogoOw->setFixedSize(50, 50);
-    lblLogoOw->setPixmap(QPixmap(":/resources/images/owicon.png"));
+    lblLogoOw->setPixmap(QPixmap(":/images/owicon.png"));
     lblLogoOw->setScaledContents(true);
 
     QFont f;
@@ -173,7 +173,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     btnNext->settings().textColor = Qt::white;
     btnNext->setFixedSize(200,28);
     btnNext->setIconSize(QSize(14,14));
-    btnNext->setIcon(QIcon(":/resources/images/load.png"));
+    btnNext->setIcon(QIcon(":/images/load.png"));
     btnNext->setText("Next");
     connect(btnNext, SIGNAL(clicked(bool)),
       SLOT(handleBtnNextClicked()));
@@ -184,7 +184,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     btnBack->settings().textColor = Qt::white;
     btnBack->setFixedSize(200,28);
     btnBack->setIconSize(QSize(14,14));
-    btnBack->setIcon(QIcon(":/resources/images/unload.png"));
+    btnBack->setIcon(QIcon(":/images/unload.png"));
     btnBack->setText("Back");
     connect(btnBack, &FlatButton::clicked, [&]{ emit backClicked(); });
 }

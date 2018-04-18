@@ -22,7 +22,7 @@ LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
 {
     setFixedSize(QSize(481, 24));
 
-    image = QImage(":/resources/images/loadingbar.png");
+    image = QImage(":/images/loadingbar.png");
     image.setDevicePixelRatio(DPR);
 
     m_timerFader->setInterval(60);

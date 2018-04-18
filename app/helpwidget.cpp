@@ -69,9 +69,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_backButton->setToolTip(tr("Go Back"));
     m_forthButton->setToolTip(tr("Go Forth"));
 
-    m_homeButton->setIcon(QIcon(":/resources/images/home.png"));
-    m_backButton->setIcon(QIcon(":/resources/images/undo.png"));
-    m_forthButton->setIcon(QIcon(":/resources/images/redo.png"));
+    m_homeButton->setIcon(QIcon(":/images/home.png"));
+    m_backButton->setIcon(QIcon(":/images/undo.png"));
+    m_forthButton->setIcon(QIcon(":/images/redo.png"));
 
     m_splitter->setHandleWidth(0);
     m_splitter->setOrientation(Qt::Horizontal);

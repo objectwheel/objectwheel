@@ -10,6 +10,7 @@
 #include <succeedwidget.h>
 #include <forgetwidget.h>
 #include <resetwidget.h>
+#include <projecttemplateswidget.h>
 
 #include <QTimer>
 #include <QVBoxLayout>
@@ -22,135 +23,153 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     setPalette(p);
     setWindowTitle(APP_NAME);
 
-    _view = new View(this);
-    _loginWidget = new LoginWidget;
-    _robotWidget = new RobotWidget;
-    _registrationWidget = new RegistrationWidget;
-    _projectsWidget = new ProjectsWidget;
-    _projectDetailsWidget = new ProjectDetailsWidget;
-    _verificationWidget = new VerificationWidget;
-    _succeedWidget = new SucceedWidget;
-    _forgetWidget = new ForgetWidget;
-    _resetWidget = new ResetWidget;
+    m_view = new View(this);
+    m_loginWidget = new LoginWidget;
+    m_robotWidget = new RobotWidget;
+    m_registrationWidget = new RegistrationWidget;
+    m_projectsWidget = new ProjectsWidget;
+    m_projectTemplatesWidget = new ProjectTemplatesWidget;
+    m_projectDetailsWidget = new ProjectDetailsWidget;
+    m_verificationWidget = new VerificationWidget;
+    m_succeedWidget = new SucceedWidget;
+    m_forgetWidget = new ForgetWidget;
+    m_resetWidget = new ResetWidget;
 
-    _view->add(Login, _loginWidget);
-    _view->add(Robot, _robotWidget);
-    _view->add(Registration, _registrationWidget);
-    _view->add(Verification, _verificationWidget);
-    _view->add(Projects, _projectsWidget);
-    _view->add(ProjectDetails, _projectDetailsWidget);
-    _view->add(Succeed, _succeedWidget);
-    _view->add(Forget, _forgetWidget);
-    _view->add(Reset, _resetWidget);
-    _view->show(Login);
+    m_view->add(Login, m_loginWidget);
+    m_view->add(Robot, m_robotWidget);
+    m_view->add(Registration, m_registrationWidget);
+    m_view->add(Verification, m_verificationWidget);
+    m_view->add(Projects, m_projectsWidget);
+    m_view->add(ProjectTemplates, m_projectTemplatesWidget);
+    m_view->add(ProjectDetails, m_projectDetailsWidget);
+    m_view->add(Succeed, m_succeedWidget);
+    m_view->add(Forget, m_forgetWidget);
+    m_view->add(Reset, m_resetWidget);
+    m_view->show(Login);
 
     /**** ForgetWidget settings ****/
-    connect(_forgetWidget, SIGNAL(done(QString)), _resetWidget, SLOT(setEmail(QString)));
-    connect(_forgetWidget, &ForgetWidget::back, [=]
+    connect(m_forgetWidget, SIGNAL(done(QString)), m_resetWidget, SLOT(setEmail(QString)));
+    connect(m_forgetWidget, &ForgetWidget::back, [=]
     {
-        _view->show(Login, View::LeftToRight);
+        m_view->show(Login, View::LeftToRight);
     });
-    connect(_forgetWidget, &ForgetWidget::done, [=]
+    connect(m_forgetWidget, &ForgetWidget::done, [=]
     {
-        _view->show(Reset, View::RightToLeft);
+        m_view->show(Reset, View::RightToLeft);
     });
 
     /**** ResetWidget settings ****/
-    connect(_resetWidget, &ResetWidget::cancel, [=]
+    connect(m_resetWidget, &ResetWidget::cancel, [=]
     {
-        _view->show(Login, View::LeftToRight);
+        m_view->show(Login, View::LeftToRight);
     });
-    connect(_resetWidget, &ResetWidget::done, [=] {
-        _view->show(Succeed, View::RightToLeft);
-        _succeedWidget->start();
-        _succeedWidget->update(
+    connect(m_resetWidget, &ResetWidget::done, [=] {
+        m_view->show(Succeed, View::RightToLeft);
+        m_succeedWidget->start();
+        m_succeedWidget->update(
           tr("Succeed."),
           tr("Your password has been successfully changed.\n"
           "You can continue by logging into the application with your new password."));
     });
 
     /**** LoginWidget settings ****/
-    connect(_loginWidget, &LoginWidget::signup, [=]
+    connect(m_loginWidget, &LoginWidget::signup, [=]
     {
-        _robotWidget->load();
-        _view->show(Robot, View::RightToLeft);
+        m_robotWidget->load();
+        m_view->show(Robot, View::RightToLeft);
     });
-    connect(_loginWidget, &LoginWidget::forget, [=]
+    connect(m_loginWidget, &LoginWidget::forget, [=]
     {
-        _view->show(Forget, View::RightToLeft);
+        m_view->show(Forget, View::RightToLeft);
     });
-    connect(_loginWidget, &LoginWidget::about, [=]
+    connect(m_loginWidget, &LoginWidget::about, [=]
     {
         WindowManager::instance()->show(WindowManager::About);
     });
-    connect(_loginWidget, &LoginWidget::done, [=]
+    connect(m_loginWidget, &LoginWidget::done, [=]
     {
-        _projectsWidget->refreshProjectList();
-        _view->show(Projects, View::RightToLeft);
+        m_projectsWidget->refreshProjectList();
+        m_view->show(Projects, View::RightToLeft);
     });
 
     /**** ProjectsWidget settings ****/
-    connect(_projectsWidget, SIGNAL(done()), SIGNAL(done()));
-    connect(_projectsWidget, SIGNAL(newProject(QString)), _projectDetailsWidget, SLOT(onNewProject(QString)));
-    connect(_projectsWidget, SIGNAL(editProject(QString)), _projectDetailsWidget, SLOT(onEditProject(QString)));
-    connect(_projectsWidget, &ProjectsWidget::newProject, [=]
+    connect(m_projectsWidget, SIGNAL(done()), SIGNAL(done()));
+    connect(m_projectsWidget, SIGNAL(newProject(QString)), m_projectTemplatesWidget, SLOT(onNewProject(QString)));
+    connect(m_projectsWidget, SIGNAL(editProject(QString)), m_projectDetailsWidget, SLOT(onEditProject(QString)));
+    connect(m_projectsWidget, &ProjectsWidget::newProject, [=]
     {
-        _view->show(ProjectDetails, View::RightToLeft);
+        m_view->show(ProjectTemplates, View::RightToLeft);
     });
-    connect(_projectsWidget, &ProjectsWidget::editProject, [=]
+    connect(m_projectsWidget, &ProjectsWidget::editProject, [=]
     {
-        _view->show(ProjectDetails, View::RightToLeft);
+        m_view->show(ProjectDetails, View::RightToLeft);
+    });
+
+    /**** ProjectTemplatesWidget settings ****/
+    connect(m_projectTemplatesWidget, SIGNAL(newProject(QString, int)), m_projectDetailsWidget, SLOT(onNewProject(QString, int)));
+    connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::back, [=]
+    {
+        m_projectsWidget->refreshProjectList();
+        m_view->show(Projects, View::LeftToRight);
+    });
+    connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::newProject, [=]
+    {
+        m_view->show(ProjectDetails, View::RightToLeft);
     });
 
     /**** ProjectDetailsWidget settings ****/
-    connect(_projectDetailsWidget, &ProjectDetailsWidget::done, [=]
+    connect(m_projectDetailsWidget, &ProjectDetailsWidget::back, [=]
     {
-        _projectsWidget->refreshProjectList();
-        _view->show(Projects, View::LeftToRight);
+        m_view->show(ProjectTemplates, View::LeftToRight);
+    });
+    connect(m_projectDetailsWidget, &ProjectDetailsWidget::done, [=]
+    {
+        m_projectsWidget->refreshProjectList();
+        m_view->show(Projects, View::LeftToRight);
     });
 
     /**** RobotWidget settings ****/
-    connect(_robotWidget, SIGNAL(done(QString)), _registrationWidget, SLOT(updateResponse(QString)));
-    connect(_robotWidget, &RobotWidget::back, [=]
+    connect(m_robotWidget, SIGNAL(done(QString)), m_registrationWidget, SLOT(updateResponse(QString)));
+    connect(m_robotWidget, &RobotWidget::back, [=]
     {
-        _view->show(Login, View::LeftToRight);
+        m_view->show(Login, View::LeftToRight);
     });
-    connect(_robotWidget, &RobotWidget::done, [=]
+    connect(m_robotWidget, &RobotWidget::done, [=]
     {
-        _view->show(Registration, View::RightToLeft);
+        m_view->show(Registration, View::RightToLeft);
     });
 
     /**** RegistrationWidget settings ****/
-    connect(_registrationWidget, &RegistrationWidget::back, [=]
+    connect(m_registrationWidget, &RegistrationWidget::back, [=]
     {
-        _view->show(Login, View::LeftToRight);
+        m_view->show(Login, View::LeftToRight);
     });
-    connect(_registrationWidget, SIGNAL(done(QString)), _verificationWidget, SLOT(setEmail(QString)));
-    connect(_registrationWidget, &RegistrationWidget::done, [=]
+    connect(m_registrationWidget, SIGNAL(done(QString)), m_verificationWidget, SLOT(setEmail(QString)));
+    connect(m_registrationWidget, &RegistrationWidget::done, [=]
     {
-        _view->show(Verification, View::RightToLeft);
-        _robotWidget->reset();
+        m_view->show(Verification, View::RightToLeft);
+        m_robotWidget->reset();
     });
 
     /**** VerificationWidget settings ****/
-    connect(_verificationWidget, &VerificationWidget::cancel, [=]
+    connect(m_verificationWidget, &VerificationWidget::cancel, [=]
     {
-        _view->show(Login, View::LeftToRight);
+        m_view->show(Login, View::LeftToRight);
     });
-    connect(_verificationWidget, &VerificationWidget::done, [=]
+    connect(m_verificationWidget, &VerificationWidget::done, [=]
     {
-        _view->show(Succeed, View::RightToLeft);
-        _succeedWidget->start();
-        _succeedWidget->update(
+        m_view->show(Succeed, View::RightToLeft);
+        m_succeedWidget->start();
+        m_succeedWidget->update(
           tr("Thank you for registering."),
           tr("Your registration is completed. Thank you for choosing us.\n"
           "You can continue by logging into the application."));
     });
 
     /**** SucceedWidget settings ****/
-    connect(_succeedWidget, &SucceedWidget::done, [=]
+    connect(m_succeedWidget, &SucceedWidget::done, [=]
     {
-        _view->show(Login, View::LeftToRight);
+        m_view->show(Login, View::LeftToRight);
     });
 }
 

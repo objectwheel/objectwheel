@@ -98,7 +98,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/hashfactory.h \
            $$PWD/form.h \
            $$PWD/themechooserwidget.h \
-    scalingwidget.h
+           $$PWD/scalingwidget.h \
+           $$PWD/projecttemplateswidget.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -179,7 +180,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/hashfactory.cpp \
            $$PWD/form.cpp \
            $$PWD/themechooserwidget.cpp \
-    scalingwidget.cpp
+           $$PWD/scalingwidget.cpp \
+           $$PWD/projecttemplateswidget.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     QApplication::setApplicationVersion(APP_VER);
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
-    QApplication::setWindowIcon(QIcon(":/resources/images/owicon.png"));
+    QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
 
     // Multiple instances protection
     QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");

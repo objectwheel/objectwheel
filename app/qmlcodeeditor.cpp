@@ -343,28 +343,28 @@ void QmlCodeEditor::handleExtractionResult(const ExtractionResult& result)
     int row = 0;
     for (auto name : result.keywords) {
         QStandardItem* item = new QStandardItem(name);
-        item->setIcon(QIcon(":/resources/images/keyword.png"));
+        item->setIcon(QIcon(":/images/keyword.png"));
         _model.setItem(row, 0, item);
         row++;
     }
 
     for (auto name : result.properties) {
         QStandardItem* item = new QStandardItem(name);
-        item->setIcon(QIcon(":/resources/images/property.png"));
+        item->setIcon(QIcon(":/images/property.png"));
         _model.setItem(row, 0, item);
         row++;
     }
 
     for (auto name : result.functions) {
         QStandardItem* item = new QStandardItem(name);
-        item->setIcon(QIcon(":/resources/images/function.png"));
+        item->setIcon(QIcon(":/images/function.png"));
         _model.setItem(row, 0, item);
         row++;
     }
 
     for (auto name : result.types) {
         QStandardItem* item = new QStandardItem(name);
-        item->setIcon(QIcon(":/resources/images/type.png"));
+        item->setIcon(QIcon(":/images/type.png"));
         _model.setItem(row, 0, item);
         row++;
     }

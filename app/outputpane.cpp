@@ -60,7 +60,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     hideButton->setIconSize(QSize(14, 14));
     hideButton->setCursor(Qt::PointingHandCursor);
     hideButton->setToolTip("Hide bar.");
-    hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
+    hideButton->setIcon(QIcon(":/images/down-arrow.png"));
     hideButton->settings().topColor = "#0D74C8";
     hideButton->settings().bottomColor = "#0b6ab8";
     hideButton->settings().borderRadius = 10;
@@ -75,7 +75,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     issuesButton->setFixedHeight(22);
     issuesButton->setCursor(Qt::PointingHandCursor);
     issuesButton->setToolTip("Show recent issues.");
-    issuesButton->setIcon(QIcon(":/resources/images/issues.png"));
+    issuesButton->setIcon(QIcon(":/images/issues.png"));
     issuesButton->settings().topColor = "#5d6975";
     issuesButton->settings().bottomColor = "#515b66";
     issuesButton->settings().textColor = Qt::white;
@@ -94,7 +94,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     searchButton->setFixedHeight(22);
     searchButton->setCursor(Qt::PointingHandCursor);
     searchButton->setToolTip("Search words within project.");
-    searchButton->setIcon(QIcon(":/resources/images/search.png"));
+    searchButton->setIcon(QIcon(":/images/search.png"));
     connect(searchButton, SIGNAL(toggled(bool)),
       SLOT(handleSearchButtonClicked(bool)));
 
@@ -109,7 +109,7 @@ OutputPanePrivate::OutputPanePrivate(OutputPane* parent)
     consoleButton->setFixedHeight(22);
     consoleButton->setCursor(Qt::PointingHandCursor);
     consoleButton->setToolTip("Show application output.");
-    consoleButton->setIcon(QIcon(":/resources/images/console.png"));
+    consoleButton->setIcon(QIcon(":/images/console.png"));
     connect(consoleButton, SIGNAL(toggled(bool)),
       SLOT(handleConsoleButtonClicked(bool)));
 
@@ -155,11 +155,11 @@ void OutputPanePrivate::handleHideButtonClicked()
 {
     if (hideButton->toolTip().contains("Hide")) {
         hideButton->setToolTip("Show pane.");
-        hideButton->setIcon(QIcon(":/resources/images/up-arrow.png"));
+        hideButton->setIcon(QIcon(":/images/up-arrow.png"));
         parent->collapse();
     } else {
         hideButton->setToolTip("Hide pane.");
-        hideButton->setIcon(QIcon(":/resources/images/down-arrow.png"));
+        hideButton->setIcon(QIcon(":/images/down-arrow.png"));
         parent->expand();
     }
 }

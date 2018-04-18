@@ -16,9 +16,9 @@
 #define COUNTDOWN        300
 #define BUTTONS_WIDTH    (300)
 #define SIZE_ICON        (QSize(80, 80))
-#define PATH_ICON        (":/resources/images/lock.png")
-#define PATH_VICON       (":/resources/images/ok.png")
-#define PATH_CICON       (":/resources/images/cancel.png")
+#define PATH_ICON        (":/images/lock.png")
+#define PATH_VICON       (":/images/ok.png")
+#define PATH_CICON       (":/images/cancel.png")
 
 static bool checkPassword(const QString& password)
 {

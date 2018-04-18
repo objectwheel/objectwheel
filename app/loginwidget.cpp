@@ -19,10 +19,10 @@
 #define AUTOLOGIN_HEIGHT (35)
 #define AUTOLOGIN_WIDTH  (300)
 #define SIZE_LOGO        (QSize(160, 80))
-#define PATH_LOGO        (":/resources/images/logo.png")
-#define PATH_RICON       (":/resources/images/new.png")
-#define PATH_LICON       (":/resources/images/load.png")
-#define PATH_HICON       (":/resources/images/info.png")
+#define PATH_LOGO        (":/images/logo.png")
+#define PATH_RICON       (":/images/new.png")
+#define PATH_LICON       (":/images/load.png")
+#define PATH_HICON       (":/images/info.png")
 
 enum Fields { Email, Password };
 enum Buttons { Login, Register };

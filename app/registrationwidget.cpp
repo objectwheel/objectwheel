@@ -20,9 +20,9 @@
 #define TERMS_WIDTH      (350)
 #define SIZE_ICON        (QSize(80, 80))
 #define PATH_COUNTRIES   (":/resources/other/countries.txt")
-#define PATH_ICON        (":/resources/images/register.png")
-#define PATH_OICON       (":/resources/images/load.png")
-#define PATH_BICON       (":/resources/images/unload.png")
+#define PATH_ICON        (":/images/register.png")
+#define PATH_OICON       (":/images/load.png")
+#define PATH_BICON       (":/images/unload.png")
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
 enum Buttons { Next, Back };
@@ -79,7 +79,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _layout->addStretch();
 
     _termsLayout->setSpacing(5);
-    _termsLayout->setContentsMargins(2.5, 0, 0, 0);
+    _termsLayout->setContentsMargins(2, 0, 0, 0);
     _termsLayout->addWidget(_termsSwitch);
     _termsLayout->addWidget(_termsLabel);
     _termsLayout->setAlignment(_termsLabel, Qt::AlignVCenter);
@@ -152,7 +152,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
         border: none;\
     }\
     QComboBox::down-arrow {\
-        image: url(:/resources/images/downarrow.png);\
+        image: url(:/images/downarrow.png);\
     }\
     QComboBox QAbstractItemView {\
         background: #f0f4f7;\

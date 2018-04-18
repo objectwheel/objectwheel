@@ -92,19 +92,20 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _layout.setAlignment(&_btnNext, Qt::AlignHCenter);
 
     _lblLogo.setFixedSize(50, 50);
-    _lblLogo.setPixmap(QPixmap(":/resources/images/helmet.png"));
+    _lblLogo.setPixmap(QPixmap(":/images/helmet.png"));
     _lblLogo.setScaledContents(true);
 
     QFont f;
     f.setPixelSize(28);
     f.setWeight(QFont::ExtraLight);
     QPalette p2(_lblTitle.palette());
-    p2.setColor(_lblTitle.foregroundRole(), "#21303c");
+    p2.setColor(_lblTitle.foregroundRole(), "black");
     _lblTitle.setFont(f);
     _lblTitle.setPalette(p2);
     _lblTitle.setText("Objectwheel Builds");
 
     f.setPixelSize(17);
+    f.setWeight(QFont::Light);
     _lblMsg.setFont(f);
     _lblMsg.setPalette(p2);
     _lblMsg.setText("Select your target platform");
@@ -115,7 +116,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _btnNext.settings().textColor = Qt::white;
     _btnNext.setFixedSize(200,28);
     _btnNext.setIconSize(QSize(14,14));
-    _btnNext.setIcon(QIcon(":/resources/images/load.png"));
+    _btnNext.setIcon(QIcon(":/images/load.png"));
     _btnNext.setText("Next");
     connect(&_btnNext, SIGNAL(clicked(bool)),
       SLOT(handleBtnNextClicked()));
@@ -139,63 +140,63 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     android->setText("Android 4.0+");
     android->setData(Arch, "Architecture: armeabi-v7a");
     android->setData(Key, OTargets::android_armeabi_v7a);
-    android->setIcon(QIcon(":/resources/images/android.png"));
+    android->setIcon(QIcon(":/images/android.png"));
     _listWidget.addItem(android);
 
     auto ioss = new QListWidgetItem;
     ioss->setText("iOS 10+");
     ioss->setData(Arch, "Architectures: armv7s, arm64");
     ioss->setData(Key, OTargets::ios);
-    ioss->setIcon(QIcon(":/resources/images/ios.png"));
+    ioss->setIcon(QIcon(":/images/ios.png"));
     _listWidget.addItem(ioss);
 
     auto mac = new QListWidgetItem;
     mac->setText("macOS 10.10+");
     mac->setData(Arch, "Architecture: x64");
     mac->setData(Key, OTargets::macos);
-    mac->setIcon(QIcon(":/resources/images/macos.png"));
+    mac->setIcon(QIcon(":/images/macos.png"));
     _listWidget.addItem(mac);
 
     auto win = new QListWidgetItem;
     win->setText("Windows 7+");
     win->setData(Arch, "Architecture: x86");
     win->setData(Key, OTargets::windows_x86);
-    win->setIcon(QIcon(":/resources/images/windows.png"));
+    win->setIcon(QIcon(":/images/windows.png"));
     _listWidget.addItem(win);
 
     auto linx = new QListWidgetItem;
     linx->setText("Linux");
     linx->setData(Arch, "Architecture: x86");
     linx->setData(Key, OTargets::linux_x86);
-    linx->setIcon(QIcon(":/resources/images/linux.png"));
+    linx->setIcon(QIcon(":/images/linux.png"));
     _listWidget.addItem(linx);
 
     auto rasp = new QListWidgetItem;
     rasp->setText("Raspberry Pi");
     rasp->setData(Arch, "Version: Pi 2+");
     rasp->setData(Key, OTargets::raspi);
-    rasp->setIcon(QIcon(":/resources/images/raspi.png"));
+    rasp->setIcon(QIcon(":/images/raspi.png"));
     _listWidget.addItem(rasp);
 
     auto androidx = new QListWidgetItem;
     androidx->setText("Android 4.0+");
     androidx->setData(Arch, "Architecture: x86");
     androidx->setData(Key, OTargets::android_x86);
-    androidx->setIcon(QIcon(":/resources/images/android.png"));
+    androidx->setIcon(QIcon(":/images/android.png"));
     _listWidget.addItem(androidx);
 
     auto winx = new QListWidgetItem;
     winx->setText("Windows 7+");
     winx->setData(Arch, "Architecture: x64");
     winx->setData(Key, OTargets::windows_x64);
-    winx->setIcon(QIcon(":/resources/images/windows.png"));
+    winx->setIcon(QIcon(":/images/windows.png"));
     _listWidget.addItem(winx);
 
     auto linuxx = new QListWidgetItem;
     linuxx->setText("Linux");
     linuxx->setData(Arch, "Architecture: x64");
     linuxx->setData(Key, OTargets::linux_x64);
-    linuxx->setIcon(QIcon(":/resources/images/linux.png"));
+    linuxx->setIcon(QIcon(":/images/linux.png"));
     _listWidget.addItem(linuxx);
     _listWidget.setCurrentRow(0);
 }

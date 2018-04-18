@@ -10,6 +10,7 @@
 #include <savebackend.h>
 #include <progressbar.h>
 #include <windowmanager.h>
+#include <dpr.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -30,15 +31,14 @@
 #define BUTTONS_WIDTH    (450)
 #define SIZE_LOGO        (QSize(80, 80))
 #define SIZE_FILEICON    (QSize(48, 48))
-#define PATH_LOGO        (":/resources/images/toolbox.png")
-#define PATH_FILEICON    (":/resources/images/fileicon.png")
-#define PATH_NICON       (":/resources/images/new.png")
-#define PATH_LICON       (":/resources/images/ok.png")
-#define PATH_IICON       (":/resources/images/load.png")
-#define PATH_EICON       (":/resources/images/unload.png")
-#define PATH_SICON       (":/resources/images/dots.png")
+#define PATH_LOGO        (":/images/toolbox.png")
+#define PATH_FILEICON    (":/images/fileicon.png")
+#define PATH_NICON       (":/images/new.png")
+#define PATH_LICON       (":/images/ok.png")
+#define PATH_IICON       (":/images/load.png")
+#define PATH_EICON       (":/images/unload.png")
+#define PATH_SICON       (":/images/dots.png")
 #define WIDTH_PROGRESS   80
-#define DPR              QGuiApplication::primaryScreen()->devicePixelRatio()
 #define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
 enum Buttons { Load, New, Import, Export, Settings };

@@ -602,7 +602,7 @@ namespace {
         preview.setDevicePixelRatio(DPR);
         preview.fill(Qt::transparent);
 
-        QImage wait(":/resources/images/wait.png");
+        QImage wait(":/images/wait.png");
         wait.setDevicePixelRatio(DPR);
 
         drawCenter(

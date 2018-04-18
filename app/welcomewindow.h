@@ -7,6 +7,7 @@ class View;
 class LoginWidget;
 class RobotWidget;
 class ProjectsWidget;
+class ProjectTemplatesWidget;
 class ProjectDetailsWidget;
 class RegistrationWidget;
 class VerificationWidget;
@@ -27,6 +28,7 @@ public:
         Forget,
         Reset,
         Projects,
+        ProjectTemplates,
         ProjectDetails,
         Succeed
     };
@@ -38,16 +40,17 @@ signals:
     void done();
 
 private:
-    View* _view;
-    LoginWidget* _loginWidget;
-    RobotWidget* _robotWidget;
-    ProjectsWidget* _projectsWidget;
-    ProjectDetailsWidget* _projectDetailsWidget;
-    RegistrationWidget* _registrationWidget;
-    VerificationWidget* _verificationWidget;
-    SucceedWidget* _succeedWidget;
-    ForgetWidget* _forgetWidget;
-    ResetWidget* _resetWidget;
+    View* m_view;
+    LoginWidget* m_loginWidget;
+    RobotWidget* m_robotWidget;
+    ProjectsWidget* m_projectsWidget;
+    ProjectTemplatesWidget* m_projectTemplatesWidget;
+    ProjectDetailsWidget* m_projectDetailsWidget;
+    RegistrationWidget* m_registrationWidget;
+    VerificationWidget* m_verificationWidget;
+    SucceedWidget* m_succeedWidget;
+    ForgetWidget* m_forgetWidget;
+    ResetWidget* m_resetWidget;
 };
 
 #endif // WELCOMEWINDOW_H

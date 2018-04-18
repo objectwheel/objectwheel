@@ -87,14 +87,14 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     newFolderButton->setToolTip("New folder.");
     downloadFileButton->setToolTip("Download file from url.");
 
-    upButton->setIcon(QIcon(":/resources/images/up.png"));
-    homeButton->setIcon(QIcon(":/resources/images/home.png"));
-    copyButton->setIcon(QIcon(":/resources/images/copy.png"));
-    deleteButton->setIcon(QIcon(":/resources/images/delete.png"));
-    renameButton->setIcon(QIcon(":/resources/images/rename.png"));
-    newFileButton->setIcon(QIcon(":/resources/images/newfile.png"));
-    newFolderButton->setIcon(QIcon(":/resources/images/newfolder.png"));
-    downloadFileButton->setIcon(QIcon(":/resources/images/downloadfile.png"));
+    upButton->setIcon(QIcon(":/images/up.png"));
+    homeButton->setIcon(QIcon(":/images/home.png"));
+    copyButton->setIcon(QIcon(":/images/copy.png"));
+    deleteButton->setIcon(QIcon(":/images/delete.png"));
+    renameButton->setIcon(QIcon(":/images/rename.png"));
+    newFileButton->setIcon(QIcon(":/images/newfile.png"));
+    newFolderButton->setIcon(QIcon(":/images/newfolder.png"));
+    downloadFileButton->setIcon(QIcon(":/images/downloadfile.png"));
 
     connect(upButton, SIGNAL(clicked(bool)), SLOT(handleUpButtonClicked()));
     connect(homeButton, SIGNAL(clicked(bool)), SLOT(handleHomeButtonClicked()));

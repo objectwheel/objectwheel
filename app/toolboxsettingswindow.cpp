@@ -95,7 +95,7 @@ ToolboxSettingsWindow::ToolboxSettingsWindow(QWidget *parent) : QWidget(parent)
     connect(ui->txtName, &QLineEdit::textChanged, this, fnDisableBtnSave);
     connect(ui->txtIcon, &QLineEdit::editingFinished, this, [=] {
         ui->txtIcon->setEnabled(false);
-        ui->lblLoading->setPixmap(QPixmap(":/resources/images/loading.png"));
+        ui->lblLoading->setPixmap(QPixmap(":/images/loading.png"));
         const auto dirctrl = dname(ui->treeWidget->urls(ui->treeWidget->currentItem()).first().toLocalFile());
         const auto remoteTry = dlfile(ui->txtIcon->text());
         QPixmap pixmap;

@@ -102,7 +102,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto inspectorTitlePinButton = new QToolButton;
     inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     inspectorTitlePinButton->setCursor(Qt::PointingHandCursor);
-    inspectorTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    inspectorTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
     connect(inspectorTitlePinButton, &QToolButton::clicked, this, [] {
         inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
     });
@@ -132,7 +132,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto propertiesTitlePinButton = new QToolButton;
     propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     propertiesTitlePinButton->setCursor(Qt::PointingHandCursor);
-    propertiesTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    propertiesTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
     connect(propertiesTitlePinButton, &QToolButton::clicked, this, [] {
         propertiesDockWidget->setFloating(!propertiesDockWidget->isFloating());
     });
@@ -162,7 +162,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto toolboxTitlePinButton = new QToolButton;
     toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     toolboxTitlePinButton->setCursor(Qt::PointingHandCursor);
-    toolboxTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    toolboxTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
     connect(toolboxTitlePinButton, &QToolButton::clicked, this, [] {
         toolboxDockWidget->setFloating(!toolboxDockWidget->isFloating());
     });
@@ -170,7 +170,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto toolboxSettingsButton = new QToolButton;
     toolboxSettingsButton->setToolTip(tr("Toolbox settings."));
     toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
-    toolboxSettingsButton->setIcon(QIcon(":/resources/images/settings.png"));
+    toolboxSettingsButton->setIcon(QIcon(":/images/settings.png"));
     connect(toolboxSettingsButton, &QToolButton::clicked, this, [=] {
         WindowManager::instance()->show(WindowManager::ToolboxSettings);
     });
@@ -202,7 +202,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto formsTitlePinButton = new QToolButton;
     formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     formsTitlePinButton->setCursor(Qt::PointingHandCursor);
-    formsTitlePinButton->setIcon(QIcon(":/resources/images/unpin.png"));
+    formsTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
     connect(formsTitlePinButton, &QToolButton::clicked, this, [] {
         formsDockWidget->setFloating(!formsDockWidget->isFloating());
     });

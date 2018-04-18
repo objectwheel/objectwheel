@@ -32,14 +32,14 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
-    m_runButton->setIcon(QIcon(":/resources/images/run.png"));
+    m_runButton->setIcon(QIcon(":/images/run.png"));
     m_runButton->setFixedSize(QSize(38, 24));
     m_runButton->settings().iconButton = true;
     connect(m_runButton, SIGNAL(clicked(bool)), SLOT(onRunButtonClick()));
 
     m_stopButton->setToolTip(tr("Stop"));
     m_stopButton->setCursor(Qt::PointingHandCursor);
-    m_stopButton->setIcon(QIcon(":/resources/images/stop.png"));
+    m_stopButton->setIcon(QIcon(":/images/stop.png"));
     m_stopButton->setFixedSize(QSize(38, 24));
     m_stopButton->settings().iconButton = true;
     connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
@@ -47,7 +47,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 
     m_projectsButton->setToolTip(tr("Show Projects"));
     m_projectsButton->setCursor(Qt::PointingHandCursor);
-    m_projectsButton->setIcon(QIcon(":/resources/images/projects.png"));
+    m_projectsButton->setIcon(QIcon(":/images/projects.png"));
     m_projectsButton->setFixedSize(QSize(38, 24));
     m_projectsButton->settings().iconButton = true;
     connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));

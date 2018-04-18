@@ -31,7 +31,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _layout.setAlignment(buttonsLay, Qt::AlignHCenter);
 
     _lblLogo.setFixedSize(50, 50);
-    _lblLogo.setPixmap(QPixmap(":/resources/images/android.png"));
+    _lblLogo.setPixmap(QPixmap(":/images/android.png"));
     _lblLogo.setScaledContents(true);
 
     QFont f;
@@ -73,12 +73,12 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _scrollAreaLay.addWidget(&_signingBox);
 
     auto btnResIcon = new QToolButton;
-    btnResIcon->setIcon(QIcon(":/resources/images/refresh.png"));
+    btnResIcon->setIcon(QIcon(":/images/refresh.png"));
     btnResIcon->setIconSize(QSize(14, 14));
     btnResIcon->setToolTip("Reset icon to default.");
     connect(btnResIcon, &QToolButton::clicked, [&]{
         _txtIconPath.setText("");
-        _picIcon.setPixmap(QPixmap(":/resources/images/android-default.png"));
+        _picIcon.setPixmap(QPixmap(":/images/android-default.png"));
     });
     _appBox.setTitle("Application Settings");
     _appBox.setFixedHeight(280);
@@ -147,7 +147,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _picIcon.setToolTip("Application icon.");
     _picIcon.setFixedSize({64, 64});
     _picIcon.setScaledContents(true);
-    _picIcon.setPixmap(QPixmap(":/resources/images/android-default.png"));
+    _picIcon.setPixmap(QPixmap(":/images/android-default.png"));
     _picIcon.setFrameShape(QFrame::StyledPanel);
 
     _txtAppName.setText("My App");
@@ -179,9 +179,9 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _cmbOrientation.setFixedWidth(120);
     _cmbOrientation.setIconSize({14, 14});
-    _cmbOrientation.addItem(QIcon(":/resources/images/free.png"), "Free");
-    _cmbOrientation.addItem(QIcon(":/resources/images/landscape.png"), "Landscape");
-    _cmbOrientation.addItem(QIcon(":/resources/images/portrait.png"), "Portrait");
+    _cmbOrientation.addItem(QIcon(":/images/free.png"), "Free");
+    _cmbOrientation.addItem(QIcon(":/images/landscape.png"), "Landscape");
+    _cmbOrientation.addItem(QIcon(":/images/portrait.png"), "Portrait");
     _cmbOrientation.setToolTip(
     "Application orientation. Use Landscape or Portrait to lock your \n"
     "application orientation; or use Free to leave it unspecified.");
@@ -310,9 +310,9 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnDelPermission.setPalette(p4);
     _permissionList.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _btnDelPermission.setText("Delete");
-    _btnDelPermission.setIcon(QIcon(":/resources/images/delete.png"));
+    _btnDelPermission.setIcon(QIcon(":/images/delete.png"));
     _btnAddPermission.setText("Add");
-    _btnAddPermission.setIcon(QIcon(":/resources/images/newfile.png"));
+    _btnAddPermission.setIcon(QIcon(":/images/newfile.png"));
     _btnAddPermission.setCursor(Qt::PointingHandCursor);
     _btnDelPermission.setCursor(Qt::PointingHandCursor);
     _btnDelPermission.setToolTip("Delete selected permission from the list.");
@@ -346,7 +346,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 
     _lblKsPath.setText("Key store path:");
     _btnNewKs.setText("Create new...");
-    _btnNewKs.setIcon(QIcon(":/resources/images/newfile.png"));
+    _btnNewKs.setIcon(QIcon(":/images/newfile.png"));
     _btnExistingKs.setText("...");
     _lblKsPw.setText("Key store password:");
     _lblKsAlias.setText("Alias:");
@@ -416,7 +416,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnBack.settings().textColor = Qt::white;
     _btnBack.setFixedSize(200,28);
     _btnBack.setIconSize(QSize(14,14));
-    _btnBack.setIcon(QIcon(":/resources/images/unload.png"));
+    _btnBack.setIcon(QIcon(":/images/unload.png"));
     _btnBack.setText("Back");
     connect(&_btnBack, &FlatButton::clicked, [&]{
         emit backClicked();
@@ -428,7 +428,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnBuild.settings().textColor = Qt::white;
     _btnBuild.setFixedSize(200,28);
     _btnBuild.setIconSize(QSize(14,14));
-    _btnBuild.setIcon(QIcon(":/resources/images/load.png"));
+    _btnBuild.setIcon(QIcon(":/images/load.png"));
     _btnBuild.setText("Build");
     connect(&_btnBuild, SIGNAL(clicked(bool)),
       SLOT(handleBtnBuildClicked()));

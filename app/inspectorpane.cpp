@@ -45,7 +45,7 @@ void fillItem(QTreeWidgetItem* parentItem, const QList<Control*>& children)
         icon.addFile(child->dir() + separator() + DIR_THIS +
                      separator() + "icon.png");
         if (icon.isNull())
-            icon.addFile(":/resources/images/item.png");
+            icon.addFile(":/images/item.png");
         item->setIcon(0, icon);
 
         parentItem->addChild(item);
@@ -277,15 +277,15 @@ void InspectorPane::refresh()
 
     if (mc->form()) {
         if (SaveUtils::isMain(mc->dir()))
-            item->setIcon(0, QIcon(":/resources/images/mform.png"));
+            item->setIcon(0, QIcon(":/images/mform.png"));
         else
-            item->setIcon(0, QIcon(":/resources/images/form.png"));
+            item->setIcon(0, QIcon(":/images/form.png"));
     } else {
         QIcon icon;
         icon.addFile(mc->dir() + separator() + DIR_THIS +
                      separator() + "icon.png");
         if (icon.isNull())
-            icon.addFile(":/resources/images/item.png");
+            icon.addFile(":/images/item.png");
         item->setIcon(0, icon);
     }
 

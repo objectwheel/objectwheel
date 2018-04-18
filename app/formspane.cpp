@@ -114,7 +114,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _addButton->setFixedSize(20, 20);
     _addButton->setIconSize(QSize(12,12));
-    _addButton->setIcon(QIcon(":/resources/images/plus.png"));
+    _addButton->setIcon(QIcon(":/images/plus.png"));
     connect(_addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
 
     _removeButton->settings().topColor = "#C2504B";
@@ -124,7 +124,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _removeButton->setFixedSize(20,20);
     _removeButton->setIconSize(QSize(12,12));
-    _removeButton->setIcon(QIcon(":/resources/images/minus.png"));
+    _removeButton->setIcon(QIcon(":/images/minus.png"));
     connect(_removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
 
     _buttonLayout->addWidget(_addButton);
@@ -234,9 +234,9 @@ void FormsPane::handleDatabaseChange()
         auto item = new QListWidgetItem;
         item->setText(_id);
         if (SaveUtils::isMain(path))
-            item->setIcon(QIcon(":/resources/images/mform.png"));
+            item->setIcon(QIcon(":/images/mform.png"));
         else
-            item->setIcon(QIcon(":/resources/images/form.png"));
+            item->setIcon(QIcon(":/images/form.png"));
         _listWidget->addItem(item);
     }
     _listWidget->setCurrentRow(row);
