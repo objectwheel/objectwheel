@@ -7,40 +7,40 @@
 
 class UTILS_EXPORT FileManager : public QObject
 {
-		Q_OBJECT
+    Q_OBJECT
 
-	public:
-		explicit FileManager(QObject *parent = 0);
+public:
+    explicit FileManager(QObject *parent = 0);
 
-	public slots:
-		bool mkfile(const QString& name) const;
-		bool mkdir(const QString& name) const;
-		bool rm(const QString& name) const;
-		bool rn(const QString& from, const QString& to) const;
-		bool rmsuffix(const QString& dir, const QString& suffix) const;
-		bool exists(const QString& name) const;
-		bool mv(const QString& from, const QString& to) const;
-        bool cp(const QString& from, const QString& toDir, const bool content = false, const bool qrc = false) const;
-		QStringList ls(const QString& dir) const;
-		QStringList lsdir(const QString& dir) const;
-		QStringList lsfile(const QString& dir) const;
-        QStringList fps(const QString& file, const QString& dir) const;
-		QString fname(const QString& name) const;
-		QString dname(const QString& name) const;
-		qint64 fsize(const QString& name) const;
-		qint64 dsize(const QString& name) const;
-		QString suffix(const QString& name) const;
-		QByteArray rdfile(const QString& file) const;
-		int wrfile(const QString& file, const QByteArray& data) const;
-        #ifdef QT_NETWORK_LIB
-          QByteArray dlfile(const QString& url);
-        #endif
-		bool isfile(const QString& name) const;
-		bool isdir(const QString& name) const;
-		QChar separator() const;
+public slots:
+    bool mkfile(const QString& name) const;
+    bool mkdir(const QString& name) const;
+    bool rm(const QString& name) const;
+    bool rn(const QString& from, const QString& to) const;
+    bool rmsuffix(const QString& dir, const QString& suffix) const;
+    bool exists(const QString& name) const;
+    bool mv(const QString& from, const QString& to) const;
+    bool cp(const QString& from, const QString& toDir, const bool content = false, const bool qrc = false) const;
+    QStringList ls(const QString& dir) const;
+    QStringList lsdir(const QString& dir) const;
+    QStringList lsfile(const QString& dir) const;
+    QStringList fps(const QString& file, const QString& dir) const;
+    QString fname(const QString& name) const;
+    QString dname(const QString& name) const;
+    qint64 fsize(const QString& name) const;
+    qint64 dsize(const QString& name) const;
+    QString suffix(const QString& name) const;
+    QByteArray rdfile(const QString& file) const;
+    int wrfile(const QString& file, const QByteArray& data) const;
+#ifdef QT_NETWORK_LIB
+    QByteArray dlfile(const QString& url);
+#endif
+    bool isfile(const QString& name) const;
+    bool isdir(const QString& name) const;
+    QChar separator() const;
 
-	private:
-        static bool copyDir(QString from, QString to, bool qrc = false);
+private:
+    static bool copyDir(QString from, QString to, bool qrc = false);
 
 };
 

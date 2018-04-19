@@ -8,11 +8,11 @@ class QPlainTextEdit;
 
 class UTILS_EXPORT QmlFormatter : public QObject
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit QmlFormatter(QObject *parent = nullptr);
-        static void format(QString& text);
+public:
+    explicit QmlFormatter(QObject *parent = nullptr);
+    static void format(QString& text);
 };
 
 #endif // QMLFORMATTER_H
