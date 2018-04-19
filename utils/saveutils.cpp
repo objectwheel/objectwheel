@@ -1,5 +1,7 @@
 #include <saveutils.h>
 #include <filemanager.h>
+#include <hashfactory.h>
+
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -135,6 +137,32 @@ void SaveUtils::updateFile(const QString& filePath, const QString& from, const Q
     wrfile(filePath, data);
 }
 
+// Recalculates all uids belongs to given control and its children (all).
+// Both database and in-memory data are updated.
+void SaveUtils::recalculateUids(const QString& topPath)
+{
+    if (topPath.isEmpty())
+        return;
+
+    QStringList paths, properties;
+
+    properties << fps(FILE_PROPERTIES, topPath);
+    paths << properties;
+
+    for (auto pfile : properties) {
+        auto propertyData = rdfile(pfile);
+
+        if (!SaveUtils::isOwctrl(propertyData))
+            continue;
+
+        auto uid = SaveUtils::property(propertyData, TAG_UID).toString();
+        auto newUid = HashFactory::generate();
+
+        for (auto file : paths)
+            SaveUtils::updateFile(file, uid, newUid);
+    }
+}
+
 // Returns biggest number from integer named dirs.
 // If no integer named dir exists, 0 returned.
 // If no dir exists or dirs are smaller than zero, 0 returned.
@@ -157,7 +185,7 @@ QStringList SaveUtils::formPaths(const QString& projectDir)
 
     for (auto dir : lsdir(baseDir)) {
         auto propertyPath = baseDir + separator() + dir + separator() +
-                            DIR_THIS + separator() + FILE_PROPERTIES;
+                DIR_THIS + separator() + FILE_PROPERTIES;
         auto propertyData = rdfile(propertyPath);
 
         if (isOwctrl(propertyData))

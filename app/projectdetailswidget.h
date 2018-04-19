@@ -35,6 +35,7 @@ private:
     BulkEdit* m_bulkEdit;
     ButtonSlice* m_buttons;
     bool m_toTemplates;
+    int m_templateNumber;
 };
 
 #endif // PROJECTDETAILSWIDGET_H

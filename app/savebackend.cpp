@@ -5,6 +5,7 @@
 #include <form.h>
 #include <parserutils.h>
 #include <hashfactory.h>
+#include <zipper.h>
 
 #include <QApplication>
 #include <QJsonDocument>
@@ -16,21 +17,17 @@ SaveBackend* SaveBackend::instance()
     return &instance;
 }
 
-bool SaveBackend::initProject(const QString& projectDirectory) const
+bool SaveBackend::initProject(const QString& projectDirectory, int templateNumber) const
 {
     if (projectDirectory.isEmpty() ||
         !::exists(projectDirectory) ||
         ::exists(projectDirectory + separator() + DIR_OWDB) ||
-        !cp(":/resources/qmls/owdb", projectDirectory, false, true))
+        !Zipper::extractZip(rdfile(tr(":/templates/template%1.zip").arg(templateNumber)), projectDirectory))
         return false;
 
-    auto propertyPath = projectDirectory + separator() + DIR_OWDB +
-                        separator() + DIR_MAINFORM + separator() +
-                        DIR_THIS + separator() + FILE_PROPERTIES;
-    auto propertyData = rdfile(propertyPath);
-    SaveUtils::setProperty(propertyData, TAG_UID, HashFactory::generate());
+    SaveUtils::recalculateUids(projectDirectory + separator() + DIR_OWDB);
 
-    return wrfile(propertyPath, propertyData);
+    return true;
 }
 
 void SaveBackend::flushId(const Control* control) const
@@ -166,23 +163,7 @@ void SaveBackend::recalculateUids(Control* control) const
     if (control->dir().isEmpty())
         return;
 
-    QStringList paths, properties;
-
-    properties << fps(FILE_PROPERTIES, control->dir());
-    paths << properties;
-
-    for (auto pfile : properties) {
-        auto propertyData = rdfile(pfile);
-
-        if (!SaveUtils::isOwctrl(propertyData))
-            continue;
-
-        auto uid = SaveUtils::property(propertyData, TAG_UID).toString();
-        auto newUid = HashFactory::generate();
-
-        for (auto file : paths)
-            SaveUtils::updateFile(file, uid, newUid);
-    }
+    SaveUtils::recalculateUids(control->dir());
 
     Control::updateUids(); // FIXME: Change with childControls()->updateUid();
 }

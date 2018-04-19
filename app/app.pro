@@ -95,7 +95,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/helpwidget.h \
            $$PWD/webenginehelpviewer.h \
            $$PWD/helpviewer.h \
-           $$PWD/hashfactory.h \
            $$PWD/form.h \
            $$PWD/themechooserwidget.h \
            $$PWD/scalingwidget.h \
@@ -177,7 +176,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/helpwidget.cpp \
            $$PWD/webenginehelpviewer.cpp \
            $$PWD/helpviewer.cpp \
-           $$PWD/hashfactory.cpp \
            $$PWD/form.cpp \
            $$PWD/themechooserwidget.cpp \
            $$PWD/scalingwidget.cpp \

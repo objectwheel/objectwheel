@@ -4,6 +4,7 @@
 #include <filemanager.h>
 #include <zipper.h>
 #include <hashfactory.h>
+#include <saveutils.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -157,6 +158,7 @@ ProjectBackend* ProjectBackend::instance()
 }
 
 bool ProjectBackend::newProject(
+    int templateNumber,
     const QString& name,
     const QString& description,
     const QString& owner,
@@ -195,7 +197,7 @@ bool ProjectBackend::newProject(
             pdir + separator() +
             FILENAME, data
         ) ||
-        SaveBackend::instance()->initProject(pdir)
+        SaveBackend::instance()->initProject(pdir, templateNumber)
     );
 }
 
@@ -257,6 +259,8 @@ bool ProjectBackend::importProject(const QString &filePath) const
         return false;
 
     ::setProperty(pdir, HASH, HashFactory::generate());
+
+    SaveUtils::recalculateUids(pdir + separator() + DIR_OWDB);
 
     return true;
 }

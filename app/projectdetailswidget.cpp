@@ -130,6 +130,7 @@ void ProjectDetailsWidget::onEditProject(const QString& hash)
 void ProjectDetailsWidget::onNewProject(const QString& projectName, int templateNumber)
 {
     m_toTemplates = true;
+    m_templateNumber = templateNumber;
     m_hash.clear();
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
@@ -154,6 +155,7 @@ void ProjectDetailsWidget::onSaveClick()
 
     if (m_hash.isEmpty()) {
         if (!ProjectBackend::instance()->newProject(
+            m_templateNumber,
             projectnametext,
             descriptiontext,
             ownertext,

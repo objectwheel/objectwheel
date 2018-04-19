@@ -13,6 +13,7 @@ HEADERS += $$PWD/zipper.h \
            $$PWD/parserutils.h \
            $$PWD/qmlformatter.h \
            $$PWD/previewresult.h \
+           $$PWD/hashfactory.h \
            $$PWD/utils_global.h
 
 SOURCES += $$PWD/zipper.cpp \
@@ -21,6 +22,7 @@ SOURCES += $$PWD/zipper.cpp \
            $$PWD/parserutils.cpp \
            $$PWD/filemanager.cpp \
            $$PWD/qmlformatter.cpp \
+           $$PWD/hashfactory.cpp \
            $$PWD/previewresult.cpp
 
 ###Includes

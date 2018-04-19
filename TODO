@@ -76,6 +76,7 @@ her çalıştır'da unsaved doclar için sorsun, eğer kullanıcı sorma derse d
 project şablonları ekle
 konsol çıktısındaki hata mesajlarının yollarını düzelt ve tıklanınca döküman açılsın
 control inspector pane tüm kontroller yüklenince refreshlensin, sadece ilkinde refreshleniyor, hatalı
+help modunda kopyala yapıştır vs çalışmıyor, splitview'e gir çık yapınca konum kayıyor, arama yapılamıyor
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |

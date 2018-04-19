@@ -147,7 +147,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     f.setWeight(QFont::Light);
     f.setPixelSize(17);
     m_informativeLabel->setFont(f);
-    m_informativeLabel->setText(tr("Choose appropriate template for your new project"));
+    m_informativeLabel->setText(tr("Choose appropriate template for your project"));
     m_informativeLabel->setAlignment(Qt::AlignCenter);
     m_informativeLabel->setStyleSheet("color: black");
 
@@ -258,17 +258,18 @@ bool ProjectTemplatesWidget::eventFilter(QObject* watched, QEvent* event)
 }
 
 namespace {
+// TODO: Finish other templates
 const QStringList NAMES = {
     QObject::tr("Blank Project"),
     QObject::tr("Plain Application Project"),
     QObject::tr("Hello World Application Project"),
     QObject::tr("Multi-page Application Project"),
     QObject::tr("Multi-window Application Project"),
-    QObject::tr("Desktop Oriented Application Project"),
+    QObject::tr("Desktop Oriented Application Project")/*,
     QObject::tr("Simple Database Application Project"),
     QObject::tr("Advanced Application Project"),
     QObject::tr("Dummy Project (Quick Controls)"),
-    QObject::tr("Dummy Project 2 (Quick Controls 2)")
+    QObject::tr("Dummy Project 2 (Quick Controls 2)")*/
 };
 
 const QStringList DESCRIPTIONS = {
@@ -277,11 +278,11 @@ const QStringList DESCRIPTIONS = {
     QObject::tr("A simple application project template with a 'hello world' setup."),
     QObject::tr("A base project template for multi-page applications."),
     QObject::tr("A base project template for multi-window applications."),
-    QObject::tr("A base project template for desktop oriented applications."),
+    QObject::tr("A base project template for desktop oriented applications.")/*,
     QObject::tr("A simple application project template with a simple database setup."),
     QObject::tr("An advanced application project template with full of features loaded."),
     QObject::tr("A dummy project template to test and see Quick Controls v1"),
-    QObject::tr("A dummy project template to test and see Quick Controls v2")
+    QObject::tr("A dummy project template to test and see Quick Controls v2")*/
 };
 } // Anonymous Namespace
 

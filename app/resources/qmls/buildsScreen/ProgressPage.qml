@@ -15,7 +15,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         fillMode: Image.PreserveAspectFit
         height: 57
-        source: "qrc:///resources/images/back-line.png"
+        source: "qrc:///images/back-line.png"
     }
     AnimatedImage {
         id: animatedImage
@@ -23,7 +23,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         fillMode: Image.PreserveAspectFit
         width: 200
-        source: "qrc:///resources/images/construction.gif"
+        source: "qrc:///images/construction.gif"
     }
     Column {
         anchors.verticalCenterOffset: -95
@@ -162,7 +162,7 @@ Item {
                         }
                         Image {
                             id: btnCancelImg
-                            source: "qrc:///resources/images/cancel.png"
+                            source: "qrc:///images/cancel.png"
                             height: btnCancel.height - 12
                             fillMode: Image.PreserveAspectFit
                         }
@@ -235,7 +235,7 @@ Item {
                         }
                         Image {
                             id: btnOkImg
-                            source: "qrc:///resources/images/cancel.png"
+                            source: "qrc:///images/cancel.png"
                             height: btnOk.height - 12
                             fillMode: Image.PreserveAspectFit
                         }
@@ -282,7 +282,7 @@ Item {
         y: - height - 20
         width: 200
         fillMode: Image.PreserveAspectFit
-        source: "qrc:///resources/images/bouncing_arrow.png"
+        source: "qrc:///images/bouncing_arrow.png"
         anchors.right:  parent.right
         Behavior on y {
             PropertyAnimation { duration: 800; easing.type: Easing.OutElastic }

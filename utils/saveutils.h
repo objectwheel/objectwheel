@@ -67,6 +67,7 @@ class UTILS_EXPORT SaveUtils : public QObject
         static void flushId(const QString& topPath, const QString& id);
         static void flushSuid(const QString& topPath, const QString& suid);
         static void updateFile(const QString& filePath, const QString& from, const QString& to);
+        static void recalculateUids(const QString& topPath);
 
         static bool isOwprj(const QByteArray& propertyData);
         static bool isOwprj(const QString& projectDir);

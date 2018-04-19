@@ -12,11 +12,12 @@ public:
     static ProjectBackend* instance();
 
     bool newProject(
-            const QString& name,
-            const QString& description,
-            const QString& owner,
-            const QString& crDate,
-            const QString& size
+        int templateNumber,
+        const QString& name,
+        const QString& description,
+        const QString& owner,
+        const QString& crDate,
+        const QString& size
     ) const;
 
     QStringList projectNames() const;

@@ -14,7 +14,7 @@ class SaveBackend : public QObject
 public:
     static SaveBackend* instance();
 
-    bool initProject(const QString& projectDirectory) const;
+    bool initProject(const QString& projectDirectory, int templateNumber) const;
     void flushId(const Control* control) const;
     void flushSuid(const Control* control, const QString& suid) const;
 
