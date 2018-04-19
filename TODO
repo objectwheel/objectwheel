@@ -78,6 +78,8 @@ konsol çıktısındaki hata mesajlarının yollarını düzelt ve tıklanınca 
 control inspector pane tüm kontroller yüklenince refreshlensin, sadece ilkinde refreshleniyor, hatalı
 help modunda kopyala yapıştır vs çalışmıyor, splitview'e gir çık yapınca konum kayıyor, arama yapılamıyor
 Options page'e multiple instance protection seçeneği ekle
+satır satır debugging, hem masaüstü hem mobilde
+ios ve android için markete "interpreter" yazılımları yazılacak ve yüklenecek, böylece kullanıcı bu yazılımı açıp login olunca canlı olarak mobil de de debugging yapabilecek
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |

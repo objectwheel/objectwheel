@@ -136,7 +136,8 @@ void DownloadWidget::download(OTargets::Targets target)
         qFatal("Error");
 
     if (!cp(pdir + separator() + DIR_OWDB, tdir.path()) ||
-        !cp(pdir + separator() + DIR_BUILD, tdir.path()))
+        !cp(pdir + separator() + DIR_BUILD, tdir.path()) ||
+        !cp(pdir + separator() + FILE_PROJECT, tdir.path()))
         qFatal("Error");
 
 
