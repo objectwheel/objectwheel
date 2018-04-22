@@ -1410,11 +1410,12 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
             } else {
                 const auto tli = _treeWidget->topLevelItem(_treeWidget->topLevelItemCount() - 1);
                 const auto lci = tli->child(tli->childCount() - 1);
-                const auto& lcir = _treeWidget->visualItemRect(lci);
-                const qreal ic = (
-                                     _treeWidget->viewport()->height() +
-                                     qAbs(lcir.y())
-                                     ) / (qreal) lcir.height();
+                auto lcir = _treeWidget->visualItemRect(lci);
+
+                if (lcir.isNull())
+                    lcir = _treeWidget->visualItemRect(tli);
+
+                const qreal ic = (_treeWidget->viewport()->height() + qAbs(lcir.y())) / (qreal) lcir.height();
 
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
