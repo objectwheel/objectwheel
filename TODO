@@ -70,7 +70,7 @@ ApplicationWindow footer, header li bir şey nasıl preview edilir, previewe sis
 ApplicationWindow contentItem'i üzerine reparent bozuk mu bi test et
 ApplicationWindow ile material tema vs test et Dark/Light modlarını
 themer, interpreter, previewer için tema ve font kayıt olaylarını hallet, temaları test et, Options pageini doldur güzelleştir
-ctrl + r ile çalıştır yapsın
+ctrl + r ile çalıştır yapsın ve auto save olsun
 her çalıştırmada önceki app'ı kapatsın
 her çalıştır'da unsaved doclar için sorsun, eğer kullanıcı sorma derse direk kaydetsin
 project şablonları ekle
@@ -80,6 +80,13 @@ help modunda kopyala yapıştır vs çalışmıyor, splitview'e gir çık yapın
 Options page'e multiple instance protection seçeneği ekle
 satır satır debugging, hem masaüstü hem mobilde
 ios ve android için markete "interpreter" yazılımları yazılacak ve yüklenecek, böylece kullanıcı bu yazılımı açıp login olunca canlı olarak mobil de de debugging yapabilecek
+qml kod editöre arama fonksiyonelliği gibi temel bir editörde olması gereken özellikler eklenecek
+run-stop mallığını düzelt, run ken ikinci kez run edilirse önce stop etsin
+video componenti previewer'da çalıyor, bunu düzelt
+issuebox düzgün çalışmıyor, ayrıca hatalı satır qml code editör de işaretlenmiyor
+helpmode'dan qml kod editöre dönünce kod editör scroll oluyor, kayıyor, terside geçerli
+konsol çıktısı üstinde kopyala yapıştır yapılamıyor
+anchorlar parantez içindeki obje şeklinde tanımlıysa previewer algılamıyor, çünkü parserutil algılamıyor
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |
