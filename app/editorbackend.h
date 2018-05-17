@@ -3,13 +3,14 @@
 
 #include <QObject>
 
-#include <qmlcodeeditor.h>
-#include <qmlcodedocument.h>
-
 #include <qmljstools/qmljsmodelmanager.h>
 #include <qmljstools/qmljsbundleprovider.h>
 #include <qmljstools/qmljslocatordata.h>
 #include <qmljstools/qmljsfunctionfilter.h>
+
+class QmlCodeDocument;
+
+namespace TextEditor { class TextEditorSettings; }
 
 class EditorBackend final : public QObject
 {
@@ -18,28 +19,29 @@ class EditorBackend final : public QObject
 
     friend class BackendManager;
 
-    EditorBackend();
-    ~EditorBackend();
-
 public:
     static EditorBackend* instance();
 
     static QList<QmlCodeDocument*> documents()
     { return m_documents; }
 
-    static QmlCodeDocument* createDocument()
-    { return (m_documents << new QmlCodeDocument(m_editors.last())).last(); }
+    static void addDocument(QmlCodeDocument* document)
+    { m_documents.append(document); }
 
-    static QmlCodeEditor* createEditor()
-    { return (m_editors << new QmlCodeEditor).last();  }
+    static void removeDocument(QmlCodeDocument* document)
+    { m_documents.removeAll(document); }
 
 private:
-    static QList<QmlCodeEditor*> m_editors;
+    EditorBackend();
+    ~EditorBackend();
+
+private:
     static QList<QmlCodeDocument*> m_documents;
     QmlJSTools::Internal::ModelManager m_modelManager;
     QmlJSTools::Internal::LocatorData m_locatorData;
     QmlJSTools::Internal::FunctionFilter m_functionFilter{&m_locatorData};
     QmlJSTools::BasicBundleProvider m_basicBundleProvider;
+    TextEditor::TextEditorSettings* m_textEditorSettings;
 };
 
 #endif // EDITORBACKEND_H

@@ -9,6 +9,7 @@
 #include <utils/textutils.h>
 #include <texteditor/tabsettings.h>
 #include <qtcassert.h>
+#include <editorbackend.h>
 
 #include <QPlainTextEdit>
 #include <QTimer>
@@ -434,6 +435,8 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
   , m_semanticHighlighter(new QmlJSEditor::Internal::SemanticHighlighter(this))
   , m_semanticHighlightingNecessary(false)
 {
+    EditorBackend::addDocument(this);
+
     // set new document layout
     QTextOption opt = defaultTextOption();
     opt.setTextDirection(Qt::LeftToRight);
@@ -474,6 +477,7 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
 
 QmlCodeDocument::~QmlCodeDocument()
 {
+    EditorBackend::removeDocument(this);
     m_semanticInfoUpdater->abort();
     m_semanticInfoUpdater->wait();
     cleanDiagnosticMarks();

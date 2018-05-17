@@ -29,6 +29,8 @@
 #include "qmljsbundleprovider.h"
 #include <editorbackend.h>
 #include <backendmanager.h>
+#include <qmlcodedocument.h>
+#include <qmlcodeeditor.h>
 
 ////#include <coreplugin/icore.h>
 //#include <coreplugin/editormanager/documentmodel.h>
@@ -51,7 +53,6 @@
 //#include <qtsupport/qmldumptool.h>
 //#include <qtsupport/qtkitinformation.h>
 //#include <qtsupport/qtsupportconstants.h>
-#include <qmlcodeeditor.h>
 
 #include <utils/algorithm.h>
 #include <utils/hostosinfo.h>

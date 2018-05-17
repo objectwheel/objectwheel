@@ -37,7 +37,6 @@ private slots:
 private:
     Core::HelpManager m_helpManager;
     static EditorBackend* m_editorBackend;
-    TextEditor::TextEditorSettings* m_textEditorSettings;
 };
 
 #endif // BACKENDMANAGER_H
