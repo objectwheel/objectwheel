@@ -8,6 +8,7 @@ HEADERS += \
     $$PWD/qmljsdocument.h \
     $$PWD/qmljsscanner.h \
     $$PWD/qmljsinterpreter.h \
+    $$PWD/qmljslink.h \
     $$PWD/qmljscheck.h \
     $$PWD/qmljsscopebuilder.h \
     $$PWD/qmljslineinfo.h \
@@ -17,6 +18,7 @@ HEADERS += \
     $$PWD/qmljspropertyreader.h \
     $$PWD/qmljsrewriter.h \
     $$PWD/qmljsicons.h \
+    $$PWD/qmljsplugindumper.h \
     $$PWD/qmljstypedescriptionreader.h \
     $$PWD/qmljsscopeastpath.h \
     $$PWD/qmljsvalueowner.h \
@@ -32,8 +34,7 @@ HEADERS += \
     $$PWD/qmljsimportdependencies.h \
     $$PWD/qmljsviewercontext.h \
     $$PWD/qmljsdescribevalue.h \
-    $$PWD/qmljsdialect.h \
-    $$PWD/qmljslink.h
+    $$PWD/qmljsdialect.h
 
 SOURCES += \
     $$PWD/qmljsbind.cpp \
@@ -42,6 +43,7 @@ SOURCES += \
     $$PWD/qmljsdocument.cpp \
     $$PWD/qmljsscanner.cpp \
     $$PWD/qmljsinterpreter.cpp \
+    $$PWD/qmljslink.cpp \
     $$PWD/qmljscheck.cpp \
     $$PWD/qmljsscopebuilder.cpp \
     $$PWD/qmljslineinfo.cpp \
@@ -50,6 +52,7 @@ SOURCES += \
     $$PWD/qmljspropertyreader.cpp \
     $$PWD/qmljsrewriter.cpp \
     $$PWD/qmljsicons.cpp \
+    $$PWD/qmljsplugindumper.cpp \
     $$PWD/qmljstypedescriptionreader.cpp \
     $$PWD/qmljsscopeastpath.cpp \
     $$PWD/qmljsvalueowner.cpp \
@@ -64,8 +67,7 @@ SOURCES += \
     $$PWD/qmljsimportdependencies.cpp \
     $$PWD/qmljsviewercontext.cpp \
     $$PWD/qmljsdescribevalue.cpp \
-    $$PWD/qmljsdialect.cpp \
-    $$PWD/qmljslink.cpp
+    $$PWD/qmljsdialect.cpp
 
 contains(QT, gui) {
     SOURCES += \

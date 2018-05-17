@@ -94,7 +94,6 @@ public:
     ObjectValue *_globalObject;
     ObjectValue *_mathObject;
     ObjectValue *_qtObject;
-    ObjectValue *_qmlKeysObject;
     ObjectValue *_qmlFontObject;
     ObjectValue *_qmlPointObject;
     ObjectValue *_qmlSizeObject;
@@ -227,7 +226,7 @@ SharedValueOwner::SharedValueOwner(SharedValueOwnerKind kind)
 
     addFunction(_objectPrototype, QLatin1String("toString"), stringValue(), 0);
     addFunction(_objectPrototype, QLatin1String("toLocaleString"), stringValue(), 0);
-    addFunction(_objectPrototype, QLatin1String("valueOf"), 0); // ### fixme it should return thisObject
+    addFunction(_objectPrototype, QLatin1String("valueOf"), 0); // ### FIXME it should return thisObject
     addFunction(_objectPrototype, QLatin1String("hasOwnProperty"), booleanValue(), 1);
     addFunction(_objectPrototype, QLatin1String("isPrototypeOf"), booleanValue(), 1);
     addFunction(_objectPrototype, QLatin1String("propertyIsEnumerable"), booleanValue(), 1);
@@ -494,6 +493,8 @@ SharedValueOwner::SharedValueOwner(SharedValueOwnerKind kind)
     _qmlFontObject->setMember(QLatin1String("letterSpacing"), realValue());
     _qmlFontObject->setMember(QLatin1String("wordSpacing"), realValue());
     _qmlFontObject->setMember(QLatin1String("hintingPreference"), unknownValue());
+    _qmlFontObject->setMember(QLatin1String("kerning"), booleanValue());
+    _qmlFontObject->setMember(QLatin1String("preferShaping"), booleanValue());
 
     _qmlPointObject = newObject(/*prototype =*/ 0);
     _qmlPointObject->setClassName(QLatin1String("Point"));
@@ -586,7 +587,7 @@ SharedValueOwner::SharedValueOwner(SharedValueOwnerKind kind)
     applicationObject->setMember(QLatin1String("active"), booleanValue());
     applicationObject->setMember(QLatin1String("layoutDirection"), intValue());
     _qtObject->setMember(QLatin1String("application"), applicationObject);
-    // fixme: add inputMethod
+    // FIXME: add inputMethod
 
     addFunction(_qtObject, QLatin1String("binding"), objectInstance, 1);
     addFunction(_qtObject, QLatin1String("atob"), &_stringValue, 1);
@@ -604,7 +605,7 @@ SharedValueOwner::SharedValueOwner(SharedValueOwnerKind kind)
     addFunction(_qtObject, QLatin1String("include"), 2);
     addFunction(_qtObject, QLatin1String("isQtObject"), &_booleanValue, 1);
     addFunction(_qtObject, QLatin1String("lighter"), &_colorValue, 1);
-    // fixme: add locale
+    // FIXME: add locale
     addFunction(_qtObject, QLatin1String("matrix4x4"), _qmlMatrix4x4Object, 16);
     addFunction(_qtObject, QLatin1String("md5"), &_stringValue, 1);
     addFunction(_qtObject, QLatin1String("openUrlExternally"), &_booleanValue, 1);
@@ -888,11 +889,6 @@ Function *ValueOwner::addFunction(ObjectValue *object, const QString &name, int 
     function->setOptionalNamedArgumentCount(optionalCount);
     object->setMember(name, function);
     return function;
-}
-
-const ObjectValue *ValueOwner::qmlKeysObject()
-{
-    return _shared->_qmlKeysObject;
 }
 
 const ObjectValue *ValueOwner::qmlFontObject()

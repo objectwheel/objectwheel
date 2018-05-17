@@ -27,9 +27,9 @@
 
 #include "languageutils_global.h"
 
-QT_BEGIN_NAMESPACE
+
 class QCryptographicHash;
-QT_END_NAMESPACE
+
 
 namespace LanguageUtils {
 

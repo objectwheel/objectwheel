@@ -1,5 +1,6 @@
 ### App Settings
 TEMPLATE = app
+CONFIG  += c++14
 TARGET   = Objectwheel
 #DEFINES += PREVIEWER_DEBUG
 
@@ -13,6 +14,7 @@ include($$PWD/aes/aes.pri)
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)
 include($$PWD/../shared/resources/shared_resources.pri)
+include ($$PWD/qmleditor/qmleditor.pri)
 
 ### Sources
 INCLUDEPATH += $$PWD
@@ -98,7 +100,17 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/form.h \
            $$PWD/themechooserwidget.h \
            $$PWD/scalingwidget.h \
-           $$PWD/projecttemplateswidget.h
+           $$PWD/projecttemplateswidget.h \
+           $$PWD/rowbar.h \
+           $$PWD/textutils.h \
+           $$PWD/linenumberband.h \
+           $$PWD/breakpointband.h \
+           $$PWD/bracketband.h \
+           $$PWD/blockdata.h \
+           $$PWD/qmlcodedocument.h \
+           $$PWD/editorbackend.h \
+           $$PWD/markband.h \
+           $$PWD/settings.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -179,7 +191,16 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/form.cpp \
            $$PWD/themechooserwidget.cpp \
            $$PWD/scalingwidget.cpp \
-           $$PWD/projecttemplateswidget.cpp
+           $$PWD/projecttemplateswidget.cpp \
+           $$PWD/rowbar.cpp \
+           $$PWD/textutils.cpp \
+           $$PWD/linenumberband.cpp \
+           $$PWD/breakpointband.cpp \
+           $$PWD/bracketband.cpp \
+           $$PWD/qmlcodedocument.cpp \
+           $$PWD/editorbackend.cpp \
+           $$PWD/markband.cpp \
+           $$PWD/settings.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
@@ -190,6 +211,8 @@ INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/fit
 INCLUDEPATH += $$PWD/../utils/miniz
 INCLUDEPATH += $$PWD/../utils/components
+INCLUDEPATH += $$PWD/../utils/qmlparser
+INCLUDEPATH += $$PWD/../utils/qmlparser/utils
 LIBS        += -L$$OUT_PWD/../utils -lutils
 windows:CONFIG(release, debug | release):LIBS += -L$$OUT_PWD/../utils/release
 windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug

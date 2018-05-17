@@ -139,6 +139,37 @@ Link::Link(const Snapshot &snapshot, const ViewerContext &vContext, const Librar
 
     d->diagnosticMessages = 0;
     d->allDiagnosticMessages = 0;
+
+    ModelManagerInterface *modelManager = ModelManagerInterface::instance();
+    if (modelManager) {
+//        ModelManagerInterface::CppDataHash cppDataHash = modelManager->cppData();
+//        {
+//            // populate engine with types from C++
+//            ModelManagerInterface::CppDataHashIterator cppDataHashIterator(cppDataHash);
+//            while (cppDataHashIterator.hasNext()) {
+//                cppDataHashIterator.next();
+//                d->valueOwner->cppQmlTypes().load(cppDataHashIterator.key(),
+//                                                  cppDataHashIterator.value().exportedTypes);
+//            }
+//        }
+
+        // build an object with the context properties from C++
+//        ObjectValue *cppContextProperties = d->valueOwner->newObject(/* prototype = */ 0);
+//        foreach (const ModelManagerInterface::CppData &cppData, cppDataHash) {
+//            QHashIterator<QString, QString> it(cppData.contextProperties);
+//            while (it.hasNext()) {
+//                it.next();
+//                const Value *value = 0;
+//                const QString cppTypeName = it.value();
+//                if (!cppTypeName.isEmpty())
+//                    value = d->valueOwner->cppQmlTypes().objectByCppName(cppTypeName);
+//                if (!value)
+//                    value = d->valueOwner->unknownValue();
+//                cppContextProperties->setMember(it.key(), value);
+//            }
+//        }
+//        d->valueOwner->cppQmlTypes().setCppContextProperties(cppContextProperties);
+    }
 }
 
 ContextPtr Link::operator()(QHash<QString, QList<DiagnosticMessage> > *messages)
@@ -177,6 +208,11 @@ Context::ImportsPerDocument LinkPrivate::linkImports()
     if (document) {
         // do it on document first, to make sure import errors are shown
         Imports *imports = new Imports(valueOwner);
+
+        // Add custom imports for the opened document
+        for (const auto &provider : CustomImportsProvider::allProviders())
+            foreach (const auto &import, provider->imports(valueOwner, document.data()))
+                importCache.insert(ImportCacheKey(import.info), import);
 
         populateImportedTypes(imports, document);
         importsPerDocument.insert(document.data(), QSharedPointer<Imports>(imports));
@@ -282,7 +318,7 @@ Import LinkPrivate::importFileOrDirectory(Document::Ptr doc, const ImportInfo &i
     } else if (importInfo.type() == ImportType::QrcFile) {
         QLocale locale;
         QStringList filePaths = ModelManagerInterface::instance()
-                ->filesAtQrcPath(path, &locale, 0, ModelManagerInterface::ActiveQrcResources);
+                ->filesAtQrcPath(path, &locale, ModelManagerInterface::ActiveQrcResources);
         if (filePaths.isEmpty())
             filePaths = ModelManagerInterface::instance()->filesAtQrcPath(path);
         if (!filePaths.isEmpty()) {
@@ -356,6 +392,15 @@ Import LinkPrivate::importNonFile(Document::Ptr doc, const ImportInfo &importInf
         import.object->setPrototype(valueOwner->cppQmlTypes().objectByCppName(moduleApi.cppName));
     }
 
+    // TODO: at the moment there is not any types information on Qbs imports.
+    // Just check that tha the import is listed in the Qbs bundle.
+    if (doc->language() == Dialect::QmlQbs) {
+        QmlBundle qbs = ModelManagerInterface::instance()
+                ->activeBundles().bundleForLanguage(Dialect::QmlQbs);
+        if (qbs.supportedImports().contains(importInfo.name()))
+            importFound = true;
+    }
+
     if (!importFound && importInfo.ast()) {
         import.valid = false;
         error(doc, locationFromRange(importInfo.ast()->firstSourceLocation(),
@@ -375,12 +420,83 @@ Import LinkPrivate::importNonFile(Document::Ptr doc, const ImportInfo &importInf
     return import;
 }
 
-bool LinkPrivate::importLibrary(Document::Ptr,
-                         const QString&,
-                         Import*,
-                         const QString&)
+bool LinkPrivate::importLibrary(Document::Ptr doc,
+                         const QString &libraryPath_,
+                         Import *import,
+                         const QString &importPath)
 {
-    // Deleted
+    const ImportInfo &importInfo = import->info;
+    QString libraryPath = libraryPath_;
+
+    LibraryInfo libraryInfo = snapshot.libraryInfo(libraryPath);
+    if (!libraryInfo.isValid())
+        return false;
+
+    import->libraryPath = libraryPath;
+
+    const ComponentVersion version = importInfo.version();
+    SourceLocation errorLoc;
+    if (const UiImport *ast = importInfo.ast())
+        errorLoc = locationFromRange(ast->firstSourceLocation(), ast->lastSourceLocation());
+
+    if (!libraryInfo.plugins().isEmpty() || !libraryInfo.typeInfos().isEmpty()) {
+        if (libraryInfo.pluginTypeInfoStatus() == LibraryInfo::NoTypeInfo) {
+            ModelManagerInterface *modelManager = ModelManagerInterface::instance();
+            if (modelManager) {
+                if (importInfo.type() == ImportType::Library) {
+                    if (version.isValid()) {
+                        const QString uri = importInfo.name();
+                        modelManager->loadPluginTypes(
+                                    libraryPath, importPath,
+                                    uri, version.toString());
+                    }
+                } else {
+                    modelManager->loadPluginTypes(
+                                libraryPath, libraryPath,
+                                QString(), version.toString());
+                }
+            }
+            if (errorLoc.isValid()) {
+                appendDiagnostic(doc, DiagnosticMessage(Severity::ReadingTypeInfoWarning,
+                                                        errorLoc,
+                                                        Link::tr("QML module contains C++ plugins, currently reading type information...")));
+                import->valid = false;
+            }
+        } else if (libraryInfo.pluginTypeInfoStatus() == LibraryInfo::DumpError
+                   || libraryInfo.pluginTypeInfoStatus() == LibraryInfo::TypeInfoFileError) {
+            // Only underline import if package isn't described in .qmltypes anyway
+            // and is not a private package
+            QString packageName = importInfo.name();
+            if (errorLoc.isValid() && (packageName.isEmpty() || !valueOwner->cppQmlTypes().hasModule(packageName))
+                    && !packageName.endsWith(QLatin1String("private"), Qt::CaseInsensitive)) {
+                error(doc, errorLoc, libraryInfo.pluginTypeInfoError());
+                import->valid = false;
+            }
+        } else {
+            const QString packageName = importInfo.name();
+            valueOwner->cppQmlTypes().load(libraryPath, libraryInfo.metaObjects(), packageName);
+            foreach (const CppComponentValue *object, valueOwner->cppQmlTypes().createObjectsForImport(packageName, version)) {
+                import->object->setMember(object->className(), object);
+            }
+
+            // all but no-uri module apis become available for import
+            QList<ModuleApiInfo> noUriModuleApis;
+            foreach (const ModuleApiInfo &moduleApi, libraryInfo.moduleApis()) {
+                if (moduleApi.uri.isEmpty())
+                    noUriModuleApis += moduleApi;
+                else
+                    importableModuleApis[moduleApi.uri] += moduleApi;
+            }
+
+            // if a module api has no uri, it shares the same name
+            ModuleApiInfo sameUriModuleApi = findBestModuleApi(noUriModuleApis, version);
+            if (sameUriModuleApi.version.isValid())
+                import->object->setPrototype(valueOwner->cppQmlTypes().objectByCppName(sameUriModuleApi.cppName));
+        }
+    }
+
+    loadQmldirComponents(import->object, version, libraryInfo, libraryPath);
+
     return true;
 }
 

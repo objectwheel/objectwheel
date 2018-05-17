@@ -28,7 +28,7 @@
 #include <qmljs/parser/qmljsast_p.h>
 #include <qmljs/qmljsutils.h>
 
-// ### fixme: remove these includes:
+// ### FIXME: remove these includes:
 #include <QTextBlock>
 #include <QTextCursor>
 #include <QTextDocument>

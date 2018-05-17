@@ -97,6 +97,8 @@ public:
     QString path() const;
     QString componentName() const;
 
+    QList<AST::SourceLocation> jsDirectives() const;
+
 private:
     bool parse_helper(int kind);
 
@@ -109,6 +111,7 @@ private:
     QString _path;
     QString _componentName;
     QString _source;
+    QList<AST::SourceLocation> _jsdirectives;
     QWeakPointer<Document> _ptr;
     QByteArray _fingerprint;
     int _editorRevision;
@@ -150,6 +153,7 @@ private:
     Status _status;
     QList<QmlDirParser::Component> _components;
     QList<QmlDirParser::Plugin> _plugins;
+    QList<QmlDirParser::TypeInfo> _typeinfos;
     typedef QList<LanguageUtils::FakeMetaObject::ConstPtr> FakeMetaObjectList;
     FakeMetaObjectList _metaObjects;
     QList<ModuleApiInfo> _moduleApis;
@@ -174,6 +178,9 @@ public:
 
     QList<QmlDirParser::Plugin> plugins() const
     { return _plugins; }
+
+    QList<QmlDirParser::TypeInfo> typeInfos() const
+    { return _typeinfos; }
 
     FakeMetaObjectList metaObjects() const
     { return _metaObjects; }

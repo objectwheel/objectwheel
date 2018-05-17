@@ -370,6 +370,22 @@ C filteredUnique(const C &container)
 }
 
 //////////////////
+// max element
+//////////////////
+
+template<typename T>
+typename T::value_type maxElementOr(const T &container, typename T::value_type other)
+{
+    typename T::const_iterator begin = std::begin(container);
+    typename T::const_iterator end = std::end(container);
+
+    typename T::const_iterator it = std::max_element(begin, end);
+    if (it == end)
+        return other;
+    return *it;
+}
+
+//////////////////
 // sort
 /////////////////
 template <typename Container>

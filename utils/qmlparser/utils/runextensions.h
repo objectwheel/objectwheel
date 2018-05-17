@@ -31,6 +31,7 @@
 #include <QCoreApplication>
 #include <QFuture>
 #include <QFutureInterface>
+#include <QFutureWatcher>
 #include <QRunnable>
 #include <QThread>
 #include <QThreadPool>
@@ -139,7 +140,7 @@ struct resultTypeIsFunctionLike<Function, false>
 
 template <typename Function>
 struct resultTypeHasCallOperator<Function, false>
-        : public resultTypeIsFunctionLike<Function, std::is_function<typename std::remove_pointer<typename std::decay<Function>::type>::type>::value>
+        : public resultTypeIsFunctionLike<Function, std::is_function<std::remove_pointer_t<std::decay_t<Function>>>::value>
 {
 };
 
@@ -256,15 +257,14 @@ void runAsyncQFutureInterfaceDispatch(std::true_type, QFutureInterface<ResultTyp
 template <typename ResultType, typename Function, typename... Args>
 void runAsyncQFutureInterfaceDispatch(std::false_type, QFutureInterface<ResultType> futureInterface, Function &&function, Args&&... args)
 {
-    runAsyncReturnVoidDispatch(std::is_void<typename std::result_of<Function(Args...)>::type>(),
+    runAsyncReturnVoidDispatch(std::is_void<std::result_of_t<Function(Args...)>>(),
                                futureInterface, std::forward<Function>(function), std::forward<Args>(args)...);
 }
 
 // function, function pointer, or other callable object that is no member pointer
 template <typename ResultType, typename Function, typename... Args,
-          typename = typename std::enable_if<
-                !std::is_member_pointer<typename std::decay<Function>::type>::value
-              >::type>
+          typename = std::enable_if_t<!std::is_member_pointer<std::decay_t<Function>>::value>
+         >
 void runAsyncMemberDispatch(QFutureInterface<ResultType> futureInterface, Function &&function, Args&&... args)
 {
     runAsyncQFutureInterfaceDispatch(functionTakesArgument<Function, 0, QFutureInterface<ResultType>&>(),
@@ -273,14 +273,13 @@ void runAsyncMemberDispatch(QFutureInterface<ResultType> futureInterface, Functi
 
 // Function = member function
 template <typename ResultType, typename Function, typename Obj, typename... Args,
-          typename = typename std::enable_if<
-                std::is_member_pointer<typename std::decay<Function>::type>::value
-              >::type>
+          typename = std::enable_if_t<std::is_member_pointer<std::decay_t<Function>>::value>
+         >
 void runAsyncMemberDispatch(QFutureInterface<ResultType> futureInterface, Function &&function, Obj &&obj, Args&&... args)
 {
     // Wrap member function with object into callable
     runAsyncImpl(futureInterface,
-                 MemberCallable<typename std::decay<Function>::type>(std::forward<Function>(function), std::forward<Obj>(obj)),
+                 MemberCallable<std::decay_t<Function>>(std::forward<Function>(function), std::forward<Obj>(obj)),
                  std::forward<Args>(args)...);
 }
 
@@ -305,16 +304,8 @@ void runAsyncImpl(QFutureInterface<ResultType> futureInterface,
    arguments that are passed to it when it is run in a thread.
 */
 
-// can be replaced with std::(make_)index_sequence with C++14
-template <std::size_t...>
-struct indexSequence { };
-template <std::size_t N, std::size_t... S>
-struct makeIndexSequence : makeIndexSequence<N-1, N-1, S...> { };
-template <std::size_t... S>
-struct makeIndexSequence<0, S...> { typedef indexSequence<S...> type; };
-
 template <class T>
-typename std::decay<T>::type
+std::decay_t<T>
 decayCopy(T&& v)
 {
     return std::forward<T>(v);
@@ -354,7 +345,7 @@ public:
             futureInterface.reportFinished();
             return;
         }
-        runHelper(typename makeIndexSequence<std::tuple_size<Data>::value>::type());
+        runHelper(std::make_index_sequence<std::tuple_size<Data>::value>());
     }
 
     void setThreadPool(QThreadPool *pool)
@@ -368,10 +359,10 @@ public:
     }
 
 private:
-    using Data = std::tuple<typename std::decay<Function>::type, typename std::decay<Args>::type...>;
+    using Data = std::tuple<std::decay_t<Function>, std::decay_t<Args>...>;
 
     template <std::size_t... index>
-    void runHelper(indexSequence<index...>)
+    void runHelper(std::index_sequence<index...>)
     {
         // invalidates data, which is moved into the call
         runAsyncImpl(futureInterface, std::move(std::get<index>(data))...);
@@ -463,10 +454,10 @@ runAsync(QThread::Priority priority, Function &&function, Args&&... args)
     \sa QThread::Priority
  */
 template <typename Function, typename... Args,
-          typename = typename std::enable_if<
-                !std::is_same<typename std::decay<Function>::type, QThreadPool>::value
-                && !std::is_same<typename std::decay<Function>::type, QThread::Priority>::value
-              >::type,
+          typename = std::enable_if_t<
+                !std::is_same<std::decay_t<Function>, QThreadPool>::value
+                && !std::is_same<std::decay_t<Function>, QThread::Priority>::value
+              >,
           typename ResultType = typename Internal::resultType<Function>::type>
 QFuture<ResultType>
 runAsync(Function &&function, Args&&... args)
@@ -482,15 +473,67 @@ runAsync(Function &&function, Args&&... args)
     \sa QThread::Priority
  */
 template <typename Function, typename... Args,
-          typename = typename std::enable_if<
-                !std::is_same<typename std::decay<Function>::type, QThread::Priority>::value
-              >::type,
+          typename = std::enable_if_t<!std::is_same<std::decay_t<Function>, QThread::Priority>::value>,
           typename ResultType = typename Internal::resultType<Function>::type>
 QFuture<ResultType>
 runAsync(QThreadPool *pool, Function &&function, Args&&... args)
 {
     return runAsync(pool, QThread::InheritPriority, std::forward<Function>(function),
                     std::forward<Args>(args)...);
+}
+
+
+/*!
+    Adds a handler for when a result is ready.
+    This creates a new QFutureWatcher. Do not use if you intend to react on multiple conditions
+    or create a QFutureWatcher already for other reasons.
+*/
+template <typename R, typename T>
+const QFuture<T> &onResultReady(const QFuture<T> &future, R *receiver, void(R::*member)(const T &))
+{
+    auto watcher = new QFutureWatcher<T>();
+    QObject::connect(watcher, &QFutureWatcherBase::finished, watcher, &QObject::deleteLater);
+    QObject::connect(watcher, &QFutureWatcherBase::resultReadyAt, receiver,
+                     [receiver, member, watcher](int index) {
+                         (receiver->*member)(watcher->future().resultAt(index));
+                     });
+    watcher->setFuture(future);
+    return future;
+}
+
+/*!
+    Adds a handler for when a result is ready. The guard object determines the lifetime of
+    the connection.
+    This creates a new QFutureWatcher. Do not use if you intend to react on multiple conditions
+    or create a QFutureWatcher already for other reasons.
+*/
+template <typename T, typename Function>
+const QFuture<T> &onResultReady(const QFuture<T> &future, QObject *guard, Function f)
+{
+    auto watcher = new QFutureWatcher<T>();
+    QObject::connect(watcher, &QFutureWatcherBase::finished, watcher, &QObject::deleteLater);
+    QObject::connect(watcher, &QFutureWatcherBase::resultReadyAt, guard, [f, watcher](int index) {
+        f(watcher->future().resultAt(index));
+    });
+    watcher->setFuture(future);
+    return future;
+}
+
+/*!
+    Adds a handler for when a result is ready.
+    This creates a new QFutureWatcher. Do not use if you intend to react on multiple conditions
+    or create a QFutureWatcher already for other reasons.
+*/
+template <typename T, typename Function>
+const QFuture<T> &onResultReady(const QFuture<T> &future, Function f)
+{
+    auto watcher = new QFutureWatcher<T>();
+    QObject::connect(watcher, &QFutureWatcherBase::finished, watcher, &QObject::deleteLater);
+    QObject::connect(watcher, &QFutureWatcherBase::resultReadyAt, [f, watcher](int index) {
+        f(watcher->future().resultAt(index));
+    });
+    watcher->setFuture(future);
+    return future;
 }
 
 } // Utils

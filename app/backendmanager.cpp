@@ -7,10 +7,12 @@
 #include <authenticator.h>
 #include <previewerbackend.h>
 #include <savetransaction.h>
+#include <editorbackend.h>
 #include <QMessageBox>
 
 BackendManager::BackendManager()
 {
+    EditorBackend::instance();
     SaveTransaction::instance();
     Authenticator::instance()->init(QUrl(APP_WSSSERVER));
 

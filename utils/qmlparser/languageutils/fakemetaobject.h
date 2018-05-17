@@ -34,9 +34,9 @@
 #include <QHash>
 #include <QSharedPointer>
 
-QT_BEGIN_NAMESPACE
+
 class QCryptographicHash;
-QT_END_NAMESPACE
+
 
 namespace LanguageUtils {
 

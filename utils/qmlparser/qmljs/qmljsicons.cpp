@@ -25,7 +25,7 @@
 
 #include "qmljsicons.h"
 
-//#include <cplusplus/Icons.h>
+#include <utils/Icons.h>
 
 #include <QDir>
 #include <QHash>
@@ -111,32 +111,32 @@ QIcon Icons::icon(const QString &packageName, const QString typeName) const
     return d->iconHash.value(element);
 }
 
-//QIcon Icons::icon(Node *node)
-//{
-//    if (dynamic_cast<AST::UiObjectDefinition*>(node))
-//        return objectDefinitionIcon();
-//    if (dynamic_cast<AST::UiScriptBinding*>(node))
-//        return scriptBindingIcon();
+QIcon Icons::icon(Node *node)
+{
+    if (dynamic_cast<AST::UiObjectDefinition*>(node))
+        return objectDefinitionIcon();
+    if (dynamic_cast<AST::UiScriptBinding*>(node))
+        return scriptBindingIcon();
 
-//    return QIcon();
-//}
+    return QIcon();
+}
 
-//QIcon Icons::objectDefinitionIcon()
-//{
-//    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::ClassIconType);
-//}
+QIcon Icons::objectDefinitionIcon()
+{
+    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::ClassIconType);
+}
 
-//QIcon Icons::scriptBindingIcon()
-//{
-//    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::VarPublicIconType);
-//}
+QIcon Icons::scriptBindingIcon()
+{
+    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::VarPublicIconType);
+}
 
-//QIcon Icons::publicMemberIcon()
-//{
-//    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::FuncPublicIconType);
-//}
+QIcon Icons::publicMemberIcon()
+{
+    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::FuncPublicIconType);
+}
 
-//QIcon Icons::functionDeclarationIcon()
-//{
-//    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::FuncPublicIconType);
-//}
+QIcon Icons::functionDeclarationIcon()
+{
+    return CPlusPlus::Icons::iconForType(CPlusPlus::Icons::FuncPublicIconType);
+}

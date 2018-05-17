@@ -35,6 +35,7 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFileInfo>
+#include <QRegExp>
 
 #include <algorithm>
 
@@ -100,7 +101,7 @@ Document::Document(const QString &fileName, Dialect language)
         _componentName = fileInfo.baseName();
 
         if (! _componentName.isEmpty()) {
-            // ### todo: check the component name.
+            // ### TODO: check the component name.
 
             if (! _componentName.at(0).isUpper())
                 _componentName.clear();
@@ -229,7 +230,17 @@ QString Document::componentName() const
 namespace {
 class CollectDirectives : public Directives
 {
-    QString documentPath;
+    void addLocation(int line, int column) {
+        const SourceLocation loc = SourceLocation(
+                    0,  // placeholder
+                    0,  // placeholder
+                    static_cast<quint32>(line),
+                    static_cast<quint32>(column));
+        _locations += loc;
+    }
+
+    QList<SourceLocation> _locations;
+
 public:
     CollectDirectives(const QString &documentPath)
         : documentPath(documentPath)
@@ -237,28 +248,40 @@ public:
 
     {}
 
-    virtual void pragmaLibrary() { isLibrary = true; }
-    virtual void importFile(const QString &jsfile, const QString &module, int line, int column)
+    virtual void pragmaLibrary(int line, int column) override
     {
-        Q_UNUSED(line);
-        Q_UNUSED(column);
+        isLibrary = true;
+        addLocation(line, column);
+    }
+    virtual void importFile(const QString &jsfile, const QString &module,
+                            int line, int column) override
+    {
         imports += ImportInfo::pathImport(
                     documentPath, jsfile, LanguageUtils::ComponentVersion(), module);
+        addLocation(line, column);
     }
 
     virtual void importModule(const QString &uri, const QString &version, const QString &module,
-                              int line, int column)
+                              int line, int column) override
     {
-        Q_UNUSED(line);
-        Q_UNUSED(column);
         imports += ImportInfo::moduleImport(uri, LanguageUtils::ComponentVersion(version), module);
+        addLocation(line, column);
     }
 
+    virtual QList<SourceLocation> locations() { return _locations; }
+
+    const QString documentPath;
     bool isLibrary;
     QList<ImportInfo> imports;
 };
 
 } // anonymous namespace
+
+
+QList<SourceLocation> Document::jsDirectives() const
+{
+    return _jsdirectives;
+}
 
 bool Document::parse_helper(int startToken)
 {
@@ -274,8 +297,8 @@ bool Document::parse_helper(int startToken)
     QString source = _source;
     lexer.setCode(source, /*line = */ 1, /*qmlMode = */_language.isQmlLikeLanguage());
 
-    CollectDirectives collectDirectives(path());
-    _engine->setDirectives(&collectDirectives);
+    CollectDirectives directives = CollectDirectives(path());
+    _engine->setDirectives(&directives);
 
     switch (startToken) {
     case QmlJSGrammar::T_FEED_UI_PROGRAM:
@@ -283,6 +306,9 @@ bool Document::parse_helper(int startToken)
         break;
     case QmlJSGrammar::T_FEED_JS_PROGRAM:
         _parsedCorrectly = parser.parseProgram();
+        for (const auto &d: directives.locations()) {
+            _jsdirectives << d;
+        }
         break;
     case QmlJSGrammar::T_FEED_JS_EXPRESSION:
         _parsedCorrectly = parser.parseExpression();
@@ -294,7 +320,7 @@ bool Document::parse_helper(int startToken)
     _ast = parser.rootNode();
     _diagnosticMessages = parser.diagnosticMessages();
 
-    _bind = new Bind(this, &_diagnosticMessages, collectDirectives.isLibrary, collectDirectives.imports);
+    _bind = new Bind(this, &_diagnosticMessages, directives.isLibrary, directives.imports);
 
     return _parsedCorrectly;
 }
@@ -338,6 +364,7 @@ LibraryInfo::LibraryInfo(const QmlDirParser &parser, const QByteArray &fingerpri
     : _status(Found)
     , _components(parser.components().values())
     , _plugins(parser.plugins())
+    , _typeinfos(parser.typeInfos())
     , _fingerprint(fingerprint)
     , _dumpStatus(NoTypeInfo)
 {
@@ -377,13 +404,13 @@ QByteArray LibraryInfo::calculateFingerprint() const
         hash.addData(reinterpret_cast<const char *>(&len), sizeof(len));
         hash.addData(reinterpret_cast<const char *>(plugin.name.constData()), len * sizeof(QChar));
     }
-    //    len = _typeinfos.size();
+    len = _typeinfos.size();
     hash.addData(reinterpret_cast<const char *>(&len), sizeof(len));
-    //    foreach (const QmlDirParser::TypeInfo &typeinfo, _typeinfos) {
-    //        len = typeinfo.fileName.size();
-    //        hash.addData(reinterpret_cast<const char *>(&len), sizeof(len));
-    //        hash.addData(reinterpret_cast<const char *>(typeinfo.fileName.constData()), len * sizeof(QChar));
-    //    }
+    foreach (const QmlDirParser::TypeInfo &typeinfo, _typeinfos) {
+        len = typeinfo.fileName.size();
+        hash.addData(reinterpret_cast<const char *>(&len), sizeof(len));
+        hash.addData(reinterpret_cast<const char *>(typeinfo.fileName.constData()), len * sizeof(QChar));
+    }
     len = _metaObjects.size();
     hash.addData(reinterpret_cast<const char *>(&len), sizeof(len));
     QList<QByteArray> metaFingerprints;

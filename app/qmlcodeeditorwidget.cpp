@@ -808,7 +808,7 @@ void QmlCodeEditorWidget::openControl(Control* control)
 
             _d->currentControl = item.control;
             _d->codeEditor->setDocument(item.documents.value(item.currentFileRelativePath).document);
-            _d->codeEditor->updateCompletion();
+//            _d->codeEditor->updateCompletion();
             _d->updateOpenDocHistory();
 
             _d->codeEditor->document()->setDefaultFont(_d->defaultFont);
@@ -998,7 +998,7 @@ void QmlCodeEditorWidget::reset()
     _d->saveButton->setDisabled(true);
 
     _d->lastWidthOfExplorerWrapper = INITIALWIDTH_FILEEXPLORER;
-    _d->codeEditor->reset();
+//    _d->codeEditor->reset();
     _d->fileExplorer->reset();
     // TODO: _d->imageEditor->reset();
     // TODO: _d->hexEditor->reset();
@@ -1024,9 +1024,9 @@ void QmlCodeEditorWidget::raiseContainer()
 void QmlCodeEditorWidget::refreshErrors()
 {
     if (_d->currentControl) {
-        _d->codeEditor->clearErrorLines();
-        for (auto error : _d->currentControl->errors())
-            _d->codeEditor->addErrorLine(error.line());
+//        _d->codeEditor->clearErrorLines();
+//        for (auto error : _d->currentControl->errors())
+//            _d->codeEditor->addErrorLine(error.line());
     }
 }
 

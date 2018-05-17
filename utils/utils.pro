@@ -1,6 +1,6 @@
 ### Library Settings
 TEMPLATE = lib
-CONFIG  += plugin
+CONFIG  += plugin c++14
 TARGET   = utils
 QT      += widgets network qml quick websockets multimedia
 DEFINES += UTILS_LIBRARY

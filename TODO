@@ -87,6 +87,7 @@ issuebox düzgün çalışmıyor, ayrıca hatalı satır qml code editör de iş
 helpmode'dan qml kod editöre dönünce kod editör scroll oluyor, kayıyor, terside geçerli
 konsol çıktısı üstinde kopyala yapıştır yapılamıyor
 anchorlar parantez içindeki obje şeklinde tanımlıysa previewer algılamıyor, çünkü parserutil algılamıyor
+server build'i kesinlikle qml ve js dosyalrını random isimlerle bir klasörde toplamalı ve androiddeployqt'nin bunları taramasını sağlamalı
 
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 |    x, y, z, w, h    | Drop bitişinde  | Drop ilk durum         | Yüklenince  | Yükleme ilk durum         | Kod değişince | Move, Resize yada Reparent ederken |

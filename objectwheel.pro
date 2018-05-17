@@ -1,5 +1,6 @@
 CONFIG  += ordered
 TEMPLATE = subdirs
+
 SUBDIRS  = $$PWD/utils/utils.pro \
            $$PWD/objectwheel-interpreter/objectwheel-interpreter.pro \
            $$PWD/objectwheel-previewer/objectwheel-previewer.pro \
