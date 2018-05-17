@@ -23,10 +23,12 @@
 **
 ****************************************************************************/
 
-//#include "coreconstants.h"
+#include "coreconstants.h"
 //#include "icore.h"
 //#include "manhattanstyle.h"
 #include "themechooser.h"
+#include <windowmanager.h>
+#include <backendmanager.h>
 
 #include <utils/algorithm.h>
 #include <utils/theme/theme.h>
@@ -175,14 +177,15 @@ void ThemeChooser::apply()
     if (index == -1)
         return;
     const QString themeId = d->m_themeListModel->themeAt(index).id().toString();
-    QSettings *settings = 0 /* BUG: ICore::settings()*/;
+    QSettings *settings = BackendManager::settings();
     const QString currentThemeId = ThemeEntry::themeSetting().toString();
     if (currentThemeId != themeId) {
-        QMessageBox::information(0 /* BUG: ICore::mainWindow()*/, tr("Restart Required"),
+        QMessageBox::information(WindowManager::instance()->get(WindowManager::Main),
+                                 tr("Restart Required"),
                                  tr("The theme change will take effect after restart."));
 
         // save filename of selected theme in global config
-        settings->setValue(QLatin1String("Constants::SETTINGS_THEME"), themeId); // BUG
+        settings->setValue(QLatin1String(Constants::SETTINGS_THEME), themeId); // BUG
     }
 }
 
@@ -203,14 +206,14 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 {
     QList<ThemeEntry> themes;
 
-    static const QString installThemeDir = /*BUG: ICore::resourcePath()*/ ":" + QLatin1String("/themes");
-    static const QString userThemeDir = /* BUG: ICore::userResourcePath()*/ ":" + QLatin1String("/themes");
+    static const QString installThemeDir = BackendManager::resourcePath() + QLatin1String("/themes");
+    static const QString userThemeDir = BackendManager::userResourcePath() + QLatin1String("/themes");
     addThemesFromPath(installThemeDir, &themes);
     if (themes.isEmpty())
         qWarning() << "Warning: No themes found in installation: "
                    << QDir::toNativeSeparators(installThemeDir);
     // move default theme to front
-    int defaultIndex = Utils::indexOf(themes, Utils::equal(&ThemeEntry::id, /* BUG */ Id("Constants::DEFAULT_THEME")));
+    int defaultIndex = Utils::indexOf(themes, Utils::equal(&ThemeEntry::id, Id(Constants::DEFAULT_THEME)));
     if (defaultIndex > 0) { // == exists and not at front
         ThemeEntry defaultEntry = themes.takeAt(defaultIndex);
         themes.prepend(defaultEntry);
@@ -221,9 +224,9 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 
 Id ThemeEntry::themeSetting()
 {
-    const Id setting /* BUG: =
-            Id::fromSetting(ICore::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
-                                                     QLatin1String(Constants::DEFAULT_THEME)))*/;
+    const Id setting =
+            Id::fromSetting(BackendManager::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
+                                                     QLatin1String(Constants::DEFAULT_THEME)));
 
     const QList<ThemeEntry> themes = availableThemes();
     if (themes.empty())

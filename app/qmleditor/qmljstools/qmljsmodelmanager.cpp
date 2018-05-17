@@ -28,6 +28,7 @@
 #include "qmljssemanticinfo.h"
 #include "qmljsbundleprovider.h"
 #include <editorbackend.h>
+#include <backendmanager.h>
 
 ////#include <coreplugin/icore.h>
 //#include <coreplugin/editormanager/documentmodel.h>
@@ -179,7 +180,7 @@ QHash<QString,Dialect> ModelManager::initLanguageForSuffix() const
 {
     QHash<QString,Dialect> res = ModelManagerInterface::languageForSuffix();
 
-//    if (ICore::instance()) {
+    if (BackendManager::instance()) {
         MimeType jsSourceTy = Utils::mimeTypeForName(Constants::JS_MIMETYPE);
         foreach (const QString &suffix, jsSourceTy.suffixes())
             res[suffix] = Dialect::JavaScript;
@@ -198,7 +199,7 @@ QHash<QString,Dialect> ModelManager::initLanguageForSuffix() const
         MimeType jsonSourceTy = Utils::mimeTypeForName(Constants::JSON_MIMETYPE);
         foreach (const QString &suffix, jsonSourceTy.suffixes())
             res[suffix] = Dialect::Json;
-//    }
+    }
     return res;
 }
 
@@ -233,7 +234,7 @@ void ModelManager::delayedInitialization()
 
     ViewerContext qbsVContext;
     qbsVContext.language = Dialect::QmlQbs;
-    qbsVContext.maybeAddPath(/*ICore::resourcePath() + */QLatin1String("/qbs"));
+    qbsVContext.maybeAddPath(BackendManager::resourcePath() + QLatin1String("/qbs"));
     setDefaultVContext(qbsVContext);
 
     updateDefaultProjectInfo(); // Sonradan ekleme
@@ -241,10 +242,10 @@ void ModelManager::delayedInitialization()
 
 void ModelManager::loadDefaultQmlTypeDescriptions()
 {
-//    if (ICore::instance()) {
-        loadQmlTypeDescriptionsInternal(/*ICore::resourcePath()*/ ":");
-//        loadQmlTypeDescriptionsInternal(ICore::userResourcePath());
-//    }
+    if (BackendManager::instance()) {
+        loadQmlTypeDescriptionsInternal(BackendManager::resourcePath());
+        loadQmlTypeDescriptionsInternal(BackendManager::userResourcePath());
+    }
 }
 
 void ModelManager::writeMessageInternal(const QString &msg) const
@@ -276,6 +277,9 @@ ModelManagerInterface::WorkingCopy ModelManager::workingCopyInternal() const
     //! Reimplemented as:
 
     WorkingCopy workingCopy;
+
+    if (!BackendManager::instance())
+        return workingCopy;
 
     if (EditorBackend::documents().isEmpty())
         return workingCopy;

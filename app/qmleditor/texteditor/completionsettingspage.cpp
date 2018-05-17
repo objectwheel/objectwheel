@@ -26,6 +26,7 @@
 #include "completionsettingspage.h"
 #include "ui_completionsettingspage.h"
 #include "texteditorsettings.h"
+#include <backendmanager.h>
 
 //#include <cpptools/cpptoolssettings.h>
 
@@ -44,7 +45,7 @@ CompletionSettingsPage::CompletionSettingsPage(QObject *parent)
     setId("P.Completion");
     setDisplayName(tr("Completion"));
 
-    QSettings *s /*= Core::ICore::settings()*/; // BUG
+    QSettings *s = BackendManager::settings();
     m_completionSettings.fromSettings(s);
 //    m_commentsSettings.fromSettings(s);
 }
@@ -130,7 +131,7 @@ void CompletionSettingsPage::apply()
 
     if (m_completionSettings != completionSettings) {
         m_completionSettings = completionSettings;
-        m_completionSettings.toSettings(0/*Core::ICore::settings()*/ /* BUG */);
+        m_completionSettings.toSettings(BackendManager::settings());
         emit completionSettingsChanged(completionSettings);
     }
 

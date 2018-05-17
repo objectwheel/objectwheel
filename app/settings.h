@@ -13,10 +13,7 @@ class Settings final : public QObject
 
 public:
     static Settings* instance();
-//    static QSettings settings();
-//    static QString mainWindow();
-//    static QString resourcePath();
-//    static QString userResourcePath();
+
 
 private:
 

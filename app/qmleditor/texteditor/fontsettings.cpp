@@ -26,6 +26,8 @@
 #include "fontsettings.h"
 #include "fontsettingspage.h"
 
+#include <backendmanager.h>
+#include <windowmanager.h>
 #include <utils/fileutils.h>
 #include <utils/hostosinfo.h>
 #include <utils/theme/theme.h>
@@ -430,7 +432,7 @@ bool FontSettings::loadColorScheme(const QString &fileName,
 
 bool FontSettings::saveColorScheme(const QString &fileName)
 {
-    const bool saved = m_scheme.save(fileName, 0 /*BUG: Core::ICore::mainWindow()*/);
+    const bool saved = m_scheme.save(fileName, WindowManager::instance()->get(WindowManager::Main));
     if (saved)
         m_schemeFileName = fileName;
     return saved;
@@ -492,7 +494,7 @@ int FontSettings::defaultFontSize()
  */
 QString FontSettings::defaultSchemeFileName(const QString &fileName)
 {
-    QString defaultScheme = 0/*Core::ICore::resourcePath()*/; // BUG
+    QString defaultScheme = BackendManager::resourcePath();
     defaultScheme += QLatin1String("/styles/");
 
     if (!fileName.isEmpty() && QFile::exists(defaultScheme + fileName)) {

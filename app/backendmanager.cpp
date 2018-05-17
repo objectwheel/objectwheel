@@ -9,10 +9,18 @@
 #include <savetransaction.h>
 #include <editorbackend.h>
 #include <QMessageBox>
+#include <texteditor/texteditorsettings.h>
+
+EditorBackend* BackendManager::m_editorBackend = nullptr;
 
 BackendManager::BackendManager()
 {
-    EditorBackend::instance();
+    Core::HelpManager::setupHelpManager();
+    Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme("flat"));
+    connect(qApp, &QCoreApplication::aboutToQuit,
+            &m_helpManager, &Core::HelpManager::aboutToShutdown);
+    m_textEditorSettings = new TextEditor::TextEditorSettings;
+
     SaveTransaction::instance();
     Authenticator::instance()->init(QUrl(APP_WSSSERVER));
 
@@ -23,16 +31,42 @@ BackendManager::BackendManager()
             tr("Unable to start Objectwheel Previewing Service")
         );
     }
+}
 
-    connect(ProjectBackend::instance(), SIGNAL(started()), WindowManager::instance()->get(WindowManager::Main), SLOT(reset()));
-    connect(ProjectBackend::instance(), SIGNAL(started()), SLOT(handleProjectStart()));
-    connect(UserBackend::instance(), SIGNAL(aboutToStop()), SLOT(handleSessionStop()));
+BackendManager::~BackendManager()
+{
+    delete m_textEditorSettings;
 }
 
 BackendManager* BackendManager::instance()
 {
     static BackendManager instance;
     return &instance;
+}
+
+void BackendManager::init()
+{
+    m_editorBackend = new EditorBackend;
+
+    connect(ProjectBackend::instance(), SIGNAL(started()), WindowManager::instance()->get(WindowManager::Main), SLOT(reset()));
+    connect(ProjectBackend::instance(), SIGNAL(started()), instance(), SLOT(handleProjectStart()));
+    connect(UserBackend::instance(), SIGNAL(aboutToStop()), instance(), SLOT(handleSessionStop()));
+}
+
+QSettings* BackendManager::settings(QSettings::Scope scope)
+{
+    static QSettings settings, globalSettings;
+    return scope == QSettings::UserScope ? &settings : &globalSettings;
+}
+
+QString BackendManager::resourcePath()
+{
+    return tr(":");
+}
+
+QString BackendManager::userResourcePath()
+{
+    return tr(":");
 }
 
 void BackendManager::handleSessionStop() const
