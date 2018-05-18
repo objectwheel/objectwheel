@@ -11,7 +11,6 @@
 class EditorBackend;
 
 namespace TextEditor { class TextEditorSettings; }
-namespace Core { class HelpManager; }
 
 class BackendManager : public QObject
 {

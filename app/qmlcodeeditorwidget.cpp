@@ -8,7 +8,6 @@
 #include <qmlcodeeditor.h>
 #include <css.h>
 #include <fileexplorer.h>
-#include <qmlhighlighter.h>
 #include <control.h>
 #include <parserutils.h>
 #include <dpr.h>
@@ -73,7 +72,6 @@ class QmlCodeEditorWidgetPrivate : public QObject
 
         Control* currentControl;
         int lastWidthOfExplorerWrapper;
-        QFont defaultFont;
         QMetaObject::Connection previousUndoConnection;
         QMetaObject::Connection previousRedoConnection;
         QAction saveAction;
@@ -203,7 +201,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     codeEditor->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
     codeEditor->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    codeEditor->setDocument(nullptr);
+    codeEditor->setCodeDocument(new QmlCodeDocument(codeEditor));
     codeEditor->hide();
 
     noDocumentIndicator->setStyleSheet("QLabel { color: #606467; }");
@@ -211,10 +209,6 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     noDocumentIndicator->setAlignment(Qt::AlignCenter);
     noDocumentIndicator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     noDocumentIndicator->show();
-
-    defaultFont.setPixelSize(defaultFont.pixelSize() - 0.5);
-    defaultFont.setFamily("Liberation Mono");
-    defaultFont.setStyleHint(QFont::Monospace);
 
     connect(parent, SIGNAL(modeChanged()), SLOT(handleModeChange()));
     connect(codeEditor, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));
@@ -451,8 +445,8 @@ void QmlCodeEditorWidgetPrivate::handleSaveButtonClicked()
 
 void QmlCodeEditorWidgetPrivate::handleZoomLevelChange(const QString& text)
 {
-    defaultFont.setPixelSize(findPixelSize(text));
-    codeEditor->document()->setDefaultFont(defaultFont);
+//    defaultFont.setPixelSize(findPixelSize(text));
+//    codeEditor->document()->setDefaultFont(defaultFont); BUG
 }
 
 void QmlCodeEditorWidgetPrivate::handleHideShowButtonClicked()
@@ -742,11 +736,10 @@ void QmlCodeEditorWidget::addControl(Control* control)
     EditorItem item;
     item.control = control;
     item.currentFileRelativePath = relativePath;
-    item.documents[relativePath].document = new QTextDocument(this);
-    item.documents[relativePath].document->setDocumentLayout(new QPlainTextDocumentLayout(item.documents[relativePath].document));
+    item.documents[relativePath].document = new QmlCodeDocument(_d->codeEditor);
+    item.documents[relativePath].document->setFilePath(control->url());
     item.documents[relativePath].document->setPlainText(rdfile(control->url()));
     item.documents[relativePath].document->setModified(false);
-    new QmlHighlighter(item.documents.value(relativePath).document);
     _editorItems.append(item);
     _d->itemsCombobox->addItem(control->id() + CHAR_SEPARATION + control->uid());
     _d->documentsCombobox->addItem(relativePath);
@@ -760,11 +753,10 @@ void QmlCodeEditorWidget::addDocument(Control* control, const QString& documentP
             relativePath.remove(control->dir() + separator() + DIR_THIS + separator());
             if (item.documents.keys().contains(relativePath))
                 return;
-            item.documents[relativePath].document = new QTextDocument(this);
-            item.documents[relativePath].document->setDocumentLayout(new QPlainTextDocumentLayout(item.documents.value(relativePath).document));
+            item.documents[relativePath].document = new QmlCodeDocument(_d->codeEditor);
+            item.documents[relativePath].document->setFilePath(documentPath);
             item.documents[relativePath].document->setPlainText(rdfile(documentPath));
             item.documents[relativePath].document->setModified(false);
-            new QmlHighlighter(item.documents.value(relativePath).document);
             _d->documentsCombobox->addItem(relativePath);
             break;
         }
@@ -807,13 +799,13 @@ void QmlCodeEditorWidget::openControl(Control* control)
             }
 
             _d->currentControl = item.control;
-            _d->codeEditor->setDocument(item.documents.value(item.currentFileRelativePath).document);
+            _d->codeEditor->setCodeDocument(item.documents.value(item.currentFileRelativePath).document);
 //            _d->codeEditor->updateCompletion();
             _d->updateOpenDocHistory();
 
-            _d->codeEditor->document()->setDefaultFont(_d->defaultFont);
-            QFontMetrics metrics(_d->defaultFont);
-            _d->codeEditor->setTabStopWidth(metrics.width(TAB_SPACE));
+//            _d->codeEditor->document()->setDefaultFont(_d->defaultFont);
+//            QFontMetrics metrics(_d->defaultFont);
+//            _d->codeEditor->setTabStopWidth(metrics.width(TAB_SPACE)); BUG
 
 
             disconnect(_d->previousUndoConnection);
@@ -919,7 +911,7 @@ void QmlCodeEditorWidget::closeDocument(Control* control, const QString& documen
 
     if (_d->currentControl == issuerItem->control &&
         issuerItem->currentFileRelativePath == relativePath) {
-        _d->codeEditor->setDocument(nullptr);
+        _d->codeEditor->setCodeDocument(nullptr);
         _d->codeEditor->hide();
         _d->noDocumentIndicator->show();
     }

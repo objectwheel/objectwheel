@@ -24,6 +24,8 @@
 #include <QPropertyAnimation>
 #include <qmljstools/qmljsindenter.h>
 #include <QAction>
+#include <texteditor/texteditorsettings.h>
+#include <texteditor/icodestylepreferences.h>
 
 using namespace Utils;
 using namespace TextEditor;
@@ -408,14 +410,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     updateHighlights();
     createToolBar();
 
-    // BUG
-    //    connect(settings, &TextEditorSettings::completionSettingsChanged,
-    //            q, &QmlCodeEditor::setCompletionSettings);
-    //    codeDocument()->setFontSettings(FontSettings());
-    //    codeDocument()->setTabSettings(TabSettings());
-    //    codeDocument()->setTypingSettings(TypingSettings());
-    setCompletionSettings(CompletionSettings());
-
     // That's how find results will be highlighted
     // Let's trig search on text editor after 4 seconds
     QTimer::singleShot(4000, [=]{
@@ -446,6 +440,23 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
         updateTabStops();
         m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
     });
+
+    TextEditorSettings *settings = TextEditorSettings::instance();
+    // Apply current settings
+    codeDocument()->setFontSettings(settings->fontSettings());
+    codeDocument()->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
+    codeDocument()->setTypingSettings(settings->typingSettings());
+//    codeDocument()->setStorageSettings(settings->storageSettings());
+//    codeDocument()->setBehaviorSettings(settings->behaviorSettings());
+//    setMarginSettings(settings->marginSettings());
+//    setDisplaySettings(settings->displaySettings());
+    setCompletionSettings(settings->completionSettings());
+//    setExtraEncodingSettings(settings->extraEncodingSettings());
+//    setCodeStyle(settings->codeStyle(m_tabSettingsId));
+
+    // BUG
+//        connect(settings, &TextEditorSettings::completionSettingsChanged,
+//                q, &QmlCodeEditor::setCompletionSettings);
 }
 
 void QmlCodeEditor::setCursorPosition(int pos)

@@ -101,7 +101,7 @@ signals:
     void collectionFileChanged();
     void helpRequested(const QUrl &url, Core::HelpManager::HelpViewerLocation location);
 
-/* BUG: private*/ public:
+public /* BUG: private*/:
     explicit HelpManager(QObject *parent = nullptr);
     ~HelpManager();
 

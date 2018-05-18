@@ -2,14 +2,14 @@
 #define QMLCODEEDITORWIDGET_H
 
 #include <QWidget>
-#include <QTextDocument>
+#include <qmlcodedocument.h>
 #include <QTextCursor>
 
 class QmlCodeEditorWidgetPrivate;
 class Control;
 
 struct DocumentData {
-    QTextDocument* document;
+    QmlCodeDocument* document;
     QTextCursor cursor;
     QMetaObject::Connection modificationConnection;
 };

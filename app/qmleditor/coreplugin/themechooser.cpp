@@ -185,7 +185,7 @@ void ThemeChooser::apply()
                                  tr("The theme change will take effect after restart."));
 
         // save filename of selected theme in global config
-        settings->setValue(QLatin1String(Constants::SETTINGS_THEME), themeId); // BUG
+        settings->setValue(QLatin1String(Constants::SETTINGS_THEME), themeId);
     }
 }
 

@@ -28,8 +28,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/control.h \
            $$PWD/savetransaction.h \
            $$PWD/qmlcodeeditor.h \
-           $$PWD/qmlhighlighter.h \
-           $$PWD/completionhelper.h \
            $$PWD/fileexplorer.h \
            $$PWD/filelist.h \
            $$PWD/toolboxtree.h \
@@ -109,8 +107,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/blockdata.h \
            $$PWD/qmlcodedocument.h \
            $$PWD/editorbackend.h \
-           $$PWD/markband.h \
-           $$PWD/settings.h
+           $$PWD/markband.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -121,8 +118,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/control.cpp \
            $$PWD/savetransaction.cpp \
            $$PWD/qmlcodeeditor.cpp \
-           $$PWD/qmlhighlighter.cpp \
-           $$PWD/completionhelper.cpp \
            $$PWD/fileexplorer.cpp \
            $$PWD/filelist.cpp \
            $$PWD/toolboxtree.cpp \
@@ -199,8 +194,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/bracketband.cpp \
            $$PWD/qmlcodedocument.cpp \
            $$PWD/editorbackend.cpp \
-           $$PWD/markband.cpp \
-           $$PWD/settings.cpp
+           $$PWD/markband.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
