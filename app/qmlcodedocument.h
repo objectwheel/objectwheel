@@ -7,6 +7,7 @@
 #include <texteditor/tabsettings.h>
 #include <blockdata.h>
 #include <texteditor/typingsettings.h>
+#include <texteditor/storagesettings.h>
 
 class QTimer;
 class QPlainTextEdit;
@@ -59,6 +60,7 @@ public:
 
     const TextEditor::TypingSettings &typingSettings() const;
     void setTypingSettings(const TextEditor::TypingSettings &typingSettings);
+    void setStorageSettings(const TextEditor::StorageSettings& storageSettings);
 
     void autoIndent(const QTextCursor &cursor, QChar typedChar = QChar::Null);
     void autoReindent(const QTextCursor &cursor);
@@ -121,6 +123,7 @@ private:
     TextEditor::TabSettings m_tabSettings;
     TextEditor::FontSettings m_fontSettings;
     TextEditor::TypingSettings m_typingSettings;
+    TextEditor::StorageSettings m_storageSettings;
     bool m_fontSettingsNeedsApply;
     QmlJSEditor::Internal::Indenter* m_indenter;
     QmlJSEditor::QmlJSHighlighter* m_syntaxHighlighter;

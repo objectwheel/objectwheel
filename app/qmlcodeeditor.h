@@ -10,6 +10,8 @@
 #include <texteditor/texteditorconstants.h>
 #include <qmljs/qmljsdocument.h>
 #include <qmljseditor/qmljsautocompleter.h>
+#include <coreplugin/id.h>
+#include <texteditor/behaviorsettings.h>
 
 class RowBar;
 class QmlCodeDocument;
@@ -29,6 +31,7 @@ class AssistInterface;
 class CodeAssistant;
 class CompletionAssistProvider;
 class IAssistProvider;
+class ICodeStylePreferences;
 namespace Internal {
 class TextEditorOverlay;
 }
@@ -126,6 +129,21 @@ public:
     using QPlainTextEdit::cursorRect;
     void setAutoCompleteSkipPosition(const QTextCursor& cursor);
     void updateCurrentLineHighlight();
+    void setCodeStyle(TextEditor::ICodeStylePreferences* preferences);
+    void setLanguageSettingsId(Core::Id settingsId);
+    Core::Id languageSettingsId() const;
+    void setMouseNavigationEnabled(bool b);
+    bool mouseNavigationEnabled() const;
+    void setMouseHidingEnabled(bool b);
+    bool mouseHidingEnabled() const;
+    void setScrollWheelZoomingEnabled(bool b);
+    bool scrollWheelZoomingEnabled() const;
+    void setConstrainTooltips(bool b);
+    bool constrainTooltips() const;
+    void setCamelCaseNavigationEnabled(bool b);
+    bool camelCaseNavigationEnabled() const;
+    void setBehaviorSettings(const TextEditor::BehaviorSettings& bs);
+    const TextEditor::BehaviorSettings& behaviorSettings() const;
 
 public slots:
     void indent();
@@ -138,6 +156,7 @@ public slots:
     void highlightSearchResultsSlot(const QString& txt, FindFlags findFlags);
     void semanticInfoUpdated(const QmlJSTools::SemanticInfo& semanticInfo);
     void animateUpdate(const QTextCursor &cursor, QPointF lastPos, QRectF rect);
+    void slotCodeStyleSettingsChanged(const QVariant&);
 
 private:
     void updateRowBarWidth();
@@ -206,6 +225,7 @@ private:
     RowBar* m_rowBar;
     QRegExp m_searchExpr;
     FindFlags m_findFlags;
+    Core::Id m_tabSettingsId;
     bool m_linkPressed;
     bool m_fontSettingsNeedsApply;
     bool m_parenthesesMatchingEnabled;
@@ -217,6 +237,11 @@ private:
     QTimer* m_updateUsesTimer;
     QTimer* m_contextPaneTimer;
     QTimer* m_parenthesesMatchingTimer;
+    bool m_animateAutoComplete = true;
+    bool m_highlightAutoComplete = true;
+    bool m_skipAutoCompletedText = true;
+    bool m_removeAutoCompletedText = true;
+    TextEditor::BehaviorSettings m_behaviorSettings;
     QList<QTextCursor> m_autoCompleteHighlightPos;
     QList<TextEditor::BaseHoverHandler*> m_hoverHandlers;
     HoverHandlerRunner* m_hoverHandlerRunner;
@@ -224,6 +249,7 @@ private:
     QPointer<TextEditorAnimator> m_bracketsAnimator;
     QPointer<TextEditorAnimator> m_autocompleteAnimator;
     TextEditor::Internal::TextEditorOverlay *m_overlay;
+    TextEditor::ICodeStylePreferences *m_codeStylePreferences = nullptr;
     TextEditor::Internal::TextEditorOverlay *m_searchResultOverlay;
     QHash<QString, QList<QTextEdit::ExtraSelection>> m_extraSelections;
     QScopedPointer<QmlJSEditor::Internal::AutoCompleter> m_autoCompleter;

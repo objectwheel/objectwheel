@@ -655,7 +655,12 @@ void QmlCodeDocument::setFontSettings(const TextEditor::FontSettings& fontSettin
     emit fontSettingsChanged();
 }
 
-const TextEditor::TypingSettings&QmlCodeDocument::typingSettings() const
+void QmlCodeDocument::setStorageSettings(const TextEditor::StorageSettings& storageSettings)
+{
+    m_storageSettings = storageSettings;
+}
+
+const TextEditor::TypingSettings& QmlCodeDocument::typingSettings() const
 {
     return m_typingSettings;
 }
@@ -984,13 +989,18 @@ const TextEditor::TabSettings& QmlCodeDocument::tabSettings() const
     return m_tabSettings;
 }
 
-void QmlCodeDocument::setTabSettings(const TextEditor::TabSettings& tabSettings)
+void QmlCodeDocument::setTabSettings(const TextEditor::TabSettings &tabSettings)
 {
     if (tabSettings == m_tabSettings)
         return;
     m_tabSettings = tabSettings;
+
+//    if (Highlighter *highlighter = qobject_cast<Highlighter *>(d->m_highlighter))
+//        highlighter->setTabSettings(tabSettings);
+
     emit tabSettingsChanged();
 }
+
 
 void QmlCodeDocument::setFilePath(const QString& filePath)
 {

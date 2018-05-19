@@ -446,17 +446,186 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     codeDocument()->setFontSettings(settings->fontSettings());
     codeDocument()->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
     codeDocument()->setTypingSettings(settings->typingSettings());
-//    codeDocument()->setStorageSettings(settings->storageSettings());
-//    codeDocument()->setBehaviorSettings(settings->behaviorSettings());
-//    setMarginSettings(settings->marginSettings());
-//    setDisplaySettings(settings->displaySettings());
+    codeDocument()->setStorageSettings(settings->storageSettings());
+    setBehaviorSettings(settings->behaviorSettings());
+    //    setMarginSettings(settings->marginSettings());
+    //    setDisplaySettings(settings->displaySettings());
     setCompletionSettings(settings->completionSettings());
-//    setExtraEncodingSettings(settings->extraEncodingSettings());
-//    setCodeStyle(settings->codeStyle(m_tabSettingsId));
+    //    setExtraEncodingSettings(settings->extraEncodingSettings());
+    setCodeStyle(settings->codeStyle(m_tabSettingsId));
+
 
     // BUG
-//        connect(settings, &TextEditorSettings::completionSettingsChanged,
-//                q, &QmlCodeEditor::setCompletionSettings);
+    //        connect(settings, &TextEditorSettings::completionSettingsChanged,
+    //                q, &QmlCodeEditor::setCompletionSettings);
+
+
+
+
+    //    QTextDocument *doc = m_document->document();
+    //    q->QPlainTextEdit::setDocument(doc);
+    //    q->setCursorWidth(2); // Applies to the document layout
+
+    //    auto documentLayout = qobject_cast<TextDocumentLayout*>(doc->documentLayout());
+    //    QTC_CHECK(documentLayout);
+
+    //    QObject::connect(documentLayout, &QPlainTextDocumentLayout::updateBlock,
+    //                     this, &TextEditorWidgetPrivate::slotUpdateBlockNotify);
+
+    //    QObject::connect(documentLayout, &TextDocumentLayout::updateExtraArea,
+    //                     m_extraArea, static_cast<void (QWidget::*)()>(&QWidget::update));
+
+    //    QObject::connect(q, &TextEditorWidget::requestBlockUpdate,
+    //                     documentLayout, &QPlainTextDocumentLayout::updateBlock);
+
+    //    QObject::connect(documentLayout, &TextDocumentLayout::updateExtraArea,
+    //                     this, &TextEditorWidgetPrivate::scheduleUpdateHighlightScrollBar);
+
+    //    QObject::connect(documentLayout, &QAbstractTextDocumentLayout::documentSizeChanged,
+    //                     this, &TextEditorWidgetPrivate::scheduleUpdateHighlightScrollBar);
+
+    //    QObject::connect(documentLayout, &QAbstractTextDocumentLayout::update,
+    //                     this, &TextEditorWidgetPrivate::scheduleUpdateHighlightScrollBar);
+
+    //    QObject::connect(doc, &QTextDocument::contentsChange,
+    //                     this, &TextEditorWidgetPrivate::editorContentsChange);
+
+    //    QObject::connect(m_document.data(), &TextDocument::aboutToReload,
+    //                     this, &TextEditorWidgetPrivate::documentAboutToBeReloaded);
+
+    //    QObject::connect(m_document.data(), &TextDocument::reloadFinished,
+    //                     this, &TextEditorWidgetPrivate::documentReloadFinished);
+
+    //    QObject::connect(m_document.data(), &TextDocument::tabSettingsChanged,
+    //                     this, [this](){
+    //        updateTabStops();
+    //        m_autoCompleter->setTabSettings(m_document->tabSettings());
+    //    });
+
+    //    QObject::connect(m_document.data(), &TextDocument::fontSettingsChanged,
+    //                     this, &TextEditorWidgetPrivate::applyFontSettingsDelayed);
+
+    //    QObject::connect(m_document.data(), &TextDocument::markRemoved,
+    //                     this, &TextEditorWidgetPrivate::markRemoved);
+
+    //    slotUpdateExtraAreaWidth();
+
+    //    TextEditorSettings *settings = TextEditorSettings::instance();
+
+    //    // Connect to settings change signals
+    //    connect(settings, &TextEditorSettings::fontSettingsChanged,
+    //            m_document.data(), &TextDocument::setFontSettings);
+    //    connect(settings, &TextEditorSettings::typingSettingsChanged,
+    //            q, &TextEditorWidget::setTypingSettings);
+    //    connect(settings, &TextEditorSettings::storageSettingsChanged,
+    //            q, &TextEditorWidget::setStorageSettings);
+    //    connect(settings, &TextEditorSettings::behaviorSettingsChanged,
+    //            q, &TextEditorWidget::setBehaviorSettings);
+    //    connect(settings, &TextEditorSettings::marginSettingsChanged,
+    //            q, &TextEditorWidget::setMarginSettings);
+    //    connect(settings, &TextEditorSettings::displaySettingsChanged,
+    //            q, &TextEditorWidget::setDisplaySettings);
+    //    connect(settings, &TextEditorSettings::completionSettingsChanged,
+    //            q, &TextEditorWidget::setCompletionSettings);
+    //    connect(settings, &TextEditorSettings::extraEncodingSettingsChanged,
+    //            q, &TextEditorWidget::setExtraEncodingSettings);
+
+    //    // Apply current settings
+    //    m_document->setFontSettings(settings->fontSettings());
+    //    m_document->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
+    //    q->setTypingSettings(settings->typingSettings());
+    //    q->setStorageSettings(settings->storageSettings());
+    //    q->setBehaviorSettings(settings->behaviorSettings());
+    //    q->setMarginSettings(settings->marginSettings());
+    //    q->setDisplaySettings(settings->displaySettings());
+    //    q->setCompletionSettings(settings->completionSettings());
+    //    q->setExtraEncodingSettings(settings->extraEncodingSettings());
+    //    q->setCodeStyle(settings->codeStyle(m_tabSettingsId));
+}
+
+void QmlCodeEditor::setCodeStyle(ICodeStylePreferences *preferences)
+{
+    codeDocument()->indenter()->setCodeStylePreferences(preferences);
+    if (m_codeStylePreferences) {
+        disconnect(m_codeStylePreferences, &ICodeStylePreferences::currentTabSettingsChanged,
+                   codeDocument(), &QmlCodeDocument::setTabSettings);
+        disconnect(m_codeStylePreferences, &ICodeStylePreferences::currentValueChanged,
+                   this, &QmlCodeEditor::slotCodeStyleSettingsChanged);
+    }
+    m_codeStylePreferences = preferences;
+    if (m_codeStylePreferences) {
+        connect(m_codeStylePreferences, &ICodeStylePreferences::currentTabSettingsChanged,
+                codeDocument(), &QmlCodeDocument::setTabSettings);
+        connect(m_codeStylePreferences, &ICodeStylePreferences::currentValueChanged,
+                this, &QmlCodeEditor::slotCodeStyleSettingsChanged);
+        codeDocument()->setTabSettings(m_codeStylePreferences->currentTabSettings());
+        slotCodeStyleSettingsChanged(m_codeStylePreferences->currentValue());
+    }
+}
+
+void QmlCodeEditor::slotCodeStyleSettingsChanged(const QVariant &)
+{
+
+}
+
+void QmlCodeEditor::setLanguageSettingsId(Core::Id settingsId)
+{
+    m_tabSettingsId = settingsId;
+}
+
+Core::Id QmlCodeEditor::languageSettingsId() const
+{
+    return m_tabSettingsId;
+}
+
+void QmlCodeEditor::setMouseNavigationEnabled(bool b)
+{
+    m_behaviorSettings.m_mouseNavigation = b;
+}
+
+bool QmlCodeEditor::mouseNavigationEnabled() const
+{
+    return m_behaviorSettings.m_mouseNavigation;
+}
+
+void QmlCodeEditor::setMouseHidingEnabled(bool b)
+{
+    m_behaviorSettings.m_mouseHiding = b;
+}
+
+bool QmlCodeEditor::mouseHidingEnabled() const
+{
+    return m_behaviorSettings.m_mouseHiding;
+}
+
+void QmlCodeEditor::setScrollWheelZoomingEnabled(bool b)
+{
+    m_behaviorSettings.m_scrollWheelZooming = b;
+}
+
+bool QmlCodeEditor::scrollWheelZoomingEnabled() const
+{
+    return m_behaviorSettings.m_scrollWheelZooming;
+}
+
+void QmlCodeEditor::setConstrainTooltips(bool b)
+{
+    m_behaviorSettings.m_constrainHoverTooltips = b;
+}
+
+bool QmlCodeEditor::constrainTooltips() const
+{
+    return m_behaviorSettings.m_constrainHoverTooltips;
+}
+
+void QmlCodeEditor::setCamelCaseNavigationEnabled(bool b)
+{
+    m_behaviorSettings.m_camelCaseNavigation = b;
+}
+
+bool QmlCodeEditor::camelCaseNavigationEnabled() const
+{
+    return m_behaviorSettings.m_camelCaseNavigation;
 }
 
 void QmlCodeEditor::setCursorPosition(int pos)
@@ -537,7 +706,7 @@ void QmlCodeEditor::handleBackspaceKey()
     if (typingSettings.m_autoIndent
             && !m_autoCompleteHighlightPos.isEmpty()
             && (m_autoCompleteHighlightPos.last() == cursor)
-            && /*m_removeAutoCompletedText*/true
+            && m_removeAutoCompletedText
             && m_autoCompleter->autoBackspace(cursor)) {
         return;
     }
@@ -875,10 +1044,10 @@ void QmlCodeEditor::setCompletionSettings(const CompletionSettings &completionSe
     m_autoCompleter->setSurroundWithBracketsEnabled(completionSettings.m_surroundingAutoBrackets);
     m_autoCompleter->setAutoInsertQuotesEnabled(completionSettings.m_autoInsertQuotes);
     m_autoCompleter->setSurroundWithQuotesEnabled(completionSettings.m_surroundingAutoQuotes);
-    //    m_animateAutoComplete = completionSettings.m_animateAutoComplete;
-    //    m_highlightAutoComplete = completionSettings.m_highlightAutoComplete;
-    //    m_skipAutoCompletedText = completionSettings.m_skipAutoCompletedText;
-    //    m_removeAutoCompletedText = completionSettings.m_autoRemove;
+    m_animateAutoComplete = completionSettings.m_animateAutoComplete;
+    m_highlightAutoComplete = completionSettings.m_highlightAutoComplete;
+    m_skipAutoCompletedText = completionSettings.m_skipAutoCompletedText;
+    m_removeAutoCompletedText = completionSettings.m_autoRemove;
 }
 
 QmlCodeDocument* QmlCodeEditor::codeDocument() const
@@ -960,13 +1129,13 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 {
     //    m_contentsChanged = false;
     if (event->type() == QEvent::ToolTip) {
-        //        if (QApplication::keyboardModifiers() & Qt::ControlModifier
-        //                || (!(QApplication::keyboardModifiers() & Qt::ShiftModifier)
-        //                    /*&& m_behaviorSettings.m_constrainHoverTooltips*/)) {
-        // Tooltips should be eaten when either control is pressed (so they don't get in the
-        // way of code navigation) or if they are in constrained mode and shift is not pressed.
-        //            return true;
-        //        }
+        if (QApplication::keyboardModifiers() & Qt::ControlModifier
+                || (!(QApplication::keyboardModifiers() & Qt::ShiftModifier)
+                    && m_behaviorSettings.m_constrainHoverTooltips)) {
+            // Tooltips should be eaten when either control is pressed (so they don't get in the
+            // way of code navigation) or if they are in constrained mode and shift is not pressed.
+            return true;
+        }
         const QHelpEvent *he = static_cast<QHelpEvent*>(event);
         const QPoint &pos = he->pos();
 
@@ -999,7 +1168,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                    && */m_linkPressed
+                                                                                            && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1151,17 +1320,27 @@ void QmlCodeEditor::keyReleaseEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Control) {
         clearLink();
-    }/* else if (e->key() == Qt::Key_Shift // BUG
+    } else if (e->key() == Qt::Key_Shift
              && m_behaviorSettings.m_constrainHoverTooltips
              && ToolTip::isVisible()) {
         ToolTip::hide();
-    } */else if (e->key() == Qt::Key_Alt
+    } else if (e->key() == Qt::Key_Alt
                  /*&& m_maybeFakeTooltipEvent*/) {
         //        m_maybeFakeTooltipEvent = false;
         processTooltipRequest(textCursor());
     }
 
     QPlainTextEdit::keyReleaseEvent(e);
+}
+
+const BehaviorSettings &QmlCodeEditor::behaviorSettings() const
+{
+    return m_behaviorSettings;
+}
+
+void QmlCodeEditor::setBehaviorSettings(const BehaviorSettings &bs)
+{
+    m_behaviorSettings = bs;
 }
 
 void QmlCodeEditor::setVisibleFoldedBlockNumber(int visibleFoldedBlockNumber)
@@ -1385,7 +1564,7 @@ void QmlCodeEditor::updateHighlights()
         }
     }
 
-    if (/*m_highlightAutoComplete && */!m_autoCompleteHighlightPos.isEmpty()) {
+    if (m_highlightAutoComplete && !m_autoCompleteHighlightPos.isEmpty()) {
         QTimer::singleShot(0, this, [this](){
             const QTextCursor &cursor = textCursor();
             auto popAutoCompletion = [&]() {
@@ -1490,13 +1669,13 @@ void QmlCodeEditor::updateAutoCompleteHighlight()
 
 void QmlCodeEditor::autocompleterHighlight(const QTextCursor &cursor)
 {
-    if ((!/*m_animateAutoComplete*/true && !/*m_highlightAutoComplete*/true)
+    if ((!m_animateAutoComplete && !m_highlightAutoComplete)
             || isReadOnly() || !cursor.hasSelection()) {
         m_autoCompleteHighlightPos.clear();
-    } else if (/*m_highlightAutoComplete*/true) {
+    } else if (m_highlightAutoComplete) {
         m_autoCompleteHighlightPos.push_back(cursor);
     }
-    if (/*m_animateAutoComplete*/true) {
+    if (m_animateAutoComplete) {
         const QTextCharFormat &matchFormat
                 = codeDocument()->fontSettings().toTextCharFormat(C_AUTOCOMPLETE);
         cancelCurrentAnimations();// one animation is enough
@@ -2648,7 +2827,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
                     codeDocument()->autoIndent(ensureVisible);
                 else if (!previousIndentationString.isEmpty())
                     ensureVisible.insertText(previousIndentationString);
-                if (/*d->m_animateAutoComplete || d->m_highlightAutoComplete*/true) {
+                if (m_animateAutoComplete || m_highlightAutoComplete) {
                     QTextCursor tc = ensureVisible;
                     tc.movePosition(QTextCursor::EndOfBlock);
                     tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
@@ -2881,7 +3060,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
         QTextCursor cursor = textCursor();
         QString autoText;
         if (!inOverwriteMode) {
-            const bool skipChar = /*d->m_skipAutoCompletedText*/true
+            const bool skipChar = m_skipAutoCompletedText
                     && !m_autoCompleteHighlightPos.isEmpty()
                     && cursor == m_autoCompleteHighlightPos.last();
             autoText = m_autoCompleter->autoComplete(cursor, eventText, skipChar);
@@ -2938,10 +3117,10 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
         setTextCursor(cursor);
     }
 
-    skip_event:
-        if (!ro && e->key() == Qt::Key_Delete && /*d->m_parenthesesMatchingEnabled*/true)
-            m_parenthesesMatchingTimer->start(50);
+skip_event:
+    if (!ro && e->key() == Qt::Key_Delete && /*d->m_parenthesesMatchingEnabled*/true)
+        m_parenthesesMatchingTimer->start(50);
 
-        if (!ro && /*d->m_contentsChanged*/codeDocument()->isModified() && isPrintableText(eventText) && !inOverwriteMode)
-            m_codeAssistant->process();
+    if (!ro && /*d->m_contentsChanged*/codeDocument()->isModified() && isPrintableText(eventText) && !inOverwriteMode)
+        m_codeAssistant->process();
 }
