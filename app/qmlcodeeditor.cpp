@@ -455,9 +455,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     setCodeStyle(settings->codeStyle(m_tabSettingsId));
 
 
-    // BUG
-    //        connect(settings, &TextEditorSettings::completionSettingsChanged,
-    //                q, &QmlCodeEditor::setCompletionSettings);
+    connect(settings, &TextEditorSettings::completionSettingsChanged,
+            this, &QmlCodeEditor::setCompletionSettings);
 
 
 
