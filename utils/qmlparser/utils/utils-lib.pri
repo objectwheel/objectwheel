@@ -17,6 +17,7 @@ SOURCES += \
     $$PWD/fileutils.cpp \
     $$PWD/hostosinfo.cpp \
     $$PWD/json.cpp \
+    $$PWD/filesearch.cpp \
     $$PWD/qtcassert.cpp \
     $$PWD/runextensions.cpp \
     $$PWD/savefile.cpp \
@@ -66,7 +67,9 @@ HEADERS += \
     $$PWD/htmldocextractor.h \
     $$PWD/link.h \
     $$PWD/utilsicons.h \
-    $$PWD/settingsutils.h
+    $$PWD/settingsutils.h \
+    $$PWD/filesearch.h \
+    $$PWD/mapreduce.h
 
 RESOURCES += $$PWD/images.qrc
 

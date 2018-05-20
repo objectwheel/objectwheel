@@ -6,6 +6,7 @@
 #include <QPointer>
 
 #include <utils/link.h>
+#include <utils/filesearch.h>
 #include <texteditor/codeassist/assistenums.h>
 #include <texteditor/texteditorconstants.h>
 #include <qmljs/qmljsdocument.h>
@@ -102,6 +103,11 @@ public:
     };
     Q_DECLARE_FLAGS(FindFlags, FindFlag)
 
+    struct SearchResult {
+        int start;
+        int length;
+    };
+
 public:
     explicit QmlCodeEditor(QWidget* parent = nullptr);
     ~QmlCodeEditor();
@@ -144,6 +150,7 @@ public:
     bool camelCaseNavigationEnabled() const;
     void setBehaviorSettings(const TextEditor::BehaviorSettings& bs);
     const TextEditor::BehaviorSettings& behaviorSettings() const;
+    bool inFindScope(int selectionStart, int selectionEnd);
 
 public slots:
     void indent();
@@ -157,6 +164,8 @@ public slots:
     void semanticInfoUpdated(const QmlJSTools::SemanticInfo& semanticInfo);
     void animateUpdate(const QTextCursor &cursor, QPointF lastPos, QRectF rect);
     void slotCodeStyleSettingsChanged(const QVariant&);
+    void slotUpdateBlockNotify(const QTextBlock& block);
+    void searchResultsReady(int beginIndex, int endIndex);
 
 private:
     void updateRowBarWidth();
@@ -164,12 +173,13 @@ private:
     bool cursorMoveKeyEvent(QKeyEvent* e);
     void updateRowBar(const QRect &rect, int dy);
     void paintOverlays(const PaintEventData &data, QPainter &painter) const;
+    void paintFindScope(const PaintEventData& data, QPainter& painter);
     void processTooltipRequest(const QTextCursor &c);
     QPoint toolTipPosition(const QTextCursor &c) const;
     void drawCollapsedBlockPopup(QPainter &painter, const QTextBlock &block, QPointF offset,
                                  const QRect &clip);
     void paintSearchResultOverlay(const PaintEventData& data, QPainter& painter);
-    QTextBlock nextVisibleBlock(const QTextBlock& block, const QTextDocument* doc);
+    QTextBlock nextVisibleBlock(const QTextBlock& block, const QTextDocument* doc) const;
     void paintCurrentLineHighlight(const PaintEventData& data, QPainter& painter) const;
     void highlightSearchResults(const QTextBlock& block, TextEditor::Internal::TextEditorOverlay* overlay);
     QString wordUnderCursor() const;
@@ -202,6 +212,10 @@ private:
     bool camelCaseRight(QTextCursor &cursor, QTextCursor::MoveMode mode);
     void invokeAssist(TextEditor::AssistKind kind, TextEditor::IAssistProvider* provider = nullptr);
     void abortAssist();
+    void setFindScope(const QTextCursor& start, const QTextCursor& end, int verticalBlockSelectionFirstColumn, int verticalBlockSelectionLastColumn);
+
+signals:
+    void requestBlockUpdate(const QTextBlock &);
 
 private:
     bool event(QEvent* e) override;
@@ -241,6 +255,12 @@ private:
     bool m_highlightAutoComplete = true;
     bool m_skipAutoCompletedText = true;
     bool m_removeAutoCompletedText = true;
+    QTextCursor m_findScopeStart;
+    QTextCursor m_findScopeEnd;
+    QVector<SearchResult> m_searchResults;
+    QFutureWatcher<Utils::FileSearchResultList> *m_searchWatcher = nullptr;
+    int m_findScopeVerticalBlockSelectionFirstColumn = -1;
+    int m_findScopeVerticalBlockSelectionLastColumn = -1;
     TextEditor::BehaviorSettings m_behaviorSettings;
     QList<QTextCursor> m_autoCompleteHighlightPos;
     QList<TextEditor::BaseHoverHandler*> m_hoverHandlers;

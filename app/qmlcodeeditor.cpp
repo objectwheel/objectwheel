@@ -1,31 +1,35 @@
 #include <qmlcodeeditor.h>
 #include <rowbar.h>
-#include <texteditor/codeassist/codeassistant.h>
 #include <qtcassert.h>
-#include <qmljseditor/qmljscompletionassist.h>
+#include <qmlcodedocument.h>
+
 #include <qmljs/parser/qmljsast_p.h>
 #include <qmljs/qmljsbind.h>
 #include <qmljs/qmljsscopechain.h>
 #include <qmljs/qmljsevaluate.h>
+#include <qmljstools/qmljssemanticinfo.h>
+#include <qmljstools/qmljsindenter.h>
 #include <qmljseditor/quicktoolbar.h>
-#include <qmlcodedocument.h>
-#include <texteditor/texteditoroverlay.h>
+#include <qmljseditor/qmljscompletionassist.h>
 #include <qmljseditor/qmljshoverhandler.h>
-#include <QFontDatabase>
-#include <QPainter>
+
 #include <utils/textutils.h>
 #include <utils/tooltip/tooltip.h>
 #include <utils/link.h>
+
+#include <texteditor/codeassist/codeassistant.h>
 #include <texteditor/colorpreviewhoverhandler.h>
-#include <qmljstools/qmljssemanticinfo.h>
+#include <texteditor/texteditorsettings.h>
+#include <texteditor/icodestylepreferences.h>
+#include <texteditor/texteditoroverlay.h>
+
+#include <QFontDatabase>
+#include <QPainter>
 #include <QApplication>
 #include <QScrollBar>
 #include <QSequentialAnimationGroup>
 #include <QPropertyAnimation>
-#include <qmljstools/qmljsindenter.h>
 #include <QAction>
-#include <texteditor/texteditorsettings.h>
-#include <texteditor/icodestylepreferences.h>
 
 using namespace Utils;
 using namespace TextEditor;
@@ -356,6 +360,12 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_searchResultOverlay(new TextEditor::Internal::TextEditorOverlay(this))
   , m_autoCompleter(new QmlJSEditor::Internal::AutoCompleter)
 {
+//    auto baseTextFind = new BaseTextFind(q);
+//    connect(baseTextFind, &BaseTextFind::highlightAllRequested,
+//            this, &TextEditorWidgetPrivate::highlightSearchResultsSlot);
+//    connect(baseTextFind, &BaseTextFind::findScopeChanged,
+//            this, &TextEditorWidgetPrivate::setFindScope);
+
     m_codeAssistant->configure(this);
     m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
 
@@ -425,28 +435,70 @@ QmlCodeEditor::~QmlCodeEditor()
 
 void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
 {
-    disconnect(document);
+    auto settings = TextEditorSettings::instance();
+    auto documentLayout = qobject_cast<QPlainTextDocumentLayout*>(document->documentLayout());
+
+    disconnect(codeDocument(), 0, this, 0);
+    disconnect(this, 0, codeDocument()->documentLayout(), 0);
+    disconnect(codeDocument()->documentLayout(), 0, this, 0);
+    disconnect(codeDocument()->documentLayout(), 0, m_rowBar, 0);
+    disconnect(settings, 0, codeDocument(), 0);
+    disconnect(settings, 0, this, 0);
+
     setDocument(document);
-    connect(document, &QmlCodeDocument::semanticInfoUpdated,
-            this, &QmlCodeEditor::semanticInfoUpdated);
-    connect(document, &QmlCodeDocument::updateCodeWarnings,
-            this, &QmlCodeEditor::updateCodeWarnings);
-    connect(document, &QmlCodeDocument::fontSettingsChanged,
-            this, &QmlCodeEditor::applyFontSettingsDelayed);
+    setCursorWidth(2);
+
+    connect(documentLayout, &QPlainTextDocumentLayout::updateBlock,
+            this, &QmlCodeEditor::slotUpdateBlockNotify);
+
+//    connect(documentLayout, &QPlainTextDocumentLayout::updateExtraArea,
+//            m_rowBar, static_cast<void (QWidget::*)()>(&QWidget::update));
+
+    connect(this, &QmlCodeEditor::requestBlockUpdate,
+            documentLayout, &QPlainTextDocumentLayout::updateBlock);
+
+//    connect(documentLayout, &QPlainTextDocumentLayout::updateExtraArea,
+//            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
+
+//    connect(documentLayout, &QAbstractTextDocumentLayout::documentSizeChanged,
+//            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
+
+//    connect(documentLayout, &QAbstractTextDocumentLayout::update,
+//            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
+
     connect(document, &QmlCodeDocument::contentsChange,
             this, &QmlCodeEditor::editorContentsChange);
+
+//    connect(document, &QmlCodeDocument::aboutToReload,
+//            this, &QmlCodeEditor::documentAboutToBeReloaded);
+
+//    connect(document, &QmlCodeDocument::reloadFinished,
+//            this, &QmlCodeEditor::documentReloadFinished);
+
     connect(document, &QmlCodeDocument::tabSettingsChanged,
             this, [this](){
         updateTabStops();
         m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
     });
 
-    TextEditorSettings *settings = TextEditorSettings::instance();
+    connect(document, &QmlCodeDocument::fontSettingsChanged,
+            this, &QmlCodeEditor::applyFontSettingsDelayed);
+
+//    connect(document, &QmlCodeDocument::markRemoved,
+//            this, &QmlCodeEditor::markRemoved);
+
+    connect(document, &QmlCodeDocument::semanticInfoUpdated,
+            this, &QmlCodeEditor::semanticInfoUpdated);
+    connect(document, &QmlCodeDocument::updateCodeWarnings,
+            this, &QmlCodeEditor::updateCodeWarnings);
+
+    updateRowBarWidth();
+
     // Apply current settings
-    codeDocument()->setFontSettings(settings->fontSettings());
-    codeDocument()->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
-    codeDocument()->setTypingSettings(settings->typingSettings());
-    codeDocument()->setStorageSettings(settings->storageSettings());
+    document->setFontSettings(settings->fontSettings());
+    document->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
+    document->setTypingSettings(settings->typingSettings());
+    document->setStorageSettings(settings->storageSettings());
     setBehaviorSettings(settings->behaviorSettings());
     //    setMarginSettings(settings->marginSettings());
     //    setDisplaySettings(settings->displaySettings());
@@ -454,92 +506,23 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     //    setExtraEncodingSettings(settings->extraEncodingSettings());
     setCodeStyle(settings->codeStyle(m_tabSettingsId));
 
-
+    // Connect to settings change signals
+    connect(settings, &TextEditorSettings::fontSettingsChanged,
+            document, &QmlCodeDocument::setFontSettings);
+    connect(settings, &TextEditorSettings::typingSettingsChanged,
+            document, &QmlCodeDocument::setTypingSettings);
+    connect(settings, &TextEditorSettings::storageSettingsChanged,
+            document, &QmlCodeDocument::setStorageSettings);
+    connect(settings, &TextEditorSettings::behaviorSettingsChanged,
+            this, &QmlCodeEditor::setBehaviorSettings);
+    //    connect(settings, &TextEditorSettings::marginSettingsChanged,
+    //            this, &QmlCodeEditor::setMarginSettings);
+    //    connect(settings, &TextEditorSettings::displaySettingsChanged,
+    //            this, &QmlCodeEditor::setDisplaySettings);
     connect(settings, &TextEditorSettings::completionSettingsChanged,
             this, &QmlCodeEditor::setCompletionSettings);
-
-
-
-
-    //    QTextDocument *doc = m_document->document();
-    //    q->QPlainTextEdit::setDocument(doc);
-    //    q->setCursorWidth(2); // Applies to the document layout
-
-    //    auto documentLayout = qobject_cast<TextDocumentLayout*>(doc->documentLayout());
-    //    QTC_CHECK(documentLayout);
-
-    //    QObject::connect(documentLayout, &QPlainTextDocumentLayout::updateBlock,
-    //                     this, &TextEditorWidgetPrivate::slotUpdateBlockNotify);
-
-    //    QObject::connect(documentLayout, &TextDocumentLayout::updateExtraArea,
-    //                     m_extraArea, static_cast<void (QWidget::*)()>(&QWidget::update));
-
-    //    QObject::connect(q, &TextEditorWidget::requestBlockUpdate,
-    //                     documentLayout, &QPlainTextDocumentLayout::updateBlock);
-
-    //    QObject::connect(documentLayout, &TextDocumentLayout::updateExtraArea,
-    //                     this, &TextEditorWidgetPrivate::scheduleUpdateHighlightScrollBar);
-
-    //    QObject::connect(documentLayout, &QAbstractTextDocumentLayout::documentSizeChanged,
-    //                     this, &TextEditorWidgetPrivate::scheduleUpdateHighlightScrollBar);
-
-    //    QObject::connect(documentLayout, &QAbstractTextDocumentLayout::update,
-    //                     this, &TextEditorWidgetPrivate::scheduleUpdateHighlightScrollBar);
-
-    //    QObject::connect(doc, &QTextDocument::contentsChange,
-    //                     this, &TextEditorWidgetPrivate::editorContentsChange);
-
-    //    QObject::connect(m_document.data(), &TextDocument::aboutToReload,
-    //                     this, &TextEditorWidgetPrivate::documentAboutToBeReloaded);
-
-    //    QObject::connect(m_document.data(), &TextDocument::reloadFinished,
-    //                     this, &TextEditorWidgetPrivate::documentReloadFinished);
-
-    //    QObject::connect(m_document.data(), &TextDocument::tabSettingsChanged,
-    //                     this, [this](){
-    //        updateTabStops();
-    //        m_autoCompleter->setTabSettings(m_document->tabSettings());
-    //    });
-
-    //    QObject::connect(m_document.data(), &TextDocument::fontSettingsChanged,
-    //                     this, &TextEditorWidgetPrivate::applyFontSettingsDelayed);
-
-    //    QObject::connect(m_document.data(), &TextDocument::markRemoved,
-    //                     this, &TextEditorWidgetPrivate::markRemoved);
-
-    //    slotUpdateExtraAreaWidth();
-
-    //    TextEditorSettings *settings = TextEditorSettings::instance();
-
-    //    // Connect to settings change signals
-    //    connect(settings, &TextEditorSettings::fontSettingsChanged,
-    //            m_document.data(), &TextDocument::setFontSettings);
-    //    connect(settings, &TextEditorSettings::typingSettingsChanged,
-    //            q, &TextEditorWidget::setTypingSettings);
-    //    connect(settings, &TextEditorSettings::storageSettingsChanged,
-    //            q, &TextEditorWidget::setStorageSettings);
-    //    connect(settings, &TextEditorSettings::behaviorSettingsChanged,
-    //            q, &TextEditorWidget::setBehaviorSettings);
-    //    connect(settings, &TextEditorSettings::marginSettingsChanged,
-    //            q, &TextEditorWidget::setMarginSettings);
-    //    connect(settings, &TextEditorSettings::displaySettingsChanged,
-    //            q, &TextEditorWidget::setDisplaySettings);
-    //    connect(settings, &TextEditorSettings::completionSettingsChanged,
-    //            q, &TextEditorWidget::setCompletionSettings);
     //    connect(settings, &TextEditorSettings::extraEncodingSettingsChanged,
-    //            q, &TextEditorWidget::setExtraEncodingSettings);
-
-    //    // Apply current settings
-    //    m_document->setFontSettings(settings->fontSettings());
-    //    m_document->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
-    //    q->setTypingSettings(settings->typingSettings());
-    //    q->setStorageSettings(settings->storageSettings());
-    //    q->setBehaviorSettings(settings->behaviorSettings());
-    //    q->setMarginSettings(settings->marginSettings());
-    //    q->setDisplaySettings(settings->displaySettings());
-    //    q->setCompletionSettings(settings->completionSettings());
-    //    q->setExtraEncodingSettings(settings->extraEncodingSettings());
-    //    q->setCodeStyle(settings->codeStyle(m_tabSettingsId));
+    //            this, &QmlCodeEditor::setExtraEncodingSettings);
 }
 
 void QmlCodeEditor::setCodeStyle(ICodeStylePreferences *preferences)
@@ -560,6 +543,137 @@ void QmlCodeEditor::setCodeStyle(ICodeStylePreferences *preferences)
         codeDocument()->setTabSettings(m_codeStylePreferences->currentTabSettings());
         slotCodeStyleSettingsChanged(m_codeStylePreferences->currentValue());
     }
+}
+
+void QmlCodeEditor::slotUpdateBlockNotify(const QTextBlock &block)
+{
+    static bool blockRecursion = false;
+    if (blockRecursion)
+        return;
+    blockRecursion = true;
+    if (m_overlay->isVisible()) {
+        /* an overlay might draw outside the block bounderies, force
+           complete viewport update */
+        viewport()->update();
+    } else {
+        if (block.previous().isValid() && block.userState() != block.previous().userState()) {
+        /* The syntax highlighting state changes. This opens up for
+           the possibility that the paragraph has braces that support
+           code folding. In this case, do the save thing and also
+           update the previous block, which might contain a fold
+           box which now is invalid.*/
+            emit requestBlockUpdate(block.previous());
+        }
+        if (!m_findScopeStart.isNull()) {
+            if (block.position() < m_findScopeEnd.position()
+                && block.position() + block.length() >= m_findScopeStart.position()) {
+                QTextBlock b = block.document()->findBlock(m_findScopeStart.position());
+                do {
+                    emit requestBlockUpdate(b);
+                    b = b.next();
+                } while (b.isValid() && b.position() < m_findScopeEnd.position());
+            }
+        }
+    }
+    blockRecursion = false;
+}
+
+void QmlCodeEditor::paintFindScope(const PaintEventData &data, QPainter &painter)
+{
+    if (m_findScopeStart.isNull())
+        return;
+    if (m_findScopeVerticalBlockSelectionFirstColumn >= 0) {
+        QTextBlock block = data.block;
+        QPointF offset = data.offset;
+        while (block.isValid()) {
+
+            QRectF blockBoundingRect = this->blockBoundingRect(block).translated(offset);
+
+            if (blockBoundingRect.bottom() >= data.eventRect.top()
+                    && blockBoundingRect.top() <= data.eventRect.bottom()) {
+
+                if (block.position() >= m_findScopeStart.block().position()
+                        && block.position() <= m_findScopeEnd.block().position()) {
+                    QTextLayout *layout = block.layout();
+                    QString text = block.text();
+                    const TabSettings &ts = codeDocument()->tabSettings();
+                    qreal spacew = QFontMetricsF(font()).width(QLatin1Char(' '));
+
+                    int offset = 0;
+                    int relativePos  =  ts.positionAtColumn(text,
+                                                            m_findScopeVerticalBlockSelectionFirstColumn,
+                                                            &offset);
+                    QTextLine line = layout->lineForTextPosition(relativePos);
+                    qreal x = line.cursorToX(relativePos) + offset * spacew;
+
+                    int eoffset = 0;
+                    int erelativePos  =  ts.positionAtColumn(text,
+                                                             m_findScopeVerticalBlockSelectionLastColumn,
+                                                             &eoffset);
+                    QTextLine eline = layout->lineForTextPosition(erelativePos);
+                    qreal ex = eline.cursorToX(erelativePos) + eoffset * spacew;
+
+                    QRectF lineRect = line.naturalTextRect();
+                    lineRect.moveTop(lineRect.top() + blockBoundingRect.top());
+                    lineRect.setLeft(blockBoundingRect.left() + x);
+                    if (line.lineNumber() == eline.lineNumber())
+                        lineRect.setRight(blockBoundingRect.left() + ex);
+                    painter.fillRect(lineRect, data.searchScopeFormat.background());
+
+                    QColor lineCol = data.searchScopeFormat.foreground().color();
+                    QPen pen = painter.pen();
+                    painter.setPen(lineCol);
+                    if (block == m_findScopeStart.block())
+                        painter.drawLine(lineRect.topLeft(), lineRect.topRight());
+                    if (block == m_findScopeEnd.block())
+                        painter.drawLine(lineRect.bottomLeft(), lineRect.bottomRight());
+                    painter.drawLine(lineRect.topLeft(), lineRect.bottomLeft());
+                    painter.drawLine(lineRect.topRight(), lineRect.bottomRight());
+                    painter.setPen(pen);
+                }
+            }
+            offset.ry() += blockBoundingRect.height();
+
+            if (offset.y() > data.viewportRect.height())
+                break;
+
+            block = nextVisibleBlock(block, data.doc);
+        }
+    } else {
+        auto overlay = new TextEditor::Internal::TextEditorOverlay(this);
+        overlay->addOverlaySelection(m_findScopeStart.position(),
+                                     m_findScopeEnd.position(),
+                                     data.searchScopeFormat.foreground().color(),
+                                     data.searchScopeFormat.background().color(),
+                                     TextEditor::Internal::TextEditorOverlay::ExpandBegin);
+        overlay->setAlpha(false);
+        overlay->paint(&painter, data.eventRect);
+        delete overlay;
+    }
+}
+
+bool QmlCodeEditor::inFindScope(int selectionStart, int selectionEnd)
+{
+    if (m_findScopeStart.isNull())
+        return true; // no scope, everything is included
+    if (selectionStart < m_findScopeStart.position())
+        return false;
+    if (selectionEnd > m_findScopeEnd.position())
+        return false;
+    if (m_findScopeVerticalBlockSelectionFirstColumn < 0)
+        return true;
+    QTextBlock block = document()->findBlock(selectionStart);
+    if (block != document()->findBlock(selectionEnd))
+        return false;
+    QString text = block.text();
+    const TabSettings &ts = codeDocument()->tabSettings();
+    int startPosition = ts.positionAtColumn(text, m_findScopeVerticalBlockSelectionFirstColumn);
+    int endPosition = ts.positionAtColumn(text, m_findScopeVerticalBlockSelectionLastColumn);
+    if (selectionStart - block.position() < startPosition)
+        return false;
+    if (selectionEnd - block.position() > endPosition)
+        return false;
+    return true;
 }
 
 void QmlCodeEditor::slotCodeStyleSettingsChanged(const QVariant &)
@@ -1116,11 +1230,37 @@ void QmlCodeEditor::paintOverlays(const PaintEventData& data, QPainter& painter)
 {
     // draw the overlays, but only if we do not have a find scope, otherwise the
     // view becomes too noisy.
-    if (m_overlay->isVisible())
-        m_overlay->paint(&painter, data.eventRect);
+    if (m_findScopeStart.isNull()) {
+        if (m_overlay->isVisible())
+            m_overlay->paint(&painter, data.eventRect);
+
+//        if (m_snippetOverlay->isVisible())
+//            m_snippetOverlay->paint(&painter, data.eventRect);
+
+//        if (!m_refactorOverlay->isEmpty())
+//            m_refactorOverlay->paint(&painter, data.eventRect);
+    }
+
     if (!m_searchResultOverlay->isEmpty()) {
         m_searchResultOverlay->paint(&painter, data.eventRect);
         m_searchResultOverlay->clear();
+    }
+}
+
+void QmlCodeEditor::setFindScope(const QTextCursor &start, const QTextCursor &end,
+                                  int verticalBlockSelectionFirstColumn,
+                                  int verticalBlockSelectionLastColumn)
+{
+    if (start != m_findScopeStart
+            || end != m_findScopeEnd
+            || verticalBlockSelectionFirstColumn != m_findScopeVerticalBlockSelectionFirstColumn
+            || verticalBlockSelectionLastColumn != m_findScopeVerticalBlockSelectionLastColumn) {
+        m_findScopeStart = start;
+        m_findScopeEnd = end;
+        m_findScopeVerticalBlockSelectionFirstColumn = verticalBlockSelectionFirstColumn;
+        m_findScopeVerticalBlockSelectionLastColumn = verticalBlockSelectionLastColumn;
+        viewport()->update();
+//        highlightSearchResultsInScrollBar();
     }
 }
 
@@ -1167,7 +1307,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                            && */m_linkPressed
+                                                                                                    && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1320,11 +1460,11 @@ void QmlCodeEditor::keyReleaseEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Control) {
         clearLink();
     } else if (e->key() == Qt::Key_Shift
-             && m_behaviorSettings.m_constrainHoverTooltips
-             && ToolTip::isVisible()) {
+               && m_behaviorSettings.m_constrainHoverTooltips
+               && ToolTip::isVisible()) {
         ToolTip::hide();
     } else if (e->key() == Qt::Key_Alt
-                 /*&& m_maybeFakeTooltipEvent*/) {
+               /*&& m_maybeFakeTooltipEvent*/) {
         //        m_maybeFakeTooltipEvent = false;
         processTooltipRequest(textCursor());
     }
@@ -1898,7 +2038,7 @@ void QmlCodeEditor::paintSearchResultOverlay(const PaintEventData &data,
 }
 
 QTextBlock QmlCodeEditor::nextVisibleBlock(const QTextBlock &block,
-                                           const QTextDocument *doc)
+                                           const QTextDocument *doc) const
 {
     QTextBlock nextVisibleBlock = block.next();
     if (!nextVisibleBlock.isVisible()) {
@@ -1938,8 +2078,8 @@ void QmlCodeEditor::highlightSearchResults(const QTextBlock &block,
                     || (idx + l < text.length() && text.at(idx + l).isLetterOrNumber())))
             continue;
 
-        //        if (!inFindScope(blockPosition + idx, blockPosition + idx + l))
-        //            continue;
+        if (!inFindScope(blockPosition + idx, blockPosition + idx + l))
+            continue;
 
         const QTextCharFormat &searchResultFormat
                 = codeDocument()->fontSettings().toTextCharFormat(C_SEARCH_RESULT);
@@ -1952,6 +2092,22 @@ void QmlCodeEditor::highlightSearchResults(const QTextBlock &block,
                                          TextEditor::Internal::TextEditorOverlay::DropShadow : 0);
 
     }
+}
+
+void QmlCodeEditor::searchResultsReady(int beginIndex, int endIndex)
+{
+//    QVector<SearchResult> results;
+//    for (int index = beginIndex; index < endIndex; ++index) {
+//        foreach (Utils::FileSearchResult result, m_searchWatcher->resultAt(index)) {
+//            const QTextBlock &block = document()->findBlockByNumber(result.lineNumber - 1);
+//            const int matchStart = block.position() + result.matchStart;
+//            if (!inFindScope(matchStart, matchStart + result.matchLength))
+//                continue;
+//            results << SearchResult{matchStart, result.matchLength};
+//        }
+//    }
+//    m_searchResults << results;
+//    addSearchResultsToScrollBar(results);
 }
 
 void QmlCodeEditor::paintCurrentLineHighlight(const PaintEventData &data, QPainter &painter) const
@@ -2411,8 +2567,8 @@ void QmlCodeEditor::clearLink()
 
 void QmlCodeEditor::requestUpdateLink(QMouseEvent *e, bool immediate)
 {
-    //    if (!mouseNavigationEnabled())
-    //        return;
+    if (!mouseNavigationEnabled())
+        return;
     if (e->modifiers() & Qt::ControlModifier) {
         // Link emulation behaviour for 'go to definition'
         const QTextCursor cursor = cursorForPosition(e->pos());
@@ -2639,6 +2795,8 @@ void QmlCodeEditor::paintEvent(QPaintEvent* e)
     data.block = firstVisibleBlock();
     data.context = getPaintContext();
 
+    // paint find scope on top of ifdefed out blocks and right margin
+    paintFindScope(data, painter);
     paintSearchResultOverlay(data, painter);
 
     while (data.block.isValid()) {
