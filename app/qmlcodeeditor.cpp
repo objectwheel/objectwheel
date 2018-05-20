@@ -12,6 +12,7 @@
 #include <qmljseditor/quicktoolbar.h>
 #include <qmljseditor/qmljscompletionassist.h>
 #include <qmljseditor/qmljshoverhandler.h>
+#include <coreplugin/find/basetextfind.h>
 
 #include <utils/textutils.h>
 #include <utils/tooltip/tooltip.h>
@@ -39,6 +40,7 @@ using namespace Utils;
 using namespace QmlJS;
 using namespace QmlJS::AST;
 using namespace QmlJSTools;
+using namespace Core;
 
 class HoverHandlerRunner
 {
@@ -360,11 +362,11 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_searchResultOverlay(new TextEditor::Internal::TextEditorOverlay(this))
   , m_autoCompleter(new QmlJSEditor::Internal::AutoCompleter)
 {
-//    auto baseTextFind = new BaseTextFind(q);
-//    connect(baseTextFind, &BaseTextFind::highlightAllRequested,
-//            this, &TextEditorWidgetPrivate::highlightSearchResultsSlot);
-//    connect(baseTextFind, &BaseTextFind::findScopeChanged,
-//            this, &TextEditorWidgetPrivate::setFindScope);
+    auto baseTextFind = new BaseTextFind(this); // BUG
+    connect(baseTextFind, &BaseTextFind::highlightAllRequested,
+            this, &QmlCodeEditor::highlightSearchResultsSlot);
+    connect(baseTextFind, &BaseTextFind::findScopeChanged,
+            this, &QmlCodeEditor::setFindScope);
 
     m_codeAssistant->configure(this);
     m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
@@ -435,6 +437,7 @@ QmlCodeEditor::~QmlCodeEditor()
 
 void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
 {
+    QMetaObject::Connection con;
     auto settings = TextEditorSettings::instance();
     auto documentLayout = qobject_cast<QPlainTextDocumentLayout*>(document->documentLayout());
 
@@ -444,6 +447,7 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     disconnect(codeDocument()->documentLayout(), 0, m_rowBar, 0);
     disconnect(settings, 0, codeDocument(), 0);
     disconnect(settings, 0, this, 0);
+    disconnect(con);
 
     setDocument(document);
     setCursorWidth(2);
@@ -475,7 +479,7 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
 //    connect(document, &QmlCodeDocument::reloadFinished,
 //            this, &QmlCodeEditor::documentReloadFinished);
 
-    connect(document, &QmlCodeDocument::tabSettingsChanged,
+    con = connect(document, &QmlCodeDocument::tabSettingsChanged,
             this, [this](){
         updateTabStops();
         m_autoCompleter->setTabSettings(codeDocument()->tabSettings());

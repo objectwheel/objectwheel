@@ -13,6 +13,7 @@
 #include <qmljseditor/qmljsautocompleter.h>
 #include <coreplugin/id.h>
 #include <texteditor/behaviorsettings.h>
+#include <coreplugin/find/textfindconstants.h>
 
 class RowBar;
 class QmlCodeDocument;
@@ -94,15 +95,6 @@ class QmlCodeEditor : public QPlainTextEdit
     friend class TextEditor::Internal::TextEditorOverlay;
 
 public:
-    enum FindFlag {
-        FindBackward = 0x01,
-        FindCaseSensitively = 0x02,
-        FindWholeWords = 0x04,
-        FindRegularExpression = 0x08,
-        FindPreserveCase = 0x10
-    };
-    Q_DECLARE_FLAGS(FindFlags, FindFlag)
-
     struct SearchResult {
         int start;
         int length;
@@ -160,7 +152,7 @@ public slots:
     void slotSelectionChanged();
     void updateAutoCompleteHighlight();
     void editorContentsChange(int, int, int);
-    void highlightSearchResultsSlot(const QString& txt, FindFlags findFlags);
+    void highlightSearchResultsSlot(const QString& txt, Core::FindFlags findFlags);
     void semanticInfoUpdated(const QmlJSTools::SemanticInfo& semanticInfo);
     void animateUpdate(const QTextCursor &cursor, QPointF lastPos, QRectF rect);
     void slotCodeStyleSettingsChanged(const QVariant&);
@@ -238,7 +230,7 @@ private:
 private:
     RowBar* m_rowBar;
     QRegExp m_searchExpr;
-    FindFlags m_findFlags;
+    Core::FindFlags m_findFlags;
     Core::Id m_tabSettingsId;
     bool m_linkPressed;
     bool m_fontSettingsNeedsApply;
