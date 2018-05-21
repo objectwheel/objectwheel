@@ -4,6 +4,7 @@
 #include <QPlainTextEdit>
 #include <QTimeLine>
 #include <QPointer>
+#include <QBasicTimer>
 
 #include <utils/link.h>
 #include <utils/filesearch.h>
@@ -15,6 +16,7 @@
 #include <texteditor/behaviorsettings.h>
 #include <coreplugin/find/textfindconstants.h>
 
+class QBasicTimer;
 class RowBar;
 class QmlCodeDocument;
 class HoverHandlerRunner;
@@ -231,6 +233,8 @@ private:
     bool replacementVisible(int blockNumber) const;
     QString foldReplacementText(const QTextBlock&) const;
     QColor replacementPenColor(int blockNumber) const;
+    void clearVisibleFoldedBlock();
+    QTextBlock foldedBlockAt(const QPoint& pos, QRect* box = nullptr) const;
 
 signals:
     void requestBlockUpdate(const QTextBlock &);
@@ -252,6 +256,7 @@ private:
     void focusOutEvent(QFocusEvent* e) override;
     void focusInEvent(QFocusEvent* e) override;
     void changeEvent(QEvent* e) override;
+    void timerEvent(QTimerEvent* e) override;
 
 private:
     RowBar* m_rowBar;
@@ -269,12 +274,16 @@ private:
     QTimer* m_updateUsesTimer;
     QTimer* m_contextPaneTimer;
     QTimer* m_parenthesesMatchingTimer;
+    QBasicTimer m_foldedBlockTimer;
+    QBasicTimer m_cursorFlashTimer;
     bool m_animateAutoComplete = true;
     bool m_highlightAutoComplete = true;
     bool m_skipAutoCompletedText = true;
     bool m_removeAutoCompletedText = true;
+    bool m_mouseOnFoldedMarker = false;
     QTextCursor m_findScopeStart;
     QTextCursor m_findScopeEnd;
+    int m_suggestedVisibleFoldedBlockNumber = -1;
     QVector<SearchResult> m_searchResults;
     QFutureWatcher<Utils::FileSearchResultList> *m_searchWatcher = nullptr;
     int m_findScopeVerticalBlockSelectionFirstColumn = -1;

@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QStack>
 #include <QTextDocument>
+#include <QTimer>
 
 BracketBand::BracketBand(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
   , m_qmlCodeEditor(editor)
@@ -20,6 +21,116 @@ BracketBand::BracketBand(QmlCodeEditor* editor, QWidget* parent) : QWidget(paren
 int BracketBand::calculatedWidth() const
 {
     return 20;
+}
+
+bool BracketBand::toggleFold(const QPoint& pos) const
+{
+    auto ce = m_qmlCodeEditor;
+    auto startBlock = QTextBlock();
+    auto block = ce->firstVisibleBlock();
+    auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
+    auto bottom = top + ce->blockBoundingRect(block).height();
+
+    while (block.isValid() && top <= rect().bottom()) {
+        auto blockData = QmlCodeDocument::userData(block);
+
+        if (pos.y() >= top && pos.y() <= bottom) {
+            if (blockData->state == BlockData::StartOn
+                    || blockData->state == BlockData::StartOff) {
+                if (blockData->state == BlockData::StartOn)
+                    blockData->state = BlockData::StartOff;
+                else
+                    blockData->state = BlockData::StartOn;
+
+                startBlock = block;
+                break;
+            }
+        }
+
+        block = block.next();
+        top = bottom;
+        bottom = top + ce->blockBoundingRect(block).height();
+    }
+
+    if (startBlock.isValid()) {
+        QTextDocument document(m_qmlCodeEditor->toPlainText());
+        TextUtils::trimCommentsAndStrings(&document);
+
+        auto lb = QLatin1Char('{');
+        auto rb = QLatin1Char('}');
+
+        block = startBlock;
+        auto blockData = QmlCodeDocument::userData(block);
+        auto blockText = document.findBlock(block.position()).text();
+
+        QStack<int> bracketStack;
+        if (blockData->state == BlockData::StartOff) {
+            block = block.next();
+            bracketStack.push(1);
+
+            while (block.isValid()) {
+                blockData = QmlCodeDocument::userData(block);
+                blockText = document.findBlock(block.position()).text();
+
+                for (int i = blockText.count(lb); i--;)
+                    bracketStack.push(1);
+
+                for (int i = blockText.count(rb); i--;) {
+                    if (!bracketStack.isEmpty())
+                        bracketStack.pop();
+                }
+
+                if (bracketStack.isEmpty())
+                    break;
+
+                block.setVisible(false);
+                block = block.next();
+            }
+        } else {
+            block = block.next();
+            bracketStack.push(1);
+
+            int level = 1;
+
+            while (block.isValid()) {
+                blockData = QmlCodeDocument::userData(block);
+                blockText = document.findBlock(block.position()).text();
+
+                for (int i = blockText.count(rb); i--;) {
+                    if (!bracketStack.isEmpty())
+                        bracketStack.pop();
+                }
+
+                if (blockData->state != BlockData::StartOn) {
+                    if (bracketStack.size() < level)
+                        --level;
+                }
+
+                if (level == bracketStack.size())
+                    block.setVisible(true);
+
+                if (blockData->state == BlockData::StartOn) {
+                    if (bracketStack.size() == level)
+                        ++level;
+                }
+
+                for (int i = blockText.count(lb); i--;)
+                    bracketStack.push(1);
+
+                if (bracketStack.isEmpty())
+                    break;
+
+                block = block.next();
+            }
+        }
+
+        m_qmlCodeEditor->document()->documentLayout()->update();
+        m_qmlCodeEditor->document()->adjustSize();
+
+        return true;
+    } else {
+        return false;
+    }
 }
 
 QSize BracketBand::sizeHint() const
@@ -78,150 +189,12 @@ void BracketBand::paintEvent(QPaintEvent* e)
     }
 }
 
-void BracketBand::mouseMoveEvent(QMouseEvent* e)
-{
-    auto pos = e->pos();
-    auto ce = m_qmlCodeEditor;
-    auto block = ce->firstVisibleBlock();
-    auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
-    auto bottom = top + ce->blockBoundingRect(block).height();
-    auto startBlock = QTextBlock();
-
-    while (block.isValid() && top <= rect().bottom()) {
-        auto blockData = QmlCodeDocument::userData(block);
-
-        if (pos.y() >= top && pos.y() <= bottom) {
-            if (blockData->state == BlockData::StartOff) {
-                startBlock = block;
-                break;
-            }
-        }
-
-        block = block.next();
-        top = bottom;
-        bottom = top + ce->blockBoundingRect(block).height();
-    }
-
-    m_qmlCodeEditor->setVisibleFoldedBlockNumber(startBlock.blockNumber() + 1);
-
-    QWidget::mouseMoveEvent(e);
-}
-
 void BracketBand::mouseReleaseEvent(QMouseEvent* e)
 {
     if (e->button() == Qt::LeftButton) {
-        auto pos = e->pos();
-        auto ce = m_qmlCodeEditor;
-        auto startBlock = QTextBlock();
-        auto block = ce->firstVisibleBlock();
-        auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
-        auto bottom = top + ce->blockBoundingRect(block).height();
-
-        while (block.isValid() && top <= rect().bottom()) {
-            auto blockData = QmlCodeDocument::userData(block);
-
-            if (pos.y() >= top && pos.y() <= bottom) {
-                if (blockData->state == BlockData::StartOn
-                        || blockData->state == BlockData::StartOff) {
-                    if (blockData->state == BlockData::StartOn)
-                        blockData->state = BlockData::StartOff;
-                    else
-                        blockData->state = BlockData::StartOn;
-
-                    startBlock = block;
-                    break;
-                }
-            }
-
-            block = block.next();
-            top = bottom;
-            bottom = top + ce->blockBoundingRect(block).height();
-        }
-
-        if (startBlock.isValid()) {
-            QTextDocument document(m_qmlCodeEditor->toPlainText());
-            TextUtils::trimCommentsAndStrings(&document);
-
-            auto lb = QLatin1Char('{');
-            auto rb = QLatin1Char('}');
-
-            block = startBlock;
-            auto blockData = QmlCodeDocument::userData(block);
-            auto blockText = document.findBlock(block.position()).text();
-
-            QStack<int> bracketStack;
-            if (blockData->state == BlockData::StartOff) {
-                block = block.next();
-                bracketStack.push(1);
-
-                while (block.isValid()) {
-                    blockData = QmlCodeDocument::userData(block);
-                    blockText = document.findBlock(block.position()).text();
-
-                    for (int i = blockText.count(lb); i--;)
-                        bracketStack.push(1);
-
-                    for (int i = blockText.count(rb); i--;) {
-                        if (!bracketStack.isEmpty())
-                            bracketStack.pop();
-                    }
-
-                    if (bracketStack.isEmpty())
-                        break;
-
-                    block.setVisible(false);
-                    block = block.next();
-                }
-            } else {
-                block = block.next();
-                bracketStack.push(1);
-
-                int level = 1;
-
-                while (block.isValid()) {
-                    blockData = QmlCodeDocument::userData(block);
-                    blockText = document.findBlock(block.position()).text();
-
-                    for (int i = blockText.count(rb); i--;) {
-                        if (!bracketStack.isEmpty())
-                            bracketStack.pop();
-                    }
-
-                    if (blockData->state != BlockData::StartOn) {
-                        if (bracketStack.size() < level)
-                            --level;
-                    }
-
-                    if (level == bracketStack.size())
-                        block.setVisible(true);
-
-                    if (blockData->state == BlockData::StartOn) {
-                        if (bracketStack.size() == level)
-                            ++level;
-                    }
-
-                    for (int i = blockText.count(lb); i--;)
-                        bracketStack.push(1);
-
-                    if (bracketStack.isEmpty())
-                        break;
-
-                    block = block.next();
-                }
-            }
-
-            m_qmlCodeEditor->document()->documentLayout()->update();
-            m_qmlCodeEditor->document()->adjustSize();
-        } else {
+        if (!toggleFold(e->pos()))
             QWidget::mouseReleaseEvent(e);
-        }
     }
-}
-
-void BracketBand::leaveEvent(QEvent* event)
-{
-    m_qmlCodeEditor->setVisibleFoldedBlockNumber(-1);
-    QWidget::leaveEvent(event);
 }
 
 void BracketBand::updateData()

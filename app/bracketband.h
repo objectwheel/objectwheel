@@ -2,6 +2,7 @@
 #define BRACKETBAND_H
 
 #include <QWidget>
+#include <QTextBlock>
 
 class QmlCodeEditor;
 
@@ -12,7 +13,7 @@ class BracketBand : public QWidget
 public:
     explicit BracketBand(QmlCodeEditor* editor, QWidget* parent = nullptr);
     int calculatedWidth() const;
-    void updateCollapser();
+    bool toggleFold(const QPoint& pos) const;
 
 private slots:
     void updateData();
@@ -20,9 +21,7 @@ private slots:
 private:
     QSize sizeHint() const override;
     void paintEvent(QPaintEvent* e) override;
-    void mouseMoveEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent* e) override;
-    void leaveEvent(QEvent *event) override;
 
 private:
     QmlCodeEditor* m_qmlCodeEditor;
