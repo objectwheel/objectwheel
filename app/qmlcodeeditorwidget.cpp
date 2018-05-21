@@ -107,7 +107,7 @@ class QmlCodeEditorWidgetPrivate : public QObject
         QToolButton* hexEditorButton;
         FileExplorer* fileExplorer;
 };
-
+#include <QTimer>
 QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* parent)
     : QObject(parent)
     , parent(parent)
@@ -350,6 +350,10 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     connect(splitter, &QSplitter::splitterMoved, this, [=] {
         lastWidthOfExplorerWrapper = explorerWrapper->width();
     });
+
+//    QTimer::singleShot(10000, [=] {
+//        handlePinButtonClicked();
+//    });
 }
 
 qreal QmlCodeEditorWidgetPrivate::findPixelSize(const QString& text)
@@ -972,6 +976,11 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
 
     _d->updateOpenDocHistory();
     emit documentSaved();
+}
+
+QmlCodeEditor* QmlCodeEditorWidget::editor() const
+{
+    return _d->codeEditor;
 }
 
 void QmlCodeEditorWidget::reset()

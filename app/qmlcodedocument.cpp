@@ -1051,7 +1051,7 @@ void QmlCodeDocument::applyFontSettings()
     }
 
     m_semanticHighlighter->updateFontSettings(m_fontSettings);
-    if (!isSemanticInfoOutdated()) {
+    if (!isSemanticInfoOutdated() && m_semanticInfo.isValid()) {
         m_semanticHighlightingNecessary = false;
         m_semanticHighlighter->rerun(m_semanticInfo);
     }

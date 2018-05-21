@@ -26,6 +26,10 @@
 #include <QDockWidget>
 #include <QLayout>
 
+#include <qmlcodedocument.h>
+#include <QTimer>
+#include <qmlcodeeditor.h>
+
 namespace {
     QDockWidget* propertiesDockWidget;
     QDockWidget* formsDockWidget;
@@ -266,6 +270,23 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             "#025dbf",
             QFont::DemiBold
         );
+    });
+
+
+    QTimer::singleShot(15000, [=]{
+
+//        auto m_qmlCodeEditor = ((CentralWidget*)centralWidget())->qmlCodeEditorWidget()->editor();
+//        const QString qmlFilePath = "/users/omergoktas/desktop/main1.qml";
+
+//        QFile file(qmlFilePath);
+//        file.open(QFile::ReadOnly | QFile::Text);
+//        const QString content = QString::fromUtf8(file.readAll());
+//        file.close();
+
+//        auto textDocument = new QmlCodeDocument(m_qmlCodeEditor);
+//        textDocument->setFilePath(qmlFilePath);
+//        m_qmlCodeEditor->setCodeDocument(textDocument);
+//        m_qmlCodeEditor->setPlainText(content);
     });
 }
 

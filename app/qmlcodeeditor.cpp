@@ -170,6 +170,7 @@ struct PaintEventData
         , viewportRect(editor->viewport()->rect())
         , eventRect(event->rect())
         , doc(editor->document())
+        , documentLayout(qobject_cast<QPlainTextDocumentLayout*>(doc->documentLayout()))
         , documentWidth(int(doc->size().width()))
         , textCursor(editor->textCursor())
         , textCursorBlock(textCursor.block())
@@ -186,6 +187,7 @@ struct PaintEventData
     const QRect eventRect;
     qreal rightMargin = -1;
     const QTextDocument *doc;
+    QPlainTextDocumentLayout *documentLayout;
     const int documentWidth;
     const QTextCursor textCursor;
     const QTextBlock textCursorBlock;
@@ -221,6 +223,16 @@ struct PaintEventBlockData
 static inline bool isPrintableText(const QString &text)
 {
     return !text.isEmpty() && (text.at(0).isPrint() || text.at(0) == QLatin1Char('\t'));
+}
+
+static QTextLayout::FormatRange createBlockCursorCharFormatRange(int pos, const QPalette &palette)
+{
+    QTextLayout::FormatRange o;
+    o.start = pos;
+    o.length = 1;
+    o.format.setForeground(palette.base());
+    o.format.setBackground(palette.text());
+    return o;
 }
 
 // could go into QTextCursor...
@@ -423,10 +435,9 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     createToolBar();
 
     // That's how find results will be highlighted
-    // Let's trig search on text editor after 4 seconds
+    // Let's trig search on text editor after 4 seconds BUG
     QTimer::singleShot(4000, [=]{
-        highlightSearchResultsSlot("swipeView",
-                                   FindFlags(FindCaseSensitively | FindWholeWords));
+        highlightSearchResultsSlot("swipeView", FindFlags(FindCaseSensitively | FindWholeWords));
     });
 }
 
@@ -455,32 +466,32 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     connect(documentLayout, &QPlainTextDocumentLayout::updateBlock,
             this, &QmlCodeEditor::slotUpdateBlockNotify);
 
-//    connect(documentLayout, &QPlainTextDocumentLayout::updateExtraArea,
-//            m_rowBar, static_cast<void (QWidget::*)()>(&QWidget::update));
+    //    connect(documentLayout, &QPlainTextDocumentLayout::updateExtraArea,
+    //            m_rowBar, static_cast<void (QWidget::*)()>(&QWidget::update));
 
     connect(this, &QmlCodeEditor::requestBlockUpdate,
             documentLayout, &QPlainTextDocumentLayout::updateBlock);
 
-//    connect(documentLayout, &QPlainTextDocumentLayout::updateExtraArea,
-//            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
+    //    connect(documentLayout, &QPlainTextDocumentLayout::updateExtraArea,
+    //            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
 
-//    connect(documentLayout, &QAbstractTextDocumentLayout::documentSizeChanged,
-//            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
+    //    connect(documentLayout, &QAbstractTextDocumentLayout::documentSizeChanged,
+    //            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
 
-//    connect(documentLayout, &QAbstractTextDocumentLayout::update,
-//            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
+    //    connect(documentLayout, &QAbstractTextDocumentLayout::update,
+    //            this, &QmlCodeEditor::scheduleUpdateHighlightScrollBar);
 
     connect(document, &QmlCodeDocument::contentsChange,
             this, &QmlCodeEditor::editorContentsChange);
 
-//    connect(document, &QmlCodeDocument::aboutToReload,
-//            this, &QmlCodeEditor::documentAboutToBeReloaded);
+    //    connect(document, &QmlCodeDocument::aboutToReload,
+    //            this, &QmlCodeEditor::documentAboutToBeReloaded);
 
-//    connect(document, &QmlCodeDocument::reloadFinished,
-//            this, &QmlCodeEditor::documentReloadFinished);
+    //    connect(document, &QmlCodeDocument::reloadFinished,
+    //            this, &QmlCodeEditor::documentReloadFinished);
 
     con = connect(document, &QmlCodeDocument::tabSettingsChanged,
-            this, [this](){
+                  this, [this](){
         updateTabStops();
         m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
     });
@@ -488,8 +499,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     connect(document, &QmlCodeDocument::fontSettingsChanged,
             this, &QmlCodeEditor::applyFontSettingsDelayed);
 
-//    connect(document, &QmlCodeDocument::markRemoved,
-//            this, &QmlCodeEditor::markRemoved);
+    //    connect(document, &QmlCodeDocument::markRemoved,
+    //            this, &QmlCodeEditor::markRemoved);
 
     connect(document, &QmlCodeDocument::semanticInfoUpdated,
             this, &QmlCodeEditor::semanticInfoUpdated);
@@ -561,7 +572,7 @@ void QmlCodeEditor::slotUpdateBlockNotify(const QTextBlock &block)
         viewport()->update();
     } else {
         if (block.previous().isValid() && block.userState() != block.previous().userState()) {
-        /* The syntax highlighting state changes. This opens up for
+            /* The syntax highlighting state changes. This opens up for
            the possibility that the paragraph has braces that support
            code folding. In this case, do the save thing and also
            update the previous block, which might contain a fold
@@ -570,7 +581,7 @@ void QmlCodeEditor::slotUpdateBlockNotify(const QTextBlock &block)
         }
         if (!m_findScopeStart.isNull()) {
             if (block.position() < m_findScopeEnd.position()
-                && block.position() + block.length() >= m_findScopeStart.position()) {
+                    && block.position() + block.length() >= m_findScopeStart.position()) {
                 QTextBlock b = block.document()->findBlock(m_findScopeStart.position());
                 do {
                     emit requestBlockUpdate(b);
@@ -1238,11 +1249,11 @@ void QmlCodeEditor::paintOverlays(const PaintEventData& data, QPainter& painter)
         if (m_overlay->isVisible())
             m_overlay->paint(&painter, data.eventRect);
 
-//        if (m_snippetOverlay->isVisible())
-//            m_snippetOverlay->paint(&painter, data.eventRect);
+        //        if (m_snippetOverlay->isVisible())
+        //            m_snippetOverlay->paint(&painter, data.eventRect);
 
-//        if (!m_refactorOverlay->isEmpty())
-//            m_refactorOverlay->paint(&painter, data.eventRect);
+        //        if (!m_refactorOverlay->isEmpty())
+        //            m_refactorOverlay->paint(&painter, data.eventRect);
     }
 
     if (!m_searchResultOverlay->isEmpty()) {
@@ -1252,8 +1263,8 @@ void QmlCodeEditor::paintOverlays(const PaintEventData& data, QPainter& painter)
 }
 
 void QmlCodeEditor::setFindScope(const QTextCursor &start, const QTextCursor &end,
-                                  int verticalBlockSelectionFirstColumn,
-                                  int verticalBlockSelectionLastColumn)
+                                 int verticalBlockSelectionFirstColumn,
+                                 int verticalBlockSelectionLastColumn)
 {
     if (start != m_findScopeStart
             || end != m_findScopeEnd
@@ -1264,7 +1275,7 @@ void QmlCodeEditor::setFindScope(const QTextCursor &start, const QTextCursor &en
         m_findScopeVerticalBlockSelectionFirstColumn = verticalBlockSelectionFirstColumn;
         m_findScopeVerticalBlockSelectionLastColumn = verticalBlockSelectionLastColumn;
         viewport()->update();
-//        highlightSearchResultsInScrollBar();
+        //        highlightSearchResultsInScrollBar();
     }
 }
 
@@ -1311,7 +1322,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                    && */m_linkPressed
+                                                                                                                    && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1725,9 +1736,9 @@ void QmlCodeEditor::updateHighlights()
     updateCurrentLineHighlight();
 
     //        if (m_displaySettings.m_highlightBlocks) {
-    //            QTextCursor cursor = textCursor();
-    //            extraAreaHighlightFoldedBlockNumber = cursor.blockNumber();
-    //            m_highlightBlocksTimer.start(100);
+    //                QTextCursor cursor = textCursor();
+    //                extraAreaHighlightFoldedBlockNumber = cursor.blockNumber(); // BUG
+    //                m_highlightBlocksTimer.start(100);
     //        }
 }
 
@@ -2100,18 +2111,18 @@ void QmlCodeEditor::highlightSearchResults(const QTextBlock &block,
 
 void QmlCodeEditor::searchResultsReady(int beginIndex, int endIndex)
 {
-//    QVector<SearchResult> results;
-//    for (int index = beginIndex; index < endIndex; ++index) {
-//        foreach (Utils::FileSearchResult result, m_searchWatcher->resultAt(index)) {
-//            const QTextBlock &block = document()->findBlockByNumber(result.lineNumber - 1);
-//            const int matchStart = block.position() + result.matchStart;
-//            if (!inFindScope(matchStart, matchStart + result.matchLength))
-//                continue;
-//            results << SearchResult{matchStart, result.matchLength};
-//        }
-//    }
-//    m_searchResults << results;
-//    addSearchResultsToScrollBar(results);
+    //    QVector<SearchResult> results;
+    //    for (int index = beginIndex; index < endIndex; ++index) {
+    //        foreach (Utils::FileSearchResult result, m_searchWatcher->resultAt(index)) {
+    //            const QTextBlock &block = document()->findBlockByNumber(result.lineNumber - 1);
+    //            const int matchStart = block.position() + result.matchStart;
+    //            if (!inFindScope(matchStart, matchStart + result.matchLength))
+    //                continue;
+    //            results << SearchResult{matchStart, result.matchLength};
+    //        }
+    //    }
+    //    m_searchResults << results;
+    //    addSearchResultsToScrollBar(results);
 }
 
 void QmlCodeEditor::paintCurrentLineHighlight(const PaintEventData &data, QPainter &painter) const
@@ -2790,33 +2801,139 @@ void QmlCodeEditor::wheelEvent(QWheelEvent *event)
 
 void QmlCodeEditor::paintEvent(QPaintEvent* e)
 {
+    //    PaintEventData data(this, e, contentOffset());
+    //    QPainter painter(viewport());
+    //    // Set a brush origin so that the WaveUnderline knows where the wave started
+    //    painter.setBrushOrigin(data.offset);
+    //    painter.setRenderHint(QPainter::Antialiasing);
+
+    //    data.block = firstVisibleBlock();
+    //    data.context = getPaintContext();
+
+    //    // paint find scope on top of ifdefed out blocks and right margin
+    //    paintFindScope(data, painter);
+    //    paintSearchResultOverlay(data, painter);
+
+    //    while (data.block.isValid()) {
+    //        PaintEventBlockData blockData;
+    //        blockData.boundingRect = blockBoundingRect(data.block).translated(data.offset);
+
+    //        if (blockData.boundingRect.bottom() >= data.eventRect.top()
+    //                && blockData.boundingRect.top() <= data.eventRect.bottom()) {
+    //            blockData.position = data.block.position();
+    //            blockData.length = data.block.length();
+    //            paintCurrentLineHighlight(data, painter);
+    //        }
+
+    //        data.offset.ry() += blockData.boundingRect.height();
+    //        if (data.offset.y() > data.viewportRect.height())
+    //            break;
+    //        data.block = data.block.next();
+
+    //        if (!data.block.isVisible()) {
+    //            if (data.block.blockNumber() == m_visibleFoldedBlockNumber) {
+    //                data.visibleCollapsedBlock = data.block;
+    //                data.visibleCollapsedBlockOffset = data.offset;
+    //            }
+    //            // invisible blocks do have zero line count
+    //            data.block = data.doc->findBlockByLineNumber(data.block.firstLineNumber());
+    //        }
+    //    }
+
+    //    painter.setPen(data.context.palette.text().color());
+
+
+    //    updateAnimator(m_bracketsAnimator, painter);
+    //    updateAnimator(m_autocompleteAnimator, painter);
+
+    //    paintOverlays(data, painter);
+
+    //    QPlainTextEdit::paintEvent(e);
+
+    //    // paint a popup with the content of the collapsed block
+    //    drawCollapsedBlockPopup(painter, data.visibleCollapsedBlock,
+    //                            data.visibleCollapsedBlockOffset, data.eventRect);
+
+
+    ///////////////////////////////////////////
+
+
+
     PaintEventData data(this, e, contentOffset());
+    QTC_ASSERT(data.documentLayout, return);
+
     QPainter painter(viewport());
     // Set a brush origin so that the WaveUnderline knows where the wave started
     painter.setBrushOrigin(data.offset);
-    painter.setRenderHint(QPainter::Antialiasing);
 
     data.block = firstVisibleBlock();
     data.context = getPaintContext();
+    // clear the back ground of the normal selection when in block selection mode
+    clearSelectionBackground(data);
 
-    // paint find scope on top of ifdefed out blocks and right margin
-    paintFindScope(data, painter);
-    paintSearchResultOverlay(data, painter);
+    { // paint background
+        // draw backgrond to the right of the wrap column before everything else
+        //        paintRightMarginArea(data, painter); // BUG
+        // paint a blended background color depending on scope depth
+        // We don't need this feature, paints block indentations
+        //        paintBlockHighlight(data, painter);
+        // paint background of if defed out blocks in bigger chunks
+        //        paintIfDefedOutBlocks(data, painter);
+        //        paintRightMarginLine(data, painter);
+        // paint find scope on top of ifdefed out blocks and right margin
+        paintFindScope(data, painter);
+        // paint search results on top of the find scope
+        paintSearchResultOverlay(data, painter);
+    }
 
     while (data.block.isValid()) {
+
         PaintEventBlockData blockData;
         blockData.boundingRect = blockBoundingRect(data.block).translated(data.offset);
 
         if (blockData.boundingRect.bottom() >= data.eventRect.top()
                 && blockData.boundingRect.top() <= data.eventRect.bottom()) {
+
+            setupBlockLayout(data, painter, blockData);
             blockData.position = data.block.position();
             blockData.length = data.block.length();
+            setupSelections(data, blockData);
+
             paintCurrentLineHighlight(data, painter);
+            //            paintBlockSelection(data, painter, blockData);
+
+            bool drawCursor = data.context.cursorPosition >= blockData.position
+                    && data.context.cursorPosition < blockData.position + blockData.length;
+
+            bool drawCursorAsBlock = drawCursor && overwriteMode() /*&& !m_inBlockSelectionMode*/;
+
+            if (drawCursorAsBlock)
+                paintCursorAsBlock(data, painter, blockData);
+
+            paintBlock(&painter, data.block, data.offset, blockData.selections, data.eventRect);
+
+            if ((drawCursor && !drawCursorAsBlock)
+                    || (data.isEditable && data.context.cursorPosition < -1
+                        && !blockData.layout->preeditAreaText().isEmpty())) {
+                setupCursorPosition(data, painter, blockData);
+            }
+
+            //            if ((!HostOsInfo::isMacHost()
+            //                 || m_blockSelection.positionColumn == m_blockSelection.anchorColumn)
+            //                    && blockData.blockSelectionCursorRect.isValid()) {
+            //                painter.fillRect(blockData.blockSelectionCursorRect, palette().text());
+            //            }
+
+            //            paintAdditionalVisualWhitespaces(data, painter, blockData.boundingRect.top());
+            paintReplacement(data, painter, blockData.boundingRect.top());
         }
+        //        updateLineAnnotation(data, blockData, painter);
 
         data.offset.ry() += blockData.boundingRect.height();
+
         if (data.offset.y() > data.viewportRect.height())
             break;
+
         data.block = data.block.next();
 
         if (!data.block.isVisible()) {
@@ -2824,24 +2941,258 @@ void QmlCodeEditor::paintEvent(QPaintEvent* e)
                 data.visibleCollapsedBlock = data.block;
                 data.visibleCollapsedBlockOffset = data.offset;
             }
+
             // invisible blocks do have zero line count
             data.block = data.doc->findBlockByLineNumber(data.block.firstLineNumber());
         }
     }
 
+    //    cleanupAnnotationCache();
+
     painter.setPen(data.context.palette.text().color());
 
+    // paint background of the widget that is not covered by the document
+    paintWidgetBackground(data, painter);
 
     updateAnimator(m_bracketsAnimator, painter);
     updateAnimator(m_autocompleteAnimator, painter);
 
     paintOverlays(data, painter);
 
-    QPlainTextEdit::paintEvent(e);
+    // draw the cursor last, on top of everything
+    paintCursor(data, painter);
 
     // paint a popup with the content of the collapsed block
     drawCollapsedBlockPopup(painter, data.visibleCollapsedBlock,
                             data.visibleCollapsedBlockOffset, data.eventRect);
+}
+
+void QmlCodeEditor::paintCursorAsBlock(const PaintEventData &data, QPainter &painter,
+                                       PaintEventBlockData &blockData) const
+{
+    const QFontMetricsF fontMetrics(blockData.layout->font());
+    int relativePos = data.context.cursorPosition - blockData.position;
+    bool doSelection = true;
+    QTextLine line = blockData.layout->lineForTextPosition(relativePos);
+    qreal x = line.cursorToX(relativePos);
+    qreal w = 0;
+    if (relativePos < line.textLength() - line.textStart()) {
+        w = line.cursorToX(relativePos + 1) - x;
+        if (data.doc->characterAt(data.context.cursorPosition) == QLatin1Char('\t')) {
+            doSelection = false;
+            qreal space = fontMetrics.width(QLatin1Char(' '));
+            if (w > space) {
+                x += w-space;
+                w = space;
+            }
+        }
+    } else
+        w = fontMetrics.width(QLatin1Char(' ')); // in sync with QTextLine::draw()
+
+    QRectF lineRect = line.rect();
+    lineRect.moveTop(lineRect.top() + blockData.boundingRect.top());
+    lineRect.moveLeft(blockData.boundingRect.left() + x);
+    lineRect.setWidth(w);
+    painter.fillRect(lineRect, palette().text());
+    if (doSelection)
+        blockData.selections.append(createBlockCursorCharFormatRange(relativePos, palette()));
+}
+
+void QmlCodeEditor::setupBlockLayout(const PaintEventData &data,
+                                     QPainter &painter,
+                                     PaintEventBlockData &blockData) const
+
+{
+    blockData.layout = data.block.layout();
+
+    QTextOption option = blockData.layout->textOption();
+    if (data.suppressSyntaxInIfdefedOutBlock && false/*TextDocumentLayout::ifdefedOut(data.block)*/) {
+        option.setFlags(option.flags() | QTextOption::SuppressColors);
+        painter.setPen(data.ifdefedOutFormat.foreground().color());
+    } else {
+        option.setFlags(option.flags() & ~QTextOption::SuppressColors);
+        painter.setPen(data.context.palette.text().color());
+    }
+    blockData.layout->setTextOption(option);
+    blockData.layout->setFont(data.doc->defaultFont());
+}
+
+void QmlCodeEditor::setupSelections(const PaintEventData &data,
+                                    PaintEventBlockData &blockData) const
+{
+    for (int i = 0; i < data.context.selections.size(); ++i) {
+        const QAbstractTextDocumentLayout::Selection &range = data.context.selections.at(i);
+        const int selStart = range.cursor.selectionStart() - blockData.position;
+        const int selEnd = range.cursor.selectionEnd() - blockData.position;
+        if (selStart < blockData.length && selEnd >= 0
+                && selEnd >= selStart) {
+            QTextLayout::FormatRange o;
+            o.start = selStart;
+            o.length = selEnd - selStart;
+            o.format = range.format;
+            //            if (i == data.blockSelectionIndex) { BUG ??
+            //                QString text = data.block.text();
+            //                const TabSettings &ts = codeDocument()->tabSettings();
+            //                o.start = ts.positionAtColumn(text, m_blockSelection.firstVisualColumn());
+            //                o.length = ts.positionAtColumn(text, m_blockSelection.lastVisualColumn()) - o.start;
+            //            }
+            if ((data.textCursor.hasSelection() && i == data.context.selections.size() - 1)
+                    || (o.format.foreground().style() == Qt::NoBrush
+                        && o.format.underlineStyle() != QTextCharFormat::NoUnderline
+                        && o.format.background() == Qt::NoBrush)) {
+                if (selectionVisible(data.block.blockNumber()))
+                    blockData.prioritySelections.append(o);
+            } else {
+                blockData.selections.append(o);
+            }
+        }
+    }
+    blockData.selections += blockData.prioritySelections;
+}
+
+void QmlCodeEditor::paintBlock(QPainter *painter,
+                               const QTextBlock &block,
+                               const QPointF &offset,
+                               const QVector<QTextLayout::FormatRange> &selections,
+                               const QRect &clipRect) const
+{
+    block.layout()->draw(painter, offset, selections, clipRect);
+}
+
+void QmlCodeEditor::setupCursorPosition(PaintEventData &data,
+                                        QPainter &painter,
+                                        PaintEventBlockData &blockData) const
+{
+    int cursorPos = data.context.cursorPosition;
+    if (cursorPos < -1)
+        cursorPos = blockData.layout->preeditAreaPosition() - (cursorPos + 2);
+    else
+        cursorPos -= blockData.position;
+    data.cursorLayout = blockData.layout;
+    data.cursorOffset = data.offset;
+    data.cursorPos = cursorPos;
+    data.cursorPen = painter.pen();
+}
+
+void QmlCodeEditor::paintReplacement(PaintEventData &data, QPainter &painter,
+                                     qreal top) const
+{
+    QTextBlock nextBlock = data.block.next();
+    QTextBlock nextVisibleBlock = QmlCodeEditor::nextVisibleBlock(data.block, data.doc);
+
+    if (nextBlock.isValid() && !nextBlock.isVisible() && replacementVisible(data.block.blockNumber())) {
+        const bool selectThis = (data.textCursor.hasSelection()
+                                 && nextBlock.position() >= data.textCursor.selectionStart()
+                                 && nextBlock.position() < data.textCursor.selectionEnd());
+        painter.save();
+        if (selectThis) {
+            painter.setBrush(palette().highlight());
+        } else {
+            QColor rc = replacementPenColor(data.block.blockNumber());
+            if (rc.isValid())
+                painter.setPen(rc);
+        }
+
+        QTextLayout *layout = data.block.layout();
+        QTextLine line = layout->lineAt(layout->lineCount()-1);
+        QRectF lineRect = line.naturalTextRect().translated(data.offset.x(), top);
+        lineRect.adjust(0, 0, -1, -1);
+
+        QString replacement = foldReplacementText(data.block);
+        QString rectReplacement = QLatin1String(" {") + replacement + QLatin1String("}; ");
+
+        QRectF collapseRect(lineRect.right() + 12,
+                            lineRect.top(),
+                            fontMetrics().width(rectReplacement),
+                            lineRect.height());
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.translate(.5, .5);
+        painter.drawRoundedRect(collapseRect.adjusted(0, 0, 0, -1), 3, 3);
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        painter.translate(-.5, -.5);
+
+        if (BlockData *nextBlockUserData = QmlCodeDocument::testUserData(nextBlock)) {
+            //            if (nextBlockUserData->foldingStartIncluded())
+            //                replacement.prepend(nextBlock.text().trimmed().left(1));
+        }
+
+        data.block = nextVisibleBlock.previous();
+        if (!data.block.isValid())
+            data.block = data.doc->lastBlock();
+
+        if (BlockData *blockUserData = QmlCodeDocument::testUserData(data.block)) {
+            //            if (blockUserData->foldingEndIncluded()) {
+            //                QString right = data.block.text().trimmed();
+            //                if (right.endsWith(QLatin1Char(';'))) {
+            //                    right.chop(1);
+            //                    right = right.trimmed();
+            //                    replacement.append(right.rightRef(right.endsWith('/') ? 2 : 1));
+            //                    replacement.append(QLatin1Char(';'));
+            //                } else { BUG
+            //                    replacement.append(right.rightRef(right.endsWith('/') ? 2 : 1));
+            //                }
+            //            }
+        }
+
+        if (selectThis)
+            painter.setPen(palette().highlightedText().color());
+        painter.drawText(collapseRect, Qt::AlignCenter, replacement);
+        painter.restore();
+    }
+}
+
+QColor QmlCodeEditor::replacementPenColor(int blockNumber) const
+{
+    Q_UNUSED(blockNumber)
+    return {};
+}
+
+QString QmlCodeEditor::foldReplacementText(const QTextBlock &) const
+{
+    return QString("· · ·");
+}
+
+bool QmlCodeEditor::selectionVisible(int blockNumber) const
+{
+    Q_UNUSED(blockNumber);
+    return true;
+}
+
+bool QmlCodeEditor::replacementVisible(int blockNumber) const
+{
+    Q_UNUSED(blockNumber)
+    return true;
+}
+
+void QmlCodeEditor::clearSelectionBackground(PaintEventData &data) const
+{
+    if (/*m_inBlockSelectionMode*/ false && data.context.selections.count()
+            && data.context.selections.last().cursor == data.textCursor) {
+        data.blockSelectionIndex = data.context.selections.size() - 1;
+        data.context.selections[data.blockSelectionIndex].format.clearBackground();
+    }
+}
+
+void QmlCodeEditor::paintWidgetBackground(const PaintEventData &data,
+                                          QPainter &painter) const
+{
+    if (backgroundVisible()
+            && !data.block.isValid()
+            && data.offset.y() <= data.eventRect.bottom()
+            && (centerOnScroll() || verticalScrollBar()->maximum() == verticalScrollBar()->minimum())) {
+        const QRect backGroundRect(QPoint(data.eventRect.left(), int(data.offset.y())),
+                                   data.eventRect.bottomRight());
+        painter.fillRect(backGroundRect, palette().background());
+    }
+}
+
+void QmlCodeEditor::paintCursor(const PaintEventData &data, QPainter &painter) const
+{
+    if (!data.cursorLayout /* BUG || m_inBlockSelectionMode*/)
+        return;
+    painter.setPen(data.cursorPen);
+    data.cursorLayout->drawCursor(&painter, data.cursorOffset,
+                                  data.cursorPos, cursorWidth());
 }
 
 void QmlCodeEditor::scrollContentsBy(int dx, int dy)
@@ -2865,25 +3216,6 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
 
     hideContextPane();
 }
-
-//void QmlCodeEditor::keyPressEvent(QKeyEvent* e)
-//{
-//    if (e->key() == Qt::Key_Tab && e->modifiers() == Qt::NoModifier)
-//        codeDocument()->autoIndent(textCursor());
-
-//    if (e->key() != Qt::Key_Backspace && e->key() != Qt::Key_Tab
-//            && e->key() != Qt::Key_Return && e->key() != Qt::Key_Enter
-//            && e->modifiers() == Qt::NoModifier) {
-//        if (!m_codeAssistant->hasContext())
-//            m_codeAssistant->invoke(TextEditor::Completion);
-//    }
-
-//    if (e->key() != Qt::Key_Tab)
-//        QPlainTextEdit::keyPressEvent(e);
-
-//    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
-//        codeDocument()->autoIndent(textCursor());
-//}
 
 void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
 {

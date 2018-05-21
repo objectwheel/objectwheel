@@ -7,6 +7,7 @@
 
 class QmlCodeEditorWidgetPrivate;
 class Control;
+class QmlCodeEditor;
 
 struct DocumentData {
     QmlCodeDocument* document;
@@ -54,6 +55,7 @@ public:
     void closeDocument(Control* control, const QString& documentPath, const bool ask = true);
     void saveControl(Control* control);
     void saveDocument(Control* control, const QString& documentPath);
+    QmlCodeEditor* editor() const;
 
 public slots:
     void reset();

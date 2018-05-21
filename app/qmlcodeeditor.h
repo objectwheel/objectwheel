@@ -19,6 +19,7 @@ class RowBar;
 class QmlCodeDocument;
 class HoverHandlerRunner;
 struct PaintEventData;
+struct PaintEventBlockData;
 
 namespace QmlJSTools {
 class SemanticInfo;
@@ -82,6 +83,18 @@ private:
     QSizeF m_size;
 };
 
+struct TextEditorPrivateHighlightBlocks
+{
+    QList<int> open;
+    QList<int> close;
+    QList<int> visualIndent;
+    inline int count() const { return visualIndent.size(); }
+    inline bool isEmpty() const { return open.isEmpty() || close.isEmpty() || visualIndent.isEmpty(); }
+    inline bool operator==(const TextEditorPrivateHighlightBlocks &o) const {
+        return (open == o.open && close == o.close && visualIndent == o.visualIndent);
+    }
+    inline bool operator!=(const TextEditorPrivateHighlightBlocks &o) const { return !(*this == o); }
+};
 
 class QmlCodeEditor : public QPlainTextEdit
 {
@@ -205,6 +218,19 @@ private:
     void invokeAssist(TextEditor::AssistKind kind, TextEditor::IAssistProvider* provider = nullptr);
     void abortAssist();
     void setFindScope(const QTextCursor& start, const QTextCursor& end, int verticalBlockSelectionFirstColumn, int verticalBlockSelectionLastColumn);
+    void paintCursor(const PaintEventData& data, QPainter& painter) const;
+    void paintWidgetBackground(const PaintEventData& data, QPainter& painter) const;
+    void clearSelectionBackground(PaintEventData& data) const;
+    void paintReplacement(PaintEventData& data, QPainter& painter, qreal top) const;
+    void setupCursorPosition(PaintEventData& data, QPainter& painter, PaintEventBlockData& blockData) const;
+    void paintBlock(QPainter* painter, const QTextBlock& block, const QPointF& offset, const QVector<QTextLayout::FormatRange>& selections, const QRect& clipRect) const;
+    void setupSelections(const PaintEventData& data, PaintEventBlockData& blockData) const;
+    void setupBlockLayout(const PaintEventData& data, QPainter& painter, PaintEventBlockData& blockData) const;
+    void paintCursorAsBlock(const PaintEventData& data, QPainter& painter, PaintEventBlockData& blockData) const;
+    bool selectionVisible(int blockNumber) const;
+    bool replacementVisible(int blockNumber) const;
+    QString foldReplacementText(const QTextBlock&) const;
+    QColor replacementPenColor(int blockNumber) const;
 
 signals:
     void requestBlockUpdate(const QTextBlock &);
