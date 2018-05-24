@@ -15,6 +15,11 @@ control id'leri ow hariç başka bir editör ile qml dosyası içinden değişti
 properties pane de objelerin focus alması kolaylaşsın
 qml editör'ün file explorer'ini sol tarafa al
 
+Editör'de ki Mark'ların tooltiplerine ikon ekle aynı Qt gibi olsun
+Editör'e find replace özelliği ekle
+Editör'e circularclipboard'ı ekle
+Editör'de import bloğunu da bracket banda ekle
+
 control inspector'un horizontal scrollbarı ı neden her "refresp preview" operasyonu sonrası çıldırıyor uzuyor
 properties pane'de geometry'yi unutma
 genel inline todo temizliği

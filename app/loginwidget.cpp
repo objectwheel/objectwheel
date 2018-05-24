@@ -78,7 +78,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _layout->setAlignment(_legalLabel, Qt::AlignCenter);
 
     _autologinLayout->setSpacing(5);
-    _autologinLayout->setContentsMargins(2.5, 0, 0, 0);
+    _autologinLayout->setContentsMargins(2, 0, 0, 0);
     _autologinLayout->addWidget(_autologinSwitch);
     _autologinLayout->addWidget(_autologinLabel);
     _autologinLayout->setAlignment(_autologinLabel, Qt::AlignVCenter);
@@ -227,7 +227,7 @@ void LoginWidget::onLoginButtonClick()
 
 //    lock();
 
-//    const auto& plan = Authenticator::instance()->login(email, password);
+//    const auto& plan = Authenticator::login(email, password);
 //    bool succeed = !plan.isEmpty();
 
 //    if (!succeed) {

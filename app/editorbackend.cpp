@@ -3,7 +3,7 @@
 
 QList<QmlCodeDocument*> EditorBackend::m_documents;
 
-EditorBackend::EditorBackend()
+EditorBackend::EditorBackend(QObject* parent) : QObject(parent)
 {
     m_modelManager.delayedInitialization();
     m_textEditorSettings = new TextEditor::TextEditorSettings;

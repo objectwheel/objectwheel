@@ -15,78 +15,84 @@
 
 typedef QCryptographicHash Hasher;
 
-Authenticator::Authenticator()
+Authenticator* Authenticator::s_instance = nullptr;
+QUrl Authenticator::s_host;
+QString Authenticator::s_message;
+
+Authenticator::Authenticator(QObject* parent) : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, parent)
 {
-    connect(this, SIGNAL(disconnected()),
-      SLOT(onDisconnected()));
-    connect(this, SIGNAL(error(QAbstractSocket::SocketError)),
-      SLOT(onError(QAbstractSocket::SocketError)));
-    connect(this, SIGNAL(sslErrors(QList<QSslError>)),
-      SLOT(onSslErrors(QList<QSslError>)));
-    connect(this, SIGNAL(textMessageReceived(QString)),
-      SLOT(onTextMessageReceived(QString)));
+    s_instance = this;
+    connect(this, &Authenticator::disconnected, this, &Authenticator::onDisconnected);
+    connect(this, qOverload<QAbstractSocket::SocketError>(&Authenticator::error),
+            this, &Authenticator::onError);
+    connect(this, &Authenticator::sslErrors, this, &Authenticator::onSslErrors);
+    connect(this, &Authenticator::textMessageReceived, this, &Authenticator::onTextMessageReceived);
+}
+
+Authenticator::~Authenticator()
+{
+    s_instance = nullptr;
 }
 
 Authenticator* Authenticator::instance()
 {
-    static Authenticator instance;
-    return &instance;
+    return s_instance;
 }
 
-void Authenticator::init(const QUrl& host)
+void Authenticator::setHost(const QUrl& host)
 {
-    _host = host;
+    s_host = host;
 }
 
 bool Authenticator::connect(int timeout)
 {    
-    if (state() == QAbstractSocket::ConnectedState)
+    if (instance()->state() == QAbstractSocket::ConnectedState)
         return true;
 
-    open(_host);
-    ignoreSslErrors(); // FIXME: Remove this
+    instance()->open(s_host);
+    instance()->ignoreSslErrors(); // FIXME: Remove this
 
     Delayer::delay([=] () -> bool {
-        return state() == QAbstractSocket::ConnectedState;
+        return instance()->state() == QAbstractSocket::ConnectedState;
     }, true, timeout);
 
-    if (state() != QAbstractSocket::ConnectedState)
-        close();
+    if (instance()->state() != QAbstractSocket::ConnectedState)
+        instance()->close();
 
-    return state() == QAbstractSocket::ConnectedState;
+    return instance()->state() == QAbstractSocket::ConnectedState;
 }
 
 QString Authenticator::readSync(int timeout)
 {
      QString incoming;
-     if (state() != QAbstractSocket::ConnectedState)
+     if (instance()->state() != QAbstractSocket::ConnectedState)
          return incoming;
 
-     Delayer::delay(std::bind(&QString::isEmpty, &_message), false, timeout);
+     Delayer::delay(std::bind(&QString::isEmpty, &s_message), false, timeout);
 
-     incoming = _message;
-     _message.clear();
+     incoming = s_message;
+     s_message.clear();
 
      return incoming;
 }
 
 void Authenticator::onDisconnected()
 {
-    _message.clear();
+    s_message.clear();
 }
 
 void Authenticator::onError(QAbstractSocket::SocketError)
 {
-    _message.clear();
+    s_message.clear();
 }
 void Authenticator::onSslErrors(const QList<QSslError>&)
 {
-    _message.clear();
+    s_message.clear();
 }
 
 void Authenticator::onTextMessageReceived(const QString& message)
 {
-    _message = message;
+    s_message = message;
 }
 
 bool Authenticator::signup(
@@ -104,7 +110,7 @@ bool Authenticator::signup(
     if (!connect(TIMEOUT))
         return false;
 
-    sendTextMessage(
+    instance()->sendTextMessage(
         TYPE_SIGNUP + ENDL +
         recaptcha + ENDL +
         first + ENDL +
@@ -119,7 +125,7 @@ bool Authenticator::signup(
 
     const auto& incoming = readSync(TIMEOUT);
 
-    close();
+    instance()->close();
 
     return incoming == TYPE_SUCCESS;
 }
@@ -129,7 +135,7 @@ bool Authenticator::verify(const QString& email, const QString& code)
     if (!connect(TIMEOUT))
         return false;
 
-    sendTextMessage(
+    instance()->sendTextMessage(
         TYPE_VERIFY + ENDL +
         email + ENDL +
         code + ENDL
@@ -137,7 +143,7 @@ bool Authenticator::verify(const QString& email, const QString& code)
 
     const auto& incoming = readSync(TIMEOUT);
 
-    close();
+    instance()->close();
 
     return incoming == TYPE_SUCCESS;
 }
@@ -147,14 +153,14 @@ bool Authenticator::forget(const QString& email)
     if (!connect(TIMEOUT))
         return false;
 
-    sendTextMessage(
+    instance()->sendTextMessage(
         TYPE_FORGET + ENDL +
         email + ENDL
     );
 
     const auto& incoming = readSync(TIMEOUT);
 
-    close();
+    instance()->close();
 
     return incoming == TYPE_SUCCESS;
 }
@@ -164,14 +170,14 @@ bool Authenticator::resend(const QString& email)
     if (!connect(TIMEOUT))
         return false;
 
-    sendTextMessage(
+    instance()->sendTextMessage(
         TYPE_RESEND + ENDL +
         email + ENDL
     );
 
     const auto& incoming = readSync(TIMEOUT);
 
-    close();
+    instance()->close();
 
     return incoming == TYPE_SUCCESS;
 
@@ -182,7 +188,7 @@ bool Authenticator::reset(const QString& email, const QString& password, const Q
     if (!connect(TIMEOUT))
         return false;
 
-    sendTextMessage(
+    instance()->sendTextMessage(
         TYPE_RESET + ENDL +
         email + ENDL +
         Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL +
@@ -191,7 +197,7 @@ bool Authenticator::reset(const QString& email, const QString& password, const Q
 
     const auto& incoming = readSync(TIMEOUT);
 
-    close();
+    instance()->close();
 
     return incoming == TYPE_SUCCESS;
 }
@@ -201,7 +207,7 @@ QString Authenticator::login(const QString& email, const QString& password)
     if (!connect(TIMEOUT))
         return QString();
 
-    sendTextMessage(
+    instance()->sendTextMessage(
         TYPE_LOGIN + ENDL +
         email + ENDL +
         Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL
@@ -215,7 +221,7 @@ QString Authenticator::login(const QString& email, const QString& password)
 
     if (!succeed) {
         plan = "";
-        close();
+        instance()->close();
     }
 
     return plan;

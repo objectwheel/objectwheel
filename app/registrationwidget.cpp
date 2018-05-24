@@ -335,7 +335,7 @@ void RegistrationWidget::onNextClicked()
     lock();
 
     bool succeed =
-    Authenticator::instance()->signup(
+    Authenticator::signup(
         _response,
         static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),

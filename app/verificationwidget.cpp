@@ -185,7 +185,7 @@ void VerificationWidget::onResendClicked()
 
     lock();
 
-    bool succeed = Authenticator::instance()->resend(email);
+    bool succeed = Authenticator::resend(email);
 
     if (succeed) {
         clear();
@@ -225,7 +225,7 @@ void VerificationWidget::onVerifyClicked()
 
     lock();
 
-    bool succeed = Authenticator::instance()->verify(email, code);
+    bool succeed = Authenticator::verify(email, code);
 
     if (succeed)
         clear();

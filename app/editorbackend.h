@@ -32,7 +32,7 @@ public:
     { m_documents.removeAll(document); }
 
 private:
-    EditorBackend();
+    explicit EditorBackend(QObject* parent = nullptr);
     ~EditorBackend();
 
 private:

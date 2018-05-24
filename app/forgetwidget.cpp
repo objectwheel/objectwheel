@@ -138,7 +138,7 @@ void ForgetWidget::onNextClicked()
     lock();
 
     bool succeed =
-    Authenticator::instance()->forget(
+    Authenticator::forget(
         static_cast<QLineEdit*>(_bulkEdit->get(Email))->text()
     );
 

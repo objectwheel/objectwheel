@@ -8,19 +8,37 @@
 #include <previewerbackend.h>
 #include <savetransaction.h>
 #include <editorbackend.h>
+#include <mainwindow.h>
 #include <QMessageBox>
-#include <coreplugin/coreconstants.h>
 
-EditorBackend* BackendManager::m_editorBackend = nullptr;
+#include <coreplugin/coreconstants.h>
+#include <theme/theme_p.h>
+#include <coreplugin/themechooser.h>
+#include <coreplugin/helpmanager.h>
+
+using namespace Core;
+
+Authenticator* BackendManager::s_authenticator = nullptr;
+HelpManager* BackendManager::s_helpManager = nullptr;
+EditorBackend* BackendManager::s_editorBackend = nullptr;
 
 BackendManager::BackendManager()
 {
-    Core::HelpManager::setupHelpManager();
-    Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
-    connect(qApp, &QCoreApplication::aboutToQuit, &m_helpManager, &Core::HelpManager::aboutToShutdown);
+    s_authenticator = new Authenticator(this);
+    s_helpManager = new HelpManager(this);
+    HelpManager::setupHelpManager();
+    Utils::setCreatorTheme(Internal::ThemeEntry::createTheme(Constants::DEFAULT_THEME));
+    connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
+
+    s_editorBackend = new EditorBackend(this);
+
+    connect(ProjectBackend::instance(), &ProjectBackend::started,
+            static_cast<MainWindow*>(WindowManager::instance()->get(WindowManager::Main)), &MainWindow::reset);
+    connect(ProjectBackend::instance(), &ProjectBackend::started, this, &BackendManager::onProjectStart);
+    connect(UserBackend::instance(), &UserBackend::aboutToStop, this, &BackendManager::onSessionStop);
 
     SaveTransaction::instance();
-    Authenticator::instance()->init(QUrl(APP_WSSSERVER));
+    Authenticator::setHost(QUrl(APP_WSSSERVER));
 
     if (!PreviewerBackend::instance()->init()) {
         QMessageBox::critical(
@@ -31,27 +49,10 @@ BackendManager::BackendManager()
     }
 }
 
-BackendManager::~BackendManager()
-{
-    delete m_editorBackend;
-}
-
-BackendManager* BackendManager::instance()
-{
-    static BackendManager instance;
-    return &instance;
-}
-
 void BackendManager::init()
 {
-    m_editorBackend = new EditorBackend;
-
-    connect(ProjectBackend::instance(), SIGNAL(started()),
-            WindowManager::instance()->get(WindowManager::Main), SLOT(reset()));
-    connect(ProjectBackend::instance(), SIGNAL(started()),
-            instance(), SLOT(handleProjectStart()));
-    connect(UserBackend::instance(), SIGNAL(aboutToStop()),
-            instance(), SLOT(handleSessionStop()));
+    static BackendManager instance;
+    Q_UNUSED(instance)
 }
 
 QSettings* BackendManager::settings(QSettings::Scope scope)
@@ -70,12 +71,12 @@ QString BackendManager::userResourcePath()
     return tr(":");
 }
 
-void BackendManager::handleSessionStop() const
+void BackendManager::onSessionStop()
 {
     ProjectBackend::instance()->stop();
 }
 
-void BackendManager::handleProjectStart() const
+void BackendManager::onProjectStart()
 {
     PreviewerBackend::instance()->restart();
     PreviewerBackend::instance()->requestInit(ProjectBackend::instance()->dir());

@@ -28,9 +28,9 @@
 #include "qmljssemanticinfo.h"
 #include "qmljsbundleprovider.h"
 #include <editorbackend.h>
-#include <backendmanager.h>
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
+#include <backendmanager.h>
 
 ////#include <coreplugin/icore.h>
 //#include <coreplugin/editormanager/documentmodel.h>
@@ -85,62 +85,62 @@ ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() 
 {
     ModelManagerInterface::ProjectInfo projectInfo/*(project)*/;
     projectInfo.qmlDumpEnvironment = Utils::Environment::systemEnvironment();
-//    Target *activeTarget = nullptr;
-//    if (project) {
-//        const QSet<QString> qmlTypeNames = { Constants::QML_MIMETYPE ,Constants::QBS_MIMETYPE,
-//                                             Constants::QMLPROJECT_MIMETYPE,
-//                                             Constants::QMLTYPES_MIMETYPE,
-//                                             Constants::QMLUI_MIMETYPE };
-//        projectInfo.sourceFiles = Utils::transform(project->files([&qmlTypeNames](const Node *n) {
-//            if (!Project::SourceFiles(n))
-//                return false;
-//            const FileNode *fn = n->asFileNode();
-//            return fn && fn->fileType() == FileType::QML
-//                    && qmlTypeNames.contains(Utils::mimeTypeForFile(fn->filePath().toString(),
-//                                                                    MimeMatchMode::MatchExtension).name());
-//        }), &FileName::toString);
-//        activeTarget = project->activeTarget();
-//    }
-//    Kit *activeKit = activeTarget ? activeTarget->kit() : KitManager::defaultKit();
-//    QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(activeKit);
+    //    Target *activeTarget = nullptr;
+    //    if (project) {
+    //        const QSet<QString> qmlTypeNames = { Constants::QML_MIMETYPE ,Constants::QBS_MIMETYPE,
+    //                                             Constants::QMLPROJECT_MIMETYPE,
+    //                                             Constants::QMLTYPES_MIMETYPE,
+    //                                             Constants::QMLUI_MIMETYPE };
+    //        projectInfo.sourceFiles = Utils::transform(project->files([&qmlTypeNames](const Node *n) {
+    //            if (!Project::SourceFiles(n))
+    //                return false;
+    //            const FileNode *fn = n->asFileNode();
+    //            return fn && fn->fileType() == FileType::QML
+    //                    && qmlTypeNames.contains(Utils::mimeTypeForFile(fn->filePath().toString(),
+    //                                                                    MimeMatchMode::MatchExtension).name());
+    //        }), &FileName::toString);
+    //        activeTarget = project->activeTarget();
+    //    }
+    //    Kit *activeKit = activeTarget ? activeTarget->kit() : KitManager::defaultKit();
+    //    QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(activeKit);
 
-//    bool preferDebugDump = false;
-//    bool setPreferDump = false;
-//    projectInfo.tryQmlDump = false;
+    //    bool preferDebugDump = false;
+    //    bool setPreferDump = false;
+    //    projectInfo.tryQmlDump = false;
 
-//    if (activeTarget) {
-//        if (BuildConfiguration *bc = activeTarget->activeBuildConfiguration()) {
-//            preferDebugDump = bc->buildType() == BuildConfiguration::Debug;
-//            setPreferDump = true;
-//            // Append QML2_IMPORT_PATH if it is defined in build configuration.
-//            // It enables qmlplugindump to correctly dump custom plugins or other dependent
-//            // plugins that are not installed in default Qt qml installation directory.
-//            projectInfo.qmlDumpEnvironment.appendOrSet("QML2_IMPORT_PATH", bc->environment().value("QML2_IMPORT_PATH"), ":");
-//        }
-//    }
-//    if (!setPreferDump && qtVersion)
-//        preferDebugDump = (qtVersion->defaultBuildConfig() & QtSupport::BaseQtVersion::DebugBuild);
-//    if (qtVersion && qtVersion->isValid()) {
-//        projectInfo.tryQmlDump = project && qtVersion->type() == QLatin1String(QtSupport::Constants::DESKTOPQT);
-//        projectInfo.qtQmlPath = qtVersion->qmlPath().toFileInfo().canonicalFilePath();
-//        projectInfo.qtImportsPath = QFileInfo(qtVersion->qmakeProperty("QT_INSTALL_IMPORTS")).canonicalFilePath();
-//        projectInfo.qtVersionString = qtVersion->qtVersionString();
-//    } else {
-        projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
-        projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
-        projectInfo.qtVersionString = QLatin1String(qVersion());
-//    }
+    //    if (activeTarget) {
+    //        if (BuildConfiguration *bc = activeTarget->activeBuildConfiguration()) {
+    //            preferDebugDump = bc->buildType() == BuildConfiguration::Debug;
+    //            setPreferDump = true;
+    //            // Append QML2_IMPORT_PATH if it is defined in build configuration.
+    //            // It enables qmlplugindump to correctly dump custom plugins or other dependent
+    //            // plugins that are not installed in default Qt qml installation directory.
+    //            projectInfo.qmlDumpEnvironment.appendOrSet("QML2_IMPORT_PATH", bc->environment().value("QML2_IMPORT_PATH"), ":");
+    //        }
+    //    }
+    //    if (!setPreferDump && qtVersion)
+    //        preferDebugDump = (qtVersion->defaultBuildConfig() & QtSupport::BaseQtVersion::DebugBuild);
+    //    if (qtVersion && qtVersion->isValid()) {
+    //        projectInfo.tryQmlDump = project && qtVersion->type() == QLatin1String(QtSupport::Constants::DESKTOPQT);
+    //        projectInfo.qtQmlPath = qtVersion->qmlPath().toFileInfo().canonicalFilePath();
+    //        projectInfo.qtImportsPath = QFileInfo(qtVersion->qmakeProperty("QT_INSTALL_IMPORTS")).canonicalFilePath();
+    //        projectInfo.qtVersionString = qtVersion->qtVersionString();
+    //    } else {
+    projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
+    projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
+    projectInfo.qtVersionString = QLatin1String(qVersion());
+    //    }
 
-//    if (projectInfo.tryQmlDump) {
-//        QtSupport::QmlDumpTool::pathAndEnvironment(activeKit,
-//                                                   preferDebugDump, &projectInfo.qmlDumpPath,
-//                                                   &projectInfo.qmlDumpEnvironment);
-//        projectInfo.qmlDumpHasRelocatableFlag = qtVersion->hasQmlDumpWithRelocatableFlag();
-//    } else {
-        projectInfo.qmlDumpPath.clear();
-        projectInfo.qmlDumpEnvironment.clear();
-        projectInfo.qmlDumpHasRelocatableFlag = true;
-//    }
+    //    if (projectInfo.tryQmlDump) {
+    //        QtSupport::QmlDumpTool::pathAndEnvironment(activeKit,
+    //                                                   preferDebugDump, &projectInfo.qmlDumpPath,
+    //                                                   &projectInfo.qmlDumpEnvironment);
+    //        projectInfo.qmlDumpHasRelocatableFlag = qtVersion->hasQmlDumpWithRelocatableFlag();
+    //    } else {
+    projectInfo.qmlDumpPath.clear();
+    projectInfo.qmlDumpEnvironment.clear();
+    projectInfo.qmlDumpHasRelocatableFlag = true;
+    //    }
     setupProjectInfoQmlBundles(projectInfo);
     return projectInfo;
 }
@@ -149,10 +149,10 @@ ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() 
 
 void setupProjectInfoQmlBundles(ModelManagerInterface::ProjectInfo &projectInfo)
 {
-//    Target *activeTarget = 0;
-//    if (projectInfo.project)
-//        activeTarget = projectInfo.project->activeTarget();
-//    Kit *activeKit = activeTarget ? activeTarget->kit() : KitManager::defaultKit();
+    //    Target *activeTarget = 0;
+    //    if (projectInfo.project)
+    //        activeTarget = projectInfo.project->activeTarget();
+    //    Kit *activeKit = activeTarget ? activeTarget->kit() : KitManager::defaultKit();
     QHash<QString, QString> replacements;
     replacements.insert(QLatin1String("$(QT_INSTALL_IMPORTS)"), projectInfo.qtImportsPath);
     replacements.insert(QLatin1String("$(QT_INSTALL_QML)"), projectInfo.qtQmlPath);
@@ -162,16 +162,16 @@ void setupProjectInfoQmlBundles(ModelManagerInterface::ProjectInfo &projectInfo)
 
     projectInfo.extendedBundle = projectInfo.activeBundle;
 
-//    if (projectInfo.project) {
-//        QSet<Kit *> currentKits;
-//        foreach (const Target *t, projectInfo.project->targets())
-//            currentKits.insert(t->kit());
-//        currentKits.remove(activeKit);
-//        foreach (Kit *kit, currentKits) {
-//            for (IBundleProvider *bp : IBundleProvider::allBundleProviders())
-//                bp->mergeBundlesForKit(kit, projectInfo.extendedBundle, replacements);
-//        }
-//    }
+    //    if (projectInfo.project) {
+    //        QSet<Kit *> currentKits;
+    //        foreach (const Target *t, projectInfo.project->targets())
+    //            currentKits.insert(t->kit());
+    //        currentKits.remove(activeKit);
+    //        foreach (Kit *kit, currentKits) {
+    //            for (IBundleProvider *bp : IBundleProvider::allBundleProviders())
+    //                bp->mergeBundlesForKit(kit, projectInfo.extendedBundle, replacements);
+    //        }
+    //    }
 }
 
 namespace Internal {
@@ -181,26 +181,25 @@ QHash<QString,Dialect> ModelManager::initLanguageForSuffix() const
 {
     QHash<QString,Dialect> res = ModelManagerInterface::languageForSuffix();
 
-    if (BackendManager::instance()) {
-        MimeType jsSourceTy = Utils::mimeTypeForName(Constants::JS_MIMETYPE);
-        foreach (const QString &suffix, jsSourceTy.suffixes())
-            res[suffix] = Dialect::JavaScript;
-        MimeType qmlSourceTy = Utils::mimeTypeForName(Constants::QML_MIMETYPE);
-        foreach (const QString &suffix, qmlSourceTy.suffixes())
-            res[suffix] = Dialect::Qml;
-        MimeType qbsSourceTy = Utils::mimeTypeForName(Constants::QBS_MIMETYPE);
-        foreach (const QString &suffix, qbsSourceTy.suffixes())
-            res[suffix] = Dialect::QmlQbs;
-        MimeType qmlProjectSourceTy = Utils::mimeTypeForName(Constants::QMLPROJECT_MIMETYPE);
-        foreach (const QString &suffix, qmlProjectSourceTy.suffixes())
-            res[suffix] = Dialect::QmlProject;
-        MimeType qmlUiSourceTy = Utils::mimeTypeForName(Constants::QMLUI_MIMETYPE);
-        foreach (const QString &suffix, qmlUiSourceTy.suffixes())
-            res[suffix] = Dialect::QmlQtQuick2Ui;
-        MimeType jsonSourceTy = Utils::mimeTypeForName(Constants::JSON_MIMETYPE);
-        foreach (const QString &suffix, jsonSourceTy.suffixes())
-            res[suffix] = Dialect::Json;
-    }
+    MimeType jsSourceTy = Utils::mimeTypeForName(Constants::JS_MIMETYPE);
+    foreach (const QString &suffix, jsSourceTy.suffixes())
+        res[suffix] = Dialect::JavaScript;
+    MimeType qmlSourceTy = Utils::mimeTypeForName(Constants::QML_MIMETYPE);
+    foreach (const QString &suffix, qmlSourceTy.suffixes())
+        res[suffix] = Dialect::Qml;
+    MimeType qbsSourceTy = Utils::mimeTypeForName(Constants::QBS_MIMETYPE);
+    foreach (const QString &suffix, qbsSourceTy.suffixes())
+        res[suffix] = Dialect::QmlQbs;
+    MimeType qmlProjectSourceTy = Utils::mimeTypeForName(Constants::QMLPROJECT_MIMETYPE);
+    foreach (const QString &suffix, qmlProjectSourceTy.suffixes())
+        res[suffix] = Dialect::QmlProject;
+    MimeType qmlUiSourceTy = Utils::mimeTypeForName(Constants::QMLUI_MIMETYPE);
+    foreach (const QString &suffix, qmlUiSourceTy.suffixes())
+        res[suffix] = Dialect::QmlQtQuick2Ui;
+    MimeType jsonSourceTy = Utils::mimeTypeForName(Constants::JSON_MIMETYPE);
+    foreach (const QString &suffix, jsonSourceTy.suffixes())
+        res[suffix] = Dialect::Json;
+
     return res;
 }
 
@@ -222,16 +221,16 @@ ModelManager::~ModelManager()
 
 void ModelManager::delayedInitialization()
 {
-//    CppTools::CppModelManager *cppModelManager = CppTools::CppModelManager::instance();
-//    // It's important to have a direct connection here so we can prevent
-//    // the source and AST of the cpp document being cleaned away.
-//    connect(cppModelManager, &CppTools::CppModelManager::documentUpdated,
-//            this, &ModelManagerInterface::maybeQueueCppQmlTypeUpdate, Qt::DirectConnection);
+    //    CppTools::CppModelManager *cppModelManager = CppTools::CppModelManager::instance();
+    //    // It's important to have a direct connection here so we can prevent
+    //    // the source and AST of the cpp document being cleaned away.
+    //    connect(cppModelManager, &CppTools::CppModelManager::documentUpdated,
+    //            this, &ModelManagerInterface::maybeQueueCppQmlTypeUpdate, Qt::DirectConnection);
 
-//    connect(SessionManager::instance(), &SessionManager::projectRemoved,
-//            this, &ModelManager::removeProjectInfo);
-//    connect(SessionManager::instance(), &SessionManager::startupProjectChanged,
-//            this, &ModelManager::updateDefaultProjectInfo);
+    //    connect(SessionManager::instance(), &SessionManager::projectRemoved,
+    //            this, &ModelManager::removeProjectInfo);
+    //    connect(SessionManager::instance(), &SessionManager::startupProjectChanged,
+    //            this, &ModelManager::updateDefaultProjectInfo);
 
     ViewerContext qbsVContext;
     qbsVContext.language = Dialect::QmlQbs;
@@ -243,50 +242,48 @@ void ModelManager::delayedInitialization()
 
 void ModelManager::loadDefaultQmlTypeDescriptions()
 {
-    if (BackendManager::instance()) {
-        loadQmlTypeDescriptionsInternal(BackendManager::resourcePath());
-        loadQmlTypeDescriptionsInternal(BackendManager::userResourcePath());
-    }
+    loadQmlTypeDescriptionsInternal(BackendManager::resourcePath());
+    loadQmlTypeDescriptionsInternal(BackendManager::userResourcePath());
 }
 
 void ModelManager::writeMessageInternal(const QString &msg) const
 {
-//    MessageManager::write(msg, MessageManager::Flash);
+    //    MessageManager::write(msg, MessageManager::Flash);
 }
 
 ModelManagerInterface::WorkingCopy ModelManager::workingCopyInternal() const
 {
-//    WorkingCopy workingCopy;
+    //    WorkingCopy workingCopy;
 
-//    if (!Core::ICore::instance())
-//        return workingCopy;
+    //    if (!Core::ICore::instance())
+    //        return workingCopy;
 
-//    foreach (IDocument *document, DocumentModel::openedDocuments()) {
-//        const QString key = document->filePath().toString();
-//        if (TextEditor::TextDocument *textDocument = qobject_cast<TextEditor::TextDocument *>(document)) {
-//            // TODO the language should be a property on the document, not the editor
-//            if (DocumentModel::editorsForDocument(document).first()
-//                    ->context().contains(ProjectExplorer::Constants::QMLJS_LANGUAGE_ID)) {
-//                workingCopy.insert(key, textDocument->plainText(),
-//                                   textDocument->document()->revision());
-//            }
-//        }
-//    }
+    //    foreach (IDocument *document, DocumentModel::openedDocuments()) {
+    //        const QString key = document->filePath().toString();
+    //        if (TextEditor::TextDocument *textDocument = qobject_cast<TextEditor::TextDocument *>(document)) {
+    //            // TODO the language should be a property on the document, not the editor
+    //            if (DocumentModel::editorsForDocument(document).first()
+    //                    ->context().contains(ProjectExplorer::Constants::QMLJS_LANGUAGE_ID)) {
+    //                workingCopy.insert(key, textDocument->plainText(),
+    //                                   textDocument->document()->revision());
+    //            }
+    //        }
+    //    }
 
-//    return workingCopy;
+    //    return workingCopy;
 
     //! Reimplemented as:
 
     WorkingCopy workingCopy;
 
-    if (!BackendManager::instance())
-        return workingCopy;
+//    if (!Core::instance())
+//        return workingCopy;
 
     if (EditorBackend::documents().isEmpty())
         return workingCopy;
 
     for (QmlCodeDocument *document : EditorBackend::documents())
-            workingCopy.insert(document->filePath(), document->toPlainText(), document->revision());
+        workingCopy.insert(document->filePath(), document->toPlainText(), document->revision());
 
     return workingCopy;
 }
@@ -294,10 +291,10 @@ ModelManagerInterface::WorkingCopy ModelManager::workingCopyInternal() const
 void ModelManager::updateDefaultProjectInfo()
 {
     // needs to be performed in the ui thread
-//    Project *currentProject = SessionManager::startupProject();
-//    ProjectInfo newDefaultProjectInfo = projectInfo(currentProject,
-//                                                    defaultProjectInfoForProject(currentProject));
-//    setDefaultProject(projectInfo(currentProject,newDefaultProjectInfo), currentProject);
+    //    Project *currentProject = SessionManager::startupProject();
+    //    ProjectInfo newDefaultProjectInfo = projectInfo(currentProject,
+    //                                                    defaultProjectInfoForProject(currentProject));
+    //    setDefaultProject(projectInfo(currentProject,newDefaultProjectInfo), currentProject);
 
     setDefaultProject(defaultProjectInfoForProject()); // Sonradan ekleme
 }
@@ -305,7 +302,7 @@ void ModelManager::updateDefaultProjectInfo()
 
 void ModelManager::addTaskInternal(QFuture<void> result, const QString &msg, const char *taskId) const
 {
-//    ProgressManager::addTask(result, msg, taskId);
+    //    ProgressManager::addTask(result, msg, taskId);
 }
 
 } // namespace Internal

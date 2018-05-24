@@ -211,7 +211,7 @@ void ResetWidget::onApplyClicked()
 
     lock();
 
-    bool succeed = Authenticator::instance()->reset(email, password, code);
+    bool succeed = Authenticator::reset(email, password, code);
 
     if (succeed)
         clear();

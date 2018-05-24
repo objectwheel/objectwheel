@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     CSS::init();
 
     // Create backend manager
-    BackendManager::instance()->init();
+    BackendManager::init();
 
     // Show welcome window
     WindowManager::instance()->show(WindowManager::Welcome);
