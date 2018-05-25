@@ -12,7 +12,7 @@
 
 QString Build::dir()
 {
-    auto projectDir = ProjectBackend::instance()->dir();
+    auto projectDir = ProjectBackend::dir();
 
     if (projectDir.isEmpty())
         return QString();

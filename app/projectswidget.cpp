@@ -306,7 +306,7 @@ void ProjectsWidget::refreshProjectList()
     if (UserBackend::instance()->dir().isEmpty())
         return;
 
-    auto projects = ProjectBackend::instance()->projects();
+    auto projects = ProjectBackend::projects();
 
     if (projects.size() < 1)
         return;
@@ -315,9 +315,9 @@ void ProjectsWidget::refreshProjectList()
         auto item = new QListWidgetItem;
         item->setIcon(QIcon(PATH_FILEICON));
         item->setData(Hash, hash);
-        item->setData(Name, ProjectBackend::instance()->name(hash));
-        item->setData(LastEdit, ProjectBackend::instance()->mfDate(hash));
-        item->setData(Active, hash == ProjectBackend::instance()->hash());
+        item->setData(Name, ProjectBackend::name(hash));
+        item->setData(LastEdit, ProjectBackend::mfDate(hash));
+        item->setData(Active, hash == ProjectBackend::hash());
         m_listWidget->addItem(item);
     }
 
@@ -331,7 +331,7 @@ void ProjectsWidget::startProject()
 {
     auto hash = m_listWidget->currentItem()->data(Hash).toString();
 
-    if (!ProjectBackend::instance()->start(hash)) {
+    if (!ProjectBackend::start(hash)) {
         qWarning() << "Project starting unsuccessful.";
         refreshProjectList();
         return;
@@ -350,7 +350,7 @@ void ProjectsWidget::startProject()
 void ProjectsWidget::onNewButtonClick()
 {
     if (UserBackend::instance()->dir().isEmpty()) return;
-    auto projects = ProjectBackend::instance()->projectNames();
+    auto projects = ProjectBackend::projectNames();
     int count = 1;
     QString projectName = "Project - 1";
 
@@ -389,7 +389,7 @@ void ProjectsWidget::onLoadButtonClick()
     }
 
     auto hash = m_listWidget->currentItem()->data(Hash).toString();
-    auto chash = ProjectBackend::instance()->hash();
+    auto chash = ProjectBackend::hash();
 
     if (!chash.isEmpty() && chash == hash) {
         emit done();
@@ -399,7 +399,7 @@ void ProjectsWidget::onLoadButtonClick()
 // FIXME
 //    if (dW->qmlEditorView()->hasUnsavedDocs()) {
 //        QMessageBox msgBox;
-//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::instance()->name()));
+//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::name()));
 //        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
 //        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
 //        msgBox.setDefaultButton(QMessageBox::SaveAll);
@@ -419,7 +419,7 @@ void ProjectsWidget::onLoadButtonClick()
 //    }
 
     WindowManager::instance()->hide(WindowManager::Main);
-    ProjectBackend::instance()->stop();
+    ProjectBackend::stop();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
 
     lock();
@@ -454,7 +454,7 @@ void ProjectsWidget::onExportButtonClick()
             pname + ".zip"
         )) return;
 
-        if (!ProjectBackend::instance()->exportProject(
+        if (!ProjectBackend::exportProject(
             hash,
             dialog.selectedFiles().at(0) +
             separator() +
@@ -478,7 +478,7 @@ void ProjectsWidget::onImportButtonClick()
 
     if (dialog.exec()) {
         for (auto fileName : dialog.selectedFiles()) {
-            if (!ProjectBackend::instance()->importProject(fileName)) {
+            if (!ProjectBackend::importProject(fileName)) {
                 QMessageBox::warning(
                     this,
                     "Operation Stopped",

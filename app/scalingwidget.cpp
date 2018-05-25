@@ -23,7 +23,7 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
 
 void ScalingWidget::reset()
 {
-    auto scaling = SaveUtils::scaling(ProjectBackend::instance()->dir());
+    auto scaling = SaveUtils::scaling(ProjectBackend::dir());
 
     if (scaling == "noScaling")
         m_noScalingButton->setChecked(true);
@@ -40,5 +40,5 @@ void ScalingWidget::saveTheme()
     else
         scaling = "noScaling";
 
-    SaveUtils::setProjectProperty(ProjectBackend::instance()->dir(), PTAG_SCALING, scaling);
+    SaveUtils::setProjectProperty(ProjectBackend::dir(), PTAG_SCALING, scaling);
 }

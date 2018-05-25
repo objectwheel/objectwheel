@@ -64,16 +64,16 @@ bool Authenticator::connect(int timeout)
 
 QString Authenticator::readSync(int timeout)
 {
-     QString incoming;
-     if (instance()->state() != QAbstractSocket::ConnectedState)
-         return incoming;
+    QString incoming;
+    if (instance()->state() != QAbstractSocket::ConnectedState)
+        return incoming;
 
-     Delayer::delay(std::bind(&QString::isEmpty, &s_message), false, timeout);
+    Delayer::delay(std::bind(&QString::isEmpty, &s_message), false, timeout);
 
-     incoming = s_message;
-     s_message.clear();
+    incoming = s_message;
+    s_message.clear();
 
-     return incoming;
+    return incoming;
 }
 
 void Authenticator::onDisconnected()
@@ -95,33 +95,25 @@ void Authenticator::onTextMessageReceived(const QString& message)
     s_message = message;
 }
 
-bool Authenticator::signup(
-    const QString& recaptcha,
-    const QString& first,
-    const QString& last,
-    const QString& email,
-    const QString& password,
-    const QString& country,
-    const QString& company,
-    const QString& title,
-    const QString& phone
-    )
+bool Authenticator::signup(const QString& recaptcha, const QString& first, const QString& last,
+                           const QString& email, const QString& password, const QString& country,
+                           const QString& company, const QString& title, const QString& phone)
 {
     if (!connect(TIMEOUT))
         return false;
 
     instance()->sendTextMessage(
-        TYPE_SIGNUP + ENDL +
-        recaptcha + ENDL +
-        first + ENDL +
-        last + ENDL +
-        email + ENDL +
-        Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL +
-        country + ENDL +
-        company + ENDL +
-        title + ENDL +
-        phone + ENDL
-    );
+                TYPE_SIGNUP + ENDL +
+                recaptcha + ENDL +
+                first + ENDL +
+                last + ENDL +
+                email + ENDL +
+                Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL +
+                country + ENDL +
+                company + ENDL +
+                title + ENDL +
+                phone + ENDL
+                );
 
     const auto& incoming = readSync(TIMEOUT);
 
@@ -136,10 +128,10 @@ bool Authenticator::verify(const QString& email, const QString& code)
         return false;
 
     instance()->sendTextMessage(
-        TYPE_VERIFY + ENDL +
-        email + ENDL +
-        code + ENDL
-    );
+                TYPE_VERIFY + ENDL +
+                email + ENDL +
+                code + ENDL
+                );
 
     const auto& incoming = readSync(TIMEOUT);
 
@@ -154,9 +146,9 @@ bool Authenticator::forget(const QString& email)
         return false;
 
     instance()->sendTextMessage(
-        TYPE_FORGET + ENDL +
-        email + ENDL
-    );
+                TYPE_FORGET + ENDL +
+                email + ENDL
+                );
 
     const auto& incoming = readSync(TIMEOUT);
 
@@ -171,9 +163,9 @@ bool Authenticator::resend(const QString& email)
         return false;
 
     instance()->sendTextMessage(
-        TYPE_RESEND + ENDL +
-        email + ENDL
-    );
+                TYPE_RESEND + ENDL +
+                email + ENDL
+                );
 
     const auto& incoming = readSync(TIMEOUT);
 
@@ -189,11 +181,11 @@ bool Authenticator::reset(const QString& email, const QString& password, const Q
         return false;
 
     instance()->sendTextMessage(
-        TYPE_RESET + ENDL +
-        email + ENDL +
-        Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL +
-        code + ENDL
-    );
+                TYPE_RESET + ENDL +
+                email + ENDL +
+                Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL +
+                code + ENDL
+                );
 
     const auto& incoming = readSync(TIMEOUT);
 
@@ -208,10 +200,10 @@ QString Authenticator::login(const QString& email, const QString& password)
         return QString();
 
     instance()->sendTextMessage(
-        TYPE_LOGIN + ENDL +
-        email + ENDL +
-        Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL
-    );
+                TYPE_LOGIN + ENDL +
+                email + ENDL +
+                Hasher::hash(password.toUtf8(), Hasher::Sha256).toHex() + ENDL
+                );
 
     auto incoming = readSync(TIMEOUT);
     QTextStream body(&incoming);

@@ -10,18 +10,9 @@
 #include <QJsonObject>
 #include <QDateTime>
 
-#define FILENAME    "project.json"
-#define PROJECTNAME "projectName"
-#define DESCRIPTION "description"
-#define OWNER       "owner"
-#define CRDATE      "crDate"
-#define MFDATE      "mfDate"
-#define SIZE        "size"
-#define HASH        "hash"
-#define OWPRJ       "owprj"
-#define SIGN_OWPRJ  "T3dwcmpfdjIuMA"
+namespace {
 
-static int biggestDir(const QString& basePath)
+int biggestDir(const QString& basePath)
 {
     int num = 0;
     for (auto dir : lsdir(basePath))
@@ -30,85 +21,69 @@ static int biggestDir(const QString& basePath)
     return num;
 }
 
-static QString byteString(const qint64 size)
+QString byteString(const qint64 size)
 {
-	QString ret;
-	float kb = 1024.0f;
-	float mb = 1048576.0f;
-	float gb = 1073741824.0f;
+    QString ret;
+    float kb = 1024.0f;
+    float mb = 1048576.0f;
+    float gb = 1073741824.0f;
 
-	if (size < kb) {
-		ret = QString::number(size);
-		ret += " Bytes";
-	} else if (size < mb) {
-		ret = QString::number(size / kb, 'f', 1);
-		ret += " KB";
-	} else if (size < gb) {
-		ret = QString::number(size / mb, 'f', 1);
-		ret += " MB";
-	} else {
-		ret = QString::number(size / gb, 'f', 2);
-		ret += " GB";
-	}
+    if (size < kb) {
+        ret = QString::number(size);
+        ret += " Bytes";
+    } else if (size < mb) {
+        ret = QString::number(size / kb, 'f', 1);
+        ret += " KB";
+    } else if (size < gb) {
+        ret = QString::number(size / mb, 'f', 1);
+        ret += " MB";
+    } else {
+        ret = QString::number(size / gb, 'f', 2);
+        ret += " GB";
+    }
 
-	return ret;
+    return ret;
 }
 
-static void setProperty(
-    const QString& rootPath,
-    const QString& property,
-    const QVariant& value
-    )
+void setProperty( const QString& rootPath, const QString& property, const QVariant& value)
 {
-    auto jobj = QJsonDocument::fromJson(
-        rdfile(
-            rootPath +
-            separator() +
-            FILENAME
-        )
-    ).object();
+    auto jobj = QJsonDocument::fromJson(rdfile(rootPath +separator() + FILE_PROJECT)).object();
 
     jobj[property] = value.toJsonValue();
-    jobj[MFDATE] = QDateTime::currentDateTime().
-                   toString(Qt::ISODate).replace("T", " ");
+    jobj[PTAG_MFDATE] = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
 
     const auto& data = QJsonDocument(jobj).toJson();
 
-    wrfile(
-        rootPath +
-        separator() +
-        FILENAME,
-        data
-    );
+    wrfile(rootPath + separator() + FILE_PROJECT, data);
 }
 
-static bool isOwprj(const QString& rootPath)
+bool isOwprj(const QString& rootPath)
 {
     const auto& jobj = QJsonDocument::fromJson(
-        rdfile(
-            rootPath +
-            separator() +
-            FILENAME
-        )
-    ).object();
+                rdfile(
+                    rootPath +
+                    separator() +
+                    FILE_PROJECT
+                    )
+                ).object();
 
-    return (jobj.value(OWPRJ).toString() == SIGN_OWPRJ);
+    return (jobj.value(PTAG_OWPRJ_SIGN).toString() == SIGN_OWPRJ);
 }
 
-static QString hash(const QString& rootPath)
+QString hash(const QString& rootPath)
 {
     const auto& jobj = QJsonDocument::fromJson(
-        rdfile(
-            rootPath +
-            separator() +
-            FILENAME
-        )
-    ).object();
+                rdfile(
+                    rootPath +
+                    separator() +
+                    FILE_PROJECT
+                    )
+                ).object();
 
-    return jobj.value(HASH).toString();
+    return jobj.value(PTAG_HASH).toString();
 }
 
-static QString dir(const QString& hash)
+QString dir(const QString& hash)
 {
     QString pdir;
     const auto& udir = UserBackend::instance()->dir();
@@ -133,7 +108,7 @@ static QString dir(const QString& hash)
     return pdir;
 }
 
-static QVariant property(const QString& hash, const QString& property)
+QVariant property(const QString& hash, const QString& property)
 {
     const auto& dir = ::dir(hash);
 
@@ -141,67 +116,76 @@ static QVariant property(const QString& hash, const QString& property)
         return QVariant();
 
     const auto& jobj = QJsonDocument::fromJson(
-        rdfile(
-            dir +
-            separator() +
-            FILENAME
-        )
-    ).object();
+                rdfile(
+                    dir +
+                    separator() +
+                    FILE_PROJECT
+                    )
+                ).object();
 
     return jobj.value(property).toVariant();
 }
+}
+
+ProjectBackend* ProjectBackend::s_instance = nullptr;
+QString ProjectBackend::s_currentHash;
 
 ProjectBackend* ProjectBackend::instance()
 {
-    static ProjectBackend instance;
-    return &instance;
+    return s_instance;
 }
 
-bool ProjectBackend::newProject(
-    int templateNumber,
-    const QString& name,
-    const QString& description,
-    const QString& owner,
-    const QString& crDate,
-    const QString& size
-  ) const
+bool ProjectBackend::newProject(int templateNumber, const QString& name, const QString& description,
+                                const QString& owner, const QString& crDate, const QString& size)
 {
     const auto& udir = UserBackend::instance()->dir();
 
-    if (udir.isEmpty() ||
-        name.isEmpty() ||
-        description.isEmpty() ||
-        owner.isEmpty() ||
-        crDate.isEmpty() ||
-        size.isEmpty())
+    if (udir.isEmpty()
+            || name.isEmpty()
+            || description.isEmpty()
+            || owner.isEmpty()
+            || crDate.isEmpty()
+            || size.isEmpty()) {
         return false;
+    }
 
-    const auto& pdir = udir + separator() +
-       QString::number(biggestDir(udir) + 1);
+    const auto& pdir = udir + separator() + QString::number(biggestDir(udir) + 1);
 
     QJsonObject jobj;
-    jobj[PROJECTNAME] = name;
-    jobj[DESCRIPTION] = description;
-    jobj[OWNER]       = owner;
-    jobj[CRDATE]      = crDate;
-    jobj[MFDATE]      = crDate;
-    jobj[SIZE]        = size;
-    jobj[OWPRJ]       = SIGN_OWPRJ;
-    jobj[HASH]        = HashFactory::generate();
+    jobj.insert(PTAG_PROJECTNAME, name);
+    jobj.insert(PTAG_DESCRIPTION, description);
+    jobj.insert(PTAG_OWNER, owner);
+    jobj.insert(PTAG_CRDATE, crDate);
+    jobj.insert(PTAG_MFDATE, crDate);
+    jobj.insert(PTAG_SIZE, size);
+    jobj.insert(PTAG_OWPRJ_SIGN, SIGN_OWPRJ);
+    jobj.insert(PTAG_HASH, HashFactory::generate());
 
     const auto& data = QJsonDocument(jobj).toJson();
 
-    return(
-        !mkdir(pdir) ||
-        0 > wrfile(
-            pdir + separator() +
-            FILENAME, data
-        ) ||
-        SaveBackend::instance()->initProject(pdir, templateNumber)
-    );
+    if (!mkdir(pdir))
+        return false;
+
+    if (wrfile(pdir + separator() + FILE_PROJECT, data) <= 0)
+        return false;
+
+    if (!SaveBackend::instance()->initProject(pdir, templateNumber))
+        return false;
+
+    return true;
 }
 
-QStringList ProjectBackend::projectNames() const
+ProjectBackend::ProjectBackend(QObject* parent) : QObject(parent)
+{
+    s_instance = this;
+}
+
+ProjectBackend::~ProjectBackend()
+{
+    s_instance = nullptr;
+}
+
+QStringList ProjectBackend::projectNames()
 {
     QStringList names;
     const auto& hashes = projects();
@@ -210,32 +194,32 @@ QStringList ProjectBackend::projectNames() const
         return names;
 
     for (const auto& hash : hashes)
-        names << ::property(hash, PROJECTNAME).toString();
+        names << ::property(hash, PTAG_PROJECTNAME).toString();
 
     return names;
 }
 
-void ProjectBackend::changeName(const QString& hash, const QString& name) const
+void ProjectBackend::changeName(const QString& hash, const QString& name)
 {
     const auto& dir = ::dir(hash);
 
     if (dir.isEmpty())
         return;
 
-    ::setProperty(dir, PROJECTNAME, name);
+    ::setProperty(dir, PTAG_PROJECTNAME, name);
 }
 
-void ProjectBackend::changeDescription(const QString& hash, const QString& desc) const
+void ProjectBackend::changeDescription(const QString& hash, const QString& desc)
 {
     const auto& dir = ::dir(hash);
 
     if (dir.isEmpty())
         return;
 
-    ::setProperty(dir, DESCRIPTION, desc);
+    ::setProperty(dir, PTAG_DESCRIPTION, desc);
 }
 
-bool ProjectBackend::exportProject(const QString& hash, const QString& filePath) const
+bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
 {
     const auto& dir = ::dir(hash);
 
@@ -245,12 +229,12 @@ bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
     return Zipper::compressDir(dir, filePath);
 }
 
-bool ProjectBackend::importProject(const QString &filePath) const
+bool ProjectBackend::importProject(const QString &filePath)
 {
     const auto& data = rdfile(filePath);
     const auto& udir = UserBackend::instance()->dir();
     const auto& pdir = udir + separator() +
-      QString::number(biggestDir(udir) + 1);
+            QString::number(biggestDir(udir) + 1);
 
     if (data.isEmpty() || udir.isEmpty())
         return false;
@@ -258,54 +242,54 @@ bool ProjectBackend::importProject(const QString &filePath) const
     if (!mkdir(pdir) || !Zipper::extractZip(data, pdir))
         return false;
 
-    ::setProperty(pdir, HASH, HashFactory::generate());
+    ::setProperty(pdir, PTAG_HASH, HashFactory::generate());
 
     SaveUtils::recalculateUids(pdir + separator() + DIR_OWDB);
 
     return true;
 }
 
-QString ProjectBackend::dir(const QString& hash) const
+QString ProjectBackend::dir(const QString& hash)
 {
     return ::dir(hash);
 }
 
-QString ProjectBackend::name(const QString& hash) const
+QString ProjectBackend::name(const QString& hash)
 {
-    return ::property(hash, PROJECTNAME).toString();
+    return ::property(hash, PTAG_PROJECTNAME).toString();
 }
 
-QString ProjectBackend::description(const QString& hash) const
+QString ProjectBackend::description(const QString& hash)
 {
-    return ::property(hash, DESCRIPTION).toString();
+    return ::property(hash, PTAG_DESCRIPTION).toString();
 }
 
-QString ProjectBackend::owner(const QString& hash) const
+QString ProjectBackend::owner(const QString& hash)
 {
-    return ::property(hash, OWNER).toString();
+    return ::property(hash, PTAG_OWNER).toString();
 }
 
-QString ProjectBackend::crDate(const QString& hash) const
+QString ProjectBackend::crDate(const QString& hash)
 {
-    return ::property(hash, CRDATE).toString();
+    return ::property(hash, PTAG_CRDATE).toString();
 }
 
-QString ProjectBackend::mfDate(const QString& hash) const
+QString ProjectBackend::mfDate(const QString& hash)
 {
-    return ::property(hash, MFDATE).toString();
+    return ::property(hash, PTAG_MFDATE).toString();
 }
 
-QString ProjectBackend::size(const QString& hash) const
+QString ProjectBackend::size(const QString& hash)
 {
-    return ::property(hash, SIZE).toString();
+    return ::property(hash, PTAG_SIZE).toString();
 }
 
-const QString& ProjectBackend::hash() const
+QString ProjectBackend::hash()
 {
-    return _currentHash;
+    return s_currentHash;
 }
 
-QStringList ProjectBackend::projects() const
+QStringList ProjectBackend::projects()
 {
     QStringList hashes;
     const auto& udir = UserBackend::instance()->dir();
@@ -322,53 +306,49 @@ QStringList ProjectBackend::projects() const
     return hashes;
 }
 
-void ProjectBackend::updateSize() const
+void ProjectBackend::updateSize()
 {
     const auto& dir = ::dir(hash());
-
     if (dir.isEmpty())
         return;
 
-    ::setProperty(dir, SIZE, byteString(dsize(dir)));
+    ::setProperty(dir, PTAG_SIZE, byteString(dsize(dir)));
 }
 
-void ProjectBackend::updateLastModification() const
+void ProjectBackend::updateLastModification()
 {
-    auto date =
-    QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
-
+    auto date = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
     const auto& dir = ::dir(hash());
-
     if (dir.isEmpty())
         return;
 
-    ::setProperty(dir, MFDATE, date);
+    ::setProperty(dir, PTAG_MFDATE, date);
 }
 
 bool ProjectBackend::start(const QString& hash)
 {
-    if (this->hash() == hash)
-		return true;
+    if (ProjectBackend::hash() == hash)
+        return true;
 
     const auto& dir = ::dir(hash);
 
     if (dir.isEmpty())
         return false;
 
-    if (!this->hash().isEmpty())
+    if (!ProjectBackend::hash().isEmpty())
         stop();
 
-    _currentHash = hash;
+    s_currentHash = hash;
 
-    emit started();
+    emit instance()->started();
 
-	return true;
+    return true;
 }
 
 void ProjectBackend::stop()
 {
     updateSize();
     updateLastModification();
-    _currentHash = "";
-    emit stopped();
+    s_currentHash = "";
+    emit instance()->stopped();
 }

@@ -19,12 +19,14 @@
 using namespace Core;
 
 Authenticator* BackendManager::s_authenticator = nullptr;
+ProjectBackend* BackendManager::s_projectBackend = nullptr;
 HelpManager* BackendManager::s_helpManager = nullptr;
 EditorBackend* BackendManager::s_editorBackend = nullptr;
 
 BackendManager::BackendManager()
 {
     s_authenticator = new Authenticator(this);
+    s_projectBackend = new ProjectBackend(this);
     s_helpManager = new HelpManager(this);
     HelpManager::setupHelpManager();
     Utils::setCreatorTheme(Internal::ThemeEntry::createTheme(Constants::DEFAULT_THEME));
@@ -33,9 +35,12 @@ BackendManager::BackendManager()
     s_editorBackend = new EditorBackend(this);
 
     connect(ProjectBackend::instance(), &ProjectBackend::started,
-            static_cast<MainWindow*>(WindowManager::instance()->get(WindowManager::Main)), &MainWindow::reset);
-    connect(ProjectBackend::instance(), &ProjectBackend::started, this, &BackendManager::onProjectStart);
-    connect(UserBackend::instance(), &UserBackend::aboutToStop, this, &BackendManager::onSessionStop);
+            static_cast<MainWindow*>(WindowManager::instance()->get(WindowManager::Main)),
+            &MainWindow::reset);
+    connect(ProjectBackend::instance(), &ProjectBackend::started,
+            this, &BackendManager::onProjectStart);
+    connect(UserBackend::instance(), &UserBackend::aboutToStop,
+            this, &BackendManager::onSessionStop);
 
     SaveTransaction::instance();
     Authenticator::setHost(QUrl(APP_WSSSERVER));
@@ -73,13 +78,13 @@ QString BackendManager::userResourcePath()
 
 void BackendManager::onSessionStop()
 {
-    ProjectBackend::instance()->stop();
+    ProjectBackend::stop();
 }
 
 void BackendManager::onProjectStart()
 {
     PreviewerBackend::instance()->restart();
-    PreviewerBackend::instance()->requestInit(ProjectBackend::instance()->dir());
+    PreviewerBackend::instance()->requestInit(ProjectBackend::dir());
     ExposerBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->designerScene()->clearSelection();

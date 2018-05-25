@@ -118,13 +118,13 @@ void ProjectDetailsWidget::onEditProject(const QString& hash)
 {
     m_toTemplates = false;
     m_hash = hash;
-    ProjectBackend::instance()->updateSize();
-    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectBackend::instance()->name(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectBackend::instance()->description(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectBackend::instance()->owner(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectBackend::instance()->crDate(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectBackend::instance()->mfDate(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectBackend::instance()->size(hash));
+    ProjectBackend::updateSize();
+    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectBackend::name(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectBackend::description(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectBackend::owner(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectBackend::crDate(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectBackend::mfDate(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectBackend::size(hash));
 }
 
 void ProjectDetailsWidget::onNewProject(const QString& projectName, int templateNumber)
@@ -154,7 +154,7 @@ void ProjectDetailsWidget::onSaveClick()
     }
 
     if (m_hash.isEmpty()) {
-        if (!ProjectBackend::instance()->newProject(
+        if (!ProjectBackend::newProject(
             m_templateNumber,
             projectnametext,
             descriptiontext,
@@ -163,7 +163,7 @@ void ProjectDetailsWidget::onSaveClick()
             sizetext
         )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
 
-        ProjectBackend::instance()->updateSize();
+        ProjectBackend::updateSize();
     } else {
         ProjectBackend::
         instance()->changeName(
@@ -182,7 +182,7 @@ void ProjectDetailsWidget::onSaveClick()
 
 void ProjectDetailsWidget::onDeleteClick()
 {
-    if (ProjectBackend::instance()->dir(m_hash).isEmpty()) {
+    if (ProjectBackend::dir(m_hash).isEmpty()) {
         emit done();
         return;
     }
@@ -191,16 +191,16 @@ void ProjectDetailsWidget::onDeleteClick()
         this,
         "Confirm Deletion",
         tr("You are about to delete %1 completely. Are you sure?").
-        arg(ProjectBackend::instance()->name(m_hash)),
+        arg(ProjectBackend::name(m_hash)),
         QMessageBox::Yes, QMessageBox::No | QMessageBox::Default
     );
 
     if (ret == QMessageBox::Yes) {
-        const auto& chash = ProjectBackend::instance()->hash();
+        const auto& chash = ProjectBackend::hash();
         if (!chash.isEmpty() && chash == m_hash)
-            ProjectBackend::instance()->stop();
+            ProjectBackend::stop();
 
-        rm(ProjectBackend::instance()->dir(m_hash));
+        rm(ProjectBackend::dir(m_hash));
 
         emit done();
     }

@@ -71,7 +71,7 @@ void SaveBackend::flushSuid(const Control* control, const QString& suid) const
 // If current project is empty, then returns false.
 bool SaveBackend::existsInForms(const Control* control) const
 {
-    for (auto path : SaveUtils::formPaths(ProjectBackend::instance()->dir())) {
+    for (auto path : SaveUtils::formPaths(ProjectBackend::dir())) {
         auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
         auto id = SaveUtils::property(propertyData, TAG_ID).toString();
 
@@ -147,7 +147,7 @@ bool SaveBackend::existsInParentScope(const Control* control, const QString& sui
 // Returned paths are rootPaths.
 QStringList SaveBackend::formScopePaths() const
 {
-    const QStringList fpaths = SaveUtils::formPaths(ProjectBackend::instance()->dir());
+    const QStringList fpaths = SaveUtils::formPaths(ProjectBackend::dir());
     QStringList paths(fpaths);
 
     for (auto path : fpaths)
@@ -185,7 +185,7 @@ void SaveBackend::refactorId(Control* control, const QString& suid, const QStrin
 // Searches within current project's path
 bool SaveBackend::isForm(const QString& rootPath) const
 {
-    auto projectDir = ProjectBackend::instance()->dir();
+    auto projectDir = ProjectBackend::dir();
     auto baseDir = projectDir + separator() + DIR_OWDB;
     return (baseDir == dname(rootPath));
 }
@@ -198,7 +198,7 @@ QString SaveBackend::findByUid(const QString& uid, const QString& rootPath) cons
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
-        auto projectDir = ProjectBackend::instance()->dir();
+        auto projectDir = ProjectBackend::dir();
 
         if (projectDir.isEmpty())
             return QString();
@@ -231,7 +231,7 @@ QString SaveBackend::findById(const QString& suid, const QString& id, const QStr
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
-        auto projectDir = ProjectBackend::instance()->dir();
+        auto projectDir = ProjectBackend::dir();
 
         if (projectDir.isEmpty())
             return QString();
@@ -261,7 +261,7 @@ QString SaveBackend::findById(const QString& suid, const QString& id, const QStr
 // Returns true if given path is inside of owdb
 bool SaveBackend::isInOwdb(const QString& path) const
 {
-    auto projectDirectory = ProjectBackend::instance()->dir();
+    auto projectDirectory = ProjectBackend::dir();
 
     Q_ASSERT(!projectDirectory.isEmpty());
 
@@ -282,7 +282,7 @@ QString SaveBackend::parentDir(const Control* control) const
 
 QString SaveBackend::basePath() const
 {
-    auto projectDir = ProjectBackend::instance()->dir();
+    auto projectDir = ProjectBackend::dir();
 
     if (projectDir.isEmpty())
         return QString();
@@ -333,7 +333,7 @@ bool SaveBackend::addForm(Form* form) const
 
     refactorId(form, QString());
 
-    auto projectDir = ProjectBackend::instance()->dir();
+    auto projectDir = ProjectBackend::dir();
 
     if (projectDir.isEmpty())
         return false;

@@ -5,6 +5,7 @@
 #include <QSettings>
 
 class Authenticator;
+class ProjectBackend;
 class EditorBackend;
 
 namespace Core { class HelpManager; }
@@ -29,6 +30,7 @@ private:
 
 private:
     static Authenticator* s_authenticator;
+    static ProjectBackend* s_projectBackend;
     static Core::HelpManager* s_helpManager;
     static EditorBackend* s_editorBackend;
 };

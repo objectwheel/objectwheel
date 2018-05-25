@@ -226,7 +226,7 @@ void FormsPane::handleDatabaseChange()
 
     _listWidget->clear();
 
-    for (auto path : SaveUtils::formPaths(ProjectBackend::instance()->dir())) {
+    for (auto path : SaveUtils::formPaths(ProjectBackend::dir())) {
         auto _id = SaveUtils::id(path);
         if (id == _id)
             row = _listWidget->count();

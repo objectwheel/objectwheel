@@ -24,7 +24,7 @@ void ExposerBackend::init(DesignerScene* designerScene)
 
 void ExposerBackend::exposeProject() const
 {
-    const auto& fpaths = SaveUtils::formPaths(ProjectBackend::instance()->dir());
+    const auto& fpaths = SaveUtils::formPaths(ProjectBackend::dir());
 
     for (const auto& path : fpaths) {
         auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");

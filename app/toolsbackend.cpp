@@ -59,10 +59,10 @@ static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)
 
 static bool isProjectFull()
 {
-    if (ProjectBackend::instance()->dir().isEmpty())
+    if (ProjectBackend::dir().isEmpty())
         return false;
     if (!QDir().exists(
-        ProjectBackend::instance()->dir() +
+        ProjectBackend::dir() +
         separator() +
         DEFAULT_TOOLS_DIRECTORY
     ))
@@ -79,7 +79,7 @@ ToolsBackend* ToolsBackend::instance()
 
 QString ToolsBackend::toolsDir() const
 {
-    auto projectDir = ProjectBackend::instance()->dir();
+    auto projectDir = ProjectBackend::dir();
     if (projectDir.isEmpty()) return projectDir;
     return projectDir + separator() + DEFAULT_TOOLS_DIRECTORY;
 }
@@ -113,7 +113,7 @@ void ToolsBackend::fillTree(ToolboxTree* tree)
 
 bool ToolsBackend::addToTree(const QString& toolPath, ToolboxTree* tree)
 {
-    if (ProjectBackend::instance()->dir().isEmpty() ||
+    if (ProjectBackend::dir().isEmpty() ||
         toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
@@ -161,7 +161,7 @@ void ToolsBackend::reset()
 
 bool ToolsBackend::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
-    if (ProjectBackend::instance()->dir().isEmpty() ||
+    if (ProjectBackend::dir().isEmpty() ||
         toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
@@ -274,7 +274,7 @@ void ToolsBackend::addToolboxTree(ToolboxTree* toolboxTree)
 
 void ToolsBackend::downloadTools(const QUrl& url)
 {
-    if (ProjectBackend::instance()->dir().isEmpty()) return;
+    if (ProjectBackend::dir().isEmpty()) return;
 
     for (auto tree : _toolboxTreeList) {
         tree->clear();

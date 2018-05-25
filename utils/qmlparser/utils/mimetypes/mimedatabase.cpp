@@ -397,8 +397,8 @@ MimeType MimeDatabase::mimeTypeForName(const QString &nameOrAlias) const
 {
     QMutexLocker locker(&d->mutex);
 
-    if (d->m_startupPhase <= MimeDatabase::PluginsInitializing)
-        qWarning("Accessing MimeDatabase for %s before plugins are initialized", qPrintable(nameOrAlias));
+//    if (d->m_startupPhase <= MimeDatabase::PluginsInitializing) // BUG??
+//        qWarning("Accessing MimeDatabase for %s before plugins are initialized", qPrintable(nameOrAlias));
 
     return d->mimeTypeForName(nameOrAlias);
 }

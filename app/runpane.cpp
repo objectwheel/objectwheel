@@ -52,9 +52,9 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     m_projectsButton->settings().iconButton = true;
     connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));
 
-    m_loadingBar->setText(ProjectBackend::instance()->name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
+    m_loadingBar->setText(ProjectBackend::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
     connect(ProjectBackend::instance(), &ProjectBackend::started, [=] {
-        m_loadingBar->setText(ProjectBackend::instance()->name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
+        m_loadingBar->setText(ProjectBackend::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
     });
 
     // FIXME
@@ -72,7 +72,7 @@ void RunPane::onStopButtonClick()
     InterpreterBackend::instance()->terminate();
     m_loadingBar->busy(
         0,
-        ProjectBackend::instance()->name() +
+        ProjectBackend::name() +
         tr(": <b>Stopped</b>  |  Finished at ") +
         QTime::currentTime().toString()
     );
@@ -83,7 +83,7 @@ void RunPane::onStopButtonDoubleClick()
     InterpreterBackend::instance()->kill();
     m_loadingBar->busy(
         0,
-        ProjectBackend::instance()->name() +
+        ProjectBackend::name() +
         tr(": <b>Stopped forcefully</b>  |  Finished at ") +
         QTime::currentTime().toString()
     );
@@ -98,7 +98,7 @@ void RunPane::onRunButtonClick()
 
     m_consoleBox->printFormatted(
         tr("Starting ") +
-        ProjectBackend::instance()->name() + "...\n",
+        ProjectBackend::name() + "...\n",
         "#025dbf",
         QFont::DemiBold
     );

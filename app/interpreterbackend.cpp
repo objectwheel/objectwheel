@@ -24,7 +24,7 @@ InterpreterBackend* InterpreterBackend::instance()
 
 void InterpreterBackend::run()
 {
-    _process->setArguments(QStringList() << ProjectBackend::instance()->dir());
+    _process->setArguments(QStringList() << ProjectBackend::dir());
     _process->setProgram(qApp->applicationDirPath() + "/objectwheel-interpreter");
     _process->start();
 }

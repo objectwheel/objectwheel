@@ -122,7 +122,7 @@ void PreviewerBackend::restart()
           ::restart(
               socket.data(),
               QStringList()
-                  << ProjectBackend::instance()->dir()
+                  << ProjectBackend::dir()
                   << serverName
           );
         #endif
