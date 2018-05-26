@@ -16,6 +16,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    friend class WindowManager;
+
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 
@@ -28,6 +30,9 @@ private slots:
 
 signals:
     void done();
+
+private:
+    QSize sizeHint() const override;
 
 private:
     CentralWidget* m_centralWidget;

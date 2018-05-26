@@ -11,6 +11,7 @@
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <dpr.h>
+#include <mainwindow.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -418,7 +419,7 @@ void ProjectsWidget::onLoadButtonClick()
 //        }
 //    }
 
-    WindowManager::instance()->hide(WindowManager::Main);
+    WindowManager::mainWindow()->hide();
     ProjectBackend::stop();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
 

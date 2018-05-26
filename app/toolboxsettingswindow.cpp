@@ -228,3 +228,8 @@ void ToolboxSettingsWindow::on_btnSave_clicked()
       (ui->treeWidget->currentItem()).first().toLocalFile()));
     ToolsBackend::instance()->changeTool(changeSet);
 }
+
+QSize ToolboxSettingsWindow::sizeHint() const
+{
+    return {1160, 670};
+}

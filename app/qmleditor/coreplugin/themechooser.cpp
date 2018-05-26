@@ -29,6 +29,7 @@
 #include "themechooser.h"
 #include <windowmanager.h>
 #include <backendmanager.h>
+#include <mainwindow.h>
 
 #include <utils/algorithm.h>
 #include <utils/theme/theme.h>
@@ -180,7 +181,7 @@ void ThemeChooser::apply()
     QSettings *settings = BackendManager::settings();
     const QString currentThemeId = ThemeEntry::themeSetting().toString();
     if (currentThemeId != themeId) {
-        QMessageBox::information(WindowManager::instance()->get(WindowManager::Main),
+        QMessageBox::information(WindowManager::mainWindow(),
                                  tr("Restart Required"),
                                  tr("The theme change will take effect after restart."));
 

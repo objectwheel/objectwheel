@@ -11,8 +11,13 @@ class AboutWindow : public QWidget
 {
     Q_OBJECT
 
+    friend class WindowManager;
+
 public:
     explicit AboutWindow(QWidget* parent = nullptr);
+
+private:
+    QSize sizeHint() const override;
 
 signals:
     void done();

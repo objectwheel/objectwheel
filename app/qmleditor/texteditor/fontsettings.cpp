@@ -32,6 +32,7 @@
 #include <utils/hostosinfo.h>
 #include <utils/theme/theme.h>
 ////#include <coreplugin/icore.h>
+#include <mainwindow.h>
 
 #include <QCoreApplication>
 #include <QDebug>
@@ -432,7 +433,7 @@ bool FontSettings::loadColorScheme(const QString &fileName,
 
 bool FontSettings::saveColorScheme(const QString &fileName)
 {
-    const bool saved = m_scheme.save(fileName, WindowManager::instance()->get(WindowManager::Main));
+    const bool saved = m_scheme.save(fileName, WindowManager::mainWindow());
     if (saved)
         m_schemeFileName = fileName;
     return saved;

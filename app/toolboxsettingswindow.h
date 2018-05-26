@@ -11,6 +11,8 @@ class ToolboxSettingsWindow : public QWidget
 {
     Q_OBJECT
 
+    friend class WindowManager;
+
 public:
     explicit ToolboxSettingsWindow(QWidget *parent = 0);
     ~ToolboxSettingsWindow();
@@ -26,6 +28,9 @@ private slots:
 
 signals:
     void done();
+
+private:
+    QSize sizeHint() const override;
 
 private:
     Ui::ToolboxSettingsWindow* ui;

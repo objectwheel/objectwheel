@@ -80,3 +80,8 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_legalLabel->setStyleSheet("color: black;");
 }
 
+QSize AboutWindow::sizeHint() const
+{
+    return {700, 400};
+}
+

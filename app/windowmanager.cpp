@@ -6,139 +6,82 @@
 #include <toolboxsettingswindow.h>
 #include <savebackend.h>
 #include <dpr.h>
-
+#include <projectbackend.h>
+#include <backendmanager.h>
 #include <QStyle>
 
-WindowManager::WindowManager() : _mainWindow(nullptr)
-  , _welcomeWindow(nullptr)
-  , _aboutWindow(nullptr)
-  , _preferencesWindow(nullptr)
-  , _toolboxSettingsWindow(nullptr)
+AboutWindow* WindowManager::s_aboutWindow = nullptr;
+PreferencesWindow* WindowManager::s_preferencesWindow = nullptr;
+ToolboxSettingsWindow* WindowManager::s_toolboxSettingsWindow = nullptr;
+MainWindow* WindowManager::s_mainWindow = nullptr;
+WelcomeWindow* WindowManager::s_welcomeWindow = nullptr;
+
+WindowManager::WindowManager()
 {
+    s_aboutWindow = new AboutWindow;
+    s_preferencesWindow = new PreferencesWindow;
+    s_toolboxSettingsWindow = new ToolboxSettingsWindow;
+    s_mainWindow = new MainWindow;
+    s_welcomeWindow = new WelcomeWindow;
+
+    QObject::connect(s_aboutWindow, &AboutWindow::done, s_aboutWindow, &AboutWindow::hide);
+    QObject::connect(s_preferencesWindow, &PreferencesWindow::done,
+                     s_preferencesWindow, &PreferencesWindow::hide);
+    QObject::connect(s_toolboxSettingsWindow, &ToolboxSettingsWindow::done,
+                     s_toolboxSettingsWindow, &ToolboxSettingsWindow::hide);
+    QObject::connect(s_mainWindow, &MainWindow::done, s_mainWindow, &MainWindow::hide);
+    QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_welcomeWindow, &WelcomeWindow::hide);
+    QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_mainWindow, &MainWindow::show);
+
+    QObject::connect(ProjectBackend::instance(), &ProjectBackend::started,
+            WindowManager::mainWindow(), &MainWindow::reset);
+    QObject::connect(ProjectBackend::instance(), &ProjectBackend::started,
+            BackendManager::instance(), &BackendManager::onProjectStart);
+
+    s_aboutWindow->setGeometry(QStyle::alignedRect(
+                                   Qt::LeftToRight, Qt::AlignCenter, s_aboutWindow->sizeHint(),
+                                   QGuiApplication::primaryScreen()->availableGeometry()));
+    s_preferencesWindow->setGeometry(QStyle::alignedRect(
+                                         Qt::LeftToRight, Qt::AlignCenter, s_preferencesWindow->sizeHint(),
+                                         QGuiApplication::primaryScreen()->availableGeometry()));
+    s_toolboxSettingsWindow->setGeometry(QStyle::alignedRect(
+                                             Qt::LeftToRight, Qt::AlignCenter, s_toolboxSettingsWindow->sizeHint(),
+                                             QGuiApplication::primaryScreen()->availableGeometry()));
+    s_mainWindow->setGeometry(QStyle::alignedRect(
+                                  Qt::LeftToRight, Qt::AlignCenter, s_mainWindow->sizeHint(),
+                                  QGuiApplication::primaryScreen()->availableGeometry()));
+    s_welcomeWindow->setGeometry(QStyle::alignedRect(
+                                     Qt::LeftToRight, Qt::AlignCenter, s_welcomeWindow->sizeHint(),
+                                     QGuiApplication::primaryScreen()->availableGeometry()));
 }
 
-WindowManager::~WindowManager()
+WelcomeWindow* WindowManager::welcomeWindow()
 {
-    for (auto w : _windows)
-        w->deleteLater(); //TODO: delete w;
+    return s_welcomeWindow;
 }
 
-WindowManager* WindowManager::instance()
+MainWindow* WindowManager::mainWindow()
+{
+    return s_mainWindow;
+}
+
+ToolboxSettingsWindow* WindowManager::toolboxSettingsWindow()
+{
+    return s_toolboxSettingsWindow;
+}
+
+PreferencesWindow* WindowManager::preferencesWindow()
+{
+    return s_preferencesWindow;
+}
+
+AboutWindow* WindowManager::aboutWindow()
+{
+    return s_aboutWindow;
+}
+
+void WindowManager::init()
 {
     static WindowManager instance;
-    return &instance;
-}
-
-QWidget* WindowManager::get(WindowManager::Windows key)
-{    
-    QWidget* window;
-    if ((window = _windows.value(key)))
-        return window;
-
-    switch (key) {
-        case Main: {
-            _mainWindow = new MainWindow;
-            _mainWindow->resize({1580, 900});
-            connect(_mainWindow, SIGNAL(done()), SLOT(done()));
-            add(Main, _mainWindow);
-            window = _mainWindow;
-            break;
-        }
-
-        case About: {
-            _aboutWindow = new AboutWindow;
-            _aboutWindow->resize({700, 400});
-            connect(_aboutWindow, SIGNAL(done()), SLOT(done()));
-            add(About, _aboutWindow);
-            window = _aboutWindow;
-            break;
-        }
-
-        case Welcome: {
-            _welcomeWindow = new WelcomeWindow;
-            _welcomeWindow->resize({1160, 670});
-            connect(_welcomeWindow, SIGNAL(done()), SLOT(done()));
-            connect(_welcomeWindow, &WelcomeWindow::done, this, [=]
-            {
-                const auto& size = QSize{1580, 900};
-                const auto& ssize = QGuiApplication::primaryScreen()->size();
-                const bool full = (size.height() + 100 > ssize.height()) ||
-                                  (size.width() + 50 > ssize.width());
-                show(Main, full ? Qt::WindowMaximized : Qt::WindowNoState);
-            });
-            add(Welcome, _welcomeWindow);
-            window = _welcomeWindow;
-            break;
-        }
-
-        case Preferences: {
-            _preferencesWindow = new PreferencesWindow;
-            _preferencesWindow->resize({1160, 670});
-            connect(_preferencesWindow, SIGNAL(done()), SLOT(done()));
-            add(Preferences, _preferencesWindow);
-            window = _preferencesWindow;
-            break;
-        }
-
-        case ToolboxSettings: {
-            _toolboxSettingsWindow = new ToolboxSettingsWindow;
-            _toolboxSettingsWindow->resize({1160, 670});
-            connect(_toolboxSettingsWindow, SIGNAL(done()), SLOT(done()));
-            add(ToolboxSettings, _toolboxSettingsWindow);
-            window = _toolboxSettingsWindow;
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    if (window) {
-        window->setGeometry(
-            QStyle::alignedRect(
-                Qt::LeftToRight,
-                Qt::AlignCenter,
-                window->size(),
-                QGuiApplication::primaryScreen()->availableGeometry()
-            )
-        );
-    }
-
-    return window;
-}
-
-void WindowManager::hide(WindowManager::Windows key)
-{
-    QWidget* window;
-    if ((window = get(key)))
-        window->hide();
-}
-
-void WindowManager::show(
-    WindowManager::Windows key,
-    Qt::WindowState state,
-    Qt::WindowModality modality
-)
-{
-    QWidget* window;
-    if ((window = get(key))) {
-        window->setWindowState(state);
-        window->setWindowModality(modality);
-        window->show();
-    }
-}
-
-void WindowManager::done()
-{
-    for (auto w : _windows) {
-        if (w == sender()) {
-            w->hide();
-            break;
-        }
-    }
-}
-
-void WindowManager::add(WindowManager::Windows key, QWidget* window)
-{
-    _windows[key] = window;
+    Q_UNUSED(instance);
 }

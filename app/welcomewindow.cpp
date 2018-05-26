@@ -11,6 +11,7 @@
 #include <forgetwidget.h>
 #include <resetwidget.h>
 #include <projecttemplateswidget.h>
+#include <aboutwindow.h>
 
 #include <QTimer>
 #include <QVBoxLayout>
@@ -84,7 +85,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
     connect(m_loginWidget, &LoginWidget::about, [=]
     {
-        WindowManager::instance()->show(WindowManager::About);
+        WindowManager::aboutWindow()->show();
     });
     connect(m_loginWidget, &LoginWidget::done, [=]
     {
@@ -171,5 +172,10 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(Login, View::LeftToRight);
     });
+}
+
+QSize WelcomeWindow::sizeHint() const
+{
+    return {1160, 670};
 }
 

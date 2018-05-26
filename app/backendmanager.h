@@ -17,18 +17,21 @@ class BackendManager final : public QObject
 
 public:
     static void init();
+    static BackendManager* instance();
     static QString resourcePath();
     static QString userResourcePath();
     static QSettings* settings(QSettings::Scope scope = QSettings::UserScope);
 
-private slots:
+public slots:
     void onSessionStop();
     void onProjectStart();
 
 private:
     BackendManager();
+    ~BackendManager();
 
 private:
+    static BackendManager* s_instance;
     static Authenticator* s_authenticator;
     static ProjectBackend* s_projectBackend;
     static Core::HelpManager* s_helpManager;

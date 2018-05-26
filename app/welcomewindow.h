@@ -19,6 +19,8 @@ class WelcomeWindow : public QWidget
 {
     Q_OBJECT
 
+    friend class WindowManager;
+
 public:
     enum Screens {
         Login,
@@ -35,6 +37,9 @@ public:
 
 public:
     explicit WelcomeWindow(QWidget* parent = nullptr);
+
+private:
+    QSize sizeHint() const override;
 
 signals:
     void done();

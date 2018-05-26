@@ -1,13 +1,15 @@
 #include <menumanager.h>
 #include <windowmanager.h>
+#include <mainwindow.h>
+#include <preferenceswindow.h>
+#include <aboutwindow.h>
 
 #include <QMenuBar>
 #include <QApplication>
-#include <QMainWindow>
 
 MenuManager::MenuManager()
 {
-    _menuBar = static_cast<QMainWindow*>(WindowManager::instance()->get(WindowManager::Main))->menuBar();
+    _menuBar = WindowManager::mainWindow()->menuBar();
     _menuBar->setStyleSheet(
         "QMenuBar {"
         "    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
@@ -288,10 +290,10 @@ void MenuManager::setParagraphSpacing()
 
 void MenuManager::preferences()
 {
-    WindowManager::instance()->show(WindowManager::Preferences);
+    WindowManager::preferencesWindow()->show();
 }
 
 void MenuManager::about()
 {
-    WindowManager::instance()->show(WindowManager::About);
+    WindowManager::aboutWindow()->show();
 }

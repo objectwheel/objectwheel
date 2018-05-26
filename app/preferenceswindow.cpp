@@ -69,3 +69,8 @@ void PreferencesWindow::filterList(const QString& /*text*/)
 {
 
 }
+
+QSize PreferencesWindow::sizeHint() const
+{
+    return {1160, 670};
+}

@@ -3,6 +3,7 @@
 #include <menumanager.h>
 #include <windowmanager.h>
 #include <backendmanager.h>
+#include <welcomewindow.h>
 
 #include <QIcon>
 #include <QMessageBox>
@@ -75,7 +76,8 @@ int main(int argc, char* argv[])
     BackendManager::init();
 
     // Show welcome window
-    WindowManager::instance()->show(WindowManager::Welcome);
+    WindowManager::init();
+    WindowManager::welcomeWindow()->show();
 
     // Initialize menus
     MenuManager::instance()->init();

@@ -27,6 +27,7 @@
 
 #include <windowmanager.h>
 #include <backendmanager.h>
+#include <mainwindow.h>
 #include "fontsettings.h"
 #include "ui_fontsettingspage.h"
 
@@ -504,7 +505,7 @@ void FontSettingsPage::copyColorScheme(const QString &name)
 
         ColorScheme scheme = d_ptr->m_value.colorScheme();
         scheme.setDisplayName(name);
-        if (scheme.save(fileName, WindowManager::instance()->get(WindowManager::Main)))
+        if (scheme.save(fileName, WindowManager::mainWindow()))
             d_ptr->m_value.setColorSchemeFileName(fileName);
 
         refreshColorSchemeList();
@@ -571,7 +572,7 @@ void FontSettingsPage::maybeSaveColorScheme()
 
     if (messageBox.exec() == QMessageBox::Save) {
         const ColorScheme &scheme = d_ptr->m_ui->schemeEdit->colorScheme();
-        scheme.save(d_ptr->m_value.colorSchemeFileName(), WindowManager::instance()->get(WindowManager::Main));
+        scheme.save(d_ptr->m_value.colorSchemeFileName(), WindowManager::mainWindow());
     }
 }
 
@@ -629,7 +630,7 @@ void FontSettingsPage::apply()
         // Update the scheme and save it under the name it already has
         d_ptr->m_value.setColorScheme(d_ptr->m_ui->schemeEdit->colorScheme());
         const ColorScheme &scheme = d_ptr->m_value.colorScheme();
-        scheme.save(d_ptr->m_value.colorSchemeFileName(), WindowManager::instance()->get(WindowManager::Main));
+        scheme.save(d_ptr->m_value.colorSchemeFileName(), WindowManager::mainWindow());
     }
 
     int index = d_ptr->m_ui->schemeComboBox->currentIndex();

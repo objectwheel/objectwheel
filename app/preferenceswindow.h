@@ -13,6 +13,9 @@ class QDialogButtonBox;
 class PreferencesWindow : public QWidget
 {
     Q_OBJECT
+
+    friend class WindowManager;
+
 public:
     explicit PreferencesWindow(QWidget *parent = nullptr);
 
@@ -21,6 +24,9 @@ private slots:
 
 signals:
     void done();
+
+private:
+     QSize sizeHint() const override;
 
 private:
     QGridLayout* _layout;

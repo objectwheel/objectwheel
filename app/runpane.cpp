@@ -5,6 +5,7 @@
 #include <projectbackend.h>
 #include <interpreterbackend.h>
 #include <consolebox.h>
+#include <welcomewindow.h>
 
 #include <QTime>
 #include <QPainter>
@@ -110,7 +111,7 @@ void RunPane::onRunButtonClick()
 
 void RunPane::onProjectsButtonClick()
 {
-    WindowManager::instance()->show(WindowManager::Welcome);
+    WindowManager::welcomeWindow()->show();
 }
 
 void RunPane::paintEvent(QPaintEvent*)

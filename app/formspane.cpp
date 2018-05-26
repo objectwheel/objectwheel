@@ -219,7 +219,7 @@ void FormsPane::addButtonClicked()
 
 void FormsPane::handleDatabaseChange()
 {
-    int row = 0;
+    int row = -1;
     QString id;
     if (_listWidget->currentItem())
         id = _listWidget->currentItem()->text();

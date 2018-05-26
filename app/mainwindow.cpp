@@ -18,6 +18,7 @@
 #include <consolebox.h>
 #include <controlwatcher.h>
 #include <control.h>
+#include <toolboxsettingswindow.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -176,7 +177,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
     toolboxSettingsButton->setIcon(QIcon(":/images/settings.png"));
     connect(toolboxSettingsButton, &QToolButton::clicked, this, [=] {
-        WindowManager::instance()->show(WindowManager::ToolboxSettings);
+        WindowManager::toolboxSettingsWindow()->show();
     });
 
     auto toolboxTitleBar = new QToolBar;
@@ -315,4 +316,9 @@ void MainWindow::showDocks()
     formsDockWidget->show();
     inspectorDockWidget->show();
     toolboxDockWidget->show();
+}
+
+QSize MainWindow::sizeHint() const
+{
+    return {1260, 700};
 }
