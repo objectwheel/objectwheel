@@ -48,7 +48,7 @@ ToolboxTree* ToolboxPane::toolboxTree()
 
 void ToolboxPane::reset()
 {
-    ToolsBackend::instance()->reset();
+    ToolsBackend::reset();
     _searchEdit->clear();
 }
 

@@ -97,7 +97,7 @@ void BackendManager::onProjectStart()
     ExposerBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->designerScene()->clearSelection();
-    ToolsBackend::instance()->downloadTools();
+    ToolsBackend::downloadTools();
     // MainWindow::instance()->setWindowTitle //FIXME
     // (QString(APP_NAME) + " - [" + projectname + "]");
 }

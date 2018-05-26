@@ -27,6 +27,8 @@
 #define DEFAULT_TOOLS_URL       "qrc:/tools/tools.json"
 #define DIR_QRC_CONTROL         ":/resources/qmls/control"
 
+namespace {
+
 static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)
 {
     auto dirCtrl = changeSet.toolPath +
@@ -70,21 +72,18 @@ static bool isProjectFull()
     else
         return true;
 }
-
-ToolsBackend* ToolsBackend::instance()
-{
-    static ToolsBackend instance;
-    return &instance;
 }
 
-QString ToolsBackend::toolsDir() const
+QList<ToolboxTree*> ToolsBackend::s_toolboxTreeList;
+
+QString ToolsBackend::toolsDir()
 {
     auto projectDir = ProjectBackend::dir();
     if (projectDir.isEmpty()) return projectDir;
     return projectDir + separator() + DEFAULT_TOOLS_DIRECTORY;
 }
 
-QStringList ToolsBackend::categories() const
+QStringList ToolsBackend::categories()
 {
     QStringList categories;
 
@@ -150,7 +149,7 @@ void ToolsBackend::reset()
     if (!isProjectFull())
         return;
 
-    for (auto tree : _toolboxTreeList) {
+    for (auto tree : s_toolboxTreeList) {
         tree->clearSelection();
         tree->setCurrentItem(nullptr);
         tree->clear();
@@ -196,7 +195,7 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
     if (name.isEmpty())
         name = DEFAULT_NAME;
 
-    for (auto tree : _toolboxTreeList) {
+    for (auto tree : s_toolboxTreeList) {
         auto topItem = tree->categoryItem(category);
         if (!topItem) {
             topItem = new QTreeWidgetItem;
@@ -223,7 +222,7 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
 
 void ToolsBackend::changeTool(const ChangeSet& changeSet)
 {
-    for (auto tree : _toolboxTreeList) {
+    for (auto tree : s_toolboxTreeList) {
         tree->clearSelection(); tree->setCurrentItem(nullptr);
         for (int i = 0; i < tree->topLevelItemCount(); i++) {
             auto tli = tree->topLevelItem(i);
@@ -246,7 +245,7 @@ void ToolsBackend::changeTool(const ChangeSet& changeSet)
 
 void ToolsBackend::removeTool(const QString& toolPath)
 {
-    for (auto tree : _toolboxTreeList) {
+    for (auto tree : s_toolboxTreeList) {
         tree->clearSelection(); tree->setCurrentItem(nullptr);
         for (int i = 0; i < tree->topLevelItemCount(); i++) {
             auto tli = tree->topLevelItem(i);
@@ -268,7 +267,7 @@ void ToolsBackend::removeTool(const QString& toolPath)
 
 void ToolsBackend::addToolboxTree(ToolboxTree* toolboxTree)
 {
-    _toolboxTreeList << toolboxTree;
+    s_toolboxTreeList << toolboxTree;
     fillTree(toolboxTree);
 }
 
@@ -276,7 +275,7 @@ void ToolsBackend::downloadTools(const QUrl& url)
 {
     if (ProjectBackend::dir().isEmpty()) return;
 
-    for (auto tree : _toolboxTreeList) {
+    for (auto tree : s_toolboxTreeList) {
         tree->clear();
         tree->clearUrls();
     }
@@ -290,10 +289,10 @@ void ToolsBackend::downloadTools(const QUrl& url)
     QNetworkReply* reply = manager->get(request);
     QObject::connect(reply, static_cast<void (QNetworkReply::*)
       (QNetworkReply::NetworkError)>(&QNetworkReply::error),
-      this, [] { qFatal("downloadTools() : Network Error"); });
+      [] { qFatal("downloadTools() : Network Error"); });
     QObject::connect(reply, &QNetworkReply::sslErrors,
-      this, [] { qFatal("downloadTools() : Ssl Error"); });
-    QObject::connect(reply, &QNetworkReply::finished, this, [=]
+      [] { qFatal("downloadTools() : Ssl Error"); });
+    QObject::connect(reply, &QNetworkReply::finished, [=]
     {
         QJsonDocument toolsDoc = QJsonDocument::fromJson(reply->readAll());
         QJsonArray toolsArray = toolsDoc.array();
@@ -348,7 +347,7 @@ void ToolsBackend::resetTools()
     if (!isProjectFull())
         return;
 
-    for (auto tree : _toolboxTreeList) {
+    for (auto tree : s_toolboxTreeList) {
         tree->clearSelection();
         tree->setCurrentItem(nullptr);
         tree->clear();
