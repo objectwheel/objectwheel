@@ -3,40 +3,44 @@
 
 #include <QObject>
 
-class UserBackend : public QObject
+class UserBackend final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(UserBackend)
 
+    friend class BackendManager;
+
 public:
     static UserBackend* instance();
 
-    bool exists(const QString& user);
-    bool newUser(const QString& user);
-    void setAutoLogin(const QString& password);
+    static bool exists(const QString& user);
+    static bool newUser(const QString& user);
+    static void setAutoLogin(const QString& password);
 
-    const QString& user() const;
-    const QString& token() const;
-    const QByteArray& key() const;
-    QString dir(const QString& = instance()->user());
+    static QString dir(const QString& = user());
 
-public slots:
-    void stop();
-    bool hasAutoLogin();
-    bool tryAutoLogin();
-    void clearAutoLogin();
-    bool start(const QString& user, const QString& password);
+    static const QString& user();
+    static const QString& token();
+    static const QByteArray& key();
+
+    static void stop();
+    static bool hasAutoLogin();
+    static bool tryAutoLogin();
+    static void clearAutoLogin();
+    static bool start(const QString& user, const QString& password);
 
 signals:
     void aboutToStop();
 
 private:
-    UserBackend() {}
+    explicit UserBackend(QObject* parent = nullptr);
+    ~UserBackend();
 
 private:
-    QString _user;
-    QString _token;
-    QByteArray _key;
+    static UserBackend* s_instance;
+    static QString s_user;
+    static QString s_token;
+    static QByteArray s_key;
 };
 
 #endif // USERBACKEND_H

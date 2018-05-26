@@ -304,7 +304,7 @@ void ProjectsWidget::refreshProjectList()
 {
     const int currentRow = m_listWidget->currentRow();
     m_listWidget->clear();
-    if (UserBackend::instance()->dir().isEmpty())
+    if (UserBackend::dir().isEmpty())
         return;
 
     auto projects = ProjectBackend::projects();
@@ -350,7 +350,7 @@ void ProjectsWidget::startProject()
 
 void ProjectsWidget::onNewButtonClick()
 {
-    if (UserBackend::instance()->dir().isEmpty()) return;
+    if (UserBackend::dir().isEmpty()) return;
     auto projects = ProjectBackend::projectNames();
     int count = 1;
     QString projectName = "Project - 1";

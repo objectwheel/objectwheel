@@ -86,7 +86,7 @@ QString hash(const QString& rootPath)
 QString dir(const QString& hash)
 {
     QString pdir;
-    const auto& udir = UserBackend::instance()->dir();
+    const auto& udir = UserBackend::dir();
 
     if (udir.isEmpty() || hash.isEmpty())
         return pdir;
@@ -138,7 +138,7 @@ ProjectBackend* ProjectBackend::instance()
 bool ProjectBackend::newProject(int templateNumber, const QString& name, const QString& description,
                                 const QString& owner, const QString& crDate, const QString& size)
 {
-    const auto& udir = UserBackend::instance()->dir();
+    const auto& udir = UserBackend::dir();
 
     if (udir.isEmpty()
             || name.isEmpty()
@@ -232,7 +232,7 @@ bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
 bool ProjectBackend::importProject(const QString &filePath)
 {
     const auto& data = rdfile(filePath);
-    const auto& udir = UserBackend::instance()->dir();
+    const auto& udir = UserBackend::dir();
     const auto& pdir = udir + separator() +
             QString::number(biggestDir(udir) + 1);
 
@@ -292,7 +292,7 @@ QString ProjectBackend::hash()
 QStringList ProjectBackend::projects()
 {
     QStringList hashes;
-    const auto& udir = UserBackend::instance()->dir();
+    const auto& udir = UserBackend::dir();
 
     if (udir.isEmpty())
         return hashes;

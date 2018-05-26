@@ -157,7 +157,7 @@ void DownloadWidget::download(OTargets::Targets target)
 
     QNetworkRequest request(QUrl::fromUserInput(url));
     request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
-    request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserBackend::instance()->token())));
+    request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserBackend::token())));
     request.setRawHeader("x86", QByteArray().insert(0, QString("{\"value\" : %1}").arg(target == OTargets::android_x86 ? "true" : "false")));
     request.setHeader(QNetworkRequest::ContentLengthHeader, body.size());
     _d->reply = _d->manager->post(request, body);

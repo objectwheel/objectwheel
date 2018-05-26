@@ -20,6 +20,7 @@ using namespace Core;
 
 BackendManager* BackendManager::s_instance = nullptr;
 Authenticator* BackendManager::s_authenticator = nullptr;
+UserBackend* BackendManager::s_userBackend = nullptr;
 ProjectBackend* BackendManager::s_projectBackend = nullptr;
 HelpManager* BackendManager::s_helpManager = nullptr;
 EditorBackend* BackendManager::s_editorBackend = nullptr;
@@ -28,6 +29,7 @@ BackendManager::BackendManager()
 {
     s_instance = this;
     s_authenticator = new Authenticator(this);
+    s_userBackend = new UserBackend(this);
     s_projectBackend = new ProjectBackend(this);
     s_helpManager = new HelpManager(this);
     HelpManager::setupHelpManager();

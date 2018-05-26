@@ -248,17 +248,11 @@ void LoginWidget::onLoginButtonClick()
 
 void LoginWidget::startSession()
 {
-    typedef bool (UserBackend::* Fn) (const QString&, const QString&);
-    auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
-    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+    const QString email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+    const QString password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
 
-    UserBackend::instance()->newUser(email);
-    QFuture<bool> future = QtConcurrent::run(
-        UserBackend::instance(),
-        (Fn) &UserBackend::start,
-        email,
-        password
-    );
+    UserBackend::newUser(email);
+    QFuture<bool> future = QtConcurrent::run(&UserBackend::start, email, password);
 
     _encryptionWatcher.setFuture(future);
 }
@@ -270,9 +264,9 @@ void LoginWidget::onSessionStart()
 
     if (_encryptionWatcher.result()) {
         if (_autologinSwitch->isChecked())
-            UserBackend::instance()->setAutoLogin(password);
+            UserBackend::setAutoLogin(password);
         else
-            UserBackend::instance()->clearAutoLogin();
+            UserBackend::clearAutoLogin();
     } else
         qFatal("Fatal : LoginWidget");
 

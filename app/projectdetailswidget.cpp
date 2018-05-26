@@ -134,7 +134,7 @@ void ProjectDetailsWidget::onNewProject(const QString& projectName, int template
     m_hash.clear();
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(UserBackend::instance()->user());
+    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(UserBackend::user());
     static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(TIME);
     static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(TIME);
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(tr("0 bytes"));
