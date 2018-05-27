@@ -247,7 +247,7 @@ void DesignerView::onPasteAction()
                 }
 
                 for (auto control : cutControls) {
-                    PreviewerBackend::instance()->removeCache(control->uid());
+                    PreviewerBackend::removeCache(control->uid());
                     control->parentControl()->refresh();
                     control->setRefreshingDisabled(true);
                     control->blockSignals(true);
@@ -267,7 +267,7 @@ void DesignerView::onDeleteAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls) {
-        PreviewerBackend::instance()->removeCache(control->uid());
+        PreviewerBackend::removeCache(control->uid());
         control->parentControl()->refresh();
         control->setRefreshingDisabled(true);
         control->blockSignals(true);

@@ -8,6 +8,7 @@ class Authenticator;
 class UserBackend;
 class ProjectBackend;
 class EditorBackend;
+class PreviewerBackend;
 
 namespace Core { class HelpManager; }
 
@@ -35,6 +36,7 @@ private:
     static BackendManager* s_instance;
     static Authenticator* s_authenticator;
     static UserBackend* s_userBackend;
+    static PreviewerBackend* s_previewerBackend;
     static ProjectBackend* s_projectBackend;
     static Core::HelpManager* s_helpManager;
     static EditorBackend* s_editorBackend;

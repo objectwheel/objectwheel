@@ -282,7 +282,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
       SLOT(onProgressChange()));
     connect(ProjectBackend::instance(), &ProjectBackend::started, [=]
     {
-        totalTask = PreviewerBackend::instance()->totalTask();
+        totalTask = PreviewerBackend::totalTask();
         onProgressChange();
     });
 }
@@ -343,7 +343,7 @@ void ProjectsWidget::startProject()
 
     m_listWidget->currentItem()->setData(Active, true);
 
-    Delayer::delay(std::bind(&PreviewerBackend::isBusy, PreviewerBackend::instance()));
+    Delayer::delay(&PreviewerBackend::isBusy);
     unlock();
     emit done();
 }
@@ -505,7 +505,7 @@ void ProjectsWidget::onSettingsButtonClick()
 
 void ProjectsWidget::onProgressChange()
 {
-    int taskDone = totalTask - PreviewerBackend::instance()->totalTask();
+    int taskDone = totalTask - PreviewerBackend::totalTask();
     m_progressBar->setValue(10 + 90.0 * taskDone / totalTask);
 }
 

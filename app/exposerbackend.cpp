@@ -53,7 +53,7 @@ void ExposerBackend::exposeProject() const
 
 Form* ExposerBackend::exposeForm(const QString& rootPath) const
 {
-    PreviewerBackend::instance()->setDisabled(true);
+    PreviewerBackend::setDisabled(true);
 
     auto form = new Form(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
@@ -63,7 +63,7 @@ Form* ExposerBackend::exposeForm(const QString& rootPath) const
     SaveBackend::instance()->addForm(form);
     m_designerScene->addForm(form);
 
-    PreviewerBackend::instance()->setDisabled(false);
+    PreviewerBackend::setDisabled(false);
     form->refresh();
 
     QMap<QString, Control*> pmap;
@@ -71,10 +71,10 @@ Form* ExposerBackend::exposeForm(const QString& rootPath) const
     for (const auto& child : SaveUtils::childrenPaths(form->dir())) {
         auto pcontrol = pmap.value(dname(dname(child)));
 
-        PreviewerBackend::instance()->setDisabled(true);
+        PreviewerBackend::setDisabled(true);
         auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         control->setParentItem(pcontrol);
-        PreviewerBackend::instance()->setDisabled(false);
+        PreviewerBackend::setDisabled(false);
         control->refresh();
 
         pmap[child] = control;
@@ -85,7 +85,7 @@ Form* ExposerBackend::exposeForm(const QString& rootPath) const
 
 Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid, Control* parentControl, QString destinationPath, QString destinationSuid) const
 {
-    PreviewerBackend::instance()->setDisabled(true);
+    PreviewerBackend::setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     SaveBackend::instance()->addControl(control, parentControl, destinationSuid, destinationPath);
@@ -95,7 +95,7 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& p
     SaveUtils::setX(control->dir(), pos.x());
     SaveUtils::setY(control->dir(), pos.y());
 
-    PreviewerBackend::instance()->setDisabled(false);
+    PreviewerBackend::setDisabled(false);
     control->refresh();
 
     QMap<QString, Control*> pmap;
@@ -103,7 +103,7 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& p
     for (const auto& child : SaveUtils::childrenPaths(control->dir(), sourceSuid)) {
         auto pcontrol = pmap.value(dname(dname(child)));
 
-        PreviewerBackend::instance()->setDisabled(true);
+        PreviewerBackend::setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         ccontrol->setParentItem(pcontrol);
         control->setPos(pos);
@@ -111,7 +111,7 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& p
         SaveUtils::setX(control->dir(), control->x());
         SaveUtils::setY(control->dir(), control->y());
 
-        PreviewerBackend::instance()->setDisabled(false);
+        PreviewerBackend::setDisabled(false);
         ccontrol->refresh();
 
         pmap[child] = ccontrol;

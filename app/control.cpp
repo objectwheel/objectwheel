@@ -82,8 +82,8 @@ void Control::onSizeChange()
     if (hasErrors() || !gui() || m_refreshingDisabled)
         return;
 
-    PreviewerBackend::instance()->updateCache(uid(), "width", size().width());
-    PreviewerBackend::instance()->updateCache(uid(), "height", size().height());
+    PreviewerBackend::updateCache(uid(), "width", size().width());
+    PreviewerBackend::updateCache(uid(), "height", size().height());
 }
 
 void Control::onParentChange()
@@ -91,7 +91,7 @@ void Control::onParentChange()
     if (!parentControl() || (!parentControl()->gui() && gui()) || m_refreshingDisabled)
         return;
 
-    PreviewerBackend::instance()->updateParent(uid(), parentControl()->uid(), url());
+    PreviewerBackend::updateParent(uid(), parentControl()->uid(), url());
 
     onSizeChange();
 }
@@ -102,7 +102,7 @@ void Control::onZValueChange()
         return;
 
     // FIXME: Do we really need this?
-    PreviewerBackend::instance()->updateCache(uid(), "z", zValue());
+    PreviewerBackend::updateCache(uid(), "z", zValue());
 }
 
 bool Control::gui() const
@@ -290,7 +290,7 @@ void Control::showResizers()
 void Control::refresh(bool repreview)
 {
     if (!m_refreshingDisabled)
-        PreviewerBackend::instance()->requestPreview(dir(), repreview);
+        PreviewerBackend::requestPreview(dir(), repreview);
 }
 
 void Control::updateUids()
@@ -537,7 +537,7 @@ void Control::updatePreview(const PreviewResult& result)
             if (!form())
                 m_clip = result.property("clip").toBool();
 
-            if (!m_dragging && !Resizer::resizing() && !PreviewerBackend::instance()->contains(uid())) {
+            if (!m_dragging && !Resizer::resizing() && !PreviewerBackend::contains(uid())) {
                 const auto& rect = getRect(result);
                 qreal z = getZ(result);
                 setRefreshingDisabled(true);

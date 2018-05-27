@@ -9,6 +9,7 @@
 #include <savetransaction.h>
 #include <editorbackend.h>
 #include <mainwindow.h>
+#include <previewerbackend.h>
 #include <QMessageBox>
 
 #include <coreplugin/coreconstants.h>
@@ -21,6 +22,7 @@ using namespace Core;
 BackendManager* BackendManager::s_instance = nullptr;
 Authenticator* BackendManager::s_authenticator = nullptr;
 UserBackend* BackendManager::s_userBackend = nullptr;
+PreviewerBackend* BackendManager::s_previewerBackend = nullptr;
 ProjectBackend* BackendManager::s_projectBackend = nullptr;
 HelpManager* BackendManager::s_helpManager = nullptr;
 EditorBackend* BackendManager::s_editorBackend = nullptr;
@@ -30,6 +32,7 @@ BackendManager::BackendManager()
     s_instance = this;
     s_authenticator = new Authenticator(this);
     s_userBackend = new UserBackend(this);
+    s_previewerBackend = new PreviewerBackend(this);
     s_projectBackend = new ProjectBackend(this);
     s_helpManager = new HelpManager(this);
     HelpManager::setupHelpManager();
@@ -44,7 +47,7 @@ BackendManager::BackendManager()
     SaveTransaction::instance();
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
-    if (!PreviewerBackend::instance()->init()) {
+    if (!PreviewerBackend::init()) {
         QMessageBox::critical(
             nullptr,
             tr("Error"),
@@ -92,8 +95,8 @@ void BackendManager::onSessionStop()
 
 void BackendManager::onProjectStart()
 {
-    PreviewerBackend::instance()->restart();
-    PreviewerBackend::instance()->requestInit(ProjectBackend::dir());
+    PreviewerBackend::restart();
+    PreviewerBackend::requestInit(ProjectBackend::dir());
     ExposerBackend::instance()->exposeProject();
 //    dW->controlScene()->clearSelection();
 //    dW->designerScene()->clearSelection();

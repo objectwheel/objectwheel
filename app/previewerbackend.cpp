@@ -16,99 +16,108 @@
 #include <QApplication>
 
 namespace {
-    quint32 blockSize = 0;
-    QString serverName;
-    QPointer<QLocalSocket> socket;
 
-    void send(QLocalSocket* socket, const QByteArray& data)
-    {
-        QByteArray msg;
-        QDataStream out(&msg, QIODevice::WriteOnly);
-        out << quint32(data.size());
-        out << data;
-        socket->write(msg);
-        socket->flush();
-    }
+quint32 blockSize = 0;
+QString serverName;
+QPointer<QLocalSocket> socket;
 
-    void terminate(QLocalSocket* socket)
-    {
-        QByteArray data;
-        QDataStream out(&data, QIODevice::WriteOnly);
-        out << REQUEST_TERMINATE;
-        send(socket, data);
-        socket->abort();
-        ::socket = nullptr;
-    }
-
-    void restart(QLocalSocket* socket, const QStringList& arguments)
-    {
-        QByteArray data;
-        QDataStream out(&data, QIODevice::WriteOnly);
-        out << REQUEST_RESTART;
-        out << arguments;
-        send(socket, data);
-        socket->abort();
-        ::socket = nullptr;
-    }
+void send(QLocalSocket* socket, const QByteArray& data)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::WriteOnly);
+    out << quint32(data.size());
+    out << data;
+    socket->write(msg);
+    socket->flush();
 }
 
-PreviewerBackend::PreviewerBackend() : m_disabled(false)
-  , m_server(new QLocalServer(this))
-  , m_dirtHandlingDisablerTimer(new QTimer(this))
-  , m_dirtHandlingEnabled(false)
+void terminate(QLocalSocket* socket)
 {
-    m_server->setSocketOptions(QLocalServer::UserAccessOption);
-    connect(m_server, SIGNAL(newConnection()), SLOT(onNewConnection()));
+    QByteArray data;
+    QDataStream out(&data, QIODevice::WriteOnly);
+    out << REQUEST_TERMINATE;
+    send(socket, data);
+    socket->abort();
+    ::socket = nullptr;
+}
+
+void restart(QLocalSocket* socket, const QStringList& arguments)
+{
+    QByteArray data;
+    QDataStream out(&data, QIODevice::WriteOnly);
+    out << REQUEST_RESTART;
+    out << arguments;
+    send(socket, data);
+    socket->abort();
+    ::socket = nullptr;
+}
+}
+
+PreviewerBackend* PreviewerBackend::s_instance = nullptr;
+bool PreviewerBackend::s_disabled = false;
+bool PreviewerBackend::s_dirtHandlingEnabled = false;
+QLocalServer* PreviewerBackend::s_server = nullptr;
+QTimer* PreviewerBackend::s_dirtHandlingDisablerTimer = nullptr;
+QList<PreviewerBackend::Task> PreviewerBackend::s_taskList;
+
+PreviewerBackend::PreviewerBackend(QObject* parent) : QObject(parent)
+{
+    s_instance = this;
+    s_server = new QLocalServer(this);
+    s_dirtHandlingDisablerTimer = new QTimer(this);
+
+    s_server->setSocketOptions(QLocalServer::UserAccessOption);
+    connect(s_server, &QLocalServer::newConnection, &PreviewerBackend::onNewConnection);
     serverName = HashFactory::generate();
-    m_dirtHandlingDisablerTimer->setInterval(500);
-    connect(m_dirtHandlingDisablerTimer, SIGNAL(timeout()), SLOT(disableDirtHandling()));
+    s_dirtHandlingDisablerTimer->setInterval(500);
+    connect(s_dirtHandlingDisablerTimer, &QTimer::timeout, &PreviewerBackend::disableDirtHandling);
 }
 
 PreviewerBackend::~PreviewerBackend()
 {
     if (socket)
         terminate(socket);
+    s_instance = nullptr;
 }
 
 PreviewerBackend* PreviewerBackend::instance()
 {
-    static PreviewerBackend instance;
-    return &instance;
+    return s_instance;
 }
 
 bool PreviewerBackend::init()
 {
-    #if defined(PREVIEWER_DEBUG)
-      QLocalServer::removeServer("serverName");
-      return m_server->listen("serverName");
-    #else
-      QProcess process;
-      process.setProgram(qApp->applicationDirPath() + "/objectwheel-previewer");
-      process.setArguments(QStringList() << serverName);
-      // process.setStandardOutputFile(QProcess::nullDevice());
-      // process.setStandardErrorFile(QProcess::nullDevice());
-      return m_server->listen(serverName) && process.startDetached();
-    #endif
+#if defined(PREVIEWER_DEBUG)
+    QLocalServer::removeServer("serverName");
+    return s_server->listen("serverName");
+#else
+    QProcess process;
+    process.setProgram(qApp->applicationDirPath() + "/objectwheel-previewer");
+    process.setArguments(QStringList() << serverName);
+    // process.setStandardOutputFile(QProcess::nullDevice());
+    // process.setStandardErrorFile(QProcess::nullDevice());
+    return s_server->listen(serverName) && process.startDetached();
+#endif
 }
 
-bool PreviewerBackend::isBusy() const
+bool PreviewerBackend::isBusy()
 {
-    return !m_taskList.isEmpty();
+    return !s_taskList.isEmpty();
 }
 
-int PreviewerBackend::totalTask() const
+int PreviewerBackend::totalTask()
 {
-    return m_taskList.size();
+    return s_taskList.size();
 }
 
 void PreviewerBackend::setDisabled(bool value)
 {
-    m_disabled = value;
+    s_disabled = value;
 }
 
-bool PreviewerBackend::contains(const QString& uid) const
+bool PreviewerBackend::contains(const QString& uid)
 {
-    for (const auto& task : m_taskList)
+    for (const auto& task : s_taskList)
         if (task.uid == uid)
             return true;
     return false;
@@ -116,20 +125,20 @@ bool PreviewerBackend::contains(const QString& uid) const
 
 void PreviewerBackend::restart()
 {
-    if (socket && m_taskList.isEmpty()) {
-        blockSize = 0;        
-        #if !defined(PREVIEWER_DEBUG)
-          ::restart(
-              socket.data(),
-              QStringList()
-                  << ProjectBackend::dir()
-                  << serverName
-          );
-        #endif
+    if (socket && s_taskList.isEmpty()) {
+        blockSize = 0;
+#if !defined(PREVIEWER_DEBUG)
+        ::restart(
+                    socket.data(),
+                    QStringList()
+                    << ProjectBackend::dir()
+                    << serverName
+                    );
+#endif
     } else {
         static bool retryAvailable = true;
         if (retryAvailable) {
-            QTimer::singleShot(3000, this, [=]{
+            QTimer::singleShot(3000, [=]{
                 restart();
                 retryAvailable = true;
             });
@@ -141,18 +150,18 @@ void PreviewerBackend::restart()
 
 void PreviewerBackend::disableDirtHandling()
 {
-    m_dirtHandlingEnabled = false;
+    s_dirtHandlingEnabled = false;
 }
 
 void PreviewerBackend::enableDirtHandling()
 {
-    m_dirtHandlingEnabled = true;
-    m_dirtHandlingDisablerTimer->start();
+    s_dirtHandlingEnabled = true;
+    s_dirtHandlingDisablerTimer->start();
 }
 
 void PreviewerBackend::requestInit(const QString& projectDir)
 {
-    if (m_disabled)
+    if (s_disabled)
         return;
 
     Task task;
@@ -160,19 +169,19 @@ void PreviewerBackend::requestInit(const QString& projectDir)
     task.uid = "initialization";
     task.type = Task::Init;
 
-    if (!m_taskList.contains(task)) {
-        m_taskList << task;
+    if (!s_taskList.contains(task)) {
+        s_taskList << task;
 
-        if (m_taskList.size() == 1) {
+        if (s_taskList.size() == 1) {
             processNextTask();
-            QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);
+            QTimer::singleShot(0, instance(), &PreviewerBackend::busyChanged);
         }
     }
 }
 
 void PreviewerBackend::requestPreview(const QString& dir, bool repreview)
 {
-    if (m_disabled)
+    if (s_disabled)
         return;
 
     Task task;
@@ -180,38 +189,38 @@ void PreviewerBackend::requestPreview(const QString& dir, bool repreview)
     task.uid = SaveUtils::uid(dir);
     task.type = repreview ? Task::Repreview : Task::Preview;
 
-    if (!m_taskList.contains(task)) {
-        m_taskList << task;
+    if (!s_taskList.contains(task)) {
+        s_taskList << task;
 
-        if (m_taskList.size() == 1) {
+        if (s_taskList.size() == 1) {
             processNextTask();
-            QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);
+            QTimer::singleShot(0, instance(), &PreviewerBackend::busyChanged);
         }
     }
 }
 
 void PreviewerBackend::removeCache(const QString& uid)
 {
-    if (m_disabled)
+    if (s_disabled)
         return;
 
     Task task;
     task.uid = uid;
     task.type = Task::Remove;
 
-    if (!m_taskList.contains(task)) {
-        m_taskList << task;
+    if (!s_taskList.contains(task)) {
+        s_taskList << task;
 
-        if (m_taskList.size() == 1) {
+        if (s_taskList.size() == 1) {
             processNextTask();
-            QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);
+            QTimer::singleShot(0, instance(), &PreviewerBackend::busyChanged);
         }
     }
 }
 
 void PreviewerBackend::updateParent(const QString& uid, const QString& parentUid, const QString& newUrl)
 {
-    if (m_disabled)
+    if (s_disabled)
         return;
 
     fixTasksAgainstReparent(uid, newUrl);
@@ -222,27 +231,27 @@ void PreviewerBackend::updateParent(const QString& uid, const QString& parentUid
     task.parentUid = parentUid;
     task.type = Task::Reparent;
 
-    if (!m_taskList.contains(task)) {
-        m_taskList << task;
+    if (!s_taskList.contains(task)) {
+        s_taskList << task;
 
-        if (m_taskList.size() == 1) {
+        if (s_taskList.size() == 1) {
             processNextTask();
-            QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);
+            QTimer::singleShot(0, instance(), &PreviewerBackend::busyChanged);
         }
     } else {
-        int index = m_taskList.indexOf(task);
+        int index = s_taskList.indexOf(task);
 
-        m_taskList[index].newUrl = newUrl;
-        m_taskList[index].parentUid = parentUid;
+        s_taskList[index].newUrl = newUrl;
+        s_taskList[index].parentUid = parentUid;
 
         if (index == 0)
-            m_taskList[index].needsUpdate = true;
+            s_taskList[index].needsUpdate = true;
     }
 }
 
 void PreviewerBackend::updateCache(const QString& uid, const QString& property, const QVariant& value)
 {
-    if (m_disabled)
+    if (s_disabled)
         return;
 
     Task task;
@@ -251,27 +260,27 @@ void PreviewerBackend::updateCache(const QString& uid, const QString& property, 
     task.propertyValue = value;
     task.type = Task::Update;
 
-    if (!m_taskList.contains(task)) {
-        m_taskList << task;
+    if (!s_taskList.contains(task)) {
+        s_taskList << task;
 
-        if (m_taskList.size() == 1) {
+        if (s_taskList.size() == 1) {
             processNextTask();
-            QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);
+            QTimer::singleShot(0, instance(), &PreviewerBackend::busyChanged);
         }
     } else {
-        int index = m_taskList.indexOf(task);
+        int index = s_taskList.indexOf(task);
 
-        m_taskList[index].property = property;
-        m_taskList[index].propertyValue = value;
+        s_taskList[index].property = property;
+        s_taskList[index].propertyValue = value;
 
         if (index == 0)
-            m_taskList[index].needsUpdate = true;
+            s_taskList[index].needsUpdate = true;
     }
 }
 
 void PreviewerBackend::fixTasksAgainstReparent(const QString& uid, const QString& newUrl)
 {
-    for (auto& task : m_taskList) {
+    for (auto& task : s_taskList) {
         if (task.uid == uid) {
             task.dir = dname(dname(newUrl));
         }
@@ -280,13 +289,13 @@ void PreviewerBackend::fixTasksAgainstReparent(const QString& uid, const QString
 
 void PreviewerBackend::onNewConnection()
 {
-    auto client = m_server->nextPendingConnection();
+    auto client = s_server->nextPendingConnection();
 
     if (socket.isNull()) {
         socket = client;
 
-        connect(socket.data(), SIGNAL(disconnected()), socket.data(), SLOT(deleteLater()));
-        connect(socket.data(), SIGNAL(readyRead()), SLOT(onReadReady()));
+        connect(socket.data(), &QLocalSocket::disconnected, socket.data(), &QLocalSocket::deleteLater);
+        connect(socket.data(), &QLocalSocket::readyRead, &PreviewerBackend::onReadReady);
 
         processNextTask();
     } else {
@@ -333,8 +342,8 @@ void PreviewerBackend::onBinaryMessageReceived(const QByteArray& data)
 
 void PreviewerBackend::processNextTask()
 {
-    if (!m_taskList.isEmpty() && socket) {
-        const auto& task = m_taskList.first();
+    if (!s_taskList.isEmpty() && socket) {
+        const auto& task = s_taskList.first();
 
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
@@ -375,13 +384,13 @@ void PreviewerBackend::processNextTask()
 void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
 {
     if (type == REQUEST_DONE) {
-        Task::Type t = m_taskList.first().type;
+        Task::Type t = s_taskList.first().type;
 
-        if (!m_taskList.first().needsUpdate) {
-            m_taskList.removeFirst();
-            QTimer::singleShot(0, this, &PreviewerBackend::taskDone);
+        if (!s_taskList.first().needsUpdate) {
+            s_taskList.removeFirst();
+            QTimer::singleShot(0, instance(), &PreviewerBackend::taskDone);
         } else
-            m_taskList.first().needsUpdate = false;
+            s_taskList.first().needsUpdate = false;
 
         PreviewResult result;
 
@@ -389,7 +398,7 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
             in >> result;
 
         if (t == Task::Remove || t == Task::Repreview || t == Task::Update) {
-            if (m_dirtHandlingEnabled) {
+            if (s_dirtHandlingEnabled) {
                 for (auto control : Control::controls()) {
                     if (result.dirtyUids.contains(control->uid())) {
                         Task task;
@@ -397,18 +406,18 @@ void PreviewerBackend::processMessage(const QString& type, QDataStream& in)
                         task.uid = control->uid();
                         task.type = Task::Preview;
 
-                        if (!m_taskList.contains(task))
-                            m_taskList << task;
+                        if (!s_taskList.contains(task))
+                            s_taskList << task;
                     }
                 }
             }
         }
 
         if (t == Task::Preview || t == Task::Repreview)
-            QTimer::singleShot(0, std::bind(&PreviewerBackend::previewReady, this, result));
+            QTimer::singleShot(0, std::bind(&PreviewerBackend::previewReady, instance(), result));
 
         if (!isBusy())
-            QTimer::singleShot(0, this, &PreviewerBackend::busyChanged);
+            QTimer::singleShot(0, instance(), &PreviewerBackend::busyChanged);
 
         return processNextTask();
     }

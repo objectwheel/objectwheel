@@ -35,8 +35,8 @@ void SaveTransaction::processGeometry(Control* control)
     SaveBackend::instance()->setProperty(control, "height", QString::number(control->size().height()));
 
     if (!control->form()) {
-        PreviewerBackend::instance()->updateCache(control->uid(), "x", control->x());
-        PreviewerBackend::instance()->updateCache(control->uid(), "y", control->y());
+        PreviewerBackend::updateCache(control->uid(), "x", control->x());
+        PreviewerBackend::updateCache(control->uid(), "y", control->y());
     }
 }
 

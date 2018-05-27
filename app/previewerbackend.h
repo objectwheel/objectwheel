@@ -10,16 +10,17 @@ struct PreviewResult;
 class QDataStream;
 class QTimer;
 
-class PreviewerBackend : public QObject
+class PreviewerBackend final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(PreviewerBackend)
 
+    friend class BackendManager;
+
 private:
     struct Task
     {
-        enum Type
-        {
+        enum Type {
             Init,
             Preview,
             Repreview,
@@ -29,9 +30,7 @@ private:
         };
 
         inline bool operator==(const Task& t1)
-        {
-            return uid == t1.uid && type == t1.type && property == t1.property;
-        }
+        { return uid == t1.uid && type == t1.type && property == t1.property; }
 
         Type type;
         QString dir;
@@ -45,31 +44,29 @@ private:
 
 public:
     static PreviewerBackend* instance();
-    bool init();
-    bool isBusy() const;
-    bool contains(const QString& uid) const;
-    int totalTask() const;
-    void setDisabled(bool value);
 
-public slots:
-    void restart();
-    void requestInit(const QString& projectDir);
-    void requestPreview(const QString& dir, bool repreview = false);
-    void removeCache(const QString& uid);
-    void updateParent(const QString& uid, const QString& parentUid, const QString& newUrl);
-    void updateCache(const QString& uid, const QString& property, const QVariant& value);
+    static bool isBusy();
+    static bool contains(const QString& uid);
+    static int totalTask();
 
-private slots:
-    void disableDirtHandling();
-    void enableDirtHandling();
-    void onNewConnection();
-    void onReadReady();
-    void onBinaryMessageReceived(const QByteArray& data);
-    void fixTasksAgainstReparent(const QString& uid, const QString& newUrl);
+    static bool init();
+    static void restart();
+    static void setDisabled(bool value);
+    static void requestInit(const QString& projectDir);
+    static void removeCache(const QString& uid);
+    static void requestPreview(const QString& dir, bool repreview = false);
+    static void updateParent(const QString& uid, const QString& parentUid, const QString& newUrl);
+    static void updateCache(const QString& uid, const QString& property, const QVariant& value);
 
 private:
-    void processNextTask();
-    void processMessage(const QString& type, QDataStream& in);
+    static void onReadReady();
+    static void processNextTask();
+    static void onNewConnection();
+    static void enableDirtHandling();
+    static void disableDirtHandling();
+    static void onBinaryMessageReceived(const QByteArray& data);
+    static void fixTasksAgainstReparent(const QString& uid, const QString& newUrl);
+    static void processMessage(const QString& type, QDataStream& in);
 
 signals:
     void taskDone();
@@ -77,15 +74,16 @@ signals:
     void previewReady(const PreviewResult& result);
 
 private:
-    PreviewerBackend();
+    explicit PreviewerBackend(QObject* parent = nullptr);
     ~PreviewerBackend();
 
 private:
-    bool m_disabled;
-    QLocalServer* m_server;
-    QTimer* m_dirtHandlingDisablerTimer;
-    QList<Task> m_taskList;
-    bool m_dirtHandlingEnabled;
+    static PreviewerBackend* s_instance;
+    static bool s_disabled;
+    static bool s_dirtHandlingEnabled;
+    static QLocalServer* s_server;
+    static QTimer* s_dirtHandlingDisablerTimer;
+    static QList<Task> s_taskList;
 };
 
 #endif // PREVIEWERBACKEND_H
