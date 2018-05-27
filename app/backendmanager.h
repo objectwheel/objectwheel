@@ -9,6 +9,8 @@ class UserBackend;
 class ProjectBackend;
 class EditorBackend;
 class PreviewerBackend;
+class ExposerBackend;
+class InterpreterBackend;
 
 namespace Core { class HelpManager; }
 
@@ -38,6 +40,8 @@ private:
     static UserBackend* s_userBackend;
     static PreviewerBackend* s_previewerBackend;
     static ProjectBackend* s_projectBackend;
+    static ExposerBackend* s_exposerBackend;
+    static InterpreterBackend* s_interpreterBackend;
     static Core::HelpManager* s_helpManager;
     static EditorBackend* s_editorBackend;
 };

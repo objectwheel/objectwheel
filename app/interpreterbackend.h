@@ -3,18 +3,19 @@
 
 #include <QProcess>
 
-class InterpreterBackend : public QObject
+class InterpreterBackend final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(InterpreterBackend)
 
+    friend class BackendManager;
+
 public:
     static InterpreterBackend* instance();
 
-public slots:
-    void run();
-    void kill();
-    void terminate();
+    static void run();
+    static void kill();
+    static void terminate();
 
 private slots:
     void onReadyReadStandardError();
@@ -28,10 +29,12 @@ signals:
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
-    InterpreterBackend();
+    explicit InterpreterBackend(QObject* parent = nullptr);
+    ~InterpreterBackend();
 
 private:
-    QProcess* _process;
+    static InterpreterBackend* s_instance;
+    static QProcess* s_process;
 };
 
 #endif // INTERPRETERBACKEND_H

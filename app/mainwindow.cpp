@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setContextMenuPolicy(Qt::NoContextMenu);
     setStyleSheet("QMainWindow::separator{ height: 1px; }");
 
-    ExposerBackend::instance()->init(m_centralWidget->designerWidget()->designerScene());
+    ExposerBackend::init(m_centralWidget->designerWidget()->designerScene());
 
     /** Set Tool Bars **/
     /* Add Run Pane */

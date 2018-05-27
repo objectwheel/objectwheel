@@ -2,51 +2,58 @@
 #include <projectbackend.h>
 #include <QApplication>
 
-InterpreterBackend::InterpreterBackend()
-{
-    _process = new QProcess(this);
+InterpreterBackend* InterpreterBackend::s_instance = nullptr;
+QProcess* InterpreterBackend::s_process = nullptr;
 
-    connect(_process, SIGNAL(readyReadStandardError()),
-      SLOT(onReadyReadStandardError()));
-    connect(_process, SIGNAL(readyReadStandardOutput()),
-      SLOT(onReadyReadStandardOutput()));
-    connect(_process,SIGNAL(finished(int,QProcess::ExitStatus)),
-      SIGNAL(finished(int,QProcess::ExitStatus)));
-    connect(_process,SIGNAL(started()),
-      SIGNAL(started()));
+InterpreterBackend::InterpreterBackend(QObject* parent) : QObject(parent)
+{
+    s_instance = this;
+    s_process = new QProcess(this);
+
+    connect(s_process, &QProcess::readyReadStandardError,
+            this, &InterpreterBackend::onReadyReadStandardError);
+    connect(s_process, &QProcess::readyReadStandardOutput,
+            this, &InterpreterBackend::onReadyReadStandardOutput);
+    connect(s_process, qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+            this, qOverload<int,QProcess::ExitStatus>(&InterpreterBackend::finished));
+    connect(s_process, &QProcess::started, this, &InterpreterBackend::started);
+}
+
+InterpreterBackend::~InterpreterBackend()
+{
+    s_instance = nullptr;
 }
 
 InterpreterBackend* InterpreterBackend::instance()
 {
-    static InterpreterBackend instance;
-    return &instance;
+    return s_instance;
 }
 
 void InterpreterBackend::run()
 {
-    _process->setArguments(QStringList() << ProjectBackend::dir());
-    _process->setProgram(qApp->applicationDirPath() + "/objectwheel-interpreter");
-    _process->start();
+    s_process->setArguments(QStringList() << ProjectBackend::dir());
+    s_process->setProgram(qApp->applicationDirPath() + "/objectwheel-interpreter");
+    s_process->start();
 }
 
 void InterpreterBackend::kill()
 {
-    _process->kill();
+    s_process->kill();
 }
 
 void InterpreterBackend::terminate()
 {
-    _process->terminate();
+    s_process->terminate();
 }
 
 void InterpreterBackend::onReadyReadStandardError()
 {
-    emit standardError(_process->readAllStandardError());
+    emit standardError(s_process->readAllStandardError());
     emit readyRead();
 }
 
 void InterpreterBackend::onReadyReadStandardOutput()
 {
-    emit standardOutput(_process->readAllStandardOutput());
+    emit standardOutput(s_process->readAllStandardOutput());
     emit readyRead();
 }

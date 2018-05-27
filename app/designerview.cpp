@@ -220,7 +220,7 @@ void DesignerView::onPasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = ExposerBackend::instance()->exposeControl(
+        auto control = ExposerBackend::exposeControl(
             url.toLocalFile(),
             QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
             sourceSuid,

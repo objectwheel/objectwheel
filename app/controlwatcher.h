@@ -6,7 +6,7 @@
 class Form;
 class Control;
 
-class ControlWatcher : public QObject
+class ControlWatcher final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(ControlWatcher)

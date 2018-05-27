@@ -5,7 +5,7 @@
 
 class Control;
 
-class SaveTransaction : public QObject
+class SaveTransaction final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(SaveTransaction)

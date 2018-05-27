@@ -36,6 +36,7 @@ private:
     ~EditorBackend();
 
 private:
+    static EditorBackend* s_instance;
     static QList<QmlCodeDocument*> m_documents;
     QmlJSTools::Internal::ModelManager m_modelManager;
     QmlJSTools::Internal::LocatorData m_locatorData;

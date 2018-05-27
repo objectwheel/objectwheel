@@ -7,22 +7,14 @@
 #include <savebackend.h>
 #include <previewerbackend.h>
 
-ExposerBackend::ExposerBackend() : m_designerScene(nullptr)
-{
-}
-
-ExposerBackend* ExposerBackend::instance()
-{
-    static ExposerBackend instance;
-    return &instance;
-}
+DesignerScene* ExposerBackend::s_designerScene = nullptr;
 
 void ExposerBackend::init(DesignerScene* designerScene)
 {
-    m_designerScene = designerScene;
+    s_designerScene = designerScene;
 }
 
-void ExposerBackend::exposeProject() const
+void ExposerBackend::exposeProject()
 {
     const auto& fpaths = SaveUtils::formPaths(ProjectBackend::dir());
 
@@ -32,7 +24,7 @@ void ExposerBackend::exposeProject() const
         if (SaveUtils::isMain(path))
             form->setMain(true);
 
-        m_designerScene->addForm(form);
+        s_designerScene->addForm(form);
         form->centralize();
         form->refresh();
 
@@ -51,7 +43,7 @@ void ExposerBackend::exposeProject() const
     }
 }
 
-Form* ExposerBackend::exposeForm(const QString& rootPath) const
+Form* ExposerBackend::exposeForm(const QString& rootPath)
 {
     PreviewerBackend::setDisabled(true);
 
@@ -61,7 +53,7 @@ Form* ExposerBackend::exposeForm(const QString& rootPath) const
         form->setMain(true);
 
     SaveBackend::instance()->addForm(form);
-    m_designerScene->addForm(form);
+    s_designerScene->addForm(form);
 
     PreviewerBackend::setDisabled(false);
     form->refresh();
@@ -83,7 +75,9 @@ Form* ExposerBackend::exposeForm(const QString& rootPath) const
     return form;
 }
 
-Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid, Control* parentControl, QString destinationPath, QString destinationSuid) const
+Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
+                                       Control* parentControl, QString destinationPath,
+                                       QString destinationSuid)
 {
     PreviewerBackend::setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");

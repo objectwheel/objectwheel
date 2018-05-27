@@ -70,7 +70,7 @@ void RunPane::reset()
 
 void RunPane::onStopButtonClick()
 {
-    InterpreterBackend::instance()->terminate();
+    InterpreterBackend::terminate();
     m_loadingBar->busy(
         0,
         ProjectBackend::name() +
@@ -81,7 +81,7 @@ void RunPane::onStopButtonClick()
 
 void RunPane::onStopButtonDoubleClick()
 {
-    InterpreterBackend::instance()->kill();
+    InterpreterBackend::kill();
     m_loadingBar->busy(
         0,
         ProjectBackend::name() +
@@ -106,7 +106,7 @@ void RunPane::onRunButtonClick()
 
     m_consoleBox->scrollToEnd();
 
-    InterpreterBackend::instance()->run();
+    InterpreterBackend::run();
 }
 
 void RunPane::onProjectsButtonClick()
