@@ -52,7 +52,7 @@ Form* ExposerBackend::exposeForm(const QString& rootPath)
     if (SaveUtils::isMain(rootPath))
         form->setMain(true);
 
-    SaveBackend::instance()->addForm(form);
+    SaveBackend::addForm(form);
     s_designerScene->addForm(form);
 
     PreviewerBackend::setDisabled(false);
@@ -82,7 +82,7 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& p
     PreviewerBackend::setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
-    SaveBackend::instance()->addControl(control, parentControl, destinationSuid, destinationPath);
+    SaveBackend::addControl(control, parentControl, destinationSuid, destinationPath);
     control->setParentItem(parentControl);
     control->setPos(pos);
 

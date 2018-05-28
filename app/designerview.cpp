@@ -252,7 +252,7 @@ void DesignerView::onPasteAction()
                     control->setRefreshingDisabled(true);
                     control->blockSignals(true);
                     scene()->removeControl(control);
-                    SaveBackend::instance()->removeControl(control);
+                    SaveBackend::removeControl(control);
                 }
             }
         }
@@ -272,7 +272,7 @@ void DesignerView::onDeleteAction()
         control->setRefreshingDisabled(true);
         control->blockSignals(true);
         scene()->removeControl(control);
-        SaveBackend::instance()->removeControl(control);
+        SaveBackend::removeControl(control);
     }
 }
 

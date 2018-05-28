@@ -6,53 +6,59 @@
 class Form;
 class Control;
 
-class SaveBackend : public QObject
+class SaveBackend final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(SaveBackend)
 
+    friend class BackendManager;
+
 public:
     static SaveBackend* instance();
 
-    bool initProject(const QString& projectDirectory, int templateNumber) const;
-    void flushId(const Control* control) const;
-    void flushSuid(const Control* control, const QString& suid) const;
+    static bool initProject(const QString& projectDirectory, int templateNumber);
+    static void flushId(const Control* control);
+    static void flushSuid(const Control* control, const QString& suid);
 
-    bool existsInForms(const Control* control) const;
-    bool existsInFormScope(const Control* control) const;
-    bool existsInParentScope(const Control* control, const QString& suid, const QString topPath) const;
+    static bool existsInForms(const Control* control);
+    static bool existsInFormScope(const Control* control);
+    static bool existsInParentScope(const Control* control, const QString& suid, const QString topPath);
 
-    void recalculateUids(Control* control) const;
-    void refreshToolUid(const QString& toolRootPath) const;
-    void refactorId(Control* control, const QString& suid, const QString& topPath = QString()) const;
-    void fixIdConflicts() const;
+    static void recalculateUids(Control* control);
+    static void refreshToolUid(const QString& toolRootPath);
+    static void refactorId(Control* control, const QString& suid, const QString& topPath = QString());
+    static void fixIdConflicts();
 
-    bool addForm(Form* form) const;
-    bool isInOwdb(const QString& path) const;
-    bool isForm(const QString& rootPath) const;
-    bool moveControl(Control* control, const Control* parentControl) const;
-    bool exists(const Control* control, const QString& suid, const QString& topPath = QString()) const;
-    bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString()) const;
+    static bool addForm(Form* form);
+    static bool isInOwdb(const QString& path);
+    static bool isForm(const QString& rootPath);
+    static bool moveControl(Control* control, const Control* parentControl);
+    static bool exists(const Control* control, const QString& suid, const QString& topPath = QString());
+    static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
 
-    void removeForm(const Form* form) const;
-    void removeControl(const Control* control) const;
-    void removeChildControlsOnly(const Control* control) const;
-    void removeProperty(const Control* control, const QString& property) const;
-    void setProperty(Control* control, const QString& property, QString value, const QString& topPath = QString()) const;
+    static void removeForm(const Form* form);
+    static void removeControl(const Control* control);
+    static void removeChildControlsOnly(const Control* control);
+    static void removeProperty(const Control* control, const QString& property);
+    static void setProperty(Control* control, const QString& property, QString value, const QString& topPath = QString());
 
-    QString basePath() const;
-    QString parentDir(const Control* control) const;
-    QString findByUid(const QString& uid, const QString& rootPath) const;
-    QString findById(const QString& suid, const QString& id, const QString& rootPath) const;
-    QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString()) const;
-    QStringList formScopePaths() const;
+    static QString basePath();
+    static QString parentDir(const Control* control);
+    static QString findByUid(const QString& uid, const QString& rootPath);
+    static QString findById(const QString& suid, const QString& id, const QString& rootPath);
+    static QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString());
+    static QStringList formScopePaths();
 
 signals:
-    void databaseChanged() const;
-    void propertyChanged(Control* control, const QString& property, const QString& value) const;
+    void databaseChanged();
+    void propertyChanged(Control* control, const QString& property, const QString& value);
 
 private:
-    SaveBackend() {}
+    explicit SaveBackend(QObject* parent = nullptr);
+    ~SaveBackend();
+
+private:
+    static SaveBackend* s_instance;
 };
 
 #endif // SAVEBACKEND_H

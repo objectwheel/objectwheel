@@ -967,7 +967,7 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
 
             const auto& id = ParserUtils::property(documentPath, "id");
             if (control->id() != id && !id.isEmpty())
-                SaveBackend::instance()->setProperty(control, "id", id);
+                SaveBackend::setProperty(control, "id", id);
 
             control->refresh(true);
             break;

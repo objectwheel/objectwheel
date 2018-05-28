@@ -192,7 +192,7 @@ void DesignerWidget::onClearButtonClick()
     switch (ret) {
         case QMessageBox::Yes: {
             m_designerScene->removeChildControlsOnly(m_designerScene->mainForm());
-            SaveBackend::instance()->removeChildControlsOnly(m_designerScene->mainForm());
+            SaveBackend::removeChildControlsOnly(m_designerScene->mainForm());
             break;
         } default: {
             // Do nothing

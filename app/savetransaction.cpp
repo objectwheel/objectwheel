@@ -27,12 +27,12 @@ void SaveTransaction::processGeometry(Control* control)
     }
 
     if (!control->form()) {
-        SaveBackend::instance()->setProperty(control, "x", QString::number(control->x()));
-        SaveBackend::instance()->setProperty(control, "y", QString::number(control->y()));
+        SaveBackend::setProperty(control, "x", QString::number(control->x()));
+        SaveBackend::setProperty(control, "y", QString::number(control->y()));
     }
 
-    SaveBackend::instance()->setProperty(control, "width", QString::number(control->size().width()));
-    SaveBackend::instance()->setProperty(control, "height", QString::number(control->size().height()));
+    SaveBackend::setProperty(control, "width", QString::number(control->size().width()));
+    SaveBackend::setProperty(control, "height", QString::number(control->size().height()));
 
     if (!control->form()) {
         PreviewerBackend::updateCache(control->uid(), "x", control->x());
@@ -45,7 +45,7 @@ void SaveTransaction::processParent(Control* control)
     if (!control->parentControl() || (!control->parentControl()->gui() && control->gui()))
         return;
 
-    SaveBackend::instance()->moveControl(control, control->parentControl());
+    SaveBackend::moveControl(control, control->parentControl());
     processGeometry(control);
 }
 
@@ -54,5 +54,5 @@ void SaveTransaction::processZ(Control* control)
     if (control->hasErrors() || !control->gui())
         return;
 
-    SaveBackend::instance()->setProperty(control, "z", QString::number(control->zValue()));
+    SaveBackend::setProperty(control, "z", QString::number(control->zValue()));
 }

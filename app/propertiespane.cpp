@@ -1282,7 +1282,7 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 
     auto sc = scs.at(0);
 
-    SaveBackend::instance()->setProperty(sc, property, parserValue);
+    SaveBackend::setProperty(sc, property, parserValue);
     PreviewerBackend::updateCache(sc->uid(), property, value);
 }
 

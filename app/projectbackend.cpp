@@ -169,7 +169,7 @@ bool ProjectBackend::newProject(int templateNumber, const QString& name, const Q
     if (wrfile(pdir + separator() + FILE_PROJECT, data) <= 0)
         return false;
 
-    if (!SaveBackend::instance()->initProject(pdir, templateNumber))
+    if (!SaveBackend::initProject(pdir, templateNumber))
         return false;
 
     return true;

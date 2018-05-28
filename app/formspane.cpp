@@ -197,7 +197,7 @@ void FormsPane::removeButtonClicked()
     auto form = m_designerScene->mainForm();
     if (!form || !form->form() || form->main())
         return;
-    SaveBackend::instance()->removeForm((Form*)form);
+    SaveBackend::removeForm((Form*)form);
     m_designerScene->removeForm(form);
 }
 

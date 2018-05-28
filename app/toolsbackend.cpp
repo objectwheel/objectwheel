@@ -179,7 +179,7 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
         if (!cp(toolPath, newToolPath, true, qrc))
             return false;
 
-        SaveBackend::instance()->refreshToolUid(newToolPath);
+        SaveBackend::refreshToolUid(newToolPath);
     } else {
         newToolPath = toolPath;
     }

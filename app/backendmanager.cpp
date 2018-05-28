@@ -12,6 +12,7 @@
 #include <previewerbackend.h>
 #include <interpreterbackend.h>
 #include <exposerbackend.h>
+#include <savebackend.h>
 
 #include <QMessageBox>
 
@@ -26,6 +27,7 @@ BackendManager* BackendManager::s_instance = nullptr;
 Authenticator* BackendManager::s_authenticator = nullptr;
 UserBackend* BackendManager::s_userBackend = nullptr;
 PreviewerBackend* BackendManager::s_previewerBackend = nullptr;
+SaveBackend* BackendManager::s_saveBackend = nullptr;
 ProjectBackend* BackendManager::s_projectBackend = nullptr;
 ExposerBackend* BackendManager::s_exposerBackend = nullptr;
 InterpreterBackend* BackendManager::s_interpreterBackend = nullptr;
@@ -38,6 +40,7 @@ BackendManager::BackendManager()
     s_authenticator = new Authenticator(this);
     s_userBackend = new UserBackend(this);
     s_previewerBackend = new PreviewerBackend(this);
+    s_saveBackend = new SaveBackend(this);
     s_projectBackend = new ProjectBackend(this);
     s_exposerBackend = new ExposerBackend;
     s_interpreterBackend = new InterpreterBackend(this);
