@@ -7,7 +7,7 @@
 #include <buildswidget.h>
 #include <issuesbox.h>
 #include <designerscene.h>
-#include <previewerbackend.h>
+#include <controlpreviewingmanager.h>
 #include <delayer.h>
 
 #include <QSplitter>
@@ -45,7 +45,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
 
     connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)), m_designerWidget, SLOT(onControlDoubleClick(Control*)));
     connect(m_designerWidget->designerScene(), SIGNAL(aboutToRemove(Control*)), m_qmlCodeEditorWidget, SLOT(handleControlRemoval(Control*)));
-    connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, PreviewerBackend::restart);
+    connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, ControlPreviewingManager::restart);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
         Delayer::delay(3000);
         m_designerWidget->refresh();

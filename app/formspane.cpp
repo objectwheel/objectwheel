@@ -2,13 +2,13 @@
 #include <flatbutton.h>
 #include <toolboxtree.h>
 #include <saveutils.h>
-#include <savebackend.h>
-#include <projectbackend.h>
+#include <savemanager.h>
+#include <projectmanager.h>
 #include <designerscene.h>
 #include <filemanager.h>
 #include <css.h>
 #include <delayer.h>
-#include <exposerbackend.h>
+#include <controlexposingmanager.h>
 
 #include <QLabel>
 #include <QStandardPaths>
@@ -89,8 +89,8 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     _listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(ProjectBackend::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
-    connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
+    connect(ProjectManager::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
+    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
     connect(m_designerScene, SIGNAL(mainFormChanged(Control*)), SLOT(handleDatabaseChange()));
     connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
 
@@ -197,7 +197,7 @@ void FormsPane::removeButtonClicked()
     auto form = m_designerScene->mainForm();
     if (!form || !form->form() || form->main())
         return;
-    SaveBackend::removeForm((Form*)form);
+    SaveManager::removeForm((Form*)form);
     m_designerScene->removeForm(form);
 }
 
@@ -211,7 +211,7 @@ void FormsPane::addButtonClicked()
     if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
         return;
 
-    auto form = ExposerBackend::exposeForm(tempPath);
+    auto form = ControlExposingManager::exposeForm(tempPath);
     form->centralize();
 
     rm(tempPath);
@@ -226,7 +226,7 @@ void FormsPane::handleDatabaseChange()
 
     _listWidget->clear();
 
-    for (auto path : SaveUtils::formPaths(ProjectBackend::dir())) {
+    for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
         auto _id = SaveUtils::id(path);
         if (id == _id)
             row = _listWidget->count();

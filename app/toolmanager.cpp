@@ -1,7 +1,7 @@
-#include <toolsbackend.h>
-#include <projectbackend.h>
+#include <toolmanager.h>
+#include <projectmanager.h>
 #include <saveutils.h>
-#include <savebackend.h>
+#include <savemanager.h>
 #include <toolboxtree.h>
 #include <filemanager.h>
 #include <zipper.h>
@@ -29,7 +29,7 @@
 
 namespace {
 
-static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)
+static void flushChangeSet(const ToolManager::ChangeSet& changeSet)
 {
     auto dirCtrl = changeSet.toolPath +
       separator() + DIR_THIS;
@@ -61,10 +61,10 @@ static void flushChangeSet(const ToolsBackend::ChangeSet& changeSet)
 
 static bool isProjectFull()
 {
-    if (ProjectBackend::dir().isEmpty())
+    if (ProjectManager::dir().isEmpty())
         return false;
     if (!QDir().exists(
-        ProjectBackend::dir() +
+        ProjectManager::dir() +
         separator() +
         DEFAULT_TOOLS_DIRECTORY
     ))
@@ -74,16 +74,16 @@ static bool isProjectFull()
 }
 }
 
-QList<ToolboxTree*> ToolsBackend::s_toolboxTreeList;
+QList<ToolboxTree*> ToolManager::s_toolboxTreeList;
 
-QString ToolsBackend::toolsDir()
+QString ToolManager::toolsDir()
 {
-    auto projectDir = ProjectBackend::dir();
+    auto projectDir = ProjectManager::dir();
     if (projectDir.isEmpty()) return projectDir;
     return projectDir + separator() + DEFAULT_TOOLS_DIRECTORY;
 }
 
-QStringList ToolsBackend::categories()
+QStringList ToolManager::categories()
 {
     QStringList categories;
 
@@ -99,7 +99,7 @@ QStringList ToolsBackend::categories()
     return categories;
 }
 
-void ToolsBackend::fillTree(ToolboxTree* tree)
+void ToolManager::fillTree(ToolboxTree* tree)
 {
     if (!isProjectFull())
         return;
@@ -110,9 +110,9 @@ void ToolsBackend::fillTree(ToolboxTree* tree)
         addToTree(toolsDir() + separator() + toolDir, tree);
 }
 
-bool ToolsBackend::addToTree(const QString& toolPath, ToolboxTree* tree)
+bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
 {
-    if (ProjectBackend::dir().isEmpty() ||
+    if (ProjectManager::dir().isEmpty() ||
         toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
@@ -144,7 +144,7 @@ bool ToolsBackend::addToTree(const QString& toolPath, ToolboxTree* tree)
     return true;
 }
 
-void ToolsBackend::reset()
+void ToolManager::reset()
 {
     if (!isProjectFull())
         return;
@@ -158,9 +158,9 @@ void ToolsBackend::reset()
     }
 }
 
-bool ToolsBackend::addTool(const QString& toolPath, const bool select, const bool qrc)
+bool ToolManager::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
-    if (ProjectBackend::dir().isEmpty() ||
+    if (ProjectManager::dir().isEmpty() ||
         toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
@@ -179,7 +179,7 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
         if (!cp(toolPath, newToolPath, true, qrc))
             return false;
 
-        SaveBackend::refreshToolUid(newToolPath);
+        SaveManager::refreshToolUid(newToolPath);
     } else {
         newToolPath = toolPath;
     }
@@ -220,7 +220,7 @@ bool ToolsBackend::addTool(const QString& toolPath, const bool select, const boo
     return true;
 }
 
-void ToolsBackend::changeTool(const ChangeSet& changeSet)
+void ToolManager::changeTool(const ChangeSet& changeSet)
 {
     for (auto tree : s_toolboxTreeList) {
         tree->clearSelection(); tree->setCurrentItem(nullptr);
@@ -243,7 +243,7 @@ void ToolsBackend::changeTool(const ChangeSet& changeSet)
     addTool(changeSet.toolPath, true);
 }
 
-void ToolsBackend::removeTool(const QString& toolPath)
+void ToolManager::removeTool(const QString& toolPath)
 {
     for (auto tree : s_toolboxTreeList) {
         tree->clearSelection(); tree->setCurrentItem(nullptr);
@@ -265,15 +265,15 @@ void ToolsBackend::removeTool(const QString& toolPath)
     }
 }
 
-void ToolsBackend::addToolboxTree(ToolboxTree* toolboxTree)
+void ToolManager::addToolboxTree(ToolboxTree* toolboxTree)
 {
     s_toolboxTreeList << toolboxTree;
     fillTree(toolboxTree);
 }
 
-void ToolsBackend::downloadTools(const QUrl& url)
+void ToolManager::downloadTools(const QUrl& url)
 {
-    if (ProjectBackend::dir().isEmpty()) return;
+    if (ProjectManager::dir().isEmpty()) return;
 
     for (auto tree : s_toolboxTreeList) {
         tree->clear();
@@ -337,12 +337,12 @@ void ToolsBackend::downloadTools(const QUrl& url)
     manager->deleteLater();
 }
 
-void ToolsBackend::newTool()
+void ToolManager::newTool()
 {
     addTool(DIR_QRC_CONTROL, true, true);
 }
 
-void ToolsBackend::resetTools()
+void ToolManager::resetTools()
 {
     if (!isProjectFull())
         return;

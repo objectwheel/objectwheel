@@ -2,15 +2,15 @@
 #include <centralwidget.h>
 #include <css.h>
 #include <saveutils.h>
-#include <savebackend.h>
+#include <savemanager.h>
 #include <delayer.h>
 #include <filemanager.h>
-#include <controlwatcher.h>
+#include <controlmonitoringmanager.h>
 #include <focuslesslineedit.h>
 #include <previewresult.h>
 #include <control.h>
 #include <designerscene.h>
-#include <previewerbackend.h>
+#include <controlpreviewingmanager.h>
 
 #include <QtWidgets>
 
@@ -817,8 +817,8 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
-    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
-    connect(ControlWatcher::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
+    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
+    connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
 }
 
 void PropertiesPane::reset()
@@ -1282,8 +1282,8 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 
     auto sc = scs.at(0);
 
-    SaveBackend::setProperty(sc, property, parserValue);
-    PreviewerBackend::updateCache(sc->uid(), property, value);
+    SaveManager::setProperty(sc, property, parserValue);
+    ControlPreviewingManager::updateCache(sc->uid(), property, value);
 }
 
 void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QString& parserValue, const QVariant& value)

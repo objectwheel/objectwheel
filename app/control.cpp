@@ -6,8 +6,8 @@
 #include <filemanager.h>
 #include <parserutils.h>
 #include <designerscene.h>
-#include <controlwatcher.h>
-#include <previewerbackend.h>
+#include <controlmonitoringmanager.h>
+#include <controlpreviewingmanager.h>
 
 #include <QtMath>
 #include <QDebug>
@@ -60,16 +60,18 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
         QPointer<Control> p(this);
         Suppressor::suppress(800, "geometryChanged", [=] {
             if (p)
-                emit cW->geometryChanged(this);
+                emit ControlMonitoringManager::instance()->geometryChanged(this);
         });
     });
 
     connect(this, &Control::zChanged, this, &Control::onZValueChange);
-    connect(this, &Control::zChanged, this, [=] { emit cW->zValueChanged(this); });
+    connect(this, &Control::zChanged, this,
+            [=] { emit ControlMonitoringManager::instance()->zValueChanged(this); });
     connect(this, &Control::parentChanged, this, &Control::onParentChange);
-    connect(this, &Control::parentChanged, this, [=] { emit cW->parentChanged(this); });
+    connect(this, &Control::parentChanged, this,
+            [=] { emit ControlMonitoringManager::instance()->parentChanged(this); });
 
-    connect(PreviewerBackend::instance(), &PreviewerBackend::previewReady, this, &Control::updatePreview);
+    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewReady, this, &Control::updatePreview);
 }
 
 Control::~Control()
@@ -82,8 +84,8 @@ void Control::onSizeChange()
     if (hasErrors() || !gui() || m_refreshingDisabled)
         return;
 
-    PreviewerBackend::updateCache(uid(), "width", size().width());
-    PreviewerBackend::updateCache(uid(), "height", size().height());
+    ControlPreviewingManager::updateCache(uid(), "width", size().width());
+    ControlPreviewingManager::updateCache(uid(), "height", size().height());
 }
 
 void Control::onParentChange()
@@ -91,7 +93,7 @@ void Control::onParentChange()
     if (!parentControl() || (!parentControl()->gui() && gui()) || m_refreshingDisabled)
         return;
 
-    PreviewerBackend::updateParent(uid(), parentControl()->uid(), url());
+    ControlPreviewingManager::updateParent(uid(), parentControl()->uid(), url());
 
     onSizeChange();
 }
@@ -102,7 +104,7 @@ void Control::onZValueChange()
         return;
 
     // FIXME: Do we really need this?
-    PreviewerBackend::updateCache(uid(), "z", zValue());
+    ControlPreviewingManager::updateCache(uid(), "z", zValue());
 }
 
 bool Control::gui() const
@@ -290,7 +292,7 @@ void Control::showResizers()
 void Control::refresh(bool repreview)
 {
     if (!m_refreshingDisabled)
-        PreviewerBackend::requestPreview(dir(), repreview);
+        ControlPreviewingManager::requestPreview(dir(), repreview);
 }
 
 void Control::updateUids()
@@ -315,7 +317,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     event->accept();
     emit controlDropped(event->pos(),
       event->mimeData()->urls().first().toLocalFile());
-    emit cW->controlDropped(this, event->pos(),
+    emit ControlMonitoringManager::instance()->controlDropped(this, event->pos(),
       event->mimeData()->urls().first().toLocalFile());
     update();
 }
@@ -417,7 +419,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
     emit doubleClicked();
-    emit cW->doubleClicked(this);
+    emit ControlMonitoringManager::instance()->doubleClicked(this);
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -537,7 +539,7 @@ void Control::updatePreview(const PreviewResult& result)
             if (!form())
                 m_clip = result.property("clip").toBool();
 
-            if (!m_dragging && !Resizer::resizing() && !PreviewerBackend::contains(uid())) {
+            if (!m_dragging && !Resizer::resizing() && !ControlPreviewingManager::contains(uid())) {
                 const auto& rect = getRect(result);
                 qreal z = getZ(result);
                 setRefreshingDisabled(true);
@@ -567,11 +569,11 @@ void Control::updatePreview(const PreviewResult& result)
 
     if (result.hasError()) {
         emit errorOccurred();
-        emit cW->errorOccurred(this);
+        emit ControlMonitoringManager::instance()->errorOccurred(this);
     }
 
     emit previewChanged();
-    emit cW->previewChanged(this);
+    emit ControlMonitoringManager::instance()->previewChanged(this);
 }
 
 namespace {

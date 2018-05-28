@@ -3,9 +3,9 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>
-#include <savebackend.h>
-#include <controlwatcher.h>
-#include <exposerbackend.h>
+#include <savemanager.h>
+#include <controlmonitoringmanager.h>
+#include <controlexposingmanager.h>
 #include <filemanager.h>
 
 #include <QToolBar>
@@ -120,8 +120,10 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
 
-    connect(cW, SIGNAL(doubleClicked(Control*)), SLOT(onControlDoubleClick(Control*)));
-    connect(cW, SIGNAL(controlDropped(Control*,QPointF,QString)), SLOT(onControlDrop(Control*,QPointF,QString)));
+    connect(ControlMonitoringManager::instance(), SIGNAL(doubleClicked(Control*)),
+            SLOT(onControlDoubleClick(Control*)));
+    connect(ControlMonitoringManager::instance(), SIGNAL(controlDropped(Control*,QPointF,QString)),
+            SLOT(onControlDrop(Control*,QPointF,QString)));
 }
 
 void DesignerWidget::scaleScene(qreal ratio)
@@ -192,7 +194,7 @@ void DesignerWidget::onClearButtonClick()
     switch (ret) {
         case QMessageBox::Yes: {
             m_designerScene->removeChildControlsOnly(m_designerScene->mainForm());
-            SaveBackend::removeChildControlsOnly(m_designerScene->mainForm());
+            SaveManager::removeChildControlsOnly(m_designerScene->mainForm());
             break;
         } default: {
             // Do nothing
@@ -231,7 +233,7 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
-    auto newControl = ExposerBackend::exposeControl(dname(dname(url)), pos, "NULL", control, m_designerScene->mainForm()->dir(), m_designerScene->mainForm()->uid());
+    auto newControl = ControlExposingManager::exposeControl(dname(dname(url)), pos, "NULL", control, m_designerScene->mainForm()->dir(), m_designerScene->mainForm()->uid());
     newControl->setSelected(true);
 }
 

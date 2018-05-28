@@ -1,20 +1,20 @@
-#ifndef SAVEBACKEND_H
-#define SAVEBACKEND_H
+#ifndef SAVEMANAGER_H
+#define SAVEMANAGER_H
 
 #include <QObject>
 
 class Form;
 class Control;
 
-class SaveBackend final : public QObject
+class SaveManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(SaveBackend)
+    Q_DISABLE_COPY(SaveManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 public:
-    static SaveBackend* instance();
+    static SaveManager* instance();
 
     static bool initProject(const QString& projectDirectory, int templateNumber);
     static void flushId(const Control* control);
@@ -54,11 +54,11 @@ signals:
     void propertyChanged(Control* control, const QString& property, const QString& value);
 
 private:
-    explicit SaveBackend(QObject* parent = nullptr);
-    ~SaveBackend();
+    explicit SaveManager(QObject* parent = nullptr);
+    ~SaveManager();
 
 private:
-    static SaveBackend* s_instance;
+    static SaveManager* s_instance;
 };
 
-#endif // SAVEBACKEND_H
+#endif // SAVEMANAGER_H

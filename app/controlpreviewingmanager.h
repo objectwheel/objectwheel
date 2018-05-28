@@ -1,5 +1,5 @@
-#ifndef PREVIEWERBACKEND_H
-#define PREVIEWERBACKEND_H
+#ifndef CONTROLPREVIEWINGMANAGER_H
+#define CONTROLPREVIEWINGMANAGER_H
 
 #include <QObject>
 #include <QRectF>
@@ -10,12 +10,12 @@ struct PreviewResult;
 class QDataStream;
 class QTimer;
 
-class PreviewerBackend final : public QObject
+class ControlPreviewingManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(PreviewerBackend)
+    Q_DISABLE_COPY(ControlPreviewingManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 private:
     struct Task
@@ -43,7 +43,7 @@ private:
     };
 
 public:
-    static PreviewerBackend* instance();
+    static ControlPreviewingManager* instance();
 
     static bool isBusy();
     static bool contains(const QString& uid);
@@ -74,11 +74,11 @@ signals:
     void previewReady(const PreviewResult& result);
 
 private:
-    explicit PreviewerBackend(QObject* parent = nullptr);
-    ~PreviewerBackend();
+    explicit ControlPreviewingManager(QObject* parent = nullptr);
+    ~ControlPreviewingManager();
 
 private:
-    static PreviewerBackend* s_instance;
+    static ControlPreviewingManager* s_instance;
     static bool s_disabled;
     static bool s_dirtHandlingEnabled;
     static QLocalServer* s_server;
@@ -86,4 +86,4 @@ private:
     static QList<Task> s_taskList;
 };
 
-#endif // PREVIEWERBACKEND_H
+#endif // CONTROLPREVIEWINGMANAGER_H

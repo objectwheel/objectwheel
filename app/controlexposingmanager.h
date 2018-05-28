@@ -1,5 +1,5 @@
-#ifndef EXPOSERBACKEND_H
-#define EXPOSERBACKEND_H
+#ifndef CONTROLEXPOSINGMANAGER_H
+#define CONTROLEXPOSINGMANAGER_H
 
 #include <QString>
 
@@ -8,11 +8,11 @@ class QPointF;
 class Control;
 class DesignerScene;
 
-class ExposerBackend final
+class ControlExposingManager final
 {
-    Q_DISABLE_COPY(ExposerBackend)
+    Q_DISABLE_COPY(ControlExposingManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 public:
     static void init(DesignerScene* designerScene);
@@ -23,10 +23,10 @@ public:
                                   QString destinationSuid);
 
 private:
-    ExposerBackend() {}
+    ControlExposingManager() {}
 
 private:
     static DesignerScene* s_designerScene;
 };
 
-#endif // EXPOSERBACKEND_H
+#endif // CONTROLEXPOSINGMANAGER_H

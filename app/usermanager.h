@@ -1,17 +1,17 @@
-#ifndef USERBACKEND_H
-#define USERBACKEND_H
+#ifndef USERMANAGER_H
+#define USERMANAGER_H
 
 #include <QObject>
 
-class UserBackend final : public QObject
+class UserManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(UserBackend)
+    Q_DISABLE_COPY(UserManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 public:
-    static UserBackend* instance();
+    static UserManager* instance();
 
     static bool exists(const QString& user);
     static bool newUser(const QString& user);
@@ -33,14 +33,14 @@ signals:
     void aboutToStop();
 
 private:
-    explicit UserBackend(QObject* parent = nullptr);
-    ~UserBackend();
+    explicit UserManager(QObject* parent = nullptr);
+    ~UserManager();
 
 private:
-    static UserBackend* s_instance;
+    static UserManager* s_instance;
     static QString s_user;
     static QString s_token;
     static QByteArray s_key;
 };
 
-#endif // USERBACKEND_H
+#endif // USERMANAGER_H

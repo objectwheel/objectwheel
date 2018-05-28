@@ -14,7 +14,7 @@ class WindowManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(WindowManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 public:
     static AboutWindow* aboutWindow();

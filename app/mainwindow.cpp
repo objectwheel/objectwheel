@@ -9,14 +9,14 @@
 #include <pageswitcherpane.h>
 #include <centralwidget.h>
 #include <windowmanager.h>
-#include <toolsbackend.h>
+#include <toolmanager.h>
 #include <designerwidget.h>
 #include <qmlcodeeditorwidget.h>
-#include <exposerbackend.h>
-#include <interpreterbackend.h>
-#include <projectbackend.h>
+#include <controlexposingmanager.h>
+#include <runmanager.h>
+#include <projectmanager.h>
 #include <consolebox.h>
-#include <controlwatcher.h>
+#include <controlmonitoringmanager.h>
 #include <control.h>
 #include <toolboxsettingswindow.h>
 
@@ -57,8 +57,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
     setStyleSheet("QMainWindow::separator{ height: 1px; }");
-
-    ExposerBackend::init(m_centralWidget->designerWidget()->designerScene());
 
     /** Set Tool Bars **/
     /* Add Run Pane */
@@ -195,7 +193,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxDockWidget->setWindowTitle(tr("Toolbox"));
     toolboxDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockWidget);
-    ToolsBackend::addToolboxTree(m_toolboxPane->toolboxTree());
+    ToolManager::addToolboxTree(m_toolboxPane->toolboxTree());
 
     /* Add Forms Pane */
     auto formsTitleLabel = new QLabel;
@@ -233,7 +231,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_pageSwitcherPane, SIGNAL(helpActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(hideDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)), m_centralWidget, SLOT(setCurrentPage(Pages)));
+    connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)),
+            m_centralWidget, SLOT(setCurrentPage(Pages)));
 
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openControlCountChanged, [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0
@@ -245,14 +244,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_pageSwitcherPane->setCurrentPage(Page_SplitView);
     });
 
-    connect(m_inspectorPane, SIGNAL(controlClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlClick(Control*)));
-    connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)), m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
+    connect(m_inspectorPane, SIGNAL(controlClicked(Control*)),
+            m_centralWidget->designerWidget(), SLOT(onControlClick(Control*)));
+    connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
+            m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
     connect(m_formsPane, SIGNAL(currentFormChanged()), m_inspectorPane, SLOT(refresh()));
-    connect(m_centralWidget->qmlCodeEditorWidget(), SIGNAL(documentSaved()), m_propertiesPane, SLOT(refreshList()));
-    connect(cW, &ControlWatcher::previewChanged, [=] (Control* control) { if (control->isSelected()) m_propertiesPane->refreshList(); });
+    connect(m_centralWidget->qmlCodeEditorWidget(), SIGNAL(documentSaved()),
+            m_propertiesPane, SLOT(refreshList()));
+    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::previewChanged,
+            [=] (Control* control) { if (control->isSelected()) m_propertiesPane->refreshList(); });
 
-    connect(InterpreterBackend::instance(),
-    QOverload<int, QProcess::ExitStatus>::of(&InterpreterBackend::finished),
+    connect(RunManager::instance(),
+    QOverload<int, QProcess::ExitStatus>::of(&RunManager::finished),
     [=] (int exitCode, QProcess::ExitStatus exitStatus)
     {
         auto pane = m_centralWidget->outputPane();
@@ -267,7 +270,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         }
 
         console->printFormatted(
-            ProjectBackend::name() + tr(" exited with code %1.\n").arg(exitCode),
+            ProjectManager::name() + tr(" exited with code %1.\n").arg(exitCode),
             "#025dbf",
             QFont::DemiBold
         );
@@ -316,6 +319,11 @@ void MainWindow::showDocks()
     formsDockWidget->show();
     inspectorDockWidget->show();
     toolboxDockWidget->show();
+}
+
+CentralWidget* MainWindow::centralWidget() const
+{
+    return m_centralWidget;
 }
 
 QSize MainWindow::sizeHint() const

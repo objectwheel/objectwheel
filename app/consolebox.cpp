@@ -1,5 +1,5 @@
 #include <consolebox.h>
-#include <interpreterbackend.h>
+#include <runmanager.h>
 #include <css.h>
 #include <outputpane.h>
 
@@ -33,9 +33,9 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     p1.setColor(QPalette::Text, Qt::black);
     _textEdit->setPalette(p1);
 
-    connect(InterpreterBackend::instance(), SIGNAL(standardError(QString)),
+    connect(RunManager::instance(), SIGNAL(standardError(QString)),
       SLOT(onStandardError(QString)));
-    connect(InterpreterBackend::instance(), SIGNAL(standardOutput(QString)),
+    connect(RunManager::instance(), SIGNAL(standardOutput(QString)),
             SLOT(onStandardOutput(QString)));
 }
 

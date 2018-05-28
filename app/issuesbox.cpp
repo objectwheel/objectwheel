@@ -2,7 +2,7 @@
 #include <css.h>
 #include <control.h>
 #include <outputpane.h>
-#include <controlwatcher.h>
+#include <controlmonitoringmanager.h>
 
 #include <QLabel>
 #include <QStyledItemDelegate>
@@ -93,7 +93,7 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     m_listWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setItemDelegate(new IssuesListDelegate(m_listWidget));
-    connect(ControlWatcher::instance(), SIGNAL(errorOccurred(Control*)),
+    connect(ControlMonitoringManager::instance(), SIGNAL(errorOccurred(Control*)),
       SLOT(handleErrors(Control*)));
 
     connect(m_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),

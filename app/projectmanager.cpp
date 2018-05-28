@@ -1,6 +1,6 @@
-#include <projectbackend.h>
-#include <userbackend.h>
-#include <savebackend.h>
+#include <projectmanager.h>
+#include <usermanager.h>
+#include <savemanager.h>
 #include <filemanager.h>
 #include <zipper.h>
 #include <hashfactory.h>
@@ -86,7 +86,7 @@ QString hash(const QString& rootPath)
 QString dir(const QString& hash)
 {
     QString pdir;
-    const auto& udir = UserBackend::dir();
+    const auto& udir = UserManager::dir();
 
     if (udir.isEmpty() || hash.isEmpty())
         return pdir;
@@ -127,18 +127,18 @@ QVariant property(const QString& hash, const QString& property)
 }
 }
 
-ProjectBackend* ProjectBackend::s_instance = nullptr;
-QString ProjectBackend::s_currentHash;
+ProjectManager* ProjectManager::s_instance = nullptr;
+QString ProjectManager::s_currentHash;
 
-ProjectBackend* ProjectBackend::instance()
+ProjectManager* ProjectManager::instance()
 {
     return s_instance;
 }
 
-bool ProjectBackend::newProject(int templateNumber, const QString& name, const QString& description,
+bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
                                 const QString& owner, const QString& crDate, const QString& size)
 {
-    const auto& udir = UserBackend::dir();
+    const auto& udir = UserManager::dir();
 
     if (udir.isEmpty()
             || name.isEmpty()
@@ -169,23 +169,23 @@ bool ProjectBackend::newProject(int templateNumber, const QString& name, const Q
     if (wrfile(pdir + separator() + FILE_PROJECT, data) <= 0)
         return false;
 
-    if (!SaveBackend::initProject(pdir, templateNumber))
+    if (!SaveManager::initProject(pdir, templateNumber))
         return false;
 
     return true;
 }
 
-ProjectBackend::ProjectBackend(QObject* parent) : QObject(parent)
+ProjectManager::ProjectManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
 }
 
-ProjectBackend::~ProjectBackend()
+ProjectManager::~ProjectManager()
 {
     s_instance = nullptr;
 }
 
-QStringList ProjectBackend::projectNames()
+QStringList ProjectManager::projectNames()
 {
     QStringList names;
     const auto& hashes = projects();
@@ -199,7 +199,7 @@ QStringList ProjectBackend::projectNames()
     return names;
 }
 
-void ProjectBackend::changeName(const QString& hash, const QString& name)
+void ProjectManager::changeName(const QString& hash, const QString& name)
 {
     const auto& dir = ::dir(hash);
 
@@ -209,7 +209,7 @@ void ProjectBackend::changeName(const QString& hash, const QString& name)
     ::setProperty(dir, PTAG_PROJECTNAME, name);
 }
 
-void ProjectBackend::changeDescription(const QString& hash, const QString& desc)
+void ProjectManager::changeDescription(const QString& hash, const QString& desc)
 {
     const auto& dir = ::dir(hash);
 
@@ -219,7 +219,7 @@ void ProjectBackend::changeDescription(const QString& hash, const QString& desc)
     ::setProperty(dir, PTAG_DESCRIPTION, desc);
 }
 
-bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
+bool ProjectManager::exportProject(const QString& hash, const QString& filePath)
 {
     const auto& dir = ::dir(hash);
 
@@ -229,10 +229,10 @@ bool ProjectBackend::exportProject(const QString& hash, const QString& filePath)
     return Zipper::compressDir(dir, filePath);
 }
 
-bool ProjectBackend::importProject(const QString &filePath)
+bool ProjectManager::importProject(const QString &filePath)
 {
     const auto& data = rdfile(filePath);
-    const auto& udir = UserBackend::dir();
+    const auto& udir = UserManager::dir();
     const auto& pdir = udir + separator() +
             QString::number(biggestDir(udir) + 1);
 
@@ -249,50 +249,50 @@ bool ProjectBackend::importProject(const QString &filePath)
     return true;
 }
 
-QString ProjectBackend::dir(const QString& hash)
+QString ProjectManager::dir(const QString& hash)
 {
     return ::dir(hash);
 }
 
-QString ProjectBackend::name(const QString& hash)
+QString ProjectManager::name(const QString& hash)
 {
     return ::property(hash, PTAG_PROJECTNAME).toString();
 }
 
-QString ProjectBackend::description(const QString& hash)
+QString ProjectManager::description(const QString& hash)
 {
     return ::property(hash, PTAG_DESCRIPTION).toString();
 }
 
-QString ProjectBackend::owner(const QString& hash)
+QString ProjectManager::owner(const QString& hash)
 {
     return ::property(hash, PTAG_OWNER).toString();
 }
 
-QString ProjectBackend::crDate(const QString& hash)
+QString ProjectManager::crDate(const QString& hash)
 {
     return ::property(hash, PTAG_CRDATE).toString();
 }
 
-QString ProjectBackend::mfDate(const QString& hash)
+QString ProjectManager::mfDate(const QString& hash)
 {
     return ::property(hash, PTAG_MFDATE).toString();
 }
 
-QString ProjectBackend::size(const QString& hash)
+QString ProjectManager::size(const QString& hash)
 {
     return ::property(hash, PTAG_SIZE).toString();
 }
 
-QString ProjectBackend::hash()
+QString ProjectManager::hash()
 {
     return s_currentHash;
 }
 
-QStringList ProjectBackend::projects()
+QStringList ProjectManager::projects()
 {
     QStringList hashes;
-    const auto& udir = UserBackend::dir();
+    const auto& udir = UserManager::dir();
 
     if (udir.isEmpty())
         return hashes;
@@ -306,7 +306,7 @@ QStringList ProjectBackend::projects()
     return hashes;
 }
 
-void ProjectBackend::updateSize()
+void ProjectManager::updateSize()
 {
     const auto& dir = ::dir(hash());
     if (dir.isEmpty())
@@ -315,7 +315,7 @@ void ProjectBackend::updateSize()
     ::setProperty(dir, PTAG_SIZE, byteString(dsize(dir)));
 }
 
-void ProjectBackend::updateLastModification()
+void ProjectManager::updateLastModification()
 {
     auto date = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
     const auto& dir = ::dir(hash());
@@ -325,9 +325,9 @@ void ProjectBackend::updateLastModification()
     ::setProperty(dir, PTAG_MFDATE, date);
 }
 
-bool ProjectBackend::start(const QString& hash)
+bool ProjectManager::start(const QString& hash)
 {
-    if (ProjectBackend::hash() == hash)
+    if (ProjectManager::hash() == hash)
         return true;
 
     const auto& dir = ::dir(hash);
@@ -335,7 +335,7 @@ bool ProjectBackend::start(const QString& hash)
     if (dir.isEmpty())
         return false;
 
-    if (!ProjectBackend::hash().isEmpty())
+    if (!ProjectManager::hash().isEmpty())
         stop();
 
     s_currentHash = hash;
@@ -345,7 +345,7 @@ bool ProjectBackend::start(const QString& hash)
     return true;
 }
 
-void ProjectBackend::stop()
+void ProjectManager::stop()
 {
     updateSize();
     updateLastModification();

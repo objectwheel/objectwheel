@@ -2,7 +2,7 @@
 #include <dpr.h>
 #include <delayer.h>
 #include <saveutils.h>
-#include <projectbackend.h>
+#include <projectmanager.h>
 #include <filemanager.h>
 #include <waitingspinnerwidget.h>
 
@@ -517,7 +517,7 @@ void ThemeChooserWidget::reset()
     m_saveButton->setDisabled(true);
     m_resetButton->setDisabled(true);
 
-    const auto& object = SaveUtils::theme(ProjectBackend::dir()).toObject();
+    const auto& object = SaveUtils::theme(ProjectManager::dir()).toObject();
 
     if (m_version == V1) {
         const auto& style = object.value("stylev1").toString();
@@ -591,13 +591,13 @@ void ThemeChooserWidget::save()
     m_saveButton->setDisabled(true);
     m_resetButton->setDisabled(true);
 
-    auto object = SaveUtils::theme(ProjectBackend::dir()).toObject();
+    auto object = SaveUtils::theme(ProjectManager::dir()).toObject();
     auto newObject = toJson();
 
     for (const auto& key : newObject.keys())
         object[key] = newObject[key];
 
-    SaveUtils::setProjectProperty(ProjectBackend::dir(), PTAG_THEME, object);
+    SaveUtils::setProjectProperty(ProjectManager::dir(), PTAG_THEME, object);
 
     emit saved();
 }

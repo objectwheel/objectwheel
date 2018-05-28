@@ -1,13 +1,13 @@
 #include <projecttemplateswidget.h>
 #include <buttonslice.h>
 #include <css.h>
-#include <userbackend.h>
-#include <projectbackend.h>
+#include <usermanager.h>
+#include <projectmanager.h>
 #include <qmlcodeeditorwidget.h>
 #include <delayer.h>
 #include <filemanager.h>
-#include <previewerbackend.h>
-#include <savebackend.h>
+#include <controlpreviewingmanager.h>
+#include <savemanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <dpr.h>

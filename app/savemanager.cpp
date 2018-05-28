@@ -1,7 +1,7 @@
-#include <savebackend.h>
+#include <savemanager.h>
 #include <saveutils.h>
 #include <filemanager.h>
-#include <projectbackend.h>
+#include <projectmanager.h>
 #include <form.h>
 #include <parserutils.h>
 #include <hashfactory.h>
@@ -11,24 +11,24 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-SaveBackend* SaveBackend::s_instance = nullptr;
+SaveManager* SaveManager::s_instance = nullptr;
 
-SaveBackend::SaveBackend(QObject* parent) : QObject(parent)
+SaveManager::SaveManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
 }
 
-SaveBackend::~SaveBackend()
+SaveManager::~SaveManager()
 {
     s_instance = nullptr;
 }
 
-SaveBackend* SaveBackend::instance()
+SaveManager* SaveManager::instance()
 {
     return s_instance;
 }
 
-bool SaveBackend::initProject(const QString& projectDirectory, int templateNumber)
+bool SaveManager::initProject(const QString& projectDirectory, int templateNumber)
 {
     if (projectDirectory.isEmpty() ||
         !::exists(projectDirectory) ||
@@ -41,7 +41,7 @@ bool SaveBackend::initProject(const QString& projectDirectory, int templateNumbe
     return true;
 }
 
-void SaveBackend::flushId(const Control* control)
+void SaveManager::flushId(const Control* control)
 {
     auto propertyPath = control->dir() + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -54,7 +54,7 @@ void SaveBackend::flushId(const Control* control)
     ParserUtils::setProperty(qmlPath, "id", control->id());
 }
 
-void SaveBackend::flushSuid(const Control* control, const QString& suid)
+void SaveManager::flushSuid(const Control* control, const QString& suid)
 {
     auto topPath = control->dir();
     auto fromUid = SaveUtils::suid(topPath);
@@ -80,9 +80,9 @@ void SaveBackend::flushSuid(const Control* control, const QString& suid)
 // Searches by id.
 // Searches control only in forms (in current project)
 // If current project is empty, then returns false.
-bool SaveBackend::existsInForms(const Control* control)
+bool SaveManager::existsInForms(const Control* control)
 {
-    for (auto path : SaveUtils::formPaths(ProjectBackend::dir())) {
+    for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
         auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
         auto id = SaveUtils::property(propertyData, TAG_ID).toString();
 
@@ -96,7 +96,7 @@ bool SaveBackend::existsInForms(const Control* control)
 // Searches by id.
 // Searches control in form scope (in current project)
 // If current project is empty, then returns false.
-bool SaveBackend::existsInFormScope(const Control* control)
+bool SaveManager::existsInFormScope(const Control* control)
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
@@ -113,7 +113,7 @@ bool SaveBackend::existsInFormScope(const Control* control)
 // Searches by id.
 // Searches control within given suid, search starts within topPath
 // Given suid has to be valid
-bool SaveBackend::existsInParentScope(const Control* control, const QString& suid, const QString topPath)
+bool SaveManager::existsInParentScope(const Control* control, const QString& suid, const QString topPath)
 {
     if (control->form())
         return existsInFormScope(control);
@@ -156,9 +156,9 @@ bool SaveBackend::existsInParentScope(const Control* control, const QString& sui
 
 // Returns all control paths in form scope.
 // Returned paths are rootPaths.
-QStringList SaveBackend::formScopePaths()
+QStringList SaveManager::formScopePaths()
 {
-    const QStringList fpaths = SaveUtils::formPaths(ProjectBackend::dir());
+    const QStringList fpaths = SaveUtils::formPaths(ProjectManager::dir());
     QStringList paths(fpaths);
 
     for (auto path : fpaths)
@@ -169,7 +169,7 @@ QStringList SaveBackend::formScopePaths()
 
 // Recalculates all uids belongs to given control and its children (all).
 // Both database and in-memory data are updated.
-void SaveBackend::recalculateUids(Control* control)
+void SaveManager::recalculateUids(Control* control)
 {
     if (control->dir().isEmpty())
         return;
@@ -181,7 +181,7 @@ void SaveBackend::recalculateUids(Control* control)
 
 // Refactor control's id if it's already exists in db
 // If suid empty, project root searched
-void SaveBackend::refactorId(Control* control, const QString& suid, const QString& topPath)
+void SaveManager::refactorId(Control* control, const QString& suid, const QString& topPath)
 {
     if (control->id().isEmpty())
         control->setId("control");
@@ -194,9 +194,9 @@ void SaveBackend::refactorId(Control* control, const QString& suid, const QStrin
 
 // Returns true if given root path belongs to a form
 // Searches within current project's path
-bool SaveBackend::isForm(const QString& rootPath)
+bool SaveManager::isForm(const QString& rootPath)
 {
-    auto projectDir = ProjectBackend::dir();
+    auto projectDir = ProjectManager::dir();
     auto baseDir = projectDir + separator() + DIR_OWDB;
     return (baseDir == dname(rootPath));
 }
@@ -205,11 +205,11 @@ bool SaveBackend::isForm(const QString& rootPath)
 // Searches within given rootPath (root control included)
 // Searches in current project directory if given rootPath is empty
 // All controls in the given rootPath are included to search
-QString SaveBackend::findByUid(const QString& uid, const QString& rootPath)
+QString SaveManager::findByUid(const QString& uid, const QString& rootPath)
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
-        auto projectDir = ProjectBackend::dir();
+        auto projectDir = ProjectManager::dir();
 
         if (projectDir.isEmpty())
             return QString();
@@ -238,11 +238,11 @@ QString SaveBackend::findByUid(const QString& uid, const QString& rootPath)
 // Searches within given rootPath (root control included)
 // Searches in current project directory if given rootPath is empty
 // Only suid scope controls in the given rootPath are returned
-QString SaveBackend::findById(const QString& suid, const QString& id, const QString& rootPath)
+QString SaveManager::findById(const QString& suid, const QString& id, const QString& rootPath)
 {
     QString baseDir;
     if (rootPath.isEmpty()) {
-        auto projectDir = ProjectBackend::dir();
+        auto projectDir = ProjectManager::dir();
 
         if (projectDir.isEmpty())
             return QString();
@@ -270,9 +270,9 @@ QString SaveBackend::findById(const QString& suid, const QString& id, const QStr
 }
 
 // Returns true if given path is inside of owdb
-bool SaveBackend::isInOwdb(const QString& path)
+bool SaveManager::isInOwdb(const QString& path)
 {
-    auto projectDirectory = ProjectBackend::dir();
+    auto projectDirectory = ProjectManager::dir();
 
     Q_ASSERT(!projectDirectory.isEmpty());
 
@@ -281,7 +281,7 @@ bool SaveBackend::isInOwdb(const QString& path)
 }
 
 // Returns root path (of parent) if given control has a parent control
-QString SaveBackend::parentDir(const Control* control)
+QString SaveManager::parentDir(const Control* control)
 {
     if (control->form() ||
         control->dir().isEmpty() ||
@@ -291,9 +291,9 @@ QString SaveBackend::parentDir(const Control* control)
     return dname(dname(control->dir()));
 }
 
-QString SaveBackend::basePath()
+QString SaveManager::basePath()
 {
-    auto projectDir = ProjectBackend::dir();
+    auto projectDir = ProjectManager::dir();
 
     if (projectDir.isEmpty())
         return QString();
@@ -301,7 +301,7 @@ QString SaveBackend::basePath()
     return (projectDir + separator() + DIR_OWDB);
 }
 
-void SaveBackend::refreshToolUid(const QString& toolRootPath)
+void SaveManager::refreshToolUid(const QString& toolRootPath)
 {
     if (toolRootPath.isEmpty())
         return;
@@ -328,13 +328,13 @@ void SaveBackend::refreshToolUid(const QString& toolRootPath)
 // You have to provide an valid suid, except if control is a form
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
-bool SaveBackend::exists(const Control* control, const QString& suid, const QString& topPath)
+bool SaveManager::exists(const Control* control, const QString& suid, const QString& topPath)
 {
     return control->form() ? existsInFormScope(control) :
       existsInParentScope(control, suid, topPath);
 }
 
-bool SaveBackend::addForm(Form* form)
+bool SaveManager::addForm(Form* form)
 {
     if (form->url().isEmpty())
         return false;
@@ -344,7 +344,7 @@ bool SaveBackend::addForm(Form* form)
 
     refactorId(form, QString());
 
-    auto projectDir = ProjectBackend::dir();
+    auto projectDir = ProjectManager::dir();
 
     if (projectDir.isEmpty())
         return false;
@@ -368,7 +368,7 @@ bool SaveBackend::addForm(Form* form)
     return true;
 }
 
-void SaveBackend::removeForm(const Form* form)
+void SaveManager::removeForm(const Form* form)
 {
     if (form->id().isEmpty() || form->url().isEmpty())
         return;
@@ -381,7 +381,7 @@ void SaveBackend::removeForm(const Form* form)
     emit instance()->databaseChanged();
 }
 
-bool SaveBackend::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
+bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
 {
     if (control->url().isEmpty())
         return false;
@@ -424,7 +424,7 @@ bool SaveBackend::addControl(Control* control, const Control* parentControl, con
 }
 
 // You can only move controls within current suid scope of related control
-bool SaveBackend::moveControl(Control* control, const Control* parentControl)
+bool SaveManager::moveControl(Control* control, const Control* parentControl)
 {
     if (parentDir(control) == parentControl->dir())
         return true;
@@ -461,7 +461,7 @@ bool SaveBackend::moveControl(Control* control, const Control* parentControl)
     return true;
 }
 
-void SaveBackend::removeControl(const Control* control)
+void SaveManager::removeControl(const Control* control)
 {
     if (control->id().isEmpty() || control->url().isEmpty())
         return;
@@ -475,7 +475,7 @@ void SaveBackend::removeControl(const Control* control)
         emit instance()->databaseChanged();
 }
 
-void SaveBackend::removeChildControlsOnly(const Control* control)
+void SaveManager::removeChildControlsOnly(const Control* control)
 {
     if (control->id().isEmpty() || control->url().isEmpty())
         return;
@@ -495,7 +495,7 @@ void SaveBackend::removeChildControlsOnly(const Control* control)
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
 // topPath is only necessary if property is an "id" set.
-void SaveBackend::setProperty(Control* control, const QString& property, QString value, const QString& topPath)
+void SaveManager::setProperty(Control* control, const QString& property, QString value, const QString& topPath)
 {
     if (control->dir().isEmpty() ||
         !SaveUtils::isOwctrl(control->dir()) ||
@@ -528,7 +528,7 @@ void SaveBackend::setProperty(Control* control, const QString& property, QString
         emit instance()->databaseChanged();
 }
 
-void SaveBackend::removeProperty(const Control* control, const QString& property)
+void SaveManager::removeProperty(const Control* control, const QString& property)
 {
     if (control->dir().isEmpty() ||
         control->hasErrors() ||
@@ -545,7 +545,7 @@ void SaveBackend::removeProperty(const Control* control, const QString& property
         emit instance()->databaseChanged();
 }
 
-QString SaveBackend::pathOfId(const QString& suid, const QString& id, const QString& rootPath)
+QString SaveManager::pathOfId(const QString& suid, const QString& id, const QString& rootPath)
 {
     return findById(suid, id, rootPath);
 }

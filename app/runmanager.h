@@ -1,17 +1,17 @@
-#ifndef INTERPRETERBACKEND_H
-#define INTERPRETERBACKEND_H
+#ifndef RUNMANAGER_H
+#define RUNMANAGER_H
 
 #include <QProcess>
 
-class InterpreterBackend final : public QObject
+class RunManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(InterpreterBackend)
+    Q_DISABLE_COPY(RunManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 public:
-    static InterpreterBackend* instance();
+    static RunManager* instance();
 
     static void run();
     static void kill();
@@ -29,12 +29,12 @@ signals:
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
-    explicit InterpreterBackend(QObject* parent = nullptr);
-    ~InterpreterBackend();
+    explicit RunManager(QObject* parent = nullptr);
+    ~RunManager();
 
 private:
-    static InterpreterBackend* s_instance;
+    static RunManager* s_instance;
     static QProcess* s_process;
 };
 
-#endif // INTERPRETERBACKEND_H
+#endif // RUNMANAGER_H

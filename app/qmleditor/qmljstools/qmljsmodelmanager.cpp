@@ -27,10 +27,10 @@
 #include "qmljstoolsconstants.h"
 #include "qmljssemanticinfo.h"
 #include "qmljsbundleprovider.h"
-#include <editorbackend.h>
+#include <documentmanager.h>
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
-#include <backendmanager.h>
+#include <initializationmanager.h>
 
 ////#include <coreplugin/icore.h>
 //#include <coreplugin/editormanager/documentmodel.h>
@@ -234,7 +234,7 @@ void ModelManager::delayedInitialization()
 
     ViewerContext qbsVContext;
     qbsVContext.language = Dialect::QmlQbs;
-    qbsVContext.maybeAddPath(BackendManager::resourcePath() + QLatin1String("/qbs"));
+    qbsVContext.maybeAddPath(InitializationManager::resourcePath() + QLatin1String("/qbs"));
     setDefaultVContext(qbsVContext);
 
     updateDefaultProjectInfo(); // Sonradan ekleme
@@ -242,8 +242,8 @@ void ModelManager::delayedInitialization()
 
 void ModelManager::loadDefaultQmlTypeDescriptions()
 {
-    loadQmlTypeDescriptionsInternal(BackendManager::resourcePath());
-    loadQmlTypeDescriptionsInternal(BackendManager::userResourcePath());
+    loadQmlTypeDescriptionsInternal(InitializationManager::resourcePath());
+    loadQmlTypeDescriptionsInternal(InitializationManager::userResourcePath());
 }
 
 void ModelManager::writeMessageInternal(const QString &msg) const
@@ -279,10 +279,10 @@ ModelManagerInterface::WorkingCopy ModelManager::workingCopyInternal() const
 //    if (!Core::instance())
 //        return workingCopy;
 
-    if (EditorBackend::documents().isEmpty())
+    if (DocumentManager::documents().isEmpty())
         return workingCopy;
 
-    for (QmlCodeDocument *document : EditorBackend::documents())
+    for (QmlCodeDocument *document : DocumentManager::documents())
         workingCopy.insert(document->filePath(), document->toPlainText(), document->revision());
 
     return workingCopy;

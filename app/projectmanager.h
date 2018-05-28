@@ -1,17 +1,17 @@
-#ifndef PROJECTBACKEND_H
-#define PROJECTBACKEND_H
+#ifndef PROJECTMANAGER_H
+#define PROJECTMANAGER_H
 
 #include <QObject>
 
-class ProjectBackend final : public QObject
+class ProjectManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(ProjectBackend)
+    Q_DISABLE_COPY(ProjectManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 public:
-    static ProjectBackend* instance();
+    static ProjectManager* instance();
 
     static QStringList projects();
     static QStringList projectNames();
@@ -40,12 +40,12 @@ signals:
     void stopped();
 
 private:
-    explicit ProjectBackend(QObject* parent = nullptr);
-    ~ProjectBackend();
+    explicit ProjectManager(QObject* parent = nullptr);
+    ~ProjectManager();
 
 private:
-    static ProjectBackend* s_instance;
+    static ProjectManager* s_instance;
     static QString s_currentHash;
 };
 
-#endif // PROJECTBACKEND_H
+#endif // PROJECTMANAGER_H

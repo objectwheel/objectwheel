@@ -1,7 +1,7 @@
 #include <toolboxpane.h>
-#include <toolsbackend.h>
+#include <toolmanager.h>
 #include <filemanager.h>
-#include <savebackend.h>
+#include <savemanager.h>
 #include <toolboxtree.h>
 #include <flatbutton.h>
 #include <focuslesslineedit.h>
@@ -48,7 +48,7 @@ ToolboxTree* ToolboxPane::toolboxTree()
 
 void ToolboxPane::reset()
 {
-    ToolsBackend::reset();
+    ToolManager::reset();
     _searchEdit->clear();
 }
 

@@ -28,7 +28,7 @@
 //#include "manhattanstyle.h"
 #include "themechooser.h"
 #include <windowmanager.h>
-#include <backendmanager.h>
+#include <initializationmanager.h>
 #include <mainwindow.h>
 
 #include <utils/algorithm.h>
@@ -178,7 +178,7 @@ void ThemeChooser::apply()
     if (index == -1)
         return;
     const QString themeId = d->m_themeListModel->themeAt(index).id().toString();
-    QSettings *settings = BackendManager::settings();
+    QSettings *settings = InitializationManager::settings();
     const QString currentThemeId = ThemeEntry::themeSetting().toString();
     if (currentThemeId != themeId) {
         QMessageBox::information(WindowManager::mainWindow(),
@@ -207,8 +207,8 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 {
     QList<ThemeEntry> themes;
 
-    static const QString installThemeDir = BackendManager::resourcePath() + QLatin1String("/themes");
-    static const QString userThemeDir = BackendManager::userResourcePath() + QLatin1String("/themes");
+    static const QString installThemeDir = InitializationManager::resourcePath() + QLatin1String("/themes");
+    static const QString userThemeDir = InitializationManager::userResourcePath() + QLatin1String("/themes");
     addThemesFromPath(installThemeDir, &themes);
     if (themes.isEmpty())
         qWarning() << "Warning: No themes found in installation: "
@@ -226,7 +226,7 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 Id ThemeEntry::themeSetting()
 {
     const Id setting =
-            Id::fromSetting(BackendManager::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
+            Id::fromSetting(InitializationManager::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
                                                      QLatin1String(Constants::DEFAULT_THEME)));
 
     const QList<ThemeEntry> themes = availableThemes();

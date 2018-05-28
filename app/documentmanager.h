@@ -1,5 +1,5 @@
-#ifndef EDITORBACKEND_H
-#define EDITORBACKEND_H
+#ifndef DOCUMENTMANAGER_H
+#define DOCUMENTMANAGER_H
 
 #include <QObject>
 
@@ -12,15 +12,15 @@ class QmlCodeDocument;
 
 namespace TextEditor { class TextEditorSettings; }
 
-class EditorBackend final : public QObject
+class DocumentManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(EditorBackend)
+    Q_DISABLE_COPY(DocumentManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 public:
-    static EditorBackend* instance();
+    static DocumentManager* instance();
 
     static QList<QmlCodeDocument*> documents()
     { return m_documents; }
@@ -32,11 +32,11 @@ public:
     { m_documents.removeAll(document); }
 
 private:
-    explicit EditorBackend(QObject* parent = nullptr);
-    ~EditorBackend();
+    explicit DocumentManager(QObject* parent = nullptr);
+    ~DocumentManager();
 
 private:
-    static EditorBackend* s_instance;
+    static DocumentManager* s_instance;
     static QList<QmlCodeDocument*> m_documents;
     QmlJSTools::Internal::ModelManager m_modelManager;
     QmlJSTools::Internal::LocatorData m_locatorData;
@@ -45,4 +45,4 @@ private:
     TextEditor::TextEditorSettings* m_textEditorSettings;
 };
 
-#endif // EDITORBACKEND_H
+#endif // DOCUMENTMANAGER_H

@@ -3,12 +3,12 @@
 #include <centralwidget.h>
 #include <filemanager.h>
 #include <saveutils.h>
-#include <savebackend.h>
+#include <savemanager.h>
 #include <formspane.h>
-#include <controlwatcher.h>
+#include <controlmonitoringmanager.h>
 #include <designerscene.h>
 #include <form.h>
-#include <projectbackend.h>
+#include <projectmanager.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -179,8 +179,8 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QW
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(refresh()));
     connect(m_designerScene, SIGNAL(mainFormChanged(Control*)), SLOT(refresh()));
-    connect(ControlWatcher::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
-    connect(SaveBackend::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
+    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
+    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
 }
 
 void InspectorPane::reset()

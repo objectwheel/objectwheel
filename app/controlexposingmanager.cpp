@@ -1,22 +1,22 @@
-#include <exposerbackend.h>
+#include <controlexposingmanager.h>
 #include <form.h>
 #include <designerscene.h>
 #include <saveutils.h>
-#include <projectbackend.h>
+#include <projectmanager.h>
 #include <filemanager.h>
-#include <savebackend.h>
-#include <previewerbackend.h>
+#include <savemanager.h>
+#include <controlpreviewingmanager.h>
 
-DesignerScene* ExposerBackend::s_designerScene = nullptr;
+DesignerScene* ControlExposingManager::s_designerScene = nullptr;
 
-void ExposerBackend::init(DesignerScene* designerScene)
+void ControlExposingManager::init(DesignerScene* designerScene)
 {
     s_designerScene = designerScene;
 }
 
-void ExposerBackend::exposeProject()
+void ControlExposingManager::exposeProject()
 {
-    const auto& fpaths = SaveUtils::formPaths(ProjectBackend::dir());
+    const auto& fpaths = SaveUtils::formPaths(ProjectManager::dir());
 
     for (const auto& path : fpaths) {
         auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
@@ -43,19 +43,19 @@ void ExposerBackend::exposeProject()
     }
 }
 
-Form* ExposerBackend::exposeForm(const QString& rootPath)
+Form* ControlExposingManager::exposeForm(const QString& rootPath)
 {
-    PreviewerBackend::setDisabled(true);
+    ControlPreviewingManager::setDisabled(true);
 
     auto form = new Form(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     if (SaveUtils::isMain(rootPath))
         form->setMain(true);
 
-    SaveBackend::addForm(form);
+    SaveManager::addForm(form);
     s_designerScene->addForm(form);
 
-    PreviewerBackend::setDisabled(false);
+    ControlPreviewingManager::setDisabled(false);
     form->refresh();
 
     QMap<QString, Control*> pmap;
@@ -63,10 +63,10 @@ Form* ExposerBackend::exposeForm(const QString& rootPath)
     for (const auto& child : SaveUtils::childrenPaths(form->dir())) {
         auto pcontrol = pmap.value(dname(dname(child)));
 
-        PreviewerBackend::setDisabled(true);
+        ControlPreviewingManager::setDisabled(true);
         auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         control->setParentItem(pcontrol);
-        PreviewerBackend::setDisabled(false);
+        ControlPreviewingManager::setDisabled(false);
         control->refresh();
 
         pmap[child] = control;
@@ -75,21 +75,21 @@ Form* ExposerBackend::exposeForm(const QString& rootPath)
     return form;
 }
 
-Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
+Control* ControlExposingManager::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
                                        Control* parentControl, QString destinationPath,
                                        QString destinationSuid)
 {
-    PreviewerBackend::setDisabled(true);
+    ControlPreviewingManager::setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
-    SaveBackend::addControl(control, parentControl, destinationSuid, destinationPath);
+    SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
     control->setParentItem(parentControl);
     control->setPos(pos);
 
     SaveUtils::setX(control->dir(), pos.x());
     SaveUtils::setY(control->dir(), pos.y());
 
-    PreviewerBackend::setDisabled(false);
+    ControlPreviewingManager::setDisabled(false);
     control->refresh();
 
     QMap<QString, Control*> pmap;
@@ -97,7 +97,7 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& p
     for (const auto& child : SaveUtils::childrenPaths(control->dir(), sourceSuid)) {
         auto pcontrol = pmap.value(dname(dname(child)));
 
-        PreviewerBackend::setDisabled(true);
+        ControlPreviewingManager::setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         ccontrol->setParentItem(pcontrol);
         control->setPos(pos);
@@ -105,7 +105,7 @@ Control* ExposerBackend::exposeControl(const QString& rootPath, const QPointF& p
         SaveUtils::setX(control->dir(), control->x());
         SaveUtils::setY(control->dir(), control->y());
 
-        PreviewerBackend::setDisabled(false);
+        ControlPreviewingManager::setDisabled(false);
         ccontrol->refresh();
 
         pmap[child] = ccontrol;

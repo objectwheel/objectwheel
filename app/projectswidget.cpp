@@ -1,13 +1,13 @@
 #include <projectswidget.h>
 #include <buttonslice.h>
 #include <css.h>
-#include <userbackend.h>
-#include <projectbackend.h>
+#include <usermanager.h>
+#include <projectmanager.h>
 #include <qmlcodeeditorwidget.h>
 #include <delayer.h>
 #include <filemanager.h>
-#include <previewerbackend.h>
-#include <savebackend.h>
+#include <controlpreviewingmanager.h>
+#include <savemanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <dpr.h>
@@ -278,11 +278,11 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     connect(m_buttons_2->get(Settings), SIGNAL(clicked(bool)),
       this, SLOT(onSettingsButtonClick()));
 
-    connect(PreviewerBackend::instance(), SIGNAL(taskDone()),
+    connect(ControlPreviewingManager::instance(), SIGNAL(taskDone()),
       SLOT(onProgressChange()));
-    connect(ProjectBackend::instance(), &ProjectBackend::started, [=]
+    connect(ProjectManager::instance(), &ProjectManager::started, [=]
     {
-        totalTask = PreviewerBackend::totalTask();
+        totalTask = ControlPreviewingManager::totalTask();
         onProgressChange();
     });
 }
@@ -304,10 +304,10 @@ void ProjectsWidget::refreshProjectList()
 {
     const int currentRow = m_listWidget->currentRow();
     m_listWidget->clear();
-    if (UserBackend::dir().isEmpty())
+    if (UserManager::dir().isEmpty())
         return;
 
-    auto projects = ProjectBackend::projects();
+    auto projects = ProjectManager::projects();
 
     if (projects.size() < 1)
         return;
@@ -316,9 +316,9 @@ void ProjectsWidget::refreshProjectList()
         auto item = new QListWidgetItem;
         item->setIcon(QIcon(PATH_FILEICON));
         item->setData(Hash, hash);
-        item->setData(Name, ProjectBackend::name(hash));
-        item->setData(LastEdit, ProjectBackend::mfDate(hash));
-        item->setData(Active, hash == ProjectBackend::hash());
+        item->setData(Name, ProjectManager::name(hash));
+        item->setData(LastEdit, ProjectManager::mfDate(hash));
+        item->setData(Active, hash == ProjectManager::hash());
         m_listWidget->addItem(item);
     }
 
@@ -332,7 +332,7 @@ void ProjectsWidget::startProject()
 {
     auto hash = m_listWidget->currentItem()->data(Hash).toString();
 
-    if (!ProjectBackend::start(hash)) {
+    if (!ProjectManager::start(hash)) {
         qWarning() << "Project starting unsuccessful.";
         refreshProjectList();
         return;
@@ -343,15 +343,15 @@ void ProjectsWidget::startProject()
 
     m_listWidget->currentItem()->setData(Active, true);
 
-    Delayer::delay(&PreviewerBackend::isBusy);
+    Delayer::delay(&ControlPreviewingManager::isBusy);
     unlock();
     emit done();
 }
 
 void ProjectsWidget::onNewButtonClick()
 {
-    if (UserBackend::dir().isEmpty()) return;
-    auto projects = ProjectBackend::projectNames();
+    if (UserManager::dir().isEmpty()) return;
+    auto projects = ProjectManager::projectNames();
     int count = 1;
     QString projectName = "Project - 1";
 
@@ -390,7 +390,7 @@ void ProjectsWidget::onLoadButtonClick()
     }
 
     auto hash = m_listWidget->currentItem()->data(Hash).toString();
-    auto chash = ProjectBackend::hash();
+    auto chash = ProjectManager::hash();
 
     if (!chash.isEmpty() && chash == hash) {
         emit done();
@@ -400,7 +400,7 @@ void ProjectsWidget::onLoadButtonClick()
 // FIXME
 //    if (dW->qmlEditorView()->hasUnsavedDocs()) {
 //        QMessageBox msgBox;
-//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectBackend::name()));
+//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectManager::name()));
 //        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
 //        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
 //        msgBox.setDefaultButton(QMessageBox::SaveAll);
@@ -420,7 +420,7 @@ void ProjectsWidget::onLoadButtonClick()
 //    }
 
     WindowManager::mainWindow()->hide();
-    ProjectBackend::stop();
+    ProjectManager::stop();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
 
     lock();
@@ -455,7 +455,7 @@ void ProjectsWidget::onExportButtonClick()
             pname + ".zip"
         )) return;
 
-        if (!ProjectBackend::exportProject(
+        if (!ProjectManager::exportProject(
             hash,
             dialog.selectedFiles().at(0) +
             separator() +
@@ -479,7 +479,7 @@ void ProjectsWidget::onImportButtonClick()
 
     if (dialog.exec()) {
         for (auto fileName : dialog.selectedFiles()) {
-            if (!ProjectBackend::importProject(fileName)) {
+            if (!ProjectManager::importProject(fileName)) {
                 QMessageBox::warning(
                     this,
                     "Operation Stopped",
@@ -505,7 +505,7 @@ void ProjectsWidget::onSettingsButtonClick()
 
 void ProjectsWidget::onProgressChange()
 {
-    int taskDone = totalTask - PreviewerBackend::totalTask();
+    int taskDone = totalTask - ControlPreviewingManager::totalTask();
     m_progressBar->setValue(10 + 90.0 * taskDone / totalTask);
 }
 

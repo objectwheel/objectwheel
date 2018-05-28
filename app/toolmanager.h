@@ -1,5 +1,5 @@
-#ifndef TOOLSBACKEND_H
-#define TOOLSBACKEND_H
+#ifndef TOOLMANAGER_H
+#define TOOLMANAGER_H
 
 #include <QtGlobal>
 #include <QUrl>
@@ -7,9 +7,9 @@
 class QJsonObject;
 class ToolboxTree;
 
-class ToolsBackend final
+class ToolManager final
 {
-    Q_DISABLE_COPY(ToolsBackend)
+    Q_DISABLE_COPY(ToolManager)
 
 public:
     struct ChangeSet {
@@ -37,10 +37,10 @@ private:
     static bool addToTree(const QString& toolPath, ToolboxTree* tree);
 
 private:
-    ToolsBackend() {}
+    ToolManager() {}
 
 private:
     static QList<ToolboxTree*> s_toolboxTreeList;
 };
 
-#endif // TOOLSBACKEND_H
+#endif // TOOLMANAGER_H

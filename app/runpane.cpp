@@ -2,8 +2,8 @@
 #include <flatbutton.h>
 #include <loadingbar.h>
 #include <windowmanager.h>
-#include <projectbackend.h>
-#include <interpreterbackend.h>
+#include <projectmanager.h>
+#include <runmanager.h>
 #include <consolebox.h>
 #include <welcomewindow.h>
 
@@ -53,14 +53,14 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     m_projectsButton->settings().iconButton = true;
     connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));
 
-    m_loadingBar->setText(ProjectBackend::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
-    connect(ProjectBackend::instance(), &ProjectBackend::started, [=] {
-        m_loadingBar->setText(ProjectBackend::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
+    m_loadingBar->setText(ProjectManager::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
+    connect(ProjectManager::instance(), &ProjectManager::started, [=] {
+        m_loadingBar->setText(ProjectManager::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
     });
 
     // FIXME
-//    connect(SaveBackend::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString))); //TODO
-//    connect(SaveBackend::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString))); //TODO
+//    connect(SaveManager::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString))); //TODO
+//    connect(SaveManager::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString))); //TODO
 }
 
 void RunPane::reset()
@@ -70,10 +70,10 @@ void RunPane::reset()
 
 void RunPane::onStopButtonClick()
 {
-    InterpreterBackend::terminate();
+    RunManager::terminate();
     m_loadingBar->busy(
         0,
-        ProjectBackend::name() +
+        ProjectManager::name() +
         tr(": <b>Stopped</b>  |  Finished at ") +
         QTime::currentTime().toString()
     );
@@ -81,10 +81,10 @@ void RunPane::onStopButtonClick()
 
 void RunPane::onStopButtonDoubleClick()
 {
-    InterpreterBackend::kill();
+    RunManager::kill();
     m_loadingBar->busy(
         0,
-        ProjectBackend::name() +
+        ProjectManager::name() +
         tr(": <b>Stopped forcefully</b>  |  Finished at ") +
         QTime::currentTime().toString()
     );
@@ -99,14 +99,14 @@ void RunPane::onRunButtonClick()
 
     m_consoleBox->printFormatted(
         tr("Starting ") +
-        ProjectBackend::name() + "...\n",
+        ProjectManager::name() + "...\n",
         "#025dbf",
         QFont::DemiBold
     );
 
     m_consoleBox->scrollToEnd();
 
-    InterpreterBackend::run();
+    RunManager::run();
 }
 
 void RunPane::onProjectsButtonClick()

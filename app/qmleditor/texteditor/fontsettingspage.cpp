@@ -26,7 +26,7 @@
 #include "fontsettingspage.h"
 
 #include <windowmanager.h>
-#include <backendmanager.h>
+#include <initializationmanager.h>
 #include <mainwindow.h>
 #include "fontsettings.h"
 #include "ui_fontsettingspage.h"
@@ -138,7 +138,7 @@ using namespace TextEditor::Internal;
 
 static QString customStylesPath()
 {
-    QString path = BackendManager::userResourcePath();
+    QString path = InitializationManager::userResourcePath();
     path.append(QLatin1String("/styles/"));
     return path;
 }
@@ -179,7 +179,7 @@ FontSettingsPagePrivate::FontSettingsPagePrivate(const FormatDescriptions &fd,
     m_schemeListModel(new SchemeListModel),
     m_refreshingSchemeList(false)
 {
-    QSettings *settings = BackendManager::settings();
+    QSettings *settings = InitializationManager::settings();
     if (settings)
         m_value.fromSettings(m_settingsGroup, m_descriptions, settings);
 
@@ -580,7 +580,7 @@ void FontSettingsPage::refreshColorSchemeList()
 {
     QList<ColorSchemeEntry> colorSchemes;
 
-    QString resourcePath = BackendManager::resourcePath();
+    QString resourcePath = InitializationManager::resourcePath();
     QDir styleDir(resourcePath + QLatin1String("/styles"));
     styleDir.setNameFilters(QStringList() << QLatin1String("*.xml"));
     styleDir.setFilter(QDir::Files);
@@ -647,7 +647,7 @@ void FontSettingsPage::saveSettings()
 {
     if (d_ptr->m_value != d_ptr->m_lastValue) {
         d_ptr->m_lastValue = d_ptr->m_value;
-        d_ptr->m_value.toSettings(d_ptr->m_settingsGroup, BackendManager::settings());
+        d_ptr->m_value.toSettings(d_ptr->m_settingsGroup, InitializationManager::settings());
 
         QTimer::singleShot(0, this, &FontSettingsPage::delayedChange);
     }

@@ -2,7 +2,7 @@
 #include <filemanager.h>
 #include <menumanager.h>
 #include <windowmanager.h>
-#include <backendmanager.h>
+#include <initializationmanager.h>
 #include <welcomewindow.h>
 
 #include <QIcon>
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     CSS::init();
 
     // Create backend manager
-    BackendManager::init(&app);
+    InitializationManager::init(&app);
 
     // Show welcome window
     WindowManager::welcomeWindow()->show();

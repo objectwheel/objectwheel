@@ -1,11 +1,11 @@
 #include <downloadwidget.h>
-#include <projectbackend.h>
-#include <userbackend.h>
+#include <projectmanager.h>
+#include <usermanager.h>
 #include <filemanager.h>
-#include <projectbackend.h>
-#include <userbackend.h>
+#include <projectmanager.h>
+#include <usermanager.h>
 #include <saveutils.h>
-#include <savebackend.h>
+#include <savemanager.h>
 #include <projectswidget.h>
 #include <dirlocker.h>
 #include <zipper.h>
@@ -127,7 +127,7 @@ void DownloadWidget::download(OTargets::Targets target)
     QMetaEnum metaEnum = QMetaEnum::fromType<OTargets::Targets>();
     auto buildLabel = QString(metaEnum.valueToKey(target));
 
-    auto pdir = ProjectBackend::dir();
+    auto pdir = ProjectManager::dir();
     if (pdir.isEmpty())
         return;
 
@@ -157,7 +157,7 @@ void DownloadWidget::download(OTargets::Targets target)
 
     QNetworkRequest request(QUrl::fromUserInput(url));
     request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
-    request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserBackend::token())));
+    request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserManager::token())));
     request.setRawHeader("x86", QByteArray().insert(0, QString("{\"value\" : %1}").arg(target == OTargets::android_x86 ? "true" : "false")));
     request.setHeader(QNetworkRequest::ContentLengthHeader, body.size());
     _d->reply = _d->manager->post(request, body);

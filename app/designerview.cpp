@@ -1,10 +1,10 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <css.h>
-#include <savebackend.h>
-#include <exposerbackend.h>
+#include <savemanager.h>
+#include <controlexposingmanager.h>
 #include <saveutils.h>
-#include <previewerbackend.h>
+#include <controlpreviewingmanager.h>
 
 #include <QMenu>
 #include <QAction>
@@ -220,7 +220,7 @@ void DesignerView::onPasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = ExposerBackend::exposeControl(
+        auto control = ControlExposingManager::exposeControl(
             url.toLocalFile(),
             QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
             sourceSuid,
@@ -247,12 +247,12 @@ void DesignerView::onPasteAction()
                 }
 
                 for (auto control : cutControls) {
-                    PreviewerBackend::removeCache(control->uid());
+                    ControlPreviewingManager::removeCache(control->uid());
                     control->parentControl()->refresh();
                     control->setRefreshingDisabled(true);
                     control->blockSignals(true);
                     scene()->removeControl(control);
-                    SaveBackend::removeControl(control);
+                    SaveManager::removeControl(control);
                 }
             }
         }
@@ -267,12 +267,12 @@ void DesignerView::onDeleteAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->mainForm());
     for (auto control : selectedControls) {
-        PreviewerBackend::removeCache(control->uid());
+        ControlPreviewingManager::removeCache(control->uid());
         control->parentControl()->refresh();
         control->setRefreshingDisabled(true);
         control->blockSignals(true);
         scene()->removeControl(control);
-        SaveBackend::removeControl(control);
+        SaveManager::removeControl(control);
     }
 }
 

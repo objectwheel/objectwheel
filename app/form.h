@@ -7,7 +7,7 @@ class Form : public Control
 {
     Q_OBJECT
 
-    friend class ExposerBackend;
+    friend class ControlExposingManager;
 
 public:
     bool main() const;

@@ -26,7 +26,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/scrollarea.h \
            $$PWD/dirlocker.h \
            $$PWD/control.h \
-           $$PWD/savetransaction.h \
+           $$PWD/controltransactionmanager.h \
            $$PWD/qmlcodeeditor.h \
            $$PWD/fileexplorer.h \
            $$PWD/filelist.h \
@@ -36,7 +36,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/issuesbox.h \
            $$PWD/consolebox.h \
            $$PWD/searchbox.h \
-           $$PWD/controlwatcher.h \
+           $$PWD/controlmonitoringmanager.h \
            $$PWD/resizer.h \
            $$PWD/suppressor.h \
            $$PWD/platformswidget.h \
@@ -55,11 +55,11 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/formspane.h \
            $$PWD/propertiespane.h \
            $$PWD/toolboxpane.h \
-           $$PWD/backendmanager.h \
-           $$PWD/savebackend.h \
-           $$PWD/projectbackend.h \
-           $$PWD/toolsbackend.h \
-           $$PWD/userbackend.h \
+           $$PWD/initializationmanager.h \
+           $$PWD/savemanager.h \
+           $$PWD/projectmanager.h \
+           $$PWD/toolmanager.h \
+           $$PWD/usermanager.h \
            $$PWD/loadingbar.h \
            $$PWD/outputpane.h \
            $$PWD/registrationwidget.h \
@@ -78,8 +78,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/resetwidget.h \
            $$PWD/succeedwidget.h \
            $$PWD/projectdetailswidget.h \
-           $$PWD/interpreterbackend.h \
-           $$PWD/previewerbackend.h \
+           $$PWD/runmanager.h \
+           $$PWD/controlpreviewingmanager.h \
            $$PWD/progressbar.h \
            $$PWD/centralwidget.h \
            $$PWD/designerwidget.h \
@@ -91,7 +91,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/buildswidget.h \
            $$PWD/pages.h \
            $$PWD/projectoptionswidget.h \
-           $$PWD/exposerbackend.h \
+           $$PWD/controlexposingmanager.h \
            $$PWD/helpwidget.h \
            $$PWD/webenginehelpviewer.h \
            $$PWD/helpviewer.h \
@@ -106,7 +106,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/bracketband.h \
            $$PWD/blockdata.h \
            $$PWD/qmlcodedocument.h \
-           $$PWD/editorbackend.h \
+           $$PWD/documentmanager.h \
            $$PWD/markband.h
 
 SOURCES += $$PWD/main.cpp\
@@ -116,7 +116,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/scrollarea.cpp \
            $$PWD/dirlocker.cpp \
            $$PWD/control.cpp \
-           $$PWD/savetransaction.cpp \
+           $$PWD/controltransactionmanager.cpp \
            $$PWD/qmlcodeeditor.cpp \
            $$PWD/fileexplorer.cpp \
            $$PWD/filelist.cpp \
@@ -125,7 +125,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/issuesbox.cpp \
            $$PWD/consolebox.cpp \
            $$PWD/searchbox.cpp \
-           $$PWD/controlwatcher.cpp \
+           $$PWD/controlmonitoringmanager.cpp \
            $$PWD/resizer.cpp \
            $$PWD/suppressor.cpp \
            $$PWD/platformswidget.cpp \
@@ -144,11 +144,11 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/formspane.cpp \
            $$PWD/propertiespane.cpp \
            $$PWD/toolboxpane.cpp \
-           $$PWD/backendmanager.cpp \
-           $$PWD/savebackend.cpp \
-           $$PWD/projectbackend.cpp \
-           $$PWD/toolsbackend.cpp \
-           $$PWD/userbackend.cpp \
+           $$PWD/initializationmanager.cpp \
+           $$PWD/savemanager.cpp \
+           $$PWD/projectmanager.cpp \
+           $$PWD/toolmanager.cpp \
+           $$PWD/usermanager.cpp \
            $$PWD/loadingbar.cpp \
            $$PWD/outputpane.cpp \
            $$PWD/registrationwidget.cpp \
@@ -167,8 +167,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/resetwidget.cpp \
            $$PWD/succeedwidget.cpp \
            $$PWD/projectdetailswidget.cpp \
-           $$PWD/interpreterbackend.cpp \
-           $$PWD/previewerbackend.cpp \
+           $$PWD/runmanager.cpp \
+           $$PWD/controlpreviewingmanager.cpp \
            $$PWD/progressbar.cpp \
            $$PWD/centralwidget.cpp \
            $$PWD/designerwidget.cpp \
@@ -179,7 +179,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/qmlcodeeditorwidget.cpp \
            $$PWD/buildswidget.cpp \
            $$PWD/projectoptionswidget.cpp \
-           $$PWD/exposerbackend.cpp \
+           $$PWD/controlexposingmanager.cpp \
            $$PWD/helpwidget.cpp \
            $$PWD/webenginehelpviewer.cpp \
            $$PWD/helpviewer.cpp \
@@ -193,7 +193,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/breakpointband.cpp \
            $$PWD/bracketband.cpp \
            $$PWD/qmlcodedocument.cpp \
-           $$PWD/editorbackend.cpp \
+           $$PWD/documentmanager.cpp \
            $$PWD/markband.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \

@@ -6,7 +6,7 @@
 #include <waitingspinnerwidget.h>
 #include <global.h>
 #include <authenticator.h>
-#include <userbackend.h>
+#include <usermanager.h>
 #include <dpr.h>
 
 #include <QtConcurrent>
@@ -251,8 +251,8 @@ void LoginWidget::startSession()
     const QString email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
     const QString password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
 
-    UserBackend::newUser(email);
-    QFuture<bool> future = QtConcurrent::run(&UserBackend::start, email, password);
+    UserManager::newUser(email);
+    QFuture<bool> future = QtConcurrent::run(&UserManager::start, email, password);
 
     _encryptionWatcher.setFuture(future);
 }
@@ -264,9 +264,9 @@ void LoginWidget::onSessionStart()
 
     if (_encryptionWatcher.result()) {
         if (_autologinSwitch->isChecked())
-            UserBackend::setAutoLogin(password);
+            UserManager::setAutoLogin(password);
         else
-            UserBackend::clearAutoLogin();
+            UserManager::clearAutoLogin();
     } else
         qFatal("Fatal : LoginWidget");
 

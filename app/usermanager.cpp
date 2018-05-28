@@ -1,4 +1,4 @@
-#include <userbackend.h>
+#include <usermanager.h>
 #include <filemanager.h>
 #include <dirlocker.h>
 #include <aes.h>
@@ -41,32 +41,32 @@ static QString generateToken(const QString& user, const QString& password)
 }
 }
 
-UserBackend* UserBackend::s_instance = nullptr;
-QString UserBackend::s_user;
-QString UserBackend::s_token;
-QByteArray UserBackend::s_key;
+UserManager* UserManager::s_instance = nullptr;
+QString UserManager::s_user;
+QString UserManager::s_token;
+QByteArray UserManager::s_key;
 
-UserBackend::UserBackend(QObject* parent) : QObject(parent)
+UserManager::UserManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
 }
 
-UserBackend::~UserBackend()
+UserManager::~UserManager()
 {
     s_instance = nullptr;
 }
 
-UserBackend* UserBackend::instance()
+UserManager* UserManager::instance()
 {
     return s_instance;
 }
 
-bool UserBackend::exists(const QString& user)
+bool UserManager::exists(const QString& user)
 {
     return ::exists(generateUserDirectory(user));
 }
 
-bool UserBackend::newUser(const QString& user)
+bool UserManager::newUser(const QString& user)
 {
 //	if (exists(user)) return false; //True code
 //	return mkdir(generateUserDirectory(user));
@@ -75,13 +75,13 @@ bool UserBackend::newUser(const QString& user)
     return mkfile(generateUserDirectory(user) + separator() + "bad.dat");
 }
 
-QString UserBackend::dir(const QString& user)
+QString UserManager::dir(const QString& user)
 {
     if (!exists(user)) return QString();
     return generateUserDirectory(user);
 }
 
-void UserBackend::setAutoLogin(const QString& password)
+void UserManager::setAutoLogin(const QString& password)
 {
     if (s_user.isEmpty() || dir().isEmpty()) return;
     QString json = "{ \"e\" : \"%1\", \"p\" : \"%2\" }";
@@ -91,22 +91,22 @@ void UserBackend::setAutoLogin(const QString& password)
         Aes::encrypt(sstep, QByteArray().insert(0, json.arg(s_user, password))));
 }
 
-const QString& UserBackend::user()
+const QString& UserManager::user()
 {
     return s_user;
 }
 
-const QString& UserBackend::token()
+const QString& UserManager::token()
 {
     return s_token;
 }
 
-const QByteArray& UserBackend::key()
+const QByteArray& UserManager::key()
 {
     return s_key;
 }
 
-void UserBackend::clearAutoLogin()
+void UserManager::clearAutoLogin()
 {
     QByteArray shredder;
     for (int i = 1048576; i--;) { shredder.append(QRandomGenerator::global()->generate() % 250); }
@@ -115,13 +115,13 @@ void UserBackend::clearAutoLogin()
     mkfile(ddd() + separator() + AUTOLOGIN_FILENAME);
 }
 
-bool UserBackend::hasAutoLogin()
+bool UserManager::hasAutoLogin()
 {
     auto algdata = rdfile(ddd() + separator() + AUTOLOGIN_FILENAME);
     return !algdata.isEmpty();
 }
 
-bool UserBackend::tryAutoLogin()
+bool UserManager::tryAutoLogin()
 {
     if (!hasAutoLogin()) return false;
     auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
@@ -131,7 +131,7 @@ bool UserBackend::tryAutoLogin()
     return start(jobj["e"].toString(), jobj["p"].toString());
 }
 
-bool UserBackend::start(const QString& user, const QString& password)
+bool UserManager::start(const QString& user, const QString& password)
 {
     if (s_user == user) {
 		return true;
@@ -178,7 +178,7 @@ bool UserBackend::start(const QString& user, const QString& password)
     return true;
 }
 
-void UserBackend::stop()
+void UserManager::stop()
 {
     if (s_user.isEmpty())
 		return;
@@ -187,7 +187,7 @@ void UserBackend::stop()
 
     if (exists(s_user) && !DirLocker::locked(dir()))
         if (!DirLocker::lock(dir(), s_key))
-            qFatal("ProjectBackend : Error occurred");
+            qFatal("ProjectManager : Error occurred");
 
     s_user = "";
     s_key = "";

@@ -1,6 +1,6 @@
 #include <androidwidget.h>
 #include <css.h>
-#include <projectbackend.h>
+#include <projectmanager.h>
 #include <filemanager.h>
 #include <build.h>
 

@@ -1,8 +1,8 @@
 #include <projectdetailswidget.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
-#include <userbackend.h>
-#include <projectbackend.h>
+#include <usermanager.h>
+#include <projectmanager.h>
 #include <filemanager.h>
 #include <dpr.h>
 
@@ -118,13 +118,13 @@ void ProjectDetailsWidget::onEditProject(const QString& hash)
 {
     m_toTemplates = false;
     m_hash = hash;
-    ProjectBackend::updateSize();
-    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectBackend::name(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectBackend::description(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectBackend::owner(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectBackend::crDate(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectBackend::mfDate(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectBackend::size(hash));
+    ProjectManager::updateSize();
+    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectManager::owner(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::crDate(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::mfDate(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectManager::size(hash));
 }
 
 void ProjectDetailsWidget::onNewProject(const QString& projectName, int templateNumber)
@@ -134,7 +134,7 @@ void ProjectDetailsWidget::onNewProject(const QString& projectName, int template
     m_hash.clear();
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(UserBackend::user());
+    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(UserManager::user());
     static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(TIME);
     static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(TIME);
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(tr("0 bytes"));
@@ -154,7 +154,7 @@ void ProjectDetailsWidget::onSaveClick()
     }
 
     if (m_hash.isEmpty()) {
-        if (!ProjectBackend::newProject(
+        if (!ProjectManager::newProject(
             m_templateNumber,
             projectnametext,
             descriptiontext,
@@ -163,14 +163,14 @@ void ProjectDetailsWidget::onSaveClick()
             sizetext
         )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
 
-        ProjectBackend::updateSize();
+        ProjectManager::updateSize();
     } else {
-        ProjectBackend::
+        ProjectManager::
         instance()->changeName(
             m_hash,
             projectnametext
         );
-        ProjectBackend::
+        ProjectManager::
         instance()->changeDescription(
             m_hash,
             descriptiontext
@@ -182,7 +182,7 @@ void ProjectDetailsWidget::onSaveClick()
 
 void ProjectDetailsWidget::onDeleteClick()
 {
-    if (ProjectBackend::dir(m_hash).isEmpty()) {
+    if (ProjectManager::dir(m_hash).isEmpty()) {
         emit done();
         return;
     }
@@ -191,16 +191,16 @@ void ProjectDetailsWidget::onDeleteClick()
         this,
         "Confirm Deletion",
         tr("You are about to delete %1 completely. Are you sure?").
-        arg(ProjectBackend::name(m_hash)),
+        arg(ProjectManager::name(m_hash)),
         QMessageBox::Yes, QMessageBox::No | QMessageBox::Default
     );
 
     if (ret == QMessageBox::Yes) {
-        const auto& chash = ProjectBackend::hash();
+        const auto& chash = ProjectManager::hash();
         if (!chash.isEmpty() && chash == m_hash)
-            ProjectBackend::stop();
+            ProjectManager::stop();
 
-        rm(ProjectBackend::dir(m_hash));
+        rm(ProjectManager::dir(m_hash));
 
         emit done();
     }

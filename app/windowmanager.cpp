@@ -4,10 +4,10 @@
 #include <aboutwindow.h>
 #include <preferenceswindow.h>
 #include <toolboxsettingswindow.h>
-#include <savebackend.h>
+#include <savemanager.h>
 #include <dpr.h>
-#include <projectbackend.h>
-#include <backendmanager.h>
+#include <projectmanager.h>
+#include <initializationmanager.h>
 #include <QStyle>
 
 AboutWindow* WindowManager::s_aboutWindow = nullptr;

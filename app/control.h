@@ -6,13 +6,13 @@
 
 class Resizer;
 class DesignerScene;
-class ControlWatcher;
+class ControlMonitoringManager;
 
 class Control : public QGraphicsWidget
 {
     Q_OBJECT
 
-    friend class ExposerBackend;
+    friend class ControlExposingManager;
     using QGraphicsWidget::contains;
 
 public:

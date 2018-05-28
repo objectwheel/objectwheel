@@ -14,7 +14,7 @@ class MenuManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(MenuManager)
 
-    friend class BackendManager;
+    friend class InitializationManager;
 
 private:
     static void onNewFile();

@@ -1,6 +1,6 @@
 #include <scalingwidget.h>
 #include <saveutils.h>
-#include <projectbackend.h>
+#include <projectmanager.h>
 
 #include <QVBoxLayout>
 #include <QRadioButton>
@@ -23,7 +23,7 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
 
 void ScalingWidget::reset()
 {
-    auto scaling = SaveUtils::scaling(ProjectBackend::dir());
+    auto scaling = SaveUtils::scaling(ProjectManager::dir());
 
     if (scaling == "noScaling")
         m_noScalingButton->setChecked(true);
@@ -40,5 +40,5 @@ void ScalingWidget::saveTheme()
     else
         scaling = "noScaling";
 
-    SaveUtils::setProjectProperty(ProjectBackend::dir(), PTAG_SCALING, scaling);
+    SaveUtils::setProjectProperty(ProjectManager::dir(), PTAG_SCALING, scaling);
 }
