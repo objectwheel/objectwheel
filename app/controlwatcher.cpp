@@ -1,7 +1,18 @@
 #include <controlwatcher.h>
 
+ControlWatcher* ControlWatcher::s_instance = nullptr;
+
+ControlWatcher::ControlWatcher(QObject* parent) : QObject(parent)
+{
+    s_instance = this;
+}
+
+ControlWatcher::~ControlWatcher()
+{
+    s_instance = nullptr;
+}
+
 ControlWatcher* ControlWatcher::instance()
 {
-    static ControlWatcher instance;
-    return &instance;
+    return s_instance;
 }

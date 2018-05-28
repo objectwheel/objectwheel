@@ -16,7 +16,7 @@ ToolboxSettingsWindow* WindowManager::s_toolboxSettingsWindow = nullptr;
 MainWindow* WindowManager::s_mainWindow = nullptr;
 WelcomeWindow* WindowManager::s_welcomeWindow = nullptr;
 
-WindowManager::WindowManager()
+WindowManager::WindowManager(QObject* parent) : QObject(parent)
 {
     s_aboutWindow = new AboutWindow;
     s_preferencesWindow = new PreferencesWindow;
@@ -33,11 +33,6 @@ WindowManager::WindowManager()
     QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_welcomeWindow, &WelcomeWindow::hide);
     QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_mainWindow, &MainWindow::show);
 
-    QObject::connect(ProjectBackend::instance(), &ProjectBackend::started,
-            WindowManager::mainWindow(), &MainWindow::reset);
-    QObject::connect(ProjectBackend::instance(), &ProjectBackend::started,
-            BackendManager::instance(), &BackendManager::onProjectStart);
-
     s_aboutWindow->setGeometry(QStyle::alignedRect(
                                    Qt::LeftToRight, Qt::AlignCenter, s_aboutWindow->sizeHint(),
                                    QGuiApplication::primaryScreen()->availableGeometry()));
@@ -53,6 +48,15 @@ WindowManager::WindowManager()
     s_welcomeWindow->setGeometry(QStyle::alignedRect(
                                      Qt::LeftToRight, Qt::AlignCenter, s_welcomeWindow->sizeHint(),
                                      QGuiApplication::primaryScreen()->availableGeometry()));
+}
+
+WindowManager::~WindowManager()
+{
+    delete s_welcomeWindow;
+    delete s_mainWindow;
+    delete s_toolboxSettingsWindow;
+    delete s_preferencesWindow;
+    delete s_aboutWindow;
 }
 
 WelcomeWindow* WindowManager::welcomeWindow()
@@ -78,10 +82,4 @@ PreferencesWindow* WindowManager::preferencesWindow()
 AboutWindow* WindowManager::aboutWindow()
 {
     return s_aboutWindow;
-}
-
-void WindowManager::init()
-{
-    static WindowManager instance;
-    Q_UNUSED(instance);
 }

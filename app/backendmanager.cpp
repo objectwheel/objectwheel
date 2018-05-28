@@ -13,6 +13,8 @@
 #include <interpreterbackend.h>
 #include <exposerbackend.h>
 #include <savebackend.h>
+#include <controlwatcher.h>
+#include <menumanager.h>
 
 #include <QMessageBox>
 
@@ -31,10 +33,14 @@ SaveBackend* BackendManager::s_saveBackend = nullptr;
 ProjectBackend* BackendManager::s_projectBackend = nullptr;
 ExposerBackend* BackendManager::s_exposerBackend = nullptr;
 InterpreterBackend* BackendManager::s_interpreterBackend = nullptr;
+ControlWatcher* BackendManager::s_controlWatcher = nullptr;
+SaveTransaction* BackendManager::s_saveTransaction = nullptr;
 HelpManager* BackendManager::s_helpManager = nullptr;
 EditorBackend* BackendManager::s_editorBackend = nullptr;
+WindowManager* BackendManager::s_windowManager = nullptr;
+MenuManager* BackendManager::s_menuManager = nullptr;
 
-BackendManager::BackendManager()
+BackendManager::BackendManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
     s_authenticator = new Authenticator(this);
@@ -44,7 +50,10 @@ BackendManager::BackendManager()
     s_projectBackend = new ProjectBackend(this);
     s_exposerBackend = new ExposerBackend;
     s_interpreterBackend = new InterpreterBackend(this);
+    s_controlWatcher = new ControlWatcher(this);
+    s_saveTransaction = new SaveTransaction(this);
     s_helpManager = new HelpManager(this);
+
     HelpManager::setupHelpManager();
     Utils::setCreatorTheme(Internal::ThemeEntry::createTheme(Constants::DEFAULT_THEME));
     connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
@@ -54,7 +63,6 @@ BackendManager::BackendManager()
     connect(UserBackend::instance(), &UserBackend::aboutToStop,
             this, &BackendManager::onSessionStop);
 
-    SaveTransaction::instance();
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
     if (!PreviewerBackend::init()) {
@@ -64,6 +72,14 @@ BackendManager::BackendManager()
             tr("Unable to start Objectwheel Previewing Service")
         );
     }
+
+    s_windowManager = new WindowManager(this);
+    s_menuManager = new MenuManager(this);
+
+    connect(ProjectBackend::instance(), &ProjectBackend::started,
+            WindowManager::mainWindow(), &MainWindow::reset);
+    connect(ProjectBackend::instance(), &ProjectBackend::started,
+            BackendManager::instance(), &BackendManager::onProjectStart);
 }
 
 BackendManager::~BackendManager()
@@ -72,10 +88,11 @@ BackendManager::~BackendManager()
     s_instance = nullptr;
 }
 
-void BackendManager::init()
+void BackendManager::init(QObject* parent)
 {
-    static BackendManager instance;
-    Q_UNUSED(instance)
+    static BackendManager* instance = nullptr;
+    if (instance == nullptr)
+        instance = new BackendManager(parent);
 }
 
 BackendManager* BackendManager::instance()

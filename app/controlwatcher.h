@@ -11,6 +11,8 @@ class ControlWatcher final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ControlWatcher)
 
+    friend class BackendManager;
+
 public:
     static ControlWatcher* instance();
 
@@ -24,7 +26,11 @@ signals:
     void controlDropped(Control*, const QPointF&, const QString&);
 
 private:
-    ControlWatcher() {}
+    explicit ControlWatcher(QObject* parent = nullptr);
+    ~ControlWatcher();
+
+private:
+    static ControlWatcher* s_instance;
 };
 
 #define cW ControlWatcher::instance()

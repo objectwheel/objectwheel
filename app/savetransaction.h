@@ -10,18 +10,15 @@ class SaveTransaction final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(SaveTransaction)
 
-public:
-    static SaveTransaction* instance();
-    void disable();
-    void enable();
+    friend class BackendManager;
 
-public slots:
+private slots:
     void processZ(Control*);
     void processParent(Control*);
     void processGeometry(Control*);
 
 private:
-    SaveTransaction();
+    explicit SaveTransaction(QObject* parent = nullptr);
 };
 
 #endif // SAVETRANSACTION_H

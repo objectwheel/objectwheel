@@ -5,17 +5,11 @@
 #include <saveutils.h>
 #include <previewerbackend.h>
 
-SaveTransaction::SaveTransaction()
+SaveTransaction::SaveTransaction(QObject* parent) : QObject(parent)
 {
-    connect(cW, SIGNAL(zValueChanged(Control*)), this, SLOT(processZ(Control*)));
-    connect(cW, SIGNAL(parentChanged(Control*)), this, SLOT(processParent(Control*)));
-    connect(cW, SIGNAL(geometryChanged(Control*)), this, SLOT(processGeometry(Control*)));
-}
-
-SaveTransaction* SaveTransaction::instance()
-{
-    static SaveTransaction instance;
-    return &instance;
+    connect(cW, &ControlWatcher::zValueChanged, this, &SaveTransaction::processZ);
+    connect(cW, &ControlWatcher::parentChanged, this, &SaveTransaction::processParent);
+    connect(cW, &ControlWatcher::geometryChanged, this, &SaveTransaction::processGeometry);
 }
 
 void SaveTransaction::processGeometry(Control* control)

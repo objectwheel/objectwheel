@@ -20,16 +20,14 @@ int main(int argc, char* argv[])
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     /* Disable Qml Parser warnings */
-    QLoggingCategory::setFilterRules(
-                QStringLiteral("qtc*.info=false\n"
-                               "qtc*.debug=false\n"
-                               "qtc*.warning=false\n"
-                               "qtc*.critical=false\n"
-                               "qtc*=false")
-                );
+    QLoggingCategory::setFilterRules(QStringLiteral("qtc*.info=false\n"
+                                                    "qtc*.debug=false\n"
+                                                    "qtc*.warning=false\n"
+                                                    "qtc*.critical=false\n"
+                                                    "qtc*=false"));
 
     // Initialize application
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
     QApplication::setApplicationName(APP_NAME);
     QApplication::setOrganizationName(APP_CORP);
     QApplication::setApplicationVersion(APP_VER);
@@ -43,19 +41,17 @@ int main(int argc, char* argv[])
         sharedMemory.attach();
         sharedMemory.detach();
         if(!sharedMemory.create(1)) {
-            QMessageBox::warning(
-                nullptr,
-                QObject::tr("Quitting"),
-                QObject::tr("Another instance is already running.")
-            );
-            a.exit();
+            QMessageBox::warning(nullptr,
+                                 QObject::tr("Quitting"),
+                                 QObject::tr("Another instance is already running."));
+            app.exit();
             return 0;
         }
     }
 
-    // Font settings
-    for (const auto& font : lsfile(":/resources/fonts"))
-        QFontDatabase::addApplicationFont(":/resources/fonts/" + font);
+//    // Font settings
+//    for (const auto& font : lsfile(":/resources/fonts"))
+//        QFontDatabase::addApplicationFont(":/resources/fonts/" + font);
 
 #if defined(Q_OS_MACOS)
     QFont font(".SF NS Display");
@@ -73,15 +69,11 @@ int main(int argc, char* argv[])
     CSS::init();
 
     // Create backend manager
-    BackendManager::init();
+    BackendManager::init(&app);
 
     // Show welcome window
-    WindowManager::init();
     WindowManager::welcomeWindow()->show();
 
-    // Initialize menus
-    MenuManager::instance()->init();
-
     // Start main event loop
-    return a.exec();
+    return app.exec();
 }

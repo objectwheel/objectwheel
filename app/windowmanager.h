@@ -1,7 +1,7 @@
 #ifndef WINDOWMANAGER_H
 #define WINDOWMANAGER_H
 
-#include <QtGlobal>
+#include <QObject>
 
 class MainWindow;
 class WelcomeWindow;
@@ -9,13 +9,14 @@ class AboutWindow;
 class PreferencesWindow;
 class ToolboxSettingsWindow;
 
-class WindowManager final
+class WindowManager final : public QObject
 {
+    Q_OBJECT
     Q_DISABLE_COPY(WindowManager)
 
-public:
-    static void init();
+    friend class BackendManager;
 
+public:
     static AboutWindow* aboutWindow();
     static PreferencesWindow* preferencesWindow();
     static ToolboxSettingsWindow* toolboxSettingsWindow();
@@ -23,7 +24,8 @@ public:
     static WelcomeWindow* welcomeWindow();
 
 private:
-    WindowManager();
+    explicit WindowManager(QObject* parent = nullptr);
+    ~WindowManager();
 
 private:
     static AboutWindow* s_aboutWindow;
