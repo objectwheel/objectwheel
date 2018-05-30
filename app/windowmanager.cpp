@@ -52,8 +52,12 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
 
 WindowManager::~WindowManager()
 {
-    delete s_welcomeWindow;
-    delete s_mainWindow;
+    // FIXME
+//    delete s_welcomeWindow;
+    s_welcomeWindow->deleteLater();
+//    delete s_mainWindow;
+    s_mainWindow->deleteLater();
+
     delete s_toolboxSettingsWindow;
     delete s_preferencesWindow;
     delete s_aboutWindow;

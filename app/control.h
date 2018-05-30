@@ -41,7 +41,7 @@ public:
     QList<Control*> childControls(bool dive = true) const;
 
 public:
-    static QList<Control*>& controls();
+    static const QList<Control*>& controls();
 
 public:
     void setClip(bool clip);

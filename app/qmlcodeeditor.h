@@ -173,6 +173,7 @@ public slots:
     void slotCodeStyleSettingsChanged(const QVariant&);
     void slotUpdateBlockNotify(const QTextBlock& block);
     void searchResultsReady(int beginIndex, int endIndex);
+    void gotoLine(int line, int column = 0, bool centerLine = true, bool animate = true);
 
 private:
     void updateRowBarWidth();
@@ -190,7 +191,6 @@ private:
     void paintCurrentLineHighlight(const PaintEventData& data, QPainter& painter) const;
     void highlightSearchResults(const QTextBlock& block, TextEditor::Internal::TextEditorOverlay* overlay);
     QString wordUnderCursor() const;
-    void gotoLine(int line, int column = 0, bool centerLine = true, bool animate = true);
     bool openLink(const Utils::Link& link);
     void openLinkUnderCursor();
     void findLinkAt(const QTextCursor &cursor, Utils::ProcessLinkCallback &&processLinkCallback);

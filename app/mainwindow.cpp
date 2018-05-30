@@ -264,7 +264,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         if (exitStatus == QProcess::CrashExit) {
             console->printFormatted(
                 tr("The process was ended forcefully.\n"),
-                "#B34B46",
+                "#b34b46",
                 QFont::DemiBold
             );
         }

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class QTextEdit;
+class QTextBrowser;
 class QVBoxLayout;
 class OutputPane;
 
@@ -26,13 +26,17 @@ public slots:
     void scrollToEnd();
 
 private slots:
+    void onLinkClick(const QString& link);
     void onStandardError(const QString& output);
     void onStandardOutput(const QString& output);
 
 private:
-    QVBoxLayout* _layout;
-    QTextEdit* _textEdit;
-    OutputPane* _outputPane;
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
+private:
+    QVBoxLayout* m_layout;
+    QTextBrowser* m_textBrowser;
+    OutputPane* m_outputPane;
 };
 
 #endif // CONSOLEBOX_H

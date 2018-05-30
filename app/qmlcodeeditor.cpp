@@ -1373,7 +1373,7 @@ void QmlCodeEditor::mousePressEvent(QMouseEvent *e)
             //                disableBlockSelection(QmlCodeEditor::NoCursorUpdate);
 
 //                        QTextBlock foldedBlock = foldedBlockAt(e->pos());
-                        if (m_rowBar->bracketBand()->toggleFold(e->pos()))
+                        if (m_mouseOnFoldedMarker && m_rowBar->bracketBand()->toggleFold(e->pos()))
                             viewport()->setCursor(Qt::IBeamCursor);
 
             //            RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());

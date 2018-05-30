@@ -50,6 +50,7 @@ public:
     void addControl(Control* control);
     void addDocument(Control* control, const QString& documentPath);
     void setCurrentDocument(Control* control, const QString& documentPath);
+    void setCurrentLine(int lineNumber);
     void openControl(Control* control);
     void closeControl(Control* control, const bool ask = true);
     void closeDocument(Control* control, const QString& documentPath, const bool ask = true);

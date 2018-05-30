@@ -783,6 +783,11 @@ void QmlCodeEditorWidget::setCurrentDocument(Control* control, const QString& do
     }
 }
 
+void QmlCodeEditorWidget::setCurrentLine(int lineNumber)
+{
+    _d->codeEditor->gotoLine(lineNumber);
+}
+
 void QmlCodeEditorWidget::openControl(Control* control)
 {
     for (auto& item : _editorItems) {
@@ -1024,11 +1029,12 @@ void QmlCodeEditorWidget::raiseContainer()
 
 void QmlCodeEditorWidget::refreshErrors()
 {
-    if (_d->currentControl) {
+    // FIXME
+//    if (_d->currentControl) {
 //        _d->codeEditor->clearErrorLines();
 //        for (auto error : _d->currentControl->errors())
 //            _d->codeEditor->addErrorLine(error.line());
-    }
+//    }
 }
 
 void QmlCodeEditorWidget::handleControlRemoval(Control* control)

@@ -222,7 +222,7 @@ QList<Control*> Control::childControls(bool dive) const
     return controls;
 }
 
-QList<Control*>& Control::controls()
+const QList<Control*>& Control::controls()
 {
     return m_controls;
 }
