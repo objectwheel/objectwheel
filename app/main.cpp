@@ -4,6 +4,7 @@
 #include <windowmanager.h>
 #include <initializationmanager.h>
 #include <welcomewindow.h>
+#include <appfontsettings.h>
 
 #include <QIcon>
 #include <QMessageBox>
@@ -49,21 +50,8 @@ int main(int argc, char* argv[])
         }
     }
 
-//    // Font settings
-//    for (const auto& font : lsfile(":/resources/fonts"))
-//        QFontDatabase::addApplicationFont(":/resources/fonts/" + font);
-
-#if defined(Q_OS_MACOS)
-    QFont font(".SF NS Display");
-#elif defined(Q_OS_WIN)
-    QFont font("Segoe UI");
-#else
-    QFont font("Open Sans");
-#endif
-
-    font.setPixelSize(14);
-    font.setStyleStrategy(QFont::PreferAntialias);
-    QApplication::setFont(font);
+    /* Set Font */
+    AppFontSettings::apply();
 
     // Initialize css
     CSS::init();

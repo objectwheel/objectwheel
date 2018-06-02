@@ -1,1 +1,0 @@
-RESOURCES += $$PWD/shared_resources.qrc

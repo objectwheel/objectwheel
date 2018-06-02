@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/resources">
+    <qresource prefix="/">
         <file>fonts/OpenSans-Bold.ttf</file>
         <file>fonts/OpenSans-BoldItalic.ttf</file>
         <file>fonts/OpenSans-ExtraBold.ttf</file>
@@ -11,9 +11,5 @@
         <file>fonts/OpenSans-SemiBold.ttf</file>
         <file>fonts/OpenSans-SemiBoldItalic.ttf</file>
         <file>qmls/module-resolver.qml</file>
-        <file>fonts/LiberationMono-Bold.ttf</file>
-        <file>fonts/LiberationMono-BoldItalic.ttf</file>
-        <file>fonts/LiberationMono-Italic.ttf</file>
-        <file>fonts/LiberationMono-Regular.ttf</file>
     </qresource>
 </RCC>

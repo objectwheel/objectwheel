@@ -13,7 +13,6 @@ include($$PWD/version.pri)
 include($$PWD/aes/aes.pri)
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)
-include($$PWD/../shared/resources/shared_resources.pri)
 include ($$PWD/qmleditor/qmleditor.pri)
 
 ### Sources
@@ -200,7 +199,6 @@ FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
 
 ### Utils Settings
-INCLUDEPATH += $$PWD/../shared
 INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/fit
 INCLUDEPATH += $$PWD/../utils/miniz
