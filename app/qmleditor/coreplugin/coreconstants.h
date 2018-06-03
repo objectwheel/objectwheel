@@ -203,7 +203,7 @@ const char SETTINGS_ID_MIMETYPES[] = "E.MimeTypes";
 const char SETTINGS_DEFAULTTEXTENCODING[] = "General/DefaultFileEncoding";
 
 const char SETTINGS_THEME[] = "Core/CreatorTheme";
-const char DEFAULT_THEME[] = "flat";
+const char DEFAULT_THEME[] = "flat-light";
 
 const char TR_CLEAR_MENU[]         = QT_TRANSLATE_NOOP("Core", "Clear Menu");
 

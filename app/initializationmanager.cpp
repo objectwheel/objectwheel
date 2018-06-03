@@ -132,9 +132,5 @@ void InitializationManager::onProjectStart()
     ControlPreviewingManager::restart();
     ControlPreviewingManager::requestInit(ProjectManager::dir());
     ControlExposingManager::exposeProject();
-    //    dW->controlScene()->clearSelection();
-    //    dW->designerScene()->clearSelection();
-    ToolManager::downloadTools();
-    // MainWindow::instance()->setWindowTitle //FIXME
-    // (QString(APP_NAME) + " - [" + projectname + "]");
+    ToolManager::exposeTools();
 }

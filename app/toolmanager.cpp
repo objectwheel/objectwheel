@@ -23,8 +23,7 @@
 
 #define DEFAULT_CATEGORY        "Others"
 #define DEFAULT_NAME            "Tool"
-#define DEFAULT_TOOLS_DIRECTORY "tools"
-#define DEFAULT_TOOLS_URL       "qrc:/tools/tools.json"
+#define DEFAULT_TOOLS_DIRECTORY ":/tools"
 #define DIR_QRC_CONTROL         ":/resources/qmls/control"
 
 namespace {
@@ -32,7 +31,7 @@ namespace {
 static void flushChangeSet(const ToolManager::ChangeSet& changeSet)
 {
     auto dirCtrl = changeSet.toolPath +
-      separator() + DIR_THIS;
+            separator() + DIR_THIS;
     auto dirIcon = dirCtrl + separator() + FILE_ICON;
     auto propertyPath = dirCtrl + separator() + FILE_PROPERTIES;
     auto propertyData = rdfile(propertyPath);
@@ -49,7 +48,7 @@ static void flushChangeSet(const ToolManager::ChangeSet& changeSet)
     const auto remoteTry = dlfile(changeSet.iconPath);
     QPixmap pixmap;
     pixmap.loadFromData(!remoteTry.isEmpty() ?
-      remoteTry : dlfile(dirCtrl + separator() + changeSet.iconPath));
+                            remoteTry : dlfile(dirCtrl + separator() + changeSet.iconPath));
     Q_ASSERT(!pixmap.isNull());
     QByteArray bArray;
     QBuffer buffer(&bArray);
@@ -59,15 +58,15 @@ static void flushChangeSet(const ToolManager::ChangeSet& changeSet)
     if (!wrfile(dirIcon, bArray)) return;
 }
 
-static bool isProjectFull()
+static bool currentProjectHasToolsInstalled()
 {
     if (ProjectManager::dir().isEmpty())
         return false;
     if (!QDir().exists(
-        ProjectManager::dir() +
-        separator() +
-        DEFAULT_TOOLS_DIRECTORY
-    ))
+                ProjectManager::dir() +
+                separator() +
+                DEFAULT_TOOLS_DIRECTORY
+                ))
         return false;
     else
         return true;
@@ -87,7 +86,7 @@ QStringList ToolManager::categories()
 {
     QStringList categories;
 
-    if (!isProjectFull())
+    if (!currentProjectHasToolsInstalled())
         return categories;
 
     for (auto dir : lsdir(toolsDir())) {
@@ -101,7 +100,7 @@ QStringList ToolManager::categories()
 
 void ToolManager::fillTree(ToolboxTree* tree)
 {
-    if (!isProjectFull())
+    if (!currentProjectHasToolsInstalled())
         return;
 
     tree->clear();
@@ -113,7 +112,7 @@ void ToolManager::fillTree(ToolboxTree* tree)
 bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
 {
     if (ProjectManager::dir().isEmpty() ||
-        toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
+            toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
     QList<QUrl> urls;
@@ -146,7 +145,7 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
 
 void ToolManager::reset()
 {
-    if (!isProjectFull())
+    if (!currentProjectHasToolsInstalled())
         return;
 
     for (auto tree : s_toolboxTreeList) {
@@ -161,17 +160,17 @@ void ToolManager::reset()
 bool ToolManager::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
     if (ProjectManager::dir().isEmpty() ||
-        toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
+            toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
         return false;
 
-    if (!isProjectFull())
+    if (!currentProjectHasToolsInstalled())
         return false;
 
     const bool isNewTool = !toolPath.contains(toolsDir());
     QString newToolPath;
     if (isNewTool) {
         newToolPath = toolsDir() + separator() +
-          QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
+                QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
 
         if (!mkdir(newToolPath))
             return false;
@@ -211,7 +210,8 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
         tree->addUrls(item, urls);
 
         if (select) {
-            tree->clearSelection(); tree->setCurrentItem(nullptr);
+            tree->clearSelection();
+            tree->setCurrentItem(nullptr);
             tree->setCurrentItem(item);
             tree->scrollToItem(item);
         }
@@ -223,13 +223,14 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
 void ToolManager::changeTool(const ChangeSet& changeSet)
 {
     for (auto tree : s_toolboxTreeList) {
-        tree->clearSelection(); tree->setCurrentItem(nullptr);
+        tree->clearSelection();
+        tree->setCurrentItem(nullptr);
         for (int i = 0; i < tree->topLevelItemCount(); i++) {
             auto tli = tree->topLevelItem(i);
             for (int j = 0; j < tli->childCount(); j++) {
                 auto ci = tli->child(j);
                 if (dname(dname(tree->urls(ci).first().
-                  toLocalFile())) == changeSet.toolPath) {
+                                toLocalFile())) == changeSet.toolPath) {
                     tree->removeUrls(ci);
                     delete tli->takeChild(j);
                     if (tli->childCount() <= 0)
@@ -246,13 +247,14 @@ void ToolManager::changeTool(const ChangeSet& changeSet)
 void ToolManager::removeTool(const QString& toolPath)
 {
     for (auto tree : s_toolboxTreeList) {
-        tree->clearSelection(); tree->setCurrentItem(nullptr);
+        tree->clearSelection();
+        tree->setCurrentItem(nullptr);
         for (int i = 0; i < tree->topLevelItemCount(); i++) {
             auto tli = tree->topLevelItem(i);
             for (int j = 0; j < tli->childCount(); j++) {
                 auto ci = tli->child(j);
                 if (dname(dname(tree->urls(ci).first().
-                  toLocalFile())) == toolPath) {
+                                toLocalFile())) == toolPath) {
                     tree->removeUrls(ci);
                     delete tli->takeChild(j);
                     if (tli->childCount() <= 0)
@@ -271,70 +273,42 @@ void ToolManager::addToolboxTree(ToolboxTree* toolboxTree)
     fillTree(toolboxTree);
 }
 
-void ToolManager::downloadTools(const QUrl& url)
+void ToolManager::exposeTools()
 {
-    if (ProjectManager::dir().isEmpty()) return;
+    if (ProjectManager::dir().isEmpty())
+        return;
 
-    for (auto tree : s_toolboxTreeList) {
+    for (ToolboxTree* tree : s_toolboxTreeList) {
         tree->clear();
         tree->clearUrls();
     }
 
-    QNetworkAccessManager* manager = new QNetworkAccessManager;
-    QNetworkRequest request;
-    if (!url.isEmpty()) request.setUrl(url);
-    else request.setUrl(QUrl::fromUserInput(DEFAULT_TOOLS_URL));
+    if (currentProjectHasToolsInstalled()) {
+        for (const QString& toolDirName : lsdir(toolsDir()))
+            addTool(toolsDir() + separator() + toolDirName, false);
+    } else {
+        for (const QString& toolName : lsfile(DEFAULT_TOOLS_DIRECTORY)) {
+            const QString& toolPath = QString(DEFAULT_TOOLS_DIRECTORY) + separator() + toolName;
+            const QString& newToolName = QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
+            const QString& newToolPath = toolsDir() + separator() + newToolName;
 
-    QSharedPointer<QEventLoop> loop(new QEventLoop);
-    QNetworkReply* reply = manager->get(request);
-    QObject::connect(reply, static_cast<void (QNetworkReply::*)
-      (QNetworkReply::NetworkError)>(&QNetworkReply::error),
-      [] { qFatal("downloadTools() : Network Error"); });
-    QObject::connect(reply, &QNetworkReply::sslErrors,
-      [] { qFatal("downloadTools() : Ssl Error"); });
-    QObject::connect(reply, &QNetworkReply::finished, [=]
-    {
-        QJsonDocument toolsDoc = QJsonDocument::fromJson(reply->readAll());
-        QJsonArray toolsArray = toolsDoc.array();
+            if (!mkdir(newToolPath)) {
+                qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x01");
+                break;
+            }
 
-        if (isProjectFull()) {
-            for (auto toolDir : lsdir(toolsDir()))
-                addTool(toolsDir() + separator() + toolDir, false);
-            reply->deleteLater();
-            if (loop)
-                loop->quit();
-            return;
+            if (!Zipper::extractZip(rdfile(toolPath), newToolPath)) {
+                qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x02");
+                break;
+            }
+
+
+            if (!addTool(newToolPath, false)) {
+                qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x03");
+                break;
+            }
         }
-
-        for (auto val : toolsArray)
-        {
-            QString toolDir = QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
-            QDir(toolsDir()).mkpath(toolDir);
-            QUrl toolUrl = QUrl::fromUserInput(val.toString());
-
-            QNetworkRequest request;
-            request.setUrl(toolUrl);
-            request.setRawHeader("User-Agent", "objectwheel 1.0");
-
-            QNetworkReply* toolReply = manager->get(request);
-            QObject::connect(toolReply, static_cast<void (QNetworkReply::*)
-              (QNetworkReply::NetworkError)> (&QNetworkReply::error), []
-              { qFatal("downloadTools() : Network Error"); });
-            QObject::connect(toolReply, &QNetworkReply::sslErrors, []
-              { qFatal("downloadTools() : Ssl Error"); });
-            QObject::connect(toolReply, &QNetworkReply::finished, [=] {
-                Zipper::extractZip(toolReply->readAll(), toolsDir() + separator() + toolDir);
-                addTool(toolsDir() + separator() + toolDir, false);
-                toolReply->deleteLater();
-                if (loop)
-                    loop->quit();
-            });
-        }
-
-        reply->deleteLater();
-    });
-    loop->exec();
-    manager->deleteLater();
+    }
 }
 
 void ToolManager::newTool()
@@ -344,17 +318,18 @@ void ToolManager::newTool()
 
 void ToolManager::resetTools()
 {
-    if (!isProjectFull())
+    if (!currentProjectHasToolsInstalled())
         return;
 
-    for (auto tree : s_toolboxTreeList) {
+    for (ToolboxTree* tree : s_toolboxTreeList) {
         tree->clearSelection();
         tree->setCurrentItem(nullptr);
         tree->clear();
         tree->clearUrls();
         emit tree->itemSelectionChanged();
     }
+
     rm(toolsDir());
-    downloadTools();
+    exposeTools();
 }
 

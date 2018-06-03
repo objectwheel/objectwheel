@@ -7,8 +7,8 @@ class QmlCodeEditorWidget;
 class DesignerScene;
 class DesignerView;
 class QVBoxLayout;
-class QToolBar;
-class QToolButton;
+class ToolBar;
+class ToolButton;
 class QComboBox;
 class Control;
 
@@ -50,14 +50,14 @@ private:
     QVBoxLayout* m_layout;
     DesignerScene* m_designerScene;
     DesignerView* m_designerView;
-    QToolBar* m_toolbar;
-    QToolButton* m_undoButton;
-    QToolButton* m_redoButton;
-    QToolButton* m_clearButton;
-    QToolButton* m_refreshButton;
-    QToolButton* m_snappingButton;
-    QToolButton* m_fitButton;
-    QToolButton* m_outlineButton;
+    ToolBar* m_toolbar;
+    ToolButton* m_undoButton;
+    ToolButton* m_redoButton;
+    ToolButton* m_clearButton;
+    ToolButton* m_refreshButton;
+    ToolButton* m_snappingButton;
+    ToolButton* m_fitButton;
+    ToolButton* m_outlineButton;
     QComboBox* m_zoomlLevelCombobox;
 };
 

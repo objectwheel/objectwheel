@@ -3,7 +3,7 @@ ThemeName=Flat
 PreferredStyles=
 
 [Palette]
-shadowBackground=ff404244
+shadowBackground=ff3B444C
 text=ff000000
 textDisabled=55000000
 toolBarItem=b6fbfdff

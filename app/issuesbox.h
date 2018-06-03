@@ -2,17 +2,18 @@
 #define ISSUESBOX_H
 
 #include <flatbutton.h>
-#include <QWidget>
-#include <QListWidget>
-#include <QToolBar>
-#include <QVBoxLayout>
-#include <QTimer>
+
 #include <QPointer>
-#include <QLabel>
-#include <QToolButton>
+#include <QMap>
 
 class Control;
 class OutputPane;
+class QVBoxLayout;
+class ToolBar;
+class ToolButton;
+class QLabel;
+class QListWidget;
+class QListWidgetItem;
 
 class Error {
 public:
@@ -58,8 +59,8 @@ signals:
 
 private:
     QVBoxLayout* m_layout;
-    QToolBar* m_toolbar;
-    QToolButton* m_clearButton;
+    ToolBar* m_toolbar;
+    ToolButton* m_clearButton;
     QLabel* m_title;
     QListWidget* m_listWidget;
     QMap<Error, QPointer<Control>> m_buggyControls;

@@ -11,6 +11,7 @@
 #include <QToolBar>
 #include <QButtonGroup>
 #include <QVBoxLayout>
+#include <QTimer>
 
 #define HEIGHT_MIN (100)
 #define HEIGHT_MAX (600)

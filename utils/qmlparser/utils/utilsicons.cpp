@@ -80,6 +80,8 @@ const Icon BOOKMARK_TOOLBAR({
         {QLatin1String(":/utils/images/bookmark.png"), Theme::IconsBaseColor}});
 const Icon BOOKMARK_TEXTEDITOR({
         {QLatin1String(":/utils/images/bookmark.png"), Theme::Bookmarks_TextMarkColor}}, Icon::Tint);
+const Icon SNAPPING_TOOLBAR({
+        {QLatin1String(":/utils/images/snapping.png"), Theme::IconsBaseColor}});
 const Icon SNAPSHOT_TOOLBAR({
         {QLatin1String(":/utils/images/snapshot.png"), Theme::IconsBaseColor}});
 const Icon NEWSEARCH_TOOLBAR({
@@ -126,6 +128,10 @@ const Icon RESET({
         {QLatin1String(":/utils/images/reset.png"), Theme::PanelTextColorMid}}, Icon::Tint);
 const Icon RESET_TOOLBAR({
         {QLatin1String(":/utils/images/reset.png"), Theme::IconsBaseColor}});
+const Icon PIN_TOOLBAR({
+        {QLatin1String(":/utils/images/pin.png"), Theme::IconsBaseColor}});
+const Icon PINNED_TOOLBAR({
+        {QLatin1String(":/utils/images/pinned.png"), Theme::IconsBaseColor}});
 
 const Icon ARROW_UP({
         {QLatin1String(":/utils/images/arrowup.png"), Theme::IconsBaseColor}});

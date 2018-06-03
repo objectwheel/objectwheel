@@ -7,10 +7,12 @@
 #include <controlmonitoringmanager.h>
 #include <controlexposingmanager.h>
 #include <filemanager.h>
+#include <transparentcombobox.h>
+#include <utilsicons.h>
+#include <toolbar.h>
+#include <toolbutton.h>
 
-#include <QToolBar>
-#include <QToolButton>
-#include <QComboBox>
+#include <toolbar.h>
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -27,15 +29,15 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
   , m_layout(new QVBoxLayout(this))
   , m_designerScene(new DesignerScene(this))
   , m_designerView(new DesignerView(m_designerScene))
-  , m_toolbar(new QToolBar)
-  , m_undoButton(new QToolButton)
-  , m_redoButton(new QToolButton)
-  , m_clearButton(new QToolButton)
-  , m_refreshButton(new QToolButton)
-  , m_snappingButton(new QToolButton)
-  , m_fitButton(new QToolButton)
-  , m_outlineButton(new QToolButton)
-  , m_zoomlLevelCombobox(new QComboBox)
+  , m_toolbar(new ToolBar)
+  , m_undoButton(new ToolButton)
+  , m_redoButton(new ToolButton)
+  , m_clearButton(new ToolButton)
+  , m_refreshButton(new ToolButton)
+  , m_snappingButton(new ToolButton)
+  , m_fitButton(new ToolButton)
+  , m_outlineButton(new ToolButton)
+  , m_zoomlLevelCombobox(new TransparentComboBox)
 {
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -50,9 +52,6 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_designerView->setFrameShape(QFrame::NoFrame);
     m_designerView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    #if defined(Q_OS_WIN)
-    m_zoomlLevelCombobox->setFixedHeight(18);
-    #endif
     m_zoomlLevelCombobox->addItem("10 %");
     m_zoomlLevelCombobox->addItem("25 %");
     m_zoomlLevelCombobox->addItem("50 %");
@@ -67,6 +66,8 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_zoomlLevelCombobox->addItem("500 %");
     m_zoomlLevelCombobox->addItem("1000 %");
     m_zoomlLevelCombobox->setCurrentIndex(5);
+    m_zoomlLevelCombobox->setMinimumWidth(100);
+    m_zoomlLevelCombobox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     m_outlineButton->setCheckable(true);
     m_outlineButton->setChecked(m_designerScene->showOutlines());
@@ -91,13 +92,13 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_fitButton->setToolTip("Fit scene into the Dashboard.");
     m_zoomlLevelCombobox->setToolTip("Change zoom level.");
 
-    m_refreshButton->setIcon(QIcon(":/images/refresh.png"));
-    m_clearButton->setIcon(QIcon(":/images/clean.png"));
-    m_undoButton->setIcon(QIcon(":/images/undo.png"));
-    m_redoButton->setIcon(QIcon(":/images/redo.png"));
-    m_snappingButton->setIcon(QIcon(":/images/snap.png"));
-    m_outlineButton->setIcon(QIcon(":/images/outline.png"));
-    m_fitButton->setIcon(QIcon(":/images/fit.png"));
+    m_refreshButton->setIcon(Utils::Icons::RELOAD.icon());
+    m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
+    m_undoButton->setIcon(Utils::Icons::UNDO_TOOLBAR.icon());
+    m_redoButton->setIcon(Utils::Icons::REDO_TOOLBAR.icon());
+    m_snappingButton->setIcon(Utils::Icons::SNAPPING_TOOLBAR.icon());
+    m_outlineButton->setIcon(Utils::Icons::BOUNDING_RECT.icon());
+    m_fitButton->setIcon(Utils::Icons::FITTOVIEW_TOOLBAR.icon());
 
     connect(m_snappingButton, SIGNAL(toggled(bool)), SLOT(onSnappingButtonClick(bool)));
     connect(m_outlineButton, SIGNAL(toggled(bool)), SLOT(onOutlineButtonClick(bool)));
@@ -106,9 +107,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     connect(m_refreshButton, SIGNAL(clicked(bool)), SLOT(onRefreshButtonClick()));
     connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(onClearButtonClick()));
 
-    m_toolbar->setStyleSheet(CSS::DesignerToolbar);
-    m_toolbar->setFixedHeight(21);
-    m_toolbar->setIconSize(QSize(14, 14));
+    m_toolbar->setFixedHeight(24);
     m_toolbar->addWidget(m_undoButton);
     m_toolbar->addWidget(m_redoButton);
     m_toolbar->addSeparator();
@@ -119,6 +118,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_outlineButton);
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
+    m_toolbar->addStretch();
 
     connect(ControlMonitoringManager::instance(), SIGNAL(doubleClicked(Control*)),
             SLOT(onControlDoubleClick(Control*)));

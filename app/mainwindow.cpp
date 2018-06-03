@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 {
     QPalette p(palette());
-    p.setColor(backgroundRole(), "#f6f6f6");
+    p.setColor(backgroundRole(), "#f0f0f0");
     setPalette(p);
 
     setWindowTitle(APP_NAME);

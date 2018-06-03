@@ -43,6 +43,7 @@ QToolBar { \
     border-bottom: 1px solid #D0D0D0;\
     background: #e4e4e4; \
     spacing: %1px; \
+    padding: 0px; \
 }"
 
 #define CSS_DESIGNER_TOOLBAR_V "\
@@ -51,6 +52,7 @@ QToolBar { \
     border-right: 1px solid #D0D0D0;\
     background: #e4e4e4; \
     spacing: %1px; \
+    padding: 0px; \
 }"
 
 #define CSS_DESIGNER_PINBAR "\

@@ -215,5 +215,11 @@
         <file>images/settingscategory_todo@2x.png</file>
         <file>images/tasklist.png</file>
         <file>images/tasklist@2x.png</file>
+        <file>images/snapping.png</file>
+        <file>images/snapping@2x.png</file>
+        <file>images/pin.png</file>
+        <file>images/pin@2x.png</file>
+        <file>images/pinned.png</file>
+        <file>images/pinned@2x.png</file>
     </qresource>
 </RCC>

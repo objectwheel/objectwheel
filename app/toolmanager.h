@@ -23,7 +23,7 @@ public:
     static void reset();
     static void newTool();
     static void resetTools();
-    static void downloadTools(const QUrl& url = QUrl());
+    static void exposeTools();
     static void removeTool(const QString& toolPath);
     static void changeTool(const ChangeSet& changeSet);
     static void addToolboxTree(ToolboxTree* toolboxTree);

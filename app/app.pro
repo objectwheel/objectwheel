@@ -106,7 +106,10 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/blockdata.h \
            $$PWD/qmlcodedocument.h \
            $$PWD/documentmanager.h \
-           $$PWD/markband.h
+           $$PWD/markband.h \
+    transparentcombobox.h \
+    toolbar.h \
+    toolbutton.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -193,7 +196,10 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/bracketband.cpp \
            $$PWD/qmlcodedocument.cpp \
            $$PWD/documentmanager.cpp \
-           $$PWD/markband.cpp
+           $$PWD/markband.cpp \
+    transparentcombobox.cpp \
+    toolbar.cpp \
+    toolbutton.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

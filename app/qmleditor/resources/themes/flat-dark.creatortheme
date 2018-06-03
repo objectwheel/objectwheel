@@ -4,7 +4,7 @@ PreferredStyles=Fusion
 DefaultTextEditorColorScheme=creator-dark.xml
 
 [Palette]
-shadowBackground=ff404244
+shadowBackground=ff3B444C
 text=ffd0d0d0
 textDisabled=60a4a6a8
 toolBarItem=b6fbfdff

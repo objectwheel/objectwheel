@@ -10,8 +10,8 @@ class QHelpEngine;
 class QVBoxLayout;
 class FocuslessLineEdit;
 class WebEngineHelpViewer;
-class QToolBar;
-class QToolButton;
+class ToolBar;
+class ToolButton;
 class QLabel;
 
 class HelpWidget : public QWidget
@@ -40,11 +40,11 @@ private slots:
 private:
     QHelpEngine* m_helpEngine;
     QVBoxLayout* m_layout;
-    QToolBar* m_toolbar;
+    ToolBar* m_toolbar;
     QComboBox* m_typeCombo;
-    QToolButton* m_homeButton;
-    QToolButton* m_backButton;
-    QToolButton* m_forthButton;
+    ToolButton* m_homeButton;
+    ToolButton* m_backButton;
+    ToolButton* m_forthButton;
     QLabel* m_titleLabel;
     QSplitter* m_splitter;
     WebEngineHelpViewer* m_helpViewer;

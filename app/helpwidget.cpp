@@ -2,6 +2,10 @@
 #include <webenginehelpviewer.h>
 #include <focuslesslineedit.h>
 #include <css.h>
+#include <transparentcombobox.h>
+#include <toolbar.h>
+#include <toolbutton.h>
+#include <utilsicons.h>
 
 #include <QtWidgets>
 #include <QtHelp>
@@ -17,11 +21,11 @@ namespace {
 HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_helpEngine(new QHelpEngine(qApp->applicationDirPath() + "/docs/docs.qhc", this))
   , m_layout(new QVBoxLayout(this))
-  , m_toolbar(new QToolBar)
-  , m_typeCombo(new QComboBox)
-  , m_homeButton(new QToolButton)
-  , m_backButton(new QToolButton)
-  , m_forthButton(new QToolButton)
+  , m_toolbar(new ToolBar)
+  , m_typeCombo(new TransparentComboBox)
+  , m_homeButton(new ToolButton)
+  , m_backButton(new ToolButton)
+  , m_forthButton(new ToolButton)
   , m_titleLabel(new QLabel)
   , m_splitter(new QSplitter)
   , m_helpViewer(new WebEngineHelpViewer(m_helpEngine))
@@ -41,15 +45,14 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_toolbar);
     m_layout->addWidget(m_splitter);
 
-    m_toolbar->setStyleSheet(CSS::DesignerToolbar);
-    m_toolbar->setIconSize(QSize(14, 14));
-    m_toolbar->setFixedHeight(21);
+    m_toolbar->setFixedHeight(24);
     m_toolbar->addWidget(m_typeCombo);
     m_toolbar->addSeparator();
     m_toolbar->addWidget(m_homeButton);
     m_toolbar->addWidget(m_backButton);
     m_toolbar->addWidget(m_forthButton);
     m_toolbar->addSeparator();
+    m_toolbar->addStretch();
     m_toolbar->addWidget(m_titleLabel);
 
     QFont f;
@@ -57,7 +60,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_titleLabel->setFont(f);
     m_titleLabel->setTextFormat(Qt::RichText);
 
-    m_typeCombo->setFixedWidth(280);
+    m_typeCombo->setFixedWidth(220);
     m_typeCombo->addItem("Index");
     m_typeCombo->addItem("Contents");
 
@@ -69,9 +72,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_backButton->setToolTip(tr("Go Back"));
     m_forthButton->setToolTip(tr("Go Forth"));
 
-    m_homeButton->setIcon(QIcon(":/images/home.png"));
-    m_backButton->setIcon(QIcon(":/images/undo.png"));
-    m_forthButton->setIcon(QIcon(":/images/redo.png"));
+    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
+    m_backButton->setIcon(Utils::Icons::PREV_TOOLBAR.icon());
+    m_forthButton->setIcon(Utils::Icons::NEXT_TOOLBAR.icon());
 
     m_splitter->setHandleWidth(0);
     m_splitter->setOrientation(Qt::Horizontal);
