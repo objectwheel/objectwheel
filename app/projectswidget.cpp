@@ -28,9 +28,9 @@
 #include <QScreen>
 #include <QFileDialog>
 
-#define SIZE_LIST        (QSize(450, 350))
+#define SIZE_LIST        (QSize(450, 300))
 #define BUTTONS_WIDTH    (450)
-#define SIZE_LOGO        (QSize(80, 80))
+#define SIZE_LOGO        (QSize(48, 48))
 #define SIZE_FILEICON    (QSize(48, 48))
 #define PATH_LOGO        (":/images/toolbox.png")
 #define PATH_FILEICON    (":/images/fileicon.png")
@@ -127,12 +127,12 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
   , m_progressBar(new ProgressBar(m_listWidget->viewport()))
 {
     m_layout->addStretch();
-    m_layout->setSpacing(12);
+    m_layout->setSpacing(6);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_iconLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_welcomeLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_versionLabel, 0, Qt::AlignCenter);
-    m_layout->addSpacing(10);
+    m_layout->addSpacing(6);
     m_layout->addWidget(m_projectsLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_listWidget, 0, Qt::AlignCenter);
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
@@ -154,14 +154,14 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(28);
+    f.setPixelSize(26);
 
     m_welcomeLabel->setFont(f);
     m_welcomeLabel->setText(tr("Welcome to Objectwheel"));
     m_welcomeLabel->setStyleSheet("color: black");
 
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
     m_versionLabel->setFont(f);
     m_versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
     m_versionLabel->setStyleSheet("color: black");

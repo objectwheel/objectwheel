@@ -27,9 +27,9 @@
 #include <QScreen>
 #include <QFileDialog>
 
-#define SIZE_LIST        (QSize(450, 350))
+#define SIZE_LIST        (QSize(450, 315))
 #define BUTTONS_WIDTH    (450)
-#define SIZE_LOGO        (QSize(80, 80))
+#define SIZE_LOGO        (QSize(48, 48))
 #define SIZE_TEMPLCON    (QSize(48, 48))
 #define PATH_LOGO        (":/images/templates.png")
 #define PATH_TEMPLATE    (":/images/template%1.png")
@@ -113,12 +113,12 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
   , m_buttons(new ButtonSlice)
 {
     m_layout->addStretch();
-    m_layout->setSpacing(12);
+    m_layout->setSpacing(6);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_iconLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_titleLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_informativeLabel, 0, Qt::AlignCenter);
-    m_layout->addSpacing(10);
+    m_layout->addSpacing(6);
     m_layout->addWidget(m_templatesLabel, 0, Qt::AlignCenter);
     m_layout->addWidget(m_listWidget, 0, Qt::AlignCenter);
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
@@ -138,14 +138,14 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(28);
+    f.setPixelSize(26);
 
     m_titleLabel->setFont(f);
     m_titleLabel->setText(tr("Project Templates"));
     m_titleLabel->setStyleSheet("color: black");
 
     f.setWeight(QFont::Light);
-    f.setPixelSize(17);
+    f.setPixelSize(15);
     m_informativeLabel->setFont(f);
     m_informativeLabel->setText(tr("Choose appropriate template for your project"));
     m_informativeLabel->setAlignment(Qt::AlignCenter);

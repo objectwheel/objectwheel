@@ -52,7 +52,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
     _legalLabel = new QLabel;
 
-    _layout->setSpacing(12);
+    _layout->setSpacing(6);
     _layout->setRowStretch(0, 1);
     _layout->setRowStretch(1, 1);
     _layout->setRowStretch(8, 1);
@@ -99,7 +99,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     _loginLabel->setFont(f);
     _loginLabel->setText(tr("Log In"));

@@ -176,6 +176,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
 QSize WelcomeWindow::sizeHint() const
 {
-    return {1160, 670};
+    return {980, 560};
 }
 

@@ -12,7 +12,7 @@
 #include <QMessageBox>
 
 #define BUTTONS_WIDTH    (350)
-#define SIZE_ICON        (QSize(80, 80))
+#define SIZE_ICON        (QSize(48, 48))
 #define PATH_ICON        (":/images/robot.png")
 #define PATH_NICON       (":/images/load.png")
 #define PATH_CICON       (":/images/unload.png")
@@ -31,7 +31,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _robotLabel = new QLabel;
     _space = new QWidget;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
-    _buttons = new ButtonSlice(_recaptchaView);
+    _buttons = new ButtonSlice(this);
 
     _layout->setSpacing(0);
     _layout->setContentsMargins(0, 0, 0, 0);
@@ -40,7 +40,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _space->setFixedSize(BUTTONS_WIDTH, 200);
     _space->installEventFilter(this);
 
-    _recaptchaLayout->setSpacing(12);
+    _recaptchaLayout->setSpacing(6);
     _recaptchaLayout->addStretch();
     _recaptchaLayout->addWidget(_iconLabel, 0, Qt::AlignCenter);
     _recaptchaLayout->addWidget(_robotLabel, 0, Qt::AlignCenter);
@@ -72,7 +72,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     _robotLabel->setFont(f);
     _robotLabel->setText(tr("I'm not Robot"));

@@ -15,7 +15,7 @@
 
 #define COUNTDOWN        300
 #define BUTTONS_WIDTH    (300)
-#define SIZE_ICON        (QSize(80, 80))
+#define SIZE_ICON        (QSize(48, 48))
 #define PATH_ICON        (":/images/verification.png")
 #define PATH_VICON       (":/images/ok.png")
 #define PATH_RICON       (":/images/reset.png")
@@ -37,8 +37,8 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _emailLabel = new QLabel;
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
-
-    _layout->setSpacing(12);
+    // TODO: Check out if the given email address is valid before sending request to the server
+    _layout->setSpacing(6);
     _layout->addStretch();
     _layout->addWidget(_iconLabel);
     _layout->addWidget(_verificationLabel);
@@ -76,7 +76,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     _verificationLabel->setFont(f);
     _verificationLabel->setText(tr("Email Verification"));

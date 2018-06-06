@@ -18,7 +18,7 @@
 
 #define TERMS_HEIGHT     (35)
 #define TERMS_WIDTH      (350)
-#define SIZE_ICON        (QSize(80, 80))
+#define SIZE_ICON        (QSize(48, 48))
 #define PATH_COUNTRIES   (":/resources/other/countries.txt")
 #define PATH_ICON        (":/images/register.png")
 #define PATH_OICON       (":/images/load.png")
@@ -66,7 +66,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
-    _layout->setSpacing(12);
+    _layout->setSpacing(6);
 
     _layout->addStretch();
     _layout->addWidget(_iconLabel,0 , Qt::AlignCenter);
@@ -100,7 +100,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     _signupLabel->setFont(f);
     _signupLabel->setText(tr("Sign Up"));
@@ -153,9 +153,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     }\
     QComboBox::down-arrow {\
         image: url(:/images/downarrow.png);\
-    }\
-    QComboBox QAbstractItemView {\
-        background: #f0f4f7;\
     }");
 
     _termsWidget->setObjectName("termsWidget");

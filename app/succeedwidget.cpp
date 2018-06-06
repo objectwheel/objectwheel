@@ -47,7 +47,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _iconLabel->setStyleSheet("background: transparent;");
 
     QFont f;
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     _titleLabel->setFont(f);
     _titleLabel->setStyleSheet("color: #65A35C");

@@ -14,7 +14,7 @@
 #include <QDateTime>
 
 #define BUTTONS_WIDTH    (450)
-#define SIZE_ICON        (QSize(80, 80))
+#define SIZE_ICON        (QSize(48, 48))
 #define PATH_ICON        (":/images/options.png")
 #define PATH_SICON       (":/images/load.png")
 #define PATH_CICON       (":/images/unload.png")
@@ -32,10 +32,10 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_bulkEdit = new BulkEdit;
     m_buttons = new ButtonSlice;
 
-    m_layout->setSpacing(12);
+    m_layout->setSpacing(6);
     m_layout->addStretch();
     m_layout->addWidget(m_iconLabel,0 , Qt::AlignCenter);
-    m_layout->addSpacing(15);
+    m_layout->addSpacing(6);
     m_layout->addWidget(m_settingsLabel,0 , Qt::AlignCenter);
     m_layout->addSpacing(5);
     m_layout->addWidget(m_bulkEdit, 0, Qt::AlignCenter);
@@ -56,7 +56,7 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     m_settingsLabel->setFont(f);
     m_settingsLabel->setText(tr("Project Settings"));

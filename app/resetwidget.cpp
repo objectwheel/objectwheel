@@ -15,7 +15,7 @@
 
 #define COUNTDOWN        300
 #define BUTTONS_WIDTH    (300)
-#define SIZE_ICON        (QSize(80, 80))
+#define SIZE_ICON        (QSize(48, 48))
 #define PATH_ICON        (":/images/lock.png")
 #define PATH_VICON       (":/images/ok.png")
 #define PATH_CICON       (":/images/cancel.png")
@@ -40,7 +40,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
-    _layout->setSpacing(12);
+    _layout->setSpacing(6);
     _layout->addStretch();
     _layout->addWidget(_iconLabel);
     _layout->addWidget(_resetLabel);
@@ -78,7 +78,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     _resetLabel->setFont(f);
     _resetLabel->setText(tr("Verify Password Reset"));

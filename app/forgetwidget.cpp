@@ -12,7 +12,7 @@
 #include <QMessageBox>
 
 #define BUTTONS_WIDTH    (350)
-#define SIZE_ICON        (QSize(80, 80))
+#define SIZE_ICON        (QSize(48, 48))
 #define PATH_ICON        (":/images/forgot.png")
 #define PATH_NICON       (":/images/load.png")
 #define PATH_CICON       (":/images/unload.png")
@@ -34,7 +34,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     _buttons = new ButtonSlice;
     _loadingIndicator = new WaitingSpinnerWidget(this, false);
 
-    _layout->setSpacing(12);
+    _layout->setSpacing(6);
     _layout->addStretch();
     _layout->addWidget(_iconLabel, 0 , Qt::AlignCenter);
     _layout->addSpacing(10);
@@ -61,7 +61,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::Light);
-    f.setPixelSize(18);
+    f.setPixelSize(16);
 
     _forgotLabel->setFont(f);
     _forgotLabel->setText(tr("Password Reset"));

@@ -44,7 +44,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(24);
+    f.setPixelSize(22);
 
     m_titleLabel->setFont(f);
     m_titleLabel->setText("About Objectwheel");
