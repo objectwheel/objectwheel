@@ -346,14 +346,14 @@ FlatButton* OutputPane::button(OutputPane::Box type)
     return nullptr;
 }
 
-void OutputPane::reset()
+void OutputPane::sweep()
 {
     _lastHeight = SIZE_INITIAL.height();
     _collapsed = false;
 
-    _issuesBox->reset();
-    _searchBox->reset();
-    _consoleBox->reset();
+    _issuesBox->sweep();
+    _searchBox->sweep();
+    _consoleBox->sweep();
 
     _d->handleIssuesButtonClicked(true);
 

@@ -21,7 +21,7 @@ public:
     explicit ThemeChooserWidget(const Version& version, QWidget *parent = nullptr);
 
 public slots:
-    void reset();
+    void sweep();
 
 private slots:
     void run();

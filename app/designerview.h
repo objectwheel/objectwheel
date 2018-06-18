@@ -15,7 +15,7 @@ public:
     DesignerScene* scene() const;
 
 public slots:
-    void reset();
+    void sweep();
 
 protected:
     void resizeEvent(QResizeEvent* event) override;

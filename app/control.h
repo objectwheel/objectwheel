@@ -12,7 +12,8 @@ class Control : public QGraphicsWidget
 {
     Q_OBJECT
 
-    friend class ControlExposingManager;
+    friend class ControlExposingManager; // For constructor
+    friend class DesignerScene; // For destructor
     using QGraphicsWidget::contains;
 
 public:

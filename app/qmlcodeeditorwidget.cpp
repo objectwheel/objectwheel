@@ -991,7 +991,7 @@ QmlCodeEditor* QmlCodeEditorWidget::editor() const
     return _d->codeEditor;
 }
 
-void QmlCodeEditorWidget::reset()
+void QmlCodeEditorWidget::sweep()
 {
     for (auto& item : _editorItems)
         closeControl(item.control, false);
@@ -1007,10 +1007,10 @@ void QmlCodeEditorWidget::reset()
     _d->saveButton->setDisabled(true);
 
     _d->lastWidthOfExplorerWrapper = INITIALWIDTH_FILEEXPLORER;
-//    _d->codeEditor->reset();
-    _d->fileExplorer->reset();
-    // TODO: _d->imageEditor->reset();
-    // TODO: _d->hexEditor->reset();
+//    _d->codeEditor->sweep();
+    _d->fileExplorer->sweep();
+    // TODO: _d->imageEditor->sweep();
+    // TODO: _d->hexEditor->sweep();
 
     if (_d->hideShowButton->toolTip().contains("Hide"))
         _d->handleHideShowButtonClicked();

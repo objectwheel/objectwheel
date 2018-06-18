@@ -63,7 +63,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 //    connect(SaveManager::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString))); //TODO
 }
 
-void RunPane::reset()
+void RunPane::sweep()
 {
     onStopButtonClick();
 }

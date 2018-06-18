@@ -21,7 +21,7 @@ public:
     DesignerScene* designerScene() const;
 
 public slots:
-    void reset();
+    void sweep();
     void refresh() { onRefreshButtonClick(); }
 
 protected:

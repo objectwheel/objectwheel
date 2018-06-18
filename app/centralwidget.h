@@ -24,7 +24,7 @@ public:
     OutputPane* outputPane() const;
 
 public slots:
-    void reset();
+    void sweep();
     void setCurrentPage(const Pages& page);
 
 private slots:

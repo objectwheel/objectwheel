@@ -293,15 +293,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
 }
 
-void MainWindow::reset()
+void MainWindow::sweep()
 {
-    m_runPane->reset();
-    m_centralWidget->reset();
-    m_formsPane->reset();
-    m_toolboxPane->reset();
-    m_inspectorPane->reset();
-    m_propertiesPane->reset();
-    m_pageSwitcherPane->reset();
+    m_runPane->sweep();
+    m_centralWidget->sweep();
+    m_formsPane->sweep();
+    m_toolboxPane->sweep();
+    m_inspectorPane->sweep();
+    m_propertiesPane->sweep();
+    m_pageSwitcherPane->sweep();
 }
 
 void MainWindow::hideDocks()

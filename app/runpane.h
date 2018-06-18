@@ -16,7 +16,7 @@ public:
     explicit RunPane(ConsoleBox* consoleBox, QWidget *parent = nullptr);
 
 public slots:
-    void reset();
+    void sweep();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

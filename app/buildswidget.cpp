@@ -29,7 +29,7 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
     _view->show(Platforms);
 }
 
-void BuildsWidget::reset()
+void BuildsWidget::sweep()
 {
     //TODO
 }

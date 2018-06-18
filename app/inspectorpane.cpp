@@ -6,6 +6,8 @@
 #include <savemanager.h>
 #include <formspane.h>
 #include <controlmonitoringmanager.h>
+#include <controlexposingmanager.h>
+#include <controlremovingmanager.h>
 #include <designerscene.h>
 #include <form.h>
 #include <projectmanager.h>
@@ -18,10 +20,43 @@
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QTimer>
+#include <QPointer>
 
 //!
 //! *************************** [global] ****************************
 //!
+namespace {
+
+QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
+{
+    QList<QTreeWidgetItem*> items;
+
+    if (!treeWidget)
+        return items;
+
+    for (int i = 0; i < treeWidget->topLevelItemCount(); ++i)
+        items.append(treeWidget->topLevelItem(i));
+
+    return items;
+}
+
+QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true)
+{
+    QList<QTreeWidgetItem*> items;
+
+    if (!parentItem)
+        return items;
+
+    if (includeParent)
+        items.append(parentItem);
+
+    for (int i = 0; i < parentItem->childCount(); i++) {
+        items.append(parentItem->child(i));
+        items.append(allSubChildItems(parentItem->child(i), false));
+    }
+
+    return items;
+}
 
 void fillItem(QTreeWidgetItem* parentItem, const QList<Control*>& children)
 {
@@ -52,15 +87,6 @@ void fillItem(QTreeWidgetItem* parentItem, const QList<Control*>& children)
         fillItem(item, child->childControls(false));
     }
 }
-
-QList<QTreeWidgetItem*> tree(QTreeWidgetItem* item)
-{
-    QList<QTreeWidgetItem*> items;
-    for (int i = 0; i < item->childCount(); i++) {
-        items << item->child(i);
-        items << tree(item->child(i));
-    }
-    return items;
 }
 
 //!
@@ -69,12 +95,12 @@ QList<QTreeWidgetItem*> tree(QTreeWidgetItem* item)
 
 class InspectorListDelegate: public QStyledItemDelegate
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        InspectorListDelegate(QWidget* parent);
-        void paint(QPainter* painter, const QStyleOptionViewItem &option,
-          const QModelIndex &index) const override;
+public:
+    InspectorListDelegate(QWidget* parent);
+    void paint(QPainter* painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
 };
 
 InspectorListDelegate::InspectorListDelegate(QWidget* parent)
@@ -83,7 +109,7 @@ InspectorListDelegate::InspectorListDelegate(QWidget* parent)
 }
 
 void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const
+                                  const QModelIndex &index) const
 {
     const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
@@ -91,7 +117,7 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
 
     auto o = option;
     if (model->data(index, Qt::UserRole).toBool() &&
-      option.state & QStyle::State_Selected) {
+            option.state & QStyle::State_Selected) {
         QPalette p(o.palette);
         p.setColor(QPalette::HighlightedText, "#D02929");
         o.palette = p;
@@ -139,6 +165,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setSelectionBehavior(QTreeWidget::SelectRows);
+    setSelectionMode(QTreeWidget::ExtendedSelection);
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setDragEnabled(false);
@@ -153,40 +180,49 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     header()->resizeSection(0, 250);
     header()->resizeSection(1, 50);
     setItemDelegate(new InspectorListDelegate(this));
-//    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     header()->setFixedHeight(23);
-    setStyleSheet("QTreeView { border: 1px solid #4A7C42; }"
-                               "QHeaderView::section {"
-                               "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #4A7C42;"
-                               "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #62A558, stop:1 #599750);}");
+    setStyleSheet("QTreeView {"
+                  "  border: 1px solid #4A7C42;"
+                  "} QHeaderView::section {"
+                  "  padding-left: 5px;"
+                  "  color: white;"
+                  "  border: none;"
+                  "  border-bottom: 1px solid #4A7C42;"
+                  "  background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+                  "                              stop:0 #62A558, stop:1 #599750);"
+                  "}");
 
-    QFont f; f.setWeight(QFont::Medium);
+    QFont f;
+    f.setWeight(QFont::Medium);
     header()->setFont(f);
 
-    connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
-      SLOT(onItemClick(QTreeWidgetItem*,int)));
-    connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-      SLOT(onItemDoubleClick(QTreeWidgetItem*,int)));
+    //    _layout->setSpacing(2);
+    //    _layout->setContentsMargins(3, 3, 3, 3);
+    //    _layout->addWidget(_treeWidget);
 
-//    _layout->setSpacing(2);
-//    _layout->setContentsMargins(3, 3, 3, 3);
-//    _layout->addWidget(_treeWidget);
+    connect(this, &InspectorPane::itemClicked, this, &InspectorPane::onItemClick);
+    connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
+    connect(m_designerScene, &DesignerScene::selectionChanged, this, &InspectorPane::onSelectionChange);
+    connect(m_designerScene, &DesignerScene::currentFormChanged, this, &InspectorPane::onCurrentFormChange);
+    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
+            this, &InspectorPane::onControlRemove);
+    connect(ControlExposingManager::instance(), &ControlExposingManager::controlExposed,
+            this, &InspectorPane::onControlAdd);
+    connect(ControlRemovingManager::instance(), &ControlRemovingManager::formAboutToBeRemoved,
+            this, &InspectorPane::onFormRemove);
 
-    /* Prepare Properties Widget */
-    connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(refresh()));
-    connect(m_designerScene, SIGNAL(currentFormChanged(Control*)), SLOT(refresh()));
-//    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
-//    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
-    connect(m_designerScene, &DesignerScene::controlAboutToBeRemoved, this, &InspectorPane::onControlRemove);
-//    connect(m_designerScene, &DesignerScene::controlRemove);
+    // TODO: Handle reparent operations
+    // TODO: Handle id change of a control
+    //    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
+    //    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
 }
 
-void InspectorPane::reset()
+void InspectorPane::sweep()
 {
-    QTreeWidget::reset();
-//    clear();
-//    _blockRefresh = false;
+    m_formStates.clear();
+    _blockRefresh = false;
+    clear();
 }
 
 bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
@@ -199,19 +235,19 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
                 const auto tli = topLevelItem(0);
                 const auto& tlir = visualItemRect(tli);
                 const qreal ic = (
-                    viewport()->height() +
-                    qAbs(tlir.y())
-                ) / (qreal) tlir.height();
+                            viewport()->height() +
+                            qAbs(tlir.y())
+                            ) / (qreal) tlir.height();
 
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
                         painter.fillRect(
-                            0,
-                            tlir.y() + i * tlir.height(),
-                            viewport()->width(),
-                            tlir.height(),
-                            QColor("#ecfbea")
-                        );
+                                    0,
+                                    tlir.y() + i * tlir.height(),
+                                    viewport()->width(),
+                                    tlir.height(),
+                                    QColor("#ecfbea")
+                                    );
                     }
                 }
             } else {
@@ -221,14 +257,14 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
                         painter.fillRect(
-                            0, i * hg,
-                            viewport()->width(),
-                            hg, QColor("#ecfbea")
-                        );
+                                    0, i * hg,
+                                    viewport()->width(),
+                                    hg, QColor("#ecfbea")
+                                    );
                     } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
                         painter.setPen(QColor("#a6afa5"));
                         painter.drawText(0, i * hg, viewport()->width(),
-                          hg, Qt::AlignCenter, "No items to show");
+                                         hg, Qt::AlignCenter, "No items to show");
                     }
                 }
             }
@@ -240,92 +276,106 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
     }
 }
 
-void InspectorPane::onControlAdd()
-{
-
-}
-
-void InspectorPane::onControlRemove()
-{
-
-}
-
 void InspectorPane::onSelectionChange()
+{    
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem))
+                childItem->setSelected(false);
+    }
+
+    for (const Control* selectedControl : m_designerScene->selectedControls()) {
+        for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+            for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+                if (selectedControl->id() == childItem->text(0))
+                    childItem->setSelected(true);
+            }
+        }
+    }
+}
+
+void InspectorPane::onCurrentFormChange(Form* currentForm)
+{
+    if (!currentForm)
+        return;
+
+    if (_blockRefresh)
+        return;
+
+    /* Save outgoing form's state */
+    if (m_currentForm) {
+        FormState state;
+        state.verticalScrollBarPosition = verticalScrollBar()->sliderPosition();
+        state.horizontalScrollBarPosition = horizontalScrollBar()->sliderPosition();
+
+        for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+            for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+                if (childItem->isSelected())
+                    state.selectedIds << childItem->text(0);
+
+                if (!childItem->isExpanded())
+                    state.collapsedIds << childItem->text(0);
+            }
+        }
+
+        m_formStates[m_currentForm] = state;
+    }
+
+    /* Clear things */
+    m_currentForm = currentForm;
+    clear();
+
+    /* Create items for incoming form */
+    auto formItem = new QTreeWidgetItem;
+    formItem->setText(0, currentForm->id());
+    formItem->setText(1, "Yes");
+    formItem->setData(0, Qt::UserRole, currentForm->hasErrors());
+    formItem->setData(1, Qt::UserRole, currentForm->hasErrors());
+    formItem->setIcon(0, SaveUtils::isMain(currentForm->dir()) ? QIcon(":/images/mform.png") :
+                                                                 QIcon(":/images/form.png"));
+
+    if (currentForm->hasErrors()) {
+        formItem->setTextColor(0, "#D02929");
+        formItem->setTextColor(1, "#D02929");
+    }
+
+    fillItem(formItem, currentForm->childControls(false));
+    addTopLevelItem(formItem);
+    expandAll();
+
+    /* Restore incoming form's state */
+    const FormState& state = m_formStates.value(currentForm);
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            for (const QString& id : state.selectedIds) {
+                if (id == childItem->text(0))
+                    childItem->setSelected(true);
+            }
+
+            for (const QString& id : state.collapsedIds) {
+                if (id == childItem->text(0))
+                    childItem->setExpanded(false);
+            }
+        }
+    }
+
+    verticalScrollBar()->setSliderPosition(state.verticalScrollBarPosition);
+    horizontalScrollBar()->setSliderPosition(state.horizontalScrollBarPosition);
+}
+
+void InspectorPane::onFormRemove(Form* form)
+{
+    m_formStates.remove(form);
+}
+
+void InspectorPane::onControlAdd(Control* control)
 {
 
 }
 
-void InspectorPane::onCurrentFormChange()
+void InspectorPane::onControlRemove(Control* control)
 {
 
 }
-
-//void InspectorPane::clear()
-//{
-//    for (int i = 0; i < topLevelItemCount(); ++i)
-//        qDeleteAll(topLevelItem(i)->takeChildren());
-
-//    clear();
-//}
-
-//void InspectorPane::refresh()
-//{
-//    if (_blockRefresh)
-//        return;
-
-//    int vsp = verticalScrollBar()->sliderPosition();
-//    int hsp = horizontalScrollBar()->sliderPosition();
-
-////    clear();
-
-//    auto scs = m_designerScene->selectedControls();
-//    auto mc = m_designerScene->currentForm();
-
-//    if (!mc)
-//        return;
-
-//    QTreeWidgetItem* item = new QTreeWidgetItem;
-//    item->setText(0, mc->id());
-//    item->setText(1, "Yes");
-//    item->setData(0, Qt::UserRole, mc->hasErrors());
-//    item->setData(1, Qt::UserRole, mc->hasErrors());
-
-//    if (mc->hasErrors()) {
-//        item->setTextColor(0, "#D02929");
-//        item->setTextColor(1, "#D02929");
-//    }
-
-//    if (mc->form()) {
-//        if (SaveUtils::isMain(mc->dir()))
-//            item->setIcon(0, QIcon(":/images/mform.png"));
-//        else
-//            item->setIcon(0, QIcon(":/images/form.png"));
-//    } else {
-//        QIcon icon;
-//        icon.addFile(mc->dir() + separator() + DIR_THIS +
-//                     separator() + "icon.png");
-//        if (icon.isNull())
-//            icon.addFile(":/images/item.png");
-//        item->setIcon(0, icon);
-//    }
-
-//    fillItem(item, mc->childControls(false));
-//    addTopLevelItem(item);
-
-//    auto items = tree(item);
-//    items << item;
-//    for (auto sc : scs) {
-//        for (auto i : items) {
-//            if (i->text(0) == sc->id()) {
-//                i->setSelected(true);
-//            }
-//        }
-//    }
-
-//    expandAll();
-//    verticalScrollBar()->setSliderPosition(vsp);
-//    horizontalScrollBar()->setSliderPosition(hsp);
-//}
 
 void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)
 {
@@ -351,26 +401,27 @@ void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)
 
 void InspectorPane::onItemClick(QTreeWidgetItem* item, int)
 {
-    const auto id = item->text(0);
-    const auto mc = m_designerScene->currentForm();
-    QList<Control*> cl;
-    cl << mc;
-    cl << mc->childControls();
+//    const QString& id = item->text(0);
+//    const Form* currentForm = m_designerScene->currentForm();
 
-    Control* c = nullptr;
-    for (auto control : cl) {
-        if (control->id() == id) {
-            c = control;
-            break;
-        }
-    }
+//    QList<Control*> childControls;
+//    childControls.append(currentForm);
+//    childControls.append(currentForm->childControls());
 
-    if (c == nullptr)
-        return;
+//    Control* c = nullptr;
+//    for (auto control : cl) {
+//        if (control->id() == id) {
+//            c = control;
+//            break;
+//        }
+//    }
 
-    _blockRefresh = true;
-    emit controlClicked(c);
-    _blockRefresh = false;
+//    if (c == nullptr)
+//        return;
+
+//    _blockRefresh = true;
+//    emit controlClicked(c);
+//    _blockRefresh = false;
 }
 
 QSize InspectorPane::sizeHint() const

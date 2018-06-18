@@ -143,7 +143,7 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
     m_menu->exec(event->globalPos());
 }
 
-void DesignerView::reset()
+void DesignerView::sweep()
 {
     update();
 }

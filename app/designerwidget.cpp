@@ -203,10 +203,10 @@ void DesignerWidget::onClearButtonClick()
     }
 }
 
-void DesignerWidget::reset()
+void DesignerWidget::sweep()
 {
-    m_designerScene->reset();
-    m_designerView->reset();
+    m_designerScene->sweep();
+    m_designerView->sweep();
     m_outlineButton->setChecked(m_designerScene->showOutlines());
     m_snappingButton->setChecked(m_designerScene->snapping());
     onZoomLevelChange("100 %");

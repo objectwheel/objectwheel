@@ -46,7 +46,7 @@ public:
     explicit IssuesBox(OutputPane* outputPane);
 
 public slots:
-    void reset();
+    void sweep();
     void refresh();
 
 private slots:

@@ -26,7 +26,7 @@ public:
     explicit BuildsWidget(QWidget *parent = nullptr);
 
 public slots:
-    void reset();
+    void sweep();
 
 protected:
     QSize sizeHint() const override;

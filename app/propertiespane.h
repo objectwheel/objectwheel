@@ -54,7 +54,7 @@ public:
     void saveChanges(const NodeType& type, const QString& parserValue, const QVariant& value);
 
 public slots:
-    void reset();
+    void sweep();
     void refreshList();
 
 protected:

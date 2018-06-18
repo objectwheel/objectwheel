@@ -149,7 +149,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     connect(m_registrationWidget, &RegistrationWidget::done, [=]
     {
         m_view->show(Verification, View::RightToLeft);
-        m_robotWidget->reset();
+        m_robotWidget->sweep();
     });
 
     /**** VerificationWidget settings ****/

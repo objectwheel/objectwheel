@@ -59,7 +59,7 @@ public:
     QmlCodeEditor* editor() const;
 
 public slots:
-    void reset();
+    void sweep();
     void saveAll();
     void raiseContainer();
     void refreshErrors();

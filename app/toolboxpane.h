@@ -18,7 +18,7 @@ public:
     ToolboxTree* toolboxTree();
 
 public slots:
-    void reset();
+    void sweep();
 
 protected:
     QSize sizeHint() const override;

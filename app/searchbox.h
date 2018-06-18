@@ -10,7 +10,7 @@ public:
     explicit SearchBox(QWidget *parent = nullptr);
 
 public slots:
-    void reset();
+    void sweep();
 };
 
 #endif // SEARCHBOX_H

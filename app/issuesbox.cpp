@@ -137,7 +137,7 @@ void IssuesBox::handleDoubleClick(QListWidgetItem* item)
     emit entryDoubleClicked(c);
 }
 
-void IssuesBox::reset()
+void IssuesBox::sweep()
 {
     clear();
 }

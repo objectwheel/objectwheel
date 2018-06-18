@@ -23,7 +23,7 @@ public:
     CentralWidget* centralWidget() const;
 
 public slots:
-    void reset();
+    void sweep();
 
 private slots:
     void hideDocks();

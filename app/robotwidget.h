@@ -21,7 +21,7 @@ public:
 public slots:
     void load();
     void reload();
-    void reset();
+    void sweep();
     void captchaExpired();
     void updateResponse(const QString& response);
 

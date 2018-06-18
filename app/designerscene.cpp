@@ -66,7 +66,7 @@ void DesignerScene::removeForm(Form* form)
 void DesignerScene::removeControl(Control* control)
 {
     removeItem(control);
-    control->deleteLater();
+    delete control;
 }
 
 Form* DesignerScene::currentForm()
@@ -725,7 +725,7 @@ QVector<QLineF> DesignerScene::guideLines() const
     return lines;
 }
 
-void DesignerScene::reset()
+void DesignerScene::sweep()
 {
     clearSelection();
     clear();

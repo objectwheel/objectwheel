@@ -136,7 +136,7 @@ void HelpWidget::onHomeButtonClick()
     m_helpViewer->home();
 }
 
-void HelpWidget::reset()
+void HelpWidget::sweep()
 {
     m_helpViewer->stop();
     m_helpViewer->page()->history()->clear();

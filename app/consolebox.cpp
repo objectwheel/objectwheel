@@ -139,7 +139,7 @@ void ConsoleBox::fade()
     cursor.mergeCharFormat(format);
 }
 
-void ConsoleBox::reset()
+void ConsoleBox::sweep()
 {
     m_textBrowser->clear();
 }

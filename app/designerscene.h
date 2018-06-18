@@ -28,7 +28,7 @@ public:
     QVector<QLineF> guideLines() const;
 
 public slots:
-    void reset();
+    void sweep();
 
 private:
     void addForm(Form* form);
@@ -42,7 +42,7 @@ private:
     void drawForeground(QPainter* painter, const QRectF& rect);
 
 signals:
-    void currentFormChanged(Control* currentForm);
+    void currentFormChanged(Form* currentForm);
 
 private:
     bool m_snapping;

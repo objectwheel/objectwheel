@@ -15,7 +15,7 @@ public:
     QString rootPath() const;
 
 public slots:
-    void reset();
+    void sweep();
 
 signals:
     void fileOpened(const QString& filePath);

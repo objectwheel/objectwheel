@@ -6,7 +6,7 @@ SearchBox::SearchBox(QWidget *parent)
 
 }
 
-void SearchBox::reset()
+void SearchBox::sweep()
 {
     // TODO
 }

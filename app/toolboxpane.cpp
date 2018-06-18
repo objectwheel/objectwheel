@@ -46,9 +46,9 @@ ToolboxTree* ToolboxPane::toolboxTree()
     return _toolboxTree;
 }
 
-void ToolboxPane::reset()
+void ToolboxPane::sweep()
 {
-    ToolManager::reset();
+    ToolManager::sweep();
     _searchEdit->clear();
 }
 

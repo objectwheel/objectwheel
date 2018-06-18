@@ -274,7 +274,7 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
     }
 }
 
-void PageSwitcherPane::reset()
+void PageSwitcherPane::sweep()
 {
     setCurrentPage(Page_Designer);
 }

@@ -81,7 +81,7 @@ InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
     s_menuManager = new MenuManager(this);
 
     connect(ProjectManager::instance(), &ProjectManager::started,
-            WindowManager::mainWindow(), &MainWindow::reset);
+            WindowManager::mainWindow(), &MainWindow::sweep);
     connect(ProjectManager::instance(), &ProjectManager::started,
             InitializationManager::instance(), &InitializationManager::onProjectStart);
 

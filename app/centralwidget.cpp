@@ -8,6 +8,7 @@
 #include <issuesbox.h>
 #include <designerscene.h>
 #include <controlpreviewingmanager.h>
+#include <controlremovingmanager.h>
 #include <delayer.h>
 
 #include <QSplitter>
@@ -44,9 +45,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_helpWidget);
 
     connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
-            m_designerWidget, SLOT(onControlDoubleClick(Control*)));
-    connect(m_designerWidget->designerScene(), SIGNAL(controlAboutToRemove(Control*)),
-            m_qmlCodeEditorWidget, SLOT(handleControlRemoval(Control*)));
+            m_designerWidget, SLOT(onControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
+    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
+            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::handleControlRemoval);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
             ControlPreviewingManager::restart);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
@@ -65,16 +66,16 @@ OutputPane* CentralWidget::outputPane() const
     return m_outputPane;
 }
 
-void CentralWidget::reset()
+void CentralWidget::sweep()
 {
     setCurrentPage(Page_Designer);
 
-    m_outputPane->reset();
-    m_qmlCodeEditorWidget->reset();
-    m_designerWidget->reset();
-    m_projectOptionsWidget->reset();
-    m_buildsWidget->reset();
-    m_helpWidget->reset();
+    m_outputPane->sweep();
+    m_qmlCodeEditorWidget->sweep();
+    m_designerWidget->sweep();
+    m_projectOptionsWidget->sweep();
+    m_buildsWidget->sweep();
+    m_helpWidget->sweep();
 }
 
 void CentralWidget::setCurrentPage(const Pages& page)

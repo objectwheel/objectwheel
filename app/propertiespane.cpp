@@ -821,7 +821,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
 }
 
-void PropertiesPane::reset()
+void PropertiesPane::sweep()
 {
     clearList();
     _searchEdit->clear();

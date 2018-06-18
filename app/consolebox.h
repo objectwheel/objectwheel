@@ -22,7 +22,7 @@ public:
 
 public slots:
     void fade();
-    void reset();
+    void sweep();
     void scrollToEnd();
 
 private slots:

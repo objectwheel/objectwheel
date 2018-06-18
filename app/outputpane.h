@@ -37,7 +37,7 @@ public:
     bool isCollapsed() const;
 
 public slots:
-    void reset();
+    void sweep();
     void expand();
     void collapse();
     void updateLastHeight();
