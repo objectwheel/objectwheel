@@ -332,12 +332,12 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         control != this && !control->dragIn()) {
         control->setDragIn(true);
 
-        for (auto c : scene()->mainForm()->childControls())
+        for (auto c : scene()->currentForm()->childControls())
             if (c != control)
                 c->setDragIn(false);
 
-        if (scene()->mainForm() != control)
-            scene()->mainForm()->setDragIn(false);
+        if (scene()->currentForm() != control)
+            scene()->currentForm()->setDragIn(false);
     }
 
     if (event->button() == Qt::MidButton)
@@ -390,9 +390,9 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsWidget::mouseReleaseEvent(event);
 
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
 
-    for (auto control : scene()->mainForm()->childControls()) {
+    for (auto control : scene()->currentForm()->childControls()) {
         if (control->dragIn() && dragging() && parentControl() != control) {
             for (auto sc : selectedControls) {
                 if (sc->dragging()) {
@@ -405,13 +405,13 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         control->setDragIn(false);
     }
 
-    if (scene()->mainForm()->dragIn() && dragging() &&
-        parentControl() != scene()->mainForm()) {
-        scene()->mainForm()->dropControl(this);
+    if (scene()->currentForm()->dragIn() && dragging() &&
+        parentControl() != scene()->currentForm()) {
+        scene()->currentForm()->dropControl(this);
         scene()->clearSelection();
-        scene()->mainForm()->setSelected(true);
+        scene()->currentForm()->setSelected(true);
     }
-    scene()->mainForm()->setDragIn(false);
+    scene()->currentForm()->setDragIn(false);
 
     event->accept();
 }

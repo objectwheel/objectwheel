@@ -17,6 +17,7 @@
 #include <menumanager.h>
 #include <centralwidget.h>
 #include <designerwidget.h>
+#include <controlremovingmanager.h>
 
 #include <QMessageBox>
 
@@ -30,15 +31,16 @@ using namespace Core;
 InitializationManager* InitializationManager::s_instance = nullptr;
 Authenticator* InitializationManager::s_authenticator = nullptr;
 UserManager* InitializationManager::s_userManager = nullptr;
-ControlPreviewingManager* InitializationManager::s_previewerManager = nullptr;
+ControlPreviewingManager* InitializationManager::s_controlPreviewingManager = nullptr;
 SaveManager* InitializationManager::s_saveManager = nullptr;
 ProjectManager* InitializationManager::s_projectManager = nullptr;
-ControlExposingManager* InitializationManager::s_exposerManager = nullptr;
-RunManager* InitializationManager::s_interpreterManager = nullptr;
-ControlMonitoringManager* InitializationManager::s_controlWatcher = nullptr;
-ControlTransactionManager* InitializationManager::s_saveTransaction = nullptr;
+ControlExposingManager* InitializationManager::s_controlExposingManager = nullptr;
+ControlRemovingManager* InitializationManager::s_controlRemovingManager = nullptr;
+RunManager* InitializationManager::s_runManager = nullptr;
+ControlMonitoringManager* InitializationManager::s_controlMonitoringManager = nullptr;
+ControlTransactionManager* InitializationManager::s_controlTransactionManager = nullptr;
 HelpManager* InitializationManager::s_helpManager = nullptr;
-DocumentManager* InitializationManager::s_editorManager = nullptr;
+DocumentManager* InitializationManager::s_documentManager = nullptr;
 WindowManager* InitializationManager::s_windowManager = nullptr;
 MenuManager* InitializationManager::s_menuManager = nullptr;
 
@@ -47,20 +49,21 @@ InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
     s_instance = this;
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);
-    s_previewerManager = new ControlPreviewingManager(this);
+    s_controlPreviewingManager = new ControlPreviewingManager(this);
     s_saveManager = new SaveManager(this);
     s_projectManager = new ProjectManager(this);
-    s_exposerManager = new ControlExposingManager;
-    s_interpreterManager = new RunManager(this);
-    s_controlWatcher = new ControlMonitoringManager(this);
-    s_saveTransaction = new ControlTransactionManager(this);
+    s_controlExposingManager = new ControlExposingManager(this);
+    s_controlRemovingManager = new ControlRemovingManager(this);
+    s_runManager = new RunManager(this);
+    s_controlMonitoringManager = new ControlMonitoringManager(this);
+    s_controlTransactionManager = new ControlTransactionManager(this);
     s_helpManager = new HelpManager(this);
 
     HelpManager::setupHelpManager();
     Utils::setCreatorTheme(Internal::ThemeEntry::createTheme(Constants::DEFAULT_THEME));
     connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
 
-    s_editorManager = new DocumentManager(this);
+    s_documentManager = new DocumentManager(this);
 
     connect(UserManager::instance(), &UserManager::aboutToStop,
             this, &InitializationManager::onSessionStop);
@@ -68,11 +71,9 @@ InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
     if (!ControlPreviewingManager::init()) {
-        QMessageBox::critical(
-                    nullptr,
-                    tr("Error"),
-                    tr("Unable to start Objectwheel Previewing Service")
-                    );
+        QMessageBox::critical(nullptr,
+                              tr("Error"),
+                              tr("Unable to start Objectwheel Previewing Service"));
     }
 
     //! GUI initialization starts here
@@ -86,11 +87,12 @@ InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
 
     ControlExposingManager::init(
                 WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
+    ControlRemovingManager::init(
+                WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
 }
 
 InitializationManager::~InitializationManager()
 {
-    delete s_exposerManager;
     s_instance = nullptr;
 }
 

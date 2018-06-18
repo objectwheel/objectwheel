@@ -12,6 +12,9 @@ class SaveManager final : public QObject
     Q_DISABLE_COPY(SaveManager)
 
     friend class InitializationManager;
+    friend class ControlRemovingManager; // For removeControl()
+    friend class ControlExposingManager; // For addControl()
+    friend class ControlTransactionManager; // For moveControl()
 
 public:
     static SaveManager* instance();
@@ -29,16 +32,9 @@ public:
     static void refactorId(Control* control, const QString& suid, const QString& topPath = QString());
     static void fixIdConflicts();
 
-    static bool addForm(Form* form);
     static bool isInOwdb(const QString& path);
     static bool isForm(const QString& rootPath);
-    static bool moveControl(Control* control, const Control* parentControl);
     static bool exists(const Control* control, const QString& suid, const QString& topPath = QString());
-    static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
-
-    static void removeForm(const Form* form);
-    static void removeControl(const Control* control);
-    static void removeChildControlsOnly(const Control* control);
     static void removeProperty(const Control* control, const QString& property);
     static void setProperty(Control* control, const QString& property, QString value, const QString& topPath = QString());
 
@@ -48,6 +44,13 @@ public:
     static QString findById(const QString& suid, const QString& id, const QString& rootPath);
     static QString pathOfId(const QString& suid, const QString& id, const QString& rootPath = QString());
     static QStringList formScopePaths();
+
+private:
+    static bool addForm(Form* form);
+    static bool moveControl(Control* control, const Control* parentControl);
+    static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
+    static void removeForm(const Form* form);
+    static void removeControl(const Control* control);
 
 signals:
     void databaseChanged();

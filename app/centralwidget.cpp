@@ -43,9 +43,12 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
 
-    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)), m_designerWidget, SLOT(onControlDoubleClick(Control*)));
-    connect(m_designerWidget->designerScene(), SIGNAL(aboutToRemove(Control*)), m_qmlCodeEditorWidget, SLOT(handleControlRemoval(Control*)));
-    connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, ControlPreviewingManager::restart);
+    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
+            m_designerWidget, SLOT(onControlDoubleClick(Control*)));
+    connect(m_designerWidget->designerScene(), SIGNAL(controlAboutToRemove(Control*)),
+            m_qmlCodeEditorWidget, SLOT(handleControlRemoval(Control*)));
+    connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
+            ControlPreviewingManager::restart);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
         Delayer::delay(3000);
         m_designerWidget->refresh();

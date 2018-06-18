@@ -174,14 +174,14 @@ void DesignerWidget::onZoomLevelChange(const QString& text)
 
 void DesignerWidget::onRefreshButtonClick()
 {
-    m_designerScene->mainForm()->refresh();
-    for (auto control : m_designerScene->mainForm()->childControls())
+    m_designerScene->currentForm()->refresh();
+    for (auto control : m_designerScene->currentForm()->childControls())
         control->refresh();
 }
 
 void DesignerWidget::onClearButtonClick()
 {
-    if (!m_designerScene->mainForm())
+    if (!m_designerScene->currentForm())
         return;
 
     QMessageBox msgBox;
@@ -192,9 +192,9 @@ void DesignerWidget::onClearButtonClick()
     msgBox.setIcon(QMessageBox::Question);
     const int ret = msgBox.exec();
     switch (ret) {
-        case QMessageBox::Yes: {
-            m_designerScene->removeChildControlsOnly(m_designerScene->mainForm());
-            SaveManager::removeChildControlsOnly(m_designerScene->mainForm());
+        case QMessageBox::Yes: { // FIXME
+//            m_designerScene->removeChildControlsOnly(m_designerScene->currentForm());
+//            SaveManager::removeChildControlsOnly(m_designerScene->currentForm());
             break;
         } default: {
             // Do nothing
@@ -233,7 +233,7 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
-    auto newControl = ControlExposingManager::exposeControl(dname(dname(url)), pos, "NULL", control, m_designerScene->mainForm()->dir(), m_designerScene->mainForm()->uid());
+    auto newControl = ControlExposingManager::exposeControl(dname(dname(url)), pos, "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());
     newControl->setSelected(true);
 }
 

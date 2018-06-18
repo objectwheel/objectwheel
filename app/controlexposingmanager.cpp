@@ -8,6 +8,24 @@
 #include <controlpreviewingmanager.h>
 
 DesignerScene* ControlExposingManager::s_designerScene = nullptr;
+ControlExposingManager* ControlExposingManager::s_instance = nullptr;
+
+// FIXME: exposeControl and exposeForm should use DesignerScene to deal with
+// GUI side control adding operations
+ControlExposingManager::ControlExposingManager(QObject* parent) : QObject(parent)
+{
+    s_instance = this;
+}
+
+ControlExposingManager::~ControlExposingManager()
+{
+    s_instance = nullptr;
+}
+
+ControlExposingManager* ControlExposingManager::instance()
+{
+    return s_instance;
+}
 
 void ControlExposingManager::init(DesignerScene* designerScene)
 {
@@ -69,15 +87,19 @@ Form* ControlExposingManager::exposeForm(const QString& rootPath)
         ControlPreviewingManager::setDisabled(false);
         control->refresh();
 
+        emit instance()->controlExposed(control);
+
         pmap[child] = control;
     }
+
+    emit instance()->formExposed(form);
 
     return form;
 }
 
 Control* ControlExposingManager::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
-                                       Control* parentControl, QString destinationPath,
-                                       QString destinationSuid)
+                                               Control* parentControl, QString destinationPath,
+                                               QString destinationSuid)
 {
     ControlPreviewingManager::setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
@@ -108,8 +130,13 @@ Control* ControlExposingManager::exposeControl(const QString& rootPath, const QP
         ControlPreviewingManager::setDisabled(false);
         ccontrol->refresh();
 
+        emit instance()->controlExposed(control);
+
         pmap[child] = ccontrol;
     }
 
+    emit instance()->controlExposed(control);
+
     return control;
 }
+

@@ -35,9 +35,6 @@ private slots:
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
 
-signals:
-    void currentFormChanged();
-
 private:
     DesignerScene* m_designerScene;
     QVBoxLayout* _layout,* _innerLayout;

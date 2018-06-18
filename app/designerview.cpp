@@ -2,8 +2,9 @@
 #include <designerscene.h>
 #include <css.h>
 #include <savemanager.h>
-#include <controlexposingmanager.h>
 #include <saveutils.h>
+#include <controlexposingmanager.h>
+#include <controlremovingmanager.h>
 #include <controlpreviewingmanager.h>
 
 #include <QMenu>
@@ -108,9 +109,9 @@ void DesignerView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
 
-    auto mainForm = scene()->mainForm();
-    if (mainForm)
-        mainForm->centralize();
+    auto currentForm = scene()->currentForm();
+    if (currentForm)
+        currentForm->centralize();
 }
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)
@@ -118,7 +119,7 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
     QGraphicsView::contextMenuEvent(event);
 
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
 
     if (selectedControls.isEmpty()) {
         m_sendBackAct->setDisabled(true);
@@ -165,8 +166,8 @@ void DesignerView::onCutAction()
     auto mimeData = new QMimeData;
     auto clipboard = QGuiApplication::clipboard();
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
-    mimeData->setData("objectwheel/uid", scene()->mainForm()->uid().toUtf8());
+    selectedControls.removeOne(scene()->currentForm());
+    mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
     mimeData->setData("objectwheel/cut", "1");
 
     for (auto control : selectedControls)
@@ -192,8 +193,8 @@ void DesignerView::onCopyAction()
     auto mimeData = new QMimeData;
     auto clipboard = QGuiApplication::clipboard();
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
-    mimeData->setData("objectwheel/uid", scene()->mainForm()->uid().toUtf8());
+    selectedControls.removeOne(scene()->currentForm());
+    mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
 
     for (auto control : selectedControls)
         for (auto ctrl : selectedControls)
@@ -212,7 +213,7 @@ void DesignerView::onPasteAction()
 {
     auto clipboard = QGuiApplication::clipboard();
     auto mimeData = clipboard->mimeData();
-    auto mainForm = scene()->mainForm();
+    auto currentForm = scene()->currentForm();
     QString sourceSuid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
         mimeData->text() != TOOL_KEY || sourceSuid.isEmpty())
@@ -224,9 +225,9 @@ void DesignerView::onPasteAction()
             url.toLocalFile(),
             QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
             sourceSuid,
-            mainForm,
-            mainForm->dir(),
-            mainForm->uid()
+            currentForm,
+            currentForm->dir(),
+            currentForm->uid()
         );
 
         controls << control;
@@ -246,14 +247,8 @@ void DesignerView::onPasteAction()
                     cutControls << (Control*)buff;
                 }
 
-                for (auto control : cutControls) {
-                    ControlPreviewingManager::removeCache(control->uid());
-                    control->parentControl()->refresh();
-                    control->setRefreshingDisabled(true);
-                    control->blockSignals(true);
-                    scene()->removeControl(control);
-                    SaveManager::removeControl(control);
-                }
+                for (auto control : cutControls)
+                    ControlRemovingManager::removeControl(control);
             }
         }
 
@@ -265,28 +260,22 @@ void DesignerView::onPasteAction()
 void DesignerView::onDeleteAction()
 { //FIXME: Do not delete if docs are open within QML Editor
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
-    for (auto control : selectedControls) {
-        ControlPreviewingManager::removeCache(control->uid());
-        control->parentControl()->refresh();
-        control->setRefreshingDisabled(true);
-        control->blockSignals(true);
-        scene()->removeControl(control);
-        SaveManager::removeControl(control);
-    }
+    selectedControls.removeOne(scene()->currentForm());
+    for (auto control : selectedControls)
+        ControlRemovingManager::removeControl(control);
 }
 
 void DesignerView::onSelectAllAction()
 {
-    auto mainForm = scene()->mainForm();
-    for (auto control : mainForm->childControls())
+    auto currentForm = scene()->currentForm();
+    for (auto control : currentForm->childControls())
         control->setSelected(true);
 }
 
 void DesignerView::onMoveUpAction()
 {
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
         control->moveBy(0, - 1);
 }
@@ -294,7 +283,7 @@ void DesignerView::onMoveUpAction()
 void DesignerView::onMoveDownAction()
 {
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
         control->moveBy(0, 1);
 }
@@ -302,7 +291,7 @@ void DesignerView::onMoveDownAction()
 void DesignerView::onMoveRightAction()
 {
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
         control->moveBy(1, 0);
 }
@@ -310,7 +299,7 @@ void DesignerView::onMoveRightAction()
 void DesignerView::onMoveLeftAction()
 {
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
         control->moveBy(- 1, 0);
 }
@@ -318,15 +307,15 @@ void DesignerView::onMoveLeftAction()
 void DesignerView::onSendBackAction()
 {
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        control->setZValue(scene()->mainForm()->lowerZValue() - 1);
+        control->setZValue(scene()->currentForm()->lowerZValue() - 1);
 }
 
 void DesignerView::onBringFrontAction()
 {
     auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->mainForm());
+    selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        control->setZValue(scene()->mainForm()->higherZValue() + 1);
+        control->setZValue(scene()->currentForm()->higherZValue() + 1);
 }

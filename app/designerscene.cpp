@@ -31,17 +31,11 @@ namespace {
 DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
   , m_snapping(true)
   , m_showOutlines(false)
-  , m_mainForm(nullptr)
+  , m_currentForm(nullptr)
 {
     connect(this, &DesignerScene::changed, [=] {
-        if (m_mainForm) {
-            setSceneRect(m_mainForm->frameGeometry().adjusted(
-               -8,
-               -8,
-                8,
-                8
-            ));
-        }
+        if (m_currentForm)
+            setSceneRect(m_currentForm->frameGeometry().adjusted(-8, -8, 8, 8));
     });
 }
 
@@ -55,57 +49,29 @@ void DesignerScene::addForm(Form* form)
 
     m_forms.append(form);
 
-    if (!m_mainForm)
-        setMainForm(form);
+    if (!m_currentForm)
+        setCurrentForm(form);
 }
 
 void DesignerScene::removeForm(Form* form)
 {
-    if (m_forms.contains(form) == false ||
-        form->main())
-        return;
+    removeControl(form);
 
-    for (auto ctrl : form->childControls())
-        emit aboutToRemove(ctrl);
-    emit aboutToRemove(form);
+    m_forms.removeAll(form);
 
-    removeItem(form);
-    m_forms.removeOne(form);
-
-    if (m_mainForm == form)
-        setMainForm(m_forms[0]);
-
-    form->deleteLater();
-    emit controlRemoved(form);
+    if (m_currentForm == form)
+        setCurrentForm(m_forms.first());
 }
 
 void DesignerScene::removeControl(Control* control)
 {
-    if (control == mainForm())
-        return;
-    for (auto ctrl : control->childControls())
-        emit aboutToRemove(ctrl);
-    emit aboutToRemove(control);
     removeItem(control);
     control->deleteLater();
-    emit controlRemoved(control);
 }
 
-void DesignerScene::removeChildControlsOnly(Control* parent)
+Form* DesignerScene::currentForm()
 {
-    for (auto control : parent->childControls())
-        emit aboutToRemove(control);
-
-    for (auto control : parent->childControls())
-        control->deleteLater();
-
-    for (auto control : parent->childControls(false))
-        removeItem(control);
-}
-
-Form* DesignerScene::mainForm()
-{
-    return m_mainForm.data();
+    return m_currentForm.data();
 }
 
 bool DesignerScene::snapping() const
@@ -126,8 +92,8 @@ bool DesignerScene::showOutlines() const
 void DesignerScene::setShowOutlines(bool value)
 {
     m_showOutlines = value;
-    if (m_mainForm)
-        m_mainForm->update();
+    if (m_currentForm)
+        m_currentForm->update();
 }
 
 QList<Control*> DesignerScene::selectedControls() const
@@ -143,11 +109,11 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mousePressEvent(event);
 
-    if (m_mainForm == nullptr)
+    if (m_currentForm == nullptr)
         return;
 
     auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_mainForm);
+    selectedControls.removeOne(m_currentForm);
 
     //TODO: Raise selected controls
 
@@ -157,7 +123,7 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
     itemMoving = false;
 
-    for (auto control : m_mainForm->childControls())
+    for (auto control : m_currentForm->childControls())
         control->setDragging(false);
 
     update();
@@ -167,13 +133,13 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
-    if (m_mainForm == nullptr)
+    if (m_currentForm == nullptr)
         return;
 
     auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_mainForm);
+    selectedControls.removeOne(m_currentForm);
 
-    if (m_mainForm && !selectedControls.isEmpty() &&
+    if (m_currentForm && !selectedControls.isEmpty() &&
         itemPressed && !Resizer::resizing()) {
         itemMoving = true;
         if (m_snapping) {
@@ -216,10 +182,10 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     itemPressed = false;
     itemMoving = false;
 
-    if (m_mainForm == nullptr)
+    if (m_currentForm == nullptr)
         return;
 
-    for (auto control : m_mainForm->childControls())
+    for (auto control : m_currentForm->childControls())
         control->setDragging(false);
 
     update();
@@ -231,10 +197,10 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
     painter->setRenderHint(QPainter::Antialiasing);
 
-    if ((itemMoving || Resizer::resizing())/*&& m_snapping */&& m_mainForm != nullptr) {
+    if ((itemMoving || Resizer::resizing())/*&& m_snapping */&& m_currentForm != nullptr) {
         {
             auto selectedControls = this->selectedControls();
-            selectedControls.removeOne(m_mainForm);
+            selectedControls.removeOne(m_currentForm);
 
             for(int i = 0; i < selectedControls.size(); i++) {
                 auto control = selectedControls[i];
@@ -266,7 +232,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
         }
     }
 
-    if (m_mainForm == nullptr) {
+    if (m_currentForm == nullptr) {
         QPen pen;
         pen.setWidthF(1);
         QRectF rect(0, 0, 150, 60);
@@ -287,7 +253,7 @@ bool DesignerScene::stick() const
 {
     bool ret = false;
     auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_mainForm);
+    selectedControls.removeOne(m_currentForm);
 
     for(int i = 0; i < selectedControls.size(); i++) {
         auto control = selectedControls[i];
@@ -625,7 +591,7 @@ QVector<QLineF> DesignerScene::guideLines() const
 {
     QVector<QLineF> lines;
     auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_mainForm);
+    selectedControls.removeOne(m_currentForm);
 
     for(int i = 0; i < selectedControls.size(); i++) {
         auto control = selectedControls[i];
@@ -765,7 +731,7 @@ void DesignerScene::reset()
     clear();
 
     m_forms.clear();
-    m_mainForm.clear();
+    m_currentForm.clear();
 
     m_snapping = true;
     m_showOutlines = false;
@@ -775,17 +741,17 @@ void DesignerScene::reset()
     itemMoving = false;
 }
 
-void DesignerScene::setMainForm(Form* mainForm)
+void DesignerScene::setCurrentForm(Form* currentForm)
 {
-    if (!m_forms.contains(mainForm) || m_mainForm == mainForm)
+    if (!m_forms.contains(currentForm) || m_currentForm == currentForm)
         return;
 
-    if (m_mainForm)
-        m_mainForm->setVisible(false);
+    if (m_currentForm)
+        m_currentForm->setVisible(false);
 
-    m_mainForm = mainForm;
-    m_mainForm->setVisible(true);
-    emit mainFormChanged(m_mainForm);
+    m_currentForm = currentForm;
+    m_currentForm->setVisible(true);
+    emit currentFormChanged(m_currentForm);
 }
 
 const QList<Form*>& DesignerScene::forms() const

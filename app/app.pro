@@ -109,7 +109,9 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/markband.h \
     transparentcombobox.h \
     toolbar.h \
-    toolbutton.h
+    toolbutton.h \
+#    inspectorpane_copy.h
+    controlremovingmanager.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -199,7 +201,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/markband.cpp \
     transparentcombobox.cpp \
     toolbar.cpp \
-    toolbutton.cpp
+    toolbutton.cpp \
+#    inspectorpane_copy.cpp
+    controlremovingmanager.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

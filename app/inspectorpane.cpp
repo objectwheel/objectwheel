@@ -118,88 +118,88 @@ void InspectorListDelegate::paint(QPainter* painter, const QStyleOptionViewItem 
 //!
 //! *********************** [InspectorPane] ***********************
 //!
+static bool _blockRefresh = false;
 
-InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QWidget(parent)
-  , _blockRefresh(false)
+InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
 {
-    _layout = new QVBoxLayout(this);
-    _treeWidget = new QTreeWidget;
-
     QPalette p(palette());
     p.setColor(QPalette::Base, QColor("#ececec"));
     p.setColor(QPalette::Window, QColor("#ececec"));
     setPalette(p);
     setAutoFillBackground(true);
 
-    QPalette p2(_treeWidget->palette());
+    QPalette p2(palette());
     p2.setColor(QPalette::All, QPalette::Base, QColor("#fefffc"));
     p2.setColor(QPalette::All, QPalette::Highlight, QColor("#cee7cb"));
     p2.setColor(QPalette::All, QPalette::Text, Qt::black);
     p2.setColor(QPalette::All, QPalette::HighlightedText, Qt::black);
-    _treeWidget->setPalette(p2);
+    setPalette(p2);
 
-    _treeWidget->setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
-    _treeWidget->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    _treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
-    _treeWidget->setFocusPolicy(Qt::NoFocus);
-    _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _treeWidget->setDragEnabled(false);
-    _treeWidget->setDropIndicatorShown(false);
-    _treeWidget->setColumnCount(2);
-    _treeWidget->setIndentation(16);
-    _treeWidget->headerItem()->setText(0, "Controls");
-    _treeWidget->headerItem()->setText(1, "Ui");
-    _treeWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
-    _treeWidget->viewport()->installEventFilter(this);
-    _treeWidget->header()->resizeSection(0, 250);
-    _treeWidget->header()->resizeSection(1, 50);
-    _treeWidget->setItemDelegate(new InspectorListDelegate(_treeWidget));
-//    _treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    setSelectionBehavior(QTreeWidget::SelectRows);
+    setFocusPolicy(Qt::NoFocus);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setDragEnabled(false);
+    setDropIndicatorShown(false);
+    setColumnCount(2);
+    setIndentation(16);
+    headerItem()->setText(0, "Controls");
+    headerItem()->setText(1, "Ui");
+    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    viewport()->installEventFilter(this);
+    header()->resizeSection(0, 250);
+    header()->resizeSection(1, 50);
+    setItemDelegate(new InspectorListDelegate(this));
+//    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    _treeWidget->header()->setFixedHeight(23);
-    _treeWidget->setStyleSheet("QTreeView { border: 1px solid #4A7C42; }"
+    header()->setFixedHeight(23);
+    setStyleSheet("QTreeView { border: 1px solid #4A7C42; }"
                                "QHeaderView::section {"
                                "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #4A7C42;"
                                "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #62A558, stop:1 #599750);}");
 
     QFont f; f.setWeight(QFont::Medium);
-    _treeWidget->header()->setFont(f);
+    header()->setFont(f);
 
-    connect(_treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
-      SLOT(handleClick(QTreeWidgetItem*,int)));
-    connect(_treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-      SLOT(handleDoubleClick(QTreeWidgetItem*,int)));
+    connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
+      SLOT(onItemClick(QTreeWidgetItem*,int)));
+    connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+      SLOT(onItemDoubleClick(QTreeWidgetItem*,int)));
 
-    _layout->setSpacing(2);
-    _layout->setContentsMargins(3, 3, 3, 3);
-    _layout->addWidget(_treeWidget);
+//    _layout->setSpacing(2);
+//    _layout->setContentsMargins(3, 3, 3, 3);
+//    _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(refresh()));
-    connect(m_designerScene, SIGNAL(mainFormChanged(Control*)), SLOT(refresh()));
-    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
-    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
+    connect(m_designerScene, SIGNAL(currentFormChanged(Control*)), SLOT(refresh()));
+//    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
+//    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
+    connect(m_designerScene, &DesignerScene::controlAboutToBeRemoved, this, &InspectorPane::onControlRemove);
+//    connect(m_designerScene, &DesignerScene::controlRemove);
 }
 
 void InspectorPane::reset()
 {
-    clear();
-    _blockRefresh = false;
+    QTreeWidget::reset();
+//    clear();
+//    _blockRefresh = false;
 }
 
 bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == _treeWidget->viewport()) {
+    if (watched == viewport()) {
         if (event->type() == QEvent::Paint) {
-            QPainter painter(_treeWidget->viewport());
+            QPainter painter(viewport());
 
-            if (_treeWidget->topLevelItemCount() > 0) {
-                const auto tli = _treeWidget->topLevelItem(0);
-                const auto& tlir = _treeWidget->visualItemRect(tli);
+            if (topLevelItemCount() > 0) {
+                const auto tli = topLevelItem(0);
+                const auto& tlir = visualItemRect(tli);
                 const qreal ic = (
-                    _treeWidget->viewport()->height() +
+                    viewport()->height() +
                     qAbs(tlir.y())
                 ) / (qreal) tlir.height();
 
@@ -208,7 +208,7 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
                         painter.fillRect(
                             0,
                             tlir.y() + i * tlir.height(),
-                            _treeWidget->viewport()->width(),
+                            viewport()->width(),
                             tlir.height(),
                             QColor("#ecfbea")
                         );
@@ -216,18 +216,18 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
                 }
             } else {
                 const qreal hg = 20.0;
-                const qreal ic = _treeWidget->viewport()->height() / hg;
+                const qreal ic = viewport()->height() / hg;
 
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
                         painter.fillRect(
                             0, i * hg,
-                            _treeWidget->viewport()->width(),
+                            viewport()->width(),
                             hg, QColor("#ecfbea")
                         );
                     } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
                         painter.setPen(QColor("#a6afa5"));
-                        painter.drawText(0, i * hg, _treeWidget->viewport()->width(),
+                        painter.drawText(0, i * hg, viewport()->width(),
                           hg, Qt::AlignCenter, "No items to show");
                     }
                 }
@@ -240,77 +240,97 @@ bool InspectorPane::eventFilter(QObject* watched, QEvent* event)
     }
 }
 
-void InspectorPane::clear()
+void InspectorPane::onControlAdd()
 {
-    for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i)
-        qDeleteAll(_treeWidget->topLevelItem(i)->takeChildren());
 
-    _treeWidget->clear();
 }
 
-void InspectorPane::refresh()
+void InspectorPane::onControlRemove()
 {
-    if (_blockRefresh)
-        return;
 
-    int vsp = _treeWidget->verticalScrollBar()->sliderPosition();
-    int hsp = _treeWidget->horizontalScrollBar()->sliderPosition();
-
-    clear();
-
-    auto scs = m_designerScene->selectedControls();
-    auto mc = m_designerScene->mainForm();
-
-    if (!mc)
-        return;
-
-    QTreeWidgetItem* item = new QTreeWidgetItem;
-    item->setText(0, mc->id());
-    item->setText(1, "Yes");
-    item->setData(0, Qt::UserRole, mc->hasErrors());
-    item->setData(1, Qt::UserRole, mc->hasErrors());
-
-    if (mc->hasErrors()) {
-        item->setTextColor(0, "#D02929");
-        item->setTextColor(1, "#D02929");
-    }
-
-    if (mc->form()) {
-        if (SaveUtils::isMain(mc->dir()))
-            item->setIcon(0, QIcon(":/images/mform.png"));
-        else
-            item->setIcon(0, QIcon(":/images/form.png"));
-    } else {
-        QIcon icon;
-        icon.addFile(mc->dir() + separator() + DIR_THIS +
-                     separator() + "icon.png");
-        if (icon.isNull())
-            icon.addFile(":/images/item.png");
-        item->setIcon(0, icon);
-    }
-
-    fillItem(item, mc->childControls(false));
-    _treeWidget->addTopLevelItem(item);
-
-    auto items = tree(item);
-    items << item;
-    for (auto sc : scs) {
-        for (auto i : items) {
-            if (i->text(0) == sc->id()) {
-                i->setSelected(true);
-            }
-        }
-    }
-
-    _treeWidget->expandAll();
-    _treeWidget->verticalScrollBar()->setSliderPosition(vsp);
-    _treeWidget->horizontalScrollBar()->setSliderPosition(hsp);
 }
 
-void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
+void InspectorPane::onSelectionChange()
+{
+
+}
+
+void InspectorPane::onCurrentFormChange()
+{
+
+}
+
+//void InspectorPane::clear()
+//{
+//    for (int i = 0; i < topLevelItemCount(); ++i)
+//        qDeleteAll(topLevelItem(i)->takeChildren());
+
+//    clear();
+//}
+
+//void InspectorPane::refresh()
+//{
+//    if (_blockRefresh)
+//        return;
+
+//    int vsp = verticalScrollBar()->sliderPosition();
+//    int hsp = horizontalScrollBar()->sliderPosition();
+
+////    clear();
+
+//    auto scs = m_designerScene->selectedControls();
+//    auto mc = m_designerScene->currentForm();
+
+//    if (!mc)
+//        return;
+
+//    QTreeWidgetItem* item = new QTreeWidgetItem;
+//    item->setText(0, mc->id());
+//    item->setText(1, "Yes");
+//    item->setData(0, Qt::UserRole, mc->hasErrors());
+//    item->setData(1, Qt::UserRole, mc->hasErrors());
+
+//    if (mc->hasErrors()) {
+//        item->setTextColor(0, "#D02929");
+//        item->setTextColor(1, "#D02929");
+//    }
+
+//    if (mc->form()) {
+//        if (SaveUtils::isMain(mc->dir()))
+//            item->setIcon(0, QIcon(":/images/mform.png"));
+//        else
+//            item->setIcon(0, QIcon(":/images/form.png"));
+//    } else {
+//        QIcon icon;
+//        icon.addFile(mc->dir() + separator() + DIR_THIS +
+//                     separator() + "icon.png");
+//        if (icon.isNull())
+//            icon.addFile(":/images/item.png");
+//        item->setIcon(0, icon);
+//    }
+
+//    fillItem(item, mc->childControls(false));
+//    addTopLevelItem(item);
+
+//    auto items = tree(item);
+//    items << item;
+//    for (auto sc : scs) {
+//        for (auto i : items) {
+//            if (i->text(0) == sc->id()) {
+//                i->setSelected(true);
+//            }
+//        }
+//    }
+
+//    expandAll();
+//    verticalScrollBar()->setSliderPosition(vsp);
+//    horizontalScrollBar()->setSliderPosition(hsp);
+//}
+
+void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = m_designerScene->mainForm();
+    const auto mc = m_designerScene->currentForm();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();
@@ -329,10 +349,10 @@ void InspectorPane::handleDoubleClick(QTreeWidgetItem* item, int)
     emit controlDoubleClicked(c);
 }
 
-void InspectorPane::handleClick(QTreeWidgetItem* item, int)
+void InspectorPane::onItemClick(QTreeWidgetItem* item, int)
 {
     const auto id = item->text(0);
-    const auto mc = m_designerScene->mainForm();
+    const auto mc = m_designerScene->currentForm();
     QList<Control*> cl;
     cl << mc;
     cl << mc->childControls();

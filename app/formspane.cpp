@@ -9,6 +9,7 @@
 #include <css.h>
 #include <delayer.h>
 #include <controlexposingmanager.h>
+#include <controlremovingmanager.h>
 
 #include <QLabel>
 #include <QStandardPaths>
@@ -91,7 +92,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
 
     connect(ProjectManager::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
     connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
-    connect(m_designerScene, SIGNAL(mainFormChanged(Control*)), SLOT(handleDatabaseChange()));
+    connect(m_designerScene, SIGNAL(currentFormChanged(Control*)), SLOT(handleDatabaseChange()));
     connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
 
     _innerWidget->setObjectName("innerWidget");
@@ -194,11 +195,7 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
 
 void FormsPane::removeButtonClicked()
 {
-    auto form = m_designerScene->mainForm();
-    if (!form || !form->form() || form->main())
-        return;
-    SaveManager::removeForm((Form*)form);
-    m_designerScene->removeForm(form);
+    ControlRemovingManager::removeForm(m_designerScene->currentForm());
 }
 
 void FormsPane::addButtonClicked()
@@ -250,8 +247,7 @@ void FormsPane::handleCurrentFormChange()
     auto id = _listWidget->currentItem()->text();
     for (auto form : m_designerScene->forms())
         if (form->id() == id)
-            m_designerScene->setMainForm(form);
-    emit currentFormChanged();
+            m_designerScene->setCurrentForm(form);
 }
 
 void FormsPane::setCurrentForm(int index)

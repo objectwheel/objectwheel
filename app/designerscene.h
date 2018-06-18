@@ -9,15 +9,14 @@ class DesignerScene : public QGraphicsScene
 {
     Q_OBJECT
 
+    friend class ControlRemovingManager; // For removeControl()
+    friend class ControlExposingManager; // For addForm()
+
 public:
     explicit DesignerScene(QObject *parent = Q_NULLPTR);
     const QList<Form*>& forms() const;
-    void addForm(Form* form);
-    void removeForm(Form* form);
-    void removeControl(Control* control);
-    void removeChildControlsOnly(Control* parent);
-    void setMainForm(Form* mainForm);
-    Form* mainForm();
+    void setCurrentForm(Form* currentForm);
+    Form* currentForm();
     bool snapping() const;
     void setSnapping(bool snapping);
     bool showOutlines() const;
@@ -32,22 +31,25 @@ public slots:
     void reset();
 
 private:
+    void addForm(Form* form);
+    void removeForm(Form* form);
+    void removeControl(Control* control);
+
+private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
     void drawForeground(QPainter* painter, const QRectF& rect);
 
 signals:
-    void aboutToRemove(Control* control);
-    void controlRemoved(Control* control);
-    void mainFormChanged(Control* mainForm);
+    void currentFormChanged(Control* currentForm);
 
 private:
     bool m_snapping;
     bool m_showOutlines;
     QPointF m_lastMousePos;
     QList<Form*> m_forms;
-    QPointer<Form> m_mainForm;
+    QPointer<Form> m_currentForm;
 };
 
 #endif // FORMSCENE_H
