@@ -244,8 +244,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_pageSwitcherPane->setCurrentPage(Page_SplitView);
     });
 
-    connect(m_inspectorPane, SIGNAL(controlClicked(Control*)),
-            m_centralWidget->designerWidget(), SLOT(onControlClick(Control*)));
+    connect(m_inspectorPane, SIGNAL(controlSelectionChanged(const QList<Control*>&)),
+            m_centralWidget->designerWidget(), SLOT(onControlSelectionChange(const QList<Control*>&)));
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
             m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
     connect(m_centralWidget->qmlCodeEditorWidget(), SIGNAL(documentSaved()),

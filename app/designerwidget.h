@@ -37,9 +37,9 @@ private slots:
     void onSnappingButtonClick(bool value);
     void onZoomLevelChange(const QString& text);
 
-    void onControlClick(Control*);
     void onControlDoubleClick(Control*);
     void onControlDrop(Control*, const QPointF&, const QString&);
+    void onControlSelectionChange(const QList<Control*>& selectedControls);
 
 private:
     void scaleScene(qreal ratio);

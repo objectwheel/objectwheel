@@ -742,7 +742,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     if (hasChild) {
         painter->setPen(isClassRow ? Qt::white : Qt::black);
         painter->setBrush(Qt::NoBrush);
-        painter->drawRect(handleRect);
+        painter->drawRoundedRect(handleRect, 1.5, 1.5);
 
         painter->drawLine(
             QPointF(handleRect.left() + 2.5, handleRect.center().y()),

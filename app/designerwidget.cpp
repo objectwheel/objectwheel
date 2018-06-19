@@ -217,12 +217,6 @@ QSize DesignerWidget::sizeHint() const
     return QSize(680, 680);
 }
 
-void DesignerWidget::onControlClick(Control* control)
-{
-    m_designerScene->clearSelection();
-    control->setSelected(true);
-}
-
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
     m_qmlCodeEditorWidget->addControl(control);
@@ -235,6 +229,13 @@ void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const Q
     m_designerScene->clearSelection();
     auto newControl = ControlExposingManager::exposeControl(dname(dname(url)), pos, "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());
     newControl->setSelected(true);
+}
+
+void DesignerWidget::onControlSelectionChange(const QList<Control*>& selectedControls)
+{
+    m_designerScene->clearSelection();
+    for (Control* control : selectedControls)
+        control->setSelected(true);
 }
 
 namespace {

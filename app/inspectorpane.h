@@ -27,22 +27,23 @@ public:
 public slots:
     void sweep();
 
-protected:
-    QSize sizeHint() const override;
-    bool eventFilter(QObject* watched, QEvent* event) override;
-
 private slots:
     void onSelectionChange();
     void onControlAdd(Control* control);
     void onControlRemove(Control* control);
     void onFormRemove(Form* form);
     void onCurrentFormChange(Form* currentForm);
-    void onItemClick(QTreeWidgetItem* item, int column);
+    void onItemSelectionChange();
     void onItemDoubleClick(QTreeWidgetItem* item, int column);
 
+private:
+    void paintEvent(QPaintEvent* e) override;
+    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
+    QSize sizeHint() const override;
+
 signals:
-    void controlClicked(Control* control);
     void controlDoubleClicked(Control* control);
+    void controlSelectionChanged(const QList<Control*>& selectedControls);
 
 private:
     DesignerScene* m_designerScene;
