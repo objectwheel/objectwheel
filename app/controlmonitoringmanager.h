@@ -23,6 +23,7 @@ signals:
     void parentChanged(Control*);
     void errorOccurred(Control*);
     void doubleClicked(Control*);
+    void idChanged(Control*, const QString& previousId);
     void controlDropped(Control*, const QPointF&, const QString&);
 
 private:

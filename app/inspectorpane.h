@@ -31,10 +31,12 @@ private slots:
     void onSelectionChange();
     void onControlAdd(Control* control);
     void onControlRemove(Control* control);
+    void onControlParentChange(Control* control);
     void onFormRemove(Form* form);
     void onCurrentFormChange(Form* currentForm);
     void onItemSelectionChange();
     void onItemDoubleClick(QTreeWidgetItem* item, int column);
+    void onControlIdChange(Control* control, const QString& previousId);
 
 private:
     void paintEvent(QPaintEvent* e) override;

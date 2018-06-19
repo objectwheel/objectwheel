@@ -94,6 +94,7 @@ signals:
     void doubleClicked();
     void errorOccurred();
     void previewChanged();
+    void idChanged(const QString& id);
     void controlDropped(const QPointF&, const QString&);
 
 private:

@@ -12,6 +12,7 @@
 #include <form.h>
 #include <projectmanager.h>
 #include <dpr.h>
+#include <controlmonitoringmanager.h>
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
@@ -22,10 +23,19 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QPointer>
+#include <QDebug>
 
 namespace {
 
 bool isSelectionHandlingBlocked = false;
+
+void expandAllChildren(QTreeWidget* treeWidget, QTreeWidgetItem* parentItem)
+{
+    treeWidget->expandItem(parentItem);
+
+    for (int i = 0; i < parentItem->childCount(); ++i)
+        expandAllChildren(treeWidget, parentItem->child(i));
+}
 
 Control* controlFromItem(const QTreeWidgetItem* item, Form* form)
 {
@@ -75,13 +85,14 @@ QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool inclu
     return items;
 }
 
-void fillWithChildren(QTreeWidgetItem* parentItem, const QList<Control*>& childItems)
+void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& childItems)
 {
     for (const Control* child : childItems) {
         QTreeWidgetItem* item = new QTreeWidgetItem;
         item->setText(0, child->id());
         item->setData(0, Qt::UserRole, child->hasErrors());
         item->setData(1, Qt::UserRole, child->hasErrors());
+        item->setExpanded(true);
 
         if (child->gui() && !child->hasErrors())
             item->setText(1, QObject::tr("Yes"));
@@ -95,7 +106,7 @@ void fillWithChildren(QTreeWidgetItem* parentItem, const QList<Control*>& childI
         item->setIcon(0, icon);
 
         parentItem->addChild(item);
-        fillWithChildren(item, child->childControls(false));
+        addChildrenIntoItem(item, child->childControls(false));
     }
 }
 }
@@ -168,7 +179,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
     QFont fontMedium(font());
     fontMedium.setWeight(QFont::Medium);
 
@@ -194,9 +204,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
 
     connect(this, &InspectorPane::itemSelectionChanged,
             this, &InspectorPane::onItemSelectionChange);
-    connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
-    connect(m_designerScene, &DesignerScene::selectionChanged,
-            this, &InspectorPane::onSelectionChange);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
             this, &InspectorPane::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
@@ -205,9 +212,22 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onControlAdd);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::formAboutToBeRemoved,
             this, &InspectorPane::onFormRemove);
+    connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
+    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::idChanged,
+            this, &InspectorPane::onControlIdChange);
+    // We delay selection change signal, otherwise FormsPane clears the selection (and hence we clear
+    // selection on tree view) on the scene before sending a formChanged signal. Thus we can't save
+    // selected item states into FormState data for outgoing form.
+    connect(m_designerScene, &DesignerScene::selectionChanged,
+            this, &InspectorPane::onSelectionChange, Qt::QueuedConnection);
+    // We delay parant change signal, otherwise it is emitted before controlExposed signal for
+    // control exposing operation. Thus we get controlAdded slot called twice for control creation.
+    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::parentChanged,
+            this, &InspectorPane::onControlParentChange, Qt::QueuedConnection);
 
-    // TODO: Handle reparent operations
-    // TODO: Handle id change of a control
+    // TODO: Birden çok control'ü reparent edince başka bi kontrole, alt kontrollerin ikonları bozuluyor
+    // TODO: Handle icon change
+    // TODO: Handle refreshing the list when project loading is done
     // TODO: Handle code changes (ui, non-ui, id change, icon change, error change)
     //    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
     //    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
@@ -319,8 +339,9 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     formItem->setIcon(0, SaveUtils::isMain(currentForm->dir()) ? QIcon(":/images/mform.png") :
                                                                  QIcon(":/images/form.png"));
 
-    fillWithChildren(formItem, currentForm->childControls(false));
+    addChildrenIntoItem(formItem, currentForm->childControls(false));
     addTopLevelItem(formItem);
+    sortItems(0, Qt::AscendingOrder);
     expandAll();
 
     /* Restore incoming form's state */
@@ -354,7 +375,9 @@ void InspectorPane::onControlAdd(Control* control)
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (parentControl->id() == childItem->text(0)) {
-                fillWithChildren(childItem, QList<Control*>() << control);
+                addChildrenIntoItem(childItem, QList<Control*>() << control);
+                expandAllChildren(this, childItem);
+                sortItems(0, Qt::AscendingOrder);
                 break;
             }
         }
@@ -368,6 +391,24 @@ void InspectorPane::onControlRemove(Control* control)
             if (control->id() == childItem->text(0)) {
                 topLevelItem->removeChild(childItem);
                 delete childItem;
+                break;
+            }
+        }
+    }
+}
+
+void InspectorPane::onControlParentChange(Control* control)
+{
+    onControlRemove(control);
+    onControlAdd(control);
+}
+
+void InspectorPane::onControlIdChange(Control* control, const QString& previousId)
+{
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (previousId == childItem->text(0)) {
+                childItem->setText(0, control->id());
                 break;
             }
         }

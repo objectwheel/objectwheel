@@ -64,14 +64,20 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
         });
     });
 
+    connect(this, &Control::idChanged, this, [=] (const QString& pid) {
+        emit ControlMonitoringManager::instance()->idChanged(this, pid);
+    });
+
     connect(this, &Control::zChanged, this, &Control::onZValueChange);
     connect(this, &Control::zChanged, this,
             [=] { emit ControlMonitoringManager::instance()->zValueChanged(this); });
+
     connect(this, &Control::parentChanged, this, &Control::onParentChange);
     connect(this, &Control::parentChanged, this,
             [=] { emit ControlMonitoringManager::instance()->parentChanged(this); });
 
-    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewReady, this, &Control::updatePreview);
+    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewReady,
+            this, &Control::updatePreview);
 }
 
 Control::~Control()
@@ -234,8 +240,12 @@ void Control::setClip(bool clip)
 
 void Control::setId(const QString& id)
 {
+    const QString previousId = m_id;
     m_id = id;
     setToolTip(id);
+
+    if (id != previousId)
+        emit idChanged(previousId);
 }
 
 void Control::setUrl(const QString& url)
