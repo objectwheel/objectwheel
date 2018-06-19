@@ -41,7 +41,6 @@ public:
     const QList<PropertyNode>& properties() const;
     QList<Control*> childControls(bool dive = true) const;
 
-public:
     static const QList<Control*>& controls();
 
 public:
@@ -59,26 +58,27 @@ public slots:
     void showResizers();
     void refresh(bool repreview = false);
 
-public slots:
     static void updateUids();
 
 private:
     void dropControl(Control* control);
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     void dragMoveEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
+
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 protected:
-    virtual void resizeEvent(QGraphicsSceneResizeEvent* event) override;
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR) override;
+    void resizeEvent(QGraphicsSceneResizeEvent* event) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR) override;
 
 protected:
     explicit Control(const QString& url, Control* parent = nullptr);

@@ -14,18 +14,18 @@
 #define MAGNETIC_FIELD (3)
 
 namespace {
-    QRectF united(const QList<Control*>& controls)
-    {
-        QRectF rect = controls.first()->geometry();
-        for (auto control : controls)
-            if (controls.first() != control)
-                rect |= QRectF(controls.first()->parentControl()->mapFromItem
-                  (control->parentControl(), control->pos()), control->size());
-        return rect;
-    }
+QRectF united(const QList<Control*>& controls)
+{
+    QRectF rect = controls.first()->geometry();
+    for (auto control : controls)
+        if (controls.first() != control)
+            rect |= QRectF(controls.first()->parentControl()->mapFromItem
+                           (control->parentControl(), control->pos()), control->size());
+    return rect;
+}
 
-    bool itemPressed = false;
-    bool itemMoving = false;
+bool itemPressed = false;
+bool itemMoving = false;
 }
 
 DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
@@ -96,6 +96,21 @@ void DesignerScene::setShowOutlines(bool value)
         m_currentForm->update();
 }
 
+QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
+{
+    QList<Control*> controls;
+
+    const QList<QGraphicsItem*>& itemsUnderPos = items(pos);
+    for (QGraphicsItem* item : itemsUnderPos) {
+        Control* control = dynamic_cast<Control*>(item);
+
+        if (control)
+            controls.append(control);
+    }
+
+    return controls;
+}
+
 QList<Control*> DesignerScene::selectedControls() const
 {
     QList<Control*> selectedControls;
@@ -140,7 +155,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     selectedControls.removeOne(m_currentForm);
 
     if (m_currentForm && !selectedControls.isEmpty() &&
-        itemPressed && !Resizer::resizing()) {
+            itemPressed && !Resizer::resizing()) {
         itemMoving = true;
         if (m_snapping) {
             auto controlUnderMouse = (Control*)(itemAt(event->scenePos(), QTransform()));
@@ -151,7 +166,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
             for(int i = 0; i < selectedControls.size(); i++) {
                 auto control = selectedControls[i];
                 if (controlUnderMouse->parentControl() != control->parentControl() ||
-                    selectedControls. contains(control->parentControl()))
+                        selectedControls.contains(control->parentControl()))
                 {
                     selectedControls.removeOne(control);
                     control->setSelected(false);
@@ -272,7 +287,7 @@ bool DesignerScene::stick() const
 
     /* Child center <-> Parent center */
     if (center.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
-        center.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
+            center.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveCenter({center.x(), parent->size().height() / 2.0});
         center = geometry.center();
@@ -282,7 +297,7 @@ bool DesignerScene::stick() const
     }
 
     if (center.x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
-        center.x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
+            center.x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveCenter({parent->size().width() / 2.0, center.y()});
         center = geometry.center();
@@ -293,7 +308,7 @@ bool DesignerScene::stick() const
 
     /* Child left <-> Parent center */
     if (geometry.topLeft().x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
-        geometry.topLeft().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
+            geometry.topLeft().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveLeft(parent->size().width() / 2.0);
         center = geometry.center();
@@ -304,7 +319,7 @@ bool DesignerScene::stick() const
 
     /* Child left <-> Parent left */
     if (geometry.topLeft().x() <= MAGNETIC_FIELD &&
-        geometry.topLeft().x() >= - MAGNETIC_FIELD) {
+            geometry.topLeft().x() >= - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveLeft(0);
         center = geometry.center();
@@ -315,7 +330,7 @@ bool DesignerScene::stick() const
 
     /* Child right <-> Parent center */
     if (geometry.topRight().x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
-        geometry.topRight().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
+            geometry.topRight().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveRight(parent->size().width() / 2.0);
         center = geometry.center();
@@ -326,7 +341,7 @@ bool DesignerScene::stick() const
 
     /* Child right <-> Parent right */
     if (geometry.topRight().x() <= parent->size().width() + MAGNETIC_FIELD &&
-        geometry.topRight().x() >= parent->size().width() - MAGNETIC_FIELD) {
+            geometry.topRight().x() >= parent->size().width() - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveRight(parent->size().width());
         center = geometry.center();
@@ -337,7 +352,7 @@ bool DesignerScene::stick() const
 
     /* Child top <-> Parent center */
     if (geometry.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
-        geometry.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
+            geometry.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveTop(parent->size().height() / 2.0);
         center = geometry.center();
@@ -348,7 +363,7 @@ bool DesignerScene::stick() const
 
     /* Child top <-> Parent top */
     if (geometry.y() <= MAGNETIC_FIELD &&
-        geometry.y() >= - MAGNETIC_FIELD) {
+            geometry.y() >= - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveTop(0);
         center = geometry.center();
@@ -359,7 +374,7 @@ bool DesignerScene::stick() const
 
     /* Child bottom <-> Parent center */
     if (geometry.bottomLeft().y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
-        geometry.bottomLeft().y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
+            geometry.bottomLeft().y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveBottom(parent->size().height() / 2.0);
         center = geometry.center();
@@ -370,7 +385,7 @@ bool DesignerScene::stick() const
 
     /* Child bottom <-> Parent bottom */
     if (geometry.bottomLeft().y() <= parent->size().height() + MAGNETIC_FIELD &&
-        geometry.bottomLeft().y() >= parent->size().height() - MAGNETIC_FIELD) {
+            geometry.bottomLeft().y() >= parent->size().height() - MAGNETIC_FIELD) {
         auto g = geometry;
         geometry.moveBottom(parent->size().height());
         center = geometry.center();
@@ -388,7 +403,7 @@ bool DesignerScene::stick() const
 
         /* Item1 center <-> Item2 center */
         if (center.x() <= ccenter.x() + MAGNETIC_FIELD &&
-            center.x() >= ccenter.x() - MAGNETIC_FIELD) {
+                center.x() >= ccenter.x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveCenter({ccenter.x(), center.y()});
             center = geometry.center();
@@ -398,7 +413,7 @@ bool DesignerScene::stick() const
         }
 
         if (center.y() <= ccenter.y() + MAGNETIC_FIELD &&
-            center.y() >= ccenter.y() - MAGNETIC_FIELD) {
+                center.y() >= ccenter.y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveCenter({center.x(), ccenter.y()});
             center = geometry.center();
@@ -409,7 +424,7 @@ bool DesignerScene::stick() const
 
         /* Item1 center <-> Item2 left */
         if (center.x() <= cgeometry.topLeft().x() + MAGNETIC_FIELD &&
-            center.x() >= cgeometry.topLeft().x() - MAGNETIC_FIELD) {
+                center.x() >= cgeometry.topLeft().x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveCenter({cgeometry.topLeft().x(), center.y()});
             center = geometry.center();
@@ -420,7 +435,7 @@ bool DesignerScene::stick() const
 
         /* Item1 center <-> Item2 top */
         if (center.y() <= cgeometry.topLeft().y() + MAGNETIC_FIELD &&
-            center.y() >= cgeometry.topLeft().y() - MAGNETIC_FIELD) {
+                center.y() >= cgeometry.topLeft().y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveCenter({center.x(), cgeometry.topLeft().y()});
             center = geometry.center();
@@ -431,7 +446,7 @@ bool DesignerScene::stick() const
 
         /* Item1 center <-> Item2 right */
         if (center.x() <= cgeometry.bottomRight().x() + MAGNETIC_FIELD &&
-            center.x() >= cgeometry.bottomRight().x() - MAGNETIC_FIELD) {
+                center.x() >= cgeometry.bottomRight().x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveCenter({cgeometry.bottomRight().x(), center.y()});
             center = geometry.center();
@@ -442,7 +457,7 @@ bool DesignerScene::stick() const
 
         /* Item1 center <-> Item2 bottom */
         if (center.y() <= cgeometry.bottomRight().y() + MAGNETIC_FIELD &&
-            center.y() >= cgeometry.bottomRight().y() - MAGNETIC_FIELD) {
+                center.y() >= cgeometry.bottomRight().y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveCenter({center.x(), cgeometry.bottomRight().y()});
             center = geometry.center();
@@ -453,7 +468,7 @@ bool DesignerScene::stick() const
 
         /* Item1 left <-> Item2 left */
         if (geometry.x() <= cgeometry.x() + MAGNETIC_FIELD &&
-            geometry.x() >= cgeometry.x() - MAGNETIC_FIELD) {
+                geometry.x() >= cgeometry.x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopLeft({cgeometry.x(), geometry.y()});
             center = geometry.center();
@@ -464,7 +479,7 @@ bool DesignerScene::stick() const
 
         /* Item1 left <-> Item2 center */
         if (geometry.x() <= ccenter.x() + MAGNETIC_FIELD &&
-            geometry.x() >= ccenter.x() - MAGNETIC_FIELD) {
+                geometry.x() >= ccenter.x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopLeft({ccenter.x(), geometry.y()});
             center = geometry.center();
@@ -475,7 +490,7 @@ bool DesignerScene::stick() const
 
         /* Item1 left <-> Item2 right */
         if (geometry.x() <= cgeometry.topRight().x() + MAGNETIC_FIELD &&
-            geometry.x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
+                geometry.x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopLeft({cgeometry.topRight().x(), geometry.y()});
             center = geometry.center();
@@ -486,7 +501,7 @@ bool DesignerScene::stick() const
 
         /* Item1 right <-> Item2 left */
         if (geometry.topRight().x() <= cgeometry.x() + MAGNETIC_FIELD &&
-            geometry.topRight().x() >= cgeometry.x() - MAGNETIC_FIELD) {
+                geometry.topRight().x() >= cgeometry.x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopRight({cgeometry.x(), geometry.y()});
             center = geometry.center();
@@ -497,7 +512,7 @@ bool DesignerScene::stick() const
 
         /* Item1 right <-> Item2 center */
         if (geometry.topRight().x() <= ccenter.x() + MAGNETIC_FIELD &&
-            geometry.topRight().x() >= ccenter.x() - MAGNETIC_FIELD) {
+                geometry.topRight().x() >= ccenter.x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopRight({ccenter.x(), geometry.y()});
             center = geometry.center();
@@ -508,7 +523,7 @@ bool DesignerScene::stick() const
 
         /* Item1 right <-> Item2 right */
         if (geometry.topRight().x() <= cgeometry.topRight().x() + MAGNETIC_FIELD &&
-            geometry.topRight().x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
+                geometry.topRight().x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopRight({cgeometry.topRight().x(), geometry.y()});
             center = geometry.center();
@@ -519,7 +534,7 @@ bool DesignerScene::stick() const
 
         /* Item1 top <-> Item2 top */
         if (geometry.y() <= cgeometry.y() + MAGNETIC_FIELD &&
-            geometry.y() >= cgeometry.y() - MAGNETIC_FIELD) {
+                geometry.y() >= cgeometry.y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopLeft({geometry.x(), cgeometry.y()});
             center = geometry.center();
@@ -530,7 +545,7 @@ bool DesignerScene::stick() const
 
         /* Item1 top <-> Item2 center */
         if (geometry.y() <= ccenter.y() + MAGNETIC_FIELD &&
-            geometry.y() >= ccenter.y() - MAGNETIC_FIELD) {
+                geometry.y() >= ccenter.y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopLeft({geometry.x(), ccenter.y()});
             center = geometry.center();
@@ -541,7 +556,7 @@ bool DesignerScene::stick() const
 
         /* Item1 top <-> Item2 bottom */
         if (geometry.y() <= cgeometry.bottomLeft().y() + MAGNETIC_FIELD &&
-            geometry.y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
+                geometry.y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveTopLeft({geometry.x(), cgeometry.bottomLeft().y()});
             center = geometry.center();
@@ -552,7 +567,7 @@ bool DesignerScene::stick() const
 
         /* Item1 bottom <-> Item2 top */
         if (geometry.bottomLeft().y() <= cgeometry.y() + MAGNETIC_FIELD &&
-            geometry.bottomLeft().y() >= cgeometry.y() - MAGNETIC_FIELD) {
+                geometry.bottomLeft().y() >= cgeometry.y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveBottomLeft({geometry.x(), cgeometry.y()});
             center = geometry.center();
@@ -563,7 +578,7 @@ bool DesignerScene::stick() const
 
         /* Item1 bottom <-> Item2 center */
         if (geometry.bottomLeft().y() <= ccenter.y() + MAGNETIC_FIELD &&
-            geometry.bottomLeft().y() >= ccenter.y() - MAGNETIC_FIELD) {
+                geometry.bottomLeft().y() >= ccenter.y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveBottomLeft({geometry.x(), ccenter.y()});
             center = geometry.center();
@@ -574,7 +589,7 @@ bool DesignerScene::stick() const
 
         /* Item1 bottom <-> Item2 bottom */
         if (geometry.bottomLeft().y() <= cgeometry.bottomLeft().y() + MAGNETIC_FIELD &&
-            geometry.bottomLeft().y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
+                geometry.bottomLeft().y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
             auto g = geometry;
             geometry.moveBottomLeft({geometry.x(), cgeometry.bottomLeft().y()});
             center = geometry.center();
@@ -596,7 +611,7 @@ QVector<QLineF> DesignerScene::guideLines() const
     for(int i = 0; i < selectedControls.size(); i++) {
         auto control = selectedControls[i];
         if (selectedControls.
-            contains(control->parentControl())) {
+                contains(control->parentControl())) {
             selectedControls.removeOne(control);
             i--;
         }
@@ -696,29 +711,29 @@ QVector<QLineF> DesignerScene::guideLines() const
 
         /* Item1 left <-> Item2 left/center/right */
         if (int(geometry.x()) == int(cgeometry.x()) ||
-            int(geometry.x()) == int(ccenter.x()) ||
-            int(geometry.x()) == int(cgeometry.topRight().x()))
+                int(geometry.x()) == int(ccenter.x()) ||
+                int(geometry.x()) == int(cgeometry.topRight().x()))
             lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
                             parent->mapToScene(QPointF(geometry.x(), ccenter.y())));
 
         /* Item1 right <-> Item2 left/center/right */
         if (int(geometry.topRight().x()) == int(cgeometry.x()) ||
-            int(geometry.topRight().x()) == int(ccenter.x()) ||
-            int(geometry.topRight().x()) == int(cgeometry.topRight().x()))
+                int(geometry.topRight().x()) == int(ccenter.x()) ||
+                int(geometry.topRight().x()) == int(cgeometry.topRight().x()))
             lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
                             parent->mapToScene(QPointF(geometry.topRight().x(), ccenter.y())));
 
         /* Item1 top <-> Item2 top/center/bottom */
         if (int(geometry.y()) == int(cgeometry.y()) ||
-            int(geometry.y()) == int(ccenter.y()) ||
-            int(geometry.y()) == int(cgeometry.bottomLeft().y()))
+                int(geometry.y()) == int(ccenter.y()) ||
+                int(geometry.y()) == int(cgeometry.bottomLeft().y()))
             lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.y())),
                             parent->mapToScene(QPointF(ccenter.x(), geometry.y())));
 
         /* Item1 bottom <-> Item2 top/center/bottom */
         if (int(geometry.bottomLeft().y()) == int(cgeometry.y()) ||
-            int(geometry.bottomLeft().y()) == int(ccenter.y()) ||
-            int(geometry.bottomLeft().y()) == int(cgeometry.bottomLeft().y()))
+                int(geometry.bottomLeft().y()) == int(ccenter.y()) ||
+                int(geometry.bottomLeft().y()) == int(cgeometry.bottomLeft().y()))
             lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.bottomLeft().y())),
                             parent->mapToScene(QPointF(ccenter.x(), geometry.bottomLeft().y())));
     }

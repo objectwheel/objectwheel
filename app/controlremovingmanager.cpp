@@ -60,6 +60,6 @@ void ControlRemovingManager::removeControl(Control* control)
     control->setRefreshingDisabled(true);
     control->blockSignals(true);
 
-    s_designerScene->removeControl(control);
     SaveManager::removeControl(control);
+    s_designerScene->removeControl(control);
 }

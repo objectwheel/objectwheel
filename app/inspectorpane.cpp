@@ -214,6 +214,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
 
     // TODO: Handle reparent operations
     // TODO: Handle id change of a control
+    // TODO: Handle code changes (ui, non-ui, id change, icon change)
     //    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
     //    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
 }
@@ -369,12 +370,28 @@ void InspectorPane::onFormRemove(Form* form)
 
 void InspectorPane::onControlAdd(Control* control)
 {
-
+    const Control* parentControl = control->parentControl();
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (parentControl->id() == childItem->text(0)) {
+                fillItem(childItem, QList<Control*>() << control);
+                break;
+            }
+        }
+    }
 }
 
 void InspectorPane::onControlRemove(Control* control)
 {
-
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (control->id() == childItem->text(0)) {
+                topLevelItem->removeChild(childItem);
+                delete childItem;
+                break;
+            }
+        }
+    }
 }
 
 void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)

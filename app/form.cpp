@@ -34,6 +34,8 @@ void Form::resizeEvent(QGraphicsSceneResizeEvent* event)
 
 void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
+    // We don't propagate the mouse press event in order to block selection on form.
+    // Hence rubber band is activated on form.
     event->ignore();
 }
 

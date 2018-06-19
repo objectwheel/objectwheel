@@ -297,7 +297,7 @@ void Control::refresh(bool repreview)
 
 void Control::updateUids()
 {
-    for (auto control : m_controls)
+    for (Control* control : m_controls)
         control->updateUid();
 }
 
@@ -319,44 +319,6 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
       event->mimeData()->urls().first().toLocalFile());
     emit ControlMonitoringManager::instance()->controlDropped(this, event->pos(),
       event->mimeData()->urls().first().toLocalFile());
-    update();
-}
-
-void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsWidget::mouseMoveEvent(event);
-
-    Control* control = nullptr;
-    auto items = scene()->items(event->scenePos());
-    if (m_dragging && items.size() > 1 && (control = dynamic_cast<Control*>(items[1])) &&
-        control != this && !control->dragIn()) {
-        control->setDragIn(true);
-
-        for (auto c : scene()->currentForm()->childControls())
-            if (c != control)
-                c->setDragIn(false);
-
-        if (scene()->currentForm() != control)
-            scene()->currentForm()->setDragIn(false);
-    }
-
-    if (event->button() == Qt::MidButton)
-        event->ignore();
-    else
-        event->accept();
-}
-
-void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
-    QGraphicsWidget::hoverEnterEvent(event);
-    m_hoverOn = true;
-    update();
-}
-
-void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
-    QGraphicsWidget::hoverLeaveEvent(event);
-    m_hoverOn = false;
     update();
 }
 
@@ -385,6 +347,43 @@ void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
     update();
 }
 
+void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsWidget::mouseMoveEvent(event);
+
+    Control* control = nullptr;
+    const QList<Control*>& controlsUnderCursor = scene()->controlsAt(event->scenePos());
+
+    if (controlsUnderCursor.size() > 1)
+        control = controlsUnderCursor.at(1);
+
+    if (control && control != this && !control->dragIn() && m_dragging) {
+        control->setDragIn(true);
+
+        for (Control* childControls : scene()->currentForm()->childControls())
+            if (childControls != control)
+                childControls->setDragIn(false);
+
+        if (scene()->currentForm() != control)
+            scene()->currentForm()->setDragIn(false);
+    }
+
+    if (event->button() == Qt::MidButton)
+        event->ignore();
+    else
+        event->accept();
+}
+
+void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsWidget::mousePressEvent(event);
+
+    if (event->button() == Qt::MidButton)
+        event->ignore();
+    else
+        event->accept();
+}
+
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsWidget::mouseReleaseEvent(event);
@@ -406,7 +405,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     }
 
     if (scene()->currentForm()->dragIn() && dragging() &&
-        parentControl() != scene()->currentForm()) {
+            parentControl() != scene()->currentForm()) {
         scene()->currentForm()->dropControl(this);
         scene()->clearSelection();
         scene()->currentForm()->setSelected(true);
@@ -420,6 +419,20 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
     emit doubleClicked();
     emit ControlMonitoringManager::instance()->doubleClicked(this);
+}
+
+void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsWidget::hoverEnterEvent(event);
+    m_hoverOn = true;
+    update();
+}
+
+void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsWidget::hoverLeaveEvent(event);
+    m_hoverOn = false;
+    update();
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -445,16 +458,6 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
         resizer->correct();
 
     onSizeChange();
-}
-
-void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsWidget::mousePressEvent(event);
-
-    if (event->button() == Qt::MidButton)
-        event->ignore();
-    else
-        event->accept();
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

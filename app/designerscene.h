@@ -22,6 +22,7 @@ public:
     bool showOutlines() const;
     void setShowOutlines(bool value);
 
+    QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QPointF lastMousePos() const;
     bool stick() const;
