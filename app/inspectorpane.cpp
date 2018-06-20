@@ -23,11 +23,43 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QPointer>
-#include <QDebug>
 
 namespace {
 
 bool isSelectionHandlingBlocked = false;
+
+void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selected, bool verticalLine)
+{
+    painter->save();
+
+    QPainterPath path;
+    path.addRect(rect);
+    painter->setClipPath(path);
+    painter->setClipping(true);
+
+    // Fill background
+    if (selected) {
+        painter->fillRect(rect, "#cee7cb");
+    } else {
+        if (row % 2)
+            painter->fillRect(rect, "#ecfbea");
+        else
+            painter->fillRect(rect, "#fefffc");
+    }
+
+    // Draw top and bottom lines
+    painter->setPen("#10000000");
+    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+
+    // Draw vertical line
+    if (verticalLine) {
+        painter->drawLine(rect.topRight() + QPointF(-0.5, 0.5),
+                          rect.bottomRight() + QPointF(-0.5, -0.5));
+    }
+
+    painter->restore();
+}
 
 void expandAllChildren(QTreeWidget* treeWidget, QTreeWidgetItem* parentItem)
 {
@@ -85,6 +117,34 @@ QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool inclu
     return items;
 }
 
+int rowsBelowIndex(const QModelIndex& index) {
+    int count = 0;
+    const QAbstractItemModel* model = index.model();
+    int rowCount = model->rowCount(index);
+    count += rowCount;
+    for (int r = 0; r < rowCount; ++r)
+        count += rowsBelowIndex(model->index(r, 0, index));
+    return count;
+
+}
+
+int calculateRow(const QModelIndex& index) {
+    int count = 0;
+    if (index.isValid()) {
+        count = (index.row()) + calculateRow(index.parent());
+
+        const QModelIndex parent = index.parent();
+        if (parent.isValid()) {
+            ++count;
+            for (int r = 0; r < index.row(); ++r)
+                count += rowsBelowIndex(parent.child(r, 0));
+
+        }
+    }
+
+    return count;
+}
+
 void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& childItems)
 {
     for (const Control* child : childItems) {
@@ -121,32 +181,18 @@ public:
 
     void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
+        painter->setRenderHint(QPainter::Antialiasing);
+
         const int iconSize = 15;
         const bool isSelected = option.state & QStyle::State_Selected;
         const QAbstractItemModel* model = index.model();
         const QIcon& icon = model->data(index, Qt::DecorationRole).value<QIcon>();
 
-        QRectF cellRect(option.rect);
         QRectF iconRect(0, 0, iconSize, iconSize);
+        iconRect.moveCenter(option.rect.center());
+        iconRect.moveLeft(option.rect.left() + 5);
 
-        iconRect.moveCenter(cellRect.center());
-        iconRect.moveLeft(cellRect.left() + 5);
-        painter->setRenderHint(QPainter::Antialiasing);
-
-        // Draw highlight
-        if (isSelected)
-            painter->fillRect(cellRect, "#cee7cb");
-
-        // Draw bottom line
-        painter->setPen("#DDEBDB");
-        painter->drawLine(cellRect.bottomLeft() + QPointF(0.5, -0.5),
-                          cellRect.bottomRight() + QPointF(-0.5, -0.5));
-
-        // Draw middle line
-        if (index.column() == 0) {
-            painter->drawLine(cellRect.topRight() + QPointF(-0.5, 0.5),
-                              cellRect.bottomRight() + QPointF(-0.5, -0.5));
-        }
+        fillBackground(painter, option.rect, calculateRow(index), isSelected, index.column() == 0);
 
         // Draw icon
         painter->drawPixmap(iconRect, icon.pixmap(iconSize, iconSize),
@@ -158,7 +204,7 @@ public:
         else
             painter->setPen(qApp->palette().text().color());
 
-        painter->drawText(cellRect.adjusted(25, 0, 0, 0), index.data(Qt::EditRole).toString(),
+        painter->drawText(option.rect.adjusted(25, 0, 0, 0), index.data(Qt::EditRole).toString(),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
     }
 };
@@ -260,25 +306,17 @@ void InspectorPane::paintEvent(QPaintEvent* e)
 
 void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
-    const qreal width = 9;
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    const qreal width = 10;
     const bool hasChild = itemFromIndex(index)->childCount();
     const bool isSelected = itemFromIndex(index)->isSelected();
 
-    QRectF branchRect(rect);
     QRectF handleRect(0, 0, width, width);
+    handleRect.moveCenter(rect.center());
+    handleRect.moveRight(rect.right() - 0.5);
 
-    handleRect.moveCenter(branchRect.center());
-    handleRect.moveRight(branchRect.right() - 0.5);
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    // Draw highlight
-    if (isSelected)
-        painter->fillRect(branchRect, "#cee7cb");
-
-    // Draw bottom line
-    painter->setPen("#DDEBDB");
-    painter->drawLine(branchRect.bottomLeft() + QPointF(0.5, -0.5),
-                      branchRect.bottomRight() + QPointF(-0.5, -0.5));
+    fillBackground(painter, rect, calculateRow(index), isSelected, false);
 
     // Draw handle
     if (hasChild) {
@@ -378,10 +416,11 @@ void InspectorPane::onControlAdd(Control* control)
                 addChildrenIntoItem(childItem, QList<Control*>() << control);
                 expandAllChildren(this, childItem);
                 sortItems(0, Qt::AscendingOrder);
-                break;
+                goto quit;
             }
         }
     }
+    quit:;
 }
 
 void InspectorPane::onControlRemove(Control* control)
@@ -391,10 +430,11 @@ void InspectorPane::onControlRemove(Control* control)
             if (control->id() == childItem->text(0)) {
                 topLevelItem->removeChild(childItem);
                 delete childItem;
-                break;
+                goto quit;
             }
         }
     }
+    quit:;
 }
 
 void InspectorPane::onControlParentChange(Control* control)
@@ -409,10 +449,11 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (previousId == childItem->text(0)) {
                 childItem->setText(0, control->id());
-                break;
+                goto quit;
             }
         }
     }
+    quit:;
 }
 
 void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)

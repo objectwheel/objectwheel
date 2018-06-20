@@ -708,7 +708,7 @@ class PropertiesTree : public QTreeWidget
 
 void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
-    qreal width = 9;
+    qreal width = 10;
     auto model = index.model();
     bool hasChild = itemFromIndex(index)->childCount();
     bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
