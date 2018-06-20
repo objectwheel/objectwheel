@@ -82,7 +82,7 @@ protected:
 
 protected:
     explicit Control(const QString& url, Control* parent = nullptr);
-    ~Control();
+    ~Control() override;
 
 private slots:
     void onSizeChange();

@@ -82,6 +82,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
 
 Control::~Control()
 {
+    // In order to prevent any kind of signals being emitted while deletion in progress
+    blockSignals(true);
     m_controls.removeOne(this);
 }
 

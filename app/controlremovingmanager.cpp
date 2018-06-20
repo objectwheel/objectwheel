@@ -3,6 +3,7 @@
 #include <designerscene.h>
 #include <savemanager.h>
 #include <controlpreviewingmanager.h>
+#include <QDebug>
 
 DesignerScene* ControlRemovingManager::s_designerScene = nullptr;
 ControlRemovingManager* ControlRemovingManager::s_instance = nullptr;
@@ -62,4 +63,23 @@ void ControlRemovingManager::removeControl(Control* control)
 
     SaveManager::removeControl(control);
     s_designerScene->removeControl(control);
+}
+
+void ControlRemovingManager::removeControls(const QList<Control*>& controls)
+{
+    for (const Control* control : controls) {
+        if (control->form()) {
+            qWarning() << "ControlRemovingManager::removeControls() can't remove forms.";
+            return;
+        }
+    }
+
+    QList<Control*> finalList(controls);
+    for (const Control* control : controls) {
+        for (Control* childControl : control->childControls())
+            finalList.removeAll(childControl);
+    }
+
+    for (Control* control : finalList)
+        removeControl(control);
 }

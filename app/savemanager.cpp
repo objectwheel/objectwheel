@@ -411,7 +411,6 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
 
     for (auto child : control->childControls())
         child->setUrl(child->url().replace(control->dir(), controlDir));
-
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
     flushId(control);
@@ -457,6 +456,8 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     if (!rm(control->dir()))
         return false;
 
+    for (auto child : control->childControls())
+        child->setUrl(child->url().replace(control->dir(), controlDir));
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
     if (isInOwdb(control->dir()))

@@ -19,6 +19,7 @@ public:
     static void init(DesignerScene* designerScene);
     static void removeForm(Form* form);
     static void removeControl(Control* control);
+    static void removeControls(const QList<Control*>& controls);
 
 signals:
     void formAboutToBeRemoved(Form* form);

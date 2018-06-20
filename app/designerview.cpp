@@ -247,8 +247,7 @@ void DesignerView::onPasteAction()
                     cutControls << (Control*)buff;
                 }
 
-                for (auto control : cutControls)
-                    ControlRemovingManager::removeControl(control);
+                ControlRemovingManager::removeControls(cutControls);
             }
         }
 
@@ -259,10 +258,10 @@ void DesignerView::onPasteAction()
 
 void DesignerView::onDeleteAction()
 { //FIXME: Do not delete if docs are open within QML Editor
-    auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->currentForm());
-    for (auto control : selectedControls)
-        ControlRemovingManager::removeControl(control);
+    QList<Control*> selectedControls = scene()->selectedControls();
+    selectedControls.removeAll(scene()->currentForm());
+
+    ControlRemovingManager::removeControls(selectedControls);
 }
 
 void DesignerView::onSelectAllAction()

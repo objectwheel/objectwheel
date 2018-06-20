@@ -271,8 +271,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::parentChanged,
             this, &InspectorPane::onControlParentChange, Qt::QueuedConnection);
 
-    // TODO: Birden çok control'ü reparent edince başka bi kontrole, alt kontrollerin ikonları bozuluyor
-    // TODO: Handle icon change
     // TODO: Handle refreshing the list when project loading is done
     // TODO: Handle code changes (ui, non-ui, id change, icon change, error change)
     //    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
