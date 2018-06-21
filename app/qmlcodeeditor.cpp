@@ -438,9 +438,9 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 
     // That's how find results will be highlighted
     // Let's trig search on text editor after 4 seconds BUG
-    QTimer::singleShot(4000, [=]{
-        highlightSearchResultsSlot("swipeView", FindFlags(FindCaseSensitively | FindWholeWords));
-    });
+    //    QTimer::singleShot(4000, [=]{
+    //        highlightSearchResultsSlot("swipeView", FindFlags(FindCaseSensitively | FindWholeWords));
+    //    });
 }
 
 QmlCodeEditor::~QmlCodeEditor()

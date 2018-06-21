@@ -5,7 +5,7 @@
 #include <qmlcodeeditorwidget.h>
 #include <savemanager.h>
 #include <controlmonitoringmanager.h>
-#include <controlexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <filemanager.h>
 #include <transparentcombobox.h>
 #include <utilsicons.h>
@@ -227,7 +227,7 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
-    auto newControl = ControlExposingManager::exposeControl(dname(dname(url)), pos, "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());
+    auto newControl = ControlCreationManager::createControl(dname(dname(url)), pos, "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());
     newControl->setSelected(true);
 }
 

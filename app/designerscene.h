@@ -9,8 +9,9 @@ class DesignerScene : public QGraphicsScene
 {
     Q_OBJECT
 
-    friend class ControlRemovingManager; // For removeControl()
-    friend class ControlExposingManager; // For addForm()
+    friend class ControlRemovingManager; // For removeControl(), removeForm()
+    friend class ControlCreationManager; // For addForm(), addControl()
+    friend class ProjectExposingManager; // For addForm(), addControl()
 
 public:
     explicit DesignerScene(QObject *parent = Q_NULLPTR);
@@ -33,6 +34,7 @@ public slots:
 
 private:
     void addForm(Form* form);
+    void addControl(Control* control, Control* parentControl);
     void removeForm(Form* form);
     void removeControl(Control* control);
 

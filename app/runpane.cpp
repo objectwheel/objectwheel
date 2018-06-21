@@ -53,7 +53,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     m_projectsButton->settings().iconButton = true;
     connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));
 
-    m_loadingBar->setText(ProjectManager::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
     connect(ProjectManager::instance(), &ProjectManager::started, [=] {
         m_loadingBar->setText(ProjectManager::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
     });

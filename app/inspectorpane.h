@@ -13,6 +13,8 @@ class InspectorPane : public QTreeWidget
 {
     Q_OBJECT
 
+    friend class InspectorListDelegate; // For itemFromIndex()
+
     struct FormState {
         QList<QString> selectedIds;
         QList<QString> collapsedIds;
@@ -28,10 +30,12 @@ public slots:
     void sweep();
 
 private slots:
+    void onProjectStart();
     void onSelectionChange();
-    void onControlAdd(Control* control);
+    void onControlCreation(Control* control);
     void onControlRemove(Control* control);
     void onControlParentChange(Control* control);
+    void onControlPreviewChange(Control* control);
     void onFormRemove(Form* form);
     void onCurrentFormChange(Form* currentForm);
     void onItemSelectionChange();
@@ -49,8 +53,8 @@ signals:
 
 private:
     DesignerScene* m_designerScene;
-    QPointer<Form> m_currentForm;
     QHash<Form*, FormState> m_formStates;
+    QPointer<Form> m_currentForm;
 };
 
 #endif // INSPECTORPANE_H

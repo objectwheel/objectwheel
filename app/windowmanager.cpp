@@ -7,7 +7,7 @@
 #include <savemanager.h>
 #include <dpr.h>
 #include <projectmanager.h>
-#include <initializationmanager.h>
+#include <applicationcore.h>
 #include <QStyle>
 
 AboutWindow* WindowManager::s_aboutWindow = nullptr;

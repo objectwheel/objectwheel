@@ -3,7 +3,7 @@
 #include <css.h>
 #include <savemanager.h>
 #include <saveutils.h>
-#include <controlexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <controlpreviewingmanager.h>
 
@@ -221,7 +221,7 @@ void DesignerView::onPasteAction()
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
-        auto control = ControlExposingManager::exposeControl(
+        auto control = ControlCreationManager::createControl(
             url.toLocalFile(),
             QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
             sourceSuid,

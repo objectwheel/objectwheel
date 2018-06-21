@@ -8,7 +8,7 @@ class UserManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(UserManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 public:
     static UserManager* instance();

@@ -11,9 +11,9 @@ class SaveManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(SaveManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
     friend class ControlRemovingManager; // For removeControl()
-    friend class ControlExposingManager; // For addControl()
+    friend class ControlCreationManager; // For addControl()
     friend class ControlTransactionManager; // For moveControl()
 
 public:

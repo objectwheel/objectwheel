@@ -10,7 +10,7 @@ class ControlTransactionManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ControlTransactionManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 private slots:
     void processZ(Control*);

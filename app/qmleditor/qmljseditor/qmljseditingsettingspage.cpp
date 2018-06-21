@@ -26,7 +26,7 @@
 #include "qmljseditingsettingspage.h"
 #include "qmljseditorconstants.h"
 
-#include <initializationmanager.h>
+#include <applicationcore.h>
 #include <qmljstools/qmljstoolsconstants.h>
 //#include <coreplugin/icore.h>
 
@@ -48,7 +48,7 @@ QmlJsEditingSettings::QmlJsEditingSettings()
 void QmlJsEditingSettings::set()
 {
     if (get() != *this)
-        toSettings(InitializationManager::settings());
+        toSettings(ApplicationCore::settings());
 }
 
 void QmlJsEditingSettings::fromSettings(QSettings *settings)
@@ -158,7 +158,7 @@ void QmlJsEditingSettignsPageWidget::setSettings(const QmlJsEditingSettings &s)
 QmlJsEditingSettings QmlJsEditingSettings::get()
 {
     QmlJsEditingSettings settings;
-    settings.fromSettings(InitializationManager::settings());
+    settings.fromSettings(ApplicationCore::settings());
     return settings;
 }
 

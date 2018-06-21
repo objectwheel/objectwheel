@@ -2,8 +2,7 @@
 #include <filemanager.h>
 #include <menumanager.h>
 #include <windowmanager.h>
-#include <initializationmanager.h>
-#include <welcomewindow.h>
+#include <applicationcore.h>
 #include <appfontsettings.h>
 
 #include <QIcon>
@@ -57,10 +56,7 @@ int main(int argc, char* argv[])
     CSS::init();
 
     // Create backend manager
-    InitializationManager::init(&app);
-
-    // Show welcome window
-    WindowManager::welcomeWindow()->show();
+    ApplicationCore::init(&app);
 
     // Start main event loop
     return app.exec();

@@ -8,7 +8,7 @@
 #include <filemanager.h>
 #include <css.h>
 #include <delayer.h>
-#include <controlexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 
 #include <QLabel>
@@ -208,7 +208,7 @@ void FormsPane::addButtonClicked()
     if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
         return;
 
-    auto form = ControlExposingManager::exposeForm(tempPath);
+    auto form = ControlCreationManager::createForm(tempPath);
     form->centralize();
 
     rm(tempPath);

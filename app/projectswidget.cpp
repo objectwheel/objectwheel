@@ -281,7 +281,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     connect(ControlPreviewingManager::instance(), SIGNAL(taskDone()),
       SLOT(onProgressChange()));
     connect(ProjectManager::instance(), &ProjectManager::started, [=]
-    {
+    { // TODO: ???
         totalTask = ControlPreviewingManager::totalTask();
         onProgressChange();
     });
@@ -420,7 +420,6 @@ void ProjectsWidget::onLoadButtonClick()
 //    }
 
     WindowManager::mainWindow()->hide();
-    ProjectManager::stop();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
 
     lock();

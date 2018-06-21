@@ -12,7 +12,7 @@ class ControlRemovingManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ControlRemovingManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 public:
     static ControlRemovingManager* instance();

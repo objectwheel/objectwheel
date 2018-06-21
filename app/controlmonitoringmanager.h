@@ -11,7 +11,7 @@ class ControlMonitoringManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ControlMonitoringManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 public:
     static ControlMonitoringManager* instance();

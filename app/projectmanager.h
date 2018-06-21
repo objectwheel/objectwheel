@@ -8,7 +8,7 @@ class ProjectManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ProjectManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 public:
     static ProjectManager* instance();
@@ -35,6 +35,7 @@ public:
     static bool exportProject(const QString& hash, const QString& filePath);
     static bool newProject(int templateNumber, const QString& name, const QString& description,
                            const QString& owner, const QString& crDate,const QString& size);
+
 signals:
     void started();
     void stopped();

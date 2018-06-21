@@ -7,7 +7,8 @@ class Form : public Control
 {
     Q_OBJECT
 
-    friend class ControlExposingManager;
+    friend class ControlCreationManager; // For constructor
+    friend class ProjectExposingManager; // For constructor
 
 public:
     bool main() const;

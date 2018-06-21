@@ -1,12 +1,8 @@
 #include <inspectorpane.h>
 #include <css.h>
-#include <centralwidget.h>
 #include <filemanager.h>
 #include <saveutils.h>
-#include <savemanager.h>
-#include <formspane.h>
-#include <controlmonitoringmanager.h>
-#include <controlexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <designerscene.h>
 #include <form.h>
@@ -14,15 +10,10 @@
 #include <dpr.h>
 #include <controlmonitoringmanager.h>
 
-#include <QVBoxLayout>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QHeaderView>
 #include <QScrollBar>
-#include <QTimer>
-#include <QPointer>
 
 namespace {
 
@@ -75,15 +66,12 @@ Control* controlFromItem(const QTreeWidgetItem* item, Form* form)
     allControls.append(form);
     allControls.append(form->childControls());
 
-    Control* control = nullptr;
     for (Control* childControl : allControls) {
-        if (childControl->id() == item->text(0)) {
-            control = childControl;
-            break;
-        }
+        if (childControl->id() == item->text(0))
+            return childControl;
     }
 
-    return control;
+    return nullptr;
 }
 
 QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
@@ -99,46 +87,41 @@ QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
     return items;
 }
 
-QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true)
+QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
+                                         bool includeCollapsed = true)
 {
     QList<QTreeWidgetItem*> items;
 
     if (!parentItem)
         return items;
 
+    if (!includeCollapsed && !parentItem->isExpanded()) {
+        if (includeParent)
+            items.append(parentItem);
+
+        return items;
+    }
+
     if (includeParent)
         items.append(parentItem);
 
     for (int i = 0; i < parentItem->childCount(); i++) {
         items.append(parentItem->child(i));
-        items.append(allSubChildItems(parentItem->child(i), false));
+        items.append(allSubChildItems(parentItem->child(i), false, includeCollapsed));
     }
 
     return items;
 }
 
-int rowsBelowIndex(const QModelIndex& index) {
+int calculateVisibleRow(const QTreeWidgetItem* item, const QTreeWidget* treeWidget)
+{
     int count = 0;
-    const QAbstractItemModel* model = index.model();
-    int rowCount = model->rowCount(index);
-    count += rowCount;
-    for (int r = 0; r < rowCount; ++r)
-        count += rowsBelowIndex(model->index(r, 0, index));
-    return count;
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(treeWidget)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem, true, false)) {
+            if (childItem == item)
+                return count;
 
-}
-
-int calculateRow(const QModelIndex& index) {
-    int count = 0;
-    if (index.isValid()) {
-        count = (index.row()) + calculateRow(index.parent());
-
-        const QModelIndex parent = index.parent();
-        if (parent.isValid()) {
             ++count;
-            for (int r = 0; r < index.row(); ++r)
-                count += rowsBelowIndex(parent.child(r, 0));
-
         }
     }
 
@@ -174,9 +157,11 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
 class InspectorListDelegate: public QStyledItemDelegate
 {
     Q_OBJECT
+    InspectorPane* m_treeWidget;
 
 public:
-    InspectorListDelegate(QWidget* parent) : QStyledItemDelegate(parent)
+    InspectorListDelegate(InspectorPane* parent) : QStyledItemDelegate(parent)
+      , m_treeWidget(parent)
     {}
 
     void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -192,7 +177,9 @@ public:
         iconRect.moveCenter(option.rect.center());
         iconRect.moveLeft(option.rect.left() + 5);
 
-        fillBackground(painter, option.rect, calculateRow(index), isSelected, index.column() == 0);
+        fillBackground(painter, option.rect,
+                       calculateVisibleRow(m_treeWidget->itemFromIndex(index), m_treeWidget),
+                       isSelected, index.column() == 0);
 
         // Draw icon
         painter->drawPixmap(iconRect, icon.pixmap(iconSize, iconSize),
@@ -225,6 +212,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     QFont fontMedium(font());
     fontMedium.setWeight(QFont::Medium);
 
@@ -254,27 +242,26 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &InspectorPane::onControlRemove);
-    connect(ControlExposingManager::instance(), &ControlExposingManager::controlExposed,
-            this, &InspectorPane::onControlAdd);
+    connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
+            this, &InspectorPane::onControlCreation);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::formAboutToBeRemoved,
             this, &InspectorPane::onFormRemove);
     connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
     connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::idChanged,
             this, &InspectorPane::onControlIdChange);
+    connect(ProjectManager::instance(), &ProjectManager::started,
+            this, &InspectorPane::onProjectStart, Qt::QueuedConnection);
     // We delay selection change signal, otherwise FormsPane clears the selection (and hence we clear
     // selection on tree view) on the scene before sending a formChanged signal. Thus we can't save
     // selected item states into FormState data for outgoing form.
     connect(m_designerScene, &DesignerScene::selectionChanged,
             this, &InspectorPane::onSelectionChange, Qt::QueuedConnection);
-    // We delay parant change signal, otherwise it is emitted before controlExposed signal for
+    // We delay parant change signal, otherwise it is emitted before controlCreated signal for
     // control exposing operation. Thus we get controlAdded slot called twice for control creation.
     connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::parentChanged,
             this, &InspectorPane::onControlParentChange, Qt::QueuedConnection);
-
-    // TODO: Handle refreshing the list when project loading is done
-    // TODO: Handle code changes (ui, non-ui, id change, icon change, error change)
-    //    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(refresh()));
-    //    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(refresh()));
+    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::previewChanged,
+            this, &InspectorPane::onControlPreviewChange/*, Qt::QueuedConnection*/);
 }
 
 void InspectorPane::paintEvent(QPaintEvent* e)
@@ -314,7 +301,8 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
     handleRect.moveCenter(rect.center());
     handleRect.moveRight(rect.right() - 0.5);
 
-    fillBackground(painter, rect, calculateRow(index), isSelected, false);
+    fillBackground(painter, rect, calculateVisibleRow(itemFromIndex(index), this),
+                   isSelected, false);
 
     // Draw handle
     if (hasChild) {
@@ -336,6 +324,11 @@ void InspectorPane::sweep()
 {
     m_formStates.clear();
     clear();
+}
+
+void InspectorPane::onProjectStart()
+{
+    onCurrentFormChange(m_designerScene->currentForm());
 }
 
 void InspectorPane::onCurrentFormChange(Form* currentForm)
@@ -369,11 +362,15 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     /* Create items for incoming form */
     auto formItem = new QTreeWidgetItem;
     formItem->setText(0, currentForm->id());
-    formItem->setText(1, tr("Yes"));
     formItem->setData(0, Qt::UserRole, currentForm->hasErrors());
     formItem->setData(1, Qt::UserRole, currentForm->hasErrors());
     formItem->setIcon(0, SaveUtils::isMain(currentForm->dir()) ? QIcon(":/images/mform.png") :
                                                                  QIcon(":/images/form.png"));
+
+    if (currentForm->gui() && !currentForm->hasErrors())
+        formItem->setText(1, tr("Yes"));
+    else
+        formItem->setText(1, tr("No"));
 
     addChildrenIntoItem(formItem, currentForm->childControls(false));
     addTopLevelItem(formItem);
@@ -405,7 +402,7 @@ void InspectorPane::onFormRemove(Form* form)
     m_formStates.remove(form);
 }
 
-void InspectorPane::onControlAdd(Control* control)
+void InspectorPane::onControlCreation(Control* control)
 {
     const Control* parentControl = control->parentControl();
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
@@ -414,11 +411,10 @@ void InspectorPane::onControlAdd(Control* control)
                 addChildrenIntoItem(childItem, QList<Control*>() << control);
                 expandAllChildren(this, childItem);
                 sortItems(0, Qt::AscendingOrder);
-                goto quit;
+                return;
             }
         }
     }
-    quit:;
 }
 
 void InspectorPane::onControlRemove(Control* control)
@@ -426,19 +422,68 @@ void InspectorPane::onControlRemove(Control* control)
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (control->id() == childItem->text(0)) {
-                topLevelItem->removeChild(childItem);
+                childItem->parent()->removeChild(childItem);
                 delete childItem;
-                goto quit;
+                // No need to following, because the order is preserved after the deletion already.
+                // sortItems(0, Qt::AscendingOrder);
+                return;
             }
         }
     }
-    quit:;
 }
 
 void InspectorPane::onControlParentChange(Control* control)
 {
-    onControlRemove(control);
-    onControlAdd(control);
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (control->id() == childItem->text(0)) {
+                for (QTreeWidgetItem* topLevelItem_2 : topLevelItems(this)) {
+                    for (QTreeWidgetItem* childItem_2 : allSubChildItems(topLevelItem_2)) {
+                        if (control->parentControl()->id() == childItem_2->text(0)) {
+                            childItem->parent()->removeChild(childItem);
+                            childItem_2->addChild(childItem);
+                            sortItems(0, Qt::AscendingOrder);
+                            return;
+                        }
+                    }
+                }
+                return;
+            }
+        }
+    }
+}
+
+void InspectorPane::onControlPreviewChange(Control* control)
+{
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (control->id() == childItem->text(0)) {
+                // No need to following, onControlIdChange takes place before the preview operation
+                // childItem->setText(0, control->id());
+                // Hence no need to this too: sortItems(0, Qt::AscendingOrder);
+                childItem->setData(0, Qt::UserRole, control->hasErrors());
+                childItem->setData(1, Qt::UserRole, control->hasErrors());
+
+                if (control->gui() && !control->hasErrors())
+                    childItem->setText(1, tr("Yes"));
+                else
+                    childItem->setText(1, tr("No"));
+
+                if (control->form()) {
+                    childItem->setIcon(0, SaveUtils::isMain(control->dir()) ?
+                                           QIcon(":/images/mform.png") :
+                                           QIcon(":/images/form.png"));
+                } else {
+                    QIcon icon(control->dir() + separator() + DIR_THIS + separator() + "icon.png");
+                    if (icon.isNull())
+                        icon.addFile(":/images/item.png");
+
+                    childItem->setIcon(0, icon);
+                }
+                return;
+            }
+        }
+    }
 }
 
 void InspectorPane::onControlIdChange(Control* control, const QString& previousId)
@@ -447,11 +492,11 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (previousId == childItem->text(0)) {
                 childItem->setText(0, control->id());
-                goto quit;
+                sortItems(0, Qt::AscendingOrder);
+                return;
             }
         }
     }
-    quit:;
 }
 
 void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)

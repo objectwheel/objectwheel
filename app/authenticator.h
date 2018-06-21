@@ -8,7 +8,7 @@ class Authenticator final : public QWebSocket
     Q_OBJECT
     Q_DISABLE_COPY(Authenticator)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 public:
     static Authenticator* instance();

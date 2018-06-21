@@ -1,4 +1,4 @@
-#include <controlexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <form.h>
 #include <designerscene.h>
 #include <saveutils.h>
@@ -7,61 +7,32 @@
 #include <savemanager.h>
 #include <controlpreviewingmanager.h>
 
-DesignerScene* ControlExposingManager::s_designerScene = nullptr;
-ControlExposingManager* ControlExposingManager::s_instance = nullptr;
+DesignerScene* ControlCreationManager::s_designerScene = nullptr;
+ControlCreationManager* ControlCreationManager::s_instance = nullptr;
 
-// FIXME: exposeControl and exposeForm should use DesignerScene to deal with
+// FIXME: createControl and createForm should use DesignerScene to deal with
 // GUI side control adding operations
-ControlExposingManager::ControlExposingManager(QObject* parent) : QObject(parent)
+ControlCreationManager::ControlCreationManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
 }
 
-ControlExposingManager::~ControlExposingManager()
+ControlCreationManager::~ControlCreationManager()
 {
     s_instance = nullptr;
 }
 
-ControlExposingManager* ControlExposingManager::instance()
+ControlCreationManager* ControlCreationManager::instance()
 {
     return s_instance;
 }
 
-void ControlExposingManager::init(DesignerScene* designerScene)
+void ControlCreationManager::init(DesignerScene* designerScene)
 {
     s_designerScene = designerScene;
 }
 
-void ControlExposingManager::exposeProject()
-{
-    const auto& fpaths = SaveUtils::formPaths(ProjectManager::dir());
-
-    for (const auto& path : fpaths) {
-        auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
-
-        if (SaveUtils::isMain(path))
-            form->setMain(true);
-
-        s_designerScene->addForm(form);
-        form->centralize();
-        form->refresh();
-
-        QMap<QString, Control*> pmap;
-        pmap[path] = form;
-
-        for (const auto& child : SaveUtils::childrenPaths(path)) {
-            auto pcontrol = pmap.value(dname(dname(child)));
-            auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-            control->blockSignals(true);
-            control->setParentItem(pcontrol);
-            control->blockSignals(false);
-            control->refresh();
-            pmap[child] = control;
-        }
-    }
-}
-
-Form* ControlExposingManager::exposeForm(const QString& rootPath)
+Form* ControlCreationManager::createForm(const QString& rootPath)
 {
     ControlPreviewingManager::setDisabled(true);
 
@@ -87,17 +58,17 @@ Form* ControlExposingManager::exposeForm(const QString& rootPath)
         ControlPreviewingManager::setDisabled(false);
         control->refresh();
 
-        emit instance()->controlExposed(control);
+        emit instance()->controlCreated(control);
 
         pmap[child] = control;
     }
 
-    emit instance()->formExposed(form);
+    emit instance()->formCreated(form);
 
     return form;
 }
 
-Control* ControlExposingManager::exposeControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
+Control* ControlCreationManager::createControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
                                                Control* parentControl, QString destinationPath,
                                                QString destinationSuid)
 {
@@ -130,12 +101,12 @@ Control* ControlExposingManager::exposeControl(const QString& rootPath, const QP
         ControlPreviewingManager::setDisabled(false);
         ccontrol->refresh();
 
-        emit instance()->controlExposed(control);
+        emit instance()->controlCreated(control);
 
         pmap[child] = ccontrol;
     }
 
-    emit instance()->controlExposed(control);
+    emit instance()->controlCreated(control);
 
     return control;
 }

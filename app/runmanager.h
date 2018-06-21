@@ -8,7 +8,7 @@ class RunManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(RunManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 public:
     static RunManager* instance();

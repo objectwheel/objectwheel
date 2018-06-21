@@ -13,7 +13,7 @@ include($$PWD/version.pri)
 include($$PWD/aes/aes.pri)
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)
-include ($$PWD/qmleditor/qmleditor.pri)
+include($$PWD/qmleditor/qmleditor.pri)
 
 ### Sources
 INCLUDEPATH += $$PWD
@@ -54,7 +54,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/formspane.h \
            $$PWD/propertiespane.h \
            $$PWD/toolboxpane.h \
-           $$PWD/initializationmanager.h \
+           $$PWD/applicationcore.h \
            $$PWD/savemanager.h \
            $$PWD/projectmanager.h \
            $$PWD/toolmanager.h \
@@ -90,7 +90,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/buildswidget.h \
            $$PWD/pages.h \
            $$PWD/projectoptionswidget.h \
-           $$PWD/controlexposingmanager.h \
+           $$PWD/controlcreationmanager.h \
            $$PWD/helpwidget.h \
            $$PWD/webenginehelpviewer.h \
            $$PWD/helpviewer.h \
@@ -107,11 +107,11 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/qmlcodedocument.h \
            $$PWD/documentmanager.h \
            $$PWD/markband.h \
-    transparentcombobox.h \
-    toolbar.h \
-    toolbutton.h \
-#    inspectorpane_copy.h
-    controlremovingmanager.h
+           $$PWD/transparentcombobox.h \
+           $$PWD/toolbar.h \
+           $$PWD/toolbutton.h \
+           $$PWD/controlremovingmanager.h \
+           $$PWD/projectexposingmanager.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -148,7 +148,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/formspane.cpp \
            $$PWD/propertiespane.cpp \
            $$PWD/toolboxpane.cpp \
-           $$PWD/initializationmanager.cpp \
+           $$PWD/applicationcore.cpp \
            $$PWD/savemanager.cpp \
            $$PWD/projectmanager.cpp \
            $$PWD/toolmanager.cpp \
@@ -183,7 +183,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/qmlcodeeditorwidget.cpp \
            $$PWD/buildswidget.cpp \
            $$PWD/projectoptionswidget.cpp \
-           $$PWD/controlexposingmanager.cpp \
+           $$PWD/controlcreationmanager.cpp \
            $$PWD/helpwidget.cpp \
            $$PWD/webenginehelpviewer.cpp \
            $$PWD/helpviewer.cpp \
@@ -199,11 +199,11 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/qmlcodedocument.cpp \
            $$PWD/documentmanager.cpp \
            $$PWD/markband.cpp \
-    transparentcombobox.cpp \
-    toolbar.cpp \
-    toolbutton.cpp \
-#    inspectorpane_copy.cpp
-    controlremovingmanager.cpp
+           $$PWD/transparentcombobox.cpp \
+           $$PWD/toolbar.cpp \
+           $$PWD/toolbutton.cpp \
+           $$PWD/controlremovingmanager.cpp \
+           $$PWD/projectexposingmanager.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

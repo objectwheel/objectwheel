@@ -12,7 +12,7 @@
 #include <toolmanager.h>
 #include <designerwidget.h>
 #include <qmlcodeeditorwidget.h>
-#include <controlexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <runmanager.h>
 #include <projectmanager.h>
 #include <consolebox.h>
@@ -275,22 +275,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         );
     });
 
-
-    QTimer::singleShot(15000, [=]{
-
-//        auto m_qmlCodeEditor = ((CentralWidget*)centralWidget())->qmlCodeEditorWidget()->editor();
-//        const QString qmlFilePath = "/users/omergoktas/desktop/main1.qml";
-
-//        QFile file(qmlFilePath);
-//        file.open(QFile::ReadOnly | QFile::Text);
-//        const QString content = QString::fromUtf8(file.readAll());
-//        file.close();
-
-//        auto textDocument = new QmlCodeDocument(m_qmlCodeEditor);
-//        textDocument->setFilePath(qmlFilePath);
-//        m_qmlCodeEditor->setCodeDocument(textDocument);
-//        m_qmlCodeEditor->setPlainText(content);
-    });
+    sweep();
 }
 
 void MainWindow::sweep()

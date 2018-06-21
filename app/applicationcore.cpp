@@ -1,8 +1,9 @@
-#include <initializationmanager.h>
+#include <applicationcore.h>
 #include <toolmanager.h>
 #include <usermanager.h>
 #include <projectmanager.h>
-#include <controlexposingmanager.h>
+#include <projectexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <windowmanager.h>
 #include <authenticator.h>
 #include <controlpreviewingmanager.h>
@@ -11,13 +12,14 @@
 #include <mainwindow.h>
 #include <controlpreviewingmanager.h>
 #include <runmanager.h>
-#include <controlexposingmanager.h>
+#include <controlcreationmanager.h>
 #include <savemanager.h>
 #include <controlmonitoringmanager.h>
 #include <menumanager.h>
 #include <centralwidget.h>
 #include <designerwidget.h>
 #include <controlremovingmanager.h>
+#include <welcomewindow.h>
 
 #include <QMessageBox>
 
@@ -28,23 +30,24 @@
 
 using namespace Core;
 
-InitializationManager* InitializationManager::s_instance = nullptr;
-Authenticator* InitializationManager::s_authenticator = nullptr;
-UserManager* InitializationManager::s_userManager = nullptr;
-ControlPreviewingManager* InitializationManager::s_controlPreviewingManager = nullptr;
-SaveManager* InitializationManager::s_saveManager = nullptr;
-ProjectManager* InitializationManager::s_projectManager = nullptr;
-ControlExposingManager* InitializationManager::s_controlExposingManager = nullptr;
-ControlRemovingManager* InitializationManager::s_controlRemovingManager = nullptr;
-RunManager* InitializationManager::s_runManager = nullptr;
-ControlMonitoringManager* InitializationManager::s_controlMonitoringManager = nullptr;
-ControlTransactionManager* InitializationManager::s_controlTransactionManager = nullptr;
-HelpManager* InitializationManager::s_helpManager = nullptr;
-DocumentManager* InitializationManager::s_documentManager = nullptr;
-WindowManager* InitializationManager::s_windowManager = nullptr;
-MenuManager* InitializationManager::s_menuManager = nullptr;
+ApplicationCore* ApplicationCore::s_instance = nullptr;
+Authenticator* ApplicationCore::s_authenticator = nullptr;
+UserManager* ApplicationCore::s_userManager = nullptr;
+ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
+SaveManager* ApplicationCore::s_saveManager = nullptr;
+ProjectManager* ApplicationCore::s_projectManager = nullptr;
+ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
+ControlCreationManager* ApplicationCore::s_controlExposingManager = nullptr;
+ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
+RunManager* ApplicationCore::s_runManager = nullptr;
+ControlMonitoringManager* ApplicationCore::s_controlMonitoringManager = nullptr;
+ControlTransactionManager* ApplicationCore::s_controlTransactionManager = nullptr;
+HelpManager* ApplicationCore::s_helpManager = nullptr;
+DocumentManager* ApplicationCore::s_documentManager = nullptr;
+WindowManager* ApplicationCore::s_windowManager = nullptr;
+MenuManager* ApplicationCore::s_menuManager = nullptr;
 
-InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
+ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 {
     s_instance = this;
     s_authenticator = new Authenticator(this);
@@ -52,7 +55,8 @@ InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
     s_controlPreviewingManager = new ControlPreviewingManager(this);
     s_saveManager = new SaveManager(this);
     s_projectManager = new ProjectManager(this);
-    s_controlExposingManager = new ControlExposingManager(this);
+    s_projectExposingManager = new ProjectExposingManager(this);
+    s_controlExposingManager = new ControlCreationManager(this);
     s_controlRemovingManager = new ControlRemovingManager(this);
     s_runManager = new RunManager(this);
     s_controlMonitoringManager = new ControlMonitoringManager(this);
@@ -66,7 +70,7 @@ InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
     s_documentManager = new DocumentManager(this);
 
     connect(UserManager::instance(), &UserManager::aboutToStop,
-            this, &InitializationManager::onSessionStop);
+            this, &ApplicationCore::onSessionStop);
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
@@ -80,59 +84,53 @@ InitializationManager::InitializationManager(QObject* parent) : QObject(parent)
     s_windowManager = new WindowManager(this);
     s_menuManager = new MenuManager(this);
 
-    connect(ProjectManager::instance(), &ProjectManager::started,
+    connect(ProjectManager::instance(), &ProjectManager::stopped,
             WindowManager::mainWindow(), &MainWindow::sweep);
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            InitializationManager::instance(), &InitializationManager::onProjectStart);
-
-    ControlExposingManager::init(
+    ProjectExposingManager::init(
+                WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
+    ControlCreationManager::init(
                 WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
     ControlRemovingManager::init(
                 WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
+
+    // Show welcome window
+    WindowManager::welcomeWindow()->show();
 }
 
-InitializationManager::~InitializationManager()
+ApplicationCore::~ApplicationCore()
 {
     s_instance = nullptr;
 }
 
-void InitializationManager::init(QObject* parent)
+void ApplicationCore::init(QObject* parent)
 {
-    static InitializationManager* instance = nullptr;
+    static ApplicationCore* instance = nullptr;
     if (instance == nullptr)
-        instance = new InitializationManager(parent);
+        instance = new ApplicationCore(parent);
 }
 
-InitializationManager* InitializationManager::instance()
+ApplicationCore* ApplicationCore::instance()
 {
     return s_instance;
 }
 
-QSettings* InitializationManager::settings(QSettings::Scope scope)
+QSettings* ApplicationCore::settings(QSettings::Scope scope)
 {
     static QSettings settings, globalSettings;
     return scope == QSettings::UserScope ? &settings : &globalSettings;
 }
 
-QString InitializationManager::resourcePath()
+QString ApplicationCore::resourcePath()
 {
     return tr(":");
 }
 
-QString InitializationManager::userResourcePath()
+QString ApplicationCore::userResourcePath()
 {
     return tr(":");
 }
 
-void InitializationManager::onSessionStop()
+void ApplicationCore::onSessionStop()
 {
     ProjectManager::stop();
-}
-
-void InitializationManager::onProjectStart()
-{
-    ControlPreviewingManager::restart();
-    ControlPreviewingManager::requestInit(ProjectManager::dir());
-    ControlExposingManager::exposeProject();
-    ToolManager::exposeTools();
 }

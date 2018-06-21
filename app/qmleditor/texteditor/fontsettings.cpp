@@ -26,7 +26,7 @@
 #include "fontsettings.h"
 #include "fontsettingspage.h"
 
-#include <initializationmanager.h>
+#include <applicationcore.h>
 #include <windowmanager.h>
 #include <utils/fileutils.h>
 #include <utils/hostosinfo.h>
@@ -495,7 +495,7 @@ int FontSettings::defaultFontSize()
  */
 QString FontSettings::defaultSchemeFileName(const QString &fileName)
 {
-    QString defaultScheme = InitializationManager::resourcePath();
+    QString defaultScheme = ApplicationCore::resourcePath();
     defaultScheme += QLatin1String("/styles/");
 
     if (!fileName.isEmpty() && QFile::exists(defaultScheme + fileName)) {

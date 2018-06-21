@@ -24,7 +24,7 @@
 ****************************************************************************/
 
 #include "helpmanager.h"
-#include <initializationmanager.h>
+#include <applicationcore.h>
 
 //#include <coreplugin/icore.h>
 //#include <coreplugin/progressmanager/progressmanager.h>
@@ -126,7 +126,7 @@ HelpManager *HelpManager::instance()
 
 QString HelpManager::collectionFilePath()
 {
-    return QDir::cleanPath(InitializationManager::userResourcePath()
+    return QDir::cleanPath(ApplicationCore::userResourcePath()
         + QLatin1String("/helpcollection.qhc"));
 }
 
@@ -473,7 +473,7 @@ HelpManagerPrivate::~HelpManagerPrivate()
 
 const QStringList HelpManagerPrivate::documentationFromInstaller()
 {
-    QSettings *installSettings = InitializationManager::settings();
+    QSettings *installSettings = ApplicationCore::settings();
     const QStringList documentationPaths = installSettings->value(QLatin1String("Help/InstalledDocumentation"))
             .toStringList();
     QStringList documentationFiles;
@@ -493,14 +493,14 @@ const QStringList HelpManagerPrivate::documentationFromInstaller()
 
 void HelpManagerPrivate::readSettings()
 {
-    m_userRegisteredFiles = InitializationManager::settings()->value(QLatin1String(kUserDocumentationKey))
+    m_userRegisteredFiles = ApplicationCore::settings()->value(QLatin1String(kUserDocumentationKey))
             .toStringList().toSet();
 }
 
 void HelpManagerPrivate::writeSettings()
 {
     const QStringList list = m_userRegisteredFiles.toList();
-    InitializationManager::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
+    ApplicationCore::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
 }
 
 }   // Core

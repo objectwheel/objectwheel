@@ -5,6 +5,9 @@
 #include <zipper.h>
 #include <hashfactory.h>
 #include <saveutils.h>
+#include <controlpreviewingmanager.h>
+#include <projectexposingmanager.h>
+#include <toolmanager.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -339,6 +342,11 @@ bool ProjectManager::start(const QString& hash)
         stop();
 
     s_currentHash = hash;
+
+    ToolManager::exposeTools();
+    ControlPreviewingManager::restart();
+    ControlPreviewingManager::requestInit(ProjectManager::dir());
+    ProjectExposingManager::exposeProject();
 
     emit instance()->started();
 

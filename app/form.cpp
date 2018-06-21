@@ -7,7 +7,7 @@
 Form::Form(const QString& url, Form* parent) : Control(url, parent)
   , m_main(false)
 {
-    setClip(true);
+    // setClip(true);
     setFlag(ItemIsMovable, false);
 }
 

@@ -53,6 +53,11 @@ void DesignerScene::addForm(Form* form)
         setCurrentForm(form);
 }
 
+void DesignerScene::addControl(Control* control, Control* parentControl)
+{
+    // TODO
+}
+
 void DesignerScene::removeForm(Form* form)
 {
     removeControl(form);

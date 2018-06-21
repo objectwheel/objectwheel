@@ -501,10 +501,11 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
 
         // We made it complicated to get a single-shot idChanged signal in ControlMonitoringManager.
         control->blockSignals(true);
+        const auto& previousId = control->id();
         control->setId(value);
         refactorId(control, _suid, topPath);
         const auto& refactoredId = control->id();
-        control->setId("");
+        control->setId(previousId);
         control->blockSignals(false);
         control->setId(refactoredId);
 

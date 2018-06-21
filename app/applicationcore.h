@@ -1,15 +1,16 @@
-#ifndef INITIALIZATIONMANAGER_H
-#define INITIALIZATIONMANAGER_H
+#ifndef APPLICATIONCORE_H
+#define APPLICATIONCORE_H
 
 #include <QObject>
 #include <QSettings>
 
 class Authenticator;
 class UserManager;
-class ProjectManager;
 class DocumentManager;
+class ProjectManager;
+class ProjectExposingManager;
 class ControlPreviewingManager;
-class ControlExposingManager;
+class ControlCreationManager;
 class ControlRemovingManager;
 class RunManager;
 class SaveManager;
@@ -20,34 +21,34 @@ class ControlTransactionManager;
 
 namespace Core { class HelpManager; }
 
-class InitializationManager final : public QObject
+class ApplicationCore final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(InitializationManager)
+    Q_DISABLE_COPY(ApplicationCore)
 
 public:
     static void init(QObject* parent);
-    static InitializationManager* instance();
+    static ApplicationCore* instance();
     static QString resourcePath();
     static QString userResourcePath();
     static QSettings* settings(QSettings::Scope scope = QSettings::UserScope);
 
 private slots:
     void onSessionStop();
-    void onProjectStart();
 
 private:
-    explicit InitializationManager(QObject* parent = nullptr);
-    ~InitializationManager();
+    explicit ApplicationCore(QObject* parent = nullptr);
+    ~ApplicationCore();
 
 private:
-    static InitializationManager* s_instance;
+    static ApplicationCore* s_instance;
     static Authenticator* s_authenticator;
     static UserManager* s_userManager;
     static ControlPreviewingManager* s_controlPreviewingManager;
     static SaveManager* s_saveManager;
     static ProjectManager* s_projectManager;
-    static ControlExposingManager* s_controlExposingManager;
+    static ProjectExposingManager* s_projectExposingManager;
+    static ControlCreationManager* s_controlExposingManager;
     static ControlRemovingManager* s_controlRemovingManager;
     static RunManager* s_runManager;
     static ControlMonitoringManager* s_controlMonitoringManager;
@@ -58,4 +59,4 @@ private:
     static MenuManager* s_menuManager;
 };
 
-#endif // INITIALIZATIONMANAGER_H
+#endif // APPLICATIONCORE_H

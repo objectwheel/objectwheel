@@ -17,7 +17,7 @@ class DocumentManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(DocumentManager)
 
-    friend class InitializationManager;
+    friend class ApplicationCore;
 
 public:
     static DocumentManager* instance();
