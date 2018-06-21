@@ -8,6 +8,7 @@
 #include <centralwidget.h>
 #include <qmlcodeeditorwidget.h>
 #include <control.h>
+#include <appfontsettings.h>
 
 #include <QTextBrowser>
 #include <QVBoxLayout>
@@ -34,7 +35,7 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     m_textBrowser->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
 
     QFont f;
-    f.setPixelSize(f.pixelSize() - 1);
+    f.setPixelSize(AppFontSettings::defaultPixelSize() - 1);
     m_textBrowser->setFont(f);
 
     QPalette p1(m_textBrowser->palette());

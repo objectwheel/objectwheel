@@ -6,6 +6,7 @@
 #include <toolbar.h>
 #include <toolbutton.h>
 #include <utilsicons.h>
+#include <appfontsettings.h>
 
 #include <QtWidgets>
 #include <QtHelp>
@@ -56,7 +57,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_toolbar->addWidget(m_titleLabel);
 
     QFont f;
-    f.setPixelSize(f.pixelSize() - 1);
+    f.setPixelSize(AppFontSettings::defaultPixelSize() - 1);
     m_titleLabel->setFont(f);
     m_titleLabel->setTextFormat(Qt::RichText);
 

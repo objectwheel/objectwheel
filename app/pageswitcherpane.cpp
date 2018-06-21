@@ -1,5 +1,6 @@
 #include <pageswitcherpane.h>
 #include <flatbutton.h>
+#include <appfontsettings.h>
 
 #include <QPainter>
 #include <QVBoxLayout>
@@ -29,7 +30,7 @@ PageSwitcherPane::PageSwitcherPane(QWidget *parent) : QWidget(parent)
 
     QFont labelFont;
     labelFont.setWeight(QFont::DemiBold);
-    labelFont.setPixelSize(labelFont.pixelSize() - 2.0);
+    labelFont.setPixelSize(AppFontSettings::defaultPixelSize() - 2.0);
 
     m_designerButton->setText(tr("Designer"));
     m_qmlCodeEditorButton->setText(tr("Editor"));

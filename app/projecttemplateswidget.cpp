@@ -11,6 +11,7 @@
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <dpr.h>
+#include <appfontsettings.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -97,7 +98,7 @@ void ProjectTemplatesDelegate::paint(QPainter* painter, const QStyleOptionViewIt
     painter->setPen("#21303c");
     painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
 
-    f.setPixelSize(f.pixelSize() - 2);
+    f.setPixelSize(AppFontSettings::defaultPixelSize() - 2);
     f.setWeight(QFont::Normal);
     painter->setFont(f);
     painter->drawText(rl, description, Qt::AlignVCenter | Qt::AlignLeft);

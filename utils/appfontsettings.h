@@ -8,6 +8,7 @@ class AppFontSettings final {
 
 public:
     static void apply();
+    static int defaultPixelSize() { return 13; }
 
 private:
     AppFontSettings() {}

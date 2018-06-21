@@ -15,6 +15,7 @@
 #include <utilsicons.h>
 #include <toolbar.h>
 #include <toolbutton.h>
+#include <appfontsettings.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -354,7 +355,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
 
 qreal QmlCodeEditorWidgetPrivate::findPixelSize(const QString& text)
 {
-    qreal base = QFont().pixelSize() - 0.5;
+    qreal base = AppFontSettings::defaultPixelSize() - 0.5;
 
     if (text == "35 %")
         return (base * 0.35);
