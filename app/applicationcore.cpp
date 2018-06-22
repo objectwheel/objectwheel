@@ -20,11 +20,14 @@
 #include <designerwidget.h>
 #include <controlremovingmanager.h>
 #include <welcomewindow.h>
+#include <appfontsettings.h>
 
 #include <QMessageBox>
+#include <QApplication>
+#include <QSharedMemory>
 
-#include <coreplugin/coreconstants.h>
 #include <theme/theme_p.h>
+#include <coreplugin/coreconstants.h>
 #include <coreplugin/themechooser.h>
 #include <coreplugin/helpmanager.h>
 
@@ -49,7 +52,32 @@ MenuManager* ApplicationCore::s_menuManager = nullptr;
 
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 {
-    s_instance = this;
+    //! Core initialization
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationDisplayName(APP_NAME);
+    QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+
+    // Multiple instances protection
+    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
+    if(!sharedMemory.create(1)) {
+        sharedMemory.attach();
+        sharedMemory.detach();
+        if(!sharedMemory.create(1)) {
+            QMessageBox::warning(nullptr,
+                                 tr("Quitting"),
+                                 tr("Another instance is already running."));
+            QMetaObject::invoke(QApplication::instance(), "exit",
+                                Qt::QueuedConnection, Q_ARG(int, EXIT_FAILURE));
+            return;
+        }
+    }
+
+    /* Set Font */
+    AppFontSettings::apply();
+
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);
     s_controlPreviewingManager = new ControlPreviewingManager(this);
@@ -80,7 +108,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
                               tr("Unable to start Objectwheel Previewing Service"));
     }
 
-    //! GUI initialization starts here
+    //! GUI initialization
     s_windowManager = new WindowManager(this);
     s_menuManager = new MenuManager(this);
 
@@ -97,16 +125,12 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     WindowManager::welcomeWindow()->show();
 }
 
-ApplicationCore::~ApplicationCore()
-{
-    s_instance = nullptr;
-}
-
 void ApplicationCore::init(QObject* parent)
 {
-    static ApplicationCore* instance = nullptr;
-    if (instance == nullptr)
-        instance = new ApplicationCore(parent);
+    if (s_instance)
+        return;
+
+    s_instance = new ApplicationCore(parent);
 }
 
 ApplicationCore* ApplicationCore::instance()

@@ -1,11 +1,12 @@
-#define REQUEST_INIT      QString("0x0000")
-#define REQUEST_PREVIEW   QString("0x0001")
-#define REQUEST_DONE      QString("0x0002")
-#define REQUEST_REPREVIEW QString("0x0003")
-#define REQUEST_TERMINATE QString("0x0004")
-#define REQUEST_RESTART   QString("0x0005")
-#define REQUEST_REMOVE    QString("0x0006")
-#define REQUEST_UPDATE    QString("0x0007")
-#define REQUEST_REPARENT  QString("0x0008")
-#define REQUEST_AWAKE     QString("0x0009")
-#define REQUEST_PROGRESS  QString("0x0010")
+#define CONNECTION_ALIVE         0x09
+#define INIT                     0x00
+#define INITIALIZATION_PROGRESS  0x10
+
+#define PREVIEW   0x01
+#define DONE      0x02
+#define REPREVIEW 0x03
+#define TERMINATE 0x04
+#define RESTART   0x05
+#define REMOVE    0x06
+#define UPDATE    0x07
+#define REPARENT  0x08

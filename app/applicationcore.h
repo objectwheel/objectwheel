@@ -38,7 +38,6 @@ private slots:
 
 private:
     explicit ApplicationCore(QObject* parent = nullptr);
-    ~ApplicationCore();
 
 private:
     static ApplicationCore* s_instance;
