@@ -92,7 +92,7 @@ bool ControlPreviewingManager::init()
     return s_server->listen("serverName");
 #else
     QProcess process;
-    process.setProgram(qApp->applicationDirPath() + "/objectwheel-previewer");
+    process.setProgram(qApp->applicationDirPath() + "/previewer");
     process.setArguments(QStringList() << serverName);
     // process.setStandardOutputFile(QProcess::nullDevice());
     // process.setStandardErrorFile(QProcess::nullDevice());

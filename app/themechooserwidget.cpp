@@ -571,7 +571,7 @@ void ThemeChooserWidget::run()
 
     process = new QProcess(this);
     process->start(
-        qApp->applicationDirPath() + "/objectwheel-themer",
+        qApp->applicationDirPath() + "/themer",
         QStringList() << "show" << tmpDir.path()
     );
 
@@ -625,7 +625,7 @@ void ThemeChooserWidget::refresh()
 
     QProcess process;
     process.start(
-        qApp->applicationDirPath() + "/objectwheel-themer",
+        qApp->applicationDirPath() + "/themer",
         QStringList() << "capture"
             << tmpDir.path()
             << tmpFile.fileName()

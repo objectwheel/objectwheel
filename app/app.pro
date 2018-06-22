@@ -233,11 +233,11 @@ DEFINES += QT_QML_DEBUG_NO_WARNING \
 
 ### Installs
 macx {
-    interpreter.files = $$OUT_PWD/../objectwheel-interpreter/objectwheel-interpreter
+    interpreter.files = $$OUT_PWD/../interpreter/interpreter
     interpreter.path = Contents/MacOS
-    previewer.files = $$OUT_PWD/../objectwheel-previewer/objectwheel-previewer
+    previewer.files = $$OUT_PWD/../previewer/previewer
     previewer.path = Contents/MacOS
-    themer.files = $$OUT_PWD/../objectwheel-themer/objectwheel-themer
+    themer.files = $$OUT_PWD/../themer/themer
     themer.path = Contents/MacOS
     utils.files = $$OUT_PWD/../utils/libutils.dylib
     utils.path = Contents/Frameworks
@@ -246,11 +246,11 @@ macx {
     docs.path = Contents/MacOS
     QMAKE_BUNDLE_DATA += interpreter previewer themer utils docs
 } else:unix {
-    interpreter.files = $$OUT_PWD/../objectwheel-interpreter/objectwheel-interpreter
+    interpreter.files = $$OUT_PWD/../interpreter/interpreter
     interpreter.path = $$OUT_PWD/
-    previewer.files = $$OUT_PWD/../objectwheel-previewer/objectwheel-previewer
+    previewer.files = $$OUT_PWD/../previewer/previewer
     previewer.path = $$OUT_PWD/
-    themer.files = $$OUT_PWD/../objectwheel-themer/objectwheel-themer
+    themer.files = $$OUT_PWD/../themer/themer
     themer.path = $$OUT_PWD/
     utils.files = $$OUT_PWD/../utils/libutils.so
     utils.path = $$OUT_PWD/
@@ -261,9 +261,9 @@ macx {
     CONFIG(debug, debug | release):COMPILING_MODE = debug
     CONFIG(release, debug | release):COMPILING_MODE = release
 
-    FILES_TO_COPY = $$OUT_PWD/../objectwheel-interpreter/$$COMPILING_MODE/objectwheel-interpreter.exe
-    FILES_TO_COPY += $$OUT_PWD/../objectwheel-previewer/$$COMPILING_MODE/objectwheel-previewer.exe
-    FILES_TO_COPY += $$OUT_PWD/../objectwheel-themer/$$COMPILING_MODE/objectwheel-themer.exe
+    FILES_TO_COPY = $$OUT_PWD/../interpreter/$$COMPILING_MODE/interpreter.exe
+    FILES_TO_COPY += $$OUT_PWD/../previewer/$$COMPILING_MODE/previewer.exe
+    FILES_TO_COPY += $$OUT_PWD/../themer/$$COMPILING_MODE/themer.exe
     FILES_TO_COPY += $$OUT_PWD/../utils/$$COMPILING_MODE/utils.dll
     DESTINATION_DIR = $$shell_quote($$shell_path($$OUT_PWD/$$COMPILING_MODE))
 
