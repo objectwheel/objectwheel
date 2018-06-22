@@ -66,7 +66,7 @@ private:
     static void disableDirtHandling();
     static void onBinaryMessageReceived(const QByteArray& data);
     static void fixTasksAgainstReparent(const QString& uid, const QString& newUrl);
-    static void processMessage(const QString& type, QDataStream& in);
+    static void processMessage(int type, QDataStream& in);
 
 signals:
     void taskDone();

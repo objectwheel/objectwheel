@@ -125,8 +125,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     p3.setColor(QPalette::Base, "#d4d4d4");
     p3.setColor(QPalette::Highlight, "#C3C7CA");
     _listWidget.setPalette(p3);
-    _listWidget.setStyleSheet(CSS::ScrollBar.
-      replace("background: transparent;", "background: #d4d4d4;"));
+    _listWidget.setStyleSheet(CSS_SCROLLBAR);
     _listWidget.setIconSize({52, 52});
     _listWidget.setMinimumWidth(400);
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));

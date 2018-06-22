@@ -35,7 +35,7 @@ void terminate(QLocalSocket* socket)
 {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
-    out << REQUEST_TERMINATE;
+    out << TERMINATE;
     send(socket, data);
     socket->abort();
     ::socket = nullptr;
@@ -45,7 +45,7 @@ void restart(QLocalSocket* socket, const QStringList& arguments)
 {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
-    out << REQUEST_RESTART;
+    out << RESTART;
     out << arguments;
     send(socket, data);
     socket->abort();
@@ -335,7 +335,7 @@ void ControlPreviewingManager::onReadReady()
 void ControlPreviewingManager::onBinaryMessageReceived(const QByteArray& data)
 {
     QDataStream in(data);
-    QString type;
+    int type;
     in >> type;
     processMessage(type, in);
 }
@@ -349,28 +349,28 @@ void ControlPreviewingManager::processNextTask()
         QDataStream out(&data, QIODevice::WriteOnly);
 
         if (task.type == Task::Init) {
-            out << REQUEST_INIT;
+            out << INIT;
             out << task.dir;
         } else if (task.type == Task::Preview) {
-            out << REQUEST_PREVIEW;
+            out << PREVIEW;
             out << task.dir;
         } else if (task.type == Task::Repreview) {
-            out << REQUEST_REPREVIEW;
+            out << REPREVIEW;
             out << task.dir;
             enableDirtHandling();
         } else if (task.type == Task::Reparent) {
-            out << REQUEST_REPARENT;
+            out << REPARENT;
             out << task.uid;
             out << task.parentUid;
             out << task.newUrl;
             // We don't need cause we get an position property update with reparent in anyways
             // enableDirtHandling();
         } else if (task.type == Task::Remove) {
-            out << REQUEST_REMOVE;
+            out << REMOVE;
             out << task.uid;
             enableDirtHandling();
         } else if (task.type == Task::Update) {
-            out << REQUEST_UPDATE;
+            out << UPDATE;
             out << task.uid;
             out << task.property;
             out << task.propertyValue;
@@ -381,9 +381,9 @@ void ControlPreviewingManager::processNextTask()
     }
 }
 
-void ControlPreviewingManager::processMessage(const QString& type, QDataStream& in)
+void ControlPreviewingManager::processMessage(int type, QDataStream& in)
 {
-    if (type == REQUEST_DONE) {
+    if (type == DONE) {
         Task::Type t = s_taskList.first().type;
 
         if (!s_taskList.first().needsUpdate) {

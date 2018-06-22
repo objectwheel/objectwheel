@@ -35,8 +35,8 @@ FileList::FileList(QWidget *parent) : QTreeView(parent)
     setSortingEnabled(true);
     header()->setSectionsMovable(false);
 
-    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
+    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
 
     _filterProxyModel.setDynamicSortFilter(true);
     _filterProxyModel.setFilterKeyColumn(0);

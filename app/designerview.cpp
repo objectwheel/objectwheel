@@ -33,8 +33,8 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
   , m_moveLeftAct(new QAction(this))
 {
     setStyleSheet("DesignerView { background: transparent }");
-    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
+    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
 
     m_sendBackAct->setText("Send to Back");
     m_bringFrontAct->setText("Bring to Front");

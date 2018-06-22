@@ -788,11 +788,11 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     _treeWidget->viewport()->installEventFilter(this);
     _treeWidget->header()->resizeSection(0, 170);
     _treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
-    _treeWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _treeWidget->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     _treeWidget->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     _treeWidget->setEditTriggers(QAbstractItemView::AllEditTriggers);
     _treeWidget->setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
-    _treeWidget->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    _treeWidget->horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
     _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _treeWidget->setItemDelegate(new PropertiesDelegate(_treeWidget, this, _treeWidget));
     _treeWidget->header()->setFixedHeight(23);

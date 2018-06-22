@@ -22,7 +22,6 @@ DEPENDPATH  += $$PWD
 HEADERS += $$PWD/mainwindow.h \
            $$PWD/flatbutton.h \
            $$PWD/css.h \
-           $$PWD/scrollarea.h \
            $$PWD/dirlocker.h \
            $$PWD/control.h \
            $$PWD/controltransactionmanager.h \
@@ -112,14 +111,11 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/toolbutton.h \
            $$PWD/controlremovingmanager.h \
            $$PWD/projectexposingmanager.h \
-#    controlpreviewingmanager_copy.h
-    bootsettings.h
+           $$PWD/bootsettings.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
            $$PWD/flatbutton.cpp \
-           $$PWD/css.cpp \
-           $$PWD/scrollarea.cpp \
            $$PWD/dirlocker.cpp \
            $$PWD/control.cpp \
            $$PWD/controltransactionmanager.cpp \
@@ -206,8 +202,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/toolbutton.cpp \
            $$PWD/controlremovingmanager.cpp \
            $$PWD/projectexposingmanager.cpp \
-#    controlpreviewingmanager_copy.cpp
-    bootsettings.cpp
+           $$PWD/bootsettings.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

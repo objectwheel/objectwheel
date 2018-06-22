@@ -61,7 +61,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _scrollArea.setWidgetResizable(true);
     _scrollArea.setWidget(scrollAreaWidgetContents);
     _scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _scrollArea.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _scrollArea.verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     _scrollArea.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     _scrollArea.setFixedWidth(600);
     _scrollAreaLay.setSpacing(30);
@@ -271,7 +271,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbPermissions.setMaxVisibleItems(15);
     _cmbPermissions.setEditable(true);
 
-    _permissionList.verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    _permissionList.verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     _permissionList.setFixedWidth(400);
     _permissionList.addItem("android.permission.WRITE_EXTERNAL_STORAGE");
     _permissionList.addItem("android.permission.READ_PHONE_STATE");

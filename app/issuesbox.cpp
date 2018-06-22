@@ -94,7 +94,7 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     m_listWidget->setIconSize({16, 16});
     m_listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
-    m_listWidget->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    m_listWidget->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setItemDelegate(new IssuesListDelegate(m_listWidget));
     connect(ControlMonitoringManager::instance(), SIGNAL(errorOccurred(Control*)),

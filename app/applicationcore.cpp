@@ -69,8 +69,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             QMessageBox::warning(nullptr,
                                  tr("Quitting"),
                                  tr("Another instance is already running."));
-            QMetaObject::invoke(QApplication::instance(), "exit",
-                                Qt::QueuedConnection, Q_ARG(int, EXIT_FAILURE));
+            QMetaObject::invokeMethod(QApplication::instance(), "exit",
+                                      Qt::QueuedConnection, Q_ARG(int, EXIT_FAILURE));
             return;
         }
     }

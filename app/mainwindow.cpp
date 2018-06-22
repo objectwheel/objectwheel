@@ -113,7 +113,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto inspectorTitleBar = new QToolBar;
     inspectorTitleBar->addWidget(inspectorTitleLabel);
     inspectorTitleBar->addWidget(inspectorTitlePinButton);
-    inspectorTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    inspectorTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     inspectorTitleBar->setIconSize(QSize(11, 11));
     inspectorTitleBar->setFixedHeight(24);
 
@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto propertiesTitleBar = new QToolBar;
     propertiesTitleBar->addWidget(propertiesTitleLabel);
     propertiesTitleBar->addWidget(propertiesTitlePinButton);
-    propertiesTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    propertiesTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     propertiesTitleBar->setIconSize(QSize(11, 11));
     propertiesTitleBar->setFixedHeight(24);
 
@@ -182,7 +182,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxTitleBar->addWidget(toolboxTitleLabel);
     toolboxTitleBar->addWidget(toolboxSettingsButton);
     toolboxTitleBar->addWidget(toolboxTitlePinButton);
-    toolboxTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    toolboxTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     toolboxTitleBar->setIconSize(QSize(11, 11));
     toolboxTitleBar->setFixedHeight(24);
 
@@ -213,7 +213,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto formsTitleBar = new QToolBar;
     formsTitleBar->addWidget(formsTitleLabel);
     formsTitleBar->addWidget(formsTitlePinButton);
-    formsTitleBar->setStyleSheet(CSS::DesignerPinbar);
+    formsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     formsTitleBar->setIconSize(QSize(11, 11));
     formsTitleBar->setFixedHeight(24);
 

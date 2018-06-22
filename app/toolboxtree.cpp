@@ -123,7 +123,7 @@ ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
     header()->hide();
     header()->setSectionResizeMode(QHeaderView::Stretch);
     setTextElideMode(Qt::ElideMiddle);
-    verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
+    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
 
     setDragEnabled(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

@@ -55,8 +55,8 @@ ToolboxSettingsWindow::ToolboxSettingsWindow(QWidget *parent) : QWidget(parent)
     ui->setupUi(this);
     ToolManager::addToolboxTree(ui->treeWidget);
 
-    ui->scrollArea->verticalScrollBar()->setStyleSheet(CSS::ScrollBar);
-    ui->scrollArea->horizontalScrollBar()->setStyleSheet(CSS::ScrollBarH);
+    ui->scrollArea->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
+    ui->scrollArea->horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
 
     connect(ui->treeWidget, &ToolboxTree::itemSelectionChanged, this, [=] {
         const bool hasValidSelection = ui->treeWidget->currentItem() &&
