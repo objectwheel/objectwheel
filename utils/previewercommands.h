@@ -1,12 +1,26 @@
-#define CONNECTION_ALIVE         0x09
-#define INIT                     0x00
-#define INITIALIZATION_PROGRESS  0x10
+#ifndef PREVIEWERCOMMANDS_H
+#define PREVIEWERCOMMANDS_H
 
-#define PREVIEW   0x01
-#define DONE      0x02
-#define REPREVIEW 0x03
-#define TERMINATE 0x04
-#define RESTART   0x05
-#define REMOVE    0x06
-#define UPDATE    0x07
-#define REPARENT  0x08
+#include <QDataStream>
+
+enum PreviewerCommands {
+    ConnectionAlive,
+    Init,
+    Preview,
+    Done,
+    Repreview,
+    Terminate,
+    Restart,
+    Remove,
+    Update,
+    Reparent,
+    InitializationProgress
+};
+
+inline QDataStream& operator>>(QDataStream& in, PreviewerCommands& e)
+{ return in >> (int&) e; }
+
+inline QDataStream& operator<<(QDataStream& out, const PreviewerCommands& e)
+{ return out << int(e); }
+
+#endif // PREVIEWERCOMMANDS_H

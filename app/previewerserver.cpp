@@ -1,8 +1,9 @@
 #include <previewerserver.h>
-#include <previewercommands.h>
 
 #include <QTimer>
 #include <QDataStream>
+#include <QLocalServer>
+#include <QLocalSocket>
 
 PreviewerServer::PreviewerServer(QObject* parent)
     : QObject(parent)
@@ -14,7 +15,14 @@ PreviewerServer::PreviewerServer(QObject* parent)
 
     connect(m_checkAliveTimer, &QTimer::timeout, this, &PreviewerServer::connectionTimeout);
 
-    connect(m_server, &QLocalServer::newConnection, &PreviewerServer::onNewConnection);
+    connect(m_server, &QLocalServer::newConnection, this, &PreviewerServer::onNewConnection);
+}
+
+void PreviewerServer::close()
+{
+    m_server->close();
+    m_checkAliveTimer->stop();
+    m_socket.clear();
 }
 
 void PreviewerServer::listen(const QString& serverName)
@@ -22,31 +30,49 @@ void PreviewerServer::listen(const QString& serverName)
     m_server->listen(serverName);
 }
 
-void PreviewerServer::send(int code, const QByteArray& data)
+void PreviewerServer::send(PreviewerCommands command, const QByteArray& data)
 {
-    if (!m_socket->isOpen() || !m_socket->isWritable())
+    send(m_socket, command, data);
+}
+
+void PreviewerServer::send(QLocalSocket* socket, PreviewerCommands command, const QByteArray& data)
+{
+    if (!socket || !socket->isOpen() || !socket->isWritable())
         return;
 
     QByteArray outgoing;
     QDataStream out(&outgoing, QIODevice::WriteOnly);
 
     if (data.isEmpty()) {
-        out << int(sizeof(int));
-        out << code;
+        out << int(sizeof(command));
+        out << command;
     } else {
-        out << int(sizeof(int)) + data.size();
-        out << code;
+        out << int(sizeof(command)) + data.size();
+        out << command;
         out << data;
     }
 
-    m_socket->write(outgoing);
-    m_socket->flush();
+    socket->write(outgoing);
+    socket->flush();
 }
 
-void PreviewerServer::sendAlive()
+void PreviewerServer::onNewConnection()
 {
-    if (state() == QLocalSocket::ConnectedState)
-        send(CONNECTION_ALIVE);
+    QLocalSocket* pendingConnection = m_server->nextPendingConnection();
+
+    if (m_socket.isNull()) {
+        m_socket = pendingConnection;
+
+        m_checkAliveTimer->start();
+
+        connect(m_socket, &QLocalSocket::disconnected, m_socket, &QLocalSocket::deleteLater);
+        connect(m_socket, &QLocalSocket::disconnected, m_checkAliveTimer, &QTimer::stop);
+        connect(m_socket, &QLocalSocket::disconnected, this, &PreviewerServer::disconnected);
+        connect(m_socket, &QLocalSocket::readyRead, this, &PreviewerServer::onReadReady);
+    } else {
+        send(pendingConnection, PreviewerCommands::Terminate);
+        pendingConnection->abort();
+    }
 }
 
 void PreviewerServer::onReadReady()
@@ -68,27 +94,14 @@ void PreviewerServer::onReadReady()
         return;
     }
 
-    int code;
-    incoming >> code;
-
-    emit dataArrived(code, incoming);
-
     m_blockSize = 0;
+
+    PreviewerCommands command;
+    incoming >> command;
+
+    if (command == PreviewerCommands::ConnectionAlive)
+        m_checkAliveTimer->start();
+    else
+        emit dataArrived(command, incoming);
 }
 
-
-void PreviewerServer::onNewConnection()
-{
-    auto client = m_server->nextPendingConnection();
-
-    if (m_socket.isNull()) {
-        m_socket = client;
-
-        connect(m_socket.data(), &QLocalSocket::disconnected, m_socket.data(), &QLocalSocket::deleteLater);
-        connect(m_socket.data(), &QLocalSocket::readyRead, &ControlPreviewingManager::onReadReady);
-
-        processNextTask();
-    } else {
-        terminate(client);
-    }
-}

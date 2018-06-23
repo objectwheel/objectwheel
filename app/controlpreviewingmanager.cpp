@@ -35,7 +35,7 @@ void terminate(QLocalSocket* socket)
 {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
-    out << TERMINATE;
+    out << PreviewerCommands::Terminate;
     send(socket, data);
     socket->abort();
     ::socket = nullptr;
@@ -45,7 +45,7 @@ void restart(QLocalSocket* socket, const QStringList& arguments)
 {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
-    out << RESTART;
+    out << PreviewerCommands::Restart;
     out << arguments;
     send(socket, data);
     socket->abort();
@@ -349,28 +349,28 @@ void ControlPreviewingManager::processNextTask()
         QDataStream out(&data, QIODevice::WriteOnly);
 
         if (task.type == Task::Init) {
-            out << INIT;
+            out << PreviewerCommands::Init;
             out << task.dir;
         } else if (task.type == Task::Preview) {
-            out << PREVIEW;
+            out << PreviewerCommands::Preview;
             out << task.dir;
         } else if (task.type == Task::Repreview) {
-            out << REPREVIEW;
+            out << PreviewerCommands::Repreview;
             out << task.dir;
             enableDirtHandling();
         } else if (task.type == Task::Reparent) {
-            out << REPARENT;
+            out << PreviewerCommands::Reparent;
             out << task.uid;
             out << task.parentUid;
             out << task.newUrl;
             // We don't need cause we get an position property update with reparent in anyways
             // enableDirtHandling();
         } else if (task.type == Task::Remove) {
-            out << REMOVE;
+            out << PreviewerCommands::Remove;
             out << task.uid;
             enableDirtHandling();
         } else if (task.type == Task::Update) {
-            out << UPDATE;
+            out << PreviewerCommands::Update;
             out << task.uid;
             out << task.property;
             out << task.propertyValue;
@@ -383,7 +383,7 @@ void ControlPreviewingManager::processNextTask()
 
 void ControlPreviewingManager::processMessage(int type, QDataStream& in)
 {
-    if (type == DONE) {
+    if (type == PreviewerCommands::Done) {
         Task::Type t = s_taskList.first().type;
 
         if (!s_taskList.first().needsUpdate) {
