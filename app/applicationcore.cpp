@@ -10,7 +10,6 @@
 #include <controltransactionmanager.h>
 #include <documentmanager.h>
 #include <mainwindow.h>
-#include <controlpreviewingmanager.h>
 #include <runmanager.h>
 #include <controlcreationmanager.h>
 #include <savemanager.h>
