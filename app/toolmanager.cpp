@@ -21,10 +21,11 @@
 #include <QEventLoop>
 #include <QtCore/QBuffer>
 
-#define DEFAULT_CATEGORY        "Others"
-#define DEFAULT_NAME            "Tool"
-#define DEFAULT_TOOLS_DIRECTORY ":/tools"
-#define DIR_QRC_CONTROL         ":/resources/qmls/control"
+#define DEFAULT_CATEGORY            "Others"
+#define DEFAULT_NAME                "Tool"
+#define TOOLS_SOURCE_DIRECTORY      ":/tools"
+#define TOOLS_DESTINATION_DIRECTORY "tools"
+#define DIR_QRC_CONTROL             ":/resources/qmls/control"
 
 namespace {
 
@@ -65,7 +66,7 @@ static bool currentProjectHasToolsInstalled()
     if (!QDir().exists(
                 ProjectManager::dir() +
                 separator() +
-                DEFAULT_TOOLS_DIRECTORY
+                TOOLS_DESTINATION_DIRECTORY
                 ))
         return false;
     else
@@ -79,7 +80,7 @@ QString ToolManager::toolsDir()
 {
     auto projectDir = ProjectManager::dir();
     if (projectDir.isEmpty()) return projectDir;
-    return projectDir + separator() + DEFAULT_TOOLS_DIRECTORY;
+    return projectDir + separator() + TOOLS_DESTINATION_DIRECTORY;
 }
 
 QStringList ToolManager::categories()
@@ -287,8 +288,8 @@ void ToolManager::exposeTools()
         for (const QString& toolDirName : lsdir(toolsDir()))
             addTool(toolsDir() + separator() + toolDirName, false);
     } else {
-        for (const QString& toolName : lsfile(DEFAULT_TOOLS_DIRECTORY)) {
-            const QString& toolPath = QString(DEFAULT_TOOLS_DIRECTORY) + separator() + toolName;
+        for (const QString& toolName : lsfile(TOOLS_SOURCE_DIRECTORY)) {
+            const QString& toolPath = QString(TOOLS_SOURCE_DIRECTORY) + separator() + toolName;
             const QString& newToolName = QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
             const QString& newToolPath = toolsDir() + separator() + newToolName;
 

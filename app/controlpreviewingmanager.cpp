@@ -62,8 +62,8 @@ void ControlPreviewingManager::scheduleInit()
     QProcess process;
     process.setArguments(arguments);
     process.setProgram(QCoreApplication::applicationDirPath() + "/previewer");
-    process.setStandardOutputFile(QProcess::nullDevice());
-    process.setStandardErrorFile(QProcess::nullDevice());
+//    process.setStandardOutputFile(QProcess::nullDevice());
+//    process.setStandardErrorFile(QProcess::nullDevice());
     process.startDetached();
 
     g_initScheduled = true;
