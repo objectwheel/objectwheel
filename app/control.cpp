@@ -92,8 +92,8 @@ void Control::onSizeChange()
     if (hasErrors() || !gui() || m_refreshingDisabled)
         return;
 
-    ControlPreviewingManager::updateCache(uid(), "width", size().width());
-    ControlPreviewingManager::updateCache(uid(), "height", size().height());
+    ControlPreviewingManager::schedulePropertyUpdate(uid(), "width", size().width());
+    ControlPreviewingManager::schedulePropertyUpdate(uid(), "height", size().height());
 }
 
 void Control::onParentChange()
@@ -101,7 +101,7 @@ void Control::onParentChange()
     if (!parentControl() || (!parentControl()->gui() && gui()) || m_refreshingDisabled)
         return;
 
-    ControlPreviewingManager::updateParent(uid(), parentControl()->uid(), url());
+    ControlPreviewingManager::scheduleParentUpdate(uid(), parentControl()->uid(), url());
 
     onSizeChange();
 }
@@ -112,7 +112,7 @@ void Control::onZValueChange()
         return;
 
     // FIXME: Do we really need this?
-    ControlPreviewingManager::updateCache(uid(), "z", zValue());
+    ControlPreviewingManager::schedulePropertyUpdate(uid(), "z", zValue());
 }
 
 bool Control::gui() const
@@ -304,7 +304,7 @@ void Control::showResizers()
 void Control::refresh(bool repreview)
 {
     if (!m_refreshingDisabled)
-        ControlPreviewingManager::requestPreview(dir(), repreview);
+//        ControlPreviewingManager::scheduleRender(dir(), repreview); // BUG
 }
 
 void Control::updateUids()

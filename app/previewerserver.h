@@ -23,6 +23,7 @@ public slots:
     void send(PreviewerCommands command, const QByteArray& data = QByteArray());
 
 signals:
+    void connected();
     void disconnected();
     void connectionTimeout();
     void dataArrived(PreviewerCommands command, QDataStream& dataStream);

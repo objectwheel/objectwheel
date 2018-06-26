@@ -3,7 +3,7 @@
 
 #include <QString>
 
-class HashFactory
+class HashFactory final
 {
     Q_DISABLE_COPY(HashFactory)
 

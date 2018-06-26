@@ -69,6 +69,8 @@ void PreviewerServer::onNewConnection()
         connect(m_socket, &QLocalSocket::disconnected, m_checkAliveTimer, &QTimer::stop);
         connect(m_socket, &QLocalSocket::disconnected, this, &PreviewerServer::disconnected);
         connect(m_socket, &QLocalSocket::readyRead, this, &PreviewerServer::onReadReady);
+
+        emit connected();
     } else {
         send(pendingConnection, PreviewerCommands::Terminate);
         pendingConnection->abort();

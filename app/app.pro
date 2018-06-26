@@ -112,7 +112,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/controlremovingmanager.h \
            $$PWD/projectexposingmanager.h \
            $$PWD/bootsettings.h \
-           $$PWD/previewerserver.h
+           $$PWD/previewerserver.h \
+    controlpreviewingmanager.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -204,7 +205,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlremovingmanager.cpp \
            $$PWD/projectexposingmanager.cpp \
            $$PWD/bootsettings.cpp \
-           $$PWD/previewerserver.cpp
+           $$PWD/previewerserver.cpp \
+    controlpreviewingmanager.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

@@ -49,7 +49,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             m_qmlCodeEditorWidget, &QmlCodeEditorWidget::handleControlRemoval);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
-            ControlPreviewingManager::restart);
+            ControlPreviewingManager::scheduleTerminate);
+    connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
+            ControlPreviewingManager::scheduleInit);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
         Delayer::delay(3000);
         m_designerWidget->refresh();

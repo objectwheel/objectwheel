@@ -32,8 +32,8 @@ void ControlTransactionManager::processGeometry(Control* control)
     SaveManager::setProperty(control, "height", QString::number(control->size().height()));
 
     if (!control->form()) {
-        ControlPreviewingManager::updateCache(control->uid(), "x", control->x());
-        ControlPreviewingManager::updateCache(control->uid(), "y", control->y());
+        ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
+        ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
     }
 }
 
