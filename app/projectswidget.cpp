@@ -282,8 +282,8 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
       SLOT(onProgressChange()));
     connect(ProjectManager::instance(), &ProjectManager::started, [=]
     { // TODO: ???
-        totalTask = ControlPreviewingManager::totalTask();
-        onProgressChange();
+//        BUG totalTask = ControlPreviewingManager::totalTask();
+//        onProgressChange();
     });
 }
 
@@ -343,7 +343,7 @@ void ProjectsWidget::startProject()
 
     m_listWidget->currentItem()->setData(Active, true);
 
-    Delayer::delay(&ControlPreviewingManager::isBusy);
+//    BUG Delayer::delay(&ControlPreviewingManager::isBusy);
     unlock();
     emit done();
 }
@@ -504,8 +504,8 @@ void ProjectsWidget::onSettingsButtonClick()
 
 void ProjectsWidget::onProgressChange()
 {
-    int taskDone = totalTask - ControlPreviewingManager::totalTask();
-    m_progressBar->setValue(10 + 90.0 * taskDone / totalTask);
+//   BUG int taskDone = totalTask - ControlPreviewingManager::totalTask();
+//    m_progressBar->setValue(10 + 90.0 * taskDone / totalTask);
 }
 
 void ProjectsWidget::lock()

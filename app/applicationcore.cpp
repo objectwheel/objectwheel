@@ -101,11 +101,11 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
-    if (!ControlPreviewingManager::init()) {
-        QMessageBox::critical(nullptr,
-                              tr("Error"),
-                              tr("Unable to start Objectwheel Previewing Service"));
-    }
+//   BUG if (!ControlPreviewingManager::init()) {
+//        QMessageBox::critical(nullptr,
+//                              tr("Error"),
+//                              tr("Unable to start Objectwheel Previewing Service"));
+//    }
 
     //! GUI initialization
     s_windowManager = new WindowManager(this);

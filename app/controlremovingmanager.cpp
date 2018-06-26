@@ -55,7 +55,7 @@ void ControlRemovingManager::removeControl(Control* control)
 
     emit instance()->controlAboutToBeRemoved(control);
 
-    ControlPreviewingManager::removeCache(control->uid());
+//    BUG ControlPreviewingManager::removeCache(control->uid());
 
     control->parentControl()->refresh();
     control->setRefreshingDisabled(true);

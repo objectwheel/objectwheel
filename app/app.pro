@@ -113,7 +113,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/projectexposingmanager.h \
            $$PWD/bootsettings.h \
            $$PWD/previewerserver.h \
-           $$PWD/controlpreviewingmanager.h \
            $$PWD/commanddispatcher.h
 
 SOURCES += $$PWD/main.cpp\
@@ -173,7 +172,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/succeedwidget.cpp \
            $$PWD/projectdetailswidget.cpp \
            $$PWD/runmanager.cpp \
-           $$PWD/controlpreviewingmanager.cpp \
            $$PWD/progressbar.cpp \
            $$PWD/centralwidget.cpp \
            $$PWD/designerwidget.cpp \

@@ -34,7 +34,7 @@ void ControlCreationManager::init(DesignerScene* designerScene)
 
 Form* ControlCreationManager::createForm(const QString& rootPath)
 {
-    ControlPreviewingManager::setDisabled(true);
+// BUG   ControlPreviewingManager::setDisabled(true);
 
     auto form = new Form(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
@@ -44,7 +44,7 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     SaveManager::addForm(form);
     s_designerScene->addForm(form);
 
-    ControlPreviewingManager::setDisabled(false);
+//    ControlPreviewingManager::setDisabled(false);
     form->refresh();
 
     QMap<QString, Control*> pmap;
@@ -52,10 +52,10 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     for (const auto& child : SaveUtils::childrenPaths(form->dir())) {
         auto pcontrol = pmap.value(dname(dname(child)));
 
-        ControlPreviewingManager::setDisabled(true);
+//        ControlPreviewingManager::setDisabled(true);
         auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         control->setParentItem(pcontrol);
-        ControlPreviewingManager::setDisabled(false);
+//        ControlPreviewingManager::setDisabled(false);
         control->refresh();
 
         emit instance()->controlCreated(control);
@@ -72,7 +72,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
                                                Control* parentControl, QString destinationPath,
                                                QString destinationSuid)
 {
-    ControlPreviewingManager::setDisabled(true);
+//    BUG ControlPreviewingManager::setDisabled(true);
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
@@ -82,7 +82,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
     SaveUtils::setX(control->dir(), pos.x());
     SaveUtils::setY(control->dir(), pos.y());
 
-    ControlPreviewingManager::setDisabled(false);
+//    ControlPreviewingManager::setDisabled(false);
     control->refresh();
 
     QMap<QString, Control*> pmap;
@@ -90,7 +90,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
     for (const auto& child : SaveUtils::childrenPaths(control->dir(), sourceSuid)) {
         auto pcontrol = pmap.value(dname(dname(child)));
 
-        ControlPreviewingManager::setDisabled(true);
+//        ControlPreviewingManager::setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         ccontrol->setParentItem(pcontrol);
         control->setPos(pos);
@@ -98,7 +98,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
         SaveUtils::setX(control->dir(), control->x());
         SaveUtils::setY(control->dir(), control->y());
 
-        ControlPreviewingManager::setDisabled(false);
+//        ControlPreviewingManager::setDisabled(false);
         ccontrol->refresh();
 
         emit instance()->controlCreated(control);

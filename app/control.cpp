@@ -76,8 +76,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     connect(this, &Control::parentChanged, this,
             [=] { emit ControlMonitoringManager::instance()->parentChanged(this); });
 
-    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewReady,
-            this, &Control::updatePreview);
+//    BUG connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewReady,
+//            this, &Control::updatePreview);
 }
 
 Control::~Control()
@@ -303,8 +303,8 @@ void Control::showResizers()
 
 void Control::refresh(bool repreview)
 {
-    if (!m_refreshingDisabled)
-//        ControlPreviewingManager::scheduleRender(dir(), repreview); // BUG
+//    if (!m_refreshingDisabled)
+//       BUG ControlPreviewingManager::scheduleRender(dir(), repreview); // BUG
 }
 
 void Control::updateUids()
@@ -554,7 +554,7 @@ void Control::updatePreview(const PreviewResult& result)
             if (!form())
                 m_clip = result.property("clip").toBool();
 
-            if (!m_dragging && !Resizer::resizing() && !ControlPreviewingManager::contains(uid())) {
+            if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
                 const auto& rect = getRect(result);
                 qreal z = getZ(result);
                 setRefreshingDisabled(true);
