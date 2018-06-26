@@ -16,10 +16,12 @@ class PreviewerServer final : public QObject
 
 public:
     explicit PreviewerServer(QObject* parent = nullptr);
+    QString serverName() const;
+    bool isConnected() const;
 
 public slots:
     void close();
-    void listen(const QString& serverName);
+    void listen();
     void send(PreviewerCommands command, const QByteArray& data = QByteArray());
 
 signals:

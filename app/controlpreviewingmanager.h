@@ -4,6 +4,7 @@
 #include <QObject>
 
 class PreviewerServer;
+class CommandDispatcher;
 
 class ControlPreviewingManager final : public QObject
 {
@@ -27,6 +28,8 @@ public:
 
 private slots:
     void onConnected();
+    void onDisconnected();
+    void onConnectionTimeout();
 
 signals:
     void previewReady();
@@ -38,6 +41,7 @@ private:
 private:
     static ControlPreviewingManager* s_instance;
     static PreviewerServer* s_previewerServer;
+    static CommandDispatcher* s_commandDispatcher;
 
 };
 

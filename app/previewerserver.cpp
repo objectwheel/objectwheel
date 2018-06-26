@@ -1,4 +1,5 @@
 #include <previewerserver.h>
+#include <hashfactory.h>
 
 #include <QTimer>
 #include <QDataStream>
@@ -13,9 +14,26 @@ PreviewerServer::PreviewerServer(QObject* parent)
 {
     m_checkAliveTimer->setInterval(3000);
 
+#if defined(PREVIEWER_DEBUG)
+    m_server->removeServer("serverName");
+    m_server->listen("serverName");
+#else
+    m_server->listen(HashFactory::generate());
+#endif
+
     connect(m_checkAliveTimer, &QTimer::timeout, this, &PreviewerServer::connectionTimeout);
 
     connect(m_server, &QLocalServer::newConnection, this, &PreviewerServer::onNewConnection);
+}
+
+QString PreviewerServer::serverName() const
+{
+    return m_server->serverName();
+}
+
+bool PreviewerServer::isConnected() const
+{
+    return !m_socket.isNull();
 }
 
 void PreviewerServer::close()
@@ -25,9 +43,9 @@ void PreviewerServer::close()
     m_socket.clear();
 }
 
-void PreviewerServer::listen(const QString& serverName)
+void PreviewerServer::listen()
 {
-    m_server->listen(serverName);
+    m_server->listen(Hash);
 }
 
 void PreviewerServer::send(PreviewerCommands command, const QByteArray& data)
