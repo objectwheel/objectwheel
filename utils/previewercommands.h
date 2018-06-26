@@ -16,6 +16,7 @@ enum PreviewerCommands {
     Reparent,
     InitializationProgress
 };
+Q_DECLARE_METATYPE(PreviewerCommands)
 
 inline QDataStream& operator>>(QDataStream& in, PreviewerCommands& e)
 { return in >> (int&) e; }

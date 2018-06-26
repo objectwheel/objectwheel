@@ -20,8 +20,9 @@ public:
     bool isConnected() const;
 
 public slots:
+    void abort();
     void close();
-    void listen();
+    void listen(const QString& serverName);
     void send(PreviewerCommands command, const QByteArray& data = QByteArray());
 
 signals:

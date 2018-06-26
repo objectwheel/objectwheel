@@ -25,8 +25,8 @@ public:
     static void scheduleIdChange(const QString& uid, const QString& newId){}
     static void scheduleAnchorChange(){}
     static void scheduleRender(const QString& uid){}
-    static void scheduleTerminate(){}
     static void scheduleInit();
+    static void terminate();
 
 private slots:
     void onConnected();

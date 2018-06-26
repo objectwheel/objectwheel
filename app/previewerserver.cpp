@@ -1,5 +1,4 @@
 #include <previewerserver.h>
-#include <hashfactory.h>
 
 #include <QTimer>
 #include <QDataStream>
@@ -29,21 +28,24 @@ bool PreviewerServer::isConnected() const
     return !m_socket.isNull();
 }
 
-void PreviewerServer::close()
+// Only aborts current connection, server remains active
+void PreviewerServer::abort()
 {
-    m_server->close();
     m_checkAliveTimer->stop();
+    if (m_socket)
+        m_socket->abort();
     m_socket.clear();
 }
 
-void PreviewerServer::listen()
+// Existing connections did not effected, only server deactivated
+void PreviewerServer::close()
 {
-#if defined(PREVIEWER_DEBUG)
-    m_server->removeServer("serverName");
-    m_server->listen("serverName");
-#else
-    m_server->listen(HashFactory::generate());
-#endif
+    m_server->close();
+}
+
+void PreviewerServer::listen(const QString& serverName)
+{
+    m_server->listen(serverName);
 }
 
 void PreviewerServer::send(PreviewerCommands command, const QByteArray& data)
