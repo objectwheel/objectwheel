@@ -13,7 +13,7 @@ public:
     explicit CommandDispatcher(QObject* parent = nullptr);
 
 public slots:
-    void onDataReceived(PreviewerCommands command, QDataStream& dataStream);
+    void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 
 signals:
     void terminate();

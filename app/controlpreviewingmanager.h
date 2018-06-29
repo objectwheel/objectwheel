@@ -25,8 +25,8 @@ public:
     static void scheduleIdChange(const QString& uid, const QString& newId){}
     static void scheduleAnchorChange(){}
     static void scheduleRender(const QString& uid){}
+    static void scheduleTerminate();
     static void scheduleInit();
-    static void terminate();
 
 private slots:
     void onConnected();
@@ -43,6 +43,7 @@ private:
 private:
     static ControlPreviewingManager* s_instance;
     static PreviewerServer* s_previewerServer;
+    static QThread* s_serverThread;
     static CommandDispatcher* s_commandDispatcher;
 
 };

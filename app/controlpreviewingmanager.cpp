@@ -5,19 +5,28 @@
 #include <hashfactory.h>
 
 #include <QDebug>
+#include <QThread>
 #include <QProcess>
 #include <QCoreApplication>
+#include <QLocalServer>
 
 namespace { bool g_initScheduled = false; }
 
 ControlPreviewingManager* ControlPreviewingManager::s_instance = nullptr;
 PreviewerServer* ControlPreviewingManager::s_previewerServer = nullptr;
+QThread* ControlPreviewingManager::s_serverThread = nullptr;
 CommandDispatcher* ControlPreviewingManager::s_commandDispatcher = nullptr;
 
 ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(parent)
 {
+    qRegisterMetaType<PreviewerCommands>("PreviewerCommands");
+
     s_instance = this;
-    s_previewerServer = new PreviewerServer(this);
+    s_previewerServer = new PreviewerServer;
+    s_serverThread = new QThread(this);
+    s_previewerServer->moveToThread(s_serverThread);
+    s_serverThread->start();
+
     s_commandDispatcher = new CommandDispatcher(this);
 
     connect(s_previewerServer, &PreviewerServer::connected,
@@ -31,22 +40,23 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
     connect(s_previewerServer, &PreviewerServer::dataArrived,
             s_commandDispatcher, &CommandDispatcher::onDataReceived);
 
-    //    connect(s_commandDispatcher, &CommandDispatcher::terminate,
-    //            this, &ApplicationCore::onTerminateCommand);
-    //    connect(s_commandDispatcher, &CommandDispatcher::init,
-    //            s_previewer, &Previewer::init);
-
 #if defined(PREVIEWER_DEBUG)
-    s_previewerServer->removeServer("serverName");
-    s_previewerServer->listen("serverName");
+    QLocalServer::removeServer("serverName");
+    QMetaObject::invokeMethod(s_previewerServer, "listen", Q_ARG(QString, "serverName"));
 #else
-    s_previewerServer->listen(HashFactory::generate());
+    QMetaObject::invokeMethod(s_previewerServer, "listen", Q_ARG(QString, HashFactory::generate()));
 #endif
 }
 
 ControlPreviewingManager::~ControlPreviewingManager()
 {
-    s_previewerServer->send(PreviewerCommands::Terminate);
+    scheduleTerminate();
+
+    QMetaObject::invokeMethod(s_previewerServer, "deleteLater");
+
+    s_serverThread->quit();
+    s_serverThread->wait();
+
     s_instance = nullptr;
 }
 
@@ -57,6 +67,13 @@ ControlPreviewingManager* ControlPreviewingManager::instance()
 
 void ControlPreviewingManager::scheduleInit()
 {
+    s_serverThread->wait(100);
+
+    if (g_initScheduled || s_previewerServer->isConnected()) {
+        qWarning() << "Terminate existing connection first in" << __FILE__ << ":" << __LINE__;
+        return;
+    }
+
     QStringList arguments;
     arguments << ProjectManager::dir();
     arguments << s_previewerServer->serverName();
@@ -73,10 +90,10 @@ void ControlPreviewingManager::scheduleInit()
     g_initScheduled = true;
 }
 
-void ControlPreviewingManager::terminate()
+void ControlPreviewingManager::scheduleTerminate()
 {
-    s_previewerServer->send(Terminate);
-    s_previewerServer->abort();
+    QMetaObject::invokeMethod(s_previewerServer, "send", Q_ARG(PreviewerCommands, Terminate));
+    QMetaObject::invokeMethod(s_previewerServer, "abort");
 }
 
 void ControlPreviewingManager::onConnected()
@@ -84,19 +101,18 @@ void ControlPreviewingManager::onConnected()
     if (g_initScheduled) {
         g_initScheduled = false;
 
-        QMetaObject::invokeMethod(s_previewerServer, "send", Qt::QueuedConnection,
-                                  Q_ARG(PreviewerCommands, Init));
+        QMetaObject::invokeMethod(s_previewerServer, "send", Q_ARG(PreviewerCommands, Init));
     }
 }
 
 void ControlPreviewingManager::onDisconnected()
 {
     // TODO
-    qDebug() << "Connection lost in" << __FILE__ << ":" << __LINE__;
+    qWarning() << "Connection lost in" << __FILE__ << ":" << __LINE__;
 }
 
 void ControlPreviewingManager::onConnectionTimeout()
 {
     // TODO
-    qDebug() << "Connection timeout in" << __FILE__ << ":" << __LINE__;
+    qWarning() << "Connection timeout in" << __FILE__ << ":" << __LINE__;
 }

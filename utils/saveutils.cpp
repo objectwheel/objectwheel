@@ -252,6 +252,33 @@ QStringList SaveUtils::masterPaths(const QString& topPath)
     return paths;
 }
 
+int SaveUtils::childrenCount(const QString& rootPath, QString suid)
+{
+    int counter = 0;
+
+    if (rootPath.isEmpty())
+        return counter;
+
+    if (suid.isEmpty()) {
+        const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+        const auto& propertyData = rdfile(propertyPath);
+        suid = property(propertyData, TAG_UID).toString();
+    }
+
+    const auto& childrenPath = rootPath + separator() + DIR_CHILDREN;
+    for (const auto& dir : lsdir(childrenPath)) {
+        const auto& propertyPath = childrenPath + separator() + dir + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+        const auto& propertyData = rdfile(propertyPath);
+
+        if (isOwctrl(propertyData) && property(propertyData, TAG_SUID).toString() == suid) {
+            ++counter;
+            counter += childrenCount(dname(dname(propertyPath)), suid);
+        }
+    }
+
+    return counter;
+}
+
 bool SaveUtils::isForm(const QString& rootPath)
 {
     return DIR_OWDB == fname(dname(rootPath));
@@ -297,6 +324,16 @@ QString SaveUtils::suid(const QString& rootPath)
     const auto& propertyPath = rootPath + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
     const auto& propertyData = rdfile(propertyPath);
     return property(propertyData, TAG_SUID).toString();
+}
+
+QString SaveUtils::toUrl(const QString& topPath)
+{
+    return topPath + separator() + DIR_THIS + separator() + "main.qml";
+}
+
+QString SaveUtils::parentDir(const QString& topPath)
+{
+    return dname(dname(topPath));
 }
 
 QString SaveUtils::toolName(const QString& toolRootPath)

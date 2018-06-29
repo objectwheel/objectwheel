@@ -5,7 +5,7 @@ CommandDispatcher::CommandDispatcher(QObject *parent) : QObject(parent)
 
 }
 
-void CommandDispatcher::onDataReceived(PreviewerCommands command, QDataStream& dataStream)
+void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {
     case Terminate:

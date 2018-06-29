@@ -23,20 +23,20 @@ public slots:
     void abort();
     void close();
     void listen(const QString& serverName);
-    void send(PreviewerCommands command, const QByteArray& data = QByteArray());
+    void send(const PreviewerCommands& command, const QByteArray& data = QByteArray());
 
 signals:
     void connected();
     void disconnected();
     void connectionTimeout();
-    void dataArrived(PreviewerCommands command, QDataStream& dataStream);
+    void dataArrived(const PreviewerCommands& command, const QByteArray& dataStream);
 
 private slots:
     void onNewConnection();
     void onReadReady();
 
 private:
-    void send(QLocalSocket* socket, PreviewerCommands command, const QByteArray& data = QByteArray());
+    void send(QLocalSocket* socket, const PreviewerCommands& command, const QByteArray& data = QByteArray());
 
 private:
     int m_blockSize;

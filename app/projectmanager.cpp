@@ -354,7 +354,7 @@ bool ProjectManager::start(const QString& hash)
 
 void ProjectManager::stop()
 {
-    ControlPreviewingManager::terminate();
+    ControlPreviewingManager::scheduleTerminate();
     updateSize();
     updateLastModification();
     s_currentHash = "";

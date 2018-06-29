@@ -48,6 +48,7 @@ public:
     static QStringList controlPaths(const QString& topPath);
     static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
     static QStringList masterPaths(const QString& topPath);
+    static int childrenCount(const QString& rootPath, QString suid = QString());
     static bool isOwctrl(const QByteArray& propertyData);
     static bool isOwctrl(const QString& rootPath);
     static bool isForm(const QString& rootPath);
@@ -57,6 +58,8 @@ public:
     static QString id(const QString& rootPath);
     static QString uid(const QString& rootPath);
     static QString suid(const QString& rootPath);
+    static QString toUrl(const QString& topPath);
+    static QString parentDir(const QString& topPath);
     static QString toolName(const QString& toolRootPath);
     static QString toolCategory(const QString& toolRootPath);
     static QJsonValue property(const QByteArray& propertyData, const QString& property);

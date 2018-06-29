@@ -48,12 +48,12 @@ void PreviewerServer::listen(const QString& serverName)
     m_server->listen(serverName);
 }
 
-void PreviewerServer::send(PreviewerCommands command, const QByteArray& data)
+void PreviewerServer::send(const PreviewerCommands& command, const QByteArray& data)
 {
     send(m_socket, command, data);
 }
 
-void PreviewerServer::send(QLocalSocket* socket, PreviewerCommands command, const QByteArray& data)
+void PreviewerServer::send(QLocalSocket* socket, const PreviewerCommands& command, const QByteArray& data)
 {
     if (!socket || !socket->isOpen() || !socket->isWritable())
         return;
@@ -122,6 +122,6 @@ void PreviewerServer::onReadReady()
     if (command == PreviewerCommands::ConnectionAlive)
         m_checkAliveTimer->start();
     else
-        emit dataArrived(command, incoming);
+        emit dataArrived(command, m_socket->readAll());
 }
 
