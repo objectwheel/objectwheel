@@ -29,7 +29,7 @@ signals:
     void connected();
     void disconnected();
     void connectionTimeout();
-    void dataArrived(const PreviewerCommands& command, const QByteArray& dataStream);
+    void dataArrived(const PreviewerCommands& command, const QByteArray& data);
 
 private slots:
     void onNewConnection();

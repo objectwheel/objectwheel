@@ -26,7 +26,7 @@ private slots:
     void onExportButtonClick();
     void onImportButtonClick();
     void onSettingsButtonClick();
-    void onProgressChange();
+    void onProgressChange(int progress);
 
 private:
     void lock();

@@ -45,8 +45,6 @@
 enum Buttons { Load, New, Import, Export, Settings };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
 
-namespace { int totalTask = 0; }
-
 class ProjectsDelegate: public QStyledItemDelegate
 {
         Q_OBJECT
@@ -278,13 +276,8 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     connect(m_buttons_2->get(Settings), SIGNAL(clicked(bool)),
       this, SLOT(onSettingsButtonClick()));
 
-    connect(ControlPreviewingManager::instance(), SIGNAL(taskDone()),
-      SLOT(onProgressChange()));
-    connect(ProjectManager::instance(), &ProjectManager::started, [=]
-    { // TODO: ???
-//        BUG totalTask = ControlPreviewingManager::totalTask();
-//        onProgressChange();
-    });
+    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::initializationProgressChanged,
+            this, &ProjectsWidget::onProgressChange);
 }
 
 bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
@@ -343,7 +336,10 @@ void ProjectsWidget::startProject()
 
     m_listWidget->currentItem()->setData(Active, true);
 
-//    BUG Delayer::delay(&ControlPreviewingManager::isBusy);
+    Delayer::delay([=] () -> bool {
+        return m_progressBar->value() < m_progressBar->maximum();
+    });
+
     unlock();
     emit done();
 }
@@ -502,10 +498,9 @@ void ProjectsWidget::onSettingsButtonClick()
         emit editProject(m_listWidget->currentItem()->data(Hash).toString());
 }
 
-void ProjectsWidget::onProgressChange()
+void ProjectsWidget::onProgressChange(int progress)
 {
-//   BUG int taskDone = totalTask - ControlPreviewingManager::totalTask();
-//    m_progressBar->setValue(10 + 90.0 * taskDone / totalTask);
+    m_progressBar->setValue(progress);
 }
 
 void ProjectsWidget::lock()

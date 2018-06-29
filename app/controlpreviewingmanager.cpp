@@ -24,10 +24,11 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
     s_instance = this;
     s_previewerServer = new PreviewerServer;
     s_serverThread = new QThread(this);
+
     s_previewerServer->moveToThread(s_serverThread);
     s_serverThread->start();
 
-    s_commandDispatcher = new CommandDispatcher(this);
+    s_commandDispatcher = new CommandDispatcher(s_previewerServer, this);
 
     connect(s_previewerServer, &PreviewerServer::connected,
             this, &ControlPreviewingManager::onConnected);
@@ -37,8 +38,8 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
     connect(s_previewerServer, &PreviewerServer::connectionTimeout,
             this, &ControlPreviewingManager::onConnectionTimeout);
 
-    connect(s_previewerServer, &PreviewerServer::dataArrived,
-            s_commandDispatcher, &CommandDispatcher::onDataReceived);
+    connect(s_commandDispatcher, &CommandDispatcher::initializationProgressChanged,
+            this, &ControlPreviewingManager::initializationProgressChanged);
 
 #if defined(PREVIEWER_DEBUG)
     QLocalServer::removeServer("serverName");
@@ -81,18 +82,22 @@ void ControlPreviewingManager::scheduleInit()
     QProcess process;
     process.setArguments(arguments);
     process.setProgram(QCoreApplication::applicationDirPath() + "/previewer");
+
 #if !defined(QT_DEBUG)
     process.setStandardOutputFile(QProcess::nullDevice());
     process.setStandardErrorFile(QProcess::nullDevice());
 #endif
+
+#if !defined(PREVIEWER_DEBUG)
     process.startDetached();
+#endif
 
     g_initScheduled = true;
 }
 
 void ControlPreviewingManager::scheduleTerminate()
 {
-    QMetaObject::invokeMethod(s_previewerServer, "send", Q_ARG(PreviewerCommands, Terminate));
+    s_commandDispatcher->scheduleTerminate();
     QMetaObject::invokeMethod(s_previewerServer, "abort");
 }
 
@@ -101,7 +106,7 @@ void ControlPreviewingManager::onConnected()
     if (g_initScheduled) {
         g_initScheduled = false;
 
-        QMetaObject::invokeMethod(s_previewerServer, "send", Q_ARG(PreviewerCommands, Init));
+        s_commandDispatcher->scheduleInit();
     }
 }
 

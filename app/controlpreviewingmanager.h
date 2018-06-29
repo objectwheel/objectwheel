@@ -35,6 +35,7 @@ private slots:
 
 signals:
     void previewReady();
+    void initializationProgressChanged(int progress);
 
 private:
     explicit ControlPreviewingManager(QObject* parent = nullptr);

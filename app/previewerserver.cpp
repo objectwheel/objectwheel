@@ -58,19 +58,11 @@ void PreviewerServer::send(QLocalSocket* socket, const PreviewerCommands& comman
     if (!socket || !socket->isOpen() || !socket->isWritable())
         return;
 
-    QByteArray outgoing;
-    QDataStream out(&outgoing, QIODevice::WriteOnly);
+    QDataStream out(m_socket);
+    out << int(sizeof(command)) + data.size();
+    out << command;
+    out << data;
 
-    if (data.isEmpty()) {
-        out << int(sizeof(command));
-        out << command;
-    } else {
-        out << int(sizeof(command)) + data.size();
-        out << command;
-        out << data;
-    }
-
-    socket->write(outgoing);
     socket->flush();
 }
 
@@ -116,12 +108,15 @@ void PreviewerServer::onReadReady()
 
     m_blockSize = 0;
 
+    QByteArray data;
     PreviewerCommands command;
+
     incoming >> command;
+    incoming >> data;
 
     if (command == PreviewerCommands::ConnectionAlive)
         m_checkAliveTimer->start();
     else
-        emit dataArrived(command, m_socket->readAll());
+        emit dataArrived(command, data);
 }
 

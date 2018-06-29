@@ -5,19 +5,25 @@
 
 #include <previewercommands.h>
 
+class PreviewerServer;
+
 class CommandDispatcher : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CommandDispatcher(QObject* parent = nullptr);
+    explicit CommandDispatcher(PreviewerServer* server, QObject* parent = nullptr);
 
 public slots:
+    void scheduleInit();
+    void scheduleTerminate();
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 
 signals:
-    void terminate();
-    void init();
+    void initializationProgressChanged(int progress);
+
+private:
+    PreviewerServer* m_server;
 };
 
 #endif // COMMANDDISPATCHER_H
