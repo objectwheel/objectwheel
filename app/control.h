@@ -109,7 +109,7 @@ private:
     QString m_url;
     QString m_uid;
     QString m_id;
-    QImage m_preview;
+    QImage m_image;
 
     QList<QString> m_events;
     QList<QQmlError> m_errors;

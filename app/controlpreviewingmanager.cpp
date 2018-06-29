@@ -3,6 +3,7 @@
 #include <previewerserver.h>
 #include <commanddispatcher.h>
 #include <hashfactory.h>
+#include <previewresult.h>
 
 #include <QDebug>
 #include <QThread>
@@ -40,6 +41,8 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
 
     connect(s_commandDispatcher, &CommandDispatcher::initializationProgressChanged,
             this, &ControlPreviewingManager::initializationProgressChanged);
+    connect(s_commandDispatcher, &CommandDispatcher::previewDone,
+            this, &ControlPreviewingManager::previewDone);
 
 #if defined(PREVIEWER_DEBUG)
     QLocalServer::removeServer("serverName");

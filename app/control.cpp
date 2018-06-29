@@ -54,7 +54,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    m_preview = initialPreview(size());
+    m_image = initialPreview(size());
 
     connect(this, &Control::geometryChanged, this, [=] {
         QPointer<Control> p(this);
@@ -76,8 +76,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     connect(this, &Control::parentChanged, this,
             [=] { emit ControlMonitoringManager::instance()->parentChanged(this); });
 
-//    BUG connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewReady,
-//            this, &Control::updatePreview);
+    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
+            this, &Control::updatePreview);
 }
 
 Control::~Control()
@@ -469,7 +469,7 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (m_preview.isNull())
+    if (m_image.isNull())
         return;
 
     if (parentControl() && parentControl()->clip() && !m_dragging) {
@@ -484,7 +484,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawImage(rect(), m_preview, QRectF(QPointF(0, 0), size() * DPR));
+    painter->drawImage(rect(), m_image, QRectF(QPointF(0, 0), size() * DPR));
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
@@ -494,10 +494,10 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         if (scene()->showOutlines()) {
             painter->fillRect(rect(), gradient);
         } else {
-            QImage highlight(m_preview);
+            QImage highlight(m_image);
             QPainter p(&highlight);
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-            p.fillRect(m_preview.rect(), gradient);
+            p.fillRect(m_image.rect(), gradient);
             p.end();
             painter->drawImage(rect(), highlight, QRectF(QPointF(0, 0), size() * DPR));
         }
@@ -530,7 +530,7 @@ void Control::updatePreview(const PreviewResult& result)
     if (result.uid != uid())
         return;
 
-    m_preview = result.preview;
+    m_image = result.image;
     m_errors = result.errors;
     m_gui = result.gui;
     m_properties = result.properties;

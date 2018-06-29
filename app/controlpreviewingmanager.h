@@ -5,6 +5,7 @@
 
 class PreviewerServer;
 class CommandDispatcher;
+struct PreviewResult;
 
 class ControlPreviewingManager final : public QObject
 {
@@ -35,7 +36,7 @@ private slots:
     void onConnectionTimeout();
 
 signals:
-    void previewReady();
+    void previewDone(const PreviewResult& result);
     void initializationProgressChanged(int progress);
 
 private:

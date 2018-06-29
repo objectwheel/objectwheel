@@ -4,9 +4,8 @@
 #include <QMap>
 #include <QHash>
 #include <QImage>
+#include <QVariant>
 #include <QQmlError>
-
-class QVariant;
 
 struct Enum {
     QString name;
@@ -26,7 +25,7 @@ struct PreviewResult {
     bool gui;
     bool window;
     QString uid;
-    QImage preview;
+    QImage image;
     QList<QQmlError> errors;
     QList<PropertyNode> properties;
 };
@@ -81,7 +80,7 @@ inline QDataStream& operator>>(QDataStream& in, PreviewResult& result)
 {
     in >> result.gui;
     in >> result.uid;
-    in >> result.preview;
+    in >> result.image;
     in >> result.window;
     in >> result.errors;
     in >> result.properties;
@@ -92,7 +91,7 @@ inline QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
 {
     out << result.gui;
     out << result.uid;
-    out << result.preview;
+    out << result.image;
     out << result.window;
     out << result.errors;
     out << result.properties;

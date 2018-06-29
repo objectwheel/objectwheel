@@ -6,6 +6,7 @@
 #include <previewercommands.h>
 
 class PreviewerServer;
+struct PreviewResult;
 
 class CommandDispatcher : public QObject
 {
@@ -22,6 +23,7 @@ public slots:
 
 signals:
     void initializationProgressChanged(int progress);
+    void previewDone(const PreviewResult& result);
 
 private:
     PreviewerServer* m_server;

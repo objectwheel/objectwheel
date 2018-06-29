@@ -1,5 +1,6 @@
 #include <commanddispatcher.h>
 #include <previewerserver.h>
+#include <previewresult.h>
 
 namespace {
 
@@ -69,6 +70,13 @@ void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const Q
         int progress;
         pullValues(data, progress);
         emit initializationProgressChanged(progress);
+        break;
+    }
+
+    case PreviewDone: {
+        PreviewResult result;
+        pullValues(data, result);
+        emit previewDone(result);
         break;
     }
 
