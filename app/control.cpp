@@ -202,11 +202,6 @@ Control* Control::parentControl() const
     return dynamic_cast<Control*>(parentItem());
 }
 
-const QList<QString>& Control::events() const
-{
-    return m_events;
-}
-
 const QList<QQmlError>& Control::errors() const
 {
     return m_errors;
@@ -538,10 +533,10 @@ void Control::updatePreview(const PreviewResult& result)
     m_preview = result.preview;
     m_errors = result.errors;
     m_gui = result.gui;
-    m_properties = result.propertyNodes;
-    m_events = result.events;
+    m_properties = result.properties;
+//    m_events = result.events;
 
-    if (result.hasError()) {
+    if (!result.errors.isEmpty()) {
         setRefreshingDisabled(true);
         blockSignals(true);
         resize(QSizeF(50, 50));
@@ -552,7 +547,7 @@ void Control::updatePreview(const PreviewResult& result)
     } else {
         if (result.gui) {
             if (!form())
-                m_clip = result.property("clip").toBool();
+//                m_clip = result.property("clip").toBool();
 
             if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
                 const auto& rect = getRect(result);
@@ -582,7 +577,7 @@ void Control::updatePreview(const PreviewResult& result)
 
     update();
 
-    if (result.hasError()) {
+    if (!result.errors.isEmpty()) {
         emit errorOccurred();
         emit ControlMonitoringManager::instance()->errorOccurred(this);
     }
@@ -594,7 +589,7 @@ void Control::updatePreview(const PreviewResult& result)
 namespace {
     qreal getZ(const PreviewResult& result)
     {
-        const QList<PropertyNode> nodes = result.propertyNodes;
+        const QList<PropertyNode> nodes = result.properties;
 
         for (const auto& node : nodes) {
             for (const auto& property : node.properties.keys()) {
@@ -639,7 +634,7 @@ namespace {
     QRectF getRect(const PreviewResult& result)
     {
         QRectF rect;
-        const QList<PropertyNode> nodes = result.propertyNodes;
+        const QList<PropertyNode> nodes = result.properties;
 
         for (const auto& node : nodes) {
             for (const auto& property : node.properties.keys()) {

@@ -38,7 +38,6 @@ public:
     DesignerScene* scene() const;
     Control* parentControl() const;
 
-    const QList<QString>& events() const;
     const QList<QQmlError>& errors() const;
     const QList<PropertyNode>& properties() const;
     QList<Control*> childControls(bool dive = true) const;

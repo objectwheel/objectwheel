@@ -24,7 +24,8 @@ public:
     static void scheduleFormDeletion(const QString& uid){}
     static void scheduleIdChange(const QString& uid, const QString& newId){}
     static void scheduleAnchorChange(){}
-    static void scheduleRender(const QString& uid){}
+
+    static void schedulePreview(const QString& uid);
     static void scheduleTerminate();
     static void scheduleInit();
 

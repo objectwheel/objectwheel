@@ -6,15 +6,13 @@
 enum PreviewerCommands {
     ConnectionAlive,
     Init,
+    InitializationProgress,
     Preview,
-    Done,
-    Repreview,
-    Terminate,
-    Restart,
+    PreviewDone,
     Remove,
-    Update,
     Reparent,
-    InitializationProgress
+    Terminate,
+    Update,
 };
 Q_DECLARE_METATYPE(PreviewerCommands)
 

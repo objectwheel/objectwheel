@@ -17,6 +17,7 @@ public:
 public slots:
     void scheduleInit();
     void scheduleTerminate();
+    void schedulePreview(const QString& uid);
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 
 signals:

@@ -57,6 +57,11 @@ void CommandDispatcher::scheduleTerminate()
     sendAsync(m_server, PreviewerCommands::Terminate);
 }
 
+void CommandDispatcher::schedulePreview(const QString& uid)
+{
+    sendAsync(m_server, PreviewerCommands::Preview, pushValues(uid));
+}
+
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {

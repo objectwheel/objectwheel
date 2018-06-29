@@ -66,6 +66,11 @@ ControlPreviewingManager* ControlPreviewingManager::instance()
     return s_instance;
 }
 
+void ControlPreviewingManager::schedulePreview(const QString& uid)
+{
+    s_commandDispatcher->schedulePreview(uid);
+}
+
 void ControlPreviewingManager::scheduleInit()
 {
     s_serverThread->wait(100);

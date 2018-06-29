@@ -32,7 +32,6 @@ SOURCES += \
     $$PWD/filemanager.cpp \
     $$PWD/qmlformatter.cpp \
     $$PWD/hashfactory.cpp \
-    $$PWD/previewresult.cpp \
     $$PWD/appfontsettings.cpp \
     $$PWD/quicktheme.cpp
 
