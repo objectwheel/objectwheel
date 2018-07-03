@@ -7,7 +7,6 @@ enum PreviewerCommands {
     ConnectionAlive,
     Init,
     InitializationProgress,
-    Preview,
     PreviewDone,
     Remove,
     Reparent,

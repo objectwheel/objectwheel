@@ -3,7 +3,6 @@
 #include <QTimer>
 #include <QDataStream>
 #include <QLocalServer>
-#include <QLocalSocket>
 
 PreviewerServer::PreviewerServer(QObject* parent)
     : QObject(parent)
@@ -71,6 +70,7 @@ void PreviewerServer::onNewConnection()
     QLocalSocket* pendingConnection = m_server->nextPendingConnection();
 
     if (m_socket.isNull()) {
+        m_blockSize = 0;
         m_socket = pendingConnection;
 
         m_checkAliveTimer->start();
@@ -79,6 +79,8 @@ void PreviewerServer::onNewConnection()
         connect(m_socket, &QLocalSocket::disconnected, m_checkAliveTimer, &QTimer::stop);
         connect(m_socket, &QLocalSocket::disconnected, this, &PreviewerServer::disconnected);
         connect(m_socket, &QLocalSocket::readyRead, this, &PreviewerServer::onReadReady);
+        connect(m_socket, qOverload<QLocalSocket::LocalSocketError>(&QLocalSocket::error),
+                this, &PreviewerServer::onError);
 
         emit connected();
     } else {
@@ -118,5 +120,10 @@ void PreviewerServer::onReadReady()
         m_checkAliveTimer->start();
     else
         emit dataArrived(command, data);
+}
+
+void PreviewerServer::onError(QLocalSocket::LocalSocketError socketError)
+{
+    qWarning() << socketError << "Socket error, in" << __FILE__ << ":" << __LINE__;
 }
 

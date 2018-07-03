@@ -534,7 +534,6 @@ void Control::updatePreview(const PreviewResult& result)
     m_errors = result.errors;
     m_gui = result.gui;
     m_properties = result.properties;
-//    m_events = result.events;
 
     if (!result.errors.isEmpty()) {
         setRefreshingDisabled(true);

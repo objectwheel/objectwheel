@@ -58,11 +58,6 @@ void CommandDispatcher::scheduleTerminate()
     sendAsync(m_server, PreviewerCommands::Terminate);
 }
 
-void CommandDispatcher::schedulePreview(const QString& uid)
-{
-    sendAsync(m_server, PreviewerCommands::Preview, pushValues(uid));
-}
-
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {
@@ -74,9 +69,9 @@ void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const Q
     }
 
     case PreviewDone: {
-        PreviewResult result;
-        pullValues(data, result);
-        emit previewDone(result);
+        QList<PreviewResult> results;
+        pullValues(data, results);
+        emit previewDone(results);
         break;
     }
 

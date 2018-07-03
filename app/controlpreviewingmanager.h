@@ -26,7 +26,6 @@ public:
     static void scheduleIdChange(const QString& uid, const QString& newId){}
     static void scheduleAnchorChange(){}
 
-    static void schedulePreview(const QString& uid);
     static void scheduleTerminate();
     static void scheduleInit();
 
@@ -34,6 +33,7 @@ private slots:
     void onConnected();
     void onDisconnected();
     void onConnectionTimeout();
+    void onPreviewResultsReady(const QList<PreviewResult>& results);
 
 signals:
     void previewDone(const PreviewResult& result);

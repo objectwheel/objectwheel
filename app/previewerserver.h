@@ -4,10 +4,10 @@
 #include <previewercommands.h>
 
 #include <QPointer>
+#include <QLocalSocket>
 
 class QTimer;
 class QLocalServer;
-class QLocalSocket;
 
 class PreviewerServer final : public QObject
 {
@@ -34,6 +34,7 @@ signals:
 private slots:
     void onNewConnection();
     void onReadReady();
+    void onError(QLocalSocket::LocalSocketError socketError);
 
 private:
     void send(QLocalSocket* socket, const PreviewerCommands& command, const QByteArray& data = QByteArray());

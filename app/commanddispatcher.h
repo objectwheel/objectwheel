@@ -18,12 +18,11 @@ public:
 public slots:
     void scheduleInit();
     void scheduleTerminate();
-    void schedulePreview(const QString& uid);
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 
 signals:
     void initializationProgressChanged(int progress);
-    void previewDone(const PreviewResult& result);
+    void previewDone(const QList<PreviewResult>& results);
 
 private:
     PreviewerServer* m_server;

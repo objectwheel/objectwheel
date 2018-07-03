@@ -42,7 +42,7 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
     connect(s_commandDispatcher, &CommandDispatcher::initializationProgressChanged,
             this, &ControlPreviewingManager::initializationProgressChanged);
     connect(s_commandDispatcher, &CommandDispatcher::previewDone,
-            this, &ControlPreviewingManager::previewDone);
+            this, &ControlPreviewingManager::onPreviewResultsReady);
 
 #if defined(PREVIEWER_DEBUG)
     QLocalServer::removeServer("serverName");
@@ -69,38 +69,34 @@ ControlPreviewingManager* ControlPreviewingManager::instance()
     return s_instance;
 }
 
-void ControlPreviewingManager::schedulePreview(const QString& uid)
-{
-    s_commandDispatcher->schedulePreview(uid);
-}
-
 void ControlPreviewingManager::scheduleInit()
 {
-    s_serverThread->wait(100);
+    Q_ASSERT_X(!g_initScheduled, "scheduleInit", "Already scheduled");
 
-    if (g_initScheduled || s_previewerServer->isConnected()) {
-        qWarning() << "Terminate existing connection first in" << __FILE__ << ":" << __LINE__;
-        return;
-    }
+//    s_serverThread->wait(5); // may scheduleTerminate happens after scheduleInit is called from ProjectManager
 
-    QStringList arguments;
-    arguments << ProjectManager::dir();
-    arguments << s_previewerServer->serverName();
+    if (s_previewerServer->isConnected()) {
+        s_commandDispatcher->scheduleInit();
+    } else {
+        QStringList arguments;
+        arguments << ProjectManager::dir();
+        arguments << s_previewerServer->serverName();
 
-    QProcess process;
-    process.setArguments(arguments);
-    process.setProgram(QCoreApplication::applicationDirPath() + "/previewer");
+        QProcess process;
+        process.setArguments(arguments);
+        process.setProgram(QCoreApplication::applicationDirPath() + "/previewer");
 
 #if !defined(QT_DEBUG)
-    process.setStandardOutputFile(QProcess::nullDevice());
-    process.setStandardErrorFile(QProcess::nullDevice());
+        process.setStandardOutputFile(QProcess::nullDevice());
+        process.setStandardErrorFile(QProcess::nullDevice());
 #endif
 
 #if !defined(PREVIEWER_DEBUG)
-    process.startDetached();
+        process.startDetached();
 #endif
 
-    g_initScheduled = true;
+        g_initScheduled = true;
+    }
 }
 
 void ControlPreviewingManager::scheduleTerminate()
@@ -121,11 +117,17 @@ void ControlPreviewingManager::onConnected()
 void ControlPreviewingManager::onDisconnected()
 {
     // TODO
-    qWarning() << "Connection lost in" << __FILE__ << ":" << __LINE__;
+    qWarning() << "Connection lost, in" << __FILE__ << ":" << __LINE__;
 }
 
 void ControlPreviewingManager::onConnectionTimeout()
 {
     // TODO
-    qWarning() << "Connection timeout in" << __FILE__ << ":" << __LINE__;
+    qWarning() << "Connection timeout, in" << __FILE__ << ":" << __LINE__;
+}
+
+void ControlPreviewingManager::onPreviewResultsReady(const QList<PreviewResult>& results)
+{
+    for (const PreviewResult& result : results)
+        emit previewDone(result);
 }
