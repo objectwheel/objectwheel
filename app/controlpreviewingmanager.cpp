@@ -69,6 +69,11 @@ ControlPreviewingManager* ControlPreviewingManager::instance()
     return s_instance;
 }
 
+void ControlPreviewingManager::schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
+{
+    s_commandDispatcher->schedulePropertyUpdate(uid, propertyName, propertyValue);
+}
+
 void ControlPreviewingManager::scheduleInit()
 {
     Q_ASSERT_X(!g_initScheduled, "scheduleInit", "Already scheduled");

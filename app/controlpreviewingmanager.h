@@ -17,7 +17,6 @@ class ControlPreviewingManager final : public QObject
 public:
     static ControlPreviewingManager* instance();
 
-    static void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue){}
     static void scheduleParentUpdate(const QString& uid, const QString& parentUid, const QString& newUrl){}
     static void scheduleControlCreation(){}
     static void scheduleControlDeletion(){}
@@ -26,6 +25,7 @@ public:
     static void scheduleIdChange(const QString& uid, const QString& newId){}
     static void scheduleAnchorChange(){}
 
+    static void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     static void scheduleTerminate();
     static void scheduleInit();
 

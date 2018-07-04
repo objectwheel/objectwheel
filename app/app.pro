@@ -2,7 +2,7 @@
 TEMPLATE = app
 CONFIG  += c++14
 TARGET   = Objectwheel
-DEFINES += PREVIEWER_DEBUG
+#DEFINES += PREVIEWER_DEBUG
 
 QT += quickwidgets qml quick help
 QT += widgets network websockets svg concurrent quickcontrols2

@@ -4,28 +4,28 @@
 
 namespace {
 
-void pushValuesHelper(QByteArray&) {}
+void pushValuesHelper(QDataStream&) {}
 
 template <typename Arg, typename... Args>
-void pushValuesHelper(QByteArray& data, const Arg& arg, const Args&... args) {
-    QDataStream stream(&data, QIODevice::WriteOnly);
+void pushValuesHelper(QDataStream& stream, const Arg& arg, const Args&... args) {
     stream << arg;
-    pushValuesHelper(data, args...);
+    pushValuesHelper(stream, args...);
 }
 
 template <typename... Args>
 QByteArray pushValues(const Args&... args) {
     QByteArray data;
-    pushValuesHelper(data, args...);
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    pushValuesHelper(stream, args...);
     return data;
 }
 
 void pullValuesHelper(QDataStream&) {}
 
 template <typename Arg, typename... Args>
-void pullValuesHelper(QDataStream& dataStream, Arg& arg, Args&... args) {
-    dataStream >> arg;
-    pullValuesHelper(dataStream, args...);
+void pullValuesHelper(QDataStream& stream, Arg& arg, Args&... args) {
+    stream >> arg;
+    pullValuesHelper(stream, args...);
 }
 
 template <typename... Args>
@@ -56,6 +56,11 @@ void CommandDispatcher::scheduleInit()
 void CommandDispatcher::scheduleTerminate()
 {
     sendAsync(m_server, PreviewerCommands::Terminate);
+}
+
+void CommandDispatcher::schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
+{
+    sendAsync(m_server, PreviewerCommands::PropertyUpdate, pushValues(uid, propertyName, propertyValue));
 }
 
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
