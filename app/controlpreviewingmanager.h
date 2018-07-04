@@ -34,6 +34,7 @@ private slots:
     void onDisconnected();
     void onConnectionTimeout();
     void onPreviewResultsReady(const QList<PreviewResult>& results);
+    void onInitializationProgressChange(int progress);
 
 signals:
     void previewDone(const PreviewResult& result);

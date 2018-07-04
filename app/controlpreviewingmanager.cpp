@@ -40,7 +40,7 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
             this, &ControlPreviewingManager::onConnectionTimeout);
 
     connect(s_commandDispatcher, &CommandDispatcher::initializationProgressChanged,
-            this, &ControlPreviewingManager::initializationProgressChanged);
+            this, &ControlPreviewingManager::onInitializationProgressChange);
     connect(s_commandDispatcher, &CommandDispatcher::previewDone,
             this, &ControlPreviewingManager::onPreviewResultsReady);
 
@@ -78,7 +78,7 @@ void ControlPreviewingManager::scheduleInit()
 {
     Q_ASSERT_X(!g_initScheduled, "scheduleInit", "Already scheduled");
 
-//    s_serverThread->wait(5); // may scheduleTerminate happens after scheduleInit is called from ProjectManager
+    s_serverThread->wait(100); // may scheduleTerminate happens after scheduleInit is called from ProjectManager
 
     if (s_previewerServer->isConnected()) {
         s_commandDispatcher->scheduleInit();
@@ -112,11 +112,8 @@ void ControlPreviewingManager::scheduleTerminate()
 
 void ControlPreviewingManager::onConnected()
 {
-    if (g_initScheduled) {
-        g_initScheduled = false;
-
+    if (g_initScheduled)
         s_commandDispatcher->scheduleInit();
-    }
 }
 
 void ControlPreviewingManager::onDisconnected()
@@ -135,4 +132,15 @@ void ControlPreviewingManager::onPreviewResultsReady(const QList<PreviewResult>&
 {
     for (const PreviewResult& result : results)
         emit previewDone(result);
+
+    if (g_initScheduled) {
+        g_initScheduled = false;
+        emit initializationProgressChanged(100);
+    }
+}
+
+void ControlPreviewingManager::onInitializationProgressChange(int progress)
+{
+    static const int maxInitProgress = 85;
+    emit initializationProgressChanged(maxInitProgress * progress / 100.0);
 }
