@@ -16,6 +16,9 @@
 #include <toolbar.h>
 #include <toolbutton.h>
 #include <appfontsettings.h>
+#include <windowmanager.h>
+#include <mainwindow.h>
+#include <inspectorpane.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -975,10 +978,13 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
             item.documents.value(relativePath).document->setModified(false);
 
             const auto& id = ParserUtils::property(documentPath, "id");
-            if (control->id() != id && !id.isEmpty())
+            if (control->id() != id && !id.isEmpty()) {
+                const QString& previousId = control->id();
                 SaveManager::setProperty(control, "id", id);
+                WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(control, previousId);
+            }
 
-            control->refresh(true);
+            //       BUG control->refresh(true);
             break;
         }
     }

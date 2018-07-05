@@ -13,7 +13,6 @@
 #include <runmanager.h>
 #include <controlcreationmanager.h>
 #include <savemanager.h>
-#include <controlmonitoringmanager.h>
 #include <menumanager.h>
 #include <centralwidget.h>
 #include <designerwidget.h>

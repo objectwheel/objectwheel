@@ -69,6 +69,11 @@ ControlPreviewingManager* ControlPreviewingManager::instance()
     return s_instance;
 }
 
+void ControlPreviewingManager::scheduleControlCreation(const QString& dir, const QString& parentUid)
+{
+    s_commandDispatcher->scheduleControlCreation(dir, parentUid);
+}
+
 void ControlPreviewingManager::schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
 {
     s_commandDispatcher->schedulePropertyUpdate(uid, propertyName, propertyValue);

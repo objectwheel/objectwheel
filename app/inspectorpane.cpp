@@ -8,7 +8,6 @@
 #include <form.h>
 #include <projectmanager.h>
 #include <dpr.h>
-#include <controlmonitoringmanager.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -247,8 +246,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::formAboutToBeRemoved,
             this, &InspectorPane::onFormRemove);
     connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
-    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::idChanged,
-            this, &InspectorPane::onControlIdChange);
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &InspectorPane::onProjectStart, Qt::QueuedConnection);
     // We delay selection change signal, otherwise FormsPane clears the selection (and hence we clear
@@ -260,8 +257,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     // control exposing operation. Thus we get controlAdded slot called twice for control creation.
     connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::parentChanged,
             this, &InspectorPane::onControlParentChange, Qt::QueuedConnection);
-    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::previewChanged,
-            this, &InspectorPane::onControlPreviewChange/*, Qt::QueuedConnection*/);
 }
 
 void InspectorPane::paintEvent(QPaintEvent* e)
@@ -453,7 +448,7 @@ void InspectorPane::onControlParentChange(Control* control)
     }
 }
 
-void InspectorPane::onControlPreviewChange(Control* control)
+void InspectorPane::handleControlPreviewChange(Control* control)
 {
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
@@ -486,7 +481,7 @@ void InspectorPane::onControlPreviewChange(Control* control)
     }
 }
 
-void InspectorPane::onControlIdChange(Control* control, const QString& previousId)
+void InspectorPane::handleControlIdChange(Control* control, const QString& previousId)
 {
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {

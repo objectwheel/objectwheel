@@ -28,6 +28,8 @@ public:
 
 public slots:
     void sweep();
+    void handleControlIdChange(Control* control, const QString& previousId);
+    void handleControlPreviewChange(Control* control);
 
 private slots:
     void onProjectStart();
@@ -35,12 +37,10 @@ private slots:
     void onControlCreation(Control* control);
     void onControlRemove(Control* control);
     void onControlParentChange(Control* control);
-    void onControlPreviewChange(Control* control);
     void onFormRemove(Form* form);
     void onCurrentFormChange(Form* currentForm);
     void onItemSelectionChange();
     void onItemDoubleClick(QTreeWidgetItem* item, int column);
-    void onControlIdChange(Control* control, const QString& previousId);
 
 private:
     void paintEvent(QPaintEvent* e) override;

@@ -251,8 +251,8 @@ void DesignerView::onPasteAction()
             }
         }
 
-        for (auto childControl : control->childControls())
-            childControl->refresh();
+        // BUG: Do we really need this?
+//        ControlPreviewingManager::scheduleRefresh(control->uid());
     }
 }
 

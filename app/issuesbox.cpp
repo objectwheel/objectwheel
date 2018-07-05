@@ -2,7 +2,6 @@
 #include <css.h>
 #include <control.h>
 #include <outputpane.h>
-#include <controlmonitoringmanager.h>
 #include <utilsicons.h>
 #include <toolbar.h>
 #include <toolbutton.h>
@@ -97,8 +96,6 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     m_listWidget->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setItemDelegate(new IssuesListDelegate(m_listWidget));
-    connect(ControlMonitoringManager::instance(), SIGNAL(errorOccurred(Control*)),
-      SLOT(handleErrors(Control*)));
 
     connect(m_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
       SLOT(handleDoubleClick(QListWidgetItem*)));

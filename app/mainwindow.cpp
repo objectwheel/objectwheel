@@ -16,7 +16,6 @@
 #include <runmanager.h>
 #include <projectmanager.h>
 #include <consolebox.h>
-#include <controlmonitoringmanager.h>
 #include <control.h>
 #include <toolboxsettingswindow.h>
 
@@ -250,8 +249,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
     connect(m_centralWidget->qmlCodeEditorWidget(), SIGNAL(documentSaved()),
             m_propertiesPane, SLOT(refreshList()));
-    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::previewChanged,
-            [=] (Control* control) { if (control->isSelected()) m_propertiesPane->refreshList(); });
 
     connect(RunManager::instance(),
     QOverload<int, QProcess::ExitStatus>::of(&RunManager::finished),
@@ -313,4 +310,14 @@ CentralWidget* MainWindow::centralWidget() const
 QSize MainWindow::sizeHint() const
 {
     return {1260, 700};
+}
+
+PropertiesPane* MainWindow::propertiesPane() const
+{
+    return m_propertiesPane;
+}
+
+InspectorPane* MainWindow::inspectorPane() const
+{
+    return m_inspectorPane;
 }

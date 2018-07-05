@@ -57,7 +57,6 @@ public slots:
     void centralize();
     void hideResizers();
     void showResizers();
-    void refresh(bool repreview = false);
 
     static void updateUids();
 
@@ -86,17 +85,7 @@ protected:
     ~Control() override;
 
 private slots:
-    void onSizeChange();
-    void onParentChange();
-    void onZValueChange();
     void updatePreview(const PreviewResult& result);
-
-signals:
-    void doubleClicked();
-    void errorOccurred();
-    void previewChanged();
-    void idChanged(const QString& id);
-    void controlDropped(const QPointF&, const QString&);
 
 private:
     bool m_gui;
@@ -111,7 +100,6 @@ private:
     QString m_id;
     QImage m_image;
 
-    QList<QString> m_events;
     QList<QQmlError> m_errors;
     QList<Resizer*> m_resizers;
     QList<PropertyNode> m_properties;

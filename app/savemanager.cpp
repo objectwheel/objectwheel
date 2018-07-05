@@ -342,9 +342,7 @@ bool SaveManager::addForm(Form* form)
     if (!SaveUtils::isOwctrl(form->dir()))
         return false;
 
-    form->blockSignals(true);
     refactorId(form, QString());
-    form->blockSignals(false);
 
     auto projectDir = ProjectManager::dir();
 
@@ -394,11 +392,9 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     if (!SaveUtils::isOwctrl(control->dir()) || !SaveUtils::isOwctrl(parentControl->dir()))
         return false;
 
-    control->blockSignals(true);
     refactorId(control, suid, topPath);
     for (auto child : control->childControls())
         refactorId(child, suid, topPath);
-    control->blockSignals(false);
 
     auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
     auto controlDir = baseDir + separator() + QString::number(SaveUtils::biggestDir(baseDir) + 1);
@@ -499,15 +495,8 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
 
         auto _suid = SaveUtils::suid(control->dir());
 
-        // We made it complicated to get a single-shot idChanged signal in ControlMonitoringManager.
-        control->blockSignals(true);
-        const auto& previousId = control->id();
         control->setId(value);
         refactorId(control, _suid, topPath);
-        const auto& refactoredId = control->id();
-        control->setId(previousId);
-        control->blockSignals(false);
-        control->setId(refactoredId);
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;

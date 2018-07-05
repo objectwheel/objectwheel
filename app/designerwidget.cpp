@@ -4,13 +4,13 @@
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>
 #include <savemanager.h>
-#include <controlmonitoringmanager.h>
 #include <controlcreationmanager.h>
 #include <filemanager.h>
 #include <transparentcombobox.h>
 #include <utilsicons.h>
 #include <toolbar.h>
 #include <toolbutton.h>
+#include <controlpreviewingmanager.h>
 
 #include <toolbar.h>
 #include <QPainter>
@@ -119,11 +119,6 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
     m_toolbar->addStretch();
-
-    connect(ControlMonitoringManager::instance(), SIGNAL(doubleClicked(Control*)),
-            SLOT(onControlDoubleClick(Control*)));
-    connect(ControlMonitoringManager::instance(), SIGNAL(controlDropped(Control*,QPointF,QString)),
-            SLOT(onControlDrop(Control*,QPointF,QString)));
 }
 
 void DesignerWidget::scaleScene(qreal ratio)
@@ -174,9 +169,7 @@ void DesignerWidget::onZoomLevelChange(const QString& text)
 
 void DesignerWidget::onRefreshButtonClick()
 {
-    m_designerScene->currentForm()->refresh();
-    for (auto control : m_designerScene->currentForm()->childControls())
-        control->refresh();
+    ControlPreviewingManager::scheduleRefresh(m_designerScene->currentForm()->uid());
 }
 
 void DesignerWidget::onClearButtonClick()
@@ -217,14 +210,14 @@ QSize DesignerWidget::sizeHint() const
     return QSize(680, 680);
 }
 
-void DesignerWidget::onControlDoubleClick(Control* control)
+void DesignerWidget::handleControlDoubleClick(Control* control)
 {
     m_qmlCodeEditorWidget->addControl(control);
     m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);
     m_qmlCodeEditorWidget->openControl(control);
 }
 
-void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
+void DesignerWidget::handleControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
     auto newControl = ControlCreationManager::createControl(dname(dname(url)), pos, "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());

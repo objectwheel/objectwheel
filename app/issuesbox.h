@@ -48,10 +48,10 @@ public:
 public slots:
     void sweep();
     void refresh();
+    void handleErrors(Control* control);
 
 private slots:
     void clear();
-    void handleErrors(Control* control);
     void handleDoubleClick(QListWidgetItem* item);
 
 signals:

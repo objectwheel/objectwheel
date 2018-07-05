@@ -45,7 +45,7 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     s_designerScene->addForm(form);
 
 //    ControlPreviewingManager::setDisabled(false);
-    form->refresh();
+//    form->refresh();
 
     QMap<QString, Control*> pmap;
     pmap[form->dir()] = form;
@@ -56,7 +56,7 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
         auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         control->setParentItem(pcontrol);
 //        ControlPreviewingManager::setDisabled(false);
-        control->refresh();
+//        control->refresh();
 
         emit instance()->controlCreated(control);
 
@@ -83,7 +83,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
     SaveUtils::setY(control->dir(), pos.y());
 
 //    ControlPreviewingManager::setDisabled(false);
-    control->refresh();
+    ControlPreviewingManager::scheduleControlCreation(control->dir(), parentControl->uid());
 
     QMap<QString, Control*> pmap;
     pmap[control->dir()] = control;
@@ -99,7 +99,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
         SaveUtils::setY(control->dir(), control->y());
 
 //        ControlPreviewingManager::setDisabled(false);
-        ccontrol->refresh();
+        ControlPreviewingManager::scheduleControlCreation(ccontrol->dir(), pcontrol->uid());
 
         emit instance()->controlCreated(control);
 

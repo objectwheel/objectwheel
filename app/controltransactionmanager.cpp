@@ -1,6 +1,5 @@
 #include <controltransactionmanager.h>
 #include <control.h>
-#include <controlmonitoringmanager.h>
 #include <savemanager.h>
 #include <saveutils.h>
 #include <controlpreviewingmanager.h>

@@ -63,6 +63,11 @@ void CommandDispatcher::schedulePropertyUpdate(const QString& uid, const QString
     sendAsync(m_server, PreviewerCommands::PropertyUpdate, pushValues(uid, propertyName, propertyValue));
 }
 
+void CommandDispatcher::scheduleControlCreation(const QString& dir, const QString& parentUid)
+{
+    sendAsync(m_server, PreviewerCommands::ControlCreation, pushValues(dir, parentUid));
+}
+
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {

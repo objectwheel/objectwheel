@@ -12,6 +12,7 @@ enum PreviewerCommands {
     Reparent,
     Terminate,
     PropertyUpdate,
+    ControlCreation
 };
 Q_DECLARE_METATYPE(PreviewerCommands)
 

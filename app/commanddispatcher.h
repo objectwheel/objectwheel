@@ -19,6 +19,7 @@ public slots:
     void scheduleInit();
     void scheduleTerminate();
     void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
+    void scheduleControlCreation(const QString& dir, const QString& parentUid);
 
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 

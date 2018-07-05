@@ -29,7 +29,7 @@ void ProjectExposingManager::exposeProject()
 
         s_designerScene->addForm(form);
         form->centralize();
-        form->refresh();
+        //       BUG form->refresh();
 
         QMap<QString, Control*> pmap;
         pmap[path] = form;
@@ -37,10 +37,8 @@ void ProjectExposingManager::exposeProject()
         for (const auto& child : SaveUtils::childrenPaths(path)) {
             auto pcontrol = pmap.value(dname(dname(child)));
             auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-            control->blockSignals(true);
             control->setParentItem(pcontrol);
-            control->blockSignals(false);
-            control->refresh();
+            //       BUG control->refresh();
             pmap[child] = control;
         }
     }

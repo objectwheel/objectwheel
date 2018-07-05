@@ -5,12 +5,14 @@
 #include <savemanager.h>
 #include <delayer.h>
 #include <filemanager.h>
-#include <controlmonitoringmanager.h>
 #include <focuslesslineedit.h>
 #include <previewresult.h>
 #include <control.h>
 #include <designerscene.h>
 #include <controlpreviewingmanager.h>
+#include <windowmanager.h>
+#include <mainwindow.h>
+#include <inspectorpane.h>
 
 #include <QtWidgets>
 
@@ -818,7 +820,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
-    connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
+// BUG   connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
 }
 
 void PropertiesPane::sweep()
@@ -1282,8 +1284,16 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 
     auto sc = scs.at(0);
 
+    const QString& previousId = sc->id();
+
     SaveManager::setProperty(sc, property, parserValue);
-    ControlPreviewingManager::schedulePropertyUpdate(sc->uid(), property, value);
+
+    if (property == "id") {
+        ControlPreviewingManager::scheduleIdChange(sc->uid(), value.toString());
+        WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(sc, previousId);
+    } else {
+        ControlPreviewingManager::schedulePropertyUpdate(sc->uid(), property, value);
+    }
 }
 
 void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QString& parserValue, const QVariant& value)

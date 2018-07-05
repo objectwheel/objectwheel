@@ -6,8 +6,15 @@
 #include <filemanager.h>
 #include <parserutils.h>
 #include <designerscene.h>
-#include <controlmonitoringmanager.h>
 #include <controlpreviewingmanager.h>
+#include <windowmanager.h>
+#include <mainwindow.h>
+#include <inspectorpane.h>
+#include <propertiespane.h>
+#include <centralwidget.h>
+#include <outputpane.h>
+#include <issuesbox.h>
+#include <designerwidget.h>
 
 #include <QtMath>
 #include <QDebug>
@@ -20,12 +27,12 @@
 extern const char* TOOL_KEY;
 
 namespace {
-    qreal getZ(const PreviewResult& result);
-    QImage initialPreview(const QSizeF& size);
-    QRectF getRect(const PreviewResult& result);
-    QList<Resizer*> initializeResizers(Control* control);
-    void setInitialProperties(Control* control);
-    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
+qreal getZ(const PreviewResult& result);
+QImage initialPreview(const QSizeF& size);
+QRectF getRect(const PreviewResult& result);
+QList<Resizer*> initializeResizers(Control* control);
+void setInitialProperties(Control* control);
+void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
 }
 
 QList<Control*> Control::m_controls;
@@ -56,26 +63,6 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
 
     m_image = initialPreview(size());
 
-    connect(this, &Control::geometryChanged, this, [=] {
-        QPointer<Control> p(this);
-        Suppressor::suppress(800, "geometryChanged", [=] {
-            if (p)
-                emit ControlMonitoringManager::instance()->geometryChanged(this);
-        });
-    });
-
-    connect(this, &Control::idChanged, this, [=] (const QString& pid) {
-        emit ControlMonitoringManager::instance()->idChanged(this, pid);
-    });
-
-    connect(this, &Control::zChanged, this, &Control::onZValueChange);
-    connect(this, &Control::zChanged, this,
-            [=] { emit ControlMonitoringManager::instance()->zValueChanged(this); });
-
-    connect(this, &Control::parentChanged, this, &Control::onParentChange);
-    connect(this, &Control::parentChanged, this,
-            [=] { emit ControlMonitoringManager::instance()->parentChanged(this); });
-
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
 }
@@ -85,34 +72,6 @@ Control::~Control()
     // In order to prevent any kind of signals being emitted while deletion in progress
     blockSignals(true);
     m_controls.removeOne(this);
-}
-
-void Control::onSizeChange()
-{
-    if (hasErrors() || !gui() || m_refreshingDisabled)
-        return;
-
-    ControlPreviewingManager::schedulePropertyUpdate(uid(), "width", size().width());
-    ControlPreviewingManager::schedulePropertyUpdate(uid(), "height", size().height());
-}
-
-void Control::onParentChange()
-{
-    if (!parentControl() || (!parentControl()->gui() && gui()) || m_refreshingDisabled)
-        return;
-
-    ControlPreviewingManager::scheduleParentUpdate(uid(), parentControl()->uid(), url());
-
-    onSizeChange();
-}
-
-void Control::onZValueChange()
-{
-    if (hasErrors() || !gui() || m_refreshingDisabled)
-        return;
-
-    // FIXME: Do we really need this?
-    ControlPreviewingManager::schedulePropertyUpdate(uid(), "z", zValue());
 }
 
 bool Control::gui() const
@@ -237,12 +196,8 @@ void Control::setClip(bool clip)
 
 void Control::setId(const QString& id)
 {
-    const QString previousId = m_id;
     m_id = id;
     setToolTip(id);
-
-    if (id != previousId)
-        emit idChanged(previousId);
 }
 
 void Control::setUrl(const QString& url)
@@ -296,12 +251,6 @@ void Control::showResizers()
         resizer->show();
 }
 
-void Control::refresh(bool repreview)
-{
-//    if (!m_refreshingDisabled)
-//       BUG ControlPreviewingManager::scheduleRender(dir(), repreview); // BUG
-}
-
 void Control::updateUids()
 {
     for (Control* control : m_controls)
@@ -315,6 +264,9 @@ void Control::dropControl(Control* control)
 
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
     control->setParentItem(this);
+
+    ControlMonitoringManager::instance()->parentChanged(control);
+
     update();
 }
 
@@ -322,10 +274,9 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     m_dragIn = false;
     event->accept();
-    emit controlDropped(event->pos(),
-      event->mimeData()->urls().first().toLocalFile());
-    emit ControlMonitoringManager::instance()->controlDropped(this, event->pos(),
-      event->mimeData()->urls().first().toLocalFile());
+    WindowManager::mainWindow()->centralWidget()->designerWidget()->handleControlDrop(
+                this, event->pos(),
+                event->mimeData()->urls().first().toLocalFile());
     update();
 }
 
@@ -338,7 +289,7 @@ void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
     auto mimeData = event->mimeData();
     if (mimeData->hasUrls() && mimeData->hasText() &&
-        mimeData->text() == TOOL_KEY) {
+            mimeData->text() == TOOL_KEY) {
         m_dragIn = true;
         event->accept();
     } else {
@@ -424,8 +375,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
-    emit doubleClicked();
-    emit ControlMonitoringManager::instance()->doubleClicked(this);
+    WindowManager::mainWindow()->centralWidget()->designerWidget()->handleControlDoubleClick(this);
 }
 
 void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
@@ -445,14 +395,14 @@ void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     switch (change) {
-        case ItemSelectedHasChanged:
-            if (value.toBool())
-                showResizers();
-            else
-                hideResizers();
-            break;
-        default:
-            break;
+    case ItemSelectedHasChanged:
+        if (value.toBool())
+            showResizers();
+        else
+            hideResizers();
+        break;
+    default:
+        break;
     }
     return QGraphicsWidget::itemChange(change, value);
 }
@@ -463,8 +413,6 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 
     for (auto resizer : m_resizers)
         resizer->correct();
-
-    onSizeChange();
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
@@ -474,13 +422,13 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     if (parentControl() && parentControl()->clip() && !m_dragging) {
         painter->setClipRect(
-           rect().intersected(
-               parentControl()->mapToItem(
-                   this,
-                   parentControl()->rect().adjusted(1, 1, -1, -1)
-               ).boundingRect()
-           )
-        );
+                    rect().intersected(
+                        parentControl()->mapToItem(
+                            this,
+                            parentControl()->rect().adjusted(1, 1, -1, -1)
+                            ).boundingRect()
+                        )
+                    );
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
@@ -546,20 +494,20 @@ void Control::updatePreview(const PreviewResult& result)
     } else {
         if (result.gui) {
             if (!form())
-//                m_clip = result.property("clip").toBool();
+                //                m_clip = result.property("clip").toBool();
 
-            if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
-                const auto& rect = getRect(result);
-                qreal z = getZ(result);
-                setRefreshingDisabled(true);
-                blockSignals(true);
-                resize(rect.size());
-                if (!form())
-                    setPos(rect.topLeft());
-                setZValue(z);
-                blockSignals(false);
-                setRefreshingDisabled(false);
-            }
+                if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
+                    const auto& rect = getRect(result);
+                    qreal z = getZ(result);
+                    setRefreshingDisabled(true);
+                    blockSignals(true);
+                    resize(rect.size());
+                    if (!form())
+                        setPos(rect.topLeft());
+                    setZValue(z);
+                    blockSignals(false);
+                    setRefreshingDisabled(false);
+                }
         } else {
             setRefreshingDisabled(true);
             blockSignals(true);
@@ -576,148 +524,144 @@ void Control::updatePreview(const PreviewResult& result)
 
     update();
 
-    if (!result.errors.isEmpty()) {
-        emit errorOccurred();
-        emit ControlMonitoringManager::instance()->errorOccurred(this);
-    }
-
-    emit previewChanged();
-    emit ControlMonitoringManager::instance()->previewChanged(this);
+    if (!result.errors.isEmpty())
+        WindowManager::mainWindow()->centralWidget()->outputPane()->issuesBox()->handleErrors(this);
+    if (isSelected())
+        WindowManager::mainWindow()->propertiesPane()->refreshList();
+    WindowManager::mainWindow()->inspectorPane()->handleControlPreviewChange(this);
 }
 
 namespace {
-    qreal getZ(const PreviewResult& result)
-    {
-        const QList<PropertyNode> nodes = result.properties;
+qreal getZ(const PreviewResult& result)
+{
+    const QList<PropertyNode> nodes = result.properties;
 
-        for (const auto& node : nodes) {
-            for (const auto& property : node.properties.keys()) {
-                if (property == "z")
-                    return node.properties.value(property).toReal();
-            }
+    for (const auto& node : nodes) {
+        for (const auto& property : node.properties.keys()) {
+            if (property == "z")
+                return node.properties.value(property).toReal();
         }
-
-        return 0.0;
     }
 
-    QImage initialPreview(const QSizeF& size)
-    {
-        auto min = qMin(24.0, qMin(size.width(), size.height()));
+    return 0.0;
+}
 
-        QImage preview(
-            qCeil(size.width() * DPR),
-            qCeil(size.height() * DPR),
-            QImage::Format_ARGB32_Premultiplied
-        );
+QImage initialPreview(const QSizeF& size)
+{
+    auto min = qMin(24.0, qMin(size.width(), size.height()));
 
-        preview.setDevicePixelRatio(DPR);
-        preview.fill(Qt::transparent);
+    QImage preview(
+                qCeil(size.width() * DPR),
+                qCeil(size.height() * DPR),
+                QImage::Format_ARGB32_Premultiplied
+                );
 
-        QImage wait(":/images/wait.png");
-        wait.setDevicePixelRatio(DPR);
+    preview.setDevicePixelRatio(DPR);
+    preview.fill(Qt::transparent);
 
-        drawCenter(
-            preview,
-            wait.scaled(
-                min * DPR,
-                min * DPR,
-                Qt::IgnoreAspectRatio,
-                Qt::SmoothTransformation
-            ),
-            size
-        );
+    QImage wait(":/images/wait.png");
+    wait.setDevicePixelRatio(DPR);
 
-        return preview;
-    }
+    drawCenter(
+                preview,
+                wait.scaled(
+                    min * DPR,
+                    min * DPR,
+                    Qt::IgnoreAspectRatio,
+                    Qt::SmoothTransformation
+                    ),
+                size
+                );
 
-    QRectF getRect(const PreviewResult& result)
-    {
-        QRectF rect;
-        const QList<PropertyNode> nodes = result.properties;
+    return preview;
+}
 
-        for (const auto& node : nodes) {
-            for (const auto& property : node.properties.keys()) {
-                if (property == "x")
-                    rect.moveLeft(node.properties.value(property).toReal());
-                else if (property == "y")
-                    rect.moveTop(node.properties.value(property).toReal());
-                else if (property == "width")
-                    rect.setWidth(node.properties.value(property).toReal());
-                else if (property == "height")
-                    rect.setHeight(node.properties.value(property).toReal());
-            }
+QRectF getRect(const PreviewResult& result)
+{
+    QRectF rect;
+    const QList<PropertyNode> nodes = result.properties;
+
+    for (const auto& node : nodes) {
+        for (const auto& property : node.properties.keys()) {
+            if (property == "x")
+                rect.moveLeft(node.properties.value(property).toReal());
+            else if (property == "y")
+                rect.moveTop(node.properties.value(property).toReal());
+            else if (property == "width")
+                rect.setWidth(node.properties.value(property).toReal());
+            else if (property == "height")
+                rect.setHeight(node.properties.value(property).toReal());
         }
-
-        return rect;
     }
 
-    QList<Resizer*> initializeResizers(Control* control)
-    {
-        QList<Resizer*> resizers;
-        int i = 0;
-        for (;i < 8;)
-            resizers << new Resizer(control, Resizer::Placement(i++));
+    return rect;
+}
 
-        return resizers;
-    }
+QList<Resizer*> initializeResizers(Control* control)
+{
+    QList<Resizer*> resizers;
+    int i = 0;
+    for (;i < 8;)
+        resizers << new Resizer(control, Resizer::Placement(i++));
 
-    void setInitialProperties(Control *control)
-    {
-        qreal x = 0;
-        qreal y = 0;
-        qreal z = 0;
-        qreal width = 50;
-        qreal height = 50;
+    return resizers;
+}
 
-        if (ParserUtils::exists(control->url(), "x"))
-            x = ParserUtils::property(control->url(), "x").toDouble();
-        else
-            x = SaveUtils::x(control->dir());
+void setInitialProperties(Control *control)
+{
+    qreal x = 0;
+    qreal y = 0;
+    qreal z = 0;
+    qreal width = 50;
+    qreal height = 50;
 
-        if (ParserUtils::exists(control->url(), "y"))
-            y = ParserUtils::property(control->url(), "y").toDouble();
-        else
-            y = SaveUtils::y(control->dir());
+    if (ParserUtils::exists(control->url(), "x"))
+        x = ParserUtils::property(control->url(), "x").toDouble();
+    else
+        x = SaveUtils::x(control->dir());
 
-        if (ParserUtils::exists(control->url(), "width"))
-            width = ParserUtils::property(control->url(), "width").toDouble();
+    if (ParserUtils::exists(control->url(), "y"))
+        y = ParserUtils::property(control->url(), "y").toDouble();
+    else
+        y = SaveUtils::y(control->dir());
 
-        if (ParserUtils::exists(control->url(), "height"))
-            height = ParserUtils::property(control->url(), "height").toDouble();
+    if (ParserUtils::exists(control->url(), "width"))
+        width = ParserUtils::property(control->url(), "width").toDouble();
 
-        if (ParserUtils::exists(control->url(), "z"))
-            z = ParserUtils::property(control->url(), "z").toDouble();
+    if (ParserUtils::exists(control->url(), "height"))
+        height = ParserUtils::property(control->url(), "height").toDouble();
 
-        control->blockSignals(true);
-        control->setId(SaveUtils::id(control->dir()));        
-        control->setPos(x, y);
-        control->setZValue(z);
-        control->resize(width, height);
-        control->blockSignals(false);
-    }
+    if (ParserUtils::exists(control->url(), "z"))
+        z = ParserUtils::property(control->url(), "z").toDouble();
 
-    void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
-    {
-        QBrush brush;
-        brush.setColor("#b0b4b7");
-        brush.setStyle(Qt::Dense6Pattern);
+    control->setId(SaveUtils::id(control->dir()));
+    control->setPos(x, y);
+    control->setZValue(z);
+    control->resize(width, height);
+}
 
-        QPainter painter(&dest);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setBrush(brush);
-        painter.setPen("#808487");
+void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
+{
+    QBrush brush;
+    brush.setColor("#b0b4b7");
+    brush.setStyle(Qt::Dense6Pattern);
 
-        QRectF rect;
-        rect.setTopLeft({0.0, 0.0});
-        rect.setWidth(size.width());
-        rect.setHeight(size.height());
+    QPainter painter(&dest);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setBrush(brush);
+    painter.setPen("#808487");
 
-        QRectF rect_2;
-        rect_2.setWidth(source.width() / DPR);
-        rect_2.setHeight(source.height() / DPR);
-        rect_2.moveCenter(rect.center());
+    QRectF rect;
+    rect.setTopLeft({0.0, 0.0});
+    rect.setWidth(size.width());
+    rect.setHeight(size.height());
 
-        painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
-        painter.drawImage(rect_2, source);
-    }
+    QRectF rect_2;
+    rect_2.setWidth(source.width() / DPR);
+    rect_2.setHeight(source.height() / DPR);
+    rect_2.moveCenter(rect.center());
+
+    painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
+    painter.drawImage(rect_2, source);
+}
 }

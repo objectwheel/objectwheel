@@ -23,6 +23,8 @@ public:
 public slots:
     void sweep();
     void refresh() { onRefreshButtonClick(); }
+    void handleControlDoubleClick(Control*);
+    void handleControlDrop(Control*, const QPointF&, const QString&);
 
 protected:
     QSize sizeHint() const override;
@@ -37,8 +39,6 @@ private slots:
     void onSnappingButtonClick(bool value);
     void onZoomLevelChange(const QString& text);
 
-    void onControlDoubleClick(Control*);
-    void onControlDrop(Control*, const QPointF&, const QString&);
     void onControlSelectionChange(const QList<Control*>& selectedControls);
 
 private:
