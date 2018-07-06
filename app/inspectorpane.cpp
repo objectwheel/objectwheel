@@ -253,10 +253,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     // selected item states into FormState data for outgoing form.
     connect(m_designerScene, &DesignerScene::selectionChanged,
             this, &InspectorPane::onSelectionChange, Qt::QueuedConnection);
-    // We delay parant change signal, otherwise it is emitted before controlCreated signal for
-    // control exposing operation. Thus we get controlAdded slot called twice for control creation.
-    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::parentChanged,
-            this, &InspectorPane::onControlParentChange, Qt::QueuedConnection);
 }
 
 void InspectorPane::paintEvent(QPaintEvent* e)
@@ -427,7 +423,7 @@ void InspectorPane::onControlRemove(Control* control)
     }
 }
 
-void InspectorPane::onControlParentChange(Control* control)
+void InspectorPane::handleControlParentChange(Control* control)
 {
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {

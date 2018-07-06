@@ -50,7 +50,6 @@ private:
     static ControlCreationManager* s_controlExposingManager;
     static ControlRemovingManager* s_controlRemovingManager;
     static RunManager* s_runManager;
-    static ControlMonitoringManager* s_controlMonitoringManager;
     static ControlTransactionManager* s_controlTransactionManager;
     static Core::HelpManager* s_helpManager;
     static DocumentManager* s_documentManager;

@@ -28,6 +28,7 @@ public:
 
 public slots:
     void sweep();
+    void handleControlParentChange(Control* control);
     void handleControlIdChange(Control* control, const QString& previousId);
     void handleControlPreviewChange(Control* control);
 
@@ -36,7 +37,6 @@ private slots:
     void onSelectionChange();
     void onControlCreation(Control* control);
     void onControlRemove(Control* control);
-    void onControlParentChange(Control* control);
     void onFormRemove(Form* form);
     void onCurrentFormChange(Form* currentForm);
     void onItemSelectionChange();

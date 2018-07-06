@@ -819,7 +819,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
-    connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
+// BUG   connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
 // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
 }
 
@@ -1344,9 +1344,13 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             if (sc[0]->form()) {
                 property = "x";
                 break;
+            } else if (!sc[0]->gui() || sc[0]->hasErrors()) {
+                sc[0]->setX(value.toReal());
+                SaveUtils::setX(sc[0]->dir(), sc[0]->x());
+                SaveUtils::setY(sc[0]->dir(), sc[0]->y());
+                return;
             } else {
                 sc[0]->setX(value.toReal());
-                return;
             }
         }
 
@@ -1369,9 +1373,10 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            if (sc[0]->gui())
+            if (sc[0]->gui() && !sc[0]->hasErrors())
                 sc[0]->resize(value.toReal(), sc[0]->size().height());
-            return;
+            else
+                return;
         }
 
         case PropertiesPane::GeometryHeight:
@@ -1379,9 +1384,10 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
             auto sc = m_designerScene->selectedControls();
             if (sc.size() != 1)
                 return;
-            if (sc[0]->gui())
+            if (sc[0]->gui() && !sc[0]->hasErrors())
                 sc[0]->resize(sc[0]->size().width(), value.toReal());
-            return;
+            else
+                return;
         }
 
         default:

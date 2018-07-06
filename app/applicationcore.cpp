@@ -41,7 +41,6 @@ ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
 ControlCreationManager* ApplicationCore::s_controlExposingManager = nullptr;
 ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
 RunManager* ApplicationCore::s_runManager = nullptr;
-ControlMonitoringManager* ApplicationCore::s_controlMonitoringManager = nullptr;
 ControlTransactionManager* ApplicationCore::s_controlTransactionManager = nullptr;
 HelpManager* ApplicationCore::s_helpManager = nullptr;
 DocumentManager* ApplicationCore::s_documentManager = nullptr;
@@ -85,7 +84,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     s_controlExposingManager = new ControlCreationManager(this);
     s_controlRemovingManager = new ControlRemovingManager(this);
     s_runManager = new RunManager(this);
-    s_controlMonitoringManager = new ControlMonitoringManager(this);
     s_controlTransactionManager = new ControlTransactionManager(this);
     s_helpManager = new HelpManager(this);
 
@@ -99,12 +97,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             this, &ApplicationCore::onSessionStop);
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
-
-//   BUG if (!ControlPreviewingManager::init()) {
-//        QMessageBox::critical(nullptr,
-//                              tr("Error"),
-//                              tr("Unable to start Objectwheel Previewing Service"));
-//    }
 
     //! GUI initialization
     s_windowManager = new WindowManager(this);

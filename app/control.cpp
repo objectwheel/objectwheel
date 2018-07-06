@@ -233,9 +233,7 @@ void Control::updateUid()
 void Control::centralize()
 {
     setRefreshingDisabled(true);
-    blockSignals(true);
     setPos(-size().width() / 2.0, -size().height() / 2.0);
-    blockSignals(false);
     setRefreshingDisabled(false);
 }
 
@@ -264,8 +262,8 @@ void Control::dropControl(Control* control)
 
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
     control->setParentItem(this);
-
-    ControlMonitoringManager::instance()->parentChanged(control);
+    ControlMonitoringManager::instance()->geometryChanged(control);
+    WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
 
     update();
 }
@@ -485,11 +483,10 @@ void Control::updatePreview(const PreviewResult& result)
 
     if (!result.errors.isEmpty()) {
         setRefreshingDisabled(true);
-        blockSignals(true);
         resize(QSizeF(50, 50));
-        blockSignals(false);
         setRefreshingDisabled(false);
         setPos(pos());
+        ControlMonitoringManager::instance()->geometryChanged(this);
         setZValue(0);
     } else {
         if (result.gui) {
@@ -499,22 +496,21 @@ void Control::updatePreview(const PreviewResult& result)
                 if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
                     const auto& rect = getRect(result);
                     qreal z = getZ(result);
-                    setRefreshingDisabled(true);
-                    blockSignals(true);
                     resize(rect.size());
+                    setRefreshingDisabled(true);
                     if (!form())
                         setPos(rect.topLeft());
+                    blockSignals(true);
                     setZValue(z);
                     blockSignals(false);
                     setRefreshingDisabled(false);
                 }
         } else {
             setRefreshingDisabled(true);
-            blockSignals(true);
             resize(QSizeF(50, 50));
-            blockSignals(false);
             setRefreshingDisabled(false);
             setPos(pos());
+            ControlMonitoringManager::instance()->geometryChanged(this);
             setZValue(0);
         }
     }
