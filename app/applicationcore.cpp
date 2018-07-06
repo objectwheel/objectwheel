@@ -17,6 +17,7 @@
 #include <centralwidget.h>
 #include <designerwidget.h>
 #include <controlremovingmanager.h>
+#include <controlpropertymanager.h>
 #include <welcomewindow.h>
 #include <appfontsettings.h>
 
@@ -40,6 +41,7 @@ ProjectManager* ApplicationCore::s_projectManager = nullptr;
 ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
 ControlCreationManager* ApplicationCore::s_controlExposingManager = nullptr;
 ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
+ControlPropertyManager* ApplicationCore::s_controlPropertyManager = nullptr;
 RunManager* ApplicationCore::s_runManager = nullptr;
 ControlTransactionManager* ApplicationCore::s_controlTransactionManager = nullptr;
 HelpManager* ApplicationCore::s_helpManager = nullptr;
@@ -83,6 +85,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     s_projectExposingManager = new ProjectExposingManager(this);
     s_controlExposingManager = new ControlCreationManager(this);
     s_controlRemovingManager = new ControlRemovingManager(this);
+    s_controlPropertyManager = new ControlPropertyManager(this);
     s_runManager = new RunManager(this);
     s_controlTransactionManager = new ControlTransactionManager(this);
     s_helpManager = new HelpManager(this);

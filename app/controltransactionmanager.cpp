@@ -6,12 +6,12 @@
 
 ControlTransactionManager::ControlTransactionManager(QObject* parent) : QObject(parent)
 {
-    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::zValueChanged,
-            this, &ControlTransactionManager::processZ);
-    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::parentChanged,
-            this, &ControlTransactionManager::processParent);
-    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::geometryChanged,
-            this, &ControlTransactionManager::processGeometry);
+//    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::zValueChanged,
+//            this, &ControlTransactionManager::processZ);
+//    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::parentChanged,
+//            this, &ControlTransactionManager::processParent);
+//    connect(ControlMonitoringManager::instance(), &ControlMonitoringManager::geometryChanged,
+//            this, &ControlTransactionManager::processGeometry);
 }
 
 void ControlTransactionManager::processGeometry(Control* control)
@@ -41,7 +41,7 @@ void ControlTransactionManager::processParent(Control* control)
     if (!control->parentControl() || (!control->parentControl()->gui() && control->gui()))
         return;
 
-    SaveManager::moveControl(control, control->parentControl());
+//    SaveManager::moveControl(control, control->parentControl());
     processGeometry(control);
 }
 

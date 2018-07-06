@@ -24,7 +24,7 @@ public:
     static void scheduleIdChange(const QString& uid, const QString& newId){}
     static void scheduleAnchorChange(){}
 
-    static void scheduleRefresh(const QString& parentUid);
+    static void scheduleRefresh(const QString& parentUid) {}
     static void scheduleControlCreation(const QString& dir, const QString& parentUid);
     static void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     static void scheduleTerminate();

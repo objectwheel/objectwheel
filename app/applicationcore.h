@@ -12,9 +12,9 @@ class ProjectExposingManager;
 class ControlPreviewingManager;
 class ControlCreationManager;
 class ControlRemovingManager;
+class ControlPropertyManager;
 class RunManager;
 class SaveManager;
-class ControlMonitoringManager;
 class WindowManager;
 class MenuManager;
 class ControlTransactionManager;
@@ -49,6 +49,7 @@ private:
     static ProjectExposingManager* s_projectExposingManager;
     static ControlCreationManager* s_controlExposingManager;
     static ControlRemovingManager* s_controlRemovingManager;
+    static ControlPropertyManager* s_controlPropertyManager;
     static RunManager* s_runManager;
     static ControlTransactionManager* s_controlTransactionManager;
     static Core::HelpManager* s_helpManager;

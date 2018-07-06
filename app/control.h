@@ -22,6 +22,7 @@ public:
     bool gui() const;
     bool form() const;
     bool clip() const;
+    bool window() const;
     bool dragIn() const;
     bool dragging() const;
     bool hasErrors() const;
@@ -90,6 +91,7 @@ private slots:
 private:
     bool m_gui;
     bool m_clip;
+    bool m_window;
     bool m_dragIn;
     bool m_hoverOn;
     bool m_dragging;

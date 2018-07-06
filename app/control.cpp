@@ -40,6 +40,7 @@ QList<Control*> Control::m_controls;
 Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_gui(false)
   , m_clip(false)
+  , m_window(false)
   , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
@@ -87,6 +88,11 @@ bool Control::form() const
 bool Control::clip() const
 {
     return m_clip;
+}
+
+bool Control::window() const
+{
+    return m_window;
 }
 
 bool Control::dragIn() const
@@ -262,7 +268,7 @@ void Control::dropControl(Control* control)
 
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
     control->setParentItem(this);
-    ControlMonitoringManager::instance()->geometryChanged(control);
+//    ControlMonitoringManager::instance()->geometryChanged(control);
     WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
 
     update();
@@ -479,6 +485,7 @@ void Control::updatePreview(const PreviewResult& result)
     m_image = result.image;
     m_errors = result.errors;
     m_gui = result.gui;
+    m_window = result.window;
     m_properties = result.properties;
 
     if (!result.errors.isEmpty()) {
@@ -486,7 +493,7 @@ void Control::updatePreview(const PreviewResult& result)
         resize(QSizeF(50, 50));
         setRefreshingDisabled(false);
         setPos(pos());
-        ControlMonitoringManager::instance()->geometryChanged(this);
+//        ControlMonitoringManager::instance()->geometryChanged(this);
         setZValue(0);
     } else {
         if (result.gui) {
@@ -510,7 +517,7 @@ void Control::updatePreview(const PreviewResult& result)
             resize(QSizeF(50, 50));
             setRefreshingDisabled(false);
             setPos(pos());
-            ControlMonitoringManager::instance()->geometryChanged(this);
+//            ControlMonitoringManager::instance()->geometryChanged(this);
             setZValue(0);
         }
     }

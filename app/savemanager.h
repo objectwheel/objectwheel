@@ -14,7 +14,7 @@ class SaveManager final : public QObject
     friend class ApplicationCore;
     friend class ControlRemovingManager; // For removeControl()
     friend class ControlCreationManager; // For addControl()
-    friend class ControlTransactionManager; // For moveControl()
+    friend class ControlPropertyManager; // For moveControl()
 
 public:
     static SaveManager* instance();
