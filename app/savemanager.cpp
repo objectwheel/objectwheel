@@ -213,6 +213,8 @@ void recalculateUids(Control* control)
     Control::updateUids(); // FIXME: Change with childControls()->updateUid();
 }
 
+// NOTE: If you use refactorId, then don't forget to call ControlPropertyManager::setId
+// in order to emit idChanged signal in ControlPropertyManager
 // Refactor control's id if it's already exists in db
 // If suid empty, project root searched
 void refactorId(Control* control, const QString& suid, const QString& topPath = QString())
@@ -252,6 +254,8 @@ bool SaveManager::addForm(Form* form)
     if (!SaveUtils::isOwctrl(form->dir()))
         return false;
 
+    // NOTE: We don't have to worry about possible child controls since addForm is only
+    // called from FormsPane > ControlCreationManager
     refactorId(form, QString());
 
     auto projectDir = ProjectManager::dir();
@@ -272,6 +276,7 @@ bool SaveManager::addForm(Form* form)
 
     flushId(form);
     recalculateUids(form);
+    ControlPropertyManager::setId(form, form->id(), false, false);
 
     return true;
 }
@@ -321,6 +326,10 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
 
     flushSuid(control, suid);
     recalculateUids(control); //for all
+
+    ControlPropertyManager::setId(control, control->id(), false, false);
+    for (auto child : control->childControls())
+        ControlPropertyManager::setId(child, child->id(), false, false);
 
     return true;
 }
@@ -397,6 +406,7 @@ void SaveManager::refreshToolUid(const QString& toolRootPath)
     }
 }
 
+// NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
 // You can not set id property of a top control if it's not exist in the project database
 // If you want to set id property of a control that is not exist in the project database,
 // then you have to provide a valid topPath
@@ -418,6 +428,10 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
 
         control->setId(value);
         refactorId(control, _suid, topPath);
+        // NOTE: We don't have to call ControlPropertyManager::setId in order to emit idChanged signal in
+        // ControlPropertyManager; because setProperty cannot be used anywhere else except ControlPropertyManager
+        // Hence, setProperty(.., "id", ...) is only called from ControlPropertyManager::setId, which means
+        // idChanged signal is already emitted.
 
         auto propertyPath = control->dir() + separator() + DIR_THIS +
                             separator() + FILE_PROPERTIES;

@@ -38,7 +38,7 @@ void ProjectExposingManager::exposeProject()
         for (const auto& child : SaveUtils::childrenPaths(path)) {
             auto pcontrol = pmap.value(dname(dname(child)));
             auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-            ControlPropertyManager::setParent(control, pcontrol, false, false, false);
+            ControlPropertyManager::setParent(control, pcontrol, false, false);
 
             //       BUG control->refresh();
             pmap[child] = control;

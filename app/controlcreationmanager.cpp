@@ -44,25 +44,15 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
 
     SaveManager::addForm(form);
     s_designerScene->addForm(form);
+    // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
+    // parent concept for forms in Designer; fors are directly put into DesignerScene
 
 //    ControlPreviewingManager::setDisabled(false);
 //    form->refresh();
+//    ControlPreviewingManager::scheduleFormCreation(control->dir(), parentControl->uid());
 
-    QMap<QString, Control*> pmap;
-    pmap[form->dir()] = form;
-    for (const auto& child : SaveUtils::childrenPaths(form->dir())) {
-        auto pcontrol = pmap.value(dname(dname(child)));
-
-//        ControlPreviewingManager::setDisabled(true);
-        auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        ControlPropertyManager::setParent(control, pcontrol, false, false, false);
-//        ControlPreviewingManager::setDisabled(false);
-//        control->refresh();
-
-        emit instance()->controlCreated(control);
-
-        pmap[child] = control;
-    }
+    // NOTE: We don't have to worry about possible child controls since createForm is only
+    // called from FormsPane
 
     emit instance()->formCreated(form);
 
@@ -78,7 +68,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
-    ControlPropertyManager::setParent(control, parentControl, false, false, false);
+    ControlPropertyManager::setParent(control, parentControl, false, false);
 
     control->setPos(pos);
 
@@ -95,7 +85,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
 
 //        ControlPreviewingManager::setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        ControlPropertyManager::setParent(ccontrol, pcontrol, false, false, false);
+        ControlPropertyManager::setParent(ccontrol, pcontrol, false, false);
         control->setPos(pos);
 
         SaveUtils::setX(control->dir(), control->x());

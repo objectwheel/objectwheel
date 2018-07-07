@@ -44,6 +44,9 @@ void DesignerScene::addForm(Form* form)
         return;
 
     addItem(form);
+    // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
+    // parent concept for forms in Designer; fors are directly put into DesignerScene
+
     form->setVisible(false);
 
     m_forms.append(form);
