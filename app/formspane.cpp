@@ -2,7 +2,6 @@
 #include <flatbutton.h>
 #include <toolboxtree.h>
 #include <saveutils.h>
-#include <savemanager.h>
 #include <projectmanager.h>
 #include <designerscene.h>
 #include <filemanager.h>
@@ -91,7 +90,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(ProjectManager::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
-    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
+//    FIXME: connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
     connect(m_designerScene, SIGNAL(currentFormChanged(Form*)), SLOT(handleDatabaseChange()));
     connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
 

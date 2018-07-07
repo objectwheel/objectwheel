@@ -4,7 +4,6 @@
 #include <aboutwindow.h>
 #include <preferenceswindow.h>
 #include <toolboxsettingswindow.h>
-#include <savemanager.h>
 #include <dpr.h>
 #include <projectmanager.h>
 #include <applicationcore.h>

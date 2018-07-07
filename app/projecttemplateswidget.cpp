@@ -7,7 +7,6 @@
 #include <delayer.h>
 #include <filemanager.h>
 #include <controlpreviewingmanager.h>
-#include <savemanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <dpr.h>

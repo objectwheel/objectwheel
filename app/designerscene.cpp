@@ -1,5 +1,4 @@
 #include <designerscene.h>
-#include <savemanager.h>
 #include <suppressor.h>
 #include <resizer.h>
 

@@ -2,7 +2,6 @@
 #include <centralwidget.h>
 #include <css.h>
 #include <saveutils.h>
-#include <savemanager.h>
 #include <delayer.h>
 #include <filemanager.h>
 #include <focuslesslineedit.h>
@@ -1288,7 +1287,7 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 
     const QString& previousId = sc->id();
 
-    SaveManager::setProperty(sc, property, parserValue);
+// FIXME   SaveManager::setProperty(sc, property, parserValue);
 
     if (property == "id") {
         ControlPreviewingManager::scheduleIdChange(sc->uid(), value.toString());

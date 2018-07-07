@@ -1,7 +1,6 @@
 #include <toolboxpane.h>
 #include <toolmanager.h>
 #include <filemanager.h>
-#include <savemanager.h>
 #include <toolboxtree.h>
 #include <flatbutton.h>
 #include <focuslesslineedit.h>

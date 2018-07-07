@@ -1,6 +1,5 @@
 #include <controltransactionmanager.h>
 #include <control.h>
-#include <savemanager.h>
 #include <saveutils.h>
 #include <controlpreviewingmanager.h>
 
@@ -23,12 +22,12 @@ void ControlTransactionManager::processGeometry(Control* control)
     }
 
     if (!control->form()) {
-        SaveManager::setProperty(control, "x", QString::number(control->x()));
-        SaveManager::setProperty(control, "y", QString::number(control->y()));
+//        SaveManager::setProperty(control, "x", QString::number(control->x()));
+//        SaveManager::setProperty(control, "y", QString::number(control->y()));
     }
 
-    SaveManager::setProperty(control, "width", QString::number(control->size().width()));
-    SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+//    SaveManager::setProperty(control, "width", QString::number(control->size().width()));
+//    SaveManager::setProperty(control, "height", QString::number(control->size().height()));
 
     if (!control->form()) {
         ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
@@ -50,5 +49,5 @@ void ControlTransactionManager::processZ(Control* control)
     if (control->hasErrors() || !control->gui())
         return;
 
-    SaveManager::setProperty(control, "z", QString::number(control->zValue()));
+//    SaveManager::setProperty(control, "z", QString::number(control->zValue()));
 }

@@ -2,7 +2,6 @@
 #include <designerscene.h>
 #include <control.h>
 #include <saveutils.h>
-#include <savemanager.h>
 #include <centralwidget.h>
 #include <filemanager.h>
 #include <qmlcodeeditor.h>
@@ -239,8 +238,8 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     connect(itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
     connect(documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
     connect(&saveAction, SIGNAL(triggered()), SLOT(handleSaveButtonClicked()));
-    connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
-    connect(SaveManager::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
+//    FIXME connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
+    // FIXME connect(SaveManager::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
 
     zoomlLevelCombobox->addItem("35 %");
     zoomlLevelCombobox->addItem("50 %");
@@ -980,7 +979,7 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
             const auto& id = ParserUtils::property(documentPath, "id");
             if (control->id() != id && !id.isEmpty()) {
                 const QString& previousId = control->id();
-                SaveManager::setProperty(control, "id", id);
+// FIXME               SaveManager::setProperty(control, "id", id);
                 WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(control, previousId);
             }
 

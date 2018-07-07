@@ -3,7 +3,6 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>
-#include <savemanager.h>
 #include <controlcreationmanager.h>
 #include <filemanager.h>
 #include <transparentcombobox.h>

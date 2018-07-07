@@ -6,42 +6,67 @@
 #include <parserutils.h>
 #include <hashfactory.h>
 #include <zipper.h>
+#include <controlpropertymanager.h>
 
 #include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 
-SaveManager* SaveManager::s_instance = nullptr;
-
-SaveManager::SaveManager(QObject* parent) : QObject(parent)
+namespace {
+// Returns true if given root path belongs to a form
+// Searches within current project's path
+bool isForm(const QString& rootPath)
 {
-    s_instance = this;
+    auto projectDir = ProjectManager::dir();
+    auto baseDir = projectDir + separator() + DIR_OWDB;
+    return (baseDir == dname(rootPath));
 }
 
-SaveManager::~SaveManager()
+// Returns root path if given uid belongs to a control
+// Searches within given rootPath (root control included)
+// Searches in current project directory if given rootPath is empty
+// All controls in the given rootPath are included to search
+QString findByUid(const QString& uid, const QString& rootPath)
 {
-    s_instance = nullptr;
+    QString baseDir;
+    if (rootPath.isEmpty()) {
+        auto projectDir = ProjectManager::dir();
+
+        if (projectDir.isEmpty())
+            return QString();
+
+        baseDir = projectDir;
+    } else {
+        baseDir = rootPath;
+    }
+
+    for (auto path : fps(FILE_PROPERTIES, baseDir)) {
+        auto propertyData = rdfile(path);
+
+        if (!SaveUtils::isOwctrl(propertyData))
+            continue;
+
+        auto _uid = SaveUtils::property(propertyData, TAG_UID).toString();
+
+        if (_uid == uid)
+            return dname(dname(path));
+    }
+
+    return QString();
 }
 
-SaveManager* SaveManager::instance()
+// Returns root path (of parent) if given control has a parent control
+QString parentDir(const Control* control)
 {
-    return s_instance;
+    if (control->form() ||
+        control->dir().isEmpty() ||
+        !SaveUtils::isOwctrl(control->dir()))
+        return QString();
+
+    return dname(dname(control->dir()));
 }
 
-bool SaveManager::initProject(const QString& projectDirectory, int templateNumber)
-{
-    if (projectDirectory.isEmpty() ||
-        !::exists(projectDirectory) ||
-        ::exists(projectDirectory + separator() + DIR_OWDB) ||
-        !Zipper::extractZip(rdfile(tr(":/templates/template%1.zip").arg(templateNumber)), projectDirectory))
-        return false;
-
-    SaveUtils::recalculateUids(projectDirectory + separator() + DIR_OWDB);
-
-    return true;
-}
-
-void SaveManager::flushId(const Control* control)
+void flushId(const Control* control)
 {
     auto propertyPath = control->dir() + separator() + DIR_THIS +
                         separator() + FILE_PROPERTIES;
@@ -54,7 +79,7 @@ void SaveManager::flushId(const Control* control)
     ParserUtils::setProperty(qmlPath, "id", control->id());
 }
 
-void SaveManager::flushSuid(const Control* control, const QString& suid)
+void flushSuid(const Control* control, const QString& suid)
 {
     auto topPath = control->dir();
     auto fromUid = SaveUtils::suid(topPath);
@@ -80,7 +105,7 @@ void SaveManager::flushSuid(const Control* control, const QString& suid)
 // Searches by id.
 // Searches control only in forms (in current project)
 // If current project is empty, then returns false.
-bool SaveManager::existsInForms(const Control* control)
+bool existsInForms(const Control* control)
 {
     for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
         auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
@@ -93,10 +118,23 @@ bool SaveManager::existsInForms(const Control* control)
     return false;
 }
 
+// Returns all control paths in form scope.
+// Returned paths are rootPaths.
+QStringList formScopePaths()
+{
+    const QStringList fpaths = SaveUtils::formPaths(ProjectManager::dir());
+    QStringList paths(fpaths);
+
+    for (auto path : fpaths)
+        paths << SaveUtils::childrenPaths(dname(path));
+
+    return paths;
+}
+
 // Searches by id.
 // Searches control in form scope (in current project)
 // If current project is empty, then returns false.
-bool SaveManager::existsInFormScope(const Control* control)
+bool existsInFormScope(const Control* control)
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
@@ -113,7 +151,7 @@ bool SaveManager::existsInFormScope(const Control* control)
 // Searches by id.
 // Searches control within given suid, search starts within topPath
 // Given suid has to be valid
-bool SaveManager::existsInParentScope(const Control* control, const QString& suid, const QString topPath)
+bool existsInParentScope(const Control* control, const QString& suid, const QString topPath)
 {
     if (control->form())
         return existsInFormScope(control);
@@ -154,22 +192,18 @@ bool SaveManager::existsInParentScope(const Control* control, const QString& sui
     }
 }
 
-// Returns all control paths in form scope.
-// Returned paths are rootPaths.
-QStringList SaveManager::formScopePaths()
+// You have to provide an valid suid, except if control is a form
+// If topPath is empty, then top level project directory searched
+// So, suid and topPath have to be in a valid logical relationship.
+bool exists(const Control* control, const QString& suid, const QString& topPath = QString())
 {
-    const QStringList fpaths = SaveUtils::formPaths(ProjectManager::dir());
-    QStringList paths(fpaths);
-
-    for (auto path : fpaths)
-        paths << SaveUtils::childrenPaths(dname(path));
-
-    return paths;
+    return control->form() ? existsInFormScope(control) :
+      existsInParentScope(control, suid, topPath);
 }
 
 // Recalculates all uids belongs to given control and its children (all).
 // Both database and in-memory data are updated.
-void SaveManager::recalculateUids(Control* control)
+void recalculateUids(Control* control)
 {
     if (control->dir().isEmpty())
         return;
@@ -181,7 +215,7 @@ void SaveManager::recalculateUids(Control* control)
 
 // Refactor control's id if it's already exists in db
 // If suid empty, project root searched
-void SaveManager::refactorId(Control* control, const QString& suid, const QString& topPath)
+void refactorId(Control* control, const QString& suid, const QString& topPath = QString())
 {
     if (control->id().isEmpty())
         control->setId("control");
@@ -191,147 +225,23 @@ void SaveManager::refactorId(Control* control, const QString& suid, const QStrin
     for (int i = 1; exists(control, suid, topPath); i++)
         control->setId(id + QString::number(i));
 }
-
-// Returns true if given root path belongs to a form
-// Searches within current project's path
-bool SaveManager::isForm(const QString& rootPath)
-{
-    auto projectDir = ProjectManager::dir();
-    auto baseDir = projectDir + separator() + DIR_OWDB;
-    return (baseDir == dname(rootPath));
 }
 
-// Returns root path if given uid belongs to a control
-// Searches within given rootPath (root control included)
-// Searches in current project directory if given rootPath is empty
-// All controls in the given rootPath are included to search
-QString SaveManager::findByUid(const QString& uid, const QString& rootPath)
+SaveManager::SaveManager(QObject* parent) : QObject(parent)
 {
-    QString baseDir;
-    if (rootPath.isEmpty()) {
-        auto projectDir = ProjectManager::dir();
-
-        if (projectDir.isEmpty())
-            return QString();
-
-        baseDir = projectDir;
-    } else {
-        baseDir = rootPath;
-    }
-
-    for (auto path : fps(FILE_PROPERTIES, baseDir)) {
-        auto propertyData = rdfile(path);
-
-        if (!SaveUtils::isOwctrl(propertyData))
-            continue;
-
-        auto _uid = SaveUtils::property(propertyData, TAG_UID).toString();
-
-        if (_uid == uid)
-            return dname(dname(path));
-    }
-
-    return QString();
 }
 
-// Returns root path if given id belongs to a control
-// Searches within given rootPath (root control included)
-// Searches in current project directory if given rootPath is empty
-// Only suid scope controls in the given rootPath are returned
-QString SaveManager::findById(const QString& suid, const QString& id, const QString& rootPath)
+bool SaveManager::initProject(const QString& projectDirectory, int templateNumber)
 {
-    QString baseDir;
-    if (rootPath.isEmpty()) {
-        auto projectDir = ProjectManager::dir();
+    if (projectDirectory.isEmpty() ||
+        !::exists(projectDirectory) ||
+        ::exists(projectDirectory + separator() + DIR_OWDB) ||
+        !Zipper::extractZip(rdfile(tr(":/templates/template%1.zip").arg(templateNumber)), projectDirectory))
+        return false;
 
-        if (projectDir.isEmpty())
-            return QString();
+    SaveUtils::recalculateUids(projectDirectory + separator() + DIR_OWDB);
 
-        baseDir = projectDir;
-    } else {
-        baseDir = rootPath;
-    }
-
-    for (auto path : fps(FILE_PROPERTIES, baseDir)) {
-        auto propertyData = rdfile(path);
-
-        if (!SaveUtils::isOwctrl(propertyData) ||
-            (SaveUtils::uid(dname(dname(path))) != suid &&
-             SaveUtils::suid(dname(dname(path))) != suid))
-            continue;
-
-        auto _id = SaveUtils::property(propertyData, TAG_ID).toString();
-
-        if (_id == id)
-            return dname(dname(path));
-    }
-
-    return QString();
-}
-
-// Returns true if given path is inside of owdb
-bool SaveManager::isInOwdb(const QString& path)
-{
-    auto projectDirectory = ProjectManager::dir();
-
-    Q_ASSERT(!projectDirectory.isEmpty());
-
-    QString owdbPath = projectDirectory + separator() + DIR_OWDB;
-    return path.contains(owdbPath, Qt::CaseInsensitive);
-}
-
-// Returns root path (of parent) if given control has a parent control
-QString SaveManager::parentDir(const Control* control)
-{
-    if (control->form() ||
-        control->dir().isEmpty() ||
-        !SaveUtils::isOwctrl(control->dir()))
-        return QString();
-
-    return dname(dname(control->dir()));
-}
-
-QString SaveManager::basePath()
-{
-    auto projectDir = ProjectManager::dir();
-
-    if (projectDir.isEmpty())
-        return QString();
-
-    return (projectDir + separator() + DIR_OWDB);
-}
-
-void SaveManager::refreshToolUid(const QString& toolRootPath)
-{
-    if (toolRootPath.isEmpty())
-        return;
-
-    QStringList paths, properties;
-
-    properties << fps(FILE_PROPERTIES, toolRootPath);
-    paths << properties;
-
-    for (auto pfile : properties) {
-        auto propertyData = rdfile(pfile);
-
-        if (!SaveUtils::isOwctrl(propertyData))
-            continue;
-
-        auto uid = SaveUtils::property(propertyData, TAG_UID).toString();
-        auto newUid = HashFactory::generate();
-
-        for (auto file : paths)
-            SaveUtils::updateFile(file, uid, newUid);
-    }
-}
-
-// You have to provide an valid suid, except if control is a form
-// If topPath is empty, then top level project directory searched
-// So, suid and topPath have to be in a valid logical relationship.
-bool SaveManager::exists(const Control* control, const QString& suid, const QString& topPath)
-{
-    return control->form() ? existsInFormScope(control) :
-      existsInParentScope(control, suid, topPath);
+    return true;
 }
 
 bool SaveManager::addForm(Form* form)
@@ -363,8 +273,6 @@ bool SaveManager::addForm(Form* form)
     flushId(form);
     recalculateUids(form);
 
-    emit instance()->databaseChanged();
-
     return true;
 }
 
@@ -377,8 +285,6 @@ void SaveManager::removeForm(const Form* form)
         return;
 
     rm(form->dir());
-
-    emit instance()->databaseChanged();
 }
 
 bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
@@ -415,9 +321,6 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
 
     flushSuid(control, suid);
     recalculateUids(control); //for all
-
-    if (isInOwdb(control->dir()))
-        emit instance()->databaseChanged();
 
     return true;
 }
@@ -456,9 +359,6 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
         child->setUrl(child->url().replace(control->dir(), controlDir));
     control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
 
-    if (isInOwdb(control->dir()))
-        emit instance()->databaseChanged();
-
     return true;
 }
 
@@ -471,9 +371,30 @@ void SaveManager::removeControl(const Control* control)
         return;
 
     rm(control->dir());
+}
 
-    if (isInOwdb(control->dir()))
-        emit instance()->databaseChanged();
+void SaveManager::refreshToolUid(const QString& toolRootPath)
+{
+    if (toolRootPath.isEmpty())
+        return;
+
+    QStringList paths, properties;
+
+    properties << fps(FILE_PROPERTIES, toolRootPath);
+    paths << properties;
+
+    for (auto pfile : properties) {
+        auto propertyData = rdfile(pfile);
+
+        if (!SaveUtils::isOwctrl(propertyData))
+            continue;
+
+        auto uid = SaveUtils::property(propertyData, TAG_UID).toString();
+        auto newUid = HashFactory::generate();
+
+        for (auto file : paths)
+            SaveUtils::updateFile(file, uid, newUid);
+    }
 }
 
 // You can not set id property of a top control if it's not exist in the project database
@@ -510,10 +431,6 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
     auto fileName = control->dir() + separator() + DIR_THIS +
                     separator() + "main.qml";
     ParserUtils::setProperty(fileName, property, value);
-    emit instance()->propertyChanged(control, property, value);
-
-    if (isInOwdb(control->dir())) //FIXME
-        emit instance()->databaseChanged();
 }
 
 void SaveManager::removeProperty(const Control* control, const QString& property)
@@ -524,16 +441,8 @@ void SaveManager::removeProperty(const Control* control, const QString& property
         property == TAG_ID)
         return;
 
-//    auto fileName = control->dir() + separator() + DIR_THIS +
+//    TODO: auto fileName = control->dir() + separator() + DIR_THIS +
 //                    separator() + "main.qml";
 
-//    ParserController::removeVariantProperty(fileName, property);
-
-    if (isInOwdb(control->dir()))
-        emit instance()->databaseChanged();
-}
-
-QString SaveManager::pathOfId(const QString& suid, const QString& id, const QString& rootPath)
-{
-    return findById(suid, id, rootPath);
+//    TODO: ParserController::removeVariantProperty(fileName, property);
 }

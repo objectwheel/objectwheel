@@ -1,7 +1,6 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <css.h>
-#include <savemanager.h>
 #include <saveutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
