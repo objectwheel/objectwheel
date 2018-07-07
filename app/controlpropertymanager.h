@@ -15,22 +15,33 @@ class ControlPropertyManager final : public QObject
     friend class ApplicationCore;
 
 public:
+    static std::function<bool()> defaultZPropertyConditions(const Control* control);
+
+public:
     static ControlPropertyManager* instance();
-    static void setX(Control* control, qreal x, bool save, bool compress = false,
+    static void setX(Control* control, qreal x, bool save = true,
+                     bool updatePreviewer = true, bool compress = false,
                      std::function<bool()> extraConditions = std::function<bool()>{nullptr});
-    static void setY(Control* control, qreal y, bool save, bool compress = false,
+    static void setY(Control* control, qreal y, bool save = true,
+                     bool updatePreviewer = true, bool compress = false,
                      std::function<bool()> extraConditions = std::function<bool()>{nullptr});
-    static void setPos(Control* control, const QPointF& pos, bool save, bool compress = false,
+    static void setPos(Control* control, const QPointF& pos, bool save = true,
+                       bool updatePreviewer = true, bool compress = false,
                        std::function<bool()> extraConditions = std::function<bool()>{nullptr});
-    static void setSize(Control* control, const QSizeF& size, bool save, bool compress = false,
+    static void setSize(Control* control, const QSizeF& size, bool save = true,
+                        bool updatePreviewer = true, bool compress = false,
                         std::function<bool()> extraConditions = std::function<bool()>{nullptr});
-    static void setGeometry(Control* control, const QRectF& geometry, bool save, bool compress = false,
+    static void setGeometry(Control* control, const QRectF& geometry, bool save = true,
+                            bool updatePreviewer = true, bool compress = false,
                             std::function<bool()> extraConditions = std::function<bool()>{nullptr});
-    static void setId(Control* control, const QString& id, bool save, bool compress = false,
+    static void setId(Control* control, const QString& id, bool save = true,
+                      bool updatePreviewer = true, bool compress = false,
                       std::function<bool()> extraConditions = std::function<bool()>{nullptr});
-    static void setParent(Control* control, Control* parentControl, bool save, bool compress = false,
+    static void setParent(Control* control, Control* parentControl, bool save = true,
+                          bool updatePreviewer = true, bool compress = false,
                           std::function<bool()> extraConditions = std::function<bool()>{nullptr});
-    static void setZ(Control* control, qreal z, bool save, bool compress = false,
+    static void setZ(Control* control, qreal z, bool save = true,
+                     bool updatePreviewer = true, bool compress = false,
                      std::function<bool()> extraConditions = std::function<bool()>{nullptr});
 
 signals:
@@ -43,6 +54,9 @@ signals:
     void errorOccurred(Control*);
     void doubleClicked(Control*);
     void controlDropped(Control*, const QPointF&, const QString&);
+
+private:
+    static bool zPropertyConditions(const Control* control);
 
 private:
     explicit ControlPropertyManager(QObject* parent = nullptr);

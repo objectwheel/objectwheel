@@ -477,6 +477,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
+// FIXME
 void Control::updatePreview(const PreviewResult& result)
 {
     if (result.uid != uid())
@@ -610,6 +611,7 @@ QList<Resizer*> initializeResizers(Control* control)
     return resizers;
 }
 
+// FIXME
 void setInitialProperties(Control *control)
 {
     qreal x = 0;

@@ -5,7 +5,7 @@
 #include <saveutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
-#include <controlpreviewingmanager.h>
+#include <controlpropertymanager.h>
 
 #include <QMenu>
 #include <QAction>
@@ -50,9 +50,9 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
     m_pasteAct->setShortcut(QKeySequence::Paste);
     m_deleteAct->setText("Delete");
     m_deleteAct->setShortcut(QKeySequence::Delete);
-    #if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS)
     m_deleteAct->setShortcuts(QList<QKeySequence>() << (Qt::CTRL + Qt::Key_Backspace) << QKeySequence::Delete);
-    #endif
+#endif
     m_selectAllAct->setText("Select All");
     m_selectAllAct->setShortcut(QKeySequence::SelectAll);
     m_moveUpAct->setShortcut(Qt::Key_Up);
@@ -216,19 +216,19 @@ void DesignerView::onPasteAction()
     auto currentForm = scene()->currentForm();
     QString sourceSuid = mimeData->data("objectwheel/uid");
     if (!mimeData->hasUrls() || !mimeData->hasText() ||
-        mimeData->text() != TOOL_KEY || sourceSuid.isEmpty())
+            mimeData->text() != TOOL_KEY || sourceSuid.isEmpty())
         return;
 
     QList<Control*> controls;
     for (auto url : mimeData->urls()) {
         auto control = ControlCreationManager::createControl(
-            url.toLocalFile(),
-            QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
-            sourceSuid,
-            currentForm,
-            currentForm->dir(),
-            currentForm->uid()
-        );
+                    url.toLocalFile(),
+                    QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
+                    sourceSuid,
+                    currentForm,
+                    currentForm->dir(),
+                    currentForm->uid()
+                    );
 
         controls << control;
 
@@ -252,7 +252,7 @@ void DesignerView::onPasteAction()
         }
 
         // BUG: Do we really need this?
-//        ControlPreviewingManager::scheduleRefresh(control->uid());
+        //        ControlPreviewingManager::scheduleRefresh(control->uid());
     }
 }
 
@@ -307,14 +307,21 @@ void DesignerView::onSendBackAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
-    for (auto control : selectedControls)
-        control->setZValue(scene()->currentForm()->lowerZValue() - 1);
+    for (auto control : selectedControls) {
+        ControlPropertyManager::setZ(control, scene()->currentForm()->lowerZValue() - 1,
+                                     true, true, false,
+                                     ControlPropertyManager::defaultZPropertyConditions(control));
+    }
+
 }
 
 void DesignerView::onBringFrontAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
-    for (auto control : selectedControls)
-        control->setZValue(scene()->currentForm()->higherZValue() + 1);
+    for (auto control : selectedControls) {
+        ControlPropertyManager::setZ(control, scene()->currentForm()->higherZValue() + 1,
+                                     true, true, false,
+                                     ControlPropertyManager::defaultZPropertyConditions(control));
+    }
 }

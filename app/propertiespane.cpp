@@ -16,6 +16,8 @@
 
 #include <QtWidgets>
 
+// FIXME: Fix this from scratch
+
 class PropertiesDelegate : public QStyledItemDelegate
 {
         Q_OBJECT
