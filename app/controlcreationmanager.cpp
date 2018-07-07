@@ -6,6 +6,7 @@
 #include <filemanager.h>
 #include <savemanager.h>
 #include <controlpreviewingmanager.h>
+#include <controlpropertymanager.h>
 
 DesignerScene* ControlCreationManager::s_designerScene = nullptr;
 ControlCreationManager* ControlCreationManager::s_instance = nullptr;
@@ -54,7 +55,7 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
 
 //        ControlPreviewingManager::setDisabled(true);
         auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        control->setParentItem(pcontrol);
+        ControlPropertyManager::setParent(control, pcontrol, false, false, false);
 //        ControlPreviewingManager::setDisabled(false);
 //        control->refresh();
 
@@ -68,6 +69,7 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     return form;
 }
 
+// FIXME: Fix bad code style
 Control* ControlCreationManager::createControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
                                                Control* parentControl, QString destinationPath,
                                                QString destinationSuid)
@@ -76,7 +78,8 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
     auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
 
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
-    control->setParentItem(parentControl);
+    ControlPropertyManager::setParent(control, parentControl, false, false, false);
+
     control->setPos(pos);
 
     SaveUtils::setX(control->dir(), pos.x());
@@ -92,7 +95,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
 
 //        ControlPreviewingManager::setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-        ccontrol->setParentItem(pcontrol);
+        ControlPropertyManager::setParent(ccontrol, pcontrol, false, false, false);
         control->setPos(pos);
 
         SaveUtils::setX(control->dir(), control->x());

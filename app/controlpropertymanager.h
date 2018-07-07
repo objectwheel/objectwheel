@@ -16,6 +16,7 @@ class ControlPropertyManager final : public QObject
 
 public:
     static std::function<bool()> defaultZPropertyConditions(const Control* control);
+    static std::function<bool()> defaultParentPropertyConditions(const Control* control, const Control* parentControl);
 
 public:
     static ControlPropertyManager* instance();
@@ -37,6 +38,7 @@ public:
     static void setId(Control* control, const QString& id, bool save = true,
                       bool updatePreviewer = true, bool compress = false,
                       std::function<bool()> extraConditions = std::function<bool()>{nullptr});
+
     static void setParent(Control* control, Control* parentControl, bool save = true,
                           bool updatePreviewer = true, bool compress = false,
                           std::function<bool()> extraConditions = std::function<bool()>{nullptr});
@@ -57,6 +59,7 @@ signals:
 
 private:
     static bool zPropertyConditions(const Control* control);
+    static bool parentPropertyConditions(const Control* control, const Control* parentControl);
 
 private:
     explicit ControlPropertyManager(QObject* parent = nullptr);

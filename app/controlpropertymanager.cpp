@@ -43,9 +43,37 @@ bool ControlPropertyManager::zPropertyConditions(const Control* control)
     return true;
 }
 
+bool ControlPropertyManager::parentPropertyConditions(const Control* control,
+                                                      const Control* parentControl)
+{
+    if (!control)
+        return false;
+
+    if (!parentControl)
+        return false;
+
+    if (control->hasErrors())
+        return false;
+
+    if (parentControl->hasErrors())
+        return false;
+
+    if (!parentControl->gui())
+        return false;
+
+    return true;
+}
+
 std::function<bool()> ControlPropertyManager::defaultZPropertyConditions(const Control* control)
 {
     return std::bind(&ControlPropertyManager::zPropertyConditions, QPointer<const Control>(control));
+}
+
+std::function<bool ()> ControlPropertyManager::defaultParentPropertyConditions(
+        const Control* control, const Control* parentControl)
+{
+    return std::bind(&ControlPropertyManager::parentPropertyConditions,
+                     QPointer<const Control>(control), QPointer<const Control>(parentControl));
 }
 
 ControlPropertyManager* ControlPropertyManager::instance()

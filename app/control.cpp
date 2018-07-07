@@ -15,6 +15,7 @@
 #include <outputpane.h>
 #include <issuesbox.h>
 #include <designerwidget.h>
+#include <controlpropertymanager.h>
 
 #include <QtMath>
 #include <QDebug>
@@ -267,8 +268,10 @@ void Control::dropControl(Control* control)
         return;
 
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
-    control->setParentItem(this);
-//    ControlMonitoringManager::instance()->geometryChanged(control);
+    ControlPropertyManager::setParent(control, this, true, true, false,
+                                      ControlPropertyManager::defaultParentPropertyConditions(control, this));
+
+//  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
     WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
 
     update();
@@ -494,7 +497,7 @@ void Control::updatePreview(const PreviewResult& result)
         resize(QSizeF(50, 50));
         setRefreshingDisabled(false);
         setPos(pos());
-//        ControlMonitoringManager::instance()->geometryChanged(this);
+//    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
         setZValue(0);
     } else {
         if (result.gui) {
@@ -518,7 +521,7 @@ void Control::updatePreview(const PreviewResult& result)
             resize(QSizeF(50, 50));
             setRefreshingDisabled(false);
             setPos(pos());
-//            ControlMonitoringManager::instance()->geometryChanged(this);
+//     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
             setZValue(0);
         }
     }

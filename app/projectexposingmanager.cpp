@@ -5,6 +5,7 @@
 #include <control.h>
 #include <form.h>
 #include <designerscene.h>
+#include <controlpropertymanager.h>
 
 DesignerScene* ProjectExposingManager::s_designerScene = nullptr;
 
@@ -37,7 +38,8 @@ void ProjectExposingManager::exposeProject()
         for (const auto& child : SaveUtils::childrenPaths(path)) {
             auto pcontrol = pmap.value(dname(dname(child)));
             auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-            control->setParentItem(pcontrol);
+            ControlPropertyManager::setParent(control, pcontrol, false, false, false);
+
             //       BUG control->refresh();
             pmap[child] = control;
         }
