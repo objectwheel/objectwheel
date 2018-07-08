@@ -12,11 +12,7 @@ class ControlPropertyManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ControlPropertyManager)
 
-    friend class ApplicationCore;
-
-public:
-    static std::function<bool()> defaultZPropertyConditions(const Control* control);
-    static std::function<bool()> defaultParentPropertyConditions(const Control* control, const Control* parentControl);
+    friend class ApplicationCore; // For constructor and destructor
 
 public:
     static ControlPropertyManager* instance();
@@ -30,13 +26,15 @@ public:
                         bool updatePreviewer = true, bool compress = false);
     static void setGeometry(Control* control, const QRectF& geometry, bool save = true,
                             bool updatePreviewer = true, bool compress = false);
-
     static void setId(Control* control, const QString& id, bool save = true,
                       bool updatePreviewer = true, bool compress = false);
     static void setParent(Control* control, Control* parentControl, bool save = true,
                           bool updatePreviewer = true, bool compress = false);
     static void setZ(Control* control, qreal z, bool save = true,
                      bool updatePreviewer = true, bool compress = false);
+
+private slots:
+    void handleDirtyProperties();
 
 signals:
     void zChanged(Control*);
@@ -48,10 +46,6 @@ signals:
     void errorOccurred(Control*);
     void doubleClicked(Control*);
     void controlDropped(Control*, const QPointF&, const QString&);
-
-private:
-    static bool zPropertyConditions(const Control* control);
-    static bool parentPropertyConditions(const Control* control, const Control* parentControl);
 
 private:
     explicit ControlPropertyManager(QObject* parent = nullptr);

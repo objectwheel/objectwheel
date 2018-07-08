@@ -59,7 +59,7 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     return form;
 }
 
-// FIXME: Fix bad code style
+// FIXME:
 Control* ControlCreationManager::createControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
                                                Control* parentControl, QString destinationPath,
                                                QString destinationSuid)
@@ -69,8 +69,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
 
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
     ControlPropertyManager::setParent(control, parentControl, false, false);
-
-    control->setPos(pos);
+    ControlPropertyManager::setPos(control, pos, false, false);
 
     SaveUtils::setX(control->dir(), pos.x());
     SaveUtils::setY(control->dir(), pos.y());
@@ -86,10 +85,12 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
 //        ControlPreviewingManager::setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
         ControlPropertyManager::setParent(ccontrol, pcontrol, false, false);
-        control->setPos(pos);
+//        control->setPos(pos); FIXME
+//        ControlPropertyManager::setPos(control, pos, false, false); FIXME
 
-        SaveUtils::setX(control->dir(), control->x());
-        SaveUtils::setY(control->dir(), control->y());
+
+//        SaveUtils::setX(control->dir(), control->x()); FIXME
+//        SaveUtils::setY(control->dir(), control->y()); FIXME
 
 //        ControlPreviewingManager::setDisabled(false);
         ControlPreviewingManager::scheduleControlCreation(ccontrol->dir(), pcontrol->uid());

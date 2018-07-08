@@ -1,6 +1,7 @@
 #include <designerscene.h>
 #include <suppressor.h>
 #include <resizer.h>
+#include <controlpropertymanager.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -298,8 +299,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveCenter({center.x(), parent->size().height() / 2.0});
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -308,8 +312,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveCenter({parent->size().width() / 2.0, center.y()});
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -319,8 +326,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveLeft(parent->size().width() / 2.0);
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -330,8 +340,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveLeft(0);
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -341,8 +354,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveRight(parent->size().width() / 2.0);
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -352,8 +368,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveRight(parent->size().width());
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -363,8 +382,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveTop(parent->size().height() / 2.0);
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -374,8 +396,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveTop(0);
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -385,8 +410,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveBottom(parent->size().height() / 2.0);
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -396,8 +424,11 @@ bool DesignerScene::stick() const
         auto g = geometry;
         geometry.moveBottom(parent->size().height());
         center = geometry.center();
-        for (auto control : selectedControls)
-            control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+        for (auto control : selectedControls) {
+            ControlPropertyManager::setPos(control,
+                                           control->pos() + geometry.topLeft() - g.topLeft(),
+                                           true, true, true);
+        }
         ret = true;
     }
 
@@ -414,8 +445,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveCenter({ccenter.x(), center.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -424,8 +458,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveCenter({center.x(), ccenter.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -435,8 +472,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveCenter({cgeometry.topLeft().x(), center.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -446,8 +486,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveCenter({center.x(), cgeometry.topLeft().y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -457,8 +500,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveCenter({cgeometry.bottomRight().x(), center.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -468,8 +514,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveCenter({center.x(), cgeometry.bottomRight().y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -479,8 +528,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopLeft({cgeometry.x(), geometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -490,8 +542,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopLeft({ccenter.x(), geometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -501,8 +556,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopLeft({cgeometry.topRight().x(), geometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -512,8 +570,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopRight({cgeometry.x(), geometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -523,8 +584,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopRight({ccenter.x(), geometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -534,8 +598,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopRight({cgeometry.topRight().x(), geometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -545,8 +612,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopLeft({geometry.x(), cgeometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -556,8 +626,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopLeft({geometry.x(), ccenter.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -567,8 +640,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveTopLeft({geometry.x(), cgeometry.bottomLeft().y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -578,8 +654,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveBottomLeft({geometry.x(), cgeometry.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -589,8 +668,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveBottomLeft({geometry.x(), ccenter.y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
 
@@ -600,8 +682,11 @@ bool DesignerScene::stick() const
             auto g = geometry;
             geometry.moveBottomLeft({geometry.x(), cgeometry.bottomLeft().y()});
             center = geometry.center();
-            for (auto control : selectedControls)
-                control->setPos(control->pos() + geometry.topLeft() - g.topLeft());
+            for (auto control : selectedControls) {
+                ControlPropertyManager::setPos(control,
+                                               control->pos() + geometry.topLeft() - g.topLeft(),
+                                               true, true, true);
+            }
             ret = true;
         }
     }

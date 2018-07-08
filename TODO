@@ -1,3 +1,22 @@
+Controller ilk oluşturulurken, proje yüklenme esnasında ya da yeni bir controlün yalnız başına oluşturulması esnasında, z, geometry, parent propertileri extraCondutions olmadan set edilitor, bunun yan etkileri neler olabilir.
+
+benzer bir durum gui iken nongui ye dönüşen, ya da errorsuzken errorluya dönüşen kontroller ile nongui'den guiye dönüşen ve errorlu iken errorsuza dönüşen objeler için de söz konusu. diğer window, gui, error özellikleri de dahil, kontrolün kodu değiştiğinde ortaya çıkabilecek bu gibi durumların yan etkileri, ve designer üzerindeki kullanıcı deneyimine olan etkileri araştırılmalı.
+
+benzer durumlara ilişkin kaygılar previewer için de güdülmeli
+
+error'lu nesleler objecleri == nullptr olacak ve non-gui olacak
+Window'lar eksili x,y alamaz
+Windowlar gibi int x,y,z,w,h'den herhangi bir designer property'si int olanlar, int olarak kayıt edilecek qml dosyasına
+saveutils manager classları dışında kullanılamayacak
+kontroller üzerinde yapılan her türlü, ama her türlü property set işlemi ControlPropertyManager aracılığıyla yapılacak
+parserutils asla dışardan kullanılamaycak, sadece manager classları
+handleDirty fonksiyonunu sadece save ve previewerupdate için olmasını sağla
+fixme'leri bug'ları temizle
+handleDirty fonksiyonunu'nun dirty propertyleri eklenme sırasını dikkate alarak işlemesini sağla
+setParent'ler den sonra objeyi uygun pozisyona setGeometry etmek dropControl'ün işi, hemen setParent'in peşine
+
+
+
 Projeye Özel Ayarlar
 1. Temalar ve Tema ayrıntıları
 2. Font ve resource'lar

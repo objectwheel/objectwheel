@@ -20,6 +20,9 @@ ControlPropertyManager::ControlPropertyManager(QObject* parent) : QObject(parent
     s_instance = this;
     s_dirtyPropertyProcessingTimer = new QTimer(this);
     s_dirtyPropertyProcessingTimer->setInterval(100);
+
+    connect(s_dirtyPropertyProcessingTimer, &QTimer::timeout,
+            this, &ControlPropertyManager::handleDirtyProperties);
 }
 
 ControlPropertyManager::~ControlPropertyManager()
@@ -30,6 +33,15 @@ ControlPropertyManager::~ControlPropertyManager()
 ControlPropertyManager* ControlPropertyManager::instance()
 {
     return s_instance;
+}
+
+void ControlPropertyManager::handleDirtyProperties()
+{
+    for (const std::function<void()>& setterFunction : s_dirtyPropertyHandlingFunctions)
+        setterFunction();
+
+    s_dirtyPropertyHandlingFunctions.clear();
+    s_dirtyPropertyProcessingTimer->stop();
 }
 
 void ControlPropertyManager::setX(Control* control, qreal x, bool save, bool updatePreviewer, bool compress)
@@ -48,13 +60,11 @@ void ControlPropertyManager::setX(Control* control, qreal x, bool save, bool upd
     } else {
         control->setX(x);
 
-        if (save) {
-            SaveUtils::setX(control->dir(), control->x());
-            SaveManager::setProperty(control, "x", QString::number(control->x()));
-        }
+        if (save)
+            SaveManager::setProperty(control, TAG_X, QString::number(control->x()));
 
         if (updatePreviewer)
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_X, control->x());
 
         emit instance()->geometryChanged(control);
     }
@@ -76,13 +86,11 @@ void ControlPropertyManager::setY(Control* control, qreal y, bool save, bool upd
     } else {
         control->setY(y);
 
-        if (save) {
-            SaveUtils::setY(control->dir(), control->y());
-            SaveManager::setProperty(control, "y", QString::number(control->y()));
-        }
+        if (save)
+            SaveManager::setProperty(control, TAG_Y, QString::number(control->y()));
 
         if (updatePreviewer)
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_Y, control->y());
 
         emit instance()->geometryChanged(control);
     }
@@ -106,15 +114,13 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, bool s
         control->setPos(pos);
 
         if (save) {
-            SaveUtils::setX(control->dir(), control->x());
-            SaveUtils::setY(control->dir(), control->y());
-            SaveManager::setProperty(control, "x", QString::number(control->x()));
-            SaveManager::setProperty(control, "y", QString::number(control->y()));
+            SaveManager::setProperty(control, TAG_X, QString::number(control->x()));
+            SaveManager::setProperty(control, TAG_Y, QString::number(control->y()));
         }
 
         if (updatePreviewer) {
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_X, control->x());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_Y, control->y());
         }
 
         emit instance()->geometryChanged(control);
@@ -142,13 +148,13 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, bool 
         control->resize(size);
 
         if (save) {
-            SaveManager::setProperty(control, "width", QString::number(control->size().width()));
-            SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+            SaveManager::setProperty(control, TAG_WIDTH, QString::number(control->size().width()));
+            SaveManager::setProperty(control, TAG_HEIGHT, QString::number(control->size().height()));
         }
 
         if (updatePreviewer) {
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", control->size().width());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", control->size().height());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_WIDTH, control->size().width());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_HEIGHT, control->size().height());
         }
 
         emit instance()->geometryChanged(control);
@@ -176,19 +182,17 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
         control->setGeometry(geometry);
 
         if (save) {
-            SaveUtils::setX(control->dir(), control->x());
-            SaveUtils::setY(control->dir(), control->y());
-            SaveManager::setProperty(control, "x", QString::number(control->x()));
-            SaveManager::setProperty(control, "y", QString::number(control->y()));
-            SaveManager::setProperty(control, "width", QString::number(control->size().width()));
-            SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+            SaveManager::setProperty(control, TAG_X, QString::number(control->x()));
+            SaveManager::setProperty(control, TAG_Y, QString::number(control->y()));
+            SaveManager::setProperty(control, TAG_WIDTH, QString::number(control->size().width()));
+            SaveManager::setProperty(control, TAG_HEIGHT, QString::number(control->size().height()));
         }
 
         if (updatePreviewer) {
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", control->size().width());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", control->size().height());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_X, control->x());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_Y, control->y());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_WIDTH, control->size().width());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_HEIGHT, control->size().height());
         }
 
         emit instance()->geometryChanged(control);
@@ -218,7 +222,7 @@ void ControlPropertyManager::setId(Control* control, const QString& id, bool sav
         control->setId(id);
 
         if (save)
-            SaveManager::setProperty(control, "id", id);
+            SaveManager::setProperty(control, TAG_ID, id);
 
         if (updatePreviewer)
             ControlPreviewingManager::scheduleIdChange(control->uid(), control->id());
@@ -274,12 +278,11 @@ void ControlPropertyManager::setZ(Control* control, qreal z, bool save, bool upd
     } else {
         control->setZValue(z);
 
-        if (save) {
-            SaveManager::setProperty(control, "z", QString::number(control->zValue()));
-        }
+        if (save)
+            SaveManager::setProperty(control, TAG_Z, QString::number(control->zValue()));
 
         if (updatePreviewer)
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "z", control->zValue());
+            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), TAG_Z, control->zValue());
 
         emit instance()->zChanged(control);
     }

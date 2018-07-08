@@ -16,7 +16,6 @@ class SaveManager final : public QObject
     friend class ControlCreationManager; // For addControl()
     friend class ControlPropertyManager; // For setProperty(), moveControl()
     friend class ProjectManager;         // For initProject()
-    friend class ToolManager;            // For refreshToolUid()
 
 private:
     explicit SaveManager(QObject* parent = nullptr);

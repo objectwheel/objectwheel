@@ -58,7 +58,7 @@ void ControlRemovingManager::removeControl(Control* control)
 //    BUG ControlPreviewingManager::removeCache(control->uid());
 
 //    control->parentControl()->refresh();
-    control->setRefreshingDisabled(true);
+//    control->setRefreshingDisabled(true);
     control->blockSignals(true);
 
     SaveManager::removeControl(control);

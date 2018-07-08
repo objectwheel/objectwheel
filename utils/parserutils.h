@@ -6,7 +6,7 @@
 
 class QTextDocument;
 
-class UTILS_EXPORT ParserUtils
+class UTILS_EXPORT ParserUtils final
 {
     Q_DISABLE_COPY(ParserUtils)
 

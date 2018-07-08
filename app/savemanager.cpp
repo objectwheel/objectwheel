@@ -394,9 +394,6 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
             || property == TAG_WIDTH
             || property == TAG_HEIGHT) {
         SaveUtils::setProperty(control->dir(), property, value);
-
-        if (property != TAG_ID && !control->gui())
-            return;
     }
 
     ParserUtils::setProperty(control->url(), property, value);

@@ -51,11 +51,9 @@ public:
     void setUrl(const QString& url);
     void setDragIn(bool dragIn);
     void setDragging(bool dragging);
-    void setRefreshingDisabled(bool disabled);
 
 public slots:
     void updateUid();
-    void centralize();
     void hideResizers();
     void showResizers();
 
@@ -95,7 +93,6 @@ private:
     bool m_dragIn;
     bool m_hoverOn;
     bool m_dragging;
-    bool m_refreshingDisabled;
 
     QString m_url;
     QString m_uid;

@@ -1,5 +1,6 @@
 #include <resizer.h>
 #include <control.h>
+#include <controlpropertymanager.h>
 
 #include <QPainter>
 #include <QCursor>
@@ -143,7 +144,9 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_y *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(0, -diff_y, 0, 0));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(0, -diff_y, 0, 0),
+                                                true, true, true);
             break;
 
         case Right:
@@ -152,7 +155,9 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_x *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(0, 0, diff_x, 0));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(0, 0, diff_x, 0),
+                                                true, true, true);
             break;
 
         case Bottom:
@@ -161,7 +166,9 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_y *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(0, 0, 0, diff_y));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(0, 0, 0, diff_y),
+                                                true, true, true);
             break;
 
         case Left:
@@ -170,7 +177,9 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_x *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(-diff_x, 0, 0, 0));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(-diff_x, 0, 0, 0),
+                                                true, true, true);
             break;
 
         case TopLeft:
@@ -183,7 +192,9 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_y *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(-diff_x, -diff_y, 0, 0));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(-diff_x, -diff_y, 0, 0),
+                                                true, true, true);
             break;
 
         case TopRight:
@@ -196,7 +207,9 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_y *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(0, -diff_y, diff_x, 0));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(0, -diff_y, diff_x, 0),
+                                                true, true, true);
             break;
 
         case BottomRight:
@@ -209,7 +222,9 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_y *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(0, 0, diff_x, diff_y));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(0, 0, diff_x, diff_y),
+                                                true, true, true);
             break;
 
         case BottomLeft:
@@ -222,12 +237,14 @@ void Resizer::mouseMoveEvent(QGsme* event)
             if (parent->form())
                 diff_y *= 2.0;
 
-            parent->setGeometry(parent->geometry().adjusted(-diff_x, 0, 0, diff_y));
+            ControlPropertyManager::setGeometry(parent,
+                                                parent->geometry().adjusted(-diff_x, 0, 0, diff_y),
+                                                true, true, true);
             break;
     }
 
     if (parent->size().width() < SIZE || parent->size().height() < SIZE)
-        parent->resize(startSize);
+        ControlPropertyManager::setSize(parent, startSize, true, true, true);
 }
 
 void Resizer::mouseReleaseEvent(QGsme* event)

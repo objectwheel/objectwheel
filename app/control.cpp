@@ -45,7 +45,6 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
-  , m_refreshingDisabled(false)
   , m_url(url)
   , m_uid(SaveUtils::uid(dir()))
   , m_resizers(initializeResizers(this))
@@ -54,10 +53,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
 
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
-    setRefreshingDisabled(true);
     setInitialProperties(this);
-    setRefreshingDisabled(false);
-
     setFlag(ItemIsMovable);
     setFlag(ItemIsFocusable);
     setFlag(ItemIsSelectable);
@@ -227,21 +223,9 @@ void Control::setDragging(bool dragging)
         setCursor(Qt::ArrowCursor);
 }
 
-void Control::setRefreshingDisabled(bool disabled)
-{
-    m_refreshingDisabled = disabled;
-}
-
 void Control::updateUid()
 {
     m_uid = SaveUtils::uid(dir());
-}
-
-void Control::centralize()
-{
-    setRefreshingDisabled(true);
-    setPos(-size().width() / 2.0, -size().height() / 2.0);
-    setRefreshingDisabled(false);
 }
 
 void Control::hideResizers()
@@ -267,7 +251,7 @@ void Control::dropControl(Control* control)
     if (!gui() && control->gui())
         return;
 
-    control->setPos(mapFromItem(control->parentItem(), control->pos()));
+    ControlPropertyManager::setPos(control, mapFromItem(control->parentItem(), control->pos()), true, true);
     ControlPropertyManager::setParent(control, this, true, true);
 
 //  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
@@ -492,9 +476,9 @@ void Control::updatePreview(const PreviewResult& result)
     m_properties = result.properties;
 
     if (!result.errors.isEmpty()) {
-        setRefreshingDisabled(true);
+//        setRefreshingDisabled(true);
         resize(QSizeF(50, 50));
-        setRefreshingDisabled(false);
+//        setRefreshingDisabled(false);
         setPos(pos());
 //    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
         setZValue(0);
@@ -507,18 +491,18 @@ void Control::updatePreview(const PreviewResult& result)
                     const auto& rect = getRect(result);
                     qreal z = getZ(result);
                     resize(rect.size());
-                    setRefreshingDisabled(true);
+//                    setRefreshingDisabled(true);
                     if (!form())
                         setPos(rect.topLeft());
                     blockSignals(true);
                     setZValue(z);
                     blockSignals(false);
-                    setRefreshingDisabled(false);
+//                    setRefreshingDisabled(false);
                 }
         } else {
-            setRefreshingDisabled(true);
+//            setRefreshingDisabled(true);
             resize(QSizeF(50, 50));
-            setRefreshingDisabled(false);
+//            setRefreshingDisabled(false);
             setPos(pos());
 //     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
             setZValue(0);
