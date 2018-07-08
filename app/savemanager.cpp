@@ -415,36 +415,46 @@ void SaveManager::refreshToolUid(const QString& toolRootPath)
 // topPath is only necessary if property is an "id" set.
 void SaveManager::setProperty(Control* control, const QString& property, QString value, const QString& topPath)
 {
-    if (control->dir().isEmpty() ||
-        !SaveUtils::isOwctrl(control->dir()) ||
-        control->hasErrors())
+    if (!control)
         return;
 
-    if (property == TAG_ID) {
+    if (control->dir().isEmpty())
+        return;
+
+    if (!SaveUtils::isOwctrl(control->dir()))
+        return;
+
+    if (property == TAG_X) {
+
+    } else if (property == TAG_Y) {
+
+    } else if (property == TAG_Z) {
+
+    } else if (property == TAG_WIDTH) {
+
+    } else if (property == TAG_HEIGHT) {
+
+    } else if (property == TAG_ID) {
         if (control->id() == value)
             return;
 
-        auto _suid = SaveUtils::suid(control->dir());
-
         control->setId(value);
-        refactorId(control, _suid, topPath);
+        refactorId(control, SaveUtils::suid(control->dir()), topPath);
         // NOTE: We don't have to call ControlPropertyManager::setId in order to emit idChanged signal in
         // ControlPropertyManager; because setProperty cannot be used anywhere else except ControlPropertyManager
         // Hence, setProperty(.., "id", ...) is only called from ControlPropertyManager::setId, which means
         // idChanged signal is already emitted.
 
-        auto propertyPath = control->dir() + separator() + DIR_THIS +
-                            separator() + FILE_PROPERTIES;
-        auto propertyData = rdfile(propertyPath);
+        const QString& propertyPath = control->dir() + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+        const QByteArray& propertyData = rdfile(propertyPath);
+
         SaveUtils::setProperty(propertyData, TAG_ID, QJsonValue(control->id()));
         wrfile(propertyPath, propertyData);
 
         value = control->id();
     }
 
-    auto fileName = control->dir() + separator() + DIR_THIS +
-                    separator() + "main.qml";
-    ParserUtils::setProperty(fileName, property, value);
+    ParserUtils::setProperty(control->url(), property, value);
 }
 
 void SaveManager::removeProperty(const Control* control, const QString& property)

@@ -268,8 +268,7 @@ void Control::dropControl(Control* control)
         return;
 
     control->setPos(mapFromItem(control->parentItem(), control->pos()));
-    ControlPropertyManager::setParent(control, this, true, true, false,
-                                      ControlPropertyManager::defaultParentPropertyConditions(control, this));
+    ControlPropertyManager::setParent(control, this, true, true);
 
 //  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
     WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
