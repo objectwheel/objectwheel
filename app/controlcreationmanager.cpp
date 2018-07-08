@@ -81,7 +81,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
     QMap<QString, Control*> pmap;
     pmap[control->dir()] = control;
     for (const auto& child : SaveUtils::childrenPaths(control->dir(), sourceSuid)) {
-        auto pcontrol = pmap.value(dname(dname(child)));
+        auto pcontrol = pmap.value(SaveUtils::toParentDir(child));
 
 //        ControlPreviewingManager::setDisabled(true);
         auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");

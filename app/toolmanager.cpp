@@ -229,8 +229,8 @@ void ToolManager::changeTool(const ChangeSet& changeSet)
             auto tli = tree->topLevelItem(i);
             for (int j = 0; j < tli->childCount(); j++) {
                 auto ci = tli->child(j);
-                if (dname(dname(tree->urls(ci).first().
-                                toLocalFile())) == changeSet.toolPath) {
+                if (SaveUtils::toParentDir(tree->urls(ci).first().
+                                toLocalFile()) == changeSet.toolPath) {
                     tree->removeUrls(ci);
                     delete tli->takeChild(j);
                     if (tli->childCount() <= 0)
@@ -253,8 +253,8 @@ void ToolManager::removeTool(const QString& toolPath)
             auto tli = tree->topLevelItem(i);
             for (int j = 0; j < tli->childCount(); j++) {
                 auto ci = tli->child(j);
-                if (dname(dname(tree->urls(ci).first().
-                                toLocalFile())) == toolPath) {
+                if (SaveUtils::toParentDir(tree->urls(ci).first().
+                                toLocalFile()) == toolPath) {
                     tree->removeUrls(ci);
                     delete tli->takeChild(j);
                     if (tli->childCount() <= 0)

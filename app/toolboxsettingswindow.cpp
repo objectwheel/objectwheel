@@ -123,8 +123,8 @@ void ToolboxSettingsWindow::on_btnReset_clicked()
             auto tli = ui->treeWidget->topLevelItem(i);
             for (int j = 0; j < tli->childCount(); j++) {
                 auto ci = tli->child(j);
-                auto currentDir = dname(dname(ui->treeWidget->
-                  urls(ci).first().toLocalFile()));
+                auto currentDir = SaveUtils::toParentDir(ui->treeWidget->
+                  urls(ci).first().toLocalFile());
                 // TODO: Check same for selected control's child controls
 //                if (dW->qmlEditorView()->isOpen(currentDir)) { //FIXME
 //                    obstacle = true;
@@ -151,11 +151,11 @@ void ToolboxSettingsWindow::on_btnRemove_clicked()
     // FIXME
 //    if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Removal",
 //      "This will remove selected tool from tool library. Are you sure?")) {
-//        auto currentDir = dname(dname(ui->treeWidget->urls
-//          (ui->treeWidget->currentItem()).first().toLocalFile()));
+//        auto currentDir = SaveUtils::toParentDir(ui->treeWidget->urls
+//          (ui->treeWidget->currentItem()).first().toLocalFile());
 //        if (!dW->qmlEditorView()->isOpen(currentDir)) {
-//            ToolManager::removeTool(dname(dname(ui->treeWidget->urls
-//              (ui->treeWidget->currentItem()).first().toLocalFile())));
+//            ToolManager::removeTool(SaveUtils::toParentDir(ui->treeWidget->urls
+//              (ui->treeWidget->currentItem()).first().toLocalFile()));
 //        } else {
 //            // TODO: Check same for selected control's child controls
 //            QMessageBox::information(this, "Oops",
@@ -192,7 +192,7 @@ void ToolboxSettingsWindow::on_btnExport_clicked()
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
     if (dialog.exec()) {
         QString msg;
-        auto dir = dname(dname(ui->treeWidget->urls(ui->treeWidget->currentItem()).first().toLocalFile()));
+        auto dir = SaveUtils::toParentDir(ui->treeWidget->urls(ui->treeWidget->currentItem()).first().toLocalFile());
         auto toolName = ui->treeWidget->currentItem()->text(0);
         if (rm(dialog.selectedFiles().first() + separator() + toolName + ".zip")) {
             if (Zipper::compressDir(dir, dialog.selectedFiles().at(0) + separator() + toolName + ".zip")) {
@@ -224,8 +224,8 @@ void ToolboxSettingsWindow::on_btnSave_clicked()
     changeSet.category = ui->txtCategory->text();
     changeSet.iconPath = ui->txtIcon->text();
     changeSet.name = ui->txtName->text();
-    changeSet.toolPath = dname(dname(ui->treeWidget->urls
-      (ui->treeWidget->currentItem()).first().toLocalFile()));
+    changeSet.toolPath = SaveUtils::toParentDir(ui->treeWidget->urls
+      (ui->treeWidget->currentItem()).first().toLocalFile());
     ToolManager::changeTool(changeSet);
 }
 

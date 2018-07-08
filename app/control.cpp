@@ -155,7 +155,7 @@ QString Control::uid() const
 
 QString Control::dir() const
 {
-    return dname(dname(m_url));
+    return SaveUtils::toParentDir(m_url);
 }
 
 DesignerScene* Control::scene() const

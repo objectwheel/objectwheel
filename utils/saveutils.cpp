@@ -3,24 +3,27 @@
 #include <hashfactory.h>
 
 #include <QJsonArray>
-#include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonDocument>
 
-/******************************************************************/
-/**          D A T A B A S E  I N F R A S T R U C T U R E        **/
-/******************************************************************/
-/** POPERTIES:                                                   **/
-/*  Elements: Main-form(master), Ordinary-form(master),           */
-/*            Child-item(master), Child-item(non-master)          */
-/*  Types:    Quick, Non-gui, Window                              */
-/*                                                                */
-/** RULES:                                                       **/
-/* - Non-gui elements can not be master (or form)                 */
-/* - Main form has to be window type                              */
-/* - Other forms could be quick item or window type (not non-gui) */
-/* - Children could be non-gui or quick item type (not window)    */
-/* - A form has to be master item                                 */
-/******************************************************************/
+/*
+                   DATABASE INFRASTRUCTURE
+
+    POPERTIES:
+        Elements:
+            Main-form(master), Ordinary-form(master),
+            Child-item(master), Child-item(non-master)
+
+        Types:
+            Quick, Non-gui, Window
+
+    RULES:
+        Non-gui elements can not be master (or form)
+        Main form has to be window type
+        Other forms could be quick item or window type (not non-gui)
+        Children could be non-gui or quick item type (not window)
+        A form has to be master item
+*/
 
 namespace {
 

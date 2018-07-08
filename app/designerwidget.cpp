@@ -4,12 +4,12 @@
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>
 #include <controlcreationmanager.h>
-#include <filemanager.h>
 #include <transparentcombobox.h>
 #include <utilsicons.h>
 #include <toolbar.h>
 #include <toolbutton.h>
 #include <controlpreviewingmanager.h>
+#include <saveutils.h>
 
 #include <toolbar.h>
 #include <QPainter>
@@ -219,7 +219,8 @@ void DesignerWidget::handleControlDoubleClick(Control* control)
 void DesignerWidget::handleControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
-    auto newControl = ControlCreationManager::createControl(dname(dname(url)), pos, "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());
+    auto newControl = ControlCreationManager::createControl(SaveUtils::toParentDir(url), pos,
+            "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());
     newControl->setSelected(true);
 }
 
