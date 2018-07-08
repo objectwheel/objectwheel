@@ -517,7 +517,7 @@ void ThemeChooserWidget::sweep()
     m_saveButton->setDisabled(true);
     m_resetButton->setDisabled(true);
 
-    const auto& object = SaveUtils::theme(ProjectManager::dir()).toObject();
+    const auto& object = SaveUtils::projectTheme(ProjectManager::dir()).toObject();
 
     if (m_version == V1) {
         const auto& style = object.value("stylev1").toString();
@@ -591,7 +591,7 @@ void ThemeChooserWidget::save()
     m_saveButton->setDisabled(true);
     m_resetButton->setDisabled(true);
 
-    auto object = SaveUtils::theme(ProjectManager::dir()).toObject();
+    auto object = SaveUtils::projectTheme(ProjectManager::dir()).toObject();
     auto newObject = toJson();
 
     for (const auto& key : newObject.keys())

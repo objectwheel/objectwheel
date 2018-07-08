@@ -23,7 +23,7 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
 
 void ScalingWidget::sweep()
 {
-    auto scaling = SaveUtils::scaling(ProjectManager::dir());
+    auto scaling = SaveUtils::projectScaling(ProjectManager::dir());
 
     if (scaling == "noScaling")
         m_noScalingButton->setChecked(true);

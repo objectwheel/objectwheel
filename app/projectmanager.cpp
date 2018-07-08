@@ -155,7 +155,7 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
     const auto& pdir = udir + separator() + QString::number(biggestDir(udir) + 1);
 
     QJsonObject jobj;
-    jobj.insert(PTAG_PROJECTNAME, name);
+    jobj.insert(PTAG_NAME, name);
     jobj.insert(PTAG_DESCRIPTION, description);
     jobj.insert(PTAG_OWNER, owner);
     jobj.insert(PTAG_CRDATE, crDate);
@@ -197,7 +197,7 @@ QStringList ProjectManager::projectNames()
         return names;
 
     for (const auto& hash : hashes)
-        names << ::property(hash, PTAG_PROJECTNAME).toString();
+        names << ::property(hash, PTAG_NAME).toString();
 
     return names;
 }
@@ -209,7 +209,7 @@ void ProjectManager::changeName(const QString& hash, const QString& name)
     if (dir.isEmpty())
         return;
 
-    ::setProperty(dir, PTAG_PROJECTNAME, name);
+    ::setProperty(dir, PTAG_NAME, name);
 }
 
 void ProjectManager::changeDescription(const QString& hash, const QString& desc)
@@ -247,7 +247,7 @@ bool ProjectManager::importProject(const QString &filePath)
 
     ::setProperty(pdir, PTAG_HASH, HashFactory::generate());
 
-    SaveUtils::recalculateUids(pdir + separator() + DIR_OWDB);
+    SaveUtils::regenerateUids(pdir + separator() + DIR_OWDB);
 
     return true;
 }
@@ -259,7 +259,7 @@ QString ProjectManager::dir(const QString& hash)
 
 QString ProjectManager::name(const QString& hash)
 {
-    return ::property(hash, PTAG_PROJECTNAME).toString();
+    return ::property(hash, PTAG_NAME).toString();
 }
 
 QString ProjectManager::description(const QString& hash)

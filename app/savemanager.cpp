@@ -40,7 +40,7 @@ QString findByUid(const QString& uid, const QString& rootPath)
         baseDir = rootPath;
     }
 
-    for (auto path : fps(FILE_PROPERTIES, baseDir)) {
+    for (auto path : fps(FILE_CONTROL, baseDir)) {
         auto propertyData = rdfile(path);
 
         if (!SaveUtils::isOwctrl(propertyData))
@@ -69,7 +69,7 @@ QString parentDir(const Control* control)
 void flushId(const Control* control)
 {
     auto propertyPath = control->dir() + separator() + DIR_THIS +
-                        separator() + FILE_PROPERTIES;
+                        separator() + FILE_CONTROL;
     auto propertyData = rdfile(propertyPath);
     SaveUtils::setProperty(propertyData, TAG_ID, control->id());
     wrfile(propertyPath, propertyData);
@@ -84,7 +84,7 @@ void flushSuid(const Control* control, const QString& suid)
     auto topPath = control->dir();
     auto fromUid = SaveUtils::suid(topPath);
     if (!fromUid.isEmpty()) {
-        for (auto path : fps(FILE_PROPERTIES, topPath)) {
+        for (auto path : fps(FILE_CONTROL, topPath)) {
             if (SaveUtils::suid(dname(dname(path))) == fromUid) {
                 auto propertyData = rdfile(path);
                 auto jobj = QJsonDocument::fromJson(propertyData).object();
@@ -95,7 +95,7 @@ void flushSuid(const Control* control, const QString& suid)
         }
     } else {
         auto propertyPath = control->dir() + separator() + DIR_THIS +
-                            separator() + FILE_PROPERTIES;
+                            separator() + FILE_CONTROL;
         auto propertyData = rdfile(propertyPath);
         SaveUtils::setProperty(propertyData, TAG_SUID, suid);
         wrfile(propertyPath, propertyData);
@@ -108,7 +108,7 @@ void flushSuid(const Control* control, const QString& suid)
 bool existsInForms(const Control* control)
 {
     for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
-        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
+        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_CONTROL);
         auto id = SaveUtils::property(propertyData, TAG_ID).toString();
 
         if (id == control->id())
@@ -138,7 +138,7 @@ bool existsInFormScope(const Control* control)
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
-        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_PROPERTIES);
+        auto propertyData = rdfile(path + separator() + DIR_THIS + separator() + FILE_CONTROL);
         auto id = SaveUtils::property(propertyData, TAG_ID).toString();
 
         if (id == control->id())
@@ -167,7 +167,7 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
 
         for (auto path :  SaveUtils::childrenPaths(parentRootPath)) {
             auto propertyData = rdfile(path + separator() + DIR_THIS +
-                                       separator() + FILE_PROPERTIES);
+                                       separator() + FILE_CONTROL);
             auto id = SaveUtils::property(propertyData, TAG_ID).toString();
 
             if (id == control->id())
@@ -181,7 +181,7 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
 
         for (auto path : paths) {
             auto propertyData = rdfile(path + separator() + DIR_THIS +
-                                       separator() + FILE_PROPERTIES);
+                                       separator() + FILE_CONTROL);
             auto id = SaveUtils::property(propertyData, TAG_ID).toString();
 
             if (id == control->id())
@@ -203,12 +203,12 @@ bool exists(const Control* control, const QString& suid, const QString& topPath 
 
 // Recalculates all uids belongs to given control and its children (all).
 // Both database and in-memory data are updated.
-void recalculateUids(Control* control)
+void regenerateUids(Control* control)
 {
     if (control->dir().isEmpty())
         return;
 
-    SaveUtils::recalculateUids(control->dir());
+    SaveUtils::regenerateUids(control->dir());
 
     Control::updateUids(); // FIXME: Change with childControls()->updateUid();
 }
@@ -241,7 +241,7 @@ bool SaveManager::initProject(const QString& projectDirectory, int templateNumbe
         !Zipper::extractZip(rdfile(tr(":/templates/template%1.zip").arg(templateNumber)), projectDirectory))
         return false;
 
-    SaveUtils::recalculateUids(projectDirectory + separator() + DIR_OWDB);
+    SaveUtils::regenerateUids(projectDirectory + separator() + DIR_OWDB);
 
     return true;
 }
@@ -275,7 +275,7 @@ bool SaveManager::addForm(Form* form)
     form->setUrl(formDir + separator() + DIR_THIS + separator() + "main.qml");
 
     flushId(form);
-    recalculateUids(form);
+    regenerateUids(form);
     ControlPropertyManager::setId(form, form->id(), false, false);
 
     return true;
@@ -325,7 +325,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
         flushId(child);
 
     flushSuid(control, suid);
-    recalculateUids(control); //for all
+    regenerateUids(control); //for all
 
     ControlPropertyManager::setId(control, control->id(), false, false);
     for (auto child : control->childControls())
@@ -382,30 +382,6 @@ void SaveManager::removeControl(const Control* control)
     rm(control->dir());
 }
 
-void SaveManager::refreshToolUid(const QString& toolRootPath)
-{
-    if (toolRootPath.isEmpty())
-        return;
-
-    QStringList paths, properties;
-
-    properties << fps(FILE_PROPERTIES, toolRootPath);
-    paths << properties;
-
-    for (auto pfile : properties) {
-        auto propertyData = rdfile(pfile);
-
-        if (!SaveUtils::isOwctrl(propertyData))
-            continue;
-
-        auto uid = SaveUtils::property(propertyData, TAG_UID).toString();
-        auto newUid = HashFactory::generate();
-
-        for (auto file : paths)
-            SaveUtils::updateFile(file, uid, newUid);
-    }
-}
-
 // NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
 // You can not set id property of a top control if it's not exist in the project database
 // If you want to set id property of a control that is not exist in the project database,
@@ -445,7 +421,7 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
         // Hence, setProperty(.., "id", ...) is only called from ControlPropertyManager::setId, which means
         // idChanged signal is already emitted.
 
-        const QString& propertyPath = control->dir() + separator() + DIR_THIS + separator() + FILE_PROPERTIES;
+        const QString& propertyPath = control->dir() + separator() + DIR_THIS + separator() + FILE_CONTROL;
         const QByteArray& propertyData = rdfile(propertyPath);
 
         SaveUtils::setProperty(propertyData, TAG_ID, QJsonValue(control->id()));

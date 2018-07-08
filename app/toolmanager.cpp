@@ -1,7 +1,6 @@
 #include <toolmanager.h>
 #include <projectmanager.h>
 #include <saveutils.h>
-#include <savemanager.h>
 #include <toolboxtree.h>
 #include <filemanager.h>
 #include <zipper.h>
@@ -34,7 +33,7 @@ static void flushChangeSet(const ToolManager::ChangeSet& changeSet)
     auto dirCtrl = changeSet.toolPath +
             separator() + DIR_THIS;
     auto dirIcon = dirCtrl + separator() + FILE_ICON;
-    auto propertyPath = dirCtrl + separator() + FILE_PROPERTIES;
+    auto propertyPath = dirCtrl + separator() + FILE_CONTROL;
     auto propertyData = rdfile(propertyPath);
 
     // Write properties
@@ -92,7 +91,7 @@ QStringList ToolManager::categories()
 
     for (auto dir : lsdir(toolsDir())) {
         auto toolPath = toolsDir() + separator() + dir;
-        auto category = SaveUtils::toolCategory(toolPath);
+        auto category = SaveUtils::category(toolPath);
         if (!categories.contains(category))
             categories << category;
     }
@@ -118,8 +117,8 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
 
     QList<QUrl> urls;
     auto dir = toolPath + separator() + DIR_THIS + separator();
-    auto category = SaveUtils::toolCategory(toolPath);
-    auto name = SaveUtils::toolName(toolPath);
+    auto category = SaveUtils::category(toolPath);
+    auto name = SaveUtils::name(toolPath);
 
     urls << QUrl::fromLocalFile(dir + "main.qml");
     if (category.isEmpty())
@@ -179,15 +178,15 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
         if (!cp(toolPath, newToolPath, true, qrc))
             return false;
 
-        SaveManager::refreshToolUid(newToolPath);
+        SaveUtils::regenerateUids(newToolPath);
     } else {
         newToolPath = toolPath;
     }
 
     QList<QUrl> urls;
     auto dir = newToolPath + separator() + DIR_THIS + separator();
-    auto category = SaveUtils::toolCategory(newToolPath);
-    auto name = SaveUtils::toolName(newToolPath);
+    auto category = SaveUtils::category(newToolPath);
+    auto name = SaveUtils::name(newToolPath);
 
     urls << QUrl::fromLocalFile(dir + "main.qml");
     if (category.isEmpty())

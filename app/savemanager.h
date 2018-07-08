@@ -23,8 +23,6 @@ private:
 
     static bool initProject(const QString& projectDirectory, int templateNumber);
 
-    static void refreshToolUid(const QString& toolRootPath);
-
     static void setProperty(Control* control, const QString& property, QString value, const QString& topPath = QString());
     static void removeProperty(const Control* control, const QString& property);
 

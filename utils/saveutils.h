@@ -5,7 +5,7 @@
 
 #include <QJsonValue>
 
-#define SIGN_OWDB        "T3dkYl92Mi4w"
+#define SIGN_OWDB        "T3dkYl92Mi4w"    // FIXME: There is no function of this
 #define SIGN_OWCTRL      "T3djdHJsX3YyLjA"
 #define SIGN_OWPRJ       "T3dwcmpfdjIuMA"
 
@@ -15,9 +15,10 @@
 #define DIR_OWDB         "owdb"
 
 #define FILE_PROJECT     "project.json"
-#define FILE_PROPERTIES  "properties.json"
-#define FILE_ICON        "icon.png" //TODO: Apply everywhere
-#define FILE_MAIN        "main.qml" //TODO: Apply everywhere
+#define FILE_OWDB        "owdb.json"       // FIXME: There is no function of this
+#define FILE_CONTROL     "control.json"
+#define FILE_ICON        "icon.png"        // TODO: Apply everywhere
+#define FILE_MAIN        "main.qml"        // TODO: Apply everywhere
 
 #define TAG_X            "x"
 #define TAG_Y            "y"
@@ -29,14 +30,14 @@
 #define TAG_SUID         "suid"
 #define TAG_NAME         "name"
 #define TAG_CATEGORY     "category"
-#define TAG_OWDB_SIGN    "owdbsign"
+#define TAG_OWDB_SIGN    "owdbsign"        // FIXME: There is no function of this
 #define TAG_OWCTRL_SIGN  "owctrlsign"
 
-#define PTAG_PROJECTNAME "projectName"
+#define PTAG_NAME        "name"
 #define PTAG_DESCRIPTION "description"
 #define PTAG_OWNER       "owner"
-#define PTAG_CRDATE      "crDate"
-#define PTAG_MFDATE      "mfDate"
+#define PTAG_CRDATE      "crdate"
+#define PTAG_MFDATE      "mfdate"
 #define PTAG_SIZE        "size"
 #define PTAG_HASH        "hash"
 #define PTAG_THEME       "theme"
@@ -56,16 +57,16 @@ public:
     static int biggestDir(const QString& basePath);
     static int childrenCount(const QString& rootPath, QString suid = QString());
 
-    static QStringList formPaths(const QString& projectDir);
-    static QStringList controlPaths(const QString& topPath);
-    static QStringList masterPaths(const QString& topPath);
-    static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
-
     static QString toUrl(const QString& rootPath);
     static QString toParentDir(const QString& topPath);
     static QString toChildrenDir(const QString& rootPath);
     static QString toProjectFile(const QString& projectDir);
-    static QString toPropertiesFile(const QString& rootPath);
+    static QString toControlFile(const QString& rootPath);
+
+    static QStringList formPaths(const QString& projectDir);
+    static QStringList controlPaths(const QString& topPath);
+    static QStringList masterPaths(const QString& topPath);
+    static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
 
     static qreal x(const QString& rootPath);
     static qreal y(const QString& rootPath);
@@ -76,8 +77,8 @@ public:
     static QString id(const QString& rootPath);
     static QString uid(const QString& rootPath);
     static QString suid(const QString& rootPath);
-    static QString toolName(const QString& toolRootPath);
-    static QString toolCategory(const QString& toolRootPath);
+    static QString name(const QString& rootPath);
+    static QString category(const QString& rootPath);
 
     static QString projectHash(const QString& projectDir);
     static QString projectName(const QString& projectDir);
@@ -102,8 +103,7 @@ public:
     static void setProperty(const QString& rootPath,  const QString& property, const QJsonValue& value);
     static void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value);
 
-    static void updateFile(const QString& filePath, const QString& from, const QString& to);
-    static void recalculateUids(const QString& topPath);
+    static void regenerateUids(const QString& topPath);
 
 private:
     SaveUtils() {}

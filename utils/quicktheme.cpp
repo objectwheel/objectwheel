@@ -4,7 +4,7 @@
 
 void QuickTheme::setTheme(const QString& projectDir, int* version)
 {
-    const QJsonObject& object = SaveUtils::theme(projectDir).toObject();
+    const QJsonObject& object = SaveUtils::projectTheme(projectDir).toObject();
     const QString& stylev1 = object.value("stylev1").toString();
     const QString& stylev2 = object.value("stylev2").toString();
     const QString& theme = object.value("theme").toString();

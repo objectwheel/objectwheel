@@ -12,9 +12,9 @@
         <file>qmls/buildsScreen/main.qml</file>
         <file>qmls/buildsScreen/ProgressPage.qml</file>
         <file>other/countries.txt</file>
-        <file>qmls/owdb/properties.json</file>
-        <file>qmls/owdb/1/t/properties.json</file>
-        <file>qmls/form/t/properties.json</file>
-        <file>qmls/control/t/properties.json</file>
+        <file>qmls/owdb/1/t/control.json</file>
+        <file>qmls/form/t/control.json</file>
+        <file>qmls/control/t/control.json</file>
+        <file>qmls/owdb/owdb.json</file>
     </qresource>
 </RCC>
