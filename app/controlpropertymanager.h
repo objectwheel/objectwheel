@@ -26,12 +26,11 @@ public:
                         bool updatePreviewer = true, bool compress = false);
     static void setGeometry(Control* control, const QRectF& geometry, bool save = true,
                             bool updatePreviewer = true, bool compress = false);
-    static void setId(Control* control, const QString& id, bool save = true,
-                      bool updatePreviewer = true, bool compress = false);
     static void setParent(Control* control, Control* parentControl, bool save = true,
                           bool updatePreviewer = true, bool compress = false);
     static void setZ(Control* control, qreal z, bool save = true,
                      bool updatePreviewer = true, bool compress = false);
+    static void setId(Control* control, const QString& id, bool save = true, bool updatePreviewer = true);
 
 private slots:
     void handleDirtyProperties();
@@ -41,11 +40,6 @@ signals:
     void parentChanged(Control*);
     void geometryChanged(Control*);
     void idChanged(Control*, const QString& previousId);
-
-    void previewChanged(Control*);
-    void errorOccurred(Control*);
-    void doubleClicked(Control*);
-    void controlDropped(Control*, const QPointF&, const QString&);
 
 private:
     explicit ControlPropertyManager(QObject* parent = nullptr);

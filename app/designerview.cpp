@@ -107,10 +107,7 @@ DesignerScene* DesignerView::scene() const
 void DesignerView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
-
-    auto currentForm = scene()->currentForm();
-    if (currentForm)
-        currentForm->centralize();
+    scene()->centralize();
 }
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)
@@ -132,12 +129,6 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
         m_cutAct->setDisabled(false);
         m_copyAct->setDisabled(false);
         m_deleteAct->setDisabled(false);
-        for (auto sc : selectedControls) {
-            if (sc->gui() == false || sc->hasErrors()) {
-                m_sendBackAct->setDisabled(true);
-                m_bringFrontAct->setDisabled(true);
-            }
-        }
     }
     m_menu->exec(event->globalPos());
 }

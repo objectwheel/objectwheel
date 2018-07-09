@@ -1,6 +1,5 @@
 #include <form.h>
 #include <designerscene.h>
-#include <controlpropertymanager.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -27,15 +26,10 @@ void Form::setMain(bool value)
     m_main = value;
 }
 
-void Form::centralize()
-{
-    ControlPropertyManager::setPos(this, {-size().width() / 2.0, -size().height() / 2.0}, false, false);
-}
-
 void Form::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     Control::resizeEvent(event);
-    centralize();
+    scene()->centralize();
 }
 
 void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)

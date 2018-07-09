@@ -31,6 +31,7 @@ public:
 
 public slots:
     void sweep();
+    void centralize();
 
 private:
     void addForm(Form* form);

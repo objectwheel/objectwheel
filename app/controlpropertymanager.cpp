@@ -49,6 +49,9 @@ void ControlPropertyManager::setX(Control* control, qreal x, bool save, bool upd
     if (!control)
         return;
 
+    if (control->x() != x)
+        control->setX(x);
+
     if (compress) {
         s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setX",
                                                 std::bind(&ControlPropertyManager::setX,
@@ -58,8 +61,6 @@ void ControlPropertyManager::setX(Control* control, qreal x, bool save, bool upd
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        control->setX(x);
-
         if (save)
             SaveManager::setProperty(control, TAG_X, QString::number(control->x()));
 
@@ -75,6 +76,9 @@ void ControlPropertyManager::setY(Control* control, qreal y, bool save, bool upd
     if (!control)
         return;
 
+    if (control->y() != y)
+        control->setY(y);
+
     if (compress) {
         s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setY",
                                                 std::bind(&ControlPropertyManager::setY,
@@ -84,8 +88,6 @@ void ControlPropertyManager::setY(Control* control, qreal y, bool save, bool upd
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        control->setY(y);
-
         if (save)
             SaveManager::setProperty(control, TAG_Y, QString::number(control->y()));
 
@@ -102,6 +104,9 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, bool s
     if (!control)
         return;
 
+    if (control->pos() != pos)
+        control->setPos(pos);
+
     if (compress) {
         s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setPos",
                                                 std::bind(&ControlPropertyManager::setPos,
@@ -111,8 +116,6 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, bool s
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        control->setPos(pos);
-
         if (save) {
             SaveManager::setProperty(control, TAG_X, QString::number(control->x()));
             SaveManager::setProperty(control, TAG_Y, QString::number(control->y()));
@@ -136,6 +139,9 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, bool 
     if (!size.isValid())
         return;
 
+    if (control->size() != size)
+        control->resize(size);
+
     if (compress) {
         s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setSize",
                                                 std::bind(&ControlPropertyManager::setSize,
@@ -145,8 +151,6 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, bool 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        control->resize(size);
-
         if (save) {
             SaveManager::setProperty(control, TAG_WIDTH, QString::number(control->size().width()));
             SaveManager::setProperty(control, TAG_HEIGHT, QString::number(control->size().height()));
@@ -170,6 +174,9 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
     if (!geometry.isValid())
         return;
 
+    if (control->geometry() != geometry)
+        control->setGeometry(geometry);
+
     if (compress) {
         s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setGeometry",
                                                 std::bind(&ControlPropertyManager::setGeometry,
@@ -179,8 +186,6 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        control->setGeometry(geometry);
-
         if (save) {
             SaveManager::setProperty(control, TAG_X, QString::number(control->x()));
             SaveManager::setProperty(control, TAG_Y, QString::number(control->y()));
@@ -199,38 +204,6 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
     }
 }
 
-void ControlPropertyManager::setId(Control* control, const QString& id, bool save,
-                                   bool updatePreviewer, bool compress)
-{
-    if (!control)
-        return;
-
-    if (id.isEmpty())
-        return;
-
-    if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setId",
-                                                std::bind(&ControlPropertyManager::setId,
-                                                          QPointer<Control>(control), id, save,
-                                                          updatePreviewer, false));
-
-        if (!s_dirtyPropertyProcessingTimer->isActive())
-            s_dirtyPropertyProcessingTimer->start();
-    } else {
-        const QString& previousId = control->id();
-
-        control->setId(id);
-
-        if (save)
-            SaveManager::setProperty(control, TAG_ID, id);
-
-        if (updatePreviewer)
-            ControlPreviewingManager::scheduleIdChange(control->uid(), control->id());
-
-        emit instance()->idChanged(control, previousId);
-    }
-}
-
 void ControlPropertyManager::setParent(Control* control, Control* parentControl, bool save,
                                        bool updatePreviewer, bool compress)
 {
@@ -239,6 +212,9 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
 
     if (!parentControl)
         return;
+
+    if (control->parentItem() != parentControl)
+        control->setParentItem(parentControl);
 
     if (compress) {
         s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setParent",
@@ -250,8 +226,6 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        control->setParentItem(parentControl);
-
         if (save)
             SaveManager::moveControl(control, parentControl);
 
@@ -267,6 +241,9 @@ void ControlPropertyManager::setZ(Control* control, qreal z, bool save, bool upd
     if (!control)
         return;
 
+    if (control->zValue() != z)
+        control->setZValue(z);
+
     if (compress) {
         s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setZ",
                                                 std::bind(&ControlPropertyManager::setZ,
@@ -276,8 +253,6 @@ void ControlPropertyManager::setZ(Control* control, qreal z, bool save, bool upd
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        control->setZValue(z);
-
         if (save)
             SaveManager::setProperty(control, TAG_Z, QString::number(control->zValue()));
 
@@ -286,4 +261,24 @@ void ControlPropertyManager::setZ(Control* control, qreal z, bool save, bool upd
 
         emit instance()->zChanged(control);
     }
+}
+
+void ControlPropertyManager::setId(Control* control, const QString& id, bool save, bool updatePreviewer)
+{
+    if (!control)
+        return;
+
+    if (id.isEmpty())
+        return;
+
+    const QString& previousId = control->id();
+    control->setId(id);
+
+    if (save)
+        SaveManager::setProperty(control, TAG_ID, id);
+
+    if (updatePreviewer)
+        ControlPreviewingManager::scheduleIdChange(control->uid(), control->id());
+
+    emit instance()->idChanged(control, previousId);
 }

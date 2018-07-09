@@ -131,7 +131,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
 
     auto parent = static_cast<Control*>(parentWidget());
 
-    if (!parent || parent->hasErrors() || m_disabled || !m_resizing)
+    if (!parent || m_disabled || !m_resizing)
         return;
 
     qreal diff_x, diff_y;

@@ -248,13 +248,10 @@ void Control::updateUids()
 
 void Control::dropControl(Control* control)
 {
-    if (!gui() && control->gui())
-        return;
-
     ControlPropertyManager::setPos(control, mapFromItem(control->parentItem(), control->pos()), true, true);
     ControlPropertyManager::setParent(control, this, true, true);
 
-//  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
+    //  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
     WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
 
     update();
@@ -476,11 +473,11 @@ void Control::updatePreview(const PreviewResult& result)
     m_properties = result.properties;
 
     if (!result.errors.isEmpty()) {
-//        setRefreshingDisabled(true);
+        //        setRefreshingDisabled(true);
         resize(QSizeF(50, 50));
-//        setRefreshingDisabled(false);
+        //        setRefreshingDisabled(false);
         setPos(pos());
-//    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
+        //    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
         setZValue(0);
     } else {
         if (result.gui) {
@@ -491,26 +488,26 @@ void Control::updatePreview(const PreviewResult& result)
                     const auto& rect = getRect(result);
                     qreal z = getZ(result);
                     resize(rect.size());
-//                    setRefreshingDisabled(true);
+                    //                    setRefreshingDisabled(true);
                     if (!form())
                         setPos(rect.topLeft());
                     blockSignals(true);
                     setZValue(z);
                     blockSignals(false);
-//                    setRefreshingDisabled(false);
+                    //                    setRefreshingDisabled(false);
                 }
         } else {
-//            setRefreshingDisabled(true);
+            //            setRefreshingDisabled(true);
             resize(QSizeF(50, 50));
-//            setRefreshingDisabled(false);
+            //            setRefreshingDisabled(false);
             setPos(pos());
-//     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
+            //     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
             setZValue(0);
         }
     }
 
-    for (auto resizer : m_resizers)
-        resizer->setDisabled(hasErrors() || !gui());
+//    for (auto resizer : m_resizers)
+//        resizer->setDisabled(hasErrors() || !gui());
 
     update();
 
@@ -540,11 +537,8 @@ QImage initialPreview(const QSizeF& size)
 {
     auto min = qMin(24.0, qMin(size.width(), size.height()));
 
-    QImage preview(
-                qCeil(size.width() * DPR),
-                qCeil(size.height() * DPR),
-                QImage::Format_ARGB32_Premultiplied
-                );
+    QImage preview(qCeil(size.width() * DPR), qCeil(size.height() * DPR),
+                   QImage::Format_ARGB32_Premultiplied);
 
     preview.setDevicePixelRatio(DPR);
     preview.fill(Qt::transparent);
@@ -552,16 +546,8 @@ QImage initialPreview(const QSizeF& size)
     QImage wait(":/images/wait.png");
     wait.setDevicePixelRatio(DPR);
 
-    drawCenter(
-                preview,
-                wait.scaled(
-                    min * DPR,
-                    min * DPR,
-                    Qt::IgnoreAspectRatio,
-                    Qt::SmoothTransformation
-                    ),
-                size
-                );
+    drawCenter(preview, wait.scaled(min * DPR, min * DPR,
+                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation), size);
 
     return preview;
 }
@@ -590,45 +576,24 @@ QRectF getRect(const PreviewResult& result)
 QList<Resizer*> initializeResizers(Control* control)
 {
     QList<Resizer*> resizers;
-    int i = 0;
-    for (;i < 8;)
-        resizers << new Resizer(control, Resizer::Placement(i++));
-
+    for (int i = 0; i < 8; ++i)
+        resizers.append(new Resizer(control, Resizer::Placement(i)));
     return resizers;
 }
 
-// FIXME
-void setInitialProperties(Control *control)
+void setInitialProperties(Control* control)
 {
-    qreal x = 0;
-    qreal y = 0;
-    qreal z = 0;
-    qreal width = 50;
-    qreal height = 50;
+    qreal x = SaveUtils::x(control->dir());
+    qreal y = SaveUtils::y(control->dir());
+    qreal z = SaveUtils::z(control->dir());
+    qreal width = SaveUtils::width(control->dir());
+    qreal height = SaveUtils::height(control->dir());
+    const QString& id = SaveUtils::id(control->dir());
 
-    if (ParserUtils::exists(control->url(), "x"))
-        x = ParserUtils::property(control->url(), "x").toDouble();
-    else
-        x = SaveUtils::x(control->dir());
-
-    if (ParserUtils::exists(control->url(), "y"))
-        y = ParserUtils::property(control->url(), "y").toDouble();
-    else
-        y = SaveUtils::y(control->dir());
-
-    if (ParserUtils::exists(control->url(), "width"))
-        width = ParserUtils::property(control->url(), "width").toDouble();
-
-    if (ParserUtils::exists(control->url(), "height"))
-        height = ParserUtils::property(control->url(), "height").toDouble();
-
-    if (ParserUtils::exists(control->url(), "z"))
-        z = ParserUtils::property(control->url(), "z").toDouble();
-
-    control->setId(SaveUtils::id(control->dir()));
-    control->setPos(x, y);
-    control->setZValue(z);
-    control->resize(width, height);
+    ControlPropertyManager::setZ(control, z, false, false);
+    ControlPropertyManager::setId(control, id, false, false);
+    ControlPropertyManager::setPos(control, {x, y}, false, false);
+    ControlPropertyManager::setSize(control, {width, height}, false, false);
 }
 
 void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)

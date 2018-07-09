@@ -17,9 +17,6 @@ public:
 public:
     void setMain(bool value);
 
-public slots:
-    void centralize();
-
 private:
     void resizeEvent(QGraphicsSceneResizeEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;

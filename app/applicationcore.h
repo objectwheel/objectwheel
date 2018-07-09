@@ -17,7 +17,6 @@ class RunManager;
 class SaveManager;
 class WindowManager;
 class MenuManager;
-class ControlTransactionManager;
 
 namespace Core { class HelpManager; }
 
@@ -51,7 +50,6 @@ private:
     static ControlRemovingManager* s_controlRemovingManager;
     static ControlPropertyManager* s_controlPropertyManager;
     static RunManager* s_runManager;
-    static ControlTransactionManager* s_controlTransactionManager;
     static Core::HelpManager* s_helpManager;
     static DocumentManager* s_documentManager;
     static WindowManager* s_windowManager;

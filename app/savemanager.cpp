@@ -149,10 +149,10 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
 
         return false;
     } else {
-        QStringList paths(parentRootPath);
-        paths.append(SaveUtils::childrenPaths(parentRootPath));
+        if (SaveUtils::id(parentRootPath) == control->id())
+            return true;
 
-        for (auto path : paths) {
+        for (auto path : SaveUtils::childrenPaths(parentRootPath)) {
             if (SaveUtils::id(path) == control->id())
                 return true;
         }
@@ -241,7 +241,7 @@ bool SaveManager::addForm(Form* form)
     if (!cp(form->dir(), formDir, true))
         return false;
 
-    form->setUrl(formDir + separator() + DIR_THIS + separator() + "main.qml");
+    form->setUrl(SaveUtils::toUrl(formDir));
 
     flushId(form);
     regenerateUids(form);
@@ -287,7 +287,7 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
 
     for (auto child : control->childControls())
         child->setUrl(child->url().replace(control->dir(), controlDir));
-    control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
+    control->setUrl(SaveUtils::toUrl(controlDir));
 
     flushId(control);
     for (auto child : control->childControls())
@@ -335,7 +335,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
 
     for (auto child : control->childControls())
         child->setUrl(child->url().replace(control->dir(), controlDir));
-    control->setUrl(controlDir + separator() + DIR_THIS + separator() + "main.qml");
+    control->setUrl(SaveUtils::toUrl(controlDir));
 
     return true;
 }
@@ -401,14 +401,11 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
 
 void SaveManager::removeProperty(const Control* control, const QString& property)
 {
-    if (control->dir().isEmpty() ||
-            control->hasErrors() ||
-            !SaveUtils::isOwctrl(control->dir()) ||
-            property == TAG_ID)
-        return;
-
-    //    TODO: auto fileName = control->dir() + separator() + DIR_THIS +
-    //                    separator() + "main.qml";
-
-    //    TODO: ParserController::removeVariantProperty(fileName, property);
+    // TODO:
+    //    if (control->dir().isEmpty() ||
+    //            control->hasErrors() ||
+    //            !SaveUtils::isOwctrl(control->dir()) ||
+    //            property == TAG_ID)
+    //        return;
+    //    ParserController::removeVariantProperty(control->url(), property);
 }

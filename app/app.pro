@@ -24,7 +24,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/css.h \
            $$PWD/dirlocker.h \
            $$PWD/control.h \
-           $$PWD/controltransactionmanager.h \
            $$PWD/qmlcodeeditor.h \
            $$PWD/fileexplorer.h \
            $$PWD/filelist.h \
@@ -113,14 +112,13 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/bootsettings.h \
            $$PWD/previewerserver.h \
            $$PWD/commanddispatcher.h \
-    controlpropertymanager.h
+           $$PWD/controlpropertymanager.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
            $$PWD/flatbutton.cpp \
            $$PWD/dirlocker.cpp \
            $$PWD/control.cpp \
-           $$PWD/controltransactionmanager.cpp \
            $$PWD/qmlcodeeditor.cpp \
            $$PWD/fileexplorer.cpp \
            $$PWD/filelist.cpp \
@@ -206,7 +204,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/previewerserver.cpp \
            $$PWD/controlpreviewingmanager.cpp \
            $$PWD/commanddispatcher.cpp \
-    controlpropertymanager.cpp
+           $$PWD/controlpropertymanager.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

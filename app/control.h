@@ -6,7 +6,6 @@
 
 class Resizer;
 class DesignerScene;
-class ControlMonitoringManager;
 
 class Control : public QGraphicsWidget
 {

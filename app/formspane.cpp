@@ -207,8 +207,7 @@ void FormsPane::addButtonClicked()
     if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
         return;
 
-    auto form = ControlCreationManager::createForm(tempPath);
-    form->centralize();
+    ControlCreationManager::createForm(tempPath);
 
     rm(tempPath);
 }

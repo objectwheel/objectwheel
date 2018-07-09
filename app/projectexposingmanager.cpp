@@ -20,28 +20,25 @@ void ProjectExposingManager::init(DesignerScene* designerScene)
 
 void ProjectExposingManager::exposeProject()
 {
-    const auto& fpaths = SaveUtils::formPaths(ProjectManager::dir());
+    for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
+        auto form = new Form(SaveUtils::toUrl(formPath));
 
-    for (const auto& path : fpaths) {
-        auto form = new Form(path + separator() + DIR_THIS + separator() + "main.qml");
-
-        if (SaveUtils::isMain(path))
+        if (SaveUtils::isMain(formPath))
             form->setMain(true);
 
         s_designerScene->addForm(form);
-        form->centralize();
-        //       BUG form->refresh();
 
-        QMap<QString, Control*> pmap;
-        pmap[path] = form;
+        QMap<QString, Control*> controlTree;
+        controlTree.insert(formPath, form);
 
-        for (const auto& child : SaveUtils::childrenPaths(path)) {
-            auto pcontrol = pmap.value(SaveUtils::toParentDir(child));
-            auto control = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
-            ControlPropertyManager::setParent(control, pcontrol, false, false);
+        for (const QString& childPath : SaveUtils::childrenPaths(formPath)) {
+            Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
 
-            //       BUG control->refresh();
-            pmap[child] = control;
+            Q_ASSERT(parentControl);
+
+            auto control = new Control(SaveUtils::toUrl(childPath));
+            ControlPropertyManager::setParent(control, parentControl, false, false);
+            controlTree.insert(childPath, control);
         }
     }
 }

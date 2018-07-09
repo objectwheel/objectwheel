@@ -7,7 +7,6 @@
 #include <windowmanager.h>
 #include <authenticator.h>
 #include <controlpreviewingmanager.h>
-#include <controltransactionmanager.h>
 #include <documentmanager.h>
 #include <mainwindow.h>
 #include <runmanager.h>
@@ -43,7 +42,6 @@ ControlCreationManager* ApplicationCore::s_controlExposingManager = nullptr;
 ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
 ControlPropertyManager* ApplicationCore::s_controlPropertyManager = nullptr;
 RunManager* ApplicationCore::s_runManager = nullptr;
-ControlTransactionManager* ApplicationCore::s_controlTransactionManager = nullptr;
 HelpManager* ApplicationCore::s_helpManager = nullptr;
 DocumentManager* ApplicationCore::s_documentManager = nullptr;
 WindowManager* ApplicationCore::s_windowManager = nullptr;
@@ -87,7 +85,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     s_controlRemovingManager = new ControlRemovingManager(this);
     s_controlPropertyManager = new ControlPropertyManager(this);
     s_runManager = new RunManager(this);
-    s_controlTransactionManager = new ControlTransactionManager(this);
     s_helpManager = new HelpManager(this);
 
     HelpManager::setupHelpManager();

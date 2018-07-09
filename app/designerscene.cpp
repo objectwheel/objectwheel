@@ -848,6 +848,14 @@ void DesignerScene::sweep()
     itemMoving = false;
 }
 
+void DesignerScene::centralize()
+{
+    if (m_currentForm) {
+        ControlPropertyManager::setPos(m_currentForm,
+        {-m_currentForm->size().width() / 2.0, -m_currentForm->size().height() / 2.0}, false, false);
+    }
+}
+
 void DesignerScene::setCurrentForm(Form* currentForm)
 {
     if (!m_forms.contains(currentForm) || m_currentForm == currentForm)
@@ -858,6 +866,9 @@ void DesignerScene::setCurrentForm(Form* currentForm)
 
     m_currentForm = currentForm;
     m_currentForm->setVisible(true);
+
+    centralize();
+
     emit currentFormChanged(m_currentForm);
 }
 

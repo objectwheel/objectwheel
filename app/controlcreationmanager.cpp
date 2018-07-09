@@ -37,7 +37,7 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
 {
 // BUG   ControlPreviewingManager::setDisabled(true);
 
-    auto form = new Form(rootPath + separator() + DIR_THIS + separator() + "main.qml");
+    auto form = new Form(SaveUtils::toUrl(rootPath));
 
     if (SaveUtils::isMain(rootPath))
         form->setMain(true);
@@ -65,7 +65,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
                                                QString destinationSuid)
 {
 //    BUG ControlPreviewingManager::setDisabled(true);
-    auto control = new Control(rootPath + separator() + DIR_THIS + separator() + "main.qml");
+    auto control = new Control(SaveUtils::toUrl(rootPath));
 
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
     ControlPropertyManager::setParent(control, parentControl, false, false);
@@ -83,7 +83,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
         auto pcontrol = pmap.value(SaveUtils::toParentDir(child));
 
 //        ControlPreviewingManager::setDisabled(true);
-        auto ccontrol = new Control(child + separator() + DIR_THIS + separator() + "main.qml");
+        auto ccontrol = new Control(SaveUtils::toUrl(child));
         ControlPropertyManager::setParent(ccontrol, pcontrol, false, false);
 //        control->setPos(pos); FIXME
 //        ControlPropertyManager::setPos(control, pos, false, false); FIXME
