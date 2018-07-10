@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <css.h>
 #include <saveutils.h>
+#include <parserutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
@@ -213,7 +214,7 @@ void DesignerView::onPasteAction()
     for (auto url : mimeData->urls()) {
         auto control = ControlCreationManager::createControl(
                     url.toLocalFile(),
-                    QPointF(SaveUtils::x(url.toLocalFile()) + 5, SaveUtils::y(url.toLocalFile()) + 5),
+                    QPointF(ParserUtils::x(SaveUtils::toUrl(url.toLocalFile())) + 5, ParserUtils::y(SaveUtils::toUrl(url.toLocalFile())) + 5),
                     sourceSuid,
                     currentForm,
                     currentForm->dir(),

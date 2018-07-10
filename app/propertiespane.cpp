@@ -1347,8 +1347,8 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
                 break;
             } else if (!sc[0]->gui() || sc[0]->hasErrors()) {
                 sc[0]->setX(value.toReal());
-                SaveUtils::setX(sc[0]->dir(), sc[0]->x());
-                SaveUtils::setY(sc[0]->dir(), sc[0]->y());
+//                BUG SaveUtils::setX(sc[0]->dir(), sc[0]->x());
+//                BUG SaveUtils::setY(sc[0]->dir(), sc[0]->y());
                 return;
             } else {
                 sc[0]->setX(value.toReal());

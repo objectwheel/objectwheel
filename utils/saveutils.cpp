@@ -233,36 +233,6 @@ QStringList SaveUtils::childrenPaths(const QString& rootPath, QString suid)
     return paths;
 }
 
-qreal SaveUtils::x(const QString& rootPath)
-{
-    return property(rootPath, TAG_X).toDouble();
-}
-
-qreal SaveUtils::y(const QString& rootPath)
-{
-    return property(rootPath, TAG_Y).toDouble();
-}
-
-qreal SaveUtils::z(const QString& rootPath)
-{
-    return property(rootPath, TAG_Z).toDouble();
-}
-
-qreal SaveUtils::width(const QString& rootPath)
-{
-    return property(rootPath, TAG_WIDTH).toDouble();
-}
-
-qreal SaveUtils::height(const QString& rootPath)
-{
-    return property(rootPath, TAG_HEIGHT).toDouble();
-}
-
-QString SaveUtils::id(const QString& rootPath)
-{
-    return property(rootPath, TAG_ID).toString();
-}
-
 QString SaveUtils::uid(const QString& rootPath)
 {
     return property(rootPath, TAG_UID).toString();
@@ -336,36 +306,6 @@ QJsonValue SaveUtils::property(const QString& rootPath, const QString& property)
 QJsonValue SaveUtils::projectProperty(const QString& projectDir, const QString& property)
 {
     return rootJsonObjectForFile(toProjectFile(projectDir)).value(property);
-}
-
-void SaveUtils::setX(const QString& rootPath, qreal x)
-{
-    setProperty(rootPath, TAG_X, x);
-}
-
-void SaveUtils::setY(const QString& rootPath, qreal y)
-{
-    setProperty(rootPath, TAG_Y, y);
-}
-
-void SaveUtils::setZ(const QString& rootPath, qreal z)
-{
-    setProperty(rootPath, TAG_Z, z);
-}
-
-void SaveUtils::setWidth(const QString& rootPath, qreal width)
-{
-    setProperty(rootPath, TAG_WIDTH, width);
-}
-
-void SaveUtils::setHeight(const QString& rootPath, qreal height)
-{
-    setProperty(rootPath, TAG_HEIGHT, height);
-}
-
-void SaveUtils::setId(const QString& rootPath, const QString& id)
-{
-    setProperty(rootPath, TAG_ID, id);
 }
 
 void SaveUtils::setProperty(const QString& rootPath, const QString& property, const QJsonValue& value)

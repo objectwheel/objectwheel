@@ -66,7 +66,6 @@ QString parentDir(const Control* control)
 
 void flushId(const Control* control)
 {
-    SaveUtils::setId(control->dir(), control->id());
     ParserUtils::setProperty(SaveUtils::toUrl(control->dir()), "id", control->id());
 }
 
@@ -90,7 +89,7 @@ void flushSuid(const Control* control, const QString& suid)
 bool existsInForms(const Control* control)
 {
     for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
-        if (SaveUtils::id(path) == control->id())
+        if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
             return true;
     }
 
@@ -117,7 +116,7 @@ bool existsInFormScope(const Control* control)
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
-        if (SaveUtils::id(path) == control->id())
+        if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
             return true;
     }
 
@@ -143,17 +142,17 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
             return true;
 
         for (auto path :  SaveUtils::childrenPaths(parentRootPath)) {
-            if (SaveUtils::id(path) == control->id())
+            if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
                 return true;
         }
 
         return false;
     } else {
-        if (SaveUtils::id(parentRootPath) == control->id())
+        if (ParserUtils::id(SaveUtils::toUrl(parentRootPath)) == control->id())
             return true;
 
         for (auto path : SaveUtils::childrenPaths(parentRootPath)) {
-            if (SaveUtils::id(path) == control->id())
+            if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
                 return true;
         }
 
@@ -371,7 +370,7 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
     if (!SaveUtils::isOwctrl(control->dir()))
         return;
 
-    if (property == TAG_ID) {
+    if (property == "id") {
         if (control->id() == value)
             return;
 
@@ -385,15 +384,6 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
         control->setId(value);
         refactorId(control, SaveUtils::suid(control->dir()), topPath);
         value = control->id();
-    }
-
-    if (property == TAG_X
-            || property == TAG_Y
-            || property == TAG_Z
-            || property == TAG_ID
-            || property == TAG_WIDTH
-            || property == TAG_HEIGHT) {
-        SaveUtils::setProperty(control->dir(), property, value);
     }
 
     ParserUtils::setProperty(control->url(), property, value);

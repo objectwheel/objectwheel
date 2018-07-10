@@ -2,6 +2,7 @@
 #include <flatbutton.h>
 #include <toolboxtree.h>
 #include <saveutils.h>
+#include <parserutils.h>
 #include <projectmanager.h>
 #include <designerscene.h>
 #include <filemanager.h>
@@ -222,7 +223,7 @@ void FormsPane::handleDatabaseChange()
     _listWidget->clear();
 
     for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
-        auto _id = SaveUtils::id(path);
+        auto _id = ParserUtils::id(SaveUtils::toUrl(path));
         if (id == _id)
             row = _listWidget->count();
 

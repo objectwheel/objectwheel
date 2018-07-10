@@ -20,12 +20,6 @@
 #define FILE_ICON        "icon.png"        // TODO: Apply everywhere
 #define FILE_MAIN        "main.qml"        // TODO: Apply everywhere
 
-#define TAG_X            "x"
-#define TAG_Y            "y"
-#define TAG_Z            "z"
-#define TAG_WIDTH        "width"
-#define TAG_HEIGHT       "height"
-#define TAG_ID           "id"
 #define TAG_UID          "uid"
 #define TAG_SUID         "suid"
 #define TAG_NAME         "name"
@@ -69,13 +63,6 @@ public:
     static QStringList masterPaths(const QString& topPath);
     static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
 
-    static qreal x(const QString& rootPath);
-    static qreal y(const QString& rootPath);
-    static qreal z(const QString& rootPath);
-    static qreal width(const QString& rootPath);
-    static qreal height(const QString& rootPath);
-
-    static QString id(const QString& rootPath);
     static QString uid(const QString& rootPath);
     static QString suid(const QString& rootPath);
     static QString name(const QString& rootPath);
@@ -93,13 +80,6 @@ public:
 
     static QJsonValue property(const QString& rootPath, const QString& property);
     static QJsonValue projectProperty(const QString& projectDir, const QString& property);
-
-    static void setX(const QString& rootPath, qreal x);
-    static void setY(const QString& rootPath, qreal y);
-    static void setZ(const QString& rootPath, qreal z);
-    static void setWidth(const QString& rootPath, qreal width);
-    static void setHeight(const QString& rootPath, qreal height);
-    static void setId(const QString& rootPath, const QString& id);
 
     static void setProperty(const QString& rootPath,  const QString& property, const QJsonValue& value);
     static void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value);
