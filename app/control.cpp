@@ -28,12 +28,58 @@
 extern const char* TOOL_KEY;
 
 namespace {
-qreal getZ(const PreviewResult& result);
-QImage initialPreview(const QSizeF& size);
-QRectF getRect(const PreviewResult& result);
-QList<Resizer*> initializeResizers(Control* control);
-void setInitialProperties(Control* control);
-void drawCenter(QImage& dest, const QImage& source, const QSizeF& size);
+
+void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
+{
+    QBrush brush;
+    brush.setColor("#b0b4b7");
+    brush.setStyle(Qt::Dense6Pattern);
+
+    QPainter painter(&dest);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setBrush(brush);
+    painter.setPen("#808487");
+
+    QRectF rect;
+    rect.setTopLeft({0.0, 0.0});
+    rect.setWidth(size.width());
+    rect.setHeight(size.height());
+
+    QRectF rect_2;
+    rect_2.setWidth(source.width() / DPR);
+    rect_2.setHeight(source.height() / DPR);
+    rect_2.moveCenter(rect.center());
+
+    painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
+    painter.drawImage(rect_2, source);
+}
+
+QImage initialPreview(const QSizeF& size)
+{
+    auto min = qMin(24.0, qMin(size.width(), size.height()));
+
+    QImage preview(qCeil(size.width() * DPR), qCeil(size.height() * DPR),
+                   QImage::Format_ARGB32_Premultiplied);
+
+    preview.setDevicePixelRatio(DPR);
+    preview.fill(Qt::transparent);
+
+    QImage wait(":/images/wait.png");
+    wait.setDevicePixelRatio(DPR);
+
+    drawCenter(preview, wait.scaled(min * DPR, min * DPR,
+                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation), size);
+
+    return preview;
+}
+
+QList<Resizer*> initializeResizers(Control* control)
+{
+    QList<Resizer*> resizers;
+    for (int i = 0; i < 8; ++i)
+        resizers.append(new Resizer(control, Resizer::Placement(i)));
+    return resizers;
+}
 }
 
 QList<Control*> Control::m_controls;
@@ -53,13 +99,13 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
 
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
-    setInitialProperties(this);
     setFlag(ItemIsMovable);
     setFlag(ItemIsFocusable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    m_image = initialPreview(size());
+    ControlPropertyManager::setSize(this, {50.0, 50.0}, false, false);
+    m_image = initialPreview({50.0, 50.0});
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
@@ -463,161 +509,58 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 // FIXME
 void Control::updatePreview(const PreviewResult& result)
 {
-    if (result.uid != uid())
-        return;
+//    if (result.uid != uid())
+//        return;
 
-    m_image = result.image;
-    m_errors = result.errors;
-    m_gui = result.gui;
-    m_window = result.window;
-    m_properties = result.properties;
+//    setId(result.id);
+//    m_image = result.image;
+//    m_errors = result.errors;
+//    m_gui = result.gui;
+//    m_window = result.window;
+//    m_properties = result.properties;
 
-    if (!result.errors.isEmpty()) {
-        //        setRefreshingDisabled(true);
-        resize(QSizeF(50, 50));
-        //        setRefreshingDisabled(false);
-        setPos(pos());
-        //    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
-        setZValue(0);
-    } else {
-        if (result.gui) {
-            if (!form())
-                //                m_clip = result.property("clip").toBool();
+//    if (!result.errors.isEmpty()) {
+//        //        setRefreshingDisabled(true);
+//        resize(QSizeF(50, 50));
+//        //        setRefreshingDisabled(false);
+//        setPos(pos());
+//        //    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
+//        setZValue(0);
+//    } else {
+//        if (result.gui) {
+//            if (!form())
+//                //                m_clip = result.property("clip").toBool();
 
-                if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
-                    const auto& rect = getRect(result);
-                    qreal z = getZ(result);
-                    resize(rect.size());
-                    //                    setRefreshingDisabled(true);
-                    if (!form())
-                        setPos(rect.topLeft());
-                    blockSignals(true);
-                    setZValue(z);
-                    blockSignals(false);
-                    //                    setRefreshingDisabled(false);
-                }
-        } else {
-            //            setRefreshingDisabled(true);
-            resize(QSizeF(50, 50));
-            //            setRefreshingDisabled(false);
-            setPos(pos());
-            //     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
-            setZValue(0);
-        }
-    }
+//                if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
+//                    const auto& rect = getRect(result);
+//                    qreal z = getZ(result);
+//                    resize(rect.size());
+//                    //                    setRefreshingDisabled(true);
+//                    if (!form())
+//                        setPos(rect.topLeft());
+//                    blockSignals(true);
+//                    setZValue(z);
+//                    blockSignals(false);
+//                    //                    setRefreshingDisabled(false);
+//                }
+//        } else {
+//            //            setRefreshingDisabled(true);
+//            resize(QSizeF(50, 50));
+//            //            setRefreshingDisabled(false);
+//            setPos(pos());
+//            //     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
+//            setZValue(0);
+//        }
+//    }
 
-//    for (auto resizer : m_resizers)
-//        resizer->setDisabled(hasErrors() || !gui());
+////    for (auto resizer : m_resizers)
+////        resizer->setDisabled(hasErrors() || !gui());
 
-    update();
+//    update();
 
-    if (!result.errors.isEmpty())
-        WindowManager::mainWindow()->centralWidget()->outputPane()->issuesBox()->handleErrors(this);
-    if (isSelected())
-        WindowManager::mainWindow()->propertiesPane()->refreshList();
-    WindowManager::mainWindow()->inspectorPane()->handleControlPreviewChange(this);
-}
-
-namespace {
-qreal getZ(const PreviewResult& result)
-{
-    const QList<PropertyNode> nodes = result.properties;
-
-    for (const auto& node : nodes) {
-        for (const auto& property : node.properties.keys()) {
-            if (property == "z")
-                return node.properties.value(property).toReal();
-        }
-    }
-
-    return 0.0;
-}
-
-QImage initialPreview(const QSizeF& size)
-{
-    auto min = qMin(24.0, qMin(size.width(), size.height()));
-
-    QImage preview(qCeil(size.width() * DPR), qCeil(size.height() * DPR),
-                   QImage::Format_ARGB32_Premultiplied);
-
-    preview.setDevicePixelRatio(DPR);
-    preview.fill(Qt::transparent);
-
-    QImage wait(":/images/wait.png");
-    wait.setDevicePixelRatio(DPR);
-
-    drawCenter(preview, wait.scaled(min * DPR, min * DPR,
-                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation), size);
-
-    return preview;
-}
-
-QRectF getRect(const PreviewResult& result)
-{
-    QRectF rect;
-    const QList<PropertyNode> nodes = result.properties;
-
-    for (const auto& node : nodes) {
-        for (const auto& property : node.properties.keys()) {
-            if (property == "x")
-                rect.moveLeft(node.properties.value(property).toReal());
-            else if (property == "y")
-                rect.moveTop(node.properties.value(property).toReal());
-            else if (property == "width")
-                rect.setWidth(node.properties.value(property).toReal());
-            else if (property == "height")
-                rect.setHeight(node.properties.value(property).toReal());
-        }
-    }
-
-    return rect;
-}
-
-QList<Resizer*> initializeResizers(Control* control)
-{
-    QList<Resizer*> resizers;
-    for (int i = 0; i < 8; ++i)
-        resizers.append(new Resizer(control, Resizer::Placement(i)));
-    return resizers;
-}
-
-void setInitialProperties(Control* control)
-{
-    qreal x = SaveUtils::x(control->dir());
-    qreal y = SaveUtils::y(control->dir());
-    qreal z = SaveUtils::z(control->dir());
-    qreal width = SaveUtils::width(control->dir());
-    qreal height = SaveUtils::height(control->dir());
-    const QString& id = SaveUtils::id(control->dir());
-
-    ControlPropertyManager::setZ(control, z, false, false);
-    ControlPropertyManager::setId(control, id, false, false);
-    ControlPropertyManager::setPos(control, {x, y}, false, false);
-    ControlPropertyManager::setSize(control, {width, height}, false, false);
-}
-
-void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
-{
-    QBrush brush;
-    brush.setColor("#b0b4b7");
-    brush.setStyle(Qt::Dense6Pattern);
-
-    QPainter painter(&dest);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setBrush(brush);
-    painter.setPen("#808487");
-
-    QRectF rect;
-    rect.setTopLeft({0.0, 0.0});
-    rect.setWidth(size.width());
-    rect.setHeight(size.height());
-
-    QRectF rect_2;
-    rect_2.setWidth(source.width() / DPR);
-    rect_2.setHeight(source.height() / DPR);
-    rect_2.moveCenter(rect.center());
-
-    painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
-    painter.drawImage(rect_2, source);
-}
+//    if (!result.errors.isEmpty())
+//        WindowManager::mainWindow()->centralWidget()->outputPane()->issuesBox()->handleErrors(this);
+//    if (isSelected())
+//        WindowManager::mainWindow()->propertiesPane()->refreshList();
+//    WindowManager::mainWindow()->inspectorPane()->handleControlPreviewChange(this);
 }

@@ -141,7 +141,7 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
         else
             item->setText(1, QObject::tr("No"));
 
-        QIcon icon(child->dir() + separator() + DIR_THIS + separator() + "icon.png");
+        QIcon icon(SaveUtils::toIcon(child->dir()));
         if (icon.isNull())
             icon.addFile(":/images/item.png");
 
@@ -465,7 +465,7 @@ void InspectorPane::handleControlPreviewChange(Control* control)
                                            QIcon(":/images/mform.png") :
                                            QIcon(":/images/form.png"));
                 } else {
-                    QIcon icon(control->dir() + separator() + DIR_THIS + separator() + "icon.png");
+                    QIcon icon(SaveUtils::toIcon(control->dir()));
                     if (icon.isNull())
                         icon.addFile(":/images/item.png");
 

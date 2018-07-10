@@ -33,7 +33,6 @@ void ProjectExposingManager::exposeProject()
 
         for (const QString& childPath : SaveUtils::childrenPaths(formPath)) {
             Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
-
             Q_ASSERT(parentControl);
 
             auto control = new Control(SaveUtils::toUrl(childPath));

@@ -24,6 +24,7 @@ struct PropertyNode {
 struct PreviewResult {
     bool gui;
     bool window;
+    QString id;
     QString uid;
     QImage image;
     QList<QQmlError> errors;
@@ -79,6 +80,7 @@ inline QDataStream& operator<<(QDataStream& out, const PropertyNode& node)
 inline QDataStream& operator>>(QDataStream& in, PreviewResult& result)
 {
     in >> result.gui;
+    in >> result.id;
     in >> result.uid;
     in >> result.image;
     in >> result.window;
@@ -90,6 +92,7 @@ inline QDataStream& operator>>(QDataStream& in, PreviewResult& result)
 inline QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
 {
     out << result.gui;
+    out << result.id;
     out << result.uid;
     out << result.image;
     out << result.window;

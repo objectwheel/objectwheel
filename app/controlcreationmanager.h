@@ -23,8 +23,8 @@ public:
                                   Control* parentControl, QString destinationPath,
                                   QString destinationSuid);
 signals:
-    void formCreated(Form* form);
-    void controlCreated(Control* control);
+    void formCreated(Form* form); // FIXME
+    void controlCreated(Control* control); // FIXME
 
 private:
     explicit ControlCreationManager(QObject* parent = nullptr);

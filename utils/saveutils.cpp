@@ -118,6 +118,11 @@ QString SaveUtils::toUrl(const QString& rootPath)
     return rootPath + separator() + DIR_THIS + separator() + FILE_MAIN;
 }
 
+QString SaveUtils::toIcon(const QString& rootPath)
+{
+    return rootPath + separator() + DIR_THIS + separator() + FILE_ICON;
+}
+
 QString SaveUtils::toParentDir(const QString& topPath)
 {
     return dname(dname(topPath));

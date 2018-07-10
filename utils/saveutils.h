@@ -58,6 +58,7 @@ public:
     static int childrenCount(const QString& rootPath, QString suid = QString());
 
     static QString toUrl(const QString& rootPath);
+    static QString toIcon(const QString& rootPath);
     static QString toParentDir(const QString& topPath);
     static QString toChildrenDir(const QString& rootPath);
     static QString toProjectFile(const QString& projectDir);

@@ -11,8 +11,6 @@
 DesignerScene* ControlCreationManager::s_designerScene = nullptr;
 ControlCreationManager* ControlCreationManager::s_instance = nullptr;
 
-// FIXME: createControl and createForm should use DesignerScene to deal with
-// GUI side control adding operations
 ControlCreationManager::ControlCreationManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
@@ -35,8 +33,6 @@ void ControlCreationManager::init(DesignerScene* designerScene)
 
 Form* ControlCreationManager::createForm(const QString& rootPath)
 {
-// BUG   ControlPreviewingManager::setDisabled(true);
-
     auto form = new Form(SaveUtils::toUrl(rootPath));
 
     if (SaveUtils::isMain(rootPath))
@@ -44,63 +40,41 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
 
     SaveManager::addForm(form);
     s_designerScene->addForm(form);
+
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
     // parent concept for forms in Designer; fors are directly put into DesignerScene
 
-//    ControlPreviewingManager::setDisabled(false);
-//    form->refresh();
-//    ControlPreviewingManager::scheduleFormCreation(control->dir(), parentControl->uid());
+    ControlPreviewingManager::scheduleFormCreation(form->dir());
 
     // NOTE: We don't have to worry about possible child controls since createForm is only
     // called from FormsPane
 
-    emit instance()->formCreated(form);
-
     return form;
 }
 
-// FIXME:
 Control* ControlCreationManager::createControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
                                                Control* parentControl, QString destinationPath,
                                                QString destinationSuid)
 {
-//    BUG ControlPreviewingManager::setDisabled(true);
     auto control = new Control(SaveUtils::toUrl(rootPath));
-
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
     ControlPropertyManager::setParent(control, parentControl, false, false);
-    ControlPropertyManager::setPos(control, pos, false, false);
-
-    SaveUtils::setX(control->dir(), pos.x());
-    SaveUtils::setY(control->dir(), pos.y());
-
-//    ControlPreviewingManager::setDisabled(false);
+    ControlPropertyManager::setPos(control, pos, true, false);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), parentControl->uid());
 
-    QMap<QString, Control*> pmap;
-    pmap[control->dir()] = control;
-    for (const auto& child : SaveUtils::childrenPaths(control->dir(), sourceSuid)) {
-        auto pcontrol = pmap.value(SaveUtils::toParentDir(child));
+    QMap<QString, Control*> controlTree;
+    controlTree.insert(control->dir(), control);
 
-//        ControlPreviewingManager::setDisabled(true);
-        auto ccontrol = new Control(SaveUtils::toUrl(child));
-        ControlPropertyManager::setParent(ccontrol, pcontrol, false, false);
-//        control->setPos(pos); FIXME
-//        ControlPropertyManager::setPos(control, pos, false, false); FIXME
+    for (const QString& childPath : SaveUtils::childrenPaths(control->dir(), sourceSuid)) {
+        Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
+        Q_ASSERT(parentControl);
 
+        auto childControl = new Control(SaveUtils::toUrl(childPath));
+        ControlPropertyManager::setParent(childControl, parentControl, false, false);
+        ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
 
-//        SaveUtils::setX(control->dir(), control->x()); FIXME
-//        SaveUtils::setY(control->dir(), control->y()); FIXME
-
-//        ControlPreviewingManager::setDisabled(false);
-        ControlPreviewingManager::scheduleControlCreation(ccontrol->dir(), pcontrol->uid());
-
-        emit instance()->controlCreated(control);
-
-        pmap[child] = ccontrol;
+        controlTree.insert(childPath, childControl);
     }
-
-    emit instance()->controlCreated(control);
 
     return control;
 }
