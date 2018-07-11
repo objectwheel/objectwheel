@@ -7,7 +7,6 @@
         <file>tools/Dial-2.zip</file>
         <file>tools/Dial.zip</file>
         <file>tools/Gauge.zip</file>
-        <file>tools/Image.zip</file>
         <file>tools/Rectangle.zip</file>
         <file>tools/StatusIndicator.zip</file>
         <file>tools/Timer.zip</file>
@@ -31,5 +30,6 @@
         <file>tools/Switch.zip</file>
         <file>tools/TextArea.zip</file>
         <file>tools/TextField.zip</file>
+        <file>tools/Image.zip</file>
     </qresource>
 </RCC>

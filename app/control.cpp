@@ -54,6 +54,27 @@ void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     painter.drawImage(rect_2, source);
 }
 
+QRectF getRect(const PreviewResult& result)
+{
+    QRectF rect;
+    const QList<PropertyNode> nodes = result.properties;
+
+    for (const auto& node : nodes) {
+        for (const auto& property : node.properties.keys()) {
+            if (property == "x")
+                rect.moveLeft(node.properties.value(property).toReal());
+            else if (property == "y")
+                rect.moveTop(node.properties.value(property).toReal());
+            else if (property == "width")
+                rect.setWidth(node.properties.value(property).toReal());
+            else if (property == "height")
+                rect.setHeight(node.properties.value(property).toReal());
+        }
+    }
+
+    return rect;
+}
+
 QImage initialPreview(const QSizeF& size)
 {
     auto min = qMin(24.0, qMin(size.width(), size.height()));
@@ -93,6 +114,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_dragging(false)
   , m_url(url)
   , m_uid(SaveUtils::uid(dir()))
+  , m_image(initialPreview({50.0, 50.0}))
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -104,8 +126,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
+    ControlPropertyManager::setId(this, ParserUtils::id(url), false, false);
     ControlPropertyManager::setSize(this, {50.0, 50.0}, false, false);
-    m_image = initialPreview({50.0, 50.0});
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
@@ -509,15 +531,17 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 // FIXME
 void Control::updatePreview(const PreviewResult& result)
 {
-//    if (result.uid != uid())
-//        return;
+    if (result.uid != uid())
+        return;
 
-//    setId(result.id);
-//    m_image = result.image;
-//    m_errors = result.errors;
-//    m_gui = result.gui;
-//    m_window = result.window;
-//    m_properties = result.properties;
+    ControlPropertyManager::setId(this, result.id, false, false);
+    ControlPropertyManager::setGeometry(this, getRect(result), false, false);
+
+    m_image = result.image;
+    m_errors = result.errors;
+    m_gui = result.gui;
+    m_window = result.window;
+    m_properties = result.properties;
 
 //    if (!result.errors.isEmpty()) {
 //        //        setRefreshingDisabled(true);
@@ -556,7 +580,7 @@ void Control::updatePreview(const PreviewResult& result)
 ////    for (auto resizer : m_resizers)
 ////        resizer->setDisabled(hasErrors() || !gui());
 
-//    update();
+    update();
 
 //    if (!result.errors.isEmpty())
 //        WindowManager::mainWindow()->centralWidget()->outputPane()->issuesBox()->handleErrors(this);
