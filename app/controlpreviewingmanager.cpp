@@ -40,7 +40,7 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
             this, &ControlPreviewingManager::onConnectionTimeout);
 
     connect(s_commandDispatcher, &CommandDispatcher::initializationProgressChanged,
-            this, &ControlPreviewingManager::onInitializationProgressChange);
+            this, &ControlPreviewingManager::initializationProgressChanged);
     connect(s_commandDispatcher, &CommandDispatcher::previewDone,
             this, &ControlPreviewingManager::onPreviewResultsReady);
 
@@ -138,14 +138,6 @@ void ControlPreviewingManager::onPreviewResultsReady(const QList<PreviewResult>&
     for (const PreviewResult& result : results)
         emit previewDone(result);
 
-    if (g_initScheduled) {
+    if (g_initScheduled)
         g_initScheduled = false;
-        emit initializationProgressChanged(100);
-    }
-}
-
-void ControlPreviewingManager::onInitializationProgressChange(int progress)
-{
-    static const int maxInitProgress = 85;
-    emit initializationProgressChanged(maxInitProgress * progress / 100.0);
 }

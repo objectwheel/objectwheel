@@ -535,7 +535,11 @@ void Control::updatePreview(const PreviewResult& result)
         return;
 
     ControlPropertyManager::setId(this, result.id, false, false);
-    ControlPropertyManager::setGeometry(this, getRect(result), false, false);
+
+    if (form())
+        ControlPropertyManager::setSize(this, getRect(result).size(), false, false);
+    else
+        ControlPropertyManager::setGeometry(this, getRect(result), false, false);
 
     m_image = result.image;
     m_errors = result.errors;
@@ -577,8 +581,8 @@ void Control::updatePreview(const PreviewResult& result)
 //        }
 //    }
 
-////    for (auto resizer : m_resizers)
-////        resizer->setDisabled(hasErrors() || !gui());
+    for (auto resizer : m_resizers)
+        resizer->setDisabled(!gui());
 
     update();
 
