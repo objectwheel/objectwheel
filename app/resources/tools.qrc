@@ -2,16 +2,12 @@
     <qresource prefix="/">
         <file>tools/AnimatedImage.zip</file>
         <file>tools/CircularGauge.zip</file>
-        <file>tools/DelayButton-2.zip</file>
         <file>tools/DelayButton.zip</file>
-        <file>tools/Dial-2.zip</file>
-        <file>tools/Dial.zip</file>
         <file>tools/Gauge.zip</file>
         <file>tools/Rectangle.zip</file>
         <file>tools/StatusIndicator.zip</file>
         <file>tools/Timer.zip</file>
         <file>tools/ToggleButton.zip</file>
-        <file>tools/Tumbler-2.zip</file>
         <file>tools/Tumbler.zip</file>
         <file>tools/BusyIndicator.zip</file>
         <file>tools/Button.zip</file>
@@ -31,5 +27,9 @@
         <file>tools/TextArea.zip</file>
         <file>tools/TextField.zip</file>
         <file>tools/Image.zip</file>
+        <file>tools/DelayButton2.zip</file>
+        <file>tools/Dial2.zip</file>
+        <file>tools/Tumbler2.zip</file>
+        <file>tools/Dial.zip</file>
     </qresource>
 </RCC>
