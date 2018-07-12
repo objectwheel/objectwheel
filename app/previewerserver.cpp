@@ -10,7 +10,7 @@ PreviewerServer::PreviewerServer(QObject* parent)
     , m_server(new QLocalServer(this))
     , m_checkAliveTimer(new QTimer(this))
 {
-    m_checkAliveTimer->setInterval(3000);
+    m_checkAliveTimer->setInterval(4000);
 
     connect(m_checkAliveTimer, &QTimer::timeout, this, &PreviewerServer::connectionTimeout);
 
@@ -75,9 +75,9 @@ void PreviewerServer::onNewConnection()
 
         m_checkAliveTimer->start();
 
-        connect(m_socket, &QLocalSocket::disconnected, m_socket, &QLocalSocket::deleteLater);
         connect(m_socket, &QLocalSocket::disconnected, m_checkAliveTimer, &QTimer::stop);
         connect(m_socket, &QLocalSocket::disconnected, this, &PreviewerServer::disconnected);
+        connect(m_socket, &QLocalSocket::disconnected, m_socket, &QLocalSocket::deleteLater);
         connect(m_socket, &QLocalSocket::readyRead, this, &PreviewerServer::onReadReady);
         connect(m_socket, qOverload<QLocalSocket::LocalSocketError>(&QLocalSocket::error),
                 this, &PreviewerServer::onError);

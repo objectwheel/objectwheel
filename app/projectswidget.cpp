@@ -210,14 +210,6 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         .arg(8)
     );
 
-    for (int i = 0; i < 10; i++) {
-        auto item = new QListWidgetItem("Test");
-        item->setIcon(QIcon(PATH_FILEICON));
-        item->setData(Name, "Project - 1");
-        item->setData(LastEdit, "Last edit: 2018.06.16 14:43:11");
-        m_listWidget->addItem(item);
-    }
-
     m_progressBar->setFixedWidth(WIDTH_PROGRESS);
 
     m_buttons_2->setFixedHeight(20);
@@ -338,6 +330,7 @@ void ProjectsWidget::startProject()
     Delayer::delay([=] () -> bool {
         return m_progressBar->value() < m_progressBar->maximum();
     });
+    Delayer::delay(200);
 
     unlock();
     emit done();
@@ -499,6 +492,8 @@ void ProjectsWidget::onSettingsButtonClick()
 
 void ProjectsWidget::onProgressChange(int progress)
 {
+    if (m_progressBar->indeterminate())
+        m_progressBar->setIndeterminate(false);
     m_progressBar->setValue(progress);
 }
 
@@ -518,7 +513,8 @@ void ProjectsWidget::lock()
 
     m_progressBar->show();
     m_progressBar->raise();
-    m_progressBar->setValue(10);
+    m_progressBar->setValue(0);
+    m_progressBar->setIndeterminate(true);
 }
 
 void ProjectsWidget::unlock()
