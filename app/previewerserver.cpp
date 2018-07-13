@@ -65,7 +65,7 @@ void PreviewerServer::send(QLocalSocket* socket, const PreviewerCommands& comman
         out << command;
         out << data;
         out.device()->seek(0);
-        out << quint32(block.size());
+        out << quint32(block.size() - sizeof(quint32));
     }
     socket->write(block);
     socket->flush();
@@ -97,51 +97,33 @@ void PreviewerServer::onNewConnection()
 
 void PreviewerServer::onReadReady()
 {
-    static qint64 pos = 0;
-    static QByteArray buffer;
+    QDataStream incoming(m_socket);
+    incoming.setVersion(QDataStream::Qt_5_11);
 
-    if (m_socket->bytesAvailable() > 0)
-        buffer.append(m_socket->readAll());
+    if (m_blockSize == 0) {
+        if (m_socket->bytesAvailable() < (int)sizeof(quint32))
+            return;
+
+        incoming >> m_blockSize;
+    }
+
+    if (m_socket->bytesAvailable() < m_blockSize || incoming.atEnd())
+        return;
 
     QByteArray data;
     PreviewerCommands command;
-    {
-        QDataStream incoming(buffer);
-        incoming.setVersion(QDataStream::Qt_5_11);
-        incoming.device()->seek(pos);
 
-        if (m_blockSize == 0) {
-            if (buffer.size() < (int)sizeof(quint32))
-                return;
+    incoming >> command;
+    incoming >> data;
 
-            incoming >> m_blockSize;
-            pos = sizeof(quint32);
-        }
-
-        if (buffer.size() < (int)m_blockSize)
-            return;
-
-        if (incoming.atEnd()) {
-            m_blockSize = 0;
-            return;
-        }
-
-        incoming >> command;
-        incoming >> data;
-    }
-
-    buffer.remove(0, m_blockSize);
     m_blockSize = 0;
-    pos = 0;
-
-    qDebug() << "#####" << m_socket->bytesAvailable() << command << data.size();
 
     if (command == PreviewerCommands::ConnectionAlive)
         m_checkAliveTimer->start();
     else
         emit dataArrived(command, data);
 
-    if (buffer.size() >= (int)sizeof(quint32))
+    if (m_socket->bytesAvailable() >= (int)sizeof(quint32))
         onReadReady();
 }
 
