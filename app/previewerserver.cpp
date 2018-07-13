@@ -97,24 +97,20 @@ void PreviewerServer::onNewConnection()
 
 void PreviewerServer::onReadReady()
 {
-    static QByteArray buffer;
-    buffer.append(m_socket->readAll());
-
     QByteArray data;
     PreviewerCommands command;
-
     {
-        QDataStream incoming(buffer);
+        QDataStream incoming(m_socket);
         incoming.setVersion(QDataStream::Qt_5_11);
 
         if (m_blockSize == 0) {
-            if (buffer.size() < (int)sizeof(quint32))
+            if (m_socket->bytesAvailable() < int(sizeof(quint32)))
                 return;
 
             incoming >> m_blockSize;
         }
 
-        if (buffer.size() < (int) m_blockSize)
+        if (m_socket->bytesAvailable() < m_blockSize - quint32(sizeof(quint32)))
             return;
 
         if (incoming.atEnd()) {
@@ -122,14 +118,13 @@ void PreviewerServer::onReadReady()
             return;
         }
 
+        m_blockSize = 0;
+
         incoming >> command;
         incoming >> data;
     }
 
-    buffer.remove(0, m_blockSize);
-    m_blockSize = 0;
-
-    qDebug() << buffer.size() << command << data;
+    qDebug() << "#####" << m_socket->bytesAvailable() << command << data.size();
 
     if (command == PreviewerCommands::ConnectionAlive)
         m_checkAliveTimer->start();
