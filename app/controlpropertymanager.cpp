@@ -13,7 +13,7 @@
 
 ControlPropertyManager* ControlPropertyManager::s_instance = nullptr;
 QTimer* ControlPropertyManager::s_dirtyPropertyProcessingTimer = nullptr;
-QHash<QString, std::function<void()>> ControlPropertyManager::s_dirtyPropertyHandlingFunctions;
+QList<ControlPropertyManager::DirtyProperty> ControlPropertyManager::s_dirtyProperties;
 
 ControlPropertyManager::ControlPropertyManager(QObject* parent) : QObject(parent)
 {
@@ -37,10 +37,10 @@ ControlPropertyManager* ControlPropertyManager::instance()
 
 void ControlPropertyManager::handleDirtyProperties()
 {
-    for (const std::function<void()>& setterFunction : s_dirtyPropertyHandlingFunctions)
-        setterFunction();
+    for (const DirtyProperty& dirtyProperty : s_dirtyProperties)
+        dirtyProperty.function();
 
-    s_dirtyPropertyHandlingFunctions.clear();
+    s_dirtyProperties.clear();
     s_dirtyPropertyProcessingTimer->stop();
 }
 
@@ -53,10 +53,12 @@ void ControlPropertyManager::setX(Control* control, qreal x, bool save, bool upd
         control->setX(x);
 
     if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setX",
-                                                std::bind(&ControlPropertyManager::setX,
-                                                          QPointer<Control>(control), x, save,
-                                                          updatePreviewer, false));
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setX";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setX, QPointer<Control>(control),
+                                           x, save, updatePreviewer, false);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
@@ -80,10 +82,12 @@ void ControlPropertyManager::setY(Control* control, qreal y, bool save, bool upd
         control->setY(y);
 
     if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setY",
-                                                std::bind(&ControlPropertyManager::setY,
-                                                          QPointer<Control>(control), y, save,
-                                                          updatePreviewer, false));
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setY";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setY, QPointer<Control>(control),
+                                           y, save, updatePreviewer, false);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
@@ -108,10 +112,12 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, bool s
         control->setPos(pos);
 
     if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setPos",
-                                                std::bind(&ControlPropertyManager::setPos,
-                                                          QPointer<Control>(control), pos, save,
-                                                          updatePreviewer, false));
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setPos";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setPos, QPointer<Control>(control),
+                                           pos, save, updatePreviewer, false);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
@@ -143,10 +149,12 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, bool 
         control->resize(size);
 
     if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setSize",
-                                                std::bind(&ControlPropertyManager::setSize,
-                                                          QPointer<Control>(control), size, save,
-                                                          updatePreviewer, false));
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setSize";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setSize, QPointer<Control>(control),
+                                          size, save, updatePreviewer, false);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
@@ -178,10 +186,12 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
         control->setGeometry(geometry);
 
     if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setGeometry",
-                                                std::bind(&ControlPropertyManager::setGeometry,
-                                                          QPointer<Control>(control), geometry, save,
-                                                          updatePreviewer, false));
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setGeometry";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setGeometry, QPointer<Control>(control),
+                                           geometry, save, updatePreviewer, false);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
@@ -217,11 +227,12 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         control->setParentItem(parentControl);
 
     if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setParent",
-                                                std::bind(&ControlPropertyManager::setParent,
-                                                          QPointer<Control>(control),
-                                                          QPointer<Control>(parentControl), save,
-                                                          updatePreviewer, false));
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setParent";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setParent, QPointer<Control>(control),
+                                           QPointer<Control>(parentControl), save, updatePreviewer, false);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
@@ -229,8 +240,10 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         if (save)
             SaveManager::moveControl(control, parentControl);
 
-        if (updatePreviewer) // FIXME: newUrl parameter?
-            ControlPreviewingManager::scheduleParentUpdate(control->uid(), parentControl->uid(), "");
+        if (updatePreviewer) {
+            ControlPreviewingManager::scheduleParentUpdate(control->dir(),
+                                                           control->uid(), parentControl->uid());
+        }
 
         emit instance()->parentChanged(control);
     }
@@ -245,10 +258,12 @@ void ControlPropertyManager::setZ(Control* control, qreal z, bool save, bool upd
         control->setZValue(z);
 
     if (compress) {
-        s_dirtyPropertyHandlingFunctions.insert(control->uid() + "setZ",
-                                                std::bind(&ControlPropertyManager::setZ,
-                                                          QPointer<Control>(control), z, save,
-                                                          updatePreviewer, false));
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setZ";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setZ, QPointer<Control>(control),
+                                           z, save, updatePreviewer, false);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();

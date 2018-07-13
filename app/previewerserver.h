@@ -40,7 +40,7 @@ private:
     void send(QLocalSocket* socket, const PreviewerCommands& command, const QByteArray& data = QByteArray());
 
 private:
-    int m_blockSize;
+    quint32 m_blockSize;
     QLocalServer* m_server;
     QTimer* m_checkAliveTimer;
     QPointer<QLocalSocket> m_socket;

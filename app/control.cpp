@@ -385,6 +385,8 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         event->ignore();
     else
         event->accept();
+
+    ControlPropertyManager::setPos(this, pos(), true, true, true);
 }
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)

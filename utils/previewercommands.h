@@ -8,8 +8,9 @@ enum PreviewerCommands {
     Init,
     InitializationProgress,
     PreviewDone,
+    Refresh,
     Remove,
-    Reparent,
+    ParentUpdate,
     Terminate,
     PropertyUpdate,
     ControlCreation
@@ -17,9 +18,9 @@ enum PreviewerCommands {
 Q_DECLARE_METATYPE(PreviewerCommands)
 
 inline QDataStream& operator>>(QDataStream& in, PreviewerCommands& e)
-{ return in >> (int&) e; }
+{ return in >> (quint32&) e; }
 
 inline QDataStream& operator<<(QDataStream& out, const PreviewerCommands& e)
-{ return out << int(e); }
+{ return out << quint32(e); }
 
 #endif // PREVIEWERCOMMANDS_H

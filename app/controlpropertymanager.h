@@ -2,7 +2,7 @@
 #define CONTROLPROPERTYMANAGER_H
 
 #include <QObject>
-#include <QHash>
+#include <QList>
 
 class Control;
 class QTimer;
@@ -13,6 +13,14 @@ class ControlPropertyManager final : public QObject
     Q_DISABLE_COPY(ControlPropertyManager)
 
     friend class ApplicationCore; // For constructor and destructor
+
+    struct DirtyProperty {
+        QString key;
+        std::function<void()> function;
+
+        bool operator==(const DirtyProperty& b) const
+        {return key == b.key; }
+    };
 
 public:
     static ControlPropertyManager* instance();
@@ -48,7 +56,7 @@ private:
 private:
     static ControlPropertyManager* s_instance;
     static QTimer* s_dirtyPropertyProcessingTimer;
-    static QHash<QString, std::function<void()>> s_dirtyPropertyHandlingFunctions;
+    static QList<DirtyProperty> s_dirtyProperties;
 };
 
 #endif // CONTROLPROPERTYMANAGER_H

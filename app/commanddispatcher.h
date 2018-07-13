@@ -20,6 +20,8 @@ public slots:
     void scheduleTerminate();
     void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void scheduleControlCreation(const QString& dir, const QString& parentUid);
+    void scheduleRefresh(const QString& formUid);
+    void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
 
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 

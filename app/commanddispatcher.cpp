@@ -16,6 +16,7 @@ template <typename... Args>
 QByteArray pushValues(const Args&... args) {
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_5_11);
     pushValuesHelper(stream, args...);
     return data;
 }
@@ -31,6 +32,7 @@ void pullValuesHelper(QDataStream& stream, Arg& arg, Args&... args) {
 template <typename... Args>
 void pullValues(const QByteArray& data, Args&... args) {
     QDataStream stream(data);
+    stream.setVersion(QDataStream::Qt_5_11);
     pullValuesHelper(stream, args...);
 }
 
@@ -66,6 +68,16 @@ void CommandDispatcher::schedulePropertyUpdate(const QString& uid, const QString
 void CommandDispatcher::scheduleControlCreation(const QString& dir, const QString& parentUid)
 {
     sendAsync(m_server, PreviewerCommands::ControlCreation, pushValues(dir, parentUid));
+}
+
+void CommandDispatcher::scheduleRefresh(const QString& formUid)
+{
+    sendAsync(m_server, PreviewerCommands::Refresh, pushValues(formUid));
+}
+
+void CommandDispatcher::scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid)
+{
+    sendAsync(m_server, PreviewerCommands::ParentUpdate, pushValues(newDir, uid, parentUid));
 }
 
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
