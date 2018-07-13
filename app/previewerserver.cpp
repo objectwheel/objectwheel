@@ -99,7 +99,9 @@ void PreviewerServer::onReadReady()
 {
     static qint64 pos = 0;
     static QByteArray buffer;
-    buffer.append(m_socket->readAll());
+
+    if (m_socket->bytesAvailable() > 0)
+        buffer.append(m_socket->readAll());
 
     QByteArray data;
     PreviewerCommands command;
@@ -138,6 +140,9 @@ void PreviewerServer::onReadReady()
         m_checkAliveTimer->start();
     else
         emit dataArrived(command, data);
+
+    if (buffer.size() >= (int)sizeof(quint32))
+        onReadReady();
 }
 
 void PreviewerServer::onError(QLocalSocket::LocalSocketError socketError)
