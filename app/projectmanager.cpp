@@ -344,8 +344,8 @@ bool ProjectManager::start(const QString& hash)
     s_currentHash = hash;
 
     ToolManager::exposeTools();
-    ControlPreviewingManager::scheduleInit();
     ProjectExposingManager::exposeProject();
+    ControlPreviewingManager::scheduleInit();
 
     emit instance()->started();
 

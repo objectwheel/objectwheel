@@ -26,6 +26,9 @@ void ProjectExposingManager::exposeProject()
         if (SaveUtils::isMain(formPath))
             form->setMain(true);
 
+        if (form->id().isEmpty())
+            ControlPropertyManager::setId(form, "form", true, false);
+
         s_designerScene->addForm(form);
 
         QMap<QString, Control*> controlTree;
@@ -36,6 +39,10 @@ void ProjectExposingManager::exposeProject()
             Q_ASSERT(parentControl);
 
             auto control = new Control(SaveUtils::toUrl(childPath));
+
+            if (control->id().isEmpty())
+                ControlPropertyManager::setId(control, "control", true, false);
+
             ControlPropertyManager::setParent(control, parentControl, false, false);
             controlTree.insert(childPath, control);
         }

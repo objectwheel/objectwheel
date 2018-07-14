@@ -1290,7 +1290,7 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 // FIXME   SaveManager::setProperty(sc, property, parserValue);
 
     if (property == "id") {
-        ControlPreviewingManager::scheduleIdChange(sc->uid(), value.toString());
+        ControlPreviewingManager::scheduleIdUpdate(sc->uid(), value.toString());
         WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(sc, previousId);
     } else {
         ControlPreviewingManager::schedulePropertyUpdate(sc->uid(), property, value);

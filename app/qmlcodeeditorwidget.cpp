@@ -977,6 +977,7 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
             item.documents.value(relativePath).document->setModified(false);
 
             const auto& id = ParserUtils::property(documentPath, "id");
+            // FIXME: Prevent empty id
             if (control->id() != id && !id.isEmpty()) {
                 const QString& previousId = control->id();
 // FIXME               SaveManager::setProperty(control, "id", id);

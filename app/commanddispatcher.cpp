@@ -80,6 +80,11 @@ void CommandDispatcher::scheduleParentUpdate(const QString& newDir, const QStrin
     sendAsync(m_server, PreviewerCommands::ParentUpdate, pushValues(newDir, uid, parentUid));
 }
 
+void CommandDispatcher::scheduleIdUpdate(const QString& uid, const QString& newId)
+{
+    sendAsync(m_server, PreviewerCommands::IdUpdate, pushValues(uid, newId));
+}
+
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {

@@ -22,6 +22,7 @@ public slots:
     void scheduleControlCreation(const QString& dir, const QString& parentUid);
     void scheduleRefresh(const QString& formUid);
     void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
+    void scheduleIdUpdate(const QString& uid, const QString& newId);
 
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 

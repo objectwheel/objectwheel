@@ -287,13 +287,14 @@ void ControlPropertyManager::setId(Control* control, const QString& id, bool sav
         return;
 
     const QString& previousId = control->id();
-    control->setId(id);
 
     if (save)
         SaveManager::setProperty(control, "id", id);
+    else
+        control->setId(id);
 
     if (updatePreviewer)
-        ControlPreviewingManager::scheduleIdChange(control->uid(), control->id());
+        ControlPreviewingManager::scheduleIdUpdate(control->uid(), control->id());
 
     emit instance()->idChanged(control, previousId);
 }

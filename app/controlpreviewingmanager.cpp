@@ -69,6 +69,11 @@ ControlPreviewingManager* ControlPreviewingManager::instance()
     return s_instance;
 }
 
+void ControlPreviewingManager::scheduleIdUpdate(const QString& uid, const QString& newId)
+{
+    s_commandDispatcher->scheduleIdUpdate(uid, newId);
+}
+
 void ControlPreviewingManager::scheduleRefresh(const QString& formUid)
 {
     s_commandDispatcher->scheduleRefresh(formUid);

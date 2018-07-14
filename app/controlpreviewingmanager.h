@@ -20,9 +20,9 @@ public:
     static void scheduleControlDeletion(){}
     static void scheduleFormCreation(const QString& dir){}
     static void scheduleFormDeletion(const QString& uid){}
-    static void scheduleIdChange(const QString& uid, const QString& newId){}
     static void scheduleAnchorChange(){}
 
+    static void scheduleIdUpdate(const QString& uid, const QString& newId);
     static void scheduleRefresh(const QString& formUid);
     static void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
     static void scheduleControlCreation(const QString& dir, const QString& parentUid);
