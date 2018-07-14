@@ -17,11 +17,11 @@ class ControlPreviewingManager final : public QObject
 public:
     static ControlPreviewingManager* instance();
 
-    static void scheduleControlDeletion(){}
     static void scheduleFormCreation(const QString& dir){}
     static void scheduleFormDeletion(const QString& uid){}
     static void scheduleAnchorChange(){}
 
+    static void scheduleControlDeletion(const QString& uid);
     static void scheduleIdUpdate(const QString& uid, const QString& newId);
     static void scheduleRefresh(const QString& formUid);
     static void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);

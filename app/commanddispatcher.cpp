@@ -85,6 +85,11 @@ void CommandDispatcher::scheduleIdUpdate(const QString& uid, const QString& newI
     sendAsync(m_server, PreviewerCommands::IdUpdate, pushValues(uid, newId));
 }
 
+void CommandDispatcher::scheduleControlDeletion(const QString& uid)
+{
+    sendAsync(m_server, PreviewerCommands::ControlDeletion, pushValues(uid));
+}
+
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {
