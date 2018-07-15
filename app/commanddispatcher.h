@@ -19,12 +19,14 @@ public slots:
     void scheduleInit();
     void scheduleTerminate();
     void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
+    void scheduleFormCreation(const QString& dir);
     void scheduleControlCreation(const QString& dir, const QString& parentUid);
     void scheduleRefresh(const QString& formUid);
     void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
     void scheduleIdUpdate(const QString& uid, const QString& newId);
     void scheduleControlDeletion(const QString& uid);
     void scheduleFormDeletion(const QString& uid);
+    void scheduleControlCodeUpdate(const QString& uid);
 
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 

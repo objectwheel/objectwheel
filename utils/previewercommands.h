@@ -16,6 +16,8 @@ enum PreviewerCommands {
     PropertyUpdate,
     ControlCreation,
     ControlDeletion,
+    ControlCodeUpdate,
+    FormCreation,
     FormDeletion
 };
 Q_DECLARE_METATYPE(PreviewerCommands)

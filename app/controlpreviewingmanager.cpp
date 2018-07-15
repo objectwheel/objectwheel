@@ -69,6 +69,16 @@ ControlPreviewingManager* ControlPreviewingManager::instance()
     return s_instance;
 }
 
+void ControlPreviewingManager::scheduleControlCodeUpdate(const QString& uid)
+{
+    s_commandDispatcher->scheduleControlCodeUpdate(uid);
+}
+
+void ControlPreviewingManager::scheduleFormCreation(const QString& dir)
+{
+    s_commandDispatcher->scheduleFormCreation(dir);
+}
+
 void ControlPreviewingManager::scheduleFormDeletion(const QString& uid)
 {
     s_commandDispatcher->scheduleFormDeletion(uid);

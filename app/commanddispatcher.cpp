@@ -70,6 +70,11 @@ void CommandDispatcher::scheduleControlCreation(const QString& dir, const QStrin
     sendAsync(m_server, PreviewerCommands::ControlCreation, pushValues(dir, parentUid));
 }
 
+void CommandDispatcher::scheduleFormCreation(const QString& dir)
+{
+    sendAsync(m_server, PreviewerCommands::FormCreation, pushValues(dir));
+}
+
 void CommandDispatcher::scheduleRefresh(const QString& formUid)
 {
     sendAsync(m_server, PreviewerCommands::Refresh, pushValues(formUid));
@@ -93,6 +98,11 @@ void CommandDispatcher::scheduleControlDeletion(const QString& uid)
 void CommandDispatcher::scheduleFormDeletion(const QString& uid)
 {
     sendAsync(m_server, PreviewerCommands::FormDeletion, pushValues(uid));
+}
+
+void CommandDispatcher::scheduleControlCodeUpdate(const QString& uid)
+{
+    sendAsync(m_server, PreviewerCommands::ControlCodeUpdate, pushValues(uid));
 }
 
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
