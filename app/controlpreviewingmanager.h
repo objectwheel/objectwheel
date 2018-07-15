@@ -18,9 +18,9 @@ public:
     static ControlPreviewingManager* instance();
 
     static void scheduleFormCreation(const QString& dir){}
-    static void scheduleFormDeletion(const QString& uid){}
     static void scheduleAnchorChange(){}
 
+    static void scheduleFormDeletion(const QString& uid);
     static void scheduleControlDeletion(const QString& uid);
     static void scheduleIdUpdate(const QString& uid, const QString& newId);
     static void scheduleRefresh(const QString& formUid);
