@@ -41,6 +41,8 @@ void ControlRemovingManager::removeForm(Form* form)
 
     emit instance()->formAboutToBeRemoved(form);
 
+    ControlPreviewingManager::scheduleFormDeletion(form->uid());
+
     SaveManager::removeForm(form);
     s_designerScene->removeForm(form);
 }
@@ -55,11 +57,7 @@ void ControlRemovingManager::removeControl(Control* control)
 
     emit instance()->controlAboutToBeRemoved(control);
 
-//    BUG ControlPreviewingManager::removeCache(control->uid());
-
-//    control->parentControl()->refresh();
-//    control->setRefreshingDisabled(true);
-    control->blockSignals(true);
+    ControlPreviewingManager::scheduleControlDeletion(control->uid());
 
     SaveManager::removeControl(control);
     s_designerScene->removeControl(control);
