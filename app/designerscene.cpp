@@ -186,9 +186,10 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         }
     }
 
-    if (itemMoving)
+    if (itemMoving) {
         for (auto selectedControl : selectedControls)
             selectedControl->setDragging(true);
+    }
 
     m_lastMousePos = event->scenePos();
 

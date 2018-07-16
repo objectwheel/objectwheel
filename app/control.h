@@ -24,6 +24,7 @@ public:
     bool window() const;
     bool dragIn() const;
     bool dragging() const;
+    bool resizing() const;
     bool hasErrors() const;
     bool contains(const QString& id) const;
 
@@ -50,6 +51,7 @@ public:
     void setUrl(const QString& url);
     void setDragIn(bool dragIn);
     void setDragging(bool dragging);
+    void setResizing(bool resizing);
 
 public slots:
     void updateUid();
@@ -57,6 +59,10 @@ public slots:
     void showResizers();
 
     static void updateUids();
+
+signals:
+    void resizingChanged();
+    void draggingChanged();
 
 private:
     void dropControl(Control* control);
@@ -84,6 +90,7 @@ protected:
 
 private slots:
     void updatePreview(const PreviewResult& result);
+    void applyCachedGeometry();
 
 private:
     bool m_gui;
@@ -92,6 +99,8 @@ private:
     bool m_dragIn;
     bool m_hoverOn;
     bool m_dragging;
+    bool m_resizing;
+    QRectF m_cachedGeometry;
 
     QString m_url;
     QString m_uid;

@@ -123,6 +123,7 @@ void Resizer::mousePressEvent(QGsme* event)
     QGraphicsItem::mousePressEvent(event);
     event->accept();
     m_resizing = true;
+    static_cast<Control*>(parentWidget())->setResizing(true);
 }
 
 void Resizer::mouseMoveEvent(QGsme* event)
@@ -251,6 +252,7 @@ void Resizer::mouseReleaseEvent(QGsme* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
     m_resizing = false;
+    static_cast<Control*>(parentWidget())->setResizing(false);
 }
 
 QRectF Resizer::boundingRect() const

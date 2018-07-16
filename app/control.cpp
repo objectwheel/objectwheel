@@ -112,6 +112,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
+  , m_resizing(false)
   , m_url(url)
   , m_uid(SaveUtils::uid(dir()))
   , m_image(initialPreview({50.0, 50.0}))
@@ -131,6 +132,11 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
+
+    connect(this, &Control::resizingChanged,
+            this, &Control::applyCachedGeometry);
+    connect(this, &Control::draggingChanged,
+            this, &Control::applyCachedGeometry);
 }
 
 Control::~Control()
@@ -168,6 +174,11 @@ bool Control::dragIn() const
 bool Control::dragging() const
 {
     return m_dragging;
+}
+
+bool Control::resizing() const
+{
+    return m_resizing;
 }
 
 bool Control::hasErrors() const
@@ -289,6 +300,16 @@ void Control::setDragging(bool dragging)
         setCursor(Qt::SizeAllCursor);
     else
         setCursor(Qt::ArrowCursor);
+
+    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
+//    emit draggingChanged();
+}
+
+void Control::setResizing(bool resizing)
+{
+    m_resizing = resizing;
+    Suppressor::suppress(150, "resizingChanged", std::bind(&Control::resizingChanged, this));
+//    emit resizingChanged();
 }
 
 void Control::updateUid()
@@ -316,8 +337,11 @@ void Control::updateUids()
 
 void Control::dropControl(Control* control)
 {
-    ControlPropertyManager::setPos(control, mapFromItem(control->parentItem(), control->pos()), true, true);
-    ControlPropertyManager::setParent(control, this, true, true);
+    const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
+    ControlPropertyManager::setParent(control, this, true);
+    ControlPropertyManager::setPos(control, newPos, true, true, true);
+    // NOTE: We compress setPos because there might be some other compressed setPos'es in the list
+    // We want the setPos that is happened after reparent operation to take place at the very last
 
     //  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
     WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
@@ -537,11 +561,9 @@ void Control::updatePreview(const PreviewResult& result)
         return;
 
     ControlPropertyManager::setId(this, result.id, false, false);
-
-    if (form())
-        ControlPropertyManager::setSize(this, getRect(result).size(), false, false);
-    else
-        ControlPropertyManager::setGeometry(this, getRect(result), false, false);
+    m_cachedGeometry = getRect(result);
+    if (!dragging() && !resizing())
+        applyCachedGeometry();
 
     m_image = result.image;
     m_errors = result.errors;
@@ -549,48 +571,58 @@ void Control::updatePreview(const PreviewResult& result)
     m_window = result.window;
     m_properties = result.properties;
 
-//    if (!result.errors.isEmpty()) {
-//        //        setRefreshingDisabled(true);
-//        resize(QSizeF(50, 50));
-//        //        setRefreshingDisabled(false);
-//        setPos(pos());
-//        //    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
-//        setZValue(0);
-//    } else {
-//        if (result.gui) {
-//            if (!form())
-//                //                m_clip = result.property("clip").toBool();
+    //    if (!result.errors.isEmpty()) {
+    //        //        setRefreshingDisabled(true);
+    //        resize(QSizeF(50, 50));
+    //        //        setRefreshingDisabled(false);
+    //        setPos(pos());
+    //        //    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
+    //        setZValue(0);
+    //    } else {
+    //        if (result.gui) {
+    //            if (!form())
+    //                //                m_clip = result.property("clip").toBool();
 
-//                if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
-//                    const auto& rect = getRect(result);
-//                    qreal z = getZ(result);
-//                    resize(rect.size());
-//                    //                    setRefreshingDisabled(true);
-//                    if (!form())
-//                        setPos(rect.topLeft());
-//                    blockSignals(true);
-//                    setZValue(z);
-//                    blockSignals(false);
-//                    //                    setRefreshingDisabled(false);
-//                }
-//        } else {
-//            //            setRefreshingDisabled(true);
-//            resize(QSizeF(50, 50));
-//            //            setRefreshingDisabled(false);
-//            setPos(pos());
-//            //     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
-//            setZValue(0);
-//        }
-//    }
+    //                if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
+    //                    const auto& rect = getRect(result);
+    //                    qreal z = getZ(result);
+    //                    resize(rect.size());
+    //                    //                    setRefreshingDisabled(true);
+    //                    if (!form())
+    //                        setPos(rect.topLeft());
+    //                    blockSignals(true);
+    //                    setZValue(z);
+    //                    blockSignals(false);
+    //                    //                    setRefreshingDisabled(false);
+    //                }
+    //        } else {
+    //            //            setRefreshingDisabled(true);
+    //            resize(QSizeF(50, 50));
+    //            //            setRefreshingDisabled(false);
+    //            setPos(pos());
+    //            //     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
+    //            setZValue(0);
+    //        }
+    //    }
 
     for (auto resizer : m_resizers)
         resizer->setDisabled(!gui());
 
     update();
 
-//    if (!result.errors.isEmpty())
-//        WindowManager::mainWindow()->centralWidget()->outputPane()->issuesBox()->handleErrors(this);
-//    if (isSelected())
-//        WindowManager::mainWindow()->propertiesPane()->refreshList();
-//    WindowManager::mainWindow()->inspectorPane()->handleControlPreviewChange(this);
+    //    if (!result.errors.isEmpty())
+    //        WindowManager::mainWindow()->centralWidget()->outputPane()->issuesBox()->handleErrors(this);
+    //    if (isSelected())
+    //        WindowManager::mainWindow()->propertiesPane()->refreshList();
+    //    WindowManager::mainWindow()->inspectorPane()->handleControlPreviewChange(this);
+}
+
+void Control::applyCachedGeometry()
+{
+    if (!dragging() && !resizing()) {
+        if (form())
+            ControlPropertyManager::setSize(this, m_cachedGeometry.size(), false, false);
+        else
+            ControlPropertyManager::setGeometry(this, m_cachedGeometry, false, false);
+    }
 }
