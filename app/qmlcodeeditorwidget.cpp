@@ -18,6 +18,8 @@
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <inspectorpane.h>
+#include <controlpropertymanager.h>
+#include <controlpreviewingmanager.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -976,15 +978,22 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
                    (relativePath).document->toPlainText().toUtf8());
             item.documents.value(relativePath).document->setModified(false);
 
-            const auto& id = ParserUtils::property(documentPath, "id");
-            // FIXME: Prevent empty id
-            if (control->id() != id && !id.isEmpty()) {
+            Q_ASSERT(!control->id().isEmpty());
+
+            const QString& id = ParserUtils::property(documentPath, "id");
+
+            if (control->id() != id) {
                 const QString& previousId = control->id();
-// FIXME               SaveManager::setProperty(control, "id", id);
+
+                if (id.isEmpty())
+                    ControlPropertyManager::setId(control, "control", true, false);
+                else
+                    ControlPropertyManager::setId(control, id, true, false); // For refactorId
+
                 WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(control, previousId);
             }
 
-            //       BUG control->refresh(true);
+            ControlPreviewingManager::scheduleControlCodeUpdate(control->uid());
             break;
         }
     }
