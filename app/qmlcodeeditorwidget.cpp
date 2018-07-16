@@ -993,7 +993,10 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
                 WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(control, previousId);
             }
 
-            ControlPreviewingManager::scheduleControlCodeUpdate(control->uid());
+            if (control->form())
+                ControlPreviewingManager::scheduleFormCodeUpdate(control->uid());
+            else
+                ControlPreviewingManager::scheduleControlCodeUpdate(control->uid());
             break;
         }
     }

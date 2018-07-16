@@ -27,6 +27,7 @@ public slots:
     void scheduleControlDeletion(const QString& uid);
     void scheduleFormDeletion(const QString& uid);
     void scheduleControlCodeUpdate(const QString& uid);
+    void scheduleFormCodeUpdate(const QString& uid);
 
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 

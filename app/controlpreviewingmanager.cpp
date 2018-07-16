@@ -74,6 +74,11 @@ void ControlPreviewingManager::scheduleControlCodeUpdate(const QString& uid)
     s_commandDispatcher->scheduleControlCodeUpdate(uid);
 }
 
+void ControlPreviewingManager::scheduleFormCodeUpdate(const QString& uid)
+{
+    s_commandDispatcher->scheduleFormCodeUpdate(uid);
+}
+
 void ControlPreviewingManager::scheduleFormCreation(const QString& dir)
 {
     s_commandDispatcher->scheduleFormCreation(dir);

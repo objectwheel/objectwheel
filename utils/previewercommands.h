@@ -5,27 +5,27 @@
 
 enum PreviewerCommands {
     ConnectionAlive,
+    ControlCodeUpdate,
+    ControlCreation,
+    ControlDeletion,
+    FormCodeUpdate,
+    FormCreation,
+    FormDeletion,
     IdUpdate,
     Init,
     InitializationProgress,
-    PreviewDone,
-    Refresh,
-    Remove,
     ParentUpdate,
-    Terminate,
+    PreviewDone,
     PropertyUpdate,
-    ControlCreation,
-    ControlDeletion,
-    ControlCodeUpdate,
-    FormCreation,
-    FormDeletion
+    Refresh,
+    Terminate
 };
 Q_DECLARE_METATYPE(PreviewerCommands)
 
 inline QDataStream& operator>>(QDataStream& in, PreviewerCommands& e)
-{ return in >> (quint32&) e; }
+{ return in >> (int&) e; }
 
 inline QDataStream& operator<<(QDataStream& out, const PreviewerCommands& e)
-{ return out << quint32(e); }
+{ return out << int(e); }
 
 #endif // PREVIEWERCOMMANDS_H

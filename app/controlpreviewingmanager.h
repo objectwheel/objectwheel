@@ -21,7 +21,6 @@ public:
 
     static void scheduleControlCodeUpdate(const QString& uid);
     static void scheduleFormCodeUpdate(const QString& uid);
-
     static void scheduleFormDeletion(const QString& uid);
     static void scheduleFormCreation(const QString& dir);
     static void scheduleControlDeletion(const QString& uid);

@@ -105,6 +105,11 @@ void CommandDispatcher::scheduleControlCodeUpdate(const QString& uid)
     sendAsync(m_server, PreviewerCommands::ControlCodeUpdate, pushValues(uid));
 }
 
+void CommandDispatcher::scheduleFormCodeUpdate(const QString& uid)
+{
+    sendAsync(m_server, PreviewerCommands::FormCodeUpdate, pushValues(uid));
+}
+
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {
