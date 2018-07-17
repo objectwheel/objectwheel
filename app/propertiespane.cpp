@@ -17,31 +17,27 @@
 
 // FIXME: Fix this from scratch
 
-class PropertiesDelegate : public QStyledItemDelegate
+class PropertiesListDelegate : public QStyledItemDelegate
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit PropertiesDelegate(QTreeWidget* view, PropertiesPane* pane, QObject* parent = 0);
-        QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-        void setEditorData(QWidget* ed, const QModelIndex &index) const override;
-        void setModelData(QWidget* ed, QAbstractItemModel* model, const QModelIndex &index) const override;
-        void updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-        QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override;
-        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+public:
+    explicit PropertiesListDelegate(PropertiesPane* parent) : QStyledItemDelegate(parent)
+      , m_propertiesPane(parent)
+    {}
 
-    private:
-        QTreeWidget* m_view;
-        PropertiesPane* m_pane;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void setEditorData(QWidget* ed, const QModelIndex& index) const override;
+    void setModelData(QWidget* ed, QAbstractItemModel* model, const QModelIndex& index) const override;
+    void updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override;
+
+private:
+    PropertiesPane* m_propertiesPane;
 };
 
-PropertiesDelegate::PropertiesDelegate(QTreeWidget* view, PropertiesPane* pane, QObject* parent) : QStyledItemDelegate(parent)
-  , m_view(view)
-  , m_pane(pane)
-{
-}
-
-QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem &, const QModelIndex &index) const
+QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& , const QModelIndex& index) const
 {
     QWidget* ed = 0;
 
@@ -49,189 +45,189 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         return ed;
 
     auto type = index.data(PropertiesPane::Type).value<PropertiesPane::NodeType>();
-    auto pIndex = m_view->model()->index(index.row(), 0, index.parent());
-    auto property = m_view->model()->data(pIndex, Qt::DisplayRole).toString();
+    auto pIndex = m_propertiesPane->model()->index(index.row(), 0, index.parent());
+    auto property = m_propertiesPane->model()->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
-        case PropertiesPane::EnumType: {
-            auto editor = new QComboBox(parent);
-            auto e = index.data(PropertiesPane::NodeRole::Data).value<Enum>();
-            editor->addItems(e.keys.keys());
-            connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            ed = editor;
-            break;
-        }
+    case PropertiesPane::EnumType: {
+        auto editor = new QComboBox(parent);
+        auto e = index.data(PropertiesPane::NodeRole::Data).value<Enum>();
+        editor->addItems(e.keys.keys());
+        connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        ed = editor;
+        break;
+    }
 
-        case PropertiesPane::FontFamily: {
-            auto editor = new QComboBox(parent);
-            editor->addItems(QFontDatabase().families());
-            connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            ed = editor;
-            break;
-        }
+    case PropertiesPane::FontFamily: {
+        auto editor = new QComboBox(parent);
+        editor->addItems(QFontDatabase().families());
+        connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        ed = editor;
+        break;
+    }
 
-        case PropertiesPane::FontWeight: {
-            auto editor = new QComboBox(parent);
-            auto fenum = QMetaEnum::fromType<QFont::Weight>();
-            for (int i = fenum.keyCount(); i--;)
-                if (QString(fenum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
-                    editor->addItem(fenum.key(i));
-            connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            ed = editor;
-            break;
-        }
+    case PropertiesPane::FontWeight: {
+        auto editor = new QComboBox(parent);
+        auto fenum = QMetaEnum::fromType<QFont::Weight>();
+        for (int i = fenum.keyCount(); i--;)
+            if (QString(fenum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
+                editor->addItem(fenum.key(i));
+        connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        ed = editor;
+        break;
+    }
 
-        case PropertiesPane::FontPtSize:
-        case PropertiesPane::FontPxSize: {
-            auto editor = new QSpinBox(parent);
-            connect(editor, &QSpinBox::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            editor->setMaximum(72);
-            editor->setMinimum(0);
-            ed = editor;
-            break;
-        }
+    case PropertiesPane::FontPtSize:
+    case PropertiesPane::FontPxSize: {
+        auto editor = new QSpinBox(parent);
+        connect(editor, &QSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        editor->setMaximum(72);
+        editor->setMinimum(0);
+        ed = editor;
+        break;
+    }
 
-        case PropertiesPane::FontBold:
-        case PropertiesPane::FontItalic:
-        case PropertiesPane::FontUnderline:
-        case PropertiesPane::FontOverline:
-        case PropertiesPane::FontStrikeout:
-        case PropertiesPane::Bool: {
-            auto editor = new QCheckBox(parent);
-            connect(editor, &QCheckBox::toggled,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            ed = editor;
-            break;
-        }
+    case PropertiesPane::FontBold:
+    case PropertiesPane::FontItalic:
+    case PropertiesPane::FontUnderline:
+    case PropertiesPane::FontOverline:
+    case PropertiesPane::FontStrikeout:
+    case PropertiesPane::Bool: {
+        auto editor = new QCheckBox(parent);
+        connect(editor, &QCheckBox::toggled,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        ed = editor;
+        break;
+    }
 
-        case PropertiesPane::Color: {
-            auto editor = new QToolButton(parent);
-            editor->setFocusPolicy(Qt::StrongFocus);
-            editor->setText("Change Color");
-            ed = editor;
+    case PropertiesPane::Color: {
+        auto editor = new QToolButton(parent);
+        editor->setFocusPolicy(Qt::StrongFocus);
+        editor->setText("Change Color");
+        ed = editor;
 
-            connect(editor, &QCheckBox::clicked, [this, property, index] ()
-            {
-                auto color = index.data(PropertiesPane::NodeRole::Data).value<QColor>();
-                color = QColorDialog::getColor(
-                    Qt::white,
-                    m_view,
-                    "Select Color",
-                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-                );
+        connect(editor, &QCheckBox::clicked, [this, property, index] ()
+        {
+            auto color = index.data(PropertiesPane::NodeRole::Data).value<QColor>();
+            color = QColorDialog::getColor(
+                        Qt::white,
+                        m_propertiesPane,
+                        "Select Color",
+                        QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+                        );
 
-                if (color.isValid()) {
-                    m_view->model()->setData(index, color, PropertiesPane::NodeRole::Data);
-                    m_view->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
-                    m_pane->saveChanges(property, "\"" + color.name(QColor::HexArgb) + "\"", color);
-                }
-            });
-            break;
-        }
-
-        case PropertiesPane::String: {
-            auto editor = new QLineEdit(parent);
-            connect(editor, &QLineEdit::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            ed = editor;
-            break;
-        }
-
-        case PropertiesPane::Id: {
-            auto editor = new QLineEdit(parent);
-            QRegExp rx("[a-z_][a-zA-Z0-9_]+");
-            QValidator* validator = new QRegExpValidator(rx, editor);
-            connect(editor, &QLineEdit::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setValidator(validator);
-            editor->setFocusPolicy(Qt::StrongFocus);
-            ed = editor;
-            break;
-        }
-
-        case PropertiesPane::Url: {
-            auto editor = new QLineEdit(parent);
-            connect(editor, &QLineEdit::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            ed = editor;
-            break;
-        }
-
-        case PropertiesPane::Double: {
-            auto editor = new QDoubleSpinBox(parent);
-            connect(editor, &QDoubleSpinBox::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            if (property == "opacity") {
-                editor->setMaximum(1.0);
-                editor->setMinimum(0.0);
-                editor->setSingleStep(0.1);
-            } else {
-                editor->setMaximum(std::numeric_limits<double>::max());
-                editor->setMinimum(std::numeric_limits<double>::min());
+            if (color.isValid()) {
+                m_propertiesPane->model()->setData(index, color, PropertiesPane::NodeRole::Data);
+                m_propertiesPane->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
+                m_propertiesPane->saveChanges(property, "\"" + color.name(QColor::HexArgb) + "\"", color);
             }
-            ed = editor;
-            break;
-        }
+        });
+        break;
+    }
 
-        case PropertiesPane::Int: {
-            auto editor = new QSpinBox(parent);
-            connect(editor, &QSpinBox::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            editor->setMaximum(std::numeric_limits<int>::max());
-            editor->setMinimum(std::numeric_limits<int>::min());
-            ed = editor;
-            break;
-        }
+    case PropertiesPane::String: {
+        auto editor = new QLineEdit(parent);
+        connect(editor, &QLineEdit::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        ed = editor;
+        break;
+    }
 
-        case PropertiesPane::GeometryX:
-        case PropertiesPane::GeometryY:
-        case PropertiesPane::GeometryWidth:
-        case PropertiesPane::GeometryHeight: {
-            auto editor = new QSpinBox(parent);
-            connect(editor, &QSpinBox::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
-            editor->setMaximum(std::numeric_limits<int>::max());
-            editor->setMinimum(std::numeric_limits<int>::min());
-            ed = editor;
-            break;
-        }
+    case PropertiesPane::Id: {
+        auto editor = new QLineEdit(parent);
+        QRegExp rx("[a-z_][a-zA-Z0-9_]+");
+        QValidator* validator = new QRegExpValidator(rx, editor);
+        connect(editor, &QLineEdit::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setValidator(validator);
+        editor->setFocusPolicy(Qt::StrongFocus);
+        ed = editor;
+        break;
+    }
 
-        case PropertiesPane::GeometryFX:
-        case PropertiesPane::GeometryFY:
-        case PropertiesPane::GeometryFWidth:
-        case PropertiesPane::GeometryFHeight: {
-            auto editor = new QDoubleSpinBox(parent);
-            connect(editor, &QDoubleSpinBox::editingFinished,
-                    [this, editor] () { ((PropertiesDelegate*)this)->commitData(editor); });
-            editor->setFocusPolicy(Qt::StrongFocus);
+    case PropertiesPane::Url: {
+        auto editor = new QLineEdit(parent);
+        connect(editor, &QLineEdit::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        ed = editor;
+        break;
+    }
+
+    case PropertiesPane::Double: {
+        auto editor = new QDoubleSpinBox(parent);
+        connect(editor, &QDoubleSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        if (property == "opacity") {
+            editor->setMaximum(1.0);
+            editor->setMinimum(0.0);
+            editor->setSingleStep(0.1);
+        } else {
             editor->setMaximum(std::numeric_limits<double>::max());
             editor->setMinimum(std::numeric_limits<double>::min());
-            ed = editor;
-            break;
         }
+        ed = editor;
+        break;
+    }
 
-        default:
-            break;
+    case PropertiesPane::Int: {
+        auto editor = new QSpinBox(parent);
+        connect(editor, &QSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        editor->setMaximum(std::numeric_limits<int>::max());
+        editor->setMinimum(std::numeric_limits<int>::min());
+        ed = editor;
+        break;
+    }
+
+    case PropertiesPane::GeometryX:
+    case PropertiesPane::GeometryY:
+    case PropertiesPane::GeometryWidth:
+    case PropertiesPane::GeometryHeight: {
+        auto editor = new QSpinBox(parent);
+        connect(editor, &QSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        editor->setMaximum(std::numeric_limits<int>::max());
+        editor->setMinimum(std::numeric_limits<int>::min());
+        ed = editor;
+        break;
+    }
+
+    case PropertiesPane::GeometryFX:
+    case PropertiesPane::GeometryFY:
+    case PropertiesPane::GeometryFWidth:
+    case PropertiesPane::GeometryFHeight: {
+        auto editor = new QDoubleSpinBox(parent);
+        connect(editor, &QDoubleSpinBox::editingFinished,
+                [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
+        editor->setFocusPolicy(Qt::StrongFocus);
+        editor->setMaximum(std::numeric_limits<double>::max());
+        editor->setMinimum(std::numeric_limits<double>::min());
+        ed = editor;
+        break;
+    }
+
+    default:
+        break;
     }
 
     return ed;
 }
 
-void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) const
+void PropertiesListDelegate::setEditorData(QWidget* ed, const QModelIndex& index) const
 {
     if (index.column() == 0)
         return;
@@ -239,108 +235,108 @@ void PropertiesDelegate::setEditorData(QWidget* ed, const QModelIndex &index) co
     auto type = index.data(PropertiesPane::NodeRole::Type).value<PropertiesPane::NodeType>();
 
     switch (type) {
-        case PropertiesPane::EnumType: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<Enum>();
-            auto editor = static_cast<QComboBox*>(ed);
-            editor->setCurrentText(val.value);
-            break;
-        }
+    case PropertiesPane::EnumType: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<Enum>();
+        auto editor = static_cast<QComboBox*>(ed);
+        editor->setCurrentText(val.value);
+        break;
+    }
 
-        case PropertiesPane::FontFamily: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QString>();
-            auto editor = static_cast<QComboBox*>(ed);
-            editor->setCurrentText(val);
-            break;
-        }
+    case PropertiesPane::FontFamily: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QString>();
+        auto editor = static_cast<QComboBox*>(ed);
+        editor->setCurrentText(val);
+        break;
+    }
 
-        case PropertiesPane::FontWeight: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QFont::Weight>();
-            auto editor = static_cast<QComboBox*>(ed);
-            editor->setCurrentText(QMetaEnum::fromType<QFont::Weight>().valueToKey(val));
-            break;
-        }
+    case PropertiesPane::FontWeight: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QFont::Weight>();
+        auto editor = static_cast<QComboBox*>(ed);
+        editor->setCurrentText(QMetaEnum::fromType<QFont::Weight>().valueToKey(val));
+        break;
+    }
 
-        case PropertiesPane::FontPtSize:
-        case PropertiesPane::FontPxSize: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
-            auto editor = static_cast<QSpinBox*>(ed);
-            editor->setValue(val);
-            break;
-        }
+    case PropertiesPane::FontPtSize:
+    case PropertiesPane::FontPxSize: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
+        auto editor = static_cast<QSpinBox*>(ed);
+        editor->setValue(val);
+        break;
+    }
 
-        case PropertiesPane::FontBold:
-        case PropertiesPane::FontItalic:
-        case PropertiesPane::FontUnderline:
-        case PropertiesPane::FontOverline:
-        case PropertiesPane::FontStrikeout:
-        case PropertiesPane::Bool: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<bool>();
-            auto editor = static_cast<QCheckBox*>(ed);
-            editor->setChecked(val);
-            break;
-        }
+    case PropertiesPane::FontBold:
+    case PropertiesPane::FontItalic:
+    case PropertiesPane::FontUnderline:
+    case PropertiesPane::FontOverline:
+    case PropertiesPane::FontStrikeout:
+    case PropertiesPane::Bool: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<bool>();
+        auto editor = static_cast<QCheckBox*>(ed);
+        editor->setChecked(val);
+        break;
+    }
 
-        case PropertiesPane::Id:
-        case PropertiesPane::String: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QString>();
-            auto editor = static_cast<QLineEdit*>(ed);
-            editor->setText(val);
-            break;
-        }
+    case PropertiesPane::Id:
+    case PropertiesPane::String: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QString>();
+        auto editor = static_cast<QLineEdit*>(ed);
+        editor->setText(val);
+        break;
+    }
 
-        case PropertiesPane::Url: {
-            auto selectedControl = m_pane->m_designerScene->selectedControls().at(0);
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QUrl>();
-            auto editor = static_cast<QLineEdit*>(ed);
-            auto dispText = val.toDisplayString();
-            if (val.isLocalFile()) {
-                dispText = val.toLocalFile().
-                           remove(selectedControl->dir() + separator() + DIR_THIS + separator());
-            }
-            editor->setText(dispText);
-            break;
+    case PropertiesPane::Url: {
+        auto selectedControl = m_propertiesPane->m_designerScene->selectedControls().at(0);
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QUrl>();
+        auto editor = static_cast<QLineEdit*>(ed);
+        auto dispText = val.toDisplayString();
+        if (val.isLocalFile()) {
+            dispText = val.toLocalFile().
+                    remove(selectedControl->dir() + separator() + DIR_THIS + separator());
         }
+        editor->setText(dispText);
+        break;
+    }
 
-        case PropertiesPane::Double: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<double>();
-            auto editor = static_cast<QDoubleSpinBox*>(ed);
-            editor->setValue(val);
-            break;
-        }
+    case PropertiesPane::Double: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<double>();
+        auto editor = static_cast<QDoubleSpinBox*>(ed);
+        editor->setValue(val);
+        break;
+    }
 
-        case PropertiesPane::Int: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
-            auto editor = static_cast<QSpinBox*>(ed);
-            editor->setValue(val);
-            break;
-        }
+    case PropertiesPane::Int: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
+        auto editor = static_cast<QSpinBox*>(ed);
+        editor->setValue(val);
+        break;
+    }
 
-        case PropertiesPane::GeometryX:
-        case PropertiesPane::GeometryY:
-        case PropertiesPane::GeometryWidth:
-        case PropertiesPane::GeometryHeight: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
-            auto editor = static_cast<QSpinBox*>(ed);
-            editor->setValue(val);
-            break;
-        }
+    case PropertiesPane::GeometryX:
+    case PropertiesPane::GeometryY:
+    case PropertiesPane::GeometryWidth:
+    case PropertiesPane::GeometryHeight: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
+        auto editor = static_cast<QSpinBox*>(ed);
+        editor->setValue(val);
+        break;
+    }
 
-        case PropertiesPane::GeometryFX:
-        case PropertiesPane::GeometryFY:
-        case PropertiesPane::GeometryFWidth:
-        case PropertiesPane::GeometryFHeight: {
-            auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<double>();
-            auto editor = static_cast<QDoubleSpinBox*>(ed);
-            editor->setValue(val);
-            break;
-        }
+    case PropertiesPane::GeometryFX:
+    case PropertiesPane::GeometryFY:
+    case PropertiesPane::GeometryFWidth:
+    case PropertiesPane::GeometryFHeight: {
+        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<double>();
+        auto editor = static_cast<QDoubleSpinBox*>(ed);
+        editor->setValue(val);
+        break;
+    }
 
-        default:
-            break;
+    default:
+        break;
     }
 }
 
-void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, const QModelIndex &index) const
+void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, const QModelIndex& index) const
 {
     if (index.column() == 0)
         return;
@@ -351,283 +347,283 @@ void PropertiesDelegate::setModelData(QWidget* ed, QAbstractItemModel* model, co
     auto property = model->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
-        case PropertiesPane::EnumType: {
-            auto editor = static_cast<QComboBox*>(ed);
-            val = editor->currentText();
-            auto preVal = model->data(index, Qt::EditRole).toString();
+    case PropertiesPane::EnumType: {
+        auto editor = static_cast<QComboBox*>(ed);
+        val = editor->currentText();
+        auto preVal = model->data(index, Qt::EditRole).toString();
 
-            if (val == preVal)
-                return;
+        if (val == preVal)
+            return;
 
-            auto e = index.data(PropertiesPane::NodeRole::Data).value<Enum>();
-            e.value = val.toString();
+        auto e = index.data(PropertiesPane::NodeRole::Data).value<Enum>();
+        e.value = val.toString();
 
-            model->setData(index, QVariant::fromValue(e), PropertiesPane::NodeRole::Data);
-            model->setData(index, e.value, Qt::EditRole);
+        model->setData(index, QVariant::fromValue(e), PropertiesPane::NodeRole::Data);
+        model->setData(index, e.value, Qt::EditRole);
 
-            m_pane->saveChanges(property, e.scope + "." + e.value, e.keys.value(e.value));
-            break;
+        m_propertiesPane->saveChanges(property, e.scope + "." + e.value, e.keys.value(e.value));
+        break;
+    }
+
+    case PropertiesPane::FontFamily: {
+        auto editor = static_cast<QComboBox*>(ed);
+        val = editor->currentText();
+        auto preVal = model->data(index, Qt::EditRole).toString();
+
+        if (val == preVal)
+            return;
+
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+
+        // Update parent node
+        auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+        auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
+        pVal.replace(preVal, val.toString());
+        model->setData(pIndex, pVal, Qt::DisplayRole);
+
+        m_propertiesPane->saveChanges(type, "\"" + val.toString() + "\"", val);
+        break;
+    }
+
+    case PropertiesPane::FontWeight: {
+        auto editor = static_cast<QComboBox*>(ed);
+        val = editor->currentText();
+        auto preVal = model->data(index, Qt::EditRole).toString();
+
+        if (val == preVal)
+            return;
+
+        auto fenum = QMetaEnum::fromType<QFont::Weight>();
+
+        model->setData(index, fenum.keyToValue(val.toString().toUtf8().data()), PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+
+        m_propertiesPane->saveChanges(type, "Font." + val.toString(), val);
+        break;
+    }
+
+    case PropertiesPane::FontPtSize:
+    case PropertiesPane::FontPxSize: {
+        auto editor = static_cast<QSpinBox*>(ed);
+        val = editor->value();
+        auto preVal = model->data(index, Qt::EditRole).toString();
+
+        if (val == preVal)
+            return;
+
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+
+        // Update parent node
+        int pxSize, ptSize;
+        if (type == PropertiesPane::FontPtSize) {
+            auto bIndex = model->index(index.row() + 1, 1, index.parent());
+            pxSize = model->data(bIndex, PropertiesPane::NodeRole::Data).toInt();
+            ptSize = val.toInt();
+        } else {
+            auto bIndex = model->index(index.row() - 1, 1, index.parent());
+            ptSize = model->data(bIndex, PropertiesPane::NodeRole::Data).toInt();
+            pxSize = val.toInt();
         }
+        bool px = pxSize > 0 ? true : false;
+        auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+        auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
+        pVal.replace(QRegExp(",.*"), ", " + QString::number(px ? pxSize : ptSize) + (px ? "px]" : "pt]"));
+        model->setData(pIndex, pVal, Qt::DisplayRole);
+        m_propertiesPane->saveChanges(type, val.toString(), val);
+        break;
+    }
 
-        case PropertiesPane::FontFamily: {
-            auto editor = static_cast<QComboBox*>(ed);
-            val = editor->currentText();
-            auto preVal = model->data(index, Qt::EditRole).toString();
+    case PropertiesPane::FontBold:
+    case PropertiesPane::FontItalic:
+    case PropertiesPane::FontUnderline:
+    case PropertiesPane::FontOverline:
+    case PropertiesPane::FontStrikeout: {
+        auto editor = static_cast<QCheckBox*>(ed);
+        val = editor->isChecked();
+        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toBool();
 
-            if (val == preVal)
-                return;
+        if (val == preVal)
+            return;
 
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        m_propertiesPane->saveChanges(type, val.toString(), val);
+        break;
+    }
 
-            // Update parent node
-            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
-            auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
-            pVal.replace(preVal, val.toString());
-            model->setData(pIndex, pVal, Qt::DisplayRole);
+    case PropertiesPane::Bool: {
+        auto editor = static_cast<QCheckBox*>(ed);
+        val = editor->isChecked();
+        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toBool();
 
-            m_pane->saveChanges(type, "\"" + val.toString() + "\"", val);
-            break;
+        if (val == preVal)
+            return;
+
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        m_propertiesPane->saveChanges(property, val.toString(), val);
+        break;
+    }
+
+    case PropertiesPane::Id: {
+        auto editor = static_cast<QLineEdit*>(ed);
+        val = editor->text();
+        auto preVal = model->data(index, Qt::EditRole).toString();
+
+        if (val == preVal)
+            return;
+
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+        m_propertiesPane->saveChanges(property, val.toString(), val);
+        break;
+    }
+
+    case PropertiesPane::String: {
+        auto editor = static_cast<QLineEdit*>(ed);
+        val = editor->text();
+        auto preVal = model->data(index, Qt::EditRole).toString();
+
+        if (val == preVal)
+            return;
+
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+        m_propertiesPane->saveChanges(property, "\"" +val.toString() + "\"", val);
+        break;
+    }
+
+    case PropertiesPane::Url: {
+        auto editor = static_cast<QLineEdit*>(ed);
+        val = QUrl(editor->text());
+        auto preVal = model->data(index, Qt::EditRole).toUrl();
+
+        if (val == preVal)
+            return;
+
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+        m_propertiesPane->saveChanges(property, "\"" + val.toString() + "\"", val);
+        break;
+    }
+
+    case PropertiesPane::Double: {
+        auto editor = static_cast<QDoubleSpinBox*>(ed);
+        val = editor->value();
+        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toDouble();
+
+        if (val == preVal)
+            return;
+
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+        if (property == "z") {
+            auto sc = m_propertiesPane->m_designerScene->selectedControls();
+            if (sc.size() == 1)
+                sc[0]->setZValue(val.toReal());
         }
+        m_propertiesPane->saveChanges(property, val.toString(), val);
+        break;
+    }
 
-        case PropertiesPane::FontWeight: {
-            auto editor = static_cast<QComboBox*>(ed);
-            val = editor->currentText();
-            auto preVal = model->data(index, Qt::EditRole).toString();
+    case PropertiesPane::Int: {
+        auto editor = static_cast<QSpinBox*>(ed);
+        val = editor->value();
+        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toInt();
 
-            if (val == preVal)
-                return;
+        if (val == preVal)
+            return;
 
-            auto fenum = QMetaEnum::fromType<QFont::Weight>();
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
+        m_propertiesPane->saveChanges(property, val.toString(), val);
+        break;
+    }
 
-            model->setData(index, fenum.keyToValue(val.toString().toUtf8().data()), PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
+    case PropertiesPane::GeometryX:
+    case PropertiesPane::GeometryY:
+    case PropertiesPane::GeometryWidth:
+    case PropertiesPane::GeometryHeight: {
+        auto editor = static_cast<QSpinBox*>(ed);
+        val = editor->value();
+        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toInt();
 
-            m_pane->saveChanges(type, "Font." + val.toString(), val);
-            break;
-        }
+        if (val == preVal)
+            return;
 
-        case PropertiesPane::FontPtSize:
-        case PropertiesPane::FontPxSize: {
-            auto editor = static_cast<QSpinBox*>(ed);
-            val = editor->value();
-            auto preVal = model->data(index, Qt::EditRole).toString();
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
 
-            if (val == preVal)
-                return;
+        // Update parent node
+        auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+        auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toInt();
+        auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toInt();
+        auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toInt();
+        auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toInt();
 
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
+        const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+                arg(x).arg(y).arg(w).arg(h);
 
-            // Update parent node
-            int pxSize, ptSize;
-            if (type == PropertiesPane::FontPtSize) {
-                auto bIndex = model->index(index.row() + 1, 1, index.parent());
-                pxSize = model->data(bIndex, PropertiesPane::NodeRole::Data).toInt();
-                ptSize = val.toInt();
-            } else {
-                auto bIndex = model->index(index.row() - 1, 1, index.parent());
-                ptSize = model->data(bIndex, PropertiesPane::NodeRole::Data).toInt();
-                pxSize = val.toInt();
-            }
-            bool px = pxSize > 0 ? true : false;
-            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
-            auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
-            pVal.replace(QRegExp(",.*"), ", " + QString::number(px ? pxSize : ptSize) + (px ? "px]" : "pt]"));
-            model->setData(pIndex, pVal, Qt::DisplayRole);
-            m_pane->saveChanges(type, val.toString(), val);
-            break;
-        }
+        model->setData(pIndex, gt, Qt::DisplayRole);
+        m_propertiesPane->saveChanges(type, val.toString(), val);
+        break;
+    }
 
-        case PropertiesPane::FontBold:
-        case PropertiesPane::FontItalic:
-        case PropertiesPane::FontUnderline:
-        case PropertiesPane::FontOverline:
-        case PropertiesPane::FontStrikeout: {
-            auto editor = static_cast<QCheckBox*>(ed);
-            val = editor->isChecked();
-            auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toBool();
+    case PropertiesPane::GeometryFX:
+    case PropertiesPane::GeometryFY:
+    case PropertiesPane::GeometryFWidth:
+    case PropertiesPane::GeometryFHeight: {
+        auto editor = static_cast<QDoubleSpinBox*>(ed);
+        val = editor->value();
+        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toReal();
 
-            if (val == preVal)
-                return;
+        if (val == preVal)
+            return;
 
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            m_pane->saveChanges(type, val.toString(), val);
-            break;
-        }
+        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, Qt::EditRole);
 
-        case PropertiesPane::Bool: {
-            auto editor = static_cast<QCheckBox*>(ed);
-            val = editor->isChecked();
-            auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toBool();
+        // Update parent node
+        auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
+        auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toReal();
+        auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toReal();
+        auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toReal();
+        auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toReal();
 
-            if (val == preVal)
-                return;
+        const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+                arg(x).arg(y).arg(w).arg(h);
 
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            m_pane->saveChanges(property, val.toString(), val);
-            break;
-        }
+        model->setData(pIndex, gt, Qt::DisplayRole);
+        m_propertiesPane->saveChanges(type, val.toString(), val);
+        break;
+    }
 
-        case PropertiesPane::Id: {
-            auto editor = static_cast<QLineEdit*>(ed);
-            val = editor->text();
-            auto preVal = model->data(index, Qt::EditRole).toString();
-
-            if (val == preVal)
-                return;
-
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
-            m_pane->saveChanges(property, val.toString(), val);
-            break;
-        }
-
-        case PropertiesPane::String: {
-            auto editor = static_cast<QLineEdit*>(ed);
-            val = editor->text();
-            auto preVal = model->data(index, Qt::EditRole).toString();
-
-            if (val == preVal)
-                return;
-
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
-            m_pane->saveChanges(property, "\"" +val.toString() + "\"", val);
-            break;
-        }
-
-        case PropertiesPane::Url: {
-            auto editor = static_cast<QLineEdit*>(ed);
-            val = QUrl(editor->text());
-            auto preVal = model->data(index, Qt::EditRole).toUrl();
-
-            if (val == preVal)
-                return;
-
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
-            m_pane->saveChanges(property, "\"" + val.toString() + "\"", val);
-            break;
-        }
-
-        case PropertiesPane::Double: {
-            auto editor = static_cast<QDoubleSpinBox*>(ed);
-            val = editor->value();
-            auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toDouble();
-
-            if (val == preVal)
-                return;
-
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
-            if (property == "z") {
-                auto sc = m_pane->m_designerScene->selectedControls();
-                if (sc.size() == 1)
-                    sc[0]->setZValue(val.toReal());
-            }
-            m_pane->saveChanges(property, val.toString(), val);
-            break;
-        }
-
-        case PropertiesPane::Int: {
-            auto editor = static_cast<QSpinBox*>(ed);
-            val = editor->value();
-            auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toInt();
-
-            if (val == preVal)
-                return;
-
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
-            m_pane->saveChanges(property, val.toString(), val);
-            break;
-        }
-
-        case PropertiesPane::GeometryX:
-        case PropertiesPane::GeometryY:
-        case PropertiesPane::GeometryWidth:
-        case PropertiesPane::GeometryHeight: {
-            auto editor = static_cast<QSpinBox*>(ed);
-            val = editor->value();
-            auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toInt();
-
-            if (val == preVal)
-                return;
-
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
-
-            // Update parent node
-            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
-            auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toInt();
-            auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toInt();
-            auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toInt();
-            auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toInt();
-
-            const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-                            arg(x).arg(y).arg(w).arg(h);
-
-            model->setData(pIndex, gt, Qt::DisplayRole);
-            m_pane->saveChanges(type, val.toString(), val);
-            break;
-        }
-
-        case PropertiesPane::GeometryFX:
-        case PropertiesPane::GeometryFY:
-        case PropertiesPane::GeometryFWidth:
-        case PropertiesPane::GeometryFHeight: {
-            auto editor = static_cast<QDoubleSpinBox*>(ed);
-            val = editor->value();
-            auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toReal();
-
-            if (val == preVal)
-                return;
-
-            model->setData(index, val, PropertiesPane::NodeRole::Data);
-            model->setData(index, val, Qt::EditRole);
-
-            // Update parent node
-            auto pIndex = model->index(index.parent().row(), 1, index.parent().parent());
-            auto x = model->data(pIndex.child(0, 1), Qt::DisplayRole).toReal();
-            auto y = model->data(pIndex.child(1, 1), Qt::DisplayRole).toReal();
-            auto w = model->data(pIndex.child(2, 1), Qt::DisplayRole).toReal();
-            auto h = model->data(pIndex.child(3, 1), Qt::DisplayRole).toReal();
-
-            const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-                            arg(x).arg(y).arg(w).arg(h);
-
-            model->setData(pIndex, gt, Qt::DisplayRole);
-            m_pane->saveChanges(type, val.toString(), val);
-            break;
-        }
-
-        default:
-            break;
+    default:
+        break;
     }
 }
 
-void PropertiesDelegate::updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void PropertiesListDelegate::updateEditorGeometry(QWidget* ed, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyledItemDelegate::updateEditorGeometry(ed, option, index);
 
     auto type = index.data(PropertiesPane::NodeRole::Type).value<PropertiesPane::NodeType>();
 
     switch (type) {
-        case 0:
-        default:
-            ed->setGeometry(ed->geometry().adjusted(0, 0, -1, -1));
-            break;
+    case 0:
+    default:
+        ed->setGeometry(ed->geometry().adjusted(0, 0, -1, -1));
+        break;
     }
 }
 
-QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &index) const
+QSize PropertiesListDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const
 {
     const auto& size = QStyledItemDelegate::sizeHint(opt, index);
     return QSize(size.width(), 22);
 }
 
-void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void PropertiesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QRectF cellRect(option.rect);
     auto model = index.model();
@@ -665,51 +661,44 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
             painter->setPen(Qt::black);
 
         painter->drawText(
-            cellRect.adjusted(5, 0, 0, 0),
-            index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
-        );
+                    cellRect.adjusted(5, 0, 0, 0),
+                    index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
+                    );
     } else {
         if (!isClassRow) {
             painter->setPen(Qt::black);
 
             painter->drawText(
-                cellRect.adjusted(5, 0, 0, 0),
-                index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
-            );
+                        cellRect.adjusted(5, 0, 0, 0),
+                        index.data(Qt::EditRole).toString(), QTextOption(Qt::AlignLeft | Qt::AlignVCenter)
+                        );
         }
 
         auto type = index.data(PropertiesPane::NodeRole::Type).value<PropertiesPane::NodeType>();
         switch (type) {
-            case PropertiesPane::FontBold:
-            case PropertiesPane::FontItalic:
-            case PropertiesPane::FontUnderline:
-            case PropertiesPane::FontOverline:
-            case PropertiesPane::FontStrikeout:
-            case PropertiesPane::Bool: {
-                bool value = index.data(PropertiesPane::NodeRole::Data).value<bool>();
-                QStyleOptionButton opt;
-                opt.initFrom(m_view);
-                opt.rect = option.rect;
-                opt.state = QStyle::State_Active | QStyle::State_Enabled;
-                opt.state |= value ? QStyle::State_On : QStyle::State_Off;
-                qApp->style()->drawControl(QStyle::CE_CheckBox, &opt, painter, m_view);
-                break;
-            }
+        case PropertiesPane::FontBold:
+        case PropertiesPane::FontItalic:
+        case PropertiesPane::FontUnderline:
+        case PropertiesPane::FontOverline:
+        case PropertiesPane::FontStrikeout:
+        case PropertiesPane::Bool: {
+            bool value = index.data(PropertiesPane::NodeRole::Data).value<bool>();
+            QStyleOptionButton opt;
+            opt.initFrom(m_propertiesPane);
+            opt.rect = option.rect;
+            opt.state = QStyle::State_Active | QStyle::State_Enabled;
+            opt.state |= value ? QStyle::State_On : QStyle::State_Off;
+            qApp->style()->drawControl(QStyle::CE_CheckBox, &opt, painter, m_propertiesPane);
+            break;
+        }
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 }
 
-class PropertiesTree : public QTreeWidget
-{
-        Q_OBJECT
-    protected:
-        void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
-};
-
-void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
+void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
     qreal width = 10;
     auto model = index.model();
@@ -748,101 +737,108 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
         painter->drawRoundedRect(handleRect, 1.5, 1.5);
 
         painter->drawLine(
-            QPointF(handleRect.left() + 2.5, handleRect.center().y()),
-            QPointF(handleRect.right() - 2.5, handleRect.center().y())
-        );
+                    QPointF(handleRect.left() + 2.5, handleRect.center().y()),
+                    QPointF(handleRect.right() - 2.5, handleRect.center().y())
+                    );
 
         if (!isExpanded(index)) {
             painter->drawLine(
-                QPointF(handleRect.center().x(), handleRect.top() + 2.5),
-                QPointF(handleRect.center().x(), handleRect.bottom() - 2.5)
-            );
+                        QPointF(handleRect.center().x(), handleRect.top() + 2.5),
+                        QPointF(handleRect.center().x(), handleRect.bottom() - 2.5)
+                        );
         }
     }
 }
 
-PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : QWidget(parent)
-  , m_designerScene(designerScene)
+void PropertiesPane::updateGeometries()
 {
-    _layout = new QVBoxLayout(this);
-    _treeWidget = new PropertiesTree;
-    _searchEdit = new FocuslessLineEdit;
+    QTreeWidget::updateGeometries();
+    QMargins vm = viewportMargins();
+    vm.setBottom(m_searchEdit->height());
+    QRect vg = viewport()->geometry();
+    QRect geometryRect(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
+    setViewportMargins(vm);
+    m_searchEdit->setGeometry(geometryRect);
+}
+
+PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
+  , m_designerScene(designerScene)
+  , m_searchEdit(new FocuslessLineEdit(this))
+{
 
     QPalette p(palette());
     p.setColor(backgroundRole(), "#ececec");
     setAutoFillBackground(true);
     setPalette(p);
 
-    QPalette p2(_treeWidget->palette());
+    QPalette p2(palette());
     p2.setColor(QPalette::All, QPalette::Base, QColor("#fffefc"));
     p2.setColor(QPalette::All, QPalette::Highlight, QColor("#ebd5c0"));
     p2.setColor(QPalette::All, QPalette::Text, Qt::black);
     p2.setColor(QPalette::All, QPalette::HighlightedText, Qt::black);
-    _treeWidget->setPalette(p2);
+    setPalette(p2);
 
-    _treeWidget->setColumnCount(2);
-    _treeWidget->setIndentation(16);
-    _treeWidget->setDragEnabled(false);
-    _treeWidget->setFocusPolicy(Qt::NoFocus);
-    _treeWidget->setUniformRowHeights(true);
-    _treeWidget->setDropIndicatorShown(false);
-    _treeWidget->headerItem()->setText(1, "Value");
-    _treeWidget->headerItem()->setText(0, "Property");
-    _treeWidget->viewport()->installEventFilter(this);
-    _treeWidget->header()->resizeSection(0, 170);
-    _treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
-    _treeWidget->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
-    _treeWidget->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    _treeWidget->setEditTriggers(QAbstractItemView::AllEditTriggers);
-    _treeWidget->setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
-    _treeWidget->horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
-    _treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _treeWidget->setItemDelegate(new PropertiesDelegate(_treeWidget, this, _treeWidget));
-    _treeWidget->header()->setFixedHeight(23);
-    _treeWidget->setStyleSheet("QTreeWidget { border: 1px solid #8c6a48; }"
-                               "QHeaderView::section {"
-                               "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #8c6a48;"
-                               "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #AB8157, stop:1 #9C7650);}");
+    setColumnCount(2);
+    setIndentation(16);
+    setDragEnabled(false);
+    setFocusPolicy(Qt::NoFocus);
+    setUniformRowHeights(true);
+    setDropIndicatorShown(false);
+    headerItem()->setText(1, "Value");
+    headerItem()->setText(0, "Property");
+    viewport()->installEventFilter(this);
+    header()->resizeSection(0, 170);
+    setSelectionBehavior(QTreeWidget::SelectRows);
+    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
+    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    setEditTriggers(QAbstractItemView::AllEditTriggers);
+    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setItemDelegate(new PropertiesListDelegate(this));
+    header()->setFixedHeight(23);
+    setStyleSheet("QTreeWidget { border: 1px solid #8c6a48; }"
+                  "QHeaderView::section {"
+                  "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #8c6a48;"
+                  "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #AB8157, stop:1 #9C7650);}");
 
     QFont f; f.setWeight(QFont::Medium);
-    _treeWidget->header()->setFont(f);
+    header()->setFont(f);
 
-    _layout->setSpacing(2);
-    _layout->setContentsMargins(3, 3, 3, 3);
+    m_searchEdit->setPlaceholderText("Filter");
+    m_searchEdit->setClearButtonEnabled(true);
+    m_searchEdit->setFixedHeight(22);
+    connect(m_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
+    setViewportMargins(0, 0, 0, 30);
 
-    _searchEdit->setPlaceholderText("Filter");
-    _searchEdit->setClearButtonEnabled(true);
-    _searchEdit->setFixedHeight(22);
-    connect(_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
-
-    _layout->addWidget(_searchEdit);
-    _layout->addWidget(_treeWidget);
+    //    _layout->addWidget(m_searchEdit);
+    //    _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
-// BUG   connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
-// BUG   connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
+    // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
+    // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
 }
 
 void PropertiesPane::sweep()
 {
     clearList();
-    _searchEdit->clear();
+    m_searchEdit->clear();
 }
 
 void PropertiesPane::clearList()
 {
-    for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i)
-        qDeleteAll(_treeWidget->topLevelItem(i)->takeChildren());
+    for (int i = 0; i < topLevelItemCount(); ++i)
+        qDeleteAll(topLevelItem(i)->takeChildren());
 
-    _treeWidget->clear();
+    clear();
 }
 
 // FIXME: x, y, width, height, z properties are not shown (because we removed them within previewer)
 void PropertiesPane::refreshList()
 {
-    int vsp = _treeWidget->verticalScrollBar()->sliderPosition();
-    int hsp = _treeWidget->horizontalScrollBar()->sliderPosition();
+    int vsp = verticalScrollBar()->sliderPosition();
+    int hsp = horizontalScrollBar()->sliderPosition();
 
     clearList();
 
@@ -873,9 +869,9 @@ void PropertiesPane::refreshList()
         item_3->setData(1, NodeRole::Type, PropertiesPane::NodeType::Id);
         item_3->setFlags(item_3->flags() | Qt::ItemIsEditable);
 
-        _treeWidget->addTopLevelItem(item_1);
-        _treeWidget->addTopLevelItem(item_2);
-        _treeWidget->addTopLevelItem(item_3);
+        addTopLevelItem(item_1);
+        addTopLevelItem(item_2);
+        addTopLevelItem(item_3);
     }
 
     for (const auto& propertyNode : propertyNodes) {
@@ -891,84 +887,84 @@ void PropertiesPane::refreshList()
         for (const auto& propertyName : map.keys()) {
             switch (map.value(propertyName).type())
             {
-                case QVariant::Font: {
-                    processFont(item, propertyName, map);
-                    break;
-                }
+            case QVariant::Font: {
+                processFont(item, propertyName, map);
+                break;
+            }
 
-                case QVariant::Color: {
-                    processColor(item, propertyName, map);
-                    break;
-                }
+            case QVariant::Color: {
+                processColor(item, propertyName, map);
+                break;
+            }
 
-                case QVariant::Bool: {
-                    processBool(item, propertyName, map);
-                    break;
-                }
+            case QVariant::Bool: {
+                processBool(item, propertyName, map);
+                break;
+            }
 
-                case QVariant::String: {
-                    processString(item, propertyName, map);
-                    break;
-                }
+            case QVariant::String: {
+                processString(item, propertyName, map);
+                break;
+            }
 
-                case QVariant::Url: {
-                    processUrl(item, propertyName, map);
-                    break;
-                }
+            case QVariant::Url: {
+                processUrl(item, propertyName, map);
+                break;
+            }
 
-                case QVariant::Double: {
-                    if (propertyName == "x" || propertyName == "y" ||
+            case QVariant::Double: {
+                if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
-                        if (propertyName == "x") //To make it called only once
-                            processGeometryF(item, "geometry", selectedControls[0]);
-                    } else {
-                        if (propertyName == "z")
-                            map[propertyName] = selectedControls[0]->zValue();
-                        processDouble(item, propertyName, map);
-                    }
-                    break;
+                    if (propertyName == "x") //To make it called only once
+                        processGeometryF(item, "geometry", selectedControls[0]);
+                } else {
+                    if (propertyName == "z")
+                        map[propertyName] = selectedControls[0]->zValue();
+                    processDouble(item, propertyName, map);
                 }
+                break;
+            }
 
-                case QVariant::Int: {
-                    if (propertyName == "x" || propertyName == "y" ||
+            case QVariant::Int: {
+                if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
-                        if (propertyName == "x")
-                            processGeometry(item, "geometry", selectedControls[0]);
-                    } else {
-                        processInt(item, propertyName, map);
-                    }
-                    break;
+                    if (propertyName == "x")
+                        processGeometry(item, "geometry", selectedControls[0]);
+                } else {
+                    processInt(item, propertyName, map);
                 }
+                break;
+            }
 
-                default: {
-                    continue;
-                    // QTreeWidgetItem* iitem = new QTreeWidgetItem;
-                    // iitem->setText(0, propertyName);
-                    // iitem->setText(1, map.value(propertyName).typeName());
-                    // item->addChild(iitem);
-                    // break;
-                }
+            default: {
+                continue;
+                // QTreeWidgetItem* iitem = new QTreeWidgetItem;
+                // iitem->setText(0, propertyName);
+                // iitem->setText(1, map.value(propertyName).typeName());
+                // item->addChild(iitem);
+                // break;
+            }
             }
         }
 
         for (auto e : enums) {
-             auto item1 = new QTreeWidgetItem;
-             item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-             item1->setText(0, e.name);
-             item1->setData(1, Qt::EditRole, e.value);
-             item1->setData(1, NodeRole::Type, PropertiesPane::NodeType::EnumType);
-             item1->setData(1, NodeRole::Data, QVariant::fromValue(e));
-             item->addChild(item1);
+            auto item1 = new QTreeWidgetItem;
+            item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+            item1->setText(0, e.name);
+            item1->setData(1, Qt::EditRole, e.value);
+            item1->setData(1, NodeRole::Type, PropertiesPane::NodeType::EnumType);
+            item1->setData(1, NodeRole::Data, QVariant::fromValue(e));
+            item->addChild(item1);
         }
 
-        _treeWidget->addTopLevelItem(item);
-        _treeWidget->expandItem(item);
+        addTopLevelItem(item);
+        expandItem(item);
     }
 
-    filterList(_searchEdit->text());
+    filterList(m_searchEdit->text());
 
-    _treeWidget->verticalScrollBar()->setSliderPosition(vsp);
-    _treeWidget->horizontalScrollBar()->setSliderPosition(hsp);
+    verticalScrollBar()->setSliderPosition(vsp);
+    horizontalScrollBar()->setSliderPosition(hsp);
 }
 
 void PropertiesPane::handleSelectionChange()
@@ -985,8 +981,8 @@ void PropertiesPane::handleSelectionChange()
 
 void PropertiesPane::filterList(const QString& filter)
 {
-    for (int i = 0; i < _treeWidget->topLevelItemCount(); i++) {
-        auto tli = _treeWidget->topLevelItem(i);
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        auto tli = topLevelItem(i);
         auto tlv = false;
 
         for (int j = 0; j < tli->childCount(); j++) {
@@ -997,7 +993,7 @@ void PropertiesPane::filterList(const QString& filter)
             for (int z = 0; z < tci->childCount(); z++) {
                 auto tdi = tci->child(z);
                 auto v = (filter.isEmpty() || vv) ? true :
-                  tdi->text(0).contains(filter, Qt::CaseInsensitive);
+                                                    tdi->text(0).contains(filter, Qt::CaseInsensitive);
 
                 tdi->setHidden(!v);
                 if (v)
@@ -1020,7 +1016,7 @@ void PropertiesPane::processFont(QTreeWidgetItem* item, const QString& propertyN
     const auto value = map.value(propertyName).value<QFont>();
     const auto px = value.pixelSize() > 0 ? true : false;
     const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
-                    .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
+            .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -1100,7 +1096,7 @@ void PropertiesPane::processGeometry(QTreeWidgetItem* item, const QString& prope
 {
     const auto value = QRect(control->pos().toPoint(), control->size().toSize());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-                    arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
+            arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -1145,8 +1141,8 @@ void PropertiesPane::processGeometryF(QTreeWidgetItem* item, const QString& prop
 {
     const auto value = QRectF(control->pos(), control->size());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-                    arg((int)value.x()).arg((int)value.y()).
-                    arg((int)value.width()).arg((int)value.height());
+            arg((int)value.x()).arg((int)value.y()).
+            arg((int)value.width()).arg((int)value.height());
 
     auto iitem = new QTreeWidgetItem;
     iitem->setText(0, propertyName);
@@ -1287,7 +1283,7 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 
     const QString& previousId = sc->id();
 
-// FIXME   SaveManager::setProperty(sc, property, parserValue);
+    // FIXME   SaveManager::setProperty(sc, property, parserValue);
 
     if (property == "id") {
         ControlPreviewingManager::scheduleIdUpdate(sc->uid(), value.toString());
@@ -1301,98 +1297,98 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
 {
     QString property;
     switch (type) {
-        case PropertiesPane::FontFamily:
-            property = "font.family";
-            break;
+    case PropertiesPane::FontFamily:
+        property = "font.family";
+        break;
 
-        case PropertiesPane::FontWeight:
-            property = "font.weight";
-            break;
+    case PropertiesPane::FontWeight:
+        property = "font.weight";
+        break;
 
-        case PropertiesPane::FontPtSize:
-            property = "font.pointSize";
-            break;
+    case PropertiesPane::FontPtSize:
+        property = "font.pointSize";
+        break;
 
-        case PropertiesPane::FontPxSize:
-            property = "font.pixelSize";
-            break;
+    case PropertiesPane::FontPxSize:
+        property = "font.pixelSize";
+        break;
 
-        case PropertiesPane::FontBold:
-            property = "font.bold";
-            break;
+    case PropertiesPane::FontBold:
+        property = "font.bold";
+        break;
 
-        case PropertiesPane::FontItalic:
-            property = "font.italic";
-            break;
+    case PropertiesPane::FontItalic:
+        property = "font.italic";
+        break;
 
-        case PropertiesPane::FontUnderline:
-            property = "font.underline";
-            break;
+    case PropertiesPane::FontUnderline:
+        property = "font.underline";
+        break;
 
-        case PropertiesPane::FontOverline:
-            property = "font.overline";
-            break;
+    case PropertiesPane::FontOverline:
+        property = "font.overline";
+        break;
 
-        case PropertiesPane::FontStrikeout:
-            property = "font.strikeout";
-            break;
+    case PropertiesPane::FontStrikeout:
+        property = "font.strikeout";
+        break;
 
-        case PropertiesPane::GeometryX:
-        case PropertiesPane::GeometryFX: {
-            auto sc = m_designerScene->selectedControls();
-            if (sc.size() != 1)
-                return;
-            if (sc[0]->form()) {
-                property = "x";
-                break;
-            } else if (!sc[0]->gui() || sc[0]->hasErrors()) {
-                sc[0]->setX(value.toReal());
-//                BUG SaveUtils::setX(sc[0]->dir(), sc[0]->x());
-//                BUG SaveUtils::setY(sc[0]->dir(), sc[0]->y());
-                return;
-            } else {
-                sc[0]->setX(value.toReal());
-            }
+    case PropertiesPane::GeometryX:
+    case PropertiesPane::GeometryFX: {
+        auto sc = m_designerScene->selectedControls();
+        if (sc.size() != 1)
+            return;
+        if (sc[0]->form()) {
+            property = "x";
+            break;
+        } else if (!sc[0]->gui() || sc[0]->hasErrors()) {
+            sc[0]->setX(value.toReal());
+            //                BUG SaveUtils::setX(sc[0]->dir(), sc[0]->x());
+            //                BUG SaveUtils::setY(sc[0]->dir(), sc[0]->y());
+            return;
+        } else {
+            sc[0]->setX(value.toReal());
         }
+    }
 
-        case PropertiesPane::GeometryY:
-        case PropertiesPane::GeometryFY: {
-            auto sc = m_designerScene->selectedControls();
-            if (sc.size() != 1)
-                return;
-            if (sc[0]->form()) {
-                property = "y";
-                break;
-            } else {
-                sc[0]->setY(value.toReal());
-                return;
-            }
-        }
-
-        case PropertiesPane::GeometryWidth:
-        case PropertiesPane::GeometryFWidth: {
-            auto sc = m_designerScene->selectedControls();
-            if (sc.size() != 1)
-                return;
-            if (sc[0]->gui() && !sc[0]->hasErrors())
-                sc[0]->resize(value.toReal(), sc[0]->size().height());
-            else
-                return;
-        }
-
-        case PropertiesPane::GeometryHeight:
-        case PropertiesPane::GeometryFHeight: {
-            auto sc = m_designerScene->selectedControls();
-            if (sc.size() != 1)
-                return;
-            if (sc[0]->gui() && !sc[0]->hasErrors())
-                sc[0]->resize(sc[0]->size().width(), value.toReal());
-            else
-                return;
-        }
-
-        default:
+    case PropertiesPane::GeometryY:
+    case PropertiesPane::GeometryFY: {
+        auto sc = m_designerScene->selectedControls();
+        if (sc.size() != 1)
+            return;
+        if (sc[0]->form()) {
+            property = "y";
             break;
+        } else {
+            sc[0]->setY(value.toReal());
+            return;
+        }
+    }
+
+    case PropertiesPane::GeometryWidth:
+    case PropertiesPane::GeometryFWidth: {
+        auto sc = m_designerScene->selectedControls();
+        if (sc.size() != 1)
+            return;
+        if (sc[0]->gui() && !sc[0]->hasErrors())
+            sc[0]->resize(value.toReal(), sc[0]->size().height());
+        else
+            return;
+    }
+
+    case PropertiesPane::GeometryHeight:
+    case PropertiesPane::GeometryFHeight: {
+        auto sc = m_designerScene->selectedControls();
+        if (sc.size() != 1)
+            return;
+        if (sc[0]->gui() && !sc[0]->hasErrors())
+            sc[0]->resize(sc[0]->size().width(), value.toReal());
+        else
+            return;
+    }
+
+    default:
+        break;
     }
     saveChanges(property, parserValue, value);
 }
@@ -1400,12 +1396,12 @@ void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QSt
 // TODO: Visibility control->properties()'den alınmayacak, ParserWorker ile alınacak
 bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == _treeWidget->viewport()) {
+    if (watched == viewport()) {
         if (event->type() == QEvent::Paint) {
             auto w = (QWidget*)watched;
             QPainter painter(w);
             painter.setRenderHint(QPainter::Antialiasing);
-            if (_treeWidget->topLevelItemCount() == 0) {
+            if (topLevelItemCount() == 0) {
                 auto sc = m_designerScene->selectedControls();
                 bool drawn = false;
                 const qreal ic = w->height() / 20; // WARNING: Constant 20?
@@ -1425,21 +1421,21 @@ bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
                 }
 
             } else {
-                const auto tli = _treeWidget->topLevelItem(_treeWidget->topLevelItemCount() - 1);
+                const auto tli = topLevelItem(topLevelItemCount() - 1);
                 const auto lci = tli->child(tli->childCount() - 1);
-                auto lcir = _treeWidget->visualItemRect(lci);
+                auto lcir = visualItemRect(lci);
 
                 if (lcir.isNull())
-                    lcir = _treeWidget->visualItemRect(tli);
+                    lcir = visualItemRect(tli);
 
-                const qreal ic = (_treeWidget->viewport()->height() + qAbs(lcir.y())) / (qreal) lcir.height();
+                const qreal ic = (viewport()->height() + qAbs(lcir.y())) / (qreal) lcir.height();
 
                 for (int i = 0; i < ic; i++) {
                     if (i % 2) {
                         painter.fillRect(
                                     0,
                                     lcir.y() + i * lcir.height(),
-                                    _treeWidget->viewport()->width(),
+                                    viewport()->width(),
                                     lcir.height(),
                                     QColor("#faf1e8")
                                     );

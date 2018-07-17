@@ -38,7 +38,7 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selecte
     }
 
     // Draw top and bottom lines
-    painter->setPen("#10000000");
+    painter->setPen("#05000000");
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
@@ -156,14 +156,13 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
 class InspectorListDelegate: public QStyledItemDelegate
 {
     Q_OBJECT
-    InspectorPane* m_treeWidget;
 
 public:
-    InspectorListDelegate(InspectorPane* parent) : QStyledItemDelegate(parent)
-      , m_treeWidget(parent)
+    explicit InspectorListDelegate(InspectorPane* parent) : QStyledItemDelegate(parent)
+      , m_inspectorPane(parent)
     {}
 
-    void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         painter->setRenderHint(QPainter::Antialiasing);
 
@@ -177,7 +176,7 @@ public:
         iconRect.moveLeft(option.rect.left() + 5);
 
         fillBackground(painter, option.rect,
-                       calculateVisibleRow(m_treeWidget->itemFromIndex(index), m_treeWidget),
+                       calculateVisibleRow(m_inspectorPane->itemFromIndex(index), m_inspectorPane),
                        isSelected, index.column() == 0);
 
         // Draw icon
@@ -193,6 +192,9 @@ public:
         painter->drawText(option.rect.adjusted(25, 0, 0, 0), index.data(Qt::EditRole).toString(),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
     }
+
+private:
+    InspectorPane* m_inspectorPane;
 };
 
 InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)

@@ -1,16 +1,14 @@
 #ifndef PROPERTIESPANE_H
 #define PROPERTIESPANE_H
 
-#include <QWidget>
+#include <QTreeWidget>
 
 class QVBoxLayout;
-class QTreeWidget;
 class FocuslessLineEdit;
 class DesignerScene;
 class Control;
-class QTreeWidgetItem;
 
-class PropertiesPane : public QWidget
+class PropertiesPane : public QTreeWidget
 {
     Q_OBJECT
 
@@ -59,7 +57,9 @@ public slots:
 
 protected:
     QSize sizeHint() const override;
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
+    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
+    void updateGeometries() override;
 
 private slots:
     void clearList();
@@ -79,11 +79,7 @@ private:
 
 public:
     DesignerScene* m_designerScene;
-
-private:
-    QVBoxLayout* _layout;
-    QTreeWidget* _treeWidget;
-    FocuslessLineEdit* _searchEdit;
+    FocuslessLineEdit* m_searchEdit;
 };
 
 Q_DECLARE_METATYPE(PropertiesPane::NodeType)

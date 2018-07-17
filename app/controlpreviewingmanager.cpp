@@ -10,6 +10,7 @@
 #include <QProcess>
 #include <QCoreApplication>
 #include <QLocalServer>
+#include <QMessageBox>
 
 namespace { bool g_initScheduled = false; }
 
@@ -163,13 +164,20 @@ void ControlPreviewingManager::onConnected()
 
 void ControlPreviewingManager::onDisconnected()
 {
-    // TODO
-    qWarning() << "Connection lost, in" << __FILE__ << ":" << __LINE__;
+    if (!ProjectManager::hash().isEmpty()) {
+        QMessageBox::StandardButton answer = QMessageBox::question(
+                    0, "Objectwheel",
+                    tr("Connection lost to Previewing Engine. Would you like to start it over again?"));
+
+        if (answer & QMessageBox::Yes)
+            scheduleInit();
+    }
 }
 
 void ControlPreviewingManager::onConnectionTimeout()
 {
     // TODO
+
     qWarning() << "Connection timeout, in" << __FILE__ << ":" << __LINE__;
 }
 
