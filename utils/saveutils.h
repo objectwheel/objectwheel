@@ -53,6 +53,7 @@ public:
 
     static QString toUrl(const QString& rootPath);
     static QString toIcon(const QString& rootPath);
+    static QString toThisDir(const QString& rootPath);
     static QString toParentDir(const QString& topPath);
     static QString toChildrenDir(const QString& rootPath);
     static QString toProjectFile(const QString& projectDir);

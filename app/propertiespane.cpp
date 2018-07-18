@@ -15,7 +15,304 @@
 
 #include <QtWidgets>
 
+namespace {
+
+enum NodeType {
+    EnumType,
+    FontFamily,
+    FontWeight,
+    FontPtSize,
+    FontPxSize,
+    FontBold,
+    FontItalic,
+    FontUnderline,
+    FontOverline,
+    FontStrikeout,
+    Color,
+    Bool,
+    String,
+    Id,
+    Url,
+    Double,
+    Int,
+    GeometryX,
+    GeometryY,
+    GeometryWidth,
+    GeometryHeight,
+    GeometryFX,
+    GeometryFY,
+    GeometryFWidth,
+    GeometryFHeight
+};
+
+enum NodeRole {
+    Type = Qt::UserRole + 1,
+    Data
+};
+
+void processFont(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+{
+    const auto value = map.value(propertyName).value<QFont>();
+    const auto px = value.pixelSize() > 0 ? true : false;
+    const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
+            .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, ft);
+
+    auto item0 = new QTreeWidgetItem;
+    item0->setFlags(item0->flags() | Qt::ItemIsEditable);
+    item0->setText(0, "family");
+    item0->setData(1, Qt::EditRole, value.family());
+    item0->setData(1, NodeRole::Type, NodeType::FontFamily);
+    item0->setData(1, NodeRole::Data, value.family());
+    iitem->addChild(item0);
+
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "weight");
+    item1->setData(1, Qt::EditRole, QMetaEnum::fromType<QFont::Weight>().valueToKey(value.weight()));
+    item1->setData(1, NodeRole::Type, NodeType::FontWeight);
+    item1->setData(1, NodeRole::Data, value.weight());
+    iitem->addChild(item1);
+
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "pointSize");
+    item2->setData(1, Qt::EditRole, value.pointSize() < 0 ? 0 : value.pointSize());
+    item2->setData(1, NodeRole::Type, NodeType::FontPtSize);
+    item2->setData(1, NodeRole::Data, value.pointSize() < 0 ? 0 : value.pointSize());
+    iitem->addChild(item2);
+
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "pixelSize");
+    item3->setData(1, Qt::EditRole, value.pixelSize() < 0 ? 0 : value.pixelSize());
+    item3->setData(1, NodeRole::Type, NodeType::FontPxSize);
+    item3->setData(1, NodeRole::Data, value.pixelSize() < 0 ? 0 : value.pixelSize());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "bold");
+    item4->setData(1, NodeRole::Type, NodeType::FontBold);
+    item4->setData(1, NodeRole::Data, value.bold());
+    iitem->addChild(item4);
+
+    auto item5 = new QTreeWidgetItem;
+    item5->setFlags(item5->flags() | Qt::ItemIsEditable);
+    item5->setText(0, "italic");
+    item5->setData(1, NodeRole::Type, NodeType::FontItalic);
+    item5->setData(1, NodeRole::Data, value.italic());
+    iitem->addChild(item5);
+
+    auto item6 = new QTreeWidgetItem;
+    item6->setFlags(item6->flags() | Qt::ItemIsEditable);
+    item6->setText(0, "underline");
+    item6->setData(1, NodeRole::Type, NodeType::FontUnderline);
+    item6->setData(1, NodeRole::Data, value.underline());
+    iitem->addChild(item6);
+
+    auto item7 = new QTreeWidgetItem;
+    item7->setFlags(item7->flags() | Qt::ItemIsEditable);
+    item7->setText(0, "overline");
+    item7->setData(1, NodeRole::Type, NodeType::FontOverline);
+    item7->setData(1, NodeRole::Data, value.overline());
+    iitem->addChild(item7);
+
+    auto item8 = new QTreeWidgetItem;
+    item8->setFlags(item8->flags() | Qt::ItemIsEditable);
+    item8->setText(0, "strikeout");
+    item8->setData(1, NodeRole::Type, NodeType::FontStrikeout);
+    item8->setData(1, NodeRole::Data, value.strikeOut());
+    iitem->addChild(item8);
+
+    item->addChild(iitem);
+}
+
+void processGeometry(QTreeWidgetItem* item, const QString& propertyName, Control* control)
+{
+    const auto value = QRect(control->pos().toPoint(), control->size().toSize());
+    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+            arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, gt);
+
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "x");
+    item1->setData(1, Qt::EditRole, value.x());
+    item1->setData(1, NodeRole::Type, NodeType::GeometryX);
+    item1->setData(1, NodeRole::Data, value.x());
+    iitem->addChild(item1);
+
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "y");
+    item2->setData(1, Qt::EditRole, value.y());
+    item2->setData(1, NodeRole::Type, NodeType::GeometryY);
+    item2->setData(1, NodeRole::Data, value.y());
+    iitem->addChild(item2);
+
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "width");
+    item3->setData(1, Qt::EditRole, value.width());
+    item3->setData(1, NodeRole::Type, NodeType::GeometryWidth);
+    item3->setData(1, NodeRole::Data, value.width());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "height");
+    item4->setData(1, Qt::EditRole, value.height());
+    item4->setData(1, NodeRole::Type, NodeType::GeometryHeight);
+    item4->setData(1, NodeRole::Data, value.height());
+    iitem->addChild(item4);
+
+    item->addChild(iitem);
+}
+
+void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, Control* control)
+{
+    const auto value = QRectF(control->pos(), control->size());
+    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
+            arg((int)value.x()).arg((int)value.y()).
+            arg((int)value.width()).arg((int)value.height());
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setText(1, gt);
+
+    auto item1 = new QTreeWidgetItem;
+    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+    item1->setText(0, "x");
+    item1->setData(1, Qt::EditRole, value.x());
+    item1->setData(1, NodeRole::Type, NodeType::GeometryFX);
+    item1->setData(1, NodeRole::Data, value.x());
+    iitem->addChild(item1);
+
+    auto item2 = new QTreeWidgetItem;
+    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
+    item2->setText(0, "y");
+    item2->setData(1, Qt::EditRole, value.y());
+    item2->setData(1, NodeRole::Type, NodeType::GeometryFY);
+    item2->setData(1, NodeRole::Data, value.y());
+    iitem->addChild(item2);
+
+    auto item3 = new QTreeWidgetItem;
+    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
+    item3->setText(0, "width");
+    item3->setData(1, Qt::EditRole, value.width());
+    item3->setData(1, NodeRole::Type, NodeType::GeometryFWidth);
+    item3->setData(1, NodeRole::Data, value.width());
+    iitem->addChild(item3);
+
+    auto item4 = new QTreeWidgetItem;
+    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
+    item4->setText(0, "height");
+    item4->setData(1, Qt::EditRole, value.height());
+    item4->setData(1, NodeRole::Type, NodeType::GeometryFHeight);
+    item4->setData(1, NodeRole::Data, value.height());
+    iitem->addChild(item4);
+
+    item->addChild(iitem);
+}
+
+void processColor(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+{
+    const auto value = map.value(propertyName).value<QColor>();
+    const auto cc = value.name(QColor::HexArgb);
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, cc);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Color);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+void processBool(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+{
+    const auto value = map.value(propertyName).value<bool>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Bool);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+void processString(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+{
+    const auto value = map.value(propertyName).value<QString>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::String);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+void processUrl(QTreeWidgetItem* item, const QString& propertyName, const QString& relativePath, const QMap<QString, QVariant>& map)
+{
+    const auto value = map.value(propertyName).value<QUrl>();
+    auto dispText = value.toDisplayString();
+    if (value.isLocalFile())
+        dispText = value.toLocalFile().remove(SaveUtils::toThisDir(relativePath) + separator());
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, dispText);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Url);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+void processDouble(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+{
+    const auto value = map.value(propertyName).value<double>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Double);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+
+void processInt(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+{
+    const auto value = map.value(propertyName).value<int>();
+
+    auto iitem = new QTreeWidgetItem;
+    iitem->setText(0, propertyName);
+    iitem->setData(1, Qt::EditRole, value);
+    iitem->setData(1, NodeRole::Data, value);
+    iitem->setData(1, NodeRole::Type, NodeType::Int);
+    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+
+    item->addChild(iitem);
+}
+}
 // FIXME: Fix this from scratch
+// TODO: Visibility control->properties()'den alınmayacak, ParserWorker ile alınacak
+
+Q_DECLARE_METATYPE(NodeType)
 
 class PropertiesListDelegate : public QStyledItemDelegate
 {
@@ -44,14 +341,14 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
     if (index.column() == 0)
         return ed;
 
-    auto type = index.data(PropertiesPane::Type).value<PropertiesPane::NodeType>();
+    auto type = index.data(NodeRole::Type).value<NodeType>();
     auto pIndex = m_propertiesPane->model()->index(index.row(), 0, index.parent());
     auto property = m_propertiesPane->model()->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
-    case PropertiesPane::EnumType: {
+    case NodeType::EnumType: {
         auto editor = new QComboBox(parent);
-        auto e = index.data(PropertiesPane::NodeRole::Data).value<Enum>();
+        auto e = index.data(NodeRole::Data).value<Enum>();
         editor->addItems(e.keys.keys());
         connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -60,7 +357,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::FontFamily: {
+    case NodeType::FontFamily: {
         auto editor = new QComboBox(parent);
         editor->addItems(QFontDatabase().families());
         connect(editor, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated),
@@ -70,7 +367,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::FontWeight: {
+    case NodeType::FontWeight: {
         auto editor = new QComboBox(parent);
         auto fenum = QMetaEnum::fromType<QFont::Weight>();
         for (int i = fenum.keyCount(); i--;)
@@ -83,8 +380,8 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::FontPtSize:
-    case PropertiesPane::FontPxSize: {
+    case NodeType::FontPtSize:
+    case NodeType::FontPxSize: {
         auto editor = new QSpinBox(parent);
         connect(editor, &QSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -95,12 +392,12 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::FontBold:
-    case PropertiesPane::FontItalic:
-    case PropertiesPane::FontUnderline:
-    case PropertiesPane::FontOverline:
-    case PropertiesPane::FontStrikeout:
-    case PropertiesPane::Bool: {
+    case NodeType::FontBold:
+    case NodeType::FontItalic:
+    case NodeType::FontUnderline:
+    case NodeType::FontOverline:
+    case NodeType::FontStrikeout:
+    case NodeType::Bool: {
         auto editor = new QCheckBox(parent);
         connect(editor, &QCheckBox::toggled,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -109,7 +406,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::Color: {
+    case NodeType::Color: {
         auto editor = new QToolButton(parent);
         editor->setFocusPolicy(Qt::StrongFocus);
         editor->setText("Change Color");
@@ -117,7 +414,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
 
         connect(editor, &QCheckBox::clicked, [this, property, index] ()
         {
-            auto color = index.data(PropertiesPane::NodeRole::Data).value<QColor>();
+            auto color = index.data(NodeRole::Data).value<QColor>();
             color = QColorDialog::getColor(
                         Qt::white,
                         m_propertiesPane,
@@ -126,7 +423,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
                         );
 
             if (color.isValid()) {
-                m_propertiesPane->model()->setData(index, color, PropertiesPane::NodeRole::Data);
+                m_propertiesPane->model()->setData(index, color, NodeRole::Data);
                 m_propertiesPane->model()->setData(index, color.name(QColor::HexArgb), Qt::EditRole);
                 m_propertiesPane->saveChanges(property, "\"" + color.name(QColor::HexArgb) + "\"", color);
             }
@@ -134,7 +431,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::String: {
+    case NodeType::String: {
         auto editor = new QLineEdit(parent);
         connect(editor, &QLineEdit::editingFinished,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -143,7 +440,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::Id: {
+    case NodeType::Id: {
         auto editor = new QLineEdit(parent);
         QRegExp rx("[a-z_][a-zA-Z0-9_]+");
         QValidator* validator = new QRegExpValidator(rx, editor);
@@ -155,7 +452,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::Url: {
+    case NodeType::Url: {
         auto editor = new QLineEdit(parent);
         connect(editor, &QLineEdit::editingFinished,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -164,7 +461,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::Double: {
+    case NodeType::Double: {
         auto editor = new QDoubleSpinBox(parent);
         connect(editor, &QDoubleSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -181,7 +478,7 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::Int: {
+    case NodeType::Int: {
         auto editor = new QSpinBox(parent);
         connect(editor, &QSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -192,10 +489,10 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::GeometryX:
-    case PropertiesPane::GeometryY:
-    case PropertiesPane::GeometryWidth:
-    case PropertiesPane::GeometryHeight: {
+    case NodeType::GeometryX:
+    case NodeType::GeometryY:
+    case NodeType::GeometryWidth:
+    case NodeType::GeometryHeight: {
         auto editor = new QSpinBox(parent);
         connect(editor, &QSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -206,10 +503,10 @@ QWidget* PropertiesListDelegate::createEditor(QWidget* parent, const QStyleOptio
         break;
     }
 
-    case PropertiesPane::GeometryFX:
-    case PropertiesPane::GeometryFY:
-    case PropertiesPane::GeometryFWidth:
-    case PropertiesPane::GeometryFHeight: {
+    case NodeType::GeometryFX:
+    case NodeType::GeometryFY:
+    case NodeType::GeometryFWidth:
+    case NodeType::GeometryFHeight: {
         auto editor = new QDoubleSpinBox(parent);
         connect(editor, &QDoubleSpinBox::editingFinished,
                 [this, editor] () { ((PropertiesListDelegate*)this)->commitData(editor); });
@@ -232,61 +529,61 @@ void PropertiesListDelegate::setEditorData(QWidget* ed, const QModelIndex& index
     if (index.column() == 0)
         return;
 
-    auto type = index.data(PropertiesPane::NodeRole::Type).value<PropertiesPane::NodeType>();
+    auto type = index.data(NodeRole::Type).value<NodeType>();
 
     switch (type) {
-    case PropertiesPane::EnumType: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<Enum>();
+    case NodeType::EnumType: {
+        auto val = index.model()->data(index, NodeRole::Data).value<Enum>();
         auto editor = static_cast<QComboBox*>(ed);
         editor->setCurrentText(val.value);
         break;
     }
 
-    case PropertiesPane::FontFamily: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QString>();
+    case NodeType::FontFamily: {
+        auto val = index.model()->data(index, NodeRole::Data).value<QString>();
         auto editor = static_cast<QComboBox*>(ed);
         editor->setCurrentText(val);
         break;
     }
 
-    case PropertiesPane::FontWeight: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QFont::Weight>();
+    case NodeType::FontWeight: {
+        auto val = index.model()->data(index, NodeRole::Data).value<QFont::Weight>();
         auto editor = static_cast<QComboBox*>(ed);
         editor->setCurrentText(QMetaEnum::fromType<QFont::Weight>().valueToKey(val));
         break;
     }
 
-    case PropertiesPane::FontPtSize:
-    case PropertiesPane::FontPxSize: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
+    case NodeType::FontPtSize:
+    case NodeType::FontPxSize: {
+        auto val = index.model()->data(index, NodeRole::Data).value<int>();
         auto editor = static_cast<QSpinBox*>(ed);
         editor->setValue(val);
         break;
     }
 
-    case PropertiesPane::FontBold:
-    case PropertiesPane::FontItalic:
-    case PropertiesPane::FontUnderline:
-    case PropertiesPane::FontOverline:
-    case PropertiesPane::FontStrikeout:
-    case PropertiesPane::Bool: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<bool>();
+    case NodeType::FontBold:
+    case NodeType::FontItalic:
+    case NodeType::FontUnderline:
+    case NodeType::FontOverline:
+    case NodeType::FontStrikeout:
+    case NodeType::Bool: {
+        auto val = index.model()->data(index, NodeRole::Data).value<bool>();
         auto editor = static_cast<QCheckBox*>(ed);
         editor->setChecked(val);
         break;
     }
 
-    case PropertiesPane::Id:
-    case PropertiesPane::String: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QString>();
+    case NodeType::Id:
+    case NodeType::String: {
+        auto val = index.model()->data(index, NodeRole::Data).value<QString>();
         auto editor = static_cast<QLineEdit*>(ed);
         editor->setText(val);
         break;
     }
 
-    case PropertiesPane::Url: {
+    case NodeType::Url: {
         auto selectedControl = m_propertiesPane->m_designerScene->selectedControls().at(0);
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<QUrl>();
+        auto val = index.model()->data(index, NodeRole::Data).value<QUrl>();
         auto editor = static_cast<QLineEdit*>(ed);
         auto dispText = val.toDisplayString();
         if (val.isLocalFile()) {
@@ -297,35 +594,35 @@ void PropertiesListDelegate::setEditorData(QWidget* ed, const QModelIndex& index
         break;
     }
 
-    case PropertiesPane::Double: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<double>();
+    case NodeType::Double: {
+        auto val = index.model()->data(index, NodeRole::Data).value<double>();
         auto editor = static_cast<QDoubleSpinBox*>(ed);
         editor->setValue(val);
         break;
     }
 
-    case PropertiesPane::Int: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
+    case NodeType::Int: {
+        auto val = index.model()->data(index, NodeRole::Data).value<int>();
         auto editor = static_cast<QSpinBox*>(ed);
         editor->setValue(val);
         break;
     }
 
-    case PropertiesPane::GeometryX:
-    case PropertiesPane::GeometryY:
-    case PropertiesPane::GeometryWidth:
-    case PropertiesPane::GeometryHeight: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<int>();
+    case NodeType::GeometryX:
+    case NodeType::GeometryY:
+    case NodeType::GeometryWidth:
+    case NodeType::GeometryHeight: {
+        auto val = index.model()->data(index, NodeRole::Data).value<int>();
         auto editor = static_cast<QSpinBox*>(ed);
         editor->setValue(val);
         break;
     }
 
-    case PropertiesPane::GeometryFX:
-    case PropertiesPane::GeometryFY:
-    case PropertiesPane::GeometryFWidth:
-    case PropertiesPane::GeometryFHeight: {
-        auto val = index.model()->data(index, PropertiesPane::NodeRole::Data).value<double>();
+    case NodeType::GeometryFX:
+    case NodeType::GeometryFY:
+    case NodeType::GeometryFWidth:
+    case NodeType::GeometryFHeight: {
+        auto val = index.model()->data(index, NodeRole::Data).value<double>();
         auto editor = static_cast<QDoubleSpinBox*>(ed);
         editor->setValue(val);
         break;
@@ -342,12 +639,12 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         return;
 
     QVariant val;
-    auto type = index.data(PropertiesPane::NodeRole::Type).value<PropertiesPane::NodeType>();
+    auto type = index.data(NodeRole::Type).value<NodeType>();
     auto pIndex = model->index(index.row(), 0, index.parent());
     auto property = model->data(pIndex, Qt::DisplayRole).toString();
 
     switch (type) {
-    case PropertiesPane::EnumType: {
+    case NodeType::EnumType: {
         auto editor = static_cast<QComboBox*>(ed);
         val = editor->currentText();
         auto preVal = model->data(index, Qt::EditRole).toString();
@@ -355,17 +652,17 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         if (val == preVal)
             return;
 
-        auto e = index.data(PropertiesPane::NodeRole::Data).value<Enum>();
+        auto e = index.data(NodeRole::Data).value<Enum>();
         e.value = val.toString();
 
-        model->setData(index, QVariant::fromValue(e), PropertiesPane::NodeRole::Data);
+        model->setData(index, QVariant::fromValue(e), NodeRole::Data);
         model->setData(index, e.value, Qt::EditRole);
 
         m_propertiesPane->saveChanges(property, e.scope + "." + e.value, e.keys.value(e.value));
         break;
     }
 
-    case PropertiesPane::FontFamily: {
+    case NodeType::FontFamily: {
         auto editor = static_cast<QComboBox*>(ed);
         val = editor->currentText();
         auto preVal = model->data(index, Qt::EditRole).toString();
@@ -373,7 +670,7 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
 
         // Update parent node
@@ -382,11 +679,11 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         pVal.replace(preVal, val.toString());
         model->setData(pIndex, pVal, Qt::DisplayRole);
 
-        m_propertiesPane->saveChanges(type, "\"" + val.toString() + "\"", val);
+        m_propertiesPane->saveChanges("font." + property, "\"" + val.toString() + "\"", val);
         break;
     }
 
-    case PropertiesPane::FontWeight: {
+    case NodeType::FontWeight: {
         auto editor = static_cast<QComboBox*>(ed);
         val = editor->currentText();
         auto preVal = model->data(index, Qt::EditRole).toString();
@@ -396,15 +693,15 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
 
         auto fenum = QMetaEnum::fromType<QFont::Weight>();
 
-        model->setData(index, fenum.keyToValue(val.toString().toUtf8().data()), PropertiesPane::NodeRole::Data);
+        model->setData(index, fenum.keyToValue(val.toString().toUtf8().data()), NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
 
-        m_propertiesPane->saveChanges(type, "Font." + val.toString(), val);
+        m_propertiesPane->saveChanges("font." + property, "Font." + val.toString(), val);
         break;
     }
 
-    case PropertiesPane::FontPtSize:
-    case PropertiesPane::FontPxSize: {
+    case NodeType::FontPtSize:
+    case NodeType::FontPxSize: {
         auto editor = static_cast<QSpinBox*>(ed);
         val = editor->value();
         auto preVal = model->data(index, Qt::EditRole).toString();
@@ -412,18 +709,18 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
 
         // Update parent node
         int pxSize, ptSize;
-        if (type == PropertiesPane::FontPtSize) {
+        if (type == NodeType::FontPtSize) {
             auto bIndex = model->index(index.row() + 1, 1, index.parent());
-            pxSize = model->data(bIndex, PropertiesPane::NodeRole::Data).toInt();
+            pxSize = model->data(bIndex, NodeRole::Data).toInt();
             ptSize = val.toInt();
         } else {
             auto bIndex = model->index(index.row() - 1, 1, index.parent());
-            ptSize = model->data(bIndex, PropertiesPane::NodeRole::Data).toInt();
+            ptSize = model->data(bIndex, NodeRole::Data).toInt();
             pxSize = val.toInt();
         }
         bool px = pxSize > 0 ? true : false;
@@ -431,41 +728,41 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         auto pVal = model->data(pIndex, Qt::DisplayRole).toString();
         pVal.replace(QRegExp(",.*"), ", " + QString::number(px ? pxSize : ptSize) + (px ? "px]" : "pt]"));
         model->setData(pIndex, pVal, Qt::DisplayRole);
-        m_propertiesPane->saveChanges(type, val.toString(), val);
+        m_propertiesPane->saveChanges("font." + property, val.toString(), val);
         break;
     }
 
-    case PropertiesPane::FontBold:
-    case PropertiesPane::FontItalic:
-    case PropertiesPane::FontUnderline:
-    case PropertiesPane::FontOverline:
-    case PropertiesPane::FontStrikeout: {
+    case NodeType::FontBold:
+    case NodeType::FontItalic:
+    case NodeType::FontUnderline:
+    case NodeType::FontOverline:
+    case NodeType::FontStrikeout: {
         auto editor = static_cast<QCheckBox*>(ed);
         val = editor->isChecked();
-        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toBool();
+        auto preVal = model->data(index, NodeRole::Data).toBool();
 
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
-        m_propertiesPane->saveChanges(type, val.toString(), val);
+        model->setData(index, val, NodeRole::Data);
+        m_propertiesPane->saveChanges("font." + property, val.toString(), val);
         break;
     }
 
-    case PropertiesPane::Bool: {
+    case NodeType::Bool: {
         auto editor = static_cast<QCheckBox*>(ed);
         val = editor->isChecked();
-        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toBool();
+        auto preVal = model->data(index, NodeRole::Data).toBool();
 
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         m_propertiesPane->saveChanges(property, val.toString(), val);
         break;
     }
 
-    case PropertiesPane::Id: {
+    case NodeType::Id: {
         auto editor = static_cast<QLineEdit*>(ed);
         val = editor->text();
         auto preVal = model->data(index, Qt::EditRole).toString();
@@ -473,13 +770,13 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
         m_propertiesPane->saveChanges(property, val.toString(), val);
         break;
     }
 
-    case PropertiesPane::String: {
+    case NodeType::String: {
         auto editor = static_cast<QLineEdit*>(ed);
         val = editor->text();
         auto preVal = model->data(index, Qt::EditRole).toString();
@@ -487,13 +784,13 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
         m_propertiesPane->saveChanges(property, "\"" +val.toString() + "\"", val);
         break;
     }
 
-    case PropertiesPane::Url: {
+    case NodeType::Url: {
         auto editor = static_cast<QLineEdit*>(ed);
         val = QUrl(editor->text());
         auto preVal = model->data(index, Qt::EditRole).toUrl();
@@ -501,21 +798,21 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
         m_propertiesPane->saveChanges(property, "\"" + val.toString() + "\"", val);
         break;
     }
 
-    case PropertiesPane::Double: {
+    case NodeType::Double: {
         auto editor = static_cast<QDoubleSpinBox*>(ed);
         val = editor->value();
-        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toDouble();
+        auto preVal = model->data(index, NodeRole::Data).toDouble();
 
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
         if (property == "z") {
             auto sc = m_propertiesPane->m_designerScene->selectedControls();
@@ -526,32 +823,32 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
         break;
     }
 
-    case PropertiesPane::Int: {
+    case NodeType::Int: {
         auto editor = static_cast<QSpinBox*>(ed);
         val = editor->value();
-        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toInt();
+        auto preVal = model->data(index, NodeRole::Data).toInt();
 
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
         m_propertiesPane->saveChanges(property, val.toString(), val);
         break;
     }
 
-    case PropertiesPane::GeometryX:
-    case PropertiesPane::GeometryY:
-    case PropertiesPane::GeometryWidth:
-    case PropertiesPane::GeometryHeight: {
+    case NodeType::GeometryX:
+    case NodeType::GeometryY:
+    case NodeType::GeometryWidth:
+    case NodeType::GeometryHeight: {
         auto editor = static_cast<QSpinBox*>(ed);
         val = editor->value();
-        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toInt();
+        auto preVal = model->data(index, NodeRole::Data).toInt();
 
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
 
         // Update parent node
@@ -565,22 +862,22 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
                 arg(x).arg(y).arg(w).arg(h);
 
         model->setData(pIndex, gt, Qt::DisplayRole);
-        m_propertiesPane->saveChanges(type, val.toString(), val);
+        m_propertiesPane->saveChanges(property, val.toString(), val);
         break;
     }
 
-    case PropertiesPane::GeometryFX:
-    case PropertiesPane::GeometryFY:
-    case PropertiesPane::GeometryFWidth:
-    case PropertiesPane::GeometryFHeight: {
+    case NodeType::GeometryFX:
+    case NodeType::GeometryFY:
+    case NodeType::GeometryFWidth:
+    case NodeType::GeometryFHeight: {
         auto editor = static_cast<QDoubleSpinBox*>(ed);
         val = editor->value();
-        auto preVal = model->data(index, PropertiesPane::NodeRole::Data).toReal();
+        auto preVal = model->data(index, NodeRole::Data).toReal();
 
         if (val == preVal)
             return;
 
-        model->setData(index, val, PropertiesPane::NodeRole::Data);
+        model->setData(index, val, NodeRole::Data);
         model->setData(index, val, Qt::EditRole);
 
         // Update parent node
@@ -594,7 +891,7 @@ void PropertiesListDelegate::setModelData(QWidget* ed, QAbstractItemModel* model
                 arg(x).arg(y).arg(w).arg(h);
 
         model->setData(pIndex, gt, Qt::DisplayRole);
-        m_propertiesPane->saveChanges(type, val.toString(), val);
+        m_propertiesPane->saveChanges(property, val.toString(), val);
         break;
     }
 
@@ -607,7 +904,7 @@ void PropertiesListDelegate::updateEditorGeometry(QWidget* ed, const QStyleOptio
 {
     QStyledItemDelegate::updateEditorGeometry(ed, option, index);
 
-    auto type = index.data(PropertiesPane::NodeRole::Type).value<PropertiesPane::NodeType>();
+    auto type = index.data(NodeRole::Type).value<NodeType>();
 
     switch (type) {
     case 0:
@@ -674,15 +971,15 @@ void PropertiesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem
                         );
         }
 
-        auto type = index.data(PropertiesPane::NodeRole::Type).value<PropertiesPane::NodeType>();
+        auto type = index.data(NodeRole::Type).value<NodeType>();
         switch (type) {
-        case PropertiesPane::FontBold:
-        case PropertiesPane::FontItalic:
-        case PropertiesPane::FontUnderline:
-        case PropertiesPane::FontOverline:
-        case PropertiesPane::FontStrikeout:
-        case PropertiesPane::Bool: {
-            bool value = index.data(PropertiesPane::NodeRole::Data).value<bool>();
+        case NodeType::FontBold:
+        case NodeType::FontItalic:
+        case NodeType::FontUnderline:
+        case NodeType::FontOverline:
+        case NodeType::FontStrikeout:
+        case NodeType::Bool: {
+            bool value = index.data(NodeRole::Data).value<bool>();
             QStyleOptionButton opt;
             opt.initFrom(m_propertiesPane);
             opt.rect = option.rect;
@@ -696,69 +993,6 @@ void PropertiesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem
             break;
         }
     }
-}
-
-void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
-{
-    qreal width = 10;
-    auto model = index.model();
-    bool hasChild = itemFromIndex(index)->childCount();
-    bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
-    bool isSelected = itemFromIndex(index)->isSelected();
-
-    QRectF branchRect(rect);
-    QRectF handleRect(0, 0, width, width);
-
-    handleRect.moveCenter(branchRect.center());
-    handleRect.moveRight(branchRect.right() - 0.5);
-
-    // Draw background
-    if (isClassRow)
-        painter->setBrush(QColor("#9D7650"));
-    else if (isSelected)
-        painter->setBrush(QColor("#ebd5c0"));
-    else if (index.row() % 2)
-        painter->setBrush(QColor("#faf1e8"));
-    else
-        painter->setBrush(QColor("#fffefc"));
-
-    painter->setPen(Qt::NoPen);
-    painter->drawRect(branchRect);
-
-    // Draw bottom & middle cell lines
-    painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen("#D6CEC6");
-    painter->drawLine(branchRect.bottomLeft() + QPointF(0.5, -0.5), branchRect.bottomRight() + QPointF(-0.5, -0.5));
-
-    // Draw handle
-    if (hasChild) {
-        painter->setPen(isClassRow ? Qt::white : Qt::black);
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRoundedRect(handleRect, 1.5, 1.5);
-
-        painter->drawLine(
-                    QPointF(handleRect.left() + 2.5, handleRect.center().y()),
-                    QPointF(handleRect.right() - 2.5, handleRect.center().y())
-                    );
-
-        if (!isExpanded(index)) {
-            painter->drawLine(
-                        QPointF(handleRect.center().x(), handleRect.top() + 2.5),
-                        QPointF(handleRect.center().x(), handleRect.bottom() - 2.5)
-                        );
-        }
-    }
-}
-
-void PropertiesPane::updateGeometries()
-{
-    QTreeWidget::updateGeometries();
-    QMargins vm = viewportMargins();
-    vm.setBottom(m_searchEdit->height());
-    QRect vg = viewport()->geometry();
-    QRect geometryRect(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
-    setViewportMargins(vm);
-    m_searchEdit->setGeometry(geometryRect);
 }
 
 PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
@@ -781,38 +1015,46 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     setColumnCount(2);
     setIndentation(16);
     setDragEnabled(false);
-    setFocusPolicy(Qt::NoFocus);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
-    headerItem()->setText(1, "Value");
-    headerItem()->setText(0, "Property");
-    viewport()->installEventFilter(this);
-    header()->resizeSection(0, 170);
-    setSelectionBehavior(QTreeWidget::SelectRows);
-    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
-    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    setEditTriggers(QAbstractItemView::AllEditTriggers);
-    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
-    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setExpandsOnDoubleClick(true);
     setItemDelegate(new PropertiesListDelegate(this));
-    header()->setFixedHeight(23);
-    setStyleSheet("QTreeWidget { border: 1px solid #8c6a48; }"
-                  "QHeaderView::section {"
-                  "padding-left: 5px; color: white; border:none; border-bottom: 1px solid #8c6a48;"
-                  "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #AB8157, stop:1 #9C7650);}");
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+    setSelectionBehavior(QTreeWidget::SelectRows);
+    setSelectionMode(QTreeWidget::SingleSelection);
+    setEditTriggers(QAbstractItemView::AllEditTriggers);
+    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    QFont f; f.setWeight(QFont::Medium);
-    header()->setFont(f);
+
+    QFont fontMedium(font());
+    fontMedium.setWeight(QFont::Medium);
+
+    header()->setFont(fontMedium);
+    header()->setFixedHeight(23);
+    header()->resizeSection(0, 180);
+    header()->resizeSection(1, 120);
+    headerItem()->setText(1, tr("Value"));
+    headerItem()->setText(0, tr("Property"));
+    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
+    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
+    setStyleSheet("QTreeView {"
+                  "    border: 1px solid #8c6a48;"
+                  "} QHeaderView::section {"
+                  "    padding-left: 5px;"
+                  "    color: white;"
+                  "    border: none;"
+                  "    border-bottom: 1px solid #8c6a48;"
+                  "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+                  "                                stop:0 #AB8157, stop:1 #9C7650);"
+                  "}");
 
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(22);
     connect(m_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
     setViewportMargins(0, 0, 0, 30);
-
-    //    _layout->addWidget(m_searchEdit);
-    //    _layout->addWidget(_treeWidget);
 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
@@ -866,7 +1108,7 @@ void PropertiesPane::refreshList()
         item_3->setText(0, "id");
         item_3->setData(1, Qt::EditRole, selectedControls[0]->id());
         item_3->setData(1, NodeRole::Data, selectedControls[0]->id());
-        item_3->setData(1, NodeRole::Type, PropertiesPane::NodeType::Id);
+        item_3->setData(1, NodeRole::Type, NodeType::Id);
         item_3->setFlags(item_3->flags() | Qt::ItemIsEditable);
 
         addTopLevelItem(item_1);
@@ -885,8 +1127,7 @@ void PropertiesPane::refreshList()
         item->setText(0, propertyNode.cleanClassName);
 
         for (const auto& propertyName : map.keys()) {
-            switch (map.value(propertyName).type())
-            {
+            switch (map.value(propertyName).type()) {
             case QVariant::Font: {
                 processFont(item, propertyName, map);
                 break;
@@ -908,7 +1149,7 @@ void PropertiesPane::refreshList()
             }
 
             case QVariant::Url: {
-                processUrl(item, propertyName, map);
+                processUrl(item, propertyName, m_designerScene->selectedControls().first()->dir(), map);
                 break;
             }
 
@@ -952,7 +1193,7 @@ void PropertiesPane::refreshList()
             item1->setFlags(item1->flags() | Qt::ItemIsEditable);
             item1->setText(0, e.name);
             item1->setData(1, Qt::EditRole, e.value);
-            item1->setData(1, NodeRole::Type, PropertiesPane::NodeType::EnumType);
+            item1->setData(1, NodeRole::Type, NodeType::EnumType);
             item1->setData(1, NodeRole::Data, QVariant::fromValue(e));
             item->addChild(item1);
         }
@@ -1011,267 +1252,6 @@ void PropertiesPane::filterList(const QString& filter)
     }
 }
 
-void PropertiesPane::processFont(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<QFont>();
-    const auto px = value.pixelSize() > 0 ? true : false;
-    const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
-            .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setText(1, ft);
-
-    auto item0 = new QTreeWidgetItem;
-    item0->setFlags(item0->flags() | Qt::ItemIsEditable);
-    item0->setText(0, "family");
-    item0->setData(1, Qt::EditRole, value.family());
-    item0->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontFamily);
-    item0->setData(1, NodeRole::Data, value.family());
-    iitem->addChild(item0);
-
-    auto item1 = new QTreeWidgetItem;
-    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-    item1->setText(0, "weight");
-    item1->setData(1, Qt::EditRole, QMetaEnum::fromType<QFont::Weight>().valueToKey(value.weight()));
-    item1->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontWeight);
-    item1->setData(1, NodeRole::Data, value.weight());
-    iitem->addChild(item1);
-
-    auto item2 = new QTreeWidgetItem;
-    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
-    item2->setText(0, "pointSize");
-    item2->setData(1, Qt::EditRole, value.pointSize() < 0 ? 0 : value.pointSize());
-    item2->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontPtSize);
-    item2->setData(1, NodeRole::Data, value.pointSize() < 0 ? 0 : value.pointSize());
-    iitem->addChild(item2);
-
-    auto item3 = new QTreeWidgetItem;
-    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
-    item3->setText(0, "pixelSize");
-    item3->setData(1, Qt::EditRole, value.pixelSize() < 0 ? 0 : value.pixelSize());
-    item3->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontPxSize);
-    item3->setData(1, NodeRole::Data, value.pixelSize() < 0 ? 0 : value.pixelSize());
-    iitem->addChild(item3);
-
-    auto item4 = new QTreeWidgetItem;
-    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
-    item4->setText(0, "bold");
-    item4->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontBold);
-    item4->setData(1, NodeRole::Data, value.bold());
-    iitem->addChild(item4);
-
-    auto item5 = new QTreeWidgetItem;
-    item5->setFlags(item5->flags() | Qt::ItemIsEditable);
-    item5->setText(0, "italic");
-    item5->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontItalic);
-    item5->setData(1, NodeRole::Data, value.italic());
-    iitem->addChild(item5);
-
-    auto item6 = new QTreeWidgetItem;
-    item6->setFlags(item6->flags() | Qt::ItemIsEditable);
-    item6->setText(0, "underline");
-    item6->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontUnderline);
-    item6->setData(1, NodeRole::Data, value.underline());
-    iitem->addChild(item6);
-
-    auto item7 = new QTreeWidgetItem;
-    item7->setFlags(item7->flags() | Qt::ItemIsEditable);
-    item7->setText(0, "overline");
-    item7->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontOverline);
-    item7->setData(1, NodeRole::Data, value.overline());
-    iitem->addChild(item7);
-
-    auto item8 = new QTreeWidgetItem;
-    item8->setFlags(item8->flags() | Qt::ItemIsEditable);
-    item8->setText(0, "strikeout");
-    item8->setData(1, NodeRole::Type, PropertiesPane::NodeType::FontStrikeout);
-    item8->setData(1, NodeRole::Data, value.strikeOut());
-    iitem->addChild(item8);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processGeometry(QTreeWidgetItem* item, const QString& propertyName, Control* control)
-{
-    const auto value = QRect(control->pos().toPoint(), control->size().toSize());
-    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-            arg(value.x()).arg(value.y()).arg(value.width()).arg(value.height());
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setText(1, gt);
-
-    auto item1 = new QTreeWidgetItem;
-    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-    item1->setText(0, "x");
-    item1->setData(1, Qt::EditRole, value.x());
-    item1->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryX);
-    item1->setData(1, NodeRole::Data, value.x());
-    iitem->addChild(item1);
-
-    auto item2 = new QTreeWidgetItem;
-    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
-    item2->setText(0, "y");
-    item2->setData(1, Qt::EditRole, value.y());
-    item2->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryY);
-    item2->setData(1, NodeRole::Data, value.y());
-    iitem->addChild(item2);
-
-    auto item3 = new QTreeWidgetItem;
-    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
-    item3->setText(0, "width");
-    item3->setData(1, Qt::EditRole, value.width());
-    item3->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryWidth);
-    item3->setData(1, NodeRole::Data, value.width());
-    iitem->addChild(item3);
-
-    auto item4 = new QTreeWidgetItem;
-    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
-    item4->setText(0, "height");
-    item4->setData(1, Qt::EditRole, value.height());
-    item4->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryHeight);
-    item4->setData(1, NodeRole::Data, value.height());
-    iitem->addChild(item4);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processGeometryF(QTreeWidgetItem* item, const QString& propertyName, Control* control)
-{
-    const auto value = QRectF(control->pos(), control->size());
-    const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
-            arg((int)value.x()).arg((int)value.y()).
-            arg((int)value.width()).arg((int)value.height());
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setText(1, gt);
-
-    auto item1 = new QTreeWidgetItem;
-    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-    item1->setText(0, "x");
-    item1->setData(1, Qt::EditRole, value.x());
-    item1->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryFX);
-    item1->setData(1, NodeRole::Data, value.x());
-    iitem->addChild(item1);
-
-    auto item2 = new QTreeWidgetItem;
-    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
-    item2->setText(0, "y");
-    item2->setData(1, Qt::EditRole, value.y());
-    item2->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryFY);
-    item2->setData(1, NodeRole::Data, value.y());
-    iitem->addChild(item2);
-
-    auto item3 = new QTreeWidgetItem;
-    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
-    item3->setText(0, "width");
-    item3->setData(1, Qt::EditRole, value.width());
-    item3->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryFWidth);
-    item3->setData(1, NodeRole::Data, value.width());
-    iitem->addChild(item3);
-
-    auto item4 = new QTreeWidgetItem;
-    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
-    item4->setText(0, "height");
-    item4->setData(1, Qt::EditRole, value.height());
-    item4->setData(1, NodeRole::Type, PropertiesPane::NodeType::GeometryFHeight);
-    item4->setData(1, NodeRole::Data, value.height());
-    iitem->addChild(item4);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processColor(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<QColor>();
-    const auto cc = value.name(QColor::HexArgb);
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, cc);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, PropertiesPane::NodeType::Color);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processBool(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<bool>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, PropertiesPane::NodeType::Bool);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processString(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<QString>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, value);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, PropertiesPane::NodeType::String);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processUrl(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    auto selectedControl = m_designerScene->selectedControls().at(0);
-    const auto value = map.value(propertyName).value<QUrl>();
-    auto dispText = value.toDisplayString();
-    if (value.isLocalFile()) {
-        dispText = value.toLocalFile().remove(selectedControl->dir() + separator() + DIR_THIS + separator());
-    }
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, dispText);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, PropertiesPane::NodeType::Url);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processDouble(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<double>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, value);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, PropertiesPane::NodeType::Double);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-void PropertiesPane::processInt(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<int>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, value);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, PropertiesPane::NodeType::Int);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
 void PropertiesPane::saveChanges(const QString& property, const QString& parserValue, const QVariant& value)
 {
     auto scs = m_designerScene->selectedControls();
@@ -1285,6 +1265,8 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
 
     // FIXME   SaveManager::setProperty(sc, property, parserValue);
 
+    qDebug() << property << value;
+
     if (property == "id") {
         ControlPreviewingManager::scheduleIdUpdate(sc->uid(), value.toString());
         WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(sc, previousId);
@@ -1293,160 +1275,116 @@ void PropertiesPane::saveChanges(const QString& property, const QString& parserV
     }
 }
 
-void PropertiesPane::saveChanges(const PropertiesPane::NodeType& type, const QString& parserValue, const QVariant& value)
+void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
-    QString property;
-    switch (type) {
-    case PropertiesPane::FontFamily:
-        property = "font.family";
-        break;
+    qreal width = 10;
+    auto model = index.model();
+    bool hasChild = itemFromIndex(index)->childCount();
+    bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
+    bool isSelected = itemFromIndex(index)->isSelected();
 
-    case PropertiesPane::FontWeight:
-        property = "font.weight";
-        break;
+    QRectF branchRect(rect);
+    QRectF handleRect(0, 0, width, width);
 
-    case PropertiesPane::FontPtSize:
-        property = "font.pointSize";
-        break;
+    handleRect.moveCenter(branchRect.center());
+    handleRect.moveRight(branchRect.right() - 0.5);
 
-    case PropertiesPane::FontPxSize:
-        property = "font.pixelSize";
-        break;
+    // Draw background
+    if (isClassRow)
+        painter->setBrush(QColor("#9D7650"));
+    else if (isSelected)
+        painter->setBrush(QColor("#ebd5c0"));
+    else if (index.row() % 2)
+        painter->setBrush(QColor("#faf1e8"));
+    else
+        painter->setBrush(QColor("#fffefc"));
 
-    case PropertiesPane::FontBold:
-        property = "font.bold";
-        break;
+    painter->setPen(Qt::NoPen);
+    painter->drawRect(branchRect);
 
-    case PropertiesPane::FontItalic:
-        property = "font.italic";
-        break;
+    // Draw bottom & middle cell lines
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setPen("#D6CEC6");
+    painter->drawLine(branchRect.bottomLeft() + QPointF(0.5, -0.5), branchRect.bottomRight() + QPointF(-0.5, -0.5));
 
-    case PropertiesPane::FontUnderline:
-        property = "font.underline";
-        break;
+    // Draw handle
+    if (hasChild) {
+        painter->setPen(isClassRow ? Qt::white : Qt::black);
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRoundedRect(handleRect, 1.5, 1.5);
 
-    case PropertiesPane::FontOverline:
-        property = "font.overline";
-        break;
+        painter->drawLine(
+                    QPointF(handleRect.left() + 2.5, handleRect.center().y()),
+                    QPointF(handleRect.right() - 2.5, handleRect.center().y())
+                    );
 
-    case PropertiesPane::FontStrikeout:
-        property = "font.strikeout";
-        break;
-
-    case PropertiesPane::GeometryX:
-    case PropertiesPane::GeometryFX: {
-        auto sc = m_designerScene->selectedControls();
-        if (sc.size() != 1)
-            return;
-        if (sc[0]->form()) {
-            property = "x";
-            break;
-        } else if (!sc[0]->gui() || sc[0]->hasErrors()) {
-            sc[0]->setX(value.toReal());
-            //                BUG SaveUtils::setX(sc[0]->dir(), sc[0]->x());
-            //                BUG SaveUtils::setY(sc[0]->dir(), sc[0]->y());
-            return;
-        } else {
-            sc[0]->setX(value.toReal());
+        if (!isExpanded(index)) {
+            painter->drawLine(
+                        QPointF(handleRect.center().x(), handleRect.top() + 2.5),
+                        QPointF(handleRect.center().x(), handleRect.bottom() - 2.5)
+                        );
         }
     }
-
-    case PropertiesPane::GeometryY:
-    case PropertiesPane::GeometryFY: {
-        auto sc = m_designerScene->selectedControls();
-        if (sc.size() != 1)
-            return;
-        if (sc[0]->form()) {
-            property = "y";
-            break;
-        } else {
-            sc[0]->setY(value.toReal());
-            return;
-        }
-    }
-
-    case PropertiesPane::GeometryWidth:
-    case PropertiesPane::GeometryFWidth: {
-        auto sc = m_designerScene->selectedControls();
-        if (sc.size() != 1)
-            return;
-        if (sc[0]->gui() && !sc[0]->hasErrors())
-            sc[0]->resize(value.toReal(), sc[0]->size().height());
-        else
-            return;
-    }
-
-    case PropertiesPane::GeometryHeight:
-    case PropertiesPane::GeometryFHeight: {
-        auto sc = m_designerScene->selectedControls();
-        if (sc.size() != 1)
-            return;
-        if (sc[0]->gui() && !sc[0]->hasErrors())
-            sc[0]->resize(sc[0]->size().width(), value.toReal());
-        else
-            return;
-    }
-
-    default:
-        break;
-    }
-    saveChanges(property, parserValue, value);
 }
 
-// TODO: Visibility control->properties()'den alınmayacak, ParserWorker ile alınacak
-bool PropertiesPane::eventFilter(QObject* watched, QEvent* event)
+void PropertiesPane::paintEvent(QPaintEvent* e)
 {
-    if (watched == viewport()) {
-        if (event->type() == QEvent::Paint) {
-            auto w = (QWidget*)watched;
-            QPainter painter(w);
-            painter.setRenderHint(QPainter::Antialiasing);
-            if (topLevelItemCount() == 0) {
-                auto sc = m_designerScene->selectedControls();
-                bool drawn = false;
-                const qreal ic = w->height() / 20; // WARNING: Constant 20?
-                for (int i = 0; i < ic; i++) {
-                    if (i % 2) {
-                        painter.fillRect(0, i * 20, w->width(),
-                                         20, QColor("#faf1e8"));
-                    } else if (!drawn && (i == int(ic) / 2 ||
-                                          i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
-                        drawn = true;
-                        painter.setPen(QColor(sc.size() == 1 ?
-                                                  "#d98083" : "#b5aea7"));
-                        painter.drawText(0, i * 20, w->width(),
-                                         20, Qt::AlignCenter, sc.size() == 1 ?
-                                             "Control has errors" : "No controls selected");
-                    }
-                }
-
-            } else {
-                const auto tli = topLevelItem(topLevelItemCount() - 1);
-                const auto lci = tli->child(tli->childCount() - 1);
-                auto lcir = visualItemRect(lci);
-
-                if (lcir.isNull())
-                    lcir = visualItemRect(tli);
-
-                const qreal ic = (viewport()->height() + qAbs(lcir.y())) / (qreal) lcir.height();
-
-                for (int i = 0; i < ic; i++) {
-                    if (i % 2) {
-                        painter.fillRect(
-                                    0,
-                                    lcir.y() + i * lcir.height(),
-                                    viewport()->width(),
-                                    lcir.height(),
-                                    QColor("#faf1e8")
-                                    );
-                    }
-                }
+    QPainter painter(viewport());
+    painter.setRenderHint(QPainter::Antialiasing);
+    if (topLevelItemCount() == 0) {
+        auto sc = m_designerScene->selectedControls();
+        bool drawn = false;
+        const qreal ic = viewport()->height() / 20; // WARNING: Constant 20?
+        for (int i = 0; i < ic; i++) {
+            if (i % 2) {
+                painter.fillRect(0, i * 20, viewport()->width(),
+                                 20, QColor("#faf1e8"));
+            } else if (!drawn && (i == int(ic) / 2 ||
+                                  i - 1 == int(ic) / 2 || i + 1 == int(ic) / 2)) {
+                drawn = true;
+                painter.setPen(QColor(sc.size() == 1 ?
+                                          "#d98083" : "#b5aea7"));
+                painter.drawText(0, i * 20, viewport()->width(),
+                                 20, Qt::AlignCenter, sc.size() == 1 ?
+                                     "Control has errors" : "No controls selected");
             }
         }
-        return false;
+
     } else {
-        return QWidget::eventFilter(watched, event);
+        const auto tli = topLevelItem(topLevelItemCount() - 1);
+        const auto lci = tli->child(tli->childCount() - 1);
+        auto lcir = visualItemRect(lci);
+
+        if (lcir.isNull())
+            lcir = visualItemRect(tli);
+
+        const qreal ic = (viewport()->height() + qAbs(lcir.y())) / (qreal) lcir.height();
+
+        for (int i = 0; i < ic; i++) {
+            if (i % 2) {
+                painter.fillRect(
+                            0,
+                            lcir.y() + i * lcir.height(),
+                            viewport()->width(),
+                            lcir.height(),
+                            QColor("#faf1e8")
+                            );
+            }
+        }
     }
+
+    QTreeWidget::paintEvent(e);
+}
+
+void PropertiesPane::updateGeometries()
+{
+    QTreeWidget::updateGeometries();
+    QMargins vm = viewportMargins();
+    vm.setBottom(m_searchEdit->height());
+    QRect vg = viewport()->geometry();
+    QRect geometryRect(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
+    setViewportMargins(vm);
+    m_searchEdit->setGeometry(geometryRect);
 }
 
 QSize PropertiesPane::sizeHint() const

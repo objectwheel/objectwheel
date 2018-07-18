@@ -43,8 +43,8 @@ private slots:
     void onItemDoubleClick(QTreeWidgetItem* item, int column);
 
 private:
-    void paintEvent(QPaintEvent* e) override;
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
+    void paintEvent(QPaintEvent* e) override;
     QSize sizeHint() const override;
 
 signals:

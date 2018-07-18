@@ -257,31 +257,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onSelectionChange, Qt::QueuedConnection);
 }
 
-void InspectorPane::paintEvent(QPaintEvent* e)
-{
-    QPainter painter(viewport());
-
-    /* Fill background */
-    const qreal bandHeight = topLevelItemCount() ? rowHeight(indexFromItem(topLevelItem(0))) : 21;
-    const qreal bandCount = viewport()->height() / bandHeight;
-
-    painter.fillRect(rect(), "#fefffc");
-
-    for (int i = 0; i < bandCount; ++i) {
-        if (i % 2) {
-            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, "#ecfbea");
-        } else if (topLevelItemCount() == 0) {
-            if (i == int(bandCount / 2.0) || i == int(bandCount / 2.0) + 1) {
-                painter.setPen("#a6afa5");
-                painter.drawText(0, i * bandHeight, viewport()->width(), bandHeight,
-                                 Qt::AlignCenter, tr("No items to show"));
-            }
-        }
-    }
-
-    QTreeWidget::paintEvent(e);
-}
-
 void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
     painter->setRenderHint(QPainter::Antialiasing);
@@ -311,6 +286,31 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
                               QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
         }
     }
+}
+
+void InspectorPane::paintEvent(QPaintEvent* e)
+{
+    QPainter painter(viewport());
+
+    /* Fill background */
+    const qreal bandHeight = topLevelItemCount() ? rowHeight(indexFromItem(topLevelItem(0))) : 21;
+    const qreal bandCount = viewport()->height() / bandHeight;
+
+    painter.fillRect(rect(), "#fefffc");
+
+    for (int i = 0; i < bandCount; ++i) {
+        if (i % 2) {
+            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, "#ecfbea");
+        } else if (topLevelItemCount() == 0) {
+            if (i == int(bandCount / 2.0) || i == int(bandCount / 2.0) + 1) {
+                painter.setPen("#a6afa5");
+                painter.drawText(0, i * bandHeight, viewport()->width(), bandHeight,
+                                 Qt::AlignCenter, tr("No items to show"));
+            }
+        }
+    }
+
+    QTreeWidget::paintEvent(e);
 }
 
 void InspectorPane::sweep()
@@ -546,7 +546,7 @@ void InspectorPane::onItemSelectionChange()
 
 QSize InspectorPane::sizeHint() const
 {
-    return QSize{200, 230};
+    return QSize{340, 240};
 }
 
 #include "inspectorpane.moc"

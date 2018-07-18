@@ -123,6 +123,11 @@ QString SaveUtils::toIcon(const QString& rootPath)
     return rootPath + separator() + DIR_THIS + separator() + FILE_ICON;
 }
 
+QString SaveUtils::toThisDir(const QString& rootPath)
+{
+    return rootPath + separator() + DIR_THIS;
+}
+
 QString SaveUtils::toParentDir(const QString& topPath)
 {
     return dname(dname(topPath));
