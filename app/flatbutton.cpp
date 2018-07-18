@@ -7,14 +7,27 @@
 #define SIZE (QSize(22, 80))
 
 namespace {
-    QRectF adjust(const QRectF& rect, bool crop = false);
-    QColor disabledColor(const QColor& color);
+
+QRectF adjust(const QRectF& rect, bool crop)
+{
+    if (crop)
+        return rect.adjusted(1, 1, -1, -1);
+    else
+        return rect;
+}
+
+QColor disabledColor(const QColor& color)
+{
+    QColor d(color);
+    d.setHslF(d.hslHueF(), d.hslSaturationF() * 0.2, d.lightnessF(), d.alphaF());
+    return d;
+}
 }
 
 FlatButton::FlatButton(QWidget* parent) : QPushButton(parent)
 {
     setFocusPolicy(Qt::NoFocus);
-	setCursor(Qt::PointingHandCursor);
+    setCursor(Qt::PointingHandCursor);
 
     resize(SIZE);
 
@@ -60,12 +73,12 @@ void FlatButton::paintEvent(QPaintEvent* event)
         image.fill(Qt::transparent);
         QPainter pn(&image);
         icon().paint(
-            &pn,
-            rect(),
-            Qt::AlignLeft | Qt::AlignTop,
-            isEnabled() ? QIcon::Normal : QIcon::Disabled,
-            isChecked() ? QIcon::On : QIcon::Off
-        );
+                    &pn,
+                    rect(),
+                    Qt::AlignLeft | Qt::AlignTop,
+                    isEnabled() ? QIcon::Normal : QIcon::Disabled,
+                    isChecked() ? QIcon::On : QIcon::Off
+                                  );
         pn.end();
 
         for (int i = 0; i < image.width(); i++) {
@@ -83,9 +96,9 @@ void FlatButton::paintEvent(QPaintEvent* event)
         if (_settings.showShadow) {
             /* Limit shadow region */
             const auto& sr = r.adjusted(
-                0, 1,
-                0, 1
-            );
+                        0, 1,
+                        0, 1
+                        );
 
             QPainterPath ph;
             ph.addRoundedRect(sr, _settings.borderRadius, _settings.borderRadius);
@@ -151,12 +164,12 @@ void FlatButton::paintEvent(QPaintEvent* event)
                 }
             }
             icon().paint(
-                &painter,
-                ir.toRect(),
-                Qt::AlignLeft | Qt::AlignTop,
-                isEnabled() ? QIcon::Normal : QIcon::Disabled,
-                isChecked() ? QIcon::On : QIcon::Off
-            );
+                        &painter,
+                        ir.toRect(),
+                        Qt::AlignLeft | Qt::AlignTop,
+                        isEnabled() ? QIcon::Normal : QIcon::Disabled,
+                        isChecked() ? QIcon::On : QIcon::Off
+                                      );
         }
 
         /* Draw text */
@@ -184,21 +197,4 @@ void FlatButton::paintEvent(QPaintEvent* event)
 QSize FlatButton::sizeHint() const
 {
     return SIZE;
-}
-
-namespace {
-    QRectF adjust(const QRectF& rect, bool crop)
-    {
-        if (crop)
-            return rect.adjusted(1, 1, -1, -1);
-        else
-            return rect;
-    }
-
-    QColor disabledColor(const QColor& color)
-    {
-        QColor d(color);
-        d.setHslF(d.hslHueF(), d.hslSaturationF() * 0.2, d.lightnessF(), d.alphaF());
-        return d;
-    }
 }

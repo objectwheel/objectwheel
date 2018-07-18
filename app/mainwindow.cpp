@@ -31,10 +31,14 @@
 #include <qmlcodeeditor.h>
 
 namespace {
-    QDockWidget* propertiesDockWidget;
-    QDockWidget* formsDockWidget;
-    QDockWidget* toolboxDockWidget;
-    QDockWidget* inspectorDockWidget;
+QDockWidget* propertiesDockWidget;
+QDockWidget* formsDockWidget;
+QDockWidget* toolboxDockWidget;
+QDockWidget* inspectorDockWidget;
+bool propertiesDockWidgetVisible;
+bool formsDockWidgetVisible;
+bool toolboxDockWidgetVisible;
+bool inspectorDockWidgetVisible;
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
@@ -225,51 +229,52 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
 
     connect(m_pageSwitcherPane, SIGNAL(buildsActivated()), SLOT(hideDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(showDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(showDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(restoreDocks()));
+    connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(restoreDocks()));
     connect(m_pageSwitcherPane, SIGNAL(helpActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(hideDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)),
-            m_centralWidget, SLOT(setCurrentPage(Pages)));
+    connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)), m_centralWidget, SLOT(setCurrentPage(Pages)));
+    connect(m_pageSwitcherPane, SIGNAL(leftPanesShowChanged(bool)), this, SLOT(showLeftPanes(bool)));
+    connect(m_pageSwitcherPane, SIGNAL(rightPanesShowChanged(bool)), this, SLOT(showRightPanes(bool)));
 
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openControlCountChanged, [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0
-            && m_pageSwitcherPane->currentPage() != Page_SplitView)
+                && m_pageSwitcherPane->currentPage() != Page_SplitView)
             m_pageSwitcherPane->setCurrentPage(Page_Designer);
 
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0
-            && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor)
+                && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor)
             m_pageSwitcherPane->setCurrentPage(Page_SplitView);
     });
 
     connect(m_inspectorPane, SIGNAL(controlSelectionChanged(const QList<Control*>&)),
             m_centralWidget->designerWidget(), SLOT(onControlSelectionChange(const QList<Control*>&)));
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
-            m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
+            m_centralWidget->designerWidget(), SLOT(handleControlDoubleClick(Control*)));
     connect(m_centralWidget->qmlCodeEditorWidget(), SIGNAL(documentSaved()),
             m_propertiesPane, SLOT(refreshList()));
 
     connect(RunManager::instance(),
-    QOverload<int, QProcess::ExitStatus>::of(&RunManager::finished),
-    [=] (int exitCode, QProcess::ExitStatus exitStatus)
+            QOverload<int, QProcess::ExitStatus>::of(&RunManager::finished),
+            [=] (int exitCode, QProcess::ExitStatus exitStatus)
     {
         auto pane = m_centralWidget->outputPane();
         auto console = pane->consoleBox();
 
         if (exitStatus == QProcess::CrashExit) {
             console->printFormatted(
-                tr("The process was ended forcefully.\n"),
-                "#b34b46",
-                QFont::DemiBold
-            );
+                        tr("The process was ended forcefully.\n"),
+                        "#b34b46",
+                        QFont::DemiBold
+                        );
         }
 
         console->printFormatted(
-            ProjectManager::name() + tr(" exited with code %1.\n").arg(exitCode),
-            "#025dbf",
-            QFont::DemiBold
-        );
+                    ProjectManager::name() + tr(" exited with code %1.\n").arg(exitCode),
+                    "#025dbf",
+                    QFont::DemiBold
+                    );
     });
 
     sweep();
@@ -286,6 +291,48 @@ void MainWindow::sweep()
     m_pageSwitcherPane->sweep();
 }
 
+void MainWindow::showLeftPanes(bool show)
+{
+    if (dockWidgetArea(propertiesDockWidget) == Qt::LeftDockWidgetArea) {
+        propertiesDockWidget->setVisible(show);
+        propertiesDockWidgetVisible = show;
+    }
+    if (dockWidgetArea(formsDockWidget) == Qt::LeftDockWidgetArea) {
+        formsDockWidget->setVisible(show);
+        formsDockWidgetVisible = show;
+    }
+    if (dockWidgetArea(inspectorDockWidget) == Qt::LeftDockWidgetArea) {
+        inspectorDockWidget->setVisible(show);
+        inspectorDockWidgetVisible = show;
+    }
+    if (dockWidgetArea(toolboxDockWidget) == Qt::LeftDockWidgetArea) {
+        toolboxDockWidget->setVisible(show);
+        toolboxDockWidgetVisible = show;
+    }
+    m_pageSwitcherPane->setLeftPanesShow(show);
+}
+
+void MainWindow::showRightPanes(bool show)
+{
+    if (dockWidgetArea(propertiesDockWidget) == Qt::RightDockWidgetArea) {
+        propertiesDockWidget->setVisible(show);
+        propertiesDockWidgetVisible = show;
+    }
+    if (dockWidgetArea(formsDockWidget) == Qt::RightDockWidgetArea) {
+        formsDockWidget->setVisible(show);
+        formsDockWidgetVisible = show;
+    }
+    if (dockWidgetArea(inspectorDockWidget) == Qt::RightDockWidgetArea) {
+        inspectorDockWidget->setVisible(show);
+        inspectorDockWidgetVisible = show;
+    }
+    if (dockWidgetArea(toolboxDockWidget) == Qt::RightDockWidgetArea) {
+        toolboxDockWidget->setVisible(show);
+        toolboxDockWidgetVisible = show;
+    }
+    m_pageSwitcherPane->setRightPanesShow(show);
+}
+
 void MainWindow::hideDocks()
 {
     propertiesDockWidget->hide();
@@ -300,6 +347,14 @@ void MainWindow::showDocks()
     formsDockWidget->show();
     inspectorDockWidget->show();
     toolboxDockWidget->show();
+}
+
+void MainWindow::restoreDocks()
+{
+    propertiesDockWidget->setVisible(propertiesDockWidgetVisible);
+    formsDockWidget->setVisible(formsDockWidgetVisible);
+    inspectorDockWidget->setVisible(inspectorDockWidgetVisible);
+    toolboxDockWidget->setVisible(toolboxDockWidgetVisible);
 }
 
 CentralWidget* MainWindow::centralWidget() const

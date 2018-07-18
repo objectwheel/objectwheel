@@ -26,10 +26,13 @@ public:
 
 public slots:
     void sweep();
+    void showLeftPanes(bool);
+    void showRightPanes(bool);
 
 private slots:
     void hideDocks();
     void showDocks();
+    void restoreDocks();
 
 signals:
     void done();

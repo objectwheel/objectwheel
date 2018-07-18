@@ -276,7 +276,7 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
     if (hasChild) {
         painter->setPen(palette().text().color());
         painter->setBrush(Qt::NoBrush);
-        painter->drawRoundedRect(handleRect, 1.5, 1.5);
+        painter->drawRoundedRect(handleRect, 0, 0);
 
         painter->drawLine(QPointF(handleRect.left() + 2.5, handleRect.center().y()),
                           QPointF(handleRect.right() - 2.5, handleRect.center().y()));

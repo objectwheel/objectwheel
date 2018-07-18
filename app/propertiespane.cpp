@@ -1027,7 +1027,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-
     QFont fontMedium(font());
     fontMedium.setWeight(QFont::Medium);
 
@@ -1054,7 +1053,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(22);
     connect(m_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
-    setViewportMargins(0, 0, 0, 30);
 
     /* Prepare Properties Widget */
     connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
@@ -1311,7 +1309,7 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
     if (hasChild) {
         painter->setPen(isClassRow ? Qt::white : Qt::black);
         painter->setBrush(Qt::NoBrush);
-        painter->drawRoundedRect(handleRect, 1.5, 1.5);
+        painter->drawRoundedRect(handleRect, 0, 0);
 
         painter->drawLine(
                     QPointF(handleRect.left() + 2.5, handleRect.center().y()),
