@@ -295,20 +295,21 @@ void processDouble(QTreeWidgetItem* item, const QString& propertyName, const QMa
     item->addChild(iitem);
 }
 
-void processInt(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+void processInt(QTreeWidgetItem* parentItem, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<int>();
 
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, value);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, NodeType::Int);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
+    auto item = new QTreeWidgetItem;
+    item->setText(0, propertyName);
+    item->setData(1, Qt::EditRole, value);
+    item->setData(1, NodeRole::Data, value);
+    item->setData(1, NodeRole::Type, NodeType::Int);
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
 
-    item->addChild(iitem);
+    parentItem->addChild(iitem);
 }
 }
+
 // FIXME: Fix this from scratch
 // TODO: Visibility control->properties()'den alınmayacak, ParserWorker ile alınacak
 
