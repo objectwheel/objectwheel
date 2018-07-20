@@ -50,7 +50,18 @@ enum NodeRole {
     Data
 };
 
-void processFont(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+void addChild(QTreeWidgetItem* parentItem, const NodeType& type, const QString& propertyName, const QVariant& value)
+{
+    auto item = new QTreeWidgetItem;
+    item->setText(0, propertyName);
+    item->setData(1, Qt::EditRole, value);
+    item->setData(1, NodeRole::Data, value);
+    item->setData(1, NodeRole::Type, type);
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    parentItem->addChild(item);
+}
+
+void addFontChild(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<QFont>();
     const auto px = value.pixelSize() > 0 ? true : false;
@@ -131,7 +142,7 @@ void processFont(QTreeWidgetItem* item, const QString& propertyName, const QMap<
     item->addChild(iitem);
 }
 
-void processGeometry(QTreeWidgetItem* item, const QString& propertyName, Control* control)
+void addGeometryChild(QTreeWidgetItem* item, const QString& propertyName, Control* control)
 {
     const auto value = QRect(control->pos().toPoint(), control->size().toSize());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
@@ -176,7 +187,7 @@ void processGeometry(QTreeWidgetItem* item, const QString& propertyName, Control
     item->addChild(iitem);
 }
 
-void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, Control* control)
+void addGeometryChildF(QTreeWidgetItem* item, const QString& propertyName, Control* control)
 {
     const auto value = QRectF(control->pos(), control->size());
     const auto gt = QString::fromUtf8("[(%1, %2), %3 x %4]").
@@ -222,7 +233,7 @@ void processGeometryF(QTreeWidgetItem* item, const QString& propertyName, Contro
     item->addChild(iitem);
 }
 
-void processColor(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+void addColorChild(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<QColor>();
     const auto cc = value.name(QColor::HexArgb);
@@ -237,34 +248,7 @@ void processColor(QTreeWidgetItem* item, const QString& propertyName, const QMap
     item->addChild(iitem);
 }
 
-void processBool(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<bool>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, NodeType::Bool);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-void processString(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<QString>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, value);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, NodeType::String);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
-}
-
-void processUrl(QTreeWidgetItem* item, const QString& propertyName, const QString& relativePath, const QMap<QString, QVariant>& map)
+void addUrlChild(QTreeWidgetItem* item, const QString& propertyName, const QString& relativePath, const QMap<QString, QVariant>& map)
 {
     const auto value = map.value(propertyName).value<QUrl>();
     auto dispText = value.toDisplayString();
@@ -280,36 +264,7 @@ void processUrl(QTreeWidgetItem* item, const QString& propertyName, const QStrin
 
     item->addChild(iitem);
 }
-
-void processDouble(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<double>();
-
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setData(1, Qt::EditRole, value);
-    iitem->setData(1, NodeRole::Data, value);
-    iitem->setData(1, NodeRole::Type, NodeType::Double);
-    iitem->setFlags(iitem->flags() | Qt::ItemIsEditable);
-
-    item->addChild(iitem);
 }
-
-void processInt(QTreeWidgetItem* parentItem, const QString& propertyName, const QMap<QString, QVariant>& map)
-{
-    const auto value = map.value(propertyName).value<int>();
-
-    auto item = new QTreeWidgetItem;
-    item->setText(0, propertyName);
-    item->setData(1, Qt::EditRole, value);
-    item->setData(1, NodeRole::Data, value);
-    item->setData(1, NodeRole::Type, NodeType::Int);
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-
-    parentItem->addChild(iitem);
-}
-}
-
 // FIXME: Fix this from scratch
 // TODO: Visibility control->properties()'den alınmayacak, ParserWorker ile alınacak
 
@@ -1128,27 +1083,27 @@ void PropertiesPane::refreshList()
         for (const auto& propertyName : map.keys()) {
             switch (map.value(propertyName).type()) {
             case QVariant::Font: {
-                processFont(item, propertyName, map);
+                addFontChild(item, propertyName, map);
                 break;
             }
 
             case QVariant::Color: {
-                processColor(item, propertyName, map);
+                addColorChild(item, propertyName, map);
                 break;
             }
 
             case QVariant::Bool: {
-                processBool(item, propertyName, map);
+                addChild(item, NodeType::Bool, propertyName, map.value(propertyName).value<bool>());
                 break;
             }
 
             case QVariant::String: {
-                processString(item, propertyName, map);
+                addChild(item, NodeType::String, propertyName, map.value(propertyName).value<QString>());
                 break;
             }
 
             case QVariant::Url: {
-                processUrl(item, propertyName, m_designerScene->selectedControls().first()->dir(), map);
+                addUrlChild(item, propertyName, m_designerScene->selectedControls().first()->dir(), map);
                 break;
             }
 
@@ -1156,11 +1111,11 @@ void PropertiesPane::refreshList()
                 if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                     if (propertyName == "x") //To make it called only once
-                        processGeometryF(item, "geometry", selectedControls[0]);
+                        addGeometryChildF(item, "geometry", selectedControls[0]);
                 } else {
                     if (propertyName == "z")
                         map[propertyName] = selectedControls[0]->zValue();
-                    processDouble(item, propertyName, map);
+                    addChild(item, NodeType::Double, propertyName, map.value(propertyName).value<double>());
                 }
                 break;
             }
@@ -1169,9 +1124,9 @@ void PropertiesPane::refreshList()
                 if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                     if (propertyName == "x")
-                        processGeometry(item, "geometry", selectedControls[0]);
+                        addGeometryChild(item, "geometry", selectedControls[0]);
                 } else {
-                    processInt(item, propertyName, map);
+                    addChild(item, NodeType::Int, propertyName, map.value(propertyName).value<int>());
                 }
                 break;
             }
