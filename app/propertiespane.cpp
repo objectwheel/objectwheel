@@ -50,174 +50,68 @@ enum NodeRole {
     Data
 };
 
-void addChild(QTreeWidgetItem* parentItem, const NodeType& type, const QString& propertyName, const QVariant& value)
+void addChild(QTreeWidgetItem* parentItem, const NodeType& type, const QString& propertyName,
+              const QVariant& value, const QVariant& editRoleValue)
 {
     auto item = new QTreeWidgetItem;
     item->setText(0, propertyName);
-    item->setData(1, Qt::EditRole, value);
+    if (editRoleValue.isValid())
+        item->setData(1, Qt::EditRole, editRoleValue);
     item->setData(1, NodeRole::Data, value);
     item->setData(1, NodeRole::Type, type);
     item->setFlags(item->flags() | Qt::ItemIsEditable);
     parentItem->addChild(item);
 }
 
-void addFontChild(QTreeWidgetItem* item, const QString& propertyName, const QMap<QString, QVariant>& map)
+void addFontChild(QTreeWidgetItem* parentItem, const QString& propertyName, const QFont& value)
 {
-    const auto value = map.value(propertyName).value<QFont>();
-    const auto px = value.pixelSize() > 0 ? true : false;
-    const auto ft = QString::fromUtf8("[%1, %2%3]").arg(value.family())
-            .arg(px ? value.pixelSize() : value.pointSize()).arg(px ? "px" : "pt");
+    const bool isPx = value.pixelSize() > 0 ? true : false;
+    const QString& fontText = QString::fromUtf8("[%1, %2%3]")
+            .arg(value.family())
+            .arg(isPx ? value.pixelSize() : value.pointSize())
+            .arg(isPx ? "px" : "pt");
 
-    auto iitem = new QTreeWidgetItem;
-    iitem->setText(0, propertyName);
-    iitem->setText(1, ft);
+    auto fontItem = new QTreeWidgetItem;
+    fontItem->setText(0, propertyName);
+    fontItem->setText(1, fontText);
+    parentItem->addChild(fontItem);
 
-    auto item0 = new QTreeWidgetItem;
-    item0->setFlags(item0->flags() | Qt::ItemIsEditable);
-    item0->setText(0, "family");
-    item0->setData(1, Qt::EditRole, value.family());
-    item0->setData(1, NodeRole::Type, NodeType::FontFamily);
-    item0->setData(1, NodeRole::Data, value.family());
-    iitem->addChild(item0);
-
-    auto item1 = new QTreeWidgetItem;
-    item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-    item1->setText(0, "weight");
-    item1->setData(1, Qt::EditRole, QMetaEnum::fromType<QFont::Weight>().valueToKey(value.weight()));
-    item1->setData(1, NodeRole::Type, NodeType::FontWeight);
-    item1->setData(1, NodeRole::Data, value.weight());
-    iitem->addChild(item1);
-
-    auto item2 = new QTreeWidgetItem;
-    item2->setFlags(item2->flags() | Qt::ItemIsEditable);
-    item2->setText(0, "pointSize");
-    item2->setData(1, Qt::EditRole, value.pointSize() < 0 ? 0 : value.pointSize());
-    item2->setData(1, NodeRole::Type, NodeType::FontPtSize);
-    item2->setData(1, NodeRole::Data, value.pointSize() < 0 ? 0 : value.pointSize());
-    iitem->addChild(item2);
-
-    auto item3 = new QTreeWidgetItem;
-    item3->setFlags(item3->flags() | Qt::ItemIsEditable);
-    item3->setText(0, "pixelSize");
-    item3->setData(1, Qt::EditRole, value.pixelSize() < 0 ? 0 : value.pixelSize());
-    item3->setData(1, NodeRole::Type, NodeType::FontPxSize);
-    item3->setData(1, NodeRole::Data, value.pixelSize() < 0 ? 0 : value.pixelSize());
-    iitem->addChild(item3);
-
-    auto item4 = new QTreeWidgetItem;
-    item4->setFlags(item4->flags() | Qt::ItemIsEditable);
-    item4->setText(0, "bold");
-    item4->setData(1, NodeRole::Type, NodeType::FontBold);
-    item4->setData(1, NodeRole::Data, value.bold());
-    iitem->addChild(item4);
-
-    auto item5 = new QTreeWidgetItem;
-    item5->setFlags(item5->flags() | Qt::ItemIsEditable);
-    item5->setText(0, "italic");
-    item5->setData(1, NodeRole::Type, NodeType::FontItalic);
-    item5->setData(1, NodeRole::Data, value.italic());
-    iitem->addChild(item5);
-
-    auto item6 = new QTreeWidgetItem;
-    item6->setFlags(item6->flags() | Qt::ItemIsEditable);
-    item6->setText(0, "underline");
-    item6->setData(1, NodeRole::Type, NodeType::FontUnderline);
-    item6->setData(1, NodeRole::Data, value.underline());
-    iitem->addChild(item6);
-
-    auto item7 = new QTreeWidgetItem;
-    item7->setFlags(item7->flags() | Qt::ItemIsEditable);
-    item7->setText(0, "overline");
-    item7->setData(1, NodeRole::Type, NodeType::FontOverline);
-    item7->setData(1, NodeRole::Data, value.overline());
-    iitem->addChild(item7);
-
-    auto item8 = new QTreeWidgetItem;
-    item8->setFlags(item8->flags() | Qt::ItemIsEditable);
-    item8->setText(0, "strikeout");
-    item8->setData(1, NodeRole::Type, NodeType::FontStrikeout);
-    item8->setData(1, NodeRole::Data, value.strikeOut());
-    iitem->addChild(item8);
-
-    item->addChild(iitem);
+    addChild(fontItem, NodeType::FontFamily, "family", value.family(), value.family());
+    addChild(fontItem, NodeType::FontWeight, "weight", value.weight(),
+             QMetaEnum::fromType<QFont::Weight>().valueToKey(value.weight()));
+    addChild(fontItem, NodeType::FontPtSize, "pointSize", value.pointSize() < 0 ? 0 : value.pointSize(),
+             value.pointSize() < 0 ? 0 : value.pointSize());
+    addChild(fontItem, NodeType::FontPxSize, "pixelSize", value.pixelSize() < 0 ? 0 : value.pixelSize(),
+             value.pixelSize() < 0 ? 0 : value.pixelSize());
+    addChild(fontItem, NodeType::FontBold, "bold", value.bold(), QVariant());
+    addChild(fontItem, NodeType::FontItalic, "italic", value.italic(), QVariant());
+    addChild(fontItem, NodeType::FontUnderline, "underline", value.underline(), QVariant());
+    addChild(fontItem, NodeType::FontOverline, "overline", value.overline(), QVariant());
+    addChild(fontItem, NodeType::FontStrikeout, "strikeout", value.strikeOut(), QVariant());
 }
 
-void addGeometryChild(QTreeWidgetItem* parentItem, const QString& propertyName, const QRect& value)
+void addGeometryChild(QTreeWidgetItem* parentItem, const QString& propertyName,
+                      const QRectF& value, bool floating)
 {
     const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
-            .arg(value.x())
-            .arg(value.y())
-            .arg(value.width())
-            .arg(value.height());
+            .arg(int(value.x()))
+            .arg(int(value.y()))
+            .arg(int(value.width()))
+            .arg(int(value.height()));
 
     auto geometryItem = new QTreeWidgetItem;
     geometryItem->setText(0, propertyName);
     geometryItem->setText(1, geometryText);
     parentItem->addChild(geometryItem);
 
-    addChild(geometryItem, NodeType::GeometryX, "x", value.x());
-    addChild(geometryItem, NodeType::GeometryY, "y", value.y());
-    addChild(geometryItem, NodeType::GeometryWidth, "width", value.width());
-    addChild(geometryItem, NodeType::GeometryHeight, "height", value.height());
-}
-
-void addGeometryChildF(QTreeWidgetItem* parentItem, const QString& propertyName, const QRectF& value)
-{
-    const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
-            .arg((int)value.x())
-            .arg((int)value.y())
-            .arg((int)value.width())
-            .arg((int)value.height());
-
-    auto geometryItem = new QTreeWidgetItem;
-    geometryItem->setText(0, propertyName);
-    geometryItem->setText(1, geometryText);
-    parentItem->addChild(geometryItem);
-
-    addChild(geometryItem, NodeType::GeometryXF, "x", value.x());
-    addChild(geometryItem, NodeType::GeometryYF, "y", value.y());
-    addChild(geometryItem, NodeType::GeometryWidthF, "width", value.width());
-    addChild(geometryItem, NodeType::GeometryHeightF, "height", value.height());
-}
-
-void addColorChild(QTreeWidgetItem* parentItem, const QString& propertyName, const QColor& value)
-{
-    const QString& colorName = value.name(QColor::HexArgb);
-
-    auto item = new QTreeWidgetItem;
-    item->setText(0, propertyName);
-    item->setData(1, Qt::EditRole, colorName);
-    item->setData(1, NodeRole::Data, value);
-    item->setData(1, NodeRole::Type, NodeType::Color);
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    parentItem->addChild(item);
-}
-
-void addBoolChild(QTreeWidgetItem* parentItem, const QString& propertyName, bool value)
-{
-    auto item = new QTreeWidgetItem;
-    item->setText(0, propertyName);
-    item->setData(1, NodeRole::Data, value);
-    item->setData(1, NodeRole::Type, NodeType::Bool);
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    parentItem->addChild(item);
-}
-
-void addUrlChild(QTreeWidgetItem* parentItem, const QString& propertyName,
-                 const QString& relativePath, const QUrl& value)
-{
-    QString displayText = value.toDisplayString();
-
-    if (value.isLocalFile())
-        displayText = value.toLocalFile().remove(SaveUtils::toThisDir(relativePath) + separator());
-
-    auto item = new QTreeWidgetItem;
-    item->setText(0, propertyName);
-    item->setData(1, Qt::EditRole, displayText);
-    item->setData(1, NodeRole::Data, value);
-    item->setData(1, NodeRole::Type, NodeType::Url);
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    parentItem->addChild(item);
+    addChild(geometryItem, floating ? NodeType::GeometryXF : NodeType::GeometryX, "x",
+             floating ? value.x() : int(value.x()), floating ? value.x() : int(value.x()));
+    addChild(geometryItem, floating ? NodeType::GeometryYF : NodeType::GeometryY, "y",
+             floating ? value.y() : int(value.y()), floating ? value.y() : int(value.y()));
+    addChild(geometryItem, floating ? NodeType::GeometryWidthF : NodeType::GeometryWidth, "width",
+             floating ? value.width() : int(value.width()), floating ? value.width() : int(value.width()));
+    addChild(geometryItem, floating ? NodeType::GeometryHeightF : NodeType::GeometryHeight, "height",
+             floating ? value.height() : int(value.height()), floating ? value.height() : int(value.height()));
 }
 }
 // FIXME: Fix this from scratch
@@ -1038,31 +932,39 @@ void PropertiesPane::refreshList()
         for (const auto& propertyName : map.keys()) {
             switch (map.value(propertyName).type()) {
             case QVariant::Font: {
-                addFontChild(item, propertyName, map);
+                const QFont& font = map.value(propertyName).value<QFont>();
+                addFontChild(item, propertyName, font);
                 break;
             }
 
             case QVariant::Color: {
                 const QColor& value = map.value(propertyName).value<QColor>();
-                addColorChild(item, propertyName, value);
+                const QString& colorName = value.name(QColor::HexArgb);
+                addChild(item, NodeType::Color, propertyName, value, colorName);
                 break;
             }
 
             case QVariant::Bool: {
                 const bool value = map.value(propertyName).value<bool>();
-                addBoolChild(item, propertyName, value);
+                addChild(item, NodeType::Bool, propertyName, value, QVariant());
                 break;
             }
 
             case QVariant::String: {
                 const QString& value = map.value(propertyName).value<QString>();
-                addChild(item, NodeType::String, propertyName, value);
+                addChild(item, NodeType::String, propertyName, value, value);
                 break;
             }
 
             case QVariant::Url: {
                 const QUrl& value = map.value(propertyName).value<QUrl>();
-                addUrlChild(item, propertyName, m_designerScene->selectedControls().first()->dir(), value);
+                const QString& relativePath = m_designerScene->selectedControls().first()->dir();
+                QString displayText = value.toDisplayString();
+
+                if (value.isLocalFile())
+                    displayText = value.toLocalFile().remove(SaveUtils::toThisDir(relativePath) + separator());
+
+                addChild(item, NodeType::Url, propertyName, value, displayText);
                 break;
             }
 
@@ -1070,11 +972,12 @@ void PropertiesPane::refreshList()
                 if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                     if (propertyName == "x") //To make it called only once
-                        addGeometryChildF(item, "geometry", selectedControls[0]->rect());
+                        addGeometryChild(item, "geometry", selectedControls[0]->rect(), true);
                 } else {
                     if (propertyName == "z")
                         map[propertyName] = selectedControls[0]->zValue();
-                    addChild(item, NodeType::Double, propertyName, map.value(propertyName).value<double>());
+                    const double value = map.value(propertyName).value<double>();
+                    addChild(item, NodeType::Double, propertyName, value, value);
                 }
                 break;
             }
@@ -1083,9 +986,10 @@ void PropertiesPane::refreshList()
                 if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
                     if (propertyName == "x")
-                        addGeometryChild(item, "geometry", selectedControls[0]->rect().toRect());
+                        addGeometryChild(item, "geometry", selectedControls[0]->rect(), false);
                 } else {
-                    addChild(item, NodeType::Int, propertyName, map.value(propertyName).value<int>());
+                    const int value = map.value(propertyName).value<int>();
+                    addChild(item, NodeType::Int, propertyName, value, value);
                 }
                 break;
             }
