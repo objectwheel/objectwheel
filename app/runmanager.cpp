@@ -76,7 +76,7 @@ RunManager* RunManager::instance()
 
 void RunManager::run()
 {
-    s_process->setArguments(QStringList() << ProjectManager::dir());
+    s_process->setArguments(QStringList(ProjectManager::dir()));
     s_process->setProgram(QCoreApplication::applicationDirPath() + "/interpreter");
     s_process->start();
 }

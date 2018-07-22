@@ -113,7 +113,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
             if (deps.contains(lastModule))
                 deps[lastModule] << line;
             else
-                deps[lastModule] = (QStringList() << line);
+                deps[lastModule] = QStringList(line);
         } else {
             lastModule = line;
             auto checkbox = new QCheckBox;

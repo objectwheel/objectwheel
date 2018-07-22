@@ -252,18 +252,18 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
     connect(m_accentColorButton, &QToolButton::clicked, [=] {
         QColor
-        color = QColorDialog::getColor(
-            Qt::white,
-            this,
-            "Select Color",
-            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-        );
+                color = QColorDialog::getColor(
+                    Qt::white,
+                    this,
+                    "Select Color",
+                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+                    );
 
         if (color.isValid()) {
             m_accentColorsCombo->setItemText(m_accentColorsCombo->count() - 1,
-                QString("Custom (%1)").arg(color.name()));
+                                             QString("Custom (%1)").arg(color.name()));
             m_accentColorsCombo->setItemData(m_accentColorsCombo->count() - 1,
-                color, Qt::DecorationRole);
+                                             color, Qt::DecorationRole);
             m_accentColorsCombo->setCurrentIndex(m_accentColorsCombo->count() - 1);
             enable();
             refresh();
@@ -272,18 +272,18 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
     connect(m_foregroundColorButton, &QToolButton::clicked, [=] {
         QColor
-        color = QColorDialog::getColor(
-            Qt::white,
-            this,
-            "Select Color",
-            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-        );
+                color = QColorDialog::getColor(
+                    Qt::white,
+                    this,
+                    "Select Color",
+                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+                    );
 
         if (color.isValid()) {
             m_foregroundColorsCombo->setItemText(m_foregroundColorsCombo->count() - 1,
-                QString("Custom (%1)").arg(color.name()));
+                                                 QString("Custom (%1)").arg(color.name()));
             m_foregroundColorsCombo->setItemData(m_foregroundColorsCombo->count() - 1,
-                color, Qt::DecorationRole);
+                                                 color, Qt::DecorationRole);
             m_foregroundColorsCombo->setCurrentIndex(m_foregroundColorsCombo->count() - 1);
             enable();
             refresh();
@@ -292,18 +292,18 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
     connect(m_backgroundColorButton, &QToolButton::clicked, [=] {
         QColor
-        color = QColorDialog::getColor(
-            Qt::white,
-            this,
-            "Select Color",
-            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-        );
+                color = QColorDialog::getColor(
+                    Qt::white,
+                    this,
+                    "Select Color",
+                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+                    );
 
         if (color.isValid()) {
             m_backgroundColorsCombo->setItemText(m_backgroundColorsCombo->count() - 1,
-                QString("Custom (%1)").arg(color.name()));
+                                                 QString("Custom (%1)").arg(color.name()));
             m_backgroundColorsCombo->setItemData(m_backgroundColorsCombo->count() - 1,
-                color, Qt::DecorationRole);
+                                                 color, Qt::DecorationRole);
             m_backgroundColorsCombo->setCurrentIndex(m_backgroundColorsCombo->count() - 1);
             enable();
             refresh();
@@ -312,18 +312,18 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
     connect(m_primaryColorButton, &QToolButton::clicked, [=] {
         QColor
-        color = QColorDialog::getColor(
-            Qt::white,
-            this,
-            "Select Color",
-            QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-        );
+                color = QColorDialog::getColor(
+                    Qt::white,
+                    this,
+                    "Select Color",
+                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
+                    );
 
         if (color.isValid()) {
             m_primaryColorsCombo->setItemText(m_primaryColorsCombo->count() - 1,
-                QString("Custom (%1)").arg(color.name()));
+                                              QString("Custom (%1)").arg(color.name()));
             m_primaryColorsCombo->setItemData(m_primaryColorsCombo->count() - 1,
-                color, Qt::DecorationRole);
+                                              color, Qt::DecorationRole);
             m_primaryColorsCombo->setCurrentIndex(m_primaryColorsCombo->count() - 1);
             enable();
             refresh();
@@ -570,10 +570,8 @@ void ThemeChooserWidget::run()
     }
 
     process = new QProcess(this);
-    process->start(
-        qApp->applicationDirPath() + "/themer",
-        QStringList() << "show" << tmpDir.path()
-    );
+    process->start(qApp->applicationDirPath() + "/themer",
+                   QStringList() << "show" << tmpDir.path());
 
     QEventLoop loop;
     connect(process, SIGNAL(started()), &loop, SLOT(quit()));
@@ -624,12 +622,11 @@ void ThemeChooserWidget::refresh()
     wrfile(tmpDir.filePath(FILE_PROJECT), QJsonDocument(jo).toJson());
 
     QProcess process;
-    process.start(
-        qApp->applicationDirPath() + "/themer",
-        QStringList() << "capture"
-            << tmpDir.path()
-            << tmpFile.fileName()
-    );
+    process.start(qApp->applicationDirPath() + "/themer",
+                  QStringList()
+                  << "capture"
+                  << tmpDir.path()
+                  << tmpFile.fileName());
 
     QEventLoop loop;
     connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
@@ -697,9 +694,9 @@ QString ThemeChooserWidget::toItem(QComboBox* comboBox, const QString& colorName
             return comboBox->itemText(i);
 
     comboBox->setItemText(comboBox->count() - 1,
-        QString("Custom (%1)").arg(colorName));
+                          QString("Custom (%1)").arg(colorName));
     comboBox->setItemData(comboBox->count() - 1,
-        QColor(colorName), Qt::DecorationRole);
+                          QColor(colorName), Qt::DecorationRole);
 
     return QString("Custom (%1)").arg(colorName);
 }

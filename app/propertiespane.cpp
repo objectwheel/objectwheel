@@ -1,8 +1,9 @@
 #include <propertiespane.h>
 #include <focuslesslineedit.h>
 #include <css.h>
-//#include <filemanager.h>
-//#include <saveutils.h>
+#include <filemanager.h>
+#include <saveutils.h>
+#include <controlpropertymanager.h>
 //#include <controlcreationmanager.h>
 //#include <controlremovingmanager.h>
 #include <designerscene.h>
@@ -38,7 +39,7 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selecte
         painter->fillRect(rect, "#fffefc");
 
     // Draw top and bottom lines
-    painter->setPen("#05000000");
+    painter->setPen("#25000000");
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
@@ -104,6 +105,23 @@ int calculateVisibleRow(const QTreeWidgetItem* item, const QTreeWidget* treeWidg
 
     return count;
 }
+
+QWidget* createIdWidget(const QString& text, Control* selectedControl)
+{
+    auto lineEdit = new QLineEdit;
+    lineEdit->setValidator(new QRegExpValidator(QRegExp("[a-z_][a-zA-Z0-9_]+"), lineEdit));
+    lineEdit->setStyleSheet("border:none; background: transparent;");
+    lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    lineEdit->setText(text);
+
+    QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
+    {
+        if (selectedControl->id() != lineEdit->text())
+            ControlPropertyManager::setId(selectedControl, lineEdit->text());
+    });
+
+    return lineEdit;
+}
 }
 
 class PropertiesListDelegate: public QStyledItemDelegate
@@ -126,15 +144,6 @@ public:
         fillBackground(painter, option.rect,
                        calculateVisibleRow(m_propertiesPane->itemFromIndex(index), m_propertiesPane),
                        isSelected, isClassRow, index.column() == 0 && !isClassRow);
-
-        // Draw text
-        if (model->data(index, Qt::UserRole).toBool())
-            painter->setPen("#D02929");
-        else
-            painter->setPen(qApp->palette().text().color());
-
-        painter->drawText(option.rect.adjusted(25, 0, 0, 0), index.data(Qt::EditRole).toString(),
-                          QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 
         // Draw data
         if (index.column() == 0) {
@@ -166,7 +175,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::SingleSelection);
-    setEditTriggers(QAbstractItemView::AllEditTriggers);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -214,7 +223,142 @@ void PropertiesPane::sweep()
 
 void PropertiesPane::onSelectionChange()
 {
+    const int verticalScrollBarPosition = verticalScrollBar()->sliderPosition();
+    const int horizontalScrollBarPosition = horizontalScrollBar()->sliderPosition();
 
+    clear();
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    setDisabled(selectedControl->hasErrors());
+
+    const QList<PropertyNode>& properties = selectedControl->properties();
+    if (properties.isEmpty())
+        return;
+
+    QTreeWidgetItem* typeItem = new QTreeWidgetItem;
+    typeItem->setText(0, tr("Type"));
+    typeItem->setText(1, properties.first().cleanClassName);
+    addTopLevelItem(typeItem);
+
+    QTreeWidgetItem* uidItem = new QTreeWidgetItem;
+    uidItem->setText(0, "uid");
+    uidItem->setText(1, selectedControl->uid());
+    addTopLevelItem(uidItem);
+
+    QTreeWidgetItem* idItem = new QTreeWidgetItem;
+    idItem->setText(0, "id");
+    addTopLevelItem(idItem);
+    setItemWidget(idItem, 1, createIdWidget(selectedControl->id(), selectedControl));
+
+
+
+    for (const auto& propertyNode : properties) {
+        auto map = propertyNode.properties;
+        auto enums = propertyNode.enums;
+
+        if (map.isEmpty() && enums.isEmpty())
+            continue;
+
+        auto item = new QTreeWidgetItem;
+        item->setText(0, propertyNode.cleanClassName);
+
+        for (const auto& propertyName : map.keys()) {
+            switch (map.value(propertyName).type()) {
+            case QVariant::Font: {
+                const QFont& font = map.value(propertyName).value<QFont>();
+//                addFontChild(item, propertyName, font);
+                break;
+            }
+
+            case QVariant::Color: {
+                const QColor& value = map.value(propertyName).value<QColor>();
+                const QString& colorName = value.name(QColor::HexArgb);
+//                addChild(item, NodeType::Color, propertyName, value, colorName);
+                break;
+            }
+
+            case QVariant::Bool: {
+                const bool value = map.value(propertyName).value<bool>();
+//                addChild(item, NodeType::Bool, propertyName, value, QVariant());
+                break;
+            }
+
+            case QVariant::String: {
+                const QString& value = map.value(propertyName).value<QString>();
+//                addChild(item, NodeType::String, propertyName, value, value);
+                break;
+            }
+
+            case QVariant::Url: {
+                const QUrl& value = map.value(propertyName).value<QUrl>();
+                const QString& relativePath = m_designerScene->selectedControls().first()->dir();
+                QString displayText = value.toDisplayString();
+
+                if (value.isLocalFile())
+                    displayText = value.toLocalFile().remove(SaveUtils::toThisDir(relativePath) + separator());
+
+//                addChild(item, NodeType::Url, propertyName, value, displayText);
+                break;
+            }
+
+            case QVariant::Double: {
+                if (propertyName == "x" || propertyName == "y" ||
+                        propertyName == "width" || propertyName == "height") {
+//                    if (propertyName == "x") //To make it called only once
+//                        addGeometryChild(item, "geometry", selectedControl->rect(), true);
+                } else {
+                    if (propertyName == "z")
+                        map[propertyName] = selectedControl->zValue();
+                    const double value = map.value(propertyName).value<double>();
+//                    addChild(item, NodeType::Double, propertyName, value, value);
+                }
+                break;
+            }
+
+            case QVariant::Int: {
+                if (propertyName == "x" || propertyName == "y" ||
+                        propertyName == "width" || propertyName == "height") {
+//                    if (propertyName == "x")
+//                        addGeometryChild(item, "geometry", selectedControl->rect(), false);
+                } else {
+                    const int value = map.value(propertyName).value<int>();
+//                    addChild(item, NodeType::Int, propertyName, value, value);
+                }
+                break;
+            }
+
+            default: {
+                continue;
+                // QTreeWidgetItem* iitem = new QTreeWidgetItem;
+                // iitem->setText(0, propertyName);
+                // iitem->setText(1, map.value(propertyName).typeName());
+                // item->addChild(iitem);
+                // break;
+            }
+            }
+        }
+
+        for (auto e : enums) {
+            auto item1 = new QTreeWidgetItem;
+//            item1->setFlags(item1->flags() | Qt::ItemIsEditable);
+            item1->setText(0, e.name);
+//            item1->setData(1, Qt::EditRole, e.value);
+//            item1->setData(1, NodeRole::Type, NodeType::EnumType);
+//            item1->setData(1, NodeRole::Data, QVariant::fromValue(e));
+            item->addChild(item1);
+        }
+
+        addTopLevelItem(item);
+        expandItem(item);
+    }
+
+//    filterList(m_searchEdit->text());
+
+    verticalScrollBar()->setSliderPosition(verticalScrollBarPosition);
+    horizontalScrollBar()->setSliderPosition(horizontalScrollBarPosition);
 }
 
 void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
