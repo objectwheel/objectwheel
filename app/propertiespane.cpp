@@ -11,11 +11,14 @@
 //#include <projectmanager.h>
 #include <dpr.h>
 
+#include <transparentcombobox.h>
+
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QHeaderView>
 #include <QScrollBar>
 
+#include <QDebug>
 namespace {
 
 void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selected, bool classRow,
@@ -106,21 +109,42 @@ int calculateVisibleRow(const QTreeWidgetItem* item, const QTreeWidget* treeWidg
     return count;
 }
 
-QWidget* createIdWidget(const QString& text, Control* selectedControl)
+QWidget* createIdWidget(Control* selectedControl)
 {
     auto lineEdit = new QLineEdit;
-    lineEdit->setValidator(new QRegExpValidator(QRegExp("[a-z_][a-zA-Z0-9_]+"), lineEdit));
-    lineEdit->setStyleSheet("border:none; background: transparent;");
+    lineEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), lineEdit));
+    lineEdit->setStyleSheet("border: none; background: transparent;");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    lineEdit->setText(text);
+    lineEdit->setText(selectedControl->id());
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
-        if (selectedControl->id() != lineEdit->text())
-            ControlPropertyManager::setId(selectedControl, lineEdit->text());
+        if (selectedControl->id() != lineEdit->text()) {
+            if (lineEdit->text().isEmpty())
+                lineEdit->setText(selectedControl->id());
+            else
+                ControlPropertyManager::setId(selectedControl, lineEdit->text());
+        }
     });
 
     return lineEdit;
+}
+
+QWidget* createEnumWidget(const Enum& enumm, Control* selectedControl)
+{
+    auto comboBox = new TransparentComboBox;
+    comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    comboBox->addItems(enumm.keys.keys());
+    comboBox->setCurrentText(enumm.value);
+
+    QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
+    {
+        ControlPropertyManager::setProperty(selectedControl,
+                                            enumm.name, enumm.scope + "." + comboBox->currentText(),
+                                            enumm.keys.value(comboBox->currentText()));
+    });
+
+    return comboBox;
 }
 }
 
@@ -146,7 +170,7 @@ public:
                        isSelected, isClassRow, index.column() == 0 && !isClassRow);
 
         // Draw data
-        if (index.column() == 0) {
+        if (index.column() == 0 || index.row() < 2) {
             if (isClassRow)
                 painter->setPen(Qt::white);
             else
@@ -251,49 +275,48 @@ void PropertiesPane::onSelectionChange()
     QTreeWidgetItem* idItem = new QTreeWidgetItem;
     idItem->setText(0, "id");
     addTopLevelItem(idItem);
-    setItemWidget(idItem, 1, createIdWidget(selectedControl->id(), selectedControl));
+    setItemWidget(idItem, 1, createIdWidget(selectedControl));
 
+    for (const PropertyNode& propertyNode : properties) {
+        const QList<Enum>& enumList = propertyNode.enums;
+        const QMap<QString, QVariant>& propertyMap = propertyNode.properties;
 
-
-    for (const auto& propertyNode : properties) {
-        auto map = propertyNode.properties;
-        auto enums = propertyNode.enums;
-
-        if (map.isEmpty() && enums.isEmpty())
+        if (propertyMap.isEmpty() && enumList.isEmpty())
             continue;
 
-        auto item = new QTreeWidgetItem;
-        item->setText(0, propertyNode.cleanClassName);
+        auto classItem = new QTreeWidgetItem;
+        classItem->setText(0, propertyNode.cleanClassName);
+        addTopLevelItem(classItem);
 
-        for (const auto& propertyName : map.keys()) {
-            switch (map.value(propertyName).type()) {
+        for (const QString& propertyName : propertyMap.keys()) {
+            switch (propertyMap.value(propertyName).type()) {
             case QVariant::Font: {
-                const QFont& font = map.value(propertyName).value<QFont>();
+                const QFont& font = propertyMap.value(propertyName).value<QFont>();
 //                addFontChild(item, propertyName, font);
                 break;
             }
 
             case QVariant::Color: {
-                const QColor& value = map.value(propertyName).value<QColor>();
+                const QColor& value = propertyMap.value(propertyName).value<QColor>();
                 const QString& colorName = value.name(QColor::HexArgb);
 //                addChild(item, NodeType::Color, propertyName, value, colorName);
                 break;
             }
 
             case QVariant::Bool: {
-                const bool value = map.value(propertyName).value<bool>();
+                const bool value = propertyMap.value(propertyName).value<bool>();
 //                addChild(item, NodeType::Bool, propertyName, value, QVariant());
                 break;
             }
 
             case QVariant::String: {
-                const QString& value = map.value(propertyName).value<QString>();
+                const QString& value = propertyMap.value(propertyName).value<QString>();
 //                addChild(item, NodeType::String, propertyName, value, value);
                 break;
             }
 
             case QVariant::Url: {
-                const QUrl& value = map.value(propertyName).value<QUrl>();
+                const QUrl& value = propertyMap.value(propertyName).value<QUrl>();
                 const QString& relativePath = m_designerScene->selectedControls().first()->dir();
                 QString displayText = value.toDisplayString();
 
@@ -310,9 +333,9 @@ void PropertiesPane::onSelectionChange()
 //                    if (propertyName == "x") //To make it called only once
 //                        addGeometryChild(item, "geometry", selectedControl->rect(), true);
                 } else {
-                    if (propertyName == "z")
-                        map[propertyName] = selectedControl->zValue();
-                    const double value = map.value(propertyName).value<double>();
+//                    if (propertyName == "z")
+//                        propertyMap[propertyName] = selectedControl->zValue();
+                    const double value = propertyMap.value(propertyName).value<double>();
 //                    addChild(item, NodeType::Double, propertyName, value, value);
                 }
                 break;
@@ -324,35 +347,25 @@ void PropertiesPane::onSelectionChange()
 //                    if (propertyName == "x")
 //                        addGeometryChild(item, "geometry", selectedControl->rect(), false);
                 } else {
-                    const int value = map.value(propertyName).value<int>();
+                    const int value = propertyMap.value(propertyName).value<int>();
 //                    addChild(item, NodeType::Int, propertyName, value, value);
                 }
                 break;
             }
 
-            default: {
-                continue;
-                // QTreeWidgetItem* iitem = new QTreeWidgetItem;
-                // iitem->setText(0, propertyName);
-                // iitem->setText(1, map.value(propertyName).typeName());
-                // item->addChild(iitem);
-                // break;
-            }
+            default:
+                break;
             }
         }
 
-        for (auto e : enums) {
-            auto item1 = new QTreeWidgetItem;
-//            item1->setFlags(item1->flags() | Qt::ItemIsEditable);
-            item1->setText(0, e.name);
-//            item1->setData(1, Qt::EditRole, e.value);
-//            item1->setData(1, NodeRole::Type, NodeType::EnumType);
-//            item1->setData(1, NodeRole::Data, QVariant::fromValue(e));
-            item->addChild(item1);
+        for (const Enum& enumm : enumList) {
+            auto item = new QTreeWidgetItem;
+            item->setText(0, enumm.name);
+            classItem->addChild(item);
+            setItemWidget(item, 1, createEnumWidget(enumm, selectedControl));
         }
 
-        addTopLevelItem(item);
-        expandItem(item);
+        expandItem(classItem);
     }
 
 //    filterList(m_searchEdit->text());

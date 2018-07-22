@@ -39,6 +39,8 @@ public:
     static void setZ(Control* control, qreal z, bool save = true,
                      bool updatePreviewer = true, bool compress = false);
     static void setId(Control* control, const QString& id, bool save = true, bool updatePreviewer = true);
+    static void setProperty(Control* control, const QString& propertyName, const QString& parserValue,
+                            const QVariant& propertyValue, bool save = true, bool updatePreviewer = true);
 
 private slots:
     void handleDirtyProperties();
@@ -47,6 +49,7 @@ signals:
     void zChanged(Control*);
     void parentChanged(Control*);
     void geometryChanged(Control*);
+    void propertyChanged(Control*);
     void idChanged(Control*, const QString& previousId);
 
 private:

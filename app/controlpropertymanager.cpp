@@ -152,7 +152,7 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, bool 
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setSize";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setSize, QPointer<Control>(control),
-                                          size, save, updatePreviewer, false);
+                                           size, save, updatePreviewer, false);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -297,4 +297,33 @@ void ControlPropertyManager::setId(Control* control, const QString& id, bool sav
         ControlPreviewingManager::scheduleIdUpdate(control->uid(), control->id());
 
     emit instance()->idChanged(control, previousId);
+}
+
+void ControlPropertyManager::setProperty(Control* control, const QString& propertyName,
+                                         const QString& parserValue, const QVariant& propertyValue,
+                                         bool save, bool updatePreviewer)
+{
+    if (!control)
+        return;
+
+    if (propertyName.isEmpty())
+        return;
+
+    if (parserValue.isEmpty())
+        return;
+
+    Q_ASSERT(propertyName != "id"
+            && propertyName != "x"
+            && propertyName != "y"
+            && propertyName != "z"
+            && propertyName != "width"
+            && propertyName != "height");
+
+    if (save)
+        SaveManager::setProperty(control, propertyName, parserValue);
+
+    if (updatePreviewer)
+        ControlPreviewingManager::schedulePropertyUpdate(control->uid(), propertyName, propertyValue);
+
+    emit instance()->propertyChanged(control);
 }

@@ -9,6 +9,7 @@ TransparentComboBox::TransparentComboBox(QWidget* parent) : QComboBox(parent)
   , m_hoverOver(false)
 {
     setStyleSheet("border: none;");
+    setSizeAdjustPolicy(AdjustToMinimumContentsLengthWithIcon);
 }
 
 void TransparentComboBox::enterEvent(QEvent* e)
