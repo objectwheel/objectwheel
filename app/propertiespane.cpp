@@ -17,12 +17,13 @@
 #include <QPainter>
 #include <QHeaderView>
 #include <QScrollBar>
+#include <QCheckBox>
+#include <QJSEngine>
 
 #include <QDebug>
 namespace {
 
-void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selected, bool classRow,
-                    bool verticalLine)
+void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRow, bool verticalLine)
 {
     painter->save();
 
@@ -34,8 +35,6 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selecte
     // Fill background
     if (classRow)
         painter->fillRect(rect, "#9D7650");
-    else if (selected)
-        painter->fillRect(rect, "#ebd5c0");
     else if (row % 2)
         painter->fillRect(rect, "#faf1e8");
     else
@@ -113,7 +112,7 @@ QWidget* createIdWidget(Control* selectedControl)
 {
     auto lineEdit = new QLineEdit;
     lineEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), lineEdit));
-    lineEdit->setStyleSheet("border: none; background: transparent;");
+    lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(selectedControl->id());
 
@@ -130,12 +129,33 @@ QWidget* createIdWidget(Control* selectedControl)
     return lineEdit;
 }
 
+QWidget* createStringWidget(const QString& propertyName, const QString& text, Control* selectedControl)
+{
+    auto lineEdit = new QLineEdit;
+    lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
+    lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    lineEdit->setText(text);
+
+    QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
+    {
+        QJSEngine jsEngine;
+        jsEngine.globalObject().setProperty("str", lineEdit->text());
+        const QString& parserValue = jsEngine.evaluate("JSON.stringify(str)").toString();
+        ControlPropertyManager::setProperty(selectedControl,
+                                            propertyName, parserValue,
+                                            lineEdit->text());
+    });
+
+    return lineEdit;
+}
+
 QWidget* createEnumWidget(const Enum& enumm, Control* selectedControl)
 {
     auto comboBox = new TransparentComboBox;
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     comboBox->addItems(enumm.keys.keys());
     comboBox->setCurrentText(enumm.value);
+    comboBox->setCursor(Qt::PointingHandCursor);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -145,6 +165,22 @@ QWidget* createEnumWidget(const Enum& enumm, Control* selectedControl)
     });
 
     return comboBox;
+}
+
+QWidget* createBoolWidget(const QString& propertyName, bool checked, Control* selectedControl)
+{
+    auto checkBox = new QCheckBox;
+    checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    checkBox->setChecked(checked);
+
+    QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
+    {
+        ControlPropertyManager::setProperty(selectedControl,
+                                            propertyName, checkBox->isChecked() ? "true" : "false",
+                                            checkBox->isChecked());
+    });
+
+    return checkBox;
 }
 }
 
@@ -162,12 +198,11 @@ public:
         painter->setRenderHint(QPainter::Antialiasing);
 
         const QAbstractItemModel* model = index.model();
-        const bool isSelected = option.state & QStyle::State_Selected;
         const bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
 
         fillBackground(painter, option.rect,
                        calculateVisibleRow(m_propertiesPane->itemFromIndex(index), m_propertiesPane),
-                       isSelected, isClassRow, index.column() == 0 && !isClassRow);
+                       isClassRow, index.column() == 0 && !isClassRow);
 
         // Draw data
         if (index.column() == 0 || index.row() < 2) {
@@ -179,6 +214,12 @@ public:
             painter->drawText(option.rect.adjusted(5, 0, 0, 0), index.data(Qt::EditRole).toString(),
                               QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         }
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
+    {
+        const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
+        return QSize(size.width(), 21);
     }
 
 private:
@@ -198,7 +239,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     setItemDelegate(new PropertiesListDelegate(this));
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
-    setSelectionMode(QTreeWidget::SingleSelection);
+    setSelectionMode(QTreeWidget::NoSelection);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -304,14 +345,20 @@ void PropertiesPane::onSelectionChange()
             }
 
             case QVariant::Bool: {
-                const bool value = propertyMap.value(propertyName).value<bool>();
-//                addChild(item, NodeType::Bool, propertyName, value, QVariant());
+                const bool checked = propertyMap.value(propertyName).value<bool>();
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                classItem->addChild(item);
+                setItemWidget(item, 1, createBoolWidget(propertyName, checked, selectedControl));
                 break;
             }
 
             case QVariant::String: {
-                const QString& value = propertyMap.value(propertyName).value<QString>();
-//                addChild(item, NodeType::String, propertyName, value, value);
+                const QString& text = propertyMap.value(propertyName).value<QString>();
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                classItem->addChild(item);
+                setItemWidget(item, 1, createStringWidget(propertyName, text, selectedControl));
                 break;
             }
 
@@ -382,14 +429,12 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
     const QAbstractItemModel* model = index.model();
     const bool hasChild = itemFromIndex(index)->childCount();
     const bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
-    const bool isSelected = itemFromIndex(index)->isSelected();
 
     QRectF handleRect(0, 0, width, width);
     handleRect.moveCenter(rect.center());
     handleRect.moveRight(rect.right() - 0.5);
 
-    fillBackground(painter, rect, calculateVisibleRow(itemFromIndex(index), this),
-                   isSelected, isClassRow, false);
+    fillBackground(painter, rect, calculateVisibleRow(itemFromIndex(index), this), isClassRow, false);
 
     // Draw handle
     if (hasChild) {

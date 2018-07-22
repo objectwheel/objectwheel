@@ -193,6 +193,12 @@ public:
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
     }
 
+    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
+    {
+        const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
+        return QSize(size.width(), 21);
+    }
+
 private:
     InspectorPane* m_inspectorPane;
 };

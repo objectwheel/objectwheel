@@ -5,25 +5,13 @@
 
 #include <QPainter>
 
+using namespace Utils;
+
 TransparentComboBox::TransparentComboBox(QWidget* parent) : QComboBox(parent)
-  , m_hoverOver(false)
 {
-    setStyleSheet("border: none;");
+    setAttribute(Qt::WA_Hover);
+    setStyleSheet("QComboBox { border: none; }");
     setSizeAdjustPolicy(AdjustToMinimumContentsLengthWithIcon);
-}
-
-void TransparentComboBox::enterEvent(QEvent* e)
-{
-    m_hoverOver = true;
-    update();
-    QComboBox::enterEvent(e);
-}
-
-void TransparentComboBox::leaveEvent(QEvent* e)
-{
-    m_hoverOver = false;
-    update();
-    QComboBox::leaveEvent(e);
 }
 
 void TransparentComboBox::paintEvent(QPaintEvent*)
@@ -31,13 +19,12 @@ void TransparentComboBox::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    if (m_hoverOver)
-        painter.fillRect(rect(), Utils::creatorTheme()->color(Utils::Theme::FancyToolButtonHoverColor));
+    if (underMouse())
+        painter.fillRect(rect(), "#15000000");
     else
         painter.fillRect(rect(), Qt::transparent);
 
-    painter.setPen(isEnabled() ? Utils::creatorTheme()->color(Utils::Theme::ComboBoxTextColor) :
-                                 Utils::creatorTheme()->color(Utils::Theme::TextColorDisabled));
+    painter.setPen(isEnabled() ? Qt::black : Qt::gray);
     painter.drawText(rect().adjusted(4, 0, -12, 0),
                      fontMetrics().elidedText(currentText(), Qt::ElideRight, width() - 16),
                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
@@ -46,14 +33,14 @@ void TransparentComboBox::paintEvent(QPaintEvent*)
     arrowRect.setSize({10.0, 10.0});
     arrowRect.moveRight(width() - 2);
 
-    static const QPixmap up = Utils::Icon({{":/utils/images/arrowup.png",
-                                            Utils::Theme::ComboBoxArrowColor}}).pixmap();
-    static const QPixmap down = Utils::Icon({{":/utils/images/arrowdown.png",
-                                              Utils::Theme::ComboBoxArrowColor}}).pixmap();
-    static const QPixmap upDisabled = Utils::Icon({{":/utils/images/arrowup.png",
-                                                    Utils::Theme::ComboBoxArrowColorDisabled}}).pixmap();
-    static const QPixmap downDisabled = Utils::Icon({{":/utils/images/arrowdown.png",
-                                                      Utils::Theme::ComboBoxArrowColorDisabled}}).pixmap();
+    static const QPixmap up = Icon({{":/utils/images/arrowup.png",
+                                     Theme::ComboBoxArrowColor}}).pixmap();
+    static const QPixmap down = Icon({{":/utils/images/arrowdown.png",
+                                       Theme::ComboBoxArrowColor}}).pixmap();
+    static const QPixmap upDisabled = Icon({{":/utils/images/arrowup.png",
+                                             Theme::ComboBoxArrowColorDisabled}}).pixmap();
+    static const QPixmap downDisabled = Icon({{":/utils/images/arrowdown.png",
+                                               Theme::ComboBoxArrowColorDisabled}}).pixmap();
 
     arrowRect.moveBottom(height() / 2.0);
     painter.drawPixmap(arrowRect, isEnabled() ? up : upDisabled, up.rect());
