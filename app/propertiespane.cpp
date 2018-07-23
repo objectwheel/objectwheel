@@ -23,6 +23,23 @@
 #include <QDebug>
 namespace {
 
+QString urlToDisplayText(const QUrl& url, const QString& controlDir)
+{
+    QString displayText = url.toDisplayString();
+    if (url.isLocalFile()) {
+        displayText = url.toLocalFile().remove(
+                    SaveUtils::toThisDir(controlDir) + separator());
+    }
+    return displayText;
+}
+
+QString stringify(const QString& text)
+{
+    QJSEngine engine;
+    engine.globalObject().setProperty("text", text);
+    return engine.evaluate("JSON.stringify(text)").toString();
+}
+
 void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRow, bool verticalLine)
 {
     painter->save();
@@ -108,7 +125,7 @@ int calculateVisibleRow(const QTreeWidgetItem* item, const QTreeWidget* treeWidg
     return count;
 }
 
-QWidget* createIdWidget(Control* selectedControl)
+QWidget* createIdHandlerWidget(Control* selectedControl)
 {
     auto lineEdit = new QLineEdit;
     lineEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), lineEdit));
@@ -129,7 +146,7 @@ QWidget* createIdWidget(Control* selectedControl)
     return lineEdit;
 }
 
-QWidget* createStringWidget(const QString& propertyName, const QString& text, Control* selectedControl)
+QWidget* createStringHandlerWidget(const QString& propertyName, const QString& text, Control* selectedControl)
 {
     auto lineEdit = new QLineEdit;
     lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
@@ -138,18 +155,34 @@ QWidget* createStringWidget(const QString& propertyName, const QString& text, Co
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
-        QJSEngine jsEngine;
-        jsEngine.globalObject().setProperty("str", lineEdit->text());
-        const QString& parserValue = jsEngine.evaluate("JSON.stringify(str)").toString();
         ControlPropertyManager::setProperty(selectedControl,
-                                            propertyName, parserValue,
+                                            propertyName, stringify(lineEdit->text()),
                                             lineEdit->text());
     });
 
     return lineEdit;
 }
 
-QWidget* createEnumWidget(const Enum& enumm, Control* selectedControl)
+QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url, Control* selectedControl)
+{
+    auto lineEdit = new QLineEdit;
+    lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
+    lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    lineEdit->setText(url);
+
+    QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
+    {
+        const QUrl& url = QUrl::fromUserInput(lineEdit->text(),
+                                              SaveUtils::toThisDir(selectedControl->dir()),
+                                              QUrl::AssumeLocalFile);
+        const QString& displayText = urlToDisplayText(url, selectedControl->dir());
+        ControlPropertyManager::setProperty(selectedControl, propertyName, stringify(displayText), url);
+    });
+
+    return lineEdit;
+}
+
+QWidget* createEnumHandlerWidget(const Enum& enumm, Control* selectedControl)
 {
     auto comboBox = new TransparentComboBox;
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -167,7 +200,7 @@ QWidget* createEnumWidget(const Enum& enumm, Control* selectedControl)
     return comboBox;
 }
 
-QWidget* createBoolWidget(const QString& propertyName, bool checked, Control* selectedControl)
+QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Control* selectedControl)
 {
     auto checkBox = new QCheckBox;
     checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -316,7 +349,7 @@ void PropertiesPane::onSelectionChange()
     QTreeWidgetItem* idItem = new QTreeWidgetItem;
     idItem->setText(0, "id");
     addTopLevelItem(idItem);
-    setItemWidget(idItem, 1, createIdWidget(selectedControl));
+    setItemWidget(idItem, 1, createIdHandlerWidget(selectedControl));
 
     for (const PropertyNode& propertyNode : properties) {
         const QList<Enum>& enumList = propertyNode.enums;
@@ -330,60 +363,60 @@ void PropertiesPane::onSelectionChange()
         addTopLevelItem(classItem);
 
         for (const QString& propertyName : propertyMap.keys()) {
-            switch (propertyMap.value(propertyName).type()) {
+            const QVariant& propertyValue = propertyMap.value(propertyName);
+
+            switch (propertyValue.type()) {
             case QVariant::Font: {
-                const QFont& font = propertyMap.value(propertyName).value<QFont>();
-//                addFontChild(item, propertyName, font);
+                const QFont& font = propertyValue.value<QFont>();
+                //                addFontChild(item, propertyName, font);
                 break;
             }
 
             case QVariant::Color: {
-                const QColor& value = propertyMap.value(propertyName).value<QColor>();
+                const QColor& value = propertyValue.value<QColor>();
                 const QString& colorName = value.name(QColor::HexArgb);
-//                addChild(item, NodeType::Color, propertyName, value, colorName);
+                //                addChild(item, NodeType::Color, propertyName, value, colorName);
                 break;
             }
 
             case QVariant::Bool: {
-                const bool checked = propertyMap.value(propertyName).value<bool>();
+                const bool checked = propertyValue.value<bool>();
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
                 classItem->addChild(item);
-                setItemWidget(item, 1, createBoolWidget(propertyName, checked, selectedControl));
+                setItemWidget(item, 1, createBoolHandlerWidget(propertyName, checked, selectedControl));
                 break;
             }
 
             case QVariant::String: {
-                const QString& text = propertyMap.value(propertyName).value<QString>();
+                const QString& text = propertyValue.value<QString>();
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
                 classItem->addChild(item);
-                setItemWidget(item, 1, createStringWidget(propertyName, text, selectedControl));
+                setItemWidget(item, 1, createStringHandlerWidget(propertyName, text, selectedControl));
                 break;
             }
 
             case QVariant::Url: {
-                const QUrl& value = propertyMap.value(propertyName).value<QUrl>();
-                const QString& relativePath = m_designerScene->selectedControls().first()->dir();
-                QString displayText = value.toDisplayString();
-
-                if (value.isLocalFile())
-                    displayText = value.toLocalFile().remove(SaveUtils::toThisDir(relativePath) + separator());
-
-//                addChild(item, NodeType::Url, propertyName, value, displayText);
+                const QUrl& url = propertyValue.value<QUrl>();
+                const QString& displayText = urlToDisplayText(url, selectedControl->dir());
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                classItem->addChild(item);
+                setItemWidget(item, 1, createUrlHandlerWidget(propertyName, displayText, selectedControl));
                 break;
             }
 
             case QVariant::Double: {
                 if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
-//                    if (propertyName == "x") //To make it called only once
-//                        addGeometryChild(item, "geometry", selectedControl->rect(), true);
+                    //                    if (propertyName == "x") //To make it called only once
+                    //                        addGeometryChild(item, "geometry", selectedControl->rect(), true);
                 } else {
-//                    if (propertyName == "z")
-//                        propertyMap[propertyName] = selectedControl->zValue();
-                    const double value = propertyMap.value(propertyName).value<double>();
-//                    addChild(item, NodeType::Double, propertyName, value, value);
+                    //                    if (propertyName == "z")
+                    //                        propertyMap[propertyName] = selectedControl->zValue();
+                    const double value = propertyValue.value<double>();
+                    //                    addChild(item, NodeType::Double, propertyName, value, value);
                 }
                 break;
             }
@@ -391,11 +424,11 @@ void PropertiesPane::onSelectionChange()
             case QVariant::Int: {
                 if (propertyName == "x" || propertyName == "y" ||
                         propertyName == "width" || propertyName == "height") {
-//                    if (propertyName == "x")
-//                        addGeometryChild(item, "geometry", selectedControl->rect(), false);
+                    //                    if (propertyName == "x")
+                    //                        addGeometryChild(item, "geometry", selectedControl->rect(), false);
                 } else {
-                    const int value = propertyMap.value(propertyName).value<int>();
-//                    addChild(item, NodeType::Int, propertyName, value, value);
+                    const int value = propertyValue.value<int>();
+                    //                    addChild(item, NodeType::Int, propertyName, value, value);
                 }
                 break;
             }
@@ -409,13 +442,13 @@ void PropertiesPane::onSelectionChange()
             auto item = new QTreeWidgetItem;
             item->setText(0, enumm.name);
             classItem->addChild(item);
-            setItemWidget(item, 1, createEnumWidget(enumm, selectedControl));
+            setItemWidget(item, 1, createEnumHandlerWidget(enumm, selectedControl));
         }
 
         expandItem(classItem);
     }
 
-//    filterList(m_searchEdit->text());
+    //    filterList(m_searchEdit->text());
 
     verticalScrollBar()->setSliderPosition(verticalScrollBarPosition);
     horizontalScrollBar()->setSliderPosition(horizontalScrollBarPosition);
