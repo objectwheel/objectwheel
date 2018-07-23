@@ -19,9 +19,24 @@
 #include <QScrollBar>
 #include <QCheckBox>
 #include <QJSEngine>
+#include <QToolButton>
+#include <QColorDialog>
 
 #include <QDebug>
 namespace {
+
+QImage colorToImage(const QSize& layoutSize, const QColor& color)
+{
+    QImage image(layoutSize * DPR, QImage::Format_ARGB32_Premultiplied);
+    image.setDevicePixelRatio(DPR);
+    image.fill(color);
+    QPainter p(&image);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::black);
+    p.drawRect(QRectF{{},layoutSize}.adjusted(0.5, 0.5, -0.5, -0.5));
+    p.end();
+    return image;
+}
 
 QString urlToDisplayText(const QUrl& url, const QString& controlDir)
 {
@@ -215,6 +230,33 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
 
     return checkBox;
 }
+
+QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color, Control* selectedControl)
+{
+    auto toolButton = new QToolButton;
+    toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    toolButton->setText(color.name(QColor::HexArgb));
+    toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
+    toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
+    toolButton->setIconSize({12, 12});
+    toolButton->setCursor(Qt::PointingHandCursor);
+
+    QObject::connect(toolButton, &QCheckBox::clicked, [=]
+    {
+        const QColor& color = QColorDialog::getColor(Qt::white, nullptr, QObject::tr("Select Color"),
+                                                     QColorDialog::ShowAlphaChannel
+                                                     | QColorDialog::DontUseNativeDialog);
+
+        if (color.isValid()) {
+            toolButton->setText(color.name(QColor::HexArgb));
+            toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
+            ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                                stringify(color.name(QColor::HexArgb)), color);
+        }
+    });
+
+    return toolButton;
+}
 }
 
 class PropertiesListDelegate: public QStyledItemDelegate
@@ -373,9 +415,11 @@ void PropertiesPane::onSelectionChange()
             }
 
             case QVariant::Color: {
-                const QColor& value = propertyValue.value<QColor>();
-                const QString& colorName = value.name(QColor::HexArgb);
-                //                addChild(item, NodeType::Color, propertyName, value, colorName);
+                const QColor& color = propertyValue.value<QColor>();
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                classItem->addChild(item);
+                setItemWidget(item, 1, createColorHandlerWidget(propertyName, color, selectedControl));
                 break;
             }
 
