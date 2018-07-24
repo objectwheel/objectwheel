@@ -142,9 +142,6 @@ void Resizer::mouseMoveEvent(QGsme* event)
             | ControlPropertyManager::UpdatePreviewer
             | ControlPropertyManager::CompressedCall;
 
-    if (parent->form())
-        options |= ControlPropertyManager::IntegerValue;
-
     switch (m_placement) {
     case Top:
         diff_y = event->lastPos().y() - event->pos().y();

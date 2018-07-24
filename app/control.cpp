@@ -337,6 +337,20 @@ void Control::updateUids()
         control->updateUid();
 }
 
+QVariant::Type Control::propertyType(const QString& propertyName) const
+{
+    for (const PropertyNode& propertyNode : m_properties) {
+        const QMap<QString, QVariant>& propertyMap = propertyNode.properties;
+        for (const QString& property : propertyMap.keys()) {
+            const QVariant& propertyValue = propertyMap.value(property);
+            if (property == propertyName)
+                return propertyValue.type();
+        }
+    }
+    Q_ASSERT(0);
+    return QVariant::Invalid;
+}
+
 void Control::dropControl(Control* control)
 {
     Q_ASSERT(!control->form());
@@ -633,7 +647,7 @@ void Control::applyCachedGeometry()
     if (!dragging() && !resizing()) {
         if (form()) {
             ControlPropertyManager::setSize(this, m_cachedGeometry.size(),
-                                            ControlPropertyManager::IntegerValue);
+                                            ControlPropertyManager::NoOption);
         } else {
             ControlPropertyManager::setGeometry(this, m_cachedGeometry,
                                                 ControlPropertyManager::NoOption);

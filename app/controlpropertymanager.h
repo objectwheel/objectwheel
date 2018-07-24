@@ -24,10 +24,10 @@ class ControlPropertyManager final : public QObject
 public:
     enum Option {
         NoOption = 0x0,
-        IntegerValue = 0x1,
-        SaveChanges = 0x2,
-        UpdatePreviewer = 0x4,
-        CompressedCall = 0x8
+        SaveChanges = 0x1,
+        UpdatePreviewer = 0x2,
+        CompressedCall = 0x4,
+        DontApplyDesigner = 0x8
     };
     Q_DECLARE_FLAGS(Options, Option)
 

@@ -14,7 +14,6 @@ class Control : public QGraphicsWidget
     friend class ControlCreationManager; // For constructor
     friend class ProjectExposingManager; // For constructor
     friend class DesignerScene; // For destructor (delete operator)
-
     using QGraphicsWidget::contains;
 
 public:
@@ -42,6 +41,7 @@ public:
     const QList<QQmlError>& errors() const;
     const QList<PropertyNode>& properties() const;
     QList<Control*> childControls(bool dive = true) const;
+    QVariant::Type propertyType(const QString& propertyName) const;
 
     static const QList<Control*>& controls();
 

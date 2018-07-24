@@ -1,9 +1,8 @@
 Property değişimleri bir önceki değer ile aynı ise katiyen kayıt edilmeyecek
 Windowların visible, visibility, x, y verileri previewer'den gelen properties'lerden alınmayacak
 SpinBox'ların stylesheet'i düzeltilecek
-Özellikle IntegerValue'ler olmak üzere, programdaki tüm window() yerine yapılmış olan tüm form() varsayımlarını gözden geçir
+SpinBox tuşları ile yapılan artırma azaltmalar anında update edilecek
 Control preview update etmeden yapılan x y z w h property set'lerinde integervalue'yi nasıl tespit etcez sonuçta window() da form() da kullanılamaz, mı?
-IntegerValue ve diğer tüm form()'a ugulanan şartları sub-control olup window() olan kontroller için de yeniden düşün
 ParserUtils ile yapılan tüm işlerde, propertylerin binding olma ihtimali göz önüne alınıp herşey yeniden düşünülecek
 
 
