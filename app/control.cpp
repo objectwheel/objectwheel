@@ -127,8 +127,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    ControlPropertyManager::setId(this, ParserUtils::id(url), false, false);
-    ControlPropertyManager::setSize(this, {50.0, 50.0}, false, false);
+    ControlPropertyManager::setId(this, ParserUtils::id(url), ControlPropertyManager::NoOption);
+    ControlPropertyManager::setSize(this, {50.0, 50.0}, ControlPropertyManager::NoOption);
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
@@ -301,15 +301,17 @@ void Control::setDragging(bool dragging)
     else
         setCursor(Qt::ArrowCursor);
 
+    // FIXME:
     Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
-//    emit draggingChanged();
+    //    emit draggingChanged();
 }
 
 void Control::setResizing(bool resizing)
 {
     m_resizing = resizing;
+    // FIXME:
     Suppressor::suppress(150, "resizingChanged", std::bind(&Control::resizingChanged, this));
-//    emit resizingChanged();
+    //    emit resizingChanged();
 }
 
 void Control::updateUid()
@@ -337,9 +339,14 @@ void Control::updateUids()
 
 void Control::dropControl(Control* control)
 {
+    Q_ASSERT(!control->form());
+
     const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
-    ControlPropertyManager::setParent(control, this, true);
-    ControlPropertyManager::setPos(control, newPos, true, true, true);
+    ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
+                                      | ControlPropertyManager::UpdatePreviewer);
+    ControlPropertyManager::setPos(control, newPos,  ControlPropertyManager::SaveChanges
+                                   | ControlPropertyManager::UpdatePreviewer
+                                   | ControlPropertyManager::CompressedCall);
     // NOTE: We compress setPos because there might be some other compressed setPos'es in the list
     // We want the setPos that is happened after reparent operation to take place at the very last
 
@@ -410,7 +417,11 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     else
         event->accept();
 
-    ControlPropertyManager::setPos(this, pos(), true, true, true);
+    if (!form()) {
+        ControlPropertyManager::setPos(this, pos(), ControlPropertyManager::SaveChanges
+                                       | ControlPropertyManager::UpdatePreviewer
+                                       | ControlPropertyManager::CompressedCall);
+    }
 }
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
@@ -560,7 +571,7 @@ void Control::updatePreview(const PreviewResult& result)
     if (result.uid != uid())
         return;
 
-    ControlPropertyManager::setId(this, result.id, false, false);
+    ControlPropertyManager::setId(this, result.id, ControlPropertyManager::NoOption);
     m_cachedGeometry = getRect(result);
     if (!dragging() && !resizing())
         applyCachedGeometry();
@@ -620,9 +631,12 @@ void Control::updatePreview(const PreviewResult& result)
 void Control::applyCachedGeometry()
 {
     if (!dragging() && !resizing()) {
-        if (form())
-            ControlPropertyManager::setSize(this, m_cachedGeometry.size(), false, false);
-        else
-            ControlPropertyManager::setGeometry(this, m_cachedGeometry, false, false);
+        if (form()) {
+            ControlPropertyManager::setSize(this, m_cachedGeometry.size(),
+                                            ControlPropertyManager::IntegerValue);
+        } else {
+            ControlPropertyManager::setGeometry(this, m_cachedGeometry,
+                                                ControlPropertyManager::NoOption);
+        }
     }
 }

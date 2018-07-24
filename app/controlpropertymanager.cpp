@@ -7,10 +7,6 @@
 #include <QTimer>
 #include <QPointer>
 
-// NOTE: Compressed calls occur in arbitrary order
-// FIXME: What if we set qreal value for an int property, especially for Window qml types
-// TODO: connect timeout signal of s_dirtyPropertyProcessingTimer
-
 ControlPropertyManager* ControlPropertyManager::s_instance = nullptr;
 QTimer* ControlPropertyManager::s_dirtyPropertyProcessingTimer = nullptr;
 QList<ControlPropertyManager::DirtyProperty> ControlPropertyManager::s_dirtyProperties;
@@ -44,100 +40,241 @@ void ControlPropertyManager::handleDirtyProperties()
     s_dirtyPropertyProcessingTimer->stop();
 }
 
-void ControlPropertyManager::setX(Control* control, qreal x, bool save, bool updatePreviewer, bool compress)
+void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
 
-    if (control->x() != x)
-        control->setX(x);
+    if ((options & IntegerValue) ? int(control->x()) != int(x) : control->x() != x)
+        control->setX((options & IntegerValue) ? int(x) : x);
 
-    if (compress) {
+    if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setX";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setX, QPointer<Control>(control),
-                                           x, save, updatePreviewer, false);
+                                           x, options ^ CompressedCall);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        if (save)
-            SaveManager::setProperty(control, "x", QString::number(control->x()));
+        if (options & SaveChanges) {
+            if (options & IntegerValue)
+                SaveManager::setProperty(control, "x", QString::number(int(control->x())));
+            else
+                SaveManager::setProperty(control, "x", QString::number(control->x()));
+        }
 
-        if (updatePreviewer)
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue)
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", int(control->x()));
+            else
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
+        }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setY(Control* control, qreal y, bool save, bool updatePreviewer, bool compress)
+void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
 
-    if (control->y() != y)
-        control->setY(y);
+    if ((options & IntegerValue) ? int(control->y()) != int(y) : control->y() != y)
+        control->setY((options & IntegerValue) ? int(y) : y);
 
-    if (compress) {
+    if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setY";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setY, QPointer<Control>(control),
-                                           y, save, updatePreviewer, false);
+                                           y, options ^ CompressedCall);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        if (save)
-            SaveManager::setProperty(control, "y", QString::number(control->y()));
+        if (options & SaveChanges) {
+            if (options & IntegerValue)
+                SaveManager::setProperty(control, "y", QString::number(int(control->y())));
+            else
+                SaveManager::setProperty(control, "y", QString::number(control->y()));
+        }
 
-        if (updatePreviewer)
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue)
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", int(control->y()));
+            else
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
+        }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setPos(Control* control, const QPointF& pos, bool save,
-                                    bool updatePreviewer, bool compress)
+void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
 
-    if (control->pos() != pos)
-        control->setPos(pos);
+    if ((options & IntegerValue) ? int(control->zValue()) != int(z) : control->zValue() != z)
+        control->setZValue((options & IntegerValue) ? int(z) : z);
 
-    if (compress) {
+    if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
-        dirtyProperty.key = control->uid() + "setPos";
-        dirtyProperty.function = std::bind(&ControlPropertyManager::setPos, QPointer<Control>(control),
-                                           pos, save, updatePreviewer, false);
+        dirtyProperty.key = control->uid() + "setZ";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setZ, QPointer<Control>(control),
+                                           z, options ^ CompressedCall);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        if (save) {
-            SaveManager::setProperty(control, "x", QString::number(control->x()));
-            SaveManager::setProperty(control, "y", QString::number(control->y()));
+        if (options & SaveChanges) {
+            if (options & IntegerValue)
+                SaveManager::setProperty(control, "z", QString::number(int(control->zValue())));
+            else
+                SaveManager::setProperty(control, "z", QString::number(control->zValue()));
         }
 
-        if (updatePreviewer) {
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue)
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "z", int(control->zValue()));
+            else
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "z", control->zValue());
+        }
+
+        emit instance()->zChanged(control);
+    }
+}
+
+void ControlPropertyManager::setWidth(Control* control, qreal width, Options options)
+{
+    if (!control)
+        return;
+
+    if ((options & IntegerValue) ?
+            int(control->size().width()) != int(width) : control->size().width() != width) {
+        control->resize((options & IntegerValue) ? int(width) : width, control->size().height());
+    }
+
+    if (options & CompressedCall) {
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setWidth";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setWidth, QPointer<Control>(control),
+                                           width, options ^ CompressedCall);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
+
+        if (!s_dirtyPropertyProcessingTimer->isActive())
+            s_dirtyPropertyProcessingTimer->start();
+    } else {
+        if (options & SaveChanges) {
+            if (options & IntegerValue)
+                SaveManager::setProperty(control, "width", QString::number(int(control->size().width())));
+            else
+                SaveManager::setProperty(control, "width", QString::number(control->size().width()));
+        }
+
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue)
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", int(control->size().width()));
+            else
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", control->size().width());
         }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setSize(Control* control, const QSizeF& size, bool save,
-                                     bool updatePreviewer, bool compress)
+void ControlPropertyManager::setHeight(Control* control, qreal height, Options options)
+{
+    if (!control)
+        return;
+
+    if ((options & IntegerValue) ?
+            int(control->size().height()) != int(height) : control->size().height() != height) {
+        control->resize(control->size().width(), (options & IntegerValue) ? int(height) : height);
+    }
+
+    if (options & CompressedCall) {
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setHeight";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setHeight, QPointer<Control>(control),
+                                           height, options ^ CompressedCall);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
+
+        if (!s_dirtyPropertyProcessingTimer->isActive())
+            s_dirtyPropertyProcessingTimer->start();
+    } else {
+        if (options & SaveChanges) {
+            if (options & IntegerValue)
+                SaveManager::setProperty(control, "height", QString::number(int(control->size().height())));
+            else
+                SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+        }
+
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue)
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", int(control->size().height()));
+            else
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", control->size().height());
+        }
+
+        emit instance()->geometryChanged(control);
+    }
+}
+
+void ControlPropertyManager::setPos(Control* control, const QPointF& pos, ControlPropertyManager::Options options)
+{
+    if (!control)
+        return;
+
+    if ((options & IntegerValue) ?
+            control->pos().toPoint() != pos.toPoint() : control->pos() != pos) {
+        control->setPos((options & IntegerValue) ? pos.toPoint() : pos);
+    }
+
+    if (options & CompressedCall) {
+        DirtyProperty dirtyProperty;
+        dirtyProperty.key = control->uid() + "setPos";
+        dirtyProperty.function = std::bind(&ControlPropertyManager::setPos, QPointer<Control>(control),
+                                           pos, options ^ CompressedCall);
+        s_dirtyProperties.removeAll(dirtyProperty);
+        s_dirtyProperties.append(dirtyProperty);
+
+        if (!s_dirtyPropertyProcessingTimer->isActive())
+            s_dirtyPropertyProcessingTimer->start();
+    } else {
+        if (options & SaveChanges) {
+            if (options & IntegerValue) {
+                SaveManager::setProperty(control, "x", QString::number(int(control->x())));
+                SaveManager::setProperty(control, "y", QString::number(int(control->y())));
+            } else {
+                SaveManager::setProperty(control, "x", QString::number(control->x()));
+                SaveManager::setProperty(control, "y", QString::number(control->y()));
+            }
+        }
+
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue) {
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", int(control->x()));
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", int(control->y()));
+            } else {
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
+            }
+        }
+
+        emit instance()->geometryChanged(control);
+    }
+}
+
+void ControlPropertyManager::setSize(Control* control, const QSizeF& size, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
@@ -145,36 +282,47 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, bool 
     if (!size.isValid())
         return;
 
-    if (control->size() != size)
-        control->resize(size);
+    if ((options & IntegerValue) ?
+            control->size().toSize() != size.toSize() : control->size() != size) {
+        control->resize((options & IntegerValue) ? size.toSize() : size);
+    }
 
-    if (compress) {
+    if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setSize";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setSize, QPointer<Control>(control),
-                                           size, save, updatePreviewer, false);
+                                           size, options ^ CompressedCall);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        if (save) {
-            SaveManager::setProperty(control, "width", QString::number(control->size().width()));
-            SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+        if (options & SaveChanges) {
+            if (options & IntegerValue) {
+                SaveManager::setProperty(control, "width", QString::number(int(control->size().width())));
+                SaveManager::setProperty(control, "height", QString::number(int(control->size().height())));
+            } else {
+                SaveManager::setProperty(control, "width", QString::number(control->size().width()));
+                SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+            }
         }
 
-        if (updatePreviewer) {
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", control->size().width());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", control->size().height());
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue) {
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", int(control->size().width()));
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", int(control->size().height()));
+            } else {
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", control->size().width());
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", control->size().height());
+            }
         }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometry, bool save,
-                                         bool updatePreviewer, bool compress)
+void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometry, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
@@ -182,40 +330,55 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
     if (!geometry.isValid())
         return;
 
-    if (control->geometry() != geometry)
-        control->setGeometry(geometry);
+    if ((options & IntegerValue) ?
+            control->geometry().toRect() != geometry.toRect() : control->geometry() != geometry) {
+        control->setGeometry((options & IntegerValue) ? geometry.toRect() : geometry);
+    }
 
-    if (compress) {
+    if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setGeometry";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setGeometry, QPointer<Control>(control),
-                                           geometry, save, updatePreviewer, false);
+                                           geometry, options ^ CompressedCall);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        if (save) {
-            SaveManager::setProperty(control, "x", QString::number(control->x()));
-            SaveManager::setProperty(control, "y", QString::number(control->y()));
-            SaveManager::setProperty(control, "width", QString::number(control->size().width()));
-            SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+        if (options & SaveChanges) {
+            if (options & IntegerValue) {
+                SaveManager::setProperty(control, "x", QString::number(int(control->x())));
+                SaveManager::setProperty(control, "y", QString::number(int(control->y())));
+                SaveManager::setProperty(control, "width", QString::number(int(control->size().width())));
+                SaveManager::setProperty(control, "height", QString::number(int(control->size().height())));
+            } else {
+                SaveManager::setProperty(control, "x", QString::number(control->x()));
+                SaveManager::setProperty(control, "y", QString::number(control->y()));
+                SaveManager::setProperty(control, "width", QString::number(control->size().width()));
+                SaveManager::setProperty(control, "height", QString::number(control->size().height()));
+            }
         }
 
-        if (updatePreviewer) {
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", control->size().width());
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", control->size().height());
+        if (options & UpdatePreviewer) {
+            if (options & IntegerValue) {
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", int(control->x()));
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", int(control->y()));
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", int(control->size().width()));
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", int(control->size().height()));
+            } else {
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", control->x());
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", control->y());
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", control->size().width());
+                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", control->size().height());
+            }
         }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setParent(Control* control, Control* parentControl, bool save,
-                                       bool updatePreviewer, bool compress)
+void ControlPropertyManager::setParent(Control* control, Control* parentControl, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
@@ -226,21 +389,21 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     if (control->parentItem() != parentControl)
         control->setParentItem(parentControl);
 
-    if (compress) {
+    if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setParent";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setParent, QPointer<Control>(control),
-                                           QPointer<Control>(parentControl), save, updatePreviewer, false);
+                                           QPointer<Control>(parentControl), options ^ CompressedCall);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        if (save)
+        if (options & SaveChanges)
             SaveManager::moveControl(control, parentControl);
 
-        if (updatePreviewer) {
+        if (options & UpdatePreviewer) {
             ControlPreviewingManager::scheduleParentUpdate(control->dir(),
                                                            control->uid(), parentControl->uid());
         }
@@ -249,36 +412,7 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     }
 }
 
-void ControlPropertyManager::setZ(Control* control, qreal z, bool save, bool updatePreviewer, bool compress)
-{
-    if (!control)
-        return;
-
-    if (control->zValue() != z)
-        control->setZValue(z);
-
-    if (compress) {
-        DirtyProperty dirtyProperty;
-        dirtyProperty.key = control->uid() + "setZ";
-        dirtyProperty.function = std::bind(&ControlPropertyManager::setZ, QPointer<Control>(control),
-                                           z, save, updatePreviewer, false);
-        s_dirtyProperties.removeAll(dirtyProperty);
-        s_dirtyProperties.append(dirtyProperty);
-
-        if (!s_dirtyPropertyProcessingTimer->isActive())
-            s_dirtyPropertyProcessingTimer->start();
-    } else {
-        if (save)
-            SaveManager::setProperty(control, "z", QString::number(control->zValue()));
-
-        if (updatePreviewer)
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "z", control->zValue());
-
-        emit instance()->zChanged(control);
-    }
-}
-
-void ControlPropertyManager::setId(Control* control, const QString& id, bool save, bool updatePreviewer)
+void ControlPropertyManager::setId(Control* control, const QString& id, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
@@ -288,12 +422,12 @@ void ControlPropertyManager::setId(Control* control, const QString& id, bool sav
 
     const QString& previousId = control->id();
 
-    if (save)
+    if (options & SaveChanges)
         SaveManager::setProperty(control, "id", id);
     else
         control->setId(id);
 
-    if (updatePreviewer)
+    if (options & UpdatePreviewer)
         ControlPreviewingManager::scheduleIdUpdate(control->uid(), control->id());
 
     emit instance()->idChanged(control, previousId);
@@ -301,7 +435,7 @@ void ControlPropertyManager::setId(Control* control, const QString& id, bool sav
 
 void ControlPropertyManager::setProperty(Control* control, const QString& propertyName,
                                          const QString& parserValue, const QVariant& propertyValue,
-                                         bool save, bool updatePreviewer)
+                                         Options options)
 {
     if (!control)
         return;
@@ -319,10 +453,10 @@ void ControlPropertyManager::setProperty(Control* control, const QString& proper
             && propertyName != "width"
             && propertyName != "height");
 
-    if (save)
+    if (options & SaveChanges)
         SaveManager::setProperty(control, propertyName, parserValue);
 
-    if (updatePreviewer)
+    if (options & UpdatePreviewer)
         ControlPreviewingManager::schedulePropertyUpdate(control->uid(), propertyName, propertyValue);
 
     emit instance()->propertyChanged(control);

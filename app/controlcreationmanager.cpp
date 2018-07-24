@@ -58,8 +58,8 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
 {
     auto control = new Control(SaveUtils::toUrl(rootPath));
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
-    ControlPropertyManager::setParent(control, parentControl, false, false);
-    ControlPropertyManager::setPos(control, pos, true, false);
+    ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
+    ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), parentControl->uid());
 
     QMap<QString, Control*> controlTree;
@@ -70,7 +70,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
         Q_ASSERT(parentControl);
 
         auto childControl = new Control(SaveUtils::toUrl(childPath));
-        ControlPropertyManager::setParent(childControl, parentControl, false, false);
+        ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
 
         controlTree.insert(childPath, childControl);

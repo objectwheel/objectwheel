@@ -27,7 +27,7 @@ void ProjectExposingManager::exposeProject()
             form->setMain(true);
 
         if (form->id().isEmpty())
-            ControlPropertyManager::setId(form, "form", true, false);
+            ControlPropertyManager::setId(form, "form", ControlPropertyManager::SaveChanges);
 
         s_designerScene->addForm(form);
 
@@ -41,9 +41,9 @@ void ProjectExposingManager::exposeProject()
             auto control = new Control(SaveUtils::toUrl(childPath));
 
             if (control->id().isEmpty())
-                ControlPropertyManager::setId(control, "control", true, false);
+                ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);
 
-            ControlPropertyManager::setParent(control, parentControl, false, false);
+            ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
             controlTree.insert(childPath, control);
         }
     }

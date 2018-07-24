@@ -244,7 +244,7 @@ bool SaveManager::addForm(Form* form)
 
     flushId(form);
     regenerateUids(form);
-    ControlPropertyManager::setId(form, form->id(), false, false);
+    ControlPropertyManager::setId(form, form->id(), ControlPropertyManager::NoOption);
 
     return true;
 }
@@ -295,9 +295,9 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
     flushSuid(control, suid);
     regenerateUids(control); //for all
 
-    ControlPropertyManager::setId(control, control->id(), false, false);
+    ControlPropertyManager::setId(control, control->id(), ControlPropertyManager::NoOption);
     for (auto child : control->childControls())
-        ControlPropertyManager::setId(child, child->id(), false, false);
+        ControlPropertyManager::setId(child, child->id(), ControlPropertyManager::NoOption);
 
     return true;
 }

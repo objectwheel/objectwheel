@@ -986,9 +986,9 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
                 const QString& previousId = control->id();
 
                 if (id.isEmpty())
-                    ControlPropertyManager::setId(control, "control", true, false);
+                    ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);
                 else
-                    ControlPropertyManager::setId(control, id, true, false); // For refactorId
+                    ControlPropertyManager::setId(control, id, ControlPropertyManager::SaveChanges); // For refactorId
 
                 WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(control, previousId);
             }

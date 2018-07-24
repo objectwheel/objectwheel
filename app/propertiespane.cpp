@@ -21,6 +21,7 @@
 #include <QJSEngine>
 #include <QToolButton>
 #include <QColorDialog>
+#include <QSpinBox>
 
 #include <QDebug>
 namespace {
@@ -151,10 +152,13 @@ QWidget* createIdHandlerWidget(Control* selectedControl)
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
         if (selectedControl->id() != lineEdit->text()) {
-            if (lineEdit->text().isEmpty())
+            if (lineEdit->text().isEmpty()) {
                 lineEdit->setText(selectedControl->id());
-            else
-                ControlPropertyManager::setId(selectedControl, lineEdit->text());
+            } else {
+                ControlPropertyManager::setId(selectedControl, lineEdit->text(),
+                                              ControlPropertyManager::SaveChanges
+                                              | ControlPropertyManager::UpdatePreviewer);
+            }
         }
     });
 
@@ -172,7 +176,9 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     {
         ControlPropertyManager::setProperty(selectedControl,
                                             propertyName, stringify(lineEdit->text()),
-                                            lineEdit->text());
+                                            lineEdit->text(),
+                                            ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdatePreviewer);
     });
 
     return lineEdit;
@@ -191,7 +197,9 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
                                               SaveUtils::toThisDir(selectedControl->dir()),
                                               QUrl::AssumeLocalFile);
         const QString& displayText = urlToDisplayText(url, selectedControl->dir());
-        ControlPropertyManager::setProperty(selectedControl, propertyName, stringify(displayText), url);
+        ControlPropertyManager::setProperty(selectedControl, propertyName, stringify(displayText), url,
+                                            ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdatePreviewer);
     });
 
     return lineEdit;
@@ -209,7 +217,9 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* selectedControl)
     {
         ControlPropertyManager::setProperty(selectedControl,
                                             enumm.name, enumm.scope + "." + comboBox->currentText(),
-                                            enumm.keys.value(comboBox->currentText()));
+                                            enumm.keys.value(comboBox->currentText()),
+                                            ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdatePreviewer);
     });
 
     return comboBox;
@@ -225,7 +235,9 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     {
         ControlPropertyManager::setProperty(selectedControl,
                                             propertyName, checkBox->isChecked() ? "true" : "false",
-                                            checkBox->isChecked());
+                                            checkBox->isChecked(),
+                                            ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdatePreviewer);
     });
 
     return checkBox;
@@ -251,11 +263,57 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
             toolButton->setText(color.name(QColor::HexArgb));
             toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
             ControlPropertyManager::setProperty(selectedControl, propertyName,
-                                                stringify(color.name(QColor::HexArgb)), color);
+                                                stringify(color.name(QColor::HexArgb)), color,
+                                                ControlPropertyManager::SaveChanges
+                                                | ControlPropertyManager::UpdatePreviewer);
         }
     });
 
     return toolButton;
+}
+
+QWidget* createNumberHandlerWidget(const QString& propertyName, double number, Control* selectedControl, bool integer)
+{
+    QAbstractSpinBox* abstractSpinBox;
+    if (integer)
+        abstractSpinBox = new QSpinBox;
+    else
+        abstractSpinBox = new QDoubleSpinBox;
+
+    abstractSpinBox->setStyleSheet("QAbstractSpinBox { border: none; background: transparent; }");
+    abstractSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+
+    if (integer) {
+        QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+        spinBox->setMaximum(std::numeric_limits<int>::max());
+        spinBox->setMinimum(std::numeric_limits<int>::min());
+        spinBox->setValue(number);
+    } else {
+        QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+        spinBox->setMaximum(std::numeric_limits<double>::max());
+        spinBox->setMinimum(std::numeric_limits<double>::min());
+        spinBox->setValue(number);
+    }
+
+
+    QObject::connect(abstractSpinBox, &QAbstractSpinBox::editingFinished, [=]
+    {
+        if (integer) {
+            QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+            ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                                QString::number(spinBox->value()), spinBox->value(),
+                                                ControlPropertyManager::SaveChanges
+                                                | ControlPropertyManager::UpdatePreviewer);
+        } else {
+            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+            ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                                QString::number(spinBox->value()), spinBox->value(),
+                                                ControlPropertyManager::SaveChanges
+                                                | ControlPropertyManager::UpdatePreviewer);
+        }
+    });
+
+    return abstractSpinBox;
 }
 }
 
@@ -474,6 +532,11 @@ void PropertiesPane::onSelectionChange()
                     const int value = propertyValue.value<int>();
                     //                    addChild(item, NodeType::Int, propertyName, value, value);
                 }
+                int number = propertyValue.value<int>();
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                classItem->addChild(item);
+                setItemWidget(item, 1, createNumberHandlerWidget(propertyName, number, selectedControl, true));
                 break;
             }
 

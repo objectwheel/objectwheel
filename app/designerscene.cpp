@@ -277,12 +277,12 @@ bool DesignerScene::stick() const
 {
     bool ret = false;
     auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_currentForm);
+    selectedControls.removeAll(m_currentForm);
 
     for(int i = 0; i < selectedControls.size(); i++) {
         auto control = selectedControls[i];
         if (selectedControls.contains(control->parentControl())) {
-            selectedControls.removeOne(control);
+            selectedControls.removeAll(control);
             i--;
         }
     }
@@ -294,6 +294,10 @@ bool DesignerScene::stick() const
     auto geometry = united(selectedControls);
     auto center = geometry.center();
 
+    const ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+            | ControlPropertyManager::UpdatePreviewer
+            | ControlPropertyManager::CompressedCall;
+
     /* Child center <-> Parent center */
     if (center.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
             center.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
@@ -302,8 +306,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -315,8 +318,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -329,8 +331,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -343,8 +344,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -357,8 +357,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -371,8 +370,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -385,8 +383,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -399,8 +396,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -413,8 +409,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -427,8 +422,7 @@ bool DesignerScene::stick() const
         center = geometry.center();
         for (auto control : selectedControls) {
             ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(),
-                                           true, true, true);
+                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
         }
         ret = true;
     }
@@ -448,8 +442,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -461,8 +454,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -475,8 +467,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -489,8 +480,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -503,8 +493,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -517,8 +506,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -531,8 +519,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -545,8 +532,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -559,8 +545,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -573,8 +558,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -587,8 +571,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -601,8 +584,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -615,8 +597,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -629,8 +610,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -643,8 +623,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -657,8 +636,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -671,8 +649,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -685,8 +662,7 @@ bool DesignerScene::stick() const
             center = geometry.center();
             for (auto control : selectedControls) {
                 ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(),
-                                               true, true, true);
+                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
             }
             ret = true;
         }
@@ -852,8 +828,16 @@ void DesignerScene::sweep()
 void DesignerScene::centralize()
 {
     if (m_currentForm) {
-        ControlPropertyManager::setPos(m_currentForm,
-        {-m_currentForm->size().width() / 2.0, -m_currentForm->size().height() / 2.0}, false, false);
+        qreal x = -m_currentForm->size().width() / 2.0;
+        qreal y = -m_currentForm->size().height() / 2.0;
+        ControlPropertyManager::setPos(m_currentForm, {x, y}, ControlPropertyManager::NoOption);
+        /*
+            NOTE: We don't use IntegerValue because we don't save x-y values for operations
+                  made by Designer itself, except PropertiesPane. Cause the set operations
+                  on forms made by Designer are the internal form centralization operations
+                  and nothing to do with actual x-y values of a form. Even further, passing
+                  IntegerValue causes flickers inside of the Designer.
+        */
     }
 }
 

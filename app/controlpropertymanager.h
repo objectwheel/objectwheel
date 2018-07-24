@@ -17,30 +17,34 @@ class ControlPropertyManager final : public QObject
     struct DirtyProperty {
         QString key;
         std::function<void()> function;
-
         bool operator==(const DirtyProperty& b) const
         {return key == b.key; }
     };
 
 public:
+    enum Option {
+        NoOption = 0x0,
+        IntegerValue = 0x1,
+        SaveChanges = 0x2,
+        UpdatePreviewer = 0x4,
+        CompressedCall = 0x8
+    };
+    Q_DECLARE_FLAGS(Options, Option)
+
+public:
     static ControlPropertyManager* instance();
-    static void setX(Control* control, qreal x, bool save = true,
-                     bool updatePreviewer = true, bool compress = false);
-    static void setY(Control* control, qreal y, bool save = true,
-                     bool updatePreviewer = true, bool compress = false);
-    static void setPos(Control* control, const QPointF& pos, bool save = true,
-                       bool updatePreviewer = true, bool compress = false);
-    static void setSize(Control* control, const QSizeF& size, bool save = true,
-                        bool updatePreviewer = true, bool compress = false);
-    static void setGeometry(Control* control, const QRectF& geometry, bool save = true,
-                            bool updatePreviewer = true, bool compress = false);
-    static void setParent(Control* control, Control* parentControl, bool save = true,
-                          bool updatePreviewer = true, bool compress = false);
-    static void setZ(Control* control, qreal z, bool save = true,
-                     bool updatePreviewer = true, bool compress = false);
-    static void setId(Control* control, const QString& id, bool save = true, bool updatePreviewer = true);
+    static void setX(Control* control, qreal x, Options options);
+    static void setY(Control* control, qreal y, Options options);
+    static void setZ(Control* control, qreal z, Options options);
+    static void setWidth(Control* control, qreal width, Options options);
+    static void setHeight(Control* control, qreal height, Options options);
+    static void setPos(Control* control, const QPointF& pos, Options options);
+    static void setSize(Control* control, const QSizeF& size, Options options);
+    static void setGeometry(Control* control, const QRectF& geometry, Options options);
+    static void setParent(Control* control, Control* parentControl, Options options);
+    static void setId(Control* control, const QString& id, Options options);
     static void setProperty(Control* control, const QString& propertyName, const QString& parserValue,
-                            const QVariant& propertyValue, bool save = true, bool updatePreviewer = true);
+                            const QVariant& propertyValue, Options options);
 
 private slots:
     void handleDirtyProperties();
@@ -61,5 +65,7 @@ private:
     static QTimer* s_dirtyPropertyProcessingTimer;
     static QList<DirtyProperty> s_dirtyProperties;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ControlPropertyManager::Options)
 
 #endif // CONTROLPROPERTYMANAGER_H

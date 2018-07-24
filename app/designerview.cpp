@@ -298,14 +298,20 @@ void DesignerView::onSendBackAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
-    for (auto control : selectedControls)
-        ControlPropertyManager::setZ(control, scene()->currentForm()->lowerZValue() - 1, true, true);
+    for (auto control : selectedControls) {
+        ControlPropertyManager::setZ(control, scene()->currentForm()->lowerZValue() - 1,
+                                     ControlPropertyManager::SaveChanges
+                                     | ControlPropertyManager::UpdatePreviewer);
+    }
 }
 
 void DesignerView::onBringFrontAction()
 {
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
-    for (auto control : selectedControls)
-        ControlPropertyManager::setZ(control, scene()->currentForm()->higherZValue() + 1, true, true);
+    for (auto control : selectedControls) {
+        ControlPropertyManager::setZ(control, scene()->currentForm()->higherZValue() + 1,
+                                     ControlPropertyManager::SaveChanges
+                                     | ControlPropertyManager::UpdatePreviewer);
+    }
 }
