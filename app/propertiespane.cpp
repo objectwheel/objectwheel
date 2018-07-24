@@ -37,6 +37,19 @@ class WheelDisabler : public QObject {
     }
 } g_wheelDisabler;
 
+bool isXProperty(const QString& propertyName)
+{
+    return propertyName == "x";
+}
+
+bool isGeometryProperty(const QString& propertyName)
+{
+    return propertyName == "x"
+            || propertyName == "y"
+            || propertyName == "width"
+            || propertyName == "height";
+}
+
 template<typename SpinBox>
 void fixPosForForm(Control* control, const QString& propertyName, SpinBox spinBox)
 {
@@ -70,6 +83,37 @@ void fixVisibilityForWindow(Control* control, const QString& propertyName, QComb
     }
 }
 
+void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRow, bool verticalLine)
+{
+    painter->save();
+
+    QPainterPath path;
+    path.addRect(rect);
+    painter->setClipPath(path);
+    painter->setClipping(true);
+
+    // Fill background
+    if (classRow)
+        painter->fillRect(rect, "#9D7650");
+    else if (row % 2)
+        painter->fillRect(rect, "#faf1e8");
+    else
+        painter->fillRect(rect, "#fffefc");
+
+    // Draw top and bottom lines
+    painter->setPen("#25000000");
+    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+
+    // Draw vertical line
+    if (verticalLine) {
+        painter->drawLine(rect.topRight() + QPointF(-0.5, 0.5),
+                          rect.bottomRight() + QPointF(-0.5, -0.5));
+    }
+
+    painter->restore();
+}
+
 QImage colorToImage(const QSize& layoutSize, const QColor& color)
 {
     QImage image(layoutSize * DPR, QImage::Format_ARGB32_Premultiplied);
@@ -100,35 +144,22 @@ QString stringify(const QString& text)
     return engine.evaluate("JSON.stringify(text)").toString();
 }
 
-void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRow, bool verticalLine)
+QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
 {
-    painter->save();
-
-    QPainterPath path;
-    path.addRect(rect);
-    painter->setClipPath(path);
-    painter->setClipping(true);
-
-    // Fill background
-    if (classRow)
-        painter->fillRect(rect, "#9D7650");
-    else if (row % 2)
-        painter->fillRect(rect, "#faf1e8");
-    else
-        painter->fillRect(rect, "#fffefc");
-
-    // Draw top and bottom lines
-    painter->setPen("#25000000");
-    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-
-    // Draw vertical line
-    if (verticalLine) {
-        painter->drawLine(rect.topRight() + QPointF(-0.5, 0.5),
-                          rect.bottomRight() + QPointF(-0.5, -0.5));
+    QRectF geometry;
+    for (const PropertyNode& propertyNode : properties) {
+        for (const QString& propertyName : propertyNode.properties.keys()) {
+            if (propertyName == "x")
+                geometry.moveLeft(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "y")
+                geometry.moveTop(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "width")
+                geometry.setWidth(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "height")
+                geometry.setHeight(propertyNode.properties.value(propertyName).toReal());
+        }
     }
-
-    painter->restore();
+    return geometry;
 }
 
 QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
@@ -192,7 +223,7 @@ QWidget* createIdHandlerWidget(Control* selectedControl)
     lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(selectedControl->id());
-    lineEdit->setFocusPolicy(Qt::ClickFocus);
+    lineEdit->setFocusPolicy(Qt::StrongFocus);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -216,7 +247,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(text);
-    lineEdit->setFocusPolicy(Qt::ClickFocus);
+    lineEdit->setFocusPolicy(Qt::StrongFocus);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -236,7 +267,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(url);
-    lineEdit->setFocusPolicy(Qt::ClickFocus);
+    lineEdit->setFocusPolicy(Qt::StrongFocus);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -343,7 +374,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number, C
     //    abstractSpinBox->setStyleSheet("QAbstractSpinBox { border: none; background: transparent; }");
     abstractSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     abstractSpinBox->installEventFilter(&g_wheelDisabler);
-    abstractSpinBox->setFocusPolicy(Qt::ClickFocus);
+    abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
 
     if (integer) {
         QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
@@ -377,7 +408,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number, C
         ControlPropertyManager::Options options =
                 ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdatePreviewer;
 
-         if (selectedControl->form() && (propertyName == "x" || propertyName == "y"))
+        if (selectedControl->form() && (propertyName == "x" || propertyName == "y"))
             options |= ControlPropertyManager::DontApplyDesigner;
 
         if (propertyName == "x") {
@@ -398,6 +429,50 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number, C
 
     return abstractSpinBox;
 }
+
+void createAndAddGeometryPropertiesBlock(QTreeWidget* treeWidget,
+                                         QTreeWidgetItem* classItem,
+                                         const QList<PropertyNode>& properties,
+                                         Control* selectedControl, int integer)
+{
+    const QRectF& geometry = getGeometryFromProperties(properties);
+    const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
+            .arg(int(geometry.x()))
+            .arg(int(geometry.y()))
+            .arg(int(geometry.width()))
+            .arg(int(geometry.height()));
+
+    auto geometryItem = new QTreeWidgetItem;
+    geometryItem->setText(0, "geometry");
+    geometryItem->setText(1, geometryText);
+    classItem->addChild(geometryItem);
+
+    auto xItem = new QTreeWidgetItem;
+    xItem->setText(0, "x");
+    xItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "x"));
+    geometryItem->addChild(xItem);
+    treeWidget->setItemWidget(xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, integer));
+
+    auto yItem = new QTreeWidgetItem;
+    yItem->setText(0, "y");
+    yItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "y"));
+    geometryItem->addChild(yItem);
+    treeWidget->setItemWidget(yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, integer));
+
+    auto wItem = new QTreeWidgetItem;
+    wItem->setText(0, "width");
+    wItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "width"));
+    geometryItem->addChild(wItem);
+    treeWidget->setItemWidget(wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, integer));
+
+    auto hItem = new QTreeWidgetItem;
+    hItem->setText(0, "height");
+    hItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "height"));
+    geometryItem->addChild(hItem);
+    treeWidget->setItemWidget(hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, integer));
+
+    treeWidget->expandItem(geometryItem);
+}
 }
 
 class PropertiesListDelegate: public QStyledItemDelegate
@@ -411,6 +486,7 @@ public:
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
+        painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
 
         const QAbstractItemModel* model = index.model();
@@ -421,15 +497,19 @@ public:
                        isClassRow, index.column() == 0 && !isClassRow);
 
         // Draw data
-        if (index.column() == 0 || index.row() < 2) {
-            if (isClassRow)
+        if (index.column() == 0 || (!index.parent().isValid() && index.row() < 2)) {
+            if (isClassRow) {
                 painter->setPen(Qt::white);
-            else
-                painter->setPen(Qt::black);
-
-            painter->drawText(option.rect.adjusted(5, 0, 0, 0), index.data(Qt::EditRole).toString(),
+            } else {
+                if (index.data(Qt::DecorationRole).toBool())
+                    painter->setPen("#2D75DC");
+                else
+                    painter->setPen(Qt::black);
+            }
+            painter->drawText(option.rect.adjusted(5, 0, 0, 0), index.data(Qt::DisplayRole).toString(),
                               QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         }
+        painter->restore();
     }
 
     QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
@@ -522,15 +602,20 @@ void PropertiesPane::onSelectionChange()
     QTreeWidgetItem* typeItem = new QTreeWidgetItem;
     typeItem->setText(0, tr("Type"));
     typeItem->setText(1, properties.first().cleanClassName);
+    typeItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
+    typeItem->setData(1, Qt::DecorationRole, false); // No 'property changed' indication
     addTopLevelItem(typeItem);
 
     QTreeWidgetItem* uidItem = new QTreeWidgetItem;
     uidItem->setText(0, "uid");
     uidItem->setText(1, selectedControl->uid());
+    uidItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
+    uidItem->setData(1, Qt::DecorationRole, false); // No 'property changed' indication
     addTopLevelItem(uidItem);
 
     QTreeWidgetItem* idItem = new QTreeWidgetItem;
     idItem->setText(0, "id");
+    idItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     addTopLevelItem(idItem);
     setItemWidget(idItem, 1, createIdHandlerWidget(selectedControl));
 
@@ -559,6 +644,7 @@ void PropertiesPane::onSelectionChange()
                 const QColor& color = propertyValue.value<QColor>();
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1, createColorHandlerWidget(propertyName, color, selectedControl));
                 break;
@@ -568,6 +654,7 @@ void PropertiesPane::onSelectionChange()
                 const bool checked = propertyValue.value<bool>();
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1, createBoolHandlerWidget(propertyName, checked, selectedControl));
                 break;
@@ -577,6 +664,7 @@ void PropertiesPane::onSelectionChange()
                 const QString& text = propertyValue.value<QString>();
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1, createStringHandlerWidget(propertyName, text, selectedControl));
                 break;
@@ -587,31 +675,43 @@ void PropertiesPane::onSelectionChange()
                 const QString& displayText = urlToDisplayText(url, selectedControl->dir());
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1, createUrlHandlerWidget(propertyName, displayText, selectedControl));
                 break;
             }
 
             case QVariant::Double: {
-                if (propertyName == "x" || propertyName == "y" ||
-                        propertyName == "width" || propertyName == "height") {
-                    //                    if (propertyName == "x") //To make it called only once
-                    //                        addGeometryChild(item, "geometry", selectedControl->rect(), true);
+                if (isXProperty(propertyName)) {
+                    createAndAddGeometryPropertiesBlock(this, classItem, properties, selectedControl, false);
                 } else {
-                    //                    if (propertyName == "z")
-                    //                        propertyMap[propertyName] = selectedControl->zValue();
-                    const double value = propertyValue.value<double>();
-                    //                    addChild(item, NodeType::Double, propertyName, value, value);
+                    if (isGeometryProperty(propertyName))
+                        break;
+
+                    double number = propertyValue.value<double>();
+                    auto item = new QTreeWidgetItem;
+                    item->setText(0, propertyName);
+                    item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), propertyName));
+                    classItem->addChild(item);
+                    setItemWidget(item, 1, createNumberHandlerWidget(propertyName, number, selectedControl, false));
                 }
                 break;
             }
 
             case QVariant::Int: {
-                int number = propertyValue.value<int>();
-                auto item = new QTreeWidgetItem;
-                item->setText(0, propertyName);
-                classItem->addChild(item);
-                setItemWidget(item, 1, createNumberHandlerWidget(propertyName, number, selectedControl, true));
+                if (isXProperty(propertyName)) {
+                    createAndAddGeometryPropertiesBlock(this, classItem, properties, selectedControl, true);
+                } else {
+                    if (isGeometryProperty(propertyName))
+                        break;
+
+                    int number = propertyValue.value<int>();
+                    auto item = new QTreeWidgetItem;
+                    item->setText(0, propertyName);
+                    item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), propertyName));
+                    classItem->addChild(item);
+                    setItemWidget(item, 1, createNumberHandlerWidget(propertyName, number, selectedControl, true));
+                }
                 break;
             }
 
@@ -623,6 +723,7 @@ void PropertiesPane::onSelectionChange()
         for (const Enum& enumm : enumList) {
             auto item = new QTreeWidgetItem;
             item->setText(0, enumm.name);
+            item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), enumm.name));
             classItem->addChild(item);
             setItemWidget(item, 1, createEnumHandlerWidget(enumm, selectedControl));
         }

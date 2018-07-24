@@ -54,25 +54,22 @@ void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     painter.drawImage(rect_2, source);
 }
 
-QRectF getRect(const PreviewResult& result)
+QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
 {
-    QRectF rect;
-    const QList<PropertyNode> nodes = result.properties;
-
-    for (const auto& node : nodes) {
-        for (const auto& property : node.properties.keys()) {
-            if (property == "x")
-                rect.moveLeft(node.properties.value(property).toReal());
-            else if (property == "y")
-                rect.moveTop(node.properties.value(property).toReal());
-            else if (property == "width")
-                rect.setWidth(node.properties.value(property).toReal());
-            else if (property == "height")
-                rect.setHeight(node.properties.value(property).toReal());
+    QRectF geometry;
+    for (const PropertyNode& propertyNode : properties) {
+        for (const QString& propertyName : propertyNode.properties.keys()) {
+            if (propertyName == "x")
+                geometry.moveLeft(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "y")
+                geometry.moveTop(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "width")
+                geometry.setWidth(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "height")
+                geometry.setHeight(propertyNode.properties.value(propertyName).toReal());
         }
     }
-
-    return rect;
+    return geometry;
 }
 
 QImage initialPreview(const QSizeF& size)
@@ -585,7 +582,7 @@ void Control::updatePreview(const PreviewResult& result)
         return;
 
     ControlPropertyManager::setId(this, result.id, ControlPropertyManager::NoOption);
-    m_cachedGeometry = getRect(result);
+    m_cachedGeometry = getGeometryFromProperties(result.properties);
     if (!dragging() && !resizing())
         applyCachedGeometry();
 
@@ -608,7 +605,7 @@ void Control::updatePreview(const PreviewResult& result)
     //                //                m_clip = result.property("clip").toBool();
 
     //                if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
-    //                    const auto& rect = getRect(result);
+    //                    const auto& rect = getGeometryFromProperties(result.properties);
     //                    qreal z = getZ(result);
     //                    resize(rect.size());
     //                    //                    setRefreshingDisabled(true);

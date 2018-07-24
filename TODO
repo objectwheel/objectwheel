@@ -1,9 +1,9 @@
 Property değişimleri bir önceki değer ile aynı ise katiyen kayıt edilmeyecek
-Windowların visible, visibility, x, y verileri previewer'den gelen properties'lerden alınmayacak
+Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
 SpinBox'ların stylesheet'i düzeltilecek
 SpinBox tuşları ile yapılan artırma azaltmalar anında update edilecek
-Control preview update etmeden yapılan x y z w h property set'lerinde integervalue'yi nasıl tespit etcez sonuçta window() da form() da kullanılamaz, mı?
-ParserUtils ile yapılan tüm işlerde, propertylerin binding olma ihtimali göz önüne alınıp herşey yeniden düşünülecek
+- Control preview update etmeden yapılan x y z w h property set'lerinde integervalue'yi nasıl tespit etcez sonuçta window() da form() da kullanılamaz, mı?
+- ParserUtils ile yapılan tüm işlerde, propertylerin binding olma ihtimali göz önüne alınıp herşey yeniden düşünülecek
 
 
 Controller ilk oluşturulurken, proje yüklenme esnasında ya da yeni bir controlün yalnız başına oluşturulması esnasında, z, geometry, parent propertileri extraCondutions olmadan set edilitor, bunun yan etkileri neler olabilir.
