@@ -347,7 +347,6 @@ QVariant::Type Control::propertyType(const QString& propertyName) const
                 return propertyValue.type();
         }
     }
-    Q_ASSERT(0);
     return QVariant::Invalid;
 }
 

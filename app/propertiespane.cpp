@@ -48,6 +48,28 @@ void fixPosForForm(Control* control, const QString& propertyName, SpinBox spinBo
     }
 }
 
+void fixVisibleForWindow(Control* control, const QString& propertyName, QCheckBox* checkBox)
+{
+    if (control->window() && propertyName == "visible")
+        checkBox->setChecked(ParserUtils::property(control->url(), propertyName) == "true");
+}
+
+void fixVisibilityForWindow(Control* control, const QString& propertyName, QComboBox* comboBox)
+{
+    if (control->window() && propertyName == "visibility") {
+        comboBox->setCurrentText("AutomaticVisibility");
+
+        const QString& visibility = ParserUtils::property(control->url(), propertyName);
+        if (visibility.isEmpty())
+            return;
+
+        for (int i = 0; i < comboBox->count(); ++i) {
+            if (visibility.contains(comboBox->itemText(i)))
+                comboBox->setCurrentIndex(i);
+        }
+    }
+}
+
 QImage colorToImage(const QSize& layoutSize, const QColor& color)
 {
     QImage image(layoutSize * DPR, QImage::Format_ARGB32_Premultiplied);
@@ -238,11 +260,20 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* selectedControl)
     comboBox->setCurrentText(enumm.value);
     comboBox->setCursor(Qt::PointingHandCursor);
     comboBox->setFocusPolicy(Qt::ClickFocus);
+    fixVisibilityForWindow(selectedControl, enumm.name, comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
+        QString fixedScope = enumm.scope;
+
+        if (selectedControl->window()) {
+            const QByteArray& qml = rdfile(selectedControl->url());
+            if (!qml.contains("import QtQuick.Window"))
+                fixedScope = "ApplicationWindow";
+        }
+
         ControlPropertyManager::setProperty(selectedControl,
-                                            enumm.name, enumm.scope + "." + comboBox->currentText(),
+                                            enumm.name, fixedScope + "." + comboBox->currentText(),
                                             enumm.keys.value(comboBox->currentText()),
                                             ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
@@ -257,6 +288,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     checkBox->setChecked(checked);
     checkBox->setFocusPolicy(Qt::ClickFocus);
+    fixVisibleForWindow(selectedControl, propertyName, checkBox);
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
     {
