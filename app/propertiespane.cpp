@@ -10,6 +10,7 @@
 //#include <form.h>
 //#include <projectmanager.h>
 #include <dpr.h>
+#include <parserutils.h>
 
 #include <transparentcombobox.h>
 
@@ -25,6 +26,21 @@
 
 #include <QDebug>
 namespace {
+class WheelDisabler : public QObject {
+    Q_OBJECT
+    bool eventFilter(QObject* o, QEvent* e) override {
+        if (e->type() == QEvent::Wheel && qobject_cast<QAbstractSpinBox*>(o)) {
+            e->ignore();
+            return true;
+        }
+        return QObject::eventFilter(o, e);
+    }
+} g_wheelDisabled;
+
+void fixPosForWindow(Control* control, const QString& propertyName, QSpin)
+{
+    // FIXME
+}
 
 QImage colorToImage(const QSize& layoutSize, const QColor& color)
 {
@@ -148,6 +164,7 @@ QWidget* createIdHandlerWidget(Control* selectedControl)
     lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(selectedControl->id());
+    lineEdit->setFocusPolicy(Qt::ClickFocus);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -171,6 +188,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(text);
+    lineEdit->setFocusPolicy(Qt::ClickFocus);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -190,6 +208,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(url);
+    lineEdit->setFocusPolicy(Qt::ClickFocus);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -212,6 +231,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* selectedControl)
     comboBox->addItems(enumm.keys.keys());
     comboBox->setCurrentText(enumm.value);
     comboBox->setCursor(Qt::PointingHandCursor);
+    comboBox->setFocusPolicy(Qt::ClickFocus);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -230,6 +250,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     auto checkBox = new QCheckBox;
     checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     checkBox->setChecked(checked);
+    checkBox->setFocusPolicy(Qt::ClickFocus);
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
     {
@@ -252,6 +273,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
     toolButton->setIconSize({12, 12});
     toolButton->setCursor(Qt::PointingHandCursor);
+    toolButton->setFocusPolicy(Qt::ClickFocus);
 
     QObject::connect(toolButton, &QCheckBox::clicked, [=]
     {
@@ -280,36 +302,117 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number, C
     else
         abstractSpinBox = new QDoubleSpinBox;
 
-    abstractSpinBox->setStyleSheet("QAbstractSpinBox { border: none; background: transparent; }");
+    //    abstractSpinBox->setStyleSheet("QAbstractSpinBox { border: none; background: transparent; }");
     abstractSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    abstractSpinBox->installEventFilter(&g_wheelDisabled);
+    abstractSpinBox->setFocusPolicy(Qt::ClickFocus);
 
     if (integer) {
         QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
         spinBox->setMaximum(std::numeric_limits<int>::max());
         spinBox->setMinimum(std::numeric_limits<int>::min());
         spinBox->setValue(number);
+        if (selectedControl->form()) {
+            if ((propertyName == "x" || propertyName == "y")
+                    && !ParserUtils::exists(selectedControl->url(), propertyName)) {
+                spinBox->setValue(0);
+            }
+        }
     } else {
         QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
         spinBox->setMaximum(std::numeric_limits<double>::max());
         spinBox->setMinimum(std::numeric_limits<double>::min());
         spinBox->setValue(number);
+        if (selectedControl->form()) {
+            if ((propertyName == "x" || propertyName == "y")
+                    && !ParserUtils::exists(selectedControl->url(), propertyName)) {
+                spinBox->setValue(0);
+            }
+        }
+        // FIXME fixPosForWindow();
     }
-
 
     QObject::connect(abstractSpinBox, &QAbstractSpinBox::editingFinished, [=]
     {
-        if (integer) {
-            QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
-            ControlPropertyManager::setProperty(selectedControl, propertyName,
-                                                QString::number(spinBox->value()), spinBox->value(),
-                                                ControlPropertyManager::SaveChanges
-                                                | ControlPropertyManager::UpdatePreviewer);
+        if (propertyName == "x") {
+            if (integer) {
+                QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setX(selectedControl, spinBox->value(),
+                                             ControlPropertyManager::SaveChanges
+                                             | ControlPropertyManager::UpdatePreviewer
+                                             | ControlPropertyManager::IntegerValue);
+            } else {
+                QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setX(selectedControl, spinBox->value(),
+                                             ControlPropertyManager::SaveChanges
+                                             | ControlPropertyManager::UpdatePreviewer);
+            }
+        } else if (propertyName == "y") {
+            if (integer) {
+                QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setY(selectedControl, spinBox->value(),
+                                             ControlPropertyManager::SaveChanges
+                                             | ControlPropertyManager::UpdatePreviewer
+                                             | ControlPropertyManager::IntegerValue);
+            } else {
+                QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setY(selectedControl, spinBox->value(),
+                                             ControlPropertyManager::SaveChanges
+                                             | ControlPropertyManager::UpdatePreviewer);
+            }
+        } else if (propertyName == "z") {
+            if (integer) {
+                QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setZ(selectedControl, spinBox->value(),
+                                             ControlPropertyManager::SaveChanges
+                                             | ControlPropertyManager::UpdatePreviewer
+                                             | ControlPropertyManager::IntegerValue);
+            } else {
+                QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setZ(selectedControl, spinBox->value(),
+                                             ControlPropertyManager::SaveChanges
+                                             | ControlPropertyManager::UpdatePreviewer);
+            }
+        } else if (propertyName == "width") {
+            if (integer) {
+                QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setWidth(selectedControl, spinBox->value(),
+                                                 ControlPropertyManager::SaveChanges
+                                                 | ControlPropertyManager::UpdatePreviewer
+                                                 | ControlPropertyManager::IntegerValue);
+            } else {
+                QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setWidth(selectedControl, spinBox->value(),
+                                                 ControlPropertyManager::SaveChanges
+                                                 | ControlPropertyManager::UpdatePreviewer);
+            }
+        } else if (propertyName == "height") {
+            if (integer) {
+                QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setHeight(selectedControl, spinBox->value(),
+                                                  ControlPropertyManager::SaveChanges
+                                                  | ControlPropertyManager::UpdatePreviewer
+                                                  | ControlPropertyManager::IntegerValue);
+            } else {
+                QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setHeight(selectedControl, spinBox->value(),
+                                                  ControlPropertyManager::SaveChanges
+                                                  | ControlPropertyManager::UpdatePreviewer);
+            }
         } else {
-            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
-            ControlPropertyManager::setProperty(selectedControl, propertyName,
-                                                QString::number(spinBox->value()), spinBox->value(),
-                                                ControlPropertyManager::SaveChanges
-                                                | ControlPropertyManager::UpdatePreviewer);
+            if (integer) {
+                QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                                    QString::number(spinBox->value()), spinBox->value(),
+                                                    ControlPropertyManager::SaveChanges
+                                                    | ControlPropertyManager::UpdatePreviewer);
+            } else {
+                QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+                ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                                    QString::number(spinBox->value()), spinBox->value(),
+                                                    ControlPropertyManager::SaveChanges
+                                                    | ControlPropertyManager::UpdatePreviewer);
+            }
         }
     });
 
@@ -524,14 +627,6 @@ void PropertiesPane::onSelectionChange()
             }
 
             case QVariant::Int: {
-                if (propertyName == "x" || propertyName == "y" ||
-                        propertyName == "width" || propertyName == "height") {
-                    //                    if (propertyName == "x")
-                    //                        addGeometryChild(item, "geometry", selectedControl->rect(), false);
-                } else {
-                    const int value = propertyValue.value<int>();
-                    //                    addChild(item, NodeType::Int, propertyName, value, value);
-                }
                 int number = propertyValue.value<int>();
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
