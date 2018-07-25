@@ -24,6 +24,7 @@
 #include <QColorDialog>
 #include <QSpinBox>
 #include <QFontDatabase>
+#include <QMetaEnum>
 
 #include <QDebug>
 namespace {
@@ -367,7 +368,37 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, 
         fontItem->setText(1, fontText);
 
         ControlPropertyManager::setProperty(control, "font.family", stringify(comboBox->currentText()),
-                                            font, ControlPropertyManager::SaveChanges
+                                            comboBox->currentText(), ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdatePreviewer);
+    });
+
+    return comboBox;
+}
+
+QWidget* createFontWeightHandlerWidget(int weight, Control* control)
+{
+    auto comboBox = new TransparentComboBox;
+    comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    comboBox->setCursor(Qt::PointingHandCursor);
+    comboBox->setFocusPolicy(Qt::ClickFocus);
+
+    QMetaEnum weightEnum = QMetaEnum::fromType<QFont::Weight>();
+    for (int i = weightEnum.keyCount(); i--;) { // Necessary somehow
+        if (QString::fromUtf8(weightEnum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
+            comboBox->addItem(weightEnum.key(i));
+    }
+
+    comboBox->setCurrentText(QMetaEnum::fromType<QFont::Weight>().valueToKey(weight));
+
+    QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
+    {
+        QFont font = getFontFromProperties(control->properties());
+        int weightValue = weightEnum.keyToValue(comboBox->currentText().toUtf8().constData());
+        font.setWeight(weightValue);
+
+        ControlPropertyManager::setProperty(control, "font.weight",
+                                            "Font." + comboBox->currentText(), weightValue,
+                                            ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
     });
 
@@ -569,7 +600,7 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
 //    bool font.underline 1
 //    real font.pointSize
 //    int font.pixelSize
-//    enumeration font.weight
+//    enumeration font.weight 1
 //    bool font.overline 1
 //    bool font.strikeout 1
 //    enumeration font.capitalization
@@ -583,12 +614,17 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
     treeWidget->setItemWidget(
                 fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), control, fontItem));
 
+    auto wItem = new QTreeWidgetItem;
+    wItem->setText(0, "weight");
+    wItem->setData(0, Qt::DecorationRole, wChanged);
+    fontItem->addChild(wItem);
+    treeWidget->setItemWidget(wItem, 1, createFontWeightHandlerWidget(font.weight(), control));
+
     auto bItem = new QTreeWidgetItem;
     bItem->setText(0, "bold");
     bItem->setData(0, Qt::DecorationRole, bChanged);
     fontItem->addChild(bItem);
-    treeWidget->setItemWidget(
-                bItem, 1, createBoolHandlerWidget("font.bold", font.bold(), control));
+    treeWidget->setItemWidget(bItem, 1, createBoolHandlerWidget("font.bold", font.bold(), control));
 
     auto iItem = new QTreeWidgetItem;
     iItem->setText(0, "italic");
