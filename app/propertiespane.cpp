@@ -392,12 +392,37 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
-        QFont font = getFontFromProperties(control->properties());
         int weightValue = weightEnum.keyToValue(comboBox->currentText().toUtf8().constData());
-        font.setWeight(weightValue);
-
         ControlPropertyManager::setProperty(control, "font.weight",
                                             "Font." + comboBox->currentText(), weightValue,
+                                            ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdatePreviewer);
+    });
+
+    return comboBox;
+}
+
+QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalization, Control* control)
+{
+    auto comboBox = new TransparentComboBox;
+    comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    comboBox->setCursor(Qt::PointingHandCursor);
+    comboBox->setFocusPolicy(Qt::ClickFocus);
+
+    QMetaEnum capitalizationEnum = QMetaEnum::fromType<QFont::Capitalization>();
+    for (int i = capitalizationEnum.keyCount(); i--;) { // Necessary somehow
+        if (QString::fromUtf8(capitalizationEnum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
+            comboBox->addItem(capitalizationEnum.key(i));
+    }
+
+    comboBox->setCurrentText(QMetaEnum::fromType<QFont::Capitalization>().valueToKey(capitalization));
+
+    QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
+    {
+        int capitalizationValue = capitalizationEnum.keyToValue(comboBox->currentText().toUtf8().constData());
+        ControlPropertyManager::setProperty(control, "font.capitalization",
+                                            "Font." + comboBox->currentText(),
+                                            QFont::Capitalization(capitalizationValue),
                                             ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
     });
@@ -619,6 +644,13 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
     wItem->setData(0, Qt::DecorationRole, wChanged);
     fontItem->addChild(wItem);
     treeWidget->setItemWidget(wItem, 1, createFontWeightHandlerWidget(font.weight(), control));
+
+    auto cItem = new QTreeWidgetItem;
+    cItem->setText(0, "capitalization");
+    cItem->setData(0, Qt::DecorationRole, cChanged);
+    fontItem->addChild(cItem);
+    treeWidget->setItemWidget(cItem, 1,
+                              createFontCapitalizationHandlerWidget(font.capitalization(), control));
 
     auto bItem = new QTreeWidgetItem;
     bItem->setText(0, "bold");
