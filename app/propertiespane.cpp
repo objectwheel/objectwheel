@@ -563,18 +563,18 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
     fontItem->setData(0, Qt::DecorationRole, fontChanged);
     classItem->addChild(fontItem);
 
-//    string font.family
-//    bool font.bold
-//    bool font.italic
-//    bool font.underline
+//    string font.family 1
+//    bool font.bold     1
+//    bool font.italic   1
+//    bool font.underline 1
 //    real font.pointSize
 //    int font.pixelSize
 //    enumeration font.weight
-//    bool font.overline
-//    bool font.strikeout
+//    bool font.overline 1
+//    bool font.strikeout 1
 //    enumeration font.capitalization
-//    bool font.kerning
-//    bool font.preferShaping
+//    bool font.kerning 1
+//    bool font.preferShaping 1
 
     auto fItem = new QTreeWidgetItem;
     fItem->setText(0, "family");
@@ -583,12 +583,55 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
     treeWidget->setItemWidget(
                 fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), control, fontItem));
 
-//    auto yItem = new QTreeWidgetItem;
-//    yItem->setText(0, "y");
-//    yItem->setData(0, Qt::DecorationRole, yChanged);
-//    fontItem->addChild(yItem);
-//    treeWidget->setItemWidget(
-//                yItem, 1, createNumberHandlerWidget("y", geometry.y(), control, integer));
+    auto bItem = new QTreeWidgetItem;
+    bItem->setText(0, "bold");
+    bItem->setData(0, Qt::DecorationRole, bChanged);
+    fontItem->addChild(bItem);
+    treeWidget->setItemWidget(
+                bItem, 1, createBoolHandlerWidget("font.bold", font.bold(), control));
+
+    auto iItem = new QTreeWidgetItem;
+    iItem->setText(0, "italic");
+    iItem->setData(0, Qt::DecorationRole, iChanged);
+    fontItem->addChild(iItem);
+    treeWidget->setItemWidget(
+                iItem, 1, createBoolHandlerWidget("font.italic", font.italic(), control));
+
+    auto uItem = new QTreeWidgetItem;
+    uItem->setText(0, "underline");
+    uItem->setData(0, Qt::DecorationRole, uChanged);
+    fontItem->addChild(uItem);
+    treeWidget->setItemWidget(
+                uItem, 1, createBoolHandlerWidget("font.underline", font.underline(), control));
+
+    auto oItem = new QTreeWidgetItem;
+    oItem->setText(0, "overline");
+    oItem->setData(0, Qt::DecorationRole, oChanged);
+    fontItem->addChild(oItem);
+    treeWidget->setItemWidget(
+                oItem, 1, createBoolHandlerWidget("font.overline", font.overline(), control));
+
+    auto sItem = new QTreeWidgetItem;
+    sItem->setText(0, "strikeout");
+    sItem->setData(0, Qt::DecorationRole, sChanged);
+    fontItem->addChild(sItem);
+    treeWidget->setItemWidget(
+                sItem, 1, createBoolHandlerWidget("font.strikeout", font.strikeOut(), control));
+
+    auto kItem = new QTreeWidgetItem;
+    kItem->setText(0, "kerning");
+    kItem->setData(0, Qt::DecorationRole, kChanged);
+    fontItem->addChild(kItem);
+    treeWidget->setItemWidget(
+                kItem, 1, createBoolHandlerWidget("font.kerning", font.kerning(), control));
+
+    auto prItem = new QTreeWidgetItem;
+    prItem->setText(0, "preferShaping");
+    prItem->setData(0, Qt::DecorationRole, prChanged);
+    fontItem->addChild(prItem);
+    treeWidget->setItemWidget(prItem, 1, createBoolHandlerWidget(
+                                  "font.preferShaping",
+                                  !(font.styleStrategy() & QFont::PreferNoShaping), control));
 
 //    auto wItem = new QTreeWidgetItem;
 //    wItem->setText(0, "width");
