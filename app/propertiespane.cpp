@@ -528,6 +528,41 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     return abstractSpinBox;
 }
 
+QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control, QTreeWidgetItem* fontItem)
+{
+    QSpinBox* spinBox = new QSpinBox;
+    //    spinBox->setStyleSheet("QAbstractSpinBox { border: none; background: transparent; }");
+    spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    spinBox->installEventFilter(&g_wheelDisabler);
+    spinBox->setFocusPolicy(Qt::StrongFocus);
+    spinBox->setMinimum(0);
+    spinBox->setMaximum(72);
+    spinBox->setValue(size < 0 ? 0 : size);
+
+    QObject::connect(spinBox, &QAbstractSpinBox::editingFinished, [=]
+    {
+        bool isPx = propertyName == "pixelSize" ? true : false;
+        QFont font = getFontFromProperties(control->properties());
+
+        if (isPx)
+            font.setPixelSize(spinBox->value());
+        else
+            font.setPointSize(spinBox->value());
+
+        ControlPropertyManager::setProperty(control, QString::fromUtf8("font.") +
+                                            (isPx ? "pointSize" : "pixelSize"),
+                                            QString::number(0), 0,
+                                            ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setProperty(control, "font." + propertyName,
+                                            QString::number(spinBox->value()), spinBox->value(),
+                                            ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setProperty(control, "font", QString(), font,
+                                            ControlPropertyManager::UpdatePreviewer);
+    });
+
+    return spinBox;
+}
+
 void createAndAddGeometryPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* classItem,
                                          const QList<PropertyNode>& properties, Control* control,
                                          int integer)
@@ -619,18 +654,32 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
     fontItem->setData(0, Qt::DecorationRole, fontChanged);
     classItem->addChild(fontItem);
 
-//    string font.family 1
-//    bool font.bold     1
-//    bool font.italic   1
-//    bool font.underline 1
-//    real font.pointSize
-//    int font.pixelSize
-//    enumeration font.weight 1
-//    bool font.overline 1
-//    bool font.strikeout 1
-//    enumeration font.capitalization
-//    bool font.kerning 1
-//    bool font.preferShaping 1
+    //    string font.family 1
+    //    bool font.bold     1
+    //    bool font.italic   1
+    //    bool font.underline 1
+    //    real font.pointSize
+    //    int font.pixelSize
+    //    enumeration font.weight 1
+    //    bool font.overline 1
+    //    bool font.strikeout 1
+    //    enumeration font.capitalization
+    //    bool font.kerning 1
+    //    bool font.preferShaping 1
+
+    auto poItem = new QTreeWidgetItem;
+    poItem->setText(0, "pointSize");
+    poItem->setData(0, Qt::DecorationRole, poChanged);
+    fontItem->addChild(poItem);
+    treeWidget->setItemWidget(
+                poItem, 1, createFontSizeHandlerWidget("pointSize", font.pointSize(), control, fontItem));
+
+    auto pxItem = new QTreeWidgetItem;
+    pxItem->setText(0, "pixelSize");
+    pxItem->setData(0, Qt::DecorationRole, piChanged);
+    fontItem->addChild(pxItem);
+    treeWidget->setItemWidget(
+                pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), control, fontItem));
 
     auto fItem = new QTreeWidgetItem;
     fItem->setText(0, "family");
@@ -701,19 +750,19 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
                                   "font.preferShaping",
                                   !(font.styleStrategy() & QFont::PreferNoShaping), control));
 
-//    auto wItem = new QTreeWidgetItem;
-//    wItem->setText(0, "width");
-//    wItem->setData(0, Qt::DecorationRole, wChanged);
-//    fontItem->addChild(wItem);
-//    treeWidget->setItemWidget(
-//                wItem, 1, createNumberHandlerWidget("width", geometry.width(), control, integer));
+    //    auto wItem = new QTreeWidgetItem;
+    //    wItem->setText(0, "width");
+    //    wItem->setData(0, Qt::DecorationRole, wChanged);
+    //    fontItem->addChild(wItem);
+    //    treeWidget->setItemWidget(
+    //                wItem, 1, createNumberHandlerWidget("width", geometry.width(), control, integer));
 
-//    auto hItem = new QTreeWidgetItem;
-//    hItem->setText(0, "height");
-//    hItem->setData(0, Qt::DecorationRole, hChanged);
-//    fontItem->addChild(hItem);
-//    treeWidget->setItemWidget(
-//                hItem, 1, createNumberHandlerWidget("height", geometry.height(), control, integer));
+    //    auto hItem = new QTreeWidgetItem;
+    //    hItem->setText(0, "height");
+    //    hItem->setData(0, Qt::DecorationRole, hChanged);
+    //    fontItem->addChild(hItem);
+    //    treeWidget->setItemWidget(
+    //                hItem, 1, createNumberHandlerWidget("height", geometry.height(), control, integer));
 
     treeWidget->expandItem(fontItem);
 }

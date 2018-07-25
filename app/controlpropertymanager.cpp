@@ -449,7 +449,7 @@ void ControlPropertyManager::setProperty(Control* control, const QString& proper
     if (propertyName.isEmpty())
         return;
 
-    if (parserValue.isEmpty())
+    if ((options & SaveChanges) && parserValue.isEmpty())
         return;
 
     Q_ASSERT(propertyName != "id"
