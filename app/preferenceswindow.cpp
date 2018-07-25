@@ -1,6 +1,5 @@
 #include <preferenceswindow.h>
 #include <focuslesslineedit.h>
-#include <css.h>
 #include <QtWidgets>
 
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
@@ -20,7 +19,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     _listWidget->setFocusPolicy(Qt::NoFocus);
     _listWidget->setSortingEnabled(true);
     _listWidget->setTextElideMode(Qt::ElideMiddle);
-    _listWidget->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     _listWidget->setDragEnabled(false);
     _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);

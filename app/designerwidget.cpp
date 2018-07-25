@@ -1,5 +1,4 @@
 #include <designerwidget.h>
-#include <css.h>
 #include <designerview.h>
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>

@@ -21,7 +21,6 @@ DEPENDPATH  += $$PWD
 
 HEADERS += $$PWD/mainwindow.h \
            $$PWD/flatbutton.h \
-           $$PWD/css.h \
            $$PWD/dirlocker.h \
            $$PWD/control.h \
            $$PWD/qmlcodeeditor.h \

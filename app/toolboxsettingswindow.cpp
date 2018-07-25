@@ -1,6 +1,5 @@
 #include <toolboxsettingswindow.h>
 #include <ui_toolboxsettingswindow.h>
-#include <css.h>
 #include <toolmanager.h>
 #include <filemanager.h>
 #include <zipper.h>
@@ -54,9 +53,6 @@ ToolboxSettingsWindow::ToolboxSettingsWindow(QWidget *parent) : QWidget(parent)
 {
     ui->setupUi(this);
     ToolManager::addToolboxTree(ui->treeWidget);
-
-    ui->scrollArea->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
-    ui->scrollArea->horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
 
     connect(ui->treeWidget, &ToolboxTree::itemSelectionChanged, this, [=] {
         const bool hasValidSelection = ui->treeWidget->currentItem() &&

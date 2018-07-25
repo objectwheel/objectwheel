@@ -1,5 +1,4 @@
 #include <inspectorpane.h>
-#include <css.h>
 #include <filemanager.h>
 #include <saveutils.h>
 #include <controlcreationmanager.h>
@@ -229,8 +228,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     header()->resizeSection(1, 50);
     headerItem()->setText(0, tr("Controls"));
     headerItem()->setText(1, tr("Ui"));
-    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
-    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
 
     setStyleSheet("QTreeView {"
                   "    border: 1px solid #4A7C42;"

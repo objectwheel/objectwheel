@@ -1,5 +1,4 @@
 #include <moduleselectionwidget.h>
-#include <css.h>
 #include <filemanager.h>
 #include <build.h>
 #include <QMap>
@@ -84,7 +83,6 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     owScArea->setWidget(owScWidget);
     owScArea->setWidgetResizable(true);
     owScArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    owScArea->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     owScArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     owScArea->setFixedWidth(400);
     owScArea->setStyleSheet("QScrollArea {background: transparent;}");
@@ -100,7 +98,6 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     qtScArea->setWidget(qtScWidget);
     qtScArea->setWidgetResizable(true);
     qtScArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    qtScArea->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     qtScArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qtScArea->setFixedWidth(400);
     qtScArea->setStyleSheet("QScrollArea {background: transparent;}");

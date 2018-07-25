@@ -5,7 +5,6 @@
 #include <centralwidget.h>
 #include <filemanager.h>
 #include <qmlcodeeditor.h>
-#include <css.h>
 #include <fileexplorer.h>
 #include <control.h>
 #include <parserutils.h>
@@ -202,8 +201,6 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     saveButton->setDisabled(true);
 
     codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    codeEditor->horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
-    codeEditor->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     codeEditor->setCodeDocument(emptyDoc);
     codeEditor->hide();
 

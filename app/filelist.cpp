@@ -1,5 +1,4 @@
 #include <filelist.h>
-#include <css.h>
 #include <filemanager.h>
 #include <delayer.h>
 #include <dpr.h>
@@ -34,9 +33,6 @@ FileList::FileList(QWidget *parent) : QTreeView(parent)
     setRootIsDecorated(false);
     setSortingEnabled(true);
     header()->setSectionsMovable(false);
-
-    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
-    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
 
     _filterProxyModel.setDynamicSortFilter(true);
     _filterProxyModel.setFilterKeyColumn(0);

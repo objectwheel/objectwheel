@@ -6,7 +6,6 @@
 #include <projectmanager.h>
 #include <designerscene.h>
 #include <filemanager.h>
-#include <css.h>
 #include <delayer.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
@@ -83,7 +82,6 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _listWidget->setIconSize(QSize(14,14));
     _listWidget->setSelectionMode(QListWidget::SingleSelection);
     _listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
-    _listWidget->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
     _listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);

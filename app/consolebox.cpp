@@ -1,6 +1,5 @@
 #include <consolebox.h>
 #include <runmanager.h>
-#include <css.h>
 #include <outputpane.h>
 #include <qmlcodeeditorwidget.h>
 #include <windowmanager.h>
@@ -32,7 +31,6 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     m_textBrowser->viewport()->installEventFilter(this);
     m_textBrowser->setWordWrapMode(QTextOption::WordWrap);
     m_textBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_textBrowser->verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
 
     QFont f;
     f.setPixelSize(AppFontSettings::defaultPixelSize() - 1);

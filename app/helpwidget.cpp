@@ -1,7 +1,6 @@
 #include <helpwidget.h>
 #include <webenginehelpviewer.h>
 #include <focuslesslineedit.h>
-#include <css.h>
 #include <transparentcombobox.h>
 #include <toolbar.h>
 #include <toolbutton.h>

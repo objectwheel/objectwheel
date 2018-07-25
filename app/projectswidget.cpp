@@ -1,6 +1,5 @@
 #include <projectswidget.h>
 #include <buttonslice.h>
-#include <css.h>
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <qmlcodeeditorwidget.h>

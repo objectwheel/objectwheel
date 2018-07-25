@@ -1,6 +1,5 @@
 #include <designerview.h>
 #include <designerscene.h>
-#include <css.h>
 #include <saveutils.h>
 #include <parserutils.h>
 #include <controlcreationmanager.h>
@@ -33,8 +32,6 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
   , m_moveLeftAct(new QAction(this))
 {
     setStyleSheet("DesignerView { background: transparent }");
-    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
-    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
 
     m_sendBackAct->setText("Send to Back");
     m_bringFrontAct->setText("Bring to Front");

@@ -1,6 +1,5 @@
 #include <propertiespane.h>
 #include <focuslesslineedit.h>
-#include <css.h>
 #include <filemanager.h>
 #include <saveutils.h>
 #include <controlpropertymanager.h>
@@ -812,8 +811,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     header()->resizeSection(1, 120);
     headerItem()->setText(1, tr("Value"));
     headerItem()->setText(0, tr("Property"));
-    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
-    horizontalScrollBar()->setStyleSheet(CSS_SCROLLBAR_H);
     setStyleSheet("QTreeView {"
                   "    border: 1px solid #8c6a48;"
                   "    outline: 0;"

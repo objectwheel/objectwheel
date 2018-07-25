@@ -1,5 +1,4 @@
 #include <toolboxtree.h>
-#include <css.h>
 #include <flatbutton.h>
 #include <global.h>
 
@@ -123,7 +122,6 @@ ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
     header()->hide();
     header()->setSectionResizeMode(QHeaderView::Stretch);
     setTextElideMode(Qt::ElideMiddle);
-    verticalScrollBar()->setStyleSheet(CSS_SCROLLBAR);
 
     setDragEnabled(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
