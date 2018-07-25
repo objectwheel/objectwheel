@@ -382,7 +382,6 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number, C
         spinBox->setMinimum(std::numeric_limits<int>::min());
         spinBox->setValue(number);
         fixPosForForm(selectedControl, propertyName, spinBox);
-
     } else {
         QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
         spinBox->setMaximum(std::numeric_limits<double>::max());
@@ -430,46 +429,63 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number, C
     return abstractSpinBox;
 }
 
-void createAndAddGeometryPropertiesBlock(QTreeWidget* treeWidget,
-                                         QTreeWidgetItem* classItem,
-                                         const QList<PropertyNode>& properties,
-                                         Control* selectedControl, int integer)
+void createAndAddGeometryPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* classItem,
+                                         const QList<PropertyNode>& properties, Control* control,
+                                         int integer)
 {
     const QRectF& geometry = getGeometryFromProperties(properties);
+
+    bool xUnknown = false, yUnknown = false;
+    if (control->form()) {
+        xUnknown = !ParserUtils::exists(control->url(), "x");
+        yUnknown = !ParserUtils::exists(control->url(), "y");
+    }
+
     const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
-            .arg(int(geometry.x()))
-            .arg(int(geometry.y()))
+            .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
+            .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
             .arg(int(geometry.width()))
             .arg(int(geometry.height()));
+
+    const bool xChanged = ParserUtils::exists(control->url(), "x");
+    const bool yChanged = ParserUtils::exists(control->url(), "y");
+    const bool wChanged = ParserUtils::exists(control->url(), "width");
+    const bool hChanged = ParserUtils::exists(control->url(), "height");
+    const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
 
     auto geometryItem = new QTreeWidgetItem;
     geometryItem->setText(0, "geometry");
     geometryItem->setText(1, geometryText);
+    geometryItem->setData(0, Qt::DecorationRole, geometryChanged);
     classItem->addChild(geometryItem);
 
     auto xItem = new QTreeWidgetItem;
     xItem->setText(0, "x");
-    xItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "x"));
+    xItem->setData(0, Qt::DecorationRole, xChanged);
     geometryItem->addChild(xItem);
-    treeWidget->setItemWidget(xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, integer));
+    treeWidget->setItemWidget(
+                xItem, 1, createNumberHandlerWidget("x", geometry.x(), control, integer));
 
     auto yItem = new QTreeWidgetItem;
     yItem->setText(0, "y");
-    yItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "y"));
+    yItem->setData(0, Qt::DecorationRole, yChanged);
     geometryItem->addChild(yItem);
-    treeWidget->setItemWidget(yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, integer));
+    treeWidget->setItemWidget(
+                yItem, 1, createNumberHandlerWidget("y", geometry.y(), control, integer));
 
     auto wItem = new QTreeWidgetItem;
     wItem->setText(0, "width");
-    wItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "width"));
+    wItem->setData(0, Qt::DecorationRole, wChanged);
     geometryItem->addChild(wItem);
-    treeWidget->setItemWidget(wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, integer));
+    treeWidget->setItemWidget(
+                wItem, 1, createNumberHandlerWidget("width", geometry.width(), control, integer));
 
     auto hItem = new QTreeWidgetItem;
     hItem->setText(0, "height");
-    hItem->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->url(), "height"));
+    hItem->setData(0, Qt::DecorationRole, hChanged);
     geometryItem->addChild(hItem);
-    treeWidget->setItemWidget(hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, integer));
+    treeWidget->setItemWidget(
+                hItem, 1, createNumberHandlerWidget("height", geometry.height(), control, integer));
 
     treeWidget->expandItem(geometryItem);
 }
@@ -497,18 +513,16 @@ public:
                        isClassRow, index.column() == 0 && !isClassRow);
 
         // Draw data
-        if (index.column() == 0 || (!index.parent().isValid() && index.row() < 2)) {
-            if (isClassRow) {
-                painter->setPen(Qt::white);
-            } else {
-                if (index.data(Qt::DecorationRole).toBool())
-                    painter->setPen("#2D75DC");
-                else
-                    painter->setPen(Qt::black);
-            }
-            painter->drawText(option.rect.adjusted(5, 0, 0, 0), index.data(Qt::DisplayRole).toString(),
-                              QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        if (isClassRow) {
+            painter->setPen(Qt::white);
+        } else {
+            if (index.column() == 0 && index.data(Qt::DecorationRole).toBool())
+                painter->setPen("#2D75DC");
+            else
+                painter->setPen(Qt::black);
         }
+        painter->drawText(option.rect.adjusted(5, 0, 0, 0), index.data(Qt::DisplayRole).toString(),
+                          QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
 
@@ -603,14 +617,12 @@ void PropertiesPane::onSelectionChange()
     typeItem->setText(0, tr("Type"));
     typeItem->setText(1, properties.first().cleanClassName);
     typeItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
-    typeItem->setData(1, Qt::DecorationRole, false); // No 'property changed' indication
     addTopLevelItem(typeItem);
 
     QTreeWidgetItem* uidItem = new QTreeWidgetItem;
     uidItem->setText(0, "uid");
     uidItem->setText(1, selectedControl->uid());
     uidItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
-    uidItem->setData(1, Qt::DecorationRole, false); // No 'property changed' indication
     addTopLevelItem(uidItem);
 
     QTreeWidgetItem* idItem = new QTreeWidgetItem;
