@@ -102,7 +102,7 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRo
         painter->fillRect(rect, "#fffefc");
 
     // Draw top and bottom lines
-    painter->setPen("#25000000");
+    painter->setPen("#408C6A48");
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
@@ -236,6 +236,8 @@ QWidget* createIdHandlerWidget(Control* control)
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(control->id());
     lineEdit->setFocusPolicy(Qt::StrongFocus);
+    lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
+    lineEdit->setMinimumWidth(1);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -261,6 +263,8 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(text);
     lineEdit->setFocusPolicy(Qt::StrongFocus);
+    lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
+    lineEdit->setMinimumWidth(1);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -282,6 +286,8 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     lineEdit->setText(url);
     lineEdit->setFocusPolicy(Qt::StrongFocus);
+    lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
+    lineEdit->setMinimumWidth(1);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -305,6 +311,8 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
     comboBox->setCurrentText(enumm.value);
     comboBox->setCursor(Qt::PointingHandCursor);
     comboBox->setFocusPolicy(Qt::ClickFocus);
+    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+    comboBox->setMinimumWidth(1);
     fixVisibilityForWindow(control, enumm.name, comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
@@ -333,6 +341,8 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     checkBox->setChecked(checked);
     checkBox->setFocusPolicy(Qt::ClickFocus);
+    checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
+    checkBox->setMinimumWidth(1);
     fixVisibleForWindow(control, propertyName, checkBox);
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
@@ -355,6 +365,8 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control)
     comboBox->setCurrentText(family);
     comboBox->setCursor(Qt::PointingHandCursor);
     comboBox->setFocusPolicy(Qt::ClickFocus);
+    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+    comboBox->setMinimumWidth(1);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -372,6 +384,8 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     comboBox->setCursor(Qt::PointingHandCursor);
     comboBox->setFocusPolicy(Qt::ClickFocus);
+    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+    comboBox->setMinimumWidth(1);
 
     QMetaEnum weightEnum = QMetaEnum::fromType<QFont::Weight>();
     for (int i = weightEnum.keyCount(); i--;) { // Necessary somehow
@@ -399,6 +413,8 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     comboBox->setCursor(Qt::PointingHandCursor);
     comboBox->setFocusPolicy(Qt::ClickFocus);
+    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+    comboBox->setMinimumWidth(1);
 
     QMetaEnum capitalizationEnum = QMetaEnum::fromType<QFont::Capitalization>();
     for (int i = capitalizationEnum.keyCount(); i--;) { // Necessary somehow
@@ -432,6 +448,8 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     toolButton->setIconSize({12, 12});
     toolButton->setCursor(Qt::PointingHandCursor);
     toolButton->setFocusPolicy(Qt::ClickFocus);
+    toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
+    toolButton->setMinimumWidth(1);
 
     QObject::connect(toolButton, &QCheckBox::clicked, [=]
     {
@@ -465,6 +483,8 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     abstractSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     abstractSpinBox->installEventFilter(&g_wheelDisabler);
     abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
+    abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
+    abstractSpinBox->setMinimumWidth(1);
 
     if (integer) {
         QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
@@ -529,6 +549,8 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
     spinBox->setMinimum(0);
     spinBox->setMaximum(72);
     spinBox->setValue(size < 0 ? 0 : size);
+    spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
+    spinBox->setMinimumWidth(1);
 
     QObject::connect(spinBox, &QAbstractSpinBox::editingFinished, [=]
     {
@@ -787,6 +809,18 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
   , m_designerScene(designerScene)
   , m_searchEdit(new FocuslessLineEdit(this))
 {
+    QFont fontMedium(font());
+    fontMedium.setWeight(QFont::Medium);
+
+    header()->setFont(fontMedium);
+    header()->setFixedHeight(23);
+    header()->setDefaultSectionSize(1);
+    header()->setMinimumSectionSize(1);
+    header()->resizeSection(0, 180); // Don't resize the last (stretched) column
+
+    headerItem()->setText(1, tr("Value"));
+    headerItem()->setText(0, tr("Property"));
+
     setColumnCount(2);
     setIndentation(16);
     setDragEnabled(false);
@@ -801,16 +835,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    QFont fontMedium(font());
-    fontMedium.setWeight(QFont::Medium);
-
-    header()->setFont(fontMedium);
-    header()->setFixedHeight(23);
-    header()->resizeSection(0, 180);
-    header()->resizeSection(1, 120);
-    headerItem()->setText(1, tr("Value"));
-    headerItem()->setText(0, tr("Property"));
     setStyleSheet("QTreeView {"
                   "    border: 1px solid #8c6a48;"
                   "    outline: 0;"

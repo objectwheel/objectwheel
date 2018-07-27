@@ -37,7 +37,7 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selecte
     }
 
     // Draw top and bottom lines
-    painter->setPen("#05000000");
+    painter->setPen("#304A7C42");
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
