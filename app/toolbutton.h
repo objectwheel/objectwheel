@@ -11,6 +11,7 @@ public:
 
 private:
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
     void enterEvent(QEvent* e) override;
     void leaveEvent(QEvent* e) override;
     void paintEvent(QPaintEvent* e) override;

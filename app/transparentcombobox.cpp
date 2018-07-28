@@ -11,7 +11,6 @@ TransparentComboBox::TransparentComboBox(QWidget* parent) : QComboBox(parent)
 {
     setAttribute(Qt::WA_Hover);
     setStyleSheet("QComboBox { border: none; }");
-    setSizeAdjustPolicy(AdjustToMinimumContentsLengthWithIcon);
 }
 
 void TransparentComboBox::paintEvent(QPaintEvent*)

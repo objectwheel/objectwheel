@@ -191,10 +191,6 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     fileExplorer->setRootPath(UNKNOWN_PATH);
 
-    itemsCombobox->setMinimumWidth(150);
-    documentsCombobox->setMinimumWidth(150);
-    zoomlLevelCombobox->setFixedWidth(100);
-
     redoButton->setDisabled(true);
     copyButton->setDisabled(true);
     cutButton->setDisabled(true);

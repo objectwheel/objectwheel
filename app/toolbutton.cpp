@@ -18,6 +18,11 @@ QSize ToolButton::sizeHint() const
     return {24, 24};
 }
 
+QSize ToolButton::minimumSizeHint() const
+{
+    return {24, 24};
+}
+
 void ToolButton::enterEvent(QEvent* e)
 {
     m_hoverOver = true;

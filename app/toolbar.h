@@ -24,7 +24,7 @@ signals:
 
 private:
     QSize sizeHint() const override;
-    void paintEvent(QPaintEvent*) override;
+    void paintEvent(QPaintEvent* e) override;
 
 private:
     QBoxLayout* m_layout;

@@ -79,8 +79,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     runBar->setFloatable(false);
     runBar->setMovable(false);
     runBar->setWindowTitle(tr("Run Bar"));
-    runBar->setStyleSheet("border: none; QToolBar { background: qlineargradient(spread:pad, x1:0.5, y1:0, "
-                          "x2:0.5, y2:1, stop:0 #2784E3, stop:1 #0e5bad); }");
+    runBar->setStyleSheet("border: none; spacing: 0;"
+                          "QToolBar {"
+                          "    background: qlineargradient(spread:pad, x1:0.5, y1:0,"
+                          "    x2:0.5, y2:1, stop:0 #2784E3, stop:1 #0e5bad);"
+                          "}");
     runBar->setContentsMargins(0, 0, 0, 0);
     runBar->layout()->setContentsMargins(0, 0, 0, 0);
     runBar->layout()->setSpacing(0);
