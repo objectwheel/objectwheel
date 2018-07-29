@@ -4,6 +4,8 @@ CONFIG  += plugin c++14
 TARGET   = utils
 QT      += widgets network qml quick websockets multimedia
 DEFINES += UTILS_LIBRARY
+DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
