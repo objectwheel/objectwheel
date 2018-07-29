@@ -2,6 +2,8 @@
 #include <bootsettings.h>
 
 #include <QApplication>
+#include <QMessageBox>
+#include <QSharedMemory>
 
 int main(int argc, char* argv[])
 {
@@ -10,6 +12,19 @@ int main(int argc, char* argv[])
 
     // Initialize application
     QApplication app(argc, argv);
+
+    // Multiple instances protection
+    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
+    if(!sharedMemory.create(1)) {
+        sharedMemory.attach();
+        sharedMemory.detach();
+        if(!sharedMemory.create(1)) {
+            QMessageBox::warning(nullptr,
+                                 QObject::tr("Quitting"),
+                                 QObject::tr("Another instance is already running."));
+            return EXIT_FAILURE;
+        }
+    }
 
     // Initialize application core
     ApplicationCore::init(&app);

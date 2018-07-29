@@ -20,9 +20,7 @@
 #include <welcomewindow.h>
 #include <appfontsettings.h>
 
-#include <QMessageBox>
 #include <QApplication>
-#include <QSharedMemory>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
@@ -56,21 +54,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
-
-    // Multiple instances protection
-    QSharedMemory sharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
-    if(!sharedMemory.create(1)) {
-        sharedMemory.attach();
-        sharedMemory.detach();
-        if(!sharedMemory.create(1)) {
-            QMessageBox::warning(nullptr,
-                                 tr("Quitting"),
-                                 tr("Another instance is already running."));
-            QMetaObject::invokeMethod(QApplication::instance(), "exit",
-                                      Qt::QueuedConnection, Q_ARG(int, EXIT_FAILURE));
-            return;
-        }
-    }
 
     /* Set Font */
     AppFontSettings::apply();
