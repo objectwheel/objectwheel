@@ -1,3 +1,4 @@
+DesignerView mouse üzerine gelince properties pane deki focusu çalışyor
 Property değişimleri bir önceki değer ile aynı ise katiyen kayıt edilmeyecek
 Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
 SpinBox'ların stylesheet'i düzeltilecek

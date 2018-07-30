@@ -56,7 +56,7 @@ void DesignerScene::addForm(Form* form)
         setCurrentForm(form);
 }
 
-void DesignerScene::addControl(Control* control, Control* parentControl)
+void DesignerScene::addControl(Control* /*control*/, Control* /*parentControl*/)
 {
     // TODO
 }

@@ -164,15 +164,15 @@ QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
     return geometry;
 }
 
-QFont getFontFromProperties(const QList<PropertyNode>& properties)
+QVariant getProperty(const QString& property, const QList<PropertyNode>& properties)
 {
     for (const PropertyNode& propertyNode : properties) {
         for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName == "font")
-                return propertyNode.properties.value(propertyName).value<QFont>();
+            if (propertyName == property)
+                return propertyNode.properties.value(propertyName);
         }
     }
-    return QFont();
+    return QVariant();
 }
 
 QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
@@ -320,7 +320,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
     {
         QString fixedScope = enumm.scope;
 
-        if (control->window()) {
+        if (control->window() && fixedScope == "Window") {
             const QByteArray& qml = rdfile(control->url());
             if (!qml.contains("import QtQuick.Window"))
                 fixedScope = "ApplicationWindow";
@@ -348,6 +348,8 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
     {
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed/toggled
         ControlPropertyManager::setProperty(control,
                                             propertyName, checkBox->isChecked() ? "true" : "false",
                                             checkBox->isChecked(),
@@ -356,6 +358,123 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     });
 
     return checkBox;
+}
+
+QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
+                                  Control* control)
+{
+    auto toolButton = new QToolButton;
+    toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
+    toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    toolButton->setText(color.name(QColor::HexArgb));
+    toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
+    toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
+    toolButton->setIconSize({12, 12});
+    toolButton->setCursor(Qt::PointingHandCursor);
+    toolButton->setFocusPolicy(Qt::ClickFocus);
+    toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
+    toolButton->setMinimumWidth(1);
+
+    QObject::connect(toolButton, &QCheckBox::clicked, [=]
+    {
+        const QColor& previousColor = getProperty(propertyName, control->properties()).value<QColor>();
+
+        QColorDialog cDialog;
+        cDialog.setWindowTitle(QObject::tr("Select Color"));
+        cDialog.setOptions(QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+        cDialog.setCurrentColor(previousColor);
+        cDialog.exec();
+
+        const QColor& color = cDialog.currentColor();
+        if (color == previousColor || !color.isValid())
+            return;
+
+        toolButton->setText(color.name(QColor::HexArgb));
+        toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
+        ControlPropertyManager::setProperty(control, propertyName,
+                                            stringify(color.name(QColor::HexArgb)), color,
+                                            ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdatePreviewer);
+    });
+
+    return toolButton;
+}
+
+QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
+                                   Control* control, bool integer)
+{
+    QAbstractSpinBox* abstractSpinBox;
+    if (integer)
+        abstractSpinBox = new QSpinBox;
+    else
+        abstractSpinBox = new QDoubleSpinBox;
+
+    auto transparentStyle = new TransparentStyle(abstractSpinBox);
+    abstractSpinBox->setStyle(transparentStyle);
+    abstractSpinBox->findChild<QLineEdit*>("qt_spinbox_lineedit")->setStyle(transparentStyle);
+    abstractSpinBox->setCursor(Qt::PointingHandCursor);
+    abstractSpinBox->installEventFilter(&g_wheelDisabler);
+    abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
+    abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
+    abstractSpinBox->setMinimumWidth(1);
+
+    const auto& updateFunction = [=]
+    {
+        double value;
+        QString parserValue;
+
+        if (integer) {
+            QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+            value = spinBox->value();
+            parserValue = QString::number(spinBox->value());
+        } else {
+            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+            value = spinBox->value();
+            parserValue = QString::number(spinBox->value());
+        }
+
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed
+
+        ControlPropertyManager::Options options =
+                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdatePreviewer;
+
+        if (control->form() && (propertyName == "x" || propertyName == "y"))
+            options |= ControlPropertyManager::DontApplyDesigner;
+
+        if (propertyName == "x") {
+            ControlPropertyManager::setX(control, value, options);
+        } else if (propertyName == "y") {
+            ControlPropertyManager::setY(control, value, options);
+        } else if (propertyName == "z") {
+            ControlPropertyManager::setZ(control, value, options);
+        } else if (propertyName == "width") {
+            ControlPropertyManager::setWidth(control, value, options);
+        } else if (propertyName == "height") {
+            ControlPropertyManager::setHeight(control, value, options);
+        } else {
+            ControlPropertyManager::setProperty(control, propertyName, parserValue,
+                                                integer ? int(value) : value, options);
+        }
+    };
+
+    if (integer) {
+        QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+        spinBox->setMaximum(std::numeric_limits<int>::max());
+        spinBox->setMinimum(std::numeric_limits<int>::min());
+        spinBox->setValue(number);
+        fixPosForForm(control, propertyName, spinBox);
+        QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), updateFunction);
+    } else {
+        QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+        spinBox->setMaximum(std::numeric_limits<double>::max());
+        spinBox->setMinimum(std::numeric_limits<double>::min());
+        spinBox->setValue(number);
+        fixPosForForm(control, propertyName, spinBox);
+        QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), updateFunction);
+    }
+
+    return abstractSpinBox;
 }
 
 QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control)
@@ -438,110 +557,6 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     return comboBox;
 }
 
-QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
-                                  Control* control)
-{
-    auto toolButton = new QToolButton;
-    toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    toolButton->setText(color.name(QColor::HexArgb));
-    toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
-    toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
-    toolButton->setIconSize({12, 12});
-    toolButton->setCursor(Qt::PointingHandCursor);
-    toolButton->setFocusPolicy(Qt::ClickFocus);
-    toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
-    toolButton->setMinimumWidth(1);
-
-    QObject::connect(toolButton, &QCheckBox::clicked, [=]
-    {
-        const QColor& color = QColorDialog::getColor(Qt::white, nullptr, QObject::tr("Select Color"),
-                                                     QColorDialog::ShowAlphaChannel
-                                                     | QColorDialog::DontUseNativeDialog);
-
-        if (color.isValid()) {
-            toolButton->setText(color.name(QColor::HexArgb));
-            toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
-            ControlPropertyManager::setProperty(control, propertyName,
-                                                stringify(color.name(QColor::HexArgb)), color,
-                                                ControlPropertyManager::SaveChanges
-                                                | ControlPropertyManager::UpdatePreviewer);
-        }
-    });
-
-    return toolButton;
-}
-
-QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
-                                   Control* control, bool integer)
-{
-    QAbstractSpinBox* abstractSpinBox;
-    if (integer)
-        abstractSpinBox = new QSpinBox;
-    else
-        abstractSpinBox = new QDoubleSpinBox;
-
-    auto transparentStyle = new TransparentStyle(abstractSpinBox);
-    abstractSpinBox->setStyle(transparentStyle);
-    abstractSpinBox->findChild<QLineEdit*>("qt_spinbox_lineedit")->setStyle(transparentStyle);
-    abstractSpinBox->setCursor(Qt::PointingHandCursor);
-    abstractSpinBox->installEventFilter(&g_wheelDisabler);
-    abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
-    abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
-    abstractSpinBox->setMinimumWidth(1);
-
-    if (integer) {
-        QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
-        spinBox->setMaximum(std::numeric_limits<int>::max());
-        spinBox->setMinimum(std::numeric_limits<int>::min());
-        spinBox->setValue(number);
-        fixPosForForm(control, propertyName, spinBox);
-    } else {
-        QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
-        spinBox->setMaximum(std::numeric_limits<double>::max());
-        spinBox->setMinimum(std::numeric_limits<double>::min());
-        spinBox->setValue(number);
-        fixPosForForm(control, propertyName, spinBox);
-    }
-
-    QObject::connect(abstractSpinBox, &QAbstractSpinBox::editingFinished, [=]
-    {
-        double value;
-        QString parserValue;
-        if (integer) {
-            QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
-            value = spinBox->value();
-            parserValue = QString::number(spinBox->value());
-        } else {
-            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
-            value = spinBox->value();
-            parserValue = QString::number(spinBox->value());
-        }
-
-        ControlPropertyManager::Options options =
-                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdatePreviewer;
-
-        if (control->form() && (propertyName == "x" || propertyName == "y"))
-            options |= ControlPropertyManager::DontApplyDesigner;
-
-        if (propertyName == "x") {
-            ControlPropertyManager::setX(control, value, options);
-        } else if (propertyName == "y") {
-            ControlPropertyManager::setY(control, value, options);
-        } else if (propertyName == "z") {
-            ControlPropertyManager::setZ(control, value, options);
-        } else if (propertyName == "width") {
-            ControlPropertyManager::setWidth(control, value, options);
-        } else if (propertyName == "height") {
-            ControlPropertyManager::setHeight(control, value, options);
-        } else {
-            ControlPropertyManager::setProperty(control, propertyName,
-                                                parserValue, integer ? int(value) : value, options);
-        }
-    });
-
-    return abstractSpinBox;
-}
-
 QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control)
 {
     QSpinBox* spinBox = new QSpinBox;
@@ -557,13 +572,18 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
     spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
     spinBox->setMinimumWidth(1);
 
-    QObject::connect(spinBox, &QAbstractSpinBox::editingFinished, [=]
+    QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
     {
         bool isPx = propertyName == "pixelSize" ? true : false;
-        QFont font = getFontFromProperties(control->properties());
+        QFont font = getProperty("font", control->properties()).value<QFont>();
+
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed
 
         if (spinBox->value() == 0) {
+            spinBox->blockSignals(true);
             spinBox->setValue(isPx ? font.pixelSize() : font.pointSize());
+            spinBox->blockSignals(false);
             return;
         }
 
@@ -572,6 +592,7 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
         else
             font.setPointSize(spinBox->value());
 
+        // FIXME: Remove related property instead of setting its value to 0
         ControlPropertyManager::setProperty(control, QString::fromUtf8("font.") +
                                             (isPx ? "pointSize" : "pixelSize"),
                                             QString::number(0), 0,
