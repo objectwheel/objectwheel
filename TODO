@@ -1,7 +1,6 @@
 DesignerView mouse üzerine gelince properties pane deki focusu çalışyor
 Property değişimleri bir önceki değer ile aynı ise katiyen kayıt edilmeyecek
 Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
-SpinBox'ların stylesheet'i düzeltilecek
 SpinBox tuşları ile yapılan artırma azaltmalar anında update edilecek
 Properties Pane row colorları düzeltilecek, calculateVisibleRow doğrumu? Ya filter yapılırsa propertiler?
 - Control preview update etmeden yapılan x y z w h property set'lerinde integervalue'yi nasıl tespit etcez sonuçta window() da form() da kullanılamaz, mı?

@@ -9,8 +9,8 @@ class TransparentComboBox : public QComboBox
 public:
     explicit TransparentComboBox(QWidget* parent = nullptr);
 
-private:
-    void paintEvent(QPaintEvent* e) override;
+//private:
+//    void paintEvent(QPaintEvent* e) override;
 };
 
 #endif // TRANSPARENTCOMBOBOX_H

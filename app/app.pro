@@ -7,8 +7,8 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += PREVIEWER_DEBUG
 
 QT += quickwidgets qml quick help
-QT += widgets network websockets svg concurrent quickcontrols2
-QT += webenginewidgets webchannel webengine webenginecore
+QT += widgets widgets-private network websockets svg concurrent
+QT += webenginewidgets webchannel webengine webenginecore quickcontrols2
 
 ### Includes
 include($$PWD/version.pri)
