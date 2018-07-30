@@ -113,7 +113,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/bootsettings.h \
            $$PWD/previewerserver.h \
            $$PWD/commanddispatcher.h \
-           $$PWD/controlpropertymanager.h
+           $$PWD/controlpropertymanager.h \
+           $$PWD/transparentstyle.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -205,7 +206,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/previewerserver.cpp \
            $$PWD/controlpreviewingmanager.cpp \
            $$PWD/commanddispatcher.cpp \
-           $$PWD/controlpropertymanager.cpp
+           $$PWD/controlpropertymanager.cpp \
+           $$PWD/transparentstyle.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

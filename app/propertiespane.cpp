@@ -12,6 +12,7 @@
 #include <parserutils.h>
 
 #include <transparentcombobox.h>
+#include <transparentstyle.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -99,7 +100,7 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRo
     else if (row % 2)
         painter->fillRect(rect, "#faf1e8");
     else
-        painter->fillRect(rect, "#fffefc");
+        painter->fillRect(rect, Qt::white);
 
     // Draw top and bottom lines
     painter->setPen("#408C6A48");
@@ -479,8 +480,10 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     else
         abstractSpinBox = new QDoubleSpinBox;
 
-    //    abstractSpinBox->setStyleSheet("QAbstractSpinBox { border: none; background: transparent; }");
-    abstractSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    auto transparentStyle = new TransparentStyle(abstractSpinBox);
+    abstractSpinBox->setStyle(transparentStyle);
+    abstractSpinBox->findChild<QLineEdit*>("qt_spinbox_lineedit")->setStyle(transparentStyle);
+    abstractSpinBox->setCursor(Qt::PointingHandCursor);
     abstractSpinBox->installEventFilter(&g_wheelDisabler);
     abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
     abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
@@ -542,8 +545,10 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
 QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control)
 {
     QSpinBox* spinBox = new QSpinBox;
-    //    spinBox->setStyleSheet("QAbstractSpinBox { border: none; background: transparent; }");
-    spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    auto transparentStyle = new TransparentStyle(spinBox);
+    spinBox->setStyle(transparentStyle);
+    spinBox->findChild<QLineEdit*>("qt_spinbox_lineedit")->setStyle(transparentStyle);
+    spinBox->setCursor(Qt::PointingHandCursor);
     spinBox->installEventFilter(&g_wheelDisabler);
     spinBox->setFocusPolicy(Qt::StrongFocus);
     spinBox->setMinimum(0);
@@ -1073,7 +1078,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
     const qreal bandCount = viewport()->height() / bandHeight;
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
 
-    painter.fillRect(rect(), "#fffefc");
+    painter.fillRect(rect(), Qt::white);
 
     for (int i = 0; i < bandCount; ++i) {
         if (i % 2) {

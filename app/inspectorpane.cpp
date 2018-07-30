@@ -31,9 +31,9 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selecte
         painter->fillRect(rect, "#cee7cb");
     } else {
         if (row % 2)
-            painter->fillRect(rect, "#ecfbea");
+            painter->fillRect(rect, "#edfceb");
         else
-            painter->fillRect(rect, "#fefffc");
+            painter->fillRect(rect, Qt::white);
     }
 
     // Draw top and bottom lines
@@ -299,11 +299,11 @@ void InspectorPane::paintEvent(QPaintEvent* e)
     const qreal bandHeight = topLevelItemCount() ? rowHeight(indexFromItem(topLevelItem(0))) : 21;
     const qreal bandCount = viewport()->height() / bandHeight;
 
-    painter.fillRect(rect(), "#fefffc");
+    painter.fillRect(rect(), Qt::white);
 
     for (int i = 0; i < bandCount; ++i) {
         if (i % 2) {
-            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, "#ecfbea");
+            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, "#edfceb");
         } else if (topLevelItemCount() == 0) {
             if (i == int(bandCount / 2.0) || i == int(bandCount / 2.0) + 1) {
                 painter.setPen("#a6afa5");
