@@ -9,7 +9,6 @@
 #include <control.h>
 #include <parserutils.h>
 #include <dpr.h>
-#include <transparentcombobox.h>
 #include <utilsicons.h>
 #include <toolbar.h>
 #include <toolbutton.h>
@@ -19,6 +18,7 @@
 #include <inspectorpane.h>
 #include <controlpropertymanager.h>
 #include <controlpreviewingmanager.h>
+#include <transparentstyle.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -29,6 +29,7 @@
 #include <QSplitter>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QComboBox>
 
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
@@ -131,9 +132,9 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     , cutButton(new ToolButton)
     , copyButton(new ToolButton)
     , pasteButton(new ToolButton)
-    , itemsCombobox(new TransparentComboBox)
-    , documentsCombobox(new TransparentComboBox)
-    , zoomlLevelCombobox(new TransparentComboBox)
+    , itemsCombobox(new QComboBox)
+    , documentsCombobox(new QComboBox)
+    , zoomlLevelCombobox(new QComboBox)
     , lineColLabel(new QLabel)
     , splitter(new QSplitter)
     , editorWrapper(new QWidget)
@@ -205,6 +206,10 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     noDocumentIndicator->setAlignment(Qt::AlignCenter);
     noDocumentIndicator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     noDocumentIndicator->show();
+
+    TransparentStyle::attach(itemsCombobox);
+    TransparentStyle::attach(documentsCombobox);
+    TransparentStyle::attach(zoomlLevelCombobox);
 
     documentsCombobox->hide();
     itemsCombobox->hide();
@@ -441,10 +446,11 @@ void QmlCodeEditorWidgetPrivate::handleSaveButtonClicked()
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleZoomLevelChange(const QString& text)
+void QmlCodeEditorWidgetPrivate::handleZoomLevelChange(const QString& /*text*/)
 {
-//    defaultFont.setPixelSize(findPixelSize(text));
-//    codeEditor->document()->setDefaultFont(defaultFont); BUG
+    // BUG
+    //    defaultFont.setPixelSize(findPixelSize(text));
+    //    codeEditor->document()->setDefaultFont(defaultFont);
 }
 
 void QmlCodeEditorWidgetPrivate::handleHideShowButtonClicked()

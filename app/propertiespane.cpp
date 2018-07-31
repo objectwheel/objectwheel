@@ -10,8 +10,6 @@
 //#include <projectmanager.h>
 #include <dpr.h>
 #include <parserutils.h>
-
-#include <transparentcombobox.h>
 #include <transparentstyle.h>
 
 #include <QStyledItemDelegate>
@@ -25,6 +23,7 @@
 #include <QSpinBox>
 #include <QFontDatabase>
 #include <QMetaEnum>
+#include <QComboBox>
 
 #include <QDebug>
 namespace {
@@ -306,7 +305,8 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
 
 QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
 {
-    auto comboBox = new TransparentComboBox;
+    auto comboBox = new QComboBox;
+    TransparentStyle::attach(comboBox);
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     comboBox->addItems(enumm.keys.keys());
     comboBox->setCurrentText(enumm.value);
@@ -409,9 +409,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     else
         abstractSpinBox = new QDoubleSpinBox;
 
-    auto transparentStyle = new TransparentStyle(abstractSpinBox);
-    abstractSpinBox->setStyle(transparentStyle);
-    abstractSpinBox->findChild<QLineEdit*>("qt_spinbox_lineedit")->setStyle(transparentStyle);
+    TransparentStyle::attach(abstractSpinBox);
     abstractSpinBox->setCursor(Qt::PointingHandCursor);
     abstractSpinBox->installEventFilter(&g_wheelDisabler);
     abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
@@ -479,7 +477,8 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
 
 QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control)
 {
-    auto comboBox = new TransparentComboBox;
+    auto comboBox = new QComboBox;
+    TransparentStyle::attach(comboBox);
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     comboBox->addItems(QFontDatabase().families());
     comboBox->setCurrentText(family);
@@ -500,7 +499,8 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control)
 
 QWidget* createFontWeightHandlerWidget(int weight, Control* control)
 {
-    auto comboBox = new TransparentComboBox;
+    auto comboBox = new QComboBox;
+    TransparentStyle::attach(comboBox);
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     comboBox->setCursor(Qt::PointingHandCursor);
     comboBox->setFocusPolicy(Qt::ClickFocus);
@@ -529,7 +529,8 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
 
 QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalization, Control* control)
 {
-    auto comboBox = new TransparentComboBox;
+    auto comboBox = new QComboBox;
+    TransparentStyle::attach(comboBox);
     comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
     comboBox->setCursor(Qt::PointingHandCursor);
     comboBox->setFocusPolicy(Qt::ClickFocus);
@@ -560,9 +561,7 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
 QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control)
 {
     QSpinBox* spinBox = new QSpinBox;
-    auto transparentStyle = new TransparentStyle(spinBox);
-    spinBox->setStyle(transparentStyle);
-    spinBox->findChild<QLineEdit*>("qt_spinbox_lineedit")->setStyle(transparentStyle);
+    TransparentStyle::attach(spinBox);
     spinBox->setCursor(Qt::PointingHandCursor);
     spinBox->installEventFilter(&g_wheelDisabler);
     spinBox->setFocusPolicy(Qt::StrongFocus);
@@ -812,7 +811,7 @@ public:
             painter->setPen(Qt::white);
         } else {
             if (index.column() == 0 && index.data(Qt::DecorationRole).toBool())
-                painter->setPen("#2D75DC");
+                painter->setPen("#1A69BD");
             else
                 painter->setPen(Qt::black);
         }

@@ -74,6 +74,11 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     Utils::setCreatorTheme(Internal::ThemeEntry::createTheme(Constants::DEFAULT_THEME));
     connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
 
+    QPalette palette(QApplication::palette());
+    palette.setColor(QPalette::Window, "#f0f0f0");
+    palette.setColor(QPalette::Highlight, "#4278f5");
+    QApplication::setPalette(palette);
+
     s_documentManager = new DocumentManager(this);
 
     connect(UserManager::instance(), &UserManager::aboutToStop,

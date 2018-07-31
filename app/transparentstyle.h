@@ -1,12 +1,17 @@
 #ifndef TRANSPARENTSTYLE_H
 #define TRANSPARENTSTYLE_H
 
-#include <QProxyStyle>
+#include <QCommonStyle>
 
 class TransparentStyle : public QCommonStyle
 {
+    Q_OBJECT
+
 public:
     explicit TransparentStyle(QObject* parent = nullptr);
+
+    static void attach(QWidget* widget);
+
     void polish(QWidget* w) override;
     void unpolish(QWidget* w) override;
     QRect subElementRect(QStyle::SubElement element, const QStyleOption *option,

@@ -3,8 +3,16 @@
 #include <QStyleFactory>
 #include <QStyleOptionSpinBox>
 #include <QPainter>
+#include <QSet>
+
+#include <QMdiSubWindow>
+#include <QFocusFrame>
+#include <QToolBar>
+#include <QMainWindow>
+#include <QMenu>
+#include <QScrollBar>
+
 #include <qdrawutil.h>
-#include <QtWidgets>
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
@@ -93,6 +101,22 @@ void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect,
 TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent)
 {
     setParent(parent);
+}
+
+void TransparentStyle::attach(QWidget* widget)
+{
+    static auto style = new TransparentStyle(QCoreApplication::instance());
+
+    QSet<QWidget*> widgetList;
+    widgetList.insert(widget);
+    widgetList.unite(QSet<QWidget*>::fromList(widget->findChildren<QWidget*>()));
+
+    for (QWidget* w : widgetList) {
+        w->setStyle(style);
+
+        if (w->inherits("QComboBox"))
+            w->setAttribute(Qt::WA_Hover);
+    }
 }
 
 void TransparentStyle::polish(QWidget* w)

@@ -3,17 +3,18 @@
 #include <designerscene.h>
 #include <qmlcodeeditorwidget.h>
 #include <controlcreationmanager.h>
-#include <transparentcombobox.h>
 #include <utilsicons.h>
 #include <toolbar.h>
 #include <toolbutton.h>
 #include <controlpreviewingmanager.h>
 #include <saveutils.h>
+#include <transparentstyle.h>
 
 #include <toolbar.h>
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QComboBox>
 
 namespace {
     QString findText(qreal ratio);
@@ -35,7 +36,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
   , m_snappingButton(new ToolButton)
   , m_fitButton(new ToolButton)
   , m_outlineButton(new ToolButton)
-  , m_zoomlLevelCombobox(new TransparentComboBox)
+  , m_zoomlLevelCombobox(new QComboBox)
 {
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -50,6 +51,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_designerView->setFrameShape(QFrame::NoFrame);
     m_designerView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+    TransparentStyle::attach(m_zoomlLevelCombobox);
     m_zoomlLevelCombobox->addItem("10 %");
     m_zoomlLevelCombobox->addItem("25 %");
     m_zoomlLevelCombobox->addItem("50 %");

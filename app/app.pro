@@ -105,7 +105,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/qmlcodedocument.h \
            $$PWD/documentmanager.h \
            $$PWD/markband.h \
-           $$PWD/transparentcombobox.h \
            $$PWD/toolbar.h \
            $$PWD/toolbutton.h \
            $$PWD/controlremovingmanager.h \
@@ -114,7 +113,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/previewerserver.h \
            $$PWD/commanddispatcher.h \
            $$PWD/controlpropertymanager.h \
-           $$PWD/transparentstyle.h
+           $$PWD/transparentstyle.h \
+           $$PWD/applicationstyle.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -197,7 +197,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/qmlcodedocument.cpp \
            $$PWD/documentmanager.cpp \
            $$PWD/markband.cpp \
-           $$PWD/transparentcombobox.cpp \
            $$PWD/toolbar.cpp \
            $$PWD/toolbutton.cpp \
            $$PWD/controlremovingmanager.cpp \
@@ -207,7 +206,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlpreviewingmanager.cpp \
            $$PWD/commanddispatcher.cpp \
            $$PWD/controlpropertymanager.cpp \
-           $$PWD/transparentstyle.cpp
+           $$PWD/transparentstyle.cpp \
+           $$PWD/applicationstyle.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

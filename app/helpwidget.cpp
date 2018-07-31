@@ -1,7 +1,7 @@
 #include <helpwidget.h>
 #include <webenginehelpviewer.h>
 #include <focuslesslineedit.h>
-#include <transparentcombobox.h>
+#include <transparentstyle.h>
 #include <toolbar.h>
 #include <toolbutton.h>
 #include <utilsicons.h>
@@ -22,7 +22,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_helpEngine(new QHelpEngine(qApp->applicationDirPath() + "/docs/docs.qhc", this))
   , m_layout(new QVBoxLayout(this))
   , m_toolbar(new ToolBar)
-  , m_typeCombo(new TransparentComboBox)
+  , m_typeCombo(new QComboBox)
   , m_homeButton(new ToolButton)
   , m_backButton(new ToolButton)
   , m_forthButton(new ToolButton)
@@ -60,6 +60,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_titleLabel->setFont(f);
     m_titleLabel->setTextFormat(Qt::RichText);
 
+    TransparentStyle::attach(m_typeCombo);
     m_typeCombo->setFixedWidth(220);
     m_typeCombo->addItem("Index");
     m_typeCombo->addItem("Contents");
