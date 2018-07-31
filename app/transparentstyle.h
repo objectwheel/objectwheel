@@ -9,7 +9,6 @@ public:
     explicit TransparentStyle(QObject* parent = nullptr);
     void polish(QWidget* w) override;
     void unpolish(QWidget* w) override;
-
     QRect subElementRect(QStyle::SubElement element, const QStyleOption *option,
                          const QWidget *widget = nullptr) const override;
     int styleHint(QStyle::StyleHint hint, const QStyleOption *option = nullptr,

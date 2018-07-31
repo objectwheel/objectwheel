@@ -343,10 +343,18 @@ int TransparentStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
         return false;
     case SH_ComboBox_ListMouseTracking:
         return false;
+    case SH_ItemView_ScrollMode:
+         return QAbstractItemView::ScrollPerPixel;
+    case SH_ItemView_ShowDecorationSelected:
+        return true;
+    case SH_ItemView_MovementWithoutUpdatingSelection:
+        return false;
     case SH_ComboBox_Popup:
         return true;
     case SH_ComboBox_PopupFrameStyle:
         return QFrame::NoFrame;
+    case SH_Menu_FillScreenWithScroll:
+        return false;
     default:
         return QCommonStyle::styleHint(hint, option, widget, returnData);
     }
@@ -363,8 +371,17 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 4;
     case PM_MenuScrollerHeight:
         return 15;
+    case PM_LayoutHorizontalSpacing:
+    case PM_LayoutVerticalSpacing:
+        return -1;
     case PM_SmallIconSize:
         return int(QStyleHelper::dpiScaled(16.));
+    case PM_LargeIconSize:
+        return int(QStyleHelper::dpiScaled(32.));
+    case PM_IconViewIconSize:
+        return proxy()->pixelMetric(PM_LargeIconSize, option, widget);
+    case PM_ScrollBarSliderMin:
+        return 24;
     case PM_DefaultFrameWidth:
         if (widget && (widget->isWindow() || !widget->parentWidget()
                        || (qobject_cast<const QMainWindow*>(widget->parentWidget())
@@ -378,6 +395,46 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
             else
                 return 1;
         }
+    case PM_LayoutLeftMargin:
+    case PM_LayoutTopMargin:
+    case PM_LayoutRightMargin:
+    case PM_LayoutBottomMargin:
+    {
+        bool isWindow = false;
+        if (option) {
+            isWindow = (option->state & State_Window);
+        } else if (widget) {
+            isWindow = widget->isWindow();
+        }
+        if (isWindow) {
+            /*
+                AHIG would have (20, 8, 10) here but that makes
+                no sense. It would also have 14 for the top margin
+                but this contradicts both Builder and most
+                applications.
+            */
+            return 10;
+        } else {
+            // hack to detect QTabWidget
+            if (widget && widget->parentWidget()
+                    && widget->parentWidget()->sizePolicy().controlType() == QSizePolicy::TabWidget) {
+                if (metric == PM_LayoutTopMargin) {
+                    /*
+                        Builder would have 14 (= 20 - 6) instead of 12,
+                        but that makes the tab look disproportionate.
+                    */
+                    return 6;
+                } else {
+                    return 8;
+                }
+            } else {
+                /*
+                    Child margins are highly inconsistent in AHIG and Builder.
+                */
+                return 8;
+            }
+        }
+    }
     default:
         return QCommonStyle::pixelMetric(metric, option, widget);
     }
