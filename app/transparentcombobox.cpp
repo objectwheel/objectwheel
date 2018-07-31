@@ -17,10 +17,10 @@ TransparentComboBox::TransparentComboBox(QWidget* parent) : QComboBox(parent)
     for (QObject* o : findChildren<QObject*>("")) {
         if (qobject_cast<QWidget*>(o)) {
             qobject_cast<QWidget*>(o)->setStyle(style());
-            qDebug() << o;
+//            qDebug() << o;
         }
     }
-    qDebug() << "----";
+//    qDebug() << "----";
 }
 
 //void TransparentComboBox::paintEvent(QPaintEvent*)

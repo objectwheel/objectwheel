@@ -8,22 +8,25 @@
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
+#include <private/qstylehelper_p.h>
 
-const int macItemFrame         = 2;    // menu item frame width
-const int macItemHMargin       = 3;    // menu item hor text margin
-const int macRightBorder       = 12;   // right border on mac
-const int PushButtonLeftOffset = 6;
+namespace {
+
+const int macItemFrame          = 2;    // menu item frame width
+const int macItemHMargin        = 3;    // menu item hor text margin
+const int macRightBorder        = 12;   // right border on mac
+const int PushButtonLeftOffset  = 6;
 const int PushButtonRightOffset = 12;
 
-static const qreal pushButtonDefaultHeight[3] = {
+const qreal pushButtonDefaultHeight[3] = {
     32, 28, 16
 };
 
-static const qreal comboBoxDefaultHeight[3] = {
+const qreal comboBoxDefaultHeight[3] = {
     26, 22, 19
 };
 
-QRectF comboboxEditBounds(const QRectF &outerBounds)
+QRectF comboboxEditBounds(const QRectF& outerBounds)
 {
     QRectF ret = outerBounds;
     ret = ret.adjusted(-5, 0, -24, 0).translated(3, 2);
@@ -31,7 +34,7 @@ QRectF comboboxEditBounds(const QRectF &outerBounds)
     return ret;
 }
 
-QRectF adjustedControlFrame(const QRectF &rect)
+QRectF adjustedControlFrame(const QRectF& rect)
 {
     QRectF frameRect;
     const auto frameSize = QSizeF(-1, comboBoxDefaultHeight[2]);
@@ -48,16 +51,7 @@ QRect comboboxInnerBounds(const QRect& outerBounds)
     return outerBounds.adjusted(3, 3, -1, -5);
 }
 
-static void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect, Qt::LayoutDirection dir)
-{
-    if (dir == Qt::RightToLeft) {
-        rect->adjust(-right, top, -left, bottom);
-    } else {
-        rect->adjust(left, top, right, bottom);
-    }
-}
-
-QPainterPath windowPanelPath(const QRectF &r)
+QPainterPath windowPanelPath(const QRectF& r)
 {
     static const qreal CornerPointOffset = 5.5;
     static const qreal CornerControlOffset = 2.1;
@@ -86,6 +80,16 @@ QPainterPath windowPanelPath(const QRectF &r)
     return path;
 }
 
+void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect,
+                          Qt::LayoutDirection dir)
+{
+    if (dir == Qt::RightToLeft)
+        rect->adjust(-right, top, -left, bottom);
+    else
+        rect->adjust(left, top, right, bottom);
+}
+}
+
 TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent)
 {
     setParent(parent);
@@ -94,8 +98,8 @@ TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent)
 void TransparentStyle::polish(QWidget* w)
 {
     if (qobject_cast<QMenu*>(w)
-            || qobject_cast<QComboBoxPrivateContainer *>(w)
-            || qobject_cast<QMdiSubWindow *>(w)) {
+            || qobject_cast<QComboBoxPrivateContainer*>(w)
+            || qobject_cast<QMdiSubWindow*>(w)) {
         w->setAttribute(Qt::WA_TranslucentBackground, true);
         w->setAutoFillBackground(false);
     }
@@ -118,14 +122,14 @@ void TransparentStyle::unpolish(QWidget* w)
         w->setWindowOpacity(1.0);
     }
 
-    if (QComboBox *combo = qobject_cast<QComboBox *>(w)) {
+    if (QComboBox *combo = qobject_cast<QComboBox*>(w)) {
         if (!combo->isEditable()) {
-            if (QWidget *widget = combo->findChild<QComboBoxPrivateContainer *>())
+            if (QWidget *widget = combo->findChild<QComboBoxPrivateContainer*>())
                 widget->setWindowOpacity(1.0);
         }
     }
 
-    if (QFocusFrame *frame = qobject_cast<QFocusFrame *>(w))
+    if (QFocusFrame *frame = qobject_cast<QFocusFrame*>(w))
         frame->setAttribute(Qt::WA_NoSystemBackground, true);
 
     QCommonStyle::unpolish(w);
@@ -143,7 +147,7 @@ QRect TransparentStyle::subElementRect(QStyle::SubElement element, const QStyleO
 
     switch (element) {
     case SE_ComboBoxLayoutItem:
-        if (widget && qobject_cast<QToolBar *>(widget->parentWidget())) {
+        if (widget && qobject_cast<QToolBar*>(widget->parentWidget())) {
             // Do nothing, because QToolbar needs the entire widget rect.
             // Otherwise it will be clipped. Equivalent to
             // widget->setAttribute(Qt::WA_LayoutUsesWidgetRect), but without
@@ -151,8 +155,7 @@ QRect TransparentStyle::subElementRect(QStyle::SubElement element, const QStyleO
         } else {
             rect = option->rect;
             setLayoutItemMargins(+2, +1, -3, -4, &rect, option->direction);
-        }
-        break;
+        } break;
     default:
         rect = QCommonStyle::subElementRect(element, option, widget);
     }
@@ -162,18 +165,18 @@ QRect TransparentStyle::subElementRect(QStyle::SubElement element, const QStyleO
 
 QStyle::SubControl TransparentStyle::hitTestComplexControl(ComplexControl control,
                                                            const QStyleOptionComplex *option,
-                                                           const QPoint &point, const QWidget *widget) const
+                                                           const QPoint& point, const QWidget *widget) const
 {
     SubControl sc = QStyle::SC_None;
+
     switch (control) {
     case CC_ComboBox:
-        if (const QStyleOptionComboBox *cmb = qstyleoption_cast<const QStyleOptionComboBox *>(option)) {
+        if (const QStyleOptionComboBox *cmb
+                = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
             sc = QCommonStyle::hitTestComplexControl(control, cmb, point, widget);
             if (!cmb->editable && sc != QStyle::SC_None)
                 sc = SC_ComboBoxArrow;  // A bit of a lie, but what we want
-        }
-        break;
-
+        } break;
     default:
         sc = QCommonStyle::hitTestComplexControl(control, option, point, widget);
         break;
@@ -188,10 +191,11 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
     QSize sz(contentsSize);
 
     switch (type) {
-    case QStyle::CT_MenuItem:
-        if (const QStyleOptionMenuItem *mi = qstyleoption_cast<const QStyleOptionMenuItem *>(option)) {
+    case CT_MenuItem:
+        if (const QStyleOptionMenuItem *mi
+                = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             int maxpmw = mi->maxIconWidth;
-            const QComboBox *comboBox = qobject_cast<const QComboBox *>(widget);
+            const QComboBox *comboBox = qobject_cast<const QComboBox*>(widget);
             int w = sz.width(),
                     h = sz.height();
             if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
@@ -228,19 +232,17 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
                 w = qMax(w, subControlRect(QStyle::CC_ComboBox, &cmb,
                                            QStyle::SC_ComboBoxEditField,
                                            comboBox).width());
-            } else
-            {
+            } else {
                 w += 12;
             }
             sz = QSize(w, h);
-        }
-        break;
+        } break;
     case CT_MenuBarItem:
         if (!sz.isEmpty())
             sz += QSize(12, 4); // Constants from QWindowsStyle
         break;
     case CT_ComboBox:
-        if (const auto *cb = qstyleoption_cast<const QStyleOptionComboBox *>(option)) {
+        if (const auto *cb = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
             if (!cb->editable) {
                 // Same as CT_PushButton, because we have to fit the focus
                 // ring and a non-editable combo box is a NSPopUpButton.
@@ -254,7 +256,7 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             sz.setHeight(pushButtonDefaultHeight[1]);
             return sz;
         } break;
-    case CT_Menu: {
+    case CT_Menu:
         if (proxy() == this) {
             sz = contentsSize;
         } else {
@@ -263,28 +265,28 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             myOption.rect.setSize(sz);
             if (proxy()->styleHint(SH_Menu_Mask, &myOption, widget, &menuMask))
                 sz = menuMask.region.boundingRect().size();
-        }
-        break; }
+        } break;
     case CT_ScrollBar :
         // Make sure that the scroll bar is large enough to display the thumb indicator.
-        if (const QStyleOptionSlider *slider = qstyleoption_cast<const QStyleOptionSlider *>(option)) {
+        if (const QStyleOptionSlider *slider
+                = qstyleoption_cast<const QStyleOptionSlider*>(option)) {
             const int minimumSize = 24; // Smallest knob size, but Cocoa doesn't seem to care
             if (slider->orientation == Qt::Horizontal)
                 sz = sz.expandedTo(QSize(minimumSize, sz.height()));
             else
                 sz = sz.expandedTo(QSize(sz.width(), minimumSize));
-        }
-        break;
+        } break;
     case CT_ItemViewItem:
-        if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option)) {
+        if (const QStyleOptionViewItem *vopt
+                = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
             sz = QCommonStyle::sizeFromContents(type, vopt, contentsSize, widget);
             sz.setHeight(sz.height() + 2);
-        }
-        break;
+        } break;
     default:
         sz = QCommonStyle::sizeFromContents(type, option, contentsSize, widget);
         break;
     }
+
     return sz;
 }
 
@@ -293,20 +295,22 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
                                        QStyle::SubControl subControl, const QWidget* widget) const
 {
     QRect ret;
+
     switch (control) {
     case CC_ComboBox:
-        if (const QStyleOptionComboBox *combo = qstyleoption_cast<const QStyleOptionComboBox *>(option)) {
+        if (const QStyleOptionComboBox *combo
+                = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
             const auto editRect = comboboxEditBounds(adjustedControlFrame(combo->rect));
             switch (subControl) {
-            case SC_ComboBoxEditField:{
+            case SC_ComboBoxEditField:
                 ret = editRect.toAlignedRect();
-                break; }
-            case SC_ComboBoxArrow:{
+                break;
+            case SC_ComboBoxArrow:
                 ret = editRect.toAlignedRect();
                 ret.setX(ret.x() + ret.width());
                 ret.setWidth(combo->rect.right() - ret.right());
-                break; }
-            case SC_ComboBoxListBoxPopup:{
+                break;
+            case SC_ComboBoxListBoxPopup:
                 if (combo->editable) {
                     const QRect inner = comboboxInnerBounds(combo->rect);
                     const int comboTop = combo->rect.top();
@@ -318,18 +322,16 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
                                 combo->rect.y() + 1,
                                 editRect.width() + 10 + 11,
                                 1);
-                }
-                break; }
+                } break;
             default:
                 break;
             }
-        }
-        break;
-
+        } break;
     default:
         ret = QCommonStyle::subControlRect(control, option, subControl, widget);
         break;
     }
+
     return ret;
 }
 
@@ -359,11 +361,23 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 0;
     case PM_MenuVMargin:
         return 4;
+    case PM_MenuScrollerHeight:
+        return 15;
+    case PM_SmallIconSize:
+        return int(QStyleHelper::dpiScaled(16.));
     case PM_DefaultFrameWidth:
-        if (qstyleoption_cast<const QStyleOptionComboBox *>(option) != 0)
-            return 0; // The combo box popup has no frame.
-        else
-            return QCommonStyle::pixelMetric(metric, option, widget);
+        if (widget && (widget->isWindow() || !widget->parentWidget()
+                       || (qobject_cast<const QMainWindow*>(widget->parentWidget())
+                           && static_cast<QMainWindow*>(widget->parentWidget())->centralWidget() == widget))
+                && qobject_cast<const QAbstractScrollArea*>(widget)) {
+            return 0;
+        } else {
+            // The combo box popup has no frame.
+            if (qstyleoption_cast<const QStyleOptionComboBox*>(option) != 0)
+                return 0;
+            else
+                return 1;
+        }
     default:
         return QCommonStyle::pixelMetric(metric, option, widget);
     }
@@ -374,8 +388,7 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
 {
     switch (element) {
     case PE_PanelLineEdit:
-        break;
-
+        break; // Skip for transparent spinbox line edit
     case PE_PanelMenu: {
         painter->save();
         painter->fillRect(option->rect, Qt::transparent);
@@ -386,7 +399,6 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->drawPath(path);
         painter->restore();
     } break;
-
     case PE_IndicatorMenuCheckMark: {
         painter->save();
         QColor pc;
@@ -403,7 +415,6 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->drawText(option->rect.adjusted(-2, 1, -2, 1), "\u2713", QTextOption(Qt::AlignCenter));
         painter->restore();
     } break;
-
     case PE_IndicatorToolBarSeparator: {
         QPainterPath path;
         if (option->state & State_Horizontal) {
@@ -421,16 +432,6 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         path = theStroker.createStroke(path);
         painter->fillPath(path, QColor(0, 0, 0, 119));
     } break;
-
-    case CE_ComboBoxLabel:
-        if (const auto *cb = qstyleoption_cast<const QStyleOptionComboBox *>(option)) {
-            auto comboCopy = *cb;
-            comboCopy.direction = Qt::LeftToRight;
-            // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
-            QCommonStyle::drawControl(CE_ComboBoxLabel, &comboCopy, painter, widget);
-        }
-        break;
-
     default:
         QCommonStyle::drawPrimitive(element, option, painter, widget);
         break;
@@ -446,14 +447,14 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_MenuVMargin:
     case CE_MenuTearoff:
     case CE_MenuScroller:
-        if (const QStyleOptionMenuItem *mi = qstyleoption_cast<const QStyleOptionMenuItem *>(option)) {
+        if (const QStyleOptionMenuItem *mi
+                = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
             QWindow *window = widget && widget->window() ? widget->window()->windowHandle() :
                                                            /*QStyleHelper::styleObjectWindow(option->styleObject)*/0;
             const bool active = mi->state & State_Selected;
             if (active)
                 painter->fillRect(mi->rect, mi->palette.highlight());
-            //            const QStyleHelper::WidgetSizePolicy widgetSize = d->aquaSizeConstrain(option, widget);
             if (element == CE_MenuTearoff) {
                 painter->setPen(QPen(mi->palette.dark().color(), 1, Qt::DashLine));
                 painter->drawLine(mi->rect.x() + 2, mi->rect.y() + mi->rect.height() / 2 - 1,
@@ -525,7 +526,7 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 int smallIconSize = proxy()->pixelMetric(PM_SmallIconSize);
                 QSize iconSize(smallIconSize, smallIconSize);
 
-                if (const QComboBox *comboBox = qobject_cast<const QComboBox *>(widget)) {
+                if (const QComboBox *comboBox = qobject_cast<const QComboBox*>(widget)) {
                     iconSize = comboBox->iconSize();
                 }
 
@@ -570,9 +571,15 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
                                   mi->rect.height(), text_flags, s);
             }
             painter->restore();
-        }
-        break;
-
+        } break;
+    case CE_ComboBoxLabel:
+        if (const auto *cb
+                = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
+            auto comboCopy = *cb;
+            comboCopy.direction = Qt::LeftToRight;
+            // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
+            QCommonStyle::drawControl(CE_ComboBoxLabel, &comboCopy, painter, widget);
+        } break;
     default:
         QCommonStyle::drawControl(element, option, painter, widget);
         break;
@@ -585,7 +592,8 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
 {
     switch (control) {
     case CC_SpinBox:
-        if (const QStyleOptionSpinBox *so = qstyleoption_cast<const QStyleOptionSpinBox *>(option)) {
+        if (const QStyleOptionSpinBox *so
+                = qstyleoption_cast<const QStyleOptionSpinBox*>(option)) {
             painter->save();
             QStyleOptionSpinBox copy = *so;
             PrimitiveElement pe;
@@ -633,11 +641,10 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 proxy()->drawPrimitive(pe, &copy, painter, widget);
             }
             painter->restore();
-        }
-        break;
-
+        } break;
     case CC_ComboBox:
-        if (const QStyleOptionComboBox *cmb = qstyleoption_cast<const QStyleOptionComboBox *>(option)) {
+        if (const QStyleOptionComboBox *cmb
+                = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
             painter->save();
             if ((cmb->subControls & SC_ComboBoxFrame) && (cmb->state & State_MouseOver))
                 painter->fillRect(option->rect, "#15000000");
@@ -659,9 +666,7 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 proxy()->drawPrimitive(PE_IndicatorArrowDown, &arrowOpt, painter, widget);
             }
             painter->restore();
-        }
-        break;
-
+        } break;
     default:
         QCommonStyle::drawComplexControl(control, option, painter, widget);
         break;
