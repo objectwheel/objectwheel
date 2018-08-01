@@ -80,6 +80,31 @@ void fixVisibilityForWindow(Control* control, const QString& propertyName, QComb
     }
 }
 
+void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
+{
+    QTreeWidget* treeWidget = fontItem->treeWidget();
+    Q_ASSERT(treeWidget);
+
+    QString fontText = fontItem->text(1);
+    if (isPx)
+        fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pixelSize()) + "px]");
+    else
+        fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pointSize()) + "pt]");
+    fontItem->setText(1, fontText);
+
+    for (int i = 0; i < fontItem->childCount(); ++i) {
+        QTreeWidgetItem* chilItem = fontItem->child(i);
+        if (chilItem->text(0) == (isPx ? "pointSize" : "pixelSize")) {
+            QSpinBox* spinBox = qobject_cast<QSpinBox*>(treeWidget->itemWidget(chilItem, 1));
+            Q_ASSERT(spinBox);
+            spinBox->blockSignals(true);
+            spinBox->setValue(0);
+            spinBox->blockSignals(false);
+            break;
+        }
+    }
+}
+
 void setPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
@@ -178,6 +203,17 @@ QVariant getProperty(const QString& property, const QList<PropertyNode>& propert
     return QVariant();
 }
 
+Enum getEnum(const QString& name, const QList<PropertyNode>& properties)
+{
+    for (const PropertyNode& propertyNode : properties) {
+        for (const Enum& enumm : propertyNode.enums) {
+            if (enumm.name == name)
+                return enumm;
+        }
+    }
+    return Enum();
+}
+
 QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
 {
     QList<QTreeWidgetItem*> items;
@@ -217,18 +253,19 @@ QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool inclu
     return items;
 }
 
-int calculateVisibleRow(const QTreeWidgetItem* item, const QTreeWidget* treeWidget)
+int calculateVisibleRow(const QTreeWidgetItem* item)
 {
+    QTreeWidget* treeWidget = item->treeWidget();
+    Q_ASSERT(treeWidget);
+
     int count = 0;
     for (QTreeWidgetItem* topLevelItem : topLevelItems(treeWidget)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem, true, false)) {
             if (childItem == item)
                 return count;
-
             ++count;
         }
     }
-
     return count;
 }
 
@@ -326,8 +363,12 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
-        QString fixedScope = enumm.scope;
+        const QString& previousValue = getEnum(enumm.name, control->properties()).value;
 
+        if (previousValue == comboBox->currentText())
+            return;
+
+        QString fixedScope = enumm.scope;
         if (control->window() && fixedScope == "Window") {
             const QByteArray& qml = rdfile(control->url());
             if (!qml.contains("import QtQuick.Window"))
@@ -367,12 +408,15 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     });
 
     auto widget = new QWidget;
+    widget->setMinimumWidth(1);
+    widget->setAttribute(Qt::WA_MacShowFocusRect, false);
+    widget->setFocusPolicy(Qt::ClickFocus);
+    widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
     auto layout = new QHBoxLayout(widget);
     layout->addWidget(checkBox);
     layout->addStretch();
     layout->setSpacing(0);
     layout->setContentsMargins(2, 0, 0, 0);
-    widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
     return widget;
 }
 
@@ -493,7 +537,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     return abstractSpinBox;
 }
 
-QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control)
+QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, QTreeWidgetItem* fontItem)
 {
     auto comboBox = new QComboBox;
     TransparentStyle::attach(comboBox);
@@ -508,6 +552,16 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control)
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
+        const QFont& font = getProperty("font", control->properties()).value<QFont>();
+
+        if (comboBox->currentText() == QFontInfo(font).family())
+            return;
+
+        const QString& previousFamily = QFontInfo(font).family();
+        QString fontText = fontItem->text(1);
+        fontText.replace(previousFamily, comboBox->currentText());
+        fontItem->setText(1, fontText);
+
         ControlPropertyManager::setProperty(control, "font.family", stringify(comboBox->currentText()),
                                             comboBox->currentText(), ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
@@ -538,6 +592,11 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
         int weightValue = weightEnum.keyToValue(comboBox->currentText().toUtf8().constData());
+        const QFont& font = getProperty("font", control->properties()).value<QFont>();
+
+        if (weightValue == font.weight())
+            return;
+
         ControlPropertyManager::setProperty(control, "font.weight",
                                             "Font." + comboBox->currentText(), weightValue,
                                             ControlPropertyManager::SaveChanges
@@ -569,6 +628,11 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
         int capitalizationValue = capitalizationEnum.keyToValue(comboBox->currentText().toUtf8().constData());
+        const QFont& font = getProperty("font", control->properties()).value<QFont>();
+
+        if (capitalizationValue == font.capitalization())
+            return;
+
         ControlPropertyManager::setProperty(control, "font.capitalization",
                                             "Font." + comboBox->currentText(),
                                             QFont::Capitalization(capitalizationValue),
@@ -579,7 +643,7 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     return comboBox;
 }
 
-QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control)
+QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control, QTreeWidgetItem* fontItem)
 {
     QSpinBox* spinBox = new QSpinBox;
     TransparentStyle::attach(spinBox);
@@ -613,6 +677,8 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
         else
             font.setPointSize(spinBox->value());
 
+        fixFontItemText(fontItem, font, isPx);
+
         // FIXME: Remove related property instead of setting its value to 0
         ControlPropertyManager::setProperty(control, QString::fromUtf8("font.") +
                                             (isPx ? "pointSize" : "pixelSize"),
@@ -628,10 +694,13 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
     return spinBox;
 }
 
-void createAndAddGeometryPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* classItem,
-                                         const QList<PropertyNode>& properties, Control* control,
-                                         int integer)
+void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
+                                         const QList<PropertyNode>& properties,
+                                         Control* control, int integer)
 {
+    QTreeWidget* treeWidget = classItem->treeWidget();
+    Q_ASSERT(treeWidget);
+
     const QRectF& geometry = getGeometryFromProperties(properties);
 
     bool xUnknown = false, yUnknown = false;
@@ -689,9 +758,11 @@ void createAndAddGeometryPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetIte
     treeWidget->expandItem(geometryItem);
 }
 
-void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* classItem,
-                                     const QFont& font, Control* control)
+void createAndAddFontPropertiesBlock(QTreeWidgetItem* classItem, const QFont& font, Control* control)
 {
+    QTreeWidget* treeWidget = classItem->treeWidget();
+    Q_ASSERT(treeWidget);
+
     const bool isPx = font.pixelSize() > 0 ? true : false;
     const QString& fontText = QString::fromUtf8("[%1, %2%3]")
             .arg(QFontInfo(font).family())
@@ -724,21 +795,21 @@ void createAndAddFontPropertiesBlock(QTreeWidget* treeWidget, QTreeWidgetItem* c
     poItem->setData(0, Qt::DecorationRole, poChanged);
     fontItem->addChild(poItem);
     treeWidget->setItemWidget(
-                poItem, 1, createFontSizeHandlerWidget("pointSize", font.pointSize(), control));
+                poItem, 1, createFontSizeHandlerWidget("pointSize", font.pointSize(), control, fontItem));
 
     auto pxItem = new QTreeWidgetItem;
     pxItem->setText(0, "pixelSize");
     pxItem->setData(0, Qt::DecorationRole, piChanged);
     fontItem->addChild(pxItem);
     treeWidget->setItemWidget(
-                pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), control));
+                pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), control, fontItem));
 
     auto fItem = new QTreeWidgetItem;
     fItem->setText(0, "family");
     fItem->setData(0, Qt::DecorationRole, fChanged);
     fontItem->addChild(fItem);
     treeWidget->setItemWidget(
-                fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), control));
+                fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), control, fontItem));
 
     auto wItem = new QTreeWidgetItem;
     wItem->setText(0, "weight");
@@ -825,7 +896,7 @@ public:
         const bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
 
         fillBackground(painter, option.rect,
-                       calculateVisibleRow(m_propertiesPane->itemFromIndex(index), m_propertiesPane),
+                       calculateVisibleRow(m_propertiesPane->itemFromIndex(index)),
                        isClassRow, index.column() == 0 && !isClassRow);
 
         // Draw data
@@ -841,7 +912,11 @@ public:
                 painter->setPen("#403121");
             }
         }
-        painter->drawText(option.rect.adjusted(5, 0, 0, 0), index.data(Qt::DisplayRole).toString(),
+
+        const QRectF& textRect = option.rect.adjusted(5, 0, 0, 0);
+        const QString& text = index.data(Qt::DisplayRole).toString();
+        painter->drawText(textRect,
+                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
@@ -969,7 +1044,7 @@ void PropertiesPane::onSelectionChange()
             switch (propertyValue.type()) {
             case QVariant::Font: {
                 const QFont& font = propertyValue.value<QFont>();
-                createAndAddFontPropertiesBlock(this, classItem, font, selectedControl);
+                createAndAddFontPropertiesBlock(classItem, font, selectedControl);
                 break;
             }
 
@@ -1024,8 +1099,7 @@ void PropertiesPane::onSelectionChange()
 
             case QVariant::Double: {
                 if (isXProperty(propertyName)) {
-                    createAndAddGeometryPropertiesBlock(
-                                this, classItem, properties, selectedControl, false);
+                    createAndAddGeometryPropertiesBlock(classItem, properties, selectedControl, false);
                 } else {
                     if (isGeometryProperty(propertyName))
                         break;
@@ -1044,8 +1118,7 @@ void PropertiesPane::onSelectionChange()
 
             case QVariant::Int: {
                 if (isXProperty(propertyName)) {
-                    createAndAddGeometryPropertiesBlock(
-                                this, classItem, properties, selectedControl, true);
+                    createAndAddGeometryPropertiesBlock(classItem, properties, selectedControl, true);
                 } else {
                     if (isGeometryProperty(propertyName))
                         break;
@@ -1098,8 +1171,7 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
     handleRect.moveCenter(rect.center());
     handleRect.moveRight(rect.right() - 0.5);
 
-    fillBackground(painter, rect,
-                   calculateVisibleRow(itemFromIndex(index), this), isClassRow, false);
+    fillBackground(painter, rect, calculateVisibleRow(itemFromIndex(index)), isClassRow, false);
 
     // Draw handle
     if (hasChild) {
