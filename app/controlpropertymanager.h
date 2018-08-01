@@ -52,8 +52,9 @@ private slots:
 signals:
     void zChanged(Control*);
     void parentChanged(Control*);
+    void previewChanged(Control*);
     void geometryChanged(Control*);
-    void propertyChanged(Control*);
+    void propertyChanged(Control*, const QString& propertyName);
     void idChanged(Control*, const QString& previousId);
 
 private:

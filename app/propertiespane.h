@@ -5,6 +5,7 @@
 
 class FocuslessLineEdit;
 class DesignerScene;
+class Control;
 
 class PropertiesPane : public QTreeWidget
 {
@@ -20,6 +21,11 @@ public slots:
 
 private slots:
     void onSelectionChange();
+    void onZChange(Control*);
+    void onPreviewChange(Control*);
+    void onGeometryChange(Control*);
+    void onPropertyChange(Control*, const QString& propertyName);
+    void onIdChange(Control*, const QString& previousId);
 
 private:
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;

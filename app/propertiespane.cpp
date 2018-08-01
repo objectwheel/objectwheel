@@ -1021,6 +1021,18 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
         if (topLevelItemCount() > 0)
             g_horizontalScrollBarPosition = max - min - horizontalScrollBar()->value();
     });
+
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::zChanged,
+            this, &PropertiesPane::onZChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
+            this, &PropertiesPane::onPreviewChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
+            this, &PropertiesPane::onGeometryChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::propertyChanged,
+            this, &PropertiesPane::onPropertyChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
+            this, &PropertiesPane::onIdChange);
+
     //    connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
     // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
@@ -1031,6 +1043,7 @@ void PropertiesPane::sweep()
     // TODO
     g_verticalScrollBarPosition = 99999;
     g_horizontalScrollBarPosition = 99999;
+    m_searchEdit->clear();
     clear();
 }
 
@@ -1201,6 +1214,81 @@ void PropertiesPane::onSelectionChange()
     horizontalScrollBar()->setSliderPosition(horizontalScrollBar()->maximum()
                                              - horizontalScrollBar()->minimum()
                                              - horizontalScrollBarPosition);
+}
+
+void PropertiesPane::onZChange(Control* control)
+{
+    if (topLevelItemCount() <= 0)
+        return;
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "z") {
+                QTreeWidget* treeWidget = childItem->treeWidget();
+                Q_ASSERT(treeWidget);
+                QSpinBox* iSpinBox
+                        = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                QDoubleSpinBox* dSpinBox
+                        = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                Q_ASSERT(iSpinBox || dSpinBox);
+
+                if (dSpinBox)
+                    dSpinBox->setValue(control->zValue());
+                else
+                    iSpinBox->setValue(control->zValue());
+                break;
+            }
+        }
+    }
+}
+
+void PropertiesPane::onPreviewChange(Control*)
+{
+
+}
+
+void PropertiesPane::onGeometryChange(Control*)
+{
+
+}
+
+void PropertiesPane::onPropertyChange(Control*, const QString& propertyName)
+{
+
+}
+
+void PropertiesPane::onIdChange(Control* control, const QString& /*previousId*/)
+{
+    if (topLevelItemCount() <= 0)
+        return;
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "id") {
+                QTreeWidget* treeWidget = childItem->treeWidget();
+                Q_ASSERT(treeWidget);
+                QLineEdit* lineEdit
+                        = qobject_cast<QLineEdit*>(treeWidget->itemWidget(childItem, 1));
+                Q_ASSERT(lineEdit);
+                lineEdit->setText(control->id());
+                break;
+            }
+        }
+    }
 }
 
 void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const

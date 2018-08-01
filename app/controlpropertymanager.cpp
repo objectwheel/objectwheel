@@ -465,5 +465,5 @@ void ControlPropertyManager::setProperty(Control* control, const QString& proper
     if (options & UpdatePreviewer)
         ControlPreviewingManager::schedulePropertyUpdate(control->uid(), propertyName, propertyValue);
 
-    emit instance()->propertyChanged(control);
+    emit instance()->propertyChanged(control, propertyName);
 }
