@@ -1032,10 +1032,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
             this, &PropertiesPane::onPropertyChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &PropertiesPane::onIdChange);
-
-    //    connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
-    // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
-    // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
 }
 
 void PropertiesPane::sweep()
@@ -1255,9 +1251,19 @@ void PropertiesPane::onZChange(Control* control)
     }
 }
 
-void PropertiesPane::onPreviewChange(Control*)
+void PropertiesPane::onPreviewChange(Control* control)
 {
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
 
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    if (topLevelItemCount() <= 0)
+        return onSelectionChange();
+
+    // FIXME: Finish this later
 }
 
 void PropertiesPane::onGeometryChange(Control* control)
