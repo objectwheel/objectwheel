@@ -25,7 +25,13 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
 
     connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=]
-    { if (_toolboxTree->currentItem() && _toolboxTree->currentItem()->parent()) emit itemDoubleClicked(_toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile()); });
+    {
+        if (_toolboxTree->currentItem()
+                && _toolboxTree->currentItem()->parent()) {
+            emit itemDoubleClicked(
+                        _toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile());
+        }
+    });
 
     _searchEdit->setFixedHeight(22);
     _searchEdit->setClearButtonEnabled(true);

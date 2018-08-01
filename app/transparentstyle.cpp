@@ -128,7 +128,7 @@ void TransparentStyle::polish(QWidget* w)
         w->setAutoFillBackground(false);
     }
 
-    QCommonStyle::polish(w);
+    ApplicationStyle::polish(w);
 
     if (qobject_cast<QScrollBar*>(w)) {
         w->setAttribute(Qt::WA_OpaquePaintEvent, false);
@@ -156,7 +156,7 @@ void TransparentStyle::unpolish(QWidget* w)
     if (QFocusFrame *frame = qobject_cast<QFocusFrame*>(w))
         frame->setAttribute(Qt::WA_NoSystemBackground, true);
 
-    QCommonStyle::unpolish(w);
+    ApplicationStyle::unpolish(w);
 
     if (qobject_cast<QScrollBar*>(w)) {
         w->setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -181,7 +181,7 @@ QRect TransparentStyle::subElementRect(QStyle::SubElement element, const QStyleO
             setLayoutItemMargins(+2, +1, -3, -4, &rect, option->direction);
         } break;
     default:
-        rect = QCommonStyle::subElementRect(element, option, widget);
+        rect = ApplicationStyle::subElementRect(element, option, widget);
     }
 
     return rect;
@@ -197,12 +197,12 @@ QStyle::SubControl TransparentStyle::hitTestComplexControl(ComplexControl contro
     case CC_ComboBox:
         if (const QStyleOptionComboBox *cmb
                 = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
-            sc = QCommonStyle::hitTestComplexControl(control, cmb, point, widget);
+            sc = ApplicationStyle::hitTestComplexControl(control, cmb, point, widget);
             if (!cmb->editable && sc != QStyle::SC_None)
                 sc = SC_ComboBoxArrow;  // A bit of a lie, but what we want
         } break;
     default:
-        sc = QCommonStyle::hitTestComplexControl(control, option, point, widget);
+        sc = ApplicationStyle::hitTestComplexControl(control, option, point, widget);
         break;
     }
 
@@ -303,11 +303,11 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
     case CT_ItemViewItem:
         if (const QStyleOptionViewItem *vopt
                 = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
-            sz = QCommonStyle::sizeFromContents(type, vopt, contentsSize, widget);
+            sz = ApplicationStyle::sizeFromContents(type, vopt, contentsSize, widget);
             sz.setHeight(sz.height() + 2);
         } break;
     default:
-        sz = QCommonStyle::sizeFromContents(type, option, contentsSize, widget);
+        sz = ApplicationStyle::sizeFromContents(type, option, contentsSize, widget);
         break;
     }
 
@@ -351,8 +351,52 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
                 break;
             }
         } break;
+
+    case CC_SpinBox:
+        if (const QStyleOptionSpinBox *spinbox = qstyleoption_cast<const QStyleOptionSpinBox *>(option)) {
+            int center = spinbox->rect.height() / 2;
+            int fw = proxy()->pixelMetric(PM_SpinBoxFrameWidth, spinbox, widget);
+            int y = fw;
+            const int buttonWidth = QStyleHelper::dpiScaled(14);
+            int x, lx, rx;
+            x = spinbox->rect.width() - y - buttonWidth + 2;
+            lx = fw;
+            rx = x - fw;
+            switch (subControl) {
+            case SC_SpinBoxUp:
+                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
+                    return QRect();
+                if (spinbox->state & State_Sunken && (spinbox->activeSubControls & SC_SpinBoxUp))
+                    ret = QRect(x - 1, fw + 3, buttonWidth, center - fw);
+                else
+                    ret = QRect(x - 3, fw + 1, buttonWidth, center - fw);
+                break;
+            case SC_SpinBoxDown:
+                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
+                    return QRect();
+                if (spinbox->state & State_Sunken && (spinbox->activeSubControls & SC_SpinBoxDown))
+                    ret = QRect(x - 1, center + 1, buttonWidth, spinbox->rect.bottom() - center - fw + 1);
+                else
+                    ret = QRect(x - 3, center - 1, buttonWidth, spinbox->rect.bottom() - center - fw + 1);
+                break;
+            case SC_SpinBoxEditField:
+                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons) {
+                    ret = QRect(lx, fw, spinbox->rect.width() - 2*fw, spinbox->rect.height() - 2*fw);
+                } else {
+                    ret = QRect(lx, fw, rx - qMax(fw - 1, 0), spinbox->rect.height() - 2*fw);
+                }
+                break;
+            case SC_SpinBoxFrame:
+                ret = spinbox->rect;
+            default:
+                break;
+            }
+            ret = visualRect(spinbox->direction, spinbox->rect, ret);
+        }
+        break;
+
     default:
-        ret = QCommonStyle::subControlRect(control, option, subControl, widget);
+        ret = ApplicationStyle::subControlRect(control, option, subControl, widget);
         break;
     }
 
@@ -365,10 +409,12 @@ int TransparentStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
     switch (hint) {
     case SH_ComboBox_AllowWheelScrolling:
         return false;
+    case SH_SpinBox_AnimateButton:
+        return true;
     case SH_ComboBox_ListMouseTracking:
         return false;
     case SH_ItemView_ScrollMode:
-         return QAbstractItemView::ScrollPerPixel;
+        return QAbstractItemView::ScrollPerPixel;
     case SH_ItemView_ShowDecorationSelected:
         return true;
     case SH_ItemView_MovementWithoutUpdatingSelection:
@@ -380,7 +426,7 @@ int TransparentStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
     case SH_Menu_FillScreenWithScroll:
         return false;
     default:
-        return QCommonStyle::styleHint(hint, option, widget, returnData);
+        return ApplicationStyle::styleHint(hint, option, widget, returnData);
     }
 }
 
@@ -460,7 +506,7 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         }
     }
     default:
-        return QCommonStyle::pixelMetric(metric, option, widget);
+        return ApplicationStyle::pixelMetric(metric, option, widget);
     }
 }
 
@@ -493,7 +539,7 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
 
         painter->setPen(pc);
         painter->setFont(f);
-        painter->drawText(option->rect.adjusted(-2, 1, -2, 1), "\u2713", QTextOption(Qt::AlignCenter));
+        painter->drawText(option->rect.adjusted(-7, 1, -7, 1), "\u2713", QTextOption(Qt::AlignCenter));
         painter->restore();
     } break;
     case PE_IndicatorToolBarSeparator: {
@@ -514,7 +560,7 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->fillPath(path, QColor(0, 0, 0, 119));
     } break;
     default:
-        QCommonStyle::drawPrimitive(element, option, painter, widget);
+        ApplicationStyle::drawPrimitive(element, option, painter, widget);
         break;
     }
 }
@@ -568,11 +614,13 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 painter->fillPath(path, option->palette.buttonText());
                 painter->restore();
             } else if (element != CE_MenuItem) {
+                painter->restore();
                 break;
             }
             if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
                 const QRect separatorRect = QRect(mi->rect.left(), mi->rect.center().y(), mi->rect.width(), 2);
                 painter->fillRect(separatorRect, "#D5D5D5");
+                painter->restore();
                 break;
             }
             const int maxpmw = mi->maxIconWidth;
@@ -659,10 +707,10 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             auto comboCopy = *cb;
             comboCopy.direction = Qt::LeftToRight;
             // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
-            QCommonStyle::drawControl(CE_ComboBoxLabel, &comboCopy, painter, widget);
+            ApplicationStyle::drawControl(CE_ComboBoxLabel, &comboCopy, painter, widget);
         } break;
     default:
-        QCommonStyle::drawControl(element, option, painter, widget);
+        ApplicationStyle::drawControl(element, option, painter, widget);
         break;
     }
 }
@@ -696,8 +744,7 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 pe = (so->buttonSymbols == QAbstractSpinBox::PlusMinus ? PE_IndicatorSpinPlus
                                                                        : PE_IndicatorSpinUp);
                 copy.rect = proxy()->subControlRect(CC_SpinBox, so, SC_SpinBoxUp, widget);
-                copy.rect.adjust(1, 1, -2, 1);
-                proxy()->drawPrimitive(pe, &copy, painter, widget);
+                ApplicationStyle::drawPrimitive(pe, &copy, painter, widget);
             }
             if (so->subControls & SC_SpinBoxDown) {
                 copy.subControls = SC_SpinBoxDown;
@@ -718,8 +765,7 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 pe = (so->buttonSymbols == QAbstractSpinBox::PlusMinus ? PE_IndicatorSpinMinus
                                                                        : PE_IndicatorSpinDown);
                 copy.rect = proxy()->subControlRect(CC_SpinBox, so, SC_SpinBoxDown, widget);
-                copy.rect.adjust(1, -1, -2, -1);
-                proxy()->drawPrimitive(pe, &copy, painter, widget);
+                ApplicationStyle::drawPrimitive(pe, &copy, painter, widget);
             }
             painter->restore();
         } break;
@@ -742,14 +788,14 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 if (sunkenArrow)
                     flags |= State_Sunken;
                 QStyleOption arrowOpt = *cmb;
-                arrowOpt.rect = ar.adjusted(3, 1, 2, -1);
+                arrowOpt.rect = ar.adjusted(3, 1, 4, -1);
                 arrowOpt.state = flags;
                 proxy()->drawPrimitive(PE_IndicatorArrowDown, &arrowOpt, painter, widget);
             }
             painter->restore();
         } break;
     default:
-        QCommonStyle::drawComplexControl(control, option, painter, widget);
+        ApplicationStyle::drawComplexControl(control, option, painter, widget);
         break;
     }
 }

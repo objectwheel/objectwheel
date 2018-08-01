@@ -10,6 +10,14 @@ class ApplicationStyle : public QProxyStyle
 
 public:
     ApplicationStyle();
+
+    int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget,
+                  QStyleHintReturn *returnData) const override;
+    int pixelMetric(PixelMetric metric, const QStyleOption *option,
+                    const QWidget *widget) const override;
+    void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
+                       const QWidget *widget) const override;
+
 };
 
 #endif // APPLICATIONSTYLE_H

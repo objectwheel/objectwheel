@@ -163,6 +163,7 @@ public:
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
+        painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
 
         const int iconSize = 15;
@@ -184,12 +185,13 @@ public:
 
         // Draw text
         if (model->data(index, Qt::UserRole).toBool())
-            painter->setPen("#D02929");
+            painter->setPen("#cc453b");
         else
-            painter->setPen(qApp->palette().text().color());
+            painter->setPen("#254022");
 
         painter->drawText(option.rect.adjusted(25, 0, 0, 0), index.data(Qt::EditRole).toString(),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        painter->restore();
     }
 
     QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
@@ -262,6 +264,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
 
 void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
+    painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
 
     const qreal width = 10;
@@ -277,7 +280,10 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
 
     // Draw handle
     if (hasChild) {
-        painter->setPen(palette().text().color());
+        QPen pen;
+        pen.setWidthF(1.3);
+        pen.setColor("#254022");
+        painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
 
@@ -289,6 +295,7 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
                               QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
         }
     }
+    painter->restore();
 }
 
 void InspectorPane::paintEvent(QPaintEvent* e)

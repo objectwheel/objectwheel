@@ -99,7 +99,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     pageSwitcherBar->setFloatable(false);
     pageSwitcherBar->setMovable(false);
     pageSwitcherBar->setWindowTitle(tr("Page Bar"));
-    pageSwitcherBar->setStyleSheet("QToolBar { background: #3b444c; border: none }");
+    pageSwitcherBar->setStyleSheet("border: none; spacing: 0;"
+                                   "QToolBar { background: #3b444c; border: none }");
     pageSwitcherBar->setContentsMargins(0, 0, 0, 0);
     pageSwitcherBar->layout()->setContentsMargins(0, 0, 0, 0);
     runBar->layout()->setSpacing(0);

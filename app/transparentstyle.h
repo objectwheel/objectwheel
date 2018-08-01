@@ -1,11 +1,12 @@
 #ifndef TRANSPARENTSTYLE_H
 #define TRANSPARENTSTYLE_H
 
-#include <QCommonStyle>
+#include <applicationstyle.h>
 
-class TransparentStyle : public QCommonStyle
+class TransparentStyle : public ApplicationStyle
 {
     Q_OBJECT
+    Q_DISABLE_COPY(TransparentStyle)
 
 public:
     explicit TransparentStyle(QObject* parent = nullptr);

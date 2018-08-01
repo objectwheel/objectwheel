@@ -84,6 +84,14 @@ void fixVisibilityForWindow(Control* control, const QString& propertyName, QComb
     }
 }
 
+void setPalette(QWidget* widget)
+{
+    QPalette palette(widget->palette());
+    palette.setColor(QPalette::Text, "#403121");
+    palette.setColor(QPalette::WindowText, "#403121");
+    widget->setPalette(palette);
+}
+
 void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRow, bool verticalLine)
 {
     painter->save();
@@ -122,7 +130,7 @@ QImage colorToImage(const QSize& layoutSize, const QColor& color)
     image.fill(color);
     QPainter p(&image);
     p.setRenderHint(QPainter::Antialiasing);
-    p.setPen(Qt::black);
+    p.setPen("#403121");
     p.drawRect(QRectF{{},layoutSize}.adjusted(0.5, 0.5, -0.5, -0.5));
     p.end();
     return image;
@@ -238,6 +246,7 @@ QWidget* createIdHandlerWidget(Control* control)
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
+    setPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -265,6 +274,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
+    setPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -288,6 +298,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
+    setPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -315,6 +326,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
     fixVisibilityForWindow(control, enumm.name, comboBox);
+    setPalette(comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -345,6 +357,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
     checkBox->setMinimumWidth(1);
     fixVisibleForWindow(control, propertyName, checkBox);
+    setPalette(checkBox);
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
     {
@@ -374,6 +387,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     toolButton->setFocusPolicy(Qt::ClickFocus);
     toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
     toolButton->setMinimumWidth(1);
+    setPalette(toolButton);
 
     QObject::connect(toolButton, &QCheckBox::clicked, [=]
     {
@@ -415,6 +429,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
     abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
     abstractSpinBox->setMinimumWidth(1);
+    setPalette(abstractSpinBox);
 
     const auto& updateFunction = [=]
     {
@@ -486,6 +501,7 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control)
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
+    setPalette(comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -506,6 +522,7 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
+    setPalette(comboBox);
 
     QMetaEnum weightEnum = QMetaEnum::fromType<QFont::Weight>();
     for (int i = weightEnum.keyCount(); i--;) { // Necessary somehow
@@ -536,6 +553,7 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
+    setPalette(comboBox);
 
     QMetaEnum capitalizationEnum = QMetaEnum::fromType<QFont::Capitalization>();
     for (int i = capitalizationEnum.keyCount(); i--;) { // Necessary somehow
@@ -570,6 +588,7 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
     spinBox->setValue(size < 0 ? 0 : size);
     spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
     spinBox->setMinimumWidth(1);
+    setPalette(spinBox);
 
     QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
     {
@@ -810,10 +829,14 @@ public:
         if (isClassRow) {
             painter->setPen(Qt::white);
         } else {
-            if (index.column() == 0 && index.data(Qt::DecorationRole).toBool())
-                painter->setPen("#1A69BD");
-            else
-                painter->setPen(Qt::black);
+            if (index.column() == 0 && index.data(Qt::DecorationRole).toBool()) {
+                QFont font (option.font);
+                font.setWeight(QFont::Medium);
+                painter->setFont(font);
+                painter->setPen("#56ab49");
+            } else {
+                painter->setPen("#403121");
+            }
         }
         painter->drawText(option.rect.adjusted(5, 0, 0, 0), index.data(Qt::DisplayRole).toString(),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
@@ -837,6 +860,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     QFont fontMedium(font());
     fontMedium.setWeight(QFont::Medium);
 
+    ::setPalette(this);
     header()->setFont(fontMedium);
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
@@ -1059,6 +1083,7 @@ void PropertiesPane::onSelectionChange()
 
 void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
+    painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
 
     const qreal width = 10;
@@ -1075,7 +1100,10 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
 
     // Draw handle
     if (hasChild) {
-        painter->setPen(isClassRow ? Qt::white : Qt::black);
+        QPen pen;
+        pen.setWidthF(1.3);
+        pen.setColor(isClassRow ? QColor(Qt::white) : QColor("#403121"));
+        painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
 
@@ -1087,6 +1115,7 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
                               QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
         }
     }
+    painter->restore();
 }
 
 void PropertiesPane::paintEvent(QPaintEvent* e)

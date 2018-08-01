@@ -146,23 +146,23 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_qmlCodeEditorButton->settings().textColor = Qt::white;
     m_designerButton->settings().textColor = Qt::white;
 
-    m_designerButton->settings().topColor = "#3B444C";
-    m_qmlCodeEditorButton->settings().topColor = "#3B444C";
-    m_projectOptionsButton->settings().topColor = "#3B444C";
-    m_helpButton->settings().topColor = "#3B444C";
-    m_splitViewButton->settings().topColor = "#3B444C";
-    m_buildsButton->settings().topColor = "#3B444C";
-    m_hideShowLeftPanesButton->settings().topColor = "#3B444C";
-    m_hideShowRightPanesButton->settings().topColor = "#3B444C";
+    m_designerButton->settings().topColor = "#384047";
+    m_qmlCodeEditorButton->settings().topColor = "#384047";
+    m_projectOptionsButton->settings().topColor = "#384047";
+    m_helpButton->settings().topColor = "#384047";
+    m_splitViewButton->settings().topColor = "#384047";
+    m_buildsButton->settings().topColor = "#384047";
+    m_hideShowLeftPanesButton->settings().topColor = "#384047";
+    m_hideShowRightPanesButton->settings().topColor = "#384047";
 
-    m_designerButton->settings().bottomColor = "#3B444C";
-    m_qmlCodeEditorButton->settings().bottomColor = "#3B444C";
-    m_projectOptionsButton->settings().bottomColor = "#3B444C";
-    m_helpButton->settings().bottomColor = "#3B444C";
-    m_splitViewButton->settings().bottomColor = "#3B444C";
-    m_buildsButton->settings().bottomColor = "#3B444C";
-    m_hideShowLeftPanesButton->settings().bottomColor = "#3B444C";
-    m_hideShowRightPanesButton->settings().bottomColor = "#3B444C";
+    m_designerButton->settings().bottomColor = "#424c54";
+    m_qmlCodeEditorButton->settings().bottomColor = "#424c54";
+    m_projectOptionsButton->settings().bottomColor = "#424c54";
+    m_helpButton->settings().bottomColor = "#424c54";
+    m_splitViewButton->settings().bottomColor = "#424c54";
+    m_buildsButton->settings().bottomColor = "#424c54";
+    m_hideShowLeftPanesButton->settings().bottomColor = "#424c54";
+    m_hideShowRightPanesButton->settings().bottomColor = "#424c54";
 
     connect(m_designerButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Designer); });
     connect(m_qmlCodeEditorButton, &FlatButton::pressed, [=] { setCurrentPage(Page_QmlCodeEditor); });
@@ -347,8 +347,8 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     QLinearGradient gradient(rect().topRight(), rect().topLeft());
-    gradient.setColorAt(0, "#3B444C");
-    gradient.setColorAt(1, "#3B444C");
+    gradient.setColorAt(0, "#384047");
+    gradient.setColorAt(1, "#424c54");
 
     painter.fillRect(rect(), gradient);
     painter.setPen("#2f353c");
