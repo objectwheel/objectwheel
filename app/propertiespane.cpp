@@ -1239,10 +1239,16 @@ void PropertiesPane::onZChange(Control* control)
                         = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
                 Q_ASSERT(iSpinBox || dSpinBox);
 
-                if (dSpinBox)
+                childItem->setData(0, Qt::DecorationRole, ParserUtils::exists(control->url(), "z"));
+                if (dSpinBox) {
+                    dSpinBox->blockSignals(true);
                     dSpinBox->setValue(control->zValue());
-                else
+                    dSpinBox->blockSignals(false);
+                } else {
+                    iSpinBox->blockSignals(true);
                     iSpinBox->setValue(control->zValue());
+                    iSpinBox->blockSignals(false);
+                }
                 break;
             }
         }
@@ -1254,14 +1260,108 @@ void PropertiesPane::onPreviewChange(Control*)
 
 }
 
-void PropertiesPane::onGeometryChange(Control*)
+void PropertiesPane::onGeometryChange(Control* control)
 {
+    if (topLevelItemCount() <= 0)
+        return;
 
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    const QRectF& geometry = control->geometry();
+
+    bool xUnknown = false, yUnknown = false;
+    if (control->form()) {
+        xUnknown = !ParserUtils::exists(control->url(), "x");
+        yUnknown = !ParserUtils::exists(control->url(), "y");
+    }
+
+    const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
+            .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
+            .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
+            .arg(int(geometry.width()))
+            .arg(int(geometry.height()));
+
+    const bool xChanged = ParserUtils::exists(control->url(), "x");
+    const bool yChanged = ParserUtils::exists(control->url(), "y");
+    const bool wChanged = ParserUtils::exists(control->url(), "width");
+    const bool hChanged = ParserUtils::exists(control->url(), "height");
+    const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
+
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "geometry") {
+                childItem->setText(1, geometryText);
+                childItem->setData(0, Qt::DecorationRole, geometryChanged);
+            }
+            if (!isGeometryProperty(childItem->text(0)))
+                continue;
+
+            QTreeWidget* treeWidget = childItem->treeWidget();
+            Q_ASSERT(treeWidget);
+            QSpinBox* iSpinBox
+                    = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+            QDoubleSpinBox* dSpinBox
+                    = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
+            Q_ASSERT(iSpinBox || dSpinBox);
+
+            if (dSpinBox)
+                dSpinBox->blockSignals(true);
+            else
+                iSpinBox->blockSignals(true);
+
+            if (childItem->text(0) == "x") {
+                childItem->setData(0, Qt::DecorationRole, xChanged);
+                if (dSpinBox) {
+                    dSpinBox->setValue(control->x());
+                    fixPosForForm(control, "x", dSpinBox);
+                } else {
+                    iSpinBox->setValue(control->x());
+                    fixPosForForm(control, "x", iSpinBox);
+                }
+            } else if (childItem->text(0) == "y") {
+                childItem->setData(0, Qt::DecorationRole, yChanged);
+                if (dSpinBox) {
+                    dSpinBox->setValue(control->y());
+                    fixPosForForm(control, "y", dSpinBox);
+                } else {
+                    iSpinBox->setValue(control->y());
+                    fixPosForForm(control, "y", iSpinBox);
+                }
+            } else if (childItem->text(0) == "width") {
+                childItem->setData(0, Qt::DecorationRole, wChanged);
+                if (dSpinBox)
+                    dSpinBox->setValue(control->size().width());
+                else
+                    iSpinBox->setValue(control->size().width());
+            } else if (childItem->text(0) == "height") {
+                childItem->setData(0, Qt::DecorationRole, hChanged);
+                if (dSpinBox)
+                    dSpinBox->setValue(control->size().height());
+                else
+                    iSpinBox->setValue(control->size().height());
+            }
+
+            if (dSpinBox)
+                dSpinBox->blockSignals(false);
+            else
+                iSpinBox->blockSignals(false);
+        }
+    }
 }
 
-void PropertiesPane::onPropertyChange(Control*, const QString& propertyName)
+void PropertiesPane::onPropertyChange(Control* /*control*/, const QString& /*propertyName*/)
 {
-
+    Q_UNUSED(0)
+    /*
+        FIXME: Empty for now, because the only user of the setProperty function of
+               ControlPropertyManager is this class. Hence no need to handle property
+               changes which made by us already.
+    */
 }
 
 void PropertiesPane::onIdChange(Control* control, const QString& /*previousId*/)
