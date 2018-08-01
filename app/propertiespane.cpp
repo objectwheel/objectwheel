@@ -23,6 +23,10 @@
 #include <QHBoxLayout>
 
 namespace {
+
+int g_verticalScrollBarPosition = 99999;
+int g_horizontalScrollBarPosition = 99999;
+
 class WheelDisabler : public QObject {
     Q_OBJECT
     bool eventFilter(QObject* o, QEvent* e) override {
@@ -993,6 +997,30 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     /* Prepare Properties Widget */
     connect(m_designerScene, &DesignerScene::selectionChanged,
             this, &PropertiesPane::onSelectionChange);
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
+    {
+        if (topLevelItemCount() > 0) {
+            g_verticalScrollBarPosition = verticalScrollBar()->maximum()
+                    - verticalScrollBar()->minimum() - value;
+        }
+    });
+    connect(horizontalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
+    {
+        if (topLevelItemCount() > 0) {
+            g_horizontalScrollBarPosition = horizontalScrollBar()->maximum()
+                    - horizontalScrollBar()->minimum() - value;
+        }
+    });
+    connect(verticalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
+    {
+        if (topLevelItemCount() > 0)
+            g_verticalScrollBarPosition = max - min - verticalScrollBar()->value();
+    });
+    connect(horizontalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
+    {
+        if (topLevelItemCount() > 0)
+            g_horizontalScrollBarPosition = max - min - horizontalScrollBar()->value();
+    });
     //    connect(m_designerScene, SIGNAL(selectionChanged()), SLOT(handleSelectionChange()));
     // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(geometryChanged(Control*)), SLOT(handleSelectionChange()));
     // BUG   connect(ControlMonitoringManager::instance(), SIGNAL(zValueChanged(Control*)), SLOT(handleSelectionChange()));
@@ -1001,12 +1029,15 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
 void PropertiesPane::sweep()
 {
     // TODO
+    g_verticalScrollBarPosition = 99999;
+    g_horizontalScrollBarPosition = 99999;
+    clear();
 }
 
 void PropertiesPane::onSelectionChange()
 {
-    const int verticalScrollBarPosition = verticalScrollBar()->sliderPosition();
-    const int horizontalScrollBarPosition = horizontalScrollBar()->sliderPosition();
+    const int verticalScrollBarPosition = g_verticalScrollBarPosition;
+    const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
 
     clear();
 
@@ -1164,8 +1195,12 @@ void PropertiesPane::onSelectionChange()
 
     //    filterList(m_searchEdit->text());
 
-    verticalScrollBar()->setSliderPosition(verticalScrollBarPosition);
-    horizontalScrollBar()->setSliderPosition(horizontalScrollBarPosition);
+    verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum()
+                                           - verticalScrollBar()->minimum()
+                                           - verticalScrollBarPosition);
+    horizontalScrollBar()->setSliderPosition(horizontalScrollBar()->maximum()
+                                             - horizontalScrollBar()->minimum()
+                                             - horizontalScrollBarPosition);
 }
 
 void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const

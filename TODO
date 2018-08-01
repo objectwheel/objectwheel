@@ -1,7 +1,4 @@
-DesignerView mouse üzerine gelince properties pane deki focusu çalışyor
-Property değişimleri bir önceki değer ile aynı ise katiyen kayıt edilmeyecek
 Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
-SpinBox tuşları ile yapılan artırma azaltmalar anında update edilecek
 Properties Pane row colorları düzeltilecek, calculateVisibleRow doğrumu? Ya filter yapılırsa propertiler?
 - Control preview update etmeden yapılan x y z w h property set'lerinde integervalue'yi nasıl tespit etcez sonuçta window() da form() da kullanılamaz, mı?
 - ParserUtils ile yapılan tüm işlerde, propertylerin binding olma ihtimali göz önüne alınıp herşey yeniden düşünülecek
@@ -25,43 +22,6 @@ handleDirty fonksiyonunu'nun dirty propertyleri eklenme sırasını dikkate alar
 setParent'ler den sonra objeyi uygun pozisyona setGeometry etmek dropControl'ün işi, hemen setParent'in peşine
 formPath -- control->dir() -> path dir ikililiğini ortadan kaldır
 topPath -- rootPath -> SaveUtils ve SaveManager fonksiyonları için uygun olanları uygun yerlere ekle, çıkar
-
-
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-|   #   |nongui-run|nongui-preview|nongui-designer * errorlu-run|errorlu-preview|errorlu-designer * window-run|window-preview|window-designer * item-run|item-preview|item-designer|         
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|      x|          |              |                *            |               |                 *           |              |                *         |            |             |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|      y|          |              |                *            |               |                 *           |              |                *         |            |             |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|      w|          |              |                *            |               |                 *           |              |                *         |            |             |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|      h|          |              |                *            |               |                 *           |              |                *         |            |             |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|      z|     5    |      4       |        3       *            |               |                 *           |              |                *         |            |             |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| parent|     2    |      1       |       ok       *            |               |                 *           |              |                *         |            |             |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|     id|    ok    |      ok      |       ok       *            |               |                 *           |              |                *         |            |             |
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-1. Eğer bir kontrol non-gui ise, dolayısıyla default property'si yoktur, yani childrenları üzerine reparent edilemez, o zaman onun:
-  a. Init yada reCreation sırasında window ve item childrenları ait oldukları form üzerine reparent edilirler, nongui ve errorlu olan childrenlar ise
-     göz ardı edilir, hiç bir yere reparent edilmez, oların zaten preview'i sabittir, değişmez.
-  b. Error'lunun objesi bulunmaz, dolayısıyla içine non-gui reparent edilemez, göz ardı edilir.
-
-2. Run esnasında;
-  a. Errorlu obje zaten programı direk göçertir, bir adım ilerisini düşünmeye gerek yok
-  b. Default property'si olmayan (yukarıdaki madde dolayısıyla geriye bu kurala uyan bir tek non-gui kaldı) obje üzerine hiç bir şey reparent edilemez.
-     Yani QQmlProperty default property için invalid oluyorsa uygun bir error mesajı (tıklanabilir vs) ile assert atılıp run sona erdirilecek.
-
-3. Designer'da;
-  a. Z değeri non-gui için her zaman set edilebilir
-  b. Eğer bir non-gui errorluya dönüşürse durum değişmez, z aynen kalır, her türlü set edilebilir yine de.
-  c. Eğer bir non-gui window'a dönüşürse z sıfırlanır
-  d. Eğer bir non-gui item'e dönüşürse z bu iteme aktarılır
-
 
 
 Projeye Özel Ayarlar
