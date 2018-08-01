@@ -167,7 +167,7 @@ bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
             if (pos.y() >= top && pos.y() <= bottom) {
                 QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+:");
                 if (exp.match(block.text()).hasMatch()
-                        && pos.x() < m_textBrowser->fontMetrics().width(exp.match(block.text()).captured())) {
+                        && pos.x() < m_textBrowser->fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
                     m_textBrowser->viewport()->setCursor(Qt::PointingHandCursor);
                 } else {
                     m_textBrowser->viewport()->setCursor(Qt::IBeamCursor);
@@ -190,7 +190,7 @@ bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
             if (pos.y() >= top && pos.y() <= bottom) {
                 QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+:");
                 if (exp.match(block.text()).hasMatch()
-                        && pos.x() < m_textBrowser->fontMetrics().width(exp.match(block.text()).captured())) {
+                        && pos.x() < m_textBrowser->fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
                     onLinkClick(exp.match(block.text()).captured());
                 }
             }

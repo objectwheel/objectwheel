@@ -32,23 +32,24 @@
 #include <QWidget>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QScreen>
 
 namespace Utils {
 namespace Internal {
 
-inline int screenNumber(const QPoint &pos, QWidget *w)
+inline QScreen* screen(const QPoint &pos, const QWidget *w)
 {
-    if (QApplication::desktop()->isVirtualDesktop())
-        return QApplication::desktop()->screenNumber(pos);
+    if (QApplication::primaryScreen()->virtualSiblings().size() > 0)
+        return QApplication::screenAt(pos);
     else
-        return QApplication::desktop()->screenNumber(w);
+        return QApplication::screens().at(QApplication::desktop()->screenNumber(w));
 }
 
-inline QRect screenGeometry(const QPoint &pos, QWidget *w)
+inline QRect screenGeometry(const QPoint &pos, const QWidget *w)
 {
     if (HostOsInfo::isMacHost())
-        return QApplication::desktop()->availableGeometry(screenNumber(pos, w));
-    return QApplication::desktop()->screenGeometry(screenNumber(pos, w));
+        return screen(pos, w)->availableGeometry();
+    return screen(pos, w)->geometry();
 }
 
 } // namespace Internal

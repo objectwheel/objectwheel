@@ -220,7 +220,7 @@ UiObjectMemberList *Rewriter::searchMemberToInsertAfter(UiObjectMemberList *memb
         else if (UiObjectBinding *objectBinding = cast<UiObjectBinding*>(member))
             orderedMembers[toString(objectBinding->qualifiedId)] = iter;
         else if (cast<UiObjectDefinition*>(member))
-            orderedMembers[QString::null] = iter;
+            orderedMembers[QString()] = iter;
         else if (UiScriptBinding *scriptBinding = cast<UiScriptBinding*>(member))
             orderedMembers[toString(scriptBinding->qualifiedId)] = iter;
         else if (cast<UiPublicMember*>(member))

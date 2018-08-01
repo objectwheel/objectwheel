@@ -55,7 +55,7 @@ int LineNumberBand::calculatedWidth() const
         ++digits;
     }
 
-    int space = 1 + fontMetrics().width(QLatin1Char('9')) * digits;
+    int space = 1 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
 
     return space;
 }

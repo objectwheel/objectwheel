@@ -156,10 +156,10 @@ void FlatButton::paintEvent(QPaintEvent* event)
             ir.moveCenter(r.center());
             if (!text().isEmpty()) {
                 if (_settings.textUnderIcon) {
-                    int th = QFontMetrics(QFont()).height();
+                    int th = fontMetrics().height();
                     ir.moveTo(ir.x(), (r.height() - ir.height() - th - _settings.textMargin) / 2.0);
                 } else {
-                    int tw = QFontMetrics(QFont()).width(text());
+                    int tw = fontMetrics().horizontalAdvance(text());
                     ir.moveTo((r.width() - ir.width() - tw - _settings.textMargin) / 2.0, ir.y());
                 }
             }
@@ -179,12 +179,12 @@ void FlatButton::paintEvent(QPaintEvent* event)
                 painter.drawText(r, text(), QTextOption(Qt::AlignCenter));
             } else {
                 if (_settings.textUnderIcon) {
-                    int th = QFontMetrics(QFont()).height();
+                    int th = fontMetrics().height();
                     QTextOption op(Qt::AlignTop | Qt::AlignHCenter);
                     op.setWrapMode(QTextOption::NoWrap);
                     painter.drawText(QRectF(r.left(), ir.bottom() + _settings.textMargin, r.width(), th), text(), op);
                 } else {
-                    int tw = QFontMetrics(QFont()).width(text());
+                    int tw = fontMetrics().horizontalAdvance(text());
                     QTextOption op(Qt::AlignVCenter | Qt::AlignLeft);
                     op.setWrapMode(QTextOption::NoWrap);
                     painter.drawText(QRectF(ir.right() + _settings.textMargin, r.top(), tw, r.height()), text(), op);

@@ -39,6 +39,7 @@
 #include <QMouseEvent>
 #include <QWidget>
 #include <QMenu>
+#include <QWindow>
 
 #include <QDebug>
 
@@ -246,23 +247,25 @@ void ToolTip::showInternal(const QPoint &pos, const QVariant &content,
                            int typeId, QWidget *w, const QString &helpId, const QRect &rect)
 {
     if (acceptShow(content, typeId, pos, w, helpId, rect)) {
-        QWidget *target = 0;
+        QScreen *target = 0;
         if (HostOsInfo::isWindowsHost())
-            target = QApplication::desktop()->screen(Internal::screenNumber(pos, w));
+            target = Internal::screen(pos, w);
         else
-            target = w;
+            target = QApplication::primaryScreen();
 
         switch (typeId) {
             case ColorContent:
-                m_tip = new ColorTip(target);
+                m_tip = new ColorTip;
                 break;
             case TextContent:
-                m_tip = new TextTip(target);
+                m_tip = new TextTip;
                 break;
             case WidgetContent:
-                m_tip = new WidgetTip(target);
+                m_tip = new WidgetTip;
                 break;
         }
+        if (m_tip->windowHandle())
+            m_tip->windowHandle()->setScreen(target);
         m_tip->setContent(content);
         m_tip->setHelpId(helpId);
         setUp(pos, w, rect);

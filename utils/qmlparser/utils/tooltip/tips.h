@@ -61,7 +61,7 @@ private:
 class TextTip : public QTipLabel
 {
 public:
-    TextTip(QWidget *parent);
+    TextTip(QWidget *parent = nullptr);
 
     virtual void setContent(const QVariant &content);
     virtual bool isInteractive() const;
@@ -79,7 +79,7 @@ private:
 class ColorTip : public QTipLabel
 {
 public:
-    ColorTip(QWidget *parent);
+    ColorTip(QWidget *parent = nullptr);
 
     virtual void setContent(const QVariant &content);
     virtual void configure(const QPoint &pos, QWidget *w);

@@ -31,6 +31,7 @@
 #include <utils/faketooltip.h>
 #include <utils/hostosinfo.h>
 #include <utils/qtcassert.h>
+#include <utils/tooltip/reuse.h>
 
 #include <QDebug>
 #include <QApplication>
@@ -365,10 +366,8 @@ void FunctionHintProposalWidget::updateContent()
 
 void FunctionHintProposalWidget::updatePosition()
 {
-    const QDesktopWidget *desktop = QApplication::desktop();
-    const QRect &screen = Utils::HostOsInfo::isMacHost()
-            ? desktop->availableGeometry(desktop->screenNumber(d->m_underlyingWidget))
-            : desktop->screenGeometry(desktop->screenNumber(d->m_underlyingWidget));
+    const QRect &screen = Utils::Internal::screenGeometry(
+                d->m_underlyingWidget->pos(), d->m_underlyingWidget);
 
     d->m_pager->setFixedWidth(d->m_pager->minimumSizeHint().width());
 

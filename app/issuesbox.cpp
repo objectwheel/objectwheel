@@ -49,7 +49,7 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
     QFontMetrics fm(f);
     f.setWeight(QFont::Normal);
     painter->setFont(f);
-    painter->drawText(r.adjusted(26.0 + fm.width(error.id) + 8, 0, 0, 0),
+    painter->drawText(r.adjusted(26.0 + fm.horizontalAdvance(error.id) + 8, 0, 0, 0),
       error.description, Qt::AlignVCenter | Qt::AlignLeft);
     painter->drawText(r, QString("Line: %1, Col: %2 ").
       arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);

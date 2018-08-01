@@ -268,7 +268,7 @@ void TextEditorAnimator::init(const QTextCursor &cursor, const QFont &f, const Q
     m_palette = pal;
     m_text = cursor.selectedText();
     QFontMetrics fm(m_font);
-    m_size = QSizeF(fm.width(m_text), fm.height());
+    m_size = QSizeF(fm.horizontalAdvance(m_text), fm.height());
 }
 
 void TextEditorAnimator::draw(QPainter *p, const QPointF &pos)
@@ -278,7 +278,7 @@ void TextEditorAnimator::draw(QPainter *p, const QPointF &pos)
     QFont f = m_font;
     f.setPointSizeF(f.pointSizeF() * (1.0 + m_value/2));
     QFontMetrics fm(f);
-    int width = fm.width(m_text);
+    int width = fm.horizontalAdvance(m_text);
     QRectF r((m_size.width()-width)/2, (m_size.height() - fm.height())/2, width, fm.height());
     r.translate(pos);
     p->fillRect(r, m_palette.base());
@@ -296,7 +296,7 @@ QRectF TextEditorAnimator::rect() const
     QFont f = m_font;
     f.setPointSizeF(f.pointSizeF() * (1.0 + m_value/2));
     QFontMetrics fm(f);
-    int width = fm.width(m_text);
+    int width = fm.horizontalAdvance(m_text);
     return QRectF((m_size.width()-width)/2, (m_size.height() - fm.height())/2, width, fm.height());
 }
 
@@ -616,7 +616,7 @@ void QmlCodeEditor::paintFindScope(const PaintEventData &data, QPainter &painter
                     QTextLayout *layout = block.layout();
                     QString text = block.text();
                     const TabSettings &ts = codeDocument()->tabSettings();
-                    qreal spacew = QFontMetricsF(font()).width(QLatin1Char(' '));
+                    qreal spacew = fontMetrics().horizontalAdvance(QLatin1Char(' '));
 
                     int offset = 0;
                     int relativePos  =  ts.positionAtColumn(text,
@@ -1355,10 +1355,10 @@ void QmlCodeEditor::mousePressEvent(QMouseEvent *e)
             int column = codeDocument()->tabSettings().columnAt(
                         cursor.block().text(), cursor.positionInBlock());
             if (cursor.positionInBlock() == cursor.block().length()-1)
-                column += (e->pos().x() - cursorRect(cursor).center().x()) / QFontMetricsF(font()).width(QLatin1Char(' '));
+                column += (e->pos().x() - cursorRect(cursor).center().x()) / fontMetrics().horizontalAdvance(QLatin1Char(' '));
             int block = cursor.blockNumber();
             if (block == blockCount() - 1)
-                block += (e->pos().y() - cursorRect(cursor).center().y()) / QFontMetricsF(font()).lineSpacing();
+                block += (e->pos().y() - cursorRect(cursor).center().y()) / fontMetrics().lineSpacing();
             //            if (m_inBlockSelectionMode) { BUG
             //                m_blockSelection.positionBlock = block;
             //                m_blockSelection.positionColumn = column;
@@ -1464,7 +1464,7 @@ QTextBlock QmlCodeEditor::foldedBlockAt(const QPoint &pos, QRect *box) const
 
                 QRectF collapseRect(lineRect.right() + 12,
                                     lineRect.top(),
-                                    fontMetrics().width(replacement),
+                                    fontMetrics().horizontalAdvance(replacement),
                                     lineRect.height());
                 if (collapseRect.contains(pos)) {
                     QTextBlock result = block;
@@ -1524,10 +1524,10 @@ void QmlCodeEditor::mouseMoveEvent(QMouseEvent *e)
             //                    int column = m_document->tabSettings().columnAt(
             //                                cursor.block().text(), cursor.positionInBlock());
             //                    if (cursor.positionInBlock() == cursor.block().length()-1)
-            //                        column += (e->pos().x() - cursorRect().center().x()) / QFontMetricsF(font()).width(QLatin1Char(' '));
+            //                        column += (e->pos().x() - cursorRect().center().x()) / fontMetrics().horizontalAdvance(QLatin1Char(' '));
             //                    int block = cursor.blockNumber();
             //                    if (block == blockCount() - 1)
-            //                        block += (e->pos().y() - cursorRect().center().y()) / QFontMetricsF(font()).lineSpacing();
+            //                        block += (e->pos().y() - cursorRect().center().y()) / fontMetrics().lineSpacing();
             //                    enableBlockSelection(block, column, block, column);
             //                }
             //            } else {
@@ -1537,7 +1537,7 @@ void QmlCodeEditor::mouseMoveEvent(QMouseEvent *e)
             //                int column = m_document->tabSettings().columnAt(
             //                            cursor.block().text(), cursor.positionInBlock());
             //                if (cursor.positionInBlock() == cursor.block().length()-1)
-            //                    column += (e->pos().x() - cursorRect().center().x()) / QFontMetricsF(font()).width(QLatin1Char(' '));
+            //                    column += (e->pos().x() - cursorRect().center().x()) / fontMetrics().horizontalAdvance(QLatin1Char(' '));
 
             //                m_blockSelection.positionBlock = cursor.blockNumber();
             //                m_blockSelection.positionColumn = column;
@@ -2268,9 +2268,9 @@ void QmlCodeEditor::updateTabStops()
 {
     // Although the tab stop is stored as qreal the API from QPlainTextEdit only allows it
     // to be set as an int. A work around is to access directly the QTextOption.
-    qreal charWidth = QFontMetricsF(font()).width(QLatin1Char(' '));
+    qreal charWidth = fontMetrics().horizontalAdvance(QLatin1Char(' '));
     QTextOption option = codeDocument()->defaultTextOption();
-    option.setTabStop(charWidth * codeDocument()->tabSettings().m_tabSize);
+    option.setTabStopDistance(charWidth * codeDocument()->tabSettings().m_tabSize);
     codeDocument()->setDefaultTextOption(option);
 }
 
@@ -3064,14 +3064,14 @@ void QmlCodeEditor::paintCursorAsBlock(const PaintEventData &data, QPainter &pai
         w = line.cursorToX(relativePos + 1) - x;
         if (data.doc->characterAt(data.context.cursorPosition) == QLatin1Char('\t')) {
             doSelection = false;
-            qreal space = fontMetrics.width(QLatin1Char(' '));
+            qreal space = fontMetrics.horizontalAdvance(QLatin1Char(' '));
             if (w > space) {
                 x += w-space;
                 w = space;
             }
         }
     } else
-        w = fontMetrics.width(QLatin1Char(' ')); // in sync with QTextLine::draw()
+        w = fontMetrics.horizontalAdvance(QLatin1Char(' ')); // in sync with QTextLine::draw()
 
     QRectF lineRect = line.rect();
     lineRect.moveTop(lineRect.top() + blockData.boundingRect.top());
@@ -3187,7 +3187,7 @@ void QmlCodeEditor::paintReplacement(PaintEventData &data, QPainter &painter,
 
         QRectF collapseRect(lineRect.right() + 12,
                             lineRect.top(),
-                            fontMetrics().width(rectReplacement),
+                            fontMetrics().horizontalAdvance(rectReplacement),
                             lineRect.height());
         painter.setRenderHint(QPainter::Antialiasing, true);
         painter.translate(.5, .5);
