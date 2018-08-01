@@ -311,6 +311,11 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
+        const QString& previousValue = getProperty(propertyName, control->properties()).value<QString>();
+
+        if (previousValue == lineEdit->text())
+            return;
+
         ControlPropertyManager::setProperty(control,
                                             propertyName, stringify(lineEdit->text()),
                                             lineEdit->text(),
@@ -335,10 +340,16 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
+        // TODO: Clear whitespaces in the url
         const QUrl& url = QUrl::fromUserInput(lineEdit->text(),
                                               SaveUtils::toThisDir(control->dir()),
                                               QUrl::AssumeLocalFile);
         const QString& displayText = urlToDisplayText(url, control->dir());
+        const QUrl& previousUrl = getProperty(propertyName, control->properties()).value<QUrl>();
+
+        if (url == previousUrl)
+            return;
+
         ControlPropertyManager::setProperty(control, propertyName, stringify(displayText), url,
                                             ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);

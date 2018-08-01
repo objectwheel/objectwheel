@@ -69,7 +69,7 @@ void setCreatorTheme(Theme *theme)
         return;
     delete m_creatorTheme;
     m_creatorTheme = theme;
-    setThemeApplicationPalette();
+//    setThemeApplicationPalette();
 }
 
 Theme::Theme(const QString &id, QObject *parent)
