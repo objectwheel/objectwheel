@@ -69,7 +69,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     setPalette(p);
 
     QPalette p2(_listWidget->palette());
-    p2.setColor(QPalette::All, QPalette::Base, QColor("#fcfeff"));
+    p2.setColor(QPalette::All, QPalette::Base, QColor(Qt::white));
     p2.setColor(QPalette::All, QPalette::Highlight, QColor("#c0d5eb"));
     p2.setColor(QPalette::All, QPalette::Text, Qt::black);
     p2.setColor(QPalette::All, QPalette::HighlightedText, Qt::black);
@@ -94,7 +94,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
 
     _innerWidget->setObjectName("innerWidget");
-    _innerWidget->setStyleSheet("#innerWidget { border: 1px solid #1a69bd; }");
+    _innerWidget->setStyleSheet("#innerWidget { border: 1px solid #a14a51; }");
 
     QFont f; f.setWeight(QFont::Medium);
     _header->setFont(f);
@@ -102,8 +102,8 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(pa
     _header->setText("Forms");
     _header->setFixedHeight(23);
     _header->setStyleSheet(
-        "color: white; padding-left: 5px; border:none; border-bottom: 1px solid #1a69bd;"
-        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #2784E3, stop:1 #1069C7);"
+        "color: white; padding-left: 5px; border:none; border-bottom: 1px solid #a14a51;"
+        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #bf5861, stop:1 #b3525a);"
     );
 
     _addButton->settings().topColor = "#62A558";
@@ -161,7 +161,7 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
                             tlir.y() + i * tlir.height(),
                             _listWidget->viewport()->width(),
                             tlir.height(),
-                            QColor("#e8f1fa")
+                            QColor("#fae8ea")
                         );
                     }
                 }
@@ -174,7 +174,7 @@ bool FormsPane::eventFilter(QObject* watched, QEvent* event)
                         painter.fillRect(
                             0, i * hg,
                             _listWidget->viewport()->width(),
-                            hg, QColor("#e8f1fa")
+                            hg, QColor("#fae8ea")
                         );
                     } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
                         painter.setPen(QColor("#a5aab0"));

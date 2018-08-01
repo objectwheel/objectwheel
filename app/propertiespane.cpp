@@ -3,11 +3,7 @@
 #include <filemanager.h>
 #include <saveutils.h>
 #include <controlpropertymanager.h>
-//#include <controlcreationmanager.h>
-//#include <controlremovingmanager.h>
 #include <designerscene.h>
-//#include <form.h>
-//#include <projectmanager.h>
 #include <dpr.h>
 #include <parserutils.h>
 #include <transparentstyle.h>
@@ -24,8 +20,8 @@
 #include <QFontDatabase>
 #include <QMetaEnum>
 #include <QComboBox>
+#include <QHBoxLayout>
 
-#include <QDebug>
 namespace {
 class WheelDisabler : public QObject {
     Q_OBJECT
@@ -352,9 +348,9 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
 {
     auto checkBox = new QCheckBox;
     checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    checkBox->setCursor(Qt::PointingHandCursor);
     checkBox->setChecked(checked);
     checkBox->setFocusPolicy(Qt::ClickFocus);
-    checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
     checkBox->setMinimumWidth(1);
     fixVisibleForWindow(control, propertyName, checkBox);
     setPalette(checkBox);
@@ -370,7 +366,14 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
                                             | ControlPropertyManager::UpdatePreviewer);
     });
 
-    return checkBox;
+    auto widget = new QWidget;
+    auto layout = new QHBoxLayout(widget);
+    layout->addWidget(checkBox);
+    layout->addStretch();
+    layout->setSpacing(0);
+    layout->setContentsMargins(2, 0, 0, 0);
+    widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
+    return widget;
 }
 
 QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
