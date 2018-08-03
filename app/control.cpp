@@ -1,5 +1,4 @@
 #include <form.h>
-#include <dpr.h>
 #include <resizer.h>
 #include <saveutils.h>
 #include <suppressor.h>
@@ -24,6 +23,7 @@
 #include <QMimeData>
 #include <QRegularExpression>
 #include <QGraphicsSceneDragDropEvent>
+#include <QApplication>
 
 extern const char* TOOL_KEY;
 
@@ -46,8 +46,8 @@ void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
     rect.setHeight(size.height());
 
     QRectF rect_2;
-    rect_2.setWidth(source.width() / DPR);
-    rect_2.setHeight(source.height() / DPR);
+    rect_2.setWidth(source.width() / source.devicePixelRatioF());
+    rect_2.setHeight(source.height() / source.devicePixelRatioF());
     rect_2.moveCenter(rect.center());
 
     painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
@@ -76,16 +76,17 @@ QImage initialPreview(const QSizeF& size)
 {
     auto min = qMin(24.0, qMin(size.width(), size.height()));
 
-    QImage preview(qCeil(size.width() * DPR), qCeil(size.height() * DPR),
+    QImage preview(qCeil(size.width() * qApp->devicePixelRatio()),
+                   qCeil(size.height() * qApp->devicePixelRatio()),
                    QImage::Format_ARGB32_Premultiplied);
 
-    preview.setDevicePixelRatio(DPR);
+    preview.setDevicePixelRatio(qApp->devicePixelRatio());
     preview.fill(Qt::transparent);
 
     QImage wait(":/images/wait.png");
-    wait.setDevicePixelRatio(DPR);
+    wait.setDevicePixelRatio(qApp->devicePixelRatio());
 
-    drawCenter(preview, wait.scaled(min * DPR, min * DPR,
+    drawCenter(preview, wait.scaled(min * qApp->devicePixelRatio(), min * qApp->devicePixelRatio(),
                                     Qt::IgnoreAspectRatio, Qt::SmoothTransformation), size);
 
     return preview;
@@ -534,7 +535,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawImage(rect(), m_image, QRectF(QPointF(0, 0), size() * DPR));
+    painter->drawImage(rect(), m_image, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
@@ -549,7 +550,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(m_image.rect(), gradient);
             p.end();
-            painter->drawImage(rect(), highlight, QRectF(QPointF(0, 0), size() * DPR));
+            painter->drawImage(rect(), highlight, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
         }
     }
 

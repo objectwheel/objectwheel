@@ -1,5 +1,4 @@
 #include <themechooserwidget.h>
-#include <dpr.h>
 #include <delayer.h>
 #include <saveutils.h>
 #include <projectmanager.h>
@@ -231,7 +230,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     }
 
     m_customizationLabel->setHidden(true);
-    m_customizationPicture->setFixedSize(420 / DPR, 420 / DPR);
+    m_customizationPicture->setFixedSize(420 / devicePixelRatioF(), 420 / devicePixelRatioF());
 
     if (m_version == V2) {
         connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
@@ -489,11 +488,11 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         if (m_stylesCombo->currentText() == "Material") {
             m_themesCombo->addItems(MATERIAL_THEMES);
             QPixmap p(":/images/material.png");
-            p.setDevicePixelRatio(DPR);
+            p.setDevicePixelRatio(devicePixelRatioF());
             m_customizationPicture->setPixmap(p);
         } else {
             QPixmap p(":/images/universal.png");
-            p.setDevicePixelRatio(DPR);
+            p.setDevicePixelRatio(devicePixelRatioF());
             m_customizationPicture->setPixmap(p);
             m_themesCombo->addItems(UNIVERSAL_THEMES);
         }
@@ -634,7 +633,7 @@ void ThemeChooserWidget::refresh()
     loop.exec();
 
     QPixmap preview(tmpFile.fileName());
-    preview.setDevicePixelRatio(DPR);
+    preview.setDevicePixelRatio(devicePixelRatioF());
     m_previewPicture->setPixmap(preview);
 
     setDisabled(false);

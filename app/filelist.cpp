@@ -1,7 +1,6 @@
 #include <filelist.h>
 #include <filemanager.h>
 #include <delayer.h>
-#include <dpr.h>
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -199,13 +198,13 @@ void FileList::resizeEvent(QResizeEvent* event)
     QTreeView::resizeEvent(event);
     dropLabel->setGeometry(viewport()->geometry());
 
-    QPixmap bn(dropLabel->size() * DPR);
-    bn.setDevicePixelRatio(DPR);
+    QPixmap bn(dropLabel->size() * devicePixelRatioF());
+    bn.setDevicePixelRatio(devicePixelRatioF());
     bn.fill("#15000000");
     dbs->b = bn;
     dbs->r.moveCenter(dropLabel->rect().center());
     dbs->ra = dbs->r.adjusted(25, 17, -25, -33);
-    dbs->a = dbs->ao.scaled((dbs->ra.size() * DPR).toSize());
+    dbs->a = dbs->ao.scaled((dbs->ra.size() * devicePixelRatioF()).toSize());
 
     QPen pen;
     pen.setStyle(Qt::DashLine);

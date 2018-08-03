@@ -1,5 +1,4 @@
 #include <aboutwindow.h>
-#include <dpr.h>
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -51,12 +50,12 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_titleLabel->setStyleSheet("color: black;");
 
     QPixmap px(":/images/logo.png");
-    px.setDevicePixelRatio(DPR);
+    px.setDevicePixelRatio(devicePixelRatioF());
 
     m_logoLabel->setFixedSize(QSize(160, 80));
     m_logoLabel->setPixmap(
         px.scaled(
-            QSize(160, 80) * DPR,
+            QSize(160, 80) * devicePixelRatioF(),
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

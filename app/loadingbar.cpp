@@ -1,5 +1,4 @@
 #include <loadingbar.h>
-#include <dpr.h>
 
 #include <QTimer>
 #include <QPainter>
@@ -23,7 +22,7 @@ LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
     setFixedSize(QSize(481, 24));
 
     image = QImage(":/images/loadingbar.png");
-    image.setDevicePixelRatio(DPR);
+    image.setDevicePixelRatio(devicePixelRatioF());
 
     m_timerFader->setInterval(60);
     m_timerEnding->setInterval(1000);
@@ -122,7 +121,8 @@ namespace {
         doc.setIndentWidth(0);
 
         QTextBlockFormat bf;
-        bf.setLineHeight(rect.height() - 1.5 * DPR, QTextBlockFormat::FixedHeight);
+        bf.setLineHeight(rect.height() - 1.5 * painter->device()->devicePixelRatioF(),
+                         QTextBlockFormat::FixedHeight);
         bf.setAlignment(Qt::AlignCenter);
 
         QTextCharFormat cf;

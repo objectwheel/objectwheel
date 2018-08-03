@@ -4,10 +4,12 @@
 #include <aboutwindow.h>
 #include <preferenceswindow.h>
 #include <toolboxsettingswindow.h>
-#include <dpr.h>
 #include <projectmanager.h>
 #include <applicationcore.h>
+
 #include <QStyle>
+#include <QApplication>
+#include <QScreen>
 
 AboutWindow* WindowManager::s_aboutWindow = nullptr;
 PreferencesWindow* WindowManager::s_preferencesWindow = nullptr;
@@ -34,19 +36,19 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
 
     s_aboutWindow->setGeometry(QStyle::alignedRect(
                                    Qt::LeftToRight, Qt::AlignCenter, s_aboutWindow->sizeHint(),
-                                   QGuiApplication::primaryScreen()->availableGeometry()));
+                                   qApp->primaryScreen()->availableGeometry()));
     s_preferencesWindow->setGeometry(QStyle::alignedRect(
                                          Qt::LeftToRight, Qt::AlignCenter, s_preferencesWindow->sizeHint(),
-                                         QGuiApplication::primaryScreen()->availableGeometry()));
+                                         qApp->primaryScreen()->availableGeometry()));
     s_toolboxSettingsWindow->setGeometry(QStyle::alignedRect(
                                              Qt::LeftToRight, Qt::AlignCenter, s_toolboxSettingsWindow->sizeHint(),
-                                             QGuiApplication::primaryScreen()->availableGeometry()));
+                                             qApp->primaryScreen()->availableGeometry()));
     s_mainWindow->setGeometry(QStyle::alignedRect(
                                   Qt::LeftToRight, Qt::AlignCenter, s_mainWindow->sizeHint(),
-                                  QGuiApplication::primaryScreen()->availableGeometry()));
+                                  qApp->primaryScreen()->availableGeometry()));
     s_welcomeWindow->setGeometry(QStyle::alignedRect(
                                      Qt::LeftToRight, Qt::AlignCenter, s_welcomeWindow->sizeHint(),
-                                     QGuiApplication::primaryScreen()->availableGeometry()));
+                                     qApp->primaryScreen()->availableGeometry()));
 }
 
 WindowManager::~WindowManager()

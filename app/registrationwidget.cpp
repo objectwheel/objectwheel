@@ -5,7 +5,6 @@
 #include <waitingspinnerwidget.h>
 #include <filemanager.h>
 #include <authenticator.h>
-#include <dpr.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -87,12 +86,12 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLayout->addStretch();
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(DPR);
+    p.setDevicePixelRatio(devicePixelRatioF());
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * DPR,
+            SIZE_ICON * devicePixelRatioF(),
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

@@ -1,3 +1,8 @@
+font monospace olacak properties pane üzerindeki widgetlerda
+sağ tık menüsü/context menu den bişey seçince ve sonra mouseu az hareket ettirince selected control gidiyor
+sağ tık ayrıca stick özelliğininde kafasını karıştırıyor
+properties pane üzerinde search filter özelliğini tamamla, bu özellik ile scrollbar sabitleme özelliğinin çatışma, birbirlerini bozma ihtimallerini düşün
+propertiespane deki bir control'ün previewi değişince güncelleme yapma özelliğini kodla
 Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
 Properties Pane row colorları düzeltilecek, calculateVisibleRow doğrumu? Ya filter yapılırsa propertiler?
 - Control preview update etmeden yapılan x y z w h property set'lerinde integervalue'yi nasıl tespit etcez sonuçta window() da form() da kullanılamaz, mı?

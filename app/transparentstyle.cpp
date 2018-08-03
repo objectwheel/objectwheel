@@ -1,4 +1,6 @@
 #include <transparentstyle.h>
+#include <qdrawutil.h>
+#include <wfw.h>
 
 #include <QStyleFactory>
 #include <QStyleOptionSpinBox>
@@ -12,7 +14,6 @@
 #include <QMenu>
 #include <QScrollBar>
 
-#include <qdrawutil.h>
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
@@ -577,8 +578,7 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
         if (const QStyleOptionMenuItem *mi
                 = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
-            QWindow *window = widget && widget->window() ? widget->window()->windowHandle() :
-                                                           /*QStyleHelper::styleObjectWindow(option->styleObject)*/0;
+            QWindow *window = wfw(widget);
             const bool active = mi->state & State_Selected;
             if (active)
                 painter->fillRect(mi->rect, mi->palette.highlight());
@@ -660,8 +660,8 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 }
 
                 QPixmap pixmap = mi->icon.pixmap(window, iconSize, mode);
-                int pixw = pixmap.width() / pixmap.devicePixelRatio();
-                int pixh = pixmap.height() / pixmap.devicePixelRatio();
+                int pixw = pixmap.width() / pixmap.devicePixelRatioF();
+                int pixh = pixmap.height() / pixmap.devicePixelRatioF();
                 QRect cr(xpos, mi->rect.y(), checkcol, mi->rect.height());
                 QRect pmr(0, 0, pixw, pixh);
                 pmr.moveCenter(cr.center());

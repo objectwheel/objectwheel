@@ -1,7 +1,6 @@
 #include <robotwidget.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <dpr.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -59,12 +58,12 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _recaptchaView->page()->setBackgroundColor(Qt::transparent);
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(DPR);
+    p.setDevicePixelRatio(devicePixelRatioF());
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * DPR,
+            SIZE_ICON * devicePixelRatioF(),
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

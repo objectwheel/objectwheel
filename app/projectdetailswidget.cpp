@@ -4,7 +4,6 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <filemanager.h>
-#include <dpr.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -43,12 +42,12 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_layout->addStretch();
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(DPR);
+    p.setDevicePixelRatio(devicePixelRatioF());
 
     m_iconLabel->setFixedSize(SIZE_ICON);
     m_iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * DPR,
+            SIZE_ICON * devicePixelRatioF(),
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

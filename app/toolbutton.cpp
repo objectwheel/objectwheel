@@ -1,5 +1,5 @@
 #include <toolbutton.h>
-#include <dpr.h>
+#include <wfw.h>
 
 #include <utils/theme/theme.h>
 
@@ -57,11 +57,11 @@ void ToolButton::paintEvent(QPaintEvent*)
 
     if (iconSize().width() < width() && iconSize().height() < height()) {
         if (isEnabled()) {
-            painter.drawPixmap(iconRect, icon().pixmap(iconSize(), QIcon::Normal),
-                               QRectF{{}, QSizeF(iconSize()) * DPR});
+            painter.drawPixmap(iconRect, icon().pixmap(wfw(this), iconSize(), QIcon::Normal),
+                               QRectF{{}, QSizeF(iconSize()) * devicePixelRatioF()});
         } else {
-            painter.drawPixmap(iconRect, icon().pixmap(iconSize(), QIcon::Disabled),
-                               QRectF{{}, QSizeF(iconSize()) * DPR});
+            painter.drawPixmap(iconRect, icon().pixmap(wfw(this), iconSize(), QIcon::Disabled),
+                               QRectF{{}, QSizeF(iconSize()) * devicePixelRatioF()});
         }
     }
 }

@@ -1,5 +1,4 @@
 #include <flatbutton.h>
-#include <dpr.h>
 
 #include <QPainter>
 #include <QtMath>
@@ -68,8 +67,10 @@ void FlatButton::paintEvent(QPaintEvent* event)
     const auto& r = adjust(rect(), _settings.showShadow);
 
     if (_settings.iconButton) {
-        QImage image(qCeil(width() * DPR), qCeil(height() * DPR), QImage::Format_ARGB32_Premultiplied);
-        image.setDevicePixelRatio(DPR);
+        QImage image(qCeil(width() * devicePixelRatioF()),
+                     qCeil(height() * devicePixelRatioF()),
+                     QImage::Format_ARGB32_Premultiplied);
+        image.setDevicePixelRatio(devicePixelRatioF());
         image.fill(Qt::transparent);
         QPainter pn(&image);
         icon().paint(
@@ -91,7 +92,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
                 }
             }
         }
-        painter.drawImage(QRectF(QPointF(), image.size() / DPR), image, image.rect());
+        painter.drawImage(QRectF(QPointF(), image.size() / devicePixelRatioF()), image, image.rect());
     } else {
         if (_settings.showShadow) {
             /* Limit shadow region */

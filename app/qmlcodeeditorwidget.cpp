@@ -8,7 +8,6 @@
 #include <fileexplorer.h>
 #include <control.h>
 #include <parserutils.h>
-#include <dpr.h>
 #include <utilsicons.h>
 #include <toolbar.h>
 #include <toolbutton.h>
@@ -30,6 +29,8 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QComboBox>
+#include <QApplication>
+#include <QScreen>
 
 #define LINE_COLOR ("#606467")
 #define CHAR_SEPARATION ("::")
@@ -414,7 +415,7 @@ void QmlCodeEditorWidgetPrivate::handlePinButtonClicked()
                 Qt::LeftToRight,
                 Qt::AlignCenter,
                 containerWidget->size(),
-                QGuiApplication::primaryScreen()->availableGeometry()
+                qApp->primaryScreen()->availableGeometry()
             )
         );
     } else {

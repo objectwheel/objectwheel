@@ -4,7 +4,6 @@
 #include <saveutils.h>
 #include <controlpropertymanager.h>
 #include <designerscene.h>
-#include <dpr.h>
 #include <parserutils.h>
 #include <transparentstyle.h>
 
@@ -21,6 +20,7 @@
 #include <QMetaEnum>
 #include <QComboBox>
 #include <QHBoxLayout>
+#include <QApplication>
 
 namespace {
 
@@ -150,8 +150,8 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRo
 
 QImage colorToImage(const QSize& layoutSize, const QColor& color)
 {
-    QImage image(layoutSize * DPR, QImage::Format_ARGB32_Premultiplied);
-    image.setDevicePixelRatio(DPR);
+    QImage image(layoutSize * qApp->devicePixelRatio(), QImage::Format_ARGB32_Premultiplied);
+    image.setDevicePixelRatio(qApp->devicePixelRatio());
     image.fill(color);
     QPainter p(&image);
     p.setRenderHint(QPainter::Antialiasing);

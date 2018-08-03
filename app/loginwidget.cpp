@@ -7,7 +7,6 @@
 #include <global.h>
 #include <authenticator.h>
 #include <usermanager.h>
-#include <dpr.h>
 
 #include <QtConcurrent>
 #include <QGridLayout>
@@ -86,12 +85,12 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _autologinLayout->addStretch();
 
     QPixmap p(PATH_LOGO);
-    p.setDevicePixelRatio(DPR);
+    p.setDevicePixelRatio(devicePixelRatioF());
 
     _logoLabel->setFixedSize(SIZE_LOGO);
     _logoLabel->setPixmap(
         p.scaled(
-            SIZE_LOGO * DPR,
+            SIZE_LOGO * devicePixelRatioF(),
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

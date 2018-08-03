@@ -6,7 +6,7 @@
 #include <designerscene.h>
 #include <form.h>
 #include <projectmanager.h>
-#include <dpr.h>
+#include <wfw.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -180,8 +180,9 @@ public:
                        isSelected, index.column() == 0);
 
         // Draw icon
-        painter->drawPixmap(iconRect, icon.pixmap(iconSize, iconSize),
-                            QRectF({}, QSizeF{iconSize * DPR, iconSize * DPR}));
+        painter->drawPixmap(iconRect, icon.pixmap(wfw(m_inspectorPane), {iconSize, iconSize}),
+                            QRectF({}, QSizeF(iconSize * m_inspectorPane->devicePixelRatioF(),
+                                              iconSize * m_inspectorPane->devicePixelRatioF())));
 
         // Draw text
         if (model->data(index, Qt::UserRole).toBool())

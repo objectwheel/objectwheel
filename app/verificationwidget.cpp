@@ -4,7 +4,6 @@
 #include <waitingspinnerwidget.h>
 #include <authenticator.h>
 #include <countdown.h>
-#include <dpr.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -63,12 +62,12 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
 
     QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(DPR);
+    p.setDevicePixelRatio(devicePixelRatioF());
 
     _iconLabel->setFixedSize(SIZE_ICON);
     _iconLabel->setPixmap(
         p.scaled(
-            SIZE_ICON * DPR,
+            SIZE_ICON * devicePixelRatioF(),
             Qt::IgnoreAspectRatio,
             Qt::SmoothTransformation
         )

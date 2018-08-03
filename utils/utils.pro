@@ -23,8 +23,8 @@ HEADERS += \
     $$PWD/utils_global.h \
     $$PWD/appfontsettings.h \
     $$PWD/quicktheme.h \
-    $$PWD/dpr.h \
-    $$PWD/previewercommands.h
+    $$PWD/previewercommands.h \
+    wfw.h
 
 SOURCES += \
     $$PWD/zipper.cpp \

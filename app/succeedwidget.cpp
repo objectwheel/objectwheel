@@ -1,6 +1,5 @@
 #include <succeedwidget.h>
 #include <buttonslice.h>
-#include <dpr.h>
 
 #include <QTimer>
 #include <QMovie>
@@ -40,7 +39,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
 
     _movie->setFileName(PATH_GIF);
     _movie->setBackgroundColor(Qt::transparent);
-    _movie->setScaledSize(SIZE_GIF * DPR);
+    _movie->setScaledSize(SIZE_GIF * devicePixelRatioF());
     connect(_movie, SIGNAL(frameChanged(int)), SLOT(update()));
 
     _iconLabel->setFixedSize(SIZE_GIF);
@@ -85,12 +84,7 @@ void SucceedWidget::paintEvent(QPaintEvent* event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     if (_movie->currentFrameNumber() > 48) {
-        auto r = _iconLabel->geometry().adjusted(
-            10,
-            10,
-            -10,
-            -10
-        );
+        auto r = _iconLabel->geometry().adjusted(10, 10, -10, -10);
         painter.setBrush(Qt::white);
         painter.drawRoundedRect(r, r.width() / 2.0, r.width() / 2.0);
     }
@@ -98,6 +92,6 @@ void SucceedWidget::paintEvent(QPaintEvent* event)
     painter.drawPixmap(
         _iconLabel->geometry(),
         _movie->currentPixmap(),
-        QRectF(QPoint(), SIZE_GIF * DPR)
+        QRectF(QPoint(), SIZE_GIF * devicePixelRatioF())
     );
 }
