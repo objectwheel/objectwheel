@@ -232,15 +232,16 @@ QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
 }
 
 QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
-                                         bool includeCollapsed = true)
+                                         bool includeCollapsed = true, bool includeHidden = false)
 {
     QList<QTreeWidgetItem*> items;
 
     if (!parentItem)
         return items;
 
-    if (!includeCollapsed && !parentItem->isExpanded()) {
-        if (includeParent)
+    if ((!includeCollapsed && !parentItem->isExpanded())
+            || (!includeHidden && parentItem->isHidden())) {
+        if (includeParent && (includeHidden || !parentItem->isHidden()))
             items.append(parentItem);
 
         return items;
@@ -250,8 +251,9 @@ QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool inclu
         items.append(parentItem);
 
     for (int i = 0; i < parentItem->childCount(); i++) {
-        items.append(parentItem->child(i));
-        items.append(allSubChildItems(parentItem->child(i), false, includeCollapsed));
+        if (includeHidden || !parentItem->child(i)->isHidden())
+            items.append(parentItem->child(i));
+        items.append(allSubChildItems(parentItem->child(i), false, includeCollapsed, includeHidden));
     }
 
     return items;
@@ -939,7 +941,7 @@ public:
     QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
     {
         const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
-        return QSize(size.width(), 21);
+        return QSize(size.width(), 21); // Fixed height for rows, 21
     }
 
 private:
@@ -992,7 +994,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(22);
-    //    connect(m_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
+    connect(m_searchEdit, &FocuslessLineEdit::textChanged, this, &PropertiesPane::filterList);
 
     /* Prepare Properties Widget */
     connect(m_designerScene, &DesignerScene::selectionChanged,
@@ -1036,7 +1038,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
 
 void PropertiesPane::sweep()
 {
-    // TODO
     g_verticalScrollBarPosition = 99999;
     g_horizontalScrollBarPosition = 99999;
     m_searchEdit->clear();
@@ -1202,7 +1203,7 @@ void PropertiesPane::onSelectionChange()
         expandItem(classItem);
     }
 
-    //    filterList(m_searchEdit->text());
+    filterList(m_searchEdit->text());
 
     verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum()
                                            - verticalScrollBar()->minimum()
@@ -1397,6 +1398,38 @@ void PropertiesPane::onIdChange(Control* control, const QString& /*previousId*/)
     }
 }
 
+void PropertiesPane::filterList(const QString& filter)
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        auto tli = topLevelItem(i);
+        auto tlv = false;
+
+        for (int j = 0; j < tli->childCount(); j++) {
+            auto tci = tli->child(j);
+            auto tcv = false;
+            auto vv = tci->text(0).contains(filter, Qt::CaseInsensitive);
+
+            for (int z = 0; z < tci->childCount(); z++) {
+                auto tdi = tci->child(z);
+                auto v = (filter.isEmpty() || vv) ? true :
+                  tdi->text(0).contains(filter, Qt::CaseInsensitive);
+
+                tdi->setHidden(!v);
+                if (v)
+                    tcv = v;
+            }
+
+            auto v = filter.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
+            tci->setHidden(!v);
+            if (v)
+                tlv = v;
+        }
+
+        auto v = filter.isEmpty() ? true : tlv;
+        tli->setHidden(!v);
+    }
+}
+
 void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
     painter->save();
@@ -1438,7 +1471,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
     QPainter painter(viewport());
 
     /* Fill background */
-    const qreal bandHeight = topLevelItemCount() ? rowHeight(indexFromItem(topLevelItem(0))) : 21;
+    const qreal bandHeight = 21;
     const qreal bandCount = viewport()->height() / bandHeight;
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
 

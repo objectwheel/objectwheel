@@ -266,8 +266,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_centralWidget->designerWidget(), SLOT(onControlSelectionChange(const QList<Control*>&)));
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
             m_centralWidget->designerWidget(), SLOT(handleControlDoubleClick(Control*)));
-    connect(m_centralWidget->qmlCodeEditorWidget(), SIGNAL(documentSaved()),
-            m_propertiesPane, SLOT(refreshList()));
 
     connect(RunManager::instance(),
             QOverload<int, QProcess::ExitStatus>::of(&RunManager::finished),

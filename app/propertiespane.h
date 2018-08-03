@@ -28,6 +28,7 @@ private slots:
     void onIdChange(Control*, const QString& previousId);
 
 private:
+    void filterList(const QString& filter);
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
     void paintEvent(QPaintEvent* e) override;
     void updateGeometries() override;
