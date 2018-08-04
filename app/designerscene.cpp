@@ -839,16 +839,21 @@ void DesignerScene::setCurrentForm(Form* currentForm)
     if (!m_forms.contains(currentForm) || m_currentForm == currentForm)
         return;
 
-    if (m_currentForm) {
-        blockSignals(true); // In order to prevent "selectionChanged" signal being emitted
-        m_currentForm->setVisible(false);
-        blockSignals(false);
-    }
+    /*
+        NOTE: InspectorPane dependency: We prevent "selectionChanged" signal being emitted here
+              Otherwise selectionChanged signal getting emitted before currentFormChanged signal,
+              hence InspectorPane clears the selection before saving selection state of a form in
+              currentFormChanged signal.
+    */
+    blockSignals(true);
+
+    if (m_currentForm)
+        m_currentForm->setVisible(false); // Clears selection and emits selectionChanged on DesignerScene
 
     m_currentForm = currentForm;
-    blockSignals(true); // In order to prevent "selectionChanged" signal being emitted
     m_currentForm->setVisible(true);
     centralize();
+
     blockSignals(false);
 
     emit currentFormChanged(m_currentForm);

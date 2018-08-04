@@ -153,7 +153,7 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
     }
 }
 }
-#include <QDebug>
+
 class InspectorListDelegate: public QStyledItemDelegate
 {
     Q_OBJECT
@@ -256,7 +256,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::formAboutToBeRemoved,
             this, &InspectorPane::onFormRemove);
     connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
-
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &InspectorPane::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
@@ -332,7 +331,6 @@ void InspectorPane::paintEvent(QPaintEvent* e)
 
 void InspectorPane::sweep()
 {
-    qDebug() << "sweep";
     isProjectStarted = false;
     m_formStates.clear();
     clear();
@@ -340,7 +338,6 @@ void InspectorPane::sweep()
 
 void InspectorPane::onProjectStart()
 {
-    qDebug() << "onProjectStart";
     Q_ASSERT(!isProjectStarted);
     isProjectStarted = true;
     onCurrentFormChange(m_designerScene->currentForm());
@@ -353,8 +350,6 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
 
     if (!currentForm)
         return;
-
-    qDebug() << "onCurrentFormChange";
 
     /* Save outgoing form's state */
     if (m_currentForm) {
@@ -378,6 +373,7 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     /* Clear things */
     m_currentForm = currentForm;
     clear();
+    m_designerScene->clearSelection();
 
     /* Create items for incoming form */
     auto formItem = new QTreeWidgetItem;
@@ -422,8 +418,6 @@ void InspectorPane::onFormRemove(Form* form)
     if (!isProjectStarted)
         return;
 
-    qDebug() << "onFormRemove";
-
     m_formStates.remove(form);
 }
 
@@ -431,8 +425,6 @@ void InspectorPane::onControlCreation(Control* control)
 {
     if (!isProjectStarted)
         return;
-
-    qDebug() << "onControlCreation";
 
     const Control* parentControl = control->parentControl();
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
@@ -452,8 +444,6 @@ void InspectorPane::onControlRemove(Control* control)
     if (!isProjectStarted)
         return;
 
-    qDebug() << "onControlRemove";
-
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (control->id() == childItem->text(0)) {
@@ -472,16 +462,16 @@ void InspectorPane::onControlParentChange(Control* control)
     if (!isProjectStarted)
         return;
 
-    qDebug() << "onControlParentChange";
-
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (control->id() == childItem->text(0)) {
                 for (QTreeWidgetItem* topLevelItem_2 : topLevelItems(this)) {
                     for (QTreeWidgetItem* childItem_2 : allSubChildItems(topLevelItem_2)) {
                         if (control->parentControl()->id() == childItem_2->text(0)) {
+                            bool isExpanded = childItem->isExpanded();
                             childItem->parent()->removeChild(childItem);
                             childItem_2->addChild(childItem);
+                            childItem->setExpanded(isExpanded);
                             sortItems(0, Qt::AscendingOrder);
                             return;
                         }
@@ -497,8 +487,6 @@ void InspectorPane::onControlPreviewChange(Control* control)
 {
     if (!isProjectStarted)
         return;
-
-    qDebug() << "onControlPreviewChange";
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
@@ -545,8 +533,6 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
     if (control->form() && m_designerScene->currentForm() != control)
         return;
 
-    qDebug() << "onControlIdChange";
-
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (previousId == childItem->text(0)) {
@@ -563,8 +549,6 @@ void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)
     if (!isProjectStarted)
         return;
 
-    qDebug() << "onItemDoubleClick";
-
     Control* control = controlFromItem(item, m_designerScene->currentForm());
     if (!control)
         return;
@@ -579,8 +563,6 @@ void InspectorPane::onSelectionChange()
 
     if (isSelectionHandlingBlocked)
         return;
-
-    qDebug() << "onSelectionChange";
 
     isSelectionHandlingBlocked = true;
 
@@ -610,8 +592,6 @@ void InspectorPane::onItemSelectionChange()
 
     if (isSelectionHandlingBlocked)
         return;
-
-    qDebug() << "onItemSelectionChange";
 
     QList<Control*> selectedControls;
     for (QTreeWidgetItem* item : selectedItems()) {

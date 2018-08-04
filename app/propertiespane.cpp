@@ -996,9 +996,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     m_searchEdit->setFixedHeight(22);
     connect(m_searchEdit, &FocuslessLineEdit::textChanged, this, &PropertiesPane::filterList);
 
-    /* Prepare Properties Widget */
-    connect(m_designerScene, &DesignerScene::selectionChanged,
-            this, &PropertiesPane::onSelectionChange);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
     {
         if (topLevelItemCount() > 0) {
@@ -1024,6 +1021,10 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
             g_horizontalScrollBarPosition = max - min - horizontalScrollBar()->value();
     });
 
+    connect(m_designerScene, &DesignerScene::currentFormChanged,
+            this, &PropertiesPane::onSelectionChange);
+    connect(m_designerScene, &DesignerScene::selectionChanged,
+            this, &PropertiesPane::onSelectionChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::zChanged,
             this, &PropertiesPane::onZChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
