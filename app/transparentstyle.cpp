@@ -729,6 +729,12 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
             if (so->subControls & SC_SpinBoxUp) {
                 copy.subControls = SC_SpinBoxUp;
                 QPalette pal2 = so->palette;
+                QColor arrowColor = pal2.windowText().color();
+                if (so->stepEnabled & QAbstractSpinBox::StepUpEnabled)
+                    arrowColor.setAlpha(160);
+                else
+                    arrowColor.setAlpha(60);
+                pal2.setColor(QPalette::ButtonText, arrowColor);
                 if (!(so->stepEnabled & QAbstractSpinBox::StepUpEnabled)) {
                     pal2.setCurrentColorGroup(QPalette::Disabled);
                     copy.state &= ~State_Enabled;
@@ -750,6 +756,12 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 copy.subControls = SC_SpinBoxDown;
                 copy.state = so->state;
                 QPalette pal2 = so->palette;
+                QColor arrowColor = pal2.windowText().color();
+                if (so->stepEnabled & QAbstractSpinBox::StepDownEnabled)
+                    arrowColor.setAlpha(160);
+                else
+                    arrowColor.setAlpha(60);
+                pal2.setColor(QPalette::ButtonText, arrowColor);
                 if (!(so->stepEnabled & QAbstractSpinBox::StepDownEnabled)) {
                     pal2.setCurrentColorGroup(QPalette::Disabled);
                     copy.state &= ~State_Enabled;

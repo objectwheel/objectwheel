@@ -5,7 +5,6 @@ Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
 Properties Pane row colorları düzeltilecek, calculateVisibleRow doğrumu? Ya filter yapılırsa propertiler?
 - Control preview update etmeden yapılan x y z w h property set'lerinde integervalue'yi nasıl tespit etcez sonuçta window() da form() da kullanılamaz, mı?
 - ParserUtils ile yapılan tüm işlerde, propertylerin binding olma ihtimali göz önüne alınıp herşey yeniden düşünülecek
-properties pane üzerindeki spinboxların okları ile comboboxların okları aynı renkte değil, uyumsuz
 
 Controller ilk oluşturulurken, proje yüklenme esnasında ya da yeni bir controlün yalnız başına oluşturulması esnasında, z, geometry, parent propertileri extraCondutions olmadan set edilitor, bunun yan etkileri neler olabilir.
 
