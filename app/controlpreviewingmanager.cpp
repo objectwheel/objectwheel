@@ -55,12 +55,17 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
 
 ControlPreviewingManager::~ControlPreviewingManager()
 {
-    scheduleTerminate();
-
-    QMetaObject::invokeMethod(s_previewerServer, "deleteLater");
-
     s_serverThread->quit();
     s_serverThread->wait();
+
+    /*!
+        NOTE: We don't post any events in order to terminate any connections within s_previewerServer
+              And we don't post eny events in order to call deleteLater() on s_previewerServer. Since
+              none of posted events are capable of being delivered while the app is about to quit.
+              But that's not a problem, since ControlPreviewingManager is a static class hence
+              s_previewerServer and all active connections will be removed by OS automatically.
+
+    */
 
     s_instance = nullptr;
 }

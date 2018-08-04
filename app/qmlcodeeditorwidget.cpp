@@ -983,14 +983,15 @@ void QmlCodeEditorWidget::saveDocument(Control* control, const QString& document
             const QString& id = ParserUtils::property(documentPath, "id");
 
             if (control->id() != id) {
-                const QString& previousId = control->id();
-
                 if (id.isEmpty())
-                    ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);
+                    ControlPropertyManager::setId(control, control->id(), ControlPropertyManager::SaveChanges);
                 else
                     ControlPropertyManager::setId(control, id, ControlPropertyManager::SaveChanges); // For refactorId
 
-                WindowManager::mainWindow()->inspectorPane()->handleControlIdChange(control, previousId);
+                if (id.isEmpty()) {
+                    ParserUtils::setProperty(item.documents.value(relativePath).document,
+                                             item.control->url(), "id", control->id());
+                }
             }
 
             if (control->form())

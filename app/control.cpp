@@ -362,7 +362,7 @@ void Control::dropControl(Control* control)
     // We want the setPos that is happened after reparent operation to take place at the very last
 
     //  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
-    WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
+    //  WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
 
     update();
 }

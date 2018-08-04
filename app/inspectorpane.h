@@ -28,9 +28,9 @@ public:
 
 public slots:
     void sweep();
-    void handleControlParentChange(Control* control);
-    void handleControlIdChange(Control* control, const QString& previousId);
-    void handleControlPreviewChange(Control* control);
+    void onControlParentChange(Control* control);
+    void onControlIdChange(Control* control, const QString& previousId);
+    void onControlPreviewChange(Control* control);
 
 private slots:
     void onProjectStart();

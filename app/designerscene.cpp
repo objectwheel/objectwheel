@@ -831,13 +831,6 @@ void DesignerScene::centralize()
         qreal x = -m_currentForm->size().width() / 2.0;
         qreal y = -m_currentForm->size().height() / 2.0;
         ControlPropertyManager::setPos(m_currentForm, {x, y}, ControlPropertyManager::NoOption);
-        /*
-            NOTE: We don't use IntegerValue because we don't save x-y values for operations
-                  made by Designer itself, except PropertiesPane. Cause the set operations
-                  on forms made by Designer are the internal form centralization operations
-                  and nothing to do with actual x-y values of a form. Even further, passing
-                  IntegerValue causes flickers inside of the Designer.
-        */
     }
 }
 
@@ -846,13 +839,17 @@ void DesignerScene::setCurrentForm(Form* currentForm)
     if (!m_forms.contains(currentForm) || m_currentForm == currentForm)
         return;
 
-    if (m_currentForm)
+    if (m_currentForm) {
+        blockSignals(true); // In order to prevent "selectionChanged" signal being emitted
         m_currentForm->setVisible(false);
+        blockSignals(false);
+    }
 
     m_currentForm = currentForm;
+    blockSignals(true); // In order to prevent "selectionChanged" signal being emitted
     m_currentForm->setVisible(true);
-
     centralize();
+    blockSignals(false);
 
     emit currentFormChanged(m_currentForm);
 }

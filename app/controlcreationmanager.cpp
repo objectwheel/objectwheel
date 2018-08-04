@@ -61,6 +61,10 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
     ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), parentControl->uid());
+    emit instance()->controlCreated(control);
+    // NOTE: InspectorPane dependency: Only emit after adding into db and then reparenting it.
+    // Adding into db is needed because of id refactoring. Reparenting is needed because
+    // InspectorPane needs the parent in order to find out parent QTreeWidgetItem to put it underneath.
 
     QMap<QString, Control*> controlTree;
     controlTree.insert(control->dir(), control);
@@ -72,6 +76,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
         auto childControl = new Control(SaveUtils::toUrl(childPath));
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
+        emit instance()->controlCreated(childControl);
 
         controlTree.insert(childPath, childControl);
     }
