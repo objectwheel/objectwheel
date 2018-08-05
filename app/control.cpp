@@ -637,7 +637,7 @@ void Control::updatePreview(const PreviewResult& result)
     //    if (isSelected())
     //        WindowManager::mainWindow()->propertiesPane()->refreshList();
     //    WindowManager::mainWindow()->inspectorPane()->handleControlPreviewChange(this);
-    ControlPropertyManager::instance()->previewChanged(this);
+    ControlPropertyManager::instance()->previewChanged(this, result.codeChanged);
 }
 
 void Control::applyCachedGeometry()

@@ -1259,7 +1259,7 @@ void PropertiesPane::onZChange(Control* control)
     }
 }
 
-void PropertiesPane::onPreviewChange(Control* control)
+void PropertiesPane::onPreviewChange(Control* control, bool codeChanged)
 {
     if (m_designerScene->selectedControls().size() != 1)
         return;
@@ -1271,7 +1271,13 @@ void PropertiesPane::onPreviewChange(Control* control)
     if (topLevelItemCount() <= 0)
         return onSelectionChange();
 
+    if (codeChanged)
+        return onSelectionChange();
+
     // FIXME: Finish this later
+
+
+
 }
 
 void PropertiesPane::onGeometryChange(Control* control)

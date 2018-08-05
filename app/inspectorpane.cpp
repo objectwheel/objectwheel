@@ -393,13 +393,20 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     sortItems(0, Qt::AscendingOrder);
     expandAll();
 
+
     /* Restore incoming form's state */
+    bool scrolled = false;
     const FormState& state = m_formStates.value(currentForm);
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             for (const QString& id : state.selectedIds) {
-                if (id == childItem->text(0))
+                if (id == childItem->text(0)) {
                     childItem->setSelected(true);
+                    if (!scrolled) {
+                        scrollToItem(childItem, PositionAtCenter);
+                        scrolled = true;
+                    }
+                }
             }
 
             for (const QString& id : state.collapsedIds) {
@@ -483,9 +490,12 @@ void InspectorPane::onControlParentChange(Control* control)
     }
 }
 
-void InspectorPane::onControlPreviewChange(Control* control)
+void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
 {
     if (!isProjectStarted)
+        return;
+
+    if (!codeChanged)
         return;
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
@@ -538,6 +548,17 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
             if (previousId == childItem->text(0)) {
                 childItem->setText(0, control->id());
                 sortItems(0, Qt::AscendingOrder);
+                goto phase2;
+            }
+        }
+    }
+
+phase2:
+
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->isSelected()) {
+                scrollToItem(childItem, QAbstractItemView::PositionAtCenter);
                 return;
             }
         }
@@ -571,12 +592,16 @@ void InspectorPane::onSelectionChange()
             childItem->setSelected(false);
     }
 
+    bool scrolled = false;
     for (const Control* selectedControl : m_designerScene->selectedControls()) {
         for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
             for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
                 if (selectedControl->id() == childItem->text(0)) {
                     childItem->setSelected(true);
-                    scrollToItem(childItem, PositionAtCenter);
+                    if (!scrolled) {
+                        scrollToItem(childItem, PositionAtCenter);
+                        scrolled = true;
+                    }
                 }
             }
         }

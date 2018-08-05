@@ -30,7 +30,7 @@ public slots:
     void sweep();
     void onControlParentChange(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);
-    void onControlPreviewChange(Control* control);
+    void onControlPreviewChange(Control* control, bool codeChanged);
 
 private slots:
     void onProjectStart();
