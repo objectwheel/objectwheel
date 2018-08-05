@@ -966,7 +966,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
-    header()->resizeSection(0, 180); // Don't resize the last (stretched) column
+    header()->resizeSection(0, 165); // Don't resize the last (stretched) column
 
     headerItem()->setText(1, tr("Value"));
     headerItem()->setText(0, tr("Property"));
@@ -1521,7 +1521,7 @@ void PropertiesPane::updateGeometries()
 
 QSize PropertiesPane::sizeHint() const
 {
-    return QSize{340, 700};
+    return QSize{310, 700};
 }
 
 #include "propertiespane.moc"

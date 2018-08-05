@@ -19,15 +19,27 @@
 #include <QScrollBar>
 #include <QPainter>
 #include <QStyledItemDelegate>
+#include <QHeaderView>
+
+namespace {
+
+void setPalette(QWidget* widget)
+{
+    QPalette palette(widget->palette());
+    palette.setColor(QPalette::Text, "#401d20");
+    palette.setColor(QPalette::WindowText, "#401d20");
+    widget->setPalette(palette);
+}
+}
 
 class FormListDelegate: public QStyledItemDelegate
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        FormListDelegate(QWidget* parent);
-        void paint(QPainter* painter, const QStyleOptionViewItem &option,
-          const QModelIndex &index) const override;
+public:
+    FormListDelegate(QWidget* parent);
+    void paint(QPainter* painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
 };
 
 FormListDelegate::FormListDelegate(QWidget* parent)
@@ -36,7 +48,7 @@ FormListDelegate::FormListDelegate(QWidget* parent)
 }
 
 void FormListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const
+                             const QModelIndex &index) const
 {
     const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
@@ -51,152 +63,130 @@ void FormListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
     QStyledItemDelegate::paint(painter, option, index);
 }
 
-FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QWidget(parent)
+FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
+  , m_addButton(new FlatButton(this))
+  , m_removeButton(new FlatButton(this))
 {
-    _layout = new QVBoxLayout(this);
-    _innerWidget = new QFrame;
-    _innerLayout = new QVBoxLayout(_innerWidget);
-    _header = new QLabel;
-    _listWidget = new QListWidget;
-    _buttonLayout = new QHBoxLayout;
-    _addButton = new FlatButton;
-    _removeButton = new FlatButton;
+    QFont fontMedium(font());
+    fontMedium.setWeight(QFont::Medium);
 
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#e4e4e4");
-    setAutoFillBackground(true);
-    setPalette(p);
+    ::setPalette(this);
+    header()->setFont(fontMedium);
+    header()->setFixedHeight(23);
+    header()->setDefaultSectionSize(1);
+    header()->setMinimumSectionSize(1);
 
-    QPalette p2(_listWidget->palette());
-    p2.setColor(QPalette::All, QPalette::Base, QColor(Qt::white));
-    p2.setColor(QPalette::All, QPalette::Highlight, QColor("#c0d5eb"));
-    p2.setColor(QPalette::All, QPalette::Text, Qt::black);
-    p2.setColor(QPalette::All, QPalette::HighlightedText, Qt::black);
-    _listWidget->setPalette(p2);
+    headerItem()->setText(0, tr("Forms"));
 
-    _listWidget->setItemDelegate(new FormListDelegate(_listWidget));
-    _listWidget->viewport()->installEventFilter(this);
-    _listWidget->setStyleSheet("QListView { border: none; }");
-    _listWidget->setFocusPolicy(Qt::NoFocus);
-    _listWidget->setIconSize(QSize(14,14));
-    _listWidget->setSelectionMode(QListWidget::SingleSelection);
-    _listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
-    _listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    _listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-    _listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setColumnCount(1);
+    setIndentation(0);
+    setIconSize(QSize(14, 14));
+    setDragEnabled(false);
+    setRootIsDecorated(false);
+    setUniformRowHeights(true);
+    setDropIndicatorShown(false);
+    setExpandsOnDoubleClick(false);
+    setItemDelegate(new FormListDelegate(this));
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+    setSelectionBehavior(QTreeWidget::SelectRows);
+    setSelectionMode(QTreeWidget::SingleSelection);
+    setDragDropMode(QAbstractItemView::NoDragDrop);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setStyleSheet("QTreeView {"
+                  "    border: 1px solid #a14a51;"
+                  "    outline: 0;"
+                  "} QHeaderView::section {"
+                  "    padding-left: 5px;"
+                  "    color: white;"
+                  "    border: none;"
+                  "    border-bottom: 1px solid #a14a51;"
+                  "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+                  "                                stop:0 #bf5861, stop:1 #b3525a);"
+                  "}");
 
-    connect(ProjectManager::instance(), SIGNAL(started()), SLOT(handleDatabaseChange()));
-//    FIXME: connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(handleDatabaseChange()));
-    connect(m_designerScene, SIGNAL(currentFormChanged(Form*)), SLOT(handleDatabaseChange()));
-    connect(_listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), SLOT(handleCurrentFormChange()));
+    m_addButton->settings().topColor = "#62A558";
+    m_addButton->settings().bottomColor = "#599750";
+    m_addButton->settings().borderRadius = 10;
+    m_addButton->settings().textColor = Qt::white;
+    m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_addButton->setFixedSize(20, 20);
+    m_addButton->setIconSize(QSize(12, 12));
+    m_addButton->setIcon(QIcon(":/images/plus.png"));
+    connect(m_addButton, &FlatButton::clicked, this, &FormsPane::onAddButtonClick);
 
-    _innerWidget->setObjectName("innerWidget");
-    _innerWidget->setStyleSheet("#innerWidget { border: 1px solid #a14a51; }");
+    m_removeButton->settings().topColor = "#C2504B";
+    m_removeButton->settings().bottomColor = "#B34B46";
+    m_removeButton->settings().borderRadius = 12;
+    m_removeButton->settings().textColor = Qt::white;
+    m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_removeButton->setFixedSize(20, 20);
+    m_removeButton->setIconSize(QSize(12, 12));
+    m_removeButton->setIcon(QIcon(":/images/minus.png"));
+    connect(m_removeButton, &FlatButton::clicked, this, &FormsPane::onRemoveButtonClick);
 
-    QFont f; f.setWeight(QFont::Medium);
-    _header->setFont(f);
 
-    _header->setText("Forms");
-    _header->setFixedHeight(23);
-    _header->setStyleSheet(
-        "color: white; padding-left: 5px; border:none; border-bottom: 1px solid #a14a51;"
-        "background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #bf5861, stop:1 #b3525a);"
-    );
+    connect(ProjectManager::instance(), SIGNAL(started()), SLOT(onDatabaseChange()));
+    //    FIXME: connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(onDatabaseChange()));
+    connect(m_designerScene, SIGNAL(currentFormChanged(Form*)), SLOT(onDatabaseChange()));
+    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), SLOT(onCurrentFormChange()));
 
-    _addButton->settings().topColor = "#62A558";
-    _addButton->settings().bottomColor = "#599750";
-    _addButton->settings().borderRadius = 10;
-    _addButton->settings().textColor = Qt::white;
-    _addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _addButton->setFixedSize(20, 20);
-    _addButton->setIconSize(QSize(12,12));
-    _addButton->setIcon(QIcon(":/images/plus.png"));
-    connect(_addButton, SIGNAL(clicked(bool)), SLOT(addButtonClicked()));
-
-    _removeButton->settings().topColor = "#C2504B";
-    _removeButton->settings().bottomColor = "#B34B46";
-    _removeButton->settings().borderRadius = 12;
-    _removeButton->settings().textColor = Qt::white;
-    _removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _removeButton->setFixedSize(20,20);
-    _removeButton->setIconSize(QSize(12,12));
-    _removeButton->setIcon(QIcon(":/images/minus.png"));
-    connect(_removeButton, SIGNAL(clicked(bool)), SLOT(removeButtonClicked()));
-
-    _buttonLayout->addWidget(_addButton);
-    _buttonLayout->addStretch();
-    _buttonLayout->addWidget(_removeButton);
-
-    _innerLayout->addWidget(_header);
-    _innerLayout->addWidget(_listWidget);
-    _innerLayout->setSpacing(0);
-    _innerLayout->setContentsMargins(0, 0, 0, 0);
-
-    _layout->addWidget(_innerWidget);
-    _layout->addLayout(_buttonLayout);
-    _layout->setSpacing(2);
-    _layout->setContentsMargins(3, 3, 3, 3);
 }
 
-bool FormsPane::eventFilter(QObject* watched, QEvent* event)
+void FormsPane::paintEvent(QPaintEvent* e)
 {
-    if (watched == _listWidget->viewport()) {
-        if (event->type() == QEvent::Paint) {
-            QPainter painter(_listWidget->viewport());
-            if (_listWidget->count() > 0) {
-                const auto tli = _listWidget->item(0);
-                const auto& tlir = _listWidget->visualItemRect(tli);
-                const qreal ic = (
-                    _listWidget->viewport()->height() +
+    QPainter painter(viewport());
+    if (topLevelItemCount() > 0) {
+        const auto tli = topLevelItem(0);
+        const auto& tlir = visualItemRect(tli);
+        const qreal ic = (
+                    viewport()->height() +
                     qAbs(tlir.y())
-                ) / (qreal) tlir.height();
+                    ) / (qreal) tlir.height();
 
-                for (int i = 0; i < ic; i++) {
-                    if (i % 2 == 0) {
-                        painter.fillRect(
+        for (int i = 0; i < ic; i++) {
+            if (i % 2 == 0) {
+                painter.fillRect(
                             0,
                             tlir.y() + i * tlir.height(),
-                            _listWidget->viewport()->width(),
+                            viewport()->width(),
                             tlir.height(),
                             QColor("#fae8ea")
-                        );
-                    }
-                }
-            } else {
-                const qreal hg = 20.0;
-                const qreal ic = _listWidget->viewport()->height() / hg;
-
-                for (int i = 0; i < ic; i++) {
-                    if (i % 2 == 0) {
-                        painter.fillRect(
-                            0, i * hg,
-                            _listWidget->viewport()->width(),
-                            hg, QColor("#fae8ea")
-                        );
-                    } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
-                        painter.setPen(QColor("#a5aab0"));
-                        painter.drawText(0, i * hg, _listWidget->viewport()->width(),
-                          hg, Qt::AlignCenter, "No forms to show");
-                    }
-                }
+                            );
             }
         }
-
-        return false;
     } else {
-        return QWidget::eventFilter(watched, event);
+        const qreal hg = 20.0;
+        const qreal ic = viewport()->height() / hg;
+
+        for (int i = 0; i < ic; i++) {
+            if (i % 2 == 0) {
+                painter.fillRect(
+                            0, i * hg,
+                            viewport()->width(),
+                            hg, QColor("#fae8ea")
+                            );
+            } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
+                painter.setPen(QColor("#a5aab0"));
+                painter.drawText(0, i * hg, viewport()->width(),
+                                 hg, Qt::AlignCenter, "No forms to show");
+            }
+        }
     }
+
+    QTreeWidget::paintEvent(e);
 }
 
-void FormsPane::removeButtonClicked()
+void FormsPane::onRemoveButtonClick()
 {
     ControlRemovingManager::removeForm(m_designerScene->currentForm());
 }
 
-void FormsPane::addButtonClicked()
+void FormsPane::onAddButtonClick()
 {
     auto tempPath = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0];
     tempPath = tempPath + separator() + "Objectwheel";
@@ -211,55 +201,62 @@ void FormsPane::addButtonClicked()
     rm(tempPath);
 }
 
-void FormsPane::handleDatabaseChange()
+void FormsPane::onDatabaseChange()
 {
     int row = -1;
     QString id;
-    if (_listWidget->currentItem())
-        id = _listWidget->currentItem()->text();
+    if (currentItem())
+        id = currentItem()->text(0);
 
-    _listWidget->clear();
+    clear();
 
     for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
         auto _id = ParserUtils::id(SaveUtils::toUrl(path));
         if (id == _id)
-            row = _listWidget->count();
+            row = topLevelItemCount();
 
-        auto item = new QListWidgetItem;
-        item->setText(_id);
+        auto item = new QTreeWidgetItem;
+        item->setText(0, _id);
         if (SaveUtils::isMain(path))
-            item->setIcon(QIcon(":/images/mform.png"));
+            item->setIcon(0, QIcon(":/images/mform.png"));
         else
-            item->setIcon(QIcon(":/images/form.png"));
-        _listWidget->addItem(item);
+            item->setIcon(0, QIcon(":/images/form.png"));
+        addTopLevelItem(item);
     }
-    _listWidget->setCurrentRow(row);
+// FIXME   setCurrentRow(row);
 }
 
-void FormsPane::handleCurrentFormChange()
+void FormsPane::onCurrentFormChange()
 {
-    if (!_listWidget->currentItem())
+    if (!currentItem())
         return;
 
-    auto id = _listWidget->currentItem()->text();
+    auto id = currentItem()->text(0);
     for (auto form : m_designerScene->forms())
         if (form->id() == id)
             m_designerScene->setCurrentForm(form);
 }
 
-void FormsPane::setCurrentForm(int index)
+void FormsPane::updateGeometries()
 {
-    _listWidget->setCurrentRow(index);
+    QTreeWidget::updateGeometries();
+    QMargins vm = viewportMargins();
+    vm.setBottom(m_addButton->height());
+    QRect vg = viewport()->geometry();
+    QRect geometryRect(vg.left(), vg.bottom(), vg.width(), m_addButton->height());
+    setViewportMargins(vm);
+    m_addButton->move(geometryRect.topLeft());
+    m_removeButton->move(geometryRect.topRight() - QPoint(m_removeButton->width(), 0));
 }
 
 void FormsPane::sweep()
 {
-    _listWidget->clear();
+    clear();
 }
 
 QSize FormsPane::sizeHint() const
 {
-    return QSize{215, 160};
+    return QSize{190, 160};
 }
 
 #include "formspane.moc"

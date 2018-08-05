@@ -19,6 +19,14 @@ namespace {
 bool isProjectStarted = false;
 bool isSelectionHandlingBlocked = false;
 
+void setPalette(QWidget* widget)
+{
+    QPalette palette(widget->palette());
+    palette.setColor(QPalette::Text, "#254022");
+    palette.setColor(QPalette::WindowText, "#254022");
+    widget->setPalette(palette);
+}
+
 void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selected, bool verticalLine)
 {
     painter->save();
@@ -210,6 +218,19 @@ private:
 InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
 {
+    QFont fontMedium(font());
+    fontMedium.setWeight(QFont::Medium);
+
+    ::setPalette(this);
+    header()->setFont(fontMedium);
+    header()->setFixedHeight(23);
+    header()->setDefaultSectionSize(1);
+    header()->setMinimumSectionSize(1);
+    header()->resizeSection(0, 220); // Don't resize the last (stretched) column
+
+    headerItem()->setText(0, tr("Controls"));
+    headerItem()->setText(1, tr("Ui"));
+
     setColumnCount(2);
     setIndentation(16);
     setDragEnabled(false);
@@ -220,20 +241,10 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::ExtendedSelection);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    QFont fontMedium(font());
-    fontMedium.setWeight(QFont::Medium);
-
-    header()->setFont(fontMedium);
-    header()->setFixedHeight(23);
-    header()->resizeSection(0, 250);
-    header()->resizeSection(1, 50);
-    headerItem()->setText(0, tr("Controls"));
-    headerItem()->setText(1, tr("Ui"));
-
     setStyleSheet("QTreeView {"
                   "    border: 1px solid #4A7C42;"
                   "} QHeaderView::section {"
@@ -634,7 +645,7 @@ void InspectorPane::onItemSelectionChange()
 
 QSize InspectorPane::sizeHint() const
 {
-    return QSize{340, 240};
+    return QSize{310, 240};
 }
 
 #include "inspectorpane.moc"
