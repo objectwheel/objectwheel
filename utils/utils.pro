@@ -24,7 +24,8 @@ HEADERS += \
     $$PWD/appfontsettings.h \
     $$PWD/quicktheme.h \
     $$PWD/previewercommands.h \
-    wfw.h
+    wfw.h \
+    paintutils.h
 
 SOURCES += \
     $$PWD/zipper.cpp \
@@ -35,7 +36,8 @@ SOURCES += \
     $$PWD/qmlformatter.cpp \
     $$PWD/hashfactory.cpp \
     $$PWD/appfontsettings.cpp \
-    $$PWD/quicktheme.cpp
+    $$PWD/quicktheme.cpp \
+    paintutils.cpp
 
 RESOURCES += \
     $$PWD/sharedresources/sharedresources.qrc

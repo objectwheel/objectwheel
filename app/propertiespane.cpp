@@ -1457,7 +1457,7 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
     // Draw handle
     if (hasChild) {
         QPen pen;
-        pen.setWidthF(1.3);
+        pen.setWidthF(1.2);
         pen.setColor(isClassRow ? QColor(Qt::white) : QColor("#403121"));
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);

@@ -8,6 +8,7 @@
 #include <form.h>
 #include <projectmanager.h>
 #include <wfw.h>
+#include <paintutils.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -22,14 +23,20 @@ bool isSelectionHandlingBlocked = false;
 void setPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
+    palette.setColor(QPalette::Base, Qt::white);
     palette.setColor(QPalette::Text, "#254022");
+    palette.setColor(QPalette::Window, "#edfceb");
     palette.setColor(QPalette::WindowText, "#254022");
     widget->setPalette(palette);
 }
 
-void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selected, bool verticalLine)
+void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool verticalLine)
 {
     painter->save();
+
+    bool isSelected = option.state & QStyle::State_Selected;
+    const QPalette& pal = option.palette;
+    const QRectF& rect = option.rect;
 
     QPainterPath path;
     path.addRect(rect);
@@ -37,17 +44,17 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool selecte
     painter->setClipping(true);
 
     // Fill background
-    if (selected) {
-        painter->fillRect(rect, "#cee7cb");
+    if (isSelected) {
+        painter->fillRect(rect, pal.highlight());
     } else {
         if (row % 2)
-            painter->fillRect(rect, "#edfceb");
+            painter->fillRect(rect, pal.window());
         else
-            painter->fillRect(rect, Qt::white);
+            painter->fillRect(rect, pal.base());
     }
 
     // Draw top and bottom lines
-    painter->setPen("#304A7C42");
+    painter->setPen(isSelected ? "#30ffffff" : "#304A7C42");
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
@@ -138,6 +145,9 @@ int calculateVisibleRow(const QTreeWidgetItem* item, const QTreeWidget* treeWidg
 
 void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& childItems)
 {
+    QTreeWidget* treeWidget = parentItem->treeWidget();
+    Q_ASSERT(treeWidget);
+
     for (const Control* child : childItems) {
         QTreeWidgetItem* item = new QTreeWidgetItem;
         item->setText(0, child->id());
@@ -150,12 +160,21 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
         else
             item->setText(1, QObject::tr("No"));
 
-        QIcon icon(SaveUtils::toIcon(child->dir()));
-        if (icon.isNull())
-            icon.addFile(":/images/item.png");
+        QIcon icon, itemIcon;
+        icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(child->dir()),
+                                                treeWidget->palette().text().color(),
+                                                treeWidget), QIcon::Normal);
+        icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(child->dir()),
+                                                treeWidget->palette().highlightedText().color(),
+                                                treeWidget), QIcon::Selected);
+        itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
+                                                    treeWidget->palette().text().color(),
+                                                    treeWidget), QIcon::Normal);
+        itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
+                                                    treeWidget->palette().highlightedText().color(),
+                                                    treeWidget), QIcon::Selected);
 
-        item->setIcon(0, icon);
-
+        item->setIcon(0, icon.isNull() ? itemIcon : icon);
         parentItem->addChild(item);
         addChildrenIntoItem(item, child->childControls(false));
     }
@@ -176,31 +195,35 @@ public:
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
 
-        const int iconSize = 15;
         const bool isSelected = option.state & QStyle::State_Selected;
         const QAbstractItemModel* model = index.model();
         const QIcon& icon = model->data(index, Qt::DecorationRole).value<QIcon>();
 
-        QRectF iconRect(0, 0, iconSize, iconSize);
+        QRectF iconRect({}, QSizeF{option.decorationSize});
         iconRect.moveCenter(option.rect.center());
         iconRect.moveLeft(option.rect.left() + 5);
 
-        fillBackground(painter, option.rect,
+        fillBackground(painter, option,
                        calculateVisibleRow(m_inspectorPane->itemFromIndex(index), m_inspectorPane),
-                       isSelected, index.column() == 0);
+                       index.column() == 0);
 
         // Draw icon
-        painter->drawPixmap(iconRect, icon.pixmap(wfw(m_inspectorPane), {iconSize, iconSize}),
-                            QRectF({}, QSizeF(iconSize * m_inspectorPane->devicePixelRatioF(),
-                                              iconSize * m_inspectorPane->devicePixelRatioF())));
+        const QPixmap& iconPixmap = icon.pixmap(wfw(m_inspectorPane), option.decorationSize,
+                                                isSelected ? QIcon::Selected : QIcon::Normal);
+        painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 
         // Draw text
         if (model->data(index, Qt::UserRole).toBool())
             painter->setPen("#cc453b");
+        else if (isSelected)
+            painter->setPen(option.palette.highlightedText().color());
         else
-            painter->setPen("#254022");
+            painter->setPen(option.palette.text().color());
 
-        painter->drawText(option.rect.adjusted(25, 0, 0, 0), index.data(Qt::EditRole).toString(),
+        const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
+        const QString& text = index.data(Qt::DisplayRole).toString();
+        painter->drawText(textRect,
+                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
         painter->restore();
     }
@@ -233,6 +256,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
 
     setColumnCount(2);
     setIndentation(16);
+    setIconSize({15, 15});
     setDragEnabled(false);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
@@ -292,14 +316,21 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
     handleRect.moveCenter(rect.center());
     handleRect.moveRight(rect.right() - 0.5);
 
-    fillBackground(painter, rect, calculateVisibleRow(itemFromIndex(index), this),
-                   isSelected, false);
+    QStyleOptionViewItem option;
+    option.initFrom(this);
+    option.rect = rect;
+    if (isSelected)
+        option.state |= QStyle::State_Selected;
+    else if (option.state & QStyle::State_Selected)
+        option.state ^= QStyle::State_Selected;
+
+    fillBackground(painter, option, calculateVisibleRow(itemFromIndex(index), this), false);
 
     // Draw handle
     if (hasChild) {
         QPen pen;
-        pen.setWidthF(1.3);
-        pen.setColor("#254022");
+        pen.setWidthF(1.2);
+        pen.setColor(isSelected ? option.palette.highlightedText().color() : option.palette.text().color());
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
@@ -323,18 +354,11 @@ void InspectorPane::paintEvent(QPaintEvent* e)
     const qreal bandHeight = topLevelItemCount() ? rowHeight(indexFromItem(topLevelItem(0))) : 21;
     const qreal bandCount = viewport()->height() / bandHeight;
 
-    painter.fillRect(rect(), Qt::white);
+    painter.fillRect(rect(), palette().base());
 
     for (int i = 0; i < bandCount; ++i) {
-        if (i % 2) {
-            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, "#edfceb");
-        } else if (topLevelItemCount() == 0) {
-            if (i == int(bandCount / 2.0) || i == int(bandCount / 2.0) + 1) {
-                painter.setPen("#a6afa5");
-                painter.drawText(0, i * bandHeight, viewport()->width(), bandHeight,
-                                 Qt::AlignCenter, tr("No items to show"));
-            }
-        }
+        if (i % 2)
+            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, palette().window());
     }
 
     QTreeWidget::paintEvent(e);
@@ -386,24 +410,36 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     clear();
     m_designerScene->clearSelection();
 
+    QIcon formIcon, mFormIcon;
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().text().color(),
+                                                 this), QIcon::Normal);
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().highlightedText().color(),
+                                                 this), QIcon::Selected);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().text().color(),
+                                                this), QIcon::Normal);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().highlightedText().color(),
+                                                this), QIcon::Selected);
+
     /* Create items for incoming form */
     auto formItem = new QTreeWidgetItem;
     formItem->setText(0, currentForm->id());
     formItem->setData(0, Qt::UserRole, currentForm->hasErrors());
     formItem->setData(1, Qt::UserRole, currentForm->hasErrors());
-    formItem->setIcon(0, SaveUtils::isMain(currentForm->dir()) ? QIcon(":/images/mform.png") :
-                                                                 QIcon(":/images/form.png"));
+    formItem->setIcon(0, SaveUtils::isMain(currentForm->dir()) ? mFormIcon : formIcon);
 
     if (currentForm->gui() && !currentForm->hasErrors())
         formItem->setText(1, tr("Yes"));
     else
         formItem->setText(1, tr("No"));
 
-    addChildrenIntoItem(formItem, currentForm->childControls(false));
     addTopLevelItem(formItem);
+    addChildrenIntoItem(formItem, currentForm->childControls(false));
     sortItems(0, Qt::AscendingOrder);
     expandAll();
-
 
     /* Restore incoming form's state */
     bool scrolled = false;
@@ -509,6 +545,26 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
     if (!codeChanged)
         return;
 
+    QIcon formIcon, mFormIcon, itemIcon;
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().text().color(),
+                                                 this), QIcon::Normal);
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().highlightedText().color(),
+                                                 this), QIcon::Selected);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().text().color(),
+                                                this), QIcon::Normal);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().highlightedText().color(),
+                                                this), QIcon::Selected);
+    itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
+                                                palette().text().color(),
+                                                this), QIcon::Normal);
+    itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
+                                                palette().highlightedText().color(),
+                                                this), QIcon::Selected);
+
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (control->id() == childItem->text(0)) {
@@ -524,15 +580,17 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     childItem->setText(1, tr("No"));
 
                 if (control->form()) {
-                    childItem->setIcon(0, SaveUtils::isMain(control->dir()) ?
-                                           QIcon(":/images/mform.png") :
-                                           QIcon(":/images/form.png"));
+                    childItem->setIcon(0, SaveUtils::isMain(control->dir()) ? mFormIcon : formIcon);
                 } else {
-                    QIcon icon(SaveUtils::toIcon(control->dir()));
-                    if (icon.isNull())
-                        icon.addFile(":/images/item.png");
+                    QIcon icon;
+                    icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(control->dir()),
+                                                            palette().text().color(),
+                                                            this), QIcon::Normal);
+                    icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(control->dir()),
+                                                            palette().highlightedText().color(),
+                                                            this), QIcon::Selected);
 
-                    childItem->setIcon(0, icon);
+                    childItem->setIcon(0, icon.isNull() ? itemIcon : icon);
                 }
                 return;
             }

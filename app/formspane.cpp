@@ -9,6 +9,8 @@
 #include <delayer.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
+#include <wfw.h>
+#include <paintutils.h>
 
 #include <QLabel>
 #include <QStandardPaths>
@@ -20,48 +22,106 @@
 #include <QPainter>
 #include <QStyledItemDelegate>
 #include <QHeaderView>
+#include <QBitmap>
 
 namespace {
 
 void setPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
+    palette.setColor(QPalette::Base, Qt::white);
     palette.setColor(QPalette::Text, "#401d20");
+    palette.setColor(QPalette::Window, "#fcebed");
     palette.setColor(QPalette::WindowText, "#401d20");
     widget->setPalette(palette);
 }
+
+void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row)
+{
+    painter->save();
+
+    bool isSelected = option.state & QStyle::State_Selected;
+    const QPalette& pal = option.palette;
+    const QRectF& rect = option.rect;
+
+    QPainterPath path;
+    path.addRect(rect);
+    painter->setClipPath(path);
+    painter->setClipping(true);
+
+    // Fill background
+    if (isSelected) {
+        painter->fillRect(rect, pal.highlight());
+    } else {
+        if (row % 2)
+            painter->fillRect(rect, pal.window());
+        else
+            painter->fillRect(rect, pal.base());
+    }
+
+    // Draw top and bottom lines
+    painter->setPen("#30a14a51");
+    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+
+    painter->restore();
+}
 }
 
-class FormListDelegate: public QStyledItemDelegate
+class FormsListDelegate: public QStyledItemDelegate
 {
     Q_OBJECT
 
 public:
-    FormListDelegate(QWidget* parent);
-    void paint(QPainter* painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const override;
+    explicit FormsListDelegate(FormsPane* parent) : QStyledItemDelegate(parent)
+      , m_formsPane(parent)
+    {}
+
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+               const QModelIndex& index) const override
+    {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+
+        const bool isSelected = option.state & QStyle::State_Selected;
+        const QAbstractItemModel* model = index.model();
+        const QIcon& icon = model->data(index, Qt::DecorationRole).value<QIcon>();
+
+        QRectF iconRect({}, QSizeF{option.decorationSize});
+        iconRect.moveCenter(option.rect.center());
+        iconRect.moveLeft(option.rect.left() + 5);
+
+        fillBackground(painter, option, index.row());
+
+        // Draw icon
+        const QPixmap& iconPixmap = icon.pixmap(wfw(m_formsPane), option.decorationSize,
+                                                isSelected ? QIcon::Selected : QIcon::Normal);
+        painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
+
+        if (isSelected)
+            painter->setPen(option.palette.highlightedText().color());
+        else
+            painter->setPen(option.palette.text().color());
+
+        // Draw text
+        const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
+        const QString& text = index.data(Qt::DisplayRole).toString();
+        painter->drawText(textRect,
+                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
+                          QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+        painter->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
+    {
+        const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
+        return QSize(size.width(), 21); // Fixed height for rows, 21
+    }
+
+private:
+    FormsPane* m_formsPane;
 };
-
-FormListDelegate::FormListDelegate(QWidget* parent)
-    : QStyledItemDelegate(parent)
-{
-}
-
-void FormListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
-                             const QModelIndex &index) const
-{
-    const QAbstractItemModel* model = index.model();
-    Q_ASSERT(model);
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    const QPen oldPen = painter->pen();
-    painter->setPen("#10000000");
-    painter->drawLine(QPointF(0.5, option.rect.bottom() + 0.5),
-                      QPointF(option.rect.right() + 0.5, option.rect.bottom() + 0.5));
-    painter->setPen(oldPen);
-
-    QStyledItemDelegate::paint(painter, option, index);
-}
 
 FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
@@ -81,13 +141,13 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
 
     setColumnCount(1);
     setIndentation(0);
-    setIconSize(QSize(14, 14));
+    setIconSize({15, 15});
     setDragEnabled(false);
     setRootIsDecorated(false);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
     setExpandsOnDoubleClick(false);
-    setItemDelegate(new FormListDelegate(this));
+    setItemDelegate(new FormsListDelegate(this));
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::SingleSelection);
@@ -134,48 +194,21 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     //    FIXME: connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(onDatabaseChange()));
     connect(m_designerScene, SIGNAL(currentFormChanged(Form*)), SLOT(onDatabaseChange()));
     connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), SLOT(onCurrentFormChange()));
-
 }
 
 void FormsPane::paintEvent(QPaintEvent* e)
 {
     QPainter painter(viewport());
-    if (topLevelItemCount() > 0) {
-        const auto tli = topLevelItem(0);
-        const auto& tlir = visualItemRect(tli);
-        const qreal ic = (
-                    viewport()->height() +
-                    qAbs(tlir.y())
-                    ) / (qreal) tlir.height();
 
-        for (int i = 0; i < ic; i++) {
-            if (i % 2 == 0) {
-                painter.fillRect(
-                            0,
-                            tlir.y() + i * tlir.height(),
-                            viewport()->width(),
-                            tlir.height(),
-                            QColor("#fae8ea")
-                            );
-            }
-        }
-    } else {
-        const qreal hg = 20.0;
-        const qreal ic = viewport()->height() / hg;
+    /* Fill background */
+    const qreal bandHeight = topLevelItemCount() ? rowHeight(indexFromItem(topLevelItem(0))) : 21;
+    const qreal bandCount = viewport()->height() / bandHeight;
 
-        for (int i = 0; i < ic; i++) {
-            if (i % 2 == 0) {
-                painter.fillRect(
-                            0, i * hg,
-                            viewport()->width(),
-                            hg, QColor("#fae8ea")
-                            );
-            } else if (i == int(ic / 2.0) || i == int(ic / 2.0) + 1) {
-                painter.setPen(QColor("#a5aab0"));
-                painter.drawText(0, i * hg, viewport()->width(),
-                                 hg, Qt::AlignCenter, "No forms to show");
-            }
-        }
+    painter.fillRect(rect(), palette().base());
+
+    for (int i = 0; i < bandCount; ++i) {
+        if (i % 2)
+            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, palette().window());
     }
 
     QTreeWidget::paintEvent(e);
@@ -203,6 +236,20 @@ void FormsPane::onAddButtonClick()
 
 void FormsPane::onDatabaseChange()
 {
+    QIcon formIcon, mFormIcon;
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().text().color(),
+                                                 this), QIcon::Normal);
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().highlightedText().color(),
+                                                 this), QIcon::Selected);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().text().color(),
+                                                this), QIcon::Normal);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().highlightedText().color(),
+                                                this), QIcon::Selected);
+
     int row = -1;
     QString id;
     if (currentItem())
@@ -218,12 +265,12 @@ void FormsPane::onDatabaseChange()
         auto item = new QTreeWidgetItem;
         item->setText(0, _id);
         if (SaveUtils::isMain(path))
-            item->setIcon(0, QIcon(":/images/mform.png"));
+            item->setIcon(0, mFormIcon);
         else
-            item->setIcon(0, QIcon(":/images/form.png"));
+            item->setIcon(0, formIcon);
         addTopLevelItem(item);
     }
-// FIXME   setCurrentRow(row);
+    // FIXME   setCurrentRow(row);
 }
 
 void FormsPane::onCurrentFormChange()
@@ -232,9 +279,10 @@ void FormsPane::onCurrentFormChange()
         return;
 
     auto id = currentItem()->text(0);
-    for (auto form : m_designerScene->forms())
+    for (auto form : m_designerScene->forms()) {
         if (form->id() == id)
             m_designerScene->setCurrentForm(form);
+    }
 }
 
 void FormsPane::updateGeometries()
