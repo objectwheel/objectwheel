@@ -1273,11 +1273,6 @@ void PropertiesPane::onPreviewChange(Control* control, bool codeChanged)
 
     if (codeChanged)
         return onSelectionChange();
-
-    // FIXME: Finish this later
-
-
-
 }
 
 void PropertiesPane::onGeometryChange(Control* control)

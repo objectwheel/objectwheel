@@ -17,7 +17,6 @@
 #include <controlpropertymanager.h>
 
 #include <QtMath>
-#include <QDebug>
 #include <QCursor>
 #include <QPainter>
 #include <QMimeData>

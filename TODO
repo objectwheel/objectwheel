@@ -1,7 +1,6 @@
 sağ tık menüsü/context menu den bişey seçince ve sonra mouseu az hareket ettirince selected control gidiyor
 sağ tık ayrıca stick özelliğininde kafasını karıştırıyor
 bazı kontrolleri basılarının üzerine sürünce, bırakmak için vs, selected özelliği gidiyor, kasıyor, özellikle sürüklenen üzerinde başka çocuklar varsa
-propertiespane deki bir control'ün previewi değişince güncelleme yapma özelliğini kodla
 Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
 - ParserUtils ile yapılan tüm işlerde, propertylerin binding olma ihtimali göz önüne alınıp herşey yeniden düşünülecek
 

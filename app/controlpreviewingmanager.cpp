@@ -5,7 +5,6 @@
 #include <hashfactory.h>
 #include <previewresult.h>
 
-#include <QDebug>
 #include <QThread>
 #include <QProcess>
 #include <QCoreApplication>
