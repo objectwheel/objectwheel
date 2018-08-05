@@ -86,11 +86,13 @@ void flushSuid(const Control* control, const QString& suid)
 // Searches by id.
 // Searches control only in forms (in current project)
 // If current project is empty, then returns false.
-bool existsInForms(const Control* control)
+bool existsInForms(const Control* control, bool includeItself)
 {
     for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
-        if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
+        if ((includeItself || path != control->dir())
+                && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
             return true;
+        }
     }
 
     return false;
@@ -112,12 +114,14 @@ QStringList formScopePaths()
 // Searches by id.
 // Searches control in form scope (in current project)
 // If current project is empty, then returns false.
-bool existsInFormScope(const Control* control)
+bool existsInFormScope(const Control* control, bool includeItself)
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
-        if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
+        if ((includeItself || path != control->dir())
+                && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
             return true;
+        }
     }
 
     return false;
@@ -126,10 +130,10 @@ bool existsInFormScope(const Control* control)
 // Searches by id.
 // Searches control within given suid, search starts within topPath
 // Given suid has to be valid
-bool existsInParentScope(const Control* control, const QString& suid, const QString topPath)
+bool existsInParentScope(const Control* control, const QString& suid, const QString topPath, bool includeItself)
 {
     if (control->form())
-        return existsInFormScope(control);
+        return existsInFormScope(control, includeItself);
 
     Q_ASSERT(!suid.isEmpty());
 
@@ -137,13 +141,17 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
     if (parentRootPath.isEmpty())
         return false;
 
+    Q_ASSERT(parentRootPath != control->dir());
+
     if (isForm(parentRootPath)) {
-        if (existsInForms(control))
+        if (existsInForms(control, includeItself))
             return true;
 
         for (auto path :  SaveUtils::childrenPaths(parentRootPath)) {
-            if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
+            if ((includeItself || path != control->dir())
+                    && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
                 return true;
+            }
         }
 
         return false;
@@ -152,8 +160,10 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
             return true;
 
         for (auto path : SaveUtils::childrenPaths(parentRootPath)) {
-            if (ParserUtils::id(SaveUtils::toUrl(path)) == control->id())
+            if ((includeItself || path != control->dir())
+                    && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
                 return true;
+            }
         }
 
         return false;
@@ -163,10 +173,11 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
 // You have to provide an valid suid, except if control is a form
 // If topPath is empty, then top level project directory searched
 // So, suid and topPath have to be in a valid logical relationship.
-bool exists(const Control* control, const QString& suid, const QString& topPath = QString())
+bool exists(const Control* control, const QString& suid, const QString& topPath = QString(),
+            bool includeItself = true)
 {
-    return control->form() ? existsInFormScope(control) :
-                             existsInParentScope(control, suid, topPath);
+    return control->form() ? existsInFormScope(control, includeItself) :
+                             existsInParentScope(control, suid, topPath, includeItself);
 }
 
 // Recalculates all uids belongs to given control and its children (all).
@@ -192,13 +203,25 @@ void refactorId(Control* control, const QString& suid, const QString& topPath = 
 
     const auto id = control->id();
 
-    for (int i = 1; exists(control, suid, topPath); i++)
+    for (int i = 1; exists(control, suid, topPath, false); i++)
         control->setId(id + QString::number(i));
 }
 }
 
+SaveManager* SaveManager::s_instance = nullptr;
 SaveManager::SaveManager(QObject* parent) : QObject(parent)
 {
+    s_instance = this;
+}
+
+SaveManager::~SaveManager()
+{
+    s_instance = nullptr;
+}
+
+SaveManager* SaveManager::instance()
+{
+    return s_instance;
 }
 
 bool SaveManager::initProject(const QString& projectDirectory, int templateNumber)
@@ -387,6 +410,7 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
     }
 
     ParserUtils::setProperty(control->url(), property, value);
+    instance()->propertyChanged(control, property, value);
 }
 
 void SaveManager::removeProperty(const Control* control, const QString& property)

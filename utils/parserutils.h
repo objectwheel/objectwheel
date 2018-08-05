@@ -21,6 +21,7 @@ public:
     static qreal height(const QString& url);
     static QString id(const QString& url);
     static QString property(const QString& url, const QString& property);
+    static QString property(QTextDocument* document, const QString& url, const QString& property);
 
     static void setX(const QString& url, qreal x);
     static void setY(const QString& url, qreal y);

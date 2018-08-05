@@ -494,6 +494,52 @@ QString ParserUtils::property(const QString& url, const QString& property)
     return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
+QString ParserUtils::property(QTextDocument* doc, const QString& url, const QString& property)
+{
+    const QString& source = doc->toPlainText();
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(url, dialect);
+    document->setSource(source);
+
+    if (!document->parse()) {
+        qWarning() << "Property couldn't read. Unable to parse qml file.";
+        return QString();
+    }
+
+    auto uiProgram = document->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't read. Corrupted ui program.";
+        return QString();
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't read. Empty source file.";
+        return QString();
+    }
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't read. Bad file format 0x1.";
+        return QString();
+    }
+
+    auto uiObjectInitializer = uiObjectDefinition->initializer;
+
+    if (!uiObjectInitializer) {
+        qWarning() << "Property couldn't read. Bad file format 0x2.";
+        return QString();
+    }
+
+    if (!propertyExists(uiObjectInitializer->members, property))
+        return QString();
+
+    return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
+}
+
 void ParserUtils::setX(const QString& url, qreal x)
 {
     setProperty(url, "x", QString::number(x));

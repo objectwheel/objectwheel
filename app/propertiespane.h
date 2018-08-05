@@ -24,8 +24,8 @@ private slots:
     void onZChange(Control*);
     void onPreviewChange(Control*);
     void onGeometryChange(Control*);
-    void onPropertyChange(Control*, const QString& propertyName);
     void onIdChange(Control*, const QString& previousId);
+    void onPropertyChange();
 
 private:
     void filterList(const QString& filter);

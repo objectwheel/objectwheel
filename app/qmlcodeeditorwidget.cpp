@@ -18,8 +18,8 @@
 #include <controlpropertymanager.h>
 #include <controlpreviewingmanager.h>
 #include <transparentstyle.h>
+#include <savemanager.h>
 
-#include <QDebug>
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QAction>
@@ -240,7 +240,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     connect(documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
     connect(&saveAction, SIGNAL(triggered()), SLOT(handleSaveButtonClicked()));
 //    FIXME connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
-    // FIXME connect(SaveManager::instance(), SIGNAL(propertyChanged(Control*,QString,QString)), SLOT(propertyUpdate(Control*,QString,QString)));
+    connect(SaveManager::instance(), &SaveManager::propertyChanged, this, &QmlCodeEditorWidgetPrivate::propertyUpdate);
 
     zoomlLevelCombobox->addItem("35 %");
     zoomlLevelCombobox->addItem("50 %");
@@ -968,31 +968,29 @@ void QmlCodeEditorWidget::saveControl(Control*)
 
 void QmlCodeEditorWidget::saveDocument(Control* control, const QString& documentPath)
 {
+    Q_ASSERT(!control->id().isEmpty());
+
     auto relativePath = documentPath;
     relativePath.remove(control->dir() + separator() + DIR_THIS + separator());
 
     for (auto& item : _editorItems) {
         if (item.control == control &&
             item.documents.keys().contains(relativePath)) {
+            QString id = ParserUtils::property(item.documents.value(relativePath).document,
+                                               documentPath, "id");
+
+            if (id.isEmpty()) {
+                ParserUtils::setProperty(item.documents.value(relativePath).document,
+                                         documentPath, "id", control->id());
+                id = control->id();
+            }
+
             wrfile(documentPath, item.documents.value
                    (relativePath).document->toPlainText().toUtf8());
             item.documents.value(relativePath).document->setModified(false);
 
-            Q_ASSERT(!control->id().isEmpty());
-
-            const QString& id = ParserUtils::property(documentPath, "id");
-
-            if (control->id() != id) {
-                if (id.isEmpty())
-                    ControlPropertyManager::setId(control, control->id(), ControlPropertyManager::SaveChanges);
-                else
-                    ControlPropertyManager::setId(control, id, ControlPropertyManager::SaveChanges); // For refactorId
-
-                if (id.isEmpty()) {
-                    ParserUtils::setProperty(item.documents.value(relativePath).document,
-                                             item.control->url(), "id", control->id());
-                }
-            }
+            if (control->id() != id)
+                ControlPropertyManager::setId(control, id, ControlPropertyManager::SaveChanges); // For refactorId
 
             if (control->form())
                 ControlPreviewingManager::scheduleFormCodeUpdate(control->uid());

@@ -1362,16 +1362,6 @@ void PropertiesPane::onGeometryChange(Control* control)
     }
 }
 
-void PropertiesPane::onPropertyChange(Control* /*control*/, const QString& /*propertyName*/)
-{
-    Q_UNUSED(0)
-    /*
-        FIXME: Empty for now, because the only user of the setProperty function of
-               ControlPropertyManager is this class. Hence no need to handle property
-               changes which made by us already.
-    */
-}
-
 void PropertiesPane::onIdChange(Control* control, const QString& /*previousId*/)
 {
     if (topLevelItemCount() <= 0)
@@ -1397,6 +1387,16 @@ void PropertiesPane::onIdChange(Control* control, const QString& /*previousId*/)
             }
         }
     }
+}
+
+void PropertiesPane::onPropertyChange()
+{
+    Q_UNUSED(0)
+    /*
+        FIXME: Empty for now, because the only user of the setProperty function of
+               ControlPropertyManager is this class. Hence no need to handle property
+               changes which made by us already.
+    */
 }
 
 void PropertiesPane::filterList(const QString& filter)

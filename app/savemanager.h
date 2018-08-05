@@ -17,8 +17,12 @@ class SaveManager final : public QObject
     friend class ControlPropertyManager; // For setProperty(), moveControl()
     friend class ProjectManager;         // For initProject()
 
+public:
+    static SaveManager* instance();
+
 private:
     explicit SaveManager(QObject* parent = nullptr);
+    ~SaveManager();
 
     static bool initProject(const QString& projectDirectory, int templateNumber);
 
@@ -31,6 +35,12 @@ private:
     static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const Control* control);
+
+signals:
+    void propertyChanged(Control* control, const QString& property, const QString& value);
+
+private:
+    static SaveManager* s_instance;
 };
 
 #endif // SAVEMANAGER_H
