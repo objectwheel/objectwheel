@@ -264,15 +264,21 @@ int calculateVisibleRow(const QTreeWidgetItem* item)
     QTreeWidget* treeWidget = item->treeWidget();
     Q_ASSERT(treeWidget);
 
+    int totalCount = 0;
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(treeWidget))
+        totalCount += allSubChildItems(topLevelItem, true, false).size();
+
     int count = 0;
     for (QTreeWidgetItem* topLevelItem : topLevelItems(treeWidget)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem, true, false)) {
             if (childItem == item)
-                return count;
+                return totalCount - count - 1;
             ++count;
         }
     }
-    return count;
+
+    Q_ASSERT(0);
+    return 0;
 }
 
 QWidget* createIdHandlerWidget(Control* control)
