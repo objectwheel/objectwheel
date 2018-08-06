@@ -6,6 +6,7 @@
 #include <designerscene.h>
 #include <parserutils.h>
 #include <transparentstyle.h>
+#include <paintutils.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -112,7 +113,9 @@ void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
 void setPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
+    palette.setColor(QPalette::Base, Qt::white);
     palette.setColor(QPalette::Text, "#403121");
+    palette.setColor(QPalette::Window, "#faf1e8");
     palette.setColor(QPalette::WindowText, "#403121");
     widget->setPalette(palette);
 }
@@ -146,19 +149,6 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRo
     }
 
     painter->restore();
-}
-
-QImage colorToImage(const QSize& layoutSize, const QColor& color)
-{
-    QImage image(layoutSize * qApp->devicePixelRatio(), QImage::Format_ARGB32_Premultiplied);
-    image.setDevicePixelRatio(qApp->devicePixelRatio());
-    image.fill(color);
-    QPainter p(&image);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setPen("#403121");
-    p.drawRect(QRectF{{},layoutSize}.adjusted(0.5, 0.5, -0.5, -0.5));
-    p.end();
-    return image;
 }
 
 QString urlToDisplayText(const QUrl& url, const QString& controlDir)
@@ -450,7 +440,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
     toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolButton->setText(color.name(QColor::HexArgb));
-    toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
+    toolButton->setIcon(QIcon(PaintUtils::colorToPixmap({12, 12}, color)));
     toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
     toolButton->setIconSize({12, 12});
     toolButton->setCursor(Qt::PointingHandCursor);
@@ -474,7 +464,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
             return;
 
         toolButton->setText(color.name(QColor::HexArgb));
-        toolButton->setIcon(QIcon(QPixmap::fromImage(colorToImage({12, 12}, color))));
+        toolButton->setIcon(QIcon(PaintUtils::colorToPixmap({12, 12}, color)));
         ControlPropertyManager::setProperty(control, propertyName,
                                             stringify(color.name(QColor::HexArgb)), color,
                                             ControlPropertyManager::SaveChanges
