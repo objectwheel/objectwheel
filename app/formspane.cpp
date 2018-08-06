@@ -1,24 +1,16 @@
 #include <formspane.h>
 #include <flatbutton.h>
-#include <toolboxtree.h>
 #include <saveutils.h>
 #include <parserutils.h>
 #include <projectmanager.h>
 #include <designerscene.h>
 #include <filemanager.h>
-#include <delayer.h>
-#include <controlcreationmanager.h>
-#include <controlremovingmanager.h>
 #include <wfw.h>
 #include <paintutils.h>
+#include <controlcreationmanager.h>
+#include <controlremovingmanager.h>
 
-#include <QLabel>
 #include <QStandardPaths>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPalette>
-#include <QListWidget>
-#include <QScrollBar>
 #include <QPainter>
 #include <QStyledItemDelegate>
 #include <QHeaderView>
@@ -200,11 +192,100 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_removeButton->setIcon(QIcon(PaintUtils::maskedPixmap(":/images/minus.png", palette().text().color(), this)));
     connect(m_removeButton, &FlatButton::clicked, this, &FormsPane::onRemoveButtonClick);
 
+    /*
+        NOTE: No need to catch any signals about form creation or deletion from ControlRemovingManager
+              or ControlCreatingManager since the member functions that are operating on forms are
+              private members and only used by FormsPane.
+    */
 
-    connect(ProjectManager::instance(), SIGNAL(started()), SLOT(onDatabaseChange()));
-    //    FIXME: connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(onDatabaseChange()));
-    connect(m_designerScene, SIGNAL(currentFormChanged(Form*)), SLOT(onDatabaseChange()));
-    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), SLOT(onCurrentFormChange()));
+    connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refreshList);
+    connect(ProjectManager::instance(), &ProjectManager::started, this, &FormsPane::refreshList);
+    connect(this, &FormsPane::currentItemChanged, this, &FormsPane::onCurrentItemChange);
+}
+
+void FormsPane::sweep()
+{
+    blockSignals(true);
+    clear();
+    blockSignals(false);
+}
+
+void FormsPane::onAddButtonClick()
+{
+    auto tempPath = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0];
+    tempPath = tempPath + separator() + "Objectwheel";
+
+    rm(tempPath);
+
+    if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
+        return;
+
+    ControlCreationManager::createForm(tempPath);
+
+    rm(tempPath);
+
+    refreshList();
+}
+
+void FormsPane::onRemoveButtonClick()
+{
+    ControlRemovingManager::removeForm(m_designerScene->currentForm());
+    // refreshList(); // Not needed, m_designerScene already emits currentFormChanged signal
+}
+
+void FormsPane::onCurrentItemChange()
+{
+   Q_ASSERT(currentItem());
+
+    const QString& id = currentItem()->text(0);
+    for (Form* form : m_designerScene->forms()) {
+        if (form->id() == id)
+            m_designerScene->setCurrentForm(form);
+    }
+}
+
+void FormsPane::refreshList()
+{
+    QIcon formIcon, mFormIcon;
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().text().color(),
+                                                 this), QIcon::Normal);
+    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
+                                                 palette().highlightedText().color(),
+                                                 this), QIcon::Selected);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().text().color(),
+                                                this), QIcon::Normal);
+    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
+                                                palette().highlightedText().color(),
+                                                this), QIcon::Selected);
+    blockSignals(true);
+
+    clear();
+
+    QTreeWidgetItem* selectionItem = nullptr;
+    for (const QString& path : SaveUtils::formPaths(ProjectManager::dir())) {
+        const QString& id = ParserUtils::id(SaveUtils::toUrl(path));
+        Q_ASSERT(!id.isEmpty());
+
+        auto item = new QTreeWidgetItem;
+        item->setText(0, id);
+
+        if (SaveUtils::isMain(path))
+            item->setIcon(0, mFormIcon);
+        else
+            item->setIcon(0, formIcon);
+
+        addTopLevelItem(item);
+
+        if (m_designerScene->currentForm()->id() == id)
+            selectionItem = item;
+    }
+
+    Q_ASSERT(selectionItem);
+    selectionItem->setSelected(true);
+
+    blockSignals(false);
 }
 
 void FormsPane::paintEvent(QPaintEvent* e)
@@ -235,88 +316,12 @@ void FormsPane::paintEvent(QPaintEvent* e)
     QTreeWidget::paintEvent(e);
 }
 
-void FormsPane::onRemoveButtonClick()
-{
-    ControlRemovingManager::removeForm(m_designerScene->currentForm());
-}
-
-void FormsPane::onAddButtonClick()
-{
-    auto tempPath = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0];
-    tempPath = tempPath + separator() + "Objectwheel";
-
-    rm(tempPath);
-
-    if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
-        return;
-
-    ControlCreationManager::createForm(tempPath);
-
-    rm(tempPath);
-}
-
-void FormsPane::onDatabaseChange()
-{
-    QIcon formIcon, mFormIcon;
-    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
-                                                 palette().text().color(),
-                                                 this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
-                                                 palette().highlightedText().color(),
-                                                 this), QIcon::Selected);
-    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
-                                                palette().text().color(),
-                                                this), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
-                                                palette().highlightedText().color(),
-                                                this), QIcon::Selected);
-
-    int row = -1;
-    QString id;
-    if (currentItem())
-        id = currentItem()->text(0);
-
-    clear();
-
-    for (auto path : SaveUtils::formPaths(ProjectManager::dir())) {
-        auto _id = ParserUtils::id(SaveUtils::toUrl(path));
-        if (id == _id)
-            row = topLevelItemCount();
-
-        auto item = new QTreeWidgetItem;
-        item->setText(0, _id);
-        if (SaveUtils::isMain(path))
-            item->setIcon(0, mFormIcon);
-        else
-            item->setIcon(0, formIcon);
-        addTopLevelItem(item);
-    }
-    // FIXME   setCurrentRow(row);
-}
-
-void FormsPane::onCurrentFormChange()
-{
-    if (!currentItem())
-        return;
-
-    auto id = currentItem()->text(0);
-    for (auto form : m_designerScene->forms()) {
-        if (form->id() == id)
-            m_designerScene->setCurrentForm(form);
-    }
-}
-
 void FormsPane::updateGeometries()
 {
     QTreeWidget::updateGeometries();
     QRect vg = viewport()->geometry();
     m_addButton->move(vg.topRight() + QPoint(-38, -21));
     m_removeButton->move(vg.topRight() + QPoint(-19, -21));
-}
-
-void FormsPane::sweep()
-{
-    clear();
 }
 
 QSize FormsPane::sizeHint() const

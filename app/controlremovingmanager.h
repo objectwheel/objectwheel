@@ -12,12 +12,11 @@ class ControlRemovingManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ControlRemovingManager)
 
-    friend class ApplicationCore;
+    friend class ApplicationCore; // For construction
+    friend class FormsPane; // For removeForm
 
 public:
     static ControlRemovingManager* instance();
-    static void init(DesignerScene* designerScene);
-    static void removeForm(Form* form);
     static void removeControl(Control* control);
     static void removeControls(const QList<Control*>& controls);
 
@@ -28,6 +27,9 @@ signals:
 private:
     explicit ControlRemovingManager(QObject* parent = nullptr);
     ~ControlRemovingManager();
+
+    static void init(DesignerScene* designerScene);
+    static void removeForm(Form* form);  // FormsPane dependency: Should be a private member
 
 private:
     static ControlRemovingManager* s_instance;

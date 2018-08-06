@@ -13,12 +13,11 @@ class ControlCreationManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ControlCreationManager)
 
-    friend class ApplicationCore;
+    friend class ApplicationCore; // For construction
+    friend class FormsPane; // For createForm
 
 public:
     static ControlCreationManager* instance();
-    static void init(DesignerScene* designerScene);
-    static Form* createForm(const QString& rootPath);
     static Control* createControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
                                   Control* parentControl, QString destinationPath,
                                   QString destinationSuid);
@@ -28,6 +27,9 @@ signals:
 private:
     explicit ControlCreationManager(QObject* parent = nullptr);
     ~ControlCreationManager();
+
+    static void init(DesignerScene* designerScene);
+    static Form* createForm(const QString& rootPath); // FormsPane dependency: Should be a private member
 
 private:
     static ControlCreationManager* s_instance;

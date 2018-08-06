@@ -63,11 +63,14 @@ void DesignerScene::addControl(Control* /*control*/, Control* /*parentControl*/)
 
 void DesignerScene::removeForm(Form* form)
 {
-    removeControl(form);
+    Form* currentForm = m_currentForm.data();
+    removeControl(form); // 1. If the given form address is the current form, then if this line runs,
+                         // QPointer clears the address within m_currentForm, because its object is "delete"d
+                         // 2. Thus we copy it.
 
     m_forms.removeAll(form);
 
-    if (m_currentForm == form)
+    if (currentForm == form) // 3. And we compare it here with the copied one
         setCurrentForm(m_forms.first());
 }
 

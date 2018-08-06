@@ -11,7 +11,7 @@ class QImage;
 namespace PaintUtils {
 QPixmap maskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap colorToPixmap(const QSize& size, const QColor& color, const QWidget* widget = nullptr,
-                     bool hasBorder = false);
+                     bool hasBorder = true);
 }
 
 #endif // PAINTUTILS_H

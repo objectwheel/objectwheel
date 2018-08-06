@@ -19,13 +19,13 @@ public slots:
 private slots:
     void onAddButtonClick();
     void onRemoveButtonClick();
-    void onDatabaseChange();
-    void onCurrentFormChange();
+    void onCurrentItemChange();
+    void refreshList();
 
 private:
     void paintEvent(QPaintEvent* e) override;
-    QSize sizeHint() const override;
     void updateGeometries() override;
+    QSize sizeHint() const override;
 
 private:
     DesignerScene* m_designerScene;
