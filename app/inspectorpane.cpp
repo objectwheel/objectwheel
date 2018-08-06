@@ -17,16 +17,21 @@
 
 namespace {
 
+const int ROW_HEIGHT = 21;
 bool isProjectStarted = false;
 bool isSelectionHandlingBlocked = false;
 
-void setPalette(QWidget* widget)
+void initPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
+    palette.setColor(QPalette::Light, "#62A558");
+    palette.setColor(QPalette::Dark, "#599750");
     palette.setColor(QPalette::Base, Qt::white);
     palette.setColor(QPalette::Text, "#254022");
-    palette.setColor(QPalette::Window, "#edfceb");
+    palette.setColor(QPalette::BrightText, Qt::white);
     palette.setColor(QPalette::WindowText, "#254022");
+    palette.setColor(QPalette::AlternateBase, "#e8f7e6");
+    palette.setColor(QPalette::Link, "#cc453b");
     widget->setPalette(palette);
 }
 
@@ -48,13 +53,15 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
         painter->fillRect(rect, pal.highlight());
     } else {
         if (row % 2)
-            painter->fillRect(rect, pal.window());
+            painter->fillRect(rect, pal.alternateBase());
         else
             painter->fillRect(rect, pal.base());
     }
 
     // Draw top and bottom lines
-    painter->setPen(isSelected ? "#30ffffff" : "#304A7C42");
+    QColor lineColor(isSelected ? pal.highlightedText().color() : pal.text().color().lighter(210));
+    lineColor.setAlpha(50);
+    painter->setPen(lineColor);
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
@@ -190,7 +197,8 @@ public:
       , m_inspectorPane(parent)
     {}
 
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+               const QModelIndex& index) const override
     {
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
@@ -214,7 +222,7 @@ public:
 
         // Draw text
         if (model->data(index, Qt::UserRole).toBool())
-            painter->setPen("#cc453b");
+            painter->setPen(option.palette.link().color());
         else if (isSelected)
             painter->setPen(option.palette.highlightedText().color());
         else
@@ -225,13 +233,14 @@ public:
         painter->drawText(textRect,
                           option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
         painter->restore();
     }
 
     QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
     {
         const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
-        return QSize(size.width(), 21);
+        return QSize(size.width(), ROW_HEIGHT);
     }
 
 private:
@@ -241,10 +250,11 @@ private:
 InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
 {
+    initPalette(this);
+
     QFont fontMedium(font());
     fontMedium.setWeight(QFont::Medium);
 
-    ::setPalette(this);
     header()->setFont(fontMedium);
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
@@ -269,16 +279,24 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setStyleSheet("QTreeView {"
-                  "    border: 1px solid #4A7C42;"
-                  "} QHeaderView::section {"
-                  "    padding-left: 5px;"
-                  "    color: white;"
-                  "    border: none;"
-                  "    border-bottom: 1px solid #4A7C42;"
-                  "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
-                  "                                stop:0 #62A558, stop:1 #599750);"
-                  "}");
+    setStyleSheet(
+                QString {
+                    "QTreeView {"
+                    "    border: 1px solid %1;"
+                    "} QHeaderView::section {"
+                    "    padding-left: 5px;"
+                    "    color: %4;"
+                    "    border: none;"
+                    "    border-bottom: 1px solid %1;"
+                    "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+                    "                                stop:0 %2, stop:1 %3);"
+                    "}"
+                }
+                .arg(palette().text().color().lighter(210).name())
+                .arg(palette().light().color().name())
+                .arg(palette().dark().color().name())
+                .arg(palette().brightText().color().name())
+    );
 
     connect(this, &InspectorPane::itemSelectionChanged,
             this, &InspectorPane::onItemSelectionChange);
@@ -330,7 +348,7 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
     if (hasChild) {
         QPen pen;
         pen.setWidthF(1.2);
-        pen.setColor(isSelected ? option.palette.highlightedText().color() : option.palette.text().color());
+        pen.setColor(isSelected ? palette().highlightedText().color() : palette().text().color());
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
@@ -343,22 +361,33 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
                               QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
         }
     }
+
     painter->restore();
 }
 
 void InspectorPane::paintEvent(QPaintEvent* e)
 {
     QPainter painter(viewport());
-
-    /* Fill background */
-    const qreal bandHeight = topLevelItemCount() ? rowHeight(indexFromItem(topLevelItem(0))) : 21;
-    const qreal bandCount = viewport()->height() / bandHeight;
-
     painter.fillRect(rect(), palette().base());
+    painter.setClipping(true);
 
-    for (int i = 0; i < bandCount; ++i) {
+    QColor lineColor(palette().text().color().lighter(210));
+    lineColor.setAlpha(50);
+    painter.setPen(lineColor);
+
+    for (int i = 0; i < viewport()->height() / qreal(ROW_HEIGHT); ++i) {
+        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
+        QPainterPath path;
+        path.addRect(rect);
+        painter.setClipPath(path);
+
+        // Fill background
         if (i % 2)
-            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, palette().window());
+            painter.fillRect(rect, palette().alternateBase());
+
+        // Draw top and bottom lines
+        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
     }
 
     QTreeWidget::paintEvent(e);

@@ -63,7 +63,7 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
     }
 
     // Draw top and bottom lines
-    QColor lineColor(pal.text().color().lighter(200));
+    QColor lineColor(pal.text().color().lighter(270));
     lineColor.setAlpha(50);
     painter->setPen(lineColor);
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
@@ -153,7 +153,6 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
     setExpandsOnDoubleClick(false);
-    setAutoFillBackground(true);
     setItemDelegate(new FormsListDelegate(this));
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
@@ -168,7 +167,6 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
                 QString {
                     "QTreeView {"
                     "    border: 1px solid %1;"
-                    "    outline: 0;"
                     "} QHeaderView::section {"
                     "    padding-left: 5px;"
                     "    color: %4;"
@@ -178,7 +176,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
                     "                                stop:0 %2, stop:1 %3);"
                     "}"
                 }
-                .arg(palette().text().color().lighter(200).name())
+                .arg(palette().text().color().lighter(270).name())
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
@@ -188,7 +186,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_addButton->settings().bottomColor = palette().brightText().color().darker(108);
     m_addButton->settings().borderRadius = 10;
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_addButton->setFixedSize(20, 20);
+    m_addButton->setFixedSize(18, 18);
     m_addButton->setIconSize(QSize(12, 12));
     m_addButton->setIcon(QIcon(PaintUtils::maskedPixmap(":/images/plus.png", palette().text().color(), this)));
     connect(m_addButton, &FlatButton::clicked, this, &FormsPane::onAddButtonClick);
@@ -197,7 +195,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_removeButton->settings().bottomColor = palette().brightText().color().darker(108);
     m_removeButton->settings().borderRadius = 10;
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_removeButton->setFixedSize(20, 20);
+    m_removeButton->setFixedSize(18, 18);
     m_removeButton->setIconSize(QSize(12, 12));
     m_removeButton->setIcon(QIcon(PaintUtils::maskedPixmap(":/images/minus.png", palette().text().color(), this)));
     connect(m_removeButton, &FlatButton::clicked, this, &FormsPane::onRemoveButtonClick);
@@ -215,11 +213,11 @@ void FormsPane::paintEvent(QPaintEvent* e)
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
 
-    QColor lineColor(palette().text().color().lighter(200));
+    QColor lineColor(palette().text().color().lighter(270));
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
-    for (int i = 1; i < viewport()->height() / qreal(ROW_HEIGHT); ++i) {
+    for (int i = 0; i < viewport()->height() / qreal(ROW_HEIGHT); ++i) {
         QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
         QPainterPath path;
         path.addRect(rect);
@@ -312,8 +310,8 @@ void FormsPane::updateGeometries()
 {
     QTreeWidget::updateGeometries();
     QRect vg = viewport()->geometry();
-    m_addButton->move(vg.topRight() + QPoint(-42, -22));
-    m_removeButton->move(vg.topRight() + QPoint(-21, -22));
+    m_addButton->move(vg.topRight() + QPoint(-38, -21));
+    m_removeButton->move(vg.topRight() + QPoint(-19, -21));
 }
 
 void FormsPane::sweep()

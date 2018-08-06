@@ -25,6 +25,7 @@
 
 namespace {
 
+const int ROW_HEIGHT = 21;
 int g_verticalScrollBarPosition = 99999;
 int g_horizontalScrollBarPosition = 99999;
 
@@ -110,19 +111,27 @@ void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
     }
 }
 
-void setPalette(QWidget* widget)
+void initPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
+    palette.setColor(QPalette::Light, "#AB8157");
+    palette.setColor(QPalette::Dark, "#9C7650");
     palette.setColor(QPalette::Base, Qt::white);
     palette.setColor(QPalette::Text, "#403121");
-    palette.setColor(QPalette::Window, "#faf1e8");
+    palette.setColor(QPalette::BrightText, Qt::white);
     palette.setColor(QPalette::WindowText, "#403121");
+    palette.setColor(QPalette::AlternateBase, "#f7efe6");
+    palette.setColor(QPalette::Link, "#cc453b");
+    palette.setColor(QPalette::LinkVisited, "#56ab49");
     widget->setPalette(palette);
 }
 
-void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRow, bool verticalLine)
+void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool classRow, bool verticalLine)
 {
     painter->save();
+
+    const QPalette& pal = option.palette;
+    const QRectF& rect = option.rect;
 
     QPainterPath path;
     path.addRect(rect);
@@ -131,14 +140,16 @@ void fillBackground(QPainter* painter, const QRectF& rect, int row, bool classRo
 
     // Fill background
     if (classRow)
-        painter->fillRect(rect, "#9D7650");
+        painter->fillRect(rect, pal.light());
     else if (row % 2)
-        painter->fillRect(rect, "#faf1e8");
+        painter->fillRect(rect, pal.alternateBase());
     else
-        painter->fillRect(rect, Qt::white);
+        painter->fillRect(rect, pal.base());
 
     // Draw top and bottom lines
-    painter->setPen("#408C6A48");
+    QColor lineColor(pal.text().color().lighter(210));
+    lineColor.setAlpha(50);
+    painter->setPen(lineColor);
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
@@ -281,7 +292,7 @@ QWidget* createIdHandlerWidget(Control* control)
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
-    setPalette(lineEdit);
+    initPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -309,7 +320,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
-    setPalette(lineEdit);
+    initPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -338,7 +349,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
-    setPalette(lineEdit);
+    initPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -372,7 +383,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
     fixVisibilityForWindow(control, enumm.name, comboBox);
-    setPalette(comboBox);
+    initPalette(comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -407,7 +418,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     checkBox->setFocusPolicy(Qt::ClickFocus);
     checkBox->setMinimumWidth(1);
     fixVisibleForWindow(control, propertyName, checkBox);
-    setPalette(checkBox);
+    initPalette(checkBox);
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
     {
@@ -447,7 +458,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     toolButton->setFocusPolicy(Qt::ClickFocus);
     toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
     toolButton->setMinimumWidth(1);
-    setPalette(toolButton);
+    initPalette(toolButton);
 
     QObject::connect(toolButton, &QCheckBox::clicked, [=]
     {
@@ -489,7 +500,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
     abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
     abstractSpinBox->setMinimumWidth(1);
-    setPalette(abstractSpinBox);
+    initPalette(abstractSpinBox);
 
     const auto& updateFunction = [=]
     {
@@ -561,7 +572,7 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, 
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
-    setPalette(comboBox);
+    initPalette(comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -592,7 +603,7 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
-    setPalette(comboBox);
+    initPalette(comboBox);
 
     QMetaEnum weightEnum = QMetaEnum::fromType<QFont::Weight>();
     for (int i = weightEnum.keyCount(); i--;) { // Necessary somehow
@@ -628,7 +639,7 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
-    setPalette(comboBox);
+    initPalette(comboBox);
 
     QMetaEnum capitalizationEnum = QMetaEnum::fromType<QFont::Capitalization>();
     for (int i = capitalizationEnum.keyCount(); i--;) { // Necessary somehow
@@ -668,7 +679,7 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
     spinBox->setValue(size < 0 ? 0 : size);
     spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
     spinBox->setMinimumWidth(1);
-    setPalette(spinBox);
+    initPalette(spinBox);
 
     QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
     {
@@ -908,21 +919,21 @@ public:
         const QAbstractItemModel* model = index.model();
         const bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
 
-        fillBackground(painter, option.rect,
+        fillBackground(painter, option,
                        calculateVisibleRow(m_propertiesPane->itemFromIndex(index)),
                        isClassRow, index.column() == 0 && !isClassRow);
 
-        // Draw data
+        // Draw text
         if (isClassRow) {
-            painter->setPen(Qt::white);
+            painter->setPen(option.palette.highlightedText().color());
         } else {
             if (index.column() == 0 && index.data(Qt::DecorationRole).toBool()) {
                 QFont font (option.font);
                 font.setWeight(QFont::Medium);
                 painter->setFont(font);
-                painter->setPen("#56ab49");
+                painter->setPen(option.palette.linkVisited().color());
             } else {
-                painter->setPen("#403121");
+                painter->setPen(option.palette.text().color());
             }
         }
 
@@ -937,7 +948,7 @@ public:
     QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
     {
         const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
-        return QSize(size.width(), 21); // Fixed height for rows, 21
+        return QSize(size.width(), ROW_HEIGHT);
     }
 
 private:
@@ -948,10 +959,11 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
   , m_designerScene(designerScene)
   , m_searchEdit(new FocuslessLineEdit(this))
 {
+    initPalette(this);
+
     QFont fontMedium(font());
     fontMedium.setWeight(QFont::Medium);
 
-    ::setPalette(this);
     header()->setFont(fontMedium);
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
@@ -975,17 +987,24 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setStyleSheet("QTreeView {"
-                  "    border: 1px solid #8c6a48;"
-                  "    outline: 0;"
-                  "} QHeaderView::section {"
-                  "    padding-left: 5px;"
-                  "    color: white;"
-                  "    border: none;"
-                  "    border-bottom: 1px solid #8c6a48;"
-                  "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
-                  "                                stop:0 #AB8157, stop:1 #9C7650);"
-                  "}");
+    setStyleSheet(
+                QString {
+                    "QTreeView {"
+                    "    border: 1px solid %1;"
+                    "} QHeaderView::section {"
+                    "    padding-left: 5px;"
+                    "    color: %4;"
+                    "    border: none;"
+                    "    border-bottom: 1px solid %1;"
+                    "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+                    "                                stop:0 %2, stop:1 %3);"
+                    "}"
+                }
+                .arg(palette().text().color().lighter(210).name())
+                .arg(palette().light().color().name())
+                .arg(palette().dark().color().name())
+                .arg(palette().brightText().color().name())
+    );
 
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
@@ -1442,13 +1461,17 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
     handleRect.moveCenter(rect.center());
     handleRect.moveRight(rect.right() - 0.5);
 
-    fillBackground(painter, rect, calculateVisibleRow(itemFromIndex(index)), isClassRow, false);
+    QStyleOptionViewItem option;
+    option.initFrom(this);
+    option.rect = rect;
+
+    fillBackground(painter, option, calculateVisibleRow(itemFromIndex(index)), isClassRow, false);
 
     // Draw handle
     if (hasChild) {
         QPen pen;
         pen.setWidthF(1.2);
-        pen.setColor(isClassRow ? QColor(Qt::white) : QColor("#403121"));
+        pen.setColor(isClassRow ? palette().highlightedText().color() : palette().text().color());
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
@@ -1461,25 +1484,32 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
                               QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
         }
     }
+
     painter->restore();
 }
 
 void PropertiesPane::paintEvent(QPaintEvent* e)
 {
     QPainter painter(viewport());
+    painter.fillRect(rect(), palette().base());
+    painter.setClipping(true);
 
-    /* Fill background */
-    const qreal bandHeight = 21;
-    const qreal bandCount = viewport()->height() / bandHeight;
+    QColor lineColor(palette().text().color().lighter(210));
+    lineColor.setAlpha(50);
+    painter.setPen(lineColor);
+
+    qreal rowCount = viewport()->height() / qreal(ROW_HEIGHT);
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
+    for (int i = 0; i < rowCount; ++i) {
+        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
+        QPainterPath path;
+        path.addRect(rect);
+        painter.setClipPath(path);
 
-    painter.fillRect(rect(), Qt::white);
-
-    for (int i = 0; i < bandCount; ++i) {
         if (i % 2) {
-            painter.fillRect(0, i * bandHeight, viewport()->width(), bandHeight, "#faf1e8");
+            painter.fillRect(rect, palette().alternateBase());
         } else if (topLevelItemCount() == 0) {
-            if (i == int(bandCount / 2.0) || i == int(bandCount / 2.0) + 1) {
+            if (i == int(rowCount) || i == int(rowCount / 2.0) + 1) {
                 QString message;
                 if (selectedControls.size() == 0)
                     message = tr("No controls selected");
@@ -1488,11 +1518,20 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
                 else
                     message = tr("Multiple controls selected");
 
-                painter.setPen(selectedControls.size() == 1 ? "#d98083" : "#b5aea7");
-                painter.drawText(0, i * bandHeight, viewport()->width(), bandHeight,
-                                 Qt::AlignCenter, message);
+                QColor messageColor = selectedControls.size() == 1
+                        ? palette().link().color()
+                        : palette().text().color().lighter(210);
+                messageColor.setAlpha(180);
+
+                painter.setPen(messageColor);
+                painter.drawText(rect, Qt::AlignCenter, message);
+                painter.setPen(lineColor);
             }
         }
+
+        // Draw top and bottom lines
+        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
     }
 
     QTreeWidget::paintEvent(e);
