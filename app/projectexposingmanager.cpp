@@ -29,6 +29,9 @@ void ProjectExposingManager::exposeProject()
         if (form->id().isEmpty())
             ControlPropertyManager::setId(form, "form", ControlPropertyManager::SaveChanges);
 
+        if (form->id() != SaveUtils::id(form->dir()))
+            SaveUtils::setProperty(form->dir(), TAG_ID, form->id());
+
         s_designerScene->addForm(form);
 
         QMap<QString, Control*> controlTree;
@@ -42,6 +45,9 @@ void ProjectExposingManager::exposeProject()
 
             if (control->id().isEmpty())
                 ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);
+
+            if (control->id() != SaveUtils::id(control->dir()))
+                SaveUtils::setProperty(control->dir(), TAG_ID, control->id());
 
             ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
             controlTree.insert(childPath, control);

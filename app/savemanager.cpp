@@ -64,11 +64,6 @@ QString parentDir(const Control* control)
     return SaveUtils::toParentDir(control->dir());
 }
 
-void flushId(const Control* control)
-{
-    ParserUtils::setProperty(SaveUtils::toUrl(control->dir()), "id", control->id());
-}
-
 void flushSuid(const Control* control, const QString& suid)
 {
     auto topPath = control->dir();
@@ -265,7 +260,7 @@ bool SaveManager::addForm(Form* form)
 
     form->setUrl(SaveUtils::toUrl(formDir));
 
-    flushId(form);
+    ParserUtils::setId(form->url(), form->id());
     regenerateUids(form);
     ControlPropertyManager::setId(form, form->id(), ControlPropertyManager::NoOption);
 
@@ -311,9 +306,9 @@ bool SaveManager::addControl(Control* control, const Control* parentControl, con
         child->setUrl(child->url().replace(control->dir(), controlDir));
     control->setUrl(SaveUtils::toUrl(controlDir));
 
-    flushId(control);
+    ParserUtils::setId(control->url(), control->id());
     for (auto child : control->childControls())
-        flushId(child);
+        ParserUtils::setId(child->url(), child->id());
 
     flushSuid(control, suid);
     regenerateUids(control); //for all
@@ -407,9 +402,11 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
         control->setId(value);
         refactorId(control, SaveUtils::suid(control->dir()), topPath);
         value = control->id();
+        ParserUtils::setId(control->url(), value);
+    } else {
+        ParserUtils::setProperty(control->url(), property, value);
     }
 
-    ParserUtils::setProperty(control->url(), property, value);
     instance()->propertyChanged(control, property, value);
 }
 

@@ -175,73 +175,75 @@ void DesignerView::onCutAction()
     clipboard->setMimeData(mimeData);
 }
 
+// FIXME:
 void DesignerView::onCopyAction()
 {
-    QList<QUrl> urls;
-    auto mimeData = new QMimeData;
-    auto clipboard = QGuiApplication::clipboard();
-    auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->currentForm());
-    mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
+//    QList<QUrl> urls;
+//    auto mimeData = new QMimeData;
+//    auto clipboard = QGuiApplication::clipboard();
+//    auto selectedControls = scene()->selectedControls();
+//    selectedControls.removeOne(scene()->currentForm());
+//    mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
 
-    for (auto control : selectedControls)
-        for (auto ctrl : selectedControls)
-            if (control->childControls().contains(ctrl))
-                selectedControls.removeAll(ctrl);
+//    for (auto control : selectedControls)
+//        for (auto ctrl : selectedControls)
+//            if (control->childControls().contains(ctrl))
+//                selectedControls.removeAll(ctrl);
 
-    for (auto control : selectedControls)
-        urls << QUrl::fromLocalFile(control->dir());
+//    for (auto control : selectedControls)
+//        urls << QUrl::fromLocalFile(control->dir());
 
-    mimeData->setUrls(urls);
-    mimeData->setText(TOOL_KEY);
-    clipboard->setMimeData(mimeData);
+//    mimeData->setUrls(urls);
+//    mimeData->setText(TOOL_KEY);
+//    clipboard->setMimeData(mimeData);
 }
 
+// FIXME:
 void DesignerView::onPasteAction()
 {
-    auto clipboard = QGuiApplication::clipboard();
-    auto mimeData = clipboard->mimeData();
-    auto currentForm = scene()->currentForm();
-    QString sourceSuid = mimeData->data("objectwheel/uid");
-    if (!mimeData->hasUrls() || !mimeData->hasText() ||
-            mimeData->text() != TOOL_KEY || sourceSuid.isEmpty())
-        return;
+//    auto clipboard = QGuiApplication::clipboard();
+//    auto mimeData = clipboard->mimeData();
+//    auto currentForm = scene()->currentForm();
+//    QString sourceSuid = mimeData->data("objectwheel/uid");
+//    if (!mimeData->hasUrls() || !mimeData->hasText() ||
+//            mimeData->text() != TOOL_KEY || sourceSuid.isEmpty())
+//        return;
 
-    QList<Control*> controls;
-    for (auto url : mimeData->urls()) {
-        auto control = ControlCreationManager::createControl(
-                    url.toLocalFile(),
-                    QPointF(ParserUtils::x(SaveUtils::toUrl(url.toLocalFile())) + 5, ParserUtils::y(SaveUtils::toUrl(url.toLocalFile())) + 5),
-                    sourceSuid,
-                    currentForm,
-                    currentForm->dir(),
-                    currentForm->uid()
-                    );
+//    QList<Control*> controls;
+//    for (auto url : mimeData->urls()) {
+//        auto control = ControlCreationManager::createControl(
+//                    url.toLocalFile(),
+//                    QPointF(ParserUtils::x(SaveUtils::toUrl(url.toLocalFile())) + 5, ParserUtils::y(SaveUtils::toUrl(url.toLocalFile())) + 5),
+//                    sourceSuid,
+//                    currentForm,
+//                    currentForm->dir(),
+//                    currentForm->uid()
+//                    );
 
-        controls << control;
+//        controls << control;
 
-        if (url == mimeData->urls().last()) {
-            scene()->clearSelection();
-            for (auto control : controls)
-                control->setSelected(true);
+//        if (url == mimeData->urls().last()) {
+//            scene()->clearSelection();
+//            for (auto control : controls)
+//                control->setSelected(true);
 
-            if (!mimeData->data("objectwheel/cut").isEmpty()) {
-                QDataStream dstream(mimeData->data("objectwheel/dstream"));
-                int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
-                QList<Control*> cutControls;
-                for (int i = 0; i < size; i++) {
-                    quint64 buff;
-                    dstream >> buff;
-                    cutControls << (Control*)buff;
-                }
+//            if (!mimeData->data("objectwheel/cut").isEmpty()) {
+//                QDataStream dstream(mimeData->data("objectwheel/dstream"));
+//                int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
+//                QList<Control*> cutControls;
+//                for (int i = 0; i < size; i++) {
+//                    quint64 buff;
+//                    dstream >> buff;
+//                    cutControls << (Control*)buff;
+//                }
 
-                ControlRemovingManager::removeControls(cutControls);
-            }
-        }
+//                ControlRemovingManager::removeControls(cutControls);
+//            }
+//        }
 
-        // BUG: Do we really need this?
-        //        ControlPreviewingManager::scheduleRefresh(control->uid());
-    }
+//        // BUG: Do we really need this?
+//        //        ControlPreviewingManager::scheduleRefresh(control->uid());
+//    }
 }
 
 void DesignerView::onDeleteAction()

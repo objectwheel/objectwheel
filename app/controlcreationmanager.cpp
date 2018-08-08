@@ -41,6 +41,9 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     SaveManager::addForm(form);
     s_designerScene->addForm(form);
 
+    if (form->id() != SaveUtils::id(form->dir()))
+        SaveUtils::setProperty(form->dir(), TAG_ID, form->id());
+
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
     // parent concept for forms in Designer; fors are directly put into DesignerScene
 
@@ -58,6 +61,10 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
 {
     auto control = new Control(SaveUtils::toUrl(rootPath));
     SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
+
+    if (control->id() != SaveUtils::id(control->dir()))
+        SaveUtils::setProperty(control->dir(), TAG_ID, control->id());
+
     ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), parentControl->uid());
@@ -74,6 +81,9 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
         Q_ASSERT(parentControl);
 
         auto childControl = new Control(SaveUtils::toUrl(childPath));
+        if (childControl->id() != SaveUtils::id(childControl->dir()))
+            SaveUtils::setProperty(childControl->dir(), TAG_ID, childControl->id());
+
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         emit instance()->controlCreated(childControl);

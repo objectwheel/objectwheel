@@ -90,34 +90,6 @@ QString fullPropertyValue(const QString& source, const QString& property, const 
     return QString();
 }
 
-bool propertyContains(const UiObjectMemberList* list, const QString& property)
-{
-    while(list) {
-        UiPublicMember* publicMember;
-        UiArrayBinding* arrayBinding;
-        UiObjectBinding* objectBinding;
-        UiScriptBinding* scriptBinding;
-
-        if ((scriptBinding = cast<UiScriptBinding*>(list->member))) {
-            if (fullPropertyName(scriptBinding->qualifiedId).contains(property))
-                return true;
-        } else if ((arrayBinding = cast<UiArrayBinding*>(list->member))) {
-            if (fullPropertyName(arrayBinding->qualifiedId).contains(property))
-                return true;
-        } else if ((objectBinding = cast<UiObjectBinding*>(list->member))) {
-            if (fullPropertyName(objectBinding->qualifiedId).contains(property))
-                return true;
-        } else if ((publicMember = cast<UiPublicMember*>(list->member))) {
-            if (publicMember->name.contains(property))
-                return true;
-        }
-
-        list = list->next;
-    }
-
-    return false;
-}
-
 bool propertyExists(const UiObjectMemberList* list, const QString& property)
 {
     while(list) {
@@ -374,82 +346,22 @@ bool ParserUtils::exists(const QString& url, const QString& property)
     return propertyExists(uiObjectInitializer->members, property);
 }
 
-bool ParserUtils::contains(const QString& url, const QString& property)
-{
-    QString source = rdfile(url);
-
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
-    document->setSource(source);
-
-    if (!document->parse()) {
-        qWarning() << "Property couldn't set. Unable to parse qml file.";
-        return false;
-    }
-
-    auto uiProgram = document->qmlProgram();
-
-    if (!uiProgram) {
-        qWarning() << "Property couldn't set. Corrupted ui program.";
-        return false;
-    }
-
-    auto uiObjectMemberList = uiProgram->members;
-
-    if (!uiObjectMemberList) {
-        qWarning() << "Property couldn't set. Empty source file.";
-        return false;
-    }
-
-    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
-
-    if (!uiObjectDefinition) {
-        qWarning() << "Property couldn't set. Bad file format 0x1.";
-        return false;
-    }
-
-    auto uiObjectInitializer = uiObjectDefinition->initializer;
-
-    if (!uiObjectInitializer) {
-        qWarning() << "Property couldn't set. Bad file format 0x2.";
-        return false;
-    }
-
-    return propertyContains(uiObjectInitializer->members, property);
-}
-
 bool ParserUtils::canParse(const QString& url)
 {
-    QString source = rdfile(url);
+    const QString& source = rdfile(url);
     Dialect dialect(Dialect::Qml);
     QSharedPointer<Document> document = Document::create(url, dialect);
     document->setSource(source);
     return document->parse();
 }
 
-qreal ParserUtils::x(const QString& url)
+bool ParserUtils::canParse(QTextDocument* doc, const QString& url)
 {
-    return property(url, "x").toDouble();
-}
-
-qreal ParserUtils::y(const QString& url)
-{
-    return property(url, "y").toDouble();
-}
-
-qreal ParserUtils::z(const QString& url)
-{
-    return property(url, "z").toDouble();
-}
-
-qreal ParserUtils::width(const QString& url)
-{
-    return property(url, "width").toDouble();
-}
-
-qreal ParserUtils::height(const QString& url)
-{
-    return property(url, "height").toDouble();
+    const QString& source = doc->toPlainText();
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(url, dialect);
+    document->setSource(source);
+    return document->parse();
 }
 
 QString ParserUtils::id(const QString& url)
@@ -550,31 +462,6 @@ QString ParserUtils::property(QTextDocument* doc, const QString& url, const QStr
         return QString();
 
     return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
-}
-
-void ParserUtils::setX(const QString& url, qreal x)
-{
-    setProperty(url, "x", QString::number(x));
-}
-
-void ParserUtils::setY(const QString& url, qreal y)
-{
-    setProperty(url, "y", QString::number(y));
-}
-
-void ParserUtils::setZ(const QString& url, qreal z)
-{
-    setProperty(url, "z", QString::number(z));
-}
-
-void ParserUtils::setWidth(const QString& url, qreal width)
-{
-    setProperty(url, "width", QString::number(width));
-}
-
-void ParserUtils::setHeight(const QString& url, qreal height)
-{
-    setProperty(url, "height", QString::number(height));
 }
 
 void ParserUtils::setId(const QString& url, const QString& id)
