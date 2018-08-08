@@ -15,6 +15,7 @@
 #include <issuesbox.h>
 #include <designerwidget.h>
 #include <controlpropertymanager.h>
+#include <paintutils.h>
 
 #include <QtMath>
 #include <QCursor>
@@ -582,15 +583,18 @@ void Control::updatePreview(const PreviewResult& result)
         return;
 
     ControlPropertyManager::setId(this, result.id, ControlPropertyManager::NoOption);
-    m_cachedGeometry = getGeometryFromProperties(result.properties);
-    if (!dragging() && !resizing())
-        applyCachedGeometry();
 
-    m_image = result.image;
     m_errors = result.errors;
     m_gui = result.gui;
     m_window = result.window;
     m_properties = result.properties;
+    m_image = hasErrors()
+            ? PaintUtils::controlErrorImage(size(), qApp->devicePixelRatio())
+            : result.image;
+
+    m_cachedGeometry = getGeometryFromProperties(result.properties);
+    if (!dragging() && !resizing())
+        applyCachedGeometry();
 
     //    if (!result.errors.isEmpty()) {
     //        //        setRefreshingDisabled(true);

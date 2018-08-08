@@ -238,6 +238,11 @@ QStringList SaveUtils::childrenPaths(const QString& rootPath, QString suid)
     return paths;
 }
 
+QString SaveUtils::id(const QString& rootPath)
+{
+    return property(rootPath, TAG_ID).toString();
+}
+
 QString SaveUtils::uid(const QString& rootPath)
 {
     return property(rootPath, TAG_UID).toString();

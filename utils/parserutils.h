@@ -11,6 +11,7 @@ class UTILS_EXPORT ParserUtils final
     Q_DISABLE_COPY(ParserUtils)
 
 public:
+    static bool canParse(const QString& url);
     static bool exists(const QString& url, const QString& property);
     static bool contains(const QString& url, const QString& property);
 

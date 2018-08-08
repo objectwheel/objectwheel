@@ -40,7 +40,8 @@ SOURCES += \
     paintutils.cpp
 
 RESOURCES += \
-    $$PWD/sharedresources/sharedresources.qrc
+    $$PWD/sharedresources/sharedresources.qrc \
+    $$PWD/resources/resources.qrc
 
 ###Includes
 include($$PWD/miniz/miniz.pri)

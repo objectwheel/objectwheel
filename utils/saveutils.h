@@ -20,6 +20,7 @@
 #define FILE_ICON        "icon.png"        // TODO: Apply everywhere
 #define FILE_MAIN        "main.qml"        // TODO: Apply everywhere
 
+#define TAG_ID           "id"
 #define TAG_UID          "uid"
 #define TAG_SUID         "suid"
 #define TAG_NAME         "name"
@@ -64,6 +65,7 @@ public:
     static QStringList masterPaths(const QString& topPath);
     static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
 
+    static QString id(const QString& rootPath);
     static QString uid(const QString& rootPath);
     static QString suid(const QString& rootPath);
     static QString name(const QString& rootPath);

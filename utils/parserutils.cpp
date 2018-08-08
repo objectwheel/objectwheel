@@ -1,4 +1,5 @@
 #include <parserutils.h>
+#include <saveutils.h>
 #include <filemanager.h>
 
 #include <qmljs/qmljsdocument.h>
@@ -417,6 +418,15 @@ bool ParserUtils::contains(const QString& url, const QString& property)
     return propertyContains(uiObjectInitializer->members, property);
 }
 
+bool ParserUtils::canParse(const QString& url)
+{
+    QString source = rdfile(url);
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(url, dialect);
+    document->setSource(source);
+    return document->parse();
+}
+
 qreal ParserUtils::x(const QString& url)
 {
     return property(url, "x").toDouble();
@@ -444,7 +454,9 @@ qreal ParserUtils::height(const QString& url)
 
 QString ParserUtils::id(const QString& url)
 {
-    return property(url, "id");
+    if (canParse(url))
+        return property(url, "id");
+    return SaveUtils::id(SaveUtils::toParentDir(url));
 }
 
 QString ParserUtils::property(const QString& url, const QString& property)
@@ -567,7 +579,10 @@ void ParserUtils::setHeight(const QString& url, qreal height)
 
 void ParserUtils::setId(const QString& url, const QString& id)
 {
-    setProperty(url, "id", id);
+    if (canParse(url))
+        setProperty(url, "id", id);
+
+    SaveUtils::setProperty(SaveUtils::toParentDir(url), TAG_ID, id);
 }
 
 void ParserUtils::setProperty(const QString& url, const QString& property, const QString& value)

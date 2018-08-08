@@ -45,6 +45,9 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
     if (!control)
         return;
 
+    if (control->hasErrors())
+        return;
+
     bool isInt = control->propertyType("x") == QVariant::Int;
 
     if (!(options & DontApplyDesigner) && (isInt ? int(control->x()) != int(x) : control->x() != x))
@@ -82,6 +85,9 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
 void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyManager::Options options)
 {
     if (!control)
+        return;
+
+    if (control->hasErrors())
         return;
 
     bool isInt = control->propertyType("y") == QVariant::Int;
@@ -123,6 +129,9 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
     if (!control)
         return;
 
+    if (control->hasErrors())
+        return;
+
     if (!(options & DontApplyDesigner) && control->zValue() != z)
         control->setZValue(z);
 
@@ -150,6 +159,9 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
 void ControlPropertyManager::setWidth(Control* control, qreal width, Options options)
 {
     if (!control)
+        return;
+
+    if (control->hasErrors())
         return;
 
     bool isInt = control->propertyType("width") == QVariant::Int;
@@ -193,6 +205,9 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
     if (!control)
         return;
 
+    if (control->hasErrors())
+        return;
+
     bool isInt = control->propertyType("height") == QVariant::Int;
 
     if (!(options & DontApplyDesigner) && (isInt ?
@@ -232,6 +247,9 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
 void ControlPropertyManager::setPos(Control* control, const QPointF& pos, ControlPropertyManager::Options options)
 {
     if (!control)
+        return;
+
+    if (control->hasErrors())
         return;
 
     bool isInt = control->propertyType("x") == QVariant::Int;
@@ -279,6 +297,9 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
 void ControlPropertyManager::setSize(Control* control, const QSizeF& size, ControlPropertyManager::Options options)
 {
     if (!control)
+        return;
+
+    if (control->hasErrors())
         return;
 
     if (!size.isValid())
@@ -329,6 +350,9 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
 void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometry, ControlPropertyManager::Options options)
 {
     if (!control)
+        return;
+
+    if (control->hasErrors())
         return;
 
     if (!geometry.isValid())
@@ -443,6 +467,8 @@ void ControlPropertyManager::setProperty(Control* control, const QString& proper
                                          const QString& parserValue, const QVariant& propertyValue,
                                          Options options)
 {
+    Q_ASSERT(!control->hasErrors());
+
     if (!control)
         return;
 
