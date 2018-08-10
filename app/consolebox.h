@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class QTextBrowser;
+class PlainTextEdit;
 class QVBoxLayout;
 class OutputPane;
 
@@ -35,7 +35,7 @@ private:
 
 private:
     QVBoxLayout* m_layout;
-    QTextBrowser* m_textBrowser;
+    PlainTextEdit* m_textBrowser;
     OutputPane* m_outputPane;
 };
 

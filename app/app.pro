@@ -6,9 +6,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += PREVIEWER_DEBUG
 
-QT += quickwidgets qml quick help
-QT += widgets widgets-private network websockets svg concurrent
-QT += webenginewidgets webchannel webengine webenginecore quickcontrols2
+QT += quickwidgets webenginewidgets concurrent quick-private qml-private widgets widgets-private
+QT += network qml quick webview websockets gamepad webchannel quickcontrols2 help
+QT += sensors svg scxml purchasing positioning nfc location bluetooth datavisualization webengine
+QT += charts 3dcore 3drender 3dinput 3dlogic 3dextras 3danimation 3dquick multimedia webenginecore
 
 ### Includes
 include($$PWD/version.pri)

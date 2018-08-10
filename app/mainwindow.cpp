@@ -254,12 +254,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openControlCountChanged, [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0
-                && m_pageSwitcherPane->currentPage() != Page_SplitView)
+                && m_pageSwitcherPane->currentPage() != Page_SplitView) {
             m_pageSwitcherPane->setCurrentPage(Page_Designer);
-
+        }
         if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0
-                && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor)
+                && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor) {
             m_pageSwitcherPane->setCurrentPage(Page_SplitView);
+        }
     });
 
     connect(m_inspectorPane, SIGNAL(controlSelectionChanged(const QList<Control*>&)),
@@ -267,26 +268,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
             m_centralWidget->designerWidget(), SLOT(handleControlDoubleClick(Control*)));
 
-    connect(RunManager::instance(),
-            QOverload<int, QProcess::ExitStatus>::of(&RunManager::finished),
-            [=] (int exitCode, QProcess::ExitStatus exitStatus)
+    connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished), [=]
+            (int exitCode, QProcess::ExitStatus)
     {
         auto pane = m_centralWidget->outputPane();
         auto console = pane->consoleBox();
 
-        if (exitStatus == QProcess::CrashExit) {
-            console->printFormatted(
-                        tr("The process was ended forcefully.\n"),
-                        "#b34b46",
-                        QFont::DemiBold
-                        );
+        if (exitCode == EXIT_FAILURE) {
+            console->printFormatted(tr("The process was ended forcefully.\n"), "#b34b46",
+                                    QFont::DemiBold);
         }
 
-        console->printFormatted(
-                    ProjectManager::name() + tr(" exited with code %1.\n").arg(exitCode),
-                    "#025dbf",
-                    QFont::DemiBold
-                    );
+        console->printFormatted(ProjectManager::name() + tr(" exited with code %1.\n").arg(exitCode),
+                                "#025dbf", QFont::DemiBold);
     });
 
     sweep();

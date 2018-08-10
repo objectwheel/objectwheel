@@ -9,7 +9,7 @@
 #include <control.h>
 #include <appfontsettings.h>
 
-#include <QTextBrowser>
+#include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QScrollBar>
 #include <QRegularExpression>
@@ -17,11 +17,15 @@
 #include <QAbstractTextDocumentLayout>
 #include <QTextBlock>
 
+class PlainTextEdit : public QPlainTextEdit {
+    friend class ConsoleBox;
+};
+
 ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
   , m_outputPane(outputPane)
 {
     m_layout = new QVBoxLayout(this);
-    m_textBrowser = new QTextBrowser;
+    m_textBrowser = new PlainTextEdit;
 
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -75,7 +79,7 @@ void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont:
     const int offset = cursor.position();
     cursor.insertText(text, format);
 
-    QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+:");
+    QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
     QRegularExpressionMatchIterator i = exp.globalMatch(text);
 
     while (i.hasNext()) {
@@ -105,7 +109,7 @@ void ConsoleBox::scrollToEnd()
 
 void ConsoleBox::onLinkClick(const QString& link)
 {
-    QRegularExpression exp("^[a-z_][a-zA-Z0-9_]+::([a-f0-9]+):.([\\w\\\\\\/\\.\\d]+):(\\d+):");
+    QRegularExpression exp("^[a-z_][a-zA-Z0-9_]+::([a-f0-9]+):.([\\w\\\\\\/\\.\\d]+):(\\d+)");
     const QString& uid = exp.match(link).captured(1);
     const QString& path = exp.match(link).captured(2);
     const int lineNumber = exp.match(link).captured(3).toInt();
@@ -157,15 +161,15 @@ bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == m_textBrowser->viewport() && event->type() == QEvent::MouseMove) {
         auto e = static_cast<QMouseEvent*>(event);
-        auto pos = e->pos();
         auto ce = m_textBrowser;
-        auto block = ce->document()->firstBlock();
-        auto top = ce->document()->documentLayout()->blockBoundingRect(block).top();
-        auto bottom = top + ce->document()->documentLayout()->blockBoundingRect(block).height();
+        auto pos = ce->contentOffset() + e->pos();
+        auto block = ce->firstVisibleBlock();
+        auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
+        auto bottom = top + ce->blockBoundingRect(block).height();
 
         while (block.isValid() && top <= rect().bottom()) {
             if (pos.y() >= top && pos.y() <= bottom) {
-                QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+:");
+                QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
                 if (exp.match(block.text()).hasMatch()
                         && pos.x() < m_textBrowser->fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
                     m_textBrowser->viewport()->setCursor(Qt::PointingHandCursor);
@@ -180,15 +184,15 @@ bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
         }
     } else if (watched == m_textBrowser->viewport() && event->type() == QEvent::MouseButtonRelease) {
         auto e = static_cast<QMouseEvent*>(event);
-        auto pos = e->pos();
         auto ce = m_textBrowser;
-        auto block = ce->document()->firstBlock();
-        auto top = ce->document()->documentLayout()->blockBoundingRect(block).top();
-        auto bottom = top + ce->document()->documentLayout()->blockBoundingRect(block).height();
+        auto pos = ce->contentOffset() + e->pos();
+        auto block = ce->firstVisibleBlock();
+        auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
+        auto bottom = top + ce->blockBoundingRect(block).height();
 
         while (block.isValid() && top <= rect().bottom()) {
             if (pos.y() >= top && pos.y() <= bottom) {
-                QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+:");
+                QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
                 if (exp.match(block.text()).hasMatch()
                         && pos.x() < m_textBrowser->fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
                     onLinkClick(exp.match(block.text()).captured());

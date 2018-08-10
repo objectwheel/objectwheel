@@ -440,6 +440,8 @@ void QmlCodeEditorWidgetPrivate::handleSaveButtonClicked()
 {
     for (auto& item : parent->_editorItems) {
         if (item.control == currentControl) {
+            if (!item.documents.value(item.currentFileRelativePath).document->isModified())
+                return;
             parent->saveDocument(item.control, item.control->dir() + separator() +
                                   DIR_THIS + separator() + item.currentFileRelativePath);
             break;

@@ -9,6 +9,7 @@
 #include <paintutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
+#include <controlpropertymanager.h>
 
 #include <QStandardPaths>
 #include <QPainter>
@@ -16,6 +17,7 @@
 #include <QHeaderView>
 
 namespace {
+bool isProjectStarted = false;
 const int ROW_HEIGHT = 21;
 
 void initPalette(QWidget* widget)
@@ -199,12 +201,18 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     */
 
     connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refreshList);
-    connect(ProjectManager::instance(), &ProjectManager::started, this, &FormsPane::refreshList);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged, this, &FormsPane::refreshList);
     connect(this, &FormsPane::currentItemChanged, this, &FormsPane::onCurrentItemChange);
+    connect(ProjectManager::instance(), &ProjectManager::started, this, [=] {
+        Q_ASSERT(!isProjectStarted);
+        isProjectStarted = true;
+        refreshList();
+    });
 }
 
 void FormsPane::sweep()
 {
+    isProjectStarted = false;
     blockSignals(true);
     clear();
     blockSignals(false);
@@ -246,6 +254,9 @@ void FormsPane::onCurrentItemChange()
 
 void FormsPane::refreshList()
 {
+    if (!isProjectStarted)
+        return;
+
     QIcon formIcon, mFormIcon;
     mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
                                                  palette().text().color(),
