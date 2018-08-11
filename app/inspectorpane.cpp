@@ -574,6 +574,12 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
     if (!codeChanged)
         return;
 
+    if (control->form() && m_designerScene->currentForm() != control)
+        return;
+
+    if (!m_designerScene->currentForm()->isAncestorOf(control))
+        return;
+
     QIcon formIcon, mFormIcon, itemIcon;
     mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
                                                  palette().text().color(),
@@ -639,6 +645,9 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
         return;
 
     if (control->form() && m_designerScene->currentForm() != control)
+        return;
+
+    if (!m_designerScene->currentForm()->isAncestorOf(control))
         return;
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
