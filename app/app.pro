@@ -247,6 +247,9 @@ macx {
     utils.files = $$OUT_PWD/../utils/libutils.dylib
     utils.path = Contents/Frameworks
     QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
+    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/interpreter -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
+    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/previewer -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
+    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/themer -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
     docs.files = $$PWD/resources/docs
     docs.path = Contents/MacOS
     QMAKE_BUNDLE_DATA += interpreter previewer themer utils docs
