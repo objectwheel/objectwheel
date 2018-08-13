@@ -2,20 +2,112 @@
 
 #include <QPainter>
 #include <QImage>
-#include <QPixmap>
+#include <QBitmap>
 #include <QWidget>
 #include <QApplication>
 
-QPixmap PaintUtils::maskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
+QImage PaintUtils::renderFilledImage(const QSizeF& size, const QColor& fillColor, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QImage dest((size * dpr).toSize(), QImage::Format_ARGB32_Premultiplied);
+    dest.setDevicePixelRatio(dpr);
+    dest.fill(fillColor);
+    return dest;
+}
+
+QImage PaintUtils::renderTransparentImage(const QSizeF& size, const QWidget* widget)
+{
+    return renderFilledImage(size, Qt::transparent, widget);
+}
+
+QImage PaintUtils::renderInvisibleControlImage(const QSizeF& size, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QImage dest = renderTransparentImage(size, widget);
+
+    QBitmap bitmap(":/images/texture.bmp");
+    bitmap.setDevicePixelRatio(dpr);
+
+    QBrush brush("#d0d0d0", bitmap);
+    brush.setStyle(Qt::TexturePattern);
+
+    QPainter p(&dest);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setBrush(brush);
+    p.setPen("#bdbdbd");
+    p.drawRect(QRectF{{}, size}.adjusted(0.5, 0.5, -0.5, -0.5));
+    p.end();
+
+    return dest;
+}
+
+QImage PaintUtils::renderInitialControlImage(const QSizeF& size, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QImage dest = renderTransparentImage(size, widget);
+
+    QImage source(":/images/wait.png");
+    source.setDevicePixelRatio(dpr);
+
+    QRectF destRect{{}, size};
+    QRectF sourceRect{{}, QSizeF{24, 24}};
+    sourceRect.moveCenter(destRect.center());
+
+    QPainter p(&dest);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.drawImage(sourceRect, source, source.rect());
+    p.end();
+
+    return dest;
+}
+
+QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QImage dest = renderTransparentImage(size, widget);
+
+    QImage source(":/images/error.png");
+    source.setDevicePixelRatio(dpr);
+
+    QRectF destRect{{}, size};
+    QRectF sourceRect{{}, QSizeF{24, 24}};
+    sourceRect.moveCenter(destRect.center());
+
+    QPainter p(&dest);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.drawImage(sourceRect, source, source.rect());
+    p.end();
+
+    return dest;
+}
+
+QImage PaintUtils::renderNonGuiControlImage(const QString& url, const QSizeF& size, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QImage dest = renderTransparentImage(size, widget);
+
+    QImage source(url);
+    source.setDevicePixelRatio(dpr);
+
+    QRectF destRect{{}, size};
+    QRectF sourceRect{{}, QSizeF{24, 24}};
+    sourceRect.moveCenter(destRect.center());
+
+    QPainter p(&dest);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.drawImage(sourceRect, source, source.rect());
+    p.end();
+
+    return dest;
+}
+
+QPixmap PaintUtils::renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
     QImage source(fileName);
     source.setDevicePixelRatio(dpr);
 
-    QImage dest(source.size(), QImage::Format_ARGB32_Premultiplied);
-    dest.setDevicePixelRatio(dpr);
-    dest.fill(color);
-
+    QImage dest = renderFilledImage(source.size() / dpr, color, widget);
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
     p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
@@ -25,49 +117,16 @@ QPixmap PaintUtils::maskedPixmap(const QString& fileName, const QColor& color, c
     return QPixmap::fromImage(dest);
 }
 
-QPixmap PaintUtils::colorToPixmap(const QSize& size, const QColor& color, const QWidget* widget,
-                                 bool hasBorder)
+QPixmap PaintUtils::renderColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget)
 {
-    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
-    QImage dest(size * dpr, QImage::Format_ARGB32_Premultiplied);
-    dest.setDevicePixelRatio(dpr);
-    dest.fill(color);
-
-    if (hasBorder) {
-        QPainter p(&dest);
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setPen(Qt::black);
-        p.drawRect(QRectF{{}, size}.adjusted(0.5, 0.5, -0.5, -0.5));
-        p.end();
-    }
-
-    return QPixmap::fromImage(dest);
-}
-
-QImage PaintUtils::controlErrorImage(const QSizeF& size, double dpr)
-{
-    QImage source(":/images/error.png");
-    source.setDevicePixelRatio(dpr);
-
-    QImage dest((size * dpr).toSize(), QImage::Format_ARGB32_Premultiplied);
-    dest.setDevicePixelRatio(dpr);
-    dest.fill(Qt::transparent);
-
-    QBrush brush;
-    brush.setColor("#40000000");
-    brush.setStyle(Qt::Dense6Pattern);
-
-    QRectF destRect{{}, size};
-    QRectF sourceRect{{}, source.size() / dpr};
-    sourceRect.moveCenter(destRect.center());
+    QImage dest = renderFilledImage(size, color, widget);
 
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
-    p.setBrush(brush);
-    p.setPen("#80000000");
-    p.drawRect(destRect.adjusted(0.5, 0.5, -0.5, -0.5));
-    p.drawImage(sourceRect, source, source.rect());
+    p.setBrush(Qt::NoBrush);
+    p.setPen(pen);
+    p.drawRect(QRectF{{}, size}.adjusted(0.5, 0.5, -0.5, -0.5));
     p.end();
 
-    return dest;
+    return QPixmap::fromImage(dest);
 }

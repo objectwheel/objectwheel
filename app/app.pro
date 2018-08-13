@@ -14,6 +14,7 @@ QT += charts 3dcore 3drender 3dinput 3dlogic 3dextras 3danimation 3dquick multim
 ### Includes
 include($$PWD/version.pri)
 include($$PWD/aes/aes.pri)
+include($$PWD/miniz/miniz.pri)
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)
 include($$PWD/qmleditor/qmleditor.pri)
@@ -115,7 +116,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/commanddispatcher.h \
            $$PWD/controlpropertymanager.h \
            $$PWD/transparentstyle.h \
-           $$PWD/applicationstyle.h
+           $$PWD/applicationstyle.h \
+           $$PWD/zipper.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -208,18 +210,18 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/commanddispatcher.cpp \
            $$PWD/controlpropertymanager.cpp \
            $$PWD/transparentstyle.cpp \
-           $$PWD/applicationstyle.cpp
+           $$PWD/applicationstyle.cpp \
+           $$PWD/zipper.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui
 
 ### Utils Settings
 INCLUDEPATH += $$PWD/../utils
-INCLUDEPATH += $$PWD/../utils/fit
-INCLUDEPATH += $$PWD/../utils/miniz
 INCLUDEPATH += $$PWD/../utils/components
 INCLUDEPATH += $$PWD/../utils/qmlparser
 INCLUDEPATH += $$PWD/../utils/qmlparser/utils
+RESOURCES   += $$PWD/../utils/resources/shared/moduleresolver/moduleresolver.qrc
 LIBS        += -L$$OUT_PWD/../utils -lutils
 windows:CONFIG(release, debug | release):LIBS += -L$$OUT_PWD/../utils/release
 windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug

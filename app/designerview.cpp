@@ -1,7 +1,6 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <saveutils.h>
-#include <parserutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
@@ -10,7 +9,7 @@
 #include <QAction>
 #include <QScrollBar>
 #include <QMimeData>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QClipboard>
 
 extern const char* TOOL_KEY;
@@ -152,7 +151,7 @@ void DesignerView::onCutAction()
     QByteArray controls;
     QDataStream dstream(&controls, QIODevice::WriteOnly);
     auto mimeData = new QMimeData;
-    auto clipboard = QGuiApplication::clipboard();
+    auto clipboard = QApplication::clipboard();
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
@@ -180,7 +179,7 @@ void DesignerView::onCopyAction()
 {
 //    QList<QUrl> urls;
 //    auto mimeData = new QMimeData;
-//    auto clipboard = QGuiApplication::clipboard();
+//    auto clipboard = QApplication::clipboard();
 //    auto selectedControls = scene()->selectedControls();
 //    selectedControls.removeOne(scene()->currentForm());
 //    mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
@@ -201,7 +200,7 @@ void DesignerView::onCopyAction()
 // FIXME:
 void DesignerView::onPasteAction()
 {
-//    auto clipboard = QGuiApplication::clipboard();
+//    auto clipboard = QApplication::clipboard();
 //    auto mimeData = clipboard->mimeData();
 //    auto currentForm = scene()->currentForm();
 //    QString sourceSuid = mimeData->data("objectwheel/uid");

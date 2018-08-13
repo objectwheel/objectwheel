@@ -3,12 +3,14 @@
 
 #include <QtGlobal>
 
-class AppFontSettings final {
+class AppFontSettings final
+{
     Q_DISABLE_COPY(AppFontSettings)
 
 public:
     static void apply();
-    static int defaultPixelSize() { return 13; }
+    static int defaultPixelSize()
+    { return 13; }
 
 private:
     AppFontSettings() {}

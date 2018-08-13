@@ -3,9 +3,7 @@
 
 #include <QWidget>
 
-// Window from widget
-
-inline QWindow* wfw(const QWidget* w)
+inline QWindow* wfw(const QWidget* w) // Window from widget
 {
     Q_ASSERT(w);
     QWindow* winHandle = w->windowHandle();

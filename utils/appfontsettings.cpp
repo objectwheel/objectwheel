@@ -1,14 +1,13 @@
 #include <appfontsettings.h>
 #include <filemanager.h>
+
 #include <QFontDatabase>
 #include <QApplication>
-#include <QDebug>
 
 void AppFontSettings::apply()
 {
-    // FIXME: Produces seg fault at exit
-    //    for (const QString& fontName : lsfile(":/fonts"))
-    //        QFontDatabase::addApplicationFont(":/fonts/" + fontName);
+    for (const QString& fontName : lsfile(":/fonts"))
+        QFontDatabase::addApplicationFont(":/fonts/" + fontName);
 
 #if defined(Q_OS_MACOS)
     QFont font(".SF NS Display");
@@ -17,7 +16,6 @@ void AppFontSettings::apply()
 #else
     QFont font("Open Sans");
 #endif
-
     font.setPixelSize(defaultPixelSize());
     font.setStyleStrategy(QFont::PreferAntialias);
 

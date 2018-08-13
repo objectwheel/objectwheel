@@ -1,9 +1,6 @@
 [submodule "app/aes"]
 	path = app/aes
 	url = https://github.com/omergoktas/aes
-[submodule "utils/miniz"]
-	path = utils/miniz
-	url = https://github.com/omergoktas/miniz
 [submodule "themer"]
 	path = themer
 	url = https://github.com/abigdreamer/themer
@@ -14,3 +11,6 @@
 	path = interpreter
 	url = https://github.com/abigdreamer/interpreter
 	branch = objectwheel
+[submodule "app/miniz"]
+	path = app/miniz
+	url = https://github.com/omergoktas/miniz

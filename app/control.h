@@ -113,6 +113,7 @@ private:
 
 private:
     static QList<Control*> m_controls;
+    static const QSizeF BASE_SIZE;
 };
 
 #endif // CONTROL_H

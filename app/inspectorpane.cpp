@@ -168,18 +168,18 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
             item->setText(1, QObject::tr("No"));
 
         QIcon icon, itemIcon;
-        icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(child->dir()),
-                                                treeWidget->palette().text().color(),
-                                                treeWidget), QIcon::Normal);
-        icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(child->dir()),
-                                                treeWidget->palette().highlightedText().color(),
-                                                treeWidget), QIcon::Selected);
-        itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
-                                                    treeWidget->palette().text().color(),
-                                                    treeWidget), QIcon::Normal);
-        itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
-                                                    treeWidget->palette().highlightedText().color(),
-                                                    treeWidget), QIcon::Selected);
+        icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(child->dir()),
+                                                      treeWidget->palette().text().color(),
+                                                      treeWidget), QIcon::Normal);
+        icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(child->dir()),
+                                                      treeWidget->palette().highlightedText().color(),
+                                                      treeWidget), QIcon::Selected);
+        itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+                                                          treeWidget->palette().text().color(),
+                                                          treeWidget), QIcon::Normal);
+        itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+                                                          treeWidget->palette().highlightedText().color(),
+                                                          treeWidget), QIcon::Selected);
 
         item->setIcon(0, icon.isNull() ? itemIcon : icon);
         parentItem->addChild(item);
@@ -296,7 +296,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
-    );
+                );
 
     connect(this, &InspectorPane::itemSelectionChanged,
             this, &InspectorPane::onItemSelectionChange);
@@ -440,18 +440,18 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     m_designerScene->clearSelection();
 
     QIcon formIcon, mFormIcon;
-    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
-                                                 palette().text().color(),
-                                                 this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
-                                                 palette().highlightedText().color(),
-                                                 this), QIcon::Selected);
-    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
-                                                palette().text().color(),
-                                                this), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
-                                                palette().highlightedText().color(),
-                                                this), QIcon::Selected);
+    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+                                                       palette().text().color(),
+                                                       this), QIcon::Normal);
+    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+                                                       palette().highlightedText().color(),
+                                                       this), QIcon::Selected);
+    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+                                                      palette().text().color(),
+                                                      this), QIcon::Normal);
+    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+                                                      palette().highlightedText().color(),
+                                                      this), QIcon::Selected);
 
     /* Create items for incoming form */
     auto formItem = new QTreeWidgetItem;
@@ -577,28 +577,30 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
     if (control->form() && m_designerScene->currentForm() != control)
         return;
 
-    if (!m_designerScene->currentForm()->isAncestorOf(control))
+    if (m_designerScene->currentForm() != control
+            && !m_designerScene->currentForm()->isAncestorOf(control)) {
         return;
+    }
 
     QIcon formIcon, mFormIcon, itemIcon;
-    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
-                                                 palette().text().color(),
-                                                 this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::maskedPixmap(":/images/mform.png",
-                                                 palette().highlightedText().color(),
-                                                 this), QIcon::Selected);
-    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
-                                                palette().text().color(),
-                                                this), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::maskedPixmap(":/images/form.png",
-                                                palette().highlightedText().color(),
-                                                this), QIcon::Selected);
-    itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
-                                                palette().text().color(),
-                                                this), QIcon::Normal);
-    itemIcon.addPixmap(PaintUtils::maskedPixmap(":/images/item.png",
-                                                palette().highlightedText().color(),
-                                                this), QIcon::Selected);
+    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+                                                       palette().text().color(),
+                                                       this), QIcon::Normal);
+    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+                                                       palette().highlightedText().color(),
+                                                       this), QIcon::Selected);
+    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+                                                      palette().text().color(),
+                                                      this), QIcon::Normal);
+    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+                                                      palette().highlightedText().color(),
+                                                      this), QIcon::Selected);
+    itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+                                                      palette().text().color(),
+                                                      this), QIcon::Normal);
+    itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+                                                      palette().highlightedText().color(),
+                                                      this), QIcon::Selected);
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
@@ -618,12 +620,12 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     childItem->setIcon(0, SaveUtils::isMain(control->dir()) ? mFormIcon : formIcon);
                 } else {
                     QIcon icon;
-                    icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(control->dir()),
-                                                            palette().text().color(),
-                                                            this), QIcon::Normal);
-                    icon.addPixmap(PaintUtils::maskedPixmap(SaveUtils::toIcon(control->dir()),
-                                                            palette().highlightedText().color(),
-                                                            this), QIcon::Selected);
+                    icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(control->dir()),
+                                                                  palette().text().color(),
+                                                                  this), QIcon::Normal);
+                    icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(control->dir()),
+                                                                  palette().highlightedText().color(),
+                                                                  this), QIcon::Selected);
 
                     childItem->setIcon(0, icon.isNull() ? itemIcon : icon);
                 }
@@ -647,8 +649,10 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
     if (control->form() && m_designerScene->currentForm() != control)
         return;
 
-    if (!m_designerScene->currentForm()->isAncestorOf(control))
+    if (m_designerScene->currentForm() != control
+            && !m_designerScene->currentForm()->isAncestorOf(control)) {
         return;
+    }
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {

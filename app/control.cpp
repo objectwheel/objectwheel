@@ -3,7 +3,6 @@
 #include <saveutils.h>
 #include <suppressor.h>
 #include <filemanager.h>
-#include <parserutils.h>
 #include <designerscene.h>
 #include <controlpreviewingmanager.h>
 #include <windowmanager.h>
@@ -16,6 +15,7 @@
 #include <designerwidget.h>
 #include <controlpropertymanager.h>
 #include <paintutils.h>
+#include <parserutils.h>
 
 #include <QtMath>
 #include <QCursor>
@@ -28,31 +28,6 @@
 extern const char* TOOL_KEY;
 
 namespace {
-
-void drawCenter(QImage& dest, const QImage& source, const QSizeF& size)
-{
-    QBrush brush;
-    brush.setColor("#b0b4b7");
-    brush.setStyle(Qt::Dense6Pattern);
-
-    QPainter painter(&dest);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setBrush(brush);
-    painter.setPen("#808487");
-
-    QRectF rect;
-    rect.setTopLeft({0.0, 0.0});
-    rect.setWidth(size.width());
-    rect.setHeight(size.height());
-
-    QRectF rect_2;
-    rect_2.setWidth(source.width() / source.devicePixelRatioF());
-    rect_2.setHeight(source.height() / source.devicePixelRatioF());
-    rect_2.moveCenter(rect.center());
-
-    painter.drawRect(rect.adjusted(0.5, 0.5, -0.5, -0.5));
-    painter.drawImage(rect_2, source);
-}
 
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
 {
@@ -72,26 +47,6 @@ QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
     return geometry;
 }
 
-QImage initialPreview(const QSizeF& size)
-{
-    auto min = qMin(24.0, qMin(size.width(), size.height()));
-
-    QImage preview(qCeil(size.width() * qApp->devicePixelRatio()),
-                   qCeil(size.height() * qApp->devicePixelRatio()),
-                   QImage::Format_ARGB32_Premultiplied);
-
-    preview.setDevicePixelRatio(qApp->devicePixelRatio());
-    preview.fill(Qt::transparent);
-
-    QImage wait(":/images/wait.png");
-    wait.setDevicePixelRatio(qApp->devicePixelRatio());
-
-    drawCenter(preview, wait.scaled(min * qApp->devicePixelRatio(), min * qApp->devicePixelRatio(),
-                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation), size);
-
-    return preview;
-}
-
 QList<Resizer*> initializeResizers(Control* control)
 {
     QList<Resizer*> resizers;
@@ -102,7 +57,7 @@ QList<Resizer*> initializeResizers(Control* control)
 }
 
 QList<Control*> Control::m_controls;
-
+const QSizeF Control::BASE_SIZE = {40.0, 40.0};
 Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_gui(false)
   , m_clip(false)
@@ -113,7 +68,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_resizing(false)
   , m_url(url)
   , m_uid(SaveUtils::uid(dir()))
-  , m_image(initialPreview({50.0, 50.0}))
+  , m_image(PaintUtils::renderInitialControlImage(BASE_SIZE))
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -125,8 +80,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    ControlPropertyManager::setId(this, ParserUtils::id(url), ControlPropertyManager::NoOption);
-    ControlPropertyManager::setSize(this, {50.0, 50.0}, ControlPropertyManager::NoOption);
+    ControlPropertyManager::setId(this, ParserUtils::id(m_url), ControlPropertyManager::NoOption);
+    ControlPropertyManager::setSize(this, BASE_SIZE, ControlPropertyManager::NoOption);
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
@@ -588,13 +543,21 @@ void Control::updatePreview(const PreviewResult& result)
     m_gui = result.gui;
     m_window = result.window;
     m_properties = result.properties;
-    m_image = hasErrors()
-            ? PaintUtils::controlErrorImage(size(), qApp->devicePixelRatio())
-            : result.image;
 
     m_cachedGeometry = getGeometryFromProperties(result.properties);
     if (!dragging() && !resizing())
         applyCachedGeometry();
+
+    m_image = hasErrors()
+            ? PaintUtils::renderErrorControlImage(size())
+            : result.image;
+
+    if (m_image.isNull()) {
+        if (m_gui)
+            m_image = PaintUtils::renderInvisibleControlImage(size());
+        else
+            m_image = PaintUtils::renderNonGuiControlImage(SaveUtils::toIcon(dir()), size());
+    }
 
     //    if (!result.errors.isEmpty()) {
     //        //        setRefreshingDisabled(true);

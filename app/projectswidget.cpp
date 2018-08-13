@@ -22,7 +22,6 @@
 #include <QPainter>
 #include <QDebug>
 #include <QDateTime>
-#include <QGuiApplication>
 #include <QScreen>
 #include <QFileDialog>
 
