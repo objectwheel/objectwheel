@@ -1,7 +1,16 @@
+Varsayılan Quick 1 teması olarak Base seçilecek, hem themer'de hem Objectwheel/app'da
+Neden CheckBox'ın labeli design area'ya başka bir nesne bırakınca siliniyor, kayboluyor doComplete ile ilgili sorun mu var?
+Neden DialogButtonBox çizimi designer'da transparan oluyor? doComplete ile ilgili sorun mu var?
+Neden dökümantasyonlardaki ButtonGroup örneğindeki kod düzgün çizilmiyor, yarısı çizik yarısı gidik designer'da?
+Neden Qml Code Editor'ün sintaxhiglerhter'ı ve kırmızı yuvarlak error bildirgeç markları bir alt ButtonTextField.qml gibi bir dosya ile tanımlanmış bir türü ilgili qml dosyasını açmadan main.qml'de "Bu tür bulunamadı" diye hata veriyor?
+Neden QFontDatabase ile eklenen fontlar program kapanırken uygulamayı removeAllApplicationFonts ile patlatıyor (FontSettingsPage vs QFontComboBox kullanan ayar sayfaları ile ilgilenilecek)
+QmlEditorWidget'deki comboboxlar çok sikko bir şekilde fazla yer kaplıyor, bunu düzelt
+
 sağ tık menüsü/context menu den bişey seçince ve sonra mouseu az hareket ettirince selected control gidiyor
 sağ tık ayrıca stick özelliğininde kafasını karıştırıyor
 bazı kontrolleri basılarının üzerine sürünce, bırakmak için vs, selected özelliği gidiyor, kasıyor, özellikle sürüklenen üzerinde başka çocuklar varsa
 Properties Pane değişmiş propertylerin resetleme özelliği eklenecek
+Properties Pane her preview update'den sonra ilgili kontrol eğer seçili ise, tüm propertylerinin QTreeWidgetItem lerini gezip düzelmeler uygulayacak ve yeşil "change indicator" dediğimiz ilgili property'nin qml dosyasına eklendiğini bildiren yeşil yazılar da ayarlanacak, güncellenecek.
 - ParserUtils ile yapılan tüm işlerde, propertylerin binding olma ihtimali göz önüne alınıp herşey yeniden düşünülecek
 
 Controller ilk oluşturulurken, proje yüklenme esnasında ya da yeni bir controlün yalnız başına oluşturulması esnasında, z, geometry, parent propertileri extraCondutions olmadan set edilitor, bunun yan etkileri neler olabilir.
