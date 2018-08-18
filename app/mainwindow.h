@@ -10,6 +10,7 @@ class ToolboxPane;
 class InspectorPane;
 class CentralWidget;
 class PropertiesPane;
+class GlobalResourcesPane;
 class PageSwitcherPane;
 
 class MainWindow : public QMainWindow
@@ -23,6 +24,7 @@ public:
     CentralWidget* centralWidget() const;
     InspectorPane* inspectorPane() const;
     PropertiesPane* propertiesPane() const;
+    GlobalResourcesPane* globalResourcesPane() const;
 
 public slots:
     void sweep();
@@ -47,6 +49,7 @@ private:
     ToolboxPane* m_toolboxPane;
     InspectorPane* m_inspectorPane;
     PropertiesPane* m_propertiesPane;
+    GlobalResourcesPane* m_globalResourcesPane;
     PageSwitcherPane* m_pageSwitcherPane;
 };
 

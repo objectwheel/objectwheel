@@ -1,8 +1,5 @@
 <RCC>
     <qresource prefix="/resources">
-        <file>qmls/delaycaller.js</file>
-        <file>qmls/FancyButton.qml</file>
-        <file>qmls/owdb/1/t/main.qml</file>
         <file>qmls/form/t/main.qml</file>
         <file>qmls/control/t/icon.png</file>
         <file>qmls/control/t/main.qml</file>
@@ -12,9 +9,8 @@
         <file>qmls/buildsScreen/main.qml</file>
         <file>qmls/buildsScreen/ProgressPage.qml</file>
         <file>other/countries.txt</file>
-        <file>qmls/owdb/1/t/control.json</file>
         <file>qmls/form/t/control.json</file>
         <file>qmls/control/t/control.json</file>
-        <file>qmls/owdb/owdb.json</file>
+        <file>qmls/buildsScreen/delaycaller.js</file>
     </qresource>
 </RCC>

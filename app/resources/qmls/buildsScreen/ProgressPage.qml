@@ -5,7 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.1
 import Qt.labs.platform 1.0
-import "../delaycaller.js" as DelayCaller
+import "delaycaller.js" as DelayCaller
 
 Item {
     id: root

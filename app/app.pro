@@ -117,7 +117,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/controlpropertymanager.h \
            $$PWD/transparentstyle.h \
            $$PWD/applicationstyle.h \
-           $$PWD/zipper.h
+           $$PWD/zipper.h \
+    globalresourcespane.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -211,7 +212,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlpropertymanager.cpp \
            $$PWD/transparentstyle.cpp \
            $$PWD/applicationstyle.cpp \
-           $$PWD/zipper.cpp
+           $$PWD/zipper.cpp \
+    globalresourcespane.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

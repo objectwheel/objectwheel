@@ -3,6 +3,7 @@
 #include <outputpane.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
+#include <globalresourcespane.h>
 #include <formspane.h>
 #include <inspectorpane.h>
 #include <pageswitcherpane.h>
@@ -41,10 +42,12 @@ QToolBar { \
 }"
 
 namespace {
+QDockWidget* globalDockWidget;
 QDockWidget* propertiesDockWidget;
 QDockWidget* formsDockWidget;
 QDockWidget* toolboxDockWidget;
 QDockWidget* inspectorDockWidget;
+bool globalDockWidgetVisible;
 bool propertiesDockWidgetVisible;
 bool formsDockWidgetVisible;
 bool toolboxDockWidgetVisible;
@@ -58,6 +61,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
   , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))
+  , m_globalResourcesPane(new GlobalResourcesPane)
   , m_pageSwitcherPane(new PageSwitcherPane)
 
 {
@@ -171,6 +175,36 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesDockWidget->setWindowTitle(tr("Properties"));
     propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
+
+    /* Add Global Resources Pane */
+    auto globalTitleLabel = new QLabel;
+    globalTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    globalTitleLabel->setText(tr("   Global Resources"));
+    globalTitleLabel->setStyleSheet("color: black");
+    globalTitleLabel->setFont(dockTitleFont);
+
+    auto globalTitlePinButton = new QToolButton;
+    globalTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    globalTitlePinButton->setCursor(Qt::PointingHandCursor);
+    globalTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    connect(globalTitlePinButton, &QToolButton::clicked, this, [] {
+        globalDockWidget->setFloating(!globalDockWidget->isFloating());
+    });
+
+    auto globalTitleBar = new QToolBar;
+    globalTitleBar->addWidget(globalTitleLabel);
+    globalTitleBar->addWidget(globalTitlePinButton);
+    globalTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
+    globalTitleBar->setIconSize(QSize(11, 11));
+    globalTitleBar->setFixedHeight(24);
+
+    globalDockWidget = new QDockWidget;
+    globalDockWidget->setStyleSheet("QDockWidget { border: none }");
+    globalDockWidget->setTitleBarWidget(globalTitleBar);
+    globalDockWidget->setWidget(m_globalResourcesPane);
+    globalDockWidget->setWindowTitle(tr("Global Resources"));
+    globalDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, globalDockWidget);
 
     /* Add Toolbox Pane */
     auto toolboxTitleLabel = new QLabel;
@@ -294,11 +328,16 @@ void MainWindow::sweep()
     m_toolboxPane->sweep();
     m_inspectorPane->sweep();
     m_propertiesPane->sweep();
+    m_globalResourcesPane->sweep();
     m_pageSwitcherPane->sweep();
 }
 
 void MainWindow::showLeftPanes(bool show)
 {
+    if (dockWidgetArea(globalDockWidget) == Qt::LeftDockWidgetArea) {
+        globalDockWidget->setVisible(show);
+        globalDockWidgetVisible = show;
+    }
     if (dockWidgetArea(propertiesDockWidget) == Qt::LeftDockWidgetArea) {
         propertiesDockWidget->setVisible(show);
         propertiesDockWidgetVisible = show;
@@ -320,6 +359,10 @@ void MainWindow::showLeftPanes(bool show)
 
 void MainWindow::showRightPanes(bool show)
 {
+    if (dockWidgetArea(globalDockWidget) == Qt::RightDockWidgetArea) {
+        globalDockWidget->setVisible(show);
+        globalDockWidgetVisible = show;
+    }
     if (dockWidgetArea(propertiesDockWidget) == Qt::RightDockWidgetArea) {
         propertiesDockWidget->setVisible(show);
         propertiesDockWidgetVisible = show;
@@ -341,6 +384,7 @@ void MainWindow::showRightPanes(bool show)
 
 void MainWindow::hideDocks()
 {
+    globalDockWidget->hide();
     propertiesDockWidget->hide();
     formsDockWidget->hide();
     inspectorDockWidget->hide();
@@ -349,6 +393,7 @@ void MainWindow::hideDocks()
 
 void MainWindow::showDocks()
 {
+    globalDockWidget->show();
     propertiesDockWidget->show();
     formsDockWidget->show();
     inspectorDockWidget->show();
@@ -357,6 +402,7 @@ void MainWindow::showDocks()
 
 void MainWindow::restoreDocks()
 {
+    globalDockWidget->setVisible(globalDockWidgetVisible);
     propertiesDockWidget->setVisible(propertiesDockWidgetVisible);
     formsDockWidget->setVisible(formsDockWidgetVisible);
     inspectorDockWidget->setVisible(inspectorDockWidgetVisible);
@@ -371,6 +417,11 @@ CentralWidget* MainWindow::centralWidget() const
 QSize MainWindow::sizeHint() const
 {
     return {1260, 700};
+}
+
+GlobalResourcesPane* MainWindow::globalResourcesPane() const
+{
+    return m_globalResourcesPane;
 }
 
 PropertiesPane* MainWindow::propertiesPane() const
