@@ -1,5 +1,8 @@
 #include <globalresourcespane.h>
 #include <focuslesslineedit.h>
+#include <projectmanager.h>
+#include <saveutils.h>
+#include <filemanager.h>
 
 #include <QPainter>
 #include <QHeaderView>
@@ -38,7 +41,7 @@ public:
     }
 };
 
-GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeWidget(parent)
+GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_searchEdit(new FocuslessLineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
 {
@@ -53,9 +56,6 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeWidget(parent)
     header()->setMinimumSectionSize(1);
     header()->setSectionsMovable(false);
 
-    headerItem()->setText(0, tr("Forms"));
-
-    setColumnCount(1);
     setIndentation(0);
     setIconSize({15, 15});
     setAcceptDrops(true);
@@ -68,13 +68,13 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeWidget(parent)
     setExpandsOnDoubleClick(false);
     setItemDelegate(new GlobalListDelegate(this));
     setAttribute(Qt::WA_MacShowFocusRect, false);
-    setSelectionBehavior(QTreeWidget::SelectRows);
-    setSelectionMode(QTreeWidget::SingleSelection);
+    setSelectionBehavior(QTreeView::SelectRows);
+    setSelectionMode(QTreeView::SingleSelection);
     setDragDropMode(QAbstractItemView::NoDragDrop);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
+    setVerticalScrollMode(QTreeView::ScrollPerPixel);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    setHorizontalScrollMode(QTreeView::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setStyleSheet(
                 QString {
@@ -95,22 +95,33 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeWidget(parent)
                 .arg(palette().brightText().color().name())
     );
 
+    m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(22);
     connect(m_searchEdit, &FocuslessLineEdit::textChanged, this, &GlobalResourcesPane::filterList);
 
-    m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+    connect(ProjectManager::instance(), &ProjectManager::started,
+            this, &GlobalResourcesPane::onProjectStart);
 }
 
 void GlobalResourcesPane::sweep()
 {
     // TODO
     m_searchEdit->clear();
-    clear();
+    setModel(nullptr);
 }
 
-void GlobalResourcesPane::filterList(const QString& filter)
+void GlobalResourcesPane::onProjectStart()
+{
+    m_fileSystemModel->setRootPath(ProjectManager::dir() + separator() + DIR_OWDB + separator() +
+                                   DIR_GLOB);
+    setModel(m_fileSystemModel);
+    setRootIndex(m_fileSystemModel->index(m_fileSystemModel->rootPath()));
+}
+
+void GlobalResourcesPane::filterList(const QString& /*filter*/)
 {
     // TODO
 }
@@ -140,12 +151,12 @@ void GlobalResourcesPane::paintEvent(QPaintEvent* e)
         painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
     }
 
-    QTreeWidget::paintEvent(e);
+    QTreeView::paintEvent(e);
 }
 
 void GlobalResourcesPane::updateGeometries()
 {
-    QTreeWidget::updateGeometries();
+    QTreeView::updateGeometries();
     QMargins vm = viewportMargins();
     vm.setBottom(m_searchEdit->height());
     QRect vg = viewport()->geometry();

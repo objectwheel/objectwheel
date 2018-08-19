@@ -1,12 +1,12 @@
 #ifndef GLOBALRESOURCESPANE_H
 #define GLOBALRESOURCESPANE_H
 
-#include <QTreeWidget>
+#include <QTreeView>
 
 class FocuslessLineEdit;
 class QFileSystemModel;
 
-class GlobalResourcesPane : public QTreeWidget
+class GlobalResourcesPane : public QTreeView
 {
     Q_OBJECT
 public:
@@ -14,6 +14,9 @@ public:
 
 public slots:
     void sweep();
+
+private slots:
+    void onProjectStart();
 
 private:
     void filterList(const QString& filter);

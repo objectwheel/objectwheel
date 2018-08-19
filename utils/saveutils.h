@@ -13,6 +13,7 @@
 #define DIR_CHILDREN     "c"
 #define DIR_MAINFORM     "1"
 #define DIR_OWDB         "owdb"
+#define DIR_GLOB         "global"
 
 #define FILE_PROJECT     "project.json"
 #define FILE_OWDB        "owdb.json"       // FIXME: There is no function of this
