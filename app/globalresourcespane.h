@@ -2,13 +2,19 @@
 #define GLOBALRESOURCESPANE_H
 
 #include <QTreeView>
+#include <private/qtreeview_p.h>
 
 class FocuslessLineEdit;
 class QFileSystemModel;
 
+class GlobalResourcesPanePrivate : public QTreeViewPrivate {};
 class GlobalResourcesPane : public QTreeView
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(GlobalResourcesPane)
+
+    friend class GlobalListDelegate;
+
 public:
     explicit GlobalResourcesPane(QWidget* parent = nullptr);
 
@@ -21,6 +27,7 @@ private slots:
 private:
     void filterList(const QString& filter);
     void paintEvent(QPaintEvent* e) override;
+    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
     void updateGeometries() override;
     QSize sizeHint() const override;
 
