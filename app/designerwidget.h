@@ -38,8 +38,10 @@ private slots:
     void onOutlineButtonClick(bool value);
     void onSnappingButtonClick(bool value);
     void onZoomLevelChange(const QString& text);
-
     void onControlSelectionChange(const QList<Control*>& selectedControls);
+
+signals:
+    void hideDockWidgetTitleBars(bool);
 
 private:
     void scaleScene(qreal ratio);
@@ -58,6 +60,7 @@ private:
     ToolButton* m_snappingButton;
     ToolButton* m_fitButton;
     ToolButton* m_outlineButton;
+    ToolButton* m_hideDockWidgetTitleBarsButton;
     QComboBox* m_zoomlLevelCombobox;
 };
 

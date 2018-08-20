@@ -22,13 +22,13 @@ const int ROW_HEIGHT = 21;
 void initPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#bf5861");
-    palette.setColor(QPalette::Dark, "#b05159");
+    palette.setColor(QPalette::Light, "#a671bd");
+    palette.setColor(QPalette::Dark, "#9968ad");
     palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::Text, "#331719");
+    palette.setColor(QPalette::Text, "#2d1f33");
     palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::WindowText, "#331719");
-    palette.setColor(QPalette::AlternateBase, "#f7e6e8");
+    palette.setColor(QPalette::WindowText, "#2d1f33");
+    palette.setColor(QPalette::AlternateBase, "#f6f2f7");
     widget->setPalette(palette);
 }
 
@@ -336,7 +336,7 @@ void FormsPane::updateGeometries()
 
 QSize FormsPane::sizeHint() const
 {
-    return QSize{190, 160};
+    return QSize{310, 140};
 }
 
 #include "formspane.moc"

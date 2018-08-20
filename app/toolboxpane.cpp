@@ -95,5 +95,5 @@ void ToolboxPane::filterList(const QString& filter)
 
 QSize ToolboxPane::sizeHint() const
 {
-    return QSize{190, 600};
+    return QSize{210, 600};
 }

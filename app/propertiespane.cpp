@@ -992,12 +992,23 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
                     "QTreeView {"
                     "    border: 1px solid %1;"
                     "} QHeaderView::section {"
-                    "    padding-left: 5px;"
                     "    color: %4;"
-                    "    border: none;"
-                    "    border-bottom: 1px solid %1;"
+                    "    padding-left: 5px;"
+                    "    padding-top: 3px;"
+                    "    padding-bottom: 3px;"
+                    "    border-style: solid;"
+                    "    border-left-width: 0px;"
+                    "    border-top-width: 0px;"
+                    "    border-bottom-color: %1;"
+                    "    border-bottom-width: 1px;"
+                    "    border-right-color: %1; "
+                    "    border-right-width: 1px;"
                     "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
                     "                                stop:0 %2, stop:1 %3);"
+                    "}"
+                    "QHeaderView::section:last{"
+                    "    border-left-width: 0px;"
+                    "    border-right-width: 0px;"
                     "}"
                 }
                 .arg(palette().text().color().lighter(210).name())
@@ -1501,6 +1512,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
     qreal rowCount = viewport()->height() / qreal(ROW_HEIGHT);
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
     for (int i = 0; i < rowCount; ++i) {
+        painter.save();
         QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
         QPainterPath path;
         path.addRect(rect);
@@ -1509,7 +1521,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
         if (i % 2) {
             painter.fillRect(rect, palette().alternateBase());
         } else if (topLevelItemCount() == 0) {
-            if (i == int(rowCount) || i == int(rowCount / 2.0) + 1) {
+            if (i == int(rowCount / 2.0) || i == int(rowCount / 2.0) + 1) {
                 QString message;
                 if (selectedControls.size() == 0)
                     message = tr("No controls selected");
@@ -1532,6 +1544,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
         // Draw top and bottom lines
         painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
         painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+        painter.restore();
     }
 
     QTreeWidget::paintEvent(e);
@@ -1550,7 +1563,7 @@ void PropertiesPane::updateGeometries()
 
 QSize PropertiesPane::sizeHint() const
 {
-    return QSize{310, 500};
+    return QSize{310, 570};
 }
 
 #include "propertiespane.moc"

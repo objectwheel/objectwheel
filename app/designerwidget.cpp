@@ -36,6 +36,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
   , m_snappingButton(new ToolButton)
   , m_fitButton(new ToolButton)
   , m_outlineButton(new ToolButton)
+  , m_hideDockWidgetTitleBarsButton(new ToolButton)
   , m_zoomlLevelCombobox(new QComboBox)
 {
     m_layout->setSpacing(0);
@@ -71,6 +72,8 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
 
     m_outlineButton->setCheckable(true);
     m_outlineButton->setChecked(m_designerScene->showOutlines());
+    m_hideDockWidgetTitleBarsButton->setCheckable(true);
+    m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setCheckable(true);
     m_snappingButton->setChecked(m_designerScene->snapping());
 
@@ -80,6 +83,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_redoButton->setCursor(Qt::PointingHandCursor);
     m_snappingButton->setCursor(Qt::PointingHandCursor);
     m_outlineButton->setCursor(Qt::PointingHandCursor);
+    m_hideDockWidgetTitleBarsButton->setCursor(Qt::PointingHandCursor);
     m_fitButton->setCursor(Qt::PointingHandCursor);
     m_zoomlLevelCombobox->setCursor(Qt::PointingHandCursor);
 
@@ -89,6 +93,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_redoButton->setToolTip("Redo action.");
     m_snappingButton->setToolTip("Enable snapping to help aligning of controls to each others.");
     m_outlineButton->setToolTip("Show outline frame for controls.");
+    m_hideDockWidgetTitleBarsButton->setToolTip("Hide title bars of Panes.");
     m_fitButton->setToolTip("Fit scene into the Dashboard.");
     m_zoomlLevelCombobox->setToolTip("Change zoom level.");
 
@@ -98,10 +103,12 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_redoButton->setIcon(Utils::Icons::REDO_TOOLBAR.icon());
     m_snappingButton->setIcon(Utils::Icons::SNAPPING_TOOLBAR.icon());
     m_outlineButton->setIcon(Utils::Icons::BOUNDING_RECT.icon());
+    m_hideDockWidgetTitleBarsButton->setIcon(Utils::Icons::CLOSE_SPLIT_TOP.icon());
     m_fitButton->setIcon(Utils::Icons::FITTOVIEW_TOOLBAR.icon());
 
     connect(m_snappingButton, SIGNAL(toggled(bool)), SLOT(onSnappingButtonClick(bool)));
     connect(m_outlineButton, SIGNAL(toggled(bool)), SLOT(onOutlineButtonClick(bool)));
+    connect(m_hideDockWidgetTitleBarsButton, SIGNAL(toggled(bool)), SIGNAL(hideDockWidgetTitleBars(bool)));
     connect(m_zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(onZoomLevelChange(QString)));
     connect(m_fitButton, SIGNAL(clicked(bool)), SLOT(onFitButtonClick()));
     connect(m_refreshButton, SIGNAL(clicked(bool)), SLOT(onRefreshButtonClick()));
@@ -119,6 +126,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
     m_toolbar->addStretch();
+    m_toolbar->addWidget(m_hideDockWidgetTitleBarsButton);
 }
 
 void DesignerWidget::scaleScene(qreal ratio)
@@ -201,6 +209,7 @@ void DesignerWidget::sweep()
     m_designerScene->sweep();
     m_designerView->sweep();
     m_outlineButton->setChecked(m_designerScene->showOutlines());
+    m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setChecked(m_designerScene->snapping());
     onZoomLevelChange("100 %");
 }

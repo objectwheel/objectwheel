@@ -47,6 +47,11 @@ QDockWidget* propertiesDockWidget;
 QDockWidget* formsDockWidget;
 QDockWidget* toolboxDockWidget;
 QDockWidget* inspectorDockWidget;
+QToolBar* globalTitleBar;
+QToolBar* propertiesTitleBar;
+QToolBar* formsTitleBar;
+QToolBar* toolboxTitleBar;
+QToolBar* inspectorTitleBar;
 bool globalDockWidgetVisible;
 bool propertiesDockWidgetVisible;
 bool formsDockWidgetVisible;
@@ -131,7 +136,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
     });
 
-    auto inspectorTitleBar = new QToolBar;
+    inspectorTitleBar = new QToolBar;
     inspectorTitleBar->addWidget(inspectorTitleLabel);
     inspectorTitleBar->addWidget(inspectorTitlePinButton);
     inspectorTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
@@ -161,7 +166,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         propertiesDockWidget->setFloating(!propertiesDockWidget->isFloating());
     });
 
-    auto propertiesTitleBar = new QToolBar;
+    propertiesTitleBar = new QToolBar;
     propertiesTitleBar->addWidget(propertiesTitleLabel);
     propertiesTitleBar->addWidget(propertiesTitlePinButton);
     propertiesTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
@@ -176,35 +181,35 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
 
-    /* Add Global Resources Pane */
-    auto globalTitleLabel = new QLabel;
-    globalTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    globalTitleLabel->setText(tr("   Global Resources"));
-    globalTitleLabel->setStyleSheet("color: black");
-    globalTitleLabel->setFont(dockTitleFont);
+    /* Add Forms Pane */
+    auto formsTitleLabel = new QLabel;
+    formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    formsTitleLabel->setText(tr("   Form Navigator"));
+    formsTitleLabel->setStyleSheet("color: black");
+    formsTitleLabel->setFont(dockTitleFont);
 
-    auto globalTitlePinButton = new QToolButton;
-    globalTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    globalTitlePinButton->setCursor(Qt::PointingHandCursor);
-    globalTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(globalTitlePinButton, &QToolButton::clicked, this, [] {
-        globalDockWidget->setFloating(!globalDockWidget->isFloating());
+    auto formsTitlePinButton = new QToolButton;
+    formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    formsTitlePinButton->setCursor(Qt::PointingHandCursor);
+    formsTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    connect(formsTitlePinButton, &QToolButton::clicked, this, [] {
+        formsDockWidget->setFloating(!formsDockWidget->isFloating());
     });
 
-    auto globalTitleBar = new QToolBar;
-    globalTitleBar->addWidget(globalTitleLabel);
-    globalTitleBar->addWidget(globalTitlePinButton);
-    globalTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    globalTitleBar->setIconSize(QSize(11, 11));
-    globalTitleBar->setFixedHeight(24);
+    formsTitleBar = new QToolBar;
+    formsTitleBar->addWidget(formsTitleLabel);
+    formsTitleBar->addWidget(formsTitlePinButton);
+    formsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
+    formsTitleBar->setIconSize(QSize(11, 11));
+    formsTitleBar->setFixedHeight(24);
 
-    globalDockWidget = new QDockWidget;
-    globalDockWidget->setStyleSheet("QDockWidget { border: none }");
-    globalDockWidget->setTitleBarWidget(globalTitleBar);
-    globalDockWidget->setWidget(m_globalResourcesPane);
-    globalDockWidget->setWindowTitle(tr("Global Resources"));
-    globalDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, globalDockWidget);
+    formsDockWidget = new QDockWidget;
+    formsDockWidget->setStyleSheet("QDockWidget { border: none }");
+    formsDockWidget->setTitleBarWidget(formsTitleBar);
+    formsDockWidget->setWidget(m_formsPane);
+    formsDockWidget->setWindowTitle(tr("Form Navigator"));
+    formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, formsDockWidget);
 
     /* Add Toolbox Pane */
     auto toolboxTitleLabel = new QLabel;
@@ -229,7 +234,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         WindowManager::toolboxSettingsWindow()->show();
     });
 
-    auto toolboxTitleBar = new QToolBar;
+    toolboxTitleBar = new QToolBar;
     toolboxTitleBar->addWidget(toolboxTitleLabel);
     toolboxTitleBar->addWidget(toolboxSettingsButton);
     toolboxTitleBar->addWidget(toolboxTitlePinButton);
@@ -246,36 +251,37 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockWidget);
     ToolManager::addToolboxTree(m_toolboxPane->toolboxTree());
 
-    /* Add Forms Pane */
-    auto formsTitleLabel = new QLabel;
-    formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    formsTitleLabel->setText(tr("   Form Navigator"));
-    formsTitleLabel->setStyleSheet("color: black");
-    formsTitleLabel->setFont(dockTitleFont);
+    /* Add Global Resources Pane */
+    auto globalTitleLabel = new QLabel;
+    globalTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    globalTitleLabel->setText(tr("   Global Resources"));
+    globalTitleLabel->setStyleSheet("color: black");
+    globalTitleLabel->setFont(dockTitleFont);
 
-    auto formsTitlePinButton = new QToolButton;
-    formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    formsTitlePinButton->setCursor(Qt::PointingHandCursor);
-    formsTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(formsTitlePinButton, &QToolButton::clicked, this, [] {
-        formsDockWidget->setFloating(!formsDockWidget->isFloating());
+    auto globalTitlePinButton = new QToolButton;
+    globalTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    globalTitlePinButton->setCursor(Qt::PointingHandCursor);
+    globalTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    connect(globalTitlePinButton, &QToolButton::clicked, this, [] {
+        globalDockWidget->setFloating(!globalDockWidget->isFloating());
     });
 
-    auto formsTitleBar = new QToolBar;
-    formsTitleBar->addWidget(formsTitleLabel);
-    formsTitleBar->addWidget(formsTitlePinButton);
-    formsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    formsTitleBar->setIconSize(QSize(11, 11));
-    formsTitleBar->setFixedHeight(24);
+    globalTitleBar = new QToolBar;
+    globalTitleBar->addWidget(globalTitleLabel);
+    globalTitleBar->addWidget(globalTitlePinButton);
+    globalTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
+    globalTitleBar->setIconSize(QSize(11, 11));
+    globalTitleBar->setFixedHeight(24);
 
-    formsDockWidget = new QDockWidget;
-    formsDockWidget->setStyleSheet("QDockWidget { border: none }");
-    formsDockWidget->setTitleBarWidget(formsTitleBar);
-    formsDockWidget->setWidget(m_formsPane);
-    formsDockWidget->setWindowTitle(tr("Form Navigator"));
-    formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
+    globalDockWidget = new QDockWidget;
+    globalDockWidget->setStyleSheet("QDockWidget { border: none }");
+    globalDockWidget->setTitleBarWidget(globalTitleBar);
+    globalDockWidget->setWidget(m_globalResourcesPane);
+    globalDockWidget->setWindowTitle(tr("Global Resources"));
+    globalDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::LeftDockWidgetArea, globalDockWidget);
 
+    connect(m_centralWidget->designerWidget(), SIGNAL(hideDockWidgetTitleBars(bool)), SLOT(setDockWidgetTitleBarsHidden(bool)));
     connect(m_pageSwitcherPane, SIGNAL(buildsActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(restoreDocks()));
     connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(restoreDocks()));
@@ -380,6 +386,45 @@ void MainWindow::showRightPanes(bool show)
         toolboxDockWidgetVisible = show;
     }
     m_pageSwitcherPane->setRightPanesShow(show);
+}
+
+void MainWindow::setDockWidgetTitleBarsHidden(bool yes)
+{
+    static auto w1 = new QWidget(this);
+    static auto w2 = new QWidget(this);
+    static auto w3 = new QWidget(this);
+    static auto w4 = new QWidget(this);
+    static auto w5 = new QWidget(this);
+    static bool set = false;
+
+    if (!set) {
+        set = true;
+        w1->setMinimumSize(0, 0);
+        w2->setMinimumSize(0, 0);
+        w3->setMinimumSize(0, 0);
+        w4->setMinimumSize(0, 0);
+        w5->setMinimumSize(0, 0);
+
+        w1->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        w2->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        w3->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        w4->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        w5->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    }
+
+    if (yes) {
+        formsDockWidget->setTitleBarWidget(w1);
+        toolboxDockWidget->setTitleBarWidget(w2);
+        inspectorDockWidget->setTitleBarWidget(w3);
+        propertiesDockWidget->setTitleBarWidget(w4);
+        globalDockWidget->setTitleBarWidget(w5);
+    } else {
+        formsDockWidget->setTitleBarWidget(formsTitleBar);
+        toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
+        inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
+        propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
+        globalDockWidget->setTitleBarWidget(globalTitleBar);
+    }
 }
 
 void MainWindow::hideDocks()

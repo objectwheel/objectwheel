@@ -30,6 +30,7 @@ public slots:
     void sweep();
     void showLeftPanes(bool);
     void showRightPanes(bool);
+    void setDockWidgetTitleBarsHidden(bool);
 
 private slots:
     void hideDocks();

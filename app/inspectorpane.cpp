@@ -284,19 +284,30 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
                     "QTreeView {"
                     "    border: 1px solid %1;"
                     "} QHeaderView::section {"
-                    "    padding-left: 5px;"
                     "    color: %4;"
-                    "    border: none;"
-                    "    border-bottom: 1px solid %1;"
+                    "    padding-left: 5px;"
+                    "    padding-top: 3px;"
+                    "    padding-bottom: 3px;"
+                    "    border-style: solid;"
+                    "    border-left-width: 0px;"
+                    "    border-top-width: 0px;"
+                    "    border-bottom-color: %1;"
+                    "    border-bottom-width: 1px;"
+                    "    border-right-color: %1; "
+                    "    border-right-width: 1px;"
                     "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
                     "                                stop:0 %2, stop:1 %3);"
+                    "}"
+                    "QHeaderView::section:last{"
+                    "    border-left-width: 0px;"
+                    "    border-right-width: 0px;"
                     "}"
                 }
                 .arg(palette().text().color().lighter(210).name())
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
-                );
+    );
 
     connect(this, &InspectorPane::itemSelectionChanged,
             this, &InspectorPane::onItemSelectionChange);
@@ -745,7 +756,7 @@ void InspectorPane::onItemSelectionChange()
 
 QSize InspectorPane::sizeHint() const
 {
-    return QSize{310, 200};
+    return QSize{310, 230};
 }
 
 #include "inspectorpane.moc"

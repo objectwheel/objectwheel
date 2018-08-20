@@ -14,15 +14,15 @@ namespace {
 const int ROW_HEIGHT = 21;
 
 void initPalette(QWidget* widget)
-{
+{    
     QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#a671bd");
-    palette.setColor(QPalette::Dark, "#9968ad");
+    palette.setColor(QPalette::Light, "#bf5861");
+    palette.setColor(QPalette::Dark, "#b05159");
     palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::Text, "#2d1f33");
+    palette.setColor(QPalette::Text, "#331719");
     palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::WindowText, "#2d1f33");
-    palette.setColor(QPalette::AlternateBase, "#f6f2f7");
+    palette.setColor(QPalette::WindowText, "#331719");
+    palette.setColor(QPalette::AlternateBase, "#f7e6e8");
     widget->setPalette(palette);
 }
 
@@ -171,6 +171,8 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                     "    border: 1px solid %1;"
                     "} QHeaderView::section {"
                     "    padding-left: 0px;"
+                    "    padding-top: 5px;"
+                    "    padding-bottom: 5px;"
                     "    color: %4;"
                     "    border: none;"
                     "    border-bottom: 1px solid %1;"
@@ -183,6 +185,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
     );
+
 
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
 
@@ -207,9 +210,9 @@ void GlobalResourcesPane::onProjectStart()
     m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
     setModel(m_fileSystemModel);
     setRootIndex(m_fileSystemModel->index(m_fileSystemModel->rootPath()));
+    hideColumn(1);
     hideColumn(2);
     hideColumn(3);
-    header()->resizeSection(0, 220); // Don't resize the last (stretched) column
 }
 
 void GlobalResourcesPane::filterList(const QString& /*filter*/)
@@ -305,7 +308,7 @@ void GlobalResourcesPane::updateGeometries()
 
 QSize GlobalResourcesPane::sizeHint() const
 {
-    return QSize{310, 240};
+    return QSize{210, 340};
 }
 
 #include "globalresourcespane.moc"
