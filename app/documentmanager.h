@@ -21,6 +21,7 @@ class DocumentManager final : public QObject
 
 public:
     static DocumentManager* instance();
+    static void updateProjectInfo();
 
     static QList<QmlCodeDocument*> documents()
     { return m_documents; }

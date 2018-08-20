@@ -119,13 +119,13 @@ ModelManagerInterface::ModelManagerInterface(QObject *parent)
     qRegisterMetaType<QmlJS::PathAndLanguage>("QmlJS::PathAndLanguage");
     qRegisterMetaType<QmlJS::PathsAndLanguages>("QmlJS::PathsAndLanguages");
 
-    m_defaultProjectInfo.qtImportsPath = QFileInfo(
-                QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
-    m_defaultProjectInfo.qtQmlPath = QFileInfo(
-                QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
+//    m_defaultProjectInfo.qtImportsPath = QFileInfo(
+//                QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
+//    m_defaultProjectInfo.qtQmlPath = QFileInfo(
+//                QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
 
     m_defaultImportPaths << environmentImportPaths();
-    updateImportPaths();
+//    updateImportPaths();
 
     Q_ASSERT(! g_instance);
     g_instance = this;
@@ -367,39 +367,39 @@ void ModelManagerInterface::removeFiles(const QStringList &files)
 }
 
 namespace {
-bool pInfoLessThanActive(const ModelManagerInterface::ProjectInfo &p1, const ModelManagerInterface::ProjectInfo &p2)
-{
-    QStringList s1 = p1.activeResourceFiles;
-    QStringList s2 = p2.activeResourceFiles;
-    if (s1.size() < s2.size())
-        return true;
-    if (s1.size() > s2.size())
-        return false;
-    for (int i = 0; i < s1.size(); ++i) {
-        if (s1.at(i) < s2.at(i))
-            return true;
-        else if (s1.at(i) > s2.at(i))
-            return false;
-    }
-    return false;
-}
+//bool pInfoLessThanActive(const ModelManagerInterface::ProjectInfo &p1, const ModelManagerInterface::ProjectInfo &p2)
+//{
+//    QStringList s1 = p1.activeResourceFiles;
+//    QStringList s2 = p2.activeResourceFiles;
+//    if (s1.size() < s2.size())
+//        return true;
+//    if (s1.size() > s2.size())
+//        return false;
+//    for (int i = 0; i < s1.size(); ++i) {
+//        if (s1.at(i) < s2.at(i))
+//            return true;
+//        else if (s1.at(i) > s2.at(i))
+//            return false;
+//    }
+//    return false;
+//}
 
-bool pInfoLessThanAll(const ModelManagerInterface::ProjectInfo &p1, const ModelManagerInterface::ProjectInfo &p2)
-{
-    QStringList s1 = p1.allResourceFiles;
-    QStringList s2 = p2.allResourceFiles;
-    if (s1.size() < s2.size())
-        return true;
-    if (s1.size() > s2.size())
-        return false;
-    for (int i = 0; i < s1.size(); ++i) {
-        if (s1.at(i) < s2.at(i))
-            return true;
-        else if (s1.at(i) > s2.at(i))
-            return false;
-    }
-    return false;
-}
+//bool pInfoLessThanAll(const ModelManagerInterface::ProjectInfo &p1, const ModelManagerInterface::ProjectInfo &p2)
+//{
+//    QStringList s1 = p1.allResourceFiles;
+//    QStringList s2 = p2.allResourceFiles;
+//    if (s1.size() < s2.size())
+//        return true;
+//    if (s1.size() > s2.size())
+//        return false;
+//    for (int i = 0; i < s1.size(); ++i) {
+//        if (s1.at(i) < s2.at(i))
+//            return true;
+//        else if (s1.at(i) > s2.at(i))
+//            return false;
+//    }
+//    return false;
+//}
 
 bool pInfoLessThanImports(const ModelManagerInterface::ProjectInfo &p1, const ModelManagerInterface::ProjectInfo &p2)
 {

@@ -50,6 +50,7 @@ public:
     ~ModelManager() override;
 
     void delayedInitialization();
+    void updateDefaultProjectInfo();
 protected:
     QHash<QString, QmlJS::Dialect> languageForSuffix() const override;
     void writeMessageInternal(const QString &msg) const override;
@@ -57,7 +58,6 @@ protected:
     void addTaskInternal(QFuture<void> result, const QString &msg, const char *taskId) const override;
     ProjectInfo defaultProjectInfoForProject(/*ProjectExplorer::Project *project*/) const override;
 private:
-    void updateDefaultProjectInfo();
     void loadDefaultQmlTypeDescriptions();
     QHash<QString, QmlJS::Dialect> initLanguageForSuffix() const;
 };

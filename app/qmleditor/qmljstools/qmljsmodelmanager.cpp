@@ -71,6 +71,9 @@
 #include <QLibraryInfo>
 #include <qglobal.h>
 
+#include <saveutils.h>
+#include <projectmanager.h>
+
 using namespace Utils;
 //using namespace Core;
 using namespace ProjectExplorer;
@@ -126,6 +129,7 @@ ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() 
     //        projectInfo.qtImportsPath = QFileInfo(qtVersion->qmakeProperty("QT_INSTALL_IMPORTS")).canonicalFilePath();
     //        projectInfo.qtVersionString = qtVersion->qtVersionString();
     //    } else {
+    projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toImportsDir(ProjectManager::dir())), Dialect::Qml); // Sonradan ekleme
     projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
     projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
     projectInfo.qtVersionString = QLatin1String(qVersion());
@@ -236,8 +240,6 @@ void ModelManager::delayedInitialization()
     qbsVContext.language = Dialect::QmlQbs;
     qbsVContext.maybeAddPath(ApplicationCore::resourcePath() + QLatin1String("/qbs"));
     setDefaultVContext(qbsVContext);
-
-    updateDefaultProjectInfo(); // Sonradan ekleme
 }
 
 void ModelManager::loadDefaultQmlTypeDescriptions()
@@ -246,7 +248,7 @@ void ModelManager::loadDefaultQmlTypeDescriptions()
     loadQmlTypeDescriptionsInternal(ApplicationCore::userResourcePath());
 }
 
-void ModelManager::writeMessageInternal(const QString &msg) const
+void ModelManager::writeMessageInternal(const QString &/*msg*/) const
 {
     //    MessageManager::write(msg, MessageManager::Flash);
 }
@@ -276,8 +278,8 @@ ModelManagerInterface::WorkingCopy ModelManager::workingCopyInternal() const
 
     WorkingCopy workingCopy;
 
-//    if (!Core::instance())
-//        return workingCopy;
+    //    if (!Core::instance())
+    //        return workingCopy;
 
     if (DocumentManager::documents().isEmpty())
         return workingCopy;
@@ -297,10 +299,11 @@ void ModelManager::updateDefaultProjectInfo()
     //    setDefaultProject(projectInfo(currentProject,newDefaultProjectInfo), currentProject);
 
     setDefaultProject(defaultProjectInfoForProject()); // Sonradan ekleme
+    updateImportPaths(); // Sonradan ekleme
 }
 
 
-void ModelManager::addTaskInternal(QFuture<void> result, const QString &msg, const char *taskId) const
+void ModelManager::addTaskInternal(QFuture<void> /*result*/, const QString &/*msg*/, const char */*taskId*/) const
 {
     //    ProgressManager::addTask(result, msg, taskId);
 }

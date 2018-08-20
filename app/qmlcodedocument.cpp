@@ -1256,8 +1256,10 @@ void QmlCodeDocument::cleanDiagnosticMarks()
 void QmlCodeDocument::createMarks(const SemanticInfo &info)
 {
     cleanSemanticMarks();
-    const auto onMarkRemoved = [this](Mark* mark) {
-        m_semanticMarks.removeAll(mark);
+    QPointer<QmlCodeDocument> ptr(this);
+    const auto onMarkRemoved = [this, ptr](Mark* mark) {
+        if (ptr)
+            m_semanticMarks.removeAll(mark);
     };
     for (const DiagnosticMessage &diagnostic : qAsConst(info.semanticMessages)) {
         auto block = findBlockByLineNumber(diagnostic.loc.startLine - 1);

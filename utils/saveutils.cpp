@@ -143,6 +143,16 @@ QString SaveUtils::toProjectFile(const QString& projectDir)
     return projectDir + separator() + FILE_PROJECT;
 }
 
+QString SaveUtils::toImportsDir(const QString& projectDir)
+{
+    return projectDir + separator() + DIR_OWDB + separator() + DIR_IMPORTS;
+}
+
+QString SaveUtils::toGlobalDir(const QString& projectDir)
+{
+    return toImportsDir(projectDir) + separator() + DIR_GLOBAL;
+}
+
 QString SaveUtils::toControlFile(const QString& rootPath)
 {
     return rootPath + separator() + DIR_THIS + separator() + FILE_CONTROL;

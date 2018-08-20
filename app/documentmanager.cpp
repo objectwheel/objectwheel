@@ -22,3 +22,8 @@ DocumentManager* DocumentManager::instance()
     return s_instance;
 }
 
+void DocumentManager::updateProjectInfo()
+{
+    instance()->m_modelManager.updateDefaultProjectInfo();
+}
+

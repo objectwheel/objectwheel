@@ -115,8 +115,7 @@ void GlobalResourcesPane::sweep()
 
 void GlobalResourcesPane::onProjectStart()
 {
-    m_fileSystemModel->setRootPath(ProjectManager::dir() + separator() + DIR_OWDB + separator() +
-                                   DIR_GLOB);
+    m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
     setModel(m_fileSystemModel);
     setRootIndex(m_fileSystemModel->index(m_fileSystemModel->rootPath()));
 }

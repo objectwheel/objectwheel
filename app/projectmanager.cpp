@@ -8,6 +8,7 @@
 #include <controlpreviewingmanager.h>
 #include <projectexposingmanager.h>
 #include <toolmanager.h>
+#include <documentmanager.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -346,6 +347,7 @@ bool ProjectManager::start(const QString& hash)
     ToolManager::exposeTools();
     ProjectExposingManager::exposeProject();
     ControlPreviewingManager::scheduleInit();
+    DocumentManager::updateProjectInfo();
 
     emit instance()->started();
 

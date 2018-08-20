@@ -13,7 +13,8 @@
 #define DIR_CHILDREN     "c"
 #define DIR_MAINFORM     "1"
 #define DIR_OWDB         "owdb"
-#define DIR_GLOB         "global"
+#define DIR_IMPORTS      "imports"
+#define DIR_GLOBAL       "Global"
 
 #define FILE_PROJECT     "project.json"
 #define FILE_OWDB        "owdb.json"       // FIXME: There is no function of this
@@ -59,6 +60,8 @@ public:
     static QString toParentDir(const QString& topPath);
     static QString toChildrenDir(const QString& rootPath);
     static QString toProjectFile(const QString& projectDir);
+    static QString toImportsDir(const QString& projectDir);
+    static QString toGlobalDir(const QString& projectDir);
     static QString toControlFile(const QString& rootPath);
 
     static QStringList formPaths(const QString& projectDir);
