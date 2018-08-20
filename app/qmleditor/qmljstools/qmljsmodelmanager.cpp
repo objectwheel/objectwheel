@@ -73,6 +73,7 @@
 
 #include <saveutils.h>
 #include <projectmanager.h>
+#include <utilityfunctions.h>
 
 using namespace Utils;
 //using namespace Core;
@@ -83,7 +84,6 @@ namespace QmlJSTools {
 namespace Internal {
 
 // BUG: Komple incelersin
-
 ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() const
 {
     ModelManagerInterface::ProjectInfo projectInfo/*(project)*/;
@@ -130,6 +130,9 @@ ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() 
     //        projectInfo.qtVersionString = qtVersion->qtVersionString();
     //    } else {
     projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toImportsDir(ProjectManager::dir())), Dialect::Qml); // Sonradan ekleme
+    projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toGlobalDir(ProjectManager::dir())), Dialect::Qml); // Sonradan ekleme
+    UtilityFunctions::registerGlobalPath(ProjectManager::dir());
+
     projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
     projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
     projectInfo.qtVersionString = QLatin1String(qVersion());
