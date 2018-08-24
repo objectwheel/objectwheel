@@ -24,7 +24,7 @@
 ****************************************************************************/
 
 #include "autocompleter.h"
-#include <qmlcodedocument.h>"
+#include <qmlcodedocument.h>
 #include "tabsettings.h"
 
 #include <QDebug>

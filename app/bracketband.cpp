@@ -3,6 +3,7 @@
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
 #include <textutils.h>
+#include <utilityfunctions.h>
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -54,7 +55,7 @@ bool BracketBand::toggleFold(const QPoint& pos) const
 
     if (startBlock.isValid()) {
         QTextDocument document(m_qmlCodeEditor->toPlainText());
-        TextUtils::trimCommentsAndStrings(&document);
+        UtilityFunctions::trimCommentsAndStrings(&document);
 
         auto lb = QLatin1Char('{');
         auto rb = QLatin1Char('}');
@@ -200,7 +201,7 @@ void BracketBand::mouseReleaseEvent(QMouseEvent* e)
 void BracketBand::updateData()
 {
     QTextDocument document(m_qmlCodeEditor->toPlainText());
-    TextUtils::trimCommentsAndStrings(&document);
+    UtilityFunctions::trimCommentsAndStrings(&document);
 
     auto ce = m_qmlCodeEditor;
     auto block = ce->document()->firstBlock();

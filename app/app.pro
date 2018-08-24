@@ -99,7 +99,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/scalingwidget.h \
            $$PWD/projecttemplateswidget.h \
            $$PWD/rowbar.h \
-           $$PWD/textutils.h \
            $$PWD/linenumberband.h \
            $$PWD/breakpointband.h \
            $$PWD/bracketband.h \
@@ -107,8 +106,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/qmlcodedocument.h \
            $$PWD/documentmanager.h \
            $$PWD/markband.h \
-           $$PWD/toolbar.h \
-           $$PWD/toolbutton.h \
            $$PWD/controlremovingmanager.h \
            $$PWD/projectexposingmanager.h \
            $$PWD/bootsettings.h \
@@ -118,7 +115,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/transparentstyle.h \
            $$PWD/applicationstyle.h \
            $$PWD/zipper.h \
-    globalresourcespane.h
+           $$PWD/globalresourcespane.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -194,15 +191,12 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/scalingwidget.cpp \
            $$PWD/projecttemplateswidget.cpp \
            $$PWD/rowbar.cpp \
-           $$PWD/textutils.cpp \
            $$PWD/linenumberband.cpp \
            $$PWD/breakpointband.cpp \
            $$PWD/bracketband.cpp \
            $$PWD/qmlcodedocument.cpp \
            $$PWD/documentmanager.cpp \
            $$PWD/markband.cpp \
-           $$PWD/toolbar.cpp \
-           $$PWD/toolbutton.cpp \
            $$PWD/controlremovingmanager.cpp \
            $$PWD/projectexposingmanager.cpp \
            $$PWD/bootsettings.cpp \
@@ -213,7 +207,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/transparentstyle.cpp \
            $$PWD/applicationstyle.cpp \
            $$PWD/zipper.cpp \
-    globalresourcespane.cpp
+           $$PWD/globalresourcespane.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui

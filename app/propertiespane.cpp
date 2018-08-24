@@ -1563,7 +1563,7 @@ void PropertiesPane::updateGeometries()
 
 QSize PropertiesPane::sizeHint() const
 {
-    return QSize{310, 570};
+    return QSize{310, 560};
 }
 
 #include "propertiespane.moc"

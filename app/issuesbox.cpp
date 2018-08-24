@@ -2,9 +2,9 @@
 #include <control.h>
 #include <outputpane.h>
 #include <utilsicons.h>
-#include <toolbar.h>
-#include <toolbutton.h>
 
+#include <QToolBar>
+#include <QToolButton>
 #include <QLabel>
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -57,8 +57,8 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
 
 IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
   , m_layout(new QVBoxLayout(this))
-  , m_toolbar(new ToolBar)
-  , m_clearButton(new ToolButton)
+  , m_toolbar(new QToolBar)
+  , m_clearButton(new QToolButton)
   , m_title(new QLabel)
   , m_listWidget(new QListWidget)
   , m_outputPane(outputPane)
@@ -76,13 +76,9 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
 
     m_title->setText("Issues");
     m_toolbar->setFixedHeight(24);
-    m_toolbar->addSpacing(5);
     m_toolbar->addWidget(m_title);
-    m_toolbar->addSpacing(5);
     m_toolbar->addSeparator();
-    m_toolbar->addSpacing(2);
     m_toolbar->addWidget(m_clearButton);
-    m_toolbar->addStretch();
 
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
     m_clearButton->setToolTip(tr("Clean errors."));

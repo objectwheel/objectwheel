@@ -9,8 +9,8 @@
 class Control;
 class OutputPane;
 class QVBoxLayout;
-class ToolBar;
-class ToolButton;
+class QToolBar;
+class QToolButton;
 class QLabel;
 class QListWidget;
 class QListWidgetItem;
@@ -59,8 +59,8 @@ signals:
 
 private:
     QVBoxLayout* m_layout;
-    ToolBar* m_toolbar;
-    ToolButton* m_clearButton;
+    QToolBar* m_toolbar;
+    QToolButton* m_clearButton;
     QLabel* m_title;
     QListWidget* m_listWidget;
     QMap<Error, QPointer<Control>> m_buggyControls;

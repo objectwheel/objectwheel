@@ -1,10 +1,10 @@
 #include <fileexplorer.h>
 #include <filelist.h>
 #include <filemanager.h>
-#include <toolbar.h>
-#include <toolbutton.h>
 #include <utilsicons.h>
 
+#include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QDebug>
@@ -33,15 +33,15 @@ class FileExplorerPrivate : public QObject
     public:
         FileExplorer* parent;
         QVBoxLayout* vBoxLayout;
-        ToolBar* toolbar;
-        ToolButton* upButton;
-        ToolButton* homeButton;
-        ToolButton* copyButton;
-        ToolButton* deleteButton;
-        ToolButton* renameButton;
-        ToolButton* newFileButton;
-        ToolButton* newFolderButton;
-        ToolButton* downloadFileButton;
+        QToolBar* toolbar;
+        QToolButton* upButton;
+        QToolButton* homeButton;
+        QToolButton* copyButton;
+        QToolButton* deleteButton;
+        QToolButton* renameButton;
+        QToolButton* newFileButton;
+        QToolButton* newFolderButton;
+        QToolButton* downloadFileButton;
         FileList* fileList;
         QMetaObject::Connection previousSelectionModelConnection;
 };
@@ -50,15 +50,15 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     : QObject(parent)
     , parent(parent)
     , vBoxLayout(new QVBoxLayout(parent))
-    , toolbar(new ToolBar)
-    , upButton(new ToolButton)
-    , homeButton(new ToolButton)
-    , copyButton(new ToolButton)
-    , deleteButton(new ToolButton)
-    , renameButton(new ToolButton)
-    , newFileButton(new ToolButton)
-    , newFolderButton(new ToolButton)
-    , downloadFileButton(new ToolButton)
+    , toolbar(new QToolBar)
+    , upButton(new QToolButton)
+    , homeButton(new QToolButton)
+    , copyButton(new QToolButton)
+    , deleteButton(new QToolButton)
+    , renameButton(new QToolButton)
+    , newFileButton(new QToolButton)
+    , newFolderButton(new QToolButton)
+    , downloadFileButton(new QToolButton)
     , fileList(new FileList)
 {
     vBoxLayout->setContentsMargins(0, 0, 0, 0);
@@ -115,7 +115,6 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     toolbar->addWidget(newFileButton);
     toolbar->addWidget(newFolderButton);
     toolbar->addWidget(downloadFileButton);
-    toolbar->addStretch();
 
     QPalette p(fileList->palette());
     p.setColor(QPalette::Background, COLOR_BACKGROUND);

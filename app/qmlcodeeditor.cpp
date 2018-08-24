@@ -3694,7 +3694,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
         setTextCursor(cursor);
     }
 
-skip_event:
+//skip_event:
     if (!ro && e->key() == Qt::Key_Delete && /*d->m_parenthesesMatchingEnabled*/true)
         m_parenthesesMatchingTimer->start(50);
 

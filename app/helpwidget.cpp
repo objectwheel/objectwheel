@@ -2,8 +2,6 @@
 #include <webenginehelpviewer.h>
 #include <focuslesslineedit.h>
 #include <transparentstyle.h>
-#include <toolbar.h>
-#include <toolbutton.h>
 #include <utilsicons.h>
 #include <appfontsettings.h>
 
@@ -21,11 +19,11 @@ namespace {
 HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_helpEngine(new QHelpEngine(qApp->applicationDirPath() + "/docs/docs.qhc", this))
   , m_layout(new QVBoxLayout(this))
-  , m_toolbar(new ToolBar)
+  , m_toolbar(new QToolBar)
   , m_typeCombo(new QComboBox)
-  , m_homeButton(new ToolButton)
-  , m_backButton(new ToolButton)
-  , m_forthButton(new ToolButton)
+  , m_homeButton(new QToolButton)
+  , m_backButton(new QToolButton)
+  , m_forthButton(new QToolButton)
   , m_titleLabel(new QLabel)
   , m_splitter(new QSplitter)
   , m_helpViewer(new WebEngineHelpViewer(m_helpEngine))
@@ -52,7 +50,6 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_toolbar->addWidget(m_backButton);
     m_toolbar->addWidget(m_forthButton);
     m_toolbar->addSeparator();
-    m_toolbar->addStretch();
     m_toolbar->addWidget(m_titleLabel);
 
     QFont f;

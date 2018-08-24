@@ -14,10 +14,10 @@
 #include <QMenu>
 #include <QScrollBar>
 
-
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
 #include <private/qstylehelper_p.h>
+#include <private/qstyle_p.h>
 
 namespace {
 
@@ -420,6 +420,10 @@ int TransparentStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
         return true;
     case SH_ItemView_MovementWithoutUpdatingSelection:
         return false;
+    case SH_ToolBar_Movable:
+        return false;
+    case SH_ToolButtonStyle:
+        return Qt::ToolButtonIconOnly;
     case SH_ComboBox_Popup:
         return true;
     case SH_ComboBox_PopupFrameStyle:
@@ -435,6 +439,17 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
                                   const QWidget* widget) const
 {
     switch (metric) {
+    case PM_ToolBarHandleExtent:
+        return 0;
+    case PM_ToolBarSeparatorExtent:
+        return 1;
+    case PM_ToolBarItemSpacing:
+        return 0;
+    case PM_ToolBarFrameWidth:
+    case PM_ToolBarItemMargin:
+        return 0;
+    case PM_ToolBarIconSize:
+        return int(QStyleHelper::dpiScaled(16.));
     case PM_ComboBoxFrameWidth:
     case PM_SpinBoxFrameWidth:
         return 0;
@@ -547,8 +562,8 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         QPainterPath path;
         if (option->state & State_Horizontal) {
             int xpoint = option->rect.center().x();
-            path.moveTo(xpoint + 0.5, option->rect.top() + 1);
-            path.lineTo(xpoint + 0.5, option->rect.bottom());
+            path.moveTo(xpoint + 0.5, option->rect.top() + 4);
+            path.lineTo(xpoint + 0.5, option->rect.bottom() - 3);
         } else {
             int ypoint = option->rect.center().y();
             path.moveTo(option->rect.left() + 2 , ypoint + 0.5);
@@ -556,9 +571,29 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         }
         QPainterPathStroker theStroker;
         theStroker.setCapStyle(Qt::FlatCap);
-        theStroker.setDashPattern(QVector<qreal>() << 1 << 2);
+        // theStroker.setDashPattern(QVector<qreal>() << 1 << 2);
         path = theStroker.createStroke(path);
-        painter->fillPath(path, QColor(0, 0, 0, 119));
+        painter->fillPath(path, QColor("#30000000"));
+    } break;
+    case PE_PanelButtonTool:
+        if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
+            painter->save();
+            if (widget && widget->inherits("QDockWidgetTitleButton")) {
+                if (option->state & State_MouseOver)
+                    proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);
+            } else {
+                proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);
+            }
+            painter->restore();
+        } break;
+    case PE_PanelButtonCommand: {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+        bool isDown = (option->state & State_Sunken) || (option->state & State_On);
+        bool isEnabled = option->state & State_Enabled;
+        if (isEnabled)
+            painter->fillRect(option->rect, isDown ? "#15000000" : "#25000000");
+        painter->restore();
     } break;
     default:
         ApplicationStyle::drawPrimitive(element, option, painter, widget);
@@ -709,6 +744,8 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
             ApplicationStyle::drawControl(CE_ComboBoxLabel, &comboCopy, painter, widget);
         } break;
+    case CE_ToolBar:
+        break;
     default:
         ApplicationStyle::drawControl(element, option, painter, widget);
         break;
@@ -805,6 +842,52 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 proxy()->drawPrimitive(PE_IndicatorArrowDown, &arrowOpt, painter, widget);
             }
             painter->restore();
+        } break;
+    case CC_ToolButton:
+        if (const QStyleOptionToolButton *toolbutton
+                = qstyleoption_cast<const QStyleOptionToolButton *>(option)) {
+            QRect button, menuarea;
+            button = proxy()->subControlRect(control, toolbutton, SC_ToolButton, widget);
+            menuarea = proxy()->subControlRect(control, toolbutton, SC_ToolButtonMenu, widget);
+            State bflags = toolbutton->state & ~State_Sunken;
+            if (bflags & State_AutoRaise) {
+                if (!(bflags & State_MouseOver) || !(bflags & State_Enabled)) {
+                    bflags &= ~State_Raised;
+                }
+            }
+            State mflags = bflags;
+            if (toolbutton->state & State_Sunken) {
+                if (toolbutton->activeSubControls & SC_ToolButton)
+                    bflags |= State_Sunken;
+                mflags |= State_Sunken;
+            }
+            QStyleOption tool = *toolbutton;
+            if (toolbutton->subControls & SC_ToolButton) {
+                if (bflags & (State_Sunken | State_On | State_Raised)) {
+                    tool.rect = button;
+                    tool.state = bflags;
+                    proxy()->drawPrimitive(PE_PanelButtonTool, &tool, painter, widget);
+                }
+            }
+            QStyleOptionToolButton label = *toolbutton;
+            label.state = bflags;
+            int fw = proxy()->pixelMetric(PM_DefaultFrameWidth, option, widget);
+            label.rect = button.adjusted(fw, fw, -fw, -fw);
+            proxy()->drawControl(CE_ToolButtonLabel, &label, painter, widget);
+            if (toolbutton->subControls & SC_ToolButtonMenu) {
+                tool.rect = menuarea;
+                tool.state = mflags;
+                if (mflags & (State_Sunken | State_On | State_Raised))
+                    proxy()->drawPrimitive(PE_IndicatorButtonDropDown, &tool, painter, widget);
+                proxy()->drawPrimitive(PE_IndicatorArrowDown, &tool, painter, widget);
+            } else if (toolbutton->features & QStyleOptionToolButton::HasMenu) {
+                int mbi = proxy()->pixelMetric(PM_MenuButtonIndicator, toolbutton, widget);
+                QRect ir = toolbutton->rect;
+                QStyleOptionToolButton newBtn = *toolbutton;
+                newBtn.rect = QRect(ir.right() + 5 - mbi, ir.y() + ir.height() - mbi + 4, mbi - 6, mbi - 6);
+                newBtn.rect = visualRect(toolbutton->direction, button, newBtn.rect);
+                proxy()->drawPrimitive(PE_IndicatorArrowDown, &newBtn, painter, widget);
+            }
         } break;
     default:
         ApplicationStyle::drawComplexControl(control, option, painter, widget);
