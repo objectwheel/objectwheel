@@ -130,7 +130,6 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_designerView->setFrameShape(QFrame::NoFrame);
     m_designerView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    TransparentStyle::attach(m_zoomlLevelCombobox);
     m_zoomlLevelCombobox->addItem("10 %");
     m_zoomlLevelCombobox->addItem("25 %");
     m_zoomlLevelCombobox->addItem("50 %");
@@ -192,6 +191,18 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     connect(m_refreshButton, SIGNAL(clicked(bool)), SLOT(onRefreshButtonClick()));
     connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(onClearButtonClick()));
 
+    TransparentStyle::attach(m_toolbar);
+
+    m_undoButton->setFixedHeight(22);
+    m_redoButton->setFixedHeight(22);
+    m_clearButton->setFixedHeight(22);
+    m_refreshButton->setFixedHeight(22);
+    m_snappingButton->setFixedHeight(22);
+    m_fitButton->setFixedHeight(22);
+    m_outlineButton->setFixedHeight(22);
+    m_hideDockWidgetTitleBarsButton->setFixedHeight(22);
+    m_zoomlLevelCombobox->setFixedHeight(22);
+
     m_toolbar->setFixedHeight(24);
     m_toolbar->addWidget(m_undoButton);
     m_toolbar->addWidget(m_redoButton);
@@ -203,7 +214,9 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_outlineButton);
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
-    //m_toolbar->addStretch();
+    auto empty = new QWidget;
+    empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    m_toolbar->addWidget(empty);
     m_toolbar->addWidget(m_hideDockWidgetTitleBarsButton);
 }
 
@@ -232,9 +245,10 @@ void DesignerWidget::onFitButtonClick()
 {
     static auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
     auto diff = qMin(m_designerView->width() / m_designerScene->width(), m_designerView->height() / m_designerScene->height());
-    for (auto ratio : ratios)
+    for (auto ratio : ratios) {
         if (roundRatio(diff) == ratio)
             m_zoomlLevelCombobox->setCurrentText(findText(ratio));
+    }
 }
 
 void DesignerWidget::onUndoButtonClick()
@@ -297,14 +311,14 @@ QSize DesignerWidget::sizeHint() const
     return QSize(680, 680);
 }
 
-void DesignerWidget::handleControlDoubleClick(Control* control)
+void DesignerWidget::onControlDoubleClick(Control* control)
 {
     m_qmlCodeEditorWidget->addControl(control);
     m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);
     m_qmlCodeEditorWidget->openControl(control);
 }
 
-void DesignerWidget::handleControlDrop(Control* control, const QPointF& pos, const QString& url)
+void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();
     auto newControl = ControlCreationManager::createControl(SaveUtils::toParentDir(url), pos,

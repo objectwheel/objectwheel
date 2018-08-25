@@ -44,8 +44,10 @@ MenuManager::MenuManager(QObject* parent) : QObject(parent)
                              "    stop:0 #ffffff, stop:1 #d6d9dc);"
                              "}");
 
-    createActions(this);
-    createMenus();
+    // FIXME: We will come back that issue later.
+    // Each window on window manager will have a separate window
+    // createActions(this);
+    // createMenus();
 }
 
 void MenuManager::createActions(QObject* parent)

@@ -46,6 +46,7 @@ private:
     QToolButton* m_backButton;
     QToolButton* m_forthButton;
     QLabel* m_titleLabel;
+    QAction* m_copyAction;
     QSplitter* m_splitter;
     WebEngineHelpViewer* m_helpViewer;
     QWidget* m_contentsWidget;

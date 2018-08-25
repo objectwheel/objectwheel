@@ -2,6 +2,7 @@
 #include <filelist.h>
 #include <filemanager.h>
 #include <utilsicons.h>
+#include <transparentstyle.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -11,8 +12,6 @@
 #include <QInputDialog>
 #include <QtNetwork>
 
-#define COLOR_BACKGROUND Qt::white
-
 class FileExplorerPrivate : public QObject
 {
         Q_OBJECT
@@ -20,15 +19,15 @@ class FileExplorerPrivate : public QObject
         FileExplorerPrivate(FileExplorer* parent);
 
     public slots:
-        void handleUpButtonClicked();
-        void handleHomeButtonClicked();
-        void handleCopyButtonClicked();
-        void handleDeleteButtonClicked();
-        void handleNewFileButtonClicked();
-        void handleRenameButtonClicked();
-        void handleNewFolderButtonClicked();
-        void handleDownloadButtonClicked();
-        void handleFileListSelectionChanged();
+        void onUpButtonClicked();
+        void onHomeButtonClicked();
+        void onCopyButtonClicked();
+        void onDeleteButtonClicked();
+        void onNewFileButtonClicked();
+        void onRenameButtonClicked();
+        void onNewFolderButtonClicked();
+        void onDownloadButtonClicked();
+        void onFileListSelectionChanged();
 
     public:
         FileExplorer* parent;
@@ -96,15 +95,27 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     newFolderButton->setIcon(QIcon(":/images/newfolder.png"));
     downloadFileButton->setIcon(QIcon(":/images/downloadfile.png"));
 
-    connect(upButton, SIGNAL(clicked(bool)), SLOT(handleUpButtonClicked()));
-    connect(homeButton, SIGNAL(clicked(bool)), SLOT(handleHomeButtonClicked()));
-    connect(copyButton, SIGNAL(clicked(bool)), SLOT(handleCopyButtonClicked()));
-    connect(deleteButton, SIGNAL(clicked(bool)), SLOT(handleDeleteButtonClicked()));
-    connect(renameButton, SIGNAL(clicked(bool)), SLOT(handleRenameButtonClicked()));
-    connect(newFileButton, SIGNAL(clicked(bool)), SLOT(handleNewFileButtonClicked()));
-    connect(newFolderButton, SIGNAL(clicked(bool)), SLOT(handleNewFolderButtonClicked()));
-    connect(downloadFileButton, SIGNAL(clicked(bool)), SLOT(handleDownloadButtonClicked()));
+    connect(upButton, SIGNAL(clicked(bool)), SLOT(onUpButtonClicked()));
+    connect(homeButton, SIGNAL(clicked(bool)), SLOT(onHomeButtonClicked()));
+    connect(copyButton, SIGNAL(clicked(bool)), SLOT(onCopyButtonClicked()));
+    connect(deleteButton, SIGNAL(clicked(bool)), SLOT(onDeleteButtonClicked()));
+    connect(renameButton, SIGNAL(clicked(bool)), SLOT(onRenameButtonClicked()));
+    connect(newFileButton, SIGNAL(clicked(bool)), SLOT(onNewFileButtonClicked()));
+    connect(newFolderButton, SIGNAL(clicked(bool)), SLOT(onNewFolderButtonClicked()));
+    connect(downloadFileButton, SIGNAL(clicked(bool)), SLOT(onDownloadButtonClicked()));
 
+    TransparentStyle::attach(toolbar);
+
+    upButton->setFixedHeight(22);
+    homeButton->setFixedHeight(22);
+    copyButton->setFixedHeight(22);
+    deleteButton->setFixedHeight(22);
+    renameButton->setFixedHeight(22);
+    newFileButton->setFixedHeight(22);
+    newFolderButton->setFixedHeight(22);
+    downloadFileButton->setFixedHeight(22);
+
+    toolbar->setFixedHeight(24);
     toolbar->addWidget(upButton);
     toolbar->addWidget(homeButton);
     toolbar->addSeparator();
@@ -115,15 +126,9 @@ FileExplorerPrivate::FileExplorerPrivate(FileExplorer* parent)
     toolbar->addWidget(newFileButton);
     toolbar->addWidget(newFolderButton);
     toolbar->addWidget(downloadFileButton);
-
-    QPalette p(fileList->palette());
-    p.setColor(QPalette::Background, COLOR_BACKGROUND);
-    p.setColor(QPalette::Base, COLOR_BACKGROUND);
-    fileList->setPalette(p);
-    fileList->setAutoFillBackground(true);
 }
 
-void FileExplorerPrivate::handleUpButtonClicked()
+void FileExplorerPrivate::onUpButtonClicked()
 {
     auto up = dname(fileList->currentPath());
     auto rootPath = fileList->fileModel()->rootPath();
@@ -131,12 +136,12 @@ void FileExplorerPrivate::handleUpButtonClicked()
         fileList->goPath(up);
 }
 
-void FileExplorerPrivate::handleHomeButtonClicked()
+void FileExplorerPrivate::onHomeButtonClicked()
 {
     fileList->goPath(fileList->fileModel()->rootPath());
 }
 
-void FileExplorerPrivate::handleCopyButtonClicked()
+void FileExplorerPrivate::onCopyButtonClicked()
 {
     auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
     auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
@@ -188,7 +193,7 @@ void FileExplorerPrivate::handleCopyButtonClicked()
     }
 }
 
-void FileExplorerPrivate::handleDeleteButtonClicked()
+void FileExplorerPrivate::onDeleteButtonClicked()
 {
     auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
     auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
@@ -222,7 +227,7 @@ void FileExplorerPrivate::handleDeleteButtonClicked()
     }
 }
 
-void FileExplorerPrivate::handleRenameButtonClicked()
+void FileExplorerPrivate::onRenameButtonClicked()
 {
     bool ok;
     auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
@@ -246,7 +251,7 @@ void FileExplorerPrivate::handleRenameButtonClicked()
             emit parent->fileRenamed(filePath, dname(filePath) + separator() + text);
 }
 
-void FileExplorerPrivate::handleNewFileButtonClicked()
+void FileExplorerPrivate::onNewFileButtonClicked()
 {
     bool ok;
     auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
@@ -263,7 +268,7 @@ void FileExplorerPrivate::handleNewFileButtonClicked()
 }
 
 
-void FileExplorerPrivate::handleNewFolderButtonClicked()
+void FileExplorerPrivate::onNewFolderButtonClicked()
 {
     bool ok;
     auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
@@ -279,7 +284,7 @@ void FileExplorerPrivate::handleNewFolderButtonClicked()
         mkdir(path + separator() + text);
 }
 
-void FileExplorerPrivate::handleDownloadButtonClicked()
+void FileExplorerPrivate::onDownloadButtonClicked()
 {
     bool ok, ok_2;
     auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
@@ -306,7 +311,7 @@ void FileExplorerPrivate::handleDownloadButtonClicked()
     }
 }
 
-void FileExplorerPrivate::handleFileListSelectionChanged()
+void FileExplorerPrivate::onFileListSelectionChanged()
 {
     auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
     auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
@@ -315,15 +320,22 @@ void FileExplorerPrivate::handleFileListSelectionChanged()
     copyButton->setEnabled(index.isValid());
 }
 
-FileExplorer::FileExplorer(QWidget *parent)
-    : QWidget(parent)
+FileExplorer::FileExplorer(QWidget *parent) : QFrame(parent)
     , _d(new FileExplorerPrivate(this))
 {
-    setAutoFillBackground(true);
     QPalette p(palette());
-    p.setColor(QPalette::Background, COLOR_BACKGROUND);
-    p.setColor(QPalette::Base, COLOR_BACKGROUND);
+    p.setColor(QPalette::Background, "#f0f0f0");
+    p.setColor(QPalette::Base, "#f0f0f0");
     setPalette(p);
+
+    QPalette p2(_d->fileList->palette());
+    p2.setColor(QPalette::Background, Qt::white);
+    p2.setColor(QPalette::Base, Qt::white);
+    _d->fileList->setPalette(p2);
+
+    setFrameShadow(QFrame::Plain);
+    setFrameShape(QFrame::StyledPanel);
+
     connect(_d->fileList, SIGNAL(fileOpened(QString)), SIGNAL(fileOpened(QString)));
 }
 
@@ -340,8 +352,8 @@ void FileExplorer::setRootPath(const QString& rootPath)
     }
     disconnect(_d->previousSelectionModelConnection);
     _d->previousSelectionModelConnection = connect(_d->fileList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-                                                   _d, SLOT(handleFileListSelectionChanged()));
-    _d->handleFileListSelectionChanged();
+                                                   _d, SLOT(onFileListSelectionChanged()));
+    _d->onFileListSelectionChanged();
 }
 
 QSize FileExplorer::sizeHint() const

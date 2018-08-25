@@ -251,6 +251,11 @@ void WebEngineHelpViewer::addForwardHistoryItems(QMenu *forwardMenu)
     }
 }
 
+WebView* WebEngineHelpViewer::webView() const
+{
+    return m_widget;
+}
+
 WebEngineHelpPage *WebEngineHelpViewer::page() const
 {
     return static_cast<WebEngineHelpPage *>(m_widget->page());

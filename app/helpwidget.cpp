@@ -12,8 +12,8 @@
 // TODO: "Find" on help page
 
 namespace {
-    QHelpContentWidget* contentWidget;
-    QHelpIndexWidget* indexWidget;
+QHelpContentWidget* contentWidget;
+QHelpIndexWidget* indexWidget;
 }
 
 HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
@@ -25,6 +25,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_backButton(new QToolButton)
   , m_forthButton(new QToolButton)
   , m_titleLabel(new QLabel)
+  , m_copyAction(new QAction(this))
   , m_splitter(new QSplitter)
   , m_helpViewer(new WebEngineHelpViewer(m_helpEngine))
   , m_contentsWidget(new QWidget)
@@ -43,6 +44,14 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_toolbar);
     m_layout->addWidget(m_splitter);
 
+    TransparentStyle::attach(m_toolbar);
+
+    m_typeCombo->setFixedHeight(22);
+    m_homeButton->setFixedHeight(22);
+    m_backButton->setFixedHeight(22);
+    m_forthButton->setFixedHeight(22);
+    m_titleLabel->setFixedHeight(22);
+
     m_toolbar->setFixedHeight(24);
     m_toolbar->addWidget(m_typeCombo);
     m_toolbar->addSeparator();
@@ -50,6 +59,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_toolbar->addWidget(m_backButton);
     m_toolbar->addWidget(m_forthButton);
     m_toolbar->addSeparator();
+    auto spacing = new QWidget(this);
+    spacing->setFixedSize(10, 24);
+    m_toolbar->addWidget(spacing);
     m_toolbar->addWidget(m_titleLabel);
 
     QFont f;
@@ -57,11 +69,11 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_titleLabel->setFont(f);
     m_titleLabel->setTextFormat(Qt::RichText);
 
-    TransparentStyle::attach(m_typeCombo);
     m_typeCombo->setFixedWidth(220);
     m_typeCombo->addItem("Index");
     m_typeCombo->addItem("Contents");
 
+    m_typeCombo->setCursor(Qt::PointingHandCursor);
     m_homeButton->setCursor(Qt::PointingHandCursor);
     m_backButton->setCursor(Qt::PointingHandCursor);
     m_forthButton->setCursor(Qt::PointingHandCursor);
@@ -108,6 +120,14 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     connect(m_homeButton, SIGNAL(clicked(bool)), SLOT(onHomeButtonClick()));
     connect(m_backButton, SIGNAL(clicked(bool)), m_helpViewer, SLOT(backward()));
     connect(m_forthButton, SIGNAL(clicked(bool)), m_helpViewer, SLOT(forward()));
+
+    m_copyAction->setText("Copy selected");
+    m_copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_copyAction->setShortcut(QKeySequence::Copy);
+//    m_helpViewer->webView()->addAction(m_copyAction);
+    connect(m_copyAction, &QAction::triggered, this, [=] {
+        QGuiApplication::clipboard()->setText(m_helpViewer->selectedText());
+    });
 }
 
 QSize HelpWidget::sizeHint() const
@@ -118,13 +138,13 @@ QSize HelpWidget::sizeHint() const
 bool HelpWidget::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == indexWidget && event->type() == QEvent::KeyPress) {
-         auto e = static_cast<QKeyEvent*>(event);
-         if (e->key() == Qt::Key_Return)
-             indexWidget->activateCurrentItem();
+        auto e = static_cast<QKeyEvent*>(event);
+        if (e->key() == Qt::Key_Return)
+            indexWidget->activateCurrentItem();
     } else if (watched == contentWidget->viewport() && event->type() == QEvent::MouseButtonPress) {
         auto e = static_cast<QMouseEvent*>(event);
         contentWidget->activated(contentWidget->indexAt(e->pos()));
-   }
+    }
     return QWidget::eventFilter(watched, event);
 }
 
@@ -183,7 +203,7 @@ void HelpWidget::onUrlChange(const QMap<QString, QUrl>& links, const QString& ke
 {
     bool ok;
     QString item = QInputDialog::getItem(this, tr("Choose Topic"),
-      tr("Choose a topic for %1:").arg(keyword), links.keys(), 0, false, &ok);
+                                         tr("Choose a topic for %1:").arg(keyword), links.keys(), 0, false, &ok);
     if (ok && !item.isEmpty())
         onUrlChange(links.value(item));
 }

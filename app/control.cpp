@@ -326,7 +326,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     m_dragIn = false;
     event->accept();
-    WindowManager::mainWindow()->centralWidget()->designerWidget()->handleControlDrop(
+    WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(
                 this, event->pos(),
                 event->mimeData()->urls().first().toLocalFile());
     update();
@@ -433,7 +433,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
-    WindowManager::mainWindow()->centralWidget()->designerWidget()->handleControlDoubleClick(this);
+    WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDoubleClick(this);
 }
 
 void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)

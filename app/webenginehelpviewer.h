@@ -56,6 +56,7 @@ public:
     void addBackHistoryItems(QMenu *backMenu) override;
     void addForwardHistoryItems(QMenu *forwardMenu) override;
 
+    WebView* webView() const;
     WebEngineHelpPage *page() const;
 
 public slots:

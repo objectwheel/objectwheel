@@ -1,11 +1,11 @@
 #ifndef FILEEXPLORER_H
 #define FILEEXPLORER_H
 
-#include <QWidget>
+#include <QFrame>
 
 class FileExplorerPrivate;
 
-class FileExplorer : public QWidget
+class FileExplorer : public QFrame
 {
     Q_OBJECT
 

@@ -23,8 +23,8 @@ public:
 public slots:
     void sweep();
     void refresh() { onRefreshButtonClick(); }
-    void handleControlDoubleClick(Control*);
-    void handleControlDrop(Control*, const QPointF&, const QString&);
+    void onControlDoubleClick(Control*);
+    void onControlDrop(Control*, const QPointF&, const QString&);
 
 protected:
     QSize sizeHint() const override;

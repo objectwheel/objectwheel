@@ -171,7 +171,7 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     containerVBoxLayout->addWidget(splitter);
 
     containerWidget->setWindowTitle("Objectwheel Qml Editor");
-    containerWidget->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+    containerWidget->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     containerWidget->addAction(&saveAction);
 
     saveAction.setText("Save document");
