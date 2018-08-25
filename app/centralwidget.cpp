@@ -47,7 +47,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
             m_designerWidget, SLOT(handleControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::handleControlRemoval);
+            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
             ControlPreviewingManager::scheduleTerminate);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,

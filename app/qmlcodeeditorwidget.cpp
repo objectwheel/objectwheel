@@ -52,23 +52,23 @@ class QmlCodeEditorWidgetPrivate : public QObject
         qreal findPixelSize(const QString& text);
 
     public slots:
-        void handleCursorPositionChanged();
-        void handleModeChange();
-        void handleFileExplorerFileOpen(const QString& filePath);
-        void handleFileExplorerFileDeleted(const QString& filePath);
-        void handleFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo);
-        void handlePinButtonClicked();
-        void handleCloseButtonClicked();
-        void handleSaveButtonClicked();
-        void handleZoomLevelChange(const QString& text);
-        void handleHideShowButtonClicked();
-        void handleCodeEditorButtonClicked();
-        void handleImageEditorButtonClicked();
-        void handleHexEditorButtonClicked();
+        void onCursorPositionChanged();
+        void onModeChange();
+        void onFileExplorerFileOpen(const QString& filePath);
+        void onFileExplorerFileDeleted(const QString& filePath);
+        void onFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo);
+        void onPinButtonClicked();
+        void onCloseButtonClicked();
+        void onSaveButtonClicked();
+        void onZoomLevelChange(const QString& text);
+        void onHideShowButtonClicked();
+        void onCodeEditorButtonClicked();
+        void onImageEditorButtonClicked();
+        void onHexEditorButtonClicked();
         void updateOpenDocHistory();
-        void handleItemsComboboxActivated(QString text);
-        void handleDocumentsComboboxActivated(QString text);
-        void handleControlRemoval(Control* control);
+        void onItemsComboboxActivated(QString text);
+        void onDocumentsComboboxActivated(QString text);
+        void onControlRemoval(Control* control);
         void propertyUpdate(Control* control, const QString& property, const QString& value);
 
     public:
@@ -96,6 +96,13 @@ class QmlCodeEditorWidgetPrivate : public QObject
         QComboBox* documentsCombobox;
         QComboBox* zoomlLevelCombobox;
         QLabel* lineColLabel;
+
+        QAction* itemsAction = 0;
+        QAction* documentsAction = 0;
+        QAction* zoomlLevelAction = 0;
+        QAction* closeAction = 0;
+        QAction* sepAction = 0;
+        QAction* sepAction_2 = 0;
 
         QSplitter* splitter;
         QWidget* editorWrapper;
@@ -173,8 +180,8 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
 
     splitter->addWidget(editorWrapper);
     splitter->addWidget(explorerWrapper);
-    splitter->setCollapsible(0, false);;
-    splitter->setCollapsible(1, false);;
+    splitter->setCollapsible(0, false);
+    splitter->setCollapsible(1, false);
     splitter->setHandleWidth(0);
 
     editorWrapperVBoxLayout->setContentsMargins(0, 0, 0, 0);
@@ -206,40 +213,59 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     codeEditor->setCodeDocument(emptyDoc);
 
-    codeEditor->hide();
-    documentsCombobox->hide();
-    itemsCombobox->hide();
-    closeButton->hide();
-    noDocumentIndicator->show();
-
     TransparentStyle::attach(toolbar);
     TransparentStyle::attach(toolbar_2);
 
-    connect(parent, SIGNAL(modeChanged()), SLOT(handleModeChange()));
-    connect(codeEditor, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));
-    connect(pinButton, SIGNAL(clicked(bool)), SLOT(handlePinButtonClicked()));
-    connect(undoButton, SIGNAL(clicked(bool)), codeEditor, SLOT(undo()));
-    connect(redoButton, SIGNAL(clicked(bool)), codeEditor, SLOT(redo()));
-    connect(copyButton, SIGNAL(clicked(bool)), codeEditor, SLOT(copy()));
-    connect(cutButton, SIGNAL(clicked(bool)), codeEditor, SLOT(cut()));
-    connect(pasteButton, SIGNAL(clicked(bool)), codeEditor, SLOT(paste()));
-    connect(codeEditor, SIGNAL(copyAvailable(bool)), copyButton, SLOT(setEnabled(bool)));
-    connect(codeEditor, SIGNAL(copyAvailable(bool)), cutButton, SLOT(setEnabled(bool)));
-    connect(zoomlLevelCombobox, SIGNAL(activated(QString)), SLOT(handleZoomLevelChange(QString)));
-    connect(hideShowButton, SIGNAL(clicked(bool)), SLOT(handleHideShowButtonClicked()));
-    connect(closeButton, SIGNAL(clicked(bool)), SLOT(handleCloseButtonClicked()));
-    connect(saveButton, SIGNAL(clicked(bool)), SLOT(handleSaveButtonClicked()));
-    connect(codeEditorButton, SIGNAL(clicked(bool)), SLOT(handleCodeEditorButtonClicked()));
-    connect(imageEditorButton, SIGNAL(clicked(bool)), SLOT(handleImageEditorButtonClicked()));
-    connect(hexEditorButton, SIGNAL(clicked(bool)), SLOT(handleHexEditorButtonClicked()));
-    connect(fileExplorer, SIGNAL(fileOpened(QString)), SLOT(handleFileExplorerFileOpen(QString)));
-    connect(fileExplorer, SIGNAL(fileDeleted(QString)), SLOT(handleFileExplorerFileDeleted(QString)));
-    connect(fileExplorer, SIGNAL(fileRenamed(QString,QString)), SLOT(handleFileExplorerFileRenamed(QString,QString)));
-    connect(itemsCombobox, SIGNAL(activated(QString)), SLOT(handleItemsComboboxActivated(QString)));
-    connect(documentsCombobox, SIGNAL(activated(QString)), SLOT(handleDocumentsComboboxActivated(QString)), Qt::QueuedConnection);
-    connect(&saveAction, SIGNAL(triggered()), SLOT(handleSaveButtonClicked()));
-//    FIXME connect(SaveManager::instance(), SIGNAL(databaseChanged()), SLOT(updateOpenDocHistory()));
-    connect(SaveManager::instance(), &SaveManager::propertyChanged, this, &QmlCodeEditorWidgetPrivate::propertyUpdate);
+    connect(parent, &QmlCodeEditorWidget::modeChanged,
+            this, &QmlCodeEditorWidgetPrivate::onModeChange);
+    connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
+            this, &QmlCodeEditorWidgetPrivate::onCursorPositionChanged);
+    connect(pinButton, &QToolButton::clicked,
+            this, &QmlCodeEditorWidgetPrivate::onPinButtonClicked);
+    connect(undoButton, &QToolButton::clicked,
+            codeEditor, &QmlCodeEditor::undo);
+    connect(redoButton, &QToolButton::clicked,
+            codeEditor, &QmlCodeEditor::redo);
+    connect(copyButton, &QToolButton::clicked,
+            codeEditor, &QmlCodeEditor::copy);
+    connect(cutButton, &QToolButton::clicked,
+            codeEditor, &QmlCodeEditor::cut);
+    connect(pasteButton, &QToolButton::clicked,
+            codeEditor, &QmlCodeEditor::paste);
+    connect(codeEditor, &QmlCodeEditor::copyAvailable,
+            copyButton, &QToolButton::setEnabled);
+    connect(codeEditor, &QmlCodeEditor::copyAvailable,
+            cutButton, &QToolButton::setEnabled);
+    connect(zoomlLevelCombobox, qOverload<const QString&>(&QComboBox::activated),
+            this, &QmlCodeEditorWidgetPrivate::onZoomLevelChange);
+    connect(hideShowButton, &QToolButton::clicked,
+            this, &QmlCodeEditorWidgetPrivate::onHideShowButtonClicked);
+    connect(closeButton, &QToolButton::clicked,
+            this, &QmlCodeEditorWidgetPrivate::onCloseButtonClicked);
+    connect(saveButton, &QToolButton::clicked,
+            this, &QmlCodeEditorWidgetPrivate::onSaveButtonClicked);
+    connect(codeEditorButton, &QToolButton::clicked,
+            this, &QmlCodeEditorWidgetPrivate::onCodeEditorButtonClicked);
+    connect(imageEditorButton, &QToolButton::clicked,
+            this, &QmlCodeEditorWidgetPrivate::onImageEditorButtonClicked);
+    connect(hexEditorButton, &QToolButton::clicked,
+            this, &QmlCodeEditorWidgetPrivate::onHexEditorButtonClicked);
+    connect(fileExplorer, &FileExplorer::fileOpened,
+            this, &QmlCodeEditorWidgetPrivate::onFileExplorerFileOpen);
+    connect(fileExplorer, &FileExplorer::fileDeleted,
+            this, &QmlCodeEditorWidgetPrivate::onFileExplorerFileDeleted);
+    connect(fileExplorer, &FileExplorer::fileRenamed,
+            this, &QmlCodeEditorWidgetPrivate::onFileExplorerFileRenamed);
+    connect(itemsCombobox, qOverload<const QString&>(&QComboBox::activated),
+            this, &QmlCodeEditorWidgetPrivate::onItemsComboboxActivated);
+    connect(documentsCombobox, qOverload<const QString&>(&QComboBox::activated),
+            this, &QmlCodeEditorWidgetPrivate::onDocumentsComboboxActivated, Qt::QueuedConnection);
+    connect(&saveAction, &QAction::triggered,
+            this, &QmlCodeEditorWidgetPrivate::onSaveButtonClicked);
+    // FIXME connect(SaveManager::instance(), &SaveManager::databaseChanged,
+    // this, &QmlCodeEditorWidgetPrivate::updateOpenDocHistory);
+    connect(SaveManager::instance(), &SaveManager::propertyChanged,
+            this, &QmlCodeEditorWidgetPrivate::propertyUpdate);
 
     zoomlLevelCombobox->addItem("35 %");
     zoomlLevelCombobox->addItem("50 %");
@@ -315,12 +341,12 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
     toolbar->addWidget(pasteButton);
     toolbar->addWidget(saveButton);
     toolbar->addSeparator();
-    toolbar->addWidget(itemsCombobox);
-    toolbar->addWidget(documentsCombobox);
-    toolbar->addSeparator();
-    toolbar->addWidget(closeButton);
-    toolbar->addSeparator();
-    toolbar->addWidget(zoomlLevelCombobox);
+    itemsAction = toolbar->addWidget(itemsCombobox);
+    documentsAction = toolbar->addWidget(documentsCombobox);
+    sepAction = toolbar->addSeparator();
+    closeAction = toolbar->addWidget(closeButton);
+    sepAction_2 = toolbar->addSeparator();
+    zoomlLevelAction = toolbar->addWidget(zoomlLevelCombobox);
     auto empty = new QWidget;
     empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolbar->addWidget(empty);
@@ -364,9 +390,14 @@ QmlCodeEditorWidgetPrivate::QmlCodeEditorWidgetPrivate(QmlCodeEditorWidget* pare
         lastWidthOfExplorerWrapper = explorerWrapper->width();
     });
 
-//    QTimer::singleShot(10000, [=] {
-//        handlePinButtonClicked();
-//    });
+    codeEditor->hide();
+    documentsAction->setVisible(false);
+    itemsAction->setVisible(false);
+    zoomlLevelAction->setVisible(false);
+    closeAction->setVisible(false);
+    sepAction->setVisible(false);
+    sepAction_2->setVisible(false);
+    noDocumentIndicator->show();
 }
 
 qreal QmlCodeEditorWidgetPrivate::findPixelSize(const QString& text)
@@ -407,14 +438,14 @@ qreal QmlCodeEditorWidgetPrivate::findPixelSize(const QString& text)
         return base;
 }
 
-void QmlCodeEditorWidgetPrivate::handleCursorPositionChanged()
+void QmlCodeEditorWidgetPrivate::onCursorPositionChanged()
 {
     auto textCursor = codeEditor->textCursor();
     QString lineColText("Line: %1, Col: %2");
     lineColLabel->setText(lineColText.arg(textCursor.blockNumber() + 1).arg(textCursor.columnNumber() + 1));
 }
 
-void QmlCodeEditorWidgetPrivate::handlePinButtonClicked()
+void QmlCodeEditorWidgetPrivate::onPinButtonClicked()
 {
     if (pinButton->toolTip().contains("Unpin")) {
         pinButton->setToolTip("Pin Editor.");
@@ -441,7 +472,7 @@ void QmlCodeEditorWidgetPrivate::handlePinButtonClicked()
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleCloseButtonClicked()
+void QmlCodeEditorWidgetPrivate::onCloseButtonClicked()
 {
     for (auto& item : parent->_editorItems) {
         if (item.control == currentControl) {
@@ -452,7 +483,7 @@ void QmlCodeEditorWidgetPrivate::handleCloseButtonClicked()
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleSaveButtonClicked()
+void QmlCodeEditorWidgetPrivate::onSaveButtonClicked()
 {
     for (auto& item : parent->_editorItems) {
         if (item.control == currentControl) {
@@ -465,14 +496,14 @@ void QmlCodeEditorWidgetPrivate::handleSaveButtonClicked()
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleZoomLevelChange(const QString& /*text*/)
+void QmlCodeEditorWidgetPrivate::onZoomLevelChange(const QString& /*text*/)
 {
     // BUG
     //    defaultFont.setPixelSize(findPixelSize(text));
     //    codeEditor->document()->setDefaultFont(defaultFont);
 }
 
-void QmlCodeEditorWidgetPrivate::handleHideShowButtonClicked()
+void QmlCodeEditorWidgetPrivate::onHideShowButtonClicked()
 {
     if (hideShowButton->toolTip().contains("Hide")) {
         hideShowButton->setIcon(Utils::Icons::CLOSE_SPLIT_LEFT.icon());
@@ -498,7 +529,7 @@ void QmlCodeEditorWidgetPrivate::handleHideShowButtonClicked()
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleModeChange()
+void QmlCodeEditorWidgetPrivate::onModeChange()
 {
     if (parent->_mode == QmlCodeEditorWidget::CodeEditor) {
         codeEditorButton->setChecked(true);
@@ -537,18 +568,18 @@ void QmlCodeEditorWidgetPrivate::handleModeChange()
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleFileExplorerFileOpen(const QString& filePath)
+void QmlCodeEditorWidgetPrivate::onFileExplorerFileOpen(const QString& filePath)
 {
     parent->addDocument(currentControl, filePath);
     parent->setCurrentDocument(currentControl, filePath);
 }
 
-void QmlCodeEditorWidgetPrivate::handleFileExplorerFileDeleted(const QString& filePath)
+void QmlCodeEditorWidgetPrivate::onFileExplorerFileDeleted(const QString& filePath)
 {
     parent->closeDocument(currentControl, filePath, false);
 }
 
-void QmlCodeEditorWidgetPrivate::handleFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo)
+void QmlCodeEditorWidgetPrivate::onFileExplorerFileRenamed(const QString& filePathFrom, const QString& filePathTo)
 {
     auto relativePath = filePathFrom;
     relativePath.remove(currentControl->dir() + separator() + DIR_THIS + separator());
@@ -570,17 +601,17 @@ void QmlCodeEditorWidgetPrivate::handleFileExplorerFileRenamed(const QString& fi
     updateOpenDocHistory();
 }
 
-void QmlCodeEditorWidgetPrivate::handleCodeEditorButtonClicked()
+void QmlCodeEditorWidgetPrivate::onCodeEditorButtonClicked()
 {
     parent->setMode(QmlCodeEditorWidget::CodeEditor);
 }
 
-void QmlCodeEditorWidgetPrivate::handleImageEditorButtonClicked()
+void QmlCodeEditorWidgetPrivate::onImageEditorButtonClicked()
 {
     parent->setMode(QmlCodeEditorWidget::ImageEditor);
 }
 
-void QmlCodeEditorWidgetPrivate::handleHexEditorButtonClicked()
+void QmlCodeEditorWidgetPrivate::onHexEditorButtonClicked()
 {
     parent->setMode(QmlCodeEditorWidget::HexEditor);
 }
@@ -620,7 +651,7 @@ void QmlCodeEditorWidgetPrivate::updateOpenDocHistory()
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleItemsComboboxActivated(QString text)
+void QmlCodeEditorWidgetPrivate::onItemsComboboxActivated(QString text)
 {
     if (text.isEmpty())
         return;
@@ -643,7 +674,7 @@ void QmlCodeEditorWidgetPrivate::handleItemsComboboxActivated(QString text)
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleDocumentsComboboxActivated(QString text)
+void QmlCodeEditorWidgetPrivate::onDocumentsComboboxActivated(QString text)
 {
     if (text.isEmpty())
         return;
@@ -662,7 +693,7 @@ void QmlCodeEditorWidgetPrivate::handleDocumentsComboboxActivated(QString text)
     }
 }
 
-void QmlCodeEditorWidgetPrivate::handleControlRemoval(Control* control)
+void QmlCodeEditorWidgetPrivate::onControlRemoval(Control* control)
 {
     parent->closeControl(control, false);
 }
@@ -857,9 +888,12 @@ void QmlCodeEditorWidget::openControl(Control* control)
             }
 
             _d->codeEditor->show();
-            _d->documentsCombobox->show();
-            _d->itemsCombobox->show();
-            _d->closeButton->show();
+            _d->documentsAction->setVisible(true);
+            _d->itemsAction->setVisible(true);
+            _d->zoomlLevelAction->setVisible(true);
+            _d->closeAction->setVisible(true);
+            _d->sepAction->setVisible(true);
+            _d->sepAction_2->setVisible(true);
             _d->noDocumentIndicator->hide();
             break;
         }
@@ -946,9 +980,12 @@ void QmlCodeEditorWidget::closeDocument(Control* control, const QString& documen
         issuerItem->currentFileRelativePath == relativePath) {
         _d->codeEditor->setCodeDocument(_d->emptyDoc);        
         _d->codeEditor->hide();
-        _d->documentsCombobox->hide();
-        _d->itemsCombobox->hide();
-        _d->closeButton->hide();
+        _d->documentsAction->setVisible(false);
+        _d->itemsAction->setVisible(false);
+        _d->zoomlLevelAction->setVisible(false);
+        _d->closeAction->setVisible(false);
+        _d->sepAction->setVisible(false);
+        _d->sepAction_2->setVisible(false);
         _d->noDocumentIndicator->show();
     }
 
@@ -1036,7 +1073,7 @@ void QmlCodeEditorWidget::sweep()
     _d->currentControl = nullptr;
 
     if (!pinned())
-        _d->handlePinButtonClicked();
+        _d->onPinButtonClicked();
 
     _d->redoButton->setDisabled(true);
     _d->copyButton->setDisabled(true);
@@ -1050,9 +1087,9 @@ void QmlCodeEditorWidget::sweep()
     // TODO: _d->hexEditor->sweep();
 
     if (_d->hideShowButton->toolTip().contains("Hide"))
-        _d->handleHideShowButtonClicked();
+        _d->onHideShowButtonClicked();
 
-    _d->handleZoomLevelChange("100 %");
+    _d->onZoomLevelChange("100 %");
     setMode(CodeEditor);
 }
 
@@ -1077,7 +1114,7 @@ void QmlCodeEditorWidget::refreshErrors()
 //    }
 }
 
-void QmlCodeEditorWidget::handleControlRemoval(Control* control)
+void QmlCodeEditorWidget::onControlRemoval(Control* control)
 {
     closeControl(control, false);
 }

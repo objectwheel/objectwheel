@@ -63,7 +63,7 @@ public slots:
     void saveAll();
     void raiseContainer();
     void refreshErrors();
-    void handleControlRemoval(Control* control);
+    void onControlRemoval(Control* control);
 
 protected:
     QSize sizeHint() const override;
