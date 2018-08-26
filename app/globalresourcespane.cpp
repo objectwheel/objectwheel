@@ -142,7 +142,7 @@ private:
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_searchEdit(new FocuslessLineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
-  , m_toolbar(new QToolBar(this))
+  , m_toolBar(new QToolBar(this))
   , m_modeComboBox(new QComboBox(header()))
   , m_upButton(new QToolButton)
   , m_homeButton(new QToolButton)
@@ -166,20 +166,14 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     header()->setMinimumSectionSize(1);
     header()->setSectionsMovable(false);
 
-    setIndentation(16);
     setIconSize({15, 15});
-    setAcceptDrops(true);
     setDragEnabled(false);
     setSortingEnabled(false);
-    setRootIsDecorated(true);
-    setItemsExpandable(true);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
-    setExpandsOnDoubleClick(true);
     setItemDelegate(new GlobalListDelegate(this));
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeView::SelectRows);
-    setSelectionMode(QTreeView::SingleSelection);
     setDragDropMode(QAbstractItemView::NoDragDrop);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setVerticalScrollMode(QTreeView::ScrollPerPixel);
@@ -211,8 +205,8 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     mp.setColor(QPalette::WindowText, Qt::white);
     mp.setColor(QPalette::ButtonText, Qt::white);
     m_modeComboBox->setPalette(mp);
-    m_modeComboBox->addItem("      " + tr("Viewer"));
-    m_modeComboBox->addItem("      " + tr("Explorer"));
+    m_modeComboBox->addItem(/*"      " + */tr("Viewer")); // First must be viewer, index is important
+    m_modeComboBox->addItem(/*"      " + */tr("Explorer"));
 
     m_upButton->setCursor(Qt::PointingHandCursor);
     m_homeButton->setCursor(Qt::PointingHandCursor);
@@ -243,6 +237,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     modeIFilterIconLabel->setPixmap(FILTER_ICON.pixmap());
     modeIFilterIconLabel->setFixedSize(16, 16);
     modeIFilterIconLabel->move(0, 3);
+    m_modeComboBox->setContentsMargins(16, 0, 0, 0);
 
     m_upButton->setIcon(Icons::ARROW_UP.icon());
     m_homeButton->setIcon(Icons::HOME_TOOLBAR.icon());
@@ -278,7 +273,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     connect(m_modeComboBox, qOverload<const QString&>(&QComboBox::activated),
             this, &GlobalResourcesPane::onModeChange);
 
-    TransparentStyle::attach(m_toolbar);
+    TransparentStyle::attach(m_toolBar);
     TransparentStyle::attach(m_modeComboBox);
 
     m_upButton->setFixedHeight(22);
@@ -293,19 +288,19 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_downloadFileButton->setFixedHeight(22);
     m_modeComboBox->setFixedHeight(22);
 
-    m_toolbar->setFixedHeight(24);
-    m_toolbar->addWidget(m_homeButton);
-    m_toolbar->addWidget(m_upButton);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(m_cutButton);
-    m_toolbar->addWidget(m_copyButton);
-    m_toolbar->addWidget(m_pasteButton);
-    m_toolbar->addWidget(m_deleteButton);
-    m_toolbar->addWidget(m_renameButton);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(m_newFileButton);
-    m_toolbar->addWidget(m_newFolderButton);
-    m_toolbar->addWidget(m_downloadFileButton);
+    m_toolBar->setFixedHeight(24);
+    m_toolBar->addWidget(m_homeButton);
+    m_toolBar->addWidget(m_upButton);
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(m_cutButton);
+    m_toolBar->addWidget(m_copyButton);
+    m_toolBar->addWidget(m_pasteButton);
+    m_toolBar->addWidget(m_deleteButton);
+    m_toolBar->addWidget(m_renameButton);
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(m_newFileButton);
+    m_toolBar->addWidget(m_newFolderButton);
+    m_toolBar->addWidget(m_downloadFileButton);
 
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
 
@@ -323,6 +318,8 @@ void GlobalResourcesPane::sweep()
     // TODO
     m_searchEdit->clear();
     setModel(nullptr);
+    m_modeComboBox->setCurrentIndex(0); // Viewer
+    onModeChange();
 }
 
 void GlobalResourcesPane::onProjectStart()
@@ -337,7 +334,32 @@ void GlobalResourcesPane::onProjectStart()
 
 void GlobalResourcesPane::onModeChange()
 {
+    if (m_modeComboBox->currentIndex() == 0)
+        m_mode = Viewer;
+    else
+        m_mode = Explorer;
 
+    if (m_mode == Viewer) {
+        m_toolBar->hide();
+
+        setIndentation(16);
+        setAcceptDrops(false);
+        setRootIsDecorated(true);
+        setItemsExpandable(true);
+        setExpandsOnDoubleClick(true);
+        setSelectionMode(QTreeView::SingleSelection);
+    } else {
+        m_toolBar->show();
+
+        setIndentation(0);
+        setAcceptDrops(true);
+        setRootIsDecorated(false);
+        setItemsExpandable(false);
+        setExpandsOnDoubleClick(false);
+        setSelectionMode(QTreeView::ExtendedSelection);
+    }
+
+    updateGeometries();
 }
 
 void GlobalResourcesPane::onUpButtonClick()
@@ -626,16 +648,18 @@ void GlobalResourcesPane::updateGeometries()
     QTreeView::updateGeometries();
     QMargins vm = viewportMargins();
     vm.setBottom(m_searchEdit->height());
-    vm.setTop(header()->height() + m_toolbar->height() - 1);
+    vm.setTop(m_mode == Explorer ? header()->height() + m_toolBar->height() - 1 : 0);
     setViewportMargins(vm);
     QRect vg = viewport()->geometry();
     QRect sg(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
-    QRect tg(vg.left(), header()->height(), vg.width(), m_toolbar->height());
-    header()->setGeometry(vg.left(), 0, vg.width(), header()->height());
-    m_toolbar->setGeometry(tg);
     m_searchEdit->setGeometry(sg);
+    header()->setGeometry(vg.left(), 0, vg.width(), header()->height());
     m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
                          header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
+    if (m_mode == Explorer) {
+        QRect tg(vg.left(), header()->height(), vg.width(), m_toolBar->height());
+        m_toolBar->setGeometry(tg);
+    }
 }
 
 QSize GlobalResourcesPane::sizeHint() const

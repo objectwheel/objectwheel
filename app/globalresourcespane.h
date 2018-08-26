@@ -49,7 +49,7 @@ private:
 private:
     FocuslessLineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
-    QToolBar* m_toolbar;
+    QToolBar* m_toolBar;
     QComboBox* m_modeComboBox;
     QToolButton* m_upButton;
     QToolButton* m_homeButton;
@@ -61,6 +61,7 @@ private:
     QToolButton* m_newFileButton;
     QToolButton* m_newFolderButton;
     QToolButton* m_downloadFileButton;
+    enum Modes { Viewer, Explorer} m_mode;
 };
 
 #endif // GLOBALRESOURCESPANE_H

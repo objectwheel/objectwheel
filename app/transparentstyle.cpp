@@ -279,6 +279,7 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             }
             // This should be enough to fit the focus ring
             sz.setHeight(pushButtonDefaultHeight[1]);
+            sz.setWidth(sz.width() + widget->contentsMargins().left() + widget->contentsMargins().right());
             return sz;
         } break;
     case CT_Menu:
@@ -325,9 +326,14 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
     case CC_ComboBox:
         if (const QStyleOptionComboBox *combo
                 = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
-            const auto editRect = comboboxEditBounds(adjustedControlFrame(combo->rect));
+            auto editRect = comboboxEditBounds(adjustedControlFrame(combo->rect));
+            const QComboBox* cb = qobject_cast<const QComboBox*>(widget);
+
             switch (subControl) {
             case SC_ComboBoxEditField:
+                if (cb)
+                    editRect = editRect.marginsRemoved(cb->contentsMargins());
+
                 ret = editRect.toAlignedRect();
                 break;
             case SC_ComboBoxArrow:
@@ -590,8 +596,12 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->save();
         bool isDown = (option->state & State_Sunken) || (option->state & State_On);
         bool isEnabled = option->state & State_Enabled;
-        if (isEnabled)
-            painter->fillRect(option->rect, isDown ? "#15000000" : "#25000000");
+        if (isEnabled) {
+            QLinearGradient g(option->rect.topLeft(), option->rect.bottomLeft());
+            g.setColorAt(0, isDown ? "#35000000" : "#10000000");
+            g.setColorAt(1, isDown ? "#25000000" : "#20000000");
+            painter->fillRect(option->rect, g);
+        }
         painter->restore();
     } break;
     default:
