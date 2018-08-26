@@ -588,7 +588,6 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         } break;
     case PE_PanelButtonCommand: {
         painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
         bool isDown = (option->state & State_Sunken) || (option->state & State_On);
         bool isEnabled = option->state & State_Enabled;
         if (isEnabled)
@@ -739,12 +738,28 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_ComboBoxLabel:
         if (const auto *cb
                 = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
-            auto comboCopy = *cb;
-            comboCopy.direction = Qt::LeftToRight;
+            auto copy = *cb;
+            copy.direction = Qt::LeftToRight;
             // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
-            ApplicationStyle::drawControl(CE_ComboBoxLabel, &comboCopy, painter, widget);
+            ApplicationStyle::drawControl(CE_ComboBoxLabel, &copy, painter, widget);
         } break;
     case CE_ToolBar:
+        if (const auto *cb
+                = qstyleoption_cast<const QStyleOptionToolBar*>(option)) {
+            if (const auto *wd
+                    = qobject_cast<const QToolBar*>(widget)) {
+                painter->save();
+                QLinearGradient g(cb->rect.topLeft(), wd->orientation() == Qt::Horizontal
+                                  ? cb->rect.bottomLeft()
+                                  : cb->rect.topRight());
+                g.setColorAt(0, Qt::white);
+                g.setColorAt(1, "#f0f0f0");
+                painter->setPen("#c4c4c4");
+                painter->setBrush(g);
+                painter->drawRect(cb->rect);
+                painter->restore();
+            }
+        } break;
         break;
     default:
         ApplicationStyle::drawControl(element, option, painter, widget);

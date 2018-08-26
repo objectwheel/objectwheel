@@ -16,6 +16,8 @@
 #include <QToolButton>
 #include <QLabel>
 
+using namespace Utils;
+
 namespace {
 const int ROW_HEIGHT = 21;
 
@@ -58,11 +60,8 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
     // Draw top and bottom lines
     QColor lineColor(isSelected ? pal.highlightedText().color() : pal.text().color().lighter(210));
     lineColor.setAlpha(50);
-    painter->setPen(row == 0 ? "#c0c0c0" : lineColor);
-    if (row == 0)
-        painter->drawLine(rect.topLeft() + QPointF{0.5, 0.5}, rect.topRight() - QPointF{0.5, -0.5});
-    else
-        painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+    painter->setPen(lineColor);
+    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
     // Draw vertical line
@@ -205,19 +204,15 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
-                );
+    );
 
     QPalette mp(m_modeComboBox->palette());
     mp.setColor(QPalette::Text, Qt::white);
     mp.setColor(QPalette::WindowText, Qt::white);
     mp.setColor(QPalette::ButtonText, Qt::white);
     m_modeComboBox->setPalette(mp);
-
     m_modeComboBox->addItem("      " + tr("Viewer"));
     m_modeComboBox->addItem("      " + tr("Explorer"));
-
-    //    m_deleteButton->setDisabled(true);
-    //    m_copyButton->setDisabled(true);
 
     m_upButton->setCursor(Qt::PointingHandCursor);
     m_homeButton->setCursor(Qt::PointingHandCursor);
@@ -231,36 +226,34 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_downloadFileButton->setCursor(Qt::PointingHandCursor);
     m_modeComboBox->setCursor(Qt::PointingHandCursor);
 
-    m_upButton->setToolTip("Go up.");
-    m_homeButton->setToolTip("Go home.");
-    m_cutButton->setToolTip("Cut files/folders.");
-    m_copyButton->setToolTip("Copy files/folders.");
-    m_pasteButton->setToolTip("Paste files/folders.");
-    m_deleteButton->setToolTip("Delete files/folders.");
-    m_renameButton->setToolTip("Rename file/folder.");
-    m_newFileButton->setToolTip("New file.");
-    m_newFolderButton->setToolTip("New folder.");
-    m_downloadFileButton->setToolTip("Download file from url.");
-    m_modeComboBox->setToolTip("File Explorer Mode.");
+    m_upButton->setToolTip(tr("Go to upper directory"));
+    m_homeButton->setToolTip(tr("Go to the home directory"));
+    m_cutButton->setToolTip(tr("Cut selected files/folders"));
+    m_copyButton->setToolTip(tr("Copy selected files/folders"));
+    m_pasteButton->setToolTip(tr("Paste files/folders into the current directory"));
+    m_deleteButton->setToolTip(tr("Delete selected files/folders"));
+    m_renameButton->setToolTip(tr("Rename selected file/folder"));
+    m_newFileButton->setToolTip(tr("Create an empty new file within the current directory"));
+    m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
+    m_downloadFileButton->setToolTip(tr("Download a file from an url into the current directory"));
+    m_modeComboBox->setToolTip(tr("Change the File Explorer Mode."));
 
-    const Utils::Icon FFF({{QLatin1String(":/utils/images/filtericon.png"), Utils::Theme::BackgroundColorNormal}});
+    const Icon FILTER_ICON({{":/utils/images/filtericon.png", Theme::BackgroundColorNormal}});
+    auto modeIFilterIconLabel = new QLabel(m_modeComboBox);
+    modeIFilterIconLabel->setPixmap(FILTER_ICON.pixmap());
+    modeIFilterIconLabel->setFixedSize(16, 16);
+    modeIFilterIconLabel->move(0, 3);
 
-    auto modeIconLabel = new QLabel(m_modeComboBox);
-    modeIconLabel->setPixmap(FFF.pixmap());
-    modeIconLabel->setFixedSize(16, 16);
-    modeIconLabel->move(0, 3);
-    modeIconLabel->setScaledContents(true);
-
-    m_upButton->setIcon(Utils::Icons::ARROW_UP.icon());
-    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
-    m_cutButton->setIcon(Utils::Icons::CUT_TOOLBAR.icon());
-    m_copyButton->setIcon(Utils::Icons::COPY_TOOLBAR.icon());
-    m_pasteButton->setIcon(Utils::Icons::PASTE_TOOLBAR.icon());
-    m_deleteButton->setIcon(Utils::Icons::DELETE_TOOLBAR.icon());
-    m_renameButton->setIcon(Utils::Icons::RENAME.icon());
-    m_newFileButton->setIcon(Utils::Icons::FILENEW.icon());
-    m_newFolderButton->setIcon(Utils::Icons::FOLDERNEW.icon());
-    m_downloadFileButton->setIcon(Utils::Icons::DOWNLOAD.icon());
+    m_upButton->setIcon(Icons::ARROW_UP.icon());
+    m_homeButton->setIcon(Icons::HOME_TOOLBAR.icon());
+    m_cutButton->setIcon(Icons::CUT_TOOLBAR.icon());
+    m_copyButton->setIcon(Icons::COPY_TOOLBAR.icon());
+    m_pasteButton->setIcon(Icons::PASTE_TOOLBAR.icon());
+    m_deleteButton->setIcon(Icons::DELETE_TOOLBAR.icon());
+    m_renameButton->setIcon(Icons::RENAME.icon());
+    m_newFileButton->setIcon(Icons::FILENEW.icon());
+    m_newFolderButton->setIcon(Icons::FOLDERNEW.icon());
+    m_downloadFileButton->setIcon(Icons::DOWNLOAD.icon());
 
     connect(m_upButton, &QToolButton::clicked,
             this, &GlobalResourcesPane::onUpButtonClick);
@@ -285,11 +278,6 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     connect(m_modeComboBox, qOverload<const QString&>(&QComboBox::activated),
             this, &GlobalResourcesPane::onModeChange);
 
-//        QPalette tp(m_toolbar->palette());
-//        tp.setColor(QPalette::Window, "#333333");
-//        m_toolbar->setAutoFillBackground(true);
-//        m_toolbar->setPalette(tp);
-
     TransparentStyle::attach(m_toolbar);
     TransparentStyle::attach(m_modeComboBox);
 
@@ -306,8 +294,8 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_modeComboBox->setFixedHeight(22);
 
     m_toolbar->setFixedHeight(24);
-    m_toolbar->addWidget(m_upButton);
     m_toolbar->addWidget(m_homeButton);
+    m_toolbar->addWidget(m_upButton);
     m_toolbar->addSeparator();
     m_toolbar->addWidget(m_cutButton);
     m_toolbar->addWidget(m_copyButton);
@@ -638,15 +626,16 @@ void GlobalResourcesPane::updateGeometries()
     QTreeView::updateGeometries();
     QMargins vm = viewportMargins();
     vm.setBottom(m_searchEdit->height());
-    vm.setTop(header()->height() + m_toolbar->height());
+    vm.setTop(header()->height() + m_toolbar->height() - 1);
+    setViewportMargins(vm);
     QRect vg = viewport()->geometry();
     QRect sg(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
     QRect tg(vg.left(), header()->height(), vg.width(), m_toolbar->height());
-    setViewportMargins(vm);
-    m_searchEdit->setGeometry(sg);
-    m_toolbar->setGeometry(tg);
     header()->setGeometry(vg.left(), 0, vg.width(), header()->height());
-    m_modeComboBox->move(header()->width() - m_modeComboBox->width(), header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
+    m_toolbar->setGeometry(tg);
+    m_searchEdit->setGeometry(sg);
+    m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
+                         header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
 }
 
 QSize GlobalResourcesPane::sizeHint() const
