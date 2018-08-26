@@ -29,7 +29,9 @@ private slots:
     void onModeChange();
     void onUpButtonClick();
     void onHomeButtonClick();
+    void onCutButtonClick();
     void onCopyButtonClick();
+    void onPasteButtonClick();
     void onDeleteButtonClick();
     void onNewFileButtonClick();
     void onRenameButtonClick();
@@ -51,7 +53,9 @@ private:
     QComboBox* m_modeComboBox;
     QToolButton* m_upButton;
     QToolButton* m_homeButton;
+    QToolButton* m_cutButton;
     QToolButton* m_copyButton;
+    QToolButton* m_pasteButton;
     QToolButton* m_deleteButton;
     QToolButton* m_renameButton;
     QToolButton* m_newFileButton;

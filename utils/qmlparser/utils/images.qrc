@@ -221,5 +221,15 @@
         <file>images/pin@2x.png</file>
         <file>images/pinned.png</file>
         <file>images/pinned@2x.png</file>
+        <file>images/delete.png</file>
+        <file>images/delete@2x.png</file>
+        <file>images/rename.png</file>
+        <file>images/rename@2x.png</file>
+        <file>images/newfile.png</file>
+        <file>images/newfile@2x.png</file>
+        <file>images/newfolder.png</file>
+        <file>images/newfolder@2x.png</file>
+        <file>images/download.png</file>
+        <file>images/download@2x.png</file>
     </qresource>
 </RCC>

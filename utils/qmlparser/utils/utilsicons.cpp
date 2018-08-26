@@ -88,6 +88,12 @@ const Icon NEWSEARCH_TOOLBAR({
         {QLatin1String(":/utils/images/zoom.png"), Theme::IconsBaseColor},
         {QLatin1String(":/utils/images/iconoverlay_add_small.png"), Theme::IconsRunColor}});
 
+const Icon RENAME({
+        {QLatin1String(":/utils/images/rename.png"), Theme::PanelTextColorMid}}, Icon::Tint);
+const Icon FILENEW({
+        {QLatin1String(":/utils/images/newfile.png"), Theme::PanelTextColorMid}}, Icon::Tint);
+const Icon FOLDERNEW({
+        {QLatin1String(":/utils/images/newfolder.png"), Theme::PanelTextColorMid}}, Icon::Tint);
 const Icon NEWFILE({
         {QLatin1String(":/utils/images/filenew.png"), Theme::PanelTextColorMid}}, Icon::Tint);
 const Icon OPENFILE({
@@ -149,6 +155,12 @@ const Icon CLEAN({
         {QLatin1String(":/utils/images/clean_pane_small.png"), Theme::PanelTextColorMid}}, Icon::Tint);
 const Icon CLEAN_TOOLBAR({
         {QLatin1String(":/utils/images/clean_pane_small.png"), Theme::IconsBaseColor}});
+const Icon DELETE({
+        {QLatin1String(":/utils/images/delete.png"), Theme::PanelTextColorMid}}, Icon::Tint);
+const Icon DELETE_TOOLBAR({
+        {QLatin1String(":/utils/images/delete.png"), Theme::IconsBaseColor}});
+const Icon DOWNLOAD({
+        {QLatin1String(":/utils/images/download.png"), Theme::PanelTextColorMid}}, Icon::Tint);
 const Icon RELOAD({
         {QLatin1String(":/utils/images/reload_gray.png"), Theme::IconsBaseColor}});
 const Icon TOGGLE_LEFT_SIDEBAR({

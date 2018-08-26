@@ -46,7 +46,6 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
     TransparentStyle::attach(m_toolbar);
 
-    m_typeCombo->setFixedHeight(22);
     m_homeButton->setFixedHeight(22);
     m_backButton->setFixedHeight(22);
     m_forthButton->setFixedHeight(22);

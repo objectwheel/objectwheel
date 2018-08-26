@@ -336,7 +336,7 @@ void FormsPane::updateGeometries()
 
 QSize FormsPane::sizeHint() const
 {
-    return QSize{310, 160};
+    return QSize{190, 190};
 }
 
 #include "formspane.moc"
