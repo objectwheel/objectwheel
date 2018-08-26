@@ -2,6 +2,7 @@
 #include <control.h>
 #include <outputpane.h>
 #include <utilsicons.h>
+#include <transparentstyle.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -73,10 +74,21 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     p1.setColor(QPalette::Highlight, QColor("#d4d4d4"));
     p1.setColor(QPalette::Text, Qt::black);
     m_listWidget->setPalette(p1);
-
     m_title->setText("Issues");
+
+    TransparentStyle::attach(m_toolbar);
+
+    m_title->setFixedHeight(22);
+    m_clearButton->setFixedHeight(22);
+
     m_toolbar->setFixedHeight(24);
+    auto spacing = new QWidget(this);
+    spacing->setFixedSize(2, 24);
+    auto spacing_2 = new QWidget(this);
+    spacing_2->setFixedSize(5, 24);
+    m_toolbar->addWidget(spacing);
     m_toolbar->addWidget(m_title);
+    m_toolbar->addWidget(spacing_2);
     m_toolbar->addSeparator();
     m_toolbar->addWidget(m_clearButton);
 
