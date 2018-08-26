@@ -267,7 +267,6 @@ void FileExplorerPrivate::onNewFileButtonClicked()
         mkfile(path + separator() + text);
 }
 
-
 void FileExplorerPrivate::onNewFolderButtonClicked()
 {
     bool ok;

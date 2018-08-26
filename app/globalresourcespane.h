@@ -6,6 +6,9 @@
 
 class FocuslessLineEdit;
 class QFileSystemModel;
+class QToolBar;
+class QToolButton;
+class QComboBox;
 
 class GlobalResourcesPanePrivate : public QTreeViewPrivate {};
 class GlobalResourcesPane : public QTreeView
@@ -23,6 +26,16 @@ public slots:
 
 private slots:
     void onProjectStart();
+    void onModeChange();
+    void onUpButtonClick();
+    void onHomeButtonClick();
+    void onCopyButtonClick();
+    void onDeleteButtonClick();
+    void onNewFileButtonClick();
+    void onRenameButtonClick();
+    void onNewFolderButtonClick();
+    void onDownloadButtonClick();
+    void onFileSelectionChange();
 
 private:
     void filterList(const QString& filter);
@@ -34,6 +47,16 @@ private:
 private:
     FocuslessLineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
+    QToolBar* m_toolbar;
+    QComboBox* m_modeComboBox;
+    QToolButton* m_upButton;
+    QToolButton* m_homeButton;
+    QToolButton* m_copyButton;
+    QToolButton* m_deleteButton;
+    QToolButton* m_renameButton;
+    QToolButton* m_newFileButton;
+    QToolButton* m_newFolderButton;
+    QToolButton* m_downloadFileButton;
 };
 
 #endif // GLOBALRESOURCESPANE_H

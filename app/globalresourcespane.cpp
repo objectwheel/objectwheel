@@ -4,11 +4,16 @@
 #include <saveutils.h>
 #include <filemanager.h>
 #include <wfw.h>
+#include <transparentstyle.h>
+#include <utilsicons.h>
 
+#include <QComboBox>
 #include <QPainter>
 #include <QHeaderView>
 #include <QStyledItemDelegate>
 #include <QFileSystemModel>
+#include <QToolBar>
+#include <QToolButton>
 
 namespace {
 const int ROW_HEIGHT = 21;
@@ -134,6 +139,16 @@ private:
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_searchEdit(new FocuslessLineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
+  , m_toolbar(new QToolBar(this))
+  , m_modeComboBox(new QComboBox(header()))
+  , m_upButton(new QToolButton)
+  , m_homeButton(new QToolButton)
+  , m_copyButton(new QToolButton)
+  , m_deleteButton(new QToolButton)
+  , m_renameButton(new QToolButton)
+  , m_newFileButton(new QToolButton)
+  , m_newFolderButton(new QToolButton)
+  , m_downloadFileButton(new QToolButton)
 {
     initPalette(this);
 
@@ -186,6 +201,90 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                 .arg(palette().brightText().color().name())
     );
 
+    QPalette mp(m_modeComboBox->palette());
+    mp.setColor(QPalette::Text, Qt::white);
+    mp.setColor(QPalette::WindowText, Qt::white);
+    mp.setColor(QPalette::ButtonText, Qt::white);
+    m_modeComboBox->setPalette(mp);
+
+    m_modeComboBox->addItem(tr("Viewer"));
+    m_modeComboBox->addItem(tr("Explorer"));
+
+    m_deleteButton->setDisabled(true);
+    m_copyButton->setDisabled(true);
+
+    m_upButton->setCursor(Qt::PointingHandCursor);
+    m_homeButton->setCursor(Qt::PointingHandCursor);
+    m_copyButton->setCursor(Qt::PointingHandCursor);
+    m_deleteButton->setCursor(Qt::PointingHandCursor);
+    m_renameButton->setCursor(Qt::PointingHandCursor);
+    m_newFileButton->setCursor(Qt::PointingHandCursor);
+    m_newFolderButton->setCursor(Qt::PointingHandCursor);
+    m_downloadFileButton->setCursor(Qt::PointingHandCursor);
+    m_modeComboBox->setCursor(Qt::PointingHandCursor);
+
+    m_upButton->setToolTip("Go up.");
+    m_homeButton->setToolTip("Go home.");
+    m_copyButton->setToolTip("Copy file/folder.");
+    m_deleteButton->setToolTip("Delete file/folder.");
+    m_renameButton->setToolTip("Rename file/folder.");
+    m_newFileButton->setToolTip("New file.");
+    m_newFolderButton->setToolTip("New folder.");
+    m_downloadFileButton->setToolTip("Download file from url.");
+    m_modeComboBox->setToolTip("File Explorer Mode.");
+
+    m_upButton->setIcon(QIcon(":/images/up.png"));
+    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
+    m_copyButton->setIcon(Utils::Icons::COPY_TOOLBAR.icon()); // TODO: Fix icons
+    m_deleteButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
+    m_renameButton->setIcon(QIcon(":/images/rename.png"));
+    m_newFileButton->setIcon(QIcon(":/images/newfile.png"));
+    m_newFolderButton->setIcon(QIcon(":/images/newfolder.png"));
+    m_downloadFileButton->setIcon(QIcon(":/images/downloadfile.png"));
+
+    connect(m_upButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onUpButtonClick);
+    connect(m_homeButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onHomeButtonClick);
+    connect(m_copyButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onCopyButtonClick);
+    connect(m_deleteButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onDeleteButtonClick);
+    connect(m_renameButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onRenameButtonClick);
+    connect(m_newFileButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onNewFileButtonClick);
+    connect(m_newFolderButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onNewFolderButtonClick);
+    connect(m_downloadFileButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onDownloadButtonClick);
+    connect(m_modeComboBox, qOverload<const QString&>(&QComboBox::activated),
+            this, &GlobalResourcesPane::onModeChange);
+
+    TransparentStyle::attach(m_toolbar);
+    TransparentStyle::attach(m_modeComboBox);
+
+    m_upButton->setFixedHeight(22);
+    m_homeButton->setFixedHeight(22);
+    m_copyButton->setFixedHeight(22);
+    m_deleteButton->setFixedHeight(22);
+    m_renameButton->setFixedHeight(22);
+    m_newFileButton->setFixedHeight(22);
+    m_newFolderButton->setFixedHeight(22);
+    m_downloadFileButton->setFixedHeight(22);
+    m_modeComboBox->setFixedHeight(22);
+
+    m_toolbar->setFixedHeight(24);
+    m_toolbar->addWidget(m_upButton);
+    m_toolbar->addWidget(m_homeButton);
+    m_toolbar->addSeparator();
+    m_toolbar->addWidget(m_copyButton);
+    m_toolbar->addWidget(m_deleteButton);
+    m_toolbar->addSeparator();
+    m_toolbar->addWidget(m_renameButton);
+    m_toolbar->addWidget(m_newFileButton);
+    m_toolbar->addWidget(m_newFolderButton);
+    m_toolbar->addWidget(m_downloadFileButton);
 
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
 
@@ -213,6 +312,202 @@ void GlobalResourcesPane::onProjectStart()
     hideColumn(1);
     hideColumn(2);
     hideColumn(3);
+}
+
+void GlobalResourcesPane::onModeChange()
+{
+
+}
+
+void GlobalResourcesPane::onUpButtonClick()
+{
+//    auto up = dname(fileList->currentPath());
+//    auto rootPath = fileList->fileModel()->rootPath();
+//    if (up.size() > rootPath.size() || up == rootPath)
+//        fileList->goPath(up);
+}
+
+void GlobalResourcesPane::onHomeButtonClick()
+{
+//    fileList->goPath(fileList->fileModel()->rootPath());
+}
+
+void GlobalResourcesPane::onCopyButtonClick()
+{
+//    auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
+//    auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
+//                 filterProxyModel()->mapToSource(fileList->rootIndex()));
+//    auto fileName = fileList->fileModel()->fileName(index);
+//    auto filePath = fileList->fileModel()->filePath(index);
+
+//    if (!index.isValid() || fileName.isEmpty() || filePath.isEmpty())
+//        return;
+
+//    QMessageBox box;
+//    box.setText("<b>Do you want to make a copy of following file/folder.</b>");
+//    box.setInformativeText("<b>Name: </b>" + fileName);
+//    box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+//    box.setDefaultButton(QMessageBox::No);
+//    box.setIcon(QMessageBox::Warning);
+//    const int ret = box.exec();
+
+//    switch (ret) {
+//        case QMessageBox::Yes: {
+//            if (fileList->fileModel()->isDir(index)) {
+//                auto copyName = fileName;
+//                for (int i = 1; exists(dname(filePath) + separator() + copyName); i++)
+//                    copyName = fileName + QString::number(i);
+//                mkdir(dname(filePath) + separator() + copyName);
+//                cp(filePath, dname(filePath) + separator() + copyName, true);
+//            } else {
+//                QString copyName = fileName;
+//                auto sfx = suffix(fileName);
+//                if (!sfx.isEmpty())
+//                    copyName.remove(copyName.lastIndexOf(sfx) - 1, sfx.size() + 1);
+
+//                if (sfx.isEmpty()) {
+//                    for (int i = 1; exists(dname(filePath) + separator() + copyName); i++)
+//                        copyName = fileName + QString::number(i);
+//                    QFile::copy(filePath, dname(filePath) + separator() + copyName);
+//                } else {
+//                    auto copy = copyName;
+//                    for (int i = 1; exists(dname(filePath) + separator() + copyName + "." + sfx); i++)
+//                        copyName = copy + QString::number(i);
+//                    QFile::copy(filePath, dname(filePath) + separator() + copyName + "." + sfx);
+//                }
+//            }
+//            break;
+//        } default: {
+//            // Do nothing
+//            break;
+//        }
+//    }
+}
+
+void GlobalResourcesPane::onDeleteButtonClick()
+{
+//    auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
+//    auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
+//                 filterProxyModel()->mapToSource(fileList->rootIndex()));
+//    auto fileName = fileList->fileModel()->fileName(index);
+//    auto filePath = fileList->fileModel()->filePath(index);
+
+//    if (fileName.startsWith("_") || fileName == "icon.png" || fileName == "main.qml")
+//        return;
+
+//    if (!index.isValid() || fileName.isEmpty() || filePath.isEmpty())
+//        return;
+
+//    QMessageBox box;
+//    box.setText("<b>Do you want to delete following file/folder.</b>");
+//    box.setInformativeText("<b>Name: </b>" + fileName);
+//    box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+//    box.setDefaultButton(QMessageBox::No);
+//    box.setIcon(QMessageBox::Warning);
+//    const int ret = box.exec();
+
+//    switch (ret) {
+//        case QMessageBox::Yes: {
+//            if (rm(filePath))
+//                emit parent->fileDeleted(filePath);
+//            break;
+//        } default: {
+//            // Do nothing
+//            break;
+//        }
+//    }
+}
+
+void GlobalResourcesPane::onRenameButtonClick()
+{
+//    bool ok;
+//    auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
+//    auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
+//                 filterProxyModel()->mapToSource(fileList->rootIndex()));
+//    auto filePath = fileList->fileModel()->filePath(index);
+//    auto fileName = fileList->fileModel()->fileName(index);
+
+//    if (fileName.startsWith("_") || fileName == "icon.png" || fileName == "main.qml")
+//        return;
+
+//    QString text = QInputDialog::getText(parent, tr("Rename file/folder"),
+//                                         tr("New name:"), QLineEdit::Normal,
+//                                         fileName, &ok);
+
+//    if (text.startsWith("_") || text == "icon.png" || text == "main.qml")
+//        return;
+
+//    if (index.isValid() && ok && !text.isEmpty() && text != fileName)
+//        if (rn(filePath, dname(filePath) + separator() + text))
+//            emit parent->fileRenamed(filePath, dname(filePath) + separator() + text);
+}
+
+void GlobalResourcesPane::onNewFileButtonClick()
+{
+//    bool ok;
+//    auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
+//    auto path = fileList->fileModel()->filePath(index);
+//    QString text = QInputDialog::getText(parent, tr("Create new file"),
+//                                         tr("File name:"), QLineEdit::Normal,
+//                                         QString(), &ok);
+
+//    if (text.startsWith("_") || text == "icon.png" || text == "main.qml")
+//        return;
+
+//    if (index.isValid() && ok && !text.isEmpty() && !exists(path + separator() + text))
+//        mkfile(path + separator() + text);
+}
+
+void GlobalResourcesPane::onNewFolderButtonClick()
+{
+//    bool ok;
+//    auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
+//    auto path = fileList->fileModel()->filePath(index);
+//    QString text = QInputDialog::getText(parent, tr("Create new folder"),
+//                                         tr("Folder name:"), QLineEdit::Normal,
+//                                         QString(), &ok);
+
+//    if (text.startsWith("_") || text == "icon.png" || text == "main.qml")
+//        return;
+
+//    if (index.isValid() && ok && !text.isEmpty() && !exists(path + separator() + text))
+//        mkdir(path + separator() + text);
+}
+
+void GlobalResourcesPane::onDownloadButtonClick()
+{
+//    bool ok, ok_2;
+//    auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
+//    auto path = fileList->fileModel()->filePath(index);
+//    QString text = QInputDialog::getText(parent, tr("Download file"),
+//                                         tr("Url:"), QLineEdit::Normal,
+//                                         QString(), &ok);
+
+//    if (!ok || text.isEmpty())
+//        return;
+
+//    QString text_2 = QInputDialog::getText(parent, tr("Download file"),
+//                                         tr("File name:"), QLineEdit::Normal,
+//                                         QString(), &ok_2);
+
+//    if (text_2.startsWith("_") || text_2 == "icon.png" || text_2 == "main.qml")
+//        return;
+
+//    if (index.isValid() && ok_2 && !text_2.isEmpty() && !exists(path + separator() + text_2)) {
+//        const auto& data = dlfile(text);
+//        if (data.isEmpty())
+//            return;
+//        wrfile(path + separator() + text_2, data);
+    //    }
+}
+
+void GlobalResourcesPane::onFileSelectionChange()
+{
+//    auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
+//    auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
+//                 filterProxyModel()->mapToSource(fileList->rootIndex()));
+//    deleteButton->setEnabled(index.isValid());
+//    copyButton->setEnabled(index.isValid());
 }
 
 void GlobalResourcesPane::filterList(const QString& /*filter*/)
@@ -300,10 +595,15 @@ void GlobalResourcesPane::updateGeometries()
     QTreeView::updateGeometries();
     QMargins vm = viewportMargins();
     vm.setBottom(m_searchEdit->height());
+    vm.setTop(header()->height() + m_toolbar->height());
     QRect vg = viewport()->geometry();
-    QRect geometryRect(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
+    QRect sg(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
+    QRect tg(vg.left(), header()->height(), vg.width(), m_toolbar->height());
     setViewportMargins(vm);
-    m_searchEdit->setGeometry(geometryRect);
+    m_searchEdit->setGeometry(sg);
+    m_toolbar->setGeometry(tg);
+    header()->setGeometry(vg.left(), 0, vg.width(), header()->height());
+    m_modeComboBox->move(header()->width() - m_modeComboBox->width(), header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
 }
 
 QSize GlobalResourcesPane::sizeHint() const
