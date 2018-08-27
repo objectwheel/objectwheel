@@ -38,13 +38,18 @@ private slots:
     void onNewFolderButtonClick();
     void onDownloadButtonClick();
     void onFileSelectionChange();
+    void onItemDoubleClick(const QModelIndex& index);
 
 private:
+    void goToPath(const QString& path);
     void filterList(const QString& filter);
     void paintEvent(QPaintEvent* e) override;
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
     void updateGeometries() override;
     QSize sizeHint() const override;
+
+signals:
+    void fileOpened(const QString& path);
 
 private:
     FocuslessLineEdit* m_searchEdit;

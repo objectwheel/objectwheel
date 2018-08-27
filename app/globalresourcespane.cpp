@@ -16,10 +16,18 @@
 #include <QToolButton>
 #include <QLabel>
 
+// TODO List
+// Drag drop from file explorer to desktop
+// Drag drop from desktop into file explorer
+
 using namespace Utils;
 
 namespace {
 const int ROW_HEIGHT = 21;
+QModelIndexList lastSelectedIndexesOfViewer;
+QModelIndexList lastSelectedIndexesOfExplorer;
+QSet<QPersistentModelIndex> lastExpandedIndexesOfViewer;
+QString lastPathofExplorer;
 
 void initPalette(QWidget* widget)
 {    
@@ -198,15 +206,15 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
-    );
+                );
 
     QPalette mp(m_modeComboBox->palette());
     mp.setColor(QPalette::Text, Qt::white);
     mp.setColor(QPalette::WindowText, Qt::white);
     mp.setColor(QPalette::ButtonText, Qt::white);
     m_modeComboBox->setPalette(mp);
-    m_modeComboBox->addItem(/*"      " + */tr("Viewer")); // First must be viewer, index is important
-    m_modeComboBox->addItem(/*"      " + */tr("Explorer"));
+    m_modeComboBox->addItem(tr("Viewer")); // First must be the Viewer, the index is important
+    m_modeComboBox->addItem(tr("Explorer"));
 
     m_upButton->setCursor(Qt::PointingHandCursor);
     m_homeButton->setCursor(Qt::PointingHandCursor);
@@ -292,11 +300,11 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_toolBar->addWidget(m_homeButton);
     m_toolBar->addWidget(m_upButton);
     m_toolBar->addSeparator();
+    m_toolBar->addWidget(m_renameButton);
+    m_toolBar->addWidget(m_deleteButton);
     m_toolBar->addWidget(m_cutButton);
     m_toolBar->addWidget(m_copyButton);
     m_toolBar->addWidget(m_pasteButton);
-    m_toolBar->addWidget(m_deleteButton);
-    m_toolBar->addWidget(m_renameButton);
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_newFileButton);
     m_toolBar->addWidget(m_newFolderButton);
@@ -311,6 +319,8 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
 
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &GlobalResourcesPane::onProjectStart);
+    connect(this, &GlobalResourcesPane::doubleClicked,
+            this, &GlobalResourcesPane::onItemDoubleClick);
 }
 
 void GlobalResourcesPane::sweep()
@@ -320,13 +330,20 @@ void GlobalResourcesPane::sweep()
     setModel(nullptr);
     m_modeComboBox->setCurrentIndex(0); // Viewer
     onModeChange();
+    lastSelectedIndexesOfExplorer.clear();
+    lastSelectedIndexesOfViewer.clear();
+    lastExpandedIndexesOfViewer.clear();
+    lastPathofExplorer.clear();
 }
 
 void GlobalResourcesPane::onProjectStart()
 {
     m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
+    selectionModel()->disconnect(this);
     setModel(m_fileSystemModel);
-    setRootIndex(m_fileSystemModel->index(m_fileSystemModel->rootPath()));
+    connect(selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &GlobalResourcesPane::onFileSelectionChange);
+    onHomeButtonClick();
     hideColumn(1);
     hideColumn(2);
     hideColumn(3);
@@ -334,13 +351,25 @@ void GlobalResourcesPane::onProjectStart()
 
 void GlobalResourcesPane::onModeChange()
 {
+    Q_D(GlobalResourcesPane);
+
     if (m_modeComboBox->currentIndex() == 0)
         m_mode = Viewer;
     else
         m_mode = Explorer;
 
     if (m_mode == Viewer) {
-        m_toolBar->hide();
+        lastPathofExplorer = m_fileSystemModel->filePath(rootIndex());
+        lastSelectedIndexesOfExplorer = selectionModel()->selectedIndexes();
+
+        onHomeButtonClick();
+
+        for (const QPersistentModelIndex& index : lastExpandedIndexesOfViewer)
+            setExpanded(index, true);
+
+        selectionModel()->clear();
+        for (const QModelIndex& index : lastSelectedIndexesOfViewer)
+            selectionModel()->select(index, QItemSelectionModel::Select);
 
         setIndentation(16);
         setAcceptDrops(false);
@@ -348,15 +377,27 @@ void GlobalResourcesPane::onModeChange()
         setItemsExpandable(true);
         setExpandsOnDoubleClick(true);
         setSelectionMode(QTreeView::SingleSelection);
-    } else {
-        m_toolBar->show();
 
+        m_toolBar->hide();
+    } else {
+        lastExpandedIndexesOfViewer = d->expandedIndexes;
+        lastSelectedIndexesOfViewer = selectionModel()->selectedIndexes();
+
+        goToPath(lastPathofExplorer);
+
+        selectionModel()->clear();
+        for (const QModelIndex& index : lastSelectedIndexesOfExplorer)
+            selectionModel()->select(index, QItemSelectionModel::Select);
+
+        collapseAll();
         setIndentation(0);
         setAcceptDrops(true);
         setRootIsDecorated(false);
         setItemsExpandable(false);
         setExpandsOnDoubleClick(false);
         setSelectionMode(QTreeView::ExtendedSelection);
+
+        m_toolBar->show();
     }
 
     updateGeometries();
@@ -364,15 +405,16 @@ void GlobalResourcesPane::onModeChange()
 
 void GlobalResourcesPane::onUpButtonClick()
 {
-    //    auto up = dname(fileList->currentPath());
-    //    auto rootPath = fileList->fileModel()->rootPath();
-    //    if (up.size() > rootPath.size() || up == rootPath)
-    //        fileList->goPath(up);
+    const QString& upperDir = dname(m_fileSystemModel->filePath(rootIndex()));
+    const QString& rootPath = m_fileSystemModel->rootPath();
+
+    if (upperDir.size() > rootPath.size() || upperDir == rootPath)
+        goToPath(upperDir);
 }
 
 void GlobalResourcesPane::onHomeButtonClick()
 {
-    //    fileList->goPath(fileList->fileModel()->rootPath());
+    goToPath(m_fileSystemModel->rootPath());
 }
 
 void GlobalResourcesPane::onCutButtonClick()
@@ -556,11 +598,32 @@ void GlobalResourcesPane::onDownloadButtonClick()
 
 void GlobalResourcesPane::onFileSelectionChange()
 {
-    //    auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
-    //    auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
-    //                 filterProxyModel()->mapToSource(fileList->rootIndex()));
-    //    deleteButton->setEnabled(index.isValid());
-    //    copyButton->setEnabled(index.isValid());
+    const int selectedItemSize = selectionModel()->selectedIndexes().size() / m_fileSystemModel->columnCount(rootIndex());
+    m_deleteButton->setEnabled(selectedItemSize > 0);
+    m_cutButton->setEnabled(selectedItemSize > 0);
+    m_copyButton->setEnabled(selectedItemSize > 0);
+    m_renameButton->setEnabled(selectedItemSize == 1);
+    qDebug() << selectedItemSize;
+}
+
+void GlobalResourcesPane::onItemDoubleClick(const QModelIndex& index)
+{
+    if (m_fileSystemModel->isDir(index) && m_mode == Explorer) {
+        setRootIndex(index);
+        m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
+    } else {
+        emit fileOpened(m_fileSystemModel->filePath(index));
+    }
+}
+
+void GlobalResourcesPane::goToPath(const QString& path)
+{
+    if (path.isEmpty())
+        return;
+
+    const QModelIndex& index = m_fileSystemModel->index(path);
+    setRootIndex(index);
+    m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
 }
 
 void GlobalResourcesPane::filterList(const QString& /*filter*/)
