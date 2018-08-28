@@ -9,6 +9,7 @@ class QFileSystemModel;
 class QToolBar;
 class QToolButton;
 class QComboBox;
+class PathIndicator;
 
 class GlobalResourcesPanePrivate : public QTreeViewPrivate {};
 class GlobalResourcesPane : public QTreeView
@@ -42,6 +43,7 @@ private slots:
 
 private:
     void goToPath(const QString& path);
+    void goToRelativePath(const QString& relativePath);
     void filterList(const QString& filter);
     void paintEvent(QPaintEvent* e) override;
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
@@ -50,11 +52,13 @@ private:
 
 signals:
     void fileOpened(const QString& path);
+    void filesDeleted(const QSet<QString>& pathes);
 
 private:
     FocuslessLineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
     QToolBar* m_toolBar;
+    PathIndicator* m_pathIndicator;
     QComboBox* m_modeComboBox;
     QToolButton* m_upButton;
     QToolButton* m_homeButton;

@@ -756,19 +756,16 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_ToolBar:
         if (const auto *cb
                 = qstyleoption_cast<const QStyleOptionToolBar*>(option)) {
-            if (const auto *wd
-                    = qobject_cast<const QToolBar*>(widget)) {
-                painter->save();
-                QLinearGradient g(cb->rect.topLeft(), wd->orientation() == Qt::Horizontal
-                                  ? cb->rect.bottomLeft()
-                                  : cb->rect.topRight());
-                g.setColorAt(0, Qt::white);
-                g.setColorAt(1, "#f0f0f0");
-                painter->setPen("#c4c4c4");
-                painter->setBrush(g);
-                painter->drawRect(cb->rect);
-                painter->restore();
-            }
+            painter->save();
+            QLinearGradient g(cb->rect.topLeft(), (cb->state & State_Horizontal)
+                              ? cb->rect.bottomLeft()
+                              : cb->rect.topRight());
+            g.setColorAt(0, Qt::white);
+            g.setColorAt(1, "#f0f0f0");
+            painter->setPen("#c4c4c4");
+            painter->setBrush(g);
+            painter->drawRect(cb->rect);
+            painter->restore();
         } break;
         break;
     default:
