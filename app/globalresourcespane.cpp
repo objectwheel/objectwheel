@@ -16,6 +16,7 @@
 #include <QToolButton>
 #include <QLabel>
 #include <QMessageBox>
+#include <QScrollBar>
 
 // TODO List
 // Drag drop from file explorer to desktop
@@ -25,6 +26,10 @@ using namespace Utils;
 
 namespace {
 const int ROW_HEIGHT = 21;
+int lastVScrollerPosOfViewer = 0;
+int lastHScrollerPosOfViewer = 0;
+int lastVScrollerPosOfExplorer = 0;
+int lastHScrollerPosOfExplorer = 0;
 QModelIndexList lastSelectedIndexesOfViewer;
 QModelIndexList lastSelectedIndexesOfExplorer;
 QSet<QPersistentModelIndex> lastExpandedIndexesOfViewer;
@@ -398,6 +403,10 @@ void GlobalResourcesPane::sweep()
     lastSelectedIndexesOfViewer.clear();
     lastExpandedIndexesOfViewer.clear();
     lastPathofExplorer.clear();
+    lastVScrollerPosOfViewer = 0;
+    lastHScrollerPosOfViewer = 0;
+    lastVScrollerPosOfExplorer = 0;
+    lastHScrollerPosOfExplorer = 0;
 }
 
 void GlobalResourcesPane::onProjectStart()
@@ -424,6 +433,8 @@ void GlobalResourcesPane::onModeChange()
     if (m_mode == Viewer) {
         lastPathofExplorer = m_fileSystemModel->filePath(rootIndex());
         lastSelectedIndexesOfExplorer = selectionModel()->selectedIndexes();
+        lastVScrollerPosOfExplorer = verticalScrollBar()->sliderPosition();
+        lastHScrollerPosOfExplorer = horizontalScrollBar()->sliderPosition();;
 
         onHomeButtonClick();
 
@@ -444,9 +455,14 @@ void GlobalResourcesPane::onModeChange()
         m_fileSystemModel->setReadOnly(true);
         m_toolBar->hide();
         m_pathIndicator->hide();
+
+        verticalScrollBar()->setSliderPosition(lastVScrollerPosOfViewer);
+        horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfViewer);
     } else {
         lastExpandedIndexesOfViewer = d->expandedIndexes;
         lastSelectedIndexesOfViewer = selectionModel()->selectedIndexes();
+        lastVScrollerPosOfViewer = verticalScrollBar()->sliderPosition();
+        lastHScrollerPosOfViewer = horizontalScrollBar()->sliderPosition();;
 
         goToPath(lastPathofExplorer);
 
@@ -465,6 +481,9 @@ void GlobalResourcesPane::onModeChange()
         m_fileSystemModel->setReadOnly(false);
         m_toolBar->show();
         m_pathIndicator->show();
+
+        verticalScrollBar()->setSliderPosition(lastVScrollerPosOfExplorer);
+        horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfExplorer);
     }
 
     updateGeometries();
@@ -775,7 +794,7 @@ void GlobalResourcesPane::updateGeometries()
     QTreeView::updateGeometries();
     QMargins vm = viewportMargins();
     vm.setBottom(m_searchEdit->height());
-    vm.setTop(m_mode == Explorer ? header()->height() + m_pathIndicator->height() + m_toolBar->height() - 2 : 0);
+    vm.setTop(header()->height() + (m_mode == Explorer ? m_pathIndicator->height() + m_toolBar->height() - 2 : 0));
     setViewportMargins(vm);
     QRect vg = viewport()->geometry();
     QRect sg(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
