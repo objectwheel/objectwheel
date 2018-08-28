@@ -17,6 +17,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QClipboard>
 
 // TODO List
 // Drag drop from file explorer to desktop
@@ -293,15 +294,16 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
 
     m_upButton->setToolTip(tr("Go to upper directory"));
     m_homeButton->setToolTip(tr("Go to the home directory"));
-    m_cutButton->setToolTip(tr("Cut selected files/folders"));
-    m_copyButton->setToolTip(tr("Copy selected files/folders"));
-    m_pasteButton->setToolTip(tr("Paste files/folders into the current directory"));
+    m_cutButton->setToolTip(tr("Cut selected files/folders into the system's clipboard"));
+    m_copyButton->setToolTip(tr("Copy selected files/folders into the system's clipboard"));
+    m_pasteButton->setToolTip(tr("Paste files/folders from system's clipboard into the current directory"));
     m_deleteButton->setToolTip(tr("Delete selected files/folders"));
     m_renameButton->setToolTip(tr("Rename selected file/folder"));
     m_newFileButton->setToolTip(tr("Create an empty new file within the current directory"));
     m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
     m_downloadFileButton->setToolTip(tr("Download a file from an url into the current directory"));
-    m_modeComboBox->setToolTip(tr("Change the File Explorer Mode."));
+    m_modeComboBox->setToolTip(tr("Change the File Explorer's operating mode"));
+    m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
 
     const Icon FILTER_ICON({{":/utils/images/filtericon.png", Theme::BackgroundColorNormal}});
     auto modeIFilterIconLabel = new QLabel(m_modeComboBox);
@@ -387,14 +389,18 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
             this, &GlobalResourcesPane::onProjectStart);
     connect(this, &GlobalResourcesPane::doubleClicked,
             this, &GlobalResourcesPane::onItemDoubleClick);
+    connect(QApplication::clipboard(), &QClipboard::dataChanged, this, [=]
+    { m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls()); });
 }
 
 void GlobalResourcesPane::sweep()
 {
     // TODO
     m_searchEdit->clear();
-    if (selectionModel())
+    if (selectionModel()) {
+        selectionModel()->clear();
         selectionModel()->disconnect(this);
+    }
     setModel(nullptr);
     m_modeComboBox->setCurrentIndex(0); // Viewer
     onModeChange();
@@ -406,6 +412,12 @@ void GlobalResourcesPane::sweep()
     lastHScrollerPosOfViewer = 0;
     lastVScrollerPosOfExplorer = 0;
     lastHScrollerPosOfExplorer = 0;
+
+    m_cutButton->setDisabled(true);
+    m_copyButton->setDisabled(true);
+    m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls());
+    m_deleteButton->setDisabled(true);
+    m_renameButton->setDisabled(true);
 }
 
 void GlobalResourcesPane::onProjectStart()
@@ -515,59 +527,27 @@ void GlobalResourcesPane::onCutButtonClick()
 
 void GlobalResourcesPane::onCopyButtonClick()
 {
-    //    auto _index = fileList->filterProxyModel()->mapToSource(fileList->currentIndex());
-    //    auto index = fileList->fileModel()->index(_index.row(), 0, fileList->
-    //                 filterProxyModel()->mapToSource(fileList->rootIndex()));
-    //    auto fileName = fileList->fileModel()->fileName(index);
-    //    auto filePath = fileList->fileModel()->filePath(index);
+    QSet<QUrl> urls;
+    for (const QModelIndex& index : selectionModel()->selectedIndexes())
+        urls.insert(QUrl::fromLocalFile(m_fileSystemModel->filePath(index)));
 
-    //    if (!index.isValid() || fileName.isEmpty() || filePath.isEmpty())
-    //        return;
-
-    //    QMessageBox box;
-    //    box.setText("<b>Do you want to make a copy of following file/folder.</b>");
-    //    box.setInformativeText("<b>Name: </b>" + fileName);
-    //    box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    //    box.setDefaultButton(QMessageBox::No);
-    //    box.setIcon(QMessageBox::Warning);
-    //    const int ret = box.exec();
-
-    //    switch (ret) {
-    //        case QMessageBox::Yes: {
-    //            if (fileList->fileModel()->isDir(index)) {
-    //                auto copyName = fileName;
-    //                for (int i = 1; exists(dname(filePath) + separator() + copyName); i++)
-    //                    copyName = fileName + QString::number(i);
-    //                mkdir(dname(filePath) + separator() + copyName);
-    //                cp(filePath, dname(filePath) + separator() + copyName, true);
-    //            } else {
-    //                QString copyName = fileName;
-    //                auto sfx = suffix(fileName);
-    //                if (!sfx.isEmpty())
-    //                    copyName.remove(copyName.lastIndexOf(sfx) - 1, sfx.size() + 1);
-
-    //                if (sfx.isEmpty()) {
-    //                    for (int i = 1; exists(dname(filePath) + separator() + copyName); i++)
-    //                        copyName = fileName + QString::number(i);
-    //                    QFile::copy(filePath, dname(filePath) + separator() + copyName);
-    //                } else {
-    //                    auto copy = copyName;
-    //                    for (int i = 1; exists(dname(filePath) + separator() + copyName + "." + sfx); i++)
-    //                        copyName = copy + QString::number(i);
-    //                    QFile::copy(filePath, dname(filePath) + separator() + copyName + "." + sfx);
-    //                }
-    //            }
-    //            break;
-    //        } default: {
-    //            // Do nothing
-    //            break;
-    //        }
-    //    }
+    if (!urls.isEmpty()) {
+        auto mimeData = new QMimeData;
+        mimeData->setUrls(urls.toList());
+        QApplication::clipboard()->setMimeData(mimeData);
+    }
 }
 
 void GlobalResourcesPane::onPasteButtonClick()
 {
-
+    const QString& rootPath = m_fileSystemModel->filePath(rootIndex());
+    const QMimeData* clipboard = QApplication::clipboard()->mimeData();
+    if (clipboard && clipboard->hasUrls()) {
+        for (const QUrl& url : clipboard->urls()) {
+            if (url.isValid() && !url.isEmpty() && url.isLocalFile())
+                cp(QFileInfo(url.toLocalFile()).canonicalFilePath(), rootPath);
+        }
+    }
 }
 
 void GlobalResourcesPane::onDeleteButtonClick()
@@ -696,6 +676,7 @@ void GlobalResourcesPane::goToPath(const QString& path)
     setRootIndex(index);
     selectionModel()->clear();
     m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
+    m_homeButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_pathIndicator->setPath(QDir(m_fileSystemModel->rootPath()).relativeFilePath(path));
 }
 
