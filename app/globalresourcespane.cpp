@@ -269,8 +269,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                 .arg(palette().text().color().lighter(270).name())
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
-                .arg(palette().brightText().color().name())
-                );
+                .arg(palette().brightText().color().name()));
 
     QPalette mp(m_modeComboBox->palette());
     mp.setColor(QPalette::Text, Qt::white);
@@ -438,12 +437,16 @@ void GlobalResourcesPane::onModeChange()
 
         onHomeButtonClick();
 
-        for (const QPersistentModelIndex& index : lastExpandedIndexesOfViewer)
-            setExpanded(index, true);
+        for (const QPersistentModelIndex& index : lastExpandedIndexesOfViewer) {
+            if (index.isValid())
+                setExpanded(index, true);
+        }
 
         selectionModel()->clear();
-        for (const QModelIndex& index : lastSelectedIndexesOfViewer)
-            selectionModel()->select(index, QItemSelectionModel::Select);
+        for (const QModelIndex& index : lastSelectedIndexesOfViewer) {
+            if (index.isValid())
+                selectionModel()->select(index, QItemSelectionModel::Select);
+        }
 
         setIndentation(16);
         setAcceptDrops(false);
@@ -467,8 +470,10 @@ void GlobalResourcesPane::onModeChange()
         goToPath(lastPathofExplorer);
 
         selectionModel()->clear();
-        for (const QModelIndex& index : lastSelectedIndexesOfExplorer)
-            selectionModel()->select(index, QItemSelectionModel::Select);
+        for (const QModelIndex& index : lastSelectedIndexesOfExplorer) {
+            if (index.isValid())
+                selectionModel()->select(index, QItemSelectionModel::Select);
+        }
 
         collapseAll();
         setIndentation(0);
@@ -593,18 +598,25 @@ void GlobalResourcesPane::onRenameButtonClick()
 
 void GlobalResourcesPane::onNewFileButtonClick()
 {
-    //    bool ok;
-    //    auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
-    //    auto path = fileList->fileModel()->filePath(index);
-    //    QString text = QInputDialog::getText(parent, tr("Create new file"),
-    //                                         tr("File name:"), QLineEdit::Normal,
-    //                                         QString(), &ok);
+    QString fileName = tr("Empty File.txt");
+    const QString& rootPath = m_fileSystemModel->filePath(rootIndex());
 
-    //    if (text.startsWith("_") || text == "icon.png" || text == "main.qml")
-    //        return;
+    for (int i = 1; exists(rootPath + separator() + fileName); i++)
+        fileName = tr("Empty File ") + QString::number(i) + ".txt";
 
-    //    if (index.isValid() && ok && !text.isEmpty() && !exists(path + separator() + text))
-    //        mkfile(path + separator() + text);
+    QModelIndex index;
+    const bool suceed = mkfile(rootPath + separator() + fileName);
+
+    if (suceed)
+        index = m_fileSystemModel->index(rootPath + separator() + fileName);
+
+    if (index.isValid()) {
+        selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+        scrollTo(index);
+        edit(index);
+    } else {
+        qWarning() << "GlobalResourcesPane:" << tr("File creation failed");
+    }
 }
 
 void GlobalResourcesPane::onNewFolderButtonClick()
@@ -713,7 +725,7 @@ void GlobalResourcesPane::drawBranches(QPainter* painter, const QRect& rect,
     painter->setRenderHint(QPainter::Antialiasing);
 
     const qreal width = 10;
-    const bool hasChild = m_fileSystemModel->QAbstractItemModel::hasChildren(index);
+    const bool hasChild = m_fileSystemModel->hasChildren(index);
     const bool isSelected = selectionModel()->isSelected(index);
 
     QRectF handleRect(0, 0, width, width);
