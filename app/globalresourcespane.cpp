@@ -25,8 +25,6 @@
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
 
 // TODO List
-// Finish the implementation of FileSystemProxyModel
-// Finish the Back and Forth buttons
 // Drag drop from the file explorer to desktop
 // Drag drop from desktop into the file explorer
 // Show progress dialog when paste action is in progress
@@ -46,7 +44,6 @@
 // Add a combobox to make it possible to short files and dirs on the tree (like QDir::SortFlags)
 // Convert "Name" title of the first header to "" (empty) and put all sort of controls (like
 // - sorting combobox) on it. --alight those control left to right--
-// Move all kind of palette settings into "initPalette" function
 // Add a rubber band for file selection
 // Block deletion of qmldir within Global dir
 
@@ -76,6 +73,8 @@ void initPalette(QWidget* widget)
     palette.setColor(QPalette::BrightText, Qt::white);
     palette.setColor(QPalette::WindowText, "#331719");
     palette.setColor(QPalette::AlternateBase, "#f7e6e8");
+    palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
+    palette.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
     widget->setPalette(palette);
 }
 
@@ -187,14 +186,17 @@ class PathIndicator : public QWidget {
 
 public:
     explicit PathIndicator(QWidget* parent = nullptr) : QWidget(parent)
-      , m_pathEdit(new QLineEdit(this)) {
+      , m_pathEdit(new QLineEdit(this))
+    {
         m_pathEdit->hide();
         connect(m_pathEdit, &QLineEdit::editingFinished,
                 m_pathEdit, &QLineEdit::hide);
         connect(m_pathEdit, &QLineEdit::editingFinished,
                 this, [=] { emit pathUpdated(m_pathEdit->text()); });
     }
-    void setPath(const QString& path) {
+
+    void setPath(const QString& path)
+    {
         m_path = path;
         if (m_path == ".")
             m_path = "";
@@ -207,13 +209,14 @@ signals:
     void pathUpdated(const QString& newPath);
 
 private:
-    void paintEvent(QPaintEvent*) override {
+    void paintEvent(QPaintEvent*) override
+    {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.fillRect(rect(), "#f6f6f6");
-        painter.setPen("#c4c4c4");
+        painter.fillRect(rect(), palette().midlight().color());
+        painter.setPen(palette().shadow().color());
         painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
-        painter.setPen(Qt::black);
+        painter.setPen(palette().text().color());
 
         if (m_pathEdit->isHidden()) {
             QTextOption textOption(Qt::AlignLeft | Qt::AlignVCenter);
@@ -223,11 +226,15 @@ private:
                              textOption);
         }
     }
-    void resizeEvent(QResizeEvent* e) override {
+
+    void resizeEvent(QResizeEvent* e) override
+    {
         QWidget::resizeEvent(e);
         m_pathEdit->setGeometry(rect());
     }
-    void mouseDoubleClickEvent(QMouseEvent* e) override {
+
+    void mouseDoubleClickEvent(QMouseEvent* e) override
+    {
         QWidget::mouseDoubleClickEvent(e);
         m_pathEdit->setText(m_path);
         m_pathEdit->show();
@@ -244,45 +251,27 @@ class FileSystemProxyModel : public QSortFilterProxyModel
     Q_OBJECT
 
 public:
-    explicit FileSystemProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+    explicit FileSystemProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent)
+    {}
 
-protected:
-    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
-    {
-        QModelIndex _index = sourceModel()->index(sourceRow, 0, sourceParent);
-        QFileSystemModel* fileModel = qobject_cast<QFileSystemModel*>(sourceModel());
-        auto fileName = fileModel->fileName(_index);
-        if (fileName.startsWith("_") || fileName.startsWith(".") || fileName == "icon.png")
-            return false;
-        else
-            return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
-    }
+private:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const override
-    {
-        // If sorting by file names column
+    { // Sort by "DirsFirst" rule
         if (sortColumn() == 0) {
-            QFileSystemModel *fsm = qobject_cast<QFileSystemModel*>(sourceModel());
-            bool asc = sortOrder() == Qt::AscendingOrder ? true : false;
+            const QFileSystemModel* fileSystemModel = qobject_cast<QFileSystemModel*>(sourceModel());
 
-            QFileInfo leftFileInfo  = fsm->fileInfo(left);
-            QFileInfo rightFileInfo = fsm->fileInfo(right);
+            QFileInfo leftFileInfo  = fileSystemModel->fileInfo(left);
+            QFileInfo rightFileInfo = fileSystemModel->fileInfo(right);
 
-            // If DotAndDot move in the beginning
-            if (sourceModel()->data(left).toString() == "..")
-                return asc;
-            if (sourceModel()->data(right).toString() == "..")
-                return !asc;
+            if (leftFileInfo.isDir() && !rightFileInfo.isDir())
+                return false;
+            if (!leftFileInfo.isDir() && rightFileInfo.isDir())
+                return true;
 
-            // Move dirs upper
-            if (!leftFileInfo.isDir() && rightFileInfo.isDir()) {
-                return !asc;
-            }
-            if (leftFileInfo.isDir() && !rightFileInfo.isDir()) {
-                return asc;
-            }
+            return QString::localeAwareCompare(leftFileInfo.fileName(), rightFileInfo.fileName()) >= 0;
         }
 
-        return QSortFilterProxyModel::lessThan(left, right);
+        return !QSortFilterProxyModel::lessThan(left, right);
     }
 };
 
@@ -306,6 +295,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_downloadFileButton(new QToolButton)
 {
     initPalette(this);
+    initPalette(m_pathIndicator);
 
     QFont fontMedium(font());
     fontMedium.setWeight(QFont::Medium);
@@ -318,7 +308,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
 
     setIconSize({15, 15});
     setDragEnabled(false);
-    setSortingEnabled(false);
+    setSortingEnabled(true);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
     setItemDelegate(new GlobalListDelegate(this));
@@ -465,6 +455,11 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_fileSystemProxyModel->setDynamicSortFilter(true);
     m_fileSystemProxyModel->setFilterKeyColumn(0);
     m_fileSystemProxyModel->setSourceModel(m_fileSystemModel);
+    connect(m_fileSystemModel, &QFileSystemModel::fileRenamed, this, [=]
+    {
+        m_fileSystemProxyModel->setDynamicSortFilter(false);
+        m_fileSystemProxyModel->setDynamicSortFilter(true);
+    });
 
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
