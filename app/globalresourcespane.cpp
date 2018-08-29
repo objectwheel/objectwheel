@@ -63,9 +63,11 @@ QModelIndexList lastSelectedIndexesOfViewer;
 QModelIndexList lastSelectedIndexesOfExplorer;
 QSet<QPersistentModelIndex> lastExpandedIndexesOfViewer;
 QString lastPathofExplorer;
+QStack<QString> backPathStack;
+QStack<QString> forthPathStack;
 
 void initPalette(QWidget* widget)
-{    
+{
     QPalette palette(widget->palette());
     palette.setColor(QPalette::Light, "#bf5861");
     palette.setColor(QPalette::Dark, "#b05159");
@@ -240,8 +242,10 @@ private:
 class FileSystemProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+
 public:
     explicit FileSystemProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+
 protected:
     virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
     {
@@ -480,13 +484,18 @@ void GlobalResourcesPane::sweep()
 {
     // TODO
     m_searchEdit->clear();
+
     if (selectionModel()) {
         selectionModel()->clear();
         selectionModel()->disconnect(this);
     }
     setModel(nullptr);
+
+    m_mode = Viewer;
     m_modeComboBox->setCurrentIndex(0); // Viewer
+
     onModeChange();
+
     lastSelectedIndexesOfExplorer.clear();
     lastSelectedIndexesOfViewer.clear();
     lastExpandedIndexesOfViewer.clear();
@@ -495,6 +504,9 @@ void GlobalResourcesPane::sweep()
     lastHScrollerPosOfViewer = 0;
     lastVScrollerPosOfExplorer = 0;
     lastHScrollerPosOfExplorer = 0;
+    backPathStack.clear();
+    forthPathStack.clear();
+
     m_copyButton->setDisabled(true);
     m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls());
     m_deleteButton->setDisabled(true);
@@ -505,7 +517,9 @@ void GlobalResourcesPane::sweep()
 
 void GlobalResourcesPane::onProjectStart()
 {
+    Q_ASSERT(exists(SaveUtils::toGlobalDir(ProjectManager::dir())));
     m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
+
     setModel(m_fileSystemProxyModel);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &GlobalResourcesPane::onFileSelectionChange);
@@ -600,12 +614,33 @@ void GlobalResourcesPane::onUpButtonClick()
 
 void GlobalResourcesPane::onBackButtonClick()
 {
+    if (backPathStack.isEmpty())
+        return;
 
+    const QStack<QString> cloneOfForth = forthPathStack;
+    const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
+
+    goToPath(backPathStack.pop());
+    backPathStack.pop();
+
+    forthPathStack = cloneOfForth;
+    if (!rootPath.isEmpty())
+        forthPathStack.push(rootPath);
+
+    m_backButton->setDisabled(backPathStack.isEmpty());
+    m_forthButton->setDisabled(forthPathStack.isEmpty());
 }
 
 void GlobalResourcesPane::onForthButtonClick()
 {
+    if (forthPathStack.isEmpty())
+        return;
 
+    const QStack<QString> cloneOfForth = forthPathStack;
+    goToPath(forthPathStack.pop());
+    forthPathStack = cloneOfForth;
+    forthPathStack.pop();
+    m_forthButton->setDisabled(forthPathStack.isEmpty());
 }
 
 void GlobalResourcesPane::onHomeButtonClick()
@@ -755,13 +790,21 @@ void GlobalResourcesPane::onItemDoubleClick(const QModelIndex& index)
 
 void GlobalResourcesPane::goToPath(const QString& path)
 {
+    if (!model())
+        return;
+
     if (path.isEmpty())
         return;
 
     if (!QFileInfo(path).exists() || !QFileInfo(path).isDir())
         return;
 
+    const QString& previousPath = m_fileSystemModel->filePath(mt(rootIndex()));
     const QModelIndex& index = m_fileSystemModel->index(path);
+
+    if (previousPath == QFileInfo(path).canonicalFilePath())
+        return;
+
     if (!index.isValid())
         return;
 
@@ -770,6 +813,16 @@ void GlobalResourcesPane::goToPath(const QString& path)
     m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_homeButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_pathIndicator->setPath(QDir(m_fileSystemModel->rootPath()).relativeFilePath(path));
+
+    if (!previousPath.isEmpty()) {
+        if (backPathStack.isEmpty() || backPathStack.top() != previousPath)
+            backPathStack.push(previousPath);
+    }
+
+    forthPathStack.clear();
+
+    m_backButton->setDisabled(backPathStack.isEmpty());
+    m_forthButton->setDisabled(forthPathStack.isEmpty());
 }
 
 void GlobalResourcesPane::goToRelativePath(const QString& relativePath)
