@@ -117,9 +117,7 @@ public:
         iconRect.moveCenter(option.rect.center());
         iconRect.moveLeft(option.rect.left() + 5);
 
-        fillBackground(painter, option,
-                       /*calculateVisibleRow(m_globalPane->itemFromIndex(index), m_globalPane)*/ m_globalPane->d_func()->viewIndex(index),
-                       index.column() == 0);
+        fillBackground(painter, option, m_globalPane->d_func()->viewIndex(index), index.column() == 0);
 
         // Draw icon
         const QPixmap& iconPixmap = icon.pixmap(wfw(m_globalPane), option.decorationSize,
