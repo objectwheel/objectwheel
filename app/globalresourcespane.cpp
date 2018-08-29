@@ -18,6 +18,10 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QClipboard>
+#include <QSortFilterProxyModel>
+
+#define mt(index) m_fileSystemProxyModel->mapToSource(index)
+#define mf(index) m_fileSystemProxyModel->mapFromSource(index)
 
 // TODO List
 // Drag drop from file explorer to desktop
@@ -26,6 +30,7 @@
 using namespace Utils;
 
 namespace {
+
 const int ROW_HEIGHT = 21;
 int lastVScrollerPosOfViewer = 0;
 int lastHScrollerPosOfViewer = 0;
@@ -211,15 +216,63 @@ private:
     QLineEdit* m_pathEdit;
 };
 
+class FileSystemProxyModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+public:
+    explicit FileSystemProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+protected:
+    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
+    {
+        QModelIndex _index = sourceModel()->index(sourceRow, 0, sourceParent);
+        QFileSystemModel* fileModel = qobject_cast<QFileSystemModel*>(sourceModel());
+        auto fileName = fileModel->fileName(_index);
+        if (fileName.startsWith("_") || fileName.startsWith(".") || fileName == "icon.png")
+            return false;
+        else
+            return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
+    }
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override
+    {
+        // If sorting by file names column
+        if (sortColumn() == 0) {
+            QFileSystemModel *fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+            bool asc = sortOrder() == Qt::AscendingOrder ? true : false;
+
+            QFileInfo leftFileInfo  = fsm->fileInfo(left);
+            QFileInfo rightFileInfo = fsm->fileInfo(right);
+
+
+            // If DotAndDot move in the beginning
+            if (sourceModel()->data(left).toString() == "..")
+                return asc;
+            if (sourceModel()->data(right).toString() == "..")
+                return !asc;
+
+            // Move dirs upper
+            if (!leftFileInfo.isDir() && rightFileInfo.isDir()) {
+                return !asc;
+            }
+            if (leftFileInfo.isDir() && !rightFileInfo.isDir()) {
+                return asc;
+            }
+        }
+
+        return QSortFilterProxyModel::lessThan(left, right);
+    }
+};
+
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_searchEdit(new FocuslessLineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
+  , m_fileSystemProxyModel(new FileSystemProxyModel(this))
   , m_toolBar(new QToolBar(this))
   , m_pathIndicator(new PathIndicator(this))
   , m_modeComboBox(new QComboBox(header()))
   , m_upButton(new QToolButton)
+  , m_backButton(new QToolButton)
+  , m_forthButton(new QToolButton)
   , m_homeButton(new QToolButton)
-  , m_cutButton(new QToolButton)
   , m_copyButton(new QToolButton)
   , m_pasteButton(new QToolButton)
   , m_deleteButton(new QToolButton)
@@ -281,8 +334,9 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_modeComboBox->addItem(tr("Explorer"));
 
     m_upButton->setCursor(Qt::PointingHandCursor);
+    m_backButton->setCursor(Qt::PointingHandCursor);
+    m_forthButton->setCursor(Qt::PointingHandCursor);
     m_homeButton->setCursor(Qt::PointingHandCursor);
-    m_cutButton->setCursor(Qt::PointingHandCursor);
     m_copyButton->setCursor(Qt::PointingHandCursor);
     m_pasteButton->setCursor(Qt::PointingHandCursor);
     m_deleteButton->setCursor(Qt::PointingHandCursor);
@@ -293,8 +347,9 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_modeComboBox->setCursor(Qt::PointingHandCursor);
 
     m_upButton->setToolTip(tr("Go to upper directory"));
+    m_backButton->setToolTip(tr("Go to previous directory"));
+    m_forthButton->setToolTip(tr("Go to next directory"));
     m_homeButton->setToolTip(tr("Go to the home directory"));
-    m_cutButton->setToolTip(tr("Cut selected files/folders into the system's clipboard"));
     m_copyButton->setToolTip(tr("Copy selected files/folders into the system's clipboard"));
     m_pasteButton->setToolTip(tr("Paste files/folders from system's clipboard into the current directory"));
     m_deleteButton->setToolTip(tr("Delete selected files/folders"));
@@ -313,8 +368,9 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_modeComboBox->setContentsMargins(16, 0, 0, 0);
 
     m_upButton->setIcon(Icons::ARROW_UP.icon());
+    m_backButton->setIcon(Icons::ARROW_BACK.icon());
+    m_forthButton->setIcon(Icons::ARROW_FORTH.icon());
     m_homeButton->setIcon(Icons::HOME_TOOLBAR.icon());
-    m_cutButton->setIcon(Icons::CUT_TOOLBAR.icon());
     m_copyButton->setIcon(Icons::COPY_TOOLBAR.icon());
     m_pasteButton->setIcon(Icons::PASTE_TOOLBAR.icon());
     m_deleteButton->setIcon(Icons::DELETE_TOOLBAR.icon());
@@ -325,10 +381,12 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
 
     connect(m_upButton, &QToolButton::clicked,
             this, &GlobalResourcesPane::onUpButtonClick);
+    connect(m_backButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onBackButtonClick);
+    connect(m_forthButton, &QToolButton::clicked,
+            this, &GlobalResourcesPane::onForthButtonClick);
     connect(m_homeButton, &QToolButton::clicked,
             this, &GlobalResourcesPane::onHomeButtonClick);
-    connect(m_cutButton, &QToolButton::clicked,
-            this, &GlobalResourcesPane::onCutButtonClick);
     connect(m_copyButton, &QToolButton::clicked,
             this, &GlobalResourcesPane::onCopyButtonClick);
     connect(m_pasteButton, &QToolButton::clicked,
@@ -351,8 +409,9 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     TransparentStyle::attach(m_modeComboBox);
 
     m_upButton->setFixedHeight(22);
+    m_backButton->setFixedHeight(22);
+    m_forthButton->setFixedHeight(22);
     m_homeButton->setFixedHeight(22);
-    m_cutButton->setFixedHeight(22);
     m_copyButton->setFixedHeight(22);
     m_pasteButton->setFixedHeight(22);
     m_deleteButton->setFixedHeight(22);
@@ -365,11 +424,12 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_pathIndicator->setFixedHeight(17);
     m_toolBar->setFixedHeight(24);
     m_toolBar->addWidget(m_homeButton);
+    m_toolBar->addWidget(m_backButton);
+    m_toolBar->addWidget(m_forthButton);
     m_toolBar->addWidget(m_upButton);
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_renameButton);
     m_toolBar->addWidget(m_deleteButton);
-    m_toolBar->addWidget(m_cutButton);
     m_toolBar->addWidget(m_copyButton);
     m_toolBar->addWidget(m_pasteButton);
     m_toolBar->addSeparator();
@@ -378,6 +438,9 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_toolBar->addWidget(m_downloadFileButton);
 
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+    m_fileSystemProxyModel->setDynamicSortFilter(true);
+    m_fileSystemProxyModel->setFilterKeyColumn(0);
+    m_fileSystemProxyModel->setSourceModel(m_fileSystemModel);
 
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
@@ -412,18 +475,18 @@ void GlobalResourcesPane::sweep()
     lastHScrollerPosOfViewer = 0;
     lastVScrollerPosOfExplorer = 0;
     lastHScrollerPosOfExplorer = 0;
-
-    m_cutButton->setDisabled(true);
     m_copyButton->setDisabled(true);
     m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls());
     m_deleteButton->setDisabled(true);
     m_renameButton->setDisabled(true);
+    m_backButton->setDisabled(true);
+    m_forthButton->setDisabled(true);
 }
 
 void GlobalResourcesPane::onProjectStart()
 {
     m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
-    setModel(m_fileSystemModel);
+    setModel(m_fileSystemProxyModel);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &GlobalResourcesPane::onFileSelectionChange);
     onHomeButtonClick();
@@ -442,8 +505,8 @@ void GlobalResourcesPane::onModeChange()
         m_mode = Explorer;
 
     if (m_mode == Viewer) {
-        lastPathofExplorer = m_fileSystemModel->filePath(rootIndex());
-        lastSelectedIndexesOfExplorer = selectionModel()->selectedIndexes();
+        lastPathofExplorer = m_fileSystemModel->filePath(mt(rootIndex()));
+        lastSelectedIndexesOfExplorer = selectedIndexes();
         lastVScrollerPosOfExplorer = verticalScrollBar()->sliderPosition();
         lastHScrollerPosOfExplorer = horizontalScrollBar()->sliderPosition();;
 
@@ -475,7 +538,7 @@ void GlobalResourcesPane::onModeChange()
         horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfViewer);
     } else {
         lastExpandedIndexesOfViewer = d->expandedIndexes;
-        lastSelectedIndexesOfViewer = selectionModel()->selectedIndexes();
+        lastSelectedIndexesOfViewer = selectedIndexes();
         lastVScrollerPosOfViewer = verticalScrollBar()->sliderPosition();
         lastHScrollerPosOfViewer = horizontalScrollBar()->sliderPosition();;
 
@@ -508,11 +571,21 @@ void GlobalResourcesPane::onModeChange()
 
 void GlobalResourcesPane::onUpButtonClick()
 {
-    const QString& upperDir = dname(m_fileSystemModel->filePath(rootIndex()));
+    const QString& upperDir = dname(m_fileSystemModel->filePath(mt(rootIndex())));
     const QString& rootPath = m_fileSystemModel->rootPath();
 
     if (upperDir.size() > rootPath.size() || upperDir == rootPath)
         goToPath(upperDir);
+}
+
+void GlobalResourcesPane::onBackButtonClick()
+{
+
+}
+
+void GlobalResourcesPane::onForthButtonClick()
+{
+
 }
 
 void GlobalResourcesPane::onHomeButtonClick()
@@ -520,16 +593,11 @@ void GlobalResourcesPane::onHomeButtonClick()
     goToPath(m_fileSystemModel->rootPath());
 }
 
-void GlobalResourcesPane::onCutButtonClick()
-{
-
-}
-
 void GlobalResourcesPane::onCopyButtonClick()
 {
     QSet<QUrl> urls;
-    for (const QModelIndex& index : selectionModel()->selectedIndexes())
-        urls.insert(QUrl::fromLocalFile(m_fileSystemModel->filePath(index)));
+    for (const QModelIndex& index : selectedIndexes())
+        urls.insert(QUrl::fromLocalFile(m_fileSystemModel->filePath(mt(index))));
 
     if (!urls.isEmpty()) {
         auto mimeData = new QMimeData;
@@ -540,7 +608,7 @@ void GlobalResourcesPane::onCopyButtonClick()
 
 void GlobalResourcesPane::onPasteButtonClick()
 {
-    const QString& rootPath = m_fileSystemModel->filePath(rootIndex());
+    const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
     const QMimeData* clipboard = QApplication::clipboard()->mimeData();
     if (clipboard && clipboard->hasUrls()) {
         for (const QUrl& url : clipboard->urls()) {
@@ -562,8 +630,8 @@ void GlobalResourcesPane::onDeleteButtonClick()
         QSet<QString> deletedFiles;
         for (const QModelIndex& index : selectedIndexes()) {
             if (index.isValid()) {
-                deletedFiles.insert(m_fileSystemModel->filePath(index));
-                m_fileSystemModel->remove(index);
+                deletedFiles.insert(m_fileSystemModel->filePath(mt(index)));
+                m_fileSystemModel->remove(mt(index));
             }
         }
         emit filesDeleted(deletedFiles);
@@ -579,7 +647,7 @@ void GlobalResourcesPane::onRenameButtonClick()
 void GlobalResourcesPane::onNewFileButtonClick()
 {
     QString fileName = tr("Empty File.txt");
-    const QString& rootPath = m_fileSystemModel->filePath(rootIndex());
+    const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
     for (int i = 1; exists(rootPath + separator() + fileName); i++)
         fileName = tr("Empty File ") + QString::number(i) + ".txt";
@@ -588,7 +656,7 @@ void GlobalResourcesPane::onNewFileButtonClick()
     const bool suceed = mkfile(rootPath + separator() + fileName);
 
     if (suceed)
-        index = m_fileSystemModel->index(rootPath + separator() + fileName);
+        index = mf(m_fileSystemModel->index(rootPath + separator() + fileName));
 
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
@@ -602,12 +670,12 @@ void GlobalResourcesPane::onNewFileButtonClick()
 void GlobalResourcesPane::onNewFolderButtonClick()
 {
     QString folderName = tr("New Folder");
-    const QString& rootPath = m_fileSystemModel->filePath(rootIndex());
+    const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
     for (int i = 1; exists(rootPath + separator() + folderName); i++)
         folderName = tr("New Folder ") + QString::number(i);
 
-    const QModelIndex& index = m_fileSystemModel->mkdir(rootIndex(), folderName);
+    const QModelIndex& index = mf(m_fileSystemModel->mkdir(mt(rootIndex()), folderName));
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
         scrollTo(index);
@@ -646,19 +714,18 @@ void GlobalResourcesPane::onDownloadButtonClick()
 
 void GlobalResourcesPane::onFileSelectionChange()
 {
-    const int selectedItemSize = selectionModel()->selectedIndexes().size() / m_fileSystemModel->columnCount(rootIndex());
+    const int selectedItemSize = selectedIndexes().size() / m_fileSystemModel->columnCount(mt(rootIndex()));
     m_deleteButton->setEnabled(selectedItemSize > 0);
-    m_cutButton->setEnabled(selectedItemSize > 0);
     m_copyButton->setEnabled(selectedItemSize > 0);
     m_renameButton->setEnabled(selectedItemSize == 1);
 }
 
 void GlobalResourcesPane::onItemDoubleClick(const QModelIndex& index)
 {
-    if (m_fileSystemModel->isDir(index) && m_mode == Explorer)
-        goToPath(m_fileSystemModel->filePath(index));
+    if (m_fileSystemModel->isDir(mt(index)) && m_mode == Explorer)
+        goToPath(m_fileSystemModel->filePath(mt(index)));
     else
-        emit fileOpened(m_fileSystemModel->filePath(index));
+        emit fileOpened(m_fileSystemModel->filePath(mt(index)));
 }
 
 void GlobalResourcesPane::goToPath(const QString& path)
@@ -673,7 +740,7 @@ void GlobalResourcesPane::goToPath(const QString& path)
     if (!index.isValid())
         return;
 
-    setRootIndex(index);
+    setRootIndex(mf(index));
     selectionModel()->clear();
     m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_homeButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
@@ -706,7 +773,7 @@ void GlobalResourcesPane::drawBranches(QPainter* painter, const QRect& rect,
     painter->setRenderHint(QPainter::Antialiasing);
 
     const qreal width = 10;
-    const bool hasChild = m_fileSystemModel->hasChildren(index);
+    const bool hasChild = m_fileSystemModel->hasChildren(mt(index));
     const bool isSelected = selectionModel()->isSelected(index);
 
     QRectF handleRect(0, 0, width, width);
@@ -746,7 +813,7 @@ void GlobalResourcesPane::drawBranches(QPainter* painter, const QRect& rect,
 
 void GlobalResourcesPane::paintEvent(QPaintEvent* e)
 {
-    const bool rootHasChildren = m_fileSystemModel->QAbstractItemModel::hasChildren(rootIndex());
+    const bool rootHasChildren = m_fileSystemModel->QAbstractItemModel::hasChildren(mt(rootIndex()));
 
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());

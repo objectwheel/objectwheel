@@ -231,5 +231,9 @@
         <file>images/newfolder@2x.png</file>
         <file>images/download.png</file>
         <file>images/download@2x.png</file>
+        <file>images/arrowback.png</file>
+        <file>images/arrowback@2x.png</file>
+        <file>images/arrowforth.png</file>
+        <file>images/arrowforth@2x.png</file>
     </qresource>
 </RCC>

@@ -139,6 +139,10 @@ const Icon PIN_TOOLBAR({
 const Icon PINNED_TOOLBAR({
         {QLatin1String(":/utils/images/pinned.png"), Theme::IconsBaseColor}});
 
+const Icon ARROW_BACK({
+        {QLatin1String(":/utils/images/arrowback.png"), Theme::IconsBaseColor}});
+const Icon ARROW_FORTH({
+        {QLatin1String(":/utils/images/arrowforth.png"), Theme::IconsBaseColor}});
 const Icon ARROW_UP({
         {QLatin1String(":/utils/images/arrowup.png"), Theme::IconsBaseColor}});
 const Icon ARROW_DOWN({

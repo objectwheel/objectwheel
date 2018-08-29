@@ -10,6 +10,7 @@ class QToolBar;
 class QToolButton;
 class QComboBox;
 class PathIndicator;
+class FileSystemProxyModel;
 
 class GlobalResourcesPanePrivate : public QTreeViewPrivate {};
 class GlobalResourcesPane : public QTreeView
@@ -29,8 +30,9 @@ private slots:
     void onProjectStart();
     void onModeChange();
     void onUpButtonClick();
+    void onBackButtonClick();
+    void onForthButtonClick();
     void onHomeButtonClick();
-    void onCutButtonClick();
     void onCopyButtonClick();
     void onPasteButtonClick();
     void onDeleteButtonClick();
@@ -57,12 +59,14 @@ signals:
 private:
     FocuslessLineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
+    FileSystemProxyModel* m_fileSystemProxyModel;
     QToolBar* m_toolBar;
     PathIndicator* m_pathIndicator;
     QComboBox* m_modeComboBox;
     QToolButton* m_upButton;
+    QToolButton* m_backButton;
+    QToolButton* m_forthButton;
     QToolButton* m_homeButton;
-    QToolButton* m_cutButton;
     QToolButton* m_copyButton;
     QToolButton* m_pasteButton;
     QToolButton* m_deleteButton;
