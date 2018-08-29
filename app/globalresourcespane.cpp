@@ -19,13 +19,36 @@
 #include <QScrollBar>
 #include <QClipboard>
 #include <QSortFilterProxyModel>
+#include <QInputDialog>
 
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
 
 // TODO List
-// Drag drop from file explorer to desktop
-// Drag drop from desktop into file explorer
+// Finish the implementation of FileSystemProxyModel
+// Finish the Back and Forth buttons
+// Drag drop from the file explorer to desktop
+// Drag drop from desktop into the file explorer
+// Show progress dialog when paste action is in progress
+// Show progress dialog when download action is in progress
+// Prompt users before paste action is about to override existing files
+// Prompt users before download action is about to override existing files
+// Prompt users for unsuccessful paste operations
+// Prompt users for unsuccessful delete operations
+// Prompt users for unsuccessful rename operations
+// Prompt users for unsuccessful download operations
+// Show a right click menu on selected entries when user right clicks on them to show available
+// - file operation options like copy, paste, delete etc.)
+// Filtering (via m_searchEdit) will be coded
+// Add a new icon for "m_modeCombobox", don't use "filter" icon for it, use it for forthcoming
+// - sort combobox
+// Add a file name auto completion when users press to Tab over PathIndicator
+// Add a combobox to make it possible to short files and dirs on the tree (like QDir::SortFlags)
+// Convert "Name" title of the first header to "" (empty) and put all sort of controls (like
+// - sorting combobox) on it. --alight those control left to right--
+// Move all kind of palette settings into "initPalette" function
+// Add a rubber band for file selection
+// Block deletion of qmldir within Global dir
 
 using namespace Utils;
 
@@ -240,7 +263,6 @@ protected:
             QFileInfo leftFileInfo  = fsm->fileInfo(left);
             QFileInfo rightFileInfo = fsm->fileInfo(right);
 
-
             // If DotAndDot move in the beginning
             if (sourceModel()->data(left).toString() == "..")
                 return asc;
@@ -344,9 +366,9 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_downloadFileButton->setCursor(Qt::PointingHandCursor);
     m_modeComboBox->setCursor(Qt::PointingHandCursor);
 
-    m_upButton->setToolTip(tr("Go to upper directory"));
-    m_backButton->setToolTip(tr("Go to previous directory"));
-    m_forthButton->setToolTip(tr("Go to next directory"));
+    m_upButton->setToolTip(tr("Go to the upper directory"));
+    m_backButton->setToolTip(tr("Go to the previous directory"));
+    m_forthButton->setToolTip(tr("Go to the next directory"));
     m_homeButton->setToolTip(tr("Go to the home directory"));
     m_copyButton->setToolTip(tr("Copy selected files/folders into the system's clipboard"));
     m_pasteButton->setToolTip(tr("Paste files/folders from system's clipboard into the current directory"));
@@ -355,7 +377,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_newFileButton->setToolTip(tr("Create an empty new file within the current directory"));
     m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
     m_downloadFileButton->setToolTip(tr("Download a file from an url into the current directory"));
-    m_modeComboBox->setToolTip(tr("Change the File Explorer's operating mode"));
+    m_modeComboBox->setToolTip(tr("Change view mode"));
     m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
 
     const Icon FILTER_ICON({{":/utils/images/filtericon.png", Theme::BackgroundColorNormal}});
@@ -685,34 +707,39 @@ void GlobalResourcesPane::onNewFolderButtonClick()
 
 void GlobalResourcesPane::onDownloadButtonClick()
 {
-    //    bool ok, ok_2;
-    //    auto index = fileList->filterProxyModel()->mapToSource(fileList->rootIndex());
-    //    auto path = fileList->fileModel()->filePath(index);
-    //    QString text = QInputDialog::getText(parent, tr("Download file"),
-    //                                         tr("Url:"), QLineEdit::Normal,
-    //                                         QString(), &ok);
+    const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    //    if (!ok || text.isEmpty())
-    //        return;
+    if (rootPath.isEmpty())
+        return;
 
-    //    QString text_2 = QInputDialog::getText(parent, tr("Download file"),
-    //                                         tr("File name:"), QLineEdit::Normal,
-    //                                         QString(), &ok_2);
+    bool dialogOkButtonClicked;
+    const QString& url = QInputDialog::getText(this, tr("Download a file"), tr("Url:"),
+                                               QLineEdit::Normal, QString(), &dialogOkButtonClicked);
 
-    //    if (text_2.startsWith("_") || text_2 == "icon.png" || text_2 == "main.qml")
-    //        return;
+    if (!dialogOkButtonClicked)
+        return;
 
-    //    if (index.isValid() && ok_2 && !text_2.isEmpty() && !exists(path + separator() + text_2)) {
-    //        const auto& data = dlfile(text);
-    //        if (data.isEmpty())
-    //            return;
-    //        wrfile(path + separator() + text_2, data);
-    //    }
+    if (url.isEmpty())
+        return;
+
+    const QString& fileName = QInputDialog::getText(this, tr("Download a file"), tr("File name:"),
+                                                    QLineEdit::Normal, QString(), &dialogOkButtonClicked);
+
+    if (!dialogOkButtonClicked)
+        return;
+
+    if (fileName.isEmpty())
+        return;
+
+    if (exists(rootPath + separator() + fileName))
+        return;
+
+    wrfile(rootPath + separator() + fileName, dlfile(url));
 }
 
 void GlobalResourcesPane::onFileSelectionChange()
 {
-    const int selectedItemSize = selectedIndexes().size() / m_fileSystemModel->columnCount(mt(rootIndex()));
+    const int selectedItemSize = selectedIndexes().size();
     m_deleteButton->setEnabled(selectedItemSize > 0);
     m_copyButton->setEnabled(selectedItemSize > 0);
     m_renameButton->setEnabled(selectedItemSize == 1);

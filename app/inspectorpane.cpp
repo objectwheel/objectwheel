@@ -396,6 +396,12 @@ void InspectorPane::paintEvent(QPaintEvent* e)
         if (i % 2)
             painter.fillRect(rect, palette().alternateBase());
 
+        // Draw vertical line
+        QRectF cell(rect);
+        cell.setSize(QSizeF(header()->sectionSize(0), rect.height()));
+        painter.drawLine(cell.topRight() + QPointF(-0.5, 0.5),
+                          cell.bottomRight() + QPointF(-0.5, -0.5));
+
         // Draw top and bottom lines
         painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
         painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
