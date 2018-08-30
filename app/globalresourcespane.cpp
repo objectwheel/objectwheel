@@ -1,3 +1,29 @@
+/*
+    TODO List
+    Remove nested painter save/restores
+    Drag drop from the file explorer to desktop
+    Drag drop from desktop into the file explorer
+    Show progress dialog when paste action is in progress
+    Show progress dialog when download action is in progress
+    Prompt users before paste action is about to override existing files
+    Prompt users before download action is about to override existing files
+    Prompt users for unsuccessful paste operations
+    Prompt users for unsuccessful delete operations
+    Prompt users for unsuccessful rename operations
+    Prompt users for unsuccessful download operations
+    Show a right click menu on selected entries when user right clicks on them to show available
+    - file operation options like copy, paste, delete etc.)
+    Filtering (via m_searchEdit) will be coded
+    Add a new icon for "m_modeCombobox", don't use "filter" icon for it, use it for forthcoming
+    - sort combobox
+    Add a file name auto completion when users press to Tab over PathIndicator
+    Add a combobox to make it possible to short files and dirs on the tree (like QDir::SortFlags)
+    Convert "Name" title of the first header to "" (empty) and put all sort of controls (like
+    - sorting combobox) on it. --alight those control left to right--
+    Add a rubber band for file selection
+    Block deletion of qmldir within Global dir
+*/
+
 #include <globalresourcespane.h>
 #include <focuslesslineedit.h>
 #include <projectmanager.h>
@@ -6,6 +32,7 @@
 #include <wfw.h>
 #include <transparentstyle.h>
 #include <utilsicons.h>
+#include <delayer.h>
 
 #include <QComboBox>
 #include <QPainter>
@@ -20,32 +47,14 @@
 #include <QClipboard>
 #include <QSortFilterProxyModel>
 #include <QInputDialog>
+#include <QGraphicsBlurEffect>
+#include <QtConcurrent>
+#include <QProgressDialog>
 
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
 
-// TODO List
-// Drag drop from the file explorer to desktop
-// Drag drop from desktop into the file explorer
-// Show progress dialog when paste action is in progress
-// Show progress dialog when download action is in progress
-// Prompt users before paste action is about to override existing files
-// Prompt users before download action is about to override existing files
-// Prompt users for unsuccessful paste operations
-// Prompt users for unsuccessful delete operations
-// Prompt users for unsuccessful rename operations
-// Prompt users for unsuccessful download operations
-// Show a right click menu on selected entries when user right clicks on them to show available
-// - file operation options like copy, paste, delete etc.)
-// Filtering (via m_searchEdit) will be coded
-// Add a new icon for "m_modeCombobox", don't use "filter" icon for it, use it for forthcoming
-// - sort combobox
-// Add a file name auto completion when users press to Tab over PathIndicator
-// Add a combobox to make it possible to short files and dirs on the tree (like QDir::SortFlags)
-// Convert "Name" title of the first header to "" (empty) and put all sort of controls (like
-// - sorting combobox) on it. --alight those control left to right--
-// Add a rubber band for file selection
-// Block deletion of qmldir within Global dir
+extern const char* TOOL_KEY;
 
 using namespace Utils;
 
@@ -80,8 +89,6 @@ void initPalette(QWidget* widget)
 
 void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool verticalLine)
 {
-    painter->save();
-
     bool isSelected = option.state & QStyle::State_Selected;
     const QPalette& pal = option.palette;
     const QRectF& rect = option.rect;
@@ -114,7 +121,68 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
                           rect.bottomRight() + QPointF(-0.5, -0.5));
     }
 
-    painter->restore();
+    painter->setClipping(false);
+}
+
+void handleDrop(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent)
+{
+    auto showMsgBox = true;
+
+    QProgressDialog progress("Copying files...", "Abort Copy", 0, urls.size(), parent);
+    progress.setWindowModality(Qt::NonModal);
+    progress.open();
+    Delayer::delay(100);
+
+    for (int i = 0; i < urls.size(); i++) {
+        progress.setValue(i);
+
+        if (progress.wasCanceled())
+            break;
+
+        auto url = urls.at(i);
+        if (!url.isLocalFile() ||
+          !url.isValid() || url.isEmpty()) {
+            Q_ASSERT(0);
+            continue;
+        }
+
+        auto path = url.toLocalFile();
+        if (path.at(path.size() - 1) == '\\' || path.at(path.size() - 1) == '/')
+            path.remove(path.size() - 1, 1);
+
+        if (exists(rootPath + separator() + fname(path))) {
+            if (showMsgBox) {
+                QMessageBox msgbox;
+                msgbox.setText("It already exists. Would you like to overwrite following file/folder?");
+                msgbox.setInformativeText(fname(path));
+                msgbox.setIcon(QMessageBox::Icon::Question);
+                msgbox.addButton(QMessageBox::Yes);
+                msgbox.addButton(QMessageBox::No);
+                msgbox.addButton(QMessageBox::YesToAll);
+                msgbox.addButton(QMessageBox::Abort);
+                msgbox.setDefaultButton(QMessageBox::No);
+                msgbox.setWindowModality(Qt::ApplicationModal);
+
+                int ret = msgbox.exec();
+                if (ret == QMessageBox::Yes) {
+                    rm(rootPath + separator() + fname(path));
+                } else if (ret == QMessageBox::No) {
+                    continue;
+                } else if (ret == QMessageBox::YesToAll) {
+                    showMsgBox = false;
+                } else {
+                    break;
+                }
+            } else {
+                rm(rootPath + separator() + fname(path));
+            }
+        }
+        auto future = QtConcurrent::run((void (*)(const QString&,
+          const QString&, bool, bool))&cp, path, rootPath, false, false);
+        Delayer::delay(std::bind(&QFuture<void>::isRunning, &future));
+    }
+    progress.setValue(urls.size());
+    Delayer::delay(100);
 }
 }
 
@@ -141,6 +209,7 @@ public:
         iconRect.moveCenter(option.rect.center());
         iconRect.moveLeft(option.rect.left() + 5);
 
+        // Fill background
         fillBackground(painter, option, m_globalPane->d_func()->viewIndex(index), index.column() == 0);
 
         // Draw icon
@@ -276,6 +345,8 @@ private:
 };
 
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
+  , m_dropHereLabel(new QLabel(this))
+  , m_droppingBlurEffect(new QGraphicsBlurEffect(this))
   , m_searchEdit(new FocuslessLineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
   , m_fileSystemProxyModel(new FileSystemProxyModel(this))
@@ -338,6 +409,20 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name()));
+
+    QPixmap p(":/images/drop.png");
+    p.setDevicePixelRatio(devicePixelRatioF());
+    m_dropHereLabel->setHidden(true);
+    m_dropHereLabel->setAlignment(Qt::AlignCenter);
+    m_dropHereLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+    m_dropHereLabel->setScaledContents(true);
+    m_dropHereLabel->setPixmap(p);
+    m_dropHereLabel->raise();
+
+    m_droppingBlurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
+    m_droppingBlurEffect->setEnabled(false);
+    m_droppingBlurEffect->setBlurRadius(40);
+    viewport()->setGraphicsEffect(m_droppingBlurEffect);
 
     QPalette mp(m_modeComboBox->palette());
     mp.setColor(QPalette::Text, Qt::white);
@@ -838,6 +923,42 @@ void GlobalResourcesPane::filterList(const QString& /*filter*/)
     // TODO
 }
 
+void GlobalResourcesPane::dropEvent(QDropEvent* event)
+{
+    const QString& rootPath = m_fileSystemModel->fileName(mt(rootIndex()));
+    if (event->mimeData()->hasUrls() &&
+     !(event->mimeData()->hasText() &&
+      event->mimeData()->text() == TOOL_KEY)) {
+        event->accept();
+        handleDrop(rootPath, event->mimeData()->urls(), this);
+    }
+    m_dropHereLabel->setHidden(true);
+    m_droppingBlurEffect->setEnabled(false);
+}
+
+void GlobalResourcesPane::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasUrls() &&
+     !(event->mimeData()->hasText() &&
+      event->mimeData()->text() == TOOL_KEY)) {
+         event->accept();
+         m_dropHereLabel->setVisible(true);
+         m_droppingBlurEffect->setEnabled(true);
+    }
+}
+
+void GlobalResourcesPane::dragMoveEvent(QDragMoveEvent* event)
+{
+    event->accept();
+}
+
+void GlobalResourcesPane::dragLeaveEvent(QDragLeaveEvent* event)
+{
+    event->accept();
+    m_dropHereLabel->setHidden(true);
+    m_droppingBlurEffect->setEnabled(false);
+}
+
 void GlobalResourcesPane::drawBranches(QPainter* painter, const QRect& rect,
                                        const QModelIndex& index) const
 {
@@ -887,7 +1008,6 @@ void GlobalResourcesPane::drawBranches(QPainter* painter, const QRect& rect,
 void GlobalResourcesPane::paintEvent(QPaintEvent* e)
 {
     const bool rootHasChildren = m_fileSystemModel->QAbstractItemModel::hasChildren(mt(rootIndex()));
-
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
@@ -918,6 +1038,7 @@ void GlobalResourcesPane::paintEvent(QPaintEvent* e)
         painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
         painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
     }
+    painter.end();
 
     QTreeView::paintEvent(e);
 }
@@ -929,12 +1050,21 @@ void GlobalResourcesPane::updateGeometries()
     vm.setBottom(m_searchEdit->height());
     vm.setTop(header()->height() + (m_mode == Explorer ? m_pathIndicator->height() + m_toolBar->height() - 2 : 0));
     setViewportMargins(vm);
+
     QRect vg = viewport()->geometry();
     QRect sg(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
     m_searchEdit->setGeometry(sg);
+
     header()->setGeometry(vg.left(), 1, vg.width(), header()->height());
     m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
                          header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
+
+    int ds = qMin(qMin(vg.width() - 5, vg.height() - 5), 100);
+    QRect dg;
+    dg.setSize({ds, ds});
+    dg.moveCenter(vg.center());
+    m_dropHereLabel->setGeometry(dg);
+
     if (m_mode == Explorer) {
         QRect tg(vg.left(), header()->height() + 1, vg.width(), m_toolBar->height());
         QRect pg(vg.left(), header()->height() + 1 + m_toolBar->height(), vg.width(), m_pathIndicator->height());

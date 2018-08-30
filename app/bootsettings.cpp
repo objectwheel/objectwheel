@@ -7,7 +7,6 @@
 void BootSettings::apply()
 {
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    // QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL); // For reCaptcha
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setStyle(new ApplicationStyle);
 

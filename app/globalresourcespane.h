@@ -11,6 +11,7 @@ class QToolButton;
 class QComboBox;
 class PathIndicator;
 class FileSystemProxyModel;
+class QLabel;
 
 class GlobalResourcesPanePrivate : public QTreeViewPrivate {};
 class GlobalResourcesPane : public QTreeView
@@ -47,6 +48,10 @@ private:
     void goToPath(const QString& path);
     void goToRelativePath(const QString& relativePath);
     void filterList(const QString& filter);
+    void dropEvent(QDropEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dragLeaveEvent(QDragLeaveEvent* event) override;
     void paintEvent(QPaintEvent* e) override;
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
     void updateGeometries() override;
@@ -57,6 +62,8 @@ signals:
     void filesDeleted(const QSet<QString>& pathes);
 
 private:
+    QLabel* m_dropHereLabel;
+    QGraphicsBlurEffect* m_droppingBlurEffect;
     FocuslessLineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
     FileSystemProxyModel* m_fileSystemProxyModel;
