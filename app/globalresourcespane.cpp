@@ -1,21 +1,10 @@
 /*
     TODO List
-    Remove nested painter save/restores
     Drag drop from the file explorer to desktop
-    Drag drop from desktop into the file explorer
-    Show progress dialog when paste action is in progress
-    Show progress dialog when download action is in progress
-    Prompt users before paste action is about to override existing files
-    Prompt users before download action is about to override existing files
-    Prompt users for unsuccessful paste operations
-    Prompt users for unsuccessful delete operations
-    Prompt users for unsuccessful rename operations
-    Prompt users for unsuccessful download operations
+    Show real progress dialog when download action is in progress
     Show a right click menu on selected entries when user right clicks on them to show available
     - file operation options like copy, paste, delete etc.)
     Filtering (via m_searchEdit) will be coded
-    Add a new icon for "m_modeCombobox", don't use "filter" icon for it, use it for forthcoming
-    - sort combobox
     Add a file name auto completion when users press to Tab over PathIndicator
     Add a combobox to make it possible to short files and dirs on the tree (like QDir::SortFlags)
     Convert "Name" title of the first header to "" (empty) and put all sort of controls (like
@@ -124,7 +113,7 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
     painter->setClipping(false);
 }
 
-void handleDrop(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent)
+void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent)
 {
     QProgressDialog progress("Copying files...", "Abort Copy", 0, urls.size(), parent);
     progress.setWindowModality(Qt::NonModal);
@@ -751,12 +740,8 @@ void GlobalResourcesPane::onPasteButtonClick()
 {
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
     const QMimeData* clipboard = QApplication::clipboard()->mimeData();
-    if (clipboard && clipboard->hasUrls()) {
-        for (const QUrl& url : clipboard->urls()) {
-            if (url.isValid() && !url.isEmpty() && url.isLocalFile())
-                cp(QFileInfo(url.toLocalFile()).canonicalFilePath(), rootPath);
-        }
-    }
+    if (clipboard && clipboard->hasUrls())
+        copyFiles(rootPath, clipboard->urls(), this);
 }
 
 void GlobalResourcesPane::onDeleteButtonClick()
@@ -852,10 +837,15 @@ void GlobalResourcesPane::onDownloadButtonClick()
     if (fileName.isEmpty())
         return;
 
-    if (exists(rootPath + separator() + fileName))
-        return;
+    QTemporaryDir tmp;
+    Q_ASSERT_X(tmp.isValid(), "GlobalResourcesPane", "Cannot create a temporary dir.");
 
-    wrfile(rootPath + separator() + fileName, dlfile(url));
+    if (!wrfile(tmp.filePath(fileName), dlfile(url))) {
+        qWarning() << tr("File downlod failed.");
+        return;
+    }
+
+    copyFiles(rootPath, QList<QUrl>() << QUrl::fromLocalFile(tmp.filePath(fileName)), this);
 }
 
 void GlobalResourcesPane::onFileSelectionChange()
@@ -936,7 +926,7 @@ void GlobalResourcesPane::dropEvent(QDropEvent* event)
             && !(event->mimeData()->hasText()
                  && event->mimeData()->text() == TOOL_KEY)) {
         event->accept();
-        handleDrop(rootPath, event->mimeData()->urls(), this);
+        copyFiles(rootPath, event->mimeData()->urls(), this);
     }
     m_dropHereLabel->setHidden(true);
     m_droppingBlurEffect->setEnabled(false);
