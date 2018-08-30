@@ -126,61 +126,63 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
 
 void handleDrop(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent)
 {
-    auto showMsgBox = true;
-
     QProgressDialog progress("Copying files...", "Abort Copy", 0, urls.size(), parent);
     progress.setWindowModality(Qt::NonModal);
     progress.open();
     Delayer::delay(100);
 
+    bool askForOverwrite = true;
+
     for (int i = 0; i < urls.size(); i++) {
+        const QUrl& url = urls.at(i);
+
         progress.setValue(i);
 
         if (progress.wasCanceled())
             break;
 
-        auto url = urls.at(i);
-        if (!url.isLocalFile() ||
-          !url.isValid() || url.isEmpty()) {
-            Q_ASSERT(0);
+        if (url.isEmpty())
             continue;
-        }
 
-        auto path = url.toLocalFile();
-        if (path.at(path.size() - 1) == '\\' || path.at(path.size() - 1) == '/')
-            path.remove(path.size() - 1, 1);
+        if (!url.isValid())
+            continue;
 
-        if (exists(rootPath + separator() + fname(path))) {
-            if (showMsgBox) {
-                QMessageBox msgbox;
-                msgbox.setText("It already exists. Would you like to overwrite following file/folder?");
-                msgbox.setInformativeText(fname(path));
-                msgbox.setIcon(QMessageBox::Icon::Question);
-                msgbox.addButton(QMessageBox::Yes);
-                msgbox.addButton(QMessageBox::No);
-                msgbox.addButton(QMessageBox::YesToAll);
-                msgbox.addButton(QMessageBox::Abort);
-                msgbox.setDefaultButton(QMessageBox::No);
-                msgbox.setWindowModality(Qt::ApplicationModal);
+        if (!url.isLocalFile())
+            continue;
 
-                int ret = msgbox.exec();
+        const QString& path = QFileInfo(url.toLocalFile()).canonicalFilePath();
+        const QString& fileName = fname(path);
+        const QString& destPath = rootPath + separator() + fileName;
+
+        if (exists(destPath)) {
+            if (askForOverwrite) {
+                int ret = QMessageBox::question(
+                            parent,
+                            QObject::tr("File or folder exists"),
+                            QObject::tr("File or folder exists. "
+                                        "Would you like to overwrite following file/folder: ") + fileName,
+                            QMessageBox::Yes | QMessageBox::No | QMessageBox::YesToAll| QMessageBox::Abort,
+                            QMessageBox::No);
                 if (ret == QMessageBox::Yes) {
-                    rm(rootPath + separator() + fname(path));
+                    rm(destPath);
                 } else if (ret == QMessageBox::No) {
                     continue;
                 } else if (ret == QMessageBox::YesToAll) {
-                    showMsgBox = false;
+                    askForOverwrite = false;
+                    rm(destPath);
                 } else {
                     break;
                 }
             } else {
-                rm(rootPath + separator() + fname(path));
+                rm(destPath);
             }
         }
-        auto future = QtConcurrent::run((void (*)(const QString&,
-          const QString&, bool, bool))&cp, path, rootPath, false, false);
+
+        QFuture<void> future = QtConcurrent::run(qOverload<const QString&, const QString&, bool, bool>(&cp),
+                                                 path, rootPath, false, false);
         Delayer::delay(std::bind(&QFuture<void>::isRunning, &future));
     }
+
     progress.setValue(urls.size());
     Delayer::delay(100);
 }
@@ -403,6 +405,10 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
                     "    border-bottom: 1px solid %1;"
                     "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
                     "                                stop:0 %2, stop:1 %3);"
+                    "} QHeaderView::down-arrow {"
+                    "    image: none;"
+                    "} QHeaderView::up-arrow {"
+                    "    image: none;"
                     "}"
                 }
                 .arg(palette().text().color().lighter(270).name())
@@ -925,10 +931,10 @@ void GlobalResourcesPane::filterList(const QString& /*filter*/)
 
 void GlobalResourcesPane::dropEvent(QDropEvent* event)
 {
-    const QString& rootPath = m_fileSystemModel->fileName(mt(rootIndex()));
-    if (event->mimeData()->hasUrls() &&
-     !(event->mimeData()->hasText() &&
-      event->mimeData()->text() == TOOL_KEY)) {
+    const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
+    if (event->mimeData()->hasUrls()
+            && !(event->mimeData()->hasText()
+                 && event->mimeData()->text() == TOOL_KEY)) {
         event->accept();
         handleDrop(rootPath, event->mimeData()->urls(), this);
     }
@@ -938,12 +944,12 @@ void GlobalResourcesPane::dropEvent(QDropEvent* event)
 
 void GlobalResourcesPane::dragEnterEvent(QDragEnterEvent* event)
 {
-    if (event->mimeData()->hasUrls() &&
-     !(event->mimeData()->hasText() &&
-      event->mimeData()->text() == TOOL_KEY)) {
-         event->accept();
-         m_dropHereLabel->setVisible(true);
-         m_droppingBlurEffect->setEnabled(true);
+    if (event->mimeData()->hasUrls()
+            && !(event->mimeData()->hasText()
+                 && event->mimeData()->text() == TOOL_KEY)) {
+        event->accept();
+        m_dropHereLabel->setVisible(true);
+        m_droppingBlurEffect->setEnabled(true);
     }
 }
 
