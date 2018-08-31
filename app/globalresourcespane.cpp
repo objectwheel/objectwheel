@@ -40,6 +40,8 @@
 #include <QtConcurrent>
 #include <QProgressDialog>
 #include <QCompleter>
+#include <QDirIterator>
+#include <QFileIconProvider>
 
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
@@ -175,6 +177,19 @@ void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent
 
     progress.setValue(urls.size());
     Delayer::delay(100);
+}
+
+void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex)
+{
+    if (!index.isValid())
+        return;
+
+    if (index == rootIndex)
+        return;
+
+    view->expand(index);
+
+    expandUpToRoot(view, index.parent(), rootIndex);
 }
 }
 
@@ -336,27 +351,99 @@ private:
     }
 };
 
-class FileSystemModel : public QFileSystemModel
+class FileSearchModel : public QStringListModel
 {
+    Q_OBJECT
 public:
-    explicit FileSystemModel(QObject *parent = nullptr) : QFileSystemModel(parent)
-    {}
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    explicit FileSearchModel(QObject* parent = nullptr) : QStringListModel(parent)
+      , m_fileSystemWatcher(new QFileSystemWatcher(this))
     {
-        if (role == Qt::DisplayRole && index.column() == 0) {
-            QString path  = QDir::toNativeSeparators(filePath(index));
+        connect(m_fileSystemWatcher, &QFileSystemWatcher::directoryChanged,
+                this, &FileSearchModel::updateModel);
+    }
+
+    QString rootPath() const { return m_rootPath; }
+    void setRootPath(const QString& rootPath) {
+        m_rootPath = rootPath;
+        if (!m_fileSystemWatcher->files().isEmpty())
+            m_fileSystemWatcher->removePaths(m_fileSystemWatcher->files());
+        if (!m_fileSystemWatcher->directories().isEmpty())
+            m_fileSystemWatcher->removePaths(m_fileSystemWatcher->directories());
+        if (!m_rootPath.isEmpty())
+            m_fileSystemWatcher->addPath(m_rootPath);
+        updateModel();
+    }
+
+private slots:
+    void updateModel()
+    {
+        QStringList files;
+        if (!m_rootPath.isEmpty()) {
+            QDirIterator it(m_rootPath, {"*"}, QDir::AllEntries | QDir::NoSymLinks
+                            | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+            while (it.hasNext())
+                files << it.next();
+        }
+        setStringList(files);
+    }
+
+private:
+    QVariant data(const QModelIndex &index, int role) const override
+    {
+        if (role == Qt::EditRole) {
+            QString path = QDir::toNativeSeparators(QStringListModel::data(index, Qt::EditRole).toString());
             if (path.endsWith(QDir::separator()))
                 path.chop(1);
-            return path;
+            return fname(path);
         }
 
-        return QFileSystemModel::data(index, role);
+        if (role == Qt::DisplayRole) {
+            QString path = QDir::toNativeSeparators(QStringListModel::data(index, Qt::EditRole).toString());
+            if (path.endsWith(QDir::separator()))
+                path.chop(1);
+            return QDir(m_rootPath).relativeFilePath(path);
+        }
+
+        if (role == Qt::DecorationRole) {
+            QString path = QDir::toNativeSeparators(QStringListModel::data(index, Qt::EditRole).toString());
+            if (path.endsWith(QDir::separator()))
+                path.chop(1);
+            return m_fileIconProvider.icon(QFileInfo(path));
+        }
+
+        return QStringListModel::data(index, role);
     }
+
+private:
+    QString m_rootPath;
+    QFileIconProvider m_fileIconProvider;
+    QFileSystemWatcher* m_fileSystemWatcher;
 };
+
+//class TabCompleter : public QObject
+//{
+//    Q_OBJECT
+//private:
+//    bool eventFilter(QObject* watched, QEvent* event) {
+//        if (event->type() == QEvent::ShortcutOverride) {
+//            auto e = static_cast<QKeyEvent*>(event);
+//            if (e->key() == Qt::Key_Tab) {
+//                if (QLineEdit* lineEdit = qobject_cast<QLineEdit*>(watched)) {
+//                    if (lineEdit->completer())
+//                        lineEdit->setText(lineEdit->completer()->currentCompletion());
+//                    event->accept();
+//                    return true;
+//                }
+//            }
+//        }
+//        return QObject::eventFilter(watched, event);
+//    }
+//} g_tabCompleter;
 
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_dropHereLabel(new QLabel(this))
   , m_droppingBlurEffect(new QGraphicsBlurEffect(this))
+  , m_searchEditCompleterModel(new FileSearchModel(this))
   , m_searchEditCompleter(new QCompleter(this))
   , m_searchEdit(new FocuslessLineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
@@ -561,14 +648,16 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
         m_fileSystemProxyModel->setDynamicSortFilter(true);
     });
 
-    auto fsm = new FileSystemModel(m_searchEditCompleter);
-    fsm->setRootPath("");
-    m_searchEditCompleter->setModel(fsm);
+    m_searchEditCompleter->setFilterMode(Qt::MatchContains);
+    m_searchEditCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    m_searchEditCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    m_searchEditCompleter->setModel(m_searchEditCompleterModel);
+    m_searchEditCompleter->popup()->setIconSize({16, 16});
     m_searchEdit->setCompleter(m_searchEditCompleter);
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(22);
-    connect(m_searchEdit, &FocuslessLineEdit::textChanged, this, &GlobalResourcesPane::filterList);
+    connect(m_searchEdit, qOverload<>(&FocuslessLineEdit::editingFinished), this, &GlobalResourcesPane::filterList);
     connect(m_pathIndicator, &PathIndicator::pathUpdated, this, &GlobalResourcesPane::goToRelativePath);
 
     connect(ProjectManager::instance(), &ProjectManager::started,
@@ -583,6 +672,7 @@ void GlobalResourcesPane::sweep()
 {
     // TODO
     m_searchEdit->clear();
+    m_searchEditCompleterModel->setRootPath(QString());
 
     if (selectionModel()) {
         selectionModel()->clear();
@@ -618,7 +708,7 @@ void GlobalResourcesPane::onProjectStart()
 {
     Q_ASSERT(exists(SaveUtils::toGlobalDir(ProjectManager::dir())));
     m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
-    m_searchEditCompleter->setCompletionPrefix(m_fileSystemModel->rootPath()/* + separator()*/);
+    m_searchEditCompleterModel->setRootPath(m_fileSystemModel->rootPath());
 
     setModel(m_fileSystemProxyModel);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged,
@@ -811,7 +901,7 @@ void GlobalResourcesPane::onNewFileButtonClick()
 
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
-        scrollTo(index);
+        scrollTo(index, PositionAtCenter);
         edit(index);
     } else {
         qWarning() << "GlobalResourcesPane:" << tr("File creation failed");
@@ -829,7 +919,7 @@ void GlobalResourcesPane::onNewFolderButtonClick()
     const QModelIndex& index = mf(m_fileSystemModel->mkdir(mt(rootIndex()), folderName));
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
-        scrollTo(index);
+        scrollTo(index, PositionAtCenter);
         edit(index);
     } else {
         qWarning() << "GlobalResourcesPane:" << tr("Folder creation failed");
@@ -939,18 +1029,30 @@ void GlobalResourcesPane::goToRelativePath(const QString& relativePath)
     goToPath(path);
 }
 
-void GlobalResourcesPane::filterList(const QString& /*filterText*/)
+void GlobalResourcesPane::filterList()
 {
-// TODO
-//    Q_D(GlobalResourcesPane);
-//    for (auto i : d->viewItems)
-//        qDebug() << m_fileSystemModel->filePath(mt(i.index));
+    if (!m_searchEditCompleter->currentIndex().isValid())
+        return;
 
-//    QDirIterator it(path, filterText, QDir::AllEntries | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-//    QStringList files;
-//    while (it.hasNext())
-//        files << it.next();
-//    files.sort();
+    const QModelIndex& currentIndex = m_searchEditCompleter->popup()->currentIndex();
+
+    if (!currentIndex.isValid())
+        return;
+
+    const QString& fileName = currentIndex.data(Qt::EditRole).toString();
+    const QString& relativePath = currentIndex.data(Qt::DisplayRole).toString();
+
+    if (relativePath.isEmpty() || fileName.isEmpty())
+        return;
+
+     if (m_searchEdit->text() != fileName)
+         return;
+
+     const QString& path = QDir(m_fileSystemModel->rootPath()).filePath(relativePath);
+     const QModelIndex& searchedIndex = mf(m_fileSystemModel->index(path));
+     expandUpToRoot(this, searchedIndex, rootIndex());
+     selectionModel()->select(searchedIndex, QItemSelectionModel::ClearAndSelect);
+     scrollTo(searchedIndex, PositionAtCenter);
 }
 
 void GlobalResourcesPane::dropEvent(QDropEvent* event)
