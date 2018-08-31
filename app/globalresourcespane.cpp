@@ -360,9 +360,10 @@ public:
     {
         connect(m_fileSystemWatcher, &QFileSystemWatcher::directoryChanged,
                 this, &FileSearchModel::updateModel);
+        connect(m_fileSystemWatcher, &QFileSystemWatcher::fileChanged,
+                this, &FileSearchModel::updateModel);
     }
 
-    QString rootPath() const { return m_rootPath; }
     void setRootPath(const QString& rootPath) {
         m_rootPath = rootPath;
         if (!m_fileSystemWatcher->files().isEmpty())
@@ -419,26 +420,6 @@ private:
     QFileIconProvider m_fileIconProvider;
     QFileSystemWatcher* m_fileSystemWatcher;
 };
-
-//class TabCompleter : public QObject
-//{
-//    Q_OBJECT
-//private:
-//    bool eventFilter(QObject* watched, QEvent* event) {
-//        if (event->type() == QEvent::ShortcutOverride) {
-//            auto e = static_cast<QKeyEvent*>(event);
-//            if (e->key() == Qt::Key_Tab) {
-//                if (QLineEdit* lineEdit = qobject_cast<QLineEdit*>(watched)) {
-//                    if (lineEdit->completer())
-//                        lineEdit->setText(lineEdit->completer()->currentCompletion());
-//                    event->accept();
-//                    return true;
-//                }
-//            }
-//        }
-//        return QObject::eventFilter(watched, event);
-//    }
-//} g_tabCompleter;
 
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_dropHereLabel(new QLabel(this))
@@ -652,7 +633,7 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
     m_searchEditCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_searchEditCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     m_searchEditCompleter->setModel(m_searchEditCompleterModel);
-    m_searchEditCompleter->popup()->setIconSize({16, 16});
+    m_searchEditCompleter->popup()->setIconSize({15, 15});
     m_searchEdit->setCompleter(m_searchEditCompleter);
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
@@ -708,7 +689,6 @@ void GlobalResourcesPane::onProjectStart()
 {
     Q_ASSERT(exists(SaveUtils::toGlobalDir(ProjectManager::dir())));
     m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
-    m_searchEditCompleterModel->setRootPath(m_fileSystemModel->rootPath());
 
     setModel(m_fileSystemProxyModel);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged,
@@ -1001,6 +981,7 @@ void GlobalResourcesPane::goToPath(const QString& path)
 
     setRootIndex(mf(index));
     selectionModel()->clear();
+    m_searchEditCompleterModel->setRootPath(path);
     m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_homeButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_pathIndicator->setPath(QDir(m_fileSystemModel->rootPath()).relativeFilePath(path));
@@ -1018,13 +999,13 @@ void GlobalResourcesPane::goToPath(const QString& path)
 
 void GlobalResourcesPane::goToRelativePath(const QString& relativePath)
 {
-    const QString& path = m_fileSystemModel->rootPath() + '/' + relativePath;
+    const QString& path = m_fileSystemModel->rootPath() + separator() + relativePath;
 
     if (!QFileInfo(path).exists() || !QFileInfo(path).isDir())
         return;
 
     if (!QFileInfo(path).canonicalFilePath().contains(m_fileSystemModel->rootPath(), Qt::CaseInsensitive))
-        return;
+        return; // Protection against "rootPath/../../.." etc
 
     goToPath(path);
 }
@@ -1048,9 +1029,13 @@ void GlobalResourcesPane::filterList()
      if (m_searchEdit->text() != fileName)
          return;
 
-     const QString& path = QDir(m_fileSystemModel->rootPath()).filePath(relativePath);
+     const QString& path = QDir(m_fileSystemModel->filePath(mt(rootIndex()))).filePath(relativePath);
      const QModelIndex& searchedIndex = mf(m_fileSystemModel->index(path));
-     expandUpToRoot(this, searchedIndex, rootIndex());
+
+     if (m_mode == Viewer)
+         expandUpToRoot(this, searchedIndex, rootIndex());
+     else
+         goToPath(dname(path));
      selectionModel()->select(searchedIndex, QItemSelectionModel::ClearAndSelect);
      scrollTo(searchedIndex, PositionAtCenter);
 }
