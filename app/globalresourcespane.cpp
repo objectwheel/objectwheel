@@ -39,6 +39,7 @@
 #include <QGraphicsBlurEffect>
 #include <QtConcurrent>
 #include <QProgressDialog>
+#include <QCompleter>
 
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
@@ -335,9 +336,28 @@ private:
     }
 };
 
+class FileSystemModel : public QFileSystemModel
+{
+public:
+    explicit FileSystemModel(QObject *parent = nullptr) : QFileSystemModel(parent)
+    {}
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    {
+        if (role == Qt::DisplayRole && index.column() == 0) {
+            QString path  = QDir::toNativeSeparators(filePath(index));
+            if (path.endsWith(QDir::separator()))
+                path.chop(1);
+            return path;
+        }
+
+        return QFileSystemModel::data(index, role);
+    }
+};
+
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
   , m_dropHereLabel(new QLabel(this))
   , m_droppingBlurEffect(new QGraphicsBlurEffect(this))
+  , m_searchEditCompleter(new QCompleter(this))
   , m_searchEdit(new FocuslessLineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
   , m_fileSystemProxyModel(new FileSystemProxyModel(this))
@@ -541,6 +561,10 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : QTreeView(parent)
         m_fileSystemProxyModel->setDynamicSortFilter(true);
     });
 
+    auto fsm = new FileSystemModel(m_searchEditCompleter);
+    fsm->setRootPath("");
+    m_searchEditCompleter->setModel(fsm);
+    m_searchEdit->setCompleter(m_searchEditCompleter);
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(22);
@@ -594,6 +618,7 @@ void GlobalResourcesPane::onProjectStart()
 {
     Q_ASSERT(exists(SaveUtils::toGlobalDir(ProjectManager::dir())));
     m_fileSystemModel->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir()));
+    m_searchEditCompleter->setCompletionPrefix(m_fileSystemModel->rootPath()/* + separator()*/);
 
     setModel(m_fileSystemProxyModel);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged,
@@ -749,7 +774,7 @@ void GlobalResourcesPane::onDeleteButtonClick()
     int result = QMessageBox::warning(this,
                                       tr("Files about to be deleted"),
                                       tr("Do you want to delete selected files? "
-                                         "Changes made in Code Editor will also be discarded."),
+                                         "Changes made in Code Editor also will be discarded."),
                                       QMessageBox::Yes | QMessageBox::No);
 
     if (result == QMessageBox::Yes) {
@@ -914,9 +939,18 @@ void GlobalResourcesPane::goToRelativePath(const QString& relativePath)
     goToPath(path);
 }
 
-void GlobalResourcesPane::filterList(const QString& /*filter*/)
+void GlobalResourcesPane::filterList(const QString& /*filterText*/)
 {
-    // TODO
+// TODO
+//    Q_D(GlobalResourcesPane);
+//    for (auto i : d->viewItems)
+//        qDebug() << m_fileSystemModel->filePath(mt(i.index));
+
+//    QDirIterator it(path, filterText, QDir::AllEntries | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+//    QStringList files;
+//    while (it.hasNext())
+//        files << it.next();
+//    files.sort();
 }
 
 void GlobalResourcesPane::dropEvent(QDropEvent* event)

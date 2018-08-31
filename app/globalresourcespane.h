@@ -12,6 +12,7 @@ class QComboBox;
 class PathIndicator;
 class FileSystemProxyModel;
 class QLabel;
+class QCompleter;
 
 class GlobalResourcesPanePrivate : public QTreeViewPrivate {};
 class GlobalResourcesPane : public QTreeView
@@ -47,7 +48,7 @@ private slots:
 private:
     void goToPath(const QString& path);
     void goToRelativePath(const QString& relativePath);
-    void filterList(const QString& filter);
+    void filterList(const QString& filterText);
     void dropEvent(QDropEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
@@ -64,6 +65,7 @@ signals:
 private:
     QLabel* m_dropHereLabel;
     QGraphicsBlurEffect* m_droppingBlurEffect;
+    QCompleter* m_searchEditCompleter;
     FocuslessLineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
     FileSystemProxyModel* m_fileSystemProxyModel;
