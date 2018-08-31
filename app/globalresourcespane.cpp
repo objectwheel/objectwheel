@@ -4,13 +4,16 @@
     Show real progress dialog when download action is in progress
     Show a right click menu on selected entries when user right clicks on them to show available
     - file operation options like copy, paste, delete etc.)
-    Filtering (via m_searchEdit) will be coded
+    Navigating on search results of the search auto completer popup should be possible via
+    - using Tab key
     Add a file name auto completion when users press to Tab over PathIndicator
     Add a combobox to make it possible to short files and dirs on the tree (like QDir::SortFlags)
     Convert "Name" title of the first header to "" (empty) and put all sort of controls (like
     - sorting combobox) on it. --alight those control left to right--
     Add a rubber band for file selection
     Block deletion of qmldir within Global dir
+    Improve the performance of FileSearchModel::updateModel, don't iterate over all the files
+    - on the file system for each QFileSystemWatcher's "changed" signals
 */
 
 #include <globalresourcespane.h>
@@ -354,6 +357,7 @@ private:
 class FileSearchModel : public QStringListModel
 {
     Q_OBJECT
+
 public:
     explicit FileSearchModel(QObject* parent = nullptr) : QStringListModel(parent)
       , m_fileSystemWatcher(new QFileSystemWatcher(this))
@@ -364,7 +368,8 @@ public:
                 this, &FileSearchModel::updateModel);
     }
 
-    void setRootPath(const QString& rootPath) {
+    void setRootPath(const QString& rootPath)
+    {
         m_rootPath = rootPath;
         if (!m_fileSystemWatcher->files().isEmpty())
             m_fileSystemWatcher->removePaths(m_fileSystemWatcher->files());
