@@ -29,6 +29,7 @@ struct PreviewResult {
     QString uid;
     QImage image;
     QList<QQmlError> errors;
+    QList<QString> events;
     QList<PropertyNode> properties;
 };
 
@@ -87,6 +88,7 @@ inline QDataStream& operator>>(QDataStream& in, PreviewResult& result)
     in >> result.window;
     in >> result.codeChanged;
     in >> result.errors;
+    in >> result.events;
     in >> result.properties;
     return in;
 }
@@ -100,6 +102,7 @@ inline QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
     out << result.window;
     out << result.codeChanged;
     out << result.errors;
+    out << result.events;
     out << result.properties;
     return out;
 }

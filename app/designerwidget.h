@@ -11,6 +11,7 @@ class QToolBar;
 class QToolButton;
 class QComboBox;
 class Control;
+class SignalChooserDialog;
 
 class DesignerWidget : public QWidget
 {
@@ -24,6 +25,7 @@ public slots:
     void sweep();
     void refresh() { onRefreshButtonClick(); }
     void onControlDoubleClick(Control*);
+    void onInspectorItemDoubleClick(Control*);
     void onControlDrop(Control*, const QPointF&, const QString&);
 
 protected:
@@ -48,6 +50,7 @@ private:
 
 private:
     qreal m_lastScale;
+    SignalChooserDialog* m_signalChooserDialog;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     QVBoxLayout* m_layout;
     DesignerScene* m_designerScene;

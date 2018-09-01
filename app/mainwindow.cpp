@@ -306,7 +306,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_inspectorPane, SIGNAL(controlSelectionChanged(const QList<Control*>&)),
             m_centralWidget->designerWidget(), SLOT(onControlSelectionChange(const QList<Control*>&)));
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
-            m_centralWidget->designerWidget(), SLOT(onControlDoubleClick(Control*)));
+            m_centralWidget->designerWidget(), SLOT(onInspectorItemDoubleClick(Control*)));
 
     connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished), [=]
             (int exitCode, QProcess::ExitStatus)

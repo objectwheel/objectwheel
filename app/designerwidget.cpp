@@ -7,6 +7,7 @@
 #include <controlpreviewingmanager.h>
 #include <saveutils.h>
 #include <transparentstyle.h>
+#include <signalchooserdialog.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -14,8 +15,24 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QComboBox>
+#include <QInputDialog>
+
+// 1. Control name; 2. Signal name; 3. Method name
+#define METHOD_BODY \
+    "\n"\
+    "// Function body for %1 corresponding to %2 signal\n"\
+    "function %1_%3() {\n"\
+    "    // Do something...\n"\
+    "}"
 
 namespace {
+
+QString methodName(const QString& signal)
+{
+    QString method(signal);
+    method.replace(0, 1, method[0].toUpper());
+    return method.prepend("on");
+}
 
 QString findText(qreal ratio)
 {
@@ -102,6 +119,7 @@ qreal findRatio(const QString& text)
 
 DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent) : QWidget(parent)
   , m_lastScale(1.0)
+  , m_signalChooserDialog(new SignalChooserDialog(this))
   , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
   , m_layout(new QVBoxLayout(this))
   , m_designerScene(new DesignerScene(this))
@@ -300,6 +318,7 @@ void DesignerWidget::sweep()
 {
     m_designerScene->sweep();
     m_designerView->sweep();
+    m_signalChooserDialog->sweet();
     m_outlineButton->setChecked(m_designerScene->showOutlines());
     m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setChecked(m_designerScene->snapping());
@@ -312,6 +331,19 @@ QSize DesignerWidget::sizeHint() const
 }
 
 void DesignerWidget::onControlDoubleClick(Control* control)
+{
+    m_signalChooserDialog->setSignalList(control->events());
+    int result = m_signalChooserDialog->exec();
+    if (result == QDialog::Rejected)
+        return;
+
+    qDebug() << QString::fromUtf8(METHOD_BODY)
+                .arg(control->id())
+                .arg(m_signalChooserDialog->currentSignal())
+                .arg(methodName(m_signalChooserDialog->currentSignal()));
+}
+
+void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 {
     m_qmlCodeEditorWidget->addControl(control);
     m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);

@@ -39,6 +39,7 @@ public:
     Control* parentControl() const;
 
     const QList<QQmlError>& errors() const;
+    const QList<QString>& events() const;
     const QList<PropertyNode>& properties() const;
     QList<Control*> childControls(bool dive = true) const;
     QVariant::Type propertyType(const QString& propertyName) const;
@@ -109,6 +110,7 @@ private:
 
     QList<QQmlError> m_errors;
     QList<Resizer*> m_resizers;
+    QList<QString> m_events;
     QList<PropertyNode> m_properties;
 
 private:

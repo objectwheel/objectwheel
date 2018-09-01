@@ -115,7 +115,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/transparentstyle.h \
            $$PWD/applicationstyle.h \
            $$PWD/zipper.h \
-           $$PWD/globalresourcespane.h
+           $$PWD/globalresourcespane.h \
+           $$PWD/signalchooserdialog.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -207,10 +208,12 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/transparentstyle.cpp \
            $$PWD/applicationstyle.cpp \
            $$PWD/zipper.cpp \
-           $$PWD/globalresourcespane.cpp
+           $$PWD/globalresourcespane.cpp \
+           $$PWD/signalchooserdialog.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
-         $$PWD/toolboxsettingswindow.ui
+         $$PWD/toolboxsettingswindow.ui \
+         $$PWD/signalchooserdialog.ui
 
 ### Utils Settings
 INCLUDEPATH += $$PWD/../utils

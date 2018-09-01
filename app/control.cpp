@@ -201,6 +201,11 @@ const QList<QQmlError>& Control::errors() const
     return m_errors;
 }
 
+const QList<QString>& Control::events() const
+{
+    return m_events;
+}
+
 const QList<PropertyNode>& Control::properties() const
 {
     return m_properties;
@@ -542,6 +547,7 @@ void Control::updatePreview(const PreviewResult& result)
     m_errors = result.errors;
     m_gui = result.gui;
     m_window = result.window;
+    m_events = result.events;
     m_properties = result.properties;
 
     m_cachedGeometry = getGeometryFromProperties(result.properties);
