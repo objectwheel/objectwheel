@@ -1,4 +1,5 @@
 #include <qmlcodeeditortoolbar.h>
+#include <qmlcodedocument.h>
 #include <utilsicons.h>
 
 #include <QToolButton>
@@ -43,6 +44,16 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QWidget *parent) : QToolBar(parent)
     addWidget(createSpacerWidget());
     addWidget(m_lineColumnLabel);
 
+    m_pinButton->setFixedHeight(22);
+    m_undoButton->setFixedHeight(22);
+    m_redoButton->setFixedHeight(22);
+    m_closeButton->setFixedHeight(22);
+    m_saveButton->setFixedHeight(22);
+    m_cutButton->setFixedHeight(22);
+    m_copyButton->setFixedHeight(22);
+    m_pasteButton->setFixedHeight(22);
+    m_lineColumnLabel->setFixedHeight(22);
+
     m_pinButton->setCursor(Qt::PointingHandCursor);
     m_undoButton->setCursor(Qt::PointingHandCursor);
     m_redoButton->setCursor(Qt::PointingHandCursor);
@@ -52,17 +63,15 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QWidget *parent) : QToolBar(parent)
     m_copyButton->setCursor(Qt::PointingHandCursor);
     m_pasteButton->setCursor(Qt::PointingHandCursor);
 
-    m_pinButton->setToolTip(tr("Unpin Editor."));
-    m_undoButton->setToolTip(tr("Undo action."));
-    m_redoButton->setToolTip(tr("Redo action."));
-    m_closeButton->setToolTip(tr("Close document."));
-    m_saveButton->setToolTip(tr("Save document."));
-    m_cutButton->setToolTip(tr("Cut selection."));
-    m_copyButton->setToolTip(tr("Copy selection."));
-    m_pasteButton->setToolTip(tr("Paste from clipboard."));
-    m_lineColumnLabel->setToolTip(tr("Cursor line/column indicator."));
+    m_undoButton->setToolTip(tr("Undo action"));
+    m_redoButton->setToolTip(tr("Redo action"));
+    m_closeButton->setToolTip(tr("Close document"));
+    m_saveButton->setToolTip(tr("Save document"));
+    m_cutButton->setToolTip(tr("Cut selection"));
+    m_copyButton->setToolTip(tr("Copy selection"));
+    m_pasteButton->setToolTip(tr("Paste from clipboard"));
+    m_lineColumnLabel->setToolTip(tr("Cursor position"));
 
-    m_pinButton->setIcon(PIN_TOOLBAR.icon());
     m_undoButton->setIcon(UNDO_TOOLBAR.icon());
     m_redoButton->setIcon(REDO_TOOLBAR.icon());
     m_closeButton->setIcon(CLOSE_TOOLBAR.icon());
@@ -71,25 +80,14 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QWidget *parent) : QToolBar(parent)
     m_copyButton->setIcon(COPY_TOOLBAR.icon());
     m_pasteButton->setIcon(PASTE_TOOLBAR.icon());
 
-    m_pinButton->setFixedHeight(22);
-    m_undoButton->setFixedHeight(22);
-    m_redoButton->setFixedHeight(22);
-    m_closeButton->setFixedHeight(22);
-    m_saveButton->setFixedHeight(22);
-    m_cutButton->setFixedHeight(22);
-    m_copyButton->setFixedHeight(22);
-    m_pasteButton->setFixedHeight(22);
-
-    connect(m_pinButton, &QToolButton::clicked,
-            this, &QmlCodeEditorToolBar::onPinButtonClick);
-
+    m_pinButton->setCheckable(true);
+    connect(m_pinButton, &QToolButton::toggled,
+            this, &QmlCodeEditorToolBar::onPinButtonToggle);
+    connect(m_pinButton, &QToolButton::toggled,
+            this, &QmlCodeEditorToolBar::pinned);
 
     connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
             this, &QmlCodeEditorToolBar::onCursorPositionChanged);
-    connect(m_undoButton, &QToolButton::clicked,
-            codeEditor, &QmlCodeEditor::undo);
-    connect(m_redoButton, &QToolButton::clicked,
-            codeEditor, &QmlCodeEditor::redo);
     connect(m_copyButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::copy);
     connect(m_cutButton, &QToolButton::clicked,
@@ -128,35 +126,36 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QWidget *parent) : QToolBar(parent)
 
 void QmlCodeEditorToolBar::sweep()
 {
-    for (auto& item : _editorItems)
-        closeControl(item.control, false);
-
-    _d->currentControl = nullptr;
-
-    if (!pinned())
-        _d->onPinButtonClick();
-
+    setDocument(nullptr);
+    m_pinButton->setChecked(true);
+    m_undoButton->setDisabled(true);
     m_redoButton->setDisabled(true);
     m_copyButton->setDisabled(true);
     m_cutButton->setDisabled(true);
     m_saveButton->setDisabled(true);
-
-    _d->lastWidthOfExplorerWrapper = INITIALWIDTH_FILEEXPLORER;
-//    _d->codeEditor->sweep();
-    _d->fileExplorer->sweep();
-    // TODO: _d->imageEditor->sweep();
-    // TODO: _d->hexEditor->sweep();
-
-    if (_d->hideShowButton->toolTip().contains("Hide"))
-        _d->onHideShowButtonClick();
-
-    _d->onZoomLevelChange("100 %");
-    setMode(CodeEditor);
 }
 
 void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
 {
+    if (m_document) {
+        m_document->disconnect(m_undoButton);
+        m_undoButton->disconnect(m_document);
+        m_document->disconnect(m_redoButton);
+        m_redoButton->disconnect(m_document);
+    }
+
     m_document = document;
+
+    if (m_document) {
+        connect(m_document, &QmlCodeDocument::undoAvailable,
+                m_undoButton, &QToolButton::setEnabled);
+        connect(m_undoButton, &QToolButton::clicked,
+                m_document, &QmlCodeDocument::undo);
+        connect(m_document, &QmlCodeDocument::redoAvailable,
+                m_redoButton, &QToolButton::setEnabled);
+        connect(m_redoButton, &QToolButton::clicked,
+                m_document, &QmlCodeDocument::redo);
+    }
 }
 
 void QmlCodeEditorToolBar::onCursorPositionChange()
@@ -166,30 +165,14 @@ void QmlCodeEditorToolBar::onCursorPositionChange()
     lineColLabel->setText(lineColText.arg(textCursor.blockNumber() + 1).arg(textCursor.columnNumber() + 1));
 }
 
-void QmlCodeEditorToolBar::onPinButtonClick()
+void QmlCodeEditorToolBar::onPinButtonToggle(bool pinned)
 {
-    if (pinButton->toolTip().contains("Unpin")) {
-        pinButton->setToolTip("Pin Editor.");
-        pinButton->setIcon(PINNED_TOOLBAR.icon());
-        containerWidget->setParent(nullptr);
-        containerWidget->setWindowIcon(QIcon(":/images/owicon.png"));
-        containerWidget->show();
-
-        TransparentStyle::attach(toolbar);
-        TransparentStyle::attach(toolbar_2);
-
-        containerWidget->setGeometry(
-            QStyle::alignedRect(
-                Qt::LeftToRight,
-                Qt::AlignCenter,
-                containerWidget->size(),
-                qApp->primaryScreen()->availableGeometry()
-            )
-        );
+    if (pinned) {
+        m_pinButton->setToolTip(tr("Unpin Editor"));
+        m_pinButton->setIcon(PINNED_TOOLBAR.icon());
     } else {
-        pinButton->setToolTip("Unpin Editor.");
-        pinButton->setIcon(PIN_TOOLBAR.icon());
-        vBoxLayout->addWidget(containerWidget);
+        m_pinButton->setToolTip(tr("Pin Editor"));
+        m_pinButton->setIcon(PIN_TOOLBAR.icon());
     }
 }
 
@@ -215,5 +198,10 @@ void QmlCodeEditorToolBar::onSaveButtonClick()
             break;
         }
     }
+}
+
+QSize QmlCodeEditorToolBar::sizeHint() const
+{
+    return {100, 24};
 }
 

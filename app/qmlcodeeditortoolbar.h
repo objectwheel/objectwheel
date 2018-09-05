@@ -18,12 +18,17 @@ public:
 
     void sweep();
     void onCursorPositionChange();
-    void onPinButtonClick();
     void onCloseButtonClick();
     void onSaveButtonClick();
 
+private slots:
+    void onPinButtonToggle(bool checked);
+
 signals:
     void pinned(bool);
+
+private:
+    QSize sizeHint() const override;
 
 private:
     QPointer<QmlCodeDocument> m_document;
