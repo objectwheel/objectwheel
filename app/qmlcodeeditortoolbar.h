@@ -17,18 +17,19 @@ public:
     explicit QmlCodeEditorToolBar(QmlCodeEditor* parent = nullptr);
     void setDocument(QmlCodeDocument* document);
 
+public slots:
     void sweep();
-    void onCursorPositionChange();
-    void onCloseButtonClick();
-    void onSaveButtonClick();
 
 private slots:
-    void onPinButtonToggle(bool checked);
+    void onCursorPositionChange();
+    void onPinButtonToggle(bool pinned);
+    void onShowButtonToggle(bool showed);
 
 signals:
     void saved();
     void closed();
     void pinned(bool);
+    void showed(bool);
 
 private:
     QSize sizeHint() const override;
@@ -43,6 +44,7 @@ private:
     QToolButton* m_cutButton;
     QToolButton* m_copyButton;
     QToolButton* m_pasteButton;
+    QToolButton* m_showButton;
     QLabel* m_lineColumnLabel;
 };
 

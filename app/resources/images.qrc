@@ -126,5 +126,6 @@
         <file>images/template8.png</file>
         <file>images/template9.png</file>
         <file>images/drop.png</file>
+        <file>images/splash.png</file>
     </qresource>
 </RCC>

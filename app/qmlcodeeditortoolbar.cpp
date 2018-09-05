@@ -13,7 +13,7 @@
 using namespace Utils;
 using namespace Icons;
 
-QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* parent) : QToolBar(parent)
+QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar(codeEditor)
   , m_pinButton(new QToolButton)
   , m_undoButton(new QToolButton)
   , m_redoButton(new QToolButton)
@@ -22,6 +22,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* parent) : QToolBar(par
   , m_cutButton(new QToolButton)
   , m_copyButton(new QToolButton)
   , m_pasteButton(new QToolButton)
+  , m_showButton(new QToolButton)
   , m_lineColumnLabel(new QLabel)
 {
     addWidget(m_pinButton);
@@ -38,6 +39,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* parent) : QToolBar(par
     addSeparator();
     addWidget(new QWidget);
     addWidget(m_lineColumnLabel);
+    addWidget(m_showButton);
 
     m_pinButton->setFixedHeight(22);
     m_undoButton->setFixedHeight(22);
@@ -47,6 +49,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* parent) : QToolBar(par
     m_cutButton->setFixedHeight(22);
     m_copyButton->setFixedHeight(22);
     m_pasteButton->setFixedHeight(22);
+    m_showButton->setFixedHeight(22);
     m_lineColumnLabel->setFixedHeight(22);
 
     m_pinButton->setCursor(Qt::PointingHandCursor);
@@ -57,6 +60,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* parent) : QToolBar(par
     m_cutButton->setCursor(Qt::PointingHandCursor);
     m_copyButton->setCursor(Qt::PointingHandCursor);
     m_pasteButton->setCursor(Qt::PointingHandCursor);
+    m_showButton->setCursor(Qt::PointingHandCursor);
 
     m_undoButton->setToolTip(tr("Undo action"));
     m_redoButton->setToolTip(tr("Redo action"));
@@ -79,39 +83,40 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* parent) : QToolBar(par
             this, &QmlCodeEditorToolBar::onPinButtonToggle);
     connect(m_pinButton, &QToolButton::toggled,
             this, &QmlCodeEditorToolBar::pinned);
+    connect(m_showButton, &QToolButton::toggled,
+            this, &QmlCodeEditorToolBar::onShowButtonToggle);
+    connect(m_showButton, &QToolButton::toggled,
+            this, &QmlCodeEditorToolBar::showed);
     connect(m_closeButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::closed);
     connect(m_saveButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::saved);
-    connect(parent, &QmlCodeEditor::copyAvailable,
+    connect(codeEditor, &QmlCodeEditor::copyAvailable,
             m_cutButton, &QToolButton::setEnabled);
     connect(m_cutButton, &QToolButton::clicked,
-            parent, &QmlCodeEditor::cut);
-    connect(parent, &QmlCodeEditor::copyAvailable,
+            codeEditor, &QmlCodeEditor::cut);
+    connect(codeEditor, &QmlCodeEditor::copyAvailable,
             m_copyButton, &QToolButton::setEnabled);
     connect(m_copyButton, &QToolButton::clicked,
-            parent, &QmlCodeEditor::copy);
+            codeEditor, &QmlCodeEditor::copy);
     connect(QApplication::clipboard(), &QClipboard::dataChanged, this, [=]
     { m_pasteButton->setEnabled(!m_document.isNull() && QApplication::clipboard()->mimeData()->hasText()); });
     connect(m_pasteButton, &QToolButton::clicked,
-            parent, &QmlCodeEditor::paste);
+            codeEditor, &QmlCodeEditor::paste);
+    connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
+            this, &QmlCodeEditorToolBar::onCursorPositionChange);
 
     m_pinButton->setCheckable(true);
-    m_cutButton->setEnabled(parent->textCursor().hasSelection());
-    m_copyButton->setEnabled(parent->textCursor().hasSelection());
+    m_showButton->setCheckable(true);
+    m_cutButton->setEnabled(codeEditor->textCursor().hasSelection());
+    m_copyButton->setEnabled(codeEditor->textCursor().hasSelection());
     m_pasteButton->setEnabled(!m_document.isNull() && QApplication::clipboard()->mimeData()->hasText());
-
-//    connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
-//            this, &QmlCodeEditorToolBar::onCursorPositionChanged);
-//    connect(hideShowButton, &QToolButton::clicked,
-//            this, &QmlCodeEditorToolBar::onHideShowButtonClick);
-//    connect(&saveAction, &QAction::triggered,
-//            this, &QmlCodeEditorToolBar::onSaveButtonClick);
 }
 
 void QmlCodeEditorToolBar::sweep()
 {
     m_pinButton->setChecked(true);
+    m_showButton->setChecked(false);
     setDocument(nullptr);
 }
 
@@ -156,9 +161,11 @@ void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
 
 void QmlCodeEditorToolBar::onCursorPositionChange()
 {
-//    auto textCursor = codeEditor->textCursor();
-//    QString lineColText("Line: %1, Col: %2");
-//    lineColLabel->setText(lineColText.arg(textCursor.blockNumber() + 1).arg(textCursor.columnNumber() + 1));
+    QTextCursor textCursor = static_cast<QmlCodeEditor*>(parentWidget())->textCursor();
+    QString lineColumnText(tr("Line: ") + "%1, " + tr("Col: ") + "%2");
+    m_lineColumnLabel->setText(lineColumnText
+                               .arg(textCursor.blockNumber() + 1)
+                               .arg(textCursor.columnNumber() + 1));
 }
 
 void QmlCodeEditorToolBar::onPinButtonToggle(bool pinned)
@@ -172,28 +179,15 @@ void QmlCodeEditorToolBar::onPinButtonToggle(bool pinned)
     }
 }
 
-void QmlCodeEditorToolBar::onCloseButtonClick()
+void QmlCodeEditorToolBar::onShowButtonToggle(bool showed)
 {
-//    for (auto& item : parent->_editorItems) {
-//        if (item.control == currentControl) {
-//            parent->closeDocument(item.control, item.control->dir() + separator() +
-//                                  DIR_THIS + separator() + item.currentFileRelativePath);
-//            break;
-//        }
-//    }
-}
-
-void QmlCodeEditorToolBar::onSaveButtonClick()
-{
-//    for (auto& item : parent->_editorItems) {
-//        if (item.control == currentControl) {
-//            if (!item.documents.value(item.currentFileRelativePath).document->isModified())
-//                return;
-//            parent->saveDocument(item.control, item.control->dir() + separator() +
-//                                 DIR_THIS + separator() + item.currentFileRelativePath);
-//            break;
-//        }
-//    }
+    if (showed) {
+        m_showButton->setToolTip(tr("Hide File Explorer"));
+        m_showButton->setIcon(CLOSE_SPLIT_RIGHT.icon());
+    } else {
+        m_showButton->setToolTip(tr("Show File Explorer"));
+        m_showButton->setIcon(CLOSE_SPLIT_LEFT.icon());
+    }
 }
 
 QSize QmlCodeEditorToolBar::sizeHint() const

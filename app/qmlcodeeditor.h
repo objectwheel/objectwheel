@@ -22,6 +22,7 @@ class QmlCodeDocument;
 class HoverHandlerRunner;
 struct PaintEventData;
 struct PaintEventBlockData;
+class QmlCodeEditorToolBar;
 
 namespace QmlJSTools {
 class SemanticInfo;
@@ -179,6 +180,7 @@ private:
     void updateRowBarWidth();
     void cancelCurrentAnimations();
     bool cursorMoveKeyEvent(QKeyEvent* e);
+    void updateToolBar();
     void updateRowBar(const QRect &rect, int dy);
     void paintOverlays(const PaintEventData &data, QPainter &painter) const;
     void paintFindScope(const PaintEventData& data, QPainter& painter);
@@ -260,6 +262,7 @@ private:
 
 private:
     RowBar* m_rowBar;
+    QmlCodeEditorToolBar* m_toolBar;
     QRegExp m_searchExpr;
     Core::FindFlags m_findFlags;
     Core::Id m_tabSettingsId;

@@ -40,6 +40,7 @@ private:
     QList<ExternalDocument*> m_regularDocuments;
     QList<ExternalDocument*> m_globalDocuments;
     QList<InternalDocument*> m_internalDocuments;
+//    QSpli
 };
 
 #endif // QMLCODEEDITORWIDGET_H

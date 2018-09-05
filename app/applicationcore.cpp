@@ -21,6 +21,7 @@
 #include <appfontsettings.h>
 
 #include <QApplication>
+#include <QSplashScreen>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
@@ -54,6 +55,13 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+
+    /* Show splash screen */
+    QPixmap pixmap(":/images/splash.png");
+    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
+    QSplashScreen splash(pixmap);
+    splash.show();
+    QApplication::processEvents();
 
     /* Set Font */
     AppFontSettings::apply();
@@ -103,6 +111,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
     // Show welcome window
     WindowManager::welcomeWindow()->show();
+    splash.finish(WindowManager::welcomeWindow());
 }
 
 void ApplicationCore::init(QObject* parent)

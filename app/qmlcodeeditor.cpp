@@ -1,5 +1,6 @@
 #include <qmlcodeeditor.h>
 #include <rowbar.h>
+#include <qmlcodeeditortoolbar.h>
 #include <qtcassert.h>
 #include <qmlcodedocument.h>
 #include <bracketband.h>
@@ -359,6 +360,7 @@ QuickToolBar* QmlCodeEditor::m_contextPane = nullptr;
 
 QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_rowBar(new RowBar(this, this))
+  , m_toolBar(new QmlCodeEditorToolBar(this))
   , m_linkPressed(false)
   , m_fontSettingsNeedsApply(true)
   , m_parenthesesMatchingEnabled(true)
@@ -412,6 +414,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     connect(this, &QPlainTextEdit::selectionChanged, this, &QmlCodeEditor::slotSelectionChanged);
     connect(this, &QmlCodeEditor::blockCountChanged, this, &QmlCodeEditor::updateRowBarWidth);
     connect(this, &QmlCodeEditor::updateRequest, this, &QmlCodeEditor::updateRowBar);
+    connect(this, &QmlCodeEditor::updateRequest, this, &QmlCodeEditor::updateToolBar);
     connect(this, &QmlCodeEditor::cursorPositionChanged, this, &QmlCodeEditor::slotCursorPositionChanged);
 
     m_parenthesesMatchingTimer->setSingleShot(true);
@@ -1237,6 +1240,12 @@ void QmlCodeEditor::updateRowBar(const QRect& rect, int dy)
 
     if (rect.contains(viewport()->rect()))
         updateRowBarWidth();
+}
+
+void QmlCodeEditor::updateToolBar()
+{
+    setViewportMargins(0, 24, 0, 0);
+    m_toolBar->setGeometry(0, 0, viewport()->width(), 24);
 }
 
 void QmlCodeEditor::editorContentsChange(int /*position*/, int /*charsRemoved*/, int /*charsAdded*/)
