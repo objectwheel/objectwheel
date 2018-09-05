@@ -8,6 +8,11 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
 {
 }
 
+void QmlCodeEditorWidget::sweep()
+{
+
+}
+
 void QmlCodeEditorWidget::openDocument(Control* control)
 {
     Q_ASSERT(control);

@@ -6,6 +6,7 @@
 
 class QToolButton;
 class QLabel;
+class QmlCodeEditor;
 class QmlCodeDocument;
 
 class QmlCodeEditorToolBar : public QToolBar
@@ -13,7 +14,7 @@ class QmlCodeEditorToolBar : public QToolBar
     Q_OBJECT
 
 public:
-    explicit QmlCodeEditorToolBar(QWidget *parent = nullptr);
+    explicit QmlCodeEditorToolBar(QmlCodeEditor* parent = nullptr);
     void setDocument(QmlCodeDocument* document);
 
     void sweep();
@@ -25,6 +26,8 @@ private slots:
     void onPinButtonToggle(bool checked);
 
 signals:
+    void saved();
+    void closed();
     void pinned(bool);
 
 private:

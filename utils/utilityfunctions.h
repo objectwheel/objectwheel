@@ -3,6 +3,7 @@
 
 class QString;
 class QTextDocument;
+class QWidget;
 
 namespace UtilityFunctions {
 void registerGlobalPath(const QString& projectDir);

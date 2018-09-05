@@ -1,7 +1,6 @@
 #include <designerwidget.h>
 #include <designerview.h>
 #include <designerscene.h>
-#include <qmlcodeeditorwidget_copy.h>
 #include <controlcreationmanager.h>
 #include <utilsicons.h>
 #include <controlpreviewingmanager.h>
@@ -337,10 +336,10 @@ void DesignerWidget::onControlDoubleClick(Control* control)
     if (result == QDialog::Rejected)
         return;
 
-    qDebug() << QString::fromUtf8(METHOD_BODY)
-                .arg(control->id())
-                .arg(m_signalChooserDialog->currentSignal())
-                .arg(methodName(m_signalChooserDialog->currentSignal()));
+//    qDebug() << QString::fromUtf8(METHOD_BODY)
+//                .arg(control->id())
+//                .arg(m_signalChooserDialog->currentSignal())
+//                .arg(methodName(m_signalChooserDialog->currentSignal()));
 }
 
 void DesignerWidget::onInspectorItemDoubleClick(Control* control)

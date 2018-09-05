@@ -2,7 +2,6 @@
 #include <buttonslice.h>
 #include <usermanager.h>
 #include <projectmanager.h>
-#include <qmlcodeeditorwidget_copy.h>
 #include <delayer.h>
 #include <filemanager.h>
 #include <controlpreviewingmanager.h>

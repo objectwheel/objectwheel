@@ -4,7 +4,6 @@
 #include <filemanager.h>
 #include <zipper.h>
 #include <saveutils.h>
-#include <qmlcodeeditorwidget_copy.h>
 
 #include <QScrollBar>
 #include <QBuffer>

@@ -23,6 +23,9 @@ public:
     struct ExternalDocument : public Document { QString path; };
     struct InternalDocument : public Document { Control* control; };
 
+public slots:
+    void sweep();
+
 public:
     explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
     void openDocument(Control* control);

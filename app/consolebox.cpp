@@ -1,11 +1,9 @@
 #include <consolebox.h>
 #include <runmanager.h>
 #include <outputpane.h>
-#include <qmlcodeeditorwidget_copy.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <centralwidget.h>
-#include <qmlcodeeditorwidget_copy.h>
 #include <control.h>
 #include <appfontsettings.h>
 
@@ -124,11 +122,11 @@ void ConsoleBox::onLinkClick(const QString& link)
     if (!control)
         return;
 
-    editorWidget->addControl(control);
-    editorWidget->addDocument(control, path);
-    editorWidget->openControl(control);
-    editorWidget->setCurrentDocument(control, path);
-    editorWidget->setCurrentLine(lineNumber);
+//    BUG editorWidget->addControl(control);
+//    editorWidget->addDocument(control, path);
+//    editorWidget->openControl(control);
+//    editorWidget->setCurrentDocument(control, path);
+//    editorWidget->setCurrentLine(lineNumber);
 }
 
 void ConsoleBox::fade()

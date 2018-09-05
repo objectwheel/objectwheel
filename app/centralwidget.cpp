@@ -1,6 +1,5 @@
 #include <centralwidget.h>
 #include <outputpane.h>
-#include <qmlcodeeditorwidget_copy.h>
 #include <designerwidget.h>
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
@@ -10,6 +9,7 @@
 #include <controlpreviewingmanager.h>
 #include <controlremovingmanager.h>
 #include <delayer.h>
+#include <qmlcodeeditorwidget.h>
 
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -46,8 +46,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
 
     connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
             m_designerWidget, SLOT(onControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
-    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
+//   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
+//            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
             ControlPreviewingManager::scheduleTerminate);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
