@@ -1,7 +1,19 @@
 #include <qmlcodeeditorwidget.h>
 #include <filemanager.h>
 
+#include <QToolBar>
+#include <QToolButton>
+
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
+  , m_toolbar(new QToolBar)
+  , m_pinButton(new QToolButton)
+  , m_undoButton(new QToolButton)
+  , m_redoButton(new QToolButton)
+  , m_closeButton(new QToolButton)
+  , m_saveButton(new QToolButton)
+  , m_cutButton(new QToolButton)
+  , m_copyButton(new QToolButton)
+  , m_pasteButton(new QToolButton)
 {
 }
 

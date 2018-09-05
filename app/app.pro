@@ -116,7 +116,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/applicationstyle.h \
            $$PWD/zipper.h \
            $$PWD/globalresourcespane.h \
-           $$PWD/signalchooserdialog.h
+           $$PWD/signalchooserdialog.h \
+           $$PWD/qmlcodeeditortoolbar.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -209,7 +210,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/applicationstyle.cpp \
            $$PWD/zipper.cpp \
            $$PWD/globalresourcespane.cpp \
-           $$PWD/signalchooserdialog.cpp
+           $$PWD/signalchooserdialog.cpp \
+           $$PWD/qmlcodeeditortoolbar.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui \

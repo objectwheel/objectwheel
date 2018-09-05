@@ -6,6 +6,8 @@
 
 class Control;
 class QmlCodeDocument;
+class QToolBar;
+class QToolButton;
 
 class QmlCodeEditorWidget : public QWidget
 {
