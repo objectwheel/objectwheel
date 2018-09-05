@@ -11,7 +11,7 @@
 #include <windowmanager.h>
 #include <toolmanager.h>
 #include <designerwidget.h>
-#include <qmlcodeeditorwidget.h>
+#include <qmlcodeeditorwidget_copy.h>
 #include <controlcreationmanager.h>
 #include <runmanager.h>
 #include <projectmanager.h>
@@ -293,14 +293,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_pageSwitcherPane, SIGNAL(rightPanesShowChanged(bool)), this, SLOT(showRightPanes(bool)));
 
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openControlCountChanged, [=] {
-        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0
-                && m_pageSwitcherPane->currentPage() != Page_SplitView) {
-            m_pageSwitcherPane->setCurrentPage(Page_Designer);
-        }
-        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0
-                && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor) {
-            m_pageSwitcherPane->setCurrentPage(Page_SplitView);
-        }
+        // BUG
+//        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() <= 0
+//                && m_pageSwitcherPane->currentPage() != Page_SplitView) {
+//            m_pageSwitcherPane->setCurrentPage(Page_Designer);
+//        }
+//        if (m_centralWidget->qmlCodeEditorWidget()->openControlCount() > 0
+//                && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor) {
+//            m_pageSwitcherPane->setCurrentPage(Page_SplitView);
+//        }
     });
 
     connect(m_inspectorPane, SIGNAL(controlSelectionChanged(const QList<Control*>&)),

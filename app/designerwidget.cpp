@@ -1,7 +1,7 @@
 #include <designerwidget.h>
 #include <designerview.h>
 #include <designerscene.h>
-#include <qmlcodeeditorwidget.h>
+#include <qmlcodeeditorwidget_copy.h>
 #include <controlcreationmanager.h>
 #include <utilsicons.h>
 #include <controlpreviewingmanager.h>
@@ -345,9 +345,10 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 
 void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 {
-    m_qmlCodeEditorWidget->addControl(control);
-    m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);
-    m_qmlCodeEditorWidget->openControl(control);
+    // BUG
+//    m_qmlCodeEditorWidget->addControl(control);
+//    m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);
+//    m_qmlCodeEditorWidget->openControl(control);
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)

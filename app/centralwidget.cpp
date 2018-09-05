@@ -1,6 +1,6 @@
 #include <centralwidget.h>
 #include <outputpane.h>
-#include <qmlcodeeditorwidget.h>
+#include <qmlcodeeditorwidget_copy.h>
 #include <designerwidget.h>
 #include <projectoptionswidget.h>
 #include <helpwidget.h>

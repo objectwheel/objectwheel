@@ -1,11 +1,11 @@
 #include <consolebox.h>
 #include <runmanager.h>
 #include <outputpane.h>
-#include <qmlcodeeditorwidget.h>
+#include <qmlcodeeditorwidget_copy.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <centralwidget.h>
-#include <qmlcodeeditorwidget.h>
+#include <qmlcodeeditorwidget_copy.h>
 #include <control.h>
 #include <appfontsettings.h>
 
