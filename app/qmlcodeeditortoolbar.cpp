@@ -1,4 +1,20 @@
 #include <qmlcodeeditortoolbar.h>
+#include <utilsicons.h>
+
+#include <QToolButton>
+#include <QLabel>
+
+using namespace Utils;
+
+namespace {
+
+QWidget* createSpacerWidget()
+{
+    auto spacer = new QWidget;
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    return spacer;
+}
+}
 
 QmlCodeEditorToolBar::QmlCodeEditorToolBar(QWidget *parent) : QToolBar(parent)
   , m_pinButton(new QToolButton)
@@ -9,37 +25,89 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QWidget *parent) : QToolBar(parent)
   , m_cutButton(new QToolButton)
   , m_copyButton(new QToolButton)
   , m_pasteButton(new QToolButton)
+  , m_lineColumnLabel(new QLabel)
 {
-    redoButton->setDisabled(true);
-    copyButton->setDisabled(true);
-    cutButton->setDisabled(true);
-    saveButton->setDisabled(true);
+    setFixedHeight(24);
+    addWidget(m_pinButton);
+    addSeparator();
+    addWidget(m_undoButton);
+    addWidget(m_redoButton);
+    addSeparator();
+    addWidget(m_cutButton);
+    addWidget(m_copyButton);
+    addWidget(m_pasteButton);
+    addWidget(m_saveButton);
+    addSeparator();
+    addWidget(m_closeButton);
+    addSeparator();
+    addWidget(createSpacerWidget());
+    addWidget(m_lineColumnLabel);
 
-    connect(parent, &QmlCodeEditorWidget::modeChanged,
-            this, &QmlCodeEditorWidgetPrivate::onModeChange);
+    m_redoButton->setDisabled(true);
+    m_copyButton->setDisabled(true);
+    m_cutButton->setDisabled(true);
+    m_saveButton->setDisabled(true);
+
+    m_pinButton->setCursor(Qt::PointingHandCursor);
+    m_undoButton->setCursor(Qt::PointingHandCursor);
+    m_redoButton->setCursor(Qt::PointingHandCursor);
+    m_closeButton->setCursor(Qt::PointingHandCursor);
+    m_saveButton->setCursor(Qt::PointingHandCursor);
+    m_cutButton->setCursor(Qt::PointingHandCursor);
+    m_copyButton->setCursor(Qt::PointingHandCursor);
+    m_pasteButton->setCursor(Qt::PointingHandCursor);
+
+    m_pinButton->setToolTip("Unpin Editor.");
+    m_undoButton->setToolTip("Undo action.");
+    m_redoButton->setToolTip("Redo action.");
+    m_closeButton->setToolTip("Close document.");
+    m_lineColumnLabel->setToolTip("Cursor line/column indicator.");
+    m_saveButton->setToolTip("Save document.");
+    m_cutButton->setToolTip("Cut selection.");
+    m_copyButton->setToolTip("Copy selection.");
+    m_pasteButton->setToolTip("Paste from clipboard.");
+
+    m_pinButton->setIcon(Icons::PIN_TOOLBAR.icon());
+    m_undoButton->setIcon(Icons::UNDO_TOOLBAR.icon());
+    m_redoButton->setIcon(Icons::REDO_TOOLBAR.icon());
+    m_closeButton->setIcon(Icons::CLOSE_TOOLBAR.icon());
+    m_saveButton->setIcon(Icons::SAVEFILE_TOOLBAR.icon());
+    m_cutButton->setIcon(Icons::CUT_TOOLBAR.icon());
+    m_copyButton->setIcon(Icons::COPY_TOOLBAR.icon());
+    m_pasteButton->setIcon(Icons::PASTE_TOOLBAR.icon());
+
+    m_pinButton->setFixedHeight(22);
+    m_undoButton->setFixedHeight(22);
+    m_redoButton->setFixedHeight(22);
+    m_closeButton->setFixedHeight(22);
+    m_saveButton->setFixedHeight(22);
+    m_cutButton->setFixedHeight(22);
+    m_copyButton->setFixedHeight(22);
+    m_pasteButton->setFixedHeight(22);
+
     connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
             this, &QmlCodeEditorWidgetPrivate::onCursorPositionChanged);
-    connect(pinButton, &QToolButton::clicked,
+    connect(m_pinButton, &QToolButton::clicked,
             this, &QmlCodeEditorWidgetPrivate::onPinButtonClicked);
-    connect(undoButton, &QToolButton::clicked,
+    connect(m_undoButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::undo);
-    connect(redoButton, &QToolButton::clicked,
+    connect(m_redoButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::redo);
-    connect(copyButton, &QToolButton::clicked,
+    connect(m_copyButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::copy);
-    connect(cutButton, &QToolButton::clicked,
+    connect(m_cutButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::cut);
-    connect(pasteButton, &QToolButton::clicked,
+    connect(m_pasteButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::paste);
     connect(codeEditor, &QmlCodeEditor::copyAvailable,
-            copyButton, &QToolButton::setEnabled);
+            m_copyButton, &QToolButton::setEnabled);
     connect(codeEditor, &QmlCodeEditor::copyAvailable,
-            cutButton, &QToolButton::setEnabled);
+            m_cutButton, &QToolButton::setEnabled);
     connect(hideShowButton, &QToolButton::clicked,
             this, &QmlCodeEditorWidgetPrivate::onHideShowButtonClicked);
-    connect(closeButton, &QToolButton::clicked,
+    connect(m_closeButton, &QToolButton::clicked,
             this, &QmlCodeEditorWidgetPrivate::onCloseButtonClicked);
-    connect(saveButton, &QToolButton::clicked,
+    connect(m_saveButton, &QToolButton::clicked,
             this, &QmlCodeEditorWidgetPrivate::onSaveButtonClicked);
     connect(codeEditorButton, &QToolButton::clicked,
             this, &QmlCodeEditorWidgetPrivate::onCodeEditorButtonClicked);
@@ -59,60 +127,9 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QWidget *parent) : QToolBar(parent)
     // this, &QmlCodeEditorWidgetPrivate::updateOpenDocHistory);
     connect(SaveManager::instance(), &SaveManager::propertyChanged,
             this, &QmlCodeEditorWidgetPrivate::propertyUpdate);
+}
 
-    pinButton->setCursor(Qt::PointingHandCursor);
-    undoButton->setCursor(Qt::PointingHandCursor);
-    redoButton->setCursor(Qt::PointingHandCursor);
-    closeButton->setCursor(Qt::PointingHandCursor);
-    saveButton->setCursor(Qt::PointingHandCursor);
-    cutButton->setCursor(Qt::PointingHandCursor);
-    copyButton->setCursor(Qt::PointingHandCursor);
-    pasteButton->setCursor(Qt::PointingHandCursor);
-
-    pinButton->setToolTip("Unpin Editor.");
-    undoButton->setToolTip("Undo action.");
-    redoButton->setToolTip("Redo action.");
-    closeButton->setToolTip("Close document.");
-    lineColLabel->setToolTip("Cursor line/column indicator.");
-    saveButton->setToolTip("Save document.");
-    cutButton->setToolTip("Cut selection.");
-    copyButton->setToolTip("Copy selection.");
-    pasteButton->setToolTip("Paste from clipboard.");
-
-    pinButton->setIcon(Utils::Icons::PIN_TOOLBAR.icon());
-    undoButton->setIcon(Utils::Icons::UNDO_TOOLBAR.icon());
-    redoButton->setIcon(Utils::Icons::REDO_TOOLBAR.icon());
-    closeButton->setIcon(Utils::Icons::CLOSE_TOOLBAR.icon());
-    saveButton->setIcon(Utils::Icons::SAVEFILE_TOOLBAR.icon());
-    cutButton->setIcon(Utils::Icons::CUT_TOOLBAR.icon());
-    copyButton->setIcon(Utils::Icons::COPY_TOOLBAR.icon());
-    pasteButton->setIcon(Utils::Icons::PASTE_TOOLBAR.icon());
-
-    pinButton->setFixedHeight(22);
-    undoButton->setFixedHeight(22);
-    redoButton->setFixedHeight(22);
-    closeButton->setFixedHeight(22);
-    saveButton->setFixedHeight(22);
-    cutButton->setFixedHeight(22);
-    copyButton->setFixedHeight(22);
-    pasteButton->setFixedHeight(22);
-
-    setFixedHeight(24);
-    addWidget(pinButton);
-    addSeparator();
-    addWidget(undoButton);
-    addWidget(redoButton);
-    addSeparator();
-    addWidget(cutButton);
-    addWidget(copyButton);
-    addWidget(pasteButton);
-    addWidget(saveButton);
-    addSeparator();
-    sepAction = addSeparator();
-    closeAction = addWidget(closeButton);
-    sepAction_2 = addSeparator();
-    auto empty = new QWidget;
-    empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    addWidget(empty);
-    addWidget(lineColLabel);
+void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
+{
+    m_document = document;
 }
