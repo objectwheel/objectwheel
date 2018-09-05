@@ -16,6 +16,15 @@ public:
     explicit QmlCodeEditorToolBar(QWidget *parent = nullptr);
     void setDocument(QmlCodeDocument* document);
 
+    void sweep();
+    void onCursorPositionChange();
+    void onPinButtonClick();
+    void onCloseButtonClick();
+    void onSaveButtonClick();
+
+signals:
+    void pinned(bool);
+
 private:
     QPointer<QmlCodeDocument> m_document;
     QToolButton* m_pinButton;
