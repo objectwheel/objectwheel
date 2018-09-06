@@ -27,7 +27,9 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
 
 void QmlCodeEditorWidget::sweep()
 {
-
+    m_codeEditor->sweep();
+    m_fileExplorer->sweep();
+    // FIXME
 }
 
 void QmlCodeEditorWidget::openDocument(Control* control)

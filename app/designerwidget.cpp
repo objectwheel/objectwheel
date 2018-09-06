@@ -7,6 +7,7 @@
 #include <saveutils.h>
 #include <transparentstyle.h>
 #include <signalchooserdialog.h>
+#include <utilityfunctions.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -187,7 +188,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_redoButton->setToolTip("Redo action.");
     m_snappingButton->setToolTip("Enable snapping to help aligning of controls to each others.");
     m_outlineButton->setToolTip("Show outline frame for controls.");
-    m_hideDockWidgetTitleBarsButton->setToolTip("Hide title bars of Panes.");
+    m_hideDockWidgetTitleBarsButton->setToolTip("Hide/Show title bars of Panes.");
     m_fitButton->setToolTip("Fit scene into the Dashboard.");
     m_zoomlLevelCombobox->setToolTip("Change zoom level.");
 
@@ -231,9 +232,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolbar->addWidget(m_outlineButton);
     m_toolbar->addWidget(m_fitButton);
     m_toolbar->addWidget(m_zoomlLevelCombobox);
-    auto empty = new QWidget;
-    empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    m_toolbar->addWidget(empty);
+    m_toolbar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolbar->addWidget(m_hideDockWidgetTitleBarsButton);
 }
 

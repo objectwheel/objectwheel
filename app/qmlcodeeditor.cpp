@@ -699,6 +699,12 @@ bool QmlCodeEditor::inFindScope(int selectionStart, int selectionEnd)
     return true;
 }
 
+void QmlCodeEditor::sweep()
+{
+    m_toolBar->sweep();
+    // FIXME
+}
+
 void QmlCodeEditor::slotCodeStyleSettingsChanged(const QVariant &)
 {
 

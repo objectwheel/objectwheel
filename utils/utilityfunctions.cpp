@@ -5,6 +5,7 @@
 #include <QTextDocument>
 #include <QRegularExpression>
 #include <QTextCursor>
+#include <QWidget>
 
 namespace {
 
@@ -44,4 +45,14 @@ void UtilityFunctions::trimCommentsAndStrings(QTextDocument* document)
         cursor.setPosition(end, QTextCursor::KeepAnchor);
         cursor.insertText(capturedText);
     }
+}
+
+QWidget* UtilityFunctions::createSpacerWidget(Qt::Orientation orientation)
+{
+    auto spacer = new QWidget;
+    spacer->setSizePolicy((orientation & Qt::Horizontal)
+                          ? QSizePolicy::Expanding : QSizePolicy::Preferred,
+                          (orientation & Qt::Vertical)
+                          ? QSizePolicy::Expanding : QSizePolicy::Preferred);
+    return spacer;
 }

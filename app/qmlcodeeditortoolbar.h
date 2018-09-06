@@ -23,7 +23,6 @@ public slots:
 private slots:
     void onCursorPositionChange();
     void onPinButtonToggle(bool pinned);
-    void onShowButtonToggle(bool showed);
 
 signals:
     void saved();

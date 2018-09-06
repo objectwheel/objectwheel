@@ -161,6 +161,7 @@ public:
     bool inFindScope(int selectionStart, int selectionEnd);
 
 public slots:
+    void sweep();
     void indent();
     void unindent();
     void updateUses();
