@@ -21,8 +21,9 @@ public slots:
     void sweep();
 
 private slots:
+    void onPinButtonClick();
+    void onShowButtonClick();
     void onCursorPositionChange();
-    void onPinButtonToggle(bool pinned);
 
 signals:
     void saved();

@@ -70,7 +70,6 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_cutButton->setToolTip(tr("Cut selection"));
     m_copyButton->setToolTip(tr("Copy selection"));
     m_pasteButton->setToolTip(tr("Paste from clipboard"));
-    m_showButton->setToolTip(tr("Show/Hide File Explorer"));
     m_lineColumnLabel->setToolTip(tr("Cursor position"));
 
     m_undoButton->setIcon(UNDO_TOOLBAR.icon());
@@ -80,14 +79,11 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_cutButton->setIcon(CUT_TOOLBAR.icon());
     m_copyButton->setIcon(COPY_TOOLBAR.icon());
     m_pasteButton->setIcon(PASTE_TOOLBAR.icon());
-    m_showButton->setIcon(CLOSE_SPLIT_LEFT.icon());
 
-    connect(m_pinButton, &QToolButton::toggled,
-            this, &QmlCodeEditorToolBar::onPinButtonToggle);
-    connect(m_pinButton, &QToolButton::toggled,
-            this, &QmlCodeEditorToolBar::pinned);
-    connect(m_showButton, &QToolButton::toggled,
-            this, &QmlCodeEditorToolBar::showed);
+    connect(m_pinButton, &QToolButton::clicked,
+            this, &QmlCodeEditorToolBar::onPinButtonClick);
+    connect(m_showButton, &QToolButton::clicked,
+            this, &QmlCodeEditorToolBar::onShowButtonClick);
     connect(m_closeButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::closed);
     connect(m_saveButton, &QToolButton::clicked,
@@ -107,8 +103,6 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
             this, &QmlCodeEditorToolBar::onCursorPositionChange);
 
-    m_pinButton->setCheckable(true);
-    m_showButton->setCheckable(true);
     m_cutButton->setEnabled(codeEditor->textCursor().hasSelection());
     m_copyButton->setEnabled(codeEditor->textCursor().hasSelection());
     m_pasteButton->setEnabled(!m_document.isNull() && QApplication::clipboard()->mimeData()->hasText());
@@ -116,9 +110,41 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
 
 void QmlCodeEditorToolBar::sweep()
 {
-    m_pinButton->setChecked(true);
-    m_showButton->setChecked(false);
     setDocument(nullptr);
+
+    m_pinButton->setProperty("ow_pinned", false);
+    m_pinButton->click();
+
+    m_showButton->setProperty("ow_showed", true);
+    m_showButton->click();
+}
+
+void QmlCodeEditorToolBar::onPinButtonClick()
+{
+    bool pin = !m_pinButton->property("ow_pinned").toBool();
+    if (pin) {
+        m_pinButton->setToolTip(tr("Unpin Editor"));
+        m_pinButton->setIcon(PINNED_TOOLBAR.icon());
+    } else {
+        m_pinButton->setToolTip(tr("Pin Editor"));
+        m_pinButton->setIcon(PIN_TOOLBAR.icon());
+    }
+    m_pinButton->setProperty("ow_pinned", pin);
+    emit QmlCodeEditorToolBar::pinned(pin);
+}
+
+void QmlCodeEditorToolBar::onShowButtonClick()
+{
+    bool show = !m_showButton->property("ow_showed").toBool();
+    if (show) {
+        m_showButton->setIcon(CLOSE_SPLIT_RIGHT.icon());
+        m_showButton->setToolTip(tr("Hide File Explorer"));
+    } else {
+        m_showButton->setIcon(CLOSE_SPLIT_LEFT.icon());
+        m_showButton->setToolTip(tr("Show File Explorer"));
+    }
+    m_showButton->setProperty("ow_showed", show);
+    emit QmlCodeEditorToolBar::showed(show);
 }
 
 void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
@@ -167,17 +193,6 @@ void QmlCodeEditorToolBar::onCursorPositionChange()
     m_lineColumnLabel->setText(lineColumnText
                                .arg(textCursor.blockNumber() + 1)
                                .arg(textCursor.columnNumber() + 1));
-}
-
-void QmlCodeEditorToolBar::onPinButtonToggle(bool pinned)
-{
-    if (pinned) {
-        m_pinButton->setToolTip(tr("Unpin Editor"));
-        m_pinButton->setIcon(PINNED_TOOLBAR.icon());
-    } else {
-        m_pinButton->setToolTip(tr("Pin Editor"));
-        m_pinButton->setIcon(PIN_TOOLBAR.icon());
-    }
 }
 
 QSize QmlCodeEditorToolBar::sizeHint() const

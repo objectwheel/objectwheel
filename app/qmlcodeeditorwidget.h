@@ -15,7 +15,7 @@ class QmlCodeEditorWidget : public QWidget
     Q_OBJECT
 
 public:
-    enum DocumentType { Internal, Global, Regular };
+    enum DocumentType { Global, Internal, External };
     struct Document {
         DocumentType type;
         QTextCursor cursor;
@@ -26,8 +26,6 @@ public:
 
 public:
     explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
-    void openDocument(Control* control);
-    void openDocument(const QString& path, DocumentType type);
 
 public slots:
     void sweep();
@@ -37,11 +35,6 @@ public slots:
 
 signals:
     void pinned(bool pinned);
-
-private:
-    void openDocument(Document* document) const;
-    Document* createNewDocument(Control* control) const;
-    Document* createNewDocument(const QString& path, DocumentType type) const;
 
 private:
     QList<ExternalDocument*> m_regularDocuments;

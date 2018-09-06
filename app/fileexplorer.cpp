@@ -62,16 +62,15 @@ QStack<QString> forthPathStack;
 QPalette initPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#AB8157");
-    palette.setColor(QPalette::Dark, "#9C7650");
+    palette.setColor(QPalette::Light, "#424c54");
+    palette.setColor(QPalette::Dark, "#384047");
     palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::Text, "#403121");
+    palette.setColor(QPalette::Text, "#24292e");
     palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::WindowText, "#403121");
-    palette.setColor(QPalette::AlternateBase, "#f7efe6");
-
-    palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
-    palette.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
+    palette.setColor(QPalette::WindowText, "#24292e");
+    palette.setColor(QPalette::AlternateBase, "#e6eff7");
+    palette.setColor(QPalette::Midlight, "#f2f4f6"); // For PathIndicator's background
+    palette.setColor(QPalette::Shadow, "#c2c4c6"); // For PathIndicator's border
     return palette;
 }
 }
