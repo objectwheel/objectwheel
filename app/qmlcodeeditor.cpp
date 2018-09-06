@@ -1894,6 +1894,11 @@ RowBar* QmlCodeEditor::rowBar() const
     return m_rowBar;
 }
 
+QmlCodeEditorToolBar* QmlCodeEditor::toolBar() const
+{
+    return m_toolBar;
+}
+
 void QmlCodeEditor::focusInEvent(QFocusEvent *e)
 {
     QPlainTextEdit::focusInEvent(e);

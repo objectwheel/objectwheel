@@ -24,13 +24,19 @@ public:
     struct ExternalDocument : public Document { QString path; };
     struct InternalDocument : public Document { Control* control; };
 
-public slots:
-    void sweep();
-
 public:
     explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
     void openDocument(Control* control);
     void openDocument(const QString& path, DocumentType type);
+
+public slots:
+    void sweep();
+    void save();
+    void close();
+    void setExplorerVisible(bool visible);
+
+signals:
+    void pinned(bool pinned);
 
 private:
     void openDocument(Document* document) const;

@@ -1,23 +1,35 @@
 #include <qmlcodeeditorwidget.h>
 #include <filemanager.h>
 #include <qmlcodeeditor.h>
+#include <qmlcodeeditortoolbar.h>
 #include <fileexplorer.h>
 
 #include <QToolBar>
 #include <QToolButton>
 #include <QSplitter>
 #include <QLayout>
-
+#include <QTimer>
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
   , m_splitter(new QSplitter(this))
   , m_codeEditor(new QmlCodeEditor(this))
-  , m_fileExplorer(new FileExplorer(this))
+  , m_fileExplorer(new FileExplorer(0))
 {
     m_splitter->addWidget(m_codeEditor);
     m_splitter->addWidget(m_fileExplorer);
     m_splitter->setCollapsible(0, false);
     m_splitter->setCollapsible(1, false);
     m_splitter->setHandleWidth(0);
+
+    m_fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::saved,
+            this, &QmlCodeEditorWidget::save);
+    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::closed,
+            this, &QmlCodeEditorWidget::close);
+    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::pinned,
+            this, &QmlCodeEditorWidget::pinned);
+    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::showed,
+            this, &QmlCodeEditorWidget::setExplorerVisible);
 
     auto layout = new QVBoxLayout(this);
     layout->addWidget(m_splitter);
@@ -27,9 +39,31 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
 
 void QmlCodeEditorWidget::sweep()
 {
+    m_splitter->setStretchFactor(0, 3);
+    m_splitter->setStretchFactor(1, 1);
+
     m_codeEditor->sweep();
     m_fileExplorer->sweep();
-    // FIXME
+
+    setExplorerVisible(false);
+    m_fileExplorer->setRootPath("/Users/omergoktas/Desktop");
+
+}
+
+void QmlCodeEditorWidget::save()
+{
+
+}
+
+void QmlCodeEditorWidget::close()
+{
+
+}
+
+void QmlCodeEditorWidget::setExplorerVisible(bool visible)
+{
+    m_splitter->handle(1)->setDisabled(!visible);
+    m_fileExplorer->setHidden(!visible);
 }
 
 void QmlCodeEditorWidget::openDocument(Control* control)

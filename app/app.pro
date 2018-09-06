@@ -29,7 +29,6 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/control.h \
            $$PWD/qmlcodeeditor.h \
            $$PWD/fileexplorer.h \
-           $$PWD/filelist.h \
            $$PWD/toolboxtree.h \
            $$PWD/view.h \
            $$PWD/global.h \
@@ -117,7 +116,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/zipper.h \
            $$PWD/globalresourcespane.h \
            $$PWD/signalchooserdialog.h \
-           $$PWD/qmlcodeeditortoolbar.h
+           $$PWD/qmlcodeeditortoolbar.h \
+           $$PWD/fileexplorer_p.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -126,7 +126,6 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/control.cpp \
            $$PWD/qmlcodeeditor.cpp \
            $$PWD/fileexplorer.cpp \
-           $$PWD/filelist.cpp \
            $$PWD/toolboxtree.cpp \
            $$PWD/view.cpp \
            $$PWD/issuesbox.cpp \
@@ -211,7 +210,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/zipper.cpp \
            $$PWD/globalresourcespane.cpp \
            $$PWD/signalchooserdialog.cpp \
-           $$PWD/qmlcodeeditortoolbar.cpp
+           $$PWD/qmlcodeeditortoolbar.cpp \
+           $$PWD/fileexplorer_p.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui \

@@ -124,6 +124,7 @@ public:
     QmlCodeDocument* codeDocument() const;
 
     RowBar* rowBar() const;
+    QmlCodeEditorToolBar* toolBar() const;
 
     static TextEditor::CompletionAssistProvider* completionAssistProvider();
     static TextEditor::IAssistProvider* quickFixAssistProvider();

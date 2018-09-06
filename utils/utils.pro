@@ -2,7 +2,7 @@
 TEMPLATE = lib
 CONFIG  += plugin c++14
 TARGET   = utils
-QT      += widgets qml quick websockets multimedia
+QT      += widgets qml quick websockets multimedia concurrent
 DEFINES += UTILS_LIBRARY
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
