@@ -177,10 +177,9 @@ public slots:
     void gotoLine(int line, int column = 0, bool centerLine = true, bool animate = true);
 
 private:
-    void updateRowBarWidth();
+    void updateViewportMargins();
     void cancelCurrentAnimations();
     bool cursorMoveKeyEvent(QKeyEvent* e);
-    void updateToolBar();
     void updateRowBar(const QRect &rect, int dy);
     void paintOverlays(const PaintEventData &data, QPainter &painter) const;
     void paintFindScope(const PaintEventData& data, QPainter& painter);

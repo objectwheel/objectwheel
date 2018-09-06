@@ -4,6 +4,7 @@
 #include <qtcassert.h>
 #include <qmlcodedocument.h>
 #include <bracketband.h>
+#include <transparentstyle.h>
 
 #include <qmljs/parser/qmljsast_p.h>
 #include <qmljs/qmljsbind.h>
@@ -412,9 +413,8 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
             m_updateUsesTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
 
     connect(this, &QPlainTextEdit::selectionChanged, this, &QmlCodeEditor::slotSelectionChanged);
-    connect(this, &QmlCodeEditor::blockCountChanged, this, &QmlCodeEditor::updateRowBarWidth);
+    connect(this, &QmlCodeEditor::blockCountChanged, this, &QmlCodeEditor::updateViewportMargins);
     connect(this, &QmlCodeEditor::updateRequest, this, &QmlCodeEditor::updateRowBar);
-    connect(this, &QmlCodeEditor::updateRequest, this, &QmlCodeEditor::updateToolBar);
     connect(this, &QmlCodeEditor::cursorPositionChanged, this, &QmlCodeEditor::slotCursorPositionChanged);
 
     m_parenthesesMatchingTimer->setSingleShot(true);
@@ -432,9 +432,10 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_codeAssistant->configure(this);
     m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
 
+    TransparentStyle::attach(m_toolBar);
     ModelManagerInterface::instance()->activateScan();
 
-    updateRowBarWidth();
+    updateViewportMargins();
     setWordWrapMode(QTextOption::NoWrap);
     updateHighlights();
     createToolBar();
@@ -514,7 +515,7 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     connect(document, &QmlCodeDocument::updateCodeWarnings,
             this, &QmlCodeEditor::updateCodeWarnings);
 
-    updateRowBarWidth();
+    updateViewportMargins();
 
     // Apply current settings
     document->setFontSettings(settings->fontSettings());
@@ -1218,12 +1219,12 @@ TextEditor::AssistInterface* QmlCodeEditor::createAssistInterface(TextEditor::As
     return 0;
 }
 
-void QmlCodeEditor::updateRowBarWidth()
+void QmlCodeEditor::updateViewportMargins()
 {
     if (isLeftToRight())
-        setViewportMargins(m_rowBar->calculatedWidth(), 0, 0, 0);
+        setViewportMargins(m_rowBar->calculatedWidth(), m_toolBar->height(), 0, 0);
     else
-        setViewportMargins(0, 0, m_rowBar->calculatedWidth(), 0);
+        setViewportMargins(0, m_toolBar->height(), m_rowBar->calculatedWidth(), 0);
 }
 
 void QmlCodeEditor::updateRowBar(const QRect& rect, int dy)
@@ -1239,13 +1240,7 @@ void QmlCodeEditor::updateRowBar(const QRect& rect, int dy)
     }
 
     if (rect.contains(viewport()->rect()))
-        updateRowBarWidth();
-}
-
-void QmlCodeEditor::updateToolBar()
-{
-    setViewportMargins(0, 24, 0, 0);
-    m_toolBar->setGeometry(0, 0, viewport()->width(), 24);
+        updateViewportMargins();
 }
 
 void QmlCodeEditor::editorContentsChange(int /*position*/, int /*charsRemoved*/, int /*charsAdded*/)
@@ -1671,7 +1666,7 @@ void QmlCodeEditor::applyFontSettings()
                 lineNumberFormat.background().color() : background);
     m_rowBar->setPalette(ep);
 
-    updateRowBarWidth();   // Adjust to new font width
+    updateViewportMargins();   // Adjust to new font width
     updateHighlights();
 
     if (!codeDocument()->isSemanticInfoOutdated())
@@ -1882,7 +1877,7 @@ void QmlCodeEditor::changeEvent(QEvent* e)
         QFont f = m_rowBar->font();
         f.setPointSizeF(font().pointSizeF());
         m_rowBar->setFont(f);
-        updateRowBarWidth();
+        updateViewportMargins();
         m_rowBar->update();
     }
 }
@@ -3305,7 +3300,8 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
-    m_rowBar->setGeometry(QRect(cr.left(), cr.top(), m_rowBar->calculatedWidth(), cr.height()));
+    m_rowBar->setGeometry(QRect(cr.left(), cr.top() + 24, m_rowBar->calculatedWidth(), cr.height() - 24));
+    m_toolBar->setGeometry(QRect(cr.left(), cr.top(), cr.width(), 24));
 
     hideContextPane();
 }

@@ -596,12 +596,8 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->save();
         bool isDown = (option->state & State_Sunken) || (option->state & State_On);
         bool isEnabled = option->state & State_Enabled;
-        if (isEnabled) {
-            QLinearGradient g(option->rect.topLeft(), option->rect.bottomLeft());
-            g.setColorAt(0, isDown ? "#35000000" : "#10000000");
-            g.setColorAt(1, isDown ? "#25000000" : "#20000000");
-            painter->fillRect(option->rect, g);
-        }
+        if (isEnabled)
+            painter->fillRect(option->rect, isDown ? "#30000000" : "#15000000");
         painter->restore();
     } break;
     default:

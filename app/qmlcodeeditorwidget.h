@@ -6,8 +6,9 @@
 
 class Control;
 class QmlCodeDocument;
-class QToolBar;
-class QToolButton;
+class QSplitter;
+class QmlCodeEditor;
+class FileExplorer;
 
 class QmlCodeEditorWidget : public QWidget
 {
@@ -40,7 +41,9 @@ private:
     QList<ExternalDocument*> m_regularDocuments;
     QList<ExternalDocument*> m_globalDocuments;
     QList<InternalDocument*> m_internalDocuments;
-//    QSpli
+    QSplitter* m_splitter;
+    QmlCodeEditor* m_codeEditor;
+    FileExplorer* m_fileExplorer;
 };
 
 #endif // QMLCODEEDITORWIDGET_H

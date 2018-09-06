@@ -1,11 +1,28 @@
 #include <qmlcodeeditorwidget.h>
 #include <filemanager.h>
+#include <qmlcodeeditor.h>
+#include <fileexplorer.h>
 
 #include <QToolBar>
 #include <QToolButton>
+#include <QSplitter>
+#include <QLayout>
 
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
+  , m_splitter(new QSplitter(this))
+  , m_codeEditor(new QmlCodeEditor(this))
+  , m_fileExplorer(new FileExplorer(this))
 {
+    m_splitter->addWidget(m_codeEditor);
+    m_splitter->addWidget(m_fileExplorer);
+    m_splitter->setCollapsible(0, false);
+    m_splitter->setCollapsible(1, false);
+    m_splitter->setHandleWidth(0);
+
+    auto layout = new QVBoxLayout(this);
+    layout->addWidget(m_splitter);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 }
 
 void QmlCodeEditorWidget::sweep()

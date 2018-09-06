@@ -43,16 +43,16 @@ enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
 
 class ProjectsDelegate: public QStyledItemDelegate
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        ProjectsDelegate(QListWidget* listWidget, QWidget* parent);
+public:
+    ProjectsDelegate(QListWidget* listWidget, QWidget* parent);
 
-        void paint(QPainter* painter, const QStyleOptionViewItem& option,
-          const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+               const QModelIndex& index) const override;
 
-    private:
-        QListWidget* m_listWidget;
+private:
+    QListWidget* m_listWidget;
 };
 
 ProjectsDelegate::ProjectsDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
@@ -62,27 +62,27 @@ ProjectsDelegate::ProjectsDelegate(QListWidget* listWidget, QWidget* parent) : Q
 
 void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-   auto item = m_listWidget->item(index.row());
-   Q_ASSERT(item);
+    auto item = m_listWidget->item(index.row());
+    Q_ASSERT(item);
 
-   auto name = item->data(Name).toString();
-   auto lastEdit = item->data(LastEdit).toString();
+    auto name = item->data(Name).toString();
+    auto lastEdit = item->data(LastEdit).toString();
 
-   auto rn = QRectF(option.rect).adjusted(option.rect.height(),
-     7, 0, - option.rect.height() / 2.0);
-   auto rl = QRectF(option.rect).adjusted(option.rect.height(),
-     option.rect.height() / 2.0, 0, - 7);
-   auto ri = QRectF(option.rect).adjusted(7, 7,
-     - option.rect.width() + option.rect.height() - 7, - 7);
-   auto ra = ri.adjusted(3, -0.5, 0, 0);
-   ra.setSize(QSize(10, 10));
-   auto icon = item->icon().pixmap(wfw(m_listWidget), ri.size().toSize());
+    auto rn = QRectF(option.rect).adjusted(option.rect.height(),
+                                           7, 0, - option.rect.height() / 2.0);
+    auto rl = QRectF(option.rect).adjusted(option.rect.height(),
+                                           option.rect.height() / 2.0, 0, - 7);
+    auto ri = QRectF(option.rect).adjusted(7, 7,
+                                           - option.rect.width() + option.rect.height() - 7, - 7);
+    auto ra = ri.adjusted(3, -0.5, 0, 0);
+    ra.setSize(QSize(10, 10));
+    auto icon = item->icon().pixmap(wfw(m_listWidget), ri.size().toSize());
 
-   painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::Antialiasing);
 
-   QPainterPath path;
-   path.addRoundedRect(m_listWidget->rect(), 8, 8);
-   painter->setClipPath(path);
+    QPainterPath path;
+    path.addRoundedRect(m_listWidget->rect(), 8, 8);
+    painter->setClipPath(path);
 
     if (item->isSelected())
         painter->fillRect(option.rect, option.palette.highlight());
@@ -139,12 +139,12 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     m_iconLabel->setFixedSize(SIZE_LOGO);
     m_iconLabel->setPixmap(
-        p.scaled(
-            SIZE_LOGO * devicePixelRatioF(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
+                p.scaled(
+                    SIZE_LOGO * devicePixelRatioF(),
+                    Qt::IgnoreAspectRatio,
+                    Qt::SmoothTransformation
+                    )
+                );
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
@@ -174,38 +174,38 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setFixedSize(SIZE_LIST);
     m_listWidget->verticalScrollBar()->setStyleSheet(
-        tr(
-            "QScrollBar:vertical {"
-            "    background: transparent;"
-            "    width: %2px;"
-            "} QScrollBar::handle:vertical {"
-            "    background: #909497;"
-            "    min-height: %1px;"
-            "    border-radius: %3px;"
-            "} QScrollBar::add-line:vertical {"
-            "    background: none;"
-            "} QScrollBar::sub-line:vertical {"
-            "    background: none;"
-            "} QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
-            "    background: none;"
-            "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
-            "    background: none;"
-            "}"
-        ).
-        arg(15).
-        arg(6).
-        arg(2.5)
-    );
+                tr(
+                    "QScrollBar:vertical {"
+                    "    background: transparent;"
+                    "    width: %2px;"
+                    "} QScrollBar::handle:vertical {"
+                    "    background: #909497;"
+                    "    min-height: %1px;"
+                    "    border-radius: %3px;"
+                    "} QScrollBar::add-line:vertical {"
+                    "    background: none;"
+                    "} QScrollBar::sub-line:vertical {"
+                    "    background: none;"
+                    "} QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
+                    "    background: none;"
+                    "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+                    "    background: none;"
+                    "}"
+                    ).
+                arg(15).
+                arg(6).
+                arg(2.5)
+                );
     m_listWidget->setStyleSheet(
-        tr(
-            "QListWidget {"
-            "    background: #12000000;"
-            "    border: 1px solid #22000000;"
-            "    border-radius: %1px;"
-            "}"
-        )
-        .arg(8)
-    );
+                tr(
+                    "QListWidget {"
+                    "    background: #12000000;"
+                    "    border: 1px solid #22000000;"
+                    "    border-radius: %1px;"
+                    "}"
+                    )
+                .arg(8)
+                );
 
     m_progressBar->setFixedWidth(WIDTH_PROGRESS);
 
@@ -224,7 +224,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
             m_buttons_2->show();
             auto rect = m_listWidget->visualItemRect(currentItem);
             m_buttons_2->move(rect.topRight().x() - m_buttons_2->width() - 5,
-                            rect.topRight().y() + (rect.height() - m_buttons_2->height()) / 2.0);
+                              rect.topRight().y() + (rect.height() - m_buttons_2->height()) / 2.0);
         } else {
             m_buttons_2->hide();
         }
@@ -254,15 +254,15 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->triggerSettings();
 
     connect(m_buttons->get(New), SIGNAL(clicked(bool)),
-      this, SLOT(onNewButtonClick()));
+            this, SLOT(onNewButtonClick()));
     connect(m_buttons->get(Load), SIGNAL(clicked(bool)),
-      this, SLOT(onLoadButtonClick()));
+            this, SLOT(onLoadButtonClick()));
     connect(m_buttons->get(Import), SIGNAL(clicked(bool)),
-      this, SLOT(onImportButtonClick()));
+            this, SLOT(onImportButtonClick()));
     connect(m_buttons->get(Export), SIGNAL(clicked(bool)),
-      this, SLOT(onExportButtonClick()));
+            this, SLOT(onExportButtonClick()));
     connect(m_buttons_2->get(Settings), SIGNAL(clicked(bool)),
-      this, SLOT(onSettingsButtonClick()));
+            this, SLOT(onSettingsButtonClick()));
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::initializationProgressChanged,
             this, &ProjectsWidget::onProgressChange);
@@ -367,10 +367,10 @@ void ProjectsWidget::onLoadButtonClick()
 {
     if (!m_listWidget->currentItem()) {
         QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Select a project first.")
-        );
+                    this,
+                    tr("Oops"),
+                    tr("Select a project first.")
+                    );
         return;
     }
 
@@ -382,27 +382,27 @@ void ProjectsWidget::onLoadButtonClick()
         return;
     }
 
-// FIXME
-//    if (dW->qmlEditorView()->hasUnsavedDocs()) {
-//        QMessageBox msgBox;
-//        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectManager::name()));
-//        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
-//        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
-//        msgBox.setDefaultButton(QMessageBox::SaveAll);
-//        int ret = msgBox.exec();
+    // FIXME
+    //    if (dW->qmlEditorView()->hasUnsavedDocs()) {
+    //        QMessageBox msgBox;
+    //        msgBox.setText(tr("%1 has some unsaved documents.").arg(ProjectManager::name()));
+    //        msgBox.setInformativeText("Do you want to save all your changes, or cancel loading new project?");
+    //        msgBox.setStandardButtons(QMessageBox::SaveAll | QMessageBox::NoToAll | QMessageBox::Cancel);
+    //        msgBox.setDefaultButton(QMessageBox::SaveAll);
+    //        int ret = msgBox.exec();
 
-//        switch (ret) {
-//            case QMessageBox::Cancel:
-//                return;
+    //        switch (ret) {
+    //            case QMessageBox::Cancel:
+    //                return;
 
-//            case QMessageBox::SaveAll:
-//                dW->qmlEditorView()->saveAll();
-//                break;
+    //            case QMessageBox::SaveAll:
+    //                dW->qmlEditorView()->saveAll();
+    //                break;
 
-//            case QMessageBox::NoToAll:
-//                break;
-//        }
-//    }
+    //            case QMessageBox::NoToAll:
+    //                break;
+    //        }
+    //    }
 
     WindowManager::mainWindow()->hide();
     QTimer::singleShot(0, this, &ProjectsWidget::startProject);
@@ -414,10 +414,10 @@ void ProjectsWidget::onExportButtonClick()
 {
     if (!m_listWidget->currentItem()) {
         QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Select the project first.")
-        );
+                    this,
+                    tr("Oops"),
+                    tr("Select the project first.")
+                    );
         return;
     }
 
@@ -434,23 +434,23 @@ void ProjectsWidget::onExportButtonClick()
 
     if (dialog.exec()) {
         if (!rm(
-            dialog.selectedFiles().at(0) +
-            separator() +
-            pname + ".zip"
-        )) return;
+                    dialog.selectedFiles().at(0) +
+                    separator() +
+                    pname + ".zip"
+                    )) return;
 
         if (!ProjectManager::exportProject(
-            hash,
-            dialog.selectedFiles().at(0) +
-            separator() +
-            pname + ".zip"
-        )) return;
+                    hash,
+                    dialog.selectedFiles().at(0) +
+                    separator() +
+                    pname + ".zip"
+                    )) return;
 
         QMessageBox::information(
-            this,
-            "Finished",
-            "Project export has successfully finished."
-        );
+                    this,
+                    "Finished",
+                    "Project export has successfully finished."
+                    );
     }
 }
 
@@ -465,19 +465,19 @@ void ProjectsWidget::onImportButtonClick()
         for (auto fileName : dialog.selectedFiles()) {
             if (!ProjectManager::importProject(fileName)) {
                 QMessageBox::warning(
-                    this,
-                    "Operation Stopped",
-                    "One or more import file is corrupted."
-                );
+                            this,
+                            "Operation Stopped",
+                            "One or more import file is corrupted."
+                            );
                 return;
             }
         }
         refreshProjectList();
         QMessageBox::information(
-            this,
-            tr("Finished"),
-            tr("Tool import has successfully finished.")
-        );
+                    this,
+                    tr("Finished"),
+                    tr("Tool import has successfully finished.")
+                    );
     }
 }
 
@@ -501,12 +501,12 @@ void ProjectsWidget::lock()
     m_buttons_2->hide();
 
     m_progressBar->move(
-        m_buttons_2->pos() +
-        QPoint(
-            -WIDTH_PROGRESS + m_buttons_2->width(),
-            m_buttons_2->height() / 2.0 - m_progressBar->height() / 2.0
-        )
-    );
+                m_buttons_2->pos() +
+                QPoint(
+                    -WIDTH_PROGRESS + m_buttons_2->width(),
+                    m_buttons_2->height() / 2.0 - m_progressBar->height() / 2.0
+                    )
+                );
 
     m_progressBar->show();
     m_progressBar->raise();
