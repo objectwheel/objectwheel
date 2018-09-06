@@ -73,7 +73,7 @@ void LineNumberBand::paintEvent(QPaintEvent* e)
     painter.setRenderHint(QPainter::Antialiasing);
 
     auto ce = m_qmlCodeEditor;
-    auto block = ce->document()->firstBlock();
+    auto block = ce->firstVisibleBlock();
     auto blockNumber = block.blockNumber();
     auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
     auto bottom = top + ce->blockBoundingRect(block).height();

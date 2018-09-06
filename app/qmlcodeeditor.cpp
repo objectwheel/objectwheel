@@ -470,6 +470,7 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
 
     setDocument(document);
     setCursorWidth(2);
+    m_toolBar->setDocument(document);
 
     connect(documentLayout, &QPlainTextDocumentLayout::updateBlock,
             this, &QmlCodeEditor::slotUpdateBlockNotify);
@@ -3305,9 +3306,9 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
 {
     QPlainTextEdit::resizeEvent(e);
 
-    QRect cr = contentsRect();
-    m_rowBar->setGeometry(QRect(cr.left(), cr.top() + 24, m_rowBar->calculatedWidth(), cr.height() - 24));
-    m_toolBar->setGeometry(QRect(cr.left(), cr.top(), cr.width(), 24));
+    QRect vg = viewport()->geometry();
+    m_rowBar->setGeometry(0, vg.top(), m_rowBar->calculatedWidth() + 1, vg.height());
+    m_toolBar->setGeometry(0, 0, vg.width() + m_rowBar->width(), 24);
 
     hideContextPane();
 }

@@ -152,7 +152,7 @@ void BracketBand::paintEvent(QPaintEvent* e)
     auto color = m_qmlCodeEditor->codeDocument()->fontSettings().toTextCharFormat(
                 TextEditor::C_CURRENT_LINE).background().color();
     color.setAlpha(128);
-    qreal lineHeight = block.layout()->lineForTextPosition(ce->textCursor().positionInBlock()).rect().height();
+    qreal lineHeight = block.layout()->lineForTextPosition(0).rect().height();
 
     while (block.isValid() && top <= e->rect().bottom()) {
         auto blockData = QmlCodeDocument::userData(block);

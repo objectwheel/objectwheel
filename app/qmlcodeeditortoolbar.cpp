@@ -163,7 +163,7 @@ void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
 void QmlCodeEditorToolBar::onCursorPositionChange()
 {
     QTextCursor textCursor = static_cast<QmlCodeEditor*>(parentWidget())->textCursor();
-    QString lineColumnText(tr("Line: ") + "%1, " + tr("Col: ") + "%2 ");
+    QString lineColumnText(tr("Line: ") + "%1, " + tr("Col: ") + "%2  ");
     m_lineColumnLabel->setText(lineColumnText
                                .arg(textCursor.blockNumber() + 1)
                                .arg(textCursor.columnNumber() + 1));
