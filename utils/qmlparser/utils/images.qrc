@@ -235,5 +235,13 @@
         <file>images/arrowback@2x.png</file>
         <file>images/arrowforth.png</file>
         <file>images/arrowforth@2x.png</file>
+        <file>images/code.png</file>
+        <file>images/code@2x.png</file>
+        <file>images/external.png</file>
+        <file>images/external@2x.png</file>
+        <file>images/global.png</file>
+        <file>images/global@2x.png</file>
+        <file>images/internal.png</file>
+        <file>images/internal@2x.png</file>
     </qresource>
 </RCC>

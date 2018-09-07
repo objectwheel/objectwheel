@@ -138,6 +138,15 @@ const Icon PIN_TOOLBAR({
         {QLatin1String(":/utils/images/pin.png"), Theme::IconsBaseColor}});
 const Icon PINNED_TOOLBAR({
         {QLatin1String(":/utils/images/pinned.png"), Theme::IconsBaseColor}});
+const Icon INTERNAL_TOOLBAR({
+        {QLatin1String(":/utils/images/internal.png"), Theme::IconsBaseColor}});
+const Icon EXTERNAL_TOOLBAR({
+        {QLatin1String(":/utils/images/external.png"), Theme::IconsBaseColor}});
+const Icon GLOBAL_TOOLBAR({
+        {QLatin1String(":/utils/images/global.png"), Theme::IconsBaseColor}});
+const Icon CODE_TOOLBAR({
+        {QLatin1String(":/utils/images/code.png"), Theme::IconsBaseColor}});
+
 
 const Icon ARROW_BACK({
         {QLatin1String(":/utils/images/arrowback.png"), Theme::IconsBaseColor}});

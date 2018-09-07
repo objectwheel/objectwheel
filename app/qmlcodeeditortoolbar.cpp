@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QMimeData>
+#include <QMenu>
 
 using namespace Utils;
 using namespace Icons;
@@ -23,6 +24,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
   , m_copyButton(new QToolButton)
   , m_pasteButton(new QToolButton)
   , m_showButton(new QToolButton)
+  , m_scopeButton(new QToolButton)
   , m_lineColumnLabel(new QLabel)
 {
     addWidget(m_pinButton);
@@ -37,6 +39,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     addSeparator();
     addWidget(m_closeButton);
     addSeparator();
+    addWidget(m_scopeButton);
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     addWidget(m_lineColumnLabel);
     addSeparator();
@@ -51,6 +54,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_copyButton->setFixedHeight(22);
     m_pasteButton->setFixedHeight(22);
     m_showButton->setFixedHeight(22);
+    m_scopeButton->setFixedHeight(22);
     m_lineColumnLabel->setFixedHeight(22);
 
     m_pinButton->setCursor(Qt::PointingHandCursor);
@@ -61,6 +65,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_cutButton->setCursor(Qt::PointingHandCursor);
     m_copyButton->setCursor(Qt::PointingHandCursor);
     m_pasteButton->setCursor(Qt::PointingHandCursor);
+    m_scopeButton->setCursor(Qt::PointingHandCursor);
     m_showButton->setCursor(Qt::PointingHandCursor);
 
     m_undoButton->setToolTip(tr("Undo action"));
@@ -70,6 +75,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_cutButton->setToolTip(tr("Cut selection"));
     m_copyButton->setToolTip(tr("Copy selection"));
     m_pasteButton->setToolTip(tr("Paste from clipboard"));
+    m_scopeButton->setToolTip(tr("Change the code scope"));
     m_lineColumnLabel->setToolTip(tr("Cursor position"));
 
     m_undoButton->setIcon(UNDO_TOOLBAR.icon());
@@ -79,6 +85,38 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_cutButton->setIcon(CUT_TOOLBAR.icon());
     m_copyButton->setIcon(COPY_TOOLBAR.icon());
     m_pasteButton->setIcon(PASTE_TOOLBAR.icon());
+
+    auto menu = new QMenu(m_scopeButton);
+    auto group = new QActionGroup(menu);
+    auto globalAction = new QAction(group);
+    auto internalAction = new QAction(group);
+    auto externalAction = new QAction(group);
+
+    menu->setToolTipsVisible(true);
+    menu->addActions(group->actions());
+
+    group->setExclusive(true);
+    group->addAction(globalAction);
+    group->addAction(internalAction);
+    group->addAction(externalAction);
+
+    globalAction->setText("Global");
+    globalAction->setIcon(GLOBAL_TOOLBAR.icon());
+    globalAction->setCheckable(true);
+    globalAction->setProperty("ow_scope", Global);
+
+    internalAction->setText("Internal");
+    internalAction->setIcon(INTERNAL_TOOLBAR.icon());
+    internalAction->setCheckable(true);
+    internalAction->setProperty("ow_scope", Internal);
+
+    externalAction->setText("External");
+    externalAction->setIcon(EXTERNAL_TOOLBAR.icon());
+    externalAction->setCheckable(true);
+    externalAction->setProperty("ow_scope", External);
+
+    m_scopeButton->setPopupMode(QToolButton::InstantPopup);
+    m_scopeButton->setMenu(menu);
 
     connect(m_pinButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onPinButtonClick);
@@ -96,12 +134,14 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
             m_copyButton, &QToolButton::setEnabled);
     connect(m_copyButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::copy);
-    connect(QApplication::clipboard(), &QClipboard::dataChanged, this, [=]
-    { m_pasteButton->setEnabled(!m_document.isNull() && QApplication::clipboard()->mimeData()->hasText()); });
+    connect(QApplication::clipboard(), &QClipboard::dataChanged,
+            this, &QmlCodeEditorToolBar::onClipboardDataChange);
     connect(m_pasteButton, &QToolButton::clicked,
             codeEditor, &QmlCodeEditor::paste);
     connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
             this, &QmlCodeEditorToolBar::onCursorPositionChange);
+    connect(menu, &QMenu::triggered, this,
+            &QmlCodeEditorToolBar::onScopeChange);
 
     m_cutButton->setEnabled(codeEditor->textCursor().hasSelection());
     m_copyButton->setEnabled(codeEditor->textCursor().hasSelection());
@@ -117,6 +157,19 @@ void QmlCodeEditorToolBar::sweep()
 
     m_showButton->setProperty("ow_showed", true);
     m_showButton->click();
+
+    setScope(Global);
+}
+
+void QmlCodeEditorToolBar::setScope(QmlCodeEditorToolBar::Scope scope)
+{
+    for (QAction* action : m_scopeButton->menu()->actions()) {
+        Scope s = action->property("ow_scope").value<Scope>();
+        if (scope == s) {
+            action->setChecked(true);
+            onScopeChange(action);
+        }
+    }
 }
 
 void QmlCodeEditorToolBar::onPinButtonClick()
@@ -145,6 +198,33 @@ void QmlCodeEditorToolBar::onShowButtonClick()
     }
     m_showButton->setProperty("ow_showed", show);
     emit QmlCodeEditorToolBar::showed(show);
+}
+
+void QmlCodeEditorToolBar::onClipboardDataChange()
+{
+    m_pasteButton->setEnabled(!m_document.isNull()
+                              && QApplication::clipboard()->mimeData()->hasText());
+}
+
+void QmlCodeEditorToolBar::onCursorPositionChange()
+{
+    QTextCursor textCursor = static_cast<QmlCodeEditor*>(parentWidget())->textCursor();
+    QString lineColumnText(tr("Line: ") + "%1, " + tr("Col: ") + "%2  ");
+    m_lineColumnLabel->setText(lineColumnText
+                               .arg(textCursor.blockNumber() + 1)
+                               .arg(textCursor.columnNumber() + 1));
+}
+
+void QmlCodeEditorToolBar::onScopeChange(QAction* action)
+{
+    Scope scope = action->property("ow_scope").value<Scope>();
+    if (scope == Global)
+        m_scopeButton->setIcon(GLOBAL_TOOLBAR.icon());
+    else if (scope == Internal)
+        m_scopeButton->setIcon(INTERNAL_TOOLBAR.icon());
+    else
+        m_scopeButton->setIcon(EXTERNAL_TOOLBAR.icon());
+    emit scopeChanged(scope);
 }
 
 void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
@@ -184,15 +264,6 @@ void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
         m_saveButton->setDisabled(true);
         m_pasteButton->setDisabled(true);
     }
-}
-
-void QmlCodeEditorToolBar::onCursorPositionChange()
-{
-    QTextCursor textCursor = static_cast<QmlCodeEditor*>(parentWidget())->textCursor();
-    QString lineColumnText(tr("Line: ") + "%1, " + tr("Col: ") + "%2  ");
-    m_lineColumnLabel->setText(lineColumnText
-                               .arg(textCursor.blockNumber() + 1)
-                               .arg(textCursor.columnNumber() + 1));
 }
 
 QSize QmlCodeEditorToolBar::sizeHint() const
