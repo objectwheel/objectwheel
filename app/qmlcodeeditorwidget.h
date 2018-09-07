@@ -18,28 +18,51 @@ public:
     enum DocumentType { Global, Internal, External };
     struct Document {
         DocumentType type;
-        QTextCursor cursor;
+        QTextCursor textCursor;
         QmlCodeDocument* document;
     };
-    struct ExternalDocument : public Document { QString path; };
-    struct InternalDocument : public Document { Control* control; };
+    struct GlobalDocument : public Document { QString relativePath; };
+    struct InternalDocument : public GlobalDocument { Control* control; };
+    struct ExternalDocument : public Document { QString fullPath; };
 
 public:
     explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
+
+    void openGlobal(const QString& relativePath);
+    void openInternal(Control* control);
+    void openExternal(const QString& fullPath);
+
+    bool globalExists(const QString& relativePath);
+    bool internalExists(Control* control, const QString& relativePath);
+    bool externalExists(const QString& fullPath);
+
+    GlobalDocument* getGlobal(const QString& relativePath);
+    InternalDocument* getInternal(Control* control, const QString& relativePath);
+    ExternalDocument* getExternal(const QString& fullPath);
+
+    GlobalDocument* createGlobal(const QString& relativePath);
+    InternalDocument* createInternal(Control* control, const QString& relativePath);
+    ExternalDocument* createExternal(const QString& fullPath);
 
 public slots:
     void sweep();
     void save();
     void close();
-    void setExplorerVisible(bool visible);
+    void setFileExplorerVisible(bool visible);
+
+private:
+    bool documentExists(Document* document);
+    void openDocument(Document* document);
+    void newDocument(Document* document);
 
 signals:
     void pinned(bool pinned);
 
 private:
-    QList<ExternalDocument*> m_regularDocuments;
-    QList<ExternalDocument*> m_globalDocuments;
+    QList<GlobalDocument*> m_globalDocuments;
     QList<InternalDocument*> m_internalDocuments;
+    QList<ExternalDocument*> m_externalDocuments;
+    Document* m_openDocument;
     QSplitter* m_splitter;
     QmlCodeEditor* m_codeEditor;
     FileExplorer* m_fileExplorer;
