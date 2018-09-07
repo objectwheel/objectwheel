@@ -14,7 +14,6 @@ class QmlCodeEditorWidget : public QWidget
 {
     Q_OBJECT
 
-public:
     enum DocumentType { Global, Internal, External };
     struct Document {
         DocumentType type;

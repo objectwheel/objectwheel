@@ -62,15 +62,15 @@ QStack<QString> forthPathStack;
 QPalette initPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#424c54");
-    palette.setColor(QPalette::Dark, "#384047");
+    palette.setColor(QPalette::Light, "#bf5861");
+    palette.setColor(QPalette::Dark, "#b05159");
     palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::Text, "#24292e");
+    palette.setColor(QPalette::Text, "#331719");
     palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::WindowText, "#24292e");
-    palette.setColor(QPalette::AlternateBase, "#e6eff7");
-    palette.setColor(QPalette::Midlight, "#f2f4f6"); // For PathIndicator's background
-    palette.setColor(QPalette::Shadow, "#c2c4c6"); // For PathIndicator's border
+    palette.setColor(QPalette::WindowText, "#331719");
+    palette.setColor(QPalette::AlternateBase, "#f7e6e8");
+    palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
+    palette.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
     return palette;
 }
 }
@@ -253,6 +253,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_fileSystemProxyModel->setDynamicSortFilter(true);
     m_fileSystemProxyModel->setFilterKeyColumn(0);
     m_fileSystemProxyModel->setSourceModel(m_fileSystemModel);
+    setModel(m_fileSystemProxyModel);
     connect(m_fileSystemModel, &QFileSystemModel::fileRenamed, this, [=]
     {
         m_fileSystemProxyModel->setDynamicSortFilter(false);
@@ -281,13 +282,9 @@ void FileExplorer::sweep()
 {
     // TODO
     m_searchEdit->clear();
-    m_searchEditCompleterModel->setRootPath(QString());
-
-    setModel(nullptr);
 
     m_mode = Viewer;
     m_modeComboBox->setCurrentIndex(0); // Viewer
-
     onModeChange();
 
     lastSelectedIndexesOfExplorer.clear();
@@ -307,6 +304,8 @@ void FileExplorer::sweep()
     m_renameButton->setDisabled(true);
     m_backButton->setDisabled(true);
     m_forthButton->setDisabled(true);
+
+    setRootPath(QApplication::applicationDirPath());
 }
 
 void FileExplorer::setRootPath(const QString& rootPath)
@@ -322,7 +321,6 @@ void FileExplorer::setRootPath(const QString& rootPath)
     }
 
     m_fileSystemModel->setRootPath(rootPath);
-    setModel(m_fileSystemProxyModel);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &FileExplorer::onFileSelectionChange);
     onHomeButtonClick();

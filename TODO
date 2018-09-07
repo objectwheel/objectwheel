@@ -1,3 +1,4 @@
+filemanager.h'e relativePath ve diğer tüm muhtemel QDir, QFileInfo, QFile kullanımlarını ekle, muhtemel dediğim işte tüm objectwheel projesinin kodlarını tara bak
 Remove nested painter save/restores
 Varsayılan Quick 1 teması olarak Base seçilecek, hem themer'de hem Objectwheel/app'da
 Neden CheckBox'ın labeli design area'ya başka bir nesne bırakınca siliniyor, kayboluyor doComplete ile ilgili sorun mu var?

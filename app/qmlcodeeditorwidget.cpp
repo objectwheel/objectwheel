@@ -28,6 +28,10 @@
 // What happens if a control's dir changes
 // What happens to the file explorer's root path if a control's dir changes
 
+// Change the relativePath parameter on public methods with filePath (like control.url())
+// Fix different fonts of different QmlCodeDocuments
+// Drag & drop files from desktop
+
 #define global(x) static_cast<GlobalDocument*>((x))
 #define internal(x) static_cast<InternalDocument*>((x))
 #define external(x) static_cast<ExternalDocument*>((x))
@@ -230,12 +234,12 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::createExternal(const
 
 void QmlCodeEditorWidget::save()
 {
-
+    // TODO
 }
 
 void QmlCodeEditorWidget::close()
 {
-
+    // TODO
 }
 
 void QmlCodeEditorWidget::openDocument(Document* document)

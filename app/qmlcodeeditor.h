@@ -16,6 +16,7 @@
 #include <texteditor/behaviorsettings.h>
 #include <coreplugin/find/textfindconstants.h>
 
+class QLabel;
 class QBasicTimer;
 class RowBar;
 class QmlCodeDocument;
@@ -169,6 +170,7 @@ public slots:
     void updateTabStops();
     void slotSelectionChanged();
     void updateAutoCompleteHighlight();
+    void setNoDocsVisible(bool visible);
     void editorContentsChange(int, int, int);
     void highlightSearchResultsSlot(const QString& txt, Core::FindFlags findFlags);
     void semanticInfoUpdated(const QmlJSTools::SemanticInfo& semanticInfo);
@@ -262,6 +264,7 @@ private:
     void timerEvent(QTimerEvent* e) override;
 
 private:
+    QLabel* m_noDocsLabel;
     RowBar* m_rowBar;
     QmlCodeEditorToolBar* m_toolBar;
     QRegExp m_searchExpr;

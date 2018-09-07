@@ -34,6 +34,7 @@
 #include <QSequentialAnimationGroup>
 #include <QPropertyAnimation>
 #include <QAction>
+#include <QLabel>
 
 using namespace Utils;
 using namespace TextEditor;
@@ -360,6 +361,7 @@ ColorPreviewHoverHandler* QmlCodeEditor::m_colorPreviewHoverHandler = nullptr;
 QuickToolBar* QmlCodeEditor::m_contextPane = nullptr;
 
 QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
+  , m_noDocsLabel(new QLabel(this))
   , m_rowBar(new RowBar(this, this))
   , m_toolBar(new QmlCodeEditorToolBar(this))
   , m_linkPressed(false)
@@ -378,6 +380,11 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_searchResultOverlay(new TextEditor::Internal::TextEditorOverlay(this))
   , m_autoCompleter(new QmlJSEditor::Internal::AutoCompleter)
 {
+    m_noDocsLabel->setStyleSheet("background: #f0f0f0; color: #808080;");
+    m_noDocsLabel->setText(tr("No documents\nopen"));
+    m_noDocsLabel->setAlignment(Qt::AlignCenter);
+    m_noDocsLabel->setVisible(false);
+
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,
             this, &QmlCodeEditor::highlightSearchResultsSlot);
@@ -1928,6 +1935,15 @@ void QmlCodeEditor::updateAutoCompleteHighlight()
     setExtraSelections("AutoCompleteSelection", extraSelections);
 }
 
+void QmlCodeEditor::setNoDocsVisible(bool visible)
+{
+    m_rowBar->setDisabled(visible);
+    viewport()->setDisabled(visible);
+    m_noDocsLabel->setVisible(visible);
+    if (visible)
+        m_noDocsLabel->raise();
+}
+
 void QmlCodeEditor::autocompleterHighlight(const QTextCursor &cursor)
 {
     if ((!m_animateAutoComplete && !m_highlightAutoComplete)
@@ -3314,6 +3330,7 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
     QRect vg = viewport()->geometry();
     m_rowBar->setGeometry(0, vg.top(), m_rowBar->calculatedWidth() + 1, vg.height());
     m_toolBar->setGeometry(0, 0, vg.width() + m_rowBar->width(), 24);
+    m_noDocsLabel->setGeometry(0, vg.top(), vg.width() + m_rowBar->width(), vg.height());
 
     hideContextPane();
 }
