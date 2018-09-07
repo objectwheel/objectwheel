@@ -13,6 +13,8 @@
 #include <QToolButton>
 #include <QSplitter>
 #include <QLayout>
+#include <QMimeDatabase>
+#include <QMessageBox>
 
 // FIXME:
 // What happens if a global open file get renamed
@@ -26,7 +28,13 @@
 // What happens if a control's dir changes
 // What happens to the file explorer's root path if a control's dir changes
 
+#define global(x) static_cast<GlobalDocument*>((x))
+#define internal(x) static_cast<InternalDocument*>((x))
+#define external(x) static_cast<ExternalDocument*>((x))
 #define globalDir() SaveUtils::toGlobalDir(ProjectManager::dir())
+#define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
+#define externalDir(x) dname(external((x))->fullPath)
+#define relativePath(x, y) QDir((x)).relativeFilePath((y))
 
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
   , m_splitter(new QSplitter(this))
@@ -37,6 +45,10 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(m_splitter);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
+
+    m_splitter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     m_splitter->addWidget(m_codeEditor);
     m_splitter->addWidget(m_fileExplorer);
@@ -52,18 +64,72 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
             this, &QmlCodeEditorWidget::setFileExplorerVisible);
     connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::pinned,
             this, &QmlCodeEditorWidget::pinned);
+
+    connect(m_fileExplorer, &FileExplorer::fileOpened,
+            this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
+}
+
+int QmlCodeEditorWidget::count() const
+{
+    return m_globalDocuments.size() + m_internalDocuments.size() + m_externalDocuments.size();
+}
+
+void QmlCodeEditorWidget::sweep()
+{
+    m_splitter->setStretchFactor(0, 30);
+    m_splitter->setStretchFactor(1, 9);
+
+    m_codeEditor->sweep();
+    m_fileExplorer->sweep();
+
+    // TODO: m_openDocument = new untitled external document
+}
+
+void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
+{
+    m_splitter->handle(1)->setDisabled(!visible);
+    m_fileExplorer->setHidden(!visible);
+}
+
+void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& filePath)
+{
+    QMimeDatabase mimeDatabase;
+    const QMimeType mimeType = mimeDatabase.mimeTypeForFile(filePath);
+    if (!mimeType.isValid() || !mimeType.inherits("text/plain")) {
+        QMessageBox::warning(this, tr("Oops"), tr("Qml Code Editor cannot open non-text files."));
+        return;
+    }
+
+    if (m_openDocument->type == Global)
+        return openGlobal(relativePath(globalDir(), filePath));
+    if (m_openDocument->type == Internal)
+        return openInternal(internal(m_openDocument)->control, relativePath(internalDir(m_openDocument), filePath));
+    if (m_openDocument->type == External)
+        return openExternal(filePath);
 }
 
 void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 {
-    GlobalDocument document;
-    document.type = Global;
-    document.document = nullptr;
-    document.relativePath = QFileInfo(relativePath).canonicalFilePath();
-//    document.
+    if (!globalExists(relativePath))
+        return openDocument(createGlobal(relativePath));
+    openDocument(getGlobal(relativePath));
 }
 
-bool QmlCodeEditorWidget::globalExists(const QString& relativePath)
+void QmlCodeEditorWidget::openInternal(Control* control, const QString& relativePath)
+{
+    if (!internalExists(control, relativePath))
+        return openDocument(createInternal(control, relativePath));
+    openDocument(getInternal(control, relativePath));
+}
+
+void QmlCodeEditorWidget::openExternal(const QString& fullPath)
+{
+    if (!externalExists(fullPath))
+        return openDocument(createExternal(fullPath));
+    openDocument(getExternal(fullPath));
+}
+
+bool QmlCodeEditorWidget::globalExists(const QString& relativePath) const
 {
     for (GlobalDocument* document : m_globalDocuments) {
         if (document->relativePath == relativePath)
@@ -72,7 +138,7 @@ bool QmlCodeEditorWidget::globalExists(const QString& relativePath)
     return false;
 }
 
-bool QmlCodeEditorWidget::internalExists(Control* control, const QString& relativePath)
+bool QmlCodeEditorWidget::internalExists(Control* control, const QString& relativePath) const
 {
     for (InternalDocument* document : m_internalDocuments) {
         if (document->relativePath == relativePath && control == document->control)
@@ -81,7 +147,7 @@ bool QmlCodeEditorWidget::internalExists(Control* control, const QString& relati
     return false;
 }
 
-bool QmlCodeEditorWidget::externalExists(const QString& fullPath)
+bool QmlCodeEditorWidget::externalExists(const QString& fullPath) const
 {
     for (ExternalDocument* document : m_externalDocuments) {
         if (document->fullPath == fullPath)
@@ -90,7 +156,7 @@ bool QmlCodeEditorWidget::externalExists(const QString& fullPath)
     return false;
 }
 
-QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::getGlobal(const QString& relativePath)
+QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::getGlobal(const QString& relativePath) const
 {
     for (GlobalDocument* document : m_globalDocuments) {
         if (document->relativePath == relativePath)
@@ -99,7 +165,8 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::getGlobal(const QStrin
     return nullptr;
 }
 
-QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::getInternal(Control* control, const QString& relativePath)
+QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::getInternal(Control* control,
+                                                                        const QString& relativePath) const
 {
     for (InternalDocument* document : m_internalDocuments) {
         if (document->relativePath == relativePath && control == document->control)
@@ -108,7 +175,7 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::getInternal(Control*
     return nullptr;
 }
 
-QmlCodeEditorWidget::ExternalDocument*QmlCodeEditorWidget::getExternal(const QString& fullPath)
+QmlCodeEditorWidget::ExternalDocument*QmlCodeEditorWidget::getExternal(const QString& fullPath) const
 {
     for (ExternalDocument* document : m_externalDocuments) {
         if (document->fullPath == fullPath)
@@ -123,19 +190,26 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::createGlobal(const QSt
     document->type = Global;
     document->relativePath = relativePath;
     document->document = new QmlCodeDocument(m_codeEditor);
+    document->document->setFilePath(globalDir() + separator() + relativePath);
     document->document->setPlainText(rdfile(globalDir() + separator() + relativePath));
+    document->document->setModified(false);
+    document->textCursor = QTextCursor(document->document);
     m_globalDocuments.append(document);
     return document;
 }
 
-QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::createInternal(Control* control, const QString& relativePath)
+QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::createInternal(Control* control,
+                                                                           const QString& relativePath)
 {
     InternalDocument* document = new InternalDocument;
     document->type = Internal;
     document->control = control;
     document->relativePath = relativePath;
     document->document = new QmlCodeDocument(m_codeEditor);
-    document->document->setPlainText(rdfile(control->dir() + separator() + relativePath));
+    document->document->setFilePath(SaveUtils::toThisDir(control->dir()) + separator() + relativePath);
+    document->document->setPlainText(rdfile(SaveUtils::toThisDir(control->dir()) + separator() + relativePath));
+    document->document->setModified(false);
+    document->textCursor = QTextCursor(document->document);
     m_internalDocuments.append(document);
     return document;
 }
@@ -146,21 +220,12 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::createExternal(const
     document->type = External;
     document->fullPath = fullPath;
     document->document = new QmlCodeDocument(m_codeEditor);
+    document->document->setFilePath(fullPath);
     document->document->setPlainText(rdfile(fullPath));
+    document->document->setModified(false);
+    document->textCursor = QTextCursor(document->document);
     m_externalDocuments.append(document);
     return document;
-}
-
-void QmlCodeEditorWidget::sweep()
-{
-    m_splitter->setStretchFactor(0, 30);
-    m_splitter->setStretchFactor(1, 9);
-
-    m_codeEditor->sweep();
-    m_fileExplorer->sweep();
-
-    // TODO: m_openDocument = new untitled external document
-    m_fileExplorer->setRootPath("/Users/omergoktas/Desktop");
 }
 
 void QmlCodeEditorWidget::save()
@@ -173,98 +238,27 @@ void QmlCodeEditorWidget::close()
 
 }
 
-void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
-{
-    m_splitter->handle(1)->setDisabled(!visible);
-    m_fileExplorer->setHidden(!visible);
-}
-
-bool QmlCodeEditorWidget::documentExists(QmlCodeEditorWidget::Document* document)
-{
-    if (document->type == Global)
-        return m_globalDocuments.contains(static_cast<GlobalDocument*>(document));
-    if (document->type == Internal)
-        return m_internalDocuments.contains(static_cast<InternalDocument*>(document));
-    if (document->type == External)
-        return m_externalDocuments.contains(static_cast<ExternalDocument*>(document));
-    Q_ASSERT(0);
-    return false;
-}
-
 void QmlCodeEditorWidget::openDocument(Document* document)
 {
-    if (!documentExists(document))
-        newDocument(document);
+    if (m_openDocument == document)
+        return;
 
     m_openDocument = document;
 
-    m_codeEditor->setDocument(m_openDocument->document);
+    m_codeEditor->setCodeDocument(m_openDocument->document);
     m_codeEditor->setTextCursor(m_openDocument->textCursor);
 
     if (m_openDocument->type == Global)
         m_fileExplorer->setRootPath(globalDir());
     else if (m_openDocument->type == Internal)
-        m_fileExplorer->setRootPath(static_cast<InternalDocument*>(m_openDocument)->control->dir());
+        m_fileExplorer->setRootPath(internalDir(m_openDocument));
     else
-        m_fileExplorer->setRootPath(dname(static_cast<ExternalDocument*>(m_openDocument)->fullPath));
+        m_fileExplorer->setRootPath(externalDir(m_openDocument));
+
+    emit activated();
 }
 
-void QmlCodeEditorWidget::newDocument(QmlCodeEditorWidget::Document* document)
+QSize QmlCodeEditorWidget::sizeHint() const
 {
-//    switch (document->type) {
-//    case Global: {
-
-//    } break;
-//    case Internal: {
-//        InternalDocument* doc = new InternalDocument;
-//        doc->type = Internal;
-//        doc->control = control;
-//        doc->document = new QmlCodeDocument(m_codeEditor);
-//        doc->document->setPlainText(rdfile(control->url()));
-
-//        m_internalDocuments.append(document);
-//    } break;
-//    case External: {
-
-//    } break;
-//    default:
-//        Q_ASSERT(0);
-//        break;
-//    }
+    return QSize(680, 680);
 }
-
-
-//QmlCodeEditorWidget::Document* QmlCodeEditorWidget::createAndAppendNewDocument(
-//        const QString& path,
-//        QmlCodeEditorWidget::DocumentType type) const
-//{
-//    Q_ASSERT(type != Internal);
-
-//    ExternalDocument* document = new ExternalDocument;
-//    document->type = type;
-//    document->path = path;
-//    document->document = new QmlCodeDocument(m_codeEditor);
-//    document->document->setPlainText(rdfile(path));
-
-//    if (type == Regular)
-//        m_regularDocuments.append(document);
-//    else
-//        m_globalDocuments.append(document);
-
-//    return document;
-//}
-
-//QmlCodeEditorWidget::Document* QmlCodeEditorWidget::createAndAppendNewDocument(Control* control) const
-//{
-//    Q_ASSERT(type == Internal);
-
-//    InternalDocument* document = new InternalDocument;
-//    document->type = Internal;
-//    document->control = control;
-//    document->document = new QmlCodeDocument(m_codeEditor);
-//    document->document->setPlainText(rdfile(control->url()));
-
-//    m_internalDocuments.append(document);
-
-//    return document;
-//}

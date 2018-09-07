@@ -311,11 +311,14 @@ void FileExplorer::sweep()
 
 void FileExplorer::setRootPath(const QString& rootPath)
 {
+    if (m_fileSystemModel->rootPath() == rootPath)
+        return;
+
     Q_ASSERT(exists(rootPath));
 
     if (selectionModel()) {
         selectionModel()->clear();
-        selectionModel()->disconnect(this);
+        selectionModel()->disconnect(this, SLOT(onFileSelectionChange()));
     }
 
     m_fileSystemModel->setRootPath(rootPath);

@@ -8,7 +8,9 @@
 #include <transparentstyle.h>
 #include <signalchooserdialog.h>
 #include <utilityfunctions.h>
+#include <qmlcodeeditorwidget.h>
 
+#include <QDir>
 #include <QToolBar>
 #include <QToolButton>
 #include <QPainter>
@@ -335,6 +337,8 @@ void DesignerWidget::onControlDoubleClick(Control* control)
     if (result == QDialog::Rejected)
         return;
 
+//    m_qmlCodeEditorWidget->openGlobal(?);
+
 //    qDebug() << QString::fromUtf8(METHOD_BODY)
 //                .arg(control->id())
 //                .arg(m_signalChooserDialog->currentSignal())
@@ -343,10 +347,9 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 
 void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 {
-    // BUG
-//    m_qmlCodeEditorWidget->addControl(control);
-//    m_qmlCodeEditorWidget->setMode(QmlCodeEditorWidget::CodeEditor);
-//    m_qmlCodeEditorWidget->openControl(control);
+    m_qmlCodeEditorWidget->openInternal(
+                control,
+                QDir(SaveUtils::toThisDir(control->dir())).relativeFilePath(control->url()));
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)

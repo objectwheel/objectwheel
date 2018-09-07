@@ -152,7 +152,7 @@ FileSearchModel::FileSearchModel(QObject* parent) : QStringListModel(parent)
 }
 
 void FileSearchModel::setRootPath(const QString& rootPath)
-{
+{    
     m_rootPath = rootPath;
     if (!m_fileSystemWatcher->files().isEmpty())
         m_fileSystemWatcher->removePaths(m_fileSystemWatcher->files());

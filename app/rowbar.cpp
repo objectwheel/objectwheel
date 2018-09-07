@@ -46,7 +46,7 @@ QSize RowBar::sizeHint() const
 
 void RowBar::mouseReleaseEvent(QMouseEvent* e)
 {
-    auto cursor = m_qmlCodeEditor->cursorForPosition(e->pos());
+    auto cursor = m_qmlCodeEditor->cursorForPosition({0, e->pos().y()});
     m_qmlCodeEditor->setTextCursor(cursor);
 }
 

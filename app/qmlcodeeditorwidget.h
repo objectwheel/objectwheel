@@ -28,17 +28,19 @@ public:
 public:
     explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
 
+    int count() const;
+
     void openGlobal(const QString& relativePath);
-    void openInternal(Control* control);
+    void openInternal(Control* control, const QString& relativePath);
     void openExternal(const QString& fullPath);
 
-    bool globalExists(const QString& relativePath);
-    bool internalExists(Control* control, const QString& relativePath);
-    bool externalExists(const QString& fullPath);
+    bool globalExists(const QString& relativePath) const;
+    bool internalExists(Control* control, const QString& relativePath) const;
+    bool externalExists(const QString& fullPath) const;
 
-    GlobalDocument* getGlobal(const QString& relativePath);
-    InternalDocument* getInternal(Control* control, const QString& relativePath);
-    ExternalDocument* getExternal(const QString& fullPath);
+    GlobalDocument* getGlobal(const QString& relativePath) const;
+    InternalDocument* getInternal(Control* control, const QString& relativePath) const;
+    ExternalDocument* getExternal(const QString& fullPath) const;
 
     GlobalDocument* createGlobal(const QString& relativePath);
     InternalDocument* createInternal(Control* control, const QString& relativePath);
@@ -50,12 +52,15 @@ public slots:
     void close();
     void setFileExplorerVisible(bool visible);
 
+private slots:
+    void onFileExplorerFileOpen(const QString& filePath);
+
 private:
-    bool documentExists(Document* document);
     void openDocument(Document* document);
-    void newDocument(Document* document);
+    QSize sizeHint() const override;
 
 signals:
+    void activated();
     void pinned(bool pinned);
 
 private:
