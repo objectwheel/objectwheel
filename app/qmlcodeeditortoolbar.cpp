@@ -75,7 +75,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_cutButton->setToolTip(tr("Cut selection"));
     m_copyButton->setToolTip(tr("Copy selection"));
     m_pasteButton->setToolTip(tr("Paste from clipboard"));
-    m_scopeButton->setToolTip(tr("Change the code scope"));
+    m_scopeButton->setToolTip(tr("Change the scope of open files"));
     m_lineColumnLabel->setToolTip(tr("Cursor position"));
 
     m_undoButton->setIcon(UNDO_TOOLBAR.icon());

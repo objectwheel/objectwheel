@@ -218,7 +218,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
 
     TransparentStyle::attach(m_toolBar);
     TransparentStyle::attach(m_pathIndicator);
-    TransparentStyle::attach(m_modeComboBox);
 
     m_upButton->setFixedHeight(22);
     m_backButton->setFixedHeight(22);
@@ -254,11 +253,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_fileSystemProxyModel->setFilterKeyColumn(0);
     m_fileSystemProxyModel->setSourceModel(m_fileSystemModel);
     setModel(m_fileSystemProxyModel);
-    connect(m_fileSystemModel, &QFileSystemModel::fileRenamed, this, [=]
-    {
-        m_fileSystemProxyModel->setDynamicSortFilter(false);
-        m_fileSystemProxyModel->setDynamicSortFilter(true);
-    });
 
     m_searchEditCompleter->setFilterMode(Qt::MatchContains);
     m_searchEditCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
@@ -269,6 +263,11 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_searchEdit->setPlaceholderText("Filter");
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setFixedHeight(22);
+    connect(m_fileSystemModel, &QFileSystemModel::fileRenamed, this, [=]
+    {
+        m_fileSystemProxyModel->setDynamicSortFilter(false);
+        m_fileSystemProxyModel->setDynamicSortFilter(true);
+    });
     connect(m_searchEdit, qOverload<>(&FocuslessLineEdit::editingFinished), this, &FileExplorer::filterList);
     connect(m_pathIndicator, &PathIndicator::pathUpdated, this, &FileExplorer::goToRelativePath);
 
@@ -590,9 +589,11 @@ void FileExplorer::onItemDoubleClick(const QModelIndex& index)
 }
 
 void FileExplorer::setPalette(const QPalette& pal)
-{
+{    
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
+
+    TransparentStyle::attach(m_modeComboBox);
 
     setStyleSheet(
                 QString {

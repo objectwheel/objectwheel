@@ -104,6 +104,7 @@ TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent)
     setParent(parent);
 }
 
+// In order to eliminate styleSheet override; this needs to be called before setStyleSheet call
 void TransparentStyle::attach(QWidget* widget)
 {
     static auto style = new TransparentStyle(QCoreApplication::instance());
@@ -113,6 +114,7 @@ void TransparentStyle::attach(QWidget* widget)
     widgetList.unite(QSet<QWidget*>::fromList(widget->findChildren<QWidget*>()));
 
     for (QWidget* w : widgetList) {
+        w->setStyleSheet(QString());
         w->setStyle(style);
 
         if (w->inherits("QComboBox"))
@@ -561,7 +563,7 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
 
         painter->setPen(pc);
         painter->setFont(f);
-        painter->drawText(option->rect.adjusted(-7, 1, -7, 1), "\u2713", QTextOption(Qt::AlignCenter));
+        painter->drawText(option->rect.adjusted(-2, 1, -2, 1), "\u2713", QTextOption(Qt::AlignCenter));
         painter->restore();
     } break;
     case PE_IndicatorToolBarSeparator: {
@@ -663,7 +665,7 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 painter->restore();
                 break;
             }
-            const int maxpmw = mi->maxIconWidth;
+            const int maxpmw = 20/*mi->maxIconWidth*/ ;
             const bool enabled = mi->state & State_Enabled;
             int xpos = mi->rect.x() + 18;
             int checkcol = maxpmw;
