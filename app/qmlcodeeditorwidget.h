@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QTextCursor>
 
+#include <qmlcodeeditortoolbar.h>
+
 class Control;
 class QmlCodeDocument;
 class QSplitter;
@@ -52,6 +54,7 @@ public slots:
     void setFileExplorerVisible(bool visible);
 
 private slots:
+    void onScopeChange(QmlCodeEditorToolBar::Scope);
     void onFileExplorerFileOpen(const QString& filePath);
 
 private:

@@ -1,7 +1,6 @@
 #include <qmlcodeeditorwidget.h>
 #include <filemanager.h>
 #include <qmlcodeeditor.h>
-#include <qmlcodeeditortoolbar.h>
 #include <fileexplorer.h>
 #include <qmlcodedocument.h>
 #include <saveutils.h>
@@ -68,6 +67,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
             this, &QmlCodeEditorWidget::setFileExplorerVisible);
     connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::pinned,
             this, &QmlCodeEditorWidget::pinned);
+    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::scopeChanged,
+            this, &QmlCodeEditorWidget::onScopeChange);
 
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
@@ -93,6 +94,11 @@ void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
 {
     m_splitter->handle(1)->setDisabled(!visible);
     m_fileExplorer->setHidden(!visible);
+}
+
+void QmlCodeEditorWidget::onScopeChange(QmlCodeEditorToolBar::Scope scope)
+{
+
 }
 
 void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& filePath)
