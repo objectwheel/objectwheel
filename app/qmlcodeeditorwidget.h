@@ -16,11 +16,10 @@ class QmlCodeEditorWidget : public QWidget
 {
     Q_OBJECT
 
-    enum DocumentType { Global, Internal, External };
     struct Document {
-        DocumentType type;
         QTextCursor textCursor;
         QmlCodeDocument* document;
+        QmlCodeEditorToolBar::Scope scope;
     };
     struct GlobalDocument : public Document { QString relativePath; };
     struct InternalDocument : public GlobalDocument { Control* control; };
@@ -43,6 +42,10 @@ public:
     InternalDocument* getInternal(Control* control, const QString& relativePath) const;
     ExternalDocument* getExternal(const QString& fullPath) const;
 
+    GlobalDocument* addGlobal(const QString& relativePath);
+    InternalDocument* addInternal(Control* control, const QString& relativePath);
+    ExternalDocument* addExternal(const QString& fullPath);
+
 public slots:
     void sweep();
     void save();
@@ -51,23 +54,23 @@ public slots:
 
 private slots:
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
-    void onFileExplorerFileOpen(const QString& filePath);
+    void onFileExplorerFileOpen(const QString& relativePath);
 
 private:
+    bool warnIfNotATextFile(const QString& filePath) const;
     void activateGlobalScope();
     void activateInternalScope();
     void activateExternalScope();
-    void updateToolBar(QmlCodeEditorToolBar::Scope);
     void openDocument(Document* document);
+    void setupToolBar(Document* document);
+    void setupCodeEditor(Document* document);
+    void setupFileExplorer(Document* document);
 
     QSize sizeHint() const override;
     QmlCodeEditorToolBar* toolBar() const;
-    GlobalDocument* addGlobal(const QString& relativePath);
-    InternalDocument* addInternal(Control* control, const QString& relativePath);
-    ExternalDocument* addExternal(const QString& fullPath);
 
 signals:
-    void activated();
+    void opened();
     void pinned(bool pinned);
 
 private:

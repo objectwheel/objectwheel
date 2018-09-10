@@ -294,7 +294,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_pageSwitcherPane, SIGNAL(leftPanesShowChanged(bool)), this, SLOT(showLeftPanes(bool)));
     connect(m_pageSwitcherPane, SIGNAL(rightPanesShowChanged(bool)), this, SLOT(showRightPanes(bool)));
 
-    connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::activated, [=] {
+    connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened, [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
                 && m_pageSwitcherPane->currentPage() != Page_SplitView) {
             m_pageSwitcherPane->setCurrentPage(Page_Designer);
