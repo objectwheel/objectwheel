@@ -40,11 +40,12 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     addWidget(m_pasteButton);
     addWidget(m_saveButton);
     addSeparator();
-    addWidget(m_closeButton);
-    addSeparator();
     addWidget(m_scopeButton);
     addWidget(m_leftCombo);
     addWidget(m_rightCombo);
+    addSeparator();
+    addWidget(m_closeButton);
+    addSeparator();
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     addWidget(m_lineColumnLabel);
     addSeparator();
@@ -63,6 +64,11 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_leftCombo->setFixedHeight(22);
     m_rightCombo->setFixedHeight(22);
     m_lineColumnLabel->setFixedHeight(22);
+
+    m_leftCombo->setDuplicatesEnabled(true);
+    m_rightCombo->setDuplicatesEnabled(true);
+    m_leftCombo->setMinimumContentsLength(20);
+    m_rightCombo->setMinimumContentsLength(20);
 
     m_pinButton->setCursor(Qt::PointingHandCursor);
     m_undoButton->setCursor(Qt::PointingHandCursor);

@@ -158,12 +158,15 @@ void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
 {
     Q_ASSERT(toolBar()->scope() != QmlCodeEditorToolBar::Global || combo != QmlCodeEditorToolBar::RightCombo);
+    Q_ASSERT(toolBar()->scope() != QmlCodeEditorToolBar::External || combo != QmlCodeEditorToolBar::RightCombo);
 
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
     if (toolBar()->scope() == QmlCodeEditorToolBar::Global)
-        openGlobal(leftCombo->currentText());
+        return openGlobal(leftCombo->currentText());
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Global)
+        return openExternal(fullPath(m_fileExplorer->rootPath(), leftCombo->currentText()));
 }
 
 void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
@@ -314,7 +317,17 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
     document->document->setPlainText(rdfile(fullPath));
     document->document->setModified(false);
     document->textCursor = QTextCursor(document->document);
+
     m_externalDocuments.append(document);
+
+    if (toolBar()->scope() == QmlCodeEditorToolBar::External) {
+        QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+        const int i = leftCombo->count();
+        leftCombo->addItem(fname(document->fullPath));
+        leftCombo->setItemData(i, document->fullPath, Qt::ToolTipRole);
+        leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
+    }
+
     return document;
 }
 
@@ -369,7 +382,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
             leftCombo->show();
-            leftCombo->setToolTip(tr("Relative file path of the document within QmlCodeEditorToolBar::Global Resources"));
+            leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
                 const int i = leftCombo->count();
                 leftCombo->addItem(doc->relativePath);
@@ -384,11 +397,22 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             break;
 
         case QmlCodeEditorToolBar::External:
+            leftCombo->show();
+            leftCombo->setToolTip(tr("File name of the open document"));
+            for (ExternalDocument* doc : m_externalDocuments) {
+                const int i = leftCombo->count();
+                leftCombo->addItem(fname(doc->fullPath));
+                leftCombo->setItemData(i, doc->fullPath, Qt::ToolTipRole);
+                leftCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
+                if (doc == document)
+                    leftCombo->setCurrentIndex(i);
+            }
             break;
         }
     } else {
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
+        case QmlCodeEditorToolBar::External:
             for (int i = 0; i < leftCombo->count(); ++i) {
                 if (leftCombo->itemData(i, DocumentRole).value<Document*>() == document) {
                     leftCombo->setCurrentIndex(i);
@@ -397,9 +421,6 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::Internal:
-            break;
-
-        case QmlCodeEditorToolBar::External:
             break;
         }
     }
