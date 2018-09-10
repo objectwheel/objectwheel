@@ -16,6 +16,7 @@ class QmlCodeEditorWidget : public QWidget
 {
     Q_OBJECT
 
+public:
     struct Document {
         QTextCursor textCursor;
         QmlCodeDocument* document;
@@ -54,13 +55,10 @@ public slots:
 
 private slots:
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
+    void onComboActivation(QmlCodeEditorToolBar::Combo);
     void onFileExplorerFileOpen(const QString& relativePath);
 
 private:
-    bool warnIfNotATextFile(const QString& filePath) const;
-    void activateGlobalScope();
-    void activateInternalScope();
-    void activateExternalScope();
     void openDocument(Document* document);
     void setupToolBar(Document* document);
     void setupCodeEditor(Document* document);
@@ -74,13 +72,18 @@ signals:
     void pinned(bool pinned);
 
 private:
-    QList<GlobalDocument*> m_globalDocuments;
-    QList<InternalDocument*> m_internalDocuments;
-    QList<ExternalDocument*> m_externalDocuments;
     Document* m_openDocument;
     QSplitter* m_splitter;
     QmlCodeEditor* m_codeEditor;
     FileExplorer* m_fileExplorer;
+    QList<GlobalDocument*> m_globalDocuments;
+    QList<InternalDocument*> m_internalDocuments;
+    QList<ExternalDocument*> m_externalDocuments;
 };
+
+Q_DECLARE_METATYPE(QmlCodeEditorWidget::Document*)
+Q_DECLARE_METATYPE(QmlCodeEditorWidget::GlobalDocument*)
+Q_DECLARE_METATYPE(QmlCodeEditorWidget::InternalDocument*)
+Q_DECLARE_METATYPE(QmlCodeEditorWidget::ExternalDocument*)
 
 #endif // QMLCODEEDITORWIDGET_H

@@ -32,15 +32,45 @@
 // Fix different fonts of different QmlCodeDocuments
 // Drag & drop files from desktop
 
-#define global(x) static_cast<GlobalDocument*>((x))
-#define internal(x) static_cast<InternalDocument*>((x))
-#define external(x) static_cast<ExternalDocument*>((x))
+#define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
+#define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
+#define external(x) static_cast<QmlCodeEditorWidget::ExternalDocument*>((x))
 #define globalDir() SaveUtils::toGlobalDir(ProjectManager::dir())
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
 #define externalDir(x) dname(external((x))->fullPath)
 #define fullPath(x, y) (x) + separator() + (y)
 
 enum ComboDataRole { DocumentRole = Qt::UserRole + 1 };
+
+namespace {
+
+QmlCodeEditorWidget::GlobalDocument* lastGlobalDocument;
+QmlCodeEditorWidget::InternalDocument* lastInternalDocument;
+QmlCodeEditorWidget::ExternalDocument* lastExternalDocument;
+
+void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document)
+{
+    if (document->scope == QmlCodeEditorToolBar::Global)
+        lastGlobalDocument = global(document);
+    else if (document->scope == QmlCodeEditorToolBar::Internal)
+        lastInternalDocument = internal(document);
+    else
+        lastExternalDocument = external(document);
+}
+
+bool warnIfNotATextFile(const QString& filePath)
+{
+    QMimeDatabase mimeDatabase;
+    const QMimeType mimeType = mimeDatabase.mimeTypeForFile(filePath);
+    if (!mimeType.isValid() || !mimeType.inherits("text/plain")) {
+        return QMessageBox::warning(
+                    0,
+                    QObject::tr("Oops"),
+                    QObject::tr("Qml Code Editor cannot open non-text files."));
+    }
+    return false;
+}
+}
 
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
   , m_splitter(new QSplitter(this))
@@ -72,6 +102,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
             this, &QmlCodeEditorWidget::pinned);
     connect(toolBar(), &QmlCodeEditorToolBar::scopeActivated,
             this, &QmlCodeEditorWidget::onScopeActivation);
+    connect(toolBar(), &QmlCodeEditorToolBar::comboActivated,
+            this, &QmlCodeEditorWidget::onComboActivation);
 
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
@@ -91,6 +123,9 @@ void QmlCodeEditorWidget::sweep()
     m_fileExplorer->sweep();
 
     m_openDocument = nullptr;
+    lastGlobalDocument = nullptr;
+    lastInternalDocument = nullptr;
+    lastExternalDocument = nullptr;
     // TODO: m_openDocument = new untitled external document
 }
 
@@ -113,11 +148,22 @@ void QmlCodeEditorWidget::close()
 void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 {
     if (scope == QmlCodeEditorToolBar::Global)
-        return activateGlobalScope();
+        return openGlobal(QString());
     if (scope == QmlCodeEditorToolBar::Internal)
-        return activateInternalScope();
+        return openInternal(nullptr, QString());
     if (scope == QmlCodeEditorToolBar::External)
-        return activateExternalScope();
+        return openExternal(QString());
+}
+
+void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
+{
+    Q_ASSERT(toolBar()->scope() != QmlCodeEditorToolBar::Global || combo != QmlCodeEditorToolBar::RightCombo);
+
+    QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+    QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
+
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Global)
+        openGlobal(leftCombo->currentText());
 }
 
 void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
@@ -130,32 +176,10 @@ void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
         return openExternal(fullPath(m_fileExplorer->rootPath(), relativePath));
 }
 
-bool QmlCodeEditorWidget::warnIfNotATextFile(const QString& filePath) const
-{
-    QMimeDatabase mimeDatabase;
-    const QMimeType mimeType = mimeDatabase.mimeTypeForFile(filePath);
-    if (!mimeType.isValid() || !mimeType.inherits("text/plain"))
-        return QMessageBox::warning(0, tr("Oops"), tr("Qml Code Editor cannot open non-text files."));
-    return false;
-}
-
-void QmlCodeEditorWidget::activateGlobalScope()
-{
-    // TODO
-}
-
-void QmlCodeEditorWidget::activateInternalScope()
-{
-    // TODO
-}
-
-void QmlCodeEditorWidget::activateExternalScope()
-{
-    // TODO
-}
-
 void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 {
+    if (relativePath.isEmpty())
+        return openDocument(lastGlobalDocument);
     if (warnIfNotATextFile(fullPath(globalDir(), relativePath)))
         return;
     if (!globalExists(relativePath))
@@ -165,6 +189,8 @@ void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 
 void QmlCodeEditorWidget::openInternal(Control* control, const QString& relativePath)
 {
+    if (!control || relativePath.isEmpty())
+        return openDocument(lastInternalDocument);
     if (warnIfNotATextFile(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
         return;
     if (!internalExists(control, relativePath))
@@ -174,6 +200,8 @@ void QmlCodeEditorWidget::openInternal(Control* control, const QString& relative
 
 void QmlCodeEditorWidget::openExternal(const QString& fullPath)
 {
+    if (fullPath.isEmpty())
+        return openDocument(lastExternalDocument);
     if (warnIfNotATextFile(fullPath))
         return;
     if (!externalExists(fullPath))
@@ -254,14 +282,14 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
         const int i = leftCombo->count();
         leftCombo->addItem(document->relativePath);
         leftCombo->setItemData(i, document->relativePath, Qt::ToolTipRole);
-        leftCombo->setItemData(i, QVariant::fromValue((void*)document), ComboDataRole::DocumentRole);
+        leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
 
     return document;
 }
 
 QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control* control,
-                                                                           const QString& relativePath)
+                                                                        const QString& relativePath)
 {
     InternalDocument* document = new InternalDocument;
     document->scope = QmlCodeEditorToolBar::Internal;
@@ -292,12 +320,16 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
 
 void QmlCodeEditorWidget::openDocument(Document* document)
 {
+    if (!document)
+        return;
+
     if (m_openDocument == document)
         return;
 
     setupToolBar(document);
     setupCodeEditor(document);
     setupFileExplorer(document);
+    setupLastOpenedDocs(document);
 
     m_openDocument = document;
 
@@ -342,7 +374,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
                 const int i = leftCombo->count();
                 leftCombo->addItem(doc->relativePath);
                 leftCombo->setItemData(i, doc->relativePath, Qt::ToolTipRole);
-                leftCombo->setItemData(i, QVariant::fromValue((void*)doc), ComboDataRole::DocumentRole);
+                leftCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
                 if (doc == document)
                     leftCombo->setCurrentIndex(i);
             }
@@ -358,7 +390,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
             for (int i = 0; i < leftCombo->count(); ++i) {
-                if (leftCombo->itemData(i, DocumentRole).value<void*>() == document) {
+                if (leftCombo->itemData(i, DocumentRole).value<Document*>() == document) {
                     leftCombo->setCurrentIndex(i);
                     break;
                 }
