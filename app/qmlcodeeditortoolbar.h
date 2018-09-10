@@ -36,7 +36,7 @@ private slots:
     void onShowButtonClick();
     void onClipboardDataChange();
     void onCursorPositionChange();
-    void onScopeChange(QAction*);
+    void onScopeActivation(QAction*);
     void onComboActivation();
 
 signals:
@@ -45,6 +45,7 @@ signals:
     void pinned(bool);
     void showed(bool);
     void scopeChanged(Scope);
+    void scopeActivated(Scope);
     void comboActivated(Combo);
 
 private:

@@ -328,6 +328,11 @@ void FileExplorer::setRootPath(const QString& rootPath)
     hideColumn(3);
 }
 
+QString FileExplorer::rootPath() const
+{
+    return m_fileSystemModel->rootPath();
+}
+
 void FileExplorer::onModeChange()
 {
     Q_D(FileExplorer);
@@ -585,7 +590,7 @@ void FileExplorer::onItemDoubleClick(const QModelIndex& index)
     if (m_fileSystemModel->isDir(mt(index)) && m_mode == Explorer)
         goToPath(m_fileSystemModel->filePath(mt(index)));
     else
-        emit fileOpened(m_fileSystemModel->filePath(mt(index)));
+        emit fileOpened(QDir(rootPath()).relativeFilePath(m_fileSystemModel->filePath(mt(index))));
 }
 
 void FileExplorer::setPalette(const QPalette& pal)

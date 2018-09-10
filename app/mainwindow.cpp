@@ -210,6 +210,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     globalDockWidget->setWindowTitle(tr("Global Resources"));
     globalDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, globalDockWidget);
+    connect(m_globalResourcesPane, &GlobalResourcesPane::fileOpened,
+            centralWidget()->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openGlobal);
 
     /* Add Toolbox Pane */
     auto toolboxTitleLabel = new QLabel;

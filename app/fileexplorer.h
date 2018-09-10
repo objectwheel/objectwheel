@@ -26,6 +26,7 @@ class FileExplorer : public QTreeView
 public:
     explicit FileExplorer(QWidget* parent = nullptr);
     void setRootPath(const QString& rootPath);
+    QString rootPath() const;
 
 public slots:
     void sweep();
@@ -64,7 +65,7 @@ private:
     void updateGeometries() override;
 
 signals:
-    void fileOpened(const QString& path);
+    void fileOpened(const QString& relativePath);
     void filesDeleted(const QSet<QString>& pathes);
 
 private:

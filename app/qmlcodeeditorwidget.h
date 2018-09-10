@@ -26,7 +26,6 @@ class QmlCodeEditorWidget : public QWidget
     struct InternalDocument : public GlobalDocument { Control* control; };
     struct ExternalDocument : public Document { QString fullPath; };
 
-
 public:
     explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
 
@@ -44,10 +43,6 @@ public:
     InternalDocument* getInternal(Control* control, const QString& relativePath) const;
     ExternalDocument* getExternal(const QString& fullPath) const;
 
-    GlobalDocument* createGlobal(const QString& relativePath);
-    InternalDocument* createInternal(Control* control, const QString& relativePath);
-    ExternalDocument* createExternal(const QString& fullPath);
-
 public slots:
     void sweep();
     void save();
@@ -55,7 +50,7 @@ public slots:
     void setFileExplorerVisible(bool visible);
 
 private slots:
-    void onScopeChange(QmlCodeEditorToolBar::Scope);
+    void onScopeActivation(QmlCodeEditorToolBar::Scope);
     void onFileExplorerFileOpen(const QString& filePath);
 
 private:
@@ -64,8 +59,12 @@ private:
     void activateExternalScope();
     void updateToolBar(QmlCodeEditorToolBar::Scope);
     void openDocument(Document* document);
-    QmlCodeEditorToolBar* toolBar() const;
+
     QSize sizeHint() const override;
+    QmlCodeEditorToolBar* toolBar() const;
+    GlobalDocument* addGlobal(const QString& relativePath);
+    InternalDocument* addInternal(Control* control, const QString& relativePath);
+    ExternalDocument* addExternal(const QString& fullPath);
 
 signals:
     void activated();

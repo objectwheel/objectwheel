@@ -38,7 +38,7 @@
 #define globalDir() SaveUtils::toGlobalDir(ProjectManager::dir())
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
 #define externalDir(x) dname(external((x))->fullPath)
-#define relativePath(x, y) QDir((x)).relativeFilePath((y))
+#define fullPath(x) m_fileExplorer->rootPath() + separator() + (x)
 
 enum ComboDataRole { DocumentRole = Qt::UserRole + 1 };
 
@@ -70,8 +70,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
             this, &QmlCodeEditorWidget::setFileExplorerVisible);
     connect(toolBar(), &QmlCodeEditorToolBar::pinned,
             this, &QmlCodeEditorWidget::pinned);
-    connect(toolBar(), &QmlCodeEditorToolBar::scopeChanged,
-            this, &QmlCodeEditorWidget::onScopeChange);
+    connect(toolBar(), &QmlCodeEditorToolBar::scopeActivated,
+            this, &QmlCodeEditorWidget::onScopeActivation);
 
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
@@ -109,7 +109,7 @@ void QmlCodeEditorWidget::close()
     // TODO
 }
 
-void QmlCodeEditorWidget::onScopeChange(QmlCodeEditorToolBar::Scope scope)
+void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 {
     if (scope == QmlCodeEditorToolBar::Global)
         return activateGlobalScope();
@@ -118,21 +118,21 @@ void QmlCodeEditorWidget::onScopeChange(QmlCodeEditorToolBar::Scope scope)
     return activateExternalScope();
 }
 
-void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& filePath)
+void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
 {
     QMimeDatabase mimeDatabase;
-    const QMimeType mimeType = mimeDatabase.mimeTypeForFile(filePath);
+    const QMimeType mimeType = mimeDatabase.mimeTypeForFile(fullPath(relativePath));
     if (!mimeType.isValid() || !mimeType.inherits("text/plain")) {
         QMessageBox::warning(this, tr("Oops"), tr("Qml Code Editor cannot open non-text files."));
         return;
     }
 
     if (m_openDocument->type == Global)
-        return openGlobal(relativePath(globalDir(), filePath));
+        return openGlobal(relativePath);
     if (m_openDocument->type == Internal)
-        return openInternal(internal(m_openDocument)->control, relativePath(internalDir(m_openDocument), filePath));
+        return openInternal(internal(m_openDocument)->control, relativePath);
     if (m_openDocument->type == External)
-        return openExternal(filePath);
+        return openExternal(fullPath(relativePath));
 }
 
 void QmlCodeEditorWidget::activateGlobalScope()
@@ -150,6 +150,7 @@ void QmlCodeEditorWidget::activateExternalScope()
     // TODO
 }
 
+// Assumes scope is set; m_openDocument is set;
 void QmlCodeEditorWidget::updateToolBar(QmlCodeEditorToolBar::Scope scope)
 {
     if (toolBar()->scope() != scope)
@@ -172,6 +173,8 @@ void QmlCodeEditorWidget::updateToolBar(QmlCodeEditorToolBar::Scope scope)
             leftCombo->addItem(document->relativePath);
             leftCombo->setItemData(i, document->relativePath, Qt::ToolTipRole);
             leftCombo->setItemData(i, QVariant::fromValue((void*)document), ComboDataRole::DocumentRole);
+            if (document == m_openDocument)
+                leftCombo->setCurrentIndex(i);
         }
         break;
 
@@ -189,21 +192,21 @@ void QmlCodeEditorWidget::updateToolBar(QmlCodeEditorToolBar::Scope scope)
 void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 {
     if (!globalExists(relativePath))
-        return openDocument(createGlobal(relativePath));
+        return openDocument(addGlobal(relativePath));
     openDocument(getGlobal(relativePath));
 }
 
 void QmlCodeEditorWidget::openInternal(Control* control, const QString& relativePath)
 {
     if (!internalExists(control, relativePath))
-        return openDocument(createInternal(control, relativePath));
+        return openDocument(addInternal(control, relativePath));
     openDocument(getInternal(control, relativePath));
 }
 
 void QmlCodeEditorWidget::openExternal(const QString& fullPath)
 {
     if (!externalExists(fullPath))
-        return openDocument(createExternal(fullPath));
+        return openDocument(addExternal(fullPath));
     openDocument(getExternal(fullPath));
 }
 
@@ -262,7 +265,7 @@ QmlCodeEditorWidget::ExternalDocument*QmlCodeEditorWidget::getExternal(const QSt
     return nullptr;
 }
 
-QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::createGlobal(const QString& relativePath)
+QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QString& relativePath)
 {
     GlobalDocument* document = new GlobalDocument;
     document->type = Global;
@@ -272,11 +275,21 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::createGlobal(const QSt
     document->document->setPlainText(rdfile(globalDir() + separator() + relativePath));
     document->document->setModified(false);
     document->textCursor = QTextCursor(document->document);
+
     m_globalDocuments.append(document);
+
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Global) {
+        QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+        const int i = leftCombo->count();
+        leftCombo->addItem(document->relativePath);
+        leftCombo->setItemData(i, document->relativePath, Qt::ToolTipRole);
+        leftCombo->setItemData(i, QVariant::fromValue((void*)document), ComboDataRole::DocumentRole);
+    }
+
     return document;
 }
 
-QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::createInternal(Control* control,
+QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control* control,
                                                                            const QString& relativePath)
 {
     InternalDocument* document = new InternalDocument;
@@ -292,7 +305,7 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::createInternal(Contr
     return document;
 }
 
-QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::createExternal(const QString& fullPath)
+QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QString& fullPath)
 {
     ExternalDocument* document = new ExternalDocument;
     document->type = External;

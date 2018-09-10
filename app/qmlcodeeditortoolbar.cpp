@@ -150,7 +150,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
             this, &QmlCodeEditorToolBar::onCursorPositionChange);
     connect(menu, &QMenu::triggered, this,
-            &QmlCodeEditorToolBar::onScopeChange);
+            &QmlCodeEditorToolBar::onScopeActivation);
     connect(m_leftCombo, qOverload<int>(&QComboBox::activated),
             this, &QmlCodeEditorToolBar::onComboActivation);
     connect(m_rightCombo, qOverload<int>(&QComboBox::activated),
@@ -176,13 +176,22 @@ void QmlCodeEditorToolBar::sweep()
 
 void QmlCodeEditorToolBar::setScope(QmlCodeEditorToolBar::Scope scope)
 {
+    m_scopeButton->setProperty("ow_scope", scope);
+
+    if (scope == Global)
+        m_scopeButton->setIcon(GLOBAL_TOOLBAR.icon());
+    else if (scope == Internal)
+        m_scopeButton->setIcon(INTERNAL_TOOLBAR.icon());
+    else
+        m_scopeButton->setIcon(EXTERNAL_TOOLBAR.icon());
+
     for (QAction* action : m_scopeButton->menu()->actions()) {
         Scope s = action->property("ow_scope").value<Scope>();
-        if (scope == s) {
+        if (scope == s)
             action->setChecked(true);
-            onScopeChange(action);
-        }
     }
+
+    emit scopeChanged(scope);
 }
 
 void QmlCodeEditorToolBar::onPinButtonClick()
@@ -228,17 +237,11 @@ void QmlCodeEditorToolBar::onCursorPositionChange()
                                .arg(textCursor.columnNumber() + 1));
 }
 
-void QmlCodeEditorToolBar::onScopeChange(QAction* action)
+void QmlCodeEditorToolBar::onScopeActivation(QAction* action)
 {
     Scope scope = action->property("ow_scope").value<Scope>();
-    if (scope == Global)
-        m_scopeButton->setIcon(GLOBAL_TOOLBAR.icon());
-    else if (scope == Internal)
-        m_scopeButton->setIcon(INTERNAL_TOOLBAR.icon());
-    else
-        m_scopeButton->setIcon(EXTERNAL_TOOLBAR.icon());
-    m_scopeButton->setProperty("ow_scope", scope);
-    emit scopeChanged(scope);
+    setScope(scope);
+    emit scopeActivated(scope);
 }
 
 void QmlCodeEditorToolBar::onComboActivation()
