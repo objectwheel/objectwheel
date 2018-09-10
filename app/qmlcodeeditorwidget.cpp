@@ -14,6 +14,7 @@
 #include <QLayout>
 #include <QMimeDatabase>
 #include <QMessageBox>
+#include <QComboBox>
 
 // FIXME:
 // What happens if a global open file get renamed
@@ -39,6 +40,8 @@
 #define externalDir(x) dname(external((x))->fullPath)
 #define relativePath(x, y) QDir((x)).relativeFilePath((y))
 
+enum ComboDataRole { DocumentRole = Qt::UserRole + 1 };
+
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
   , m_splitter(new QSplitter(this))
   , m_codeEditor(new QmlCodeEditor(this))
@@ -59,15 +62,15 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
     m_splitter->setCollapsible(1, false);
     m_splitter->setHandleWidth(0);
 
-    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::saved,
+    connect(toolBar(), &QmlCodeEditorToolBar::saved,
             this, &QmlCodeEditorWidget::save);
-    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::closed,
+    connect(toolBar(), &QmlCodeEditorToolBar::closed,
             this, &QmlCodeEditorWidget::close);
-    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::showed,
+    connect(toolBar(), &QmlCodeEditorToolBar::showed,
             this, &QmlCodeEditorWidget::setFileExplorerVisible);
-    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::pinned,
+    connect(toolBar(), &QmlCodeEditorToolBar::pinned,
             this, &QmlCodeEditorWidget::pinned);
-    connect(m_codeEditor->toolBar(), &QmlCodeEditorToolBar::scopeChanged,
+    connect(toolBar(), &QmlCodeEditorToolBar::scopeChanged,
             this, &QmlCodeEditorWidget::onScopeChange);
 
     connect(m_fileExplorer, &FileExplorer::fileOpened,
@@ -96,9 +99,23 @@ void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
     m_fileExplorer->setHidden(!visible);
 }
 
+void QmlCodeEditorWidget::save()
+{
+    // TODO
+}
+
+void QmlCodeEditorWidget::close()
+{
+    // TODO
+}
+
 void QmlCodeEditorWidget::onScopeChange(QmlCodeEditorToolBar::Scope scope)
 {
-
+    if (scope == QmlCodeEditorToolBar::Global)
+        return activateGlobalScope();
+    if (scope == QmlCodeEditorToolBar::Internal)
+        return activateInternalScope();
+    return activateExternalScope();
 }
 
 void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& filePath)
@@ -116,6 +133,57 @@ void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& filePath)
         return openInternal(internal(m_openDocument)->control, relativePath(internalDir(m_openDocument), filePath));
     if (m_openDocument->type == External)
         return openExternal(filePath);
+}
+
+void QmlCodeEditorWidget::activateGlobalScope()
+{
+    // TODO
+}
+
+void QmlCodeEditorWidget::activateInternalScope()
+{
+    // TODO
+}
+
+void QmlCodeEditorWidget::activateExternalScope()
+{
+    // TODO
+}
+
+void QmlCodeEditorWidget::updateToolBar(QmlCodeEditorToolBar::Scope scope)
+{
+    if (toolBar()->scope() != scope)
+        return;
+
+    QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+    QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
+
+    leftCombo->hide();
+    leftCombo->clear();
+    rightCombo->hide();
+    rightCombo->clear();
+
+    switch (scope) {
+    case QmlCodeEditorToolBar::Global:
+        leftCombo->show();
+        leftCombo->setToolTip(tr("Relative file path of the document within Global Resources"));
+        for (GlobalDocument* document : m_globalDocuments) {
+            const int i = leftCombo->count();
+            leftCombo->addItem(document->relativePath);
+            leftCombo->setItemData(i, document->relativePath, Qt::ToolTipRole);
+            leftCombo->setItemData(i, QVariant::fromValue((void*)document), ComboDataRole::DocumentRole);
+        }
+        break;
+
+    case QmlCodeEditorToolBar::Internal:
+        break;
+
+    case QmlCodeEditorToolBar::External:
+        break;
+
+    default:
+        break;
+    }
 }
 
 void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
@@ -238,16 +306,6 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::createExternal(const
     return document;
 }
 
-void QmlCodeEditorWidget::save()
-{
-    // TODO
-}
-
-void QmlCodeEditorWidget::close()
-{
-    // TODO
-}
-
 void QmlCodeEditorWidget::openDocument(Document* document)
 {
     if (m_openDocument == document)
@@ -266,6 +324,11 @@ void QmlCodeEditorWidget::openDocument(Document* document)
         m_fileExplorer->setRootPath(externalDir(m_openDocument));
 
     emit activated();
+}
+
+QmlCodeEditorToolBar* QmlCodeEditorWidget::toolBar() const
+{
+    return m_codeEditor->toolBar();
 }
 
 QSize QmlCodeEditorWidget::sizeHint() const

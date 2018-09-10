@@ -10,6 +10,7 @@
 #include <QClipboard>
 #include <QMimeData>
 #include <QMenu>
+#include <QComboBox>
 
 using namespace Utils;
 using namespace Icons;
@@ -26,6 +27,8 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
   , m_showButton(new QToolButton)
   , m_scopeButton(new QToolButton)
   , m_lineColumnLabel(new QLabel)
+  , m_leftCombo(new QComboBox)
+  , m_rightCombo(new QComboBox)
 {
     addWidget(m_pinButton);
     addSeparator();
@@ -40,6 +43,8 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     addWidget(m_closeButton);
     addSeparator();
     addWidget(m_scopeButton);
+    addWidget(m_leftCombo);
+    addWidget(m_rightCombo);
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     addWidget(m_lineColumnLabel);
     addSeparator();
@@ -55,6 +60,8 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_pasteButton->setFixedHeight(22);
     m_showButton->setFixedHeight(22);
     m_scopeButton->setFixedHeight(22);
+    m_leftCombo->setFixedHeight(22);
+    m_rightCombo->setFixedHeight(22);
     m_lineColumnLabel->setFixedHeight(22);
 
     m_pinButton->setCursor(Qt::PointingHandCursor);
@@ -67,6 +74,8 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     m_pasteButton->setCursor(Qt::PointingHandCursor);
     m_scopeButton->setCursor(Qt::PointingHandCursor);
     m_showButton->setCursor(Qt::PointingHandCursor);
+    m_leftCombo->setCursor(Qt::PointingHandCursor);
+    m_rightCombo->setCursor(Qt::PointingHandCursor);
 
     m_undoButton->setToolTip(tr("Undo action"));
     m_redoButton->setToolTip(tr("Redo action"));
@@ -142,6 +151,10 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
             this, &QmlCodeEditorToolBar::onCursorPositionChange);
     connect(menu, &QMenu::triggered, this,
             &QmlCodeEditorToolBar::onScopeChange);
+    connect(m_leftCombo, qOverload<int>(&QComboBox::activated),
+            this, &QmlCodeEditorToolBar::onComboActivation);
+    connect(m_rightCombo, qOverload<int>(&QComboBox::activated),
+            this, &QmlCodeEditorToolBar::onComboActivation);
 
     m_cutButton->setEnabled(codeEditor->textCursor().hasSelection());
     m_copyButton->setEnabled(codeEditor->textCursor().hasSelection());
@@ -224,7 +237,18 @@ void QmlCodeEditorToolBar::onScopeChange(QAction* action)
         m_scopeButton->setIcon(INTERNAL_TOOLBAR.icon());
     else
         m_scopeButton->setIcon(EXTERNAL_TOOLBAR.icon());
+    m_scopeButton->setProperty("ow_scope", scope);
     emit scopeChanged(scope);
+}
+
+void QmlCodeEditorToolBar::onComboActivation()
+{
+    if (auto combo = qobject_cast<QComboBox*>(sender())) {
+        if (combo == m_leftCombo)
+            return comboActivated(LeftCombo);
+        if (combo == m_rightCombo)
+            return comboActivated(RightCombo);
+    }
 }
 
 void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
@@ -264,6 +288,18 @@ void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
         m_saveButton->setDisabled(true);
         m_pasteButton->setDisabled(true);
     }
+}
+
+QmlCodeEditorToolBar::Scope QmlCodeEditorToolBar::scope() const
+{
+    return m_scopeButton->property("ow_scope").value<Scope>();
+}
+
+QComboBox* QmlCodeEditorToolBar::combo(QmlCodeEditorToolBar::Combo combo) const
+{
+    if (combo == LeftCombo)
+        return m_leftCombo;
+    return m_rightCombo;
 }
 
 QSize QmlCodeEditorToolBar::sizeHint() const

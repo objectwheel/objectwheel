@@ -26,6 +26,7 @@ class QmlCodeEditorWidget : public QWidget
     struct InternalDocument : public GlobalDocument { Control* control; };
     struct ExternalDocument : public Document { QString fullPath; };
 
+
 public:
     explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
 
@@ -58,7 +59,12 @@ private slots:
     void onFileExplorerFileOpen(const QString& filePath);
 
 private:
+    void activateGlobalScope();
+    void activateInternalScope();
+    void activateExternalScope();
+    void updateToolBar(QmlCodeEditorToolBar::Scope);
     void openDocument(Document* document);
+    QmlCodeEditorToolBar* toolBar() const;
     QSize sizeHint() const override;
 
 signals:
