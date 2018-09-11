@@ -15,10 +15,6 @@
 using namespace Utils;
 using namespace Icons;
 
-namespace {
-QHash<QmlCodeEditorToolBar::Combo, QAction*> g_actions;
-}
-
 QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar(codeEditor)
   , m_pinButton(new QToolButton)
   , m_undoButton(new QToolButton)
@@ -45,12 +41,15 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     addWidget(m_saveButton);
     addSeparator();
     addWidget(m_scopeButton);
-    g_actions.insert(LeftCombo, addWidget(m_leftCombo));
-    g_actions.insert(RightCombo, addWidget(m_rightCombo));
     addSeparator();
-    addWidget(m_closeButton);
-    addSeparator();
+    m_documentActions.append(addWidget(m_leftCombo));   // 0
+    m_documentActions.append(addSeparator());           // 1
+    m_documentActions.append(addWidget(m_rightCombo));  // 2
+    m_documentActions.append(addSeparator());           // 3
+    m_documentActions.append(addWidget(m_closeButton)); // 4
+    m_documentActions.append(addSeparator());           // 5
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
+    addSeparator();
     addWidget(m_lineColumnLabel);
     addSeparator();
     addWidget(m_showButton);
@@ -250,7 +249,7 @@ void QmlCodeEditorToolBar::onClipboardDataChange()
 void QmlCodeEditorToolBar::onCursorPositionChange()
 {
     QTextCursor textCursor = static_cast<QmlCodeEditor*>(parentWidget())->textCursor();
-    QString lineColumnText(tr("Line: ") + "%1, " + tr("Col: ") + "%2  ");
+    QString lineColumnText(tr("  Line: ") + "%1, " + tr("Col: ") + "%2  ");
     m_lineColumnLabel->setText(lineColumnText
                                .arg(textCursor.blockNumber() + 1)
                                .arg(textCursor.columnNumber() + 1));
@@ -312,6 +311,16 @@ void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
     }
 }
 
+void QmlCodeEditorToolBar::setVisibleDocumentActions(QmlCodeEditorToolBar::DocumentActions action)
+{
+    m_documentActions.at(0)->setVisible(action & LeftAction);
+    m_documentActions.at(1)->setVisible(action & LeftAction);
+    m_documentActions.at(2)->setVisible(action & RightAction);
+    m_documentActions.at(3)->setVisible(action & RightAction);
+    m_documentActions.at(4)->setVisible(action & CloseAction);
+    m_documentActions.at(5)->setVisible(action & CloseAction);
+}
+
 QmlCodeEditorToolBar::Scope QmlCodeEditorToolBar::scope() const
 {
     return m_scopeButton->property("ow_scope").value<Scope>();
@@ -322,11 +331,6 @@ QComboBox* QmlCodeEditorToolBar::combo(QmlCodeEditorToolBar::Combo combo) const
     if (combo == LeftCombo)
         return m_leftCombo;
     return m_rightCombo;
-}
-
-QAction* QmlCodeEditorToolBar::comboAction(QmlCodeEditorToolBar::Combo combo) const
-{
-    return g_actions.value(combo);
 }
 
 QSize QmlCodeEditorToolBar::sizeHint() const

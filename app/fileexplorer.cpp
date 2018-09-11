@@ -588,8 +588,8 @@ void FileExplorer::onFileSelectionChange()
 void FileExplorer::onItemDoubleClick(const QModelIndex& index)
 {
     if (m_fileSystemModel->isDir(mt(index)) && m_mode == Explorer)
-        goToPath(m_fileSystemModel->filePath(mt(index)));
-    else
+        return goToPath(m_fileSystemModel->filePath(mt(index)));
+    if (!m_fileSystemModel->isDir(mt(index)))
         emit fileOpened(QDir(rootPath()).relativeFilePath(m_fileSystemModel->filePath(mt(index))));
 }
 

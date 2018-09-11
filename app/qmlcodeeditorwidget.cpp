@@ -28,7 +28,6 @@
 // What happens if a control's dir changes
 // What happens to the file explorer's root path if a control's dir changes
 
-// Change the relativePath parameter on public methods with filePath (like control.url())
 // Fix different fonts of different QmlCodeDocuments
 // Drag & drop files from desktop
 
@@ -429,19 +428,15 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
     bool refresh = !m_openDocument || m_openDocument->scope != document->scope;
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
-    QAction* leftComboAction = toolBar()->comboAction(QmlCodeEditorToolBar::LeftCombo);
-    QAction* rightComboAction = toolBar()->comboAction(QmlCodeEditorToolBar::RightCombo);
 
     if (refresh) {
         leftCombo->clear();
         rightCombo->clear();
-        leftComboAction->setVisible(false);
-        rightComboAction->setVisible(false);
         toolBar()->setScope(scope);
 
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
-            leftComboAction->setVisible(true);
+            toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::LeftAction | QmlCodeEditorToolBar::CloseAction);
             leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
                 const int i = leftCombo->count();
@@ -453,8 +448,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::Internal:
-            leftComboAction->setVisible(true);
-            rightComboAction->setVisible(true);
+            toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::AllActions);
             leftCombo->setToolTip(tr("Control name"));
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
             for (Control* control : controls(m_internalDocuments)) {
@@ -475,7 +469,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::External:
-            leftComboAction->setVisible(true);
+            toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::LeftAction | QmlCodeEditorToolBar::CloseAction);
             leftCombo->setToolTip(tr("File name of the open document"));
             for (ExternalDocument* doc : m_externalDocuments) {
                 const int i = leftCombo->count();

@@ -1348,7 +1348,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                            && */m_linkPressed
+                                                                                                                                    && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1394,9 +1394,9 @@ void QmlCodeEditor::mousePressEvent(QMouseEvent *e)
             //            if (m_inBlockSelectionMode)
             //                disableBlockSelection(QmlCodeEditor::NoCursorUpdate);
 
-//                        QTextBlock foldedBlock = foldedBlockAt(e->pos());
-                        if (m_mouseOnFoldedMarker && m_rowBar->bracketBand()->toggleFold(e->pos()))
-                            viewport()->setCursor(Qt::IBeamCursor);
+            //                        QTextBlock foldedBlock = foldedBlockAt(e->pos());
+            if (m_mouseOnFoldedMarker && m_rowBar->bracketBand()->toggleFold(e->pos()))
+                viewport()->setCursor(Qt::IBeamCursor);
 
             //            RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());
             //            if (refactorMarker.isValid()) {
@@ -1457,7 +1457,7 @@ void QmlCodeEditor::timerEvent(QTimerEvent* e)
         m_foldedBlockTimer.stop();
         viewport()->update();
     } else if (e->timerId() == m_cursorFlashTimer.timerId()) {
-//        m_cursorVisible = !m_cursorVisible;
+        //        m_cursorVisible = !m_cursorVisible;
         viewport()->update();
     }
     QPlainTextEdit::timerEvent(e);
@@ -1941,11 +1941,12 @@ void QmlCodeEditor::updateAutoCompleteHighlight()
 
 void QmlCodeEditor::setNoDocsVisible(bool visible)
 {
-    m_toolBar->comboAction(QmlCodeEditorToolBar::LeftCombo)->setVisible(!visible);
-    m_toolBar->comboAction(QmlCodeEditorToolBar::RightCombo)->setVisible(!visible);
     m_rowBar->setDisabled(visible);
     viewport()->setDisabled(visible);
     m_noDocsLabel->setVisible(visible);
+    m_toolBar->setVisibleDocumentActions(visible
+                                         ? QmlCodeEditorToolBar::NoAction
+                                         : QmlCodeEditorToolBar::AllActions);
     if (visible)
         m_noDocsLabel->raise();
 }
@@ -3734,7 +3735,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
         setTextCursor(cursor);
     }
 
-//skip_event:
+    //skip_event:
     if (!ro && e->key() == Qt::Key_Delete && /*d->m_parenthesesMatchingEnabled*/true)
         m_parenthesesMatchingTimer->start(50);
 

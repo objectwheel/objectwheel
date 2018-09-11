@@ -15,19 +15,28 @@ class QmlCodeEditorToolBar : public QToolBar
     Q_OBJECT
 
 public:
+    enum DocumentAction {
+        NoAction = 0x0,
+        LeftAction = 0x1,
+        RightAction = 0x2,
+        CloseAction = 0x4,
+        AllActions = LeftAction | RightAction | CloseAction
+    };
     enum Combo { LeftCombo, RightCombo };
     enum Scope { Global, Internal, External };
+
     Q_ENUM(Scope)
+    Q_DECLARE_FLAGS(DocumentActions, DocumentAction)
 
 public:
     explicit QmlCodeEditorToolBar(QmlCodeEditor* parent = nullptr);
 
     void setScope(Scope);
     void setDocument(QmlCodeDocument* document);
+    void setVisibleDocumentActions(DocumentActions action);
 
     Scope scope() const;
     QComboBox* combo(Combo) const;
-    QAction* comboAction(Combo) const;
 
 public slots:
     void sweep();
@@ -53,6 +62,7 @@ private:
 
 private:
     QPointer<QmlCodeDocument> m_document;
+    QList<QAction*> m_documentActions;
     QToolButton* m_pinButton;
     QToolButton* m_undoButton;
     QToolButton* m_redoButton;
@@ -67,5 +77,7 @@ private:
     QComboBox* m_leftCombo;
     QComboBox* m_rightCombo;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QmlCodeEditorToolBar::DocumentActions)
 
 #endif // QMLCODEEDITORTOOLBAR_H
