@@ -264,6 +264,7 @@ private:
     void timerEvent(QTimerEvent* e) override;
 
 private:
+    QmlCodeDocument* m_initialEmptyDocument;
     QLabel* m_noDocsLabel;
     RowBar* m_rowBar;
     QmlCodeEditorToolBar* m_toolBar;

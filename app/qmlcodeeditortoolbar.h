@@ -45,7 +45,6 @@ signals:
     void closed();
     void pinned(bool);
     void showed(bool);
-    void scopeChanged(Scope);
     void scopeActivated(Scope);
     void comboActivated(Combo);
 

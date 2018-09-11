@@ -44,7 +44,7 @@ enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
 
 namespace {
 
-bool g_fileExplorerOpen;
+bool g_fileExplorerHid = false;
 QmlCodeEditorWidget::GlobalDocument* g_lastGlobalDocument;
 QmlCodeEditorWidget::InternalDocument* g_lastInternalDocument;
 QmlCodeEditorWidget::ExternalDocument* g_lastExternalDocument;
@@ -125,16 +125,36 @@ int QmlCodeEditorWidget::count() const
 
 void QmlCodeEditorWidget::sweep()
 {
-    m_splitter->setStretchFactor(0, 30);
-    m_splitter->setStretchFactor(1, 9);
-
     m_codeEditor->sweep();
     m_fileExplorer->sweep();
 
+    m_splitter->setStretchFactor(0, 30);
+    m_splitter->setStretchFactor(1, 9);
+
+    g_fileExplorerHid = false;
     m_openDocument = nullptr;
     g_lastGlobalDocument = nullptr;
     g_lastInternalDocument = nullptr;
     g_lastExternalDocument = nullptr;
+
+    setFileExplorerVisible(false);
+
+    for (GlobalDocument* document : m_globalDocuments) {
+        delete document->document;
+        delete document;
+    }
+    for (InternalDocument* document : m_internalDocuments) {
+        delete document->document;
+        delete document;
+    }
+    for (ExternalDocument* document : m_externalDocuments) {
+        delete document->document;
+        delete document;
+    }
+    m_globalDocuments.clear();
+    m_internalDocuments.clear();
+    m_externalDocuments.clear();
+
     // TODO: m_openDocument = new untitled external document
 }
 
@@ -165,6 +185,10 @@ void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 
     m_openDocument = nullptr;
     m_codeEditor->setNoDocsVisible(true);
+    if (m_fileExplorer->isVisible()) {
+        g_fileExplorerHid = true;
+        setFileExplorerVisible(false);
+    }
 }
 
 void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
@@ -380,6 +404,10 @@ void QmlCodeEditorWidget::openDocument(Document* document)
 
 void QmlCodeEditorWidget::setupCodeEditor(QmlCodeEditorWidget::Document* document)
 {
+    if (g_fileExplorerHid) {
+        g_fileExplorerHid = false;
+        setFileExplorerVisible(true);
+    }
     m_codeEditor->setNoDocsVisible(false);
     m_codeEditor->setCodeDocument(document->document);
     m_codeEditor->setTextCursor(document->textCursor);

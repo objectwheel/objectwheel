@@ -362,6 +362,7 @@ ColorPreviewHoverHandler* QmlCodeEditor::m_colorPreviewHoverHandler = nullptr;
 QuickToolBar* QmlCodeEditor::m_contextPane = nullptr;
 
 QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
+  , m_initialEmptyDocument(new QmlCodeDocument(this))
   , m_noDocsLabel(new QLabel(this))
   , m_rowBar(new RowBar(this, this))
   , m_toolBar(new QmlCodeEditorToolBar(this))
@@ -436,7 +437,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
         invokeAssist(TextEditor::Completion);
     });
 
-    setCodeDocument(new QmlCodeDocument(this));
+    setCodeDocument(m_initialEmptyDocument);
     m_codeAssistant->configure(this);
     m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
 
@@ -711,6 +712,8 @@ bool QmlCodeEditor::inFindScope(int selectionStart, int selectionEnd)
 void QmlCodeEditor::sweep()
 {
     m_toolBar->sweep();
+    setNoDocsVisible(true);
+    setCodeDocument(m_initialEmptyDocument);
     // FIXME
 }
 

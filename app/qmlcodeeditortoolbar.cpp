@@ -139,8 +139,16 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
 
     connect(m_pinButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onPinButtonClick);
+    connect(m_pinButton, &QToolButton::clicked,
+            this, [=] {
+            emit pinned(!m_pinButton->property("ow_pinned").toBool());
+    });
     connect(m_showButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onShowButtonClick);
+    connect(m_showButton, &QToolButton::clicked,
+            this, [=] {
+            emit showed(!m_showButton->property("ow_showed").toBool());
+    });
     connect(m_closeButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::closed);
     connect(m_saveButton, &QToolButton::clicked,
@@ -204,7 +212,7 @@ void QmlCodeEditorToolBar::setScope(QmlCodeEditorToolBar::Scope scope)
             action->setChecked(true);
     }
 
-    emit scopeChanged(scope);
+    // emit scopeChanged(scope);
 }
 
 void QmlCodeEditorToolBar::onPinButtonClick()
@@ -218,7 +226,6 @@ void QmlCodeEditorToolBar::onPinButtonClick()
         m_pinButton->setIcon(PIN_TOOLBAR.icon());
     }
     m_pinButton->setProperty("ow_pinned", pin);
-    emit QmlCodeEditorToolBar::pinned(pin);
 }
 
 void QmlCodeEditorToolBar::onShowButtonClick()
@@ -232,7 +239,6 @@ void QmlCodeEditorToolBar::onShowButtonClick()
         m_showButton->setToolTip(tr("Show File Explorer"));
     }
     m_showButton->setProperty("ow_showed", show);
-    emit QmlCodeEditorToolBar::showed(show);
 }
 
 void QmlCodeEditorToolBar::onClipboardDataChange()
