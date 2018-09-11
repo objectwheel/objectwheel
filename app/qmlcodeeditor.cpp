@@ -35,6 +35,7 @@
 #include <QPropertyAnimation>
 #include <QAction>
 #include <QLabel>
+#include <QComboBox>
 
 using namespace Utils;
 using namespace TextEditor;
@@ -1937,6 +1938,8 @@ void QmlCodeEditor::updateAutoCompleteHighlight()
 
 void QmlCodeEditor::setNoDocsVisible(bool visible)
 {
+    m_toolBar->comboAction(QmlCodeEditorToolBar::LeftCombo)->setVisible(!visible);
+    m_toolBar->comboAction(QmlCodeEditorToolBar::RightCombo)->setVisible(!visible);
     m_rowBar->setDisabled(visible);
     viewport()->setDisabled(visible);
     m_noDocsLabel->setVisible(visible);

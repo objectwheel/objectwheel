@@ -27,6 +27,7 @@ public:
 
     Scope scope() const;
     QComboBox* combo(Combo) const;
+    QAction* comboAction(Combo) const;
 
 public slots:
     void sweep();

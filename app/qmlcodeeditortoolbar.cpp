@@ -15,6 +15,10 @@
 using namespace Utils;
 using namespace Icons;
 
+namespace {
+QHash<QmlCodeEditorToolBar::Combo, QAction*> g_actions;
+}
+
 QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar(codeEditor)
   , m_pinButton(new QToolButton)
   , m_undoButton(new QToolButton)
@@ -41,8 +45,8 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     addWidget(m_saveButton);
     addSeparator();
     addWidget(m_scopeButton);
-    addWidget(m_leftCombo);
-    addWidget(m_rightCombo);
+    g_actions.insert(LeftCombo, addWidget(m_leftCombo));
+    g_actions.insert(RightCombo, addWidget(m_rightCombo));
     addSeparator();
     addWidget(m_closeButton);
     addSeparator();
@@ -177,6 +181,9 @@ void QmlCodeEditorToolBar::sweep()
     m_showButton->setProperty("ow_showed", true);
     m_showButton->click();
 
+    m_leftCombo->clear();
+    m_rightCombo->clear();
+
     setScope(Global);
 }
 
@@ -309,6 +316,11 @@ QComboBox* QmlCodeEditorToolBar::combo(QmlCodeEditorToolBar::Combo combo) const
     if (combo == LeftCombo)
         return m_leftCombo;
     return m_rightCombo;
+}
+
+QAction* QmlCodeEditorToolBar::comboAction(QmlCodeEditorToolBar::Combo combo) const
+{
+    return g_actions.value(combo);
 }
 
 QSize QmlCodeEditorToolBar::sizeHint() const

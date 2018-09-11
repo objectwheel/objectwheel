@@ -44,18 +44,19 @@ enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
 
 namespace {
 
-QmlCodeEditorWidget::GlobalDocument* lastGlobalDocument;
-QmlCodeEditorWidget::InternalDocument* lastInternalDocument;
-QmlCodeEditorWidget::ExternalDocument* lastExternalDocument;
+bool g_fileExplorerOpen;
+QmlCodeEditorWidget::GlobalDocument* g_lastGlobalDocument;
+QmlCodeEditorWidget::InternalDocument* g_lastInternalDocument;
+QmlCodeEditorWidget::ExternalDocument* g_lastExternalDocument;
 
 void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document)
 {
     if (document->scope == QmlCodeEditorToolBar::Global)
-        lastGlobalDocument = global(document);
+        g_lastGlobalDocument = global(document);
     else if (document->scope == QmlCodeEditorToolBar::Internal)
-        lastInternalDocument = internal(document);
+        g_lastInternalDocument = internal(document);
     else
-        lastExternalDocument = external(document);
+        g_lastExternalDocument = external(document);
 }
 
 bool warnIfNotATextFile(const QString& filePath)
@@ -131,9 +132,9 @@ void QmlCodeEditorWidget::sweep()
     m_fileExplorer->sweep();
 
     m_openDocument = nullptr;
-    lastGlobalDocument = nullptr;
-    lastInternalDocument = nullptr;
-    lastExternalDocument = nullptr;
+    g_lastGlobalDocument = nullptr;
+    g_lastInternalDocument = nullptr;
+    g_lastExternalDocument = nullptr;
     // TODO: m_openDocument = new untitled external document
 }
 
@@ -155,12 +156,15 @@ void QmlCodeEditorWidget::close()
 
 void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 {
-    if (scope == QmlCodeEditorToolBar::Global)
+    if (scope == QmlCodeEditorToolBar::Global && g_lastGlobalDocument)
         return openGlobal(QString());
-    if (scope == QmlCodeEditorToolBar::Internal)
+    if (scope == QmlCodeEditorToolBar::Internal && g_lastInternalDocument)
         return openInternal(nullptr, QString());
-    if (scope == QmlCodeEditorToolBar::External)
+    if (scope == QmlCodeEditorToolBar::External && g_lastExternalDocument)
         return openExternal(QString());
+
+    m_openDocument = nullptr;
+    m_codeEditor->setNoDocsVisible(true);
 }
 
 void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
@@ -192,7 +196,7 @@ void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
 void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 {
     if (relativePath.isEmpty())
-        return openDocument(lastGlobalDocument);
+        return openDocument(g_lastGlobalDocument);
     if (warnIfNotATextFile(fullPath(globalDir(), relativePath)))
         return;
     if (!globalExists(relativePath))
@@ -203,7 +207,7 @@ void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 void QmlCodeEditorWidget::openInternal(Control* control, const QString& relativePath)
 {
     if (!control || relativePath.isEmpty())
-        return openDocument(lastInternalDocument);
+        return openDocument(g_lastInternalDocument);
     if (warnIfNotATextFile(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
         return;
     if (!internalExists(control, relativePath))
@@ -214,7 +218,7 @@ void QmlCodeEditorWidget::openInternal(Control* control, const QString& relative
 void QmlCodeEditorWidget::openExternal(const QString& fullPath)
 {
     if (fullPath.isEmpty())
-        return openDocument(lastExternalDocument);
+        return openDocument(g_lastExternalDocument);
     if (warnIfNotATextFile(fullPath))
         return;
     if (!externalExists(fullPath))
@@ -364,10 +368,10 @@ void QmlCodeEditorWidget::openDocument(Document* document)
     if (m_openDocument == document)
         return;
 
-    setupToolBar(document);
     setupCodeEditor(document);
     setupFileExplorer(document);
     setupLastOpenedDocs(document);
+    setupToolBar(document);
 
     m_openDocument = document;
 
@@ -376,6 +380,7 @@ void QmlCodeEditorWidget::openDocument(Document* document)
 
 void QmlCodeEditorWidget::setupCodeEditor(QmlCodeEditorWidget::Document* document)
 {
+    m_codeEditor->setNoDocsVisible(false);
     m_codeEditor->setCodeDocument(document->document);
     m_codeEditor->setTextCursor(document->textCursor);
 }
@@ -396,17 +401,19 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
     bool refresh = !m_openDocument || m_openDocument->scope != document->scope;
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
+    QAction* leftComboAction = toolBar()->comboAction(QmlCodeEditorToolBar::LeftCombo);
+    QAction* rightComboAction = toolBar()->comboAction(QmlCodeEditorToolBar::RightCombo);
 
     if (refresh) {
-        leftCombo->hide();
         leftCombo->clear();
-        rightCombo->hide();
         rightCombo->clear();
+        leftComboAction->setVisible(false);
+        rightComboAction->setVisible(false);
         toolBar()->setScope(scope);
 
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
-            leftCombo->show();
+            leftComboAction->setVisible(true);
             leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
                 const int i = leftCombo->count();
@@ -418,8 +425,8 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::Internal:
-            leftCombo->show();
-            rightCombo->show();
+            leftComboAction->setVisible(true);
+            rightComboAction->setVisible(true);
             leftCombo->setToolTip(tr("Control name"));
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
             for (Control* control : controls(m_internalDocuments)) {
@@ -440,7 +447,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::External:
-            leftCombo->show();
+            leftComboAction->setVisible(true);
             leftCombo->setToolTip(tr("File name of the open document"));
             for (ExternalDocument* doc : m_externalDocuments) {
                 const int i = leftCombo->count();
