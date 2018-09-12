@@ -214,8 +214,15 @@ void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
         return openGlobal(leftCombo->currentText());
     if (toolBar()->scope() == QmlCodeEditorToolBar::External)
         return openExternal(fullPath(m_fileExplorer->rootPath(), leftCombo->currentText()));
-    if (toolBar()->scope() == QmlCodeEditorToolBar::Internal)
-        return openInternal(leftCombo->itemData(leftCombo->currentIndex(), ControlRole).value<Control*>(), rightCombo->currentText());
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Internal) {
+        Control* control = leftCombo->itemData(leftCombo->currentIndex(), ControlRole).value<Control*>();
+        if (combo == QmlCodeEditorToolBar::RightCombo)
+            return openInternal(control, rightCombo->currentText());
+        if (combo == QmlCodeEditorToolBar::LeftCombo) {
+            const QString& relativePath = rightCombo->itemText(control->property("ow_last_index").toInt());
+            return openInternal(control, relativePath);
+        }
+    }
 }
 
 void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
@@ -331,7 +338,7 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
 
     if (toolBar()->scope() == QmlCodeEditorToolBar::Global) {
         QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
-        const int i = leftCombo->count();
+        int i = leftCombo->count();
         leftCombo->addItem(document->relativePath);
         leftCombo->setItemData(i, document->relativePath, Qt::ToolTipRole);
         leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
@@ -358,13 +365,13 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control*
     if (toolBar()->scope() == QmlCodeEditorToolBar::Internal) {
         if (!controlExistsIn(m_internalDocuments, control)) {
             QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
-            const int i = leftCombo->count();
+            int i = leftCombo->count();
             leftCombo->addItem(control->id());
             leftCombo->setItemData(i, control->id() + "::" + control->uid(), Qt::ToolTipRole);
             leftCombo->setItemData(i, QVariant::fromValue(control), ComboDataRole::DocumentRole);
         }
         QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
-        const int i = rightCombo->count();
+        int i = rightCombo->count();
         rightCombo->addItem(document->relativePath);
         rightCombo->setItemData(i, document->relativePath, Qt::ToolTipRole);
         rightCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
@@ -388,7 +395,7 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
 
     if (toolBar()->scope() == QmlCodeEditorToolBar::External) {
         QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
-        const int i = leftCombo->count();
+        int i = leftCombo->count();
         leftCombo->addItem(fname(document->fullPath));
         leftCombo->setItemData(i, document->fullPath, Qt::ToolTipRole);
         leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
@@ -457,7 +464,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::LeftAction | QmlCodeEditorToolBar::CloseAction);
             leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
-                const int i = leftCombo->count();
+                int i = leftCombo->count();
                 leftCombo->addItem(doc->relativePath);
                 leftCombo->setItemData(i, doc->relativePath, Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
@@ -470,7 +477,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             leftCombo->setToolTip(tr("Control name"));
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
             for (Control* control : controls(m_internalDocuments)) {
-                const int i = leftCombo->count();
+                int i = leftCombo->count();
                 leftCombo->addItem(control->id());
                 leftCombo->setItemData(i, control->id() + "::" + control->uid(), Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(control), ComboDataRole::ControlRole);
@@ -478,12 +485,14 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
                     leftCombo->setCurrentIndex(i);
             } for (InternalDocument* doc : m_internalDocuments) {
                 if (internal(document)->control == doc->control) {
-                    const int i = rightCombo->count();
+                    int i = rightCombo->count();
                     rightCombo->addItem(doc->relativePath);
                     rightCombo->setItemData(i, doc->relativePath, Qt::ToolTipRole);
                     rightCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
-                    if (doc == document)
+                    if (doc == document) {
                         rightCombo->setCurrentIndex(i);
+                        internal(document)->control->setProperty("ow_last_index", i);
+                    }
                 }
             } break;
 
@@ -491,7 +500,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::LeftAction | QmlCodeEditorToolBar::CloseAction);
             leftCombo->setToolTip(tr("File name of the open document"));
             for (ExternalDocument* doc : m_externalDocuments) {
-                const int i = leftCombo->count();
+                int i = leftCombo->count();
                 leftCombo->addItem(fname(doc->fullPath));
                 leftCombo->setItemData(i, doc->fullPath, Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
@@ -526,6 +535,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } for (int i = 0; i < rightCombo->count(); ++i) {
                 if (rightCombo->itemData(i, DocumentRole).value<InternalDocument*>() == document) {
                     rightCombo->setCurrentIndex(i);
+                    internal(document)->control->setProperty("ow_last_index", i);
                     break;
                 }
             } break;
