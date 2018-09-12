@@ -69,11 +69,6 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_rightCombo->setFixedHeight(22);
     m_lineColumnLabel->setFixedHeight(22);
 
-    m_leftCombo->setDuplicatesEnabled(true);
-    m_rightCombo->setDuplicatesEnabled(true);
-    m_leftCombo->setMinimumContentsLength(20);
-    m_rightCombo->setMinimumContentsLength(20);
-
     m_pinButton->setCursor(Qt::PointingHandCursor);
     m_undoButton->setCursor(Qt::PointingHandCursor);
     m_redoButton->setCursor(Qt::PointingHandCursor);
@@ -138,6 +133,17 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_scopeButton->setPopupMode(QToolButton::InstantPopup);
     m_scopeButton->setMenu(menu);
 
+    m_cutButton->setEnabled(m_codeEditor->textCursor().hasSelection());
+    m_copyButton->setEnabled(m_codeEditor->textCursor().hasSelection());
+    m_pasteButton->setEnabled(!m_document.isNull()
+                              && m_codeEditor->isValid()
+                              && QApplication::clipboard()->mimeData()->hasText());
+
+    m_leftCombo->setDuplicatesEnabled(true);
+    m_rightCombo->setDuplicatesEnabled(true);
+    m_leftCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    m_rightCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
     connect(m_pinButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onPinButtonClick);
     connect(m_pinButton, &QToolButton::clicked,
@@ -176,12 +182,6 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
             this, &QmlCodeEditorToolBar::onComboActivation);
     connect(m_rightCombo, qOverload<int>(&QComboBox::activated),
             this, &QmlCodeEditorToolBar::onComboActivation);
-
-    m_cutButton->setEnabled(m_codeEditor->textCursor().hasSelection());
-    m_copyButton->setEnabled(m_codeEditor->textCursor().hasSelection());
-    m_pasteButton->setEnabled(!m_document.isNull()
-                              && m_codeEditor->isValid()
-                              && QApplication::clipboard()->mimeData()->hasText());
 }
 
 void QmlCodeEditorToolBar::sweep()

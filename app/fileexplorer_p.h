@@ -58,6 +58,7 @@ public:
 
 private:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 };
 
 class FileSearchModel : public QStringListModel

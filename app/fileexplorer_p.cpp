@@ -92,7 +92,7 @@ void PathIndicator::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(rect(), palette().midlight().color());
-    painter.setPen(palette().shadow().color());
+    painter.setPen(palette().color(QPalette::Inactive, QPalette::Shadow));
     painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
     painter.setPen(palette().text().color());
 
@@ -140,6 +140,15 @@ bool FileSystemProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
     }
 
     return !QSortFilterProxyModel::lessThan(left, right);
+}
+
+QVariant FileSystemProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (section == 0 && role == Qt::DisplayRole)
+        return "  " + tr("Files");
+    if (role == Qt::DecorationRole)
+        return QPixmap();
+    return QSortFilterProxyModel::headerData(section, orientation, role);
 }
 
 FileSearchModel::FileSearchModel(QObject* parent) : QStringListModel(parent)

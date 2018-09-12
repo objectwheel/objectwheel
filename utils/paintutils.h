@@ -18,6 +18,7 @@ QImage renderInvisibleControlImage(const QSizeF& size, const QWidget* widget = n
 QImage renderErrorControlImage(const QSizeF& size, const QWidget* widget = nullptr);
 QImage renderNonGuiControlImage(const QString& url, const QSizeF& size, const QWidget* widget = nullptr);
 QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
+QPixmap renderColoredPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
 }
 

@@ -542,6 +542,7 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         break; // Skip for transparent spinbox line edit
     case PE_PanelMenu: {
         painter->save();
+        qDebug() << widget;
         painter->fillRect(option->rect, Qt::transparent);
         painter->setPen(Qt::transparent);
         painter->setBrush(option->palette.window());

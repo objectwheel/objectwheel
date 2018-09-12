@@ -104,6 +104,7 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
     m_codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+    m_splitter->setFrameShape(QFrame::NoFrame);
     m_splitter->addWidget(m_codeEditor);
     m_splitter->addWidget(m_fileExplorer);
     m_splitter->setCollapsible(0, false);

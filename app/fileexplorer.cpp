@@ -23,6 +23,7 @@
 #include <filemanager.h>
 #include <transparentstyle.h>
 #include <utilsicons.h>
+#include <paintutils.h>
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -47,6 +48,7 @@ using namespace Utils;
 
 namespace {
 
+QLabel* g_modeIFilterIconLabel;
 const int ROW_HEIGHT = 21;
 int lastVScrollerPosOfViewer = 0;
 int lastHScrollerPosOfViewer = 0;
@@ -62,15 +64,16 @@ QStack<QString> forthPathStack;
 QPalette initPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#bf5861");
-    palette.setColor(QPalette::Dark, "#b05159");
+    palette.setColor(QPalette::Light, "#ffffff");
+    palette.setColor(QPalette::Dark, "#f0f0f0");
+    palette.setColor(QPalette::Active, QPalette::Shadow, Qt::transparent);
     palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::Text, "#331719");
-    palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::WindowText, "#331719");
-    palette.setColor(QPalette::AlternateBase, "#f7e6e8");
+    palette.setColor(QPalette::Text, "#282828");
+    palette.setColor(QPalette::BrightText, "#282828");
+    palette.setColor(QPalette::WindowText, "#282828");
+    palette.setColor(QPalette::AlternateBase, "#f7f7f7");
     palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
-    palette.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
+    palette.setColor(QPalette::Inactive, QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
     return palette;
 }
 }
@@ -98,12 +101,13 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_newFolderButton(new QToolButton)
   , m_downloadFileButton(new QToolButton)
 {
+    g_modeIFilterIconLabel = new QLabel(m_modeComboBox);
+    g_modeIFilterIconLabel->setFixedSize(16, 16);
+    g_modeIFilterIconLabel->move(0, 3);
+    m_modeComboBox->setContentsMargins(16, 0, 0, 0);
+
     setPalette(initPalette(this));
 
-    QFont fontMedium(font());
-    fontMedium.setWeight(QFont::Medium);
-
-    header()->setFont(fontMedium);
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
@@ -137,11 +141,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_droppingBlurEffect->setBlurRadius(40);
     viewport()->setGraphicsEffect(m_droppingBlurEffect);
 
-    QPalette mp(m_modeComboBox->palette());
-    mp.setColor(QPalette::Text, Qt::white);
-    mp.setColor(QPalette::WindowText, Qt::white);
-    mp.setColor(QPalette::ButtonText, Qt::white);
-    m_modeComboBox->setPalette(mp);
     m_modeComboBox->addItem(tr("Viewer")); // First must be the Viewer, the index is important
     m_modeComboBox->addItem(tr("Explorer"));
 
@@ -171,13 +170,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_downloadFileButton->setToolTip(tr("Download a file from an url into the current directory"));
     m_modeComboBox->setToolTip(tr("Change view mode"));
     m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
-
-    const Icon FILTER_ICON({{":/utils/images/filtericon.png", Theme::BackgroundColorNormal}});
-    auto modeIFilterIconLabel = new QLabel(m_modeComboBox);
-    modeIFilterIconLabel->setPixmap(FILTER_ICON.pixmap());
-    modeIFilterIconLabel->setFixedSize(16, 16);
-    modeIFilterIconLabel->move(0, 3);
-    m_modeComboBox->setContentsMargins(16, 0, 0, 0);
 
     m_upButton->setIcon(Icons::ARROW_UP.icon());
     m_backButton->setIcon(Icons::ARROW_BACK.icon());
@@ -598,31 +590,51 @@ void FileExplorer::setPalette(const QPalette& pal)
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
 
+    const QPixmap& icon = PaintUtils::renderColoredPixmap(":/utils/images/filtericon@2x.png",
+                                                          pal.brightText().color().lighter(250), this);
+    g_modeIFilterIconLabel->setPixmap(icon);
+    QPalette mp(m_modeComboBox->palette());
+    mp.setColor(QPalette::Text, pal.brightText().color());
+    mp.setColor(QPalette::WindowText, pal.brightText().color());
+    mp.setColor(QPalette::ButtonText, pal.brightText().color());
+    m_modeComboBox->setPalette(mp);
+
     TransparentStyle::attach(m_modeComboBox);
 
-    setStyleSheet(
-                QString {
-                    "QTreeView {"
-                    "    border: 1px solid %1;"
-                    "} QHeaderView::section {"
-                    "    padding-left: 0px;"
-                    "    padding-top: 3px;"
-                    "    padding-bottom: 3px;"
-                    "    color: %4;"
-                    "    border: none;"
-                    "    border-bottom: 1px solid %1;"
-                    "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
-                    "                                stop:0 %2, stop:1 %3);"
-                    "} QHeaderView::down-arrow {"
-                    "    image: none;"
-                    "} QHeaderView::up-arrow {"
-                    "    image: none;"
-                    "}"
-                }
-                .arg(palette().text().color().lighter(270).name())
-                .arg(palette().light().color().name())
-                .arg(palette().dark().color().name())
-                .arg(palette().brightText().color().name()));
+    QString styleSheet = {
+        "QHeaderView::down-arrow {"
+        "    image: none;"
+        "} QHeaderView::up-arrow {"
+        "    image: none;"
+        "} QHeaderView::section {"
+        "    padding-left: 0px;"
+        "    padding-top: 3px;"
+        "    padding-bottom: 3px;"
+        "    color: %4;"
+        "    border: none;"
+        "    border-bottom: 1px solid %1;"
+        "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+        "                                stop:0 %2, stop:1 %3);"
+        "}"
+    };
+
+    styleSheet = styleSheet
+            .arg(palette().dark().color().darker(120).name())
+            .arg(palette().light().color().name())
+            .arg(palette().dark().color().name())
+            .arg(palette().brightText().color().name());
+
+    if (palette().color(QPalette::Active, QPalette::Shadow) != Qt::transparent) {
+        styleSheet.append(
+                    QString {
+                        "QTreeView {"
+                        "    border: 1px solid %1;"
+                        "}"
+                    }
+                    .arg(palette().color(QPalette::Active, QPalette::Shadow).name()));
+    }
+
+    setStyleSheet(styleSheet);
 
     update();
 }
@@ -649,10 +661,11 @@ void FileExplorer::fillBackground(QPainter* painter, const QStyleOptionViewItem&
     }
 
     // Draw top and bottom lines
-    QColor lineColor(isSelected ? pal.highlightedText().color() : pal.text().color().lighter(210));
+    QColor lineColor(isSelected ? pal.highlightedText().color() : pal.text().color().lighter(250));
     lineColor.setAlpha(50);
     painter->setPen(lineColor);
-    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+    if (row != 0)
+        painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
     painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
 
     // Draw vertical line
@@ -834,7 +847,9 @@ void FileExplorer::paintEvent(QPaintEvent* e)
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
 
-    QColor lineColor(palette().text().color().lighter(270));
+    QColor lineColor(palette().text().color() == Qt::white
+                     ? Qt::white
+                     : palette().text().color().lighter(250));
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
@@ -850,7 +865,7 @@ void FileExplorer::paintEvent(QPaintEvent* e)
             painter.fillRect(rect, palette().alternateBase());
         } else if (!rootHasChildren) {
             if (i == int(rowCount / 2.0) || i == int(rowCount / 2.0) + 1) {
-                painter.setPen(palette().text().color().lighter(240));
+                painter.setPen(palette().text().color().lighter(250));
                 painter.drawText(rect, Qt::AlignCenter, tr("Empty folder"));
                 painter.setPen(lineColor);
             }
@@ -880,6 +895,16 @@ void FileExplorer::updateGeometries()
     header()->setGeometry(vg.left(), 1, vg.width(), header()->height());
     m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
                          header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
+    if (width() < m_modeComboBox->width() + 40) {
+        m_modeComboBox->hide();
+    } else if (m_modeComboBox->isHidden()) {
+        m_modeComboBox->show();
+        QPalette mp(m_modeComboBox->palette());
+        mp.setColor(QPalette::Text, palette().brightText().color());
+        mp.setColor(QPalette::WindowText, palette().brightText().color());
+        mp.setColor(QPalette::ButtonText, palette().brightText().color());
+        m_modeComboBox->setPalette(mp);
+    }
 
     int ds = qMin(qMin(vg.width() - 5, vg.height() - 5), 100);
     QRect dg;

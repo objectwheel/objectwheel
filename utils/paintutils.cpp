@@ -117,6 +117,28 @@ QPixmap PaintUtils::renderMaskedPixmap(const QString& fileName, const QColor& co
     return QPixmap::fromImage(dest);
 }
 
+QPixmap PaintUtils::renderColoredPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QImage source(fileName);
+    source.setDevicePixelRatio(dpr);
+
+    QImage dest = renderFilledImage(source.size() / dpr, Qt::transparent, widget);
+
+    Q_ASSERT(source.size() == dest.size());
+
+    QColor copy(color);
+    for (int i = 0; i < dest.width(); ++i) {
+        for (int j = 0; j < dest.height(); ++j) {
+            int alpha = QColor(source.pixel(i, j)).black();
+            copy.setAlpha(alpha);
+            dest.setPixelColor(QPoint(i, j), copy);
+        }
+    }
+
+    return QPixmap::fromImage(dest);
+}
+
 QPixmap PaintUtils::renderColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget)
 {
     QImage dest = renderFilledImage(size, color, widget);
