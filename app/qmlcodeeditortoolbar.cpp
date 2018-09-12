@@ -133,6 +133,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     externalAction->setCheckable(true);
     externalAction->setProperty("ow_scope", External);
 
+    m_scopeButton->setAttribute(Qt::WA_Hover);
     m_scopeButton->setPopupMode(QToolButton::InstantPopup);
     m_scopeButton->setMenu(menu);
 
@@ -140,13 +141,13 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
             this, &QmlCodeEditorToolBar::onPinButtonClick);
     connect(m_pinButton, &QToolButton::clicked,
             this, [=] {
-            emit pinned(!m_pinButton->property("ow_pinned").toBool());
+            emit pinned(m_pinButton->property("ow_pinned").toBool());
     });
     connect(m_showButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onShowButtonClick);
     connect(m_showButton, &QToolButton::clicked,
             this, [=] {
-            emit showed(!m_showButton->property("ow_showed").toBool());
+            emit showed(m_showButton->property("ow_showed").toBool());
     });
     connect(m_closeButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::closed);
@@ -183,10 +184,10 @@ void QmlCodeEditorToolBar::sweep()
     setDocument(nullptr);
 
     m_pinButton->setProperty("ow_pinned", false);
-    m_pinButton->click();
+    onPinButtonClick();
 
     m_showButton->setProperty("ow_showed", true);
-    m_showButton->click();
+    onShowButtonClick();
 
     m_leftCombo->clear();
     m_rightCombo->clear();

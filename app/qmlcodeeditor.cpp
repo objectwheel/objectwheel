@@ -1944,9 +1944,6 @@ void QmlCodeEditor::setNoDocsVisible(bool visible)
     m_rowBar->setDisabled(visible);
     viewport()->setDisabled(visible);
     m_noDocsLabel->setVisible(visible);
-    m_toolBar->setVisibleDocumentActions(visible
-                                         ? QmlCodeEditorToolBar::NoAction
-                                         : QmlCodeEditorToolBar::AllActions);
     if (visible)
         m_noDocsLabel->raise();
 }
