@@ -299,7 +299,7 @@ QColor FormatDescription::defaultBackground(TextStyle id)
         qreal smallRatio;
         qreal largeRatio;
         if (id == C_CURRENT_LINE) {
-            smallRatio = .35;
+            smallRatio = .32;
             largeRatio = .6;
         } else {
             smallRatio = .05;

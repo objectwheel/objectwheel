@@ -147,7 +147,7 @@ void QmlCodeEditorWidget::sweep()
     g_lastExternalDocument = nullptr;
 
     setFileExplorerVisible(false);
-    toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::NoAction);
+    toolBar()->setHiddenActions(QmlCodeEditorToolBar::AllActions);
 
     for (GlobalDocument* document : m_globalDocuments) {
         delete document->document;
@@ -195,7 +195,7 @@ void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 
     m_openDocument = nullptr;
     m_codeEditor->setNoDocsVisible(true);
-    toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::NoAction);
+    toolBar()->setHiddenActions(QmlCodeEditorToolBar::AllActions);
     if (m_fileExplorer->isVisible()) {
         g_fileExplorerHid = true;
         setFileExplorerVisible(false);
@@ -461,7 +461,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
 
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
-            toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::LeftAction | QmlCodeEditorToolBar::CloseAction);
+                toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction);
             leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
                 int i = leftCombo->count();
@@ -473,7 +473,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::Internal:
-            toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::AllActions);
+            toolBar()->setHiddenActions(QmlCodeEditorToolBar::NoAction);
             leftCombo->setToolTip(tr("Control name"));
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
             for (Control* control : controls(m_internalDocuments)) {
@@ -497,7 +497,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::External:
-            toolBar()->setVisibleDocumentActions(QmlCodeEditorToolBar::LeftAction | QmlCodeEditorToolBar::CloseAction);
+            toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction);
             leftCombo->setToolTip(tr("File name of the open document"));
             for (ExternalDocument* doc : m_externalDocuments) {
                 int i = leftCombo->count();

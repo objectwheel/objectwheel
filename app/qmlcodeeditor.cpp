@@ -556,6 +556,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
             this, &QmlCodeEditor::setCompletionSettings);
     //    connect(settings, &TextEditorSettings::extraEncodingSettingsChanged,
     //            this, &QmlCodeEditor::setExtraEncodingSettings);
+
+    emit documentChanged();
 }
 
 void QmlCodeEditor::setCodeStyle(ICodeStylePreferences *preferences)
@@ -707,6 +709,11 @@ bool QmlCodeEditor::inFindScope(int selectionStart, int selectionEnd)
     if (selectionEnd - block.position() > endPosition)
         return false;
     return true;
+}
+
+bool QmlCodeEditor::isValid() const
+{
+    return codeDocument() != m_initialEmptyDocument;
 }
 
 void QmlCodeEditor::sweep()
@@ -1941,11 +1948,19 @@ void QmlCodeEditor::updateAutoCompleteHighlight()
 
 void QmlCodeEditor::setNoDocsVisible(bool visible)
 {
+    setReadOnly(visible);
     m_rowBar->setDisabled(visible);
     viewport()->setDisabled(visible);
     m_noDocsLabel->setVisible(visible);
-    if (visible)
+    if (visible) {
+        m_initialEmptyDocument->clear();
+        m_initialEmptyDocument->setModified(false);
+        m_initialEmptyDocument->clearUndoRedoStacks();
+        setCodeDocument(m_initialEmptyDocument);
+        textCursor().clearSelection();
+        setTextCursor(QTextCursor());
         m_noDocsLabel->raise();
+    }
 }
 
 void QmlCodeEditor::autocompleterHighlight(const QTextCursor &cursor)

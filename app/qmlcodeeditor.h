@@ -161,6 +161,7 @@ public:
     void setBehaviorSettings(const TextEditor::BehaviorSettings& bs);
     const TextEditor::BehaviorSettings& behaviorSettings() const;
     bool inFindScope(int selectionStart, int selectionEnd);
+    bool isValid() const;
 
 public slots:
     void sweep();
@@ -243,6 +244,7 @@ private:
 
 signals:
     void requestBlockUpdate(const QTextBlock &);
+    void documentChanged();
 
 private:
     bool event(QEvent* e) override;

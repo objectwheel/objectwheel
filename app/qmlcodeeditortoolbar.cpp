@@ -15,7 +15,8 @@
 using namespace Utils;
 using namespace Icons;
 
-QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar(codeEditor)
+QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolBar(m_codeEditor)
+  , m_codeEditor(m_codeEditor)
   , m_pinButton(new QToolButton)
   , m_undoButton(new QToolButton)
   , m_redoButton(new QToolButton)
@@ -42,17 +43,17 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     addSeparator();
     addWidget(m_scopeButton);
     addSeparator();
-    m_documentActions.append(addWidget(m_leftCombo));   // 0
-    m_documentActions.append(addSeparator());           // 1
-    m_documentActions.append(addWidget(m_rightCombo));  // 2
-    m_documentActions.append(addSeparator());           // 3
-    m_documentActions.append(addWidget(m_closeButton)); // 4
-    m_documentActions.append(addSeparator());           // 5
+    m_actions.append(addWidget(m_leftCombo));       // 0
+    m_actions.append(addSeparator());               // 1
+    m_actions.append(addWidget(m_rightCombo));      // 2
+    m_actions.append(addSeparator());               // 3
+    m_actions.append(addWidget(m_closeButton));     // 4
+    m_actions.append(addSeparator());               // 5
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
-    addSeparator();
-    addWidget(m_lineColumnLabel);
-    addSeparator();
-    addWidget(m_showButton);
+    m_actions.append(addSeparator());               // 6
+    m_actions.append(addWidget(m_lineColumnLabel)); // 7
+    m_actions.append(addSeparator());               // 8
+    m_actions.append(addWidget(m_showButton));      // 9
 
     m_pinButton->setFixedHeight(22);
     m_undoButton->setFixedHeight(22);
@@ -153,19 +154,21 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
             this, &QmlCodeEditorToolBar::closed);
     connect(m_saveButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::saved);
-    connect(codeEditor, &QmlCodeEditor::copyAvailable,
+    connect(m_codeEditor, &QmlCodeEditor::copyAvailable,
             m_cutButton, &QToolButton::setEnabled);
     connect(m_cutButton, &QToolButton::clicked,
-            codeEditor, &QmlCodeEditor::cut);
-    connect(codeEditor, &QmlCodeEditor::copyAvailable,
+            m_codeEditor, &QmlCodeEditor::cut);
+    connect(m_codeEditor, &QmlCodeEditor::copyAvailable,
             m_copyButton, &QToolButton::setEnabled);
     connect(m_copyButton, &QToolButton::clicked,
-            codeEditor, &QmlCodeEditor::copy);
+            m_codeEditor, &QmlCodeEditor::copy);
+    connect(m_codeEditor, &QmlCodeEditor::documentChanged,
+            this, &QmlCodeEditorToolBar::onClipboardDataChange);
     connect(QApplication::clipboard(), &QClipboard::dataChanged,
             this, &QmlCodeEditorToolBar::onClipboardDataChange);
     connect(m_pasteButton, &QToolButton::clicked,
-            codeEditor, &QmlCodeEditor::paste);
-    connect(codeEditor, &QmlCodeEditor::cursorPositionChanged,
+            m_codeEditor, &QmlCodeEditor::paste);
+    connect(m_codeEditor, &QmlCodeEditor::cursorPositionChanged,
             this, &QmlCodeEditorToolBar::onCursorPositionChange);
     connect(menu, &QMenu::triggered, this,
             &QmlCodeEditorToolBar::onScopeActivation);
@@ -174,9 +177,11 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* codeEditor) : QToolBar
     connect(m_rightCombo, qOverload<int>(&QComboBox::activated),
             this, &QmlCodeEditorToolBar::onComboActivation);
 
-    m_cutButton->setEnabled(codeEditor->textCursor().hasSelection());
-    m_copyButton->setEnabled(codeEditor->textCursor().hasSelection());
-    m_pasteButton->setEnabled(!m_document.isNull() && QApplication::clipboard()->mimeData()->hasText());
+    m_cutButton->setEnabled(m_codeEditor->textCursor().hasSelection());
+    m_copyButton->setEnabled(m_codeEditor->textCursor().hasSelection());
+    m_pasteButton->setEnabled(!m_document.isNull()
+                              && m_codeEditor->isValid()
+                              && QApplication::clipboard()->mimeData()->hasText());
 }
 
 void QmlCodeEditorToolBar::sweep()
@@ -244,6 +249,7 @@ void QmlCodeEditorToolBar::onShowButtonClick()
 void QmlCodeEditorToolBar::onClipboardDataChange()
 {
     m_pasteButton->setEnabled(!m_document.isNull()
+                              && m_codeEditor->isValid()
                               && QApplication::clipboard()->mimeData()->hasText());
 }
 
@@ -312,14 +318,18 @@ void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
     }
 }
 
-void QmlCodeEditorToolBar::setVisibleDocumentActions(QmlCodeEditorToolBar::DocumentActions action)
+void QmlCodeEditorToolBar::setHiddenActions(QmlCodeEditorToolBar::DocumentActions action)
 {
-    m_documentActions.at(0)->setVisible(action & LeftAction);
-    m_documentActions.at(1)->setVisible(action & LeftAction);
-    m_documentActions.at(2)->setVisible(action & RightAction);
-    m_documentActions.at(3)->setVisible(action & RightAction);
-    m_documentActions.at(4)->setVisible(action & CloseAction);
-    m_documentActions.at(5)->setVisible(action & CloseAction);
+    m_actions.at(0)->setVisible(!(action & LeftAction));
+    m_actions.at(1)->setVisible(!(action & LeftAction));
+    m_actions.at(2)->setVisible(!(action & RightAction));
+    m_actions.at(3)->setVisible(!(action & RightAction));
+    m_actions.at(4)->setVisible(!(action & CloseAction));
+    m_actions.at(5)->setVisible(!(action & CloseAction));
+    m_actions.at(6)->setVisible(!(action & LineColAction));
+    m_actions.at(7)->setVisible(!(action & LineColAction));
+    m_actions.at(8)->setVisible(!(action & ShowAction));
+    m_actions.at(9)->setVisible(!(action & ShowAction));
 }
 
 QmlCodeEditorToolBar::Scope QmlCodeEditorToolBar::scope() const
