@@ -11,6 +11,7 @@
 #include <QMimeData>
 #include <QMenu>
 #include <QComboBox>
+#include <QTimer>
 
 using namespace Utils;
 using namespace Icons;
@@ -141,8 +142,10 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
 
     m_leftCombo->setDuplicatesEnabled(true);
     m_rightCombo->setDuplicatesEnabled(true);
-    m_leftCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    m_rightCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    QTimer::singleShot(1000, [=] { // FIXME: This fixes a weird bug on TransparentStyle
+        m_leftCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+        m_rightCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    });
 
     connect(m_pinButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onPinButtonClick);
