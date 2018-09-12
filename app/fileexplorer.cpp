@@ -311,6 +311,25 @@ void FileExplorer::setRootPath(const QString& rootPath)
         selectionModel()->disconnect(this, SLOT(onFileSelectionChange()));
     }
 
+    setRootIndex(QModelIndex());
+    lastSelectedIndexesOfExplorer.clear();
+    lastSelectedIndexesOfViewer.clear();
+    lastExpandedIndexesOfViewer.clear();
+    lastPathofExplorer.clear();
+    lastVScrollerPosOfViewer = 0;
+    lastHScrollerPosOfViewer = 0;
+    lastVScrollerPosOfExplorer = 0;
+    lastHScrollerPosOfExplorer = 0;
+    backPathStack.clear();
+    forthPathStack.clear();
+
+    m_copyButton->setDisabled(true);
+    m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls());
+    m_deleteButton->setDisabled(true);
+    m_renameButton->setDisabled(true);
+    m_backButton->setDisabled(true);
+    m_forthButton->setDisabled(true);
+
     m_fileSystemModel->setRootPath(rootPath);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &FileExplorer::onFileSelectionChange);
