@@ -1648,9 +1648,6 @@ void QmlCodeEditor::setExtraSelections(const QString& kind, const QList<QTextEdi
                 continue;
             all += i.value();
         }
-        qDebug() << all.size() << codeDocument() << codeDocument()->isEmpty() << codeDocument()->isModified()
-                 << codeDocument()->toPlainText();
-
         QPlainTextEdit::setExtraSelections(all);
     }
     viewport()->update(viewport()->visibleRegion());

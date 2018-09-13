@@ -323,8 +323,8 @@ void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
         if (combo == QmlCodeEditorToolBar::RightCombo)
             return openInternal(control, rightCombo->currentText());
         if (combo == QmlCodeEditorToolBar::LeftCombo) {
-            const QString& relativePath = rightCombo->itemText(control->property("ow_last_index").toInt());
-            return openInternal(control, relativePath);
+            InternalDocument* lastDoc = control->property("ow_last_document").value<InternalDocument*>();
+            return openDocument(lastDoc);
         }
     }
 }
@@ -337,6 +337,23 @@ void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
         return openInternal(internal(m_openDocument)->control, relativePath);
     if (m_openDocument->scope == QmlCodeEditorToolBar::External)
         return openExternal(fullPath(m_fileExplorer->rootPath(), relativePath));
+}
+
+bool QmlCodeEditorWidget::documentExists(QmlCodeEditorWidget::Document* document) const
+{
+    for (GlobalDocument* doc : m_globalDocuments) {
+        if (doc == document)
+            return true;
+    }
+    for (InternalDocument* doc : m_internalDocuments) {
+        if (doc == document)
+            return true;
+    }
+    for (ExternalDocument* doc : m_externalDocuments) {
+        if (doc == document)
+            return true;
+    }
+    return false;
 }
 
 void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
@@ -516,6 +533,9 @@ void QmlCodeEditorWidget::openDocument(Document* document)
     if (m_openDocument == document)
         return;
 
+    if (!documentExists(document))
+        return;
+
     if (m_openDocument)
         m_openDocument->textCursor = m_codeEditor->textCursor();
 
@@ -628,7 +648,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
                     rightCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
                     if (doc == document) {
                         rightCombo->setCurrentIndex(i);
-                        internal(document)->control->setProperty("ow_last_index", i);
+                        internal(document)->control->setProperty("ow_last_document", QVariant::fromValue(doc));
                     }
                 }
             } break;
@@ -670,9 +690,10 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
                     break;
                 }
             } for (int i = 0; i < rightCombo->count(); ++i) {
-                if (rightCombo->itemData(i, DocumentRole).value<InternalDocument*>() == document) {
+                InternalDocument* doc = rightCombo->itemData(i, DocumentRole).value<InternalDocument*>();
+                if (doc == document) {
                     rightCombo->setCurrentIndex(i);
-                    internal(document)->control->setProperty("ow_last_index", i);
+                    internal(document)->control->setProperty("ow_last_document", QVariant::fromValue(doc));
                     break;
                 }
             } break;
