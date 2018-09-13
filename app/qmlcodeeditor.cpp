@@ -477,6 +477,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     disconnect(settings, 0, this, 0);
     disconnect(con);
 
+    m_extraSelections.clear();
+    QPlainTextEdit::setExtraSelections({});
     setDocument(document);
     setCursorWidth(2);
     m_toolBar->setDocument(document);
@@ -557,6 +559,7 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     //    connect(settings, &TextEditorSettings::extraEncodingSettingsChanged,
     //            this, &QmlCodeEditor::setExtraEncodingSettings);
 
+    update();
     emit documentChanged();
 }
 
@@ -1645,6 +1648,9 @@ void QmlCodeEditor::setExtraSelections(const QString& kind, const QList<QTextEdi
                 continue;
             all += i.value();
         }
+        qDebug() << all.size() << codeDocument() << codeDocument()->isEmpty() << codeDocument()->isModified()
+                 << codeDocument()->toPlainText();
+
         QPlainTextEdit::setExtraSelections(all);
     }
     viewport()->update(viewport()->visibleRegion());
