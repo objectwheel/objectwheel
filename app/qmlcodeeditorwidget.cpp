@@ -30,6 +30,7 @@
 // What happens to the file explorer's root path if a control's dir changes
 
 // Fix different fonts of different QmlCodeDocuments
+// Add * indicator for modified docs
 
 #define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
 #define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
@@ -67,6 +68,20 @@ void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document)
         g_lastInternalDocument = internal(document);
     else
         g_lastExternalDocument = external(document);
+}
+
+int warnIfModifiedContent(const QmlCodeEditorWidget::Document* document)
+{
+    const QmlCodeDocument* qmlDoc = document->document;
+    if (qmlDoc->isModified()) {
+        return QMessageBox::warning(
+                    0,
+                    QObject::tr("Unsaved Content"),
+                    QObject::tr("The document contains unsaved content."
+                                "What would you like to do with the document?"),
+                    QMessageBox::Discard | QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Cancel);
+    }
+    return QMessageBox::Discard;
 }
 
 bool warnIfNotATextFile(const QString& filePath)
@@ -168,8 +183,6 @@ void QmlCodeEditorWidget::sweep()
     m_globalDocuments.clear();
     m_internalDocuments.clear();
     m_externalDocuments.clear();
-
-    // TODO: m_openDocument = new untitled external document
 }
 
 void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
@@ -185,7 +198,95 @@ void QmlCodeEditorWidget::save()
 
 void QmlCodeEditorWidget::close()
 {
-    // TODO
+    if (!m_openDocument)
+        return;
+
+    switch (warnIfModifiedContent(m_openDocument)) {
+    case QMessageBox::Save:
+        save();
+        break;
+    case QMessageBox::Discard:
+        break;
+    case QMessageBox::Cancel:
+        return;
+    default:
+        Q_ASSERT(0);
+        return;
+    }
+
+    Document* nextDocument = nullptr;
+    QmlCodeEditorToolBar::Scope scope = m_openDocument->scope;
+    QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+    QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
+
+    if (scope == QmlCodeEditorToolBar::Global) {
+        g_lastGlobalDocument = nullptr;
+        m_globalDocuments.removeOne(global(m_openDocument));
+        for (int i = 0; i < leftCombo->count(); ++i) {
+            if (leftCombo->itemData(i, DocumentRole).value<GlobalDocument*>() == m_openDocument) {
+                leftCombo->removeItem(i);
+                break;
+            }
+        }
+        if (leftCombo->count() > 0)
+            nextDocument = leftCombo->itemData(0, DocumentRole).value<GlobalDocument*>();
+    } else if (scope == QmlCodeEditorToolBar::Internal) {
+        g_lastInternalDocument = nullptr;
+        m_internalDocuments.removeOne(internal(m_openDocument));
+        for (int i = 0; i < rightCombo->count(); ++i) {
+            if (rightCombo->itemData(i, DocumentRole).value<InternalDocument*>() == m_openDocument) {
+                rightCombo->removeItem(i);
+                break;
+            }
+        }
+        if (rightCombo->count() > 0) {
+            nextDocument = rightCombo->itemData(0, DocumentRole).value<ExternalDocument*>();
+        } else {
+            for (int i = 0; i < leftCombo->count(); ++i) {
+                if (leftCombo->itemData(i, ControlRole).value<Control*>() == internal(m_openDocument)->control) {
+                    leftCombo->removeItem(i);
+                    break;
+                }
+            }
+            if (leftCombo->count() > 0) {
+                Q_ASSERT(m_internalDocuments.size() > 0);
+                nextDocument = m_internalDocuments.last();
+            }
+        }
+    } else {
+        g_lastExternalDocument = nullptr;
+        m_externalDocuments.removeOne(external(m_openDocument));
+        for (int i = 0; i < leftCombo->count(); ++i) {
+            if (leftCombo->itemData(i, DocumentRole).value<ExternalDocument*>() == m_openDocument) {
+                leftCombo->removeItem(i);
+                break;
+            }
+        }
+        if (leftCombo->count() > 0)
+            nextDocument = leftCombo->itemData(0, DocumentRole).value<ExternalDocument*>();
+    }
+
+    Q_ASSERT(m_openDocument != nextDocument);
+
+    Document* deletion = m_openDocument;
+    showNoDocumentsOpen();
+
+    delete deletion->document;
+    delete deletion;
+
+    if (nextDocument)
+        openDocument(nextDocument);
+}
+
+void QmlCodeEditorWidget::showNoDocumentsOpen()
+{
+    m_openDocument = nullptr;
+    m_codeEditor->setNoDocsVisible(true);
+    toolBar()->setHiddenActions(QmlCodeEditorToolBar::AllActions);
+    if (m_fileExplorer->isVisible()) {
+        g_fileExplorerHid = true;
+        setFileExplorerVisible(false);
+    }
 }
 
 void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
@@ -196,14 +297,7 @@ void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
         return openInternal(nullptr, QString());
     if (scope == QmlCodeEditorToolBar::External && g_lastExternalDocument)
         return openExternal(QString());
-
-    m_openDocument = nullptr;
-    m_codeEditor->setNoDocsVisible(true);
-    toolBar()->setHiddenActions(QmlCodeEditorToolBar::AllActions);
-    if (m_fileExplorer->isVisible()) {
-        g_fileExplorerHid = true;
-        setFileExplorerVisible(false);
-    }
+    showNoDocumentsOpen();
 }
 
 void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
@@ -494,7 +588,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
 
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
-                toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction);
+            toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction);
             leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
                 int i = leftCombo->count();

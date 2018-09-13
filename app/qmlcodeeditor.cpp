@@ -720,7 +720,6 @@ void QmlCodeEditor::sweep()
 {
     m_toolBar->sweep();
     setNoDocsVisible(true);
-    setCodeDocument(m_initialEmptyDocument);
     // FIXME
 }
 

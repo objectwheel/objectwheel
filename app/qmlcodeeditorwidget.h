@@ -59,6 +59,7 @@ private slots:
     void onFileExplorerFileOpen(const QString& relativePath);
 
 private:
+    void showNoDocumentsOpen();
     void openDocument(Document* document);
     void setupToolBar(Document* document);
     void setupCodeEditor(Document* document);
