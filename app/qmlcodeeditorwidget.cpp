@@ -28,9 +28,13 @@
 // What happens if a control get deleted
 // What happens if a control's dir changes
 // What happens to the file explorer's root path if a control's dir changes
+// What if files changes outside, the content I mean, especially external files
 
 // Fix different fonts of different QmlCodeDocuments
 // Add * indicator for modified docs
+// Add new file option for external
+// Add a way of open doc indication for scope combobox
+// Look to older qml code editor widget's older version from github commit history for catching up lacks
 
 #define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
 #define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
@@ -77,7 +81,7 @@ int warnIfModifiedContent(const QmlCodeEditorWidget::Document* document)
         return QMessageBox::warning(
                     0,
                     QObject::tr("Unsaved Content"),
-                    QObject::tr("The document contains unsaved content."
+                    QObject::tr("The document contains unsaved content. "
                                 "What would you like to do with the document?"),
                     QMessageBox::Discard | QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Cancel);
     }
@@ -95,6 +99,25 @@ bool warnIfNotATextFile(const QString& filePath)
                     QObject::tr("Qml Code Editor cannot open non-text files."));
     }
     return false;
+}
+
+bool warnIfFileWriteFails(const QString& filePath, const QString& content)
+{
+    if (!wrfile(filePath, content.toUtf8())) {
+        return QMessageBox::critical(
+                    0,
+                    QObject::tr("Oops"),
+                    QObject::tr("File write failed. File path: %1").arg(filePath));
+    }
+    return false;
+}
+
+QString choppedPath(const QString& path)
+{
+    QString choppedPath(path);
+    if (choppedPath.right(1) == "*")
+        choppedPath.chop(1);
+    return choppedPath;
 }
 
 QList<Control*> controls(const QList<QmlCodeEditorWidget::InternalDocument*>& documents)
@@ -193,7 +216,25 @@ void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
 
 void QmlCodeEditorWidget::save()
 {
-    // TODO
+    if (!m_openDocument)
+        return;
+
+    Q_ASSERT(m_openDocument->document->isModified());
+
+    QString path;
+    if (m_openDocument->scope == QmlCodeEditorToolBar::Global)
+        path = fullPath(globalDir(), global(m_openDocument)->relativePath);
+    else if (m_openDocument->scope == QmlCodeEditorToolBar::Internal)
+        path = fullPath(internalDir(m_openDocument), internal(m_openDocument)->relativePath);
+    else
+        path = external(m_openDocument)->fullPath;
+
+    Q_ASSERT(!path.isEmpty());
+
+    if (warnIfFileWriteFails(path, m_openDocument->document->toPlainText()))
+        return;
+
+    m_openDocument->document->setModified(false);
 }
 
 void QmlCodeEditorWidget::close()
@@ -315,13 +356,13 @@ void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
     if (toolBar()->scope() == QmlCodeEditorToolBar::Global)
-        return openGlobal(leftCombo->currentText());
+        return openGlobal(choppedPath(leftCombo->currentText()));
     if (toolBar()->scope() == QmlCodeEditorToolBar::External)
-        return openExternal(fullPath(m_fileExplorer->rootPath(), leftCombo->currentText()));
+        return openExternal(fullPath(m_fileExplorer->rootPath(), choppedPath(leftCombo->currentText())));
     if (toolBar()->scope() == QmlCodeEditorToolBar::Internal) {
         Control* control = leftCombo->itemData(leftCombo->currentIndex(), ControlRole).value<Control*>();
         if (combo == QmlCodeEditorToolBar::RightCombo)
-            return openInternal(control, rightCombo->currentText());
+            return openInternal(control, choppedPath(rightCombo->currentText()));
         if (combo == QmlCodeEditorToolBar::LeftCombo) {
             InternalDocument* lastDoc = control->property("ow_last_document").value<InternalDocument*>();
             return openDocument(lastDoc);

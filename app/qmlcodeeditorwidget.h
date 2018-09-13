@@ -59,18 +59,20 @@ private slots:
     void onFileExplorerFileOpen(const QString& relativePath);
 
 private:
+    QmlCodeEditorToolBar* toolBar() const;
     bool documentExists(Document* document) const;
     void showNoDocumentsOpen();
     void openDocument(Document* document);
     void setupToolBar(Document* document);
     void setupCodeEditor(Document* document);
     void setupFileExplorer(Document* document);
+
+protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     QSize sizeHint() const override;
-    QmlCodeEditorToolBar* toolBar() const;
 
 signals:
     void opened();
