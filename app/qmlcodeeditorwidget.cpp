@@ -13,6 +13,7 @@
 #include <QSplitter>
 #include <QLayout>
 #include <QMimeDatabase>
+#include <QMimeData>
 #include <QMessageBox>
 #include <QComboBox>
 
@@ -29,7 +30,6 @@
 // What happens to the file explorer's root path if a control's dir changes
 
 // Fix different fonts of different QmlCodeDocuments
-// Drag & drop files from desktop
 
 #define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
 #define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
@@ -38,6 +38,7 @@
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
 #define externalDir(x) dname(external((x))->fullPath)
 #define fullPath(x, y) (x) + separator() + (y)
+extern const char* TOOL_KEY;
 
 enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
 
@@ -110,6 +111,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
     m_splitter->setCollapsible(0, false);
     m_splitter->setCollapsible(1, false);
     m_splitter->setHandleWidth(0);
+
+    setAcceptDrops(true);
 
     connect(toolBar(), &QmlCodeEditorToolBar::saved,
             this, &QmlCodeEditorWidget::save);
@@ -442,6 +445,35 @@ void QmlCodeEditorWidget::setupFileExplorer(QmlCodeEditorWidget::Document* docum
         return m_fileExplorer->setRootPath(internalDir(document));
     if (document->scope == QmlCodeEditorToolBar::External)
         return m_fileExplorer->setRootPath(externalDir(document));
+}
+
+void QmlCodeEditorWidget::dragEnterEvent(QDragEnterEvent* event)
+{
+    event->accept();
+}
+
+void QmlCodeEditorWidget::dragMoveEvent(QDragMoveEvent* event)
+{
+    event->accept();
+}
+
+void QmlCodeEditorWidget::dragLeaveEvent(QDragLeaveEvent* event)
+{
+    event->accept();
+}
+
+void QmlCodeEditorWidget::dropEvent(QDropEvent* event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls() && !(mimeData->hasText() && mimeData->text() == TOOL_KEY)) {
+        event->accept();
+        for (const QUrl& url : mimeData->urls()) {
+            if (url.isLocalFile())
+                openExternal(url.toLocalFile());
+        }
+    } else {
+        event->ignore();
+    }
 }
 
 void QmlCodeEditorWidget::setupToolBar(Document* document)
