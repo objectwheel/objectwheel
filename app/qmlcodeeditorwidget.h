@@ -54,6 +54,8 @@ public slots:
     void setFileExplorerVisible(bool visible);
 
 private slots:
+    void onNewExternalFile();
+    void onOpenExternalFile();
     void onModificationChange();
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
     void onComboActivation(QmlCodeEditorToolBar::Combo);

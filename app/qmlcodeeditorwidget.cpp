@@ -16,6 +16,8 @@
 #include <QMimeData>
 #include <QMessageBox>
 #include <QComboBox>
+#include <QFileDialog>
+#include <QStandardPaths>
 
 // FIXME:
 // What happens if a global open file get renamed
@@ -181,7 +183,10 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
             this, &QmlCodeEditorWidget::onScopeActivation);
     connect(toolBar(), &QmlCodeEditorToolBar::comboActivated,
             this, &QmlCodeEditorWidget::onComboActivation);
-
+    connect(toolBar(), &QmlCodeEditorToolBar::newFile,
+            this, &QmlCodeEditorWidget::onNewExternalFile);
+    connect(toolBar(), &QmlCodeEditorToolBar::openFile,
+            this, &QmlCodeEditorWidget::onOpenExternalFile);
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
@@ -231,6 +236,37 @@ void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
 {
     m_splitter->handle(1)->setDisabled(!visible);
     m_fileExplorer->setHidden(!visible);
+}
+
+void QmlCodeEditorWidget::onNewExternalFile()
+{
+    const QString& fullPath = QFileDialog::getSaveFileName(
+                this,
+                tr("New External File"),
+                QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
+                tr("Text files (*.txt *.qml *.js *.json *.xml *.html *.htm *.css)"));
+
+    if (fullPath.isEmpty())
+        return;
+
+    if (!mkfile(fullPath))
+        return;
+
+    openExternal(fullPath);
+}
+
+void QmlCodeEditorWidget::onOpenExternalFile()
+{
+    const QString& fullPath = QFileDialog::getOpenFileName(
+                this,
+                tr("New External File"),
+                QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
+                tr("Text files (*.txt *.qml *.js *.json *.xml *.html *.htm *.css)"));
+
+    if (fullPath.isEmpty())
+        return;
+
+    openExternal(fullPath);
 }
 
 void QmlCodeEditorWidget::onModificationChange()
@@ -395,7 +431,7 @@ void QmlCodeEditorWidget::showNoDocumentsOpen()
 {
     QmlCodeEditorToolBar::DocumentActions hiddenActions = QmlCodeEditorToolBar::AllActions;
     if (toolBar()->scope() == QmlCodeEditorToolBar::External)
-        hiddenActions &= ~QmlCodeEditorToolBar::NewFileAction;
+        hiddenActions &= ~QmlCodeEditorToolBar::FileActions;
     m_openDocument = nullptr;
     m_codeEditor->setNoDocsVisible(true);
     toolBar()->setHiddenActions(hiddenActions);
@@ -728,7 +764,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
 
         switch (scope) {
         case QmlCodeEditorToolBar::Global:
-            toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction | QmlCodeEditorToolBar::NewFileAction);
+            toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction | QmlCodeEditorToolBar::FileActions);
             leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
                 int i = leftCombo->count();
@@ -740,7 +776,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
 
         case QmlCodeEditorToolBar::Internal:
-            toolBar()->setHiddenActions(QmlCodeEditorToolBar::NewFileAction);
+            toolBar()->setHiddenActions(QmlCodeEditorToolBar::FileActions);
             leftCombo->setToolTip(tr("Control name"));
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
             for (Control* control : controls(m_internalDocuments)) {
