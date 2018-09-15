@@ -54,6 +54,7 @@ public slots:
     void setFileExplorerVisible(bool visible);
 
 private slots:
+    void onModificationChange();
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
     void onComboActivation(QmlCodeEditorToolBar::Combo);
     void onFileExplorerFileOpen(const QString& relativePath);
@@ -61,6 +62,7 @@ private slots:
 private:
     QmlCodeEditorToolBar* toolBar() const;
     bool documentExists(Document* document) const;
+    bool controlModified(const Control* control) const;
     void showNoDocumentsOpen();
     void openDocument(Document* document);
     void setupToolBar(Document* document);

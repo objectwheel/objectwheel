@@ -31,7 +31,6 @@
 // What if files changes outside, the content I mean, especially external files
 
 // Fix different fonts of different QmlCodeDocuments
-// Add * indicator for modified docs
 // Add new file option for external
 // Add a way of open doc indication for scope combobox
 // Look to older qml code editor widget's older version from github commit history for catching up lacks
@@ -43,6 +42,7 @@
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
 #define externalDir(x) dname(external((x))->fullPath)
 #define fullPath(x, y) (x) + separator() + (y)
+#define modified(x, y) (x)->isModified() ? (y + "*") : y
 extern const char* TOOL_KEY;
 
 enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
@@ -167,6 +167,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
 
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
+    connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
+            this, &QmlCodeEditorWidget::onModificationChange, Qt::QueuedConnection);
 }
 
 int QmlCodeEditorWidget::count() const
@@ -212,6 +214,53 @@ void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
 {
     m_splitter->handle(1)->setDisabled(!visible);
     m_fileExplorer->setHidden(!visible);
+}
+
+void QmlCodeEditorWidget::onModificationChange()
+{
+    if (!m_openDocument)
+        return;
+
+    Q_ASSERT(m_openDocument->document == m_codeEditor->codeDocument());
+
+    QmlCodeEditorToolBar::Scope scope = m_openDocument->scope;
+    QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+    QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
+
+    switch (scope) {
+    case QmlCodeEditorToolBar::Global:
+        for (int i = 0; i < leftCombo->count(); ++i) {
+            GlobalDocument* doc = leftCombo->itemData(i, DocumentRole).value<GlobalDocument*>();
+            if (doc == m_openDocument) {
+                leftCombo->setItemText(i, modified(doc->document, doc->relativePath));
+                break;
+            }
+        } break;
+
+    case QmlCodeEditorToolBar::External:
+        for (int i = 0; i < leftCombo->count(); ++i) {
+            ExternalDocument* doc = leftCombo->itemData(i, DocumentRole).value<ExternalDocument*>();
+            if (doc == m_openDocument) {
+                leftCombo->setItemText(i, modified(doc->document, fname(doc->fullPath)));
+                break;
+            }
+        } break;
+
+    case QmlCodeEditorToolBar::Internal:
+        for (int i = 0; i < leftCombo->count(); ++i) {
+            Control* control = leftCombo->itemData(i, ControlRole).value<Control*>();
+            if (control == internal(m_openDocument)->control) {
+                leftCombo->setItemText(i, controlModified(control) ? control->id() + "*" : control->id());
+                break;
+            }
+        } for (int i = 0; i < rightCombo->count(); ++i) {
+            InternalDocument* doc = rightCombo->itemData(i, DocumentRole).value<InternalDocument*>();
+            if (doc == m_openDocument) {
+                rightCombo->setItemText(i, modified(doc->document, doc->relativePath));
+                break;
+            }
+        } break;
+    }
 }
 
 void QmlCodeEditorWidget::save()
@@ -394,6 +443,21 @@ bool QmlCodeEditorWidget::documentExists(QmlCodeEditorWidget::Document* document
         if (doc == document)
             return true;
     }
+    return false;
+}
+
+bool QmlCodeEditorWidget::controlModified(const Control* control) const
+{
+    bool found = false;
+    for (InternalDocument* document : m_internalDocuments) {
+        if (document->control == control) {
+            if (document->document->isModified())
+                return true;
+            found = true;
+        }
+    }
+
+    Q_ASSERT(found);
     return false;
 }
 
@@ -663,7 +727,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
             for (GlobalDocument* doc : m_globalDocuments) {
                 int i = leftCombo->count();
-                leftCombo->addItem(doc->relativePath);
+                leftCombo->addItem(modified(doc->document, doc->relativePath));
                 leftCombo->setItemData(i, doc->relativePath, Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
                 if (doc == document)
@@ -676,7 +740,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
             for (Control* control : controls(m_internalDocuments)) {
                 int i = leftCombo->count();
-                leftCombo->addItem(control->id());
+                leftCombo->addItem(controlModified(control) ? control->id() + "*" : control->id());
                 leftCombo->setItemData(i, control->id() + "::" + control->uid(), Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(control), ComboDataRole::ControlRole);
                 if (internal(document)->control == control)
@@ -684,7 +748,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } for (InternalDocument* doc : m_internalDocuments) {
                 if (internal(document)->control == doc->control) {
                     int i = rightCombo->count();
-                    rightCombo->addItem(doc->relativePath);
+                    rightCombo->addItem(modified(doc->document, doc->relativePath));
                     rightCombo->setItemData(i, doc->relativePath, Qt::ToolTipRole);
                     rightCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
                     if (doc == document) {
@@ -699,7 +763,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             leftCombo->setToolTip(tr("File name of the open document"));
             for (ExternalDocument* doc : m_externalDocuments) {
                 int i = leftCombo->count();
-                leftCombo->addItem(fname(doc->fullPath));
+                leftCombo->addItem(modified(doc->document, fname(doc->fullPath)));
                 leftCombo->setItemData(i, doc->fullPath, Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
                 if (doc == document)
