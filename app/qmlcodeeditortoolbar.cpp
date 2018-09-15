@@ -16,6 +16,29 @@
 using namespace Utils;
 using namespace Icons;
 
+#define MARK_BULLET "•"
+
+namespace {
+QAction* g_globalAction;
+QAction* g_internalAction;
+QAction* g_externalAction;
+
+QString choppedText(const QString& text)
+{
+    QString choppedText(text);
+    if (choppedText.right(1) == MARK_BULLET)
+        choppedText.chop(1);
+    return choppedText;
+}
+
+QString bulletText(const QString& text)
+{
+    QString bulletText(choppedText(text));
+    bulletText += MARK_BULLET;
+    return bulletText;
+}
+}
+
 QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolBar(m_codeEditor)
   , m_codeEditor(m_codeEditor)
   , m_pinButton(new QToolButton)
@@ -116,32 +139,29 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
 
     auto menu = new QMenu(m_scopeButton);
     auto group = new QActionGroup(menu);
-    auto globalAction = new QAction(group);
-    auto internalAction = new QAction(group);
-    auto externalAction = new QAction(group);
+    g_globalAction = new QAction(group);
+    g_internalAction = new QAction(group);
+    g_externalAction = new QAction(group);
 
     menu->setToolTipsVisible(true);
     menu->addActions(group->actions());
 
     group->setExclusive(true);
-    group->addAction(globalAction);
-    group->addAction(internalAction);
-    group->addAction(externalAction);
+    group->addAction(g_globalAction);
+    group->addAction(g_internalAction);
+    group->addAction(g_externalAction);
 
-    globalAction->setText("Global");
-    globalAction->setIcon(GLOBAL_TOOLBAR.icon());
-    globalAction->setCheckable(true);
-    globalAction->setProperty("ow_scope", Global);
+    g_globalAction->setIcon(GLOBAL_TOOLBAR.icon());
+    g_globalAction->setCheckable(true);
+    g_globalAction->setProperty("ow_scope", Global);
 
-    internalAction->setText("Internal");
-    internalAction->setIcon(INTERNAL_TOOLBAR.icon());
-    internalAction->setCheckable(true);
-    internalAction->setProperty("ow_scope", Internal);
+    g_internalAction->setIcon(INTERNAL_TOOLBAR.icon());
+    g_internalAction->setCheckable(true);
+    g_internalAction->setProperty("ow_scope", Internal);
 
-    externalAction->setText("External");
-    externalAction->setIcon(EXTERNAL_TOOLBAR.icon());
-    externalAction->setCheckable(true);
-    externalAction->setProperty("ow_scope", External);
+    g_externalAction->setIcon(EXTERNAL_TOOLBAR.icon());
+    g_externalAction->setCheckable(true);
+    g_externalAction->setProperty("ow_scope", External);
 
     m_scopeButton->setAttribute(Qt::WA_Hover);
     m_scopeButton->setPopupMode(QToolButton::InstantPopup);
@@ -206,6 +226,10 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
 
 void QmlCodeEditorToolBar::sweep()
 {
+    g_globalAction->setText(tr("Global\t"));
+    g_internalAction->setText(tr("Internal\t"));
+    g_externalAction->setText(tr("External\t"));
+
     setDocument(nullptr);
 
     m_pinButton->setProperty("ow_pinned", false);
@@ -238,6 +262,23 @@ void QmlCodeEditorToolBar::setScope(QmlCodeEditorToolBar::Scope scope)
     }
 
     // emit scopeChanged(scope);
+}
+
+void QmlCodeEditorToolBar::setScopeWide(QmlCodeEditorToolBar::Scope scope, bool wide)
+{
+    QAction* action;
+
+    if (scope == Global)
+        action = g_globalAction;
+    else if (scope == Internal)
+        action = g_internalAction;
+    else
+        action = g_externalAction;
+
+    if (wide)
+        action->setText(bulletText(action->text()));
+    else
+        action->setText(choppedText(action->text()));
 }
 
 void QmlCodeEditorToolBar::onPinButtonClick()

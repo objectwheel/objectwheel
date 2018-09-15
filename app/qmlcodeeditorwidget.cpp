@@ -33,10 +33,9 @@
 // What if files changes outside, the content I mean, especially external files
 
 // Fix different fonts of different QmlCodeDocuments
-// Add new file option for external
-// Add a way of open doc indication for scope combobox
 // Look to older qml code editor widget's older version from github commit history for catching up lacks
 
+#define MARK_ASTERISK "*"
 #define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
 #define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
 #define external(x) static_cast<QmlCodeEditorWidget::ExternalDocument*>((x))
@@ -44,8 +43,8 @@
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
 #define externalDir(x) dname(external((x))->fullPath)
 #define fullPath(x, y) (x) + separator() + (y)
-#define modified(x, y) (x)->isModified() ? ((y) + "*") : (y)
-#define modifiedControl(x, y) controlModified((y), (x)) ? (x)->id() + "*" : (x)->id()
+#define modified(x, y) (x)->isModified() ? ((y) + MARK_ASTERISK) : (y)
+#define modifiedControl(x, y) controlModified((y), (x)) ? (x)->id() + MARK_ASTERISK : (x)->id()
 extern const char* TOOL_KEY;
 
 enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
@@ -134,7 +133,7 @@ bool warnIfFileWriteFails(const QString& filePath, const QString& content)
 QString choppedPath(const QString& path)
 {
     QString choppedPath(path);
-    if (choppedPath.right(1) == "*")
+    if (choppedPath.right(1) == MARK_ASTERISK)
         choppedPath.chop(1);
     return choppedPath;
 }
@@ -375,6 +374,7 @@ void QmlCodeEditorWidget::close()
         leftCombo->removeItem(indexForRemoval);
         if (leftCombo->count() > 0)
             nextDocument = leftCombo->itemData(0, DocumentRole).value<GlobalDocument*>();
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::Global, !m_globalDocuments.isEmpty());
     } else if (scope == QmlCodeEditorToolBar::Internal) {
         g_lastInternalDocument = nullptr;
         m_internalDocuments.removeOne(internal(m_openDocument));
@@ -401,6 +401,7 @@ void QmlCodeEditorWidget::close()
                 nextDocument = m_internalDocuments.last();
             }
         }
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::Internal, !m_internalDocuments.isEmpty());
     } else {
         g_lastExternalDocument = nullptr;
         m_externalDocuments.removeOne(external(m_openDocument));
@@ -413,6 +414,7 @@ void QmlCodeEditorWidget::close()
         leftCombo->removeItem(indexForRemoval);
         if (leftCombo->count() > 0)
             nextDocument = leftCombo->itemData(0, DocumentRole).value<ExternalDocument*>();
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::External, !m_externalDocuments.isEmpty());
     }
 
     Q_ASSERT(m_openDocument != nextDocument);
@@ -611,6 +613,8 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
         leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
 
+    toolBar()->setScopeWide(QmlCodeEditorToolBar::Global, true);
+
     return document;
 }
 
@@ -644,6 +648,8 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control*
         rightCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
 
+    toolBar()->setScopeWide(QmlCodeEditorToolBar::Internal, true);
+
     return document;
 }
 
@@ -667,6 +673,8 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
         leftCombo->setItemData(i, document->fullPath, Qt::ToolTipRole);
         leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
+
+    toolBar()->setScopeWide(QmlCodeEditorToolBar::External, true);
 
     return document;
 }

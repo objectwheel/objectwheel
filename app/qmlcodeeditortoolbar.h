@@ -35,6 +35,7 @@ public:
     explicit QmlCodeEditorToolBar(QmlCodeEditor* codeEditor);
 
     void setScope(Scope);
+    void setScopeWide(Scope, bool);
     void setDocument(QmlCodeDocument* document);
     void setHiddenActions(DocumentActions action);
 
