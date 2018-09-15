@@ -62,7 +62,7 @@ private slots:
 private:
     QmlCodeEditorToolBar* toolBar() const;
     bool documentExists(Document* document) const;
-    bool controlModified(const Control* control) const;
+
     void showNoDocumentsOpen();
     void openDocument(Document* document);
     void setupToolBar(Document* document);

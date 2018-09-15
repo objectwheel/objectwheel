@@ -20,9 +20,10 @@ public:
         LeftAction = 0x01,
         RightAction = 0x02,
         CloseAction = 0x04,
-        LineColAction = 0x08,
-        ShowAction = 0x10,
-        AllActions = LeftAction | RightAction | CloseAction | LineColAction | ShowAction
+        NewFileAction = 0x08,
+        LineColAction = 0x10,
+        ShowAction = 0x20,
+        AllActions = LeftAction | RightAction | CloseAction | NewFileAction | LineColAction | ShowAction
     };
     enum Combo { LeftCombo, RightCombo };
     enum Scope { Global, Internal, External };
@@ -54,6 +55,7 @@ private slots:
 signals:
     void saved();
     void closed();
+    void newFile();
     void pinned(bool);
     void showed(bool);
     void scopeActivated(Scope);
@@ -70,6 +72,7 @@ private:
     QToolButton* m_undoButton;
     QToolButton* m_redoButton;
     QToolButton* m_closeButton;
+    QToolButton* m_newFileButton;
     QToolButton* m_saveButton;
     QToolButton* m_cutButton;
     QToolButton* m_copyButton;

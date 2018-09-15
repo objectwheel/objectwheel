@@ -393,6 +393,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     connect(baseTextFind, &BaseTextFind::findScopeChanged,
             this, &QmlCodeEditor::setFindScope);
 
+    setAcceptDrops(false);
     setMouseTracking(true);
 
     if (!m_qmlJsHoverHandler) {

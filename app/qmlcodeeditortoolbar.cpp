@@ -22,6 +22,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
   , m_undoButton(new QToolButton)
   , m_redoButton(new QToolButton)
   , m_closeButton(new QToolButton)
+  , m_newFileButton(new QToolButton)
   , m_saveButton(new QToolButton)
   , m_cutButton(new QToolButton)
   , m_copyButton(new QToolButton)
@@ -44,22 +45,25 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     addSeparator();
     addWidget(m_scopeButton);
     addSeparator();
-    m_actions.append(addWidget(m_leftCombo));       // 0
+    m_actions.append(addWidget(m_newFileButton));   // 0
     m_actions.append(addSeparator());               // 1
-    m_actions.append(addWidget(m_rightCombo));      // 2
+    m_actions.append(addWidget(m_leftCombo));       // 2
     m_actions.append(addSeparator());               // 3
-    m_actions.append(addWidget(m_closeButton));     // 4
+    m_actions.append(addWidget(m_rightCombo));      // 4
     m_actions.append(addSeparator());               // 5
+    m_actions.append(addWidget(m_closeButton));     // 6
+    m_actions.append(addSeparator());               // 7
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
-    m_actions.append(addSeparator());               // 6
-    m_actions.append(addWidget(m_lineColumnLabel)); // 7
     m_actions.append(addSeparator());               // 8
-    m_actions.append(addWidget(m_showButton));      // 9
+    m_actions.append(addWidget(m_lineColumnLabel)); // 9
+    m_actions.append(addSeparator());               // 10
+    m_actions.append(addWidget(m_showButton));      // 11
 
     m_pinButton->setFixedHeight(22);
     m_undoButton->setFixedHeight(22);
     m_redoButton->setFixedHeight(22);
     m_closeButton->setFixedHeight(22);
+    m_newFileButton->setFixedHeight(22);
     m_saveButton->setFixedHeight(22);
     m_cutButton->setFixedHeight(22);
     m_copyButton->setFixedHeight(22);
@@ -74,6 +78,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_undoButton->setCursor(Qt::PointingHandCursor);
     m_redoButton->setCursor(Qt::PointingHandCursor);
     m_closeButton->setCursor(Qt::PointingHandCursor);
+    m_newFileButton->setCursor(Qt::PointingHandCursor);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     m_cutButton->setCursor(Qt::PointingHandCursor);
     m_copyButton->setCursor(Qt::PointingHandCursor);
@@ -86,6 +91,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_undoButton->setToolTip(tr("Undo action"));
     m_redoButton->setToolTip(tr("Redo action"));
     m_closeButton->setToolTip(tr("Close document"));
+    m_newFileButton->setToolTip(tr("New external file"));
     m_saveButton->setToolTip(tr("Save document"));
     m_cutButton->setToolTip(tr("Cut selection"));
     m_copyButton->setToolTip(tr("Copy selection"));
@@ -96,6 +102,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_undoButton->setIcon(UNDO_TOOLBAR.icon());
     m_redoButton->setIcon(REDO_TOOLBAR.icon());
     m_closeButton->setIcon(CLOSE_TOOLBAR.icon());
+    m_newFileButton->setIcon(FILENEW.icon());
     m_saveButton->setIcon(SAVEFILE_TOOLBAR.icon());
     m_cutButton->setIcon(CUT_TOOLBAR.icon());
     m_copyButton->setIcon(COPY_TOOLBAR.icon());
@@ -161,6 +168,8 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     });
     connect(m_closeButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::closed);
+    connect(m_newFileButton, &QToolButton::clicked,
+            this, &QmlCodeEditorToolBar::newFile);
     connect(m_saveButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::saved);
     connect(m_codeEditor, &QmlCodeEditor::copyAvailable,
@@ -323,16 +332,18 @@ void QmlCodeEditorToolBar::setDocument(QmlCodeDocument* document)
 
 void QmlCodeEditorToolBar::setHiddenActions(QmlCodeEditorToolBar::DocumentActions action)
 {
-    m_actions.at(0)->setVisible(!(action & LeftAction));
-    m_actions.at(1)->setVisible(!(action & LeftAction));
-    m_actions.at(2)->setVisible(!(action & RightAction));
-    m_actions.at(3)->setVisible(!(action & RightAction));
-    m_actions.at(4)->setVisible(!(action & CloseAction));
-    m_actions.at(5)->setVisible(!(action & CloseAction));
-    m_actions.at(6)->setVisible(!(action & LineColAction));
-    m_actions.at(7)->setVisible(!(action & LineColAction));
-    m_actions.at(8)->setVisible(!(action & ShowAction));
-    m_actions.at(9)->setVisible(!(action & ShowAction));
+    m_actions.at(0)->setVisible(!(action & NewFileAction));
+    m_actions.at(1)->setVisible(!(action & NewFileAction));
+    m_actions.at(2)->setVisible(!(action & LeftAction));
+    m_actions.at(3)->setVisible(!(action & LeftAction));
+    m_actions.at(4)->setVisible(!(action & RightAction));
+    m_actions.at(5)->setVisible(!(action & RightAction));
+    m_actions.at(6)->setVisible(!(action & CloseAction));
+    m_actions.at(7)->setVisible(!(action & CloseAction));
+    m_actions.at(8)->setVisible(!(action & LineColAction));
+    m_actions.at(9)->setVisible(!(action & LineColAction));
+    m_actions.at(10)->setVisible(!(action & ShowAction));
+    m_actions.at(11)->setVisible(!(action & ShowAction));
 }
 
 QmlCodeEditorToolBar::Scope QmlCodeEditorToolBar::scope() const
