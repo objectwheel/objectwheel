@@ -37,6 +37,7 @@ QString polishOutput(QString str)
     if (!deepestControl)
         return str;
 
+    // FIXME: What if the file is a global resources file?
     const QString& dir = deepestControl->dir() + separator() + DIR_THIS + separator();
     const QString& newDir = deepestControl->id() + "::" + deepestControl->uid() + ": ";
     const QRegularExpression& exp = QRegularExpression("file:\\/{1,3}" + dir);

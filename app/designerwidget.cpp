@@ -347,9 +347,7 @@ void DesignerWidget::onControlDoubleClick(Control* control)
 
 void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 {
-    m_qmlCodeEditorWidget->openInternal(
-                control,
-                QDir(SaveUtils::toThisDir(control->dir())).relativeFilePath(control->url()));
+    m_qmlCodeEditorWidget->openInternal(control, "main.qml");
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)

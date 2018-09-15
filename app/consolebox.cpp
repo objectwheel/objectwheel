@@ -6,6 +6,8 @@
 #include <centralwidget.h>
 #include <control.h>
 #include <appfontsettings.h>
+#include <qmlcodeeditor.h>
+#include <qmlcodeeditorwidget.h>
 
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
@@ -122,11 +124,9 @@ void ConsoleBox::onLinkClick(const QString& link)
     if (!control)
         return;
 
-//    BUG editorWidget->addControl(control);
-//    editorWidget->addDocument(control, path);
-//    editorWidget->openControl(control);
-//    editorWidget->setCurrentDocument(control, path);
-//    editorWidget->setCurrentLine(lineNumber);
+    // FIXME: What if the file is a global resources file?
+    editorWidget->openInternal(control, path);
+    editorWidget->codeEditor()->gotoLine(lineNumber);
 }
 
 void ConsoleBox::fade()

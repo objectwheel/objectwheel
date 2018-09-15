@@ -11,8 +11,7 @@ class UTILS_EXPORT ParserUtils final
     Q_DISABLE_COPY(ParserUtils)
 
     friend class SaveManager; // For setId and setProperty
-    friend class QmlCodeEditorWidget; // For setProperty
-    friend class QmlCodeEditorWidgetPrivate; // For setProperty
+    friend class CentralWidget; // For setProperty
 
 public:
     static bool canParse(const QString& url);

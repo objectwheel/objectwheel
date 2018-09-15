@@ -31,6 +31,9 @@ public:
 
     int count() const;
 
+    bool controlExists(const Control* control);
+    bool controlModified(const Control* control);
+
     void openGlobal(const QString& relativePath);
     void openInternal(Control* control, const QString& relativePath);
     void openExternal(const QString& fullPath);
@@ -47,6 +50,8 @@ public:
     InternalDocument* addInternal(Control* control, const QString& relativePath);
     ExternalDocument* addExternal(const QString& fullPath);
 
+    QmlCodeEditor* codeEditor() const;
+
 public slots:
     void sweep();
     void save();
@@ -61,16 +66,6 @@ private slots:
     void onComboActivation(QmlCodeEditorToolBar::Combo);
     void onFileExplorerFileOpen(const QString& relativePath);
 
-private:
-    QmlCodeEditorToolBar* toolBar() const;
-    bool documentExists(Document* document) const;
-
-    void showNoDocumentsOpen();
-    void openDocument(Document* document);
-    void setupToolBar(Document* document);
-    void setupCodeEditor(Document* document);
-    void setupFileExplorer(Document* document);
-
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
@@ -78,15 +73,25 @@ protected:
     void dropEvent(QDropEvent *event) override;
     QSize sizeHint() const override;
 
+private:
+    void showNoDocumentsOpen();
+    void openDocument(Document* document);
+    void setupToolBar(Document* document);
+    void setupCodeEditor(Document* document);
+    void setupFileExplorer(Document* document);
+    bool documentExists(Document* document) const;
+    QmlCodeEditorToolBar* toolBar() const;
+
 signals:
     void opened();
     void pinned(bool pinned);
 
 private:
-    Document* m_openDocument;
     QSplitter* m_splitter;
     QmlCodeEditor* m_codeEditor;
     FileExplorer* m_fileExplorer;
+
+    Document* m_openDocument;
     QList<GlobalDocument*> m_globalDocuments;
     QList<InternalDocument*> m_internalDocuments;
     QList<ExternalDocument*> m_externalDocuments;

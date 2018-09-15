@@ -34,6 +34,7 @@
 
 // Fix different fonts of different QmlCodeDocuments
 // Look to older qml code editor widget's older version from github commit history for catching up lacks
+// Implement pin/unpin feature
 
 #define MARK_ASTERISK "*"
 #define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
@@ -44,7 +45,7 @@
 #define externalDir(x) dname(external((x))->fullPath)
 #define fullPath(x, y) (x) + separator() + (y)
 #define modified(x, y) (x)->isModified() ? ((y) + MARK_ASTERISK) : (y)
-#define modifiedControl(x, y) controlModified((y), (x)) ? (x)->id() + MARK_ASTERISK : (x)->id()
+#define modifiedControlId(x) controlModified((x)) ? (x)->id() + MARK_ASTERISK : (x)->id()
 extern const char* TOOL_KEY;
 
 enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
@@ -55,32 +56,6 @@ bool g_fileExplorerHid = false;
 QmlCodeEditorWidget::GlobalDocument* g_lastGlobalDocument;
 QmlCodeEditorWidget::InternalDocument* g_lastInternalDocument;
 QmlCodeEditorWidget::ExternalDocument* g_lastExternalDocument;
-
-bool controlExistsIn(const QList<QmlCodeEditorWidget::InternalDocument*>& documents,
-                     const Control* control)
-{
-    for (QmlCodeEditorWidget::InternalDocument* document : documents) {
-        if (document->control == control)
-            return true;
-    }
-    return false;
-}
-
-bool controlModified(const QList<QmlCodeEditorWidget::InternalDocument*>& documents,
-                     const Control* control)
-{
-    bool found = false;
-    for (QmlCodeEditorWidget::InternalDocument* document : documents) {
-        if (document->control == control) {
-            if (document->document->isModified())
-                return true;
-            found = true;
-        }
-    }
-
-    Q_ASSERT(found);
-    return false;
-}
 
 void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document)
 {
@@ -302,7 +277,7 @@ void QmlCodeEditorWidget::onModificationChange()
         for (int i = 0; i < leftCombo->count(); ++i) {
             Control* control = leftCombo->itemData(i, ControlRole).value<Control*>();
             if (control == internal(m_openDocument)->control) {
-                leftCombo->setItemText(i, modifiedControl(control, m_internalDocuments));
+                leftCombo->setItemText(i, modifiedControlId(control));
                 break;
             }
         } for (int i = 0; i < rightCombo->count(); ++i) {
@@ -634,7 +609,7 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control*
     m_internalDocuments.append(document);
 
     if (toolBar()->scope() == QmlCodeEditorToolBar::Internal) {
-        if (!controlExistsIn(m_internalDocuments, control)) {
+        if (!controlExists(control)) {
             QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
             int i = leftCombo->count();
             leftCombo->addItem(control->id());
@@ -789,7 +764,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
             for (Control* control : controls(m_internalDocuments)) {
                 int i = leftCombo->count();
-                leftCombo->addItem(modifiedControl(control, m_internalDocuments));
+                leftCombo->addItem(modifiedControlId(control));
                 leftCombo->setItemData(i, control->id() + "::" + control->uid(), Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(control), ComboDataRole::ControlRole);
                 if (internal(document)->control == control)
@@ -853,6 +828,32 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             } break;
         }
     }
+}
+
+bool QmlCodeEditorWidget::controlExists(const Control* control)
+{
+    for (QmlCodeEditorWidget::InternalDocument* document : m_internalDocuments) {
+        if (document->control == control)
+            return true;
+    }
+    return false;
+}
+
+bool QmlCodeEditorWidget::controlModified(const Control* control)
+{
+    Q_ASSERT(controlExists(control));
+    for (QmlCodeEditorWidget::InternalDocument* document : m_internalDocuments) {
+        if (document->control == control) {
+            if (document->document->isModified())
+                return true;
+        }
+    }
+    return false;
+}
+
+QmlCodeEditor* QmlCodeEditorWidget::codeEditor() const
+{
+    return m_codeEditor;
 }
 
 QmlCodeEditorToolBar* QmlCodeEditorWidget::toolBar() const

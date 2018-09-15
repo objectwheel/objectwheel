@@ -132,7 +132,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     inspectorTitlePinButton->setCursor(Qt::PointingHandCursor);
     inspectorTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(inspectorTitlePinButton, &QToolButton::clicked, this, [] {
+    connect(inspectorTitlePinButton, &QToolButton::clicked,
+            this, [] {
         inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
     });
 
@@ -162,7 +163,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     propertiesTitlePinButton->setCursor(Qt::PointingHandCursor);
     propertiesTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(propertiesTitlePinButton, &QToolButton::clicked, this, [] {
+    connect(propertiesTitlePinButton, &QToolButton::clicked,
+            this, [] {
         propertiesDockWidget->setFloating(!propertiesDockWidget->isFloating());
     });
 
@@ -192,7 +194,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     globalTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     globalTitlePinButton->setCursor(Qt::PointingHandCursor);
     globalTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(globalTitlePinButton, &QToolButton::clicked, this, [] {
+    connect(globalTitlePinButton, &QToolButton::clicked,
+            this, [] {
         globalDockWidget->setFloating(!globalDockWidget->isFloating());
     });
 
@@ -224,7 +227,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     toolboxTitlePinButton->setCursor(Qt::PointingHandCursor);
     toolboxTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(toolboxTitlePinButton, &QToolButton::clicked, this, [] {
+    connect(toolboxTitlePinButton, &QToolButton::clicked,
+            this, [] {
         toolboxDockWidget->setFloating(!toolboxDockWidget->isFloating());
     });
 
@@ -232,7 +236,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxSettingsButton->setToolTip(tr("Toolbox settings."));
     toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
     toolboxSettingsButton->setIcon(QIcon(":/images/settings.png"));
-    connect(toolboxSettingsButton, &QToolButton::clicked, this, [=] {
+    connect(toolboxSettingsButton, &QToolButton::clicked,
+            this, [=] {
         WindowManager::toolboxSettingsWindow()->show();
     });
 
@@ -264,7 +269,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     formsTitlePinButton->setCursor(Qt::PointingHandCursor);
     formsTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(formsTitlePinButton, &QToolButton::clicked, this, [] {
+    connect(formsTitlePinButton, &QToolButton::clicked,
+            this, [] {
         formsDockWidget->setFloating(!formsDockWidget->isFloating());
     });
 
@@ -294,7 +300,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_pageSwitcherPane, SIGNAL(leftPanesShowChanged(bool)), this, SLOT(showLeftPanes(bool)));
     connect(m_pageSwitcherPane, SIGNAL(rightPanesShowChanged(bool)), this, SLOT(showRightPanes(bool)));
 
-    connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened, [=] {
+    connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
+            [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
                 && m_pageSwitcherPane->currentPage() != Page_SplitView) {
             m_pageSwitcherPane->setCurrentPage(Page_Designer);
@@ -310,9 +317,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
             m_centralWidget->designerWidget(), SLOT(onInspectorItemDoubleClick(Control*)));
 
-    connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished), [=]
-            (int exitCode, QProcess::ExitStatus)
-    {
+    connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished),
+            [=] (int exitCode, QProcess::ExitStatus) {
         auto pane = m_centralWidget->outputPane();
         auto console = pane->consoleBox();
 

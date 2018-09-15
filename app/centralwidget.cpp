@@ -10,6 +10,9 @@
 #include <controlremovingmanager.h>
 #include <delayer.h>
 #include <qmlcodeeditorwidget.h>
+#include <qmlcodedocument.h>
+#include <savemanager.h>
+#include <parserutils.h>
 
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -48,6 +51,14 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             m_designerWidget, SLOT(onControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
 //   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
 //            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
+
+    connect(SaveManager::instance(), &SaveManager::propertyChanged,
+            this, [=] (Control* control, const QString& property, const QString& value) {
+        QmlCodeEditorWidget::InternalDocument* document = qmlCodeEditorWidget()->getInternal(control, "main.qml");
+        if (document)
+            ParserUtils::setProperty(document->document, control->url(), property, value);
+    });
+
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
             ControlPreviewingManager::scheduleTerminate);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
