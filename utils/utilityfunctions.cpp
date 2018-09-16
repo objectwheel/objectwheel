@@ -12,6 +12,8 @@
 #include <QProgressDialog>
 #include <QtConcurrent>
 #include <QTreeView>
+#include <QScreen>
+#include <QWindow>
 
 namespace {
 
@@ -137,4 +139,22 @@ void UtilityFunctions::expandUpToRoot(QTreeView* view, const QModelIndex& index,
     view->expand(index);
 
     expandUpToRoot(view, index.parent(), rootIndex);
+}
+
+QWindow* UtilityFunctions::window(const QWidget* w)
+{
+    Q_ASSERT(w);
+    QWindow* winHandle = w->windowHandle();
+    if (!winHandle) {
+        if (const QWidget* nativeParent = w->nativeParentWidget())
+            winHandle = nativeParent->windowHandle();
+    }
+    Q_ASSERT(winHandle);
+    return winHandle;
+}
+
+void UtilityFunctions::centralizeWidget(QWidget* widget)
+{
+    widget->setGeometry(QStyle::alignedRect(widget->layoutDirection(), Qt::AlignCenter, widget->size(),
+                                            window(widget)->screen()->availableGeometry()));
 }

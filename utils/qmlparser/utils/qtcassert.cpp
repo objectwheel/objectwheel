@@ -37,6 +37,8 @@ void writeAssertLocation(const char *msg)
         qFatal("SOFT ASSERT made fatal: %s", msg);
     else
         qDebug("SOFT ASSERT: %s", msg);
+#else
+    Q_UNUSED(msg)
 #endif
 }
 

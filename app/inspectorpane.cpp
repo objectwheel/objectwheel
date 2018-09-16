@@ -7,8 +7,8 @@
 #include <designerscene.h>
 #include <form.h>
 #include <projectmanager.h>
-#include <wfw.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -216,7 +216,8 @@ public:
                        index.column() == 0);
 
         // Draw icon
-        const QPixmap& iconPixmap = icon.pixmap(wfw(m_inspectorPane), option.decorationSize,
+        const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_inspectorPane),
+                                                option.decorationSize,
                                                 isSelected ? QIcon::Selected : QIcon::Normal);
         painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 

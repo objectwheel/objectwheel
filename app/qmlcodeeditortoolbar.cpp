@@ -224,19 +224,27 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
             this, &QmlCodeEditorToolBar::onComboActivation);
 }
 
+void QmlCodeEditorToolBar::setPinned(bool pin)
+{
+    m_pinButton->setProperty("ow_pinned", !pin);
+    onPinButtonClick();
+}
+
+void QmlCodeEditorToolBar::setShowed(bool show)
+{
+    m_showButton->setProperty("ow_showed", !show);
+    onShowButtonClick();
+}
+
 void QmlCodeEditorToolBar::sweep()
 {
     g_globalAction->setText(tr("Global\t"));
     g_internalAction->setText(tr("Internal\t"));
     g_externalAction->setText(tr("External\t"));
 
+    setPinned(true);
+    setShowed(false);
     setDocument(nullptr);
-
-    m_pinButton->setProperty("ow_pinned", false);
-    onPinButtonClick();
-
-    m_showButton->setProperty("ow_showed", true);
-    onShowButtonClick();
 
     m_leftCombo->clear();
     m_rightCombo->clear();

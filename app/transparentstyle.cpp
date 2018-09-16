@@ -1,6 +1,6 @@
 #include <transparentstyle.h>
 #include <qdrawutil.h>
-#include <wfw.h>
+#include <utilityfunctions.h>
 
 #include <QStyleFactory>
 #include <QStyleOptionSpinBox>
@@ -620,7 +620,7 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
         if (const QStyleOptionMenuItem *mi
                 = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
-            QWindow *window = wfw(widget);
+            QWindow *window = UtilityFunctions::window(widget);
             const bool active = mi->state & State_Selected;
             if (active)
                 painter->fillRect(mi->rect, mi->palette.highlight());

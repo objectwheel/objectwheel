@@ -8,13 +8,16 @@ class QWidget;
 class QUrl;
 class QModelIndex;
 class QTreeView;
+class QWindow;
 
 namespace UtilityFunctions {
 void registerGlobalPath(const QString& projectDir);
 void trimCommentsAndStrings(QTextDocument* document);
-QWidget* createSpacerWidget(Qt::Orientation orientation);
 void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent);
 void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex);
+QWidget* createSpacerWidget(Qt::Orientation orientation);
+QWindow* window(const QWidget* w);
+void centralizeWidget(QWidget* widget);
 }
 
 #endif // UTILITYFUNCTIONS_H

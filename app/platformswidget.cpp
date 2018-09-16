@@ -1,6 +1,6 @@
 #include <platformswidget.h>
 #include <build.h>
-#include <wfw.h>
+#include <utilityfunctions.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -49,7 +49,7 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
      option.rect.height() / 2.0, 0, - 7);
    auto ricon = option.rect.adjusted(7, 7,
      - option.rect.width() + option.rect.height() - 7, - 7);
-   auto icon = item->icon().pixmap(wfw(m_view), ricon.size());
+   auto icon = item->icon().pixmap(UtilityFunctions::window(m_view), ricon.size());
     painter->setRenderHint(QPainter::Antialiasing);
 
     QFont f;

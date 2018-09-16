@@ -1,7 +1,7 @@
 #include <fileexplorer.h>
 #include <fileexplorer_p.h>
-#include <wfw.h>
 #include <filemanager.h>
+#include <utilityfunctions.h>
 
 #include <QPainter>
 #include <QLineEdit>
@@ -35,7 +35,8 @@ void FileExplorerListDelegate::paint(QPainter* painter, const QStyleOptionViewIt
     m_fileExplorer->fillBackground(painter, option, m_fileExplorer->d_func()->viewIndex(index), index.column() == 0);
 
     // Draw icon
-    const QPixmap& iconPixmap = icon.pixmap(wfw(m_fileExplorer), option.decorationSize,
+    const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_fileExplorer),
+                                            option.decorationSize,
                                             isSelected ? QIcon::Selected : QIcon::Normal);
     painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 

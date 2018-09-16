@@ -28,6 +28,8 @@ void SignalChooserDialog::setSignalList(const QStringList& signalss)
 {
     ui->signalList->clear();
     ui->signalList->addItems(signalss);
+    ui->searchEdit->setFocus();
+    ui->searchEdit->selectAll();
     filterList();
 }
 

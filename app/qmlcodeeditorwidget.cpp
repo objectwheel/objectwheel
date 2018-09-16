@@ -6,7 +6,9 @@
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <control.h>
+#include <utilityfunctions.h>
 
+#include <QTimer>
 #include <QApplication>
 #include <QToolBar>
 #include <QToolButton>
@@ -18,6 +20,8 @@
 #include <QComboBox>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QWindow>
+#include <QScreen>
 
 // FIXME:
 // What happens if a global open file get renamed
@@ -37,7 +41,6 @@
 // What happens to the file explorer's root path if a control's dir changes
 
 // Fix different fonts of different QmlCodeDocuments
-// Implement pin/unpin feature
 
 #define MARK_ASTERISK "*"
 #define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
@@ -125,7 +128,7 @@ QList<Control*> controls(const QList<QmlCodeEditorWidget::InternalDocument*>& do
 }
 }
 
-QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
+QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
   , m_splitter(new QSplitter(this))
   , m_codeEditor(new QmlCodeEditor(this))
   , m_fileExplorer(new FileExplorer(0))
@@ -155,7 +158,7 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget *parent) : QWidget(parent)
     connect(toolBar(), &QmlCodeEditorToolBar::showed,
             this, &QmlCodeEditorWidget::setFileExplorerVisible);
     connect(toolBar(), &QmlCodeEditorToolBar::pinned,
-            this, &QmlCodeEditorWidget::pinned);
+            this, &QmlCodeEditorWidget::onPinActivation);
     connect(toolBar(), &QmlCodeEditorToolBar::scopeActivated,
             this, &QmlCodeEditorWidget::onScopeActivation);
     connect(toolBar(), &QmlCodeEditorToolBar::comboActivated,
@@ -290,6 +293,21 @@ void QmlCodeEditorWidget::onModificationChange()
                 break;
             }
         } break;
+    }
+}
+
+void QmlCodeEditorWidget::onPinActivation(bool pinned)
+{
+    const QRect& geo = geometry();
+    setWindowFlags(pinned ? Qt::Widget : Qt::Tool);
+    if (!pinned) {
+        QTimer::singleShot(200, [=] {
+            show();
+            setGeometry(geo);
+            UtilityFunctions::centralizeWidget(this);
+        });
+    } else {
+        show();
     }
 }
 
@@ -709,32 +727,44 @@ void QmlCodeEditorWidget::setupFileExplorer(QmlCodeEditorWidget::Document* docum
         return m_fileExplorer->setRootPath(externalDir(document));
 }
 
-void QmlCodeEditorWidget::dragEnterEvent(QDragEnterEvent* event)
+void QmlCodeEditorWidget::dragEnterEvent(QDragEnterEvent* e)
 {
-    event->accept();
+    e->accept();
 }
 
-void QmlCodeEditorWidget::dragMoveEvent(QDragMoveEvent* event)
+void QmlCodeEditorWidget::dragMoveEvent(QDragMoveEvent* e)
 {
-    event->accept();
+    e->accept();
 }
 
-void QmlCodeEditorWidget::dragLeaveEvent(QDragLeaveEvent* event)
+void QmlCodeEditorWidget::dragLeaveEvent(QDragLeaveEvent* e)
 {
-    event->accept();
+    e->accept();
 }
 
-void QmlCodeEditorWidget::dropEvent(QDropEvent* event)
+void QmlCodeEditorWidget::dropEvent(QDropEvent* e)
 {
-    const QMimeData* mimeData = event->mimeData();
+    const QMimeData* mimeData = e->mimeData();
     if (mimeData->hasUrls() && !(mimeData->hasText() && mimeData->text() == TOOL_KEY)) {
-        event->accept();
+        e->accept();
         for (const QUrl& url : mimeData->urls()) {
             if (url.isLocalFile())
                 openExternal(url.toLocalFile());
         }
     } else {
-        event->ignore();
+        e->ignore();
+    }
+}
+
+void QmlCodeEditorWidget::closeEvent(QCloseEvent* e)
+{
+    QWidget::closeEvent(e);
+    if (windowFlags() & Qt::Window) {
+        QTimer::singleShot(200, this, [=] {
+            toolBar()->setPinned(true);
+            setWindowFlags(Qt::Widget);
+            show();
+        });
     }
 }
 

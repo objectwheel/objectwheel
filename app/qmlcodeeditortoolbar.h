@@ -34,6 +34,8 @@ public:
 public:
     explicit QmlCodeEditorToolBar(QmlCodeEditor* codeEditor);
 
+    void setPinned(bool);
+    void setShowed(bool);
     void setScope(Scope);
     void setScopeWide(Scope, bool);
     void setDocument(QmlCodeDocument* document);

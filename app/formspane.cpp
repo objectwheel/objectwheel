@@ -4,8 +4,8 @@
 #include <projectmanager.h>
 #include <designerscene.h>
 #include <filemanager.h>
-#include <wfw.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
@@ -92,7 +92,8 @@ public:
         fillBackground(painter, option, index.row());
 
         // Draw icon
-        const QPixmap& iconPixmap = icon.pixmap(wfw(m_formsPane), option.decorationSize,
+        const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_formsPane),
+                                                option.decorationSize,
                                                 isSelected ? QIcon::Selected : QIcon::Normal);
         painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 

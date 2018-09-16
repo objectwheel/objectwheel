@@ -382,10 +382,10 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_searchResultOverlay(new TextEditor::Internal::TextEditorOverlay(this))
   , m_autoCompleter(new QmlJSEditor::Internal::AutoCompleter)
 {
-    m_noDocsLabel->setStyleSheet("background: #f0f0f0; color: #808080;");
-    m_noDocsLabel->setText(tr("No documents\nopen"));
-    m_noDocsLabel->setAlignment(Qt::AlignCenter);
     m_noDocsLabel->setVisible(false);
+    m_noDocsLabel->setAlignment(Qt::AlignCenter);
+    m_noDocsLabel->setText(tr("No documents\nopen"));
+    m_noDocsLabel->setStyleSheet("QLabel { background: #f0f0f0; color: #808080;}");
 
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,

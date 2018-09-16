@@ -35,7 +35,7 @@ public:
     struct ExternalDocument : public Document { QString fullPath; };
 
 public:
-    explicit QmlCodeEditorWidget(QWidget *parent = nullptr);
+    explicit QmlCodeEditorWidget(QWidget* parent = nullptr);
 
     int count() const;
 
@@ -59,6 +59,7 @@ public:
     ExternalDocument* addExternal(const QString& fullPath);
 
     QmlCodeEditor* codeEditor() const;
+    QmlCodeEditorToolBar* toolBar() const;
 
     void addSaveFilter(SaveFilter* sf) { m_saveFilters.append(sf); }
 
@@ -72,15 +73,17 @@ private slots:
     void onNewExternalFile();
     void onOpenExternalFile();
     void onModificationChange();
+    void onPinActivation(bool pinned);
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
     void onComboActivation(QmlCodeEditorToolBar::Combo);
     void onFileExplorerFileOpen(const QString& relativePath);
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragMoveEvent(QDragMoveEvent *event) override;
-    void dragLeaveEvent(QDragLeaveEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent* e) override;
+    void dragMoveEvent(QDragMoveEvent* e) override;
+    void dragLeaveEvent(QDragLeaveEvent* e) override;
+    void dropEvent(QDropEvent* e) override;
+    void closeEvent(QCloseEvent* e) override;
     QSize sizeHint() const override;
 
 private:
@@ -90,11 +93,9 @@ private:
     void setupCodeEditor(Document* document);
     void setupFileExplorer(Document* document);
     bool documentExists(Document* document) const;
-    QmlCodeEditorToolBar* toolBar() const;
 
 signals:
     void opened();
-    void pinned(bool pinned);
 
 private:
     QSplitter* m_splitter;

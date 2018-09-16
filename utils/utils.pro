@@ -22,7 +22,6 @@ HEADERS += \
     $$PWD/utils_global.h \
     $$PWD/quicktheme.h \
     $$PWD/previewercommands.h \
-    $$PWD/wfw.h \
     $$PWD/paintutils.h \
     $$PWD/appfontsettings.h \
     $$PWD/utilityfunctions.h
