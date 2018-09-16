@@ -2,9 +2,6 @@
     <qresource prefix="/">
         <file>templates/template1.zip</file>
         <file>templates/template2.zip</file>
-        <file>templates/template3.zip</file>
-        <file>templates/template4.zip</file>
-        <file>templates/template5.zip</file>
         <file>templates/template0.zip</file>
     </qresource>
 </RCC>

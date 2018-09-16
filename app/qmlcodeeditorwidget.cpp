@@ -371,7 +371,8 @@ void QmlCodeEditorWidget::close()
                 break;
             }
         }
-        leftCombo->removeItem(indexForRemoval);
+        if (indexForRemoval >= 0)
+            leftCombo->removeItem(indexForRemoval);
         if (leftCombo->count() > 0)
             nextDocument = leftCombo->itemData(0, DocumentRole).value<GlobalDocument*>();
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Global, !m_globalDocuments.isEmpty());
@@ -384,7 +385,8 @@ void QmlCodeEditorWidget::close()
                 break;
             }
         }
-        rightCombo->removeItem(indexForRemoval);
+        if (indexForRemoval >= 0)
+            rightCombo->removeItem(indexForRemoval);
         if (rightCombo->count() > 0) {
             nextDocument = rightCombo->itemData(0, DocumentRole).value<InternalDocument*>();
         } else {
@@ -395,7 +397,8 @@ void QmlCodeEditorWidget::close()
                     break;
                 }
             }
-            leftCombo->removeItem(indexForRemoval);
+            if (indexForRemoval >= 0)
+                leftCombo->removeItem(indexForRemoval);
             if (leftCombo->count() > 0) {
                 Q_ASSERT(m_internalDocuments.size() > 0);
                 nextDocument = m_internalDocuments.last();
@@ -411,7 +414,8 @@ void QmlCodeEditorWidget::close()
                 break;
             }
         }
-        leftCombo->removeItem(indexForRemoval);
+        if (indexForRemoval >= 0)
+            leftCombo->removeItem(indexForRemoval);
         if (leftCombo->count() > 0)
             nextDocument = leftCombo->itemData(0, DocumentRole).value<ExternalDocument*>();
         toolBar()->setScopeWide(QmlCodeEditorToolBar::External, !m_externalDocuments.isEmpty());
