@@ -62,6 +62,8 @@ ContextPaneTextWidget::ContextPaneTextWidget(QWidget *parent) :
     ui->colorButton->setShowArrow(false);
     ui->textColorButton->setShowArrow(false);
 
+    ui->fontComboBox->deleteLater(); // BUG: Delete this later
+
     connect(ui->colorButton, &QmlEditorWidgets::ColorButton::toggled,
             this, &ContextPaneTextWidget::onColorButtonToggled);
     connect(ui->textColorButton, &QmlEditorWidgets::ColorButton::toggled,
@@ -87,8 +89,8 @@ ContextPaneTextWidget::ContextPaneTextWidget(QWidget *parent) :
             this, &ContextPaneTextWidget::onUnderlineCheckedChanged);
     connect(ui->strikeoutButton, &QToolButton::toggled,
             this, &ContextPaneTextWidget::onStrikeoutCheckedChanged);
-    connect(ui->fontComboBox, &QFontComboBox::currentFontChanged,
-            this, &ContextPaneTextWidget::onCurrentFontChanged);
+//    BUG: connect(ui->fontComboBox, &QFontComboBox::currentFontChanged,
+//            this, &ContextPaneTextWidget::onCurrentFontChanged);
 
     connect(ui->centerHAlignmentButton, &QToolButton::toggled,
             this, &ContextPaneTextWidget::onHorizontalAlignmentChanged);
@@ -199,11 +201,11 @@ void ContextPaneTextWidget::setProperties(QmlJS::PropertyReader *propertyReader)
         QFont font;
         font.setFamily(familyName);
 
-        ui->fontComboBox->setCurrentFont(font);
-        if (propertyReader->isBindingOrEnum(QLatin1String("font.family")))
-            ui->fontComboBox->setEnabled(false);
-        else
-            ui->fontComboBox->setEnabled(true);
+// BUG       ui->fontComboBox->setCurrentFont(font);
+//        if (propertyReader->isBindingOrEnum(QLatin1String("font.family")))
+//            ui->fontComboBox->setEnabled(false);
+//        else
+//            ui->fontComboBox->setEnabled(true);
     }
 
     if (propertyReader->hasProperty(QLatin1String("horizontalAlignment"))) {

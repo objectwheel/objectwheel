@@ -28,7 +28,6 @@
 #include <utils/hostosinfo.h>
 
 #include <QToolButton>
-#include <QFontComboBox>
 #include <QComboBox>
 #include <QSpinBox>
 #include <QHBoxLayout>

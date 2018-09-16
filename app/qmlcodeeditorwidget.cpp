@@ -40,8 +40,6 @@
 // What happens if a control's id changes (within code editor/out of code editor)
 // What happens to the file explorer's root path if a control's dir changes
 
-// Fix different fonts of different QmlCodeDocuments
-
 #define MARK_ASTERISK "*"
 #define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
 #define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))

@@ -32,8 +32,6 @@ class QmlCodeDocument : public QTextDocument
 {
     Q_OBJECT
 
-    friend class QmlCodeEditor;
-
 public:
     QmlCodeDocument(QPlainTextEdit* editor);
     ~QmlCodeDocument();
@@ -93,20 +91,14 @@ public:
     static bool findNextBlockClosingParenthesis(QTextCursor* cursor);
     static bool findPreviousBlockOpenParenthesis(QTextCursor* cursor, bool checkStartPosition = false);
 
-signals:
-    void tabSettingsChanged();
-    void fontSettingsChanged();
-    void updateCodeWarnings(QmlJS::Document::Ptr doc);
-    void semanticInfoUpdated(const QmlJSTools::SemanticInfo& semanticInfo);
-
-protected:
-    void applyFontSettings();
+public slots:
     void triggerPendingUpdates();
 
 private slots:
     void reparseDocument();
-    void onDocumentUpdated(QmlJS::Document::Ptr doc);
+    void applyFontSettings();
     void reupdateSemanticInfo();
+    void onDocumentUpdated(QmlJS::Document::Ptr doc);
     void acceptNewSemanticInfo(const QmlJSTools::SemanticInfo& semanticInfo);
 
 private:
@@ -116,6 +108,12 @@ private:
     void createMarks(const QmlJSTools::SemanticInfo& info);
     void createMarks(const QList<QmlJS::DiagnosticMessage>& diagnostics);
     void cleanSemanticMarks();
+
+signals:
+    void tabSettingsChanged();
+    void fontSettingsChanged();
+    void updateCodeWarnings(QmlJS::Document::Ptr doc);
+    void semanticInfoUpdated(const QmlJSTools::SemanticInfo& semanticInfo);
 
 private:
     QPlainTextEdit* m_editor;

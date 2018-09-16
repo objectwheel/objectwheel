@@ -356,7 +356,8 @@ QWidget *FontSettingsPage::widget()
                     .arg(Utils::creatorTheme()->displayName()));
         d_ptr->m_ui->schemeComboBox->setModel(d_ptr->m_schemeListModel);
 
-        d_ptr->m_ui->fontComboBox->setCurrentFont(d_ptr->m_value.family());
+        d_ptr->m_ui->fontComboBox->deleteLater(); // BUG: Delete this later
+        // BUG: d_ptr->m_ui->fontComboBox->setCurrentFont(d_ptr->m_value.family());
 
         d_ptr->m_ui->antialias->setChecked(d_ptr->m_value.antialias());
         d_ptr->m_ui->zoomSpinBox->setValue(d_ptr->m_value.fontZoom());
@@ -365,8 +366,8 @@ QWidget *FontSettingsPage::widget()
         d_ptr->m_ui->schemeEdit->setBaseFont(d_ptr->m_value.font());
         d_ptr->m_ui->schemeEdit->setColorScheme(d_ptr->m_value.colorScheme());
 
-        connect(d_ptr->m_ui->fontComboBox, &QFontComboBox::currentFontChanged,
-                this, &FontSettingsPage::fontSelected);
+        // BUG: connect(d_ptr->m_ui->fontComboBox, &QFontComboBox::currentFontChanged,
+        // BUG:         this, &FontSettingsPage::fontSelected);
         connect(d_ptr->m_ui->sizeComboBox,
                 static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
                 this, &FontSettingsPage::fontSizeSelected);
@@ -417,17 +418,18 @@ void FontSettingsPage::updatePointSizes()
 
 QList<int> FontSettingsPage::pointSizesForSelectedFont() const
 {
-    QFontDatabase db;
-    const QString familyName = d_ptr->m_ui->fontComboBox->currentFont().family();
-    QList<int> sizeLst = db.pointSizes(familyName);
-    if (!sizeLst.isEmpty())
-        return sizeLst;
+// BUG:
+//    QFontDatabase db;
+//    const QString familyName = d_ptr->m_ui->fontComboBox->currentFont().family();
+    QList<int> sizeLst/* = db.pointSizes(familyName)*/;
+//    if (!sizeLst.isEmpty())
+//        return sizeLst;
 
-    QStringList styles = db.styles(familyName);
-    if (!styles.isEmpty())
-        sizeLst = db.pointSizes(familyName, styles.first());
-    if (sizeLst.isEmpty())
-        sizeLst = QFontDatabase::standardSizes();
+//    QStringList styles = db.styles(familyName);
+//    if (!styles.isEmpty())
+//        sizeLst = db.pointSizes(familyName, styles.first());
+//    if (sizeLst.isEmpty())
+//        sizeLst = QFontDatabase::standardSizes();
 
     return sizeLst;
 }

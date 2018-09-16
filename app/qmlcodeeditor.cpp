@@ -2917,7 +2917,6 @@ bool QmlCodeEditor::event(QEvent *e)
     }
 
     return QPlainTextEdit::event(e);
-
 }
 
 void QmlCodeEditor::wheelEvent(QWheelEvent *event)

@@ -1045,6 +1045,9 @@ void QmlCodeDocument::setDiagnosticRanges(const QVector<QTextLayout::FormatRange
 void QmlCodeDocument::applyFontSettings()
 {
     m_fontSettingsNeedsApply = false;
+
+    setDefaultFont(m_fontSettings.font());
+
     if (m_syntaxHighlighter) {
         m_syntaxHighlighter->setFontSettings(m_fontSettings);
         m_syntaxHighlighter->rehighlight();
