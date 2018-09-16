@@ -685,7 +685,7 @@ void QmlCodeEditorWidget::openDocument(Document* document)
         return;
 
     if (m_openDocument == document)
-        return;
+        return opened();
 
     if (!documentExists(document))
         return;
