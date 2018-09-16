@@ -12,6 +12,7 @@ class UTILS_EXPORT ParserUtils final
 
     friend class SaveManager; // For setId and setProperty
     friend class CentralWidget; // For setProperty
+    friend class ControlSaveFilter; // For setProperty and property
 
 public:
     static bool canParse(const QString& url);

@@ -22,6 +22,14 @@ public:
         QmlCodeDocument* document;
         QmlCodeEditorToolBar::Scope scope;
     };
+
+    class SaveFilter {
+    public:
+        ~SaveFilter() {}
+        virtual void beforeSave(Document*) = 0;
+        virtual void afterSave(Document*) = 0;
+    };
+
     struct GlobalDocument : public Document { QString relativePath; };
     struct InternalDocument : public GlobalDocument { Control* control; };
     struct ExternalDocument : public Document { QString fullPath; };
@@ -51,6 +59,8 @@ public:
     ExternalDocument* addExternal(const QString& fullPath);
 
     QmlCodeEditor* codeEditor() const;
+
+    void addSaveFilter(SaveFilter* sf) { m_saveFilters.append(sf); }
 
 public slots:
     void sweep();
@@ -92,6 +102,7 @@ private:
     FileExplorer* m_fileExplorer;
 
     Document* m_openDocument;
+    QList<SaveFilter*> m_saveFilters;
     QList<GlobalDocument*> m_globalDocuments;
     QList<InternalDocument*> m_internalDocuments;
     QList<ExternalDocument*> m_externalDocuments;

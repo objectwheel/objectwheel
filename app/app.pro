@@ -117,7 +117,8 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/globalresourcespane.h \
            $$PWD/signalchooserdialog.h \
            $$PWD/qmlcodeeditortoolbar.h \
-           $$PWD/fileexplorer_p.h
+           $$PWD/fileexplorer_p.h \
+           $$PWD/controlsavefilter.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -211,7 +212,8 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/globalresourcespane.cpp \
            $$PWD/signalchooserdialog.cpp \
            $$PWD/qmlcodeeditortoolbar.cpp \
-           $$PWD/fileexplorer_p.cpp
+           $$PWD/fileexplorer_p.cpp \
+           $$PWD/controlsavefilter.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui \

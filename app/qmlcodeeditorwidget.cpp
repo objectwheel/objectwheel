@@ -24,16 +24,19 @@
 // What happens if a global open file get deleted
 // What happens if a global open file get overwritten/content changed outside
 
+// What happens if a external open file get renamed
+// What happens if a external open file get deleted
+// What happens if a external open file get overwritten/content changed outside
+
 // What happens if a internal open file get renamed
 // What happens if a internal open file get deleted
 // What happens if a internal open file get overwritten/content changed outside
 // What happens if a control get deleted
 // What happens if a control's dir changes
+// What happens if a control's id changes (within code editor/out of code editor)
 // What happens to the file explorer's root path if a control's dir changes
-// What if files changes outside, the content I mean, especially external files
 
 // Fix different fonts of different QmlCodeDocuments
-// Look to older qml code editor widget's older version from github commit history for catching up lacks
 // Implement pin/unpin feature
 
 #define MARK_ASTERISK "*"
@@ -307,10 +310,16 @@ void QmlCodeEditorWidget::save()
 
     Q_ASSERT(!path.isEmpty());
 
+    for (SaveFilter* saveFilter : m_saveFilters)
+        saveFilter->beforeSave(m_openDocument);
+
     if (warnIfFileWriteFails(path, m_openDocument->document->toPlainText()))
         return;
 
     m_openDocument->document->setModified(false);
+
+    for (SaveFilter* saveFilter : m_saveFilters)
+        saveFilter->afterSave(m_openDocument);
 }
 
 void QmlCodeEditorWidget::close()
