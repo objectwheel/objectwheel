@@ -52,8 +52,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
+    g_editorContainer->setObjectName("g_editorContainer");
     g_editorContainer->setText(tr("Editor window\nraised"));
-    g_editorContainer->setStyleSheet("QLabel { background: transparent; color: #808080;}");
+    g_editorContainer->setStyleSheet("#g_editorContainer { background: transparent; color: #808080;}");
     g_editorContainer->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     g_editorContainer->setLayout(new QVBoxLayout(g_editorContainer));
     g_editorContainer->layout()->setSpacing(0);

@@ -332,6 +332,9 @@ QSize DesignerWidget::sizeHint() const
 
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
+    if (control->hasErrors())
+        return (void) QMessageBox::warning(this, tr("Oops"), tr("Control has errors, fix them first."));
+
     m_signalChooserDialog->setSignalList(control->events());
     int result = m_signalChooserDialog->exec();
     if (result == QDialog::Rejected)
