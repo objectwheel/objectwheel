@@ -364,9 +364,10 @@ void DesignerWidget::onControlDoubleClick(Control* control)
             .arg(control->id())
             .arg(methodName(m_signalChooserDialog->currentSignal()));
     const QString& methodBody = QString::fromUtf8(METHOD_BODY).arg(methodSign);
-    const QString& formJS = m_designerScene->currentForm()->main()
-            ? "application.js"
-            : m_designerScene->currentForm()->id() + ".js";
+    const QString& formSign = m_designerScene->currentForm()->main()
+            ? "application"
+            : m_designerScene->currentForm()->id();
+    const QString& formJS = formSign + ".js";
     const QString& fullPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + formJS;
 
     if (warnIfFileDoesNotExist(fullPath))
@@ -381,7 +382,7 @@ void DesignerWidget::onControlDoubleClick(Control* control)
     if (pos < 0) {
         const QString& connection =
                 control->id() + "." + m_signalChooserDialog->currentSignal() + ".connect(" + methodSign + ")";
-        const QString& loaderSign = QString::fromUtf8(FORM_DECL).arg(m_designerScene->currentForm()->id());
+        const QString& loaderSign = QString::fromUtf8(FORM_DECL).arg(formSign);
         ParserUtils::addConnection(document->document, fullPath, loaderSign, connection);
         pos = ParserUtils::addMethod(document->document, fullPath, methodBody);
         pos += 3;

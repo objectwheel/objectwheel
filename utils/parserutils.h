@@ -26,6 +26,9 @@ public:
     static int addMethod(QTextDocument* document, const QString& url, const QString& method);
     static int methodLine(QTextDocument* document, const QString& url, const QString& methodSign);
     static int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace);
+    static void addImport(const QString& url, const QString& import);
+    static void addImport(QTextDocument* document, const QString& url, const QString& import);
+    static void addConnection(const QString& url, const QString& loaderSign, const QString& connection);
     static void addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection);
 
 private:

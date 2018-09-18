@@ -113,6 +113,23 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         QByteArray qmldirFile = rdfile(qmldirPath);
         qmldirFile.append(qmldirLine);
         wrfile(qmldirPath, qmldirFile);
+
+        const QString& appJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + "application.js";
+        const QString& importStatement = ".import \"" + id + ".js\" as " + FormJS;
+        const QString& connectionStatement = QString::fromUtf8("%1.QQ2.Component.completed.connect(%2.%1_onCompleted)").arg(id).arg(FormJS);
+        QmlCodeEditorWidget::GlobalDocument* appjsDoc = qmlCodeEditorWidget()->getGlobal("application.js");
+        if (appjsDoc) {
+            bool modified = appjsDoc->document->isModified();
+
+            ParserUtils::addImport(appjsDoc->document, appJSPath, importStatement);
+            ParserUtils::addConnection(appjsDoc->document, appJSPath, "application_onCompleted", connectionStatement);
+
+            if (!modified)
+                appjsDoc->document->setModified(false);
+        }
+
+        ParserUtils::addImport(appJSPath, importStatement);
+        ParserUtils::addConnection(appJSPath, "application_onCompleted", connectionStatement);
     });
 
     //   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
