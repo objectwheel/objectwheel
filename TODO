@@ -1,3 +1,18 @@
+application general settings
+qmlcodeeditor general settings
+qmlcodeeditör de dahil uygulamadaki her bir pencere kendi shortcutlarına ve menüsüne sahip olacak
+qmlcodeeditarwidget editördki son belgeyi kapatırken bazen çöküyor
+qmlcodeeditorwidget'in bir sürü todo su halen duruyor, özellikle kontrol silme, dosyanın içeriğinin değişmesi gibi durumlar için olan todolar
+tema değiştirme ve controlpreviewmanager'in init olayı doğru dürüst çalışmıyor, ve birbirleri ile çelişiyor karışıyorlar
+nongui itemlerin x,y set etme problemi, ama set etmesek bu seferde ilk oluşumda set edemiyoruz, çünkü ilk oluşumda gri/nongui durumu daha belli değil
+ayrı bir gri düzenleme aracında tool oluşturulabilmeli, bu da son flaw
+"creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
+runpane doğru dürüst çalışmıyor
+qmlcodeeditor yatay scrollbar kaydırılıp içerik sola gidince, ve sol tarafta gizlenince uygulamanın cpu kullanımı deli bir şekilde artıyor
+propertiespane'de yeşil indikatörlerle ilgili hatalar var, todoları bi gözden geçir
+açık olan bir sekme, altta outputpane'de, sweep'den sonra orda takılı kalıyor ancak başka sekmeyi gösteriyor, consolebox ile dene gör, aç konsolebox'u sonra çalıştır bir app, sonra projeyi değiştir ve yine çalıştır ve gör, konsolebox'da takılı kalıyor
+kod editörün canlı hata marklama özelliği issuesbox ile eşzamanlı olarak çalışacak hataları gösterecek
+consolebox da dahil tüm output pane lerin sweep leri yeniden düzenlenecek
 filemanager.h'e relativePath ve diğer tüm muhtemel QDir, QFileInfo, QFile kullanımlarını ekle, muhtemel dediğim işte tüm objectwheel projesinin kodlarını tara bak
 Remove nested painter save/restores
 Varsayılan Quick 1 teması olarak Base seçilecek, hem themer'de hem Objectwheel/app'da
