@@ -24,7 +24,9 @@ public:
     static QString property(QTextDocument* document, const QString& url, const QString& property);
 
     static int addMethod(QTextDocument* document, const QString& url, const QString& method);
-    static int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign);
+    static int methodLine(QTextDocument* document, const QString& url, const QString& methodSign);
+    static int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace);
+    static void addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection);
 
 private:
     static void setId(const QString& url, const QString& id);

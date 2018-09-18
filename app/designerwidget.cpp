@@ -349,6 +349,8 @@ QSize DesignerWidget::sizeHint() const
 
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
+    Q_ASSERT(m_designerScene->currentForm());
+
     if (control->hasErrors())
         return (void) QMessageBox::warning(this, tr("Oops"), tr("Control has errors, fix them first."));
 
@@ -375,8 +377,12 @@ void DesignerWidget::onControlDoubleClick(Control* control)
     QmlCodeEditorWidget::GlobalDocument* document = m_qmlCodeEditorWidget->getGlobal(formJS);
     Q_ASSERT(document);
 
-    int pos = ParserUtils::methodPosition(document->document, fullPath, methodSign);
+    int pos = ParserUtils::methodLine(document->document, fullPath, methodSign);
     if (pos < 0) {
+        const QString& connection =
+                control->id() + "." + m_signalChooserDialog->currentSignal() + ".connect(" + methodSign + ")";
+        const QString& loaderSign = QString::fromUtf8(FORM_DECL).arg(m_designerScene->currentForm()->id());
+        ParserUtils::addConnection(document->document, fullPath, loaderSign, connection);
         pos = ParserUtils::addMethod(document->document, fullPath, methodBody);
         pos += 3;
     }

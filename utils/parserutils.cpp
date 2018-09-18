@@ -504,7 +504,7 @@ int ParserUtils::addMethod(QTextDocument* document, const QString& url, const QS
     return jsElements->lastSourceLocation().startLine;
 }
 
-int ParserUtils::methodPosition(QTextDocument* document, const QString& url, const QString& methodSign)
+int ParserUtils::methodLine(QTextDocument* document, const QString& url, const QString& methodSign)
 {
     QString source = document->toPlainText();
     Dialect dialect(Dialect::JavaScript);
@@ -550,6 +550,64 @@ int ParserUtils::methodPosition(QTextDocument* document, const QString& url, con
     }
 
     return -1;
+}
+
+int ParserUtils::methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace)
+{
+    QString source = document->toPlainText();
+    Dialect dialect(Dialect::JavaScript);
+    QSharedPointer<Document> doc = Document::create(url, dialect);
+    doc->setSource(source);
+
+    if (!doc->parse()) {
+        qWarning() << "JS File couldn't read. Unable to parse js file.";
+        return -1;
+    }
+
+    auto jsProgram = doc->jsProgram();
+
+    if (!jsProgram) {
+        qWarning() << "JS File couldn't read. Corrupted js program.";
+        return -1;
+    }
+
+    auto jsElements = jsProgram->elements;
+
+    if (jsElements) {
+        while (jsElements) {
+            Q_ASSERT(jsElements->element);
+            if (jsElements->element->kind == Node::Kind_FunctionSourceElement) {
+                auto element = static_cast<FunctionSourceElement*>(jsElements->element);
+                Q_ASSERT(element->declaration);
+                if (element->declaration->name == methodSign) {
+                    if (lbrace)
+                        return element->declaration->lbraceToken.end();
+                    else
+                        return element->declaration->rbraceToken.begin();
+                }
+
+            }
+
+            jsElements = jsElements->next;
+        }
+    } else {
+        qWarning() << "JS File error. Empty source file.";
+        return -1;
+    }
+
+    return -1;
+}
+
+void ParserUtils::addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection)
+{
+    int i = methodPosition(document, url, loaderSign, false);
+    if (i > 0) {
+        QTextCursor cursor(document);
+        cursor.beginEditBlock();
+        cursor.setPosition(i);
+        cursor.insertText("    " + connection + "\n");
+        cursor.endEditBlock();
+    }
 }
 
 void ParserUtils::setId(const QString& url, const QString& id)
