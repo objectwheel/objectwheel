@@ -12,5 +12,6 @@
         <file>qmls/form/t/control.json</file>
         <file>qmls/control/t/control.json</file>
         <file>qmls/buildsScreen/delaycaller.js</file>
+        <file>other/form.js</file>
     </qresource>
 </RCC>

@@ -31,12 +31,14 @@ private:
 
     static bool addForm(Form* form);
     static void removeForm(const Form* form);
+    static void setupFormGlobalConnections(Form* form);
 
     static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const Control* control);
 
 signals:
+    void formGlobalConnectionsDone(const QString& FormJS, const QString& id);
     void propertyChanged(Control* control, const QString& property, const QString& value);
 
 private:

@@ -11,6 +11,7 @@
 #include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDebug>
 
 namespace {
 // Returns true if given root path belongs to a form
@@ -276,6 +277,34 @@ void SaveManager::removeForm(const Form* form)
         return;
 
     rm(form->dir());
+}
+
+void SaveManager::setupFormGlobalConnections(Form* form)
+{
+    Q_ASSERT(!form->id().isEmpty() && !form->url().isEmpty());
+
+    QString id = form->id();
+    const QString FormJS = id.replace(0, 1, id[0].toUpper()) + "JS";
+    id = form->id();
+
+    QString content = rdfile(form->url());
+    Q_ASSERT(!content.isEmpty());
+
+    content.replace(QString::fromUtf8("// GlobalConnectionHere"),
+                    QString::fromUtf8("Component.onCompleted: %1.%2_onCompleted()").arg(FormJS).arg(id));
+
+    wrfile(form->url(), content.toUtf8());
+
+    const QString& globalJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + id + ".js";
+    QString js = rdfile(":/resources/other/form.js");
+    js = js.arg(id);
+
+    if (!exists(globalJSPath))
+        wrfile(globalJSPath, js.toUtf8());
+    else
+        qWarning() << tr("SaveManager::setupFormGlobalConnections: Global %1 file is already exists.").arg(id + ".js");
+
+    emit instance()->formGlobalConnectionsDone(FormJS, id);
 }
 
 bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)

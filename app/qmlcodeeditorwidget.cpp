@@ -512,6 +512,8 @@ void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 {
     if (relativePath.isEmpty())
         return openDocument(g_lastGlobalDocument);
+    if (!exists(fullPath(globalDir(), relativePath)))
+        return (void) (qWarning() << tr("openGlobal: File not exists."));
     if (warnIfNotATextFile(fullPath(globalDir(), relativePath)))
         return;
     if (!globalExists(relativePath))
@@ -523,6 +525,8 @@ void QmlCodeEditorWidget::openInternal(Control* control, const QString& relative
 {
     if (!control || relativePath.isEmpty())
         return openDocument(g_lastInternalDocument);
+    if (!exists(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
+        return (void) (qWarning() << tr("openInternal: File not exists."));
     if (warnIfNotATextFile(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
         return;
     if (!internalExists(control, relativePath))
@@ -534,6 +538,8 @@ void QmlCodeEditorWidget::openExternal(const QString& fullPath)
 {
     if (fullPath.isEmpty())
         return openDocument(g_lastExternalDocument);
+    if (!exists(fullPath))
+        return (void) (qWarning() << tr("openExternal: File not exists."));
     if (warnIfNotATextFile(fullPath))
         return;
     if (!externalExists(fullPath))

@@ -44,6 +44,8 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     if (form->id() != SaveUtils::id(form->dir()))
         SaveUtils::setProperty(form->dir(), TAG_ID, form->id());
 
+    SaveManager::setupFormGlobalConnections(form);
+
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
     // parent concept for forms in Designer; fors are directly put into DesignerScene
 

@@ -123,6 +123,17 @@ qreal findRatio(const QString& text)
     else
         return 1.0;
 }
+
+bool warnIfFileDoesNotExist(const QString& filePath)
+{
+    if (!exists(filePath)) {
+        return QMessageBox::warning(
+                    0,
+                    QObject::tr("Oops"),
+                    QObject::tr("File %1 does not exist.").arg(fname(filePath)));
+    }
+    return false;
+}
 }
 
 DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent) : QWidget(parent)
@@ -354,13 +365,16 @@ void DesignerWidget::onControlDoubleClick(Control* control)
     const QString& formJS = m_designerScene->currentForm()->main()
             ? "application.js"
             : m_designerScene->currentForm()->id() + ".js";
+    const QString& fullPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + formJS;
+
+    if (warnIfFileDoesNotExist(fullPath))
+        return;
 
     m_qmlCodeEditorWidget->openGlobal(formJS);
 
     QmlCodeEditorWidget::GlobalDocument* document = m_qmlCodeEditorWidget->getGlobal(formJS);
     Q_ASSERT(document);
 
-    const QString& fullPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + formJS;
     int pos = ParserUtils::methodPosition(document->document, fullPath, methodSign);
     if (pos < 0) {
         pos = ParserUtils::addMethod(document->document, fullPath, methodBody);

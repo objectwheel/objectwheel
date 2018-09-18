@@ -15,6 +15,10 @@
 #include <parserutils.h>
 #include <controlsavefilter.h>
 #include <utilityfunctions.h>
+#include <qmlcodeeditor.h>
+#include <filemanager.h>
+#include <saveutils.h>
+#include <projectmanager.h>
 
 #include <QWindow>
 #include <QSplitter>
@@ -80,6 +84,37 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         if (document)
             ParserUtils::setProperty(document->document, control->url(), property, value);
     });
+    connect(SaveManager::instance(), &SaveManager::formGlobalConnectionsDone,
+            this, [=] (const QString& FormJS, const QString& id) {
+        qmlCodeEditorWidget()->openGlobal(id + ".js");
+        qmlCodeEditorWidget()->codeEditor()->gotoLine(4);
+
+        QmlCodeEditorWidget::GlobalDocument* qmldirDoc = qmlCodeEditorWidget()->getGlobal("qmldir");
+        if (qmldirDoc) {
+            bool modified = qmldirDoc->document->isModified();
+            QTextCursor cursor(qmldirDoc->document);
+            cursor.beginEditBlock();
+            cursor.movePosition(QTextCursor::End);
+            cursor.insertText("\n" + FormJS + " 1.0 " + id + ".js");
+            cursor.endEditBlock();
+
+            if (!modified)
+                qmldirDoc->document->setModified(false);
+        }
+
+        const QString& qmldirLine = "\n" + FormJS + " 1.0 " + id + ".js";
+        const QString& qmldirPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + "qmldir";
+
+        if (!exists(qmldirPath)) {
+            qFatal("CentralWidget: qmldir file is gone.");
+            return;
+        }
+
+        QByteArray qmldirFile = rdfile(qmldirPath);
+        qmldirFile.append(qmldirLine);
+        wrfile(qmldirPath, qmldirFile);
+    });
+
     //   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
     //            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
 
