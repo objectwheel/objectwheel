@@ -108,7 +108,6 @@ class QML_PARSER_EXPORT Node: public Managed
 public:
     enum Kind {
         Kind_Undefined,
-
         Kind_ArgumentList,
         Kind_ArrayLiteral,
         Kind_ArrayMemberExpression,

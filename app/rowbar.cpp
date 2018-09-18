@@ -56,6 +56,8 @@ void RowBar::paintEvent(QPaintEvent* e)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(e->rect().adjusted(0, 0, - m_bracketBand->calculatedWidth(), 0),
                      palette().color(QPalette::Background));
+    painter.setPen("#c4c4c4");
+    painter.drawLine(rect().topLeft() + QPointF(0.5, 0.5), rect().bottomLeft() + QPointF(0.5, -0.5));
 }
 
 BreakpointBand* RowBar::breakpointBand() const

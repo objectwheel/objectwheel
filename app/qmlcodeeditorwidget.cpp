@@ -688,6 +688,8 @@ void QmlCodeEditorWidget::openDocument(Document* document)
     if (!document)
         return;
 
+    m_codeEditor->setFocus();
+
     if (m_openDocument == document)
         return opened();
 
@@ -716,7 +718,6 @@ void QmlCodeEditorWidget::setupCodeEditor(QmlCodeEditorWidget::Document* documen
     m_codeEditor->setNoDocsVisible(false);
     m_codeEditor->setCodeDocument(document->document);
     m_codeEditor->setTextCursor(document->textCursor);
-    m_codeEditor->setFocus();
 }
 
 void QmlCodeEditorWidget::setupFileExplorer(QmlCodeEditorWidget::Document* document)

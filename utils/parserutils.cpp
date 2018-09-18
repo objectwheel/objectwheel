@@ -464,6 +464,94 @@ QString ParserUtils::property(QTextDocument* doc, const QString& url, const QStr
     return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
+int ParserUtils::addMethod(QTextDocument* document, const QString& url, const QString& method)
+{
+    quint32 begin = 0;
+    const QString& source = document->toPlainText();
+    Dialect dialect(Dialect::JavaScript);
+    QSharedPointer<Document> doc = Document::create(url, dialect);
+    doc->setSource(source);
+
+    if (!doc->parse()) {
+        qWarning() << "JS File couldn't read. Unable to parse js file.";
+        return -1;
+    }
+
+    auto jsProgram = doc->jsProgram();
+
+    if (!jsProgram) {
+        qWarning() << "JS File couldn't read. Corrupted js program.";
+        return -1;
+    }
+
+    auto jsElements = jsProgram->elements;
+
+    if (jsElements) {
+        begin = jsElements->lastSourceLocation().end();
+    } else {
+        qWarning() << "JS File error. Empty source file.";
+        return -1;
+    }
+
+    if (begin > 0) {
+        QTextCursor cursor(document);
+        cursor.beginEditBlock();
+        cursor.setPosition(begin);
+        cursor.insertText(method);
+        cursor.endEditBlock();
+    }
+
+    return jsElements->lastSourceLocation().startLine;
+}
+
+int ParserUtils::methodPosition(QTextDocument* document, const QString& url, const QString& methodSign)
+{
+    QString source = document->toPlainText();
+    Dialect dialect(Dialect::JavaScript);
+    QSharedPointer<Document> doc = Document::create(url, dialect);
+    doc->setSource(source);
+
+    if (!doc->parse()) {
+        qWarning() << "JS File couldn't read. Unable to parse js file.";
+        return -1;
+    }
+
+    auto jsProgram = doc->jsProgram();
+
+    if (!jsProgram) {
+        qWarning() << "JS File couldn't read. Corrupted js program.";
+        return -1;
+    }
+
+    auto jsElements = jsProgram->elements;
+
+    if (jsElements) {
+        while (jsElements) {
+            Q_ASSERT(jsElements->element);
+            if (jsElements->element->kind == Node::Kind_FunctionSourceElement) {
+                auto element = static_cast<FunctionSourceElement*>(jsElements->element);
+                Q_ASSERT(element->declaration);
+                if (element->declaration->name == methodSign) {
+                    int lbrace = element->declaration->lbraceToken.startLine;
+                    int rbrace = element->declaration->rbraceToken.startLine;
+                    if (lbrace == rbrace || lbrace + 1 == rbrace)
+                        return lbrace;
+                    else
+                        return lbrace + 1;
+                }
+
+            }
+
+            jsElements = jsElements->next;
+        }
+    } else {
+        qWarning() << "JS File error. Empty source file.";
+        return -1;
+    }
+
+    return -1;
+}
+
 void ParserUtils::setId(const QString& url, const QString& id)
 {
     if (canParse(url))

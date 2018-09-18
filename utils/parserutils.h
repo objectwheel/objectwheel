@@ -23,6 +23,9 @@ public:
     static QString property(const QString& url, const QString& property);
     static QString property(QTextDocument* document, const QString& url, const QString& property);
 
+    static int addMethod(QTextDocument* document, const QString& url, const QString& method);
+    static int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign);
+
 private:
     static void setId(const QString& url, const QString& id);
     static void setProperty(const QString& url, const QString& property, const QString& value);

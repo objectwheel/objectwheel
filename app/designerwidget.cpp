@@ -9,6 +9,11 @@
 #include <signalchooserdialog.h>
 #include <utilityfunctions.h>
 #include <qmlcodeeditorwidget.h>
+#include <parserutils.h>
+#include <projectmanager.h>
+#include <filemanager.h>
+#include <qmlcodeeditor.h>
+#include <qmlcodedocument.h>
 
 #include <QDir>
 #include <QToolBar>
@@ -19,11 +24,12 @@
 #include <QComboBox>
 #include <QInputDialog>
 
-// 1. Control name; 2. Signal name; 3. Method name
+// 1. Control name; 2. Method name
+#define METHOD_DECL "%1_%2"
+#define FORM_DECL "%1_onCompleted"
 #define METHOD_BODY \
-    "\n"\
-    "// Function body for %1 corresponding to %2 signal\n"\
-    "function %1_%3() {\n"\
+    "\n\n"\
+    "function %1() {\n"\
     "    // Do something...\n"\
     "}"
 
@@ -336,16 +342,32 @@ void DesignerWidget::onControlDoubleClick(Control* control)
         return (void) QMessageBox::warning(this, tr("Oops"), tr("Control has errors, fix them first."));
 
     m_signalChooserDialog->setSignalList(control->events());
+
     int result = m_signalChooserDialog->exec();
     if (result == QDialog::Rejected)
         return;
 
-//    m_qmlCodeEditorWidget->openGlobal(?);
+    const QString& methodSign = QString::fromUtf8(METHOD_DECL)
+            .arg(control->id())
+            .arg(methodName(m_signalChooserDialog->currentSignal()));
+    const QString& methodBody = QString::fromUtf8(METHOD_BODY).arg(methodSign);
+    const QString& formJS = m_designerScene->currentForm()->main()
+            ? "application.js"
+            : m_designerScene->currentForm()->id() + ".js";
 
-//    qDebug() << QString::fromUtf8(METHOD_BODY)
-//                .arg(control->id())
-//                .arg(m_signalChooserDialog->currentSignal())
-//                .arg(methodName(m_signalChooserDialog->currentSignal()));
+    m_qmlCodeEditorWidget->openGlobal(formJS);
+
+    QmlCodeEditorWidget::GlobalDocument* document = m_qmlCodeEditorWidget->getGlobal(formJS);
+    Q_ASSERT(document);
+
+    const QString& fullPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + formJS;
+    int pos = ParserUtils::methodPosition(document->document, fullPath, methodSign);
+    if (pos < 0) {
+        pos = ParserUtils::addMethod(document->document, fullPath, methodBody);
+        pos += 3;
+    }
+
+    m_qmlCodeEditorWidget->codeEditor()->gotoLine(pos);
 }
 
 void DesignerWidget::onInspectorItemDoubleClick(Control* control)
