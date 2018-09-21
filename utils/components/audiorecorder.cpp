@@ -97,15 +97,3 @@ void AudioRecorder::handleBuffer()
 		emit readyBuffer(data);
 	}
 }
-
-#ifdef QT_QML_LIB
-#include <QQmlEngine>
-#define COMPONENT_URI "com.objectwheel.components"
-#define COMPONENT_NAME "AudioRecorder"
-#define COMPONENT_VERSION_MAJOR 1
-#define COMPONENT_VERSION_MINOR 0
-void AudioRecorder::registerQmlType()
-{
-	qmlRegisterType<AudioRecorder>(COMPONENT_URI, COMPONENT_VERSION_MAJOR, COMPONENT_VERSION_MINOR, COMPONENT_NAME);
-}
-#endif
