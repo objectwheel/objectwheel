@@ -24,7 +24,8 @@ HEADERS += \
     $$PWD/previewercommands.h \
     $$PWD/paintutils.h \
     $$PWD/appfontsettings.h \
-    $$PWD/utilityfunctions.h
+    $$PWD/utilityfunctions.h \
+    qmlengine.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -36,7 +37,8 @@ SOURCES += \
     $$PWD/quicktheme.cpp \
     $$PWD/paintutils.cpp \
     $$PWD/appfontsettings.cpp \
-    $$PWD/utilityfunctions.cpp
+    $$PWD/utilityfunctions.cpp \
+    qmlengine.cpp
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \
