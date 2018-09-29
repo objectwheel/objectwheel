@@ -22,7 +22,6 @@ QString g_projectDirectory;
 
 void UtilityFunctions::registerGlobalPath(const QString& projectDirectory)
 {
-    Q_ASSERT(g_projectDirectory.isEmpty());
     g_projectDirectory = projectDirectory;
     qmlRegisterSingletonType("Objectwheel.GlobalResources", 1, 0, "GlobalResources",
                              [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QJSValue {

@@ -14,7 +14,7 @@
 #define DIR_MAINFORM     "1"
 #define DIR_OWDB         "owdb"
 #define DIR_IMPORTS      "imports"
-#define DIR_GLOBAL       "Global"
+#define DIR_GLOBAL       "Objectwheel/GlobalResources"
 
 #define FILE_PROJECT     "project.json"
 #define FILE_OWDB        "owdb.json"       // FIXME: There is no function of this
