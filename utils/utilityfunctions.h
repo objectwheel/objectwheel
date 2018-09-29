@@ -9,9 +9,11 @@ class QUrl;
 class QModelIndex;
 class QTreeView;
 class QWindow;
+class QQmlEngine;
 
 namespace UtilityFunctions {
-void registerGlobalPath(const QString& projectDir);
+void registerOfflineStorage();
+void registerGlobalPath(const QString& projectDirectory);
 void trimCommentsAndStrings(QTextDocument* document);
 void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent);
 void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex);

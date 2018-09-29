@@ -132,6 +132,7 @@ ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() 
     projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toImportsDir(ProjectManager::dir())), Dialect::Qml); // Sonradan ekleme
     projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toGlobalDir(ProjectManager::dir())), Dialect::Qml); // Sonradan ekleme
     UtilityFunctions::registerGlobalPath(ProjectManager::dir());
+    UtilityFunctions::registerOfflineStorage();
 
     projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
     projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();

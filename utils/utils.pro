@@ -25,7 +25,7 @@ HEADERS += \
     $$PWD/paintutils.h \
     $$PWD/appfontsettings.h \
     $$PWD/utilityfunctions.h \
-    qmlengine.h
+    $$PWD/offlinestorage.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -38,7 +38,7 @@ SOURCES += \
     $$PWD/paintutils.cpp \
     $$PWD/appfontsettings.cpp \
     $$PWD/utilityfunctions.cpp \
-    qmlengine.cpp
+    $$PWD/offlinestorage.cpp
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \

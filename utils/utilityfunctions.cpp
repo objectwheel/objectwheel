@@ -2,6 +2,7 @@
 #include <saveutils.h>
 #include <filemanager.h>
 #include <delayer.h>
+#include <offlinestorage.h>
 
 #include <QFileInfo>
 #include <QMessageBox>
@@ -16,21 +17,30 @@
 #include <QWindow>
 
 namespace {
-
-QString projectDirectory;
+QString g_projectDirectory;
 }
 
-void UtilityFunctions::registerGlobalPath(const QString& projectDir)
+void UtilityFunctions::registerGlobalPath(const QString& projectDirectory)
 {
-    projectDirectory = projectDir;
-    qmlRegisterSingletonType("Global", 1, 0, "Global",
-                             [] (QQmlEngine* engine, QJSEngine* scriptEngine) -> QJSValue {
+    Q_ASSERT(g_projectDirectory.isEmpty());
+    g_projectDirectory = projectDirectory;
+    qmlRegisterSingletonType("Objectwheel.GlobalResources", 1, 0, "GlobalResources",
+                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QJSValue {
         Q_UNUSED(engine)
-        QJSValue globalPath = scriptEngine->newObject();
-        globalPath.setProperty("path", SaveUtils::toGlobalDir(projectDirectory));
-        globalPath.setProperty("url", scriptEngine->toScriptValue(
-                                   QUrl::fromLocalFile(SaveUtils::toGlobalDir(projectDirectory))));
+        QJSValue globalPath = jsEngine->newObject();
+        globalPath.setProperty("path", SaveUtils::toGlobalDir(g_projectDirectory));
+        globalPath.setProperty("url", jsEngine->toScriptValue(
+                                   QUrl::fromLocalFile(SaveUtils::toGlobalDir(g_projectDirectory))));
         return globalPath;
+    });
+}
+
+void UtilityFunctions::registerOfflineStorage()
+{
+    qmlRegisterSingletonType<OfflineStorage>("Objectwheel.OfflineStorage", 1, 0, "OfflineStorage",
+                                        [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
+        Q_UNUSED(jsEngine)
+        return new OfflineStorage(engine);
     });
 }
 
