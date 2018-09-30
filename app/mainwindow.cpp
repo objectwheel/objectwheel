@@ -232,18 +232,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         toolboxDockWidget->setFloating(!toolboxDockWidget->isFloating());
     });
 
-    auto toolboxSettingsButton = new QToolButton;
-    toolboxSettingsButton->setToolTip(tr("Toolbox settings."));
-    toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
-    toolboxSettingsButton->setIcon(QIcon(":/images/settings.png"));
-    connect(toolboxSettingsButton, &QToolButton::clicked,
-            this, [=] {
-        WindowManager::toolboxSettingsWindow()->show();
-    });
+    //    auto toolboxSettingsButton = new QToolButton;
+    //    toolboxSettingsButton->setToolTip(tr("Toolbox settings."));
+    //    toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
+    //    toolboxSettingsButton->setIcon(QIcon(":/images/settings.png"));
+    //    connect(toolboxSettingsButton, &QToolButton::clicked,
+    //            this, [=] {
+    //        WindowManager::toolboxSettingsWindow()->show();
+    //    });
 
     toolboxTitleBar = new QToolBar;
     toolboxTitleBar->addWidget(toolboxTitleLabel);
-    toolboxTitleBar->addWidget(toolboxSettingsButton);
+    // toolboxTitleBar->addWidget(toolboxSettingsButton);
     toolboxTitleBar->addWidget(toolboxTitlePinButton);
     toolboxTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     toolboxTitleBar->setIconSize(QSize(11, 11));

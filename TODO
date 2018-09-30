@@ -21,7 +21,6 @@ Neden DialogButtonBox çizimi designer'da transparan oluyor? doComplete ile ilgi
 Neden dökümantasyonlardaki ButtonGroup örneğindeki kod düzgün çizilmiyor, yarısı çizik yarısı gidik designer'da?
 Neden Qml Code Editor'ün sintaxhiglerhter'ı ve kırmızı yuvarlak error bildirgeç markları bir alt ButtonTextField.qml gibi bir dosya ile tanımlanmış bir türü ilgili qml dosyasını açmadan main.qml'de "Bu tür bulunamadı" diye hata veriyor?
 Neden QFontDatabase ile eklenen fontlar program kapanırken uygulamayı removeAllApplicationFonts ile patlatıyor (FontSettingsPage vs QFontComboBox kullanan ayar sayfaları ile ilgilenilecek)
-QmlEditorWidget'deki comboboxlar çok sikko bir şekilde fazla yer kaplıyor, bunu düzelt
 
 sağ tık menüsü/context menu den bişey seçince ve sonra mouseu az hareket ettirince selected control gidiyor
 sağ tık ayrıca stick özelliğininde kafasını karıştırıyor
