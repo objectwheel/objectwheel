@@ -20,7 +20,6 @@
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QDebug>
-#include <QDateTime>
 #include <QScreen>
 #include <QFileDialog>
 
@@ -36,7 +35,6 @@
 #define PATH_EICON       (":/images/unload.png")
 #define PATH_SICON       (":/images/dots.png")
 #define WIDTH_PROGRESS   80
-#define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
 enum Buttons { Load, New, Import, Export, Settings };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
@@ -298,7 +296,7 @@ void ProjectsWidget::refreshProjectList()
         item->setIcon(QIcon(PATH_FILEICON));
         item->setData(Hash, hash);
         item->setData(Name, ProjectManager::name(hash));
-        item->setData(LastEdit, ProjectManager::mfDate(hash));
+        item->setData(LastEdit, ProjectManager::toUiTime(ProjectManager::mfDate(hash)));
         item->setData(Active, hash == ProjectManager::hash());
         m_listWidget->addItem(item);
     }
@@ -351,7 +349,7 @@ void ProjectsWidget::onNewButtonClick()
     auto item = new QListWidgetItem;
     item->setIcon(QIcon(PATH_FILEICON));
     item->setData(Name, projectName);
-    item->setData(LastEdit, TIME);
+    item->setData(LastEdit, ProjectManager::currentUiTime());
     item->setData(Active, false);
     m_listWidget->addItem(item);
     m_listWidget->setCurrentItem(item);

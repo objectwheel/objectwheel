@@ -13,6 +13,11 @@ class ProjectManager final : public QObject
 public:
     static ProjectManager* instance();
 
+    static QString currentDbTime();
+    static QString currentUiTime();
+    static QString toDbTime(const QString& uiTime);
+    static QString toUiTime(const QString& dbTime);
+
     static QStringList projects();
     static QStringList projectNames();
 

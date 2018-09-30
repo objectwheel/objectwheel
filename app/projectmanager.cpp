@@ -54,7 +54,7 @@ void setProperty( const QString& rootPath, const QString& property, const QVaria
     auto jobj = QJsonDocument::fromJson(rdfile(rootPath +separator() + FILE_PROJECT)).object();
 
     jobj[property] = value.toJsonValue();
-    jobj[PTAG_MFDATE] = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
+    jobj[PTAG_MFDATE] = ProjectManager::currentDbTime();
 
     const auto& data = QJsonDocument(jobj).toJson();
 
@@ -137,6 +137,26 @@ QString ProjectManager::s_currentHash;
 ProjectManager* ProjectManager::instance()
 {
     return s_instance;
+}
+
+QString ProjectManager::currentDbTime()
+{
+    return QDateTime::currentDateTime().toString(Qt::ISODate);
+}
+
+QString ProjectManager::currentUiTime()
+{
+    return QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate);
+}
+
+QString ProjectManager::toDbTime(const QString& uiTime)
+{
+    return QDateTime::fromString(uiTime, Qt::SystemLocaleLongDate).toString(Qt::ISODate);
+}
+
+QString ProjectManager::toUiTime(const QString& dbTime)
+{
+    return QDateTime::fromString(dbTime, Qt::ISODate).toString(Qt::SystemLocaleLongDate);
 }
 
 bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
@@ -321,12 +341,11 @@ void ProjectManager::updateSize()
 
 void ProjectManager::updateLastModification()
 {
-    auto date = QDateTime::currentDateTime().toString(Qt::ISODate).replace("T", " ");
     const auto& dir = ::dir(hash());
     if (dir.isEmpty())
         return;
 
-    ::setProperty(dir, PTAG_MFDATE, date);
+    ::setProperty(dir, PTAG_MFDATE, ProjectManager::currentDbTime());
 }
 
 bool ProjectManager::start(const QString& hash)

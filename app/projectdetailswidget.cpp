@@ -10,7 +10,6 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
-#include <QDateTime>
 
 #define BUTTONS_WIDTH    (450)
 #define SIZE_ICON        (QSize(48, 48))
@@ -18,7 +17,6 @@
 #define PATH_SICON       (":/images/load.png")
 #define PATH_CICON       (":/images/unload.png")
 #define PATH_DICON       (":/images/cancel.png")
-#define TIME             QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate)
 
 enum Fields { Name, Description, Owner, CreationDate, ModificationDate, Size };
 enum Buttons { Back, Save, Delete };
@@ -121,8 +119,8 @@ void ProjectDetailsWidget::onEditProject(const QString& hash)
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(hash));
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(hash));
     static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectManager::owner(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::crDate(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::mfDate(hash));
+    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::toUiTime(ProjectManager::crDate(hash)));
+    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::toUiTime(ProjectManager::mfDate(hash)));
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectManager::size(hash));
 }
 
@@ -134,8 +132,8 @@ void ProjectDetailsWidget::onNewProject(const QString& projectName, int template
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
     static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(UserManager::user());
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(TIME);
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(TIME);
+    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::currentUiTime());
+    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::currentUiTime());
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(tr("0 bytes"));
 }
 
@@ -158,7 +156,7 @@ void ProjectDetailsWidget::onSaveClick()
             projectnametext,
             descriptiontext,
             ownertext,
-            crdatetext,
+            ProjectManager::toDbTime(crdatetext),
             sizetext
         )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
 
