@@ -8,6 +8,7 @@ class ButtonSlice;
 class QVBoxLayout;
 class QListWidget;
 class ProgressBar;
+class FilterWidget;
 
 class ProjectsWidget : public QWidget
 {
@@ -46,6 +47,7 @@ private:
     QLabel* m_welcomeLabel;
     QLabel* m_versionLabel;
     QLabel* m_projectsLabel;
+    FilterWidget* m_filterWidget;
     QListWidget* m_listWidget;
     ButtonSlice* m_buttons;
     ButtonSlice* m_buttons_2;

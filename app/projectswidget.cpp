@@ -22,6 +22,9 @@
 #include <QDebug>
 #include <QScreen>
 #include <QFileDialog>
+#include <QComboBox>
+#include <QLineEdit>
+#include <transparentstyle.h>
 
 #define SIZE_LIST        (QSize(450, 300))
 #define BUTTONS_WIDTH    (450)
@@ -36,8 +39,63 @@
 #define PATH_SICON       (":/images/dots.png")
 #define WIDTH_PROGRESS   80
 
+// TODO: Double click on a project in the list should load the project
+// TODO: If the list has the focus, then pressing a key on keyboard should redirect to a project
+
 enum Buttons { Load, New, Import, Export, Settings };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
+
+class FilterWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit FilterWidget(QWidget* parent = nullptr) : QWidget(parent)
+      , m_layout(new QHBoxLayout(this))
+      , m_sortLabel(new QLabel(this))
+      , m_sortComboBox(new QComboBox(this))
+      , m_searchLineEdit(new QLineEdit(this))
+    {
+        m_layout->setContentsMargins(0, 0, 0, 0);
+        m_layout->setSpacing(0);
+        m_layout->addWidget(m_searchLineEdit);
+        m_layout->addWidget(m_sortLabel);
+        m_layout->addWidget(m_sortComboBox);
+
+        m_sortLabel->setText("|  " + tr("Sort by: "));
+
+        m_searchLineEdit->setPlaceholderText(tr("Search"));
+        m_searchLineEdit->setStyleSheet("background: transparent;");
+        m_searchLineEdit->setClearButtonEnabled(true);
+        m_searchLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+        m_searchLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+        m_sortComboBox->addItem(tr("Date"));
+        m_sortComboBox->addItem(tr("Name"));
+        m_sortComboBox->setCursor(Qt::PointingHandCursor);
+        m_sortComboBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    }
+
+private:
+    void paintEvent(QPaintEvent*) override
+    {
+        QPainter p(this);
+        p.setPen("#22000000");
+        p.setBrush(QColor("#12000000"));
+        p.drawRoundedRect(QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5), 1.0, 1.0);
+    }
+
+    QSize sizeHint() const override
+    {
+        return QSize(100, 24);
+    }
+
+private:
+    QHBoxLayout* m_layout;
+    QLabel* m_sortLabel;
+    QComboBox* m_sortComboBox;
+    QLineEdit* m_searchLineEdit;
+};
 
 class ProjectsDelegate: public QStyledItemDelegate
 {
@@ -113,6 +171,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
   , m_welcomeLabel(new QLabel)
   , m_versionLabel(new QLabel)
   , m_projectsLabel(new QLabel)
+  , m_filterWidget(new FilterWidget)
   , m_listWidget(new QListWidget)
   , m_buttons(new ButtonSlice)
   , m_buttons_2(new ButtonSlice(m_listWidget->viewport()))
@@ -126,6 +185,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_versionLabel, 0, Qt::AlignCenter);
     m_layout->addSpacing(6);
     m_layout->addWidget(m_projectsLabel, 0, Qt::AlignCenter);
+    m_layout->addWidget(m_filterWidget, 0, Qt::AlignCenter);
     m_layout->addWidget(m_listWidget, 0, Qt::AlignCenter);
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
     m_layout->addStretch();
@@ -160,6 +220,9 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     m_projectsLabel->setText(tr("Your Projects"));
     m_projectsLabel->setStyleSheet("color: black");
+
+    TransparentStyle::attach(m_filterWidget);
+    m_filterWidget->setFixedWidth(SIZE_LIST.width());
 
     QPalette p1;
     p1.setColor(QPalette::Highlight, "#12000000");
