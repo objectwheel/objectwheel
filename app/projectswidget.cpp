@@ -78,8 +78,8 @@ public:
         m_filterLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         m_filterLineEdit->setToolTip(tr("Filter by name"));
 
-        m_sortComboBox->addItem(tr("Name"));
         m_sortComboBox->addItem(tr("Date"));
+        m_sortComboBox->addItem(tr("Name"));
         m_sortComboBox->setCursor(Qt::PointingHandCursor);
         m_sortComboBox->setToolTip(tr("Change sorting criteria"));
         m_sortComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
