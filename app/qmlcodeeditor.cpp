@@ -2273,7 +2273,7 @@ void QmlCodeEditor::paintCurrentLineHighlight(const PaintEventData &data, QPaint
     QColor color = codeDocument()->fontSettings().toTextCharFormat(C_CURRENT_LINE).background().color();
     // set alpha, otherwise we cannot see block highlighting and find scope underneath
     color.setAlpha(128);
-    if (!data.eventRect.contains(lineRect.toRect())) {
+    if (!data.isEditable && !data.eventRect.contains(lineRect.toRect())) {
         QRect updateRect = data.eventRect;
         updateRect.setLeft(0);
         updateRect.setRight(data.viewportRect.width() - int(data.offset.x()));
