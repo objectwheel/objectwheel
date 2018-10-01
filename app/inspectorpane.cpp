@@ -763,7 +763,7 @@ void InspectorPane::onItemSelectionChange()
 
 QSize InspectorPane::sizeHint() const
 {
-    return QSize{310, 210};
+    return QSize{310, 220};
 }
 
 #include "inspectorpane.moc"

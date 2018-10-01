@@ -127,5 +127,7 @@
         <file>images/template9.png</file>
         <file>images/drop.png</file>
         <file>images/splash.png</file>
+        <file>images/devices.png</file>
+        <file>images/mycomputer.png</file>
     </qresource>
 </RCC>

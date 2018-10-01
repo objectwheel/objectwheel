@@ -35,5 +35,5 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : FileExplorer(parent)
 
 QSize GlobalResourcesPane::sizeHint() const
 {
-    return QSize{310, 280};
+    return QSize{310, 250};
 }

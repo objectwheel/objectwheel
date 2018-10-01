@@ -9,6 +9,8 @@ class QSize;
 class QSizeF;
 class QImage;
 class QPen;
+class QPainter;
+class QStyleOption;
 
 namespace PaintUtils {
 QImage renderFilledImage(const QSizeF& size, const QColor& fillColor, const QWidget* widget = nullptr);
@@ -20,6 +22,7 @@ QImage renderNonGuiControlImage(const QString& url, const QSizeF& size, const QW
 QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderColoredPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
+void drawMacStyleButtonBackground(QPainter* painter, const QStyleOption& option, QWidget* widget);
 }
 
 #endif // PAINTUTILS_H

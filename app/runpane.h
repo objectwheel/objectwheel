@@ -7,6 +7,7 @@ class LoadingBar;
 class FlatButton;
 class QHBoxLayout;
 class ConsoleBox;
+class DevicesButton;
 
 class RunPane : public QWidget
 {
@@ -33,6 +34,7 @@ private:
     LoadingBar* m_loadingBar;
     FlatButton* m_runButton;
     FlatButton* m_stopButton;
+    DevicesButton* m_devicesButton;
     FlatButton* m_projectsButton;
 };
 

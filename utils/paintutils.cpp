@@ -5,6 +5,7 @@
 #include <QBitmap>
 #include <QWidget>
 #include <QApplication>
+#include <QStyleOptionButton>
 
 QImage PaintUtils::renderFilledImage(const QSizeF& size, const QColor& fillColor, const QWidget* widget)
 {
@@ -151,4 +152,53 @@ QPixmap PaintUtils::renderColorPixmap(const QSize& size, const QColor& color, co
     p.end();
 
     return QPixmap::fromImage(dest);
+}
+
+void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOption& option, QWidget* widget)
+{
+    // Draw drop shadow
+    QPainterPath dropShadowPath;
+    dropShadowPath.addRect(3.5, widget->rect().bottom() + 0.5, widget->width() - 7, 1);
+    QLinearGradient dropShadowGrad(QPointF(3.5, widget->rect().bottom()),
+                                   QPointF(widget->width() - 3.5, widget->rect().bottom()));
+    dropShadowGrad.setColorAt(0, QColor("#12202020"));
+    dropShadowGrad.setColorAt(0.05, QColor("#10202020"));
+    dropShadowGrad.setColorAt(0.5, QColor("#10202020"));
+    dropShadowGrad.setColorAt(0.95, QColor("#10202020"));
+    dropShadowGrad.setColorAt(1, QColor("#12202020"));
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(dropShadowGrad);
+    painter->drawPath(dropShadowPath);
+
+    // Draw shadow
+    QPainterPath shadowPath;
+    shadowPath.addRoundedRect(QRectF(widget->rect()).adjusted(0, 0.5, 0, -0.5), 4.25, 4.25);
+    QLinearGradient shadowGrad(widget->rect().topLeft(), widget->rect().bottomLeft());
+    shadowGrad.setColorAt(0.85, QColor("#20303030"));
+    shadowGrad.setColorAt(1, QColor("#3d000000"));
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(shadowGrad);
+    painter->drawPath(shadowPath);
+
+    // Draw body
+    QPainterPath bodyPath;
+    bodyPath.addRoundedRect(QRectF(widget->rect()).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
+    QLinearGradient bodyGrad(widget->rect().topLeft(), widget->rect().bottomLeft());
+    bodyGrad.setColorAt(0, option.state & QStyle::State_Sunken ? QColor("#e7e7e7") : QColor("#fefefe"));
+    bodyGrad.setColorAt(1, option.state & QStyle::State_Sunken ? QColor("#e1e1e1") : QColor("#f7f7f7"));
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(bodyGrad);
+    painter->drawPath(bodyPath);
+
+    // Draw glowing for pressed state
+    if (option.state & QStyle::State_Sunken) {
+        QPainterPath glowPath;
+        glowPath.addRoundedRect(QRectF(widget->rect()).adjusted(0.5, 2, -0.5, 1), 3.65, 3.65);
+        QLinearGradient glowGrad(widget->width() / 2.0, 1, widget->width() / 2.0, 2);
+        glowGrad.setColorAt(0, QColor("#f7f7f7"));
+        glowGrad.setColorAt(1, QColor("#eaeaea"));
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(glowGrad);
+        painter->drawPath(bodyPath.subtracted(glowPath));
+    }
 }
