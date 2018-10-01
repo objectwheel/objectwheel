@@ -39,9 +39,6 @@
 #define PATH_SICON       (":/images/dots.png")
 #define WIDTH_PROGRESS   80
 
-// TODO: Double click on a project in the list should load the project
-// TODO: If the list has the focus, then pressing a key on keyboard should redirect to a project
-
 enum Buttons { Load, New, Import, Export, Settings };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
 
@@ -52,11 +49,11 @@ class FilterWidget : public QWidget
 public:
     explicit FilterWidget(QWidget* parent = nullptr) : QWidget(parent)
       , m_layout(new QHBoxLayout(this))
-      , m_sortLabel(new QLabel(this))
-      , m_sortComboBox(new QComboBox(this))
-      , m_searchLineEdit(new QLineEdit(this))
+      , m_sortLabel(new QLabel)
+      , m_sortComboBox(new QComboBox)
+      , m_searchLineEdit(new QLineEdit)
     {
-        m_layout->setContentsMargins(0, 0, 0, 0);
+        m_layout->setContentsMargins(2, 0, 0, 0);
         m_layout->setSpacing(0);
         m_layout->addWidget(m_searchLineEdit);
         m_layout->addWidget(m_sortLabel);
@@ -65,7 +62,7 @@ public:
         m_sortLabel->setText("|  " + tr("Sort by: "));
 
         m_searchLineEdit->setPlaceholderText(tr("Search"));
-        m_searchLineEdit->setStyleSheet("background: transparent;");
+        m_searchLineEdit->setStyleSheet("border: none; background: transparent;");
         m_searchLineEdit->setClearButtonEnabled(true);
         m_searchLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
         m_searchLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -74,6 +71,20 @@ public:
         m_sortComboBox->addItem(tr("Name"));
         m_sortComboBox->setCursor(Qt::PointingHandCursor);
         m_sortComboBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+        connect(m_searchLineEdit, &QLineEdit::textChanged, this, &FilterWidget::searchTextChanged);
+        connect(m_sortComboBox, &QComboBox::currentTextChanged, this, &FilterWidget::sortCriteriaChanged);
+
+        TransparentStyle::attach(this);
+        QTimer::singleShot(100, [=] { // FIXME
+            TransparentStyle::attach(this);
+        });
+    }
+
+public slots:
+    void textFocus()
+    {
+        m_searchLineEdit->setFocus();
     }
 
 private:
@@ -89,6 +100,10 @@ private:
     {
         return QSize(100, 24);
     }
+
+signals:
+    void searchTextChanged(const QString& text);
+    void sortCriteriaChanged(const QString& criteria);
 
 private:
     QHBoxLayout* m_layout;
@@ -221,8 +236,9 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_projectsLabel->setText(tr("Your Projects"));
     m_projectsLabel->setStyleSheet("color: black");
 
-    TransparentStyle::attach(m_filterWidget);
     m_filterWidget->setFixedWidth(SIZE_LIST.width());
+    connect(m_filterWidget, &FilterWidget::searchTextChanged, this, &ProjectsWidget::onSearchTextChange);
+//    connect(m_filterWidget, &FilterWidget::sortCriteriaChanged, this, &FilterWidget::sortCriteriaChanged);
 
     QPalette p1;
     p1.setColor(QPalette::Highlight, "#12000000");
@@ -279,6 +295,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons_2->settings().cellWidth = m_buttons_2->height();
     m_buttons_2->settings().borderRadius = m_buttons_2->height() / 2.0;
     m_buttons_2->triggerSettings();
+    connect(m_listWidget, &QListWidget::itemDoubleClicked, this, &ProjectsWidget::onLoadButtonClick);
     connect(m_listWidget, &QListWidget::currentItemChanged, [=] {
         auto currentItem = m_listWidget->currentItem();
         if (currentItem) {
@@ -331,12 +348,16 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
 bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == m_listWidget->viewport() && event->type() == QEvent::Paint && m_listWidget->count() == 0) {
-        QPainter p(m_listWidget->viewport());
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setPen("#30000000");
-        p.drawText(m_listWidget->viewport()->rect(), tr("No projects"), QTextOption(Qt::AlignCenter));
-        return true;
+    if (watched == m_listWidget->viewport()) {
+        if(event->type() == QEvent::Paint && m_listWidget->count() == 0) {
+            QPainter p(m_listWidget->viewport());
+            p.setRenderHint(QPainter::Antialiasing);
+            p.setPen("#30000000");
+            p.drawText(m_listWidget->viewport()->rect(), tr("No projects"), QTextOption(Qt::AlignCenter));
+            return true;
+        }
+        if(event->type() == QEvent::MouseButtonPress)
+            m_filterWidget->textFocus();
     }
 
     return false;
@@ -553,6 +574,27 @@ void ProjectsWidget::onProgressChange(int progress)
     if (m_progressBar->indeterminate())
         m_progressBar->setIndeterminate(false);
     m_progressBar->setValue(progress);
+}
+
+void ProjectsWidget::onSearchTextChange(const QString& text)
+{
+    QListWidgetItem* firstVisibleItem = nullptr;
+    for (int i = m_listWidget->count() - 1; i >= 0; --i) {
+        QListWidgetItem* item = m_listWidget->item(i);
+        const QString& projectName = item->data(Name).toString();
+        item->setHidden(!text.isEmpty() && !projectName.contains(text, Qt::CaseInsensitive));
+        if (!item->isHidden())
+            firstVisibleItem = item;
+    }
+    if (firstVisibleItem) {
+        m_listWidget->selectionModel()->clear();
+        firstVisibleItem->setSelected(true);
+    }
+}
+
+void ProjectsWidget::onSortCriteriaChange(const QString& criteria)
+{
+
 }
 
 void ProjectsWidget::lock()

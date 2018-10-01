@@ -28,6 +28,8 @@ private slots:
     void onImportButtonClick();
     void onSettingsButtonClick();
     void onProgressChange(int progress);
+    void onSearchTextChange(const QString& text);
+    void onSortCriteriaChange(const QString& criteria);
 
 private:
     void lock();
