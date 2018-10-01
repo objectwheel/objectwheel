@@ -159,6 +159,16 @@ QString ProjectManager::toUiTime(const QString& dbTime)
     return QDateTime::fromString(dbTime, Qt::ISODate).toString(Qt::SystemLocaleLongDate);
 }
 
+QDateTime ProjectManager::fromDb(const QString& dbTime)
+{
+    return QDateTime::fromString(dbTime, Qt::ISODate);
+}
+
+QDateTime ProjectManager::fromUi(const QString& uiTime)
+{
+    return QDateTime::fromString(uiTime, Qt::SystemLocaleLongDate);
+}
+
 bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
                                 const QString& owner, const QString& crDate, const QString& size)
 {

@@ -9,6 +9,7 @@
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <utilityfunctions.h>
+#include <transparentstyle.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -24,7 +25,9 @@
 #include <QFileDialog>
 #include <QComboBox>
 #include <QLineEdit>
-#include <transparentstyle.h>
+#include <QCheckBox>
+#include <QSortFilterProxyModel>
+#include <QDateTime>
 
 #define SIZE_LIST        (QSize(450, 300))
 #define BUTTONS_WIDTH    (450)
@@ -51,40 +54,63 @@ public:
       , m_layout(new QHBoxLayout(this))
       , m_sortLabel(new QLabel)
       , m_sortComboBox(new QComboBox)
-      , m_searchLineEdit(new QLineEdit)
+      , m_filterLineEdit(new QLineEdit)
+      , m_reverseSortCheckBox(new QCheckBox)
     {
         m_layout->setContentsMargins(2, 0, 0, 0);
         m_layout->setSpacing(0);
-        m_layout->addWidget(m_searchLineEdit);
+        m_layout->addWidget(m_filterLineEdit);
         m_layout->addWidget(m_sortLabel);
+        m_layout->addWidget(m_reverseSortCheckBox);
         m_layout->addWidget(m_sortComboBox);
-
-        m_sortLabel->setText("|  " + tr("Sort by: "));
-
-        m_searchLineEdit->setPlaceholderText(tr("Search"));
-        m_searchLineEdit->setStyleSheet("border: none; background: transparent;");
-        m_searchLineEdit->setClearButtonEnabled(true);
-        m_searchLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-        m_searchLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-        m_sortComboBox->addItem(tr("Date"));
-        m_sortComboBox->addItem(tr("Name"));
-        m_sortComboBox->setCursor(Qt::PointingHandCursor);
-        m_sortComboBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-
-        connect(m_searchLineEdit, &QLineEdit::textChanged, this, &FilterWidget::searchTextChanged);
-        connect(m_sortComboBox, &QComboBox::currentTextChanged, this, &FilterWidget::sortCriteriaChanged);
 
         TransparentStyle::attach(this);
         QTimer::singleShot(100, [=] { // FIXME
             TransparentStyle::attach(this);
         });
+
+        m_sortLabel->setText("| " + tr("Sort reverse "));
+
+        m_filterLineEdit->setPlaceholderText(tr("Filter"));
+        m_filterLineEdit->setStyleSheet("border: none; background: transparent;");
+        m_filterLineEdit->setClearButtonEnabled(true);
+        m_filterLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+        m_filterLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_filterLineEdit->setToolTip(tr("Filter by name"));
+
+        m_sortComboBox->addItem(tr("Name"));
+        m_sortComboBox->addItem(tr("Date"));
+        m_sortComboBox->setCursor(Qt::PointingHandCursor);
+        m_sortComboBox->setToolTip(tr("Change sorting criteria"));
+        m_sortComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+        m_sortComboBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+        m_reverseSortCheckBox->setText("by :");
+        m_reverseSortCheckBox->setToolTip(tr("Reverse order"));
+        m_reverseSortCheckBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        m_reverseSortCheckBox->setCursor(Qt::PointingHandCursor);
+
+        connect(m_filterLineEdit, &QLineEdit::textChanged, this, &FilterWidget::filterTextChanged);
+        connect(m_sortComboBox, &QComboBox::currentTextChanged, this, &FilterWidget::sortCriteriaChanged);
+        connect(m_reverseSortCheckBox, &QCheckBox::clicked, this, [=] {
+            emit sortCriteriaChanged(m_sortComboBox->currentText());
+        });
+    }
+
+    bool isReverseSort() const
+    {
+        return m_reverseSortCheckBox->isChecked();
+    }
+
+    QString sortingCriteria() const
+    {
+        return m_sortComboBox->currentText();
     }
 
 public slots:
     void textFocus()
     {
-        m_searchLineEdit->setFocus();
+        m_filterLineEdit->setFocus();
     }
 
 private:
@@ -102,14 +128,15 @@ private:
     }
 
 signals:
-    void searchTextChanged(const QString& text);
+    void filterTextChanged(const QString& text);
     void sortCriteriaChanged(const QString& criteria);
 
 private:
     QHBoxLayout* m_layout;
     QLabel* m_sortLabel;
     QComboBox* m_sortComboBox;
-    QLineEdit* m_searchLineEdit;
+    QLineEdit* m_filterLineEdit;
+    QCheckBox* m_reverseSortCheckBox;
 };
 
 class ProjectsDelegate: public QStyledItemDelegate
@@ -117,68 +144,97 @@ class ProjectsDelegate: public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    ProjectsDelegate(QListWidget* listWidget, QWidget* parent);
+    ProjectsDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
+      , m_listWidget(listWidget)
+    {
+    }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
-               const QModelIndex& index) const override;
+               const QModelIndex& index) const override
+    {
+        auto item = m_listWidget->item(index.row());
+        Q_ASSERT(item);
+
+        auto name = item->data(Name).toString();
+        auto lastEdit = item->data(LastEdit).toString();
+
+        auto rn = QRectF(option.rect).adjusted(option.rect.height(),
+                                               7, 0, - option.rect.height() / 2.0);
+        auto rl = QRectF(option.rect).adjusted(option.rect.height(),
+                                               option.rect.height() / 2.0, 0, - 7);
+        auto ri = QRectF(option.rect).adjusted(7, 7,
+                                               - option.rect.width() + option.rect.height() - 7, - 7);
+        auto ra = ri.adjusted(3, -0.5, 0, 0);
+        ra.setSize(QSize(10, 10));
+        auto icon = item->icon().pixmap(UtilityFunctions::window(m_listWidget), ri.size().toSize());
+
+        painter->setRenderHint(QPainter::Antialiasing);
+
+        QPainterPath path;
+        path.addRoundedRect(m_listWidget->rect(), 8, 8);
+        painter->setClipPath(path);
+
+        if (item->isSelected())
+            painter->fillRect(option.rect, option.palette.highlight());
+
+        painter->drawPixmap(ri, icon, icon.rect());
+
+        if (item->data(Active).toBool()) {
+            QLinearGradient g(ri.topLeft(), ri.bottomLeft());
+            g.setColorAt(0, "#6BCB36");
+            g.setColorAt(0.5, "#4db025");
+            painter->setBrush(g);
+            painter->setPen("#6BCB36");
+            painter->drawRoundedRect(ra, ra.width(), ra.height());
+        }
+
+        QFont f;
+        f.setWeight(QFont::DemiBold);
+        painter->setFont(f);
+        painter->setPen("#21303c");
+        painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
+
+        f.setWeight(QFont::Normal);
+        painter->setFont(f);
+        painter->drawText(rl, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
+    }
+
 
 private:
     QListWidget* m_listWidget;
 };
 
-ProjectsDelegate::ProjectsDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-  , m_listWidget(listWidget)
+class ProjectListWidgetItem : public QListWidgetItem
 {
-}
+public:
+    explicit ProjectListWidgetItem(ProjectsWidget* view) : m_projectsWidget(view)
+    {}
 
-void ProjectsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    auto item = m_listWidget->item(index.row());
-    Q_ASSERT(item);
+    bool operator<(const QListWidgetItem& other) const override
+    {
+        const FilterWidget* filterWidget = m_projectsWidget->filterWidget();
+        const QString& criteria = filterWidget->sortingCriteria();
+        bool reverseSort = filterWidget->isReverseSort();
 
-    auto name = item->data(Name).toString();
-    auto lastEdit = item->data(LastEdit).toString();
+        if (criteria == QObject::tr("Name")) {
+            const QString& myName = data(Name).toString();
+            const QString& othersName = other.data(Name).toString();
+            bool result = QString::localeAwareCompare(myName, othersName) < 0;
+            return reverseSort ? !result : result;
+        }
+        if (criteria == QObject::tr("Date")) {
+            const QDateTime& myDate = ProjectManager::fromUi(data(LastEdit).toString());
+            const QDateTime& othersDate = ProjectManager::fromUi(other.data(LastEdit).toString());
+            bool result = myDate > othersDate;
+            return reverseSort ? !result : result;
+        }
 
-    auto rn = QRectF(option.rect).adjusted(option.rect.height(),
-                                           7, 0, - option.rect.height() / 2.0);
-    auto rl = QRectF(option.rect).adjusted(option.rect.height(),
-                                           option.rect.height() / 2.0, 0, - 7);
-    auto ri = QRectF(option.rect).adjusted(7, 7,
-                                           - option.rect.width() + option.rect.height() - 7, - 7);
-    auto ra = ri.adjusted(3, -0.5, 0, 0);
-    ra.setSize(QSize(10, 10));
-    auto icon = item->icon().pixmap(UtilityFunctions::window(m_listWidget), ri.size().toSize());
-
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    QPainterPath path;
-    path.addRoundedRect(m_listWidget->rect(), 8, 8);
-    painter->setClipPath(path);
-
-    if (item->isSelected())
-        painter->fillRect(option.rect, option.palette.highlight());
-
-    painter->drawPixmap(ri, icon, icon.rect());
-
-    if (item->data(Active).toBool()) {
-        QLinearGradient g(ri.topLeft(), ri.bottomLeft());
-        g.setColorAt(0, "#6BCB36");
-        g.setColorAt(0.5, "#4db025");
-        painter->setBrush(g);
-        painter->setPen("#6BCB36");
-        painter->drawRoundedRect(ra, ra.width(), ra.height());
+        return QListWidgetItem::operator <(other);
     }
 
-    QFont f;
-    f.setWeight(QFont::DemiBold);
-    painter->setFont(f);
-    painter->setPen("#21303c");
-    painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
-
-    f.setWeight(QFont::Normal);
-    painter->setFont(f);
-    painter->drawText(rl, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
-}
+private:
+    ProjectsWidget* m_projectsWidget;
+};
 
 ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
@@ -237,8 +293,10 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_projectsLabel->setStyleSheet("color: black");
 
     m_filterWidget->setFixedWidth(SIZE_LIST.width());
-    connect(m_filterWidget, &FilterWidget::searchTextChanged, this, &ProjectsWidget::onSearchTextChange);
-//    connect(m_filterWidget, &FilterWidget::sortCriteriaChanged, this, &FilterWidget::sortCriteriaChanged);
+    connect(m_filterWidget, &FilterWidget::filterTextChanged, this, &ProjectsWidget::onFilterTextChange);
+    connect(m_filterWidget, &FilterWidget::sortCriteriaChanged, [=] {
+        m_listWidget->sortItems();
+    });
 
     QPalette p1;
     p1.setColor(QPalette::Highlight, "#12000000");
@@ -349,12 +407,26 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == m_listWidget->viewport()) {
-        if(event->type() == QEvent::Paint && m_listWidget->count() == 0) {
-            QPainter p(m_listWidget->viewport());
-            p.setRenderHint(QPainter::Antialiasing);
-            p.setPen("#30000000");
-            p.drawText(m_listWidget->viewport()->rect(), tr("No projects"), QTextOption(Qt::AlignCenter));
-            return true;
+        if(event->type() == QEvent::Paint) {
+            QString message = tr("No results");
+            if (m_listWidget->count() == 0)
+                message = tr("No projects");
+
+            QListWidgetItem* firstVisibleItem = nullptr;
+            for (int i = m_listWidget->count() - 1; i >= 0; --i) {
+                QListWidgetItem* item = m_listWidget->item(i);
+                if (!item->isHidden()) {
+                    firstVisibleItem = item;
+                    break;
+                }
+            }
+            if (!firstVisibleItem) {
+                QPainter p(m_listWidget->viewport());
+                p.setRenderHint(QPainter::Antialiasing);
+                p.setPen("#45000000");
+                p.drawText(m_listWidget->viewport()->rect(), message, QTextOption(Qt::AlignCenter));
+                return true;
+            }
         }
         if(event->type() == QEvent::MouseButtonPress)
             m_filterWidget->textFocus();
@@ -363,10 +435,16 @@ bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
     return false;
 }
 
+FilterWidget* ProjectsWidget::filterWidget() const
+{
+    return m_filterWidget;
+}
+
 void ProjectsWidget::refreshProjectList()
 {
     const int currentRow = m_listWidget->currentRow();
     m_listWidget->clear();
+
     if (UserManager::dir().isEmpty())
         return;
 
@@ -376,7 +454,7 @@ void ProjectsWidget::refreshProjectList()
         return;
 
     for (auto hash : projects) {
-        auto item = new QListWidgetItem;
+        auto item = new ProjectListWidgetItem(this);
         item->setIcon(QIcon(PATH_FILEICON));
         item->setData(Hash, hash);
         item->setData(Name, ProjectManager::name(hash));
@@ -385,10 +463,14 @@ void ProjectsWidget::refreshProjectList()
         m_listWidget->addItem(item);
     }
 
-    if (currentRow >= 0 && m_listWidget->count() > currentRow)
-        m_listWidget->setCurrentRow(currentRow);
-    else
+    if (currentRow >= 0 && m_listWidget->count() > currentRow) {
+        QListWidgetItem* currentItem = m_listWidget->item(currentRow);
+        m_listWidget->sortItems();
+        m_listWidget->setCurrentItem(currentItem);
+    } else {
+        m_listWidget->sortItems();
         m_listWidget->setCurrentRow(0);
+    }
 }
 
 void ProjectsWidget::startProject()
@@ -430,7 +512,7 @@ void ProjectsWidget::onNewButtonClick()
         projectName += QString::number(count);
     }
 
-    auto item = new QListWidgetItem;
+    auto item = new ProjectListWidgetItem(this);
     item->setIcon(QIcon(PATH_FILEICON));
     item->setData(Name, projectName);
     item->setData(LastEdit, ProjectManager::currentUiTime());
@@ -576,7 +658,7 @@ void ProjectsWidget::onProgressChange(int progress)
     m_progressBar->setValue(progress);
 }
 
-void ProjectsWidget::onSearchTextChange(const QString& text)
+void ProjectsWidget::onFilterTextChange(const QString& text)
 {
     QListWidgetItem* firstVisibleItem = nullptr;
     for (int i = m_listWidget->count() - 1; i >= 0; --i) {
@@ -586,15 +668,9 @@ void ProjectsWidget::onSearchTextChange(const QString& text)
         if (!item->isHidden())
             firstVisibleItem = item;
     }
-    if (firstVisibleItem) {
-        m_listWidget->selectionModel()->clear();
-        firstVisibleItem->setSelected(true);
-    }
-}
-
-void ProjectsWidget::onSortCriteriaChange(const QString& criteria)
-{
-
+    if (firstVisibleItem)
+        m_listWidget->setCurrentItem(firstVisibleItem);
+    m_buttons_2->setVisible(firstVisibleItem);
 }
 
 void ProjectsWidget::lock()

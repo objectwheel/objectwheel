@@ -16,6 +16,7 @@ class ProjectsWidget : public QWidget
 
 public:
     explicit ProjectsWidget(QWidget* parent = nullptr);
+    FilterWidget* filterWidget() const;
 
 public slots:
     void refreshProjectList();
@@ -28,8 +29,7 @@ private slots:
     void onImportButtonClick();
     void onSettingsButtonClick();
     void onProgressChange(int progress);
-    void onSearchTextChange(const QString& text);
-    void onSortCriteriaChange(const QString& criteria);
+    void onFilterTextChange(const QString& text);
 
 private:
     void lock();

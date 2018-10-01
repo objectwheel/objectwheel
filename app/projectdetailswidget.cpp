@@ -11,7 +11,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 
-#define BUTTONS_WIDTH    (450)
+#define BUTTONS_WIDTH    (338)
 #define SIZE_ICON        (QSize(48, 48))
 #define PATH_ICON        (":/images/options.png")
 #define PATH_SICON       (":/images/load.png")
@@ -86,9 +86,9 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->add(Back, "#5BC5F8", "#2592F9");
     m_buttons->add(Delete, "#CC5D67", "#B2525A");
     m_buttons->add(Save, "#86CC63", "#75B257");
-    m_buttons->get(Delete)->setText(tr("Delete Project"));
+    m_buttons->get(Delete)->setText(tr("Delete"));
     m_buttons->get(Back)->setText(tr("Back"));
-    m_buttons->get(Save)->setText(tr("Save Changes"));
+    m_buttons->get(Save)->setText(tr("Save"));
     m_buttons->get(Delete)->setIcon(QIcon(PATH_DICON));
     m_buttons->get(Back)->setIcon(QIcon(PATH_CICON));
     m_buttons->get(Save)->setIcon(QIcon(PATH_SICON));

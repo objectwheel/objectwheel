@@ -17,6 +17,8 @@ public:
     static QString currentUiTime();
     static QString toDbTime(const QString& uiTime);
     static QString toUiTime(const QString& dbTime);
+    static QDateTime fromDb(const QString& dbTime);
+    static QDateTime fromUi(const QString& uiTime);
 
     static QStringList projects();
     static QStringList projectNames();
