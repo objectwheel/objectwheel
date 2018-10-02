@@ -60,23 +60,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
     connect(m_stopButton, SIGNAL(doubleClick()), SLOT(onStopButtonDoubleClick()));
 
-    auto menu = new QMenu(m_devicesButton);
-    auto group = new QActionGroup(menu);
-    auto myComputerDeviceAction = new QAction(group);
-
-    menu->setToolTipsVisible(true);
-    menu->addActions(group->actions());
-
-    group->setExclusive(true);
-    group->addAction(myComputerDeviceAction);
-
-    myComputerDeviceAction->setText(tr("My Computer"));
-    myComputerDeviceAction->setIcon(QIcon(":/images/mycomputer.png"));
-    myComputerDeviceAction->setCheckable(true);
-    myComputerDeviceAction->setProperty("ow_device_id", 0);
-
-    m_devicesButton->setAttribute(Qt::WA_Hover);
-    m_devicesButton->setMenu(menu);
     m_devicesButton->setFixedHeight(24);
     m_devicesButton->setCursor(Qt::PointingHandCursor);
     m_devicesButton->setToolTip(tr("Select target device"));
