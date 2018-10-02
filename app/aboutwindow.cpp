@@ -37,7 +37,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_layout->setAlignment(m_legalLabel, Qt::AlignCenter);
     m_layout->setSpacing(20);
 
-    QFont f;
+    QFont f(font());
     f.setWeight(QFont::ExtraLight);
     f.setPixelSize(22);
 

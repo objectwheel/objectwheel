@@ -79,7 +79,6 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 
     _verificationLabel->setFont(f);
     _verificationLabel->setText(tr("Email Verification"));
-    _verificationLabel->setStyleSheet("color: black");
 
     _countdownLabel->setAlignment(Qt::AlignHCenter);
     _countdownLabel->setText(tr("You have left:"));

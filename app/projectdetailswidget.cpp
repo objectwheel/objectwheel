@@ -57,7 +57,6 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
 
     m_settingsLabel->setFont(f);
     m_settingsLabel->setText(tr("Project Settings"));
-    m_settingsLabel->setStyleSheet("color: black");
 
     m_bulkEdit->add(Name, tr("Project Name"));
     m_bulkEdit->add(Description, tr("Description"));

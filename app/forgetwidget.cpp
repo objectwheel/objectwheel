@@ -64,7 +64,6 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
 
     _forgotLabel->setFont(f);
     _forgotLabel->setText(tr("Password Reset"));
-    _forgotLabel->setStyleSheet("color: black");
 
     _bulkEdit->add(Email, tr("Email Address"));
     _bulkEdit->setFixedWidth(BUTTONS_WIDTH);

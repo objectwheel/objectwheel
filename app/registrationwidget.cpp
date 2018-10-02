@@ -103,7 +103,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
 
     _signupLabel->setFont(f);
     _signupLabel->setText(tr("Sign Up"));
-    _signupLabel->setStyleSheet("color: black");
 
     _bulkEdit->add(First, tr("First Name *"));
     _bulkEdit->add(Last, tr("Last Name *"));
@@ -143,7 +142,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     "QComboBox {\
         border: none;\
         background: transparent;\
-        color: black;\
     }\
     QComboBox::drop-down {\
         subcontrol-origin: padding;\
@@ -170,11 +168,9 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setFocusPolicy(Qt::NoFocus);
     _termsLabel->setTextFormat(Qt::RichText);
     _termsLabel->setText(tr(
-        "I accept <a href=\"http://objectwheel.com/\" "
-        "style=\"color: black;\">the terms and conditions</a>"
+        "I accept <a href=\"http://objectwheel.com/\">the terms and conditions</a>"
     ));
 
-    _termsLabel->setStyleSheet("color: black");
     _termsLabel->setOpenExternalLinks(true);
     _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 

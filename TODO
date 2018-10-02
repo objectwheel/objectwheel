@@ -1,3 +1,4 @@
+Projeyi ükledikten sonra ana ekran açılınca Designer Scene'nin scrollbar'ı aşağı çekilmiş olarak başlıyor
 Checkout if bold font issues on welcome window is fixes with Qt 5.12
 application general settings
 qmlcodeeditor general settings

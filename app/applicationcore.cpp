@@ -93,6 +93,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     palette.setColor(QPalette::HighlightedText, "#ffffff");
     palette.setColor(QPalette::ToolTipText, "#3C444C");
     palette.setColor(QPalette::ToolTipBase, "#f0f0f0");
+    palette.setColor(QPalette::Link, "#025dbf");
+    palette.setColor(QPalette::LinkVisited, "#B44B46");
     QApplication::setPalette(palette);
 
     s_documentManager = new DocumentManager(this);

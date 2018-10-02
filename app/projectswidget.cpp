@@ -281,16 +281,13 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     m_welcomeLabel->setFont(f);
     m_welcomeLabel->setText(tr("Welcome to Objectwheel"));
-    m_welcomeLabel->setStyleSheet("color: black");
 
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
     m_versionLabel->setFont(f);
     m_versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
-    m_versionLabel->setStyleSheet("color: black");
 
     m_projectsLabel->setText(tr("Your Projects"));
-    m_projectsLabel->setStyleSheet("color: black");
 
     m_filterWidget->setFixedWidth(SIZE_LIST.width());
     connect(m_filterWidget, &FilterWidget::filterTextChanged, this, &ProjectsWidget::onFilterTextChange);
@@ -529,7 +526,7 @@ void ProjectsWidget::onNewButtonClick()
 
 void ProjectsWidget::onLoadButtonClick()
 {
-    if (!m_listWidget->currentItem()) {
+    if (!m_listWidget->currentItem() || m_listWidget->currentItem()->isHidden()) {
         QMessageBox::warning(
                     this,
                     tr("Oops"),

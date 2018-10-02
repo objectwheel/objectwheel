@@ -75,7 +75,6 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 
     _robotLabel->setFont(f);
     _robotLabel->setText(tr("I'm not Robot"));
-    _robotLabel->setStyleSheet("color: black");
 
     _buttons->add(Back, "#5BC5F8", "#2592F9");
     _buttons->add(Next, "#8BBB56", "#6EA045");

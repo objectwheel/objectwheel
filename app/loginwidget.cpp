@@ -102,7 +102,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     _loginLabel->setFont(f);
     _loginLabel->setText(tr("Log In"));
-    _loginLabel->setStyleSheet("color: black");
 
     _bulkEdit->add(Email, tr("Email"));
     _bulkEdit->add(Password, tr("Password"));
@@ -126,8 +125,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     );
 
     _autologinLabel->setText(tr("Automatic login"));
-    _autologinLabel->setStyleSheet("color: black");
-
     _autologinSwitch->setChecked(true);
 
     _buttons->add(Register, "#5BC5F8", "#2592F9");

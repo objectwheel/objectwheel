@@ -1,5 +1,6 @@
 #include <succeedwidget.h>
 #include <buttonslice.h>
+#include <utilityfunctions.h>
 
 #include <QTimer>
 #include <QMovie>
@@ -45,10 +46,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _iconLabel->setFixedSize(SIZE_GIF);
     _iconLabel->setStyleSheet("background: transparent;");
 
-    QFont f;
-    f.setPixelSize(16);
-
-    _titleLabel->setFont(f);
+    UtilityFunctions::adjustFontPixelSize(_titleLabel, 3);
     _titleLabel->setStyleSheet("color: #65A35C");
 
     _descriptionLabel->setStyleSheet("color: #304050");

@@ -2,6 +2,7 @@
 #define UTILITYFUNCTIONS_H
 
 #include <Qt>
+#include <QFont>
 
 class QTextDocument;
 class QWidget;
@@ -20,6 +21,7 @@ void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex
 QWidget* createSpacerWidget(Qt::Orientation orientation);
 QWindow* window(const QWidget* w);
 void centralizeWidget(QWidget* widget);
+void adjustFontWeight(QWidget* w, QFont::Weight we);
 void adjustFontPixelSize(QWidget* w, int advance);
 }
 

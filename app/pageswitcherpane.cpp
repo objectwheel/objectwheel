@@ -39,6 +39,13 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     labelFont.setWeight(QFont::DemiBold);
     labelFont.setPixelSize(AppFontSettings::defaultPixelSize() - 2.0);
 
+    m_buildsButton->setFont(labelFont);
+    m_splitViewButton->setFont(labelFont);
+    m_helpButton->setFont(labelFont);
+    m_projectOptionsButton->setFont(labelFont);
+    m_qmlCodeEditorButton->setFont(labelFont);
+    m_designerButton->setFont(labelFont);
+
     m_designerButton->setText(tr("Designer"));
     m_qmlCodeEditorButton->setText(tr("Editor"));
     m_projectOptionsButton->setText(tr("Options"));
@@ -52,13 +59,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->setToolTip(TOOLTIP.arg(tr("Help and Documentations")));
     m_splitViewButton->setToolTip(TOOLTIP.arg(tr("Splitted View")));
     m_buildsButton->setToolTip(TOOLTIP.arg(tr("Cloud Builds")));
-
-    m_buildsButton->setFont(labelFont);
-    m_splitViewButton->setFont(labelFont);
-    m_helpButton->setFont(labelFont);
-    m_projectOptionsButton->setFont(labelFont);
-    m_qmlCodeEditorButton->setFont(labelFont);
-    m_designerButton->setFont(labelFont);
 
     m_designerButton->setAutoExclusive(true);
     m_qmlCodeEditorButton->setAutoExclusive(true);

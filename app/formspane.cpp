@@ -125,10 +125,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
 {
     initPalette(this);
 
-    QFont fontMedium(font());
-    fontMedium.setWeight(QFont::Medium);
-
-    header()->setFont(fontMedium);
+    UtilityFunctions::adjustFontWeight(header(), QFont::Medium);
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);

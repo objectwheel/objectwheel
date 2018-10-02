@@ -4,12 +4,14 @@
 #include <transparentstyle.h>
 #include <utilsicons.h>
 #include <appfontsettings.h>
+#include <utilityfunctions.h>
 
 #include <QtWidgets>
 #include <QtHelp>
 #include <QtWebEngineWidgets>
 
 // TODO: "Find" on help page
+// TODO: Copy/paste keyboard shortcuts
 
 namespace {
 QHelpContentWidget* contentWidget;
@@ -63,9 +65,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_toolbar->addWidget(spacing);
     m_toolbar->addWidget(m_titleLabel);
 
-    QFont f;
-    f.setPixelSize(AppFontSettings::defaultPixelSize() - 1);
-    m_titleLabel->setFont(f);
+    UtilityFunctions::adjustFontPixelSize(m_titleLabel, -1);
     m_titleLabel->setTextFormat(Qt::RichText);
 
     m_typeCombo->setFixedWidth(220);

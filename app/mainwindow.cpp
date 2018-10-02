@@ -18,6 +18,7 @@
 #include <control.h>
 #include <toolboxsettingswindow.h>
 #include <qmlcodeeditorwidget.h>
+#include <utilityfunctions.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -114,15 +115,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addToolBar(Qt::LeftToolBarArea , pageSwitcherBar);
 
     /** Set Dock Widgets **/
-    QFont dockTitleFont;
-    dockTitleFont.setWeight(QFont::Medium);
-
     /* Add Inspector Pane */
     auto inspectorTitleLabel = new QLabel;
     inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     inspectorTitleLabel->setText(tr("   Control Inspector"));
-    inspectorTitleLabel->setStyleSheet("color: black");
-    inspectorTitleLabel->setFont(dockTitleFont);
+    UtilityFunctions::adjustFontWeight(inspectorTitleLabel, QFont::Medium);
 
     auto inspectorTitlePinButton = new QToolButton;
     inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -152,8 +149,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto propertiesTitleLabel = new QLabel;
     propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     propertiesTitleLabel->setText(tr("   Properties"));
-    propertiesTitleLabel->setStyleSheet("color: black");
-    propertiesTitleLabel->setFont(dockTitleFont);
+    UtilityFunctions::adjustFontWeight(propertiesTitleLabel, QFont::Medium);
 
     auto propertiesTitlePinButton = new QToolButton;
     propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -183,8 +179,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto globalTitleLabel = new QLabel;
     globalTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     globalTitleLabel->setText(tr("   Global Resources"));
-    globalTitleLabel->setStyleSheet("color: black");
-    globalTitleLabel->setFont(dockTitleFont);
+    UtilityFunctions::adjustFontWeight(globalTitleLabel, QFont::Medium);
 
     auto globalTitlePinButton = new QToolButton;
     globalTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -216,8 +211,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto toolboxTitleLabel = new QLabel;
     toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolboxTitleLabel->setText(tr("   Toolbox"));
-    toolboxTitleLabel->setStyleSheet("color: black");
-    toolboxTitleLabel->setFont(dockTitleFont);
+    UtilityFunctions::adjustFontWeight(toolboxTitleLabel, QFont::Medium);
 
     auto toolboxTitlePinButton = new QToolButton;
     toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -258,8 +252,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto formsTitleLabel = new QLabel;
     formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     formsTitleLabel->setText(tr("   Form Navigator"));
-    formsTitleLabel->setStyleSheet("color: black");
-    formsTitleLabel->setFont(dockTitleFont);
+    UtilityFunctions::adjustFontWeight(formsTitleLabel, QFont::Medium);
 
     auto formsTitlePinButton = new QToolButton;
     formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));

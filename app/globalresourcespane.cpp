@@ -1,6 +1,7 @@
 #include <globalresourcespane.h>
 #include <projectmanager.h>
 #include <saveutils.h>
+#include <utilityfunctions.h>
 
 #include <QHeaderView>
 
@@ -22,9 +23,7 @@ QPalette initPalette(QWidget* widget)
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : FileExplorer(parent)
 {
     setPalette(initPalette(this));
-    QFont fontMedium(font());
-    fontMedium.setWeight(QFont::Medium);
-    header()->setFont(fontMedium);
+    UtilityFunctions::adjustFontWeight(header(), QFont::Medium);
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
 }

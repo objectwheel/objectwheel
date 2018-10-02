@@ -174,3 +174,10 @@ void UtilityFunctions::adjustFontPixelSize(QWidget* w, int advance)
     font.setPixelSize(font.pixelSize() + advance);
     w->setFont(font);
 }
+
+void UtilityFunctions::adjustFontWeight(QWidget* w, QFont::Weight we)
+{
+    QFont font(w->font());
+    font.setWeight(we);
+    w->setFont(font);
+}

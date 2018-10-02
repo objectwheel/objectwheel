@@ -139,17 +139,14 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
 
     m_titleLabel->setFont(f);
     m_titleLabel->setText(tr("Project Templates"));
-    m_titleLabel->setStyleSheet("color: black");
 
     f.setWeight(QFont::Light);
     f.setPixelSize(15);
     m_informativeLabel->setFont(f);
     m_informativeLabel->setText(tr("Choose appropriate template for your project"));
     m_informativeLabel->setAlignment(Qt::AlignCenter);
-    m_informativeLabel->setStyleSheet("color: black");
 
     m_templatesLabel->setText(tr("Templates"));
-    m_templatesLabel->setStyleSheet("color: black");
 
     QPalette p1;
     p1.setColor(QPalette::Highlight, "#15000000");

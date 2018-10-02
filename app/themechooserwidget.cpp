@@ -4,6 +4,7 @@
 #include <projectmanager.h>
 #include <filemanager.h>
 #include <waitingspinnerwidget.h>
+#include <utilityfunctions.h>
 
 #include <QJsonValue>
 #include <QtWidgets>
@@ -51,9 +52,6 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
   , m_gridLayout(new QGridLayout(this))
   , m_loadingIndicator(new WaitingSpinnerWidget(m_previewPicture))
 {
-    QFont sectionsFont;
-    sectionsFont.setWeight(QFont::DemiBold);
-
     m_loadingIndicator->setStyleSheet("background: transparent;");
     m_loadingIndicator->setColor("#333333");
     m_loadingIndicator->setRoundness(50);
@@ -66,8 +64,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_loadingIndicator->setLineWidth(3);
 
     m_stylesLabel->setText(tr("Style:"));
-    m_stylesLabel->setStyleSheet("color: black");
-    m_stylesLabel->setFont(sectionsFont);
+    UtilityFunctions::adjustFontWeight(m_stylesLabel, QFont::DemiBold);
 
     m_stylesCombo->addItems(m_version == V1 ? STYLES : STYLES_V2);
     m_stylesCombo->setFixedWidth(150);
@@ -88,27 +85,17 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
     if (m_version == V2) {
         m_themesLabel->setText(tr("Theme:"));
-        m_themesLabel->setStyleSheet("color: black");
-        m_themesLabel->setFont(sectionsFont);
+        UtilityFunctions::adjustFontWeight(m_themesLabel, QFont::DemiBold);
 
         m_themesCombo->setCurrentText("None");
         m_themesCombo->setFixedWidth(150);
 
+        UtilityFunctions::adjustFontWeight(m_detailsLabel, QFont::DemiBold);
         m_detailsLabel->setText(tr("Details:"));
-        m_detailsLabel->setStyleSheet("color: black");
-        m_detailsLabel->setFont(sectionsFont);
-
         m_accentDetailLabel->setText(tr("Accent color:"));
-        m_accentDetailLabel->setStyleSheet("color: black");
-
         m_primaryDetailLabel->setText(tr("Primary color:"));
-        m_primaryDetailLabel->setStyleSheet("color: black");
-
         m_foregroundDetailLabel->setText(tr("Foreground color:"));
-        m_foregroundDetailLabel->setStyleSheet("color: black");
-
         m_backgroundDetailLabel->setText(tr("Background color:"));
-        m_backgroundDetailLabel->setStyleSheet("color: black");
 
         m_accentColorsCombo->setFixedWidth(200);
         m_primaryColorsCombo->setFixedWidth(200);
@@ -144,16 +131,14 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         m_backgroundColorButton->setText("...");
 
         m_customizationLabel->setText(tr("Customization:"));
-        m_customizationLabel->setStyleSheet("color: black");
-        m_customizationLabel->setFont(sectionsFont);
+        UtilityFunctions::adjustFontWeight(m_customizationLabel, QFont::DemiBold);
 
         m_customizationPicture->setScaledContents(false);
         m_customizationPicture->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     }
 
     m_previewLabel->setText(tr("Preview:"));
-    m_previewLabel->setStyleSheet("color: black");
-    m_previewLabel->setFont(sectionsFont);
+    UtilityFunctions::adjustFontWeight(m_previewLabel, QFont::DemiBold);
 
     m_previewPicture->setScaledContents(true);
     m_previewPicture->setAlignment(Qt::AlignTop | Qt::AlignLeft);

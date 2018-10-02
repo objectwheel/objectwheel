@@ -8,6 +8,7 @@
 #include <appfontsettings.h>
 #include <qmlcodeeditor.h>
 #include <qmlcodeeditorwidget.h>
+#include <utilityfunctions.h>
 
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
@@ -35,10 +36,7 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     m_textBrowser->viewport()->installEventFilter(this);
     m_textBrowser->setWordWrapMode(QTextOption::WordWrap);
     m_textBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    QFont f;
-    f.setPixelSize(AppFontSettings::defaultPixelSize() - 1);
-    m_textBrowser->setFont(f);
+    UtilityFunctions::adjustFontPixelSize(m_textBrowser, -1);
 
     connect(RunManager::instance(), &RunManager::standardError, this, &ConsoleBox::onStandardError);
     connect(RunManager::instance(), &RunManager::standardOutput, this, &ConsoleBox::onStandardOutput);
