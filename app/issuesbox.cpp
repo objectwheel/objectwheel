@@ -72,7 +72,6 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     QPalette p1(m_listWidget->palette());
     p1.setColor(QPalette::Base, Qt::white);
     p1.setColor(QPalette::Highlight, QColor("#d4d4d4"));
-    p1.setColor(QPalette::Text, Qt::black);
     m_listWidget->setPalette(p1);
     m_title->setText("Issues");
 

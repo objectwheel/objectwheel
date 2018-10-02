@@ -88,8 +88,8 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
     connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
 
-    _loadingIndicator->setStyleSheet("Background: transparent;");
-    _loadingIndicator->setColor(Qt::black);
+    _loadingIndicator->setStyleSheet("background: transparent;");
+    _loadingIndicator->setColor(palette().text().color());
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);

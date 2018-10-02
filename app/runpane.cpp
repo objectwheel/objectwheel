@@ -8,6 +8,7 @@
 #include <welcomewindow.h>
 #include <transparentstyle.h>
 #include <devicesbutton.h>
+#include <elasticspacer.h>
 
 #include <QTime>
 #include <QTimer>
@@ -15,9 +16,9 @@
 #include <QHBoxLayout>
 #include <QActionGroup>
 #include <QMenu>
+#include <QDebug>
 
 // TODO: Ask for "stop task"if main window closes before user closes the running project
-
 RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
   , m_consoleBox(consoleBox)
   , m_layout(new QHBoxLayout(this))
@@ -33,6 +34,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_runButton);
     m_layout->addWidget(m_stopButton);
     m_layout->addWidget(m_devicesButton);
+//    m_layout->addItem(new ElasticSpacer(m_devicesButton, 291, 24));
     m_layout->addStretch();
     m_layout->addWidget(m_loadingBar);
     m_layout->addStretch();
@@ -43,7 +45,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 //        TransparentStyle::attach(this);
 //    });
 
-    m_loadingBar->setFixedSize(QSize(481, 24));
+//    m_loadingBar->setFixedSize(QSize(481, 24));
 
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));

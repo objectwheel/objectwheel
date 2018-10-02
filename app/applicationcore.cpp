@@ -83,10 +83,12 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
 
     QPalette palette(QApplication::palette());
+
+    palette.setColor(QPalette::Text, "#3C444C");
     palette.setColor(QPalette::Window, "#f0f0f0");
     palette.setColor(QPalette::Highlight, "#1C77D5");
     palette.setColor(QPalette::ToolTipBase, "#E9E9E9");
-    palette.setColor(QPalette::ToolTipText, "#222222");
+    palette.setColor(QPalette::ToolTipText, "#3C444C");
     QApplication::setPalette(palette);
 
     s_documentManager = new DocumentManager(this);

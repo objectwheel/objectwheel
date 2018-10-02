@@ -19,9 +19,6 @@
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#f0f0f0");
-    setPalette(p);
     setWindowTitle(APP_NAME);
 
     m_view = new View(this);

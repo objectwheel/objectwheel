@@ -126,7 +126,7 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
         );
     });
 
-    _loadingIndicator->setStyleSheet("Background: transparent;");
+    _loadingIndicator->setStyleSheet("background: transparent;");
     _loadingIndicator->setColor("#2E3A41");
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);

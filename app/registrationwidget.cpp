@@ -142,7 +142,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     cbox->setStyleSheet(
     "QComboBox {\
         border: none;\
-        Background: transparent;\
+        background: transparent;\
         color: black;\
     }\
     QComboBox::drop-down {\
@@ -194,8 +194,8 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
     connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
 
-    _loadingIndicator->setStyleSheet("Background: transparent;");
-    _loadingIndicator->setColor(Qt::black);
+    _loadingIndicator->setStyleSheet("background: transparent;");
+    _loadingIndicator->setColor(palette().text().color());
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);

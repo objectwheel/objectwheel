@@ -135,7 +135,6 @@ WebEngineHelpViewer::WebEngineHelpViewer(QHelpEngine* helpEngine, QWidget *paren
 
     QPalette p = palette();
     p.setColor(QPalette::Base, Qt::white);
-    p.setColor(QPalette::Text, Qt::black);
     setPalette(p);
 
     connect(m_widget, &QWebEngineView::urlChanged, this, &WebEngineHelpViewer::sourceChanged);

@@ -19,12 +19,16 @@ public:
     void removeDeviceAction(QAction* action);
     void setCurrentDeviceAction(QAction* action);
 
-public slots:
+private slots:
     void onCurrentDeviceActionChange(QAction*);
 
-private:
+protected:
     void paintEvent(QPaintEvent*) override;
+    QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+
+private:
+    QSize recomputeSizeHint() const;
 
 signals:
     void currentDeviceActionChanged(QAction*);

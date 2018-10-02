@@ -57,7 +57,7 @@ WaitingSpinnerWidget::WaitingSpinnerWidget(Qt::WindowModality modality,
 }
 
 void WaitingSpinnerWidget::initialize() {
-    _color = Qt::black;
+    _color = palette().text().color();
     _roundness = 100.0;
     _minimumTrailOpacity = 3.14159265358979323846;
     _trailFadePercentage = 80.0;

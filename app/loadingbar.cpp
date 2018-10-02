@@ -11,7 +11,6 @@ namespace {
     int counter;
     QImage image;
     QColor loadingColor;
-    void drawText(QPainter *painter, const QString &text, const QRectF& rect);
 }
 
 LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
@@ -104,36 +103,25 @@ void LoadingBar::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.drawImage(rect(), image, image.rect());
 
-    drawText(&painter, m_text, rect());
+    // Draw text
+    QTextDocument doc;
+    doc.setTextWidth(rect().width());
+    doc.setDocumentMargin(0);
+    doc.setIndentWidth(0);
+    QTextBlockFormat bf;
+    bf.setLineHeight(rect().height() - 1.5 * devicePixelRatioF(), QTextBlockFormat::FixedHeight);
+    bf.setAlignment(Qt::AlignCenter);
+    QTextCharFormat cf;
+    cf.setForeground(palette().text());
+    QTextCursor cursor(&doc);
+    cursor.insertHtml(m_text);
+    cursor.select(QTextCursor::Document);
+    cursor.mergeBlockFormat(bf);
+    cursor.mergeCharFormat(cf);
+    doc.drawContents(&painter, rect());
 
     QPainterPath path;
     path.addRoundedRect(0.5, 0.5, 480.0, 23.0, 3.5, 3.5);
     painter.setClipPath(path);
     painter.fillRect(QRectF{0.5, 21.5, m_progress * 4.8, 10}, loadingColor);
-}
-
-namespace {
-    void drawText(QPainter *painter, const QString &text, const QRectF& rect)
-    {
-        QTextDocument doc;
-        doc.setTextWidth(rect.width());
-        doc.setDocumentMargin(0);
-        doc.setIndentWidth(0);
-
-        QTextBlockFormat bf;
-        bf.setLineHeight(rect.height() - 1.5 * painter->device()->devicePixelRatioF(),
-                         QTextBlockFormat::FixedHeight);
-        bf.setAlignment(Qt::AlignCenter);
-
-        QTextCharFormat cf;
-        cf.setForeground(Qt::black);
-
-        QTextCursor cursor(&doc);
-        cursor.insertHtml(text);
-        cursor.select(QTextCursor::Document);
-        cursor.mergeBlockFormat(bf);
-        cursor.mergeCharFormat(cf);
-
-        doc.drawContents(painter, rect);
-    }
 }

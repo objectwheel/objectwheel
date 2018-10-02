@@ -156,6 +156,8 @@ QPixmap PaintUtils::renderColorPixmap(const QSize& size, const QColor& color, co
 
 void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOption& option, QWidget* widget)
 {
+    painter->save();
+
     // Draw drop shadow
     QPainterPath dropShadowPath;
     dropShadowPath.addRect(3.5, widget->rect().bottom() + 0.5, widget->width() - 7, 1);
@@ -201,4 +203,6 @@ void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOpt
         painter->setBrush(glowGrad);
         painter->drawPath(bodyPath.subtracted(glowPath));
     }
+
+    painter->restore();
 }

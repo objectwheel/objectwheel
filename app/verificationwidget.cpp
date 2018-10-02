@@ -126,8 +126,8 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
         );
     });
 
-    _loadingIndicator->setStyleSheet("Background: transparent;");
-    _loadingIndicator->setColor(Qt::black);
+    _loadingIndicator->setStyleSheet("background: transparent;");
+    _loadingIndicator->setColor(palette().text().color());
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);

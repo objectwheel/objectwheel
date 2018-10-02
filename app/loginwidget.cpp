@@ -169,7 +169,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     connect(_helpButton, SIGNAL(clicked(bool)), _helpBox, SLOT(show()));
 
     _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor(Qt::black);
+    _loadingIndicator->setColor(palette().text().color());
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);
@@ -180,7 +180,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setLineWidth(2);
 
     _legalLabel->setText(QString("<p><b>© 2015 - 2018 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
-    _legalLabel->setStyleSheet("color: black;");
     _legalLabel->setAlignment(Qt::AlignHCenter);
 }
 

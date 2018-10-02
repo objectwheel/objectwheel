@@ -33,7 +33,7 @@ FlatButton::FlatButton(QWidget* parent) : QPushButton(parent)
     /* Set size settings */
     _settings.topColor = "#f0f0f0";
     _settings.bottomColor = "#ececec";
-    _settings.textColor = Qt::black;
+    _settings.textColor = palette().text().color();
     _settings.borderRadius = 0;
     _settings.textMargin = 2;
     _settings.iconButton = false;

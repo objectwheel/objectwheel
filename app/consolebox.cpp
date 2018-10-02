@@ -43,7 +43,6 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     QPalette p1(m_textBrowser->palette());
     p1.setColor(QPalette::Base, Qt::white);
     p1.setColor(QPalette::Highlight, QColor("#d4d4d4"));
-    p1.setColor(QPalette::Text, Qt::black);
     m_textBrowser->setPalette(p1);
 
     connect(RunManager::instance(), &RunManager::standardError, this, &ConsoleBox::onStandardError);

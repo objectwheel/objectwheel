@@ -29,7 +29,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     QPalette p2(palette());
     p2.setColor(QPalette::Base, Qt::white);
     p2.setColor(QPalette::Highlight, "#d4d4d4");
-    p2.setColor(QPalette::Text, Qt::black);
     _listWidget->setPalette(p2);
 
     QFont f;

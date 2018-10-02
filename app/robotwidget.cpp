@@ -96,7 +96,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
       SIGNAL(back()));
 
     _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor(Qt::black);
+    _loadingIndicator->setColor(palette().text().color());
     _loadingIndicator->setRoundness(50);
     _loadingIndicator->setMinimumTrailOpacity(5);
     _loadingIndicator->setTrailFadePercentage(100);
