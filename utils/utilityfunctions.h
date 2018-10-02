@@ -20,6 +20,7 @@ void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex
 QWidget* createSpacerWidget(Qt::Orientation orientation);
 QWindow* window(const QWidget* w);
 void centralizeWidget(QWidget* widget);
+void adjustFontPixelSize(QWidget* w, int advance);
 }
 
 #endif // UTILITYFUNCTIONS_H

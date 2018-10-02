@@ -17,11 +17,6 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
     _searchEdit = new FocuslessLineEdit;
     _toolboxTree = new ToolboxTree;
 
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#ececec");
-    setAutoFillBackground(true);
-    setPalette(p);
-
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
 
     connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=]

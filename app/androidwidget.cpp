@@ -36,15 +36,11 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     QFont f;
     f.setPixelSize(28);
     f.setWeight(QFont::ExtraLight);
-    QPalette p2(_lblTitle.palette());
-    p2.setColor(_lblTitle.foregroundRole(), "#21303c");
     _lblTitle.setFont(f);
-    _lblTitle.setPalette(p2);
     _lblTitle.setText("Target: Android");
 
     f.setPixelSize(17);
     _lblMsg.setFont(f);
-    _lblMsg.setPalette(p2);
     _lblMsg.setText("Settings");
 
     auto scrollAreaWidgetContents = new QWidget();

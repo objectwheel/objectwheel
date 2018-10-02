@@ -106,13 +106,6 @@ QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelInd
 
 ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
 {
-    QPalette p2(palette());
-    p2.setColor(QPalette::Base, Qt::white);
-    p2.setColor(QPalette::Highlight, "#d0d0d0");
-    p2.setColor(QPalette::HighlightedText, palette().text().color());
-    setAutoFillBackground(true);
-    setPalette(p2);
-
     setIconSize({22, 22});
     setFocusPolicy(Qt::NoFocus);
     setIndentation(0);

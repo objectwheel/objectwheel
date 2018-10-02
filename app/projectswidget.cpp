@@ -299,9 +299,9 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     });
 
     QPalette p1;
-    p1.setColor(QPalette::Highlight, "#12000000");
-    m_listWidget->viewport()->installEventFilter(this);
+    p1.setColor(QPalette::Highlight, "#15000000");
     m_listWidget->setPalette(p1);
+    m_listWidget->viewport()->installEventFilter(this);
     m_listWidget->setIconSize(SIZE_FILEICON);
     m_listWidget->setMinimumWidth(400);
     m_listWidget->setItemDelegate(new ProjectsDelegate(m_listWidget, m_listWidget));

@@ -69,14 +69,9 @@ IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
     m_layout->addWidget(m_toolbar);
     m_layout->addWidget(m_listWidget);
 
-    QPalette p1(m_listWidget->palette());
-    p1.setColor(QPalette::Base, Qt::white);
-    p1.setColor(QPalette::Highlight, QColor("#d4d4d4"));
-    m_listWidget->setPalette(p1);
-    m_title->setText("Issues");
-
     TransparentStyle::attach(m_toolbar);
 
+    m_title->setText("Issues");
     m_title->setFixedHeight(22);
     m_clearButton->setFixedHeight(22);
 

@@ -133,10 +133,6 @@ WebEngineHelpViewer::WebEngineHelpViewer(QHelpEngine* helpEngine, QWidget *paren
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_widget, 10);
 
-    QPalette p = palette();
-    p.setColor(QPalette::Base, Qt::white);
-    setPalette(p);
-
     connect(m_widget, &QWebEngineView::urlChanged, this, &WebEngineHelpViewer::sourceChanged);
     connect(m_widget, &QWebEngineView::loadStarted, this, &WebEngineHelpViewer::slotLoadStarted);
     connect(m_widget, &QWebEngineView::loadFinished, this, &WebEngineHelpViewer::slotLoadFinished);

@@ -167,3 +167,10 @@ void UtilityFunctions::centralizeWidget(QWidget* widget)
     widget->setGeometry(QStyle::alignedRect(widget->layoutDirection(), Qt::AlignCenter, widget->size(),
                                             window(widget)->screen()->availableGeometry()));
 }
+
+void UtilityFunctions::adjustFontPixelSize(QWidget* w, int advance)
+{
+    QFont font(w->font());
+    font.setPixelSize(font.pixelSize() + advance);
+    w->setFont(font);
+}

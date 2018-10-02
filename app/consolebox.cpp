@@ -40,11 +40,6 @@ ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
     f.setPixelSize(AppFontSettings::defaultPixelSize() - 1);
     m_textBrowser->setFont(f);
 
-    QPalette p1(m_textBrowser->palette());
-    p1.setColor(QPalette::Base, Qt::white);
-    p1.setColor(QPalette::Highlight, QColor("#d4d4d4"));
-    m_textBrowser->setPalette(p1);
-
     connect(RunManager::instance(), &RunManager::standardError, this, &ConsoleBox::onStandardError);
     connect(RunManager::instance(), &RunManager::standardOutput, this, &ConsoleBox::onStandardOutput);
 }

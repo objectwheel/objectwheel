@@ -152,7 +152,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_templatesLabel->setStyleSheet("color: black");
 
     QPalette p1;
-    p1.setColor(QPalette::Highlight, "#12000000");
+    p1.setColor(QPalette::Highlight, "#15000000");
     m_listWidget->viewport()->installEventFilter(this);
     m_listWidget->setPalette(p1);
     m_listWidget->setIconSize(SIZE_TEMPLCON);

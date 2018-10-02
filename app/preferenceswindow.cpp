@@ -5,11 +5,6 @@
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
 {
     setWindowTitle(tr("Preferences"));
-
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#ececec");
-    setPalette(p);
-
     _scrollArea = new QScrollArea;
     _scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -25,11 +20,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     _listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     _listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     _listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-
-    QPalette p2(palette());
-    p2.setColor(QPalette::Base, Qt::white);
-    p2.setColor(QPalette::Highlight, "#d4d4d4");
-    _listWidget->setPalette(p2);
 
     QFont f;
     f.setWeight(QFont::Medium);

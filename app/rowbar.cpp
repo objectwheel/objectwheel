@@ -24,12 +24,6 @@ RowBar::RowBar(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_linenumberBand);
     m_layout->addWidget(m_markBand);
     m_layout->addWidget(m_bracketBand);
-
-    auto p = palette();
-    p.setColor(backgroundRole(), Qt::white);
-    setPalette(p);
-    setAutoFillBackground(true);
-
     connect(m_qmlCodeEditor, SIGNAL(updateRequest(QRect,int)), this, SLOT(update()));
 }
 

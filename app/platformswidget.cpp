@@ -97,16 +97,12 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     QFont f;
     f.setPixelSize(28);
     f.setWeight(QFont::ExtraLight);
-    QPalette p2(_lblTitle.palette());
-    p2.setColor(_lblTitle.foregroundRole(), "black");
     _lblTitle.setFont(f);
-    _lblTitle.setPalette(p2);
     _lblTitle.setText("Objectwheel Builds");
 
     f.setPixelSize(17);
     f.setWeight(QFont::Light);
     _lblMsg.setFont(f);
-    _lblMsg.setPalette(p2);
     _lblMsg.setText("Select your target platform");
 
     _btnNext.settings().topColor = "#F4BA48";
@@ -120,10 +116,6 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     connect(&_btnNext, SIGNAL(clicked(bool)),
       SLOT(handleBtnNextClicked()));
 
-    QPalette p3;
-    p3.setColor(QPalette::Base, "#d4d4d4");
-    p3.setColor(QPalette::Highlight, "#C3C7CA");
-    _listWidget.setPalette(p3);
     _listWidget.setIconSize({52, 52});
     _listWidget.setMinimumWidth(400);
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));

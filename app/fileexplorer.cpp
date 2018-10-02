@@ -67,10 +67,6 @@ QPalette initPalette(QWidget* widget)
     palette.setColor(QPalette::Light, "#ffffff");
     palette.setColor(QPalette::Dark, "#f0f0f0");
     palette.setColor(QPalette::Active, QPalette::Shadow, Qt::transparent);
-    palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::Text, "#282828");
-    palette.setColor(QPalette::BrightText, "#282828");
-    palette.setColor(QPalette::WindowText, "#282828");
     palette.setColor(QPalette::AlternateBase, "#f7f7f7");
     palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
     palette.setColor(QPalette::Inactive, QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
@@ -922,7 +918,7 @@ void FileExplorer::updateGeometries()
         mp.setColor(QPalette::Text, palette().brightText().color());
         mp.setColor(QPalette::WindowText, palette().brightText().color());
         mp.setColor(QPalette::ButtonText, palette().brightText().color());
-        m_modeComboBox->setPalette(mp);
+        m_modeComboBox->setPalette(mp); // TODO: Remove that, it's a weird workaround however
     }
 
     int ds = qMin(qMin(vg.width() - 5, vg.height() - 5), 100);

@@ -58,15 +58,11 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     QFont f;
     f.setPixelSize(28);
     f.setWeight(QFont::ExtraLight);
-    QPalette p2(lblTitle->palette());
-    p2.setColor(lblTitle->foregroundRole(), "#21303c");
     lblTitle->setFont(f);
-    lblTitle->setPalette(p2);
     lblTitle->setText("Module Settings");
 
     f.setPixelSize(17);
     lblMsg->setFont(f);
-    lblMsg->setPalette(p2);
     lblMsg->setText("Select modules you use in your application");
 
     owBox->setTitle("Qbjectwheel Modules");

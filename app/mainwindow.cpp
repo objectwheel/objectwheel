@@ -70,10 +70,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_pageSwitcherPane(new PageSwitcherPane)
 
 {
-    QPalette p(palette());
-    p.setColor(backgroundRole(), "#f0f0f0");
-    setPalette(p);
-
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);

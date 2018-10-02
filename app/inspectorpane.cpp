@@ -26,10 +26,6 @@ void initPalette(QWidget* widget)
     QPalette palette(widget->palette());
     palette.setColor(QPalette::Light, "#62A558");
     palette.setColor(QPalette::Dark, "#599750");
-    palette.setColor(QPalette::Base, Qt::white);
-    palette.setColor(QPalette::Text, "#254022");
-    palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::WindowText, "#254022");
     palette.setColor(QPalette::AlternateBase, "#e8f7e6");
     palette.setColor(QPalette::Link, "#cc453b");
     widget->setPalette(palette);
