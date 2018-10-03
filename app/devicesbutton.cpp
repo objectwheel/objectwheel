@@ -27,7 +27,8 @@ QPixmap pixmap(QWidget* w, const QIcon& icon, const QSizeF& size)
 QPixmap standardPixmap(QWidget* w, const QString& fileName, const QSizeF& size)
 {
     QPixmap pixmap(Icon({{fileName, Theme::IconsBaseColor}}).pixmap());
-    return pixmap.scaled((w->devicePixelRatioF() * size).toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    return pixmap.scaled((w->devicePixelRatioF() * size).toSize(),
+                         Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 }
 
@@ -145,6 +146,7 @@ void DevicesButton::paintEvent(QPaintEvent*)
     p.drawText(left, 0, textWidth, height(), Qt::AlignVCenter | Qt::AlignLeft,
                fontMetrics().elidedText(text(), Qt::ElideRight, textWidth + 1));
 
+    // Draw menu down arrow
     if (isDown() || hasHover(this)) {
         left += textWidth + (g_rightPadding - 4.5) / 2.0;
         PaintUtils::drawMenuDownArrow(&p, QPointF(left, 16), opt, this);
@@ -174,6 +176,5 @@ QSize DevicesButton::recomputeSizeHint() const
             g_spacing +
             fontMetrics().horizontalAdvance(text()) +
             g_rightPadding;
-
     return QSize(qMin(computedWidth, 270), 24);
 }

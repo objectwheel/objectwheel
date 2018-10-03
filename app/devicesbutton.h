@@ -35,7 +35,7 @@ signals:
     void currentDeviceActionTriggered(QAction*);
 
 private:
-    QIcon m_devicesIcon;
+    const QIcon m_devicesIcon;
     QMenu* m_menu;
     QActionGroup* m_actionGroup;
     QAction* m_myComputerAction;

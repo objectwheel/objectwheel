@@ -120,7 +120,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/fileexplorer_p.h \
            $$PWD/controlsavefilter.h \
            $$PWD/devicesbutton.h \
-    elasticspacer.h
+           $$PWD/smartspacer.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -217,7 +217,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/fileexplorer_p.cpp \
            $$PWD/controlsavefilter.cpp \
            $$PWD/devicesbutton.cpp \
-    elasticspacer.cpp
+           $$PWD/smartspacer.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui \

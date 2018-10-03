@@ -8,7 +8,7 @@
 #include <welcomewindow.h>
 #include <transparentstyle.h>
 #include <devicesbutton.h>
-#include <elasticspacer.h>
+#include <smartspacer.h>
 
 #include <QTime>
 #include <QTimer>
@@ -30,22 +30,24 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 {
     m_layout->setSpacing(8);
     m_layout->setContentsMargins(8, 0, 8, 0);
-
     m_layout->addWidget(m_runButton);
     m_layout->addWidget(m_stopButton);
     m_layout->addWidget(m_devicesButton);
-//    m_layout->addItem(new ElasticSpacer(m_devicesButton, 291, 24));
     m_layout->addStretch();
     m_layout->addWidget(m_loadingBar);
     m_layout->addStretch();
+    m_layout->addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, 47, QSize(150, 24),
+                                          m_devicesButton->sizePolicy().horizontalPolicy(),
+                                          m_devicesButton->sizePolicy().verticalPolicy(), this));
     m_layout->addWidget(m_projectsButton);
 
-//    TransparentStyle::attach(this);
-//    QTimer::singleShot(100, [=]{
-//        TransparentStyle::attach(this);
-//    });
+    //    TransparentStyle::attach(this);
+    //    QTimer::singleShot(10000, [=]{
+    //        TransparentStyle::attach(this);
+    //        qDebug() << w->size();
+    //    });
 
-//    m_loadingBar->setFixedSize(QSize(481, 24));
+    //    m_loadingBar->setFixedSize(QSize(481, 24));
 
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
@@ -62,7 +64,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
     connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
     connect(m_stopButton, SIGNAL(doubleClick()), SLOT(onStopButtonDoubleClick()));
 
-    m_devicesButton->setFixedHeight(24);
     m_devicesButton->setCursor(Qt::PointingHandCursor);
     m_devicesButton->setToolTip(tr("Select target device"));
 
