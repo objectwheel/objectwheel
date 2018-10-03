@@ -37,7 +37,7 @@ void UtilityFunctions::registerGlobalPath(const QString& projectDirectory)
 void UtilityFunctions::registerOfflineStorage()
 {
     qmlRegisterSingletonType<OfflineStorage>("Objectwheel.OfflineStorage", 1, 0, "OfflineStorage",
-                                        [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
+                                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
         Q_UNUSED(jsEngine)
         return new OfflineStorage(engine);
     });
@@ -150,12 +150,12 @@ void UtilityFunctions::expandUpToRoot(QTreeView* view, const QModelIndex& index,
     expandUpToRoot(view, index.parent(), rootIndex);
 }
 
-QWindow* UtilityFunctions::window(const QWidget* w)
+QWindow* UtilityFunctions::window(const QWidget* widget)
 {
-    Q_ASSERT(w);
-    QWindow* winHandle = w->windowHandle();
+    Q_ASSERT(widget);
+    QWindow* winHandle = widget->windowHandle();
     if (!winHandle) {
-        if (const QWidget* nativeParent = w->nativeParentWidget())
+        if (const QWidget* nativeParent = widget->nativeParentWidget())
             winHandle = nativeParent->windowHandle();
     }
     Q_ASSERT(winHandle);
@@ -168,16 +168,23 @@ void UtilityFunctions::centralizeWidget(QWidget* widget)
                                             window(widget)->screen()->availableGeometry()));
 }
 
-void UtilityFunctions::adjustFontPixelSize(QWidget* w, int advance)
+void UtilityFunctions::adjustFontPixelSize(QWidget* widget, int advance)
 {
-    QFont font(w->font());
+    QFont font(widget->font());
     font.setPixelSize(font.pixelSize() + advance);
-    w->setFont(font);
+    widget->setFont(font);
 }
 
-void UtilityFunctions::adjustFontWeight(QWidget* w, QFont::Weight we)
+void UtilityFunctions::adjustFontWeight(QWidget* widget, QFont::Weight weight)
 {
-    QFont font(w->font());
-    font.setWeight(we);
-    w->setFont(font);
+    QFont font(widget->font());
+    font.setWeight(weight);
+    widget->setFont(font);
+}
+
+bool UtilityFunctions::hasHover(const QWidget* widget) // FIXME: This is a workaround for QTBUG-44400
+{
+    return widget->isVisible()
+            && widget->isEnabled()
+            && widget->rect().contains(widget->mapFromGlobal(QCursor::pos()));
 }

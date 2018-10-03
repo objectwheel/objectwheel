@@ -163,7 +163,6 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     g_externalAction->setCheckable(true);
     g_externalAction->setProperty("ow_scope", External);
 
-    m_scopeButton->setAttribute(Qt::WA_Hover);
     m_scopeButton->setPopupMode(QToolButton::InstantPopup);
     m_scopeButton->setMenu(menu);
 

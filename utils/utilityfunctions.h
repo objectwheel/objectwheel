@@ -19,10 +19,11 @@ void trimCommentsAndStrings(QTextDocument* document);
 void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent);
 void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex);
 QWidget* createSpacerWidget(Qt::Orientation orientation);
-QWindow* window(const QWidget* w);
+QWindow* window(const QWidget* widget);
 void centralizeWidget(QWidget* widget);
-void adjustFontWeight(QWidget* w, QFont::Weight we);
-void adjustFontPixelSize(QWidget* w, int advance);
+void adjustFontWeight(QWidget* widget, QFont::Weight weight);
+void adjustFontPixelSize(QWidget* widget, int advance);
+bool hasHover(const QWidget* widget);
 }
 
 #endif // UTILITYFUNCTIONS_H

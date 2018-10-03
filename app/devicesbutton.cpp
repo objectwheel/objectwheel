@@ -12,7 +12,7 @@ using namespace Utils;
 namespace {
 const int g_iconSize = 18;
 const int g_leftPadding = 6;
-const int g_rightPadding = 13;
+const int g_rightPadding = 10;
 const int g_spacing = 3;
 const int g_arrowSize = 12;
 const char* g_iconText = "Devices";
@@ -34,8 +34,8 @@ DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
     m_myComputerAction->setIcon(QIcon(":/images/mycomputer.png"));
 
     addDeviceAction(m_myComputerAction);
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     setCurrentDeviceAction(m_myComputerAction);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setMenu(m_menu);
     connect(m_menu, &QMenu::triggered,
             this, &DevicesButton::onCurrentDeviceActionChange);
@@ -141,13 +141,15 @@ void DevicesButton::paintEvent(QPaintEvent*)
     p.drawText(left, 0, textWidth, height(), Qt::AlignVCenter | Qt::AlignLeft,
                fontMetrics().elidedText(text(), Qt::ElideRight, textWidth + 1));
 
-    left += textWidth + (g_rightPadding - 4) / 2.0;
-    QPointF bp(left, 16);
-    QPointF pts[3] = {{0, 0}, {4, 0}, {2, 3}};
-    pts[0] += bp, pts[1] += bp, pts[2] += bp;
-    p.setBrush(isDown() ? QColor("#424b54") : QColor("#57626e"));
-    p.setPen(isDown() ? "#424b54" : "#57626e");
-    p.drawPolygon(pts, 3);
+    if (isDown() || UtilityFunctions::hasHover(this)) {
+        left += textWidth + (g_rightPadding - 4.5) / 2.0;
+        QPointF bp(left, 16);
+        QPointF pts[3] = {{0, 0}, {4.5, 0}, {2.25, 2.5}};
+        pts[0] += bp, pts[1] += bp, pts[2] += bp;
+        p.setPen(isDown() ? "#424b54" : "#6A7887");
+        p.setBrush(isDown() ? QColor("#424b54") : QColor("#6A7887"));
+        p.drawPolygon(pts, 3);
+    }
 }
 
 QSize DevicesButton::minimumSizeHint() const
@@ -174,5 +176,5 @@ QSize DevicesButton::recomputeSizeHint() const
             fontMetrics().horizontalAdvance(text()) +
             g_rightPadding;
 
-    return QSize(computedWidth, 24);
+    return QSize(qMin(computedWidth, 270), 24);
 }

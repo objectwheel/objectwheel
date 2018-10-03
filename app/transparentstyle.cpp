@@ -116,9 +116,6 @@ void TransparentStyle::attach(QWidget* widget)
     for (QWidget* w : widgetList) {
         w->setStyleSheet(QString());
         w->setStyle(style);
-
-        if (w->inherits("QComboBox"))
-            w->setAttribute(Qt::WA_Hover);
     }
 }
 
@@ -844,7 +841,7 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
         if (const QStyleOptionComboBox *cmb
                 = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
             painter->save();
-            if ((cmb->subControls & SC_ComboBoxFrame) && (cmb->state & State_MouseOver))
+            if ((cmb->subControls & SC_ComboBoxFrame) && UtilityFunctions::hasHover(widget))
                 painter->fillRect(option->rect, "#15000000");
             if (cmb->subControls & SC_ComboBoxArrow) {
                 State flags = State_None;
@@ -873,7 +870,7 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
             menuarea = proxy()->subControlRect(control, toolbutton, SC_ToolButtonMenu, widget);
             State bflags = toolbutton->state & ~State_Sunken;
             if (bflags & State_AutoRaise) {
-                if (!(bflags & State_MouseOver) || !(bflags & State_Enabled)) {
+                if (!UtilityFunctions::hasHover(widget) || !(bflags & State_Enabled)) {
                     bflags &= ~State_Raised;
                 }
             }

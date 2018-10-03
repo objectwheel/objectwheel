@@ -672,6 +672,7 @@ void ProjectsWidget::onFilterTextChange(const QString& text)
 
 void ProjectsWidget::lock()
 {
+    m_filterWidget->setDisabled(true);
     m_buttons->setDisabled(true);
     m_listWidget->setDisabled(true);
     m_buttons_2->hide();
@@ -692,6 +693,7 @@ void ProjectsWidget::lock()
 
 void ProjectsWidget::unlock()
 {
+    m_filterWidget->setEnabled(true);
     m_buttons->setEnabled(true);
     m_listWidget->setEnabled(true);
     m_buttons_2->show();
