@@ -144,7 +144,7 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
         painter->fillRect(rect, pal.base());
 
     // Draw top and bottom lines
-    QColor lineColor(pal.text().color().lighter(210));
+    QColor lineColor(pal.dark().color());
     lineColor.setAlpha(50);
     painter->setPen(lineColor);
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
@@ -1005,7 +1005,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
                     "    border-right-width: 0px;"
                     "}"
                 }
-                .arg(palette().text().color().lighter(210).name())
+                .arg(palette().dark().color().darker(120).name())
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
@@ -1499,7 +1499,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
 
-    QColor lineColor(palette().text().color().lighter(210));
+    QColor lineColor(palette().dark().color());
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
@@ -1515,7 +1515,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
         if (i % 2) {
             painter.fillRect(rect, palette().alternateBase());
         } else if (topLevelItemCount() == 0) {
-            if (i == int(rowCount / 2.0) || i == int(rowCount / 2.0) + 1) {
+            if (i == int((rowCount - 1) / 2.0) || i == int((rowCount - 1)/ 2.0) + 1) {
                 QString message;
                 if (selectedControls.size() == 0)
                     message = tr("No controls selected");
@@ -1526,7 +1526,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
 
                 QColor messageColor = selectedControls.size() == 1
                         ? palette().link().color()
-                        : palette().text().color().lighter(210);
+                        : palette().dark().color();
                 messageColor.setAlpha(180);
 
                 painter.setPen(messageColor);

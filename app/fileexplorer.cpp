@@ -68,6 +68,7 @@ QPalette initPalette(QWidget* widget)
     palette.setColor(QPalette::Dark, "#f0f0f0");
     palette.setColor(QPalette::Active, QPalette::Shadow, Qt::transparent);
     palette.setColor(QPalette::AlternateBase, "#f7f7f7");
+    palette.setColor(QPalette::Mid, palette.text().color().lighter()); // For line and "empty folder" color
     palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
     palette.setColor(QPalette::Inactive, QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
     return palette;
@@ -606,12 +607,12 @@ void FileExplorer::setPalette(const QPalette& pal)
     m_pathIndicator->setPalette(pal);
 
     const QPixmap& icon = PaintUtils::renderColoredPixmap(":/utils/images/filtericon@2x.png",
-                                                          pal.brightText().color().lighter(250), this);
+                                                          pal.buttonText().color(), this);
     g_modeIFilterIconLabel->setPixmap(icon);
     QPalette mp(m_modeComboBox->palette());
-    mp.setColor(QPalette::Text, pal.brightText().color());
-    mp.setColor(QPalette::WindowText, pal.brightText().color());
-    mp.setColor(QPalette::ButtonText, pal.brightText().color());
+    mp.setColor(QPalette::Text, pal.text().color());
+    mp.setColor(QPalette::WindowText, pal.windowText().color());
+    mp.setColor(QPalette::ButtonText, pal.buttonText().color());
     m_modeComboBox->setPalette(mp);
 
     TransparentStyle::attach(m_modeComboBox);
@@ -637,7 +638,7 @@ void FileExplorer::setPalette(const QPalette& pal)
             .arg(palette().dark().color().darker(120).name())
             .arg(palette().light().color().name())
             .arg(palette().dark().color().name())
-            .arg(palette().brightText().color().name());
+            .arg(palette().buttonText().color().name());
 
     if (palette().color(QPalette::Active, QPalette::Shadow) != Qt::transparent) {
         styleSheet.append(
@@ -676,7 +677,7 @@ void FileExplorer::fillBackground(QPainter* painter, const QStyleOptionViewItem&
     }
 
     // Draw top and bottom lines
-    QColor lineColor(isSelected ? pal.highlightedText().color() : pal.text().color().lighter(250));
+    QColor lineColor(pal.mid().color());
     lineColor.setAlpha(50);
     painter->setPen(lineColor);
     if (row != 0)
@@ -857,14 +858,12 @@ void FileExplorer::drawBranches(QPainter* painter, const QRect& rect,
 
 void FileExplorer::paintEvent(QPaintEvent* e)
 {
-    const bool rootHasChildren = m_fileSystemModel->QAbstractItemModel::hasChildren(mt(rootIndex()));
+    const bool folderHasChildren = m_fileSystemModel->QAbstractItemModel::hasChildren(mt(rootIndex()));
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
 
-    QColor lineColor(palette().text().color() == Qt::white
-                     ? Qt::white
-                     : palette().text().color().lighter(250));
+    QColor lineColor(palette().mid().color());
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
@@ -878,9 +877,9 @@ void FileExplorer::paintEvent(QPaintEvent* e)
         // Fill background
         if (i % 2) {
             painter.fillRect(rect, palette().alternateBase());
-        } else if (!rootHasChildren) {
-            if (i == int(rowCount / 2.0) || i == int(rowCount / 2.0) + 1) {
-                painter.setPen(palette().text().color().lighter(250));
+        } else if (!folderHasChildren) {
+            if (i == int((rowCount - 1) / 2.0) || i == int((rowCount - 1) / 2.0) + 1) {
+                painter.setPen(palette().mid().color());
                 painter.drawText(rect, Qt::AlignCenter, tr("Empty folder"));
                 painter.setPen(lineColor);
             }
@@ -915,9 +914,9 @@ void FileExplorer::updateGeometries()
     } else if (m_modeComboBox->isHidden()) {
         m_modeComboBox->show();
         QPalette mp(m_modeComboBox->palette());
-        mp.setColor(QPalette::Text, palette().brightText().color());
-        mp.setColor(QPalette::WindowText, palette().brightText().color());
-        mp.setColor(QPalette::ButtonText, palette().brightText().color());
+        mp.setColor(QPalette::Text, palette().text().color());
+        mp.setColor(QPalette::WindowText, palette().windowText().color());
+        mp.setColor(QPalette::ButtonText, palette().buttonText().color());
         m_modeComboBox->setPalette(mp); // TODO: Remove that, it's a weird workaround however
     }
 

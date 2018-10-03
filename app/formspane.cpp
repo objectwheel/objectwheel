@@ -52,7 +52,7 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
     }
 
     // Draw top and bottom lines
-    QColor lineColor(pal.text().color().lighter(270));
+    QColor lineColor(pal.dark().color());
     lineColor.setAlpha(50);
     painter->setPen(lineColor);
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
@@ -163,7 +163,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
                     "                                stop:0 %2, stop:1 %3);"
                     "}"
                 }
-                .arg(palette().text().color().lighter(270).name())
+                .arg(palette().dark().color().darker(140).name())
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
@@ -298,7 +298,7 @@ void FormsPane::paintEvent(QPaintEvent* e)
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
 
-    QColor lineColor(palette().text().color().lighter(270));
+    QColor lineColor(palette().dark().color());
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 

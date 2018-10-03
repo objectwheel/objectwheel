@@ -55,7 +55,7 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
     }
 
     // Draw top and bottom lines
-    QColor lineColor(isSelected ? pal.highlightedText().color() : pal.text().color().lighter(210));
+    QColor lineColor(pal.dark().color());
     lineColor.setAlpha(50);
     painter->setPen(lineColor);
     painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
@@ -297,7 +297,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
                     "    border-right-width: 0px;"
                     "}"
                 }
-                .arg(palette().text().color().lighter(210).name())
+                .arg(palette().dark().color().darker(120).name())
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
@@ -376,7 +376,7 @@ void InspectorPane::paintEvent(QPaintEvent* e)
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
 
-    QColor lineColor(palette().text().color().lighter(210));
+    QColor lineColor(palette().dark().color());
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
