@@ -27,7 +27,6 @@ void initPalette(QWidget* widget)
     palette.setColor(QPalette::Light, "#62A558");
     palette.setColor(QPalette::Dark, "#599750");
     palette.setColor(QPalette::AlternateBase, "#e8f7e6");
-    palette.setColor(QPalette::Link, "#cc453b");
     widget->setPalette(palette);
 }
 
@@ -218,8 +217,10 @@ public:
         painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 
         // Draw text
-        if (model->data(index, Qt::UserRole).toBool())
-            painter->setPen(option.palette.link().color());
+        if (model->data(index, Qt::UserRole).toBool() && isSelected)
+            painter->setPen(option.palette.linkVisited().color().lighter(140));
+        else if (model->data(index, Qt::UserRole).toBool() && !isSelected)
+            painter->setPen(option.palette.linkVisited().color());
         else if (isSelected)
             painter->setPen(option.palette.highlightedText().color());
         else
@@ -301,7 +302,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
-    );
+                );
 
     connect(this, &InspectorPane::itemSelectionChanged,
             this, &InspectorPane::onItemSelectionChange);
@@ -394,7 +395,7 @@ void InspectorPane::paintEvent(QPaintEvent* e)
         QRectF cell(rect);
         cell.setSize(QSizeF(header()->sectionSize(0), rect.height()));
         painter.drawLine(cell.topRight() + QPointF(-0.5, 0.5),
-                          cell.bottomRight() + QPointF(-0.5, -0.5));
+                         cell.bottomRight() + QPointF(-0.5, -0.5));
 
         // Draw top and bottom lines
         painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});

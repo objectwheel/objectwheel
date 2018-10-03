@@ -30,6 +30,15 @@ const int ROW_HEIGHT = 21;
 int g_verticalScrollBarPosition = 99999;
 int g_horizontalScrollBarPosition = 99999;
 
+void initPalette(QWidget* widget)
+{
+    QPalette palette(widget->palette());
+    palette.setColor(QPalette::Light, "#AB8157");
+    palette.setColor(QPalette::Dark, "#9C7650");
+    palette.setColor(QPalette::AlternateBase, "#f7efe6");
+    widget->setPalette(palette);
+}
+
 class WheelDisabler : public QObject {
     Q_OBJECT
     bool eventFilter(QObject* o, QEvent* e) override {
@@ -110,17 +119,6 @@ void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
             break;
         }
     }
-}
-
-void initPalette(QWidget* widget)
-{
-    QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#AB8157");
-    palette.setColor(QPalette::Dark, "#9C7650");
-    palette.setColor(QPalette::AlternateBase, "#f7efe6");
-    palette.setColor(QPalette::Link, "#cc453b");
-    palette.setColor(QPalette::LinkVisited, "#56ab49");
-    widget->setPalette(palette);
 }
 
 void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool classRow, bool verticalLine)
@@ -928,7 +926,7 @@ public:
                 QFont font (option.font);
                 font.setWeight(QFont::Medium);
                 painter->setFont(font);
-                painter->setPen(option.palette.linkVisited().color());
+                painter->setPen(option.palette.link().color());
             } else {
                 painter->setPen(option.palette.text().color());
             }
@@ -1525,7 +1523,7 @@ void PropertiesPane::paintEvent(QPaintEvent* e)
                     message = tr("Multiple controls selected");
 
                 QColor messageColor = selectedControls.size() == 1
-                        ? palette().link().color()
+                        ? palette().linkVisited().color()
                         : palette().dark().color();
                 messageColor.setAlpha(180);
 

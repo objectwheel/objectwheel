@@ -66,11 +66,10 @@ QPalette initPalette(QWidget* widget)
     QPalette palette(widget->palette());
     palette.setColor(QPalette::Light, "#ffffff");
     palette.setColor(QPalette::Dark, "#f0f0f0");
-    palette.setColor(QPalette::Active, QPalette::Shadow, Qt::transparent);
     palette.setColor(QPalette::AlternateBase, "#f7f7f7");
     palette.setColor(QPalette::Mid, palette.text().color().lighter()); // For line and "empty folder" color
     palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
-    palette.setColor(QPalette::Inactive, QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
+    palette.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
     return palette;
 }
 }
@@ -618,7 +617,9 @@ void FileExplorer::setPalette(const QPalette& pal)
     TransparentStyle::attach(m_modeComboBox);
 
     QString styleSheet = {
-        "QHeaderView::down-arrow {"
+        "QTreeView {"
+        "    border: 1px solid %1;"
+        "} QHeaderView::down-arrow {"
         "    image: none;"
         "} QHeaderView::up-arrow {"
         "    image: none;"
@@ -639,16 +640,6 @@ void FileExplorer::setPalette(const QPalette& pal)
             .arg(palette().light().color().name())
             .arg(palette().dark().color().name())
             .arg(palette().buttonText().color().name());
-
-    if (palette().color(QPalette::Active, QPalette::Shadow) != Qt::transparent) {
-        styleSheet.append(
-                    QString {
-                        "QTreeView {"
-                        "    border: 1px solid %1;"
-                        "}"
-                    }
-                    .arg(palette().color(QPalette::Active, QPalette::Shadow).name()));
-    }
 
     setStyleSheet(styleSheet);
 

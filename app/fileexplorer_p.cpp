@@ -93,7 +93,7 @@ void PathIndicator::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(rect(), palette().midlight().color());
-    painter.setPen(palette().color(QPalette::Inactive, QPalette::Shadow));
+    painter.setPen(palette().color(QPalette::Shadow));
     painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
     painter.setPen(palette().text().color());
 

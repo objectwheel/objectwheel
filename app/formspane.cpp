@@ -22,9 +22,9 @@ const int ROW_HEIGHT = 21;
 void initPalette(QWidget* widget)
 {
     QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#a671bd");
-    palette.setColor(QPalette::Dark, "#9968ad");
-    palette.setColor(QPalette::AlternateBase, "#f6f2f7");
+    palette.setColor(QPalette::Light, "#bf5861");
+    palette.setColor(QPalette::Dark, "#b05159");
+    palette.setColor(QPalette::AlternateBase, "#f7e6e8");
     widget->setPalette(palette);
 }
 
