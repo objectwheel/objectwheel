@@ -24,6 +24,8 @@ void centralizeWidget(QWidget* widget);
 void adjustFontWeight(QWidget* widget, QFont::Weight weight);
 void adjustFontPixelSize(QWidget* widget, int advance);
 bool hasHover(const QWidget* widget);
+QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left = 0);
+QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top = 0);
 }
 
 #endif // UTILITYFUNCTIONS_H

@@ -8,27 +8,35 @@
 #include <QStyleOptionButton>
 
 using namespace Utils;
+using namespace UtilityFunctions;
 
 namespace {
-const int g_iconSize = 18;
+
+const QSizeF& g_iconSize = {18, 18};
+const QSizeF& g_arrowSize = {12, 12};
 const int g_leftPadding = 6;
 const int g_rightPadding = 10;
 const int g_spacing = 3;
-const int g_arrowSize = 12;
 const char* g_iconText = "Devices";
+
+QPixmap pixmap(QWidget* w, const QIcon& icon, const QSizeF& size)
+{
+    return icon.pixmap(window(w), size.toSize(), w->isEnabled() ? QIcon::Normal : QIcon::Disabled);
+}
+
+QPixmap standardPixmap(QWidget* w, const QString& fileName, const QSizeF& size)
+{
+    QPixmap pixmap(Icon({{fileName, Theme::IconsBaseColor}}).pixmap());
+    return pixmap.scaled((w->devicePixelRatioF() * size).toSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+}
 }
 
 DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
-  , m_devicesPixmap(":/images/devices.png")
+  , m_devicesIcon(":/images/devices.png")
   , m_menu(new QMenu(this))
   , m_actionGroup(new QActionGroup(this))
   , m_myComputerAction(new QAction(this))
 {
-    m_devicesPixmap.setDevicePixelRatio(devicePixelRatioF());
-    m_devicesPixmap = m_devicesPixmap.scaled(devicePixelRatioF() * g_iconSize,
-                                             devicePixelRatioF() * g_iconSize,
-                                             Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
     m_actionGroup->setExclusive(true);
     m_myComputerAction->setText(tr("My Computer"));
     m_myComputerAction->setIcon(QIcon(":/images/mycomputer.png"));
@@ -94,6 +102,7 @@ void DevicesButton::setCurrentDeviceAction(QAction* action)
 
 void DevicesButton::onCurrentDeviceActionChange(QAction* action)
 {
+    setDisabled(true);
     setCurrentDeviceAction(action);
     emit currentDeviceActionTriggered(action);
 }
@@ -101,8 +110,8 @@ void DevicesButton::onCurrentDeviceActionChange(QAction* action)
 void DevicesButton::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
-    p.setPen(isDown() ? palette().text().color().darker() : palette().text().color());
     p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(isDown() ? palette().text().color().darker() : palette().text().color());
 
     // Draw background
     QStyleOptionButton opt;
@@ -110,45 +119,35 @@ void DevicesButton::paintEvent(QPaintEvent*)
     opt.state |= isDown() ? QStyle::State_Sunken : QStyle::State_Raised;
     PaintUtils::drawMacStyleButtonBackground(&p, opt, this);
 
+    // Draw devices icon
     int left = g_leftPadding;
-    QRectF iconRect(0, 0, g_iconSize, g_iconSize);
-    iconRect.moveCenter(QRectF(rect()).center());
-    iconRect.moveLeft(left);
-    p.drawPixmap(iconRect, m_devicesPixmap, m_devicesPixmap.rect());
+    const QPixmap& dp = pixmap(this, m_devicesIcon, g_iconSize);
+    p.drawPixmap(verticalAlignedRect(g_iconSize, rect(), left), dp, dp.rect());
 
-    left += g_iconSize + g_spacing;
+    // Draw devices text
+    left += g_iconSize.width() + g_spacing;
     int textWidth = fontMetrics().horizontalAdvance(tr(g_iconText));
     p.drawText(left, 0, textWidth, height(), Qt::AlignCenter, tr(g_iconText));
 
+    // Draw arrow
     left += textWidth + g_spacing;
-    QPixmap nextPixmap(Icon({{QLatin1String(":/utils/images/next.png"), Theme::IconsBaseColor}}).pixmap());
-    nextPixmap = nextPixmap.scaled(devicePixelRatioF() * 12, devicePixelRatioF() * 12,
-                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    iconRect.setSize({12, 12});
-    iconRect.moveCenter(QRectF(rect()).center());
-    iconRect.moveLeft(left);
-    p.drawPixmap(iconRect, nextPixmap, nextPixmap.rect());
+    const QPixmap nextPixmap = standardPixmap(this, ":/utils/images/next.png", g_arrowSize);
+    p.drawPixmap(verticalAlignedRect(g_arrowSize, rect(), left), nextPixmap, nextPixmap.rect());
 
-    left += g_arrowSize + g_spacing;
-    QPixmap buttonPixmap(icon().pixmap(UtilityFunctions::window(this), {g_iconSize, g_iconSize}));
-    iconRect.setSize({g_iconSize, g_iconSize});
-    iconRect.moveCenter(QRectF(rect()).center());
-    iconRect.moveLeft(left);
-    p.drawPixmap(iconRect, buttonPixmap, buttonPixmap.rect());
+    // Draw device icon
+    left += g_arrowSize.width() + g_spacing;
+    const QPixmap& buttonPixmap = pixmap(this, icon(), g_iconSize);
+    p.drawPixmap(verticalAlignedRect(g_iconSize, rect(), left), buttonPixmap, buttonPixmap.rect());
 
-    left += g_iconSize + g_spacing;
+    // Draw device name
+    left += g_iconSize.width() + g_spacing;
     textWidth = qMin(width() - left - g_rightPadding, fontMetrics().horizontalAdvance(text()));
     p.drawText(left, 0, textWidth, height(), Qt::AlignVCenter | Qt::AlignLeft,
                fontMetrics().elidedText(text(), Qt::ElideRight, textWidth + 1));
 
-    if (isDown() || UtilityFunctions::hasHover(this)) {
+    if (isDown() || hasHover(this)) {
         left += textWidth + (g_rightPadding - 4.5) / 2.0;
-        QPointF bp(left, 16);
-        QPointF pts[3] = {{0, 0}, {4.5, 0}, {2.25, 2.5}};
-        pts[0] += bp, pts[1] += bp, pts[2] += bp;
-        p.setPen(isDown() ? "#424b54" : "#6A7887");
-        p.setBrush(isDown() ? QColor("#424b54") : QColor("#6A7887"));
-        p.drawPolygon(pts, 3);
+        PaintUtils::drawMenuDownArrow(&p, QPointF(left, 16), opt, this);
     }
 }
 
@@ -165,13 +164,13 @@ QSize DevicesButton::sizeHint() const
 QSize DevicesButton::recomputeSizeHint() const
 {
     int computedWidth = g_leftPadding +
-            g_iconSize +
+            g_iconSize.width() +
             g_spacing +
             fontMetrics().horizontalAdvance(tr(g_iconText)) +
             g_spacing +
-            g_arrowSize +
+            g_arrowSize.width() +
             g_spacing +
-            g_iconSize +
+            g_iconSize.width() +
             g_spacing +
             fontMetrics().horizontalAdvance(text()) +
             g_rightPadding;

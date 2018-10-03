@@ -83,7 +83,9 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
 
     QPalette palette(QApplication::palette());
-    palette.setColor(QPalette::Text, "#3C444C");
+    palette.setColor(QPalette::Active, QPalette::Text, "#3C444C");
+    palette.setColor(QPalette::Inactive, QPalette::Text, "#3C444C");
+    palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
     palette.setColor(QPalette::Base, "#ffffff");
     palette.setColor(QPalette::Window, "#f0f0f0");
     palette.setColor(QPalette::Highlight, "#1C77D5");

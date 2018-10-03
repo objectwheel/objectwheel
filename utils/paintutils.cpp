@@ -206,3 +206,17 @@ void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOpt
 
     painter->restore();
 }
+
+void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, const QStyleOption& option, QWidget* widget)
+{
+    painter->save();
+    const QColor& color = (option.state & QStyle::State_Sunken)
+            ? widget->palette().text().color().lighter(115)
+            : widget->palette().text().color().lighter(160);
+    QPointF points[3] = {{0, 0}, {4.5, 0}, {2.25, 2.5}};
+    points[0] += offset, points[1] += offset, points[2] += offset;
+    painter->setPen(color);
+    painter->setBrush(color);
+    painter->drawPolygon(points, 3);
+    painter->restore();
+}

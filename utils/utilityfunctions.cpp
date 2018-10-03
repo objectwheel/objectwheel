@@ -188,3 +188,19 @@ bool UtilityFunctions::hasHover(const QWidget* widget) // FIXME: This is a worka
             && widget->isEnabled()
             && widget->rect().contains(widget->mapFromGlobal(QCursor::pos()));
 }
+
+QRectF UtilityFunctions::verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left)
+{
+    QRectF ret({0, 0}, size);
+    ret.moveCenter(rect.center());
+    ret.moveLeft(left);
+    return ret;
+}
+
+QRectF UtilityFunctions::horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top)
+{
+    QRectF ret({0, 0}, size);
+    ret.moveCenter(rect.center());
+    ret.moveTop(top);
+    return ret;
+}
