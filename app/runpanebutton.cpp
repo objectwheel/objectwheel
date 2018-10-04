@@ -7,6 +7,7 @@
 
 RunPaneButton::RunPaneButton(QWidget* parent) : QAbstractButton(parent)
 {
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
 void RunPaneButton::paintEvent(QPaintEvent*)

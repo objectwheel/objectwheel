@@ -1,4 +1,5 @@
-#include <loadingbar.h>
+#include <runpaneloadingbar.h>
+#include <paintutils.h>
 
 #include <QTimer>
 #include <QPainter>
@@ -6,22 +7,19 @@
 #include <QTextDocument>
 #include <QTextCharFormat>
 #include <QTextBlockFormat>
+#include <QStyleOption>
 
 namespace {
     int counter;
-    QImage image;
     QColor loadingColor;
 }
 
-LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
+RunPaneLoadingBar::RunPaneLoadingBar(QWidget *parent) : QWidget(parent)
   , m_progress(0)
   , m_timerEnding(new QTimer(this))
   , m_timerFader(new QTimer(this))
 {
-    setFixedSize(QSize(481, 24));
-
-    image = QImage(":/images/loadingbar.png");
-    image.setDevicePixelRatio(devicePixelRatioF());
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
 
     m_timerFader->setInterval(60);
     m_timerEnding->setInterval(1000);
@@ -30,12 +28,13 @@ LoadingBar::LoadingBar(QWidget *parent) : QWidget(parent)
     connect(m_timerFader, SIGNAL(timeout()), SLOT(onFaderTimeout()));
 }
 
-void LoadingBar::setText(const QString& text)
+void RunPaneLoadingBar::setText(const QString& text)
 {
     m_text = text;
+    updateGeometry();
 }
 
-void LoadingBar::busy(int progress, const QString& text)
+void RunPaneLoadingBar::busy(int progress, const QString& text)
 {
     counter = 25;
     loadingColor = "#606467";
@@ -48,7 +47,7 @@ void LoadingBar::busy(int progress, const QString& text)
     update();
 }
 
-void LoadingBar::done(const QString& text)
+void RunPaneLoadingBar::done(const QString& text)
 {
     counter = 25;
     loadingColor = "#30a8f7";
@@ -61,7 +60,7 @@ void LoadingBar::done(const QString& text)
     update();
 }
 
-void LoadingBar::error(const QString& text)
+void RunPaneLoadingBar::error(const QString& text)
 {
     counter = 25;
     loadingColor = "#C2504B";
@@ -74,13 +73,13 @@ void LoadingBar::error(const QString& text)
     update();
 }
 
-void LoadingBar::onEndingTimeout()
+void RunPaneLoadingBar::onEndingTimeout()
 {
     m_timerEnding->stop();
     m_timerFader->start();
 }
 
-void LoadingBar::onFaderTimeout()
+void RunPaneLoadingBar::onFaderTimeout()
 {
     loadingColor.setAlpha(counter * 10);
 
@@ -97,11 +96,17 @@ void LoadingBar::onFaderTimeout()
     update();
 }
 
-void LoadingBar::paintEvent(QPaintEvent*)
+void RunPaneLoadingBar::paintEvent(QPaintEvent*)
 {
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawImage(rect(), image, image.rect());
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(palette().buttonText().color());
+
+    // Draw background
+    QStyleOptionFrame opt;
+    opt.initFrom(this);
+    opt.state |= QStyle::State_Raised;
+    PaintUtils::drawMacStyleButtonBackground(&p, opt, this);
 
     // Draw text
     QTextDocument doc;
@@ -118,10 +123,26 @@ void LoadingBar::paintEvent(QPaintEvent*)
     cursor.select(QTextCursor::Document);
     cursor.mergeBlockFormat(bf);
     cursor.mergeCharFormat(cf);
-    doc.drawContents(&painter, rect());
+    doc.drawContents(&p, rect());
 
     QPainterPath path;
     path.addRoundedRect(0.5, 0.5, 480.0, 23.0, 3.5, 3.5);
-    painter.setClipPath(path);
-    painter.fillRect(QRectF{0.5, 21.5, m_progress * 4.8, 10}, loadingColor);
+    p.setClipPath(path);
+    p.fillRect(QRectF{0.5, 21.5, m_progress * 4.8, 10}, loadingColor);
+}
+
+QSize RunPaneLoadingBar::sizeHint() const
+{
+    return QSize(480, 24);
+}
+
+QSize RunPaneLoadingBar::minimumSizeHint() const
+{
+    return recomputeMinimumSizeHint();
+}
+
+QSize RunPaneLoadingBar::recomputeMinimumSizeHint() const
+{
+    int computedWidth = fontMetrics().horizontalAdvance(m_text) + 12;
+    return QSize(qMin(computedWidth, 480), 24);
 }

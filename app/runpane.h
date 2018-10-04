@@ -1,15 +1,14 @@
 #ifndef RUNPANE_H
 #define RUNPANE_H
 
-#include <QWidget>
+#include <QToolBar>
 
-class LoadingBar;
-class QHBoxLayout;
 class ConsoleBox;
 class DevicesButton;
 class RunPaneButton;
+class RunPaneLoadingBar;
 
-class RunPane : public QWidget
+class RunPane : public QToolBar
 {
     Q_OBJECT
 
@@ -21,6 +20,8 @@ public slots:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
 
 private slots:
     void onRunButtonClick();
@@ -30,12 +31,11 @@ private slots:
 
 private:
     ConsoleBox* m_consoleBox;
-    QHBoxLayout* m_layout;
-    LoadingBar* m_loadingBar;
     RunPaneButton* m_runButton;
     RunPaneButton* m_stopButton;
     DevicesButton* m_devicesButton;
     RunPaneButton* m_projectsButton;
+    RunPaneLoadingBar* m_loadingBar;
 };
 
 #endif // RUNPANE_H

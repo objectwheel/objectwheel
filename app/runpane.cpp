@@ -1,57 +1,59 @@
 #include <runpane.h>
-#include <loadingbar.h>
+#include <runpaneloadingbar.h>
 #include <windowmanager.h>
 #include <projectmanager.h>
 #include <runmanager.h>
 #include <consolebox.h>
 #include <welcomewindow.h>
-#include <transparentstyle.h>
 #include <devicesbutton.h>
 #include <smartspacer.h>
 #include <runpanebutton.h>
 #include <paintutils.h>
+#include <transparentstyle.h>
+#include <utilityfunctions.h>
 
 #include <QTime>
 #include <QPainter>
-#include <QHBoxLayout>
+#include <QLayout>
 #include <QActionGroup>
 #include <QMenu>
+#include <QTimer>
 
 using namespace PaintUtils;
+using namespace UtilityFunctions;
 
 // TODO: Ask for "stop task"if main window closes before user closes the running project
-RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
+RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
   , m_consoleBox(consoleBox)
-  , m_layout(new QHBoxLayout(this))
-  , m_loadingBar(new LoadingBar)
   , m_runButton(new RunPaneButton)
   , m_stopButton(new RunPaneButton)
   , m_devicesButton(new DevicesButton)
   , m_projectsButton(new RunPaneButton)
+  , m_loadingBar(new RunPaneLoadingBar)
 {
-    m_layout->setSpacing(8);
-    m_layout->setContentsMargins(8, 0, 8, 0);
-    m_layout->addWidget(m_runButton);
-    m_layout->addWidget(m_stopButton);
-    m_layout->addWidget(m_devicesButton);
-    m_layout->addStretch();
-    m_layout->addWidget(m_loadingBar);
-    m_layout->addStretch();
-    m_layout->addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, 47, QSize(150, 24),
-                                          m_devicesButton->sizePolicy().horizontalPolicy(),
-                                          m_devicesButton->sizePolicy().verticalPolicy(), this));
-    m_layout->addWidget(m_projectsButton);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+    addWidget(m_runButton);
+    addWidget(m_stopButton);
+    addWidget(m_devicesButton);
+    addWidget(createSpacerWidget(Qt::Horizontal));
+    addWidget(m_loadingBar);
+    addWidget(createSpacerWidget(Qt::Horizontal));
+    addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, 46, QSize(0, 24),
+                              m_devicesButton->sizePolicy().horizontalPolicy(),
+                              m_devicesButton->sizePolicy().verticalPolicy(), this));
+    addWidget(m_projectsButton);
 
     m_devicesButton->setCursor(Qt::PointingHandCursor);
     m_devicesButton->setToolTip(tr("Select target device"));
 
-    //    TransparentStyle::attach(this);
-    //    QTimer::singleShot(10000, [=]{
-    //        TransparentStyle::attach(this);
-    //        qDebug() << w->size();
-    //    });
-
-    //    m_loadingBar->setFixedSize(QSize(481, 24));
+    TransparentStyle::attach(this);
+    QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
+        setContentsMargins(0, 0, 0, 0);
+        layout()->setContentsMargins(7, 7, 7, 7);
+        layout()->setSpacing(7);
+    });
 
     QIcon icon;
     const QColor active = palette().buttonText().color().darker(180);
@@ -84,7 +86,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 
     connect(ProjectManager::instance(), &ProjectManager::started,
             [=] {
-        m_loadingBar->setText(ProjectManager::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
+        m_loadingBar->setText(ProjectManager::name() + tr(": Ready  |  Welcome to Objectwheel"));
     });
 
     // FIXME
@@ -100,14 +102,14 @@ void RunPane::sweep()
 void RunPane::onStopButtonClick()
 {
     RunManager::terminate();
-    m_loadingBar->busy(0, ProjectManager::name() + tr(": <b>Stopped</b>  |  Finished at ") +
+    m_loadingBar->busy(0, ProjectManager::name() + tr(": Stopped  |  Finished at ") +
                        QTime::currentTime().toString());
 }
 
 void RunPane::onStopButtonDoubleClick()
 {
     RunManager::kill();
-    m_loadingBar->busy(0, ProjectManager::name() + tr(": <b>Stopped forcefully</b>  |  Finished at ") +
+    m_loadingBar->busy(0, ProjectManager::name() + tr(": Stopped forcefully  |  Finished at ") +
                        QTime::currentTime().toString());
 }
 
@@ -145,4 +147,14 @@ void RunPane::paintEvent(QPaintEvent*)
     painter.setPen("#0e5bad");
     painter.drawLine(QRectF(rect()).bottomLeft() + QPointF(0.5, -0.5), QRectF(rect()).bottomRight() +
                      QPointF(-0.5, -0.5));
+}
+
+QSize RunPane::minimumSizeHint() const
+{
+    return QSize(0, 38);
+}
+
+QSize RunPane::sizeHint() const
+{
+    return QSize(100, 38);
 }

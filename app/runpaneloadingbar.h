@@ -1,14 +1,14 @@
-#ifndef LOADINGBAR_H
-#define LOADINGBAR_H
+#ifndef RUNPANELOADINGBAR_H
+#define RUNPANELOADINGBAR_H
 
 #include <QWidget>
 
-class LoadingBar : public QWidget
+class RunPaneLoadingBar : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit LoadingBar(QWidget *parent = nullptr);
+    explicit RunPaneLoadingBar(QWidget *parent = nullptr);
     void setText(const QString& text);
 
 public slots:
@@ -16,12 +16,17 @@ public slots:
     void done(const QString& text);
     void error(const QString& text);
 
-protected:
-    void paintEvent(QPaintEvent *event) override;
-
 private slots:
     void onEndingTimeout();
     void onFaderTimeout();
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+
+private:
+    QSize recomputeMinimumSizeHint() const;
 
 private:
     int m_progress;
@@ -29,4 +34,4 @@ private:
     QTimer* m_timerEnding,* m_timerFader;
 };
 
-#endif // LOADINGBAR_H
+#endif // RUNPANELOADINGBAR_H

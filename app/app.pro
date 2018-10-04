@@ -58,7 +58,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/projectmanager.h \
            $$PWD/toolmanager.h \
            $$PWD/usermanager.h \
-           $$PWD/loadingbar.h \
+           $$PWD/runpaneloadingbar.h \
            $$PWD/outputpane.h \
            $$PWD/registrationwidget.h \
            $$PWD/loginwidget.h \
@@ -158,7 +158,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/projectmanager.cpp \
            $$PWD/toolmanager.cpp \
            $$PWD/usermanager.cpp \
-           $$PWD/loadingbar.cpp \
+           $$PWD/runpaneloadingbar.cpp \
            $$PWD/outputpane.cpp \
            $$PWD/registrationwidget.cpp \
            $$PWD/loginwidget.cpp \

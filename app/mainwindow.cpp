@@ -79,23 +79,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Set Tool Bars **/
     /* Add Run Pane */
-    auto runBar = new QToolBar;
-    runBar->setOrientation(Qt::Horizontal);
-    runBar->setFixedHeight(38);
-    runBar->setFloatable(false);
-    runBar->setMovable(false);
-    runBar->setWindowTitle(tr("Run Bar"));
-    runBar->setStyleSheet("border: none; spacing: 0;"
-                          "QToolBar {"
-                          "    background: qlineargradient(spread:pad, x1:0.5, y1:0,"
-                          "    x2:0.5, y2:1, stop:0 #2784E3, stop:1 #0e5bad);"
-                          "}");
-    runBar->setContentsMargins(0, 0, 0, 0);
-    runBar->layout()->setContentsMargins(0, 0, 0, 0);
-    runBar->layout()->setSpacing(0);
-    runBar->addWidget(m_runPane);
-    m_runPane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    addToolBar(Qt::TopToolBarArea, runBar);
+    m_runPane->setOrientation(Qt::Horizontal);
+    m_runPane->setFloatable(false);
+    m_runPane->setMovable(false);
+    m_runPane->setWindowTitle(tr("Run Bar"));
+    addToolBar(Qt::TopToolBarArea, m_runPane);
 
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
@@ -109,7 +97,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
                                    "QToolBar { background: #3b444c; border: none }");
     pageSwitcherBar->setContentsMargins(0, 0, 0, 0);
     pageSwitcherBar->layout()->setContentsMargins(0, 0, 0, 0);
-    runBar->layout()->setSpacing(0);
+    pageSwitcherBar->layout()->setSpacing(0);
     pageSwitcherBar->addWidget(m_pageSwitcherPane);
     m_pageSwitcherPane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     addToolBar(Qt::LeftToolBarArea , pageSwitcherBar);
