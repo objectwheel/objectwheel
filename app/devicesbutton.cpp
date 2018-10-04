@@ -8,6 +8,7 @@
 #include <QStyleOptionButton>
 
 using namespace Utils;
+using namespace PaintUtils;
 using namespace UtilityFunctions;
 
 namespace {
@@ -18,18 +19,6 @@ const int g_leftPadding = 6;
 const int g_rightPadding = 10;
 const int g_spacing = 3;
 const char* g_iconText = "Devices";
-
-QPixmap pixmap(QWidget* w, const QIcon& icon, const QSizeF& size)
-{
-    return icon.pixmap(window(w), size.toSize(), w->isEnabled() ? QIcon::Normal : QIcon::Disabled);
-}
-
-QPixmap standardPixmap(QWidget* w, const QString& fileName, const QSizeF& size)
-{
-    QPixmap pixmap(Icon({{fileName, Theme::IconsBaseColor}}).pixmap());
-    return pixmap.scaled((w->devicePixelRatioF() * size).toSize(),
-                         Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-}
 }
 
 DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
@@ -112,7 +101,7 @@ void DevicesButton::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    p.setPen(isDown() ? palette().text().color().darker() : palette().text().color());
+    p.setPen(isDown() ? palette().buttonText().color().darker() : palette().buttonText().color());
 
     // Draw background
     QStyleOptionButton opt;
@@ -132,7 +121,7 @@ void DevicesButton::paintEvent(QPaintEvent*)
 
     // Draw arrow
     left += textWidth + g_spacing;
-    const QPixmap nextPixmap = standardPixmap(this, ":/utils/images/next.png", g_arrowSize);
+    const QPixmap nextPixmap = renderColoredPixmap(":/utils/images/next@2x.png", p.pen().color(), this);
     p.drawPixmap(verticalAlignedRect(g_arrowSize, rect(), left), nextPixmap, nextPixmap.rect());
 
     // Draw device icon

@@ -3,6 +3,7 @@
 #include <filemanager.h>
 #include <delayer.h>
 #include <offlinestorage.h>
+#include <utils/utilsicons.h>
 
 #include <QFileInfo>
 #include <QMessageBox>
@@ -15,6 +16,7 @@
 #include <QTreeView>
 #include <QScreen>
 #include <QWindow>
+#include <QAbstractButton>
 
 namespace {
 QString g_projectDirectory;
@@ -193,7 +195,8 @@ QRectF UtilityFunctions::verticalAlignedRect(const QSizeF& size, const QRectF& r
 {
     QRectF ret({0, 0}, size);
     ret.moveCenter(rect.center());
-    ret.moveLeft(left);
+    if (left >= 0)
+        ret.moveLeft(left);
     return ret;
 }
 
@@ -201,6 +204,14 @@ QRectF UtilityFunctions::horizontalAlignedRect(const QSizeF& size, const QRectF&
 {
     QRectF ret({0, 0}, size);
     ret.moveCenter(rect.center());
-    ret.moveTop(top);
+    if (top >= 0)
+        ret.moveTop(top);
     return ret;
+}
+
+QPixmap UtilityFunctions::pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size)
+{
+    return icon.pixmap(window(button), size.toSize(), !button->isEnabled()
+                       ? QIcon::Disabled
+                       : (button->isDown() ? QIcon::Active : QIcon::Normal));
 }

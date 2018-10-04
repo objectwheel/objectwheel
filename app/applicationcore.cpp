@@ -86,11 +86,15 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     palette.setColor(QPalette::Active, QPalette::Text, "#3C444C");
     palette.setColor(QPalette::Inactive, QPalette::Text, "#3C444C");
     palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
+    palette.setColor(QPalette::Active, QPalette::WindowText, "#3C444C");
+    palette.setColor(QPalette::Inactive, QPalette::WindowText, "#3C444C");
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, "#6f7e8c");
+    palette.setColor(QPalette::Active, QPalette::ButtonText, "#3C444C");
+    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#3C444C");
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#6f7e8c");
     palette.setColor(QPalette::Base, "#ffffff");
     palette.setColor(QPalette::Window, "#f0f0f0");
     palette.setColor(QPalette::Highlight, "#1C77D5");
-    palette.setColor(QPalette::WindowText, "#3C444C");
-    palette.setColor(QPalette::ButtonText, "#3C444C");
     palette.setColor(QPalette::BrightText, "#ffffff");
     palette.setColor(QPalette::HighlightedText, "#ffffff");
     palette.setColor(QPalette::ToolTipText, "#3C444C");

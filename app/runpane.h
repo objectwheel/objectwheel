@@ -4,10 +4,10 @@
 #include <QWidget>
 
 class LoadingBar;
-class FlatButton;
 class QHBoxLayout;
 class ConsoleBox;
 class DevicesButton;
+class RunPaneButton;
 
 class RunPane : public QWidget
 {
@@ -32,10 +32,10 @@ private:
     ConsoleBox* m_consoleBox;
     QHBoxLayout* m_layout;
     LoadingBar* m_loadingBar;
-    FlatButton* m_runButton;
-    FlatButton* m_stopButton;
+    RunPaneButton* m_runButton;
+    RunPaneButton* m_stopButton;
     DevicesButton* m_devicesButton;
-    FlatButton* m_projectsButton;
+    RunPaneButton* m_projectsButton;
 };
 
 #endif // RUNPANE_H

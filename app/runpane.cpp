@@ -1,5 +1,4 @@
 #include <runpane.h>
-#include <flatbutton.h>
 #include <loadingbar.h>
 #include <windowmanager.h>
 #include <projectmanager.h>
@@ -9,24 +8,26 @@
 #include <transparentstyle.h>
 #include <devicesbutton.h>
 #include <smartspacer.h>
+#include <runpanebutton.h>
+#include <paintutils.h>
 
 #include <QTime>
-#include <QTimer>
 #include <QPainter>
 #include <QHBoxLayout>
 #include <QActionGroup>
 #include <QMenu>
-#include <QDebug>
+
+using namespace PaintUtils;
 
 // TODO: Ask for "stop task"if main window closes before user closes the running project
 RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
   , m_consoleBox(consoleBox)
   , m_layout(new QHBoxLayout(this))
   , m_loadingBar(new LoadingBar)
-  , m_runButton(new FlatButton)
-  , m_stopButton(new FlatButton)
+  , m_runButton(new RunPaneButton)
+  , m_stopButton(new RunPaneButton)
   , m_devicesButton(new DevicesButton)
-  , m_projectsButton(new FlatButton)
+  , m_projectsButton(new RunPaneButton)
 {
     m_layout->setSpacing(8);
     m_layout->setContentsMargins(8, 0, 8, 0);
@@ -41,6 +42,9 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
                                           m_devicesButton->sizePolicy().verticalPolicy(), this));
     m_layout->addWidget(m_projectsButton);
 
+    m_devicesButton->setCursor(Qt::PointingHandCursor);
+    m_devicesButton->setToolTip(tr("Select target device"));
+
     //    TransparentStyle::attach(this);
     //    QTimer::singleShot(10000, [=]{
     //        TransparentStyle::attach(this);
@@ -49,29 +53,33 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QWidget(parent)
 
     //    m_loadingBar->setFixedSize(QSize(481, 24));
 
+    QIcon icon;
+    const QColor active = palette().buttonText().color().darker(180);
+    const QColor normal = palette().buttonText().color().lighter(130);
+
+    icon.addPixmap(renderColoredPixmap(":/utils/images/run_small@2x.png", normal, this), QIcon::Normal);
+    icon.addPixmap(renderColoredPixmap(":/utils/images/run_small@2x.png", active, this), QIcon::Active);
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
-    m_runButton->setIcon(QIcon(":/images/run.png"));
-    m_runButton->setFixedSize(QSize(39, 24));
-    m_runButton->settings().iconButton = true;
+    m_runButton->setIconSize({16, 16});
+    m_runButton->setIcon(icon);
     connect(m_runButton, SIGNAL(clicked(bool)), SLOT(onRunButtonClick()));
 
-    m_stopButton->setToolTip(tr("Stop"));
+    icon.addPixmap(renderColoredPixmap(":/utils/images/stop_small@2x.png", normal, this), QIcon::Normal);
+    icon.addPixmap(renderColoredPixmap(":/utils/images/stop_small@2x.png", active, this), QIcon::Active);
     m_stopButton->setCursor(Qt::PointingHandCursor);
-    m_stopButton->setIcon(QIcon(":/images/stop.png"));
-    m_stopButton->setFixedSize(QSize(39, 24));
-    m_stopButton->settings().iconButton = true;
+    m_stopButton->setToolTip(tr("Stop"));
+    m_stopButton->setIconSize({16, 16});
+    m_stopButton->setIcon(icon);
     connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
-    connect(m_stopButton, SIGNAL(doubleClick()), SLOT(onStopButtonDoubleClick()));
+    // FIXME: connect(m_stopButton, SIGNAL(doubleClicked()), SLOT(onStopButtonDoubleClick()));
 
-    m_devicesButton->setCursor(Qt::PointingHandCursor);
-    m_devicesButton->setToolTip(tr("Select target device"));
-
-    m_projectsButton->setToolTip(tr("Show Projects"));
+    icon.addPixmap(renderMaskedPixmap(":/images/projects.png", normal, this), QIcon::Normal);
+    icon.addPixmap(renderMaskedPixmap(":/images/projects.png", active, this), QIcon::Active);
     m_projectsButton->setCursor(Qt::PointingHandCursor);
-    m_projectsButton->setIcon(QIcon(":/images/projects.png"));
-    m_projectsButton->setFixedSize(QSize(39, 24));
-    m_projectsButton->settings().iconButton = true;
+    m_projectsButton->setToolTip(tr("Show Projects"));
+    m_projectsButton->setIconSize({16, 16});
+    m_projectsButton->setIcon(icon);
     connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));
 
     connect(ProjectManager::instance(), &ProjectManager::started,
