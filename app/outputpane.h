@@ -10,7 +10,8 @@ class SearchBox;
 class ConsoleBox;
 class FlatButton;
 class QSplitterHandle;
-class OutputPanePrivate;
+class QVBoxLayout;
+class QToolBar;
 
 class OutputPane : public QWidget
 {
@@ -43,19 +44,30 @@ public slots:
     void updateLastHeight();
     void shine(Box type);
 
+private slots:
+    void handleHideButtonClicked();
+    void handleIssuesButtonClicked(bool val);
+    void handleSearchButtonClicked(bool val);
+    void handleConsoleButtonClicked(bool val);
+
 protected:
     QSize sizeHint() const override;
 
 private:
-    QPointer<QSplitter> _splitter;
-    QPointer<QSplitterHandle> _splitterHandle;
-    OutputPanePrivate* _d;
-    IssuesBox* _issuesBox;
-    ConsoleBox* _consoleBox;
-    SearchBox* _searchBox;
-    int _lastHeight;
-    QWidget* _activeBox;
-    bool _collapsed;
+    QVBoxLayout* m_layout;
+    QToolBar* m_toolbar;
+    FlatButton* m_hideButton;
+    FlatButton* m_issuesButton;
+    FlatButton* m_searchButton;
+    FlatButton* m_consoleButton;
+    QPointer<QSplitter> m_splitter;
+    QPointer<QSplitterHandle> m_splitterHandle;
+    IssuesBox* m_issuesBox;
+    ConsoleBox* m_consoleBox;
+    SearchBox* m_searchBox;
+    int m_lastHeight;
+    QWidget* m_activeBox;
+    bool m_collapsed;
 };
 
 #endif // OUTPUTPANE_H
