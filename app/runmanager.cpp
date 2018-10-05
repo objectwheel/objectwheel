@@ -87,9 +87,9 @@ void RunManager::kill()
     s_process->kill();
 }
 
-void RunManager::terminate()
+void RunManager::waitForKill(int msecs)
 {
-    s_process->terminate();
+    s_process->waitForFinished(msecs);
 }
 
 void RunManager::onReadyReadStandardError()

@@ -52,6 +52,7 @@ void RunPaneLoadingBar::setText(const QString& text)
 {
     m_text = text;
     updateGeometry();
+    update();
 }
 
 void RunPaneLoadingBar::busy(int progress, const QString& text)
@@ -70,7 +71,7 @@ void RunPaneLoadingBar::busy(int progress, const QString& text)
 void RunPaneLoadingBar::done(const QString& text)
 {
     g_counter = g_counterStart;
-    g_loadingColor = "#87c300";
+    g_loadingColor = "#30acff";
 
     m_text = text;
     m_progress = 100;
@@ -101,7 +102,7 @@ void RunPaneLoadingBar::onEndingTimeout()
 
 void RunPaneLoadingBar::onFaderTimeout()
 {
-    g_loadingColor.setAlpha(g_counter * 10);
+    g_loadingColor.setAlpha((g_counter / qreal(g_counterStart)) * 255);
 
     if (g_counter > 0)
         g_counter--;

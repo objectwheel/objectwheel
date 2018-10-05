@@ -14,8 +14,8 @@ class ToolboxSettingsWindow : public QWidget
     friend class WindowManager;
 
 public:
-    explicit ToolboxSettingsWindow(QWidget *parent = 0);
-    ~ToolboxSettingsWindow();
+    explicit ToolboxSettingsWindow(QWidget *parent = nullptr);
+    ~ToolboxSettingsWindow() override;
 
 private slots:
     void on_btnReset_clicked();

@@ -22,6 +22,15 @@
 using namespace PaintUtils;
 using namespace UtilityFunctions;
 
+namespace {
+const char* g_welcomeMessage = "<b>Ready</b>  |  Welcome to Objectwheel";
+const char* g_userStoppedRunningMessage = "<b>Stopped</b>  |  Execution stopped at ";
+const char* g_appCrashedMessage = "<b>Crashed</b>  |  Application crashed at ";
+const char* g_finishedRunningMessage = "<b>Finished</b>  |  Application closed at ";
+const char* g_startRunningMessage = "<b>Starting</b> interpretation...";
+const char* g_runningMessage = "<b>Running</b> on ";
+}
+
 // TODO: Ask for "stop task"if main window closes before user closes the running project
 RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
   , m_consoleBox(consoleBox)
@@ -74,7 +83,6 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
     m_stopButton->setIconSize({16, 16});
     m_stopButton->setIcon(icon);
     connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
-    // FIXME: connect(m_stopButton, SIGNAL(doubleClicked()), SLOT(onStopButtonDoubleClick()));
 
     icon.addPixmap(renderMaskedPixmap(":/images/projects.png", normal, this), QIcon::Normal);
     icon.addPixmap(renderMaskedPixmap(":/images/projects.png", active, this), QIcon::Active);
@@ -85,47 +93,75 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
     connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));
 
     connect(ProjectManager::instance(), &ProjectManager::started,
+            this, [=] { setMessage(tr(g_welcomeMessage)); });
+    connect(RunManager::instance(), &RunManager::started, this,
             [=] {
-        m_loadingBar->setText(ProjectManager::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
+        m_runButton->setEnabled(true);
+        done(tr(g_runningMessage) + tr("My Computer")); // TODO: Fix this "My Computer" thing
     });
+    connect(RunManager::instance(), &RunManager::finished, this,
+            [=] (int exitCode, QProcess::ExitStatus status) {
+        if (status == QProcess::CrashExit) // Stopped by user
+            setMessage(tr(g_userStoppedRunningMessage) + QTime::currentTime().toString());
+        else if (exitCode == 0) // User just closed the app
+            setMessage(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
+        else // The app has erros thus the interpreter shut itself down
+            error(tr(g_appCrashedMessage) + QTime::currentTime().toString());
 
-    // FIXME
-    //    connect(SaveManager::instance(), SIGNAL(doneExecuter(QString)), _loadingBar, SLOT(done(QString))); //TODO
-    //    connect(SaveManager::instance(), SIGNAL(busyExecuter(int, QString)), _loadingBar, SLOT(busy(int,QString))); //TODO
+        m_runButton->setEnabled(true);
+        m_stopButton->setDisabled(true);
+    });
 }
 
 void RunPane::sweep()
 {
-    onStopButtonClick();
+    RunManager::kill();
+    m_runButton->setEnabled(true);
+    m_stopButton->setDisabled(true);
+}
+
+void RunPane::busy(int progress, const QString& message)
+{
+    m_loadingBar->busy(progress, ProjectManager::name() + ": " + message);
+}
+
+void RunPane::done(const QString& message)
+{
+    m_loadingBar->done(ProjectManager::name() + ": " + message);
+}
+
+void RunPane::error(const QString& message)
+{
+    m_loadingBar->error(ProjectManager::name() + ": " + message);
+}
+
+void RunPane::setMessage(const QString& message)
+{
+    m_loadingBar->setText(ProjectManager::name() + ": " + message);
 }
 
 void RunPane::onStopButtonClick()
 {
-    RunManager::terminate();
-    m_loadingBar->busy(0, ProjectManager::name() + tr(": <b>Stopped</b>  |  Finished at ") +
-                       QTime::currentTime().toString());
-}
-
-void RunPane::onStopButtonDoubleClick()
-{
     RunManager::kill();
-    m_loadingBar->busy(0, ProjectManager::name() + tr(": <b>Stopped forcefully</b>  |  Finished at ") +
-                       QTime::currentTime().toString());
 }
 
 void RunPane::onRunButtonClick()
 {
     m_consoleBox->fade();
-
     if (!m_consoleBox->isClean())
         m_consoleBox->print("\n");
-
     m_consoleBox->printFormatted(tr("Starting ") + ProjectManager::name() + "...\n", "#025dbf",
                                  QFont::DemiBold);
-
     m_consoleBox->scrollToEnd();
 
+    RunManager::kill();
+    RunManager::waitForKill(3000);
+
+    busy(40, tr(g_startRunningMessage));
     RunManager::run();
+
+    m_runButton->setDisabled(true);
+    m_stopButton->setEnabled(true);
 }
 
 void RunPane::onProjectsButtonClick()
@@ -137,16 +173,12 @@ void RunPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-
     QLinearGradient gradient(rect().topLeft(), rect().bottomLeft());
     gradient.setColorAt(0, "#2784E3");
     gradient.setColorAt(1, "#1068C6");
-
     painter.fillRect(rect(), gradient);
-
     painter.setPen("#0e5bad");
-    painter.drawLine(QRectF(rect()).bottomLeft() + QPointF(0.5, -0.5), QRectF(rect()).bottomRight() +
-                     QPointF(-0.5, -0.5));
+    painter.drawLine(rect().bottomLeft() + QPointF(0, 0.5), rect().bottomRight() + QPointF(0, 0.5));
 }
 
 QSize RunPane::minimumSizeHint() const

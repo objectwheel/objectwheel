@@ -15,7 +15,7 @@ public:
 
     static void run();
     static void kill();
-    static void terminate();
+    static void waitForKill(int msecs);
 
 private slots:
     void onReadyReadStandardError();

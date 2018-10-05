@@ -191,6 +191,8 @@ void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOpt
     painter->setPen(Qt::NoPen);
     painter->setBrush(bodyGrad);
     painter->drawPath(bodyPath);
+    // NOTE: QRect's bottom() and bottomLeft()... are different from QRectF, for historical reasons
+    // as stated in the docs, those functions return top() + height() - 1 (QRect)
 
     // Draw glowing for pressed state
     if (option.state & QStyle::State_Sunken) {
@@ -214,7 +216,7 @@ void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, con
             ? widget->palette().text().color().lighter(115)
             : widget->palette().text().color().lighter(160);
     QPointF points[3] = {{0, 0}, {4.5, 0}, {2.25, 2.5}};
-    points[0] += offset, points[1] += offset, points[2] += offset;
+    points[0] += offset; points[1] += offset; points[2] += offset;
     painter->setPen(color);
     painter->setBrush(color);
     painter->drawPolygon(points, 3);

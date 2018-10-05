@@ -92,7 +92,6 @@ void DevicesButton::setCurrentDeviceAction(QAction* action)
 
 void DevicesButton::onCurrentDeviceActionChange(QAction* action)
 {
-    setDisabled(true);
     setCurrentDeviceAction(action);
     emit currentDeviceActionTriggered(action);
 }
