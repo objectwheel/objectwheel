@@ -168,20 +168,20 @@ void BracketBand::paintEvent(QPaintEvent* e)
             if (blockData->state == BlockData::StartOn || blockData->state == BlockData::StartOff) {
                 painter.drawRect(hr);
                 painter.setPen("#555555");
-                painter.drawLine(hr.x() + 2.5, hr.center().y(), hr.right() - 2.5, hr.center().y());
+                painter.drawLine(QPointF(hr.x() + 2.5, hr.center().y()), QPointF(hr.right() - 2.5, hr.center().y()));
 
                 if (blockData->state == BlockData::StartOff) {
-                    painter.drawLine(hr.center().x(), hr.top() + 2.5,
-                                     hr.center().x(), hr.bottom() - 2.5);
+                    painter.drawLine(QPointF(hr.center().x(), hr.top() + 2.5),
+                                     QPointF(hr.center().x(), hr.bottom() - 2.5));
                 }
             } else if (blockData->state == BlockData::Line) {
-                painter.drawLine(hr.center().x(), top, hr.center().x(), bottom);
+                painter.drawLine(QPointF(hr.center().x(), top), QPointF(hr.center().x(), bottom));
             } else if (blockData->state == BlockData::MiddleEnd) {
-                painter.drawLine(hr.center().x(), top, hr.center().x(), bottom);
-                painter.drawLine(hr.center().x(), hr.center().y(), hr.right(), hr.center().y());
+                painter.drawLine(QPointF(hr.center().x(), top), QPointF(hr.center().x(), bottom));
+                painter.drawLine(QPointF(hr.center().x(), hr.center().y()), QPointF(hr.right(), hr.center().y()));
             } else if (blockData->state == BlockData::End) {
-                painter.drawLine(hr.center().x(), top, hr.center().x(), bottom);
-                painter.drawLine(hr.center().x(), bottom, hr.right(), bottom);
+                painter.drawLine(QPointF(hr.center().x(), top), QPointF(hr.center().x(), bottom));
+                painter.drawLine(QPointF(hr.center().x(), bottom), QPointF(hr.right(), bottom));
             }
         }
 

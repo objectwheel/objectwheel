@@ -91,7 +91,7 @@ void ProjectTemplatesDelegate::paint(QPainter* painter, const QStyleOptionViewIt
     QFont f;
     f.setWeight(QFont::DemiBold);
     painter->setFont(f);
-    painter->setPen("#21303c");
+    painter->setPen(option.palette.text().color());
     painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
 
     f.setPixelSize(AppFontSettings::defaultPixelSize() - 2);

@@ -63,6 +63,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
     connect(s_process, qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
             this, qOverload<int,QProcess::ExitStatus>(&RunManager::finished));
     connect(s_process, &QProcess::started, this, &RunManager::started);
+    connect(qApp, &QApplication::aboutToQuit, this, &RunManager::kill);
 }
 
 RunManager::~RunManager()

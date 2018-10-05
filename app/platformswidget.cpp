@@ -60,7 +60,7 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
 
     painter->drawPixmap(ricon, icon, icon.rect());
 
-    painter->setPen("#21303c");
+    painter->setPen(option.palette.text().color());
     painter->setFont(f);
     painter->drawText(rutext, utext, Qt::AlignVCenter | Qt::AlignLeft);
 

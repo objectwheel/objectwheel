@@ -166,7 +166,8 @@ public:
                                                - option.rect.width() + option.rect.height() - 7, - 7);
         auto ra = ri.adjusted(3, -0.5, 0, 0);
         ra.setSize(QSize(10, 10));
-        auto icon = item->icon().pixmap(UtilityFunctions::window(m_listWidget), ri.size().toSize());
+        auto icon = item->icon().pixmap(UtilityFunctions::window(m_listWidget), ri.size().toSize(),
+                                        m_listWidget->isEnabled() ? QIcon::Normal : QIcon::Disabled);
 
         painter->setRenderHint(QPainter::Antialiasing);
 
@@ -191,7 +192,7 @@ public:
         QFont f;
         f.setWeight(QFont::DemiBold);
         painter->setFont(f);
-        painter->setPen("#21303c");
+        painter->setPen(option.palette.text().color());
         painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
 
         f.setWeight(QFont::Normal);

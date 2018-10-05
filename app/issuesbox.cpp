@@ -42,7 +42,7 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
     Error error = model->data(index, Qt::UserRole).value<Error>();
     painter->setPen("#a0a4a7");
     painter->drawLine(r.bottomLeft(), r.bottomRight());
-    painter->setPen(option.palette.Text);
+    painter->setPen(option.palette.text().color());
     f.setWeight(QFont::Medium);
     painter->setFont(f);
     painter->drawText(r.adjusted(26, 0, 0, 0),

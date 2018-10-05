@@ -31,7 +31,6 @@ const char* g_startRunningMessage = "<b>Starting</b> interpretation...";
 const char* g_runningMessage = "<b>Running</b> on ";
 }
 
-// TODO: Ask for "stop task"if main window closes before user closes the running project
 RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
   , m_consoleBox(consoleBox)
   , m_runButton(new RunPaneButton)

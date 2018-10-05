@@ -25,6 +25,7 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
   , m_hideShowLeftPanesButton(new FlatButton(this))
   , m_hideShowRightPanesButton(new FlatButton(this))
 {
+    setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_designerButton);
@@ -216,7 +217,6 @@ bool PageSwitcherPane::isPageEnabled(const Pages& page) const
 
     case Page_ProjectOptions:
         return m_projectOptionsButton->isEnabled();
-
     default:
         Q_ASSERT(false);
         return false;
@@ -346,7 +346,7 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    QLinearGradient gradient(rect().topRight(), rect().topLeft());
+    QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).topLeft());
     gradient.setColorAt(0, "#384047");
     gradient.setColorAt(1, "#424c54");
 
