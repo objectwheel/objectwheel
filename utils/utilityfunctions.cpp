@@ -215,3 +215,8 @@ QPixmap UtilityFunctions::pixmap(QAbstractButton* button, const QIcon& icon, con
                        ? QIcon::Disabled
                        : (button->isDown() ? QIcon::Active : QIcon::Normal));
 }
+
+QPixmap UtilityFunctions::scaled(const QPixmap& pixmap, const QSize& size)
+{
+    return pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+}

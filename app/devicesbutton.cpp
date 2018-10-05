@@ -121,7 +121,8 @@ void DevicesButton::paintEvent(QPaintEvent*)
 
     // Draw arrow
     left += textWidth + g_spacing;
-    const QPixmap nextPixmap = renderColoredPixmap(":/utils/images/next@2x.png", p.pen().color(), this);
+    const QPixmap nextPixmap = scaled(renderColoredPixmap(":/utils/images/next@2x.png", p.pen().color(), this),
+                                      (g_arrowSize * devicePixelRatioF()).toSize());
     p.drawPixmap(verticalAlignedRect(g_arrowSize, rect(), left), nextPixmap, nextPixmap.rect());
 
     // Draw device icon
