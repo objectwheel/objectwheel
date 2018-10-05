@@ -10,8 +10,28 @@
 #include <QStyleOption>
 
 namespace {
-    int counter;
-    QColor loadingColor;
+
+const int g_counterStart = 50;
+int g_counter;
+qreal g_barHeight = 2;
+QColor g_loadingColor;
+
+void setupDocument(const QWidget* widget, QTextDocument& doc, const QString& text)
+{
+    doc.setTextWidth(widget->rect().width());
+    doc.setDocumentMargin(0);
+    doc.setIndentWidth(0);
+    QTextBlockFormat bf;
+    bf.setLineHeight(widget->rect().height() - 1.5 * widget->devicePixelRatioF(), QTextBlockFormat::FixedHeight);
+    bf.setAlignment(Qt::AlignCenter);
+    QTextCharFormat cf;
+    cf.setForeground(widget->palette().text());
+    QTextCursor cursor(&doc);
+    cursor.insertHtml(text);
+    cursor.select(QTextCursor::Document);
+    cursor.mergeBlockFormat(bf);
+    cursor.mergeCharFormat(cf);
+}
 }
 
 RunPaneLoadingBar::RunPaneLoadingBar(QWidget *parent) : QWidget(parent)
@@ -36,8 +56,8 @@ void RunPaneLoadingBar::setText(const QString& text)
 
 void RunPaneLoadingBar::busy(int progress, const QString& text)
 {
-    counter = 25;
-    loadingColor = "#606467";
+    g_counter = g_counterStart;
+    g_loadingColor = palette().buttonText().color();
 
     m_text = text;
     m_progress = progress;
@@ -49,8 +69,8 @@ void RunPaneLoadingBar::busy(int progress, const QString& text)
 
 void RunPaneLoadingBar::done(const QString& text)
 {
-    counter = 25;
-    loadingColor = "#30a8f7";
+    g_counter = g_counterStart;
+    g_loadingColor = "#87c300";
 
     m_text = text;
     m_progress = 100;
@@ -62,8 +82,8 @@ void RunPaneLoadingBar::done(const QString& text)
 
 void RunPaneLoadingBar::error(const QString& text)
 {
-    counter = 25;
-    loadingColor = "#C2504B";
+    g_counter = g_counterStart;
+    g_loadingColor = "#e05650";
 
     m_text = text;
     m_progress = 100;
@@ -81,13 +101,13 @@ void RunPaneLoadingBar::onEndingTimeout()
 
 void RunPaneLoadingBar::onFaderTimeout()
 {
-    loadingColor.setAlpha(counter * 10);
+    g_loadingColor.setAlpha(g_counter * 10);
 
-    if (counter > 0)
-        counter--;
+    if (g_counter > 0)
+        g_counter--;
     else {
-        counter = 25;
-        loadingColor = "#606467";
+        g_counter = g_counterStart;
+        g_loadingColor = "#606467";
 
         m_progress = 0;
         m_timerFader->stop();
@@ -109,26 +129,15 @@ void RunPaneLoadingBar::paintEvent(QPaintEvent*)
     PaintUtils::drawMacStyleButtonBackground(&p, opt, this);
 
     // Draw text
-    QTextDocument doc;
-    doc.setTextWidth(rect().width());
-    doc.setDocumentMargin(0);
-    doc.setIndentWidth(0);
-    QTextBlockFormat bf;
-    bf.setLineHeight(rect().height() - 1.5 * devicePixelRatioF(), QTextBlockFormat::FixedHeight);
-    bf.setAlignment(Qt::AlignCenter);
-    QTextCharFormat cf;
-    cf.setForeground(palette().text());
-    QTextCursor cursor(&doc);
-    cursor.insertHtml(m_text);
-    cursor.select(QTextCursor::Document);
-    cursor.mergeBlockFormat(bf);
-    cursor.mergeCharFormat(cf);
-    doc.drawContents(&p, rect());
+    QTextDocument document;
+    setupDocument(this, document, m_text);
+    document.drawContents(&p, rect());
 
-    QPainterPath path;
-    path.addRoundedRect(0.5, 0.5, 480.0, 23.0, 3.5, 3.5);
-    p.setClipPath(path);
-    p.fillRect(QRectF{0.5, 21.5, m_progress * 4.8, 10}, loadingColor);
+    QPainterPath bodyPath;
+    bodyPath.addRoundedRect(QRectF(rect()).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
+    p.setClipPath(bodyPath);
+    p.fillRect(QRectF{0.5, height() - 1 - g_barHeight,
+                      m_progress * (width() - 1) / 100.0, g_barHeight}, g_loadingColor);
 }
 
 QSize RunPaneLoadingBar::sizeHint() const
@@ -143,6 +152,8 @@ QSize RunPaneLoadingBar::minimumSizeHint() const
 
 QSize RunPaneLoadingBar::recomputeMinimumSizeHint() const
 {
-    int computedWidth = fontMetrics().horizontalAdvance(m_text) + 12;
+    QTextDocument document;
+    setupDocument(this, document, m_text);
+    int computedWidth = fontMetrics().horizontalAdvance(document.toPlainText()) + 12;
     return QSize(qMin(computedWidth, 480), 24);
 }

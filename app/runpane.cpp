@@ -86,7 +86,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
 
     connect(ProjectManager::instance(), &ProjectManager::started,
             [=] {
-        m_loadingBar->setText(ProjectManager::name() + tr(": Ready  |  Welcome to Objectwheel"));
+        m_loadingBar->setText(ProjectManager::name() + tr(": <b>Ready</b>  |  Welcome to Objectwheel"));
     });
 
     // FIXME
@@ -102,14 +102,14 @@ void RunPane::sweep()
 void RunPane::onStopButtonClick()
 {
     RunManager::terminate();
-    m_loadingBar->busy(0, ProjectManager::name() + tr(": Stopped  |  Finished at ") +
+    m_loadingBar->busy(0, ProjectManager::name() + tr(": <b>Stopped</b>  |  Finished at ") +
                        QTime::currentTime().toString());
 }
 
 void RunPane::onStopButtonDoubleClick()
 {
     RunManager::kill();
-    m_loadingBar->busy(0, ProjectManager::name() + tr(": Stopped forcefully  |  Finished at ") +
+    m_loadingBar->busy(0, ProjectManager::name() + tr(": <b>Stopped forcefully</b>  |  Finished at ") +
                        QTime::currentTime().toString());
 }
 
