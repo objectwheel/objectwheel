@@ -14,7 +14,7 @@ void AppFontSettings::apply()
 #elif defined(Q_OS_WIN)
     QFont font("Segoe UI");
 #else
-    QFont font("Open Sans");
+    QFont font("Roboto");
 #endif
     font.setPixelSize(defaultPixelSize());
     font.setStyleStrategy(QFont::PreferAntialias);

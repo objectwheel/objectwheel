@@ -172,6 +172,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_addButton->settings().topColor = palette().brightText().color();
     m_addButton->settings().bottomColor = palette().brightText().color().darker(108);
     m_addButton->settings().borderRadius = 10;
+    m_addButton->setToolTip(tr("Add new form to the project"));
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_addButton->setFixedSize(18, 18);
     m_addButton->setIconSize(QSize(12, 12));
@@ -181,6 +182,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_removeButton->settings().topColor = palette().brightText().color();
     m_removeButton->settings().bottomColor = palette().brightText().color().darker(108);
     m_removeButton->settings().borderRadius = 10;
+    m_removeButton->setToolTip(tr("Remove selected form from the project"));
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_removeButton->setFixedSize(18, 18);
     m_removeButton->setIconSize(QSize(12, 12));

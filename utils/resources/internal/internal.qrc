@@ -1,17 +1,19 @@
 <RCC>
     <qresource prefix="/">
         <file>images/error.png</file>
-        <file>fonts/OpenSans-Bold.ttf</file>
-        <file>fonts/OpenSans-BoldItalic.ttf</file>
-        <file>fonts/OpenSans-ExtraBold.ttf</file>
-        <file>fonts/OpenSans-ExtraBoldItalic.ttf</file>
-        <file>fonts/OpenSans-Italic.ttf</file>
-        <file>fonts/OpenSans-Light.ttf</file>
-        <file>fonts/OpenSans-LightItalic.ttf</file>
-        <file>fonts/OpenSans-Regular.ttf</file>
-        <file>fonts/OpenSans-SemiBold.ttf</file>
-        <file>fonts/OpenSans-SemiBoldItalic.ttf</file>
         <file>images/texture.bmp</file>
         <file>images/wait.png</file>
+        <file>fonts/Roboto-Black.ttf</file>
+        <file>fonts/Roboto-BlackItalic.ttf</file>
+        <file>fonts/Roboto-Bold.ttf</file>
+        <file>fonts/Roboto-BoldItalic.ttf</file>
+        <file>fonts/Roboto-Italic.ttf</file>
+        <file>fonts/Roboto-Light.ttf</file>
+        <file>fonts/Roboto-LightItalic.ttf</file>
+        <file>fonts/Roboto-Medium.ttf</file>
+        <file>fonts/Roboto-MediumItalic.ttf</file>
+        <file>fonts/Roboto-Regular.ttf</file>
+        <file>fonts/Roboto-Thin.ttf</file>
+        <file>fonts/Roboto-ThinItalic.ttf</file>
     </qresource>
 </RCC>
