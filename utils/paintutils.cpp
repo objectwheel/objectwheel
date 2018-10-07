@@ -5,7 +5,8 @@
 #include <QBitmap>
 #include <QWidget>
 #include <QApplication>
-#include <QStyleOptionButton>
+#include <QStyleOption>
+#include <QPalette>
 
 QImage PaintUtils::renderFilledImage(const QSizeF& size, const QColor& fillColor, const QWidget* widget)
 {
@@ -155,44 +156,31 @@ QPixmap PaintUtils::renderColorPixmap(const QSize& size, const QColor& color, co
     return QPixmap::fromImage(dest);
 }
 
-void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOption& option, QWidget* widget)
+void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& option)
 {
     painter->save();
 
+    const bool down = (option.state & QStyle::State_Sunken) || (option.state & QStyle::State_On);
+
     // Draw drop shadow
     QPainterPath dropShadowPath;
-    dropShadowPath.addRect(3.5, widget->rect().bottom() + 0.5, widget->width() - 7, 1);
-    QLinearGradient dropShadowGrad(QPointF(3.5, widget->rect().bottom()),
-                                   QPointF(widget->width() - 3.5, widget->rect().bottom()));
-    dropShadowGrad.setColorAt(0, QColor("#12202020"));
-    dropShadowGrad.setColorAt(0.05, QColor("#10202020"));
-    dropShadowGrad.setColorAt(0.5, QColor("#10202020"));
-    dropShadowGrad.setColorAt(0.95, QColor("#10202020"));
-    dropShadowGrad.setColorAt(1, QColor("#12202020"));
+    dropShadowPath.addRect(3.5, option.rect.bottom() + 0.5, option.rect.width() - 7, 1);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(dropShadowGrad);
+    painter->setBrush(option.palette.shadow());
     painter->drawPath(dropShadowPath);
 
     // Draw shadow
     QPainterPath shadowPath;
-    shadowPath.addRoundedRect(QRectF(widget->rect()).adjusted(0, 0.5, 0, -0.5), 4.25, 4.25);
-    QLinearGradient shadowGrad(widget->rect().topLeft(), widget->rect().bottomLeft());
-    shadowGrad.setColorAt(0.85, QColor("#20303030"));
-    shadowGrad.setColorAt(1, QColor("#3d000000"));
+    shadowPath.addRoundedRect(QRectF(option.rect).adjusted(0, 0.5, 0, -0.5), 4.25, 4.25);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(shadowGrad);
+    painter->setBrush(option.palette.dark());
     painter->drawPath(shadowPath);
-
-    const bool down = (option.state & QStyle::State_Sunken) || (option.state & QStyle::State_On);
 
     // Draw body
     QPainterPath bodyPath;
-    bodyPath.addRoundedRect(QRectF(widget->rect()).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
-    QLinearGradient bodyGrad(widget->rect().topLeft(), widget->rect().bottomLeft());
-    bodyGrad.setColorAt(0, down ? QColor("#e7e7e7") : QColor("#fefefe"));
-    bodyGrad.setColorAt(1, down ? QColor("#e1e1e1") : QColor("#f7f7f7"));
+    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(bodyGrad);
+    painter->setBrush(down ? option.palette.mid() : option.palette.button());
     painter->drawPath(bodyPath);
     // NOTE: QRect's bottom() and bottomLeft()... are different from QRectF, for historical reasons
     // as stated in the docs, those functions return top() + height() - 1 (QRect)
@@ -200,24 +188,21 @@ void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOpt
     // Draw glowing for pressed state
     if (down) {
         QPainterPath glowPath;
-        glowPath.addRoundedRect(QRectF(widget->rect()).adjusted(0.5, 2, -0.5, 1), 3.65, 3.65);
-        QLinearGradient glowGrad(widget->width() / 2.0, 1, widget->width() / 2.0, 2);
-        glowGrad.setColorAt(0, QColor("#f7f7f7"));
-        glowGrad.setColorAt(1, QColor("#eaeaea"));
+        glowPath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 2, -0.5, 1), 3.65, 3.65);
         painter->setPen(Qt::NoPen);
-        painter->setBrush(glowGrad);
+        painter->setBrush(option.palette.midlight());
         painter->drawPath(bodyPath.subtracted(glowPath));
     }
 
     painter->restore();
 }
 
-void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, const QStyleOption& option, QWidget* widget)
+void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, const QStyleOption& option)
 {
     painter->save();
     const QColor& color = (option.state & QStyle::State_Sunken)
-            ? widget->palette().text().color().lighter(115)
-            : widget->palette().text().color().lighter(160);
+            ? option.palette.text().color().lighter(115)
+            : option.palette.text().color().lighter(160);
     QPointF points[3] = {{0, 0}, {4.5, 0}, {2.25, 2.5}};
     points[0] += offset; points[1] += offset; points[2] += offset;
     painter->setPen(color);
@@ -231,4 +216,48 @@ QIcon PaintUtils::renderColorizedIcon(const QString& fileName, const QColor& col
     QIcon icon;
     icon.addPixmap(renderColorizedPixmap(fileName, color, widget));
     return icon;
+}
+
+/*!
+    QPalette::Light     :  Button's frame rect color (not used)
+    QPalette::Midlight  :  Button's glowing color (when pressed)
+    QPalette::Button    :  Button's normal body color
+    QPalette::Mid       :  Button's pressed body color
+    QPalette::Dark      :  Button's base and surrounding border's color
+    QPalette::Shadow    :  Button's drop shadow color
+*/
+void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette)
+{
+    QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
+    shadowGrad.setCoordinateMode(QGradient::ObjectMode);
+    shadowGrad.setColorAt(0, "#12202020");
+    shadowGrad.setColorAt(0.05, "#10202020");
+    shadowGrad.setColorAt(0.5, "#10202020");
+    shadowGrad.setColorAt(0.95, "#10202020");
+    shadowGrad.setColorAt(1, "#12202020");
+    palette.setBrush(QPalette::Shadow, shadowGrad);
+
+    QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
+    darkGrad.setCoordinateMode(QGradient::ObjectMode);
+    darkGrad.setColorAt(0.85, "#20303030");
+    darkGrad.setColorAt(1, "#3d000000");
+    palette.setBrush(QPalette::Dark, darkGrad);
+
+    QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
+    midGrad.setCoordinateMode(QGradient::ObjectMode);
+    midGrad.setColorAt(0, "#e7e7e7");
+    midGrad.setColorAt(1, "#e1e1e1");
+    palette.setBrush(QPalette::Mid, midGrad);
+
+    QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
+    buttonGrad.setCoordinateMode(QGradient::ObjectMode);
+    buttonGrad.setColorAt(0, "#fefefe");
+    buttonGrad.setColorAt(1, "#f7f7f7");
+    palette.setBrush(QPalette::Button, buttonGrad);
+
+    QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
+    midlightGrad.setCoordinateMode(QGradient::ObjectMode);
+    midlightGrad.setColorAt(0, "#f4f4f4");
+    midlightGrad.setColorAt(0.1, "#ededed");
+    palette.setBrush(QPalette::Midlight, midlightGrad);
 }

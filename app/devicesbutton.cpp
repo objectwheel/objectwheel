@@ -27,6 +27,10 @@ DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
   , m_actionGroup(new QActionGroup(this))
   , m_myComputerAction(new QAction(this))
 {
+    QPalette p(palette());
+    PaintUtils::setPanelButtonPaletteDefaults(p);
+    setPalette(p);
+
     m_actionGroup->setExclusive(true);
     m_myComputerAction->setText(tr("My Computer"));
     m_myComputerAction->setIcon(QIcon(":/images/mycomputer.png"));
@@ -106,7 +110,7 @@ void DevicesButton::paintEvent(QPaintEvent*)
     QStyleOptionButton opt;
     opt.initFrom(this);
     opt.state |= isDown() ? QStyle::State_Sunken : QStyle::State_Raised;
-    PaintUtils::drawMacStyleButtonBackground(&p, opt, this);
+    PaintUtils::drawPanelButtonBevel(&p, opt);
 
     // Draw devices icon
     int left = g_leftPadding;
@@ -138,7 +142,7 @@ void DevicesButton::paintEvent(QPaintEvent*)
     // Draw menu down arrow
     if (isDown() || hasHover(this)) {
         left += textWidth + (g_rightPadding - 4.5) / 2.0;
-        PaintUtils::drawMenuDownArrow(&p, QPointF(left, 16), opt, this);
+        PaintUtils::drawMenuDownArrow(&p, QPointF(left, 16), opt);
     }
 }
 

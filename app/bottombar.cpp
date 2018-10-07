@@ -16,8 +16,8 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    m_layout->setSpacing(2);
-    m_layout->setContentsMargins(2, 2, 2, 2);
+    m_layout->setSpacing(1);
+    m_layout->setContentsMargins(1, 1, 1, 1);
     m_layout->addWidget(m_issuesButton, 0, Qt::AlignVCenter);
     m_layout->addWidget(m_consoleButton, 0, Qt::AlignVCenter);
     m_layout->addStretch();
@@ -59,21 +59,14 @@ void BottomBar::paintEvent(QPaintEvent*)
     opt.initFrom(this);
     opt.state |= QStyle::State_Horizontal;
     p.drawControl(QStyle::CE_ToolBar, opt);
-
-//    QLinearGradient g(rect().topLeft(), rect().bottomLeft());
-//    g.setColorAt(0, "#E5E5E6");
-//    g.setColorAt(1, "#CDCDCE");
-//    p.setBrush(g);
-//    p.drawRect(rect());
-////    p.fillRect(rect(), "#D6D6D7");
 }
 
 QSize BottomBar::sizeHint() const
 {
-    return QSize(100, 26);
+    return QSize(100, 24);
 }
 
 QSize BottomBar::minimumSizeHint() const
 {
-    return QSize(0, 26);
+    return QSize(0, 24);
 }

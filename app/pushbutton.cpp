@@ -6,6 +6,9 @@
 
 PushButton::PushButton(QWidget* parent) : QPushButton(parent)
 {
+    QPalette p(palette());
+    PaintUtils::setPanelButtonPaletteDefaults(p);
+    setPalette(p);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 }
 
@@ -17,7 +20,7 @@ void PushButton::paintEvent(QPaintEvent*)
     // Draw background
     QStyleOptionButton opt;
     initStyleOption(&opt);
-    PaintUtils::drawMacStyleButtonBackground(&p, opt, this);
+    PaintUtils::drawPanelButtonBevel(&p, opt);
 
     // Draw the rest
     opt.state |= isDown() ? QStyle::State_On : QStyle::State_Off;

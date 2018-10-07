@@ -39,6 +39,9 @@ RunPaneLoadingBar::RunPaneLoadingBar(QWidget *parent) : QWidget(parent)
   , m_timerEnding(new QTimer(this))
   , m_timerFader(new QTimer(this))
 {
+    QPalette p(palette());
+    PaintUtils::setPanelButtonPaletteDefaults(p);
+    setPalette(p);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
 
     m_timerFader->setInterval(60);
@@ -127,7 +130,7 @@ void RunPaneLoadingBar::paintEvent(QPaintEvent*)
     QStyleOptionFrame opt;
     opt.initFrom(this);
     opt.state |= QStyle::State_Raised;
-    PaintUtils::drawMacStyleButtonBackground(&p, opt, this);
+    PaintUtils::drawPanelButtonBevel(&p, opt);
 
     // Draw text
     QTextDocument document;
