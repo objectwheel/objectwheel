@@ -265,7 +265,7 @@ void LoginWidget::onSessionStart()
     } else
         qFatal("Fatal : LoginWidget");
 
-    clear();
+    QTimer::singleShot(500, this, &LoginWidget::clear);
 
     emit done();
 }

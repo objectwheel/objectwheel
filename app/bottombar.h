@@ -20,6 +20,7 @@ protected:
 private:
     QHBoxLayout* m_layout;
     PushButton* m_consoleButton;
+    PushButton* m_issuesButton;
 };
 
 #endif // BOTTOMBAR_H
