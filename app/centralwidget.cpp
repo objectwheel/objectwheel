@@ -19,6 +19,8 @@
 #include <filemanager.h>
 #include <saveutils.h>
 #include <projectmanager.h>
+#include <bottombar.h>
+#include <transparentstyle.h>
 
 #include <QWindow>
 #include <QSplitter>
@@ -38,6 +40,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_splitterOut(new QSplitter)
   , m_splitterIn(new QSplitter)
   , m_outputPane(new OutputPane)
+  , m_bottomBar(new BottomBar)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
@@ -52,7 +55,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->setHandleWidth(0);
     m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
-    m_splitterOut->addWidget(m_outputPane);
+//    m_splitterOut->addWidget(m_outputPane);
+    m_splitterOut->addWidget(m_bottomBar);
+
+    TransparentStyle::attach(m_bottomBar);
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
@@ -160,12 +166,12 @@ void CentralWidget::setCurrentPage(const Pages& page)
         break;
 
     case Page_Designer:
-        m_outputPane->show();
+//        m_outputPane->show();
         return m_designerWidget->show();
         break;
 
     case Page_SplitView:
-        m_outputPane->show();
+//        m_outputPane->show();
         m_designerWidget->show();
         return g_editorContainer->show();
         break;
@@ -175,7 +181,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
         break;
 
     case Page_QmlCodeEditor:
-        m_outputPane->show();
+//        m_outputPane->show();
         return g_editorContainer->show();
         break;
 

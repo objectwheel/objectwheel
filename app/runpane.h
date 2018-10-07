@@ -5,7 +5,7 @@
 
 class ConsoleBox;
 class DevicesButton;
-class RunPaneButton;
+class PushButton;
 class RunPaneLoadingBar;
 
 class RunPane : public QToolBar
@@ -34,10 +34,10 @@ protected:
 
 private:
     ConsoleBox* m_consoleBox;
-    RunPaneButton* m_runButton;
-    RunPaneButton* m_stopButton;
+    PushButton* m_runButton;
+    PushButton* m_stopButton;
     DevicesButton* m_devicesButton;
-    RunPaneButton* m_projectsButton;
+    PushButton* m_projectsButton;
     RunPaneLoadingBar* m_loadingBar;
 };
 

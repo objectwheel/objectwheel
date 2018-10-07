@@ -176,7 +176,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_addButton->setFixedSize(18, 18);
     m_addButton->setIconSize(QSize(12, 12));
-    m_addButton->setIcon(QIcon(PaintUtils::renderMaskedPixmap(":/images/plus.png", palette().text().color(), this)));
+    m_addButton->setIcon(QIcon(PaintUtils::renderColorizedPixmap(":/images/plus.png", palette().text().color(), this)));
     connect(m_addButton, &FlatButton::clicked, this, &FormsPane::onAddButtonClick);
 
     m_removeButton->settings().topColor = palette().brightText().color();
@@ -186,7 +186,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_removeButton->setFixedSize(18, 18);
     m_removeButton->setIconSize(QSize(12, 12));
-    m_removeButton->setIcon(QIcon(PaintUtils::renderMaskedPixmap(":/images/minus.png", palette().text().color(), this)));
+    m_removeButton->setIcon(QIcon(PaintUtils::renderColorizedPixmap(":/images/minus.png", palette().text().color(), this)));
     connect(m_removeButton, &FlatButton::clicked, this, &FormsPane::onRemoveButtonClick);
 
     /*
@@ -253,16 +253,16 @@ void FormsPane::refreshList()
         return;
 
     QIcon formIcon, mFormIcon;
-    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+    mFormIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/mform.png",
                                                        palette().text().color(),
                                                        this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+    mFormIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/mform.png",
                                                        palette().highlightedText().color(),
                                                        this), QIcon::Selected);
-    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+    formIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/form.png",
                                                       palette().text().color(),
                                                       this), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+    formIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/form.png",
                                                       palette().highlightedText().color(),
                                                       this), QIcon::Selected);
     blockSignals(true);

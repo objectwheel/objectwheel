@@ -12,6 +12,7 @@ class QmlCodeEditorWidget;
 class ProjectOptionsWidget;
 class HelpWidget;
 class BuildsWidget;
+class BottomBar;
 
 class CentralWidget : public QWidget
 {
@@ -34,6 +35,7 @@ private:
     QVBoxLayout* m_layout;
     QSplitter* m_splitterOut,* m_splitterIn;
     OutputPane* m_outputPane;
+    BottomBar* m_bottomBar;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     DesignerWidget* m_designerWidget;
     ProjectOptionsWidget* m_projectOptionsWidget;

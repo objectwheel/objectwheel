@@ -605,7 +605,7 @@ void FileExplorer::setPalette(const QPalette& pal)
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
 
-    const QPixmap& icon = PaintUtils::renderColoredPixmap(":/utils/images/filtericon@2x.png",
+    const QPixmap& icon = PaintUtils::renderMaskedPixmap(":/utils/images/filtericon@2x.png",
                                                           pal.buttonText().color(), this);
     g_modeIFilterIconLabel->setPixmap(icon);
     QPalette mp(m_modeComboBox->palette());

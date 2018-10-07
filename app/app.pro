@@ -119,7 +119,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/controlsavefilter.h \
            $$PWD/devicesbutton.h \
            $$PWD/smartspacer.h \
-           $$PWD/runpanebutton.h \
+           $$PWD/pushbutton.h \
            $$PWD/bottombar.h
 
 SOURCES += $$PWD/main.cpp\
@@ -218,7 +218,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/controlsavefilter.cpp \
            $$PWD/devicesbutton.cpp \
            $$PWD/smartspacer.cpp \
-           $$PWD/runpanebutton.cpp \
+           $$PWD/pushbutton.cpp \
            $$PWD/bottombar.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \

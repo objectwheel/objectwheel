@@ -7,7 +7,7 @@
 #include <welcomewindow.h>
 #include <devicesbutton.h>
 #include <smartspacer.h>
-#include <runpanebutton.h>
+#include <pushbutton.h>
 #include <paintutils.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
@@ -33,10 +33,10 @@ const char* g_runningMessage = "<b>Running</b> on ";
 
 RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
   , m_consoleBox(consoleBox)
-  , m_runButton(new RunPaneButton)
-  , m_stopButton(new RunPaneButton)
+  , m_runButton(new PushButton)
+  , m_stopButton(new PushButton)
   , m_devicesButton(new DevicesButton)
-  , m_projectsButton(new RunPaneButton)
+  , m_projectsButton(new PushButton)
   , m_loadingBar(new RunPaneLoadingBar)
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -64,29 +64,32 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
     });
 
     QIcon icon;
-    const QColor active = palette().buttonText().color().darker(180);
-    const QColor normal = palette().buttonText().color().lighter(130);
+    const QColor on = palette().buttonText().color().darker(180); // pressed
+    const QColor off = palette().buttonText().color().lighter(130); // not pressed
 
-    icon.addPixmap(renderColoredPixmap(":/utils/images/run_small@2x.png", normal, this), QIcon::Normal);
-    icon.addPixmap(renderColoredPixmap(":/utils/images/run_small@2x.png", active, this), QIcon::Active);
+    icon.addPixmap(renderMaskedPixmap(":/utils/images/run_small@2x.png", on, this), QIcon::Normal, QIcon::On);
+    icon.addPixmap(renderMaskedPixmap(":/utils/images/run_small@2x.png", off, this), QIcon::Normal, QIcon::Off);
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
+    m_runButton->setFixedWidth(39);
     m_runButton->setIconSize({16, 16});
     m_runButton->setIcon(icon);
     connect(m_runButton, SIGNAL(clicked(bool)), SLOT(onRunButtonClick()));
 
-    icon.addPixmap(renderColoredPixmap(":/utils/images/stop_small@2x.png", normal, this), QIcon::Normal);
-    icon.addPixmap(renderColoredPixmap(":/utils/images/stop_small@2x.png", active, this), QIcon::Active);
+    icon.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", on, this), QIcon::Normal, QIcon::On);
+    icon.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", off, this), QIcon::Normal, QIcon::Off);
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setToolTip(tr("Stop"));
+    m_stopButton->setFixedWidth(39);
     m_stopButton->setIconSize({16, 16});
     m_stopButton->setIcon(icon);
     connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
 
-    icon.addPixmap(renderMaskedPixmap(":/images/projects.png", normal, this), QIcon::Normal);
-    icon.addPixmap(renderMaskedPixmap(":/images/projects.png", active, this), QIcon::Active);
+    icon.addPixmap(renderColorizedPixmap(":/images/projects.png", on, this), QIcon::Normal, QIcon::On);
+    icon.addPixmap(renderColorizedPixmap(":/images/projects.png", off, this), QIcon::Normal, QIcon::Off);
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
+    m_projectsButton->setFixedWidth(39);
     m_projectsButton->setIconSize({16, 16});
     m_projectsButton->setIcon(icon);
     connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));

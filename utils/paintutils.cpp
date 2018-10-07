@@ -102,7 +102,7 @@ QImage PaintUtils::renderNonGuiControlImage(const QString& url, const QSizeF& si
     return dest;
 }
 
-QPixmap PaintUtils::renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
+QPixmap PaintUtils::renderColorizedPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
     QImage source(fileName);
@@ -118,7 +118,8 @@ QPixmap PaintUtils::renderMaskedPixmap(const QString& fileName, const QColor& co
     return QPixmap::fromImage(dest);
 }
 
-QPixmap PaintUtils::renderColoredPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
+// For colorizing the files that are located within the "utils/images" directory
+QPixmap PaintUtils::renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
     QImage source(fileName);
@@ -182,12 +183,14 @@ void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOpt
     painter->setBrush(shadowGrad);
     painter->drawPath(shadowPath);
 
+    const bool down = (option.state & QStyle::State_Sunken) || (option.state & QStyle::State_On);
+
     // Draw body
     QPainterPath bodyPath;
     bodyPath.addRoundedRect(QRectF(widget->rect()).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
     QLinearGradient bodyGrad(widget->rect().topLeft(), widget->rect().bottomLeft());
-    bodyGrad.setColorAt(0, option.state & QStyle::State_Sunken ? QColor("#e7e7e7") : QColor("#fefefe"));
-    bodyGrad.setColorAt(1, option.state & QStyle::State_Sunken ? QColor("#e1e1e1") : QColor("#f7f7f7"));
+    bodyGrad.setColorAt(0, down ? QColor("#e7e7e7") : QColor("#fefefe"));
+    bodyGrad.setColorAt(1, down ? QColor("#e1e1e1") : QColor("#f7f7f7"));
     painter->setPen(Qt::NoPen);
     painter->setBrush(bodyGrad);
     painter->drawPath(bodyPath);
@@ -195,7 +198,7 @@ void PaintUtils::drawMacStyleButtonBackground(QPainter* painter, const QStyleOpt
     // as stated in the docs, those functions return top() + height() - 1 (QRect)
 
     // Draw glowing for pressed state
-    if (option.state & QStyle::State_Sunken) {
+    if (down) {
         QPainterPath glowPath;
         glowPath.addRoundedRect(QRectF(widget->rect()).adjusted(0.5, 2, -0.5, 1), 3.65, 3.65);
         QLinearGradient glowGrad(widget->width() / 2.0, 1, widget->width() / 2.0, 2);
@@ -221,4 +224,11 @@ void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, con
     painter->setBrush(color);
     painter->drawPolygon(points, 3);
     painter->restore();
+}
+
+QIcon PaintUtils::renderColorizedIcon(const QString& fileName, const QColor& color, const QWidget* widget)
+{
+    QIcon icon;
+    icon.addPixmap(renderColorizedPixmap(fileName, color, widget));
+    return icon;
 }

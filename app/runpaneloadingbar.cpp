@@ -155,6 +155,6 @@ QSize RunPaneLoadingBar::recomputeMinimumSizeHint() const
 {
     QTextDocument document;
     setupDocument(this, document, m_text);
-    int computedWidth = fontMetrics().horizontalAdvance(document.toPlainText()) + 12;
+    int computedWidth = fontMetrics().horizontalAdvance(document.toPlainText()) + 16;
     return QSize(qMin(computedWidth, 480), 24);
 }

@@ -163,16 +163,16 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
             item->setText(1, QObject::tr("No"));
 
         QIcon icon, itemIcon;
-        icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(child->dir()),
+        icon.addPixmap(PaintUtils::renderColorizedPixmap(SaveUtils::toIcon(child->dir()),
                                                       treeWidget->palette().text().color(),
                                                       treeWidget), QIcon::Normal);
-        icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(child->dir()),
+        icon.addPixmap(PaintUtils::renderColorizedPixmap(SaveUtils::toIcon(child->dir()),
                                                       treeWidget->palette().highlightedText().color(),
                                                       treeWidget), QIcon::Selected);
-        itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+        itemIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/item.png",
                                                           treeWidget->palette().text().color(),
                                                           treeWidget), QIcon::Normal);
-        itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+        itemIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/item.png",
                                                           treeWidget->palette().highlightedText().color(),
                                                           treeWidget), QIcon::Selected);
 
@@ -452,16 +452,16 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     m_designerScene->clearSelection();
 
     QIcon formIcon, mFormIcon;
-    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+    mFormIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/mform.png",
                                                        palette().text().color(),
                                                        this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+    mFormIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/mform.png",
                                                        palette().highlightedText().color(),
                                                        this), QIcon::Selected);
-    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+    formIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/form.png",
                                                       palette().text().color(),
                                                       this), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+    formIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/form.png",
                                                       palette().highlightedText().color(),
                                                       this), QIcon::Selected);
 
@@ -595,22 +595,22 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
     }
 
     QIcon formIcon, mFormIcon, itemIcon;
-    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+    mFormIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/mform.png",
                                                        palette().text().color(),
                                                        this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/mform.png",
+    mFormIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/mform.png",
                                                        palette().highlightedText().color(),
                                                        this), QIcon::Selected);
-    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+    formIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/form.png",
                                                       palette().text().color(),
                                                       this), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/form.png",
+    formIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/form.png",
                                                       palette().highlightedText().color(),
                                                       this), QIcon::Selected);
-    itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+    itemIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/item.png",
                                                       palette().text().color(),
                                                       this), QIcon::Normal);
-    itemIcon.addPixmap(PaintUtils::renderMaskedPixmap(":/images/item.png",
+    itemIcon.addPixmap(PaintUtils::renderColorizedPixmap(":/images/item.png",
                                                       palette().highlightedText().color(),
                                                       this), QIcon::Selected);
 
@@ -632,10 +632,10 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     childItem->setIcon(0, SaveUtils::isMain(control->dir()) ? mFormIcon : formIcon);
                 } else {
                     QIcon icon;
-                    icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(control->dir()),
+                    icon.addPixmap(PaintUtils::renderColorizedPixmap(SaveUtils::toIcon(control->dir()),
                                                                   palette().text().color(),
                                                                   this), QIcon::Normal);
-                    icon.addPixmap(PaintUtils::renderMaskedPixmap(SaveUtils::toIcon(control->dir()),
+                    icon.addPixmap(PaintUtils::renderColorizedPixmap(SaveUtils::toIcon(control->dir()),
                                                                   palette().highlightedText().color(),
                                                                   this), QIcon::Selected);
 
