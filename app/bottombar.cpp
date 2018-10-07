@@ -58,6 +58,7 @@ void setPanelButtonPaletteDark(QWidget* widget)
     palette.setBrush(QPalette::ButtonText, Qt::white);
     widget->setPalette(palette);
 }
+
 void setPanelButtonPaletteRed(QWidget* widget)
 {
     QPalette palette(widget->palette());
@@ -117,11 +118,14 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     buttonGroup->setExclusive(false);
     connect(buttonGroup, qOverload<QAbstractButton*>(&QButtonGroup::buttonClicked),
             this, [=] (QAbstractButton* button) {
+        emit buttonActivated(button, button->isChecked());
         if (!button->isChecked())
             return;
         for (QAbstractButton* b : buttonGroup->buttons()) {
-            if (b != button)
+            if (b != button) {
                 b->setChecked(false);
+                emit buttonActivated(b, false);
+            }
         }
     });
 
@@ -135,6 +139,7 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_consoleButton->setCheckable(true);
     m_consoleButton->setText(tr("Console Output"));
     m_consoleButton->setToolTip(tr("Activate console output"));
+    m_consoleButton->setIconSize({16, 16});
     m_consoleButton->setIcon(renderColorizedIcon(":/images/console.png", iconColor, this));
 
     m_issuesButton->setMaximumHeight(20);
@@ -142,37 +147,11 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setCheckable(true);
     m_issuesButton->setText(tr("Issues"));
     m_issuesButton->setToolTip(tr("Activate issues list"));
+    m_issuesButton->setIconSize({16, 16});
     m_issuesButton->setIcon(renderColorizedIcon(":/images/issues.png", iconColor, this));
-
-    QTimer::singleShot(15000, this, [=]{ flash(m_consoleButton); });
 }
 
-void BottomBar::paintEvent(QPaintEvent*)
-{
-    QStylePainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
-    QStyleOptionToolBar opt;
-    opt.initFrom(this);
-    opt.state |= QStyle::State_Horizontal;
-    p.drawControl(QStyle::CE_ToolBar, opt);
-}
-
-QSize BottomBar::sizeHint() const
-{
-    return QSize(100, 24);
-}
-
-QSize BottomBar::minimumSizeHint() const
-{
-    return QSize(0, 24);
-}
-
-PushButton* BottomBar::issuesButton() const
-{
-    return m_issuesButton;
-}
-
-void BottomBar::flash(PushButton* button)
+void BottomBar::flash(QAbstractButton* button)
 {
     setPanelButtonPaletteRed(button);
     QTimer::singleShot(400, this,
@@ -207,7 +186,38 @@ void BottomBar::flash(PushButton* button)
     });
 }
 
-PushButton* BottomBar::consoleButton() const
+void BottomBar::sweep()
+{
+    m_consoleButton->setChecked(false);
+    m_issuesButton->setChecked(false);
+}
+
+QAbstractButton* BottomBar::consoleButton() const
 {
     return m_consoleButton;
+}
+
+QAbstractButton* BottomBar::issuesButton() const
+{
+    return m_issuesButton;
+}
+
+void BottomBar::paintEvent(QPaintEvent*)
+{
+    QStylePainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+    QStyleOptionToolBar opt;
+    opt.initFrom(this);
+    opt.state |= QStyle::State_Horizontal;
+    p.drawControl(QStyle::CE_ToolBar, opt);
+}
+
+QSize BottomBar::sizeHint() const
+{
+    return QSize(100, 24);
+}
+
+QSize BottomBar::minimumSizeHint() const
+{
+    return QSize(0, 24);
 }

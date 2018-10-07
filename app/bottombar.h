@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class QHBoxLayout;
+class QAbstractButton;
 class PushButton;
 
 class BottomBar : public QWidget
@@ -11,16 +12,22 @@ class BottomBar : public QWidget
     Q_OBJECT
 public:
     explicit BottomBar(QWidget* parent = nullptr);
-    PushButton* consoleButton() const;
-    PushButton* issuesButton() const;
+    QAbstractButton* consoleButton() const;
+    QAbstractButton* issuesButton() const;
 
 public:
-    void flash(PushButton*);
+    void flash(QAbstractButton*);
+
+public slots:
+    void sweep();
 
 protected:
     void paintEvent(QPaintEvent*) override;
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
+
+signals:
+    void buttonActivated(QAbstractButton* button, bool checked);
 
 private:
     QHBoxLayout* m_layout;
