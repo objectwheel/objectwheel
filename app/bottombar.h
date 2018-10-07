@@ -11,6 +11,11 @@ class BottomBar : public QWidget
     Q_OBJECT
 public:
     explicit BottomBar(QWidget* parent = nullptr);
+    PushButton* consoleButton() const;
+    PushButton* issuesButton() const;
+
+public:
+    void flash(PushButton*);
 
 protected:
     void paintEvent(QPaintEvent*) override;

@@ -446,7 +446,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
     toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolButton->setText(color.name(QColor::HexArgb));
-    toolButton->setIcon(QIcon(PaintUtils::renderColorPixmap({12, 12}, color, {Qt::black})));
+    toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black})));
     toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
     toolButton->setIconSize({12, 12});
     toolButton->setCursor(Qt::PointingHandCursor);
@@ -470,7 +470,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
             return;
 
         toolButton->setText(color.name(QColor::HexArgb));
-        toolButton->setIcon(QIcon(PaintUtils::renderColorPixmap({12, 12}, color, {Qt::black})));
+        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black})));
         ControlPropertyManager::setProperty(control, propertyName,
                                             stringify(color.name(QColor::HexArgb)), color,
                                             ControlPropertyManager::SaveChanges

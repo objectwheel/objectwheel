@@ -1,4 +1,5 @@
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
 #include <QPainter>
 #include <QImage>
@@ -103,10 +104,33 @@ QImage PaintUtils::renderNonGuiControlImage(const QString& url, const QSizeF& si
     return dest;
 }
 
+QIcon PaintUtils::renderColorizedIcon(const QString& fileName, const QColor& color, const QWidget* widget)
+{
+    QIcon icon;
+    icon.addPixmap(renderColorizedPixmap(fileName, color, widget));
+    return icon;
+}
+
+QIcon PaintUtils::renderColorizedIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget)
+{
+    QIcon i;
+    i.addPixmap(renderColorizedPixmap(icon.pixmap(UtilityFunctions::window(widget), size), color, widget));
+    return i;
+}
+
 QPixmap PaintUtils::renderColorizedPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
     QImage source(fileName);
+    source.setDevicePixelRatio(dpr);
+    return renderColorizedPixmap(QPixmap::fromImage(source), color, widget);
+}
+
+QPixmap PaintUtils::renderColorizedPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+
+    QImage source(pixmap.toImage());
     source.setDevicePixelRatio(dpr);
 
     QImage dest = renderFilledImage(source.size() / dpr, color, widget);
@@ -142,7 +166,7 @@ QPixmap PaintUtils::renderMaskedPixmap(const QString& fileName, const QColor& co
     return QPixmap::fromImage(dest);
 }
 
-QPixmap PaintUtils::renderColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget)
+QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget)
 {
     QImage dest = renderFilledImage(size, color, widget);
 
@@ -209,13 +233,6 @@ void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, con
     painter->setBrush(color);
     painter->drawPolygon(points, 3);
     painter->restore();
-}
-
-QIcon PaintUtils::renderColorizedIcon(const QString& fileName, const QColor& color, const QWidget* widget)
-{
-    QIcon icon;
-    icon.addPixmap(renderColorizedPixmap(fileName, color, widget));
-    return icon;
 }
 
 /*!
