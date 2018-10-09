@@ -60,7 +60,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->addWidget(m_issuesBox);
     m_splitterOut->addWidget(m_bottomBar);
 
-    TransparentStyle::attach(m_bottomBar);
+    m_splitterOut->handle(3)->setDisabled(true);
+
+    m_bottomBar->setFixedHeight(24);
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
@@ -87,6 +89,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     connect(m_issuesBox, &IssuesBox::flashMe,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());
+    });
+    connect(m_consoleBox, &ConsoleBox::flashMe,
+            this, [=] {
+        m_bottomBar->flash(m_bottomBar->consoleButton());
     });
 
     connect(m_bottomBar, &BottomBar::buttonActivated,

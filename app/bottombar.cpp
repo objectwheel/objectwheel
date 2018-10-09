@@ -7,6 +7,7 @@
 #include <QStyleOption>
 #include <QButtonGroup>
 #include <QTimer>
+#include <QApplication>
 
 using namespace PaintUtils;
 
@@ -19,17 +20,17 @@ namespace {
     QPalette::Dark      :  Button's base and surrounding border's color
     QPalette::Shadow    :  Button's drop shadow color
 */
-void setPanelButtonPaletteDark(QWidget* widget)
+void setPanelButtonPaletteDarkerShadows(QWidget* widget)
 {
     QPalette palette(widget->palette());
 
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
     shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-    shadowGrad.setColorAt(0, "#22202020");
-    shadowGrad.setColorAt(0.05, "#20202020");
-    shadowGrad.setColorAt(0.5, "#20202020");
-    shadowGrad.setColorAt(0.95, "#20202020");
-    shadowGrad.setColorAt(1, "#22202020");
+    shadowGrad.setColorAt(0, "#52202020");
+    shadowGrad.setColorAt(0.05, "#50202020");
+    shadowGrad.setColorAt(0.5, "#50202020");
+    shadowGrad.setColorAt(0.95, "#50202020");
+    shadowGrad.setColorAt(1, "#52202020");
     palette.setBrush(QPalette::Shadow, shadowGrad);
 
     QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
@@ -40,22 +41,22 @@ void setPanelButtonPaletteDark(QWidget* widget)
 
     QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
     midGrad.setCoordinateMode(QGradient::ObjectMode);
-    midGrad.setColorAt(0, "#515b66");
-    midGrad.setColorAt(1, "#444e57");
+    midGrad.setColorAt(0, "#e7e7e7");
+    midGrad.setColorAt(1, "#e1e1e1");
     palette.setBrush(QPalette::Mid, midGrad);
 
     QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
     buttonGrad.setCoordinateMode(QGradient::ObjectMode);
-    buttonGrad.setColorAt(0, "#5d6975");
-    buttonGrad.setColorAt(1, "#515b66");
+    buttonGrad.setColorAt(0, "#fefefe");
+    buttonGrad.setColorAt(1, "#f7f7f7");
     palette.setBrush(QPalette::Button, buttonGrad);
 
     QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
     midlightGrad.setCoordinateMode(QGradient::ObjectMode);
-    midlightGrad.setColorAt(0, "#282d33");
-    midlightGrad.setColorAt(0.1, "#1c2024");
+    midlightGrad.setColorAt(0, "#d4d4d4");
+    midlightGrad.setColorAt(0.1, "#c7c7c7");
     palette.setBrush(QPalette::Midlight, midlightGrad);
-    palette.setBrush(QPalette::ButtonText, Qt::white);
+    palette.setBrush(QPalette::ButtonText, qApp->palette().buttonText());
     widget->setPalette(palette);
 }
 
@@ -129,8 +130,8 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
         }
     });
 
-    setPanelButtonPaletteDark(m_consoleButton);
-    setPanelButtonPaletteDark(m_issuesButton);
+    setPanelButtonPaletteDarkerShadows(m_consoleButton);
+    setPanelButtonPaletteDarkerShadows(m_issuesButton);
 
     const QColor& iconColor = m_consoleButton->palette().buttonText().color();
 
@@ -149,14 +150,17 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setToolTip(tr("Activate issues list"));
     m_issuesButton->setIconSize({16, 16});
     m_issuesButton->setIcon(renderColorizedIcon(":/images/issues.png", iconColor, this));
+    QTimer::singleShot(19000, std::bind(&BottomBar::flash, this, m_consoleButton));
 }
 
 void BottomBar::flash(QAbstractButton* button)
 {
     setPanelButtonPaletteRed(button);
+    button->setIcon(renderColorizedIcon(button->icon(), button->iconSize(),
+                                        button->palette().buttonText().color(), button));
     QTimer::singleShot(400, this,
                        [=] {
-        setPanelButtonPaletteDark(button);
+        setPanelButtonPaletteDarkerShadows(button);
         button->setIcon(renderColorizedIcon(button->icon(), button->iconSize(),
                                             button->palette().buttonText().color(), button));
     });
@@ -168,7 +172,7 @@ void BottomBar::flash(QAbstractButton* button)
     });
     QTimer::singleShot(1200, this,
                        [=] {
-        setPanelButtonPaletteDark(button);
+        setPanelButtonPaletteDarkerShadows(button);
         button->setIcon(renderColorizedIcon(button->icon(), button->iconSize(),
                                             button->palette().buttonText().color(), button));
     });
@@ -180,7 +184,7 @@ void BottomBar::flash(QAbstractButton* button)
     });
     QTimer::singleShot(2000, this,
                        [=] {
-        setPanelButtonPaletteDark(button);
+        setPanelButtonPaletteDarkerShadows(button);
         button->setIcon(renderColorizedIcon(button->icon(), button->iconSize(),
                                             button->palette().buttonText().color(), button));
     });
@@ -215,10 +219,8 @@ void BottomBar::paintEvent(QPaintEvent*)
 {
     QStylePainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    QStyleOptionToolBar opt;
-    opt.initFrom(this);
-    opt.state |= QStyle::State_Horizontal;
-    p.drawControl(QStyle::CE_ToolBar, opt);
+    p.setPen("#c4c4c4");
+    p.drawLine(rect().topLeft(), rect().topRight());
 }
 
 QSize BottomBar::sizeHint() const

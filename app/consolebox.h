@@ -32,6 +32,9 @@ private slots:
 private:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
+signals:
+    void flashMe();
+
 private:
     QVBoxLayout* m_layout;
     PlainTextEdit* m_textBrowser;

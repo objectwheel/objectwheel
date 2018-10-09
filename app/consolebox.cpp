@@ -87,8 +87,8 @@ void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont:
     if (atEnd)
         scrollToEnd();
 
-//    if (m_outputPane->isCollapsed() || m_outputPane->activeBox() != OutputPane::Console)
-//        m_outputPane->shine(OutputPane::Console); WARNING
+    if (isHidden())
+        emit flashMe();
 }
 
 void ConsoleBox::scrollToEnd()
