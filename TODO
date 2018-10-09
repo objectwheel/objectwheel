@@ -1,9 +1,13 @@
+Make sure you clean up that extern const char* TOOL_KEY; mess
+Anchors should be able to edited from PropertiesPane
+PropertiesPane should be able to support attached properties, like Component.xx, Layout.xx, ScrollView.xx
+Double click on a control leads to a signal list, that signal list should be able to support and show attached signals and slots
 Projeyi ükledikten sonra ana ekran açılınca Designer Scene'nin scrollbar'ı aşağı çekilmiş olarak başlıyor
-Checkout if bold font issues on welcome window is fixes with Qt 5.12
 application general settings
 qmlcodeeditor general settings
 qmlcodeeditör de dahil uygulamadaki her bir pencere kendi shortcutlarına ve menüsüne sahip olacak
 qmlcodeeditarwidget editördki son belgeyi kapatırken bazen çöküyor
+qmleditorwidget sweep()'deki delete document->document proje den projeye geçerken bazen çökme yapıyor
 qmlcodeeditorwidget'in bir sürü todo su halen duruyor, özellikle kontrol silme, dosyanın içeriğinin değişmesi gibi durumlar için olan todolar
 tema değiştirme ve controlpreviewmanager'in init olayı doğru dürüst çalışmıyor, ve birbirleri ile çelişiyor karışıyorlar
 nongui itemlerin x,y set etme problemi, ama set etmesek bu seferde ilk oluşumda set edemiyoruz, çünkü ilk oluşumda gri/nongui durumu daha belli değil

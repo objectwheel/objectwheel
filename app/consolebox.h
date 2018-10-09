@@ -11,7 +11,7 @@ class ConsoleBox : public QWidget
     Q_OBJECT
 
 public:
-    explicit ConsoleBox(QWidget* widget);
+    explicit ConsoleBox(QWidget* widget = nullptr);
 
 public:
     bool isClean() const;

@@ -20,6 +20,7 @@
 #include <projectmanager.h>
 #include <bottombar.h>
 #include <transparentstyle.h>
+#include <consolebox.h>
 
 #include <QWindow>
 #include <QSplitter>
@@ -81,8 +82,12 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
 
-    connect(m_outputPane->issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
+    connect(issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
             m_designerWidget, SLOT(onControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
+    connect(m_issuesBox, &IssuesBox::flashMe,
+            this, [=] {
+        m_bottomBar->flash(m_bottomBar->issuesButton());
+    });
 
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
     connect(SaveManager::instance(), &SaveManager::propertyChanged,    // Changes made out of code editor
@@ -154,7 +159,9 @@ void CentralWidget::sweep()
 {
     setCurrentPage(Page_Designer);
 
-    m_outputPane->sweep();
+    m_bottomBar->sweep();
+    m_consoleBox->sweep();
+    m_issuesBox->sweep();
     m_qmlCodeEditorWidget->sweep();
     m_designerWidget->sweep();
     m_projectOptionsWidget->sweep();
@@ -172,12 +179,12 @@ void CentralWidget::setCurrentPage(const Pages& page)
         break;
 
     case Page_Designer:
-//        m_outputPane->show();
+//        m_outputPane->show(); WARNING
         return m_designerWidget->show();
         break;
 
     case Page_SplitView:
-//        m_outputPane->show();
+//        m_outputPane->show(); WARNING
         m_designerWidget->show();
         return g_editorContainer->show();
         break;
@@ -187,7 +194,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
         break;
 
     case Page_QmlCodeEditor:
-//        m_outputPane->show();
+//        m_outputPane->show(); WARNING
         return g_editorContainer->show();
         break;
 
@@ -199,7 +206,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
 
 void CentralWidget::hideWidgets()
 {
-    m_outputPane->hide();
+//    m_outputPane->hide(); WARNING
     m_designerWidget->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();

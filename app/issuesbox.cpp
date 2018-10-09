@@ -117,7 +117,7 @@ void IssuesBox::handleErrors(Control* control)
             item->setIcon(QIcon(":/images/error.png"));
             m_listWidget->addItem(item);
             m_buggyControls[err] = control;
-            m_outputPane->shine(OutputPane::Issues);
+            emit flashMe();
         }
     }
 }
@@ -170,8 +170,7 @@ void IssuesBox::refresh()
         }
     }
 
-    m_outputPane->button(OutputPane::Issues)->setText
-            (QString("Issues [%1]").arg(m_listWidget->count()));
+    emit updateTitle(QString::fromUtf8("Issues [%1]").arg(m_listWidget->count()));
 }
 
 void IssuesBox::clear()

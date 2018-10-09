@@ -54,6 +54,8 @@ private slots:
     void handleDoubleClick(QListWidgetItem* item);
 
 signals:
+    void flashMe();
+    void updateTitle(const QString& title);
     void entryDoubleClicked(Control*);
 
 private:
