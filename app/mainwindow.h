@@ -5,7 +5,6 @@
 
 class RunPane;
 class FormsPane;
-class OutputPane;
 class ToolboxPane;
 class InspectorPane;
 class CentralWidget;

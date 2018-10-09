@@ -1,5 +1,4 @@
 #include <centralwidget.h>
-#include <outputpane.h>
 #include <designerwidget.h>
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
@@ -39,8 +38,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_splitterOut(new QSplitter)
   , m_splitterIn(new QSplitter)
-  , m_outputPane(new OutputPane)
   , m_bottomBar(new BottomBar)
+  , m_consoleBox(new ConsoleBox)
+  , m_issuesBox(new IssuesBox)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
@@ -55,7 +55,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->setHandleWidth(0);
     m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
-//    m_splitterOut->addWidget(m_outputPane);
+    m_splitterOut->addWidget(m_consoleBox);
+    m_splitterOut->addWidget(m_issuesBox);
     m_splitterOut->addWidget(m_bottomBar);
 
     TransparentStyle::attach(m_bottomBar);
@@ -139,9 +140,14 @@ DesignerWidget* CentralWidget::designerWidget() const
     return m_designerWidget;
 }
 
-OutputPane* CentralWidget::outputPane() const
+IssuesBox* CentralWidget::issuesBox() const
 {
-    return m_outputPane;
+    return m_issuesBox;
+}
+
+ConsoleBox* CentralWidget::consoleBox() const
+{
+    return m_consoleBox;
 }
 
 void CentralWidget::sweep()

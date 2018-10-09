@@ -1,6 +1,5 @@
 #include <consolebox.h>
 #include <runmanager.h>
-#include <outputpane.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <centralwidget.h>
@@ -22,8 +21,7 @@ class PlainTextEdit : public QPlainTextEdit {
     friend class ConsoleBox;
 };
 
-ConsoleBox::ConsoleBox(OutputPane* outputPane) : QWidget(outputPane)
-  , m_outputPane(outputPane)
+ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
 {
     m_layout = new QVBoxLayout(this);
     m_textBrowser = new PlainTextEdit;

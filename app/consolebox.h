@@ -5,14 +5,13 @@
 
 class PlainTextEdit;
 class QVBoxLayout;
-class OutputPane;
 
 class ConsoleBox : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ConsoleBox(OutputPane* outputPane);
+    explicit ConsoleBox(QWidget* widget);
 
 public:
     bool isClean() const;
@@ -36,7 +35,6 @@ private:
 private:
     QVBoxLayout* m_layout;
     PlainTextEdit* m_textBrowser;
-    OutputPane* m_outputPane;
 };
 
 #endif // CONSOLEBOX_H

@@ -1,6 +1,5 @@
 #include <mainwindow.h>
 #include <runpane.h>
-#include <outputpane.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
 #include <globalresourcespane.h>
@@ -62,7 +61,7 @@ bool inspectorDockWidgetVisible;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
-  , m_runPane(new RunPane(m_centralWidget->outputPane()->consoleBox()))
+  , m_runPane(new RunPane(m_centralWidget->consoleBox()))
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
@@ -296,8 +295,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished),
             [=] (int exitCode, QProcess::ExitStatus) {
-        auto pane = m_centralWidget->outputPane();
-        auto console = pane->consoleBox();
+        auto console = m_centralWidget->consoleBox();
 
         if (exitCode == EXIT_FAILURE) {
             console->printFormatted(tr("The process was ended forcefully.\n"), "#b34b46",

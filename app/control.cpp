@@ -10,7 +10,6 @@
 #include <inspectorpane.h>
 #include <propertiespane.h>
 #include <centralwidget.h>
-#include <outputpane.h>
 #include <issuesbox.h>
 #include <designerwidget.h>
 #include <controlpropertymanager.h>

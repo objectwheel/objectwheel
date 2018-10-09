@@ -7,7 +7,6 @@
 #include <QMap>
 
 class Control;
-class OutputPane;
 class QVBoxLayout;
 class QToolBar;
 class QToolButton;
@@ -43,7 +42,7 @@ class IssuesBox : public QWidget
 {
     Q_OBJECT
 public:
-    explicit IssuesBox(OutputPane* outputPane);
+    explicit IssuesBox(QWidget* parent = nullptr);
 
 public slots:
     void sweep();
@@ -64,7 +63,6 @@ private:
     QLabel* m_title;
     QListWidget* m_listWidget;
     QMap<Error, QPointer<Control>> m_buggyControls;
-    OutputPane* m_outputPane;
 };
 
 #endif // ISSUESBOX_H

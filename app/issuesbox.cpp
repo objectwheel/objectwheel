@@ -1,6 +1,5 @@
 #include <issuesbox.h>
 #include <control.h>
-#include <outputpane.h>
 #include <utilsicons.h>
 #include <transparentstyle.h>
 
@@ -56,13 +55,12 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
       arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
 }
 
-IssuesBox::IssuesBox(OutputPane* outputPane) : QWidget(outputPane)
+IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_toolbar(new QToolBar)
   , m_clearButton(new QToolButton)
   , m_title(new QLabel)
   , m_listWidget(new QListWidget)
-  , m_outputPane(outputPane)
 {
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
