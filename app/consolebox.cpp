@@ -149,7 +149,9 @@ void ConsoleBox::onStandardOutput(const QString& output)
 
 bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == m_textBrowser->viewport() && event->type() == QEvent::MouseMove) {
+    if (watched == m_textBrowser->viewport()
+            && (event->type() == QEvent::MouseMove
+                || event->type() == QEvent::MouseButtonRelease)) {
         auto e = static_cast<QMouseEvent*>(event);
         auto ce = m_textBrowser;
         auto pos = ce->contentOffset() + e->pos();
@@ -162,30 +164,12 @@ bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
                 QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
                 if (exp.match(block.text()).hasMatch()
                         && pos.x() < m_textBrowser->fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
-                    m_textBrowser->viewport()->setCursor(Qt::PointingHandCursor);
+                    if (event->type() == QEvent::MouseMove)
+                        m_textBrowser->viewport()->setCursor(Qt::PointingHandCursor);
+                    else
+                        onLinkClick(exp.match(block.text()).captured());
                 } else {
                     m_textBrowser->viewport()->setCursor(Qt::IBeamCursor);
-                }
-            }
-
-            block = block.next();
-            top = bottom;
-            bottom = top + ce->document()->documentLayout()->blockBoundingRect(block).height();
-        }
-    } else if (watched == m_textBrowser->viewport() && event->type() == QEvent::MouseButtonRelease) {
-        auto e = static_cast<QMouseEvent*>(event);
-        auto ce = m_textBrowser;
-        auto pos = ce->contentOffset() + e->pos();
-        auto block = ce->firstVisibleBlock();
-        auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
-        auto bottom = top + ce->blockBoundingRect(block).height();
-
-        while (block.isValid() && top <= rect().bottom()) {
-            if (pos.y() >= top && pos.y() <= bottom) {
-                QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
-                if (exp.match(block.text()).hasMatch()
-                        && pos.x() < m_textBrowser->fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
-                    onLinkClick(exp.match(block.text()).captured());
                 }
             }
 
