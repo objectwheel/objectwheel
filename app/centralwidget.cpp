@@ -89,6 +89,21 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         m_bottomBar->flash(m_bottomBar->issuesButton());
     });
 
+    connect(m_bottomBar, &BottomBar::buttonActivated,
+            this, [=] (QAbstractButton* button) {
+        if (button == m_bottomBar->consoleButton()) {
+            if (button->isChecked())
+                m_consoleBox->show();
+            else
+                m_consoleBox->hide();
+        } else {
+            if (button->isChecked())
+                m_issuesBox->show();
+            else
+                m_issuesBox->hide();
+        }
+    });
+
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
     connect(SaveManager::instance(), &SaveManager::propertyChanged,    // Changes made out of code editor
             this, [=] (Control* control, const QString& property, const QString& value) {
@@ -158,7 +173,8 @@ ConsoleBox* CentralWidget::consoleBox() const
 void CentralWidget::sweep()
 {
     setCurrentPage(Page_Designer);
-
+    m_consoleBox->hide();
+    m_issuesBox->hide();
     m_bottomBar->sweep();
     m_consoleBox->sweep();
     m_issuesBox->sweep();
@@ -179,12 +195,20 @@ void CentralWidget::setCurrentPage(const Pages& page)
         break;
 
     case Page_Designer:
-//        m_outputPane->show(); WARNING
+        m_bottomBar->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+            m_consoleBox->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+            m_issuesBox->show();
         return m_designerWidget->show();
         break;
 
     case Page_SplitView:
-//        m_outputPane->show(); WARNING
+        m_bottomBar->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+            m_consoleBox->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+            m_issuesBox->show();
         m_designerWidget->show();
         return g_editorContainer->show();
         break;
@@ -194,7 +218,11 @@ void CentralWidget::setCurrentPage(const Pages& page)
         break;
 
     case Page_QmlCodeEditor:
-//        m_outputPane->show(); WARNING
+        m_bottomBar->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+            m_consoleBox->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+            m_issuesBox->show();
         return g_editorContainer->show();
         break;
 
@@ -206,7 +234,9 @@ void CentralWidget::setCurrentPage(const Pages& page)
 
 void CentralWidget::hideWidgets()
 {
-//    m_outputPane->hide(); WARNING
+    m_bottomBar->hide();
+    m_issuesBox->hide();
+    m_consoleBox->hide();
     m_designerWidget->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();

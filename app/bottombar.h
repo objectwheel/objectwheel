@@ -12,14 +12,13 @@ class BottomBar : public QWidget
     Q_OBJECT
 public:
     explicit BottomBar(QWidget* parent = nullptr);
+    QAbstractButton* activeButton() const;
     QAbstractButton* consoleButton() const;
     QAbstractButton* issuesButton() const;
 
-public:
-    void flash(QAbstractButton*);
-
 public slots:
     void sweep();
+    void flash(QAbstractButton*);
 
 protected:
     void paintEvent(QPaintEvent*) override;

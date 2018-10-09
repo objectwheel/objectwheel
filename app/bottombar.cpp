@@ -192,6 +192,15 @@ void BottomBar::sweep()
     m_issuesButton->setChecked(false);
 }
 
+QAbstractButton* BottomBar::activeButton() const
+{
+    if (m_consoleButton->isChecked())
+        return m_consoleButton;
+    if (m_issuesButton->isChecked())
+        return m_issuesButton;
+    return nullptr;
+}
+
 QAbstractButton* BottomBar::consoleButton() const
 {
     return m_consoleButton;
