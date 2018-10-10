@@ -58,8 +58,8 @@ void setPanelButtonPaletteDarkerShadows(QWidget* widget)
 
     QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
     midlightGrad.setCoordinateMode(QGradient::ObjectMode);
-    midlightGrad.setColorAt(0, "#d4d4d4");
-    midlightGrad.setColorAt(0.1, "#c7c7c7");
+    midlightGrad.setColorAt(0, "#f4f4f4");
+    midlightGrad.setColorAt(0.1, "#ededed");
     palette.setBrush(QPalette::Midlight, midlightGrad);
     palette.setBrush(QPalette::ButtonText, qApp->palette().buttonText());
     widget->setPalette(palette);
@@ -141,6 +141,8 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
 
     setPanelButtonPaletteDarkerShadows(m_consoleButton);
     setPanelButtonPaletteDarkerShadows(m_issuesButton);
+    setPanelButtonPaletteDarkerShadows(m_showHideLeftPanesButton);
+    setPanelButtonPaletteDarkerShadows(m_showHideRightPanesButton);
 
     const QColor& iconColor = m_consoleButton->palette().buttonText().color();
 
@@ -160,24 +162,22 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setIconSize({16, 16});
     m_issuesButton->setIcon(renderColorizedIcon(":/images/issues.png", iconColor, this));
 
-
-    m_showHideLeftPanesButton->setIcon(Icon({{TOGGLE_LEFT_SIDEBAR_TOOLBAR.imageFileName(),
-                                              Theme::FancyToolButtonSelectedColor}}).icon());
-    m_showHideRightPanesButton->setIcon(Icon({{TOGGLE_RIGHT_SIDEBAR_TOOLBAR.imageFileName(),
-                                               Theme::FancyToolButtonSelectedColor}}).icon());
-    m_showHideLeftPanesButton->setIconSize(QSize(20, 20));
-    m_showHideRightPanesButton->setIconSize(QSize(20, 20));
+    m_showHideLeftPanesButton->setMaximumHeight(20);
+    m_showHideLeftPanesButton->setCursor(Qt::PointingHandCursor);
     m_showHideLeftPanesButton->setCheckable(true);
+    m_showHideLeftPanesButton->setIconSize({16, 16});
+    m_showHideLeftPanesButton->setIcon(TOGGLE_LEFT_SIDEBAR_TOOLBAR.icon());
+
+    m_showHideRightPanesButton->setMaximumHeight(20);
+    m_showHideRightPanesButton->setCursor(Qt::PointingHandCursor);
     m_showHideRightPanesButton->setCheckable(true);
-    m_showHideLeftPanesButton->setFixedHeight(22);
-    m_showHideRightPanesButton->setFixedHeight(22);
-    m_showHideLeftPanesButton->setFixedWidth(35);
-    m_showHideRightPanesButton->setFixedWidth(35);
+    m_showHideRightPanesButton->setIconSize({16, 16});
+    m_showHideRightPanesButton->setIcon(TOGGLE_RIGHT_SIDEBAR_TOOLBAR.icon());
 
     connect(m_showHideLeftPanesButton, &PushButton::clicked,
             this, &BottomBar::showHideLeftPanesButtonActivated);
     connect(m_showHideRightPanesButton, &PushButton::clicked,
-            this, &BottomBar::showHideLeftPanesButtonActivated);
+            this, &BottomBar::showHideRightPanesButtonActivated);
     connect(m_showHideLeftPanesButton, &PushButton::clicked,
             this, &BottomBar::setLeftShowHideButtonToolTip);
     connect(m_showHideRightPanesButton, &PushButton::clicked,

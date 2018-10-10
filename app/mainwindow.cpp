@@ -18,6 +18,7 @@
 #include <toolboxsettingswindow.h>
 #include <qmlcodeeditorwidget.h>
 #include <utilityfunctions.h>
+#include <bottombar.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -265,17 +266,30 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
 
-    connect(m_centralWidget->designerWidget(), SIGNAL(hideDockWidgetTitleBars(bool)), SLOT(setDockWidgetTitleBarsHidden(bool)));
-    connect(m_pageSwitcherPane, SIGNAL(buildsActivated()), SLOT(hideDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(designerActivated()), SLOT(restoreDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(splitViewActivated()), SLOT(restoreDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(helpActivated()), SLOT(hideDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(hideDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(hideDocks()));
-    connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)), m_centralWidget, SLOT(setCurrentPage(Pages)));
-//    WARNING connect(m_pageSwitcherPane, SIGNAL(leftPanesShowChanged(bool)), this, SLOT(showLeftPanes(bool)));
-//    WARNING connect(m_pageSwitcherPane, SIGNAL(rightPanesShowChanged(bool)), this, SLOT(showRightPanes(bool)));
-
+    connect(m_centralWidget->designerWidget(), &DesignerWidget::hideDockWidgetTitleBars,
+            this, &MainWindow::setDockWidgetTitleBarsHidden);
+    connect(m_centralWidget->bottomBar(), &BottomBar::showHideLeftPanesButtonActivated,
+            this, &MainWindow::showLeftPanes);
+    connect(m_centralWidget->bottomBar(), &BottomBar::showHideRightPanesButtonActivated,
+            this, &MainWindow::showRightPanes);
+    connect(m_pageSwitcherPane, &PageSwitcherPane::buildsActivated,
+            this, &MainWindow::hideDocks);
+    connect(m_pageSwitcherPane, &PageSwitcherPane::designerActivated,
+            this, &MainWindow::restoreDocks);
+    connect(m_pageSwitcherPane, &PageSwitcherPane::splitViewActivated,
+            this, &MainWindow::restoreDocks);
+    connect(m_pageSwitcherPane, &PageSwitcherPane::helpActivated,
+            this, &MainWindow::hideDocks);
+    connect(m_pageSwitcherPane, &PageSwitcherPane::qmlCodeEditorActivated,
+            this, &MainWindow::hideDocks);
+    connect(m_pageSwitcherPane, &PageSwitcherPane::projectOptionsActivated,
+            this, &MainWindow::hideDocks);
+    connect(m_pageSwitcherPane, &PageSwitcherPane::currentPageChanged,
+            m_centralWidget, &CentralWidget::setCurrentPage);
+    connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
+            m_centralWidget->designerWidget(), &DesignerWidget::onControlSelectionChange);
+    connect(m_inspectorPane, &InspectorPane::controlDoubleClicked,
+            m_centralWidget->designerWidget(), &DesignerWidget::onInspectorItemDoubleClick);
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
@@ -287,12 +301,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_pageSwitcherPane->setCurrentPage(Page_SplitView);
         }
     });
-
-    connect(m_inspectorPane, SIGNAL(controlSelectionChanged(const QList<Control*>&)),
-            m_centralWidget->designerWidget(), SLOT(onControlSelectionChange(const QList<Control*>&)));
-    connect(m_inspectorPane, SIGNAL(controlDoubleClicked(Control*)),
-            m_centralWidget->designerWidget(), SLOT(onInspectorItemDoubleClick(Control*)));
-
     connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished),
             [=] (int exitCode, QProcess::ExitStatus) {
         auto console = m_centralWidget->consoleBox();

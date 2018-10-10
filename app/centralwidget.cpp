@@ -171,6 +171,11 @@ IssuesBox* CentralWidget::issuesBox() const
     return m_issuesBox;
 }
 
+BottomBar* CentralWidget::bottomBar() const
+{
+    return m_bottomBar;
+}
+
 ConsoleBox* CentralWidget::consoleBox() const
 {
     return m_consoleBox;

@@ -25,6 +25,7 @@ public:
     DesignerWidget* designerWidget() const;
     ConsoleBox* consoleBox() const;
     IssuesBox* issuesBox() const;
+    BottomBar* bottomBar() const;
 
 public slots:
     void sweep();

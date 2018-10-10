@@ -27,6 +27,7 @@ public slots:
     void onControlDoubleClick(Control*);
     void onInspectorItemDoubleClick(Control*);
     void onControlDrop(Control*, const QPointF&, const QString&);
+    void onControlSelectionChange(const QList<Control*>& selectedControls);
 
 protected:
     QSize sizeHint() const override;
@@ -40,7 +41,6 @@ private slots:
     void onOutlineButtonClick(bool value);
     void onSnappingButtonClick(bool value);
     void onZoomLevelChange(const QString& text);
-    void onControlSelectionChange(const QList<Control*>& selectedControls);
 
 signals:
     void hideDockWidgetTitleBars(bool);
