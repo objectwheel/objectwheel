@@ -1,18 +1,13 @@
 #include <pageswitcherpane.h>
 #include <flatbutton.h>
 #include <appfontsettings.h>
-#include <utilsicons.h>
 
 #include <QPainter>
 #include <QVBoxLayout>
 
 namespace {
-const QString TOOLTIP = QObject::tr("<span style=\"font-size: 12px !important;\">Open <b>%1</b></span>");
-const QString TOOLTIP_2 = QObject::tr("<span style=\"font-size: 12px !important;\">%1</span>");
+const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1 <b>%2</b></span>";
 }
-
-using namespace Utils;
-using namespace Icons;
 
 PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
@@ -52,12 +47,12 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_splitViewButton->setText(tr("Split View"));
     m_buildsButton->setText(tr("Builds"));
 
-    m_designerButton->setToolTip(TOOLTIP.arg(tr("Designer")));
-    m_qmlCodeEditorButton->setToolTip(TOOLTIP.arg(tr("Qml Code Editor")));
-    m_projectOptionsButton->setToolTip(TOOLTIP.arg(tr("Project Options")));
-    m_helpButton->setToolTip(TOOLTIP.arg(tr("Help and Documentations")));
-    m_splitViewButton->setToolTip(TOOLTIP.arg(tr("Splitted View")));
-    m_buildsButton->setToolTip(TOOLTIP.arg(tr("Cloud Builds")));
+    m_designerButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Designer")));
+    m_qmlCodeEditorButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Qml Code Editor")));
+    m_projectOptionsButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Project Options")));
+    m_helpButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Help and Documentations")));
+    m_splitViewButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Splitted View")));
+    m_buildsButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Cloud Builds")));
 
     m_designerButton->setAutoExclusive(true);
     m_qmlCodeEditorButton->setAutoExclusive(true);

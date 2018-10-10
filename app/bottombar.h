@@ -20,20 +20,26 @@ public slots:
     void sweep();
     void flash(QAbstractButton*);
 
+private slots:
+    void setLeftShowHideButtonToolTip(bool);
+    void setRightShowHideButtonToolTip(bool);
+
 protected:
     void paintEvent(QPaintEvent*) override;
-    QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
 
 signals:
+    void showHideLeftPanesButtonActivated(bool);
+    void showHideRightPanesButtonActivated(bool);
     void buttonActivated(QAbstractButton* button, bool checked);
 
 private:
     QHBoxLayout* m_layout;
     PushButton* m_consoleButton;
     PushButton* m_issuesButton;
-    PushButton* m_hideShowLeftPanesButton;
-    PushButton* m_hideShowRightPanesButton;
+    PushButton* m_showHideLeftPanesButton;
+    PushButton* m_showHideRightPanesButton;
 };
 
 #endif // BOTTOMBAR_H

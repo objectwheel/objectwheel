@@ -15,6 +15,8 @@ using namespace Utils;
 using namespace Utils::Icons;
 
 namespace {
+const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1</span>";
+
 /*!
     QPalette::Light     :  Button's frame rect color (not used)
     QPalette::Midlight  :  Button's glowing color (when pressed)
@@ -103,56 +105,22 @@ void setPanelButtonPaletteRed(QWidget* widget)
 }
 }
 
-
-void changeLeftShowHideButtonToolTip(bool);
-void changeRightShowHideButtonToolTip(bool);
-void setLeftPanesShow(bool);
-void setRightPanesShow(bool);
-void leftPanesShowChanged(bool);
-void rightPanesShowChanged(bool);
-void PageSwitcherPane::changeLeftShowHideButtonToolTip(bool showed)
-{
-    if (showed)
-        m_hideShowLeftPanesButton->setToolTip(TOOLTIP_2.arg(tr("Hide Left Panes")));
-    else
-        m_hideShowLeftPanesButton->setToolTip(TOOLTIP_2.arg(tr("Show Left Panes")));
-}
-
-void PageSwitcherPane::changeRightShowHideButtonToolTip(bool showed)
-{
-    if (showed)
-        m_hideShowRightPanesButton->setToolTip(TOOLTIP_2.arg(tr("Hide Right Panes")));
-    else
-        m_hideShowRightPanesButton->setToolTip(TOOLTIP_2.arg(tr("Show Right Panes")));
-}
-
-
-void PageSwitcherPane::setRightPanesShow(bool value)
-{
-    if (m_hideShowRightPanesButton->isEnabled() && m_hideShowRightPanesButton->isChecked() != value)
-        m_hideShowRightPanesButton->setChecked(value);
-}
-
-void PageSwitcherPane::setLeftPanesShow(bool value)
-{
-    if (m_hideShowLeftPanesButton->isEnabled() && m_hideShowLeftPanesButton->isChecked() != value)
-        m_hideShowLeftPanesButton->setChecked(value);
-}
-
 BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
   , m_layout(new QHBoxLayout(this))
   , m_consoleButton(new PushButton(this))
   , m_issuesButton(new PushButton(this))
-  , m_hideShowLeftPanesButton(new PushButton(this))
-  , m_hideShowRightPanesButton(new PushButton(this))
+  , m_showHideLeftPanesButton(new PushButton(this))
+  , m_showHideRightPanesButton(new PushButton(this))
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     m_layout->setSpacing(2);
     m_layout->setContentsMargins(2, 2, 2, 2);
+    m_layout->addWidget(m_showHideLeftPanesButton, 0, Qt::AlignVCenter);
     m_layout->addWidget(m_issuesButton, 0, Qt::AlignVCenter);
     m_layout->addWidget(m_consoleButton, 0, Qt::AlignVCenter);
     m_layout->addStretch();
+    m_layout->addWidget(m_showHideRightPanesButton, 0, Qt::AlignVCenter);
 
     auto buttonGroup = new QButtonGroup(this);
     buttonGroup->addButton(m_consoleButton);
@@ -193,27 +161,27 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setIcon(renderColorizedIcon(":/images/issues.png", iconColor, this));
 
 
-    m_hideShowLeftPanesButton->setIcon(Icon({{TOGGLE_LEFT_SIDEBAR_TOOLBAR.imageFileName(),
-                                                   Theme::FancyToolButtonSelectedColor}}).icon());
-    m_hideShowRightPanesButton->setIcon(Icon({{TOGGLE_RIGHT_SIDEBAR_TOOLBAR.imageFileName(),
-                                                    Theme::FancyToolButtonSelectedColor}}).icon());
-    m_hideShowLeftPanesButton->setIconSize(QSize(20, 20));
-    m_hideShowRightPanesButton->setIconSize(QSize(20, 20));
-    m_hideShowLeftPanesButton->setCheckable(true);
-    m_hideShowRightPanesButton->setCheckable(true);
-    m_hideShowLeftPanesButton->setFixedHeight(22);
-    m_hideShowRightPanesButton->setFixedHeight(22);
-    m_hideShowLeftPanesButton->setFixedWidth(35);
-    m_hideShowRightPanesButton->setFixedWidth(35);
+    m_showHideLeftPanesButton->setIcon(Icon({{TOGGLE_LEFT_SIDEBAR_TOOLBAR.imageFileName(),
+                                              Theme::FancyToolButtonSelectedColor}}).icon());
+    m_showHideRightPanesButton->setIcon(Icon({{TOGGLE_RIGHT_SIDEBAR_TOOLBAR.imageFileName(),
+                                               Theme::FancyToolButtonSelectedColor}}).icon());
+    m_showHideLeftPanesButton->setIconSize(QSize(20, 20));
+    m_showHideRightPanesButton->setIconSize(QSize(20, 20));
+    m_showHideLeftPanesButton->setCheckable(true);
+    m_showHideRightPanesButton->setCheckable(true);
+    m_showHideLeftPanesButton->setFixedHeight(22);
+    m_showHideRightPanesButton->setFixedHeight(22);
+    m_showHideLeftPanesButton->setFixedWidth(35);
+    m_showHideRightPanesButton->setFixedWidth(35);
 
-    connect(m_hideShowLeftPanesButton, &FlatButton::toggled,
-            this, &PageSwitcherPane::leftPanesShowChanged);
-    connect(m_hideShowRightPanesButton, &FlatButton::toggled,
-            this, &PageSwitcherPane::rightPanesShowChanged);
-    connect(this, &PageSwitcherPane::leftPanesShowChanged,
-            this, &PageSwitcherPane::changeLeftShowHideButtonToolTip);
-    connect(this, &PageSwitcherPane::rightPanesShowChanged,
-            this, &PageSwitcherPane::changeRightShowHideButtonToolTip);
+    connect(m_showHideLeftPanesButton, &PushButton::clicked,
+            this, &BottomBar::showHideLeftPanesButtonActivated);
+    connect(m_showHideRightPanesButton, &PushButton::clicked,
+            this, &BottomBar::showHideLeftPanesButtonActivated);
+    connect(m_showHideLeftPanesButton, &PushButton::clicked,
+            this, &BottomBar::setLeftShowHideButtonToolTip);
+    connect(m_showHideRightPanesButton, &PushButton::clicked,
+            this, &BottomBar::setRightShowHideButtonToolTip);
 }
 
 void BottomBar::flash(QAbstractButton* button)
@@ -253,12 +221,30 @@ void BottomBar::flash(QAbstractButton* button)
     });
 }
 
+void BottomBar::setLeftShowHideButtonToolTip(bool checked)
+{
+    if (checked)
+        m_showHideLeftPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Hide Left Panes")));
+    else
+        m_showHideLeftPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Show Left Panes")));
+}
+
+void BottomBar::setRightShowHideButtonToolTip(bool checked)
+{
+    if (checked)
+        m_showHideRightPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Hide Right Panes")));
+    else
+        m_showHideRightPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Show Right Panes")));
+}
+
 void BottomBar::sweep()
 {
     m_consoleButton->setChecked(false);
     m_issuesButton->setChecked(false);
-    setRightPanesShow(true); // WARNING
-    setLeftPanesShow(true); // WARNING
+    m_showHideLeftPanesButton->setChecked(true);
+    m_showHideRightPanesButton->setChecked(true);
+    setLeftShowHideButtonToolTip(true);
+    setRightShowHideButtonToolTip(true);
 }
 
 QAbstractButton* BottomBar::activeButton() const
@@ -286,19 +272,19 @@ void BottomBar::paintEvent(QPaintEvent*)
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen("#c4c4c4");
     p.drawLine(rect().topLeft() + QPointF(0.5, 0.5),
-                      rect().topRight() + QPointF(0.5, 0.5));
+               rect().topRight() + QPointF(0.5, 0.5));
     p.drawLine(rect().topLeft() + QPointF(0.5, 0.5),
-                      rect().bottomLeft() + QPointF(0.5, 0.5));
+               rect().bottomLeft() + QPointF(0.5, 0.5));
     p.drawLine(rect().topRight() + QPointF(0.5, 0.5),
-                      rect().bottomRight() + QPointF(0.5, 0.5));
-}
-
-QSize BottomBar::sizeHint() const
-{
-    return QSize(100, 24);
+               rect().bottomRight() + QPointF(0.5, 0.5));
 }
 
 QSize BottomBar::minimumSizeHint() const
 {
     return QSize(0, 24);
+}
+
+QSize BottomBar::sizeHint() const
+{
+    return QSize(100, 24);
 }

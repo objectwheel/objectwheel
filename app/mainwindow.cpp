@@ -273,8 +273,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_pageSwitcherPane, SIGNAL(qmlCodeEditorActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(projectOptionsActivated()), SLOT(hideDocks()));
     connect(m_pageSwitcherPane, SIGNAL(currentPageChanged(Pages)), m_centralWidget, SLOT(setCurrentPage(Pages)));
-    connect(m_pageSwitcherPane, SIGNAL(leftPanesShowChanged(bool)), this, SLOT(showLeftPanes(bool)));
-    connect(m_pageSwitcherPane, SIGNAL(rightPanesShowChanged(bool)), this, SLOT(showRightPanes(bool)));
+//    WARNING connect(m_pageSwitcherPane, SIGNAL(leftPanesShowChanged(bool)), this, SLOT(showLeftPanes(bool)));
+//    WARNING connect(m_pageSwitcherPane, SIGNAL(rightPanesShowChanged(bool)), this, SLOT(showRightPanes(bool)));
 
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
@@ -319,6 +319,9 @@ void MainWindow::sweep()
     m_propertiesPane->sweep();
     m_globalResourcesPane->sweep();
     m_pageSwitcherPane->sweep();
+
+    showLeftPanes(true);
+    showRightPanes(true);
 }
 
 void MainWindow::showLeftPanes(bool show)
@@ -343,7 +346,6 @@ void MainWindow::showLeftPanes(bool show)
         toolboxDockWidget->setVisible(show);
         toolboxDockWidgetVisible = show;
     }
-//    WARNING m_pageSwitcherPane->setLeftPanesShow(show);
 }
 
 void MainWindow::showRightPanes(bool show)
@@ -368,7 +370,6 @@ void MainWindow::showRightPanes(bool show)
         toolboxDockWidget->setVisible(show);
         toolboxDockWidgetVisible = show;
     }
-//   WARNING m_pageSwitcherPane->setRightPanesShow(show);
 }
 
 void MainWindow::setDockWidgetTitleBarsHidden(bool yes)

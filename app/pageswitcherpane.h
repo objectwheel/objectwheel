@@ -24,7 +24,6 @@ public slots:
 
 protected:
     void paintEvent(QPaintEvent* e) override;
-    void resizeEvent(QResizeEvent* e) override;
 
 signals:
     void buildsActivated();
