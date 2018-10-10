@@ -60,7 +60,7 @@ signals:
 
 private:
     QVBoxLayout* m_layout;
-    QToolBar* m_toolbar;
+    QToolBar* m_toolBar;
     QToolButton* m_clearButton;
     QLabel* m_title;
     QListWidget* m_listWidget;

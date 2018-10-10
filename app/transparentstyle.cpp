@@ -762,17 +762,17 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             painter->fillRect(cb->rect, g);
             painter->setPen("#c4c4c4");
 
-            if (cb->state & State_Horizontal) {
+//            if (cb->state & State_Horizontal) {
                 painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
                                   cb->rect.topRight() + QPointF(-0.5, 0.5));
                 painter->drawLine(cb->rect.bottomLeft() + QPointF(0.5, 0.5),
                                   cb->rect.bottomRight() + QPointF(-0.5, 0.5));
-            } else  {
+//            } else  {
                 painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
                                   cb->rect.bottomLeft() + QPointF(0.5, 0.5));
                 painter->drawLine(cb->rect.topRight() + QPointF(-0.5, 0.5),
                                   cb->rect.bottomRight() + QPointF(-0.5, 0.5));
-            }
+//            }
 
             painter->restore();
         } break;

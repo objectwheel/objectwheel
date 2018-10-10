@@ -59,7 +59,7 @@ RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
     TransparentStyle::attach(this);
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
         setContentsMargins(0, 0, 0, 0);
-        layout()->setContentsMargins(7, 7, 7, 7);
+        layout()->setContentsMargins(7, 7, 7, 7); // They must be all same
         layout()->setSpacing(7);
     });
 

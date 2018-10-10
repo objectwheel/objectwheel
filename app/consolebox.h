@@ -5,6 +5,9 @@
 
 class PlainTextEdit;
 class QVBoxLayout;
+class QToolButton;
+class QToolBar;
+class QLabel;
 
 class ConsoleBox : public QWidget
 {
@@ -37,7 +40,10 @@ signals:
 
 private:
     QVBoxLayout* m_layout;
-    PlainTextEdit* m_textBrowser;
+    PlainTextEdit* m_plainTextEdit;
+    QToolBar* m_toolBar;
+    QLabel* m_titleLabel;
+    QToolButton* m_clearButton;
 };
 
 #endif // CONSOLEBOX_H

@@ -57,32 +57,32 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
 
 IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
-  , m_toolbar(new QToolBar)
+  , m_toolBar(new QToolBar)
   , m_clearButton(new QToolButton)
   , m_title(new QLabel)
   , m_listWidget(new QListWidget)
 {
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
-    m_layout->addWidget(m_toolbar);
+    m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_listWidget);
 
-    TransparentStyle::attach(m_toolbar);
+    TransparentStyle::attach(m_toolBar);
 
     m_title->setText("Issues");
     m_title->setFixedHeight(22);
     m_clearButton->setFixedHeight(22);
 
-    m_toolbar->setFixedHeight(24);
+    m_toolBar->setFixedHeight(24);
     auto spacing = new QWidget(this);
     spacing->setFixedSize(2, 24);
     auto spacing_2 = new QWidget(this);
     spacing_2->setFixedSize(5, 24);
-    m_toolbar->addWidget(spacing);
-    m_toolbar->addWidget(m_title);
-    m_toolbar->addWidget(spacing_2);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(m_clearButton);
+    m_toolBar->addWidget(spacing);
+    m_toolBar->addWidget(m_title);
+    m_toolBar->addWidget(spacing_2);
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(m_clearButton);
 
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
     m_clearButton->setToolTip(tr("Clean errors."));

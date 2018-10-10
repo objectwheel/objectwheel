@@ -40,7 +40,7 @@ private slots:
 private:
     QHelpEngine* m_helpEngine;
     QVBoxLayout* m_layout;
-    QToolBar* m_toolbar;
+    QToolBar* m_toolBar;
     QComboBox* m_typeCombo;
     QToolButton* m_homeButton;
     QToolButton* m_backButton;

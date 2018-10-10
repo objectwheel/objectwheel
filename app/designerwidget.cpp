@@ -143,7 +143,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
   , m_layout(new QVBoxLayout(this))
   , m_designerScene(new DesignerScene(this))
   , m_designerView(new DesignerView(m_designerScene))
-  , m_toolbar(new QToolBar)
+  , m_toolBar(new QToolBar)
   , m_undoButton(new QToolButton)
   , m_redoButton(new QToolButton)
   , m_clearButton(new QToolButton)
@@ -156,7 +156,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
 {
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_toolbar);
+    m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_designerView);
 
     m_designerView->setRenderHint(QPainter::Antialiasing);
@@ -228,7 +228,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     connect(m_refreshButton, SIGNAL(clicked(bool)), SLOT(onRefreshButtonClick()));
     connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(onClearButtonClick()));
 
-    TransparentStyle::attach(m_toolbar);
+    TransparentStyle::attach(m_toolBar);
 
     m_undoButton->setFixedHeight(22);
     m_redoButton->setFixedHeight(22);
@@ -240,19 +240,19 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_hideDockWidgetTitleBarsButton->setFixedHeight(22);
     m_zoomlLevelCombobox->setFixedHeight(22);
 
-    m_toolbar->setFixedHeight(24);
-    m_toolbar->addWidget(m_undoButton);
-    m_toolbar->addWidget(m_redoButton);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(m_refreshButton);
-    m_toolbar->addWidget(m_clearButton);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(m_snappingButton);
-    m_toolbar->addWidget(m_outlineButton);
-    m_toolbar->addWidget(m_fitButton);
-    m_toolbar->addWidget(m_zoomlLevelCombobox);
-    m_toolbar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
-    m_toolbar->addWidget(m_hideDockWidgetTitleBarsButton);
+    m_toolBar->setFixedHeight(24);
+    m_toolBar->addWidget(m_undoButton);
+    m_toolBar->addWidget(m_redoButton);
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(m_refreshButton);
+    m_toolBar->addWidget(m_clearButton);
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(m_snappingButton);
+    m_toolBar->addWidget(m_outlineButton);
+    m_toolBar->addWidget(m_fitButton);
+    m_toolBar->addWidget(m_zoomlLevelCombobox);
+    m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
+    m_toolBar->addWidget(m_hideDockWidgetTitleBarsButton);
 }
 
 void DesignerWidget::scaleScene(qreal ratio)

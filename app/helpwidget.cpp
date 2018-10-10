@@ -21,7 +21,7 @@ QHelpIndexWidget* indexWidget;
 HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_helpEngine(new QHelpEngine(qApp->applicationDirPath() + "/docs/docs.qhc", this))
   , m_layout(new QVBoxLayout(this))
-  , m_toolbar(new QToolBar)
+  , m_toolBar(new QToolBar)
   , m_typeCombo(new QComboBox)
   , m_homeButton(new QToolButton)
   , m_backButton(new QToolButton)
@@ -43,27 +43,27 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_toolbar);
+    m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_splitter);
 
-    TransparentStyle::attach(m_toolbar);
+    TransparentStyle::attach(m_toolBar);
 
     m_homeButton->setFixedHeight(22);
     m_backButton->setFixedHeight(22);
     m_forthButton->setFixedHeight(22);
     m_titleLabel->setFixedHeight(22);
 
-    m_toolbar->setFixedHeight(24);
-    m_toolbar->addWidget(m_typeCombo);
-    m_toolbar->addSeparator();
-    m_toolbar->addWidget(m_homeButton);
-    m_toolbar->addWidget(m_backButton);
-    m_toolbar->addWidget(m_forthButton);
-    m_toolbar->addSeparator();
+    m_toolBar->setFixedHeight(24);
+    m_toolBar->addWidget(m_typeCombo);
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(m_homeButton);
+    m_toolBar->addWidget(m_backButton);
+    m_toolBar->addWidget(m_forthButton);
+    m_toolBar->addSeparator();
     auto spacing = new QWidget(this);
     spacing->setFixedSize(10, 24);
-    m_toolbar->addWidget(spacing);
-    m_toolbar->addWidget(m_titleLabel);
+    m_toolBar->addWidget(spacing);
+    m_toolBar->addWidget(m_titleLabel);
 
     UtilityFunctions::adjustFontPixelSize(m_titleLabel, -1);
     m_titleLabel->setTextFormat(Qt::RichText);

@@ -55,7 +55,7 @@ private:
     QVBoxLayout* m_layout;
     DesignerScene* m_designerScene;
     DesignerView* m_designerView;
-    QToolBar* m_toolbar;
+    QToolBar* m_toolBar;
     QToolButton* m_undoButton;
     QToolButton* m_redoButton;
     QToolButton* m_clearButton;
