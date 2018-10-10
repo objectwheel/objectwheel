@@ -22,7 +22,9 @@ void PushButton::paintEvent(QPaintEvent*)
     initStyleOption(&opt);
     PaintUtils::drawPanelButtonBevel(&p, opt);
 
-    // Draw the rest
+    // Draw the rest (FIXME: Remove this "&& opt.palette.buttonText().color() != Qt::white")
+    if ((isDown() || isChecked()) && opt.palette.buttonText().color() != Qt::white)
+        opt.palette.setColor(QPalette::ButtonText, opt.palette.buttonText().color().darker());
     opt.state |= isDown() ? QStyle::State_On : QStyle::State_Off;
     opt.rect = style()->subElementRect(QStyle::SE_PushButtonContents, &opt, this);
     p.drawControl(QStyle::CE_PushButtonLabel, opt);
