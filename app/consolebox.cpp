@@ -46,7 +46,6 @@ ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
 
     m_titleLabel->setText("   " + tr("Console Output") + "   ");
     m_titleLabel->setFixedHeight(22);
-    UtilityFunctions::adjustFontWeight(m_titleLabel, QFont::Medium);
 
     m_toolBar->addWidget(m_titleLabel);
     m_toolBar->addSeparator();
@@ -89,13 +88,6 @@ ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &ConsoleBox::minimized);
 
-    TransparentStyle::attach(m_toolBar);
-    QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
-        m_toolBar->setContentsMargins(0, 0, 0, 0);
-        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
-        m_toolBar->layout()->setSpacing(0);
-    });
-
     m_plainTextEdit->setObjectName("m_plainTextEdit");
     m_plainTextEdit->setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
                                    "border-top: none; border-bottom: none;}");
@@ -104,6 +96,13 @@ ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
     m_plainTextEdit->setWordWrapMode(QTextOption::WordWrap);
     m_plainTextEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     UtilityFunctions::adjustFontPixelSize(m_plainTextEdit, -1);
+
+    TransparentStyle::attach(m_toolBar);
+    QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
+        m_toolBar->setContentsMargins(0, 0, 0, 0);
+        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
+        m_toolBar->layout()->setSpacing(0);
+    });
 
     connect(RunManager::instance(), &RunManager::standardError,
             this, &ConsoleBox::onStandardError);
@@ -159,7 +158,7 @@ void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont:
         scrollToEnd();
 
     // if (isHidden()) FIXME: Add this to global settings
-        emit flashMe();
+        emit flash();
 }
 
 void ConsoleBox::scrollToEnd()

@@ -58,17 +58,21 @@ protected:
     QSize minimumSizeHint() const override;
 
 signals:
-    void flashMe();
-    void updateTitle(const QString& title);
+    void flash();
+    void minimized();
+    void titleChanged(const QString& title);
     void entryDoubleClicked(Control*);
 
 private:
     QVBoxLayout* m_layout;
-    QToolBar* m_toolBar;
-    QToolButton* m_clearButton;
-    QLabel* m_title;
     QListWidget* m_listWidget;
     QMap<Error, QPointer<Control>> m_buggyControls;
+    QToolBar* m_toolBar;
+    QLabel* m_titleLabel;
+    QToolButton* m_clearButton;
+    QToolButton* m_fontSizeUpButton;
+    QToolButton* m_fontSizeDownButton;
+    QToolButton* m_minimizeButton;
 };
 
 #endif // ISSUESBOX_H

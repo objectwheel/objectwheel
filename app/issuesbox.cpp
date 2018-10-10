@@ -12,6 +12,7 @@
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QListWidget>
+#include <QTimer>
 
 class IssuesListDelegate: public QStyledItemDelegate
 {
@@ -58,48 +59,82 @@ void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &op
 
 IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
-  , m_toolBar(new QToolBar)
-  , m_clearButton(new QToolButton)
-  , m_title(new QLabel)
   , m_listWidget(new QListWidget)
+  , m_toolBar(new QToolBar(this))
+  , m_titleLabel(new QLabel(this))
+  , m_clearButton(new QToolButton(this))
+  , m_fontSizeUpButton(new QToolButton(this))
+  , m_fontSizeDownButton(new QToolButton(this))
+  , m_minimizeButton(new QToolButton(this))
 {
-    m_layout->setContentsMargins(0, 0, 0, 0);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+
     m_layout->setSpacing(0);
+    m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_listWidget);
 
-    TransparentStyle::attach(m_toolBar);
+    m_titleLabel->setText("   " + tr("Issues") + "   ");
+    m_titleLabel->setFixedHeight(22);
 
-    m_title->setText("Issues");
-    m_title->setFixedHeight(22);
-    UtilityFunctions::adjustFontWeight(m_title, QFont::Medium);
-
-    m_clearButton->setFixedHeight(22);
-
-    m_toolBar->setFixedHeight(24);
-    auto spacing = new QWidget(this);
-    spacing->setFixedSize(2, 24);
-    auto spacing_2 = new QWidget(this);
-    spacing_2->setFixedSize(5, 24);
-    m_toolBar->addWidget(spacing);
-    m_toolBar->addWidget(m_title);
-    m_toolBar->addWidget(spacing_2);
+    m_toolBar->addWidget(m_titleLabel);
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_clearButton);
+    m_toolBar->addWidget(m_fontSizeUpButton);
+    m_toolBar->addWidget(m_fontSizeDownButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
+    m_toolBar->addWidget(m_minimizeButton);
+    m_toolBar->setFixedHeight(24);
 
+    m_clearButton->setFixedHeight(22);
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
-    m_clearButton->setToolTip(tr("Clean errors."));
+    m_clearButton->setToolTip(tr("Clean issues list"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
-    connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(clear()));
+    connect(m_clearButton, &QToolButton::clicked,
+            m_listWidget, &QListWidget::clear);
 
+    m_fontSizeUpButton->setFixedHeight(22);
+    m_fontSizeUpButton->setIcon(Utils::Icons::PLUS_TOOLBAR.icon());
+    m_fontSizeUpButton->setToolTip(tr("Increase font size"));
+    m_fontSizeUpButton->setCursor(Qt::PointingHandCursor);
+    connect(m_fontSizeUpButton, &QToolButton::clicked,
+            this, [=] { // TODO: Change this with zoomIn
+        UtilityFunctions::adjustFontPixelSize(m_listWidget, 1);
+    });
+
+    m_fontSizeDownButton->setFixedHeight(22);
+    m_fontSizeDownButton->setIcon(Utils::Icons::MINUS.icon());
+    m_fontSizeDownButton->setToolTip(tr("Decrease font size"));
+    m_fontSizeDownButton->setCursor(Qt::PointingHandCursor);
+    connect(m_fontSizeDownButton, &QToolButton::clicked,
+            this, [=] { // TODO: Change this with zoomOut
+        UtilityFunctions::adjustFontPixelSize(m_listWidget, -1);
+    });
+
+    m_minimizeButton->setFixedHeight(22);
+    m_minimizeButton->setIcon(Utils::Icons::CLOSE_SPLIT_BOTTOM.icon());
+    m_minimizeButton->setToolTip(tr("Minimize the pane"));
+    m_minimizeButton->setCursor(Qt::PointingHandCursor);
+    connect(m_minimizeButton, &QToolButton::clicked,
+            this, &IssuesBox::minimized);
+
+    m_listWidget->setObjectName("m_listWidget");
+    m_listWidget->setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"
+                                   "border-top: none; border-bottom: none;}");
     m_listWidget->setIconSize({16, 16});
     m_listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setItemDelegate(new IssuesListDelegate(m_listWidget));
+    connect(m_listWidget, &QListWidget::itemDoubleClicked,
+            this, &IssuesBox::handleDoubleClick);
 
-    connect(m_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
-      SLOT(handleDoubleClick(QListWidgetItem*)));
+    TransparentStyle::attach(m_toolBar);
+    QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
+        m_toolBar->setContentsMargins(0, 0, 0, 0);
+        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
+        m_toolBar->layout()->setSpacing(0);
+    });
 }
 
 void IssuesBox::handleErrors(Control* control)
@@ -120,7 +155,7 @@ void IssuesBox::handleErrors(Control* control)
             item->setIcon(QIcon(":/images/error.png"));
             m_listWidget->addItem(item);
             m_buggyControls[err] = control;
-            emit flashMe();
+            emit flash();
         }
     }
 }
@@ -173,7 +208,7 @@ void IssuesBox::refresh()
         }
     }
 
-    emit updateTitle(QString::fromUtf8("Issues [%1]").arg(m_listWidget->count()));
+    emit titleChanged(QString::fromUtf8("Issues [%1]").arg(m_listWidget->count()));
 }
 
 void IssuesBox::clear()

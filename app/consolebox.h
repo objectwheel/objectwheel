@@ -38,7 +38,7 @@ protected:
     QSize sizeHint() const override;
 
 signals:
-    void flashMe();
+    void flash();
     void minimized();
 
 private:

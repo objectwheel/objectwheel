@@ -28,7 +28,6 @@ const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1</span>";
 void setPanelButtonPaletteDarkerShadows(QWidget* widget)
 {
     QPalette palette(widget->palette());
-
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
     shadowGrad.setCoordinateMode(QGradient::ObjectMode);
     shadowGrad.setColorAt(0, "#52202020");
@@ -97,8 +96,8 @@ void setPanelButtonPaletteRed(QWidget* widget)
 
     QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
     midlightGrad.setCoordinateMode(QGradient::ObjectMode);
-    midlightGrad.setColorAt(0, "#932b26");
-    midlightGrad.setColorAt(0.1, "#802020");
+    midlightGrad.setColorAt(0.1, "#cc5650");
+    midlightGrad.setColorAt(0, "#e5615a");
     palette.setBrush(QPalette::Midlight, midlightGrad);
     palette.setBrush(QPalette::ButtonText, Qt::white);
     widget->setPalette(palette);

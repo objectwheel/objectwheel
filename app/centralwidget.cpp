@@ -86,15 +86,26 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
 
     connect(issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
             m_designerWidget, SLOT(onControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
-    connect(m_issuesBox, &IssuesBox::flashMe,
+    connect(m_issuesBox, &IssuesBox::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());
     });
-    connect(m_consoleBox, &ConsoleBox::flashMe,
+    connect(m_consoleBox, &ConsoleBox::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->consoleButton());
     });
-
+    connect(m_issuesBox, &IssuesBox::minimized,
+            this, [=] {
+        m_bottomBar->issuesButton()->setChecked(false);
+        m_issuesBox->hide();
+    });
+    connect(m_consoleBox, &ConsoleBox::minimized,
+            this, [=] {
+        m_bottomBar->consoleButton()->setChecked(false);
+        m_consoleBox->hide();
+    });
+    connect(m_issuesBox, &IssuesBox::titleChanged,
+            m_bottomBar->issuesButton(), &QAbstractButton::setText);
     connect(m_bottomBar, &BottomBar::buttonActivated,
             this, [=] (QAbstractButton* button) {
         if (button == m_bottomBar->consoleButton()) {
