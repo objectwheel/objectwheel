@@ -150,7 +150,6 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setToolTip(tr("Activate issues list"));
     m_issuesButton->setIconSize({16, 16});
     m_issuesButton->setIcon(renderColorizedIcon(":/images/issues.png", iconColor, this));
-    QTimer::singleShot(19000, std::bind(&BottomBar::flash, this, m_consoleButton));
 }
 
 void BottomBar::flash(QAbstractButton* button)
