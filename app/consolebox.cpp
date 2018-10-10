@@ -22,43 +22,83 @@
 #include <QToolButton>
 #include <QTimer>
 
-class PlainTextEdit : public QPlainTextEdit { friend class ConsoleBox; };
+class PlainTextEdit : public QPlainTextEdit {
+    explicit PlainTextEdit(QWidget* parent = nullptr) : QPlainTextEdit(parent) {}
+    friend class ConsoleBox;
+};
 
 ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
-  , m_plainTextEdit(new PlainTextEdit)
-  , m_toolBar(new QToolBar)
-  , m_titleLabel(new QLabel)
-  , m_clearButton(new QToolButton)
+  , m_plainTextEdit(new PlainTextEdit(this))
+  , m_toolBar(new QToolBar(this))
+  , m_titleLabel(new QLabel(this))
+  , m_clearButton(new QToolButton(this))
+  , m_fontSizeUpButton(new QToolButton(this))
+  , m_fontSizeDownButton(new QToolButton(this))
+  , m_minimizeButton(new QToolButton(this))
 {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_plainTextEdit);
 
-    m_titleLabel->setText("   " + tr("Console Output") + "  ");
-    m_titleLabel->setFixedHeight(21);
+    m_titleLabel->setText("   " + tr("Console Output") + "   ");
+    m_titleLabel->setFixedHeight(22);
+    UtilityFunctions::adjustFontWeight(m_titleLabel, QFont::Medium);
 
     m_toolBar->addWidget(m_titleLabel);
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_clearButton);
-    m_toolBar->setFixedHeight(23);
+    m_toolBar->addWidget(m_fontSizeUpButton);
+    m_toolBar->addWidget(m_fontSizeDownButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
+    m_toolBar->addWidget(m_minimizeButton);
+    m_toolBar->setFixedHeight(24);
 
-    m_clearButton->setFixedHeight(21);
+    m_clearButton->setFixedHeight(22);
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
-    m_clearButton->setToolTip(tr("Clean console output."));
+    m_clearButton->setToolTip(tr("Clean console output"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
     connect(m_clearButton, &QToolButton::clicked,
             m_plainTextEdit, &PlainTextEdit::clear);
+
+    m_fontSizeUpButton->setFixedHeight(22);
+    m_fontSizeUpButton->setIcon(Utils::Icons::PLUS_TOOLBAR.icon());
+    m_fontSizeUpButton->setToolTip(tr("Increase font size"));
+    m_fontSizeUpButton->setCursor(Qt::PointingHandCursor);
+    connect(m_fontSizeUpButton, &QToolButton::clicked,
+            this, [=] { // TODO: Change this with zoomIn
+        UtilityFunctions::adjustFontPixelSize(m_plainTextEdit, 1);
+    });
+
+    m_fontSizeDownButton->setFixedHeight(22);
+    m_fontSizeDownButton->setIcon(Utils::Icons::MINUS.icon());
+    m_fontSizeDownButton->setToolTip(tr("Decrease font size"));
+    m_fontSizeDownButton->setCursor(Qt::PointingHandCursor);
+    connect(m_fontSizeDownButton, &QToolButton::clicked,
+            this, [=] { // TODO: Change this with zoomOut
+        UtilityFunctions::adjustFontPixelSize(m_plainTextEdit, -1);
+    });
+
+    m_minimizeButton->setFixedHeight(22);
+    m_minimizeButton->setIcon(Utils::Icons::CLOSE_SPLIT_BOTTOM.icon());
+    m_minimizeButton->setToolTip(tr("Minimize the pane"));
+    m_minimizeButton->setCursor(Qt::PointingHandCursor);
+    connect(m_minimizeButton, &QToolButton::clicked,
+            this, &ConsoleBox::minimized);
 
     TransparentStyle::attach(m_toolBar);
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
         m_toolBar->setContentsMargins(0, 0, 0, 0);
         m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
-        m_toolBar->layout()->setSpacing(5);
+        m_toolBar->layout()->setSpacing(0);
     });
 
-    m_plainTextEdit->setStyleSheet("border: none; spacing: 0; padding: 0; margin: 0;");
+    m_plainTextEdit->setObjectName("m_plainTextEdit");
+    m_plainTextEdit->setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
+                                   "border-top: none; border-bottom: none;}");
     m_plainTextEdit->viewport()->setMouseTracking(true);
     m_plainTextEdit->viewport()->installEventFilter(this);
     m_plainTextEdit->setWordWrapMode(QTextOption::WordWrap);
@@ -211,3 +251,12 @@ bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
     return false;
 }
 
+QSize ConsoleBox::minimumSizeHint() const
+{
+    return {100, 100};
+}
+
+QSize ConsoleBox::sizeHint() const
+{
+    return {100, 100};
+}

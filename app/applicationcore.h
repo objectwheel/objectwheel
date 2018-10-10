@@ -31,6 +31,7 @@ public:
     static QString resourcePath();
     static QString userResourcePath();
     static QSettings* settings(QSettings::Scope scope = QSettings::UserScope);
+    static void setApplicationPalette();
 
 private slots:
     void onSessionStop();

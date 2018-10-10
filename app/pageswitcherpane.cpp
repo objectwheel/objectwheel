@@ -22,8 +22,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
   , m_buildsButton(new FlatButton)
   , m_helpButton(new FlatButton)
   , m_splitViewButton(new FlatButton)
-  , m_hideShowLeftPanesButton(new FlatButton(this))
-  , m_hideShowRightPanesButton(new FlatButton(this))
 {
     setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
@@ -74,10 +72,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->setFixedHeight(60);
     m_splitViewButton->setFixedHeight(60);
     m_buildsButton->setFixedHeight(60);
-    m_hideShowLeftPanesButton->setFixedHeight(22);
-    m_hideShowRightPanesButton->setFixedHeight(22);
-    m_hideShowLeftPanesButton->setFixedWidth(35);
-    m_hideShowRightPanesButton->setFixedWidth(35);
 
     m_designerButton->setCheckable(true);
     m_qmlCodeEditorButton->setCheckable(true);
@@ -85,8 +79,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->setCheckable(true);
     m_splitViewButton->setCheckable(true);
     m_buildsButton->setCheckable(true);
-    m_hideShowLeftPanesButton->setCheckable(true);
-    m_hideShowRightPanesButton->setCheckable(true);
 
     m_designerButton->setIconSize(QSize(23, 23));
     m_qmlCodeEditorButton->setIconSize(QSize(23, 23));
@@ -94,8 +86,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->setIconSize(QSize(23, 23));
     m_splitViewButton->setIconSize(QSize(23, 23));
     m_buildsButton->setIconSize(QSize(23, 23));
-    m_hideShowLeftPanesButton->setIconSize(QSize(20, 20));
-    m_hideShowRightPanesButton->setIconSize(QSize(20, 20));
 
     m_designerButton->setIcon(QIcon(":/images/designer.png"));
     m_qmlCodeEditorButton->setIcon(QIcon(":/images/editor.png"));
@@ -103,10 +93,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->setIcon(QIcon(":/images/help.png"));
     m_splitViewButton->setIcon(QIcon(":/images/split.png"));
     m_buildsButton->setIcon(QIcon(":/images/helmet.png"));
-    m_hideShowLeftPanesButton->setIcon(Icon({{TOGGLE_LEFT_SIDEBAR_TOOLBAR.imageFileName(),
-                                                   Theme::FancyToolButtonSelectedColor}}).icon());
-    m_hideShowRightPanesButton->setIcon(Icon({{TOGGLE_RIGHT_SIDEBAR_TOOLBAR.imageFileName(),
-                                                    Theme::FancyToolButtonSelectedColor}}).icon());
 
     m_designerButton->settings().showShadow = false;
     m_qmlCodeEditorButton->settings().showShadow = false;
@@ -114,8 +100,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->settings().showShadow = false;
     m_splitViewButton->settings().showShadow = false;
     m_buildsButton->settings().showShadow = false;
-    m_hideShowLeftPanesButton->settings().showShadow = false;
-    m_hideShowRightPanesButton->settings().showShadow = false;
 
     m_designerButton->settings().textUnderIcon = true;
     m_qmlCodeEditorButton->settings().textUnderIcon = true;
@@ -137,8 +121,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->settings().textMargin = 0;
     m_splitViewButton->settings().textMargin = 0;
     m_buildsButton->settings().textMargin = 0;
-    m_hideShowLeftPanesButton->settings().textMargin = 0;
-    m_hideShowRightPanesButton->settings().textMargin = 0;
 
     m_buildsButton->settings().textColor = Qt::white;
     m_splitViewButton->settings().textColor = Qt::white;
@@ -153,8 +135,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->settings().topColor = "#384047";
     m_splitViewButton->settings().topColor = "#384047";
     m_buildsButton->settings().topColor = "#384047";
-    m_hideShowLeftPanesButton->settings().topColor = "#384047";
-    m_hideShowRightPanesButton->settings().topColor = "#384047";
 
     m_designerButton->settings().bottomColor = "#424c54";
     m_qmlCodeEditorButton->settings().bottomColor = "#424c54";
@@ -162,8 +142,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_helpButton->settings().bottomColor = "#424c54";
     m_splitViewButton->settings().bottomColor = "#424c54";
     m_buildsButton->settings().bottomColor = "#424c54";
-    m_hideShowLeftPanesButton->settings().bottomColor = "#424c54";
-    m_hideShowRightPanesButton->settings().bottomColor = "#424c54";
 
     connect(m_designerButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Designer); });
     connect(m_qmlCodeEditorButton, &FlatButton::pressed, [=] { setCurrentPage(Page_QmlCodeEditor); });
@@ -171,14 +149,6 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     connect(m_helpButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Help); });
     connect(m_splitViewButton, &FlatButton::pressed, [=] { setCurrentPage(Page_SplitView); });
     connect(m_buildsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Builds); });
-    connect(m_hideShowLeftPanesButton, &FlatButton::toggled,
-            this, &PageSwitcherPane::leftPanesShowChanged);
-    connect(m_hideShowRightPanesButton, &FlatButton::toggled,
-            this, &PageSwitcherPane::rightPanesShowChanged);
-    connect(this, &PageSwitcherPane::leftPanesShowChanged,
-            this, &PageSwitcherPane::changeLeftShowHideButtonToolTip);
-    connect(this, &PageSwitcherPane::rightPanesShowChanged,
-            this, &PageSwitcherPane::changeRightShowHideButtonToolTip);
 }
 
 Pages PageSwitcherPane::currentPage() const
@@ -228,48 +198,36 @@ void PageSwitcherPane::setCurrentPage(const Pages& page)
     switch (page) {
     case Page_Builds:
         m_buildsButton->setChecked(true);
-        m_hideShowLeftPanesButton->setEnabled(false);
-        m_hideShowRightPanesButton->setEnabled(false);
         emit buildsActivated();
         emit currentPageChanged(Page_Builds);
         break;
 
     case Page_Designer:
         m_designerButton->setChecked(true);
-        m_hideShowLeftPanesButton->setEnabled(true);
-        m_hideShowRightPanesButton->setEnabled(true);
         emit designerActivated();
         emit currentPageChanged(Page_Designer);
         break;
 
     case Page_SplitView:
         m_splitViewButton->setChecked(true);
-        m_hideShowLeftPanesButton->setEnabled(true);
-        m_hideShowRightPanesButton->setEnabled(true);
         emit splitViewActivated();
         emit currentPageChanged(Page_SplitView);
         break;
 
     case Page_Help:
         m_helpButton->setChecked(true);
-        m_hideShowLeftPanesButton->setEnabled(false);
-        m_hideShowRightPanesButton->setEnabled(false);
         emit helpActivated();
         emit currentPageChanged(Page_Help);
         break;
 
     case Page_QmlCodeEditor:
         m_qmlCodeEditorButton->setChecked(true);
-        m_hideShowLeftPanesButton->setEnabled(false);
-        m_hideShowRightPanesButton->setEnabled(false);
         emit qmlCodeEditorActivated();
         emit currentPageChanged(Page_QmlCodeEditor);
         break;
 
     case Page_ProjectOptions:
         m_projectOptionsButton->setChecked(true);
-        m_hideShowLeftPanesButton->setEnabled(false);
-        m_hideShowRightPanesButton->setEnabled(false);
         emit projectOptionsActivated();
         emit currentPageChanged(Page_ProjectOptions);
         break;
@@ -322,23 +280,9 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
     }
 }
 
-void PageSwitcherPane::setRightPanesShow(bool value)
-{
-    if (m_hideShowRightPanesButton->isEnabled() && m_hideShowRightPanesButton->isChecked() != value)
-        m_hideShowRightPanesButton->setChecked(value);
-}
-
-void PageSwitcherPane::setLeftPanesShow(bool value)
-{
-    if (m_hideShowLeftPanesButton->isEnabled() && m_hideShowLeftPanesButton->isChecked() != value)
-        m_hideShowLeftPanesButton->setChecked(value);
-}
-
 void PageSwitcherPane::sweep()
 {
     setCurrentPage(Page_Designer);
-    setRightPanesShow(true);
-    setLeftPanesShow(true);
 }
 
 void PageSwitcherPane::paintEvent(QPaintEvent*)
@@ -354,29 +298,4 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
     painter.setPen("#2f353c");
     painter.drawLine(QRectF(rect()).topRight() + QPointF(-0.5, 0.5),
                      QRectF(rect()).bottomRight() + QPointF(-0.5, -0.5));
-}
-
-void PageSwitcherPane::resizeEvent(QResizeEvent* e)
-{
-    QWidget::resizeEvent(e);
-    m_hideShowLeftPanesButton->move(rect().center().x() - m_hideShowLeftPanesButton->width(),
-                                         rect().bottom() - m_hideShowLeftPanesButton->height());
-    m_hideShowRightPanesButton->move(rect().center().x(),
-                                          rect().bottom() - m_hideShowRightPanesButton->height());
-}
-
-void PageSwitcherPane::changeLeftShowHideButtonToolTip(bool showed)
-{
-    if (showed)
-        m_hideShowLeftPanesButton->setToolTip(TOOLTIP_2.arg(tr("Hide Left Panes")));
-    else
-        m_hideShowLeftPanesButton->setToolTip(TOOLTIP_2.arg(tr("Show Left Panes")));
-}
-
-void PageSwitcherPane::changeRightShowHideButtonToolTip(bool showed)
-{
-    if (showed)
-        m_hideShowRightPanesButton->setToolTip(TOOLTIP_2.arg(tr("Hide Right Panes")));
-    else
-        m_hideShowRightPanesButton->setToolTip(TOOLTIP_2.arg(tr("Show Right Panes")));
 }

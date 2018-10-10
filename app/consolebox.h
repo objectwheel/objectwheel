@@ -32,11 +32,14 @@ private slots:
     void onStandardError(const QString& output);
     void onStandardOutput(const QString& output);
 
-private:
+protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
 
 signals:
     void flashMe();
+    void minimized();
 
 private:
     QVBoxLayout* m_layout;
@@ -44,6 +47,9 @@ private:
     QToolBar* m_toolBar;
     QLabel* m_titleLabel;
     QToolButton* m_clearButton;
+    QToolButton* m_fontSizeUpButton;
+    QToolButton* m_fontSizeDownButton;
+    QToolButton* m_minimizeButton;
 };
 
 #endif // CONSOLEBOX_H

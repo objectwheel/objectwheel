@@ -32,6 +32,8 @@ private:
     QHBoxLayout* m_layout;
     PushButton* m_consoleButton;
     PushButton* m_issuesButton;
+    PushButton* m_hideShowLeftPanesButton;
+    PushButton* m_hideShowRightPanesButton;
 };
 
 #endif // BOTTOMBAR_H

@@ -343,7 +343,7 @@ void MainWindow::showLeftPanes(bool show)
         toolboxDockWidget->setVisible(show);
         toolboxDockWidgetVisible = show;
     }
-    m_pageSwitcherPane->setLeftPanesShow(show);
+//    WARNING m_pageSwitcherPane->setLeftPanesShow(show);
 }
 
 void MainWindow::showRightPanes(bool show)
@@ -368,7 +368,7 @@ void MainWindow::showRightPanes(bool show)
         toolboxDockWidget->setVisible(show);
         toolboxDockWidgetVisible = show;
     }
-    m_pageSwitcherPane->setRightPanesShow(show);
+//   WARNING m_pageSwitcherPane->setRightPanesShow(show);
 }
 
 void MainWindow::setDockWidgetTitleBarsHidden(bool yes)

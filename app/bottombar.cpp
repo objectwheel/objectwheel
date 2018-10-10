@@ -1,6 +1,7 @@
 #include <bottombar.h>
 #include <pushbutton.h>
 #include <paintutils.h>
+#include <utilsicons.h>
 
 #include <QHBoxLayout>
 #include <QStylePainter>
@@ -10,6 +11,8 @@
 #include <QApplication>
 
 using namespace PaintUtils;
+using namespace Utils;
+using namespace Utils::Icons;
 
 namespace {
 /*!
@@ -100,10 +103,48 @@ void setPanelButtonPaletteRed(QWidget* widget)
 }
 }
 
+
+void changeLeftShowHideButtonToolTip(bool);
+void changeRightShowHideButtonToolTip(bool);
+void setLeftPanesShow(bool);
+void setRightPanesShow(bool);
+void leftPanesShowChanged(bool);
+void rightPanesShowChanged(bool);
+void PageSwitcherPane::changeLeftShowHideButtonToolTip(bool showed)
+{
+    if (showed)
+        m_hideShowLeftPanesButton->setToolTip(TOOLTIP_2.arg(tr("Hide Left Panes")));
+    else
+        m_hideShowLeftPanesButton->setToolTip(TOOLTIP_2.arg(tr("Show Left Panes")));
+}
+
+void PageSwitcherPane::changeRightShowHideButtonToolTip(bool showed)
+{
+    if (showed)
+        m_hideShowRightPanesButton->setToolTip(TOOLTIP_2.arg(tr("Hide Right Panes")));
+    else
+        m_hideShowRightPanesButton->setToolTip(TOOLTIP_2.arg(tr("Show Right Panes")));
+}
+
+
+void PageSwitcherPane::setRightPanesShow(bool value)
+{
+    if (m_hideShowRightPanesButton->isEnabled() && m_hideShowRightPanesButton->isChecked() != value)
+        m_hideShowRightPanesButton->setChecked(value);
+}
+
+void PageSwitcherPane::setLeftPanesShow(bool value)
+{
+    if (m_hideShowLeftPanesButton->isEnabled() && m_hideShowLeftPanesButton->isChecked() != value)
+        m_hideShowLeftPanesButton->setChecked(value);
+}
+
 BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
   , m_layout(new QHBoxLayout(this))
   , m_consoleButton(new PushButton(this))
   , m_issuesButton(new PushButton(this))
+  , m_hideShowLeftPanesButton(new PushButton(this))
+  , m_hideShowRightPanesButton(new PushButton(this))
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -150,6 +191,29 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setToolTip(tr("Activate issues list"));
     m_issuesButton->setIconSize({16, 16});
     m_issuesButton->setIcon(renderColorizedIcon(":/images/issues.png", iconColor, this));
+
+
+    m_hideShowLeftPanesButton->setIcon(Icon({{TOGGLE_LEFT_SIDEBAR_TOOLBAR.imageFileName(),
+                                                   Theme::FancyToolButtonSelectedColor}}).icon());
+    m_hideShowRightPanesButton->setIcon(Icon({{TOGGLE_RIGHT_SIDEBAR_TOOLBAR.imageFileName(),
+                                                    Theme::FancyToolButtonSelectedColor}}).icon());
+    m_hideShowLeftPanesButton->setIconSize(QSize(20, 20));
+    m_hideShowRightPanesButton->setIconSize(QSize(20, 20));
+    m_hideShowLeftPanesButton->setCheckable(true);
+    m_hideShowRightPanesButton->setCheckable(true);
+    m_hideShowLeftPanesButton->setFixedHeight(22);
+    m_hideShowRightPanesButton->setFixedHeight(22);
+    m_hideShowLeftPanesButton->setFixedWidth(35);
+    m_hideShowRightPanesButton->setFixedWidth(35);
+
+    connect(m_hideShowLeftPanesButton, &FlatButton::toggled,
+            this, &PageSwitcherPane::leftPanesShowChanged);
+    connect(m_hideShowRightPanesButton, &FlatButton::toggled,
+            this, &PageSwitcherPane::rightPanesShowChanged);
+    connect(this, &PageSwitcherPane::leftPanesShowChanged,
+            this, &PageSwitcherPane::changeLeftShowHideButtonToolTip);
+    connect(this, &PageSwitcherPane::rightPanesShowChanged,
+            this, &PageSwitcherPane::changeRightShowHideButtonToolTip);
 }
 
 void BottomBar::flash(QAbstractButton* button)
@@ -193,6 +257,8 @@ void BottomBar::sweep()
 {
     m_consoleButton->setChecked(false);
     m_issuesButton->setChecked(false);
+    setRightPanesShow(true); // WARNING
+    setLeftPanesShow(true); // WARNING
 }
 
 QAbstractButton* BottomBar::activeButton() const
@@ -219,7 +285,12 @@ void BottomBar::paintEvent(QPaintEvent*)
     QStylePainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen("#c4c4c4");
-    p.drawLine(rect().topLeft(), rect().topRight());
+    p.drawLine(rect().topLeft() + QPointF(0.5, 0.5),
+                      rect().topRight() + QPointF(0.5, 0.5));
+    p.drawLine(rect().topLeft() + QPointF(0.5, 0.5),
+                      rect().bottomLeft() + QPointF(0.5, 0.5));
+    p.drawLine(rect().topRight() + QPointF(0.5, 0.5),
+                      rect().bottomRight() + QPointF(0.5, 0.5));
 }
 
 QSize BottomBar::sizeHint() const

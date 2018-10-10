@@ -53,6 +53,10 @@ private slots:
     void clear();
     void handleDoubleClick(QListWidgetItem* item);
 
+protected:
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+
 signals:
     void flashMe();
     void updateTitle(const QString& title);

@@ -2,6 +2,7 @@
 #include <control.h>
 #include <utilsicons.h>
 #include <transparentstyle.h>
+#include <utilityfunctions.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -71,6 +72,8 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
 
     m_title->setText("Issues");
     m_title->setFixedHeight(22);
+    UtilityFunctions::adjustFontWeight(m_title, QFont::Medium);
+
     m_clearButton->setFixedHeight(22);
 
     m_toolBar->setFixedHeight(24);
@@ -177,6 +180,16 @@ void IssuesBox::clear()
 {
     m_buggyControls.clear();
     m_listWidget->clear();
+}
+
+QSize IssuesBox::minimumSizeHint() const
+{
+    return {100, 100};
+}
+
+QSize IssuesBox::sizeHint() const
+{
+    return {100, 100};
 }
 
 bool operator<(const Error& e1, const Error& e2)
