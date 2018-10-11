@@ -157,7 +157,7 @@ void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont:
     if (atEnd)
         scrollToEnd();
 
-    // if (isHidden()) FIXME: Add this to global settings
+     if (isHidden()) // FIXME: Add this to global settings
         emit flash();
 }
 

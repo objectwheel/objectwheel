@@ -13,49 +13,55 @@
 #include <QVBoxLayout>
 #include <QListWidget>
 #include <QTimer>
+#include <QQmlError>
+
+enum Roles
+{
+    ErrorRole = ErrorRole + 1,
+    ControlRole
+};
 
 class IssuesListDelegate: public QStyledItemDelegate
 {
-        Q_OBJECT
+    Q_OBJECT
+public:
+    IssuesListDelegate(QWidget* parent) : QStyledItemDelegate(parent)
+    {
+    }
 
-    public:
-        IssuesListDelegate(QWidget* parent);
-        void paint(QPainter* painter, const QStyleOptionViewItem &option,
-          const QModelIndex &index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const
+    {
+        const QAbstractItemModel* model = index.model();
+        Q_ASSERT(model);
+        painter->setRenderHint(QPainter::Antialiasing);
+
+        QStyledItemDelegate::paint(painter, option, index);
+
+        auto f = option.font;
+        auto r = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5);
+        const QQmlError& error = model->data(index, ErrorRole).value<QQmlError>();
+        const QPointer<Control>& control = model->data(index, ControlRole).value<QPointer<Control>>();
+
+        if (control.isNull())
+            return;
+
+        painter->setPen("#a0a4a7");
+        painter->drawLine(r.bottomLeft(), r.bottomRight());
+        painter->setPen(option.palette.text().color());
+        f.setWeight(QFont::Medium);
+        painter->setFont(f);
+        painter->drawText(r.adjusted(26, 0, 0, 0),
+                          control->id() + ":", Qt::AlignVCenter | Qt::AlignLeft);
+        QFontMetrics fm(f);
+        f.setWeight(QFont::Normal);
+        painter->setFont(f);
+        painter->drawText(r.adjusted(26.0 + fm.horizontalAdvance(control->id()) + 8, 0, 0, 0),
+                          error.description, Qt::AlignVCenter | Qt::AlignLeft);
+        painter->drawText(r, QString("Line: %1, Col: %2 ").
+                          arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
+    }
 };
-
-IssuesListDelegate::IssuesListDelegate(QWidget* parent)
-    : QStyledItemDelegate(parent)
-{
-}
-
-void IssuesListDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const
-{
-    const QAbstractItemModel* model = index.model();
-    Q_ASSERT(model);
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    QStyledItemDelegate::paint(painter, option, index);
-
-    auto f = option.font;
-    auto r = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5);
-    Error error = model->data(index, Qt::UserRole).value<Error>();
-    painter->setPen("#a0a4a7");
-    painter->drawLine(r.bottomLeft(), r.bottomRight());
-    painter->setPen(option.palette.text().color());
-    f.setWeight(QFont::Medium);
-    painter->setFont(f);
-    painter->drawText(r.adjusted(26, 0, 0, 0),
-      error.id + ":", Qt::AlignVCenter | Qt::AlignLeft);
-    QFontMetrics fm(f);
-    f.setWeight(QFont::Normal);
-    painter->setFont(f);
-    painter->drawText(r.adjusted(26.0 + fm.horizontalAdvance(error.id) + 8, 0, 0, 0),
-      error.description, Qt::AlignVCenter | Qt::AlignLeft);
-    painter->drawText(r, QString("Line: %1, Col: %2 ").
-      arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
-}
 
 IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
@@ -137,39 +143,6 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
     });
 }
 
-void IssuesBox::handleErrors(Control* control)
-{
-    refresh();
-    if (control->hasErrors()) {
-        for (const auto& error : control->errors()) {
-            Error err;
-            err.id = control->id();
-            err.uid = control->uid();
-            err.description = error.description();
-            err.line = error.line();
-            err.column = error.column();
-            if (m_buggyControls.contains(err))
-                continue;
-            auto item = new QListWidgetItem;
-            item->setData(Qt::UserRole, QVariant::fromValue<Error>(err));
-            item->setIcon(QIcon(":/images/error.png"));
-            m_listWidget->addItem(item);
-            m_buggyControls[err] = control;
-            emit flash();
-        }
-    }
-}
-
-void IssuesBox::handleDoubleClick(QListWidgetItem* item)
-{
-    const auto& error = item->data(Qt::UserRole).value<Error>();
-    const auto& c = m_buggyControls.value(error);
-
-    if (c == nullptr)
-        return;
-    emit entryDoubleClicked(c);
-}
-
 void IssuesBox::sweep()
 {
     clear();
@@ -177,15 +150,15 @@ void IssuesBox::sweep()
 
 void IssuesBox::refresh()
 {
-    for (const auto& err : m_buggyControls.keys()) {
-        auto control = m_buggyControls.value(err);
+    for (const auto& err : m_defectiveControls.keys()) {
+        auto control = m_defectiveControls.value(err);
         if (control.isNull() || !control->hasErrors()) {
             for (int i = 0; i < m_listWidget->count(); i++) {
                 auto item = m_listWidget->item(i);
-                if (item->data(Qt::UserRole).value<Error>() == err)
+                if (item->data(ErrorRole).value<Error>() == err)
                     delete m_listWidget->takeItem(i);
             }
-            m_buggyControls.remove(err);
+            m_defectiveControls.remove(err);
         } else {
             QList<Error> es;
             for (const auto& error : control->errors()) {
@@ -200,10 +173,10 @@ void IssuesBox::refresh()
             if (!es.contains(err)) {
                 for (int i = 0; i < m_listWidget->count(); i++) {
                     auto item = m_listWidget->item(i);
-                    if (item->data(Qt::UserRole).value<Error>() == err)
+                    if (item->data(ErrorRole).value<Error>() == err)
                         delete m_listWidget->takeItem(i);
                 }
-                m_buggyControls.remove(err);
+                m_defectiveControls.remove(err);
             }
         }
     }
@@ -211,10 +184,43 @@ void IssuesBox::refresh()
     emit titleChanged(QString::fromUtf8("Issues [%1]").arg(m_listWidget->count()));
 }
 
+void IssuesBox::process(Control* control)
+{
+    refresh();
+    if (control->hasErrors()) {
+        for (const auto& error : control->errors()) {
+            Error err;
+            err.id = control->id();
+            err.uid = control->uid();
+            err.description = error.description();
+            err.line = error.line();
+            err.column = error.column();
+            if (m_defectiveControls.contains(err))
+                continue;
+            auto item = new QListWidgetItem;
+            item->setData(ErrorRole, QVariant::fromValue<Error>(err));
+            item->setIcon(QIcon(":/images/error.png"));
+            m_listWidget->addItem(item);
+            m_defectiveControls[err] = control;
+            emit flash();
+        }
+    }
+}
+
 void IssuesBox::clear()
 {
-    m_buggyControls.clear();
+    m_defectiveControls.clear();
     m_listWidget->clear();
+}
+
+void IssuesBox::onItemDoubleClick(QListWidgetItem* item)
+{
+    const auto& error = item->data(ErrorRole).value<Error>();
+    const auto& c = m_defectiveControls.value(error);
+
+    if (c == nullptr)
+        return;
+    emit itemDoubleClicked(c);
 }
 
 QSize IssuesBox::minimumSizeHint() const
@@ -225,16 +231,6 @@ QSize IssuesBox::minimumSizeHint() const
 QSize IssuesBox::sizeHint() const
 {
     return {100, 100};
-}
-
-bool operator<(const Error& e1, const Error& e2)
-{
-    return (e1.uid + e1.description +
-      QString::number(e1.column) +
-      QString::number(e1.line)) <
-     (e2.uid + e2.description +
-      QString::number(e2.column) +
-      QString::number(e2.line));
 }
 
 #include "issuesbox.moc"
