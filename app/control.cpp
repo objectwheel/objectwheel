@@ -7,10 +7,7 @@
 #include <controlpreviewingmanager.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
-#include <inspectorpane.h>
-#include <propertiespane.h>
 #include <centralwidget.h>
-#include <issuesbox.h>
 #include <designerwidget.h>
 #include <controlpropertymanager.h>
 #include <paintutils.h>
@@ -603,11 +600,6 @@ void Control::updatePreview(const PreviewResult& result)
 
     update();
 
-    //    if (!result.errors.isEmpty())
-    //        WindowManager::mainWindow()->centralWidget()->outputPane()->issuesBox()->handleErrors(this);
-    //    if (isSelected())
-    //        WindowManager::mainWindow()->propertiesPane()->refreshList();
-    //    WindowManager::mainWindow()->inspectorPane()->handleControlPreviewChange(this);
     ControlPropertyManager::instance()->previewChanged(this, result.codeChanged);
 }
 

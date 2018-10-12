@@ -1,4 +1,4 @@
-#include <issuesbox.h>
+#include <issuespane.h>
 #include <control.h>
 #include <utilsicons.h>
 #include <transparentstyle.h>
@@ -25,18 +25,44 @@ class IssuesListDelegate: public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    IssuesListDelegate(QWidget* parent) : QStyledItemDelegate(parent)
+    IssuesListDelegate(QListWidget* parent) : QStyledItemDelegate(parent)
+      , m_listWidget(parent)
     {
     }
 
-    void paint(QPainter* painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const
+    void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         const QAbstractItemModel* model = index.model();
         Q_ASSERT(model);
         painter->setRenderHint(QPainter::Antialiasing);
 
-        QStyledItemDelegate::paint(painter, option, index);
+
+        const int errorIndex = index.data(QmlErrorIndexRole).toInt();
+        const IssuesPane::ControlErrors* controlErrors
+                = index.data(ControlErrorsRole).value<const IssuesPane::ControlErrors*>();
+        const QQmlError& error = controlErrors->errors.at(errorIndex);
+        const QtMsgType msgType = error.messageType();
+
+        QStyleOptionViewItem copy(option);
+
+        switch (msgType) {
+        case QtInfoMsg:
+        case QtDebugMsg:
+            copy.icon = m_listWidget->style()->standardIcon(QStyle::SP_MessageBoxInformation, &copy, m_listWidget);
+            break;
+
+        case QtCriticalMsg:
+        case QtFatalMsg:
+            copy.icon = m_listWidget->style()->standardIcon(QStyle::SP_MessageBoxCritical, &copy, m_listWidget);
+            break;
+
+        case QtWarningMsg:
+            copy.icon = m_listWidget->style()->standardIcon(QStyle::SP_MessageBoxWarning, &copy, m_listWidget);
+            break;
+        }
+
+        copy.text = error.toString();
+        QStyledItemDelegate::paint(painter, copy, index);
 
         //        auto f = option.font;
         //        auto r = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5);
@@ -61,9 +87,11 @@ public:
         //        painter->drawText(r, QString("Line: %1, Col: %2 ").
         //                          arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
     }
+private:
+    QListWidget* m_listWidget;
 };
 
-IssuesBox::IssuesBox(QWidget* parent) : QListWidget(parent)
+IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
   , m_toolBar(new QToolBar(this))
   , m_titleLabel(new QLabel(this))
   , m_clearButton(new QToolButton(this))
@@ -80,7 +108,7 @@ IssuesBox::IssuesBox(QWidget* parent) : QListWidget(parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setItemDelegate(new IssuesListDelegate(this));
     connect(this, &QListWidget::itemDoubleClicked,
-            this, &IssuesBox::onItemDoubleClick);
+            this, &IssuesPane::onItemDoubleClick);
 
     m_titleLabel->setText("   " + tr("Issues") + "   ");
     m_titleLabel->setFixedHeight(22);
@@ -124,7 +152,7 @@ IssuesBox::IssuesBox(QWidget* parent) : QListWidget(parent)
     m_minimizeButton->setToolTip(tr("Minimize the pane"));
     m_minimizeButton->setCursor(Qt::PointingHandCursor);
     connect(m_minimizeButton, &QToolButton::clicked,
-            this, &IssuesBox::minimized);
+            this, &IssuesPane::minimized);
 
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
             this, [=] (Control* control, int codeChanged) {
@@ -140,14 +168,14 @@ IssuesBox::IssuesBox(QWidget* parent) : QListWidget(parent)
     });
 }
 
-void IssuesBox::sweep()
+void IssuesPane::sweep()
 {
     clear();
     qDeleteAll(m_erroneousControls);
     m_erroneousControls.clear();
 }
 
-void IssuesBox::update(Control* control)
+void IssuesPane::update(Control* control)
 {
     ControlErrors* controlErrors = nullptr;
     for (ControlErrors* error : m_erroneousControls) {
@@ -176,6 +204,9 @@ void IssuesBox::update(Control* control)
 
         delete controlErrors;
 
+        if (isHidden())
+            emit flash();
+
         return titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
     }
 
@@ -183,7 +214,7 @@ void IssuesBox::update(Control* control)
         controlErrors = new ControlErrors;
         controlErrors->control = control;
         m_erroneousControls.append(controlErrors);
-        connect(control, &Control::destroyed, this, &IssuesBox::onControlDestruction);
+        connect(control, &Control::destroyed, this, &IssuesPane::onControlDestruction);
     } else {
         controlErrors->errors.clear();
         for (int i = count() - 1; i >= 0; --i) {
@@ -203,10 +234,19 @@ void IssuesBox::update(Control* control)
         addItem(item);
     }
 
+    if (isHidden())
+        emit flash();
+
     emit titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
 }
 
-void IssuesBox::onControlDestruction(QObject* controlObject)
+void IssuesPane::onItemDoubleClick(QListWidgetItem* item)
+{
+    const ControlErrors* controlErrors = item->data(ControlErrorsRole).value<const ControlErrors*>();
+    emit controlDoubleClicked(controlErrors->control);
+}
+
+void IssuesPane::onControlDestruction(QObject* controlObject)
 {
     Control* control = qobject_cast<Control*>(controlObject);
     Q_ASSERT(control);
@@ -230,20 +270,13 @@ void IssuesBox::onControlDestruction(QObject* controlObject)
 
     delete controlErrors;
 
-    return titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
+    if (isHidden())
+        emit flash();
+
+    emit titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
 }
 
-void IssuesBox::onItemDoubleClick(QListWidgetItem* item)
-{
-    //    const auto& error = item->data(QmlErrorRole).value<Error>();
-    //    const auto& c = m_erroneousControls.value(error);
-
-    //    if (c == nullptr)
-    //        return;
-    //    emit controlDoubleClicked(c);
-}
-
-void IssuesBox::updateGeometries()
+void IssuesPane::updateGeometries()
 {
     QListWidget::updateGeometries();
     QMargins vm = viewportMargins();
@@ -253,14 +286,14 @@ void IssuesBox::updateGeometries()
     m_toolBar->setGeometry(tg);
 }
 
-QSize IssuesBox::sizeHint() const
+QSize IssuesPane::sizeHint() const
 {
     return {100, 100};
 }
 
-QSize IssuesBox::minimumSizeHint() const
+QSize IssuesPane::minimumSizeHint() const
 {
     return {100, 100};
 }
 
-#include "issuesbox.moc"
+#include "issuespane.moc"

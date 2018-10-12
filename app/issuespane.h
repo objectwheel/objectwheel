@@ -1,8 +1,8 @@
-#ifndef ISSUESBOX_H
-#define ISSUESBOX_H
+#ifndef ISSUESPANE_H
+#define ISSUESPANE_H
 
 #include <QListWidget>
-#include <QSet>
+#include <QList>
 #include <QQmlError>
 
 class QVBoxLayout;
@@ -11,26 +11,28 @@ class QLabel;
 class QToolButton;
 class Control;
 
-class IssuesBox : public QListWidget
+class IssuesPane : public QListWidget
 {
     Q_OBJECT
 
+    friend class IssuesListDelegate;
     template <typename T> friend struct QMetaTypeId;
+
     struct ControlErrors {
         Control* control;
         QList<QQmlError> errors;
     };
 
 public:
-    explicit IssuesBox(QWidget* parent = nullptr);
+    explicit IssuesPane(QWidget* parent = nullptr);
 
 public slots:
     void sweep();
     void update(Control* control);
 
 private slots:
-    void onControlDestruction(QObject* controlObject);
     void onItemDoubleClick(QListWidgetItem* item);
+    void onControlDestruction(QObject* controlObject);
 
 protected:
     void updateGeometries() override;
@@ -53,7 +55,7 @@ private:
     QList<ControlErrors*> m_erroneousControls;
 };
 
-Q_DECLARE_METATYPE(const IssuesBox::ControlErrors*)
+Q_DECLARE_METATYPE(const IssuesPane::ControlErrors*)
 
 inline bool operator==(const QQmlError& e1, const QQmlError& e2)
 {
@@ -65,4 +67,4 @@ inline bool operator==(const QQmlError& e1, const QQmlError& e2)
             && e1.url() == e2.url();
 }
 
-#endif // ISSUESBOX_H
+#endif // ISSUESPANE_H

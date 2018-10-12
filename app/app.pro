@@ -30,7 +30,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/toolboxtree.h \
            $$PWD/view.h \
            $$PWD/global.h \
-           $$PWD/issuesbox.h \
+           $$PWD/issuespane.h \
            $$PWD/consolebox.h \
            $$PWD/searchbox.h \
            $$PWD/resizer.h \
@@ -130,7 +130,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/fileexplorer.cpp \
            $$PWD/toolboxtree.cpp \
            $$PWD/view.cpp \
-           $$PWD/issuesbox.cpp \
+           $$PWD/issuespane.cpp \
            $$PWD/consolebox.cpp \
            $$PWD/searchbox.cpp \
            $$PWD/resizer.cpp \

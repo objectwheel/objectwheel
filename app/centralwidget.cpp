@@ -3,7 +3,7 @@
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
 #include <buildswidget.h>
-#include <issuesbox.h>
+#include <issuespane.h>
 #include <designerscene.h>
 #include <controlpreviewingmanager.h>
 #include <controlremovingmanager.h>
@@ -42,7 +42,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_splitterIn(new QSplitter)
   , m_bottomBar(new BottomBar)
   , m_consoleBox(new ConsoleBox)
-  , m_issuesBox(new IssuesBox)
+  , m_issuesPane(new IssuesPane)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
@@ -58,7 +58,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
     m_splitterOut->addWidget(m_consoleBox);
-    m_splitterOut->addWidget(m_issuesBox);
+    m_splitterOut->addWidget(m_issuesPane);
     m_splitterOut->addWidget(m_bottomBar);
 
     m_splitterOut->handle(3)->setDisabled(true);
@@ -85,9 +85,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
 
-    connect(issuesBox(), SIGNAL(entryDoubleClicked(Control*)),
+    connect(m_issuesPane, SIGNAL(controlDoubleClicked(Control*)),
             m_designerWidget, SLOT(onControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
-    connect(m_issuesBox, &IssuesBox::flash,
+    connect(m_issuesPane, &IssuesPane::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());
     });
@@ -95,17 +95,17 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             this, [=] {
         m_bottomBar->flash(m_bottomBar->consoleButton());
     });
-    connect(m_issuesBox, &IssuesBox::minimized,
+    connect(m_issuesPane, &IssuesPane::minimized,
             this, [=] {
         m_bottomBar->issuesButton()->setChecked(false);
-        m_issuesBox->hide();
+        m_issuesPane->hide();
     });
     connect(m_consoleBox, &ConsoleBox::minimized,
             this, [=] {
         m_bottomBar->consoleButton()->setChecked(false);
         m_consoleBox->hide();
     });
-    connect(m_issuesBox, &IssuesBox::titleChanged,
+    connect(m_issuesPane, &IssuesPane::titleChanged,
             m_bottomBar->issuesButton(), &QAbstractButton::setText);
     connect(m_bottomBar, &BottomBar::buttonActivated,
             this, [=] (QAbstractButton* button) {
@@ -116,9 +116,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
                 m_consoleBox->hide();
         } else {
             if (button->isChecked())
-                m_issuesBox->show();
+                m_issuesPane->show();
             else
-                m_issuesBox->hide();
+                m_issuesPane->hide();
         }
     });
 
@@ -178,9 +178,9 @@ DesignerWidget* CentralWidget::designerWidget() const
     return m_designerWidget;
 }
 
-IssuesBox* CentralWidget::issuesBox() const
+IssuesPane* CentralWidget::issuesPane() const
 {
-    return m_issuesBox;
+    return m_issuesPane;
 }
 
 BottomBar* CentralWidget::bottomBar() const
@@ -197,10 +197,10 @@ void CentralWidget::sweep()
 {
     setCurrentPage(Page_Designer);
     m_consoleBox->hide();
-    m_issuesBox->hide();
+    m_issuesPane->hide();
     m_bottomBar->sweep();
     m_consoleBox->sweep();
-    m_issuesBox->sweep();
+    m_issuesPane->sweep();
     m_qmlCodeEditorWidget->sweep();
     m_designerWidget->sweep();
     m_projectOptionsWidget->sweep();
@@ -222,7 +222,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
         if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
             m_consoleBox->show();
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesBox->show();
+            m_issuesPane->show();
         return m_designerWidget->show();
         break;
 
@@ -231,7 +231,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
         if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
             m_consoleBox->show();
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesBox->show();
+            m_issuesPane->show();
         m_designerWidget->show();
         return g_editorContainer->show();
         break;
@@ -245,7 +245,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
         if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
             m_consoleBox->show();
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesBox->show();
+            m_issuesPane->show();
         return g_editorContainer->show();
         break;
 
@@ -258,7 +258,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
 void CentralWidget::hideWidgets()
 {
     m_bottomBar->hide();
-    m_issuesBox->hide();
+    m_issuesPane->hide();
     m_consoleBox->hide();
     m_designerWidget->hide();
     g_editorContainer->hide();
