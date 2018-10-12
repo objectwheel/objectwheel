@@ -23,6 +23,7 @@ void centralizeWidget(QWidget* widget);
 void adjustFontWeight(QWidget* widget, QFont::Weight weight);
 void adjustFontPixelSize(QWidget* widget, int advance);
 bool hasHover(const QWidget* widget);
+QWidget* createSpacingWidget(const QSize& size);
 QWidget* createSpacerWidget(Qt::Orientation orientation);
 QWindow* window(const QWidget* widget);
 QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left = 0);

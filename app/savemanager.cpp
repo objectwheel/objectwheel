@@ -12,6 +12,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
+#include <QRegularExpression>
 
 namespace {
 // Returns true if given root path belongs to a form
@@ -394,6 +395,24 @@ void SaveManager::removeControl(const Control* control)
         return;
 
     rm(control->dir());
+}
+
+QString SaveManager::correctedKnownPaths(const QString& text)
+{
+    QString correctedText(text);
+    for (const Control* control : Control::controls()) {
+        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(control->dir()) + separator());
+        const QString& correction = control->id() + "::" + control->uid() + ": ";
+        if (correctedText.contains(exp))
+            correctedText.replace(exp, correction);
+    }
+
+    QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toGlobalDir(ProjectManager::dir()) + separator());
+    const QString& correction = tr("GlobalResources") + ": ";
+    if (correctedText.contains(exp))
+        correctedText.replace(exp, correction);
+
+    return correctedText;
 }
 
 /*

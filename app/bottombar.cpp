@@ -228,7 +228,7 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setMaximumHeight(20);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setCheckable(true);
-    m_issuesButton->setText(tr("Issues"));
+    m_issuesButton->setText(tr("Issues") + " [0]");
     m_issuesButton->setToolTip(tr("Activate issues list"));
     m_issuesButton->setIconSize({16, 16});
     m_issuesButton->setIcon(issuesIcon);

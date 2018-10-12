@@ -66,6 +66,13 @@ void UtilityFunctions::trimCommentsAndStrings(QTextDocument* document)
     }
 }
 
+QWidget* UtilityFunctions::createSpacingWidget(const QSize& size)
+{
+    auto spacing = new QWidget;
+    spacing->setFixedSize(size);
+    return spacing;
+}
+
 QWidget* UtilityFunctions::createSpacerWidget(Qt::Orientation orientation)
 {
     auto spacer = new QWidget;

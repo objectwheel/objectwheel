@@ -398,8 +398,7 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
                 break;
             }
             ret = visualRect(spinbox->direction, spinbox->rect, ret);
-        }
-        break;
+        } break;
 
     default:
         ret = ApplicationStyle::subControlRect(control, option, subControl, widget);
@@ -699,7 +698,7 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
                 QWindow* window = nullptr;
                 if (widget)
-                     window = UtilityFunctions::window(widget);
+                    window = UtilityFunctions::window(widget);
                 QPixmap pixmap = mi->icon.pixmap(window, iconSize, mode);
                 int pixw = pixmap.width() / pixmap.devicePixelRatioF();
                 int pixh = pixmap.height() / pixmap.devicePixelRatioF();
@@ -761,19 +760,14 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             g.setColorAt(1, "#f0f0f0");
             painter->fillRect(cb->rect, g);
             painter->setPen("#c4c4c4");
-
-//            if (cb->state & State_Horizontal) {
-                painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
-                                  cb->rect.topRight() + QPointF(0.5, 0.5));
-                painter->drawLine(cb->rect.bottomLeft() + QPointF(0.5, 0.5),
-                                  cb->rect.bottomRight() + QPointF(0.5, 0.5));
-//            } else  {
-                painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
-                                  cb->rect.bottomLeft() + QPointF(0.5, 0.5));
-                painter->drawLine(cb->rect.topRight() + QPointF(0.5, 0.5),
-                                  cb->rect.bottomRight() + QPointF(0.5, 0.5));
-//            }
-
+            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
+                              cb->rect.topRight() + QPointF(0.5, 0.5));
+            painter->drawLine(cb->rect.bottomLeft() + QPointF(0.5, 0.5),
+                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
+            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
+                              cb->rect.bottomLeft() + QPointF(0.5, 0.5));
+            painter->drawLine(cb->rect.topRight() + QPointF(0.5, 0.5),
+                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
             painter->restore();
         } break;
         break;

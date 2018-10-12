@@ -19,6 +19,7 @@ class SaveManager final : public QObject
 
 public:
     static SaveManager* instance();
+    static QString correctedKnownPaths(const QString& text);
 
 private:
     explicit SaveManager(QObject* parent = nullptr);

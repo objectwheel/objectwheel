@@ -1,9 +1,10 @@
 #include <issuespane.h>
 #include <control.h>
-#include <utilsicons.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
 #include <controlpropertymanager.h>
+#include <utilsicons.h>
+#include <savemanager.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -18,74 +19,45 @@
 
 namespace {
 
-QIcon iconForError(const QQmlError& error, const QWidget* widget)
+QIcon iconForError(const QQmlError& error, const QListWidget* widget)
 {
-    QStyleOption opt;
-    opt.initFrom(widget);
+    QIcon ret;
     switch (error.messageType()) {
     case QtInfoMsg:
     case QtDebugMsg:
-        return widget->style()->standardIcon(QStyle::SP_MessageBoxInformation, &opt, widget);
+        ret = Utils::Icons::INFO.icon();
     case QtCriticalMsg:
     case QtFatalMsg:
-        return widget->style()->standardIcon(QStyle::SP_MessageBoxCritical, &opt, widget);
-    case QtWarningMsg:
-        return widget->style()->standardIcon(QStyle::SP_MessageBoxWarning, &opt, widget);
+        ret = Utils::Icons::CRITICAL.icon();
+    case QtWarningMsg: // TODO: Fix this when Qt has a proper fix
+        ret = Utils::Icons::CRITICAL/*WARNING*/.icon();
     }
+    ret.addPixmap(ret.pixmap(UtilityFunctions::window(widget), widget->iconSize(), QIcon::Normal),
+                  QIcon::Selected);
+    return ret;
 }
 }
-enum Roles {
-    ControlErrorsRole = Qt::UserRole + 1,
-    QmlErrorIndexRole
-};
+
+enum Roles { ControlErrorsRole = Qt::UserRole + 1 };
 
 class IssuesListDelegate: public QStyledItemDelegate
 {
     Q_OBJECT
 public:
     IssuesListDelegate(QListWidget* parent) : QStyledItemDelegate(parent)
-      , m_listWidget(parent)
     {
     }
 
-    void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    void paint(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index) const
     {
-        const QAbstractItemModel* model = index.model();
-        Q_ASSERT(model);
-        painter->setRenderHint(QPainter::Antialiasing);
-
-        const int errorIndex = index.data(QmlErrorIndexRole).toInt();
-        const IssuesPane::ControlErrors* controlErrors
-                = index.data(ControlErrorsRole).value<const IssuesPane::ControlErrors*>();
-        const QQmlError& error = controlErrors->errors.at(errorIndex);
-        const int lspace = 3 - QString::number(error.line()).size();
-        const int cspace = 3 - QString::number(error.column()).size();
-
-        QString laddition;
-        if (lspace > 0) {
-            for (int i = 0; i < lspace; ++i)
-                laddition.append(" ");
-        }
-
-        QString caddition;
-        if (cspace > 0) {
-            for (int i = 0; i < cspace; ++i)
-                caddition.append(" ");
-        }
-
-        QString text("%1 %2 %3");
-        QString desc(error.description());
-        QString path(error.url().toString());
-        QString lineCol(("\t" + tr("Line") + ":%1%2, " + tr("Col") + ":%3%4")
-                        .arg(laddition).arg(error.line()).arg(caddition).arg(error.column()));
-
-        QStyleOptionViewItem copy(option);
-        copy.text = text.arg(path).arg(desc).arg(lineCol);
-        QStyledItemDelegate::paint(painter, copy, index);
+        p->setRenderHint(QPainter::Antialiasing);
+        p->setPen("#c4c4c4");
+        p->setBrush(Qt::NoBrush);
+        p->fillRect(opt.rect, "#f0f0f0");
+        p->drawLine(opt.rect.bottomLeft() + QPointF(0.5, 0.5),
+                    opt.rect.bottomRight() + QPointF(0.5, 0.5));
+        QStyledItemDelegate::paint(p, opt, index);
     }
-
-private:
-    QListWidget* m_listWidget;
 };
 
 IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
@@ -96,8 +68,8 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
   , m_fontSizeDownButton(new QToolButton(this))
   , m_minimizeButton(new QToolButton(this))
 {
-
-    setTextElideMode(Qt::ElideMiddle);
+    setTextElideMode(Qt::ElideRight);
+    setItemDelegate(new IssuesListDelegate(this));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     setObjectName("m_listWidget");
     setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"
@@ -105,30 +77,36 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
     setIconSize({16, 16});
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setItemDelegate(new IssuesListDelegate(this));
     connect(this, &QListWidget::itemDoubleClicked,
             this, &IssuesPane::onItemDoubleClick);
 
     m_titleLabel->setText("   " + tr("Issues") + "   ");
-    m_titleLabel->setFixedHeight(22);
+    m_titleLabel->setFixedHeight(20);
 
+    TransparentStyle::attach(m_toolBar);
     m_toolBar->addWidget(m_titleLabel);
     m_toolBar->addSeparator();
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({4, 4}));
     m_toolBar->addWidget(m_clearButton);
     m_toolBar->addWidget(m_fontSizeUpButton);
     m_toolBar->addWidget(m_fontSizeDownButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolBar->addWidget(m_minimizeButton);
-    m_toolBar->setFixedHeight(24);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
+    m_toolBar->setIconSize({14, 14});
 
-    m_clearButton->setFixedHeight(22);
+    m_clearButton->setFixedSize({18, 18});
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
     m_clearButton->setToolTip(tr("Clean issues list"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
     connect(m_clearButton, &QToolButton::clicked,
             this, &QListWidget::clear);
+    connect(m_clearButton, &QToolButton::clicked,
+            this, [=] {
+        emit titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
+    });
 
-    m_fontSizeUpButton->setFixedHeight(22);
+    m_fontSizeUpButton->setFixedSize({18, 18});
     m_fontSizeUpButton->setIcon(Utils::Icons::PLUS_TOOLBAR.icon());
     m_fontSizeUpButton->setToolTip(tr("Increase font size"));
     m_fontSizeUpButton->setCursor(Qt::PointingHandCursor);
@@ -137,7 +115,7 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
         UtilityFunctions::adjustFontPixelSize(this, 1);
     });
 
-    m_fontSizeDownButton->setFixedHeight(22);
+    m_fontSizeDownButton->setFixedSize({18, 18});
     m_fontSizeDownButton->setIcon(Utils::Icons::MINUS.icon());
     m_fontSizeDownButton->setToolTip(tr("Decrease font size"));
     m_fontSizeDownButton->setCursor(Qt::PointingHandCursor);
@@ -146,7 +124,7 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
         UtilityFunctions::adjustFontPixelSize(this, -1);
     });
 
-    m_minimizeButton->setFixedHeight(22);
+    m_minimizeButton->setFixedSize({18, 18});
     m_minimizeButton->setIcon(Utils::Icons::CLOSE_SPLIT_BOTTOM.icon());
     m_minimizeButton->setToolTip(tr("Minimize the pane"));
     m_minimizeButton->setCursor(Qt::PointingHandCursor);
@@ -159,11 +137,11 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
             update(control);
     });
 
-    TransparentStyle::attach(m_toolBar);
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
         m_toolBar->setContentsMargins(0, 0, 0, 0);
         m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
         m_toolBar->layout()->setSpacing(0);
+        m_toolBar->setFixedHeight(22);
     });
 }
 
@@ -229,8 +207,8 @@ void IssuesPane::update(Control* control)
         controlErrors->errors.append(error);
         auto item = new QListWidgetItem;
         item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
-        item->setData(QmlErrorIndexRole, controlErrors->errors.size() - 1);
-        item->setData(Qt::ToolTipRole, error.toString());
+        item->setData(Qt::ToolTipRole, SaveManager::correctedKnownPaths(error.toString()));
+        item->setData(Qt::DisplayRole, SaveManager::correctedKnownPaths(error.toString()));
         item->setIcon(iconForError(error, this));
         addItem(item);
     }
@@ -283,18 +261,17 @@ void IssuesPane::updateGeometries()
     QMargins vm = viewportMargins();
     vm.setTop(m_toolBar->height());
     setViewportMargins(vm);
-    QRect tg(0, 0, width(), m_toolBar->height());
-    m_toolBar->setGeometry(tg);
+    m_toolBar->setGeometry(0, 0, width(), m_toolBar->height());
 }
 
 QSize IssuesPane::sizeHint() const
 {
-    return {100, 100};
+    return {0, 100};
 }
 
 QSize IssuesPane::minimumSizeHint() const
 {
-    return {100, 100};
+    return {0, 100};
 }
 
 #include "issuespane.moc"
