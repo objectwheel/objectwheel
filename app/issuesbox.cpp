@@ -3,6 +3,7 @@
 #include <utilsicons.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
+#include <controlpropertymanager.h>
 
 #include <QToolBar>
 #include <QToolButton>
@@ -15,10 +16,9 @@
 #include <QTimer>
 #include <QQmlError>
 
-enum Roles
-{
-    ErrorRole = ErrorRole + 1,
-    ControlRole
+enum Roles {
+    ControlErrorsRole = Qt::UserRole + 1,
+    QmlErrorIndexRole
 };
 
 class IssuesListDelegate: public QStyledItemDelegate
@@ -38,34 +38,32 @@ public:
 
         QStyledItemDelegate::paint(painter, option, index);
 
-        auto f = option.font;
-        auto r = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5);
-        const QQmlError& error = model->data(index, ErrorRole).value<QQmlError>();
-        const QPointer<Control>& control = model->data(index, ControlRole).value<QPointer<Control>>();
+        //        auto f = option.font;
+        //        auto r = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5);
+        //        const QQmlError& error = model->data(index, QmlErrorRole).value<QQmlError>();
+        //        const QPointer<Control>& control = model->data(index, ControlRole).value<QPointer<Control>>();
 
-        if (control.isNull())
-            return;
+        //        if (control.isNull())
+        //            return;
 
-        painter->setPen("#a0a4a7");
-        painter->drawLine(r.bottomLeft(), r.bottomRight());
-        painter->setPen(option.palette.text().color());
-        f.setWeight(QFont::Medium);
-        painter->setFont(f);
-        painter->drawText(r.adjusted(26, 0, 0, 0),
-                          control->id() + ":", Qt::AlignVCenter | Qt::AlignLeft);
-        QFontMetrics fm(f);
-        f.setWeight(QFont::Normal);
-        painter->setFont(f);
-        painter->drawText(r.adjusted(26.0 + fm.horizontalAdvance(control->id()) + 8, 0, 0, 0),
-                          error.description, Qt::AlignVCenter | Qt::AlignLeft);
-        painter->drawText(r, QString("Line: %1, Col: %2 ").
-                          arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
+        //        painter->setPen("#a0a4a7");
+        //        painter->drawLine(r.bottomLeft(), r.bottomRight());
+        //        painter->setPen(option.palette.text().color());
+        //        f.setWeight(QFont::Medium);
+        //        painter->setFont(f);
+        //        painter->drawText(r.adjusted(26, 0, 0, 0),
+        //                          control->id() + ":", Qt::AlignVCenter | Qt::AlignLeft);
+        //        QFontMetrics fm(f);
+        //        f.setWeight(QFont::Normal);
+        //        painter->setFont(f);
+        //        painter->drawText(r.adjusted(26.0 + fm.horizontalAdvance(control->id()) + 8, 0, 0, 0),
+        //                          error.description, Qt::AlignVCenter | Qt::AlignLeft);
+        //        painter->drawText(r, QString("Line: %1, Col: %2 ").
+        //                          arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
     }
 };
 
-IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
-  , m_layout(new QVBoxLayout(this))
-  , m_listWidget(new QListWidget)
+IssuesBox::IssuesBox(QWidget* parent) : QListWidget(parent)
   , m_toolBar(new QToolBar(this))
   , m_titleLabel(new QLabel(this))
   , m_clearButton(new QToolButton(this))
@@ -74,11 +72,15 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
   , m_minimizeButton(new QToolButton(this))
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    m_layout->setSpacing(0);
-    m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_toolBar);
-    m_layout->addWidget(m_listWidget);
+    setObjectName("m_listWidget");
+    setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"
+                  "border-top: none; border-bottom: none;}");
+    setIconSize({16, 16});
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setItemDelegate(new IssuesListDelegate(this));
+    connect(this, &QListWidget::itemDoubleClicked,
+            this, &IssuesBox::onItemDoubleClick);
 
     m_titleLabel->setText("   " + tr("Issues") + "   ");
     m_titleLabel->setFixedHeight(22);
@@ -97,7 +99,7 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
     m_clearButton->setToolTip(tr("Clean issues list"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
     connect(m_clearButton, &QToolButton::clicked,
-            m_listWidget, &QListWidget::clear);
+            this, &QListWidget::clear);
 
     m_fontSizeUpButton->setFixedHeight(22);
     m_fontSizeUpButton->setIcon(Utils::Icons::PLUS_TOOLBAR.icon());
@@ -105,7 +107,7 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
     m_fontSizeUpButton->setCursor(Qt::PointingHandCursor);
     connect(m_fontSizeUpButton, &QToolButton::clicked,
             this, [=] { // TODO: Change this with zoomIn
-        UtilityFunctions::adjustFontPixelSize(m_listWidget, 1);
+        UtilityFunctions::adjustFontPixelSize(this, 1);
     });
 
     m_fontSizeDownButton->setFixedHeight(22);
@@ -114,7 +116,7 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
     m_fontSizeDownButton->setCursor(Qt::PointingHandCursor);
     connect(m_fontSizeDownButton, &QToolButton::clicked,
             this, [=] { // TODO: Change this with zoomOut
-        UtilityFunctions::adjustFontPixelSize(m_listWidget, -1);
+        UtilityFunctions::adjustFontPixelSize(this, -1);
     });
 
     m_minimizeButton->setFixedHeight(22);
@@ -124,16 +126,11 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &IssuesBox::minimized);
 
-    m_listWidget->setObjectName("m_listWidget");
-    m_listWidget->setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"
-                                   "border-top: none; border-bottom: none;}");
-    m_listWidget->setIconSize({16, 16});
-    m_listWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_listWidget->setFocusPolicy(Qt::NoFocus);
-    m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_listWidget->setItemDelegate(new IssuesListDelegate(m_listWidget));
-    connect(m_listWidget, &QListWidget::itemDoubleClicked,
-            this, &IssuesBox::handleDoubleClick);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
+            this, [=] (Control* control, int codeChanged) {
+        if (codeChanged)
+            update(control);
+    });
 
     TransparentStyle::attach(m_toolBar);
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
@@ -146,89 +143,122 @@ IssuesBox::IssuesBox(QWidget* parent) : QWidget(parent)
 void IssuesBox::sweep()
 {
     clear();
+    qDeleteAll(m_erroneousControls);
+    m_erroneousControls.clear();
 }
 
-void IssuesBox::refresh()
+void IssuesBox::update(Control* control)
 {
-    for (const auto& err : m_defectiveControls.keys()) {
-        auto control = m_defectiveControls.value(err);
-        if (control.isNull() || !control->hasErrors()) {
-            for (int i = 0; i < m_listWidget->count(); i++) {
-                auto item = m_listWidget->item(i);
-                if (item->data(ErrorRole).value<Error>() == err)
-                    delete m_listWidget->takeItem(i);
+    ControlErrors* controlErrors = nullptr;
+    for (ControlErrors* error : m_erroneousControls) {
+        if (error->control == control)
+            controlErrors = error;
+    }
+
+    if (!controlErrors && !control->hasErrors())
+        return;
+
+    if (controlErrors && !control->hasErrors()) {
+        for (int i = count() - 1; i >= 0; --i) {
+            const ControlErrors* error = item(i)->data(ControlErrorsRole).value<const ControlErrors*>();
+            if (error->control == control)
+                delete takeItem(i);
+        }
+
+        for (int i = 0; i < m_erroneousControls.size(); ++i) {
+            if (m_erroneousControls.at(i)->control == control) {
+                m_erroneousControls.removeAt(i);
+                break;
             }
-            m_defectiveControls.remove(err);
-        } else {
-            QList<Error> es;
-            for (const auto& error : control->errors()) {
-                Error e;
-                e.id = control->id();
-                e.uid = control->uid();
-                e.description = error.description();
-                e.line = error.line();
-                e.column = error.column();
-                es << e;
-            }
-            if (!es.contains(err)) {
-                for (int i = 0; i < m_listWidget->count(); i++) {
-                    auto item = m_listWidget->item(i);
-                    if (item->data(ErrorRole).value<Error>() == err)
-                        delete m_listWidget->takeItem(i);
-                }
-                m_defectiveControls.remove(err);
-            }
+        }
+
+        control->disconnect(this);
+
+        delete controlErrors;
+
+        return titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
+    }
+
+    if (!controlErrors) {
+        controlErrors = new ControlErrors;
+        controlErrors->control = control;
+        m_erroneousControls.append(controlErrors);
+        connect(control, &Control::destroyed, this, &IssuesBox::onControlDestruction);
+    } else {
+        controlErrors->errors.clear();
+        for (int i = count() - 1; i >= 0; --i) {
+            const ControlErrors* error = item(i)->data(ControlErrorsRole).value<const ControlErrors*>();
+            if (error->control == control)
+                delete takeItem(i);
         }
     }
 
-    emit titleChanged(QString::fromUtf8("Issues [%1]").arg(m_listWidget->count()));
+    Q_ASSERT(control->hasErrors());
+
+    for (const QQmlError& error : control->errors()) {
+        controlErrors->errors.append(error);
+        auto item = new QListWidgetItem;
+        item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
+        item->setData(QmlErrorIndexRole, controlErrors->errors.size() - 1);
+        addItem(item);
+    }
+
+    emit titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
 }
 
-void IssuesBox::process(Control* control)
+void IssuesBox::onControlDestruction(QObject* controlObject)
 {
-    refresh();
-    if (control->hasErrors()) {
-        for (const auto& error : control->errors()) {
-            Error err;
-            err.id = control->id();
-            err.uid = control->uid();
-            err.description = error.description();
-            err.line = error.line();
-            err.column = error.column();
-            if (m_defectiveControls.contains(err))
-                continue;
-            auto item = new QListWidgetItem;
-            item->setData(ErrorRole, QVariant::fromValue<Error>(err));
-            item->setIcon(QIcon(":/images/error.png"));
-            m_listWidget->addItem(item);
-            m_defectiveControls[err] = control;
-            emit flash();
+    Control* control = qobject_cast<Control*>(controlObject);
+    Q_ASSERT(control);
+
+    for (int i = count() - 1; i >= 0; --i) {
+        const ControlErrors* error = item(i)->data(ControlErrorsRole).value<const ControlErrors*>();
+        if (error->control == control)
+            delete takeItem(i);
+    }
+
+    ControlErrors* controlErrors = nullptr;
+    for (int i = 0; i < m_erroneousControls.size(); ++i) {
+        if (m_erroneousControls.at(i)->control == control) {
+            controlErrors = m_erroneousControls.at(i);
+            m_erroneousControls.removeAt(i);
+            break;
         }
     }
-}
 
-void IssuesBox::clear()
-{
-    m_defectiveControls.clear();
-    m_listWidget->clear();
+    Q_ASSERT(controlErrors);
+
+    delete controlErrors;
+
+    return titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
 }
 
 void IssuesBox::onItemDoubleClick(QListWidgetItem* item)
 {
-    const auto& error = item->data(ErrorRole).value<Error>();
-    const auto& c = m_defectiveControls.value(error);
+    //    const auto& error = item->data(QmlErrorRole).value<Error>();
+    //    const auto& c = m_erroneousControls.value(error);
 
-    if (c == nullptr)
-        return;
-    emit itemDoubleClicked(c);
+    //    if (c == nullptr)
+    //        return;
+    //    emit controlDoubleClicked(c);
 }
 
-QSize IssuesBox::minimumSizeHint() const
+void IssuesBox::updateGeometries()
+{
+    QListWidget::updateGeometries();
+    QMargins vm = viewportMargins();
+    vm.setTop(m_toolBar->height());
+    setViewportMargins(vm);
+    QRect tg(0, 0, width(), m_toolBar->height());
+    m_toolBar->setGeometry(tg);
+}
+
+QSize IssuesBox::sizeHint() const
 {
     return {100, 100};
 }
 
-QSize IssuesBox::sizeHint() const
+QSize IssuesBox::minimumSizeHint() const
 {
     return {100, 100};
 }

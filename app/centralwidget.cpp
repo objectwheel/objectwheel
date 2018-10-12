@@ -27,6 +27,7 @@
 #include <QVBoxLayout>
 #include <QStyle>
 #include <QLabel>
+#include <QAbstractButton>
 
 class EditorContainer : public QLabel {
 public: explicit EditorContainer(QWidget* parent) : QLabel(parent) {}
