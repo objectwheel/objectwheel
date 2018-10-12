@@ -85,8 +85,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
 
-    connect(m_issuesPane, SIGNAL(controlDoubleClicked(Control*)),
-            m_designerWidget, SLOT(onControlDoubleClick(Control*))); // FIXME: onControlDo.. is a private member
+    connect(m_issuesPane, &IssuesPane::controlDoubleClicked,
+            m_designerWidget, &DesignerWidget::onInspectorItemDoubleClick);
     connect(m_issuesPane, &IssuesPane::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());

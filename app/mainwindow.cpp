@@ -33,11 +33,11 @@
 
 #define CSS_DESIGNER_PINBAR "\
 QToolBar { \
-    border-top: 1px solid  #c6c6c6;\
-    border-bottom: 1px solid #c6c6c6;\
-    border-right: 1px solid #c6c6c6;\
+    border-top: 1px solid  #c4c4c4;\
+    border-bottom: 1px solid #c4c4c4;\
+    border-right: 1px solid #c4c4c4;\
     border-left: 3px solid #0D74C8;\
-    margin-left: 1px; margin-right: 1px;\
+    margin: 0px;\
     background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #ffffff, stop:1 #e3e3e3); \
     spacing: 5px; \
 }"

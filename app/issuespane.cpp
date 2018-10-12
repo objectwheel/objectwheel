@@ -16,6 +16,24 @@
 #include <QTimer>
 #include <QQmlError>
 
+namespace {
+
+QIcon iconForError(const QQmlError& error, const QWidget* widget)
+{
+    QStyleOption opt;
+    opt.initFrom(widget);
+    switch (error.messageType()) {
+    case QtInfoMsg:
+    case QtDebugMsg:
+        return widget->style()->standardIcon(QStyle::SP_MessageBoxInformation, &opt, widget);
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        return widget->style()->standardIcon(QStyle::SP_MessageBoxCritical, &opt, widget);
+    case QtWarningMsg:
+        return widget->style()->standardIcon(QStyle::SP_MessageBoxWarning, &opt, widget);
+    }
+}
+}
 enum Roles {
     ControlErrorsRole = Qt::UserRole + 1,
     QmlErrorIndexRole
@@ -36,57 +54,36 @@ public:
         Q_ASSERT(model);
         painter->setRenderHint(QPainter::Antialiasing);
 
-
         const int errorIndex = index.data(QmlErrorIndexRole).toInt();
         const IssuesPane::ControlErrors* controlErrors
                 = index.data(ControlErrorsRole).value<const IssuesPane::ControlErrors*>();
         const QQmlError& error = controlErrors->errors.at(errorIndex);
-        const QtMsgType msgType = error.messageType();
+        const int lspace = 3 - QString::number(error.line()).size();
+        const int cspace = 3 - QString::number(error.column()).size();
 
-        QStyleOptionViewItem copy(option);
-
-        switch (msgType) {
-        case QtInfoMsg:
-        case QtDebugMsg:
-            copy.icon = m_listWidget->style()->standardIcon(QStyle::SP_MessageBoxInformation, &copy, m_listWidget);
-            break;
-
-        case QtCriticalMsg:
-        case QtFatalMsg:
-            copy.icon = m_listWidget->style()->standardIcon(QStyle::SP_MessageBoxCritical, &copy, m_listWidget);
-            break;
-
-        case QtWarningMsg:
-            copy.icon = m_listWidget->style()->standardIcon(QStyle::SP_MessageBoxWarning, &copy, m_listWidget);
-            break;
+        QString laddition;
+        if (lspace > 0) {
+            for (int i = 0; i < lspace; ++i)
+                laddition.append(" ");
         }
 
-        copy.text = error.toString();
+        QString caddition;
+        if (cspace > 0) {
+            for (int i = 0; i < cspace; ++i)
+                caddition.append(" ");
+        }
+
+        QString text("%1 %2 %3");
+        QString desc(error.description());
+        QString path(error.url().toString());
+        QString lineCol(("\t" + tr("Line") + ":%1%2, " + tr("Col") + ":%3%4")
+                        .arg(laddition).arg(error.line()).arg(caddition).arg(error.column()));
+
+        QStyleOptionViewItem copy(option);
+        copy.text = text.arg(path).arg(desc).arg(lineCol);
         QStyledItemDelegate::paint(painter, copy, index);
-
-        //        auto f = option.font;
-        //        auto r = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5);
-        //        const QQmlError& error = model->data(index, QmlErrorRole).value<QQmlError>();
-        //        const QPointer<Control>& control = model->data(index, ControlRole).value<QPointer<Control>>();
-
-        //        if (control.isNull())
-        //            return;
-
-        //        painter->setPen("#a0a4a7");
-        //        painter->drawLine(r.bottomLeft(), r.bottomRight());
-        //        painter->setPen(option.palette.text().color());
-        //        f.setWeight(QFont::Medium);
-        //        painter->setFont(f);
-        //        painter->drawText(r.adjusted(26, 0, 0, 0),
-        //                          control->id() + ":", Qt::AlignVCenter | Qt::AlignLeft);
-        //        QFontMetrics fm(f);
-        //        f.setWeight(QFont::Normal);
-        //        painter->setFont(f);
-        //        painter->drawText(r.adjusted(26.0 + fm.horizontalAdvance(control->id()) + 8, 0, 0, 0),
-        //                          error.description, Qt::AlignVCenter | Qt::AlignLeft);
-        //        painter->drawText(r, QString("Line: %1, Col: %2 ").
-        //                          arg(error.line).arg(error.column), Qt::AlignVCenter | Qt::AlignRight);
     }
+
 private:
     QListWidget* m_listWidget;
 };
@@ -99,6 +96,8 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
   , m_fontSizeDownButton(new QToolButton(this))
   , m_minimizeButton(new QToolButton(this))
 {
+
+    setTextElideMode(Qt::ElideMiddle);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     setObjectName("m_listWidget");
     setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"
@@ -231,6 +230,8 @@ void IssuesPane::update(Control* control)
         auto item = new QListWidgetItem;
         item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
         item->setData(QmlErrorIndexRole, controlErrors->errors.size() - 1);
+        item->setData(Qt::ToolTipRole, error.toString());
+        item->setIcon(iconForError(error, this));
         addItem(item);
     }
 
