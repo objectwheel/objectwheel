@@ -48,21 +48,24 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
     TransparentStyle::attach(m_toolBar);
 
-    m_homeButton->setFixedHeight(22);
-    m_backButton->setFixedHeight(22);
-    m_forthButton->setFixedHeight(22);
-    m_titleLabel->setFixedHeight(22);
+    m_homeButton->setFixedHeight(20);
+    m_backButton->setFixedHeight(20);
+    m_forthButton->setFixedHeight(20);
+    m_titleLabel->setFixedHeight(20);
+    m_typeCombo->setFixedHeight(20);
 
     m_toolBar->setFixedHeight(24);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_typeCombo);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addWidget(m_homeButton);
     m_toolBar->addWidget(m_backButton);
     m_toolBar->addWidget(m_forthButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();
-    auto spacing = new QWidget(this);
-    spacing->setFixedSize(10, 24);
-    m_toolBar->addWidget(spacing);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({10, 10}));
     m_toolBar->addWidget(m_titleLabel);
 
     UtilityFunctions::adjustFontPixelSize(m_titleLabel, -1);

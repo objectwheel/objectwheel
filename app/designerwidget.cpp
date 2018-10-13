@@ -230,29 +230,35 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
 
     TransparentStyle::attach(m_toolBar);
 
-    m_undoButton->setFixedHeight(22);
-    m_redoButton->setFixedHeight(22);
-    m_clearButton->setFixedHeight(22);
-    m_refreshButton->setFixedHeight(22);
-    m_snappingButton->setFixedHeight(22);
-    m_fitButton->setFixedHeight(22);
-    m_outlineButton->setFixedHeight(22);
-    m_hideDockWidgetTitleBarsButton->setFixedHeight(22);
-    m_zoomlLevelCombobox->setFixedHeight(22);
+    m_undoButton->setFixedHeight(20);
+    m_redoButton->setFixedHeight(20);
+    m_clearButton->setFixedHeight(20);
+    m_refreshButton->setFixedHeight(20);
+    m_snappingButton->setFixedHeight(20);
+    m_fitButton->setFixedHeight(20);
+    m_outlineButton->setFixedHeight(20);
+    m_hideDockWidgetTitleBarsButton->setFixedHeight(20);
+    m_zoomlLevelCombobox->setFixedHeight(20);
 
     m_toolBar->setFixedHeight(24);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_undoButton);
     m_toolBar->addWidget(m_redoButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addWidget(m_refreshButton);
     m_toolBar->addWidget(m_clearButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addWidget(m_snappingButton);
     m_toolBar->addWidget(m_outlineButton);
     m_toolBar->addWidget(m_fitButton);
     m_toolBar->addWidget(m_zoomlLevelCombobox);
     m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolBar->addWidget(m_hideDockWidgetTitleBarsButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
 }
 
 void DesignerWidget::scaleScene(qreal ratio)

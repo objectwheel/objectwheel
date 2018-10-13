@@ -57,48 +57,66 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
   , m_leftCombo(new QComboBox)
   , m_rightCombo(new QComboBox)
 {
+    addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     addWidget(m_pinButton);
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addSeparator();
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addWidget(m_undoButton);
     addWidget(m_redoButton);
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addSeparator();
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addWidget(m_cutButton);
     addWidget(m_copyButton);
     addWidget(m_pasteButton);
     addWidget(m_saveButton);
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addSeparator();
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addWidget(m_scopeButton);
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addSeparator();
-    m_actions.append(addWidget(m_newFileButton));   // 0
-    m_actions.append(addWidget(m_openFileButton));  // 1
-    m_actions.append(addSeparator());               // 2
-    m_actions.append(addWidget(m_leftCombo));       // 3
-    m_actions.append(addSeparator());               // 4
-    m_actions.append(addWidget(m_rightCombo));      // 5
-    m_actions.append(addSeparator());               // 6
-    m_actions.append(addWidget(m_closeButton));     // 7
-    m_actions.append(addSeparator());               // 8
+    addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    m_actions.append(addWidget(m_newFileButton));                               // 0
+    m_actions.append(addWidget(m_openFileButton));                              // 1
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 2
+    m_actions.append(addSeparator());                                           // 3
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 4
+    m_actions.append(addWidget(m_leftCombo));                                   // 5
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 6
+    m_actions.append(addSeparator());                                           // 7
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 8
+    m_actions.append(addWidget(m_rightCombo));                                  // 9
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 10
+    m_actions.append(addSeparator());                                           // 11
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 12
+    m_actions.append(addWidget(m_closeButton));                                 // 13
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 14
+    m_actions.append(addSeparator());                                           // 15
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
-    m_actions.append(addSeparator());               // 9
-    m_actions.append(addWidget(m_lineColumnLabel)); // 10
-    m_actions.append(addSeparator());               // 11
-    m_actions.append(addWidget(m_showButton));      // 12
+    m_actions.append(addSeparator());                                           // 16
+    m_actions.append(addWidget(m_lineColumnLabel));                             // 17
+    m_actions.append(addSeparator());                                           // 18
+    m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 19
+    m_actions.append(addWidget(m_showButton));                                  // 20
+    addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
 
-    m_pinButton->setFixedHeight(22);
-    m_undoButton->setFixedHeight(22);
-    m_redoButton->setFixedHeight(22);
-    m_closeButton->setFixedHeight(22);
-    m_newFileButton->setFixedHeight(22);
-    m_openFileButton->setFixedHeight(22);
-    m_saveButton->setFixedHeight(22);
-    m_cutButton->setFixedHeight(22);
-    m_copyButton->setFixedHeight(22);
-    m_pasteButton->setFixedHeight(22);
-    m_showButton->setFixedHeight(22);
-    m_scopeButton->setFixedHeight(22);
-    m_leftCombo->setFixedHeight(22);
-    m_rightCombo->setFixedHeight(22);
-    m_lineColumnLabel->setFixedHeight(22);
+    m_pinButton->setFixedHeight(20);
+    m_undoButton->setFixedHeight(20);
+    m_redoButton->setFixedHeight(20);
+    m_closeButton->setFixedHeight(20);
+    m_newFileButton->setFixedHeight(20);
+    m_openFileButton->setFixedHeight(20);
+    m_saveButton->setFixedHeight(20);
+    m_cutButton->setFixedHeight(20);
+    m_copyButton->setFixedHeight(20);
+    m_pasteButton->setFixedHeight(20);
+    m_showButton->setFixedHeight(20);
+    m_scopeButton->setFixedHeight(20);
+    m_leftCombo->setFixedHeight(20);
+    m_rightCombo->setFixedHeight(20);
+    m_lineColumnLabel->setFixedHeight(20);
 
     m_pinButton->setCursor(Qt::PointingHandCursor);
     m_undoButton->setCursor(Qt::PointingHandCursor);
@@ -391,16 +409,24 @@ void QmlCodeEditorToolBar::setHiddenActions(QmlCodeEditorToolBar::DocumentAction
     m_actions.at(0)->setVisible(!(action & FileActions));
     m_actions.at(1)->setVisible(!(action & FileActions));
     m_actions.at(2)->setVisible(!(action & FileActions));
-    m_actions.at(3)->setVisible(!(action & LeftAction));
-    m_actions.at(4)->setVisible(!(action & LeftAction));
-    m_actions.at(5)->setVisible(!(action & RightAction));
-    m_actions.at(6)->setVisible(!(action & RightAction));
-    m_actions.at(7)->setVisible(!(action & CloseAction));
-    m_actions.at(8)->setVisible(!(action & CloseAction));
-    m_actions.at(9)->setVisible(!(action & LineColAction));
-    m_actions.at(10)->setVisible(!(action & LineColAction));
-    m_actions.at(11)->setVisible(!(action & ShowAction));
-    m_actions.at(12)->setVisible(!(action & ShowAction));
+    m_actions.at(3)->setVisible(!(action & FileActions));
+    m_actions.at(4)->setVisible(!(action & FileActions));
+    m_actions.at(5)->setVisible(!(action & LeftAction));
+    m_actions.at(6)->setVisible(!(action & LeftAction));
+    m_actions.at(7)->setVisible(!(action & LeftAction));
+    m_actions.at(8)->setVisible(!(action & LeftAction));
+    m_actions.at(9)->setVisible(!(action & RightAction));
+    m_actions.at(10)->setVisible(!(action & RightAction));
+    m_actions.at(11)->setVisible(!(action & RightAction));
+    m_actions.at(12)->setVisible(!(action & RightAction));
+    m_actions.at(13)->setVisible(!(action & CloseAction));
+    m_actions.at(14)->setVisible(!(action & CloseAction));
+    m_actions.at(15)->setVisible(!(action & CloseAction));
+    m_actions.at(16)->setVisible(!(action & LineColAction));
+    m_actions.at(17)->setVisible(!(action & LineColAction));
+    m_actions.at(18)->setVisible(!(action & ShowAction));
+    m_actions.at(19)->setVisible(!(action & ShowAction));
+    m_actions.at(20)->setVisible(!(action & ShowAction));
 }
 
 QmlCodeEditorToolBar::Scope QmlCodeEditorToolBar::scope() const

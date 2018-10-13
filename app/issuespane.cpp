@@ -27,9 +27,7 @@ class IssuesListDelegate: public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    IssuesListDelegate(QListWidget* parent) : QStyledItemDelegate(parent)
-    {
-    }
+    IssuesListDelegate(QListWidget* parent) : QStyledItemDelegate(parent) {}
 
     void paint(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index) const
     {

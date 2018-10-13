@@ -3349,7 +3349,7 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
     QPlainTextEdit::resizeEvent(e);
 
     QRect vg = viewport()->geometry();
-    m_rowBar->setGeometry(0, vg.top(), m_rowBar->calculatedWidth() + 1, vg.height());
+    m_rowBar->setGeometry(0, vg.top(), m_rowBar->calculatedWidth(), vg.height());
     m_toolBar->setGeometry(0, 0, vg.width() + m_rowBar->width(), 24);
     m_noDocsLabel->setGeometry(0, vg.top(), vg.width() + m_rowBar->width(), vg.height());
 
