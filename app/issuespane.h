@@ -38,8 +38,9 @@ protected:
 signals:
     void flash();
     void minimized();
-    void controlDoubleClicked(Control*);
     void titleChanged(const QString& title);
+    void globalFileOpened(const QString& relativePath, int line, int column);
+    void internalFileOpened(Control* control, const QString& relativePath, int line, int column);
 
 private:
     QToolBar* m_toolBar;

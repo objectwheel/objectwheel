@@ -2379,12 +2379,12 @@ QString QmlCodeEditor::wordUnderCursor() const
 void QmlCodeEditor::gotoLine(int line, int column, bool centerLine, bool animate)
 {
     //    m_lastCursorChangeWasInteresting = false; // avoid adding the previous position to history
-    const int blockNumber = qMin(line, document()->blockCount()) - 1;
+    const int blockNumber = qMin(line - 1, document()->blockCount());
     const QTextBlock &block = document()->findBlockByNumber(blockNumber);
     if (block.isValid()) {
         QTextCursor cursor(block);
         if (column > 0) {
-            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column - 1);
         } else {
             int pos = cursor.position();
             while (document()->characterAt(pos).category() == QChar::Separator_Space) {

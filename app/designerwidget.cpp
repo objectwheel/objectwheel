@@ -396,11 +396,16 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
     m_qmlCodeEditorWidget->openInternal(control, "main.qml");
 }
 
-void DesignerWidget::onIssuesItemDoubleClick(Control*, int line, int col)
+void DesignerWidget::onGlobalFileOpen(const QString& relativePath, int line, int column)
 {
-    // WARNING: Global, inline, internal, external each one must be handled
-    //    m_qmlCodeEditorWidget->openInternal(control, "main.qml");
-    //    qmlCodeEditorWidget()->codeEditor()->gotoLine(4);
+    m_qmlCodeEditorWidget->openGlobal(relativePath);
+    m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
+}
+
+void DesignerWidget::onInternalFileOpen(Control* control, const QString& relativePath, int line, int column)
+{
+    m_qmlCodeEditorWidget->openInternal(control, relativePath);
+    m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
 }
 
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)

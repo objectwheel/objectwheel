@@ -85,8 +85,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
 
-    connect(m_issuesPane, &IssuesPane::controlDoubleClicked,
-            m_designerWidget, &DesignerWidget::onInspectorItemDoubleClick);
+    connect(m_issuesPane, &IssuesPane::internalFileOpened,
+            m_designerWidget, &DesignerWidget::onInternalFileOpen);
+    connect(m_issuesPane, &IssuesPane::globalFileOpened,
+            m_designerWidget, &DesignerWidget::onGlobalFileOpen);
     connect(m_issuesPane, &IssuesPane::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());

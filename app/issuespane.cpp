@@ -5,7 +5,10 @@
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
 #include <controlpropertymanager.h>
+#include <saveutils.h>
+#include <projectmanager.h>
 
+#include <QDir>
 #include <QLabel>
 #include <QTimer>
 #include <QLayout>
@@ -13,8 +16,12 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QStyledItemDelegate>
+#include <QQmlError>
 
-enum Roles { ControlErrorsRole = Qt::UserRole + 1 };
+enum Roles {
+    ControlErrorsRole = Qt::UserRole + 1,
+    QmlErrorIndexRole,
+};
 
 class IssuesListDelegate: public QStyledItemDelegate
 {
@@ -182,6 +189,7 @@ void IssuesPane::update(Control* control)
     for (const QQmlError& error : control->errors()) {
         controlErrors->errors.append(error);
         auto item = new QListWidgetItem;
+        item->setData(QmlErrorIndexRole, controlErrors->errors.size() - 1);
         item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
         item->setData(Qt::ToolTipRole, SaveManager::correctedKnownPaths(error.toString()));
         item->setData(Qt::DisplayRole, SaveManager::correctedKnownPaths(error.toString()));
@@ -197,8 +205,20 @@ void IssuesPane::update(Control* control)
 
 void IssuesPane::onItemDoubleClick(QListWidgetItem* item)
 {
+    const int errorIndex = item->data(QmlErrorIndexRole).toInt();
     const ControlErrors* controlErrors = item->data(ControlErrorsRole).value<const ControlErrors*>();
-    emit controlDoubleClicked(controlErrors->control);
+    const QQmlError& error = controlErrors->errors.at(errorIndex);
+    const QString& fullPath = error.url().toLocalFile();
+    const QString& globalPath = SaveUtils::toGlobalDir(ProjectManager::dir());
+
+    if (fullPath.contains(globalPath)) {
+        emit globalFileOpened(QDir(globalPath).relativeFilePath(fullPath), error.line(),
+                              error.column());
+    } else {
+        emit internalFileOpened(controlErrors->control,
+            QDir(SaveUtils::toThisDir(controlErrors->control->dir())).relativeFilePath(fullPath),
+            error.line(), error.column());
+    }
 }
 
 void IssuesPane::onControlDestruction(QObject* controlObject)

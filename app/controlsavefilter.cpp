@@ -20,6 +20,9 @@ void ControlSaveFilter::beforeSave(QmlCodeEditorWidget::Document* document)
     if (document->scope != QmlCodeEditorToolBar::Internal)
         return;
 
+    if (internal(document)->relativePath != "main.qml")
+        return;
+
     Control* control = internal(document)->control;
     QmlCodeDocument* doc = internal(document)->document;
 
@@ -38,8 +41,10 @@ void ControlSaveFilter::afterSave(QmlCodeEditorWidget::Document* document)
 
     Control* control = internal(document)->control;
 
-    if (control->id() != m_id)
-        ControlPropertyManager::setId(control, m_id, ControlPropertyManager::SaveChanges); // For refactorId
+    if (internal(document)->relativePath == "main.qml") {
+        if (control->id() != m_id)
+            ControlPropertyManager::setId(control, m_id, ControlPropertyManager::SaveChanges); // For refactorId
+    }
 
     if (control->form())
         ControlPreviewingManager::scheduleFormCodeUpdate(control->uid());
