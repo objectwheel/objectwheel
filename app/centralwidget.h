@@ -12,7 +12,7 @@ class ProjectOptionsWidget;
 class HelpWidget;
 class BuildsWidget;
 class BottomBar;
-class ConsoleBox;
+class ConsolePane;
 class IssuesPane;
 
 class CentralWidget : public QWidget
@@ -23,7 +23,7 @@ public:
     explicit CentralWidget(QWidget* parent = nullptr);
     QmlCodeEditorWidget* qmlCodeEditorWidget() const;
     DesignerWidget* designerWidget() const;
-    ConsoleBox* consoleBox() const;
+    ConsolePane* consolePane() const;
     IssuesPane* issuesPane() const;
     BottomBar* bottomBar() const;
 
@@ -38,7 +38,7 @@ private:
     QVBoxLayout* m_layout;
     QSplitter* m_splitterOut,* m_splitterIn;
     BottomBar* m_bottomBar;
-    ConsoleBox* m_consoleBox;
+    ConsolePane* m_consolePane;
     IssuesPane* m_issuesPane;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     DesignerWidget* m_designerWidget;

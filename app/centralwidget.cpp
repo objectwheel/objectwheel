@@ -20,7 +20,7 @@
 #include <projectmanager.h>
 #include <bottombar.h>
 #include <transparentstyle.h>
-#include <consolebox.h>
+#include <consolepane.h>
 
 #include <QWindow>
 #include <QSplitter>
@@ -41,7 +41,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_splitterOut(new QSplitter)
   , m_splitterIn(new QSplitter)
   , m_bottomBar(new BottomBar)
-  , m_consoleBox(new ConsoleBox)
+  , m_consolePane(new ConsolePane)
   , m_issuesPane(new IssuesPane)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
@@ -57,7 +57,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->setHandleWidth(0);
     m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
-    m_splitterOut->addWidget(m_consoleBox);
+    m_splitterOut->addWidget(m_consolePane);
     m_splitterOut->addWidget(m_issuesPane);
     m_splitterOut->addWidget(m_bottomBar);
 
@@ -91,7 +91,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());
     });
-    connect(m_consoleBox, &ConsoleBox::flash,
+    connect(m_consolePane, &ConsolePane::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->consoleButton());
     });
@@ -100,10 +100,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         m_bottomBar->issuesButton()->setChecked(false);
         m_issuesPane->hide();
     });
-    connect(m_consoleBox, &ConsoleBox::minimized,
+    connect(m_consolePane, &ConsolePane::minimized,
             this, [=] {
         m_bottomBar->consoleButton()->setChecked(false);
-        m_consoleBox->hide();
+        m_consolePane->hide();
     });
     connect(m_issuesPane, &IssuesPane::titleChanged,
             m_bottomBar->issuesButton(), &QAbstractButton::setText);
@@ -111,9 +111,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             this, [=] (QAbstractButton* button) {
         if (button == m_bottomBar->consoleButton()) {
             if (button->isChecked())
-                m_consoleBox->show();
+                m_consolePane->show();
             else
-                m_consoleBox->hide();
+                m_consolePane->hide();
         } else {
             if (button->isChecked())
                 m_issuesPane->show();
@@ -188,18 +188,18 @@ BottomBar* CentralWidget::bottomBar() const
     return m_bottomBar;
 }
 
-ConsoleBox* CentralWidget::consoleBox() const
+ConsolePane* CentralWidget::consolePane() const
 {
-    return m_consoleBox;
+    return m_consolePane;
 }
 
 void CentralWidget::sweep()
 {
     setCurrentPage(Page_Designer);
-    m_consoleBox->hide();
+    m_consolePane->hide();
     m_issuesPane->hide();
     m_bottomBar->sweep();
-    m_consoleBox->sweep();
+    m_consolePane->sweep();
     m_issuesPane->sweep();
     m_qmlCodeEditorWidget->sweep();
     m_designerWidget->sweep();
@@ -220,7 +220,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
     case Page_Designer:
         m_bottomBar->show();
         if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consoleBox->show();
+            m_consolePane->show();
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
             m_issuesPane->show();
         return m_designerWidget->show();
@@ -229,7 +229,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
     case Page_SplitView:
         m_bottomBar->show();
         if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consoleBox->show();
+            m_consolePane->show();
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
             m_issuesPane->show();
         m_designerWidget->show();
@@ -243,7 +243,7 @@ void CentralWidget::setCurrentPage(const Pages& page)
     case Page_QmlCodeEditor:
         m_bottomBar->show();
         if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consoleBox->show();
+            m_consolePane->show();
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
             m_issuesPane->show();
         return g_editorContainer->show();
@@ -259,7 +259,7 @@ void CentralWidget::hideWidgets()
 {
     m_bottomBar->hide();
     m_issuesPane->hide();
-    m_consoleBox->hide();
+    m_consolePane->hide();
     m_designerWidget->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();

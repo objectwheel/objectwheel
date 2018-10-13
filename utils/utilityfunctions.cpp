@@ -227,3 +227,27 @@ QPixmap UtilityFunctions::scaled(const QPixmap& pixmap, const QSize& size)
 {
     return pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
+
+QIcon UtilityFunctions::iconForQmlError(const QQmlError& error, const QAbstractItemView* view)
+{
+    static QIcon info, warning, critical;
+    if (info.isNull()) {
+        info = Utils::Icons::INFO.icon();
+        warning = Utils::Icons::WARNING.icon();
+        critical = Utils::Icons::CRITICAL.icon();
+        info.addPixmap(info.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
+        warning.addPixmap(warning.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
+        critical.addPixmap(critical.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
+    }
+
+    switch (error.messageType()) {
+    case QtInfoMsg:
+    case QtDebugMsg:
+        return info;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        return critical;
+    case QtWarningMsg: // TODO: Fix this when Qt has a proper fix
+        return /*warning*/critical;
+    }
+}

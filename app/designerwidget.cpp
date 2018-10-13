@@ -396,6 +396,13 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
     m_qmlCodeEditorWidget->openInternal(control, "main.qml");
 }
 
+void DesignerWidget::onIssuesItemDoubleClick(Control*, int line, int col)
+{
+    // WARNING: Global, inline, internal, external each one must be handled
+    //    m_qmlCodeEditorWidget->openInternal(control, "main.qml");
+    //    qmlCodeEditorWidget()->codeEditor()->gotoLine(4);
+}
+
 void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
 {
     m_designerScene->clearSelection();

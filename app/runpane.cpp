@@ -3,7 +3,7 @@
 #include <windowmanager.h>
 #include <projectmanager.h>
 #include <runmanager.h>
-#include <consolebox.h>
+#include <consolepane.h>
 #include <welcomewindow.h>
 #include <devicesbutton.h>
 #include <smartspacer.h>
@@ -31,8 +31,8 @@ const char* g_startRunningMessage = "<b>Starting</b> interpretation...";
 const char* g_runningMessage = "<b>Running</b> on ";
 }
 
-RunPane::RunPane(ConsoleBox* consoleBox, QWidget *parent) : QToolBar(parent)
-  , m_consoleBox(consoleBox)
+RunPane::RunPane(ConsolePane* consolePane, QWidget *parent) : QToolBar(parent)
+  , m_consolePane(consolePane)
   , m_runButton(new PushButton)
   , m_stopButton(new PushButton)
   , m_devicesButton(new DevicesButton)
@@ -149,12 +149,12 @@ void RunPane::onStopButtonClick()
 
 void RunPane::onRunButtonClick()
 {
-    m_consoleBox->fade();
-    if (!m_consoleBox->isClean())
-        m_consoleBox->print("\n");
-    m_consoleBox->printFormatted(tr("Starting ") + ProjectManager::name() + "...\n", "#025dbf",
+    m_consolePane->fade();
+    if (!m_consolePane->isClean())
+        m_consolePane->print("\n");
+    m_consolePane->printFormatted(tr("Starting ") + ProjectManager::name() + "...\n", "#025dbf",
                                  QFont::DemiBold);
-    m_consoleBox->scrollToEnd();
+    m_consolePane->scrollToEnd();
 
     RunManager::kill();
     RunManager::waitForKill(3000);

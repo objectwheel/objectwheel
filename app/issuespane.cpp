@@ -1,42 +1,18 @@
 #include <issuespane.h>
 #include <control.h>
+#include <utilsicons.h>
+#include <savemanager.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
 #include <controlpropertymanager.h>
-#include <utilsicons.h>
-#include <savemanager.h>
 
+#include <QLabel>
+#include <QTimer>
+#include <QLayout>
+#include <QPainter>
 #include <QToolBar>
 #include <QToolButton>
-#include <QLabel>
 #include <QStyledItemDelegate>
-#include <QPainter>
-#include <QScrollBar>
-#include <QVBoxLayout>
-#include <QListWidget>
-#include <QTimer>
-#include <QQmlError>
-
-namespace {
-
-QIcon iconForError(const QQmlError& error, const QListWidget* widget)
-{
-    QIcon ret;
-    switch (error.messageType()) {
-    case QtInfoMsg:
-    case QtDebugMsg:
-        ret = Utils::Icons::INFO.icon();
-    case QtCriticalMsg:
-    case QtFatalMsg:
-        ret = Utils::Icons::CRITICAL.icon();
-    case QtWarningMsg: // TODO: Fix this when Qt has a proper fix
-        ret = Utils::Icons::CRITICAL/*WARNING*/.icon();
-    }
-    ret.addPixmap(ret.pixmap(UtilityFunctions::window(widget), widget->iconSize(), QIcon::Normal),
-                  QIcon::Selected);
-    return ret;
-}
-}
 
 enum Roles { ControlErrorsRole = Qt::UserRole + 1 };
 
@@ -137,7 +113,7 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
             update(control);
     });
 
-    QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
+    QTimer::singleShot(200, [=] { // FIXME: Workaround for QToolBarLayout's obsolote serMargin function usage
         m_toolBar->setContentsMargins(0, 0, 0, 0);
         m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
         m_toolBar->layout()->setSpacing(0);
@@ -209,7 +185,7 @@ void IssuesPane::update(Control* control)
         item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
         item->setData(Qt::ToolTipRole, SaveManager::correctedKnownPaths(error.toString()));
         item->setData(Qt::DisplayRole, SaveManager::correctedKnownPaths(error.toString()));
-        item->setIcon(iconForError(error, this));
+        item->setIcon(UtilityFunctions::iconForQmlError(error, this));
         addItem(item);
     }
 
@@ -227,27 +203,25 @@ void IssuesPane::onItemDoubleClick(QListWidgetItem* item)
 
 void IssuesPane::onControlDestruction(QObject* controlObject)
 {
-    Control* control = qobject_cast<Control*>(controlObject);
-    Q_ASSERT(control);
+    Q_ASSERT(controlObject);
 
     for (int i = count() - 1; i >= 0; --i) {
         const ControlErrors* error = item(i)->data(ControlErrorsRole).value<const ControlErrors*>();
-        if (error->control == control)
+        if (dynamic_cast<QObject*>(error->control) == controlObject)
             delete takeItem(i);
     }
 
     ControlErrors* controlErrors = nullptr;
     for (int i = 0; i < m_erroneousControls.size(); ++i) {
-        if (m_erroneousControls.at(i)->control == control) {
+        if (dynamic_cast<QObject*>(m_erroneousControls.at(i)->control) == controlObject) {
             controlErrors = m_erroneousControls.at(i);
             m_erroneousControls.removeAt(i);
             break;
         }
     }
 
-    Q_ASSERT(controlErrors);
-
-    delete controlErrors;
+    if (controlErrors)
+        delete controlErrors;
 
     if (isHidden())
         emit flash();

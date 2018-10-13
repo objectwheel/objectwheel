@@ -2,10 +2,8 @@
 #define ISSUESPANE_H
 
 #include <QListWidget>
-#include <QList>
 #include <QQmlError>
 
-class QVBoxLayout;
 class QToolBar;
 class QLabel;
 class QToolButton;
@@ -15,9 +13,7 @@ class IssuesPane : public QListWidget
 {
     Q_OBJECT
 
-    friend class IssuesListDelegate;
     template <typename T> friend struct QMetaTypeId;
-
     struct ControlErrors {
         Control* control;
         QList<QQmlError> errors;
@@ -56,15 +52,5 @@ private:
 };
 
 Q_DECLARE_METATYPE(const IssuesPane::ControlErrors*)
-
-inline bool operator==(const QQmlError& e1, const QQmlError& e2)
-{
-    return e1.column() == e2.column()
-            && e1.description() == e2.description()
-            && e1.line() == e2.line()
-            && e1.messageType() == e2.messageType()
-            && e1.object() == e2.object()
-            && e1.url() == e2.url();
-}
 
 #endif // ISSUESPANE_H

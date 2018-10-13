@@ -12,6 +12,8 @@ class QTreeView;
 class QWindow;
 class QQmlEngine;
 class QAbstractButton;
+class QAbstractItemView;
+class QQmlError;
 
 namespace UtilityFunctions {
 void registerOfflineStorage();
@@ -30,6 +32,7 @@ QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left = 
 QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top = 0);
 QPixmap pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size);
 QPixmap scaled(const QPixmap& pixmap, const QSize& size);
+QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view);
 }
 
 #endif // UTILITYFUNCTIONS_H

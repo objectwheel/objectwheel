@@ -1,3 +1,12 @@
+Error'lu yollar kontrol isimleriyle ve GlobalResources ismiyle değiştirilecek, inline ve global js de aynen
+Error'lu linklere tıklanamıyor çünkü fare üzerine tak denk gelmiyor
+Global, inline, js, kontrol dosyalarının 4 türü de tıklanabilir olmalı, ayıklanabilmeli
+yeni form eklenince o form direk gui editörde açılsın
+
+Çift tıklayınca satır sütün şeklinde açacak editörü, global, internal, external, inline alayı halledilmeli
+global resource'dan veya external bir kaynaktan bir dosya kod editörde editlenirken save edilirse, o dosyayı import eden tüm internal ve external ne varsa alayına ilişkin context'ler deki Qml objeleri sanki code change olmuş gibi yeniden derlenecek, preveiew edilecek
+
+PropertiesPane, IssuesPane... gibi tüm pane kodlarında ControlPropertyManager sinyallerinin ilgili pane slotlarına connect edilmesi yanlış, bu connectionlar bir üst sınıflara taşınacak, CentralWidget, MainWindow gibi
 Make sure you clean up that extern const char* TOOL_KEY; mess
 Anchors should be able to edited from PropertiesPane
 PropertiesPane should be able to support attached properties, like Component.xx, Layout.xx, ScrollView.xx

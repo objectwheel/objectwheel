@@ -31,7 +31,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/view.h \
            $$PWD/global.h \
            $$PWD/issuespane.h \
-           $$PWD/consolebox.h \
+           $$PWD/consolepane.h \
            $$PWD/searchbox.h \
            $$PWD/resizer.h \
            $$PWD/suppressor.h \
@@ -131,7 +131,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/toolboxtree.cpp \
            $$PWD/view.cpp \
            $$PWD/issuespane.cpp \
-           $$PWD/consolebox.cpp \
+           $$PWD/consolepane.cpp \
            $$PWD/searchbox.cpp \
            $$PWD/resizer.cpp \
            $$PWD/suppressor.cpp \

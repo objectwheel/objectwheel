@@ -1,5 +1,5 @@
-#ifndef CONSOLEBOX_H
-#define CONSOLEBOX_H
+#ifndef CONSOLEPANE_H
+#define CONSOLEPANE_H
 
 #include <QWidget>
 
@@ -9,12 +9,12 @@ class QToolButton;
 class QToolBar;
 class QLabel;
 
-class ConsoleBox : public QWidget
+class ConsolePane : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ConsoleBox(QWidget* widget = nullptr);
+    explicit ConsolePane(QWidget* widget = nullptr);
 
 public:
     bool isClean() const;
@@ -52,4 +52,4 @@ private:
     QToolButton* m_minimizeButton;
 };
 
-#endif // CONSOLEBOX_H
+#endif // CONSOLEPANE_H

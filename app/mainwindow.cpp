@@ -13,7 +13,7 @@
 #include <controlcreationmanager.h>
 #include <runmanager.h>
 #include <projectmanager.h>
-#include <consolebox.h>
+#include <consolepane.h>
 #include <control.h>
 #include <toolboxsettingswindow.h>
 #include <qmlcodeeditorwidget.h>
@@ -62,7 +62,7 @@ bool inspectorDockWidgetVisible;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
-  , m_runPane(new RunPane(m_centralWidget->consoleBox()))
+  , m_runPane(new RunPane(m_centralWidget->consolePane()))
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
@@ -303,7 +303,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished),
             [=] (int exitCode, QProcess::ExitStatus) {
-        auto console = m_centralWidget->consoleBox();
+        auto console = m_centralWidget->consolePane();
 
         if (exitCode == EXIT_FAILURE) {
             console->printFormatted(tr("The process was ended forcefully.\n"), "#b34b46",

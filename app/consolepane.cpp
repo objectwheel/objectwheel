@@ -1,4 +1,4 @@
-#include <consolebox.h>
+#include <consolepane.h>
 #include <runmanager.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
@@ -24,10 +24,10 @@
 
 class PlainTextEdit : public QPlainTextEdit {
     explicit PlainTextEdit(QWidget* parent = nullptr) : QPlainTextEdit(parent) {}
-    friend class ConsoleBox;
+    friend class ConsolePane;
 };
 
-ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
+ConsolePane::ConsolePane(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_plainTextEdit(new PlainTextEdit(this))
   , m_toolBar(new QToolBar(this))
@@ -89,7 +89,7 @@ ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
     m_minimizeButton->setToolTip(tr("Minimize the pane"));
     m_minimizeButton->setCursor(Qt::PointingHandCursor);
     connect(m_minimizeButton, &QToolButton::clicked,
-            this, &ConsoleBox::minimized);
+            this, &ConsolePane::minimized);
 
     m_plainTextEdit->setObjectName("m_plainTextEdit");
     m_plainTextEdit->setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
@@ -108,27 +108,27 @@ ConsoleBox::ConsoleBox(QWidget* parent) : QWidget(parent)
     });
 
     connect(RunManager::instance(), &RunManager::standardError,
-            this, &ConsoleBox::onStandardError);
+            this, &ConsolePane::onStandardError);
     connect(RunManager::instance(), &RunManager::standardOutput,
-            this, &ConsoleBox::onStandardOutput);
+            this, &ConsolePane::onStandardOutput);
 }
 
-bool ConsoleBox::isClean() const
+bool ConsolePane::isClean() const
 {
     return m_plainTextEdit->toPlainText().isEmpty();
 }
 
-void ConsoleBox::print(const QString& text)
+void ConsolePane::print(const QString& text)
 {
     printFormatted(text, m_plainTextEdit->palette().text().color(), QFont::Normal);
 }
 
-void ConsoleBox::printError(const QString& text)
+void ConsolePane::printError(const QString& text)
 {
     printFormatted(text, "#B44B46", QFont::Normal);
 }
 
-void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont::Weight weight)
+void ConsolePane::printFormatted(const QString& text, const QColor& color, QFont::Weight weight)
 {
     const QScrollBar* bar = m_plainTextEdit->verticalScrollBar();
     const bool atEnd = bar->value() > bar->maximum() * 0.8;
@@ -164,13 +164,13 @@ void ConsoleBox::printFormatted(const QString& text, const QColor& color, QFont:
         emit flash();
 }
 
-void ConsoleBox::scrollToEnd()
+void ConsolePane::scrollToEnd()
 {
     auto scrollBar = m_plainTextEdit->verticalScrollBar();
     scrollBar->setSliderPosition(scrollBar->maximum());
 }
 
-void ConsoleBox::onLinkClick(const QString& link)
+void ConsolePane::onLinkClick(const QString& link)
 {
     QRegularExpression exp("^[a-z_][a-zA-Z0-9_]+::([a-f0-9]+):.([\\w\\\\\\/\\.\\d]+):(\\d+)");
     const QString& uid = exp.match(link).captured(1);
@@ -192,7 +192,7 @@ void ConsoleBox::onLinkClick(const QString& link)
     editorWidget->codeEditor()->gotoLine(lineNumber);
 }
 
-void ConsoleBox::fade()
+void ConsolePane::fade()
 {
     QTextCharFormat format;
     format.setForeground(QColor("#707477"));
@@ -203,22 +203,22 @@ void ConsoleBox::fade()
     cursor.mergeCharFormat(format);
 }
 
-void ConsoleBox::sweep()
+void ConsolePane::sweep()
 {
     m_plainTextEdit->clear();
 }
 
-void ConsoleBox::onStandardError(const QString& output)
+void ConsolePane::onStandardError(const QString& output)
 {
     printError(output);
 }
 
-void ConsoleBox::onStandardOutput(const QString& output)
+void ConsolePane::onStandardOutput(const QString& output)
 {
     print(output);
 }
 
-bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
+bool ConsolePane::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == m_plainTextEdit->viewport()
             && (event->type() == QEvent::MouseMove
@@ -253,12 +253,12 @@ bool ConsoleBox::eventFilter(QObject* watched, QEvent* event)
     return false;
 }
 
-QSize ConsoleBox::minimumSizeHint() const
+QSize ConsolePane::minimumSizeHint() const
 {
     return {0, 100};
 }
 
-QSize ConsoleBox::sizeHint() const
+QSize ConsolePane::sizeHint() const
 {
     return {0, 100};
 }
