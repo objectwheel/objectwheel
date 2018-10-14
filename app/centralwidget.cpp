@@ -60,6 +60,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->addWidget(m_consolePane);
     m_splitterOut->addWidget(m_issuesPane);
     m_splitterOut->addWidget(m_bottomBar);
+    m_splitterOut->setChildrenCollapsible(false);
 
     m_splitterOut->handle(3)->setDisabled(true);
 
@@ -71,19 +72,21 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     g_editorContainer->setText(tr("Editor window\nraised"));
     g_editorContainer->setStyleSheet("#g_editorContainer { background: transparent; color: #808080;}");
     g_editorContainer->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    g_editorContainer->setLayout(new QVBoxLayout(g_editorContainer));
+    g_editorContainer->setLayout(new QHBoxLayout);
     g_editorContainer->layout()->setSpacing(0);
     g_editorContainer->layout()->setContentsMargins(0, 0, 0, 0);
+    g_editorContainer->layout()->addWidget(UtilityFunctions::createSeparatorWidget(Qt::Vertical));
     g_editorContainer->layout()->addWidget(m_qmlCodeEditorWidget);
 
-    m_splitterIn->setStyleSheet("QSplitter, QSplitter::handle { border: none }");
     m_splitterIn->setHandleWidth(0);
+    m_splitterIn->setStyleSheet("QSplitter, QSplitter::handle { border: none; }");
     m_splitterIn->setOrientation(Qt::Horizontal);
     m_splitterIn->addWidget(m_designerWidget);
     m_splitterIn->addWidget(g_editorContainer);
     m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
+    m_splitterIn->setChildrenCollapsible(false);
 
     connect(m_issuesPane, &IssuesPane::internalFileOpened,
             m_designerWidget, &DesignerWidget::onInternalFileOpen);

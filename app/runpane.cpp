@@ -180,7 +180,7 @@ void RunPane::paintEvent(QPaintEvent*)
     gradient.setColorAt(1, "#1068C6");
     painter.fillRect(rect(), gradient);
     painter.setPen("#0e5bad");
-    painter.drawLine(rect().bottomLeft() + QPointF(0, 0.5), rect().bottomRight() + QPointF(0, 0.5));
+    painter.drawLine(rect().bottomLeft() + QPointF(0.5, 0.5), rect().bottomRight() + QPointF(0.5, 0.5));
 }
 
 QSize RunPane::minimumSizeHint() const

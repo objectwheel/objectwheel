@@ -387,6 +387,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_noDocsLabel->setText(tr("No documents\nopen"));
     m_noDocsLabel->setStyleSheet("QLabel { background: #f0f0f0; color: #808080;}");
 
+
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,
             this, &QmlCodeEditor::highlightSearchResultsSlot);
@@ -395,6 +396,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 
     setAcceptDrops(false);
     setMouseTracking(true);
+    setFrameShape(QFrame::NoFrame);
 
     if (!m_qmlJsHoverHandler) {
         m_completionAssistProvider = new QmlJSCompletionAssistProvider;
@@ -1250,9 +1252,9 @@ TextEditor::AssistInterface* QmlCodeEditor::createAssistInterface(TextEditor::As
 void QmlCodeEditor::updateViewportMargins()
 {
     if (isLeftToRight())
-        setViewportMargins(m_rowBar->calculatedWidth(), m_toolBar->height(), 0, 0);
+        setViewportMargins(m_rowBar->calculatedWidth(), m_toolBar->height(), 1, 0);
     else
-        setViewportMargins(0, m_toolBar->height(), m_rowBar->calculatedWidth(), 0);
+        setViewportMargins(1, m_toolBar->height(), m_rowBar->calculatedWidth(), 0);
 }
 
 void QmlCodeEditor::updateRowBar(const QRect& rect, int dy)
@@ -1358,7 +1360,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                    && */m_linkPressed
+                                                                                                                                            && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -2244,7 +2246,7 @@ void QmlCodeEditor::highlightSearchResults(const QTextBlock &block,
     }
 }
 
-void QmlCodeEditor::searchResultsReady(int beginIndex, int endIndex)
+void QmlCodeEditor::searchResultsReady(int /*beginIndex*/, int /*endIndex*/)
 {
     //    QVector<SearchResult> results;
     //    for (int index = beginIndex; index < endIndex; ++index) {
@@ -2452,13 +2454,13 @@ bool QmlCodeEditor::openLink(const Utils::Link &link)
         return false;
 
     if (codeDocument()->filePath() == link.targetFileName) {
-        // BUG        EditorManager::addCurrentPositionToNavigationHistory();
         gotoLine(link.targetLine, link.targetColumn, true, true);
         setFocus();
         return true;
     }
 
-    // BUG return EditorManager::openEditorAt(link.targetFileName, link.targetLine, link.targetColumn, Id());
+    return false;
+    // FIXME return EditorManager::openEditorAt(link.targetFileName, link.targetLine, link.targetColumn, Id());
 }
 
 bool QmlCodeEditor::cursorMoveKeyEvent(QKeyEvent *e)
@@ -2935,64 +2937,6 @@ void QmlCodeEditor::wheelEvent(QWheelEvent *event)
 
 void QmlCodeEditor::paintEvent(QPaintEvent* e)
 {
-    //    PaintEventData data(this, e, contentOffset());
-    //    QPainter painter(viewport());
-    //    // Set a brush origin so that the WaveUnderline knows where the wave started
-    //    painter.setBrushOrigin(data.offset);
-    //    painter.setRenderHint(QPainter::Antialiasing);
-
-    //    data.block = firstVisibleBlock();
-    //    data.context = getPaintContext();
-
-    //    // paint find scope on top of ifdefed out blocks and right margin
-    //    paintFindScope(data, painter);
-    //    paintSearchResultOverlay(data, painter);
-
-    //    while (data.block.isValid()) {
-    //        PaintEventBlockData blockData;
-    //        blockData.boundingRect = blockBoundingRect(data.block).translated(data.offset);
-
-    //        if (blockData.boundingRect.bottom() >= data.eventRect.top()
-    //                && blockData.boundingRect.top() <= data.eventRect.bottom()) {
-    //            blockData.position = data.block.position();
-    //            blockData.length = data.block.length();
-    //            paintCurrentLineHighlight(data, painter);
-    //        }
-
-    //        data.offset.ry() += blockData.boundingRect.height();
-    //        if (data.offset.y() > data.viewportRect.height())
-    //            break;
-    //        data.block = data.block.next();
-
-    //        if (!data.block.isVisible()) {
-    //            if (data.block.blockNumber() == m_visibleFoldedBlockNumber) {
-    //                data.visibleCollapsedBlock = data.block;
-    //                data.visibleCollapsedBlockOffset = data.offset;
-    //            }
-    //            // invisible blocks do have zero line count
-    //            data.block = data.doc->findBlockByLineNumber(data.block.firstLineNumber());
-    //        }
-    //    }
-
-    //    painter.setPen(data.context.palette.text().color());
-
-
-    //    updateAnimator(m_bracketsAnimator, painter);
-    //    updateAnimator(m_autocompleteAnimator, painter);
-
-    //    paintOverlays(data, painter);
-
-    //    QPlainTextEdit::paintEvent(e);
-
-    //    // paint a popup with the content of the collapsed block
-    //    drawCollapsedBlockPopup(painter, data.visibleCollapsedBlock,
-    //                            data.visibleCollapsedBlockOffset, data.eventRect);
-
-
-    ///////////////////////////////////////////
-
-
-
     PaintEventData data(this, e, contentOffset());
     QTC_ASSERT(data.documentLayout, return);
 
@@ -3215,7 +3159,7 @@ void QmlCodeEditor::paintReplacement(PaintEventData &data, QPainter &painter,
                                      qreal top) const
 {
     QTextBlock nextBlock = data.block.next();
-    QTextBlock nextVisibleBlock = QmlCodeEditor::nextVisibleBlock(data.block, data.doc);
+//    QTextBlock nextVisibleBlock = QmlCodeEditor::nextVisibleBlock(data.block, data.doc);
 
     if (nextBlock.isValid() && !nextBlock.isVisible() && replacementVisible(data.block.blockNumber())) {
         const bool selectThis = (data.textCursor.hasSelection()
@@ -3348,10 +3292,11 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
 {
     QPlainTextEdit::resizeEvent(e);
 
+    int rcw = m_rowBar->calculatedWidth();
     QRect vg = viewport()->geometry();
-    m_rowBar->setGeometry(0, vg.top(), m_rowBar->calculatedWidth(), vg.height());
-    m_toolBar->setGeometry(0, 0, vg.width() + m_rowBar->width(), 24);
-    m_noDocsLabel->setGeometry(0, vg.top(), vg.width() + m_rowBar->width(), vg.height());
+    m_toolBar->setGeometry(0, 0, rcw + vg.width(), 24);
+    m_rowBar->setGeometry(0, vg.top(), rcw, vg.height());
+    m_noDocsLabel->setGeometry(0, vg.top(), rcw + vg.width(), vg.height());
 
     hideContextPane();
 }

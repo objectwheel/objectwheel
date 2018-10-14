@@ -83,6 +83,18 @@ QWidget* UtilityFunctions::createSpacerWidget(Qt::Orientation orientation)
     return spacer;
 }
 
+QWidget* UtilityFunctions::createSeparatorWidget(Qt::Orientation orientation)
+{
+    auto separator = new QWidget;
+    separator->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    if (orientation & Qt::Horizontal)
+        separator->setFixedHeight(1);
+    else
+        separator->setFixedWidth(1);
+    separator->setStyleSheet("border: none; background: #c4c4c4;");
+    return separator;
+}
+
 void UtilityFunctions::copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent)
 {
     QProgressDialog progress("Copying files...", "Abort Copy", 0, urls.size(), parent);

@@ -16,8 +16,8 @@ class RowBar : public QWidget
 
 public:
     explicit RowBar(QmlCodeEditor* editor, QWidget* parent = nullptr);
-    int calculatedWidth() const;
 
+    int calculatedWidth() const;
     BracketBand* bracketBand() const;
     LineNumberBand* linenumberBand() const;
     MarkBand* markBand() const;
@@ -26,7 +26,6 @@ public:
 private:
     QSize sizeHint() const override;
     void mouseReleaseEvent(QMouseEvent* e) override;
-    void paintEvent(QPaintEvent* e) override;
 
 private:
     QmlCodeEditor* m_qmlCodeEditor;
