@@ -3294,9 +3294,9 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
 
     int rcw = m_rowBar->calculatedWidth();
     QRect vg = viewport()->geometry();
-    m_toolBar->setGeometry(0, 0, rcw + vg.width(), 24);
+    m_toolBar->setGeometry(0, 0, rcw + vg.width() + 1, 24);
     m_rowBar->setGeometry(0, vg.top(), rcw, vg.height());
-    m_noDocsLabel->setGeometry(0, vg.top(), rcw + vg.width(), vg.height());
+    m_noDocsLabel->setGeometry(0, vg.top(), rcw + vg.width() + 1, vg.height());
 
     hideContextPane();
 }
