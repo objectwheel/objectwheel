@@ -18,6 +18,7 @@
 #include <QActionGroup>
 #include <QMenu>
 #include <QTimer>
+#include <QScrollBar>
 
 using namespace PaintUtils;
 using namespace UtilityFunctions;
@@ -154,7 +155,9 @@ void RunPane::onRunButtonClick()
         m_consolePane->print("\n");
     m_consolePane->printFormatted(tr("Starting ") + ProjectManager::name() + "...\n", "#025dbf",
                                  QFont::DemiBold);
-    m_consolePane->scrollToEnd();
+
+    // WARNING
+    m_consolePane->verticalScrollBar()->setSliderPosition(m_consolePane->verticalScrollBar()->maximum());
 
     RunManager::kill();
     RunManager::waitForKill(3000);

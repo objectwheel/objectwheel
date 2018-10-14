@@ -1,15 +1,14 @@
 #ifndef CONSOLEPANE_H
 #define CONSOLEPANE_H
 
-#include <QWidget>
+#include <QPlainTextEdit>
 
-class PlainTextEdit;
-class QVBoxLayout;
 class QToolButton;
 class QToolBar;
 class QLabel;
+class Control;
 
-class ConsolePane : public QWidget
+class ConsolePane : public QPlainTextEdit
 {
     Q_OBJECT
 
@@ -25,25 +24,26 @@ public:
 public slots:
     void fade();
     void sweep();
-    void scrollToEnd();
 
 private slots:
     void onLinkClick(const QString& link);
-    void onStandardError(const QString& output);
     void onStandardOutput(const QString& output);
+    void onStandardErrorOutput(const QString& output);
 
 protected:
-    bool eventFilter(QObject *watched, QEvent *event) override;
-    QSize minimumSizeHint() const override;
+    void updateViewportMargins();
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+    bool eventFilter(QObject*, QEvent*) override;
+    void resizeEvent(QResizeEvent* e) override;
 
 signals:
     void flash();
     void minimized();
+    void globalFileOpened(const QString& relativePath, int line, int column);
+    void internalFileOpened(Control* control, const QString& relativePath, int line, int column);
 
 private:
-    QVBoxLayout* m_layout;
-    PlainTextEdit* m_plainTextEdit;
     QToolBar* m_toolBar;
     QLabel* m_titleLabel;
     QToolButton* m_clearButton;

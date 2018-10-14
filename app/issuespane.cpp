@@ -253,7 +253,7 @@ void IssuesPane::updateGeometries()
     QMargins vm = viewportMargins();
     vm.setTop(m_toolBar->height());
     setViewportMargins(vm);
-    m_toolBar->setGeometry(0, 0, width(), m_toolBar->height());
+    m_toolBar->setGeometry(0, 0, viewport()->width() + 2, m_toolBar->height());
 }
 
 QSize IssuesPane::sizeHint() const

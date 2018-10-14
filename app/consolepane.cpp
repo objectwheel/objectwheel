@@ -11,8 +11,6 @@
 #include <utilsicons.h>
 #include <transparentstyle.h>
 
-#include <QPlainTextEdit>
-#include <QVBoxLayout>
 #include <QScrollBar>
 #include <QRegularExpression>
 #include <QMouseEvent>
@@ -21,15 +19,9 @@
 #include <QLabel>
 #include <QToolButton>
 #include <QTimer>
+#include <QLayout>
 
-class PlainTextEdit : public QPlainTextEdit {
-    explicit PlainTextEdit(QWidget* parent = nullptr) : QPlainTextEdit(parent) {}
-    friend class ConsolePane;
-};
-
-ConsolePane::ConsolePane(QWidget* parent) : QWidget(parent)
-  , m_layout(new QVBoxLayout(this))
-  , m_plainTextEdit(new PlainTextEdit(this))
+ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
   , m_toolBar(new QToolBar(this))
   , m_titleLabel(new QLabel(this))
   , m_clearButton(new QToolButton(this))
@@ -38,11 +30,6 @@ ConsolePane::ConsolePane(QWidget* parent) : QWidget(parent)
   , m_minimizeButton(new QToolButton(this))
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    m_layout->setSpacing(0);
-    m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_toolBar);
-    m_layout->addWidget(m_plainTextEdit);
 
     m_titleLabel->setText("   " + tr("Console Output") + "   ");
     m_titleLabel->setFixedHeight(20);
@@ -64,7 +51,7 @@ ConsolePane::ConsolePane(QWidget* parent) : QWidget(parent)
     m_clearButton->setToolTip(tr("Clean console output"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
     connect(m_clearButton, &QToolButton::clicked,
-            m_plainTextEdit, &PlainTextEdit::clear);
+            this, &ConsolePane::clear);
 
     m_fontSizeUpButton->setFixedSize({18, 18});
     m_fontSizeUpButton->setIcon(Utils::Icons::PLUS_TOOLBAR.icon());
@@ -72,7 +59,8 @@ ConsolePane::ConsolePane(QWidget* parent) : QWidget(parent)
     m_fontSizeUpButton->setCursor(Qt::PointingHandCursor);
     connect(m_fontSizeUpButton, &QToolButton::clicked,
             this, [=] { // TODO: Change this with zoomIn
-        UtilityFunctions::adjustFontPixelSize(m_plainTextEdit, 1);
+        UtilityFunctions::adjustFontPixelSize(this, 1);
+        updateViewportMargins();
     });
 
     m_fontSizeDownButton->setFixedSize({18, 18});
@@ -81,7 +69,8 @@ ConsolePane::ConsolePane(QWidget* parent) : QWidget(parent)
     m_fontSizeDownButton->setCursor(Qt::PointingHandCursor);
     connect(m_fontSizeDownButton, &QToolButton::clicked,
             this, [=] { // TODO: Change this with zoomOut
-        UtilityFunctions::adjustFontPixelSize(m_plainTextEdit, -1);
+        UtilityFunctions::adjustFontPixelSize(this, -1);
+        updateViewportMargins();
     });
 
     m_minimizeButton->setFixedSize({18, 18});
@@ -91,36 +80,37 @@ ConsolePane::ConsolePane(QWidget* parent) : QWidget(parent)
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &ConsolePane::minimized);
 
-    m_plainTextEdit->setObjectName("m_plainTextEdit");
-    m_plainTextEdit->setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
+    setObjectName("m_plainTextEdit");
+    setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
                                    "border-top: none; border-bottom: none;}");
-    m_plainTextEdit->viewport()->setMouseTracking(true);
-    m_plainTextEdit->viewport()->installEventFilter(this);
-    m_plainTextEdit->setWordWrapMode(QTextOption::WordWrap);
-    m_plainTextEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    UtilityFunctions::adjustFontPixelSize(m_plainTextEdit, -1);
+    viewport()->setMouseTracking(true);
+    viewport()->installEventFilter(this);
+    setWordWrapMode(QTextOption::WordWrap);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    UtilityFunctions::adjustFontPixelSize(this, -1);
 
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
         m_toolBar->setContentsMargins(0, 0, 0, 0);
         m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
         m_toolBar->layout()->setSpacing(0);
         m_toolBar->setFixedHeight(22);
+        updateViewportMargins();
     });
 
     connect(RunManager::instance(), &RunManager::standardError,
-            this, &ConsolePane::onStandardError);
+            this, &ConsolePane::onStandardErrorOutput);
     connect(RunManager::instance(), &RunManager::standardOutput,
             this, &ConsolePane::onStandardOutput);
 }
 
 bool ConsolePane::isClean() const
 {
-    return m_plainTextEdit->toPlainText().isEmpty();
+    return toPlainText().isEmpty();
 }
 
 void ConsolePane::print(const QString& text)
 {
-    printFormatted(text, m_plainTextEdit->palette().text().color(), QFont::Normal);
+    printFormatted(text, palette().text().color(), QFont::Normal);
 }
 
 void ConsolePane::printError(const QString& text)
@@ -130,14 +120,14 @@ void ConsolePane::printError(const QString& text)
 
 void ConsolePane::printFormatted(const QString& text, const QColor& color, QFont::Weight weight)
 {
-    const QScrollBar* bar = m_plainTextEdit->verticalScrollBar();
+    QScrollBar* bar = verticalScrollBar();
     const bool atEnd = bar->value() > bar->maximum() * 0.8;
 
     QTextCharFormat format;
     format.setFontWeight(weight);
     format.setForeground(color);
 
-    QTextCursor cursor(m_plainTextEdit->textCursor());
+    QTextCursor cursor(textCursor());
     cursor.movePosition(QTextCursor::End);
     const int offset = cursor.position();
     cursor.insertText(text, format);
@@ -158,16 +148,10 @@ void ConsolePane::printFormatted(const QString& text, const QColor& color, QFont
     }
 
     if (atEnd)
-        scrollToEnd();
+        bar->setSliderPosition(bar->maximum());
 
      if (isHidden()) // FIXME: Add this to global settings
         emit flash();
-}
-
-void ConsolePane::scrollToEnd()
-{
-    auto scrollBar = m_plainTextEdit->verticalScrollBar();
-    scrollBar->setSliderPosition(scrollBar->maximum());
 }
 
 void ConsolePane::onLinkClick(const QString& link)
@@ -197,7 +181,7 @@ void ConsolePane::fade()
     QTextCharFormat format;
     format.setForeground(QColor("#707477"));
 
-    QTextCursor cursor(m_plainTextEdit->document());
+    QTextCursor cursor(document());
     cursor.movePosition(QTextCursor::Start);
     cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
     cursor.mergeCharFormat(format);
@@ -205,12 +189,7 @@ void ConsolePane::fade()
 
 void ConsolePane::sweep()
 {
-    m_plainTextEdit->clear();
-}
-
-void ConsolePane::onStandardError(const QString& output)
-{
-    printError(output);
+    clear();
 }
 
 void ConsolePane::onStandardOutput(const QString& output)
@@ -218,35 +197,52 @@ void ConsolePane::onStandardOutput(const QString& output)
     print(output);
 }
 
+void ConsolePane::onStandardErrorOutput(const QString& output)
+{
+    printError(output);
+}
+
+void ConsolePane::updateViewportMargins()
+{
+    QMargins vm = viewportMargins();
+    vm.setTop(m_toolBar->height());
+    setViewportMargins(vm);
+}
+
+void ConsolePane::resizeEvent(QResizeEvent* e)
+{
+    QPlainTextEdit::resizeEvent(e);
+    m_toolBar->setGeometry(0, 0, viewport()->width() + 2, m_toolBar->height());
+}
+
 bool ConsolePane::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == m_plainTextEdit->viewport()
+    if (watched == viewport()
             && (event->type() == QEvent::MouseMove
                 || event->type() == QEvent::MouseButtonRelease)) {
         auto e = static_cast<QMouseEvent*>(event);
-        auto ce = m_plainTextEdit;
-        auto pos = ce->contentOffset() + e->pos();
-        auto block = ce->firstVisibleBlock();
-        auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
-        auto bottom = top + ce->blockBoundingRect(block).height();
+        auto pos = contentOffset() + e->pos();
+        auto block = firstVisibleBlock();
+        auto top = blockBoundingGeometry(block).translated(contentOffset()).top();
+        auto bottom = top + blockBoundingRect(block).height();
 
         while (block.isValid() && top <= rect().bottom()) {
             if (pos.y() >= top && pos.y() <= bottom) {
                 QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
                 if (exp.match(block.text()).hasMatch()
-                        && pos.x() < m_plainTextEdit->fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
+                        && pos.x() < fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
                     if (event->type() == QEvent::MouseMove)
-                        m_plainTextEdit->viewport()->setCursor(Qt::PointingHandCursor);
+                        viewport()->setCursor(Qt::PointingHandCursor);
                     else
                         onLinkClick(exp.match(block.text()).captured());
                 } else {
-                    m_plainTextEdit->viewport()->setCursor(Qt::IBeamCursor);
+                    viewport()->setCursor(Qt::IBeamCursor);
                 }
             }
 
             block = block.next();
             top = bottom;
-            bottom = top + ce->document()->documentLayout()->blockBoundingRect(block).height();
+            bottom = top + document()->documentLayout()->blockBoundingRect(block).height();
         }
     }
 
