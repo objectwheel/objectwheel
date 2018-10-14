@@ -101,6 +101,8 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
             this, &ConsolePane::onStandardErrorOutput);
     connect(RunManager::instance(), &RunManager::standardOutput,
             this, &ConsolePane::onStandardOutput);
+    connect(this, &ConsolePane::blockCountChanged,
+            this, &ConsolePane::updateViewportMargins);
 }
 
 bool ConsolePane::isClean() const
