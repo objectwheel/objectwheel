@@ -51,7 +51,7 @@ void RunManager::waitForKill(int msecs)
 
 void RunManager::onReadyReadStandardError()
 {
-    emit standardError(SaveManager::correctedKnownPaths(s_process->readAllStandardError()));
+    emit standardErrorOutput(SaveManager::correctedKnownPaths(s_process->readAllStandardError()));
     emit readyRead();
 }
 

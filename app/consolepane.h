@@ -1,6 +1,7 @@
 #ifndef CONSOLEPANE_H
 #define CONSOLEPANE_H
 
+#include <QGuiApplication>
 #include <QPlainTextEdit>
 
 class QToolButton;
@@ -15,15 +16,12 @@ class ConsolePane : public QPlainTextEdit
 public:
     explicit ConsolePane(QWidget* widget = nullptr);
 
-public:
-    bool isClean() const;
-    void print(const QString& text);
-    void printError(const QString& text);
-    void printFormatted(const QString& text, const QColor& color, QFont::Weight weight);
-
 public slots:
     void fade();
     void sweep();
+    void press(const QString& text,
+               const QColor& color = QGuiApplication::palette().color(QPalette::Text),
+               QFont::Weight weight = QFont::Normal);
 
 private slots:
     void onLinkClick(const QString& link);

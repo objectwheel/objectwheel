@@ -24,7 +24,7 @@ private slots:
 signals:
     void started();
     void readyRead();
-    void standardError(const QString& error);
+    void standardErrorOutput(const QString& error);
     void standardOutput(const QString& output);
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
 

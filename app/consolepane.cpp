@@ -29,7 +29,16 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
   , m_fontSizeDownButton(new QToolButton(this))
   , m_minimizeButton(new QToolButton(this))
 {
+    viewport()->setMouseTracking(true);
+    viewport()->installEventFilter(this);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+    setWordWrapMode(QTextOption::WordWrap);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setObjectName("m_plainTextEdit");
+    setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
+                  "border-top: none; border-bottom: none;}");
+    UtilityFunctions::adjustFontPixelSize(this, -1);
 
     m_titleLabel->setText("   " + tr("Console Output") + "   ");
     m_titleLabel->setFixedHeight(20);
@@ -79,15 +88,12 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     m_minimizeButton->setCursor(Qt::PointingHandCursor);
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &ConsolePane::minimized);
-
-    setObjectName("m_plainTextEdit");
-    setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
-                                   "border-top: none; border-bottom: none;}");
-    viewport()->setMouseTracking(true);
-    viewport()->installEventFilter(this);
-    setWordWrapMode(QTextOption::WordWrap);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    UtilityFunctions::adjustFontPixelSize(this, -1);
+    connect(RunManager::instance(), &RunManager::standardErrorOutput,
+            this, &ConsolePane::onStandardErrorOutput);
+    connect(RunManager::instance(), &RunManager::standardOutput,
+            this, &ConsolePane::onStandardOutput);
+    connect(this, &ConsolePane::blockCountChanged,
+            this, &ConsolePane::updateViewportMargins);
 
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
         m_toolBar->setContentsMargins(0, 0, 0, 0);
@@ -96,64 +102,6 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
         m_toolBar->setFixedHeight(22);
         updateViewportMargins();
     });
-
-    connect(RunManager::instance(), &RunManager::standardError,
-            this, &ConsolePane::onStandardErrorOutput);
-    connect(RunManager::instance(), &RunManager::standardOutput,
-            this, &ConsolePane::onStandardOutput);
-    connect(this, &ConsolePane::blockCountChanged,
-            this, &ConsolePane::updateViewportMargins);
-}
-
-bool ConsolePane::isClean() const
-{
-    return toPlainText().isEmpty();
-}
-
-void ConsolePane::print(const QString& text)
-{
-    printFormatted(text, palette().text().color(), QFont::Normal);
-}
-
-void ConsolePane::printError(const QString& text)
-{
-    printFormatted(text, "#B44B46", QFont::Normal);
-}
-
-void ConsolePane::printFormatted(const QString& text, const QColor& color, QFont::Weight weight)
-{
-    QScrollBar* bar = verticalScrollBar();
-    const bool atEnd = bar->value() > bar->maximum() * 0.8;
-
-    QTextCharFormat format;
-    format.setFontWeight(weight);
-    format.setForeground(color);
-
-    QTextCursor cursor(textCursor());
-    cursor.movePosition(QTextCursor::End);
-    const int offset = cursor.position();
-    cursor.insertText(text, format);
-
-    QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
-    QRegularExpressionMatchIterator i = exp.globalMatch(text);
-
-    while (i.hasNext()) {
-        QRegularExpressionMatch match = i.next();
-        cursor.setPosition(offset + match.capturedStart());
-        cursor.setPosition(offset + match.capturedEnd(), QTextCursor::KeepAnchor);
-
-        QTextCharFormat format;
-        format.setFontWeight(weight);
-        format.setForeground(QColor("#025dbf"));
-        format.setFontUnderline(true);
-        cursor.mergeCharFormat(format);
-    }
-
-    if (atEnd)
-        bar->setSliderPosition(bar->maximum());
-
-     if (isHidden()) // FIXME: Add this to global settings
-        emit flash();
 }
 
 void ConsolePane::onLinkClick(const QString& link)
@@ -194,14 +142,50 @@ void ConsolePane::sweep()
     clear();
 }
 
+void ConsolePane::press(const QString& text, const QColor& color, QFont::Weight weight)
+{
+    QScrollBar* bar = verticalScrollBar();
+    const bool atEnd = bar->value() > bar->maximum() * 0.8;
+
+    QTextCharFormat format;
+    format.setFontWeight(weight);
+    format.setForeground(color);
+
+    QTextCursor cursor(textCursor());
+    cursor.movePosition(QTextCursor::End);
+    const int offset = cursor.position();
+    cursor.insertText(text, format);
+
+    QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
+    QRegularExpressionMatchIterator i = exp.globalMatch(text);
+
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        cursor.setPosition(offset + match.capturedStart());
+        cursor.setPosition(offset + match.capturedEnd(), QTextCursor::KeepAnchor);
+
+        QTextCharFormat format;
+        format.setFontWeight(weight);
+        format.setForeground(QColor("#025dbf"));
+        format.setFontUnderline(true);
+        cursor.mergeCharFormat(format);
+    }
+
+    if (atEnd)
+        bar->setSliderPosition(bar->maximum());
+
+     if (isHidden()) // FIXME: Add this to global settings
+        emit flash();
+}
+
 void ConsolePane::onStandardOutput(const QString& output)
 {
-    print(output);
+    press(output);
 }
 
 void ConsolePane::onStandardErrorOutput(const QString& output)
 {
-    printError(output);
+    press(output, "#B44B46");
 }
 
 void ConsolePane::updateViewportMargins()
