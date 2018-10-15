@@ -1,5 +1,4 @@
 #include <consolepane.h>
-#include <runmanager.h>
 #include <utilityfunctions.h>
 #include <utilsicons.h>
 #include <transparentstyle.h>
@@ -80,10 +79,6 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     m_minimizeButton->setCursor(Qt::PointingHandCursor);
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &ConsolePane::minimized);
-    connect(RunManager::instance(), &RunManager::standardErrorOutput,
-            this, [=] (const QString& output) { press(output, palette().linkVisited()); });
-    connect(RunManager::instance(), &RunManager::standardOutput,
-            this, [=] (const QString& output) { press(output); });
     connect(this, &ConsolePane::blockCountChanged,
             this, &ConsolePane::updateViewportMargins);
 

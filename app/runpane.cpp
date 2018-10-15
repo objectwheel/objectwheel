@@ -3,7 +3,6 @@
 #include <windowmanager.h>
 #include <projectmanager.h>
 #include <runmanager.h>
-#include <consolepane.h>
 #include <welcomewindow.h>
 #include <devicesbutton.h>
 #include <smartspacer.h>
@@ -32,8 +31,7 @@ const char* g_startRunningMessage = "<b>Starting</b> interpretation...";
 const char* g_runningMessage = "<b>Running</b> on ";
 }
 
-RunPane::RunPane(ConsolePane* consolePane, QWidget *parent) : QToolBar(parent)
-  , m_consolePane(consolePane)
+RunPane::RunPane(QWidget *parent) : QToolBar(parent)
   , m_runButton(new PushButton)
   , m_stopButton(new PushButton)
   , m_devicesButton(new DevicesButton)
@@ -75,7 +73,8 @@ RunPane::RunPane(ConsolePane* consolePane, QWidget *parent) : QToolBar(parent)
     m_runButton->setFixedWidth(39);
     m_runButton->setIconSize({16, 16});
     m_runButton->setIcon(icon);
-    connect(m_runButton, SIGNAL(clicked(bool)), SLOT(onRunButtonClick()));
+    connect(m_runButton, &PushButton::clicked, this, &RunPane::runButtonClicked);
+    connect(m_runButton, &PushButton::clicked, this, &RunPane::onRunButtonClick);
 
     icon.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", on, this), QIcon::Normal, QIcon::On);
     icon.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", off, this), QIcon::Normal, QIcon::Off);
@@ -84,7 +83,7 @@ RunPane::RunPane(ConsolePane* consolePane, QWidget *parent) : QToolBar(parent)
     m_stopButton->setFixedWidth(39);
     m_stopButton->setIconSize({16, 16});
     m_stopButton->setIcon(icon);
-    connect(m_stopButton, SIGNAL(clicked(bool)), SLOT(onStopButtonClick()));
+    connect(m_stopButton, &PushButton::clicked, &RunManager::kill);
 
     icon.addPixmap(renderColorizedPixmap(":/images/projects.png", on, this), QIcon::Normal, QIcon::On);
     icon.addPixmap(renderColorizedPixmap(":/images/projects.png", off, this), QIcon::Normal, QIcon::Off);
@@ -93,7 +92,7 @@ RunPane::RunPane(ConsolePane* consolePane, QWidget *parent) : QToolBar(parent)
     m_projectsButton->setFixedWidth(39);
     m_projectsButton->setIconSize({16, 16});
     m_projectsButton->setIcon(icon);
-    connect(m_projectsButton, SIGNAL(clicked(bool)), SLOT(onProjectsButtonClick()));
+    connect(m_projectsButton, &PushButton::clicked, this, &RunPane::projectsButtonClicked);
 
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { setMessage(tr(g_welcomeMessage)); });
@@ -143,21 +142,8 @@ void RunPane::setMessage(const QString& message)
     m_loadingBar->setText(ProjectManager::name() + ": " + message);
 }
 
-void RunPane::onStopButtonClick()
-{
-    RunManager::kill();
-}
-
 void RunPane::onRunButtonClick()
 {
-    m_consolePane->fade();
-    if (!m_consolePane->toPlainText().isEmpty())
-        m_consolePane->press("\n");
-    m_consolePane->press(tr("Starting") + " " + ProjectManager::name() + "...\n", QColor("#025dbf"),
-                         QFont::DemiBold);
-
-    m_consolePane->verticalScrollBar()->setValue(m_consolePane->verticalScrollBar()->maximum());
-
     RunManager::kill();
     RunManager::waitForKill(3000);
 
@@ -166,11 +152,6 @@ void RunPane::onRunButtonClick()
 
     m_runButton->setDisabled(true);
     m_stopButton->setEnabled(true);
-}
-
-void RunPane::onProjectsButtonClick()
-{
-    WindowManager::welcomeWindow()->show();
 }
 
 void RunPane::paintEvent(QPaintEvent*)

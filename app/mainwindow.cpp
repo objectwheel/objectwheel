@@ -19,6 +19,9 @@
 #include <qmlcodeeditorwidget.h>
 #include <utilityfunctions.h>
 #include <bottombar.h>
+#include <saveutils.h>
+#include <windowmanager.h>
+#include <welcomewindow.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -26,6 +29,7 @@
 #include <QToolButton>
 #include <QDockWidget>
 #include <QLayout>
+#include <QScrollBar>
 
 #include <qmlcodedocument.h>
 #include <QTimer>
@@ -62,7 +66,7 @@ bool inspectorDockWidgetVisible;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
-  , m_runPane(new RunPane(m_centralWidget->consolePane()))
+  , m_runPane(new RunPane)
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
@@ -301,6 +305,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_pageSwitcherPane->setCurrentPage(Page_SplitView);
         }
     });
+    connect(ProjectManager::instance(), &ProjectManager::started,
+            this, [=] { m_globalResourcesPane->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
     connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished),
             [=] (int exitCode, QProcess::ExitStatus) {
         auto console = m_centralWidget->consolePane();
@@ -311,6 +317,21 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         console->press(ProjectManager::name() + " " +
                        tr("exited with code") + QString::fromUtf8(" %1.\n").arg(exitCode),
                        QColor("#025dbf"), QFont::DemiBold);
+    });
+
+    connect(m_runPane, &RunPane::projectsButtonClicked,
+            this, [=] {
+        WindowManager::welcomeWindow()->show();
+    });
+    connect(m_runPane, &RunPane::runButtonClicked,
+            this, [=] {
+        m_centralWidget->consolePane()->fade();
+        if (!m_centralWidget->consolePane()->toPlainText().isEmpty())
+            m_centralWidget->consolePane()->press("\n");
+        m_centralWidget->consolePane()->press(tr("Starting") + " " + ProjectManager::name() + "...\n",
+                                              QColor("#025dbf"), QFont::DemiBold);
+        m_centralWidget->consolePane()->verticalScrollBar()->
+                setValue(m_centralWidget->consolePane()->verticalScrollBar()->maximum());
     });
 
     sweep();

@@ -21,6 +21,8 @@
 #include <bottombar.h>
 #include <transparentstyle.h>
 #include <consolepane.h>
+#include <runmanager.h>
+#include <controlpropertymanager.h>
 
 #include <QWindow>
 #include <QSplitter>
@@ -88,6 +90,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_helpWidget);
     m_splitterIn->setChildrenCollapsible(false);
 
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
+            this, [=] (Control* control, int codeChanged) {
+        if (codeChanged)
+            m_issuesPane->refresh(control);
+    });
+    connect(m_issuesPane, &IssuesPane::titleChanged,
+            m_bottomBar->issuesButton(), &QAbstractButton::setText);
     connect(m_issuesPane, &IssuesPane::internalFileOpened,
             m_designerWidget, &DesignerWidget::onInternalFileOpen);
     connect(m_issuesPane, &IssuesPane::globalFileOpened,
@@ -114,8 +123,11 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         m_bottomBar->consoleButton()->setChecked(false);
         m_consolePane->hide();
     });
-    connect(m_issuesPane, &IssuesPane::titleChanged,
-            m_bottomBar->issuesButton(), &QAbstractButton::setText);
+    connect(RunManager::instance(), &RunManager::standardErrorOutput,
+            this, [=] (const QString& output) { m_consolePane->press(output, palette().linkVisited()); });
+    connect(RunManager::instance(), &RunManager::standardOutput,
+            this, [=] (const QString& output) { m_consolePane->press(output); });
+
     connect(m_bottomBar, &BottomBar::buttonActivated,
             this, [=] (QAbstractButton* button) {
         if (button == m_bottomBar->consoleButton()) {

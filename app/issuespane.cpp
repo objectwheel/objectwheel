@@ -4,7 +4,6 @@
 #include <pathfinder.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
-#include <controlpropertymanager.h>
 #include <saveutils.h>
 #include <projectmanager.h>
 
@@ -112,12 +111,6 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &IssuesPane::minimized);
 
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
-            this, [=] (Control* control, int codeChanged) {
-        if (codeChanged)
-            update(control);
-    });
-
     QTimer::singleShot(200, [=] { // FIXME: Workaround for QToolBarLayout's obsolote serMargin function usage
         m_toolBar->setContentsMargins(0, 0, 0, 0);
         m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
@@ -133,7 +126,7 @@ void IssuesPane::sweep()
     m_erroneousControls.clear();
 }
 
-void IssuesPane::update(Control* control)
+void IssuesPane::refresh(Control* control)
 {
     ControlErrors* controlErrors = nullptr;
     for (ControlErrors* error : m_erroneousControls) {

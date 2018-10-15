@@ -1,8 +1,5 @@
 #include <globalresourcespane.h>
-#include <projectmanager.h>
-#include <saveutils.h>
 #include <utilityfunctions.h>
-
 #include <QHeaderView>
 
 namespace {
@@ -26,8 +23,6 @@ GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : FileExplorer(parent)
 {
     setPalette(initPalette(this));
     UtilityFunctions::adjustFontWeight(header(), QFont::Medium);
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] { setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
 }
 
 QSize GlobalResourcesPane::sizeHint() const

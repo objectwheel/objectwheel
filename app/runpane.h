@@ -3,7 +3,6 @@
 
 #include <QToolBar>
 
-class ConsolePane;
 class DevicesButton;
 class PushButton;
 class RunPaneLoadingBar;
@@ -12,8 +11,8 @@ class RunPane : public QToolBar
 {
     Q_OBJECT
 
-public: // FIXME: ConsolePane* should not be passed to the constructor here
-    explicit RunPane(ConsolePane* consolePane, QWidget *parent = nullptr);
+public:
+    explicit RunPane(QWidget *parent = nullptr);
 
 public slots:
     void sweep();
@@ -24,16 +23,17 @@ public slots:
 
 private slots:
     void onRunButtonClick();
-    void onStopButtonClick();
-    void onProjectsButtonClick();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
+signals:
+    void runButtonClicked();
+    void projectsButtonClicked();
+
 private:
-    ConsolePane* m_consolePane;
     PushButton* m_runButton;
     PushButton* m_stopButton;
     DevicesButton* m_devicesButton;

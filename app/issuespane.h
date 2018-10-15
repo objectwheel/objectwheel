@@ -24,7 +24,7 @@ public:
 
 public slots:
     void sweep();
-    void update(Control* control);
+    void refresh(Control* control);
 
 private slots:
     void onItemDoubleClick(QListWidgetItem* item);
