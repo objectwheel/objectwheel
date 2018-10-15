@@ -1,27 +1,17 @@
 #include <consolepane.h>
 #include <runmanager.h>
-#include <windowmanager.h>
-#include <mainwindow.h>
-#include <centralwidget.h>
-#include <control.h>
-#include <appfontsettings.h>
-#include <qmlcodeeditor.h>
-#include <qmlcodeeditorwidget.h>
 #include <utilityfunctions.h>
 #include <utilsicons.h>
 #include <transparentstyle.h>
-#include <pathfinder.h>
 
 #include <QScrollBar>
-#include <QRegularExpression>
-#include <QMouseEvent>
-#include <QAbstractTextDocumentLayout>
 #include <QTextBlock>
 #include <QLabel>
 #include <QToolButton>
 #include <QTimer>
 #include <QLayout>
 #include <QTextStream>
+#include <QToolBar>
 
 ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
   , m_toolBar(new QToolBar(this))
@@ -106,16 +96,6 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     });
 }
 
-void ConsolePane::onLinkClick(const PathFinder::Result& result)
-{
-    if (result.type == PathFinder::Result::Global) {
-        emit globalFileOpened(result.relativePath, result.line, 0);
-    } else {
-        emit internalFileOpened(static_cast<const PathFinder::InternalResult&>(result).control,
-                                result.relativePath, result.line, 0);
-    }
-}
-
 void ConsolePane::fade()
 {
     QTextCharFormat faded;
@@ -177,6 +157,16 @@ void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight 
 
     if (isHidden())
         emit flash();
+}
+
+void ConsolePane::onLinkClick(const PathFinder::Result& result)
+{
+    if (result.type == PathFinder::Result::Global) {
+        emit globalFileOpened(result.relativePath, result.line, 0);
+    } else {
+        emit internalFileOpened(static_cast<const PathFinder::InternalResult&>(result).control,
+                                result.relativePath, result.line, 0);
+    }
 }
 
 void ConsolePane::updateViewportMargins()

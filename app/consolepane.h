@@ -27,11 +27,13 @@ private slots:
     void onLinkClick(const PathFinder::Result& result);
 
 protected:
-    void updateViewportMargins();
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
     bool eventFilter(QObject*, QEvent*) override;
     void resizeEvent(QResizeEvent*) override;
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+
+private:
+    void updateViewportMargins();
 
 signals:
     void flash();
