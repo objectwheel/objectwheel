@@ -10,6 +10,7 @@
 #include <utilityfunctions.h>
 #include <utilsicons.h>
 #include <transparentstyle.h>
+#include <pathfinder.h>
 
 #include <QScrollBar>
 #include <QRegularExpression>
@@ -20,6 +21,7 @@
 #include <QToolButton>
 #include <QTimer>
 #include <QLayout>
+#include <QTextStream>
 
 ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
   , m_toolBar(new QToolBar(this))
@@ -102,6 +104,11 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
         m_toolBar->setFixedHeight(22);
         updateViewportMargins();
     });
+
+
+    QTimer::singleShot(20000, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
+        press("Buraya sakın tıklamaaaa <a href=\"http://objectwheel.com/\"> hişşşt.");
+    });
 }
 
 void ConsolePane::onLinkClick(const QString& link)
@@ -151,24 +158,48 @@ void ConsolePane::press(const QString& text, const QColor& color, QFont::Weight 
     format.setFontWeight(weight);
     format.setForeground(color);
 
+    QTextCharFormat linkFormat;
+    linkFormat.setFontWeight(weight);
+    linkFormat.setForeground(QColor("#025dbf"));
+    linkFormat.setFontUnderline(true);
+
     QTextCursor cursor(textCursor());
     cursor.movePosition(QTextCursor::End);
     const int offset = cursor.position();
-    cursor.insertText(text, format);
+//    cursor.insertText(PathFinder::cleansed(text, true), format);
 
-    QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
-    QRegularExpressionMatchIterator i = exp.globalMatch(text);
+//    QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
+//    QRegularExpressionMatchIterator i = exp.globalMatch(text);
 
-    while (i.hasNext()) {
-        QRegularExpressionMatch match = i.next();
-        cursor.setPosition(offset + match.capturedStart());
-        cursor.setPosition(offset + match.capturedEnd(), QTextCursor::KeepAnchor);
+//    while (i.hasNext()) {
+//        QRegularExpressionMatch match = i.next();
+//        cursor.setPosition(offset + match.capturedStart());
+//        cursor.setPosition(offset + match.capturedEnd(), QTextCursor::KeepAnchor);
 
-        QTextCharFormat format;
-        format.setFontWeight(weight);
-        format.setForeground(QColor("#025dbf"));
-        format.setFontUnderline(true);
-        cursor.mergeCharFormat(format);
+//        QTextCharFormat format;
+//        format.setFontWeight(weight);
+//        format.setForeground(QColor("#025dbf"));
+//        format.setFontUnderline(true);
+//        cursor.mergeCharFormat(format);
+//    }
+
+    QString line;
+    QTextStream stream(text.toUtf8());
+    while (stream.readLineInto(&line)) {
+        PathFinder::GlobalResult globalResult = PathFinder::findGlobal(line);
+        PathFinder::InternalResult internalResult = PathFinder::findInternal(line);
+
+        cursor.insertBlock();
+
+        if (globalResult.isNull() && internalResult.isNull()) {
+            cursor.insertText(line, format);
+            continue;
+        }
+
+        if (!globalResult.isNull()) {
+            line.replace(globalResult.begin, globalResult.end - globalResult.begin,
+                         PathFinder::cleansed())
+        }
     }
 
     if (atEnd)
@@ -193,12 +224,6 @@ void ConsolePane::updateViewportMargins()
     QMargins vm = viewportMargins();
     vm.setTop(m_toolBar->height());
     setViewportMargins(vm);
-}
-
-void ConsolePane::resizeEvent(QResizeEvent* e)
-{
-    QPlainTextEdit::resizeEvent(e);
-    m_toolBar->setGeometry(0, 0, viewport()->width() + 2, m_toolBar->height());
 }
 
 bool ConsolePane::eventFilter(QObject* watched, QEvent* event)
@@ -233,6 +258,12 @@ bool ConsolePane::eventFilter(QObject* watched, QEvent* event)
     }
 
     return false;
+}
+
+void ConsolePane::resizeEvent(QResizeEvent* e)
+{
+    QPlainTextEdit::resizeEvent(e);
+    m_toolBar->setGeometry(0, 0, viewport()->width() + 2, m_toolBar->height());
 }
 
 QSize ConsolePane::minimumSizeHint() const

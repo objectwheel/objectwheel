@@ -397,24 +397,6 @@ void SaveManager::removeControl(const Control* control)
     rm(control->dir());
 }
 
-QString SaveManager::correctedKnownPaths(const QString& text)
-{
-    QString correctedText(text);
-    for (const Control* control : Control::controls()) {
-        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(control->dir()) + separator());
-        const QString& correction = control->id() + "::";
-        if (correctedText.contains(exp))
-            correctedText.replace(exp, correction);
-    }
-
-    QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toGlobalDir(ProjectManager::dir()) + separator());
-    const QString& correction = tr("GlobalResources") + "::";
-    if (correctedText.contains(exp))
-        correctedText.replace(exp, correction);
-
-    return correctedText;
-}
-
 /*
     NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
     You can not set id property of a top control if it's not exist in the project database

@@ -1,7 +1,5 @@
 #include <runmanager.h>
 #include <projectmanager.h>
-#include <savemanager.h>
-
 #include <QApplication>
 
 RunManager* RunManager::s_instance = nullptr;
@@ -51,12 +49,12 @@ void RunManager::waitForKill(int msecs)
 
 void RunManager::onReadyReadStandardError()
 {
-    emit standardErrorOutput(SaveManager::correctedKnownPaths(s_process->readAllStandardError()));
+    emit standardErrorOutput(s_process->readAllStandardError());
     emit readyRead();
 }
 
 void RunManager::onReadyReadStandardOutput()
 {
-    emit standardOutput(SaveManager::correctedKnownPaths(s_process->readAllStandardOutput()));
+    emit standardOutput(s_process->readAllStandardOutput());
     emit readyRead();
 }

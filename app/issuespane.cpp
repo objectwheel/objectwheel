@@ -1,7 +1,7 @@
 #include <issuespane.h>
 #include <control.h>
 #include <utilsicons.h>
-#include <savemanager.h>
+#include <pathfinder.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
 #include <controlpropertymanager.h>
@@ -189,8 +189,8 @@ void IssuesPane::update(Control* control)
         auto item = new QListWidgetItem;
         item->setData(QmlErrorIndexRole, controlErrors->errors.size() - 1);
         item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
-        item->setData(Qt::ToolTipRole, SaveManager::correctedKnownPaths(error.toString()));
-        item->setData(Qt::DisplayRole, SaveManager::correctedKnownPaths(error.toString()));
+        item->setData(Qt::ToolTipRole, PathFinder::cleansed(error.toString()));
+        item->setData(Qt::DisplayRole, PathFinder::cleansed(error.toString()));
         item->setIcon(UtilityFunctions::iconForQmlError(error, this));
         addItem(item);
     }
