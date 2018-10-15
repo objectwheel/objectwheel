@@ -15,6 +15,7 @@ public:
         int begin, end, length;
         QString relativePath;
         virtual bool isNull() const = 0;
+        enum Type { Global, Internal } type;
     };
 
     struct GlobalResult : public Result {

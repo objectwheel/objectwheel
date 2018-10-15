@@ -1,8 +1,9 @@
 #ifndef CONSOLEPANE_H
 #define CONSOLEPANE_H
 
-#include <QGuiApplication>
+#include <QApplication>
 #include <QPlainTextEdit>
+#include <pathfinder.h>
 
 class QToolButton;
 class QToolBar;
@@ -19,19 +20,18 @@ public:
 public slots:
     void fade();
     void sweep();
-    void press(const QString& text,
-               const QBrush& brush = QGuiApplication::palette().text(),
+    void press(const QString& text, const QBrush& brush = QApplication::palette().text(),
                QFont::Weight weight = QFont::Normal);
 
 private slots:
-    void onLinkClick(const QString& link);
+    void onLinkClick(const PathFinder::Result& result);
 
 protected:
     void updateViewportMargins();
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
     bool eventFilter(QObject*, QEvent*) override;
-    void resizeEvent(QResizeEvent* e) override;
+    void resizeEvent(QResizeEvent*) override;
 
 signals:
     void flash();

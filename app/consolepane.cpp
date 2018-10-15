@@ -91,7 +91,7 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &ConsolePane::minimized);
     connect(RunManager::instance(), &RunManager::standardErrorOutput,
-             this, [=] (const QString& output) { press(output, palette().linkVisited()); });
+            this, [=] (const QString& output) { press(output, palette().linkVisited()); });
     connect(RunManager::instance(), &RunManager::standardOutput,
             this, [=] (const QString& output) { press(output); });
     connect(this, &ConsolePane::blockCountChanged,
@@ -106,26 +106,14 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     });
 }
 
-void ConsolePane::onLinkClick(const QString& link)
+void ConsolePane::onLinkClick(const PathFinder::Result& result)
 {
-    QRegularExpression exp("^[a-z_][a-zA-Z0-9_]+::([a-f0-9]+):.([\\w\\\\\\/\\.\\d]+):(\\d+)");
-    const QString& uid = exp.match(link).captured(1);
-    const QString& path = exp.match(link).captured(2);
-    const int lineNumber = exp.match(link).captured(3).toInt();
-    QmlCodeEditorWidget* editorWidget = WindowManager::mainWindow()->centralWidget()->qmlCodeEditorWidget();
-    Control* control = nullptr;
-
-    for (const auto c : Control::controls()) {
-        if (c->uid() == uid)
-            control = c;
+    if (result.type == PathFinder::Result::Global) {
+        emit globalFileOpened(result.relativePath, result.line, 0);
+    } else {
+        emit internalFileOpened(static_cast<const PathFinder::InternalResult&>(result).control,
+                                result.relativePath, result.line, 0);
     }
-
-    if (!control)
-        return;
-
-    // FIXME: What if the file is a global resources file?
-    editorWidget->openInternal(control, path);
-    editorWidget->codeEditor()->gotoLine(lineNumber);
 }
 
 void ConsolePane::fade()
@@ -161,11 +149,10 @@ void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight 
 
     QString line;
     QTextStream stream(text.toUtf8());
-
     while (stream.readLineInto(&line)) {
         line = PathFinder::cleansed(line, true);
-        PathFinder::GlobalResult globalResult = PathFinder::findGlobal(line);
-        PathFinder::InternalResult internalResult = PathFinder::findInternal(line);
+        const PathFinder::GlobalResult& globalResult = PathFinder::findGlobal(line);
+        const PathFinder::InternalResult& internalResult = PathFinder::findInternal(line);
 
         if (cursor.position() != 0)
             cursor.insertBlock();
@@ -177,23 +164,18 @@ void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight 
 
         Q_ASSERT(globalResult.isNull() || internalResult.isNull());
 
-        if (!globalResult.isNull()) {
-            cursor.insertText(line.mid(0, globalResult.begin), format);
-            cursor.insertText(line.mid(globalResult.begin, globalResult.length), linkFormat);
-            cursor.insertText(line.mid(globalResult.end), format);
-        }
-
-        if (!internalResult.isNull()) {
-            cursor.insertText(line.mid(0, internalResult.begin), format);
-            cursor.insertText(line.mid(internalResult.begin, internalResult.length), linkFormat);
-            cursor.insertText(line.mid(internalResult.end), format);
-        }
+        const PathFinder::Result& result = !globalResult.isNull()
+                ? static_cast<const PathFinder::Result&>(globalResult)
+                : static_cast<const PathFinder::Result&>(internalResult);
+        cursor.insertText(line.mid(0, result.begin), format);
+        cursor.insertText(line.mid(result.begin, result.length), linkFormat);
+        cursor.insertText(line.mid(result.end), format);
     }
 
     if (scrollDown)
         verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 
-     if (isHidden())
+    if (isHidden())
         emit flash();
 }
 
@@ -204,37 +186,47 @@ void ConsolePane::updateViewportMargins()
     setViewportMargins(vm);
 }
 
-bool ConsolePane::eventFilter(QObject* watched, QEvent* event)
+bool ConsolePane::eventFilter(QObject* w, QEvent* e)
 {
-    if (watched == viewport()
-            && (event->type() == QEvent::MouseMove
-                || event->type() == QEvent::MouseButtonRelease)) {
-        auto e = static_cast<QMouseEvent*>(event);
-        auto pos = contentOffset() + e->pos();
-        auto block = firstVisibleBlock();
-        auto top = blockBoundingGeometry(block).translated(contentOffset()).top();
-        auto bottom = top + blockBoundingRect(block).height();
+    if (w == viewport() && (e->type() == QEvent::MouseMove || e->type() == QEvent::MouseButtonRelease)) {
+        QMouseEvent* event = static_cast<QMouseEvent*>(e);
+        QTextBlock block = firstVisibleBlock();
+        qreal top = blockBoundingGeometry(block).translated(contentOffset()).top();
+        qreal bottom = top + blockBoundingRect(block).height();
 
-        while (block.isValid() && top <= rect().bottom()) {
-            if (pos.y() >= top && pos.y() <= bottom) {
-                QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
-                if (exp.match(block.text()).hasMatch()
-                        && pos.x() < fontMetrics().horizontalAdvance(exp.match(block.text()).captured())) {
-                    if (event->type() == QEvent::MouseMove)
-                        viewport()->setCursor(Qt::PointingHandCursor);
-                    else
-                        onLinkClick(exp.match(block.text()).captured());
-                } else {
+        while (block.isValid() && top <= viewport()->rect().bottom()) {
+            if (event->pos().y() >= top && event->pos().y() <= bottom) {
+                const QString& line = block.text();
+                const PathFinder::GlobalResult& globalResult = PathFinder::findGlobal(line);
+                const PathFinder::InternalResult& internalResult = PathFinder::findInternal(line);
+
+                if (globalResult.isNull() && internalResult.isNull()) {
                     viewport()->setCursor(Qt::IBeamCursor);
+                } else {
+                    Q_ASSERT(globalResult.isNull() || internalResult.isNull());
+
+                    const PathFinder::Result& result = !globalResult.isNull()
+                            ? static_cast<const PathFinder::Result&>(globalResult)
+                            : static_cast<const PathFinder::Result&>(internalResult);
+                    int begin = fontMetrics().horizontalAdvance(line.mid(0, result.begin));
+                    int end = fontMetrics().horizontalAdvance(line.mid(0, result.end));
+
+                    if (event->pos().x() >= begin && event->pos().x() <= end) {
+                        if (event->type() == QEvent::MouseMove)
+                            viewport()->setCursor(Qt::PointingHandCursor);
+                        else
+                            onLinkClick(result);
+                    } else {
+                        viewport()->setCursor(Qt::IBeamCursor);
+                    }
                 }
             }
 
             block = block.next();
             top = bottom;
-            bottom = top + document()->documentLayout()->blockBoundingRect(block).height();
+            bottom = top + blockBoundingRect(block).height();
         }
     }
-
     return false;
 }
 

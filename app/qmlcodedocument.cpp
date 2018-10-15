@@ -1233,8 +1233,10 @@ static void cleanMarks(QVector<Mark*>* marks)
 void QmlCodeDocument::createMarks(const QList<DiagnosticMessage> &diagnostics)
 {
     for (const DiagnosticMessage &diagnostic : diagnostics) {
-        const auto onMarkRemoved = [this](Mark *mark) {
-            m_diagnosticMarks.removeAll(mark);
+        QPointer<QmlCodeDocument> ptr(this);
+        const auto onMarkRemoved = [ptr] (Mark* mark) {
+            if (ptr)
+                ptr->m_diagnosticMarks.removeAll(mark);
         };
         auto block = findBlockByLineNumber(diagnostic.loc.startLine - 1);
         auto blockData = QmlCodeDocument::userData(block);
@@ -1246,23 +1248,13 @@ void QmlCodeDocument::createMarks(const QList<DiagnosticMessage> &diagnostics)
     }
 }
 
-void QmlCodeDocument::cleanSemanticMarks()
-{
-    cleanMarks(&m_semanticMarks);
-}
-
-void QmlCodeDocument::cleanDiagnosticMarks()
-{
-    cleanMarks(&m_diagnosticMarks);
-}
-
 void QmlCodeDocument::createMarks(const SemanticInfo &info)
 {
     cleanSemanticMarks();
     QPointer<QmlCodeDocument> ptr(this);
-    const auto onMarkRemoved = [this, ptr](Mark* mark) {
+    const auto onMarkRemoved = [ptr] (Mark* mark) {
         if (ptr)
-            m_semanticMarks.removeAll(mark);
+            ptr->m_semanticMarks.removeAll(mark);
     };
     for (const DiagnosticMessage &diagnostic : qAsConst(info.semanticMessages)) {
         auto block = findBlockByLineNumber(diagnostic.loc.startLine - 1);
@@ -1284,171 +1276,12 @@ void QmlCodeDocument::createMarks(const SemanticInfo &info)
     }
 }
 
-/*! BUG
- * Saves the document to the file specified by \a fileName. If errors occur,
- * \a errorString contains their cause.
- * \a autoSave returns whether this function was called by the automatic save routine.
- * If \a autoSave is true, the cursor will be restored and some signals suppressed
- * and we do not clean up the text file (cleanWhitespace(), ensureFinalNewLine()).
- */
-//bool TextDocument::save(QString *errorString, const QString &saveFileName, bool autoSave)
-//{
-//    QTextCursor cursor(&d->m_document);
+void QmlCodeDocument::cleanSemanticMarks()
+{
+    cleanMarks(&m_semanticMarks);
+}
 
-//    // When autosaving, we don't want to modify the document/location under the user's fingers.
-//    QmlCodeEditor *editorWidget = nullptr;
-//    int savedPosition = 0;
-//    int savedAnchor = 0;
-//    int savedVScrollBarValue = 0;
-//    int savedHScrollBarValue = 0;
-//    int undos = d->m_document.availableUndoSteps();
-
-//    // When saving the current editor, make sure to maintain the cursor and scroll bar
-//    // positions for undo
-//    if (BaseTextEditor *editor = BaseTextEditor::currentTextEditor()) {
-//        if (editor->document() == this) {
-//            editorWidget = editor->editorWidget();
-//            QTextCursor cur = editor->textCursor();
-//            savedPosition = cur.position();
-//            savedAnchor = cur.anchor();
-//            savedVScrollBarValue = editorWidget->verticalScrollBar()->value();
-//            savedHScrollBarValue = editorWidget->horizontalScrollBar()->value();
-//            cursor.setPosition(cur.position());
-//        }
-//    }
-
-//    if (!autoSave) {
-//        cursor.beginEditBlock();
-//        cursor.movePosition(QTextCursor::Start);
-
-//        if (d->m_storageSettings.m_cleanWhitespace)
-//          cleanWhitespace(cursor, d->m_storageSettings.m_cleanIndentation, d->m_storageSettings.m_inEntireDocument);
-//        if (d->m_storageSettings.m_addFinalNewLine)
-//          ensureFinalNewLine(cursor);
-//        cursor.endEditBlock();
-//      }
-
-//    QString fName = filePath().toString();
-//    if (!saveFileName.isEmpty())
-//        fName = saveFileName;
-
-//    // check if UTF8-BOM has to be added or removed
-//    Utils::TextFileFormat saveFormat = format();
-//    if (saveFormat.codec->name() == "UTF-8" && supportsUtf8Bom()) {
-//        switch (d->m_extraEncodingSettings.m_utf8BomSetting) {
-//        case ExtraEncodingSettings::AlwaysAdd:
-//            saveFormat.hasUtf8Bom = true;
-//            break;
-//        case ExtraEncodingSettings::OnlyKeep:
-//            break;
-//        case ExtraEncodingSettings::AlwaysDelete:
-//            saveFormat.hasUtf8Bom = false;
-//            break;
-//        }
-//    }
-
-//    const bool ok = write(fName, saveFormat, d->m_document.toPlainText(), errorString);
-
-//    // restore text cursor and scroll bar positions
-//    if (autoSave && undos < d->m_document.availableUndoSteps()) {
-//        d->m_document.undo();
-//        if (editorWidget) {
-//            QTextCursor cur = editorWidget->textCursor();
-//            cur.setPosition(savedAnchor);
-//            cur.setPosition(savedPosition, QTextCursor::KeepAnchor);
-//            editorWidget->verticalScrollBar()->setValue(savedVScrollBarValue);
-//            editorWidget->horizontalScrollBar()->setValue(savedHScrollBarValue);
-//            editorWidget->setTextCursor(cur);
-//        }
-//    }
-
-//    if (!ok)
-//        return false;
-//    d->m_autoSaveRevision = d->m_document.revision();
-//    if (autoSave)
-//        return true;
-
-//    // inform about the new filename
-//    const QFileInfo fi(fName);
-//    d->m_document.setModified(false); // also triggers update of the block revisions
-//    setFilePath(Utils::FileName::fromUserInput(fi.absoluteFilePath()));
-//    emit changed();
-//    return true;
-//}
-
-//Core::IDocument::OpenResult TextDocument::open(QString *errorString, const QString &fileName,
-//                                               const QString &realFileName)
-//{
-//    emit aboutToOpen(fileName, realFileName);
-//    OpenResult success = openImpl(errorString, fileName, realFileName, /*reload =*/ false);
-//    if (success == OpenResult::Success) {
-//        setMimeType(Utils::mimeTypeForFile(fileName).name());
-//        emit openFinishedSuccessfully();
-//    }
-//    return success;
-//}
-
-//Core::IDocument::OpenResult TextDocument::openImpl(QString *errorString, const QString &fileName,
-//                                                   const QString &realFileName, bool reload)
-//{
-//    QStringList content;
-
-//    ReadResult readResult = Utils::TextFileFormat::ReadIOError;
-
-//    if (!fileName.isEmpty()) {
-//        const QFileInfo fi(fileName);
-//        d->m_fileIsReadOnly = !fi.isWritable();
-//        readResult = read(realFileName, &content, errorString);
-//        const int chunks = content.size();
-
-//        // Don't call setUndoRedoEnabled(true) when reload is true and filenames are different,
-//        // since it will reset the undo's clear index
-//        if (!reload || fileName == realFileName)
-//            d->m_document.setUndoRedoEnabled(reload);
-
-//        QTextCursor c(&d->m_document);
-//        c.beginEditBlock();
-//        if (reload) {
-//            c.select(QTextCursor::Document);
-//            c.removeSelectedText();
-//        } else {
-//            d->m_document.clear();
-//        }
-
-//        if (chunks == 1) {
-//            c.insertText(content.at(0));
-//        } else if (chunks > 1) {
-//            QFutureInterface<void> interface;
-//            interface.setProgressRange(0, chunks);
-//            ProgressManager::addTask(interface.future(), tr("Opening File"),
-//                                     Constants::TASK_OPEN_FILE);
-//            interface.reportStarted();
-
-//            for (int i = 0; i < chunks; ++i) {
-//                c.insertText(content.at(i));
-//                interface.setProgressValue(i + 1);
-//                QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//            }
-
-//            interface.reportFinished();
-//        }
-
-//        c.endEditBlock();
-
-//        // Don't call setUndoRedoEnabled(true) when reload is true and filenames are different,
-//        // since it will reset the undo's clear index
-//        if (!reload || fileName == realFileName)
-//            d->m_document.setUndoRedoEnabled(true);
-
-//        TextDocumentLayout *documentLayout =
-//            qobject_cast<TextDocumentLayout*>(d->m_document.documentLayout());
-//        QTC_ASSERT(documentLayout, return OpenResult::CannotHandle);
-//        documentLayout->lastSaveRevision = d->m_autoSaveRevision = d->m_document.revision();
-//        d->updateRevisions();
-//        d->m_document.setModified(fileName != realFileName);
-//        setFilePath(Utils::FileName::fromUserInput(fi.absoluteFilePath()));
-//    }
-//    if (readResult == Utils::TextFileFormat::ReadIOError)
-//        return OpenResult::ReadError;
-//    return OpenResult::Success;
-//}
+void QmlCodeDocument::cleanDiagnosticMarks()
+{
+    cleanMarks(&m_diagnosticMarks);
+}

@@ -92,6 +92,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             m_designerWidget, &DesignerWidget::onInternalFileOpen);
     connect(m_issuesPane, &IssuesPane::globalFileOpened,
             m_designerWidget, &DesignerWidget::onGlobalFileOpen);
+    connect(m_consolePane, &ConsolePane::internalFileOpened,
+            m_designerWidget, &DesignerWidget::onInternalFileOpen);
+    connect(m_consolePane, &ConsolePane::globalFileOpened,
+            m_designerWidget, &DesignerWidget::onGlobalFileOpen);
     connect(m_issuesPane, &IssuesPane::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());
