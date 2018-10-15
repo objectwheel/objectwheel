@@ -15,12 +15,12 @@ public:
 
 public slots:
     void sweep();
+    void refresh();
 
 private slots:
     void onAddButtonClick();
     void onRemoveButtonClick();
     void onCurrentItemChange();
-    void refreshList();
 
 private:
     void paintEvent(QPaintEvent* e) override;

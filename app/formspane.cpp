@@ -8,7 +8,6 @@
 #include <utilityfunctions.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
-#include <controlpropertymanager.h>
 
 #include <QStandardPaths>
 #include <QPainter>
@@ -195,13 +194,12 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
               private members and only used by FormsPane.
     */
 
-    connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refreshList);
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged, this, &FormsPane::refreshList);
+    connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refresh);
     connect(this, &FormsPane::currentItemChanged, this, &FormsPane::onCurrentItemChange);
     connect(ProjectManager::instance(), &ProjectManager::started, this, [=] {
         Q_ASSERT(!isProjectStarted);
         isProjectStarted = true;
-        refreshList();
+        refresh();
     });
 }
 
@@ -227,7 +225,7 @@ void FormsPane::onAddButtonClick()
 
     rm(tempPath);
 
-    refreshList();
+    refresh();
 }
 
 void FormsPane::onRemoveButtonClick()
@@ -247,7 +245,7 @@ void FormsPane::onCurrentItemChange()
     }
 }
 
-void FormsPane::refreshList()
+void FormsPane::refresh()
 {
     if (!isProjectStarted)
         return;

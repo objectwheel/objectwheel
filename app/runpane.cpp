@@ -1,9 +1,7 @@
 #include <runpane.h>
 #include <runpaneloadingbar.h>
-#include <windowmanager.h>
 #include <projectmanager.h>
 #include <runmanager.h>
-#include <welcomewindow.h>
 #include <devicesbutton.h>
 #include <smartspacer.h>
 #include <pushbutton.h>
@@ -14,10 +12,7 @@
 #include <QTime>
 #include <QPainter>
 #include <QLayout>
-#include <QActionGroup>
-#include <QMenu>
 #include <QTimer>
-#include <QScrollBar>
 
 using namespace PaintUtils;
 using namespace UtilityFunctions;
@@ -109,7 +104,6 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
             setMessage(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
         else // The app has erros thus the interpreter shut itself down
             error(tr(g_appCrashedMessage) + QTime::currentTime().toString());
-
         m_runButton->setEnabled(true);
         m_stopButton->setDisabled(true);
     });
@@ -162,8 +156,6 @@ void RunPane::paintEvent(QPaintEvent*)
     gradient.setColorAt(0, "#2784E3");
     gradient.setColorAt(1, "#1068C6");
     painter.fillRect(rect(), gradient);
-    painter.setPen("#0e5bad");
-    painter.drawLine(rect().bottomLeft() + QPointF(0.5, 0.5), rect().bottomRight() + QPointF(0.5, 0.5));
 }
 
 QSize RunPane::minimumSizeHint() const

@@ -22,6 +22,7 @@
 #include <saveutils.h>
 #include <windowmanager.h>
 #include <welcomewindow.h>
+#include <controlpropertymanager.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -333,6 +334,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         m_centralWidget->consolePane()->verticalScrollBar()->
                 setValue(m_centralWidget->consolePane()->verticalScrollBar()->maximum());
     });
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
+            m_formsPane, &FormsPane::refresh);
 
     sweep();
 }
