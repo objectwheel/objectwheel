@@ -6,8 +6,8 @@
 #include <QRegularExpression>
 
 namespace {
-const char* g_globalPattern = "^%1::([\\w\\\\\\/\\.\\d]+):(\\d+)";
-const char* g_internalPattern = "^[a-z_][a-zA-Z0-9_]+::([a-f0-9]+)::([\\w\\\\\\/\\.\\d]+):(\\d+)";
+const char* g_globalPattern = "%1::([\\w\\\\\\/\\.\\d]+):(\\d+)";
+const char* g_internalPattern = "[a-z_][a-zA-Z0-9_]+::([a-f0-9]+)::([\\w\\\\\\/\\.\\d]+):(\\d+)";
 }
 
 QString PathFinder::cleansed(const QString& text, bool withUid)
@@ -34,8 +34,9 @@ PathFinder::GlobalResult PathFinder::findGlobal(const QString& line)
     const QRegularExpressionMatch& match = exp.match(line);
 
     GlobalResult result;
-    result.end = match.capturedEnd();
     result.begin = match.capturedStart();
+    result.end = match.capturedEnd();
+    result.length = result.end - result.begin;
     result.relativePath = match.captured(1);
     result.line = match.captured(2).toInt();
 
@@ -49,8 +50,9 @@ PathFinder::InternalResult PathFinder::findInternal(const QString& line)
     const QString& uid = match.captured(1);
 
     InternalResult result;
-    result.end = match.capturedEnd();
     result.begin = match.capturedStart();
+    result.end = match.capturedEnd();
+    result.length = result.end - result.begin;
     result.relativePath = match.captured(2);
     result.line = match.captured(3).toInt();
 

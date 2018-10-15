@@ -153,11 +153,10 @@ void RunPane::onRunButtonClick()
     m_consolePane->fade();
     if (!m_consolePane->toPlainText().isEmpty())
         m_consolePane->press("\n");
-    m_consolePane->press(tr("Starting") + " " + ProjectManager::name() + "...\n", "#025dbf",
+    m_consolePane->press(tr("Starting") + " " + ProjectManager::name() + "...\n", QColor("#025dbf"),
                          QFont::DemiBold);
 
-    // WARNING
-    m_consolePane->verticalScrollBar()->setSliderPosition(m_consolePane->verticalScrollBar()->maximum());
+    m_consolePane->verticalScrollBar()->setValue(m_consolePane->verticalScrollBar()->maximum());
 
     RunManager::kill();
     RunManager::waitForKill(3000);

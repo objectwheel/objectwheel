@@ -91,9 +91,9 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &ConsolePane::minimized);
     connect(RunManager::instance(), &RunManager::standardErrorOutput,
-            this, &ConsolePane::onStandardErrorOutput);
+             this, [=] (const QString& output) { press(output, palette().linkVisited()); });
     connect(RunManager::instance(), &RunManager::standardOutput,
-            this, &ConsolePane::onStandardOutput);
+            this, [=] (const QString& output) { press(output); });
     connect(this, &ConsolePane::blockCountChanged,
             this, &ConsolePane::updateViewportMargins);
 
@@ -103,11 +103,6 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
         m_toolBar->layout()->setSpacing(0);
         m_toolBar->setFixedHeight(22);
         updateViewportMargins();
-    });
-
-
-    QTimer::singleShot(20000, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
-        press("Buraya sakın tıklamaaaa <a href=\"http://objectwheel.com/\"> hişşşt.");
     });
 }
 
@@ -135,13 +130,12 @@ void ConsolePane::onLinkClick(const QString& link)
 
 void ConsolePane::fade()
 {
-    QTextCharFormat format;
-    format.setForeground(QColor("#707477"));
-
+    QTextCharFormat faded;
+    faded.setForeground(palette().brush(QPalette::Disabled, QPalette::Text));
     QTextCursor cursor(document());
     cursor.movePosition(QTextCursor::Start);
     cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-    cursor.mergeCharFormat(format);
+    cursor.mergeCharFormat(faded);
 }
 
 void ConsolePane::sweep()
@@ -149,74 +143,58 @@ void ConsolePane::sweep()
     clear();
 }
 
-void ConsolePane::press(const QString& text, const QColor& color, QFont::Weight weight)
+void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight weight)
 {
-    QScrollBar* bar = verticalScrollBar();
-    const bool atEnd = bar->value() > bar->maximum() * 0.8;
+    bool scrollDown = verticalScrollBar()->value() == verticalScrollBar()->maximum();
 
     QTextCharFormat format;
     format.setFontWeight(weight);
-    format.setForeground(color);
+    format.setForeground(brush);
 
     QTextCharFormat linkFormat;
     linkFormat.setFontWeight(weight);
-    linkFormat.setForeground(QColor("#025dbf"));
+    linkFormat.setForeground(palette().link());
     linkFormat.setFontUnderline(true);
 
     QTextCursor cursor(textCursor());
     cursor.movePosition(QTextCursor::End);
-    const int offset = cursor.position();
-//    cursor.insertText(PathFinder::cleansed(text, true), format);
-
-//    QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::[a-f0-9]+:.[\\w\\\\\\/\\.\\d]+:\\d+");
-//    QRegularExpressionMatchIterator i = exp.globalMatch(text);
-
-//    while (i.hasNext()) {
-//        QRegularExpressionMatch match = i.next();
-//        cursor.setPosition(offset + match.capturedStart());
-//        cursor.setPosition(offset + match.capturedEnd(), QTextCursor::KeepAnchor);
-
-//        QTextCharFormat format;
-//        format.setFontWeight(weight);
-//        format.setForeground(QColor("#025dbf"));
-//        format.setFontUnderline(true);
-//        cursor.mergeCharFormat(format);
-//    }
 
     QString line;
     QTextStream stream(text.toUtf8());
+
     while (stream.readLineInto(&line)) {
+        line = PathFinder::cleansed(line, true);
         PathFinder::GlobalResult globalResult = PathFinder::findGlobal(line);
         PathFinder::InternalResult internalResult = PathFinder::findInternal(line);
 
-        cursor.insertBlock();
+        if (cursor.position() != 0)
+            cursor.insertBlock();
 
         if (globalResult.isNull() && internalResult.isNull()) {
             cursor.insertText(line, format);
             continue;
         }
 
+        Q_ASSERT(globalResult.isNull() || internalResult.isNull());
+
         if (!globalResult.isNull()) {
-            line.replace(globalResult.begin, globalResult.end - globalResult.begin,
-                         PathFinder::cleansed())
+            cursor.insertText(line.mid(0, globalResult.begin), format);
+            cursor.insertText(line.mid(globalResult.begin, globalResult.length), linkFormat);
+            cursor.insertText(line.mid(globalResult.end), format);
+        }
+
+        if (!internalResult.isNull()) {
+            cursor.insertText(line.mid(0, internalResult.begin), format);
+            cursor.insertText(line.mid(internalResult.begin, internalResult.length), linkFormat);
+            cursor.insertText(line.mid(internalResult.end), format);
         }
     }
 
-    if (atEnd)
-        bar->setSliderPosition(bar->maximum());
+    if (scrollDown)
+        verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 
-     if (isHidden()) // FIXME: Add this to global settings
+     if (isHidden())
         emit flash();
-}
-
-void ConsolePane::onStandardOutput(const QString& output)
-{
-    press(output);
-}
-
-void ConsolePane::onStandardErrorOutput(const QString& output)
-{
-    press(output, "#B44B46");
 }
 
 void ConsolePane::updateViewportMargins()

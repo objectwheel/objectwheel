@@ -20,13 +20,11 @@ public slots:
     void fade();
     void sweep();
     void press(const QString& text,
-               const QColor& color = QGuiApplication::palette().color(QPalette::Text),
+               const QBrush& brush = QGuiApplication::palette().text(),
                QFont::Weight weight = QFont::Normal);
 
 private slots:
     void onLinkClick(const QString& link);
-    void onStandardOutput(const QString& output);
-    void onStandardErrorOutput(const QString& output);
 
 protected:
     void updateViewportMargins();

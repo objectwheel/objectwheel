@@ -12,7 +12,7 @@ class PathFinder final
 public:
     struct Result {
         int line;
-        int begin, end;
+        int begin, end, length;
         QString relativePath;
         virtual bool isNull() const = 0;
     };

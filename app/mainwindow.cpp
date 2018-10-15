@@ -306,11 +306,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         auto console = m_centralWidget->consolePane();
 
         if (exitCode == EXIT_FAILURE)
-            console->press(tr("The process was ended forcefully.") + "\n", "#b34b46", QFont::DemiBold);
+            console->press(tr("The process was ended forcefully.") + "\n", QColor("#b34b46"), QFont::DemiBold);
 
         console->press(ProjectManager::name() + " " +
                        tr("exited with code") + QString::fromUtf8(" %1.\n").arg(exitCode),
-                       "#025dbf", QFont::DemiBold);
+                       QColor("#025dbf"), QFont::DemiBold);
     });
 
     sweep();
