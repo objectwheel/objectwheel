@@ -509,16 +509,6 @@ void QmlCodeDocument::onDocumentUpdated(Document::Ptr doc)
     emit updateCodeWarnings(doc);
 }
 
-void QmlCodeDocument::reupdateSemanticInfo()
-{
-    // If the editor is newer than the semantic info (possibly with update in progress),
-    // new semantic infos won't be accepted anyway. We'll get a onDocumentUpdated anyhow.
-    if (revision() != m_semanticInfoDocRevision)
-        return;
-
-    m_semanticInfoUpdater->reupdate(ModelManagerInterface::instance()->snapshot());
-}
-
 void QmlCodeDocument::acceptNewSemanticInfo(const SemanticInfo& semanticInfo)
 {
     if (semanticInfo.revision() != revision()) {
@@ -541,6 +531,16 @@ void QmlCodeDocument::acceptNewSemanticInfo(const SemanticInfo& semanticInfo)
 
     createMarks(m_semanticInfo);
     emit semanticInfoUpdated(m_semanticInfo); // calls triggerPendingUpdates as necessary
+}
+
+void QmlCodeDocument::reupdateSemanticInfo()
+{
+    // If the editor is newer than the semantic info (possibly with update in progress),
+    // new semantic infos won't be accepted anyway. We'll get a onDocumentUpdated anyhow.
+    if (revision() != m_semanticInfoDocRevision)
+        return;
+
+    m_semanticInfoUpdater->reupdate(ModelManagerInterface::instance()->snapshot());
 }
 
 QTextCursor QmlCodeDocument::indentOrUnindent(const QTextCursor &textCursor, bool doIndent,
@@ -1223,13 +1223,6 @@ static bool isWarning(QmlJS::Severity::Enum kind)
     return false;
 }
 
-static void cleanMarks(QVector<Mark*>* marks)
-{
-    for (Mark* mark : *marks)
-        mark->type = Mark::NoMark;
-    marks->clear();
-}
-
 void QmlCodeDocument::createMarks(const QList<DiagnosticMessage> &diagnostics)
 {
     for (const DiagnosticMessage &diagnostic : diagnostics) {
@@ -1274,6 +1267,13 @@ void QmlCodeDocument::createMarks(const SemanticInfo &info)
         blockData->mark.removalCallback = onMarkRemoved;
         m_semanticMarks.append(&blockData->mark);
     }
+}
+
+static void cleanMarks(QVector<Mark*>* marks)
+{
+    for (Mark* mark : *marks)
+        mark->type = Mark::NoMark;
+    marks->clear();
 }
 
 void QmlCodeDocument::cleanSemanticMarks()

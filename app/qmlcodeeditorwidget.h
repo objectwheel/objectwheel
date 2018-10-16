@@ -22,6 +22,9 @@ public:
         QmlCodeDocument* document;
         QmlCodeEditorToolBar::Scope scope;
     };
+    struct GlobalDocument : public Document { QString relativePath; };
+    struct InternalDocument : public GlobalDocument { Control* control; };
+    struct ExternalDocument : public Document { QString fullPath; };
 
     class SaveFilter {
     public:
@@ -29,10 +32,6 @@ public:
         virtual void beforeSave(Document*) = 0;
         virtual void afterSave(Document*) = 0;
     };
-
-    struct GlobalDocument : public Document { QString relativePath; };
-    struct InternalDocument : public GlobalDocument { Control* control; };
-    struct ExternalDocument : public Document { QString fullPath; };
 
 public:
     explicit QmlCodeEditorWidget(QWidget* parent = nullptr);

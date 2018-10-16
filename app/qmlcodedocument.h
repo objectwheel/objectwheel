@@ -104,10 +104,10 @@ private slots:
 private:
     QTextCursor indentOrUnindent(const QTextCursor &textCursor, bool doIndent, bool blockSelection,
                                  int columnIn, int *offset);
-    void cleanDiagnosticMarks();
     void createMarks(const QmlJSTools::SemanticInfo& info);
     void createMarks(const QList<QmlJS::DiagnosticMessage>& diagnostics);
     void cleanSemanticMarks();
+    void cleanDiagnosticMarks();
 
 signals:
     void tabSettingsChanged();
@@ -133,8 +133,8 @@ private:
     QVector<QTextLayout::FormatRange> m_diagnosticRanges;
     QmlJSEditor::Internal::SemanticHighlighter* m_semanticHighlighter;
     bool m_semanticHighlightingNecessary;
-    QVector<Mark *> m_diagnosticMarks;
-    QVector<Mark *> m_semanticMarks;
+    QVector<Mark*> m_diagnosticMarks;
+    QVector<Mark*> m_semanticMarks;
 };
 
 #endif // QMLCODEDOCUMENT_H
