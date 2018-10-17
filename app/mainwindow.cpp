@@ -23,6 +23,7 @@
 #include <windowmanager.h>
 #include <welcomewindow.h>
 #include <controlpropertymanager.h>
+#include <preferenceswindow.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -323,6 +324,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_runPane, &RunPane::projectsButtonClicked,
             this, [=] {
         WindowManager::welcomeWindow()->show();
+    });
+    connect(m_runPane, &RunPane::preferencesButtonClicked,
+            this, [=] {
+        WindowManager::preferencesWindow()->show();
     });
     connect(m_runPane, &RunPane::runButtonClicked,
             this, [=] {

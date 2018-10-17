@@ -32,11 +32,13 @@ protected:
 signals:
     void runButtonClicked();
     void projectsButtonClicked();
+    void preferencesButtonClicked();
 
 private:
     PushButton* m_runButton;
     PushButton* m_stopButton;
     DevicesButton* m_devicesButton;
+    PushButton* m_preferencesButton;
     PushButton* m_projectsButton;
     RunPaneLoadingBar* m_loadingBar;
 };

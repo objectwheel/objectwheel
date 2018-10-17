@@ -79,5 +79,6 @@
         <file>images/splash.png</file>
         <file>images/devices.png</file>
         <file>images/mycomputer.png</file>
+        <file>images/preferences.png</file>
     </qresource>
 </RCC>

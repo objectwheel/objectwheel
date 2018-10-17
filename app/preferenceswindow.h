@@ -29,12 +29,12 @@ private:
      QSize sizeHint() const override;
 
 private:
-    QGridLayout* _layout;
-    QListWidget* _listWidget;
-    QScrollArea* _scrollArea;
-    FocuslessLineEdit* _txtFilter;
-    QLabel* _lblTitle;
-    QDialogButtonBox* _bboxButtons;
+    QGridLayout* m_layout;
+    QListWidget* m_listWidget;
+    QScrollArea* m_scrollArea;
+    FocuslessLineEdit* m_txtFilter;
+    QLabel* m_lblTitle;
+    QDialogButtonBox* m_bboxButtons;
 };
 
 #endif // PREFERENCESWINDOW_H

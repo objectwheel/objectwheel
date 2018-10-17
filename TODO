@@ -45,6 +45,8 @@ Neden dökümantasyonlardaki ButtonGroup örneğindeki kod düzgün çizilmiyor,
 Neden Qml Code Editor'ün sintaxhiglerhter'ı ve kırmızı yuvarlak error bildirgeç markları bir alt ButtonTextField.qml gibi bir dosya ile tanımlanmış bir türü ilgili qml dosyasını açmadan main.qml'de "Bu tür bulunamadı" diye hata veriyor?
 Neden QFontDatabase ile eklenen fontlar program kapanırken uygulamayı removeAllApplicationFonts ile patlatıyor (FontSettingsPage vs QFontComboBox kullanan ayar sayfaları ile ilgilenilecek)
 
+PreviewingEngine de adam akıllı "render edilemeyen obje" tespiti yapıp, ilgili obje yeniden render edilecek, böyle bir sistem kurulacak, render edilemeyen obje render kuyruğunu meşgul etmemeli, biraz beklenip render edilememiş kontroller yeniden render edilmeli, hep birlikte
+Tumbler doesn’t display properly before running. Shows tiny edge of control. 
 sağ tık menüsü/context menu den bişey seçince ve sonra mouseu az hareket ettirince selected control gidiyor
 sağ tık ayrıca stick özelliğininde kafasını karıştırıyor
 bazı kontrolleri basılarının üzerine sürünce, bırakmak için vs, selected özelliği gidiyor, kasıyor, özellikle sürüklenen üzerinde başka çocuklar varsa

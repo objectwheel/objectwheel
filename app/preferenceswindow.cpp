@@ -5,51 +5,51 @@
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
 {
     setWindowTitle(tr("Preferences"));
-    _scrollArea = new QScrollArea;
-    _scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_scrollArea = new QScrollArea;
+    m_scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    _listWidget = new QListWidget;
-    _listWidget->setFixedWidth(150);
-    _listWidget->setIconSize({24, 24});
-    _listWidget->setFocusPolicy(Qt::NoFocus);
-    _listWidget->setSortingEnabled(true);
-    _listWidget->setTextElideMode(Qt::ElideMiddle);
-    _listWidget->setDragEnabled(false);
-    _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
-    _listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    _listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    _listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    m_listWidget = new QListWidget;
+    m_listWidget->setFixedWidth(150);
+    m_listWidget->setIconSize({24, 24});
+    m_listWidget->setFocusPolicy(Qt::NoFocus);
+    m_listWidget->setSortingEnabled(true);
+    m_listWidget->setTextElideMode(Qt::ElideMiddle);
+    m_listWidget->setDragEnabled(false);
+    m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
+    m_listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    m_listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     QFont f;
     f.setWeight(QFont::Medium);
     f.setPixelSize(14);
-    _lblTitle = new QLabel;
-    _lblTitle->setFont(f);
-    _lblTitle->setText("Title");
+    m_lblTitle = new QLabel;
+    m_lblTitle->setFont(f);
+    m_lblTitle->setText("Title");
 
-    _txtFilter = new FocuslessLineEdit;
-    _txtFilter->setPlaceholderText("Filter");
-    _txtFilter->setClearButtonEnabled(true);
-    _txtFilter->setFixedWidth(150);
-    _txtFilter->setFixedHeight(22);
-    connect(_txtFilter, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
+    m_txtFilter = new FocuslessLineEdit;
+    m_txtFilter->setPlaceholderText("Filter");
+    m_txtFilter->setClearButtonEnabled(true);
+    m_txtFilter->setFixedWidth(150);
+    m_txtFilter->setFixedHeight(22);
+    connect(m_txtFilter, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
 
-    _bboxButtons = new QDialogButtonBox;
-    _bboxButtons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Save);
-    connect(_bboxButtons->button(QDialogButtonBox::Cancel), SIGNAL(clicked(bool)), SIGNAL(done()));
+    m_bboxButtons = new QDialogButtonBox;
+    m_bboxButtons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Save);
+    connect(m_bboxButtons->button(QDialogButtonBox::Cancel), SIGNAL(clicked(bool)), SIGNAL(done()));
 
-    _bboxButtons->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
-    _bboxButtons->button(QDialogButtonBox::Save)->setCursor(Qt::PointingHandCursor);
+    m_bboxButtons->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
+    m_bboxButtons->button(QDialogButtonBox::Save)->setCursor(Qt::PointingHandCursor);
 
-    _layout = new QGridLayout(this);
-    _layout->setSpacing(6);
-    _layout->setContentsMargins(10, 10, 10, 10);
-    _layout->addWidget(_txtFilter, 0, 0);
-    _layout->addWidget(_lblTitle, 0, 1);
-    _layout->addWidget(_listWidget, 1, 0);
-    _layout->addWidget(_scrollArea, 1, 1);
-    _layout->addWidget(_bboxButtons, 2, 0, 1, 2);
+    m_layout = new QGridLayout(this);
+    m_layout->setSpacing(6);
+    m_layout->setContentsMargins(10, 10, 10, 10);
+    m_layout->addWidget(m_txtFilter, 0, 0);
+    m_layout->addWidget(m_lblTitle, 0, 1);
+    m_layout->addWidget(m_listWidget, 1, 0);
+    m_layout->addWidget(m_scrollArea, 1, 1);
+    m_layout->addWidget(m_bboxButtons, 2, 0, 1, 2);
 }
 
 void PreferencesWindow::filterList(const QString& /*text*/)

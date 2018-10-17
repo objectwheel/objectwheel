@@ -20,6 +20,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
+
     CentralWidget* centralWidget() const;
     InspectorPane* inspectorPane() const;
     PropertiesPane* propertiesPane() const;
