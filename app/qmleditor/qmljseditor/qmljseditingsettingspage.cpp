@@ -132,13 +132,13 @@ void QmlJsEditingSettings::setAutoFormatOnlyCurrentProject(const bool autoFormat
     m_autoFormatOnlyCurrentProject = autoFormatOnlyCurrentProject;
 }
 
-QmlJsEditingSettignsPageWidget::QmlJsEditingSettignsPageWidget(QWidget *parent) :
+QmlJsEditingSettingsPageWidget::QmlJsEditingSettingsPageWidget(QWidget *parent) :
     QWidget(parent)
 {
     m_ui.setupUi(this);
 }
 
-QmlJsEditingSettings QmlJsEditingSettignsPageWidget::settings() const
+QmlJsEditingSettings QmlJsEditingSettingsPageWidget::settings() const
 {
     QmlJsEditingSettings s;
     s.setEnableContextPane(m_ui.textEditHelperCheckBox->isChecked());
@@ -148,7 +148,7 @@ QmlJsEditingSettings QmlJsEditingSettignsPageWidget::settings() const
     return s;
 }
 
-void QmlJsEditingSettignsPageWidget::setSettings(const QmlJsEditingSettings &s)
+void QmlJsEditingSettingsPageWidget::setSettings(const QmlJsEditingSettings &s)
 {
     m_ui.textEditHelperCheckBox->setChecked(s.enableContextPane());
     m_ui.textEditHelperCheckBoxPin->setChecked(s.pinContextPane());
@@ -174,7 +174,7 @@ QmlJsEditingSettingsPage::QmlJsEditingSettingsPage() :
 QWidget *QmlJsEditingSettingsPage::widget()
 {
     if (!m_widget) {
-        m_widget = new QmlJsEditingSettignsPageWidget;
+        m_widget = new QmlJsEditingSettingsPageWidget;
         m_widget->setSettings(QmlJsEditingSettings::get());
     }
     return m_widget;

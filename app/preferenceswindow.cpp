@@ -1,63 +1,66 @@
 #include <preferenceswindow.h>
 #include <focuslesslineedit.h>
-#include <QtWidgets>
+#include <settingspage.h>
+
+#include <QListWidget>
+#include <QGridLayout>
+#include <QPushButton>
+#include <QDialogButtonBox>
 
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
+  , m_layout(new QGridLayout(this))
+  , m_listWidget(new QListWidget(this))
+  , m_searchLineEdit(new FocuslessLineEdit(this))
+  , m_dialogButtonBox(new QDialogButtonBox(this))
 {
     setWindowTitle(tr("Preferences"));
-    m_scrollArea = new QScrollArea;
-    m_scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    m_listWidget = new QListWidget;
-    m_listWidget->setFixedWidth(150);
+    m_layout->setSpacing(6);
+    m_layout->setContentsMargins(10, 10, 10, 10);
+    m_layout->addWidget(m_searchLineEdit, 0, 0, 1, 1);
+    m_layout->addWidget(m_listWidget, 1, 0, 1, 1);
+    // m_layout->addWidget(m_scrollArea, 0, 1, 1, 2);
+    m_layout->addWidget(m_dialogButtonBox, 2, 0, 1, 2);
+
+    m_listWidget->setFixedWidth(170);
     m_listWidget->setIconSize({24, 24});
-    m_listWidget->setFocusPolicy(Qt::NoFocus);
-    m_listWidget->setSortingEnabled(true);
-    m_listWidget->setTextElideMode(Qt::ElideMiddle);
     m_listWidget->setDragEnabled(false);
-    m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_listWidget->setSortingEnabled(true);
+    m_listWidget->setFocusPolicy(Qt::NoFocus);
+    m_listWidget->setTextElideMode(Qt::ElideMiddle);
     m_listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
     m_listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    QFont f;
-    f.setWeight(QFont::Medium);
-    f.setPixelSize(14);
-    m_lblTitle = new QLabel;
-    m_lblTitle->setFont(f);
-    m_lblTitle->setText("Title");
+    m_searchLineEdit->setFixedWidth(170);
+    m_searchLineEdit->setFixedHeight(22);
+    m_searchLineEdit->setPlaceholderText(tr("Filter"));
+    m_searchLineEdit->setClearButtonEnabled(true);
+    connect(m_searchLineEdit, &FocuslessLineEdit::textEdited,
+            this, &PreferencesWindow::search);
 
-    m_txtFilter = new FocuslessLineEdit;
-    m_txtFilter->setPlaceholderText("Filter");
-    m_txtFilter->setClearButtonEnabled(true);
-    m_txtFilter->setFixedWidth(150);
-    m_txtFilter->setFixedHeight(22);
-    connect(m_txtFilter, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
+    m_dialogButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Apply | QDialogButtonBox::Ok);
+    connect(m_dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked,
+            this, &PreferencesWindow::done);
 
-    m_bboxButtons = new QDialogButtonBox;
-    m_bboxButtons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Save);
-    connect(m_bboxButtons->button(QDialogButtonBox::Cancel), SIGNAL(clicked(bool)), SIGNAL(done()));
-
-    m_bboxButtons->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
-    m_bboxButtons->button(QDialogButtonBox::Save)->setCursor(Qt::PointingHandCursor);
-
-    m_layout = new QGridLayout(this);
-    m_layout->setSpacing(6);
-    m_layout->setContentsMargins(10, 10, 10, 10);
-    m_layout->addWidget(m_txtFilter, 0, 0);
-    m_layout->addWidget(m_lblTitle, 0, 1);
-    m_layout->addWidget(m_listWidget, 1, 0);
-    m_layout->addWidget(m_scrollArea, 1, 1);
-    m_layout->addWidget(m_bboxButtons, 2, 0, 1, 2);
+    m_dialogButtonBox->button(QDialogButtonBox::Ok)->setCursor(Qt::PointingHandCursor);
+    m_dialogButtonBox->button(QDialogButtonBox::Apply)->setCursor(Qt::PointingHandCursor);
+    m_dialogButtonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
 }
 
-void PreferencesWindow::filterList(const QString& /*text*/)
+void PreferencesWindow::search(const QString& /*text*/)
 {
-
+    // TODO
 }
 
 QSize PreferencesWindow::sizeHint() const
 {
-    return {1160, 670};
+    return {850, 480};
+}
+
+void PreferencesWindow::addPage(SettingsPage* page)
+{
+    m_settingsPages.insert(page->title(), page);
 }

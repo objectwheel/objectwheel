@@ -77,12 +77,12 @@ class QmlJsEditingSettings;
 
 namespace Internal {
 
-class QmlJsEditingSettignsPageWidget : public QWidget
+class QmlJsEditingSettingsPageWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit QmlJsEditingSettignsPageWidget(QWidget *parent = 0);
+    explicit QmlJsEditingSettingsPageWidget(QWidget *parent = 0);
 
     QmlJsEditingSettings settings() const;
     void setSettings(const QmlJsEditingSettings &);
@@ -106,7 +106,7 @@ public:
     void finish();
 
 private:
-    QPointer<QmlJsEditingSettignsPageWidget> m_widget;
+    QPointer<QmlJsEditingSettingsPageWidget> m_widget;
 };
 
 } // namespace Internal

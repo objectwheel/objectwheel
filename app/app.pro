@@ -120,7 +120,9 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/smartspacer.h \
            $$PWD/pushbutton.h \
            $$PWD/bottombar.h \
-           $$PWD/pathfinder.h
+           $$PWD/pathfinder.h \
+           $$PWD/generalsettingspage.h \
+           $$PWD/settingspage.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -219,7 +221,9 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/smartspacer.cpp \
            $$PWD/pushbutton.cpp \
            $$PWD/bottombar.cpp \
-           $$PWD/pathfinder.cpp
+           $$PWD/pathfinder.cpp \
+           $$PWD/generalsettingspage.cpp \
+           $$PWD/settingspage.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui \

@@ -2,13 +2,14 @@
 #define PREFERENCESWINDOW_H
 
 #include <QWidget>
+#include <QHash>
 
 class QLabel;
 class QGridLayout;
 class QListWidget;
-class QScrollArea;
 class FocuslessLineEdit;
 class QDialogButtonBox;
+class SettingsPage;
 
 class PreferencesWindow : public QWidget
 {
@@ -20,21 +21,23 @@ public:
     explicit PreferencesWindow(QWidget *parent = nullptr);
 
 private slots:
-    void filterList(const QString& text);
+    void search(const QString& text);
+
+protected:
+     QSize sizeHint() const override;
+
+private:
+   void addPage(SettingsPage* page);
 
 signals:
     void done();
 
 private:
-     QSize sizeHint() const override;
-
-private:
     QGridLayout* m_layout;
     QListWidget* m_listWidget;
-    QScrollArea* m_scrollArea;
-    FocuslessLineEdit* m_txtFilter;
-    QLabel* m_lblTitle;
-    QDialogButtonBox* m_bboxButtons;
+    FocuslessLineEdit* m_searchLineEdit;
+    QDialogButtonBox* m_dialogButtonBox;
+    QHash<QString, SettingsPage*> m_settingsPages;
 };
 
 #endif // PREFERENCESWINDOW_H

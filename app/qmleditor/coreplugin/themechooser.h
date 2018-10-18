@@ -27,7 +27,6 @@
 
 #include "id.h"
 
-#include <coreplugin/dialogs/ioptionspage.h>
 
 #include <QWidget>
 
@@ -35,8 +34,6 @@ namespace Utils { class Theme; }
 
 namespace Core {
 namespace Internal {
-
-class ThemeChooserPrivate;
 
 class ThemeEntry
 {
@@ -55,23 +52,6 @@ private:
     Id m_id;
     QString m_filePath;
     mutable QString m_displayName;
-};
-
-class ThemeChooser : public QWidget
-{
-    Q_OBJECT
-
-    ThemeChooser(QWidget *parent = 0);
-public:
-    ~ThemeChooser();
-
-    void apply();
-
-public slots:
-    void load();
-
-private:
-    ThemeChooserPrivate *d;
 };
 
 } // namespace Internal

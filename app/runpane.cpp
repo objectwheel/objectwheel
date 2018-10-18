@@ -46,8 +46,8 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, 0, QSize(0, 24),
                               m_devicesButton->sizePolicy().horizontalPolicy(),
                               m_devicesButton->sizePolicy().verticalPolicy(), this));
-    addWidget(m_preferencesButton);
     addWidget(m_projectsButton);
+    addWidget(m_preferencesButton);
 
     m_devicesButton->setCursor(Qt::PointingHandCursor);
     m_devicesButton->setToolTip(tr("Select target device"));
