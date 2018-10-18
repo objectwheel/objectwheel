@@ -812,7 +812,7 @@ QVector<QLineF> DesignerScene::guideLines() const
     return lines;
 }
 
-void DesignerScene::sweep()
+void DesignerScene::discharge()
 {
     clearSelection();
     clear();

@@ -17,7 +17,7 @@ public:
     explicit PropertiesPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 
 public slots:
-    void sweep();
+    void discharge();
 
 private slots:
     void onSelectionChange();

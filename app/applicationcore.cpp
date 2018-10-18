@@ -89,8 +89,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
     s_documentManager = new DocumentManager(this);
 
-    connect(UserManager::instance(), &UserManager::aboutToStop,
-            this, &ApplicationCore::onSessionStop);
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
@@ -98,8 +96,15 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     s_windowManager = new WindowManager(this);
     s_menuManager = new MenuManager(this);
 
+    connect(UserManager::instance(), &UserManager::started,
+            this, &ApplicationCore::onUserSessionStart);
+    connect(UserManager::instance(), &UserManager::aboutToStop,
+            this, &ApplicationCore::onUserSessionStop);
+    connect(ProjectManager::instance(), &ProjectManager::started,
+            this, &ApplicationCore::onProjectStart);
     connect(ProjectManager::instance(), &ProjectManager::stopped,
-            WindowManager::mainWindow(), &MainWindow::sweep);
+            this, &ApplicationCore::onProjectStop);
+
     ProjectExposingManager::init(
                 WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
     ControlCreationManager::init(
@@ -159,7 +164,22 @@ QString ApplicationCore::userResourcePath()
     return tr(":");
 }
 
-void ApplicationCore::onSessionStop()
+void ApplicationCore::onUserSessionStart()
+{
+    DocumentManager::load();
+}
+
+void ApplicationCore::onUserSessionStop()
 {
     ProjectManager::stop();
+}
+
+void ApplicationCore::onProjectStart()
+{
+    // WindowManager::mainWindow()->discharge();
+}
+
+void ApplicationCore::onProjectStop()
+{
+    WindowManager::mainWindow()->discharge();
 }

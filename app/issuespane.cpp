@@ -119,7 +119,7 @@ IssuesPane::IssuesPane(QWidget* parent) : QListWidget(parent)
     });
 }
 
-void IssuesPane::sweep()
+void IssuesPane::discharge()
 {
     clear();
     qDeleteAll(m_erroneousControls);

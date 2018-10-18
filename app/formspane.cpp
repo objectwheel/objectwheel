@@ -203,7 +203,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     });
 }
 
-void FormsPane::sweep()
+void FormsPane::discharge()
 {
     isProjectStarted = false;
     blockSignals(true);

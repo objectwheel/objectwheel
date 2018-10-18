@@ -45,7 +45,7 @@ public:
     QComboBox* combo(Combo) const;
 
 public slots:
-    void sweep();
+    void discharge();
 
 private slots:
     void onPinButtonClick();

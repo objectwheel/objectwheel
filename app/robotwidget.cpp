@@ -126,7 +126,7 @@ void RobotWidget::reload()
     _recaptchaView->load(QUrl(PATH_RECAPTCHA));
 }
 
-void RobotWidget::sweep()
+void RobotWidget::discharge()
 {
     _recaptchaView->page()->runJavaScript("grecaptcha.reset();");
     _response.clear();

@@ -22,7 +22,7 @@ public:
     explicit HelpWidget(QWidget *parent = nullptr);
 
 public slots:
-    void sweep();
+    void discharge();
 
 protected:
     QSize sizeHint() const override;

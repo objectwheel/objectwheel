@@ -23,7 +23,7 @@ public:
     explicit IssuesPane(QWidget* parent = nullptr);
 
 public slots:
-    void sweep();
+    void discharge();
     void refresh(Control* control);
 
 private slots:

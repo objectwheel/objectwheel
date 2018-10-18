@@ -20,7 +20,7 @@ protected:
     QSize sizeHint() const override;
 
 public slots:
-    void sweep();
+    void discharge();
 
 signals:
     void themeChanged();

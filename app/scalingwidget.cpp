@@ -21,7 +21,7 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
     connect(m_noScalingButton, SIGNAL(clicked(bool)), SLOT(saveTheme()));
 }
 
-void ScalingWidget::sweep()
+void ScalingWidget::discharge()
 {
     auto scaling = SaveUtils::projectScaling(ProjectManager::dir());
 

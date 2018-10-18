@@ -185,6 +185,8 @@ bool UserManager::start(const QString& user, const QString& password)
 
     s_settings = new QSettings(dir(s_user) + "/settings.ini", QSettings::IniFormat, instance());
 
+    emit instance()->started();
+
     return true;
 }
 

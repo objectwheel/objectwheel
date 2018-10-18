@@ -100,7 +100,6 @@ BehaviorSettingsPage::BehaviorSettingsPage(const BehaviorSettingsPageParameters 
     // default pool for all other languages
 //    d->m_defaultCodeStylePool = new CodeStylePool(0, this); // Any language
 //    d->m_defaultCodeStylePool->addCodeStyle(d->m_codeStyle);
-    d->init();
 
     setId(p.id);
     setDisplayName(p.displayName);
@@ -147,6 +146,7 @@ void BehaviorSettingsPage::apply()
 
     settingsFromUI(&newTypingSettings, &newStorageSettings, &newBehaviorSettings);
 
+    Q_ASSERT(UserManager::settings());
     QSettings *s = UserManager::settings();
 
     if (d->m_codeStyle->tabSettings() != d->m_pageCodeStyle->tabSettings()) {
@@ -251,6 +251,11 @@ const StorageSettings &BehaviorSettingsPage::storageSettings() const
 const BehaviorSettings &BehaviorSettingsPage::behaviorSettings() const
 {
     return d->m_behaviorSettings;
+}
+
+void BehaviorSettingsPage::load()
+{
+    d->init();
 }
 
 //const ExtraEncodingSettings &BehaviorSettingsPage::extraEncodingSettings() const

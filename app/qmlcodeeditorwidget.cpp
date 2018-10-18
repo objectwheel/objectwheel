@@ -175,10 +175,10 @@ int QmlCodeEditorWidget::count() const
     return m_globalDocuments.size() + m_internalDocuments.size() + m_externalDocuments.size();
 }
 
-void QmlCodeEditorWidget::sweep()
+void QmlCodeEditorWidget::discharge()
 {
-    m_codeEditor->sweep();
-    m_fileExplorer->sweep();
+    m_codeEditor->discharge();
+    m_fileExplorer->discharge();
 
     m_splitter->setStretchFactor(0, 30);
     m_splitter->setStretchFactor(1, 9);

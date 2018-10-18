@@ -28,7 +28,7 @@ public:
     BottomBar* bottomBar() const;
 
 public slots:
-    void sweep();
+    void discharge();
     void setCurrentPage(const Pages& page);
 
 private slots:

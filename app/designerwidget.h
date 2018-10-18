@@ -22,7 +22,7 @@ public:
     DesignerScene* designerScene() const;
 
 public slots:
-    void sweep();
+    void discharge();
     void refresh() { onRefreshButtonClick(); }
     void onControlDoubleClick(Control*);
     void onInspectorItemDoubleClick(Control*);

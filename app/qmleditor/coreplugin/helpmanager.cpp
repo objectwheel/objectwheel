@@ -474,34 +474,35 @@ HelpManagerPrivate::~HelpManagerPrivate()
 
 const QStringList HelpManagerPrivate::documentationFromInstaller()
 {
-    QSettings *installSettings = UserManager::settings();
-    const QStringList documentationPaths = installSettings->value(QLatin1String("Help/InstalledDocumentation"))
-            .toStringList();
+    // WARNING
+//    QSettings *installSettings = UserManager::settings();
+//    const QStringList documentationPaths = installSettings->value(QLatin1String("Help/InstalledDocumentation"))
+//            .toStringList();
     QStringList documentationFiles;
-    for (const QString &path : documentationPaths) {
-        QFileInfo pathInfo(path);
-        if (pathInfo.isFile() && pathInfo.isReadable()) {
-            documentationFiles << pathInfo.absoluteFilePath();
-        } else if (pathInfo.isDir()) {
-            const QFileInfoList files(QDir(path).entryInfoList(QStringList(QLatin1String("*.qch")),
-                                                               QDir::Files | QDir::Readable));
-            for (const QFileInfo &fileInfo : files)
-                documentationFiles << fileInfo.absoluteFilePath();
-        }
-    }
+//    for (const QString &path : documentationPaths) {
+//        QFileInfo pathInfo(path);
+//        if (pathInfo.isFile() && pathInfo.isReadable()) {
+//            documentationFiles << pathInfo.absoluteFilePath();
+//        } else if (pathInfo.isDir()) {
+//            const QFileInfoList files(QDir(path).entryInfoList(QStringList(QLatin1String("*.qch")),
+//                                                               QDir::Files | QDir::Readable));
+//            for (const QFileInfo &fileInfo : files)
+//                documentationFiles << fileInfo.absoluteFilePath();
+//        }
+//    }
     return documentationFiles;
 }
 
 void HelpManagerPrivate::readSettings()
-{
-    m_userRegisteredFiles = UserManager::settings()->value(QLatin1String(kUserDocumentationKey))
-            .toStringList().toSet();
+{// WARNING
+//    m_userRegisteredFiles = UserManager::settings()->value(QLatin1String(kUserDocumentationKey))
+//            .toStringList().toSet();
 }
 
 void HelpManagerPrivate::writeSettings()
-{
-    const QStringList list = m_userRegisteredFiles.toList();
-    UserManager::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
+{// WARNING
+//    const QStringList list = m_userRegisteredFiles.toList();
+//    UserManager::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
 }
 
 }   // Core

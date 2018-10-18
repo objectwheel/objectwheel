@@ -44,10 +44,6 @@ CompletionSettingsPage::CompletionSettingsPage(QObject *parent)
 {
     setId("P.Completion");
     setDisplayName(tr("Completion"));
-
-    QSettings *s = UserManager::settings();
-    m_completionSettings.fromSettings(s);
-//    m_commentsSettings.fromSettings(s);
 }
 
 CompletionSettingsPage::~CompletionSettingsPage()
@@ -130,6 +126,7 @@ void CompletionSettingsPage::apply()
     settingsFromUi(completionSettings/*, commentsSettings*/);
 
     if (m_completionSettings != completionSettings) {
+        Q_ASSERT(UserManager::settings());
         m_completionSettings = completionSettings;
         m_completionSettings.toSettings(UserManager::settings());
         emit completionSettingsChanged(completionSettings);
@@ -211,6 +208,13 @@ void CompletionSettingsPage::finish()
 const CompletionSettings &CompletionSettingsPage::completionSettings()
 {
     return m_completionSettings;
+}
+
+void CompletionSettingsPage::load()
+{
+    QSettings *s = UserManager::settings();
+    m_completionSettings.fromSettings(s);
+//    m_commentsSettings.fromSettings(s);
 }
 
 //const CommentsSettings &CompletionSettingsPage::commentsSettings()

@@ -20,7 +20,7 @@ public:
     };
 
 public:
-    static void sweep();
+    static void discharge();
     static void newTool();
     static void resetTools();
     static void exposeTools();

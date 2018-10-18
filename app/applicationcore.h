@@ -32,7 +32,10 @@ public:
     static void setApplicationPalette();
 
 private slots:
-    void onSessionStop();
+    void onUserSessionStart();
+    void onUserSessionStop();
+    void onProjectStart();
+    void onProjectStop();
 
 private:
     explicit ApplicationCore(QObject* parent = nullptr);

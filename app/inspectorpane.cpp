@@ -405,7 +405,7 @@ void InspectorPane::paintEvent(QPaintEvent* e)
     QTreeWidget::paintEvent(e);
 }
 
-void InspectorPane::sweep()
+void InspectorPane::discharge()
 {
     isProjectStarted = false;
     m_formStates.clear();

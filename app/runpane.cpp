@@ -123,7 +123,7 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     });
 }
 
-void RunPane::sweep()
+void RunPane::discharge()
 {
     RunManager::kill();
     m_runButton->setEnabled(true);

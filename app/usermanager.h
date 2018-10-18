@@ -33,6 +33,7 @@ public:
     static bool start(const QString& user, const QString& password);
 
 signals:
+    void started();
     void aboutToStop();
 
 private:

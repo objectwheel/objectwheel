@@ -1055,7 +1055,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
             this, &PropertiesPane::onIdChange);
 }
 
-void PropertiesPane::sweep()
+void PropertiesPane::discharge()
 {
     g_verticalScrollBarPosition = 99999;
     g_horizontalScrollBarPosition = 99999;

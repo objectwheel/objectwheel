@@ -98,6 +98,7 @@ public:
     static Core::Id languageId(const QString &mimeType);
     static int increaseFontZoom(int step);
     static void resetFontZoom();
+    static void load();
 
 signals:
     void fontSettingsChanged(const TextEditor::FontSettings &);

@@ -27,7 +27,7 @@ public:
     explicit InspectorPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 
 public slots:
-    void sweep();
+    void discharge();
     void onControlParentChange(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);
     void onControlPreviewChange(Control* control, bool codeChanged);

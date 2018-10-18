@@ -17,7 +17,7 @@ public:
     QAbstractButton* issuesButton() const;
 
 public slots:
-    void sweep();
+    void discharge();
     void flash(QAbstractButton*);
 
 private slots:

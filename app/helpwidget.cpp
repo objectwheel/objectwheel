@@ -157,7 +157,7 @@ void HelpWidget::onHomeButtonClick()
     m_helpViewer->home();
 }
 
-void HelpWidget::sweep()
+void HelpWidget::discharge()
 {
     m_helpViewer->stop();
     m_helpViewer->page()->history()->clear();

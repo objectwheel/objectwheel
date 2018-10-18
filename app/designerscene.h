@@ -30,7 +30,7 @@ public:
     QVector<QLineF> guideLines() const;
 
 public slots:
-    void sweep();
+    void discharge();
     void centralize();
 
 private:

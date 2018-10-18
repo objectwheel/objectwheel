@@ -342,19 +342,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             m_formsPane, &FormsPane::refresh);
 
-    sweep();
+    discharge();
 }
 
-void MainWindow::sweep()
+void MainWindow::discharge()
 {
-    m_runPane->sweep();
-    m_centralWidget->sweep();
-    m_formsPane->sweep();
-    m_toolboxPane->sweep();
-    m_inspectorPane->sweep();
-    m_propertiesPane->sweep();
-    m_globalResourcesPane->sweep();
-    m_pageSwitcherPane->sweep();
+    m_runPane->discharge();
+    m_centralWidget->discharge();
+    m_formsPane->discharge();
+    m_toolboxPane->discharge();
+    m_inspectorPane->discharge();
+    m_propertiesPane->discharge();
+    m_globalResourcesPane->discharge();
+    m_pageSwitcherPane->discharge();
 
     showLeftPanes(true);
     showRightPanes(true);

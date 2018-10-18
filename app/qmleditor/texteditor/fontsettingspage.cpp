@@ -116,6 +116,7 @@ public:
                             const QString &displayName,
                             const QString &category);
     ~FontSettingsPagePrivate();
+    void load();
 
 public:
     const Core::Id m_id;
@@ -180,6 +181,15 @@ FontSettingsPagePrivate::FontSettingsPagePrivate(const FormatDescriptions &fd,
     m_schemeListModel(new SchemeListModel),
     m_refreshingSchemeList(false)
 {
+}
+
+FontSettingsPagePrivate::~FontSettingsPagePrivate()
+{
+    delete m_schemeListModel;
+}
+
+void FontSettingsPagePrivate::load()
+{
     QSettings *settings = UserManager::settings();
     if (settings)
         m_value.fromSettings(m_settingsGroup, m_descriptions, settings);
@@ -189,12 +199,6 @@ FontSettingsPagePrivate::FontSettingsPagePrivate(const FormatDescriptions &fd,
 
     m_lastValue = m_value;
 }
-
-FontSettingsPagePrivate::~FontSettingsPagePrivate()
-{
-    delete m_schemeListModel;
-}
-
 
 // ------- FormatDescription
 FormatDescription::FormatDescription(TextStyle id,
@@ -648,6 +652,7 @@ void FontSettingsPage::apply()
 
 void FontSettingsPage::saveSettings()
 {
+    Q_ASSERT(UserManager::settings());
     if (d_ptr->m_value != d_ptr->m_lastValue) {
         d_ptr->m_lastValue = d_ptr->m_value;
         d_ptr->m_value.toSettings(d_ptr->m_settingsGroup, UserManager::settings());
@@ -670,4 +675,9 @@ void FontSettingsPage::finish()
 const FontSettings &FontSettingsPage::fontSettings() const
 {
     return d_ptr->m_value;
+}
+
+void FontSettingsPage::load()
+{
+    d_ptr->load();
 }

@@ -164,7 +164,7 @@ public:
     bool isValid() const;
 
 public slots:
-    void sweep();
+    void discharge();
     void indent();
     void unindent();
     void updateUses();

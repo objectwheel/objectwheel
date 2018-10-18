@@ -214,19 +214,19 @@ ConsolePane* CentralWidget::consolePane() const
     return m_consolePane;
 }
 
-void CentralWidget::sweep()
+void CentralWidget::discharge()
 {
     setCurrentPage(Page_Designer);
     m_consolePane->hide();
     m_issuesPane->hide();
-    m_bottomBar->sweep();
-    m_consolePane->sweep();
-    m_issuesPane->sweep();
-    m_qmlCodeEditorWidget->sweep();
-    m_designerWidget->sweep();
-    m_projectOptionsWidget->sweep();
-    m_buildsWidget->sweep();
-    m_helpWidget->sweep();
+    m_bottomBar->discharge();
+    m_consolePane->discharge();
+    m_issuesPane->discharge();
+    m_qmlCodeEditorWidget->discharge();
+    m_designerWidget->discharge();
+    m_projectOptionsWidget->discharge();
+    m_buildsWidget->discharge();
+    m_helpWidget->discharge();
 }
 
 void CentralWidget::setCurrentPage(const Pages& page)

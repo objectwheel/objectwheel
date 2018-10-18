@@ -15,7 +15,7 @@ public:
     explicit RunPane(QWidget *parent = nullptr);
 
 public slots:
-    void sweep();
+    void discharge();
     void busy(int progress, const QString& message);
     void done(const QString& message);
     void error(const QString& message);

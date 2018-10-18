@@ -530,3 +530,10 @@ void TextEditorSettings::resetFontZoom()
     fs.setFontZoom(100);
     d->m_fontSettingsPage->saveSettings();
 }
+
+void TextEditorSettings::load()
+{
+    d->m_behaviorSettingsPage->load();
+    d->m_completionSettingsPage->load();
+    d->m_fontSettingsPage->load();
+}

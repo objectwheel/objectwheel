@@ -52,6 +52,9 @@ public:
     const CompletionSettings & completionSettings();
 //    const CommentsSettings & commentsSettings();
 
+public slots:
+    void load();
+
 signals:
     void completionSettingsChanged(const CompletionSettings &);
 //    void commentsSettingsChanged(const CommentsSettings &);

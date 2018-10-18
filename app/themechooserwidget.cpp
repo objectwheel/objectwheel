@@ -483,13 +483,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         }
     });
 
-    connect(m_resetButton, SIGNAL(clicked(bool)), SLOT(sweep()));
+    connect(m_resetButton, SIGNAL(clicked(bool)), SLOT(discharge()));
     connect(m_saveButton, SIGNAL(clicked(bool)), SLOT(save()));
     connect(m_seeRunningButton, SIGNAL(clicked(bool)), SLOT(run()));
     resize(1299, 1299);
 }
 
-void ThemeChooserWidget::sweep()
+void ThemeChooserWidget::discharge()
 {
     m_stylesCombo->setCurrentIndex(0);
     m_themesCombo->setCurrentIndex(0);

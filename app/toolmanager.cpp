@@ -143,7 +143,7 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
     return true;
 }
 
-void ToolManager::sweep()
+void ToolManager::discharge()
 {
     if (!currentProjectHasToolsInstalled())
         return;

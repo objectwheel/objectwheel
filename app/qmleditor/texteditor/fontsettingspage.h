@@ -132,6 +132,9 @@ public:
 
     const FontSettings &fontSettings() const;
 
+public slots:
+    void load();
+
 signals:
     void changed(const TextEditor::FontSettings&);
 

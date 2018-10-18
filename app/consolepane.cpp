@@ -101,7 +101,7 @@ void ConsolePane::fade()
     cursor.mergeCharFormat(faded);
 }
 
-void ConsolePane::sweep()
+void ConsolePane::discharge()
 {
     clear();
 }

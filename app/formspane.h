@@ -14,7 +14,7 @@ public:
     explicit FormsPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 
 public slots:
-    void sweep();
+    void discharge();
     void refresh();
 
 private slots:

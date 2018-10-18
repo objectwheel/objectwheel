@@ -29,7 +29,7 @@ public:
     QString rootPath() const;
 
 public slots:
-    void sweep();
+    void discharge();
 
 private slots:
     void onModeChange();

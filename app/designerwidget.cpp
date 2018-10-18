@@ -337,10 +337,10 @@ void DesignerWidget::onClearButtonClick()
     }
 }
 
-void DesignerWidget::sweep()
+void DesignerWidget::discharge()
 {
-    m_designerScene->sweep();
-    m_designerView->sweep();
+    m_designerScene->discharge();
+    m_designerView->discharge();
     m_signalChooserDialog->sweet();
     m_outlineButton->setChecked(m_designerScene->showOutlines());
     m_hideDockWidgetTitleBarsButton->setChecked(false);

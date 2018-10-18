@@ -129,7 +129,7 @@ class ThemeChooserPrivate
 public:
     ThemeChooserPrivate(QWidget *widget);
     ~ThemeChooserPrivate();
-
+    void load();
 public:
     ThemeListModel *m_themeListModel;
     QComboBox *m_themeComboBox;
@@ -150,16 +150,21 @@ ThemeChooserPrivate::ThemeChooserPrivate(QWidget *widget)
     layout->addSpacerItem(horizontalSpacer);
     m_themeComboBox->setModel(m_themeListModel);
     const QList<ThemeEntry> themes = ThemeEntry::availableThemes();
-    const Id themeSetting = ThemeEntry::themeSetting();
-    const int selected = Utils::indexOf(themes, Utils::equal(&ThemeEntry::id, themeSetting));
     m_themeListModel->setThemes(themes);
-    if (selected >= 0)
-        m_themeComboBox->setCurrentIndex(selected);
 }
 
 ThemeChooserPrivate::~ThemeChooserPrivate()
 {
     delete m_themeListModel;
+}
+
+void ThemeChooserPrivate::load()
+{
+    const QList<ThemeEntry> themes = ThemeEntry::availableThemes();
+    const Id themeSetting = ThemeEntry::themeSetting();
+    const int selected = Utils::indexOf(themes, Utils::equal(&ThemeEntry::id, themeSetting));
+    if (selected >= 0)
+        m_themeComboBox->setCurrentIndex(selected);
 }
 
 ThemeChooser::ThemeChooser(QWidget *parent) :
@@ -179,6 +184,7 @@ void ThemeChooser::apply()
     if (index == -1)
         return;
     const QString themeId = d->m_themeListModel->themeAt(index).id().toString();
+    Q_ASSERT(UserManager::settings());
     QSettings *settings = UserManager::settings();
     const QString currentThemeId = ThemeEntry::themeSetting().toString();
     if (currentThemeId != themeId) {
@@ -189,6 +195,11 @@ void ThemeChooser::apply()
         // save filename of selected theme in global config
         settings->setValue(QLatin1String(Constants::SETTINGS_THEME), themeId);
     }
+}
+
+void ThemeChooser::load()
+{
+    d->load();
 }
 
 static void addThemesFromPath(const QString &path, QList<ThemeEntry> *themes)

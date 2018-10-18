@@ -253,7 +253,7 @@ void QmlCodeEditorToolBar::setShowed(bool show)
     onShowButtonClick();
 }
 
-void QmlCodeEditorToolBar::sweep()
+void QmlCodeEditorToolBar::discharge()
 {
     g_globalAction->setText(tr("Global\t"));
     g_internalAction->setText(tr("Internal\t"));

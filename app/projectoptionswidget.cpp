@@ -33,9 +33,9 @@ QSize ProjectOptionsWidget::sizeHint() const
     return QSize(680, 680);
 }
 
-void ProjectOptionsWidget::sweep()
+void ProjectOptionsWidget::discharge()
 {
-    m_themeChooserWidget->sweep();
-    m_themeChooserWidget_2->sweep();
-    m_scalingWidget->sweep();
+    m_themeChooserWidget->discharge();
+    m_themeChooserWidget_2->discharge();
+    m_scalingWidget->discharge();
 }

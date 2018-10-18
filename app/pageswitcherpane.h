@@ -17,7 +17,7 @@ public:
     bool isPageEnabled(const Pages& page) const;
 
 public slots:
-    void sweep();
+    void discharge();
     void setCurrentPage(const Pages& page);
     void setPageEnabled(const Pages& page);
     void setPageDisabled(const Pages& page);

@@ -27,7 +27,7 @@ public:
     GlobalResourcesPane* globalResourcesPane() const;
 
 public slots:
-    void sweep();
+    void discharge();
     void showLeftPanes(bool);
     void showRightPanes(bool);
     void setDockWidgetTitleBarsHidden(bool);

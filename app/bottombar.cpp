@@ -296,7 +296,7 @@ void BottomBar::setRightShowHideButtonToolTip(bool checked)
         m_showHideRightPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Show right panes")));
 }
 
-void BottomBar::sweep()
+void BottomBar::discharge()
 {
     m_consoleButton->setChecked(false);
     m_issuesButton->setChecked(false);

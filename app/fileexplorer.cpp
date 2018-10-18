@@ -271,7 +271,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     { m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls()); });
 }
 
-void FileExplorer::sweep()
+void FileExplorer::discharge()
 {
     // TODO
     m_searchEdit->clear();

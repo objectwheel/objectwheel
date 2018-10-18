@@ -63,7 +63,7 @@ public:
     void addSaveFilter(SaveFilter* sf) { m_saveFilters.append(sf); }
 
 public slots:
-    void sweep();
+    void discharge();
     void save();
     void close();
     void setFileExplorerVisible(bool visible);

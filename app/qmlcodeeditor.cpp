@@ -722,9 +722,9 @@ bool QmlCodeEditor::isValid() const
     return codeDocument() != m_initialEmptyDocument;
 }
 
-void QmlCodeEditor::sweep()
+void QmlCodeEditor::discharge()
 {
-    m_toolBar->sweep();
+    m_toolBar->discharge();
     setNoDocsVisible(true);
     // FIXME
 }

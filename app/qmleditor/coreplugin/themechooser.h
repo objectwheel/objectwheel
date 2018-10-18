@@ -61,11 +61,14 @@ class ThemeChooser : public QWidget
 {
     Q_OBJECT
 
-public:
     ThemeChooser(QWidget *parent = 0);
+public:
     ~ThemeChooser();
 
     void apply();
+
+public slots:
+    void load();
 
 private:
     ThemeChooserPrivate *d;
