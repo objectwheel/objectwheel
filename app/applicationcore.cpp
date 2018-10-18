@@ -125,12 +125,6 @@ ApplicationCore* ApplicationCore::instance()
     return s_instance;
 }
 
-QSettings* ApplicationCore::settings(QSettings::Scope scope)
-{
-    static QSettings settings, globalSettings;
-    return scope == QSettings::UserScope ? &settings : &globalSettings;
-}
-
 void ApplicationCore::setApplicationPalette()
 {
     QPalette palette(QApplication::palette());

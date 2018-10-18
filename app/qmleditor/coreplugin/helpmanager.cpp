@@ -24,6 +24,7 @@
 ****************************************************************************/
 
 #include "helpmanager.h"
+#include <usermanager.h>
 #include <applicationcore.h>
 
 //#include <coreplugin/icore.h>
@@ -473,7 +474,7 @@ HelpManagerPrivate::~HelpManagerPrivate()
 
 const QStringList HelpManagerPrivate::documentationFromInstaller()
 {
-    QSettings *installSettings = ApplicationCore::settings();
+    QSettings *installSettings = UserManager::settings();
     const QStringList documentationPaths = installSettings->value(QLatin1String("Help/InstalledDocumentation"))
             .toStringList();
     QStringList documentationFiles;
@@ -493,14 +494,14 @@ const QStringList HelpManagerPrivate::documentationFromInstaller()
 
 void HelpManagerPrivate::readSettings()
 {
-    m_userRegisteredFiles = ApplicationCore::settings()->value(QLatin1String(kUserDocumentationKey))
+    m_userRegisteredFiles = UserManager::settings()->value(QLatin1String(kUserDocumentationKey))
             .toStringList().toSet();
 }
 
 void HelpManagerPrivate::writeSettings()
 {
     const QStringList list = m_userRegisteredFiles.toList();
-    ApplicationCore::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
+    UserManager::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
 }
 
 }   // Core

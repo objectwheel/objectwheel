@@ -10,6 +10,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRandomGenerator>
+#include <QSettings>
 
 #define AUTOLOGIN_FILENAME  "alg.lock"
 #define AUTOLOGIN_PROTECTOR "QWxsYWggaXMgZ3JlYXRlc3Qu"
@@ -45,6 +46,7 @@ UserManager* UserManager::s_instance = nullptr;
 QString UserManager::s_user;
 QString UserManager::s_token;
 QByteArray UserManager::s_key;
+QSettings* UserManager::s_settings = nullptr;
 
 UserManager::UserManager(QObject* parent) : QObject(parent)
 {
@@ -104,6 +106,11 @@ const QString& UserManager::token()
 const QByteArray& UserManager::key()
 {
     return s_key;
+}
+
+QSettings* UserManager::settings()
+{
+    return s_settings;
 }
 
 void UserManager::clearAutoLogin()
@@ -175,6 +182,9 @@ bool UserManager::start(const QString& user, const QString& password)
 			return false;
 		}
 	}
+
+    s_settings = new QSettings(dir(s_user) + "/settings.ini", QSettings::IniFormat, instance());
+
     return true;
 }
 
@@ -185,9 +195,15 @@ void UserManager::stop()
 
     emit instance()->aboutToStop();
 
-    if (exists(s_user) && !DirLocker::locked(dir()))
+    if (s_settings) {
+        delete s_settings;
+        s_settings = nullptr;
+    }
+
+    if (exists(s_user) && !DirLocker::locked(dir())) {
         if (!DirLocker::lock(dir(), s_key))
             qFatal("ProjectManager : Error occurred");
+    }
 
     s_user = "";
     s_key = "";

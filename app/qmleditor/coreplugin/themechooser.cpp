@@ -28,6 +28,7 @@
 //#include "manhattanstyle.h"
 #include "themechooser.h"
 #include <windowmanager.h>
+#include <usermanager.h>
 #include <applicationcore.h>
 #include <mainwindow.h>
 
@@ -178,7 +179,7 @@ void ThemeChooser::apply()
     if (index == -1)
         return;
     const QString themeId = d->m_themeListModel->themeAt(index).id().toString();
-    QSettings *settings = ApplicationCore::settings();
+    QSettings *settings = UserManager::settings();
     const QString currentThemeId = ThemeEntry::themeSetting().toString();
     if (currentThemeId != themeId) {
         QMessageBox::information(WindowManager::mainWindow(),
@@ -226,7 +227,7 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 Id ThemeEntry::themeSetting()
 {
     const Id setting =
-            Id::fromSetting(ApplicationCore::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
+            Id::fromSetting(UserManager::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
                                                      QLatin1String(Constants::DEFAULT_THEME)));
 
     const QList<ThemeEntry> themes = availableThemes();

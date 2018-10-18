@@ -26,6 +26,7 @@
 #include "fontsettingspage.h"
 
 #include <windowmanager.h>
+#include <usermanager.h>
 #include <applicationcore.h>
 #include <mainwindow.h>
 #include "fontsettings.h"
@@ -179,7 +180,7 @@ FontSettingsPagePrivate::FontSettingsPagePrivate(const FormatDescriptions &fd,
     m_schemeListModel(new SchemeListModel),
     m_refreshingSchemeList(false)
 {
-    QSettings *settings = ApplicationCore::settings();
+    QSettings *settings = UserManager::settings();
     if (settings)
         m_value.fromSettings(m_settingsGroup, m_descriptions, settings);
 
@@ -649,7 +650,7 @@ void FontSettingsPage::saveSettings()
 {
     if (d_ptr->m_value != d_ptr->m_lastValue) {
         d_ptr->m_lastValue = d_ptr->m_value;
-        d_ptr->m_value.toSettings(d_ptr->m_settingsGroup, ApplicationCore::settings());
+        d_ptr->m_value.toSettings(d_ptr->m_settingsGroup, UserManager::settings());
 
         QTimer::singleShot(0, this, &FontSettingsPage::delayedChange);
     }

@@ -2,7 +2,6 @@
 #define APPLICATIONCORE_H
 
 #include <QObject>
-#include <QSettings>
 
 class Authenticator;
 class UserManager;
@@ -30,7 +29,6 @@ public:
     static ApplicationCore* instance();
     static QString resourcePath();
     static QString userResourcePath();
-    static QSettings* settings(QSettings::Scope scope = QSettings::UserScope);
     static void setApplicationPalette();
 
 private slots:
