@@ -13,6 +13,7 @@ class SettingsPage : public QWidget
 public:
     explicit SettingsPage(QWidget* parent = nullptr);
 
+    virtual void apply()
     virtual QString title() const = 0;
     virtual QIcon icon() const = 0;
     virtual bool containsWord(const QString& word) const = 0;

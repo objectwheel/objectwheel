@@ -16,6 +16,7 @@ include($$PWD/miniz/miniz.pri)
 include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)
 include($$PWD/qmleditor/qmleditor.pri)
+include($$PWD/settings/settings.pri)
 
 ### Sources
 INCLUDEPATH += $$PWD
@@ -120,9 +121,7 @@ HEADERS += $$PWD/mainwindow.h \
            $$PWD/smartspacer.h \
            $$PWD/pushbutton.h \
            $$PWD/bottombar.h \
-           $$PWD/pathfinder.h \
-           $$PWD/generalsettingspage.h \
-           $$PWD/settingspage.h
+           $$PWD/pathfinder.h
 
 SOURCES += $$PWD/main.cpp\
            $$PWD/mainwindow.cpp \
@@ -221,9 +220,7 @@ SOURCES += $$PWD/main.cpp\
            $$PWD/smartspacer.cpp \
            $$PWD/pushbutton.cpp \
            $$PWD/bottombar.cpp \
-           $$PWD/pathfinder.cpp \
-           $$PWD/generalsettingspage.cpp \
-           $$PWD/settingspage.cpp
+           $$PWD/pathfinder.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui \
          $$PWD/toolboxsettingswindow.ui \

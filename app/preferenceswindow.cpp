@@ -68,11 +68,6 @@ void PreferencesWindow::search(const QString& /*text*/)
     // TODO
 }
 
-QSize PreferencesWindow::sizeHint() const
-{
-    return {850, 480};
-}
-
 void PreferencesWindow::addPage(SettingsPage* page)
 {
     if (page->parentWidget() != this)
@@ -98,4 +93,9 @@ void PreferencesWindow::setCurrentPage(SettingsPage* page, SettingsPage* previou
             page->show();
         }
     }
+}
+
+QSize PreferencesWindow::sizeHint() const
+{
+    return {850, 480};
 }
