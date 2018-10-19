@@ -22,9 +22,9 @@ public:
         QmlCodeDocument* document;
         QmlCodeEditorToolBar::Scope scope;
     };
-    struct GlobalDocument : public Document { QString relativePath; };
-    struct InternalDocument : public GlobalDocument { Control* control; };
-    struct ExternalDocument : public Document { QString fullPath; };
+    struct GlobalDocument : Document { QString relativePath; };
+    struct InternalDocument : GlobalDocument { Control* control; };
+    struct ExternalDocument : Document { QString fullPath; };
 
     class SaveFilter {
     public:

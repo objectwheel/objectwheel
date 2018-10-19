@@ -288,9 +288,5 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
     QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).topLeft());
     gradient.setColorAt(0, "#384047");
     gradient.setColorAt(1, "#424c54");
-
     painter.fillRect(rect(), gradient);
-    painter.setPen("#2f353c");
-    painter.drawLine(QRectF(rect()).topRight() + QPointF(-0.5, 0.5),
-                     QRectF(rect()).bottomRight() + QPointF(-0.5, -0.5));
 }
