@@ -1,22 +1,12 @@
 #ifndef INTERFACESETTINGS_H
 #define INTERFACESETTINGS_H
 
-#include <QWidget>
+#include <settings.h>
 
-namespace Ui {
-class InterfaceSettings;
-}
-
-class InterfaceSettings : public QWidget
+struct InterfaceSettings : public Settings
 {
-    Q_OBJECT
+    InterfaceSettings();
 
-public:
-    explicit InterfaceSettings(QWidget *parent = 0);
-    ~InterfaceSettings();
-
-private:
-    Ui::InterfaceSettings *ui;
 };
 
 #endif // INTERFACESETTINGS_H

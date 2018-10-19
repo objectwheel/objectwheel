@@ -1,5 +1,6 @@
 #include <settingspage.h>
 #include <utilityfunctions.h>
+#include <settingswidget.h>
 
 #include <QLabel>
 #include <QTabWidget>
@@ -24,9 +25,9 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
     QTimer::singleShot(100, this, [=] { m_titleLabel->setText(title()); });
 }
 
-void SettingsPage::addWidget(const QString& title, QWidget* widget)
+void SettingsPage::addWidget(SettingsWidget* widget)
 {
-    m_tabWidget->addTab(widget, title);
+    m_tabWidget->addTab(widget, widget->title());
 }
 
 QSize SettingsPage::sizeHint() const

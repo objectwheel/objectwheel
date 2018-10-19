@@ -1,8 +1,10 @@
 #include <generalsettingspage.h>
+#include <interfacesettingswidget.h>
 #include <QIcon>
 
 GeneralSettingsPage::GeneralSettingsPage(QWidget* parent) : SettingsPage(parent)
 {
+    addWidget(new InterfaceSettingsWidget(this));
 }
 
 QString GeneralSettingsPage::title() const

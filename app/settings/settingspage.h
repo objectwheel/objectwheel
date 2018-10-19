@@ -5,6 +5,7 @@
 
 class QLabel;
 class QTabWidget;
+class SettingsWidget;
 
 class SettingsPage : public QWidget
 {
@@ -13,12 +14,17 @@ class SettingsPage : public QWidget
 public:
     explicit SettingsPage(QWidget* parent = nullptr);
 
-    virtual void apply()
+//    virtual void apply() charge
+//    discharge
+//    load
+//    unload
+
+
     virtual QString title() const = 0;
     virtual QIcon icon() const = 0;
     virtual bool containsWord(const QString& word) const = 0;
 
-    void addWidget(const QString& title, QWidget* widget);
+    void addWidget(SettingsWidget* widget);
 
 protected:
     QSize sizeHint() const override;

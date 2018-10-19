@@ -25,7 +25,8 @@ HEADERS += \
     $$PWD/paintutils.h \
     $$PWD/appfontsettings.h \
     $$PWD/utilityfunctions.h \
-    $$PWD/offlinestorage.h
+    $$PWD/offlinestorage.h\
+    $$PWD/qtcolorbutton.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -38,7 +39,9 @@ SOURCES += \
     $$PWD/paintutils.cpp \
     $$PWD/appfontsettings.cpp \
     $$PWD/utilityfunctions.cpp \
-    $$PWD/offlinestorage.cpp
+    $$PWD/offlinestorage.cpp \
+    $$PWD/qtcolorbutton.cpp
+
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \

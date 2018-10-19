@@ -1,14 +1,6 @@
-#include "interfacesettings.h"
-#include "ui_interfacesettings.h"
+#include <interfacesettings.h>
 
-InterfaceSettings::InterfaceSettings(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::InterfaceSettings)
+InterfaceSettings::InterfaceSettings()
 {
-    ui->setupUi(this);
-}
 
-InterfaceSettings::~InterfaceSettings()
-{
-    delete ui;
 }
