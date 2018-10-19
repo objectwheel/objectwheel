@@ -1,6 +1,6 @@
 #include <settingswidget.h>
 
-SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
+SettingsWidget::SettingsWidget(QWidget *parent) : QAbstractScrollArea(parent)
+  , m_activated(false)
 {
-
 }

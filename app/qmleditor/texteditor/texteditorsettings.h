@@ -61,8 +61,8 @@ class TEXTEDITOR_EXPORT TextEditorSettings : public QObject
 {
     Q_OBJECT
 
-public:
     TextEditorSettings();
+public:
     ~TextEditorSettings();
 
     static TextEditorSettings *instance();
