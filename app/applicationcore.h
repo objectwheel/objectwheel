@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include <generalsettings.h>
+
 class Authenticator;
 class UserManager;
 class DocumentManager;
@@ -56,6 +58,8 @@ private:
     static DocumentManager* s_documentManager;
     static WindowManager* s_windowManager;
     static MenuManager* s_menuManager;
+
+    GeneralSettings m_generalSettings;
 };
 
 #endif // APPLICATIONCORE_H

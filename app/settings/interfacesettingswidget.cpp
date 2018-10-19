@@ -1,5 +1,6 @@
 #include <interfacesettingswidget.h>
 #include <interfacesettings.h>
+#include <generalsettings.h>
 #include <qtcolorbutton.h>
 
 #include <QLabel>
@@ -77,11 +78,23 @@ void InterfaceSettingsWidget::apply()
     if (!isActivated())
         return;
 
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->color = m_colorButton->color();
+    settings->theme = m_themeBox->currentText();
+    settings->language = m_languageBox->currentText();
+    settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
 }
 
-void InterfaceSettingsWidget::reject()
+void InterfaceSettingsWidget::clean()
 {
+    if (!isActivated())
+        return;
 
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    m_colorButton->setColor(settings->color);
+    m_themeBox->setCurrentText(tr(settings->theme.toUtf8()));
+    m_languageBox->setCurrentText(tr(settings->language.toUtf8()));
+    m_hdpiCheckBox->setChecked(settings->hdpiEnabled);
 }
 
 QString InterfaceSettingsWidget::title() const

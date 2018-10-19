@@ -4,7 +4,7 @@
 #include <settings.h>
 #include <QColor>
 
-class InterfaceSettings : public Settings
+struct InterfaceSettings : Settings
 {
     InterfaceSettings(const QString& group);
 

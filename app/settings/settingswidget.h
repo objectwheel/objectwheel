@@ -13,7 +13,7 @@ public:
     inline bool isActivated() const { return m_activated; }
 
     virtual QString title() const = 0;
-    virtual void reject() = 0;
+    virtual void clean() = 0;
     virtual void apply() = 0;
 
 public:

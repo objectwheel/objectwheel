@@ -3,11 +3,9 @@
 
 #include <QString>
 
-class Settings
+struct Settings
 {
-public:
     Settings(const QString& group);
-
     virtual ~Settings() {}
     virtual void read() = 0;
     virtual void write() = 0;
