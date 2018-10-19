@@ -27,7 +27,8 @@ protected:
      QSize sizeHint() const override;
 
 private:
-   void addPage(SettingsPage* page);
+     void addPage(SettingsPage* page);
+     void setCurrentPage(SettingsPage* page, SettingsPage* previous);
 
 signals:
     void done();
@@ -37,7 +38,6 @@ private:
     QListWidget* m_listWidget;
     FocuslessLineEdit* m_searchLineEdit;
     QDialogButtonBox* m_dialogButtonBox;
-    QHash<QString, SettingsPage*> m_settingsPages;
 };
 
 #endif // PREFERENCESWINDOW_H

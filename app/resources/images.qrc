@@ -80,5 +80,6 @@
         <file>images/devices.png</file>
         <file>images/mycomputer.png</file>
         <file>images/preferences.png</file>
+        <file>images/settings/general.png</file>
     </qresource>
 </RCC>

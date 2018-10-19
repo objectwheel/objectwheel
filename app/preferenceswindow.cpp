@@ -1,11 +1,13 @@
 #include <preferenceswindow.h>
 #include <focuslesslineedit.h>
-#include <settingspage.h>
+#include <generalsettingspage.h>
 
 #include <QListWidget>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QDialogButtonBox>
+
+enum Roles { SettingsPageRole = Qt::UserRole + 1 };
 
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
   , m_layout(new QGridLayout(this))
@@ -19,7 +21,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_layout->setContentsMargins(10, 10, 10, 10);
     m_layout->addWidget(m_searchLineEdit, 0, 0, 1, 1);
     m_layout->addWidget(m_listWidget, 1, 0, 1, 1);
-    // m_layout->addWidget(m_scrollArea, 0, 1, 1, 2);
     m_layout->addWidget(m_dialogButtonBox, 2, 0, 1, 2);
 
     m_listWidget->setFixedWidth(170);
@@ -48,6 +49,18 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_dialogButtonBox->button(QDialogButtonBox::Ok)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Apply)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
+
+    connect(m_listWidget, &QListWidget::currentItemChanged,
+            this, [=] (QListWidgetItem* curr, QListWidgetItem* prev) {
+        SettingsPage* current = curr ? curr->data(SettingsPageRole).value<SettingsPage*>() : nullptr;
+        SettingsPage* previous = prev ? prev->data(SettingsPageRole).value<SettingsPage*>() : nullptr;
+
+        Q_ASSERT(current);
+
+        setCurrentPage(current, previous);
+    });
+
+    addPage(new GeneralSettingsPage(this));
 }
 
 void PreferencesWindow::search(const QString& /*text*/)
@@ -62,5 +75,27 @@ QSize PreferencesWindow::sizeHint() const
 
 void PreferencesWindow::addPage(SettingsPage* page)
 {
-    m_settingsPages.insert(page->title(), page);
+    if (page->parentWidget() != this)
+        page->setParent(this);
+
+    page->hide();
+
+    auto item = new QListWidgetItem(page->icon(), page->title());
+    item->setData(SettingsPageRole, QVariant::fromValue<SettingsPage*>(page));
+
+    m_listWidget->addItem(item);
+}
+
+void PreferencesWindow::setCurrentPage(SettingsPage* page, SettingsPage* previous)
+{
+    if (previous) {
+        m_layout->removeWidget(previous);
+        previous->hide();
+    }
+    for (int i = 0; i < m_listWidget->count(); ++i) {
+        if (m_listWidget->item(i)->data(SettingsPageRole).value<SettingsPage*>() == page) {
+            m_layout->addWidget(page, 0, 1, 2, 1);
+            page->show();
+        }
+    }
 }

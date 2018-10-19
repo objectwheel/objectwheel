@@ -13,8 +13,9 @@ class SettingsPage : public QWidget
 public:
     explicit SettingsPage(QWidget* parent = nullptr);
 
-    virtual bool containsWord(const QString& word) const = 0;
     virtual QString title() const = 0;
+    virtual QIcon icon() const = 0;
+    virtual bool containsWord(const QString& word) const = 0;
 
     void addWidget(const QString& title, QWidget* widget);
 
@@ -25,5 +26,7 @@ private:
     QTabWidget* m_tabWidget;
     QLabel* m_titleLabel;
 };
+
+Q_DECLARE_METATYPE(SettingsPage*)
 
 #endif // SETTINGSPAGE_H
