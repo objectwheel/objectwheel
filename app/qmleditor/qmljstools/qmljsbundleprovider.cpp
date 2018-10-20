@@ -26,7 +26,7 @@
 #include "qmljsbundleprovider.h"
 
 //#include <coreplugin/icore.h>
-#include <applicationcore.h>
+#include <bootsettings.h>
 #include <qmljs/qmljsbundle.h>
 #include <qmljs/qmljsconstants.h>
 //#include <qtsupport/qtkitinformation.h>
@@ -52,7 +52,7 @@ QmlBundle BasicBundleProvider::defaultBundle(const QString &bundleInfoName)
 {
     static bool wroteErrors = false;
     QmlBundle res;
-    QString defaultBundlePath = ApplicationCore::resourcePath()
+    QString defaultBundlePath = BootSettings::resourcePath()
             + QLatin1String("/qml-type-descriptions/")
             + bundleInfoName;
     if (!QFileInfo::exists(defaultBundlePath)) {

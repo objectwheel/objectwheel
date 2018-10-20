@@ -25,7 +25,7 @@
 
 #include "behaviorsettingspage.h"
 
-#include <applicationcore.h>
+#include <bootsettings.h>
 #include "behaviorsettings.h"
 #include "typingsettings.h"
 #include "storagesettings.h"
@@ -47,7 +47,6 @@
 #include <qmljstools/qmljstoolsconstants.h>
 
 #include <QPointer>
-#include <QSettings>
 #include <QTextCodec>
 
 using namespace TextEditor;
@@ -79,7 +78,7 @@ BehaviorSettingsPage::BehaviorSettingsPagePrivate::BehaviorSettingsPagePrivate
 
 void BehaviorSettingsPage::BehaviorSettingsPagePrivate::init()
 {
-    const QSettings *s = ApplicationCore::settings();
+    const QSettings *s = BootSettings::settings();
     m_codeStyle->fromSettings(m_parameters.settingsPrefix, s);
     m_typingSettings.fromSettings(m_parameters.settingsPrefix, s);
     m_storageSettings.fromSettings(m_parameters.settingsPrefix, s);
@@ -147,7 +146,7 @@ void BehaviorSettingsPage::apply()
 
     settingsFromUI(&newTypingSettings, &newStorageSettings, &newBehaviorSettings);
 
-    QSettings *s = ApplicationCore::settings();
+    QSettings *s = BootSettings::settings();
 
     if (d->m_codeStyle->tabSettings() != d->m_pageCodeStyle->tabSettings()) {
         d->m_codeStyle->setTabSettings(d->m_pageCodeStyle->tabSettings());

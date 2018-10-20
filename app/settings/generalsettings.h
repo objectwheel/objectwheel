@@ -5,12 +5,12 @@
 
 class InterfaceSettings;
 
-class GeneralSettings : public QObject
+class GeneralSettings final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(GeneralSettings)
 
-    friend class ApplicationCore; //  Make it constructable only from ApplicationCore
+    friend class BootSettings; //  Make it constructable only from BootSettings
 
 public:
     static GeneralSettings* instance();

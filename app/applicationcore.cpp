@@ -19,11 +19,9 @@
 #include <controlpropertymanager.h>
 #include <welcomewindow.h>
 #include <appfontsettings.h>
-#include <generalsettings.h>
 
 #include <QApplication>
 #include <QSplashScreen>
-#include <QSettings>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
@@ -33,8 +31,6 @@
 using namespace Core;
 
 ApplicationCore* ApplicationCore::s_instance = nullptr;
-QSettings* ApplicationCore::s_settings = nullptr;
-GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
@@ -70,10 +66,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     /* Set Font */
     AppFontSettings::apply();
 
-    s_settings = new QSettings(QApplication::applicationDirPath() + "/settings.ini", QSettings::IniFormat, this);
-    s_generalSettings = new GeneralSettings(this);
-    s_generalSettings->read();
-
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);
     s_controlPreviewingManager = new ControlPreviewingManager(this);
@@ -96,7 +88,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             this, &ApplicationCore::setApplicationPalette);
 
     s_documentManager = new DocumentManager(this);
-
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
@@ -138,11 +129,6 @@ ApplicationCore* ApplicationCore::instance()
     return s_instance;
 }
 
-QSettings* ApplicationCore::settings()
-{
-    return s_settings;
-}
-
 void ApplicationCore::setApplicationPalette()
 {
     QPalette palette(QApplication::palette());
@@ -165,16 +151,6 @@ void ApplicationCore::setApplicationPalette()
     palette.setColor(QPalette::Link, "#025dbf");
     palette.setColor(QPalette::LinkVisited, "#B44B46");
     QApplication::setPalette(palette);
-}
-
-QString ApplicationCore::resourcePath()
-{
-    return tr(":");
-}
-
-QString ApplicationCore::userResourcePath()
-{
-    return tr(":");
 }
 
 void ApplicationCore::onUserSessionStart()

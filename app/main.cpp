@@ -8,7 +8,7 @@
 int main(int argc, char* argv[])
 {
     // Apply boot Settings
-    BootSettings::apply();
+    BootSettings::init(argv[0]);
 
     // Initialize application
     QApplication app(argc, argv);

@@ -1,12 +1,11 @@
 #include <interfacesettings.h>
-#include <applicationcore.h>
+#include <bootsettings.h>
 
-#include <QSettings>
 #include <QTimer>
 
 namespace {
 
-const char* g_category = "InterfaceSettings";
+const char* g_category = "Interface";
 const char* g_leftBarColor = "LeftBarColor";
 const char* g_topBarColor = "TopBarColor";
 const char* g_theme = "Theme";
@@ -32,7 +31,7 @@ void InterfaceSettings::read()
 {
     reset();
 
-    QSettings* settings = ApplicationCore::settings();
+    QSettings* settings = BootSettings::settings();
     settings->beginGroup(group());
     theme = settings->value(joint(g_theme), theme).value<QString>();
     language = settings->value(joint(g_language), language).value<QString>();
@@ -44,7 +43,7 @@ void InterfaceSettings::read()
 
 void InterfaceSettings::write()
 {
-    QSettings* settings = ApplicationCore::settings();
+    QSettings* settings = BootSettings::settings();
     settings->beginGroup(group());
     settings->setValue(joint(g_theme), theme);
     settings->setValue(joint(g_language), language);

@@ -16,8 +16,6 @@ class RunManager;
 class SaveManager;
 class WindowManager;
 class MenuManager;
-class QSettings;
-class GeneralSettings;
 
 namespace Core { class HelpManager; }
 
@@ -29,9 +27,6 @@ class ApplicationCore final : public QObject
 public:
     static void init(QObject* parent);
     static ApplicationCore* instance();
-    static QSettings* settings();
-    static QString resourcePath();
-    static QString userResourcePath();
     static void setApplicationPalette();
 
 private slots:
@@ -45,8 +40,6 @@ private:
 
 private:
     static ApplicationCore* s_instance;
-    static QSettings* s_settings;
-    static GeneralSettings* s_generalSettings;
     static Authenticator* s_authenticator;
     static UserManager* s_userManager;
     static ControlPreviewingManager* s_controlPreviewingManager;

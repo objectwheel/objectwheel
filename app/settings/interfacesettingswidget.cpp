@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QVBoxLayout>
+#include <QMessageBox>
 
 InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_layout(new QVBoxLayout(this))
@@ -92,13 +93,23 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_themeBox->addItem(tr("Light"));
     m_languageBox->addItem(tr("English"));
 
-    connect(m_leftBarColorResetButton, &QPushButton::clicked,
-            this, [=] {
+    connect(m_leftBarColorResetButton, &QPushButton::clicked, this, [=] {
         m_leftBarColorButton->setColor(InterfaceSettings().leftBarColor);
     });
-    connect(m_topBarColorResetButton, &QPushButton::clicked,
-            this, [=] {
+    connect(m_topBarColorResetButton, &QPushButton::clicked, this, [=] {
         m_topBarColorButton->setColor(InterfaceSettings().topBarColor);
+    });
+    connect(m_hdpiCheckBox, &QCheckBox::toggled, this, [=] {
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the high DPI settings will take effect after application restart."));
+    });
+    connect(m_languageBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the language change will take effect after application restart."));
+    });
+    connect(m_themeBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the theme change will take effect after application restart."));
     });
 
     activate();
