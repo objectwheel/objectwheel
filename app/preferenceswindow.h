@@ -21,10 +21,14 @@ public:
     explicit PreferencesWindow(QWidget *parent = nullptr);
 
 private slots:
+    void apply();
+    void reset();
     void search(const QString& text);
 
 protected:
-     QSize sizeHint() const override;
+    void showEvent(QShowEvent*) override;
+    void closeEvent(QCloseEvent*) override;
+    QSize sizeHint() const override;
 
 private:
      void addPage(SettingsPage* page);

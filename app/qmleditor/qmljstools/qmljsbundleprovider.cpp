@@ -89,9 +89,9 @@ QmlBundle BasicBundleProvider::defaultQmlprojectBundle()
     return defaultBundle(QLatin1String("qmlproject-bundle.json"));
 }
 
-void BasicBundleProvider::mergeBundlesForKit(ProjectExplorer::Kit *kit
+void BasicBundleProvider::mergeBundlesForKit(ProjectExplorer::Kit */*kit*/
                                              , QmlLanguageBundles &bundles
-                                             , const QHash<QString,QString> &replacements)
+                                             , const QHash<QString,QString> &/*replacements*/)
 {
 //    QHash<QString,QString> myReplacements = replacements;
 

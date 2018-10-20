@@ -8,7 +8,6 @@
 #include <QTimer>
 
 SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
-  , m_activated(true)
   , m_tabWidget(new QTabWidget(this))
   , m_titleLabel(new QLabel(this))
 {
@@ -24,6 +23,33 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
     UtilityFunctions::adjustFontWeight(m_titleLabel, QFont::DemiBold);
 
     QTimer::singleShot(100, this, [=] { m_titleLabel->setText(title()); });
+    connect(m_tabWidget, &QTabWidget::currentChanged,
+            this, [=] (int index) {
+        if (index < 0)
+            return;
+        if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->widget(index)))
+            widget->activate();
+    });
+}
+
+void SettingsPage::reset()
+{
+    for (SettingsWidget* widget : widgets())
+        widget->reset();
+    activateCurrent();
+}
+
+void SettingsPage::apply()
+{
+    for (SettingsWidget* widget : widgets())
+        widget->apply();
+    activateCurrent();
+}
+
+void SettingsPage::activateCurrent()
+{
+    if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->currentWidget()))
+        widget->activate();
 }
 
 void SettingsPage::addWidget(SettingsWidget* widget)

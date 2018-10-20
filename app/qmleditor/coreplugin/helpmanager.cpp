@@ -52,8 +52,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-static const char kUserDocumentationKey[] = "Help/UserDocumentation";
-static const char kUpdateDocumentationTask[] = "UpdateDocumentationTask";
+//static const char kUserDocumentationKey[] = "Help/UserDocumentation";
+//static const char kUpdateDocumentationTask[] = "UpdateDocumentationTask";
 
 namespace Core {
 

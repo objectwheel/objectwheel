@@ -3,8 +3,6 @@
 
 #include <QObject>
 
-#include <generalsettings.h>
-
 class Authenticator;
 class UserManager;
 class DocumentManager;
@@ -19,6 +17,7 @@ class SaveManager;
 class WindowManager;
 class MenuManager;
 class QSettings;
+class GeneralSettings;
 
 namespace Core { class HelpManager; }
 
@@ -43,10 +42,12 @@ private slots:
 
 private:
     explicit ApplicationCore(QObject* parent = nullptr);
+    ~ApplicationCore();
 
 private:
     static ApplicationCore* s_instance;
     static QSettings* s_settings;
+    static GeneralSettings* s_generalSettings;
     static Authenticator* s_authenticator;
     static UserManager* s_userManager;
     static ControlPreviewingManager* s_controlPreviewingManager;
@@ -61,8 +62,6 @@ private:
     static DocumentManager* s_documentManager;
     static WindowManager* s_windowManager;
     static MenuManager* s_menuManager;
-
-    GeneralSettings m_generalSettings;
 };
 
 #endif // APPLICATIONCORE_H

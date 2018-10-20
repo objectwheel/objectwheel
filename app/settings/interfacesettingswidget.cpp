@@ -71,6 +71,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_colorButton->setFixedWidth(64);
     m_themeBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     m_languageBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+    activate();
+    reset();
 }
 
 void InterfaceSettingsWidget::apply()
@@ -78,17 +81,22 @@ void InterfaceSettingsWidget::apply()
     if (!isActivated())
         return;
 
+    activate(false);
+
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->color = m_colorButton->color();
     settings->theme = m_themeBox->currentText();
     settings->language = m_languageBox->currentText();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
+    settings->write();
 }
 
-void InterfaceSettingsWidget::clean()
+void InterfaceSettingsWidget::reset()
 {
     if (!isActivated())
         return;
+
+    activate(false);
 
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     m_colorButton->setColor(settings->color);

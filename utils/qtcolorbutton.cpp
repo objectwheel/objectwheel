@@ -64,9 +64,9 @@ void QtColorButtonPrivate::slotEditColor()
                                           QColorDialog::ShowAlphaChannel);
     } else {
         newColor = QColorDialog::getColor(m_color, q_ptr);
-        if (!newColor.isValid())
-            return;
     }
+    if (!newColor.isValid())
+        return;
     if (newColor == q_ptr->color())
         return;
     q_ptr->setColor(newColor);

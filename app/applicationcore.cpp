@@ -19,6 +19,7 @@
 #include <controlpropertymanager.h>
 #include <welcomewindow.h>
 #include <appfontsettings.h>
+#include <generalsettings.h>
 
 #include <QApplication>
 #include <QSplashScreen>
@@ -33,6 +34,7 @@ using namespace Core;
 
 ApplicationCore* ApplicationCore::s_instance = nullptr;
 QSettings* ApplicationCore::s_settings = nullptr;
+GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
@@ -69,6 +71,9 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     AppFontSettings::apply();
 
     s_settings = new QSettings(QApplication::applicationDirPath() + "/settings.ini", QSettings::IniFormat, this);
+    s_generalSettings = new GeneralSettings;
+    s_generalSettings->read();
+
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);
     s_controlPreviewingManager = new ControlPreviewingManager(this);
@@ -118,6 +123,11 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     // Show welcome window
     WindowManager::welcomeWindow()->show();
     splash.finish(WindowManager::welcomeWindow());
+}
+
+ApplicationCore::~ApplicationCore()
+{
+    delete s_generalSettings;
 }
 
 void ApplicationCore::init(QObject* parent)

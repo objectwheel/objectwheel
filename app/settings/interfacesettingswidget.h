@@ -21,7 +21,7 @@ public:
     explicit InterfaceSettingsWidget(QWidget* parent = nullptr);
 
     void apply() override;
-    void clean() override;
+    void reset() override;
     QString title() const override;
 
 private:

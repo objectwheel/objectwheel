@@ -9,11 +9,11 @@ class SettingsWidget : public QAbstractScrollArea
 public:
     explicit SettingsWidget(QWidget* parent = nullptr);
 
-    void activate() { m_activated = true; }
-    bool isActivated() const { return m_activated; }
+    void activate(bool activate = true);
+    bool isActivated() const;
 
     virtual void apply() = 0;
-    virtual void clean() = 0;
+    virtual void reset() = 0;
     virtual QString title() const = 0;
 
 private:

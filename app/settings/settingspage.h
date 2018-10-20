@@ -18,11 +18,9 @@ public:
 //    discharge
 //    load
 //    unload
-    void activate() { m_activated = true; }
-    bool isActivated() const { return m_activated; }
-
-    virtual void clean() = 0;
-    virtual void apply() = 0;
+    void reset();
+    void apply();
+    void activateCurrent();
     virtual QIcon icon() const = 0;
     virtual QString title() const = 0;
     virtual bool containsWord(const QString& word) const = 0;
@@ -34,7 +32,6 @@ protected:
     QSize sizeHint() const override;
 
 private:
-    bool m_activated;
     QTabWidget* m_tabWidget;
     QLabel* m_titleLabel;
 };
