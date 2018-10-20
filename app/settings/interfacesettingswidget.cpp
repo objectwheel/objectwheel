@@ -100,15 +100,15 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     connect(m_topBarColorResetButton, &QPushButton::clicked, this, [=] {
         m_topBarColorButton->setColor(InterfaceSettings().topBarColor);
     });
-    connect(m_hdpiCheckBox, &QCheckBox::toggled, this, [=] {
+    connect(m_hdpiCheckBox, &QCheckBox::clicked, this, [=] {
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the high DPI settings will take effect after application restart."));
     });
-    connect(m_languageBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
+    connect(m_languageBox, qOverload<int>(&QComboBox::activated), this, [=] {
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the language change will take effect after application restart."));
     });
-    connect(m_themeBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
+    connect(m_themeBox, qOverload<int>(&QComboBox::activated), this, [=] {
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the theme change will take effect after application restart."));
     });
