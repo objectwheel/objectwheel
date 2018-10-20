@@ -25,7 +25,7 @@
 
 #include "behaviorsettingspage.h"
 
-#include <usermanager.h>
+#include <applicationcore.h>
 #include "behaviorsettings.h"
 #include "typingsettings.h"
 #include "storagesettings.h"
@@ -79,7 +79,7 @@ BehaviorSettingsPage::BehaviorSettingsPagePrivate::BehaviorSettingsPagePrivate
 
 void BehaviorSettingsPage::BehaviorSettingsPagePrivate::init()
 {
-    const QSettings *s = UserManager::settings();
+    const QSettings *s = ApplicationCore::settings();
     m_codeStyle->fromSettings(m_parameters.settingsPrefix, s);
     m_typingSettings.fromSettings(m_parameters.settingsPrefix, s);
     m_storageSettings.fromSettings(m_parameters.settingsPrefix, s);
@@ -100,6 +100,7 @@ BehaviorSettingsPage::BehaviorSettingsPage(const BehaviorSettingsPageParameters 
     // default pool for all other languages
 //    d->m_defaultCodeStylePool = new CodeStylePool(0, this); // Any language
 //    d->m_defaultCodeStylePool->addCodeStyle(d->m_codeStyle);
+    d->init();
 
     setId(p.id);
     setDisplayName(p.displayName);
@@ -146,8 +147,7 @@ void BehaviorSettingsPage::apply()
 
     settingsFromUI(&newTypingSettings, &newStorageSettings, &newBehaviorSettings);
 
-    Q_ASSERT(UserManager::settings());
-    QSettings *s = UserManager::settings();
+    QSettings *s = ApplicationCore::settings();
 
     if (d->m_codeStyle->tabSettings() != d->m_pageCodeStyle->tabSettings()) {
         d->m_codeStyle->setTabSettings(d->m_pageCodeStyle->tabSettings());
@@ -251,11 +251,6 @@ const StorageSettings &BehaviorSettingsPage::storageSettings() const
 const BehaviorSettings &BehaviorSettingsPage::behaviorSettings() const
 {
     return d->m_behaviorSettings;
-}
-
-void BehaviorSettingsPage::load()
-{
-    d->init();
 }
 
 //const ExtraEncodingSettings &BehaviorSettingsPage::extraEncodingSettings() const

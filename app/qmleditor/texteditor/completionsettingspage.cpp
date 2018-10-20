@@ -26,7 +26,7 @@
 #include "completionsettingspage.h"
 #include "ui_completionsettingspage.h"
 #include "texteditorsettings.h"
-#include <usermanager.h>
+#include <applicationcore.h>
 
 //#include <cpptools/cpptoolssettings.h>
 
@@ -44,6 +44,10 @@ CompletionSettingsPage::CompletionSettingsPage(QObject *parent)
 {
     setId("P.Completion");
     setDisplayName(tr("Completion"));
+
+    QSettings *s = ApplicationCore::settings();
+    m_completionSettings.fromSettings(s);
+//    m_commentsSettings.fromSettings(s);
 }
 
 CompletionSettingsPage::~CompletionSettingsPage()
@@ -126,9 +130,8 @@ void CompletionSettingsPage::apply()
     settingsFromUi(completionSettings/*, commentsSettings*/);
 
     if (m_completionSettings != completionSettings) {
-        Q_ASSERT(UserManager::settings());
         m_completionSettings = completionSettings;
-        m_completionSettings.toSettings(UserManager::settings());
+        m_completionSettings.toSettings(ApplicationCore::settings());
         emit completionSettingsChanged(completionSettings);
     }
 
@@ -208,13 +211,6 @@ void CompletionSettingsPage::finish()
 const CompletionSettings &CompletionSettingsPage::completionSettings()
 {
     return m_completionSettings;
-}
-
-void CompletionSettingsPage::load()
-{
-    QSettings *s = UserManager::settings();
-    m_completionSettings.fromSettings(s);
-//    m_commentsSettings.fromSettings(s);
 }
 
 //const CommentsSettings &CompletionSettingsPage::commentsSettings()

@@ -9,9 +9,10 @@ class GeneralSettingsPage : public SettingsPage
 
 public:
     explicit GeneralSettingsPage(QWidget* parent = nullptr);
-
-    QString title() const override;
+    void clean() override;
+    void apply() override;
     QIcon icon() const override;
+    QString title() const override;
     bool containsWord(const QString &word) const override;
 };
 

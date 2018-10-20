@@ -26,7 +26,6 @@
 #include "fontsettingspage.h"
 
 #include <windowmanager.h>
-#include <usermanager.h>
 #include <applicationcore.h>
 #include <mainwindow.h>
 #include "fontsettings.h"
@@ -116,7 +115,6 @@ public:
                             const QString &displayName,
                             const QString &category);
     ~FontSettingsPagePrivate();
-    void load();
 
 public:
     const Core::Id m_id;
@@ -181,16 +179,7 @@ FontSettingsPagePrivate::FontSettingsPagePrivate(const FormatDescriptions &fd,
     m_schemeListModel(new SchemeListModel),
     m_refreshingSchemeList(false)
 {
-}
-
-FontSettingsPagePrivate::~FontSettingsPagePrivate()
-{
-    delete m_schemeListModel;
-}
-
-void FontSettingsPagePrivate::load()
-{
-    QSettings *settings = UserManager::settings();
+    QSettings *settings = ApplicationCore::settings();
     if (settings)
         m_value.fromSettings(m_settingsGroup, m_descriptions, settings);
 
@@ -198,6 +187,11 @@ void FontSettingsPagePrivate::load()
         m_value.loadColorScheme(FontSettings::defaultSchemeFileName(), m_descriptions);
 
     m_lastValue = m_value;
+}
+
+FontSettingsPagePrivate::~FontSettingsPagePrivate()
+{
+    delete m_schemeListModel;
 }
 
 // ------- FormatDescription
@@ -652,10 +646,9 @@ void FontSettingsPage::apply()
 
 void FontSettingsPage::saveSettings()
 {
-    Q_ASSERT(UserManager::settings());
     if (d_ptr->m_value != d_ptr->m_lastValue) {
         d_ptr->m_lastValue = d_ptr->m_value;
-        d_ptr->m_value.toSettings(d_ptr->m_settingsGroup, UserManager::settings());
+        d_ptr->m_value.toSettings(d_ptr->m_settingsGroup, ApplicationCore::settings());
 
         QTimer::singleShot(0, this, &FontSettingsPage::delayedChange);
     }
@@ -675,9 +668,4 @@ void FontSettingsPage::finish()
 const FontSettings &FontSettingsPage::fontSettings() const
 {
     return d_ptr->m_value;
-}
-
-void FontSettingsPage::load()
-{
-    d_ptr->load();
 }

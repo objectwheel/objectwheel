@@ -68,9 +68,6 @@ public:
     const BehaviorSettings &behaviorSettings() const;
 //    const ExtraEncodingSettings &extraEncodingSettings() const;
 
-public slots:
-    void load();
-
 signals:
     void typingSettingsChanged(const TextEditor::TypingSettings &);
     void storageSettingsChanged(const TextEditor::StorageSettings &);

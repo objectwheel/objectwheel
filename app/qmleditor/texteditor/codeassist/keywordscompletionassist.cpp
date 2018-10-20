@@ -217,7 +217,7 @@ IAssistProposal *KeywordsCompletionAssistProcessor::perform(const AssistInterfac
     }
 }
 
-void KeywordsCompletionAssistProcessor::setSnippetGroup(const QString &id)
+void KeywordsCompletionAssistProcessor::setSnippetGroup(const QString &/*id*/)
 {
 //    m_snippetCollector.setGroupId(id);
 }

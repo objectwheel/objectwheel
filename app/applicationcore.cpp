@@ -22,6 +22,7 @@
 
 #include <QApplication>
 #include <QSplashScreen>
+#include <QSettings>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
@@ -31,6 +32,7 @@
 using namespace Core;
 
 ApplicationCore* ApplicationCore::s_instance = nullptr;
+QSettings* ApplicationCore::s_settings = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
@@ -66,6 +68,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     /* Set Font */
     AppFontSettings::apply();
 
+    s_settings = new QSettings(QApplication::applicationDirPath() + "/settings.ini", QSettings::IniFormat, this);
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);
     s_controlPreviewingManager = new ControlPreviewingManager(this);
@@ -130,6 +133,11 @@ ApplicationCore* ApplicationCore::instance()
     return s_instance;
 }
 
+QSettings* ApplicationCore::settings()
+{
+    return s_settings;
+}
+
 void ApplicationCore::setApplicationPalette()
 {
     QPalette palette(QApplication::palette());
@@ -166,7 +174,7 @@ QString ApplicationCore::userResourcePath()
 
 void ApplicationCore::onUserSessionStart()
 {
-    DocumentManager::load();
+    // DocumentManager::load();
 }
 
 void ApplicationCore::onUserSessionStop()

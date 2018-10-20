@@ -1,5 +1,5 @@
 #include <interfacesettings.h>
-#include <usermanager.h>
+#include <applicationcore.h>
 
 #include <QSettings>
 #include <QTimer>
@@ -30,7 +30,7 @@ void InterfaceSettings::read()
 {
     reset();
 
-    QSettings* settings = UserManager::settings();
+    QSettings* settings = ApplicationCore::settings();
     settings->beginGroup(group());
     color = settings->value(joint(g_color), color).value<QColor>();
     theme = settings->value(joint(g_theme), theme).value<QString>();
@@ -41,7 +41,7 @@ void InterfaceSettings::read()
 
 void InterfaceSettings::write()
 {
-    QSettings* settings = UserManager::settings();
+    QSettings* settings = ApplicationCore::settings();
     settings->beginGroup(group());
     settings->setValue(joint(g_color), color);
     settings->setValue(joint(g_theme), theme);

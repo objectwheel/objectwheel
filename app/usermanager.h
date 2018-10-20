@@ -3,8 +3,6 @@
 
 #include <QObject>
 
-class QSettings;
-
 class UserManager final : public QObject
 {
     Q_OBJECT
@@ -24,7 +22,6 @@ public:
     static const QString& user();
     static const QString& token();
     static const QByteArray& key();
-    static QSettings* settings();
 
     static void stop();
     static bool hasAutoLogin();
@@ -45,7 +42,6 @@ private:
     static QString s_user;
     static QString s_token;
     static QByteArray s_key;
-    static QSettings* s_settings;
 };
 
 #endif // USERMANAGER_H

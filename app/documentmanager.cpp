@@ -26,9 +26,3 @@ void DocumentManager::updateProjectInfo()
 {
     instance()->m_modelManager.updateDefaultProjectInfo();
 }
-
-void DocumentManager::load()
-{
-    instance()->m_textEditorSettings->load();
-}
-

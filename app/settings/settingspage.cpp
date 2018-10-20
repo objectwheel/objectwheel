@@ -8,6 +8,7 @@
 #include <QTimer>
 
 SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
+  , m_activated(true)
   , m_tabWidget(new QTabWidget(this))
   , m_titleLabel(new QLabel(this))
 {
@@ -28,6 +29,16 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
 void SettingsPage::addWidget(SettingsWidget* widget)
 {
     m_tabWidget->addTab(widget, widget->title());
+}
+
+QList<SettingsWidget*> SettingsPage::widgets() const
+{
+    QList<SettingsWidget*> widgets;
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        if (SettingsWidget* w = qobject_cast<SettingsWidget*>(m_tabWidget->widget(i)))
+            widgets.append(w);
+    }
+    return widgets;
 }
 
 QSize SettingsPage::sizeHint() const

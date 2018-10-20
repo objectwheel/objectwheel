@@ -28,7 +28,6 @@
 //#include "manhattanstyle.h"
 #include "themechooser.h"
 #include <windowmanager.h>
-#include <usermanager.h>
 #include <applicationcore.h>
 #include <mainwindow.h>
 
@@ -116,7 +115,7 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 Id ThemeEntry::themeSetting()
 {
     const Id setting =
-            Id::fromSetting(UserManager::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
+            Id::fromSetting(ApplicationCore::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
                                                      QLatin1String(Constants::DEFAULT_THEME)));
 
     const QList<ThemeEntry> themes = availableThemes();
