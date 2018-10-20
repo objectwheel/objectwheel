@@ -28,25 +28,25 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_languageBox(new QComboBox(m_interfaceGroup))
   , m_hdpiCheckBox(new QCheckBox(m_interfaceGroup))
 {
-    m_layout->setSpacing(6);
+    m_layout->setSpacing(8);
     m_layout->setContentsMargins(6, 6, 6, 6);
     m_layout->addWidget(m_interfaceGroup);
     m_layout->addStretch();
 
     auto hb1 = new QHBoxLayout;
-    hb1->setSpacing(6);
+    hb1->setSpacing(8);
     hb1->setContentsMargins(0, 0, 0, 0);
     hb1->addWidget(m_topBarColorButton);
     hb1->addWidget(m_topBarColorResetButton);
     hb1->addStretch();
     auto hb2 = new QHBoxLayout;
-    hb2->setSpacing(6);
+    hb2->setSpacing(8);
     hb2->setContentsMargins(0, 0, 0, 0);
     hb2->addWidget(m_leftBarColorButton);
     hb2->addWidget(m_leftBarColorResetButton);
     hb2->addStretch();
 
-    m_interfaceLayout->setSpacing(6);
+    m_interfaceLayout->setSpacing(8);
     m_interfaceLayout->setContentsMargins(6, 6, 6, 6);
     m_interfaceLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_interfaceLayout->addWidget(m_topBarColorLabel, 0, 0);
@@ -79,6 +79,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_languageBox->setToolTip(tr("Change language"));
     m_hdpiCheckBox->setToolTip(tr("Enable high DPI scaling"));
 
+    m_hdpiLabel->setFixedWidth(120);
     m_topBarColorButton->setFixedWidth(64);
     m_leftBarColorButton->setFixedWidth(64);
 
