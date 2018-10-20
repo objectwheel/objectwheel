@@ -60,7 +60,7 @@ void QtColorButtonPrivate::slotEditColor()
 {
     QColor newColor;
     if (m_alphaAllowed) {
-        newColor = QColorDialog::getColor(m_color.rgba(), q_ptr, tr("Choose color"),
+        newColor = QColorDialog::getColor(m_color, q_ptr, tr("Choose color"),
                                           QColorDialog::ShowAlphaChannel);
     } else {
         newColor = QColorDialog::getColor(m_color, q_ptr);
