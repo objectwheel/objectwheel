@@ -32,26 +32,32 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_layout->addWidget(m_interfaceGroup);
     m_layout->addStretch();
 
+    auto hb1 = new QHBoxLayout;
+    hb1->setSpacing(6);
+    hb1->setContentsMargins(0, 0, 0, 0);
+    hb1->addWidget(m_topBarColorButton);
+    hb1->addWidget(m_topBarColorResetButton);
+    hb1->addStretch();
+    auto hb2 = new QHBoxLayout;
+    hb2->setSpacing(6);
+    hb2->setContentsMargins(0, 0, 0, 0);
+    hb2->addWidget(m_leftBarColorButton);
+    hb2->addWidget(m_leftBarColorResetButton);
+    hb2->addStretch();
+
     m_interfaceLayout->setSpacing(6);
     m_interfaceLayout->setContentsMargins(6, 6, 6, 6);
-
+    m_interfaceLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_interfaceLayout->addWidget(m_topBarColorLabel, 0, 0);
     m_interfaceLayout->addWidget(m_leftBarColorLabel, 1, 0);
     m_interfaceLayout->addWidget(m_themeLabel, 2, 0);
     m_interfaceLayout->addWidget(m_languageLabel, 3, 0);
     m_interfaceLayout->addWidget(m_hdpiLabel, 4, 0);
-
-    m_interfaceLayout->addWidget(m_topBarColorButton, 0, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_topBarColorResetButton, 0, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_leftBarColorButton, 1, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_leftBarColorResetButton, 1, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-
+    m_interfaceLayout->addLayout(hb1, 0, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addLayout(hb2, 1, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_themeBox, 2, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-
     m_interfaceLayout->addWidget(m_languageBox, 3, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-
     m_interfaceLayout->addWidget(m_hdpiCheckBox, 4, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-
     m_interfaceLayout->setColumnStretch(3, 1);
 
     m_interfaceGroup->setTitle(tr("User Interface"));
@@ -72,6 +78,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_languageBox->setToolTip(tr("Change language"));
     m_hdpiCheckBox->setToolTip(tr("Enable high DPI scaling"));
 
+    m_topBarColorButton->setFixedWidth(64);
+    m_leftBarColorButton->setFixedWidth(64);
+
     m_topBarColorButton->setCursor(Qt::PointingHandCursor);
     m_leftBarColorButton->setCursor(Qt::PointingHandCursor);
     m_topBarColorResetButton->setCursor(Qt::PointingHandCursor);
@@ -80,10 +89,8 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_languageBox->setCursor(Qt::PointingHandCursor);
     m_hdpiCheckBox->setCursor(Qt::PointingHandCursor);
 
-    m_topBarColorButton->setFixedWidth(64);
-    m_leftBarColorButton->setFixedWidth(64);
-    m_themeBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    m_languageBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    m_themeBox->addItem(tr("Light"));
+    m_languageBox->addItem(tr("English"));
 
     connect(m_leftBarColorResetButton, &QPushButton::clicked,
             this, [=] {

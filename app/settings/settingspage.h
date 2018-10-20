@@ -28,9 +28,6 @@ public:
     void addWidget(SettingsWidget* widget);
     QList<SettingsWidget*> widgets() const;
 
-protected:
-    QSize sizeHint() const override;
-
 private:
     QTabWidget* m_tabWidget;
     QLabel* m_titleLabel;

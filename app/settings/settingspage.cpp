@@ -11,8 +11,6 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
   , m_tabWidget(new QTabWidget(this))
   , m_titleLabel(new QLabel(this))
 {
-    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(6);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -65,9 +63,4 @@ QList<SettingsWidget*> SettingsPage::widgets() const
             widgets.append(w);
     }
     return widgets;
-}
-
-QSize SettingsPage::sizeHint() const
-{
-    return {200, 200};
 }

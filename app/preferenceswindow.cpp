@@ -113,6 +113,8 @@ void PreferencesWindow::showEvent(QShowEvent* e)
 {
     QWidget::showEvent(e);
     if (e->isAccepted()) {
+        if (!m_listWidget->currentItem())
+            m_listWidget->setCurrentRow(0);
         if (SettingsPage* page = pageFromItem(m_listWidget->currentItem()))
             page->activateCurrent();
     }
