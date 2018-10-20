@@ -269,8 +269,8 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
 void PageSwitcherPane::updateColors()
 {
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    const QColor& lighter = settings->color.lighter(106);
-    const QColor& darker = settings->color.darker(110);
+    const QColor& lighter = settings->leftBarColor.lighter(106);
+    const QColor& darker = settings->leftBarColor.darker(110);
 
     m_buildsButton->settings().textColor = Qt::white;
     m_splitViewButton->settings().textColor = Qt::white;
@@ -308,7 +308,7 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
 
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).topLeft());
-    gradient.setColorAt(0, settings->color.lighter(106));
-    gradient.setColorAt(1, settings->color.darker(110));
+    gradient.setColorAt(0, settings->leftBarColor.lighter(106));
+    gradient.setColorAt(1, settings->leftBarColor.darker(110));
     painter.fillRect(rect(), gradient);
 }

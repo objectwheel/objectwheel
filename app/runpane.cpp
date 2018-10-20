@@ -8,6 +8,8 @@
 #include <paintutils.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 
 #include <QTime>
 #include <QPainter>
@@ -121,6 +123,8 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
         m_runButton->setEnabled(true);
         m_stopButton->setDisabled(true);
     });
+    connect(GeneralSettings::interfaceSettings(), &InterfaceSettings::changed,
+            this, qOverload<>(&RunPane::update));
 }
 
 void RunPane::discharge()
@@ -161,18 +165,16 @@ void RunPane::onRunButtonClick()
     m_runButton->setDisabled(true);
     m_stopButton->setEnabled(true);
 }
-#include <generalsettings.h>
-#include <interfacesettings.h>
+
 void RunPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
+
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).bottomRight());
-    gradient.setColorAt(0, settings->color.lighter(106));
-    gradient.setColorAt(1, settings->color.darker(110));
-//    gradient.setColorAt(0, "#2784E3");
-//    gradient.setColorAt(1, "#1068C6");
+    QLinearGradient gradient(rect().topLeft(), rect().bottomLeft());
+    gradient.setColorAt(0, settings->topBarColor.lighter(110));
+    gradient.setColorAt(1, settings->topBarColor.darker(108));
     painter.fillRect(rect(), gradient);
 }
 

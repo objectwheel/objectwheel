@@ -16,10 +16,11 @@ public:
     void write() override;
     void reset() override;
 
-    QColor color;
+    bool hdpiEnabled;
     QString theme;
     QString language;
-    bool hdpiEnabled;
+    QColor topBarColor;
+    QColor leftBarColor;
 };
 
 #endif // INTERFACESETTINGS_H

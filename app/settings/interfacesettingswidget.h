@@ -28,12 +28,15 @@ private:
     QVBoxLayout* m_layout;
     QGroupBox* m_interfaceGroup;
     QGridLayout* m_interfaceLayout;
-    QLabel* m_colorLabel;
+    QLabel* m_topBarColorLabel;
+    QLabel* m_leftBarColorLabel;
     QLabel* m_themeLabel;
     QLabel* m_languageLabel;
     QLabel* m_hdpiLabel;
-    Utils::QtColorButton* m_colorButton;
-    QPushButton* m_colorResetButton;
+    Utils::QtColorButton* m_topBarColorButton;
+    Utils::QtColorButton* m_leftBarColorButton;
+    QPushButton* m_topBarColorResetButton;
+    QPushButton* m_leftBarColorResetButton;
     QComboBox* m_themeBox;
     QComboBox* m_languageBox;
     QCheckBox* m_hdpiCheckBox;
