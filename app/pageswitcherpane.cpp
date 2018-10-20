@@ -1,6 +1,8 @@
 #include <pageswitcherpane.h>
 #include <flatbutton.h>
 #include <appfontsettings.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 
 #include <QPainter>
 #include <QVBoxLayout>
@@ -117,33 +119,22 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_splitViewButton->settings().textMargin = 0;
     m_buildsButton->settings().textMargin = 0;
 
-    m_buildsButton->settings().textColor = Qt::white;
-    m_splitViewButton->settings().textColor = Qt::white;
-    m_helpButton->settings().textColor = Qt::white;
-    m_projectOptionsButton->settings().textColor = Qt::white;
-    m_qmlCodeEditorButton->settings().textColor = Qt::white;
-    m_designerButton->settings().textColor = Qt::white;
+    updateColors();
 
-    m_designerButton->settings().topColor = "#384047";
-    m_qmlCodeEditorButton->settings().topColor = "#384047";
-    m_projectOptionsButton->settings().topColor = "#384047";
-    m_helpButton->settings().topColor = "#384047";
-    m_splitViewButton->settings().topColor = "#384047";
-    m_buildsButton->settings().topColor = "#384047";
-
-    m_designerButton->settings().bottomColor = "#424c54";
-    m_qmlCodeEditorButton->settings().bottomColor = "#424c54";
-    m_projectOptionsButton->settings().bottomColor = "#424c54";
-    m_helpButton->settings().bottomColor = "#424c54";
-    m_splitViewButton->settings().bottomColor = "#424c54";
-    m_buildsButton->settings().bottomColor = "#424c54";
-
-    connect(m_designerButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Designer); });
-    connect(m_qmlCodeEditorButton, &FlatButton::pressed, [=] { setCurrentPage(Page_QmlCodeEditor); });
-    connect(m_projectOptionsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_ProjectOptions); });
-    connect(m_helpButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Help); });
-    connect(m_splitViewButton, &FlatButton::pressed, [=] { setCurrentPage(Page_SplitView); });
-    connect(m_buildsButton, &FlatButton::pressed, [=] { setCurrentPage(Page_Builds); });
+    connect(m_designerButton, &FlatButton::pressed,
+            this, [=] { setCurrentPage(Page_Designer); });
+    connect(m_qmlCodeEditorButton, &FlatButton::pressed,
+            this, [=] { setCurrentPage(Page_QmlCodeEditor); });
+    connect(m_projectOptionsButton, &FlatButton::pressed,
+            this, [=] { setCurrentPage(Page_ProjectOptions); });
+    connect(m_helpButton, &FlatButton::pressed,
+            this, [=] { setCurrentPage(Page_Help); });
+    connect(m_splitViewButton, &FlatButton::pressed,
+            this, [=] { setCurrentPage(Page_SplitView); });
+    connect(m_buildsButton, &FlatButton::pressed,
+            this, [=] { setCurrentPage(Page_Builds); });
+    connect(GeneralSettings::interfaceSettings(), &InterfaceSettings::changed,
+            this, &PageSwitcherPane::updateColors);
 }
 
 Pages PageSwitcherPane::currentPage() const
@@ -275,6 +266,36 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
     }
 }
 
+void PageSwitcherPane::updateColors()
+{
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const QColor& lighter = settings->color.lighter(106);
+    const QColor& darker = settings->color.darker(110);
+
+    m_buildsButton->settings().textColor = Qt::white;
+    m_splitViewButton->settings().textColor = Qt::white;
+    m_helpButton->settings().textColor = Qt::white;
+    m_projectOptionsButton->settings().textColor = Qt::white;
+    m_qmlCodeEditorButton->settings().textColor = Qt::white;
+    m_designerButton->settings().textColor = Qt::white;
+
+    m_designerButton->settings().topColor = lighter;
+    m_qmlCodeEditorButton->settings().topColor = lighter;
+    m_projectOptionsButton->settings().topColor = lighter;
+    m_helpButton->settings().topColor = lighter;
+    m_splitViewButton->settings().topColor = lighter;
+    m_buildsButton->settings().topColor = lighter;
+
+    m_designerButton->settings().bottomColor = darker;
+    m_qmlCodeEditorButton->settings().bottomColor = darker;
+    m_projectOptionsButton->settings().bottomColor = darker;
+    m_helpButton->settings().bottomColor = darker;
+    m_splitViewButton->settings().bottomColor = darker;
+    m_buildsButton->settings().bottomColor = darker;
+
+    update();
+}
+
 void PageSwitcherPane::discharge()
 {
     setCurrentPage(Page_Designer);
@@ -285,8 +306,9 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).topLeft());
-    gradient.setColorAt(0, "#384047");
-    gradient.setColorAt(1, "#424c54");
+    gradient.setColorAt(0, settings->color.lighter(106));
+    gradient.setColorAt(1, settings->color.darker(110));
     painter.fillRect(rect(), gradient);
 }

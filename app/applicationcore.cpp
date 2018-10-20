@@ -71,7 +71,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     AppFontSettings::apply();
 
     s_settings = new QSettings(QApplication::applicationDirPath() + "/settings.ini", QSettings::IniFormat, this);
-    s_generalSettings = new GeneralSettings;
+    s_generalSettings = new GeneralSettings(this);
     s_generalSettings->read();
 
     s_authenticator = new Authenticator(this);
@@ -123,11 +123,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     // Show welcome window
     WindowManager::welcomeWindow()->show();
     splash.finish(WindowManager::welcomeWindow());
-}
-
-ApplicationCore::~ApplicationCore()
-{
-    delete s_generalSettings;
 }
 
 void ApplicationCore::init(QObject* parent)

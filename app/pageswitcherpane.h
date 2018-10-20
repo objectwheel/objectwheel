@@ -22,6 +22,9 @@ public slots:
     void setPageEnabled(const Pages& page);
     void setPageDisabled(const Pages& page);
 
+private slots:
+    void updateColors();
+
 protected:
     void paintEvent(QPaintEvent* e) override;
 

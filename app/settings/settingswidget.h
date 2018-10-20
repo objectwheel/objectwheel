@@ -6,6 +6,7 @@
 class SettingsWidget : public QAbstractScrollArea
 {
     Q_OBJECT
+
 public:
     explicit SettingsWidget(QWidget* parent = nullptr);
 

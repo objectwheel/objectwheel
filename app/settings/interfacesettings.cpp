@@ -18,12 +18,13 @@ inline QString joint(const char* setting)
 }
 }
 
-InterfaceSettings::InterfaceSettings(const QString& group) : Settings(group)
-  , color("#3e474f")
-  , theme("Light")
-  , language("English")
-  , hdpiEnabled(true)
+InterfaceSettings::InterfaceSettings(QObject* parent) : InterfaceSettings({}, parent)
 {
+}
+
+InterfaceSettings::InterfaceSettings(const QString& group, QObject* parent) : Settings(group, parent)
+{
+    reset();
 }
 
 void InterfaceSettings::read()
@@ -48,9 +49,14 @@ void InterfaceSettings::write()
     settings->setValue(joint(g_language), language);
     settings->setValue(joint(g_hdpiEnabled), hdpiEnabled);
     settings->endGroup();
+
+    emit changed();
 }
 
 void InterfaceSettings::reset()
 {
-    *this = InterfaceSettings(group());
+    color = "#3e474f";
+    theme = "Light";
+    language = "English";
+    hdpiEnabled = true;
 }

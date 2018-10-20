@@ -1,14 +1,16 @@
 #ifndef GENERALSETTINGS_H
 #define GENERALSETTINGS_H
 
-#include <settings.h>
+#include <QObject>
 
-struct InterfaceSettings;
+class InterfaceSettings;
 
-class GeneralSettings
+class GeneralSettings : public QObject
 {
-    friend class ApplicationCore; //  Make it constructable only from ApplicationCore
+    Q_OBJECT
     Q_DISABLE_COPY(GeneralSettings)
+
+    friend class ApplicationCore; //  Make it constructable only from ApplicationCore
 
 public:
     static GeneralSettings* instance();
@@ -18,7 +20,7 @@ public:
     static void reset();
 
 private:
-    GeneralSettings();
+    explicit GeneralSettings(QObject* parent = nullptr);
     ~GeneralSettings();
 
 private:

@@ -6,15 +6,14 @@ namespace { const char* g_group = "General"; }
 GeneralSettings* GeneralSettings::s_instance = nullptr;
 InterfaceSettings* GeneralSettings::s_interfaceSettings = nullptr;
 
-GeneralSettings::GeneralSettings()
+GeneralSettings::GeneralSettings(QObject* parent) : QObject(parent)
 {
     s_instance = this;
-    s_interfaceSettings = new InterfaceSettings(g_group);
+    s_interfaceSettings = new InterfaceSettings(g_group, this);
 }
 
 GeneralSettings::~GeneralSettings()
 {
-    delete s_interfaceSettings;
     s_instance = nullptr;
 }
 

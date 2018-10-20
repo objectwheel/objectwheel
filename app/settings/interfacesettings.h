@@ -4,9 +4,13 @@
 #include <settings.h>
 #include <QColor>
 
-struct InterfaceSettings : Settings
+class InterfaceSettings : public Settings
 {
-    InterfaceSettings(const QString& group);
+    Q_OBJECT
+
+public:
+    explicit InterfaceSettings(QObject* parent = nullptr);
+    explicit InterfaceSettings(const QString& group, QObject* parent = nullptr);
 
     void read() override;
     void write() override;

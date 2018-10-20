@@ -1,6 +1,11 @@
 #include <settings.h>
 
-Settings::Settings(const QString& group) : m_group(group)
+Settings::Settings(QObject* parent) : Settings({}, parent)
+{
+}
+
+Settings::Settings(const QString& group, QObject* parent) : QObject(parent)
+  , m_group(group)
 {
 }
 

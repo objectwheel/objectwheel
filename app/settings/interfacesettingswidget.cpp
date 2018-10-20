@@ -72,6 +72,11 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_themeBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     m_languageBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
+    connect(m_colorResetButton, &QPushButton::clicked,
+            this, [=] {
+        m_colorButton->setColor(InterfaceSettings().color);
+    });
+
     activate();
     reset();
 }
