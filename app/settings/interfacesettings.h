@@ -17,6 +17,7 @@ public:
     void reset() override;
 
     bool hdpiEnabled;
+    bool bottomPanesPop;
     QString theme;
     QString language;
     QColor topBarColor;

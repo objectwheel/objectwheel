@@ -14,15 +14,13 @@ class SettingsPage : public QWidget
 public:
     explicit SettingsPage(QWidget* parent = nullptr);
 
-//    virtual void apply() charge
-//    discharge
-//    load
-//    unload
     void reset();
     void apply();
     void activateCurrent();
+    void setTitle(const QString& title);
+    QString title() const;
+
     virtual QIcon icon() const = 0;
-    virtual QString title() const = 0;
     virtual bool containsWord(const QString& word) const = 0;
 
     void addWidget(SettingsWidget* widget);

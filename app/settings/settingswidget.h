@@ -13,12 +13,15 @@ public:
     void activate(bool activate = true);
     bool isActivated() const;
 
+    QString title() const;
+    void setTitle(const QString& title);
+
     virtual void apply() = 0;
     virtual void reset() = 0;
-    virtual QString title() const = 0;
 
 private:
     bool m_activated;
+    QString m_title;
 };
 
 #endif // SETTINGSWIDGET_H

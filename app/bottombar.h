@@ -6,6 +6,7 @@
 class QHBoxLayout;
 class QAbstractButton;
 class PushButton;
+class QButtonGroup;
 
 class BottomBar : public QWidget
 {
@@ -23,6 +24,7 @@ public slots:
 private slots:
     void setLeftShowHideButtonToolTip(bool);
     void setRightShowHideButtonToolTip(bool);
+    void onButtonClick(QAbstractButton* button);
 
 protected:
     void paintEvent(QPaintEvent*) override;
@@ -36,6 +38,7 @@ signals:
 
 private:
     QHBoxLayout* m_layout;
+    QButtonGroup* m_buttonGroup;
     PushButton* m_consoleButton;
     PushButton* m_issuesButton;
     PushButton* m_showHideLeftPanesButton;

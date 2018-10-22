@@ -22,7 +22,6 @@ public:
 
     void apply() override;
     void reset() override;
-    QString title() const override;
 
 private:
     QVBoxLayout* m_layout;
@@ -33,6 +32,7 @@ private:
     QLabel* m_themeLabel;
     QLabel* m_languageLabel;
     QLabel* m_hdpiLabel;
+    QLabel* m_bottomPanesLabel;
     Utils::QtColorButton* m_topBarColorButton;
     Utils::QtColorButton* m_leftBarColorButton;
     QPushButton* m_topBarColorResetButton;
@@ -40,6 +40,7 @@ private:
     QComboBox* m_themeBox;
     QComboBox* m_languageBox;
     QCheckBox* m_hdpiCheckBox;
+    QCheckBox* m_bottomPanesCheckBox;
 };
 
 #endif // INTERFACESETTINGSWIDGET_H

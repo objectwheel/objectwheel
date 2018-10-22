@@ -5,7 +5,6 @@
 #include <QLabel>
 #include <QTabWidget>
 #include <QVBoxLayout>
-#include <QTimer>
 
 SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
   , m_tabWidget(new QTabWidget(this))
@@ -20,7 +19,6 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
     UtilityFunctions::adjustFontPixelSize(m_titleLabel, 1);
     UtilityFunctions::adjustFontWeight(m_titleLabel, QFont::DemiBold);
 
-    QTimer::singleShot(100, this, [=] { m_titleLabel->setText(title()); });
     connect(m_tabWidget, &QTabWidget::currentChanged,
             this, [=] (int index) {
         if (index < 0)
@@ -48,6 +46,16 @@ void SettingsPage::activateCurrent()
 {
     if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->currentWidget()))
         widget->activate();
+}
+
+void SettingsPage::setTitle(const QString& title)
+{
+    m_titleLabel->setText(title);
+}
+
+QString SettingsPage::title() const
+{
+    return m_titleLabel->text();
 }
 
 void SettingsPage::addWidget(SettingsWidget* widget)

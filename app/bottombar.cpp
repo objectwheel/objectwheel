@@ -3,6 +3,8 @@
 #include <paintutils.h>
 #include <utilsicons.h>
 #include <utilityfunctions.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 
 #include <QHBoxLayout>
 #include <QStylePainter>
@@ -168,6 +170,7 @@ private:
 
 BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
   , m_layout(new QHBoxLayout(this))
+  , m_buttonGroup(new QButtonGroup(this))
   , m_consoleButton(new PushButton(this))
   , m_issuesButton(new PushButton(this))
   , m_showHideLeftPanesButton(new PushButton(this))
@@ -183,22 +186,11 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_layout->addStretch();
     m_layout->addWidget(m_showHideRightPanesButton, 0, Qt::AlignVCenter);
 
-    auto buttonGroup = new QButtonGroup(this);
-    buttonGroup->addButton(m_consoleButton);
-    buttonGroup->addButton(m_issuesButton);
-    buttonGroup->setExclusive(false);
-    connect(buttonGroup, qOverload<QAbstractButton*>(&QButtonGroup::buttonClicked),
-            this, [=] (QAbstractButton* button) {
-        emit buttonActivated(button, button->isChecked());
-        if (!button->isChecked())
-            return;
-        for (QAbstractButton* b : buttonGroup->buttons()) {
-            if (b != button) {
-                b->setChecked(false);
-                emit buttonActivated(b, false);
-            }
-        }
-    });
+    m_buttonGroup->addButton(m_consoleButton);
+    m_buttonGroup->addButton(m_issuesButton);
+    m_buttonGroup->setExclusive(false);
+    connect(m_buttonGroup, qOverload<QAbstractButton*>(&QButtonGroup::buttonClicked),
+            this, &BottomBar::onButtonClick);
 
     setPanelButtonPaletteDarkerShadows(m_consoleButton);
     setPanelButtonPaletteDarkerShadows(m_issuesButton);
@@ -278,6 +270,10 @@ void BottomBar::flash(QAbstractButton* button)
         g_consoleFlasher->flash(400, 3);
     else if (button == m_issuesButton)
         g_issuesFlasher->flash(400, 3);
+
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    if (settings->bottomPanesPop && !button->isChecked())
+        button->animateClick();
 }
 
 void BottomBar::setLeftShowHideButtonToolTip(bool checked)
@@ -294,6 +290,19 @@ void BottomBar::setRightShowHideButtonToolTip(bool checked)
         m_showHideRightPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Hide right panes")));
     else
         m_showHideRightPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Show right panes")));
+}
+
+void BottomBar::onButtonClick(QAbstractButton* button)
+{
+    emit buttonActivated(button, button->isChecked());
+    if (!button->isChecked())
+        return;
+    for (QAbstractButton* b : m_buttonGroup->buttons()) {
+        if (b != button) {
+            b->setChecked(false);
+            emit buttonActivated(b, false);
+        }
+    }
 }
 
 void BottomBar::discharge()

@@ -122,6 +122,9 @@ void PreferencesWindow::showEvent(QShowEvent* e)
 
 void PreferencesWindow::addPage(SettingsPage* page)
 {
+    if (!page)
+        return;
+
     if (page->parentWidget() != this)
         page->setParent(this);
 

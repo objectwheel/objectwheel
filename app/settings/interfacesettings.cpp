@@ -11,6 +11,7 @@ const char* g_topBarColor = "TopBarColor";
 const char* g_theme = "Theme";
 const char* g_language = "Language";
 const char* g_hdpiEnabled = "HdpiEnabled";
+const char* g_bottomPanesPop = "BottomPanesPop";
 
 inline QString joint(const char* setting)
 {
@@ -36,6 +37,7 @@ void InterfaceSettings::read()
     theme = settings->value(joint(g_theme), theme).value<QString>();
     language = settings->value(joint(g_language), language).value<QString>();
     hdpiEnabled = settings->value(joint(g_hdpiEnabled), hdpiEnabled).value<bool>();
+    bottomPanesPop = settings->value(joint(g_bottomPanesPop), bottomPanesPop).value<bool>();
     topBarColor = settings->value(joint(g_topBarColor), topBarColor).value<QColor>();
     leftBarColor = settings->value(joint(g_leftBarColor), leftBarColor).value<QColor>();
     settings->endGroup();
@@ -48,6 +50,7 @@ void InterfaceSettings::write()
     settings->setValue(joint(g_theme), theme);
     settings->setValue(joint(g_language), language);
     settings->setValue(joint(g_hdpiEnabled), hdpiEnabled);
+    settings->setValue(joint(g_bottomPanesPop), bottomPanesPop);
     settings->setValue(joint(g_topBarColor), topBarColor);
     settings->setValue(joint(g_leftBarColor), leftBarColor);
     settings->endGroup();
@@ -57,6 +60,7 @@ void InterfaceSettings::write()
 void InterfaceSettings::reset()
 {
     hdpiEnabled = true;
+    bottomPanesPop = false;
     theme = "Light";
     language = "English";
     topBarColor = "#247dd6";

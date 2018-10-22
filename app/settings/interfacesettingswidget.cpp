@@ -20,6 +20,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_themeLabel(new QLabel(m_interfaceGroup))
   , m_languageLabel(new QLabel(m_interfaceGroup))
   , m_hdpiLabel(new QLabel(m_interfaceGroup))
+  , m_bottomPanesLabel(new QLabel(m_interfaceGroup))
   , m_topBarColorButton(new Utils::QtColorButton(m_interfaceGroup))
   , m_leftBarColorButton(new Utils::QtColorButton(m_interfaceGroup))
   , m_topBarColorResetButton(new QPushButton(m_interfaceGroup))
@@ -27,7 +28,10 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_themeBox(new QComboBox(m_interfaceGroup))
   , m_languageBox(new QComboBox(m_interfaceGroup))
   , m_hdpiCheckBox(new QCheckBox(m_interfaceGroup))
+  , m_bottomPanesCheckBox(new QCheckBox(m_interfaceGroup))
 {
+    setTitle(tr("Interface"));
+
     m_layout->setSpacing(8);
     m_layout->setContentsMargins(6, 6, 6, 6);
     m_layout->addWidget(m_interfaceGroup);
@@ -54,22 +58,26 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_interfaceLayout->addWidget(m_themeLabel, 2, 0);
     m_interfaceLayout->addWidget(m_languageLabel, 3, 0);
     m_interfaceLayout->addWidget(m_hdpiLabel, 4, 0);
+    m_interfaceLayout->addWidget(m_bottomPanesLabel, 5, 0);
     m_interfaceLayout->addLayout(hb1, 0, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addLayout(hb2, 1, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_themeBox, 2, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_languageBox, 3, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_hdpiCheckBox, 4, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_bottomPanesCheckBox, 5, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->setColumnStretch(3, 1);
 
     m_interfaceGroup->setTitle(tr("User Interface"));
     m_topBarColorResetButton->setText(tr("Reset"));
     m_leftBarColorResetButton->setText(tr("Reset"));
     m_hdpiCheckBox->setText(tr("Enable high DPI scaling"));
+    m_bottomPanesCheckBox->setText(tr("Show bottom panes when they flash"));
     m_topBarColorLabel->setText(tr("Top bar color") + ":");
     m_leftBarColorLabel->setText(tr("Left bar color") + ":");
     m_themeLabel->setText(tr("Theme") + ":");
     m_languageLabel->setText(tr("Language") + ":");
     m_hdpiLabel->setText(tr("High DPI scaling") + ":");
+    m_bottomPanesLabel->setText(tr("Pop up bottom panes") + ":");
 
     m_topBarColorResetButton->setToolTip(tr("Reset color to default"));
     m_leftBarColorResetButton->setToolTip(tr("Reset color to default"));
@@ -78,8 +86,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_themeBox->setToolTip(tr("Change gui theme"));
     m_languageBox->setToolTip(tr("Change language"));
     m_hdpiCheckBox->setToolTip(tr("Enable high DPI scaling"));
+    m_bottomPanesCheckBox->setToolTip(tr("Show bottom panes when they flash"));
 
-    m_hdpiLabel->setFixedWidth(120);
+    m_bottomPanesLabel->setFixedWidth(140);
     m_topBarColorButton->setFixedWidth(64);
     m_leftBarColorButton->setFixedWidth(64);
 
@@ -90,6 +99,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_themeBox->setCursor(Qt::PointingHandCursor);
     m_languageBox->setCursor(Qt::PointingHandCursor);
     m_hdpiCheckBox->setCursor(Qt::PointingHandCursor);
+    m_bottomPanesCheckBox->setCursor(Qt::PointingHandCursor);
 
     m_themeBox->addItem(tr("Light"));
     m_languageBox->addItem(tr("English"));
@@ -130,6 +140,7 @@ void InterfaceSettingsWidget::apply()
     settings->theme = m_themeBox->currentText();
     settings->language = m_languageBox->currentText();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
+    settings->bottomPanesPop = m_bottomPanesCheckBox->isChecked();
     settings->write();
 }
 
@@ -146,9 +157,5 @@ void InterfaceSettingsWidget::reset()
     m_themeBox->setCurrentText(tr(settings->theme.toUtf8()));
     m_languageBox->setCurrentText(tr(settings->language.toUtf8()));
     m_hdpiCheckBox->setChecked(settings->hdpiEnabled);
-}
-
-QString InterfaceSettingsWidget::title() const
-{
-    return tr("Interface");
+    m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);
 }
