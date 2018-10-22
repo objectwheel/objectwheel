@@ -7,10 +7,10 @@ GeneralSettingsPage::GeneralSettingsPage(QWidget* parent) : SettingsPage(parent)
     addWidget(new InterfaceSettingsWidget(this));
 }
 
-QString GeneralSettingsPage::title() const
-{
-    return tr("General");
-}
+//QString GeneralSettingsPage::title() const
+//{
+//    return tr("General");
+//}
 
 QIcon GeneralSettingsPage::icon() const
 {
