@@ -32,7 +32,6 @@ private:
     QLabel* m_themeLabel;
     QLabel* m_languageLabel;
     QLabel* m_hdpiLabel;
-    QLabel* m_bottomPanesLabel;
     Utils::QtColorButton* m_topBarColorButton;
     Utils::QtColorButton* m_leftBarColorButton;
     QPushButton* m_topBarColorResetButton;
@@ -40,7 +39,12 @@ private:
     QComboBox* m_themeBox;
     QComboBox* m_languageBox;
     QCheckBox* m_hdpiCheckBox;
+
+    QGroupBox* m_behavioralGroup;
+    QGridLayout* m_behavioralLayout;
+    QLabel* m_visibleBottomPaneLabel;
     QCheckBox* m_bottomPanesCheckBox;
+    QComboBox* m_visibleBottomPaneBox;
 };
 
 #endif // INTERFACESETTINGSWIDGET_H

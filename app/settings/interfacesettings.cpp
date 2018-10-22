@@ -12,6 +12,7 @@ const char* g_theme = "Theme";
 const char* g_language = "Language";
 const char* g_hdpiEnabled = "HdpiEnabled";
 const char* g_bottomPanesPop = "BottomPanesPop";
+const char* g_visibleBottomPane = "VisibleBottomPane";
 
 inline QString joint(const char* setting)
 {
@@ -40,6 +41,7 @@ void InterfaceSettings::read()
     bottomPanesPop = settings->value(joint(g_bottomPanesPop), bottomPanesPop).value<bool>();
     topBarColor = settings->value(joint(g_topBarColor), topBarColor).value<QColor>();
     leftBarColor = settings->value(joint(g_leftBarColor), leftBarColor).value<QColor>();
+    visibleBottomPane = settings->value(joint(g_visibleBottomPane), visibleBottomPane).value<QString>();
     settings->endGroup();
 }
 
@@ -53,6 +55,7 @@ void InterfaceSettings::write()
     settings->setValue(joint(g_bottomPanesPop), bottomPanesPop);
     settings->setValue(joint(g_topBarColor), topBarColor);
     settings->setValue(joint(g_leftBarColor), leftBarColor);
+    settings->setValue(joint(g_visibleBottomPane), visibleBottomPane);
     settings->endGroup();
     emit changed();
 }
@@ -65,4 +68,5 @@ void InterfaceSettings::reset()
     language = "English";
     topBarColor = "#247dd6";
     leftBarColor = "#3e474f";
+    visibleBottomPane = "None";
 }

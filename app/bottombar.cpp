@@ -307,12 +307,20 @@ void BottomBar::onButtonClick(QAbstractButton* button)
 
 void BottomBar::discharge()
 {
-    m_consoleButton->setChecked(false);
     m_issuesButton->setChecked(false);
+    m_consoleButton->setChecked(false);
     m_showHideLeftPanesButton->setChecked(true);
     m_showHideRightPanesButton->setChecked(true);
     setLeftShowHideButtonToolTip(true);
     setRightShowHideButtonToolTip(true);
+
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    if (settings->visibleBottomPane != "None") {
+        if (settings->visibleBottomPane == "Console Pane")
+            m_consoleButton->animateClick();
+        else
+            m_issuesButton->animateClick();
+    }
 }
 
 QAbstractButton* BottomBar::activeButton() const

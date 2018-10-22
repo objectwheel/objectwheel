@@ -22,6 +22,7 @@ public:
     QString language;
     QColor topBarColor;
     QColor leftBarColor;
+    QString visibleBottomPane;
 };
 
 #endif // INTERFACESETTINGS_H
