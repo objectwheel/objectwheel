@@ -1,5 +1,5 @@
-INCLUDEPATH += $$PWD
 DEPENDPATH  += $$PWD
+INCLUDEPATH += $$PWD
 
 include($$PWD/texteditor/texteditor.pri)
 include($$PWD/coreplugin/coreplugin.pri)

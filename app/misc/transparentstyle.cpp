@@ -35,6 +35,13 @@ const qreal comboBoxDefaultHeight[3] = {
     26, 22, 19
 };
 
+QColor outlineColor(const QPalette &pal)
+{
+    if (pal.window().style() == Qt::TexturePattern)
+        return QColor(0, 0, 0, 160);
+    return pal.window().color().darker(140);
+}
+
 QRectF comboboxEditBounds(const QRectF& outerBounds)
 {
     QRectF ret = outerBounds;
@@ -756,18 +763,11 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             QLinearGradient g(cb->rect.topLeft(), (cb->state & State_Horizontal)
                               ? cb->rect.bottomLeft()
                               : cb->rect.topRight());
-            g.setColorAt(0, option->palette.window().color().lighter(120));
+            g.setColorAt(0, option->palette.window().color().lighter(130));
             g.setColorAt(1, option->palette.window().color());
-            painter->fillRect(cb->rect, g);
-//            painter->setPen("#c4c4c4");
-//            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
-//                              cb->rect.topRight() + QPointF(0.5, 0.5));
-//            painter->drawLine(cb->rect.bottomLeft() + QPointF(0.5, 0.5),
-//                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
-//            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
-//                              cb->rect.bottomLeft() + QPointF(0.5, 0.5));
-//            painter->drawLine(cb->rect.topRight() + QPointF(0.5, 0.5),
-//                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
+            painter->setBrush(g);
+            painter->setPen(outlineColor(option->palette));
+            painter->drawRect(QRectF(cb->rect).adjusted(0.5, 0.5, -0.5, -0.5));
             painter->restore();
         } break;
         break;
