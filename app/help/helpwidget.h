@@ -9,10 +9,11 @@ class QComboBox;
 class QHelpEngine;
 class QVBoxLayout;
 class FocuslessLineEdit;
-class WebEngineHelpViewer;
 class QToolBar;
 class QToolButton;
 class QLabel;
+
+namespace Help { namespace Internal { class TextBrowserHelpViewer; }}
 
 class HelpWidget : public QWidget
 {
@@ -48,7 +49,7 @@ private:
     QLabel* m_titleLabel;
     QAction* m_copyAction;
     QSplitter* m_splitter;
-    WebEngineHelpViewer* m_helpViewer;
+    Help::Internal::TextBrowserHelpViewer* m_helpViewer;
     QWidget* m_contentsWidget;
     QVBoxLayout* m_contentsLayout;
     QWidget* m_indexWidget;

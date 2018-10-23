@@ -1,14 +1,25 @@
 #include <helpwidget.h>
-#include <webenginehelpviewer.h>
 #include <focuslesslineedit.h>
 #include <transparentstyle.h>
 #include <utilsicons.h>
 #include <appfontsettings.h>
 #include <utilityfunctions.h>
+#include <textbrowserhelpviewer.h>
 
-#include <QtWidgets>
-#include <QtHelp>
-#include <QtWebEngineWidgets>
+#include <QHelpContentWidget>
+#include <QHelpIndexWidget>
+#include <QHelpEngine>
+#include <QVBoxLayout>
+#include <QToolBar>
+#include <QComboBox>
+#include <QToolButton>
+#include <QLabel>
+#include <QSplitter>
+#include <QApplication>
+#include <QInputDialog>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QClipboard>
 
 // TODO: "Find" on help page
 // TODO: Copy/paste keyboard shortcuts
@@ -19,7 +30,7 @@ QHelpIndexWidget* indexWidget;
 }
 
 HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
-  , m_helpEngine(new QHelpEngine(qApp->applicationDirPath() + "/docs/docs.qhc", this))
+  , m_helpEngine(new QHelpEngine(QApplication::applicationDirPath() + "/docs/docs.qhc", this))
   , m_layout(new QVBoxLayout(this))
   , m_toolBar(new QToolBar)
   , m_typeCombo(new QComboBox)
@@ -29,7 +40,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_titleLabel(new QLabel)
   , m_copyAction(new QAction(this))
   , m_splitter(new QSplitter)
-  , m_helpViewer(new WebEngineHelpViewer(m_helpEngine))
+  , m_helpViewer(new Help::Internal::TextBrowserHelpViewer(m_helpEngine))
   , m_contentsWidget(new QWidget)
   , m_contentsLayout(new QVBoxLayout(m_contentsWidget))
   , m_indexWidget(new QWidget)
@@ -160,7 +171,7 @@ void HelpWidget::onHomeButtonClick()
 void HelpWidget::discharge()
 {
     m_helpViewer->stop();
-    m_helpViewer->page()->history()->clear();
+    m_helpViewer->clearHistory();
     m_helpViewer->home();
     m_typeCombo->setCurrentIndex(0);
     m_indexFilterEdit->clear();

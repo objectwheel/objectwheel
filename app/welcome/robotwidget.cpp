@@ -5,9 +5,9 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QWebEngineView>
-#include <QWebChannel>
-#include <QWebEngineSettings>
+//#include <QWebEngineView>
+//#include <QWebChannel>
+//#include <QWebEngineSettings>
 #include <QMessageBox>
 
 #define BUTTONS_WIDTH    (350)
@@ -15,17 +15,17 @@
 #define PATH_ICON        (":/images/robot.png")
 #define PATH_NICON       (":/images/load.png")
 #define PATH_CICON       (":/images/unload.png")
-#define PATH_RECAPTCHA   (tr(APP_HTTPSSERVER) + "/recaptcha.html")
+//#define PATH_RECAPTCHA   (tr(APP_HTTPSSERVER) + "/recaptcha.html")
 
 enum Buttons { Next, Back };
 
 RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
-    _webChannel = new QWebChannel(this);
-    _recaptchaView = new QWebEngineView;
-    _recaptchaWidget = new QWidget(_recaptchaView);
-    _recaptchaLayout = new QVBoxLayout(_recaptchaWidget);
+//    _webChannel = new QWebChannel(this);
+//    _recaptchaView = new QWebEngineView;
+//    _recaptchaWidget = new QWidget(_recaptchaView);
+//    _recaptchaLayout = new QVBoxLayout(_recaptchaWidget);
     _iconLabel = new QLabel;
     _robotLabel = new QLabel;
     _space = new QWidget;
@@ -34,28 +34,28 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 
     _layout->setSpacing(0);
     _layout->setContentsMargins(0, 0, 0, 0);
-    _layout->addWidget(_recaptchaView);
+//    _layout->addWidget(_recaptchaView);
 
     _space->setFixedSize(BUTTONS_WIDTH, 200);
     _space->installEventFilter(this);
 
-    _recaptchaLayout->setSpacing(6);
-    _recaptchaLayout->addStretch();
-    _recaptchaLayout->addWidget(_iconLabel, 0, Qt::AlignCenter);
-    _recaptchaLayout->addWidget(_robotLabel, 0, Qt::AlignCenter);
-    _recaptchaLayout->addStretch();
-    _recaptchaLayout->addWidget(_loadingIndicator, 0, Qt::AlignCenter);
-    _recaptchaLayout->addWidget(_space, 0 , Qt::AlignCenter);
-    _recaptchaLayout->addStretch();
+//    _recaptchaLayout->setSpacing(6);
+//    _recaptchaLayout->addStretch();
+//    _recaptchaLayout->addWidget(_iconLabel, 0, Qt::AlignCenter);
+//    _recaptchaLayout->addWidget(_robotLabel, 0, Qt::AlignCenter);
+//    _recaptchaLayout->addStretch();
+//    _recaptchaLayout->addWidget(_loadingIndicator, 0, Qt::AlignCenter);
+//    _recaptchaLayout->addWidget(_space, 0 , Qt::AlignCenter);
+//    _recaptchaLayout->addStretch();
 
-    connect(_recaptchaView, SIGNAL(loadStarted()),
-      _loadingIndicator, SLOT(start()));
-    connect(_recaptchaView, SIGNAL(loadFinished(bool)),
-      _loadingIndicator, SLOT(stop()));
+//    connect(_recaptchaView, SIGNAL(loadStarted()),
+//      _loadingIndicator, SLOT(start()));
+//    connect(_recaptchaView, SIGNAL(loadFinished(bool)),
+//      _loadingIndicator, SLOT(stop()));
 
-    _webChannel->registerObject("cpp", this);
-    _recaptchaView->page()->setWebChannel(_webChannel);
-    _recaptchaView->page()->setBackgroundColor(Qt::transparent);
+//    _webChannel->registerObject("cpp", this);
+//    _recaptchaView->page()->setWebChannel(_webChannel);
+//    _recaptchaView->page()->setBackgroundColor(Qt::transparent);
 
     QPixmap p(PATH_ICON);
     p.setDevicePixelRatio(devicePixelRatioF());
@@ -106,7 +106,7 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _loadingIndicator->setLineWidth(2);
     _loadingIndicator->start();
 
-    _recaptchaWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
+//    _recaptchaWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     _buttons->raise();
 }
 
@@ -117,18 +117,18 @@ const QString& RobotWidget::response() const
 
 void RobotWidget::load()
 {
-    if (_recaptchaView->page()->url().isEmpty())
-        reload();
+//    if (_recaptchaView->page()->url().isEmpty())
+//        reload();
 }
 
 void RobotWidget::reload()
 {
-    _recaptchaView->load(QUrl(PATH_RECAPTCHA));
+//    _recaptchaView->load(QUrl(PATH_RECAPTCHA));
 }
 
 void RobotWidget::discharge()
 {
-    _recaptchaView->page()->runJavaScript("grecaptcha.reset();");
+//    _recaptchaView->page()->runJavaScript("grecaptcha.reset();");
     _response.clear();
     _buttons->raise();
 }
@@ -158,7 +158,7 @@ void RobotWidget::onNextClicked()
 
 void RobotWidget::resizeEvent(QResizeEvent* event)
 {
-    _recaptchaWidget->setGeometry(rect());
+//    _recaptchaWidget->setGeometry(rect());
     QWidget::resizeEvent(event);
 }
 

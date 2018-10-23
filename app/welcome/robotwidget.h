@@ -6,8 +6,6 @@
 class QLabel;
 class ButtonSlice;
 class QVBoxLayout;
-class QWebChannel;
-class QWebEngineView;
 class WaitingSpinnerWidget;
 
 class RobotWidget : public QWidget
@@ -39,8 +37,8 @@ signals:
 private:
     QString _response;
     QVBoxLayout* _layout;
-    QWebChannel* _webChannel;
-    QWebEngineView* _recaptchaView;
+//    QWebChannel* _webChannel;
+//    QWebEngineView* _recaptchaView;
     QWidget* _recaptchaWidget;
     QVBoxLayout* _recaptchaLayout;
     QLabel* _iconLabel;

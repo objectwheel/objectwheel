@@ -3,7 +3,6 @@
 
 #include <QFont>
 #include <QMenu>
-#include <QPrinter>
 #include <QString>
 #include <QUrl>
 #include <QWidget>
@@ -62,7 +61,6 @@ public:
     virtual void stop() = 0;
     virtual void forward() = 0;
     virtual void backward() = 0;
-    virtual void print(QPrinter *printer) = 0;
 
 signals:
     void sourceChanged(const QUrl &);
