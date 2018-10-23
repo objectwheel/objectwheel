@@ -2,6 +2,8 @@
 #include <paintutils.h>
 #include <utilsicons.h>
 #include <utilityfunctions.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 
 #include <QMenu>
 #include <QPainter>
@@ -28,7 +30,7 @@ DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
   , m_myComputerAction(new QAction(this))
 {
     QPalette p(palette());
-    PaintUtils::setPanelButtonPaletteDefaults(p);
+    PaintUtils::setPanelButtonPaletteDefaults(p, GeneralSettings::interfaceSettings()->theme == "Light");
     setPalette(p);
 
     m_actionGroup->setExclusive(true);

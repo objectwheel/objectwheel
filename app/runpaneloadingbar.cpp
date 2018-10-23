@@ -1,5 +1,7 @@
 #include <runpaneloadingbar.h>
 #include <paintutils.h>
+#include <interfacesettings.h>
+#include <generalsettings.h>
 
 #include <QTimer>
 #include <QPainter>
@@ -40,7 +42,7 @@ RunPaneLoadingBar::RunPaneLoadingBar(QWidget *parent) : QWidget(parent)
   , m_timerFader(new QTimer(this))
 {
     QPalette p(palette());
-    PaintUtils::setPanelButtonPaletteDefaults(p);
+    PaintUtils::setPanelButtonPaletteDefaults(p, GeneralSettings::interfaceSettings()->theme == "Light");
     setPalette(p);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
 

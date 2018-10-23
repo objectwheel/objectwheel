@@ -14,7 +14,7 @@
 
 namespace {
 
-const char* g_themes[] = {"Light"/*, "Dark"*/};
+const char* g_themes[] = {"Light", "Dark"};
 const char* g_bottomPanes[] = {"None", "Console Pane", "Issues Pane"};
 const char* g_langIcons[] = {":/images/flags/en.png"};
 const char* g_languages[] = {"English"};
@@ -85,16 +85,16 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_interfaceLayout->setSpacing(8);
     m_interfaceLayout->setContentsMargins(6, 6, 6, 6);
     m_interfaceLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_interfaceLayout->addWidget(m_topBarColorLabel, 0, 0);
-    m_interfaceLayout->addWidget(m_leftBarColorLabel, 1, 0);
-    m_interfaceLayout->addWidget(m_themeLabel, 2, 0);
-    m_interfaceLayout->addWidget(m_languageLabel, 3, 0);
-    m_interfaceLayout->addWidget(m_hdpiLabel, 4, 0);
+    m_interfaceLayout->addWidget(m_topBarColorLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_leftBarColorLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_themeLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_languageLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_hdpiLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addLayout(hb1, 0, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addLayout(hb2, 1, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_themeBox, 2, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_languageBox, 3, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_hdpiCheckBox, 4, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);    
+    m_interfaceLayout->addWidget(m_hdpiCheckBox, 4, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->setColumnStretch(3, 1);
 
     m_interfaceGroup->setTitle(tr("User Interface"));
@@ -128,9 +128,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_behavioralLayout->setSpacing(8);
     m_behavioralLayout->setContentsMargins(6, 6, 6, 6);
     m_behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_behavioralLayout->addWidget(m_bottomPanesCheckBox, 0, 0);
-    m_behavioralLayout->addWidget(m_visibleBottomPaneLabel, 0, 2);
-    m_behavioralLayout->addWidget(m_visibleBottomPaneBox, 0, 3);
+    m_behavioralLayout->addWidget(m_bottomPanesCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_behavioralLayout->addWidget(m_visibleBottomPaneLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_behavioralLayout->addWidget(m_visibleBottomPaneBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
     m_behavioralLayout->setColumnStretch(4, 1);
     m_behavioralLayout->setColumnMinimumWidth(1, 20);
 
@@ -161,10 +161,6 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     connect(m_languageBox, qOverload<int>(&QComboBox::activated), this, [=] {
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the language change will take effect after application restart."));
-    });
-    connect(m_themeBox, qOverload<int>(&QComboBox::activated), this, [=] {
-        QMessageBox::information(this, tr("Restart Required"),
-            tr("Be aware that the theme change will take effect after application restart."));
     });
 
     activate();

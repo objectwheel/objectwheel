@@ -243,38 +243,66 @@ void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, con
     QPalette::Dark      :  Button's base and surrounding border's color
     QPalette::Shadow    :  Button's drop shadow color
 */
-void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette)
+void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette, bool themeLight)
 {
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
     shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-    shadowGrad.setColorAt(0, "#12202020");
-    shadowGrad.setColorAt(0.05, "#10202020");
-    shadowGrad.setColorAt(0.5, "#10202020");
-    shadowGrad.setColorAt(0.95, "#10202020");
-    shadowGrad.setColorAt(1, "#12202020");
+    if (themeLight) {
+        shadowGrad.setColorAt(0, "#12202020");
+        shadowGrad.setColorAt(0.05, "#10202020");
+        shadowGrad.setColorAt(0.5, "#10202020");
+        shadowGrad.setColorAt(0.95, "#10202020");
+        shadowGrad.setColorAt(1, "#12202020");
+    } else {
+        shadowGrad.setColorAt(0, "#12202020");
+        shadowGrad.setColorAt(0.05, "#10202020");
+        shadowGrad.setColorAt(0.5, "#10202020");
+        shadowGrad.setColorAt(0.95, "#10202020");
+        shadowGrad.setColorAt(1, "#12202020");
+    }
     palette.setBrush(QPalette::Shadow, shadowGrad);
 
     QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
     darkGrad.setCoordinateMode(QGradient::ObjectMode);
-    darkGrad.setColorAt(0.85, "#20303030");
-    darkGrad.setColorAt(1, "#3d000000");
+    if (themeLight) {
+        darkGrad.setColorAt(0.85, "#20303030");
+        darkGrad.setColorAt(1, "#3d000000");
+    } else {
+        darkGrad.setColorAt(0.85, "#20303030");
+        darkGrad.setColorAt(1, "#3d000000");
+    }
     palette.setBrush(QPalette::Dark, darkGrad);
 
     QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
     midGrad.setCoordinateMode(QGradient::ObjectMode);
-    midGrad.setColorAt(0, "#e7e7e7");
-    midGrad.setColorAt(1, "#e1e1e1");
+    if (themeLight) {
+        midGrad.setColorAt(0, "#e7e7e7");
+        midGrad.setColorAt(1, "#e1e1e1");
+    } else {
+        midGrad.setColorAt(0, "#e7e7e7");
+        midGrad.setColorAt(1, "#e1e1e1");
+    }
     palette.setBrush(QPalette::Mid, midGrad);
 
     QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
     buttonGrad.setCoordinateMode(QGradient::ObjectMode);
-    buttonGrad.setColorAt(0, "#fefefe");
-    buttonGrad.setColorAt(1, "#f7f7f7");
+    if (themeLight) {
+        buttonGrad.setColorAt(0, "#fefefe");
+        buttonGrad.setColorAt(1, "#f7f7f7");
+    } else {
+        buttonGrad.setColorAt(0, "#637280");
+        buttonGrad.setColorAt(1, "#5b6975");
+    }
     palette.setBrush(QPalette::Button, buttonGrad);
 
     QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
     midlightGrad.setCoordinateMode(QGradient::ObjectMode);
-    midlightGrad.setColorAt(0, "#f4f4f4");
-    midlightGrad.setColorAt(0.1, "#ededed");
+    if (themeLight) {
+        midlightGrad.setColorAt(0, "#f4f4f4");
+        midlightGrad.setColorAt(0.1, "#ededed");
+    } else {
+        midlightGrad.setColorAt(0, "#f4f4f4");
+        midlightGrad.setColorAt(0.1, "#ededed");
+    }
     palette.setBrush(QPalette::Midlight, midlightGrad);
 }

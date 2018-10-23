@@ -756,18 +756,18 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             QLinearGradient g(cb->rect.topLeft(), (cb->state & State_Horizontal)
                               ? cb->rect.bottomLeft()
                               : cb->rect.topRight());
-            g.setColorAt(0, Qt::white);
-            g.setColorAt(1, "#f0f0f0");
+            g.setColorAt(0, option->palette.window().color().lighter(120));
+            g.setColorAt(1, option->palette.window().color());
             painter->fillRect(cb->rect, g);
-            painter->setPen("#c4c4c4");
-            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
-                              cb->rect.topRight() + QPointF(0.5, 0.5));
-            painter->drawLine(cb->rect.bottomLeft() + QPointF(0.5, 0.5),
-                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
-            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
-                              cb->rect.bottomLeft() + QPointF(0.5, 0.5));
-            painter->drawLine(cb->rect.topRight() + QPointF(0.5, 0.5),
-                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
+//            painter->setPen("#c4c4c4");
+//            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
+//                              cb->rect.topRight() + QPointF(0.5, 0.5));
+//            painter->drawLine(cb->rect.bottomLeft() + QPointF(0.5, 0.5),
+//                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
+//            painter->drawLine(cb->rect.topLeft() + QPointF(0.5, 0.5),
+//                              cb->rect.bottomLeft() + QPointF(0.5, 0.5));
+//            painter->drawLine(cb->rect.topRight() + QPointF(0.5, 0.5),
+//                              cb->rect.bottomRight() + QPointF(0.5, 0.5));
             painter->restore();
         } break;
         break;
