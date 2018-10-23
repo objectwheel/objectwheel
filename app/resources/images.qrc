@@ -81,5 +81,6 @@
         <file>images/mycomputer.png</file>
         <file>images/preferences.png</file>
         <file>images/settings/general.png</file>
+        <file>images/flags/en.png</file>
     </qresource>
 </RCC>

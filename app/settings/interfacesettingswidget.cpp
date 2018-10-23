@@ -10,10 +10,34 @@
 #include <QCheckBox>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QAction>
 
 namespace {
 
+const char* g_themes[] = {"Light"/*, "Dark"*/};
+const char* g_bottomPanes[] = {"None", "Console Pane", "Issues Pane"};
+const char* g_langIcons[] = {":/images/flags/en.png"};
+const char* g_languages[] = {"English"};
+
+void addThemes(QComboBox* comboBox)
+{
+    for (size_t i = 0; i < sizeof(g_themes) / sizeof(g_themes[0]); ++i)
+        comboBox->addItem(QObject::tr(g_themes[i]), g_themes[i]);
 }
+
+void addBottomPanes(QComboBox* comboBox)
+{
+    for (size_t i = 0; i < sizeof(g_bottomPanes) / sizeof(g_bottomPanes[0]); ++i)
+        comboBox->addItem(QObject::tr(g_bottomPanes[i]), g_bottomPanes[i]);
+}
+
+void addLanguages(QComboBox* comboBox)
+{
+    for (size_t i = 0; i < sizeof(g_languages) / sizeof(g_languages[0]); ++i)
+        comboBox->addItem(QIcon(g_langIcons[i]), QObject::tr(g_languages[i]), g_languages[i]);
+}
+}
+
 InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_interfaceGroup(new QGroupBox(this))
@@ -101,9 +125,6 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_languageBox->setCursor(Qt::PointingHandCursor);
     m_hdpiCheckBox->setCursor(Qt::PointingHandCursor);
 
-    m_themeBox->addItem(tr("Light"));
-    m_languageBox->addItem(tr("English"));
-
     m_behavioralLayout->setSpacing(8);
     m_behavioralLayout->setContentsMargins(6, 6, 6, 6);
     m_behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
@@ -116,15 +137,16 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_behavioralGroup->setTitle(tr("Behavioral"));
     m_bottomPanesCheckBox->setText(tr("Pop up bottom pane when it flashes"));
     m_visibleBottomPaneLabel->setText(tr("Show bottom pane at startup") + ":");
-    m_visibleBottomPaneBox->addItem(tr("None"));
-    m_visibleBottomPaneBox->addItem(tr("Issues Pane"));
-    m_visibleBottomPaneBox->addItem(tr("Console Pane"));
 
     m_bottomPanesCheckBox->setToolTip(tr("Pop up bottom pane when it flashes"));
     m_visibleBottomPaneBox->setToolTip(tr("Bottom pane that will be open at startup by default"));
 
     m_bottomPanesCheckBox->setCursor(Qt::PointingHandCursor);
     m_visibleBottomPaneBox->setCursor(Qt::PointingHandCursor);
+
+    addThemes(m_themeBox);
+    addLanguages(m_languageBox);
+    addBottomPanes(m_visibleBottomPaneBox);
 
     connect(m_leftBarColorResetButton, &QPushButton::clicked, this, [=] {
         m_leftBarColorButton->setColor(InterfaceSettings().leftBarColor);
@@ -159,9 +181,9 @@ void InterfaceSettingsWidget::apply()
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->topBarColor = m_topBarColorButton->color();
     settings->leftBarColor = m_leftBarColorButton->color();
-    settings->theme = m_themeBox->currentText();
-    settings->language = m_languageBox->currentText();
-    settings->visibleBottomPane = m_visibleBottomPaneBox->currentText();
+    settings->theme = m_themeBox->currentData().toString();
+    settings->language = m_languageBox->currentData().toString();
+    settings->visibleBottomPane = m_visibleBottomPaneBox->currentData().toString();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
     settings->bottomPanesPop = m_bottomPanesCheckBox->isChecked();
     settings->write();
