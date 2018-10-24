@@ -35,7 +35,7 @@ void setPanelButtonPaletteDarkerShadows(QWidget* widget)
 {
     QPalette palette(widget->palette());
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
-    shadowGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    shadowGrad.setCoordinateMode(QGradient::ObjectMode);
     shadowGrad.setColorAt(0, "#52202020");
     shadowGrad.setColorAt(0.05, "#50202020");
     shadowGrad.setColorAt(0.5, "#50202020");
@@ -44,25 +44,25 @@ void setPanelButtonPaletteDarkerShadows(QWidget* widget)
     palette.setBrush(QPalette::Shadow, shadowGrad);
 
     QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
-    darkGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    darkGrad.setCoordinateMode(QGradient::ObjectMode);
     darkGrad.setColorAt(0.85, "#60303030");
     darkGrad.setColorAt(1, "#7d000000");
     palette.setBrush(QPalette::Dark, darkGrad);
 
     QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
-    midGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    midGrad.setCoordinateMode(QGradient::ObjectMode);
     midGrad.setColorAt(0, "#e7e7e7");
     midGrad.setColorAt(1, "#e1e1e1");
     palette.setBrush(QPalette::Mid, midGrad);
 
     QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
-    buttonGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    buttonGrad.setCoordinateMode(QGradient::ObjectMode);
     buttonGrad.setColorAt(0, "#fefefe");
     buttonGrad.setColorAt(1, "#f7f7f7");
     palette.setBrush(QPalette::Button, buttonGrad);
 
     QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
-    midlightGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    midlightGrad.setCoordinateMode(QGradient::ObjectMode);
     midlightGrad.setColorAt(0, "#f4f4f4");
     midlightGrad.setColorAt(0.1, "#ededed");
     palette.setBrush(QPalette::Midlight, midlightGrad);
@@ -75,7 +75,7 @@ void setPanelButtonPaletteRed(QWidget* widget)
 {
     QPalette palette(widget->palette());
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
-    shadowGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    shadowGrad.setCoordinateMode(QGradient::ObjectMode);
     shadowGrad.setColorAt(0, "#22202020");
     shadowGrad.setColorAt(0.05, "#20202020");
     shadowGrad.setColorAt(0.5, "#20202020");
@@ -84,25 +84,25 @@ void setPanelButtonPaletteRed(QWidget* widget)
     palette.setBrush(QPalette::Shadow, shadowGrad);
 
     QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
-    darkGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    darkGrad.setCoordinateMode(QGradient::ObjectMode);
     darkGrad.setColorAt(0.85, "#60303030");
     darkGrad.setColorAt(1, "#7d000000");
     palette.setBrush(QPalette::Dark, darkGrad);
 
     QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
-    midGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    midGrad.setCoordinateMode(QGradient::ObjectMode);
     midGrad.setColorAt(0, "#b34b46");
     midGrad.setColorAt(1, "#a2403b");
     palette.setBrush(QPalette::Mid, midGrad);
 
     QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
-    buttonGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    buttonGrad.setCoordinateMode(QGradient::ObjectMode);
     buttonGrad.setColorAt(0, "#c2504b");
     buttonGrad.setColorAt(1, "#b34b46");
     palette.setBrush(QPalette::Button, buttonGrad);
 
     QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
-    midlightGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    midlightGrad.setCoordinateMode(QGradient::ObjectMode);
     midlightGrad.setColorAt(0.1, "#cc5650");
     midlightGrad.setColorAt(0, "#e5615a");
     palette.setBrush(QPalette::Midlight, midlightGrad);

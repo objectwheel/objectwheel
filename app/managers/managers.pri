@@ -13,7 +13,8 @@ HEADERS += $$PWD/controlcreationmanager.h \
            $$PWD/savemanager.h \
            $$PWD/toolmanager.h \
            $$PWD/usermanager.h \
-           $$PWD/windowmanager.h
+           $$PWD/windowmanager.h \
+           $$PWD/helpmanager.h
 
 SOURCES += $$PWD/controlcreationmanager.cpp \
            $$PWD/controlpreviewingmanager.cpp \
@@ -27,4 +28,5 @@ SOURCES += $$PWD/controlcreationmanager.cpp \
            $$PWD/savemanager.cpp \
            $$PWD/toolmanager.cpp \
            $$PWD/usermanager.cpp \
-           $$PWD/windowmanager.cpp
+           $$PWD/windowmanager.cpp \
+           $$PWD/helpmanager.cpp

@@ -34,7 +34,6 @@
 #include <utils/runextensions.h>
 
 #include <QDateTime>
-#include <QDebug>
 #include <QDir>
 #include <QFileInfo>
 #include <QFutureWatcher>
@@ -51,8 +50,6 @@
 
 //static const char kUserDocumentationKey[] = "Help/UserDocumentation";
 //static const char kUpdateDocumentationTask[] = "UpdateDocumentationTask";
-
-namespace Core {
 
 struct HelpManagerPrivate
 {
@@ -101,8 +98,7 @@ struct DbCleaner
 
 // -- HelpManager
 
-HelpManager::HelpManager(QObject *parent) :
-    QObject(parent)
+HelpManager::HelpManager(QObject *parent) : QObject(parent)
 {
     QTC_CHECK(!m_instance);
     m_instance = this;
@@ -426,27 +422,29 @@ void HelpManager::setupHelpManager()
 
     // create the help engine
     d->m_helpEngine = new QHelpEngine(collectionFilePath(), m_instance);
-//    d->m_helpEngine->setupData();
     d->m_helpEngine->setAutoSaveFilter(false);
+//    d->m_helpEngine->setupData();
 
-    for (const QString &filePath : d->documentationFromInstaller())
-        d->m_filesToRegister.insert(filePath);
+    qDebug() << d->m_helpEngine->registeredDocumentations();
 
-    d->cleanUpDocumentation();
+//    for (const QString &filePath : d->documentationFromInstaller())
+//        d->m_filesToRegister.insert(filePath);
 
-    if (!d->m_nameSpacesToUnregister.isEmpty()) {
-        unregisterDocumentation(d->m_nameSpacesToUnregister.toList());
-        d->m_nameSpacesToUnregister.clear();
-    }
+//    d->cleanUpDocumentation();
 
-    if (!d->m_filesToRegister.isEmpty()) {
-        registerDocumentation(d->m_filesToRegister.toList());
-        d->m_filesToRegister.clear();
-    }
+//    if (!d->m_nameSpacesToUnregister.isEmpty()) {
+//        unregisterDocumentation(d->m_nameSpacesToUnregister.toList());
+//        d->m_nameSpacesToUnregister.clear();
+//    }
 
-    QHash<QString, QVariant>::const_iterator it;
-    for (it = d->m_customValues.constBegin(); it != d->m_customValues.constEnd(); ++it)
-        setCustomValue(it.key(), it.value());
+//    if (!d->m_filesToRegister.isEmpty()) {
+//        registerDocumentation(d->m_filesToRegister.toList());
+//        d->m_filesToRegister.clear();
+//    }
+
+//    QHash<QString, QVariant>::const_iterator it;
+//    for (it = d->m_customValues.constBegin(); it != d->m_customValues.constEnd(); ++it)
+//        setCustomValue(it.key(), it.value());
 
     emit m_instance->setupFinished();
 }
@@ -505,5 +503,3 @@ void HelpManagerPrivate::writeSettings()
 //    const QStringList list = m_userRegisteredFiles.toList();
 //    BootSettings::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
 }
-
-}   // Core

@@ -16,8 +16,7 @@ class RunManager;
 class SaveManager;
 class WindowManager;
 class MenuManager;
-
-namespace Core { class HelpManager; }
+class HelpManager;
 
 class ApplicationCore final : public QObject
 {
@@ -50,7 +49,7 @@ private:
     static ControlRemovingManager* s_controlRemovingManager;
     static ControlPropertyManager* s_controlPropertyManager;
     static RunManager* s_runManager;
-    static Core::HelpManager* s_helpManager;
+    static HelpManager* s_helpManager;
     static DocumentManager* s_documentManager;
     static WindowManager* s_windowManager;
     static MenuManager* s_menuManager;

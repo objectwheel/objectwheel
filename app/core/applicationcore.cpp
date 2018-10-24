@@ -31,8 +31,6 @@
 #include <coreplugin/themechooser.h>
 #include <coreplugin/helpmanager.h>
 
-using namespace Core;
-
 ApplicationCore* ApplicationCore::s_instance = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
@@ -70,7 +68,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     /* Set Font */
     AppFontSettings::apply();
 
-
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);
     s_controlPreviewingManager = new ControlPreviewingManager(this);
@@ -84,7 +81,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     s_helpManager = new HelpManager(this);
 
     HelpManager::setupHelpManager();
-    Utils::setCreatorTheme(Internal::ThemeEntry::createTheme(Constants::DEFAULT_THEME));
+    Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
     connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
 
     /* Palette settings */

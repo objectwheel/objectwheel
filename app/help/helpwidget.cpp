@@ -95,7 +95,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_splitter->addWidget(m_helpViewer);
     m_splitter->setSizes(QList<int>() << 140 << 600);
 
-    QHelpEngine* engine = Core::HelpManager::helpEngine();
+    QHelpEngine* engine = HelpManager::helpEngine();
     engine->contentWidget()->setAttribute(Qt::WA_MacShowFocusRect, false);
     engine->indexWidget()->setAttribute(Qt::WA_MacShowFocusRect, false);
 
@@ -141,7 +141,7 @@ QSize HelpWidget::sizeHint() const
 
 bool HelpWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    QHelpEngine* engine = Core::HelpManager::helpEngine();
+    QHelpEngine* engine = HelpManager::helpEngine();
     if (watched == engine->indexWidget() && event->type() == QEvent::KeyPress) {
         auto e = static_cast<QKeyEvent*>(event);
         if (e->key() == Qt::Key_Return)
@@ -161,7 +161,7 @@ void HelpWidget::onHomeButtonClick()
 
 void HelpWidget::discharge()
 {
-    QHelpEngine* engine = Core::HelpManager::helpEngine();
+    QHelpEngine* engine = HelpManager::helpEngine();
     m_helpViewer->stop();
     m_helpViewer->clearHistory();
     m_helpViewer->home();
@@ -190,7 +190,7 @@ void HelpWidget::onTitleChange()
 
 void HelpWidget::onIndexFilterTextChange(const QString& filterText)
 {
-    QHelpEngine* engine = Core::HelpManager::helpEngine();
+    QHelpEngine* engine = HelpManager::helpEngine();
     engine->indexWidget()->filterIndices(filterText);
 }
 

@@ -25,8 +25,6 @@
 
 #pragma once
 
-#include "core_global.h"
-
 #include <QObject>
 #include <QStringList>
 #include <QVariant>
@@ -34,20 +32,16 @@
 #include <QHash>
 #include <QFutureInterface>
 
-QT_FORWARD_DECLARE_CLASS(QUrl)
-QT_FORWARD_DECLARE_CLASS(QHelpEngine)
+class QUrl;
+class QHelpEngine;
 
-namespace Core {
 struct HelpManagerPrivate;
 
-namespace Internal {
-class CorePlugin;
-class MainWindow;
-}
-
-class CORE_EXPORT HelpManager : public QObject
+class HelpManager : public QObject
 {
     Q_OBJECT
+
+    friend class ApplicationCore; // For constructor and setupHelpManager()
 
 public:
     enum HelpViewerLocation {
@@ -92,18 +86,16 @@ public:
     static void aboutToShutdown();
 
 public slots:
-    static void handleHelpRequest(const QUrl &url,
-                                  Core::HelpManager::HelpViewerLocation location = HelpModeAlways);
-    static void handleHelpRequest(const QString &url,
-                                  Core::HelpManager::HelpViewerLocation location = HelpModeAlways);
+    static void handleHelpRequest(const QUrl &url, HelpViewerLocation location = HelpModeAlways);
+    static void handleHelpRequest(const QString &url, HelpViewerLocation location = HelpModeAlways);
 
 signals:
     void setupFinished();
     void documentationChanged();
     void collectionFileChanged();
-    void helpRequested(const QUrl &url, Core::HelpManager::HelpViewerLocation location);
+    void helpRequested(const QUrl &url, HelpViewerLocation location);
 
-public /* BUG: private*/:
+private:
     explicit HelpManager(QObject *parent = nullptr);
     ~HelpManager();
 
@@ -111,5 +103,3 @@ public /* BUG: private*/:
     static void registerDocumentationNow(QFutureInterface<bool> &futureInterface,
                                          const QStringList &fileNames);
 };
-
-}   // Core

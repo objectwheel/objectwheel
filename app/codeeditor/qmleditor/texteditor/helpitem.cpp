@@ -95,7 +95,7 @@ QString HelpItem::extractContent(bool extended) const
             helpLinks.insert(m_helpId, m_helpId);
     }
     foreach (const QUrl &url, helpLinks) {
-        const QString html = QString::fromUtf8(Core::HelpManager::fileData(url));
+        const QString html = QString::fromUtf8(HelpManager::fileData(url));
         switch (m_category) {
         case Brief:
             contents = htmlExtractor.getClassOrNamespaceBrief(html, m_docMark);
@@ -138,6 +138,6 @@ QString HelpItem::extractContent(bool extended) const
 QMap<QString, QUrl> HelpItem::retrieveHelpLinks() const
 {
     if (m_helpLinks.isEmpty())
-        m_helpLinks = Core::HelpManager::linksForIdentifier(m_helpId);
+        m_helpLinks = HelpManager::linksForIdentifier(m_helpId);
     return m_helpLinks;
 }
