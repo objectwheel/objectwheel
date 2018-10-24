@@ -206,7 +206,7 @@ QByteArray ICodeStylePreferences::currentDelegateId() const
     return id(); // or 0?
 }
 
-void ICodeStylePreferences::setCurrentDelegate(const QByteArray &id)
+void ICodeStylePreferences::setCurrentDelegate(const QByteArray &/*id*/)
 {
 //    if (d->m_pool)
 //        setCurrentDelegate(d->m_pool->codeStyle(id)); // BUG ??

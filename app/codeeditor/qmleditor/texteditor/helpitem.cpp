@@ -25,7 +25,7 @@
 
 #include "helpitem.h"
 
-#include <coreplugin/helpmanager.h>
+#include <helpmanager.h>
 #include <utils/htmldocextractor.h>
 
 using namespace TextEditor;

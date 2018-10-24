@@ -32,7 +32,7 @@
 //#include <coreplugin/icore.h>
 //#include <coreplugin/editormanager/ieditor.h>
 //#include <coreplugin/editormanager/editormanager.h>
-#include <coreplugin/helpmanager.h>
+#include <helpmanager.h>
 #include <utils/qtcassert.h>
 //#include <extensionsystem/pluginmanager.h>
 #include <qmljs/qmljscontext.h>

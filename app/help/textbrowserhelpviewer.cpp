@@ -24,6 +24,7 @@
 ****************************************************************************/
 
 #include "textbrowserhelpviewer.h"
+#include <helpmanager.h>
 
 //#include "helpconstants.h"
 //#include "localhelpmanager.h"
@@ -315,10 +316,10 @@ TextBrowserHelpWidget::TextBrowserHelpWidget(TextBrowserHelpViewer *parent)
     document()->setDocumentMargin(8);
 }
 
-QVariant TextBrowserHelpWidget::loadResource(int /*type*/, const QUrl &/*name*/)
+QVariant TextBrowserHelpWidget::loadResource(int type, const QUrl &name)
 {
-//    if (type < QTextDocument::UserResource)
-//        return LocalHelpManager::helpData(name).data;
+    if (type < QTextDocument::UserResource)
+        return HelpManager::helpData(name).data;
     return QByteArray();
 }
 

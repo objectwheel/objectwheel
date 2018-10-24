@@ -94,11 +94,11 @@ void HelpViewer::home()
 
 void HelpViewer::slotLoadStarted()
 {
-    // BUG: QWebEngineView bug: qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 }
 void HelpViewer::slotLoadFinished()
 {
-    // BUG: QWebEngineView bug: qApp->restoreOverrideCursor();
+    QApplication::restoreOverrideCursor();
     emit sourceChanged(source());
     emit loadFinished();
 }

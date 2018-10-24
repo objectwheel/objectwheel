@@ -5,7 +5,7 @@
 #include <appfontsettings.h>
 #include <utilityfunctions.h>
 #include <textbrowserhelpviewer.h>
-#include <coreplugin/helpmanager.h>
+#include <helpmanager.h>
 
 #include <QHelpContentWidget>
 #include <QHelpIndexWidget>

@@ -29,7 +29,7 @@
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/themechooser.h>
-#include <coreplugin/helpmanager.h>
+#include <helpmanager.h>
 
 ApplicationCore* ApplicationCore::s_instance = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;

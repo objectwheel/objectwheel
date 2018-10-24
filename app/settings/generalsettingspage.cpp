@@ -16,4 +16,5 @@ QIcon GeneralSettingsPage::icon() const
 bool GeneralSettingsPage::containsWord(const QString& /*word*/) const
 {
     // TODO
+    return false;
 }

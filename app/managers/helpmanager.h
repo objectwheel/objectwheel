@@ -31,8 +31,8 @@
 #include <QMap>
 #include <QHash>
 #include <QFutureInterface>
+#include <QUrl>
 
-class QUrl;
 class QHelpEngine;
 
 struct HelpManagerPrivate;
@@ -44,6 +44,12 @@ class HelpManager : public QObject
     friend class ApplicationCore; // For constructor and setupHelpManager()
 
 public:
+    struct HelpData {
+        QUrl resolvedUrl;
+        QByteArray data;
+        QString mimeType;
+    };
+
     enum HelpViewerLocation {
         SideBySideIfPossible = 0,
         SideBySideAlways = 1,
@@ -72,6 +78,7 @@ public:
     static QStringList registeredNamespaces();
     static QString namespaceFromFile(const QString &file);
     static QString fileFromNamespace(const QString &nameSpace);
+    static HelpData helpData(const QUrl &url);
 
     static void setCustomValue(const QString &key, const QVariant &value);
     static QVariant customValue(const QString &key, const QVariant &value = QVariant());
