@@ -2,7 +2,6 @@
 #define BOOTSETTINGS_H
 
 #include <generalsettings.h>
-#include <applicationstyle.h>
 #include <QSettings>
 
 class BootSettings final
@@ -23,7 +22,6 @@ private:
     static BootSettings* s_instance;
     QSettings m_settings;
     GeneralSettings m_generalSettings;
-    ApplicationStyle style;
 };
 
 #endif // BOOTSETTINGS_H

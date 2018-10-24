@@ -41,7 +41,7 @@ class TextBrowserHelpViewer : public HelpViewer
     Q_OBJECT
 
 public:
-    explicit TextBrowserHelpViewer(QHelpEngine* helpEngine, QWidget *parent = nullptr);
+    explicit TextBrowserHelpViewer(QWidget *parent = nullptr);
     ~TextBrowserHelpViewer() override;
 
     QFont viewerFont() const override;
@@ -67,6 +67,7 @@ public:
 //    bool findText(const QString &text, Core::FindFlags flags,
 //                  bool incremental, bool fromSearch, bool *wrapped = nullptr) override;
 
+public slots:
     void scaleUp() override;
     void scaleDown() override;
     void resetScale() override;

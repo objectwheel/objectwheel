@@ -26,15 +26,15 @@
 enum Fields { Email, Password };
 enum Buttons { Login, Register };
 
-static bool checkEmail(const QString& email)
-{
-    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
-}
+//static bool checkEmail(const QString& email)
+//{
+//    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
+//}
 
-static bool checkPassword(const QString& password)
-{
-    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
-}
+//static bool checkPassword(const QString& password)
+//{
+//    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
+//}
 
 LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 {

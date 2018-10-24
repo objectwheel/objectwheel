@@ -39,7 +39,6 @@ private slots:
     void onUrlChange(const QMap<QString, QUrl> &links, const QString &keyword);
 
 private:
-    QHelpEngine* m_helpEngine;
     QVBoxLayout* m_layout;
     QToolBar* m_toolBar;
     QComboBox* m_typeCombo;

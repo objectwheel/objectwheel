@@ -47,8 +47,8 @@ using namespace Help::Internal;
 
 // -- HelpViewer
 
-TextBrowserHelpViewer::TextBrowserHelpViewer(QHelpEngine* helpEngine, QWidget *parent)
-    : HelpViewer(helpEngine, parent)
+TextBrowserHelpViewer::TextBrowserHelpViewer(QWidget *parent)
+    : HelpViewer(parent)
     , m_textBrowser(new TextBrowserHelpWidget(this))
 {
     m_textBrowser->setOpenLinks(false);
@@ -315,7 +315,7 @@ TextBrowserHelpWidget::TextBrowserHelpWidget(TextBrowserHelpViewer *parent)
     document()->setDocumentMargin(8);
 }
 
-QVariant TextBrowserHelpWidget::loadResource(int type, const QUrl &name)
+QVariant TextBrowserHelpWidget::loadResource(int /*type*/, const QUrl &/*name*/)
 {
 //    if (type < QTextDocument::UserResource)
 //        return LocalHelpManager::helpData(name).data;

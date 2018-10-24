@@ -439,7 +439,7 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
     instance()->propertyChanged(control, property, value);
 }
 
-void SaveManager::removeProperty(const Control* control, const QString& property)
+void SaveManager::removeProperty(const Control* /*control*/, const QString& /*property*/)
 {
     // TODO:
     //    if (control->dir().isEmpty() ||

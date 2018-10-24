@@ -43,8 +43,7 @@ struct ExtensionMap {
     {0, 0}
 };
 
-HelpViewer::HelpViewer(QHelpEngine* helpEngine, QWidget *parent) : QWidget(parent)
-  , m_helpEngine(helpEngine)
+HelpViewer::HelpViewer(QWidget *parent) : QWidget(parent)
 {
 }
 
@@ -89,9 +88,7 @@ QString HelpViewer::mimeFromUrl(const QUrl &url)
 
 void HelpViewer::home()
 {
-    static const QString url = QString::fromLatin1("qthelp://org.qt-project.qtdoc."
-        "%1%2%3/qtdoc/index.html").arg(QT_VERSION_MAJOR).arg(QT_VERSION_MINOR)
-        .arg(QT_VERSION_PATCH);
+    static const QString url = "qthelp://org.qt-project.qtdoc.5101/qtdoc/index.html";
     setSource(url);
 }
 

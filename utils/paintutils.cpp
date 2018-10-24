@@ -246,7 +246,7 @@ void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, con
 void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette, bool themeLight)
 {
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
-    shadowGrad.setCoordinateMode(QGradient::ObjectMode);
+    shadowGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
     if (themeLight) {
         shadowGrad.setColorAt(0, "#12202020");
         shadowGrad.setColorAt(0.05, "#10202020");
@@ -263,7 +263,7 @@ void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette, bool themeLigh
     palette.setBrush(QPalette::Shadow, shadowGrad);
 
     QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
-    darkGrad.setCoordinateMode(QGradient::ObjectMode);
+    darkGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
     if (themeLight) {
         darkGrad.setColorAt(0.85, "#20303030");
         darkGrad.setColorAt(1, "#3d000000");
@@ -274,7 +274,7 @@ void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette, bool themeLigh
     palette.setBrush(QPalette::Dark, darkGrad);
 
     QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
-    midGrad.setCoordinateMode(QGradient::ObjectMode);
+    midGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
     if (themeLight) {
         midGrad.setColorAt(0, "#e7e7e7");
         midGrad.setColorAt(1, "#e1e1e1");
@@ -285,7 +285,7 @@ void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette, bool themeLigh
     palette.setBrush(QPalette::Mid, midGrad);
 
     QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
-    buttonGrad.setCoordinateMode(QGradient::ObjectMode);
+    buttonGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
     if (themeLight) {
         buttonGrad.setColorAt(0, "#fefefe");
         buttonGrad.setColorAt(1, "#f7f7f7");
@@ -296,7 +296,7 @@ void PaintUtils::setPanelButtonPaletteDefaults(QPalette& palette, bool themeLigh
     palette.setBrush(QPalette::Button, buttonGrad);
 
     QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
-    midlightGrad.setCoordinateMode(QGradient::ObjectMode);
+    midlightGrad.setCoordinateMode(QGradient::ObjectBoundingMode);
     if (themeLight) {
         midlightGrad.setColorAt(0, "#f4f4f4");
         midlightGrad.setColorAt(0.1, "#ededed");

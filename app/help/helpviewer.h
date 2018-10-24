@@ -20,7 +20,7 @@ public:
     };
     Q_DECLARE_FLAGS(Actions, Action)
 
-    explicit HelpViewer(QHelpEngine* helpEngine, QWidget *parent = 0);
+    explicit HelpViewer(QWidget *parent = 0);
     ~HelpViewer() { }
 
     virtual QFont viewerFont() const = 0;
@@ -77,7 +77,6 @@ protected:
     void slotLoadFinished();
 
     Actions m_visibleActions = 0;
-    QHelpEngine* m_helpEngine;
 };
 
 #endif // HELPVIEWER_H

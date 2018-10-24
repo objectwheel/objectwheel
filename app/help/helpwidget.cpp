@@ -5,6 +5,7 @@
 #include <appfontsettings.h>
 #include <utilityfunctions.h>
 #include <textbrowserhelpviewer.h>
+#include <coreplugin/helpmanager.h>
 
 #include <QHelpContentWidget>
 #include <QHelpIndexWidget>
@@ -15,7 +16,6 @@
 #include <QToolButton>
 #include <QLabel>
 #include <QSplitter>
-#include <QApplication>
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -24,13 +24,7 @@
 // TODO: "Find" on help page
 // TODO: Copy/paste keyboard shortcuts
 
-namespace {
-QHelpContentWidget* contentWidget;
-QHelpIndexWidget* indexWidget;
-}
-
 HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
-  , m_helpEngine(new QHelpEngine(QApplication::applicationDirPath() + "/docs/docs.qhc", this))
   , m_layout(new QVBoxLayout(this))
   , m_toolBar(new QToolBar)
   , m_typeCombo(new QComboBox)
@@ -40,18 +34,13 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_titleLabel(new QLabel)
   , m_copyAction(new QAction(this))
   , m_splitter(new QSplitter)
-  , m_helpViewer(new Help::Internal::TextBrowserHelpViewer(m_helpEngine))
+  , m_helpViewer(new Help::Internal::TextBrowserHelpViewer)
   , m_contentsWidget(new QWidget)
   , m_contentsLayout(new QVBoxLayout(m_contentsWidget))
   , m_indexWidget(new QWidget)
   , m_indexLayout(new QVBoxLayout(m_indexWidget))
   , m_indexFilterEdit(new FocuslessLineEdit)
 {
-    m_helpEngine->setAutoSaveFilter(false);
-
-    contentWidget = m_helpEngine->contentWidget();
-    indexWidget = m_helpEngine->indexWidget();
-
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_toolBar);
@@ -106,28 +95,29 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_splitter->addWidget(m_helpViewer);
     m_splitter->setSizes(QList<int>() << 140 << 600);
 
-    contentWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
-    indexWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
+    QHelpEngine* engine = Core::HelpManager::helpEngine();
+    engine->contentWidget()->setAttribute(Qt::WA_MacShowFocusRect, false);
+    engine->indexWidget()->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     m_contentsLayout->setSpacing(5);
     m_contentsLayout->setContentsMargins(5, 5, 5, 5);
-    m_contentsLayout->addWidget(contentWidget);
+    m_contentsLayout->addWidget(engine->contentWidget());
     m_indexFilterEdit->setClearButtonEnabled(true);
 
     m_indexLayout->setSpacing(5);
     m_indexLayout->setContentsMargins(5, 5, 5, 5);
     m_indexLayout->addWidget(m_indexFilterEdit);
-    m_indexLayout->addWidget(indexWidget);
+    m_indexLayout->addWidget(engine->indexWidget());
 
-    indexWidget->installEventFilter(this);
-    contentWidget->viewport()->installEventFilter(this);
+    engine->indexWidget()->installEventFilter(this);
+    engine->contentWidget()->viewport()->installEventFilter(this);
 
     connect(m_typeCombo, SIGNAL(currentIndexChanged(int)), SLOT(onTypeChange()));
     connect(m_indexFilterEdit, SIGNAL(textChanged(QString)), SLOT(onIndexFilterTextChange(QString)));
-    connect(m_indexFilterEdit, SIGNAL(returnPressed()), indexWidget, SLOT(activateCurrentItem()));
-    connect(contentWidget, SIGNAL(linkActivated(QUrl)), SLOT(onUrlChange(QUrl)));
-    connect(indexWidget, SIGNAL(linkActivated(QUrl,QString)), SLOT(onUrlChange(QUrl,QString)));
-    connect(indexWidget, SIGNAL(linksActivated(QMap<QString,QUrl>,QString)), SLOT(onUrlChange(QMap<QString,QUrl>,QString)));
+    connect(m_indexFilterEdit, SIGNAL(returnPressed()), engine->indexWidget(), SLOT(activateCurrentItem()));
+    connect(engine->contentWidget(), SIGNAL(linkActivated(QUrl)), SLOT(onUrlChange(QUrl)));
+    connect(engine->indexWidget(), SIGNAL(linkActivated(QUrl,QString)), SLOT(onUrlChange(QUrl,QString)));
+    connect(engine->indexWidget(), SIGNAL(linksActivated(QMap<QString,QUrl>,QString)), SLOT(onUrlChange(QMap<QString,QUrl>,QString)));
     connect(m_helpViewer, SIGNAL(titleChanged()), SLOT(onTitleChange()));
     connect(m_helpViewer, SIGNAL(backwardAvailable(bool)), m_backButton, SLOT(setEnabled(bool)));
     connect(m_helpViewer, SIGNAL(forwardAvailable(bool)), m_forthButton, SLOT(setEnabled(bool)));
@@ -139,9 +129,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     m_copyAction->setShortcut(QKeySequence::Copy);
 //    m_helpViewer->webView()->addAction(m_copyAction);
-    connect(m_copyAction, &QAction::triggered, this, [=] {
-        QGuiApplication::clipboard()->setText(m_helpViewer->selectedText());
-    });
+//    connect(m_copyAction, &QAction::triggered, this, [=] {
+//        QGuiApplication::clipboard()->setText(m_helpViewer->selectedText());
+//    });
 }
 
 QSize HelpWidget::sizeHint() const
@@ -151,13 +141,14 @@ QSize HelpWidget::sizeHint() const
 
 bool HelpWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    if (watched == indexWidget && event->type() == QEvent::KeyPress) {
+    QHelpEngine* engine = Core::HelpManager::helpEngine();
+    if (watched == engine->indexWidget() && event->type() == QEvent::KeyPress) {
         auto e = static_cast<QKeyEvent*>(event);
         if (e->key() == Qt::Key_Return)
-            indexWidget->activateCurrentItem();
-    } else if (watched == contentWidget->viewport() && event->type() == QEvent::MouseButtonPress) {
+            engine->indexWidget()->activateCurrentItem();
+    } else if (watched == engine->contentWidget()->viewport() && event->type() == QEvent::MouseButtonPress) {
         auto e = static_cast<QMouseEvent*>(event);
-        contentWidget->activated(contentWidget->indexAt(e->pos()));
+        engine->contentWidget()->activated(engine->contentWidget()->indexAt(e->pos()));
     }
     return QWidget::eventFilter(watched, event);
 }
@@ -170,15 +161,16 @@ void HelpWidget::onHomeButtonClick()
 
 void HelpWidget::discharge()
 {
+    QHelpEngine* engine = Core::HelpManager::helpEngine();
     m_helpViewer->stop();
     m_helpViewer->clearHistory();
     m_helpViewer->home();
     m_typeCombo->setCurrentIndex(0);
     m_indexFilterEdit->clear();
-    indexWidget->clearSelection();
-    contentWidget->clearSelection();
-    indexWidget->scrollToTop();
-    contentWidget->collapseAll();
+    engine->indexWidget()->clearSelection();
+    engine->contentWidget()->clearSelection();
+    engine->indexWidget()->scrollToTop();
+    engine->contentWidget()->collapseAll();
     m_backButton->setDisabled(true);
     m_forthButton->setDisabled(true);
 }
@@ -198,7 +190,8 @@ void HelpWidget::onTitleChange()
 
 void HelpWidget::onIndexFilterTextChange(const QString& filterText)
 {
-    indexWidget->filterIndices(filterText);
+    QHelpEngine* engine = Core::HelpManager::helpEngine();
+    engine->indexWidget()->filterIndices(filterText);
 }
 
 void HelpWidget::onUrlChange(const QUrl& url)

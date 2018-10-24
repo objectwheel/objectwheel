@@ -21,6 +21,7 @@
 #include <appfontsettings.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
+#include <applicationstyle.h>
 
 #include <QApplication>
 #include <QSplashScreen>
@@ -57,6 +58,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+    QApplication::setStyle(new ApplicationStyle);
 
     /* Show splash screen */
     QPixmap pixmap(":/images/splash.png");
@@ -67,6 +69,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
     /* Set Font */
     AppFontSettings::apply();
+
 
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);

@@ -16,8 +16,6 @@ BootSettings::BootSettings(const char* filePath)
     if (m_generalSettings.interfaceSettings()->hdpiEnabled)
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QApplication::setStyle(&style);
-
     /* Disable Qml Parser warnings */
     QLoggingCategory::setFilterRules(QStringLiteral("qtc*.info=false\n"
                                                     "qtc*.debug=false\n"

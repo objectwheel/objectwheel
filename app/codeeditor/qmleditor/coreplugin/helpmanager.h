@@ -35,6 +35,7 @@
 #include <QFutureInterface>
 
 QT_FORWARD_DECLARE_CLASS(QUrl)
+QT_FORWARD_DECLARE_CLASS(QHelpEngine)
 
 namespace Core {
 struct HelpManagerPrivate;
@@ -59,6 +60,7 @@ public:
     typedef QHash<QString, QStringList> Filters;
 
     static HelpManager *instance();
+    static QHelpEngine* helpEngine();
     static QString collectionFilePath();
 
     static void registerDocumentation(const QStringList &fileNames);
@@ -108,8 +110,6 @@ public /* BUG: private*/:
     static void setupHelpManager();
     static void registerDocumentationNow(QFutureInterface<bool> &futureInterface,
                                          const QStringList &fileNames);
-    friend class Core::Internal::CorePlugin; // setupHelpManager
-    friend class Core::Internal::MainWindow; // constructor/destructor
 };
 
 }   // Core

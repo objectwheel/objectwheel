@@ -298,7 +298,7 @@ void QmlJSHighlighter::onBlockEnd(int state)
 //    QmlCodeDocument::setFoldingIndent(currentBlock(), m_foldingIndent); // BUG
 }
 
-void QmlJSHighlighter::onOpeningParenthesis(QChar parenthesis, int pos, bool atStart)
+void QmlJSHighlighter::onOpeningParenthesis(QChar parenthesis, int pos, bool /*atStart*/)
 {
     if (parenthesis == QLatin1Char('{') || parenthesis == QLatin1Char('[') || parenthesis == QLatin1Char('+')) {
         ++m_braceDepth;
@@ -310,7 +310,7 @@ void QmlJSHighlighter::onOpeningParenthesis(QChar parenthesis, int pos, bool atS
     m_currentBlockParentheses.push_back(Parenthesis(Parenthesis::Opened, parenthesis, pos));
 }
 
-void QmlJSHighlighter::onClosingParenthesis(QChar parenthesis, int pos, bool atEnd)
+void QmlJSHighlighter::onClosingParenthesis(QChar parenthesis, int pos, bool /*atEnd*/)
 {
     if (parenthesis == QLatin1Char('}') || parenthesis == QLatin1Char(']') || parenthesis == QLatin1Char('-')) {
         --m_braceDepth;

@@ -41,11 +41,8 @@
 #include <QStringList>
 #include <QUrl>
 #include <QSettings>
-
-#ifdef QT_HELP_LIB
-
-#include <QHelpEngineCore>
-
+#include <QApplication>
+#include <QHelpEngine>
 #include <QMutexLocker>
 #include <QSqlDatabase>
 #include <QSqlDriver>
@@ -71,7 +68,7 @@ struct HelpManagerPrivate
     void cleanUpDocumentation();
 
     bool m_needsSetup;
-    QHelpEngineCore *m_helpEngine;
+    QHelpEngine *m_helpEngine;
     Utils::FileSystemWatcher *m_collectionWatcher;
 
     // data for delayed initialization
@@ -124,10 +121,14 @@ HelpManager *HelpManager::instance()
     return m_instance;
 }
 
+QHelpEngine* HelpManager::helpEngine()
+{
+    return d->m_helpEngine;
+}
+
 QString HelpManager::collectionFilePath()
 {
-    return QDir::cleanPath(BootSettings::userResourcePath()
-        + QLatin1String("/helpcollection.qhc"));
+    return QApplication::applicationDirPath() + "/docs/docs.qhc";
 }
 
 void HelpManager::registerDocumentation(const QStringList &files)
@@ -424,8 +425,9 @@ void HelpManager::setupHelpManager()
     d->readSettings();
 
     // create the help engine
-    d->m_helpEngine = new QHelpEngineCore(collectionFilePath(), m_instance);
-    d->m_helpEngine->setupData();
+    d->m_helpEngine = new QHelpEngine(collectionFilePath(), m_instance);
+//    d->m_helpEngine->setupData();
+    d->m_helpEngine->setAutoSaveFilter(false);
 
     for (const QString &filePath : d->documentationFromInstaller())
         d->m_filesToRegister.insert(filePath);
@@ -505,51 +507,3 @@ void HelpManagerPrivate::writeSettings()
 }
 
 }   // Core
-
-#else // QT_HELP_LIB
-
-namespace Core {
-
-HelpManager *HelpManager::instance() { return 0; }
-
-QString HelpManager::collectionFilePath() { return QString(); }
-
-void HelpManager::registerDocumentation(const QStringList &) {}
-void HelpManager::registerDocumentationNow(QFutureInterface<bool> &, const QStringList &) {}
-void HelpManager::unregisterDocumentation(const QStringList &) {}
-
-void HelpManager::registerUserDocumentation(const QStringList &) {}
-QSet<QString> HelpManager::userDocumentationPaths() { return {}; }
-
-QMap<QString, QUrl> HelpManager::linksForKeyword(const QString &) { return {}; }
-QMap<QString, QUrl> HelpManager::linksForIdentifier(const QString &) { return {}; }
-
-QUrl HelpManager::findFile(const QUrl &) { return QUrl();}
-QByteArray HelpManager::fileData(const QUrl &) { return QByteArray();}
-
-QStringList HelpManager::registeredNamespaces() { return {}; }
-QString HelpManager::namespaceFromFile(const QString &) { return QString(); }
-QString HelpManager::fileFromNamespace(const QString &) { return QString(); }
-
-void HelpManager::setCustomValue(const QString &, const QVariant &) {}
-QVariant HelpManager::customValue(const QString &, const QVariant &) { return QVariant(); }
-
-HelpManager::Filters filters() { return {}; }
-HelpManager::Filters fixedFilters() { return {}; }
-
-HelpManager::Filters userDefinedFilters() { return {}; }
-
-void HelpManager::removeUserDefinedFilter(const QString &) {}
-void HelpManager::addUserDefinedFilter(const QString &, const QStringList &) {}
-
-void HelpManager::handleHelpRequest(const QUrl &, HelpManager::HelpViewerLocation) {}
-void HelpManager::handleHelpRequest(const QString &, HelpViewerLocation) {}
-
-HelpManager::HelpManager(QObject *) {}
-HelpManager::~HelpManager() {}
-void HelpManager::aboutToShutdown() {}
-void HelpManager::setupHelpManager() {}
-
-} // namespace Core
-
-#endif // QT_HELP_LIB
