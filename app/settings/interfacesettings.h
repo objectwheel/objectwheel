@@ -2,7 +2,9 @@
 #define INTERFACESETTINGS_H
 
 #include <settings.h>
+
 #include <QColor>
+#include <QFont>
 
 class InterfaceSettings : public Settings
 {
@@ -18,6 +20,7 @@ public:
 
     bool hdpiEnabled;
     bool bottomPanesPop;
+    QFont font;
     QString theme;
     QString language;
     QColor topBarColor;

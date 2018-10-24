@@ -7,7 +7,7 @@
 #include <controlpreviewingmanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>
-#include <appfontsettings.h>
+#include <defaultfont.h>
 #include <utilityfunctions.h>
 
 #include <QMessageBox>
@@ -88,13 +88,13 @@ void ProjectTemplatesDelegate::paint(QPainter* painter, const QStyleOptionViewIt
 
     painter->drawPixmap(ri, icon, icon.rect());
 
-    QFont f;
+    QFont f(DefaultFont::font());
     f.setWeight(QFont::DemiBold);
     painter->setFont(f);
     painter->setPen(option.palette.text().color());
     painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
 
-    f.setPixelSize(AppFontSettings::defaultPixelSize() - 2);
+    f.setPixelSize(f.pixelSize() - 2);
     f.setWeight(QFont::Normal);
     painter->setFont(f);
     painter->drawText(rl, description, Qt::AlignVCenter | Qt::AlignLeft);

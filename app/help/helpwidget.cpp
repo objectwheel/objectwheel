@@ -2,7 +2,7 @@
 #include <focuslesslineedit.h>
 #include <transparentstyle.h>
 #include <utilsicons.h>
-#include <appfontsettings.h>
+#include <defaultfont.h>
 #include <utilityfunctions.h>
 #include <textbrowserhelpviewer.h>
 #include <helpmanager.h>

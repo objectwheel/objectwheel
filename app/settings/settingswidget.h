@@ -1,27 +1,34 @@
 #ifndef SETTINGSWIDGET_H
 #define SETTINGSWIDGET_H
 
-#include <QAbstractScrollArea>
+#include <QScrollArea>
 
-class SettingsWidget : public QAbstractScrollArea
+class QVBoxLayout;
+
+class SettingsWidget : public QScrollArea
 {
     Q_OBJECT
 
 public:
     explicit SettingsWidget(QWidget* parent = nullptr);
 
-    void activate(bool activate = true);
-    bool isActivated() const;
-
-    QString title() const;
-    void setTitle(const QString& title);
-
     virtual void apply() = 0;
     virtual void reset() = 0;
+    virtual QString title() const = 0;
+
+    void activate(bool activate = true);
+    bool isActivated() const;
+    QWidget* contentWidget() const;
+    QVBoxLayout* contentLayout() const;
+
+protected:
+    bool event(QEvent*) override;
+    void paintEvent(QPaintEvent*) override;
 
 private:
     bool m_activated;
-    QString m_title;
+    QWidget* m_contentWidget;
+    QVBoxLayout* m_contentLayout;
 };
 
 #endif // SETTINGSWIDGET_H

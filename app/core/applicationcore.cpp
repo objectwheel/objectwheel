@@ -18,10 +18,10 @@
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
 #include <welcomewindow.h>
-#include <appfontsettings.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <applicationstyle.h>
+#include <defaultfont.h>
 
 #include <QApplication>
 #include <QSplashScreen>
@@ -56,7 +56,15 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+
+    // Load fonts
+    DefaultFont::load();
+
+    // FIXME: To re-read font settings after QApplication instance is constructed
+    GeneralSettings::interfaceSettings()->read();
+
     QApplication::setStyle(new ApplicationStyle);
+    QApplication::setFont(GeneralSettings::interfaceSettings()->font);
 
     /* Show splash screen */
     QPixmap pixmap(":/images/splash.png");
@@ -64,9 +72,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QSplashScreen splash(pixmap);
     splash.show();
     QApplication::processEvents();
-
-    /* Set Font */
-    AppFontSettings::apply();
 
     s_authenticator = new Authenticator(this);
     s_userManager = new UserManager(this);

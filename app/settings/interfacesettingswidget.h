@@ -22,6 +22,7 @@ public:
 
     void apply() override;
     void reset() override;
+    QString title() const override;
 
 private:
     QVBoxLayout* m_layout;
@@ -39,7 +40,17 @@ private:
     QComboBox* m_themeBox;
     QComboBox* m_languageBox;
     QCheckBox* m_hdpiCheckBox;
-
+    /****/
+    QGroupBox* m_fontGroup;
+    QGridLayout* m_fontLayout;
+    QLabel* m_fontFamilyLabel;
+    QLabel* m_fontSizeLabel;
+    QComboBox* m_fontFamilyBox;
+    QComboBox* m_fontSizeBox;
+    QCheckBox* m_fontAntialiasingBox;
+    QCheckBox* m_fontThickBox;
+    QPushButton* m_fontResetButton;
+    /****/
     QGroupBox* m_behavioralGroup;
     QGridLayout* m_behavioralLayout;
     QLabel* m_visibleBottomPaneLabel;

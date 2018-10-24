@@ -1,5 +1,6 @@
 #include <interfacesettings.h>
 #include <bootsettings.h>
+#include <defaultfont.h>
 
 #include <QTimer>
 
@@ -9,6 +10,7 @@ const char* g_category = "Interface";
 const char* g_leftBarColor = "LeftBarColor";
 const char* g_topBarColor = "TopBarColor";
 const char* g_theme = "Theme";
+const char* g_font = "Font";
 const char* g_language = "Language";
 const char* g_hdpiEnabled = "HdpiEnabled";
 const char* g_bottomPanesPop = "BottomPanesPop";
@@ -36,6 +38,7 @@ void InterfaceSettings::read()
     QSettings* settings = BootSettings::settings();
     settings->beginGroup(group());
     theme = settings->value(joint(g_theme), theme).value<QString>();
+    font = settings->value(joint(g_font), font).value<QFont>();
     language = settings->value(joint(g_language), language).value<QString>();
     hdpiEnabled = settings->value(joint(g_hdpiEnabled), hdpiEnabled).value<bool>();
     bottomPanesPop = settings->value(joint(g_bottomPanesPop), bottomPanesPop).value<bool>();
@@ -50,6 +53,7 @@ void InterfaceSettings::write()
     QSettings* settings = BootSettings::settings();
     settings->beginGroup(group());
     settings->setValue(joint(g_theme), theme);
+    settings->setValue(joint(g_font), font);
     settings->setValue(joint(g_language), language);
     settings->setValue(joint(g_hdpiEnabled), hdpiEnabled);
     settings->setValue(joint(g_bottomPanesPop), bottomPanesPop);
@@ -64,6 +68,7 @@ void InterfaceSettings::reset()
 {
     hdpiEnabled = true;
     bottomPanesPop = false;
+    font = DefaultFont::font();
     theme = "Light";
     language = "English";
     topBarColor = "#247dd6";

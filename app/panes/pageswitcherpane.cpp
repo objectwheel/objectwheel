@@ -1,8 +1,9 @@
 #include <pageswitcherpane.h>
 #include <flatbutton.h>
-#include <appfontsettings.h>
+#include <defaultfont.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
+#include <utilityfunctions.h>
 
 #include <QPainter>
 #include <QVBoxLayout>
@@ -31,9 +32,9 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_helpButton);
     m_layout->addStretch();
 
-    QFont labelFont;
+    QFont labelFont(DefaultFont::font());
     labelFont.setWeight(QFont::DemiBold);
-    labelFont.setPixelSize(AppFontSettings::defaultPixelSize() - 2.0);
+    labelFont.setPixelSize(labelFont.pixelSize() - 2.0);
 
     m_buildsButton->setFont(labelFont);
     m_splitViewButton->setFont(labelFont);

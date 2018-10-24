@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QAction>
+#include <QFontDatabase>
 
 namespace {
 
@@ -39,8 +40,7 @@ void addLanguages(QComboBox* comboBox)
 }
 
 InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidget(parent)
-  , m_layout(new QVBoxLayout(this))
-  , m_interfaceGroup(new QGroupBox(this))
+  , m_interfaceGroup(new QGroupBox(contentWidget()))
   , m_interfaceLayout(new QGridLayout(m_interfaceGroup))
   , m_topBarColorLabel(new QLabel(m_interfaceGroup))
   , m_leftBarColorLabel(new QLabel(m_interfaceGroup))
@@ -54,20 +54,29 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_themeBox(new QComboBox(m_interfaceGroup))
   , m_languageBox(new QComboBox(m_interfaceGroup))
   , m_hdpiCheckBox(new QCheckBox(m_interfaceGroup))
-  //***
-  , m_behavioralGroup(new QGroupBox(this))
+  /****/
+  , m_fontGroup(new QGroupBox(contentWidget()))
+  , m_fontLayout(new QGridLayout(m_fontGroup))
+  , m_fontFamilyLabel(new QLabel(m_fontGroup))
+  , m_fontSizeLabel(new QLabel(m_fontGroup))
+  , m_fontFamilyBox(new QComboBox(m_fontGroup))
+  , m_fontSizeBox(new QComboBox(m_fontGroup))
+  , m_fontAntialiasingBox(new QCheckBox(m_fontGroup))
+  , m_fontThickBox(new QCheckBox(m_fontGroup))
+  , m_fontResetButton(new QPushButton(m_fontGroup))
+  /****/
+  , m_behavioralGroup(new QGroupBox(contentWidget()))
   , m_behavioralLayout(new QGridLayout(m_behavioralGroup))
   , m_visibleBottomPaneLabel(new QLabel(m_behavioralGroup))
   , m_bottomPanesCheckBox(new QCheckBox(m_behavioralGroup))
   , m_visibleBottomPaneBox(new QComboBox(m_behavioralGroup))
 {
-    setTitle(tr("Interface"));
+    contentLayout()->addWidget(m_interfaceGroup);
+    contentLayout()->addWidget(m_fontGroup);
+    contentLayout()->addWidget(m_behavioralGroup);
+    contentLayout()->addStretch();
 
-    m_layout->setSpacing(8);
-    m_layout->setContentsMargins(6, 6, 6, 6);
-    m_layout->addWidget(m_interfaceGroup);
-    m_layout->addWidget(m_behavioralGroup);
-    m_layout->addStretch();
+    /****/
 
     auto hb1 = new QHBoxLayout;
     hb1->setSpacing(8);
@@ -125,6 +134,48 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_languageBox->setCursor(Qt::PointingHandCursor);
     m_hdpiCheckBox->setCursor(Qt::PointingHandCursor);
 
+    /****/
+
+    m_fontLayout->setSpacing(8);
+    m_fontLayout->setContentsMargins(6, 6, 6, 6);
+    m_fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    m_fontLayout->addWidget(m_fontFamilyLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_fontLayout->addWidget(m_fontFamilyBox, 0, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    m_fontLayout->addWidget(m_fontSizeLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_fontLayout->addWidget(m_fontSizeBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
+    m_fontLayout->addWidget(m_fontAntialiasingBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_fontLayout->addWidget(m_fontThickBox, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    m_fontLayout->addWidget(m_fontResetButton, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_fontLayout->setColumnStretch(4, 1);
+
+    m_fontGroup->setTitle(tr("Font"));
+    m_fontFamilyLabel->setText(tr("Family") + ":");
+    m_fontFamilyBox->addItems(QFontDatabase().families());
+    m_fontSizeLabel->setText(tr("Size") + ":");
+    m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
+                             "18", "24", "36", "48", "64", "72", "96", "144"});
+    m_fontAntialiasingBox->setText(tr("Prefer antialiasing"));
+    m_fontThickBox->setText(tr("Prefer thicker"));
+    m_fontResetButton->setText(tr("Reset"));
+
+//    m_topBarColorResetButton->setToolTip(tr("Reset color to default"));
+//    m_leftBarColorResetButton->setToolTip(tr("Reset color to default"));
+//    m_topBarColorButton->setToolTip(tr("Chage top bar color"));
+//    m_leftBarColorButton->setToolTip(tr("Chage left bar color"));
+//    m_themeBox->setToolTip(tr("Change gui theme"));
+//    m_languageBox->setToolTip(tr("Change language"));
+//    m_hdpiCheckBox->setToolTip(tr("Enable high DPI scaling"));
+//    m_leftBarColorButton->setFixedWidth(64);
+//    m_topBarColorButton->setFixedWidth(64);
+
+    m_fontFamilyBox->setCursor(Qt::PointingHandCursor);
+    m_fontSizeBox->setCursor(Qt::PointingHandCursor);
+    m_fontAntialiasingBox->setCursor(Qt::PointingHandCursor);
+    m_fontThickBox->setCursor(Qt::PointingHandCursor);
+    m_fontResetButton->setCursor(Qt::PointingHandCursor);
+
+    /****/
+
     m_behavioralLayout->setSpacing(8);
     m_behavioralLayout->setContentsMargins(6, 6, 6, 6);
     m_behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
@@ -144,6 +195,8 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_bottomPanesCheckBox->setCursor(Qt::PointingHandCursor);
     m_visibleBottomPaneBox->setCursor(Qt::PointingHandCursor);
 
+    /****/
+
     addThemes(m_themeBox);
     addLanguages(m_languageBox);
     addBottomPanes(m_visibleBottomPaneBox);
@@ -158,9 +211,13 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the high DPI settings will take effect after application restart."));
     });
-    connect(m_languageBox, qOverload<int>(&QComboBox::activated), this, [=] {
+    connect(m_languageBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the language change will take effect after application restart."));
+    });
+    connect(m_themeBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the theme change will take effect after application restart."));
     });
 
     activate();
@@ -200,4 +257,9 @@ void InterfaceSettingsWidget::reset()
     m_visibleBottomPaneBox->setCurrentText(tr(settings->visibleBottomPane.toUtf8()));
     m_hdpiCheckBox->setChecked(settings->hdpiEnabled);
     m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);
+}
+
+QString InterfaceSettingsWidget::title() const
+{
+    return tr("Interface");
 }
