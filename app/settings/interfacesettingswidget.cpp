@@ -14,7 +14,7 @@
 
 namespace {
 
-const char* g_themes[] = {"Light", "Dark"};
+const char* g_themes[] = {"Light"/*, "Dark"*/};
 const char* g_bottomPanes[] = {"None", "Console Pane", "Issues Pane"};
 const char* g_langIcons[] = {":/images/flags/en.png"};
 const char* g_languages[] = {"English"};
