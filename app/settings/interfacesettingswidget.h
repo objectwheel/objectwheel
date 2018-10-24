@@ -42,7 +42,7 @@ private:
     QCheckBox* m_hdpiCheckBox;
     /****/
     QGroupBox* m_fontGroup;
-    QGridLayout* m_fontLayout;
+    QVBoxLayout* m_fontLayout;
     QLabel* m_fontFamilyLabel;
     QLabel* m_fontSizeLabel;
     QComboBox* m_fontFamilyBox;

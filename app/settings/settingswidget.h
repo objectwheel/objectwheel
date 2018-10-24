@@ -18,12 +18,9 @@ public:
 
     void activate(bool activate = true);
     bool isActivated() const;
+
     QWidget* contentWidget() const;
     QVBoxLayout* contentLayout() const;
-
-protected:
-    bool event(QEvent*) override;
-    void paintEvent(QPaintEvent*) override;
 
 private:
     bool m_activated;

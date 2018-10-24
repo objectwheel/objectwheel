@@ -15,6 +15,10 @@
 
 namespace {
 
+bool g_themeMessageShowed = false;
+bool g_languageMessageShowed = false;
+bool g_hdpiMessageShowed = false;
+bool g_fontMessageShowed = false;
 const char* g_themes[] = {"Light"/*, "Dark"*/};
 const char* g_bottomPanes[] = {"None", "Console Pane", "Issues Pane"};
 const char* g_langIcons[] = {":/images/flags/en.png"};
@@ -56,7 +60,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_hdpiCheckBox(new QCheckBox(m_interfaceGroup))
   /****/
   , m_fontGroup(new QGroupBox(contentWidget()))
-  , m_fontLayout(new QGridLayout(m_fontGroup))
+  , m_fontLayout(new QVBoxLayout(m_fontGroup))
   , m_fontFamilyLabel(new QLabel(m_fontGroup))
   , m_fontSizeLabel(new QLabel(m_fontGroup))
   , m_fontFamilyBox(new QComboBox(m_fontGroup))
@@ -99,12 +103,13 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_interfaceLayout->addWidget(m_themeLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_languageLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->addWidget(m_hdpiLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addLayout(hb1, 0, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addLayout(hb2, 1, 1, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_themeBox, 2, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_languageBox, 3, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_hdpiCheckBox, 4, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addLayout(hb1, 0, 2, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addLayout(hb2, 1, 2, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_themeBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_languageBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_interfaceLayout->addWidget(m_hdpiCheckBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_interfaceLayout->setColumnStretch(3, 1);
+    m_interfaceLayout->setColumnMinimumWidth(1, 20);
 
     m_interfaceGroup->setTitle(tr("User Interface"));
     m_topBarColorResetButton->setText(tr("Reset"));
@@ -136,17 +141,30 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
 
     /****/
 
+    auto hb3 = new QHBoxLayout;
+    hb3->setSpacing(8);
+    hb3->setContentsMargins(0, 0, 0, 0);
+    hb3->addWidget(m_fontFamilyLabel);
+    hb3->addWidget(m_fontFamilyBox);
+    hb3->addSpacing(20);
+    hb3->addWidget(m_fontSizeLabel);
+    hb3->addWidget(m_fontSizeBox);
+    hb3->addSpacing(30);
+    hb3->addWidget(m_fontResetButton);
+    hb3->addStretch();
+    auto hb4 = new QHBoxLayout;
+    hb4->setSpacing(8);
+    hb4->setContentsMargins(0, 0, 0, 0);
+    hb4->addWidget(m_fontAntialiasingBox);
+    hb4->addWidget(m_fontThickBox);
+    hb4->addStretch();
+
     m_fontLayout->setSpacing(8);
     m_fontLayout->setContentsMargins(6, 6, 6, 6);
     m_fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_fontLayout->addWidget(m_fontFamilyLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_fontLayout->addWidget(m_fontFamilyBox, 0, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_fontLayout->addWidget(m_fontSizeLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_fontLayout->addWidget(m_fontSizeBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
-    m_fontLayout->addWidget(m_fontAntialiasingBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_fontLayout->addWidget(m_fontThickBox, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    m_fontLayout->addWidget(m_fontResetButton, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_fontLayout->setColumnStretch(4, 1);
+    m_fontLayout->addLayout(hb3);
+    m_fontLayout->addLayout(hb4);
+    m_fontLayout->addStretch();
 
     m_fontGroup->setTitle(tr("Font"));
     m_fontFamilyLabel->setText(tr("Family") + ":");
@@ -158,15 +176,11 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_fontThickBox->setText(tr("Prefer thicker"));
     m_fontResetButton->setText(tr("Reset"));
 
-//    m_topBarColorResetButton->setToolTip(tr("Reset color to default"));
-//    m_leftBarColorResetButton->setToolTip(tr("Reset color to default"));
-//    m_topBarColorButton->setToolTip(tr("Chage top bar color"));
-//    m_leftBarColorButton->setToolTip(tr("Chage left bar color"));
-//    m_themeBox->setToolTip(tr("Change gui theme"));
-//    m_languageBox->setToolTip(tr("Change language"));
-//    m_hdpiCheckBox->setToolTip(tr("Enable high DPI scaling"));
-//    m_leftBarColorButton->setFixedWidth(64);
-//    m_topBarColorButton->setFixedWidth(64);
+    m_fontFamilyBox->setToolTip(tr("Chage font family"));
+    m_fontSizeBox->setToolTip(tr("Chage font pixel size"));
+    m_fontAntialiasingBox->setToolTip(tr("Enable font antialiasing"));
+    m_fontThickBox->setToolTip(tr("Enable text thickness increasing"));
+    m_fontResetButton->setToolTip(tr("Reset font settings to default"));
 
     m_fontFamilyBox->setCursor(Qt::PointingHandCursor);
     m_fontSizeBox->setCursor(Qt::PointingHandCursor);
@@ -207,15 +221,59 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     connect(m_topBarColorResetButton, &QPushButton::clicked, this, [=] {
         m_topBarColorButton->setColor(InterfaceSettings().topBarColor);
     });
+    connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
+        const QFont font = InterfaceSettings().font;
+        m_fontFamilyBox->setCurrentText(QFontInfo(font).family());
+        m_fontSizeBox->setCurrentText(QString::number(font.pixelSize()));
+        m_fontThickBox->setChecked(font.weight() == QFont::Medium);
+        m_fontAntialiasingBox->setChecked(font.styleStrategy() == QFont::PreferAntialias);
+    });
+    connect(m_fontAntialiasingBox, &QCheckBox::clicked, this, [=] {
+        if (g_fontMessageShowed)
+            return;
+        g_fontMessageShowed = true;
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the font settings will take effect after application restart."));
+    });
+    connect(m_fontThickBox, &QCheckBox::clicked, this, [=] {
+        if (g_fontMessageShowed)
+            return;
+        g_fontMessageShowed = true;
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the font settings will take effect after application restart."));
+    });
+    connect(m_fontSizeBox, qOverload<int>(&QComboBox::activated), this, [=] {
+        if (g_fontMessageShowed)
+            return;
+        g_fontMessageShowed = true;
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the font settings will take effect after application restart."));
+    });
+    connect(m_fontFamilyBox, qOverload<int>(&QComboBox::activated), this, [=] {
+        if (g_fontMessageShowed)
+            return;
+        g_fontMessageShowed = true;
+        QMessageBox::information(this, tr("Restart Required"),
+            tr("Be aware that the font settings will take effect after application restart."));
+    });
     connect(m_hdpiCheckBox, &QCheckBox::clicked, this, [=] {
+        if (g_hdpiMessageShowed)
+            return;
+        g_hdpiMessageShowed = true;
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the high DPI settings will take effect after application restart."));
     });
-    connect(m_languageBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
+    connect(m_languageBox, qOverload<int>(&QComboBox::activated), this, [=] {
+        if (g_languageMessageShowed)
+            return;
+        g_languageMessageShowed = true;
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the language change will take effect after application restart."));
     });
-    connect(m_themeBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=] {
+    connect(m_themeBox, qOverload<int>(&QComboBox::activated), this, [=] {
+        if (g_themeMessageShowed)
+            return;
+        g_themeMessageShowed = true;
         QMessageBox::information(this, tr("Restart Required"),
             tr("Be aware that the theme change will take effect after application restart."));
     });
@@ -231,14 +289,29 @@ void InterfaceSettingsWidget::apply()
 
     activate(false);
 
+    g_themeMessageShowed = false;
+    g_languageMessageShowed = false;
+    g_hdpiMessageShowed = false;
+    g_fontMessageShowed = false;
+
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    /****/
     settings->topBarColor = m_topBarColorButton->color();
     settings->leftBarColor = m_leftBarColorButton->color();
     settings->theme = m_themeBox->currentData().toString();
     settings->language = m_languageBox->currentData().toString();
-    settings->visibleBottomPane = m_visibleBottomPaneBox->currentData().toString();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
+    /****/
+    QFont font;
+    font.setFamily(m_fontFamilyBox->currentText());
+    font.setPixelSize(m_fontSizeBox->currentText().toInt());
+    font.setWeight(m_fontThickBox->isChecked() ? QFont::Medium : QFont::Normal);
+    font.setStyleStrategy(m_fontAntialiasingBox->isChecked() ? QFont::PreferAntialias : QFont::NoAntialias);
+    settings->font = font;
+    /****/
+    settings->visibleBottomPane = m_visibleBottomPaneBox->currentData().toString();
     settings->bottomPanesPop = m_bottomPanesCheckBox->isChecked();
+    /****/
     settings->write();
 }
 
@@ -249,13 +322,25 @@ void InterfaceSettingsWidget::reset()
 
     activate(false);
 
+    g_themeMessageShowed = false;
+    g_languageMessageShowed = false;
+    g_hdpiMessageShowed = false;
+    g_fontMessageShowed = false;
+
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    /****/
     m_topBarColorButton->setColor(settings->topBarColor);
     m_leftBarColorButton->setColor(settings->leftBarColor);
     m_themeBox->setCurrentText(tr(settings->theme.toUtf8()));
     m_languageBox->setCurrentText(tr(settings->language.toUtf8()));
-    m_visibleBottomPaneBox->setCurrentText(tr(settings->visibleBottomPane.toUtf8()));
     m_hdpiCheckBox->setChecked(settings->hdpiEnabled);
+    /****/
+    m_fontFamilyBox->setCurrentText(QFontInfo(settings->font).family());
+    m_fontSizeBox->setCurrentText(QString::number(settings->font.pixelSize()));
+    m_fontThickBox->setChecked(settings->font.weight() == QFont::Medium);
+    m_fontAntialiasingBox->setChecked(settings->font.styleStrategy() == QFont::PreferAntialias);
+    /****/
+    m_visibleBottomPaneBox->setCurrentText(tr(settings->visibleBottomPane.toUtf8()));
     m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);
 }
 
