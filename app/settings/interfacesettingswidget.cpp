@@ -41,6 +41,15 @@ void addLanguages(QComboBox* comboBox)
     for (size_t i = 0; i < sizeof(g_languages) / sizeof(g_languages[0]); ++i)
         comboBox->addItem(QIcon(g_langIcons[i]), QObject::tr(g_languages[i]), g_languages[i]);
 }
+
+bool containsWord(QComboBox* comboBox, const QString& word)
+{
+    for (int i = 0; i < comboBox->count(); ++i) {
+        if (comboBox->itemText(i).contains(word, Qt::CaseInsensitive))
+            return true;
+    }
+    return false;
+}
 }
 
 InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidget(parent)
@@ -349,4 +358,25 @@ QIcon InterfaceSettingsWidget::icon() const
 QString InterfaceSettingsWidget::title() const
 {
     return tr("Interface");
+}
+
+bool InterfaceSettingsWidget::containsWord(const QString& word) const
+{
+    return title().contains(word, Qt::CaseInsensitive)
+            || m_topBarColorLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_leftBarColorLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_themeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_languageLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_hdpiLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_hdpiCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
+            || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
+            || m_visibleBottomPaneLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_bottomPanesCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || ::containsWord(m_themeBox, word)
+            || ::containsWord(m_languageBox, word)
+            || ::containsWord(m_visibleBottomPaneBox, word)
+            ;
 }

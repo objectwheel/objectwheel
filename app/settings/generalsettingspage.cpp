@@ -12,9 +12,3 @@ QIcon GeneralSettingsPage::icon() const
 {
     return QIcon(":/images/settings/general.png");
 }
-
-bool GeneralSettingsPage::containsWord(const QString& /*word*/) const
-{
-    // TODO
-    return false;
-}

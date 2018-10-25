@@ -58,6 +58,17 @@ QString SettingsPage::title() const
     return m_titleLabel->text();
 }
 
+bool SettingsPage::containsWord(const QString& word) const
+{
+    if (title().contains(word, Qt::CaseInsensitive))
+        return true;
+    for (SettingsWidget* widget : widgets()) {
+        if (widget->containsWord(word))
+            return true;
+    }
+    return false;
+}
+
 void SettingsPage::addWidget(SettingsWidget* widget)
 {
     m_tabWidget->addTab(widget, widget->icon(), widget->title());

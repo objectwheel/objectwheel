@@ -16,6 +16,7 @@ public:
     virtual void reset() = 0;
     virtual QIcon icon() const = 0;
     virtual QString title() const = 0;
+    virtual bool containsWord(const QString& word) const = 0;
 
     void activate(bool activate = true);
     bool isActivated() const;

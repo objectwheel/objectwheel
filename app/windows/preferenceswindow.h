@@ -23,7 +23,7 @@ public:
 private slots:
     void apply();
     void reset();
-    void search(const QString& text);
+    void search(const QString& word);
 
 protected:
     void showEvent(QShowEvent*) override;

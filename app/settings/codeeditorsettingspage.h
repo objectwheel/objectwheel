@@ -9,7 +9,6 @@ class CodeEditorSettingsPage : public SettingsPage
 
 public:
     explicit CodeEditorSettingsPage(QWidget* parent = nullptr);
-    bool containsWord(const QString &word) const override;
     QIcon icon() const override;
 };
 

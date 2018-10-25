@@ -21,7 +21,7 @@ public:
     QString title() const;
 
     virtual QIcon icon() const = 0;
-    virtual bool containsWord(const QString& word) const = 0;
+    virtual bool containsWord(const QString& word) const;
 
     void addWidget(SettingsWidget* widget);
     QList<SettingsWidget*> widgets() const;

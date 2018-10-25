@@ -107,9 +107,15 @@ void PreferencesWindow::reset()
     }
 }
 
-void PreferencesWindow::search(const QString& /*text*/)
+void PreferencesWindow::search(const QString& word)
 {
-    // TODO
+    for (int i = 0; i < m_listWidget->count(); ++i) {
+        if (SettingsPage* page = pageFromItem(m_listWidget->item(i)))
+            m_listWidget->item(i)->setHidden(!word.isEmpty() && !page->containsWord(word));
+    }
+    QListWidgetItem* item = m_listWidget->itemAt({0, 0});
+    if (item && m_listWidget->currentItem()->isHidden())
+        m_listWidget->setCurrentItem(item);
 }
 
 void PreferencesWindow::showEvent(QShowEvent* e)

@@ -12,9 +12,3 @@ QIcon CodeEditorSettingsPage::icon() const
 {
     return QIcon(":/images/settings/codeeditor.png");
 }
-
-bool CodeEditorSettingsPage::containsWord(const QString& /*word*/) const
-{
-    // TODO
-    return false;
-}

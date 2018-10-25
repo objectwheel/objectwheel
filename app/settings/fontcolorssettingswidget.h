@@ -21,6 +21,7 @@ public:
     void reset() override;
     QIcon icon() const override;
     QString title() const override;
+    bool containsWord(const QString& word) const override;
 
 private:
     QGroupBox* m_fontGroup;

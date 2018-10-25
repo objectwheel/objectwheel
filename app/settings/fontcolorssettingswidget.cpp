@@ -127,3 +127,13 @@ QString FontColorsSettingsWidget::title() const
 {
     return tr("Font") + " && " + tr("Colors");
 }
+
+bool FontColorsSettingsWidget::containsWord(const QString& word) const
+{
+    return title().contains(word, Qt::CaseInsensitive)
+            || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
+            || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
+            ;
+}
