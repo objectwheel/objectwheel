@@ -27,8 +27,6 @@
 
 #include <QtGlobal>
 
-namespace TextEditor {
-
 // Text color and style categories
 enum TextStyle : quint8 {
     C_TEXT,
@@ -105,6 +103,8 @@ enum TextStyle : quint8 {
 
     C_LAST_STYLE_SENTINEL
 };
+
+namespace TextEditor {
 
 namespace Constants {
 

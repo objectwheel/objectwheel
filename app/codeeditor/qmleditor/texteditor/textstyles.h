@@ -29,7 +29,6 @@
 
 #include <utils/sizedarray.h>
 
-namespace TextEditor {
 using MixinTextStyles = Utils::SizedArray<TextStyle, 6>;
 
 struct TextStyles {
@@ -45,5 +44,3 @@ struct TextStyles {
         return res;
     }
 };
-
-} // namespace TextEditor

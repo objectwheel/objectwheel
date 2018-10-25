@@ -151,8 +151,7 @@ void BracketBand::paintEvent(QPaintEvent* e)
     auto block = ce->firstVisibleBlock();
     auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
     auto bottom = top + ce->blockBoundingRect(block).height();
-    QColor color = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(
-                TextEditor::C_CURRENT_LINE).background().color();
+    QColor color = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_CURRENT_LINE).background().color();
     color.setAlpha(128);
     qreal lineHeight = block.layout()->lineForTextPosition(0).rect().height();
 

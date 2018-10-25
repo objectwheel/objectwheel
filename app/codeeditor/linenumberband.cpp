@@ -22,8 +22,7 @@ struct ExtraAreaPaintEventData
         , markWidth(/*m_marksVisible ? */lineSpacing/* : 0*/)
         , collapseColumnWidth(/*m_codeFoldingVisible ? foldBoxWidth(fontMetrics) :*/ 0)
         , extraAreaWidth(editor->rowBar()->width() - collapseColumnWidth)
-        , currentLineNumberFormat(
-              CodeEditorSettings::fontColorsSettings()->toTextCharFormat(TextEditor::C_CURRENT_LINE_NUMBER))
+        , currentLineNumberFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_CURRENT_LINE_NUMBER))
         , palette(editor->rowBar()->palette())
     {
         palette.setCurrentColorGroup(QPalette::Active);

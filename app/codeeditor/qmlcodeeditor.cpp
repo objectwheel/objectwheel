@@ -346,9 +346,9 @@ static void appendExtraSelectionsForMessages(
         const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
 
         if (d.isWarning())
-            sel.format = settings->toTextCharFormat(TextEditor::C_WARNING);
+            sel.format = settings->toTextCharFormat(C_WARNING);
         else
-            sel.format = settings->toTextCharFormat(TextEditor::C_ERROR);
+            sel.format = settings->toTextCharFormat(C_ERROR);
 
         sel.format.setToolTip(d.message);
 
