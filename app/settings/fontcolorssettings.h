@@ -20,5 +20,4 @@ struct FontColorsSettings : public Settings
     QString fontFamily;
 };
 
-
 #endif // FONTCOLORSSETTINGS_H

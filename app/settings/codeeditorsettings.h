@@ -8,9 +8,7 @@ struct FontColorsSettings;
 class CodeEditorSettings final : public GroupSettings
 {
     Q_OBJECT
-    Q_DISABLE_COPY(CodeEditorSettings)
-
-    friend class ApplicationCore; //  Make it constructable only from ApplicationCore
+    friend class ApplicationCore; //  For constructor
 
 public:
     static CodeEditorSettings* instance();

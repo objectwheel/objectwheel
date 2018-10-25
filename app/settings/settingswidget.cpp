@@ -35,5 +35,3 @@ QVBoxLayout* SettingsWidget::contentLayout() const
 {
     return m_contentLayout;
 }
-
-#include "settingswidget.moc"

@@ -8,9 +8,7 @@ struct InterfaceSettings;
 class GeneralSettings final : public GroupSettings
 {
     Q_OBJECT
-    Q_DISABLE_COPY(GeneralSettings)
-
-    friend class ApplicationCore; //  For ApplicationCore
+    friend class ApplicationCore; //  For constructor
 
 public:
     static GeneralSettings* instance();

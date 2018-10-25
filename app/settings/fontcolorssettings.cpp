@@ -1,6 +1,5 @@
 #include <fontcolorssettings.h>
 #include <codeeditorsettings.h>
-#include <QVariant>
 
 namespace {
 const char* g_fontFamily = "FontFamily";
@@ -19,10 +18,10 @@ void FontColorsSettings::read()
     reset();
 
     begin();
-    fontPreferThick = value(g_fontPreferThick, fontPreferThick).value<bool>();
-    fontPreferAntialiasing = value(g_fontPreferAntialiasing, fontPreferAntialiasing).value<bool>();
-    fontPixelSize = value(g_fontPixelSize, fontPixelSize).value<int>();
-    fontFamily = value(g_fontFamily, fontFamily).value<QString>();
+    fontPreferThick = value<bool>(g_fontPreferThick, fontPreferThick);
+    fontPreferAntialiasing = value<bool>(g_fontPreferAntialiasing, fontPreferAntialiasing);
+    fontPixelSize = value<int>(g_fontPixelSize, fontPixelSize);
+    fontFamily = value<QString>(g_fontFamily, fontFamily);
     end();
 }
 

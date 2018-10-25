@@ -27,12 +27,12 @@ void Settings::setValue(const char* setting, const QVariant& value)
     ApplicationCore::settings()->setValue(path(setting), value);
 }
 
-QVariant Settings::value(const char* setting, const QVariant& defaultValue)
-{
-    return ApplicationCore::settings()->value(path(setting), defaultValue);
-}
-
 QString Settings::path(const char* setting) const
 {
     return category() + QLatin1Char('.') + setting;
+}
+
+QVariant Settings::valueHelper(const char* setting, const QVariant& defaultValue)
+{
+    return ApplicationCore::settings()->value(path(setting), defaultValue);
 }

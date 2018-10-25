@@ -1,6 +1,5 @@
 #include <interfacesettings.h>
 #include <generalsettings.h>
-#include <QVariant>
 
 namespace {
 const char* g_leftBarColor = "LeftBarColor";
@@ -26,19 +25,19 @@ void InterfaceSettings::read()
     reset();
 
     begin();
-    hdpiEnabled = value(g_hdpiEnabled, hdpiEnabled).value<bool>();
-    theme = value(g_theme, theme).value<QString>();
-    language = value(g_language, language).value<QString>();
-    topBarColor = value(g_topBarColor, topBarColor).value<QColor>();
-    leftBarColor = value(g_leftBarColor, leftBarColor).value<QColor>();
+    hdpiEnabled = value<bool>(g_hdpiEnabled, hdpiEnabled);
+    theme = value<QString>(g_theme, theme);
+    language = value<QString>(g_language, language);
+    topBarColor = value<QColor>(g_topBarColor, topBarColor);
+    leftBarColor = value<QColor>(g_leftBarColor, leftBarColor);
     /****/
-    fontPreferThick = value(g_fontPreferThick, fontPreferThick).value<bool>();
-    fontPreferAntialiasing = value(g_fontPreferAntialiasing, fontPreferAntialiasing).value<bool>();
-    fontPixelSize = value(g_fontPixelSize, fontPixelSize).value<int>();
-    fontFamily = value(g_fontFamily, fontFamily).value<QString>();
+    fontPreferThick = value<bool>(g_fontPreferThick, fontPreferThick);
+    fontPreferAntialiasing = value<bool>(g_fontPreferAntialiasing, fontPreferAntialiasing);
+    fontPixelSize = value<int>(g_fontPixelSize, fontPixelSize);
+    fontFamily = value<QString>(g_fontFamily, fontFamily);
     /****/
-    bottomPanesPop = value(g_bottomPanesPop, bottomPanesPop).value<bool>();
-    visibleBottomPane = value(g_visibleBottomPane, visibleBottomPane).value<QString>();
+    bottomPanesPop = value<bool>(g_bottomPanesPop, bottomPanesPop);
+    visibleBottomPane = value<QString>(g_visibleBottomPane, visibleBottomPane);
     end();
 }
 
