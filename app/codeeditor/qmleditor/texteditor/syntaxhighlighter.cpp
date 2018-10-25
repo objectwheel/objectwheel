@@ -26,7 +26,8 @@
 #include "syntaxhighlighter.h"
 #include <qmlcodedocument.h>
 #include "texteditorsettings.h"
-#include "fontsettings.h"
+#include <codeeditorsettings.h>
+#include <fontcolorssettings.h>
 
 #include <utils/algorithm.h>
 #include <utils/qtcassert.h>
@@ -47,7 +48,9 @@ class SyntaxHighlighterPrivate
 public:
     SyntaxHighlighterPrivate()
     {
-        updateFormats(TextEditorSettings::fontSettings());
+        QObject::connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
+                         this, &SyntaxHighlighterPrivate::updateFormats);
+        updateFormats();
     }
 
     QPointer<QTextDocument> doc;
@@ -64,7 +67,7 @@ public:
     }
 
     void applyFormatChanges(int from, int charsRemoved, int charsAdded);
-    void updateFormats(const FontSettings &fontSettings);
+    void updateFormats();
 
     QVector<QTextCharFormat> formatChanges;
     QTextBlock currentBlock;
@@ -760,11 +763,6 @@ QList<QColor> SyntaxHighlighter::generateColors(int n, const QColor &background)
     return result;
 }
 
-void SyntaxHighlighter::setFontSettings(const FontSettings &fontSettings)
-{
-    Q_D(SyntaxHighlighter);
-    d->updateFormats(fontSettings);
-}
 /*!
     The syntax highlighter is not anymore reacting to the text document if \a noAutmatic is
     \c true.
@@ -818,7 +816,7 @@ void SyntaxHighlighter::setTextFormatCategories(const QVector<std::pair<int, Tex
     d->formatCategories = categories;
     const int maxCategory = Utils::maxElementOr(categories, {-1, C_TEXT}).first;
     d->formats = QVector<QTextCharFormat>(maxCategory + 1);
-    d->updateFormats(TextEditorSettings::fontSettings());
+    d->updateFormats();
 }
 
 QTextCharFormat SyntaxHighlighter::formatForCategory(int category) const
@@ -834,11 +832,12 @@ void SyntaxHighlighter::highlightBlock(const QString &text)
     formatSpaces(text);
 }
 
-void SyntaxHighlighterPrivate::updateFormats(const FontSettings &fontSettings)
+void SyntaxHighlighterPrivate::updateFormats()
 {
-    for (const auto &pair : qAsConst(formatCategories))
-        formats[pair.first] = fontSettings.toTextCharFormat(pair.second);
-    whitespaceFormat = fontSettings.toTextCharFormat(C_VISUAL_WHITESPACE);
+    // WARNING
+//    for (const auto &pair : qAsConst(formatCategories))
+//        formats[pair.first] = fontSettings.toTextCharFormat(pair.second);
+//    whitespaceFormat = fontSettings.toTextCharFormat(C_VISUAL_WHITESPACE);
 }
 
 } // namespace TextEditor

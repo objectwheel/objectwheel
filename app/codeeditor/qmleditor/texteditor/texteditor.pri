@@ -39,8 +39,8 @@ HEADERS += \
         $$PWD/helpitem.h \
         $$PWD/completionsettingspage.h \
         $$PWD/completionsettings.h \
-        $$PWD/colorschemeedit.h \
-        $$PWD/colorscheme.h \
+#        $$PWD/colorschemeedit.h \
+#        $$PWD/colorscheme.h \
         $$PWD/colorpreviewhoverhandler.h \
         $$PWD/behaviorsettingswidget.h \
         $$PWD/behaviorsettingspage.h \
@@ -52,6 +52,7 @@ HEADERS += \
         $$PWD/simplecodestylepreferences.h \
         $$PWD/icodestylepreferences.h \
         $$PWD/simplecodestylepreferenceswidget.h
+#WARNING
 
 SOURCES += \
         $$PWD/codeassist/assistinterface.cpp \
@@ -80,8 +81,8 @@ SOURCES += \
         $$PWD/behaviorsettingspage.cpp \
         $$PWD/behaviorsettingswidget.cpp \
         $$PWD/colorpreviewhoverhandler.cpp \
-        $$PWD/colorscheme.cpp \
-        $$PWD/colorschemeedit.cpp \
+#        $$PWD/colorscheme.cpp \
+#        $$PWD/colorschemeedit.cpp \
         $$PWD/completionsettings.cpp \
         $$PWD/completionsettingspage.cpp \
         $$PWD/helpitem.cpp \
@@ -106,6 +107,6 @@ SOURCES += \
 FORMS += \
         $$PWD/behaviorsettingspage.ui \
         $$PWD/behaviorsettingswidget.ui \
-        $$PWD/colorschemeedit.ui \
+#        $$PWD/colorschemeedit.ui \
         $$PWD/completionsettingspage.ui \
         $$PWD/tabsettingswidget.ui

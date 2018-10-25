@@ -5,6 +5,8 @@
 #include <qmlcodedocument.h>
 #include <bracketband.h>
 #include <transparentstyle.h>
+#include <codeeditorsettings.h>
+#include <fontcolorssettings.h>
 
 #include <qmljs/parser/qmljsast_p.h>
 #include <qmljs/qmljsbind.h>
@@ -366,7 +368,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_rowBar(new RowBar(this, this))
   , m_toolBar(new QmlCodeEditorToolBar(this))
   , m_linkPressed(false)
-  , m_fontSettingsNeedsApply(true)
   , m_parenthesesMatchingEnabled(true)
   , m_oldCursorPosition(-1)
   , m_visibleFoldedBlockNumber(-1)
@@ -385,7 +386,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_noDocsLabel->setAlignment(Qt::AlignCenter);
     m_noDocsLabel->setText(tr("No documents\nopen"));
     m_noDocsLabel->setStyleSheet("QLabel { background: #f0f0f0; color: #808080;}");
-
 
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,
@@ -438,6 +438,9 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     connect(completionAction, &QAction::triggered, [this]() {
         invokeAssist(TextEditor::Completion);
     });
+
+    connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
+            this, &QmlCodeEditor::applyFontSettings);
 
     setCodeDocument(m_initialEmptyDocument);
     m_codeAssistant->configure(this);
@@ -517,9 +520,6 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
         updateTabStops();
         m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
     });
-
-    connect(document, &QmlCodeDocument::fontSettingsChanged,
-            this, &QmlCodeEditor::applyFontSettingsDelayed);
 
     //    connect(document, &QmlCodeDocument::markRemoved,
     //            this, &QmlCodeEditor::markRemoved);
@@ -1662,7 +1662,6 @@ QList<QTextEdit::ExtraSelection> QmlCodeEditor::extraSelections(const QString& k
 
 void QmlCodeEditor::applyFontSettings()
 {
-    m_fontSettingsNeedsApply = false;
     const FontSettings &fs = codeDocument()->fontSettings();
     const QTextCharFormat textFormat = fs.toTextCharFormat(C_TEXT);
     const QTextCharFormat selectionFormat = fs.toTextCharFormat(C_SELECTION);
@@ -2881,17 +2880,8 @@ void QmlCodeEditor::updateCodeWarnings(Document::Ptr doc)
     }
 }
 
-void QmlCodeEditor::applyFontSettingsDelayed()
-{
-    m_fontSettingsNeedsApply = true;
-    if (isVisible())
-        triggerPendingUpdates();
-}
-
 void QmlCodeEditor::triggerPendingUpdates()
 {
-    if (m_fontSettingsNeedsApply)
-        applyFontSettings();
     codeDocument()->triggerPendingUpdates();
 }
 

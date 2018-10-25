@@ -210,7 +210,6 @@ private:
     bool hideContextPane();
     void showTextMarker();
     void updateCodeWarnings(QmlJS::Document::Ptr doc);
-    void applyFontSettingsDelayed();
     void triggerPendingUpdates();
     void applyFontSettings();
     void updateHighlights();
@@ -274,7 +273,6 @@ private:
     Core::FindFlags m_findFlags;
     Core::Id m_tabSettingsId;
     bool m_linkPressed;
-    bool m_fontSettingsNeedsApply;
     bool m_parenthesesMatchingEnabled;
     Utils::Link m_currentLink;
     QTextCursor m_pendingLinkUpdate;
