@@ -1,12 +1,8 @@
 #include <interfacesettings.h>
-#include <applicationcore.h>
-
-#include <QSettings>
-#include <QFontInfo>
+#include <generalsettings.h>
+#include <QVariant>
 
 namespace {
-
-const char* g_category = "Interface";
 const char* g_leftBarColor = "LeftBarColor";
 const char* g_topBarColor = "TopBarColor";
 const char* g_theme = "Theme";
@@ -18,18 +14,9 @@ const char* g_language = "Language";
 const char* g_hdpiEnabled = "HdpiEnabled";
 const char* g_bottomPanesPop = "BottomPanesPop";
 const char* g_visibleBottomPane = "VisibleBottomPane";
-
-inline QString joint(const char* setting)
-{
-    return QLatin1String(g_category) + "." + setting;
-}
 }
 
-InterfaceSettings::InterfaceSettings(QObject* parent) : InterfaceSettings({}, parent)
-{
-}
-
-InterfaceSettings::InterfaceSettings(const QString& group, QObject* parent) : Settings(group, parent)
+InterfaceSettings::InterfaceSettings(GeneralSettings* generalSettings) : Settings(generalSettings)
 {
     reset();
 }
@@ -38,47 +25,42 @@ void InterfaceSettings::read()
 {
     reset();
 
-    QSettings* settings = ApplicationCore::settings();
-    settings->beginGroup(group());
+    begin();
+    hdpiEnabled = value(g_hdpiEnabled, hdpiEnabled).value<bool>();
+    theme = value(g_theme, theme).value<QString>();
+    language = value(g_language, language).value<QString>();
+    topBarColor = value(g_topBarColor, topBarColor).value<QColor>();
+    leftBarColor = value(g_leftBarColor, leftBarColor).value<QColor>();
     /****/
-    theme = settings->value(joint(g_theme), theme).value<QString>();
-    fontFamily = settings->value(joint(g_fontFamily), fontFamily).value<QString>();
-    fontPixelSize = settings->value(joint(g_fontPixelSize), fontPixelSize).value<int>();
-    fontPreferThick = settings->value(joint(g_fontPreferThick), fontPreferThick).value<bool>();
-    fontPreferAntialiasing = settings->value(joint(g_fontPreferAntialiasing), fontPreferAntialiasing).value<bool>();
+    fontPreferThick = value(g_fontPreferThick, fontPreferThick).value<bool>();
+    fontPreferAntialiasing = value(g_fontPreferAntialiasing, fontPreferAntialiasing).value<bool>();
+    fontPixelSize = value(g_fontPixelSize, fontPixelSize).value<int>();
+    fontFamily = value(g_fontFamily, fontFamily).value<QString>();
     /****/
-    language = settings->value(joint(g_language), language).value<QString>();
-    hdpiEnabled = settings->value(joint(g_hdpiEnabled), hdpiEnabled).value<bool>();
-    topBarColor = settings->value(joint(g_topBarColor), topBarColor).value<QColor>();
-    leftBarColor = settings->value(joint(g_leftBarColor), leftBarColor).value<QColor>();
-    /****/
-    bottomPanesPop = settings->value(joint(g_bottomPanesPop), bottomPanesPop).value<bool>();
-    visibleBottomPane = settings->value(joint(g_visibleBottomPane), visibleBottomPane).value<QString>();
-    /****/
-    settings->endGroup();
+    bottomPanesPop = value(g_bottomPanesPop, bottomPanesPop).value<bool>();
+    visibleBottomPane = value(g_visibleBottomPane, visibleBottomPane).value<QString>();
+    end();
 }
 
 void InterfaceSettings::write()
 {
-    QSettings* settings = ApplicationCore::settings();
-    settings->beginGroup(group());
+    begin();
+    setValue(g_hdpiEnabled, hdpiEnabled);
+    setValue(g_theme, theme);
+    setValue(g_language, language);
+    setValue(g_topBarColor, topBarColor);
+    setValue(g_leftBarColor, leftBarColor);
     /****/
-    settings->setValue(joint(g_theme), theme);
-    settings->setValue(joint(g_language), language);
-    settings->setValue(joint(g_hdpiEnabled), hdpiEnabled);
-    settings->setValue(joint(g_topBarColor), topBarColor);
-    settings->setValue(joint(g_leftBarColor), leftBarColor);
+    setValue(g_fontPreferThick, fontPreferThick);
+    setValue(g_fontPreferAntialiasing, fontPreferAntialiasing);
+    setValue(g_fontPixelSize, fontPixelSize);
+    setValue(g_fontFamily, fontFamily);
     /****/
-    settings->setValue(joint(g_fontFamily), fontFamily);
-    settings->setValue(joint(g_fontPixelSize), fontPixelSize);
-    settings->setValue(joint(g_fontPreferThick), fontPreferThick);
-    settings->setValue(joint(g_fontPreferAntialiasing), fontPreferAntialiasing);
-    /****/
-    settings->setValue(joint(g_bottomPanesPop), bottomPanesPop);
-    settings->setValue(joint(g_visibleBottomPane), visibleBottomPane);
-    /****/
-    settings->endGroup();
-    emit changed();
+    setValue(g_bottomPanesPop, bottomPanesPop);
+    setValue(g_visibleBottomPane, visibleBottomPane);
+    end();
+
+    emit static_cast<GeneralSettings*>(groupSettings())->interfaceSettingsChanged();
 }
 
 void InterfaceSettings::reset()
@@ -89,6 +71,9 @@ void InterfaceSettings::reset()
     topBarColor = "#247dd6";
     leftBarColor = "#3e474f";
     /****/
+    fontPreferThick = false;
+    fontPreferAntialiasing = true;
+    fontPixelSize = 13;
 #if defined(Q_OS_MACOS)
     fontFamily = ".SF NS Display";
 #elif defined(Q_OS_WIN)
@@ -96,10 +81,12 @@ void InterfaceSettings::reset()
 #else
     fontFamily = "Roboto";
 #endif
-    fontPreferThick = false;
-    fontPreferAntialiasing = true;
-    fontPixelSize = 13;
     /****/
     bottomPanesPop = false;
     visibleBottomPane = "None";
+}
+
+const char* InterfaceSettings::category() const
+{
+    return "Interface";
 }

@@ -1,11 +1,11 @@
 #ifndef CODEEDITORSETTINGS_H
 #define CODEEDITORSETTINGS_H
 
-#include <QObject>
+#include <groupsettings.h>
 
-class FontColorsSettings;
+struct FontColorsSettings;
 
-class CodeEditorSettings final : public QObject
+class CodeEditorSettings final : public GroupSettings
 {
     Q_OBJECT
     Q_DISABLE_COPY(CodeEditorSettings)
@@ -14,10 +14,15 @@ class CodeEditorSettings final : public QObject
 
 public:
     static CodeEditorSettings* instance();
-    static FontColorsSettings* fontColorsSettings();
     static void read();
     static void write();
     static void reset();
+    static FontColorsSettings* fontColorsSettings();
+
+    const char* group() const override;
+
+signals:
+    void fontColorsSettingsChanged();
 
 private:
     explicit CodeEditorSettings(QObject* parent = nullptr);

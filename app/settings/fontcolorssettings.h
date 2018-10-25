@@ -3,22 +3,22 @@
 
 #include <settings.h>
 
-class FontColorsSettings : public Settings
-{
-    Q_OBJECT
+class CodeEditorSettings;
 
-public:
-    explicit FontColorsSettings(QObject* parent = nullptr);
-    explicit FontColorsSettings(const QString& group, QObject* parent = nullptr);
+struct FontColorsSettings : public Settings
+{
+    FontColorsSettings(CodeEditorSettings* codeEditorSettings = nullptr);
 
     void read() override;
     void write() override;
     void reset() override;
+    const char* category() const override;
 
-    int fontPixelSize;
-    QString fontFamily;
     bool fontPreferThick;
     bool fontPreferAntialiasing;
+    int fontPixelSize;
+    QString fontFamily;
 };
+
 
 #endif // FONTCOLORSSETTINGS_H

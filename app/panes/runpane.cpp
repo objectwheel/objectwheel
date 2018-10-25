@@ -123,7 +123,7 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
         m_runButton->setEnabled(true);
         m_stopButton->setDisabled(true);
     });
-    connect(GeneralSettings::interfaceSettings(), &InterfaceSettings::changed,
+    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
             this, qOverload<>(&RunPane::update));
 }
 

@@ -1,23 +1,28 @@
 #ifndef GENERALSETTINGS_H
 #define GENERALSETTINGS_H
 
-#include <QObject>
+#include <groupsettings.h>
 
-class InterfaceSettings;
+struct InterfaceSettings;
 
-class GeneralSettings final : public QObject
+class GeneralSettings final : public GroupSettings
 {
     Q_OBJECT
     Q_DISABLE_COPY(GeneralSettings)
 
-    friend class ApplicationCore; //  Make it constructable only from ApplicationCore
+    friend class ApplicationCore; //  For ApplicationCore
 
 public:
     static GeneralSettings* instance();
-    static InterfaceSettings* interfaceSettings();
     static void read();
     static void write();
     static void reset();
+    static InterfaceSettings* interfaceSettings();
+
+    const char* group() const override;
+
+signals:
+    void interfaceSettingsChanged();
 
 private:
     explicit GeneralSettings(QObject* parent = nullptr);

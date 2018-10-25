@@ -1,27 +1,30 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <QObject>
+#include <QVariant>
 
-class Settings : public QObject
+class GroupSettings;
+
+struct Settings
 {
-    Q_OBJECT
-
-public:
-    explicit Settings(QObject* parent = nullptr);
-    explicit Settings(const QString& group, QObject* parent = nullptr);
-
+    Settings(GroupSettings* groupSettings);
     virtual void read() = 0;
     virtual void write() = 0;
     virtual void reset() = 0;
+    virtual const char* category() const = 0;
+    GroupSettings* groupSettings() const;
 
-    const QString& group() const;
-
-signals:
-    void changed();
+protected:
+    void begin() const;
+    void end() const;
+    void setValue(const char* setting, const QVariant& value);
+    QVariant value(const char* setting, const QVariant& defaultValue);
 
 private:
-    QString m_group;
+    QString path(const char* setting) const;
+
+private:
+    GroupSettings* m_groupSettings;
 };
 
 #endif // SETTINGS_H

@@ -1,15 +1,13 @@
 #include <generalsettings.h>
 #include <interfacesettings.h>
 
-namespace { const char* g_group = "General"; }
-
 GeneralSettings* GeneralSettings::s_instance = nullptr;
 InterfaceSettings* GeneralSettings::s_interfaceSettings = nullptr;
 
-GeneralSettings::GeneralSettings(QObject* parent) : QObject(parent)
+GeneralSettings::GeneralSettings(QObject* parent) : GroupSettings(parent)
 {
     s_instance = this;
-    s_interfaceSettings = new InterfaceSettings(g_group, this);
+    s_interfaceSettings = new InterfaceSettings(this);
 }
 
 GeneralSettings::~GeneralSettings()
@@ -25,6 +23,11 @@ GeneralSettings* GeneralSettings::instance()
 InterfaceSettings* GeneralSettings::interfaceSettings()
 {
     return s_interfaceSettings;
+}
+
+const char* GeneralSettings::group() const
+{
+    return "General";
 }
 
 void GeneralSettings::read()

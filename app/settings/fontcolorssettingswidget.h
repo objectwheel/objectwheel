@@ -10,7 +10,7 @@ class QCheckBox;
 class QVBoxLayout;
 class QPushButton;
 
-class FontColorsSettingsWidget : public SettingsWidget
+struct FontColorsSettingsWidget : public SettingsWidget
 {
     Q_OBJECT
 

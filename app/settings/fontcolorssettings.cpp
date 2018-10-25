@@ -1,26 +1,15 @@
 #include <fontcolorssettings.h>
-#include <applicationcore.h>
-#include <QSettings>
+#include <codeeditorsettings.h>
+#include <QVariant>
 
 namespace {
-
-const char* g_category = "FontColors";
 const char* g_fontFamily = "FontFamily";
 const char* g_fontPixelSize = "FontPixelSize";
 const char* g_fontPreferThick = "FontPreferThick";
 const char* g_fontPreferAntialiasing = "FontPreferAntialiasing";
-
-inline QString joint(const char* setting)
-{
-    return QLatin1String(g_category) + "." + setting;
-}
 }
 
-FontColorsSettings::FontColorsSettings(QObject* parent) : FontColorsSettings({}, parent)
-{
-}
-
-FontColorsSettings::FontColorsSettings(const QString& group, QObject* parent) : Settings(group, parent)
+FontColorsSettings::FontColorsSettings(CodeEditorSettings* codeEditorSettings) : Settings(codeEditorSettings)
 {
     reset();
 }
@@ -29,33 +18,31 @@ void FontColorsSettings::read()
 {
     reset();
 
-    QSettings* settings = ApplicationCore::settings();
-    settings->beginGroup(group());
-    /****/
-    fontFamily = settings->value(joint(g_fontFamily), fontFamily).value<QString>();
-    fontPixelSize = settings->value(joint(g_fontPixelSize), fontPixelSize).value<int>();
-    fontPreferThick = settings->value(joint(g_fontPreferThick), fontPreferThick).value<bool>();
-    fontPreferAntialiasing = settings->value(joint(g_fontPreferAntialiasing), fontPreferAntialiasing).value<bool>();
-    /****/
-    settings->endGroup();
+    begin();
+    fontPreferThick = value(g_fontPreferThick, fontPreferThick).value<bool>();
+    fontPreferAntialiasing = value(g_fontPreferAntialiasing, fontPreferAntialiasing).value<bool>();
+    fontPixelSize = value(g_fontPixelSize, fontPixelSize).value<int>();
+    fontFamily = value(g_fontFamily, fontFamily).value<QString>();
+    end();
 }
 
 void FontColorsSettings::write()
 {
-    QSettings* settings = ApplicationCore::settings();
-    settings->beginGroup(group());
-    /****/
-    settings->setValue(joint(g_fontFamily), fontFamily);
-    settings->setValue(joint(g_fontPixelSize), fontPixelSize);
-    settings->setValue(joint(g_fontPreferThick), fontPreferThick);
-    settings->setValue(joint(g_fontPreferAntialiasing), fontPreferAntialiasing);
-    /****/
-    settings->endGroup();
-    emit changed();
+    begin();
+    setValue(g_fontPreferThick, fontPreferThick);
+    setValue(g_fontPreferAntialiasing, fontPreferAntialiasing);
+    setValue(g_fontPixelSize, fontPixelSize);
+    setValue(g_fontFamily, fontFamily);
+    end();
+
+    emit static_cast<CodeEditorSettings*>(groupSettings())->fontColorsSettingsChanged();
 }
 
 void FontColorsSettings::reset()
 {
+    fontPreferThick = false;
+    fontPreferAntialiasing = true;
+    fontPixelSize = 13;
 #if defined(Q_OS_MACOS)
     fontFamily = ".SF NS Display";
 #elif defined(Q_OS_WIN)
@@ -63,7 +50,9 @@ void FontColorsSettings::reset()
 #else
     fontFamily = "Roboto";
 #endif
-    fontPreferThick = false;
-    fontPreferAntialiasing = true;
-    fontPixelSize = 13;
+}
+
+const char* FontColorsSettings::category() const
+{
+    return "FontColors";
 }

@@ -1,15 +1,38 @@
 #include <settings.h>
+#include <groupsettings.h>
+#include <applicationcore.h>
+#include <QSettings>
 
-Settings::Settings(QObject* parent) : Settings({}, parent)
+Settings::Settings(GroupSettings* groupSettings) : m_groupSettings(groupSettings)
 {
 }
 
-Settings::Settings(const QString& group, QObject* parent) : QObject(parent)
-  , m_group(group)
+GroupSettings* Settings::groupSettings() const
 {
+    return m_groupSettings;
 }
 
-const QString& Settings::group() const
+void Settings::begin() const
 {
-    return m_group;
+    ApplicationCore::settings()->beginGroup(groupSettings()->group());
+}
+
+void Settings::end() const
+{
+    ApplicationCore::settings()->endGroup();
+}
+
+void Settings::setValue(const char* setting, const QVariant& value)
+{
+    ApplicationCore::settings()->setValue(path(setting), value);
+}
+
+QVariant Settings::value(const char* setting, const QVariant& defaultValue)
+{
+    return ApplicationCore::settings()->value(path(setting), defaultValue);
+}
+
+QString Settings::path(const char* setting) const
+{
+    return category() + QLatin1Char('.') + setting;
 }

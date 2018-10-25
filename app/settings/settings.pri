@@ -11,7 +11,8 @@ HEADERS += $$PWD/settingspage.h \
            $$PWD/codeeditorsettings.h \
            $$PWD/codeeditorsettingspage.h \
            $$PWD/fontcolorssettingswidget.h \
-           $$PWD/fontcolorssettings.h
+           $$PWD/fontcolorssettings.h \
+    $$PWD/groupsettings.h
 
 SOURCES += $$PWD/settingspage.cpp \
            $$PWD/generalsettingspage.cpp \
@@ -23,4 +24,5 @@ SOURCES += $$PWD/settingspage.cpp \
            $$PWD/codeeditorsettingspage.cpp \
            $$PWD/codeeditorsettings.cpp \
            $$PWD/fontcolorssettings.cpp \
-           $$PWD/fontcolorssettingswidget.cpp
+           $$PWD/fontcolorssettingswidget.cpp \
+    $$PWD/groupsettings.cpp

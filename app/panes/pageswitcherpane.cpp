@@ -133,7 +133,7 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
             this, [=] { setCurrentPage(Page_SplitView); });
     connect(m_buildsButton, &FlatButton::pressed,
             this, [=] { setCurrentPage(Page_Builds); });
-    connect(GeneralSettings::interfaceSettings(), &InterfaceSettings::changed,
+    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
             this, &PageSwitcherPane::updateColors);
 }
 

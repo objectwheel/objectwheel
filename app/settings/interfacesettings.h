@@ -4,28 +4,27 @@
 #include <settings.h>
 #include <QColor>
 
-class InterfaceSettings : public Settings
-{
-    Q_OBJECT
+class GeneralSettings;
 
-public:
-    explicit InterfaceSettings(QObject* parent = nullptr);
-    explicit InterfaceSettings(const QString& group, QObject* parent = nullptr);
+struct InterfaceSettings : public Settings
+{
+    InterfaceSettings(GeneralSettings* generalSettings = nullptr);
 
     void read() override;
     void write() override;
     void reset() override;
+    const char* category() const override;
 
-    int fontPixelSize;
-    QString fontFamily;
-    bool fontPreferThick;
-    bool fontPreferAntialiasing;
-    /****/
-    QString theme;
     bool hdpiEnabled;
+    QString theme;
     QString language;
     QColor topBarColor;
     QColor leftBarColor;
+    /****/
+    bool fontPreferThick;
+    bool fontPreferAntialiasing;
+    int fontPixelSize;
+    QString fontFamily;
     /****/
     bool bottomPanesPop;
     QString visibleBottomPane;

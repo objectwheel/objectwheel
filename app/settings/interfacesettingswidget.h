@@ -13,7 +13,7 @@ class QPushButton;
 class QGridLayout;
 class QVBoxLayout;
 
-class InterfaceSettingsWidget : public SettingsWidget
+struct InterfaceSettingsWidget : public SettingsWidget
 {
     Q_OBJECT
 
