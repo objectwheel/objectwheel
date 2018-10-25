@@ -25,7 +25,7 @@
 
 #include "behaviorsettingspage.h"
 
-#include <bootsettings.h>
+#include <applicationcore.h>
 #include "behaviorsettings.h"
 #include "typingsettings.h"
 #include "storagesettings.h"
@@ -78,7 +78,7 @@ BehaviorSettingsPage::BehaviorSettingsPagePrivate::BehaviorSettingsPagePrivate
 
 void BehaviorSettingsPage::BehaviorSettingsPagePrivate::init()
 {
-    const QSettings *s = BootSettings::settings();
+    const QSettings *s = ApplicationCore::settings();
     m_codeStyle->fromSettings(m_parameters.settingsPrefix, s);
     m_typingSettings.fromSettings(m_parameters.settingsPrefix, s);
     m_storageSettings.fromSettings(m_parameters.settingsPrefix, s);
@@ -146,7 +146,7 @@ void BehaviorSettingsPage::apply()
 
     settingsFromUI(&newTypingSettings, &newStorageSettings, &newBehaviorSettings);
 
-    QSettings *s = BootSettings::settings();
+    QSettings *s = ApplicationCore::settings();
 
     if (d->m_codeStyle->tabSettings() != d->m_pageCodeStyle->tabSettings()) {
         d->m_codeStyle->setTabSettings(d->m_pageCodeStyle->tabSettings());

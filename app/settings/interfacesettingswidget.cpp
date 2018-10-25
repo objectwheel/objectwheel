@@ -302,8 +302,7 @@ void InterfaceSettingsWidget::apply()
     settings->language = m_languageBox->currentData().toString();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
     /****/
-    QFont font;
-    font.setFamily(m_fontFamilyBox->currentText());
+    QFont font(m_fontFamilyBox->currentText());
     font.setPixelSize(m_fontSizeBox->currentText().toInt());
     font.setWeight(m_fontThickBox->isChecked() ? QFont::Medium : QFont::Normal);
     font.setStyleStrategy(m_fontAntialiasingBox->isChecked() ? QFont::PreferAntialias : QFont::NoAntialias);

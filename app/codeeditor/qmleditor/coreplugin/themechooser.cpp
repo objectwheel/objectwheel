@@ -28,7 +28,7 @@
 //#include "manhattanstyle.h"
 #include "themechooser.h"
 #include <windowmanager.h>
-#include <bootsettings.h>
+#include <applicationcore.h>
 #include <mainwindow.h>
 
 #include <utils/algorithm.h>
@@ -96,8 +96,8 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 {
     QList<ThemeEntry> themes;
 
-    static const QString installThemeDir = BootSettings::resourcePath() + QLatin1String("/themes");
-    static const QString userThemeDir = BootSettings::userResourcePath() + QLatin1String("/themes");
+    static const QString installThemeDir = ApplicationCore::resourcePath() + QLatin1String("/themes");
+    static const QString userThemeDir = ApplicationCore::userResourcePath() + QLatin1String("/themes");
     addThemesFromPath(installThemeDir, &themes);
     if (themes.isEmpty())
         qWarning() << "Warning: No themes found in installation: "
@@ -115,7 +115,7 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 Id ThemeEntry::themeSetting()
 {
     const Id setting =
-            Id::fromSetting(BootSettings::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
+            Id::fromSetting(ApplicationCore::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
                                                      QLatin1String(Constants::DEFAULT_THEME)));
 
     const QList<ThemeEntry> themes = availableThemes();

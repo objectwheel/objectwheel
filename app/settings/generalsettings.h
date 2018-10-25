@@ -10,7 +10,7 @@ class GeneralSettings final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(GeneralSettings)
 
-    friend class BootSettings; //  Make it constructable only from BootSettings
+    friend class ApplicationCore; //  Make it constructable only from ApplicationCore
 
 public:
     static GeneralSettings* instance();

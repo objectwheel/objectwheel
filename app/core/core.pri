@@ -3,7 +3,6 @@ INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/applicationcore.h \
            $$PWD/applicationstyle.h \
-           $$PWD/bootsettings.h \
            $$PWD/centralwidget.h \
            $$PWD/control.h \
            $$PWD/controlsavefilter.h \
@@ -17,7 +16,6 @@ HEADERS += $$PWD/applicationcore.h \
 SOURCES += $$PWD/main.cpp \
            $$PWD/applicationcore.cpp \
            $$PWD/applicationstyle.cpp \
-           $$PWD/bootsettings.cpp \
            $$PWD/centralwidget.cpp \
            $$PWD/control.cpp \
            $$PWD/controlsavefilter.cpp \

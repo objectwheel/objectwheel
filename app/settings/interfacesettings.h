@@ -20,7 +20,10 @@ public:
 
     bool hdpiEnabled;
     bool bottomPanesPop;
-    QFont font;
+    bool fontPreferThick;
+    bool fontPreferAntialiasing;
+    int fontPixelSize;
+    QString fontFamily;
     QString theme;
     QString language;
     QColor topBarColor;

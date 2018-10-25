@@ -5,10 +5,12 @@ HEADERS += $$PWD/dirlocker.h \
            $$PWD/pathfinder.h \
            $$PWD/suppressor.h \
            $$PWD/transparentstyle.h \
-           $$PWD/zipper.h
+           $$PWD/zipper.h \
+    $$PWD/splashscreen.h
 
 SOURCES += $$PWD/dirlocker.cpp \
            $$PWD/pathfinder.cpp \
            $$PWD/suppressor.cpp \
            $$PWD/transparentstyle.cpp \
-           $$PWD/zipper.cpp
+           $$PWD/zipper.cpp \
+    $$PWD/splashscreen.cpp

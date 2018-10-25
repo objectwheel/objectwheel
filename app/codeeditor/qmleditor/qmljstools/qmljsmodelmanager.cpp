@@ -30,7 +30,7 @@
 #include <documentmanager.h>
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
-#include <bootsettings.h>
+#include <applicationcore.h>
 
 ////#include <coreplugin/icore.h>
 //#include <coreplugin/editormanager/documentmodel.h>
@@ -242,14 +242,14 @@ void ModelManager::delayedInitialization()
 
     ViewerContext qbsVContext;
     qbsVContext.language = Dialect::QmlQbs;
-    qbsVContext.maybeAddPath(BootSettings::resourcePath() + QLatin1String("/qbs"));
+    qbsVContext.maybeAddPath(ApplicationCore::resourcePath() + QLatin1String("/qbs"));
     setDefaultVContext(qbsVContext);
 }
 
 void ModelManager::loadDefaultQmlTypeDescriptions()
 {
-    loadQmlTypeDescriptionsInternal(BootSettings::resourcePath());
-    loadQmlTypeDescriptionsInternal(BootSettings::userResourcePath());
+    loadQmlTypeDescriptionsInternal(ApplicationCore::resourcePath());
+    loadQmlTypeDescriptionsInternal(ApplicationCore::userResourcePath());
 }
 
 void ModelManager::writeMessageInternal(const QString &/*msg*/) const

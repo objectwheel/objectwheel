@@ -1,8 +1,10 @@
 #ifndef APPLICATIONCORE_H
 #define APPLICATIONCORE_H
 
-#include <QObject>
+#include <QPalette>
 
+class QSettings;
+class GeneralSettings;
 class Authenticator;
 class UserManager;
 class DocumentManager;
@@ -17,28 +19,33 @@ class SaveManager;
 class WindowManager;
 class MenuManager;
 class HelpManager;
+class QObject;
 
-class ApplicationCore final : public QObject
+class ApplicationCore final
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(ApplicationCore)
-
 public:
-    static void init(QObject* parent);
-    static ApplicationCore* instance();
-    static void setApplicationPalette();
+    static void run(QApplication* app);
+    static void preparation(const char* filePath);
 
-private slots:
-    void onUserSessionStart();
-    void onUserSessionStop();
-    void onProjectStart();
-    void onProjectStop();
+    static QPalette palette();
+    static QSettings* settings();
+    static const char* resourcePath();
+    static const char* userResourcePath();
 
 private:
-    explicit ApplicationCore(QObject* parent = nullptr);
+    static void onProjectStop();
+    static void onProjectStart();
+    static void onUserSessionStop();
+    static void onUserSessionStart();
 
 private:
-    static ApplicationCore* s_instance;
+    ApplicationCore(QApplication* app);
+    ApplicationCore(const ApplicationCore&) = delete;
+    ApplicationCore &operator=(const ApplicationCore&) = delete;
+
+private:
+    static QSettings* s_settings;
+    static GeneralSettings* s_generalSettings;
     static Authenticator* s_authenticator;
     static UserManager* s_userManager;
     static ControlPreviewingManager* s_controlPreviewingManager;

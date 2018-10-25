@@ -26,13 +26,13 @@
 #include "qmljseditingsettingspage.h"
 #include "qmljseditorconstants.h"
 
-#include <bootsettings.h>
+#include <applicationcore.h>
 #include <qmljstools/qmljstoolsconstants.h>
 //#include <coreplugin/icore.h>
 
 #include <QTextStream>
 #include <QCheckBox>
-
+#include <QSettings>
 
 using namespace QmlJSEditor;
 using namespace QmlJSEditor::Internal;
@@ -47,7 +47,7 @@ QmlJsEditingSettings::QmlJsEditingSettings()
 void QmlJsEditingSettings::set()
 {
     if (get() != *this)
-        toSettings(BootSettings::settings());
+        toSettings(ApplicationCore::settings());
 }
 
 void QmlJsEditingSettings::fromSettings(QSettings *settings)
@@ -157,7 +157,7 @@ void QmlJsEditingSettingsPageWidget::setSettings(const QmlJsEditingSettings &s)
 QmlJsEditingSettings QmlJsEditingSettings::get()
 {
     QmlJsEditingSettings settings;
-    settings.fromSettings(BootSettings::settings());
+    settings.fromSettings(ApplicationCore::settings());
     return settings;
 }
 

@@ -1,6 +1,4 @@
 #include <applicationcore.h>
-#include <bootsettings.h>
-
 #include <QApplication>
 #include <QMessageBox>
 #include <QSharedMemory>
@@ -8,7 +6,7 @@
 int main(int argc, char* argv[])
 {
     // Apply boot Settings
-    BootSettings::init(argv[0]);
+    ApplicationCore::preparation(argv[0]);
 
     // Initialize application
     QApplication app(argc, argv);
@@ -27,7 +25,7 @@ int main(int argc, char* argv[])
     }
 
     // Initialize application core
-    ApplicationCore::init(&app);
+    ApplicationCore::run(&app);
 
     // Start main event loop
     return app.exec();

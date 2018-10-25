@@ -22,16 +22,20 @@
 #include <interfacesettings.h>
 #include <applicationstyle.h>
 #include <defaultfont.h>
+#include <filemanager.h>
+#include <splashscreen.h>
+#include <helpmanager.h>
 
+#include <QFontDatabase>
 #include <QApplication>
-#include <QSplashScreen>
+#include <QSettings>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/themechooser.h>
-#include <helpmanager.h>
 
-ApplicationCore* ApplicationCore::s_instance = nullptr;
+QSettings* ApplicationCore::s_settings = nullptr;
+GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
@@ -47,9 +51,9 @@ DocumentManager* ApplicationCore::s_documentManager = nullptr;
 WindowManager* ApplicationCore::s_windowManager = nullptr;
 MenuManager* ApplicationCore::s_menuManager = nullptr;
 
-ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
+ApplicationCore::ApplicationCore(QApplication* app)
 {
-    //! Core initialization
+    /** Core initialization **/
     QApplication::setApplicationName(APP_NAME);
     QApplication::setOrganizationName(APP_CORP);
     QApplication::setApplicationVersion(APP_VER);
@@ -57,94 +61,97 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
 
-    // Load fonts
-    DefaultFont::load();
+    const char* fontPath = ":/fonts";
+    const char* settingsPath = QApplication::applicationDirPath() + "/settings.ini";
 
-    // FIXME: To re-read font settings after QApplication instance is constructed
-    GeneralSettings::interfaceSettings()->read();
+    /* Prepare setting instances */
+    s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);
+    s_generalSettings = new GeneralSettings(app);
 
-    QApplication::setStyle(new ApplicationStyle);
+    /* Read settings */
+    GeneralSettings::read();
+
+    /* Load default fonts */
+    for (const QString& fontName : lsfile(fontPath))
+        QFontDatabase::addApplicationFont(fontPath + fontName);
+
+    /* Set application ui settings */
+    QApplication::setPalette(palette());
     QApplication::setFont(GeneralSettings::interfaceSettings()->font);
+    QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
 
     /* Show splash screen */
-    QPixmap pixmap(":/images/splash.png");
-    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-    QSplashScreen splash(pixmap);
-    splash.show();
-    QApplication::processEvents();
+    SplashScreen splashScreen;
+    Q_UNUSED(splashScreen);
 
-    s_authenticator = new Authenticator(this);
-    s_userManager = new UserManager(this);
-    s_controlPreviewingManager = new ControlPreviewingManager(this);
-    s_saveManager = new SaveManager(this);
-    s_projectManager = new ProjectManager(this);
-    s_projectExposingManager = new ProjectExposingManager(this);
-    s_controlExposingManager = new ControlCreationManager(this);
-    s_controlRemovingManager = new ControlRemovingManager(this);
-    s_controlPropertyManager = new ControlPropertyManager(this);
-    s_runManager = new RunManager(this);
-    s_helpManager = new HelpManager(this);
+    s_authenticator = new Authenticator(app);
+    s_userManager = new UserManager(app);
+    s_controlPreviewingManager = new ControlPreviewingManager(app);
+    s_saveManager = new SaveManager(app);
+    s_projectManager = new ProjectManager(app);
+    s_projectExposingManager = new ProjectExposingManager(app);
+    s_controlExposingManager = new ControlCreationManager(app);
+    s_controlRemovingManager = new ControlRemovingManager(app);
+    s_controlPropertyManager = new ControlPropertyManager(app);
+    s_runManager = new RunManager(app);
+    s_helpManager = new HelpManager(app);
 
     HelpManager::setupHelpManager();
     Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
-    connect(qApp, &QCoreApplication::aboutToQuit, s_helpManager, &HelpManager::aboutToShutdown);
+    QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit,
+                     s_helpManager, &HelpManager::aboutToShutdown);
 
-    /* Palette settings */
-    setApplicationPalette();
-    connect(GeneralSettings::interfaceSettings(), &InterfaceSettings::changed,
-            this, &ApplicationCore::setApplicationPalette);
-
-    s_documentManager = new DocumentManager(this);
+    s_documentManager = new DocumentManager(app);
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
-    //! GUI initialization
-    s_windowManager = new WindowManager(this);
-    s_menuManager = new MenuManager(this);
+    /** Ui initialization **/
+    s_windowManager = new WindowManager(app);
+    s_menuManager = new MenuManager(app);
 
-    connect(UserManager::instance(), &UserManager::started,
-            this, &ApplicationCore::onUserSessionStart);
-    connect(UserManager::instance(), &UserManager::aboutToStop,
-            this, &ApplicationCore::onUserSessionStop);
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &ApplicationCore::onProjectStart);
-    connect(ProjectManager::instance(), &ProjectManager::stopped,
-            this, &ApplicationCore::onProjectStop);
+    QObject::connect(UserManager::instance(), &UserManager::started,
+            &ApplicationCore::onUserSessionStart);
+    QObject::connect(UserManager::instance(), &UserManager::aboutToStop,
+            &ApplicationCore::onUserSessionStop);
+    QObject::connect(ProjectManager::instance(), &ProjectManager::started,
+            &ApplicationCore::onProjectStart);
+    QObject::connect(ProjectManager::instance(), &ProjectManager::stopped,
+            &ApplicationCore::onProjectStop);
 
-    ProjectExposingManager::init(
-                WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
-    ControlCreationManager::init(
-                WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
-    ControlRemovingManager::init(
-                WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene());
+    DesignerScene* scene = WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene();
+    ProjectExposingManager::init(scene);
+    ControlCreationManager::init(scene);
+    ControlRemovingManager::init(scene);
 
     // Show welcome window
     WindowManager::welcomeWindow()->show();
-    splash.finish(WindowManager::welcomeWindow());
 }
 
-void ApplicationCore::init(QObject* parent)
+void ApplicationCore::run(QApplication* app)
 {
-    if (s_instance)
-        return;
-
-    s_instance = new ApplicationCore(parent);
+    static ApplicationCore instance(app);
+    Q_UNUSED(instance);
 }
 
-ApplicationCore* ApplicationCore::instance()
+void ApplicationCore::preparation(const char* filePath)
 {
-    return s_instance;
+    QSettings setting(dname(filePath) + "/settings.ini", QSettings::IniFormat);
+    if (setting.value("General/Interface.HdpiEnabled", true).toBool())
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    /* Disable Qml Parser warnings */
+    QLoggingCategory::setFilterRules("qtc*.info=false\n"
+                                     "qtc*.debug=false\n"
+                                     "qtc*.warning=false\n"
+                                     "qtc*.critical=false\n"
+                                     "qtc*=false");
 }
 
-void ApplicationCore::setApplicationPalette()
+QPalette ApplicationCore::palette()
 {
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-
     QPalette palette(QApplication::palette());
-    if (settings->theme == "Light") {
-        if (palette.color(QPalette::Active, QPalette::Text) == "#3C444C")
-            return;
-
+    if (GeneralSettings::interfaceSettings()->theme == "Light") {
         palette.setColor(QPalette::Active, QPalette::Text, "#3C444C");
         palette.setColor(QPalette::Inactive, QPalette::Text, "#3C444C");
         palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
@@ -165,9 +172,6 @@ void ApplicationCore::setApplicationPalette()
         palette.setColor(QPalette::Link, "#025dbf");
         palette.setColor(QPalette::LinkVisited, "#B44B46");
     } else {
-        if (palette.color(QPalette::Active, QPalette::Text) == "#ffffff")
-            return;
-
         palette.setColor(QPalette::Active, QPalette::Text, "#e5e5e5");
         palette.setColor(QPalette::Inactive, QPalette::Text, "#e5e5e5");
         palette.setColor(QPalette::Disabled, QPalette::Text, "#e5e5e5");
@@ -188,18 +192,27 @@ void ApplicationCore::setApplicationPalette()
         palette.setColor(QPalette::Link, "#025dbf");
         palette.setColor(QPalette::LinkVisited, "#B44B46");
     }
-
-    QApplication::setPalette(palette);
+    return palette;
 }
 
-void ApplicationCore::onUserSessionStart()
+QSettings* ApplicationCore::settings()
 {
-    // DocumentManager::load();
+    return s_settings;
 }
 
-void ApplicationCore::onUserSessionStop()
+const char* ApplicationCore::resourcePath()
 {
-    ProjectManager::stop();
+    return ":";
+}
+
+const char* ApplicationCore::userResourcePath()
+{
+    return ":";
+}
+
+void ApplicationCore::onProjectStop()
+{
+    WindowManager::mainWindow()->discharge();
 }
 
 void ApplicationCore::onProjectStart()
@@ -207,7 +220,12 @@ void ApplicationCore::onProjectStart()
     // WindowManager::mainWindow()->discharge();
 }
 
-void ApplicationCore::onProjectStop()
+void ApplicationCore::onUserSessionStop()
 {
-    WindowManager::mainWindow()->discharge();
+    ProjectManager::stop();
+}
+
+void ApplicationCore::onUserSessionStart()
+{
+    // DocumentManager::load();
 }

@@ -23,7 +23,6 @@ HEADERS += \
     $$PWD/quicktheme.h \
     $$PWD/previewercommands.h \
     $$PWD/paintutils.h \
-    $$PWD/defaultfont.h \
     $$PWD/utilityfunctions.h \
     $$PWD/offlinestorage.h\
     $$PWD/qtcolorbutton.h
@@ -37,11 +36,9 @@ SOURCES += \
     $$PWD/hashfactory.cpp \
     $$PWD/quicktheme.cpp \
     $$PWD/paintutils.cpp \
-    $$PWD/defaultfont.cpp \
     $$PWD/utilityfunctions.cpp \
     $$PWD/offlinestorage.cpp \
     $$PWD/qtcolorbutton.cpp
-
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \
