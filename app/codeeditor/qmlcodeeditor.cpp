@@ -197,7 +197,6 @@ struct PaintEventData
     const QTextCursor textCursor;
     const QTextBlock textCursorBlock;
     const bool isEditable;
-    const FontSettings fontSettings;
     const QTextCharFormat searchScopeFormat;
     const QTextCharFormat searchResultFormat;
     const QTextCharFormat visualWhitespaceFormat;

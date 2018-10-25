@@ -25,7 +25,6 @@
 
 #include "texteditorsettings.h"
 
-#include "fontsettings.h"
 #include <qmlcodeeditor.h>
 #include "behaviorsettings.h"
 #include "behaviorsettingspage.h"
@@ -33,7 +32,6 @@
 //#include "marginsettings.h"
 //#include "displaysettings.h"
 //#include "displaysettingspage.h"
-#include "fontsettingspage.h"
 #include "typingsettings.h"
 #include "storagesettings.h"
 #include "tabsettings.h"
@@ -60,7 +58,6 @@ namespace Internal {
 class TextEditorSettingsPrivate
 {
 public:
-    FontSettingsPage *m_fontSettingsPage;
     BehaviorSettingsPage *m_behaviorSettingsPage;
 //    DisplaySettingsPage *m_displaySettingsPage;
 //    HighlighterSettingsPage *m_highlighterSettingsPage;
@@ -332,10 +329,6 @@ TextEditorSettings::TextEditorSettings()
                              outputArgumentFormat,
                              FormatDescription::ShowFontUnderlineAndRelativeControls);
 
-    d->m_fontSettingsPage = new FontSettingsPage(formatDescr,
-                                                   Constants::TEXT_EDITOR_FONT_SETTINGS,
-                                                   this);
-
     // Add the GUI used to configure the tab, storage and interaction settings
     BehaviorSettingsPageParameters behaviorSettingsPageParameters;
     behaviorSettingsPageParameters.id = Constants::TEXT_EDITOR_BEHAVIOR_SETTINGS;
@@ -385,11 +378,6 @@ TextEditorSettings::~TextEditorSettings()
 TextEditorSettings *TextEditorSettings::instance()
 {
     return m_instance;
-}
-
-const FontSettings &TextEditorSettings::fontSettings()
-{
-    return d->m_fontSettingsPage->fontSettings();
 }
 
 const TypingSettings &TextEditorSettings::typingSettings()
@@ -510,23 +498,4 @@ void TextEditorSettings::registerMimeTypeForLanguageId(const char *mimeType, Cor
 Core::Id TextEditorSettings::languageId(const QString &mimeType)
 {
     return d->m_mimeTypeToLanguage.value(mimeType);
-}
-
-int TextEditorSettings::increaseFontZoom(int step)
-{
-    FontSettings &fs = const_cast<FontSettings&>(d->m_fontSettingsPage->fontSettings());
-    const int previousZoom = fs.fontZoom();
-    const int newZoom = qMax(10, previousZoom + step);
-    if (newZoom != previousZoom) {
-        fs.setFontZoom(newZoom);
-        d->m_fontSettingsPage->saveSettings();
-    }
-    return newZoom;
-}
-
-void TextEditorSettings::resetFontZoom()
-{
-    FontSettings &fs = const_cast<FontSettings&>(d->m_fontSettingsPage->fontSettings());
-    fs.setFontZoom(100);
-    d->m_fontSettingsPage->saveSettings();
 }

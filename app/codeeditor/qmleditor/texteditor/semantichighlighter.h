@@ -27,8 +27,6 @@
 
 #include "texteditor_global.h"
 
-#include "fontsettings.h"
-
 #include <QHash>
 #include <QFuture>
 #include <QTextCharFormat>
