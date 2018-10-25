@@ -164,7 +164,6 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_fontLayout->addLayout(hb3);
     m_fontLayout->addLayout(hb4);
-    m_fontLayout->addStretch();
 
     m_fontGroup->setTitle(tr("Font"));
     m_fontFamilyLabel->setText(tr("Family") + ":");

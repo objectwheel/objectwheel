@@ -26,7 +26,6 @@ public:
     QString title() const override;
 
 private:
-    QVBoxLayout* m_layout;
     QGroupBox* m_interfaceGroup;
     QGridLayout* m_interfaceLayout;
     QLabel* m_topBarColorLabel;

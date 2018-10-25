@@ -3,9 +3,6 @@
 
 #include <settings.h>
 
-#include <QColor>
-#include <QFont>
-
 class FontColorsSettings : public Settings
 {
     Q_OBJECT
@@ -18,17 +15,10 @@ public:
     void write() override;
     void reset() override;
 
-    bool hdpiEnabled;
-    bool bottomPanesPop;
-    bool fontPreferThick;
-    bool fontPreferAntialiasing;
     int fontPixelSize;
     QString fontFamily;
-    QString theme;
-    QString language;
-    QColor topBarColor;
-    QColor leftBarColor;
-    QString visibleBottomPane;
+    bool fontPreferThick;
+    bool fontPreferAntialiasing;
 };
 
 #endif // FONTCOLORSSETTINGS_H
