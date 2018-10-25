@@ -60,7 +60,7 @@ WindowManager::~WindowManager()
     s_mainWindow->deleteLater();
 
 //    delete s_toolboxSettingsWindow;
-    delete s_preferencesWindow;
+    s_preferencesWindow->deleteLater();
     delete s_aboutWindow;
 }
 
