@@ -7,7 +7,6 @@
 #include <controlpreviewingmanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>
-#include <defaultfont.h>
 #include <utilityfunctions.h>
 
 #include <QMessageBox>
@@ -88,7 +87,7 @@ void ProjectTemplatesDelegate::paint(QPainter* painter, const QStyleOptionViewIt
 
     painter->drawPixmap(ri, icon, icon.rect());
 
-    QFont f(DefaultFont::font());
+    QFont f;
     f.setWeight(QFont::DemiBold);
     painter->setFont(f);
     painter->setPen(option.palette.text().color());

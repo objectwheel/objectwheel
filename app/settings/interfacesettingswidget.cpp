@@ -222,11 +222,11 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
         m_topBarColorButton->setColor(InterfaceSettings().topBarColor);
     });
     connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
-        const QFont font = InterfaceSettings().font;
-        m_fontFamilyBox->setCurrentText(QFontInfo(font).family());
-        m_fontSizeBox->setCurrentText(QString::number(font.pixelSize()));
-        m_fontThickBox->setChecked(font.weight() == QFont::Medium);
-        m_fontAntialiasingBox->setChecked(font.styleStrategy() == QFont::PreferAntialias);
+        const InterfaceSettings settings;
+        m_fontFamilyBox->setCurrentText(settings.fontFamily);
+        m_fontSizeBox->setCurrentText(QString::number(settings.fontPixelSize));
+        m_fontThickBox->setChecked(settings.fontPreferThick);
+        m_fontAntialiasingBox->setChecked(settings.fontPreferAntialiasing);
     });
     connect(m_fontAntialiasingBox, &QCheckBox::clicked, this, [=] {
         if (g_fontMessageShowed)
@@ -302,11 +302,10 @@ void InterfaceSettingsWidget::apply()
     settings->language = m_languageBox->currentData().toString();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
     /****/
-    QFont font(m_fontFamilyBox->currentText());
-    font.setPixelSize(m_fontSizeBox->currentText().toInt());
-    font.setWeight(m_fontThickBox->isChecked() ? QFont::Medium : QFont::Normal);
-    font.setStyleStrategy(m_fontAntialiasingBox->isChecked() ? QFont::PreferAntialias : QFont::NoAntialias);
-    settings->font = font;
+    settings->fontFamily = m_fontFamilyBox->currentText();
+    settings->fontPixelSize = m_fontSizeBox->currentText().toInt();
+    settings->fontPreferThick = m_fontThickBox->isChecked();
+    settings->fontPreferAntialiasing = m_fontAntialiasingBox->isChecked();
     /****/
     settings->visibleBottomPane = m_visibleBottomPaneBox->currentData().toString();
     settings->bottomPanesPop = m_bottomPanesCheckBox->isChecked();
@@ -334,10 +333,10 @@ void InterfaceSettingsWidget::reset()
     m_languageBox->setCurrentText(tr(settings->language.toUtf8()));
     m_hdpiCheckBox->setChecked(settings->hdpiEnabled);
     /****/
-    m_fontFamilyBox->setCurrentText(QFontInfo(settings->font).family());
-    m_fontSizeBox->setCurrentText(QString::number(settings->font.pixelSize()));
-    m_fontThickBox->setChecked(settings->font.weight() == QFont::Medium);
-    m_fontAntialiasingBox->setChecked(settings->font.styleStrategy() == QFont::PreferAntialias);
+    m_fontFamilyBox->setCurrentText(settings->fontFamily);
+    m_fontSizeBox->setCurrentText(QString::number(settings->fontPixelSize));
+    m_fontThickBox->setChecked(settings->fontPreferThick);
+    m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
     /****/
     m_visibleBottomPaneBox->setCurrentText(tr(settings->visibleBottomPane.toUtf8()));
     m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);

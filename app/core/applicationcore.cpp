@@ -21,14 +21,15 @@
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <applicationstyle.h>
-#include <defaultfont.h>
 #include <filemanager.h>
 #include <splashscreen.h>
 #include <helpmanager.h>
 
-#include <QFontDatabase>
-#include <QApplication>
 #include <QSettings>
+#include <QMessageBox>
+#include <QApplication>
+#include <QFontDatabase>
+#include <QSharedMemory>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
@@ -61,23 +62,15 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
 
-    const char* fontPath = ":/fonts";
-    const char* settingsPath = QApplication::applicationDirPath() + "/settings.ini";
-
-    /* Prepare setting instances */
-    s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);
-    s_generalSettings = new GeneralSettings(app);
-
-    /* Read settings */
-    GeneralSettings::read();
-
-    /* Load default fonts */
-    for (const QString& fontName : lsfile(fontPath))
-        QFontDatabase::addApplicationFont(fontPath + fontName);
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    QFont font(settings->fontFamily);
+    font.setPixelSize(settings->fontPixelSize);
+    font.setWeight(settings->fontPreferThick ? QFont::DemiBold : QFont::Normal);
+    font.setStyleStrategy(settings->fontPreferAntialiasing ? QFont::PreferAntialias : QFont::NoAntialias);
 
     /* Set application ui settings */
+    QApplication::setFont(font);
     QApplication::setPalette(palette());
-    QApplication::setFont(GeneralSettings::interfaceSettings()->font);
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
 
     /* Show splash screen */
@@ -110,13 +103,13 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_menuManager = new MenuManager(app);
 
     QObject::connect(UserManager::instance(), &UserManager::started,
-            &ApplicationCore::onUserSessionStart);
+                     &ApplicationCore::onUserSessionStart);
     QObject::connect(UserManager::instance(), &UserManager::aboutToStop,
-            &ApplicationCore::onUserSessionStop);
+                     &ApplicationCore::onUserSessionStop);
     QObject::connect(ProjectManager::instance(), &ProjectManager::started,
-            &ApplicationCore::onProjectStart);
+                     &ApplicationCore::onProjectStart);
     QObject::connect(ProjectManager::instance(), &ProjectManager::stopped,
-            &ApplicationCore::onProjectStop);
+                     &ApplicationCore::onProjectStop);
 
     DesignerScene* scene = WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene();
     ProjectExposingManager::init(scene);
@@ -127,16 +120,45 @@ ApplicationCore::ApplicationCore(QApplication* app)
     WindowManager::welcomeWindow()->show();
 }
 
+bool ApplicationCore::locked()
+{
+    QSharedMemory* sharedMemory = new QSharedMemory("T2JqZWN0d2hlZWxTaGFyZWRNZW1vcnlLZXk");
+    if(!sharedMemory->create(1)) {
+        sharedMemory->attach();
+        sharedMemory->detach();
+        if(!sharedMemory->create(1)) {
+            QMessageBox::warning(nullptr,
+                                 QObject::tr("Quitting"),
+                                 QObject::tr("Another instance is already running."));
+            return true;
+        }
+    }
+    return false;
+}
+
 void ApplicationCore::run(QApplication* app)
 {
     static ApplicationCore instance(app);
     Q_UNUSED(instance);
 }
 
-void ApplicationCore::preparation(const char* filePath)
+void ApplicationCore::prepare(const char* filePath)
 {
-    QSettings setting(dname(filePath) + "/settings.ini", QSettings::IniFormat);
-    if (setting.value("General/Interface.HdpiEnabled", true).toBool())
+    const QString fontPath = ":/fonts";
+    const QString settingsPath = dname(filePath) + "/settings.ini";
+
+    /* Prepare setting instances */
+    s_settings = new QSettings(settingsPath, QSettings::IniFormat, nullptr);
+    s_generalSettings = new GeneralSettings(nullptr);
+
+    /* Read settings */
+    GeneralSettings::read();
+
+    /* Load default fonts */
+    for (const QString& fontName : lsfile(fontPath))
+        QFontDatabase::addApplicationFont(fontPath + fontName);
+
+    if (GeneralSettings::interfaceSettings()->hdpiEnabled)
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 

@@ -24,8 +24,9 @@ class QObject;
 class ApplicationCore final
 {
 public:
+    static bool locked();
     static void run(QApplication* app);
-    static void preparation(const char* filePath);
+    static void prepare(const char* filePath);
 
     static QPalette palette();
     static QSettings* settings();
