@@ -41,12 +41,12 @@ namespace {
 QTextCharFormat textCharFormatForResult(const HighlightingResult &result,
                                         const QHash<int, QTextCharFormat> &kindToFormat)
 {
-    if (result.useTextSyles)
-        return TextEditorSettings::fontSettings().toTextCharFormat(result.textStyles);
-    else
+    // WARNING
+//    if (result.useTextSyles)
+//        return TextEditorSettings::fontSettings().toTextCharFormat(result.textStyles);
+//    else
         return kindToFormat.value(result.kind);
 }
-
 }
 
 void SemanticHighlighter::incrementalApplyExtraAdditionalFormats(

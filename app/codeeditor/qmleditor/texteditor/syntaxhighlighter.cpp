@@ -45,11 +45,13 @@ class SyntaxHighlighterPrivate
 {
     SyntaxHighlighter *q_ptr = nullptr;
     Q_DECLARE_PUBLIC(SyntaxHighlighter)
+    QObject test;
 public:
     SyntaxHighlighterPrivate()
     {
+        QPointer<QObject> p(&test);
         QObject::connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
-                         this, &SyntaxHighlighterPrivate::updateFormats);
+                         [=] { if (p) updateFormats(); });
         updateFormats();
     }
 
@@ -73,7 +75,7 @@ public:
     QTextBlock currentBlock;
     bool rehighlightPending = false;
     bool inReformatBlocks = false;
-//    TextDocumentLayout::FoldValidator foldValidator; // BUG ??
+    //    TextDocumentLayout::FoldValidator foldValidator; // BUG ??
     QVector<QTextCharFormat> formats;
     QVector<std::pair<int,TextStyle>> formatCategories;
     QTextCharFormat whitespaceFormat;
@@ -177,7 +179,7 @@ void SyntaxHighlighter::reformatBlocks(int from, int charsRemoved, int charsAdde
 
 void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int charsAdded)
 {
-//    foldValidator.reset();
+    //    foldValidator.reset();
 
     rehighlightPending = false;
 
@@ -206,7 +208,7 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
 
     formatChanges.clear();
 
-//    foldValidator.finalize();
+    //    foldValidator.finalize();
 }
 
 void SyntaxHighlighterPrivate::reformatBlock(const QTextBlock &block, int from, int charsRemoved, int charsAdded)
@@ -221,7 +223,7 @@ void SyntaxHighlighterPrivate::reformatBlock(const QTextBlock &block, int from, 
     q->highlightBlock(block.text());
     applyFormatChanges(from, charsRemoved, charsAdded);
 
-//    foldValidator.process(currentBlock);
+    //    foldValidator.process(currentBlock);
 
     currentBlock = QTextBlock();
 }
@@ -322,7 +324,7 @@ void SyntaxHighlighter::setDocument(QTextDocument *doc)
             d->rehighlightPending = true;
             QTimer::singleShot(0, this, &SyntaxHighlighter::delayedRehighlight);
         }
-//        d->foldValidator.setup(qobject_cast<TextDocumentLayout *>(doc->documentLayout()));
+        //        d->foldValidator.setup(qobject_cast<TextDocumentLayout *>(doc->documentLayout()));
     }
 }
 
@@ -669,15 +671,15 @@ static bool byStartOfRange(const QTextLayout::FormatRange &range, const QTextLay
 void SyntaxHighlighter::setExtraFormats(const QTextBlock &block,
                                         QVector<QTextLayout::FormatRange> &formats)
 {
-//    qDebug() << "setFormats() on block" << block.blockNumber();
-//    qDebug() << "   is valid:" << (block.isValid() ? "Yes" : "No");
-//    qDebug() << "   has layout:" << (block.layout() ? "Yes" : "No");
-//    if (block.layout()) qDebug() << "   has text:" << (block.text().isEmpty() ? "No" : "Yes");
+    //    qDebug() << "setFormats() on block" << block.blockNumber();
+    //    qDebug() << "   is valid:" << (block.isValid() ? "Yes" : "No");
+    //    qDebug() << "   has layout:" << (block.layout() ? "Yes" : "No");
+    //    if (block.layout()) qDebug() << "   has text:" << (block.text().isEmpty() ? "No" : "Yes");
 
-//    for (int i = 0; i < overrides.count(); ++i)
-//        qDebug() << "   from " << overrides.at(i).start << "length"
-//                 << overrides.at(i).length
-//                 << "color:" << overrides.at(i).format.foreground().color();
+    //    for (int i = 0; i < overrides.count(); ++i)
+    //        qDebug() << "   from " << overrides.at(i).start << "length"
+    //                 << overrides.at(i).length
+    //                 << "color:" << overrides.at(i).format.foreground().color();
     Q_D(SyntaxHighlighter);
 
     const int blockLength = block.length();
@@ -835,9 +837,9 @@ void SyntaxHighlighter::highlightBlock(const QString &text)
 void SyntaxHighlighterPrivate::updateFormats()
 {
     // WARNING
-//    for (const auto &pair : qAsConst(formatCategories))
-//        formats[pair.first] = fontSettings.toTextCharFormat(pair.second);
-//    whitespaceFormat = fontSettings.toTextCharFormat(C_VISUAL_WHITESPACE);
+    //    for (const auto &pair : qAsConst(formatCategories))
+    //        formats[pair.first] = fontSettings.toTextCharFormat(pair.second);
+    //    whitespaceFormat = fontSettings.toTextCharFormat(C_VISUAL_WHITESPACE);
 }
 
 } // namespace TextEditor
