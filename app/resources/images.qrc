@@ -82,5 +82,8 @@
         <file>images/preferences.png</file>
         <file>images/settings/general.png</file>
         <file>images/flags/en.png</file>
+        <file>images/settings/interface.png</file>
+        <file>images/settings/codeeditor.png</file>
+        <file>images/settings/fontcolors.png</file>
     </qresource>
 </RCC>

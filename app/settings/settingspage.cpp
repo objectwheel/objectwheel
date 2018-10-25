@@ -60,7 +60,7 @@ QString SettingsPage::title() const
 
 void SettingsPage::addWidget(SettingsWidget* widget)
 {
-    m_tabWidget->addTab(widget, widget->title());
+    m_tabWidget->addTab(widget, widget->icon(), widget->title());
 }
 
 QList<SettingsWidget*> SettingsPage::widgets() const

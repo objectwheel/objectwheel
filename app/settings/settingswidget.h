@@ -14,6 +14,7 @@ public:
 
     virtual void apply() = 0;
     virtual void reset() = 0;
+    virtual QIcon icon() const = 0;
     virtual QString title() const = 0;
 
     void activate(bool activate = true);
