@@ -64,15 +64,9 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
 
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    QFont font(settings->fontFamily);
-    font.setPixelSize(settings->fontPixelSize);
-    font.setWeight(settings->fontPreferThick ? QFont::Medium : QFont::Normal);
-    font.setStyleStrategy(settings->fontPreferAntialiasing ? QFont::PreferAntialias : QFont::NoAntialias);
-
     /* Set application ui settings */
-    QApplication::setFont(font);
     QApplication::setPalette(palette());
+    QApplication::setFont(GeneralSettings::interfaceSettings()->toFont());
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
 
     /* Show splash screen */

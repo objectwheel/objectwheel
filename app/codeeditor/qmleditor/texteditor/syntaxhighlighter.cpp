@@ -836,10 +836,10 @@ void SyntaxHighlighter::highlightBlock(const QString &text)
 
 void SyntaxHighlighterPrivate::updateFormats()
 {
-    // WARNING
-    //    for (const auto &pair : qAsConst(formatCategories))
-    //        formats[pair.first] = fontSettings.toTextCharFormat(pair.second);
-    //    whitespaceFormat = fontSettings.toTextCharFormat(C_VISUAL_WHITESPACE);
+    const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+    for (const auto &pair : qAsConst(formatCategories))
+        formats[pair.first] = settings->toTextCharFormat(pair.second);
+    whitespaceFormat = settings->toTextCharFormat(C_VISUAL_WHITESPACE);
 }
 
 } // namespace TextEditor

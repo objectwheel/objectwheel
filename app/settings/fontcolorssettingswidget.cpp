@@ -110,7 +110,7 @@ void FontColorsSettingsWidget::reset()
 
     activate(false);
 
-    FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+    const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
     /****/
     m_fontFamilyBox->setCurrentText(settings->fontFamily);
     m_fontSizeBox->setCurrentText(QString::number(settings->fontPixelSize));
@@ -134,6 +134,5 @@ bool FontColorsSettingsWidget::containsWord(const QString& word) const
             || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
-            || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
-            ;
+            || m_fontThickBox->text().contains(word, Qt::CaseInsensitive);
 }

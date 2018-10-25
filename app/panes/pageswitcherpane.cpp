@@ -268,7 +268,7 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
 
 void PageSwitcherPane::updateColors()
 {
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     const QColor& lighter = settings->leftBarColor.lighter(106);
     const QColor& darker = settings->leftBarColor.darker(110);
 
@@ -306,7 +306,7 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).topLeft());
     gradient.setColorAt(0, settings->leftBarColor.lighter(106));
     gradient.setColorAt(1, settings->leftBarColor.darker(110));

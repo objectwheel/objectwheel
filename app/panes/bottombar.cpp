@@ -271,7 +271,7 @@ void BottomBar::flash(QAbstractButton* button)
     else if (button == m_issuesButton)
         g_issuesFlasher->flash(400, 3);
 
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     if (settings->bottomPanesPop && !button->isChecked())
         button->animateClick();
 }
@@ -314,7 +314,7 @@ void BottomBar::discharge()
     setLeftShowHideButtonToolTip(true);
     setRightShowHideButtonToolTip(true);
 
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     if (settings->visibleBottomPane != "None") {
         if (settings->visibleBottomPane == "Console Pane")
             m_consoleButton->animateClick();

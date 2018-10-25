@@ -75,7 +75,7 @@ public:
 
     int startRevision() const;
 
-    void updateFontSettings(const TextEditor::FontSettings &fontSettings);
+    void updateFontSettings();
     void reportMessagesInfo(const QVector<QTextLayout::FormatRange> &diagnosticMessages,
                             const QHash<int,QTextCharFormat> &formats);
 

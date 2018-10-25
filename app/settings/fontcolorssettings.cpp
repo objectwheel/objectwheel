@@ -55,3 +55,22 @@ const char* FontColorsSettings::category() const
 {
     return "FontColors";
 }
+
+QFont FontColorsSettings::toFont() const
+{
+    QFont font(fontFamily);
+    font.setPixelSize(fontPixelSize);
+    font.setWeight(fontPreferThick ? QFont::Medium : QFont::Normal);
+    font.setStyleStrategy(fontPreferAntialiasing ? QFont::PreferAntialias : QFont::NoAntialias);
+    return font;
+}
+
+QTextCharFormat FontColorsSettings::toTextCharFormat(TextEditor::TextStyle category) const
+{
+// WARNING
+}
+
+QTextCharFormat FontColorsSettings::toTextCharFormat(TextEditor::TextStyles textStyles) const
+{
+    // WARNING
+}

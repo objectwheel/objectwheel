@@ -4,6 +4,8 @@
 #include <qmlcodeeditor.h>
 #include <textutils.h>
 #include <utilityfunctions.h>
+#include <codeeditorsettings.h>
+#include <fontcolorssettings.h>
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -149,8 +151,8 @@ void BracketBand::paintEvent(QPaintEvent* e)
     auto block = ce->firstVisibleBlock();
     auto top = ce->blockBoundingGeometry(block).translated(ce->contentOffset()).top();
     auto bottom = top + ce->blockBoundingRect(block).height();
-    QColor color /* WARNING = m_qmlCodeEditor->codeDocument()->fontSettings().toTextCharFormat(
-                TextEditor::C_CURRENT_LINE).background().color()*/;
+    QColor color = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(
+                TextEditor::C_CURRENT_LINE).background().color();
     color.setAlpha(128);
     qreal lineHeight = block.layout()->lineForTextPosition(0).rect().height();
 

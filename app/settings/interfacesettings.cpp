@@ -89,3 +89,12 @@ const char* InterfaceSettings::category() const
 {
     return "Interface";
 }
+
+QFont InterfaceSettings::toFont() const
+{
+    QFont font(fontFamily);
+    font.setPixelSize(fontPixelSize);
+    font.setWeight(fontPreferThick ? QFont::Medium : QFont::Normal);
+    font.setStyleStrategy(fontPreferAntialiasing ? QFont::PreferAntialias : QFont::NoAntialias);
+    return font;
+}

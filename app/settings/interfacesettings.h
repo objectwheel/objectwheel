@@ -3,6 +3,7 @@
 
 #include <settings.h>
 #include <QColor>
+#include <QFont>
 
 class GeneralSettings;
 
@@ -14,6 +15,8 @@ struct InterfaceSettings : public Settings
     void write() override;
     void reset() override;
     const char* category() const override;
+
+    QFont toFont() const;
 
     bool hdpiEnabled;
     QString theme;

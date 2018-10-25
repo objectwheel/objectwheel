@@ -2,6 +2,10 @@
 #define FONTCOLORSSETTINGS_H
 
 #include <settings.h>
+#include <texteditor/textstyles.h>
+
+#include <QFont>
+#include <QTextCharFormat>
 
 class CodeEditorSettings;
 
@@ -13,6 +17,10 @@ struct FontColorsSettings : public Settings
     void write() override;
     void reset() override;
     const char* category() const override;
+
+    QFont toFont() const;
+    QTextCharFormat toTextCharFormat(TextEditor::TextStyle category) const;
+    QTextCharFormat toTextCharFormat(TextEditor::TextStyles textStyles) const;
 
     bool fontPreferThick;
     bool fontPreferAntialiasing;

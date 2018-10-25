@@ -561,7 +561,6 @@ HelpManagerPrivate::~HelpManagerPrivate()
 
 const QStringList HelpManagerPrivate::documentationFromInstaller()
 {
-    // WARNING
 //    QSettings *installSettings = ApplicationCore::settings();
 //    const QStringList documentationPaths = installSettings->value(QLatin1String("Help/InstalledDocumentation"))
 //            .toStringList();
@@ -581,13 +580,13 @@ const QStringList HelpManagerPrivate::documentationFromInstaller()
 }
 
 void HelpManagerPrivate::readSettings()
-{// WARNING
+{
 //    m_userRegisteredFiles = ApplicationCore::settings()->value(QLatin1String(kUserDocumentationKey))
 //            .toStringList().toSet();
 }
 
 void HelpManagerPrivate::writeSettings()
-{// WARNING
+{
 //    const QStringList list = m_userRegisteredFiles.toList();
 //    ApplicationCore::settings()->setValue(QLatin1String(kUserDocumentationKey), list);
 }

@@ -171,7 +171,7 @@ void RunPane::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     QLinearGradient gradient(rect().topLeft(), rect().bottomLeft());
     gradient.setColorAt(0, settings->topBarColor.lighter(110));
     gradient.setColorAt(1, settings->topBarColor.darker(108));

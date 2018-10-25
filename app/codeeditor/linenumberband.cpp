@@ -2,6 +2,8 @@
 #include <rowbar.h>
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
+#include <codeeditorsettings.h>
+#include <fontcolorssettings.h>
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -20,8 +22,8 @@ struct ExtraAreaPaintEventData
         , markWidth(/*m_marksVisible ? */lineSpacing/* : 0*/)
         , collapseColumnWidth(/*m_codeFoldingVisible ? foldBoxWidth(fontMetrics) :*/ 0)
         , extraAreaWidth(editor->rowBar()->width() - collapseColumnWidth)
-//   WARNING     , currentLineNumberFormat(
-//              editor->codeDocument()->fontSettings().toTextCharFormat(TextEditor::C_CURRENT_LINE_NUMBER))
+        , currentLineNumberFormat(
+              CodeEditorSettings::fontColorsSettings()->toTextCharFormat(TextEditor::C_CURRENT_LINE_NUMBER))
         , palette(editor->rowBar()->palette())
     {
         palette.setCurrentColorGroup(QPalette::Active);

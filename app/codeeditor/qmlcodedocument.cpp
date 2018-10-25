@@ -1034,13 +1034,7 @@ void QmlCodeDocument::setDiagnosticRanges(const QVector<QTextLayout::FormatRange
 
 void QmlCodeDocument::applyFontSettings()
 {
-    FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
-    QFont font(settings->fontFamily);
-    font.setPixelSize(settings->fontPixelSize);
-    font.setWeight(settings->fontPreferThick ? QFont::Medium : QFont::Normal);
-    font.setStyleStrategy(settings->fontPreferAntialiasing ? QFont::PreferAntialias : QFont::NoAntialias);
-
-    setDefaultFont(font);
+    setDefaultFont(CodeEditorSettings::fontColorsSettings()->toFont());
 
     if (m_syntaxHighlighter)
         m_syntaxHighlighter->rehighlight();

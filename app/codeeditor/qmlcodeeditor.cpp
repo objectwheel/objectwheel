@@ -182,11 +182,10 @@ struct PaintEventData
         , textCursor(editor->textCursor())
         , textCursorBlock(textCursor.block())
         , isEditable(!editor->isReadOnly())
-//  WARNING      , fontSettings(editor->codeDocument()->fontSettings())
-//        , searchScopeFormat(fontSettings.toTextCharFormat(C_SEARCH_SCOPE))
-//        , searchResultFormat(fontSettings.toTextCharFormat(C_SEARCH_RESULT))
-//        , visualWhitespaceFormat(fontSettings.toTextCharFormat(C_VISUAL_WHITESPACE))
-//        , ifdefedOutFormat(fontSettings.toTextCharFormat(C_DISABLED_CODE))
+        , searchScopeFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_SEARCH_SCOPE))
+        , searchResultFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_SEARCH_RESULT))
+        , visualWhitespaceFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_VISUAL_WHITESPACE))
+        , ifdefedOutFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_DISABLED_CODE))
         , suppressSyntaxInIfdefedOutBlock(ifdefedOutFormat.foreground() != editor->palette().foreground())
     { }
     QPointF offset;
@@ -344,12 +343,12 @@ static void appendExtraSelectionsForMessages(
             sel.cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, d.loc.length);
         }
 
-//      WARNING  const auto fontSettings = document->fontSettings();
+        const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
 
-//        if (d.isWarning())
-//            sel.format = fontSettings.toTextCharFormat(TextEditor::C_WARNING);
-//        else
-//            sel.format = fontSettings.toTextCharFormat(TextEditor::C_ERROR);
+        if (d.isWarning())
+            sel.format = settings->toTextCharFormat(TextEditor::C_WARNING);
+        else
+            sel.format = settings->toTextCharFormat(TextEditor::C_ERROR);
 
         sel.format.setToolTip(d.message);
 
@@ -1356,7 +1355,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                            && */m_linkPressed
+                                                                                                                                                    && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1659,10 +1658,10 @@ QList<QTextEdit::ExtraSelection> QmlCodeEditor::extraSelections(const QString& k
 
 void QmlCodeEditor::applyFontSettings()
 {
-// WARNING   const FontSettings &fs = codeDocument()->fontSettings();
-    const QTextCharFormat textFormat/* = fs.toTextCharFormat(C_TEXT)*/;
-    const QTextCharFormat selectionFormat/* = fs.toTextCharFormat(C_SELECTION)*/;
-    const QTextCharFormat lineNumberFormat/* = fs.toTextCharFormat(C_LINE_NUMBER)*/;
+    const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+    const QTextCharFormat textFormat = settings->toTextCharFormat(C_TEXT);
+    const QTextCharFormat selectionFormat = settings->toTextCharFormat(C_SELECTION);
+    const QTextCharFormat lineNumberFormat = settings->toTextCharFormat(C_LINE_NUMBER);
     QFont font(textFormat.font());
 
     const QColor foreground = textFormat.foreground().color();
@@ -1735,10 +1734,10 @@ void QmlCodeEditor::matchParentheses()
         return;
     }
 
-    const QTextCharFormat /*&*/matchFormat
-            /* WARNING = codeDocument()->fontSettings().toTextCharFormat(C_PARENTHESES)*/;
-    const QTextCharFormat /*&*/mismatchFormat
-            /* WARNING = codeDocument()->fontSettings().toTextCharFormat(C_PARENTHESES_MISMATCH)*/;
+    const QTextCharFormat &matchFormat
+            = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_PARENTHESES);
+    const QTextCharFormat &mismatchFormat
+            = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_PARENTHESES_MISMATCH);
     int animatePosition = -1;
 
     if (backwardMatch.hasSelection()) {
@@ -1865,10 +1864,10 @@ void QmlCodeEditor::updateCurrentLineHighlight()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
-    FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+    const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
     if (/*m_highlightCurrentLine*/ codeDocument()) {
         QTextEdit::ExtraSelection sel;
-//  WARNING      sel.format.setBackground(settings->toTextCharFormat(C_CURRENT_LINE).background());
+        sel.format.setBackground(settings->toTextCharFormat(C_CURRENT_LINE).background());
         sel.format.setProperty(QTextFormat::FullWidthSelection, true);
         sel.cursor = textCursor();
         sel.cursor.clearSelection();
@@ -1933,14 +1932,14 @@ void QmlCodeEditor::focusOutEvent(QFocusEvent *e)
 
 void QmlCodeEditor::updateAutoCompleteHighlight()
 {
-//    WARNING const QTextCharFormat &matchFormat
-//            = codeDocument()->fontSettings().toTextCharFormat(C_AUTOCOMPLETE);
+    const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+    const QTextCharFormat &matchFormat = settings->toTextCharFormat(C_AUTOCOMPLETE);
 
     QList<QTextEdit::ExtraSelection> extraSelections;
     for (const QTextCursor &cursor : qAsConst(m_autoCompleteHighlightPos)) {
         QTextEdit::ExtraSelection sel;
         sel.cursor = cursor;
-//   WARNING     sel.format.setBackground(matchFormat.background());
+        sel.format.setBackground(matchFormat.background());
         extraSelections.append(sel);
     }
     setExtraSelections("AutoCompleteSelection", extraSelections);
@@ -1972,16 +1971,16 @@ void QmlCodeEditor::autocompleterHighlight(const QTextCursor &cursor)
         m_autoCompleteHighlightPos.push_back(cursor);
     }
     if (m_animateAutoComplete) {
-        FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
-//    WARNING    const QTextCharFormat &matchFormat = settings->toTextCharFormat(C_AUTOCOMPLETE);
-//        cancelCurrentAnimations();// one animation is enough
-//        QPalette pal;
-//        pal.setBrush(QPalette::Text, matchFormat.foreground());
-//        pal.setBrush(QPalette::Base, matchFormat.background());
-//        m_autocompleteAnimator = new TextEditorAnimator(this);
-//        m_autocompleteAnimator->init(cursor, font(), pal);
-//        connect(m_autocompleteAnimator.data(), &TextEditorAnimator::updateRequest,
-//                this, &QmlCodeEditor::animateUpdate);
+        const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+        const QTextCharFormat &matchFormat = settings->toTextCharFormat(C_AUTOCOMPLETE);
+        cancelCurrentAnimations();// one animation is enough
+        QPalette pal;
+        pal.setBrush(QPalette::Text, matchFormat.foreground());
+        pal.setBrush(QPalette::Base, matchFormat.background());
+        m_autocompleteAnimator = new TextEditorAnimator(this);
+        m_autocompleteAnimator->init(cursor, font(), pal);
+        connect(m_autocompleteAnimator.data(), &TextEditorAnimator::updateRequest,
+                this, &QmlCodeEditor::animateUpdate);
     }
     updateAutoCompleteHighlight();
 }
@@ -2128,10 +2127,11 @@ void QmlCodeEditor::drawCollapsedBlockPopup(QPainter &painter,
     painter.translate(.5, .5);
     QBrush brush = palette().base();
 
-//  WARNING  const QTextCharFormat &ifdefedOutFormat
-//            = codeDocument()->fontSettings().toTextCharFormat(C_DISABLED_CODE);
-//    if (ifdefedOutFormat.hasProperty(QTextFormat::BackgroundBrush))
-//        brush = ifdefedOutFormat.background();
+    const QTextCharFormat &ifdefedOutFormat
+            = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_DISABLED_CODE);
+    if (ifdefedOutFormat.hasProperty(QTextFormat::BackgroundBrush))
+        brush = ifdefedOutFormat.background();
+
     painter.setBrush(brush);
     painter.drawRoundedRect(QRectF(offset.x(),
                                    offset.y(),
@@ -2229,8 +2229,8 @@ void QmlCodeEditor::highlightSearchResults(const QTextBlock &block,
         if (!inFindScope(blockPosition + idx, blockPosition + idx + l))
             continue;
 
-        const QTextCharFormat /*&*/searchResultFormat
-                /* WARNING = codeDocument()->fontSettings().toTextCharFormat(C_SEARCH_RESULT)*/;
+        const QTextCharFormat &searchResultFormat
+                = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_SEARCH_RESULT);
         overlay->addOverlaySelection(blockPosition + idx,
                                      blockPosition + idx + l,
                                      searchResultFormat.background().color().darker(120),
@@ -2268,7 +2268,7 @@ void QmlCodeEditor::paintCurrentLineHighlight(const PaintEventData &data, QPaint
     lineRect.moveTop(lineRect.top() + blockRect.top());
     lineRect.setLeft(0);
     lineRect.setRight(data.viewportRect.width() - data.offset.x());
-    QColor color/* WARNING = codeDocument()->fontSettings().toTextCharFormat(C_CURRENT_LINE).background().color()*/;
+    QColor color = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_CURRENT_LINE).background().color();
     // set alpha, otherwise we cannot see block highlighting and find scope underneath
     color.setAlpha(128);
     if (!data.isEditable && !data.eventRect.contains(lineRect.toRect())) {
@@ -2306,7 +2306,7 @@ void QmlCodeEditor::updateUses()
             continue;
 
         QTextEdit::ExtraSelection sel;
-//     WARNING   sel.format = codeDocument()->fontSettings().toTextCharFormat(C_OCCURRENCES);
+        sel.format = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_OCCURRENCES);
         sel.cursor = textCursor();
         sel.cursor.setPosition(loc.begin());
         sel.cursor.setPosition(loc.end(), QTextCursor::KeepAnchor);
@@ -2692,7 +2692,7 @@ void QmlCodeEditor::showLink(const Utils::Link &link)
     sel.cursor = textCursor();
     sel.cursor.setPosition(link.linkTextStart);
     sel.cursor.setPosition(link.linkTextEnd, QTextCursor::KeepAnchor);
-//  WARNING  sel.format = codeDocument()->fontSettings().toTextCharFormat(C_LINK);
+    sel.format = CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_LINK);
     sel.format.setFontUnderline(true);
     setExtraSelections("OtherSelection", QList<QTextEdit::ExtraSelection>() << sel);
     viewport()->setCursor(Qt::PointingHandCursor);
@@ -3146,7 +3146,7 @@ void QmlCodeEditor::paintReplacement(PaintEventData &data, QPainter &painter,
                                      qreal top) const
 {
     QTextBlock nextBlock = data.block.next();
-//    QTextBlock nextVisibleBlock = QmlCodeEditor::nextVisibleBlock(data.block, data.doc);
+    //    QTextBlock nextVisibleBlock = QmlCodeEditor::nextVisibleBlock(data.block, data.doc);
 
     if (nextBlock.isValid() && !nextBlock.isVisible() && replacementVisible(data.block.blockNumber())) {
         const bool selectThis = (data.textCursor.hasSelection()

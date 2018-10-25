@@ -333,7 +333,7 @@ void InterfaceSettingsWidget::reset()
     g_hdpiMessageShowed = false;
     g_fontMessageShowed = false;
 
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     /****/
     m_topBarColorButton->setColor(settings->topBarColor);
     m_leftBarColorButton->setColor(settings->leftBarColor);
@@ -377,6 +377,5 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
             || m_bottomPanesCheckBox->text().contains(word, Qt::CaseInsensitive)
             || ::containsWord(m_themeBox, word)
             || ::containsWord(m_languageBox, word)
-            || ::containsWord(m_visibleBottomPaneBox, word)
-            ;
+            || ::containsWord(m_visibleBottomPaneBox, word);
 }
