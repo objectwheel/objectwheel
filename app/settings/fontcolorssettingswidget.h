@@ -1,5 +1,5 @@
-#ifndef FONTSETTINGSWIDGET_H
-#define FONTSETTINGSWIDGET_H
+#ifndef FONTCOLORSSETTINGSWIDGET_H
+#define FONTCOLORSSETTINGSWIDGET_H
 
 #include <settingswidget.h>
 
@@ -13,12 +13,12 @@ class QPushButton;
 class QGridLayout;
 class QVBoxLayout;
 
-class FontSettingsWidget : public SettingsWidget
+class FontColorsSettingsWidget : public SettingsWidget
 {
     Q_OBJECT
 
 public:
-    explicit FontSettingsWidget(QWidget* parent = nullptr);
+    explicit FontColorsSettingsWidget(QWidget* parent = nullptr);
 
     void apply() override;
     void reset() override;
@@ -59,4 +59,4 @@ private:
     QComboBox* m_visibleBottomPaneBox;
 };
 
-#endif // FONTSETTINGSWIDGET_H
+#endif // FONTCOLORSSETTINGSWIDGET_H

@@ -5,6 +5,7 @@
 
 class QSettings;
 class GeneralSettings;
+class CodeEditorSettings;
 class Authenticator;
 class UserManager;
 class DocumentManager;
@@ -47,6 +48,7 @@ private:
 private:
     static QSettings* s_settings;
     static GeneralSettings* s_generalSettings;
+    static CodeEditorSettings* s_codeEditorSettings;
     static Authenticator* s_authenticator;
     static UserManager* s_userManager;
     static ControlPreviewingManager* s_controlPreviewingManager;

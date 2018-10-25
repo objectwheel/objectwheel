@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class FontSettings;
+class FontColorsSettings;
 
 class CodeEditorSettings final : public QObject
 {
@@ -14,7 +14,7 @@ class CodeEditorSettings final : public QObject
 
 public:
     static CodeEditorSettings* instance();
-    static FontSettings* fontSettings();
+    static FontColorsSettings* fontColorsSettings();
     static void read();
     static void write();
     static void reset();
@@ -25,7 +25,7 @@ private:
 
 private:
     static CodeEditorSettings* s_instance;
-    static FontSettings* s_fontSettings;
+    static FontColorsSettings* s_fontColorsSettings;
 };
 
 #endif // CODEEDITORSETTINGS_H

@@ -20,6 +20,7 @@
 #include <welcomewindow.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
+#include <codeeditorsettings.h>
 #include <applicationstyle.h>
 #include <filemanager.h>
 #include <splashscreen.h>
@@ -37,6 +38,7 @@
 
 QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
+CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
@@ -150,9 +152,11 @@ void ApplicationCore::prepare(const char* filePath)
     /* Prepare setting instances */
     s_settings = new QSettings(settingsPath, QSettings::IniFormat, nullptr);
     s_generalSettings = new GeneralSettings(nullptr);
+    s_codeEditorSettings = new CodeEditorSettings(nullptr);
 
     /* Read settings */
     GeneralSettings::read();
+    CodeEditorSettings::read();
 
     /* Load default fonts */
     for (const QString& fontName : lsfile(fontPath))

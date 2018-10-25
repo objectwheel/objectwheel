@@ -70,7 +70,7 @@ IAssistProcessor *DocumentContentCompletionProvider::createProcessor() const
     return new DocumentContentCompletionProcessor(""/*m_snippetGroup*/);
 }
 
-DocumentContentCompletionProcessor::DocumentContentCompletionProcessor(const QString &snippetGroupId)
+DocumentContentCompletionProcessor::DocumentContentCompletionProcessor(const QString &/*snippetGroupId*/)
 //    : m_snippetCollector(snippetGroupId, QIcon(":/texteditor/images/snippet.png"))
 { }
 

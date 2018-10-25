@@ -1,6 +1,7 @@
 #include <preferenceswindow.h>
 #include <focuslesslineedit.h>
 #include <generalsettingspage.h>
+#include <codeeditorsettingspage.h>
 
 #include <QListWidget>
 #include <QGridLayout>
@@ -36,6 +37,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     setAttribute(Qt::WA_QuitOnClose, false);
 
     addPage(new GeneralSettingsPage(this));
+    addPage(new CodeEditorSettingsPage(this));
 
     m_layout->setSpacing(6);
     m_layout->setContentsMargins(10, 10, 10, 10);

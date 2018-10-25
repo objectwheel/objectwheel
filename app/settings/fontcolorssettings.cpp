@@ -1,4 +1,4 @@
-#include <fontsettings.h>
+#include <fontcolorssettings.h>
 #include <applicationcore.h>
 
 #include <QSettings>
@@ -25,16 +25,16 @@ inline QString joint(const char* setting)
 }
 }
 
-FontSettings::FontSettings(QObject* parent) : FontSettings({}, parent)
+FontColorsSettings::FontColorsSettings(QObject* parent) : FontColorsSettings({}, parent)
 {
 }
 
-FontSettings::FontSettings(const QString& group, QObject* parent) : Settings(group, parent)
+FontColorsSettings::FontColorsSettings(const QString& group, QObject* parent) : Settings(group, parent)
 {
     reset();
 }
 
-void FontSettings::read()
+void FontColorsSettings::read()
 {
     reset();
 
@@ -58,7 +58,7 @@ void FontSettings::read()
     settings->endGroup();
 }
 
-void FontSettings::write()
+void FontColorsSettings::write()
 {
     QSettings* settings = ApplicationCore::settings();
     settings->beginGroup(group());
@@ -81,7 +81,7 @@ void FontSettings::write()
     emit changed();
 }
 
-void FontSettings::reset()
+void FontColorsSettings::reset()
 {
     hdpiEnabled = true;
     theme = "Light";

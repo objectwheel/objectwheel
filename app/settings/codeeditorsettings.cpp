@@ -1,15 +1,15 @@
 #include <codeeditorsettings.h>
-#include <fontsettings.h>
+#include <fontcolorssettings.h>
 
 namespace { const char* g_group = "General"; }
 
 CodeEditorSettings* CodeEditorSettings::s_instance = nullptr;
-FontSettings* CodeEditorSettings::s_fontSettings = nullptr;
+FontColorsSettings* CodeEditorSettings::s_fontColorsSettings = nullptr;
 
 CodeEditorSettings::CodeEditorSettings(QObject* parent) : QObject(parent)
 {
     s_instance = this;
-    s_fontSettings = new FontSettings(g_group, this);
+    s_fontColorsSettings = new FontColorsSettings(g_group, this);
 }
 
 CodeEditorSettings::~CodeEditorSettings()
@@ -22,22 +22,22 @@ CodeEditorSettings* CodeEditorSettings::instance()
     return s_instance;
 }
 
-FontSettings* CodeEditorSettings::fontSettings()
+FontColorsSettings* CodeEditorSettings::fontColorsSettings()
 {
-    return s_fontSettings;
+    return s_fontColorsSettings;
 }
 
 void CodeEditorSettings::read()
 {
-    s_fontSettings->read();
+    s_fontColorsSettings->read();
 }
 
 void CodeEditorSettings::write()
 {
-    s_fontSettings->write();
+    s_fontColorsSettings->write();
 }
 
 void CodeEditorSettings::reset()
 {
-    s_fontSettings->reset();
+    s_fontColorsSettings->reset();
 }

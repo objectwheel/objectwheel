@@ -1,11 +1,11 @@
 #include <codeeditorsettingspage.h>
-#include <fontsettingswidget.h>
+#include <fontcolorssettingswidget.h>
 #include <QIcon>
 
 CodeEditorSettingsPage::CodeEditorSettingsPage(QWidget* parent) : SettingsPage(parent)
 {
     setTitle(tr("Code Editor"));
-    addWidget(new FontSettingsWidget(this));
+    addWidget(new FontColorsSettingsWidget(this));
 }
 
 QIcon CodeEditorSettingsPage::icon() const

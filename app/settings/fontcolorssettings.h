@@ -1,18 +1,18 @@
-#ifndef FONTSETTINGS_H
-#define FONTSETTINGS_H
+#ifndef FONTCOLORSSETTINGS_H
+#define FONTCOLORSSETTINGS_H
 
 #include <settings.h>
 
 #include <QColor>
 #include <QFont>
 
-class FontSettings : public Settings
+class FontColorsSettings : public Settings
 {
     Q_OBJECT
 
 public:
-    explicit FontSettings(QObject* parent = nullptr);
-    explicit FontSettings(const QString& group, QObject* parent = nullptr);
+    explicit FontColorsSettings(QObject* parent = nullptr);
+    explicit FontColorsSettings(const QString& group, QObject* parent = nullptr);
 
     void read() override;
     void write() override;
@@ -31,4 +31,4 @@ public:
     QString visibleBottomPane;
 };
 
-#endif // FONTSETTINGS_H
+#endif // FONTCOLORSSETTINGS_H

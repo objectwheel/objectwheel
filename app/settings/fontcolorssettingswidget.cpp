@@ -1,5 +1,5 @@
-#include <fontsettingswidget.h>
-#include <fontsettings.h>
+#include <fontcolorssettingswidget.h>
+#include <fontcolorssettings.h>
 #include <codeeditorsettings.h>
 #include <qtcolorbutton.h>
 
@@ -43,7 +43,7 @@ void addLanguages(QComboBox* comboBox)
 }
 }
 
-FontSettingsWidget::FontSettingsWidget(QWidget *parent) : SettingsWidget(parent)
+FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_interfaceGroup(new QGroupBox(contentWidget()))
   , m_interfaceLayout(new QGridLayout(m_interfaceGroup))
   , m_topBarColorLabel(new QLabel(m_interfaceGroup))
@@ -216,13 +216,13 @@ FontSettingsWidget::FontSettingsWidget(QWidget *parent) : SettingsWidget(parent)
     addBottomPanes(m_visibleBottomPaneBox);
 
     connect(m_leftBarColorResetButton, &QPushButton::clicked, this, [=] {
-        m_leftBarColorButton->setColor(FontSettings().leftBarColor);
+        m_leftBarColorButton->setColor(FontColorsSettings().leftBarColor);
     });
     connect(m_topBarColorResetButton, &QPushButton::clicked, this, [=] {
-        m_topBarColorButton->setColor(FontSettings().topBarColor);
+        m_topBarColorButton->setColor(FontColorsSettings().topBarColor);
     });
     connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
-        const FontSettings settings;
+        const FontColorsSettings settings;
         m_fontFamilyBox->setCurrentText(settings.fontFamily);
         m_fontSizeBox->setCurrentText(QString::number(settings.fontPixelSize));
         m_fontThickBox->setChecked(settings.fontPreferThick);
@@ -282,7 +282,7 @@ FontSettingsWidget::FontSettingsWidget(QWidget *parent) : SettingsWidget(parent)
     reset();
 }
 
-void FontSettingsWidget::apply()
+void FontColorsSettingsWidget::apply()
 {
     if (!isActivated())
         return;
@@ -294,7 +294,7 @@ void FontSettingsWidget::apply()
     g_hdpiMessageShowed = false;
     g_fontMessageShowed = false;
 
-    FontSettings* settings = CodeEditorSettings::fontSettings();
+    FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
     /****/
     settings->topBarColor = m_topBarColorButton->color();
     settings->leftBarColor = m_leftBarColorButton->color();
@@ -313,7 +313,7 @@ void FontSettingsWidget::apply()
     settings->write();
 }
 
-void FontSettingsWidget::reset()
+void FontColorsSettingsWidget::reset()
 {
     if (!isActivated())
         return;
@@ -325,7 +325,7 @@ void FontSettingsWidget::reset()
     g_hdpiMessageShowed = false;
     g_fontMessageShowed = false;
 
-    FontSettings* settings = CodeEditorSettings::fontSettings();
+    FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
     /****/
     m_topBarColorButton->setColor(settings->topBarColor);
     m_leftBarColorButton->setColor(settings->leftBarColor);
@@ -342,12 +342,12 @@ void FontSettingsWidget::reset()
     m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);
 }
 
-QIcon FontSettingsWidget::icon() const
+QIcon FontColorsSettingsWidget::icon() const
 {
     return QIcon(":/images/settings/fontcolors.png");
 }
 
-QString FontSettingsWidget::title() const
+QString FontColorsSettingsWidget::title() const
 {
     return tr("Font & Colors");
 }
