@@ -33,6 +33,12 @@ private:
     QCheckBox* m_fontAntialiasingBox;
     QCheckBox* m_fontThickBox;
     QPushButton* m_fontResetButton;
+    /****/
+    QGroupBox* m_colorSchemeGroup;
+    QVBoxLayout* m_colorSchemeLayout;
+    QComboBox* m_colorSchemeBox;
+    QPushButton* m_schemeCopyButton;
+    QPushButton* m_schemeDeleteButton;
 };
 
 #endif // FONTCOLORSSETTINGSWIDGET_H

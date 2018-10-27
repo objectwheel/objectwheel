@@ -330,6 +330,10 @@ TextEditorSettings::TextEditorSettings()
                              outputArgumentFormat,
                              FormatDescription::ShowFontUnderlineAndRelativeControls);
 
+//    d->m_fontSettingsPage = new FontSettingsPage(formatDescr,
+//                                                   Constants::TEXT_EDITOR_FONT_SETTINGS,
+//                                                   this);
+
     // Add the GUI used to configure the tab, storage and interaction settings
     BehaviorSettingsPageParameters behaviorSettingsPageParameters;
     behaviorSettingsPageParameters.id = Constants::TEXT_EDITOR_BEHAVIOR_SETTINGS;

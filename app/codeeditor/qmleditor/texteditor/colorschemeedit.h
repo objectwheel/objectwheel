@@ -26,6 +26,7 @@
 #pragma once
 
 #include "colorscheme.h"
+#include <fontcolorssettings.h>
 
 #include <QDialog>
 

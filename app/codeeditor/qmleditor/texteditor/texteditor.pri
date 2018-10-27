@@ -39,7 +39,7 @@ HEADERS += \
         $$PWD/helpitem.h \
         $$PWD/completionsettingspage.h \
         $$PWD/completionsettings.h \
-#        $$PWD/colorschemeedit.h \
+        $$PWD/colorschemeedit.h \
         $$PWD/colorscheme.h \
         $$PWD/colorpreviewhoverhandler.h \
         $$PWD/behaviorsettingswidget.h \
@@ -81,7 +81,7 @@ SOURCES += \
         $$PWD/behaviorsettingswidget.cpp \
         $$PWD/colorpreviewhoverhandler.cpp \
         $$PWD/colorscheme.cpp \
-#        $$PWD/colorschemeedit.cpp \
+        $$PWD/colorschemeedit.cpp \
         $$PWD/completionsettings.cpp \
         $$PWD/completionsettingspage.cpp \
         $$PWD/helpitem.cpp \
@@ -106,6 +106,6 @@ SOURCES += \
 FORMS += \
         $$PWD/behaviorsettingspage.ui \
         $$PWD/behaviorsettingswidget.ui \
-#        $$PWD/colorschemeedit.ui \
+        $$PWD/colorschemeedit.ui \
         $$PWD/completionsettingspage.ui \
         $$PWD/tabsettingswidget.ui

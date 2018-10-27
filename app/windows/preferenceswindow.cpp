@@ -45,7 +45,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_listWidget, 1, 0, 1, 1);
     m_layout->addWidget(m_dialogButtonBox, 2, 0, 1, 2);
 
-    m_listWidget->setFixedWidth(170);
+    m_listWidget->setFixedWidth(150);
     m_listWidget->setIconSize({24, 24});
     m_listWidget->setDragEnabled(false);
     m_listWidget->setSortingEnabled(true);
@@ -57,7 +57,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    m_searchLineEdit->setFixedWidth(170);
+    m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setFixedHeight(22);
     m_searchLineEdit->setPlaceholderText(tr("Filter"));
     m_searchLineEdit->setClearButtonEnabled(true);
