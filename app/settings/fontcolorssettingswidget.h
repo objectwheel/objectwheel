@@ -2,13 +2,17 @@
 #define FONTCOLORSSETTINGSWIDGET_H
 
 #include <settingswidget.h>
+#include <fontcolorssettings.h>
 
 class QLabel;
 class QGroupBox;
 class QComboBox;
 class QCheckBox;
-class QVBoxLayout;
 class QPushButton;
+class QVBoxLayout;
+class QGridLayout;
+
+namespace TextEditor { namespace Internal { class ColorSchemeEdit; } }
 
 struct FontColorsSettingsWidget : public SettingsWidget
 {
@@ -34,11 +38,13 @@ private:
     QCheckBox* m_fontThickBox;
     QPushButton* m_fontResetButton;
     /****/
+    FormatDescriptions m_colorFormatDescriptions;
     QGroupBox* m_colorSchemeGroup;
-    QVBoxLayout* m_colorSchemeLayout;
+    QGridLayout* m_colorSchemeLayout;
     QComboBox* m_colorSchemeBox;
-    QPushButton* m_schemeCopyButton;
-    QPushButton* m_schemeDeleteButton;
+    QPushButton* m_colorSchemeCopyButton;
+    QPushButton* m_colorSchemeDeleteButton;
+    TextEditor::Internal::ColorSchemeEdit* m_colorSchemeEdit;
 };
 
 #endif // FONTCOLORSSETTINGSWIDGET_H
