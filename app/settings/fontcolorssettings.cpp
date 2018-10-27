@@ -1,6 +1,10 @@
 #include <fontcolorssettings.h>
 #include <codeeditorsettings.h>
 
+#include <utils/theme/theme.h>
+
+#include <QPalette>
+
 namespace {
 
 const char* g_fontFamily = "FontFamily";
@@ -32,6 +36,7 @@ uint qHash(const TextStyle &textStyle)
 {
     return ::qHash(quint8(textStyle));
 }
+
 uint qHash(TextStyles textStyles)
 {
     return ::qHash(reinterpret_cast<quint64&>(textStyles));
@@ -41,6 +46,139 @@ bool operator==(const TextStyles &first, const TextStyles &second)
 {
     return first.mainStyle == second.mainStyle
         && first.mixinStyles == second.mixinStyles;
+}
+
+FormatDescription::FormatDescription(TextStyle id,
+                                     const QString &displayName,
+                                     const QString &tooltipText,
+                                     const QColor &foreground,
+                                     FormatDescription::ShowControls showControls)
+    : m_id(id),
+      m_displayName(displayName),
+      m_tooltipText(tooltipText),
+      m_showControls(showControls)
+{
+    m_format.setForeground(foreground);
+    m_format.setBackground(defaultBackground(id));
+}
+
+FormatDescription::FormatDescription(TextStyle id,
+                                     const QString &displayName,
+                                     const QString &tooltipText,
+                                     const TextEditor::Format &format,
+                                     FormatDescription::ShowControls showControls)
+    : m_id(id),
+      m_format(format),
+      m_displayName(displayName),
+      m_tooltipText(tooltipText),
+      m_showControls(showControls)
+{
+}
+
+FormatDescription::FormatDescription(TextStyle id,
+                                     const QString &displayName,
+                                     const QString &tooltipText,
+                                     const QColor &underlineColor,
+                                     const QTextCharFormat::UnderlineStyle underlineStyle,
+                                     FormatDescription::ShowControls showControls)
+    : m_id(id),
+      m_displayName(displayName),
+      m_tooltipText(tooltipText),
+      m_showControls(showControls)
+{
+    m_format.setForeground(defaultForeground(id));
+    m_format.setBackground(defaultBackground(id));
+    m_format.setUnderlineColor(underlineColor);
+    m_format.setUnderlineStyle(underlineStyle);
+}
+
+FormatDescription::FormatDescription(TextStyle id,
+                                     const QString &displayName,
+                                     const QString &tooltipText,
+                                     FormatDescription::ShowControls showControls)
+    : m_id(id),
+      m_displayName(displayName),
+      m_tooltipText(tooltipText),
+      m_showControls(showControls)
+{
+    m_format.setForeground(defaultForeground(id));
+    m_format.setBackground(defaultBackground(id));
+}
+
+QColor FormatDescription::defaultForeground(TextStyle id)
+{
+    if (id == C_LINE_NUMBER) {
+        const QPalette palette = Utils::Theme::initialPalette();
+        const QColor bg = palette.background().color();
+        if (bg.value() < 128)
+            return palette.foreground().color();
+        else
+            return palette.dark().color();
+    } else if (id == C_CURRENT_LINE_NUMBER) {
+        const QPalette palette = Utils::Theme::initialPalette();
+        const QColor bg = palette.background().color();
+        if (bg.value() < 128)
+            return palette.foreground().color();
+        else
+            return QColor();
+    } else if (id == C_PARENTHESES) {
+        return QColor(Qt::red);
+    } else if (id == C_AUTOCOMPLETE) {
+        return QColor(Qt::darkBlue);
+    }
+    return QColor();
+}
+
+QColor FormatDescription::defaultBackground(TextStyle id)
+{
+    if (id == C_TEXT) {
+        return Qt::white;
+    } else if (id == C_LINE_NUMBER) {
+        return Utils::Theme::initialPalette().background().color();
+    } else if (id == C_SEARCH_RESULT) {
+        return QColor(0xffef0b);
+    } else if (id == C_PARENTHESES) {
+        return QColor(0xb4, 0xee, 0xb4);
+    } else if (id == C_PARENTHESES_MISMATCH) {
+        return QColor(Qt::magenta);
+    } else if (id == C_AUTOCOMPLETE) {
+        return QColor(192, 192, 255);
+    } else if (id == C_CURRENT_LINE || id == C_SEARCH_SCOPE) {
+        const QPalette palette = Utils::Theme::initialPalette();
+        const QColor &fg = palette.color(QPalette::Highlight);
+        const QColor &bg = palette.color(QPalette::Base);
+
+        qreal smallRatio;
+        qreal largeRatio;
+        if (id == C_CURRENT_LINE) {
+            smallRatio = .3;
+            largeRatio = .6;
+        } else {
+            smallRatio = .05;
+            largeRatio = .4;
+        }
+        const qreal ratio = ((palette.color(QPalette::Text).value() < 128)
+                             ^ (palette.color(QPalette::HighlightedText).value() < 128)) ? smallRatio : largeRatio;
+
+        const QColor &col = QColor::fromRgbF(fg.redF() * ratio + bg.redF() * (1 - ratio),
+                                             fg.greenF() * ratio + bg.greenF() * (1 - ratio),
+                                             fg.blueF() * ratio + bg.blueF() * (1 - ratio));
+        return col;
+    } else if (id == C_SELECTION) {
+        return Utils::Theme::initialPalette().color(QPalette::Highlight);
+    } else if (id == C_OCCURRENCES) {
+        return QColor(180, 180, 180);
+    } else if (id == C_OCCURRENCES_RENAME) {
+        return QColor(255, 100, 100);
+    } else if (id == C_DISABLED_CODE) {
+        return QColor(239, 239, 239);
+    }
+    return QColor(); // invalid color
+}
+
+bool FormatDescription::showControl(FormatDescription::ShowControls showControl) const
+{
+    return m_showControls & showControl;
 }
 
 FontColorsSettings::FontColorsSettings(CodeEditorSettings* codeEditorSettings) : Settings(codeEditorSettings)
@@ -108,7 +246,7 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyle category) const
     if (textCharFormatIterator != m_formatCache.end())
         return *textCharFormatIterator;
 
-    const Format &f = m_scheme.formatFor(category);
+    const TextEditor::Format &f = m_scheme.formatFor(category);
     QTextCharFormat tf;
 
     if (category == C_TEXT)
@@ -160,7 +298,7 @@ void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const Mi
     using namespace TextEditor;
 
     for (TextStyle mixinStyle : mixinStyles) {
-        const Format &format = m_scheme.formatFor(mixinStyle);
+        const TextEditor::Format &format = m_scheme.formatFor(mixinStyle);
 
         if (textCharFormat.hasProperty(QTextFormat::ForegroundBrush)) {
             if (format.foreground().isValid())
