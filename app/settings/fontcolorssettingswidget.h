@@ -11,6 +11,7 @@ class QCheckBox;
 class QPushButton;
 class QVBoxLayout;
 class QGridLayout;
+class SchemeListModel;
 
 namespace TextEditor { namespace Internal { class ColorSchemeEdit; } }
 
@@ -39,6 +40,7 @@ private:
     QPushButton* m_fontResetButton;
     /****/
     FormatDescriptions m_colorFormatDescriptions;
+    SchemeListModel* m_schemeListModel;
     QGroupBox* m_colorSchemeGroup;
     QGridLayout* m_colorSchemeLayout;
     QComboBox* m_colorSchemeBox;

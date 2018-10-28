@@ -293,6 +293,12 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyles textStyles) cons
     return textCharFormat;
 }
 
+void FontColorsSettings::clearCache()
+{
+    m_formatCache.clear();
+    m_textCharFormatCache.clear();
+}
+
 void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const MixinTextStyles& mixinStyles) const
 {
     using namespace TextEditor;

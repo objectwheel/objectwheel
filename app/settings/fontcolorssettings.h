@@ -90,6 +90,7 @@ struct FontColorsSettings : public Settings
     QFont toFont() const;
     QTextCharFormat toTextCharFormat(TextStyle category) const;
     QTextCharFormat toTextCharFormat(TextStyles textStyles) const;
+    void clearCache();
 
     bool fontPreferThick;
     bool fontPreferAntialiasing;

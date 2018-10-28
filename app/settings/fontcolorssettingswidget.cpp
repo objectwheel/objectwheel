@@ -49,8 +49,8 @@ FormatDescriptions colorFormatDescriptions()
     FormatDescriptions formatDescr;
     formatDescr.reserve(C_LAST_STYLE_SENTINEL);
     formatDescr.emplace_back(C_TEXT, QObject::tr("Text"), QObject::tr("Generic text.\nApplied to "
-                                                    "text, if no other "
-                                                    "rules matching."));
+                                                                      "text, if no other "
+                                                                      "rules matching."));
 
     // Special categories
     const QPalette p = QApplication::palette();
@@ -69,13 +69,13 @@ FormatDescriptions colorFormatDescriptions()
                              FormatDescription::ShowBackgroundControl);
     formatDescr.emplace_back(C_PARENTHESES, QObject::tr("Parentheses"),
                              QObject::tr("Displayed when matching parentheses, square brackets "
-                                "or curly brackets are found."));
+                                         "or curly brackets are found."));
     formatDescr.emplace_back(C_PARENTHESES_MISMATCH, QObject::tr("Mismatched Parentheses"),
                              QObject::tr("Displayed when mismatched parentheses, "
-                                "square brackets, or curly brackets are found."));
+                                         "square brackets, or curly brackets are found."));
     formatDescr.emplace_back(C_AUTOCOMPLETE, QObject::tr("Auto Complete"),
                              QObject::tr("Displayed when a character is automatically inserted "
-                                "like brackets or quotes."));
+                                         "like brackets or quotes."));
     formatDescr.emplace_back(C_CURRENT_LINE, QObject::tr("Current Line"),
                              QObject::tr("Line where the cursor is placed in."),
                              FormatDescription::ShowBackgroundControl);
@@ -83,7 +83,7 @@ FormatDescriptions colorFormatDescriptions()
     FormatDescription currentLineNumber(C_CURRENT_LINE_NUMBER,
                                         QObject::tr("Current Line Number"),
                                         QObject::tr("Line number located on the left side of the "
-                                           "editor where the cursor is placed in."),
+                                                    "editor where the cursor is placed in."),
                                         Qt::darkGray,
                                         FormatDescription::AllControlsExceptUnderline);
     currentLineNumber.format().setBold(true);
@@ -92,7 +92,7 @@ FormatDescriptions colorFormatDescriptions()
 
     formatDescr.emplace_back(C_OCCURRENCES, QObject::tr("Occurrences"),
                              QObject::tr("Occurrences of the symbol under the cursor.\n"
-                                "(Only the background will be applied.)"),
+                                         "(Only the background will be applied.)"),
                              FormatDescription::ShowBackgroundControl);
     formatDescr.emplace_back(C_OCCURRENCES_UNUSED,
                              QObject::tr("Unused Occurrence"),
@@ -132,7 +132,7 @@ FormatDescriptions colorFormatDescriptions()
 
     formatDescr.emplace_back(C_BINDING, QObject::tr("QML Binding"),
                              QObject::tr("QML item property, that allows a "
-                                "binding to another property."),
+                                         "binding to another property."),
                              Qt::darkRed);
 
     TextEditor::Format qmlLocalNameFormat;
@@ -180,7 +180,7 @@ FormatDescriptions colorFormatDescriptions()
 
     formatDescr.emplace_back(C_KEYWORD, QObject::tr("Keyword"),
                              QObject::tr("Reserved keywords of the programming language except "
-                                "keywords denoting primitive types."), Qt::darkYellow);
+                                         "keywords denoting primitive types."), Qt::darkYellow);
     formatDescr.emplace_back(C_OPERATOR, QObject::tr("Operator"),
                              QObject::tr("Operators (for example operator++ or operator-=)."));
     formatDescr.emplace_back(C_PREPROCESSOR, QObject::tr("Preprocessor"),
@@ -196,7 +196,7 @@ FormatDescriptions colorFormatDescriptions()
                              Qt::blue);
     formatDescr.emplace_back(C_VISUAL_WHITESPACE, QObject::tr("Visual Whitespace"),
                              QObject::tr("Whitespace.\nWill not be applied to whitespace "
-                                "in comments and strings."), Qt::lightGray);
+                                         "in comments and strings."), Qt::lightGray);
     formatDescr.emplace_back(C_DISABLED_CODE, QObject::tr("Disabled Code"),
                              QObject::tr("Code disabled by preprocessor directives."));
 
@@ -211,32 +211,32 @@ FormatDescriptions colorFormatDescriptions()
                              QObject::tr("Compared files (in diff editor)."), Qt::darkBlue);
     formatDescr.emplace_back(C_DIFF_LOCATION, QObject::tr("Diff Location"),
                              QObject::tr("Location in the files where the difference is "
-                                "(in diff editor)."), Qt::blue);
+                                         "(in diff editor)."), Qt::blue);
 
     // New diff categories
     formatDescr.emplace_back(C_DIFF_FILE_LINE, QObject::tr("Diff File Line"),
                              QObject::tr("Applied to lines with file information "
-                                "in differences (in side-by-side diff editor)."),
+                                         "in differences (in side-by-side diff editor)."),
                              TextEditor::Format(QColor(), QColor(255, 255, 0)));
     formatDescr.emplace_back(C_DIFF_CONTEXT_LINE, QObject::tr("Diff Context Line"),
                              QObject::tr("Applied to lines describing hidden context "
-                                "in differences (in side-by-side diff editor)."),
+                                         "in differences (in side-by-side diff editor)."),
                              TextEditor::Format(QColor(), QColor(175, 215, 231)));
     formatDescr.emplace_back(C_DIFF_SOURCE_LINE, QObject::tr("Diff Source Line"),
                              QObject::tr("Applied to source lines with changes "
-                                "in differences (in side-by-side diff editor)."),
+                                         "in differences (in side-by-side diff editor)."),
                              TextEditor::Format(QColor(), QColor(255, 223, 223)));
     formatDescr.emplace_back(C_DIFF_SOURCE_CHAR, QObject::tr("Diff Source Character"),
                              QObject::tr("Applied to removed characters "
-                                "in differences (in side-by-side diff editor)."),
+                                         "in differences (in side-by-side diff editor)."),
                              TextEditor::Format(QColor(), QColor(255, 175, 175)));
     formatDescr.emplace_back(C_DIFF_DEST_LINE, QObject::tr("Diff Destination Line"),
                              QObject::tr("Applied to destination lines with changes "
-                                "in differences (in side-by-side diff editor)."),
+                                         "in differences (in side-by-side diff editor)."),
                              TextEditor::Format(QColor(), QColor(223, 255, 223)));
     formatDescr.emplace_back(C_DIFF_DEST_CHAR, QObject::tr("Diff Destination Character"),
                              QObject::tr("Applied to added characters "
-                                "in differences (in side-by-side diff editor)."),
+                                         "in differences (in side-by-side diff editor)."),
                              TextEditor::Format(QColor(), QColor(175, 255, 175)));
 
     formatDescr.emplace_back(C_LOG_CHANGE_LINE, QObject::tr("Log Change Line"),
@@ -291,6 +291,61 @@ FormatDescriptions colorFormatDescriptions()
 }
 }
 
+struct ColorSchemeEntry
+{
+    ColorSchemeEntry(const QString &fileName,
+                     bool readOnly):
+        fileName(fileName),
+        name(TextEditor::ColorScheme::readNameOfScheme(fileName)),
+        readOnly(readOnly)
+    { }
+
+    QString fileName;
+    QString name;
+    QString id;
+    bool readOnly;
+};
+
+class SchemeListModel : public QAbstractListModel
+{
+public:
+    SchemeListModel(QObject *parent = 0):
+        QAbstractListModel(parent)
+    {
+    }
+
+    int rowCount(const QModelIndex &parent) const
+    { return parent.isValid() ? 0 : m_colorSchemes.size(); }
+
+    QVariant data(const QModelIndex &index, int role) const
+    {
+        if (role == Qt::DisplayRole)
+            return m_colorSchemes.at(index.row()).name;
+
+        return QVariant();
+    }
+
+    void removeColorScheme(int index)
+    {
+        beginRemoveRows(QModelIndex(), index, index);
+        m_colorSchemes.removeAt(index);
+        endRemoveRows();
+    }
+
+    void setColorSchemes(const QList<ColorSchemeEntry> &colorSchemes)
+    {
+        beginResetModel();
+        m_colorSchemes = colorSchemes;
+        endResetModel();
+    }
+
+    const ColorSchemeEntry &colorSchemeAt(int index) const
+    { return m_colorSchemes.at(index); }
+
+private:
+    QList<ColorSchemeEntry> m_colorSchemes;
+};
+
 FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_fontGroup(new QGroupBox(contentWidget()))
   , m_fontLayout(new QVBoxLayout(m_fontGroup))
@@ -303,6 +358,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
   , m_fontResetButton(new QPushButton(m_fontGroup))
   /****/
   , m_colorFormatDescriptions(colorFormatDescriptions())
+  , m_schemeListModel(new SchemeListModel)
   , m_colorSchemeGroup(new QGroupBox(contentWidget()))
   , m_colorSchemeLayout(new QGridLayout(m_colorSchemeGroup))
   , m_colorSchemeBox(new QComboBox(m_colorSchemeGroup))
@@ -372,7 +428,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
     m_colorSchemeLayout->addWidget(m_colorSchemeDeleteButton, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_colorSchemeLayout->addWidget(m_colorSchemeEdit, 1, 0, 1, 3, Qt::AlignLeft | Qt::AlignVCenter);
 
-    m_fontGroup->setTitle(tr("Color Scheme"));
+    m_colorSchemeGroup->setTitle(tr("Color Scheme"));
     m_colorSchemeDeleteButton->setText(tr("Delete"));
     m_colorSchemeCopyButton->setText(tr("Copy") + "...");
 

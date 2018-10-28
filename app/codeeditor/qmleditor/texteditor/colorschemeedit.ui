@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>462</width>
-    <height>389</height>
+    <height>431</height>
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0,0">
@@ -98,6 +98,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -123,6 +126,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="toolTip">
       <string>Erase background.</string>
@@ -159,6 +165,9 @@
    </item>
    <item row="7" column="2" colspan="2">
     <widget class="QDoubleSpinBox" name="foregroundSaturationSpinBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="minimum">
       <double>-1.000000000000000</double>
      </property>
@@ -191,6 +200,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>Erase foreground.</string>
      </property>
@@ -217,6 +229,9 @@
    </item>
    <item row="19" column="2" colspan="2">
     <widget class="QCheckBox" name="italicCheckBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="text">
       <string>Italic</string>
      </property>
@@ -224,6 +239,9 @@
    </item>
    <item row="9" column="2" colspan="2">
     <widget class="QDoubleSpinBox" name="foregroundLightnessSpinBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="minimum">
       <double>-1.000000000000000</double>
      </property>
@@ -259,6 +277,9 @@
    </item>
    <item row="13" column="2" colspan="2">
     <widget class="QDoubleSpinBox" name="backgroundSaturationSpinBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="minimum">
       <double>-1.000000000000000</double>
      </property>
@@ -352,6 +373,9 @@
    </item>
    <item row="19" column="1">
     <widget class="QCheckBox" name="boldCheckBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="text">
       <string>Bold</string>
      </property>
@@ -475,6 +499,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -546,6 +573,9 @@
    </item>
    <item row="15" column="2" colspan="2">
     <widget class="QDoubleSpinBox" name="backgroundLightnessSpinBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="minimum">
       <double>-1.000000000000000</double>
      </property>
@@ -565,6 +595,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -578,6 +611,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>Erase background.</string>
      </property>
@@ -590,7 +626,11 @@
     </widget>
    </item>
    <item row="25" column="1" colspan="3">
-    <widget class="QComboBox" name="underlineComboBox"/>
+    <widget class="QComboBox" name="underlineComboBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+    </widget>
    </item>
    <item row="8" column="1" colspan="3">
     <widget class="QWidget" name="relativeForegroundSpacer2" native="true">
