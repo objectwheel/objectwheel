@@ -46,7 +46,7 @@ FormatDescriptions defaultFormatDescriptions()
     formatDescr.emplace_back(C_LINK, QObject::tr("Link"),
                              QObject::tr("Links that follow symbol under cursor."), Qt::blue);
     formatDescr.emplace_back(C_SELECTION, QObject::tr("Selection"), QObject::tr("Selected text."),
-                             ApplicationCore::palette().highlight().color());
+                             ApplicationCore::palette().highlightedText().color());
     formatDescr.emplace_back(C_LINE_NUMBER, QObject::tr("Line Number"),
                              QObject::tr("Line numbers located on the left side of the editor."),
                              FormatDescription::AllControlsExceptUnderline);
