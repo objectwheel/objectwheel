@@ -6,6 +6,8 @@
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
 #include <texteditor/texteditorconstants.h>
+#include <codeeditorsettings.h>
+#include <fontcolorssettings.h>
 
 #include <QPainter>
 #include <QHBoxLayout>
@@ -25,6 +27,8 @@ RowBar::RowBar(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_markBand);
     m_layout->addWidget(m_bracketBand);
     connect(m_qmlCodeEditor, SIGNAL(updateRequest(QRect,int)), this, SLOT(update()));
+    connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
+            this, qOverload<>(&RowBar::update));
 }
 
 int RowBar::calculatedWidth() const
@@ -47,6 +51,12 @@ void RowBar::mouseReleaseEvent(QMouseEvent* e)
 BreakpointBand* RowBar::breakpointBand() const
 {
     return m_breakpointBand;
+}
+
+void RowBar::paintEvent(QPaintEvent*)
+{
+    QPainter p(this);
+    p.fillRect(rect(), CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_LINE_NUMBER).background());
 }
 
 MarkBand* RowBar::markBand() const

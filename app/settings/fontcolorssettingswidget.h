@@ -2,7 +2,6 @@
 #define FONTCOLORSSETTINGSWIDGET_H
 
 #include <settingswidget.h>
-#include <fontcolorssettings.h>
 
 class QLabel;
 class QGroupBox;
@@ -39,7 +38,6 @@ private:
     QCheckBox* m_fontThickBox;
     QPushButton* m_fontResetButton;
     /****/
-    FormatDescriptions m_colorFormatDescriptions;
     SchemeListModel* m_schemeListModel;
     QGroupBox* m_colorSchemeGroup;
     QGridLayout* m_colorSchemeLayout;

@@ -426,6 +426,8 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     connect(this, &QmlCodeEditor::blockCountChanged, this, &QmlCodeEditor::updateViewportMargins);
     connect(this, &QmlCodeEditor::updateRequest, this, &QmlCodeEditor::updateRowBar);
     connect(this, &QmlCodeEditor::cursorPositionChanged, this, &QmlCodeEditor::slotCursorPositionChanged);
+    connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
+            this, &QmlCodeEditor::applyFontSettingsDelayed);
 
     m_parenthesesMatchingTimer->setSingleShot(true);
     connect(m_parenthesesMatchingTimer, &QTimer::timeout, this, &QmlCodeEditor::matchParentheses);

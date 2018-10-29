@@ -46,6 +46,8 @@ LineNumberBand::LineNumberBand(QmlCodeEditor* editor, QWidget* parent) : QWidget
   , m_qmlCodeEditor(editor)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
+            this, qOverload<>(&RowBar::update));
 }
 
 int LineNumberBand::calculatedWidth() const
@@ -95,6 +97,7 @@ void LineNumberBand::paintEvent(QPaintEvent* e)
                          && data.selectionEnd > data.block.position())
                         || (data.selectionStart == data.selectionEnd && data.selectionEnd == data.block.position())
                         );
+
             if (selected) {
                 painter.save();
                 QFont f = painter.font();

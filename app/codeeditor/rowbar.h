@@ -24,6 +24,7 @@ public:
     BreakpointBand* breakpointBand() const;
 
 private:
+    void paintEvent(QPaintEvent *event) override;
     QSize sizeHint() const override;
     void mouseReleaseEvent(QMouseEvent* e) override;
 

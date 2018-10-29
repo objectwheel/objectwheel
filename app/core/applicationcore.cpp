@@ -63,9 +63,21 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+    QApplication::setPalette(palette());
+
+    const QString fontPath = ":/fonts";
+    const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
+
+    /* Prepare setting instances */
+    s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);
+    s_generalSettings = new GeneralSettings(app);
+    s_codeEditorSettings = new CodeEditorSettings(app);
+
+    /* Read settings */
+    GeneralSettings::read();
+    CodeEditorSettings::read();
 
     /* Set application ui settings */
-    QApplication::setPalette(palette());
     QApplication::setFont(GeneralSettings::interfaceSettings()->toFont());
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
 
@@ -143,20 +155,12 @@ void ApplicationCore::prepare(const char* filePath)
     const QString fontPath = ":/fonts";
     const QString settingsPath = dname(filePath) + "/settings.ini";
 
-    /* Prepare setting instances */
-    s_settings = new QSettings(settingsPath, QSettings::IniFormat, nullptr);
-    s_generalSettings = new GeneralSettings(nullptr);
-    s_codeEditorSettings = new CodeEditorSettings(nullptr);
-
-    /* Read settings */
-    GeneralSettings::read();
-    CodeEditorSettings::read();
-
     /* Load default fonts */
     for (const QString& fontName : lsfile(fontPath))
         QFontDatabase::addApplicationFont(fontPath + fontName);
 
-    if (GeneralSettings::interfaceSettings()->hdpiEnabled)
+    QSettings settings(settingsPath, QSettings::IniFormat);
+    if (settings.value("General/Interface.HdpiEnabled").toBool())
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
@@ -170,8 +174,10 @@ void ApplicationCore::prepare(const char* filePath)
 
 QPalette ApplicationCore::palette()
 {
+    const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
     QPalette palette(QApplication::palette());
-    if (GeneralSettings::interfaceSettings()->theme == "Light") {
+    QSettings settings(settingsPath, QSettings::IniFormat);
+    if (settings.value("General/Interface.Theme").toString() == "Light") {
         palette.setColor(QPalette::Active, QPalette::Text, "#3C444C");
         palette.setColor(QPalette::Inactive, QPalette::Text, "#3C444C");
         palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");

@@ -98,6 +98,7 @@ struct FontColorsSettings : public Settings
     QString fontFamily;
     QString colorSchemeFileName;
     TextEditor::ColorScheme colorScheme;
+    const FormatDescriptions defaultFormatDescriptions;
 
 private:
     bool loadColorScheme(const QString &fileName);
