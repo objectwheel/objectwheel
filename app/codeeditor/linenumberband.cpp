@@ -17,29 +17,23 @@ struct ExtraAreaPaintEventData
         , documentLayout(qobject_cast<QPlainTextDocumentLayout*>(doc->documentLayout()))
         , selectionStart(editor->textCursor().selectionStart())
         , selectionEnd(editor->textCursor().selectionEnd())
-        , fontMetrics(editor->rowBar()->font())
-        , lineSpacing(fontMetrics.lineSpacing())
-        , markWidth(/*m_marksVisible ? */lineSpacing/* : 0*/)
         , collapseColumnWidth(/*m_codeFoldingVisible ? foldBoxWidth(fontMetrics) :*/ 0)
         , extraAreaWidth(editor->rowBar()->width() - collapseColumnWidth)
+        , lineNumberFormat(
+              CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_LINE_NUMBER))
         , currentLineNumberFormat(
               CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_CURRENT_LINE_NUMBER))
-        , palette(editor->rowBar()->palette())
     {
-        palette.setCurrentColorGroup(QPalette::Active);
     }
     QTextBlock block;
     const QTextDocument *doc;
     const QPlainTextDocumentLayout *documentLayout;
     const int selectionStart;
     const int selectionEnd;
-    const QFontMetrics fontMetrics;
-    const int lineSpacing;
-    const int markWidth;
     const int collapseColumnWidth;
     const int extraAreaWidth;
+    const QTextCharFormat lineNumberFormat;
     const QTextCharFormat currentLineNumberFormat;
-    QPalette palette;
 };
 
 LineNumberBand::LineNumberBand(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
@@ -83,34 +77,25 @@ void LineNumberBand::paintEvent(QPaintEvent* e)
     auto bottom = top + ce->blockBoundingRect(block).height();
 
     while (block.isValid() && top <= e->rect().bottom()) {
-        auto f = font();
         if (ce->textCursor().block() == block)
-            f.setBold(true);
-        painter.setFont(f);
+            painter.setFont(data.currentLineNumberFormat.font());
+        else
+            painter.setFont(data.lineNumberFormat.font());
+
+        if (ce->textCursor().block() == block)
+            painter.setPen(data.currentLineNumberFormat.foreground().color());
+        else
+            painter.setPen(data.lineNumberFormat.foreground().color());
 
         if (block.isVisible() && bottom >= e->rect().top()) {
-            auto number = QString::number(blockNumber + 1);
-            painter.setPen(data.palette.color(QPalette::Dark));
+            const QString& number = QString::number(blockNumber + 1);
 
-            const bool selected = (
-                        (data.selectionStart < data.block.position() + data.block.length()
-                         && data.selectionEnd > data.block.position())
-                        || (data.selectionStart == data.selectionEnd && data.selectionEnd == data.block.position())
-                        );
+            const bool selected = block.position() + block.length() > data.selectionStart
+                    && block.position() < data.selectionEnd;
 
             if (selected) {
-                painter.save();
-                QFont f = painter.font();
-                f.setBold(data.currentLineNumberFormat.font().bold());
-                f.setItalic(data.currentLineNumberFormat.font().italic());
-                painter.setFont(f);
+                painter.setFont(data.currentLineNumberFormat.font());
                 painter.setPen(data.currentLineNumberFormat.foreground().color());
-                if (data.currentLineNumberFormat.background() != Qt::NoBrush) {
-                    painter.fillRect(QRectF(0, top,
-                                            data.extraAreaWidth, bottom - top),
-                                     data.currentLineNumberFormat.background().color());
-                }
-                painter.restore();
             }
 
             painter.drawText(0, top, width(), fontMetrics().height(),

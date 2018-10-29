@@ -543,18 +543,13 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyles textStyles) cons
     return textCharFormat;
 }
 
-void FontColorsSettings::clearCache()
-{
-    m_formatCache.clear();
-    m_textCharFormatCache.clear();
-}
-
 bool FontColorsSettings::loadColorScheme(const QString& fileName)
 {
     bool loaded = true;
     colorSchemeFileName = fileName;
 
-    clearCache();
+    m_formatCache.clear();
+    m_textCharFormatCache.clear();
 
     if (!colorScheme.load(colorSchemeFileName)) {
         loaded = false;

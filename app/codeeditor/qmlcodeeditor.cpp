@@ -1899,11 +1899,7 @@ void QmlCodeEditor::changeEvent(QEvent* e)
     QPlainTextEdit::changeEvent(e);
     if (e->type() == QEvent::ApplicationFontChange
             || e->type() == QEvent::FontChange) {
-        QFont f = m_rowBar->font();
-        f.setPointSizeF(font().pointSizeF());
-        m_rowBar->setFont(f);
         updateViewportMargins();
-        m_rowBar->update();
     }
 }
 
