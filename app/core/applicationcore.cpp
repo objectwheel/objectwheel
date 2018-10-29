@@ -65,7 +65,14 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
     QApplication::setPalette(palette());
 
+    const QString fontPath = ":/fonts";
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
+
+    /* Load default fonts */
+    for (const QString& fontName : lsfile(fontPath))
+        QFontDatabase::addApplicationFont(fontPath + separator() + fontName);
+    for (const QString& fontName : lsfile("/Users/omergoktas/Desktop/fonts"))
+        QFontDatabase::addApplicationFont(QString("/Users/omergoktas/Desktop/fonts") + separator() + fontName);
 
     /* Prepare setting instances */
     s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);
@@ -151,13 +158,7 @@ void ApplicationCore::run(QApplication* app)
 
 void ApplicationCore::prepare(const char* filePath)
 {
-    const QString fontPath = ":/fonts";
     const QString settingsPath = dname(filePath) + "/settings.ini";
-
-    /* Load default fonts */
-    for (const QString& fontName : lsfile(fontPath))
-        QFontDatabase::addApplicationFont(fontPath + fontName);
-
     QSettings settings(settingsPath, QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled").toBool())
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

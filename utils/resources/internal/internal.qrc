@@ -15,5 +15,7 @@
         <file>fonts/Roboto-Regular.ttf</file>
         <file>fonts/Roboto-Thin.ttf</file>
         <file>fonts/Roboto-ThinItalic.ttf</file>
+        <file>fonts/Inconsolata-Bold.ttf</file>
+        <file>fonts/Inconsolata-Regular.ttf</file>
     </qresource>
 </RCC>

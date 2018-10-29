@@ -463,14 +463,8 @@ void FontColorsSettings::reset()
 {
     fontPreferThick = false;
     fontPreferAntialiasing = true;
-    fontPixelSize = 13;
-#if defined(Q_OS_MACOS)
-    fontFamily = ".SF NS Display";
-#elif defined(Q_OS_WIN)
-    fontFamily = "Segoe UI";
-#else
-    fontFamily = "Roboto";
-#endif
+    fontPixelSize = 14;
+    fontFamily = "Inconsolata";
     loadColorScheme(":/styles/default.xml");
 }
 
@@ -483,7 +477,7 @@ QFont FontColorsSettings::toFont() const
 {
     QFont font(fontFamily);
     font.setPixelSize(fontPixelSize);
-    font.setWeight(fontPreferThick ? QFont::Medium : QFont::Normal);
+    font.setWeight(fontPreferThick ? QFont::Bold : QFont::Normal);
     font.setStyleStrategy(fontPreferAntialiasing ? QFont::PreferAntialias : QFont::NoAntialias);
     return font;
 }
@@ -518,7 +512,7 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyle category) const
     if (f.underlineStyle() != QTextCharFormat::NoUnderline && !f.background().isValid())
         tf.setBackground(QBrush(Qt::BrushStyle::NoBrush));
 
-    tf.setFontWeight(f.bold() ? QFont::Bold : (fontPreferThick ? QFont::Medium : QFont::Normal));
+    tf.setFontWeight((f.bold() || fontPreferThick) ? QFont::Bold : QFont::Normal);
     tf.setFontItalic(f.italic());
 
     tf.setUnderlineColor(f.underlineColor());
@@ -621,8 +615,8 @@ void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const Mi
         if (!textCharFormat.fontItalic())
             textCharFormat.setFontItalic(format.italic());
         
-        if (textCharFormat.fontWeight() == QFont::Normal || textCharFormat.fontWeight() == QFont::Medium)
-            textCharFormat.setFontWeight(format.bold() ? QFont::Bold : (fontPreferThick ? QFont::Medium : QFont::Normal));
+        if (textCharFormat.fontWeight() == QFont::Normal)
+            textCharFormat.setFontWeight((format.bold() || fontPreferThick) ? QFont::Bold : QFont::Normal);
         
         if (textCharFormat.underlineStyle() == QTextCharFormat::NoUnderline) {
             textCharFormat.setUnderlineStyle(format.underlineStyle());
