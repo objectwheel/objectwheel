@@ -65,7 +65,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
     QApplication::setPalette(palette());
 
-    const QString fontPath = ":/fonts";
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
 
     /* Prepare setting instances */
