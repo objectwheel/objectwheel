@@ -4,6 +4,7 @@
 #include <utils/theme/theme.h>
 
 #include <QPalette>
+#include <QDebug>
 
 namespace {
 

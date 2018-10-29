@@ -37,8 +37,6 @@ HEADERS += \
         $$PWD/quickfix.h \
         $$PWD/indenter.h \
         $$PWD/helpitem.h \
-        $$PWD/fontsettingspage.h \
-        $$PWD/fontsettings.h \
         $$PWD/completionsettingspage.h \
         $$PWD/completionsettings.h \
         $$PWD/colorschemeedit.h \
@@ -86,8 +84,6 @@ SOURCES += \
         $$PWD/colorschemeedit.cpp \
         $$PWD/completionsettings.cpp \
         $$PWD/completionsettingspage.cpp \
-        $$PWD/fontsettings.cpp \
-        $$PWD/fontsettingspage.cpp \
         $$PWD/helpitem.cpp \
         $$PWD/indenter.cpp \
         $$PWD/quickfix.cpp \
@@ -112,5 +108,4 @@ FORMS += \
         $$PWD/behaviorsettingswidget.ui \
         $$PWD/colorschemeedit.ui \
         $$PWD/completionsettingspage.ui \
-        $$PWD/tabsettingswidget.ui \
-        $$PWD/fontsettingspage.ui
+        $$PWD/tabsettingswidget.ui

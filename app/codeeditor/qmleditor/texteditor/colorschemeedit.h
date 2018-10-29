@@ -26,8 +26,7 @@
 #pragma once
 
 #include "colorscheme.h"
-#include "fontsettingspage.h"
-
+#include <fontcolorssettings.h>
 #include <QDialog>
 
 QT_BEGIN_NAMESPACE

@@ -67,7 +67,6 @@ public:
 
     static TextEditorSettings *instance();
 
-    static const FontSettings &fontSettings();
     static const TypingSettings &typingSettings();
     static const StorageSettings &storageSettings();
     static const BehaviorSettings &behaviorSettings();
@@ -96,11 +95,8 @@ public:
 
     static void registerMimeTypeForLanguageId(const char *mimeType, Core::Id languageId);
     static Core::Id languageId(const QString &mimeType);
-    static int increaseFontZoom(int step);
-    static void resetFontZoom();
 
 signals:
-    void fontSettingsChanged(const TextEditor::FontSettings &);
     void typingSettingsChanged(const TextEditor::TypingSettings &);
     void storageSettingsChanged(const TextEditor::StorageSettings &);
     void behaviorSettingsChanged(const TextEditor::BehaviorSettings &);

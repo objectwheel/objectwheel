@@ -67,10 +67,8 @@ public:
 
     static QList<QColor> generateColors(int n, const QColor &background);
 
-    // Don't call in constructors of derived classes
-    virtual void setFontSettings(const TextEditor::FontSettings &fontSettings);
-
     void setNoAutomaticHighlighting(bool noAutomatic);
+    void updateFormats();
 
 public slots:
     void rehighlight();

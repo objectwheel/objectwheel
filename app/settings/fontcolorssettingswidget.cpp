@@ -38,19 +38,19 @@ const char* g_colorSchemeNames[] = {"Qt Dark",
 void addColorSchemes(QComboBox* comboBox)
 {
     for (size_t i = 0; i < sizeof(g_colorSchemeNames) / sizeof(g_colorSchemeNames[0]); ++i)
-        comboBox->addItem(QObject::tr(g_colorSchemeNames[i]), g_colorSchemeFiles[i]);
+        comboBox->addItem(QObject::QObject::tr(g_colorSchemeNames[i]), g_colorSchemeFiles[i]);
 }
 
 FormatDescriptions colorFormatDescriptions()
 {
+    using namespace TextEditor;
     // Note: default background colors are coming from FormatDescription::background()
-
     // Add font preference page
     FormatDescriptions formatDescr;
     formatDescr.reserve(C_LAST_STYLE_SENTINEL);
     formatDescr.emplace_back(C_TEXT, QObject::tr("Text"), QObject::tr("Generic text.\nApplied to "
-                                                                      "text, if no other "
-                                                                      "rules matching."));
+                                                    "text, if no other "
+                                                    "rules matching."));
 
     // Special categories
     const QPalette p = QApplication::palette();
@@ -69,13 +69,13 @@ FormatDescriptions colorFormatDescriptions()
                              FormatDescription::ShowBackgroundControl);
     formatDescr.emplace_back(C_PARENTHESES, QObject::tr("Parentheses"),
                              QObject::tr("Displayed when matching parentheses, square brackets "
-                                         "or curly brackets are found."));
+                                "or curly brackets are found."));
     formatDescr.emplace_back(C_PARENTHESES_MISMATCH, QObject::tr("Mismatched Parentheses"),
                              QObject::tr("Displayed when mismatched parentheses, "
-                                         "square brackets, or curly brackets are found."));
+                                "square brackets, or curly brackets are found."));
     formatDescr.emplace_back(C_AUTOCOMPLETE, QObject::tr("Auto Complete"),
                              QObject::tr("Displayed when a character is automatically inserted "
-                                         "like brackets or quotes."));
+                                "like brackets or quotes."));
     formatDescr.emplace_back(C_CURRENT_LINE, QObject::tr("Current Line"),
                              QObject::tr("Line where the cursor is placed in."),
                              FormatDescription::ShowBackgroundControl);
@@ -83,7 +83,7 @@ FormatDescriptions colorFormatDescriptions()
     FormatDescription currentLineNumber(C_CURRENT_LINE_NUMBER,
                                         QObject::tr("Current Line Number"),
                                         QObject::tr("Line number located on the left side of the "
-                                                    "editor where the cursor is placed in."),
+                                           "editor where the cursor is placed in."),
                                         Qt::darkGray,
                                         FormatDescription::AllControlsExceptUnderline);
     currentLineNumber.format().setBold(true);
@@ -92,7 +92,7 @@ FormatDescriptions colorFormatDescriptions()
 
     formatDescr.emplace_back(C_OCCURRENCES, QObject::tr("Occurrences"),
                              QObject::tr("Occurrences of the symbol under the cursor.\n"
-                                         "(Only the background will be applied.)"),
+                                "(Only the background will be applied.)"),
                              FormatDescription::ShowBackgroundControl);
     formatDescr.emplace_back(C_OCCURRENCES_UNUSED,
                              QObject::tr("Unused Occurrence"),
@@ -121,7 +121,7 @@ FormatDescriptions colorFormatDescriptions()
     formatDescr.emplace_back(C_ENUMERATION, QObject::tr("Enumeration"),
                              QObject::tr("Applied to enumeration items."), Qt::darkMagenta);
 
-    TextEditor::Format functionFormat;
+    Format functionFormat;
     functionFormat.setForeground(QColor(0, 103, 124));
     formatDescr.emplace_back(C_FUNCTION, QObject::tr("Function"), QObject::tr("Name of a function."),
                              functionFormat);
@@ -132,10 +132,10 @@ FormatDescriptions colorFormatDescriptions()
 
     formatDescr.emplace_back(C_BINDING, QObject::tr("QML Binding"),
                              QObject::tr("QML item property, that allows a "
-                                         "binding to another property."),
+                                "binding to another property."),
                              Qt::darkRed);
 
-    TextEditor::Format qmlLocalNameFormat;
+    Format qmlLocalNameFormat;
     qmlLocalNameFormat.setItalic(true);
     formatDescr.emplace_back(C_QML_LOCAL_ID, QObject::tr("QML Local Id"),
                              QObject::tr("QML item id within a QML file."), qmlLocalNameFormat);
@@ -151,7 +151,7 @@ FormatDescriptions colorFormatDescriptions()
     formatDescr.emplace_back(C_QML_TYPE_ID, QObject::tr("QML Type Name"),
                              QObject::tr("Name of a QML type."), Qt::darkMagenta);
 
-    TextEditor::Format qmlExternalNameFormat = qmlLocalNameFormat;
+    Format qmlExternalNameFormat = qmlLocalNameFormat;
     qmlExternalNameFormat.setForeground(Qt::darkBlue);
     formatDescr.emplace_back(C_QML_EXTERNAL_ID, QObject::tr("QML External Id"),
                              QObject::tr("QML id defined in another QML file."),
@@ -161,14 +161,14 @@ FormatDescriptions colorFormatDescriptions()
                              QObject::tr("QML property defined in another QML file."),
                              qmlExternalNameFormat);
 
-    TextEditor::Format jsLocalFormat;
+    Format jsLocalFormat;
     jsLocalFormat.setForeground(QColor(41, 133, 199)); // very light blue
     jsLocalFormat.setItalic(true);
     formatDescr.emplace_back(C_JS_SCOPE_VAR, QObject::tr("JavaScript Scope Var"),
                              QObject::tr("Variables defined inside the JavaScript file."),
                              jsLocalFormat);
 
-    TextEditor::Format jsGlobalFormat;
+    Format jsGlobalFormat;
     jsGlobalFormat.setForeground(QColor(0, 85, 175)); // light blue
     jsGlobalFormat.setItalic(true);
     formatDescr.emplace_back(C_JS_IMPORT_VAR, QObject::tr("JavaScript Import"),
@@ -180,7 +180,7 @@ FormatDescriptions colorFormatDescriptions()
 
     formatDescr.emplace_back(C_KEYWORD, QObject::tr("Keyword"),
                              QObject::tr("Reserved keywords of the programming language except "
-                                         "keywords denoting primitive types."), Qt::darkYellow);
+                                "keywords denoting primitive types."), Qt::darkYellow);
     formatDescr.emplace_back(C_OPERATOR, QObject::tr("Operator"),
                              QObject::tr("Operators (for example operator++ or operator-=)."));
     formatDescr.emplace_back(C_PREPROCESSOR, QObject::tr("Preprocessor"),
@@ -196,7 +196,7 @@ FormatDescriptions colorFormatDescriptions()
                              Qt::blue);
     formatDescr.emplace_back(C_VISUAL_WHITESPACE, QObject::tr("Visual Whitespace"),
                              QObject::tr("Whitespace.\nWill not be applied to whitespace "
-                                         "in comments and strings."), Qt::lightGray);
+                                "in comments and strings."), Qt::lightGray);
     formatDescr.emplace_back(C_DISABLED_CODE, QObject::tr("Disabled Code"),
                              QObject::tr("Code disabled by preprocessor directives."));
 
@@ -211,37 +211,37 @@ FormatDescriptions colorFormatDescriptions()
                              QObject::tr("Compared files (in diff editor)."), Qt::darkBlue);
     formatDescr.emplace_back(C_DIFF_LOCATION, QObject::tr("Diff Location"),
                              QObject::tr("Location in the files where the difference is "
-                                         "(in diff editor)."), Qt::blue);
+                                "(in diff editor)."), Qt::blue);
 
     // New diff categories
     formatDescr.emplace_back(C_DIFF_FILE_LINE, QObject::tr("Diff File Line"),
                              QObject::tr("Applied to lines with file information "
-                                         "in differences (in side-by-side diff editor)."),
-                             TextEditor::Format(QColor(), QColor(255, 255, 0)));
+                                "in differences (in side-by-side diff editor)."),
+                             Format(QColor(), QColor(255, 255, 0)));
     formatDescr.emplace_back(C_DIFF_CONTEXT_LINE, QObject::tr("Diff Context Line"),
                              QObject::tr("Applied to lines describing hidden context "
-                                         "in differences (in side-by-side diff editor)."),
-                             TextEditor::Format(QColor(), QColor(175, 215, 231)));
+                                "in differences (in side-by-side diff editor)."),
+                             Format(QColor(), QColor(175, 215, 231)));
     formatDescr.emplace_back(C_DIFF_SOURCE_LINE, QObject::tr("Diff Source Line"),
                              QObject::tr("Applied to source lines with changes "
-                                         "in differences (in side-by-side diff editor)."),
-                             TextEditor::Format(QColor(), QColor(255, 223, 223)));
+                                "in differences (in side-by-side diff editor)."),
+                             Format(QColor(), QColor(255, 223, 223)));
     formatDescr.emplace_back(C_DIFF_SOURCE_CHAR, QObject::tr("Diff Source Character"),
                              QObject::tr("Applied to removed characters "
-                                         "in differences (in side-by-side diff editor)."),
-                             TextEditor::Format(QColor(), QColor(255, 175, 175)));
+                                "in differences (in side-by-side diff editor)."),
+                             Format(QColor(), QColor(255, 175, 175)));
     formatDescr.emplace_back(C_DIFF_DEST_LINE, QObject::tr("Diff Destination Line"),
                              QObject::tr("Applied to destination lines with changes "
-                                         "in differences (in side-by-side diff editor)."),
-                             TextEditor::Format(QColor(), QColor(223, 255, 223)));
+                                "in differences (in side-by-side diff editor)."),
+                             Format(QColor(), QColor(223, 255, 223)));
     formatDescr.emplace_back(C_DIFF_DEST_CHAR, QObject::tr("Diff Destination Character"),
                              QObject::tr("Applied to added characters "
-                                         "in differences (in side-by-side diff editor)."),
-                             TextEditor::Format(QColor(), QColor(175, 255, 175)));
+                                "in differences (in side-by-side diff editor)."),
+                             Format(QColor(), QColor(175, 255, 175)));
 
     formatDescr.emplace_back(C_LOG_CHANGE_LINE, QObject::tr("Log Change Line"),
                              QObject::tr("Applied to lines describing changes in VCS log."),
-                             TextEditor::Format(QColor(192, 0, 0), QColor()));
+                             Format(QColor(192, 0, 0), QColor()));
 
 
     // Mixin categories
@@ -269,7 +269,7 @@ FormatDescriptions colorFormatDescriptions()
                              QColor(255, 190, 0),
                              QTextCharFormat::DotLine,
                              FormatDescription::ShowUnderlineControl);
-    TextEditor::Format declarationFormat = TextEditor::Format::createMixinFormat();
+    Format declarationFormat = Format::createMixinFormat();
     declarationFormat.setBold(true);
     formatDescr.emplace_back(C_DECLARATION,
                              QObject::tr("Function Declaration"),
@@ -279,8 +279,8 @@ FormatDescriptions colorFormatDescriptions()
     formatDescr.emplace_back(C_FUNCTION_DEFINITION,
                              QObject::tr("Function Definition"),
                              QObject::tr("Name of function at its definition."),
-                             TextEditor::Format::createMixinFormat());
-    TextEditor::Format outputArgumentFormat = TextEditor::Format::createMixinFormat();
+                             Format::createMixinFormat());
+    Format outputArgumentFormat = Format::createMixinFormat();
     outputArgumentFormat.setItalic(true);
     formatDescr.emplace_back(C_OUTPUT_ARGUMENT,
                              QObject::tr("Output Argument"),
@@ -396,21 +396,21 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
     m_fontLayout->addLayout(hb1);
     m_fontLayout->addLayout(hb2);
 
-    m_fontGroup->setTitle(tr("Font"));
-    m_fontFamilyLabel->setText(tr("Family") + ":");
+    m_fontGroup->setTitle(QObject::tr("Font"));
+    m_fontFamilyLabel->setText(QObject::tr("Family") + ":");
     m_fontFamilyBox->addItems(QFontDatabase().families());
-    m_fontSizeLabel->setText(tr("Size") + ":");
+    m_fontSizeLabel->setText(QObject::tr("Size") + ":");
     m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
                              "18", "24", "36", "48", "64", "72", "96", "144"});
-    m_fontAntialiasingBox->setText(tr("Prefer antialiasing"));
-    m_fontThickBox->setText(tr("Prefer thicker"));
-    m_fontResetButton->setText(tr("Reset"));
+    m_fontAntialiasingBox->setText(QObject::tr("Prefer antialiasing"));
+    m_fontThickBox->setText(QObject::tr("Prefer thicker"));
+    m_fontResetButton->setText(QObject::tr("Reset"));
 
-    m_fontFamilyBox->setToolTip(tr("Chage font family"));
-    m_fontSizeBox->setToolTip(tr("Chage font pixel size"));
-    m_fontAntialiasingBox->setToolTip(tr("Enable font antialiasing"));
-    m_fontThickBox->setToolTip(tr("Enable text thickness increasing"));
-    m_fontResetButton->setToolTip(tr("Reset font settings to default"));
+    m_fontFamilyBox->setToolTip(QObject::tr("Chage font family"));
+    m_fontSizeBox->setToolTip(QObject::tr("Chage font pixel size"));
+    m_fontAntialiasingBox->setToolTip(QObject::tr("Enable font antialiasing"));
+    m_fontThickBox->setToolTip(QObject::tr("Enable text thickness increasing"));
+    m_fontResetButton->setToolTip(QObject::tr("Reset font settings to default"));
 
     m_fontFamilyBox->setCursor(Qt::PointingHandCursor);
     m_fontSizeBox->setCursor(Qt::PointingHandCursor);
@@ -428,13 +428,13 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
     m_colorSchemeLayout->addWidget(m_colorSchemeDeleteButton, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_colorSchemeLayout->addWidget(m_colorSchemeEdit, 1, 0, 1, 3, Qt::AlignLeft | Qt::AlignVCenter);
 
-    m_colorSchemeGroup->setTitle(tr("Color Scheme"));
-    m_colorSchemeDeleteButton->setText(tr("Delete"));
-    m_colorSchemeCopyButton->setText(tr("Copy") + "...");
+    m_colorSchemeGroup->setTitle(QObject::tr("Color Scheme"));
+    m_colorSchemeDeleteButton->setText(QObject::tr("Delete"));
+    m_colorSchemeCopyButton->setText(QObject::tr("Copy") + "...");
 
-    m_colorSchemeBox->setToolTip(tr("Chage code color scheme"));
-    m_colorSchemeCopyButton->setToolTip(tr("Copy and create new color scheme from current scheme"));
-    m_colorSchemeDeleteButton->setToolTip(tr("Delete current color scheme"));
+    m_colorSchemeBox->setToolTip(QObject::tr("Chage code color scheme"));
+    m_colorSchemeCopyButton->setToolTip(QObject::tr("Copy and create new color scheme from current scheme"));
+    m_colorSchemeDeleteButton->setToolTip(QObject::tr("Delete current color scheme"));
 
     m_colorSchemeBox->setCursor(Qt::PointingHandCursor);
     m_colorSchemeCopyButton->setCursor(Qt::PointingHandCursor);
@@ -495,7 +495,7 @@ QIcon FontColorsSettingsWidget::icon() const
 
 QString FontColorsSettingsWidget::title() const
 {
-    return tr("Font") + " && " + tr("Colors");
+    return QObject::tr("Font") + " && " + QObject::tr("Colors");
 }
 
 bool FontColorsSettingsWidget::containsWord(const QString& word) const

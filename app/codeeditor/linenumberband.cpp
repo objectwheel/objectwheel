@@ -2,6 +2,8 @@
 #include <rowbar.h>
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
+#include <codeeditorsettings.h>
+#include <fontcolorssettings.h>
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -21,7 +23,7 @@ struct ExtraAreaPaintEventData
         , collapseColumnWidth(/*m_codeFoldingVisible ? foldBoxWidth(fontMetrics) :*/ 0)
         , extraAreaWidth(editor->rowBar()->width() - collapseColumnWidth)
         , currentLineNumberFormat(
-              editor->codeDocument()->fontSettings().toTextCharFormat(C_CURRENT_LINE_NUMBER))
+              CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_CURRENT_LINE_NUMBER))
         , palette(editor->rowBar()->palette())
     {
         palette.setCurrentColorGroup(QPalette::Active);

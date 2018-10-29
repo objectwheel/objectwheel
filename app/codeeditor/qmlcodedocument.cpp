@@ -10,6 +10,8 @@
 #include <texteditor/tabsettings.h>
 #include <qtcassert.h>
 #include <documentmanager.h>
+#include <codeeditorsettings.h>
+#include <fontcolorssettings.h>
 
 #include <QPlainTextEdit>
 #include <QTimer>
@@ -471,6 +473,10 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
             this, &QmlCodeDocument::reupdateSemanticInfo);
     connect(modelManager, &ModelManagerInterface::libraryInfoUpdated,
             m_reupdateSemanticInfoTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
+            this, [=] {
+        m_fontSettingsNeedsApply = true;
+    });
 
     modelManager->updateSourceFiles(QStringList(filePath()), false);
 }
@@ -639,20 +645,6 @@ QTextCursor QmlCodeDocument::indentOrUnindent(const QTextCursor &textCursor, boo
 QmlJSEditor::Internal::Indenter* QmlCodeDocument::indenter() const
 {
     return m_indenter;
-}
-
-TextEditor::FontSettings QmlCodeDocument::fontSettings() const
-{
-    return m_fontSettings;
-}
-
-void QmlCodeDocument::setFontSettings(const TextEditor::FontSettings& fontSettings)
-{
-    if (fontSettings == m_fontSettings)
-        return;
-    m_fontSettings = fontSettings;
-    m_fontSettingsNeedsApply = true;
-    emit fontSettingsChanged();
 }
 
 void QmlCodeDocument::setStorageSettings(const TextEditor::StorageSettings& storageSettings)
@@ -1046,14 +1038,14 @@ void QmlCodeDocument::applyFontSettings()
 {
     m_fontSettingsNeedsApply = false;
 
-    setDefaultFont(m_fontSettings.font());
+    setDefaultFont(CodeEditorSettings::fontColorsSettings()->toFont());
 
     if (m_syntaxHighlighter) {
-        m_syntaxHighlighter->setFontSettings(m_fontSettings);
+        m_syntaxHighlighter->updateFormats();
         m_syntaxHighlighter->rehighlight();
     }
 
-    m_semanticHighlighter->updateFontSettings(m_fontSettings);
+    m_semanticHighlighter->updateFontSettings();
     if (!isSemanticInfoOutdated() && m_semanticInfo.isValid()) {
         m_semanticHighlightingNecessary = false;
         m_semanticHighlighter->rerun(m_semanticInfo);
