@@ -3,6 +3,7 @@
 
 #include <QTextDocument>
 #include <qmljstools/qmljssemanticinfo.h>
+#include <texteditor/fontsettings.h>
 #include <texteditor/tabsettings.h>
 #include <blockdata.h>
 #include <texteditor/typingsettings.h>
@@ -51,6 +52,9 @@ public:
 
     const TextEditor::TabSettings& tabSettings() const;
     void setTabSettings(const TextEditor::TabSettings& tabSettings);
+
+    TextEditor::FontSettings fontSettings() const;
+    void setFontSettings(const TextEditor::FontSettings& fontSettings);
 
     const TextEditor::TypingSettings &typingSettings() const;
     void setTypingSettings(const TextEditor::TypingSettings &typingSettings);
@@ -107,6 +111,7 @@ private:
 
 signals:
     void tabSettingsChanged();
+    void fontSettingsChanged();
     void updateCodeWarnings(QmlJS::Document::Ptr doc);
     void semanticInfoUpdated(const QmlJSTools::SemanticInfo& semanticInfo);
 
@@ -114,8 +119,10 @@ private:
     QPlainTextEdit* m_editor;
     QString m_filePath;
     TextEditor::TabSettings m_tabSettings;
+    TextEditor::FontSettings m_fontSettings;
     TextEditor::TypingSettings m_typingSettings;
     TextEditor::StorageSettings m_storageSettings;
+    bool m_fontSettingsNeedsApply;
     QmlJSEditor::Internal::Indenter* m_indenter;
     QmlJSEditor::QmlJSHighlighter* m_syntaxHighlighter;
     QTimer* m_updateDocumentTimer;

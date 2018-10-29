@@ -26,7 +26,8 @@
 #pragma once
 
 #include "texteditor_global.h"
-#include "textstyles.h"
+
+#include "fontsettings.h"
 
 #include <QHash>
 #include <QFuture>

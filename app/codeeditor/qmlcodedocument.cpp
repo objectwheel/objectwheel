@@ -10,8 +10,6 @@
 #include <texteditor/tabsettings.h>
 #include <qtcassert.h>
 #include <documentmanager.h>
-#include <codeeditorsettings.h>
-#include <fontcolorssettings.h>
 
 #include <QPlainTextEdit>
 #include <QTimer>
@@ -427,6 +425,7 @@ protected:
 }
 
 QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
+  , m_fontSettingsNeedsApply(false)
   , m_indenter(new Indenter)
   , m_syntaxHighlighter(new QmlJSHighlighter(this))
   , m_updateDocumentTimer(new QTimer(this))
@@ -472,9 +471,6 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
             this, &QmlCodeDocument::reupdateSemanticInfo);
     connect(modelManager, &ModelManagerInterface::libraryInfoUpdated,
             m_reupdateSemanticInfoTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
-
-    connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
-            this, &QmlCodeDocument::applyFontSettings);
 
     modelManager->updateSourceFiles(QStringList(filePath()), false);
 }
@@ -643,6 +639,20 @@ QTextCursor QmlCodeDocument::indentOrUnindent(const QTextCursor &textCursor, boo
 QmlJSEditor::Internal::Indenter* QmlCodeDocument::indenter() const
 {
     return m_indenter;
+}
+
+TextEditor::FontSettings QmlCodeDocument::fontSettings() const
+{
+    return m_fontSettings;
+}
+
+void QmlCodeDocument::setFontSettings(const TextEditor::FontSettings& fontSettings)
+{
+    if (fontSettings == m_fontSettings)
+        return;
+    m_fontSettings = fontSettings;
+    m_fontSettingsNeedsApply = true;
+    emit fontSettingsChanged();
 }
 
 void QmlCodeDocument::setStorageSettings(const TextEditor::StorageSettings& storageSettings)
@@ -1034,11 +1044,16 @@ void QmlCodeDocument::setDiagnosticRanges(const QVector<QTextLayout::FormatRange
 
 void QmlCodeDocument::applyFontSettings()
 {
-    setDefaultFont(CodeEditorSettings::fontColorsSettings()->toFont());
+    m_fontSettingsNeedsApply = false;
 
-    if (m_syntaxHighlighter)
+    setDefaultFont(m_fontSettings.font());
+
+    if (m_syntaxHighlighter) {
+        m_syntaxHighlighter->setFontSettings(m_fontSettings);
         m_syntaxHighlighter->rehighlight();
+    }
 
+    m_semanticHighlighter->updateFontSettings(m_fontSettings);
     if (!isSemanticInfoOutdated() && m_semanticInfo.isValid()) {
         m_semanticHighlightingNecessary = false;
         m_semanticHighlighter->rerun(m_semanticInfo);
@@ -1047,6 +1062,9 @@ void QmlCodeDocument::applyFontSettings()
 
 void QmlCodeDocument::triggerPendingUpdates()
 {
+    if (m_fontSettingsNeedsApply) // calls applyFontSettings if necessary
+        applyFontSettings();
+
     // might still need to rehighlight if font settings did not change
     if (m_semanticHighlightingNecessary && !isSemanticInfoOutdated()) {
         m_semanticHighlightingNecessary = false;

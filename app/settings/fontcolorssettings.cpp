@@ -45,7 +45,7 @@ uint qHash(TextStyles textStyles)
 bool operator==(const TextStyles &first, const TextStyles &second)
 {
     return first.mainStyle == second.mainStyle
-        && first.mixinStyles == second.mixinStyles;
+            && first.mixinStyles == second.mixinStyles;
 }
 
 FormatDescription::FormatDescription(TextStyle id,
@@ -222,6 +222,7 @@ void FontColorsSettings::reset()
 #else
     fontFamily = "Roboto";
 #endif
+    loadColorScheme(":/styles/solarized-light.xml");
 }
 
 const char* FontColorsSettings::category() const
@@ -246,7 +247,7 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyle category) const
     if (textCharFormatIterator != m_formatCache.end())
         return *textCharFormatIterator;
 
-    const TextEditor::Format &f = m_scheme.formatFor(category);
+    const TextEditor::Format &f = colorScheme.formatFor(category);
     QTextCharFormat tf;
 
     if (category == C_TEXT)
@@ -261,7 +262,7 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyle category) const
             && category != C_SEARCH_RESULT
             && category != C_PARENTHESES_MISMATCH)
         tf.setForeground(f.foreground());
-    if (f.background().isValid() && (category == C_TEXT || f.background() != m_scheme.formatFor(C_TEXT).background()))
+    if (f.background().isValid() && (category == C_TEXT || f.background() != colorScheme.formatFor(C_TEXT).background()))
         tf.setBackground(f.background());
 
     // underline does not need to fill without having background color
@@ -299,13 +300,64 @@ void FontColorsSettings::clearCache()
     m_textCharFormatCache.clear();
 }
 
+bool FontColorsSettings::loadColorScheme(const QString& fileName)
+{
+    bool loaded = true;
+    colorSchemeFileName = fileName;
+
+    clearCache();
+
+    if (!colorScheme.load(colorSchemeFileName)) {
+        loaded = false;
+        colorSchemeFileName.clear();
+        qWarning() << "Failed to load color scheme:" << fileName;
+    }
+
+    // Apply default formats to undefined categories
+//    for (const FormatDescription &desc : FontColorsSettingsWidget::m_colorFormatDescriptions) {
+//        const TextStyle id = desc.id();
+//        if (!colorScheme.contains(id)) {
+//            TextEditor::Format format;
+//            const TextEditor::Format &descFormat = desc.format();
+//            if (descFormat == format && colorScheme.contains(C_TEXT)) {
+//                // Default format -> Text
+//                const TextEditor::Format textFormat = colorScheme.formatFor(C_TEXT);
+//                format.setForeground(textFormat.foreground());
+//                format.setBackground(textFormat.background());
+//            } else {
+//                format.setForeground(descFormat.foreground());
+//                format.setBackground(descFormat.background());
+//            }
+//            format.setRelativeForegroundSaturation(descFormat.relativeForegroundSaturation());
+//            format.setRelativeForegroundLightness(descFormat.relativeForegroundLightness());
+//            format.setRelativeBackgroundSaturation(descFormat.relativeBackgroundSaturation());
+//            format.setRelativeBackgroundLightness(descFormat.relativeBackgroundLightness());
+//            format.setBold(descFormat.bold());
+//            format.setItalic(descFormat.italic());
+//            format.setUnderlineColor(descFormat.underlineColor());
+//            format.setUnderlineStyle(descFormat.underlineStyle());
+//            colorScheme.setFormatFor(id, format);
+//        }
+//    }
+
+    return loaded;
+}
+
+bool FontColorsSettings::saveColorScheme(const QString& fileName)
+{
+    const bool saved = colorScheme.save(fileName, nullptr);
+    if (saved)
+        colorSchemeFileName = fileName;
+    return saved;
+}
+
 void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const MixinTextStyles& mixinStyles) const
 {
     using namespace TextEditor;
 
     for (TextStyle mixinStyle : mixinStyles) {
-        const TextEditor::Format &format = m_scheme.formatFor(mixinStyle);
-
+        const TextEditor::Format &format = colorScheme.formatFor(mixinStyle);
+        
         if (textCharFormat.hasProperty(QTextFormat::ForegroundBrush)) {
             if (format.foreground().isValid())
                 textCharFormat.setForeground(format.foreground());
@@ -324,10 +376,10 @@ void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const Mi
         }
         if (!textCharFormat.fontItalic())
             textCharFormat.setFontItalic(format.italic());
-
+        
         if (textCharFormat.fontWeight() == QFont::Normal || textCharFormat.fontWeight() == QFont::Medium)
             textCharFormat.setFontWeight(format.bold() ? QFont::Bold : (fontPreferThick ? QFont::Medium : QFont::Normal));
-
+        
         if (textCharFormat.underlineStyle() == QTextCharFormat::NoUnderline) {
             textCharFormat.setUnderlineStyle(format.underlineStyle());
             textCharFormat.setUnderlineColor(format.underlineColor());

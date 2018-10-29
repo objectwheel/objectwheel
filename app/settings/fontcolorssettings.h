@@ -96,13 +96,16 @@ struct FontColorsSettings : public Settings
     bool fontPreferAntialiasing;
     int fontPixelSize;
     QString fontFamily;
-
-    TextEditor::ColorScheme m_scheme;
-    mutable QHash<TextStyle, QTextCharFormat> m_formatCache;
-    mutable QHash<TextStyles, QTextCharFormat> m_textCharFormatCache;
+    QString colorSchemeFileName;
+    TextEditor::ColorScheme colorScheme;
 
 private:
+    bool loadColorScheme(const QString &fileName);
+    bool saveColorScheme(const QString &fileName);
     void addMixinStyle(QTextCharFormat &textCharFormat, const MixinTextStyles &mixinStyles) const;
+
+    mutable QHash<TextStyle, QTextCharFormat> m_formatCache;
+    mutable QHash<TextStyles, QTextCharFormat> m_textCharFormatCache;
 };
 
 #endif // FONTCOLORSSETTINGS_H

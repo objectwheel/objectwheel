@@ -38,7 +38,7 @@ const char* g_colorSchemeNames[] = {"Qt Dark",
 void addColorSchemes(QComboBox* comboBox)
 {
     for (size_t i = 0; i < sizeof(g_colorSchemeNames) / sizeof(g_colorSchemeNames[0]); ++i)
-        comboBox->addItem(QObject::tr(g_colorSchemeNames[i]), g_colorSchemeNames[i]);
+        comboBox->addItem(QObject::tr(g_colorSchemeNames[i]), g_colorSchemeFiles[i]);
 }
 
 FormatDescriptions colorFormatDescriptions()
@@ -439,9 +439,6 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
     m_colorSchemeBox->setCursor(Qt::PointingHandCursor);
     m_colorSchemeCopyButton->setCursor(Qt::PointingHandCursor);
     m_colorSchemeDeleteButton->setCursor(Qt::PointingHandCursor);
-
-    m_colorSchemeEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_colorSchemeBox->setSizePolicy(QSizePolicy::MinimumExpanding, m_colorSchemeBox->sizePolicy().verticalPolicy());
 
     /****/
 

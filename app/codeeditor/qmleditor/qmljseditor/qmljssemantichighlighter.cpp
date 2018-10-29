@@ -41,11 +41,10 @@
 #include <qmlcodedocument.h>
 #include <texteditor/texteditorconstants.h>
 #include <texteditor/texteditorsettings.h>
+#include <texteditor/fontsettings.h>
 #include <utils/algorithm.h>
 #include <utils/qtcassert.h>
 #include <utils/runextensions.h>
-#include <codeeditorsettings.h>
-#include <fontcolorssettings.h>
 
 #include <QTextDocument>
 #include <QThreadPool>
@@ -376,7 +375,7 @@ protected:
     }
 
     void addMessages(QList<DiagnosticMessage> messages,
-                     const Document::Ptr &doc)
+            const Document::Ptr &doc)
     {
         foreach (const DiagnosticMessage &d, messages) {
             int line = d.loc.startLine;
@@ -397,13 +396,13 @@ protected:
                 length = end-begin;
             }
 
-            const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+            const TextEditor::FontSettings &fontSettings = TextEditor::TextEditorSettings::instance()->fontSettings();
 
             QTextCharFormat format;
             if (d.isWarning())
-                format = settings->toTextCharFormat(C_WARNING);
+                format = fontSettings.toTextCharFormat(C_WARNING);
             else
-                format = settings->toTextCharFormat(C_ERROR);
+                format = fontSettings.toTextCharFormat(C_ERROR);
 
             format.setToolTip(d.message);
 
@@ -434,17 +433,17 @@ protected:
                 length = end-begin;
             }
 
-            const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
+            const TextEditor::FontSettings &fontSettings = TextEditor::TextEditorSettings::instance()->fontSettings();
 
             QTextCharFormat format;
             if (d.severity == Severity::Warning
                     || d.severity == Severity::MaybeWarning
                     || d.severity == Severity::ReadingTypeInfoWarning) {
-                format = settings->toTextCharFormat(C_WARNING);
+                format = fontSettings.toTextCharFormat(C_WARNING);
             } else if (d.severity == Severity::Error || d.severity == Severity::MaybeError) {
-                format = settings->toTextCharFormat(C_ERROR);
+                format = fontSettings.toTextCharFormat(C_ERROR);
             } else if (d.severity == Severity::Hint) {
-                format = settings->toTextCharFormat(C_WARNING);
+                format = fontSettings.toTextCharFormat(C_WARNING);
                 format.setUnderlineColor(Qt::darkGreen);
             }
 
@@ -541,8 +540,6 @@ SemanticHighlighter::SemanticHighlighter(QmlCodeDocument *document)
             this, &SemanticHighlighter::applyResults);
     connect(&m_watcher, &QFutureWatcherBase::finished,
             this, &SemanticHighlighter::finished);
-    connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
-            this, &SemanticHighlighter::updateFontSettings);
 }
 
 void SemanticHighlighter::rerun(const QmlJSTools::SemanticInfo &semanticInfo)
@@ -590,21 +587,20 @@ void SemanticHighlighter::run(QFutureInterface<SemanticHighlighter::Use> &future
     task.run();
 }
 
-void SemanticHighlighter::updateFontSettings()
+void SemanticHighlighter::updateFontSettings(const TextEditor::FontSettings &fontSettings)
 {
-    const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
-    m_formats[LocalIdType] = settings->toTextCharFormat(C_QML_LOCAL_ID);
-    m_formats[ExternalIdType] = settings->toTextCharFormat(C_QML_EXTERNAL_ID);
-    m_formats[QmlTypeType] = settings->toTextCharFormat(C_QML_TYPE_ID);
-    m_formats[RootObjectPropertyType] = settings->toTextCharFormat(C_QML_ROOT_OBJECT_PROPERTY);
-    m_formats[ScopeObjectPropertyType] = settings->toTextCharFormat(C_QML_SCOPE_OBJECT_PROPERTY);
-    m_formats[ExternalObjectPropertyType] = settings->toTextCharFormat(C_QML_EXTERNAL_OBJECT_PROPERTY);
-    m_formats[JsScopeType] = settings->toTextCharFormat(C_JS_SCOPE_VAR);
-    m_formats[JsImportType] = settings->toTextCharFormat(C_JS_IMPORT_VAR);
-    m_formats[JsGlobalType] = settings->toTextCharFormat(C_JS_GLOBAL_VAR);
-    m_formats[LocalStateNameType] = settings->toTextCharFormat(C_QML_STATE_NAME);
-    m_formats[BindingNameType] = settings->toTextCharFormat(C_BINDING);
-    m_formats[FieldType] = settings->toTextCharFormat(C_FIELD);
+    m_formats[LocalIdType] = fontSettings.toTextCharFormat(C_QML_LOCAL_ID);
+    m_formats[ExternalIdType] = fontSettings.toTextCharFormat(C_QML_EXTERNAL_ID);
+    m_formats[QmlTypeType] = fontSettings.toTextCharFormat(C_QML_TYPE_ID);
+    m_formats[RootObjectPropertyType] = fontSettings.toTextCharFormat(C_QML_ROOT_OBJECT_PROPERTY);
+    m_formats[ScopeObjectPropertyType] = fontSettings.toTextCharFormat(C_QML_SCOPE_OBJECT_PROPERTY);
+    m_formats[ExternalObjectPropertyType] = fontSettings.toTextCharFormat(C_QML_EXTERNAL_OBJECT_PROPERTY);
+    m_formats[JsScopeType] = fontSettings.toTextCharFormat(C_JS_SCOPE_VAR);
+    m_formats[JsImportType] = fontSettings.toTextCharFormat(C_JS_IMPORT_VAR);
+    m_formats[JsGlobalType] = fontSettings.toTextCharFormat(C_JS_GLOBAL_VAR);
+    m_formats[LocalStateNameType] = fontSettings.toTextCharFormat(C_QML_STATE_NAME);
+    m_formats[BindingNameType] = fontSettings.toTextCharFormat(C_BINDING);
+    m_formats[FieldType] = fontSettings.toTextCharFormat(C_FIELD);
 }
 
 void SemanticHighlighter::reportMessagesInfo(const QVector<QTextLayout::FormatRange> &diagnosticRanges,

@@ -27,8 +27,6 @@
 
 #include "syntaxhighlighter.h"
 #include "texteditorsettings.h"
-#include <codeeditorsettings.h>
-#include <fontcolorssettings.h>
 
 #include <utils/qtcassert.h>
 
@@ -44,10 +42,11 @@ QTextCharFormat textCharFormatForResult(const HighlightingResult &result,
                                         const QHash<int, QTextCharFormat> &kindToFormat)
 {
     if (result.useTextSyles)
-        return CodeEditorSettings::fontColorsSettings()->toTextCharFormat(result.textStyles);
+        return TextEditorSettings::fontSettings().toTextCharFormat(result.textStyles);
     else
         return kindToFormat.value(result.kind);
 }
+
 }
 
 void SemanticHighlighter::incrementalApplyExtraAdditionalFormats(

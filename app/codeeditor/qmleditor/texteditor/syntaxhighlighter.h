@@ -47,6 +47,7 @@ QT_END_NAMESPACE
 
 namespace TextEditor {
 
+class FontSettings;
 class SyntaxHighlighterPrivate;
 
 class TEXTEDITOR_EXPORT SyntaxHighlighter : public QObject
@@ -65,6 +66,9 @@ public:
     void setExtraFormats(const QTextBlock &block, QVector<QTextLayout::FormatRange> &formats);
 
     static QList<QColor> generateColors(int n, const QColor &background);
+
+    // Don't call in constructors of derived classes
+    virtual void setFontSettings(const TextEditor::FontSettings &fontSettings);
 
     void setNoAutomaticHighlighting(bool noAutomatic);
 
