@@ -220,6 +220,8 @@ void FontColorsSettingsWidget::apply()
     settings->fontPreferThick = m_fontThickBox->isChecked();
     settings->fontPreferAntialiasing = m_fontAntialiasingBox->isChecked();
     /****/
+    settings->loadColorScheme(m_colorSchemeBox->currentData().toString());
+    /****/
     settings->write();
 }
 
@@ -236,6 +238,9 @@ void FontColorsSettingsWidget::reset()
     m_fontSizeBox->setCurrentText(QString::number(settings->fontPixelSize));
     m_fontThickBox->setChecked(settings->fontPreferThick);
     m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
+    /****/
+    m_colorSchemeBox->setCurrentText(tr(settings->colorScheme.displayName().toUtf8()));
+//    m_colorSchemeEdit->setColorScheme(settings->colorScheme);
 }
 
 QIcon FontColorsSettingsWidget::icon() const

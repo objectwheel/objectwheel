@@ -90,6 +90,8 @@ struct FontColorsSettings : public Settings
     QFont toFont() const;
     QTextCharFormat toTextCharFormat(TextStyle category) const;
     QTextCharFormat toTextCharFormat(TextStyles textStyles) const;
+    bool loadColorScheme(const QString &fileName);
+    bool saveColorScheme(const QString &fileName);
 
     bool fontPreferThick;
     bool fontPreferAntialiasing;
@@ -100,8 +102,6 @@ struct FontColorsSettings : public Settings
     const FormatDescriptions defaultFormatDescriptions;
 
 private:
-    bool loadColorScheme(const QString &fileName);
-    bool saveColorScheme(const QString &fileName);
     void addMixinStyle(QTextCharFormat &textCharFormat, const MixinTextStyles &mixinStyles) const;
 
     mutable QHash<TextStyle, QTextCharFormat> m_formatCache;

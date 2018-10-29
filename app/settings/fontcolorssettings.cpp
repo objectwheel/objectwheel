@@ -11,6 +11,7 @@ const char* g_fontFamily = "FontFamily";
 const char* g_fontPixelSize = "FontPixelSize";
 const char* g_fontPreferThick = "FontPreferThick";
 const char* g_fontPreferAntialiasing = "FontPreferAntialiasing";
+const char* g_colorSchemeFileName = "ColorSchemeFileName";
 
 double clamp(double value)
 {
@@ -444,6 +445,8 @@ void FontColorsSettings::read()
     fontPreferAntialiasing = value<bool>(g_fontPreferAntialiasing, fontPreferAntialiasing);
     fontPixelSize = value<int>(g_fontPixelSize, fontPixelSize);
     fontFamily = value<QString>(g_fontFamily, fontFamily);
+    colorSchemeFileName = value<QString>(g_colorSchemeFileName, colorSchemeFileName);
+    loadColorScheme(colorSchemeFileName);
     end();
 }
 
@@ -454,6 +457,8 @@ void FontColorsSettings::write()
     setValue(g_fontPreferAntialiasing, fontPreferAntialiasing);
     setValue(g_fontPixelSize, fontPixelSize);
     setValue(g_fontFamily, fontFamily);
+    setValue(g_colorSchemeFileName, colorSchemeFileName);
+    colorScheme.save(colorSchemeFileName, nullptr);
     end();
 
     emit static_cast<CodeEditorSettings*>(groupSettings())->fontColorsSettingsChanged();
