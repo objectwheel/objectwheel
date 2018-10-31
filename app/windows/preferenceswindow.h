@@ -23,6 +23,7 @@ public:
 private slots:
     void apply();
     void reset();
+    void activateCurrent();
     void search(const QString& word);
 
 protected:

@@ -179,12 +179,12 @@ QWindow* UtilityFunctions::window(const QWidget* widget)
         if (const QWidget* nativeParent = widget->nativeParentWidget())
             winHandle = nativeParent->windowHandle();
     }
-    Q_ASSERT(winHandle);
     return winHandle;
 }
 
 void UtilityFunctions::centralizeWidget(QWidget* widget)
 {
+    Q_ASSERT(window(widget));
     widget->setGeometry(QStyle::alignedRect(widget->layoutDirection(), Qt::AlignCenter, widget->size(),
                                             window(widget)->screen()->availableGeometry()));
 }
@@ -230,6 +230,7 @@ QRectF UtilityFunctions::horizontalAlignedRect(const QSizeF& size, const QRectF&
 
 QPixmap UtilityFunctions::pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size)
 {
+    Q_ASSERT(window(button));
     return icon.pixmap(window(button), size.toSize(), !button->isEnabled()
                        ? QIcon::Disabled
                        : (button->isDown() ? QIcon::Active : QIcon::Normal));
@@ -247,6 +248,7 @@ QIcon UtilityFunctions::iconForQmlError(const QQmlError& error, const QAbstractI
         info = Utils::Icons::INFO.icon();
         warning = Utils::Icons::WARNING.icon();
         critical = Utils::Icons::CRITICAL.icon();
+        Q_ASSERT(window(view));
         info.addPixmap(info.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
         warning.addPixmap(warning.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
         critical.addPixmap(critical.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);

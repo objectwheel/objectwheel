@@ -27,6 +27,10 @@ public:
     QString title() const override;
     bool containsWord(const QString& word) const override;
 
+private slots:
+    void onFontOptionsChange();
+    void onColorOptionsChange(int index);
+
 private:
     QGroupBox* m_fontGroup;
     QVBoxLayout* m_fontLayout;

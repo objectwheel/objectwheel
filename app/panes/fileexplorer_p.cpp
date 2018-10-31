@@ -35,6 +35,7 @@ void FileExplorerListDelegate::paint(QPainter* painter, const QStyleOptionViewIt
     m_fileExplorer->fillBackground(painter, option, m_fileExplorer->d_func()->viewIndex(index), index.column() == 0);
 
     // Draw icon
+    Q_ASSERT(UtilityFunctions::window(m_fileExplorer));
     const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_fileExplorer),
                                             option.decorationSize,
                                             isSelected ? QIcon::Selected : QIcon::Normal);

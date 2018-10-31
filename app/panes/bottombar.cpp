@@ -153,6 +153,7 @@ private:
         if (!button->property("ow_flashed").toBool()) {
             QColor on = button->palette().buttonText().color().darker(180); // pressed
             QColor off = button->palette().buttonText().color().lighter(130); // not pressed
+            Q_ASSERT(UtilityFunctions::window(button));
             icon.addPixmap(renderColorizedPixmap(button->icon().pixmap(UtilityFunctions::window(button),
                 button->iconSize()), on, button), QIcon::Normal, QIcon::On);
             icon.addPixmap(renderColorizedPixmap(button->icon().pixmap(UtilityFunctions::window(button),

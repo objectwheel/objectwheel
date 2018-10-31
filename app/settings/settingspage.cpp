@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QTabWidget>
 #include <QVBoxLayout>
+#include <QWindow>
 
 SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
   , m_tabWidget(new QTabWidget(this))
@@ -23,6 +24,8 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
             this, [=] (int index) {
         if (index < 0)
             return;
+        if (!UtilityFunctions::window(this) || !UtilityFunctions::window(this)->isVisible())
+            return;
         if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->widget(index)))
             widget->activate();
     });
@@ -32,14 +35,11 @@ void SettingsPage::reset()
 {
     for (SettingsWidget* widget : widgets())
         widget->reset();
-    activateCurrent();
 }
-
 void SettingsPage::apply()
 {
     for (SettingsWidget* widget : widgets())
         widget->apply();
-    activateCurrent();
 }
 
 void SettingsPage::activateCurrent()

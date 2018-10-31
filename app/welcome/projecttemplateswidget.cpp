@@ -74,6 +74,7 @@ void ProjectTemplatesDelegate::paint(QPainter* painter, const QStyleOptionViewIt
      - option.rect.width() + option.rect.height() - 7, - 7);
    auto ra = ri.adjusted(3, -0.5, 0, 0);
    ra.setSize(QSize(10, 10));
+   Q_ASSERT(UtilityFunctions::window(m_listWidget));
    auto icon = item->icon().pixmap(UtilityFunctions::window(m_listWidget), ri.size().toSize());
 
    painter->setRenderHint(QPainter::Antialiasing);

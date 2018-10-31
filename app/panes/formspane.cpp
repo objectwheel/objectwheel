@@ -87,6 +87,7 @@ public:
         fillBackground(painter, option, index.row());
 
         // Draw icon
+        Q_ASSERT(UtilityFunctions::window(m_formsPane));
         const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_formsPane),
                                                 option.decorationSize,
                                                 isSelected ? QIcon::Selected : QIcon::Normal);

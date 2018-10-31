@@ -114,6 +114,7 @@ QIcon PaintUtils::renderColorizedIcon(const QString& fileName, const QColor& col
 QIcon PaintUtils::renderColorizedIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget)
 {
     QIcon i;
+    Q_ASSERT(UtilityFunctions::window(widget));
     i.addPixmap(renderColorizedPixmap(icon.pixmap(UtilityFunctions::window(widget), size), color, widget));
     return i;
 }

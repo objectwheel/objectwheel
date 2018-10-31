@@ -49,6 +49,7 @@ void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
      option.rect.height() / 2.0, 0, - 7);
    auto ricon = option.rect.adjusted(7, 7,
      - option.rect.width() + option.rect.height() - 7, - 7);
+   Q_ASSERT(UtilityFunctions::window(m_view));
    auto icon = item->icon().pixmap(UtilityFunctions::window(m_view), ricon.size());
     painter->setRenderHint(QPainter::Antialiasing);
 

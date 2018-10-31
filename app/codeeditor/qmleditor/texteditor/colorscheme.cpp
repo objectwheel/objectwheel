@@ -358,7 +358,7 @@ void ColorSchemeReader::readStyleScheme()
     Q_ASSERT(isStartElement() && name() == QLatin1String("style-scheme"));
 
     const QXmlStreamAttributes attr = attributes();
-    m_name = attr.value(QLatin1String("name")).toString();
+    m_name = QObject::tr(attr.value(QLatin1String("name")).toString().toUtf8());
     if (!m_scheme)
         // We're done
         raiseError(QLatin1String("name loaded"));

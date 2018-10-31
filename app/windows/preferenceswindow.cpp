@@ -85,6 +85,8 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
             this, &PreferencesWindow::reset);
     connect(m_dialogButtonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,
             this, &PreferencesWindow::apply);
+    connect(m_dialogButtonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,
+            this, &PreferencesWindow::activateCurrent);
     connect(m_dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked,
             this, &PreferencesWindow::apply);
     connect(m_dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked,
@@ -107,6 +109,12 @@ void PreferencesWindow::reset()
     }
 }
 
+void PreferencesWindow::activateCurrent()
+{
+    if (SettingsPage* page = pageFromItem(m_listWidget->currentItem()))
+        page->activateCurrent();
+}
+
 void PreferencesWindow::search(const QString& word)
 {
     for (int i = 0; i < m_listWidget->count(); ++i) {
@@ -124,8 +132,7 @@ void PreferencesWindow::showEvent(QShowEvent* e)
     if (e->isAccepted()) {
         if (!m_listWidget->currentItem())
             m_listWidget->setCurrentRow(0);
-        if (SettingsPage* page = pageFromItem(m_listWidget->currentItem()))
-            page->activateCurrent();
+        activateCurrent();
     }
 }
 
@@ -155,6 +162,7 @@ void PreferencesWindow::setCurrentPage(SettingsPage* page, SettingsPage* previou
         if (pageFromItem(m_listWidget->item(i)) == page) {
             m_layout->addWidget(page, 0, 1, 2, 1);
             page->show();
+            page->activateCurrent();
         }
     }
 }

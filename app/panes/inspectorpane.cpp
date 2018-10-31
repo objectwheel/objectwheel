@@ -211,6 +211,7 @@ public:
                        index.column() == 0);
 
         // Draw icon
+        Q_ASSERT(UtilityFunctions::window(m_inspectorPane));
         const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_inspectorPane),
                                                 option.decorationSize,
                                                 isSelected ? QIcon::Selected : QIcon::Normal);

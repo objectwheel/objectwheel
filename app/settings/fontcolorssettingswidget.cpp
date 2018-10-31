@@ -1,8 +1,11 @@
 #include <fontcolorssettingswidget.h>
 #include <codeeditorsettings.h>
+#include <applicationcore.h>
+#include <utilityfunctions.h>
 
 #include <texteditor/colorschemeedit.h>
 
+#include <QDir>
 #include <QLabel>
 #include <QGroupBox>
 #include <QPushButton>
@@ -11,41 +14,11 @@
 #include <QVBoxLayout>
 #include <QFontDatabase>
 #include <QApplication>
-
-namespace {
-
-const char* g_colorSchemeFiles[] = {":/styles/creator-dark.xml",
-                                    ":/styles/dark.xml",
-                                    ":/styles/default.xml",
-                                    ":/styles/default_classic.xml",
-                                    ":/styles/grayscale.xml",
-                                    ":/styles/inkpot.xml",
-                                    ":/styles/intellij.xml",
-                                    ":/styles/modnokai_night_shift_v2.xml",
-                                    ":/styles/solarized-dark.xml",
-                                    ":/styles/solarized-light.xml"};
-const char* g_colorSchemeNames[] = {"Qt Dark",
-                                    "Dark",
-                                    "Default",
-                                    "Default Classic",
-                                    "Grayscale",
-                                    "Inkpot",
-                                    "IntelliJ IDEA",
-                                    "Modnokai Night Shift v2",
-                                    "Solarized Dark",
-                                    "Solarized Light"};
-
-void addColorSchemes(QComboBox* comboBox)
-{
-    for (size_t i = 0; i < sizeof(g_colorSchemeNames) / sizeof(g_colorSchemeNames[0]); ++i)
-        comboBox->addItem(QObject::QObject::tr(g_colorSchemeNames[i]), g_colorSchemeFiles[i]);
-}
-}
+#include <QStandardPaths>
 
 struct ColorSchemeEntry
 {
-    ColorSchemeEntry(const QString &fileName,
-                     bool readOnly):
+    ColorSchemeEntry(const QString &fileName, bool readOnly):
         fileName(fileName),
         name(TextEditor::ColorScheme::readNameOfScheme(fileName)),
         readOnly(readOnly)
@@ -60,8 +33,7 @@ struct ColorSchemeEntry
 class SchemeListModel : public QAbstractListModel
 {
 public:
-    SchemeListModel(QObject *parent = 0):
-        QAbstractListModel(parent)
+    SchemeListModel(QObject *parent = 0): QAbstractListModel(parent)
     {
     }
 
@@ -108,7 +80,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
   , m_fontThickBox(new QCheckBox(m_fontGroup))
   , m_fontResetButton(new QPushButton(m_fontGroup))
   /****/
-  , m_schemeListModel(new SchemeListModel)
+  , m_schemeListModel(new SchemeListModel(this))
   , m_colorSchemeGroup(new QGroupBox(contentWidget()))
   , m_colorSchemeLayout(new QGridLayout(m_colorSchemeGroup))
   , m_colorSchemeBox(new QComboBox(m_colorSchemeGroup))
@@ -172,11 +144,14 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
 
     m_colorSchemeLayout->setSpacing(8);
     m_colorSchemeLayout->setContentsMargins(6, 6, 6, 6);
-    m_colorSchemeLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+//    m_colorSchemeLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_colorSchemeLayout->addWidget(m_colorSchemeBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     m_colorSchemeLayout->addWidget(m_colorSchemeCopyButton, 0, 1, Qt::AlignLeft | Qt::AlignVCenter);
     m_colorSchemeLayout->addWidget(m_colorSchemeDeleteButton, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_colorSchemeLayout->addWidget(m_colorSchemeEdit, 1, 0, 1, 3, Qt::AlignLeft | Qt::AlignVCenter);
+    m_colorSchemeLayout->addItem(new QSpacerItem(1, 1), 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
+    m_colorSchemeLayout->addWidget(m_colorSchemeEdit, 1, 0, 1, 4, Qt::AlignLeft | Qt::AlignVCenter);
+//    m_colorSchemeLayout->setColumnStretch(2, 1);
+
 
     m_colorSchemeGroup->setTitle(QObject::tr("Color Scheme"));
     m_colorSchemeDeleteButton->setText(QObject::tr("Delete"));
@@ -190,9 +165,36 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
     m_colorSchemeCopyButton->setCursor(Qt::PointingHandCursor);
     m_colorSchemeDeleteButton->setCursor(Qt::PointingHandCursor);
 
+    m_colorSchemeEdit->setFormatDescriptions(CodeEditorSettings::fontColorsSettings()->defaultFormatDescriptions);
+    m_colorSchemeBox->setModel(m_schemeListModel);
+
+    connect(m_colorSchemeBox, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, &FontColorsSettingsWidget::onColorOptionsChange);
+    connect(m_fontFamilyBox, &QComboBox::currentTextChanged,
+            this, &FontColorsSettingsWidget::onFontOptionsChange);
+    connect(m_fontSizeBox, &QComboBox::currentTextChanged,
+            this, &FontColorsSettingsWidget::onFontOptionsChange);
+    connect(m_fontThickBox, &QCheckBox::toggled,
+            this, &FontColorsSettingsWidget::onFontOptionsChange);
+    connect(m_fontAntialiasingBox, &QCheckBox::toggled,
+            this, &FontColorsSettingsWidget::onFontOptionsChange);
+
     /****/
 
-    addColorSchemes(m_colorSchemeBox);
+    QList<ColorSchemeEntry> colorSchemes;
+    const QString& resourceStylesPath = ApplicationCore::resourcePath();
+    QDir resourceStyleDir(resourceStylesPath + "/styles");
+    resourceStyleDir.setNameFilters(QStringList() << "*.xml");
+    resourceStyleDir.setFilter(QDir::Files);
+    const QString& customStylesPath = QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0);
+    QDir customStyleDir(customStylesPath + "/styles");
+    customStyleDir.setNameFilters(QStringList() << "*.xml");
+    customStyleDir.setFilter(QDir::Files);
+    for (const QString& fileName : resourceStyleDir.entryList())
+        colorSchemes.append(ColorSchemeEntry(resourceStylesPath + "/styles/" + fileName, true));
+    for (const QString& fileName : customStyleDir.entryList())
+        colorSchemes.append(ColorSchemeEntry(customStylesPath + "/styles/" + fileName, false));
+    m_schemeListModel->setColorSchemes(colorSchemes);
 
     connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
         const FontColorsSettings settings;
@@ -240,7 +242,7 @@ void FontColorsSettingsWidget::reset()
     m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
     /****/
     m_colorSchemeBox->setCurrentText(tr(settings->colorScheme.displayName().toUtf8()));
-//    m_colorSchemeEdit->setColorScheme(settings->colorScheme);
+    //    m_colorSchemeEdit->setColorScheme(settings->colorScheme);
 }
 
 QIcon FontColorsSettingsWidget::icon() const
@@ -260,4 +262,32 @@ bool FontColorsSettingsWidget::containsWord(const QString& word) const
             || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
             || m_fontThickBox->text().contains(word, Qt::CaseInsensitive);
+}
+
+void FontColorsSettingsWidget::onFontOptionsChange()
+{
+    QFont font(m_fontFamilyBox->currentText());
+    font.setBold(m_fontThickBox->isChecked());
+    font.setStyleStrategy(m_fontAntialiasingBox->isChecked() ? QFont::PreferAntialias : QFont::NoAntialias);
+    font.setPixelSize(m_fontSizeBox->currentText().toInt());
+    m_colorSchemeEdit->setBaseFont(font);
+}
+
+void FontColorsSettingsWidget::onColorOptionsChange(int index)
+{
+    bool readOnly = true;
+    if (index != -1) {
+        // Check whether we're switching away from a changed color scheme
+        //        if (!d_ptr->m_refreshingSchemeList)
+        //            maybeSaveColorScheme();
+
+        const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+        readOnly = entry.readOnly;
+        FontColorsSettings colorSchemeSetting;
+        colorSchemeSetting.loadColorScheme(entry.fileName);
+        m_colorSchemeEdit->setColorScheme(colorSchemeSetting.colorScheme);
+    }
+    m_colorSchemeCopyButton->setEnabled(index != -1);
+    m_colorSchemeDeleteButton->setEnabled(!readOnly);
+    m_colorSchemeEdit->setReadOnly(readOnly);
 }

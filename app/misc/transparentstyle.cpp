@@ -704,8 +704,10 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 }
 
                 QWindow* window = nullptr;
-                if (widget)
+                if (widget) {
+                    Q_ASSERT(UtilityFunctions::window(widget));
                     window = UtilityFunctions::window(widget);
+                }
                 QPixmap pixmap = mi->icon.pixmap(window, iconSize, mode);
                 int pixw = pixmap.width() / pixmap.devicePixelRatioF();
                 int pixh = pixmap.height() / pixmap.devicePixelRatioF();
