@@ -44,7 +44,7 @@ private:
     /****/
     SchemeListModel* m_schemeListModel;
     QGroupBox* m_colorSchemeGroup;
-    QGridLayout* m_colorSchemeLayout;
+    QVBoxLayout* m_colorSchemeLayout;
     QComboBox* m_colorSchemeBox;
     QPushButton* m_colorSchemeCopyButton;
     QPushButton* m_colorSchemeDeleteButton;

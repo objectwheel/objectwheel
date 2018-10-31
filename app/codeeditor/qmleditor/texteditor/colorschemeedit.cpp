@@ -114,7 +114,7 @@ public:
         case Qt::FontRole: {
             QFont font = m_baseFont;
             auto format = m_scheme->formatFor(description.id());
-            font.setBold(format.bold());
+            font.setBold(font.bold() || format.bold());
             font.setItalic(format.italic());
             font.setUnderline(format.underlineStyle() != QTextCharFormat::NoUnderline);
             return font;
@@ -284,7 +284,6 @@ void ColorSchemeEdit::updateForegroundControls()
     m_ui->foregroundLabel->setVisible(isVisible);
     m_ui->foregroundToolButton->setVisible(isVisible);
     m_ui->eraseForegroundToolButton->setVisible(isVisible);
-    m_ui->foregroundSpacer->setVisible(isVisible);
 
     m_ui->foregroundToolButton->setStyleSheet(colorButtonStyleSheet(format.foreground()));
     m_ui->eraseForegroundToolButton->setEnabled(!m_readOnly
@@ -325,8 +324,6 @@ void ColorSchemeEdit::updateRelativeForegroundControls()
     m_ui->foregroundLightnessLabel->setVisible(isVisible);
     m_ui->foregroundSaturationSpinBox->setVisible(isVisible);
     m_ui->foregroundLightnessSpinBox->setVisible(isVisible);
-    m_ui->relativeForegroundSpacer1->setVisible(isVisible);
-    m_ui->relativeForegroundSpacer2->setVisible(isVisible);
     m_ui->relativeForegroundSpacer3->setVisible(isVisible);
 
     m_ui->foregroundSaturationSpinBox->setValue(format.relativeForegroundSaturation());
@@ -348,8 +345,6 @@ void ColorSchemeEdit::updateRelativeBackgroundControls()
     m_ui->backgroundLightnessLabel->setVisible(isVisible);
     m_ui->backgroundSaturationSpinBox->setVisible(isVisible);
     m_ui->backgroundLightnessSpinBox->setVisible(isVisible);
-    m_ui->relativeBackgroundSpacer1->setVisible(isVisible);
-    m_ui->relativeBackgroundSpacer2->setVisible(isVisible);
     m_ui->relativeBackgroundSpacer3->setVisible(isVisible);
 
     m_ui->backgroundSaturationSpinBox->setValue(format.relativeBackgroundSaturation());
@@ -369,7 +364,6 @@ void ColorSchemeEdit::updateFontControls()
     m_ui->fontHeadline->setVisible(isVisible);
     m_ui->boldCheckBox->setVisible(isVisible);
     m_ui->italicCheckBox->setVisible(isVisible);
-    m_ui->fontSpacer1->setVisible(isVisible);
     m_ui->fontSpacer2->setVisible(isVisible);
 
     m_ui->boldCheckBox->setChecked(format.bold());
@@ -391,8 +385,6 @@ void ColorSchemeEdit::updateUnderlineControls()
     m_ui->underlineColorToolButton->setVisible(isVisible);
     m_ui->eraseUnderlineColorToolButton->setVisible(isVisible);
     m_ui->underlineComboBox->setVisible(isVisible);
-    m_ui->underlineSpacer1->setVisible(isVisible);
-    m_ui->underlineSpacer2->setVisible(isVisible);
 
     m_ui->underlineColorToolButton->setStyleSheet(colorButtonStyleSheet(format.underlineColor()));
     m_ui->eraseUnderlineColorToolButton->setEnabled(!m_readOnly
