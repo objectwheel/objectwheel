@@ -306,7 +306,6 @@ void FontColorsSettingsWidget::onFontOptionsChange()
     font.setStyleStrategy(m_fontAntialiasingBox->isChecked() ? QFont::PreferAntialias : QFont::NoAntialias);
     font.setPixelSize(m_fontSizeBox->currentText().toInt());
     font.setBold(m_fontThickBox->isChecked());
-    m_colorSchemeEdit->setBaseFont(QFont());
     m_colorSchemeEdit->setBaseFont(font);
 }
 
