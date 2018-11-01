@@ -427,7 +427,8 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     connect(this, &QmlCodeEditor::updateRequest, this, &QmlCodeEditor::updateRowBar);
     connect(this, &QmlCodeEditor::cursorPositionChanged, this, &QmlCodeEditor::slotCursorPositionChanged);
     connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
-            this, &QmlCodeEditor::applyFontSettingsDelayed);
+            this, &QmlCodeEditor::applyFontSettingsDelayed, Qt::QueuedConnection);
+    // NOTE: It is a QueuedConnection connection, hence all the docs get updated before we call applyFontSettingsDelayed
 
     m_parenthesesMatchingTimer->setSingleShot(true);
     connect(m_parenthesesMatchingTimer, &QTimer::timeout, this, &QmlCodeEditor::matchParentheses);

@@ -479,6 +479,7 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
     });
 
     modelManager->updateSourceFiles(QStringList(filePath()), false);
+    applyFontSettings();
 }
 
 QmlCodeDocument::~QmlCodeDocument()
