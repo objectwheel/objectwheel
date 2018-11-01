@@ -18,6 +18,14 @@ public:
     void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
                        const QWidget *widget) const override;
 
+    void drawControl(QStyle::ControlElement element, const QStyleOption* option,
+                     QPainter* painter, const QWidget* widget) const override;
+
+
+    void polish(QWidget* w) override;
+
+    void unpolish(QWidget* w) override;
+
 };
 
 #endif // APPLICATIONSTYLE_H

@@ -311,11 +311,13 @@ void FontColorsSettingsWidget::onFontOptionsChange()
 
 void FontColorsSettingsWidget::onColorOptionsChange(int index)
 {
+    static int lastIndex = -1;
     bool readOnly = true;
     if (index != -1) {
-        // Check whether we're switching away from a changed color scheme
-        //        if (!d_ptr->m_refreshingSchemeList)
-        //     WARNING       maybeSaveColorScheme();
+        if (lastIndex >= 0) {
+            const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+            maybeSaveColorScheme(entry.fileName);
+        }
 
         const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
         readOnly = entry.readOnly;
@@ -326,6 +328,7 @@ void FontColorsSettingsWidget::onColorOptionsChange(int index)
     m_colorSchemeCopyButton->setEnabled(index != -1);
     m_colorSchemeDeleteButton->setEnabled(!readOnly);
     m_colorSchemeEdit->setReadOnly(readOnly);
+    lastIndex = index;
 }
 
 void FontColorsSettingsWidget::onFontResetButtonClick()
