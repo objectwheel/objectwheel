@@ -43,6 +43,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
+    void resetSettings();
     void readSettings();
     void writeSettings();
 

@@ -87,6 +87,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Set Tool Bars **/
     /* Add Run Pane */
+    m_runPane->setObjectName("runPane");
     m_runPane->setOrientation(Qt::Horizontal);
     m_runPane->setFloatable(false);
     m_runPane->setMovable(false);
@@ -95,6 +96,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
+    pageSwitcherBar->setObjectName("pageSwitcherBar");
     pageSwitcherBar->setOrientation(Qt::Vertical);
     pageSwitcherBar->setFixedWidth(70);
     pageSwitcherBar->setWindowFlags(pageSwitcherBar->windowFlags() | Qt::WindowStaysOnTopHint);
@@ -114,7 +116,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Inspector Pane */
     auto inspectorTitleLabel = new QLabel;
     inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    inspectorTitleLabel->setText(tr("   Control Inspector"));
+    inspectorTitleLabel->setText("   " + tr("Control Inspector"));
     UtilityFunctions::adjustFontWeight(inspectorTitleLabel, QFont::Medium);
 
     auto inspectorTitlePinButton = new QToolButton;
@@ -134,6 +136,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     inspectorTitleBar->setFixedHeight(24);
 
     inspectorDockWidget = new QDockWidget;
+    inspectorDockWidget->setObjectName("inspectorDockWidget");
     inspectorDockWidget->setStyleSheet("QDockWidget { border: none }");
     inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
     inspectorDockWidget->setWidget(m_inspectorPane);
@@ -144,7 +147,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Properties Pane */
     auto propertiesTitleLabel = new QLabel;
     propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    propertiesTitleLabel->setText(tr("   Properties"));
+    propertiesTitleLabel->setText("   " + tr("Properties"));
     UtilityFunctions::adjustFontWeight(propertiesTitleLabel, QFont::Medium);
 
     auto propertiesTitlePinButton = new QToolButton;
@@ -164,6 +167,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesTitleBar->setFixedHeight(24);
 
     propertiesDockWidget = new QDockWidget;
+    propertiesDockWidget->setObjectName("propertiesDockWidget");
     propertiesDockWidget->setStyleSheet("QDockWidget { border: none }");
     propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
     propertiesDockWidget->setWidget(m_propertiesPane);
@@ -174,7 +178,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Global Resources Pane */
     auto globalTitleLabel = new QLabel;
     globalTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    globalTitleLabel->setText(tr("   Global Resources"));
+    globalTitleLabel->setText("   " + tr("Global Resources"));
     UtilityFunctions::adjustFontWeight(globalTitleLabel, QFont::Medium);
 
     auto globalTitlePinButton = new QToolButton;
@@ -194,6 +198,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     globalTitleBar->setFixedHeight(24);
 
     globalDockWidget = new QDockWidget;
+    globalDockWidget->setObjectName("globalDockWidget");
     globalDockWidget->setStyleSheet("QDockWidget { border: none }");
     globalDockWidget->setTitleBarWidget(globalTitleBar);
     globalDockWidget->setWidget(m_globalResourcesPane);
@@ -206,7 +211,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Toolbox Pane */
     auto toolboxTitleLabel = new QLabel;
     toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    toolboxTitleLabel->setText(tr("   Toolbox"));
+    toolboxTitleLabel->setText("   " + tr("Toolbox"));
     UtilityFunctions::adjustFontWeight(toolboxTitleLabel, QFont::Medium);
 
     auto toolboxTitlePinButton = new QToolButton;
@@ -226,6 +231,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxTitleBar->setFixedHeight(24);
 
     toolboxDockWidget = new QDockWidget;
+    toolboxDockWidget->setObjectName("toolboxDockWidget");
     toolboxDockWidget->setStyleSheet("QDockWidget { border: none }");
     toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
     toolboxDockWidget->setWidget(m_toolboxPane);
@@ -237,7 +243,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Forms Pane */
     auto formsTitleLabel = new QLabel;
     formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    formsTitleLabel->setText(tr("   Form Navigator"));
+    formsTitleLabel->setText("   " + tr("Form Navigator"));
     UtilityFunctions::adjustFontWeight(formsTitleLabel, QFont::Medium);
 
     auto formsTitlePinButton = new QToolButton;
@@ -257,6 +263,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsTitleBar->setFixedHeight(24);
 
     formsDockWidget = new QDockWidget;
+    formsDockWidget->setObjectName("formsDockWidget");
     formsDockWidget->setStyleSheet("QDockWidget { border: none }");
     formsDockWidget->setTitleBarWidget(formsTitleBar);
     formsDockWidget->setWidget(m_formsPane);
@@ -488,6 +495,11 @@ InspectorPane* MainWindow::inspectorPane() const
     return m_inspectorPane;
 }
 
+void MainWindow::resetSettings()
+{
+    // WARNING, TODO
+}
+
 void MainWindow::readSettings()
 {
     const auto& defaultPos = [=] () -> QPoint {
@@ -503,6 +515,7 @@ void MainWindow::readSettings()
         showMaximized();
     if (settings->value<bool>("MainWindow.Fullscreen", false))
         showFullScreen();
+    restoreState(settings->value<QByteArray>("MainWindow.WindowState", {}));
     settings->end();
 }
 
@@ -514,6 +527,7 @@ void MainWindow::writeSettings()
     settings->setValue("MainWindow.Position", pos());
     settings->setValue("MainWindow.Maximized", isMaximized());
     settings->setValue("MainWindow.Fullscreen", isFullScreen());
+    settings->setValue("MainWindow.WindowState", saveState());
     settings->end();
 }
 
