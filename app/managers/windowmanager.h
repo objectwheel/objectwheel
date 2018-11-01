@@ -7,7 +7,6 @@ class MainWindow;
 class WelcomeWindow;
 class AboutWindow;
 class PreferencesWindow;
-class ToolboxSettingsWindow;
 
 class WindowManager final : public QObject
 {
@@ -19,7 +18,6 @@ class WindowManager final : public QObject
 public:
     static AboutWindow* aboutWindow();
     static PreferencesWindow* preferencesWindow();
-    static ToolboxSettingsWindow* toolboxSettingsWindow();
     static MainWindow* mainWindow();
     static WelcomeWindow* welcomeWindow();
 
@@ -30,7 +28,6 @@ private:
 private:
     static AboutWindow* s_aboutWindow;
     static PreferencesWindow* s_preferencesWindow;
-    static ToolboxSettingsWindow* s_toolboxSettingsWindow;
     static MainWindow* s_mainWindow;
     static WelcomeWindow* s_welcomeWindow;
 };

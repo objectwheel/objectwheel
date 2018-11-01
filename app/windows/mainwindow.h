@@ -37,11 +37,17 @@ private slots:
     void showDocks();
     void restoreDocks();
 
-signals:
-    void done();
+protected:
+    QSize sizeHint() const override;
+    void showEvent(QShowEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
 
 private:
-    QSize sizeHint() const override;
+    void readSettings();
+    void writeSettings();
+
+signals:
+    void done();
 
 private:
     CentralWidget* m_centralWidget;

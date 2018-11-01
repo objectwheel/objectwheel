@@ -15,7 +15,6 @@
 #include <projectmanager.h>
 #include <consolepane.h>
 #include <control.h>
-#include <toolboxsettingswindow.h>
 #include <qmlcodeeditorwidget.h>
 #include <utilityfunctions.h>
 #include <bottombar.h>
@@ -24,6 +23,8 @@
 #include <welcomewindow.h>
 #include <controlpropertymanager.h>
 #include <preferenceswindow.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -32,6 +33,7 @@
 #include <QDockWidget>
 #include <QLayout>
 #include <QScrollBar>
+#include <QScreen>
 
 #include <qmlcodedocument.h>
 #include <QTimer>
@@ -216,18 +218,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         toolboxDockWidget->setFloating(!toolboxDockWidget->isFloating());
     });
 
-    //    auto toolboxSettingsButton = new QToolButton;
-    //    toolboxSettingsButton->setToolTip(tr("Toolbox settings."));
-    //    toolboxSettingsButton->setCursor(Qt::PointingHandCursor);
-    //    toolboxSettingsButton->setIcon(QIcon(":/images/settings.png"));
-    //    connect(toolboxSettingsButton, &QToolButton::clicked,
-    //            this, [=] {
-    //        WindowManager::toolboxSettingsWindow()->show();
-    //    });
-
     toolboxTitleBar = new QToolBar;
     toolboxTitleBar->addWidget(toolboxTitleLabel);
-    // toolboxTitleBar->addWidget(toolboxSettingsButton);
     toolboxTitleBar->addWidget(toolboxTitlePinButton);
     toolboxTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     toolboxTitleBar->setIconSize(QSize(11, 11));
@@ -481,11 +473,6 @@ CentralWidget* MainWindow::centralWidget() const
     return m_centralWidget;
 }
 
-QSize MainWindow::sizeHint() const
-{
-    return {1260, 700};
-}
-
 GlobalResourcesPane* MainWindow::globalResourcesPane() const
 {
     return m_globalResourcesPane;
@@ -499,4 +486,50 @@ PropertiesPane* MainWindow::propertiesPane() const
 InspectorPane* MainWindow::inspectorPane() const
 {
     return m_inspectorPane;
+}
+
+void MainWindow::readSettings()
+{
+    const auto& defaultPos = [=] () -> QPoint {
+        return QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(),
+                                   QApplication::primaryScreen()->availableGeometry()).topLeft();
+    };
+
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    resize(settings->value<QSize>("MainWindow.Size", sizeHint()));
+    move(settings->value<QPoint>("MainWindow.Position", defaultPos()));
+    if (settings->value<bool>("MainWindow.Maximized", false))
+        showMaximized();
+    if (settings->value<bool>("MainWindow.Fullscreen", false))
+        showFullScreen();
+    settings->end();
+}
+
+void MainWindow::writeSettings()
+{
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    settings->setValue("MainWindow.Size", size());
+    settings->setValue("MainWindow.Position", pos());
+    settings->setValue("MainWindow.Maximized", isMaximized());
+    settings->setValue("MainWindow.Fullscreen", isFullScreen());
+    settings->end();
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{
+    readSettings();
+    event->accept();
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    writeSettings();
+    event->accept();
+}
+
+QSize MainWindow::sizeHint() const
+{
+    return {1260, 700};
 }

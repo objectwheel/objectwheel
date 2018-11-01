@@ -9,6 +9,8 @@ class GeneralSettings;
 
 struct InterfaceSettings : public Settings
 {
+    friend class MainWindow;
+
     InterfaceSettings(GeneralSettings* generalSettings = nullptr);
 
     void read() override;
