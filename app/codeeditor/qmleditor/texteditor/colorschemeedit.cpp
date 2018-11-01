@@ -147,8 +147,6 @@ private:
 } // namespace Internal
 } // namespace TextEditor
 
-extern class WheelDisabler g_wheelDisabler;
-
 ColorSchemeEdit::ColorSchemeEdit(QWidget *parent) :
     QWidget(parent),
     m_ui(new Ui::ColorSchemeEdit),
@@ -158,12 +156,6 @@ ColorSchemeEdit::ColorSchemeEdit(QWidget *parent) :
     setPalette(Utils::Theme::initialPalette());
     m_ui->setupUi(this);
     m_ui->itemList->setModel(m_formatsModel);
-
-    m_ui->backgroundLightnessSpinBox->installEventFilter(reinterpret_cast<QObject*>(&g_wheelDisabler));
-    m_ui->backgroundSaturationSpinBox->installEventFilter(reinterpret_cast<QObject*>(&g_wheelDisabler));
-    m_ui->foregroundLightnessSpinBox->installEventFilter(reinterpret_cast<QObject*>(&g_wheelDisabler));
-    m_ui->foregroundSaturationSpinBox->installEventFilter(reinterpret_cast<QObject*>(&g_wheelDisabler));
-    m_ui->underlineComboBox->installEventFilter(reinterpret_cast<QObject*>(&g_wheelDisabler));
 
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     populateUnderlineStyleComboBox();

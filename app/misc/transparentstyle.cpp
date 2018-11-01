@@ -2,18 +2,12 @@
 #include <qdrawutil.h>
 #include <utilityfunctions.h>
 
-#include <QStyleFactory>
-#include <QStyleOptionSpinBox>
-#include <QPainter>
+#include <private/qstylehelper_p.h>
 
-#include <QFocusFrame>
-#include <QToolBar>
+#include <QPainter>
 #include <QMainWindow>
 #include <QComboBox>
-#include <QAbstractItemView>
-
-#include <private/qstylehelper_p.h>
-#include <private/qstyle_p.h>
+#include <QAbstractScrollArea>
 
 namespace {
 
@@ -24,51 +18,16 @@ const qreal pushButtonDefaultHeight[3] = {
     32, 28, 16
 };
 
-const qreal comboBoxDefaultHeight[3] = {
-    26, 22, 19
-};
-
 QColor outlineColor(const QPalette &pal)
 {
     if (pal.window().style() == Qt::TexturePattern)
         return QColor(0, 0, 0, 160);
     return pal.window().color().darker(140);
 }
-
-QRectF comboboxEditBounds(const QRectF& outerBounds)
-{
-    QRectF ret = outerBounds;
-    ret = ret.adjusted(-5, 0, -24, 0).translated(3, 2);
-    ret.setHeight(14);
-    return ret;
 }
 
-QRectF adjustedControlFrame(const QRectF& rect)
-{
-    QRectF frameRect;
-    const auto frameSize = QSizeF(-1, comboBoxDefaultHeight[2]);
-    // Center in the style option's rect.
-    frameRect = QRectF(QPointF(0, (rect.height() - frameSize.height()) / 2.0),
-                       QSizeF(rect.width(), frameSize.height()));
-    frameRect = frameRect.translated(rect.topLeft());
-    frameRect = frameRect.adjusted(0, 0, -6, 0).translated(4, 0);
-    return frameRect;
-}
-
-QRect comboboxInnerBounds(const QRect& outerBounds)
-{
-    return outerBounds.adjusted(3, 3, -1, -5);
-}
-
-void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect,
-                          Qt::LayoutDirection dir)
-{
-    if (dir == Qt::RightToLeft)
-        rect->adjust(-right, top, -left, bottom);
-    else
-        rect->adjust(left, top, right, bottom);
-}
-}
+QRectF comboboxEditBounds(const QRectF& outerBounds);
+QRectF adjustedControlFrame(const QRectF& rect);
 
 TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent)
 {
@@ -88,28 +47,6 @@ void TransparentStyle::attach(QWidget* widget)
         w->setStyleSheet(QString());
         w->setStyle(style);
     }
-}
-
-QRect TransparentStyle::subElementRect(QStyle::SubElement element, const QStyleOption* option, const QWidget* widget) const
-{
-    QRect rect;
-
-    switch (element) {
-    case SE_ComboBoxLayoutItem:
-        if (widget && qobject_cast<QToolBar*>(widget->parentWidget())) {
-            // Do nothing, because QToolbar needs the entire widget rect.
-            // Otherwise it will be clipped. Equivalent to
-            // widget->setAttribute(Qt::WA_LayoutUsesWidgetRect), but without
-            // all the hassle.
-        } else {
-            rect = option->rect;
-            setLayoutItemMargins(+2, +1, -3, -4, &rect, option->direction);
-        } break;
-    default:
-        rect = ApplicationStyle::subElementRect(element, option, widget);
-    }
-
-    return rect;
 }
 
 QStyle::SubControl TransparentStyle::hitTestComplexControl(ComplexControl control,
@@ -140,56 +77,6 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
     QSize sz(contentsSize);
 
     switch (type) {
-    case CT_MenuItem:
-        if (const QStyleOptionMenuItem *mi
-                = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
-            int maxpmw = mi->maxIconWidth;
-            const QComboBox *comboBox = qobject_cast<const QComboBox*>(widget);
-            int w = sz.width(),
-                    h = sz.height();
-            if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
-                w = 10;
-                h = 2; // Menu separator height
-            } else {
-                h = mi->fontMetrics.height() + 2;
-                if (!mi->icon.isNull()) {
-                    if (comboBox) {
-                        const QSize &iconSize = comboBox->iconSize();
-                        h = qMax(h, iconSize.height() + 4);
-                        maxpmw = qMax(maxpmw, iconSize.width());
-                    } else
-                    {
-                        int iconExtent = proxy()->pixelMetric(PM_SmallIconSize);
-                        h = qMax(h, mi->icon.actualSize(QSize(iconExtent, iconExtent)).height() + 4);
-                    }
-                }
-            }
-            if (mi->text.contains(QLatin1Char('\t')))
-                w += 12;
-            else if (mi->menuItemType == QStyleOptionMenuItem::SubMenu)
-                w += 35; // Not quite exactly as it seems to depend on other factors
-            if (maxpmw)
-                w += maxpmw + 6;
-            // add space for a check. All items have place for a check too.
-            w += 20;
-            if (comboBox && comboBox->isVisible()) {
-                QStyleOptionComboBox cmb;
-                cmb.initFrom(comboBox);
-                cmb.editable = false;
-                cmb.subControls = QStyle::SC_ComboBoxEditField;
-                cmb.activeSubControls = QStyle::SC_None;
-                w = qMax(w, subControlRect(QStyle::CC_ComboBox, &cmb,
-                                           QStyle::SC_ComboBoxEditField,
-                                           comboBox).width());
-            } else {
-                w += 12;
-            }
-            sz = QSize(w, h);
-        } break;
-    case CT_MenuBarItem:
-        if (!sz.isEmpty())
-            sz += QSize(12, 4); // Constants from QWindowsStyle
-        break;
     case CT_ComboBox:
         if (const auto *cb = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
             if (!cb->editable) {
@@ -206,16 +93,6 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             sz.setWidth(sz.width() + widget->contentsMargins().left() + widget->contentsMargins().right());
             return sz;
         } break;
-    case CT_Menu:
-        if (proxy() == this) {
-            sz = contentsSize;
-        } else {
-            QStyleHintReturnMask menuMask;
-            QStyleOption myOption = *option;
-            myOption.rect.setSize(sz);
-            if (proxy()->styleHint(SH_Menu_Mask, &myOption, widget, &menuMask))
-                sz = menuMask.region.boundingRect().size();
-        } break;
     case CT_ScrollBar :
         // Make sure that the scroll bar is large enough to display the thumb indicator.
         if (const QStyleOptionSlider *slider
@@ -225,12 +102,6 @@ QSize TransparentStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
                 sz = sz.expandedTo(QSize(minimumSize, sz.height()));
             else
                 sz = sz.expandedTo(QSize(sz.width(), minimumSize));
-        } break;
-    case CT_ItemViewItem:
-        if (const QStyleOptionViewItem *vopt
-                = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
-            sz = ApplicationStyle::sizeFromContents(type, vopt, contentsSize, widget);
-            sz.setHeight(sz.height() + 2);
         } break;
     default:
         sz = ApplicationStyle::sizeFromContents(type, option, contentsSize, widget);
@@ -265,20 +136,8 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
                 ret.setX(ret.x() + ret.width());
                 ret.setWidth(combo->rect.right() - ret.right());
                 break;
-            case SC_ComboBoxListBoxPopup:
-                if (combo->editable) {
-                    const QRect inner = comboboxInnerBounds(combo->rect);
-                    const int comboTop = combo->rect.top();
-                    ret = QRect(inner.x(), comboTop,
-                                inner.x() - combo->rect.left() + inner.width(),
-                                editRect.bottom() - comboTop + 2);
-                } else {
-                    ret = QRect(combo->rect.x() + 4 - 11,
-                                combo->rect.y() + 1,
-                                editRect.width() + 10 + 11,
-                                1);
-                } break;
             default:
+                ret = ApplicationStyle::subControlRect(control, option, subControl, widget);
                 break;
             }
         } break;
@@ -337,28 +196,10 @@ int TransparentStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
                                 const QWidget* widget, QStyleHintReturn* returnData) const
 {
     switch (hint) {
-    case SH_ComboBox_AllowWheelScrolling:
-        return false;
-    case SH_SpinBox_AnimateButton:
-        return true;
-    case SH_ComboBox_ListMouseTracking:
-        return false;
-    case SH_ItemView_ScrollMode:
-        return QAbstractItemView::ScrollPerPixel;
-    case SH_ItemView_ShowDecorationSelected:
-        return true;
-    case SH_ItemView_MovementWithoutUpdatingSelection:
-        return false;
     case SH_ToolBar_Movable:
         return false;
     case SH_ToolButtonStyle:
         return Qt::ToolButtonIconOnly;
-    case SH_ComboBox_Popup:
-        return true;
-    case SH_ComboBox_PopupFrameStyle:
-        return QFrame::NoFrame;
-    case SH_Menu_FillScreenWithScroll:
-        return false;
     default:
         return ApplicationStyle::styleHint(hint, option, widget, returnData);
     }
@@ -382,10 +223,6 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_ComboBoxFrameWidth:
     case PM_SpinBoxFrameWidth:
         return 0;
-    case PM_MenuVMargin:
-        return 4;
-    case PM_MenuScrollerHeight:
-        return 15;
     case PM_LayoutHorizontalSpacing:
     case PM_LayoutVerticalSpacing:
         return -1;
