@@ -280,7 +280,7 @@ void TextEditorAnimator::draw(QPainter *p, const QPointF &pos)
     m_lastDrawPos = pos;
     p->setPen(m_palette.text().color());
     QFont f = m_font;
-    f.setPointSizeF(f.pointSizeF() * (1.0 + m_value/2));
+    f.setPixelSize(f.pixelSize() * (1.0 + m_value/2));
     QFontMetrics fm(f);
     int width = fm.horizontalAdvance(m_text);
     QRectF r((m_size.width()-width)/2, (m_size.height() - fm.height())/2, width, fm.height());
@@ -298,7 +298,7 @@ bool TextEditorAnimator::isRunning() const
 QRectF TextEditorAnimator::rect() const
 {
     QFont f = m_font;
-    f.setPointSizeF(f.pointSizeF() * (1.0 + m_value/2));
+    f.setPixelSize(f.pixelSize() * (1.0 + m_value/2));
     QFontMetrics fm(f);
     int width = fm.horizontalAdvance(m_text);
     return QRectF((m_size.width()-width)/2, (m_size.height() - fm.height())/2, width, fm.height());

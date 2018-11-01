@@ -55,6 +55,9 @@ public:
     void setBaseFont(const QFont &font);
     void setReadOnly(bool readOnly);
 
+    void setOriginalColorScheme(const ColorScheme &colorScheme)
+    { m_originalScheme = colorScheme; }
+
     void setColorScheme(const ColorScheme &colorScheme);
     const ColorScheme &colorScheme() const;
     bool isReadOnly() const;

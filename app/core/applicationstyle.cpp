@@ -454,7 +454,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             if (!s.isEmpty()) {
                 const int xm = macItemFrame + maxpmw + macItemHMargin;
                 QFont myFont = mi->font;
-                myFont.setPointSizeF(QFontInfo(mi->font).pointSizeF());
+                myFont.setPixelSize(QFontInfo(mi->font).pixelSize());
                 painter->setFont(myFont);
                 painter->drawText(xpos, yPos, mi->rect.width() - xm - tabwidth + 1,
                                   mi->rect.height(), text_flags, s);

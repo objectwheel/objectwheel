@@ -19,45 +19,6 @@
 #include <QDebug>
 #include <QMessageBox>
 
-namespace {
-
-bool g_disableSaving = false;
-
-QString createColorSchemeFileName(const QString& pattern)
-{
-    const QString stylesPath = ApplicationCore::userResourcePath() + "/styles/";
-    QString baseFileName = stylesPath;
-    baseFileName += pattern;
-
-    // Find an available file name
-    int i = 1;
-    QString fileName;
-    do {
-        fileName = baseFileName.arg((i == 1) ? QString() : QString::number(i));
-        ++i;
-    } while (QFile::exists(fileName));
-
-    // Create the base directory when it doesn't exist
-    if (!QFile::exists(stylesPath) && !QDir().mkpath(stylesPath)) {
-        qWarning() << "Failed to create color scheme directory:" << stylesPath;
-        return QString();
-    }
-
-    return fileName;
-}
-
-bool formatDescriptionsContainsWord(const QString& word)
-{
-    for (const FormatDescription& desc : FormatDescription::defaultFormatDescriptions()) {
-        if (desc.displayName().contains(word, Qt::CaseInsensitive)
-                || desc.tooltipText().contains(word, Qt::CaseInsensitive)) {
-            return true;
-        }
-    }
-    return false;
-}
-}
-
 struct ColorSchemeEntry
 {
     ColorSchemeEntry(const QString& fileName, bool readOnly):
@@ -113,6 +74,63 @@ public:
 private:
     QList<ColorSchemeEntry> m_colorSchemes;
 };
+
+namespace {
+
+bool g_disableSaving = false;
+
+void addSchemes(SchemeListModel* model)
+{
+    QList<ColorSchemeEntry> colorSchemes;
+    const QString& resourceStylesPath = ApplicationCore::resourcePath();
+    QDir resourceStyleDir(resourceStylesPath + "/styles");
+    resourceStyleDir.setNameFilters(QStringList() << "*.xml");
+    resourceStyleDir.setFilter(QDir::Files);
+    const QString& customStylesPath = ApplicationCore::userResourcePath();
+    QDir customStyleDir(customStylesPath + "/styles");
+    customStyleDir.setNameFilters(QStringList() << "*.xml");
+    customStyleDir.setFilter(QDir::Files);
+    for (const QString& fileName : resourceStyleDir.entryList())
+        colorSchemes.append(ColorSchemeEntry(resourceStylesPath + "/styles/" + fileName, true));
+    for (const QString& fileName : customStyleDir.entryList())
+        colorSchemes.append(ColorSchemeEntry(customStylesPath + "/styles/" + fileName, false));
+    model->setColorSchemes(colorSchemes);
+}
+
+QString createColorSchemeFileName(const QString& pattern)
+{
+    const QString stylesPath = ApplicationCore::userResourcePath() + "/styles/";
+    QString baseFileName = stylesPath;
+    baseFileName += pattern;
+
+    // Find an available file name
+    int i = 1;
+    QString fileName;
+    do {
+        fileName = baseFileName.arg((i == 1) ? QString() : QString::number(i));
+        ++i;
+    } while (QFile::exists(fileName));
+
+    // Create the base directory when it doesn't exist
+    if (!QFile::exists(stylesPath) && !QDir().mkpath(stylesPath)) {
+        qWarning() << "Failed to create color scheme directory:" << stylesPath;
+        return QString();
+    }
+
+    return fileName;
+}
+
+bool formatDescriptionsContainsWord(const QString& word)
+{
+    for (const FormatDescription& desc : FormatDescription::defaultFormatDescriptions()) {
+        if (desc.displayName().contains(word, Qt::CaseInsensitive)
+                || desc.tooltipText().contains(word, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+    return false;
+}
+}
 
 FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWidget(parent)
   , m_fontGroup(new QGroupBox(contentWidget()))
@@ -217,23 +235,9 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
     m_colorSchemeEdit->setFormatDescriptions(FormatDescription::defaultFormatDescriptions());
     m_colorSchemeBox->setModel(m_schemeListModel);
 
-    QList<ColorSchemeEntry> colorSchemes;
-    const QString& resourceStylesPath = ApplicationCore::resourcePath();
-    QDir resourceStyleDir(resourceStylesPath + "/styles");
-    resourceStyleDir.setNameFilters(QStringList() << "*.xml");
-    resourceStyleDir.setFilter(QDir::Files);
-    const QString& customStylesPath = ApplicationCore::userResourcePath();
-    QDir customStyleDir(customStylesPath + "/styles");
-    customStyleDir.setNameFilters(QStringList() << "*.xml");
-    customStyleDir.setFilter(QDir::Files);
-    for (const QString& fileName : resourceStyleDir.entryList())
-        colorSchemes.append(ColorSchemeEntry(resourceStylesPath + "/styles/" + fileName, true));
-    for (const QString& fileName : customStyleDir.entryList())
-        colorSchemes.append(ColorSchemeEntry(customStylesPath + "/styles/" + fileName, false));
-    m_schemeListModel->setColorSchemes(colorSchemes);
-
     /****/
 
+    addSchemes(m_schemeListModel);
     onFontOptionsChange();
     onColorOptionsChange(m_colorSchemeBox->currentIndex());
 
@@ -277,6 +281,8 @@ void FontColorsSettingsWidget::apply()
     settings->colorScheme = m_colorSchemeEdit->colorScheme();
     /****/
     settings->write();
+
+    m_colorSchemeEdit->setOriginalColorScheme(settings->colorScheme);
 }
 
 void FontColorsSettingsWidget::reset()
