@@ -24,6 +24,17 @@
 #include <QHBoxLayout>
 #include <QApplication>
 
+class WheelDisabler : public QObject {
+    Q_OBJECT
+    bool eventFilter(QObject* o, QEvent* e) override {
+        if (e->type() == QEvent::Wheel) {
+            e->ignore();
+            return true;
+        }
+        return QObject::eventFilter(o, e);
+    }
+} g_wheelDisabler;
+
 namespace {
 
 const int ROW_HEIGHT = 21;
@@ -38,17 +49,6 @@ void initPalette(QWidget* widget)
     palette.setColor(QPalette::AlternateBase, "#f7efe6");
     widget->setPalette(palette);
 }
-
-class WheelDisabler : public QObject {
-    Q_OBJECT
-    bool eventFilter(QObject* o, QEvent* e) override {
-        if (e->type() == QEvent::Wheel && qobject_cast<QAbstractSpinBox*>(o)) {
-            e->ignore();
-            return true;
-        }
-        return QObject::eventFilter(o, e);
-    }
-} g_wheelDisabler;
 
 bool isXProperty(const QString& propertyName)
 {

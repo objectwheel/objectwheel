@@ -31,8 +31,8 @@ public:
 
     static QPalette palette();
     static QSettings* settings();
-    static const char* resourcePath();
-    static const char* userResourcePath();
+    static QString resourcePath();
+    static QString userResourcePath();
 
 private:
     static void onProjectStop();

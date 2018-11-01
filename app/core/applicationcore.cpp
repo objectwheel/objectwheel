@@ -26,6 +26,7 @@
 #include <splashscreen.h>
 #include <helpmanager.h>
 
+#include <QStandardPaths>
 #include <QSettings>
 #include <QMessageBox>
 #include <QApplication>
@@ -226,14 +227,19 @@ QSettings* ApplicationCore::settings()
     return s_settings;
 }
 
-const char* ApplicationCore::resourcePath()
+QString ApplicationCore::resourcePath()
 {
     return ":";
 }
 
-const char* ApplicationCore::userResourcePath()
+QString ApplicationCore::userResourcePath()
 {
-    return ":";
+#if defined(Q_OS_WIN)
+    Q_ASSERT(!QStandardPaths::standardLocations(QStandardPaths::DataLocation).isEmpty());
+    return QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0);
+#else
+    return QCoreApplication::applicationDirPath();
+#endif
 }
 
 void ApplicationCore::onProjectStop()

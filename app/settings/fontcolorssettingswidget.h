@@ -30,6 +30,9 @@ public:
 private slots:
     void onFontOptionsChange();
     void onColorOptionsChange(int index);
+    void onFontResetButtonClick();
+    void onColorSchemeCopyButtonClick();
+    void onColorSchemeDeleteButtonClick();
 
 private:
     QGroupBox* m_fontGroup;

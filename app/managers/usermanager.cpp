@@ -2,9 +2,8 @@
 #include <filemanager.h>
 #include <dirlocker.h>
 #include <aes.h>
+#include <applicationcore.h>
 
-#include <QStandardPaths>
-#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QByteArray>
 #include <QJsonDocument>
@@ -16,21 +15,10 @@
 
 namespace {
 
-// Default data directory
-static inline QString ddd()
-{
-	QString baseDir;
-    #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(Q_OS_WINPHONE) || defined(Q_OS_WIN)
-	baseDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0);
-    #else
-	baseDir = QCoreApplication::applicationDirPath();
-    #endif
-	return baseDir + separator() + "data";
-}
-
 static QString generateUserDirectory(const QString& user)
 {
-    return ddd() + separator() + QCryptographicHash::hash(QByteArray().insert(0, user), QCryptographicHash::Md5).toHex();
+    return ApplicationCore::userResourcePath() + "/data/" +
+            QCryptographicHash::hash(QByteArray().insert(0, user), QCryptographicHash::Md5).toHex();
 }
 
 static QString generateToken(const QString& user, const QString& password)
@@ -87,7 +75,7 @@ void UserManager::setAutoLogin(const QString& password)
     QString json = "{ \"e\" : \"%1\", \"p\" : \"%2\" }";
     auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
     auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
-    wrfile(ddd() + separator() + AUTOLOGIN_FILENAME,
+    wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME,
         Aes::encrypt(sstep, QByteArray().insert(0, json.arg(s_user, password))));
 }
 
@@ -110,14 +98,14 @@ void UserManager::clearAutoLogin()
 {
     QByteArray shredder;
     for (int i = 1048576; i--;) { shredder.append(QRandomGenerator::global()->generate() % 250); }
-    wrfile(ddd() + separator() + AUTOLOGIN_FILENAME, shredder);
-    rm(ddd() + separator() + AUTOLOGIN_FILENAME);
-    mkfile(ddd() + separator() + AUTOLOGIN_FILENAME);
+    wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME, shredder);
+    rm(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
+    mkfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
 }
 
 bool UserManager::hasAutoLogin()
 {
-    auto algdata = rdfile(ddd() + separator() + AUTOLOGIN_FILENAME);
+    auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
     return !algdata.isEmpty();
 }
 
@@ -126,7 +114,7 @@ bool UserManager::tryAutoLogin()
     if (!hasAutoLogin()) return false;
     auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
     auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
-    auto algdata = rdfile(ddd() + separator() + AUTOLOGIN_FILENAME);
+    auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
     auto jobj = QJsonDocument::fromJson(Aes::decrypt(sstep, algdata)).object();
     return start(jobj["e"].toString(), jobj["p"].toString());
 }

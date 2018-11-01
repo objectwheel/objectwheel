@@ -58,6 +58,9 @@ public:
     void setColorScheme(const ColorScheme &colorScheme);
     const ColorScheme &colorScheme() const;
 
+protected:
+    QSize sizeHint() const override;
+
 private:
     void currentItemChanged(const QModelIndex &index);
     void changeForeColor();
