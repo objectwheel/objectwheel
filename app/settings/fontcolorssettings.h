@@ -10,6 +10,7 @@
 #include <QTextCharFormat>
 
 class CodeEditorSettings;
+typedef std::vector<class FormatDescription> FormatDescriptions;
 
 class FormatDescription
 {
@@ -68,6 +69,8 @@ public:
 
     bool showControl(ShowControls showControl) const;
 
+    static FormatDescriptions defaultFormatDescriptions();
+
 private:
     TextStyle m_id;            // Name of the category
     TextEditor::Format m_format;            // Default format
@@ -76,20 +79,14 @@ private:
     ShowControls m_showControls = AllControls;
 };
 
-typedef std::vector<FormatDescription> FormatDescriptions;
-
 struct FontColorsSettings : public Settings
 {
     FontColorsSettings(CodeEditorSettings* codeEditorSettings = nullptr);
 
-    void read() override;
-    void write() override;
-    void reset() override;
+    void read() override;  // Clears cache
+    void write() override; // Clears cache
+    void reset() override; // Clears cache
     const char* category() const override;
-
-    void clearCache();
-    void loadColorScheme();
-    void saveColorScheme();
 
     QFont toFont() const;
     QTextCharFormat toTextCharFormat(TextStyle category) const;
@@ -101,9 +98,10 @@ struct FontColorsSettings : public Settings
     QString fontFamily;
     QString colorSchemeFileName;
     TextEditor::ColorScheme colorScheme;
-    const FormatDescriptions defaultFormatDescriptions;
 
 private:
+    bool loadColorScheme();
+    bool saveColorScheme();
     void addMixinStyle(QTextCharFormat &textCharFormat, const MixinTextStyles &mixinStyles) const;
 
     mutable QHash<TextStyle, QTextCharFormat> m_formatCache;

@@ -1,6 +1,7 @@
 #include <fontcolorssettingswidget.h>
 #include <codeeditorsettings.h>
 #include <applicationcore.h>
+#include <utilityfunctions.h>
 
 #include <texteditor/colorschemeedit.h>
 
@@ -19,6 +20,8 @@
 #include <QMessageBox>
 
 namespace {
+
+bool g_disableSaving = false;
 
 QString createColorSchemeFileName(const QString& pattern)
 {
@@ -41,6 +44,17 @@ QString createColorSchemeFileName(const QString& pattern)
     }
 
     return fileName;
+}
+
+bool formatDescriptionsContainsWord(const QString& word)
+{
+    for (const FormatDescription& desc : FormatDescription::defaultFormatDescriptions()) {
+        if (desc.displayName().contains(word, Qt::CaseInsensitive)
+                || desc.tooltipText().contains(word, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+    return false;
 }
 }
 
@@ -200,7 +214,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
     m_colorSchemeDeleteButton->setCursor(Qt::PointingHandCursor);
 
     m_colorSchemeBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    m_colorSchemeEdit->setFormatDescriptions(CodeEditorSettings::fontColorsSettings()->defaultFormatDescriptions);
+    m_colorSchemeEdit->setFormatDescriptions(FormatDescription::defaultFormatDescriptions());
     m_colorSchemeBox->setModel(m_schemeListModel);
 
     QList<ColorSchemeEntry> colorSchemes;
@@ -262,7 +276,6 @@ void FontColorsSettingsWidget::apply()
     settings->colorSchemeFileName = m_schemeListModel->colorSchemeAt(m_colorSchemeBox->currentIndex()).fileName;
     settings->colorScheme = m_colorSchemeEdit->colorScheme();
     /****/
-    settings->clearCache();
     settings->write();
 }
 
@@ -280,7 +293,10 @@ void FontColorsSettingsWidget::reset()
     m_fontThickBox->setChecked(settings->fontPreferThick);
     m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
     /****/
+    g_disableSaving = true;
+    m_colorSchemeBox->setCurrentIndex(-1);
     setCurrentColorScheme(settings->colorSchemeFileName);
+    g_disableSaving = false;
 }
 
 QIcon FontColorsSettingsWidget::icon() const
@@ -295,12 +311,20 @@ QString FontColorsSettingsWidget::title() const
 
 bool FontColorsSettingsWidget::containsWord(const QString& word) const
 {
-    // WARNING: Finish this
     return title().contains(word, Qt::CaseInsensitive)
+            || m_fontGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_colorSchemeGroup->title().contains(word, Qt::CaseInsensitive)
             || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
-            || m_fontThickBox->text().contains(word, Qt::CaseInsensitive);
+            || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
+            || m_colorSchemeDeleteButton->text().contains(word, Qt::CaseInsensitive)
+            || m_colorSchemeCopyButton->text().contains(word, Qt::CaseInsensitive)
+            || m_colorSchemeBox->toolTip().contains(word, Qt::CaseInsensitive)
+            || m_colorSchemeCopyButton->toolTip().contains(word, Qt::CaseInsensitive)
+            || m_colorSchemeDeleteButton->toolTip().contains(word, Qt::CaseInsensitive)
+            || UtilityFunctions::comboContainsWord(m_colorSchemeBox, word)
+            || formatDescriptionsContainsWord(word);
 }
 
 void FontColorsSettingsWidget::onFontOptionsChange()
@@ -324,10 +348,9 @@ void FontColorsSettingsWidget::onColorOptionsChange(int index)
 
         const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
         readOnly = entry.readOnly;
-        FontColorsSettings colorSchemeSetting;
-        colorSchemeSetting.colorSchemeFileName = entry.fileName;
-        colorSchemeSetting.loadColorScheme();
-        m_colorSchemeEdit->setColorScheme(colorSchemeSetting.colorScheme);
+        TextEditor::ColorScheme colorScheme;
+        TextEditor::ColorScheme::loadColorSchemeInto(colorScheme, entry.fileName);
+        m_colorSchemeEdit->setColorScheme(colorScheme);
     }
     m_colorSchemeCopyButton->setEnabled(index != -1);
     m_colorSchemeDeleteButton->setEnabled(!readOnly);
@@ -358,7 +381,6 @@ void FontColorsSettingsWidget::onColorSchemeCopyButtonClick()
                 return;
 
             const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-
             QString baseFileName = QFileInfo(entry.fileName).completeBaseName();
             baseFileName += QLatin1String("_copy%1.xml");
             QString fileName = createColorSchemeFileName(baseFileName);
@@ -424,6 +446,9 @@ void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
 
 void FontColorsSettingsWidget::maybeSaveColorScheme(const QString& fileName)
 {
+    if (g_disableSaving)
+        return;
+
     if (fileName.isEmpty())
         return;
 
@@ -434,18 +459,18 @@ void FontColorsSettingsWidget::maybeSaveColorScheme(const QString& fileName)
         return;
 
     static QMessageBox* messageBox = [this] () -> QMessageBox* {
-        auto messageBox = new QMessageBox(QMessageBox::Warning,
-                                          tr("Color Scheme Changed"),
-                                          tr("The color scheme \"%1\" was modified, do you want to save the changes?")
-                                          .arg(m_colorSchemeEdit->colorScheme().displayName()),
-                                          QMessageBox::Discard | QMessageBox::Save,
-                                          window());
-        // Change the text of the discard button
-        QPushButton* discardButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
-        discardButton->setText(tr("Discard"));
-        messageBox->addButton(discardButton, QMessageBox::DestructiveRole);
-        messageBox->setDefaultButton(QMessageBox::Save);
-        return messageBox;
+            auto messageBox = new QMessageBox(QMessageBox::Warning,
+                                              tr("Color Scheme Changed"),
+                                              tr("The color scheme \"%1\" was modified, do you want to save the changes?")
+                                              .arg(m_colorSchemeEdit->colorScheme().displayName()),
+                                              QMessageBox::Discard | QMessageBox::Save,
+                                              window());
+            // Change the text of the discard button
+            QPushButton* discardButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
+            discardButton->setText(tr("Discard"));
+            messageBox->addButton(discardButton, QMessageBox::DestructiveRole);
+            messageBox->setDefaultButton(QMessageBox::Save);
+            return messageBox;
     }();
 
     if (messageBox->exec() == QMessageBox::Save) {

@@ -14,6 +14,7 @@ class QQmlEngine;
 class QAbstractButton;
 class QAbstractItemView;
 class QQmlError;
+class QComboBox;
 
 namespace UtilityFunctions {
 void registerOfflineStorage();
@@ -34,6 +35,7 @@ QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top =
 QPixmap pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size);
 QPixmap scaled(const QPixmap& pixmap, const QSize& size);
 QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view);
+bool comboContainsWord(QComboBox* comboBox, const QString& word);
 }
 
 #endif // UTILITYFUNCTIONS_H

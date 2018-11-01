@@ -2,6 +2,7 @@
 #include <interfacesettings.h>
 #include <generalsettings.h>
 #include <qtcolorbutton.h>
+#include <utilityfunctions.h>
 
 #include <QLabel>
 #include <QGroupBox>
@@ -40,15 +41,6 @@ void addLanguages(QComboBox* comboBox)
 {
     for (size_t i = 0; i < sizeof(g_languages) / sizeof(g_languages[0]); ++i)
         comboBox->addItem(QIcon(g_langIcons[i]), QObject::tr(g_languages[i]), g_languages[i]);
-}
-
-bool containsWord(QComboBox* comboBox, const QString& word)
-{
-    for (int i = 0; i < comboBox->count(); ++i) {
-        if (comboBox->itemText(i).contains(word, Qt::CaseInsensitive))
-            return true;
-    }
-    return false;
 }
 }
 
@@ -363,6 +355,8 @@ QString InterfaceSettingsWidget::title() const
 bool InterfaceSettingsWidget::containsWord(const QString& word) const
 {
     return title().contains(word, Qt::CaseInsensitive)
+            || m_fontGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_behavioralGroup->title().contains(word, Qt::CaseInsensitive)
             || m_topBarColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_leftBarColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_themeLabel->text().contains(word, Qt::CaseInsensitive)
@@ -375,7 +369,7 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
             || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
             || m_visibleBottomPaneLabel->text().contains(word, Qt::CaseInsensitive)
             || m_bottomPanesCheckBox->text().contains(word, Qt::CaseInsensitive)
-            || ::containsWord(m_themeBox, word)
-            || ::containsWord(m_languageBox, word)
-            || ::containsWord(m_visibleBottomPaneBox, word);
+            || UtilityFunctions::comboContainsWord(m_themeBox, word)
+            || UtilityFunctions::comboContainsWord(m_languageBox, word)
+            || UtilityFunctions::comboContainsWord(m_visibleBottomPaneBox, word);
 }

@@ -17,6 +17,7 @@
 #include <QScreen>
 #include <QWindow>
 #include <QAbstractButton>
+#include <QComboBox>
 
 namespace {
 QString g_projectDirectory;
@@ -264,4 +265,13 @@ QIcon UtilityFunctions::iconForQmlError(const QQmlError& error, const QAbstractI
     case QtWarningMsg: // TODO: Fix this when Qt has a proper fix
         return /*warning*/critical;
     }
+}
+
+bool UtilityFunctions::comboContainsWord(QComboBox* comboBox, const QString& word)
+{
+    for (int i = 0; i < comboBox->count(); ++i) {
+        if (comboBox->itemText(i).contains(word, Qt::CaseInsensitive))
+            return true;
+    }
+    return false;
 }

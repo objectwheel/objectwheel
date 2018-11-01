@@ -24,8 +24,8 @@
 ****************************************************************************/
 
 #include "colorscheme.h"
-
 #include "texteditorconstants.h"
+#include <fontcolorssettings.h>
 
 #include <utils/fileutils.h>
 
@@ -33,6 +33,7 @@
 #include <QCoreApplication>
 #include <QMetaEnum>
 #include <QXmlStreamWriter>
+#include <QDebug>
 
 using namespace TextEditor;
 
@@ -434,4 +435,43 @@ bool ColorScheme::load(const QString &fileName)
 QString ColorScheme::readNameOfScheme(const QString &fileName)
 {
     return ColorSchemeReader().readName(fileName);
+}
+
+bool ColorScheme::loadColorSchemeInto(ColorScheme& scheme, const QString& fileName)
+{
+    bool loaded = true;
+
+    if (!scheme.load(fileName)) {
+        loaded = false;
+        qWarning() << "Failed to load color scheme:" << fileName;
+    }
+
+    // Apply default formats to undefined categories
+    for (const FormatDescription &desc : FormatDescription::defaultFormatDescriptions()) {
+        const TextStyle id = desc.id();
+        if (!scheme.contains(id)) {
+            TextEditor::Format format;
+            const TextEditor::Format &descFormat = desc.format();
+            if (descFormat == format && scheme.contains(C_TEXT)) {
+                // Default format -> Text
+                const TextEditor::Format textFormat = scheme.formatFor(C_TEXT);
+                format.setForeground(textFormat.foreground());
+                format.setBackground(textFormat.background());
+            } else {
+                format.setForeground(descFormat.foreground());
+                format.setBackground(descFormat.background());
+            }
+            format.setRelativeForegroundSaturation(descFormat.relativeForegroundSaturation());
+            format.setRelativeForegroundLightness(descFormat.relativeForegroundLightness());
+            format.setRelativeBackgroundSaturation(descFormat.relativeBackgroundSaturation());
+            format.setRelativeBackgroundLightness(descFormat.relativeBackgroundLightness());
+            format.setBold(descFormat.bold());
+            format.setItalic(descFormat.italic());
+            format.setUnderlineColor(descFormat.underlineColor());
+            format.setUnderlineStyle(descFormat.underlineStyle());
+            scheme.setFormatFor(id, format);
+        }
+    }
+
+    return loaded;
 }

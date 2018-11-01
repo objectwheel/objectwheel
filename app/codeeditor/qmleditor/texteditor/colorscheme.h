@@ -137,6 +137,8 @@ public:
 
     static QString readNameOfScheme(const QString &fileName);
 
+    static bool loadColorSchemeInto(ColorScheme& scheme, const QString& fileName);
+
 private:
     QMap<TextStyle, Format> m_formats;
     QString m_displayName;
