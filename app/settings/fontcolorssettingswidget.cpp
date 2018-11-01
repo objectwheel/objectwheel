@@ -100,7 +100,7 @@ private:
     QList<ColorSchemeEntry> m_colorSchemes;
 };
 
-FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWidget(parent)
+FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWidget(parent)
   , m_fontGroup(new QGroupBox(contentWidget()))
   , m_fontLayout(new QVBoxLayout(m_fontGroup))
   , m_fontFamilyLabel(new QLabel(m_fontGroup))
@@ -199,6 +199,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget *parent) : SettingsWi
     m_colorSchemeCopyButton->setCursor(Qt::PointingHandCursor);
     m_colorSchemeDeleteButton->setCursor(Qt::PointingHandCursor);
 
+    m_colorSchemeBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     m_colorSchemeEdit->setFormatDescriptions(CodeEditorSettings::fontColorsSettings()->defaultFormatDescriptions);
     m_colorSchemeBox->setModel(m_schemeListModel);
 
@@ -381,7 +382,41 @@ void FontColorsSettingsWidget::onColorSchemeCopyButtonClick()
 
 void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
 {
+    const int index = m_colorSchemeBox->currentIndex();
+    if (index == -1)
+        return;
 
+    const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+    if (entry.readOnly)
+        return;
+
+    static QMessageBox* messageBox = [this] () -> QMessageBox* {
+        auto messageBox = new QMessageBox(QMessageBox::Warning,
+                                          tr("Delete Color Scheme"),
+                                          tr("Are you sure you want to delete this color scheme permanently?"),
+                                          QMessageBox::Discard | QMessageBox::Cancel,
+                                          window());
+        // Change the text and role of the discard button
+        QPushButton* deleteButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
+        deleteButton->setText(tr("Delete"));
+        messageBox->addButton(deleteButton, QMessageBox::AcceptRole);
+        messageBox->setDefaultButton(deleteButton);
+
+        connect(deleteButton, &QAbstractButton::clicked, messageBox, &QDialog::accept);
+        connect(messageBox, &QDialog::accepted, this, [=] {
+            const int index = m_colorSchemeBox->currentIndex();
+            Q_ASSERT(index >= 0);
+
+            const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+            Q_ASSERT(!entry.readOnly);
+
+            if (QFile::remove(entry.fileName))
+                m_schemeListModel->removeColorScheme(index);
+        });
+        return messageBox;
+    }();
+
+    messageBox->open();
 }
 
 void FontColorsSettingsWidget::maybeSaveColorScheme(const QString& fileName)
@@ -395,20 +430,22 @@ void FontColorsSettingsWidget::maybeSaveColorScheme(const QString& fileName)
     if (!m_colorSchemeEdit->isModified())
         return;
 
-    QMessageBox messageBox(QMessageBox::Warning,
-                           tr("Color Scheme Changed"),
-                           tr("The color scheme \"%1\" was modified, do you want to save the changes?")
-                           .arg(m_colorSchemeEdit->colorScheme().displayName()),
-                           QMessageBox::Discard | QMessageBox::Save,
-                           window());
+    static QMessageBox* messageBox = [this] () -> QMessageBox* {
+        auto messageBox = new QMessageBox(QMessageBox::Warning,
+                                          tr("Color Scheme Changed"),
+                                          tr("The color scheme \"%1\" was modified, do you want to save the changes?")
+                                          .arg(m_colorSchemeEdit->colorScheme().displayName()),
+                                          QMessageBox::Discard | QMessageBox::Save,
+                                          window());
+        // Change the text of the discard button
+        QPushButton* discardButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
+        discardButton->setText(tr("Discard"));
+        messageBox->addButton(discardButton, QMessageBox::DestructiveRole);
+        messageBox->setDefaultButton(QMessageBox::Save);
+        return messageBox;
+    }();
 
-    // Change the text of the discard button
-    QPushButton *discardButton = static_cast<QPushButton*>(messageBox.button(QMessageBox::Discard));
-    discardButton->setText(tr("Discard"));
-    messageBox.addButton(discardButton, QMessageBox::DestructiveRole);
-    messageBox.setDefaultButton(QMessageBox::Save);
-
-    if (messageBox.exec() == QMessageBox::Save) {
+    if (messageBox->exec() == QMessageBox::Save) {
         const TextEditor::ColorScheme &scheme = m_colorSchemeEdit->colorScheme();
         scheme.save(fileName, window());
     }
