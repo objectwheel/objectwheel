@@ -258,7 +258,9 @@ void FontColorsSettingsWidget::apply()
     settings->fontPreferThick = m_fontThickBox->isChecked();
     settings->fontPreferAntialiasing = m_fontAntialiasingBox->isChecked();
     /****/
-    settings->loadColorScheme(m_colorSchemeBox->currentData().toString());
+    Q_ASSERT(m_colorSchemeBox->currentIndex() >= 0);
+    settings->colorSchemeFileName = m_schemeListModel->colorSchemeAt(m_colorSchemeBox->currentIndex()).fileName;
+    settings->colorScheme = m_colorSchemeEdit->colorScheme();
     /****/
     settings->write();
 }
@@ -293,6 +295,7 @@ QString FontColorsSettingsWidget::title() const
 
 bool FontColorsSettingsWidget::containsWord(const QString& word) const
 {
+    // WARNING: Finish this
     return title().contains(word, Qt::CaseInsensitive)
             || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
