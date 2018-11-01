@@ -20,7 +20,7 @@
 
 namespace {
 
-QString createColorSchemeFileName(const QString &pattern)
+QString createColorSchemeFileName(const QString& pattern)
 {
     const QString stylesPath = ApplicationCore::userResourcePath() + "/styles/";
     QString baseFileName = stylesPath;
@@ -46,7 +46,7 @@ QString createColorSchemeFileName(const QString &pattern)
 
 struct ColorSchemeEntry
 {
-    ColorSchemeEntry(const QString &fileName, bool readOnly):
+    ColorSchemeEntry(const QString& fileName, bool readOnly):
         fileName(fileName),
         name(TextEditor::ColorScheme::readNameOfScheme(fileName)),
         readOnly(readOnly)
@@ -262,6 +262,7 @@ void FontColorsSettingsWidget::apply()
     settings->colorSchemeFileName = m_schemeListModel->colorSchemeAt(m_colorSchemeBox->currentIndex()).fileName;
     settings->colorScheme = m_colorSchemeEdit->colorScheme();
     /****/
+    settings->clearCache();
     settings->write();
 }
 
@@ -280,7 +281,6 @@ void FontColorsSettingsWidget::reset()
     m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
     /****/
     setCurrentColorScheme(settings->colorSchemeFileName);
-    //    m_colorSchemeEdit->setColorScheme(settings->colorScheme);
 }
 
 QIcon FontColorsSettingsWidget::icon() const
@@ -318,14 +318,15 @@ void FontColorsSettingsWidget::onColorOptionsChange(int index)
     bool readOnly = true;
     if (index != -1) {
         if (lastIndex >= 0) {
-            const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+            const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
             maybeSaveColorScheme(entry.fileName);
         }
 
-        const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+        const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
         readOnly = entry.readOnly;
         FontColorsSettings colorSchemeSetting;
-        colorSchemeSetting.loadColorScheme(entry.fileName);
+        colorSchemeSetting.colorSchemeFileName = entry.fileName;
+        colorSchemeSetting.loadColorScheme();
         m_colorSchemeEdit->setColorScheme(colorSchemeSetting.colorScheme);
     }
     m_colorSchemeCopyButton->setEnabled(index != -1);
@@ -388,7 +389,7 @@ void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
     if (index == -1)
         return;
 
-    const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+    const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
     if (entry.readOnly)
         return;
 
@@ -409,7 +410,7 @@ void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
             const int index = m_colorSchemeBox->currentIndex();
             Q_ASSERT(index >= 0);
 
-            const ColorSchemeEntry &entry = m_schemeListModel->colorSchemeAt(index);
+            const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
             Q_ASSERT(!entry.readOnly);
 
             if (QFile::remove(entry.fileName))
@@ -448,7 +449,7 @@ void FontColorsSettingsWidget::maybeSaveColorScheme(const QString& fileName)
     }();
 
     if (messageBox->exec() == QMessageBox::Save) {
-        const TextEditor::ColorScheme &scheme = m_colorSchemeEdit->colorScheme();
+        const TextEditor::ColorScheme& scheme = m_colorSchemeEdit->colorScheme();
         scheme.save(fileName, window());
     }
 }

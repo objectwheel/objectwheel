@@ -449,7 +449,7 @@ void FontColorsSettings::read()
     fontPixelSize = value<int>(g_fontPixelSize, fontPixelSize);
     fontFamily = value<QString>(g_fontFamily, fontFamily);
     colorSchemeFileName = value<QString>(g_colorSchemeFileName, colorSchemeFileName);
-    loadColorScheme(colorSchemeFileName);
+    loadColorScheme();
     end();
 }
 
@@ -461,8 +461,7 @@ void FontColorsSettings::write()
     setValue(g_fontPixelSize, fontPixelSize);
     setValue(g_fontFamily, fontFamily);
     setValue(g_colorSchemeFileName, colorSchemeFileName);
-    if (QFileInfo(colorSchemeFileName).isWritable())
-        colorScheme.save(colorSchemeFileName, nullptr);
+    saveColorScheme();
     end();
 
     emit static_cast<CodeEditorSettings*>(groupSettings())->fontColorsSettingsChanged();
@@ -474,12 +473,60 @@ void FontColorsSettings::reset()
     fontPreferAntialiasing = true;
     fontPixelSize = 14;
     fontFamily = "Inconsolata";
-    loadColorScheme(":/styles/default.xml");
+    colorSchemeFileName = ":/styles/default.xml";
+    loadColorScheme();
 }
 
 const char* FontColorsSettings::category() const
 {
     return "FontColors";
+}
+
+void FontColorsSettings::clearCache()
+{
+    m_formatCache.clear();
+    m_textCharFormatCache.clear();
+}
+
+void FontColorsSettings::loadColorScheme()
+{
+    clearCache();
+
+    if (!colorScheme.load(colorSchemeFileName))
+        qWarning() << "Failed to load color scheme:" << colorSchemeFileName;
+
+    // Apply default formats to undefined categories
+    for (const FormatDescription &desc : defaultFormatDescriptions) {
+        const TextStyle id = desc.id();
+        if (!colorScheme.contains(id)) {
+            TextEditor::Format format;
+            const TextEditor::Format &descFormat = desc.format();
+            if (descFormat == format && colorScheme.contains(C_TEXT)) {
+                // Default format -> Text
+                const TextEditor::Format textFormat = colorScheme.formatFor(C_TEXT);
+                format.setForeground(textFormat.foreground());
+                format.setBackground(textFormat.background());
+            } else {
+                format.setForeground(descFormat.foreground());
+                format.setBackground(descFormat.background());
+            }
+            format.setRelativeForegroundSaturation(descFormat.relativeForegroundSaturation());
+            format.setRelativeForegroundLightness(descFormat.relativeForegroundLightness());
+            format.setRelativeBackgroundSaturation(descFormat.relativeBackgroundSaturation());
+            format.setRelativeBackgroundLightness(descFormat.relativeBackgroundLightness());
+            format.setBold(descFormat.bold());
+            format.setItalic(descFormat.italic());
+            format.setUnderlineColor(descFormat.underlineColor());
+            format.setUnderlineStyle(descFormat.underlineStyle());
+            colorScheme.setFormatFor(id, format);
+        }
+    }
+}
+
+void FontColorsSettings::saveColorScheme()
+{
+    if (QFileInfo(colorSchemeFileName).isWritable())
+        colorScheme.save(colorSchemeFileName, nullptr);
 }
 
 QFont FontColorsSettings::toFont() const
@@ -544,58 +591,6 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyles textStyles) cons
     m_textCharFormatCache.insert(textStyles, textCharFormat);
 
     return textCharFormat;
-}
-
-bool FontColorsSettings::loadColorScheme(const QString& fileName)
-{
-    bool loaded = true;
-    colorSchemeFileName = fileName;
-
-    m_formatCache.clear();
-    m_textCharFormatCache.clear();
-
-    if (!colorScheme.load(colorSchemeFileName)) {
-        loaded = false;
-        colorSchemeFileName.clear();
-        qWarning() << "Failed to load color scheme:" << fileName;
-    }
-
-    // Apply default formats to undefined categories
-    for (const FormatDescription &desc : defaultFormatDescriptions) {
-        const TextStyle id = desc.id();
-        if (!colorScheme.contains(id)) {
-            TextEditor::Format format;
-            const TextEditor::Format &descFormat = desc.format();
-            if (descFormat == format && colorScheme.contains(C_TEXT)) {
-                // Default format -> Text
-                const TextEditor::Format textFormat = colorScheme.formatFor(C_TEXT);
-                format.setForeground(textFormat.foreground());
-                format.setBackground(textFormat.background());
-            } else {
-                format.setForeground(descFormat.foreground());
-                format.setBackground(descFormat.background());
-            }
-            format.setRelativeForegroundSaturation(descFormat.relativeForegroundSaturation());
-            format.setRelativeForegroundLightness(descFormat.relativeForegroundLightness());
-            format.setRelativeBackgroundSaturation(descFormat.relativeBackgroundSaturation());
-            format.setRelativeBackgroundLightness(descFormat.relativeBackgroundLightness());
-            format.setBold(descFormat.bold());
-            format.setItalic(descFormat.italic());
-            format.setUnderlineColor(descFormat.underlineColor());
-            format.setUnderlineStyle(descFormat.underlineStyle());
-            colorScheme.setFormatFor(id, format);
-        }
-    }
-
-    return loaded;
-}
-
-bool FontColorsSettings::saveColorScheme(const QString& fileName)
-{
-    const bool saved = colorScheme.save(fileName, nullptr);
-    if (saved)
-        colorSchemeFileName = fileName;
-    return saved;
 }
 
 void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const MixinTextStyles& mixinStyles) const

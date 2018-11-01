@@ -87,11 +87,13 @@ struct FontColorsSettings : public Settings
     void reset() override;
     const char* category() const override;
 
+    void clearCache();
+    void loadColorScheme();
+    void saveColorScheme();
+
     QFont toFont() const;
     QTextCharFormat toTextCharFormat(TextStyle category) const;
     QTextCharFormat toTextCharFormat(TextStyles textStyles) const;
-    bool loadColorScheme(const QString &fileName);
-    bool saveColorScheme(const QString &fileName);
 
     bool fontPreferThick;
     bool fontPreferAntialiasing;

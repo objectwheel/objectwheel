@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>styles/creator-dark.xml</file>
         <file>styles/dark.xml</file>
         <file>styles/default_classic.xml</file>
         <file>styles/default.xml</file>
@@ -109,5 +108,6 @@
         <file>qmldesigner/images/underline-h-icon.png</file>
         <file>qmldesigner/images/vertical-scale-icon.png</file>
         <file>qmleditorwidgets/ow_logo.png</file>
+        <file>styles/qt-dark.xml</file>
     </qresource>
 </RCC>
