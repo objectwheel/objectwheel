@@ -324,10 +324,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_runPane, &RunPane::projectsButtonClicked,
             this, [=] {
         WindowManager::welcomeWindow()->show();
+        WindowManager::welcomeWindow()->raise();
     });
     connect(m_runPane, &RunPane::preferencesButtonClicked,
             this, [=] {
         WindowManager::preferencesWindow()->show();
+        WindowManager::preferencesWindow()->raise();
     });
     connect(m_runPane, &RunPane::runButtonClicked,
             this, [=] {
