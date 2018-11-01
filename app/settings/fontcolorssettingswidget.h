@@ -35,6 +35,10 @@ private slots:
     void onColorSchemeDeleteButtonClick();
 
 private:
+    void maybeSaveColorScheme(const QString& fileName);
+    void setCurrentColorScheme(const QString& fileName);
+
+private:
     QGroupBox* m_fontGroup;
     QVBoxLayout* m_fontLayout;
     QLabel* m_fontFamilyLabel;

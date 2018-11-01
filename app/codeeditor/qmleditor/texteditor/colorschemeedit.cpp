@@ -254,6 +254,7 @@ void ColorSchemeEdit::setReadOnly(bool readOnly)
 void ColorSchemeEdit::setColorScheme(const ColorScheme &colorScheme)
 {
     m_scheme = colorScheme;
+    m_originalScheme = colorScheme;
     m_formatsModel->setColorScheme(&m_scheme);
     setItemListBackground(m_scheme.formatFor(C_TEXT).background());
     updateControls();
@@ -624,4 +625,9 @@ void ColorSchemeEdit::populateUnderlineStyleComboBox()
                                      QVariant::fromValue(int(QTextCharFormat::DashDotLine)));
     m_ui->underlineComboBox->addItem(tr("Dash-Dot-Dot Underline"),
                                      QVariant::fromValue(int(QTextCharFormat::DashDotDotLine)));
+}
+
+bool ColorSchemeEdit::isReadOnly() const
+{
+    return m_readOnly;
 }

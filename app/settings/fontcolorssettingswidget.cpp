@@ -16,6 +16,7 @@
 #include <QStandardPaths>
 #include <QInputDialog>
 #include <QDebug>
+#include <QMessageBox>
 
 namespace {
 
@@ -275,7 +276,7 @@ void FontColorsSettingsWidget::reset()
     m_fontThickBox->setChecked(settings->fontPreferThick);
     m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
     /****/
-    m_colorSchemeBox->setCurrentText(tr(settings->colorScheme.displayName().toUtf8()));
+    setCurrentColorScheme(settings->colorSchemeFileName);
     //    m_colorSchemeEdit->setColorScheme(settings->colorScheme);
 }
 
@@ -345,40 +346,32 @@ void FontColorsSettingsWidget::onColorSchemeCopyButtonClick()
         dialog->setLabelText(tr("Color scheme name:"));
         connect(dialog, &QInputDialog::textValueSelected,
                 this, [=] (const QString& name) {
+            int index = m_colorSchemeBox->currentIndex();
+            if (index == -1)
+                return;
 
+            const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
 
-        int index = m_colorSchemeBox->currentIndex();
-        if (index == -1)
-            return;
+            QString baseFileName = QFileInfo(entry.fileName).completeBaseName();
+            baseFileName += QLatin1String("_copy%1.xml");
+            QString fileName = createColorSchemeFileName(baseFileName);
 
-        const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
+            if (!fileName.isEmpty()) {
+                // Ask about saving any existing modifactions
+                maybeSaveColorScheme(entry.fileName);
 
-        QString baseFileName = QFileInfo(entry.fileName).completeBaseName();
-        baseFileName += QLatin1String("_copy%1.xml");
-        QString fileName = createColorSchemeFileName(baseFileName);
+                TextEditor::ColorScheme scheme = m_colorSchemeEdit->colorScheme();
+                scheme.setDisplayName(name);
+                scheme.save(fileName, window());
 
-        if (!fileName.isEmpty()) {
-            // Ask about saving any existing modifactions
-//     WARNING       maybeSaveColorScheme();
-
-            // Make sure we're copying the current version
-//            d_ptr->m_value.setColorScheme(d_ptr->m_ui->schemeEdit->colorScheme());
-
-            TextEditor::ColorScheme scheme = m_colorSchemeEdit->colorScheme();
-            scheme.setDisplayName(name);
-            /*if (*/scheme.save(fileName, nullptr)/*)*/;
-//                d_ptr->m_value.setColorSchemeFileName(fileName);
-
-
-            QList<ColorSchemeEntry> colorSchemes(m_schemeListModel->colorSchemes());
-            colorSchemes.append(ColorSchemeEntry(fileName, false));
-            m_schemeListModel->setColorSchemes(colorSchemes);
-            m_colorSchemeBox->setCurrentText(colorSchemes.last().name);
-        }
+                QList<ColorSchemeEntry> colorSchemes(m_schemeListModel->colorSchemes());
+                colorSchemes.append(ColorSchemeEntry(fileName, false));
+                m_schemeListModel->setColorSchemes(colorSchemes);
+                setCurrentColorScheme(fileName);
+            }
         });
         return dialog;
     }();
-
     dialog->setTextValue(tr("%1 (copy)").arg(m_colorSchemeEdit->colorScheme().displayName()));
     dialog->open();
 }
@@ -386,4 +379,45 @@ void FontColorsSettingsWidget::onColorSchemeCopyButtonClick()
 void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
 {
 
+}
+
+void FontColorsSettingsWidget::maybeSaveColorScheme(const QString& fileName)
+{
+    if (fileName.isEmpty())
+        return;
+
+    if (m_colorSchemeEdit->isReadOnly())
+        return;
+
+    if (!m_colorSchemeEdit->isModified())
+        return;
+
+    QMessageBox messageBox(QMessageBox::Warning,
+                           tr("Color Scheme Changed"),
+                           tr("The color scheme \"%1\" was modified, do you want to save the changes?")
+                           .arg(m_colorSchemeEdit->colorScheme().displayName()),
+                           QMessageBox::Discard | QMessageBox::Save,
+                           window());
+
+    // Change the text of the discard button
+    QPushButton *discardButton = static_cast<QPushButton*>(messageBox.button(QMessageBox::Discard));
+    discardButton->setText(tr("Discard"));
+    messageBox.addButton(discardButton, QMessageBox::DestructiveRole);
+    messageBox.setDefaultButton(QMessageBox::Save);
+
+    if (messageBox.exec() == QMessageBox::Save) {
+        const TextEditor::ColorScheme &scheme = m_colorSchemeEdit->colorScheme();
+        scheme.save(fileName, window());
+    }
+}
+
+void FontColorsSettingsWidget::setCurrentColorScheme(const QString& fileName)
+{
+    for (int i = 0; i < m_colorSchemeBox->count(); ++i) {
+        if (QFileInfo(m_schemeListModel->colorSchemeAt(i).fileName).canonicalFilePath()
+                == QFileInfo(fileName).canonicalFilePath()) {
+            m_colorSchemeBox->setCurrentIndex(i);
+            break;
+        }
+    }
 }

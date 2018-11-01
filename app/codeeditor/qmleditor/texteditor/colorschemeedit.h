@@ -57,6 +57,10 @@ public:
 
     void setColorScheme(const ColorScheme &colorScheme);
     const ColorScheme &colorScheme() const;
+    bool isReadOnly() const;
+
+    bool isModified() const
+    { return m_originalScheme != m_scheme; }
 
 protected:
     QSize sizeHint() const override;
@@ -88,7 +92,7 @@ private:
 
 private:
     FormatDescriptions m_descriptions;
-    ColorScheme m_scheme;
+    ColorScheme m_originalScheme, m_scheme;
     int m_curItem = -1;
     Ui::ColorSchemeEdit *m_ui;
     FormatsModel *m_formatsModel;
