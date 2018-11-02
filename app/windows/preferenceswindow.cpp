@@ -126,16 +126,6 @@ void PreferencesWindow::search(const QString& word)
         m_listWidget->setCurrentItem(item);
 }
 
-void PreferencesWindow::showEvent(QShowEvent* e)
-{
-    QWidget::showEvent(e);
-    if (e->isAccepted()) {
-        if (!m_listWidget->currentItem())
-            m_listWidget->setCurrentRow(0);
-        activateCurrent();
-    }
-}
-
 void PreferencesWindow::addPage(SettingsPage* page)
 {
     if (!page)
@@ -172,6 +162,16 @@ void PreferencesWindow::closeEvent(QCloseEvent* e)
     QWidget::closeEvent(e);
     if (e->isAccepted())
         reset();
+}
+
+void PreferencesWindow::showEvent(QShowEvent* e)
+{
+    QWidget::showEvent(e);
+    if (e->isAccepted()) {
+        if (!m_listWidget->currentItem())
+            m_listWidget->setCurrentRow(0);
+        activateCurrent();
+    }
 }
 
 QSize PreferencesWindow::sizeHint() const

@@ -51,6 +51,8 @@ QToolBar { \
 }"
 
 namespace {
+
+QByteArray resetState;
 QDockWidget* globalDockWidget;
 QDockWidget* propertiesDockWidget;
 QDockWidget* formsDockWidget;
@@ -66,6 +68,12 @@ bool propertiesDockWidgetVisible;
 bool formsDockWidgetVisible;
 bool toolboxDockWidgetVisible;
 bool inspectorDockWidgetVisible;
+
+QPoint defaultPos(const QSize& size)
+{
+    return QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size,
+                               QApplication::primaryScreen()->availableGeometry()).topLeft();
+}
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
@@ -344,6 +352,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_formsPane, &FormsPane::refresh);
 
     discharge();
+    resetState = saveState();
 }
 
 void MainWindow::discharge()
@@ -497,24 +506,31 @@ InspectorPane* MainWindow::inspectorPane() const
 
 void MainWindow::resetSettings()
 {
-    // WARNING, TODO
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    settings->setValue("MainWindow.Size", sizeHint());
+    settings->setValue("MainWindow.Position", defaultPos(sizeHint()));
+    settings->setValue("MainWindow.Maximized", false);
+    settings->setValue("MainWindow.Fullscreen", false);
+    settings->setValue("MainWindow.WindowState", resetState);
+    settings->end();
+
+    if (isVisible())
+        readSettings();
 }
 
 void MainWindow::readSettings()
 {
-    const auto& defaultPos = [=] () -> QPoint {
-        return QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(),
-                                   QApplication::primaryScreen()->availableGeometry()).topLeft();
-    };
-
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->begin();
     resize(settings->value<QSize>("MainWindow.Size", sizeHint()));
-    move(settings->value<QPoint>("MainWindow.Position", defaultPos()));
-    if (settings->value<bool>("MainWindow.Maximized", false))
-        showMaximized();
+    move(settings->value<QPoint>("MainWindow.Position", defaultPos(size())));
     if (settings->value<bool>("MainWindow.Fullscreen", false))
         showFullScreen();
+    else if (settings->value<bool>("MainWindow.Maximized", false))
+        showMaximized();
+    else
+        showNormal();
     restoreState(settings->value<QByteArray>("MainWindow.WindowState", {}));
     settings->end();
 }
@@ -533,13 +549,15 @@ void MainWindow::writeSettings()
 
 void MainWindow::showEvent(QShowEvent* event)
 {
-    readSettings();
+    if (GeneralSettings::interfaceSettings()->preserveWindowStates)
+        readSettings();
     event->accept();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    writeSettings();
+    if (GeneralSettings::interfaceSettings()->preserveWindowStates)
+        writeSettings();
     event->accept();
 }
 

@@ -12,6 +12,7 @@ const char* g_fontPreferAntialiasing = "FontPreferAntialiasing";
 const char* g_language = "Language";
 const char* g_hdpiEnabled = "HdpiEnabled";
 const char* g_bottomPanesPop = "BottomPanesPop";
+const char* g_preserveWindowStates = "PreserveWindowStates";
 const char* g_visibleBottomPane = "VisibleBottomPane";
 }
 
@@ -37,6 +38,7 @@ void InterfaceSettings::read()
     fontFamily = value<QString>(g_fontFamily, fontFamily);
     /****/
     bottomPanesPop = value<bool>(g_bottomPanesPop, bottomPanesPop);
+    preserveWindowStates = value<bool>(g_preserveWindowStates, preserveWindowStates);
     visibleBottomPane = value<QString>(g_visibleBottomPane, visibleBottomPane);
     end();
 }
@@ -56,6 +58,7 @@ void InterfaceSettings::write()
     setValue(g_fontFamily, fontFamily);
     /****/
     setValue(g_bottomPanesPop, bottomPanesPop);
+    setValue(g_preserveWindowStates, preserveWindowStates);
     setValue(g_visibleBottomPane, visibleBottomPane);
     end();
 
@@ -82,6 +85,7 @@ void InterfaceSettings::reset()
 #endif
     /****/
     bottomPanesPop = false;
+    preserveWindowStates = true;
     visibleBottomPane = "None";
 }
 

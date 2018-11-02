@@ -74,6 +74,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_behavioralLayout(new QGridLayout(m_behavioralGroup))
   , m_visibleBottomPaneLabel(new QLabel(m_behavioralGroup))
   , m_bottomPanesCheckBox(new QCheckBox(m_behavioralGroup))
+  , m_preserveWindowStatesCheckBox(new QCheckBox(m_behavioralGroup))
   , m_visibleBottomPaneBox(new QComboBox(m_behavioralGroup))
 {
     contentLayout()->addWidget(m_interfaceGroup);
@@ -194,6 +195,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_behavioralLayout->setContentsMargins(6, 6, 6, 6);
     m_behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_behavioralLayout->addWidget(m_bottomPanesCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_behavioralLayout->addWidget(m_preserveWindowStatesCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
     m_behavioralLayout->addWidget(m_visibleBottomPaneLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_behavioralLayout->addWidget(m_visibleBottomPaneBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
     m_behavioralLayout->setColumnStretch(4, 1);
@@ -201,12 +203,16 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
 
     m_behavioralGroup->setTitle(tr("Behavioral"));
     m_bottomPanesCheckBox->setText(tr("Pop up bottom pane when it flashes"));
+    m_preserveWindowStatesCheckBox->setText(tr("Save and restore window states"));
     m_visibleBottomPaneLabel->setText(tr("Show bottom pane at startup") + ":");
 
     m_bottomPanesCheckBox->setToolTip(tr("Pop up bottom pane when it flashes"));
+    m_preserveWindowStatesCheckBox->setToolTip(tr("Tool bars, dock widgets, pane postions and other designer "
+                                          "states are preserved between application starts"));
     m_visibleBottomPaneBox->setToolTip(tr("Bottom pane that will be open at startup by default"));
 
     m_bottomPanesCheckBox->setCursor(Qt::PointingHandCursor);
+    m_preserveWindowStatesCheckBox->setCursor(Qt::PointingHandCursor);
     m_visibleBottomPaneBox->setCursor(Qt::PointingHandCursor);
 
     /****/
@@ -309,6 +315,7 @@ void InterfaceSettingsWidget::apply()
     /****/
     settings->visibleBottomPane = m_visibleBottomPaneBox->currentData().toString();
     settings->bottomPanesPop = m_bottomPanesCheckBox->isChecked();
+    settings->preserveWindowStates = m_preserveWindowStatesCheckBox->isChecked();
     /****/
     settings->write();
 }
@@ -340,6 +347,7 @@ void InterfaceSettingsWidget::reset()
     /****/
     m_visibleBottomPaneBox->setCurrentText(tr(settings->visibleBottomPane.toUtf8()));
     m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);
+    m_preserveWindowStatesCheckBox->setChecked(settings->preserveWindowStates);
 }
 
 QIcon InterfaceSettingsWidget::icon() const
@@ -369,6 +377,7 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
             || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
             || m_visibleBottomPaneLabel->text().contains(word, Qt::CaseInsensitive)
             || m_bottomPanesCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_preserveWindowStatesCheckBox->text().contains(word, Qt::CaseInsensitive)
             || UtilityFunctions::comboContainsWord(m_themeBox, word)
             || UtilityFunctions::comboContainsWord(m_languageBox, word)
             || UtilityFunctions::comboContainsWord(m_visibleBottomPaneBox, word);

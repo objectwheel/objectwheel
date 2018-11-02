@@ -21,6 +21,7 @@ public:
 
 signals:
     void interfaceSettingsChanged();
+    void resetWindowSettings();
 
 private:
     explicit GeneralSettings(QObject* parent = nullptr);

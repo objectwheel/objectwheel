@@ -27,8 +27,8 @@ private slots:
     void search(const QString& word);
 
 protected:
-    void showEvent(QShowEvent*) override;
     void closeEvent(QCloseEvent*) override;
+    void showEvent(QShowEvent*) override;
     QSize sizeHint() const override;
 
 private:
