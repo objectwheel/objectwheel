@@ -56,8 +56,9 @@ private:
     QGridLayout* m_behavioralLayout;
     QLabel* m_visibleBottomPaneLabel;
     QCheckBox* m_bottomPanesCheckBox;
-    QCheckBox* m_preserveWindowStatesCheckBox;
+    QCheckBox* m_preserveDesignerStateCheckBox;
     QComboBox* m_visibleBottomPaneBox;
+    QPushButton* m_designerStateResetButton;
 };
 
 #endif // INTERFACESETTINGSWIDGET_H

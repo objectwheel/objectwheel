@@ -350,6 +350,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             m_formsPane, &FormsPane::refresh);
+    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
+            this, &MainWindow::resetSettings);
 
     discharge();
     resetState = saveState();
@@ -549,14 +551,13 @@ void MainWindow::writeSettings()
 
 void MainWindow::showEvent(QShowEvent* event)
 {
-    if (GeneralSettings::interfaceSettings()->preserveWindowStates)
-        readSettings();
+    readSettings();
     event->accept();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    if (GeneralSettings::interfaceSettings()->preserveWindowStates)
+    if (GeneralSettings::interfaceSettings()->preserveDesignerState)
         writeSettings();
     event->accept();
 }

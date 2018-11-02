@@ -74,8 +74,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_behavioralLayout(new QGridLayout(m_behavioralGroup))
   , m_visibleBottomPaneLabel(new QLabel(m_behavioralGroup))
   , m_bottomPanesCheckBox(new QCheckBox(m_behavioralGroup))
-  , m_preserveWindowStatesCheckBox(new QCheckBox(m_behavioralGroup))
+  , m_preserveDesignerStateCheckBox(new QCheckBox(m_behavioralGroup))
   , m_visibleBottomPaneBox(new QComboBox(m_behavioralGroup))
+  , m_designerStateResetButton(new QPushButton(m_behavioralGroup))
 {
     contentLayout()->addWidget(m_interfaceGroup);
     contentLayout()->addWidget(m_fontGroup);
@@ -195,24 +196,29 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     m_behavioralLayout->setContentsMargins(6, 6, 6, 6);
     m_behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_behavioralLayout->addWidget(m_bottomPanesCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_behavioralLayout->addWidget(m_preserveWindowStatesCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_behavioralLayout->addWidget(m_preserveDesignerStateCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
     m_behavioralLayout->addWidget(m_visibleBottomPaneLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_behavioralLayout->addWidget(m_visibleBottomPaneBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
+    m_behavioralLayout->addWidget(m_designerStateResetButton, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     m_behavioralLayout->setColumnStretch(4, 1);
     m_behavioralLayout->setColumnMinimumWidth(1, 20);
 
     m_behavioralGroup->setTitle(tr("Behavioral"));
     m_bottomPanesCheckBox->setText(tr("Pop up bottom pane when it flashes"));
-    m_preserveWindowStatesCheckBox->setText(tr("Save and restore window states"));
+    m_preserveDesignerStateCheckBox->setText(tr("Enable designer state saving"));
+    m_designerStateResetButton->setText(tr("Reset designer states to default"));
     m_visibleBottomPaneLabel->setText(tr("Show bottom pane at startup") + ":");
 
     m_bottomPanesCheckBox->setToolTip(tr("Pop up bottom pane when it flashes"));
-    m_preserveWindowStatesCheckBox->setToolTip(tr("Tool bars, dock widgets, pane postions and other designer "
-                                          "states are preserved between application starts"));
+    m_preserveDesignerStateCheckBox->setToolTip(tr("Enabling this option leads preserving tool bars, dock widgets, pane "
+                                                   "postions and other designer states between application starts"));
+    m_designerStateResetButton->setToolTip(tr("Resets tool bars, dock widgets, pane postions and other designer "
+                                             "states to default"));
     m_visibleBottomPaneBox->setToolTip(tr("Bottom pane that will be open at startup by default"));
 
     m_bottomPanesCheckBox->setCursor(Qt::PointingHandCursor);
-    m_preserveWindowStatesCheckBox->setCursor(Qt::PointingHandCursor);
+    m_designerStateResetButton->setCursor(Qt::PointingHandCursor);
+    m_preserveDesignerStateCheckBox->setCursor(Qt::PointingHandCursor);
     m_visibleBottomPaneBox->setCursor(Qt::PointingHandCursor);
 
     /****/
@@ -283,6 +289,13 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
         QMessageBox::information(this, tr("Restart Required"),
                                  tr("Be aware that the theme change will take effect after application restart."));
     });
+    connect(m_designerStateResetButton, &QCheckBox::clicked, this, [=] {
+        int ret = QMessageBox::question(this, tr("Are you sure?"),
+                              tr("This will reset tool bars, dock widgets, pane postions and other designer "
+                                 "states to default. Are you sure to proceed?"));
+        if (ret == QMessageBox::Yes)
+            emit GeneralSettings::instance()->designerStateReset();
+    });
 
     activate();
     reset();
@@ -315,7 +328,7 @@ void InterfaceSettingsWidget::apply()
     /****/
     settings->visibleBottomPane = m_visibleBottomPaneBox->currentData().toString();
     settings->bottomPanesPop = m_bottomPanesCheckBox->isChecked();
-    settings->preserveWindowStates = m_preserveWindowStatesCheckBox->isChecked();
+    settings->preserveDesignerState = m_preserveDesignerStateCheckBox->isChecked();
     /****/
     settings->write();
 }
@@ -347,7 +360,7 @@ void InterfaceSettingsWidget::reset()
     /****/
     m_visibleBottomPaneBox->setCurrentText(tr(settings->visibleBottomPane.toUtf8()));
     m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);
-    m_preserveWindowStatesCheckBox->setChecked(settings->preserveWindowStates);
+    m_preserveDesignerStateCheckBox->setChecked(settings->preserveDesignerState);
 }
 
 QIcon InterfaceSettingsWidget::icon() const
@@ -377,7 +390,10 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
             || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
             || m_visibleBottomPaneLabel->text().contains(word, Qt::CaseInsensitive)
             || m_bottomPanesCheckBox->text().contains(word, Qt::CaseInsensitive)
-            || m_preserveWindowStatesCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_preserveDesignerStateCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_preserveDesignerStateCheckBox->toolTip().contains(word, Qt::CaseInsensitive)
+            || m_designerStateResetButton->text().contains(word, Qt::CaseInsensitive)
+            || m_designerStateResetButton->toolTip().contains(word, Qt::CaseInsensitive)
             || UtilityFunctions::comboContainsWord(m_themeBox, word)
             || UtilityFunctions::comboContainsWord(m_languageBox, word)
             || UtilityFunctions::comboContainsWord(m_visibleBottomPaneBox, word);

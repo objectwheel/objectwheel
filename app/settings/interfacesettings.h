@@ -32,7 +32,7 @@ struct InterfaceSettings : public Settings
     QString fontFamily;
     /****/
     bool bottomPanesPop;
-    bool preserveWindowStates;
+    bool preserveDesignerState;
     QString visibleBottomPane;
 };
 
