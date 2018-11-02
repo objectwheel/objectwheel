@@ -36,10 +36,8 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
 
 WindowManager::~WindowManager()
 {
-    // FIXME
-//    delete s_welcomeWindow;
+    // FIXME: Use delete instead
     s_welcomeWindow->deleteLater();
-//    delete s_mainWindow;
     s_mainWindow->deleteLater();
     s_preferencesWindow->deleteLater();
     delete s_aboutWindow;
