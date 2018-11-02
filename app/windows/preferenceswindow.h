@@ -27,9 +27,14 @@ private slots:
     void search(const QString& word);
 
 protected:
-    void closeEvent(QCloseEvent*) override;
-    void showEvent(QShowEvent*) override;
     QSize sizeHint() const override;
+    void showEvent(QShowEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
+
+private:
+    void resetSettings();
+    void readSettings();
+    void writeSettings();
 
 private:
      void addPage(SettingsPage* page);

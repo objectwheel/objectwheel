@@ -11,6 +11,7 @@ struct InterfaceSettings : public Settings
 {
     friend class MainWindow;
     friend class WelcomeWindow;
+    friend class PreferencesWindow;
 
     InterfaceSettings(GeneralSettings* generalSettings = nullptr);
 

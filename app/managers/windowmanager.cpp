@@ -32,9 +32,6 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
     s_aboutWindow->setGeometry(QStyle::alignedRect(
                                    Qt::LeftToRight, Qt::AlignCenter, s_aboutWindow->sizeHint(),
                                    qApp->primaryScreen()->availableGeometry()));
-    s_preferencesWindow->setGeometry(QStyle::alignedRect(
-                                         Qt::LeftToRight, Qt::AlignCenter, s_preferencesWindow->sizeHint(),
-                                         qApp->primaryScreen()->availableGeometry()));
 }
 
 WindowManager::~WindowManager()
