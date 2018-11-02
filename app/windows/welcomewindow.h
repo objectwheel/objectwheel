@@ -38,8 +38,15 @@ public:
 public:
     explicit WelcomeWindow(QWidget* parent = nullptr);
 
-private:
+protected:
     QSize sizeHint() const override;
+    void showEvent(QShowEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
+
+private:
+    void resetSettings();
+    void readSettings();
+    void writeSettings();
 
 signals:
     void done();

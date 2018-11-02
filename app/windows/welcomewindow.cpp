@@ -12,10 +12,14 @@
 #include <resetwidget.h>
 #include <projecttemplateswidget.h>
 #include <aboutwindow.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
+#include <utilityfunctions.h>
 
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QCloseEvent>
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
@@ -169,10 +173,64 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(Login, View::LeftToRight);
     });
+    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
+            this, &WelcomeWindow::resetSettings);
+}
+
+void WelcomeWindow::resetSettings()
+{
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    settings->setValue("WelcomeWindow.Size", sizeHint());
+    settings->setValue("WelcomeWindow.Position", UtilityFunctions::centerPos(sizeHint()));
+    settings->setValue("WelcomeWindow.Maximized", false);
+    settings->setValue("WelcomeWindow.Fullscreen", false);
+    settings->end();
+
+    if (isVisible())
+        readSettings();
+}
+
+void WelcomeWindow::readSettings()
+{
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    resize(settings->value<QSize>("WelcomeWindow.Size", sizeHint()));
+    move(settings->value<QPoint>("WelcomeWindow.Position", UtilityFunctions::centerPos(size())));
+    if (settings->value<bool>("WelcomeWindow.Fullscreen", false))
+        showFullScreen();
+    else if (settings->value<bool>("WelcomeWindow.Maximized", false))
+        showMaximized();
+    else
+        showNormal();
+    settings->end();
+}
+
+void WelcomeWindow::writeSettings()
+{
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    settings->setValue("WelcomeWindow.Size", size());
+    settings->setValue("WelcomeWindow.Position", pos());
+    settings->setValue("WelcomeWindow.Maximized", isMaximized());
+    settings->setValue("WelcomeWindow.Fullscreen", isFullScreen());
+    settings->end();
+}
+
+void WelcomeWindow::showEvent(QShowEvent* event)
+{
+    readSettings();
+    event->accept();
+}
+
+void WelcomeWindow::closeEvent(QCloseEvent* event)
+{
+    if (GeneralSettings::interfaceSettings()->preserveDesignerState)
+        writeSettings();
+    event->accept();
 }
 
 QSize WelcomeWindow::sizeHint() const
 {
     return {980, 560};
 }
-

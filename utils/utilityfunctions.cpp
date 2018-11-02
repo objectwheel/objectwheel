@@ -18,6 +18,7 @@
 #include <QWindow>
 #include <QAbstractButton>
 #include <QComboBox>
+#include <QApplication>
 
 namespace {
 QString g_projectDirectory;
@@ -274,4 +275,10 @@ bool UtilityFunctions::comboContainsWord(QComboBox* comboBox, const QString& wor
             return true;
     }
     return false;
+}
+
+QPoint UtilityFunctions::centerPos(const QSize& size)
+{
+    return QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size,
+                               QApplication::primaryScreen()->availableGeometry()).topLeft();
 }

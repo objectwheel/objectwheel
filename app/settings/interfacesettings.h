@@ -10,6 +10,7 @@ class GeneralSettings;
 struct InterfaceSettings : public Settings
 {
     friend class MainWindow;
+    friend class WelcomeWindow;
 
     InterfaceSettings(GeneralSettings* generalSettings = nullptr);
 

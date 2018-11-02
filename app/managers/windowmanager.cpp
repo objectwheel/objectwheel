@@ -35,9 +35,6 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
     s_preferencesWindow->setGeometry(QStyle::alignedRect(
                                          Qt::LeftToRight, Qt::AlignCenter, s_preferencesWindow->sizeHint(),
                                          qApp->primaryScreen()->availableGeometry()));
-    s_welcomeWindow->setGeometry(QStyle::alignedRect(
-                                     Qt::LeftToRight, Qt::AlignCenter, s_welcomeWindow->sizeHint(),
-                                     qApp->primaryScreen()->availableGeometry()));
 }
 
 WindowManager::~WindowManager()
@@ -47,7 +44,6 @@ WindowManager::~WindowManager()
     s_welcomeWindow->deleteLater();
 //    delete s_mainWindow;
     s_mainWindow->deleteLater();
-
     s_preferencesWindow->deleteLater();
     delete s_aboutWindow;
 }

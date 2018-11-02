@@ -51,7 +51,6 @@ QToolBar { \
 }"
 
 namespace {
-
 QByteArray resetState;
 QDockWidget* globalDockWidget;
 QDockWidget* propertiesDockWidget;
@@ -68,12 +67,6 @@ bool propertiesDockWidgetVisible;
 bool formsDockWidgetVisible;
 bool toolboxDockWidgetVisible;
 bool inspectorDockWidgetVisible;
-
-QPoint defaultPos(const QSize& size)
-{
-    return QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size,
-                               QApplication::primaryScreen()->availableGeometry()).topLeft();
-}
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
@@ -511,7 +504,7 @@ void MainWindow::resetSettings()
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->begin();
     settings->setValue("MainWindow.Size", sizeHint());
-    settings->setValue("MainWindow.Position", defaultPos(sizeHint()));
+    settings->setValue("MainWindow.Position", UtilityFunctions::centerPos(sizeHint()));
     settings->setValue("MainWindow.Maximized", false);
     settings->setValue("MainWindow.Fullscreen", false);
     settings->setValue("MainWindow.WindowState", resetState);
@@ -526,7 +519,7 @@ void MainWindow::readSettings()
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->begin();
     resize(settings->value<QSize>("MainWindow.Size", sizeHint()));
-    move(settings->value<QPoint>("MainWindow.Position", defaultPos(size())));
+    move(settings->value<QPoint>("MainWindow.Position", UtilityFunctions::centerPos(size())));
     if (settings->value<bool>("MainWindow.Fullscreen", false))
         showFullScreen();
     else if (settings->value<bool>("MainWindow.Maximized", false))
