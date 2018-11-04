@@ -1,99 +1,75 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtCore module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+#ifndef VPFS_H
+#define VPFS_H
 
-#ifndef QRESOURCE_H
-#define QRESOURCE_H
+#include <private/qabstractfileengine_p.h>
 
-#include <QtCore/qstring.h>
-#include <QtCore/qlocale.h>
-#include <QtCore/qstringlist.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qscopedpointer.h>
+#include <QResource>
 
-QT_BEGIN_NAMESPACE
-
-
-class QResourcePrivate;
-
-class Q_CORE_EXPORT QResource
+class Vpfs : public QResource
 {
+    friend class VpfsFileEngine;
+    friend class VpfsFileEngineIterator;
+
 public:
-    QResource(const QString &file=QString(), const QLocale &locale=QLocale());
-    ~QResource();
-
-    void setFileName(const QString &file);
-    QString fileName() const;
-    QString absoluteFilePath() const;
-
-    void setLocale(const QLocale &locale);
-    QLocale locale() const;
-
-    bool isValid() const;
-
-    bool isCompressed() const;
-    qint64 size() const;
-    const uchar *data() const;
-    QDateTime lastModified() const;
-
-    static void addSearchPath(const QString &path);
-    static QStringList searchPaths();
-
-    static bool registerResource(const QString &rccFilename, const QString &resourceRoot=QString());
-    static bool unregisterResource(const QString &rccFilename, const QString &resourceRoot=QString());
-
-    static bool registerResource(const uchar *rccData, const QString &resourceRoot=QString());
-    static bool unregisterResource(const uchar *rccData, const QString &resourceRoot=QString());
-
-protected:
-    friend class QResourceFileEngine;
-    friend class QResourceFileEngineIterator;
-    bool isDir() const;
-    inline bool isFile() const { return !isDir(); }
-    QStringList children() const;
-
-protected:
-    QScopedPointer<QResourcePrivate> d_ptr;
-
-private:
-    Q_DECLARE_PRIVATE(QResource)
+    Vpfs(const QString &file=QString(), const QLocale &locale=QLocale()) : QResource(file, locale)
+    {}
 };
 
-QT_END_NAMESPACE
+class VpfsFileEnginePrivate;
+class VpfsFileEngine : public QAbstractFileEngine
+{
+private:
+    Q_DECLARE_PRIVATE(VpfsFileEngine)
+public:
+    explicit VpfsFileEngine(const QString &path);
+    ~VpfsFileEngine();
 
-#endif // QRESOURCE_H
+    virtual void setFileName(const QString &file) override;
+
+    virtual bool open(QIODevice::OpenMode flags) override ;
+    virtual bool close() override;
+    virtual bool flush() override;
+    virtual qint64 size() const override;
+    virtual qint64 pos() const override;
+    virtual bool atEnd() const;
+    virtual bool seek(qint64) override;
+    virtual qint64 read(char *data, qint64 maxlen) override;
+    virtual qint64 write(const char *data, qint64 len) override;
+
+    virtual bool remove() override;
+    virtual bool copy(const QString &newName) override;
+    virtual bool rename(const QString &newName) override;
+    virtual bool link(const QString &newName) override;
+
+    virtual bool isSequential() const override;
+
+    virtual bool isRelativePath() const override;
+
+    virtual bool mkdir(const QString &dirName, bool createParentDirectories) const override;
+    virtual bool rmdir(const QString &dirName, bool recurseParentDirectories) const override;
+
+    virtual bool setSize(qint64 size) override;
+
+    virtual QStringList entryList(QDir::Filters filters, const QStringList &filterNames) const override;
+
+    virtual bool caseSensitive() const override;
+
+    virtual FileFlags fileFlags(FileFlags type) const override;
+
+    virtual bool setPermissions(uint perms) override;
+
+    virtual QString fileName(QAbstractFileEngine::FileName file) const override;
+
+    virtual uint ownerId(FileOwner) const override;
+    virtual QString owner(FileOwner) const override;
+
+    virtual QDateTime fileTime(FileTime time) const override;
+
+    virtual Iterator *beginEntryList(QDir::Filters filters, const QStringList &filterNames) override;
+    virtual Iterator *endEntryList() override;
+
+    bool extension(Extension extension, const ExtensionOption *option = 0, ExtensionReturn *output = 0) override;
+    bool supportsExtension(Extension extension) const override;
+};
+
+#endif // VPFS_H
