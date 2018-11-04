@@ -35,8 +35,7 @@ bool VpfsFileEngine::caseSensitive() const
     return true;
 }
 
-VpfsFileEngine::VpfsFileEngine(const QString &file) :
-    QAbstractFileEngine(*new VpfsFileEnginePrivate)
+VpfsFileEngine::VpfsFileEngine(const QString &file) : QAbstractFileEngine(*new VpfsFileEnginePrivate)
 {
     Q_D(VpfsFileEngine);
     d->resource.setFileName(file);
@@ -82,7 +81,7 @@ bool VpfsFileEngine::flush()
     return true;
 }
 
-qint64 VpfsFileEngine::read(char *data, qint64 len)
+qint64 VpfsFileEngine::read(char* data, qint64 len)
 {
     Q_D(VpfsFileEngine);
     if(len > size()-d->offset)
@@ -97,7 +96,7 @@ qint64 VpfsFileEngine::read(char *data, qint64 len)
     return len;
 }
 
-qint64 VpfsFileEngine::write(const char *, qint64)
+qint64 VpfsFileEngine::write(const char* , qint64)
 {
     return -1;
 }
@@ -246,34 +245,28 @@ QDateTime VpfsFileEngine::fileTime(FileTime time) const
     return QDateTime();
 }
 
-/*!
-    \internal
-*/
-QAbstractFileEngine::Iterator *VpfsFileEngine::beginEntryList(QDir::Filters filters,
+QAbstractFileEngine::Iterator* VpfsFileEngine::beginEntryList(QDir::Filters filters,
                                                               const QStringList &filterNames)
 {
     return new VpfsFileEngineIterator(filters, filterNames);
 }
 
-/*!
-    \internal
-*/
-QAbstractFileEngine::Iterator *VpfsFileEngine::endEntryList()
+QAbstractFileEngine::Iterator* VpfsFileEngine::endEntryList()
 {
     return 0;
 }
 
-bool VpfsFileEngine::extension(Extension extension, const ExtensionOption *option, ExtensionReturn *output)
+bool VpfsFileEngine::extension(Extension extension, const ExtensionOption* option, ExtensionReturn* output)
 {
     Q_D(VpfsFileEngine);
     if (extension == MapExtension) {
-        const MapExtensionOption *options = (const MapExtensionOption*)(option);
-        MapExtensionReturn *returnValue = static_cast<MapExtensionReturn*>(output);
+        const MapExtensionOption* options = (const MapExtensionOption*)(option);
+        MapExtensionReturn* returnValue = static_cast<MapExtensionReturn*>(output);
         returnValue->address = d->map(options->offset, options->size, options->flags);
         return (returnValue->address != 0);
     }
     if (extension == UnMapExtension) {
-        const UnMapExtensionOption *options = (const UnMapExtensionOption*)option;
+        const UnMapExtensionOption* options = (const UnMapExtensionOption*)option;
         return d->unmap(options->address);
     }
     return false;
@@ -284,7 +277,7 @@ bool VpfsFileEngine::supportsExtension(Extension extension) const
     return (extension == UnMapExtension || extension == MapExtension);
 }
 
-uchar *VpfsFileEnginePrivate::map(qint64 offset, qint64 size, QFile::MemoryMapFlags flags)
+uchar* VpfsFileEnginePrivate::map(qint64 offset, qint64 size, QFile::MemoryMapFlags flags)
 {
     Q_Q(VpfsFileEngine);
     Q_UNUSED(flags);
@@ -292,11 +285,11 @@ uchar *VpfsFileEnginePrivate::map(qint64 offset, qint64 size, QFile::MemoryMapFl
         q->setError(QFile::UnspecifiedError, QString());
         return 0;
     }
-    uchar *address = const_cast<uchar *>(resource.data());
+    uchar* address = const_cast<uchar*>(resource.data());
     return (address + offset);
 }
 
-bool VpfsFileEnginePrivate::unmap(uchar *ptr)
+bool VpfsFileEnginePrivate::unmap(uchar* ptr)
 {
     Q_UNUSED(ptr);
     return true;
@@ -304,11 +297,6 @@ bool VpfsFileEnginePrivate::unmap(uchar *ptr)
 
 void VpfsFileEnginePrivate::uncompress() const
 {
-    if (resource.isCompressed() && uncompressed.isEmpty() && resource.size()) {
-#ifndef QT_NO_COMPRESS
+    if (resource.isCompressed() && uncompressed.isEmpty() && resource.size())
         uncompressed = qUncompress(resource.data(), resource.size());
-#else
-        Q_ASSERT(!"VpfsFileEngine::open: Qt built without support for compression");
-#endif
-    }
 }

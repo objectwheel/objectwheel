@@ -9,8 +9,8 @@ class VpfsFileEnginePrivate : public QAbstractFileEnginePrivate
 protected:
     Q_DECLARE_PUBLIC(VpfsFileEngine)
 private:
-    uchar *map(qint64 offset, qint64 size, QFile::MemoryMapFlags flags);
-    bool unmap(uchar *ptr);
+    uchar* map(qint64 offset, qint64 size, QFile::MemoryMapFlags flags);
+    bool unmap(uchar* ptr);
     void uncompress() const;
     qint64 offset;
     Vpfs resource;

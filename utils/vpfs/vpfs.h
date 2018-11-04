@@ -9,10 +9,8 @@ class Vpfs : public QResource
 {
     friend class VpfsFileEngine;
     friend class VpfsFileEngineIterator;
-
 public:
-    Vpfs(const QString &file=QString(), const QLocale &locale=QLocale()) : QResource(file, locale)
-    {}
+    Vpfs(const QString &file = QString(), const QLocale &locale = QLocale()) : QResource(file, locale) {}
 };
 
 class VpfsFileEnginePrivate;
@@ -33,8 +31,8 @@ public:
     virtual qint64 pos() const override;
     virtual bool atEnd() const;
     virtual bool seek(qint64) override;
-    virtual qint64 read(char *data, qint64 maxlen) override;
-    virtual qint64 write(const char *data, qint64 len) override;
+    virtual qint64 read(char* data, qint64 maxlen) override;
+    virtual qint64 write(const char* data, qint64 len) override;
 
     virtual bool remove() override;
     virtual bool copy(const QString &newName) override;
@@ -65,10 +63,10 @@ public:
 
     virtual QDateTime fileTime(FileTime time) const override;
 
-    virtual Iterator *beginEntryList(QDir::Filters filters, const QStringList &filterNames) override;
-    virtual Iterator *endEntryList() override;
+    virtual Iterator* beginEntryList(QDir::Filters filters, const QStringList &filterNames) override;
+    virtual Iterator* endEntryList() override;
 
-    bool extension(Extension extension, const ExtensionOption *option = 0, ExtensionReturn *output = 0) override;
+    bool extension(Extension extension, const ExtensionOption* option = 0, ExtensionReturn* output = 0) override;
     bool supportsExtension(Extension extension) const override;
 };
 
