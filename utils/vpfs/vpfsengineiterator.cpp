@@ -1,16 +1,16 @@
-#include <vpfs_iterator_p.h>
+#include <vpfsengineiterator.h>
 #include <vpfs.h>
 
-VpfsFileEngineIterator::VpfsFileEngineIterator(QDir::Filters filters, const QStringList &filterNames)
+VpfsEngineIterator::VpfsEngineIterator(QDir::Filters filters, const QStringList &filterNames)
     : QAbstractFileEngineIterator(filters, filterNames), index(-1)
 {
 }
 
-VpfsFileEngineIterator::~VpfsFileEngineIterator()
+VpfsEngineIterator::~VpfsEngineIterator()
 {
 }
 
-QString VpfsFileEngineIterator::next()
+QString VpfsEngineIterator::next()
 {
     if (!hasNext())
         return QString();
@@ -18,7 +18,7 @@ QString VpfsFileEngineIterator::next()
     return currentFilePath();
 }
 
-bool VpfsFileEngineIterator::hasNext() const
+bool VpfsEngineIterator::hasNext() const
 {
     if (index == -1) {
         // Lazy initialization of the iterator
@@ -34,7 +34,7 @@ bool VpfsFileEngineIterator::hasNext() const
     return index < entries.size();
 }
 
-QString VpfsFileEngineIterator::currentFileName() const
+QString VpfsEngineIterator::currentFileName() const
 {
     if (index <= 0 || index > entries.size())
         return QString();

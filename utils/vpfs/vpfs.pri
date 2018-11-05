@@ -1,9 +1,14 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-SOURCES += $$PWD/vpfs.cpp \
-           $$PWD/vpfs_iterator.cpp
+SOURCES += \
+    $$PWD/vpfsengine.cpp \
+    $$PWD/vpfsengineiterator.cpp \
+    $$PWD/vpfs.cpp
 
-HEADERS += $$PWD/vpfs.h \
-           $$PWD/vpfs_p.h \
-           $$PWD/vpfs_iterator_p.h
+HEADERS += \
+    $$PWD/vpfsengineiterator.h \
+    $$PWD/vpfsengine_p.h \
+    $$PWD/vpfsengine.h \
+    $$PWD/vpfs.h \
+    $$PWD/vpfs_p.h

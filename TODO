@@ -1,3 +1,21 @@
+Dosyalar sürükle bırak ile FileExplorer'da klasörden klasöre taşınabilmeli
+Dosyalar tek tuş ile çoğaltılabilrmeli dosyaadi_copy.txt gibi
+Designer'daki seçimler GeneralSettings ile kaydedilip hatırlanmalı, file explorer moduda.
+Objeler etrafına çerçeve çizme varsayılan olarak açık gelmeli ve çerçevelerin köşeleri adam akıllı çizilmeli.
+Dosyalar dışarıdan FileExplorer üzerindeki bir klasöre direk sürekle bırak ile, ilgili klasör hedeflenerek atılabilmeli, ancak klasör doluyken klasör üstüne gelme efekti kullanıcının esas dosyayı ana dizine atmasına engel olmamalı
+Anchor özelliği, bir şekilde çalışmıyor.. İki eleman at, birinü yukarı, diğerini aşağı hizala ve son bir eleman daha atıp bunu, o ikisinin arasına anchorlamaya çalışınca designer patlıyor.  Ortaya hizalanan en başta dashboard'a atılsayıdı çalışıyordu.
+Dosya renaming keşke uzantıyı içermese, default olarak.
+GUI objelerinin idleri intellisense tarafından tanınmıyor, ayrıca önerilerde göstermeli noktaya basınca
+Dosya sürükle bırak tanımlanırken aynı zamanda multiple eleman seçme özelliği bozulmamalı, o da olmalı
+FileExplorer'da toolbara kes butonuda eklenmeli
+ControlInspectorda da, aynı fileexplorerdaki gibi multiple objeler seçilebilirken, aynı zamanda parent-child drag-drop mümkün olmalı. Bu drag sırasında hizalama çizgileri olmalı, hani şu mavi olanlardan
+Control parent child creation order çok önemli ve uygulanmalı.
+Designer çok yavaş, özellikle obje seçerken, objeler drop edilirken hizalama çizgileri belirmeli.
+Designer yeniden tasarlanırken listview tarzı, sweepview tarzı içinde scrollbar içeren ve iç içe obje içeren konteynerler dikkate alınmalı
+ControlInspector sağ tıklama menüsü içermeli, aynı designer üzerindeki objelere sağ tıklanır gibi. Tümünü seç, yapıştır vs gibi boşluğa tıklanınca çıkması gereken, boşluğa sağ tıklama özelliği de olmalı.
+Yukarıdaki özelliğin aynısı FileExplorer'de de olmalı
+Kontrol kopyala-yapıştır özelliği olmalı
+
 bir kontrolün internal kaynaklarından herhangi bir qml kullanması ile birlikte, bu alt qml de bir değişiklik olunca main.qml yeniden derlenmelidir, ancak Qt nin cache'ü buna izin vermiyor
 Aynı şekilde bir global resource değiştirilince onu import eden tüm kaynaklar ve objecler recompile edilmeli
 herhangi bir şekilde kod editör splitview de açılınca kod editör ilgili satır sütuna focus etmeli ve cursor gözükmeli
