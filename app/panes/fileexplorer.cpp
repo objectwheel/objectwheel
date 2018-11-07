@@ -611,9 +611,12 @@ void FileExplorer::setPalette(const QPalette& pal)
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
 
-    const QPixmap& icon = PaintUtils::renderMaskedPixmap(":/utils/images/filtericon@2x.png",
+    QPixmap icon = PaintUtils::renderMaskedPixmap(":/utils/images/filtericon@2x.png",
                                                           pal.buttonText().color(), this);
-    g_modeIFilterIconLabel->setPixmap(icon);
+    icon.setDevicePixelRatio(devicePixelRatioF());
+    g_modeIFilterIconLabel->setPixmap(icon.scaled(16 * devicePixelRatioF(),
+                                                  16 * devicePixelRatioF(),
+                                                  Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     QPalette mp(m_modeComboBox->palette());
     mp.setColor(QPalette::Text, pal.text().color());
     mp.setColor(QPalette::WindowText, pal.windowText().color());

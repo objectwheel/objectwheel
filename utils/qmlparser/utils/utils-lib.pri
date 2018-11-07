@@ -73,7 +73,8 @@ HEADERS += \
     $$PWD/mapreduce.h \
     $$PWD/fadingindicator.h
 
-RESOURCES += $$PWD/images.qrc
+RESOURCES += \
+    $$PWD/utilimages.qrc
 
 osx {
     HEADERS += \

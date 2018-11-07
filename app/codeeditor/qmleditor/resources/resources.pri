@@ -1,1 +1,2 @@
-RESOURCES += $$PWD/resources.qrc
+RESOURCES += \
+    $$PWD/styles.qrc

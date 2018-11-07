@@ -161,7 +161,7 @@ void ApplicationCore::prepare(const char* filePath)
 {
     const QString settingsPath = dname(filePath) + "/settings.ini";
     QSettings settings(settingsPath, QSettings::IniFormat);
-    if (settings.value("General/Interface.HdpiEnabled").toBool())
+    if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings().hdpiEnabled).toBool())
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
@@ -178,7 +178,7 @@ QPalette ApplicationCore::palette()
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
     QPalette palette(QApplication::palette());
     QSettings settings(settingsPath, QSettings::IniFormat);
-    if (settings.value("General/Interface.Theme").toString() == "Light") {
+    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light") {
         palette.setColor(QPalette::Active, QPalette::Text, "#3C444C");
         palette.setColor(QPalette::Inactive, QPalette::Text, "#3C444C");
         palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");

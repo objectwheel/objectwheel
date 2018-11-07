@@ -293,8 +293,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         break;
     case PE_PanelMenu: {
         painter->save();
-        painter->fillRect(option->rect, Qt::transparent);
-        painter->setPen(Qt::transparent);
+        painter->setPen(option->palette.text().color());
         painter->setBrush(option->palette.window());
         painter->setRenderHint(QPainter::Antialiasing, true);
         const QPainterPath path = windowPanelPath(option->rect);
@@ -480,6 +479,11 @@ void ApplicationStyle::polish(QWidget* w)
     if (qobject_cast<QMenu*>(w)
             || qobject_cast<QComboBoxPrivateContainer*>(w)
             || qobject_cast<QMdiSubWindow*>(w)) {
+        if (const QComboBoxPrivateContainer* cw = qobject_cast<QComboBoxPrivateContainer*>(w)) {
+            cw->itemView()->setStyleSheet("background: transparent;");
+            cw->itemView()->viewport()->setStyleSheet("background: transparent;");
+        }
+
         w->setAttribute(Qt::WA_TranslucentBackground, true);
         w->setAutoFillBackground(false);
     }
