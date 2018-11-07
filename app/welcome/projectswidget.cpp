@@ -279,7 +279,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     f.setPixelSize(26);
 
     m_welcomeLabel->setFont(f);
-    m_welcomeLabel->setText(tr("Welcome to Objectwheel"));
+    m_welcomeLabel->setText(tr("Welcome to ") + APP_NAME);
 
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
