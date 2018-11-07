@@ -149,7 +149,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _helpBox->setWindowTitle("Help");
     _helpBox->setText("Need help?");
     _helpBox->addButton("Forgot my password", QMessageBox::ActionRole);
-    _helpBox->addButton("About Objectwheel", QMessageBox::ActionRole);
+    _helpBox->addButton("About", QMessageBox::ActionRole);
     _helpBox->addButton(QMessageBox::Cancel);
     _helpBox->setDefaultButton(QMessageBox::Cancel);
     connect(_helpBox, (void(QMessageBox::*)(QAbstractButton*))

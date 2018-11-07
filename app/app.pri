@@ -13,7 +13,7 @@ windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug
 ### Defines
 DEFINES += QT_QML_DEBUG_NO_WARNING \
            APP_VER='"\\\"$$VERSION\\\""' \
-           APP_NAME='"\\\"$$TARGET\\\""' \
+           APP_NAME='"\\\"$$TARGET (Beta)\\\""' \
            APP_CORP='"\\\"Objectwheel, Inc.\\\""' \
            APP_DOMAIN='"\\\"objectwheel.com\\\""' \
            APP_WSSSERVER='"\\\"wss://api.objectwheel.com:4443\\\""' \

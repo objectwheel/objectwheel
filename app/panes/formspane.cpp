@@ -215,7 +215,7 @@ void FormsPane::discharge()
 void FormsPane::onAddButtonClick()
 {
     auto tempPath = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0];
-    tempPath = tempPath + separator() + "Objectwheel";
+    tempPath = tempPath + separator() + APP_NAME;
 
     rm(tempPath);
 

@@ -20,7 +20,7 @@ using namespace PaintUtils;
 using namespace UtilityFunctions;
 
 namespace {
-const char* g_welcomeMessage = "<b>Ready</b>  |  Welcome to Objectwheel";
+const char* g_welcomeMessage = "<b>Ready</b>  |  Welcome to Objectwheel (Beta)";
 const char* g_userStoppedRunningMessage = "<b>Stopped</b>  |  Execution stopped at ";
 const char* g_appCrashedMessage = "<b>Crashed</b>  |  Application crashed at ";
 const char* g_finishedRunningMessage = "<b>Finished</b>  |  Application closed at ";
