@@ -293,7 +293,11 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         break;
     case PE_PanelMenu: {
         painter->save();
+#if !defined(Q_OS_MACOS)
         painter->setPen(option->palette.text().color());
+#else
+        painter->setPen(Qt::transparent);
+#endif
         painter->setBrush(option->palette.window());
         painter->setRenderHint(QPainter::Antialiasing, true);
         const QPainterPath path = windowPanelPath(option->rect);
@@ -330,33 +334,37 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_MenuVMargin:
     case CE_MenuTearoff:
     case CE_MenuScroller:
-        if (const QStyleOptionMenuItem *mi
+        if (const QStyleOptionMenuItem *m
                 = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
-            const bool active = mi->state & State_Selected;
+            QStyleOptionMenuItem mi(*m);
+#if !defined(Q_OS_MACOS)
+            mi.rect.adjust(1, 0, -1, 0);
+#endif
+            const bool active = mi.state & State_Selected;
             if (active)
-                painter->fillRect(mi->rect, mi->palette.highlight());
+                painter->fillRect(mi.rect, mi.palette.highlight());
             if (element == CE_MenuTearoff) {
-                painter->setPen(QPen(mi->palette.dark().color(), 1, Qt::DashLine));
-                painter->drawLine(mi->rect.x() + 2, mi->rect.y() + mi->rect.height() / 2 - 1,
-                                  mi->rect.x() + mi->rect.width() - 4,
-                                  mi->rect.y() + mi->rect.height() / 2 - 1);
-                painter->setPen(QPen(mi->palette.light().color(), 1, Qt::DashLine));
-                painter->drawLine(mi->rect.x() + 2, mi->rect.y() + mi->rect.height() / 2,
-                                  mi->rect.x() + mi->rect.width() - 4,
-                                  mi->rect.y() + mi->rect.height() / 2);
+                painter->setPen(QPen(mi.palette.dark().color(), 1, Qt::DashLine));
+                painter->drawLine(mi.rect.x() + 2, mi.rect.y() + mi.rect.height() / 2 - 1,
+                                  mi.rect.x() + mi.rect.width() - 4,
+                                  mi.rect.y() + mi.rect.height() / 2 - 1);
+                painter->setPen(QPen(mi.palette.light().color(), 1, Qt::DashLine));
+                painter->drawLine(mi.rect.x() + 2, mi.rect.y() + mi.rect.height() / 2,
+                                  mi.rect.x() + mi.rect.width() - 4,
+                                  mi.rect.y() + mi.rect.height() / 2);
             } else if (element == CE_MenuScroller) {
                 const QSize scrollerSize = QSize(10, 8);
                 const int scrollerVOffset = 5;
-                const int left = mi->rect.x() + (mi->rect.width() - scrollerSize.width()) / 2;
+                const int left = mi.rect.x() + (mi.rect.width() - scrollerSize.width()) / 2;
                 const int right = left + scrollerSize.width();
                 int top;
                 int bottom;
                 if (option->state & State_DownArrow) {
-                    bottom = mi->rect.y() + scrollerVOffset;
+                    bottom = mi.rect.y() + scrollerVOffset;
                     top = bottom + scrollerSize.height();
                 } else {
-                    bottom = mi->rect.bottom() - scrollerVOffset;
+                    bottom = mi.rect.bottom() - scrollerVOffset;
                     top = bottom - scrollerSize.height();
                 }
                 painter->save();
@@ -371,29 +379,29 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 painter->restore();
                 break;
             }
-            if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
-                const QRect separatorRect = QRect(mi->rect.left(), mi->rect.center().y(), mi->rect.width(), 2);
+            if (mi.menuItemType == QStyleOptionMenuItem::Separator) {
+                const QRect separatorRect = QRect(mi.rect.left(), mi.rect.center().y(), mi.rect.width(), 2);
                 painter->fillRect(separatorRect, "#D5D5D5");
                 painter->restore();
                 break;
             }
-            const int maxpmw = 20/*mi->maxIconWidth*/ ;
-            const bool enabled = mi->state & State_Enabled;
-            int xpos = mi->rect.x() + 18;
+            const int maxpmw = 20/*mi.maxIconWidth*/ ;
+            const bool enabled = mi.state & State_Enabled;
+            int xpos = mi.rect.x() + 18;
             int checkcol = maxpmw;
             if (!enabled)
-                painter->setPen(mi->palette.text().color());
+                painter->setPen(mi.palette.text().color());
             else if (active)
-                painter->setPen(mi->palette.highlightedText().color());
+                painter->setPen(mi.palette.highlightedText().color());
             else
-                painter->setPen(mi->palette.buttonText().color());
-            if (mi->checked) {
+                painter->setPen(mi.palette.buttonText().color());
+            if (mi.checked) {
                 QStyleOption checkmarkOpt;
                 checkmarkOpt.initFrom(widget);
                 const int mw = checkcol + macItemFrame;
-                const int mh = mi->rect.height() + macItemFrame;
-                const int xp = mi->rect.x() + macItemFrame;
-                checkmarkOpt.rect = QRect(xp, mi->rect.y() - checkmarkOpt.fontMetrics.descent(), mw, mh);
+                const int mh = mi.rect.height() + macItemFrame;
+                const int xp = mi.rect.x() + macItemFrame;
+                checkmarkOpt.rect = QRect(xp, mi.rect.y() - checkmarkOpt.fontMetrics.descent(), mw, mh);
                 checkmarkOpt.state.setFlag(State_On, active);
                 checkmarkOpt.state.setFlag(State_Enabled, enabled);
                 checkmarkOpt.state |= State_Small;
@@ -402,8 +410,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 checkmarkOpt.palette.setColor(QPalette::Text, painter->pen().color());
                 proxy()->drawPrimitive(PE_IndicatorMenuCheckMark, &checkmarkOpt, painter, widget);
             }
-            if (!mi->icon.isNull()) {
-                QIcon::Mode mode = (mi->state & State_Enabled) ? QIcon::Normal
+            if (!mi.icon.isNull()) {
+                QIcon::Mode mode = (mi.state & State_Enabled) ? QIcon::Normal
                                                                : QIcon::Disabled;
                 // Always be normal or disabled to follow the Mac style.
                 int smallIconSize = proxy()->pixelMetric(PM_SmallIconSize);
@@ -418,21 +426,21 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     Q_ASSERT(UtilityFunctions::window(widget));
                     window = UtilityFunctions::window(widget);
                 }
-                QPixmap pixmap = mi->icon.pixmap(window, iconSize, mode);
+                QPixmap pixmap = mi.icon.pixmap(window, iconSize, mode);
                 int pixw = pixmap.width() / pixmap.devicePixelRatioF();
                 int pixh = pixmap.height() / pixmap.devicePixelRatioF();
-                QRect cr(xpos, mi->rect.y(), checkcol, mi->rect.height());
+                QRect cr(xpos, mi.rect.y(), checkcol, mi.rect.height());
                 QRect pmr(0, 0, pixw, pixh);
                 pmr.moveCenter(cr.center());
                 painter->drawPixmap(pmr.topLeft(), pixmap);
                 xpos += pixw + 6;
             }
-            QString s = mi->text;
+            QString s = mi.text;
             const auto text_flags = Qt::AlignVCenter | Qt::TextHideMnemonic
                     | Qt::TextSingleLine | Qt::AlignAbsolute;
-            int yPos = mi->rect.y();
-            const bool isSubMenu = mi->menuItemType == QStyleOptionMenuItem::SubMenu;
-            const int tabwidth = isSubMenu ? 9 : mi->tabWidth;
+            int yPos = mi.rect.y();
+            const bool isSubMenu = mi.menuItemType == QStyleOptionMenuItem::SubMenu;
+            const int tabwidth = isSubMenu ? 9 : mi.tabWidth;
             QString rightMarginText;
             if (isSubMenu)
                 rightMarginText = QStringLiteral("\u25b6\ufe0e"); // U+25B6 U+FE0E: BLACK RIGHT-POINTING TRIANGLE
@@ -445,18 +453,18 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             }
             if (!rightMarginText.isEmpty()) {
                 painter->setFont(qt_app_fonts_hash()->value("QMenuItem", painter->font()));
-                int xp = mi->rect.right() - tabwidth - macRightBorder + 2;
+                int xp = mi.rect.right() - tabwidth - macRightBorder + 2;
                 if (!isSubMenu)
                     xp -= macItemHMargin + macItemFrame + 3; // Adjust for shortcut
-                painter->drawText(xp, yPos, tabwidth, mi->rect.height(), text_flags | Qt::AlignRight, rightMarginText);
+                painter->drawText(xp, yPos, tabwidth, mi.rect.height(), text_flags | Qt::AlignRight, rightMarginText);
             }
             if (!s.isEmpty()) {
                 const int xm = macItemFrame + maxpmw + macItemHMargin;
-                QFont myFont = mi->font;
-                myFont.setPixelSize(QFontInfo(mi->font).pixelSize());
+                QFont myFont = mi.font;
+                myFont.setPixelSize(QFontInfo(mi.font).pixelSize());
                 painter->setFont(myFont);
-                painter->drawText(xpos, yPos, mi->rect.width() - xm - tabwidth + 1,
-                                  mi->rect.height(), text_flags, s);
+                painter->drawText(xpos, yPos, mi.rect.width() - xm - tabwidth + 1,
+                                  mi.rect.height(), text_flags, s);
             }
             painter->restore();
         } break;
@@ -480,8 +488,8 @@ void ApplicationStyle::polish(QWidget* w)
             || qobject_cast<QComboBoxPrivateContainer*>(w)
             || qobject_cast<QMdiSubWindow*>(w)) {
         if (const QComboBoxPrivateContainer* cw = qobject_cast<QComboBoxPrivateContainer*>(w)) {
-            cw->itemView()->setStyleSheet("background: transparent;");
-            cw->itemView()->viewport()->setStyleSheet("background: transparent;");
+            for (QWidget* wd : cw->findChildren<QWidget*>())
+                wd->setStyleSheet("background: transparent;");
         }
 
         w->setAttribute(Qt::WA_TranslucentBackground, true);
