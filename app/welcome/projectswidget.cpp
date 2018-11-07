@@ -65,9 +65,6 @@ public:
         m_layout->addWidget(m_sortComboBox);
 
         TransparentStyle::attach(this);
-        QTimer::singleShot(100, [=] { // FIXME
-            TransparentStyle::attach(this);
-        });
 
         m_sortLabel->setText("| " + tr("Sort reverse "));
 

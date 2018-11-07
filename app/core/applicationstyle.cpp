@@ -39,34 +39,6 @@ QRect comboboxInnerBounds(const QRect& outerBounds)
     return outerBounds.adjusted(3, 3, -1, -5);
 }
 
-QPainterPath windowPanelPath(const QRectF& r)
-{
-    static const qreal CornerPointOffset = 5.5;
-    static const qreal CornerControlOffset = 2.1;
-    QPainterPath path;
-    // Top-left corner
-    path.moveTo(r.left(), r.top() + CornerPointOffset);
-    path.cubicTo(r.left(), r.top() + CornerControlOffset,
-                 r.left() + CornerControlOffset, r.top(),
-                 r.left() + CornerPointOffset, r.top());
-    // Top-right corner
-    path.lineTo(r.right() - CornerPointOffset, r.top());
-    path.cubicTo(r.right() - CornerControlOffset, r.top(),
-                 r.right(), r.top() + CornerControlOffset,
-                 r.right(), r.top() + CornerPointOffset);
-    // Bottom-right corner
-    path.lineTo(r.right(), r.bottom() - CornerPointOffset);
-    path.cubicTo(r.right(), r.bottom() - CornerControlOffset,
-                 r.right() - CornerControlOffset, r.bottom(),
-                 r.right() - CornerPointOffset, r.bottom());
-    // Bottom-right corner
-    path.lineTo(r.left() + CornerPointOffset, r.bottom());
-    path.cubicTo(r.left() + CornerControlOffset, r.bottom(),
-                 r.left(), r.bottom() - CornerControlOffset,
-                 r.left(), r.bottom() - CornerPointOffset);
-    path.lineTo(r.left(), r.top() + CornerPointOffset);
-    return path;
-}
 }
 
 QRectF comboboxEditBounds(const QRectF& outerBounds)
@@ -294,14 +266,13 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     case PE_PanelMenu: {
         painter->save();
 #if !defined(Q_OS_MACOS)
-        painter->setPen(option->palette.text().color());
+        painter->setPen(option->palette.text().color().lighter(170));
 #else
         painter->setPen(Qt::transparent);
 #endif
         painter->setBrush(option->palette.window());
         painter->setRenderHint(QPainter::Antialiasing, true);
-        const QPainterPath path = windowPanelPath(option->rect);
-        painter->drawPath(path);
+        painter->drawRoundedRect(QRectF(option->rect).adjusted(0.5, 0.5, -0.5, -0.5), 5, 5);
         painter->restore();
     } break;
     case PE_IndicatorMenuCheckMark: {
@@ -339,7 +310,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             painter->save();
             QStyleOptionMenuItem mi(*m);
 #if !defined(Q_OS_MACOS)
-            mi.rect.adjust(1, 0, -1, 0);
+            mi.rect.adjust(1, 1, -1, -1);
 #endif
             const bool active = mi.state & State_Selected;
             if (active)
@@ -487,11 +458,23 @@ void ApplicationStyle::polish(QWidget* w)
     if (qobject_cast<QMenu*>(w)
             || qobject_cast<QComboBoxPrivateContainer*>(w)
             || qobject_cast<QMdiSubWindow*>(w)) {
-        if (const QComboBoxPrivateContainer* cw = qobject_cast<QComboBoxPrivateContainer*>(w)) {
-            for (QWidget* wd : cw->findChildren<QWidget*>())
-                wd->setStyleSheet("background: transparent;");
-        }
 
+        if (!w->property("ow_flag_set").isValid()) {
+            if (const QComboBoxPrivateContainer* cw = qobject_cast<QComboBoxPrivateContainer*>(w)) {
+                w->setProperty("ow_flag_set", true);
+                for (QWidget* wd : cw->findChildren<QWidget*>()) {
+                    if (wd != w && wd != cw)
+                        wd->setStyleSheet("background: transparent;");
+                }
+
+#if !defined(Q_OS_MACOS)
+                w->setWindowFlags(w->windowFlags()
+                             | Qt::X11BypassWindowManagerHint
+                             | Qt::NoDropShadowWindowHint
+                             | Qt::FramelessWindowHint);
+#endif
+            }
+        }
         w->setAttribute(Qt::WA_TranslucentBackground, true);
         w->setAutoFillBackground(false);
     }

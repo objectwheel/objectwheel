@@ -159,6 +159,7 @@ void ApplicationCore::run(QApplication* app)
 
 void ApplicationCore::prepare(const char* filePath)
 {
+    // qputenv("QT_SCALE_FACTOR", "2");
     const QString settingsPath = dname(filePath) + "/settings.ini";
     QSettings settings(settingsPath, QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings().hdpiEnabled).toBool())
