@@ -32,7 +32,7 @@
 #include <QAbstractButton>
 
 class EditorContainer : public QLabel {
-public: explicit EditorContainer(QWidget* parent) : QLabel(parent) {}
+public: explicit EditorContainer(QWidget* parent) : QLabel(parent) {} 
 public: QSize sizeHint() const override { return {680, 680}; }
 };
 
@@ -171,10 +171,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         const QString& qmldirLine = "\n" + FormJS + " 1.0 " + id + ".js";
         const QString& qmldirPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + "qmldir";
 
-        if (!exists(qmldirPath)) {
+        if (!exists(qmldirPath))
             qFatal("CentralWidget: qmldir file is gone.");
-            return;
-        }
 
         QByteArray qmldirFile = rdfile(qmldirPath);
         qmldirFile.append(qmldirLine);
@@ -236,7 +234,6 @@ void CentralWidget::setCurrentPage(const Pages& page)
     switch (page) {
     case Page_Builds:
         return m_buildsWidget->show();
-        break;
 
     case Page_Designer:
         m_bottomBar->show();
@@ -245,7 +242,6 @@ void CentralWidget::setCurrentPage(const Pages& page)
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
             m_issuesPane->show();
         return m_designerWidget->show();
-        break;
 
     case Page_SplitView:
         m_bottomBar->show();
@@ -255,11 +251,9 @@ void CentralWidget::setCurrentPage(const Pages& page)
             m_issuesPane->show();
         m_designerWidget->show();
         return g_editorContainer->show();
-        break;
 
     case Page_Help:
         return m_helpWidget->show();
-        break;
 
     case Page_QmlCodeEditor:
         m_bottomBar->show();
@@ -268,11 +262,9 @@ void CentralWidget::setCurrentPage(const Pages& page)
         if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
             m_issuesPane->show();
         return g_editorContainer->show();
-        break;
 
     case Page_ProjectOptions:
         return m_projectOptionsWidget->show();
-        break;
     }
 }
 

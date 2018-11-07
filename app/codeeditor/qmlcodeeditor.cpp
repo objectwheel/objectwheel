@@ -1425,8 +1425,8 @@ void QmlCodeEditor::mousePressEvent(QMouseEvent *e)
         }
     }
 
-    if (HostOsInfo::isLinuxHost() /*&& handleForwardBackwardMouseButtons(e)*/)
-        return;
+    /*if (HostOsInfo::isLinuxHost() && handleForwardBackwardMouseButtons(e))
+        return;*/
 
     QPlainTextEdit::mousePressEvent(e);
 }

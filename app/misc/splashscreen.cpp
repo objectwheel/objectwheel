@@ -6,8 +6,10 @@
 SplashScreen::SplashScreen(QWidget *parent) : QSplashScreen(parent)
 {
     QPixmap pixmap(":/images/splash.png");
-    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-    setPixmap(pixmap);
+    pixmap.setDevicePixelRatio(devicePixelRatioF());
+    setPixmap(pixmap.scaled(int(512 * devicePixelRatioF()),
+                            int(280 * devicePixelRatioF()),
+                            Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     show();
     QApplication::processEvents();
 }
