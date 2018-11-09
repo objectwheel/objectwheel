@@ -3,61 +3,58 @@
 
 #include <private/qabstractfileengine_p.h>
 
-class VpfsEnginePrivate;
 class VpfsEngine : public QAbstractFileEngine
 {
-private:
-    Q_DECLARE_PRIVATE(VpfsEngine)
 public:
     explicit VpfsEngine(const QString &path);
     ~VpfsEngine();
 
-    virtual void setFileName(const QString &file) override;
+    bool open(QIODevice::OpenMode openMode);
+    bool close();
+    bool flush();
+    bool syncToDisk();// ********
+    bool seek(qint64 pos);
+    bool isSequential() const;
+    bool remove();
+    bool copy(const QString &newName);
+    bool rename(const QString &newName);
+    bool renameOverwrite(const QString &newName);// ******
+    bool link(const QString &newName);
+    bool mkdir(const QString &dirName, bool createParentDirectories) const;
+    bool rmdir(const QString &dirName, bool recurseParentDirectories) const;
+    bool setSize(qint64 size);
+    bool caseSensitive() const;
+    bool isRelativePath() const;
+    bool setPermissions(uint perms);
+    bool setFileTime(const QDateTime &newDate, FileTime time);// *********
+    bool extension(Extension extension, const ExtensionOption *option = 0, ExtensionReturn *output = 0);
+    bool supportsExtension(Extension extension) const;
+    bool cloneTo(QAbstractFileEngine *target);
 
-    virtual bool open(QIODevice::OpenMode flags) override ;
-    virtual bool close() override;
-    virtual bool flush() override;
-    virtual qint64 size() const override;
-    virtual qint64 pos() const override;
-    virtual bool atEnd() const;
-    virtual bool seek(qint64) override;
-    virtual qint64 read(char* data, qint64 maxlen) override;
-    virtual qint64 write(const char* data, qint64 len) override;
+    int handle() const;// *********
 
-    virtual bool remove() override;
-    virtual bool copy(const QString &newName) override;
-    virtual bool rename(const QString &newName) override;
-    virtual bool link(const QString &newName) override;
+    void setFileName(const QString &file);// ********
 
-    virtual bool isSequential() const override;
+    uint ownerId(FileOwner) const;
+    qint64 size() const;
+    qint64 pos() const;
+    qint64 read(char *data, qint64 maxlen);
+    qint64 readLine(char *data, qint64 maxlen);// **********
+    qint64 write(const char *data, qint64 len);
 
-    virtual bool isRelativePath() const override;
+    FileFlags fileFlags(FileFlags type=FileInfoAll) const;
 
-    virtual bool mkdir(const QString &dirName, bool createParentDirectories) const override;
-    virtual bool rmdir(const QString &dirName, bool recurseParentDirectories) const override;
+    QString owner(FileOwner) const;
+    QString fileName(FileName file=DefaultName) const;
+    QStringList entryList(QDir::Filters filters, const QStringList &filterNames) const;
 
-    virtual bool setSize(qint64 size) override;
+    QByteArray id() const;// ********
+    QDateTime fileTime(FileTime time) const;
 
-    virtual QStringList entryList(QDir::Filters filters, const QStringList &filterNames) const override;
+    Iterator *endEntryList();
+    Iterator *beginEntryList(QDir::Filters filters, const QStringList &filterNames);
 
-    virtual bool caseSensitive() const override;
-
-    virtual FileFlags fileFlags(FileFlags type) const override;
-
-    virtual bool setPermissions(uint perms) override;
-
-    virtual QString fileName(QAbstractFileEngine::FileName file) const override;
-
-    virtual uint ownerId(FileOwner) const override;
-    virtual QString owner(FileOwner) const override;
-
-    virtual QDateTime fileTime(FileTime time) const override;
-
-    virtual Iterator* beginEntryList(QDir::Filters filters, const QStringList &filterNames) override;
-    virtual Iterator* endEntryList() override;
-
-    bool extension(Extension extension, const ExtensionOption* option = 0, ExtensionReturn* output = 0) override;
-    bool supportsExtension(Extension extension) const override;
+    // bool atEnd() const; // ******** TODO: Make it available via exension function
 };
 
 #endif // VPFSENGINE_H

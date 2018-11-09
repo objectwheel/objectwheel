@@ -45,6 +45,6 @@ RESOURCES += \
     $$PWD/resources/shared/moduleresolver/moduleresolver.qrc
 
 ###Includes
-#include($$PWD/vpfs/vpfs.pri)
+include($$PWD/vpfs/vpfs.pri)
 include($$PWD/qmlparser/qmlparser.pri)
 include($$PWD/components/components.pri)
