@@ -27,9 +27,9 @@ public:
     bool isRelativePath() const;
     bool setPermissions(uint perms);
     bool setFileTime(const QDateTime &newDate, FileTime time);// *********
-    bool extension(Extension extension, const ExtensionOption *option = 0, ExtensionReturn *output = 0);
+    bool extension(Extension extension, const ExtensionOption* option = 0, ExtensionReturn* output = 0);
     bool supportsExtension(Extension extension) const;
-    bool cloneTo(QAbstractFileEngine *target);
+    bool cloneTo(QAbstractFileEngine* target);
 
     int handle() const;// *********
 
@@ -38,9 +38,9 @@ public:
     uint ownerId(FileOwner) const;
     qint64 size() const;
     qint64 pos() const;
-    qint64 read(char *data, qint64 maxlen);
-    qint64 readLine(char *data, qint64 maxlen);// **********
-    qint64 write(const char *data, qint64 len);
+    qint64 read(char* data, qint64 maxlen);
+    qint64 readLine(char* data, qint64 maxlen);// **********
+    qint64 write(const char* data, qint64 len);
 
     FileFlags fileFlags(FileFlags type=FileInfoAll) const;
 
@@ -51,8 +51,8 @@ public:
     QByteArray id() const;// ********
     QDateTime fileTime(FileTime time) const;
 
-    Iterator *endEntryList();
-    Iterator *beginEntryList(QDir::Filters filters, const QStringList &filterNames);
+    Iterator* endEntryList();
+    Iterator* beginEntryList(QDir::Filters filters, const QStringList &filterNames);
 
     // bool atEnd() const; // ******** TODO: Make it available via exension function
 };
