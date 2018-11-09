@@ -13,18 +13,20 @@ class VpfsVolume final
 
 public:
     const QString& path() const;
+    char letter() const;
 
     bool isValid() const;
 
 private:
-    static VpfsVolume* create(const QString& vpdiPath);
+    static VpfsVolume* create(const QString& vpdiPath, char letter);
 
 private:
-    VpfsVolume(const QString& vpdiPath);
+    VpfsVolume(const QString& vpdiPath, char letter);
     ~VpfsVolume();
 
 private:
     const QString& m_path;
+    const char m_letter;
 };
 
 #endif // VPFSVOLUME_H

@@ -13,19 +13,22 @@ VpfsVolume* VpfsSpace::volume(const QString& vpdiPath)
 {
     const QString& canonicalVpdiPath = QFileInfo(vpdiPath).canonicalFilePath();
     for (int i = 0; i < s_volumes.size(); ++i) {
-        VpfsVolume* volume = s_volumes.at(i);
+        VpfsVolume* volume = s_volumes[i];
         if (volume->path() == canonicalVpdiPath)
             return volume;
     }
     return nullptr;
 }
 
-VpfsVolume* VpfsSpace::mount(const QString& vpdiPath)
+VpfsVolume* VpfsSpace::mount(const QString& vpdiPath, char letter)
 {
     if (VpfsVolume* found = volume(vpdiPath))
         return found;
 
-    VpfsVolume* vol = VpfsVolume::create(vpdiPath);
+    if (letter == 0)
+        letter = newUniqueLetter();
+
+    VpfsVolume* vol = VpfsVolume::create(vpdiPath, letter);
     if (vol)
         s_volumes.append(vol);
 
@@ -46,4 +49,29 @@ void VpfsSpace::eject(VpfsVolume* volume)
         s_volumes.removeOne(volume);
         delete volume;
     }
+}
+
+char VpfsSpace::newUniqueLetter()
+{
+    static const auto& letterExists = [] (char letter) -> bool {
+        for (const VpfsVolume* volume : s_volumes) {
+            if (volume->letter() == letter)
+                return true;
+        }
+        return false;
+    };
+
+    for (char letter = 'A'; letter <= 'Z'; ++letter) {
+        if (!letterExists(letter))
+            return letter;
+    }
+
+    for (char letter = 'a'; letter <= 'z'; ++letter) {
+        if (!letterExists(letter))
+            return letter;
+    }
+
+    qWarning("You reached the maximum number of volumes.");
+
+    return 0;
 }
