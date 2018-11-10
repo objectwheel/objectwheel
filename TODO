@@ -1,3 +1,27 @@
+------------------------------------------
+| file               | directory         |
+|--------------------|-------------------|
+| fileName           | fileName          |
+| absuluteFilePath   | absuluteFilePath  |
+| directory          | directory         |
+| data               | data              |
+| creationDate       | creationDate      |
+| modificationDate   | modificationDate  |
+| owner              | owner             |
+------------------------------------------
+
+vpfs
+version
+
+header
+   |
+    ---- 
+
+data
+   |
+    ---- 
+
+
 Dosyalar sürükle bırak ile FileExplorer'da klasörden klasöre taşınabilmeli
 Dosyalar tek tuş ile çoğaltılabilrmeli dosyaadi_copy.txt gibi
 Designer'daki seçimler GeneralSettings ile kaydedilip hatırlanmalı, file explorer moduda.

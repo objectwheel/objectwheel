@@ -13,9 +13,11 @@ class VpfsSpace final
 public:
     static const QList<VpfsVolume*>& volumes();
 
+    static VpfsVolume* volume(char letter);
     static VpfsVolume* volume(const QString& vpdiPath);
     static VpfsVolume* mount(const QString& vpdiPath, char letter = 0);
 
+    static void eject(char letter);
     static void eject(const QString& vpdiPath);
     static void eject(VpfsVolume* volume);
 
