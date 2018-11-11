@@ -88,7 +88,7 @@ QWidget* UtilityFunctions::createSpacerWidget(Qt::Orientation orientation)
 QWidget* UtilityFunctions::createSeparatorWidget(Qt::Orientation orientation)
 {
     auto separator = new QWidget;
-    separator->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    separator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     if (orientation & Qt::Horizontal)
         separator->setFixedHeight(1);
     else
@@ -265,6 +265,8 @@ QIcon UtilityFunctions::iconForQmlError(const QQmlError& error, const QAbstractI
         return critical;
     case QtWarningMsg: // TODO: Fix this when Qt has a proper fix
         return /*warning*/critical;
+    default:
+        return info;
     }
 }
 
