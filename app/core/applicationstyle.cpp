@@ -265,11 +265,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         break;
     case PE_PanelMenu: {
         painter->save();
-#if !defined(Q_OS_MACOS)
         painter->setPen(option->palette.text().color().lighter(170));
-#else
-        painter->setPen(Qt::transparent);
-#endif
         painter->setBrush(option->palette.window());
         painter->setRenderHint(QPainter::Antialiasing, true);
         painter->drawRoundedRect(QRectF(option->rect).adjusted(0.5, 0.5, -0.5, -0.5), 5, 5);
@@ -309,9 +305,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
             QStyleOptionMenuItem mi(*m);
-#if !defined(Q_OS_MACOS)
             mi.rect.adjust(1, 1, -1, -1);
-#endif
             const bool active = mi.state & State_Selected;
             if (active)
                 painter->fillRect(mi.rect, mi.palette.highlight());
@@ -383,7 +377,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             }
             if (!mi.icon.isNull()) {
                 QIcon::Mode mode = (mi.state & State_Enabled) ? QIcon::Normal
-                                                               : QIcon::Disabled;
+                                                              : QIcon::Disabled;
                 // Always be normal or disabled to follow the Mac style.
                 int smallIconSize = proxy()->pixelMetric(PM_SmallIconSize);
                 QSize iconSize(smallIconSize, smallIconSize);
@@ -460,20 +454,29 @@ void ApplicationStyle::polish(QWidget* w)
             || qobject_cast<QMdiSubWindow*>(w)) {
 
         if (!w->property("ow_flag_set").isValid()) {
-            if (const QComboBoxPrivateContainer* cw = qobject_cast<QComboBoxPrivateContainer*>(w)) {
-                w->setProperty("ow_flag_set", true);
-                for (QWidget* wd : cw->findChildren<QWidget*>()) {
-                    if (wd != w && wd != cw)
-                        wd->setStyleSheet("background: transparent;");
-                }
-
-#if !defined(Q_OS_MACOS)
-                w->setWindowFlags(w->windowFlags()
-                             | Qt::X11BypassWindowManagerHint
-                             | Qt::NoDropShadowWindowHint
-                             | Qt::FramelessWindowHint);
-#endif
+            w->setProperty("ow_flag_set", true);
+            for (QWidget* wd : w->findChildren<QWidget*>()) {
+                if (wd != w)
+                    wd->setStyleSheet("background: transparent;");
             }
+            class A : public QObject {
+                bool eventFilter(QObject* w, QEvent* e) override
+                {
+                    if (e->type() == QEvent::Show) {
+                        QWidget* wid = static_cast<QWidget*>(w);
+                        QWidget* parentWid = wid->parentWidget();
+                        wid->setWindowFlags(wid->windowFlags()
+                                            | Qt::X11BypassWindowManagerHint
+                                            | Qt::NoDropShadowWindowHint
+                                            | Qt::FramelessWindowHint);
+                        wid->removeEventFilter(this);
+                        if (parentWid)
+                            wid->show();
+                    }
+                    return false;
+                }
+            } static shadowRemover;
+            w->installEventFilter(&shadowRemover);
         }
         w->setAttribute(Qt::WA_TranslucentBackground, true);
         w->setAutoFillBackground(false);
