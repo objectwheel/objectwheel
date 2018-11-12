@@ -4,15 +4,7 @@
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
-
 #include <QMenu>
-#include <QAction>
-#include <QScrollBar>
-#include <QMimeData>
-#include <QApplication>
-#include <QClipboard>
-
-extern const char* TOOL_KEY;
 
 DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
   , m_menu(new QMenu(this))
@@ -145,104 +137,119 @@ void DesignerView::onRedoAction()
     //TODO
 }
 
-void DesignerView::onCutAction()
+namespace {
+struct CopyPaste final
 {
-    QList<QUrl> urls;
-    QByteArray controls;
-    QDataStream dstream(&controls, QIODevice::WriteOnly);
-    auto mimeData = new QMimeData;
-    auto clipboard = QApplication::clipboard();
-    auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->currentForm());
-    mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
-    mimeData->setData("objectwheel/cut", "1");
+    enum ActionType { Invalid, Copy, Cut };
 
-    for (auto control : selectedControls)
-        for (auto ctrl : selectedControls)
-            if (control->childControls().contains(ctrl))
-                selectedControls.removeAll(ctrl);
+    CopyPaste() = delete;
+    CopyPaste(const CopyPaste&) = delete;
+    CopyPaste &operator=(const CopyPaste&) = delete;
 
-    for (auto control : selectedControls) {
-        urls << QUrl::fromLocalFile(control->dir());
-        dstream << (quint64)control;
-    }
+    static inline QString suid()
+    { return s_suid; }
+    static inline ActionType actionType()
+    { return s_actionType; }
+    static inline QList<QPointer<Control>> controls()
+    { return s_controls; }
+    static inline bool isValid()
+    { return s_actionType != Invalid && !s_controls.isEmpty() && !s_suid.isEmpty(); }
+    static inline void invalidate()
+    { s_actionType = Invalid; s_controls.clear(); s_suid.clear(); }
+    static inline void setControls(const QList<QPointer<Control>>& value, const QString& suid, ActionType actionType)
+    { s_controls = value; s_suid = suid; s_actionType = actionType; }
 
-    mimeData->setData("objectwheel/dstreamsize", QString::number(selectedControls.size()).toUtf8());
-    mimeData->setData("objectwheel/dstream", controls);
-    mimeData->setUrls(urls);
-    mimeData->setText(TOOL_KEY);
-    clipboard->setMimeData(mimeData);
+private:
+    static QString s_suid;
+    static ActionType s_actionType;
+    static QList<QPointer<Control>> s_controls;
+};
+QString CopyPaste::s_suid;
+QList<QPointer<Control>> CopyPaste::s_controls;
+CopyPaste::ActionType CopyPaste::s_actionType = CopyPaste::Invalid;
 }
 
-// FIXME:
+void DesignerView::onCutAction()
+{
+    QList<Control*> controlsForRemoval;
+    QList<Control*> controls(scene()->selectedControls());
+
+    controlsForRemoval.append(scene()->currentForm());
+    for (Control* control : controls) {
+        for (Control* ctrl : controls) {
+            if (control->childControls().contains(ctrl))
+                controlsForRemoval.append(ctrl);
+        }
+    }
+
+    for (Control* control : controlsForRemoval)
+        controls.removeOne(control);
+
+    QList<QPointer<Control>> controlPtrList;
+    for (Control* control : controls)
+        controlPtrList.append(QPointer<Control>(control));
+
+    CopyPaste::setControls(controlPtrList, scene()->currentForm()->uid(), CopyPaste::Cut);
+}
+
 void DesignerView::onCopyAction()
 {
-//    QList<QUrl> urls;
-//    auto mimeData = new QMimeData;
-//    auto clipboard = QApplication::clipboard();
-//    auto selectedControls = scene()->selectedControls();
-//    selectedControls.removeOne(scene()->currentForm());
-//    mimeData->setData("objectwheel/uid", scene()->currentForm()->uid().toUtf8());
+    QList<Control*> controlsForRemoval;
+    QList<Control*> controls(scene()->selectedControls());
 
-//    for (auto control : selectedControls)
-//        for (auto ctrl : selectedControls)
-//            if (control->childControls().contains(ctrl))
-//                selectedControls.removeAll(ctrl);
+    controlsForRemoval.append(scene()->currentForm());
+    for (Control* control : controls) {
+        for (Control* ctrl : controls) {
+            if (control->childControls().contains(ctrl))
+                controlsForRemoval.append(ctrl);
+        }
+    }
 
-//    for (auto control : selectedControls)
-//        urls << QUrl::fromLocalFile(control->dir());
+    for (Control* control : controlsForRemoval)
+        controls.removeOne(control);
 
-//    mimeData->setUrls(urls);
-//    mimeData->setText(TOOL_KEY);
-//    clipboard->setMimeData(mimeData);
+    QList<QPointer<Control>> controlPtrList;
+    for (Control* control : controls)
+        controlPtrList.append(QPointer<Control>(control));
+
+    CopyPaste::setControls(controlPtrList, scene()->currentForm()->uid(), CopyPaste::Copy);
 }
 
 // FIXME:
 void DesignerView::onPasteAction()
 {
-//    auto clipboard = QApplication::clipboard();
-//    auto mimeData = clipboard->mimeData();
-//    auto currentForm = scene()->currentForm();
-//    QString sourceSuid = mimeData->data("objectwheel/uid");
-//    if (!mimeData->hasUrls() || !mimeData->hasText() ||
-//            mimeData->text() != TOOL_KEY || sourceSuid.isEmpty())
-//        return;
+    if (!CopyPaste::isValid())
+        return;
 
-//    QList<Control*> controls;
-//    for (auto url : mimeData->urls()) {
-//        auto control = ControlCreationManager::createControl(
-//                    url.toLocalFile(),
-//                    QPointF(ParserUtils::x(SaveUtils::toUrl(url.toLocalFile())) + 5, ParserUtils::y(SaveUtils::toUrl(url.toLocalFile())) + 5),
-//                    sourceSuid,
-//                    currentForm,
-//                    currentForm->dir(),
-//                    currentForm->uid()
-//                    );
+    const QString& suid = CopyPaste::suid();
+    const CopyPaste::ActionType actionType = CopyPaste::actionType();
+    const QList<QPointer<Control>>& controls = CopyPaste::controls();
+    Form* currentForm = scene()->currentForm();
 
-//        controls << control;
+    if (actionType == CopyPaste::Cut)
+        CopyPaste::invalidate();
 
-//        if (url == mimeData->urls().last()) {
-//            scene()->clearSelection();
-//            for (auto control : controls)
-//                control->setSelected(true);
+    scene()->clearSelection();
 
-//            if (!mimeData->data("objectwheel/cut").isEmpty()) {
-//                QDataStream dstream(mimeData->data("objectwheel/dstream"));
-//                int size = QString(mimeData->data("objectwheel/dstreamsize")).toInt();
-//                QList<Control*> cutControls;
-//                for (int i = 0; i < size; i++) {
-//                    quint64 buff;
-//                    dstream >> buff;
-//                    cutControls << (Control*)buff;
-//                }
+    for (const QPointer<Control>& control : controls) {
+        if (control.isNull())
+            continue;
+        Control* newControl = ControlCreationManager::createControl(control->dir(),
+                                                                    control->pos() + QPointF(5, 5),
+                                                                    suid, currentForm,
+                                                                    currentForm->dir(),
+                                                                    currentForm->uid());
+        newControl->setSelected(true);
+    }
 
-//                ControlRemovingManager::removeControls(cutControls);
-//            }
-//        }
+    QList<Control*> controlsToRemove;
+    for (const QPointer<Control>& control : controls) {
+        if (control)
+            controlsToRemove.append(control.data());
+    }
 
-//        // BUG: Do we really need this?
-//        //        ControlPreviewingManager::scheduleRefresh(control->uid());
-//    }
+    if (actionType == CopyPaste::Cut)
+        ControlRemovingManager::removeControls(controlsToRemove);
 }
 
 void DesignerView::onDeleteAction()

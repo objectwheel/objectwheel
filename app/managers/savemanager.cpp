@@ -193,14 +193,14 @@ void regenerateUids(Control* control)
 // in order to emit idChanged signal in ControlPropertyManager
 // Refactor control's id if it's already exists in db
 // If suid empty, project root searched
-void refactorId(Control* control, const QString& suid, const QString& topPath = QString())
+void refactorId(Control* control, const QString& suid, const QString& topPath = QString(), bool includeItself = true)
 {
     if (control->id().isEmpty())
         control->setId("control");
 
     const auto id = control->id();
 
-    for (int i = 1; exists(control, suid, topPath, false); i++)
+    for (int i = 1; exists(control, suid, topPath, includeItself); i++)
         control->setId(id + QString::number(i));
 }
 }
@@ -429,7 +429,7 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
                   which means idChanged signal is already emitted.
         */
         control->setId(value);
-        refactorId(control, SaveUtils::suid(control->dir()), topPath);
+        refactorId(control, SaveUtils::suid(control->dir()), topPath, false);
         value = control->id();
         ParserUtils::setId(control->url(), value);
     } else {
