@@ -284,3 +284,36 @@ QPoint UtilityFunctions::centerPos(const QSize& size)
     return QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size,
                                QApplication::primaryScreen()->availableGeometry()).topLeft();
 }
+
+QString UtilityFunctions::increasedNumberedText(const QString& text, bool addSpace, bool trim)
+{
+    int number = 0;
+    QString finalText(trim ? text.trimmed() : text);
+    bool isLastElementNumber = false;
+
+    if (!finalText.isEmpty())
+        number = finalText.right(1).toInt(&isLastElementNumber);
+
+    if (!isLastElementNumber) {
+        if (addSpace && !finalText.isEmpty()) {
+            if (finalText.back().isSpace())
+                return finalText.append("1");
+            else
+                return finalText.append(" 1");
+        } else {
+            return finalText.append("1");
+        }
+    }
+
+    // Empty strings cannot go further
+
+    Q_ASSERT(number >= 0 && number <= 9);
+
+    if (number != 9)
+        return finalText.replace(finalText.size() - 1, 1, QString::number(number + 1));
+
+    if (finalText.size() > 1)
+        return increasedNumberedText(finalText.left(finalText.size() - 1), false, false) + "0";
+    else
+        return "10";
+}

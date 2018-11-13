@@ -7,6 +7,7 @@
 #include <hashfactory.h>
 #include <zipper.h>
 #include <controlpropertymanager.h>
+#include <utilityfunctions.h>
 
 #include <QApplication>
 #include <QJsonDocument>
@@ -198,10 +199,8 @@ void refactorId(Control* control, const QString& suid, const QString& topPath = 
     if (control->id().isEmpty())
         control->setId("control");
 
-    const auto id = control->id();
-
-    for (int i = 1; exists(control, suid, topPath, includeItself); i++)
-        control->setId(id + QString::number(i));
+    while (exists(control, suid, topPath, includeItself))
+        control->setId(UtilityFunctions::increasedNumberedText(control->id(), false, true));
 }
 }
 

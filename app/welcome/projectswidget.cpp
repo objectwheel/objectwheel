@@ -69,7 +69,7 @@ public:
         m_sortLabel->setText("| " + tr("Sort reverse "));
 
         m_filterLineEdit->setPlaceholderText(tr("Filter"));
-        m_filterLineEdit->setStyleSheet("border: none; background: transparent;");
+        m_filterLineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
         m_filterLineEdit->setClearButtonEnabled(true);
         m_filterLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
         m_filterLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -496,17 +496,13 @@ void ProjectsWidget::startProject()
 void ProjectsWidget::onNewButtonClick()
 {
     if (UserManager::dir().isEmpty()) return;
-    auto projects = ProjectManager::projectNames();
-    int count = 1;
-    QString projectName = "Project - 1";
-
     m_buttons->setDisabled(true);
 
-    while (projects.contains(projectName)) {
-        count++;
-        projectName.remove(projectName.size() - 1, 1);
-        projectName += QString::number(count);
-    }
+    auto projects = ProjectManager::projectNames();
+    QString projectName = tr("Project") + " - 1";
+
+    while (projects.contains(projectName))
+        projectName = UtilityFunctions::increasedNumberedText(projectName, true, true);
 
     auto item = new ProjectListWidgetItem(this);
     item->setIcon(QIcon(PATH_FILEICON));

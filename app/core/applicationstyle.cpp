@@ -457,7 +457,7 @@ void ApplicationStyle::polish(QWidget* w)
             w->setProperty("ow_flag_set", true);
             for (QWidget* wd : w->findChildren<QWidget*>()) {
                 if (wd != w)
-                    wd->setStyleSheet("background: transparent;");
+                    wd->setStyleSheet("QWidget { background: transparent; }");
             }
             class A : public QObject {
                 bool eventFilter(QObject* w, QEvent* e) override

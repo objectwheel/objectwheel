@@ -514,17 +514,17 @@ void FileExplorer::onRenameButtonClick()
 
 void FileExplorer::onNewFileButtonClick()
 {
-    QString fileName = tr("Empty File.txt");
+    QString baseFileName = tr("Empty File");
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    for (int i = 1; exists(rootPath + separator() + fileName); i++)
-        fileName = tr("Empty File ") + QString::number(i) + ".txt";
+    while (exists(rootPath + separator() + baseFileName + ".txt"))
+        baseFileName = UtilityFunctions::increasedNumberedText(baseFileName, true, true);
 
     QModelIndex index;
-    const bool suceed = mkfile(rootPath + separator() + fileName);
+    const bool suceed = mkfile(rootPath + separator() + baseFileName + ".txt");
 
     if (suceed)
-        index = mf(m_fileSystemModel->index(rootPath + separator() + fileName));
+        index = mf(m_fileSystemModel->index(rootPath + separator() + baseFileName + ".txt"));
 
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
@@ -537,13 +537,13 @@ void FileExplorer::onNewFileButtonClick()
 
 void FileExplorer::onNewFolderButtonClick()
 {
-    QString folderName = tr("New Folder");
+    QString baseFolderName = tr("New Folder");
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    for (int i = 1; exists(rootPath + separator() + folderName); i++)
-        folderName = tr("New Folder ") + QString::number(i);
+    while (exists(rootPath + separator() + baseFolderName))
+        baseFolderName = UtilityFunctions::increasedNumberedText(baseFolderName, true, true);
 
-    const QModelIndex& index = mf(m_fileSystemModel->mkdir(mt(rootIndex()), folderName));
+    const QModelIndex& index = mf(m_fileSystemModel->mkdir(mt(rootIndex()), baseFolderName));
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
         scrollTo(index, PositionAtCenter);
