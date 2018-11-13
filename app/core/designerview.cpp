@@ -57,24 +57,24 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
 {
     setStyleSheet("DesignerView { background: transparent }");
 
-    m_sendBackAct->setText("Send to Back");
-    m_bringFrontAct->setText("Bring to Front");
-    m_undoAct->setText("Undo");
+    m_sendBackAct->setText(tr("Send to Back"));
+    m_bringFrontAct->setText(tr("Bring to Front"));
+    m_undoAct->setText(tr("Undo"));
     m_undoAct->setShortcut(QKeySequence::Undo);
-    m_redoAct->setText("Redo");
+    m_redoAct->setText(tr("Redo"));
     m_redoAct->setShortcut(QKeySequence::Redo);
-    m_cutAct->setText("Cut");
+    m_cutAct->setText(tr("Cut"));
     m_cutAct->setShortcut(QKeySequence::Cut);
-    m_copyAct->setText("Copy");
+    m_copyAct->setText(tr("Copy"));
     m_copyAct->setShortcut(QKeySequence::Copy);
-    m_pasteAct->setText("Paste");
+    m_pasteAct->setText(tr("Paste"));
     m_pasteAct->setShortcut(QKeySequence::Paste);
-    m_deleteAct->setText("Delete");
+    m_deleteAct->setText(tr("Delete"));
     m_deleteAct->setShortcut(QKeySequence::Delete);
 #if defined(Q_OS_MACOS)
     m_deleteAct->setShortcuts(QList<QKeySequence>() << (Qt::CTRL + Qt::Key_Backspace) << QKeySequence::Delete);
 #endif
-    m_selectAllAct->setText("Select All");
+    m_selectAllAct->setText(tr("Select All"));
     m_selectAllAct->setShortcut(QKeySequence::SelectAll);
     m_moveUpAct->setShortcut(Qt::Key_Up);
     m_moveDownAct->setShortcut(Qt::Key_Down);
