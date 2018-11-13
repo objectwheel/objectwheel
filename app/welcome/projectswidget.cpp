@@ -45,6 +45,19 @@
 enum Buttons { Load, New, Import, Export, Settings };
 enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
 
+namespace {
+
+QListWidgetItem* itemForHash(const QListWidget* listWidget, const QString& hash)
+{
+    for (int i = 0; i < listWidget->count(); ++i) {
+        QListWidgetItem* item = listWidget->item(i);
+        if (item->data(Hash).toString() == hash)
+            return item;
+    }
+    return nullptr;
+}
+}
+
 class FilterWidget : public QWidget
 {
     Q_OBJECT
@@ -436,13 +449,16 @@ FilterWidget* ProjectsWidget::filterWidget() const
     return m_filterWidget;
 }
 
-void ProjectsWidget::refreshProjectList()
+void ProjectsWidget::refreshProjectList(bool selectionPreserved)
 {
-    const int currentRow = m_listWidget->currentRow();
     m_listWidget->clear();
 
     if (UserManager::dir().isEmpty())
         return;
+
+    int row = 0;
+    if (m_listWidget->currentItem())
+        row = m_listWidget->currentRow();
 
     auto projects = ProjectManager::projects();
 
@@ -459,26 +475,35 @@ void ProjectsWidget::refreshProjectList()
         m_listWidget->addItem(item);
     }
 
-    if (currentRow >= 0 && m_listWidget->count() > currentRow) {
-        QListWidgetItem* currentItem = m_listWidget->item(currentRow);
+    if (!projects.isEmpty()) {
         m_listWidget->sortItems();
-        m_listWidget->setCurrentItem(currentItem);
-    } else {
-        m_listWidget->sortItems();
-        m_listWidget->setCurrentRow(0);
+        if (selectionPreserved) {
+            m_listWidget->setCurrentRow(row);
+            if (const QListWidgetItem* item = m_listWidget->item(row))
+                m_listWidget->scrollToItem(item);
+        } else {
+            m_listWidget->setCurrentRow(0);
+        }
     }
-
-    m_listWidget->scrollToItem(m_listWidget->currentItem());
-    updateGadgetPositions();
 }
 
 void ProjectsWidget::startProject()
 {
+    if (!m_listWidget->currentItem())
+        return;
+
     auto hash = m_listWidget->currentItem()->data(Hash).toString();
 
+    Q_ASSERT(!hash.isEmpty());
+
     if (!ProjectManager::start(hash)) {
-        qWarning() << "Project starting unsuccessful.";
+        QMessageBox::critical(this, tr("Oops"), tr("Project start unsuccessful."));
         refreshProjectList();
+        QListWidgetItem* item = itemForHash(m_listWidget, hash);
+        if (item) {
+            m_listWidget->setCurrentItem(item);
+            m_listWidget->scrollToItem(item);
+        }
         return;
     }
 
@@ -518,10 +543,9 @@ void ProjectsWidget::onNewButtonClick()
     item->setData(LastEdit, ProjectManager::currentUiTime());
     item->setData(Active, false);
     m_listWidget->addItem(item);
-    m_listWidget->setCurrentItem(item);
     m_listWidget->sortItems();
-    m_listWidget->scrollToItem(m_listWidget->currentItem());
-    updateGadgetPositions();
+    m_listWidget->setCurrentItem(item);
+    m_listWidget->scrollToItem(item);
 
     Delayer::delay(250);
 
@@ -533,11 +557,7 @@ void ProjectsWidget::onNewButtonClick()
 void ProjectsWidget::onLoadButtonClick()
 {
     if (!m_listWidget->currentItem() || m_listWidget->currentItem()->isHidden()) {
-        QMessageBox::warning(
-                    this,
-                    tr("Oops"),
-                    tr("Select a project first.")
-                    );
+        QMessageBox::warning(this, tr("Oops"), tr("Select a project first."));
         return;
     }
 
@@ -580,11 +600,7 @@ void ProjectsWidget::onLoadButtonClick()
 void ProjectsWidget::onExportButtonClick()
 {
     if (!m_listWidget->currentItem()) {
-        QMessageBox::warning(
-                    this,
-                    tr("Oops"),
-                    tr("Select the project first.")
-                    );
+        QMessageBox::warning(this, tr("Oops"), tr("Select the project first."));
         return;
     }
 
@@ -600,24 +616,15 @@ void ProjectsWidget::onExportButtonClick()
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
 
     if (dialog.exec()) {
-        if (!rm(
-                    dialog.selectedFiles().at(0) +
-                    separator() +
-                    pname + ".zip"
-                    )) return;
+        if (!rm(dialog.selectedFiles().at(0) + separator() + pname + ".zip"))
+            return;
 
-        if (!ProjectManager::exportProject(
-                    hash,
-                    dialog.selectedFiles().at(0) +
-                    separator() +
-                    pname + ".zip"
-                    )) return;
+        if (!ProjectManager::exportProject(hash, dialog.selectedFiles().at(0) +
+                                           separator() + pname + ".zip")) {
+            return;
+        }
 
-        QMessageBox::information(
-                    this,
-                    "Finished",
-                    "Project export has successfully finished."
-                    );
+        QMessageBox::information(this, tr("Finished"), tr("Project export has successfully finished."));
     }
 }
 
@@ -629,22 +636,23 @@ void ProjectsWidget::onImportButtonClick()
     dialog.setViewMode(QFileDialog::Detail);
 
     if (dialog.exec()) {
-        for (auto fileName : dialog.selectedFiles()) {
-            if (!ProjectManager::importProject(fileName)) {
-                QMessageBox::warning(
-                            this,
-                            "Operation Stopped",
-                            "One or more import file is corrupted."
-                            );
+        QString hash;
+        for (const QString& fileName : dialog.selectedFiles()) {
+            if (!ProjectManager::importProject(fileName, &hash)) {
+                QMessageBox::warning(this, tr("Operation Stopped"),
+                                     tr("One or more import file is broken."));
                 return;
             }
         }
+        Q_ASSERT(!hash.isEmpty());
+
         refreshProjectList();
-        QMessageBox::information(
-                    this,
-                    tr("Finished"),
-                    tr("Tool import has successfully finished.")
-                    );
+        QListWidgetItem* item = itemForHash(m_listWidget, hash);
+        if (item) {
+            m_listWidget->setCurrentItem(item);
+            m_listWidget->scrollToItem(item);
+        }
+        QMessageBox::information(this, tr("Finished"), tr("Tool import has successfully finished."));
     }
 }
 
@@ -671,8 +679,10 @@ void ProjectsWidget::onFilterTextChange(const QString& text)
         if (!item->isHidden())
             firstVisibleItem = item;
     }
-    if (firstVisibleItem)
+    if (firstVisibleItem) {
         m_listWidget->setCurrentItem(firstVisibleItem);
+        m_listWidget->scrollToItem(firstVisibleItem);
+    }
     m_buttons_2->setVisible(firstVisibleItem);
 }
 

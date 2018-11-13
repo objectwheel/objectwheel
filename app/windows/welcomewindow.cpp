@@ -126,7 +126,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
     connect(m_projectDetailsWidget, &ProjectDetailsWidget::done, [=]
     {
-        m_projectsWidget->refreshProjectList();
+        m_projectsWidget->refreshProjectList(true);
         m_view->show(Projects, View::LeftToRight);
     });
 

@@ -262,7 +262,7 @@ bool ProjectManager::exportProject(const QString& hash, const QString& filePath)
     return Zipper::compressDir(dir, filePath);
 }
 
-bool ProjectManager::importProject(const QString &filePath)
+bool ProjectManager::importProject(const QString &filePath, QString* hash)
 {
     const auto& data = rdfile(filePath);
     const auto& udir = UserManager::dir();
@@ -275,7 +275,8 @@ bool ProjectManager::importProject(const QString &filePath)
     if (!mkdir(pdir) || !Zipper::extractZip(data, pdir))
         return false;
 
-    ::setProperty(pdir, PTAG_HASH, HashFactory::generate());
+    *hash = HashFactory::generate();
+    ::setProperty(pdir, PTAG_HASH, *hash);
 
     SaveUtils::regenerateUids(pdir + separator() + DIR_OWDB);
 

@@ -19,7 +19,7 @@ public:
     FilterWidget* filterWidget() const;
 
 public slots:
-    void refreshProjectList();
+    void refreshProjectList(bool selectionPreserved = false);
 
 private slots:
     void startProject();
